@@ -38,14 +38,13 @@ import de.anomic.server.logging.serverLog;
  */
 public abstract class HttpClient {
     
-    private static final String systemOST;
-    static {
-        // provide system information for client identification
-        final String loc = generateLocation();
-        systemOST = System.getProperty("os.arch", "no-os-arch") + " " + System.getProperty("os.name", "no-os-name") +
+    /**
+     * provide system information for client identification
+     */
+    private static final String systemOST =
+        System.getProperty("os.arch", "no-os-arch") + " " + System.getProperty("os.name", "no-os-name") +
                 " " + System.getProperty("os.version", "no-os-version") + "; " + "java " +
-                System.getProperty("java.version", "no-java-version") + "; " + loc;
-    }
+                System.getProperty("java.version", "no-java-version") + "; " + generateLocation();
 
     /**
      * generating the location string

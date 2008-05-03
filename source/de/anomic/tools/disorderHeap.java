@@ -41,9 +41,14 @@
 
 package de.anomic.tools;
 
+import java.io.Serializable;
 import java.util.LinkedList;
 
-public class disorderHeap {
+public class disorderHeap implements Serializable {
+    /**
+     * generated with svn4743 on 2008-04-28
+     */
+    private static final long serialVersionUID = -1576632540870640019L;
 
     LinkedList<String> list;
 

@@ -51,8 +51,8 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 public class IndexCleaner_p {
-    private static indexRepositoryReference.BlacklistCleaner urldbCleanerThread;
-    private static plasmaWordIndex.ReferenceCleaner indexCleanerThread;
+    private static indexRepositoryReference.BlacklistCleaner urldbCleanerThread = null;
+    private static plasmaWordIndex.ReferenceCleaner indexCleanerThread = null;
 
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
         serverObjects prop = new serverObjects();

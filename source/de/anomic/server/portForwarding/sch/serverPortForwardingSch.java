@@ -94,10 +94,10 @@ public class serverPortForwardingSch implements serverPortForwarding{
     private String localHost;
     private int localHostPort;
 
-    private static Session session;
-    private static serverInstantBusyThread sessionWatcher;
+    private static Session session = null;
+    private static serverInstantBusyThread sessionWatcher = null;
 
-    private serverLog log;
+    private final serverLog log;
 
     public serverPortForwardingSch() {
         super();

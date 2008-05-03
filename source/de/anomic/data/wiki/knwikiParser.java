@@ -191,11 +191,11 @@ public class knwikiParser implements wikiParser {
 				while (m.find()) try {
 					//System.out.print("found " + st.getClass().getSimpleName() +  ": " +
 					//		m.group().replaceAll("\n", "\\\\n").replaceAll("\t", "    ") + ", ");
-					if (st.setText(m.group(), j)) {
-					//	System.out.println("usable");
-					} else {
+					if (!st.setText(m.group(), j)) {
 					//	System.out.println("not usable");
 						continue;
+					//} else {
+					//	System.out.println("usable");
 					}
 					m.appendReplacement(sb, (st.getMarkup() == null) ? m.group() : st.getMarkup());
 				} catch (wikiParserException e) {

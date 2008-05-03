@@ -322,9 +322,9 @@ public class yacyPeerActions {
                         return false;
                     }
 
-                    if (connectedSeed.getName() != seed.getName()) {
+                    /*if (connectedSeed.getName() != seed.getName()) {
                         // TODO: update seed name lookup cache
-                    }
+                    }*/
                 } catch (NumberFormatException e) {
                     yacyCore.log.logFine("connect: rejecting wrong peer '" + seed.getName() + "' from " + seed.getPublicAddress() + ". Cause: " + e.getMessage());
                     return false;

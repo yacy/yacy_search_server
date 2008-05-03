@@ -28,6 +28,7 @@ package de.anomic.yacy;
 // and to prevent that java.net.URL usage causes DNS queries which are used in java.net.
 
 import java.io.File;
+import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.util.Iterator;
 import java.util.TreeSet;
@@ -40,14 +41,17 @@ import de.anomic.server.serverDomains;
 import de.anomic.tools.Punycode;
 import de.anomic.tools.Punycode.PunycodeException;
 
-public class yacyURL {
-    
+public class yacyURL implements Serializable {
+    /**
+     * generated with svn4751 on 2008-05-01
+     */
+    private static final long serialVersionUID = -1173233022912141884L;
+
     public static final int TLD_any_zone_filter = 255; // from TLD zones can be filtered during search; this is the catch-all filter
     
-    public static String dummyHash;
+    public static String dummyHash = "";
     static {
         // create a dummy hash
-        dummyHash = "";
         for (int i = 0; i < yacySeedDB.commonHashLength; i++) dummyHash += "-";
     }
     

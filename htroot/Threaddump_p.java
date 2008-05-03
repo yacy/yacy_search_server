@@ -65,12 +65,12 @@ import java.io.IOException;
 
 public class Threaddump_p {
 
-	private static serverObjects prop;
-	private static plasmaSwitchboard sb;
+	private static final serverObjects prop = new serverObjects();
+	private static plasmaSwitchboard sb = null;
 
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
 
-    	prop = new serverObjects();
+    	prop.clear();
     	sb = (plasmaSwitchboard) env;
     	StringBuffer buffer = new StringBuffer(1000);
     	

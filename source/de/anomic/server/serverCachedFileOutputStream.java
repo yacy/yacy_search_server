@@ -121,7 +121,7 @@ public class serverCachedFileOutputStream extends ByteArrayOutputStream {
         return this.isFallback;
     }
     
-    public void write(int b) {
+    public synchronized void write(int b) {
         if (checkFallback(++this.size)) try {
             this.fallback.write(b);
         } catch (IOException e) {
@@ -131,7 +131,7 @@ public class serverCachedFileOutputStream extends ByteArrayOutputStream {
         }
     }
     
-    public void write(byte[] b, int off, int len) {
+    public synchronized void write(byte[] b, int off, int len) {
         if (checkFallback(this.size += len)) try {
             this.fallback.write(b, off, len);
         } catch (IOException e) {

@@ -140,14 +140,14 @@ public final class userDB {
         String[] tmp=auth.split(":");
         if(tmp.length == 2){
             entry=this.passwordAuth(tmp[0], tmp[1]);
-            if(entry != null){
+//            if(entry != null){
                 //return entry;
-			}else{ //wrong/no auth, so auth is removed from browser
+//			}else{ //wrong/no auth, so auth is removed from browser
 				/*FIXME: This cannot work
 				try{
     					entry.setProperty(Entry.LOGGED_OUT, "false");
     				}catch(IOException e){}*/
-			}
+//			}
             return entry;
 		}
 		return null;

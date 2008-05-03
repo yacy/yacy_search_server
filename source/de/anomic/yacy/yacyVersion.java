@@ -154,8 +154,12 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
     }
     
     public boolean equals(Object obj) {
-        yacyVersion v = (yacyVersion) obj;
-        return (this.svn == v.svn) && (this.url.toNormalform(true, true).equals(v.url.toNormalform(true, true)));
+        if(obj instanceof yacyVersion) {
+            yacyVersion v = (yacyVersion) obj;
+            return (this.svn == v.svn) && (this.url.toNormalform(true, true).equals(v.url.toNormalform(true, true)));
+        } else {
+            return false;
+        }
     }
     
     public int hashCode() {

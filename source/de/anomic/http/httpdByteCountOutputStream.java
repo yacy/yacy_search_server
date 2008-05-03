@@ -89,13 +89,13 @@ public class httpdByteCountOutputStream extends BufferedOutputStream {
     }
 
     /** @see java.io.OutputStream#write(byte[], int, int) */
-    public void write(byte[] b, int off, int len) throws IOException {        
+    public synchronized void write(byte[] b, int off, int len) throws IOException {        
         super.write(b, off, len);
         this.byteCount += len;
     }
 
     /** @see java.io.OutputStream#write(int) */
-    public void write(int b) throws IOException {
+    public synchronized void write(int b) throws IOException {
         super.write(b);
         this.byteCount++;
     }

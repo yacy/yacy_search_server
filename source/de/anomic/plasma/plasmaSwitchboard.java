@@ -184,7 +184,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
     public static TreeSet<String> badwords = null;
     public static TreeSet<String> blueList = null;
     public static TreeSet<String> stopwords = null;    
-    public static indexReferenceBlacklist urlBlacklist;
+    public static indexReferenceBlacklist urlBlacklist = null;
     
     public static wikiParser wikiParser = null;
     
@@ -207,7 +207,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
     public  wikiBoard                   wikiDB;
     public  blogBoard                   blogDB;
     public  blogBoardComments           blogCommentDB;
-    public  static plasmaCrawlRobotsTxt robots;
+    public  static plasmaCrawlRobotsTxt robots = null;
     public  plasmaCrawlProfile          profilesActiveCrawls, profilesPassiveCrawls;
     public  plasmaCrawlProfile.entry    defaultProxyProfile;
     public  plasmaCrawlProfile.entry    defaultRemoteProfile;
@@ -836,7 +836,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
     
     public Hashtable<String, Object[]> crawlJobsStatus = new Hashtable<String, Object[]>(); 
     
-    private static plasmaSwitchboard sb;
+    private static plasmaSwitchboard sb = null;
     
     public plasmaSwitchboard(File rootPath, String initPath, String configPath, boolean applyPro) {
         super(rootPath, initPath, configPath, applyPro);
@@ -1627,9 +1627,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
             }        
             
             // work off unwritten files
-            if (entry.cacheArray() == null)  {
-                //this.log.logFine("EXISTING FILE (" + entry.cacheFile.length() + " bytes) for " + entry.cacheFile);
-            } else {
+            if (entry.cacheArray() != null) {
                 String error = entry.shallStoreCacheForProxy();
                 if (error == null) {
                     plasmaHTCache.writeResourceContent(entry.url(), entry.cacheArray());
@@ -1637,6 +1635,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
                 } else {
                     if (this.log.isFine()) this.log.logFine("WRITE OF FILE " + entry.cacheFile() + " FORBIDDEN: " + error);
                 }
+            //} else {
+                //this.log.logFine("EXISTING FILE (" + entry.cacheFile.length() + " bytes) for " + entry.cacheFile);
             }
         }
         

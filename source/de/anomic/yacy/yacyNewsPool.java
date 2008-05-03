@@ -254,9 +254,8 @@ public class yacyNewsPool {
     	CATEGORY_BLOG_ADD,
     	CATEGORY_BLOG_DEL
     };
-    public static HashSet<String> categories;
+    public static final HashSet<String> categories = new HashSet<String>();
     static {
-        categories = new HashSet<String>();
         for (int i = 0; i < category.length; i++) categories.add(category[i]);
     }
     

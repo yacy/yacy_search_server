@@ -117,8 +117,9 @@ public final class httpdFileHandler {
     private static final boolean safeServletsMode = false; // if true then all servlets are called synchronized
     
     private static final Properties mimeTable = new Properties();
-    private static final serverClassLoader provider;
-    private static serverSwitch<?> switchboard;
+    // create a class loader
+    private static final serverClassLoader provider = new serverClassLoader(/*this.getClass().getClassLoader()*/);
+    private static serverSwitch<?> switchboard = null;
     private static plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
     
     private static File     htRootPath     = null;
@@ -134,19 +135,14 @@ public final class httpdFileHandler {
     public static boolean useTemplateCache = false;
     
     //private Properties connectionProperties = null;
-    private static serverLog theLogger;
+    // creating a logger
+    private static final serverLog theLogger = new serverLog("FILEHANDLER");
     
     static {
-        serverSwitch<?> switchboard = plasmaSwitchboard.getSwitchboard();
+        final serverSwitch<?> switchboard = plasmaSwitchboard.getSwitchboard();
         useTemplateCache = switchboard.getConfig("enableTemplateCache","true").equalsIgnoreCase("true");
         templateCache = (useTemplateCache)? new HashMap<File, SoftReference<byte[]>>() : new HashMap<File, SoftReference<byte[]>>(0);
         templateMethodCache = (useTemplateCache) ? new HashMap<File, SoftReference<Method>>() : new HashMap<File, SoftReference<Method>>(0);
-        
-        // create a class loader
-        provider = new serverClassLoader(/*this.getClass().getClassLoader()*/);
-
-        // creating a logger
-        theLogger = new serverLog("FILEHANDLER");
         
         if (httpdFileHandler.switchboard == null) {
             httpdFileHandler.switchboard = switchboard;
@@ -217,7 +213,7 @@ public final class httpdFileHandler {
         if (htLocalePath == null) htLocalePath = switchboard.getConfigPath("locale.translated_html","DATA/LOCALE/htroot");
 
         if (!(localeSelection.equals("default"))) {
-            File localePath = new File(htLocalePath, localeSelection + "/" + path);
+            File localePath = new File(htLocalePath, localeSelection + '/' + path);
             if (localePath.exists())  // avoid "NoSuchFile" troubles if the "localeSelection" is misspelled
                 return localePath;
         }

@@ -120,9 +120,7 @@ public class News {
             prop.put("page", tableID + 1);
             prop.put("table_page", tableID + 1);
             
-            if (yacyCore.seedDB == null) {
-                
-            } else {
+            if (yacyCore.seedDB != null) {
                 int maxCount = Math.min(1000, yacyCore.newsPool.size(tableID));
                 Iterator<yacyNewsRecord> recordIterator = yacyCore.newsPool.recordIterator(tableID, false);
                 yacyNewsRecord record;

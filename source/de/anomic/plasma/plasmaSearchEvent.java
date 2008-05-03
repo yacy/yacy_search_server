@@ -670,9 +670,7 @@ public final class plasmaSearchEvent {
         }
          */
         TreeMap<String, String> abstractJoin = (rcAbstracts.size() == query.queryHashes.size()) ? kelondroMSetTools.joinConstructive(rcAbstracts.values(), true) : new TreeMap<String, String>();
-        if (abstractJoin.size() == 0) {
-            //System.out.println("DEBUG-INDEXABSTRACT: no success using index abstracts from remote peers");
-        } else {
+        if (abstractJoin.size() != 0) {
             //System.out.println("DEBUG-INDEXABSTRACT: index abstracts delivered " + abstractJoin.size() + " additional results for secondary search");
             // generate query for secondary search
             TreeMap<String, String> secondarySearchURLs = new TreeMap<String, String>(); // a (peerhash:urlhash-liststring) mapping
@@ -717,6 +715,8 @@ public final class plasmaSearchEvent {
                         query.ranking, query.constraint, preselectedPeerHashes);
 
             }
+        //} else {
+            //System.out.println("DEBUG-INDEXABSTRACT: no success using index abstracts from remote peers");
         }
     }
     

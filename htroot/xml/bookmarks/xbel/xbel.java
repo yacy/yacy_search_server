@@ -10,15 +10,15 @@ import de.anomic.server.serverSwitch;
 
 public class xbel {
 
-	private static serverObjects prop;
-	private static plasmaSwitchboard switchboard;
-	private static boolean isAdmin;	
+	private static final serverObjects prop = new serverObjects();
+	private static plasmaSwitchboard switchboard = null;
+	private static boolean isAdmin = false;	
 	
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
  
     	int count = 0;;
     	
-    	prop = new serverObjects();
+    	prop.clear();
     	switchboard = (plasmaSwitchboard) env;    	
     	isAdmin=switchboard.verifyAuthentication(header, true);   
   

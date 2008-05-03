@@ -123,10 +123,10 @@ public final class httpdProxyHandler {
     private static int timeout = 30000;
     private static boolean yacyTrigger = true;
     public static boolean isTransparentProxy = false;
-    private static Process redirectorProcess;
-    private static boolean redirectorEnabled=false;
-    private static PrintWriter redirectorWriter;
-    private static BufferedReader redirectorReader;
+    private static Process redirectorProcess = null;
+    private static boolean redirectorEnabled = false;
+    private static PrintWriter redirectorWriter = null;
+    private static BufferedReader redirectorReader = null;
 
     private static htmlFilterTransformer transformer = null;
     /**
@@ -137,7 +137,8 @@ public final class httpdProxyHandler {
     private static File htRootPath = null;
 
     //private Properties connectionProperties = null;
-    private static serverLog theLogger;
+    // creating a logger
+    private static final serverLog theLogger = new serverLog("PROXY");
     
     private static boolean doAccessLogging = false; 
 	/**
@@ -191,8 +192,6 @@ public final class httpdProxyHandler {
         
         switchboard = plasmaSwitchboard.getSwitchboard();
         if (switchboard != null) {
-        // creating a logger
-        theLogger = new serverLog("PROXY");
             
         isTransparentProxy = Boolean.valueOf(switchboard.getConfig("isTransparentProxy","false")).booleanValue();
             
@@ -696,7 +695,7 @@ public final class httpdProxyHandler {
 
                 writeContent(res, new BufferedWriter(hfos));
                 if (hfos instanceof htmlFilterWriter) ((htmlFilterWriter) hfos).finalize();
-                if (sizeBeforeDelete == -1) {
+                /*if (sizeBeforeDelete == -1) {
                     // no old file and no load. just data passing
                     //cacheEntry.status = plasmaHTCache.CACHE_PASSING;
                     //cacheManager.push(cacheEntry);
@@ -704,7 +703,7 @@ public final class httpdProxyHandler {
                     // before we came here we deleted a cache entry
                     //cacheEntry.status = plasmaHTCache.CACHE_STALE_NO_RELOAD;
                     //cacheManager.push(cacheEntry);
-                }
+                }*/
                 conProp.setProperty(httpHeader.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_MISS");
             }
             

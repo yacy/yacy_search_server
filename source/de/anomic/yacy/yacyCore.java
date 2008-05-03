@@ -88,11 +88,11 @@ public class yacyCore {
     public static final HashMap<String, String> seedUploadMethods = new HashMap<String, String>();
     public static yacyPeerActions peerActions = null;
     public static yacyDHTAction dhtAgent = null;
-    public static serverLog log;
+    public static final serverLog log = new serverLog("YACY");
     public static long lastOnlineTime = 0;
     /** pseudo-random key derived from a time-interval while YaCy startup*/
     public static long speedKey = 0;
-    public static File yacyDBPath;
+    public static File yacyDBPath = null;
     public static final Map<String, yacyAccessible> amIAccessibleDB = Collections.synchronizedMap(new HashMap<String, yacyAccessible>()); // Holds PeerHash / yacyAccessible Relations
     // constants for PeerPing behaviour
     private static final int PING_INITIAL = 10;
@@ -130,9 +130,6 @@ public class yacyCore {
         RSSFeed peernews = RSSFeed.channels(channelName);
         peernews.setMaxsize(1000);
         peernews.addMessage(new RSSMessage("YaCy started", ""));
-
-        // set log level
-        log = new serverLog("YACY");
 
         // create a yacy db
         yacyDBPath = sb.getConfigPath("yacyDB", "DATA/YACYDB");
@@ -590,9 +587,9 @@ public class yacyCore {
                 for (int currentThreadIdx = 0; currentThreadIdx < threadCount; currentThreadIdx++) {
                     Thread currentThread = threadList[currentThreadIdx];
 
-                    if (currentThread.isAlive()) {
+                    /*if (currentThread.isAlive()) {
                         // TODO: this object should care of all open clien connections within this class and close them here
-                    }
+                    }*/
                 }
 
                 // we need to use a timeout here because of missing interruptable session threads ...

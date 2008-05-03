@@ -101,13 +101,13 @@ public final class plasmaHTCache {
     private static final ConcurrentLinkedQueue<Entry> cacheStack = new ConcurrentLinkedQueue<Entry>();
     private static final ConcurrentHashMap<String, File> cacheAge = new ConcurrentHashMap<String, File>(); // a <date+hash, cache-path> - relation
     public static long curCacheSize = 0;
-    public static long maxCacheSize;
-    public static File cachePath;
+    public static long maxCacheSize = 0l;
+    public static File cachePath = null;
     public static final serverLog log = new serverLog("HTCACHE");
     private static long lastcleanup = System.currentTimeMillis();
     
     private static ResourceInfoFactory objFactory = new ResourceInfoFactory();
-    private static serverThread cacheScanThread;
+    private static serverThread cacheScanThread = null;
 
     // doctypes:
     public static final char DT_PDFPS   = 'p';

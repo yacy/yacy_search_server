@@ -140,7 +140,7 @@ public final class yacy {
     // static objects
     public static final String vString = "@REPL_VERSION@";
     public static double version = 0.1;
-    public static boolean pro;
+    public static boolean pro = false;
     
     public static final String vDATE   = "@REPL_DATE@";
     public static final String copyright = "[ YaCy v" + vString + ", build " + vDATE + " by Michael Christen / www.yacy.net ]";

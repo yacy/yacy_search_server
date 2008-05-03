@@ -69,11 +69,10 @@ import de.anomic.yacy.yacyURL;
 public class htmlFilterContentScraper extends htmlFilterAbstractScraper implements htmlFilterScraper {
 
     // statics: for initialization of the HTMLFilterAbstractScraper
-    private static HashSet<String> linkTags0;
-    private static HashSet<String> linkTags1;
+    private static final HashSet<String> linkTags0 = new HashSet<String>(9,0.99f);
+    private static final HashSet<String> linkTags1 = new HashSet<String>(7,0.99f);
 
     static {
-        linkTags0 = new HashSet<String>();
         linkTags0.add("img");
         linkTags0.add("base");
         linkTags0.add("frame");
@@ -83,7 +82,6 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         linkTags0.add("embed");     //added by [MN]
         linkTags0.add("param");     //added by [MN]
 
-        linkTags1 = new HashSet<String>();
         linkTags1.add("a");
         linkTags1.add("h1");
         linkTags1.add("h2");

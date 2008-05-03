@@ -59,21 +59,19 @@ import de.anomic.server.serverCharBuffer;
 public class htmlFilterContentTransformer extends htmlFilterAbstractTransformer implements htmlFilterTransformer {
 
     // statics: for initialisation of the HTMLFilterAbstractTransformer
-    private static TreeSet<String> linkTags0;
-    private static TreeSet<String> linkTags1;
-
     private static final Collator insensitiveCollator = Collator.getInstance(Locale.US);
+    private static final TreeSet<String> linkTags0 = new TreeSet<String>(insensitiveCollator);;
+    private static final TreeSet<String> linkTags1 = new TreeSet<String>(insensitiveCollator);;
+
     static {
         insensitiveCollator.setStrength(Collator.SECONDARY);
         insensitiveCollator.setDecomposition(Collator.NO_DECOMPOSITION);
     }
 
     static {
-        linkTags0 = new TreeSet<String>(insensitiveCollator);
         linkTags0.add("img");
         linkTags0.add("input");
 
-        linkTags1 = new TreeSet<String>(insensitiveCollator);
         linkTags1.add("a");
     }
 
@@ -134,6 +132,7 @@ public class htmlFilterContentTransformer extends htmlFilterAbstractTransformer 
         serverByteBuffer[] sbbs = httpTemplate.splitQuotations(sbb);
         //sbb = new serverByteBuffer();
         for (int i = 0; i < sbbs.length; i++) {
+            // TODO: avoid empty if statements
             if (sbbs[i].isWhitespace(true)) {
                 //sbb.append(sbbs[i]);
             } else if ((sbbs[i].byteAt(0) == httpTemplate.hash) ||

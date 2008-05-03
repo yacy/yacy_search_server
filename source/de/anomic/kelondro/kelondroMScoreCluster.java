@@ -125,9 +125,8 @@ public final class kelondroMScoreCluster<E> {
         }
     }
     
-    private static byte[] plainByteArray;
+    private static final byte[] plainByteArray = new byte[256];
     static {
-        plainByteArray = new byte[256];
         for (int i = 0; i < 32; i++) plainByteArray[i] = (byte) i;
         for (int i = 32; i < 96; i++) plainByteArray[i] = (byte) (i - 32);
         for (int i = 96; i < 128; i++) plainByteArray[i] = (byte) (i - 64);

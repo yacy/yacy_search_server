@@ -77,7 +77,7 @@ import de.anomic.yacy.yacySeedUploader;
 
 public class SettingsAck_p {
     
-    private static boolean nothingChanged;
+    private static boolean nothingChanged = false;
     
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
         // return variable that accumulates replacements

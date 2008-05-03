@@ -441,23 +441,20 @@ public final class serverDate {
     private static Calendar thisCalendar = Calendar.getInstance();
 
     // pre-calculation of time tables
-    private final static long[] dimnormalacc, dimleapacc;
-    private static long[] utimeyearsacc;
+    private final static long[] dimnormalacc = new long[12], dimleapacc = new long[12];
+    private final static long[] utimeyearsacc = new long[67];
     static {
         long millis = 0;
-        utimeyearsacc = new long[67];
         for (int i = 0; i < 67; i++) {
             utimeyearsacc[i] = millis;
             millis += ((i & 3) == 0) ? leapyearMillis : normalyearMillis;
         }
         millis = 0;
-        dimnormalacc = new long[12];
         for (int i = 0; i < 12; i++) {
             dimnormalacc[i] = millis;
             millis += (dayMillis * dimnormal[i]);
         }
         millis = 0;
-        dimleapacc = new long[12];
         for (int i = 0; i < 12; i++) {
             dimleapacc[i] = millis;
             millis += (dayMillis * dimleap[i]);

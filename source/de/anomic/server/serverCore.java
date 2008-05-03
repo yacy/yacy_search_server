@@ -834,33 +834,31 @@ public final class serverCore extends serverAbstractBusyThread implements server
                         //announceMoreExecTime(commandStart - System.currentTimeMillis()); // shall be negative!
                         //log.logDebug("* session " + handle + " completed command '" + request + "'. time = " + (System.currentTimeMillis() - handle));
                         this.out.flush();
-                        if (result == null) {
-                                    /*
-                                    log(2, true, "(NULL RETURNED/STREAM PASSED)");
-                                     */
-                        } else if (result instanceof Boolean) {
-                            if (((Boolean) result).equals(TERMINATE_CONNECTION)) break;
-                            
-                            /* 
-                             * setting timeout to a very high level. 
-                             * this is needed because of persistent connection
-                             * support.
-                             */
-                            if (!this.controlSocket.isClosed()) this.controlSocket.setSoTimeout(30*60*1000);
-                        } else if (result instanceof String) {
-                            if (((String) result).startsWith("!")) {
-                                result = ((String) result).substring(1);
-                                terminate = true;
+                        if (result != null) {
+                            if (result instanceof Boolean) {
+                                if (((Boolean) result).equals(TERMINATE_CONNECTION)) break;
+                                
+                                /* 
+                                 * setting timeout to a very high level. 
+                                 * this is needed because of persistent connection
+                                 * support.
+                                 */
+                                if (!this.controlSocket.isClosed()) this.controlSocket.setSoTimeout(30*60*1000);
+                            } else if (result instanceof String) {
+                                if (((String) result).startsWith("!")) {
+                                    result = ((String) result).substring(1);
+                                    terminate = true;
+                                }
+                                writeLine((String) result);
+                            } else if (result instanceof InputStream) {
+                                String tmp = send(this.out, (InputStream) result);
+                                if ((tmp.length() > 4) && (tmp.toUpperCase().startsWith("PASS"))) {
+                                    log(true, "PASS ********");
+                                } else {
+                                    log(true, tmp);
+                                }
+                                tmp = null;
                             }
-                            writeLine((String) result);
-                        } else if (result instanceof InputStream) {
-                            String tmp = send(this.out, (InputStream) result);
-                            if ((tmp.length() > 4) && (tmp.toUpperCase().startsWith("PASS"))) {
-                                log(true, "PASS ********");
-                            } else {
-                                log(true, tmp);
-                            }
-                            tmp = null;
                         }
                         if (terminate) break;
                         

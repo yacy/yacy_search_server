@@ -67,8 +67,8 @@ import de.anomic.server.serverCore;
 // The Naming of the functions is a bit strange...
 
 public class listManager {
-    public static plasmaSwitchboard switchboard;
-    public static File listsPath;
+    public static plasmaSwitchboard switchboard = null;
+    public static File listsPath = null;
 
     /**
      * Get ListSet from configuration file and return it as a unified Set.

@@ -235,8 +235,8 @@ public class ftpc {
                 ret = (((Boolean) getClass().getMethod(cmd[0].toUpperCase(), new Class[0]).invoke(this, new Object[0]))
                         .booleanValue());
             } catch (final InvocationTargetException e) {
-                if (e.getMessage() == null) {
-                } else if (notConnected()) {
+                if (e.getMessage() != null) {
+                if (notConnected()) {
                     // the error was probably caused because there is no
                     // connection
                     errPrintln("not connected. no effect.");
@@ -245,6 +245,7 @@ public class ftpc {
                 } else {
                     errPrintln("ftp internal exception: target exception " + e);
                     return ret;
+                }
                 }
             } catch (final IllegalAccessException e) {
                 errPrintln("ftp internal exception: wrong access " + e);
@@ -304,7 +305,7 @@ public class ftpc {
             super();
         }
 
-        public Class<?> loadClass(final String classname, final boolean resolve) throws ClassNotFoundException {
+        public synchronized Class<?> loadClass(final String classname, final boolean resolve) throws ClassNotFoundException {
             Class<?> c = findLoadedClass(classname);
             if (c == null) {
                 try {
@@ -394,8 +395,7 @@ public class ftpc {
             errPrintln("no \"public static main(String args[])\" in " + obj);
         } catch (final InvocationTargetException e) {
             final Throwable orig = e.getTargetException();
-            if (orig.getMessage() == null) {
-            } else {
+            if (orig.getMessage() != null) {
                 errPrintln("Exception from " + obj + ": " + orig.getMessage());
                 orig.printStackTrace(err);
             }

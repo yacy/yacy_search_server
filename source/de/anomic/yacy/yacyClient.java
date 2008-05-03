@@ -937,9 +937,9 @@ public final class yacyClient {
         final List<Part> post = yacyNetwork.basicRequestPost(plasmaSwitchboard.getSwitchboard(), targetSeed.hash, salt);
         
         // enabling gzip compression for post request body
-        if ((gzipBody) && (targetSeed.getVersion() >= yacyVersion.YACY_SUPPORTS_GZIP_POST_REQUESTS)) {
+        /*if ((gzipBody) && (targetSeed.getVersion() >= yacyVersion.YACY_SUPPORTS_GZIP_POST_REQUESTS)) {
             // TODO generate gzip-Header (and stream?)
-        }
+        }*/
         post.add(new StringPart("wordc", Integer.toString(indexes.length)));
         
         int indexcount = 0;
@@ -995,9 +995,9 @@ public final class yacyClient {
         final List<Part> post = yacyNetwork.basicRequestPost(plasmaSwitchboard.getSwitchboard(), targetSeed.hash, salt);
         
         // enabling gzip compression for post request body
-        if ((gzipBody) && (targetSeed.getVersion() >= yacyVersion.YACY_SUPPORTS_GZIP_POST_REQUESTS)) {
+        /*if ((gzipBody) && (targetSeed.getVersion() >= yacyVersion.YACY_SUPPORTS_GZIP_POST_REQUESTS)) {
             // TODO generate gzip-Header (and stream?)
-        }        
+        }*/
         
         String resource = "";
         int urlc = 0;

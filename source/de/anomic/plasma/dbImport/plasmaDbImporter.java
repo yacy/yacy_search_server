@@ -173,36 +173,38 @@ public class plasmaDbImporter extends AbstractImporter implements dbImporter {
                         if (isAborted()) break;
                         String urlHash = urlIter.next();
 
-                        if (importedUrlBuffer.contains(urlHash)) {
-                            // already known url
-                        } else if (unknownUrlBuffer.contains(urlHash)) {
-                            // url known as unknown
-                            unknownUrlBuffer.add(urlHash);
-                            notBoundEntryCounter++;
-                            newContainer.remove(urlHash);
-                            continue;
-                        } else {
-                            // we need to import the url
-
-                            // getting the url entry
-                            indexURLReference urlEntry = this.importWordIndex.getURL(urlHash, null, 0);
-                            if (urlEntry != null) {
-
-                                /* write it into the home url db */
-                                homeWordIndex.putURL(urlEntry);
-                                importedUrlBuffer.add(urlHash);
-                                this.urlCounter++;
-
-                                if (this.urlCounter % 500 == 0) {
-                                    this.log.logFine(this.urlCounter + " URLs processed so far.");
-                                }
-
-                            } else {
+                        if (!importedUrlBuffer.contains(urlHash)) {
+                            if (unknownUrlBuffer.contains(urlHash)) {
+                                // url known as unknown
                                 unknownUrlBuffer.add(urlHash);
                                 notBoundEntryCounter++;
                                 newContainer.remove(urlHash);
                                 continue;
+                            } else {
+                                // we need to import the url
+
+                                // getting the url entry
+                                indexURLReference urlEntry = this.importWordIndex.getURL(urlHash, null, 0);
+                                if (urlEntry != null) {
+
+                                    /* write it into the home url db */
+                                    homeWordIndex.putURL(urlEntry);
+                                    importedUrlBuffer.add(urlHash);
+                                    this.urlCounter++;
+
+                                    if (this.urlCounter % 500 == 0) {
+                                        this.log.logFine(this.urlCounter + " URLs processed so far.");
+                                    }
+
+                                } else {
+                                    unknownUrlBuffer.add(urlHash);
+                                    notBoundEntryCounter++;
+                                    newContainer.remove(urlHash);
+                                    continue;
+                                }
                             }
+                        //} else {
+                            // already known url
                         }
                         this.entryCounter++;
                     }

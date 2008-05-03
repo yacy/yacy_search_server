@@ -62,7 +62,7 @@ public final class ConsoleOutHandler extends StreamHandler{
         flush();
     }
     
-    public void close() {
+    public synchronized void close() {
         flush();
     }
 }

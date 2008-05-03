@@ -39,7 +39,7 @@ public class serverMemory {
     private static final long[] gcs = new long[5];
     private static int gcs_pos = 0;
 
-    private static long lastGC;
+    private static long lastGC = 0l;
 
     /**
      * Runs the garbage collector if last garbage collection is more than last millis ago

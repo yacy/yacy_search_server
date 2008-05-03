@@ -220,8 +220,8 @@ public class CacheAdmin_p {
             	prop.put("info_empty", "0");
                 final TreeSet<String> dList = new TreeSet<String>();
                 final TreeSet<String> fList = new TreeSet<String>();
-                int size = list.length - 1, i = size;
-                for (; i >= 0 ; i--) { // Rueckwaerts ist schneller
+                int size = list.length - 1, i;
+                for (i = size; i >= 0 ; i--) { // Rueckwaerts ist schneller
                     if (new File(dir, list[i]).isDirectory())
                         dList.add(list[i]);
                     else

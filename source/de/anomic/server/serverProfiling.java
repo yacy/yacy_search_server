@@ -33,17 +33,15 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class serverProfiling extends Thread {
     
-    private static Map<String, ConcurrentLinkedQueue<Event>> historyMaps; // key=name of history, value=TreeMap of Long/Event
-    private static Map<String, Integer> eventCounter; // key=name of history, value=Integer of event counter
-    private static serverProfiling systemProfiler;
-    
-    static {
-        // initialize profiling
-        historyMaps = new ConcurrentHashMap<String, ConcurrentLinkedQueue<Event>>();
-        eventCounter = new ConcurrentHashMap<String, Integer>();
-        //lastCompleteCleanup = System.currentTimeMillis();
-        systemProfiler = null;
-    }
+    /**
+     * key=name of history, value=TreeMap of Long/Event
+     */
+    private static final Map<String, ConcurrentLinkedQueue<Event>> historyMaps = new ConcurrentHashMap<String, ConcurrentLinkedQueue<Event>>();;
+    /**
+     * key=name of history, value=Integer of event counter
+     */
+    private static final Map<String, Integer> eventCounter = new ConcurrentHashMap<String, Integer>();
+    private static serverProfiling systemProfiler = null;
     
     public static void startSystemProfiling() {
     	systemProfiler = new serverProfiling(1000);

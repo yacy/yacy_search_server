@@ -77,10 +77,10 @@ import de.anomic.yacy.yacyURL;
 
 public class Bookmarks {
 
-	private static serverObjects prop;
-	private static plasmaSwitchboard switchboard;
-	private static userDB.Entry user;
-	private static boolean isAdmin;	
+	private static final serverObjects prop = new serverObjects();
+	private static plasmaSwitchboard switchboard = null;
+	private static userDB.Entry user = null;
+	private static boolean isAdmin = false;	
 
 	final static int SORT_ALPHA = 1;
 	final static int SORT_SIZE = 2;
@@ -95,7 +95,7 @@ public class Bookmarks {
     	String tagName = "";
     	String username="";
     	
-    	prop = new serverObjects();
+    	prop.clear();
     	switchboard = (plasmaSwitchboard) env;
     	user = switchboard.userDB.getUser(header);   
     	isAdmin=(switchboard.verifyAuthentication(header, true) || user!= null && user.hasRight(userDB.Entry.BOOKMARK_RIGHT));
@@ -177,8 +177,8 @@ public class Bookmarks {
     				}
     				bookmark.setTags(tags, true);
     				switchboard.bookmarksDB.saveBookmark(bookmark);
-    			}else{
-    				//ERROR
+    			//}else{
+    	                    //ERROR
     			}
     		}else if(post.containsKey("edit")){
     			String urlHash=(String) post.get("edit");

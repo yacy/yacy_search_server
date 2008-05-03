@@ -117,7 +117,7 @@ public class serverCoreSocket extends Socket {
                 break;
             }
             this.isSSL = true;
-        } else {
+        //} else {
             // maybe SSL_2, but we can not be sure
         }
 

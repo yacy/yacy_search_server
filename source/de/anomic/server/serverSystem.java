@@ -295,32 +295,33 @@ public final class serverSystem {
 	try {
 	    String cmd;
 	    Process p;
-	    if (systemOS == systemUnknown) {
-	    } else if (systemOS == systemMacOSC) {
-		if ((isMacArchitecture) && (macMRJFileUtils != null)) {
-		    macOpenURL.invoke(null, new Object[] {url});
-		}
-	    } else if (systemOS == systemMacOSX) {
-		p = Runtime.getRuntime().exec(new String[] {"/usr/bin/osascript", "-e", "open location \"" + url + "\""});
-		p.waitFor();
-		if (p.exitValue() != 0) throw new RuntimeException("EXEC ERROR: " + errorResponse(p));
-	    } else if (systemOS == systemUnix) {
-		cmd = app + " -remote openURL(" + url + ") &";
-		p = Runtime.getRuntime().exec(cmd);
-		p.waitFor();
-		if (p.exitValue() != 0) {
-		    cmd = app + " "  + url + " &";
-		    p = Runtime.getRuntime().exec(cmd);
-		    p.waitFor();
-		}
-		if (p.exitValue() != 0) throw new RuntimeException("EXEC ERROR: " + errorResponse(p));
-	    } else if (systemOS == systemWindows) {
-		// see forum at http://forum.java.sun.com/thread.jsp?forum=57&thread=233364&message=838441
-		cmd = "rundll32 url.dll,FileProtocolHandler " + url;
-		//cmd = "cmd.exe /c start javascript:document.location='" + url + "'";
-		p = Runtime.getRuntime().exec(cmd);
-		p.waitFor();
-		if (p.exitValue() != 0) throw new RuntimeException("EXEC ERROR: " + errorResponse(p));
+	    if (systemOS != systemUnknown) {
+            if (systemOS == systemMacOSC) {
+            if ((isMacArchitecture) && (macMRJFileUtils != null)) {
+                macOpenURL.invoke(null, new Object[] {url});
+            }
+            } else if (systemOS == systemMacOSX) {
+            p = Runtime.getRuntime().exec(new String[] {"/usr/bin/osascript", "-e", "open location \"" + url + "\""});
+            p.waitFor();
+            if (p.exitValue() != 0) throw new RuntimeException("EXEC ERROR: " + errorResponse(p));
+            } else if (systemOS == systemUnix) {
+            cmd = app + " -remote openURL(" + url + ") &";
+            p = Runtime.getRuntime().exec(cmd);
+            p.waitFor();
+            if (p.exitValue() != 0) {
+                cmd = app + " "  + url + " &";
+                p = Runtime.getRuntime().exec(cmd);
+                p.waitFor();
+            }
+            if (p.exitValue() != 0) throw new RuntimeException("EXEC ERROR: " + errorResponse(p));
+            } else if (systemOS == systemWindows) {
+            // see forum at http://forum.java.sun.com/thread.jsp?forum=57&thread=233364&message=838441
+            cmd = "rundll32 url.dll,FileProtocolHandler " + url;
+            //cmd = "cmd.exe /c start javascript:document.location='" + url + "'";
+            p = Runtime.getRuntime().exec(cmd);
+            p.waitFor();
+            if (p.exitValue() != 0) throw new RuntimeException("EXEC ERROR: " + errorResponse(p));
+            }
 	    }
 	} catch (Exception e) {
 	    System.out.println("please start your browser and open the following location: " + url);

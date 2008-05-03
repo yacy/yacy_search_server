@@ -279,6 +279,7 @@ public final class plasmaCrawlStacker extends Thread {
     private void deleteDB() {
         if (this.dbtype == QUEUE_DB_TYPE_RAM) {
             // do nothing..
+            return;
         }
         if (this.dbtype == QUEUE_DB_TYPE_ECO) {
             new File(cacheStacksPath, stackfile).delete();

@@ -116,7 +116,7 @@ public class translator {
 				splitted = line.split("==", 2);
 				if(splitted.length == 2){
 					translationList.put(splitted[0], splitted[1]);
-				}else{ //Invalid line
+				//}else{ //Invalid line
 				}
 			}else if(line.startsWith("#File: ")){
 				if(!forFile.equals("")){
@@ -212,7 +212,7 @@ public class translator {
                                     , translationLists.get(relativePath))){
 						serverLog.logSevere("TRANSLATOR", "File error while translating file "+relativePath);
 					}
-				}else{
+				//}else{
 						//serverLog.logInfo("TRANSLATOR", "No translation for file: "+relativePath);
 				}
 			}

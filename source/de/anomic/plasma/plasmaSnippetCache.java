@@ -86,9 +86,9 @@ public class plasmaSnippetCache {
     public static final int ERROR_PARSER_NO_LINES = 15;
     public static final int ERROR_NO_MATCH = 16;
     
-    private static int                   snippetsScoreCounter;
-    private static kelondroMScoreCluster<String> snippetsScore;
-    private static HashMap<String, String>       snippetsCache;
+    private static int                   snippetsScoreCounter = 0;
+    private static kelondroMScoreCluster<String> snippetsScore = null;
+    private static final HashMap<String, String>       snippetsCache = new HashMap<String, String>();
     
     /**
      * a cache holding URLs to favicons specified by the page content, e.g. by using the html link-tag. e.g.
@@ -96,9 +96,9 @@ public class plasmaSnippetCache {
      * 	 &lt;link rel="shortcut icon" type="image/x-icon" href="../src/favicon.ico"&gt;
      * </pre>
      */
-    private static HashMap<String, yacyURL> faviconCache;
-    private static plasmaParser          parser;
-    private static serverLog             log;
+    private static final HashMap<String, yacyURL> faviconCache = new HashMap<String, yacyURL>();
+    private static plasmaParser          parser = null;
+    private static serverLog             log = null;
     
     public static void init(
             plasmaParser parserx,
@@ -108,8 +108,8 @@ public class plasmaSnippetCache {
         log = logx;
         snippetsScoreCounter = 0;
         snippetsScore = new kelondroMScoreCluster<String>();
-        snippetsCache = new HashMap<String, String>(); 
-        faviconCache = new HashMap<String, yacyURL>();
+        snippetsCache.clear(); 
+        faviconCache.clear();
     }
     
     public static class TextSnippet {
@@ -477,7 +477,7 @@ public class plasmaSnippetCache {
         if (snippetsScoreCounter == java.lang.Integer.MAX_VALUE) {
             snippetsScoreCounter = 0;
             snippetsScore = new kelondroMScoreCluster<String>();
-            snippetsCache = new HashMap<String, String>();
+            snippetsCache.clear();
         }
         
         // flush cache if cache is full

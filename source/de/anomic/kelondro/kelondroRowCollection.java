@@ -874,7 +874,7 @@ public class kelondroRowCollection {
     	if (b == 0) return a; else return a / b;
     }
     
-    private static Random random;
+    private static Random random = null;
     private static String randomHash() {
     	return
     		kelondroBase64Order.enhancedCoder.encodeLong(random.nextLong(), 4) +
@@ -940,9 +940,9 @@ public class kelondroRowCollection {
     	System.out.println("uniq d     : " + (t6 - t5) + " nanoseconds, " + d(testsize, (t6 - t5)) + " entries/nanoseconds");
     	random = new Random(0);
     	kelondroRowSet e = new kelondroRowSet(r, testsize);
-    	for (int i = 0; i < testsize; i++) {
+    	/*for (int i = 0; i < testsize; i++) {
     		//e.put(r.newEntry(randomHash().getBytes()));
-    	}
+    	}*/
     	long t7 = System.nanoTime();
     	System.out.println("create e   : " + (t7 - t6) + " nanoseconds, " + d(testsize, (t7 - t6)) + " entries/nanoseconds");
     	e.sort();

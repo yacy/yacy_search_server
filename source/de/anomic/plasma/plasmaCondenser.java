@@ -693,7 +693,7 @@ public final class plasmaCondenser {
         char c, lc = ' '; // starting with ' ' as last character prevents that the result string starts with a ' '
         
         // find sentence end
-        for (;;) {
+        while (true) {
             nextChar = reader.read();
             //System.out.print((char) nextChar); // DEBUG    
             if (nextChar < 0) {

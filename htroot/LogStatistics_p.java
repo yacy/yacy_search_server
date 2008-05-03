@@ -157,8 +157,8 @@ public class LogStatistics_p {
         
         String[] names = ((HashSet<String>) r.get(LogParserPLASMA.DHT_REJECTED_PEERS_NAME)).toArray(new String[1]);
         String[] hashes = ((HashSet<String>) r.get(LogParserPLASMA.DHT_REJECTED_PEERS_HASH)).toArray(new String[1]);
-        int i = 0;
-        for (; i<names.length && i<hashes.length; i++) {
+        int i;
+        for (i = 0; i<names.length && i<hashes.length; i++) {
             prop.put(RESULTS + "useDHTRejectPeers_DHTRejectPeers_" + i + "_name", names[i]);
             prop.put(RESULTS + "useDHTRejectPeers_DHTRejectPeers_" + i + "_hash", hashes[i]);
         }
@@ -168,8 +168,7 @@ public class LogStatistics_p {
         
         names = ((HashSet<String>)r.get(LogParserPLASMA.DHT_SENT_PEERS_NAME)).toArray(new String[1]);
         hashes = ((HashSet<String>)r.get(LogParserPLASMA.DHT_SENT_PEERS_HASH)).toArray(new String[1]);
-        i = 0;
-        for (; i<names.length && i<hashes.length; i++) {
+        for (i = 0; i<names.length && i<hashes.length; i++) {
             prop.put(RESULTS + "useDHTPeers_DHTPeers_" + i + "_name", names[i]);
             prop.put(RESULTS + "useDHTPeers_DHTPeers_" + i + "_hash", hashes[i]);
         }
