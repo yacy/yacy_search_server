@@ -17,11 +17,19 @@ public class xbel {
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
  
     	int count = 0;;
-    	
+
     	prop.clear();
     	switchboard = (plasmaSwitchboard) env;    	
     	isAdmin=switchboard.verifyAuthentication(header, true);   
-  
+
+    	if(post != null) {
+    		if(!isAdmin) {
+    			if(post.containsKey("login")) {
+    				prop.put("AUTHENTICATE","admin log-in");
+    			}
+		}
+	}
+	
     	if(isAdmin) {
            	count = recurseFolders(switchboard.bookmarksDB.getFolderList(isAdmin),"/",0,true,"");
            	prop.put("xbel", count);  
