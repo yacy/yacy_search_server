@@ -64,6 +64,8 @@ import java.util.Iterator;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
+import org.apache.commons.httpclient.ChunkedInputStream;
+
 import de.anomic.data.htmlTools;
 import de.anomic.data.userDB;
 import de.anomic.kelondro.kelondroBase64Order;
@@ -599,6 +601,26 @@ public final class httpd implements serverHandler {
             if (httpVersion.equals(httpHeader.HTTP_VERSION_0_9))  header = new httpHeader(reverseMappingCache);
             else header = httpHeader.readHeader(this.prop,this.session);
             
+            // handle transfer-coding
+            final InputStream sessionIn;
+            final String transferEncoding = header.get(httpHeader.TRANSFER_ENCODING);
+            if (transferEncoding != null) {
+                if (!httpHeader.HTTP_VERSION_1_1.equals(httpVersion)) {
+                    this.log.logWarning("client "+ session.getName() +" uses transfer-coding with HTTP version "+ httpVersion +"!");
+                }
+                if("chunked".equalsIgnoreCase(header.get(httpHeader.TRANSFER_ENCODING))) {
+                    sessionIn = new ChunkedInputStream(this.session.in);
+                } else {
+                    // "A server which receives an entity-body with a transfer-coding it does
+                    // not understand SHOULD return 501 (Unimplemented), and close the
+                    // connection." [RFC 2616, section 3.6]
+                    session.out.write((httpVersion + " 501 transfer-encoding not implemented" + serverCore.CRLF_STRING + serverCore.CRLF_STRING + "you send a transfer-encoding to this server, which is not supported: " + transferEncoding + serverCore.CRLF_STRING).getBytes());
+                    return serverCore.TERMINATE_CONNECTION;
+                }
+            } else {
+                sessionIn = this.session.in;
+            }
+            
             // handle transparent proxy support
             httpHeader.handleTransparentProxySupport(header, this.prop, virtualHost, httpdProxyHandler.isTransparentProxy);
             
@@ -610,7 +632,7 @@ public final class httpd implements serverHandler {
                 // pass to server
                 if (allowServer) {
                     if (handleServerAuthentication(header)) {
-                        httpdFileHandler.doPost(prop, header, this.session.out, this.session.in);
+                        httpdFileHandler.doPost(prop, header, this.session.out, sessionIn);
                     }
                 } else {
                     // not authorized through firewall blocking (ip does not match filter)
@@ -621,7 +643,7 @@ public final class httpd implements serverHandler {
                 // pass to proxy
                 if (((this.allowYaCyHop) && (handleYaCyHopAuthentication(header))) ||
                     ((this.allowProxy) && (handleProxyAuthentication(header)))) {
-                    httpdProxyHandler.doPost(prop, header, this.session.out, this.session.in);
+                    httpdProxyHandler.doPost(prop, header, this.session.out, sessionIn);
                 } else {
                     // not authorized through firewall blocking (ip does not match filter)
                     session.out.write((httpVersion + " 403 refused (IP not granted)" + serverCore.CRLF_STRING + serverCore.CRLF_STRING + "you are not allowed to connect to this proxy, because you are using the non-granted IP " + clientIP + ". allowed are only connections that match with the following filter: " + switchboard.getConfig("proxyClient", "*") + serverCore.CRLF_STRING).getBytes());
@@ -1183,9 +1205,6 @@ public final class httpd implements serverHandler {
             tp.put("requestURL",       urlString);
 
             switch (errorcase) {
-                case ERRORCASE_MESSAGE:
-                    tp.put("errorMessageType_detailedErrorMsg", (detailedErrorMsgText == null) ? "" : detailedErrorMsgText.replaceAll("\n", "<br />"));
-                    break;
                 case ERRORCASE_FILE:
                     tp.put("errorMessageType_file", (detailedErrorMsgFile == null) ? "" : detailedErrorMsgFile.toString());
                     if ((detailedErrorMsgValues != null) && (detailedErrorMsgValues.size() > 0)) {
@@ -1197,7 +1216,9 @@ public final class httpd implements serverHandler {
                         }                        
                     }                    
                     break;
+                case ERRORCASE_MESSAGE:
                 default:
+                    tp.put("errorMessageType_detailedErrorMsg", (detailedErrorMsgText == null) ? "" : detailedErrorMsgText.replaceAll("\n", "<br />"));
                     break;
             }
             

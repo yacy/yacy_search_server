@@ -263,7 +263,7 @@ public final class httpdFileHandler {
         doResponse(conProp, requestHeader, response, null);
     }
     
-    public static void doPost(Properties conProp, httpHeader requestHeader, OutputStream response, PushbackInputStream body) {
+    public static void doPost(Properties conProp, httpHeader requestHeader, OutputStream response, InputStream body) {
         doResponse(conProp, requestHeader, response, body);
     }
     
@@ -352,11 +352,14 @@ public final class httpdFileHandler {
                 if (method.equals(httpHeader.METHOD_POST)) {
     
                     GZIPInputStream gzipBody = null;
-                    if (requestHeader.containsKey(httpHeader.CONTENT_LENGTH)) {
-                        length = Integer.parseInt((String) requestHeader.get(httpHeader.CONTENT_LENGTH));
-                    } else if (requestHeader.gzip()) {
+                    /* "If the message does include a non-identity transfer-coding, the Content-Length MUST be ignored."
+                     * [RFC 2616 HTTP/1.1, section 4.4] TODO: full RFC compliance
+                     */
+                    if (requestHeader.gzip()) {
                         length = -1;
                         gzipBody = new GZIPInputStream(body);
+                    } else if (requestHeader.containsKey(httpHeader.CONTENT_LENGTH)) {
+                        length = Integer.parseInt((String) requestHeader.get(httpHeader.CONTENT_LENGTH));
                     }
     //                } else {
     //                    httpd.sendRespondError(conProp,out,4,403,null,"bad post values",null); 

@@ -25,11 +25,14 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 package de.anomic.http;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.httpclient.ConnectMethod;
 import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
@@ -44,6 +47,7 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.HeadMethod;
 import org.apache.commons.httpclient.methods.InputStreamRequestEntity;
 import org.apache.commons.httpclient.methods.PostMethod;
+import org.apache.commons.httpclient.methods.RequestEntity;
 import org.apache.commons.httpclient.methods.multipart.ByteArrayPartSource;
 import org.apache.commons.httpclient.methods.multipart.FilePart;
 import org.apache.commons.httpclient.methods.multipart.MultipartRequestEntity;
@@ -77,14 +81,11 @@ public class JakartaCommonsHttpClient {
          */
         // set user-agent
         final yacyVersion thisversion = yacyVersion.thisVersion();
-        apacheHttpClient.getParams().setParameter(
-                                                  HttpMethodParams.USER_AGENT,
-                                                  "yacy/" + ((thisversion == null) ? "0.0" : thisversion.releaseNr) +
-                                                          " (www.yacy.net; " +
-                                                          de.anomic.http.HttpClient.getSystemOST() + ") " +
-                                                          getCurrentUserAgent().replace(';', ':')); // last ; must be
-                                                                                                    // before location
-                                                                                                    // (this is parsed)
+        final String userAgent = "yacy/" + ((thisversion == null) ? "0.0" : thisversion.releaseNr) +
+                " (www.yacy.net; " + de.anomic.http.HttpClient.getSystemOST() + ") " +
+                // last ; must be before location (this is parsed)
+                getCurrentUserAgent().replace(';', ':');
+        apacheHttpClient.getParams().setParameter(HttpMethodParams.USER_AGENT, userAgent);
         // only one retry
         apacheHttpClient.getParams().setParameter(HttpMethodParams.RETRY_HANDLER,
                                                   new DefaultHttpMethodRetryHandler(1, false));
@@ -116,15 +117,15 @@ public class JakartaCommonsHttpClient {
         // after a connection is established with a resource
         System.setProperty("sun.net.client.defaultReadTimeout", "60000");
     }
-    
+
     /**
      * every x milliseconds do a cleanup (close old connections)
      */
     private static final int cleanupIntervall = 60000;
     /**
      * close connections when they are not used for this time
-     * or otherwise:
-     * hold connections this time open to reuse them
+     * 
+     * or otherwise: hold connections this time open to reuse them
      */
     private static final long closeConnectionsAfterMillis = 120000;
     /**
@@ -167,7 +168,7 @@ public class JakartaCommonsHttpClient {
      * @see de.anomic.http.HttpClient#setHeader(de.anomic.http.httpHeader)
      */
     public void setHeader(final httpHeader header) {
-        headers = convertHeaders(header);
+        this.headers = convertHeaders(header);
     }
 
     /*
@@ -185,7 +186,7 @@ public class JakartaCommonsHttpClient {
      * @param follow
      */
     public void setFollowRedirects(final boolean follow) {
-        followRedirects = follow;
+        this.followRedirects = follow;
     }
 
     /*
@@ -206,7 +207,7 @@ public class JakartaCommonsHttpClient {
      */
     public JakartaCommonsHttpResponse GET(final String uri) throws IOException {
         final HttpMethod get = new GetMethod(uri);
-        get.setFollowRedirects(followRedirects);
+        get.setFollowRedirects(this.followRedirects);
         return execute(get);
     }
 
@@ -221,7 +222,7 @@ public class JakartaCommonsHttpClient {
     public JakartaCommonsHttpResponse HEAD(final String uri) throws IOException {
         assert uri != null : "precondition violated: uri != null";
         final HttpMethod head = new HeadMethod(uri);
-        head.setFollowRedirects(followRedirects);
+        head.setFollowRedirects(this.followRedirects);
         return execute(head);
     }
 
@@ -240,63 +241,63 @@ public class JakartaCommonsHttpClient {
         assert ins != null : "precondition violated: ins != null";
         final PostMethod post = new PostMethod(uri);
         post.setRequestEntity(new InputStreamRequestEntity(ins));
-        post.setFollowRedirects(false); // redirects in POST cause a "Entity enclosing requests cannot be redirected without user intervention" - exception
+        // redirects in POST cause a "Entity enclosing requests cannot be redirected without user intervention" -
+        // exception
+        post.setFollowRedirects(false);
         return execute(post);
     }
 
     /**
-     * This method sends several files at once via a POST request. Only those files in the Hashtable files are written
-     * whose names are contained in args.
+     * This method sends several data at once via a POST request (multipart-message)
+     * 
+     * @param uri
+     * @param multiparts
+     * @return
+     * @throws IOException
+     */
+    public JakartaCommonsHttpResponse POST(final String uri, final List<Part> multiparts) throws IOException {
+        return POST(uri, multiparts, false);
+    }
+
+    /**
+     * This method sends several data at once via a POST request (multipart-message), maybe compressed
      * 
      * @param uri The URI to the page which the post is sent to.
-     * @param files HashMap with the names of data as key and the content (currently implemented is File, byte[] and
-     *                String) of the files as value.
+     * @param multiparts {@link java.util.List} with the {@link Part}s of data
+     * @param gzipBody should the body be compressed
      * @return Instance of response with the content.
      * @throws IOException
      */
-    public JakartaCommonsHttpResponse POST(final String uri, final List<Part> files) throws IOException {
+    public JakartaCommonsHttpResponse POST(final String uri, final List<Part> multiparts, final boolean gzipBody)
+            throws IOException {
         assert uri != null : "precondition violated: uri != null";
         final PostMethod post = new PostMethod(uri);
 
         final Part[] parts;
-        if (files != null) {
-            parts = new Part[files.size()];
-            int i = 0;
-            for (final Part part : files) {
-                parts[i] = part;
-                /*
-                if (value instanceof File) {
-                    final File file = (File) value;
-                    if (file.isFile() && file.canRead()) {
-                        // read file
-                        final ByteArrayOutputStream fileData = new ByteArrayOutputStream();
-                        serverFileUtils.copyToStream(new BufferedInputStream(new FileInputStream(file)),
-                                                     new BufferedOutputStream(fileData));
-                        value = fileData.toByteArray();
-                    }
-                }
-                if (value instanceof byte[]) {
-                    // file/binary data
-                    parts[i] = new FilePart(key, new ByteArrayPartSource(key, (byte[]) value));
-                } else if (value instanceof String) {
-                    // simple text value
-                    parts[i] = new StringPart(key, (String) value);
-                } else {
-                    // not supported
-                    final String msg = "type of POST-data not supported: " + value.getClass();
-                    serverLog.logSevere("HTTPC", msg);
-                    throw new IOException("cannot POST data: " + msg);
-                    // break; // post nothing is not what is expected by the caller
-                }
-                */
-                i++;
-            }
+        if (multiparts != null) {
+            parts = multiparts.toArray(new Part[0]);
         } else {
             // nothing to POST
             parts = new Part[0];
         }
-        post.setRequestEntity(new MultipartRequestEntity(parts, post.getParams()));
-        post.setFollowRedirects(false); // redirects in POST cause a "Entity enclosing requests cannot be redirected without user intervention" - exception
+        RequestEntity data = new MultipartRequestEntity(parts, post.getParams());
+        if (gzipBody) {
+            // cache data and gzip it
+            final ByteArrayOutputStream zippedBytes = new ByteArrayOutputStream();
+            final GZIPOutputStream toZip = new GZIPOutputStream(zippedBytes);
+            data.writeRequest(toZip);
+            toZip.finish();
+            toZip.flush();
+            // use compressed data as body (not setting content length according to RFC 2616 HTTP/1.1, section 4.4)
+            data = new InputStreamRequestEntity(new ByteArrayInputStream(zippedBytes.toByteArray()), -1, data
+                    .getContentType());
+
+            post.setRequestHeader(httpHeader.CONTENT_ENCODING, httpHeader.CONTENT_ENCODING_GZIP);
+        }
+        post.setRequestEntity(data);
+        // redirects in POST cause a "Entity enclosing requests cannot be redirected without user intervention" -
+        // exception
+        post.setFollowRedirects(false);
         return execute(post);
     }
 
@@ -375,18 +376,18 @@ public class JakartaCommonsHttpClient {
     private JakartaCommonsHttpResponse execute(final HttpMethod method) throws IOException, HttpException {
         assert method != null : "precondition violated: method != null";
         // set header
-        for (final Header header : headers) {
+        for (final Header header : this.headers) {
             method.setRequestHeader(header);
         }
-        
+
         // set proxy
-        final httpRemoteProxyConfig proxyConfig = getProxyConfig(method.getURI().getHost());
-        addProxyAuth(method, proxyConfig);
-        final HostConfiguration hostConfig = getProxyHostConfig(proxyConfig);
-        
+        final httpRemoteProxyConfig hostProxyConfig = getProxyConfig(method.getURI().getHost());
+        addProxyAuth(method, hostProxyConfig);
+        final HostConfiguration hostConfig = getProxyHostConfig(hostProxyConfig);
+
         // statistics
         HttpConnectionInfo.addConnection(generateConInfo(method));
-        
+
         // execute (send request)
         try {
             if (hostConfig == null) {
@@ -394,12 +395,12 @@ public class JakartaCommonsHttpClient {
             } else {
                 apacheHttpClient.executeMethod(hostConfig, method);
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             // cleanUp statistics
             HttpConnectionInfo.removeConnection(generateConInfo(method));
             throw e;
         }
-        
+
         // return response
         return new JakartaCommonsHttpResponse(method);
     }
@@ -420,24 +421,24 @@ public class JakartaCommonsHttpClient {
             // should not happen, because method is already executed
         }
         final String query = (method.getQueryString() != null) ? "?" + method.getQueryString() : "";
-        return new HttpConnectionInfo(protocol, (port == -1 || port == 80) ? host : host + ":" + port, method.getName() + " " +
-                method.getPath() + query, method.hashCode(), System.currentTimeMillis());
+        return new HttpConnectionInfo(protocol, (port == -1 || port == 80) ? host : host + ":" + port,
+                method.getName() + " " + method.getPath() + query, method.hashCode(), System.currentTimeMillis());
     }
 
     /**
      * if necessary adds a header for proxy-authentication
      * 
      * @param method
-     * @param proxyConfig
+     * @param hostProxyConfig
      */
-    private void addProxyAuth(final HttpMethod method, final httpRemoteProxyConfig proxyConfig) {
-        if (proxyConfig != null && proxyConfig.useProxy()) {
-            final String remoteProxyUser = proxyConfig.getProxyUser();
+    private void addProxyAuth(final HttpMethod method, final httpRemoteProxyConfig hostProxyConfig) {
+        if (hostProxyConfig != null && hostProxyConfig.useProxy()) {
+            final String remoteProxyUser = hostProxyConfig.getProxyUser();
             if (remoteProxyUser != null && remoteProxyUser.length() > 0) {
                 if (remoteProxyUser.contains(":")) {
                     serverLog.logWarning("HTTPC", "Proxy authentication contains invalid characters, trying anyway");
                 }
-                final String remoteProxyPwd = proxyConfig.getProxyPwd();
+                final String remoteProxyPwd = hostProxyConfig.getProxyPwd();
                 final String credentials = kelondroBase64Order.standardCoder.encodeString(remoteProxyUser.replace(":",
                                                                                                                   "") +
                         ":" + remoteProxyPwd);
@@ -452,28 +453,28 @@ public class JakartaCommonsHttpClient {
      * @return
      */
     private httpRemoteProxyConfig getProxyConfig(final String hostname) {
-        final httpRemoteProxyConfig proxyConfig;
+        final httpRemoteProxyConfig hostProxyConfig;
         if (this.proxyConfig != null) {
             // client specific
-            proxyConfig = httpdProxyHandler.getProxyConfig(hostname, this.proxyConfig);
+            hostProxyConfig = httpdProxyHandler.getProxyConfig(hostname, this.proxyConfig);
         } else {
             // default settings
-            proxyConfig = httpdProxyHandler.getProxyConfig(hostname, 0);
+            hostProxyConfig = httpdProxyHandler.getProxyConfig(hostname, 0);
         }
-        return proxyConfig;
+        return hostProxyConfig;
     }
 
     /**
-     * @param proxyConfig
+     * @param hostProxyConfig
      * @return current host-config with additional proxy set or null if no proxy should be used
      */
-    private HostConfiguration getProxyHostConfig(final httpRemoteProxyConfig proxyConfig) {
+    private HostConfiguration getProxyHostConfig(final httpRemoteProxyConfig hostProxyConfig) {
         // generate http-configuration
-        if (proxyConfig != null && proxyConfig.useProxy()) {
+        if (hostProxyConfig != null && hostProxyConfig.useProxy()) {
             // new config based on client (default)
             final HostConfiguration hostConfig = new HostConfiguration(apacheHttpClient.getHostConfiguration());
             // add proxy
-            hostConfig.setProxy(proxyConfig.getProxyHost(), proxyConfig.getProxyPort());
+            hostConfig.setProxy(hostProxyConfig.getProxyHost(), hostProxyConfig.getProxyPort());
             return hostConfig;
         } else {
             return null;
@@ -526,8 +527,10 @@ public class JakartaCommonsHttpClient {
             if (args.length > 1 && "post".equals(args[1])) {
                 // POST
                 final ArrayList<Part> files = new ArrayList<Part>();
-                files.add(new FilePart("myfile.txt", new ByteArrayPartSource("myfile.txt", "this is not a file ;)".getBytes())));
-                files.add(new FilePart("anotherfile.raw", new ByteArrayPartSource("anotherfile.raw", "this is not a binary file ;)".getBytes())));
+                files.add(new FilePart("myfile.txt", new ByteArrayPartSource("myfile.txt", "this is not a file ;)"
+                        .getBytes())));
+                files.add(new FilePart("anotherfile.raw", new ByteArrayPartSource("anotherfile.raw",
+                        "this is not a binary file ;)".getBytes())));
                 System.out.println("POST " + files.size() + " elements to " + url);
                 final JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(1000, null, null);
                 resp = client.POST(url, files);
@@ -577,8 +580,8 @@ public class JakartaCommonsHttpClient {
      */
     public static void cleanup() {
         // do it only once a while
-        final long now = System.currentTimeMillis(); 
-        if(now - lastCleanup > cleanupIntervall) {
+        final long now = System.currentTimeMillis();
+        if (now - lastCleanup > cleanupIntervall) {
             lastCleanup = now;
             conManager.closeIdleConnections(closeConnectionsAfterMillis);
             conManager.deleteClosedConnections();

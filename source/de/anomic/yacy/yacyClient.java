@@ -46,6 +46,8 @@ package de.anomic.yacy;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -251,7 +253,21 @@ public final class yacyClient {
      * @throws IOException
      */
     private static byte[] wput(final String url, String vhost, final List<Part> post) throws IOException {
-        return wput(url, vhost, post, 10000);
+        return wput(url, vhost, post, 10000, false);
+    }
+
+    /**
+     * send data to the server named by vhost
+     * 
+     * @param address address of the server
+     * @param vhost name of the server at address which should respond
+     * @param post data to send (name-value-pairs)
+     * @param gzipBody send with content gzip encoded
+     * @return response body
+     * @throws IOException
+     */
+    private static byte[] wput(final String url, String vhost, final List<Part> post, boolean gzipBody) throws IOException {
+        return wput(url, vhost, post, 10000, gzipBody);
     }
     /**
      * send data to the server named by vhost
@@ -264,6 +280,20 @@ public final class yacyClient {
      * @throws IOException
      */
     private static byte[] wput(final String url, String vhost, final List<Part> post, final int timeout) throws IOException {
+        return wput(url, vhost, post, timeout, false);
+    }
+    /**
+     * send data to the server named by vhost
+     * 
+     * @param address address of the server
+     * @param vhost name of the server at address which should respond
+     * @param post data to send (name-value-pairs)
+     * @param timeout in milliseconds
+     * @param gzipBody send with content gzip encoded
+     * @return response body
+     * @throws IOException
+     */
+    private static byte[] wput(final String url, String vhost, final List<Part> post, final int timeout, boolean gzipBody) throws IOException {
         JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(timeout, null, null);
         client.setProxy(proxyConfig());
         
@@ -276,7 +306,7 @@ public final class yacyClient {
         byte[] content = null;
         try {
             // send request/data
-            res = client.POST(url, post);
+            res = client.POST(url, post, gzipBody);
             content = res.getData();
         } finally {
             if(res != null) {
@@ -937,9 +967,9 @@ public final class yacyClient {
         final List<Part> post = yacyNetwork.basicRequestPost(plasmaSwitchboard.getSwitchboard(), targetSeed.hash, salt);
         
         // enabling gzip compression for post request body
-        /*if ((gzipBody) && (targetSeed.getVersion() >= yacyVersion.YACY_SUPPORTS_GZIP_POST_REQUESTS)) {
-            // TODO generate gzip-Header (and stream?)
-        }*/
+        if (gzipBody && (targetSeed.getVersion() < yacyVersion.YACY_SUPPORTS_GZIP_POST_REQUESTS_CHUNKED)) {
+            gzipBody = false;
+        }
         post.add(new StringPart("wordc", Integer.toString(indexes.length)));
         
         int indexcount = 0;
@@ -968,9 +998,9 @@ public final class yacyClient {
         post.add(new StringPart("entryc", Integer.toString(indexcount)));
         post.add(new StringPart("indexes", entrypost.toString()));  
         try {
-            final byte[] content = wput("http://" + address + "/yacy/transferRWI.html", targetSeed.getHexHash() + ".yacyh", post);
+            final byte[] content = wput("http://" + address + "/yacy/transferRWI.html", targetSeed.getHexHash() + ".yacyh", post, gzipBody);
             final ArrayList<String> v = nxTools.strings(content, "UTF-8");
-            // this should return a list of urlhashes that are unknwon
+            // this should return a list of urlhashes that are unknown
             if ((v != null) && (v.size() > 0)) {
                 yacyCore.seedDB.mySeed().incSI(indexcount);
             }
@@ -995,9 +1025,9 @@ public final class yacyClient {
         final List<Part> post = yacyNetwork.basicRequestPost(plasmaSwitchboard.getSwitchboard(), targetSeed.hash, salt);
         
         // enabling gzip compression for post request body
-        /*if ((gzipBody) && (targetSeed.getVersion() >= yacyVersion.YACY_SUPPORTS_GZIP_POST_REQUESTS)) {
-            // TODO generate gzip-Header (and stream?)
-        }*/
+        if (gzipBody && (targetSeed.getVersion() < yacyVersion.YACY_SUPPORTS_GZIP_POST_REQUESTS_CHUNKED)) {
+            gzipBody = false;
+        }
         
         String resource = "";
         int urlc = 0;
@@ -1014,7 +1044,7 @@ public final class yacyClient {
         }
         post.add(new StringPart("urlc", Integer.toString(urlc)));
         try {
-            final byte[] content = wput("http://" + address + "/yacy/transferURL.html", targetSeed.getHexHash() + ".yacyh", post);
+            final byte[] content = wput("http://" + address + "/yacy/transferURL.html", targetSeed.getHexHash() + ".yacyh", post, gzipBody);
             final ArrayList<String> v = nxTools.strings(content, "UTF-8");
             
             if ((v != null) && (v.size() > 0)) {
@@ -1058,6 +1088,7 @@ public final class yacyClient {
     }
 
     public static void main(String[] args) {
+        if(args.length > 1) {
         System.out.println("yacyClient Test");
         try {
             final plasmaSwitchboard sb = new plasmaSwitchboard(new File(args[0]), "httpProxy.init", "DATA/SETTINGS/yacy.conf", false);
@@ -1083,6 +1114,35 @@ public final class yacyClient {
             e.printStackTrace();
         }
         System.exit(0);
+        } else if(args.length == 1) {
+            System.out.println("wput Test");
+            // connection params
+            URL url = null;
+            try {
+                url = new URL(args[0]);
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
+            if(url == null) {
+                System.exit(1);
+                return;
+            }
+            final String vhost = url.getHost();
+            final int timeout = 10000;
+            final boolean gzipBody = true;
+            // data
+            final List<Part> post = new ArrayList<Part>();
+            post.add(new StringPart("process", "permission"));
+            post.add(new StringPart("purpose", "crcon"));
+            //post.add(new FilePart("filename", new ByteArrayPartSource(filename, file)));
+            // do it!
+            try {
+                final byte[] response = wput(url.toString(), vhost, post, timeout, gzipBody);
+                System.out.println(new String(response));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
 }
