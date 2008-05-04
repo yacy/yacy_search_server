@@ -244,9 +244,8 @@ public final class yacy {
 
             // if we are running an SVN version, we try to detect the used svn revision now ...
             final Properties buildProp = new Properties();
-            File buildPropFile = null;
+            File buildPropFile = new File(homePath,"build.properties");
             try {
-                buildPropFile = new File(homePath,"build.properties");
                 buildProp.load(new FileInputStream(buildPropFile));
             } catch (Exception e) {
                 serverLog.logWarning("STARTUP", buildPropFile.toString() + " not found in settings path");
@@ -327,11 +326,8 @@ public final class yacy {
             yacyVersion.deleteOldDownloads(sb.releasePath, deleteOldDownloadsAfterDays );
             
             // set user-agent
-            final yacyVersion thisversion = yacyVersion.thisVersion();
-            final String userAgent = "yacy/" + ((thisversion == null) ? "0.0" : thisversion.releaseNr) +
-                    " (www.yacy.net; " + de.anomic.http.HttpClient.getSystemOST() + ") " +
-                    // last ; must be before location (this is parsed)
-                    JakartaCommonsHttpClient.getCurrentUserAgent().replace(';', ':');
+            final String userAgent = "yacy/" + Double.toString(version) + " (www.yacy.net; "
+                    + de.anomic.http.HttpClient.getSystemOST() + ")";
             JakartaCommonsHttpClient.setUserAgent(userAgent);
             
             // start main threads
