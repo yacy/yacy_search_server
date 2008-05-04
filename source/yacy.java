@@ -326,6 +326,14 @@ public final class yacy {
             int deleteOldDownloadsAfterDays = (int) sb.getConfigLong("update.deleteOld", 30);
             yacyVersion.deleteOldDownloads(sb.releasePath, deleteOldDownloadsAfterDays );
             
+            // set user-agent
+            final yacyVersion thisversion = yacyVersion.thisVersion();
+            final String userAgent = "yacy/" + ((thisversion == null) ? "0.0" : thisversion.releaseNr) +
+                    " (www.yacy.net; " + de.anomic.http.HttpClient.getSystemOST() + ") " +
+                    // last ; must be before location (this is parsed)
+                    JakartaCommonsHttpClient.getCurrentUserAgent().replace(';', ':');
+            JakartaCommonsHttpClient.setUserAgent(userAgent);
+            
             // start main threads
             final String port = sb.getConfig("port", "8080");
             try {

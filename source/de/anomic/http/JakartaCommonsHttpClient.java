@@ -79,13 +79,6 @@ public class JakartaCommonsHttpClient {
         /**
          * set options for client
          */
-        // set user-agent
-        final yacyVersion thisversion = yacyVersion.thisVersion();
-        final String userAgent = "yacy/" + ((thisversion == null) ? "0.0" : thisversion.releaseNr) +
-                " (www.yacy.net; " + de.anomic.http.HttpClient.getSystemOST() + ") " +
-                // last ; must be before location (this is parsed)
-                getCurrentUserAgent().replace(';', ':');
-        apacheHttpClient.getParams().setParameter(HttpMethodParams.USER_AGENT, userAgent);
         // only one retry
         apacheHttpClient.getParams().setParameter(HttpMethodParams.RETRY_HANDLER,
                                                   new DefaultHttpMethodRetryHandler(1, false));
@@ -564,6 +557,13 @@ public class JakartaCommonsHttpClient {
      */
     public static String getCurrentUserAgent() {
         return (String) apacheHttpClient.getParams().getParameter(HttpMethodParams.USER_AGENT);
+    }
+
+    /**
+     * @param userAgent
+     */
+    public static void setUserAgent(final String userAgent) {
+        apacheHttpClient.getParams().setParameter(HttpMethodParams.USER_AGENT, userAgent);
     }
 
     /**
