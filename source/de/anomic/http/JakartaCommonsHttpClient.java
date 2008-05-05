@@ -52,6 +52,7 @@ import org.apache.commons.httpclient.methods.multipart.ByteArrayPartSource;
 import org.apache.commons.httpclient.methods.multipart.FilePart;
 import org.apache.commons.httpclient.methods.multipart.MultipartRequestEntity;
 import org.apache.commons.httpclient.methods.multipart.Part;
+import org.apache.commons.httpclient.params.DefaultHttpParams;
 import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
@@ -59,7 +60,6 @@ import org.apache.commons.httpclient.util.DateUtil;
 
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.server.logging.serverLog;
-import de.anomic.yacy.yacyVersion;
 
 /**
  * HttpClient implementation which uses Jakarta Commons HttpClient 3.x {@link http://hc.apache.org/httpclient-3.x/}
@@ -75,14 +75,19 @@ public class JakartaCommonsHttpClient {
     private final static MultiThreadedHttpConnectionManager conManager = new MultiThreadedHttpConnectionManager();
     private final static HttpClient apacheHttpClient = new HttpClient(conManager);
 
+    // last ; must be before location (this is parsed)
+    private final static String jakartaUserAgent = " " +
+            ((String) DefaultHttpParams.getDefaultParams().getParameter(HttpMethodParams.USER_AGENT)).replace(';', ':');
+
     static {
         /**
          * set options for client
          */
+        // simple user agent
+        setUserAgent("yacy (www.yacy.net; " + de.anomic.http.HttpClient.getSystemOST() + ")");
         // only one retry
         apacheHttpClient.getParams().setParameter(HttpMethodParams.RETRY_HANDLER,
                                                   new DefaultHttpMethodRetryHandler(1, false));
-
         /**
          * set options for connection manager
          */
@@ -563,7 +568,7 @@ public class JakartaCommonsHttpClient {
      * @param userAgent
      */
     public static void setUserAgent(final String userAgent) {
-        apacheHttpClient.getParams().setParameter(HttpMethodParams.USER_AGENT, userAgent);
+        apacheHttpClient.getParams().setParameter(HttpMethodParams.USER_AGENT, userAgent + jakartaUserAgent);
     }
 
     /**
