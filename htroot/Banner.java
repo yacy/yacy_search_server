@@ -46,10 +46,10 @@
 
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaGrafics;
+import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.ymage.ymageMatrix;
-import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 
 import java.awt.image.BufferedImage;
@@ -61,7 +61,7 @@ import javax.imageio.ImageIO;
 public class Banner {
 
     public static ymageMatrix respond(httpHeader header, serverObjects post, serverSwitch<?> env) throws IOException {
-
+        plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final String IMAGE = "htroot/env/grafics/yacy.gif";
         int width = 468;
         int height = 60;
@@ -84,14 +84,14 @@ public class Banner {
         double myqph   = 0;
         String type    = "";
         String network = env.getConfig("network.unit.name", "unspecified").toUpperCase();
-        int    peers   = yacyCore.seedDB.sizeConnected() + 1; // the '+ 1': the own peer is not included in sizeConnected()
-        long   nlinks  = yacyCore.seedDB.countActiveURL();
-        long   nwords  = yacyCore.seedDB.countActiveRWI();
-        double nqpm    = yacyCore.seedDB.countActiveQPM();
-        long   nppm    = yacyCore.seedDB.countActivePPM();
+        int    peers   = sb.wordIndex.seedDB.sizeConnected() + 1; // the '+ 1': the own peer is not included in sizeConnected()
+        long   nlinks  = sb.wordIndex.seedDB.countActiveURL();
+        long   nwords  = sb.wordIndex.seedDB.countActiveRWI();
+        double nqpm    = sb.wordIndex.seedDB.countActiveQPM();
+        long   nppm    = sb.wordIndex.seedDB.countActivePPM();
         double nqph    = 0;
 
-        yacySeed seed = yacyCore.seedDB.mySeed();
+        yacySeed seed = sb.wordIndex.seedDB.mySeed();
         if (seed != null){
             name    = seed.get(yacySeed.NAME, "-").toUpperCase();
             links   = Long.parseLong(seed.get(yacySeed.LCOUNT, "0"));
@@ -99,19 +99,19 @@ public class Banner {
             myppm   = seed.getPPM();
             myqph   = 60d * seed.getQPM();
 
-            if (yacyCore.seedDB.mySeed().isVirgin()) {
+            if (sb.wordIndex.seedDB.mySeed().isVirgin()) {
                 type = "VIRGIN";
                 nqph = Math.round(6000d * nqpm) / 100d;
-            } else if(yacyCore.seedDB.mySeed().isJunior()) {
+            } else if(sb.wordIndex.seedDB.mySeed().isJunior()) {
                 type = "JUNIOR";
                 nqph = Math.round(6000d * nqpm) / 100d;
-            } else if(yacyCore.seedDB.mySeed().isSenior()) {
+            } else if(sb.wordIndex.seedDB.mySeed().isSenior()) {
                 type = "SENIOR";
                 nlinks = nlinks + links;
                 nwords = nwords + words;
                 nqph = Math.round(6000d * nqpm + 100d * myqph) / 100d;
                 nppm = nppm + myppm;
-            } else if(yacyCore.seedDB.mySeed().isPrincipal()) {
+            } else if(sb.wordIndex.seedDB.mySeed().isPrincipal()) {
                 type = "PRINCIPAL";
                 nlinks = nlinks + links;
                 nwords = nwords + words;

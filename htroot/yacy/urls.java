@@ -25,6 +25,7 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import java.io.IOException;
+import java.util.Date;
 
 import de.anomic.http.httpHeader;
 import de.anomic.index.indexURLReference;
@@ -34,7 +35,6 @@ import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNetwork;
 import de.anomic.yacy.yacyURL;
 
@@ -45,7 +45,7 @@ public class urls {
         
         // insert default values
         serverObjects prop = new serverObjects();
-        prop.put("iam", yacyCore.seedDB.mySeed().hash);
+        prop.put("iam", sb.wordIndex.seedDB.mySeed().hash);
         prop.put("response", "rejected - insufficient call parameters");
         prop.put("channel_title", "");
         prop.put("channel_description", "");
@@ -69,10 +69,20 @@ public class urls {
                     break;
                 }
                 if (entry == null) break;
+                
                 // find referrer, if there is one
                 referrer = sb.getURL(entry.referrerhash());
+                
                 // place url to notice-url db
-                sb.crawlQueues.delegatedURL.push(sb.crawlQueues.delegatedURL.newEntry(entry.url(), "client=____________"));
+                sb.crawlQueues.delegatedURL.push(
+                        sb.crawlQueues.delegatedURL.newEntry(
+                                entry,
+                                sb.wordIndex.seedDB.mySeed().hash,
+                                new Date(),
+                                0,
+                                "client=____________")
+                );
+                
                 // create RSS entry
                 prop.put("item_" + c + "_title", "");
                 prop.putHTML("item_" + c + "_link", entry.url().toNormalform(true, false));

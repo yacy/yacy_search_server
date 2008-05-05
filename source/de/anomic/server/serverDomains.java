@@ -596,34 +596,19 @@ public class serverDomains {
     }
     
     public static String myPublicIP() {
-        try {
-
-            // if a static IP was configured, we have to return it here ...
-            plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
-            if (sb != null) {
-                String staticIP = sb.getConfig("staticIP", "");
-                if ((!staticIP.equals(""))) {
-                    return staticIP;
-                }
+        // if a static IP was configured, we have to return it here ...
+        plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
+        if (sb != null) {
+            String staticIP = sb.getConfig("staticIP", "");
+            if ((!staticIP.equals(""))) {
+                return staticIP;
             }
-
-            // If port forwarding was enabled we need to return the remote IP
-            // Address
-            if ((serverCore.portForwardingEnabled) && (serverCore.portForwarding != null)) {
-                // does not return serverCore.portForwarding.getHost(), because
-                // hostnames are not valid, except in DebugMode
-                return InetAddress.getByName(
-                        serverCore.portForwarding.getHost()).getHostAddress();
-            }
-
-            // otherwise we return the real IP address of this host
-            InetAddress pLIP = myPublicLocalIP();
-            if (pLIP != null) return pLIP.getHostAddress();
-            return null;
-        } catch (java.net.UnknownHostException e) {
-            System.err.println("ERROR: (internal) " + e.getMessage());
-            return null;
         }
+
+        // otherwise we return the real IP address of this host
+        InetAddress pLIP = myPublicLocalIP();
+        if (pLIP != null) return pLIP.getHostAddress();
+        return null;
     }
 
     public static InetAddress myPublicLocalIP() {

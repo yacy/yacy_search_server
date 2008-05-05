@@ -54,7 +54,6 @@ import de.anomic.server.serverCodings;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNetwork;
 import de.anomic.yacy.yacySeed;
 
@@ -86,7 +85,7 @@ public final class transfer {
         	return prop;
         }
 
-        yacySeed otherseed = yacyCore.seedDB.get(otherpeer);
+        yacySeed otherseed = sb.wordIndex.seedDB.get(otherpeer);
         if ((otherseed == null) || (filename.indexOf("..") >= 0)) {
             // reject unknown peers: this does not appear fair, but anonymous senders are dangerous
             // reject paths that contain '..' because they are dangerous
@@ -106,7 +105,7 @@ public final class transfer {
                 String access = kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(otherpeer + ":" + filename)) + ":" + kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw("" + System.currentTimeMillis()));
                 prop.put("response", "ok");
                 prop.put("process_access", access);
-                prop.put("process_address", yacyCore.seedDB.mySeed().getPublicAddress());
+                prop.put("process_address", sb.wordIndex.seedDB.mySeed().getPublicAddress());
                 prop.put("process_protocol", "http");
                 prop.put("process_path", "");  // currently empty; the store process will find a path
                 prop.put("process_maxsize", "-1"); // if response is too big we return the size of the file

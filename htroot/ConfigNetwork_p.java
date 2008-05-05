@@ -31,7 +31,6 @@ import de.anomic.server.serverBusyThread;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyCore;
 
 public class ConfigNetwork_p {
 
@@ -103,10 +102,10 @@ public class ConfigNetwork_p {
 
             if (indexReceive) {
                 sb.setConfig("allowReceiveIndex", "true");
-                yacyCore.seedDB.mySeed().setFlagAcceptRemoteIndex(true);
+                sb.wordIndex.seedDB.mySeed().setFlagAcceptRemoteIndex(true);
             } else {
                 sb.setConfig("allowReceiveIndex", "false");
-                yacyCore.seedDB.mySeed().setFlagAcceptRemoteIndex(false);
+                sb.wordIndex.seedDB.mySeed().setFlagAcceptRemoteIndex(false);
             }
 
             if (post.get("indexReceiveBlockBlacklist", "").equals("on")) {
@@ -116,7 +115,7 @@ public class ConfigNetwork_p {
             }
                 
             if (post.containsKey("peertags")) {
-                yacyCore.seedDB.mySeed().setPeerTags(serverCodings.string2set(normalizedList((String) post.get("peertags")), ","));
+                sb.wordIndex.seedDB.mySeed().setPeerTags(serverCodings.string2set(normalizedList((String) post.get("peertags")), ","));
             }
             
             sb.setConfig("cluster.mode", post.get("cluster.mode", "publicpeer"));
@@ -136,7 +135,7 @@ public class ConfigNetwork_p {
             sb.setConfig("cluster.peers.yacydomain", checkYaCyDomainList(post.get("cluster.peers.yacydomain", "")));
             
             // update the cluster hash set
-            sb.clusterhashes = yacyCore.seedDB.clusterHashes(sb.getConfig("cluster.peers.yacydomain", ""));
+            sb.clusterhashes = sb.wordIndex.seedDB.clusterHashes(sb.getConfig("cluster.peers.yacydomain", ""));
             
         }
         
@@ -162,11 +161,11 @@ public class ConfigNetwork_p {
         prop.put("indexReceiveChecked", (indexReceive) ? "1" : "0");
         prop.put("indexReceiveBlockBlacklistChecked.on", (sb.getConfig("indexReceiveBlockBlacklist", "true").equals("true")) ? "1" : "0");
         prop.put("indexReceiveBlockBlacklistChecked.off", (sb.getConfig("indexReceiveBlockBlacklist", "true").equals("true")) ? "0" : "1");
-        prop.putHTML("peertags", serverCodings.set2string(yacyCore.seedDB.mySeed().getPeerTags(), ",", false));
+        prop.putHTML("peertags", serverCodings.set2string(sb.wordIndex.seedDB.mySeed().getPeerTags(), ",", false));
 
         // set seed information directly
-        yacyCore.seedDB.mySeed().setFlagAcceptRemoteCrawl(sb.getConfigBool("crawlResponse", false));
-        yacyCore.seedDB.mySeed().setFlagAcceptRemoteIndex(indexReceive);
+        sb.wordIndex.seedDB.mySeed().setFlagAcceptRemoteCrawl(sb.getConfigBool("crawlResponse", false));
+        sb.wordIndex.seedDB.mySeed().setFlagAcceptRemoteIndex(indexReceive);
         
         // set p2p/robinson mode flags and values
         prop.put("p2p.checked", (indexDistribute || indexReceive) ? "1" : "0");

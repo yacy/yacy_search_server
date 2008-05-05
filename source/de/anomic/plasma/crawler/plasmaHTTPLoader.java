@@ -139,7 +139,7 @@ public final class plasmaHTTPLoader {
 
         if (retryCount < 0) {
             this.log.logInfo("Redirection counter exceeded for URL " + entry.url().toString() + ". Processing aborted.");
-            sb.crawlQueues.errorURL.newEntry(entry, null, new Date(), 1, plasmaCrawlEURL.DENIED_REDIRECTION_COUNTER_EXCEEDED).store();
+            sb.crawlQueues.errorURL.newEntry(entry, sb.wordIndex.seedDB.mySeed().hash, new Date(), 1, plasmaCrawlEURL.DENIED_REDIRECTION_COUNTER_EXCEEDED).store();
             return null;
         }
         
@@ -154,7 +154,7 @@ public final class plasmaHTTPLoader {
         String hostlow = host.toLowerCase();
         if (plasmaSwitchboard.urlBlacklist.isListed(indexReferenceBlacklist.BLACKLIST_CRAWLER, hostlow, path)) {
             this.log.logInfo("CRAWLER Rejecting URL '" + entry.url().toString() + "'. URL is in blacklist.");
-            sb.crawlQueues.errorURL.newEntry(entry, null, new Date(), 1, plasmaCrawlEURL.DENIED_URL_IN_BLACKLIST).store();
+            sb.crawlQueues.errorURL.newEntry(entry, sb.wordIndex.seedDB.mySeed().hash, new Date(), 1, plasmaCrawlEURL.DENIED_URL_IN_BLACKLIST).store();
             return null;
         }
         
@@ -192,7 +192,7 @@ public final class plasmaHTTPLoader {
                 // aborting download if content is to long ...
                 if (htCache.cacheFile().getAbsolutePath().length() > serverSystem.maxPathLength) {
                     this.log.logInfo("REJECTED URL " + entry.url().toString() + " because path too long '" + plasmaHTCache.cachePath.getAbsolutePath() + "'");
-                    sb.crawlQueues.errorURL.newEntry(entry, null, new Date(), 1, plasmaCrawlEURL.DENIED_CACHEFILE_PATH_TOO_LONG);                    
+                    sb.crawlQueues.errorURL.newEntry(entry, sb.wordIndex.seedDB.mySeed().hash, new Date(), 1, plasmaCrawlEURL.DENIED_CACHEFILE_PATH_TOO_LONG);                    
                     return (htCache = null);
                 }
 
@@ -202,7 +202,7 @@ public final class plasmaHTTPLoader {
                     this.log.logInfo("REJECTED URL " + entry.url().toString() + " because of an invalid file path ('" +
                                 htCache.cacheFile().getCanonicalPath() + "' does not start with '" +
                                 plasmaHTCache.cachePath.getAbsolutePath() + "').");
-                    sb.crawlQueues.errorURL.newEntry(entry, null, new Date(), 1, plasmaCrawlEURL.DENIED_INVALID_CACHEFILE_PATH);
+                    sb.crawlQueues.errorURL.newEntry(entry, sb.wordIndex.seedDB.mySeed().hash, new Date(), 1, plasmaCrawlEURL.DENIED_INVALID_CACHEFILE_PATH);
                     return (htCache = null);
                 }
 
@@ -232,7 +232,7 @@ public final class plasmaHTTPLoader {
                                     fos = new httpdBoundedSizeOutputStream(fos,this.maxFileSize);                     
                                 } else if (contentLength > this.maxFileSize) {
                                     this.log.logInfo("REJECTED URL " + entry.url() + " because file size '" + contentLength + "' exceeds max filesize limit of " + this.maxFileSize + " bytes.");
-                                    sb.crawlQueues.errorURL.newEntry(entry, null, new Date(), 1, plasmaCrawlEURL.DENIED_FILESIZE_LIMIT_EXCEEDED);                    
+                                    sb.crawlQueues.errorURL.newEntry(entry, sb.wordIndex.seedDB.mySeed().hash, new Date(), 1, plasmaCrawlEURL.DENIED_FILESIZE_LIMIT_EXCEEDED);                    
                                     return null;
                                 }
                             }
@@ -251,7 +251,7 @@ public final class plasmaHTTPLoader {
                     } else {
                         // if the response has not the right file type then reject file
                         this.log.logInfo("REJECTED WRONG MIME/EXT TYPE " + res.getResponseHeader().mime() + " for URL " + entry.url().toString());
-                        sb.crawlQueues.errorURL.newEntry(entry, null, new Date(), 1, plasmaCrawlEURL.DENIED_WRONG_MIMETYPE_OR_EXT);
+                        sb.crawlQueues.errorURL.newEntry(entry, sb.wordIndex.seedDB.mySeed().hash, new Date(), 1, plasmaCrawlEURL.DENIED_WRONG_MIMETYPE_OR_EXT);
                         return null;
                     }
                 } catch (SocketException e) {
@@ -262,7 +262,7 @@ public final class plasmaHTTPLoader {
                     // and most possible corrupted
                     if (cacheFile.exists()) cacheFile.delete();
                     this.log.logSevere("CRAWLER LOADER ERROR1: with URL=" + entry.url().toString() + ": " + e.toString());
-                    sb.crawlQueues.errorURL.newEntry(entry, null, new Date(), 1, plasmaCrawlEURL.DENIED_CONNECTION_ERROR);
+                    sb.crawlQueues.errorURL.newEntry(entry, sb.wordIndex.seedDB.mySeed().hash, new Date(), 1, plasmaCrawlEURL.DENIED_CONNECTION_ERROR);
                     htCache = null;
                 }
             } else if (res.getStatusLine().startsWith("30")) {
@@ -273,7 +273,7 @@ public final class plasmaHTTPLoader {
 
                         if (redirectionUrlString.length() == 0) {
                             this.log.logWarning("CRAWLER Redirection of URL=" + entry.url().toString() + " aborted. Location header is empty.");
-                            sb.crawlQueues.errorURL.newEntry(entry, null, new Date(), 1, plasmaCrawlEURL.DENIED_REDIRECTION_HEADER_EMPTY);
+                            sb.crawlQueues.errorURL.newEntry(entry, sb.wordIndex.seedDB.mySeed().hash, new Date(), 1, plasmaCrawlEURL.DENIED_REDIRECTION_HEADER_EMPTY);
                             return null;
                         }
                         
@@ -287,7 +287,7 @@ public final class plasmaHTTPLoader {
                         // if we are already doing a shutdown we don't need to retry crawling
                         if (Thread.currentThread().isInterrupted()) {
                             this.log.logSevere("CRAWLER Retry of URL=" + entry.url().toString() + " aborted because of server shutdown.");
-                            sb.crawlQueues.errorURL.newEntry(entry, null, new Date(), 1, plasmaCrawlEURL.DENIED_SERVER_SHUTDOWN);
+                            sb.crawlQueues.errorURL.newEntry(entry, sb.wordIndex.seedDB.mySeed().hash, new Date(), 1, plasmaCrawlEURL.DENIED_SERVER_SHUTDOWN);
                             return null;
                         }
 
@@ -298,7 +298,7 @@ public final class plasmaHTTPLoader {
                         String dbname = sb.urlExists(urlhash);
                         if (dbname != null) {
                             this.log.logWarning("CRAWLER Redirection of URL=" + entry.url().toString() + " ignored. The url appears already in db " + dbname);
-                            sb.crawlQueues.errorURL.newEntry(entry, null, new Date(), 1, plasmaCrawlEURL.DENIED_REDIRECTION_TO_DOUBLE_CONTENT);
+                            sb.crawlQueues.errorURL.newEntry(entry, sb.wordIndex.seedDB.mySeed().hash, new Date(), 1, plasmaCrawlEURL.DENIED_REDIRECTION_TO_DOUBLE_CONTENT);
                             return null;
                         }
                         
@@ -312,7 +312,7 @@ public final class plasmaHTTPLoader {
                 this.log.logInfo("REJECTED WRONG STATUS TYPE '" + res.getStatusLine() + "' for URL " + entry.url().toString());
                 
                 // not processed any further
-                sb.crawlQueues.errorURL.newEntry(entry, null, new Date(), 1, plasmaCrawlEURL.DENIED_WRONG_HTTP_STATUSCODE + res.getStatusCode() +  ")");
+                sb.crawlQueues.errorURL.newEntry(entry, sb.wordIndex.seedDB.mySeed().hash, new Date(), 1, plasmaCrawlEURL.DENIED_WRONG_HTTP_STATUSCODE + res.getStatusCode() +  ")");
             }
             
             } finally {
@@ -402,7 +402,7 @@ public final class plasmaHTTPLoader {
 
             if (failreason != null) {
                 // add url into error db
-                sb.crawlQueues.errorURL.newEntry(entry, null, new Date(), 1, failreason);
+                sb.crawlQueues.errorURL.newEntry(entry, sb.wordIndex.seedDB.mySeed().hash, new Date(), 1, failreason);
             }
             return null;
         }

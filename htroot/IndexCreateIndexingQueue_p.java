@@ -54,7 +54,6 @@ import de.anomic.plasma.plasmaSwitchboardQueue;
 import de.anomic.server.serverMemory;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyURL;
 
@@ -62,7 +61,7 @@ public class IndexCreateIndexingQueue_p {
     
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
         // return variable that accumulates replacements
-        plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
+        plasmaSwitchboard sb = (plasmaSwitchboard) env;
         serverObjects prop = new serverObjects();
         prop.put("rejected", "0");
         int showRejectedCount = 100;
@@ -76,27 +75,27 @@ public class IndexCreateIndexingQueue_p {
             }    
             
             if (post.containsKey("clearRejected")) {
-                switchboard.crawlQueues.errorURL.clearStack();
+                sb.crawlQueues.errorURL.clearStack();
             } 
             if (post.containsKey("moreRejected")) {
                 showRejectedCount = post.getInt("showRejected", 10);
             }
             if (post.containsKey("clearIndexingQueue")) {
                 try {
-                    synchronized (switchboard.sbQueue) {
+                    synchronized (sb.sbQueue) {
                         plasmaSwitchboardQueue.QueueEntry entry = null;
-                        while ((entry = switchboard.sbQueue.pop()) != null) {
+                        while ((entry = sb.sbQueue.pop()) != null) {
                             if ((entry != null) && (entry.profile() != null) && (!(entry.profile().storeHTCache()))) {
                                 plasmaHTCache.deleteURLfromCache(entry.url());
                             }                            
                         }
-                        switchboard.sbQueue.clear(); // reset file to clean up content completely
+                        sb.sbQueue.clear(); // reset file to clean up content completely
                     } 
                 } catch (Exception e) {}
             } else if (post.containsKey("deleteEntry")) {
                 String urlHash = (String) post.get("deleteEntry");
                 try {
-                    switchboard.sbQueue.remove(urlHash);
+                    sb.sbQueue.remove(urlHash);
                 } catch (Exception e) {}
                 prop.put("LOCATION","");
                 return prop;
@@ -106,7 +105,7 @@ public class IndexCreateIndexingQueue_p {
         yacySeed initiator;
         boolean dark;
         
-        if ((switchboard.sbQueue.size() == 0) && (switchboard.sbQueue.getActiveQueueSize() == 0)) {
+        if ((sb.sbQueue.size() == 0) && (sb.sbQueue.getActiveQueueSize() == 0)) {
             prop.put("indexing-queue", "0"); //is empty
         } else {
             prop.put("indexing-queue", "1"); // there are entries in the queue or in process
@@ -118,12 +117,12 @@ public class IndexCreateIndexingQueue_p {
             
             // getting all entries that are currently in process
             ArrayList<plasmaSwitchboardQueue.QueueEntry> entryList = new ArrayList<plasmaSwitchboardQueue.QueueEntry>();
-            entryList.addAll(switchboard.sbQueue.getActiveQueueEntries());
+            entryList.addAll(sb.sbQueue.getActiveQueueEntries());
             int inProcessCount = entryList.size();
             
             // getting all enqueued entries
-            if ((switchboard.sbQueue.size() > 0)) {
-                Iterator<plasmaSwitchboardQueue.QueueEntry> i = switchboard.sbQueue.entryIterator(false);
+            if ((sb.sbQueue.size() > 0)) {
+                Iterator<plasmaSwitchboardQueue.QueueEntry> i = sb.sbQueue.entryIterator(false);
                 while (i.hasNext()) entryList.add(i.next());
             }
                             
@@ -136,7 +135,7 @@ public class IndexCreateIndexingQueue_p {
                 if ((pcentry != null)&&(pcentry.url() != null)) {
                     long entrySize = pcentry.size();
                     totalSize += entrySize;
-                    initiator = yacyCore.seedDB.getConnected(pcentry.initiator());
+                    initiator = sb.wordIndex.seedDB.getConnected(pcentry.initiator());
                     prop.put("indexing-queue_list_"+entryCount+"_dark", inProcess ? "2" : (dark ? "1" : "0"));
                     prop.putHTML("indexing-queue_list_"+entryCount+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()));
                     prop.put("indexing-queue_list_"+entryCount+"_depth", pcentry.depth());
@@ -158,11 +157,11 @@ public class IndexCreateIndexingQueue_p {
         }
         
         // failure cases
-        if (switchboard.crawlQueues.errorURL.stackSize() != 0) {
-            if (showRejectedCount > switchboard.crawlQueues.errorURL.stackSize()) showRejectedCount = switchboard.crawlQueues.errorURL.stackSize();
+        if (sb.crawlQueues.errorURL.stackSize() != 0) {
+            if (showRejectedCount > sb.crawlQueues.errorURL.stackSize()) showRejectedCount = sb.crawlQueues.errorURL.stackSize();
             prop.put("rejected", "1");
-            prop.putNum("rejected_num", switchboard.crawlQueues.errorURL.stackSize());
-            if (showRejectedCount != switchboard.crawlQueues.errorURL.stackSize()) {
+            prop.putNum("rejected_num", sb.crawlQueues.errorURL.stackSize());
+            if (showRejectedCount != sb.crawlQueues.errorURL.stackSize()) {
                 prop.put("rejected_only-latest", "1");
                 prop.putNum("rejected_only-latest_num", showRejectedCount);
                 prop.put("rejected_only-latest_newnum", ((int) (showRejectedCount * 1.5)));
@@ -175,16 +174,16 @@ public class IndexCreateIndexingQueue_p {
             plasmaCrawlZURL.Entry entry;
             yacySeed initiatorSeed, executorSeed;
             int j=0;
-            for (int i = switchboard.crawlQueues.errorURL.stackSize() - 1; i >= (switchboard.crawlQueues.errorURL.stackSize() - showRejectedCount); i--) {
-                    entry = switchboard.crawlQueues.errorURL.top(i);
+            for (int i = sb.crawlQueues.errorURL.stackSize() - 1; i >= (sb.crawlQueues.errorURL.stackSize() - showRejectedCount); i--) {
+                    entry = sb.crawlQueues.errorURL.top(i);
                     if (entry == null) continue;
                     url = entry.url();
                     if (url == null) continue;
                     
                     initiatorHash = entry.initiator();
                     executorHash = entry.executor();
-                    initiatorSeed = yacyCore.seedDB.getConnected(initiatorHash);
-                    executorSeed = yacyCore.seedDB.getConnected(executorHash);
+                    initiatorSeed = sb.wordIndex.seedDB.getConnected(initiatorHash);
+                    executorSeed = sb.wordIndex.seedDB.getConnected(executorHash);
                     prop.putHTML("rejected_list_"+j+"_initiator", ((initiatorSeed == null) ? "proxy" : initiatorSeed.getName()));
                     prop.putHTML("rejected_list_"+j+"_executor", ((executorSeed == null) ? "proxy" : executorSeed.getName()));
                     prop.putHTML("rejected_list_"+j+"_url", url.toNormalform(false, true));

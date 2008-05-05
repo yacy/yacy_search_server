@@ -89,9 +89,6 @@ public final class Settings_p {
         else if (page.equals("messageForwarding")) {
             prop.put("settingsTables", "Settings_MessageForwarding.inc");
         }
-        else if (page.equals("portForwarding")) {
-            prop.put("settingsTables", "Settings_PortForwarding.inc");
-        }
         else if (page.equals("parser")) {
             prop.put("settingsTables", "Settings_Parser.inc");
         }
@@ -114,37 +111,7 @@ public final class Settings_p {
         prop.put("connectionKeepAliveSupport", env.getConfig("connectionKeepAliveSupport", "false").equals("true") ? "1" : "0");
         prop.put("proxy.sendViaHeader", env.getConfig("proxy.sendViaHeader", "false").equals("true") ? "1" : "0");
         prop.put("proxy.sendXForwardedForHeader", env.getConfig("proxy.sendXForwardedForHeader", "true").equals("true") ? "1" : "0");
-        
-        // remote port forwarding settings
-        String[] forwardingMethods = new String[]{"sch","upnp"};
-        String currentForwarder = env.getConfig("portForwarding.Type", "none");
-        boolean portForwardingAvailable = false;
-        int methodCount = 0;
-        
-        for (int i=0; i < forwardingMethods.length; i++) {
-            try {            
-                //Class forwarder = Class.forName(env.getConfig("portForwarding." + forwardingMethods[i],"")); // FIXME: why is forwarder declared, but never used?
-                prop.put("forwardingMethods_" + methodCount + "_name",forwardingMethods[i]);
-                prop.put("forwardingMethods_" + methodCount + "_selected", forwardingMethods[i].equals(currentForwarder)?1:0);
-                methodCount++;
-            } catch (Exception e) {
-            } catch (Error e) {}
-        }
-        prop.put("forwardingMethods", methodCount);
-        
-        if (methodCount > 0) portForwardingAvailable = true;
-        
-        prop.put("portForwarding.Type",currentForwarder);
-        prop.put("portForwarding.Available",portForwardingAvailable? "1" : "0");
-        prop.put("portForwarding.Enabled",env.getConfig("portForwarding.Enabled","false").equals("true")? "1" : "0");
-        
-        prop.put("portForwarding.sch.UseProxy",env.getConfig("portForwarding.sch.UseProxy", "false").equals("true") ? "1" : "0");
-        prop.put("portForwarding.sch.Port",env.getConfig("portForwarding.sch.Port", ""));        
-        prop.put("portForwarding.sch.Host",env.getConfig("portForwarding.sch.Host", ""));
-        prop.put("portForwarding.sch.HostPort",env.getConfig("portForwarding.sch.HostPort", ""));
-        prop.put("portForwarding.sch.HostUser",env.getConfig("portForwarding.sch.HostUser", ""));
-        prop.put("portForwarding.sch.HostPwd",env.getConfig("portForwarding.sch.HostPwd", ""));
-        
+
         // set values
         String s;
         int pos;

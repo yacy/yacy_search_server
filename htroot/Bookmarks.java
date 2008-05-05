@@ -69,7 +69,6 @@ import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.logging.serverLog;
-import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacyNewsRecord;
 import de.anomic.yacy.yacyURL;
@@ -78,7 +77,7 @@ import de.anomic.yacy.yacyURL;
 public class Bookmarks {
 
 	private static final serverObjects prop = new serverObjects();
-	private static plasmaSwitchboard switchboard = null;
+	private static plasmaSwitchboard sb = null;
 	private static userDB.Entry user = null;
 	private static boolean isAdmin = false;	
 
@@ -96,9 +95,9 @@ public class Bookmarks {
     	String username="";
     	
     	prop.clear();
-    	switchboard = (plasmaSwitchboard) env;
-    	user = switchboard.userDB.getUser(header);   
-    	isAdmin=(switchboard.verifyAuthentication(header, true) || user!= null && user.hasRight(userDB.Entry.BOOKMARK_RIGHT));
+    	sb = (plasmaSwitchboard) env;
+    	user = sb.userDB.getUser(header);   
+    	isAdmin=(sb.verifyAuthentication(header, true) || user!= null && user.hasRight(userDB.Entry.BOOKMARK_RIGHT));
     
     	// set user name
     	if(user != null) username=user.getUserName();
@@ -112,7 +111,7 @@ public class Bookmarks {
     	*/
     
     	// set peer address
-    	final String address = yacyCore.seedDB.mySeed().getPublicAddress();
+    	final String address = sb.wordIndex.seedDB.mySeed().getPublicAddress();
     	prop.put("address", address);
     
     	//defaultvalues
@@ -157,7 +156,7 @@ public class Bookmarks {
     				tagsString="unsorted"; //default tag
     			}
     			Set<String> tags=listManager.string2set(bookmarksDB.cleanTagsString(tagsString)); 
-    			bookmarksDB.Bookmark bookmark = switchboard.bookmarksDB.createBookmark(url, username);
+    			bookmarksDB.Bookmark bookmark = sb.bookmarksDB.createBookmark(url, username);
     			if(bookmark != null){
     				bookmark.setProperty(bookmarksDB.Bookmark.BOOKMARK_TITLE, title);
     				bookmark.setProperty(bookmarksDB.Bookmark.BOOKMARK_DESCRIPTION, description);
@@ -176,7 +175,7 @@ public class Bookmarks {
     					bookmark.setFeed(false);
     				}
     				bookmark.setTags(tags, true);
-    				switchboard.bookmarksDB.saveBookmark(bookmark);
+    				sb.bookmarksDB.saveBookmark(bookmark);
     			//}else{
     	                    //ERROR
     			}
@@ -193,10 +192,10 @@ public class Bookmarks {
     				prop.put("mode_public", "0");
     				prop.put("mode_feed", "0");
     			} else {
-                    bookmarksDB.Bookmark bookmark = switchboard.bookmarksDB.getBookmark(urlHash);
+                    bookmarksDB.Bookmark bookmark = sb.bookmarksDB.getBookmark(urlHash);
                     if (bookmark == null) {
                         // try to get the bookmark from the LURL database
-                        indexURLReference urlentry = switchboard.wordIndex.getURL(urlHash, null, 0);
+                        indexURLReference urlentry = sb.wordIndex.getURL(urlHash, null, 0);
                         plasmaParserDocument document = null;
                         if (urlentry != null) {
                             indexURLReference.Components comp = urlentry.comp();
@@ -244,7 +243,7 @@ public class Bookmarks {
     			serverLog.logInfo("BOOKMARKS", "I try to import bookmarks from HTML-file");
     			try {
     				File file=new File((String)post.get("htmlfile"));    			
-    				switchboard.bookmarksDB.importFromBookmarks(new yacyURL(file) , post.get("htmlfile$file"), tags, isPublic);
+    				sb.bookmarksDB.importFromBookmarks(new yacyURL(file) , post.get("htmlfile$file"), tags, isPublic);
     			} catch (MalformedURLException e) {}
     			serverLog.logInfo("BOOKMARKS", "success!!");
     		}else if(post.containsKey("xmlfile")){
@@ -252,10 +251,10 @@ public class Bookmarks {
     			if(((String) post.get("public")).equals("public")){
     				isPublic=true;
     			}
-    			switchboard.bookmarksDB.importFromXML(post.get("xmlfile$file"), isPublic);
+    			sb.bookmarksDB.importFromXML(post.get("xmlfile$file"), isPublic);
     		}else if(post.containsKey("delete")){
     			String urlHash=(String) post.get("delete");
-    			switchboard.bookmarksDB.removeBookmark(urlHash);
+    			sb.bookmarksDB.removeBookmark(urlHash);
     		}
     		if(post.containsKey("tag")){
     			tagName=(String) post.get("tag");
@@ -285,15 +284,15 @@ public class Bookmarks {
        	Iterator<String> tagsIt;
        	int tagCount;
        	
-       	prop.put("num-bookmarks", switchboard.bookmarksDB.bookmarksSize());
+       	prop.put("num-bookmarks", sb.bookmarksDB.bookmarksSize());
        	
        	count=0;
        	if(!tagName.equals("")){
        		prop.put("selected", "");
-       		it=switchboard.bookmarksDB.getBookmarksIterator(tagName, isAdmin);
+       		it=sb.bookmarksDB.getBookmarksIterator(tagName, isAdmin);
        	}else{
        		prop.put("selected", " selected=\"selected\"");
-       		it=switchboard.bookmarksDB.getBookmarksIterator(isAdmin);
+       		it=sb.bookmarksDB.getBookmarksIterator(isAdmin);
        	}
        	
        	//skip the first entries (display next page)
@@ -305,7 +304,7 @@ public class Bookmarks {
        	
        	count=0;
        	while(count<max_count && it.hasNext()){
-       		bookmark=switchboard.bookmarksDB.getBookmark((String)it.next());
+       		bookmark=sb.bookmarksDB.getBookmark((String)it.next());
        		if(bookmark!=null){
        			if(bookmark.getFeed() && isAdmin)
        				prop.put("bookmarks_"+count+"_link", "/FeedReader_p.html?url="+bookmark.getUrl());
@@ -359,7 +358,7 @@ public class Bookmarks {
     	//-----------------------
        	
        	count = 0;
-       	count = recurseFolders(switchboard.bookmarksDB.getFolderList(isAdmin),"/",0,true,"");
+       	count = recurseFolders(sb.bookmarksDB.getFolderList(isAdmin),"/",0,true,"");
        	prop.put("folderlist", count);
        	
     
@@ -372,9 +371,9 @@ public class Bookmarks {
     	Iterator<Tag> it = null;
     	
         if (tagName.equals("")) {
-        	it = switchboard.bookmarksDB.getTagIterator(isAdmin, comp, max);
+        	it = sb.bookmarksDB.getTagIterator(isAdmin, comp, max);
         } else {
-        	it = switchboard.bookmarksDB.getTagIterator(tagName, isAdmin, comp, max);
+        	it = sb.bookmarksDB.getTagIterator(tagName, isAdmin, comp, max);
         }
        	while(it.hasNext()){
        		tag=(Tag) it.next();
@@ -418,9 +417,9 @@ public class Bookmarks {
     	if(fn.startsWith(root)){
     		prop.put("folderlist_"+count+"_folder", "<li>"+fn.replaceFirst(root+"/*","")+"<ul class=\"folder\">");
     		count++;    
-    		Iterator<String> bit=switchboard.bookmarksDB.getBookmarksIterator(fn, isAdmin);
+    		Iterator<String> bit=sb.bookmarksDB.getBookmarksIterator(fn, isAdmin);
     		while(bit.hasNext()){
-    			bookmark=switchboard.bookmarksDB.getBookmark((String)bit.next());
+    			bookmark=sb.bookmarksDB.getBookmark((String)bit.next());
     			prop.put("folderlist_"+count+"_folder", "<li><a href=\""+bookmark.getUrl()+"\" title=\""+bookmark.getDescription()+"\">"+ bookmark.getTitle()+"</a></li>");
     			count++;
     		}    	
@@ -444,7 +443,7 @@ public class Bookmarks {
     	map.put("title", title.replace(',', ' '));
     	map.put("description", description.replace(',', ' '));
     	map.put("tags", tagsString.replace(',', ' '));
-    	yacyCore.newsPool.publishMyNews(yacyNewsRecord.newRecord(yacyNewsPool.CATEGORY_BOOKMARK_ADD, map));
+    	sb.wordIndex.newsPool.publishMyNews(yacyNewsRecord.newRecord(sb.wordIndex.seedDB.mySeed(), yacyNewsPool.CATEGORY_BOOKMARK_ADD, map));
     }
 
 }

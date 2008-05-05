@@ -79,8 +79,6 @@ import de.anomic.server.serverHandler;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.logging.serverLog;
-import de.anomic.yacy.yacyCore;
-import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyURL;
 
 
@@ -102,6 +100,7 @@ public final class httpd implements serverHandler {
     
     public static final int ERRORCASE_MESSAGE = 4;
     public static final int ERRORCASE_FILE = 5;
+    public static httpdAlternativeDomainNames alternativeResolver = null;
     
     /**
      * A hashset containing extensions that indicate content that should not be transported
@@ -363,8 +362,10 @@ public final class httpd implements serverHandler {
         // user = addressed peer name
         // pw = addressed peer hash (b64-hash)
         String auth = (String) header.get(httpHeader.PROXY_AUTHORIZATION,"xxxxxx");
-        String test = kelondroBase64Order.standardCoder.encodeString(yacyCore.seedDB.mySeed().getName() + ":" + yacyCore.seedDB.mySeed().hash);
-        if (!test.equals(auth.trim().substring(6))) return false;
+        if (alternativeResolver != null) {
+            String test = kelondroBase64Order.standardCoder.encodeString(alternativeResolver.myName() + ":" + alternativeResolver.myID());
+            if (!test.equals(auth.trim().substring(6))) return false;
+        }
         
         // the accessing client must use a yacy user-agent
         if (!(((String) header.get(httpHeader.USER_AGENT,"")).startsWith("yacy"))) return false;
@@ -1184,21 +1185,19 @@ public final class httpd implements serverHandler {
                 tp.put("port", serverCore.getPortNr(switchboard.getConfig("port", "8080")));
             } else {
                 tp.put("host", serverDomains.myPublicIP());
-                tp.put("port", (serverCore.portForwardingEnabled && (serverCore.portForwarding != null)) 
-                        ? Integer.toString(serverCore.portForwarding.getPort()) 
-                        : Integer.toString(serverCore.getPortNr(switchboard.getConfig("port", "8080"))));
+                tp.put("port", Integer.toString(serverCore.getPortNr(switchboard.getConfig("port", "8080"))));
             }
 
             // if peer has public address it will be used
-            if (yacyCore.seedDB.mySeed().getPublicAddress() != null) {
-                tp.put("extAddress", yacyCore.seedDB.mySeed().getPublicAddress());
+            if (alternativeResolver != null) {
+                tp.put("extAddress", alternativeResolver.myIP() + ":" + alternativeResolver.myPort());
             }
             // otherwise the local ip address will be used
             else {
                 tp.put("extAddress", tp.get("host", "127.0.0.1") + ":" + tp.get("port", "8080"));
             }
 
-            tp.put("peerName", yacyCore.seedDB.mySeed().getName());
+            tp.put("peerName", (alternativeResolver == null) ? "" : alternativeResolver.myName());
             tp.put("errorMessageType", errorcase);
             tp.put("httpStatus",       Integer.toString(httpStatusCode) + " " + httpStatusText);
             tp.put("requestMethod",    conProp.getProperty(httpHeader.CONNECTION_PROP_METHOD));
@@ -1496,34 +1495,14 @@ public final class httpd implements serverHandler {
         // httpHeader.CONNECTION_PROP_PROXY_RESPOND_STATUS
     }
     
-    public static boolean isThisHostPortForwardingIP(String hostName) {
-        if ((hostName == null) || (hostName.length() == 0)) return false;
-        if ((!serverCore.portForwardingEnabled) || (serverCore.portForwarding == null)) return false;
-        
-        boolean isThisHostIP = false;
-        try {
-            //InetAddress hostAddress = InetAddress.getByName(hostName);
-            InetAddress hostAddress = serverDomains.dnsResolve(hostName);
-            //InetAddress forwardingAddress = InetAddress.getByName(serverCore.portForwarding.getHost());
-            InetAddress forwardingAddress = serverDomains.dnsResolve(serverCore.portForwarding.getHost());
-            
-            if ((hostAddress==null)||(forwardingAddress==null)) return false;
-            if (hostAddress.equals(forwardingAddress)) return true;              
-        } catch (Exception e) {}   
-        return isThisHostIP;        
-    }    
-    
     public static boolean isThisSeedIP(String hostName) {
         if ((hostName == null) || (hostName.length() == 0)) return false;
         
         // getting ip address and port of this seed
-        yacySeed thisSeed =  yacyCore.seedDB.mySeed();
-        String thisSeedIP   = thisSeed.get(yacySeed.IP,null);
-        String thisSeedPort = thisSeed.get(yacySeed.PORT,null);
+        if (alternativeResolver == null) return false;
         
         // resolve ip addresses
-        if (thisSeedIP == null || thisSeedPort == null) return false;
-        InetAddress seedInetAddress = serverDomains.dnsResolve(thisSeedIP);
+        InetAddress seedInetAddress = serverDomains.dnsResolve(alternativeResolver.myIP());
         InetAddress hostInetAddress = serverDomains.dnsResolve(hostName);
         if (seedInetAddress == null || hostInetAddress == null) return false;
         
@@ -1580,7 +1559,8 @@ public final class httpd implements serverHandler {
             final Integer dstPort = (idx != -1) ? Integer.valueOf(hostName.substring(idx+1).trim()) : new Integer(80);
             
             // if the hostname endswith thisPeerName.yacy ...
-            if (dstHost.endsWith(yacyCore.seedDB.mySeed().getName() + ".yacy")) {
+            String alternativeAddress = (alternativeResolver == null) ? null : alternativeResolver.myAlternativeAddress();
+            if ((alternativeAddress != null) && (dstHost.endsWith(alternativeAddress))) {
                 return true;
             /* 
              * If the port number is equal to the yacy port and the IP address is an address of this host ...
@@ -1597,11 +1577,6 @@ public final class httpd implements serverHandler {
                     )
             ) {
                  return true;                
-            } else if ((serverCore.portForwardingEnabled) && 
-                       (serverCore.portForwarding != null) && 
-                       (dstPort.intValue() == serverCore.portForwarding.getPort()) &&
-                       isThisHostPortForwardingIP(dstHost)) {
-                return true;  
             }
         } catch (Exception e) {}    
         return false;

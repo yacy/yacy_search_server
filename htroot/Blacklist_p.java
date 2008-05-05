@@ -65,7 +65,6 @@ import de.anomic.index.indexReferenceBlacklist;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyURL;
 
@@ -75,7 +74,8 @@ public class Blacklist_p {
     private final static String BLACKLIST_SHARED = "BlackLists.Shared";
 
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
-
+        plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        
         // initialize the list manager
         listManager.switchboard = (plasmaSwitchboard) env;
         listManager.listsPath = new File(listManager.switchboard.getRootPath(),listManager.switchboard.getConfig("listManager.listsPath", "DATA/LISTS"));
@@ -321,11 +321,11 @@ prop.putHTML("asd", "0");
 
 
 	        // List known hosts for BlackList retrieval
-	        if (yacyCore.seedDB != null && yacyCore.seedDB.sizeConnected() > 0) { // no nullpointer error
+	        if (sb.wordIndex.seedDB != null && sb.wordIndex.seedDB.sizeConnected() > 0) { // no nullpointer error
 	            int peerCount = 0;
 	            try {
 	                TreeMap<String, String> hostList = new TreeMap<String, String>();
-	                final Iterator<yacySeed> e = yacyCore.seedDB.seedsConnected(true, false, null, (float) 0.0);
+	                final Iterator<yacySeed> e = sb.wordIndex.seedDB.seedsConnected(true, false, null, (float) 0.0);
 	                while (e.hasNext()) {
 	                    yacySeed seed = (yacySeed) e.next();
 	                    if (seed != null) hostList.put(seed.get(yacySeed.NAME, "nameless"),seed.hash);

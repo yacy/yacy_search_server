@@ -106,7 +106,7 @@ public class plasmaCrawlQueues {
     }
     
     public yacyURL getURL(String urlhash) {
-        if (urlhash.equals(yacyURL.dummyHash)) return null;
+        assert urlhash != null;
         plasmaCrawlEntry ne = noticeURL.get(urlhash);
         if (ne != null) return ne.url();
         plasmaCrawlZURL.Entry ee = delegatedURL.getEntry(urlhash);
@@ -220,7 +220,7 @@ public class plasmaCrawlQueues {
                 }
                 
                 if (this.log.isFine()) log.logFine("LOCALCRAWL: URL=" + urlEntry.url() + ", initiator=" + urlEntry.initiator() + ", crawlOrder=" + ((profile.remoteIndexing()) ? "true" : "false") + ", depth=" + urlEntry.depth() + ", crawlDepth=" + profile.generalDepth() + ", filter=" + profile.generalFilter()
-                        + ", permission=" + ((yacyCore.seedDB == null) ? "undefined" : (((yacyCore.seedDB.mySeed().isSenior()) || (yacyCore.seedDB.mySeed().isPrincipal())) ? "true" : "false")));
+                        + ", permission=" + ((sb.wordIndex.seedDB == null) ? "undefined" : (((sb.wordIndex.seedDB.mySeed().isSenior()) || (sb.wordIndex.seedDB.mySeed().isPrincipal())) ? "true" : "false")));
                 
                 processLocalCrawling(urlEntry, stats);
                 return true;
@@ -234,13 +234,13 @@ public class plasmaCrawlQueues {
     
     public boolean remoteCrawlLoaderJob() {
         // check if we are allowed to crawl urls provided by other peers
-        if (!yacyCore.seedDB.mySeed().getFlagAcceptRemoteCrawl()) {
+        if (!sb.wordIndex.seedDB.mySeed().getFlagAcceptRemoteCrawl()) {
             //this.log.logInfo("remoteCrawlLoaderJob: not done, we are not allowed to do that");
             return false;
         }
         
         // check if we are a senior peer
-        if (!yacyCore.seedDB.mySeed().isActive()) {
+        if (!sb.wordIndex.seedDB.mySeed().isActive()) {
             //this.log.logInfo("remoteCrawlLoaderJob: not done, this should be a senior or principal peer");
             return false;
         }
@@ -266,7 +266,7 @@ public class plasmaCrawlQueues {
             (coreCrawlJobSize() == 0) &&
             (remoteTriggeredCrawlJobSize() == 0) &&
             (sb.queueSize() < 10)) {
-            if (yacyCore.seedDB != null && yacyCore.seedDB.sizeConnected() > 0) {
+            if (sb.wordIndex.seedDB != null && sb.wordIndex.seedDB.sizeConnected() > 0) {
                 Iterator<yacySeed> e = yacyCore.dhtAgent.getProvidesRemoteCrawlURLs();
                 while (e.hasNext()) {
                     seed = e.next();
@@ -285,7 +285,7 @@ public class plasmaCrawlQueues {
         while ((seed == null) && (remoteCrawlProviderHashes.size() > 0)) {
             hash = (String) remoteCrawlProviderHashes.remove(remoteCrawlProviderHashes.size() - 1);
             if (hash == null) continue;
-            seed = yacyCore.seedDB.get(hash);
+            seed = sb.wordIndex.seedDB.get(hash);
             if (seed == null) continue;
             // check if the peer is inside our cluster
             if ((sb.isRobinsonMode()) && (!sb.isInMyCluster(seed))) {
@@ -296,7 +296,7 @@ public class plasmaCrawlQueues {
         if (seed == null) return false;
         
         // we know a peer which should provide remote crawl entries. load them now.
-        RSSFeed feed = (seed == null) ? null : yacyClient.queryRemoteCrawlURLs(seed, 20);
+        RSSFeed feed = (seed == null) ? null : yacyClient.queryRemoteCrawlURLs(sb.wordIndex.seedDB, seed, 20);
         if (feed == null) return true;
         // parse the rss
         yacyURL url, referrer;
@@ -408,7 +408,7 @@ public class plasmaCrawlQueues {
             }
             
             if (this.log.isFine()) log.logFine("plasmaSwitchboard.remoteTriggeredCrawlJob: url=" + urlEntry.url() + ", initiator=" + urlEntry.initiator() + ", crawlOrder=" + ((profile.remoteIndexing()) ? "true" : "false") + ", depth=" + urlEntry.depth() + ", crawlDepth=" + profile.generalDepth() + ", filter="
-                        + profile.generalFilter() + ", permission=" + ((yacyCore.seedDB == null) ? "undefined" : (((yacyCore.seedDB.mySeed().isSenior()) || (yacyCore.seedDB.mySeed().isPrincipal())) ? "true" : "false")));
+                        + profile.generalFilter() + ", permission=" + ((sb.wordIndex.seedDB == null) ? "undefined" : (((sb.wordIndex.seedDB.mySeed().isSenior()) || (sb.wordIndex.seedDB.mySeed().isPrincipal())) ? "true" : "false")));
 
             processLocalCrawling(urlEntry, stats);
             return true;
@@ -440,9 +440,9 @@ public class plasmaCrawlQueues {
     ) {
         
         plasmaCrawlEntry centry = new plasmaCrawlEntry(
-                yacyCore.seedDB.mySeed().hash, 
+                sb.wordIndex.seedDB.mySeed().hash, 
                 url, 
-                null, 
+                "", 
                 "", 
                 new Date(),
                 (forText) ?
@@ -485,7 +485,12 @@ public class plasmaCrawlQueues {
                 this.entry.setStatus("worker-checkingrobots");
                 if ((entry.url().getProtocol().equals("http") || entry.url().getProtocol().equals("https")) && robotsParser.isDisallowed(entry.url())) {
                     if (log.isFine()) log.logFine("Crawling of URL '" + entry.url().toString() + "' disallowed by robots.txt.");
-                    plasmaCrawlZURL.Entry eentry = errorURL.newEntry(this.entry.url(), "denied by robots.txt");
+                    plasmaCrawlZURL.Entry eentry = errorURL.newEntry(
+                            this.entry,
+                            sb.wordIndex.seedDB.mySeed().hash,
+                            new Date(),
+                            1,
+                            "denied by robots.txt");
                     eentry.store();
                     errorURL.push(eentry);         
                 } else {
@@ -493,7 +498,12 @@ public class plasmaCrawlQueues {
                     this.entry.setStatus("worker-loading");
                     String result = loader.process(this.entry, plasmaParser.PARSER_MODE_CRAWLER);
                     if (result != null) {
-                        plasmaCrawlZURL.Entry eentry = errorURL.newEntry(this.entry.url(), "cannot load: " + result);
+                        plasmaCrawlZURL.Entry eentry = errorURL.newEntry(
+                                this.entry,
+                                sb.wordIndex.seedDB.mySeed().hash,
+                                new Date(),
+                                1,
+                                "cannot load: " + result);
                         eentry.store();
                         errorURL.push(eentry);
                     } else {
@@ -501,7 +511,12 @@ public class plasmaCrawlQueues {
                     }
                 }
             } catch (Exception e) {
-                plasmaCrawlZURL.Entry eentry = errorURL.newEntry(this.entry.url(), e.getMessage() + " - in worker");
+                plasmaCrawlZURL.Entry eentry = errorURL.newEntry(
+                        this.entry,
+                        sb.wordIndex.seedDB.mySeed().hash,
+                        new Date(),
+                        1,
+                        e.getMessage() + " - in worker");
                 eentry.store();
                 errorURL.push(eentry);
                 e.printStackTrace();

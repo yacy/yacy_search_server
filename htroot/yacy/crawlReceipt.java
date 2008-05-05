@@ -56,7 +56,6 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.crypt;
-import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNetwork;
 import de.anomic.yacy.yacySeed;
 
@@ -69,12 +68,12 @@ public final class crawlReceipt {
 
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
         // return variable that accumulates replacements
-        plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
+        plasmaSwitchboard sb = (plasmaSwitchboard) env;
         serverObjects prop = new serverObjects();
         if ((post == null) || (env == null)) return prop;
         if (!yacyNetwork.authentifyRequest(post, env)) return prop;
         
-        serverLog log = switchboard.getLog();
+        serverLog log = sb.getLog();
 
         //int proxyPrefetchDepth = Integer.parseInt(env.getConfig("proxyPrefetchDepth", "0"));
         //int crawlingDepth = Integer.parseInt(env.getConfig("crawlingDepth", "0"));
@@ -111,10 +110,10 @@ public final class crawlReceipt {
 
         */
         
-        final yacySeed otherPeer = yacyCore.seedDB.get(iam);
+        final yacySeed otherPeer = sb.wordIndex.seedDB.get(iam);
         final String otherPeerName = iam + ":" + ((otherPeer == null) ? "NULL" : (otherPeer.getName() + "/" + otherPeer.getVersion()));        
 
-        if ((yacyCore.seedDB.mySeed() == null) || (!(yacyCore.seedDB.mySeed().hash.equals(youare)))) {
+        if ((sb.wordIndex.seedDB.mySeed() == null) || (!(sb.wordIndex.seedDB.mySeed().hash.equals(youare)))) {
             // no yacy connection / unknown peers
             prop.put("delay", "3600");
             return prop;
@@ -126,7 +125,7 @@ public final class crawlReceipt {
             return prop;
         }
         
-        if ((switchboard.isRobinsonMode()) && (!switchboard.isInMyCluster(otherPeer))) {
+        if ((sb.isRobinsonMode()) && (!sb.isInMyCluster(otherPeer))) {
         	// we reject urls that are from outside our cluster
         	prop.put("delay", "9999");
     	}
@@ -147,7 +146,7 @@ public final class crawlReceipt {
         }
         
         // check if the entry is in our network domain
-        String urlRejectReason = switchboard.acceptURL(comp.url());
+        String urlRejectReason = sb.acceptURL(comp.url());
         if (urlRejectReason != null) {
             log.logWarning("crawlReceipt: RECEIVED wrong RECEIPT (" + urlRejectReason + ") for hash " + entry.hash() + " from peer " + iam + "\n\tURL properties: "+ propStr);
             prop.put("delay", "9999");
@@ -156,9 +155,9 @@ public final class crawlReceipt {
         
         if (result.equals("fill")) try {
             // put new entry into database
-            switchboard.wordIndex.putURL(entry);
-            switchboard.crawlResults.stack(entry, youare, iam, 1);
-            switchboard.crawlQueues.delegatedURL.remove(entry.hash()); // the delegated work has been done
+            sb.wordIndex.putURL(entry);
+            sb.crawlResults.stack(entry, youare, iam, 1);
+            sb.crawlQueues.delegatedURL.remove(entry.hash()); // the delegated work has been done
             log.logInfo("crawlReceipt: RECEIVED RECEIPT from " + otherPeerName + " for URL " + entry.hash() + ":" + comp.url().toNormalform(false, true));
 
             // ready for more
@@ -170,10 +169,15 @@ public final class crawlReceipt {
             return prop;
         }
 
-        switchboard.crawlQueues.delegatedURL.remove(entry.hash()); // the delegated work is transformed into an error case
-        plasmaCrawlZURL.Entry ee = switchboard.crawlQueues.errorURL.newEntry(entry.toBalancerEntry(), youare, null, 0, result + ":" + reason);
+        sb.crawlQueues.delegatedURL.remove(entry.hash()); // the delegated work is transformed into an error case
+        plasmaCrawlZURL.Entry ee = sb.crawlQueues.errorURL.newEntry(
+                entry.toBalancerEntry(iam),
+                youare,
+                null,
+                0,
+                result + ":" + reason);
         ee.store();
-        switchboard.crawlQueues.errorURL.push(ee);
+        sb.crawlQueues.errorURL.push(ee);
         //switchboard.noticeURL.remove(receivedUrlhash);
         prop.put("delay", "3600");
         return prop;

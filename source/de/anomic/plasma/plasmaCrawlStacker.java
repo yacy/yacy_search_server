@@ -66,7 +66,6 @@ import de.anomic.kelondro.kelondroRowSet;
 import de.anomic.kelondro.kelondroTree;
 import de.anomic.server.serverDomains;
 import de.anomic.server.logging.serverLog;
-import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyURL;
 
 public final class plasmaCrawlStacker extends Thread {
@@ -213,7 +212,7 @@ public final class plasmaCrawlStacker extends Thread {
 
             // if the url was rejected we store it into the error URL db
             if (rejectReason != null) {
-                plasmaCrawlZURL.Entry ee = sb.crawlQueues.errorURL.newEntry(entry, yacyCore.seedDB.mySeed().hash, null, 0, rejectReason);
+                plasmaCrawlZURL.Entry ee = sb.crawlQueues.errorURL.newEntry(entry, sb.wordIndex.seedDB.mySeed().hash, new Date(), 1, rejectReason);
                 ee.store();
                 sb.crawlQueues.errorURL.push(ee);
             }
@@ -357,7 +356,7 @@ public final class plasmaCrawlStacker extends Thread {
         plasmaCrawlEntry entry = new plasmaCrawlEntry(
                 initiatorHash,                               // initiator, needed for p2p-feedback
                 url,                                         // url clear text string
-                (referrer == null) ? null : referrer.hash(), // last url in crawling queue
+                (referrer == null) ? "" : referrer.hash(),   // last url in crawling queue
                 name,                                        // load date
                 loadDate,                                    // the anchor name
                 (profile == null) ? null : profile.handle(), // profile must not be null!
@@ -481,15 +480,15 @@ public final class plasmaCrawlStacker extends Thread {
         }
         
         // store information
-        boolean local = ((entry.initiator().equals(yacyURL.dummyHash)) || (entry.initiator().equals(yacyCore.seedDB.mySeed().hash)));
+        boolean local = entry.initiator().equals(sb.wordIndex.seedDB.mySeed().hash);
         boolean global = 
             (profile != null) &&
             (profile.remoteIndexing()) /* granted */ &&
             (entry.depth() == profile.generalDepth()) /* leaf node */ && 
             //(initiatorHash.equals(yacyCore.seedDB.mySeed.hash)) /* not proxy */ &&
             (
-                    (yacyCore.seedDB.mySeed().isSenior()) ||
-                    (yacyCore.seedDB.mySeed().isPrincipal())
+                    (sb.wordIndex.seedDB.mySeed().isSenior()) ||
+                    (sb.wordIndex.seedDB.mySeed().isPrincipal())
             ) /* qualified */;
         
         if ((!local)&&(!global)&&(!profile.handle().equals(this.sb.defaultRemoteProfile.handle()))) {

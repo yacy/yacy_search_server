@@ -643,7 +643,7 @@ public final class yacy {
             int cacheMem = (int)(serverMemory.max() - serverMemory.total());
             if (cacheMem < 2048000) throw new OutOfMemoryError("Not enough memory available to start clean up.");
                 
-            plasmaWordIndex wordIndex = new plasmaWordIndex(indexPrimaryRoot, indexSecondaryRoot, networkName, log);
+            plasmaWordIndex wordIndex = new plasmaWordIndex(networkName, log, indexPrimaryRoot, indexSecondaryRoot);
             Iterator<indexContainer> indexContainerIterator = wordIndex.wordContainers("AAAAAAAAAAAA", false, false);
             
             long urlCounter = 0, wordCounter = 0;
@@ -834,7 +834,7 @@ public final class yacy {
         try {
             Iterator<indexContainer> indexContainerIterator = null;
             if (resource.equals("all")) {
-                WordIndex = new plasmaWordIndex(indexPrimaryRoot, indexSecondaryRoot, "freeworld", log);
+                WordIndex = new plasmaWordIndex("freeworld", log, indexPrimaryRoot, indexSecondaryRoot);
                 indexContainerIterator = WordIndex.wordContainers(wordChunkStartHash, false, false);
             }
             int counter = 0;
@@ -889,7 +889,7 @@ public final class yacy {
     public static void testPeerDB(File homePath) {
         
         try {
-            File yacyDBPath = new File(homePath, "DATA/YACYDB");
+            File yacyDBPath = new File(homePath, "DATA/INDEX/freeworld/NETWORK");
             
             String[] dbFileNames = {"seed.new.db","seed.old.db","seed.pot.db"};
             for (int i=0; i < dbFileNames.length; i++) {

@@ -74,7 +74,6 @@ import java.util.TreeMap;
 import de.anomic.index.indexWord;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.net.natLib;
-import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDate;
@@ -783,22 +782,22 @@ public class yacySeed {
         return bestHash;
     }
     
-    public static yacySeed genLocalSeed(plasmaSwitchboard sb) {
-        // genera a seed for the local peer
+    public static yacySeed genLocalSeed(yacySeedDB db) {
+        return genLocalSeed(db, 0, null); // an anonymous peer
+    }
+    
+    public static yacySeed genLocalSeed(yacySeedDB db, int port, String name) {
+        // generate a seed for the local peer
         // this is the birthplace of a seed, that then will start to travel to other peers
 
-        final String hash = bestGap(yacyCore.seedDB);
+        final String hash = bestGap(db);
         yacyCore.log.logInfo("init: OWN SEED = " + hash);
 
         final yacySeed newSeed = new yacySeed(hash);
 
         // now calculate other information about the host
-        newSeed.dna.put(yacySeed.NAME, sb.getConfig("peerName", "unnamed"));
-        if ((serverCore.portForwardingEnabled) && (serverCore.portForwarding != null)) {
-            newSeed.dna.put(yacySeed.PORT, Integer.toString(serverCore.portForwarding.getPort()));
-        } else {
-            newSeed.dna.put(yacySeed.PORT, Integer.toString(serverCore.getPortNr(sb.getConfig("port", "8080"))));
-        }
+        newSeed.dna.put(yacySeed.NAME, (name) == null ? "anonymous" : name);
+        newSeed.dna.put(yacySeed.PORT, Integer.toString((port <= 0) ? 8080 : port));
         newSeed.dna.put(yacySeed.BDATE, serverDate.formatShortSecond(new Date(System.currentTimeMillis() - serverDate.UTCDiff())) );
         newSeed.dna.put(yacySeed.LASTSEEN, newSeed.dna.get(yacySeed.BDATE)); // just as initial setting
         newSeed.dna.put(yacySeed.UTC, serverDate.UTCDiffString());

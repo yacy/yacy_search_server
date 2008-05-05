@@ -64,13 +64,13 @@ import de.anomic.http.JakartaCommonsHttpClient;
 import de.anomic.http.JakartaCommonsHttpResponse;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpd;
+import de.anomic.http.httpdAlternativeDomainNames;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroMapObjects;
 import de.anomic.plasma.plasmaHTCache;
-import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverDomains;
@@ -79,7 +79,7 @@ import de.anomic.server.serverSwitch;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.nxTools;
 
-public final class yacySeedDB {
+public final class yacySeedDB implements httpdAlternativeDomainNames {
   
     // global statics
 
@@ -99,25 +99,28 @@ public final class yacySeedDB {
     
     // class objects
     protected File seedActiveDBFile, seedPassiveDBFile, seedPotentialDBFile;
-
+    protected File myOwnSeedFile;
     protected kelondroMapObjects seedActiveDB, seedPassiveDB, seedPotentialDB;
     
-    private final plasmaSwitchboard sb;
+    public int lastSeedUpload_seedDBSize = 0;
+    public long lastSeedUpload_timeStamp = System.currentTimeMillis();
+    public String lastSeedUpload_myIP = "";
+    
     private yacySeed mySeed; // my own seed
     
     private final Hashtable<String, yacySeed> nameLookupCache;
     private final Hashtable<InetAddress, SoftReference<yacySeed>> ipLookupCache;
     
-    public yacySeedDB(plasmaSwitchboard sb,
+    public yacySeedDB(
             File seedActiveDBFile,
             File seedPassiveDBFile,
-            File seedPotentialDBFile) {
-        
+            File seedPotentialDBFile,
+            File myOwnSeedFile) {
         this.seedActiveDBFile = seedActiveDBFile;
         this.seedPassiveDBFile = seedPassiveDBFile;
         this.seedPotentialDBFile = seedPotentialDBFile;
         this.mySeed = null; // my own seed
-        this.sb = sb;
+        this.myOwnSeedFile = myOwnSeedFile;
         
         // set up seed database
         seedActiveDB = openSeedTable(seedActiveDBFile);
@@ -132,19 +135,23 @@ public final class yacySeedDB {
         
         // check if we are in the seedCaches: this can happen if someone else published our seed
         removeMySeed();
+        
+        lastSeedUpload_seedDBSize = sizeConnected();
+
+        // tell the httpdProxy how to find this table as address resolver
+        httpd.alternativeResolver = this;
     }
     
     private synchronized void initMySeed() {
         if (this.mySeed != null) return;
         
         // create or init own seed
-        File myOwnSeedFile = sb.getOwnSeedFile();
         if (myOwnSeedFile.length() > 0) try {
             // load existing identity
             mySeed = yacySeed.load(myOwnSeedFile);
         } catch (IOException e) {
             // create new identity
-            mySeed = yacySeed.genLocalSeed(sb);
+            mySeed = yacySeed.genLocalSeed(this);
             try {
                 mySeed.save(myOwnSeedFile);
             } catch (IOException ee) {
@@ -153,7 +160,7 @@ public final class yacySeedDB {
             }
         } else {
             // create new identity
-            mySeed = yacySeed.genLocalSeed(sb);
+            mySeed = yacySeed.genLocalSeed(this);
             try {
                 mySeed.save(myOwnSeedFile);
             } catch (IOException ee) {
@@ -162,15 +169,8 @@ public final class yacySeedDB {
             }
         }
         
-        if (sb.getConfig("portForwardingEnabled","false").equalsIgnoreCase("true")) {
-            mySeed.put(yacySeed.PORT, sb.getConfig("portForwardingPort","8080"));
-            mySeed.put(yacySeed.IP, sb.getConfig("portForwardingHost","localhost"));
-        } else {
-            mySeed.put(yacySeed.IP, "");       // we delete the old information to see what we have now
-            mySeed.put(yacySeed.PORT, Integer.toString(serverCore.getPortNr(sb.getConfig("port", "8080")))); // set my seed's correct port number
-        }
+        mySeed.put(yacySeed.IP, "");       // we delete the old information to see what we have now
         mySeed.put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN); // markup startup condition
-        
     }
 
     public boolean mySeedIsDefined() {
@@ -183,6 +183,26 @@ public final class yacySeedDB {
             initMySeed();
         }
         return this.mySeed;
+    }
+    
+    public String myAlternativeAddress() {
+        return mySeed().getName() + ".yacy";
+    }
+    
+    public String myIP() {
+        return mySeed().getIP();
+    }
+    
+    public int myPort() {
+        return mySeed().getPort();
+    }
+    
+    public String myName() {
+        return mySeed.getName();
+    }
+    
+    public String myID() {
+        return mySeed.hash;
     }
     
     public synchronized void removeMySeed() {
@@ -866,7 +886,10 @@ public final class yacySeedDB {
         return null;
     }
 
-    public String resolveYacyAddress(String host) {
+    /**
+     * resolve a yacy address
+     */
+    public String resolve(String host) {
         yacySeed seed;
         int p;
         String subdom = null;
@@ -908,7 +931,7 @@ public final class yacySeedDB {
             if (this.mySeed == null) initMySeed();
             if ((seed == mySeed) && (!(seed.isOnline()))) {
                 // take local ip instead of external
-                return serverDomains.myPublicIP() + ":" + serverCore.getPortNr(sb.getConfig("port", "8080")) + ((subdom == null) ? "" : ("/" + subdom));
+                return serverDomains.myPublicIP() + ":8080" + ((subdom == null) ? "" : ("/" + subdom));
             }
             return seed.getPublicAddress() + ((subdom == null) ? "" : ("/" + subdom));
         } else {

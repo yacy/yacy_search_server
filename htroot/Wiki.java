@@ -59,7 +59,6 @@ import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacyNewsRecord;
 
@@ -75,48 +74,48 @@ public class Wiki {
 
 
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) throws IOException {
-        plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
+        plasmaSwitchboard sb = (plasmaSwitchboard) env;
         serverObjects prop = new serverObjects();
         if (post == null) {
             post = new serverObjects();
             post.put("page", "start");
         }
 
-        final boolean authenticated = switchboard.adminAuthenticated(header) >= 2;
+        final boolean authenticated = sb.adminAuthenticated(header) >= 2;
         final int display = ((post == null) || (!authenticated)) ? 0 : post.getInt("display", 0);
         prop.put("display", display);
         
-        String access = switchboard.getConfig("WikiAccess", "admin");
+        String access = sb.getConfig("WikiAccess", "admin");
         String pagename = post.get("page", "start");
         String ip = post.get(httpHeader.CONNECTION_PROP_CLIENTIP, "127.0.0.1");
         String author = post.get("author", "anonymous");
         if (author.equals("anonymous")) {
             author = wikiBoard.guessAuthor(ip);
             if (author == null) {
-                if (de.anomic.yacy.yacyCore.seedDB.mySeed() == null) author = "anonymous";
-                else author = de.anomic.yacy.yacyCore.seedDB.mySeed().get("Name", "anonymous");
+                if (sb.wordIndex.seedDB.mySeed() == null) author = "anonymous";
+                else author = sb.wordIndex.seedDB.mySeed().get("Name", "anonymous");
             }
         }
         
         if (post.containsKey("access")) {
             // only the administrator may change the access right
-            if (!switchboard.verifyAuthentication(header, true)) {
+            if (!sb.verifyAuthentication(header, true)) {
                 // check access right for admin
                 prop.put("AUTHENTICATE", "admin log-in"); // force log-in
                 return prop;
             }
             
             access = post.get("access", "admin");
-            switchboard.setConfig("WikiAccess", access);
+            sb.setConfig("WikiAccess", access);
         }
         if (access.equals("admin")) prop.put("mode_access", "0");
         if (access.equals("all"))   prop.put("mode_access", "1");
 
-        wikiBoard.entry page = switchboard.wikiDB.read(pagename);
+        wikiBoard.entry page = sb.wikiDB.read(pagename);
         
         if (post.containsKey("submit")) {
             
-            if ((access.equals("admin") && (!switchboard.verifyAuthentication(header, true)))) {
+            if ((access.equals("admin") && (!sb.verifyAuthentication(header, true)))) {
                 // check access right for admin
                 prop.put("AUTHENTICATE", "admin log-in"); // force log-in
                 return prop;
@@ -129,20 +128,20 @@ public class Wiki {
             } catch (UnsupportedEncodingException e) {
                 content = post.get("content", "").getBytes();
             }
-            wikiBoard.entry newEntry = switchboard.wikiDB.newEntry(pagename, author, ip, post.get("reason", "edit"), content);
-            switchboard.wikiDB.write(newEntry);
+            wikiBoard.entry newEntry = sb.wikiDB.newEntry(pagename, author, ip, post.get("reason", "edit"), content);
+            sb.wikiDB.write(newEntry);
             // create a news message
             HashMap<String, String> map = new HashMap<String, String>();
             map.put("page", pagename);
             map.put("author", author.replace(',', ' '));
             if (post.get("content", "").trim().length() > 0 && !page.page().equals(content))
-                yacyCore.newsPool.publishMyNews(yacyNewsRecord.newRecord(yacyNewsPool.CATEGORY_WIKI_UPDATE, map));
+                sb.wordIndex.newsPool.publishMyNews(yacyNewsRecord.newRecord(sb.wordIndex.seedDB.mySeed(), yacyNewsPool.CATEGORY_WIKI_UPDATE, map));
             page = newEntry;
             prop.put("LOCATION", "/Wiki.html?page=" + pagename);
         }
 
         if (post.containsKey("edit")) {
-            if ((access.equals("admin") && (!switchboard.verifyAuthentication(header, true)))) {
+            if ((access.equals("admin") && (!sb.verifyAuthentication(header, true)))) {
                 // check access right for admin
                 prop.put("AUTHENTICATE", "admin log-in"); // force log-in
                 return prop;
@@ -174,12 +173,12 @@ public class Wiki {
             prop.put("mode", "3"); //Index
             String subject;
             try {
-                Iterator<String> i = switchboard.wikiDB.keys(true);
+                Iterator<String> i = sb.wikiDB.keys(true);
                 wikiBoard.entry entry;
                 int count=0;
                 while (i.hasNext()) {
                     subject = i.next();
-                    entry = switchboard.wikiDB.read(subject);
+                    entry = sb.wikiDB.read(subject);
                     prop.putHTML("mode_pages_"+count+"_name",wikiBoard.webalize(subject));
                     prop.putHTML("mode_pages_"+count+"_subject", subject);
                     prop.put("mode_pages_"+count+"_date", dateString(entry.date()));
@@ -201,14 +200,14 @@ public class Wiki {
             prop.putHTML("mode_error_page", pagename);
             
             try {
-                Iterator<String> it = switchboard.wikiDB.keysBkp(true);
+                Iterator<String> it = sb.wikiDB.keysBkp(true);
                 wikiBoard.entry entry;
                 wikiBoard.entry oentry = null;
                 wikiBoard.entry nentry = null;
                 int count = 0;
                 boolean oldselected = false, newselected = false;
                 while (it.hasNext()) {
-                    entry = switchboard.wikiDB.readBkp(it.next());
+                    entry = sb.wikiDB.readBkp(it.next());
                     prop.put("mode_error_versions_" + count + "_date", wikiBoard.dateString(entry.date()));
                     prop.put("mode_error_versions_" + count + "_fdate", dateString(entry.date()));
                     if (wikiBoard.dateString(entry.date()).equals(post.get("old", null))) {
@@ -235,7 +234,7 @@ public class Wiki {
                     prop.put("mode_error_versions", count);
                 }
                 
-                entry = switchboard.wikiDB.read(pagename);
+                entry = sb.wikiDB.read(pagename);
                 if (entry != null) {
                     prop.put("mode_error_curdate", wikiBoard.dateString(entry.date()));
                     prop.put("mode_error_curfdate", dateString(entry.date()));

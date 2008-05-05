@@ -54,19 +54,19 @@ public class status_p {
     
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
         // return variable that accumulates replacements
-        plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
+        plasmaSwitchboard sb = (plasmaSwitchboard) env;
         serverObjects prop = new serverObjects();
         if (post == null || !post.containsKey("html"))
             prop.setLocalized(false);
         prop.put("rejected", "0");
         yacyCore.peerActions.updateMySeed();
-        final int  cacheOutSize = switchboard.wordIndex.dhtOutCacheSize();
-        final long cacheMaxSize = switchboard.getConfigLong(plasmaSwitchboard.WORDCACHE_MAX_COUNT, 10000);
-        prop.putNum("ppm", yacyCore.seedDB.mySeed().getPPM());
-        prop.putNum("qpm", yacyCore.seedDB.mySeed().getQPM());
-        prop.putNum("wordCacheSize", switchboard.wordIndex.dhtOutCacheSize() + switchboard.wordIndex.dhtInCacheSize());
+        final int  cacheOutSize = sb.wordIndex.dhtOutCacheSize();
+        final long cacheMaxSize = sb.getConfigLong(plasmaSwitchboard.WORDCACHE_MAX_COUNT, 10000);
+        prop.putNum("ppm", sb.wordIndex.seedDB.mySeed().getPPM());
+        prop.putNum("qpm", sb.wordIndex.seedDB.mySeed().getQPM());
+        prop.putNum("wordCacheSize", sb.wordIndex.dhtOutCacheSize() + sb.wordIndex.dhtInCacheSize());
         prop.putNum("wordCacheWSize", cacheOutSize);
-        prop.putNum("wordCacheKSize", switchboard.wordIndex.dhtInCacheSize());
+        prop.putNum("wordCacheKSize", sb.wordIndex.dhtInCacheSize());
         prop.putNum("wordCacheMaxSize", cacheMaxSize);
         prop.put("wordCacheWCount", cacheOutSize);
         prop.put("wordCacheMaxCount", cacheMaxSize);

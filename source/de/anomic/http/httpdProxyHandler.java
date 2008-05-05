@@ -1,14 +1,13 @@
 // httpdProxyHandler.java
-// -----------------------
-// part of YACY
-// (C) by Michael Peter Christen; mc@anomic.de
-// first published on http://www.anomic.de
-// Frankfurt, Germany, 2004
+// (C) 2004 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
+// first published 2004 on http://yacy.net
 //
 // $LastChangedDate$
 // $LastChangedRevision$
 // $LastChangedBy$
 //
+// LICENSE
+// 
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -22,25 +21,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-//
-// Using this software in any meaning (reading, learning, copying, compiling,
-// running) means that you agree that the Author(s) is (are) not responsible
-// for cost, loss of data or any harm that may be caused directly or indirectly
-// by usage of this softare or this documentation. The usage of this software
-// is on your own risk. The installation and usage (starting/running) of this
-// software may allow other people or application to access your computer and
-// any attached devices and is highly dependent on the configuration of the
-// software which must be done by the user of the software; the author(s) is
-// (are) also not responsible for proper configuration and usage of the
-// software, even if provoked by documentation provided together with
-// the software.
-//
-// Any changes to this file according to the GPL as documented in the file
-// gpl.txt aside this file in the shipment you received can be done to the
-// lines that follows this copyright notice here, but changes must not be
-// done inside the copyright notive above. A re-distribution must contain
-// the intact and unchanged copyright notice.
-// Contributions and changes to the program code must be marked as such.
 
 // Contributions:
 // [AS] Alexander Schier: Blacklist (404 response for AGIS hosts)
@@ -53,7 +33,7 @@
    or a host is given in the header host field of an HTTP/1.0 / HTTP/1.1
    command.
    Transparency is maintained, whenever appropriate. We change header
-   atributes if necessary for the indexing mechanism; i.e. we do not
+   attributes if necessary for the indexing mechanism; i.e. we do not
    support gzip-ed encoding. We also do not support unrealistic
    'expires' values that would force a cache to be flushed immediately
    pragma non-cache attributes are supported
@@ -507,7 +487,7 @@ public final class httpdProxyHandler {
             }            
             
             // resolve yacy and yacyh domains
-            String yAddress = yacyCore.seedDB.resolveYacyAddress(host);
+            String yAddress = (httpd.alternativeResolver == null) ? null : httpd.alternativeResolver.resolve(host);
             
             // re-calc the url path
             String remotePath = (args == null) ? path : (path + "?" + args); // with leading '/'
@@ -975,7 +955,7 @@ public final class httpdProxyHandler {
                 return;
             }                   
             
-            // set another userAgent, if not yellowlisted
+            // set another userAgent, if not yellow-listed
             if (!(yellowList.contains(domain(hostlow)))) {
                 // change the User-Agent
                 requestHeader.put(httpHeader.USER_AGENT, generateUserAgent(requestHeader));
@@ -984,7 +964,7 @@ public final class httpdProxyHandler {
             addXForwardedForHeader(conProp, requestHeader);
             
             // resolve yacy and yacyh domains
-            String yAddress = yacyCore.seedDB.resolveYacyAddress(host);
+            String yAddress = (httpd.alternativeResolver == null) ? null : httpd.alternativeResolver.resolve(host);
             
             // attach possible yacy-sublevel-domain
             if ((yAddress != null) && ((pos = yAddress.indexOf("/")) >= 0)) remotePath = yAddress.substring(pos) + remotePath;
@@ -1084,7 +1064,7 @@ public final class httpdProxyHandler {
             addXForwardedForHeader(conProp, requestHeader);
             
             // resolve yacy and yacyh domains
-            String yAddress = yacyCore.seedDB.resolveYacyAddress(host);
+            String yAddress = (httpd.alternativeResolver == null) ? null : httpd.alternativeResolver.resolve(host);
             
             // re-calc the url path
             String remotePath = (args == null) ? path : (path + "?" + args);
@@ -1658,20 +1638,23 @@ public final class httpdProxyHandler {
     
     private static void setViaHeader(httpHeader header, String httpVer) {
         if (!switchboard.getConfigBool("proxy.sendViaHeader", true)) return;
-        
-        // getting header set by other proxies in the chain
-        StringBuffer viaValue = new StringBuffer();
-        if (header.containsKey(httpHeader.VIA)) viaValue.append((String)header.get(httpHeader.VIA));
-        if (viaValue.length() > 0) viaValue.append(", ");
-        
-        // appending info about this peer
-        viaValue
-        .append(httpVer).append(" ")
-        .append(yacyCore.seedDB.mySeed().getName()).append(".yacy ")
-        .append("(YaCy ").append(switchboard.getConfig("vString", "0.0")).append(")");
-        
-        // storing header back
-        header.put(httpHeader.VIA, new String(viaValue));                 
+        String myAddress = (httpd.alternativeResolver == null) ? null : httpd.alternativeResolver.myAlternativeAddress();
+        if (myAddress != null) {
+
+            // getting header set by other proxies in the chain
+            StringBuffer viaValue = new StringBuffer();
+            if (header.containsKey(httpHeader.VIA)) viaValue.append((String)header.get(httpHeader.VIA));
+            if (viaValue.length() > 0) viaValue.append(", ");
+              
+            // appending info about this peer
+            viaValue
+            .append(httpVer).append(" ")
+            .append(myAddress).append(" ")
+            .append("(YaCy ").append(switchboard.getConfig("vString", "0.0")).append(")");
+            
+            // storing header back
+            header.put(httpHeader.VIA, new String(viaValue));
+        }
     }
     
     /**

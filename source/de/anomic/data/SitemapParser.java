@@ -62,12 +62,12 @@ import de.anomic.http.JakartaCommonsHttpClient;
 import de.anomic.http.JakartaCommonsHttpResponse;
 import de.anomic.http.httpdByteCountInputStream;
 import de.anomic.index.indexURLReference;
+import de.anomic.plasma.plasmaCrawlEntry;
 import de.anomic.plasma.plasmaCrawlProfile;
 import de.anomic.plasma.plasmaCrawlZURL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverDate;
 import de.anomic.server.logging.serverLog;
-import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyURL;
 
 /**
@@ -298,7 +298,7 @@ public class SitemapParser extends DefaultHandler {
             String error = null;
             error = this.switchboard.crawlStacker.stackCrawl(url,
                                                              null, // this.siteMapURL.toString(),
-                                                             yacyCore.seedDB.mySeed().hash, this.nextURL, new Date(),
+                                                             this.switchboard.wordIndex.seedDB.mySeed().hash, this.nextURL, new Date(),
                                                              0, this.crawlingProfile);
 
             if (error != null) {
@@ -306,8 +306,21 @@ public class SitemapParser extends DefaultHandler {
                     this.logger.logInfo("The URL '" + this.nextURL + "' can not be crawled. Reason: " + error);
 
                     // insert URL into the error DB
-                    plasmaCrawlZURL.Entry ee = this.switchboard.crawlQueues.errorURL.newEntry(new yacyURL(this.nextURL,
-                            null), error);
+                    plasmaCrawlZURL.Entry ee = this.switchboard.crawlQueues.errorURL.newEntry(
+                            new plasmaCrawlEntry(
+                                    switchboard.wordIndex.seedDB.mySeed().hash, 
+                                    new yacyURL(this.nextURL, null), 
+                                    "", 
+                                    "", 
+                                    new Date(),
+                                    null,
+                                    0, 
+                                    0, 
+                                    0),
+                            this.switchboard.wordIndex.seedDB.mySeed().hash,
+                            new Date(),
+                            1,
+                            error);
                     ee.store();
                     this.switchboard.crawlQueues.errorURL.push(ee);
                 } catch (MalformedURLException e) {/* ignore this */

@@ -36,7 +36,6 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.nxTools;
-import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyURL;
 
@@ -170,8 +169,8 @@ public class CrawlResults {
                     urle = sb.wordIndex.getURL(urlHash, null, 0);
                     indexURLReference.Components comp = urle.comp();
 //                  serverLog.logFinest("PLASMA", "plasmaCrawlLURL/genTableProps urle=" + urle.toString());
-                    initiatorSeed = yacyCore.seedDB.getConnected(initiatorHash);
-                    executorSeed = yacyCore.seedDB.getConnected(executorHash);
+                    initiatorSeed = sb.wordIndex.seedDB.getConnected(initiatorHash);
+                    executorSeed = sb.wordIndex.seedDB.getConnected(executorHash);
 
                     urlstr = comp.url().toNormalform(false, true);
                     urltxt = nxTools.shortenURLString(urlstr, 72); // shorten the string text like a URL

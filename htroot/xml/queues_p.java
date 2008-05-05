@@ -60,7 +60,6 @@ import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardQueue;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 
 public class queues_p {
@@ -119,7 +118,7 @@ public class queues_p {
                 if ((pcentry != null) && (pcentry.url() != null)) {
                     long entrySize = pcentry.size();
                     totalSize += entrySize;
-                    initiator = yacyCore.seedDB.getConnected(pcentry.initiator());
+                    initiator = sb.wordIndex.seedDB.getConnected(pcentry.initiator());
                     prop.put("list-indexing_"+i+"_profile", (pcentry.profile() != null) ? pcentry.profile().name() : "deleted");
                     prop.put("list-indexing_"+i+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()));
                     prop.put("list-indexing_"+i+"_depth", pcentry.depth());
@@ -146,7 +145,7 @@ public class queues_p {
             for (int i = 0; i < w.length; i++)  {
                 if (w[i] == null) continue;
                 prop.put("list-loader_"+count+"_profile", w[i].profileHandle());
-                initiator = yacyCore.seedDB.getConnected(w[i].initiator());
+                initiator = sb.wordIndex.seedDB.getConnected(w[i].initiator());
                 prop.put("list-loader_"+count+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()));
                 prop.put("list-loader_"+count+"_depth", w[i].depth());
                 prop.putHTML("list-loader_"+count+"_url", w[i].url().toString(), true);
@@ -159,7 +158,7 @@ public class queues_p {
         prop.putNum("localCrawlSize", Integer.toString(sb.getThread(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL).getJobCount()));
         prop.put("localCrawlState", sb.crawlJobIsPaused(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL) ? STATE_PAUSED : STATE_RUNNING);
         int stackSize = sb.crawlQueues.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE);
-        addNTable(prop, "list-local", sb.crawlQueues.noticeURL.top(plasmaCrawlNURL.STACK_TYPE_CORE, Math.min(10, stackSize)));
+        addNTable(sb, prop, "list-local", sb.crawlQueues.noticeURL.top(plasmaCrawlNURL.STACK_TYPE_CORE, Math.min(10, stackSize)));
 
         //global crawl queue
         prop.putNum("limitCrawlSize", Integer.toString(sb.crawlQueues.limitCrawlJobSize()));
@@ -174,7 +173,7 @@ public class queues_p {
         if (stackSize == 0) {
             prop.put("list-remote", "0");
         } else {
-            addNTable(prop, "list-remote", sb.crawlQueues.noticeURL.top(plasmaCrawlNURL.STACK_TYPE_LIMIT, Math.min(10, stackSize)));
+            addNTable(sb, prop, "list-remote", sb.crawlQueues.noticeURL.top(plasmaCrawlNURL.STACK_TYPE_LIMIT, Math.min(10, stackSize)));
         }
 
         // return rewrite properties
@@ -182,7 +181,7 @@ public class queues_p {
     }
     
     
-    public static final void addNTable(serverObjects prop, String tableName, plasmaCrawlEntry[] crawlerList) {
+    public static final void addNTable(plasmaSwitchboard sb, serverObjects prop, String tableName, plasmaCrawlEntry[] crawlerList) {
 
         int showNum = 0;
         plasmaCrawlEntry urle;
@@ -190,7 +189,7 @@ public class queues_p {
         for (int i = 0; i < crawlerList.length; i++) {
             urle = crawlerList[i];
             if ((urle != null) && (urle.url() != null)) {
-                initiator = yacyCore.seedDB.getConnected(urle.initiator());
+                initiator = sb.wordIndex.seedDB.getConnected(urle.initiator());
                 prop.put(tableName + "_" + showNum + "_profile", urle.profileHandle());
                 prop.put(tableName + "_" + showNum + "_initiator", ((initiator == null) ? "proxy" : initiator.getName()));
                 prop.put(tableName + "_" + showNum + "_depth", urle.depth());

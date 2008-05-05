@@ -34,7 +34,6 @@ import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNetwork;
 import de.anomic.yacy.yacySeed;
 
@@ -55,7 +54,7 @@ public final class list {
         
         String otherPeerName = null;
         if (post.containsKey("iam")) {
-            yacySeed bla = yacyCore.seedDB.get(post.get("iam", ""));
+            yacySeed bla = sb.wordIndex.seedDB.get(post.get("iam", ""));
             if (bla != null) otherPeerName = bla.getName();
         }
         if (otherPeerName == null) otherPeerName = (String)header.get(httpHeader.CONNECTION_PROP_CLIENTIP);

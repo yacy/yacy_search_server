@@ -34,7 +34,6 @@ import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyCore;
 
 public class index {
 
@@ -80,7 +79,7 @@ public class index {
         if (cds.equals("app")) contentdom = plasmaSearchQuery.CONTENTDOM_APP;
         
         //long mylinks = 0;
-        prop.putNum("links", yacyCore.seedDB.mySeed().getLinkCount());
+        prop.putNum("links", sb.wordIndex.seedDB.mySeed().getLinkCount());
         
         // we create empty entries for template strings
         String promoteSearchPageGreeting = env.getConfig("promoteSearchPageGreeting", "");

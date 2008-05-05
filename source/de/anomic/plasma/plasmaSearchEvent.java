@@ -48,7 +48,6 @@ import de.anomic.kelondro.kelondroSortStore;
 import de.anomic.plasma.plasmaSnippetCache.MediaSnippet;
 import de.anomic.server.serverProfiling;
 import de.anomic.server.logging.serverLog;
-import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyDHTAction;
 import de.anomic.yacy.yacySearch;
 import de.anomic.yacy.yacySeed;
@@ -184,7 +183,7 @@ public final class plasmaSearchEvent {
                         IAmaxcounthash = wordhash;
                         maxcount = container.size();
                     }
-                    d = yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed().hash, wordhash);
+                    d = yacyDHTAction.dhtDistance(wordIndex.seedDB.mySeed().hash, wordhash);
                     if (d < mindhtdistance) {
                         // calculate the word hash that is closest to our dht position
                         mindhtdistance = d;
@@ -364,7 +363,7 @@ public final class plasmaSearchEvent {
             } else {
                 // problems with snippet fetch
                 registerFailure(page.hash(), "no text snippet for URL " + comp.url());
-                plasmaSnippetCache.failConsequences(snippet, query.id(false));
+                if (!wordIndex.seedDB.mySeed().isVirgin()) plasmaSnippetCache.failConsequences(snippet, query.id(false));
                 return null;
             }
         } else {
@@ -677,7 +676,7 @@ public final class plasmaSearchEvent {
             Iterator<Map.Entry<String, String>> i1 = abstractJoin.entrySet().iterator();
             Map.Entry<String, String> entry1;
             String url, urls, peer, peers;
-            String mypeerhash = yacyCore.seedDB.mySeed().hash;
+            String mypeerhash = wordIndex.seedDB.mySeed().hash;
             boolean mypeerinvolved = false;
             int mypeercount;
             while (i1.hasNext()) {
@@ -788,7 +787,7 @@ public final class plasmaSearchEvent {
                 // translate host into current IP
                 int p = host.indexOf(".");
                 String hash = yacySeed.hexHash2b64Hash(host.substring(p + 1, host.length() - 6));
-                yacySeed seed = yacyCore.seedDB.getConnected(hash);
+                yacySeed seed = wordIndex.seedDB.getConnected(hash);
                 String filename = urlcomps.url().getFile();
                 String address = null;
                 if ((seed == null) || ((address = seed.getPublicAddress()) == null)) {

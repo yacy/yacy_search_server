@@ -46,14 +46,7 @@ public class yacyURL implements Serializable {
      * generated with svn4751 on 2008-05-01
      */
     private static final long serialVersionUID = -1173233022912141884L;
-
-    public static final int TLD_any_zone_filter = 255; // from TLD zones can be filtered during search; this is the catch-all filter
-    
-    public static String dummyHash = "";
-    static {
-        // create a dummy hash
-        for (int i = 0; i < yacySeedDB.commonHashLength; i++) dummyHash += "-";
-    }
+    public  static final int TLD_any_zone_filter = 255; // from TLD zones can be filtered during search; this is the catch-all filter
     
     // class variables
     private String protocol, host, userInfo, path, quest, ref, hash;

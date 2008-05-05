@@ -70,15 +70,14 @@ public class ViewProfile {
 
     @SuppressWarnings("unchecked")
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
-        // listManager.switchboard = (plasmaSwitchboard) env;
         serverObjects prop = new serverObjects();
-        plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
-        boolean authenticated = switchboard.adminAuthenticated(header) >= 2;
+        plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        boolean authenticated = sb.adminAuthenticated(header) >= 2;
         int display = ((post == null) || (!authenticated)) ? 0 : post.getInt("display", 0);
         prop.put("display", display);
         String hash = (post == null) ? null : (String) post.get("hash");
         
-        if ((hash == null) || (yacyCore.seedDB == null)) {
+        if ((hash == null) || (sb.wordIndex.seedDB == null)) {
             // wrong access
             prop.put("success", "0");
             return prop;
@@ -102,24 +101,24 @@ public class ViewProfile {
             profile.putAll(p);
             prop.put("success", "3"); // everything ok
             prop.put("localremotepeer", "0");
-            prop.putHTML("success_peername", yacyCore.seedDB.mySeed().getName());
-            prop.put("success_peerhash", yacyCore.seedDB.mySeed().hash);
-            address = yacyCore.seedDB.mySeed().getPublicAddress();
+            prop.putHTML("success_peername", sb.wordIndex.seedDB.mySeed().getName());
+            prop.put("success_peerhash", sb.wordIndex.seedDB.mySeed().hash);
+            address = sb.wordIndex.seedDB.mySeed().getPublicAddress();
         } else {
             // read the profile from remote peer
-            yacySeed seed = yacyCore.seedDB.getConnected(hash);
-            if (seed == null) seed = yacyCore.seedDB.getDisconnected(hash);
+            yacySeed seed = sb.wordIndex.seedDB.getConnected(hash);
+            if (seed == null) seed = sb.wordIndex.seedDB.getDisconnected(hash);
             if (seed == null) {
                 prop.put("success", "1"); // peer unknown
             } else {
                 // process news if existent
                 try {
-                    yacyNewsRecord record = yacyCore.newsPool.getByOriginator(yacyNewsPool.INCOMING_DB, yacyNewsPool.CATEGORY_PROFILE_UPDATE, seed.hash);
-                    if (record != null) yacyCore.newsPool.moveOff(yacyNewsPool.INCOMING_DB, record.id());
+                    yacyNewsRecord record = sb.wordIndex.newsPool.getByOriginator(yacyNewsPool.INCOMING_DB, yacyNewsPool.CATEGORY_PROFILE_UPDATE, seed.hash);
+                    if (record != null) sb.wordIndex.newsPool.moveOff(yacyNewsPool.INCOMING_DB, record.id());
                 } catch (IOException e) {}
                 
                 // try to get the profile from remote peer
-                if (switchboard.clusterhashes != null) seed.setAlternativeAddress((String) switchboard.clusterhashes.get(seed.hash));
+                if (sb.clusterhashes != null) seed.setAlternativeAddress((String) sb.clusterhashes.get(seed.hash));
                 profile = yacyClient.getProfile(seed);
                 
                 // if profile did not arrive, say that peer is disconnected

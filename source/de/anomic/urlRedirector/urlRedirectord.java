@@ -17,7 +17,6 @@ import de.anomic.server.serverCore;
 import de.anomic.server.serverHandler;
 import de.anomic.server.logging.serverLog;
 import de.anomic.server.serverCore.Session;
-import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyURL;
 
 public class urlRedirectord implements serverHandler {
@@ -199,7 +198,7 @@ public class urlRedirectord implements serverHandler {
                             reasonString = switchboard.crawlStacker.stackCrawl(
                                     reqURL, 
                                     null, 
-                                    yacyCore.seedDB.mySeed().hash, 
+                                    switchboard.wordIndex.seedDB.mySeed().hash, 
                                     "URL Redirector", 
                                     new Date(), 
                                     0, 

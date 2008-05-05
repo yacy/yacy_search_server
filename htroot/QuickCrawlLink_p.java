@@ -58,7 +58,6 @@ import de.anomic.plasma.plasmaCrawlProfile;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyURL;
 
 public class QuickCrawlLink_p {
@@ -74,7 +73,7 @@ public class QuickCrawlLink_p {
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
         
         serverObjects prop = new serverObjects();
-        plasmaSwitchboard switchboard = (plasmaSwitchboard)env;
+        plasmaSwitchboard sb = (plasmaSwitchboard) env;
         
         if (post == null) {
             // send back usage example
@@ -139,14 +138,14 @@ public class QuickCrawlLink_p {
             }
                     
             String urlhash = crawlingStartURL.hash();
-            switchboard.wordIndex.removeURL(urlhash);
-            switchboard.crawlQueues.noticeURL.removeByURLHash(urlhash);
-            switchboard.crawlQueues.errorURL.remove(urlhash);
+            sb.wordIndex.removeURL(urlhash);
+            sb.crawlQueues.noticeURL.removeByURLHash(urlhash);
+            sb.crawlQueues.errorURL.remove(urlhash);
             
             // create crawling profile
             plasmaCrawlProfile.entry pe = null;
             try {
-                pe = switchboard.profilesActiveCrawls.newEntry(
+                pe = sb.profilesActiveCrawls.newEntry(
                         crawlingStartURL.getHost(), 
                         crawlingStartURL, 
                         crawlingFilter, 
@@ -176,10 +175,10 @@ public class QuickCrawlLink_p {
             
             // stack URL
             String reasonString = null;
-            reasonString = switchboard.crawlStacker.stackCrawl(
+            reasonString = sb.crawlStacker.stackCrawl(
                         crawlingStartURL, 
                         null, 
-                        yacyCore.seedDB.mySeed().hash, 
+                        sb.wordIndex.seedDB.mySeed().hash, 
                         (title==null)?"CRAWLING-ROOT":title, 
                                 new Date(), 
                                 0, 

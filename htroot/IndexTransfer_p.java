@@ -65,12 +65,12 @@ public final class IndexTransfer_p {
     
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
         // return variable that accumulates replacements
-        plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
+        plasmaSwitchboard sb = (plasmaSwitchboard) env;
         serverObjects prop = new serverObjects();
         
         if (post != null) {            
             if (post.containsKey("startIndexTransfer")) {                
-                yacySeed seed = yacyCore.seedDB.getConnected(post.get("hostHash", ""));                
+                yacySeed seed = sb.wordIndex.seedDB.getConnected(post.get("hostHash", ""));                
                 if (seed == null) {
                     prop.put("running_status","Disconnected peer");
                 } else {                    
@@ -78,30 +78,30 @@ public final class IndexTransfer_p {
                     if(prop.containsKey("overwriteIP") && ! ((String)prop.get("overwriteIP")).equals("")){
                         seed.setIP((String) prop.get("overwriteIP"));
                     }
-                    switchboard.startTransferWholeIndex(seed,deleteIndex);
+                    sb.startTransferWholeIndex(seed,deleteIndex);
                     prop.put("LOCATION","");
                     return prop;
                 }
             } else if (post.containsKey("stopIndexTransfer")) {
-                switchboard.stopTransferWholeIndex(true);
+                sb.stopTransferWholeIndex(true);
                 prop.put("LOCATION","");
                 return prop;
                 
             } else if (post.containsKey("newIndexTransfer")) {
-                switchboard.abortTransferWholeIndex(true);
+                sb.abortTransferWholeIndex(true);
                 prop.put("LOCATION","");
                 return prop;
             }
         }
         
         // insert constants
-        prop.putNum("wcount", switchboard.wordIndex.size());
-        prop.putNum("ucount", switchboard.wordIndex.countURL());
-        prop.put("running",(switchboard.transferIdxThread==null) ? "0" : "1");
-        if (switchboard.transferIdxThread != null) {
-            String[] status = switchboard.transferIdxThread.getStatus();
-            String[] range  = switchboard.transferIdxThread.getRange();
-            int[] chunk     = switchboard.transferIdxThread.getIndexCount();
+        prop.putNum("wcount", sb.wordIndex.size());
+        prop.putNum("ucount", sb.wordIndex.countURL());
+        prop.put("running",(sb.transferIdxThread==null) ? "0" : "1");
+        if (sb.transferIdxThread != null) {
+            String[] status = sb.transferIdxThread.getStatus();
+            String[] range  = sb.transferIdxThread.getRange();
+            int[] chunk     = sb.transferIdxThread.getIndexCount();
             
             prop.put("running_selection.status",status[0]);
             prop.put("running_selection.twrange", range[0]);
@@ -112,15 +112,15 @@ public final class IndexTransfer_p {
             prop.put("running_transfer.twchunk", chunk[1]);
 
             
-            prop.putNum("running_twEntityCount", switchboard.transferIdxThread.getTransferedContainerCount());
-            prop.putNum("running_twEntryCount", switchboard.transferIdxThread.getTransferedEntryCount());
-            prop.put("running_twPayloadSize", serverMemory.bytesToString(switchboard.transferIdxThread.getTransferedBytes()));
-            prop.putNum("running_twEntityPercent", switchboard.transferIdxThread.getTransferedContainerPercent());
-            prop.putNum("running_twEntrySpeed", switchboard.transferIdxThread.getTransferedEntrySpeed());
+            prop.putNum("running_twEntityCount", sb.transferIdxThread.getTransferedContainerCount());
+            prop.putNum("running_twEntryCount", sb.transferIdxThread.getTransferedEntryCount());
+            prop.put("running_twPayloadSize", serverMemory.bytesToString(sb.transferIdxThread.getTransferedBytes()));
+            prop.putNum("running_twEntityPercent", sb.transferIdxThread.getTransferedContainerPercent());
+            prop.putNum("running_twEntrySpeed", sb.transferIdxThread.getTransferedEntrySpeed());
             
-            prop.put("running_deleteIndex", switchboard.transferIdxThread.deleteIndex() ? "1" : "0");
-            prop.put("running_peerName",switchboard.transferIdxThread.getSeed().getName());
-            prop.put("running_stopped",(switchboard.transferIdxThread.isFinished()) || (!switchboard.transferIdxThread.isAlive()) ? "1" : "0");
+            prop.put("running_deleteIndex", sb.transferIdxThread.deleteIndex() ? "1" : "0");
+            prop.put("running_peerName",sb.transferIdxThread.getSeed().getName());
+            prop.put("running_stopped",(sb.transferIdxThread.isFinished()) || (!sb.transferIdxThread.isAlive()) ? "1" : "0");
         } else {
             if (!prop.containsKey("running_status")) prop.put("running_status","Not running");
         }
@@ -130,7 +130,7 @@ public final class IndexTransfer_p {
         //List known hosts
         yacySeed seed;
         int hc = 0;
-        if ((yacyCore.seedDB != null) && (yacyCore.seedDB.sizeConnected() > 0)) {
+        if ((sb.wordIndex.seedDB != null) && (sb.wordIndex.seedDB.sizeConnected() > 0)) {
             Iterator<yacySeed> e = yacyCore.dhtAgent.getAcceptRemoteIndexSeeds("------------");
             TreeMap<String, String> hostList = new TreeMap<String, String>();
             while (e.hasNext()) {

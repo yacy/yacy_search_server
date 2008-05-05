@@ -58,7 +58,6 @@ import de.anomic.data.wiki.tokens.SimpleToken;
 import de.anomic.data.wiki.tokens.TableToken;
 import de.anomic.data.wiki.tokens.Token;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.yacy.yacyCore;
 
 public class knwikiParser implements wikiParser {
 	
@@ -146,7 +145,7 @@ public class knwikiParser implements wikiParser {
         tokens = new Token[] {
                 new SimpleToken('=', '=', new String[][] { null, { "h2" }, { "h3" }, { "h4" } }, true),
                 new SimpleToken('\'', '\'', new String[][] { null, { "i" }, { "b" }, null, { "b", "i" } }, false),
-                new LinkToken((publicAddress == null) ? yacyCore.seedDB.mySeed().getPublicAddress() : publicAddress, "Wiki.html?page=", sb),
+                new LinkToken((publicAddress == null) ? sb.wordIndex.seedDB.mySeed().getPublicAddress() : publicAddress, "Wiki.html?page=", sb),
                 new ListToken('*', "ul"),
                 new ListToken('#', "ol"),
                 new ListToken(':', "blockquote", null),

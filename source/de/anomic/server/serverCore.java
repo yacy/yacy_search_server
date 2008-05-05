@@ -77,11 +77,8 @@ import javax.net.ssl.SSLSocketFactory;
 
 import de.anomic.icap.icapd;
 import de.anomic.server.logging.serverLog;
-import de.anomic.server.portForwarding.serverPortForwarding;
 import de.anomic.tools.PKCS12Tool;
 import de.anomic.urlRedirector.urlRedirectord;
-import de.anomic.yacy.yacyCore;
-import de.anomic.yacy.yacySeed;
 
 public final class serverCore extends serverAbstractBusyThread implements serverBusyThread {
 
@@ -142,9 +139,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
      */
     public boolean forceRestart = false;
     
-    public static boolean portForwardingEnabled = false;
     public static boolean useStaticIP = false;
-    public static serverPortForwarding portForwarding = null;
     
     private SSLSocketFactory sslSocketFactory = null;
     private ServerSocket socket;           // listener
@@ -261,25 +256,13 @@ public final class serverCore extends serverAbstractBusyThread implements server
             
             // updating the port information
             //yacyCore.seedDB.mySeed.put(yacySeed.PORT,Integer.toString(bindAddress.getPort()));    
-            yacyCore.seedDB.mySeed().put(yacySeed.PORT, extendedPort);
+            //yacyCore.seedDB.mySeed().put(yacySeed.PORT, extendedPort);
         } catch (Exception e) {
             String errorMsg = "FATAL ERROR: " + e.getMessage() + " - probably root access rights needed. check port number";
             this.log.logSevere(errorMsg);
             System.out.println(errorMsg);             
             System.exit(0);
         }
-
-        // init port forwarding            
-        try {
-            this.initPortForwarding();
-        } catch (Exception e) {
-            this.log.logSevere("Unable to initialize server port forwarding.",e);
-            this.switchboard.setConfig("portForwardingEnabled","false");
-        } catch (Error e) {
-            this.log.logSevere("Unable to initialize server port forwarding.",e);
-            this.switchboard.setConfig("portForwardingEnabled","false");
-        }
-
     }
     
     public static int getPortNr(String extendedPortString) {
@@ -338,57 +321,6 @@ public final class serverCore extends serverAbstractBusyThread implements server
         return (bindIP == null) 
         ? new InetSocketAddress(bindPort)
         : new InetSocketAddress(bindIP, bindPort);
-    }
-    
-    public void initPortForwarding() throws Exception {
-        // doing the port forwarding stuff
-        if (this.switchboard.getConfigBool("portForwarding.Enabled",false)) {
-            this.log.logInfo("Initializing port forwarding ...");
-            try {
-                // getting the port forwarding type to use
-                String forwardingType = this.switchboard.getConfig("portForwarding.Type","none");                               
-                
-                // loading port forwarding class
-                this.log.logInfo("Trying to load port forwarding class for forwarding type '" + forwardingType + "'.");
-                String forwardingClass = this.switchboard.getConfig("portForwarding." + forwardingType ,"");
-                
-                Class<?> forwarderClass = Class.forName(forwardingClass);
-                serverCore.portForwarding = (serverPortForwarding) forwarderClass.newInstance();                
-                
-                // initializing port forwarding
-                String localHost = this.socket.getInetAddress().getHostName();
-                Integer localPort = new Integer(this.socket.getLocalPort());                
-                
-                serverCore.portForwarding.init(
-                        this.switchboard,
-                        localHost,
-                        localPort.intValue());
-                
-                // connection to port forwarding host
-                serverCore.portForwarding.connect();
-                
-                serverCore.portForwardingEnabled = true;
-                yacyCore.seedDB.mySeed().put(yacySeed.IP, serverDomains.myPublicIP());
-                yacyCore.seedDB.mySeed().put(yacySeed.PORT,Integer.toString(serverCore.portForwarding.getPort()));                               
-            } catch (Exception e) {
-                serverCore.portForwardingEnabled = false;
-                this.switchboard.setConfig("portForwarding.Enabled", "false");
-                throw e;
-            } catch (Error e) {
-                serverCore.portForwardingEnabled = false;
-                this.switchboard.setConfig("portForwarding.Enabled", "false");
-                throw e;                
-            }
-
-        } else {
-            serverCore.portForwardingEnabled = false;
-            serverCore.portForwarding = null;
-            yacyCore.seedDB.mySeed().put(yacySeed.IP, serverDomains.myPublicIP());
-            yacyCore.seedDB.mySeed().put(yacySeed.PORT,Integer.toString(serverCore.getPortNr(this.switchboard.getConfig("port", "8080"))));             
-        }
-        if(! this.switchboard.getConfig("staticIP", "").equals(""))
-            serverCore.useStaticIP=true;
-
     }
     
     public void open() {
@@ -491,18 +423,6 @@ public final class serverCore extends serverAbstractBusyThread implements server
                 e.printStackTrace();
             } catch (ConcurrentModificationException e) {
                 e.printStackTrace();
-            }
-        }
-        
-        // closing the port forwarding channel
-        if ((portForwardingEnabled) && (portForwarding != null) ) {
-            try {
-                this.log.logInfo("Shutdown port forwarding ...");
-                portForwarding.disconnect();
-                portForwardingEnabled = false;
-                portForwarding = null;
-            } catch (Exception e) {
-                this.log.logWarning("Unable to shutdown the port forwarding channel.");
             }
         }
         

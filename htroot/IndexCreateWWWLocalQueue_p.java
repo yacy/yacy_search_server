@@ -58,7 +58,6 @@ import de.anomic.plasma.plasmaCrawlProfile;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 
 public class IndexCreateWWWLocalQueue_p {
@@ -182,7 +181,7 @@ public class IndexCreateWWWLocalQueue_p {
             for (i = 0; (i < crawlerList.length) && (showNum < showLimit); i++) {
                 urle = crawlerList[i];
                 if ((urle != null)&&(urle.url()!=null)) {
-                    initiator = yacyCore.seedDB.getConnected(urle.initiator());
+                    initiator = sb.wordIndex.seedDB.getConnected(urle.initiator());
                     profileHandle = urle.profileHandle();
                     profileEntry = (profileHandle == null) ? null : sb.profilesActiveCrawls.getEntry(profileHandle);
                     prop.put("crawler-queue_list_"+showNum+"_dark", dark ? "1" : "0");

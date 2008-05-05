@@ -315,11 +315,11 @@ public class yacyDHTAction implements yacyPeerAction {
     public void processPeerPing(yacySeed peer) {
     }
     
-    public static boolean shallBeOwnWord(String wordhash) {
-        if (yacyCore.seedDB == null) return false;
-        if (yacyCore.seedDB.mySeed().isPotential()) return false;
-        final double distance = dhtDistance(yacyCore.seedDB.mySeed().hash, wordhash);
-        final double max = 1.2 / yacyCore.seedDB.sizeConnected();
+    public static boolean shallBeOwnWord(yacySeedDB seedDB, String wordhash) {
+        if (seedDB == null) return false;
+        if (seedDB.mySeed().isPotential()) return false;
+        final double distance = dhtDistance(seedDB.mySeed().hash, wordhash);
+        final double max = 1.2 / seedDB.sizeConnected();
         //System.out.println("Distance for " + wordhash + ": " + distance + "; max is " + max);
         return (distance > 0) && (distance <= max);
     }
@@ -347,13 +347,13 @@ public class yacyDHTAction implements yacyPeerAction {
         return ((double) (kelondroBase64Order.enhancedCoder.cardinal(from.getBytes()) - kelondroBase64Order.enhancedCoder.cardinal(to.getBytes()))) / ((double) Long.MAX_VALUE);
     }
     
-    public synchronized ArrayList<yacySeed> getDHTTargets(serverLog log, int primaryPeerCount, int reservePeerCount, String firstKey, String lastKey, double maxDist) {
+    public synchronized ArrayList<yacySeed> getDHTTargets(yacySeedDB seedDB, serverLog log, int primaryPeerCount, int reservePeerCount, String firstKey, String lastKey, double maxDist) {
         // find a list of DHT-peers
         assert firstKey != null;
         assert lastKey != null;
-        assert yacyCore.seedDB != null;
-        assert yacyCore.seedDB.mySeed() != null;
-        assert yacyCore.seedDB.mySeed().hash != null;
+        assert seedDB != null;
+        assert seedDB.mySeed() != null;
+        assert seedDB.mySeed().hash != null;
         /*
         assert
             !(kelondroBase64Order.enhancedCoder.cardinal(firstKey.getBytes()) < kelondroBase64Order.enhancedCoder.cardinal(yacyCore.seedDB.mySeed.hash.getBytes()) &&
@@ -367,7 +367,7 @@ public class yacyDHTAction implements yacyPeerAction {
         double firstdist, lastdist;
         Iterator<yacySeed> e = this.getAcceptRemoteIndexSeeds(lastKey);
         TreeSet<String> doublecheck = new TreeSet<String>(kelondroBase64Order.enhancedComparator);
-        int maxloop = Math.min(100, yacyCore.seedDB.sizeConnected()); // to ensure termination
+        int maxloop = Math.min(100, seedDB.sizeConnected()); // to ensure termination
         if (log != null) log.logInfo("Collecting DHT target peers for first_hash = " + firstKey + ", last_hash = " + lastKey);
         while ((e.hasNext()) && (seeds.size() < (primaryPeerCount + reservePeerCount)) && (maxloop-- > 0)) {
             seed = (yacySeed) e.next();

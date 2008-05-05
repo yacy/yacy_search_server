@@ -48,29 +48,28 @@ import de.anomic.plasma.plasmaCrawlEntry;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 
 public class IndexCreateLoaderQueue_p {
     
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
         // return variable that accumulates replacements
-        plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
+        plasmaSwitchboard sb = (plasmaSwitchboard) env;
         serverObjects prop = new serverObjects();
         
 
-        if (switchboard.crawlQueues.size() == 0) {
+        if (sb.crawlQueues.size() == 0) {
             prop.put("loader-set", "0");
         } else {
             prop.put("loader-set", "1");
             boolean dark = true;
-            plasmaCrawlEntry[] w = switchboard.crawlQueues.activeWorkerEntries();
+            plasmaCrawlEntry[] w = sb.crawlQueues.activeWorkerEntries();
             yacySeed initiator;
             int count = 0;
             for (int i = 0; i < w.length; i++)  {
                 if (w[i] == null) continue;
                 
-                initiator = yacyCore.seedDB.getConnected(w[i].initiator());
+                initiator = sb.wordIndex.seedDB.getConnected(w[i].initiator());
                 prop.put("loader-set_list_"+count+"_dark", dark ? "1" : "0");
                 prop.putHTML("loader-set_list_"+count+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()));
                 prop.put("loader-set_list_"+count+"_depth", w[i].depth());

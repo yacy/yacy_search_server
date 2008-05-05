@@ -38,7 +38,6 @@ import de.anomic.kelondro.kelondroFlexWidthArray;
 import de.anomic.kelondro.kelondroIndex;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroRowSet;
-import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyURL;
 
@@ -90,15 +89,15 @@ public class plasmaCrawlZURL {
     }
 
     public synchronized Entry newEntry(
-            plasmaCrawlEntry bentry, String executor, Date workdate,
-            int workcount, String anycause) {
-        if ((executor == null) || (executor.length() < yacySeedDB.commonHashLength)) executor = yacyURL.dummyHash;
+            plasmaCrawlEntry bentry,
+            String executor,
+            Date workdate,
+            int workcount,
+            String anycause) {
+        assert executor != null;
+        assert executor.length() > 0;
         if (anycause == null) anycause = "unknown";
         return new Entry(bentry, executor, workdate, workcount, anycause);
-    }
-
-    public synchronized Entry newEntry(yacyURL url, String anycause) {
-        return new Entry(url, anycause);
     }
 
     public boolean remove(String hash) {
@@ -155,23 +154,23 @@ public class plasmaCrawlZURL {
     public class Entry {
 
         plasmaCrawlEntry bentry;    // the balancer entry
-        private String   executor;  // the crawling initiator
+        private String   executor;  // the crawling executor
         private Date     workdate;  // the time when the url was last time tried to load
         private int      workcount; // number of tryings
         private String   anycause;  // string describing reason for load fail
         private boolean  stored;
 
-        public Entry(yacyURL url, String reason) {
-            this(new plasmaCrawlEntry(url), null, new Date(), 0, reason);
-        }
-        
         public Entry(
-                plasmaCrawlEntry bentry, String executor, Date workdate,
-                int workcount, String anycause) {
+                plasmaCrawlEntry bentry,
+                String executor,
+                Date workdate,
+                int workcount,
+                String anycause) {
             // create new entry
             assert bentry != null;
+            assert executor != null;
             this.bentry = bentry;
-            this.executor = (executor == null) ? yacyCore.seedDB.mySeed().hash : executor;
+            this.executor = executor;
             this.workdate = (workdate == null) ? new Date() : workdate;
             this.workcount = workcount;
             this.anycause = (anycause == null) ? "" : anycause;
@@ -179,11 +178,6 @@ public class plasmaCrawlZURL {
         }
 
         public Entry(kelondroRow.Entry entry) throws IOException {
-            insertEntry(entry);
-            this.stored = true;
-        }
-        
-        private void insertEntry(kelondroRow.Entry entry) throws IOException {
             assert (entry != null);
             this.executor = entry.getColString(1, "UTF-8");
             this.workdate = new Date(entry.getColLong(2));
@@ -191,6 +185,7 @@ public class plasmaCrawlZURL {
             this.anycause = entry.getColString(4, "UTF-8");
             this.bentry = new plasmaCrawlEntry(plasmaCrawlEntry.rowdef.newEntry(entry.getColBytes(5)));
             assert ((new String(entry.getColBytes(0))).equals(bentry.url().hash()));
+            this.stored = true;
             return;
         }
         

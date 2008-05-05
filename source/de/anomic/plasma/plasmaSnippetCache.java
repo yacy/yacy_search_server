@@ -66,7 +66,6 @@ import de.anomic.kelondro.kelondroMSetTools;
 import de.anomic.plasma.cache.IResourceInfo;
 import de.anomic.plasma.parser.ParserException;
 import de.anomic.server.logging.serverLog;
-import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySearch;
 import de.anomic.yacy.yacyURL;
 
@@ -897,7 +896,6 @@ public class plasmaSnippetCache {
     
     public static String failConsequences(TextSnippet snippet, String eventID) {
         // problems with snippet fetch
-        if (yacyCore.seedDB.mySeed().isVirgin()) return snippet.getError() + " (no consequences, no network connection)"; // no consequences if we do not have a network connection
         String urlHash = snippet.getUrl().hash();
         String querystring = kelondroMSetTools.setToString(snippet.getRemainingHashes(), ' ');
         if ((snippet.getErrorCode() == ERROR_SOURCE_LOADING) ||

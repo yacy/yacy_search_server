@@ -52,8 +52,8 @@ import java.util.StringTokenizer;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyClient;
-import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
+import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyVersion;
 
 public final class plasmaRankingDistribution {
@@ -73,10 +73,12 @@ public final class plasmaRankingDistribution {
     private int method;          // of peer selection
     private int percentage;      // to select any other peer
     private String address[];      // of fixed other peer
+    private yacySeedDB seedDB;
     private static Random random = new Random(System.currentTimeMillis());
     
-    public plasmaRankingDistribution(serverLog log, File sourcePath, int method, int percentage, String addresses) {
+    public plasmaRankingDistribution(serverLog log, yacySeedDB seedDB, File sourcePath, int method, int percentage, String addresses) {
         this.log        = log;
+        this.seedDB     = seedDB;
         this.sourcePath = sourcePath;
         this.method     = method;
         this.percentage = percentage;
@@ -104,15 +106,15 @@ public final class plasmaRankingDistribution {
             log.logFine("no ranking distribution: no transfer method given");
             return false;
         }
-        if (yacyCore.seedDB == null) {
+        if (seedDB == null) {
             log.logFine("no ranking distribution: seedDB == null");
             return false;
         }
-        if (yacyCore.seedDB.mySeed() == null) {
+        if (seedDB.mySeed() == null) {
             log.logFine("no ranking distribution: mySeed == null");
             return false;
         }
-        if (yacyCore.seedDB.mySeed().isVirgin()) {
+        if (seedDB.mySeed().isVirgin()) {
             log.logFine("no ranking distribution: status is virgin");
             return false;
         }
@@ -164,7 +166,7 @@ public final class plasmaRankingDistribution {
             if (Thread.currentThread().isInterrupted()) throw new InterruptedException("Shutdown in progress");
             
             // get next target
-            target = yacyCore.seedDB.anySeedVersion(yacyVersion.YACY_ACCEPTS_RANKING_TRANSMISSION);
+            target = seedDB.anySeedVersion(yacyVersion.YACY_ACCEPTS_RANKING_TRANSMISSION);
             
             if (target == null) continue;
             String targetaddress = target.getPublicAddress();

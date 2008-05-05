@@ -56,7 +56,6 @@ import java.util.LinkedList;
 
 import de.anomic.index.indexURLReference;
 import de.anomic.yacy.yacySeedDB;
-import de.anomic.yacy.yacyURL;
 
 public final class plasmaCrawlResultURLs {
 
@@ -81,10 +80,10 @@ public final class plasmaCrawlResultURLs {
     }
 
     public synchronized void stack(indexURLReference e, String initiatorHash, String executorHash, int stackType) {
+        assert initiatorHash != null;
+        assert executorHash != null;
         if (e == null) { return; }
         try {
-            if (initiatorHash == null) { initiatorHash = yacyURL.dummyHash; }
-            if (executorHash == null) { executorHash = yacyURL.dummyHash; }
             switch (stackType) {
                 case 0: break;
                 case 1: externResultStack.add(e.hash() + initiatorHash + executorHash); break;

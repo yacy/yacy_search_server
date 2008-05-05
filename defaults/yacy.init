@@ -624,22 +624,6 @@ proxy.sendViaHeader=true
 # Specifies if the proxy should send the X-Forwarded-For header
 proxy.sendXForwardedForHeader=true
 
-# Configuration options needed to configure server port forwarding
-portForwarding.Enabled=false
-portForwarding.Type=none
-
-# port forwarding via sch
-portForwarding.sch=de.anomic.server.portForwarding.sch.serverPortForwardingSch
-portForwarding.sch.UseProxy=false
-portForwarding.sch.Port=
-portForwarding.sch.Host=
-portForwarding.sch.HostPort=22
-portForwarding.sch.HostUser=
-portForwarding.sch.HostPwd=
-
-# port forwarding via upnp
-portForwarding.upnp=de.anomic.server.portForwarding.upnp.serverPortForwardingUpnp
-
 # msgForwarding: Specifies if yacy should forward received messages via
 # email to the configured email address
 msgForwardingEnabled=false

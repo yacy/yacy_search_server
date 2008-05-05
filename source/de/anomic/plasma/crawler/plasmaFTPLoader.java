@@ -157,7 +157,7 @@ public class plasmaFTPLoader {
             // some error logging
             final String detail = (berr.size() > 0) ? "\n    Errorlog: " + berr.toString() : "";
             log.logWarning("Unable to download URL " + entry.url().toString() + detail);
-            sb.crawlQueues.errorURL.newEntry(entry, null, new Date(), 1, plasmaCrawlEURL.DENIED_SERVER_DOWNLOAD_ERROR);
+            sb.crawlQueues.errorURL.newEntry(entry, sb.wordIndex.seedDB.mySeed().hash, new Date(), 1, plasmaCrawlEURL.DENIED_SERVER_DOWNLOAD_ERROR);
 
             // an error has occured. cleanup
             if (cacheFile.exists()) {
@@ -281,7 +281,7 @@ public class plasmaFTPLoader {
                 ftpClient.exec("get \"" + path + "\" \"" + cacheFile.getAbsolutePath() + "\"", false);
             } else {
                 log.logInfo("REJECTED TOO BIG FILE with size " + size + " Bytes for URL " + entry.url().toString());
-                sb.crawlQueues.errorURL.newEntry(entry, null, new Date(), 1,
+                sb.crawlQueues.errorURL.newEntry(entry, this.sb.wordIndex.seedDB.mySeed().hash, new Date(), 1,
                         plasmaCrawlEURL.DENIED_FILESIZE_LIMIT_EXCEEDED);
                 throw new Exception("file size exceeds limit");
             }

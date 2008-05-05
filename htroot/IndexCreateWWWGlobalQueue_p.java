@@ -54,7 +54,6 @@ import de.anomic.plasma.plasmaCrawlProfile;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 
 public class IndexCreateWWWGlobalQueue_p {
@@ -67,7 +66,7 @@ public class IndexCreateWWWGlobalQueue_p {
     
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
         // return variable that accumulates replacements
-        plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
+        plasmaSwitchboard sb = (plasmaSwitchboard) env;
         serverObjects prop = new serverObjects();
  
         int showLimit = 100;
@@ -79,9 +78,9 @@ public class IndexCreateWWWGlobalQueue_p {
             }            
             
             if (post.containsKey("clearcrawlqueue")) {
-                int c = switchboard.crawlQueues.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT);
-                switchboard.crawlQueues.noticeURL.clear(plasmaCrawlNURL.STACK_TYPE_LIMIT);
-                try { switchboard.cleanProfiles(); } catch (InterruptedException e) { /* Ignore this */}
+                int c = sb.crawlQueues.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT);
+                sb.crawlQueues.noticeURL.clear(plasmaCrawlNURL.STACK_TYPE_LIMIT);
+                try { sb.cleanProfiles(); } catch (InterruptedException e) { /* Ignore this */}
                 /*
                 int c = 0;
                 while (switchboard.urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT) > 0) {
@@ -93,18 +92,18 @@ public class IndexCreateWWWGlobalQueue_p {
                 prop.putNum("info_numEntries", c);
             } else if (post.containsKey("deleteEntry")) {
                 String urlHash = (String) post.get("deleteEntry");
-                switchboard.crawlQueues.noticeURL.removeByURLHash(urlHash);
+                sb.crawlQueues.noticeURL.removeByURLHash(urlHash);
                 prop.put("LOCATION","");
                 return prop;
             }
         }
 
-        int stackSize = switchboard.crawlQueues.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT);
+        int stackSize = sb.crawlQueues.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT);
         if (stackSize == 0) {
             prop.put("crawler-queue", "0");
         } else {
             prop.put("crawler-queue", "1");
-            plasmaCrawlEntry[] crawlerList = switchboard.crawlQueues.noticeURL.top(plasmaCrawlNURL.STACK_TYPE_LIMIT, showLimit);
+            plasmaCrawlEntry[] crawlerList = sb.crawlQueues.noticeURL.top(plasmaCrawlNURL.STACK_TYPE_LIMIT, showLimit);
             
             plasmaCrawlEntry urle;
             boolean dark = true;
@@ -115,9 +114,9 @@ public class IndexCreateWWWGlobalQueue_p {
             for (i = 0; (i < crawlerList.length) && (showNum < showLimit); i++) {
                 urle = crawlerList[i];
                 if ((urle != null)&&(urle.url()!=null)) {
-                    initiator = yacyCore.seedDB.getConnected(urle.initiator());
+                    initiator = sb.wordIndex.seedDB.getConnected(urle.initiator());
                     profileHandle = urle.profileHandle();
-                    profileEntry = (profileHandle == null) ? null : switchboard.profilesActiveCrawls.getEntry(profileHandle);
+                    profileEntry = (profileHandle == null) ? null : sb.profilesActiveCrawls.getEntry(profileHandle);
                     prop.put("crawler-queue_list_"+showNum+"_dark", dark ? "1" : "0");
                     prop.putHTML("crawler-queue_list_"+showNum+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()) );
                     prop.put("crawler-queue_list_"+showNum+"_profile", ((profileEntry == null) ? "unknown" : profileEntry.name()));

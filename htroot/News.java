@@ -53,7 +53,6 @@ import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacyNewsRecord;
 import de.anomic.yacy.yacySeed;
@@ -61,7 +60,7 @@ import de.anomic.yacy.yacySeed;
 public class News {
     
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
-        plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
+        plasmaSwitchboard sb = (plasmaSwitchboard) env;
         serverObjects prop = new serverObjects();
         boolean overview = (post == null) || (post.get("page", "0").equals("0"));
         int tableID = (overview) ? -1 : Integer.parseInt(post.get("page", "0")) - 1;
@@ -70,7 +69,7 @@ public class News {
         if (post != null) {
             
             if ((post.containsKey("deletespecific")) && (tableID >= 0)) {
-                if (switchboard.adminAuthenticated(header) < 2) {
+                if (sb.adminAuthenticated(header) < 2) {
                     prop.put("AUTHENTICATE", "admin log-in");
                     return prop; // this button needs authentication, force log-in
                 }
@@ -82,22 +81,22 @@ public class News {
                     if ((check.startsWith("del_")) && (post.get(check, "off").equals("on"))) {
                         id = check.substring(4);
                         try {
-                            yacyCore.newsPool.moveOff(tableID, id);
+                            sb.wordIndex.newsPool.moveOff(tableID, id);
                         } catch (IOException ee) {ee.printStackTrace();}
                     }
                 }
             }
             
             if ((post.containsKey("deleteall")) && (tableID >= 0)) {
-                if (switchboard.adminAuthenticated(header) < 2) {
+                if (sb.adminAuthenticated(header) < 2) {
                     prop.put("AUTHENTICATE", "admin log-in");
                     return prop; // this button needs authentication, force log-in
                 }
                 try {
                     if ((tableID == yacyNewsPool.PROCESSED_DB) || (tableID == yacyNewsPool.PUBLISHED_DB)) {
-                        yacyCore.newsPool.clear(tableID);
+                        sb.wordIndex.newsPool.clear(tableID);
                     } else {
-                        yacyCore.newsPool.moveOffAll(tableID);
+                        sb.wordIndex.newsPool.moveOffAll(tableID);
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -110,19 +109,19 @@ public class News {
             // show overview
             prop.put("table", "0");
             prop.put("page", "0");
-            prop.putNum("table_insize", yacyCore.newsPool.size(yacyNewsPool.INCOMING_DB));
-            prop.putNum("table_prsize", yacyCore.newsPool.size(yacyNewsPool.PROCESSED_DB));
-            prop.putNum("table_ousize", yacyCore.newsPool.size(yacyNewsPool.OUTGOING_DB));
-            prop.putNum("table_pusize", yacyCore.newsPool.size(yacyNewsPool.PUBLISHED_DB));
+            prop.putNum("table_insize", sb.wordIndex.newsPool.size(yacyNewsPool.INCOMING_DB));
+            prop.putNum("table_prsize", sb.wordIndex.newsPool.size(yacyNewsPool.PROCESSED_DB));
+            prop.putNum("table_ousize", sb.wordIndex.newsPool.size(yacyNewsPool.OUTGOING_DB));
+            prop.putNum("table_pusize", sb.wordIndex.newsPool.size(yacyNewsPool.PUBLISHED_DB));
         } else {
             // generate table
             prop.put("table", "1");
             prop.put("page", tableID + 1);
             prop.put("table_page", tableID + 1);
             
-            if (yacyCore.seedDB != null) {
-                int maxCount = Math.min(1000, yacyCore.newsPool.size(tableID));
-                Iterator<yacyNewsRecord> recordIterator = yacyCore.newsPool.recordIterator(tableID, false);
+            if (sb.wordIndex.seedDB != null) {
+                int maxCount = Math.min(1000, sb.wordIndex.newsPool.size(tableID));
+                Iterator<yacyNewsRecord> recordIterator = sb.wordIndex.newsPool.recordIterator(tableID, false);
                 yacyNewsRecord record;
                 yacySeed seed;
                 int i = 0;
@@ -130,8 +129,8 @@ public class News {
                     record = recordIterator.next();
                     if (record == null) continue;
                     
-                    seed = yacyCore.seedDB.getConnected(record.originator());
-                    if (seed == null) seed = yacyCore.seedDB.getDisconnected(record.originator());
+                    seed = sb.wordIndex.seedDB.getConnected(record.originator());
+                    if (seed == null) seed = sb.wordIndex.seedDB.getDisconnected(record.originator());
                     String category = record.category();
                     prop.put("table_list_" + i + "_id", record.id());
                     prop.putHTML("table_list_" + i + "_ori", (seed == null) ? record.originator() : seed.getName());
@@ -202,7 +201,7 @@ public class News {
         }
         
         // adding the peer address
-        prop.put("address",yacyCore.seedDB.mySeed().getPublicAddress());
+        prop.put("address", sb.wordIndex.seedDB.mySeed().getPublicAddress());
         
         // return rewrite properties
         return prop;

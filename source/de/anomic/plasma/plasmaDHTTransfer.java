@@ -48,6 +48,7 @@ import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
+import de.anomic.yacy.yacySeedDB;
 
 public class plasmaDHTTransfer extends Thread {
 
@@ -72,12 +73,14 @@ public class plasmaDHTTransfer extends Thread {
     plasmaDHTChunk dhtChunk;
 
     // other fields
+    private yacySeedDB seedDB;
     private int maxRetry;
     private int transferMode = TRANSFER_MODE_DISTRIBUTION;
     serverLog log;
 
     public plasmaDHTTransfer(
-            serverLog log, 
+            serverLog log,
+            yacySeedDB seedDB,
             yacySeed destSeed, 
             plasmaDHTChunk dhtChunk, 
             boolean gzipBody, 
@@ -86,6 +89,7 @@ public class plasmaDHTTransfer extends Thread {
     ) {
         super(new ThreadGroup("TransferIndexThreadGroup"), "TransferIndexWorker_" + destSeed.getName());
         this.log = log;
+        this.seedDB = seedDB;
         this.gzipBody4Transfer = gzipBody;
         this.timeout4Transfer = timeout;
         this.dhtChunk = dhtChunk;
@@ -152,7 +156,7 @@ public class plasmaDHTTransfer extends Thread {
 
             // transfering seleted words to remote peer
             this.transferStatusMessage = "Running: Transfering chunk to target " + this.seed.hash + "/" + this.seed.getName();
-            HashMap<String, Object> result = yacyClient.transferIndex(this.seed, this.dhtChunk.containers(), this.dhtChunk.urlCacheMap(), this.gzipBody4Transfer, this.timeout4Transfer);
+            HashMap<String, Object> result = yacyClient.transferIndex(this.seedDB, this.seed, this.dhtChunk.containers(), this.dhtChunk.urlCacheMap(), this.gzipBody4Transfer, this.timeout4Transfer);
             String error = (String) result.get("result");
             if (error == null) {
                 // words successfully transfered
@@ -236,7 +240,7 @@ public class plasmaDHTTransfer extends Thread {
                         return;
 
                     // doing a peer ping to the remote seed
-                    int added = yacyClient.publishMySeed(this.seed.getPublicAddress(), this.seed.hash);
+                    int added = yacyClient.publishMySeed(this.seedDB.mySeed(), this.seed.getPublicAddress(), this.seed.hash);
                     if (added < 0) {
                         // inc. retry counter
                         retryCount++;
@@ -246,7 +250,7 @@ public class plasmaDHTTransfer extends Thread {
                         continue;
                     }
 
-                    yacyCore.seedDB.getConnected(this.seed.hash);
+                    this.seedDB.getConnected(this.seed.hash);
                     this.transferStatusMessage = "running";
                     break;
                 }

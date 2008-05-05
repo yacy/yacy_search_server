@@ -91,7 +91,7 @@ import de.anomic.xml.RSSReader;
 
 public final class yacyClient {
 
-    public static int publishMySeed(String address, String otherHash) {
+    public static int publishMySeed(yacySeed mySeed, String address, String otherHash) {
         // this is called to enrich the seed information by
         // - own address (if peer is behind a nat/router)
         // - check peer type (virgin/junior/senior/principal)
@@ -116,7 +116,7 @@ public final class yacyClient {
         for (int retry = 0; retry < 4; retry++) try {
             // generate request
             post.add(new StringPart("count", "20"));
-            post.add(new StringPart("seed", yacyCore.seedDB.mySeed().genSeedStr(salt)));
+            post.add(new StringPart("seed", mySeed.genSeedStr(salt)));
             yacyCore.log.logFine("yacyClient.publishMySeed thread '" + Thread.currentThread().getName() + "' contacting peer at " + address);
             // send request
             byte[] content = wput("http://" + address + "/yacy/hello.html", yacySeed.b64Hash2hexHash(otherHash) + ".yacyh", post);
@@ -141,7 +141,6 @@ public final class yacyClient {
 
         // check consistency with expectation
         yacySeed otherPeer = null;
-        float otherPeerVersion = 0;
         String seed;
         if ((otherHash != null) &&
             (otherHash.length() > 0) &&
@@ -154,72 +153,50 @@ public final class yacyClient {
             		yacyCore.log.logFine("yacyClient.publishMySeed: consistency error: other peer '" + ((otherPeer==null)?"unknown":otherPeer.getName()) + "' wrong");
             		return -1; // no success
             	}
-            	otherPeerVersion = otherPeer.getVersion();
             }
         }
 
         // set my own seed according to new information
-        // we overwrite our own IP number only, if we do not portForwarding
-        if (serverCore.portForwardingEnabled || serverCore.useStaticIP) {
-            yacyCore.seedDB.mySeed().put(yacySeed.IP, serverDomains.myPublicIP());
+        // we overwrite our own IP number only
+        if (serverCore.useStaticIP) {
+            mySeed.put(yacySeed.IP, serverDomains.myPublicIP());
         } else {
-            yacyCore.seedDB.mySeed().put(yacySeed.IP, (String) result.get("yourip"));
+            mySeed.put(yacySeed.IP, (String) result.get("yourip"));
         }
 
-        /* If we have port forwarding enabled but the other peer uses a too old yacy version
-         * we can ignore the seed-type that was reported by the peer.
-         * 
-         * Otherwise we have to change our seed-type  
-         * 
-         * @see serverCore#portForwardingEnabled 
+        // change our seed-type
+        String mytype = (String) result.get(yacySeed.YOURTYPE);
+        if (mytype == null) { mytype = ""; }        
+        yacyAccessible accessible = new yacyAccessible();
+        if (mytype.equals(yacySeed.PEERTYPE_SENIOR)||mytype.equals(yacySeed.PEERTYPE_PRINCIPAL)) {
+            accessible.IWasAccessed = true;
+            if (mySeed.isPrincipal()) {
+                mytype = yacySeed.PEERTYPE_PRINCIPAL;
+            }
+        } else {
+            accessible.IWasAccessed = false;
+        }
+        accessible.lastUpdated = System.currentTimeMillis();
+        yacyCore.amIAccessibleDB.put(otherHash, accessible);
+
+        /* 
+         * If we were reported as junior we have to check if your port forwarding channel is broken
+         * If this is true we try to reconnect the sch channel to the remote server now.
          */
-        if (!serverCore.portForwardingEnabled || otherPeerVersion >= yacyVersion.YACY_SUPPORTS_PORT_FORWARDING) {
-            String mytype = (String) result.get(yacySeed.YOURTYPE);
-            if (mytype == null) { mytype = ""; }        
-            yacyAccessible accessible = new yacyAccessible();
-            if (mytype.equals(yacySeed.PEERTYPE_SENIOR)||mytype.equals(yacySeed.PEERTYPE_PRINCIPAL)) {
-                accessible.IWasAccessed = true;
-                if (yacyCore.seedDB.mySeed().isPrincipal()) {
-                    mytype = yacySeed.PEERTYPE_PRINCIPAL;
-                }
-            } else {
-                accessible.IWasAccessed = false;
-            }
-            accessible.lastUpdated = System.currentTimeMillis();
-            yacyCore.amIAccessibleDB.put(otherHash, accessible);
-
-            /* 
-             * If we were reported as junior we have to check if your port forwarding channel is broken
-             * If this is true we try to reconnect the sch channel to the remote server now.
-             */
-            if (mytype.equalsIgnoreCase(yacySeed.PEERTYPE_JUNIOR)) {
-                yacyCore.log.logInfo("yacyClient.publishMySeed: Peer '" + ((otherPeer==null)?"unknown":otherPeer.getName()) + "' reported us as junior.");
-                if (serverCore.portForwardingEnabled) {
-                    if (!Thread.currentThread().isInterrupted() && 
-                         serverCore.portForwarding != null && 
-                        !serverCore.portForwarding.isConnected()
-                    ) {
-                        yacyCore.log.logWarning("yacyClient.publishMySeed: Broken portForwarding channel detected. Trying to reconnect ...");                        
-                        try {
-                            serverCore.portForwarding.reconnect();
-                        } catch (IOException e) {
-                            yacyCore.log.logWarning("yacyClient.publishMySeed: Unable to reconnect to port forwarding host.");
-                        }
-                    }
-                }
-            } else if ((mytype.equalsIgnoreCase(yacySeed.PEERTYPE_SENIOR)) ||
-                       (mytype.equalsIgnoreCase(yacySeed.PEERTYPE_PRINCIPAL))) {
-                yacyCore.log.logFine("yacyClient.publishMySeed: Peer '" + ((otherPeer==null)?"unknown":otherPeer.getName()) + "' reported us as " + mytype + ", accepted other peer.");
-            } else {
-                // wrong type report
-                yacyCore.log.logFine("yacyClient.publishMySeed: Peer '" + ((otherPeer==null)?"unknown":otherPeer.getName()) + "' reported us as " + mytype + ", rejecting other peer.");
-                return -1;
-            }
-            if (yacyCore.seedDB.mySeed().orVirgin().equals(yacySeed.PEERTYPE_VIRGIN))
-                yacyCore.seedDB.mySeed().put(yacySeed.PEERTYPE, mytype);
+        if (mytype.equalsIgnoreCase(yacySeed.PEERTYPE_JUNIOR)) {
+            yacyCore.log.logInfo("yacyClient.publishMySeed: Peer '" + ((otherPeer==null)?"unknown":otherPeer.getName()) + "' reported us as junior.");
+        } else if ((mytype.equalsIgnoreCase(yacySeed.PEERTYPE_SENIOR)) ||
+                   (mytype.equalsIgnoreCase(yacySeed.PEERTYPE_PRINCIPAL))) {
+            yacyCore.log.logFine("yacyClient.publishMySeed: Peer '" + ((otherPeer==null)?"unknown":otherPeer.getName()) + "' reported us as " + mytype + ", accepted other peer.");
+        } else {
+            // wrong type report
+            yacyCore.log.logFine("yacyClient.publishMySeed: Peer '" + ((otherPeer==null)?"unknown":otherPeer.getName()) + "' reported us as " + mytype + ", rejecting other peer.");
+            return -1;
         }
+        if (mySeed.orVirgin().equals(yacySeed.PEERTYPE_VIRGIN))
+            mySeed.put(yacySeed.PEERTYPE, mytype);
 
-        final String error = yacyCore.seedDB.mySeed().isProper();
+        final String error = mySeed.isProper();
         if (error != null) {
             yacyCore.log.logSevere("yacyClient.publishMySeed mySeed error - not proper: " + error);
             return -1;
@@ -328,8 +305,8 @@ public final class yacyClient {
     private static byte[] postToFile(final yacySeed target, final String filename, final List<Part> post) throws IOException {
         return wput("http://" + target.getClusterAddress() + "/yacy/" + filename, target.getHexHash() + ".yacyh", post);
     }
-    private static byte[] postToFile(final String targetHash, final String filename, final List<Part> post) throws IOException {
-        return wput("http://" + targetAddress(targetHash) + "/yacy/" + filename, yacySeed.b64Hash2hexHash(targetHash)+ ".yacyh", post);
+    private static byte[] postToFile(yacySeedDB seedDB, final String targetHash, final String filename, final List<Part> post) throws IOException {
+        return wput("http://" + targetAddress(seedDB, targetHash) + "/yacy/" + filename, yacySeed.b64Hash2hexHash(targetHash)+ ".yacyh", post);
     }
 
     public static yacySeed querySeed(yacySeed target, String seedHash) {
@@ -376,7 +353,6 @@ public final class yacyClient {
 
     public static int queryUrlCount(yacySeed target) {        
         if (target == null) { return -1; }
-        if (yacyCore.seedDB.mySeed() == null) return -1;
         
         // prepare request
         final String salt = crypt.randomSalt();
@@ -405,10 +381,9 @@ public final class yacyClient {
         }
     }
 
-    public static RSSFeed queryRemoteCrawlURLs(yacySeed target, int count) {
+    public static RSSFeed queryRemoteCrawlURLs(yacySeedDB seedDB, yacySeed target, int count) {
         // returns a list of 
         if (target == null) { return null; }
-        if (yacyCore.seedDB.mySeed() == null) return null;
         
         // prepare request
         final String salt = crypt.randomSalt();
@@ -427,7 +402,7 @@ public final class yacyClient {
                 yacyCore.log.logWarning("yacyClient.queryRemoteCrawlURLs failed asking peer '" + target.getName() + "': probably bad response from remote peer");
                 System.out.println("***DEBUG*** rss input = " + new String(result));
                 target.put(yacySeed.RCOUNT, "0");
-                yacyCore.seedDB.update(target.hash, target); // overwrite number of remote-available number to avoid that this peer is called again (until update is done by peer ping)
+                seedDB.update(target.hash, target); // overwrite number of remote-available number to avoid that this peer is called again (until update is done by peer ping)
                 //e.printStackTrace();
                 return null;
             }
@@ -439,6 +414,7 @@ public final class yacyClient {
     }
 
     public static String[] search(
+            yacySeed mySeed,
             String wordhashes,
             String excludehashes,
             String urlhashes,
@@ -476,7 +452,7 @@ public final class yacyClient {
         // prepare request
         final String salt = crypt.randomSalt();
         final List<Part> post = yacyNetwork.basicRequestPost(plasmaSwitchboard.getSwitchboard(), target.hash, salt);
-        post.add(new StringPart("myseed", yacyCore.seedDB.mySeed().genSeedStr(salt)));
+        post.add(new StringPart("myseed", mySeed.genSeedStr(salt)));
         post.add(new StringPart("count", Integer.toString(Math.max(10, count))));
         post.add(new StringPart("resource", ((global) ? "global" : "local")));
         post.add(new StringPart("partitions", Integer.toString(partitions)));
@@ -590,7 +566,7 @@ public final class yacyClient {
 			// passed all checks, store url
 			try {
 				wordIndex.putURL(urlEntry);
-				crawlResults.stack(urlEntry, yacyCore.seedDB.mySeed().hash, target.hash, 2);
+				crawlResults.stack(urlEntry, mySeed.hash, target.hash, 2);
 			} catch (IOException e) {
 				yacyCore.log.logSevere("could not store search result", e);
 				continue; // db-error
@@ -681,11 +657,10 @@ public final class yacyClient {
 		return urls;
 	}
 
-    public static HashMap<String, String> permissionMessage(String targetHash) {
+    public static HashMap<String, String> permissionMessage(yacySeedDB seedDB, String targetHash) {
         // ask for allowed message size and attachement size
         // if this replies null, the peer does not answer
-        if (yacyCore.seedDB == null || yacyCore.seedDB.mySeed() == null) { return null; }
-
+        
         // prepare request
         final String salt = crypt.randomSalt();
         final List<Part> post = yacyNetwork.basicRequestPost(plasmaSwitchboard.getSwitchboard(), targetHash, salt);
@@ -693,7 +668,7 @@ public final class yacyClient {
         
         // send request
         try {
-            final byte[] content = postToFile(targetHash, "message.html", post); 
+            final byte[] content = postToFile(seedDB, targetHash, "message.html", post); 
             final HashMap<String, String> result = nxTools.table(content, "UTF-8");
             return result;
         } catch (Exception e) {
@@ -703,14 +678,14 @@ public final class yacyClient {
         }
     }
 
-    public static HashMap<String, String> postMessage(String targetHash, String subject, byte[] message) {
+    public static HashMap<String, String> postMessage(yacySeedDB seedDB, String targetHash, String subject, byte[] message) {
         // this post a message to the remote message board
 
         // prepare request
         final String salt = crypt.randomSalt();
         final List<Part> post = yacyNetwork.basicRequestPost(plasmaSwitchboard.getSwitchboard(), targetHash, salt);
         post.add(new StringPart("process", "post"));
-        post.add(new StringPart("myseed", yacyCore.seedDB.mySeed().genSeedStr(salt)));
+        post.add(new StringPart("myseed", seedDB.mySeed().genSeedStr(salt)));
         post.add(new StringPart("subject", subject));
         try {
             post.add(new StringPart("message", new String(message, "UTF-8")));
@@ -720,7 +695,7 @@ public final class yacyClient {
 
         // send request
         try {
-            final byte[] content = postToFile(targetHash, "message.html", post);
+            final byte[] content = postToFile(seedDB, targetHash, "message.html", post);
             final HashMap<String, String> result = nxTools.table(content, "UTF-8");
             return result;
         } catch (Exception e) {
@@ -729,13 +704,13 @@ public final class yacyClient {
         }
     }
     
-    public static String targetAddress(String targetHash) {
+    public static String targetAddress(yacySeedDB seedDB, String targetHash) {
         // find target address    
         String address;
-        if (targetHash.equals(yacyCore.seedDB.mySeed().hash)) {
-            address = yacyCore.seedDB.mySeed().getClusterAddress();
+        if (targetHash.equals(seedDB.mySeed().hash)) {
+            address = seedDB.mySeed().getClusterAddress();
         } else {
-            final yacySeed targetSeed = yacyCore.seedDB.getConnected(targetHash);
+            final yacySeed targetSeed = seedDB.getConnected(targetHash);
             if (targetSeed == null) { return null; }
             address = targetSeed.getClusterAddress();
         }
@@ -818,10 +793,10 @@ public final class yacyClient {
         return "wrong protocol: " + protocol;
     }
 
-    public static HashMap<String, String> crawlReceipt(yacySeed target, String process, String result, String reason, indexURLReference entry, String wordhashes) {
+    public static HashMap<String, String> crawlReceipt(yacySeed mySeed, yacySeed target, String process, String result, String reason, indexURLReference entry, String wordhashes) {
         assert (target != null);
-        assert (yacyCore.seedDB.mySeed() != null);
-        assert (yacyCore.seedDB.mySeed() != target);
+        assert (mySeed != null);
+        assert (mySeed != target);
 
         /*
          the result can have one of the following values:
@@ -868,7 +843,7 @@ public final class yacyClient {
         }
     }
 
-    public static HashMap<String, Object> transferIndex(yacySeed targetSeed, indexContainer[] indexes, HashMap<String, indexURLReference> urlCache, boolean gzipBody, int timeout) {
+    public static HashMap<String, Object> transferIndex(yacySeedDB seedDB, yacySeed targetSeed, indexContainer[] indexes, HashMap<String, indexURLReference> urlCache, boolean gzipBody, int timeout) {
         
         HashMap<String, Object> resultObj = new HashMap<String, Object>();
         int payloadSize = 0;
@@ -888,7 +863,7 @@ public final class yacyClient {
             }        
             
             // transfer the RWI without the URLs
-            HashMap<String, String> in = transferRWI(targetSeed, indexes, gzipBody, timeout);
+            HashMap<String, String> in = transferRWI(seedDB, targetSeed, indexes, gzipBody, timeout);
             resultObj.put("resultTransferRWI", in);
             
             if (in == null) {
@@ -904,7 +879,7 @@ public final class yacyClient {
             }
             if (!(result.equals("ok"))) {
                 targetSeed.setFlagAcceptRemoteIndex(false);
-                yacyCore.seedDB.update(targetSeed.hash, targetSeed);
+                seedDB.update(targetSeed.hash, targetSeed);
                 resultObj.put("result", result);
                 return resultObj;
             }
@@ -929,7 +904,7 @@ public final class yacyClient {
                 }
             }
             
-            in = transferURL(targetSeed, urls, gzipBody, timeout);
+            in = transferURL(seedDB, targetSeed, urls, gzipBody, timeout);
             resultObj.put("resultTransferURL", in);
             
             if (in == null) {
@@ -945,7 +920,7 @@ public final class yacyClient {
             }
             if (!(result.equals("ok"))) {
                 targetSeed.setFlagAcceptRemoteIndex(false);
-                yacyCore.seedDB.update(targetSeed.hash, targetSeed);
+                seedDB.update(targetSeed.hash, targetSeed);
                 resultObj.put("result",result);
                 return resultObj;
             }
@@ -958,7 +933,7 @@ public final class yacyClient {
         }
     }
 
-    private static HashMap<String, String> transferRWI(yacySeed targetSeed, indexContainer[] indexes, boolean gzipBody, int timeout) {
+    private static HashMap<String, String> transferRWI(yacySeedDB seedDB, yacySeed targetSeed, indexContainer[] indexes, boolean gzipBody, int timeout) {
         final String address = targetSeed.getPublicAddress();
         if (address == null) { return null; }
 
@@ -1002,7 +977,7 @@ public final class yacyClient {
             final ArrayList<String> v = nxTools.strings(content, "UTF-8");
             // this should return a list of urlhashes that are unknown
             if ((v != null) && (v.size() > 0)) {
-                yacyCore.seedDB.mySeed().incSI(indexcount);
+                seedDB.mySeed().incSI(indexcount);
             }
             
             final HashMap<String, String> result = nxTools.table(v);
@@ -1015,7 +990,7 @@ public final class yacyClient {
         }
     }
 
-    private static HashMap<String, String> transferURL(yacySeed targetSeed, indexURLReference[] urls, boolean gzipBody, int timeout) {
+    private static HashMap<String, String> transferURL(yacySeedDB seedDB, yacySeed targetSeed, indexURLReference[] urls, boolean gzipBody, int timeout) {
         // this post a message to the remote message board
         final String address = targetSeed.getPublicAddress();
         if (address == null) { return null; }
@@ -1048,7 +1023,7 @@ public final class yacyClient {
             final ArrayList<String> v = nxTools.strings(content, "UTF-8");
             
             if ((v != null) && (v.size() > 0)) {
-                yacyCore.seedDB.mySeed().incSU(urlc);
+                seedDB.mySeed().incSU(urlc);
             }
             
             HashMap<String, String> result = nxTools.table(v);
@@ -1094,15 +1069,15 @@ public final class yacyClient {
             final plasmaSwitchboard sb = new plasmaSwitchboard(new File(args[0]), "httpProxy.init", "DATA/SETTINGS/yacy.conf", false);
             /*final yacyCore core =*/ new yacyCore(sb);
             yacyCore.peerActions.loadSeedLists();
-            final yacySeed target = yacyCore.seedDB.getConnected(args[1]);
+            final yacySeed target = sb.wordIndex.seedDB.getConnected(args[1]);
             final String wordhashe = indexWord.word2hash("test");
             //System.out.println("permission=" + permissionMessage(args[1]));
             
             final byte[] content = HttpClient.wget(
                                               "http://" + target.getPublicAddress() + "/yacy/search.html" +
-                                                      "?myseed=" + yacyCore.seedDB.mySeed().genSeedStr(null) +
+                                                      "?myseed=" + sb.wordIndex.seedDB.mySeed().genSeedStr(null) +
                                                       "&youare=" + target.hash + "&key=" +
-                                                      "&myseed=" + yacyCore.seedDB.mySeed() .genSeedStr(null) +
+                                                      "&myseed=" + sb.wordIndex.seedDB.mySeed() .genSeedStr(null) +
                                                       "&count=10" +
                                                       "&resource=global" +
                                                       "&query=" + wordhashe +

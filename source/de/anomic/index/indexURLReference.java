@@ -191,7 +191,7 @@ public class indexURLReference {
         this.ranking = ranking;
     }
 
-    public indexURLReference(Properties prop){
+    public indexURLReference(Properties prop) {
         // generates an plasmaLURLEntry using the properties from the argument
         // the property names must correspond to the one from toString
         //System.out.println("DEBUG-ENTRY: prop=" + prop.toString());
@@ -224,7 +224,7 @@ public class indexURLReference {
         } catch (ParseException e) {
             encodeDate(col_fresh, new Date());
         }
-        this.entry.setCol(col_referrer, prop.getProperty("referrer", yacyURL.dummyHash).getBytes());
+        this.entry.setCol(col_referrer, prop.getProperty("referrer", "").getBytes());
         this.entry.setCol(col_md5, serverCodings.decodeHex(prop.getProperty("md5", "")));
         this.entry.setCol(col_size, Integer.parseInt(prop.getProperty("size", "0")));
         this.entry.setCol(col_wc, Integer.parseInt(prop.getProperty("wc", "0")));
@@ -434,9 +434,9 @@ public class indexURLReference {
         //return "{" + core + ",snippet=" + crypt.simpleEncode(snippet) + "}";
     }
 
-    public plasmaCrawlEntry toBalancerEntry() {
+    public plasmaCrawlEntry toBalancerEntry(String initiatorHash) {
         return new plasmaCrawlEntry(
-                null, 
+                initiatorHash, 
                 comp().url(), 
                 referrerHash(), 
                 comp().dc_title(),

@@ -44,9 +44,9 @@
 //if the shell's current path is HTROOT
 
 import de.anomic.http.httpHeader;
+import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyCore;
 
 public class YaCySearchPluginFF {
     
@@ -57,7 +57,7 @@ public class YaCySearchPluginFF {
      * @return the rewrite-properties for the template
      */
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
-        
+        plasmaSwitchboard sb = (plasmaSwitchboard) env;
         serverObjects prop = new serverObjects();
         
         // getting the http host header
@@ -72,7 +72,7 @@ public class YaCySearchPluginFF {
         
         prop.put("host", host);
         prop.put("port", port);
-        prop.putHTML("name", yacyCore.seedDB.mySeed().getName());
+        prop.putHTML("name", sb.wordIndex.seedDB.mySeed().getName());
         
         return prop;
     }

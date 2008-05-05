@@ -77,10 +77,10 @@ public class BlogComments {
     }
 
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
-        plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
+        plasmaSwitchboard sb = (plasmaSwitchboard) env;
         serverObjects prop = new serverObjects();
         blogBoard.BlogEntry page = null;
-        boolean hasRights = switchboard.verifyAuthentication(header, true);
+        boolean hasRights = sb.verifyAuthentication(header, true);
 
         if (hasRights) prop.put("mode_admin", "1");
         else prop.put("mode_admin", "0");
@@ -91,7 +91,7 @@ public class BlogComments {
         }
 
         if(!hasRights){
-            userDB.Entry userentry = switchboard.userDB.proxyAuth((String)header.get("Authorization", "xxxxxx"));
+            userDB.Entry userentry = sb.userDB.proxyAuth((String)header.get("Authorization", "xxxxxx"));
             if(userentry != null && userentry.hasRight(userDB.Entry.BLOG_RIGHT)){
                 hasRights=true;
             }
@@ -107,14 +107,14 @@ public class BlogComments {
         String StrAuthor = post.get("author", "anonymous");
 
         if (StrAuthor.equals("anonymous")) {
-            StrAuthor = switchboard.blogDB.guessAuthor(ip);
+            StrAuthor = sb.blogDB.guessAuthor(ip);
 
             if (StrAuthor == null || StrAuthor.length() == 0) {
-                if (de.anomic.yacy.yacyCore.seedDB.mySeed() == null) {
+                if (sb.wordIndex.seedDB.mySeed() == null) {
                     StrAuthor = "anonymous";
                 }
                 else {
-                    StrAuthor = de.anomic.yacy.yacyCore.seedDB.mySeed().get("Name", "anonymous");
+                    StrAuthor = sb.wordIndex.seedDB.mySeed().get("Name", "anonymous");
                 }
             }
         }
@@ -126,7 +126,7 @@ public class BlogComments {
             author = StrAuthor.getBytes();
         }
 
-        page = switchboard.blogDB.readBlogEntry(pagename); //maybe "if(page == null)"
+        page = sb.blogDB.readBlogEntry(pagename); //maybe "if(page == null)"
         
         // comments not allowed
         if (page.getCommentMode() == 0) {
@@ -158,34 +158,34 @@ public class BlogComments {
                     subject = StrSubject.getBytes();
                 }
                 String commentID = String.valueOf(System.currentTimeMillis());
-                BlogEntry blogEntry = switchboard.blogDB.readBlogEntry(pagename);
+                BlogEntry blogEntry = sb.blogDB.readBlogEntry(pagename);
                 blogEntry.addComment(commentID);
-                switchboard.blogDB.writeBlogEntry(blogEntry);
-                switchboard.blogCommentDB.write(switchboard.blogCommentDB.newEntry(commentID, subject, author, ip, date, content));
+                sb.blogDB.writeBlogEntry(blogEntry);
+                sb.blogCommentDB.write(sb.blogCommentDB.newEntry(commentID, subject, author, ip, date, content));
                 prop.put("LOCATION","BlogComments.html?page=" + pagename);
 
                 messageBoard.entry msgEntry = null;
                 try {
-                    switchboard.messageDB.write(msgEntry = switchboard.messageDB.newEntry(
+                    sb.messageDB.write(msgEntry = sb.messageDB.newEntry(
                             "blogComment",
                             StrAuthor,
-                            yacyCore.seedDB.mySeed().hash,
-                            yacyCore.seedDB.mySeed().getName(), yacyCore.seedDB.mySeed().hash,
+                            sb.wordIndex.seedDB.mySeed().hash,
+                            sb.wordIndex.seedDB.mySeed().getName(), sb.wordIndex.seedDB.mySeed().hash,
                             "new blog comment: " + new String(blogEntry.getSubject(),"UTF-8"), content));
                 } catch (UnsupportedEncodingException e1) {
-                    switchboard.messageDB.write(msgEntry = switchboard.messageDB.newEntry(
+                    sb.messageDB.write(msgEntry = sb.messageDB.newEntry(
                             "blogComment",
                             StrAuthor,
-                            yacyCore.seedDB.mySeed().hash,
-                            yacyCore.seedDB.mySeed().getName(), yacyCore.seedDB.mySeed().hash,
+                            sb.wordIndex.seedDB.mySeed().hash,
+                            sb.wordIndex.seedDB.mySeed().getName(), sb.wordIndex.seedDB.mySeed().hash,
                             "new blog comment: " + new String(blogEntry.getSubject()), content));
                 }
 
-                messageForwardingViaEmail(env, msgEntry);
+                messageForwardingViaEmail(sb, msgEntry);
 
                 // finally write notification
-                File notifierSource = new File(switchboard.getRootPath(), switchboard.getConfig("htRootPath","htroot") + "/env/grafics/message.gif");
-                File notifierDest   = new File(switchboard.getConfigPath("htDocsPath", "DATA/HTDOCS"), "notifier.gif");
+                File notifierSource = new File(sb.getRootPath(), sb.getConfig("htRootPath","htroot") + "/env/grafics/message.gif");
+                File notifierDest   = new File(sb.getConfigPath("htDocsPath", "DATA/HTDOCS"), "notifier.gif");
                 try {
                     serverFileUtils.copy(notifierSource, notifierDest);
                 } catch (IOException e) {
@@ -197,14 +197,14 @@ public class BlogComments {
 
         if(hasRights && post.containsKey("delete") && post.containsKey("page") && post.containsKey("comment")) {
             if(page.removeComment((String) post.get("comment"))) {
-                switchboard.blogCommentDB.delete((String) post.get("comment"));
+                sb.blogCommentDB.delete((String) post.get("comment"));
             }
         }
 
         if(hasRights && post.containsKey("allow") && post.containsKey("page") && post.containsKey("comment")) {
-            blogBoardComments.CommentEntry entry = switchboard.blogCommentDB.read((String) post.get("comment"));
+            blogBoardComments.CommentEntry entry = sb.blogCommentDB.read((String) post.get("comment"));
             entry.allow();
-            switchboard.blogCommentDB.write(entry);
+            sb.blogCommentDB.write(entry);
         }
 
         if(post.containsKey("preview") && page.getCommentMode() != 0) {
@@ -279,7 +279,7 @@ public class BlogComments {
                             continue;
                         }
                             
-                        entry = switchboard.blogCommentDB.read(pageid);
+                        entry = sb.blogCommentDB.read(pageid);
 
                         if (commentMode == 2 && !hasRights && !entry.isAllowed())
                             continue;
@@ -338,15 +338,15 @@ public class BlogComments {
         return prop;
     }
 
-    private static void messageForwardingViaEmail(serverSwitch<?> env, messageBoard.entry msgEntry) {
+    private static void messageForwardingViaEmail(plasmaSwitchboard sb, messageBoard.entry msgEntry) {
         try {
-            if (!Boolean.valueOf(env.getConfig("msgForwardingEnabled","false")).booleanValue()) return;
+            if (!Boolean.valueOf(sb.getConfig("msgForwardingEnabled","false")).booleanValue()) return;
 
             // getting the recipient address
-            String sendMailTo = env.getConfig("msgForwardingTo","root@localhost").trim();
+            String sendMailTo = sb.getConfig("msgForwardingTo","root@localhost").trim();
 
             // getting the sendmail configuration
-            String sendMailStr = env.getConfig("msgForwardingCmd","/usr/bin/sendmail")+" "+sendMailTo;
+            String sendMailStr = sb.getConfig("msgForwardingCmd","/usr/bin/sendmail")+" "+sendMailTo;
             String[] sendMail = sendMailStr.trim().split(" ");
 
             // building the message text
@@ -355,7 +355,7 @@ public class BlogComments {
             .append(sendMailTo)
             .append("\nFrom: ")
             .append("yacy@")
-            .append(yacyCore.seedDB.mySeed().getName())
+            .append(sb.wordIndex.seedDB.mySeed().getName())
             .append("\nSubject: [YaCy] ")
             .append(msgEntry.subject().replace('\n', ' '))
             .append("\nDate: ")

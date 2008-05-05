@@ -45,6 +45,7 @@
 
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaGrafics;
+import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.ymage.ymageMatrix;
@@ -53,7 +54,8 @@ import de.anomic.ymage.ymageMatrix;
 public class NetworkPicture {
     
     public static ymageMatrix respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
-
+        plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        
         int width = 768;
         int height = 576;
         int passiveLimit = 300;
@@ -80,7 +82,7 @@ public class NetworkPicture {
         if (passiveLimit > 1000000) passiveLimit = 1000000;
         if (potentialLimit > 1000000) potentialLimit = 1000000;
         if (maxCount > 1000) maxCount = 1000;
-        return plasmaGrafics.getNetworkPicture(10000, width, height, passiveLimit, potentialLimit, maxCount, corona, env.getConfig("network.unit.name", "unspecified"), env.getConfig("network.unit.description", "unspecified"), bgcolor);
+        return plasmaGrafics.getNetworkPicture(sb.wordIndex.seedDB, 10000, width, height, passiveLimit, potentialLimit, maxCount, corona, env.getConfig("network.unit.name", "unspecified"), env.getConfig("network.unit.description", "unspecified"), bgcolor);
     }
     
 }

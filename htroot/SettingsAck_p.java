@@ -64,7 +64,6 @@ import de.anomic.http.httpdProxyHandler;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.server.serverBusyThread;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDate;
@@ -82,6 +81,7 @@ public class SettingsAck_p {
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
         // return variable that accumulates replacements
         serverObjects prop = new serverObjects();
+        plasmaSwitchboard sb = (plasmaSwitchboard) env;
         
         // get referer for backlink
         String referer = (String) header.get(httpHeader.REFERER);
@@ -234,51 +234,6 @@ public class SettingsAck_p {
             return prop;
         }
         
-        // port forwarding configuration
-        if (post.containsKey("portForwarding")) {            
-            env.setConfig("portForwarding.Enabled", post.containsKey("portForwarding.Enabled")?"true":"false");
-            env.setConfig("portForwarding.Type", (String)post.get("portForwarding.Type"));            
-            
-            env.setConfig("portForwarding.sch.UseProxy",post.containsKey("portForwarding.sch.UseProxy")?"true":"false");
-            env.setConfig("portForwarding.sch.Port",    (String)post.get("portForwarding.sch.Port"));                        
-            env.setConfig("portForwarding.sch.Host",    (String)post.get("portForwarding.sch.Host"));
-            env.setConfig("portForwarding.sch.HostPort",(String)post.get("portForwarding.sch.HostPort"));
-            env.setConfig("portForwarding.sch.HostUser",(String)post.get("portForwarding.sch.HostUser"));
-            env.setConfig("portForwarding.sch.HostPwd", (String)post.get("portForwarding.sch.HostPwd"));
-            
-            // trying to reconnect the port forwarding channel
-            try {
-                serverCore httpd = (serverCore) env.getThread("10_httpd");
-                if ((serverCore.portForwardingEnabled) && (serverCore.portForwarding != null)) {
-                    // trying to shutdown the current port forwarding channel
-                    serverCore.portForwarding.disconnect();                
-                }            
-                // trying to reinitialize the port forwarding
-                httpd.initPortForwarding();
-                
-                // notifying publishSeed Thread
-                serverBusyThread peerPing = env.getThread("30_peerping");
-                peerPing.notifyThread();
-            } catch (Exception e) {
-                prop.put("info", "23"); 
-                prop.putHTML("info_errormsg",(e.getMessage() == null) ? "unknown" : e.getMessage().replaceAll("\n","<br>"));
-                return prop;
-            }
-            
-            prop.put("info", "22"); 
-            prop.put("info_portForwarding.Enabled", post.containsKey("portForwarding.Enabled")?"on":"off");
-            prop.put("info_portForwarding.Type", (String)post.get("portForwarding.Type"));
-            
-            prop.put("info_portForwarding.sch.UseProxy",post.containsKey("portForwarding.sch.UseProxy")?"on":"off");
-            prop.put("info_portForwarding.sch.Port",    (String)post.get("portForwarding.sch.Port"));
-            prop.put("info_portForwarding.sch.Host",    (String)post.get("portForwarding.sch.Host"));
-            prop.put("info_portForwarding.sch.HostPort",(String)post.get("portForwarding.sch.HostPort"));
-            prop.put("info_portForwarding.sch.HostUser",(String)post.get("portForwarding.sch.HostUser"));
-            prop.put("info_portForwarding.sch.HostPwd", (String)post.get("portForwarding.sch.HostPwd"));   
-            return prop;
-        }
-        
-        
         // server access
         if (post.containsKey("serveraccount")) {
 
@@ -297,7 +252,7 @@ public class SettingsAck_p {
             } else {
                 serverCore.useStaticIP = true;
             }
-            yacyCore.seedDB.mySeed().put(yacySeed.IP, staticIP);
+            sb.wordIndex.seedDB.mySeed().put(yacySeed.IP, staticIP);
             env.setConfig("staticIP", staticIP);
 
             // server access data
@@ -413,7 +368,6 @@ public class SettingsAck_p {
             /* ====================================================================
              * Enabling settings
              * ==================================================================== */
-            plasmaSwitchboard sb = (plasmaSwitchboard)env;
             httpdProxyHandler.setRemoteProxyConfig(httpRemoteProxyConfig.init(sb));            
             
 //            httpdProxyHandler.remoteProxyUse = post.get("remoteProxyUse", "").equals("on");
@@ -437,7 +391,7 @@ public class SettingsAck_p {
         
         if (post.containsKey("seedUploadRetry")) {
             String error;
-            if ((error = ((plasmaSwitchboard)env).yc.saveSeedList(env)) == null) {
+            if ((error = yacyCore.saveSeedList(sb)) == null) {
                 // trying to upload the seed-list file    
                 prop.put("info", "13");
                 prop.put("info_success", "1");
@@ -468,7 +422,7 @@ public class SettingsAck_p {
                 
                 // try an upload
                 String error;
-                if ((error = ((plasmaSwitchboard)env).yc.saveSeedList(env)) == null) {
+                if ((error = yacyCore.saveSeedList(sb)) == null) {
                     // we have successfully uploaded the seed-list file
                     prop.put("info_seedUploadMethod", newSeedUploadMethod);
                     prop.putHTML("info_seedURL",newSeedURLStr);
@@ -514,7 +468,7 @@ public class SettingsAck_p {
                     // were changed, we now try to upload the seed list with the new settings
                     if (env.getConfig("seedUploadMethod","none").equalsIgnoreCase(uploaderName)) {
                         String error;
-                        if ((error = ((plasmaSwitchboard)env).yc.saveSeedList(env)) == null) {
+                        if ((error = yacyCore.saveSeedList(sb)) == null) {
                             
                             // we have successfully uploaded the seed file
                             prop.put("info", "13");

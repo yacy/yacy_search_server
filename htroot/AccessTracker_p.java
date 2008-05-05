@@ -40,7 +40,6 @@ import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 
 public class AccessTracker_p {
@@ -53,8 +52,8 @@ public class AccessTracker_p {
 		return accessClone;
 	}
 	
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> sb) {
-        plasmaSwitchboard switchboard = (plasmaSwitchboard) sb;
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
+        plasmaSwitchboard sb = (plasmaSwitchboard) env;
      
         // return variable that accumulates replacements
         serverObjects prop = new serverObjects();
@@ -66,14 +65,14 @@ public class AccessTracker_p {
         int maxCount = 1000;
         boolean dark = true;
         if (page == 0) {
-            Iterator<String> i = switchboard.accessHosts();
+            Iterator<String> i = sb.accessHosts();
             String host;
             TreeMap<Long, String> access;
             int entCount = 0;
             try {
             while ((entCount < maxCount) && (i.hasNext())) {
                 host = (String) i.next();
-                access = switchboard.accessTrack(host);
+                access = sb.accessTrack(host);
                 prop.putHTML("page_list_" + entCount + "_host", host);
                 prop.putNum("page_list_" + entCount + "_countSecond", access.tailMap(new Long(System.currentTimeMillis() - 1000)).size());
                 prop.putNum("page_list_" + entCount + "_countMinute", access.tailMap(new Long(System.currentTimeMillis() - 1000 * 60)).size());
@@ -91,7 +90,7 @@ public class AccessTracker_p {
             TreeMap<Long, String> access;
             Map.Entry<Long, String> entry;
             if (host.length() > 0) {
-				access = switchboard.accessTrack(host);
+				access = sb.accessTrack(host);
 				if (access != null) {
 					try {
 						Iterator<Map.Entry<Long, String>> ii = treemapclone(access).entrySet().iterator();
@@ -106,10 +105,10 @@ public class AccessTracker_p {
 				}
 			} else {
                 try {
-                	Iterator<String> i = switchboard.accessHosts();
+                	Iterator<String> i = sb.accessHosts();
                     while ((entCount < maxCount) && (i.hasNext())) {
 						host = (String) i.next();
-						access = switchboard.accessTrack(host);
+						access = sb.accessTrack(host);
 						Iterator<Map.Entry<Long, String>> ii = treemapclone(access).entrySet().iterator();
 						while (ii.hasNext()) {
 							entry = ii.next();
@@ -125,7 +124,7 @@ public class AccessTracker_p {
             prop.put("page_num", entCount);
         }
         if ((page == 2) || (page == 4)) {
-            ArrayList<plasmaSearchQuery> array = (page == 2) ? switchboard.localSearches : switchboard.remoteSearches;
+            ArrayList<plasmaSearchQuery> array = (page == 2) ? sb.localSearches : sb.remoteSearches;
             plasmaSearchQuery searchProfile;
             int m = Math.min(maxCount, array.size());
             long qcountSum = 0;
@@ -173,10 +172,10 @@ public class AccessTracker_p {
             prop.putNum("page_urltime_avg", (double) utimeSum / m);
             prop.putNum("page_snippettime_avg", (double) stimeSum / m);
             prop.putNum("page_resulttime_avg", (double) rtimeSum / m);
-            prop.putNum("page_total", (page == 2) ? switchboard.localSearches.size() : switchboard.remoteSearches.size());
+            prop.putNum("page_total", (page == 2) ? sb.localSearches.size() : sb.remoteSearches.size());
         }
         if ((page == 3) || (page == 5)) {
-            Iterator<Entry<String, TreeSet<Long>>> i = (page == 3) ? switchboard.localSearchTracker.entrySet().iterator() : switchboard.remoteSearchTracker.entrySet().iterator();
+            Iterator<Entry<String, TreeSet<Long>>> i = (page == 3) ? sb.localSearchTracker.entrySet().iterator() : sb.remoteSearchTracker.entrySet().iterator();
             String host;
             TreeSet<Long> handles;
             int entCount = 0;
@@ -204,7 +203,7 @@ public class AccessTracker_p {
                 prop.put("page_list_" + entCount + "_dark", ((dark) ? 1 : 0) ); dark =! dark;
                 prop.putHTML("page_list_" + entCount + "_host", host);
                 if (page == 5) {
-                    yacySeed remotepeer = yacyCore.seedDB.lookupByIP(natLib.getInetAddress(host), true, true, true);
+                    yacySeed remotepeer = sb.wordIndex.seedDB.lookupByIP(natLib.getInetAddress(host), true, true, true);
                     prop.putHTML("page_list_" + entCount + "_peername", (remotepeer == null) ? "UNKNOWN" : remotepeer.getName());
                 }
                 prop.putNum("page_list_" + entCount + "_count", handles.size());
@@ -215,7 +214,7 @@ public class AccessTracker_p {
             } catch (ConcurrentModificationException e) {} // we dont want to synchronize this
             prop.put("page_list", entCount);
             prop.putNum("page_num", entCount);
-            prop.putNum("page_total", (page == 3) ? switchboard.localSearches.size() : switchboard.remoteSearches.size());
+            prop.putNum("page_total", (page == 3) ? sb.localSearches.size() : sb.remoteSearches.size());
             prop.putNum("page_qph_sum", qphSum);
         }
         // return rewrite properties

@@ -63,7 +63,6 @@ import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.tools.nxTools;
-import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyURL;
 
@@ -77,6 +76,7 @@ public class sharedBlacklist_p {
     public static final int STATUS_WRONG_INVOCATION = 5;
     
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
+        plasmaSwitchboard sb = (plasmaSwitchboard) env;
         // return variable that accumulates replacements
         serverObjects prop = new serverObjects();
 
@@ -104,8 +104,8 @@ public class sharedBlacklist_p {
                 
                 // generate the download URL
                 String downloadURL = null;
-                if( yacyCore.seedDB != null ){ //no nullpointer error..
-                    yacySeed seed = yacyCore.seedDB.getConnected(Hash); 
+                if( sb.wordIndex.seedDB != null ){ //no nullpointer error..
+                    yacySeed seed = sb.wordIndex.seedDB.getConnected(Hash); 
                     if (seed != null) {
                         String IP = seed.get(yacySeed.IP, "127.0.0.1"); 
                         String Port = seed.get(yacySeed.PORT, "8080");

@@ -58,7 +58,6 @@ import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 
 public class Messages_p {
@@ -71,22 +70,22 @@ public class Messages_p {
     }
 
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
-        plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
+        plasmaSwitchboard sb = (plasmaSwitchboard) env;
         serverObjects prop = new serverObjects();
 
         // set peer address / name
-        final String peerAddress = yacyCore.seedDB.mySeed().getPublicAddress();
-        final String peerName = yacyCore.seedDB.mySeed().getName();
+        final String peerAddress = sb.wordIndex.seedDB.mySeed().getPublicAddress();
+        final String peerName = sb.wordIndex.seedDB.mySeed().getName();
         prop.put("peerAddress", peerAddress);
         prop.putHTML("peerName", peerName, true);
 
         // List known hosts for message sending (from Blacklist_p.java)
-        if (yacyCore.seedDB != null && yacyCore.seedDB.sizeConnected() > 0) {
+        if (sb.wordIndex.seedDB != null && sb.wordIndex.seedDB.sizeConnected() > 0) {
             prop.put("peersKnown", "1");
             int peerCount = 0;
             try {
                 TreeMap<String, String> hostList = new TreeMap<String, String>();
-                final Iterator<yacySeed> e = yacyCore.seedDB.seedsConnected(true, false, null, (float) 0.0);
+                final Iterator<yacySeed> e = sb.wordIndex.seedDB.seedsConnected(true, false, null, (float) 0.0);
                 while (e.hasNext()) {
                     yacySeed seed = e.next();
                     if (seed != null) hostList.put(seed.get(yacySeed.NAME, "nameless"),seed.hash);
@@ -113,8 +112,8 @@ public class Messages_p {
         messageBoard.entry message;
 
         // first reset notification
-        File notifierSource = new File(switchboard.getRootPath(), switchboard.getConfig("htRootPath", "htroot") + "/env/grafics/empty.gif");
-        File notifierDest = new File(switchboard.getConfigPath("htDocsPath", "DATA/HTDOCS"), "notifier.gif");
+        File notifierSource = new File(sb.getRootPath(), sb.getConfig("htRootPath", "htroot") + "/env/grafics/empty.gif");
+        File notifierDest = new File(sb.getConfigPath("htDocsPath", "DATA/HTDOCS"), "notifier.gif");
         try {
             serverFileUtils.copy(notifierSource, notifierDest);
         } catch (IOException e) {
@@ -122,21 +121,21 @@ public class Messages_p {
 
         if (action.equals("delete")) {
             String key = post.get("object", "");
-            switchboard.messageDB.remove(key);
+            sb.messageDB.remove(key);
             action = "list";
         }
 
         if (action.equals("list")) {
             prop.put("mode", "0"); //list
             try {
-                Iterator<String> i = switchboard.messageDB.keys(null, true);
+                Iterator<String> i = sb.messageDB.keys(null, true);
                 String key;
 
                 boolean dark = true;
                 int count=0;
                 while (i.hasNext()) {
                     key = i.next();
-                    message = switchboard.messageDB.read(key);
+                    message = sb.messageDB.read(key);
                     prop.put("mode_messages_"+count+"_dark", ((dark) ? "1" : "0") );
                     prop.put("mode_messages_"+count+"_date", dateString(message.date()));
                     prop.putHTML("mode_messages_"+count+"_from", message.author(), true);
@@ -174,7 +173,7 @@ public class Messages_p {
         if (action.equals("view")) {
             prop.put("mode", "1"); //view
             String key = post.get("object", "");
-            message = switchboard.messageDB.read(key);
+            message = sb.messageDB.read(key);
             if (message == null) throw new NullPointerException("Message with ID " + key + " does not exist");
 
             prop.putHTML("mode_from", message.author(), true);

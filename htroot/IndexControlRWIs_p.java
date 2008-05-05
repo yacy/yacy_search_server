@@ -50,7 +50,6 @@ import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyClient;
-import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyURL;
 
@@ -174,14 +173,14 @@ public class IndexControlRWIs_p {
                 if (host.length() != 0) {
                     if (host.length() == 12) {
                         // the host string is a peer hash
-                        seed = yacyCore.seedDB.getConnected(host);
+                        seed = sb.wordIndex.seedDB.getConnected(host);
                     } else {
                         // the host string can be a host name
-                        seed = yacyCore.seedDB.lookupByName(host);
+                        seed = sb.wordIndex.seedDB.lookupByName(host);
                     }
                 } else {
                     host = post.get("hostHash", ""); // if input field is empty, get from select box
-                    seed = yacyCore.seedDB.getConnected(host);
+                    seed = sb.wordIndex.seedDB.getConnected(host);
                 }
                 
                 // prepare index
@@ -210,6 +209,7 @@ public class IndexControlRWIs_p {
                 String gzipBody = sb.getConfig("indexControl.gzipBody","false");
                 int timeout = (int) sb.getConfigLong("indexControl.timeout",60000);
                 HashMap<String, Object> resultObj = yacyClient.transferIndex(
+                             sb.wordIndex.seedDB,
                              seed,
                              new indexContainer[]{index},
                              knownURLs,

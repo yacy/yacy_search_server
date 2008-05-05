@@ -92,7 +92,7 @@ public final class message {
 
         String youare = post.get("youare", ""); // seed hash of the target peer, needed for network stability
         // check if we are the right target and requester has correct information about this peer
-        if ((yacyCore.seedDB.mySeed() == null) || (!(yacyCore.seedDB.mySeed().hash.equals(youare)))) {
+        if ((sb.wordIndex.seedDB.mySeed() == null) || (!(sb.wordIndex.seedDB.mySeed().hash.equals(youare)))) {
             // this request has a wrong target
             prop.put("response", "-1"); // request rejected
             return prop;
@@ -152,10 +152,10 @@ public final class message {
             sb.messageDB.write(msgEntry = sb.messageDB.newEntry(
                     "remote",
                     otherSeed.get(yacySeed.NAME, "anonymous"), otherSeed.hash,
-                    yacyCore.seedDB.mySeed().getName(), yacyCore.seedDB.mySeed().hash,
+                    sb.wordIndex.seedDB.mySeed().getName(), sb.wordIndex.seedDB.mySeed().hash,
                     subject, mb));
 
-            messageForwardingViaEmail(env, msgEntry);
+            messageForwardingViaEmail(sb, msgEntry);
 
             // finally write notification
             File notifierSource = new File(sb.getRootPath(), sb.getConfig("htRootPath","htroot") + "/env/grafics/message.gif");
@@ -181,15 +181,15 @@ public final class message {
 
      #[message]#
      */
-    private static void messageForwardingViaEmail(serverSwitch<?> env, messageBoard.entry msgEntry) {
+    private static void messageForwardingViaEmail(plasmaSwitchboard sb, messageBoard.entry msgEntry) {
         try {
-            if (!Boolean.valueOf(env.getConfig("msgForwardingEnabled","false")).booleanValue()) return;
+            if (!Boolean.valueOf(sb.getConfig("msgForwardingEnabled","false")).booleanValue()) return;
 
             // getting the recipient address
-            String sendMailTo = env.getConfig("msgForwardingTo","root@localhost").trim();
+            String sendMailTo = sb.getConfig("msgForwardingTo","root@localhost").trim();
 			
             // getting the sendmail configuration
-            String sendMailStr = env.getConfig("msgForwardingCmd","/usr/bin/sendmail")+" "+sendMailTo;
+            String sendMailStr = sb.getConfig("msgForwardingCmd","/usr/bin/sendmail")+" "+sendMailTo;
             String[] sendMail = sendMailStr.trim().split(" ");
 
             // building the message text
@@ -198,7 +198,7 @@ public final class message {
             .append(sendMailTo)
             .append("\nFrom: ")
             .append("yacy@")
-            .append(yacyCore.seedDB.mySeed().getName())
+            .append(sb.wordIndex.seedDB.mySeed().getName())
             .append("\nSubject: [YaCy] ")
             .append(msgEntry.subject().replace('\n', ' '))
             .append("\nDate: ")

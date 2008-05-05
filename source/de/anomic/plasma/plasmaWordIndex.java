@@ -63,6 +63,7 @@ import de.anomic.xml.RSSFeed;
 import de.anomic.xml.RSSMessage;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyDHTAction;
+import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyURL;
 
@@ -79,8 +80,12 @@ public final class plasmaWordIndex implements indexRI {
     private final indexCollectionRI        collections;          // new database structure to replace AssortmentCluster and FileCluster
     private       serverLog                log;
     final         indexRepositoryReference referenceURL;
+    public        yacySeedDB               seedDB;
+    public        yacyNewsPool             newsPool;
     
-    public plasmaWordIndex(File indexPrimaryRoot, File indexSecondaryRoot, String networkName, serverLog log) {
+    
+    
+    public plasmaWordIndex(String networkName, serverLog log, File indexPrimaryRoot, File indexSecondaryRoot) {
         this.log = log;
         File indexPrimaryPath = new File(indexPrimaryRoot, networkName);
         File indexPrimaryTextLocation = new File(indexPrimaryPath, "TEXT");
@@ -113,6 +118,22 @@ public final class plasmaWordIndex implements indexRI {
         // create LURL-db
         referenceURL = new indexRepositoryReference(indexSecondaryRoot, networkName);
         
+        // create or init seed cache
+        File networkRoot = new File(indexPrimaryPath, "NETWORK");
+        networkRoot.mkdirs();
+        File mySeedFile = new File(networkRoot, "mySeed.txt");
+        File oldSeedFile = new File(new File(indexPrimaryRoot.getParentFile(), "YACYDB"), "mySeed.txt");
+        if (oldSeedFile.exists()) oldSeedFile.renameTo(mySeedFile);
+        seedDB = new yacySeedDB(
+                new File(networkRoot, "seed.new.db"),
+                new File(networkRoot, "seed.old.db"),
+                new File(networkRoot, "seed.pot.db"),
+                mySeedFile
+                );
+
+        // create or init news database
+        newsPool = new yacyNewsPool(networkRoot);
+
     }
 
     public void putURL(indexURLReference entry) throws IOException {
@@ -236,7 +257,7 @@ public final class plasmaWordIndex implements indexRI {
 
     public void addEntry(String wordHash, indexRWIRowEntry entry, long updateTime, boolean dhtInCase) {
         // set dhtInCase depending on wordHash
-        if ((!dhtInCase) && (yacyDHTAction.shallBeOwnWord(wordHash))) dhtInCase = true;
+        if ((!dhtInCase) && (yacyDHTAction.shallBeOwnWord(seedDB, wordHash))) dhtInCase = true;
         
         // add the entry
         if (dhtInCase) {
@@ -256,7 +277,7 @@ public final class plasmaWordIndex implements indexRI {
         assert (entries.row().objectsize == indexRWIRowEntry.urlEntryRow.objectsize);
         
         // set dhtInCase depending on wordHash
-        if ((!dhtInCase) && (yacyDHTAction.shallBeOwnWord(entries.getWordHash()))) dhtInCase = true;
+        if ((!dhtInCase) && (yacyDHTAction.shallBeOwnWord(seedDB, entries.getWordHash()))) dhtInCase = true;
         
         // add the entry
         if (dhtInCase) {
@@ -508,8 +529,10 @@ public final class plasmaWordIndex implements indexRI {
         dhtOutCache.close();
         collections.close();
         referenceURL.close();
+        seedDB.close();
+        newsPool.close();
     }
-
+    
     public indexContainer deleteContainer(String wordHash) {
         indexContainer c = new indexContainer(
                 wordHash,

@@ -51,7 +51,6 @@ import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNetwork;
 
 public final class query {
@@ -88,7 +87,7 @@ public final class query {
         prop.put("mytime", serverDate.formatShortSecond());
 
         // check if we are the right target and requester has correct information about this peer
-        if (yacyCore.seedDB.mySeed() == null || !yacyCore.seedDB.mySeed().hash.equals(youare)) {
+        if (sb.wordIndex.seedDB.mySeed() == null || !sb.wordIndex.seedDB.mySeed().hash.equals(youare)) {
             // this request has a wrong target
             prop.put("response", "-1"); // request rejected
             return prop;

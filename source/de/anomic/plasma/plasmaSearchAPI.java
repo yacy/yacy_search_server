@@ -72,20 +72,16 @@ public class plasmaSearchAPI {
         yacySeed seed;
         int hc = 0;
         prop.put("searchresult_keyhash", startHash);
-        if (yacyCore.seedDB != null && yacyCore.seedDB.sizeConnected() > 0) {
-            Iterator<yacySeed> e = yacyCore.dhtAgent.getAcceptRemoteIndexSeeds(startHash);
-            while (e.hasNext()) {
-                seed = (yacySeed) e.next();
-                if (seed != null) {
-                    prop.put("searchresult_hosts_" + hc + "_hosthash", seed.hash);
-                    prop.putHTML("searchresult_hosts_" + hc + "_hostname", seed.hash + " " + seed.get(yacySeed.NAME, "nameless"));
-                    hc++;
-                }
+        Iterator<yacySeed> e = yacyCore.dhtAgent.getAcceptRemoteIndexSeeds(startHash);
+        while (e.hasNext()) {
+            seed = (yacySeed) e.next();
+            if (seed != null) {
+                prop.put("searchresult_hosts_" + hc + "_hosthash", seed.hash);
+                prop.putHTML("searchresult_hosts_" + hc + "_hostname", seed.hash + " " + seed.get(yacySeed.NAME, "nameless"));
+                hc++;
             }
-            prop.put("searchresult_hosts", hc);
-        } else {
-            prop.put("searchresult_hosts", "0");
         }
+        prop.put("searchresult_hosts", hc);
     }
 
     public static plasmaSearchRankingProcess genSearchresult(serverObjects prop, plasmaSwitchboard sb, String keyhash, kelondroBitfield filter) {

@@ -54,15 +54,15 @@ import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.servletProperties;
-import de.anomic.yacy.yacyCore;
 
 public class ConfigRobotsTxt_p {
     
     public static servletProperties respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
+        plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final servletProperties prop = new servletProperties();
         
         httpdRobotsTxtConfig rbc = ((plasmaSwitchboard)env).robotstxtConfig;
-        prop.put("clientname", yacyCore.seedDB.mySeed().getPublicAddress());
+        prop.put("clientname", sb.wordIndex.seedDB.mySeed().getPublicAddress());
         
         if (post != null) {
             if (post.containsKey("save")) {

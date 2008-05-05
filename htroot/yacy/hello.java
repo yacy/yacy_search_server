@@ -144,7 +144,7 @@ public final class hello {
         	boolean isNotLocal = true;
         	
         	// we are only allowed to connect to the client IP address if it's not our own address
-        	if (serverCore.portForwardingEnabled || serverCore.useStaticIP) {
+        	if (serverCore.useStaticIP) {
         		isNotLocal = !ias.isSiteLocalAddress();
             }
         	if (isNotLocal) {
@@ -194,15 +194,15 @@ public final class hello {
         serverCore.checkInterruption();
         final StringBuffer seeds = new StringBuffer(768);
         // attach some more seeds, as requested
-        if ((yacyCore.seedDB != null) && (yacyCore.seedDB.sizeConnected() > 0)) {
-            if (count > yacyCore.seedDB.sizeConnected()) { count = yacyCore.seedDB.sizeConnected(); }
+        if ((sb.wordIndex.seedDB != null) && (sb.wordIndex.seedDB.sizeConnected() > 0)) {
+            if (count > sb.wordIndex.seedDB.sizeConnected()) { count = sb.wordIndex.seedDB.sizeConnected(); }
             if (count > 100) { count = 100; }
             
             // latest seeds
-            final Map<String, yacySeed> ySeeds = yacyCore.seedDB.seedsByAge(true, count); // peerhash/yacySeed relation
+            final Map<String, yacySeed> ySeeds = sb.wordIndex.seedDB.seedsByAge(true, count); // peerhash/yacySeed relation
             
             // attach also my own seed
-            seeds.append("seed0=").append(yacyCore.seedDB.mySeed().genSeedStr(key)).append(serverCore.CRLF_STRING);
+            seeds.append("seed0=").append(sb.wordIndex.seedDB.mySeed().genSeedStr(key)).append(serverCore.CRLF_STRING);
             count = 1;            
             
             // attach other seeds
@@ -222,7 +222,7 @@ public final class hello {
             }
         } else {
             // attach also my own seed
-            seeds.append("seed0=").append(yacyCore.seedDB.mySeed().genSeedStr(key)).append(serverCore.CRLF_STRING);
+            seeds.append("seed0=").append(sb.wordIndex.seedDB.mySeed().genSeedStr(key)).append(serverCore.CRLF_STRING);
         }
 
         prop.put("seedlist", seeds.toString());

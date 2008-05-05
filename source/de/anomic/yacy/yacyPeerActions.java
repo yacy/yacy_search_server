@@ -91,11 +91,7 @@ public class yacyPeerActions {
             sb.setConfig("peerName", yacySeed.makeDefaultPeerName());
         }
         seedDB.mySeed().put(yacySeed.NAME, sb.getConfig("peerName", "nameless"));
-        if ((serverCore.portForwardingEnabled) && (serverCore.portForwarding != null)) {
-            seedDB.mySeed().put(yacySeed.PORT, Integer.toString(serverCore.portForwarding.getPort()));
-        } else {
-            seedDB.mySeed().put(yacySeed.PORT, Integer.toString(serverCore.getPortNr(sb.getConfig("port", "8080"))));
-        }
+        seedDB.mySeed().put(yacySeed.PORT, Integer.toString(serverCore.getPortNr(sb.getConfig("port", "8080"))));
         
         long uptime = (System.currentTimeMillis() - serverCore.startupTime) / 1000;
 		long uptimediff = uptime - sb.lastseedcheckuptime;

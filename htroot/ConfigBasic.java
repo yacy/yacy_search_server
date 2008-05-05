@@ -62,7 +62,6 @@ import de.anomic.server.serverDomains;
 import de.anomic.server.serverInstantBusyThread;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 
 public class ConfigBasic {
@@ -76,7 +75,6 @@ public class ConfigBasic {
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
         
         // return variable that accumulates replacements
-        ConfigBasic config = new ConfigBasic();
         plasmaSwitchboard sb = (plasmaSwitchboard) env;
         serverObjects prop = new serverObjects();
         String langPath = env.getConfigPath("locale.work", "DATA/LOCALE/locales").getAbsolutePath();
@@ -89,45 +87,14 @@ public class ConfigBasic {
             return prop;
         }
         
-        // reconfigure port forwarding
-        if ((post != null)) config.reinitPortForwarding(post, env);
-        
         // starting a peer ping
         
         //boolean doPeerPing = false;
-        if ((yacyCore.seedDB.mySeed().isVirgin()) || (yacyCore.seedDB.mySeed().isJunior())) {
+        if ((sb.wordIndex.seedDB.mySeed().isVirgin()) || (sb.wordIndex.seedDB.mySeed().isJunior())) {
             serverInstantBusyThread.oneTimeJob(sb.yc, "peerPing", null, 0);
             //doPeerPing = true;
         }
         
-        // scan for Upnp routers
-        /*
-        long begin = System.currentTimeMillis();
-        boolean upnpRouterFound = false;
-        if (yacyCore.seedDB.mySeed.isVirgin() || yacyCore.seedDB.mySeed.isJunior()) {
-        	upnpRouterFound = config.findUPnPRouter(3000);
-        }
-        long end = System.currentTimeMillis();
-        
-        // if the upnp router scan has taken less than 3 sec, we need to wait
-        // a little bit for success of peer ping
-        if ((doPeerPing) && ((end - begin) < 3000 )) {
-            try {Thread.sleep(3000-(end - begin));} catch (InterruptedException e) {/* *///} 
-        /*}
-        
-        // if a UPnP router is available
-        String currentForwarder = env.getConfig("portForwarding.Type", "none");
-        boolean forwardingEnabled = env.getConfigBool("portForwarding.Enabled",false);
-        boolean otherForwarderEnabled = serverCore.portForwardingEnabled && serverCore.portForwarding != null && !currentForwarder.equalsIgnoreCase("upnp");
-        if (otherForwarderEnabled) {
-            prop.put("upnp",0); 
-        } else {
-            prop.put("upnp", upnpRouterFound ? 1 : 0);
-        }
-        
-        // if UPnp is already enabled
-        prop.put("upnp_enabled", currentForwarder.equalsIgnoreCase("upnp") && forwardingEnabled ? 1 : 0);
-        */
         // language settings
         if ((post != null) && (!(post.get("language", "default").equals(lang)))) {
             translator.changeLang(env, langPath, post.get("language", "default") + ".lng");
@@ -158,7 +125,7 @@ public class ConfigBasic {
         }
 
         // check if peer name already exists
-        yacySeed oldSeed = yacyCore.seedDB.lookupByName(peerName);
+        yacySeed oldSeed = sb.wordIndex.seedDB.lookupByName(peerName);
         if ((oldSeed == null) && (!(env.getConfig("peerName", "").equals(peerName)))) {
             // the name is new
         	boolean nameOK = Pattern.compile("[A-Za-z0-9\\-_]{3,80}").matcher(peerName).matches();
@@ -201,7 +168,7 @@ public class ConfigBasic {
         // check if values are proper
         boolean properPW = (env.getConfig("adminAccount", "").length() == 0) && (env.getConfig(httpd.ADMIN_ACCOUNT_B64MD5, "").length() > 0);
         boolean properName = (env.getConfig("peerName","").length() >= 3) && (!(yacySeed.isDefaultPeerName(env.getConfig("peerName",""))));
-        boolean properPort = (yacyCore.seedDB.mySeed().isSenior()) || (yacyCore.seedDB.mySeed().isPrincipal());
+        boolean properPort = (sb.wordIndex.seedDB.mySeed().isSenior()) || (sb.wordIndex.seedDB.mySeed().isPrincipal());
         
         if ((properPW) && (env.getConfig("defaultFiles", "").startsWith("ConfigBasic.html,"))) {
         	    env.setConfig("defaultFiles", env.getConfig("defaultFiles", "").substring(17));
@@ -239,81 +206,5 @@ public class ConfigBasic {
             prop.put("langEnglish", "0");
         }
         return prop;
-    }
-    /*
-    private boolean findUPnPRouter(int timeout) {
-        
-        // determine if the upnp port forwarding class is available and load it dynamically
-        Object[] UpnpForwarder = this.getUpnpForwarderClasses();
-        serverPortForwarding upnp = (serverPortForwarding) UpnpForwarder[0];
-        Method scanForRouter = (Method) UpnpForwarder[1];
-        if ((upnp == null) || (scanForRouter == null)) return false; 
-        
-        // trying to find a upnp router
-        try {
-            Object result = scanForRouter.invoke(upnp, new Object[]{new Integer(timeout)});
-            if ((result != null)&&(result instanceof Boolean)) {
-                return ((Boolean)result).booleanValue();
-            }
-        } catch (Exception e) {  // ignore this error
-        } catch (Error e)     {} // ignore this error
-        return false;
-    }
-    
-    private Object[] getUpnpForwarderClasses() {
-        serverPortForwarding upnp = null;
-        Method scanForRouter = null;
-        
-        try {
-            
-            // trying to load the upnp forwarder class
-            Class forwarderClass = Class.forName("de.anomic.server.portForwarding.upnp.serverPortForwardingUpnp");
-            // create a new instance 
-            upnp = (serverPortForwarding) forwarderClass.newInstance();
-            // trying to get the proper method for router scanning
-            scanForRouter = upnp.getClass().getMethod("routerAvailable", new Class[] {int.class});
-            
-        } catch (Exception e) {  // ignore this error
-        } catch (Error e)     {} // ignore this error
-
-        return new Object[]{upnp,scanForRouter};
-    }
-    */
-    private void reinitPortForwarding(serverObjects post, serverSwitch<?> env) {
-        if ((post != null)) {
-            try {
-                boolean reinitPortForwarding = false;
-                
-                if (post.containsKey("enableUpnp")) {
-                    // upnp should be enabled
-                    env.setConfig("portForwarding.Enabled","true");
-                    env.setConfig("portForwarding.Type", "upnp");
-                    reinitPortForwarding = true;
-                } else {
-                    String currentForwarder = env.getConfig("portForwarding.Type", "none");
-                    boolean otherForwarderEnabled = serverCore.portForwardingEnabled && serverCore.portForwarding != null && !currentForwarder.equalsIgnoreCase("upnp");
-                    
-                    // if no other forwarder is running we deactivate forwarding
-                    // and try to stop an eventually running upnp forwarder
-                    if (!otherForwarderEnabled) {
-                        env.setConfig("portForwarding.Enabled","false");
-                        env.setConfig("portForwarding.Type", "none");
-                        reinitPortForwarding = true;
-                    }
-                }
-                
-                if (reinitPortForwarding) {
-                    if ((serverCore.portForwardingEnabled) && (serverCore.portForwarding != null)) {
-                        // trying to shutdown the current port forwarding channel
-                        serverCore.portForwarding.disconnect();
-                    }
-                    
-                    // trying to reinitialize the port forwarding
-                    serverCore httpd = (serverCore) env.getThread("10_httpd");
-                    httpd.initPortForwarding();
-                }
-                
-            } catch (Exception e) { /* */ }
-        }
     }
 }

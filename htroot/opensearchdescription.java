@@ -25,15 +25,15 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import de.anomic.http.httpHeader;
+import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyCore;
 
 public class opensearchdescription {
 
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
-
+        plasmaSwitchboard sb = (plasmaSwitchboard) env;
         // generate message content for open search description
         String promoteSearchPageGreeting = env.getConfig("promoteSearchPageGreeting", "");
         if (env.getConfigBool("promoteSearchPageGreeting.useNetworkName", false)) promoteSearchPageGreeting = env.getConfig("network.unit.description", "");
@@ -45,7 +45,7 @@ public class opensearchdescription {
         final serverObjects prop = new serverObjects();
         prop.putHTML("thisaddress", thisaddress, true);
         prop.putHTML("SearchPageGreeting", promoteSearchPageGreeting, true);
-        prop.putHTML("clientname", yacyCore.seedDB.mySeed().getName(), true);
+        prop.putHTML("clientname", sb.wordIndex.seedDB.mySeed().getName(), true);
         
         // return rewrite properties
         return prop;

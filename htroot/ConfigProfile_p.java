@@ -55,16 +55,16 @@ import java.io.IOException;
 import java.util.Properties;
 
 import de.anomic.http.httpHeader;
+import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacyNewsRecord;
 
 public class ConfigProfile_p {
 
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
-        //listManager.switchboard = (plasmaSwitchboard) env;
+        plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final serverObjects prop = new serverObjects();
         final Properties profile = new Properties();
         FileInputStream fileIn = null;
@@ -113,7 +113,7 @@ public class ConfigProfile_p {
                 // generate a news message
                 Properties news = profile;
                 news.remove("comment");
-                yacyCore.newsPool.publishMyNews(yacyNewsRecord.newRecord(yacyNewsPool.CATEGORY_PROFILE_UPDATE, news));
+                sb.wordIndex.newsPool.publishMyNews(yacyNewsRecord.newRecord(sb.wordIndex.seedDB.mySeed(), yacyNewsPool.CATEGORY_PROFILE_UPDATE, news));
                 //yacyCore.newsPool.publishMyNews(new yacyNewsRecord(yacyNewsRecord.CATEGORY_PROFILE_UPDATE, profile));
             } catch(IOException e) {
             } finally {

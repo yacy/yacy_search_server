@@ -68,7 +68,6 @@ import de.anomic.server.serverProfiling;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.yFormatter;
-import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacyNewsRecord;
 import de.anomic.yacy.yacyURL;
@@ -208,7 +207,7 @@ public class yacysearch {
                 map.put("urlhash", delHash);
                 map.put("vote", "negative");
                 map.put("refid", "");
-                yacyCore.newsPool.publishMyNews(yacyNewsRecord.newRecord(yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, map));
+                sb.wordIndex.newsPool.publishMyNews(yacyNewsRecord.newRecord(sb.wordIndex.seedDB.mySeed(), yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, map));
             }
 
             // if a plus-button was hit, create new voting message
@@ -231,14 +230,14 @@ public class yacysearch {
                         map.put("description", ((document == null) ? comp.dc_title() : document.dc_title()).replace(',', ' '));
                         map.put("author", ((document == null) ? "" : document.dc_creator()));
                         map.put("tags", ((document == null) ? "" : document.dc_subject(' ')));
-                        yacyCore.newsPool.publishMyNews(yacyNewsRecord.newRecord(yacyNewsPool.CATEGORY_SURFTIPP_ADD, map));
+                        sb.wordIndex.newsPool.publishMyNews(yacyNewsRecord.newRecord(sb.wordIndex.seedDB.mySeed(), yacyNewsPool.CATEGORY_SURFTIPP_ADD, map));
                         document.close();
                     }
                 }
             }
 
             // prepare search properties
-            final boolean yacyonline = ((yacyCore.seedDB != null) && (yacyCore.seedDB.mySeed() != null) && (yacyCore.seedDB.mySeed().getPublicAddress() != null));
+            final boolean yacyonline = ((sb.wordIndex.seedDB != null) && (sb.wordIndex.seedDB.mySeed() != null) && (sb.wordIndex.seedDB.mySeed().getPublicAddress() != null));
             final boolean globalsearch = (global) && (yacyonline) && (sb.getConfigBool(plasmaSwitchboard.INDEX_RECEIVE_ALLOW, false));
         
             // do the search

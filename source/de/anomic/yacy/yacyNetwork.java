@@ -71,14 +71,14 @@ public class yacyNetwork {
 		return false;
 	}
 	
-	public static final List<Part> basicRequestPost(serverSwitch<?> env, String targetHash, String salt) {
+	public static final List<Part> basicRequestPost(plasmaSwitchboard sb, String targetHash, String salt) {
         // put in all the essentials for routing and network authentification
 		// generate a session key
         ArrayList<Part> post = new ArrayList<Part>();
         post.add(new StringPart("key", salt));
         
         // just standard identification essentials
-		post.add(new StringPart("iam", yacyCore.seedDB.mySeed().hash));
+		post.add(new StringPart("iam", sb.wordIndex.seedDB.mySeed().hash));
 		if (targetHash != null) post.add(new StringPart("youare", targetHash));
         
         // time information for synchronization
@@ -89,13 +89,13 @@ public class yacyNetwork {
         post.add(new StringPart("network.unit.name", plasmaSwitchboard.getSwitchboard().getConfig("network.unit.name", yacySeed.DFLT_NETWORK_UNIT)));
 
         // authentification essentials
-        String authentificationControl = env.getConfig("network.unit.protocol.control", "uncontrolled");
-        String authentificationMethod = env.getConfig("network.unit.protocol.request.authentification.method", "");
+        String authentificationControl = sb.getConfig("network.unit.protocol.control", "uncontrolled");
+        String authentificationMethod = sb.getConfig("network.unit.protocol.request.authentification.method", "");
         if ((authentificationControl.equals("controlled")) && (authentificationMethod.length() > 0)) {
             if (authentificationMethod.equals("salted-magic-sim")) {
                 // generate an authentification essential using the salt, the iam-hash and the network magic
-                String magic = env.getConfig("network.unit.protocol.request.authentification.essentials", "");
-                String md5 = serverCodings.encodeMD5Hex(salt + yacyCore.seedDB.mySeed().hash + magic);
+                String magic = sb.getConfig("network.unit.protocol.request.authentification.essentials", "");
+                String md5 = serverCodings.encodeMD5Hex(salt + sb.wordIndex.seedDB.mySeed().hash + magic);
                 post.add(new StringPart("magicmd5", md5));
             }
         }        

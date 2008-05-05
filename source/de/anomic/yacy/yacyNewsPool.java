@@ -265,11 +265,11 @@ public class yacyNewsPool {
     
     
     public yacyNewsPool(File yacyDBPath) {
-        newsDB = new yacyNewsDB(new File(yacyDBPath, "news2.db"));
-        outgoingNews  = new yacyNewsQueue(new File(yacyDBPath, "newsOut1.stack"), newsDB);
-        publishedNews = new yacyNewsQueue(new File(yacyDBPath, "newsPublished1.stack"), newsDB);
-        incomingNews  = new yacyNewsQueue(new File(yacyDBPath, "newsIn1.stack"), newsDB);
-        processedNews = new yacyNewsQueue(new File(yacyDBPath, "newsProcessed1.stack"), newsDB);
+        newsDB = new yacyNewsDB(new File(yacyDBPath, "news.db"));
+        outgoingNews  = new yacyNewsQueue(new File(yacyDBPath, "newsOut.stack"), newsDB);
+        publishedNews = new yacyNewsQueue(new File(yacyDBPath, "newsPublished.stack"), newsDB);
+        incomingNews  = new yacyNewsQueue(new File(yacyDBPath, "newsIn.stack"), newsDB);
+        processedNews = new yacyNewsQueue(new File(yacyDBPath, "newsProcessed.stack"), newsDB);
         maxDistribution = 30;
     }
     
@@ -348,7 +348,7 @@ public class yacyNewsPool {
         return switchQueue(dbKey).size();
     }
     
-    public int automaticProcess() throws IOException, InterruptedException {
+    public int automaticProcess(yacySeedDB seedDB) throws IOException, InterruptedException {
         // processes news in the incoming-db
         // returns number of processes
         yacyNewsRecord record;
@@ -361,7 +361,7 @@ public class yacyNewsPool {
                 
                 // get next news record
                 record = (yacyNewsRecord) i.next();
-                if (automaticProcessP(record)) {
+                if (automaticProcessP(seedDB, record)) {
                     this.processedNews.push(record);
                     i.remove();
                     pc++;
@@ -372,7 +372,7 @@ public class yacyNewsPool {
     }
     
     long day = 1000 * 60 * 60 * 24;
-    private boolean automaticProcessP(yacyNewsRecord record) {
+    private boolean automaticProcessP(yacySeedDB seedDB, yacyNewsRecord record) {
         if (record == null) return false;
         if (record.category() == null) return true;
         if ((System.currentTimeMillis() - record.created().getTime()) > (14 * day)) {
@@ -393,7 +393,7 @@ public class yacyNewsPool {
             }
         if ((record.category().equals(CATEGORY_CRAWL_START)) &&
             ((System.currentTimeMillis() - record.created().getTime()) > (2 * day))) {
-            yacySeed seed = yacyCore.seedDB.get(record.originator());
+            yacySeed seed = seedDB.get(record.originator());
             if (seed == null) return false;
             try {
                 return (Integer.parseInt(seed.get(yacySeed.ISPEED, "-")) < 10);

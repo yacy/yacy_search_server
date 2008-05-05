@@ -38,6 +38,7 @@ import java.util.regex.PatternSyntaxException;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterWriter;
 import de.anomic.http.httpHeader;
+import de.anomic.plasma.plasmaCrawlEntry;
 import de.anomic.plasma.plasmaCrawlProfile;
 import de.anomic.plasma.plasmaCrawlZURL;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -45,7 +46,6 @@ import de.anomic.plasma.dbImport.SitemapImporter;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacyNewsRecord;
 import de.anomic.yacy.yacyURL;
@@ -61,7 +61,7 @@ public class WatchCrawler_p {
     
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
         // return variable that accumulates replacements
-        plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
+        plasmaSwitchboard sb = (plasmaSwitchboard) env;
         serverObjects prop = new serverObjects();
         prop.put("forwardToCrawlStart", "0");
         
@@ -72,9 +72,9 @@ public class WatchCrawler_p {
             prop.put("info", "0");
             
             if ((post.containsKey("autoforward")) &&
-                (switchboard.crawlQueues.coreCrawlJobSize() == 0) &&
-                (switchboard.crawlQueues.remoteTriggeredCrawlJobSize() == 0) &&
-                (switchboard.queueSize() < 30)) {
+                (sb.crawlQueues.coreCrawlJobSize() == 0) &&
+                (sb.crawlQueues.remoteTriggeredCrawlJobSize() == 0) &&
+                (sb.queueSize() < 30)) {
                 prop.put("forwardToCrawlStart", "1");
             }
             
@@ -82,9 +82,9 @@ public class WatchCrawler_p {
                 // continue queue
                 String queue = post.get("continue", "");
                 if (queue.equals("localcrawler")) {
-                    switchboard.continueCrawlJob(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL);
+                    sb.continueCrawlJob(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL);
                 } else if (queue.equals("remotecrawler")) {
-                    switchboard.continueCrawlJob(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
+                    sb.continueCrawlJob(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
                 }
             }
 
@@ -92,15 +92,15 @@ public class WatchCrawler_p {
                 // pause queue
                 String queue = post.get("pause", "");
                 if (queue.equals("localcrawler")) {
-                    switchboard.pauseCrawlJob(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL);
+                    sb.pauseCrawlJob(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL);
                 } else if (queue.equals("remotecrawler")) {
-                    switchboard.pauseCrawlJob(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
+                    sb.pauseCrawlJob(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
                 }
             }
             
             if (post.containsKey("crawlingstart")) {
                 // init crawl
-                if (yacyCore.seedDB == null) {
+                if (sb.wordIndex.seedDB == null) {
                     prop.put("info", "3");
                 } else {
                     // set new properties
@@ -185,20 +185,20 @@ public class WatchCrawler_p {
                             // first delete old entry, if exists
                             yacyURL url = new yacyURL(crawlingStart, null);
                             String urlhash = url.hash();
-                            switchboard.wordIndex.removeURL(urlhash);
-                            switchboard.crawlQueues.noticeURL.removeByURLHash(urlhash);
-                            switchboard.crawlQueues.errorURL.remove(urlhash);
+                            sb.wordIndex.removeURL(urlhash);
+                            sb.crawlQueues.noticeURL.removeByURLHash(urlhash);
+                            sb.crawlQueues.errorURL.remove(urlhash);
                             
                             // stack url
-                            switchboard.profilesPassiveCrawls.removeEntry(crawlingStartURL.hash()); // if there is an old entry, delete it
-                            plasmaCrawlProfile.entry pe = switchboard.profilesActiveCrawls.newEntry(
+                            sb.profilesPassiveCrawls.removeEntry(crawlingStartURL.hash()); // if there is an old entry, delete it
+                            plasmaCrawlProfile.entry pe = sb.profilesActiveCrawls.newEntry(
                                     crawlingStartURL.getHost(), crawlingStartURL, newcrawlingfilter, newcrawlingfilter,
                                     newcrawlingdepth, newcrawlingdepth,
                                     crawlingIfOlder, crawlingDomFilterDepth, crawlingDomMaxPages,
                                     crawlingQ,
                                     indexText, indexMedia,
                                     storeHTCache, true, crawlOrder, xsstopw, xdstopw, xpstopw);
-                            String reasonString = switchboard.crawlStacker.stackCrawl(url, null, yacyCore.seedDB.mySeed().hash, "CRAWLING-ROOT", new Date(), 0, pe);
+                            String reasonString = sb.crawlStacker.stackCrawl(url, null, sb.wordIndex.seedDB.mySeed().hash, "CRAWLING-ROOT", new Date(), 0, pe);
                             
                             if (reasonString == null) {
                                 // liftoff!
@@ -220,7 +220,7 @@ public class WatchCrawler_p {
                                     m.remove("generalFilter");
                                     m.remove("specificFilter");
                                     m.put("intention", post.get("intention", "").replace(',', '/'));
-                                    yacyCore.newsPool.publishMyNews(yacyNewsRecord.newRecord(yacyNewsPool.CATEGORY_CRAWL_START, m));
+                                    sb.wordIndex.newsPool.publishMyNews(yacyNewsRecord.newRecord(sb.wordIndex.seedDB.mySeed(), yacyNewsPool.CATEGORY_CRAWL_START, m));
                                 }
                                 
                             } else {
@@ -228,9 +228,24 @@ public class WatchCrawler_p {
                                 prop.putHTML("info_crawlingURL", ((String) post.get("crawlingURL")));
                                 prop.putHTML("info_reasonString", reasonString);
                                 
-                                plasmaCrawlZURL.Entry ee = switchboard.crawlQueues.errorURL.newEntry(crawlingStartURL, reasonString);
+                                plasmaCrawlZURL.Entry ee = sb.crawlQueues.errorURL.newEntry(
+                                        new plasmaCrawlEntry(
+                                                sb.wordIndex.seedDB.mySeed().hash, 
+                                                crawlingStartURL, 
+                                                "", 
+                                                "", 
+                                                new Date(),
+                                                pe.handle(),
+                                                0, 
+                                                0, 
+                                                0),
+                                        sb.wordIndex.seedDB.mySeed().hash,
+                                        new Date(),
+                                        1,
+                                        reasonString);
+                                
                                 ee.store();
-                                switchboard.crawlQueues.errorURL.push(ee);
+                                sb.crawlQueues.errorURL.push(ee);
                             }
                         } catch (PatternSyntaxException e) {
                             prop.put("info", "4"); //crawlfilter does not match url
@@ -270,10 +285,10 @@ public class WatchCrawler_p {
                                 
                                 // creating a crawler profile
                                 yacyURL crawlURL = new yacyURL("file://" + file.toString(), null);
-                                plasmaCrawlProfile.entry profile = switchboard.profilesActiveCrawls.newEntry(fileName, crawlURL, newcrawlingfilter, newcrawlingfilter, newcrawlingdepth, newcrawlingdepth, crawlingIfOlder, crawlingDomFilterDepth, crawlingDomMaxPages, crawlingQ, indexText, indexMedia, storeHTCache, true, crawlOrder, xsstopw, xdstopw, xpstopw);
+                                plasmaCrawlProfile.entry profile = sb.profilesActiveCrawls.newEntry(fileName, crawlURL, newcrawlingfilter, newcrawlingfilter, newcrawlingdepth, newcrawlingdepth, crawlingIfOlder, crawlingDomFilterDepth, crawlingDomMaxPages, crawlingQ, indexText, indexMedia, storeHTCache, true, crawlOrder, xsstopw, xdstopw, xpstopw);
                                 
                                 // pause local crawl here
-                                switchboard.pauseCrawlJob(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL);
+                                sb.pauseCrawlJob(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL);
                                 
                                 // loop through the contained links
                                 Iterator<Map.Entry<yacyURL, String>> linkiterator = hyperlinks.entrySet().iterator();
@@ -284,10 +299,10 @@ public class WatchCrawler_p {
                                     if (nexturl == null) continue;
                                     
                                     // enqueuing the url for crawling
-                                    switchboard.crawlStacker.enqueueEntry(
+                                    sb.crawlStacker.enqueueEntry(
                                             nexturl, 
                                             null, 
-                                            yacyCore.seedDB.mySeed().hash, 
+                                            sb.wordIndex.seedDB.mySeed().hash, 
                                             (String) e.getValue(), 
                                             new Date(), 
                                             0, 
@@ -306,7 +321,7 @@ public class WatchCrawler_p {
                                 prop.putHTML("info_error", e.getMessage());
                                 e.printStackTrace();
                             }
-                            switchboard.continueCrawlJob(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL);
+                            sb.continueCrawlJob(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL);
                         }
                     } else if (crawlingMode.equals(CRAWLING_MODE_SITEMAP)) { 
                     	String sitemapURLStr = null;
@@ -316,7 +331,7 @@ public class WatchCrawler_p {
                     		yacyURL sitemapURL = new yacyURL(sitemapURLStr, null);
                             
                     		// create a new profile
-                    		plasmaCrawlProfile.entry pe = switchboard.profilesActiveCrawls.newEntry(
+                    		plasmaCrawlProfile.entry pe = sb.profilesActiveCrawls.newEntry(
                     				sitemapURLStr, sitemapURL, newcrawlingfilter, newcrawlingfilter,
                     				newcrawlingdepth, newcrawlingdepth,
                     				crawlingIfOlder, crawlingDomFilterDepth, crawlingDomMaxPages,
@@ -325,9 +340,9 @@ public class WatchCrawler_p {
                     				storeHTCache, true, crawlOrder, xsstopw, xdstopw, xpstopw);
                     		
                     		// create a new sitemap importer
-                    		SitemapImporter importerThread = (SitemapImporter) switchboard.dbImportManager.getNewImporter("sitemap");
+                    		SitemapImporter importerThread = (SitemapImporter) sb.dbImportManager.getNewImporter("sitemap");
                     		if (importerThread != null) {
-                    			importerThread.init(switchboard, 0);
+                    			importerThread.init(sb, 0);
                     			importerThread.initSitemap(new yacyURL(sitemapURLStr, null), pe);
                     			importerThread.startIt();
                     		}
@@ -343,7 +358,7 @@ public class WatchCrawler_p {
             }
             
             if (post.containsKey("crawlingPerformance")) {
-                setPerformance(switchboard, post);
+                setPerformance(sb, post);
             }
         }
         

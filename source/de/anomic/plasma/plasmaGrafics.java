@@ -54,9 +54,9 @@ import java.awt.image.BufferedImage;
 import java.util.Date;
 import java.util.Iterator;
 
-import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySearch;
 import de.anomic.yacy.yacySeed;
+import de.anomic.yacy.yacySeedDB;
 import de.anomic.ymage.ymageMatrix;
 import de.anomic.ymage.ymageToolPrint;
 
@@ -125,7 +125,7 @@ public class plasmaGrafics {
     private static BufferedImage logo = null;               // [MN]
     private static long          bannerPictureDate = 0;     // [MN]
 
-    public static ymageMatrix getSearchEventPicture(String eventID) {
+    public static ymageMatrix getSearchEventPicture(yacySeedDB seedDB, String eventID) {
         plasmaSearchEvent event = plasmaSearchEvent.getEvent(eventID);
         if (event == null) return null;
         yacySearch[] primarySearches = event.getPrimarySearchThreads();
@@ -133,7 +133,7 @@ public class plasmaGrafics {
         if (primarySearches == null) return null; // this was a local search and there are no threads
 
         // get a copy of a recent network picture
-        ymageMatrix eventPicture = getNetworkPicture(120000, plasmaSwitchboard.getSwitchboard().getConfig("network.unit.name", "unspecified"), plasmaSwitchboard.getSwitchboard().getConfig("network.unit.description", "unspecified"), COL_BACKGROUND);
+        ymageMatrix eventPicture = getNetworkPicture(seedDB, 120000, plasmaSwitchboard.getSwitchboard().getConfig("network.unit.name", "unspecified"), plasmaSwitchboard.getSwitchboard().getConfig("network.unit.description", "unspecified"), COL_BACKGROUND);
         //if (eventPicture instanceof ymageMatrix) eventPicture = (ymageMatrix) eventPicture; //new ymageMatrix((ymageMatrix) eventPicture);
         // TODO: fix cloning of ymageMatrix pictures
         
@@ -177,24 +177,24 @@ public class plasmaGrafics {
         return eventPicture;
     }
 
-    public static ymageMatrix getNetworkPicture(long maxAge, String networkName, String networkTitle, String bgcolor) {
-        return getNetworkPicture(maxAge, 640, 480, 300, 300, 1000, true, networkName, networkTitle, bgcolor);
+    public static ymageMatrix getNetworkPicture(yacySeedDB seedDB, long maxAge, String networkName, String networkTitle, String bgcolor) {
+        return getNetworkPicture(seedDB, maxAge, 640, 480, 300, 300, 1000, true, networkName, networkTitle, bgcolor);
     }
 
-    public static ymageMatrix getNetworkPicture(long maxAge, int width, int height, int passiveLimit, int potentialLimit, int maxCount, boolean corona, String networkName, String networkTitle, String bgcolor) {
+    public static ymageMatrix getNetworkPicture(yacySeedDB seedDB, long maxAge, int width, int height, int passiveLimit, int potentialLimit, int maxCount, boolean corona, String networkName, String networkTitle, String bgcolor) {
         if ((networkPicture == null) || ((System.currentTimeMillis() - networkPictureDate) > maxAge)) {
-            drawNetworkPicture(width, height, passiveLimit, potentialLimit, maxCount, corona, networkName, networkTitle, bgcolor);
+            drawNetworkPicture(seedDB, width, height, passiveLimit, potentialLimit, maxCount, corona, networkName, networkTitle, bgcolor);
         }
         return networkPicture;
     }
 
-    private static void drawNetworkPicture(int width, int height, int passiveLimit, int potentialLimit, int maxCount, boolean corona, String networkName, String networkTitle, String bgcolor) {
+    private static void drawNetworkPicture(yacySeedDB seedDB, int width, int height, int passiveLimit, int potentialLimit, int maxCount, boolean corona, String networkName, String networkTitle, String bgcolor) {
 
         int innerradius = Math.min(width, height) / 5;
-        int outerradius = innerradius + innerradius * yacyCore.seedDB.sizeConnected() / 100;
+        int outerradius = innerradius + innerradius * seedDB.sizeConnected() / 100;
         if (outerradius > innerradius * 2) outerradius = innerradius * 2;
 
-        if (yacyCore.seedDB == null) return; // no other peers known
+        if (seedDB == null) return; // no other peers known
 
         networkPicture = new ymageMatrix(width, height, ymageMatrix.MODE_SUB, bgcolor);
 
@@ -211,7 +211,7 @@ public class plasmaGrafics {
         // draw connected senior and principals
         int count = 0;
         int totalCount = 0;
-        Iterator<yacySeed> e = yacyCore.seedDB.seedsConnected(true, false, null, (float) 0.0);
+        Iterator<yacySeed> e = seedDB.seedsConnected(true, false, null, (float) 0.0);
         
         while (e.hasNext() && count < maxCount) {
             seed = (yacySeed) e.next();
@@ -224,7 +224,7 @@ public class plasmaGrafics {
 
         // draw disconnected senior and principals that have been seen lately
         count = 0;
-        e = yacyCore.seedDB.seedsSortedDisconnected(false, yacySeed.LASTSEEN);
+        e = seedDB.seedsSortedDisconnected(false, yacySeed.LASTSEEN);
         while (e.hasNext() && count < maxCount) {
             seed = (yacySeed) e.next();
             if (seed != null) {
@@ -238,7 +238,7 @@ public class plasmaGrafics {
 
         // draw juniors that have been seen lately
         count = 0;
-        e = yacyCore.seedDB.seedsSortedPotential(false, yacySeed.LASTSEEN);
+        e = seedDB.seedsSortedPotential(false, yacySeed.LASTSEEN);
         while (e.hasNext() && count < maxCount) {
             seed = (yacySeed) e.next();
             if (seed != null) {
@@ -251,7 +251,7 @@ public class plasmaGrafics {
         totalCount += count;
 
         // draw my own peer
-        drawNetworkPicturePeer(networkPicture, width / 2, height / 2 + 20, innerradius, outerradius, yacyCore.seedDB.mySeed(), COL_WE_DOT, COL_WE_LINE, COL_WE_TEXT, corona);
+        drawNetworkPicturePeer(networkPicture, width / 2, height / 2 + 20, innerradius, outerradius, seedDB.mySeed(), COL_WE_DOT, COL_WE_LINE, COL_WE_TEXT, corona);
 
         // draw description
         networkPicture.setColor(COL_HEADLINE);

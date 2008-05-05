@@ -230,21 +230,6 @@ public class migration {
         	sb.setConfig("locale.translated_html", "DATA/LOCALE/htroot");
         }
         
-        // migration for port forwarding settings
-        if ((value = sb.getConfig("portForwardingHost","")).length() > 0) {
-            sb.setConfig("portForwarding.Enabled", sb.getConfig("portForwardingEnabled",""));
-            if (sb.getConfigBool("portForwardingEnabled", false)) {
-                sb.setConfig("portForwarding.Type", "sch");
-            }
-                        
-            sb.setConfig("portForwarding.sch.UseProxy", sb.getConfig("portForwardingUseProxy",""));
-            sb.setConfig("portForwarding.sch.Port", sb.getConfig("portForwardingPort",""));
-            sb.setConfig("portForwarding.sch.Host", sb.getConfig("portForwardingHost",""));
-            sb.setConfig("portForwarding.sch.HostPort", sb.getConfig("portForwardingHostPort",""));
-            sb.setConfig("portForwarding.sch.HostUser", sb.getConfig("portForwardingHostUser",""));
-            sb.setConfig("portForwarding.sch.HostPwd", sb.getConfig("portForwardingHostPwd",""));
-        }
-        
         // migration for blacklists
         if ((value = sb.getConfig("proxyBlackListsActive","")).length() > 0) {
             sb.setConfig("proxy.BlackLists", value);

@@ -65,22 +65,21 @@ import de.anomic.server.serverSwitch;
 import de.anomic.server.serverThread;
 import de.anomic.server.serverCore.Session;
 import de.anomic.urlRedirector.urlRedirectord;
-import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 
 public final class Connections_p {    
     
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> sb) {
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
         // return variable that accumulates replacements
-        plasmaSwitchboard switchboard = (plasmaSwitchboard) sb;
+        plasmaSwitchboard sb = (plasmaSwitchboard) env;
         serverObjects prop = new serverObjects();
          
         
         // get the virtualHost string
-        String virtualHost = switchboard.getConfig("fileHost","localhost");
+        String virtualHost = sb.getConfig("fileHost","localhost");
         
         // get the serverCore thread
-        serverThread httpd = switchboard.getThread("10_httpd");
+        serverThread httpd = sb.getThread("10_httpd");
         
         /* waiting for all threads to finish */
         int threadCount  = serverCore.sessionThreadGroup.activeCount();    
@@ -177,14 +176,14 @@ public final class Connections_p {
                     commandLine = urlRedir.getURL();
                 }                
                 
-                if ((dest != null) && (dest.equals(virtualHost))) dest = yacyCore.seedDB.mySeed().getName() + ".yacy";
+                if ((dest != null) && (dest.equals(virtualHost))) dest = sb.wordIndex.seedDB.mySeed().getName() + ".yacy";
                 
                 // determining if the source is a yacy host
                 yacySeed seed = null;
                 if (doNameLookup) {
-                    seed = yacyCore.seedDB.lookupByIP(userAddress,true,false,false);
+                    seed = sb.wordIndex.seedDB.lookupByIP(userAddress,true,false,false);
                     if (seed != null) {
-                        if ((seed.hash.equals(yacyCore.seedDB.mySeed().hash)) && 
+                        if ((seed.hash.equals(sb.wordIndex.seedDB.mySeed().hash)) && 
                                 (!seed.get(yacySeed.PORT,"").equals(Integer.toString(userPort)))) {
                             seed = null;
                         }

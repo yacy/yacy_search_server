@@ -93,7 +93,7 @@ public class yacyNewsRecord {
         }
     }
 
-    public static yacyNewsRecord newRecord(String category, Properties attributes) {
+    public static yacyNewsRecord newRecord(yacySeed mySeed, String category, Properties attributes) {
         try {
             HashMap<String, String> m = new HashMap<String, String>();
             Iterator<Entry<Object, Object>> e = attributes.entrySet().iterator();
@@ -102,16 +102,16 @@ public class yacyNewsRecord {
                 entry = e.next();
                 m.put((String) entry.getKey(), (String) entry.getValue());
             }
-            return new yacyNewsRecord(category, m);
+            return new yacyNewsRecord(mySeed, category, m);
         } catch (IllegalArgumentException e) {
             yacyCore.log.logWarning("rejected bad yacy news record: " + e.getMessage());
             return null;
         }
     }
     
-    public static yacyNewsRecord newRecord(String category, Map<String, String> attributes) {
+    public static yacyNewsRecord newRecord(yacySeed mySeed, String category, Map<String, String> attributes) {
         try {
-            return new yacyNewsRecord(category, attributes);
+            return new yacyNewsRecord(mySeed, category, attributes);
         } catch (IllegalArgumentException e) {
             yacyCore.log.logWarning("rejected bad yacy news record: " + e.getMessage());
             return null;
@@ -139,7 +139,7 @@ public class yacyNewsRecord {
         removeStandards();
     }
 
-    public yacyNewsRecord(String category, Map<String, String> attributes) {
+    public yacyNewsRecord(yacySeed mySeed, String category, Map<String, String> attributes) {
         if (category.length() > categoryStringLength) throw new IllegalArgumentException("category length (" + category.length() + ") exceeds maximum (" + categoryStringLength + ")");
         if (attributes.toString().length() > attributesMaxLength) throw new IllegalArgumentException("attributes length (" + attributes.toString().length() + ") exceeds maximum (" + attributesMaxLength + ")");
         this.attributes = attributes;
@@ -147,7 +147,7 @@ public class yacyNewsRecord {
         this.created = new Date();
         this.category = category;
         this.distributed = 0;
-        this.originator = yacyCore.seedDB.mySeed().hash;
+        this.originator = mySeed.hash;
         removeStandards();
     }
 

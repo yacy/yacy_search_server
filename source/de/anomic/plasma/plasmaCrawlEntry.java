@@ -34,7 +34,6 @@ import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroRow;
-import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyURL;
 
@@ -79,10 +78,6 @@ public class plasmaCrawlEntry {
     private String   status;
     private int      initialHash;   // to provide a object hash that does not change even if the url changes because of redirection
     
-    public plasmaCrawlEntry(yacyURL url) {
-        this(yacyCore.seedDB.mySeed().hash, url, null, null, new Date(), null, 0, 0, 0);
-    }
-    
     /**
      * @param initiator the hash of the initiator peer
      * @param url the {@link URL} to crawl
@@ -108,10 +103,12 @@ public class plasmaCrawlEntry {
         // create new entry and store it into database
         assert appdate != null;
         assert url != null;
-        if ((initiator == null) || (initiator.length() == 0)) initiator = yacyURL.dummyHash;
+        assert initiator != null;
+        assert initiator.length() > 0;
+        assert referrerhash != null;
         this.initiator     = initiator;
         this.url           = url;
-        this.refhash       = (referrerhash == null) ? yacyURL.dummyHash : referrerhash;
+        this.refhash       = referrerhash;
         this.name          = (name == null) ? "" : name;
         this.appdate       = (appdate == null) ? 0 : appdate.getTime();
         this.profileHandle = profileHandle; // must not be null
@@ -137,7 +134,7 @@ public class plasmaCrawlEntry {
         if (urlstring == null) throw new IOException ("url string is null");
         this.initiator = entry.getColString(1, null);
         this.url = new yacyURL(urlstring, entry.getColString(0, null));
-        this.refhash = (entry.empty(3)) ? yacyURL.dummyHash : entry.getColString(3, null);
+        this.refhash = (entry.empty(3)) ? "" : entry.getColString(3, null);
         this.name = (entry.empty(4)) ? "" : entry.getColString(4, "UTF-8").trim();
         this.appdate = entry.getColLong(5);
         this.profileHandle = (entry.empty(6)) ? null : entry.getColString(6, null).trim();

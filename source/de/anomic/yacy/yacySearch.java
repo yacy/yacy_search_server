@@ -109,6 +109,7 @@ public class yacySearch extends Thread {
 
     public void run() {
         this.urls = yacyClient.search(
+                    wordIndex.seedDB.mySeed(),
                     wordhashes, excludehashes, urlhashes, prefer, filter, count, maxDistance, global, partitions,
                     targetPeer, wordIndex, crawlResults, containerCache, abstractCache,
                     blacklist, rankingProfile, constraint);
@@ -117,8 +118,8 @@ public class yacySearch extends Thread {
             StringBuffer urllist = new StringBuffer(this.urls.length * 13);
             for (int i = 0; i < this.urls.length; i++) urllist.append(this.urls[i]).append(' ');
             yacyCore.log.logInfo("REMOTE SEARCH - remote peer " + targetPeer.hash + ":" + targetPeer.getName() + " contributed " + urls.length + " links for word hash " + wordhashes + ": " + new String(urllist));
-            yacyCore.seedDB.mySeed().incRI(urls.length);
-            yacyCore.seedDB.mySeed().incRU(urls.length);
+            wordIndex.seedDB.mySeed().incRI(urls.length);
+            wordIndex.seedDB.mySeed().incRU(urls.length);
         } else {
             yacyCore.log.logInfo("REMOTE SEARCH - no answer from remote peer " + targetPeer.hash + ":" + targetPeer.getName());
         }
@@ -143,14 +144,14 @@ public class yacySearch extends Thread {
         return targetPeer;
     }
 
-    private static yacySeed[] selectClusterPeers(TreeMap<String, String> peerhashes) {
+    private static yacySeed[] selectClusterPeers(yacySeedDB seedDB, TreeMap<String, String> peerhashes) {
     	Iterator<Map.Entry<String, String>> i = peerhashes.entrySet().iterator();
     	ArrayList<yacySeed> l = new ArrayList<yacySeed>();
     	Map.Entry<String, String> entry;
     	yacySeed s;
     	while (i.hasNext()) {
     		entry = i.next();
-    		s = yacyCore.seedDB.get(entry.getKey()); // should be getConnected; get only during testing time
+    		s = seedDB.get(entry.getKey()); // should be getConnected; get only during testing time
     		if (s != null) {
     			s.setAlternativeAddress(entry.getValue());
     			l.add(s);
@@ -164,13 +165,13 @@ public class yacySearch extends Thread {
     	//return (yacySeed[]) l.toArray();
     }
     
-    private static yacySeed[] selectSearchTargets(Set<String> wordhashes, int seedcount) {
+    private static yacySeed[] selectSearchTargets(yacySeedDB seedDB, Set<String> wordhashes, int seedcount) {
         // find out a specific number of seeds, that would be relevant for the given word hash(es)
         // the result is ordered by relevance: [0] is most relevant
         // the seedcount is the maximum number of wanted results
-        if (yacyCore.seedDB == null) { return null; }
-        if ((seedcount >= yacyCore.seedDB.sizeConnected()) || (yacyCore.seedDB.noDHTActivity())) {
-            seedcount = yacyCore.seedDB.sizeConnected();
+        if (seedDB == null) { return null; }
+        if ((seedcount >= seedDB.sizeConnected()) || (seedDB.noDHTActivity())) {
+            seedcount = seedDB.sizeConnected();
         }
         
         // put in seeds according to dht
@@ -199,10 +200,10 @@ public class yacySearch extends Thread {
         }
 
         // put in seeds according to size of peer
-        dhtEnum = yacyCore.seedDB.seedsSortedConnected(false, yacySeed.ICOUNT);
+        dhtEnum = seedDB.seedsSortedConnected(false, yacySeed.ICOUNT);
         c = seedcount;
         int score;
-        if (c > yacyCore.seedDB.sizeConnected()) { c = yacyCore.seedDB.sizeConnected(); }
+        if (c > seedDB.sizeConnected()) { c = seedDB.sizeConnected(); }
         while (dhtEnum.hasNext() && c > 0) {
             seed = dhtEnum.next();
             if (seed == null) continue;
@@ -216,7 +217,7 @@ public class yacySearch extends Thread {
 
         // put in seeds that are public robinson peers and where the peer tags match with query
         // or seeds that are newbies to ensure that public demonstrations always work
-        dhtEnum = yacyCore.seedDB.seedsConnected(true, false, null, (float) 0.50);
+        dhtEnum = seedDB.seedsConnected(true, false, null, (float) 0.50);
         while (dhtEnum.hasNext()) {
         	seed = dhtEnum.next();
             if (seed == null) continue;
@@ -261,10 +262,10 @@ public class yacySearch extends Thread {
             kelondroBitfield constraint,
             TreeMap<String, String> clusterselection) {
         // check own peer status
-        if (yacyCore.seedDB.mySeed() == null || yacyCore.seedDB.mySeed().getPublicAddress() == null) { return null; }
+        if (wordIndex.seedDB.mySeed() == null || wordIndex.seedDB.mySeed().getPublicAddress() == null) { return null; }
 
         // prepare seed targets and threads
-        final yacySeed[] targetPeers = (clusterselection == null) ? selectSearchTargets(plasmaSearchQuery.hashes2Set(wordhashes), targets) : selectClusterPeers(clusterselection);
+        final yacySeed[] targetPeers = (clusterselection == null) ? selectSearchTargets(wordIndex.seedDB, plasmaSearchQuery.hashes2Set(wordhashes), targets) : selectClusterPeers(wordIndex.seedDB, clusterselection);
         if (targetPeers == null) return new yacySearch[0];
         targets = targetPeers.length;
         if (targets == 0) return new yacySearch[0];
@@ -286,10 +287,10 @@ public class yacySearch extends Thread {
             plasmaSearchRankingProfile rankingProfile,
             kelondroBitfield constraint, TreeMap<String, String> clusterselection) {
         // check own peer status
-        if (yacyCore.seedDB.mySeed() == null || yacyCore.seedDB.mySeed().getPublicAddress() == null) { return null; }
+        if (wordIndex.seedDB.mySeed() == null || wordIndex.seedDB.mySeed().getPublicAddress() == null) { return null; }
 
         // prepare seed targets and threads
-        final yacySeed targetPeer = yacyCore.seedDB.getConnected(targethash);
+        final yacySeed targetPeer = wordIndex.seedDB.getConnected(targethash);
         if (targetPeer == null) return null;
         if (clusterselection != null) targetPeer.setAlternativeAddress((String) clusterselection.get(targetPeer.hash));
         yacySearch searchThread = new yacySearch(wordhashes, excludehashes, urlhashes, "", "", 0, 9999, true, 0, targetPeer,

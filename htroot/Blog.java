@@ -60,7 +60,6 @@ import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacyNewsRecord;
 
@@ -76,11 +75,11 @@ public class Blog {
     }
 
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
-        final plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
+        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final serverObjects prop = new serverObjects();
         blogBoard.BlogEntry page = null;
 
-        boolean hasRights = switchboard.verifyAuthentication(header, true);
+        boolean hasRights = sb.verifyAuthentication(header, true);
         
         //final int display = (hasRights || post == null) ? 1 : post.getInt("display", 0);
         //prop.put("display", display);   
@@ -88,7 +87,7 @@ public class Blog {
 
         
         final boolean xml = ((String)header.get(httpHeader.CONNECTION_PROP_PATH)).endsWith(".xml");
-        final String address = yacyCore.seedDB.mySeed().getPublicAddress();
+        final String address = sb.wordIndex.seedDB.mySeed().getPublicAddress();
 
         if(hasRights) {
             prop.put("mode_admin", "1");
@@ -97,16 +96,16 @@ public class Blog {
         }
 
         if (post == null) {
-            prop.putHTML("peername", yacyCore.seedDB.mySeed().getName());
+            prop.putHTML("peername", sb.wordIndex.seedDB.mySeed().getName());
             prop.put("address", address);
-            return putBlogDefault(prop, switchboard, address, 0, 10, hasRights, xml);
+            return putBlogDefault(prop, sb, address, 0, 10, hasRights, xml);
         }
 
         final int start = post.getInt("start",0); //indicates from where entries should be shown
         final int num   = post.getInt("num",10);  //indicates how many entries should be shown
 
         if(!hasRights){
-            final userDB.Entry userentry = switchboard.userDB.proxyAuth((String)header.get("Authorization", "xxxxxx"));
+            final userDB.Entry userentry = sb.userDB.proxyAuth((String)header.get("Authorization", "xxxxxx"));
             if(userentry != null && userentry.hasRight(userDB.Entry.BLOG_RIGHT)){
                 hasRights=true;
             } else if(post.containsKey("login")) {
@@ -121,13 +120,13 @@ public class Blog {
         String StrAuthor = post.get("author", "");
 
         if (StrAuthor.equals("anonymous")) {
-            StrAuthor = switchboard.blogDB.guessAuthor(ip);
+            StrAuthor = sb.blogDB.guessAuthor(ip);
 
             if (StrAuthor == null || StrAuthor.length() == 0) {
-                if (de.anomic.yacy.yacyCore.seedDB.mySeed() == null) {
+                if (sb.wordIndex.seedDB.mySeed() == null) {
                     StrAuthor = "anonymous";
                 } else {
-                    StrAuthor = de.anomic.yacy.yacyCore.seedDB.mySeed().get("Name", "anonymous");
+                    StrAuthor = sb.wordIndex.seedDB.mySeed().get("Name", "anonymous");
                 }
             }
         }
@@ -140,12 +139,12 @@ public class Blog {
         }
 
         if(hasRights && post.containsKey("delete") && post.get("delete").equals("sure")) {
-            page = switchboard.blogDB.readBlogEntry(pagename);
+            page = sb.blogDB.readBlogEntry(pagename);
             final Iterator<String> i = page.getComments().iterator();
             while(i.hasNext()) {
-                switchboard.blogCommentDB.delete(i.next());
+                sb.blogCommentDB.delete(i.next());
             }
-            switchboard.blogDB.deleteBlogEntry(pagename);
+            sb.blogDB.deleteBlogEntry(pagename);
             pagename = DEFAULT_PAGE;
         }
 
@@ -169,7 +168,7 @@ public class Blog {
             if(pagename.equals(DEFAULT_PAGE)) {
                 pagename = String.valueOf(System.currentTimeMillis());
             } else {
-                page = switchboard.blogDB.readBlogEntry(pagename);
+                page = sb.blogDB.readBlogEntry(pagename);
                 comments = page.getComments();
                 date = page.getDate();
             }
@@ -182,17 +181,17 @@ public class Blog {
                 subject = StrSubject.getBytes();
             }
 
-            switchboard.blogDB.writeBlogEntry(switchboard.blogDB.newEntry(pagename, subject, author, ip, date, content, comments, commentMode));
+            sb.blogDB.writeBlogEntry(sb.blogDB.newEntry(pagename, subject, author, ip, date, content, comments, commentMode));
 
             // create a news message
             final HashMap<String, String> map = new HashMap<String, String>();
             map.put("page", pagename);
             map.put("subject", StrSubject.replace(',', ' '));
             map.put("author", StrAuthor.replace(',', ' '));
-            yacyCore.newsPool.publishMyNews(yacyNewsRecord.newRecord(yacyNewsPool.CATEGORY_BLOG_ADD, map));
+            sb.wordIndex.newsPool.publishMyNews(yacyNewsRecord.newRecord(sb.wordIndex.seedDB.mySeed(), yacyNewsPool.CATEGORY_BLOG_ADD, map));
         }
 
-        page = switchboard.blogDB.readBlogEntry(pagename); //maybe "if(page == null)"
+        page = sb.blogDB.readBlogEntry(pagename); //maybe "if(page == null)"
 
         if (post.containsKey("edit")) {
             //edit an entry
@@ -253,7 +252,7 @@ public class Blog {
         }
         else if (post.containsKey("xmlfile")) {
             prop.put("mode", "5");
-            if(switchboard.blogDB.importXML(post.get("xmlfile$file"))) {
+            if(sb.blogDB.importXML(post.get("xmlfile$file"))) {
                 prop.put("mode_state", "1");
             }
             else {
@@ -266,10 +265,10 @@ public class Blog {
             if(pagename.equals(DEFAULT_PAGE)) {
                 // XXX: where are "peername" and "address" used in the template?
                 // XXX: "clientname" is already set to the peername, no need for a new setting
-                prop.putHTML("peername", yacyCore.seedDB.mySeed().getName(), xml);
+                prop.putHTML("peername", sb.wordIndex.seedDB.mySeed().getName(), xml);
                 prop.put("address", address);
                 //index all entries
-                putBlogDefault(prop, switchboard, address, start, num, hasRights, xml);
+                putBlogDefault(prop, sb, address, start, num, hasRights, xml);
             }
             else {
                 //only show 1 entry

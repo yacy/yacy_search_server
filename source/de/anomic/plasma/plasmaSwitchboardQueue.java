@@ -59,7 +59,6 @@ import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroStack;
 import de.anomic.plasma.cache.IResourceInfo;
 import de.anomic.server.logging.serverLog;
-import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyURL;
@@ -68,14 +67,14 @@ public class plasmaSwitchboardQueue {
 
     kelondroStack sbQueueStack;
     plasmaCrawlProfile profiles;
-    plasmaWordIndex index;
+    plasmaWordIndex wordIndex;
     private File sbQueueStackPath;
     ConcurrentHashMap<String, QueueEntry> queueInProcess;
     
-    public plasmaSwitchboardQueue(plasmaWordIndex index, File sbQueueStackPath, plasmaCrawlProfile profiles) {
+    public plasmaSwitchboardQueue(plasmaWordIndex wordIndex, File sbQueueStackPath, plasmaCrawlProfile profiles) {
         this.sbQueueStackPath = sbQueueStackPath;
         this.profiles = profiles;
-        this.index = index;
+        this.wordIndex = wordIndex;
         this.queueInProcess = new ConcurrentHashMap<String, QueueEntry>();
 
         initQueueStack();
@@ -112,12 +111,12 @@ public class plasmaSwitchboardQueue {
         if (entry == null) return;
         sbQueueStack.push(sbQueueStack.row().newEntry(new byte[][]{
             entry.url.toString().getBytes(),
-            (entry.referrerHash == null) ? yacyURL.dummyHash.getBytes() : entry.referrerHash.getBytes(),
+            (entry.referrerHash == null) ? "".getBytes() : entry.referrerHash.getBytes(),
             kelondroBase64Order.enhancedCoder.encodeLong((entry.ifModifiedSince == null) ? 0 : entry.ifModifiedSince.getTime(), 11).getBytes(),
             new byte[]{entry.flags},
-            (entry.initiator == null) ? yacyURL.dummyHash.getBytes() : entry.initiator.getBytes(),
+            (entry.initiator == null) ? "".getBytes() : entry.initiator.getBytes(),
             kelondroBase64Order.enhancedCoder.encodeLong((long) entry.depth, rowdef.width(5)).getBytes(),
-            (entry.profileHandle == null) ? yacyURL.dummyHash.getBytes() : entry.profileHandle.getBytes(),
+            (entry.profileHandle == null) ? "".getBytes() : entry.profileHandle.getBytes(),
             (entry.anchorName == null) ? "-".getBytes("UTF-8") : entry.anchorName.getBytes("UTF-8")
         }));
     }
@@ -326,7 +325,7 @@ public class plasmaSwitchboardQueue {
         }
 
         public boolean proxy() {
-            return (initiator == null) || (initiator.equals(yacyURL.dummyHash));
+            return (initiator == null) || (initiator.equals(initiator.length() == 0));
         }
 
         public String initiator() {
@@ -334,13 +333,13 @@ public class plasmaSwitchboardQueue {
         }
         
         public yacySeed initiatorPeer() {
-            if ((initiator == null) || (initiator.equals(yacyURL.dummyHash))) return null;
-            if (initiator.equals(yacyCore.seedDB.mySeed().hash)) {
+            if ((initiator == null) || (initiator.length() == 0)) return null;
+            if (initiator.equals(wordIndex.seedDB.mySeed().hash)) {
                 // normal crawling
                 return null;
             } else {
                 // this was done for remote peer (a global crawl)
-                return yacyCore.seedDB.getConnected(initiator);
+                return wordIndex.seedDB.getConnected(initiator);
             }
         }
 
@@ -384,8 +383,8 @@ public class plasmaSwitchboardQueue {
         
         public yacyURL referrerURL() {
             if (referrerURL == null) {
-                if ((referrerHash == null) || (referrerHash.equals(yacyURL.dummyHash))) return null;
-                indexURLReference entry = index.getURL(referrerHash, null, 0);
+                if ((referrerHash == null) || (referrerHash.equals(initiator.length() == 0))) return null;
+                indexURLReference entry = wordIndex.getURL(referrerHash, null, 0);
                 if (entry == null) referrerURL = null; else referrerURL = entry.comp().url();
             }
             return referrerURL;
@@ -408,10 +407,10 @@ public class plasmaSwitchboardQueue {
             // 5) local prefetch/crawling (initiator is own seedHash)
             // 6) local fetching for global crawling (other known or unknwon initiator)
             int processCase = plasmaSwitchboard.PROCESSCASE_0_UNKNOWN;
-            if ((initiator == null) || (initiator.equals(yacyURL.dummyHash))) {
+            if ((initiator == null) || (initiator.equals(initiator.length() == 0))) {
                 // proxy-load
                 processCase = plasmaSwitchboard.PROCESSCASE_4_PROXY_LOAD;
-            } else if ((initiator != null) && (initiator.equals(yacyCore.seedDB.mySeed().hash))) {
+            } else if ((initiator != null) && (initiator.equals(wordIndex.seedDB.mySeed().hash))) {
                 // normal crawling
                 processCase = plasmaSwitchboard.PROCESSCASE_5_LOCAL_CRAWLING;
             } else {

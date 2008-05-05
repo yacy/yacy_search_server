@@ -43,7 +43,6 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.tools.crypt;
 import de.anomic.tools.nxTools;
-import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacyNewsRecord;
 import de.anomic.yacy.yacySeed;
@@ -79,7 +78,7 @@ public class Supporter {
                 map.put("urlhash", hash);
                 map.put("vote", "negative");
                 map.put("refid", post.get("refid", ""));
-                yacyCore.newsPool.publishMyNews(yacyNewsRecord.newRecord(yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, map));
+                sb.wordIndex.newsPool.publishMyNews(yacyNewsRecord.newRecord(sb.wordIndex.seedDB.mySeed(), yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, map));
             }
             if ((post != null) && ((hash = post.get("votePositive", null)) != null)) {
                 if (!sb.verifyAuthentication(header, false)) {
@@ -95,19 +94,19 @@ public class Supporter {
                 map.put("vote", "positive");
                 map.put("refid", post.get("refid", ""));
                 map.put("comment", post.get("comment", ""));
-                yacyCore.newsPool.publishMyNews(new yacyNewsRecord(yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, map));
+                sb.wordIndex.newsPool.publishMyNews(new yacyNewsRecord(sb.wordIndex.seedDB.mySeed(), yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, map));
             }
         
             // create Supporter
             HashMap<String, Integer> negativeHashes = new HashMap<String, Integer>(); // a mapping from an url hash to Integer (count of votes)
             HashMap<String, Integer> positiveHashes = new HashMap<String, Integer>(); // a mapping from an url hash to Integer (count of votes)
-            accumulateVotes(negativeHashes, positiveHashes, yacyNewsPool.INCOMING_DB);
+            accumulateVotes(sb, negativeHashes, positiveHashes, yacyNewsPool.INCOMING_DB);
             //accumulateVotes(negativeHashes, positiveHashes, yacyNewsPool.OUTGOING_DB);
             //accumulateVotes(negativeHashes, positiveHashes, yacyNewsPool.PUBLISHED_DB);
             kelondroMScoreCluster<String> ranking = new kelondroMScoreCluster<String>(); // score cluster for url hashes
             kelondroRow rowdef = new kelondroRow("String url-255, String title-120, String description-120, String refid-" + (serverDate.PATTERN_SHORT_SECOND.length() + 12), kelondroNaturalOrder.naturalOrder, 0);
             HashMap<String, Entry> Supporter = new HashMap<String, Entry>(); // a mapping from an url hash to a kelondroRow.Entry with display properties
-            accumulateSupporter(Supporter, ranking, rowdef, negativeHashes, positiveHashes, yacyNewsPool.INCOMING_DB);
+            accumulateSupporter(sb, Supporter, ranking, rowdef, negativeHashes, positiveHashes, yacyNewsPool.INCOMING_DB);
             //accumulateSupporter(Supporter, ranking, rowdef, negativeHashes, positiveHashes, yacyNewsPool.OUTGOING_DB);
             //accumulateSupporter(Supporter, ranking, rowdef, negativeHashes, positiveHashes, yacyNewsPool.PUBLISHED_DB);
         
@@ -132,8 +131,8 @@ public class Supporter {
                 description = row.getColString(2,"UTF-8");
                 if ((url == null) || (title == null) || (description == null)) continue;
                 refid = row.getColString(3, null);
-                voted = (yacyCore.newsPool.getSpecific(yacyNewsPool.OUTGOING_DB, yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, "refid", refid) != null) || 
-                        (yacyCore.newsPool.getSpecific(yacyNewsPool.PUBLISHED_DB, yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, "refid", refid) != null);
+                voted = (sb.wordIndex.newsPool.getSpecific(yacyNewsPool.OUTGOING_DB, yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, "refid", refid) != null) || 
+                        (sb.wordIndex.newsPool.getSpecific(yacyNewsPool.PUBLISHED_DB, yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, "refid", refid) != null);
                 prop.put("supporter_results_" + i + "_authorized", authenticated ? "1" : "0");
                 prop.put("supporter_results_" + i + "_authorized_recommend", voted ? "0" : "1");
 
@@ -168,10 +167,10 @@ public class Supporter {
         return (int) Math.max(0, 10 - ((System.currentTimeMillis() - created.getTime()) / 24 / 60 / 60 / 1000));
     }
     
-    private static void accumulateVotes(HashMap<String, Integer> negativeHashes, HashMap<String, Integer> positiveHashes, int dbtype) {
-        int maxCount = Math.min(1000, yacyCore.newsPool.size(dbtype));
+    private static void accumulateVotes(plasmaSwitchboard sb, HashMap<String, Integer> negativeHashes, HashMap<String, Integer> positiveHashes, int dbtype) {
+        int maxCount = Math.min(1000, sb.wordIndex.newsPool.size(dbtype));
         yacyNewsRecord record;
-        Iterator<yacyNewsRecord> recordIterator = yacyCore.newsPool.recordIterator(dbtype, true);
+        Iterator<yacyNewsRecord> recordIterator = sb.wordIndex.newsPool.recordIterator(dbtype, true);
         int j = 0;
         while ((recordIterator.hasNext()) && (j++ < maxCount)) {
             record = recordIterator.next();
@@ -196,11 +195,12 @@ public class Supporter {
     }
     
     private static void accumulateSupporter(
+            plasmaSwitchboard sb,
             HashMap<String, Entry> Supporter, kelondroMScoreCluster<String> ranking, kelondroRow rowdef,
             HashMap<String, Integer> negativeHashes, HashMap<String, Integer> positiveHashes, int dbtype) {
-        int maxCount = Math.min(1000, yacyCore.newsPool.size(dbtype));
+        int maxCount = Math.min(1000, sb.wordIndex.newsPool.size(dbtype));
         yacyNewsRecord record;
-        Iterator<yacyNewsRecord> recordIterator = yacyCore.newsPool.recordIterator(dbtype, true);
+        Iterator<yacyNewsRecord> recordIterator = sb.wordIndex.newsPool.recordIterator(dbtype, true);
         int j = 0;
         String url = "", urlhash;
         kelondroRow.Entry entry;
@@ -213,7 +213,7 @@ public class Supporter {
             
             entry = null;
             if ((record.category().equals(yacyNewsPool.CATEGORY_PROFILE_UPDATE)) &&
-                ((seed = yacyCore.seedDB.getConnected(record.originator())) != null)) try {
+                ((seed = sb.wordIndex.seedDB.getConnected(record.originator())) != null)) try {
                 url = record.attribute("homepage", "");
                 if (url.length() < 12) continue;
                 entry = rowdef.newEntry(new byte[][]{
@@ -226,7 +226,7 @@ public class Supporter {
             } catch (IOException e) {}
 
             if ((record.category().equals(yacyNewsPool.CATEGORY_PROFILE_BROADCAST)) &&
-                ((seed = yacyCore.seedDB.getConnected(record.originator())) != null)) try {
+                ((seed = sb.wordIndex.seedDB.getConnected(record.originator())) != null)) try {
                 url = record.attribute("homepage", "");
                 if (url.length() < 12) continue;
                 entry = rowdef.newEntry(new byte[][]{

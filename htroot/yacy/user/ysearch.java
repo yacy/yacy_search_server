@@ -40,7 +40,6 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.yFormatter;
-import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyURL;
 
 public class ysearch {
@@ -161,7 +160,7 @@ public class ysearch {
             }
 
             // prepare search properties
-            final boolean yacyonline = ((yacyCore.seedDB != null) && (yacyCore.seedDB.mySeed() != null) && (yacyCore.seedDB.mySeed().getPublicAddress() != null));
+            final boolean yacyonline = ((sb.wordIndex.seedDB != null) && (sb.wordIndex.seedDB.mySeed() != null) && (sb.wordIndex.seedDB.mySeed().getPublicAddress() != null));
             final boolean globalsearch = (global) && (yacyonline) && (sb.getConfigBool(plasmaSwitchboard.INDEX_RECEIVE_ALLOW, false));
         
             // do the search

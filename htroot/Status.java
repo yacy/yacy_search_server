@@ -170,16 +170,6 @@ public class Status {
         // ssl support
         prop.put("sslSupport",sb.getConfig("keyStore", "").length() == 0 ? "0" : "1");
 
-        // port forwarding: hostname and port
-        if ((serverCore.portForwardingEnabled) && (serverCore.portForwarding != null)) {
-            prop.put("portForwarding", "1");
-            prop.put("portForwarding_host", serverCore.portForwarding.getHost());
-            prop.put("portForwarding_port", Integer.toString(serverCore.portForwarding.getPort()));
-            prop.put("portForwarding_status", serverCore.portForwarding.isConnected() ? "1" : "0");
-        } else {
-            prop.put("portForwarding", "0");
-        }
-
         if (sb.getConfig("remoteProxyUse", "false").equals("true")) {
             prop.put("remoteProxy", "1");
             prop.putHTML("remoteProxy_host", sb.getConfig("remoteProxyHost", "<unknown>"), true);
@@ -192,35 +182,35 @@ public class Status {
         // peer information
         String thisHash = "";
         final String thisName = sb.getConfig("peerName", "<nameless>");
-        if (yacyCore.seedDB.mySeed() == null)  {
+        if (sb.wordIndex.seedDB.mySeed() == null)  {
             thisHash = "not assigned";
             prop.put("peerAddress", "0");    // not assigned
             prop.put("peerStatistics", "0"); // unknown
         } else {
-            final long uptime = 60000 * Long.parseLong(yacyCore.seedDB.mySeed().get(yacySeed.UPTIME, "0"));
+            final long uptime = 60000 * Long.parseLong(sb.wordIndex.seedDB.mySeed().get(yacySeed.UPTIME, "0"));
             prop.put("peerStatistics", "1");
             prop.put("peerStatistics_uptime", serverDate.formatInterval(uptime));
-            prop.putNum("peerStatistics_pagesperminute", yacyCore.seedDB.mySeed().getPPM());
-            prop.putNum("peerStatistics_queriesperhour", Math.round(6000d * yacyCore.seedDB.mySeed().getQPM()) / 100d);
-            prop.putNum("peerStatistics_links", yacyCore.seedDB.mySeed().getLinkCount());
-            prop.put("peerStatistics_words", yFormatter.number(yacyCore.seedDB.mySeed().get(yacySeed.ICOUNT, "0")));
+            prop.putNum("peerStatistics_pagesperminute", sb.wordIndex.seedDB.mySeed().getPPM());
+            prop.putNum("peerStatistics_queriesperhour", Math.round(6000d * sb.wordIndex.seedDB.mySeed().getQPM()) / 100d);
+            prop.putNum("peerStatistics_links", sb.wordIndex.seedDB.mySeed().getLinkCount());
+            prop.put("peerStatistics_words", yFormatter.number(sb.wordIndex.seedDB.mySeed().get(yacySeed.ICOUNT, "0")));
             prop.putNum("peerStatistics_juniorConnects", yacyCore.peerActions.juniorConnects);
             prop.putNum("peerStatistics_seniorConnects", yacyCore.peerActions.seniorConnects);
             prop.putNum("peerStatistics_principalConnects", yacyCore.peerActions.principalConnects);
             prop.putNum("peerStatistics_disconnects", yacyCore.peerActions.disconnects);
-            prop.put("peerStatistics_connects", yFormatter.number(yacyCore.seedDB.mySeed().get(yacySeed.CCOUNT, "0")));
-            if (yacyCore.seedDB.mySeed().getPublicAddress() == null) {
-                thisHash = yacyCore.seedDB.mySeed().hash;
+            prop.put("peerStatistics_connects", yFormatter.number(sb.wordIndex.seedDB.mySeed().get(yacySeed.CCOUNT, "0")));
+            if (sb.wordIndex.seedDB.mySeed().getPublicAddress() == null) {
+                thisHash = sb.wordIndex.seedDB.mySeed().hash;
                 prop.put("peerAddress", "0"); // not assigned + instructions
                 prop.put("warningGoOnline", "1");
             } else {
-                thisHash = yacyCore.seedDB.mySeed().hash;
+                thisHash = sb.wordIndex.seedDB.mySeed().hash;
                 prop.put("peerAddress", "1"); // Address
-                prop.put("peerAddress_address", yacyCore.seedDB.mySeed().getPublicAddress());
+                prop.put("peerAddress_address", sb.wordIndex.seedDB.mySeed().getPublicAddress());
                 prop.putHTML("peerAddress_peername", sb.getConfig("peerName", "<nameless>").toLowerCase(), true);
             }
         }
-        final String peerStatus = ((yacyCore.seedDB.mySeed() == null) ? yacySeed.PEERTYPE_VIRGIN : yacyCore.seedDB.mySeed().get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN));
+        final String peerStatus = ((sb.wordIndex.seedDB.mySeed() == null) ? yacySeed.PEERTYPE_VIRGIN : sb.wordIndex.seedDB.mySeed().get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN));
         if (peerStatus.equals(yacySeed.PEERTYPE_VIRGIN)) {
             prop.put(PEERSTATUS, "0");
             prop.put("urgentStatusVirgin", "1");
@@ -233,7 +223,7 @@ public class Status {
         } else if (peerStatus.equals(yacySeed.PEERTYPE_PRINCIPAL)) {
             prop.put(PEERSTATUS, "3");
             prop.put("hintStatusPrincipal", "1");
-            prop.put("hintStatusPrincipal_seedURL", yacyCore.seedDB.mySeed().get("seedURL", "?"));
+            prop.put("hintStatusPrincipal_seedURL", sb.wordIndex.seedDB.mySeed().get("seedURL", "?"));
         }
         prop.putHTML("peerName", thisName);
         prop.put("hash", thisHash);
@@ -262,14 +252,14 @@ public class Status {
                 prop.put("seedServer_seedFile", sb.getConfig("seedFilePath", ""));
             }
             prop.put("seedServer_lastUpload",
-                    serverDate.formatInterval(System.currentTimeMillis() - sb.yc.lastSeedUpload_timeStamp));
+                    serverDate.formatInterval(System.currentTimeMillis() - sb.wordIndex.seedDB.lastSeedUpload_timeStamp));
         } else {
             prop.put(SEEDSERVER, "0"); // disabled
         }
         
-        if (yacyCore.seedDB != null && yacyCore.seedDB.sizeConnected() > 0){
+        if (sb.wordIndex.seedDB != null && sb.wordIndex.seedDB.sizeConnected() > 0){
             prop.put("otherPeers", "1");
-            prop.putNum("otherPeers_num", yacyCore.seedDB.sizeConnected());
+            prop.putNum("otherPeers_num", sb.wordIndex.seedDB.sizeConnected());
         }else{
             prop.put("otherPeers", "0"); // not online
         }

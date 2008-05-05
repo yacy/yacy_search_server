@@ -52,8 +52,8 @@ public class rct_p {
         if (post != null) {
             if (post.containsKey("retrieve")) {
                 String peerhash = post.get("peer", null);
-                yacySeed seed = (peerhash == null) ? null : yacyCore.seedDB.getConnected(peerhash);
-                RSSFeed feed = (seed == null) ? null : yacyClient.queryRemoteCrawlURLs(seed, 10);
+                yacySeed seed = (peerhash == null) ? null : sb.wordIndex.seedDB.getConnected(peerhash);
+                RSSFeed feed = (seed == null) ? null : yacyClient.queryRemoteCrawlURLs(sb.wordIndex.seedDB, seed, 10);
                 if (feed != null) {
                     for (RSSMessage item: feed) {
                         //System.out.println("URL=" + item.getLink() + ", desc=" + item.getDescription() + ", pubDate=" + item.getPubDate());
@@ -95,17 +95,17 @@ public class rct_p {
             }
         }
         
-        listHosts(prop);
+        listHosts(sb, prop);
 
         // return rewrite properties
         return prop;
     }
     
-    private static void listHosts(serverObjects prop) {
+    private static void listHosts(plasmaSwitchboard sb, serverObjects prop) {
         // list known hosts
         yacySeed seed;
         int hc = 0;
-        if (yacyCore.seedDB != null && yacyCore.seedDB.sizeConnected() > 0) {
+        if (sb.wordIndex.seedDB != null && sb.wordIndex.seedDB.sizeConnected() > 0) {
             Iterator<yacySeed> e = yacyCore.dhtAgent.getProvidesRemoteCrawlURLs();
             while (e.hasNext()) {
                 seed = e.next();
