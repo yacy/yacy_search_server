@@ -37,6 +37,7 @@ var loader = null;
 var lastwait = 1000;
 var tab = "&nbsp;&nbsp;";
 var lastShow = new Date();
+var set = "";
 
 function fillLines() {
 alert(maxlines);
@@ -114,10 +115,6 @@ function showRSS(RSS) {
   return true;
 }
 
-function idlepingInit() {
-  idleping = window.setInterval("idlepingExec()", 10000);
-}
-
 function idlepingExec() {
   if (lines.length <= maxlines) {
     // feed in some empty lines to make the list appear alive
@@ -125,16 +122,11 @@ function idlepingExec() {
   }
 }
 
-function loaderInit() {
-  loader=window.setInterval("load()", 6000);
-  load();
-}
-
 function load() {
-  getRSS("/xml/feed.rss?set=PEERNEWS&count=50");
+  getRSS("/xml/feed.rss?count=50&set=" + set);
 }
 
-function windowsizing() {
+function init() {
   if (query.maxlines) maxlines = query.maxlines;
   if (query.maxwidth) maxwidth = query.maxwidth;
   if (query.maxtime) maxtime = query.maxtime;
@@ -146,12 +138,16 @@ function windowsizing() {
   if (query.height) {
     document.getElementById("feedbox").style.height = query.height;
   }
+  if (query.set) set = query.set;
+  idleping = window.setInterval("idlepingExec()", 17000);
+  loader=window.setInterval("load()", 10000);
+  load();
 }
 
 </script>
 </head>
 
-<body onload="self.getURLparameters();windowsizing();idlepingInit();loaderInit();">
+<body onload="self.getURLparameters();init();">
   <div id="feedbox">
       <p id="content"></p>
   </div>

@@ -84,7 +84,6 @@ public class yacyCore {
     public static final ThreadGroup publishThreadGroup = new ThreadGroup("publishThreadGroup");
     public static final HashMap<String, String> seedUploadMethods = new HashMap<String, String>();
     public static yacyPeerActions peerActions = null;
-    public static yacyDHTAction dhtAgent = null;
     public static final serverLog log = new serverLog("YACY");
     public static long lastOnlineTime = 0;
     /** pseudo-random key derived from a time-interval while YaCy startup*/
@@ -97,8 +96,7 @@ public class yacyCore {
     private static final int PING_MIN_DBSIZE = 5;
     private static final int PING_MIN_PEERSEEN = 1; // min. accessible to force senior
     private static final long PING_MAX_DBAGE = 15 * 60 * 1000; // in milliseconds
-    public static final String channelName = "PEERNEWS";
-
+    
     // public static yacyShare shareManager = null;
     // public static boolean terminate = false;
 
@@ -118,17 +116,14 @@ public class yacyCore {
         sb.setConfig("yacyStatus", "");
         
         // create a peer news channel
-        RSSFeed peernews = RSSFeed.channels(channelName);
+        RSSFeed peernews = RSSFeed.channels(RSSFeed.PEERNEWS);
         peernews.setMaxsize(1000);
-        peernews.addMessage(new RSSMessage("YaCy started", ""));
+        peernews.addMessage(new RSSMessage("YaCy started", "", ""));
 
         loadSeedUploadMethods();
 
         // deploy peer actions
         peerActions = new yacyPeerActions(sb.wordIndex.seedDB, sb);
-        dhtAgent = new yacyDHTAction(sb.wordIndex.seedDB);
-        peerActions.deploy(dhtAgent);
-        peerActions.deploy(new yacyNewsAction(sb.wordIndex.newsPool));
 
         log.logConfig("CORE INITIALIZED");
         // ATTENTION, VERY IMPORTANT: before starting the thread, the httpd yacy server must be running!

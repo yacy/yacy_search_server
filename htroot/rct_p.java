@@ -106,7 +106,7 @@ public class rct_p {
         yacySeed seed;
         int hc = 0;
         if (sb.wordIndex.seedDB != null && sb.wordIndex.seedDB.sizeConnected() > 0) {
-            Iterator<yacySeed> e = yacyCore.dhtAgent.getProvidesRemoteCrawlURLs();
+            Iterator<yacySeed> e = yacyCore.peerActions.dhtAction.getProvidesRemoteCrawlURLs();
             while (e.hasNext()) {
                 seed = e.next();
                 if (seed != null) {

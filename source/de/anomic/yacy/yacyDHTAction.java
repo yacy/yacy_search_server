@@ -56,7 +56,7 @@ import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroRotateIterator;
 import de.anomic.server.logging.serverLog;
 
-public class yacyDHTAction implements yacyPeerAction {
+public class yacyDHTAction {
    
     protected yacySeedDB seedDB;
     protected kelondroMScoreCluster<String> seedCrawlReady;
@@ -310,9 +310,6 @@ public class yacyDHTAction implements yacyPeerAction {
     
     public void processPeerDeparture(yacySeed peer) {
         seedCrawlReady.deleteScore(peer.hash);
-    }
-    
-    public void processPeerPing(yacySeed peer) {
     }
     
     public static boolean shallBeOwnWord(yacySeedDB seedDB, String wordhash) {

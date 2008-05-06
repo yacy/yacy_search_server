@@ -151,8 +151,8 @@ public class CrawlStartSimple_p {
         if ((sb.wordIndex.seedDB == null) || (sb.wordIndex.seedDB.mySeed().isVirgin()) || (sb.wordIndex.seedDB.mySeed().isJunior())) {
             prop.put("remoteCrawlPeers", "0");
         } else {
-            Iterator<yacySeed> crawlavail = yacyCore.dhtAgent.getAcceptRemoteCrawlSeeds(null, true);
-            Iterator<yacySeed> crawlpendi = yacyCore.dhtAgent.getAcceptRemoteCrawlSeeds(null, false);
+            Iterator<yacySeed> crawlavail = yacyCore.peerActions.dhtAction.getAcceptRemoteCrawlSeeds(null, true);
+            Iterator<yacySeed> crawlpendi = yacyCore.peerActions.dhtAction.getAcceptRemoteCrawlSeeds(null, false);
             if ((!(crawlavail.hasNext())) && (!(crawlpendi.hasNext()))) {
                 prop.put("remoteCrawlPeers", "0"); //no peers availible
             } else {

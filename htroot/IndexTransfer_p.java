@@ -131,7 +131,7 @@ public final class IndexTransfer_p {
         yacySeed seed;
         int hc = 0;
         if ((sb.wordIndex.seedDB != null) && (sb.wordIndex.seedDB.sizeConnected() > 0)) {
-            Iterator<yacySeed> e = yacyCore.dhtAgent.getAcceptRemoteIndexSeeds("------------");
+            Iterator<yacySeed> e = yacyCore.peerActions.dhtAction.getAcceptRemoteIndexSeeds("------------");
             TreeMap<String, String> hostList = new TreeMap<String, String>();
             while (e.hasNext()) {
                 seed = e.next();

@@ -26,12 +26,31 @@
 
 package de.anomic.xml;
 
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class RSSFeed implements Iterable<RSSMessage> {
 
+    // static channel names of feeds
+    public static final String PEERNEWS       = "PEERNEWS";
+    public static final String REMOTESEARCH   = "REMOTESEARCH";
+    public static final String LOCALSEARCH    = "LOCALSEARCH";
+    public static final String REMOTEINDEXING = "REMOTEINDEXING";
+    public static final String LOCALINDEXING  = "LOCALINDEXING";
+    
+    /**
+     * the following private channels are declared to prevent that an access to the feed servlet
+     * gets results from news channels that are not for the public
+     */
+    public static HashSet<String> privateChannels = new HashSet<String>();
+    static {
+        privateChannels.add(LOCALSEARCH);
+        privateChannels.add(LOCALINDEXING);
+    }
+    
+    
     // class variables
     private RSSMessage channel;
     private String imageURL;
@@ -136,7 +155,7 @@ public class RSSFeed implements Iterable<RSSMessage> {
         RSSFeed feed = channels.get(channelName);
         if (feed != null) return feed;
         feed = new RSSFeed();
-        feed.setChannel(new RSSMessage(channelName, ""));
+        feed.setChannel(new RSSMessage(channelName, "", ""));
         channels.put(channelName, feed);
         return feed;
     }

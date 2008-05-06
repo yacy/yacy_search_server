@@ -2587,7 +2587,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
         try {
             // find a list of DHT-peers
             double maxDist = 0.2;
-            ArrayList<yacySeed> seeds = yacyCore.dhtAgent.getDHTTargets(wordIndex.seedDB, log, peerCount, Math.min(8, (int) (this.wordIndex.seedDB.sizeConnected() * maxDist)), dhtChunk.firstContainer().getWordHash(), dhtChunk.lastContainer().getWordHash(), maxDist);
+            ArrayList<yacySeed> seeds = yacyCore.peerActions.dhtAction.getDHTTargets(wordIndex.seedDB, log, peerCount, Math.min(8, (int) (this.wordIndex.seedDB.sizeConnected() * maxDist)), dhtChunk.firstContainer().getWordHash(), dhtChunk.lastContainer().getWordHash(), maxDist);
             if (seeds.size() < peerCount) {
                 log.logWarning("found not enough (" + seeds.size() + ") peers for distribution for dhtchunk [" + dhtChunk.firstContainer().getWordHash() + " .. " + dhtChunk.lastContainer().getWordHash() + "]");
                 return false;

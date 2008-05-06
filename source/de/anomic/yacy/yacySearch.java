@@ -185,7 +185,7 @@ public class yacySearch extends Thread {
         Iterator<String> iter = wordhashes.iterator();
         while (iter.hasNext()) {
             wordhash = iter.next();
-            dhtEnum = yacyCore.dhtAgent.getDHTSeeds(true, wordhash, (float) 0.0);
+            dhtEnum = yacyCore.peerActions.dhtAction.getDHTSeeds(true, wordhash, (float) 0.0);
             c = seedcount;
             while (dhtEnum.hasNext() && c > 0) {
                 seed = (yacySeed) dhtEnum.next();

@@ -46,43 +46,42 @@ package de.anomic.yacy;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 
 import de.anomic.crawler.NoticedURL;
 import de.anomic.http.HttpClient;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.server.serverCodings;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDate;
+import de.anomic.server.logging.serverLog;
 import de.anomic.tools.nxTools;
+import de.anomic.xml.RSSFeed;
+import de.anomic.xml.RSSMessage;
 
 public class yacyPeerActions {
    
     private yacySeedDB seedDB;
     private plasmaSwitchboard sb;
-    private HashSet<yacyPeerAction> actions;
     private HashMap<String, String> userAgents;
     public  long juniorConnects;
     public  long seniorConnects;
     public  long principalConnects;
     public  long disconnects;
     private int  bootstrapLoadTimeout;
+    public  yacyDHTAction dhtAction;
     
     public yacyPeerActions(yacySeedDB seedDB, plasmaSwitchboard switchboard) {
         this.seedDB = seedDB;
         this.sb = switchboard;
-        this.actions = new HashSet<yacyPeerAction>();
         this.userAgents = new HashMap<String, String>();
         this.juniorConnects = 0;
         this.seniorConnects = 0;
         this.principalConnects = 0;
         this.disconnects = 0;
         this.bootstrapLoadTimeout = (int) switchboard.getConfigLong("bootstrapLoadTimeout", 6000);
-    }
-    
-    public void deploy(yacyPeerAction action) {
-        actions.add(action);
+        this.dhtAction = new yacyDHTAction(sb.wordIndex.seedDB);
     }
     
     public void updateMySeed() {
@@ -348,33 +347,30 @@ public class yacyPeerActions {
         }
     }
 
-    private final void disconnectPeer(yacySeed seed, String cause) {
-        // we do this if we did not get contact with the other peer
-	    yacyCore.log.logFine("connect: no contact to a " + seed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN) + " peer '" + seed.getName() + "' at " + seed.getPublicAddress() + ". Cause: " + cause);
-        synchronized (seedDB) {
-	        if (!seedDB.hasDisconnected(seed.hash)) { disconnects++; }
-            seed.put("dct", Long.toString(System.currentTimeMillis()));
-	        seedDB.addDisconnected(seed); // update info
-        }
-    }
-
     public boolean peerArrival(yacySeed peer, boolean direct) {
         if (peer == null) return false;
         boolean res = connectPeer(peer, direct);
-        // perform all actions if peer is effective new
         if (res) {
-            Iterator<yacyPeerAction> i = actions.iterator();
-            while (i.hasNext()) i.next().processPeerArrival(peer, direct);
+            // perform all actions if peer is effective new
+            dhtAction.processPeerArrival(peer, direct);
+            this.processPeerArrival(peer, direct);
+            RSSFeed.channels(RSSFeed.PEERNEWS).addMessage(new RSSMessage(peer.getName() + " has joined the network", "", ""));
         }
         return res;
     }
     
     public void peerDeparture(yacySeed peer, String cause) {
         if (peer == null) return;
-        disconnectPeer(peer, cause);
+        // we do this if we did not get contact with the other peer
+        yacyCore.log.logFine("connect: no contact to a " + peer.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN) + " peer '" + peer.getName() + "' at " + peer.getPublicAddress() + ". Cause: " + cause);
+        synchronized (seedDB) {
+            if (!seedDB.hasDisconnected(peer.hash)) { disconnects++; }
+            peer.put("dct", Long.toString(System.currentTimeMillis()));
+            seedDB.addDisconnected(peer); // update info
+        }
         // perform all actions
-        Iterator<yacyPeerAction> i = actions.iterator();
-        while (i.hasNext()) i.next().processPeerDeparture(peer);
+        dhtAction.processPeerDeparture(peer);
+        RSSFeed.channels(RSSFeed.PEERNEWS).addMessage(new RSSMessage(peer.getName() + " has left the network", "", ""));
     }
     
     public void peerPing(yacySeed peer) {
@@ -382,8 +378,30 @@ public class yacyPeerActions {
         // this is called only if the peer has junior status
         seedDB.addPotential(peer);
         // perform all actions
-        Iterator<yacyPeerAction> i = actions.iterator();
-        while (i.hasNext()) i.next().processPeerPing(peer);
+        processPeerArrival(peer, true);
+        RSSFeed.channels(RSSFeed.PEERNEWS).addMessage(new RSSMessage(peer.getName() + " has sent me a ping", "", ""));
+    }
+    
+    private void processPeerArrival(yacySeed peer, boolean direct) {
+        String recordString = peer.get("news", null);
+        //System.out.println("### triggered news arrival from peer " + peer.getName() + ", news " + ((recordString == null) ? "empty" : "attached"));
+        if ((recordString == null) || (recordString.length() == 0)) return;
+        String decodedString = de.anomic.tools.crypt.simpleDecode(recordString, "");
+        yacyNewsRecord record = yacyNewsRecord.newRecord(decodedString);
+        if (record != null) {
+            //System.out.println("### news arrival from peer " + peer.getName() + ", decoded=" + decodedString + ", record=" + recordString + ", news=" + record.toString());
+            String cre1 = (String) serverCodings.string2map(decodedString, ",").get("cre");
+            String cre2 = (String) serverCodings.string2map(record.toString(), ",").get("cre");
+            if ((cre1 == null) || (cre2 == null) || (!(cre1.equals(cre2)))) {
+                System.out.println("### ERROR - cre are not equal: cre1=" + cre1 + ", cre2=" + cre2);
+                return;
+            }
+            try {
+                synchronized (sb.wordIndex.newsPool) {this.sb.wordIndex.newsPool.enqueueIncomingNews(record);}
+            } catch (IOException e) {
+                serverLog.logSevere("YACY", "processPeerArrival", e);
+            }
+        }
     }
     
     public void setUserAgent(String IP, String userAgent) {

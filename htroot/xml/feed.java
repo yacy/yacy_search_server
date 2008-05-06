@@ -27,6 +27,7 @@
 package xml;
 
 import de.anomic.http.httpHeader;
+import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.xml.RSSFeed;
@@ -34,50 +35,60 @@ import de.anomic.xml.RSSMessage;
 
 public class feed {
  
- public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
-     //plasmaSwitchboard sb = (plasmaSwitchboard) env;
-     
-     // insert default values
-     serverObjects prop = new serverObjects();
-     prop.put("channel_title", "");
-     prop.put("channel_description", "");
-     prop.put("channel_pubDate", "");
-     prop.put("item", "0");
-     
-     if ((post == null) || (env == null)) return prop;
-     //boolean authorized = sb.adminAuthenticated(header) >= 2;
-     
-     String channelName = post.get("set");
-     if (channelName == null) return prop;
-     
-     RSSFeed feed = RSSFeed.channels(channelName);
-     if ((feed == null) || (feed.size() == 0)) return prop;
-     int count = post.getInt("count", 100);
-     
-     RSSMessage message = feed.getChannel();
-     if (message != null) {
-         prop.put("channel_title", message.getTitle());
-         prop.put("channel_description", message.getDescription());
-         prop.put("channel_pubDate", message.getPubDate());
-     }
-     int c = 0;
-     while ((count > 0) && (feed.size() > 0)) {
-         message = feed.pollMessage();
-         if (message == null) continue;
-         
-         // create RSS entry
-         prop.putHTML("item_" + c + "_title", message.getTitle());
-         prop.putHTML("item_" + c + "_description", message.getDescription());
-         prop.putHTML("item_" + c + "_link", message.getLink());
-         prop.put("item_" + c + "_pubDate", message.getPubDate());
-         prop.put("item_" + c + "_guid", message.getGuid());
-         c++;
-         count--;
-     }
-     prop.put("item", c);
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
+        plasmaSwitchboard sb = (plasmaSwitchboard) env;
 
-     // return rewrite properties
-     return prop;
- }
+        // insert default values
+        serverObjects prop = new serverObjects();
+        prop.put("channel_title", "");
+        prop.put("channel_description", "");
+        prop.put("channel_pubDate", "");
+        prop.put("item", "0");
+
+        if ((post == null) || (env == null)) return prop;
+        boolean authorized = sb.verifyAuthentication(header, false);
+
+        String channelNames = post.get("set");
+        if (channelNames == null) return prop;
+        String[] channels = channelNames.split(","); // several channel names can be given and separated by comma
+
+        int messageCount = 0;
+        int messageMaxCount = Math.min(post.getInt("count", 100), 1000);
+
+        RSSFeed feed;
+        channelIteration: for (int channelIndex = 0; channelIndex < channels.length; channelIndex++) {
+            // prevent that unauthorized access to this servlet get results from private data
+            if ((!authorized) && (RSSFeed.privateChannels.contains(channels[channelIndex]))) continue channelIteration; // allow only public channels if not authorized
+
+            // read the channel
+            feed = RSSFeed.channels(channels[channelIndex]);
+            if ((feed == null) || (feed.size() == 0)) continue channelIteration;
+
+            RSSMessage message = feed.getChannel();
+            if (message != null) {
+                prop.put("channel_title", message.getTitle());
+                prop.put("channel_description", message.getDescription());
+                prop.put("channel_pubDate", message.getPubDate());
+            }
+            while ((messageMaxCount > 0) && (feed.size() > 0)) {
+                message = feed.pollMessage();
+                if (message == null) continue;
+
+                // create RSS entry
+                prop.putHTML("item_" + messageCount + "_title", channels[channelIndex] + ": " + message.getTitle());
+                prop.putHTML("item_" + messageCount + "_description", message.getDescription());
+                prop.putHTML("item_" + messageCount + "_link", message.getLink());
+                prop.put("item_" + messageCount + "_pubDate", message.getPubDate());
+                prop.put("item_" + messageCount + "_guid", message.getGuid());
+                messageCount++;
+                messageMaxCount--;
+            }
+            if (messageMaxCount == 0) break channelIteration;
+        }
+        prop.put("item", messageCount);
+
+        // return rewrite properties
+        return prop;
+    }
  
 }

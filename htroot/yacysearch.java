@@ -68,6 +68,8 @@ import de.anomic.server.serverProfiling;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.yFormatter;
+import de.anomic.xml.RSSFeed;
+import de.anomic.xml.RSSMessage;
 import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacyNewsRecord;
 import de.anomic.yacy.yacyURL;
@@ -272,6 +274,7 @@ public class yacysearch {
             
             // log
             serverLog.logInfo("LOCAL_SEARCH", "INIT WORD SEARCH: " + theQuery.queryString + ":" + theQuery.queryHashes + " - " + theQuery.neededResults() + " links to be computed, " + theQuery.displayResults() + " lines to be displayed");
+            RSSFeed.channels(RSSFeed.LOCALSEARCH).addMessage(new RSSMessage("Local Search Request", theQuery.queryString, ""));
             long timestamp = System.currentTimeMillis();
 
             // create a new search event

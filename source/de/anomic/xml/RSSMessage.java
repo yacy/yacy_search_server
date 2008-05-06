@@ -59,10 +59,11 @@ public class RSSMessage {
     
     private HashMap<String, String> map;
 
-    public RSSMessage(String title, String description) {
+    public RSSMessage(String title, String description, String link) {
         this();
         setValue("title", title);
         setValue("description", description);
+        setValue("link", link);
         setValue("pubDate", new Date().toString());
         setValue("guid", Integer.toHexString((title + description).hashCode()));
     }
