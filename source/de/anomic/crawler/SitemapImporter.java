@@ -1,4 +1,4 @@
-//AbstractParser.java 
+//SitemapImporter.java 
 //------------------------
 //part of YaCy
 //(C) by Michael Peter Christen; mc@anomic.de
@@ -42,24 +42,34 @@
 //the intact and unchanged copyright notice.
 //Contributions and changes to the program code must be marked as such.
 
-package de.anomic.plasma.dbImport;
+package de.anomic.crawler;
 
-import java.util.HashMap;
-
-import de.anomic.crawler.CrawlProfile;
 import de.anomic.data.SitemapParser;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.yacy.yacyURL;
 
-public class SitemapImporter extends AbstractImporter implements dbImporter {
+public class SitemapImporter extends AbstractImporter implements Importer {
 
 	private SitemapParser parser = null;
 	private yacyURL sitemapURL = null;
+	private ImporterManager superviser;
 	
-	public SitemapImporter(plasmaSwitchboard switchboard) {
-		super("sitemap",switchboard);
-	}
-
+	public SitemapImporter(plasmaSwitchboard sb, ImporterManager importManager, yacyURL sitemapURL, CrawlProfile.entry profileEntry) throws ImporterException {
+		super("sitemap");
+		this.superviser = importManager;
+        try {
+            // getting the sitemap URL
+            this.sitemapURL = sitemapURL;
+            
+            // creating the sitemap parser
+            this.parser = new SitemapParser(sb, this.sitemapURL, profileEntry);
+        } catch (Exception e) {
+            throw new ImporterException("Unable to initialize Importer",e);
+        }
+    }
+    
+    
+    
 	public long getEstimatedTime() {
 		long t = getElapsedTime();
 		int p = getProcessingStatusPercent();
@@ -67,14 +77,14 @@ public class SitemapImporter extends AbstractImporter implements dbImporter {
 	}
 
 	/**
-	 * @see dbImporter#getJobName()
+	 * @see Importer#getJobName()
 	 */
 	public String getJobName() {
 		return this.sitemapURL.toString();
 	}
 
 	/**
-	 * @see dbImporter#getProcessingStatusPercent()
+	 * @see Importer#getProcessingStatusPercent()
 	 */
 	public int getProcessingStatusPercent() {
 		if (this.parser == null) return 0;
@@ -87,7 +97,7 @@ public class SitemapImporter extends AbstractImporter implements dbImporter {
 	}
 
 	/**
-	 * @see dbImporter#getStatus()
+	 * @see Importer#getStatus()
 	 */
 	public String getStatus() {
         StringBuffer theStatus = new StringBuffer();
@@ -96,33 +106,13 @@ public class SitemapImporter extends AbstractImporter implements dbImporter {
         
         return theStatus.toString();
 	}
-
-	/**
-	 * @see dbImporter#init(HashMap)
-	 * @see AbstractImporter#init(HashMap)
-	 */
-	public void init(plasmaSwitchboard switchboard, int cacheSize) throws ImporterException {
-        super.init();
-	}
-	
-	public void initSitemap(yacyURL sitemapURL, CrawlProfile.entry profileEntry) throws ImporterException {
-        try {
-            // getting the sitemap URL
-            this.sitemapURL = sitemapURL;
-            
-            // creating the sitemap parser
-            this.parser = new SitemapParser(this.sb,this.sitemapURL, profileEntry);
-        } catch (Exception e) {
-            throw new ImporterException("Unable to initialize Importer",e);
-        }
-    }
 	
 	public void run() {
 		try {
 			this.parser.parse();
 		} finally {
 			this.globalEnd = System.currentTimeMillis();
-			this.sb.dbImportManager.finishedJobs.add(this);			
+			this.superviser.finishedJobs.add(this);			
 		}
 	}
 }

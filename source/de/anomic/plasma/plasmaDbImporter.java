@@ -1,22 +1,18 @@
-package de.anomic.plasma.dbImport;
+package de.anomic.plasma;
 
-import java.io.File;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.TreeSet;
 
+import de.anomic.crawler.AbstractImporter;
+import de.anomic.crawler.Importer;
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexRWIRowEntry;
 import de.anomic.index.indexURLReference;
-import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.server.serverDate;
 
-public class plasmaDbImporter extends AbstractImporter implements dbImporter {
-
-	private File importPrimaryPath, importSecondaryPath;
+public class plasmaDbImporter extends AbstractImporter implements Importer {
 	
 	/**
 	 * the source word index (the DB to import)
@@ -36,21 +32,22 @@ public class plasmaDbImporter extends AbstractImporter implements dbImporter {
     private long urlCounter = 0, wordCounter = 0, entryCounter = 0, notBoundEntryCounter = 0;
     
 
-    public plasmaDbImporter(plasmaSwitchboard sb, plasmaWordIndex homeWI, plasmaWordIndex importWI) {
-    	super("PLASMADB",sb);
+    public plasmaDbImporter(plasmaWordIndex homeWI, plasmaWordIndex importWI) {
+    	super("PLASMADB");
         this.homeWordIndex = homeWI;
         this.importWordIndex = importWI;
-    }
-    
-    /**
-     * @see dbImporter#getJobName()
-     */
-    public String getJobName() {
-        return this.importPrimaryPath.toString();
+        this.importStartSize = this.importWordIndex.size();
     }
 
     /**
-     * @see dbImporter#getStatus()
+     * @see Importer#getJobName()
+     */
+    public String getJobName() {
+        return this.importWordIndex.getLocation(true).toString();
+    }
+
+    /**
+     * @see Importer#getStatus()
      */
     public String getStatus() {
         StringBuffer theStatus = new StringBuffer();
@@ -64,46 +61,6 @@ public class plasmaDbImporter extends AbstractImporter implements dbImporter {
         return theStatus.toString();
     }
     
-    //public void init(File thePrimaryPath, File theSecondaryPath, int theCacheSize, long preloadTime) {
-    /**
-     * @throws ImporterException 
-     * @see dbImporter#init(HashMap)
-     */
-    public void init(plasmaSwitchboard db, int cacheSize) throws ImporterException {
-        super.init();
-        
-        // TODO: we need more errorhandling here
-        this.importPrimaryPath = sb.indexPrimaryPath;
-        this.importSecondaryPath = sb.indexSecondaryPath;
-
-        this.cacheSize = cacheSize;
-        if (this.cacheSize < 2*1024*1024) this.cacheSize = 8*1024*1024;
-        
-        // configure import DB
-        String errorMsg = null;
-        if (!this.importPrimaryPath.exists()) errorMsg = "Primary Import directory does not exist.";
-        if (!this.importPrimaryPath.canRead()) errorMsg = "Primary Import directory is not readable.";
-        if (!this.importPrimaryPath.canWrite()) errorMsg = "Primary Import directory is not writeable";
-        if (!this.importPrimaryPath.isDirectory()) errorMsg = "Primary Import directory is not a directory.";
-        if (errorMsg != null) {
-            this.log.logSevere(errorMsg + "\nName: " + this.importPrimaryPath.getAbsolutePath());
-            throw new IllegalArgumentException(errorMsg);
-        }
-        if (!this.importSecondaryPath.exists()) errorMsg = "Secondary Import directory does not exist.";
-        if (!this.importSecondaryPath.canRead()) errorMsg = "Secondary Import directory is not readable.";
-        if (!this.importSecondaryPath.canWrite()) errorMsg = "Secondary Import directory is not writeable";
-        if (!this.importSecondaryPath.isDirectory()) errorMsg = "Secondary Import directory is not a directory.";
-        if (errorMsg != null) {
-            this.log.logSevere(errorMsg + "\nName: " + this.importSecondaryPath.getAbsolutePath());
-            throw new IllegalArgumentException(errorMsg);
-        }
-        
-        this.log.logFine("Initializing source word index db.");
-        this.importWordIndex = new plasmaWordIndex(sb.getConfig("network.unit.name", ""), this.log, this.importPrimaryPath, this.importSecondaryPath);
-
-        this.importStartSize = this.importWordIndex.size();
-    }
-    
     public void run() {
         try {
             importWordsDB();
@@ -114,7 +71,7 @@ public class plasmaDbImporter extends AbstractImporter implements dbImporter {
     }
 
     /**
-     * @see dbImporter#getProcessingStatusPercent()
+     * @see Importer#getProcessingStatusPercent()
      */
     public int getProcessingStatusPercent() {
         // thid seems to be better:
@@ -125,7 +82,7 @@ public class plasmaDbImporter extends AbstractImporter implements dbImporter {
     }
 
     /**
-     * @see dbImporter#getElapsedTime()
+     * @see Importer#getElapsedTime()
      */
     public long getEstimatedTime() {
         return (this.wordCounter==0)?0:((this.importStartSize*getElapsedTime())/this.wordCounter)-getElapsedTime();
@@ -135,7 +92,7 @@ public class plasmaDbImporter extends AbstractImporter implements dbImporter {
         this.log.logInfo("STARTING DB-IMPORT");  
         
         try {
-            this.log.logInfo("Importing DB from '" + this.importPrimaryPath.getAbsolutePath() + "'/'" + this.importSecondaryPath.getAbsolutePath() + "'");
+            this.log.logInfo("Importing DB from '" + this.importWordIndex.getLocation(true).getAbsolutePath() + "'");
             this.log.logInfo("Home word index contains " + homeWordIndex.size() + " words and " + homeWordIndex.countURL() + " URLs.");
             this.log.logInfo("Import word index contains " + this.importWordIndex.size() + " words and " + this.importWordIndex.countURL() + " URLs.");                        
             
@@ -267,7 +224,5 @@ public class plasmaDbImporter extends AbstractImporter implements dbImporter {
             if (this.importWordIndex != null) try { this.importWordIndex.close(); } catch (Exception e){}
         }
     }    
-    
 
-    
 }

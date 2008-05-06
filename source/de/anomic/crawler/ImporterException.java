@@ -1,4 +1,4 @@
-package de.anomic.plasma.dbImport;
+package de.anomic.crawler;
 
 public class ImporterException extends Exception {
 

@@ -635,10 +635,10 @@ public final class yacy {
             log.logInfo("STARTING URL CLEANUP");
             
             // db containing all currently loades urls
-            indexRepositoryReference currentUrlDB = new indexRepositoryReference(indexSecondaryRoot, networkName);
+            indexRepositoryReference currentUrlDB = new indexRepositoryReference(new File(indexSecondaryRoot, networkName));
             
             // db used to hold all neede urls
-            indexRepositoryReference minimizedUrlDB = new indexRepositoryReference(indexRoot2, networkName);
+            indexRepositoryReference minimizedUrlDB = new indexRepositoryReference(new File(indexRoot2, networkName));
             
             int cacheMem = (int)(serverMemory.max() - serverMemory.total());
             if (cacheMem < 2048000) throw new OutOfMemoryError("Not enough memory available to start clean up.");
@@ -817,7 +817,7 @@ public final class yacy {
         File root = homePath;
         File indexroot = new File(root, "DATA/INDEX");
         try {serverLog.configureLogging(homePath, new File(homePath, "DATA/LOG/yacy.logging"));} catch (Exception e) {}
-        indexRepositoryReference currentUrlDB = new indexRepositoryReference(indexroot, networkName);
+        indexRepositoryReference currentUrlDB = new indexRepositoryReference(new File(indexroot, networkName));
         currentUrlDB.deadlinkCleaner(null);
         currentUrlDB.close();
     }

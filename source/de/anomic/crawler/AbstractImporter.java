@@ -1,45 +1,30 @@
-package de.anomic.plasma.dbImport;
+package de.anomic.crawler;
 
-import java.util.HashMap;
-
-import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.logging.serverLog;
 
-public abstract class AbstractImporter extends Thread implements dbImporter{
+public abstract class AbstractImporter extends Thread implements Importer {
 
     protected int jobID = -1;
     protected String jobType;
     protected serverLog log;
     protected boolean stopped = false;
     protected boolean paused = false;
-    
-    protected int cacheSize;
-    
     protected long globalStart = System.currentTimeMillis();
     protected long globalEnd;
     protected long globalPauseLast;
     protected long globalPauseDuration;
     protected String error;
-    
-    protected plasmaSwitchboard sb;
 
-    AbstractImporter(String theJobType, plasmaSwitchboard switchboard) {
-    	super(switchboard.dbImportManager.runningJobs,"");
+    public AbstractImporter(String theJobType) {
     	this.jobType = theJobType;
-    	this.sb = switchboard;
+
+        // initializing the logger and setting a more verbose thread name
+        this.log = new serverLog("IMPORT_" + this.jobType + "_" + this.jobID);
+        this.setName("IMPORT_" + this.jobType + "_" + this.jobID);
     }
     
     public String getError() {
         return this.error;
-    }    
-    
-    /**
-     * @see dbImporter#init(HashMap)
-     */
-    public void init() {
-        // initializing the logger and setting a more verbose thread name
-        this.log = new serverLog("IMPORT_" + this.jobType + "_" + this.jobID);
-        this.setName("IMPORT_" + this.jobType + "_" + this.jobID);
     }
     
     public void startIt() {

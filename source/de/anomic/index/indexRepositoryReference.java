@@ -57,26 +57,9 @@ public final class indexRepositoryReference {
     kelondroIndex urlIndexFile;
     private Export exportthread = null; // will habe a export thread assigned if exporter is running
     
-    public indexRepositoryReference(File indexSecondaryRoot, String networkName) {
+    public indexRepositoryReference(File indexSecondaryPath) {
         super();
-        File indexSecondaryPath = new File(indexSecondaryRoot, networkName);
-        File indexSecondaryTextLocation = new File(indexSecondaryPath, "TEXT");
-        if (!indexSecondaryTextLocation.exists()) {
-            // patch old index locations; the secondary path is patched in plasmaCrawlLURL
-            File oldSecondaryPath = new File(new File(indexSecondaryRoot, "PUBLIC"), "TEXT");
-            File oldSecondaryTextLocation = new File(new File(indexSecondaryRoot, "PUBLIC"), "TEXT");
-            if (oldSecondaryPath.exists() && oldSecondaryTextLocation.exists()) {
-                // move the text folder from the old location to the new location
-                assert !indexSecondaryTextLocation.exists();
-                indexSecondaryTextLocation.mkdirs();
-                if (oldSecondaryTextLocation.renameTo(indexSecondaryTextLocation)) {
-                    if (!oldSecondaryPath.delete()) oldSecondaryPath.deleteOnExit();
-                } else {
-                    indexSecondaryTextLocation = oldSecondaryTextLocation; // emergency case: stay with old directory
-                }
-            }
-        }
-        
+        File indexSecondaryTextLocation = new File(indexSecondaryPath, "TEXT");        
         urlIndexFile = new kelondroSplitTable(indexSecondaryTextLocation, "urls", indexURLReference.rowdef, false);
     }
 

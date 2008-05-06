@@ -111,11 +111,6 @@ public class SitemapParser extends DefaultHandler {
     private CrawlProfile.entry crawlingProfile = null;
 
     /**
-     * Reference to the plasmaswitchboard.
-     */
-    private plasmaSwitchboard switchboard = null;
-
-    /**
      * Name of the current XML element
      */
     private String currentElement = null;
@@ -154,13 +149,11 @@ public class SitemapParser extends DefaultHandler {
      * last modification date of the {@link #nextURL}
      */
     private Date lastMod = null;
-
+    private plasmaSwitchboard sb;
+    
     public SitemapParser(plasmaSwitchboard sb, yacyURL sitemap, CrawlProfile.entry theCrawlingProfile) {
-        if (sb == null)
-            throw new NullPointerException("The switchboard must not be null");
-        if (sitemap == null)
-            throw new NullPointerException("The sitemap URL must not be null");
-        this.switchboard = sb;
+        assert sitemap != null;
+        this.sb = sb;
         this.siteMapURL = sitemap;
 
         if (theCrawlingProfile == null) {
@@ -281,10 +274,10 @@ public class SitemapParser extends DefaultHandler {
 
             // check if the url is known and needs to be recrawled
             if (this.lastMod != null) {
-                String dbocc = this.switchboard.urlExists(nexturlhash);
+                String dbocc = this.sb.urlExists(nexturlhash);
                 if ((dbocc != null) && (dbocc.equalsIgnoreCase("loaded"))) {
                     // the url was already loaded. we need to check the date
-                    indexURLReference oldEntry = switchboard.wordIndex.getURL(nexturlhash, null, 0);
+                    indexURLReference oldEntry = this.sb.wordIndex.getURL(nexturlhash, null, 0);
                     if (oldEntry != null) {
                         Date modDate = oldEntry.moddate();
                         // check if modDate is null
@@ -296,9 +289,9 @@ public class SitemapParser extends DefaultHandler {
 
             // URL needs to crawled
             String error = null;
-            error = this.switchboard.crawlStacker.stackCrawl(url,
+            error = this.sb.crawlStacker.stackCrawl(url,
                                                              null, // this.siteMapURL.toString(),
-                                                             this.switchboard.wordIndex.seedDB.mySeed().hash, this.nextURL, new Date(),
+                                                             this.sb.wordIndex.seedDB.mySeed().hash, this.nextURL, new Date(),
                                                              0, this.crawlingProfile);
 
             if (error != null) {
@@ -306,9 +299,9 @@ public class SitemapParser extends DefaultHandler {
                     this.logger.logInfo("The URL '" + this.nextURL + "' can not be crawled. Reason: " + error);
 
                     // insert URL into the error DB
-                    ZURL.Entry ee = this.switchboard.crawlQueues.errorURL.newEntry(
+                    ZURL.Entry ee = this.sb.crawlQueues.errorURL.newEntry(
                             new CrawlEntry(
-                                    switchboard.wordIndex.seedDB.mySeed().hash, 
+                                    sb.wordIndex.seedDB.mySeed().hash, 
                                     new yacyURL(this.nextURL, null), 
                                     "", 
                                     "", 
@@ -317,12 +310,12 @@ public class SitemapParser extends DefaultHandler {
                                     0, 
                                     0, 
                                     0),
-                            this.switchboard.wordIndex.seedDB.mySeed().hash,
+                            this.sb.wordIndex.seedDB.mySeed().hash,
                             new Date(),
                             1,
                             error);
                     ee.store();
-                    this.switchboard.crawlQueues.errorURL.push(ee);
+                    this.sb.crawlQueues.errorURL.push(ee);
                 } catch (MalformedURLException e) {/* ignore this */
                 }
             } else {
@@ -353,7 +346,7 @@ public class SitemapParser extends DefaultHandler {
     }
 
     private CrawlProfile.entry createProfile(String domainName, yacyURL sitemapURL) {
-        return this.switchboard.profilesActiveCrawls.newEntry(domainName, sitemapURL,
+        return this.sb.profilesActiveCrawls.newEntry(domainName, sitemapURL,
         // crawlingFilter
                                                               ".*", ".*",
                                                               // Depth

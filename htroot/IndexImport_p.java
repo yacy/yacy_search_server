@@ -51,9 +51,10 @@
 import java.io.PrintStream;
 import java.util.Date;
 
+import de.anomic.crawler.NoticeURLImporter;
+import de.anomic.crawler.Importer;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.dbImport.dbImporter;
 import de.anomic.server.serverByteBuffer;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
@@ -71,27 +72,12 @@ public final class IndexImport_p {
         if (post != null) {
             if (post.containsKey("startIndexDbImport")) {
                 try {
-                    String importType = (String) post.get("importType");
-                    int cacheSize = post.getInt("cacheSize", 0);
-                    boolean startImport = true;
-                    
-//                    // check if there is an already running thread with the same import path
-//                    Thread[] importThreads = new Thread[plasmaDbImporter.runningJobs.activeCount()*2];
-//                    activeCount = plasmaDbImporter.runningJobs.enumerate(importThreads);
-//                    
-//                    for (int i=0; i < activeCount; i++) {
-//                        plasmaDbImporter currThread = (plasmaDbImporter) importThreads[i];
-//                        if (currThread.getJobName().equals(new File(importPath))) {
-//                            prop.put("error",2);
-//                            startImport = false;
-//                        }
-//                    }                    
-//                    
-                    
+                    boolean startImport = true;                    
                     if (startImport) {
-                        dbImporter importerThread = switchboard.dbImportManager.getNewImporter(importType);
+                        Importer importerThread = new NoticeURLImporter(switchboard.plasmaPath, switchboard.crawlQueues, switchboard.profilesActiveCrawls, switchboard.dbImportManager);
+
                         if (importerThread != null) {
-                            importerThread.init(switchboard, cacheSize);
+                            importerThread.setJobID(switchboard.dbImportManager.generateUniqueJobID());
                             importerThread.startIt();                            
                         }
                         prop.put("LOCATION","");
@@ -119,7 +105,7 @@ public final class IndexImport_p {
             ) {
                 // getting the job nr of the thread
                 String jobID = (String) post.get("jobNr");
-                dbImporter importer = switchboard.dbImportManager.getImporterByID(Integer.valueOf(jobID).intValue());
+                Importer importer = switchboard.dbImportManager.getImporterByID(Integer.valueOf(jobID).intValue());
                 if (importer != null) {
                     if (post.containsKey("stopIndexDbImport")) {
                         try {
@@ -145,11 +131,11 @@ public final class IndexImport_p {
         /*
          * Loop over all currently running jobs
          */
-        dbImporter[] importThreads = switchboard.dbImportManager.getRunningImporter();
+        Importer[] importThreads = switchboard.dbImportManager.getRunningImporter();
         activeCount = importThreads.length;
         
         for (int i=0; i < activeCount; i++) {
-            dbImporter currThread = importThreads[i];
+            Importer currThread = importThreads[i];
 
             // get import type
             prop.put("running.jobs_" + i + "_type", currThread.getJobType());
@@ -183,9 +169,9 @@ public final class IndexImport_p {
         /*
          * Loop over all finished jobs 
          */
-        dbImporter[] finishedJobs = switchboard.dbImportManager.getFinishedImporter();
+        Importer[] finishedJobs = switchboard.dbImportManager.getFinishedImporter();
         for (int i=0; i<finishedJobs.length; i++) {
-            dbImporter currThread = finishedJobs[i];
+            Importer currThread = finishedJobs[i];
             String error = currThread.getError();
             String fullName = currThread.getJobName().toString();
             String shortName = (fullName.length()>30)?fullName.substring(0,12) + "..." + fullName.substring(fullName.length()-22,fullName.length()):fullName;            

@@ -37,12 +37,12 @@ import java.util.regex.PatternSyntaxException;
 
 import de.anomic.crawler.CrawlEntry;
 import de.anomic.crawler.CrawlProfile;
+import de.anomic.crawler.SitemapImporter;
 import de.anomic.crawler.ZURL;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterWriter;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.dbImport.SitemapImporter;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -340,10 +340,9 @@ public class WatchCrawler_p {
                     				storeHTCache, true, crawlOrder, xsstopw, xdstopw, xpstopw);
                     		
                     		// create a new sitemap importer
-                    		SitemapImporter importerThread = (SitemapImporter) sb.dbImportManager.getNewImporter("sitemap");
+                    		SitemapImporter importerThread = new SitemapImporter(sb, sb.dbImportManager, new yacyURL(sitemapURLStr, null), pe);
                     		if (importerThread != null) {
-                    			importerThread.init(sb, 0);
-                    			importerThread.initSitemap(new yacyURL(sitemapURLStr, null), pe);
+                    		    importerThread.setJobID(sb.dbImportManager.generateUniqueJobID());
                     			importerThread.startIt();
                     		}
                     	} catch (Exception e) {

@@ -1,4 +1,4 @@
-package de.anomic.plasma.dbImport;
+package de.anomic.crawler;
 
 import java.io.File;
 import java.io.IOException;
@@ -6,12 +6,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 
-import de.anomic.crawler.CrawlEntry;
-import de.anomic.crawler.CrawlProfile;
-import de.anomic.crawler.NoticedURL;
 import de.anomic.plasma.plasmaSwitchboard;
 
-public class plasmaCrawlNURLImporter extends AbstractImporter implements dbImporter {
+public class NoticeURLImporter extends AbstractImporter implements Importer {
 
 	private File plasmaPath = null;
     private HashSet<String> importProfileHandleCache = new HashSet<String>();
@@ -20,45 +17,24 @@ public class plasmaCrawlNURLImporter extends AbstractImporter implements dbImpor
     private int importStartSize;
     private int urlCount = 0;
     private int profileCount = 0;
+    private CrawlQueues crawlQueues;
+    private CrawlProfile activeCrawls;
+    private ImporterManager dbImportManager;
     
-    public plasmaCrawlNURLImporter(plasmaSwitchboard theSb) {
-    	super("NURL",theSb);
-    }
-
-    public long getEstimatedTime() {
-        return (this.urlCount==0)?0:((this.importStartSize*getElapsedTime())/(this.urlCount))-getElapsedTime();
-    }
-
-    public String getJobName() {
-        return this.plasmaPath.toString();
-    }
-
-    public int getProcessingStatusPercent() {
-        return (this.urlCount)/((this.importStartSize<100)?1:(this.importStartSize)/100);
-    }
-
-    public String getStatus() {
-        StringBuffer theStatus = new StringBuffer();
+    public NoticeURLImporter(File crawlerPath, CrawlQueues crawlQueues, CrawlProfile activeCrawls, ImporterManager dbImportManager) throws ImporterException {
+        super("NURL");
+        this.crawlQueues = crawlQueues;
+        this.activeCrawls = activeCrawls;
+        this.dbImportManager = dbImportManager;
         
-        theStatus.append("#URLs=").append(this.urlCount).append("\n");
-        theStatus.append("#Profiles=").append(this.profileCount);
-        
-        return theStatus.toString();
-    }
-
-    public void init(plasmaSwitchboard sb, int cacheSize) throws ImporterException {
-        super.init();
-        
-        // TODO: we need more errorhandling here
-        this.plasmaPath = sb.plasmaPath;
-        this.cacheSize = cacheSize;
-        if (this.cacheSize < 2*1024*1024) this.cacheSize = 8*1024*1024;
+        // TODO: we need more error handling here
+        this.plasmaPath = crawlerPath;
         File noticeUrlDbFile = new File(plasmaPath,"urlNotice1.db");
         File profileDbFile = new File(plasmaPath, plasmaSwitchboard.DBFILE_ACTIVE_CRAWL_PROFILES);
         
         String errorMsg = null;
         if (!plasmaPath.exists()) 
-            errorMsg = "The import path '" + plasmaPath+ "' does not exist.";
+            errorMsg = "The import path '" + plasmaPath + "' does not exist.";
         else if (!plasmaPath.isDirectory()) 
             errorMsg = "The import path '" + plasmaPath + "' is not a directory.";
         else if (!plasmaPath.canRead()) 
@@ -98,6 +74,27 @@ public class plasmaCrawlNURLImporter extends AbstractImporter implements dbImpor
         // init profile DB
         this.log.logInfo("Initializing the source profileDB");
         this.importProfileDB = new CrawlProfile(profileDbFile);
+    }
+
+    public long getEstimatedTime() {
+        return (this.urlCount==0)?0:((this.importStartSize*getElapsedTime())/(this.urlCount))-getElapsedTime();
+    }
+
+    public String getJobName() {
+        return this.plasmaPath.toString();
+    }
+
+    public int getProcessingStatusPercent() {
+        return (this.urlCount)/((this.importStartSize<100)?1:(this.importStartSize)/100);
+    }
+
+    public String getStatus() {
+        StringBuffer theStatus = new StringBuffer();
+        
+        theStatus.append("#URLs=").append(this.urlCount).append("\n");
+        theStatus.append("#Profiles=").append(this.profileCount);
+        
+        return theStatus.toString();
     }
 
     @SuppressWarnings("unchecked")
@@ -161,7 +158,7 @@ public class plasmaCrawlNURLImporter extends AbstractImporter implements dbImpor
                         if (!this.importProfileHandleCache.contains(profileHandle)) {
                             
                             // testing if the profile is already known
-                            CrawlProfile.entry profileEntry = this.sb.profilesActiveCrawls.getEntry(profileHandle);
+                            CrawlProfile.entry profileEntry = this.activeCrawls.getEntry(profileHandle);
                             
                             // if not we need to import it
                             if (profileEntry == null) {
@@ -170,7 +167,7 @@ public class plasmaCrawlNURLImporter extends AbstractImporter implements dbImpor
                                 if (sourceEntry != null) {
                                     this.profileCount++;
                                     this.importProfileHandleCache.add(profileHandle);
-                                    this.sb.profilesActiveCrawls.newEntry((HashMap<String, String>) sourceEntry.map().clone());
+                                    this.activeCrawls.newEntry((HashMap<String, String>) sourceEntry.map().clone());
                                 } else {
                                     this.log.logWarning("Profile '" + profileHandle + "' of url entry '" + nextHash + "' unknown.");
                                     continue;
@@ -179,8 +176,8 @@ public class plasmaCrawlNURLImporter extends AbstractImporter implements dbImpor
                         }
                         
                         // if the url does not alredy exists in the destination stack we insert it now
-                        if (!this.sb.crawlQueues.noticeURL.existsInStack(nextHash)) {
-                            this.sb.crawlQueues.noticeURL.push((stackTypes[stackType] != -1) ? stackTypes[stackType] : NoticedURL.STACK_TYPE_CORE, nextEntry);
+                        if (!this.crawlQueues.noticeURL.existsInStack(nextHash)) {
+                            this.crawlQueues.noticeURL.push((stackTypes[stackType] != -1) ? stackTypes[stackType] : NoticedURL.STACK_TYPE_CORE, nextEntry);
                         }
                         
                         // removing hash from the import db
@@ -207,7 +204,7 @@ public class plasmaCrawlNURLImporter extends AbstractImporter implements dbImpor
         } finally { 
             this.log.logInfo("Import process finished.");
             this.globalEnd = System.currentTimeMillis();
-            this.sb.dbImportManager.finishedJobs.add(this);
+            this.dbImportManager.finishedJobs.add(this);
             this.importNurlDB.close();
             this.importProfileDB.close();
         }

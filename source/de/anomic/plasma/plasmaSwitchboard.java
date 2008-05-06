@@ -118,6 +118,7 @@ import de.anomic.crawler.RobotsTxt;
 import de.anomic.crawler.CrawlStacker;
 import de.anomic.crawler.ProtocolLoader;
 import de.anomic.crawler.ZURL;
+import de.anomic.crawler.ImporterManager;
 import de.anomic.data.URLLicense;
 import de.anomic.data.blogBoard;
 import de.anomic.data.blogBoardComments;
@@ -144,7 +145,6 @@ import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMSetTools;
 import de.anomic.kelondro.kelondroMapTable;
 import de.anomic.kelondro.kelondroNaturalOrder;
-import de.anomic.plasma.dbImport.dbImportManager;
 import de.anomic.plasma.parser.ParserException;
 import de.anomic.server.serverAbstractSwitch;
 import de.anomic.server.serverBusyThread;
@@ -198,58 +198,57 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
     public static wikiParser wikiParser = null;
     
     // storage management
-    public  File                        htCachePath;
-    public  File                        plasmaPath;
-    public  File                        indexPrimaryPath, indexSecondaryPath;
-    public  File                        listsPath;
-    public  File                        htDocsPath;
-    public  File                        rankingPath;
-    public  File                        workPath;
-    public  File                        releasePath;
-    public  HashMap<String, String>     rankingPermissions;
-    public  plasmaWordIndex             wordIndex;
-    public  CrawlQueues           crawlQueues;
-    public  ResultURLs          crawlResults;
-    public  plasmaSwitchboardQueue      sbQueue;
-    public  CrawlStacker          crawlStacker;
-    public  messageBoard                messageDB;
-    public  wikiBoard                   wikiDB;
-    public  blogBoard                   blogDB;
-    public  blogBoardComments           blogCommentDB;
-    public  static RobotsTxt robots = null;
-    public  CrawlProfile          profilesActiveCrawls, profilesPassiveCrawls;
-    public  CrawlProfile.entry    defaultProxyProfile;
-    public  CrawlProfile.entry    defaultRemoteProfile;
-    public  CrawlProfile.entry    defaultTextSnippetLocalProfile, defaultTextSnippetGlobalProfile;
-    public  CrawlProfile.entry    defaultMediaSnippetLocalProfile, defaultMediaSnippetGlobalProfile;
-    public  boolean                     rankingOn;
-    public  plasmaRankingDistribution   rankingOwnDistribution;
-    public  plasmaRankingDistribution   rankingOtherDistribution;
-    public  HashMap<String, Object[]>   outgoingCookies, incomingCookies;
-    public  kelondroMapTable            facilityDB;
-    public  plasmaParser                parser;
-    public  volatile long                        proxyLastAccess, localSearchLastAccess, remoteSearchLastAccess;
-    public  yacyCore                    yc;
-    public  userDB                      userDB;
-    public  bookmarksDB                 bookmarksDB;
-    public  plasmaWebStructure          webStructure;
-    public  dbImportManager             dbImportManager;
-    public  plasmaDHTFlush              transferIdxThread = null;
-    private plasmaDHTChunk              dhtTransferChunk = null;
-    public  ArrayList<plasmaSearchQuery> localSearches; // array of search result properties as HashMaps
-    public  ArrayList<plasmaSearchQuery> remoteSearches; // array of search result properties as HashMaps
+    public  File                           htCachePath;
+    public  File                           plasmaPath;
+    public  File                           listsPath;
+    public  File                           htDocsPath;
+    public  File                           rankingPath;
+    public  File                           workPath;
+    public  File                           releasePath;
+    public  HashMap<String, String>        rankingPermissions;
+    public  plasmaWordIndex                wordIndex;
+    public  CrawlQueues                    crawlQueues;
+    public  ResultURLs                     crawlResults;
+    public  plasmaSwitchboardQueue         sbQueue;
+    public  CrawlStacker                   crawlStacker;
+    public  messageBoard                   messageDB;
+    public  wikiBoard                      wikiDB;
+    public  blogBoard                      blogDB;
+    public  blogBoardComments              blogCommentDB;
+    public  static RobotsTxt               robots = null;
+    public  CrawlProfile                   profilesActiveCrawls, profilesPassiveCrawls;
+    public  CrawlProfile.entry             defaultProxyProfile;
+    public  CrawlProfile.entry             defaultRemoteProfile;
+    public  CrawlProfile.entry             defaultTextSnippetLocalProfile, defaultTextSnippetGlobalProfile;
+    public  CrawlProfile.entry             defaultMediaSnippetLocalProfile, defaultMediaSnippetGlobalProfile;
+    public  boolean                        rankingOn;
+    public  plasmaRankingDistribution      rankingOwnDistribution;
+    public  plasmaRankingDistribution      rankingOtherDistribution;
+    public  HashMap<String, Object[]>      outgoingCookies, incomingCookies;
+    public  kelondroMapTable               facilityDB;
+    public  plasmaParser                   parser;
+    public  volatile long                  proxyLastAccess, localSearchLastAccess, remoteSearchLastAccess;
+    public  yacyCore                       yc;
+    public  userDB                         userDB;
+    public  bookmarksDB                    bookmarksDB;
+    public  plasmaWebStructure             webStructure;
+    public  ImporterManager                dbImportManager;
+    public  plasmaDHTFlush                 transferIdxThread = null;
+    private plasmaDHTChunk                 dhtTransferChunk = null;
+    public  ArrayList<plasmaSearchQuery>   localSearches; // array of search result properties as HashMaps
+    public  ArrayList<plasmaSearchQuery>   remoteSearches; // array of search result properties as HashMaps
     public  HashMap<String, TreeSet<Long>> localSearchTracker, remoteSearchTracker; // mappings from requesting host to a TreeSet of Long(access time)
-    public  long                        lastseedcheckuptime = -1;
-    public  long                        indexedPages = 0;
-    public  long                        lastindexedPages = 0;
-    public  double                      requestedQueries = 0d;
-    public  double                      lastrequestedQueries = 0d;
-    public  int                         totalPPM = 0;
-    public  double                      totalQPM = 0d;
-    public  TreeMap<String, String>     clusterhashes; // map of peerhash(String)/alternative-local-address as ip:port or only ip (String) or null if address in seed should be used
-    public  boolean                     acceptLocalURLs, acceptGlobalURLs;
-    public  URLLicense                  licensedURLs;
-    public  Timer                       moreMemory;
+    public  long                           lastseedcheckuptime = -1;
+    public  long                           indexedPages = 0;
+    public  long                           lastindexedPages = 0;
+    public  double                         requestedQueries = 0d;
+    public  double                         lastrequestedQueries = 0d;
+    public  int                            totalPPM = 0;
+    public  double                         totalQPM = 0d;
+    public  TreeMap<String, String>        clusterhashes; // map of peerhash(String)/alternative-local-address as ip:port or only ip (String) or null if address in seed should be used
+    public  boolean                        acceptLocalURLs, acceptGlobalURLs;
+    public  URLLicense                     licensedURLs;
+    public  Timer                          moreMemory;
     
     public serverProcessor<indexingQueueEntry> indexingDocumentProcessor;
     public serverProcessor<indexingQueueEntry> indexingCondensementProcessor;
@@ -921,13 +920,13 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
         this.acceptGlobalURLs = "global.any".indexOf(getConfig("network.unit.domain", "global")) >= 0;
         this.acceptLocalURLs = "local.any".indexOf(getConfig("network.unit.domain", "global")) >= 0;
         
-        // load values from configs
+        // load values from configs        
         this.plasmaPath   = getConfigPath(PLASMA_PATH, PLASMA_PATH_DEFAULT);
         this.log.logConfig("Plasma DB Path: " + this.plasmaPath.toString());
-        this.indexPrimaryPath = getConfigPath(INDEX_PRIMARY_PATH, INDEX_PATH_DEFAULT);
-        this.log.logConfig("Index Primary Path: " + this.indexPrimaryPath.toString());
-        this.indexSecondaryPath = (getConfig(INDEX_SECONDARY_PATH, "").length() == 0) ? indexPrimaryPath : new File(getConfig(INDEX_SECONDARY_PATH, ""));
-        this.log.logConfig("Index Secondary Path: " + this.indexSecondaryPath.toString());
+        File indexPrimaryPath = getConfigPath(INDEX_PRIMARY_PATH, INDEX_PATH_DEFAULT);
+        this.log.logConfig("Index Primary Path: " + indexPrimaryPath.toString());
+        File indexSecondaryPath = (getConfig(INDEX_SECONDARY_PATH, "").length() == 0) ? indexPrimaryPath : new File(getConfig(INDEX_SECONDARY_PATH, ""));
+        this.log.logConfig("Index Secondary Path: " + indexSecondaryPath.toString());
         this.listsPath      = getConfigPath(LISTS_PATH, LISTS_PATH_DEFAULT);
         this.log.logConfig("Lists Path:     " + this.listsPath.toString());
         this.htDocsPath   = getConfigPath(HTDOCS_PATH, HTDOCS_PATH_DEFAULT);
@@ -1277,7 +1276,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
         //plasmaSnippetCache.result scr = snippetCache.retrieve(new URL("http://www.heise.de/security/news/foren/go.shtml?read=1&msg_id=7301419&forum_id=72721"), query, true);
         //plasmaSnippetCache.result scr = snippetCache.retrieve(new URL("http://www.heise.de/kiosk/archiv/ct/2003/4/20"), query, true, 260);
 
-        this.dbImportManager = new dbImportManager(this);
+        this.dbImportManager = new ImporterManager();
         
         log.logConfig("Finished Switchboard Initialization");
     }

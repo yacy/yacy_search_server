@@ -82,13 +82,13 @@ public final class plasmaWordIndex implements indexRI {
     final         indexRepositoryReference referenceURL;
     public        yacySeedDB               seedDB;
     public        yacyNewsPool             newsPool;
-    
-    
+    private       File                     primaryRoot, secondaryRoot;
     
     public plasmaWordIndex(String networkName, serverLog log, File indexPrimaryRoot, File indexSecondaryRoot) {
         this.log = log;
-        File indexPrimaryPath = new File(indexPrimaryRoot, networkName);
-        File indexPrimaryTextLocation = new File(indexPrimaryPath, "TEXT");
+        this.primaryRoot = new File(indexPrimaryRoot, networkName);
+        this.secondaryRoot = new File(indexSecondaryRoot, networkName);
+        File indexPrimaryTextLocation = new File(this.primaryRoot, "TEXT");
         if (!indexPrimaryTextLocation.exists()) {
             // patch old index locations; the secondary path is patched in plasmaCrawlLURL
             File oldPrimaryPath = new File(new File(indexPrimaryRoot, "PUBLIC"), "TEXT");
@@ -116,10 +116,10 @@ public final class plasmaWordIndex implements indexRI {
         this.collections = new indexCollectionRI(textindexcollections, "collection", maxCollectionPartition, indexRWIRowEntry.urlEntryRow);
 
         // create LURL-db
-        referenceURL = new indexRepositoryReference(indexSecondaryRoot, networkName);
+        referenceURL = new indexRepositoryReference(this.secondaryRoot);
         
         // create or init seed cache
-        File networkRoot = new File(indexPrimaryPath, "NETWORK");
+        File networkRoot = new File(this.primaryRoot, "NETWORK");
         networkRoot.mkdirs();
         File mySeedFile = new File(networkRoot, "mySeed.txt");
         File oldSeedFile = new File(new File(indexPrimaryRoot.getParentFile(), "YACYDB"), "mySeed.txt");
@@ -133,7 +133,10 @@ public final class plasmaWordIndex implements indexRI {
 
         // create or init news database
         newsPool = new yacyNewsPool(networkRoot);
-
+    }
+    
+    public File getLocation(boolean primary) {
+        return (primary) ? this.primaryRoot : this.secondaryRoot;
     }
 
     public void putURL(indexURLReference entry) throws IOException {

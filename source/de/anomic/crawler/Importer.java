@@ -1,8 +1,6 @@
-package de.anomic.plasma.dbImport;
+package de.anomic.crawler;
 
-import de.anomic.plasma.plasmaSwitchboard;
-
-public interface dbImporter {
+public interface Importer {
 
     // functions to pause and continue importing
     public boolean isPaused();
@@ -23,6 +21,5 @@ public interface dbImporter {
     public String getJobType();
     public String getError();
     public String getStatus();
-    public void init(plasmaSwitchboard switchboard, int cacheSize) throws ImporterException;
     public void startIt();    
 }

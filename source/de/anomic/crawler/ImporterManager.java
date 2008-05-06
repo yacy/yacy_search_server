@@ -1,22 +1,19 @@
-package de.anomic.plasma.dbImport;
+package de.anomic.crawler;
 
 import java.util.Vector;
 
-import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.logging.serverLog;
 
-public class dbImportManager {
+public class ImporterManager {
 
-    public final Vector<dbImporter> finishedJobs = new Vector<dbImporter>();
+    public final Vector<Importer> finishedJobs = new Vector<Importer>();
     public final ThreadGroup runningJobs = new ThreadGroup("ImporterThreads");
     public  int currMaxJobNr = 0;
-    private plasmaSwitchboard sb;
     
-    public dbImportManager(plasmaSwitchboard theSb) {
-        this.sb = theSb;
+    public ImporterManager() {
     }
     
-    private int generateUniqueJobID() {
+    public int generateUniqueJobID() {
         int jobID;
         synchronized(this.runningJobs) {
             jobID = this.currMaxJobNr;
@@ -25,51 +22,32 @@ public class dbImportManager {
         return jobID;
     }
     
-    public dbImporter[] getRunningImporter() {
+    public Importer[] getRunningImporter() {
         Thread[] importThreads = new Thread[this.runningJobs.activeCount()*2];
         int activeCount = this.runningJobs.enumerate(importThreads);
-        dbImporter[] importers = new dbImporter[activeCount];
+        Importer[] importers = new Importer[activeCount];
         for (int i=0; i<activeCount; i++) {
-            importers[i] = (dbImporter) importThreads[i];
+            importers[i] = (Importer) importThreads[i];
         }
         return importers;
     }
     
-    public dbImporter[] getFinishedImporter() {
-        return (dbImporter[]) this.finishedJobs.toArray(new dbImporter[this.finishedJobs.size()]);
+    public Importer[] getFinishedImporter() {
+        return (Importer[]) this.finishedJobs.toArray(new Importer[this.finishedJobs.size()]);
     }
     
-    public dbImporter getImporterByID(int jobID) {
+    public Importer getImporterByID(int jobID) {
 
         Thread[] importThreads = new Thread[this.runningJobs.activeCount()*2];
         int activeCount = this.runningJobs.enumerate(importThreads);
         
         for (int i=0; i < activeCount; i++) {
-            dbImporter currThread = (dbImporter) importThreads[i];
+            Importer currThread = (Importer) importThreads[i];
             if (currThread.getJobID() == jobID) {
                 return currThread;
             }                    
         }        
         return null;        
-    }
-    
-    public dbImporter getNewImporter(String type) {
-        if (type == null) return null;
-        if (type.length() == 0) return null;
-        
-        // create a new importer thread
-        dbImporter newImporter = null;
-        if (type.equalsIgnoreCase("NURL")) {
-            newImporter = new plasmaCrawlNURLImporter(this.sb);
-        } else if (type.equalsIgnoreCase("sitemap")) {
-        	newImporter = new SitemapImporter(this.sb);
-        }
-        
-        // assign a job ID to it
-        newImporter.setJobID(this.generateUniqueJobID());
-        
-        // return the newly created importer
-        return newImporter;
     }
     
     /**
@@ -94,7 +72,7 @@ public class dbImportManager {
             for ( int currentThreadIdx = 0; currentThreadIdx < threadCount; currentThreadIdx++ )  {
                 Thread currentThread = threadList[currentThreadIdx];
                 if (currentThread.isAlive()) {
-                    ((dbImporter)currentThread).stopIt();
+                    ((Importer)currentThread).stopIt();
                 }
             }      
             
