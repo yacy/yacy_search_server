@@ -136,6 +136,7 @@
 
   <!-- initializing all needed variables -->
   <target name="init" depends="determineExtensionTarget">
+    <mkdir dir="${build}/de/anomic/crawler"/>
     <mkdir dir="${build}/de/anomic/data"/>
     <mkdir dir="${build}/de/anomic/htmlFilter"/>
     <mkdir dir="${build}/de/anomic/http"/>
