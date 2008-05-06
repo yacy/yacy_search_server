@@ -24,32 +24,31 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.plasma.crawler;
+package de.anomic.crawler;
 
 import java.util.Arrays;
 import java.util.HashSet;
 
-import de.anomic.plasma.plasmaCrawlEntry;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.logging.serverLog;
 
-public final class plasmaProtocolLoader {
+public final class ProtocolLoader {
 
     private plasmaSwitchboard sb;
     private serverLog log;
     private HashSet<String> supportedProtocols;
-    private plasmaHTTPLoader httpLoader;
-    private plasmaFTPLoader ftpLoader;
+    private HTTPLoader httpLoader;
+    private FTPLoader ftpLoader;
     
-    public plasmaProtocolLoader(plasmaSwitchboard sb, serverLog log) {
+    public ProtocolLoader(plasmaSwitchboard sb, serverLog log) {
         this.sb = sb;
         this.log = log;
         this.supportedProtocols = new HashSet<String>(Arrays.asList(new String[]{"http","https","ftp"}));
         
         // initiate loader objects
-        httpLoader = new plasmaHTTPLoader(sb, log);
-        ftpLoader = new plasmaFTPLoader(sb, log);
+        httpLoader = new HTTPLoader(sb, log);
+        ftpLoader = new FTPLoader(sb, log);
     }
     
     public boolean isSupportedProtocol(String protocol) {
@@ -62,7 +61,7 @@ public final class plasmaProtocolLoader {
         return (HashSet<String>) this.supportedProtocols.clone();
     }
     
-    public plasmaHTCache.Entry load(plasmaCrawlEntry entry, String parserMode) {
+    public plasmaHTCache.Entry load(CrawlEntry entry, String parserMode) {
         // getting the protocol of the next URL                
         String protocol = entry.url().getProtocol();
         
@@ -73,7 +72,7 @@ public final class plasmaProtocolLoader {
         return null;
     }
     
-    public String process(plasmaCrawlEntry entry, String parserMode) {
+    public String process(CrawlEntry entry, String parserMode) {
         // load a resource, store it to htcache and push queue entry to switchboard queue
         // returns null if everything went fine, a fail reason string if a problem occurred
         plasmaHTCache.Entry h;

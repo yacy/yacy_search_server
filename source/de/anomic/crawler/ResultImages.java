@@ -24,16 +24,17 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.plasma;
+package de.anomic.crawler;
 
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import de.anomic.htmlFilter.htmlFilterImageEntry;
+import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.yacy.yacyURL;
 
-public class plasmaCrawlResultImages {
+public class ResultImages {
 
     // we maintain two different queues for private and public crawls and divide both into two halves:
     // such images that appear to be good quality for a image monitor bacause their size is known, and other images

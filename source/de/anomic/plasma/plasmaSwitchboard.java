@@ -107,6 +107,17 @@ import java.util.TimerTask;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import de.anomic.crawler.CrawlEntry;
+import de.anomic.crawler.ErrorURL;
+import de.anomic.crawler.CrawlProfile;
+import de.anomic.crawler.CrawlQueues;
+import de.anomic.crawler.NoticedURL;
+import de.anomic.crawler.ResultImages;
+import de.anomic.crawler.ResultURLs;
+import de.anomic.crawler.RobotsTxt;
+import de.anomic.crawler.CrawlStacker;
+import de.anomic.crawler.ProtocolLoader;
+import de.anomic.crawler.ZURL;
 import de.anomic.data.URLLicense;
 import de.anomic.data.blogBoard;
 import de.anomic.data.blogBoardComments;
@@ -133,8 +144,6 @@ import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMSetTools;
 import de.anomic.kelondro.kelondroMapTable;
 import de.anomic.kelondro.kelondroNaturalOrder;
-import de.anomic.plasma.crawler.plasmaCrawlQueues;
-import de.anomic.plasma.crawler.plasmaProtocolLoader;
 import de.anomic.plasma.dbImport.dbImportManager;
 import de.anomic.plasma.parser.ParserException;
 import de.anomic.server.serverAbstractSwitch;
@@ -199,20 +208,20 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
     public  File                        releasePath;
     public  HashMap<String, String>     rankingPermissions;
     public  plasmaWordIndex             wordIndex;
-    public  plasmaCrawlQueues           crawlQueues;
-    public  plasmaCrawlResultURLs          crawlResults;
+    public  CrawlQueues           crawlQueues;
+    public  ResultURLs          crawlResults;
     public  plasmaSwitchboardQueue      sbQueue;
-    public  plasmaCrawlStacker          crawlStacker;
+    public  CrawlStacker          crawlStacker;
     public  messageBoard                messageDB;
     public  wikiBoard                   wikiDB;
     public  blogBoard                   blogDB;
     public  blogBoardComments           blogCommentDB;
-    public  static plasmaCrawlRobotsTxt robots = null;
-    public  plasmaCrawlProfile          profilesActiveCrawls, profilesPassiveCrawls;
-    public  plasmaCrawlProfile.entry    defaultProxyProfile;
-    public  plasmaCrawlProfile.entry    defaultRemoteProfile;
-    public  plasmaCrawlProfile.entry    defaultTextSnippetLocalProfile, defaultTextSnippetGlobalProfile;
-    public  plasmaCrawlProfile.entry    defaultMediaSnippetLocalProfile, defaultMediaSnippetGlobalProfile;
+    public  static RobotsTxt robots = null;
+    public  CrawlProfile          profilesActiveCrawls, profilesPassiveCrawls;
+    public  CrawlProfile.entry    defaultProxyProfile;
+    public  CrawlProfile.entry    defaultRemoteProfile;
+    public  CrawlProfile.entry    defaultTextSnippetLocalProfile, defaultTextSnippetGlobalProfile;
+    public  CrawlProfile.entry    defaultMediaSnippetLocalProfile, defaultMediaSnippetGlobalProfile;
     public  boolean                     rankingOn;
     public  plasmaRankingDistribution   rankingOwnDistribution;
     public  plasmaRankingDistribution   rankingOtherDistribution;
@@ -933,7 +942,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
         log.logConfig("Starting Indexing Management");
         String networkName = getConfig("network.unit.name", "");
         wordIndex = new plasmaWordIndex(networkName, log, indexPrimaryPath, indexSecondaryPath);
-        crawlResults = new plasmaCrawlResultURLs();
+        crawlResults = new ResultURLs();
         
         // start yacy core
         log.logConfig("Starting YaCy Protocol Core");
@@ -1020,13 +1029,13 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
         // make crawl profiles database and default profiles
         this.log.logConfig("Initializing Crawl Profiles");
         File profilesActiveFile = new File(this.plasmaPath, DBFILE_ACTIVE_CRAWL_PROFILES);
-        this.profilesActiveCrawls = new plasmaCrawlProfile(profilesActiveFile);
+        this.profilesActiveCrawls = new CrawlProfile(profilesActiveFile);
         initActiveCrawlProfiles();
         log.logConfig("Loaded active crawl profiles from file " + profilesActiveFile.getName() +
                 ", " + this.profilesActiveCrawls.size() + " entries" +
                 ", " + ppRamString(profilesActiveFile.length()/1024));
         File profilesPassiveFile = new File(this.plasmaPath, DBFILE_PASSIVE_CRAWL_PROFILES);
-        this.profilesPassiveCrawls = new plasmaCrawlProfile(profilesPassiveFile);
+        this.profilesPassiveCrawls = new CrawlProfile(profilesPassiveFile);
         log.logConfig("Loaded passive crawl profiles from file " + profilesPassiveFile.getName() +
                 ", " + this.profilesPassiveCrawls.size() + " entries" +
                 ", " + ppRamString(profilesPassiveFile.length()/1024));
@@ -1034,7 +1043,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
         // loading the robots.txt db
         this.log.logConfig("Initializing robots.txt DB");
         File robotsDBFile = new File(this.plasmaPath, DBFILE_CRAWL_ROBOTS);
-        robots = new plasmaCrawlRobotsTxt(robotsDBFile);
+        robots = new RobotsTxt(robotsDBFile);
         this.log.logConfig("Loaded robots.txt DB from file " + robotsDBFile.getName() +
         ", " + robots.size() + " entries" +
         ", " + ppRamString(robotsDBFile.length()/1024));
@@ -1112,7 +1121,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
         
         // start a loader
         log.logConfig("Starting Crawl Loader");
-        this.crawlQueues = new plasmaCrawlQueues(this, plasmaPath);
+        this.crawlQueues = new CrawlQueues(this, plasmaPath);
                 
         /*
          * Creating sync objects and loading status for the crawl jobs
@@ -1208,7 +1217,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
         }
         
         // initializing the stackCrawlThread
-        this.crawlStacker = new plasmaCrawlStacker(this, this.plasmaPath, (int) getConfigLong("tableTypeForPreNURL", 0), (((int) getConfigLong("tableTypeForPreNURL", 0) == 0) && (getConfigLong(CRAWLSTACK_BUSYSLEEP, 0) <= 100)));
+        this.crawlStacker = new CrawlStacker(this, this.plasmaPath, (int) getConfigLong("tableTypeForPreNURL", 0), (((int) getConfigLong("tableTypeForPreNURL", 0) == 0) && (getConfigLong(CRAWLSTACK_BUSYSLEEP, 0) <= 100)));
         //this.sbStackCrawlThread = new plasmaStackCrawlThread(this,this.plasmaPath,ramPreNURL);
         //this.sbStackCrawlThread.start();
         
@@ -1464,8 +1473,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
         this.defaultTextSnippetGlobalProfile = null;
         this.defaultMediaSnippetLocalProfile = null;
         this.defaultMediaSnippetGlobalProfile = null;
-        Iterator<plasmaCrawlProfile.entry> i = this.profilesActiveCrawls.profiles(true);
-        plasmaCrawlProfile.entry profile;
+        Iterator<CrawlProfile.entry> i = this.profilesActiveCrawls.profiles(true);
+        CrawlProfile.entry profile;
         String name;
         while (i.hasNext()) {
             profile = i.next();
@@ -1518,17 +1527,17 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
     private void resetProfiles() {
         final File pdb = new File(plasmaPath, DBFILE_ACTIVE_CRAWL_PROFILES);
         if (pdb.exists()) pdb.delete();
-        profilesActiveCrawls = new plasmaCrawlProfile(pdb);
+        profilesActiveCrawls = new CrawlProfile(pdb);
         initActiveCrawlProfiles();
     }
     
     /**
-     * {@link plasmaCrawlProfile Crawl Profiles} are saved independantly from the queues themselves
+     * {@link CrawlProfile Crawl Profiles} are saved independantly from the queues themselves
      * and therefore have to be cleaned up from time to time. This method only performs the clean-up
      * if - and only if - the {@link plasmaSwitchboardQueue switchboard},
-     * {@link plasmaProtocolLoader loader} and {@link plasmaCrawlNURL local crawl} queues are all empty.
+     * {@link ProtocolLoader loader} and {@link plasmaCrawlNURL local crawl} queues are all empty.
      * <p>
-     *   Then it iterates through all existing {@link plasmaCrawlProfile crawl profiles} and removes
+     *   Then it iterates through all existing {@link CrawlProfile crawl profiles} and removes
      *   all profiles which are not hardcoded.
      * </p>
      * <p>
@@ -1549,8 +1558,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
                 (crawlStacker != null && crawlStacker.size() > 0) ||
                 (crawlQueues.noticeURL.notEmpty())) 
             return false;
-        final Iterator<plasmaCrawlProfile.entry> iter = profilesActiveCrawls.profiles(true);
-        plasmaCrawlProfile.entry entry;
+        final Iterator<CrawlProfile.entry> iter = profilesActiveCrawls.profiles(true);
+        CrawlProfile.entry entry;
         boolean hasDoneSomething = false;
         try {
             while (iter.hasNext()) {
@@ -1742,10 +1751,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
         synchronized (sbQueue) {
             // do one processing step
             if (this.log.isFine()) log.logFine("DEQUEUE: sbQueueSize=" + sbQueue.size() +
-                    ", coreStackSize=" + crawlQueues.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) +
-                    ", limitStackSize=" + crawlQueues.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT) +
-                    ", overhangStackSize=" + crawlQueues.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_OVERHANG) +
-                    ", remoteStackSize=" + crawlQueues.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_REMOTE));
+                    ", coreStackSize=" + crawlQueues.noticeURL.stackSize(NoticedURL.STACK_TYPE_CORE) +
+                    ", limitStackSize=" + crawlQueues.noticeURL.stackSize(NoticedURL.STACK_TYPE_LIMIT) +
+                    ", overhangStackSize=" + crawlQueues.noticeURL.stackSize(NoticedURL.STACK_TYPE_OVERHANG) +
+                    ", remoteStackSize=" + crawlQueues.noticeURL.stackSize(NoticedURL.STACK_TYPE_REMOTE));
             try {
                 int sizeBefore = sbQueue.size();
                 nextentry = sbQueue.pop();
@@ -1929,7 +1938,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
                 }
             }
             // clean up image stack
-            plasmaCrawlResultImages.clearQueues();
+            ResultImages.clearQueues();
             
             // clean up profiles
             checkInterruption();
@@ -2156,7 +2165,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
             }
             long stackEndTime = System.currentTimeMillis();
             if (log.isInfo()) log.logInfo("CRAWL: ADDED " + hl.size() + " LINKS FROM " + entry.url().toNormalform(false, true) +
-                    ", NEW CRAWL STACK SIZE IS " + crawlQueues.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) +
+                    ", NEW CRAWL STACK SIZE IS " + crawlQueues.noticeURL.stackSize(NoticedURL.STACK_TYPE_CORE) +
                     ", STACKING TIME = " + (stackEndTime-stackStartTime) +
                     ", PARSING TIME = " + (parsingEndTime-parsingStartTime));
         }
@@ -2179,8 +2188,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
         // update image result list statistics
         // its good to do this concurrently here, because it needs a DNS lookup
         // to compute a URL hash which is necessary for a double-check
-        plasmaCrawlProfile.entry profile = profilesActiveCrawls.getEntry(in.queueEntry.profileHandle);
-        plasmaCrawlResultImages.registerImages(in.document, (profile == null) ? true : !profile.remoteIndexing());
+        CrawlProfile.entry profile = profilesActiveCrawls.getEntry(in.queueEntry.profileHandle);
+        ResultImages.registerImages(in.document, (profile == null) ? true : !profile.remoteIndexing());
         
         return new indexingQueueEntry(in.queueEntry, in.document, condenser);
     }
@@ -2191,7 +2200,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
         yacyURL referrerURL = entry.referrerURL();
         int processCase = entry.processCase();
         
-        String noIndexReason = plasmaCrawlEURL.DENIED_UNSPECIFIED_INDEXING_ERROR;
+        String noIndexReason = ErrorURL.DENIED_UNSPECIFIED_INDEXING_ERROR;
         if (processCase == PROCESSCASE_4_PROXY_LOAD) {
             // proxy-load
             noIndexReason = entry.shallIndexCacheForProxy();
@@ -2273,7 +2282,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
         // STORE WORD INDEX
         if ((!queueEntry.profile().indexText()) && (!queueEntry.profile().indexMedia())) {
             if (this.log.isFine()) log.logFine("Not Indexed Resource '" + queueEntry.url().toNormalform(false, true) + "': process case=" + processCase);
-            addURLtoErrorDB(queueEntry.url(), referrerURL.hash(), queueEntry.initiator(), dc_title, plasmaCrawlEURL.DENIED_UNKNOWN_INDEXING_PROCESS_CASE, new kelondroBitfield());
+            addURLtoErrorDB(queueEntry.url(), referrerURL.hash(), queueEntry.initiator(), dc_title, ErrorURL.DENIED_UNKNOWN_INDEXING_PROCESS_CASE, new kelondroBitfield());
             return;
         }
         
@@ -2658,7 +2667,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
     ) {
         assert initiator != null;
         // create a new errorURL DB entry
-        plasmaCrawlEntry bentry = new plasmaCrawlEntry(
+        CrawlEntry bentry = new CrawlEntry(
                 initiator, 
                 url, 
                 referrerHash, 
@@ -2668,7 +2677,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
                 0, 
                 0, 
                 0);
-        plasmaCrawlZURL.Entry ee = crawlQueues.errorURL.newEntry(
+        ZURL.Entry ee = crawlQueues.errorURL.newEntry(
                 bentry, initiator, new Date(),
                 0, failreason);
         // store the entry

@@ -48,9 +48,9 @@
 
 import java.io.IOException;
 
+import de.anomic.crawler.ZURL;
 import de.anomic.http.httpHeader;
 import de.anomic.index.indexURLReference;
-import de.anomic.plasma.plasmaCrawlZURL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -170,7 +170,7 @@ public final class crawlReceipt {
         }
 
         sb.crawlQueues.delegatedURL.remove(entry.hash()); // the delegated work is transformed into an error case
-        plasmaCrawlZURL.Entry ee = sb.crawlQueues.errorURL.newEntry(
+        ZURL.Entry ee = sb.crawlQueues.errorURL.newEntry(
                 entry.toBalancerEntry(iam),
                 youare,
                 null,

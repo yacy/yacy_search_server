@@ -1,4 +1,4 @@
-// plasmaCrawlEntry.java
+// CrawlEntry.java
 // (C) 2007 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 14.03.2007 on http://yacy.net
 //
@@ -24,7 +24,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.plasma;
+package de.anomic.crawler;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -37,7 +37,7 @@ import de.anomic.kelondro.kelondroRow;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyURL;
 
-public class plasmaCrawlEntry {
+public class CrawlEntry {
     
     // row definition for balancer-related NURL-entries
     public final static kelondroRow rowdef = new kelondroRow(
@@ -89,7 +89,7 @@ public class plasmaCrawlEntry {
      * @param anchors number of anchors of the parent
      * @param forkfactor sum of anchors of all ancestors
      */
-    public plasmaCrawlEntry(
+    public CrawlEntry(
                  String initiator, 
                  yacyURL url, 
                  String referrerhash, 
@@ -124,7 +124,7 @@ public class plasmaCrawlEntry {
         this.initialHash   = url.hashCode();
     }
     
-    public plasmaCrawlEntry(kelondroRow.Entry entry) throws IOException {
+    public CrawlEntry(kelondroRow.Entry entry) throws IOException {
         assert (entry != null);
         insertEntry(entry);
     }

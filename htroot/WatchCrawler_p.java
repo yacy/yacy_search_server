@@ -35,12 +35,12 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import de.anomic.crawler.CrawlEntry;
+import de.anomic.crawler.CrawlProfile;
+import de.anomic.crawler.ZURL;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterWriter;
 import de.anomic.http.httpHeader;
-import de.anomic.plasma.plasmaCrawlEntry;
-import de.anomic.plasma.plasmaCrawlProfile;
-import de.anomic.plasma.plasmaCrawlZURL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.dbImport.SitemapImporter;
 import de.anomic.server.serverFileUtils;
@@ -191,7 +191,7 @@ public class WatchCrawler_p {
                             
                             // stack url
                             sb.profilesPassiveCrawls.removeEntry(crawlingStartURL.hash()); // if there is an old entry, delete it
-                            plasmaCrawlProfile.entry pe = sb.profilesActiveCrawls.newEntry(
+                            CrawlProfile.entry pe = sb.profilesActiveCrawls.newEntry(
                                     crawlingStartURL.getHost(), crawlingStartURL, newcrawlingfilter, newcrawlingfilter,
                                     newcrawlingdepth, newcrawlingdepth,
                                     crawlingIfOlder, crawlingDomFilterDepth, crawlingDomMaxPages,
@@ -228,8 +228,8 @@ public class WatchCrawler_p {
                                 prop.putHTML("info_crawlingURL", ((String) post.get("crawlingURL")));
                                 prop.putHTML("info_reasonString", reasonString);
                                 
-                                plasmaCrawlZURL.Entry ee = sb.crawlQueues.errorURL.newEntry(
-                                        new plasmaCrawlEntry(
+                                ZURL.Entry ee = sb.crawlQueues.errorURL.newEntry(
+                                        new CrawlEntry(
                                                 sb.wordIndex.seedDB.mySeed().hash, 
                                                 crawlingStartURL, 
                                                 "", 
@@ -285,7 +285,7 @@ public class WatchCrawler_p {
                                 
                                 // creating a crawler profile
                                 yacyURL crawlURL = new yacyURL("file://" + file.toString(), null);
-                                plasmaCrawlProfile.entry profile = sb.profilesActiveCrawls.newEntry(fileName, crawlURL, newcrawlingfilter, newcrawlingfilter, newcrawlingdepth, newcrawlingdepth, crawlingIfOlder, crawlingDomFilterDepth, crawlingDomMaxPages, crawlingQ, indexText, indexMedia, storeHTCache, true, crawlOrder, xsstopw, xdstopw, xpstopw);
+                                CrawlProfile.entry profile = sb.profilesActiveCrawls.newEntry(fileName, crawlURL, newcrawlingfilter, newcrawlingfilter, newcrawlingdepth, newcrawlingdepth, crawlingIfOlder, crawlingDomFilterDepth, crawlingDomMaxPages, crawlingQ, indexText, indexMedia, storeHTCache, true, crawlOrder, xsstopw, xdstopw, xpstopw);
                                 
                                 // pause local crawl here
                                 sb.pauseCrawlJob(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL);
@@ -331,7 +331,7 @@ public class WatchCrawler_p {
                     		yacyURL sitemapURL = new yacyURL(sitemapURLStr, null);
                             
                     		// create a new profile
-                    		plasmaCrawlProfile.entry pe = sb.profilesActiveCrawls.newEntry(
+                    		CrawlProfile.entry pe = sb.profilesActiveCrawls.newEntry(
                     				sitemapURLStr, sitemapURL, newcrawlingfilter, newcrawlingfilter,
                     				newcrawlingdepth, newcrawlingdepth,
                     				crawlingIfOlder, crawlingDomFilterDepth, crawlingDomMaxPages,

@@ -27,10 +27,10 @@
 import java.io.IOException;
 import java.util.Date;
 
+import de.anomic.crawler.CrawlEntry;
+import de.anomic.crawler.NoticedURL;
 import de.anomic.http.httpHeader;
 import de.anomic.index.indexURLReference;
-import de.anomic.plasma.plasmaCrawlEntry;
-import de.anomic.plasma.plasmaCrawlNURL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
@@ -57,10 +57,10 @@ public class urls {
         
         if (post.get("call", "").equals("remotecrawl")) {
             // perform a remote crawl url handover
-            int stackType = plasmaCrawlNURL.STACK_TYPE_LIMIT;
+            int stackType = NoticedURL.STACK_TYPE_LIMIT;
             int count = Math.min(100, post.getInt("count", 0));
             int c = 0;
-            plasmaCrawlEntry entry;
+            CrawlEntry entry;
             yacyURL referrer;
             while ((count > 0) && (sb.crawlQueues.noticeURL.stackSize(stackType) > 0)) {
                 try {

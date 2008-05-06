@@ -53,9 +53,9 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Locale;
 
+import de.anomic.crawler.CrawlEntry;
+import de.anomic.crawler.NoticedURL;
 import de.anomic.http.httpHeader;
-import de.anomic.plasma.plasmaCrawlEntry;
-import de.anomic.plasma.plasmaCrawlNURL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardQueue;
 import de.anomic.server.serverObjects;
@@ -140,7 +140,7 @@ public class queues_p {
         if (sb.crawlQueues.size() == 0) {
             prop.put("list-loader", "0");
         } else {
-            plasmaCrawlEntry[] w = sb.crawlQueues.activeWorkerEntries();
+            CrawlEntry[] w = sb.crawlQueues.activeWorkerEntries();
             int count = 0;
             for (int i = 0; i < w.length; i++)  {
                 if (w[i] == null) continue;
@@ -157,23 +157,23 @@ public class queues_p {
         //local crawl queue
         prop.putNum("localCrawlSize", Integer.toString(sb.getThread(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL).getJobCount()));
         prop.put("localCrawlState", sb.crawlJobIsPaused(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL) ? STATE_PAUSED : STATE_RUNNING);
-        int stackSize = sb.crawlQueues.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE);
-        addNTable(sb, prop, "list-local", sb.crawlQueues.noticeURL.top(plasmaCrawlNURL.STACK_TYPE_CORE, Math.min(10, stackSize)));
+        int stackSize = sb.crawlQueues.noticeURL.stackSize(NoticedURL.STACK_TYPE_CORE);
+        addNTable(sb, prop, "list-local", sb.crawlQueues.noticeURL.top(NoticedURL.STACK_TYPE_CORE, Math.min(10, stackSize)));
 
         //global crawl queue
         prop.putNum("limitCrawlSize", Integer.toString(sb.crawlQueues.limitCrawlJobSize()));
         prop.put("limitCrawlState", STATE_RUNNING);
-        stackSize = sb.crawlQueues.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT);
+        stackSize = sb.crawlQueues.noticeURL.stackSize(NoticedURL.STACK_TYPE_LIMIT);
 
         //global crawl queue
         prop.putNum("remoteCrawlSize", Integer.toString(sb.getThread(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL).getJobCount()));
         prop.put("remoteCrawlState", sb.crawlJobIsPaused(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL) ? STATE_PAUSED : STATE_RUNNING);
-        stackSize = sb.crawlQueues.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT);
+        stackSize = sb.crawlQueues.noticeURL.stackSize(NoticedURL.STACK_TYPE_LIMIT);
 
         if (stackSize == 0) {
             prop.put("list-remote", "0");
         } else {
-            addNTable(sb, prop, "list-remote", sb.crawlQueues.noticeURL.top(plasmaCrawlNURL.STACK_TYPE_LIMIT, Math.min(10, stackSize)));
+            addNTable(sb, prop, "list-remote", sb.crawlQueues.noticeURL.top(NoticedURL.STACK_TYPE_LIMIT, Math.min(10, stackSize)));
         }
 
         // return rewrite properties
@@ -181,10 +181,10 @@ public class queues_p {
     }
     
     
-    public static final void addNTable(plasmaSwitchboard sb, serverObjects prop, String tableName, plasmaCrawlEntry[] crawlerList) {
+    public static final void addNTable(plasmaSwitchboard sb, serverObjects prop, String tableName, CrawlEntry[] crawlerList) {
 
         int showNum = 0;
-        plasmaCrawlEntry urle;
+        CrawlEntry urle;
         yacySeed initiator;
         for (int i = 0; i < crawlerList.length; i++) {
             urle = crawlerList[i];

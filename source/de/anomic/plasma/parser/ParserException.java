@@ -44,7 +44,7 @@
 
 package de.anomic.plasma.parser;
 
-import de.anomic.plasma.plasmaCrawlEURL;
+import de.anomic.crawler.ErrorURL;
 import de.anomic.yacy.yacyURL;
 
 public class ParserException extends Exception
@@ -59,7 +59,7 @@ public class ParserException extends Exception
     }
 
     public ParserException(String message, yacyURL url) {
-        this(message,url,plasmaCrawlEURL.DENIED_PARSER_ERROR);
+        this(message,url,ErrorURL.DENIED_PARSER_ERROR);
     }    
     
     public ParserException(String message, yacyURL url, String errorCode) {
@@ -69,7 +69,7 @@ public class ParserException extends Exception
     }
 
     public ParserException(String message, yacyURL url, Throwable cause) {
-        this(message,url,cause,plasmaCrawlEURL.DENIED_PARSER_ERROR);
+        this(message,url,cause,ErrorURL.DENIED_PARSER_ERROR);
     }
     
     public ParserException(String message, yacyURL url, Throwable cause, String errorCode) {

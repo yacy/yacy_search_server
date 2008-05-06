@@ -24,7 +24,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.plasma;
+package de.anomic.crawler;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,6 +32,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
 
+import de.anomic.crawler.CrawlEntry;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroEcoTable;
 import de.anomic.kelondro.kelondroFlexWidthArray;
@@ -41,7 +42,7 @@ import de.anomic.kelondro.kelondroRowSet;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyURL;
 
-public class plasmaCrawlZURL {
+public class ZURL {
     
     private static final int EcoFSBufferSize = 200;
     
@@ -51,7 +52,7 @@ public class plasmaCrawlZURL {
             "Cardinal workdate-8 {b256}, " +                           // the time when the url was last time tried to load
             "Cardinal workcount-4 {b256}, " +                          // number of load retries
             "String anycause-80, " +                                   // string describing load failure
-            "byte[] entry-" + plasmaCrawlEntry.rowdef.objectsize,                                          // extra space
+            "byte[] entry-" + CrawlEntry.rowdef.objectsize,                                          // extra space
             kelondroBase64Order.enhancedCoder,
             0);
 
@@ -59,8 +60,8 @@ public class plasmaCrawlZURL {
     kelondroIndex urlIndex = null;
     private LinkedList<String> stack = new LinkedList<String>(); // strings: url
     
-    public plasmaCrawlZURL(File cachePath, String tablename, boolean startWithEmptyFile) {
-    	// creates a new ZURL in a file
+    public ZURL(File cachePath, String tablename, boolean startWithEmptyFile) {
+        // creates a new ZURL in a file
         cachePath.mkdirs();
         File f = new File(cachePath, tablename);
         if (startWithEmptyFile) {
@@ -72,8 +73,8 @@ public class plasmaCrawlZURL {
         //urlIndex = new kelondroFlexTable(cachePath, tablename, -1, rowdef, 0, true);
     }
     
-    public plasmaCrawlZURL() {
-    	// creates a new ZUR in RAM
+    public ZURL() {
+        // creates a new ZUR in RAM
         urlIndex = new kelondroRowSet(rowdef, 0);
     }
     
@@ -89,7 +90,7 @@ public class plasmaCrawlZURL {
     }
 
     public synchronized Entry newEntry(
-            plasmaCrawlEntry bentry,
+            CrawlEntry bentry,
             String executor,
             Date workdate,
             int workcount,
@@ -153,7 +154,7 @@ public class plasmaCrawlZURL {
     
     public class Entry {
 
-        plasmaCrawlEntry bentry;    // the balancer entry
+        CrawlEntry bentry;    // the balancer entry
         private String   executor;  // the crawling executor
         private Date     workdate;  // the time when the url was last time tried to load
         private int      workcount; // number of tryings
@@ -161,7 +162,7 @@ public class plasmaCrawlZURL {
         private boolean  stored;
 
         public Entry(
-                plasmaCrawlEntry bentry,
+                CrawlEntry bentry,
                 String executor,
                 Date workdate,
                 int workcount,
@@ -183,7 +184,7 @@ public class plasmaCrawlZURL {
             this.workdate = new Date(entry.getColLong(2));
             this.workcount = (int) entry.getColLong(3);
             this.anycause = entry.getColString(4, "UTF-8");
-            this.bentry = new plasmaCrawlEntry(plasmaCrawlEntry.rowdef.newEntry(entry.getColBytes(5)));
+            this.bentry = new CrawlEntry(CrawlEntry.rowdef.newEntry(entry.getColBytes(5)));
             assert ((new String(entry.getColBytes(0))).equals(bentry.url().hash()));
             this.stored = true;
             return;
@@ -275,3 +276,4 @@ public class plasmaCrawlZURL {
         return new kiter(up, firstHash);
     }
 }
+

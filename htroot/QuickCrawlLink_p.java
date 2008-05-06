@@ -53,8 +53,8 @@ import java.net.MalformedURLException;
 import java.net.URLDecoder;
 import java.util.Date;
 
+import de.anomic.crawler.CrawlProfile;
 import de.anomic.http.httpHeader;
-import de.anomic.plasma.plasmaCrawlProfile;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -143,7 +143,7 @@ public class QuickCrawlLink_p {
             sb.crawlQueues.errorURL.remove(urlhash);
             
             // create crawling profile
-            plasmaCrawlProfile.entry pe = null;
+            CrawlProfile.entry pe = null;
             try {
                 pe = sb.profilesActiveCrawls.newEntry(
                         crawlingStartURL.getHost(), 

@@ -1,9 +1,9 @@
 
 import java.util.Iterator;
 
+import de.anomic.crawler.CrawlProfile.entry;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaCrawlProfile.entry;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 

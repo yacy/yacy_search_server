@@ -24,7 +24,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.plasma.crawler;
+package de.anomic.crawler;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,10 +38,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import de.anomic.data.robotsParser;
 import de.anomic.kelondro.kelondroFlexWidthArray;
-import de.anomic.plasma.plasmaCrawlEntry;
-import de.anomic.plasma.plasmaCrawlNURL;
-import de.anomic.plasma.plasmaCrawlProfile;
-import de.anomic.plasma.plasmaCrawlZURL;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -54,27 +50,27 @@ import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyURL;
 
-public class plasmaCrawlQueues {
+public class CrawlQueues {
 
-    private plasmaSwitchboard sb;
+    plasmaSwitchboard sb;
     serverLog log;
     Map<Integer, crawlWorker> workers; // mapping from url hash to Worker thread object
-    plasmaProtocolLoader loader;
+    ProtocolLoader loader;
     private ArrayList<String> remoteCrawlProviderHashes;
 
-    public  plasmaCrawlNURL noticeURL;
-    public  plasmaCrawlZURL errorURL, delegatedURL;
+    public  NoticedURL noticeURL;
+    public  ZURL errorURL, delegatedURL;
     
-    public plasmaCrawlQueues(plasmaSwitchboard sb, File plasmaPath) {
+    public CrawlQueues(plasmaSwitchboard sb, File plasmaPath) {
         this.sb = sb;
         this.log = new serverLog("CRAWLER");
         this.workers = new ConcurrentHashMap<Integer, crawlWorker>();
-        this.loader = new plasmaProtocolLoader(sb, log);
+        this.loader = new ProtocolLoader(sb, log);
         this.remoteCrawlProviderHashes = new ArrayList<String>();
         
         // start crawling management
         log.logConfig("Starting Crawling Management");
-        noticeURL = new plasmaCrawlNURL(plasmaPath);
+        noticeURL = new NoticedURL(plasmaPath);
         //errorURL = new plasmaCrawlZURL(); // fresh error DB each startup; can be hold in RAM and reduces IO;
         File errorDBFile = new File(plasmaPath, "urlError2.db");
         if (errorDBFile.exists()) {
@@ -82,8 +78,8 @@ public class plasmaCrawlQueues {
             // this is useful because there is currently no re-use of the data in this table.
             if (errorDBFile.isDirectory()) kelondroFlexWidthArray.delete(plasmaPath, "urlError2.db"); else errorDBFile.delete();
         }
-        errorURL = new plasmaCrawlZURL(plasmaPath, "urlError2.db", false);
-        delegatedURL = new plasmaCrawlZURL(plasmaPath, "urlDelegated2.db", true);
+        errorURL = new ZURL(plasmaPath, "urlError2.db", false);
+        delegatedURL = new ZURL(plasmaPath, "urlDelegated2.db", true);
     }
     
     public String urlExists(String hash) {
@@ -107,9 +103,9 @@ public class plasmaCrawlQueues {
     
     public yacyURL getURL(String urlhash) {
         assert urlhash != null;
-        plasmaCrawlEntry ne = noticeURL.get(urlhash);
+        CrawlEntry ne = noticeURL.get(urlhash);
         if (ne != null) return ne.url();
-        plasmaCrawlZURL.Entry ee = delegatedURL.getEntry(urlhash);
+        ZURL.Entry ee = delegatedURL.getEntry(urlhash);
         if (ee != null) return ee.url();
         ee = errorURL.getEntry(urlhash);
         if (ee != null) return ee.url();
@@ -130,9 +126,9 @@ public class plasmaCrawlQueues {
         delegatedURL.close();
     }
     
-    public plasmaCrawlEntry[] activeWorkerEntries() {
+    public CrawlEntry[] activeWorkerEntries() {
         synchronized (workers) {
-            plasmaCrawlEntry[] e = new plasmaCrawlEntry[workers.size()];
+            CrawlEntry[] e = new CrawlEntry[workers.size()];
             int i = 0;
             for (crawlWorker w: workers.values()) e[i++] = w.entry;
             return e;
@@ -144,7 +140,7 @@ public class plasmaCrawlQueues {
     }
     
     public int coreCrawlJobSize() {
-        return noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE);
+        return noticeURL.stackSize(NoticedURL.STACK_TYPE_CORE);
     }
     
     public boolean coreCrawlJob() {
@@ -157,14 +153,14 @@ public class plasmaCrawlQueues {
             // move some tasks to the core crawl job so we have something to do
             int toshift = Math.min(10, limitCrawlJobSize()); // this cannot be a big number because the balancer makes a forced waiting if it cannot balance
             for (int i = 0; i < toshift; i++) {
-                noticeURL.shift(plasmaCrawlNURL.STACK_TYPE_LIMIT, plasmaCrawlNURL.STACK_TYPE_CORE);
+                noticeURL.shift(NoticedURL.STACK_TYPE_LIMIT, NoticedURL.STACK_TYPE_CORE);
             }
             log.logInfo("shifted " + toshift + " jobs from global crawl to local crawl (coreCrawlJobSize()=" + coreCrawlJobSize() +
                     ", limitCrawlJobSize()=" + limitCrawlJobSize() + ", cluster.mode=" + sb.getConfig(plasmaSwitchboard.CLUSTER_MODE, "") +
                     ", robinsonMode=" + ((sb.isRobinsonMode()) ? "on" : "off"));
         }
         
-        if (noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) == 0) {
+        if (noticeURL.stackSize(NoticedURL.STACK_TYPE_CORE) == 0) {
             //log.logDebug("CoreCrawl: queue is empty");
             return false;
         }
@@ -193,11 +189,11 @@ public class plasmaCrawlQueues {
         }
         
         // do a local crawl        
-        plasmaCrawlEntry urlEntry = null;
-        while (urlEntry == null && noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) > 0) {
-            String stats = "LOCALCRAWL[" + noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) + ", " + noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT) + ", " + noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_OVERHANG) + ", " + noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_REMOTE) + "]";
+        CrawlEntry urlEntry = null;
+        while (urlEntry == null && noticeURL.stackSize(NoticedURL.STACK_TYPE_CORE) > 0) {
+            String stats = "LOCALCRAWL[" + noticeURL.stackSize(NoticedURL.STACK_TYPE_CORE) + ", " + noticeURL.stackSize(NoticedURL.STACK_TYPE_LIMIT) + ", " + noticeURL.stackSize(NoticedURL.STACK_TYPE_OVERHANG) + ", " + noticeURL.stackSize(NoticedURL.STACK_TYPE_REMOTE) + "]";
             try {
-                urlEntry = noticeURL.pop(plasmaCrawlNURL.STACK_TYPE_CORE, true);
+                urlEntry = noticeURL.pop(NoticedURL.STACK_TYPE_CORE, true);
                 String profileHandle = urlEntry.profileHandle();
                 // System.out.println("DEBUG plasmaSwitchboard.processCrawling:
                 // profileHandle = " + profileHandle + ", urlEntry.url = " + urlEntry.url());
@@ -205,7 +201,7 @@ public class plasmaCrawlQueues {
                     log.logSevere(stats + ": NULL PROFILE HANDLE '" + urlEntry.profileHandle() + "' for URL " + urlEntry.url());
                     return true;
                 }
-                plasmaCrawlProfile.entry profile = sb.profilesActiveCrawls.getEntry(profileHandle);
+                CrawlProfile.entry profile = sb.profilesActiveCrawls.getEntry(profileHandle);
                 if (profile == null) {
                     log.logWarning(stats + ": LOST PROFILE HANDLE '" + urlEntry.profileHandle() + "' for URL " + urlEntry.url());
                     return true;
@@ -226,7 +222,7 @@ public class plasmaCrawlQueues {
                 return true;
             } catch (IOException e) {
                 log.logSevere(stats + ": CANNOT FETCH ENTRY: " + e.getMessage(), e);
-                if (e.getMessage().indexOf("hash is null") > 0) noticeURL.clear(plasmaCrawlNURL.STACK_TYPE_CORE);
+                if (e.getMessage().indexOf("hash is null") > 0) noticeURL.clear(NoticedURL.STACK_TYPE_CORE);
             }
         }
         return true;
@@ -343,11 +339,11 @@ public class plasmaCrawlQueues {
     }
     
     public int limitCrawlJobSize() {
-        return noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT);
+        return noticeURL.stackSize(NoticedURL.STACK_TYPE_LIMIT);
     }
     
     public int remoteTriggeredCrawlJobSize() {
-        return noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_REMOTE);
+        return noticeURL.stackSize(NoticedURL.STACK_TYPE_REMOTE);
     }
     
     public boolean remoteTriggeredCrawlJob() {
@@ -355,7 +351,7 @@ public class plasmaCrawlQueues {
         
         // do nothing if either there are private processes to be done
         // or there is no global crawl on the stack
-        if (noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_REMOTE) == 0) {
+        if (noticeURL.stackSize(NoticedURL.STACK_TYPE_REMOTE) == 0) {
             //log.logDebug("GlobalCrawl: queue is empty");
             return false;
         }
@@ -384,15 +380,15 @@ public class plasmaCrawlQueues {
         }
         
         // we don't want to crawl a global URL globally, since WE are the global part. (from this point of view)
-        String stats = "REMOTETRIGGEREDCRAWL[" + noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) + ", " + noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT) + ", " + noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_OVERHANG) + ", "
-                        + noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_REMOTE) + "]";
+        String stats = "REMOTETRIGGEREDCRAWL[" + noticeURL.stackSize(NoticedURL.STACK_TYPE_CORE) + ", " + noticeURL.stackSize(NoticedURL.STACK_TYPE_LIMIT) + ", " + noticeURL.stackSize(NoticedURL.STACK_TYPE_OVERHANG) + ", "
+                        + noticeURL.stackSize(NoticedURL.STACK_TYPE_REMOTE) + "]";
         try {
-            plasmaCrawlEntry urlEntry = noticeURL.pop(plasmaCrawlNURL.STACK_TYPE_REMOTE, true);
+            CrawlEntry urlEntry = noticeURL.pop(NoticedURL.STACK_TYPE_REMOTE, true);
             String profileHandle = urlEntry.profileHandle();
             // System.out.println("DEBUG plasmaSwitchboard.processCrawling:
             // profileHandle = " + profileHandle + ", urlEntry.url = " +
             // urlEntry.url());
-            plasmaCrawlProfile.entry profile = sb.profilesActiveCrawls.getEntry(profileHandle);
+            CrawlProfile.entry profile = sb.profilesActiveCrawls.getEntry(profileHandle);
 
             if (profile == null) {
                 log.logWarning(stats + ": LOST PROFILE HANDLE '" + urlEntry.profileHandle() + "' for URL " + urlEntry.url());
@@ -414,12 +410,12 @@ public class plasmaCrawlQueues {
             return true;
         } catch (IOException e) {
             log.logSevere(stats + ": CANNOT FETCH ENTRY: " + e.getMessage(), e);
-            if (e.getMessage().indexOf("hash is null") > 0) noticeURL.clear(plasmaCrawlNURL.STACK_TYPE_REMOTE);
+            if (e.getMessage().indexOf("hash is null") > 0) noticeURL.clear(NoticedURL.STACK_TYPE_REMOTE);
             return true;
         }
     }
     
-    private void processLocalCrawling(plasmaCrawlEntry entry, String stats) {
+    private void processLocalCrawling(CrawlEntry entry, String stats) {
         // work off one Crawl stack entry
         if ((entry == null) || (entry.url() == null)) {
             log.logInfo(stats + ": urlEntry = null");
@@ -439,7 +435,7 @@ public class plasmaCrawlQueues {
             boolean global
     ) {
         
-        plasmaCrawlEntry centry = new plasmaCrawlEntry(
+        CrawlEntry centry = new CrawlEntry(
                 sb.wordIndex.seedDB.mySeed().hash, 
                 url, 
                 "", 
@@ -466,10 +462,10 @@ public class plasmaCrawlQueues {
     
     protected class crawlWorker extends Thread {
         
-        public plasmaCrawlEntry entry;
+        public CrawlEntry entry;
         private Integer code;
         
-        public crawlWorker(plasmaCrawlEntry entry) {
+        public crawlWorker(CrawlEntry entry) {
             this.entry = entry;
             this.entry.setStatus("worker-initialized");
             this.code = new Integer(entry.hashCode());
@@ -485,7 +481,7 @@ public class plasmaCrawlQueues {
                 this.entry.setStatus("worker-checkingrobots");
                 if ((entry.url().getProtocol().equals("http") || entry.url().getProtocol().equals("https")) && robotsParser.isDisallowed(entry.url())) {
                     if (log.isFine()) log.logFine("Crawling of URL '" + entry.url().toString() + "' disallowed by robots.txt.");
-                    plasmaCrawlZURL.Entry eentry = errorURL.newEntry(
+                    ZURL.Entry eentry = errorURL.newEntry(
                             this.entry,
                             sb.wordIndex.seedDB.mySeed().hash,
                             new Date(),
@@ -498,7 +494,7 @@ public class plasmaCrawlQueues {
                     this.entry.setStatus("worker-loading");
                     String result = loader.process(this.entry, plasmaParser.PARSER_MODE_CRAWLER);
                     if (result != null) {
-                        plasmaCrawlZURL.Entry eentry = errorURL.newEntry(
+                        ZURL.Entry eentry = errorURL.newEntry(
                                 this.entry,
                                 sb.wordIndex.seedDB.mySeed().hash,
                                 new Date(),
@@ -511,7 +507,7 @@ public class plasmaCrawlQueues {
                     }
                 }
             } catch (Exception e) {
-                plasmaCrawlZURL.Entry eentry = errorURL.newEntry(
+                ZURL.Entry eentry = errorURL.newEntry(
                         this.entry,
                         sb.wordIndex.seedDB.mySeed().hash,
                         new Date(),

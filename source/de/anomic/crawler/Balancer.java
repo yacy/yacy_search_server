@@ -39,7 +39,7 @@
 // the intact and unchanged copyright notice.
 // Contributions and changes to the program code must be marked as such.
 
-package de.anomic.plasma;
+package de.anomic.crawler;
 
 import java.io.File;
 import java.io.IOException;
@@ -58,10 +58,11 @@ import de.anomic.kelondro.kelondroEcoTable;
 import de.anomic.kelondro.kelondroIndex;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroStack;
+import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySeedDB;
 
-public class plasmaCrawlBalancer {
+public class Balancer {
     
     private static final String stackSuffix = "9.stack";
     private static final String indexSuffix = "9.db";
@@ -102,7 +103,7 @@ public class plasmaCrawlBalancer {
     	}
     }
     
-    public plasmaCrawlBalancer(File cachePath, String stackname, boolean fullram) {
+    public Balancer(File cachePath, String stackname, boolean fullram) {
         this.cacheStacksPath = cachePath;
         this.stackname = stackname;
         File stackFile = new File(cachePath, stackname + stackSuffix);
@@ -147,7 +148,7 @@ public class plasmaCrawlBalancer {
     
     private void openFileIndex() {
         cacheStacksPath.mkdirs();
-        urlFileIndex = new kelondroEcoTable(new File(cacheStacksPath, stackname + indexSuffix), plasmaCrawlEntry.rowdef, (fullram) ? kelondroEcoTable.tailCacheUsageAuto : kelondroEcoTable.tailCacheDenyUsage, EcoFSBufferSize, 0);
+        urlFileIndex = new kelondroEcoTable(new File(cacheStacksPath, stackname + indexSuffix), CrawlEntry.rowdef, (fullram) ? kelondroEcoTable.tailCacheUsageAuto : kelondroEcoTable.tailCacheDenyUsage, EcoFSBufferSize, 0);
     }
     
     private void resetFileIndex() {
@@ -159,11 +160,11 @@ public class plasmaCrawlBalancer {
         openFileIndex();
     }
     
-    public synchronized plasmaCrawlEntry get(String urlhash) throws IOException {
+    public synchronized CrawlEntry get(String urlhash) throws IOException {
         assert urlhash != null;
         kelondroRow.Entry entry = urlFileIndex.get(urlhash.getBytes());
        if (entry == null) return null;
-       return new plasmaCrawlEntry(entry);
+       return new CrawlEntry(entry);
     }
     
     public synchronized int removeAllByProfileHandle(String profileHandle) throws IOException {
@@ -175,10 +176,10 @@ public class plasmaCrawlBalancer {
         Iterator<kelondroRow.Entry> i = urlFileIndex.rows(true, null);
         HashSet<String> urlHashes = new HashSet<String>();
         kelondroRow.Entry rowEntry;
-        plasmaCrawlEntry crawlEntry;
+        CrawlEntry crawlEntry;
         while (i.hasNext()) {
             rowEntry = (kelondroRow.Entry) i.next();
-            crawlEntry = new plasmaCrawlEntry(rowEntry);
+            crawlEntry = new CrawlEntry(rowEntry);
             if (crawlEntry.profileHandle().equals(profileHandle)) {
                 urlHashes.add(crawlEntry.url().hash());
             }
@@ -317,7 +318,7 @@ public class plasmaCrawlBalancer {
             urlFileStack.push(urlFileStack.row().newEntry(new byte[][]{((String) urlRAMStack.get(urlRAMStack.size() / 2)).getBytes()}));
     }
     
-    public synchronized void push(plasmaCrawlEntry entry) throws IOException {
+    public synchronized void push(CrawlEntry entry) throws IOException {
         assert entry != null;
         if (urlFileIndex.has(entry.url().hash().getBytes())) {
             serverLog.logWarning("PLASMA BALANCER", "double-check has failed for urlhash " + entry.url().hash()  + " in " + stackname + " - fixed");
@@ -348,7 +349,7 @@ public class plasmaCrawlBalancer {
         }
     }
     
-    public synchronized plasmaCrawlEntry pop(long minimumLocalDelta, long minimumGlobalDelta, long maximumAge) throws IOException {
+    public synchronized CrawlEntry pop(long minimumLocalDelta, long minimumGlobalDelta, long maximumAge) throws IOException {
         // returns an url-hash from the stack and ensures minimum delta times
         // we have 3 sources to choose from: the ramStack, the domainStacks and the fileStack
         
@@ -481,9 +482,9 @@ public class plasmaCrawlBalancer {
         } else {
             assert urlFileIndex.size() + 1 == s : "urlFileIndex.size() = " + urlFileIndex.size() + ", s = " + s + ", result = " + result;
         }
-        plasmaCrawlEntry crawlEntry = new plasmaCrawlEntry(rowEntry);
+        CrawlEntry crawlEntry = new CrawlEntry(rowEntry);
         long minimumDelta = (crawlEntry.url().isLocal()) ? minimumLocalDelta : minimumGlobalDelta;
-        plasmaCrawlRobotsTxt.Entry robotsEntry = plasmaSwitchboard.robots.getEntry(crawlEntry.url().getHost());
+        RobotsTxt.Entry robotsEntry = plasmaSwitchboard.robots.getEntry(crawlEntry.url().getHost());
         Integer hostDelay = (robotsEntry == null) ? null : robotsEntry.getCrawlDelay();
         long genericDelta = ((robotsEntry == null) || (hostDelay == null)) ? minimumDelta : Math.max(minimumDelta, hostDelay.intValue() * 1000);
         genericDelta = Math.min(10000, genericDelta); // prevent that ta robots file can stop our indexer completely
@@ -511,7 +512,7 @@ public class plasmaCrawlBalancer {
         return System.currentTimeMillis() - lastAccess.time();
     }
     
-    public synchronized plasmaCrawlEntry top(int dist) throws IOException {
+    public synchronized CrawlEntry top(int dist) throws IOException {
         // if we need to flush anything, then flush the domain stack first,
         // to avoid that new urls get hidden by old entries from the file stack
         if (urlRAMStack == null) return null;
@@ -536,14 +537,14 @@ public class plasmaCrawlBalancer {
             if (kelondroAbstractRecords.debugmode) serverLog.logWarning("PLASMA BALANCER", "no entry in index for urlhash " + urlhash);
             return null;
         }
-        return new plasmaCrawlEntry(entry);
+        return new CrawlEntry(entry);
     }
 
-    public synchronized Iterator<plasmaCrawlEntry> iterator() throws IOException {
+    public synchronized Iterator<CrawlEntry> iterator() throws IOException {
         return new EntryIterator();
     }
     
-    private class EntryIterator implements Iterator<plasmaCrawlEntry> {
+    private class EntryIterator implements Iterator<CrawlEntry> {
 
         private Iterator<kelondroRow.Entry> rowIterator;
         
@@ -555,10 +556,10 @@ public class plasmaCrawlBalancer {
             return (rowIterator == null) ? false : rowIterator.hasNext();
         }
 
-        public plasmaCrawlEntry next() {
+        public CrawlEntry next() {
             kelondroRow.Entry entry = (kelondroRow.Entry) rowIterator.next();
             try {
-                return (entry == null) ? null : new plasmaCrawlEntry(entry);
+                return (entry == null) ? null : new CrawlEntry(entry);
             } catch (IOException e) {
                 rowIterator = null;
                 return null;

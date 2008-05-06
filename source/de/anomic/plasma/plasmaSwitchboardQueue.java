@@ -52,6 +52,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 
+import de.anomic.crawler.CrawlProfile;
 import de.anomic.index.indexURLReference;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroNaturalOrder;
@@ -66,12 +67,12 @@ import de.anomic.yacy.yacyURL;
 public class plasmaSwitchboardQueue {
 
     kelondroStack sbQueueStack;
-    plasmaCrawlProfile profiles;
+    CrawlProfile profiles;
     plasmaWordIndex wordIndex;
     private File sbQueueStackPath;
     ConcurrentHashMap<String, QueueEntry> queueInProcess;
     
-    public plasmaSwitchboardQueue(plasmaWordIndex wordIndex, File sbQueueStackPath, plasmaCrawlProfile profiles) {
+    public plasmaSwitchboardQueue(plasmaWordIndex wordIndex, File sbQueueStackPath, CrawlProfile profiles) {
         this.sbQueueStackPath = sbQueueStackPath;
         this.profiles = profiles;
         this.wordIndex = wordIndex;
@@ -231,7 +232,7 @@ public class plasmaSwitchboardQueue {
         int status;
         
         // computed values
-        private plasmaCrawlProfile.entry profileEntry;
+        private CrawlProfile.entry profileEntry;
         private IResourceInfo contentInfo;
         private yacyURL referrerURL;
 
@@ -351,7 +352,7 @@ public class plasmaSwitchboardQueue {
             if (cacheFile().exists()) return cacheFile().length(); else return 0;
         }
 
-        public plasmaCrawlProfile.entry profile() {
+        public CrawlProfile.entry profile() {
             if (profileEntry == null) profileEntry = profiles.getEntry(profileHandle);
             return profileEntry;
         }

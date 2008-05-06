@@ -28,10 +28,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import de.anomic.crawler.CrawlProfile;
+import de.anomic.crawler.CrawlProfile.entry;
 import de.anomic.http.httpHeader;
-import de.anomic.plasma.plasmaCrawlProfile;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaCrawlProfile.entry;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.servletProperties;
@@ -87,7 +87,7 @@ public class CrawlProfileEditor_p {
         if (post != null) {
             if (post.containsKey("terminate")) {
                 // termination of a crawl: shift the crawl from active to passive
-                plasmaCrawlProfile.entry entry = sb.profilesActiveCrawls.getEntry(handle);
+                CrawlProfile.entry entry = sb.profilesActiveCrawls.getEntry(handle);
                 if (entry != null) sb.profilesPassiveCrawls.newEntry(entry.map());
                 sb.profilesActiveCrawls.removeEntry(handle);
                 // delete all entries from the crawl queue that are deleted here
@@ -98,7 +98,7 @@ public class CrawlProfileEditor_p {
                 sb.profilesPassiveCrawls.removeEntry(handle);
             }
             if (post.containsKey("deleteTerminatedProfiles")) {
-                Iterator<plasmaCrawlProfile.entry> profiles = sb.profilesPassiveCrawls.profiles(false);
+                Iterator<CrawlProfile.entry> profiles = sb.profilesPassiveCrawls.profiles(false);
                 while (profiles.hasNext()) {
                     profiles.next();
                     profiles.remove();
@@ -109,7 +109,7 @@ public class CrawlProfileEditor_p {
         
         // generate handle list
         int count = 0;
-        Iterator<plasmaCrawlProfile.entry> it = sb.profilesActiveCrawls.profiles(true);
+        Iterator<CrawlProfile.entry> it = sb.profilesActiveCrawls.profiles(true);
         entry selentry;
         while (it.hasNext()) {
             selentry = it.next();
@@ -150,7 +150,7 @@ public class CrawlProfileEditor_p {
         count = 0;
         boolean dark = true;
         int domlistlength = (post == null) ? 160 : post.getInt("domlistlength", 160);
-        plasmaCrawlProfile.entry profile;
+        CrawlProfile.entry profile;
         // put active crawls into list
         it = sb.profilesActiveCrawls.profiles(true);
         while (it.hasNext()) {
@@ -206,7 +206,7 @@ public class CrawlProfileEditor_p {
         return prop;
     }
     
-    private static void putProfileEntry(servletProperties prop, plasmaCrawlProfile.entry profile, boolean active, boolean dark, int count, int domlistlength) {
+    private static void putProfileEntry(servletProperties prop, CrawlProfile.entry profile, boolean active, boolean dark, int count, int domlistlength) {
         prop.put("crawlProfiles_" + count + "_dark", dark ? "1" : "0");
         prop.put("crawlProfiles_" + count + "_status", active ? "1" : "0");
         prop.put("crawlProfiles_" + count + "_name", profile.name());

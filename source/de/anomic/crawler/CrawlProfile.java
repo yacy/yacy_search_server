@@ -39,7 +39,7 @@
 // the intact and unchanged copyright notice.
 // Contributions and changes to the program code must be marked as such.
 
-package de.anomic.plasma;
+package de.anomic.crawler;
 
 import java.io.File;
 import java.io.IOException;
@@ -58,14 +58,14 @@ import de.anomic.server.serverCodings;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyURL;
 
-public class plasmaCrawlProfile {
+public class CrawlProfile {
     
     static HashMap<String, Map<String, DomProfile>> domsCache = new HashMap<String, Map<String, DomProfile>>();
     
     kelondroMapObjects profileTable;
     private File profileTableFile;
     
-    public plasmaCrawlProfile(File file) {
+    public CrawlProfile(File file) {
         this.profileTableFile = file;
         profileTableFile.getParentFile().mkdirs();
         kelondroDyn dyn = new kelondroDyn(profileTableFile, true, true, yacySeedDB.commonHashLength, 2000, '#', kelondroNaturalOrder.naturalOrder, false, false, true);

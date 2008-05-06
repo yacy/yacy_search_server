@@ -60,6 +60,7 @@ import org.apache.commons.httpclient.methods.multipart.FilePart;
 import org.apache.commons.httpclient.methods.multipart.Part;
 import org.apache.commons.httpclient.methods.multipart.StringPart;
 
+import de.anomic.crawler.ResultURLs;
 import de.anomic.http.HttpClient;
 import de.anomic.http.JakartaCommonsHttpClient;
 import de.anomic.http.JakartaCommonsHttpResponse;
@@ -74,7 +75,6 @@ import de.anomic.index.indexURLReference;
 import de.anomic.index.indexWord;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroBitfield;
-import de.anomic.plasma.plasmaCrawlResultURLs;
 import de.anomic.plasma.plasmaSearchRankingProcess;
 import de.anomic.plasma.plasmaSearchRankingProfile;
 import de.anomic.plasma.plasmaSnippetCache;
@@ -426,7 +426,7 @@ public final class yacyClient {
             int partitions,
             yacySeed target,
             plasmaWordIndex wordIndex,
-            plasmaCrawlResultURLs crawlResults,
+            ResultURLs crawlResults,
             plasmaSearchRankingProcess containerCache,
             Map<String, TreeMap<String, String>> abstractCache,
             indexReferenceBlacklist blacklist,

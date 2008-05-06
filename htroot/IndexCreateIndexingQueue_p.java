@@ -46,8 +46,8 @@
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import de.anomic.crawler.ZURL;
 import de.anomic.http.httpHeader;
-import de.anomic.plasma.plasmaCrawlZURL;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardQueue;
@@ -171,7 +171,7 @@ public class IndexCreateIndexingQueue_p {
             dark = true;
             yacyURL url; 
             String initiatorHash, executorHash;
-            plasmaCrawlZURL.Entry entry;
+            ZURL.Entry entry;
             yacySeed initiatorSeed, executorSeed;
             int j=0;
             for (int i = sb.crawlQueues.errorURL.stackSize() - 1; i >= (sb.crawlQueues.errorURL.stackSize() - showRejectedCount); i--) {

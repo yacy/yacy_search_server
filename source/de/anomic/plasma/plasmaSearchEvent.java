@@ -37,6 +37,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
+import de.anomic.crawler.ResultURLs;
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexRWIVarEntry;
@@ -88,12 +89,12 @@ public final class plasmaSearchEvent {
     TreeSet<String> snippetFetchWordHashes; // a set of word hashes that are used to match with the snippets
     long urlRetrievalAllTime;
     long snippetComputationAllTime;
-    plasmaCrawlResultURLs crawlResults;
+    ResultURLs crawlResults;
     
     @SuppressWarnings("unchecked")
     private plasmaSearchEvent(plasmaSearchQuery query,
                              plasmaWordIndex wordIndex,
-                             plasmaCrawlResultURLs crawlResults,
+                             ResultURLs crawlResults,
                              TreeMap<String, String> preselectedPeerHashes,
                              boolean generateAbstracts) {
         this.eventTime = System.currentTimeMillis(); // for lifetime check
@@ -456,7 +457,7 @@ public final class plasmaSearchEvent {
             plasmaSearchQuery query,
             plasmaSearchRankingProfile ranking,
             plasmaWordIndex wordIndex,
-            plasmaCrawlResultURLs crawlResults,
+            ResultURLs crawlResults,
             TreeMap<String, String> preselectedPeerHashes,
             boolean generateAbstracts) {
         plasmaSearchEvent event = lastEvents.get(query.id(false));

@@ -47,10 +47,10 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+import de.anomic.crawler.CrawlEntry;
+import de.anomic.crawler.CrawlProfile;
+import de.anomic.crawler.NoticedURL;
 import de.anomic.http.httpHeader;
-import de.anomic.plasma.plasmaCrawlEntry;
-import de.anomic.plasma.plasmaCrawlNURL;
-import de.anomic.plasma.plasmaCrawlProfile;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -78,8 +78,8 @@ public class IndexCreateWWWGlobalQueue_p {
             }            
             
             if (post.containsKey("clearcrawlqueue")) {
-                int c = sb.crawlQueues.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT);
-                sb.crawlQueues.noticeURL.clear(plasmaCrawlNURL.STACK_TYPE_LIMIT);
+                int c = sb.crawlQueues.noticeURL.stackSize(NoticedURL.STACK_TYPE_LIMIT);
+                sb.crawlQueues.noticeURL.clear(NoticedURL.STACK_TYPE_LIMIT);
                 try { sb.cleanProfiles(); } catch (InterruptedException e) { /* Ignore this */}
                 /*
                 int c = 0;
@@ -98,18 +98,18 @@ public class IndexCreateWWWGlobalQueue_p {
             }
         }
 
-        int stackSize = sb.crawlQueues.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT);
+        int stackSize = sb.crawlQueues.noticeURL.stackSize(NoticedURL.STACK_TYPE_LIMIT);
         if (stackSize == 0) {
             prop.put("crawler-queue", "0");
         } else {
             prop.put("crawler-queue", "1");
-            plasmaCrawlEntry[] crawlerList = sb.crawlQueues.noticeURL.top(plasmaCrawlNURL.STACK_TYPE_LIMIT, showLimit);
+            CrawlEntry[] crawlerList = sb.crawlQueues.noticeURL.top(NoticedURL.STACK_TYPE_LIMIT, showLimit);
             
-            plasmaCrawlEntry urle;
+            CrawlEntry urle;
             boolean dark = true;
             yacySeed initiator;
             String profileHandle;
-            plasmaCrawlProfile.entry profileEntry;
+            CrawlProfile.entry profileEntry;
             int i, showNum = 0;
             for (i = 0; (i < crawlerList.length) && (showNum < showLimit); i++) {
                 urle = crawlerList[i];

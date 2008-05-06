@@ -46,8 +46,8 @@ package de.anomic.plasma.dbImport;
 
 import java.util.HashMap;
 
+import de.anomic.crawler.CrawlProfile;
 import de.anomic.data.SitemapParser;
-import de.anomic.plasma.plasmaCrawlProfile;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.yacy.yacyURL;
 
@@ -105,7 +105,7 @@ public class SitemapImporter extends AbstractImporter implements dbImporter {
         super.init();
 	}
 	
-	public void initSitemap(yacyURL sitemapURL, plasmaCrawlProfile.entry profileEntry) throws ImporterException {
+	public void initSitemap(yacyURL sitemapURL, CrawlProfile.entry profileEntry) throws ImporterException {
         try {
             // getting the sitemap URL
             this.sitemapURL = sitemapURL;

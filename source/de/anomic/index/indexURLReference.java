@@ -32,12 +32,12 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Properties;
 
+import de.anomic.crawler.CrawlEntry;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroRow;
-import de.anomic.plasma.plasmaCrawlEntry;
 import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.server.serverCharBuffer;
 import de.anomic.server.serverCodings;
@@ -434,8 +434,8 @@ public class indexURLReference {
         //return "{" + core + ",snippet=" + crypt.simpleEncode(snippet) + "}";
     }
 
-    public plasmaCrawlEntry toBalancerEntry(String initiatorHash) {
-        return new plasmaCrawlEntry(
+    public CrawlEntry toBalancerEntry(String initiatorHash) {
+        return new CrawlEntry(
                 initiatorHash, 
                 comp().url(), 
                 referrerHash(), 

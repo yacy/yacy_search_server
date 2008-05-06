@@ -50,14 +50,14 @@
    algorithm. The MD5 is not encoded as a hex value, but a b64 value.
 */
 
-package de.anomic.plasma;
+package de.anomic.crawler;
 
 import java.util.LinkedList;
 
 import de.anomic.index.indexURLReference;
 import de.anomic.yacy.yacySeedDB;
 
-public final class plasmaCrawlResultURLs {
+public final class ResultURLs {
 
     // result stacks;
     // these have all entries of form
@@ -69,7 +69,7 @@ public final class plasmaCrawlResultURLs {
     private final LinkedList<String> lcrawlResultStack; // 5 - local index: result of local crawling
     private final LinkedList<String> gcrawlResultStack; // 6 - local index: triggered external
 
-    public plasmaCrawlResultURLs() {
+    public ResultURLs() {
         // init result stacks
         externResultStack = new LinkedList<String>();
         searchResultStack = new LinkedList<String>();

@@ -43,8 +43,8 @@
 // javac -classpath .:../classes IndexCreate_p.java
 // if the shell's current path is HTROOT
 
+import de.anomic.crawler.CrawlEntry;
 import de.anomic.http.httpHeader;
-import de.anomic.plasma.plasmaCrawlEntry;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -63,7 +63,7 @@ public class IndexCreateLoaderQueue_p {
         } else {
             prop.put("loader-set", "1");
             boolean dark = true;
-            plasmaCrawlEntry[] w = sb.crawlQueues.activeWorkerEntries();
+            CrawlEntry[] w = sb.crawlQueues.activeWorkerEntries();
             yacySeed initiator;
             int count = 0;
             for (int i = 0; i < w.length; i++)  {

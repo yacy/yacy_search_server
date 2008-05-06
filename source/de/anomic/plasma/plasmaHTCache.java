@@ -70,6 +70,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import de.anomic.crawler.CrawlProfile;
 import de.anomic.http.httpHeader;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroDyn;
@@ -893,7 +894,7 @@ public final class plasmaHTCache {
             String responseStatus,
             IResourceInfo docInfo,            
             String initiator,
-            plasmaCrawlProfile.entry profile
+            CrawlProfile.entry profile
     ) {
         return new Entry(
                 initDate, 
@@ -920,7 +921,7 @@ public final class plasmaHTCache {
     private Date                     lastModified;
     private char                     doctype;
     private String                   language;
-    private plasmaCrawlProfile.entry profile;
+    private CrawlProfile.entry profile;
     private String                   initiator;
     
     /**
@@ -948,7 +949,7 @@ public final class plasmaHTCache {
             String responseStatus,
             IResourceInfo resourceInfo,            
             String initiator,
-            plasmaCrawlProfile.entry profile
+            CrawlProfile.entry profile
     ) {
         if (resourceInfo == null){
             System.out.println("Content information object is null. " + url);
@@ -999,7 +1000,7 @@ public final class plasmaHTCache {
         return this.language;
     }
     
-    public plasmaCrawlProfile.entry profile() {
+    public CrawlProfile.entry profile() {
         return this.profile;
     }
     

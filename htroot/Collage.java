@@ -39,8 +39,8 @@
 
 import java.util.Random;
 
+import de.anomic.crawler.ResultImages;
 import de.anomic.http.httpHeader;
-import de.anomic.plasma.plasmaCrawlResultImages;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -54,7 +54,7 @@ public class Collage {
     private static           int fifoSize = 0;
     private static           long zIndex  = 0;
     
-    private static           plasmaCrawlResultImages.OriginEntry    origins[]      = new plasmaCrawlResultImages.OriginEntry[fifoMax];
+    private static           ResultImages.OriginEntry    origins[]      = new ResultImages.OriginEntry[fifoMax];
     private static           Integer   imgWidth[]    = new Integer[fifoMax];
     private static           Integer   imgHeight[]   = new Integer[fifoMax];
     private static           Integer   imgPosX[]     = new Integer[fifoMax];
@@ -66,7 +66,7 @@ public class Collage {
         final serverObjects prop = new serverObjects();
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final boolean authenticated = sb.adminAuthenticated(header) >= 2;
-        plasmaCrawlResultImages.OriginEntry nextOrigin = plasmaCrawlResultImages.next(!authenticated);
+        ResultImages.OriginEntry nextOrigin = ResultImages.next(!authenticated);
         
         if (nextOrigin != null) {
             if (fifoSize == 0 || origins[fifoPos] != nextOrigin) {
@@ -104,9 +104,9 @@ public class Collage {
             prop.put("imgurl", "0");
         }
         
-        prop.putNum("refresh", Math.max(2, Math.min(5, 500 / (1 + plasmaCrawlResultImages.queueSize(!authenticated)))));
-        prop.put("privateQueueSize", plasmaCrawlResultImages.privateQueueHighSize() + "+" + plasmaCrawlResultImages.privateQueueLowSize());
-        prop.put("publicQueueSize", plasmaCrawlResultImages.publicQueueHighSize()  + "+" + plasmaCrawlResultImages.publicQueueLowSize());
+        prop.putNum("refresh", Math.max(2, Math.min(5, 500 / (1 + ResultImages.queueSize(!authenticated)))));
+        prop.put("privateQueueSize", ResultImages.privateQueueHighSize() + "+" + ResultImages.privateQueueLowSize());
+        prop.put("publicQueueSize", ResultImages.publicQueueHighSize()  + "+" + ResultImages.publicQueueLowSize());
         return prop;
     }
 }

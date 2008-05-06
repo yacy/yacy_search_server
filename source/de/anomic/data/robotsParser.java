@@ -56,11 +56,11 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Date;
 
+import de.anomic.crawler.RobotsTxt;
 import de.anomic.http.HttpClient;
 import de.anomic.http.JakartaCommonsHttpClient;
 import de.anomic.http.JakartaCommonsHttpResponse;
 import de.anomic.http.httpHeader;
-import de.anomic.plasma.plasmaCrawlRobotsTxt;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverByteBuffer;
 import de.anomic.server.serverFileUtils;
@@ -218,7 +218,7 @@ public final class robotsParser{
                         }
                         
                         // escaping all occurences of ; because this char is used as special char in the Robots DB
-                        path = path.replaceAll(plasmaCrawlRobotsTxt.ROBOTS_DB_PATH_SEPARATOR,"%3B");                    
+                        path = path.replaceAll(RobotsTxt.ROBOTS_DB_PATH_SEPARATOR,"%3B");                    
                         
                         // adding it to the pathlist
                         if (!isDisallowRule) path = "!" + path;
@@ -262,7 +262,7 @@ public final class robotsParser{
         // generating the hostname:poart string needed to do a DB lookup
         String urlHostPort = getHostPort(theURL);    	
     	
-        plasmaCrawlRobotsTxt.Entry robotsTxt4Host = null;
+        RobotsTxt.Entry robotsTxt4Host = null;
         synchronized(urlHostPort) {
             // doing a DB lookup to determine if the robots data is already available
             robotsTxt4Host = plasmaSwitchboard.robots.getEntry(urlHostPort);
@@ -284,7 +284,7 @@ public final class robotsParser{
         // generating the hostname:poart string needed to do a DB lookup
         String urlHostPort = getHostPort(theURL);    	
     	
-        plasmaCrawlRobotsTxt.Entry robotsTxt4Host = null;
+        RobotsTxt.Entry robotsTxt4Host = null;
         synchronized(urlHostPort) {
             // doing a DB lookup to determine if the robots data is already available
             robotsTxt4Host = plasmaSwitchboard.robots.getEntry(urlHostPort);
@@ -305,7 +305,7 @@ public final class robotsParser{
         // generating the hostname:poart string needed to do a DB lookup
         String urlHostPort = getHostPort(nexturl);
         
-        plasmaCrawlRobotsTxt.Entry robotsTxt4Host = null;
+        RobotsTxt.Entry robotsTxt4Host = null;
         synchronized(urlHostPort) {
             // doing a DB lookup to determine if the robots data is already available
             robotsTxt4Host = plasmaSwitchboard.robots.getEntry(urlHostPort);
@@ -378,7 +378,7 @@ public final class robotsParser{
         return false;
     }
     
-    static Object[] downloadRobotsTxt(yacyURL robotsURL, int redirectionCount, plasmaCrawlRobotsTxt.Entry entry) throws Exception {
+    static Object[] downloadRobotsTxt(yacyURL robotsURL, int redirectionCount, RobotsTxt.Entry entry) throws Exception {
         
         if (redirectionCount < 0) return new Object[]{Boolean.FALSE,null,null};
         redirectionCount--;

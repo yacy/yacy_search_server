@@ -6,17 +6,17 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 
-import de.anomic.plasma.plasmaCrawlEntry;
-import de.anomic.plasma.plasmaCrawlNURL;
-import de.anomic.plasma.plasmaCrawlProfile;
+import de.anomic.crawler.CrawlEntry;
+import de.anomic.crawler.CrawlProfile;
+import de.anomic.crawler.NoticedURL;
 import de.anomic.plasma.plasmaSwitchboard;
 
 public class plasmaCrawlNURLImporter extends AbstractImporter implements dbImporter {
 
 	private File plasmaPath = null;
     private HashSet<String> importProfileHandleCache = new HashSet<String>();
-    private plasmaCrawlProfile importProfileDB;
-    private plasmaCrawlNURL importNurlDB;
+    private CrawlProfile importProfileDB;
+    private NoticedURL importNurlDB;
     private int importStartSize;
     private int urlCount = 0;
     private int profileCount = 0;
@@ -91,13 +91,13 @@ public class plasmaCrawlNURLImporter extends AbstractImporter implements dbImpor
         
         // init noticeUrlDB
         this.log.logInfo("Initializing the source noticeUrlDB");
-        this.importNurlDB = new plasmaCrawlNURL(plasmaPath);
+        this.importNurlDB = new NoticedURL(plasmaPath);
         this.importStartSize = this.importNurlDB.size();
         //int stackSize = this.importNurlDB.stackSize();
         
         // init profile DB
         this.log.logInfo("Initializing the source profileDB");
-        this.importProfileDB = new plasmaCrawlProfile(profileDbFile);
+        this.importProfileDB = new CrawlProfile(profileDbFile);
     }
 
     @SuppressWarnings("unchecked")
@@ -107,9 +107,10 @@ public class plasmaCrawlNURLImporter extends AbstractImporter implements dbImpor
             //this.importNurlDB.waitOnInitThread();
             
             // the stack types we want to import
-            int[] stackTypes = new int[] {plasmaCrawlNURL.STACK_TYPE_CORE,
-                                          plasmaCrawlNURL.STACK_TYPE_LIMIT,
-                                          plasmaCrawlNURL.STACK_TYPE_REMOTE,
+            int[] stackTypes = new int[] {
+                    NoticedURL.STACK_TYPE_CORE,
+                    NoticedURL.STACK_TYPE_LIMIT,
+                    NoticedURL.STACK_TYPE_REMOTE,
                                           -1};
             
             // looping through the various stacks
@@ -121,11 +122,11 @@ public class plasmaCrawlNURLImporter extends AbstractImporter implements dbImpor
                 }
                 
                 // getting an iterator and loop through the URL entries
-                Iterator<plasmaCrawlEntry> entryIter = (stackTypes[stackType] == -1) ? this.importNurlDB.iterator(stackType) : null;
+                Iterator<CrawlEntry> entryIter = (stackTypes[stackType] == -1) ? this.importNurlDB.iterator(stackType) : null;
                 while (true) {
                     
                     String nextHash = null;
-                    plasmaCrawlEntry nextEntry = null;
+                    CrawlEntry nextEntry = null;
                     
                     try {                        
                         if (stackTypes[stackType] != -1) {
@@ -160,12 +161,12 @@ public class plasmaCrawlNURLImporter extends AbstractImporter implements dbImpor
                         if (!this.importProfileHandleCache.contains(profileHandle)) {
                             
                             // testing if the profile is already known
-                            plasmaCrawlProfile.entry profileEntry = this.sb.profilesActiveCrawls.getEntry(profileHandle);
+                            CrawlProfile.entry profileEntry = this.sb.profilesActiveCrawls.getEntry(profileHandle);
                             
                             // if not we need to import it
                             if (profileEntry == null) {
                                 // copy and store the source profile entry into the destination db
-                                plasmaCrawlProfile.entry sourceEntry = this.importProfileDB.getEntry(profileHandle);
+                                CrawlProfile.entry sourceEntry = this.importProfileDB.getEntry(profileHandle);
                                 if (sourceEntry != null) {
                                     this.profileCount++;
                                     this.importProfileHandleCache.add(profileHandle);
@@ -179,7 +180,7 @@ public class plasmaCrawlNURLImporter extends AbstractImporter implements dbImpor
                         
                         // if the url does not alredy exists in the destination stack we insert it now
                         if (!this.sb.crawlQueues.noticeURL.existsInStack(nextHash)) {
-                            this.sb.crawlQueues.noticeURL.push((stackTypes[stackType] != -1) ? stackTypes[stackType] : plasmaCrawlNURL.STACK_TYPE_CORE, nextEntry);
+                            this.sb.crawlQueues.noticeURL.push((stackTypes[stackType] != -1) ? stackTypes[stackType] : NoticedURL.STACK_TYPE_CORE, nextEntry);
                         }
                         
                         // removing hash from the import db

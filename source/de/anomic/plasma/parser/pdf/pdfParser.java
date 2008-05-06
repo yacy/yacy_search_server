@@ -56,7 +56,7 @@ import org.pdfbox.pdmodel.PDDocumentInformation;
 import org.pdfbox.pdmodel.encryption.StandardDecryptionMaterial;
 import org.pdfbox.util.PDFTextStripper;
 
-import de.anomic.plasma.plasmaCrawlEURL;
+import de.anomic.crawler.ErrorURL;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.parser.AbstractParser;
 import de.anomic.plasma.parser.Parser;
@@ -122,7 +122,7 @@ public class pdfParser extends AbstractParser implements Parser {
             if (theDocument.isEncrypted()) {
                 theDocument.openProtection(new StandardDecryptionMaterial(""));
                 if (!theDocument.getCurrentAccessPermission().canExtractContent())
-                    throw new ParserException("Document is encrypted",location,plasmaCrawlEURL.DENIED_DOCUMENT_ENCRYPTED);
+                    throw new ParserException("Document is encrypted",location,ErrorURL.DENIED_DOCUMENT_ENCRYPTED);
             }
             
             // extracting some metadata

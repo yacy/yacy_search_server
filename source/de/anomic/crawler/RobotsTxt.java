@@ -43,7 +43,7 @@
 //Contributions and changes to the program code must be marked as such.
 
 
-package de.anomic.plasma;
+package de.anomic.crawler;
 
 import java.io.File;
 import java.io.IOException;
@@ -59,14 +59,14 @@ import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMapObjects;
 import de.anomic.kelondro.kelondroNaturalOrder;
 
-public class plasmaCrawlRobotsTxt {
+public class RobotsTxt {
     
     public static final String ROBOTS_DB_PATH_SEPARATOR = ";";    
     
     kelondroMapObjects robotsTable;
     private final File robotsTableFile;
     
-    public plasmaCrawlRobotsTxt(File robotsTableFile) {
+    public RobotsTxt(File robotsTableFile) {
         this.robotsTableFile = robotsTableFile;
         robotsTableFile.getParentFile().mkdirs();
         robotsTable = new kelondroMapObjects(new kelondroDyn(robotsTableFile, true, true, 256, 512, '_', kelondroNaturalOrder.naturalOrder, false, false, true), 100);

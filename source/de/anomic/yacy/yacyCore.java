@@ -104,7 +104,7 @@ public class yacyCore {
 
     // class variables
     private static int onlineMode = 1;
-    private plasmaSwitchboard sb;
+    plasmaSwitchboard sb;
 
     public static int yacyTime() {
         // the time since startup of yacy in seconds

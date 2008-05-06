@@ -40,12 +40,13 @@
 //Contributions and changes to the program code must be marked as such.
 
 
-package de.anomic.plasma;
+package de.anomic.crawler;
 
+import de.anomic.plasma.plasmaHTCache;
 import de.anomic.server.serverSemaphore;
 import de.anomic.yacy.yacyURL;
 
-public final class plasmaCrawlLoaderMessage {
+public final class LoaderMessage {
     public final int crawlingPriority;
     
     public final yacyURL url;
@@ -53,7 +54,7 @@ public final class plasmaCrawlLoaderMessage {
     public final String referer;
     public final String initiator;
     public final int depth;
-    public final plasmaCrawlProfile.entry profile;
+    public final CrawlProfile.entry profile;
     public final boolean acceptAllContent;
     public final int timeout;
     public final boolean keepInMemory;
@@ -63,13 +64,13 @@ public final class plasmaCrawlLoaderMessage {
     private String errorMessage;
     
     // loadParallel(URL url, String referer, String initiator, int depth, plasmaCrawlProfile.entry profile) {
-    public plasmaCrawlLoaderMessage(
+    public LoaderMessage(
             yacyURL url,
             String name,                       // the name of the url, from anchor tag <a>name</a>
             String referer, 
             String initiator, 
             int depth, 
-            plasmaCrawlProfile.entry profile,
+            CrawlProfile.entry profile,
             int crawlingPriority,
             boolean acceptAllContent,
             int timeout,

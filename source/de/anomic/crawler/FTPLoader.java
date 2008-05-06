@@ -44,7 +44,7 @@
 // the intact and unchanged copyright notice.
 // Contributions and changes to the program code must be marked as such.
 
-package de.anomic.plasma.crawler;
+package de.anomic.crawler;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -54,8 +54,6 @@ import java.io.PrintWriter;
 import java.util.Date;
 
 import de.anomic.net.ftpc;
-import de.anomic.plasma.plasmaCrawlEURL;
-import de.anomic.plasma.plasmaCrawlEntry;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -63,19 +61,19 @@ import de.anomic.plasma.cache.ftp.ResourceInfo;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyURL;
 
-public class plasmaFTPLoader {
+public class FTPLoader {
 
     private final plasmaSwitchboard sb;
     private final serverLog log;
     private final int maxFileSize;
 
-    public plasmaFTPLoader(final plasmaSwitchboard sb, final serverLog log) {
+    public FTPLoader(final plasmaSwitchboard sb, final serverLog log) {
         this.sb = sb;
         this.log = log;
         maxFileSize = (int) sb.getConfigLong("crawler.ftp.maxFileSize", -1l);
     }
 
-    protected plasmaHTCache.Entry createCacheEntry(final plasmaCrawlEntry entry, final String mimeType,
+    protected plasmaHTCache.Entry createCacheEntry(final CrawlEntry entry, final String mimeType,
             final Date fileDate) {
         return plasmaHTCache.newEntry(new Date(), entry.depth(), entry.url(), entry.name(), "OK", new ResourceInfo(
                 entry.url(), sb.getURL(entry.referrerhash()), mimeType, fileDate), entry.initiator(),
@@ -88,7 +86,7 @@ public class plasmaFTPLoader {
      * @param entry
      * @return
      */
-    public plasmaHTCache.Entry load(final plasmaCrawlEntry entry) {
+    public plasmaHTCache.Entry load(final CrawlEntry entry) {
         final yacyURL entryUrl = entry.url();
         final String fullPath = getPath(entryUrl);
         final File cacheFile = createCachefile(entryUrl);
@@ -157,7 +155,7 @@ public class plasmaFTPLoader {
             // some error logging
             final String detail = (berr.size() > 0) ? "\n    Errorlog: " + berr.toString() : "";
             log.logWarning("Unable to download URL " + entry.url().toString() + detail);
-            sb.crawlQueues.errorURL.newEntry(entry, sb.wordIndex.seedDB.mySeed().hash, new Date(), 1, plasmaCrawlEURL.DENIED_SERVER_DOWNLOAD_ERROR);
+            sb.crawlQueues.errorURL.newEntry(entry, sb.wordIndex.seedDB.mySeed().hash, new Date(), 1, ErrorURL.DENIED_SERVER_DOWNLOAD_ERROR);
 
             // an error has occured. cleanup
             if (cacheFile.exists()) {
@@ -253,7 +251,7 @@ public class plasmaFTPLoader {
      * @return
      * @throws Exception
      */
-    private plasmaHTCache.Entry getFile(final ftpc ftpClient, final plasmaCrawlEntry entry, final File cacheFile)
+    private plasmaHTCache.Entry getFile(final ftpc ftpClient, final CrawlEntry entry, final File cacheFile)
             throws Exception {
         // determine the mimetype of the resource
         final yacyURL entryUrl = entry.url();
@@ -282,13 +280,13 @@ public class plasmaFTPLoader {
             } else {
                 log.logInfo("REJECTED TOO BIG FILE with size " + size + " Bytes for URL " + entry.url().toString());
                 sb.crawlQueues.errorURL.newEntry(entry, this.sb.wordIndex.seedDB.mySeed().hash, new Date(), 1,
-                        plasmaCrawlEURL.DENIED_FILESIZE_LIMIT_EXCEEDED);
+                        ErrorURL.DENIED_FILESIZE_LIMIT_EXCEEDED);
                 throw new Exception("file size exceeds limit");
             }
         } else {
             // if the response has not the right file type then reject file
             log.logInfo("REJECTED WRONG MIME/EXT TYPE " + mimeType + " for URL " + entry.url().toString());
-            sb.crawlQueues.errorURL.newEntry(entry, null, new Date(), 1, plasmaCrawlEURL.DENIED_WRONG_MIMETYPE_OR_EXT);
+            sb.crawlQueues.errorURL.newEntry(entry, null, new Date(), 1, ErrorURL.DENIED_WRONG_MIMETYPE_OR_EXT);
             throw new Exception("response has not the right file type -> rejected");
         }
         return htCache;
@@ -310,7 +308,7 @@ public class plasmaFTPLoader {
      * @param cacheFile
      * @return
      */
-    private boolean generateDirlist(final ftpc ftpClient, final plasmaCrawlEntry entry, final String path,
+    private boolean generateDirlist(final ftpc ftpClient, final CrawlEntry entry, final String path,
             final File cacheFile) {
         // getting the dirlist
         final yacyURL entryUrl = entry.url();

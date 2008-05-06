@@ -45,7 +45,7 @@
 // the intact and unchanged copyright notice.
 // Contributions and changes to the program code must be marked as such.
 
-package de.anomic.plasma;
+package de.anomic.crawler;
 
 import java.io.File;
 import java.io.IOException;
@@ -64,11 +64,12 @@ import de.anomic.kelondro.kelondroIndex;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroRowSet;
 import de.anomic.kelondro.kelondroTree;
+import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverDomains;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyURL;
 
-public final class plasmaCrawlStacker extends Thread {
+public final class CrawlStacker extends Thread {
     
     private static final int EcoFSBufferSize = 20;
     private static String stackfile = "urlNoticeStacker9.db";
@@ -93,7 +94,7 @@ public final class plasmaCrawlStacker extends Thread {
     // objects for the prefetch task
     private ArrayList<String> dnsfetchHosts = new ArrayList<String>();    
     
-    public plasmaCrawlStacker(plasmaSwitchboard sb, File dbPath, int dbtype, boolean prequeue) {
+    public CrawlStacker(plasmaSwitchboard sb, File dbPath, int dbtype, boolean prequeue) {
         this.sb = sb;
         this.prequeue = prequeue;
         this.dnsHit = 0;
@@ -122,7 +123,7 @@ public final class plasmaCrawlStacker extends Thread {
             }
         } catch (kelondroException e) {
             /* if we have an error, we start with a fresh database */
-            plasmaCrawlStacker.this.log.logSevere("Unable to initialize crawl stacker queue, kelondroException:" + e.getMessage() + ". Reseting DB.\n", e);
+            CrawlStacker.this.log.logSevere("Unable to initialize crawl stacker queue, kelondroException:" + e.getMessage() + ". Reseting DB.\n", e);
 
             // deleting old db and creating a new db
             try {this.urlEntryCache.close();} catch (Exception ex) {}
@@ -130,7 +131,7 @@ public final class plasmaCrawlStacker extends Thread {
             openDB();
         } catch (IOException e) {
             /* if we have an error, we start with a fresh database */
-            plasmaCrawlStacker.this.log.logSevere("Unable to initialize crawl stacker queue, IOException:" + e.getMessage() + ". Reseting DB.\n", e);
+            CrawlStacker.this.log.logSevere("Unable to initialize crawl stacker queue, IOException:" + e.getMessage() + ". Reseting DB.\n", e);
 
             // deleting old db and creating a new db
             try {this.urlEntryCache.close();} catch (Exception ex) {}
@@ -197,7 +198,7 @@ public final class plasmaCrawlStacker extends Thread {
     }
     
     public boolean job() {
-        plasmaCrawlEntry entry;
+        CrawlEntry entry;
         try {
             entry = dequeueEntry();
         } catch (IOException e) {
@@ -212,12 +213,12 @@ public final class plasmaCrawlStacker extends Thread {
 
             // if the url was rejected we store it into the error URL db
             if (rejectReason != null) {
-                plasmaCrawlZURL.Entry ee = sb.crawlQueues.errorURL.newEntry(entry, sb.wordIndex.seedDB.mySeed().hash, new Date(), 1, rejectReason);
+                ZURL.Entry ee = sb.crawlQueues.errorURL.newEntry(entry, sb.wordIndex.seedDB.mySeed().hash, new Date(), 1, rejectReason);
                 ee.store();
                 sb.crawlQueues.errorURL.push(ee);
             }
         } catch (Exception e) {
-            plasmaCrawlStacker.this.log.logWarning("Error while processing stackCrawl entry.\n" + "Entry: " + entry.toString() + "Error: " + e.toString(), e);
+            CrawlStacker.this.log.logWarning("Error while processing stackCrawl entry.\n" + "Entry: " + entry.toString() + "Error: " + e.toString(), e);
             return false;
         }
         return true;
@@ -230,9 +231,9 @@ public final class plasmaCrawlStacker extends Thread {
             String name, 
             Date loadDate, 
             int currentdepth, 
-            plasmaCrawlProfile.entry profile) {
+            CrawlProfile.entry profile) {
         if (profile == null) return;
-        plasmaCrawlEntry newEntry = new plasmaCrawlEntry(
+        CrawlEntry newEntry = new CrawlEntry(
                     initiatorHash,
                     nexturl,
                     referrerhash,
@@ -294,22 +295,22 @@ public final class plasmaCrawlStacker extends Thread {
         if (!(cacheStacksPath.exists())) cacheStacksPath.mkdir(); // make the path
 
         if (this.dbtype == QUEUE_DB_TYPE_RAM) {
-            this.urlEntryCache = new kelondroRowSet(plasmaCrawlEntry.rowdef, 0);
+            this.urlEntryCache = new kelondroRowSet(CrawlEntry.rowdef, 0);
         }
         if (this.dbtype == QUEUE_DB_TYPE_ECO) {
             cacheStacksPath.mkdirs();
             File f = new File(cacheStacksPath, stackfile);
             try {
-                this.urlEntryCache = new kelondroEcoTable(f, plasmaCrawlEntry.rowdef, kelondroEcoTable.tailCacheUsageAuto, EcoFSBufferSize, 0);
-                //this.urlEntryCache = new kelondroCache(new kelondroFlexTable(cacheStacksPath, newCacheName, preloadTime, plasmaCrawlEntry.rowdef, 0, true));
+                this.urlEntryCache = new kelondroEcoTable(f, CrawlEntry.rowdef, kelondroEcoTable.tailCacheUsageAuto, EcoFSBufferSize, 0);
+                //this.urlEntryCache = new kelondroCache(new kelondroFlexTable(cacheStacksPath, newCacheName, preloadTime, CrawlEntry.rowdef, 0, true));
             } catch (Exception e) {
                 e.printStackTrace();
                 // kill DB and try again
                 f.delete();
                 //kelondroFlexTable.delete(cacheStacksPath, newCacheName);
                 try {
-                    this.urlEntryCache = new kelondroEcoTable(f, plasmaCrawlEntry.rowdef, kelondroEcoTable.tailCacheUsageAuto, EcoFSBufferSize, 0);
-                    //this.urlEntryCache = new kelondroCache(new kelondroFlexTable(cacheStacksPath, newCacheName, preloadTime, plasmaCrawlEntry.rowdef, 0, true));
+                    this.urlEntryCache = new kelondroEcoTable(f, CrawlEntry.rowdef, kelondroEcoTable.tailCacheUsageAuto, EcoFSBufferSize, 0);
+                    //this.urlEntryCache = new kelondroCache(new kelondroFlexTable(cacheStacksPath, newCacheName, preloadTime, CrawlEntry.rowdef, 0, true));
                 } catch (Exception ee) {
                     ee.printStackTrace();
                     System.exit(-1);
@@ -319,7 +320,7 @@ public final class plasmaCrawlStacker extends Thread {
         if (this.dbtype == QUEUE_DB_TYPE_TREE) {
             File cacheFile = new File(cacheStacksPath, stackfile);
             cacheFile.getParentFile().mkdirs();
-            this.urlEntryCache = new kelondroCache(kelondroTree.open(cacheFile, true, 0, plasmaCrawlEntry.rowdef));
+            this.urlEntryCache = new kelondroCache(kelondroTree.open(cacheFile, true, 0, CrawlEntry.rowdef));
         }
     }
 
@@ -333,7 +334,7 @@ public final class plasmaCrawlStacker extends Thread {
         return this.dbtype;
     }
 
-    public plasmaCrawlEntry dequeueEntry() throws IOException {
+    public CrawlEntry dequeueEntry() throws IOException {
         if (this.urlEntryHashCache.size() == 0) return null;
         String urlHash = null;
         kelondroRow.Entry entry = null;
@@ -344,16 +345,16 @@ public final class plasmaCrawlStacker extends Thread {
         }
 
         if ((urlHash == null) || (entry == null)) return null;
-        return new plasmaCrawlEntry(entry);
+        return new CrawlEntry(entry);
     }
     
-    public String stackCrawl(yacyURL url, yacyURL referrer, String initiatorHash, String name, Date loadDate, int currentdepth, plasmaCrawlProfile.entry profile) {
+    public String stackCrawl(yacyURL url, yacyURL referrer, String initiatorHash, String name, Date loadDate, int currentdepth, CrawlProfile.entry profile) {
         // stacks a crawl item. The position can also be remote
         // returns null if successful, a reason string if not successful
         //this.log.logFinest("stackCrawl: nexturlString='" + nexturlString + "'");
         
         // add the url into the crawling queue
-        plasmaCrawlEntry entry = new plasmaCrawlEntry(
+        CrawlEntry entry = new CrawlEntry(
                 initiatorHash,                               // initiator, needed for p2p-feedback
                 url,                                         // url clear text string
                 (referrer == null) ? "" : referrer.hash(),   // last url in crawling queue
@@ -367,7 +368,7 @@ public final class plasmaCrawlStacker extends Thread {
         return stackCrawl(entry);
     }
     
-    public String stackCrawl(plasmaCrawlEntry entry) {
+    public String stackCrawl(CrawlEntry entry) {
         // stacks a crawl item. The position can also be remote
         // returns null if successful, a reason string if not successful
         //this.log.logFinest("stackCrawl: nexturlString='" + nexturlString + "'");
@@ -378,7 +379,7 @@ public final class plasmaCrawlStacker extends Thread {
         // check if the protocol is supported
         String urlProtocol = entry.url().getProtocol();
         if (!sb.crawlQueues.isSupportedProtocol(urlProtocol)) {
-            reason = plasmaCrawlEURL.DENIED_UNSUPPORTED_PROTOCOL;
+            reason = ErrorURL.DENIED_UNSUPPORTED_PROTOCOL;
             this.log.logSevere("Unsupported protocol in URL '" + entry.url().toString() + "'. " + 
                                "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
             return reason;            
@@ -394,13 +395,13 @@ public final class plasmaCrawlStacker extends Thread {
         
         // check blacklist
         if (plasmaSwitchboard.urlBlacklist.isListed(indexReferenceBlacklist.BLACKLIST_CRAWLER, entry.url())) {
-            reason = plasmaCrawlEURL.DENIED_URL_IN_BLACKLIST;
+            reason = ErrorURL.DENIED_URL_IN_BLACKLIST;
             if (this.log.isFine()) this.log.logFine("URL '" + entry.url().toString() + "' is in blacklist. " +
                              "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
             return reason;
         }
         
-        plasmaCrawlProfile.entry profile = sb.profilesActiveCrawls.getEntry(entry.profileHandle());
+        CrawlProfile.entry profile = sb.profilesActiveCrawls.getEntry(entry.profileHandle());
         if (profile == null) {
             String errorMsg = "LOST PROFILE HANDLE '" + entry.profileHandle() + "' for URL " + entry.url();
             log.logWarning(errorMsg);
@@ -409,7 +410,7 @@ public final class plasmaCrawlStacker extends Thread {
         
         // filter deny
         if ((entry.depth() > 0) && (profile != null) && (!(entry.url().toString().matches(profile.generalFilter())))) {
-            reason = plasmaCrawlEURL.DENIED_URL_DOES_NOT_MATCH_FILTER;
+            reason = ErrorURL.DENIED_URL_DOES_NOT_MATCH_FILTER;
 
             if (this.log.isFine()) this.log.logFine("URL '" + entry.url().toString() + "' does not match crawling filter '" + profile.generalFilter() + "'. " +
                              "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
@@ -418,7 +419,7 @@ public final class plasmaCrawlStacker extends Thread {
         
         // deny cgi
         if (entry.url().isCGI())  {
-            reason = plasmaCrawlEURL.DENIED_CGI_URL;
+            reason = ErrorURL.DENIED_CGI_URL;
 
             if (this.log.isFine()) this.log.logFine("URL '" + entry.url().toString() + "' is CGI URL. " + 
                              "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
@@ -427,7 +428,7 @@ public final class plasmaCrawlStacker extends Thread {
         
         // deny post properties
         if ((entry.url().isPOST()) && (profile != null) && (!(profile.crawlingQ())))  {
-            reason = plasmaCrawlEURL.DENIED_POST_URL;
+            reason = ErrorURL.DENIED_POST_URL;
 
             if (this.log.isFine()) this.log.logFine("URL '" + entry.url().toString() + "' is post URL. " + 
                              "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
@@ -443,7 +444,7 @@ public final class plasmaCrawlStacker extends Thread {
 
         // deny urls that do not match with the profile domain list
         if (!(profile.grantedDomAppearance(entry.url().getHost()))) {
-            reason = plasmaCrawlEURL.DENIED_NO_MATCH_WITH_DOMAIN_FILTER;
+            reason = ErrorURL.DENIED_NO_MATCH_WITH_DOMAIN_FILTER;
             if (this.log.isFine()) this.log.logFine("URL '" + entry.url().toString() + "' is not listed in granted domains. " + 
                              "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
             return reason;
@@ -451,7 +452,7 @@ public final class plasmaCrawlStacker extends Thread {
 
         // deny urls that exceed allowed number of occurrences
         if (!(profile.grantedDomCount(entry.url().getHost()))) {
-            reason = plasmaCrawlEURL.DENIED_DOMAIN_COUNT_EXCEEDED;
+            reason = ErrorURL.DENIED_DOMAIN_COUNT_EXCEEDED;
             if (this.log.isFine()) this.log.logFine("URL '" + entry.url().toString() + "' appeared too often, a maximum of " + profile.domMaxPages() + " is allowed. "+ 
                              "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
             return reason;
@@ -463,12 +464,12 @@ public final class plasmaCrawlStacker extends Thread {
         boolean recrawl = (oldEntry != null) && ((System.currentTimeMillis() - oldEntry.loaddate().getTime()) > profile.recrawlIfOlder());
         // do double-check
         if ((dbocc != null) && (!recrawl)) {
-            reason = plasmaCrawlEURL.DOUBLE_REGISTERED + dbocc + ")";
+            reason = ErrorURL.DOUBLE_REGISTERED + dbocc + ")";
             if (this.log.isFine()) this.log.logFine("URL '" + entry.url().toString() + "' is double registered in '" + dbocc + "'. " + "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
             return reason;
         }
         if ((oldEntry != null) && (!recrawl)) {
-            reason = plasmaCrawlEURL.DOUBLE_REGISTERED + "LURL)";
+            reason = ErrorURL.DOUBLE_REGISTERED + "LURL)";
             if (this.log.isFine()) this.log.logFine("URL '" + entry.url().toString() + "' is double registered in 'LURL'. " + "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
             return reason;
         }
@@ -497,8 +498,8 @@ public final class plasmaCrawlStacker extends Thread {
         
         // add the url into the crawling queue
         sb.crawlQueues.noticeURL.push(
-                ((global) ? plasmaCrawlNURL.STACK_TYPE_LIMIT :
-                ((local) ? plasmaCrawlNURL.STACK_TYPE_CORE : plasmaCrawlNURL.STACK_TYPE_REMOTE)) /*local/remote stack*/,
+                ((global) ? NoticedURL.STACK_TYPE_LIMIT :
+                ((local) ? NoticedURL.STACK_TYPE_CORE : NoticedURL.STACK_TYPE_REMOTE)) /*local/remote stack*/,
                 entry);
         return null;
     }

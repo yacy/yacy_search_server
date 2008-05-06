@@ -51,10 +51,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import de.anomic.crawler.CrawlEntry;
+import de.anomic.crawler.CrawlProfile;
+import de.anomic.crawler.NoticedURL;
 import de.anomic.http.httpHeader;
-import de.anomic.plasma.plasmaCrawlEntry;
-import de.anomic.plasma.plasmaCrawlNURL;
-import de.anomic.plasma.plasmaCrawlProfile;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -95,8 +95,8 @@ public class IndexCreateWWWLocalQueue_p {
                 String pattern = post.get("pattern", ".*").trim();
                 final int option  = post.getInt("option", INVALID);
                 if (pattern.equals(".*")) {
-                    c = sb.crawlQueues.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE);
-                    sb.crawlQueues.noticeURL.clear(plasmaCrawlNURL.STACK_TYPE_CORE);
+                    c = sb.crawlQueues.noticeURL.stackSize(NoticedURL.STACK_TYPE_CORE);
+                    sb.crawlQueues.noticeURL.clear(NoticedURL.STACK_TYPE_CORE);
                     try { sb.cleanProfiles(); } catch (InterruptedException e) {/* ignore this */}
                 } else if (option > INVALID) {
                     Pattern compiledPattern = null;
@@ -107,8 +107,8 @@ public class IndexCreateWWWLocalQueue_p {
                         if (option == PROFILE) {
                             // search and delete the crawl profile (_much_ faster, independant of queue size)
                             // XXX: what to do about the annoying LOST PROFILE messages in the log?
-                            Iterator<plasmaCrawlProfile.entry> it = sb.profilesActiveCrawls.profiles(true);
-                            plasmaCrawlProfile.entry entry;
+                            Iterator<CrawlProfile.entry> it = sb.profilesActiveCrawls.profiles(true);
+                            CrawlProfile.entry entry;
                             while (it.hasNext()) {
                                 entry = it.next();
                                 final String name = entry.name();
@@ -125,8 +125,8 @@ public class IndexCreateWWWLocalQueue_p {
                             }
                         } else {
                             // iterating through the list of URLs
-                            Iterator<plasmaCrawlEntry> iter = sb.crawlQueues.noticeURL.iterator(plasmaCrawlNURL.STACK_TYPE_CORE);
-                            plasmaCrawlEntry entry;
+                            Iterator<CrawlEntry> iter = sb.crawlQueues.noticeURL.iterator(NoticedURL.STACK_TYPE_CORE);
+                            CrawlEntry entry;
                             while (iter.hasNext()) {
                                 if ((entry = iter.next()) == null) continue;
                                 String value = null;
@@ -165,18 +165,18 @@ public class IndexCreateWWWLocalQueue_p {
             }
         }
 
-        int showNum = 0, stackSize = sb.crawlQueues.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE);
+        int showNum = 0, stackSize = sb.crawlQueues.noticeURL.stackSize(NoticedURL.STACK_TYPE_CORE);
         if (stackSize == 0) {
             prop.put("crawler-queue", "0");
         } else {
             prop.put("crawler-queue", "1");
-            plasmaCrawlEntry[] crawlerList = sb.crawlQueues.noticeURL.top(plasmaCrawlNURL.STACK_TYPE_CORE, (int) (showLimit * 1.20));
+            CrawlEntry[] crawlerList = sb.crawlQueues.noticeURL.top(NoticedURL.STACK_TYPE_CORE, (int) (showLimit * 1.20));
 
-            plasmaCrawlEntry urle;
+            CrawlEntry urle;
             boolean dark = true;
             yacySeed initiator;
             String profileHandle;
-            plasmaCrawlProfile.entry profileEntry;
+            CrawlProfile.entry profileEntry;
             int i;
             for (i = 0; (i < crawlerList.length) && (showNum < showLimit); i++) {
                 urle = crawlerList[i];

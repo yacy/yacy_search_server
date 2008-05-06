@@ -58,13 +58,13 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import de.anomic.crawler.CrawlEntry;
+import de.anomic.crawler.CrawlProfile;
+import de.anomic.crawler.ZURL;
 import de.anomic.http.JakartaCommonsHttpClient;
 import de.anomic.http.JakartaCommonsHttpResponse;
 import de.anomic.http.httpdByteCountInputStream;
 import de.anomic.index.indexURLReference;
-import de.anomic.plasma.plasmaCrawlEntry;
-import de.anomic.plasma.plasmaCrawlProfile;
-import de.anomic.plasma.plasmaCrawlZURL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverDate;
 import de.anomic.server.logging.serverLog;
@@ -108,7 +108,7 @@ public class SitemapParser extends DefaultHandler {
     /**
      * The crawling profile used to parse the URLs contained in the sitemap file
      */
-    private plasmaCrawlProfile.entry crawlingProfile = null;
+    private CrawlProfile.entry crawlingProfile = null;
 
     /**
      * Reference to the plasmaswitchboard.
@@ -155,7 +155,7 @@ public class SitemapParser extends DefaultHandler {
      */
     private Date lastMod = null;
 
-    public SitemapParser(plasmaSwitchboard sb, yacyURL sitemap, plasmaCrawlProfile.entry theCrawlingProfile) {
+    public SitemapParser(plasmaSwitchboard sb, yacyURL sitemap, CrawlProfile.entry theCrawlingProfile) {
         if (sb == null)
             throw new NullPointerException("The switchboard must not be null");
         if (sitemap == null)
@@ -306,8 +306,8 @@ public class SitemapParser extends DefaultHandler {
                     this.logger.logInfo("The URL '" + this.nextURL + "' can not be crawled. Reason: " + error);
 
                     // insert URL into the error DB
-                    plasmaCrawlZURL.Entry ee = this.switchboard.crawlQueues.errorURL.newEntry(
-                            new plasmaCrawlEntry(
+                    ZURL.Entry ee = this.switchboard.crawlQueues.errorURL.newEntry(
+                            new CrawlEntry(
                                     switchboard.wordIndex.seedDB.mySeed().hash, 
                                     new yacyURL(this.nextURL, null), 
                                     "", 
@@ -352,7 +352,7 @@ public class SitemapParser extends DefaultHandler {
         }
     }
 
-    private plasmaCrawlProfile.entry createProfile(String domainName, yacyURL sitemapURL) {
+    private CrawlProfile.entry createProfile(String domainName, yacyURL sitemapURL) {
         return this.switchboard.profilesActiveCrawls.newEntry(domainName, sitemapURL,
         // crawlingFilter
                                                               ".*", ".*",
