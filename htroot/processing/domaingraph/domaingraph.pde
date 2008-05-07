@@ -13,8 +13,8 @@ import processing.net.*;
 
 final float NODE_SIZE       = 6;
 final float EDGE_LENGTH     = 50;
-final float EDGE_STRENGTH   = 0.01;
-final float SPACER_STRENGTH = 10;
+final float EDGE_STRENGTH   = 0.001;
+final float SPACER_STRENGTH = 500;
 
 ParticleSystem physics;
 Smoother3D centroid;
@@ -159,6 +159,22 @@ void drawNetwork() {
 void keyPressed() {
   if ( key == 'c' ) {
     initializePhysics();
+    return;
+  }
+  
+  if ( key == 'd' ) {
+    HashSet hs = new HashSet();
+    for (int i = 0; i < physics.numberOfParticles(); ++i ) {
+      hs.add(physics.getParticle(i));
+    }
+    for (int i = 0; i < physics.numberOfSprings(); ++i ) {
+      hs.remove(physics.getSpring(i).getOneEnd());
+      hs.remove(physics.getSpring(i).getTheOtherEnd());
+    }
+    Iterator i = hs.iterator();
+    while (i.hasNext()) {
+      ((Particle) i.next()).kill();
+    }
     return;
   }
   

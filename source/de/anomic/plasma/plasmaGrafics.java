@@ -196,7 +196,7 @@ public class plasmaGrafics {
 
         if (seedDB == null) return; // no other peers known
 
-        networkPicture = new ymageMatrix(width, height, ymageMatrix.MODE_SUB, bgcolor);
+        networkPicture = new ymageMatrix(width, height, (bgcolor.equals("000000")) ? ymageMatrix.MODE_ADD : ymageMatrix.MODE_SUB, bgcolor);
 
         // draw network circle
         networkPicture.setColor(COL_DHTCIRCLE);
