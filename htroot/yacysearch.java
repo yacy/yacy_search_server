@@ -416,7 +416,7 @@ public class yacysearch {
     private static String navurla(int page, int display, plasmaSearchQuery theQuery) {
         return
         "<a href=\"yacysearch.html?display=" + display +
-        "&amp;search=" + theQuery.queryString() +
+        "&amp;search=" + theQuery.queryString(true) +
         "&amp;count="+ theQuery.displayResults() +
         "&amp;offset=" + (page * theQuery.displayResults()) +
         "&amp;resource=" + ((theQuery.isLocal()) ? "local" : "global") +
@@ -424,6 +424,6 @@ public class yacysearch {
         "&amp;prefermaskfilter=" + theQuery.prefer +
         "&amp;cat=href&amp;constraint=" + ((theQuery.constraint == null) ? "" : theQuery.constraint.exportB64()) +
         "&amp;contentdom=" + theQuery.contentdom() +
-        "&amp;former=" + theQuery.queryString() + "\">";
+        "&amp;former=" + theQuery.queryString(true) + "\">";
     }
 }

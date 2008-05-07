@@ -179,7 +179,7 @@ public class sidebar_navigation {
     
     private static String navurla(int page, plasmaSearchQuery theQuery) {
         return
-        "<a href=\"ysearch.html?search=" + theQuery.queryString() +
+        "<a href=\"ysearch.html?search=" + theQuery.queryString(true) +
         "&amp;count="+ theQuery.displayResults() +
         "&amp;offset=" + (page * theQuery.displayResults()) +
         "&amp;resource=" + ((theQuery.isLocal()) ? "local" : "global") +
@@ -187,7 +187,7 @@ public class sidebar_navigation {
         "&amp;prefermaskfilter=" + theQuery.prefer +
         "&amp;cat=href&amp;constraint=" + ((theQuery.constraint == null) ? "" : theQuery.constraint.exportB64()) +
         "&amp;contentdom=" + theQuery.contentdom() +
-        "&amp;former=" + theQuery.queryString() + "\">";
+        "&amp;former=" + theQuery.queryString(true) + "\">";
     }
     
     private static void domzone(serverObjects prop, String zonename, int zonecount, plasmaSearchQuery theQuery) {

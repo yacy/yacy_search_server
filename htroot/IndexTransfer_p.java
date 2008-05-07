@@ -142,7 +142,7 @@ public final class IndexTransfer_p {
             try {
                 while ((hostName = (String) hostList.firstKey()) != null) {
                     prop.put("running_hosts_" + hc + "_hosthash", hostList.get(hostName));
-                    prop.put("running_hosts_" + hc + "_hostname", /*seed.hash + " " +*/ hostName);
+                    prop.putHTML("running_hosts_" + hc + "_hostname", /*seed.hash + " " +*/ hostName);
                     hc++;                
                     hostList.remove(hostName);
                 }

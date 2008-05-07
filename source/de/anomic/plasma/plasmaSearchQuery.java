@@ -46,6 +46,7 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 
+import de.anomic.data.htmlTools;
 import de.anomic.htmlFilter.htmlFilterAbstractScraper;
 import de.anomic.index.indexWord;
 import de.anomic.kelondro.kelondroBase64Order;
@@ -276,8 +277,12 @@ public final class plasmaSearchQuery {
         return new TreeSet[]{query, exclude};
     }
     
-    public String queryString() {
-    	return this.queryString;
+    public String queryString(boolean encodeHTML) {
+    	if(encodeHTML){
+    		return htmlTools.encodeUnicode2html(this.queryString, true);
+    	} else  {
+    		return this.queryString;
+    	}
     }
     
     public TreeSet<String>[] queryWords() {
