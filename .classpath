@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry excluding="env/|htdocsdefault/|proxymsg/|yacy/|env/|yacy/user/|yacy/user/|yacy/ui/" kind="src" path="htroot"/>
+	<classpathentry excluding="env/|htdocsdefault/|proxymsg/|yacy/|env/|yacy/user/|yacy/user/|yacy/ui/|processing/domaingraph/applet/|processing/domaingraph/" kind="src" path="htroot"/>
 	<classpathentry excluding="user/|user/|ui/" kind="src" path="htroot/yacy"/>
 	<classpathentry kind="src" path="htroot/env"/>
 	<classpathentry kind="src" path="source"/>

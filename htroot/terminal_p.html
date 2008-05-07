@@ -1,0 +1,136 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" >
+<head>
+<title>YaCy System Monitor</title>
+<meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
+<meta name="description" content="YaCy Peer Live Monitoring" />
+<meta name="keywords" content="open,source,search,engine,monitor" />
+<link rel="stylesheet" type="text/css" href="/env/terminal.css" />
+
+<script type="text/javascript">
+var loaderBanner = null;
+var loaderPerformance = null;
+var loaderNetwork = null;
+var cnt=0;
+
+function loadBanner() {
+  document.images[0].src = "/Banner.png?textcolor=ffffff&bgcolor=000000&bordercolor=aaaaaa&cnt=" + cnt++;
+}
+function loadPerformance() {
+  document.images[1].src = "/PerformanceGraph.png?cnt=" + cnt++;
+}
+function loadNetwork() {
+  document.images[3].src = "/NetworkPicture.png?width=660&height=360&bgcolor=FFFFFF&cnt=" + cnt++;
+}
+
+function init() {
+  loaderBanner = window.setInterval("loadBanner()", 28000);
+  loaderPerformance = window.setInterval("loadPerformance()", 4000);
+  loaderNetwork = window.setInterval("loadNetwork()", 57000);
+}
+</script>
+
+</head>
+
+<body onload="init();">
+
+<div id="outer">
+
+<div id="location">
+<a href="http://yacy.net"><img src="/Banner.png?textcolor=ffffff&bgcolor=000000&bordercolor=aaaaaa" alt="YaCy" width="468" height="60" border="0" align="middle"></a>
+</div>
+
+<div class="bars"></div>
+
+<div id="left"> <!-- begin left side -->
+
+<div class="navouter">
+<div class="navheader">Terminal</div>
+<div class="navcontent">
+<iframe src="/rssTerminal.html?set=PEERNEWS&width=430px&height=200px&maxlines=20&maxwidth=95"
+              width="430" height="220" scrolling="no" name="newsframe"
+              marginheight="0" marginwidth="0" frameborder="0">
+</iframe>
+</div>
+</div>
+
+
+</div> <!-- end left side -->
+
+
+
+<div id="right"> <!-- start right side -->
+
+<h1>Resource Monitor</h1>
+<img src="/PerformanceGraph.png" width="330" height="120" name="graph" alt="PerformanceGraph"/>
+<img src="/WebStructurePicture_p.png?host=auto&amp;depth=2&amp;width=660&amp;height=240&amp;nodes=100&amp;time=1000" width="330" height="120" alt="WebStructurePicture"/>
+
+<h1>Network Monitor</h1>
+<div style="text-align:left;margin:0;padding:0;">
+<img src="/NetworkPicture.png?width=660&amp;height=360&amp;bgcolor=FFFFFF" width="330" height="180" alt="The yacy Network" />
+<embed src="http://maps.amung.us/flash/flashsrv.php?k=qp3j5gox&type=emb.swf" quality="high" pluginspage="http://www.macromedia.com/go/getflashplayer" wmode="transparent" allowScriptAccess="always" allowNetworking="all" type="application/x-shockwave-flash" flashvars="wausitehash=qp3j5gox&map=night&pin=star-orange&link=no" width="330" />
+</div>
+
+<h1>Domain Monitor</h1>
+<div style="text-align:left;margin:0;padding:0;">
+
+			<!--[if !IE]> -->
+				<object classid="java:domaingraph.class" 
+            			type="application/x-java-applet"
+            			archive="domaingraph.jar"
+            			width="660" height="400"
+            			standby="Loading Processing software..." >
+            	    
+            		<param name="codebase" value="processing/domaingraph/applet/"> 
+					<param name="archive" value="domaingraph.jar" />
+				
+					<param name="mayscript" value="true" />
+					<param name="scriptable" value="true" />
+				
+					<param name="image" value="processing/domaingraph/applet/loading.gif" />
+					<param name="boxmessage" value="Loading Processing software..." />
+					<param name="boxbgcolor" value="#FFFFFF" />
+				
+					<param name="test_string" value="outer" />
+			<!--<![endif]-->
+				
+				<object classid="clsid:8AD9C840-044E-11D1-B3E9-00805F499D93" 
+						codebase="http://java.sun.com/update/1.4.2/jinstall-1_4_2_12-windows-i586.cab"
+						width="660" height="400"
+						standby="Loading Processing software..."  >
+						
+					<param name="code" value="domaingraph" />
+					<param name="archive" value="processing/domaingraph/applet/domaingraph.jar" />
+					
+					<param name="mayscript" value="true" />
+					<param name="scriptable" value="true" />
+					
+					<param name="image" value="processing/domaingraph/applet/loading.gif" />
+					<param name="boxmessage" value="Loading Processing software..." />
+					<param name="boxbgcolor" value="#FFFFFF" />
+					
+					<param name="test_string" value="inner" />
+					
+					<p>
+						<strong>
+							This browser does not have a Java Plug-in.
+							<br />
+							<a href="http://java.sun.com/products/plugin/downloads/index.html" title="Download Java Plug-in">
+								Get the latest Java Plug-in here.
+							</a>
+						</strong>
+					</p>
+				
+				</object>
+				
+			<!--[if !IE]> -->
+				</object>
+			<!--<![endif]-->
+</div>
+
+</div> <!-- end right side -->
+</div>
+
+</body>
+</html>

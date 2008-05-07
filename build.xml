@@ -215,6 +215,7 @@
 
     <!-- compiling htroot, htroot/yacy and htroot/htdocsdefault -->
     <javac srcdir="${htroot}/"
+    	   excludes="processing/**"
            classpathref="project.class.path"
            debug="true" debuglevel="lines,vars,source"
            source="${javacSource}" target="${javacTarget}"/>
