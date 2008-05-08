@@ -18,7 +18,8 @@
 				<pathelement location="${libx}/PDFBox-0.7.3.jar" />
 				<!-- additional fontparsing lib, part of PDFBox -->
 				<pathelement location="${libx}/FontBox-0.1.0-dev.jar" />
-				<pathelement location="${libx}/bcprov-jdk14-132.jar" />
+				<pathelement location="${libx}/bcprov-jdk14-139.jar" />
+				<pathelement location="${libx}/bcmail-jdk14-139.jar" />
 			</classpath>
 		</javac>
 	</target>
