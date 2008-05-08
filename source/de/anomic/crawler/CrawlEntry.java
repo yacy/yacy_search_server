@@ -218,8 +218,8 @@ public class CrawlEntry {
 
     public String initiator() {
         // returns the hash of the initiating peer
-        if (initiator == null) return null;
-        if (initiator.length() == 0) return null; 
+        if (initiator == null) return "";
+        if (initiator.length() == 0) return ""; 
         return initiator;
     }
 
