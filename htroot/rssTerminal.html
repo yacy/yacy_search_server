@@ -6,11 +6,9 @@
 <style type="text/css">
 
 div#feedbox {
-  padding-left: 6px;
-  padding-top: 6px;
+  padding: 0;
+  margin: 0;
   background: #fff;
-  border:1px solid #888;
-  margin:0 auto;
   text-align:left;
   font:9px 'Lucida Console', 'Courier New', monospace;
 }
@@ -139,6 +137,12 @@ function init() {
     document.getElementById("feedbox").style.height = query.height;
   }
   if (query.set) set = query.set;
+  if (query.background) {
+	document.getElementById("feedbox").style.background = "#" + query.background;
+  }
+  if (query.color) {
+	document.getElementById("feedbox").style.color = "#" + query.color;
+  }
   idleping = window.setInterval("idlepingExec()", 17000);
   loader=window.setInterval("load()", 10000);
   load();
