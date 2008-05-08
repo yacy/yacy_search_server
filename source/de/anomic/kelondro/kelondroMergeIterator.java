@@ -50,11 +50,11 @@ import java.util.Set;
 
 public class kelondroMergeIterator<E> implements kelondroCloneableIterator<E> {
     
-    Comparator<E> comp;
-    kelondroCloneableIterator<E> a, b;
-    E na, nb;
-    Method merger;
-    boolean up;
+    private Comparator<E> comp;
+    private kelondroCloneableIterator<E> a, b;
+    private E na, nb;
+    private final Method merger;
+    private final boolean up;
     
     public kelondroMergeIterator(kelondroCloneableIterator<E> a, kelondroCloneableIterator<E> b, Comparator<E> c, Method m, boolean up) {
         // this works currently only for String-type key iterations
