@@ -330,7 +330,7 @@ public class plasmaSwitchboardQueue {
         }
 
         public String initiator() {
-            return initiator;
+            return (initiator == null) ? "" : initiator;
         }
         
         public yacySeed initiatorPeer() {

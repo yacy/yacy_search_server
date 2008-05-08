@@ -691,7 +691,7 @@ public final class plasmaWordIndex implements indexRI {
                     "Anchors: " + ((document.getAnchors() == null) ? 0 : document.getAnchors().size()) +
                     "\n\tLinkStorageTime: " + (storageEndTime - startTime) + " ms | " +
                     "indexStorageTime: " + (indexingEndTime - storageEndTime) + " ms");
-            RSSFeed.channels((entry.initiator.equals(seedDB.mySeed().hash)) ? RSSFeed.LOCALINDEXING : RSSFeed.REMOTEINDEXING).addMessage(new RSSMessage("Indexed web page", "", entry.url().toNormalform(true, false)));
+            RSSFeed.channels((entry.initiator().equals(seedDB.mySeed().hash)) ? RSSFeed.LOCALINDEXING : RSSFeed.REMOTEINDEXING).addMessage(new RSSMessage("Indexed web page", "", entry.url().toNormalform(true, false)));
         }
         
         // finished
