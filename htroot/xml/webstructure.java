@@ -41,7 +41,8 @@ public class webstructure {
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
         serverObjects prop = new serverObjects();
         plasmaSwitchboard sb = (plasmaSwitchboard) env;
-        Iterator<plasmaWebStructure.structureEntry> i = sb.webStructure.structureEntryIterator();
+        boolean latest = ((post == null) ? false : post.containsKey("latest"));
+        Iterator<plasmaWebStructure.structureEntry> i = sb.webStructure.structureEntryIterator(latest);
         int c = 0, d;
         plasmaWebStructure.structureEntry sentry;
         Map.Entry<String, Integer> refentry;
@@ -71,6 +72,7 @@ public class webstructure {
         }
         prop.put("domains", c);
         prop.put("maxref", plasmaWebStructure.maxref);
+        if (latest) sb.webStructure.joinOldNew();
         
         // return rewrite properties
         return prop;

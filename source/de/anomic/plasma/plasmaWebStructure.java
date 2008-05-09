@@ -54,7 +54,7 @@ public class plasmaWebStructure {
     private serverLog    log;
     private File         rankingPath, structureFile;
     private String       crlFile, crgFile;
-    TreeMap<String, String> structure; // <b64hash(6)>','<host> to <date-yyyymmdd(8)>{<target-b64hash(6)><target-count-hex(4)>}*
+    TreeMap<String, String> structure_old, structure_new; // <b64hash(6)>','<host> to <date-yyyymmdd(8)>{<target-b64hash(6)><target-count-hex(4)>}*
     
     public plasmaWebStructure(serverLog log, File rankingPath, String crlFile, String crgFile, File structureFile) {
         this.log = log;
@@ -62,27 +62,28 @@ public class plasmaWebStructure {
         this.crlFile = crlFile;
         this.crgFile = crgFile;
         this.crg = new StringBuffer(maxCRGDump);
-        this.structure = new TreeMap<String, String>();
+        this.structure_old = new TreeMap<String, String>();
+        this.structure_new = new TreeMap<String, String>();
         this.structureFile = structureFile;
         
         // load web structure
         Map<String, String> loadedStructure = (this.structureFile.exists()) ? serverFileUtils.loadHashMap(this.structureFile) : new TreeMap<String, String>();
-        if (loadedStructure != null) this.structure.putAll(loadedStructure);
+        if (loadedStructure != null) this.structure_old.putAll(loadedStructure);
         
-        // delete outdated entries in case the structure is too big
-        if (this.structure.size() > maxhosts) {
+        // delete out-dated entries in case the structure is too big
+        if (this.structure_old.size() > maxhosts) {
         	// fill a set with last-modified - dates of the structure
         	TreeSet<String> delset = new TreeSet<String>();
         	String key, value;
-        	for (Map.Entry<String, String> entry : this.structure.entrySet()) {
+        	for (Map.Entry<String, String> entry : this.structure_old.entrySet()) {
         		key = entry.getKey();
         		value = entry.getValue();
         		delset.add(value.substring(0, 8) + key);
         	}
-        	int delcount = this.structure.size() - (maxhosts * 9 / 10);
+        	int delcount = this.structure_old.size() - (maxhosts * 9 / 10);
         	Iterator<String> j = delset.iterator();
         	while ((delcount > 0) && (j.hasNext())) {
-        		this.structure.remove(j.next().substring(8));
+        		this.structure_old.remove(j.next().substring(8));
         		delcount--;
         	}
         }
@@ -216,46 +217,78 @@ public class plasmaWebStructure {
     public Map<String, Integer> references(String domhash) {
         // returns a map with a domhash(String):refcount(Integer) relation
         assert domhash.length() == 6;
-        synchronized(structure) {
-            SortedMap<String, String> tailMap = structure.tailMap(domhash);
-            if ((tailMap == null) || (tailMap.isEmpty())) return new HashMap<String, Integer>();
-            String key = tailMap.firstKey();
-            if (key.startsWith(domhash)) {
-                return refstr2map(tailMap.get(key));
-            } else {
-                return new HashMap<String, Integer>();
+        SortedMap<String, String> tailMap;
+        Map<String, Integer> h = new HashMap<String, Integer>();
+        synchronized (structure_old) {
+            tailMap = structure_old.tailMap(domhash);
+            if (!tailMap.isEmpty()) {
+                String key = tailMap.firstKey();
+                if (key.startsWith(domhash)) {
+                    h = refstr2map(tailMap.get(key));
+                }
             }
         }
+        synchronized (structure_new) {
+            tailMap = structure_new.tailMap(domhash);
+            if (!tailMap.isEmpty()) {
+                String key = tailMap.firstKey();
+                if (key.startsWith(domhash)) {
+                    h.putAll(refstr2map(tailMap.get(key)));
+                }
+            }
+        }
+        return h;
     }
     
     public int referencesCount(String domhash) {
         // returns the number of domains that are referenced by this domhash
         assert domhash.length() == 6 : "domhash = " + domhash;
-        synchronized(structure) {
-            SortedMap<String, String> tailMap = structure.tailMap(domhash);
-            if ((tailMap == null) || (tailMap.isEmpty())) return 0;
-            String key = tailMap.firstKey();
-            if (key.startsWith(domhash)) {
-                return refstr2count(tailMap.get(key));
-            } else {
-                return 0;
+        SortedMap<String, String> tailMap;
+        int c = 0;
+        synchronized (structure_old) {
+            tailMap = structure_old.tailMap(domhash);
+            if (!tailMap.isEmpty()) {
+                String key = tailMap.firstKey();
+                if (key.startsWith(domhash)) {
+                    c = refstr2count(tailMap.get(key));
+                }
             }
         }
+        synchronized (structure_new) {
+            tailMap = structure_new.tailMap(domhash);
+            if (!tailMap.isEmpty()) {
+                String key = tailMap.firstKey();
+                if (key.startsWith(domhash)) {
+                    c += refstr2count(tailMap.get(key));
+                }
+            }
+        }
+        return c;
     }
     
     public String resolveDomHash2DomString(String domhash) {
         // returns the domain as string, null if unknown
         assert domhash.length() == 6;
-        synchronized(structure) {
-            SortedMap<String, String> tailMap = structure.tailMap(domhash);
-            if ((tailMap == null) || (tailMap.isEmpty())) return null;
-            String key = tailMap.firstKey();
-            if (key.startsWith(domhash)) {
-                return key.substring(7);
-            } else {
-                return null;
+        SortedMap<String, String> tailMap;
+        synchronized(structure_old) {
+            tailMap = structure_old.tailMap(domhash);
+            if (!tailMap.isEmpty()) {
+                String key = tailMap.firstKey();
+                if (key.startsWith(domhash)) {
+                    return key.substring(7);
+                }
             }
         }
+        synchronized(structure_new) {
+            tailMap = structure_new.tailMap(domhash);
+            if (!tailMap.isEmpty()) {
+                String key = tailMap.firstKey();
+                if (key.startsWith(domhash)) {
+                    return key.substring(7);
+                }
+            }
+        }
+        return null;
     }
     
     private void learn(yacyURL url, StringBuffer reference /*string of b64(12digits)-hashes*/) {
@@ -297,15 +330,42 @@ public class plasmaWebStructure {
 		}
         
         // store the map back to the structure
-        synchronized(structure) {
-            structure.put(domhash + "," + url.getHost(), map2refstr(refs));
+        synchronized(structure_new) {
+            structure_new.put(domhash + "," + url.getHost(), map2refstr(refs));
+        }
+    }
+    
+    private static final void joinStructure(TreeMap<String, String> into, TreeMap<String, String> from) {
+        for (Map.Entry<String, String> e: from.entrySet()) {
+            if (into.containsKey(e.getKey())) {
+                Map<String, Integer> s0 = refstr2map(into.get(e.getKey()));
+                Map<String, Integer> s1 = refstr2map(e.getValue());
+                for (Map.Entry<String, Integer> r: s1.entrySet()) {
+                    if (s0.containsKey(r.getKey())) {
+                        s0.put(r.getKey(), s0.get(r.getKey()).intValue() + r.getValue().intValue());
+                    } else {
+                        s0.put(r.getKey(), r.getValue().intValue());
+                    }
+                }
+                into.put(e.getKey(), map2refstr(s0));
+            } else {
+                into.put(e.getKey(), e.getValue());
+            }
+        }
+    }
+    
+    public void joinOldNew() {
+        synchronized(structure_new) {
+            joinStructure(this.structure_old, this.structure_new);
+            this.structure_new.clear();
         }
     }
     
     public void saveWebStructure() {
+        joinOldNew();
         try {
-            synchronized(structure) {
-                serverFileUtils.saveMap(this.structureFile, this.structure, "Web Structure Syntax: <b64hash(6)>','<host> to <date-yyyymmdd(8)>{<target-b64hash(6)><target-count-hex(4)>}*");
+            synchronized(structure_old) {
+                serverFileUtils.saveMap(this.structureFile, this.structure_old, "Web Structure Syntax: <b64hash(6)>','<host> to <date-yyyymmdd(8)>{<target-b64hash(6)><target-count-hex(4)>}*");
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -316,8 +376,9 @@ public class plasmaWebStructure {
         // find domain with most references
         String maxhost = null;
         int refsize, maxref = 0;
-        synchronized(structure) {
-            for (Map.Entry<String, String> entry : structure.entrySet()) {
+        joinOldNew();
+        synchronized(structure_new) {
+            for (Map.Entry<String, String> entry : structure_old.entrySet()) {
                 refsize = entry.getValue().length();
                 if (refsize > maxref) {
                     maxref = refsize;
@@ -328,9 +389,9 @@ public class plasmaWebStructure {
         return maxhost;
     }
     
-    public Iterator<structureEntry> structureEntryIterator() {
+    public Iterator<structureEntry> structureEntryIterator(boolean latest) {
         // iterates objects of type structureEntry
-        return new structureIterator();
+        return new structureIterator(latest);
     }
     
     public class structureIterator implements Iterator<structureEntry> {
@@ -338,8 +399,8 @@ public class plasmaWebStructure {
         private Iterator<Map.Entry<String, String>> i;
         private structureEntry nextentry;
         
-        public structureIterator() {
-            i = structure.entrySet().iterator();
+        public structureIterator(boolean latest) {
+            i = ((latest) ? structure_new : structure_old).entrySet().iterator();
             next0();
         }
         

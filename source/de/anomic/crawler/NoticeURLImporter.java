@@ -21,7 +21,7 @@ public class NoticeURLImporter extends AbstractImporter implements Importer {
     private CrawlProfile activeCrawls;
     private ImporterManager dbImportManager;
     
-    public NoticeURLImporter(File crawlerPath, CrawlQueues crawlQueues, CrawlProfile activeCrawls, ImporterManager dbImportManager) throws ImporterException {
+    public NoticeURLImporter(File crawlerPath, CrawlQueues crawlQueues, CrawlProfile activeCrawls, ImporterManager dbImportManager) {
         super("NURL");
         this.crawlQueues = crawlQueues;
         this.activeCrawls = activeCrawls;

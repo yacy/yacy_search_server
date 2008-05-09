@@ -12,53 +12,155 @@ import traer.animation.*;
 import processing.net.*;
 
 final float NODE_SIZE       = 6;
-final float EDGE_LENGTH     = 50;
+final float EDGE_LENGTH     = 30;
 final float EDGE_STRENGTH   = 0.001;
-final float SPACER_STRENGTH = 500;
+final float SPACER_STRENGTH = 250;
 
 ParticleSystem physics;
 Smoother3D centroid;
 PFont font;
+float x = 0.0;
+float y = 0.0;
+float z = 1.0;
 Client myClient; 
 Particle center0, center1; // two gravity centers to support object ordering for non-quadratic fields
 String parsingHostName = "";
 String parsingHostID = "";
 HashMap nodes = new HashMap(); // map that holds host objects
+String host;
+int port;
+float a = 0.0;
+long lastUpdate = Long.MAX_VALUE;
+boolean initTime = true;
 
 void setup() {
   
   String[] fontList = PFont.list();
   //println(fontList);
   font = createFont(fontList[0], 32); //just take any, should be mostly Arial
-  textFont(font, 12); 
+  textFont(font, 9); 
   
   size(660, 400);
   smooth();
-  frameRate( 24 );
-  strokeWeight( 2 );
+  frameRate( 12 );
+  strokeWeight( 1 );
   ellipseMode( CENTER );       
   
   physics = new ParticleSystem( 0, 0.25 );
   centroid = new Smoother3D( 0.8 );
 
   initializePhysics();
-  initRequest();
+  URL url = null;
+  try {
+    url = getDocumentBase();
+  } catch (NullPointerException e) {}
+  if (url == null) {
+    host="localhost";
+    port=8080;
+  } else {
+    host=url.getHost();
+    port=url.getPort();
+  }
+  //println("CodeBase: " + url);
+  //println("host: " + host);
+  //println("port: " + port);
+  
+  initRequest(false);
 }
 
-void initRequest() {
-  myClient = new Client(this, "localhost", 8080);
-  myClient.write("GET /xml/webstructure.xml HTTP/1.1\n");
+void initializePhysics() {
+  physics.clear();
+  center0 = physics.makeParticle(1.0, -EDGE_LENGTH * 10, 0, 0);
+  center0.makeFixed();
+  center1 = physics.makeParticle(1.0, EDGE_LENGTH * 10, 0, 0);
+  center1.makeFixed();
+  centroid.setValue( 0, 0, 1.0 );
+}
+
+void draw() {
+  processRequestResponse(20);
+  
+  physics.tick( 1.0 ); 
+  HashSet invisible = invisibleParticles();
+  if (physics.numberOfParticles() > 1) updateCentroid(invisible);
+  centroid.tick();
+
+  background( 0 );
+  translate( width/2 , height/2 );
+  scale( centroid.z() );
+  translate( -centroid.x(), -centroid.y() );
+ 
+  drawNetwork(invisible);
+}
+
+void initRequest(boolean update) {
+  myClient = new Client(this, host, port);
+  myClient.write((update) ? "GET /xml/webstructure.xml?latest= HTTP/1.1\n" : "GET /xml/webstructure.xml HTTP/1.1\n");
   myClient.write("Host: localhost\n\n");
 }
 
-void processRequestResponse() {
-  if (myClient.available() > 0) {
-    String line = myClient.readStringUntil((byte) 10);
-    //println("Line: " + line);
-    if (line == null) line = ""; else line = line.trim();
-    if (line.startsWith("<domain")) processDomain(parseProps(line.substring(7, line.length() - 1).trim()));
-    if (line.startsWith("<citation")) processCitation(parseProps(line.substring(9, line.length() - 2).trim()));
+void processRequestResponse(int steps) {
+  if (((myClient == null) || (myClient.available() <= 0)) && (System.currentTimeMillis() - lastUpdate > 10000)) {
+    initRequest(true);
+    lastUpdate = Long.MAX_VALUE;
+    return;
   }
+  for (int i = 0; i < steps; i++) {
+    if (myClient.available() > 0) {
+      String line = myClient.readStringUntil((byte) 10);
+      //println("Line: " + line);
+      if (line == null) line = ""; else line = line.trim();
+      if (line.startsWith("<domain")) processDomain(parseProps(line.substring(7, line.length() - 1).trim()));
+      if (line.startsWith("<citation")) processCitation(parseProps(line.substring(9, line.length() - 2).trim()));
+      lastUpdate = System.currentTimeMillis();
+    } else {
+      initTime = false;
+    }
+  }
+}
+
+void processDomain(HashMap props) {
+  //println("Domain: " + props.toString());
+  parsingHostName = (String) props.get("host"); if (parsingHostName == null) parsingHostName = "";
+  parsingHostID = (String) props.get("id"); if (parsingHostID == null) parsingHostID = "";
+  host h = (host) nodes.get(parsingHostID);
+  if (h != null) {
+    h.time = System.currentTimeMillis();
+    return;
+  }
+  h = new host(parsingHostName, physics.makeParticle(1.0, EDGE_LENGTH * 20 * cos(a), -EDGE_LENGTH * 10 * sin(a), 0));
+  a += TWO_PI/256.0 + TWO_PI / 2; if (a > TWO_PI) a -= TWO_PI;
+  nodes.put(parsingHostID, h);
+  addAttraction(h.node);
+}
+
+void processCitation(HashMap props) {
+  //println("Citation: " + props.toString());
+  String host = (String) props.get("host"); if (host == null) host = "";
+  String id = (String) props.get("id"); if (id == null) id = "";
+  int count = 0;
+  try {
+  String counts = (String) props.get("count"); if (counts != null) count = Integer.parseInt(counts);
+  } catch (NumberFormatException e) {}
+  // find the two nodes that have a relation
+  host h = (host) nodes.get(id);
+  if (h == null) {
+    return; /*
+    h = new host(host, physics.makeParticle(1.0, EDGE_LENGTH * 20 * cos(a), -EDGE_LENGTH * 10 * sin(a), 0));
+    a += TWO_PI/256.0 + TWO_PI / 2; if (a > TWO_PI) a -= TWO_PI;
+    nodes.put(id, h);
+    addAttraction(h.node);*/
+  }
+  h.time = System.currentTimeMillis();
+  host p = (host) nodes.get(parsingHostID); // this should be successful
+  // prevent that a spring is made twice
+  for ( int i = 0; i < physics.numberOfSprings(); ++i ) {
+    Spring e = physics.getSpring(i);
+    Particle a = e.getOneEnd();
+    Particle b = e.getTheOtherEnd();
+    if (((a == h.node) && (b == p.node)) || ((b == h.node) && (a == p.node))) return;
+  }
+  physics.makeSpring(h.node, p.node, EDGE_STRENGTH, EDGE_STRENGTH, EDGE_LENGTH );
 }
 
 HashMap parseProps(String s) {
@@ -78,91 +180,80 @@ HashMap parseProps(String s) {
   return map;
 }
 
-void processDomain(HashMap props) {
-  //println("Domain: " + props.toString());
-  parsingHostName = (String) props.get("host"); if (parsingHostName == null) parsingHostName = "";
-  parsingHostID = (String) props.get("id"); if (parsingHostID == null) parsingHostID = "";
-  host h = new host(parsingHostName, physics.makeParticle(1.0, random(0, EDGE_LENGTH * 30), random(- EDGE_LENGTH * 2, EDGE_LENGTH * 2), 0));
-  nodes.put(parsingHostID, h);
-  addAttraction(h.node);
-}
-
-void processCitation(HashMap props) {
-  //println("Citation: " + props.toString());
-  String host = (String) props.get("host"); if (host == null) host = "";
-  String id = (String) props.get("id"); if (id == null) id = "";
-  int count = 0;
-  try {
-  String counts = (String) props.get("count"); if (counts != null) count = Integer.parseInt(counts);
-  } catch (NumberFormatException e) {}
-  // find the two nodes that have a relation
-  host h = (host) nodes.get(id);
-  if (h == null) return; // host is not known TODO: store these and create relation later
-  host p = (host) nodes.get(parsingHostID); // this should be successful
-  addRelation(h.node, p.node);
-}
-
-void draw() {
-  processRequestResponse();
-  
-  physics.tick( 1.0 ); 
-  if (physics.numberOfParticles() > 1) updateCentroid();
-  centroid.tick();
-
-  background( 0 );
-  translate( width/2 , height/2 );
-  scale( centroid.z() );
-  translate( -centroid.x(), -centroid.y() );
- 
-  drawNetwork();
-}
-
-void drawNetwork() {      
-  fill( 100, 255, 100 );
-  
-  // draw vertices
-  noStroke();
-  String name;
+HashSet invisibleParticles() {
+  // get nodes that have no edges
+  HashSet particles = new HashSet();
   Iterator j = nodes.values().iterator();
   host h;
+  long t = 0, n = System.currentTimeMillis();
+  while (j.hasNext()) {
+    h = (host) j.next();
+    t += n - h.time;
+    particles.add(h.node);
+  }
+  t = t / (nodes.size() + 1);
+  for ( int i = 0; i < physics.numberOfSprings(); ++i ) {
+    Spring e = physics.getSpring(i);
+    particles.remove(e.getOneEnd());
+    particles.remove(e.getTheOtherEnd());
+  }
+  // add more nodes if the number is too large
+  if (nodes.size() > 80) {
+    j = nodes.values().iterator();
+    while (j.hasNext()) {
+      h = (host) j.next();
+      if (n - h.time > 15000) particles.add(h.node);
+      if (nodes.size() - particles.size() < 80) break;
+    }
+  }
+  return particles;
+}
+
+void drawNetwork(HashSet invisible) {
+  
+  // draw vertices
+  fill( 120, 255, 120 );
+  noStroke();
+  String name;
+  host h;
+  Iterator j = nodes.values().iterator();
   while (j.hasNext()) {
     h = (host) j.next();
     Particle v = h.node;
+    if (invisible.contains(v)) continue;
     ellipse(v.position().x(), v.position().y(), NODE_SIZE, NODE_SIZE);
     name = h.name;
     text(name, v.position().x() - (name.length() * 26 / 10), v.position().y() + 14);
   }
-  
+
   // draw center
-  /*
-  ellipse( center0.position().x(), center0.position().y(), NODE_SIZE * 2, NODE_SIZE * 2 );
-  name = "Center0";
-  text(name, center0.position().x() - (name.length() * 26 / 10), center0.position().y() + 14);
-  ellipse( center1.position().x(), center1.position().y(), NODE_SIZE * 2, NODE_SIZE * 2 );
-  name = "Center1";
-  text(name, center1.position().x() - (name.length() * 26 / 10), center1.position().y() + 14);
-  */
-  
+  //fill( 255, 0, 0 );
+  //ellipse( center0.position().x(), center0.position().y(), NODE_SIZE * 2, NODE_SIZE * 2 );
+  //ellipse( center1.position().x(), center1.position().y(), NODE_SIZE * 2, NODE_SIZE * 2 );
+
   // draw edges 
-  stroke( 160 );
-  beginShape( LINES );
+  stroke( 200 );
   for ( int i = 0; i < physics.numberOfSprings(); ++i ) {
     Spring e = physics.getSpring( i );
     Particle a = e.getOneEnd();
+    if (invisible.contains(a)) continue;
     Particle b = e.getTheOtherEnd();
-    vertex( a.position().x(), a.position().y() );
-    vertex( b.position().x(), b.position().y() );
+    if (invisible.contains(b)) continue;
+    line(a.position().x(), a.position().y(), b.position().x(), b.position().y());
   }
-  endShape();
+
 }
 
 void keyPressed() {
-  if ( key == 'c' ) {
-    initializePhysics();
-    return;
-  }
-  
-  if ( key == 'd' ) {
+  if ( key == 'c' ) initializePhysics();
+  if ( key == 'a' ) x = Math.max(-1.0, x - 0.1);
+  if ( key == 'd' ) x = Math.min( 1.0, x + 0.1);
+  if ( key == 'w' ) y = Math.max(-1.0, y - 0.1);
+  if ( key == 's' ) y = Math.min( 1.0, y + 0.1);
+  if ( key == '-' ) z = Math.max( 1.0, z - 1.0);
+  if ( key == '+' ) z = Math.min(10.0, z + 1.0);
+  if ( key == '0' ) { x = 0.0; y = 0.0; z = 1.0; }
+  if ( key == 't' ) {
     HashSet hs = new HashSet();
     for (int i = 0; i < physics.numberOfParticles(); ++i ) {
       hs.add(physics.getParticle(i));
@@ -177,49 +268,36 @@ void keyPressed() {
     }
     return;
   }
-  
-  if ( key == ' ' ) {
-    Particle p = physics.makeParticle();
-    addRelation(p, physics.getParticle( (int) random( 0, physics.numberOfParticles()-1) ));
-    addAttraction(p);
-    return;
-  }
 }
 
-void updateCentroid() {
+void updateCentroid(HashSet invisible) {
   float 
     xMax = Float.NEGATIVE_INFINITY, 
     xMin = Float.POSITIVE_INFINITY, 
     yMin = Float.POSITIVE_INFINITY, 
     yMax = Float.NEGATIVE_INFINITY;
 
-  for ( int i = 0; i < physics.numberOfParticles(); ++i ) {
-    Particle p = physics.getParticle( i );
+  for (int i = 0; i < physics.numberOfParticles(); ++i) {
+    Particle p = physics.getParticle(i);
+    if ((i >= 2) && ((p == center0) || (p == center1) || (invisible.contains(p)))) continue;
     xMax = max( xMax, p.position().x() );
     xMin = min( xMin, p.position().x() );
     yMin = min( yMin, p.position().y() );
     yMax = max( yMax, p.position().y() );
   }
+  
   float deltaX = xMax-xMin;
   float deltaY = yMax-yMin;
-  if ( deltaY > deltaX )
-    centroid.setTarget( xMin + 0.5*deltaX, yMin +0.5*deltaY, height/(deltaY+50) );
-  else
-    centroid.setTarget( xMin + 0.5*deltaX, yMin +0.5*deltaY, width/(deltaX+50) );
-}
-
-void initializePhysics() {
-  physics.clear();
-  center0 = physics.makeParticle(1.0, 0, 0, 0);
-  center0.makeFixed();
-  center1 = physics.makeParticle(1.0, EDGE_LENGTH * 30, 0, 0);
-  center1.makeFixed();
-  centroid.setValue( 0, 0, 1.0 );
+  centroid.setTarget(
+    xMin + (x + 1) * 0.5 * deltaX,
+    yMin + (y + 1) * 0.5 * deltaY,
+    z * ((deltaY > deltaX) ? height / (deltaY + 50) : width / (deltaX + 50))
+  );
 }
 
 void addAttraction(Particle p) {
-  physics.makeAttraction(center0, p, 5000.0, 3 * EDGE_LENGTH);
-  physics.makeAttraction(center1, p, 5000.0, 3 * EDGE_LENGTH);
+  physics.makeAttraction(center0, p, SPACER_STRENGTH * 10000.0, 100 * EDGE_LENGTH);
+  physics.makeAttraction(center1, p, SPACER_STRENGTH * 10000.0, 100 * EDGE_LENGTH);
 
   // spacers
   for ( int i = 0; i < physics.numberOfParticles(); ++i ) {
@@ -228,16 +306,13 @@ void addAttraction(Particle p) {
   }
 }
 
-void addRelation(Particle p, Particle other) {
-  physics.makeSpring( p, other, EDGE_STRENGTH, EDGE_STRENGTH, EDGE_LENGTH );
-  //p.moveTo( q.position().x() + random( -1, 1 ), q.position().y() + random( -1, 1 ), 0 );
-}
-
 static class host {
   String name;
   Particle node;
+  long time;
   public host(String name, Particle node) {
     this.name = name;
     this.node = node;
+    this.time = System.currentTimeMillis();
   }
 }

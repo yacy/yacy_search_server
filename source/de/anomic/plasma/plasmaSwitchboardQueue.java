@@ -392,7 +392,7 @@ public class plasmaSwitchboardQueue {
         }
         
         public String referrerHash() {
-            return referrerHash;
+            return (referrerHash == null) ? "" : referrerHash;
         }
 
         public String anchorName() {
