@@ -63,8 +63,6 @@ public class serverDomains {
          "EDU=US Educational",
          "GOV=US Government",
          "MIL=US Military",
-         "NET=Network",
-         "ORG=Non-Profit Organization",
          "AN=Netherlands Antilles",
          "AS=American Samoa",
          "AG=Antigua and Barbuda",
@@ -92,6 +90,7 @@ public class serverDomains {
          "KN=Saint Kitts and Nevis", // islands in the carribean see
          "KY=Cayman Islands",
          "LC=Saint Lucia",
+         "MF=Saint Martin (French part)",
          "MH=Marshall Islands", // formerly US atomic bomb test site, now a key installation in the US missile defense network
          "MP=Northern Mariana Islands", // US strategic location in the western Pacific Ocean
          "NC=New Caledonia",
@@ -103,7 +102,7 @@ public class serverDomains {
          "PN=Pitcairn", // overseas territory of the UK
          "PR=Puerto Rico", // territory of the US with commonwealth status
          "PW=Palau", // was once governed by Micronesia
-         "Sb=Solomon Islands",
+         "SB=Solomon Islands",
          "TC=Turks and Caicos Islands", // overseas territory of the UK
          "TK=Tokelau", // group of three atolls in the South Pacific Ocean, british protectorat
          "TO=Tonga",
@@ -153,11 +152,13 @@ public class serverDomains {
          "AL=Albania",
          "AQ=Antarctica",
          "AT=Austria",
+         "AX=Aaland Islands",
          "BA=Bosnia and Herzegovina",
          "BE=Belgium",
          "BG=Bulgaria",
          "BV=Bouvet Island", // this island is uninhabited and covered by ice, south of africa but governed by Norway
          "BY=Belarus",
+         "CAT=Catalan",
          "CH=Switzerland",
          "CS=Czechoslovakia (former)",
          "CZ=Czech Republic",
@@ -172,6 +173,7 @@ public class serverDomains {
          "FR=France",
          "FX=France, Metropolitan",
          "GB=Great Britain (UK)",
+         "GG=Guernsey",
          "GI=Gibraltar",
          "GL=Greenland",
          "GR=Greece",
@@ -180,12 +182,14 @@ public class serverDomains {
          "IE=Ireland",
          "IS=Iceland",
          "IT=Italy",
+         "JE=Jersey",
          "LI=Liechtenstein",
          "LT=Lithuania",
          "LU=Luxembourg",
          "LV=Latvia",
-         "MD=Moldova",
          "MC=Monaco",
+         "MD=Moldova",
+         "ME=Montenegro",
          "MK=Macedonia",
          "MN=Mongolia",
          "MS=Montserrat", // British island in the Caribbean Sea, almost not populated because of strong vulcanic activity
@@ -199,6 +203,7 @@ public class serverDomains {
          "PM=St. Pierre and Miquelon", // french-administrated colony close to canada, belongs to France
          "PT=Portugal",
          "RO=Romania",
+         "RS=Serbia",
          "RU=Russia",
          "SE=Sweden",
          "SI=Slovenia",
@@ -229,6 +234,7 @@ public class serverDomains {
          "KZ=Kazakhstan",
          "KW=Kuwait",
          "LB=Lebanon",
+         "PS=Palestinian Territory",
          "OM=Oman",
          "QA=Qatar",
          "SA=Saudi Arabia",
@@ -241,6 +247,7 @@ public class serverDomains {
          "YE=Yemen"
      };
      private static final String[] TLD_SouthEastAsia = {
+         "ASIA=The Pan-Asia and Asia Pacific community",
          "BD=Bangladesh",
          "BN=Brunei Darussalam",
          "BT=Bhutan",
@@ -263,15 +270,18 @@ public class serverDomains {
          "SG=Singapore",
          "TP=East Timor",
          "TH=Thailand",
+         "TL=Timor-Leste",
          "TW=Taiwan",
          "VN=Viet Nam"
      };
      private static final String[] TLD_Africa = {
+         "AC=Ascension Island",
          "AO=Angola",
          "BF=Burkina Faso",
          "BI=Burundi",
          "BJ=Benin",
          "BW=Botswana",
+         "CD=Democratic Republic of the Congo",
          "CF=Central African Republic",
          "CG=Congo",
          "CI=Cote D'Ivoire (Ivory Coast)",
@@ -327,17 +337,21 @@ public class serverDomains {
      };
      private static final String[] TLD_Generic = {
          "COM=US Commercial",
-         "AERO=",
-         "BIZ=",
-         "COOP=",
+         "AERO=The air-transport industry",
+         "ARPA=operationally-critical infrastructural identifier spaces",
+         "BIZ=Business",
+         "COOP=cooperative associations",
          "INFO=",
-         "MUSEUM=",
-         "NAME=",
-         "PRO=",
-         "ARPA=",
-         "INT=International",
-         "ARPA=Arpanet",
-         "NT=Neutral Zone"
+         "JOBS=human resource managers",
+         "MOBI=mobile products and services",
+         "MUSEUM=Museums",
+         "NAME=Individuals",
+         "NET=Network",
+         "ORG=Non-Profit Organization",
+         "PRO=Credentialed professionals",
+         "TEL=Published contact data",
+         "TRAVEL=The travel industry",
+         "INT=International"
      };
 
     private static HashMap<String, Integer> TLDID = new HashMap<String, Integer>();
