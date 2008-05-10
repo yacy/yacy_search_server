@@ -185,7 +185,7 @@
       <pathelement location="${libx}/saaj.jar" />
       <pathelement location="${libx}/axis.jar" />
       <pathelement location="${lib}/commons-httpclient-3.1.jar" />
-      <pathelement location="${libx}/commons-logging.jar" />
+      <pathelement location="${lib}/commons-logging-1.1.1.jar" />
     </path>
 
     <!-- compiling yacy.java -->

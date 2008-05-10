@@ -33,12 +33,12 @@
 	<classpathentry kind="lib" path="libx/activation.jar"/>
 	<classpathentry kind="lib" path="libx/webcat-0.1-swf.jar"/>
 	<classpathentry kind="lib" path="libx/J7Zip-modified.jar"/>
-	<classpathentry kind="lib" path="libx/commons-logging.jar"/>
 	<classpathentry kind="lib" path="libx/PDFBox-0.7.3.jar"/>
 	<classpathentry kind="lib" path="libx/FontBox-0.1.0-dev.jar"/>
 	<classpathentry kind="lib" path="libx/bcprov-jdk14-139.jar"/>
 	<classpathentry kind="lib" path="libx/bcmail-jdk14-139.jar"/>
 	<classpathentry kind="lib" path="libx/commons-codec-1.3.jar"/>
 	<classpathentry kind="lib" path="lib/commons-httpclient-3.1.jar"/>
+	<classpathentry kind="lib" path="lib/commons-logging-1.1.1.jar"/>
 	<classpathentry kind="output" path="gen"/>
 </classpath>
