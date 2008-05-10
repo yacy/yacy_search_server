@@ -1112,7 +1112,7 @@ public class ftpc {
      * 8 1994 etc
      * 
      * @param line
-     * @return
+     * @return null if not parseable
      */
     private entryInfo parseListData(final String line) {
         final Pattern lsStyle = Pattern
@@ -2539,9 +2539,12 @@ public class ftpc {
         }
     }
 
-    public StringBuilder dirhtml(final String remotePath) {
+    public StringBuilder dirhtml(String remotePath) {
         // returns a directory listing using an existing connection
         try {
+            if(isFolder(remotePath) && !"/".equals(remotePath.charAt(remotePath.length()-1))) {
+                remotePath += '/';
+            }
             final List<String> list = list(remotePath, true);
             if (remotesystem == null) {
                 sys();
@@ -2596,10 +2599,24 @@ public class ftpc {
         page.append("  </pre></p>\n");
         page.append("  <hr>\n");
         page.append("  <pre>\n");
+        int nameStart, nameEnd;
+        entryInfo info;
         for (final String line : list) {
-            final entryInfo info = parseListData(line);
-            page.append(line.substring(0, line.indexOf(info.name)));
-            page.append("<a href=\"" + base + info.name + ((info.isDir) ? "/" : "") + "\">" + info.name + "</a>\n");
+            info = parseListData(line);
+            if(info != null) {
+                // with link
+                nameStart = line.indexOf(info.name);
+                page.append(line.substring(0, nameStart));
+                page.append("<a href=\"" + base + info.name + ((info.isDir) ? "/" : "") + "\">" + info.name + "</a>");
+                nameEnd = nameStart + info.name.length();
+                if(line.length() > nameEnd) {
+                    page.append(line.substring(nameEnd));
+                }
+            } else {
+                // raw
+                page.append(line);
+            }
+            page.append('\n');
         }
         page.append("  </pre>\n");
         page.append("  <hr>\n");
