@@ -55,6 +55,12 @@ public class serverDomains {
     private static final Set<String> nameCacheNoCachingList = Collections.synchronizedSet(new HashSet<String>());
     private static final long startTime = System.currentTimeMillis();
 
+    /**
+     * ! ! !   A T T E N T I O N   A T T E N T I O N   A T T E N T I O N   ! ! !
+     * 
+     * Do not move a TLD to another group (if you do not exactly know what you
+     * are doing)! Because it will change the hash of the url!
+     */
     private static final String[] TLD_NorthAmericaOceania={
         // primary english-speaking countries
         // english-speaking countries from central america are also included
