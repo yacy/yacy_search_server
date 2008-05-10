@@ -64,7 +64,7 @@ div.top {
   color: #999999;
 }
 .small {
-  font: normal Arial, Helvetica, sans-serif;
+  font: normal small Arial, Helvetica, sans-serif;
   font-size: 9px;
 }
 .normal {
@@ -250,12 +250,12 @@ div.searchresults.hidden {
   	margin-bottom:0.6em;
   	margin-left:22px;
 }
-.searchresults .url a,. searchselect .url a {
+.searchresults .url a, .searchselect .url a {
   	color:#20A020;
   	text-decoration:none;
 }
 img.favicon{  
-  width: 16px;pagesize
+  width: 16px;
   height: 16px;
   vertical-align: middle;  
   margin-left: -20px;

@@ -1,13 +1,32 @@
 
 <script type="text/javascript">
    //<![CDATA[
-	$(document).ready(function() { 
-    	$('#ymarks') 
-    	.tablesorter({widgets: ['zebra']}) 
-    	.tablesorterPager({container: $('#pager'), size: 5, positionFixed: false});
+	$(document).ready(function() {     	
 		$("#side1").accordion("activate", 1);
 		$("#side3").accordion("activate", 2);
 		$('#yoptions').resetForm();
+	
+		$.ajax({
+			type: "GET",
+			url: "/xml/bookmarks/xbel/xbel.xml?login=",
+			dataType: "xml",
+			success: function(xml) {
+				$(xml).find('bookmark').each(function(){					
+					var link = $(this).attr('href');
+					var hash = $(this).attr('id');
+					var title = $(this).find('title').text();
+					var date = "01-01-0101";
+					var desc = $(this).find('desc').text();
+					var tags = $(this).find('metadata').attr('ShortcutURL');					
+					$('<tr></tr')
+						.html('<td><input type="checkbox" value="true" /></td><td><img src="img-2/world2.png" alt="public bookmark" title="public bookmark"/></td><td><h3 class="linktitle">' +title+ '</h3><p class="desc">' +desc+ '</p><p class="url"><a href="' +link+ '">' +link+ '</a></p><td>' +tags+ '</td><td>' +date+ '</td><td><a href="/Bookmarks.html?edit=' +hash+ '"><img src="img-2/pencil.png" alt="edit bookmark" title="edit bookmark" /></a><img src="img-2/cancel.png" alt="delete bookmark" title="delete bookmark"/></td>')						
+						.appendTo('#ymarks tbody');																	
+				}); //close each(
+				$('#ymarks') 
+    				.tablesorter({widgets: ['zebra']}) 
+    				.tablesorterPager({container: $('#pager'), size: 5, positionFixed: false});
+			}
+		}); //close $.ajax(			
 	});
   //]]>
 </script>
@@ -32,36 +51,7 @@
 				<th class="{sorter: false}"></th>							
 			  </tr>
 			</thead>			
-			<tbody>
-			#{bookmarks}#						
-			<tr>
-				<td>
-					<input type="checkbox" value="true" />
-				</td>
-				<td>
-					#(public)#
-					<img src="img-2/lock.png" alt="private bookmark" title="private bookmark"/>
-					::
-					<img src="img-2/world2.png" alt="public bookmark" title="public bookmark"/>
-					#(/public)#
-				</td>
-				<td>
-					<h3 class="linktitle">#[title]#</h3>
-					<p class="desc">#[description]#</p>
-					<p class="url"><a href="#[link]#">#[link]#</a></p>					
-				</td>								
-				<td>#{tags}# #[tag]#,#{/tags}#</td>
-				<td>
-					#[date]#
-				</td>
-				<td>
-					<a href="Bookmarks.html?edit=#[hash]#">
-						<img src="img-2/pencil.png" alt="edit bookmark" title="edit bookmark" />
-					</a>
-					<img src="img-2/cancel.png" alt="delete bookmark" title="delete bookmark"/>					
-				</td>
-			</tr>			
-			#{/bookmarks}#
+			<tbody>			
 			</tbody>
 		</table>
 

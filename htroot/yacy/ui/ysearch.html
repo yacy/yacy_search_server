@@ -2,15 +2,17 @@
   //<![CDATA[
 	$(function() {				
 		$("#side3").accordion("activate", 0);
+		var pagination = tabid + " .pagination";		
+		$('<div class="pagination"></div>').html('[loading...]').appendTo(tabid);
 		$.ajax({
 			type: "GET",
 			url: query,
 			dataType: "xml",
 			success: function(xml) {
 				var totalResults = parseInt($(xml).find('totalResults').text().replace(".",""));
-				var startIndex = parseInt($(xml).find('startIndex').text());
+				var startIndex = parseInt($(xml).find('startIndex').text());				
 				var itemsPerPage = parseInt($(xml).find('itemsPerPage').text());
-				var query = $(xml).find('Query').attr('searchTerms');
+				var query = $(xml).find('Query').attr('searchTerms');				
 				var endIndex = startIndex+itemsPerPage;				
 				if (endIndex > totalResults) {
 					endIndex = totalResults;
@@ -21,8 +23,8 @@
     				var currentPage = ((startIndex-1)/itemsPerPage);
   				} else {
     				var currentPage = 0;
-  				}
-				$("#pagination").pagination(totalResults, {
+  				}  				
+				$(pagination).pagination(totalResults, {
 					current_page:currentPage,
 					items_per_page:itemsPerPage,
 					num_edge_entries:1,
@@ -69,5 +71,4 @@
 	 }); //close $(
   //]]>
 </script>
-<div id="pagination" class="pagination">[loading...]</div>
 
