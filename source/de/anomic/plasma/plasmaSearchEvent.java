@@ -828,7 +828,7 @@ public final class plasmaSearchEvent {
             return (alternative_urlstring == null) ? urlcomps.url().toNormalform(false, true) : alternative_urlstring;
         }
         public String urlname() {
-            return (alternative_urlname == null) ? urlcomps.url().toNormalform(false, true) : alternative_urlname;
+            return (alternative_urlname == null) ? yacyURL.unescape(urlcomps.url().toNormalform(false, true)) : alternative_urlname;
         }
         public String title() {
             return urlcomps.dc_title();
