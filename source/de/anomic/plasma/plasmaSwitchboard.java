@@ -1475,16 +1475,27 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
         Iterator<CrawlProfile.entry> i = this.profilesActiveCrawls.profiles(true);
         CrawlProfile.entry profile;
         String name;
-        while (i.hasNext()) {
-            profile = i.next();
-            name = profile.name();
-            if (name.equals(CRAWL_PROFILE_PROXY)) this.defaultProxyProfile = profile;
-            if (name.equals(CRAWL_PROFILE_REMOTE)) this.defaultRemoteProfile = profile;
-            if (name.equals(CRAWL_PROFILE_SNIPPET_LOCAL_TEXT)) this.defaultTextSnippetLocalProfile = profile;
-            if (name.equals(CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT)) this.defaultTextSnippetGlobalProfile = profile;
-            if (name.equals(CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA)) this.defaultMediaSnippetLocalProfile = profile;
-            if (name.equals(CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA)) this.defaultMediaSnippetGlobalProfile = profile;
+        try {
+            while (i.hasNext()) {
+                profile = i.next();
+                name = profile.name();
+                if (name.equals(CRAWL_PROFILE_PROXY)) this.defaultProxyProfile = profile;
+                if (name.equals(CRAWL_PROFILE_REMOTE)) this.defaultRemoteProfile = profile;
+                if (name.equals(CRAWL_PROFILE_SNIPPET_LOCAL_TEXT)) this.defaultTextSnippetLocalProfile = profile;
+                if (name.equals(CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT)) this.defaultTextSnippetGlobalProfile = profile;
+                if (name.equals(CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA)) this.defaultMediaSnippetLocalProfile = profile;
+                if (name.equals(CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA)) this.defaultMediaSnippetGlobalProfile = profile;
+            }
+        } catch (Exception e) {
+            this.profilesActiveCrawls.resetDatabase();
+            this.defaultProxyProfile = null;
+            this.defaultRemoteProfile = null;
+            this.defaultTextSnippetLocalProfile = null;
+            this.defaultTextSnippetGlobalProfile = null;
+            this.defaultMediaSnippetLocalProfile = null;
+            this.defaultMediaSnippetGlobalProfile = null;
         }
+        
         if (this.defaultProxyProfile == null) {
             // generate new default entry for proxy crawling
             this.defaultProxyProfile = this.profilesActiveCrawls.newEntry("proxy", null, ".*", ".*",

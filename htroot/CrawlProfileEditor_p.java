@@ -91,7 +91,7 @@ public class CrawlProfileEditor_p {
                 if (entry != null) sb.profilesPassiveCrawls.newEntry(entry.map());
                 sb.profilesActiveCrawls.removeEntry(handle);
                 // delete all entries from the crawl queue that are deleted here
-                sb.crawlQueues.noticeURL.removeByProfileHandle(handle);
+                sb.crawlQueues.noticeURL.removeByProfileHandle(handle, 10000);
             }
             if (post.containsKey("delete")) {
                 // deletion of a terminated crawl profile

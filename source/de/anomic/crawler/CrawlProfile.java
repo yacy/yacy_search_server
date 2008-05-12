@@ -72,7 +72,7 @@ public class CrawlProfile {
         profileTable = new kelondroMapObjects(dyn, 500);
     }
     
-    void resetDatabase() {
+    public void resetDatabase() {
         // deletes the profile database and creates a new one
         if (profileTable != null) profileTable.close();
         if (!(profileTableFile.delete())) throw new RuntimeException("cannot delete crawl profile database");

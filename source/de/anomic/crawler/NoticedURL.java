@@ -174,11 +174,11 @@ public class NoticedURL {
         return false;
     }
     
-    public int removeByProfileHandle(String handle) {
+    public int removeByProfileHandle(String handle, long timeout) {
         int removed = 0;
-        try {removed += coreStack.removeAllByProfileHandle(handle);} catch (IOException e) {}
-        try {removed += limitStack.removeAllByProfileHandle(handle);} catch (IOException e) {}
-        try {removed += remoteStack.removeAllByProfileHandle(handle);} catch (IOException e) {}
+        try {removed += coreStack.removeAllByProfileHandle(handle, timeout);} catch (IOException e) {}
+        try {removed += limitStack.removeAllByProfileHandle(handle, timeout);} catch (IOException e) {}
+        try {removed += remoteStack.removeAllByProfileHandle(handle, timeout);} catch (IOException e) {}
         return removed;
     }
     

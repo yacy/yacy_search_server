@@ -167,7 +167,7 @@ public class Balancer {
        return new CrawlEntry(entry);
     }
     
-    public synchronized int removeAllByProfileHandle(String profileHandle) throws IOException {
+    public synchronized int removeAllByProfileHandle(String profileHandle, long timeout) throws IOException {
         // removes all entries with a specific profile hash.
         // this may last some time
         // returns number of deletions
@@ -177,7 +177,8 @@ public class Balancer {
         HashSet<String> urlHashes = new HashSet<String>();
         kelondroRow.Entry rowEntry;
         CrawlEntry crawlEntry;
-        while (i.hasNext()) {
+        long terminate = (timeout > 0) ? System.currentTimeMillis() + timeout : Long.MAX_VALUE;
+        while (i.hasNext() && (System.currentTimeMillis() < terminate)) {
             rowEntry = (kelondroRow.Entry) i.next();
             crawlEntry = new CrawlEntry(rowEntry);
             if (crawlEntry.profileHandle().equals(profileHandle)) {
