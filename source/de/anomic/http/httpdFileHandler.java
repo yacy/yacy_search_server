@@ -303,7 +303,10 @@ public final class httpdFileHandler {
             
             int pos = path.lastIndexOf(".");
             
-            if ((path.substring(0,(pos==-1)?path.length():pos)).endsWith("_p") && (adminAccountBase64MD5.length() != 0)) {
+            if ((!clientIP.equals("localhost")) &&
+                (!clientIP.startsWith("0:0:0:0:0:0:0:1")) &&
+                (path.substring(0,(pos==-1)?path.length():pos)).endsWith("_p") &&
+                (adminAccountBase64MD5.length() != 0)) {
                 //authentication required
                 //userDB
                 if(sb.userDB.hasAdminRight(authorization, conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP), requestHeader.getHeaderCookies())){

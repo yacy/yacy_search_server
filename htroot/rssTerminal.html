@@ -36,6 +36,7 @@ var lastwait = 1000;
 var tab = "&nbsp;&nbsp;";
 var lastShow = new Date();
 var set = "";
+var requestCount = 0;
 
 function fillLines() {
 alert(maxlines);
@@ -121,7 +122,8 @@ function idlepingExec() {
 }
 
 function load() {
-  getRSS("/xml/feed.rss?count=50&set=" + set);
+  getRSS("/xml/feed.rss?count=50&set=" + set + "&requestCount=" + requestCount + "&time=" + (new Date()).getTime());
+  requestCount++;
 }
 
 function init() {

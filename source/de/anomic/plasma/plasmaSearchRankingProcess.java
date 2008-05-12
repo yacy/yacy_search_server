@@ -297,6 +297,7 @@ public final class plasmaSearchRankingProcess {
         while ((stack.size() > 0) || (size() > 0)) {
                 if (((stack.size() == 0) && (size() == 0))) break;
                 kelondroSortStack<indexRWIVarEntry>.stackElement obrwi = bestRWI(skipDoubleDom);
+                if (obrwi == null) continue; // *** ? this happenened and the thread was suspended silently. cause?
                 indexURLReference u = wordIndex.getURL(obrwi.element.urlHash(), obrwi.element, obrwi.weight.longValue());
                 if (u != null) {
                     indexURLReference.Components comp = u.comp();

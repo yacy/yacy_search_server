@@ -42,7 +42,7 @@ public void setup() {
   
   size(660, 400);
   smooth();
-  frameRate( 12 );
+  frameRate( 6 );
   strokeWeight( 1 );
   ellipseMode( CENTER );       
   
@@ -78,10 +78,11 @@ public void initializePhysics() {
 }
 
 public void draw() {
-  processRequestResponse(20);
+  processRequestResponse(50);
   
   physics.tick( 1.0f ); 
   HashSet invisible = invisibleParticles();
+  deleteParticles(invisible);
   if (physics.numberOfParticles() > 1) updateCentroid(invisible);
   centroid.tick();
 
@@ -90,7 +91,7 @@ public void draw() {
   scale( centroid.z() );
   translate( -centroid.x(), -centroid.y() );
  
-  drawNetwork(invisible);
+  drawNetwork();
 }
 
 public void initRequest(boolean update) {
@@ -153,6 +154,7 @@ public void processCitation(HashMap props) {
   }
   h.time = System.currentTimeMillis();
   host p = (host) nodes.get(parsingHostID); // this should be successful
+  if (p == null) return;
   // prevent that a spring is made twice
   for ( int i = 0; i < physics.numberOfSprings(); ++i ) {
     Spring e = physics.getSpring(i);
@@ -209,7 +211,19 @@ public HashSet invisibleParticles() {
   return particles;
 }
 
-public void drawNetwork(HashSet invisible) {
+public void deleteParticles(HashSet particles) {
+  Iterator j = nodes.values().iterator();
+  host h;
+  while (j.hasNext()) {
+    h = (host) j.next();
+    if (particles.contains(h.node)) {
+      h.node.kill();
+      j.remove();
+    }
+  }
+}
+
+public void drawNetwork() {
   
   // draw vertices
   fill( 120, 255, 120 );
@@ -220,7 +234,6 @@ public void drawNetwork(HashSet invisible) {
   while (j.hasNext()) {
     h = (host) j.next();
     Particle v = h.node;
-    if (invisible.contains(v)) continue;
     ellipse(v.position().x(), v.position().y(), NODE_SIZE, NODE_SIZE);
     name = h.name;
     text(name, v.position().x() - (name.length() * 26 / 10), v.position().y() + 14);
@@ -236,9 +249,7 @@ public void drawNetwork(HashSet invisible) {
   for ( int i = 0; i < physics.numberOfSprings(); ++i ) {
     Spring e = physics.getSpring( i );
     Particle a = e.getOneEnd();
-    if (invisible.contains(a)) continue;
     Particle b = e.getTheOtherEnd();
-    if (invisible.contains(b)) continue;
     line(a.position().x(), a.position().y(), b.position().x(), b.position().y());
   }
 

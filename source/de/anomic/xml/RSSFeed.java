@@ -40,6 +40,9 @@ public class RSSFeed implements Iterable<RSSMessage> {
     public static final String REMOTEINDEXING = "REMOTEINDEXING";
     public static final String LOCALINDEXING  = "LOCALINDEXING";
     
+    // test:
+    // http://localhost:8080/xml/feed.rss?set=PEERNEWS,REMOTESEARCH,LOCALSEARCH,REMOTEINDEXING,LOCALINDEXING
+    
     /**
      * the following private channels are declared to prevent that an access to the feed servlet
      * gets results from news channels that are not for the public
@@ -152,7 +155,9 @@ public class RSSFeed implements Iterable<RSSMessage> {
     private static final ConcurrentHashMap<String, RSSFeed> channels = new ConcurrentHashMap<String, RSSFeed>();
     
     public static RSSFeed channels(String channelName) {
-        RSSFeed feed = channels.get(channelName);
+        ConcurrentHashMap<String, RSSFeed> channelss = channels;
+        RSSFeed feed = channelss.get(channelName);
+        if (feed == null) System.out.println("channel " + channelName + " is new");
         if (feed != null) return feed;
         feed = new RSSFeed();
         feed.setChannel(new RSSMessage(channelName, "", ""));

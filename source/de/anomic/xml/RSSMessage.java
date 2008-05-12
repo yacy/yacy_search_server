@@ -65,7 +65,7 @@ public class RSSMessage {
         setValue("description", description);
         setValue("link", link);
         setValue("pubDate", new Date().toString());
-        setValue("guid", Integer.toHexString((title + description).hashCode()));
+        setValue("guid", Integer.toHexString((title + description + link).hashCode()));
     }
     
     public RSSMessage() {

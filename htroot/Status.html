@@ -3,8 +3,21 @@
   <head>
     <title>YaCy '#[clientname]#': Console Status</title>
     #%env/templates/metas.template%#
+    <script type="text/javascript">
+      function loadBanner() {
+        for (var i = 0; i < document.images.length; i++) {
+          if (document.images[i].src.indexOf("Banner.png") > 0) {
+            document.images[i].src = "/Banner.png?textcolor=000000&amp;bgcolor=ddeeee&amp;bordercolor=aaaaaa&time=" + (new Date()).getTime();
+            break;
+          }
+        }
+      }
+      function init() {
+        loaderBanner = window.setInterval("loadBanner()", 20000);
+      }
+    </script>
   </head>
-  <body style="margin:0px;">
+  <body onload="init();">
     #%env/templates/header.template%#
     #%env/templates/submenuConfig.template%#
     
