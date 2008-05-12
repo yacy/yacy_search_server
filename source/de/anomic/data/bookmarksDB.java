@@ -434,9 +434,12 @@ public class bookmarksDB {
     
     public Iterator<Tag> getTagIterator(boolean priv, int comp, int max){
     	if (max==SHOW_ALL) 
-    		return getTagIterator(priv, comp);
-    	Iterator<Tag> it = getTagIterator(priv, comp);
-    	TreeSet<Tag> set=new TreeSet<Tag>(new tagComparator());
+    		return getTagIterator(priv, comp);    	
+    	Iterator<Tag> it = getTagIterator(priv, SORT_SIZE);
+    	Comparator<Tag> c;    	
+    	if (comp == SORT_SIZE) c = new tagSizeComparator();
+    	else c = new tagComparator();
+    	TreeSet<Tag> set=new TreeSet<Tag>(c);
     	int count = 0;
     	while (it.hasNext() && count<=max) {
     		set.add(it.next());
@@ -446,7 +449,7 @@ public class bookmarksDB {
     }
     
     public Iterator<Tag> getTagIterator(String tagName, boolean priv){
-     	return getTagIterator(tagName, priv, 1);
+     	return getTagIterator(tagName, priv, SORT_ALPHA);
     }
     
     public Iterator<Tag> getTagIterator(String tagName, boolean priv, int comp){
@@ -476,8 +479,11 @@ public class bookmarksDB {
     public Iterator<Tag> getTagIterator(String tagName, boolean priv, int comp, int max){
     	if (max==SHOW_ALL) 
     		return getTagIterator(priv, comp);
-   		Iterator<Tag> it = getTagIterator(tagName, priv, comp);
-   		TreeSet<Tag> set=new TreeSet<Tag>(new tagComparator());
+   		Iterator<Tag> it = getTagIterator(tagName, priv, SORT_SIZE);
+   		Comparator<Tag> c;   
+   		if (comp == SORT_SIZE) c = new tagSizeComparator();
+    	else c = new tagComparator();   		
+   		TreeSet<Tag> set=new TreeSet<Tag>(c);
    		int count = 0;
    		while (it.hasNext() && count<=max) {
    			set.add(it.next());
