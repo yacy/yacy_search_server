@@ -8,25 +8,31 @@
 	
 		$.ajax({
 			type: "GET",
-			url: "/xml/bookmarks/xbel/xbel.xml?login=",
+			url: "/xml/bookmarks/xbel/xbel.xml?login=true&tag="+qtag,			
 			dataType: "xml",
 			success: function(xml) {
 				$(xml).find('bookmark').each(function(){					
 					var link = $(this).attr('href');
 					var hash = $(this).attr('id');
 					var title = $(this).find('title').text();
-					var date = "01-01-0101";
+					var date = $(this).attr('added');;
 					var desc = $(this).find('desc').text();
-					var tags = $(this).find('metadata').attr('ShortcutURL');					
+					var pub = $(this).find('metadata[@owner=YaCy][@public]').attr('public');					
+					var tags = $(this).find('metadata[@owner=Mozilla][@ShortcutURL]').attr('ShortcutURL').replace(",",", ","g");					
+					if (pub == "true") {
+						icon = '<img src="img-2/world2.png" alt="public bookmark" title="public bookmark"/>'
+					} else {
+						 var icon = '<img src="img-2/lock.png" alt="private bookmark" title="private bookmark"/>'
+					}				
 					$('<tr></tr')
-						.html('<td><input type="checkbox" value="true" /></td><td><img src="img-2/world2.png" alt="public bookmark" title="public bookmark"/></td><td><h3 class="linktitle">' +title+ '</h3><p class="desc">' +desc+ '</p><p class="url"><a href="' +link+ '">' +link+ '</a></p><td>' +tags+ '</td><td>' +date+ '</td><td><a href="/Bookmarks.html?edit=' +hash+ '"><img src="img-2/pencil.png" alt="edit bookmark" title="edit bookmark" /></a><img src="img-2/cancel.png" alt="delete bookmark" title="delete bookmark"/></td>')						
-						.appendTo('#ymarks tbody');																	
+						.html('<td><input type="checkbox" value="true" /></td><td>' +icon+ '</td><td><h3 class="linktitle">' +title+ '</h3><p class="desc">' +desc+ '</p><p class="url"><a href="' +link+ '">' +link+ '</a></p><td>' +tags+ ' </td><td>' +date+ '</td><td><a href="/Bookmarks.html?edit=' +hash+ '"><img src="img-2/pencil.png" alt="edit bookmark" title="edit bookmark" /></a><img src="img-2/cancel.png" alt="delete bookmark" title="delete bookmark"/></td>')						
+						.appendTo('#ymarks tbody');																						
 				}); //close each(
 				$('#ymarks') 
     				.tablesorter({widgets: ['zebra']}) 
-    				.tablesorterPager({container: $('#pager'), size: 5, positionFixed: false});
+    				.tablesorterPager({container: $('#pager'), size: 5, positionFixed: false});				
 			}
-		}); //close $.ajax(			
+		}); //close $.ajax(				
 	});
   //]]>
 </script>

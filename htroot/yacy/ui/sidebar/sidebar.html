@@ -1,11 +1,31 @@
 <script type="text/javascript"> 
    //<![CDATA[
-	$(document).ready(function() { 
+	$(document).ready(function() {   		
   		$("#side3").accordion({
 			autoheight: false,
 			header: "h3"
-		});	
-	});
+		});
+		$.ajax({
+			type: "GET",
+			url: "/xml/bookmarks/tags/get.xml?login=&top=25&sort=size",			
+			dataType: "xml",
+			success: function(xml) {				
+				$(xml).find('tag').each(function(){					
+					var count = $(this).attr('count');
+					var tag = $(this).attr('tag');										
+					var size = ((count/20)+0.3);
+					if (size < 1) {size = 1;}					
+					$('<a style="font-size:'+size+'em"></a>')
+						.html(tag+' ')						
+						.appendTo('#tagcloud')
+						.bind('click', function() {
+							qtag = $(this).text();
+							$('#container ul').tabs("load", 2);							
+						});																										
+				}); //close each(
+			}
+		}); //close $.ajax(			
+	});	
   //]]>
 </script>
 
@@ -71,7 +91,8 @@
 				<option value="50">50</option>
 			</select>
 		 </p>
-	</form>	
+	</form>
+	<p id="tagcloud"></p>	
 </div>	
 
 

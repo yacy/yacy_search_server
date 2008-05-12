@@ -26,6 +26,7 @@
   <script type="text/javascript">
    //<![CDATA[
 	$(function() {		
+		qtag = "";
 		/* Initialize Tabs and set up close function */
 		var $tabs = $('#container ul').tabs()
         	.bind('add.ui-tabs', function(e, ui) {
@@ -90,7 +91,7 @@
 		/* Load Sidebar */
 		$("#side1").load("sidebar/sidebar_admin.html");	
 		/* $("#side2").load("sidebar/sidebar_pager.html"); */
-		$("#side3").load("sidebar/sidebar.html");			
+		$("#side3").load("sidebar/sidebar.html");
 		
 		/* Load Search Result into new Tab */
 		$('#searchbox').submit(function() {			
@@ -99,6 +100,10 @@
 			$tabs.tabs('add', "ysearch.html", '*' + tabname);
 			$tabs.tabs('select',tabnr);
 			return false;
+		});
+		
+		$("#tagcloud").click(function () { 
+			alert("tagcloud"); 
 		});
 		
 		$("#searchtext").click(function () { 

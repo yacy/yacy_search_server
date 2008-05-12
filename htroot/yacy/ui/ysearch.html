@@ -9,7 +9,7 @@
 			url: query,
 			dataType: "xml",
 			success: function(xml) {
-				var totalResults = parseInt($(xml).find('totalResults').text().replace(".",""));
+				var totalResults = parseInt($(xml).find('totalResults').text().replace(".","","g"));
 				var startIndex = parseInt($(xml).find('startIndex').text());				
 				var itemsPerPage = parseInt($(xml).find('itemsPerPage').text());
 				var query = $(xml).find('Query').attr('searchTerms');				
@@ -63,7 +63,7 @@
 				+"&prefermaskfilter="+$(tabid).attr('prefermaskfilter')
 				+"&urlmaskfilter="+$(tabid).attr('urlmaskfilter');
 			
-			var selected = $('#container ul').data('selected.ui-tabs');		
+			var selected = $tabs.data('selected.ui-tabs');		
 			$tabs.tabs("load", selected);			
 			$('#pagination').trigger("update");
 			return false;
