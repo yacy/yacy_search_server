@@ -50,28 +50,57 @@ package xml.bookmarks.tags;
 import java.util.Iterator;
 
 import de.anomic.data.bookmarksDB;
+import de.anomic.data.bookmarksDB.Tag;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 public class get {
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
+	final static int SORT_ALPHA = 1;
+	final static int SORT_SIZE = 2;
+	final static int SHOW_ALL = -1;
+	
+	public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
         // return variable that accumulates replacements
         plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
         boolean isAdmin=switchboard.verifyAuthentication(header, true);
         serverObjects prop = new serverObjects();
-
+        Iterator<Tag> it = null;
+        String tagName = "";
+        int top = SHOW_ALL;
+        int comp = SORT_ALPHA;
+        
+        
     	if(post != null){        
     		if(!isAdmin){
 			// force authentication if desired
     			if(post.containsKey("login")){
     				prop.put("AUTHENTICATE","admin log-in");
     			}
-		}
-	}
+    		} 
+    	}
+    	   			
+    	if(post.containsKey("top")) {    				
+    		String s_top = (String) post.get("top");
+    		top = Integer.parseInt(s_top);    				
+    	}
+    	if(post.containsKey("sort")) {
+    		String sort = (String) post.get("sort");
+    		if (sort.equals("size"))
+    			comp = SORT_SIZE;
+    	}    				
+		if(post.containsKey("tag")) {
+			tagName=(String) post.get("tag");    			
+			if (!tagName.equals("")) {
+				it = switchboard.bookmarksDB.getTagIterator(tagName, isAdmin, comp, top);						
+			} 
+		} else {
+				it = switchboard.bookmarksDB.getTagIterator(isAdmin, comp, top);
+		}    	 	
 
-        Iterator<bookmarksDB.Tag> it = switchboard.bookmarksDB.getTagIterator(isAdmin);
+        // Iterator<bookmarksDB.Tag> it = switchboard.bookmarksDB.getTagIterator(isAdmin);
+        
         int count=0;
         bookmarksDB.Tag tag;
         while (it.hasNext()) {
