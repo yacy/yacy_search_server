@@ -384,7 +384,7 @@ public class plasmaSwitchboardQueue {
         
         public yacyURL referrerURL() {
             if (referrerURL == null) {
-                if ((referrerHash == null) || (referrerHash.equals(initiator.length() == 0))) return null;
+                if ((referrerHash == null) || ((initiator != null) && (referrerHash.equals(initiator.length() == 0)))) return null;
                 indexURLReference entry = wordIndex.getURL(referrerHash, null, 0);
                 if (entry == null) referrerURL = null; else referrerURL = entry.comp().url();
             }
