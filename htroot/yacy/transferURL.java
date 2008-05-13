@@ -56,6 +56,8 @@ import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.serverDate;
+import de.anomic.xml.RSSFeed;
+import de.anomic.xml.RSSMessage;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNetwork;
 import de.anomic.yacy.yacySeed;
@@ -169,7 +171,8 @@ public final class transferURL {
             // return rewrite properties
             final int more = sb.wordIndex.countURL() - sizeBefore;
             doublevalues = Integer.toString(received - more);
-            sb.getLog().logInfo("Received " + received + " URLs from peer " + otherPeerName + " in " + (System.currentTimeMillis() - start) + " ms, Blocked " + blocked + " URLs");
+            sb.getLog().logInfo("Received " + received + " URLs from peer " + otherPeerName + " in " + (System.currentTimeMillis() - start) + " ms, blocked " + blocked + " URLs");
+            RSSFeed.channels(RSSFeed.INDEXRECEIVE).addMessage(new RSSMessage("Received " + received + " URLs from peer " + otherPeerName + ", blocked " + blocked, "", ""));
             if ((received - more) > 0) sb.getLog().logSevere("Received " + doublevalues + " double URLs from peer " + otherPeerName);
             result = "ok";
         }

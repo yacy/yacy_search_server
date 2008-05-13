@@ -58,6 +58,8 @@ import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.tools.nxTools;
+import de.anomic.xml.RSSFeed;
+import de.anomic.xml.RSSMessage;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyDHTAction;
 import de.anomic.yacy.yacyNetwork;
@@ -198,6 +200,7 @@ public final class transferRWI {
             } else {
                 final double avdist = (yacyDHTAction.dhtDistance(sb.wordIndex.seedDB.mySeed().hash, wordhashes[0]) + yacyDHTAction.dhtDistance(sb.wordIndex.seedDB.mySeed().hash, wordhashes[received - 1])) / 2.0;
                 sb.getLog().logInfo("Received " + received + " Entries " + wordc + " Words [" + wordhashes[0] + " .. " + wordhashes[received - 1] + "]/" + avdist + " from " + otherPeerName + ", processed in " + (System.currentTimeMillis() - startProcess) + " milliseconds, requesting " + unknownURL.size() + "/" + receivedURL + " URLs, blocked " + blocked + " RWIs");
+                RSSFeed.channels(RSSFeed.INDEXRECEIVE).addMessage(new RSSMessage("Received " + received + " RWIs [" + wordhashes[0] + " .. " + wordhashes[received - 1] + "]/" + avdist + " from " + otherPeerName + ", requesting " + unknownURL.size() + " URLs, blocked " + blocked, "", ""));
             }
             result = "ok";
             

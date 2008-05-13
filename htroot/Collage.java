@@ -46,9 +46,7 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 public class Collage {
-    private static final     int fifoMax  = 20;
-    private static final     int posXMax  = 800;
-    private static final     int posYMax  = 500;
+    private static           int fifoMax  = 20;
     
     private static           int fifoPos  = -1;
     private static           int fifoSize = 0;
@@ -65,12 +63,24 @@ public class Collage {
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
         final serverObjects prop = new serverObjects();
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
-        final boolean authenticated = sb.adminAuthenticated(header) >= 2;
+        final boolean authenticated = sb.verifyAuthentication(header, false);
         ResultImages.OriginEntry nextOrigin = ResultImages.next(!authenticated);
+        int posXMax  = 800;
+        int posYMax  = 500;
+        boolean embed = false;
+        
+        if (post != null) {
+        	embed = post.containsKey("emb");
+        	posXMax = post.getInt("width", posXMax);
+        	posYMax = post.getInt("height", posYMax);
+        	if (post.containsKey("max")) fifoMax = post.getInt("max", fifoMax);
+        }
+        prop.put("emb", (embed) ? "0" : "1");
         
         if (nextOrigin != null) {
+        	System.out.println("NEXTORIGIN=" + nextOrigin.imageEntry.url().toNormalform(true, false));
             if (fifoSize == 0 || origins[fifoPos] != nextOrigin) {
-                fifoPos = fifoPos + 1 == fifoMax ? 0 : fifoPos + 1;
+                fifoPos = fifoPos + 1 >= fifoMax ? 0 : fifoPos + 1;
                 fifoSize = fifoSize + 1 > fifoMax ? fifoMax : fifoSize + 1;
                 origins[fifoPos] = nextOrigin;
                 
@@ -78,8 +88,8 @@ public class Collage {
                 imgWidth[fifoPos]  = (int) (((float)nextOrigin.imageEntry.width()) / scale);
                 imgHeight[fifoPos] = (int) (((float)nextOrigin.imageEntry.height()) / scale);
 
-                imgPosX[fifoPos]   = rand.nextInt(posXMax);
-                imgPosY[fifoPos]   = rand.nextInt(posYMax);
+                imgPosX[fifoPos]   = rand.nextInt((imgWidth[fifoPos] == 0) ? posXMax / 2 : Math.max(1, posXMax - imgWidth[fifoPos]));
+                imgPosY[fifoPos]   = rand.nextInt((imgHeight[fifoPos] == 0) ? posYMax / 2 : Math.max(1, posYMax - imgHeight[fifoPos]));
                 
                 imgZIndex[fifoPos] = zIndex;
                 zIndex += 1;
@@ -92,11 +102,13 @@ public class Collage {
             for (int i = 0; i < fifoSize; i++)
               prop.put("imgurl_list_" + i + "_url",
                        "<a href=\"" + origins[i].baseURL.toNormalform(true, false) + "\">"
-                       + "<img src=\"" + origins[i].imageEntry.url().toNormalform(true, false) + "\" style=\"width:" + imgWidth[i]
-                       + "px;height:" + imgHeight[i]
-                       + "px;position:absolute;top:" + imgPosY[i]
+                       + "<img src=\"" + origins[i].imageEntry.url().toNormalform(true, false) + "\" "
+                       + "style=\""
+                       + ((imgWidth[i] == 0 || imgHeight[i] == 0) ? "" : "width:" + imgWidth[i] + "px;height:" + imgHeight[i] + "px;")
+                       + "position:absolute;top:" + imgPosY[i]
                        + "px;left:" + imgPosX[i]
-                       + "px;z-index:" + imgZIndex[i] + "\" title=\"" + origins[i].baseURL.toNormalform(true, false) + "\">"
+                       + "px;z-index:" + imgZIndex[i] + "\""
+                       + "title=\"" + origins[i].baseURL.toNormalform(true, false) + "\">"
                        + "</a><br>");
 
             prop.put("imgurl_list", fifoSize);
@@ -105,8 +117,8 @@ public class Collage {
         }
         
         prop.putNum("refresh", Math.max(2, Math.min(5, 500 / (1 + ResultImages.queueSize(!authenticated)))));
-        prop.put("privateQueueSize", ResultImages.privateQueueHighSize() + "+" + ResultImages.privateQueueLowSize());
-        prop.put("publicQueueSize", ResultImages.publicQueueHighSize()  + "+" + ResultImages.publicQueueLowSize());
+        prop.put("emb_privateQueueSize", ResultImages.privateQueueHighSize() + "+" + ResultImages.privateQueueLowSize());
+        prop.put("emb_publicQueueSize", ResultImages.publicQueueHighSize()  + "+" + ResultImages.publicQueueLowSize());
         return prop;
     }
 }

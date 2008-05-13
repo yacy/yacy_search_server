@@ -354,7 +354,7 @@ public class yacyPeerActions {
             // perform all actions if peer is effective new
             dhtAction.processPeerArrival(peer, direct);
             this.processPeerArrival(peer, direct);
-            RSSFeed.channels(RSSFeed.PEERNEWS).addMessage(new RSSMessage(peer.getName() + " has joined the network", "", ""));
+            RSSFeed.channels(RSSFeed.PEERNEWS).addMessage(new RSSMessage(peer.getName() + " joined the network", "", ""));
         }
         return res;
     }
@@ -370,7 +370,7 @@ public class yacyPeerActions {
         }
         // perform all actions
         dhtAction.processPeerDeparture(peer);
-        RSSFeed.channels(RSSFeed.PEERNEWS).addMessage(new RSSMessage(peer.getName() + " has left the network", "", ""));
+        RSSFeed.channels(RSSFeed.PEERNEWS).addMessage(new RSSMessage(peer.getName() + " left the network", "", ""));
     }
     
     public void peerPing(yacySeed peer) {
@@ -379,7 +379,7 @@ public class yacyPeerActions {
         seedDB.addPotential(peer);
         // perform all actions
         processPeerArrival(peer, true);
-        RSSFeed.channels(RSSFeed.PEERNEWS).addMessage(new RSSMessage(peer.getName() + " has sent me a ping", "", ""));
+        RSSFeed.channels(RSSFeed.PEERNEWS).addMessage(new RSSMessage(peer.getName() + " sent me a ping", "", ""));
     }
     
     private void processPeerArrival(yacySeed peer, boolean direct) {

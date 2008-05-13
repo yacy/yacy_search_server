@@ -312,6 +312,7 @@ public class kelondroCollectionIndex {
         try {
             array = openArrayFile(partitionNumber, serialNumber, indexOrder, true);
         } catch (IOException e) {
+        	e.printStackTrace();
             return null;
         }
         arrays.put(accessKey, array);

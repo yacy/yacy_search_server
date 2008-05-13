@@ -18,7 +18,12 @@ form dd {
 </style>
 <meta http-equiv="REFRESH" content="#[refresh]#" />
 </head>
-<body style="margin:0px;">
+<body>
+#(emb)#
+<script type="text/javascript">
+document.body.style.background = "#000";
+</script>
+::
 #%env/templates/header.template%#
 #%env/templates/submenuWebStructure.template%#
 <h2>Collage</h2>
@@ -33,13 +38,15 @@ form dd {
 </dl>
 </form>
 </div>
-
+#(/emb)#
 #(imgurl)#
 ::
   #{list}#
     #[url]#
   #{/list}#
 #(/imgurl)#
+#(emb)#::
 #%env/templates/footer.template%#
+#(/emb)#
 </body>
 </html>
