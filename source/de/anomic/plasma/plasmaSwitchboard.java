@@ -2438,7 +2438,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
         // 10   <  wantedPPM <  1000: custom performance
         // 1000 <= wantedPPM        : maximum performance
         if (wantedPPM <= 10) wantedPPM = 10;
-        if (wantedPPM >= 1000) wantedPPM = 1000;
+        if (wantedPPM >= 6000) wantedPPM = 6000;
         int newBusySleep = 60000 / wantedPPM; // for wantedPPM = 10: 6000; for wantedPPM = 1000: 60
 
         serverBusyThread thread;

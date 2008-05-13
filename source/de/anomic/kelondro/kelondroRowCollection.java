@@ -326,11 +326,13 @@ public class kelondroRowCollection {
         assert (!(serverLog.allZero(a, astart, alength))) : "a = " + serverLog.arrayList(a, astart, alength);
         assert (alength > 0);
         assert (astart + alength <= a.length);
+        /*
         if (bugappearance(a, astart, alength)) {
             serverLog.logWarning("RowCollection", "wrong a = " + serverLog.arrayList(a, astart, alength));
             //return false; // TODO: this is temporary; remote peers may still submit bad entries
         }
-        assert (!(bugappearance(a, astart, alength))) : "a = " + serverLog.arrayList(a, astart, alength);
+        */
+        //assert (!(bugappearance(a, astart, alength))) : "a = " + serverLog.arrayList(a, astart, alength);
         int l = Math.min(rowdef.objectsize, Math.min(alength, a.length - astart));
         ensureSize(chunkcount + 1);
         System.arraycopy(a, astart, chunkcache, rowdef.objectsize * chunkcount, l);
@@ -338,7 +340,7 @@ public class kelondroRowCollection {
         this.lastTimeWrote = System.currentTimeMillis();
         return true;
     }
-    
+    /*
     private static boolean bugappearance(byte[] a, int astart, int alength) {
         // check strange appearances of '@[B', which is not a b64-value or any other hash fragment
         if (astart + 3 > alength) return false;
@@ -350,7 +352,8 @@ public class kelondroRowCollection {
         }
         return false;
     }
-
+    */
+    
     public synchronized final void addAllUnique(kelondroRowCollection c) {
         if (c == null) return;
         assert(rowdef.objectsize == c.rowdef.objectsize);
@@ -806,8 +809,8 @@ public class kelondroRowCollection {
         if (i == j) return 0;
         assert (this.rowdef.primaryKeyIndex == 0) : "this.sortColumn = " + this.rowdef.primaryKeyIndex;
         int colstart = (this.rowdef.primaryKeyIndex < 0) ? 0 : this.rowdef.colstart[this.rowdef.primaryKeyIndex];
-        assert (!bugappearance(chunkcache, i * this.rowdef.objectsize + colstart, this.rowdef.primaryKeyLength));
-        assert (!bugappearance(chunkcache, j * this.rowdef.objectsize + colstart, this.rowdef.primaryKeyLength));
+        //assert (!bugappearance(chunkcache, i * this.rowdef.objectsize + colstart, this.rowdef.primaryKeyLength));
+        //assert (!bugappearance(chunkcache, j * this.rowdef.objectsize + colstart, this.rowdef.primaryKeyLength));
         int c = this.rowdef.objectOrder.compare(
                 chunkcache,
                 i * this.rowdef.objectsize + colstart,
@@ -824,7 +827,7 @@ public class kelondroRowCollection {
         assert (this.rowdef.objectOrder instanceof kelondroBase64Order);
         assert (this.rowdef.primaryKeyIndex == 0) : "this.sortColumn = " + this.rowdef.primaryKeyIndex;
         int colstart = (this.rowdef.primaryKeyIndex < 0) ? 0 : this.rowdef.colstart[this.rowdef.primaryKeyIndex];
-        assert (!bugappearance(chunkcache, i * this.rowdef.objectsize + colstart, this.rowdef.primaryKeyLength));
+        //assert (!bugappearance(chunkcache, i * this.rowdef.objectsize + colstart, this.rowdef.primaryKeyLength));
         return ((kelondroBase64Order) this.rowdef.objectOrder).compilePivot(chunkcache, i * this.rowdef.objectsize + colstart, this.rowdef.primaryKeyLength);
     }
     
@@ -842,7 +845,7 @@ public class kelondroRowCollection {
         assert (this.rowdef.objectOrder instanceof kelondroBase64Order);
         assert (this.rowdef.primaryKeyIndex == 0) : "this.sortColumn = " + this.rowdef.primaryKeyIndex;
         int colstart = (this.rowdef.primaryKeyIndex < 0) ? 0 : this.rowdef.colstart[this.rowdef.primaryKeyIndex];
-        assert (!bugappearance(chunkcache, j * this.rowdef.objectsize + colstart, this.rowdef.primaryKeyLength));
+        //assert (!bugappearance(chunkcache, j * this.rowdef.objectsize + colstart, this.rowdef.primaryKeyLength));
         int c = ((kelondroBase64Order) this.rowdef.objectOrder).comparePivot(
         		compiledPivot,
                 chunkcache,

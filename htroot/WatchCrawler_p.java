@@ -386,12 +386,12 @@ public class WatchCrawler_p {
     private static void setPerformance(plasmaSwitchboard sb, serverObjects post) {
         String crawlingPerformance = post.get("crawlingPerformance","custom");
         long LCbusySleep = Integer.parseInt(sb.getConfig(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL_BUSYSLEEP, "100"));
-        int wantedPPM = (int) (60000L / LCbusySleep);
+        int wantedPPM = (LCbusySleep == 0) ? 6000 : (int) (60000L / LCbusySleep);
         try {
-            wantedPPM = Integer.parseInt(post.get("customPPM",Integer.toString(wantedPPM)));
+            wantedPPM = Integer.parseInt(post.get("customPPM", Integer.toString(wantedPPM)));
         } catch (NumberFormatException e) {}
         if (crawlingPerformance.equals("minimum")) wantedPPM = 10;
-        if (crawlingPerformance.equals("maximum")) wantedPPM = 1000;
+        if (crawlingPerformance.equals("maximum")) wantedPPM = 6000;
         sb.setPerformance(wantedPPM);
     }
     
