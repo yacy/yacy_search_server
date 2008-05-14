@@ -627,8 +627,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
      * <p>Name of the setting how many active crawler-threads may maximal be running on the same time</p>
      */
     public static final String CRAWLER_THREADS_ACTIVE_MAX       = "crawler.MaxActiveThreads";
-
-    public static final String OWN_SEED_FILE                    = "yacyOwnSeedFile";
     public static final String YACY_MODE_DEBUG                  = "yacyDebugMode";
     public static final String WORDCACHE_INIT_COUNT             = "wordCacheInitCount";
     /**
@@ -814,11 +812,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
      * @see bookmarksDB for more detailed overview about the bookmarks structure
      */
     public static final String DBFILE_BOOKMARKS_DATES   = "bookmarkDates.db";
-    /**
-     * <p><code>public static final String <strong>DBFILE_OWN_SEED</strong> = "mySeed.txt"</code></p>
-     * <p>Name of the file containing the database holding this peer's seed</p>
-     */
-    public static final String DBFILE_OWN_SEED          = "mySeed.txt";
     /**
      * <p><code>public static final String <strong>DBFILE_CRAWL_PROFILES</strong> = "crawlProfiles0.db"</code>
      * <p>Name of the file containing the database holding all recent crawl profiles</p>
@@ -2055,14 +2048,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
             this.log.logInfo("cleanupJob: Shutdown detected");
             return false;
         }
-    }
-    
-    /**
-     * Creates a new File instance with absolute path of ours Seed File.<br>
-     * @return a new File instance
-     */
-    public File getOwnSeedFile() {
-        return getConfigPath(OWN_SEED_FILE, DBFILE_OWN_SEED);
     }
     
     /**

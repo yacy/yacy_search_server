@@ -435,14 +435,6 @@ browserPopUpTrigger=true
 browserPopUpPage=Status.html
 browserPopUpApplication=netscape
 
-# the proxy saves it's own seed information. It is positive for the network if
-# the seed does not change it's configuration often (or not at all).
-# The reason for that is that the seed hash is the target for the
-# distributed hash table distribution function.
-# The following file will contain the saved seed:
-yacyOwnSeedFile=DATA/YACYDB/mySeed.txt
-yacyDB=DATA/YACYDB
-
 # index sharing attributes: by default, sharing is on.
 # If you want to use YaCy only for local indexing (robinson mode),
 # you may switch this off

@@ -120,7 +120,7 @@ public final class plasmaWordIndex implements indexRI {
         // create or init seed cache
         File networkRoot = new File(this.primaryRoot, "NETWORK");
         networkRoot.mkdirs();
-        File mySeedFile = new File(networkRoot, "mySeed.txt");
+        File mySeedFile = new File(networkRoot, yacySeedDB.DBFILE_OWN_SEED);
         File oldSeedFile = new File(new File(indexPrimaryRoot.getParentFile(), "YACYDB"), "mySeed.txt");
         if (oldSeedFile.exists()) oldSeedFile.renameTo(mySeedFile);
         seedDB = new yacySeedDB(

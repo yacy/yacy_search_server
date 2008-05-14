@@ -117,7 +117,6 @@ public class yacyCore {
         
         // create a peer news channel
         RSSFeed peernews = RSSFeed.channels(RSSFeed.PEERNEWS);
-        peernews.setMaxsize(1000);
         peernews.addMessage(new RSSMessage("YaCy started", "", ""));
 
         loadSeedUploadMethods();
@@ -406,7 +405,7 @@ public class yacyCore {
 
             // going through the peer list and starting a new publisher thread for each peer
             int i = 0;
-            while (si. hasNext()) {
+            while (si.hasNext()) {
                 seed = (yacySeed) si.next();
                 if (seed == null) {
                     sync.P();
@@ -503,17 +502,15 @@ public class yacyCore {
                 log.logInfo("PeerPing: No data, staying at myType: " + sb.wordIndex.seedDB.mySeed().orVirgin());
             }
 
-            if (newSeeds >= 0) {
-                // success! we have published our peer to a senior peer
-                // update latest news from the other peer
-                // log.logInfo("publish: handshaked " + t.seed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR) + " peer '" + t.seed.getName() + "' at " + t.seed.getAddress());
-                peerActions.saveMySeed();
-                return newSeeds;
-            }
+            // success! we have published our peer to a senior peer
+            // update latest news from the other peer
+            // log.logInfo("publish: handshaked " + t.seed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR) + " peer '" + t.seed.getName() + "' at " + t.seed.getAddress());
+            sb.wordIndex.seedDB.saveMySeed();
 
             // if we have an address, we do nothing
             if (sb.wordIndex.seedDB.mySeed().isProper() == null && !force) { return 0; }
-
+            if (newSeeds > 0) return newSeeds;
+            
             // still no success: ask own NAT or internet responder
             //final boolean DI604use = switchboard.getConfig("DI604use", "false").equals("true");
             //final String  DI604pw  = switchboard.getConfig("DI604pw", "");
@@ -526,7 +523,7 @@ public class yacyCore {
                 sb.wordIndex.seedDB.mySeed().put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR); // to start bootstraping, we need to be recognised as PEERTYPE_SENIOR peer
             log.logInfo("publish: no recipient found, our address is " +
                     ((sb.wordIndex.seedDB.mySeed().getPublicAddress() == null) ? "unknown" : sb.wordIndex.seedDB.mySeed().getPublicAddress()));
-            peerActions.saveMySeed();
+            sb.wordIndex.seedDB.saveMySeed();
             return 0;
         } catch (InterruptedException e) {
             try {

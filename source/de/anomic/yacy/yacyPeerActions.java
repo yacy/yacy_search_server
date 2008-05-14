@@ -127,12 +127,6 @@ public class yacyPeerActions {
         seedDB.mySeed().setFlagAcceptRemoteIndex(sb.getConfig("allowReceiveIndex", "").equals("true"));
         //mySeed.setFlagAcceptRemoteIndex(true);
     }
-            
-    public void saveMySeed() {
-        try {
-          seedDB.mySeed().save(sb.getOwnSeedFile());
-        } catch (IOException e) {}
-    }
 
     public void loadSeedLists() {
         // uses the superseed to initialize the database with known seeds

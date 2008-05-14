@@ -875,7 +875,7 @@ public class yacySeed {
     }
 
     public final void save(File f) throws IOException {
-        final String out = this.genSeedStr('z', null);
+        final String out = this.genSeedStr('p', null);
         final FileWriter fw = new FileWriter(f);
         fw.write(out, 0, out.length());
         fw.close();

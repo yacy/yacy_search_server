@@ -93,6 +93,12 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
     public static final int commonHashLength = 12;
     public static final int dhtActivityMagic = 32;
     
+    /**
+     * <p><code>public static final String <strong>DBFILE_OWN_SEED</strong> = "mySeed.txt"</code></p>
+     * <p>Name of the file containing the database holding this peer's seed</p>
+     */
+    public static final String DBFILE_OWN_SEED = "mySeed.txt";
+    
     public static final String[]      sortFields = new String[] {yacySeed.LCOUNT, yacySeed.ICOUNT, yacySeed.UPTIME, yacySeed.VERSION, yacySeed.LASTSEEN};
     public static final String[]   longaccFields = new String[] {yacySeed.LCOUNT, yacySeed.ICOUNT, yacySeed.ISPEED};
     public static final String[] doubleaccFields = new String[] {yacySeed.RSPEED};
@@ -212,6 +218,12 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
             seedActiveDB.remove(mySeed.hash);
             seedPassiveDB.remove(mySeed.hash);
             seedPotentialDB.remove(mySeed.hash);
+        } catch (IOException e) {}
+    }
+    
+    public void saveMySeed() {
+        try {
+          this.mySeed().save(myOwnSeedFile);
         } catch (IOException e) {}
     }
     
