@@ -7,7 +7,7 @@
 		});
 		$.ajax({
 			type: "GET",
-			url: "/xml/bookmarks/tags/get.xml?login=&top=25&sort=size",			
+			url: "/xml/bookmarks/tags/get.xml?login=true&top=25&sort=alpha",			
 			dataType: "xml",
 			success: function(xml) {				
 				$(xml).find('tag').each(function(){					
