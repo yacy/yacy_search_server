@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaWordIndex;
 
 public class NoticeURLImporter extends AbstractImporter implements Importer {
 
@@ -30,7 +30,7 @@ public class NoticeURLImporter extends AbstractImporter implements Importer {
         // TODO: we need more error handling here
         this.plasmaPath = crawlerPath;
         File noticeUrlDbFile = new File(plasmaPath,"urlNotice1.db");
-        File profileDbFile = new File(plasmaPath, plasmaSwitchboard.DBFILE_ACTIVE_CRAWL_PROFILES);
+        File profileDbFile = new File(plasmaPath, plasmaWordIndex.DBFILE_ACTIVE_CRAWL_PROFILES);
         
         String errorMsg = null;
         if (!plasmaPath.exists()) 

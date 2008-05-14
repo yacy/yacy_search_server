@@ -194,15 +194,15 @@ public final class hello {
         serverCore.checkInterruption();
         final StringBuffer seeds = new StringBuffer(768);
         // attach some more seeds, as requested
-        if ((sb.wordIndex.seedDB != null) && (sb.wordIndex.seedDB.sizeConnected() > 0)) {
-            if (count > sb.wordIndex.seedDB.sizeConnected()) { count = sb.wordIndex.seedDB.sizeConnected(); }
+        if ((sb.webIndex.seedDB != null) && (sb.webIndex.seedDB.sizeConnected() > 0)) {
+            if (count > sb.webIndex.seedDB.sizeConnected()) { count = sb.webIndex.seedDB.sizeConnected(); }
             if (count > 100) { count = 100; }
             
             // latest seeds
-            final Map<String, yacySeed> ySeeds = sb.wordIndex.seedDB.seedsByAge(true, count); // peerhash/yacySeed relation
+            final Map<String, yacySeed> ySeeds = sb.webIndex.seedDB.seedsByAge(true, count); // peerhash/yacySeed relation
             
             // attach also my own seed
-            seeds.append("seed0=").append(sb.wordIndex.seedDB.mySeed().genSeedStr(key)).append(serverCore.CRLF_STRING);
+            seeds.append("seed0=").append(sb.webIndex.seedDB.mySeed().genSeedStr(key)).append(serverCore.CRLF_STRING);
             count = 1;            
             
             // attach other seeds
@@ -222,7 +222,7 @@ public final class hello {
             }
         } else {
             // attach also my own seed
-            seeds.append("seed0=").append(sb.wordIndex.seedDB.mySeed().genSeedStr(key)).append(serverCore.CRLF_STRING);
+            seeds.append("seed0=").append(sb.webIndex.seedDB.mySeed().genSeedStr(key)).append(serverCore.CRLF_STRING);
         }
 
         prop.put("seedlist", seeds.toString());

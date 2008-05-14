@@ -203,7 +203,7 @@ public class AccessTracker_p {
                 prop.put("page_list_" + entCount + "_dark", ((dark) ? 1 : 0) ); dark =! dark;
                 prop.putHTML("page_list_" + entCount + "_host", host);
                 if (page == 5) {
-                    yacySeed remotepeer = sb.wordIndex.seedDB.lookupByIP(natLib.getInetAddress(host), true, true, true);
+                    yacySeed remotepeer = sb.webIndex.seedDB.lookupByIP(natLib.getInetAddress(host), true, true, true);
                     prop.putHTML("page_list_" + entCount + "_peername", (remotepeer == null) ? "UNKNOWN" : remotepeer.getName());
                 }
                 prop.putNum("page_list_" + entCount + "_count", handles.size());

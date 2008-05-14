@@ -84,30 +84,30 @@ public class Network {
         prop.putHTML("page_networkName", sb.getConfig("network.unit.name", "unspecified"));
         final boolean overview = (post == null) || (post.get("page", "0").equals("0"));
 
-        final String mySeedType = sb.wordIndex.seedDB.mySeed().get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN);
+        final String mySeedType = sb.webIndex.seedDB.mySeed().get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN);
         final boolean iAmActive = (mySeedType.equals(yacySeed.PEERTYPE_SENIOR) || mySeedType.equals(yacySeed.PEERTYPE_PRINCIPAL));
 
         if (overview) {
-            long accActLinks = sb.wordIndex.seedDB.countActiveURL();
-            long accActWords = sb.wordIndex.seedDB.countActiveRWI();
-            final long accPassLinks = sb.wordIndex.seedDB.countPassiveURL();
-            final long accPassWords = sb.wordIndex.seedDB.countPassiveRWI();
-            long accPotLinks = sb.wordIndex.seedDB.countPotentialURL();
-            long accPotWords = sb.wordIndex.seedDB.countPotentialRWI();
+            long accActLinks = sb.webIndex.seedDB.countActiveURL();
+            long accActWords = sb.webIndex.seedDB.countActiveRWI();
+            final long accPassLinks = sb.webIndex.seedDB.countPassiveURL();
+            final long accPassWords = sb.webIndex.seedDB.countPassiveRWI();
+            long accPotLinks = sb.webIndex.seedDB.countPotentialURL();
+            long accPotWords = sb.webIndex.seedDB.countPotentialRWI();
 
-            int conCount = sb.wordIndex.seedDB.sizeConnected();
-            final int disconCount = sb.wordIndex.seedDB.sizeDisconnected();
-            int potCount = sb.wordIndex.seedDB.sizePotential();
+            int conCount = sb.webIndex.seedDB.sizeConnected();
+            final int disconCount = sb.webIndex.seedDB.sizeDisconnected();
+            int potCount = sb.webIndex.seedDB.sizePotential();
 
 //          final boolean complete = ((post == null) ? false : post.get("links", "false").equals("true"));
-            final long otherppm = sb.wordIndex.seedDB.countActivePPM();
-            final double otherqpm = sb.wordIndex.seedDB.countActiveQPM();
+            final long otherppm = sb.webIndex.seedDB.countActivePPM();
+            final double otherqpm = sb.webIndex.seedDB.countActiveQPM();
             long myppm = 0;
             double myqph = 0d;
 
             // create own peer info
-            yacySeed seed = sb.wordIndex.seedDB.mySeed();
-            if (sb.wordIndex.seedDB.mySeed() != null){ //our Peer
+            yacySeed seed = sb.webIndex.seedDB.mySeed();
+            if (sb.webIndex.seedDB.mySeed() != null){ //our Peer
                 // update seed info
                 yacyCore.peerActions.updateMySeed();
                 
@@ -123,17 +123,17 @@ public class Network {
                 // my-info
                 prop.putHTML("table_my-name", seed.get(yacySeed.NAME, "-") );
                 prop.put("table_my-hash", seed.hash );
-                if (sb.wordIndex.seedDB.mySeed().isVirgin()) {
+                if (sb.webIndex.seedDB.mySeed().isVirgin()) {
                     prop.put("table_my-info", 0);
-                } else if(sb.wordIndex.seedDB.mySeed().isJunior()) {
+                } else if(sb.webIndex.seedDB.mySeed().isJunior()) {
                     prop.put("table_my-info", 1);
                     accPotLinks += LCount;
                     accPotWords += ICount;
-                } else if(sb.wordIndex.seedDB.mySeed().isSenior()) {
+                } else if(sb.webIndex.seedDB.mySeed().isSenior()) {
                     prop.put("table_my-info", 2);
                     accActLinks += LCount;
                     accActWords += ICount;
-                } else if(sb.wordIndex.seedDB.mySeed().isPrincipal()) {
+                } else if(sb.webIndex.seedDB.mySeed().isPrincipal()) {
                     prop.put("table_my-info", 3);
                     accActLinks += LCount;
                     accActWords += ICount;
@@ -214,13 +214,13 @@ public class Network {
                 yacySeed peer = new yacySeed(post.get("peerHash"),map);
 
                 yacyCore.peerActions.updateMySeed();
-                final int added = yacyClient.publishMySeed(sb.wordIndex.seedDB.mySeed(), peer.getPublicAddress(), peer.hash);
+                final int added = yacyClient.publishMySeed(sb.webIndex.seedDB.mySeed(), peer.getPublicAddress(), peer.hash);
 
                 if (added <= 0) {
                     prop.put("table_comment",1);
                     prop.putHTML("table_comment_status","publish: disconnected peer '" + peer.getName() + "/" + post.get("peerHash") + "' from " + peer.getPublicAddress());
                 } else {
-                    peer = sb.wordIndex.seedDB.getConnected(peer.hash);
+                    peer = sb.webIndex.seedDB.getConnected(peer.hash);
                     if (peer == null) {
                         prop.put("table_comment",1);
                         prop.put("table_comment_status","publish: disconnected peer 'UNKNOWN/" + post.get("peerHash") + "' from UNKNOWN");
@@ -246,14 +246,14 @@ public class Network {
             final int page = Integer.parseInt(post.get("page", "1"));
             final int maxCount = Integer.parseInt(post.get("maxCount", "300"));
             int conCount = 0;            
-            if (sb.wordIndex.seedDB == null) {
+            if (sb.webIndex.seedDB == null) {
                 prop.put("table", 0);//no remote senior/principal proxies known"
             } else {
                 int size = 0;
                 switch (page) {
-                    case 1 : size = sb.wordIndex.seedDB.sizeConnected(); break;
-                    case 2 : size = sb.wordIndex.seedDB.sizeDisconnected(); break;
-                    case 3 : size = sb.wordIndex.seedDB.sizePotential(); break;
+                    case 1 : size = sb.webIndex.seedDB.sizeConnected(); break;
+                    case 2 : size = sb.webIndex.seedDB.sizeDisconnected(); break;
+                    case 3 : size = sb.webIndex.seedDB.sizePotential(); break;
                     default: break;
                 }
                 if (size == 0) {
@@ -262,7 +262,7 @@ public class Network {
                     // add temporary the own seed to the database
                     if (iAmActive) {
                         yacyCore.peerActions.updateMySeed();
-                        sb.wordIndex.seedDB.addConnected(sb.wordIndex.seedDB.mySeed());
+                        sb.webIndex.seedDB.addConnected(sb.webIndex.seedDB.mySeed());
                     }
 
                     // find updated Information using YaCyNews
@@ -271,7 +271,7 @@ public class Network {
                     final HashMap<String, Map<String, String>> updatedBlog = new HashMap<String, Map<String, String>>();
                     final HashMap<String, String> isCrawling = new HashMap<String, String>();
                     yacyNewsRecord record;
-                    Iterator<yacyNewsRecord> recordIterator = sb.wordIndex.newsPool.recordIterator(yacyNewsPool.INCOMING_DB, true);
+                    Iterator<yacyNewsRecord> recordIterator = sb.webIndex.newsPool.recordIterator(yacyNewsPool.INCOMING_DB, true);
                     while (recordIterator.hasNext()) {
                         record = recordIterator.next();
                         if (record == null) {
@@ -292,9 +292,9 @@ public class Network {
                     final boolean complete = post.containsKey("ip");
                     Iterator<yacySeed> e = null;
                     switch (page) {
-                        case 1 : e = sb.wordIndex.seedDB.seedsSortedConnected(post.get("order", "down").equals("up"), post.get("sort", yacySeed.LCOUNT)); break;
-                        case 2 : e = sb.wordIndex.seedDB.seedsSortedDisconnected(post.get("order", "down").equals("up"), post.get("sort", yacySeed.LASTSEEN)); break;
-                        case 3 : e = sb.wordIndex.seedDB.seedsSortedPotential(post.get("order", "down").equals("up"), post.get("sort", yacySeed.LASTSEEN)); break;
+                        case 1 : e = sb.webIndex.seedDB.seedsSortedConnected(post.get("order", "down").equals("up"), post.get("sort", yacySeed.LCOUNT)); break;
+                        case 2 : e = sb.webIndex.seedDB.seedsSortedDisconnected(post.get("order", "down").equals("up"), post.get("sort", yacySeed.LASTSEEN)); break;
+                        case 3 : e = sb.webIndex.seedDB.seedsSortedPotential(post.get("order", "down").equals("up"), post.get("sort", yacySeed.LASTSEEN)); break;
                         default: break;
                     }
                     String startURL;
@@ -336,7 +336,7 @@ public class Network {
                             prop.put(STR_TABLE_LIST + conCount + "_updatedBlog", 0);
                             prop.put(STR_TABLE_LIST + conCount + "_isCrawling", 0);
                             if (conCount >= maxCount) { break; }
-                            if (seed.hash.equals(sb.wordIndex.seedDB.mySeed().hash)) {
+                            if (seed.hash.equals(sb.webIndex.seedDB.mySeed().hash)) {
                                 prop.put(STR_TABLE_LIST + conCount + "_dark", 2);
                             } else {
                                 prop.put(STR_TABLE_LIST + conCount + "_dark", ((dark) ? 1 : 0) ); dark=!dark;
@@ -374,7 +374,7 @@ public class Network {
                             prop.putHTML(STR_TABLE_LIST + conCount + "_shortname", shortname);
                             prop.putHTML(STR_TABLE_LIST + conCount + "_fullname", seed.get(yacySeed.NAME, "deadlink"));
                             userAgent = null;
-                            if (seed.hash.equals(sb.wordIndex.seedDB.mySeed().hash)) {
+                            if (seed.hash.equals(sb.webIndex.seedDB.mySeed().hash)) {
                                 final JakartaCommonsHttpClient httpClient = new JakartaCommonsHttpClient(10000, null, null);
                                 userAgent = httpClient.getUserAgent();
                                 location = HttpClient.generateLocation();
@@ -463,7 +463,7 @@ public class Network {
                             conCount++;
                         } // seed != null
                     } // while
-                    if (iAmActive) { sb.wordIndex.seedDB.removeMySeed(); }
+                    if (iAmActive) { sb.webIndex.seedDB.removeMySeed(); }
                     prop.putNum("table_list", conCount);
                     prop.put("table", 1);
                     prop.putNum("table_num", conCount);

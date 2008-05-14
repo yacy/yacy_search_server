@@ -54,7 +54,7 @@ public final class list {
         
         String otherPeerName = null;
         if (post.containsKey("iam")) {
-            yacySeed bla = sb.wordIndex.seedDB.get(post.get("iam", ""));
+            yacySeed bla = sb.webIndex.seedDB.get(post.get("iam", ""));
             if (bla != null) otherPeerName = bla.getName();
         }
         if (otherPeerName == null) otherPeerName = (String)header.get(httpHeader.CONNECTION_PROP_CLIENTIP);

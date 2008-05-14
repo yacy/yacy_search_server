@@ -87,14 +87,14 @@ public class MessageSend_p {
 
             // open an editor page for the message
             // first ask if the other peer is online, and also what kind of document it accepts
-            HashMap<String, String> result = yacyClient.permissionMessage(sb.wordIndex.seedDB, hash);
+            HashMap<String, String> result = yacyClient.permissionMessage(sb.webIndex.seedDB, hash);
             //System.out.println("DEBUG: permission request result = " + result.toString());
             String peerName;
             yacySeed targetPeer = null;
-            if (hash.equals(sb.wordIndex.seedDB.mySeed().hash)) {
-                peerName = sb.wordIndex.seedDB.mySeed().get(yacySeed.NAME,"nameless");
+            if (hash.equals(sb.webIndex.seedDB.mySeed().hash)) {
+                peerName = sb.webIndex.seedDB.mySeed().get(yacySeed.NAME,"nameless");
             } else {
-                targetPeer = sb.wordIndex.seedDB.getConnected(hash);
+                targetPeer = sb.webIndex.seedDB.getConnected(hash);
                 if (targetPeer == null)
                     peerName = "nameless";
                 else
@@ -151,7 +151,7 @@ public class MessageSend_p {
                 } catch (UnsupportedEncodingException e) {
                     mb = message.getBytes();
                 }
-                HashMap<String, String> result = yacyClient.postMessage(sb.wordIndex.seedDB, hash, subject, mb);
+                HashMap<String, String> result = yacyClient.postMessage(sb.webIndex.seedDB, hash, subject, mb);
 
                 //message has been sent
                 prop.put("mode_status_response", (String) result.get("response"));

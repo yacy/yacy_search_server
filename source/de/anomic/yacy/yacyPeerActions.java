@@ -81,7 +81,7 @@ public class yacyPeerActions {
         this.principalConnects = 0;
         this.disconnects = 0;
         this.bootstrapLoadTimeout = (int) switchboard.getConfigLong("bootstrapLoadTimeout", 6000);
-        this.dhtAction = new yacyDHTAction(sb.wordIndex.seedDB);
+        this.dhtAction = new yacyDHTAction(sb.webIndex.seedDB);
     }
     
     public void updateMySeed() {
@@ -109,10 +109,10 @@ public class yacyPeerActions {
         seedDB.mySeed().put(yacySeed.RSPEED, Double.toString(sb.totalQPM /*Math.max((float) requestcdiff, 0f) * 60f / Math.max((float) uptimediff, 1f)*/ ));
         
         seedDB.mySeed().put(yacySeed.UPTIME, Long.toString(uptime/60)); // the number of minutes that the peer is up in minutes/day (moving average MA30)
-        seedDB.mySeed().put(yacySeed.LCOUNT, Integer.toString(sb.wordIndex.countURL())); // the number of links that the peer has stored (LURL's)
+        seedDB.mySeed().put(yacySeed.LCOUNT, Integer.toString(sb.webIndex.countURL())); // the number of links that the peer has stored (LURL's)
         seedDB.mySeed().put(yacySeed.NCOUNT, Integer.toString(sb.crawlQueues.noticeURL.size())); // the number of links that the peer has noticed, but not loaded (NURL's)
         seedDB.mySeed().put(yacySeed.RCOUNT, Integer.toString(sb.crawlQueues.noticeURL.stackSize(NoticedURL.STACK_TYPE_LIMIT))); // the number of links that the peer provides for remote crawling (ZURL's)
-        seedDB.mySeed().put(yacySeed.ICOUNT, Integer.toString(sb.wordIndex.size())); // the minimum number of words that the peer has indexed (as it says)
+        seedDB.mySeed().put(yacySeed.ICOUNT, Integer.toString(sb.webIndex.size())); // the minimum number of words that the peer has indexed (as it says)
         seedDB.mySeed().put(yacySeed.SCOUNT, Integer.toString(seedDB.sizeConnected())); // the number of seeds that the peer has stored
         seedDB.mySeed().put(yacySeed.CCOUNT, Double.toString(((int) ((seedDB.sizeConnected() + seedDB.sizeDisconnected() + seedDB.sizePotential()) * 60.0 / (uptime + 1.01)) * 100) / 100.0)); // the number of clients that the peer connects (as connects/hour)
         seedDB.mySeed().put(yacySeed.VERSION, sb.getConfig("version", ""));
@@ -391,7 +391,7 @@ public class yacyPeerActions {
                 return;
             }
             try {
-                synchronized (sb.wordIndex.newsPool) {this.sb.wordIndex.newsPool.enqueueIncomingNews(record);}
+                synchronized (sb.webIndex.newsPool) {this.sb.webIndex.newsPool.enqueueIncomingNews(record);}
             } catch (IOException e) {
                 serverLog.logSevere("YACY", "processPeerArrival", e);
             }

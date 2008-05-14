@@ -77,7 +77,7 @@ public class ViewProfile {
         prop.put("display", display);
         String hash = (post == null) ? null : (String) post.get("hash");
         
-        if ((hash == null) || (sb.wordIndex.seedDB == null)) {
+        if ((hash == null) || (sb.webIndex.seedDB == null)) {
             // wrong access
             prop.put("success", "0");
             return prop;
@@ -101,20 +101,20 @@ public class ViewProfile {
             profile.putAll(p);
             prop.put("success", "3"); // everything ok
             prop.put("localremotepeer", "0");
-            prop.putHTML("success_peername", sb.wordIndex.seedDB.mySeed().getName());
-            prop.put("success_peerhash", sb.wordIndex.seedDB.mySeed().hash);
-            address = sb.wordIndex.seedDB.mySeed().getPublicAddress();
+            prop.putHTML("success_peername", sb.webIndex.seedDB.mySeed().getName());
+            prop.put("success_peerhash", sb.webIndex.seedDB.mySeed().hash);
+            address = sb.webIndex.seedDB.mySeed().getPublicAddress();
         } else {
             // read the profile from remote peer
-            yacySeed seed = sb.wordIndex.seedDB.getConnected(hash);
-            if (seed == null) seed = sb.wordIndex.seedDB.getDisconnected(hash);
+            yacySeed seed = sb.webIndex.seedDB.getConnected(hash);
+            if (seed == null) seed = sb.webIndex.seedDB.getDisconnected(hash);
             if (seed == null) {
                 prop.put("success", "1"); // peer unknown
             } else {
                 // process news if existent
                 try {
-                    yacyNewsRecord record = sb.wordIndex.newsPool.getByOriginator(yacyNewsPool.INCOMING_DB, yacyNewsPool.CATEGORY_PROFILE_UPDATE, seed.hash);
-                    if (record != null) sb.wordIndex.newsPool.moveOff(yacyNewsPool.INCOMING_DB, record.id());
+                    yacyNewsRecord record = sb.webIndex.newsPool.getByOriginator(yacyNewsPool.INCOMING_DB, yacyNewsPool.CATEGORY_PROFILE_UPDATE, seed.hash);
+                    if (record != null) sb.webIndex.newsPool.moveOff(yacyNewsPool.INCOMING_DB, record.id());
                 } catch (IOException e) {}
                 
                 // try to get the profile from remote peer

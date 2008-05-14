@@ -128,7 +128,7 @@ public final class search {
         
         // store accessing peer
         yacySeed remoteSeed = yacySeed.genRemoteSeed(oseed, key, true);
-        if (sb.wordIndex.seedDB == null) {
+        if (sb.webIndex.seedDB == null) {
             yacyCore.log.logSevere("yacy.search: seed cache not initialized");
         } else {
             yacyCore.peerActions.peerArrival(remoteSeed, true);
@@ -156,7 +156,7 @@ public final class search {
             yacyCore.log.logInfo("INIT HASH SEARCH (abstracts only): " + plasmaSearchQuery.anonymizedQueryHashes(theQuery.queryHashes) + " - " + theQuery.displayResults() + " links");
 
             long timer = System.currentTimeMillis();
-            Map<String, indexContainer>[] containers = sb.wordIndex.localSearchContainers(theQuery, plasmaSearchQuery.hashes2Set(urls));
+            Map<String, indexContainer>[] containers = sb.webIndex.localSearchContainers(theQuery, plasmaSearchQuery.hashes2Set(urls));
             serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(theQuery.id(true), plasmaSearchEvent.COLLECTION, containers[0].size(), System.currentTimeMillis() - timer));
             if (containers != null) {
                 Iterator<Map.Entry<String, indexContainer>> ci = containers[0].entrySet().iterator();
@@ -183,7 +183,7 @@ public final class search {
             RSSFeed.channels(RSSFeed.REMOTESEARCH).addMessage(new RSSMessage("Remote Search Request from " + remoteSeed.getName(), plasmaSearchQuery.anonymizedQueryHashes(theQuery.queryHashes), ""));
             
             // make event
-            theSearch = plasmaSearchEvent.getEvent(theQuery, rankingProfile, sb.wordIndex, sb.crawlResults, null, true); 
+            theSearch = plasmaSearchEvent.getEvent(theQuery, rankingProfile, sb.webIndex, sb.crawlResults, null, true); 
             
             // set statistic details of search result and find best result index set
             if (theSearch.getRankingResult().getLocalResourceSize() == 0) {
@@ -285,7 +285,7 @@ public final class search {
         prop.put("fwrec", ""); // peers that would have helped to construct this result (recommendations)
 
         // prepare search statistics
-        theQuery.remotepeer = sb.wordIndex.seedDB.lookupByIP(natLib.getInetAddress(client), true, false, false);
+        theQuery.remotepeer = sb.webIndex.seedDB.lookupByIP(natLib.getInetAddress(client), true, false, false);
         theQuery.resultcount = (theSearch == null) ? 0 : theSearch.getRankingResult().getLocalResourceSize() + theSearch.getRankingResult().getRemoteResourceSize();
         theQuery.searchtime = System.currentTimeMillis() - timestamp;
         theQuery.urlretrievaltime = (theSearch == null) ? 0 : theSearch.getURLRetrievalTime();
@@ -306,8 +306,8 @@ public final class search {
         prop.put("searchtime", System.currentTimeMillis() - timestamp);
 
         final int links = Integer.parseInt(prop.get("linkcount","0"));
-        sb.wordIndex.seedDB.mySeed().incSI(links);
-        sb.wordIndex.seedDB.mySeed().incSU(links);
+        sb.webIndex.seedDB.mySeed().incSI(links);
+        sb.webIndex.seedDB.mySeed().incSU(links);
         return prop;
     }
 

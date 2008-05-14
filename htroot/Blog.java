@@ -87,7 +87,7 @@ public class Blog {
 
         
         final boolean xml = ((String)header.get(httpHeader.CONNECTION_PROP_PATH)).endsWith(".xml");
-        final String address = sb.wordIndex.seedDB.mySeed().getPublicAddress();
+        final String address = sb.webIndex.seedDB.mySeed().getPublicAddress();
 
         if(hasRights) {
             prop.put("mode_admin", "1");
@@ -96,7 +96,7 @@ public class Blog {
         }
 
         if (post == null) {
-            prop.putHTML("peername", sb.wordIndex.seedDB.mySeed().getName());
+            prop.putHTML("peername", sb.webIndex.seedDB.mySeed().getName());
             prop.put("address", address);
             return putBlogDefault(prop, sb, address, 0, 10, hasRights, xml);
         }
@@ -123,10 +123,10 @@ public class Blog {
             StrAuthor = sb.blogDB.guessAuthor(ip);
 
             if (StrAuthor == null || StrAuthor.length() == 0) {
-                if (sb.wordIndex.seedDB.mySeed() == null) {
+                if (sb.webIndex.seedDB.mySeed() == null) {
                     StrAuthor = "anonymous";
                 } else {
-                    StrAuthor = sb.wordIndex.seedDB.mySeed().get("Name", "anonymous");
+                    StrAuthor = sb.webIndex.seedDB.mySeed().get("Name", "anonymous");
                 }
             }
         }
@@ -188,7 +188,7 @@ public class Blog {
             map.put("page", pagename);
             map.put("subject", StrSubject.replace(',', ' '));
             map.put("author", StrAuthor.replace(',', ' '));
-            sb.wordIndex.newsPool.publishMyNews(yacyNewsRecord.newRecord(sb.wordIndex.seedDB.mySeed(), yacyNewsPool.CATEGORY_BLOG_ADD, map));
+            sb.webIndex.newsPool.publishMyNews(yacyNewsRecord.newRecord(sb.webIndex.seedDB.mySeed(), yacyNewsPool.CATEGORY_BLOG_ADD, map));
         }
 
         page = sb.blogDB.readBlogEntry(pagename); //maybe "if(page == null)"
@@ -265,7 +265,7 @@ public class Blog {
             if(pagename.equals(DEFAULT_PAGE)) {
                 // XXX: where are "peername" and "address" used in the template?
                 // XXX: "clientname" is already set to the peername, no need for a new setting
-                prop.putHTML("peername", sb.wordIndex.seedDB.mySeed().getName(), xml);
+                prop.putHTML("peername", sb.webIndex.seedDB.mySeed().getName(), xml);
                 prop.put("address", address);
                 //index all entries
                 putBlogDefault(prop, sb, address, start, num, hasRights, xml);

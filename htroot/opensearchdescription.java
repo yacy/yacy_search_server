@@ -45,7 +45,7 @@ public class opensearchdescription {
         final serverObjects prop = new serverObjects();
         prop.putHTML("thisaddress", thisaddress, true);
         prop.putHTML("SearchPageGreeting", promoteSearchPageGreeting, true);
-        prop.putHTML("clientname", sb.wordIndex.seedDB.mySeed().getName(), true);
+        prop.putHTML("clientname", sb.webIndex.seedDB.mySeed().getName(), true);
         
         // return rewrite properties
         return prop;

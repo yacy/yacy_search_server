@@ -321,11 +321,11 @@ prop.putHTML("asd", "0");
 
 
 	        // List known hosts for BlackList retrieval
-	        if (sb.wordIndex.seedDB != null && sb.wordIndex.seedDB.sizeConnected() > 0) { // no nullpointer error
+	        if (sb.webIndex.seedDB != null && sb.webIndex.seedDB.sizeConnected() > 0) { // no nullpointer error
 	            int peerCount = 0;
 	            try {
 	                TreeMap<String, String> hostList = new TreeMap<String, String>();
-	                final Iterator<yacySeed> e = sb.wordIndex.seedDB.seedsConnected(true, false, null, (float) 0.0);
+	                final Iterator<yacySeed> e = sb.webIndex.seedDB.seedsConnected(true, false, null, (float) 0.0);
 	                while (e.hasNext()) {
 	                    yacySeed seed = (yacySeed) e.next();
 	                    if (seed != null) hostList.put(seed.get(yacySeed.NAME, "nameless"),seed.hash);

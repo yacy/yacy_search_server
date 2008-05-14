@@ -52,8 +52,8 @@ public class rct_p {
         if (post != null) {
             if (post.containsKey("retrieve")) {
                 String peerhash = post.get("peer", null);
-                yacySeed seed = (peerhash == null) ? null : sb.wordIndex.seedDB.getConnected(peerhash);
-                RSSFeed feed = (seed == null) ? null : yacyClient.queryRemoteCrawlURLs(sb.wordIndex.seedDB, seed, 10);
+                yacySeed seed = (peerhash == null) ? null : sb.webIndex.seedDB.getConnected(peerhash);
+                RSSFeed feed = (seed == null) ? null : yacyClient.queryRemoteCrawlURLs(sb.webIndex.seedDB, seed, 10);
                 if (feed != null) {
                     for (RSSMessage item: feed) {
                         //System.out.println("URL=" + item.getLink() + ", desc=" + item.getDescription() + ", pubDate=" + item.getPubDate());
@@ -76,7 +76,7 @@ public class rct_p {
                         if (urlRejectReason == null) {
                             // stack url
                             sb.getLog().logFinest("crawlOrder: stack: url='" + url + "'");
-                            String reasonString = sb.crawlStacker.stackCrawl(url, referrer, peerhash, "REMOTE-CRAWLING", loaddate, 0, sb.defaultRemoteProfile);
+                            String reasonString = sb.crawlStacker.stackCrawl(url, referrer, peerhash, "REMOTE-CRAWLING", loaddate, 0, sb.webIndex.defaultRemoteProfile);
 
                             if (reasonString == null) {
                                 // done
@@ -105,7 +105,7 @@ public class rct_p {
         // list known hosts
         yacySeed seed;
         int hc = 0;
-        if (sb.wordIndex.seedDB != null && sb.wordIndex.seedDB.sizeConnected() > 0) {
+        if (sb.webIndex.seedDB != null && sb.webIndex.seedDB.sizeConnected() > 0) {
             Iterator<yacySeed> e = yacyCore.peerActions.dhtAction.getProvidesRemoteCrawlURLs();
             while (e.hasNext()) {
                 seed = e.next();

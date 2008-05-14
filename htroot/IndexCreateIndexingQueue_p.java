@@ -47,10 +47,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import de.anomic.crawler.ZURL;
+import de.anomic.crawler.IndexingStack;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaSwitchboardQueue;
 import de.anomic.server.serverMemory;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -82,20 +82,20 @@ public class IndexCreateIndexingQueue_p {
             }
             if (post.containsKey("clearIndexingQueue")) {
                 try {
-                    synchronized (sb.sbQueue) {
-                        plasmaSwitchboardQueue.QueueEntry entry = null;
-                        while ((entry = sb.sbQueue.pop()) != null) {
+                    synchronized (sb.webIndex.queuePreStack) {
+                        IndexingStack.QueueEntry entry = null;
+                        while ((entry = sb.webIndex.queuePreStack.pop()) != null) {
                             if ((entry != null) && (entry.profile() != null) && (!(entry.profile().storeHTCache()))) {
                                 plasmaHTCache.deleteURLfromCache(entry.url());
                             }                            
                         }
-                        sb.sbQueue.clear(); // reset file to clean up content completely
+                        sb.webIndex.queuePreStack.clear(); // reset file to clean up content completely
                     } 
                 } catch (Exception e) {}
             } else if (post.containsKey("deleteEntry")) {
                 String urlHash = (String) post.get("deleteEntry");
                 try {
-                    sb.sbQueue.remove(urlHash);
+                    sb.webIndex.queuePreStack.remove(urlHash);
                 } catch (Exception e) {}
                 prop.put("LOCATION","");
                 return prop;
@@ -105,24 +105,24 @@ public class IndexCreateIndexingQueue_p {
         yacySeed initiator;
         boolean dark;
         
-        if ((sb.sbQueue.size() == 0) && (sb.sbQueue.getActiveQueueSize() == 0)) {
+        if ((sb.webIndex.queuePreStack.size() == 0) && (sb.webIndex.queuePreStack.getActiveQueueSize() == 0)) {
             prop.put("indexing-queue", "0"); //is empty
         } else {
             prop.put("indexing-queue", "1"); // there are entries in the queue or in process
             
             dark = true;
-            plasmaSwitchboardQueue.QueueEntry pcentry;
+            IndexingStack.QueueEntry pcentry;
             int entryCount = 0, totalCount = 0; 
             long totalSize = 0;
             
             // getting all entries that are currently in process
-            ArrayList<plasmaSwitchboardQueue.QueueEntry> entryList = new ArrayList<plasmaSwitchboardQueue.QueueEntry>();
-            entryList.addAll(sb.sbQueue.getActiveQueueEntries());
+            ArrayList<IndexingStack.QueueEntry> entryList = new ArrayList<IndexingStack.QueueEntry>();
+            entryList.addAll(sb.webIndex.queuePreStack.getActiveQueueEntries());
             int inProcessCount = entryList.size();
             
             // getting all enqueued entries
-            if ((sb.sbQueue.size() > 0)) {
-                Iterator<plasmaSwitchboardQueue.QueueEntry> i = sb.sbQueue.entryIterator(false);
+            if ((sb.webIndex.queuePreStack.size() > 0)) {
+                Iterator<IndexingStack.QueueEntry> i = sb.webIndex.queuePreStack.entryIterator(false);
                 while (i.hasNext()) entryList.add(i.next());
             }
                             
@@ -131,11 +131,11 @@ public class IndexCreateIndexingQueue_p {
             for (int i = 0; (i < count) && (entryCount < showLimit); i++) {
 
                 boolean inProcess = i < inProcessCount;
-                pcentry = (plasmaSwitchboardQueue.QueueEntry) entryList.get(i);
+                pcentry = (IndexingStack.QueueEntry) entryList.get(i);
                 if ((pcentry != null)&&(pcentry.url() != null)) {
                     long entrySize = pcentry.size();
                     totalSize += entrySize;
-                    initiator = sb.wordIndex.seedDB.getConnected(pcentry.initiator());
+                    initiator = sb.webIndex.seedDB.getConnected(pcentry.initiator());
                     prop.put("indexing-queue_list_"+entryCount+"_dark", inProcess ? "2" : (dark ? "1" : "0"));
                     prop.putHTML("indexing-queue_list_"+entryCount+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()));
                     prop.put("indexing-queue_list_"+entryCount+"_depth", pcentry.depth());
@@ -182,8 +182,8 @@ public class IndexCreateIndexingQueue_p {
                     
                     initiatorHash = entry.initiator();
                     executorHash = entry.executor();
-                    initiatorSeed = sb.wordIndex.seedDB.getConnected(initiatorHash);
-                    executorSeed = sb.wordIndex.seedDB.getConnected(executorHash);
+                    initiatorSeed = sb.webIndex.seedDB.getConnected(initiatorHash);
+                    executorSeed = sb.webIndex.seedDB.getConnected(executorHash);
                     prop.putHTML("rejected_list_"+j+"_initiator", ((initiatorSeed == null) ? "proxy" : initiatorSeed.getName()));
                     prop.putHTML("rejected_list_"+j+"_executor", ((executorSeed == null) ? "proxy" : executorSeed.getName()));
                     prop.putHTML("rejected_list_"+j+"_url", url.toNormalform(false, true));

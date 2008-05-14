@@ -88,7 +88,7 @@ public final class transferRWI {
         boolean blockBlacklist = sb.getConfig("indexReceiveBlockBlacklist", "false").equals("true");
         boolean checkLimit    = sb.getConfigBool("indexDistribution.transferRWIReceiptLimitEnabled", true);
         final long cachelimit = sb.getConfigLong("indexDistribution.dhtReceiptLimit", 10000);
-        final yacySeed otherPeer = sb.wordIndex.seedDB.get(iam);
+        final yacySeed otherPeer = sb.webIndex.seedDB.get(iam);
         final String otherPeerName = iam + ":" + ((otherPeer == null) ? "NULL" : (otherPeer.getName() + "/" + otherPeer.getVersion()));                
         
         // response values
@@ -96,8 +96,8 @@ public final class transferRWI {
         StringBuffer unknownURLs = new StringBuffer();
         int          pause       = 10000;
         
-        if ((youare == null) || (!youare.equals(sb.wordIndex.seedDB.mySeed().hash))) {
-        	sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". Wrong target. Wanted peer=" + youare + ", iam=" + sb.wordIndex.seedDB.mySeed().hash);
+        if ((youare == null) || (!youare.equals(sb.webIndex.seedDB.mySeed().hash))) {
+        	sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". Wrong target. Wanted peer=" + youare + ", iam=" + sb.webIndex.seedDB.mySeed().hash);
             result = "wrong_target";
             pause = 0;
         } else if ((!granted) || (sb.isRobinsonMode())) {
@@ -105,9 +105,9 @@ public final class transferRWI {
             sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". Not granted.");
             result = "not_granted";
             pause = 0;
-        } else if (checkLimit && sb.wordIndex.dhtInCacheSize() > cachelimit) {
+        } else if (checkLimit && sb.webIndex.dhtInCacheSize() > cachelimit) {
             // we are too busy to receive indexes
-            sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". We are too busy (buffersize=" + sb.wordIndex.dhtInCacheSize() + ").");
+            sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". We are too busy (buffersize=" + sb.webIndex.dhtInCacheSize() + ").");
             granted = false; // don't accept more words if there are too many words to flush
             result = "busy";
             pause = 60000;
@@ -168,12 +168,12 @@ public final class transferRWI {
                 }
                 
                 // learn entry
-                sb.wordIndex.addEntry(wordHash, iEntry, System.currentTimeMillis(), true);
+                sb.webIndex.addEntry(wordHash, iEntry, System.currentTimeMillis(), true);
                 serverCore.checkInterruption();
 
                 // check if we need to ask for the corresponding URL
                 if (!(knownURL.contains(urlHash)||unknownURL.contains(urlHash)))  try {
-                    if (sb.wordIndex.existsURL(urlHash)) {
+                    if (sb.webIndex.existsURL(urlHash)) {
                         knownURL.add(urlHash);
                     } else {
                         unknownURL.add(urlHash);
@@ -186,7 +186,7 @@ public final class transferRWI {
                 }
                 received++;
             }
-            sb.wordIndex.seedDB.mySeed().incRI(received);
+            sb.webIndex.seedDB.mySeed().incRI(received);
 
             // finally compose the unknownURL hash list
             final Iterator<String> it = unknownURL.iterator();  
@@ -198,14 +198,14 @@ public final class transferRWI {
             if ((wordhashes.length == 0) || (received == 0)) {
                 sb.getLog().logInfo("Received 0 RWIs from " + otherPeerName + ", processed in " + (System.currentTimeMillis() - startProcess) + " milliseconds, requesting " + unknownURL.size() + " URLs, blocked " + blocked + " RWIs");
             } else {
-                final double avdist = (yacyDHTAction.dhtDistance(sb.wordIndex.seedDB.mySeed().hash, wordhashes[0]) + yacyDHTAction.dhtDistance(sb.wordIndex.seedDB.mySeed().hash, wordhashes[received - 1])) / 2.0;
+                final double avdist = (yacyDHTAction.dhtDistance(sb.webIndex.seedDB.mySeed().hash, wordhashes[0]) + yacyDHTAction.dhtDistance(sb.webIndex.seedDB.mySeed().hash, wordhashes[received - 1])) / 2.0;
                 sb.getLog().logInfo("Received " + received + " Entries " + wordc + " Words [" + wordhashes[0] + " .. " + wordhashes[received - 1] + "]/" + avdist + " from " + otherPeerName + ", processed in " + (System.currentTimeMillis() - startProcess) + " milliseconds, requesting " + unknownURL.size() + "/" + receivedURL + " URLs, blocked " + blocked + " RWIs");
                 RSSFeed.channels(RSSFeed.INDEXRECEIVE).addMessage(new RSSMessage("Received " + received + " RWIs [" + wordhashes[0] + " .. " + wordhashes[received - 1] + "]/" + avdist + " from " + otherPeerName + ", requesting " + unknownURL.size() + " URLs, blocked " + blocked, "", ""));
             }
             result = "ok";
             
             if (checkLimit) {
-                pause = (sb.wordIndex.dhtInCacheSize() < 500) ? 0 : sb.wordIndex.dhtInCacheSize(); // estimation of necessary pause time
+                pause = (sb.webIndex.dhtInCacheSize() < 500) ? 0 : sb.webIndex.dhtInCacheSize(); // estimation of necessary pause time
             }
         }
 

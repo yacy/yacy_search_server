@@ -62,7 +62,7 @@ public class IndexCleaner_p {
             //prop.putHTML("bla", "post!=null");
             if (post.get("action").equals("ustart")) {
                 if (urldbCleanerThread==null || !urldbCleanerThread.isAlive()) {
-                    urldbCleanerThread = sb.wordIndex.getURLCleaner(plasmaSwitchboard.urlBlacklist);
+                    urldbCleanerThread = sb.webIndex.getURLCleaner(plasmaSwitchboard.urlBlacklist);
                     urldbCleanerThread.start();
                 }
                 else {
@@ -77,7 +77,7 @@ public class IndexCleaner_p {
             }
             else if (post.get("action").equals("rstart")) {
                 if (indexCleanerThread==null || !indexCleanerThread.isAlive()) {
-                    indexCleanerThread = sb.wordIndex.getReferenceCleaner(post.get("wordHash","AAAAAAAAAAAA"));
+                    indexCleanerThread = sb.webIndex.getReferenceCleaner(post.get("wordHash","AAAAAAAAAAAA"));
                     indexCleanerThread.start();
                 }
                 else {
@@ -96,7 +96,7 @@ public class IndexCleaner_p {
         //prop.put("bla", "post==null");
         if (urldbCleanerThread!=null) {
             prop.put("urldb", "1");
-            prop.putNum("urldb_percentUrls", ((double)urldbCleanerThread.totalSearchedUrls/sb.wordIndex.countURL())*100);
+            prop.putNum("urldb_percentUrls", ((double)urldbCleanerThread.totalSearchedUrls/sb.webIndex.countURL())*100);
             prop.putNum("urldb_blacklisted", urldbCleanerThread.blacklistedUrls);
             prop.putNum("urldb_total", urldbCleanerThread.totalSearchedUrls);
             prop.putHTML("urldb_lastBlacklistedUrl", urldbCleanerThread.lastBlacklistedUrl);
@@ -113,7 +113,7 @@ public class IndexCleaner_p {
             prop.put("rwidb_threadAlive", indexCleanerThread.isAlive() + "");
             prop.put("rwidb_threadToString", indexCleanerThread.toString());
             prop.putNum("rwidb_RWIcountstart", indexCleanerThread.rwiCountAtStart);
-            prop.putNum("rwidb_RWIcountnow", sb.wordIndex.size());
+            prop.putNum("rwidb_RWIcountnow", sb.webIndex.size());
             prop.put("rwidb_wordHashNow", indexCleanerThread.wordHashNow);
             prop.put("rwidb_lastWordHash", indexCleanerThread.lastWordHash);
             prop.putNum("rwidb_lastDeletionCounter", indexCleanerThread.lastDeletionCounter);

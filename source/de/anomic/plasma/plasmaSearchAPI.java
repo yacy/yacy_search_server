@@ -86,7 +86,7 @@ public class plasmaSearchAPI {
 
     public static plasmaSearchRankingProcess genSearchresult(serverObjects prop, plasmaSwitchboard sb, String keyhash, kelondroBitfield filter) {
         plasmaSearchQuery query = new plasmaSearchQuery(keyhash, -1, sb.getRanking(), filter);
-        plasmaSearchRankingProcess ranked = new plasmaSearchRankingProcess(sb.wordIndex, query, Integer.MAX_VALUE, 1);
+        plasmaSearchRankingProcess ranked = new plasmaSearchRankingProcess(sb.webIndex, query, Integer.MAX_VALUE, 1);
         ranked.execQuery();
         
         if (ranked.filteredCount() == 0) {

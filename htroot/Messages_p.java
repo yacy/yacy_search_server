@@ -74,18 +74,18 @@ public class Messages_p {
         serverObjects prop = new serverObjects();
 
         // set peer address / name
-        final String peerAddress = sb.wordIndex.seedDB.mySeed().getPublicAddress();
-        final String peerName = sb.wordIndex.seedDB.mySeed().getName();
+        final String peerAddress = sb.webIndex.seedDB.mySeed().getPublicAddress();
+        final String peerName = sb.webIndex.seedDB.mySeed().getName();
         prop.put("peerAddress", peerAddress);
         prop.putHTML("peerName", peerName, true);
 
         // List known hosts for message sending (from Blacklist_p.java)
-        if (sb.wordIndex.seedDB != null && sb.wordIndex.seedDB.sizeConnected() > 0) {
+        if (sb.webIndex.seedDB != null && sb.webIndex.seedDB.sizeConnected() > 0) {
             prop.put("peersKnown", "1");
             int peerCount = 0;
             try {
                 TreeMap<String, String> hostList = new TreeMap<String, String>();
-                final Iterator<yacySeed> e = sb.wordIndex.seedDB.seedsConnected(true, false, null, (float) 0.0);
+                final Iterator<yacySeed> e = sb.webIndex.seedDB.seedsConnected(true, false, null, (float) 0.0);
                 while (e.hasNext()) {
                     yacySeed seed = e.next();
                     if (seed != null) hostList.put(seed.get(yacySeed.NAME, "nameless"),seed.hash);

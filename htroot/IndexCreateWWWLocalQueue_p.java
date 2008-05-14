@@ -56,6 +56,7 @@ import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.NoticedURL;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacySeed;
@@ -107,20 +108,20 @@ public class IndexCreateWWWLocalQueue_p {
                         if (option == PROFILE) {
                             // search and delete the crawl profile (_much_ faster, independant of queue size)
                             // XXX: what to do about the annoying LOST PROFILE messages in the log?
-                            Iterator<CrawlProfile.entry> it = sb.profilesActiveCrawls.profiles(true);
+                            Iterator<CrawlProfile.entry> it = sb.webIndex.profilesActiveCrawls.profiles(true);
                             CrawlProfile.entry entry;
                             while (it.hasNext()) {
                                 entry = it.next();
                                 final String name = entry.name();
-                                if (name.equals(plasmaSwitchboard.CRAWL_PROFILE_PROXY) ||
-                                        name.equals(plasmaSwitchboard.CRAWL_PROFILE_REMOTE) ||
-                                        name.equals(plasmaSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_TEXT)  ||
-                                        name.equals(plasmaSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT)  ||
-                                        name.equals(plasmaSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA) ||
-                                        name.equals(plasmaSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA))
+                                if (name.equals(plasmaWordIndex.CRAWL_PROFILE_PROXY) ||
+                                        name.equals(plasmaWordIndex.CRAWL_PROFILE_REMOTE) ||
+                                        name.equals(plasmaWordIndex.CRAWL_PROFILE_SNIPPET_LOCAL_TEXT)  ||
+                                        name.equals(plasmaWordIndex.CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT)  ||
+                                        name.equals(plasmaWordIndex.CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA) ||
+                                        name.equals(plasmaWordIndex.CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA))
                                     continue;
                                 if (compiledPattern.matcher(name).find()) {
-                                    sb.profilesActiveCrawls.removeEntry(entry.handle());
+                                    sb.webIndex.profilesActiveCrawls.removeEntry(entry.handle());
                                 }
                             }
                         } else {
@@ -181,9 +182,9 @@ public class IndexCreateWWWLocalQueue_p {
             for (i = 0; (i < crawlerList.length) && (showNum < showLimit); i++) {
                 urle = crawlerList[i];
                 if ((urle != null)&&(urle.url()!=null)) {
-                    initiator = sb.wordIndex.seedDB.getConnected(urle.initiator());
+                    initiator = sb.webIndex.seedDB.getConnected(urle.initiator());
                     profileHandle = urle.profileHandle();
-                    profileEntry = (profileHandle == null) ? null : sb.profilesActiveCrawls.getEntry(profileHandle);
+                    profileEntry = (profileHandle == null) ? null : sb.webIndex.profilesActiveCrawls.getEntry(profileHandle);
                     prop.put("crawler-queue_list_"+showNum+"_dark", dark ? "1" : "0");
                     prop.putHTML("crawler-queue_list_"+showNum+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()) );
                     prop.put("crawler-queue_list_"+showNum+"_profile", ((profileEntry == null) ? "unknown" : profileEntry.name()));

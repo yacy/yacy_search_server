@@ -213,8 +213,7 @@ public final class indexContainerHeap {
     }
     
     public int size() {
-        assert this.cache != null;
-        return this.cache.size();
+        return (this.cache == null) ? 0 : this.cache.size();
     }
     
     /**

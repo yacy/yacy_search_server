@@ -425,7 +425,7 @@ public final class httpdProxyHandler {
                     //cachedResponseHeader,          // response headers
                     cachedResInfo,
                     null,                            // initiator
-                    switchboard.defaultProxyProfile  // profile
+                    switchboard.webIndex.defaultProxyProfile  // profile
             );
             if (yacyCore.getOnlineMode() == 0) {
             	if (cacheExists) {
@@ -549,7 +549,7 @@ public final class httpdProxyHandler {
                     //res.responseHeader,
                     resInfo,
                     null, 
-                    switchboard.defaultProxyProfile
+                    switchboard.webIndex.defaultProxyProfile
             );
 
             // handle file types and make (possibly transforming) output stream

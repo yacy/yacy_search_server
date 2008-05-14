@@ -164,8 +164,8 @@ public class CrawlQueues {
             //log.logDebug("CoreCrawl: queue is empty");
             return false;
         }
-        if (sb.sbQueue.size() >= (int) sb.getConfigLong(plasmaSwitchboard.INDEXER_SLOTS, 30)) {
-            if (this.log.isFine()) log.logFine("CoreCrawl: too many processes in indexing queue, dismissed (" + "sbQueueSize=" + sb.sbQueue.size() + ")");
+        if (sb.webIndex.queuePreStack.size() >= (int) sb.getConfigLong(plasmaSwitchboard.INDEXER_SLOTS, 30)) {
+            if (this.log.isFine()) log.logFine("CoreCrawl: too many processes in indexing queue, dismissed (" + "sbQueueSize=" + sb.webIndex.queuePreStack.size() + ")");
             return false;
         }
         if (this.size() >= sb.getConfigLong(plasmaSwitchboard.CRAWLER_THREADS_ACTIVE_MAX, 10)) {
@@ -201,7 +201,7 @@ public class CrawlQueues {
                     log.logSevere(stats + ": NULL PROFILE HANDLE '" + urlEntry.profileHandle() + "' for URL " + urlEntry.url());
                     return true;
                 }
-                CrawlProfile.entry profile = sb.profilesActiveCrawls.getEntry(profileHandle);
+                CrawlProfile.entry profile = sb.webIndex.profilesActiveCrawls.getEntry(profileHandle);
                 if (profile == null) {
                     log.logWarning(stats + ": LOST PROFILE HANDLE '" + urlEntry.profileHandle() + "' for URL " + urlEntry.url());
                     return true;
@@ -216,7 +216,7 @@ public class CrawlQueues {
                 }
                 
                 if (this.log.isFine()) log.logFine("LOCALCRAWL: URL=" + urlEntry.url() + ", initiator=" + urlEntry.initiator() + ", crawlOrder=" + ((profile.remoteIndexing()) ? "true" : "false") + ", depth=" + urlEntry.depth() + ", crawlDepth=" + profile.generalDepth() + ", filter=" + profile.generalFilter()
-                        + ", permission=" + ((sb.wordIndex.seedDB == null) ? "undefined" : (((sb.wordIndex.seedDB.mySeed().isSenior()) || (sb.wordIndex.seedDB.mySeed().isPrincipal())) ? "true" : "false")));
+                        + ", permission=" + ((sb.webIndex.seedDB == null) ? "undefined" : (((sb.webIndex.seedDB.mySeed().isSenior()) || (sb.webIndex.seedDB.mySeed().isPrincipal())) ? "true" : "false")));
                 
                 processLocalCrawling(urlEntry, stats);
                 return true;
@@ -230,19 +230,19 @@ public class CrawlQueues {
     
     public boolean remoteCrawlLoaderJob() {
         // check if we are allowed to crawl urls provided by other peers
-        if (!sb.wordIndex.seedDB.mySeed().getFlagAcceptRemoteCrawl()) {
+        if (!sb.webIndex.seedDB.mySeed().getFlagAcceptRemoteCrawl()) {
             //this.log.logInfo("remoteCrawlLoaderJob: not done, we are not allowed to do that");
             return false;
         }
         
         // check if we are a senior peer
-        if (!sb.wordIndex.seedDB.mySeed().isActive()) {
+        if (!sb.webIndex.seedDB.mySeed().isActive()) {
             //this.log.logInfo("remoteCrawlLoaderJob: not done, this should be a senior or principal peer");
             return false;
         }
         
-        if (sb.sbQueue.size() >= (int) sb.getConfigLong(plasmaSwitchboard.INDEXER_SLOTS, 30)) {
-            if (this.log.isFine()) log.logFine("remoteCrawlLoaderJob: too many processes in indexing queue, dismissed (" + "sbQueueSize=" + sb.sbQueue.size() + ")");
+        if (sb.webIndex.queuePreStack.size() >= (int) sb.getConfigLong(plasmaSwitchboard.INDEXER_SLOTS, 30)) {
+            if (this.log.isFine()) log.logFine("remoteCrawlLoaderJob: too many processes in indexing queue, dismissed (" + "sbQueueSize=" + sb.webIndex.queuePreStack.size() + ")");
             return false;
         }
         
@@ -262,7 +262,7 @@ public class CrawlQueues {
             (coreCrawlJobSize() == 0) &&
             (remoteTriggeredCrawlJobSize() == 0) &&
             (sb.queueSize() < 10)) {
-            if (sb.wordIndex.seedDB != null && sb.wordIndex.seedDB.sizeConnected() > 0) {
+            if (sb.webIndex.seedDB != null && sb.webIndex.seedDB.sizeConnected() > 0) {
                 Iterator<yacySeed> e = yacyCore.peerActions.dhtAction.getProvidesRemoteCrawlURLs();
                 while (e.hasNext()) {
                     seed = e.next();
@@ -281,7 +281,7 @@ public class CrawlQueues {
         while ((seed == null) && (remoteCrawlProviderHashes.size() > 0)) {
             hash = (String) remoteCrawlProviderHashes.remove(remoteCrawlProviderHashes.size() - 1);
             if (hash == null) continue;
-            seed = sb.wordIndex.seedDB.get(hash);
+            seed = sb.webIndex.seedDB.get(hash);
             if (seed == null) continue;
             // check if the peer is inside our cluster
             if ((sb.isRobinsonMode()) && (!sb.isInMyCluster(seed))) {
@@ -292,7 +292,7 @@ public class CrawlQueues {
         if (seed == null) return false;
         
         // we know a peer which should provide remote crawl entries. load them now.
-        RSSFeed feed = (seed == null) ? null : yacyClient.queryRemoteCrawlURLs(sb.wordIndex.seedDB, seed, 20);
+        RSSFeed feed = (seed == null) ? null : yacyClient.queryRemoteCrawlURLs(sb.webIndex.seedDB, seed, 20);
         if (feed == null) return true;
         // parse the rss
         yacyURL url, referrer;
@@ -320,7 +320,7 @@ public class CrawlQueues {
             if (urlRejectReason == null) {
                 // stack url
                 sb.getLog().logFinest("crawlOrder: stack: url='" + url + "'");
-                String reasonString = sb.crawlStacker.stackCrawl(url, referrer, hash, item.getDescription(), loaddate, 0, sb.defaultRemoteProfile);
+                String reasonString = sb.crawlStacker.stackCrawl(url, referrer, hash, item.getDescription(), loaddate, 0, sb.webIndex.defaultRemoteProfile);
 
                 if (reasonString == null) {
                     // done
@@ -355,8 +355,8 @@ public class CrawlQueues {
             //log.logDebug("GlobalCrawl: queue is empty");
             return false;
         }
-        if (sb.sbQueue.size() >= (int) sb.getConfigLong(plasmaSwitchboard.INDEXER_SLOTS, 30)) {
-            if (this.log.isFine()) log.logFine("GlobalCrawl: too many processes in indexing queue, dismissed (" + "sbQueueSize=" + sb.sbQueue.size() + ")");
+        if (sb.webIndex.queuePreStack.size() >= (int) sb.getConfigLong(plasmaSwitchboard.INDEXER_SLOTS, 30)) {
+            if (this.log.isFine()) log.logFine("GlobalCrawl: too many processes in indexing queue, dismissed (" + "sbQueueSize=" + sb.webIndex.queuePreStack.size() + ")");
             return false;
         }
         if (this.size() >= sb.getConfigLong(plasmaSwitchboard.CRAWLER_THREADS_ACTIVE_MAX, 10)) {
@@ -388,7 +388,7 @@ public class CrawlQueues {
             // System.out.println("DEBUG plasmaSwitchboard.processCrawling:
             // profileHandle = " + profileHandle + ", urlEntry.url = " +
             // urlEntry.url());
-            CrawlProfile.entry profile = sb.profilesActiveCrawls.getEntry(profileHandle);
+            CrawlProfile.entry profile = sb.webIndex.profilesActiveCrawls.getEntry(profileHandle);
 
             if (profile == null) {
                 log.logWarning(stats + ": LOST PROFILE HANDLE '" + urlEntry.profileHandle() + "' for URL " + urlEntry.url());
@@ -404,7 +404,7 @@ public class CrawlQueues {
             }
             
             if (this.log.isFine()) log.logFine("plasmaSwitchboard.remoteTriggeredCrawlJob: url=" + urlEntry.url() + ", initiator=" + urlEntry.initiator() + ", crawlOrder=" + ((profile.remoteIndexing()) ? "true" : "false") + ", depth=" + urlEntry.depth() + ", crawlDepth=" + profile.generalDepth() + ", filter="
-                        + profile.generalFilter() + ", permission=" + ((sb.wordIndex.seedDB == null) ? "undefined" : (((sb.wordIndex.seedDB.mySeed().isSenior()) || (sb.wordIndex.seedDB.mySeed().isPrincipal())) ? "true" : "false")));
+                        + profile.generalFilter() + ", permission=" + ((sb.webIndex.seedDB == null) ? "undefined" : (((sb.webIndex.seedDB.mySeed().isSenior()) || (sb.webIndex.seedDB.mySeed().isPrincipal())) ? "true" : "false")));
 
             processLocalCrawling(urlEntry, stats);
             return true;
@@ -436,19 +436,19 @@ public class CrawlQueues {
     ) {
         
         CrawlEntry centry = new CrawlEntry(
-                sb.wordIndex.seedDB.mySeed().hash, 
+                sb.webIndex.seedDB.mySeed().hash, 
                 url, 
                 "", 
                 "", 
                 new Date(),
                 (forText) ?
                     ((global) ?
-                        sb.defaultTextSnippetGlobalProfile.handle() :
-                        sb.defaultTextSnippetLocalProfile.handle())
+                        sb.webIndex.defaultTextSnippetGlobalProfile.handle() :
+                        sb.webIndex.defaultTextSnippetLocalProfile.handle())
                     :
                     ((global) ?
-                        sb.defaultMediaSnippetGlobalProfile.handle() :
-                        sb.defaultMediaSnippetLocalProfile.handle()), // crawl profile
+                        sb.webIndex.defaultMediaSnippetGlobalProfile.handle() :
+                        sb.webIndex.defaultMediaSnippetLocalProfile.handle()), // crawl profile
                 0, 
                 0, 
                 0);
@@ -483,7 +483,7 @@ public class CrawlQueues {
                     if (log.isFine()) log.logFine("Crawling of URL '" + entry.url().toString() + "' disallowed by robots.txt.");
                     ZURL.Entry eentry = errorURL.newEntry(
                             this.entry,
-                            sb.wordIndex.seedDB.mySeed().hash,
+                            sb.webIndex.seedDB.mySeed().hash,
                             new Date(),
                             1,
                             "denied by robots.txt");
@@ -496,7 +496,7 @@ public class CrawlQueues {
                     if (result != null) {
                         ZURL.Entry eentry = errorURL.newEntry(
                                 this.entry,
-                                sb.wordIndex.seedDB.mySeed().hash,
+                                sb.webIndex.seedDB.mySeed().hash,
                                 new Date(),
                                 1,
                                 "cannot load: " + result);
@@ -509,7 +509,7 @@ public class CrawlQueues {
             } catch (Exception e) {
                 ZURL.Entry eentry = errorURL.newEntry(
                         this.entry,
-                        sb.wordIndex.seedDB.mySeed().hash,
+                        sb.webIndex.seedDB.mySeed().hash,
                         new Date(),
                         1,
                         e.getMessage() + " - in worker");

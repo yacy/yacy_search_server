@@ -84,14 +84,14 @@ public class Banner {
         double myqph   = 0;
         String type    = "";
         String network = env.getConfig("network.unit.name", "unspecified").toUpperCase();
-        int    peers   = sb.wordIndex.seedDB.sizeConnected() + 1; // the '+ 1': the own peer is not included in sizeConnected()
-        long   nlinks  = sb.wordIndex.seedDB.countActiveURL();
-        long   nwords  = sb.wordIndex.seedDB.countActiveRWI();
-        double nqpm    = sb.wordIndex.seedDB.countActiveQPM();
-        long   nppm    = sb.wordIndex.seedDB.countActivePPM();
+        int    peers   = sb.webIndex.seedDB.sizeConnected() + 1; // the '+ 1': the own peer is not included in sizeConnected()
+        long   nlinks  = sb.webIndex.seedDB.countActiveURL();
+        long   nwords  = sb.webIndex.seedDB.countActiveRWI();
+        double nqpm    = sb.webIndex.seedDB.countActiveQPM();
+        long   nppm    = sb.webIndex.seedDB.countActivePPM();
         double nqph    = 0;
 
-        yacySeed seed = sb.wordIndex.seedDB.mySeed();
+        yacySeed seed = sb.webIndex.seedDB.mySeed();
         if (seed != null){
             name    = seed.get(yacySeed.NAME, "-").toUpperCase();
             links   = Long.parseLong(seed.get(yacySeed.LCOUNT, "0"));
@@ -99,19 +99,19 @@ public class Banner {
             myppm   = seed.getPPM();
             myqph   = 60d * seed.getQPM();
 
-            if (sb.wordIndex.seedDB.mySeed().isVirgin()) {
+            if (sb.webIndex.seedDB.mySeed().isVirgin()) {
                 type = "VIRGIN";
                 nqph = Math.round(6000d * nqpm) / 100d;
-            } else if(sb.wordIndex.seedDB.mySeed().isJunior()) {
+            } else if(sb.webIndex.seedDB.mySeed().isJunior()) {
                 type = "JUNIOR";
                 nqph = Math.round(6000d * nqpm) / 100d;
-            } else if(sb.wordIndex.seedDB.mySeed().isSenior()) {
+            } else if(sb.webIndex.seedDB.mySeed().isSenior()) {
                 type = "SENIOR";
                 nlinks = nlinks + links;
                 nwords = nwords + words;
                 nqph = Math.round(6000d * nqpm + 100d * myqph) / 100d;
                 nppm = nppm + myppm;
-            } else if(sb.wordIndex.seedDB.mySeed().isPrincipal()) {
+            } else if(sb.webIndex.seedDB.mySeed().isPrincipal()) {
                 type = "PRINCIPAL";
                 nlinks = nlinks + links;
                 nwords = nwords + words;

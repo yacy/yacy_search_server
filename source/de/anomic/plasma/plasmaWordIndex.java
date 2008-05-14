@@ -37,6 +37,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import de.anomic.crawler.CrawlProfile;
+import de.anomic.crawler.IndexingStack;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.index.indexCollectionRI;
 import de.anomic.index.indexContainer;
@@ -53,6 +55,7 @@ import de.anomic.index.indexRepositoryReference.Export;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroByteOrder;
 import de.anomic.kelondro.kelondroCloneableIterator;
+import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMergeIterator;
 import de.anomic.kelondro.kelondroOrder;
 import de.anomic.kelondro.kelondroRotateIterator;
@@ -74,14 +77,32 @@ public final class plasmaWordIndex implements indexRI {
     public  static final int  lowcachedivisor =  1200;
     public  static final int  maxCollectionPartition = 7;       // should be 7
     
+
+    public static final String CRAWL_PROFILE_PROXY                 = "proxy";
+    public static final String CRAWL_PROFILE_REMOTE                = "remote";
+    public static final String CRAWL_PROFILE_SNIPPET_LOCAL_TEXT    = "snippetLocalText";
+    public static final String CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT   = "snippetGlobalText";
+    public static final String CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA   = "snippetLocalMedia";
+    public static final String CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA  = "snippetGlobalMedia";
+    public static final String DBFILE_ACTIVE_CRAWL_PROFILES        = "crawlProfilesActive.db";
+    public static final String DBFILE_PASSIVE_CRAWL_PROFILES       = "crawlProfilesPassive.db";
+    
+    
     private final kelondroByteOrder        indexOrder = kelondroBase64Order.enhancedCoder;
     private final indexRAMRI               dhtOutCache, dhtInCache;
     private final indexCollectionRI        collections;          // new database structure to replace AssortmentCluster and FileCluster
     private       serverLog                log;
-    final         indexRepositoryReference referenceURL;
+    private       indexRepositoryReference referenceURL;
     public        yacySeedDB               seedDB;
     public        yacyNewsPool             newsPool;
     private       File                     primaryRoot, secondaryRoot;
+    public        IndexingStack        queuePreStack;
+    public        CrawlProfile             profilesActiveCrawls, profilesPassiveCrawls;
+    public  CrawlProfile.entry             defaultProxyProfile;
+    public  CrawlProfile.entry             defaultRemoteProfile;
+    public  CrawlProfile.entry             defaultTextSnippetLocalProfile, defaultTextSnippetGlobalProfile;
+    public  CrawlProfile.entry             defaultMediaSnippetLocalProfile, defaultMediaSnippetGlobalProfile;
+    private File                           queuesRoot;
     
     public plasmaWordIndex(String networkName, serverLog log, File indexPrimaryRoot, File indexSecondaryRoot) {
         this.log = log;
@@ -117,6 +138,41 @@ public final class plasmaWordIndex implements indexRI {
         // create LURL-db
         referenceURL = new indexRepositoryReference(this.secondaryRoot);
         
+        // make crawl profiles database and default profiles
+        this.queuesRoot = new File(this.primaryRoot, "QUEUES");
+        this.queuesRoot.mkdirs();
+        this.log.logConfig("Initializing Crawl Profiles");
+        File profilesActiveFile = new File(queuesRoot, DBFILE_ACTIVE_CRAWL_PROFILES);
+        if (!profilesActiveFile.exists()) {
+            // migrate old file
+            File oldFile = new File(new File(queuesRoot.getParentFile().getParentFile().getParentFile(), "PLASMADB"), "crawlProfilesActive1.db");
+            if (oldFile.exists()) oldFile.renameTo(profilesActiveFile);
+        }
+        this.profilesActiveCrawls = new CrawlProfile(profilesActiveFile);
+        initActiveCrawlProfiles();
+        log.logConfig("Loaded active crawl profiles from file " + profilesActiveFile.getName() +
+                ", " + this.profilesActiveCrawls.size() + " entries" +
+                ", " + profilesActiveFile.length()/1024);
+        File profilesPassiveFile = new File(queuesRoot, DBFILE_PASSIVE_CRAWL_PROFILES);
+        if (!profilesPassiveFile.exists()) {
+            // migrate old file
+            File oldFile = new File(new File(queuesRoot.getParentFile().getParentFile().getParentFile(), "PLASMADB"), "crawlProfilesPassive1.db");
+            if (oldFile.exists()) oldFile.renameTo(profilesPassiveFile);
+        }
+        this.profilesPassiveCrawls = new CrawlProfile(profilesPassiveFile);
+        log.logConfig("Loaded passive crawl profiles from file " + profilesPassiveFile.getName() +
+                ", " + this.profilesPassiveCrawls.size() + " entries" +
+                ", " + profilesPassiveFile.length()/1024);
+        
+        // init queues
+        File preStackFile = new File(queuesRoot, "urlNoticePreStack");
+        if (!preStackFile.exists()) {
+            // migrate old file
+            File oldFile = new File(new File(queuesRoot.getParentFile().getParentFile().getParentFile(), "PLASMADB"), "switchboardQueue.stack");
+            if (oldFile.exists()) oldFile.renameTo(preStackFile);
+        }
+        this.queuePreStack = new IndexingStack(this, preStackFile, this.profilesActiveCrawls);
+        
         // create or init seed cache
         File networkRoot = new File(this.primaryRoot, "NETWORK");
         networkRoot.mkdirs();
@@ -132,6 +188,114 @@ public final class plasmaWordIndex implements indexRI {
 
         // create or init news database
         newsPool = new yacyNewsPool(networkRoot);
+    }
+    
+
+    private void initActiveCrawlProfiles() {
+        this.defaultProxyProfile = null;
+        this.defaultRemoteProfile = null;
+        this.defaultTextSnippetLocalProfile = null;
+        this.defaultTextSnippetGlobalProfile = null;
+        this.defaultMediaSnippetLocalProfile = null;
+        this.defaultMediaSnippetGlobalProfile = null;
+        Iterator<CrawlProfile.entry> i = this.profilesActiveCrawls.profiles(true);
+        CrawlProfile.entry profile;
+        String name;
+        try {
+            while (i.hasNext()) {
+                profile = i.next();
+                name = profile.name();
+                if (name.equals(CRAWL_PROFILE_PROXY)) this.defaultProxyProfile = profile;
+                if (name.equals(CRAWL_PROFILE_REMOTE)) this.defaultRemoteProfile = profile;
+                if (name.equals(CRAWL_PROFILE_SNIPPET_LOCAL_TEXT)) this.defaultTextSnippetLocalProfile = profile;
+                if (name.equals(CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT)) this.defaultTextSnippetGlobalProfile = profile;
+                if (name.equals(CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA)) this.defaultMediaSnippetLocalProfile = profile;
+                if (name.equals(CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA)) this.defaultMediaSnippetGlobalProfile = profile;
+            }
+        } catch (Exception e) {
+            this.profilesActiveCrawls.resetDatabase();
+            this.defaultProxyProfile = null;
+            this.defaultRemoteProfile = null;
+            this.defaultTextSnippetLocalProfile = null;
+            this.defaultTextSnippetGlobalProfile = null;
+            this.defaultMediaSnippetLocalProfile = null;
+            this.defaultMediaSnippetGlobalProfile = null;
+        }
+        
+        if (this.defaultProxyProfile == null) {
+            // generate new default entry for proxy crawling
+            this.defaultProxyProfile = this.profilesActiveCrawls.newEntry("proxy", null, ".*", ".*",
+                    0 /*Integer.parseInt(getConfig(PROXY_PREFETCH_DEPTH, "0"))*/,
+                    0 /*Integer.parseInt(getConfig(PROXY_PREFETCH_DEPTH, "0"))*/,
+                    60 * 24, -1, -1, false,
+                    true /*getConfigBool(PROXY_INDEXING_LOCAL_TEXT, true)*/,
+                    true /*getConfigBool(PROXY_INDEXING_LOCAL_MEDIA, true)*/,
+                    true, true,
+                    false /*getConfigBool(PROXY_INDEXING_REMOTE, false)*/, true, true, true);
+        }
+        if (this.defaultRemoteProfile == null) {
+            // generate new default entry for remote crawling
+            defaultRemoteProfile = this.profilesActiveCrawls.newEntry(CRAWL_PROFILE_REMOTE, null, ".*", ".*", 0, 0,
+                    -1, -1, -1, true, true, true, false, true, false, true, true, false);
+        }
+        if (this.defaultTextSnippetLocalProfile == null) {
+            // generate new default entry for snippet fetch and optional crawling
+            defaultTextSnippetLocalProfile = this.profilesActiveCrawls.newEntry(CRAWL_PROFILE_SNIPPET_LOCAL_TEXT, null, ".*", ".*", 0, 0,
+                    60 * 24 * 30, -1, -1, true, false, false, false, false, false, true, true, false);
+        }
+        if (this.defaultTextSnippetGlobalProfile == null) {
+            // generate new default entry for snippet fetch and optional crawling
+            defaultTextSnippetGlobalProfile = this.profilesActiveCrawls.newEntry(CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT, null, ".*", ".*", 0, 0,
+                    60 * 24 * 30, -1, -1, true, true, true, true, true, false, true, true, false);
+        }
+        if (this.defaultMediaSnippetLocalProfile == null) {
+            // generate new default entry for snippet fetch and optional crawling
+            defaultMediaSnippetLocalProfile = this.profilesActiveCrawls.newEntry(CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA, null, ".*", ".*", 0, 0,
+                    60 * 24 * 30, -1, -1, true, false, false, false, false, false, true, true, false);
+        }
+        if (this.defaultMediaSnippetGlobalProfile == null) {
+            // generate new default entry for snippet fetch and optional crawling
+            defaultMediaSnippetGlobalProfile = this.profilesActiveCrawls.newEntry(CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA, null, ".*", ".*", 0, 0,
+                    60 * 24 * 30, -1, -1, true, false, true, true, true, false, true, true, false);
+        }
+    }
+    
+    private void resetProfiles() {
+        File pdb = new File(this.queuesRoot, DBFILE_ACTIVE_CRAWL_PROFILES);
+        if (pdb.exists()) pdb.delete();
+        profilesActiveCrawls = new CrawlProfile(pdb);
+        initActiveCrawlProfiles();
+    }
+    
+    
+    public boolean cleanProfiles() throws InterruptedException {
+        if (queuePreStack.size() > 0) return false;
+        final Iterator<CrawlProfile.entry> iter = profilesActiveCrawls.profiles(true);
+        CrawlProfile.entry entry;
+        boolean hasDoneSomething = false;
+        try {
+            while (iter.hasNext()) {
+                // check for interruption
+                if (Thread.currentThread().isInterrupted()) throw new InterruptedException("Shutdown in progress");
+                
+                // getting next profile
+                entry = iter.next();
+                if (!((entry.name().equals(CRAWL_PROFILE_PROXY))  ||
+                      (entry.name().equals(CRAWL_PROFILE_REMOTE)) ||
+                      (entry.name().equals(CRAWL_PROFILE_SNIPPET_LOCAL_TEXT))  ||
+                      (entry.name().equals(CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT)) ||
+                      (entry.name().equals(CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA)) ||
+                      (entry.name().equals(CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA)))) {
+                    profilesPassiveCrawls.newEntry(entry.map());
+                    iter.remove();
+                    hasDoneSomething = true;
+                }
+            }
+        } catch (kelondroException e) {
+            resetProfiles();
+            hasDoneSomething = true;
+        }
+        return hasDoneSomething;
     }
     
     public File getLocation(boolean primary) {
@@ -533,6 +697,8 @@ public final class plasmaWordIndex implements indexRI {
         referenceURL.close();
         seedDB.close();
         newsPool.close();
+        profilesActiveCrawls.close();
+        queuePreStack.close();
     }
     
     public indexContainer deleteContainer(String wordHash) {
@@ -626,7 +792,7 @@ public final class plasmaWordIndex implements indexRI {
         return containers; // this may return less containers as demanded
     }
 
-    public indexURLReference storeDocument(plasmaSwitchboardQueue.QueueEntry entry, plasmaParserDocument document, plasmaCondenser condenser) throws IOException {
+    public indexURLReference storeDocument(IndexingStack.QueueEntry entry, plasmaParserDocument document, plasmaCondenser condenser) throws IOException {
         long startTime = System.currentTimeMillis();
 
         // CREATE INDEX

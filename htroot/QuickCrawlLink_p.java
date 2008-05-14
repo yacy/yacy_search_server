@@ -138,14 +138,14 @@ public class QuickCrawlLink_p {
             }
                     
             String urlhash = crawlingStartURL.hash();
-            sb.wordIndex.removeURL(urlhash);
+            sb.webIndex.removeURL(urlhash);
             sb.crawlQueues.noticeURL.removeByURLHash(urlhash);
             sb.crawlQueues.errorURL.remove(urlhash);
             
             // create crawling profile
             CrawlProfile.entry pe = null;
             try {
-                pe = sb.profilesActiveCrawls.newEntry(
+                pe = sb.webIndex.profilesActiveCrawls.newEntry(
                         crawlingStartURL.getHost(), 
                         crawlingStartURL, 
                         crawlingFilter, 
@@ -178,7 +178,7 @@ public class QuickCrawlLink_p {
             reasonString = sb.crawlStacker.stackCrawl(
                         crawlingStartURL, 
                         null, 
-                        sb.wordIndex.seedDB.mySeed().hash, 
+                        sb.webIndex.seedDB.mySeed().hash, 
                         (title==null)?"CRAWLING-ROOT":title, 
                                 new Date(), 
                                 0, 

@@ -903,18 +903,18 @@ public class plasmaSnippetCache {
             (snippet.getErrorCode() == ERROR_PARSER_FAILED) ||
             (snippet.getErrorCode() == ERROR_PARSER_NO_LINES)) {
             log.logInfo("error: '" + snippet.getError() + "', remove url = " + snippet.getUrl().toNormalform(false, true) + ", cause: " + snippet.getError());
-            plasmaSwitchboard.getSwitchboard().wordIndex.removeURL(urlHash);
+            plasmaSwitchboard.getSwitchboard().webIndex.removeURL(urlHash);
             plasmaSearchEvent event = plasmaSearchEvent.getEvent(eventID);
             assert plasmaSwitchboard.getSwitchboard() != null;
-            assert plasmaSwitchboard.getSwitchboard().wordIndex != null;
+            assert plasmaSwitchboard.getSwitchboard().webIndex != null;
             assert event != null : "eventID = " + eventID;
             assert event.getQuery() != null;
-            plasmaSwitchboard.getSwitchboard().wordIndex.removeEntryMultiple(event.getQuery().queryHashes, urlHash);
+            plasmaSwitchboard.getSwitchboard().webIndex.removeEntryMultiple(event.getQuery().queryHashes, urlHash);
             event.remove(urlHash);
         }
         if (snippet.getErrorCode() == ERROR_NO_MATCH) {
             log.logInfo("error: '" + snippet.getError() + "', remove words '" + querystring + "' for url = " + snippet.getUrl().toNormalform(false, true) + ", cause: " + snippet.getError());
-            plasmaSwitchboard.getSwitchboard().wordIndex.removeEntryMultiple(snippet.remaingHashes, urlHash);
+            plasmaSwitchboard.getSwitchboard().webIndex.removeEntryMultiple(snippet.remaingHashes, urlHash);
             plasmaSearchEvent.getEvent(eventID).remove(urlHash);
         }
         return snippet.getError();

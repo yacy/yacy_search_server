@@ -122,7 +122,7 @@ public class yacyCore {
         loadSeedUploadMethods();
 
         // deploy peer actions
-        peerActions = new yacyPeerActions(sb.wordIndex.seedDB, sb);
+        peerActions = new yacyPeerActions(sb.webIndex.seedDB, sb);
 
         log.logConfig("CORE INITIALIZED");
         // ATTENTION, VERY IMPORTANT: before starting the thread, the httpd yacy server must be running!
@@ -176,11 +176,11 @@ public class yacyCore {
             yacyCore.log.logDebug("***DEBUG publishSeedList: I can reach myself");
         */
 
-        if ((sb.wordIndex.seedDB.lastSeedUpload_myIP.equals(sb.wordIndex.seedDB.mySeed().get(yacySeed.IP, "127.0.0.1"))) &&
-            (sb.wordIndex.seedDB.lastSeedUpload_seedDBSize == sb.wordIndex.seedDB.sizeConnected()) &&
+        if ((sb.webIndex.seedDB.lastSeedUpload_myIP.equals(sb.webIndex.seedDB.mySeed().get(yacySeed.IP, "127.0.0.1"))) &&
+            (sb.webIndex.seedDB.lastSeedUpload_seedDBSize == sb.webIndex.seedDB.sizeConnected()) &&
             (canReachMyself()) &&
-            (System.currentTimeMillis() - sb.wordIndex.seedDB.lastSeedUpload_timeStamp < 1000 * 60 * 60 * 24) &&
-            (sb.wordIndex.seedDB.mySeed().isPrincipal())
+            (System.currentTimeMillis() - sb.webIndex.seedDB.lastSeedUpload_timeStamp < 1000 * 60 * 60 * 24) &&
+            (sb.webIndex.seedDB.mySeed().isPrincipal())
         ) {
             log.logFine("yacyCore.publishSeedList: not necessary to publish: oldIP is equal, sizeConnected is equal and I can reach myself under the old IP.");
             return;
@@ -228,29 +228,29 @@ public class yacyCore {
         peerActions.updateMySeed();
 
         // publish own seed to other peer, this can every peer, but makes only sense for senior peers
-        if (sb.wordIndex.seedDB.sizeConnected() == 0) {
+        if (sb.webIndex.seedDB.sizeConnected() == 0) {
             // reload the seed lists
             peerActions.loadSeedLists();
-            log.logInfo("re-initialized seed list. received " + sb.wordIndex.seedDB.sizeConnected() + " new peer(s)");
+            log.logInfo("re-initialized seed list. received " + sb.webIndex.seedDB.sizeConnected() + " new peer(s)");
         }
         final int newSeeds = publishMySeed(false);
         if (newSeeds > 0) {
-            log.logInfo("received " + newSeeds + " new peer(s), know a total of " + sb.wordIndex.seedDB.sizeConnected() + " different peers");
+            log.logInfo("received " + newSeeds + " new peer(s), know a total of " + sb.webIndex.seedDB.sizeConnected() + " different peers");
         }
     }
 
     private boolean canReachMyself() { // TODO: check if this method is necessary - depending on the used router it will not work
         // returns true if we can reach ourself under our known peer address
         // if we cannot reach ourself, we call a forced publishMySeed and return false
-    	final int urlc = yacyClient.queryUrlCount(sb.wordIndex.seedDB.mySeed());
+    	final int urlc = yacyClient.queryUrlCount(sb.webIndex.seedDB.mySeed());
         if (urlc >= 0) {
-            sb.wordIndex.seedDB.mySeed().setLastSeenUTC();
+            sb.webIndex.seedDB.mySeed().setLastSeenUTC();
             return true;
         }
         log.logInfo("re-connect own seed");
-        final String oldAddress = sb.wordIndex.seedDB.mySeed().getPublicAddress();
+        final String oldAddress = sb.webIndex.seedDB.mySeed().getPublicAddress();
         /*final int newSeeds =*/ publishMySeed(true);
-        return (oldAddress != null && oldAddress.equals(sb.wordIndex.seedDB.mySeed().getPublicAddress()));
+        return (oldAddress != null && oldAddress.equals(sb.webIndex.seedDB.mySeed().getPublicAddress()));
     }
 
     protected class publishThread extends Thread {
@@ -273,7 +273,7 @@ public class yacyCore {
 
         public final void run() {
             try {
-                this.added = yacyClient.publishMySeed(sb.wordIndex.seedDB.mySeed(), seed.getClusterAddress(), seed.hash);
+                this.added = yacyClient.publishMySeed(sb.webIndex.seedDB.mySeed(), seed.getClusterAddress(), seed.hash);
                 if (this.added < 0) {
                     // no or wrong response, delete that address
                     String cause = "peer ping to peer resulted in error response (added < 0)";
@@ -284,7 +284,7 @@ public class yacyCore {
                     // update latest news from the other peer
                     log.logInfo("publish: handshaked " + this.seed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR) + " peer '" + this.seed.getName() + "' at " + this.seed.getPublicAddress());
                     // check if seed's lastSeen has been updated
-                    yacySeed newSeed = sb.wordIndex.seedDB.getConnected(this.seed.hash);
+                    yacySeed newSeed = sb.webIndex.seedDB.getConnected(this.seed.hash);
                     if (newSeed != null) {
                         if (newSeed.getLastSeenUTC() < (System.currentTimeMillis() - 10000)) {
                             // update last seed date
@@ -337,13 +337,13 @@ public class yacyCore {
             // init yacyHello-process
             Map<String, yacySeed> seeds; // hash/yacySeed relation
 
-            int attempts = sb.wordIndex.seedDB.sizeConnected();
+            int attempts = sb.webIndex.seedDB.sizeConnected();
 
             // getting a list of peers to contact
-            if (sb.wordIndex.seedDB.mySeed().get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN).equals(yacySeed.PEERTYPE_VIRGIN)) {
+            if (sb.webIndex.seedDB.mySeed().get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN).equals(yacySeed.PEERTYPE_VIRGIN)) {
                 if (attempts > PING_INITIAL) { attempts = PING_INITIAL; }
                 Map<String, String> ch = plasmaSwitchboard.getSwitchboard().clusterhashes;
-                seeds = sb.wordIndex.seedDB.seedsByAge(true, attempts - ((ch == null) ? 0 : ch.size())); // best for fast connection
+                seeds = sb.webIndex.seedDB.seedsByAge(true, attempts - ((ch == null) ? 0 : ch.size())); // best for fast connection
                 // add also all peers from cluster if this is a public robinson cluster
                 if (plasmaSwitchboard.getSwitchboard().clusterhashes != null) {
                     Iterator<Map.Entry<String, String>> i = ch.entrySet().iterator();
@@ -355,7 +355,7 @@ public class yacyCore {
                         hash = entry.getKey();
                         seed = (yacySeed) seeds.get(hash);
                         if (seed == null) {
-                            seed = sb.wordIndex.seedDB.get(hash);
+                            seed = sb.webIndex.seedDB.get(hash);
                             if (seed == null) continue;
                         }
                         seed.setAlternativeAddress((String) entry.getValue());
@@ -370,7 +370,7 @@ public class yacyCore {
                 } else {
                     if (attempts > PING_MIN_RUNNING) { attempts = PING_MIN_RUNNING; }
                 }
-                seeds = sb.wordIndex.seedDB.seedsByAge(false, attempts); // best for seed list maintenance/cleaning
+                seeds = sb.webIndex.seedDB.seedsByAge(false, attempts); // best for seed list maintenance/cleaning
             }
 
             if ((seeds == null) || seeds.size() == 0) { return 0; }
@@ -382,20 +382,20 @@ public class yacyCore {
 
             // include a YaCyNews record to my seed
             try {
-                final yacyNewsRecord record = sb.wordIndex.newsPool.myPublication();
+                final yacyNewsRecord record = sb.webIndex.newsPool.myPublication();
                 if (record == null) {
-                    sb.wordIndex.seedDB.mySeed().put("news", "");
+                    sb.webIndex.seedDB.mySeed().put("news", "");
                 } else {
-                    sb.wordIndex.seedDB.mySeed().put("news", de.anomic.tools.crypt.simpleEncode(record.toString()));
+                    sb.webIndex.seedDB.mySeed().put("news", de.anomic.tools.crypt.simpleEncode(record.toString()));
                 }
             } catch (IOException e) {
                 log.logSevere("publishMySeed: problem with news encoding", e);
             }
-            sb.wordIndex.seedDB.mySeed().setUnusedFlags();
+            sb.webIndex.seedDB.mySeed().setUnusedFlags();
 
             // include current citation-rank file count
-            sb.wordIndex.seedDB.mySeed().put(yacySeed.CRWCNT, Integer.toString(sb.rankingOwnDistribution.size()));
-            sb.wordIndex.seedDB.mySeed().put(yacySeed.CRTCNT, Integer.toString(sb.rankingOtherDistribution.size()));
+            sb.webIndex.seedDB.mySeed().put(yacySeed.CRWCNT, Integer.toString(sb.rankingOwnDistribution.size()));
+            sb.webIndex.seedDB.mySeed().put(yacySeed.CRTCNT, Integer.toString(sb.rankingOtherDistribution.size()));
             int newSeeds = -1;
             //if (seeds.length > 1) {
             // holding a reference to all started threads
@@ -483,7 +483,7 @@ public class yacyCore {
                 if ((accessible >= PING_MIN_PEERSEEN) ||
                     (accessible >= notaccessible)) {
                     // We can be reached from a majority of other Peers
-                    if (sb.wordIndex.seedDB.mySeed().isPrincipal()) {
+                    if (sb.webIndex.seedDB.mySeed().isPrincipal()) {
                         newPeerType = yacySeed.PEERTYPE_PRINCIPAL;
                     } else {
                         newPeerType = yacySeed.PEERTYPE_SENIOR;
@@ -492,23 +492,23 @@ public class yacyCore {
                     // We cannot be reached from the outside
                     newPeerType = yacySeed.PEERTYPE_JUNIOR;
                 }
-                if (sb.wordIndex.seedDB.mySeed().orVirgin().equals(newPeerType)) {
-                    log.logInfo("PeerPing: myType is " + sb.wordIndex.seedDB.mySeed().orVirgin());
+                if (sb.webIndex.seedDB.mySeed().orVirgin().equals(newPeerType)) {
+                    log.logInfo("PeerPing: myType is " + sb.webIndex.seedDB.mySeed().orVirgin());
                 } else {
-                    log.logInfo("PeerPing: changing myType from '" + sb.wordIndex.seedDB.mySeed().orVirgin() + "' to '" + newPeerType + "'");
-                    sb.wordIndex.seedDB.mySeed().put(yacySeed.PEERTYPE, newPeerType);
+                    log.logInfo("PeerPing: changing myType from '" + sb.webIndex.seedDB.mySeed().orVirgin() + "' to '" + newPeerType + "'");
+                    sb.webIndex.seedDB.mySeed().put(yacySeed.PEERTYPE, newPeerType);
                 }
             } else {
-                log.logInfo("PeerPing: No data, staying at myType: " + sb.wordIndex.seedDB.mySeed().orVirgin());
+                log.logInfo("PeerPing: No data, staying at myType: " + sb.webIndex.seedDB.mySeed().orVirgin());
             }
 
             // success! we have published our peer to a senior peer
             // update latest news from the other peer
             // log.logInfo("publish: handshaked " + t.seed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR) + " peer '" + t.seed.getName() + "' at " + t.seed.getAddress());
-            sb.wordIndex.seedDB.saveMySeed();
+            sb.webIndex.seedDB.saveMySeed();
 
             // if we have an address, we do nothing
-            if (sb.wordIndex.seedDB.mySeed().isProper() == null && !force) { return 0; }
+            if (sb.webIndex.seedDB.mySeed().isProper() == null && !force) { return 0; }
             if (newSeeds > 0) return newSeeds;
             
             // still no success: ask own NAT or internet responder
@@ -518,12 +518,12 @@ public class yacyCore {
             //if (ip.equals("")) ip = natLib.retrieveIP(DI604use, DI604pw);
             
             // yacyCore.log.logDebug("DEBUG: new IP=" + ip);
-            sb.wordIndex.seedDB.mySeed().put(yacySeed.IP, ip);
-            if (sb.wordIndex.seedDB.mySeed().get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_JUNIOR).equals(yacySeed.PEERTYPE_JUNIOR)) // ???????????????
-                sb.wordIndex.seedDB.mySeed().put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR); // to start bootstraping, we need to be recognised as PEERTYPE_SENIOR peer
+            sb.webIndex.seedDB.mySeed().put(yacySeed.IP, ip);
+            if (sb.webIndex.seedDB.mySeed().get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_JUNIOR).equals(yacySeed.PEERTYPE_JUNIOR)) // ???????????????
+                sb.webIndex.seedDB.mySeed().put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR); // to start bootstraping, we need to be recognised as PEERTYPE_SENIOR peer
             log.logInfo("publish: no recipient found, our address is " +
-                    ((sb.wordIndex.seedDB.mySeed().getPublicAddress() == null) ? "unknown" : sb.wordIndex.seedDB.mySeed().getPublicAddress()));
-            sb.wordIndex.seedDB.saveMySeed();
+                    ((sb.webIndex.seedDB.mySeed().getPublicAddress() == null) ? "unknown" : sb.webIndex.seedDB.mySeed().getPublicAddress()));
+            sb.webIndex.seedDB.saveMySeed();
             return 0;
         } catch (InterruptedException e) {
             try {
@@ -657,7 +657,7 @@ public class yacyCore {
             String logt;
 
             // be shure that we have something to say
-            if (sb.wordIndex.seedDB.mySeed().getPublicAddress() == null) {
+            if (sb.webIndex.seedDB.mySeed().getPublicAddress() == null) {
                 final String errorMsg = "We have no valid IP address until now";
                 log.logWarning("SaveSeedList: " + errorMsg);
                 return errorMsg;
@@ -711,20 +711,20 @@ public class yacyCore {
             }
 
             // upload the seed-list using the configured uploader class
-            String prevStatus = sb.wordIndex.seedDB.mySeed().get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_JUNIOR);
+            String prevStatus = sb.webIndex.seedDB.mySeed().get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_JUNIOR);
             if (prevStatus.equals(yacySeed.PEERTYPE_PRINCIPAL)) { prevStatus = yacySeed.PEERTYPE_SENIOR; }
 
             try {
-                sb.wordIndex.seedDB.mySeed().put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_PRINCIPAL); // this information shall also be uploaded
+                sb.webIndex.seedDB.mySeed().put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_PRINCIPAL); // this information shall also be uploaded
 
                 log.logFine("SaveSeedList: Using seed uploading method '" + seedUploadMethod + "' for seed-list uploading." +
-                            "\n\tPrevious peerType is '" + sb.wordIndex.seedDB.mySeed().get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_JUNIOR) + "'.");
+                            "\n\tPrevious peerType is '" + sb.webIndex.seedDB.mySeed().get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_JUNIOR) + "'.");
 
 //              logt = seedDB.uploadCache(seedFTPServer, seedFTPAccount, seedFTPPassword, seedFTPPath, seedURL);
-                logt = sb.wordIndex.seedDB.uploadCache(uploader, sb, sb.wordIndex.seedDB, seedURL);
+                logt = sb.webIndex.seedDB.uploadCache(uploader, sb, sb.webIndex.seedDB, seedURL);
                 if (logt != null) {
                     if (logt.indexOf("Error") >= 0) {
-                        sb.wordIndex.seedDB.mySeed().put(yacySeed.PEERTYPE, prevStatus);
+                        sb.webIndex.seedDB.mySeed().put(yacySeed.PEERTYPE, prevStatus);
                         final String errorMsg = "SaveSeedList: seed upload failed using " + uploader.getClass().getName() + " (error): " + logt.substring(logt.indexOf("Error") + 6);
                         log.logSevere(errorMsg);
                         return errorMsg;
@@ -736,16 +736,16 @@ public class yacyCore {
                 sb.setConfig("yacyStatus", yacySeed.PEERTYPE_PRINCIPAL);
                 return null;
             } catch (Exception e) {
-                sb.wordIndex.seedDB.mySeed().put(yacySeed.PEERTYPE, prevStatus);
+                sb.webIndex.seedDB.mySeed().put(yacySeed.PEERTYPE, prevStatus);
                 sb.setConfig("yacyStatus", prevStatus);
                 final String errorMsg = "SaveSeedList: Seed upload failed (IO error): " + e.getMessage();
                 log.logInfo(errorMsg, e);
                 return errorMsg;
             }
         } finally {
-            sb.wordIndex.seedDB.lastSeedUpload_seedDBSize = sb.wordIndex.seedDB.sizeConnected();
-            sb.wordIndex.seedDB.lastSeedUpload_timeStamp = System.currentTimeMillis();
-            sb.wordIndex.seedDB.lastSeedUpload_myIP = sb.wordIndex.seedDB.mySeed().get(yacySeed.IP, "127.0.0.1");
+            sb.webIndex.seedDB.lastSeedUpload_seedDBSize = sb.webIndex.seedDB.sizeConnected();
+            sb.webIndex.seedDB.lastSeedUpload_timeStamp = System.currentTimeMillis();
+            sb.webIndex.seedDB.lastSeedUpload_myIP = sb.webIndex.seedDB.mySeed().get(yacySeed.IP, "127.0.0.1");
         }
     }
 

@@ -162,7 +162,7 @@ public class result {
             }
 
             // prepare search properties
-            final boolean yacyonline = ((sb.wordIndex.seedDB != null) && (sb.wordIndex.seedDB.mySeed() != null) && (sb.wordIndex.seedDB.mySeed().getPublicAddress() != null));
+            final boolean yacyonline = ((sb.webIndex.seedDB != null) && (sb.webIndex.seedDB.mySeed() != null) && (sb.webIndex.seedDB.mySeed().getPublicAddress() != null));
             final boolean globalsearch = (global) && (yacyonline) && (sb.getConfigBool(plasmaSwitchboard.INDEX_RECEIVE_ALLOW, false));
         
             // do the search
@@ -206,7 +206,7 @@ public class result {
                 theQuery.setOffset(0); // in case that this is a new search, always start without a offset 
                 offset = 0;
             }
-            plasmaSearchEvent theSearch = plasmaSearchEvent.getEvent(theQuery, ranking, sb.wordIndex, sb.crawlResults, (sb.isRobinsonMode()) ? sb.clusterhashes : null, false);
+            plasmaSearchEvent theSearch = plasmaSearchEvent.getEvent(theQuery, ranking, sb.webIndex, sb.crawlResults, (sb.isRobinsonMode()) ? sb.clusterhashes : null, false);
             
             // generate result object
             serverLog.logFine("LOCAL_SEARCH", "SEARCH TIME AFTER ORDERING OF SEARCH RESULTS: " + ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");

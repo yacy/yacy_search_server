@@ -25,118 +25,153 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+import java.io.File;
+import java.util.HashSet;
+
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.server.serverBusyThread;
 import de.anomic.server.serverCodings;
+import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 public class ConfigNetwork_p {
 
-	public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
         
         plasmaSwitchboard sb = (plasmaSwitchboard) env;
         serverObjects prop = new serverObjects();
         int commit = 0;
         
-        prop.put("network.unit.definition", sb.getConfig("network.unit.definition", ""));
-        prop.put("network.unit.name", sb.getConfig("network.unit.name", ""));
-        prop.put("network.unit.description", sb.getConfig("network.unit.description", ""));
-        prop.put("network.unit.domain", sb.getConfig("network.unit.domain", ""));
-        prop.put("network.unit.dht", sb.getConfig("network.unit.dht", ""));
+        // load all options for network definitions
+        File networkBootstrapLocationsFile = new File(new File(sb.getRootPath(), "defaults"), "yacy.networks");
+        HashSet<String> networkBootstrapLocations = serverFileUtils.loadList(networkBootstrapLocationsFile);
+        
         
         if (post != null) {
-        	
-        	boolean crawlResponse = post.get("crawlResponse", "off").equals("on");
-        	
-        	// DHT control
-            boolean indexDistribute = post.get("indexDistribute", "").equals("on");
-            boolean indexReceive = post.get("indexReceive", "").equals("on");
-            boolean robinsonmode = post.get("network", "").equals("robinson");
-            String clustermode = post.get("cluster.mode", "publicpeer");
-            if (robinsonmode) {
-            	indexDistribute = false;
-            	indexReceive = false;
-            	if ((clustermode.equals("privatepeer")) || (clustermode.equals("publicpeer"))) {
-            		prop.put("commitRobinsonWithoutRemoteIndexing", "1");
-            		crawlResponse = false;
-            	}
-            	if ((clustermode.equals("privatecluster")) || (clustermode.equals("publiccluster"))) {
-            		prop.put("commitRobinsonWithRemoteIndexing", "1");
-            		crawlResponse = true;
-            	}
-            	commit = 1;
-            } else {
-            	if (!indexDistribute && !indexReceive) {
-            		prop.put("commitDHTIsRobinson", "1");
-            		commit = 2;
-            	} else if (indexDistribute && indexReceive) {
-            		commit = 1;
-            	} else {
-            		prop.put("commitDHTNoGlobalSearch", "1");
-            		commit = 1;
-            	}
-            	if (!crawlResponse) {
-            		prop.put("commitCrawlPlea", "1");
-            	}
+            
+            if (post.containsKey("changeNetwork")) {
+                String networkDefinition = post.get("networkDefinition", "defaults/yacy.network.freeworld.unit");
+                if (networkDefinition.equals(sb.getConfig("network.unit.definition", ""))) {
+                    // no change
+                    commit = 3;
+                } else {
+                    // shut down old network and index, start up new network and index
+                    commit = 1;
+                    // pause crawls
+                    boolean lcp = sb.crawlJobIsPaused(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL);
+                    if (!lcp) sb.pauseCrawlJob(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL);
+                    boolean rcp = sb.crawlJobIsPaused(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
+                    if (!rcp) sb.pauseCrawlJob(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
+                    // trigger online caution
+                    sb.proxyLastAccess = System.currentTimeMillis() + 60000; // at least 1 minute online caution to prevent unnecessary action on database meanwhile
+                    // switch the networks
+                    synchronized (sb.webIndex) {
+                        sb.webIndex.close();
+                        sb.setConfig("network.unit.definition", networkDefinition);
+                        plasmaSwitchboard.overwriteNetworkDefinition(sb);
+                        File indexPrimaryPath = sb.getConfigPath(plasmaSwitchboard.INDEX_PRIMARY_PATH, plasmaSwitchboard.INDEX_PATH_DEFAULT);
+                        File indexSecondaryPath = (sb.getConfig(plasmaSwitchboard.INDEX_SECONDARY_PATH, "").length() == 0) ? indexPrimaryPath : new File(sb.getConfig(plasmaSwitchboard.INDEX_SECONDARY_PATH, ""));
+                        sb.webIndex = new plasmaWordIndex(sb.getConfig("network.unit.name", ""), sb.getLog(), indexPrimaryPath, indexSecondaryPath);
+                    }
+                    // start up crawl jobs again
+                    if (lcp) sb.continueCrawlJob(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL);
+                    if (rcp) sb.continueCrawlJob(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
+                }
             }
             
-            if (indexDistribute) {
-                sb.setConfig(plasmaSwitchboard.INDEX_DIST_ALLOW, "true");
-            } else {
-                sb.setConfig(plasmaSwitchboard.INDEX_DIST_ALLOW, "false");
-            }
-
-            if (post.get("indexDistributeWhileCrawling","").equals("on")) {
-                sb.setConfig(plasmaSwitchboard.INDEX_DIST_ALLOW_WHILE_CRAWLING, "true");
-            } else {
-                sb.setConfig(plasmaSwitchboard.INDEX_DIST_ALLOW_WHILE_CRAWLING, "false");
-            }
-
-            if (post.get("indexDistributeWhileIndexing","").equals("on")) {
-                sb.setConfig(plasmaSwitchboard.INDEX_DIST_ALLOW_WHILE_INDEXING, "true");
-            } else {
-                sb.setConfig(plasmaSwitchboard.INDEX_DIST_ALLOW_WHILE_INDEXING, "false");
-            }
-
-            if (indexReceive) {
-                sb.setConfig("allowReceiveIndex", "true");
-                sb.wordIndex.seedDB.mySeed().setFlagAcceptRemoteIndex(true);
-            } else {
-                sb.setConfig("allowReceiveIndex", "false");
-                sb.wordIndex.seedDB.mySeed().setFlagAcceptRemoteIndex(false);
-            }
-
-            if (post.get("indexReceiveBlockBlacklist", "").equals("on")) {
-                sb.setConfig("indexReceiveBlockBlacklist", "true");
-            } else {
-                sb.setConfig("indexReceiveBlockBlacklist", "false");
-            }
+            if (post.containsKey("save")) {
+                boolean crawlResponse = post.get("crawlResponse", "off").equals("on");
                 
-            if (post.containsKey("peertags")) {
-                sb.wordIndex.seedDB.mySeed().setPeerTags(serverCodings.string2set(normalizedList((String) post.get("peertags")), ","));
-            }
-            
-            sb.setConfig("cluster.mode", post.get("cluster.mode", "publicpeer"));
-        	
-            // read remote crawl request settings
-            sb.setConfig("crawlResponse", (crawlResponse) ? "true" : "false");
-            int newppm = 1;
-            try {
-                newppm = Math.max(1, Integer.parseInt(post.get("acceptCrawlLimit", "1")));
-            } catch (NumberFormatException e) {}
-            long newBusySleep = Math.max(100, 60000 / newppm);
-            serverBusyThread rct = sb.getThread(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
-            rct.setBusySleep(newBusySleep);
-            sb.setConfig(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_BUSYSLEEP, Long.toString(newBusySleep));
-            
-            sb.setConfig("cluster.peers.ipport", checkIPPortList(post.get("cluster.peers.ipport", "")));
-            sb.setConfig("cluster.peers.yacydomain", checkYaCyDomainList(post.get("cluster.peers.yacydomain", "")));
-            
-            // update the cluster hash set
-            sb.clusterhashes = sb.wordIndex.seedDB.clusterHashes(sb.getConfig("cluster.peers.yacydomain", ""));
-            
+                // DHT control
+                boolean indexDistribute = post.get("indexDistribute", "").equals("on");
+                boolean indexReceive = post.get("indexReceive", "").equals("on");
+                boolean robinsonmode = post.get("network", "").equals("robinson");
+                String clustermode = post.get("cluster.mode", "publicpeer");
+                if (robinsonmode) {
+                    indexDistribute = false;
+                    indexReceive = false;
+                    if ((clustermode.equals("privatepeer")) || (clustermode.equals("publicpeer"))) {
+                        prop.put("commitRobinsonWithoutRemoteIndexing", "1");
+                        crawlResponse = false;
+                    }
+                    if ((clustermode.equals("privatecluster")) || (clustermode.equals("publiccluster"))) {
+                        prop.put("commitRobinsonWithRemoteIndexing", "1");
+                        crawlResponse = true;
+                    }
+                    commit = 1;
+                } else {
+                    if (!indexDistribute && !indexReceive) {
+                        prop.put("commitDHTIsRobinson", "1");
+                        commit = 2;
+                    } else if (indexDistribute && indexReceive) {
+                        commit = 1;
+                    } else {
+                        prop.put("commitDHTNoGlobalSearch", "1");
+                        commit = 1;
+                    }
+                    if (!crawlResponse) {
+                        prop.put("commitCrawlPlea", "1");
+                    }
+                }
+                
+                if (indexDistribute) {
+                    sb.setConfig(plasmaSwitchboard.INDEX_DIST_ALLOW, "true");
+                } else {
+                    sb.setConfig(plasmaSwitchboard.INDEX_DIST_ALLOW, "false");
+                }
+    
+                if (post.get("indexDistributeWhileCrawling","").equals("on")) {
+                    sb.setConfig(plasmaSwitchboard.INDEX_DIST_ALLOW_WHILE_CRAWLING, "true");
+                } else {
+                    sb.setConfig(plasmaSwitchboard.INDEX_DIST_ALLOW_WHILE_CRAWLING, "false");
+                }
+    
+                if (post.get("indexDistributeWhileIndexing","").equals("on")) {
+                    sb.setConfig(plasmaSwitchboard.INDEX_DIST_ALLOW_WHILE_INDEXING, "true");
+                } else {
+                    sb.setConfig(plasmaSwitchboard.INDEX_DIST_ALLOW_WHILE_INDEXING, "false");
+                }
+    
+                if (indexReceive) {
+                    sb.setConfig("allowReceiveIndex", "true");
+                    sb.webIndex.seedDB.mySeed().setFlagAcceptRemoteIndex(true);
+                } else {
+                    sb.setConfig("allowReceiveIndex", "false");
+                    sb.webIndex.seedDB.mySeed().setFlagAcceptRemoteIndex(false);
+                }
+    
+                if (post.get("indexReceiveBlockBlacklist", "").equals("on")) {
+                    sb.setConfig("indexReceiveBlockBlacklist", "true");
+                } else {
+                    sb.setConfig("indexReceiveBlockBlacklist", "false");
+                }
+                    
+                if (post.containsKey("peertags")) {
+                    sb.webIndex.seedDB.mySeed().setPeerTags(serverCodings.string2set(normalizedList((String) post.get("peertags")), ","));
+                }
+                
+                sb.setConfig("cluster.mode", post.get("cluster.mode", "publicpeer"));
+                
+                // read remote crawl request settings
+                sb.setConfig("crawlResponse", (crawlResponse) ? "true" : "false");
+                int newppm = 1;
+                try {
+                    newppm = Math.max(1, Integer.parseInt(post.get("acceptCrawlLimit", "1")));
+                } catch (NumberFormatException e) {}
+                long newBusySleep = Math.max(100, 60000 / newppm);
+                serverBusyThread rct = sb.getThread(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
+                rct.setBusySleep(newBusySleep);
+                sb.setConfig(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_BUSYSLEEP, Long.toString(newBusySleep));
+                
+                sb.setConfig("cluster.peers.ipport", checkIPPortList(post.get("cluster.peers.ipport", "")));
+                sb.setConfig("cluster.peers.yacydomain", checkYaCyDomainList(post.get("cluster.peers.yacydomain", "")));
+                
+                // update the cluster hash set
+                sb.clusterhashes = sb.webIndex.seedDB.clusterHashes(sb.getConfig("cluster.peers.yacydomain", ""));
+            }            
         }
         
         // write answer code
@@ -161,11 +196,11 @@ public class ConfigNetwork_p {
         prop.put("indexReceiveChecked", (indexReceive) ? "1" : "0");
         prop.put("indexReceiveBlockBlacklistChecked.on", (sb.getConfig("indexReceiveBlockBlacklist", "true").equals("true")) ? "1" : "0");
         prop.put("indexReceiveBlockBlacklistChecked.off", (sb.getConfig("indexReceiveBlockBlacklist", "true").equals("true")) ? "0" : "1");
-        prop.putHTML("peertags", serverCodings.set2string(sb.wordIndex.seedDB.mySeed().getPeerTags(), ",", false));
+        prop.putHTML("peertags", serverCodings.set2string(sb.webIndex.seedDB.mySeed().getPeerTags(), ",", false));
 
         // set seed information directly
-        sb.wordIndex.seedDB.mySeed().setFlagAcceptRemoteCrawl(sb.getConfigBool("crawlResponse", false));
-        sb.wordIndex.seedDB.mySeed().setFlagAcceptRemoteIndex(indexReceive);
+        sb.webIndex.seedDB.mySeed().setFlagAcceptRemoteCrawl(sb.getConfigBool("crawlResponse", false));
+        sb.webIndex.seedDB.mySeed().setFlagAcceptRemoteIndex(indexReceive);
         
         // set p2p/robinson mode flags and values
         prop.put("p2p.checked", (indexDistribute || indexReceive) ? "1" : "0");
@@ -173,42 +208,54 @@ public class ConfigNetwork_p {
         prop.put("cluster.peers.ipport", sb.getConfig("cluster.peers.ipport", ""));
         prop.put("cluster.peers.yacydomain", sb.getConfig("cluster.peers.yacydomain", ""));
         prop.put("cluster.peers.yacydomain.hashes", (sb.clusterhashes.size() == 0) ? "" : sb.clusterhashes.toString());
+        
         // set p2p mode flags
         prop.put("privatepeerChecked", (sb.getConfig("cluster.mode", "").equals("privatepeer")) ? "1" : "0");
         prop.put("privateclusterChecked", (sb.getConfig("cluster.mode", "").equals("privatecluster")) ? "1" : "0");
         prop.put("publicclusterChecked", (sb.getConfig("cluster.mode", "").equals("publiccluster")) ? "1" : "0");
         prop.put("publicpeerChecked", (sb.getConfig("cluster.mode", "").equals("publicpeer")) ? "1" : "0");
         
+        // set network configuration
+        prop.put("network.unit.definition", sb.getConfig("network.unit.definition", ""));
+        prop.put("network.unit.name", sb.getConfig("network.unit.name", ""));
+        prop.put("network.unit.description", sb.getConfig("network.unit.description", ""));
+        prop.put("network.unit.domain", sb.getConfig("network.unit.domain", ""));
+        prop.put("network.unit.dht", sb.getConfig("network.unit.dht", ""));
+        networkBootstrapLocations.remove(sb.getConfig("network.unit.definition", ""));
+        int c = 0;
+        for (String s: networkBootstrapLocations) prop.put("networks_" + c++ + "_network", s);
+        prop.put("networks", c);
+        
         return prop;
-	}
-	
-	public static String normalizedList(String input) {
-		input = input.replace(' ', ',');
-		input = input.replace(' ', ';');
-		input = input.replaceAll(",,", ",");
-		if (input.startsWith(",")) input = input.substring(1);
-		if (input.endsWith(",")) input = input.substring(0, input.length() - 1);
-		return input;
-	}
-	
-	public static String checkYaCyDomainList(String input) {
-		input = normalizedList(input);
-		String[] s = input.split(",");
-		input = "";
-		for (int i = 0; i < s.length; i++) {
-			if ((s[i].endsWith(".yacyh")) || (s[i].endsWith(".yacy")) ||
-			    (s[i].indexOf(".yacyh=") > 0) || (s[i].indexOf(".yacy=") > 0)) input += "," + s[i];
-		}
-		if (input.length() == 0) return input; else return input.substring(1);
-	}
-	
-	public static String checkIPPortList(String input) {
-		input = normalizedList(input);
-		String[] s = input.split(",");
-		input = "";
-		for (int i = 0; i < s.length; i++) {
-			if (s[i].indexOf(':') >= 9) input += "," + s[i];
-		}
-		if (input.length() == 0) return input; else return input.substring(1);
-	}
+    }
+    
+    public static String normalizedList(String input) {
+        input = input.replace(' ', ',');
+        input = input.replace(' ', ';');
+        input = input.replaceAll(",,", ",");
+        if (input.startsWith(",")) input = input.substring(1);
+        if (input.endsWith(",")) input = input.substring(0, input.length() - 1);
+        return input;
+    }
+    
+    public static String checkYaCyDomainList(String input) {
+        input = normalizedList(input);
+        String[] s = input.split(",");
+        input = "";
+        for (int i = 0; i < s.length; i++) {
+            if ((s[i].endsWith(".yacyh")) || (s[i].endsWith(".yacy")) ||
+                (s[i].indexOf(".yacyh=") > 0) || (s[i].indexOf(".yacy=") > 0)) input += "," + s[i];
+        }
+        if (input.length() == 0) return input; else return input.substring(1);
+    }
+    
+    public static String checkIPPortList(String input) {
+        input = normalizedList(input);
+        String[] s = input.split(",");
+        input = "";
+        for (int i = 0; i < s.length; i++) {
+            if (s[i].indexOf(':') >= 9) input += "," + s[i];
+        }
+        if (input.length() == 0) return input; else return input.substring(1);
+    }
 }

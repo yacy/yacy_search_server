@@ -77,7 +77,7 @@ public class FTPLoader {
             final Date fileDate) {
         return plasmaHTCache.newEntry(new Date(), entry.depth(), entry.url(), entry.name(), "OK", new ResourceInfo(
                 entry.url(), sb.getURL(entry.referrerhash()), mimeType, fileDate), entry.initiator(),
-                sb.profilesActiveCrawls.getEntry(entry.profileHandle()));
+                sb.webIndex.profilesActiveCrawls.getEntry(entry.profileHandle()));
     }
 
     /**
@@ -155,7 +155,7 @@ public class FTPLoader {
             // some error logging
             final String detail = (berr.size() > 0) ? "\n    Errorlog: " + berr.toString() : "";
             log.logWarning("Unable to download URL " + entry.url().toString() + detail);
-            sb.crawlQueues.errorURL.newEntry(entry, sb.wordIndex.seedDB.mySeed().hash, new Date(), 1, ErrorURL.DENIED_SERVER_DOWNLOAD_ERROR);
+            sb.crawlQueues.errorURL.newEntry(entry, sb.webIndex.seedDB.mySeed().hash, new Date(), 1, ErrorURL.DENIED_SERVER_DOWNLOAD_ERROR);
 
             // an error has occured. cleanup
             if (cacheFile.exists()) {
@@ -279,7 +279,7 @@ public class FTPLoader {
                 ftpClient.exec("get \"" + path + "\" \"" + cacheFile.getAbsolutePath() + "\"", false);
             } else {
                 log.logInfo("REJECTED TOO BIG FILE with size " + size + " Bytes for URL " + entry.url().toString());
-                sb.crawlQueues.errorURL.newEntry(entry, this.sb.wordIndex.seedDB.mySeed().hash, new Date(), 1,
+                sb.crawlQueues.errorURL.newEntry(entry, this.sb.webIndex.seedDB.mySeed().hash, new Date(), 1,
                         ErrorURL.DENIED_FILESIZE_LIMIT_EXCEEDED);
                 throw new Exception("file size exceeds limit");
             }

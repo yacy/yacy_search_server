@@ -72,7 +72,7 @@ public class YaCySearchPluginFF {
         
         prop.put("host", host);
         prop.put("port", port);
-        prop.putHTML("name", sb.wordIndex.seedDB.mySeed().getName());
+        prop.putHTML("name", sb.webIndex.seedDB.mySeed().getName());
         
         return prop;
     }

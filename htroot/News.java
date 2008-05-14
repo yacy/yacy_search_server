@@ -81,7 +81,7 @@ public class News {
                     if ((check.startsWith("del_")) && (post.get(check, "off").equals("on"))) {
                         id = check.substring(4);
                         try {
-                            sb.wordIndex.newsPool.moveOff(tableID, id);
+                            sb.webIndex.newsPool.moveOff(tableID, id);
                         } catch (IOException ee) {ee.printStackTrace();}
                     }
                 }
@@ -94,9 +94,9 @@ public class News {
                 }
                 try {
                     if ((tableID == yacyNewsPool.PROCESSED_DB) || (tableID == yacyNewsPool.PUBLISHED_DB)) {
-                        sb.wordIndex.newsPool.clear(tableID);
+                        sb.webIndex.newsPool.clear(tableID);
                     } else {
-                        sb.wordIndex.newsPool.moveOffAll(tableID);
+                        sb.webIndex.newsPool.moveOffAll(tableID);
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -109,19 +109,19 @@ public class News {
             // show overview
             prop.put("table", "0");
             prop.put("page", "0");
-            prop.putNum("table_insize", sb.wordIndex.newsPool.size(yacyNewsPool.INCOMING_DB));
-            prop.putNum("table_prsize", sb.wordIndex.newsPool.size(yacyNewsPool.PROCESSED_DB));
-            prop.putNum("table_ousize", sb.wordIndex.newsPool.size(yacyNewsPool.OUTGOING_DB));
-            prop.putNum("table_pusize", sb.wordIndex.newsPool.size(yacyNewsPool.PUBLISHED_DB));
+            prop.putNum("table_insize", sb.webIndex.newsPool.size(yacyNewsPool.INCOMING_DB));
+            prop.putNum("table_prsize", sb.webIndex.newsPool.size(yacyNewsPool.PROCESSED_DB));
+            prop.putNum("table_ousize", sb.webIndex.newsPool.size(yacyNewsPool.OUTGOING_DB));
+            prop.putNum("table_pusize", sb.webIndex.newsPool.size(yacyNewsPool.PUBLISHED_DB));
         } else {
             // generate table
             prop.put("table", "1");
             prop.put("page", tableID + 1);
             prop.put("table_page", tableID + 1);
             
-            if (sb.wordIndex.seedDB != null) {
-                int maxCount = Math.min(1000, sb.wordIndex.newsPool.size(tableID));
-                Iterator<yacyNewsRecord> recordIterator = sb.wordIndex.newsPool.recordIterator(tableID, false);
+            if (sb.webIndex.seedDB != null) {
+                int maxCount = Math.min(1000, sb.webIndex.newsPool.size(tableID));
+                Iterator<yacyNewsRecord> recordIterator = sb.webIndex.newsPool.recordIterator(tableID, false);
                 yacyNewsRecord record;
                 yacySeed seed;
                 int i = 0;
@@ -129,8 +129,8 @@ public class News {
                     record = recordIterator.next();
                     if (record == null) continue;
                     
-                    seed = sb.wordIndex.seedDB.getConnected(record.originator());
-                    if (seed == null) seed = sb.wordIndex.seedDB.getDisconnected(record.originator());
+                    seed = sb.webIndex.seedDB.getConnected(record.originator());
+                    if (seed == null) seed = sb.webIndex.seedDB.getDisconnected(record.originator());
                     String category = record.category();
                     prop.put("table_list_" + i + "_id", record.id());
                     prop.putHTML("table_list_" + i + "_ori", (seed == null) ? record.originator() : seed.getName());
@@ -201,7 +201,7 @@ public class News {
         }
         
         // adding the peer address
-        prop.put("address", sb.wordIndex.seedDB.mySeed().getPublicAddress());
+        prop.put("address", sb.webIndex.seedDB.mySeed().getPublicAddress());
         
         // return rewrite properties
         return prop;

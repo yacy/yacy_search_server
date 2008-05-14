@@ -102,7 +102,7 @@ public class CrawlResults {
                 String hash = post.get("hash", null);
                 if (hash != null) {
                     // delete from database
-                    sb.wordIndex.removeURL(hash);
+                    sb.webIndex.removeURL(hash);
                 }
             }
         if (post.containsKey("moreIndexed")) {
@@ -166,11 +166,11 @@ public class CrawlResults {
                 urlHash = sb.crawlResults.getUrlHash(tabletype, i);
 //              serverLog.logFinest("PLASMA", "plasmaCrawlLURL/genTableProps urlHash=" + urlHash);
                 try {
-                    urle = sb.wordIndex.getURL(urlHash, null, 0);
+                    urle = sb.webIndex.getURL(urlHash, null, 0);
                     indexURLReference.Components comp = urle.comp();
 //                  serverLog.logFinest("PLASMA", "plasmaCrawlLURL/genTableProps urle=" + urle.toString());
-                    initiatorSeed = sb.wordIndex.seedDB.getConnected(initiatorHash);
-                    executorSeed = sb.wordIndex.seedDB.getConnected(executorHash);
+                    initiatorSeed = sb.webIndex.seedDB.getConnected(initiatorHash);
+                    executorSeed = sb.webIndex.seedDB.getConnected(executorHash);
 
                     urlstr = comp.url().toNormalform(false, true);
                     urltxt = nxTools.shortenURLString(urlstr, 72); // shorten the string text like a URL

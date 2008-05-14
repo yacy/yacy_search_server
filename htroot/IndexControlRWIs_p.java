@@ -110,7 +110,7 @@ public class IndexControlRWIs_p {
                 if (delurl || delurlref) {
                     // generate an urlx array
                     indexContainer index = null;
-                    index = sb.wordIndex.getContainer(keyhash, null);
+                    index = sb.webIndex.getContainer(keyhash, null);
                     Iterator<indexRWIRowEntry> en = index.entries();
                     int i = 0;
                     urlx = new String[index.size()];
@@ -127,7 +127,7 @@ public class IndexControlRWIs_p {
                         sb.urlRemove(urlx[i]);
                     }
                 }
-                sb.wordIndex.deleteContainer(keyhash);
+                sb.webIndex.deleteContainer(keyhash);
                 post.remove("keyhashdeleteall");
                 post.put("urllist", "generated");
             }
@@ -144,7 +144,7 @@ public class IndexControlRWIs_p {
                 }
                 Set<String> urlHashes = new HashSet<String>();
                 for (int i = 0; i < urlx.length; i++) urlHashes.add(urlx[i]);
-                sb.wordIndex.removeEntries(keyhash, urlHashes);
+                sb.webIndex.removeEntries(keyhash, urlHashes);
                 // this shall lead to a presentation of the list; so handle that the remaining program
                 // thinks that it was called for a list presentation
                 post.remove("keyhashdelete");
@@ -173,21 +173,21 @@ public class IndexControlRWIs_p {
                 if (host.length() != 0) {
                     if (host.length() == 12) {
                         // the host string is a peer hash
-                        seed = sb.wordIndex.seedDB.getConnected(host);
+                        seed = sb.webIndex.seedDB.getConnected(host);
                     } else {
                         // the host string can be a host name
-                        seed = sb.wordIndex.seedDB.lookupByName(host);
+                        seed = sb.webIndex.seedDB.lookupByName(host);
                     }
                 } else {
                     host = post.get("hostHash", ""); // if input field is empty, get from select box
-                    seed = sb.wordIndex.seedDB.getConnected(host);
+                    seed = sb.webIndex.seedDB.getConnected(host);
                 }
                 
                 // prepare index
                 indexContainer index;
                 String result;
                 long starttime = System.currentTimeMillis();
-                index = sb.wordIndex.getContainer(keyhash, null);
+                index = sb.webIndex.getContainer(keyhash, null);
                 // built urlCache
                 Iterator<indexRWIRowEntry> urlIter = index.entries();
                 HashMap<String, indexURLReference> knownURLs = new HashMap<String, indexURLReference>();
@@ -196,7 +196,7 @@ public class IndexControlRWIs_p {
                 indexURLReference lurl;
                 while (urlIter.hasNext()) {
                     iEntry = urlIter.next();
-                    lurl = sb.wordIndex.getURL(iEntry.urlHash(), null, 0);
+                    lurl = sb.webIndex.getURL(iEntry.urlHash(), null, 0);
                     if (lurl == null) {
                         unknownURLEntries.add(iEntry.urlHash());
                         urlIter.remove();
@@ -209,7 +209,7 @@ public class IndexControlRWIs_p {
                 String gzipBody = sb.getConfig("indexControl.gzipBody","false");
                 int timeout = (int) sb.getConfigLong("indexControl.timeout",60000);
                 HashMap<String, Object> resultObj = yacyClient.transferIndex(
-                             sb.wordIndex.seedDB,
+                             sb.webIndex.seedDB,
                              seed,
                              new indexContainer[]{index},
                              knownURLs,
@@ -222,7 +222,7 @@ public class IndexControlRWIs_p {
     
             // generate list
             if (post.containsKey("keyhashsimilar")) {
-                final Iterator<indexContainer> containerIt = sb.wordIndex.indexContainerSet(keyhash, false, true, 256).iterator();
+                final Iterator<indexContainer> containerIt = sb.webIndex.indexContainerSet(keyhash, false, true, 256).iterator();
                     indexContainer container;
                     int i = 0;
                     int rows = 0, cols = 0;
@@ -254,8 +254,8 @@ public class IndexControlRWIs_p {
                         yacyURL url;
                         for (int i=0; i<urlx.length; i++) {
                             urlHashes.add(urlx[i]);
-                            indexURLReference e = sb.wordIndex.getURL(urlx[i], null, 0);
-                            sb.wordIndex.removeURL(urlx[i]);
+                            indexURLReference e = sb.webIndex.getURL(urlx[i], null, 0);
+                            sb.webIndex.removeURL(urlx[i]);
                             if (e != null) {
                                 url = e.comp().url();
                                 pw.println(url.getHost() + "/" + url.getFile());
@@ -282,8 +282,8 @@ public class IndexControlRWIs_p {
                         yacyURL url;
                         for (int i=0; i<urlx.length; i++) {
                             urlHashes.add(urlx[i]);
-                            indexURLReference e = sb.wordIndex.getURL(urlx[i], null, 0);
-                            sb.wordIndex.removeURL(urlx[i]);
+                            indexURLReference e = sb.webIndex.getURL(urlx[i], null, 0);
+                            sb.webIndex.removeURL(urlx[i]);
                             if (e != null) {
                                 url = e.comp().url();
                                 pw.println(url.getHost() + "/.*");
@@ -300,7 +300,7 @@ public class IndexControlRWIs_p {
                     } catch (IOException e) {
                     }
                 }
-                sb.wordIndex.removeEntries(keyhash, urlHashes);
+                sb.webIndex.removeEntries(keyhash, urlHashes);
             }
         
             if (prop.getInt("searchresult", 0) == 3) plasmaSearchAPI.listHosts(prop, keyhash);
@@ -308,7 +308,7 @@ public class IndexControlRWIs_p {
         
 
         // insert constants
-        prop.putNum("wcount", sb.wordIndex.size());
+        prop.putNum("wcount", sb.webIndex.size());
         // return rewrite properties
         return prop;
     }

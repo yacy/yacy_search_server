@@ -322,6 +322,7 @@ public class kelondroEcoTable implements kelondroIndex {
     }
     
     public synchronized Entry get(byte[] key) throws IOException {
+    	if ((file == null) || (index == null)) return null;
         assert file.size() == index.size() + fail : "file.size() = " + file.size() + ", index.size() = " + index.size() + ", fail = " + fail;
         assert ((table == null) || (table.size() == index.size()));
         int i = index.geti(key);

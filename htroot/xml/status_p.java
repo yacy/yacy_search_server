@@ -60,13 +60,13 @@ public class status_p {
             prop.setLocalized(false);
         prop.put("rejected", "0");
         yacyCore.peerActions.updateMySeed();
-        final int  cacheOutSize = sb.wordIndex.dhtOutCacheSize();
+        final int  cacheOutSize = sb.webIndex.dhtOutCacheSize();
         final long cacheMaxSize = sb.getConfigLong(plasmaSwitchboard.WORDCACHE_MAX_COUNT, 10000);
-        prop.putNum("ppm", sb.wordIndex.seedDB.mySeed().getPPM());
-        prop.putNum("qpm", sb.wordIndex.seedDB.mySeed().getQPM());
-        prop.putNum("wordCacheSize", sb.wordIndex.dhtOutCacheSize() + sb.wordIndex.dhtInCacheSize());
+        prop.putNum("ppm", sb.webIndex.seedDB.mySeed().getPPM());
+        prop.putNum("qpm", sb.webIndex.seedDB.mySeed().getQPM());
+        prop.putNum("wordCacheSize", sb.webIndex.dhtOutCacheSize() + sb.webIndex.dhtInCacheSize());
         prop.putNum("wordCacheWSize", cacheOutSize);
-        prop.putNum("wordCacheKSize", sb.wordIndex.dhtInCacheSize());
+        prop.putNum("wordCacheKSize", sb.webIndex.dhtInCacheSize());
         prop.putNum("wordCacheMaxSize", cacheMaxSize);
         prop.put("wordCacheWCount", cacheOutSize);
         prop.put("wordCacheMaxCount", cacheMaxSize);

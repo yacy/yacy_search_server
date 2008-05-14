@@ -1069,15 +1069,15 @@ public final class yacyClient {
             final plasmaSwitchboard sb = new plasmaSwitchboard(new File(args[0]), "httpProxy.init", "DATA/SETTINGS/yacy.conf", false);
             /*final yacyCore core =*/ new yacyCore(sb);
             yacyCore.peerActions.loadSeedLists();
-            final yacySeed target = sb.wordIndex.seedDB.getConnected(args[1]);
+            final yacySeed target = sb.webIndex.seedDB.getConnected(args[1]);
             final String wordhashe = indexWord.word2hash("test");
             //System.out.println("permission=" + permissionMessage(args[1]));
             
             final byte[] content = HttpClient.wget(
                                               "http://" + target.getPublicAddress() + "/yacy/search.html" +
-                                                      "?myseed=" + sb.wordIndex.seedDB.mySeed().genSeedStr(null) +
+                                                      "?myseed=" + sb.webIndex.seedDB.mySeed().genSeedStr(null) +
                                                       "&youare=" + target.hash + "&key=" +
-                                                      "&myseed=" + sb.wordIndex.seedDB.mySeed() .genSeedStr(null) +
+                                                      "&myseed=" + sb.webIndex.seedDB.mySeed() .genSeedStr(null) +
                                                       "&count=10" +
                                                       "&resource=global" +
                                                       "&query=" + wordhashe +

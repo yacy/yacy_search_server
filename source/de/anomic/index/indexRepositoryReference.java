@@ -56,11 +56,12 @@ public final class indexRepositoryReference {
     // class objects
     kelondroIndex urlIndexFile;
     private Export exportthread = null; // will habe a export thread assigned if exporter is running
+    private File location = null;
     
     public indexRepositoryReference(File indexSecondaryPath) {
         super();
-        File indexSecondaryTextLocation = new File(indexSecondaryPath, "TEXT");        
-        urlIndexFile = new kelondroSplitTable(indexSecondaryTextLocation, "urls", indexURLReference.rowdef, false);
+        this.location = new File(indexSecondaryPath, "TEXT");        
+        urlIndexFile = new kelondroSplitTable(this.location, "urls", indexURLReference.rowdef, false);
     }
 
     public int size() {
@@ -84,6 +85,7 @@ public final class indexRepositoryReference {
         // generates an plasmaLURLEntry using the url hash
         // if the url cannot be found, this returns null
         if (urlHash == null) return null;
+        assert urlIndexFile != null;
         try {
             kelondroRow.Entry entry = urlIndexFile.get(urlHash.getBytes());
             if (entry == null) return null;

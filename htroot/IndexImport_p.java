@@ -74,7 +74,7 @@ public final class IndexImport_p {
                 try {
                     boolean startImport = true;                    
                     if (startImport) {
-                        Importer importerThread = new NoticeURLImporter(switchboard.plasmaPath, switchboard.crawlQueues, switchboard.profilesActiveCrawls, switchboard.dbImportManager);
+                        Importer importerThread = new NoticeURLImporter(switchboard.plasmaPath, switchboard.crawlQueues, switchboard.webIndex.profilesActiveCrawls, switchboard.dbImportManager);
 
                         if (importerThread != null) {
                             importerThread.setJobID(switchboard.dbImportManager.generateUniqueJobID());
@@ -125,8 +125,8 @@ public final class IndexImport_p {
             }
         }
         
-        prop.putNum("wcount", switchboard.wordIndex.size());
-        prop.putNum("ucount", switchboard.wordIndex.countURL());
+        prop.putNum("wcount", switchboard.webIndex.size());
+        prop.putNum("ucount", switchboard.webIndex.countURL());
         
         /*
          * Loop over all currently running jobs

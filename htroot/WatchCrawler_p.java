@@ -100,7 +100,7 @@ public class WatchCrawler_p {
             
             if (post.containsKey("crawlingstart")) {
                 // init crawl
-                if (sb.wordIndex.seedDB == null) {
+                if (sb.webIndex.seedDB == null) {
                     prop.put("info", "3");
                 } else {
                     // set new properties
@@ -185,20 +185,20 @@ public class WatchCrawler_p {
                             // first delete old entry, if exists
                             yacyURL url = new yacyURL(crawlingStart, null);
                             String urlhash = url.hash();
-                            sb.wordIndex.removeURL(urlhash);
+                            sb.webIndex.removeURL(urlhash);
                             sb.crawlQueues.noticeURL.removeByURLHash(urlhash);
                             sb.crawlQueues.errorURL.remove(urlhash);
                             
                             // stack url
-                            sb.profilesPassiveCrawls.removeEntry(crawlingStartURL.hash()); // if there is an old entry, delete it
-                            CrawlProfile.entry pe = sb.profilesActiveCrawls.newEntry(
+                            sb.webIndex.profilesPassiveCrawls.removeEntry(crawlingStartURL.hash()); // if there is an old entry, delete it
+                            CrawlProfile.entry pe = sb.webIndex.profilesActiveCrawls.newEntry(
                                     crawlingStartURL.getHost(), crawlingStartURL, newcrawlingfilter, newcrawlingfilter,
                                     newcrawlingdepth, newcrawlingdepth,
                                     crawlingIfOlder, crawlingDomFilterDepth, crawlingDomMaxPages,
                                     crawlingQ,
                                     indexText, indexMedia,
                                     storeHTCache, true, crawlOrder, xsstopw, xdstopw, xpstopw);
-                            String reasonString = sb.crawlStacker.stackCrawl(url, null, sb.wordIndex.seedDB.mySeed().hash, "CRAWLING-ROOT", new Date(), 0, pe);
+                            String reasonString = sb.crawlStacker.stackCrawl(url, null, sb.webIndex.seedDB.mySeed().hash, "CRAWLING-ROOT", new Date(), 0, pe);
                             
                             if (reasonString == null) {
                                 // liftoff!
@@ -220,7 +220,7 @@ public class WatchCrawler_p {
                                     m.remove("generalFilter");
                                     m.remove("specificFilter");
                                     m.put("intention", post.get("intention", "").replace(',', '/'));
-                                    sb.wordIndex.newsPool.publishMyNews(yacyNewsRecord.newRecord(sb.wordIndex.seedDB.mySeed(), yacyNewsPool.CATEGORY_CRAWL_START, m));
+                                    sb.webIndex.newsPool.publishMyNews(yacyNewsRecord.newRecord(sb.webIndex.seedDB.mySeed(), yacyNewsPool.CATEGORY_CRAWL_START, m));
                                 }
                                 
                             } else {
@@ -230,7 +230,7 @@ public class WatchCrawler_p {
                                 
                                 ZURL.Entry ee = sb.crawlQueues.errorURL.newEntry(
                                         new CrawlEntry(
-                                                sb.wordIndex.seedDB.mySeed().hash, 
+                                                sb.webIndex.seedDB.mySeed().hash, 
                                                 crawlingStartURL, 
                                                 "", 
                                                 "", 
@@ -239,7 +239,7 @@ public class WatchCrawler_p {
                                                 0, 
                                                 0, 
                                                 0),
-                                        sb.wordIndex.seedDB.mySeed().hash,
+                                        sb.webIndex.seedDB.mySeed().hash,
                                         new Date(),
                                         1,
                                         reasonString);
@@ -285,7 +285,7 @@ public class WatchCrawler_p {
                                 
                                 // creating a crawler profile
                                 yacyURL crawlURL = new yacyURL("file://" + file.toString(), null);
-                                CrawlProfile.entry profile = sb.profilesActiveCrawls.newEntry(fileName, crawlURL, newcrawlingfilter, newcrawlingfilter, newcrawlingdepth, newcrawlingdepth, crawlingIfOlder, crawlingDomFilterDepth, crawlingDomMaxPages, crawlingQ, indexText, indexMedia, storeHTCache, true, crawlOrder, xsstopw, xdstopw, xpstopw);
+                                CrawlProfile.entry profile = sb.webIndex.profilesActiveCrawls.newEntry(fileName, crawlURL, newcrawlingfilter, newcrawlingfilter, newcrawlingdepth, newcrawlingdepth, crawlingIfOlder, crawlingDomFilterDepth, crawlingDomMaxPages, crawlingQ, indexText, indexMedia, storeHTCache, true, crawlOrder, xsstopw, xdstopw, xpstopw);
                                 
                                 // pause local crawl here
                                 sb.pauseCrawlJob(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL);
@@ -302,7 +302,7 @@ public class WatchCrawler_p {
                                     sb.crawlStacker.enqueueEntry(
                                             nexturl, 
                                             null, 
-                                            sb.wordIndex.seedDB.mySeed().hash, 
+                                            sb.webIndex.seedDB.mySeed().hash, 
                                             (String) e.getValue(), 
                                             new Date(), 
                                             0, 
@@ -331,7 +331,7 @@ public class WatchCrawler_p {
                     		yacyURL sitemapURL = new yacyURL(sitemapURLStr, null);
                             
                     		// create a new profile
-                    		CrawlProfile.entry pe = sb.profilesActiveCrawls.newEntry(
+                    		CrawlProfile.entry pe = sb.webIndex.profilesActiveCrawls.newEntry(
                     				sitemapURLStr, sitemapURL, newcrawlingfilter, newcrawlingfilter,
                     				newcrawlingdepth, newcrawlingdepth,
                     				crawlingIfOlder, crawlingDomFilterDepth, crawlingDomMaxPages,

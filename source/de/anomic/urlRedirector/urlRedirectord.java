@@ -22,18 +22,18 @@ import de.anomic.yacy.yacyURL;
 public class urlRedirectord implements serverHandler {
     
     private serverCore.Session session;
-    private static plasmaSwitchboard switchboard = null;
+    private static plasmaSwitchboard sb = null;
     private serverLog theLogger = new serverLog("URL-REDIRECTOR");
     private static CrawlProfile.entry profile = null;
     private String nextURL;
     
     public urlRedirectord() {
-        if (switchboard == null) {
-            switchboard = plasmaSwitchboard.getSwitchboard();
+        if (sb == null) {
+            sb = plasmaSwitchboard.getSwitchboard();
         }
         
         if (profile == null) {
-                profile = switchboard.profilesActiveCrawls.newEntry(
+                profile = sb.webIndex.profilesActiveCrawls.newEntry(
                             // name
                             "URL Redirector",
                             // start URL
@@ -130,7 +130,7 @@ public class urlRedirectord implements serverHandler {
                     userName = line.substring(line.indexOf(" ")).trim();
                 } else if (line.startsWith("PWD")) {
                     if (userName != null) {
-                        userDB.Entry userEntry = switchboard.userDB.getEntry(userName);
+                        userDB.Entry userEntry = sb.userDB.getEntry(userName);
                         if (userEntry != null) {
                             md5Pwd = line.substring(line.indexOf(" ")).trim();
                             if (userEntry.getMD5EncodedUserPwd().equals(md5Pwd)) {
@@ -150,7 +150,7 @@ public class urlRedirectord implements serverHandler {
                     if (pos != -1) {
                         String newDepth = line.substring(pos).trim();
                         this.theLogger.logFine("Changing crawling depth to '" + newDepth + "'.");
-                        switchboard.profilesActiveCrawls.changeEntry(profile, "generalDepth",newDepth);
+                        sb.webIndex.profilesActiveCrawls.changeEntry(profile, "generalDepth",newDepth);
                     }
                     outputWriter.print("\r\n");
                     outputWriter.flush();
@@ -159,7 +159,7 @@ public class urlRedirectord implements serverHandler {
                     if (pos != -1) {
                         String newValue = line.substring(pos).trim();
                         this.theLogger.logFine("Changing crawl dynamic setting to '" + newValue + "'");
-                        switchboard.profilesActiveCrawls.changeEntry(profile, "crawlingQ",newValue);
+                        sb.webIndex.profilesActiveCrawls.changeEntry(profile, "crawlingQ",newValue);
                     }
                     outputWriter.print("\r\n");
                     outputWriter.flush();                    
@@ -190,15 +190,15 @@ public class urlRedirectord implements serverHandler {
                         ) {
                             // first delete old entry, if exists
                             String urlhash = reqURL.hash();
-                            switchboard.wordIndex.removeURL(urlhash);
-                            switchboard.crawlQueues.noticeURL.removeByURLHash(urlhash);
-                            switchboard.crawlQueues.errorURL.remove(urlhash);                            
+                            sb.webIndex.removeURL(urlhash);
+                            sb.crawlQueues.noticeURL.removeByURLHash(urlhash);
+                            sb.crawlQueues.errorURL.remove(urlhash);                            
                             
                             // enqueuing URL for crawling
-                            reasonString = switchboard.crawlStacker.stackCrawl(
+                            reasonString = sb.crawlStacker.stackCrawl(
                                     reqURL, 
                                     null, 
-                                    switchboard.wordIndex.seedDB.mySeed().hash, 
+                                    sb.webIndex.seedDB.mySeed().hash, 
                                     "URL Redirector", 
                                     new Date(), 
                                     0, 

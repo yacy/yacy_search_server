@@ -55,9 +55,9 @@ import java.util.Locale;
 
 import de.anomic.crawler.CrawlEntry;
 import de.anomic.crawler.NoticedURL;
+import de.anomic.crawler.IndexingStack;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaSwitchboardQueue;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacySeed;
@@ -86,25 +86,25 @@ public class queues_p {
         yacySeed initiator;
         
         //indexing queue
-        prop.putNum("indexingSize", sb.getThread(plasmaSwitchboard.INDEXER).getJobCount() + sb.sbQueue.getActiveQueueSize());
+        prop.putNum("indexingSize", sb.getThread(plasmaSwitchboard.INDEXER).getJobCount() + sb.webIndex.queuePreStack.getActiveQueueSize());
         prop.putNum("indexingMax", (int) sb.getConfigLong(plasmaSwitchboard.INDEXER_SLOTS, 30));
-        prop.putNum("urlpublictextSize", sb.wordIndex.countURL());
-        prop.putNum("rwipublictextSize", sb.wordIndex.size());
-        if ((sb.sbQueue.size() == 0) && (sb.sbQueue.getActiveQueueSize() == 0)) {
+        prop.putNum("urlpublictextSize", sb.webIndex.countURL());
+        prop.putNum("rwipublictextSize", sb.webIndex.size());
+        if ((sb.webIndex.queuePreStack.size() == 0) && (sb.webIndex.queuePreStack.getActiveQueueSize() == 0)) {
             prop.put("list", "0"); //is empty
         } else {
-            plasmaSwitchboardQueue.QueueEntry pcentry;
+            IndexingStack.QueueEntry pcentry;
             long totalSize = 0;
             int i=0; //counter
             
             // getting all entries that are currently in process
-            ArrayList<plasmaSwitchboardQueue.QueueEntry> entryList = new ArrayList<plasmaSwitchboardQueue.QueueEntry>();
-            entryList.addAll(sb.sbQueue.getActiveQueueEntries());
+            ArrayList<IndexingStack.QueueEntry> entryList = new ArrayList<IndexingStack.QueueEntry>();
+            entryList.addAll(sb.webIndex.queuePreStack.getActiveQueueEntries());
             int inProcessCount = entryList.size();
             
             // getting all enqueued entries
-            if ((sb.sbQueue.size() > 0)) {
-                Iterator<plasmaSwitchboardQueue.QueueEntry> i1 = sb.sbQueue.entryIterator(false);
+            if ((sb.webIndex.queuePreStack.size() > 0)) {
+                Iterator<IndexingStack.QueueEntry> i1 = sb.webIndex.queuePreStack.entryIterator(false);
                 while (i1.hasNext()) entryList.add(i1.next());
             }
             
@@ -118,7 +118,7 @@ public class queues_p {
                 if ((pcentry != null) && (pcentry.url() != null)) {
                     long entrySize = pcentry.size();
                     totalSize += entrySize;
-                    initiator = sb.wordIndex.seedDB.getConnected(pcentry.initiator());
+                    initiator = sb.webIndex.seedDB.getConnected(pcentry.initiator());
                     prop.put("list-indexing_"+i+"_profile", (pcentry.profile() != null) ? pcentry.profile().name() : "deleted");
                     prop.put("list-indexing_"+i+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()));
                     prop.put("list-indexing_"+i+"_depth", pcentry.depth());
@@ -145,7 +145,7 @@ public class queues_p {
             for (int i = 0; i < w.length; i++)  {
                 if (w[i] == null) continue;
                 prop.put("list-loader_"+count+"_profile", w[i].profileHandle());
-                initiator = sb.wordIndex.seedDB.getConnected(w[i].initiator());
+                initiator = sb.webIndex.seedDB.getConnected(w[i].initiator());
                 prop.put("list-loader_"+count+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()));
                 prop.put("list-loader_"+count+"_depth", w[i].depth());
                 prop.putHTML("list-loader_"+count+"_url", w[i].url().toString(), true);
@@ -189,7 +189,7 @@ public class queues_p {
         for (int i = 0; i < crawlerList.length; i++) {
             urle = crawlerList[i];
             if ((urle != null) && (urle.url() != null)) {
-                initiator = sb.wordIndex.seedDB.getConnected(urle.initiator());
+                initiator = sb.webIndex.seedDB.getConnected(urle.initiator());
                 prop.put(tableName + "_" + showNum + "_profile", urle.profileHandle());
                 prop.put(tableName + "_" + showNum + "_initiator", ((initiator == null) ? "proxy" : initiator.getName()));
                 prop.put(tableName + "_" + showNum + "_depth", urle.depth());

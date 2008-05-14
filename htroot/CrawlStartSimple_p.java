@@ -100,7 +100,7 @@ public class CrawlStartSimple_p {
         boolean dark = true;   
         
         // create other peer crawl table using YaCyNews
-        Iterator<yacyNewsRecord> recordIterator = sb.wordIndex.newsPool.recordIterator(yacyNewsPool.INCOMING_DB, true);
+        Iterator<yacyNewsRecord> recordIterator = sb.webIndex.newsPool.recordIterator(yacyNewsPool.INCOMING_DB, true);
         int showedCrawl = 0;
         yacyNewsRecord record;
         yacySeed peer;
@@ -109,7 +109,7 @@ public class CrawlStartSimple_p {
             record = recordIterator.next();
             if (record == null) continue;
             if (record.category().equals(yacyNewsPool.CATEGORY_CRAWL_START)) {
-                peer = sb.wordIndex.seedDB.get(record.originator());
+                peer = sb.webIndex.seedDB.get(record.originator());
                 if (peer == null) peername = record.originator(); else peername = peer.getName();
                 prop.put("otherCrawlStartInProgress_" + showedCrawl + "_dark", dark ? "1" : "0");
                 prop.put("otherCrawlStartInProgress_" + showedCrawl + "_cre", record.created().toString());
@@ -125,13 +125,13 @@ public class CrawlStartSimple_p {
         prop.put("otherCrawlStartInProgress", showedCrawl);
         
         // finished remote crawls
-        recordIterator = sb.wordIndex.newsPool.recordIterator(yacyNewsPool.PROCESSED_DB, true);
+        recordIterator = sb.webIndex.newsPool.recordIterator(yacyNewsPool.PROCESSED_DB, true);
         showedCrawl = 0;
         while (recordIterator.hasNext()) {
             record = (yacyNewsRecord) recordIterator.next();
             if (record == null) continue;
             if (record.category().equals(yacyNewsPool.CATEGORY_CRAWL_START)) {
-                peer = sb.wordIndex.seedDB.get(record.originator());
+                peer = sb.webIndex.seedDB.get(record.originator());
                 if (peer == null) peername = record.originator(); else peername = peer.getName();
                 prop.put("otherCrawlStartFinished_" + showedCrawl + "_dark", dark ? "1" : "0");
                 prop.put("otherCrawlStartFinished_" + showedCrawl + "_cre", record.created().toString());
@@ -148,7 +148,7 @@ public class CrawlStartSimple_p {
 
         
         // remote crawl peers
-        if ((sb.wordIndex.seedDB == null) || (sb.wordIndex.seedDB.mySeed().isVirgin()) || (sb.wordIndex.seedDB.mySeed().isJunior())) {
+        if ((sb.webIndex.seedDB == null) || (sb.webIndex.seedDB.mySeed().isVirgin()) || (sb.webIndex.seedDB.mySeed().isJunior())) {
             prop.put("remoteCrawlPeers", "0");
         } else {
             Iterator<yacySeed> crawlavail = yacyCore.peerActions.dhtAction.getAcceptRemoteCrawlSeeds(null, true);

@@ -70,7 +70,7 @@ public final class IndexTransfer_p {
         
         if (post != null) {            
             if (post.containsKey("startIndexTransfer")) {                
-                yacySeed seed = sb.wordIndex.seedDB.getConnected(post.get("hostHash", ""));                
+                yacySeed seed = sb.webIndex.seedDB.getConnected(post.get("hostHash", ""));                
                 if (seed == null) {
                     prop.put("running_status","Disconnected peer");
                 } else {                    
@@ -95,8 +95,8 @@ public final class IndexTransfer_p {
         }
         
         // insert constants
-        prop.putNum("wcount", sb.wordIndex.size());
-        prop.putNum("ucount", sb.wordIndex.countURL());
+        prop.putNum("wcount", sb.webIndex.size());
+        prop.putNum("ucount", sb.webIndex.countURL());
         prop.put("running",(sb.transferIdxThread==null) ? "0" : "1");
         if (sb.transferIdxThread != null) {
             String[] status = sb.transferIdxThread.getStatus();
@@ -130,7 +130,7 @@ public final class IndexTransfer_p {
         //List known hosts
         yacySeed seed;
         int hc = 0;
-        if ((sb.wordIndex.seedDB != null) && (sb.wordIndex.seedDB.sizeConnected() > 0)) {
+        if ((sb.webIndex.seedDB != null) && (sb.webIndex.seedDB.sizeConnected() > 0)) {
             Iterator<yacySeed> e = yacyCore.peerActions.dhtAction.getAcceptRemoteIndexSeeds("------------");
             TreeMap<String, String> hostList = new TreeMap<String, String>();
             while (e.hasNext()) {

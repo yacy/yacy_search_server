@@ -69,7 +69,7 @@ public class IndexCreateLoaderQueue_p {
             for (int i = 0; i < w.length; i++)  {
                 if (w[i] == null) continue;
                 
-                initiator = sb.wordIndex.seedDB.getConnected(w[i].initiator());
+                initiator = sb.webIndex.seedDB.getConnected(w[i].initiator());
                 prop.put("loader-set_list_"+count+"_dark", dark ? "1" : "0");
                 prop.putHTML("loader-set_list_"+count+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()));
                 prop.put("loader-set_list_"+count+"_depth", w[i].depth());

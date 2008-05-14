@@ -274,6 +274,10 @@ public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
         }
     }
 
+    public void removeConfig(String key) {
+    	configProps.remove(key);
+    }
+    
     /* (non-Javadoc)
      * @see de.anomic.server.serverSwitch#getConfig(java.lang.String, java.lang.String)
      */

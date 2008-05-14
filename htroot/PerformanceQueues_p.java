@@ -177,7 +177,7 @@ public class PerformanceQueues_p {
             // disallow setting of memprereq for indexer to prevent db from throwing OOMs
             prop.put("table_" + c + "_disabled", /*(threadName.endsWith("_indexing")) ? 1 :*/ "0");
             prop.put("table_" + c + "_recommendation", threadName.endsWith("_indexing") ? "1" : "0");
-            prop.putNum("table_" + c + "_recommendation_value", threadName.endsWith("_indexing") ? (switchboard.wordIndex.minMem() / 1024) : 0);
+            prop.putNum("table_" + c + "_recommendation_value", threadName.endsWith("_indexing") ? (switchboard.webIndex.minMem() / 1024) : 0);
             c++;
         }
         prop.put("table", c);
@@ -185,7 +185,7 @@ public class PerformanceQueues_p {
         if ((post != null) && (post.containsKey("cacheSizeSubmit"))) {
             int wordCacheMaxCount = post.getInt("wordCacheMaxCount", 20000);
             switchboard.setConfig(plasmaSwitchboard.WORDCACHE_MAX_COUNT, Integer.toString(wordCacheMaxCount));
-            switchboard.wordIndex.setMaxWordCount(wordCacheMaxCount);
+            switchboard.webIndex.setMaxWordCount(wordCacheMaxCount);
             
             int wordCacheInitCount = post.getInt(plasmaSwitchboard.WORDCACHE_INIT_COUNT, 30000);
             switchboard.setConfig(plasmaSwitchboard.WORDCACHE_INIT_COUNT, Integer.toString(wordCacheInitCount));
@@ -231,17 +231,17 @@ public class PerformanceQueues_p {
         }
         
         // table cache settings
-        prop.putNum("urlCacheSize", switchboard.wordIndex.getURLwriteCacheSize());  
-        prop.putNum("wordCacheWSize", switchboard.wordIndex.dhtOutCacheSize());
-        prop.putNum("wordCacheKSize", switchboard.wordIndex.dhtInCacheSize());
-        prop.putNum("wordCacheWSizeKBytes", switchboard.wordIndex.dhtCacheSizeBytes(false)/1024);
-        prop.putNum("wordCacheKSizeKBytes", switchboard.wordIndex.dhtCacheSizeBytes(true)/1024);
-        prop.putNum("maxURLinWCache", switchboard.wordIndex.maxURLinDHTOutCache());
-        prop.putNum("maxURLinKCache", switchboard.wordIndex.maxURLinDHTInCache());
-        prop.putNum("maxAgeOfWCache", switchboard.wordIndex.maxAgeOfDHTOutCache() / 1000 / 60); // minutes
-        prop.putNum("maxAgeOfKCache", switchboard.wordIndex.maxAgeOfDHTInCache() / 1000 / 60); // minutes
-        prop.putNum("minAgeOfWCache", switchboard.wordIndex.minAgeOfDHTOutCache() / 1000 / 60); // minutes
-        prop.putNum("minAgeOfKCache", switchboard.wordIndex.minAgeOfDHTInCache() / 1000 / 60); // minutes
+        prop.putNum("urlCacheSize", switchboard.webIndex.getURLwriteCacheSize());  
+        prop.putNum("wordCacheWSize", switchboard.webIndex.dhtOutCacheSize());
+        prop.putNum("wordCacheKSize", switchboard.webIndex.dhtInCacheSize());
+        prop.putNum("wordCacheWSizeKBytes", switchboard.webIndex.dhtCacheSizeBytes(false)/1024);
+        prop.putNum("wordCacheKSizeKBytes", switchboard.webIndex.dhtCacheSizeBytes(true)/1024);
+        prop.putNum("maxURLinWCache", switchboard.webIndex.maxURLinDHTOutCache());
+        prop.putNum("maxURLinKCache", switchboard.webIndex.maxURLinDHTInCache());
+        prop.putNum("maxAgeOfWCache", switchboard.webIndex.maxAgeOfDHTOutCache() / 1000 / 60); // minutes
+        prop.putNum("maxAgeOfKCache", switchboard.webIndex.maxAgeOfDHTInCache() / 1000 / 60); // minutes
+        prop.putNum("minAgeOfWCache", switchboard.webIndex.minAgeOfDHTOutCache() / 1000 / 60); // minutes
+        prop.putNum("minAgeOfKCache", switchboard.webIndex.minAgeOfDHTInCache() / 1000 / 60); // minutes
         prop.putNum("maxWaitingWordFlush", switchboard.getConfigLong("maxWaitingWordFlush", 180));
         prop.put("wordCacheMaxCount", switchboard.getConfigLong(plasmaSwitchboard.WORDCACHE_MAX_COUNT, 20000));
         prop.put("wordCacheInitCount", switchboard.getConfigLong(plasmaSwitchboard.WORDCACHE_INIT_COUNT, 30000));

@@ -277,7 +277,7 @@ public class SitemapParser extends DefaultHandler {
                 String dbocc = this.sb.urlExists(nexturlhash);
                 if ((dbocc != null) && (dbocc.equalsIgnoreCase("loaded"))) {
                     // the url was already loaded. we need to check the date
-                    indexURLReference oldEntry = this.sb.wordIndex.getURL(nexturlhash, null, 0);
+                    indexURLReference oldEntry = this.sb.webIndex.getURL(nexturlhash, null, 0);
                     if (oldEntry != null) {
                         Date modDate = oldEntry.moddate();
                         // check if modDate is null
@@ -291,7 +291,7 @@ public class SitemapParser extends DefaultHandler {
             String error = null;
             error = this.sb.crawlStacker.stackCrawl(url,
                                                              null, // this.siteMapURL.toString(),
-                                                             this.sb.wordIndex.seedDB.mySeed().hash, this.nextURL, new Date(),
+                                                             this.sb.webIndex.seedDB.mySeed().hash, this.nextURL, new Date(),
                                                              0, this.crawlingProfile);
 
             if (error != null) {
@@ -301,7 +301,7 @@ public class SitemapParser extends DefaultHandler {
                     // insert URL into the error DB
                     ZURL.Entry ee = this.sb.crawlQueues.errorURL.newEntry(
                             new CrawlEntry(
-                                    sb.wordIndex.seedDB.mySeed().hash, 
+                                    sb.webIndex.seedDB.mySeed().hash, 
                                     new yacyURL(this.nextURL, null), 
                                     "", 
                                     "", 
@@ -310,7 +310,7 @@ public class SitemapParser extends DefaultHandler {
                                     0, 
                                     0, 
                                     0),
-                            this.sb.wordIndex.seedDB.mySeed().hash,
+                            this.sb.webIndex.seedDB.mySeed().hash,
                             new Date(),
                             1,
                             error);
@@ -346,7 +346,7 @@ public class SitemapParser extends DefaultHandler {
     }
 
     private CrawlProfile.entry createProfile(String domainName, yacyURL sitemapURL) {
-        return this.sb.profilesActiveCrawls.newEntry(domainName, sitemapURL,
+        return this.sb.webIndex.profilesActiveCrawls.newEntry(domainName, sitemapURL,
         // crawlingFilter
                                                               ".*", ".*",
                                                               // Depth

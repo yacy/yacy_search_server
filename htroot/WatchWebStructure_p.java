@@ -4,6 +4,7 @@ import java.util.Iterator;
 import de.anomic.crawler.CrawlProfile.entry;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -31,16 +32,16 @@ public class WatchWebStructure_p {
         
         if (host.equals("auto")) {
         	// try to find the host from the crawl profiles
-        	Iterator<entry> it = sb.profilesActiveCrawls.profiles(true);
+        	Iterator<entry> it = sb.webIndex.profilesActiveCrawls.profiles(true);
             entry e;
             while (it.hasNext()) {
                 e = it.next();
-                if (e.name().equals(plasmaSwitchboard.CRAWL_PROFILE_PROXY) ||
-                    e.name().equals(plasmaSwitchboard.CRAWL_PROFILE_REMOTE) ||
-                    e.name().equals(plasmaSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_TEXT)  ||
-                    e.name().equals(plasmaSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT) ||
-                    e.name().equals(plasmaSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA) ||
-                    e.name().equals(plasmaSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA))
+                if (e.name().equals(plasmaWordIndex.CRAWL_PROFILE_PROXY) ||
+                    e.name().equals(plasmaWordIndex.CRAWL_PROFILE_REMOTE) ||
+                    e.name().equals(plasmaWordIndex.CRAWL_PROFILE_SNIPPET_LOCAL_TEXT)  ||
+                    e.name().equals(plasmaWordIndex.CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT) ||
+                    e.name().equals(plasmaWordIndex.CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA) ||
+                    e.name().equals(plasmaWordIndex.CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA))
                    continue;
                 host = e.name();
                 break; // take the first one

@@ -436,7 +436,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
 
         // close all sessions
         this.log.logInfo("Closing server sessions ...");
-        for (Session s: this.busySessions.keySet()) {
+        if (this.busySessions != null) for (Session s: this.busySessions.keySet()) {
             s.interrupt();
             s.close();
         }

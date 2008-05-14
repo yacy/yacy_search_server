@@ -104,6 +104,7 @@ public interface serverSwitch<E> {
     public long getConfigLong(String key, long dflt);
     public boolean getConfigBool(String key, boolean dflt);
     public File getConfigPath(String key, String dflt);
+    public void removeConfig(String key);
     public Iterator<String> configKeys();
     public Map<String, String> getRemoved();
         

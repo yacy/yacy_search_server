@@ -82,7 +82,7 @@ public class NetworkPicture {
         if (passiveLimit > 1000000) passiveLimit = 1000000;
         if (potentialLimit > 1000000) potentialLimit = 1000000;
         if (maxCount > 1000) maxCount = 1000;
-        return plasmaGrafics.getNetworkPicture(sb.wordIndex.seedDB, 10000, width, height, passiveLimit, potentialLimit, maxCount, corona, env.getConfig("network.unit.name", "unspecified"), env.getConfig("network.unit.description", "unspecified"), bgcolor);
+        return plasmaGrafics.getNetworkPicture(sb.webIndex.seedDB, 10000, width, height, passiveLimit, potentialLimit, maxCount, corona, env.getConfig("network.unit.name", "unspecified"), env.getConfig("network.unit.description", "unspecified"), bgcolor);
     }
     
 }

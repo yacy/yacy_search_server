@@ -92,7 +92,7 @@ public final class message {
 
         String youare = post.get("youare", ""); // seed hash of the target peer, needed for network stability
         // check if we are the right target and requester has correct information about this peer
-        if ((sb.wordIndex.seedDB.mySeed() == null) || (!(sb.wordIndex.seedDB.mySeed().hash.equals(youare)))) {
+        if ((sb.webIndex.seedDB.mySeed() == null) || (!(sb.webIndex.seedDB.mySeed().hash.equals(youare)))) {
             // this request has a wrong target
             prop.put("response", "-1"); // request rejected
             return prop;
@@ -152,7 +152,7 @@ public final class message {
             sb.messageDB.write(msgEntry = sb.messageDB.newEntry(
                     "remote",
                     otherSeed.get(yacySeed.NAME, "anonymous"), otherSeed.hash,
-                    sb.wordIndex.seedDB.mySeed().getName(), sb.wordIndex.seedDB.mySeed().hash,
+                    sb.webIndex.seedDB.mySeed().getName(), sb.webIndex.seedDB.mySeed().hash,
                     subject, mb));
 
             messageForwardingViaEmail(sb, msgEntry);
@@ -198,7 +198,7 @@ public final class message {
             .append(sendMailTo)
             .append("\nFrom: ")
             .append("yacy@")
-            .append(sb.wordIndex.seedDB.mySeed().getName())
+            .append(sb.webIndex.seedDB.mySeed().getName())
             .append("\nSubject: [YaCy] ")
             .append(msgEntry.subject().replace('\n', ' '))
             .append("\nDate: ")

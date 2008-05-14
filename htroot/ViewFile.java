@@ -108,7 +108,7 @@ public class ViewFile {
         if (urlHash.length() > 0) {
             // getting the urlEntry that belongs to the url hash
             indexURLReference urlEntry = null;
-            urlEntry = sb.wordIndex.getURL(urlHash, null, 0);
+            urlEntry = sb.webIndex.getURL(urlHash, null, 0);
             if (urlEntry == null) {
                 prop.put("error", "2");
                 prop.put("viewMode",VIEW_MODE_NO_TEXT);

@@ -71,7 +71,7 @@ public class plasmaDHTFlush extends Thread {
             this.seed = seed;
             this.delete = delete;
             this.sb = plasmaSwitchboard.getSwitchboard();
-            this.initialWordsDBSize = this.sb.wordIndex.size();   
+            this.initialWordsDBSize = this.sb.webIndex.size();   
             this.gzipBody4Transfer = gzipBody;
             this.timeout4Transfer = timeout;
             //this.maxOpenFiles4Transfer = (int) sb.getConfigLong("indexTransfer.maxOpenFiles",800);
@@ -116,7 +116,7 @@ public class plasmaDHTFlush extends Thread {
         }
         
         public float getTransferedContainerPercent() {
-            long currentWordsDBSize = this.sb.wordIndex.size(); 
+            long currentWordsDBSize = this.sb.webIndex.size(); 
             if (this.initialWordsDBSize == 0) return 100;
             else if (currentWordsDBSize >= this.initialWordsDBSize) return 0;
             //else return (float) ((initialWordsDBSize-currentWordsDBSize)/(initialWordsDBSize/100));
@@ -176,7 +176,7 @@ public class plasmaDHTFlush extends Thread {
                      * b) max open file limit was exceeded 
                      */
                     if (nothingSelected(newDHTChunk)) {
-                        if (this.sb.wordIndex.size() > 0 && this.delete) {
+                        if (this.sb.webIndex.size() > 0 && this.delete) {
                             // if there are still words in the index we try it again now
                             this.startPointHash = "AAAAAAAAAAAA";
                         } else {                            
@@ -237,7 +237,7 @@ public class plasmaDHTFlush extends Thread {
                 }
                 
                 // if we reach this point we were aborted by the user or by server shutdown
-                if (this.sb.wordIndex.size() > 0) this.status = "aborted";
+                if (this.sb.webIndex.size() > 0) this.status = "aborted";
             } catch (Exception e) {
                 this.status = "Error: " + e.getMessage();
                 this.log.logWarning("Index transfer to peer " + this.seed.getName() + ":" + this.seed.hash + " failed:'" + e.getMessage() + "'",e);

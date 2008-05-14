@@ -73,7 +73,7 @@ public class welcome {
 
         prop.putHTML("peername", env.getConfig("peerName", "<nameless>"));
         prop.putHTML("peerdomain", env.getConfig("peerName", "<nameless>").toLowerCase());
-        prop.putHTML("peeraddress", sb.wordIndex.seedDB.mySeed().getPublicAddress());
+        prop.putHTML("peeraddress", sb.webIndex.seedDB.mySeed().getPublicAddress());
         prop.put("hostname", serverDomains.myPublicIP());
         try{
             prop.put("hostip", InetAddress.getByName(serverDomains.myPublicIP()).getHostAddress());
@@ -83,7 +83,7 @@ public class welcome {
         prop.put("port", serverCore.getPortNr(env.getConfig("port","8080")));
         prop.put("clientip", (String) header.get(httpHeader.CONNECTION_PROP_CLIENTIP, ""));
 
-        final String peertype = (sb.wordIndex.seedDB.mySeed() == null) ? yacySeed.PEERTYPE_JUNIOR : sb.wordIndex.seedDB.mySeed().get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN);
+        final String peertype = (sb.webIndex.seedDB.mySeed() == null) ? yacySeed.PEERTYPE_JUNIOR : sb.webIndex.seedDB.mySeed().get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN);
         final boolean senior = (peertype.equals(yacySeed.PEERTYPE_SENIOR)) || (peertype.equals(yacySeed.PEERTYPE_PRINCIPAL));
         if (senior) { prop.put("couldcan", "can"); } else { prop.put("couldcan", "could"); }
         if (senior) { prop.put("seniorinfo", "This peer runs in senior mode which means that your peer can be accessed using the addresses shown above."); } else { prop.putHTML("seniorinfo", "<b>Nobody can access your peer from the outside of your intranet. You must open your firewall and/or set a 'virtual server' in the settings of your router to enable access to the addresses as shown below.</b>"); }

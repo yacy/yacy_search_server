@@ -110,11 +110,11 @@ public class BlogComments {
             StrAuthor = sb.blogDB.guessAuthor(ip);
 
             if (StrAuthor == null || StrAuthor.length() == 0) {
-                if (sb.wordIndex.seedDB.mySeed() == null) {
+                if (sb.webIndex.seedDB.mySeed() == null) {
                     StrAuthor = "anonymous";
                 }
                 else {
-                    StrAuthor = sb.wordIndex.seedDB.mySeed().get("Name", "anonymous");
+                    StrAuthor = sb.webIndex.seedDB.mySeed().get("Name", "anonymous");
                 }
             }
         }
@@ -169,15 +169,15 @@ public class BlogComments {
                     sb.messageDB.write(msgEntry = sb.messageDB.newEntry(
                             "blogComment",
                             StrAuthor,
-                            sb.wordIndex.seedDB.mySeed().hash,
-                            sb.wordIndex.seedDB.mySeed().getName(), sb.wordIndex.seedDB.mySeed().hash,
+                            sb.webIndex.seedDB.mySeed().hash,
+                            sb.webIndex.seedDB.mySeed().getName(), sb.webIndex.seedDB.mySeed().hash,
                             "new blog comment: " + new String(blogEntry.getSubject(),"UTF-8"), content));
                 } catch (UnsupportedEncodingException e1) {
                     sb.messageDB.write(msgEntry = sb.messageDB.newEntry(
                             "blogComment",
                             StrAuthor,
-                            sb.wordIndex.seedDB.mySeed().hash,
-                            sb.wordIndex.seedDB.mySeed().getName(), sb.wordIndex.seedDB.mySeed().hash,
+                            sb.webIndex.seedDB.mySeed().hash,
+                            sb.webIndex.seedDB.mySeed().getName(), sb.webIndex.seedDB.mySeed().hash,
                             "new blog comment: " + new String(blogEntry.getSubject()), content));
                 }
 
@@ -355,7 +355,7 @@ public class BlogComments {
             .append(sendMailTo)
             .append("\nFrom: ")
             .append("yacy@")
-            .append(sb.wordIndex.seedDB.mySeed().getName())
+            .append(sb.webIndex.seedDB.mySeed().getName())
             .append("\nSubject: [YaCy] ")
             .append(msgEntry.subject().replace('\n', ' '))
             .append("\nDate: ")

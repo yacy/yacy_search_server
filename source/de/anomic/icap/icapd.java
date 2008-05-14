@@ -394,7 +394,7 @@ public class icapd implements serverHandler {
                     httpRespStatusLine,
                     resInfo,
                     null, 
-                    switchboard.defaultProxyProfile
+                    switchboard.webIndex.defaultProxyProfile
             );
             
             // getting the filename/path to store the response body

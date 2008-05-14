@@ -41,13 +41,14 @@
     #(commit)#
         ::<div class="commit">Accepted Changes.</div>
         ::<div class="error">Inapplicable Setting Combination:</div>
-        #(/commit)#
-        #(commitCrawlPlea)#::<div class="error">P2P operation can run without remote indexing, but runs better with remote indexing switched on. Please switch 'Accept Remote Crawl Requests' on.</div>#(/commitCrawlPlea)#
-        #(commitDHTIsRobinson)#::<div class="error">For P2P operation, at least DHT distribution or DHT receive (or both) must be set. You have thus defined a Robinson configuration.</div>#(/commitDHTIsRobinson)#
-        #(commitDHTNoGlobalSearch)#::<div class="error">Global Search in P2P configuration is only allowed, if both, index receive and distribution is switched on. You have a P2P configuration, but are not allowed to search other peers.</div>#(/commitDHTNoGlobalSearch)#
-        #(commitRobinson)#::<div class="commit">For Robinson Mode, index distribution and receive is switched off.</div>#(/commitRobinson)#
-        #(commitRobinsonWithRemoteIndexing)#::<div class="commit">This Robinson Mode switches remote indexing on, but limits targets to peers within the same cluster. Remote indexing requests from peers within the same cluster are accepted.</div>#(/commitRobinsonWithRemoteIndexing)#
-        #(commitRobinsonWithoutRemoteIndexing)#::<div class="commit">This Robinson Mode does not allow any remote indexing (neither requests remote indexing, nor accepts it).</div>#(/commitRobinsonWithoutRemoteIndexing)#
+        ::<div class="error">No changes were made!</div>
+    #(/commit)#
+    #(commitCrawlPlea)#::<div class="error">P2P operation can run without remote indexing, but runs better with remote indexing switched on. Please switch 'Accept Remote Crawl Requests' on.</div>#(/commitCrawlPlea)#
+    #(commitDHTIsRobinson)#::<div class="error">For P2P operation, at least DHT distribution or DHT receive (or both) must be set. You have thus defined a Robinson configuration.</div>#(/commitDHTIsRobinson)#
+    #(commitDHTNoGlobalSearch)#::<div class="error">Global Search in P2P configuration is only allowed, if both, index receive and distribution is switched on. You have a P2P configuration, but are not allowed to search other peers.</div>#(/commitDHTNoGlobalSearch)#
+    #(commitRobinson)#::<div class="commit">For Robinson Mode, index distribution and receive is switched off.</div>#(/commitRobinson)#
+    #(commitRobinsonWithRemoteIndexing)#::<div class="commit">This Robinson Mode switches remote indexing on, but limits targets to peers within the same cluster. Remote indexing requests from peers within the same cluster are accepted.</div>#(/commitRobinsonWithRemoteIndexing)#
+    #(commitRobinsonWithoutRemoteIndexing)#::<div class="commit">This Robinson Mode does not allow any remote indexing (neither requests remote indexing, nor accepts it).</div>#(/commitRobinsonWithoutRemoteIndexing)#
     <form name="ConfigForm" method="post" action="ConfigNetwork_p.html" enctype="multipart/form-data" accept-charset="UTF-8">
     <fieldset>
       <legend>
@@ -60,23 +61,33 @@
       </p>
       <dl>
         <dt>Network Definition</dt>
-		<dd>#[network.unit.definition]#</dd>
-		<dt>Network Nick</dt>
-		<dd>#[network.unit.name]#</dd>
-		<dt>Long Description</dt>
-		<dd>#[network.unit.description]#</dd>
-		<dt>Indexing Domain</dt>
-		<dd>#[network.unit.domain]#</dd>
-		<dt>DHT</dt>
-		<dd>#[network.unit.dht]#</dd>
+        <dd>
+        <select id="networkDefinition" name="networkDefinition">
+          <option selected="selected">#[network.unit.definition]#</option>
+          #{networks}#
+            <option>#[network]#</option>
+          #{/networks}#
+        </select>
+        
+        </dd>
+        <dt>Network Nick</dt>
+        <dd>#[network.unit.name]#</dd>
+        <dt>Long Description</dt>
+        <dd>#[network.unit.description]#</dd>
+        <dt>Indexing Domain</dt>
+        <dd>#[network.unit.domain]#</dd>
+        <dt>DHT</dt>
+        <dd>#[network.unit.dht]#</dd>
+        <dt>&nbsp;</dt>
+        <dd><input type="submit" name="changeNetwork" value="Change Network" /></dd>
       </dl>
-	</fieldset>
-	</form>
+    </fieldset>
+    </form>
     <fieldset>
       <legend>
         <label for="p2p">Distributed Computing Network for Domain</label>
       </legend>
-	  
+      
     <p>
       You can configure if you want to participate at the global YaCy network or if you want to have your
       own separate search cluster with or without connection to the global network. You may also define
@@ -89,7 +100,7 @@
         <input type="radio" name="network" id="p2p" onclick="EnableP2P()" value="p2p"#(p2p.checked)#:: checked="checked"#(/p2p.checked)# />
         <label for="p2p">Peer-to-Peer Mode</label>
       </legend>
-	  <dl>
+      <dl>
         <dt>
           <label for="indexDistribute">Index Distribution</label>
           <input type="checkbox" id="indexDistribute" name="indexDistribute" onclick="CheckForRobinson()" #(indexDistributeChecked)#::checked="checked" #(/indexDistributeChecked)#/>
@@ -112,18 +123,18 @@
                  name="indexDistributeWhileIndexing"
                  #(indexDistributeWhileIndexing.off)#::checked="checked" #(/indexDistributeWhileIndexing.off)#/>
           <label for="indexDistributeWhileIndexingOff">disabled during indexing</label>.
-		</dd>
-		<dt>
-		  <label for="indexReceive">Index Receive</label>
-		  <input type="checkbox" id="indexReceive" name="indexReceive" onclick="CheckForRobinson()" #(indexReceiveChecked)#::checked="checked" #(/indexReceiveChecked)#/>
-		</dt>
-		<dd>
-		  Accept remote Index Transmissions.<br />
-		  This works only if you have a senior peer. The DHT-rules do not work without this function.<br />
-		  <input type="radio" value="on" id="indexReceiveBlockBlacklistOn"
-		         name="indexReceiveBlockBlacklist"
-		         #(indexReceiveBlockBlacklistChecked.on)#::checked="checked" #(/indexReceiveBlockBlacklistChecked.on)#/>
-		  <label for="indexReceiveBlockBlacklistOn">reject</label> /
+        </dd>
+        <dt>
+          <label for="indexReceive">Index Receive</label>
+          <input type="checkbox" id="indexReceive" name="indexReceive" onclick="CheckForRobinson()" #(indexReceiveChecked)#::checked="checked" #(/indexReceiveChecked)#/>
+        </dt>
+        <dd>
+          Accept remote Index Transmissions.<br />
+          This works only if you have a senior peer. The DHT-rules do not work without this function.<br />
+          <input type="radio" value="on" id="indexReceiveBlockBlacklistOn"
+                 name="indexReceiveBlockBlacklist"
+                 #(indexReceiveBlockBlacklistChecked.on)#::checked="checked" #(/indexReceiveBlockBlacklistChecked.on)#/>
+          <label for="indexReceiveBlockBlacklistOn">reject</label> /
           <input type="radio" value="off" id="indexReceiveBlockBlacklistOff"
                  name="indexReceiveBlockBlacklist"
                  #(indexReceiveBlockBlacklistChecked.off)#::checked="checked" #(/indexReceiveBlockBlacklistChecked.off)#/>
@@ -133,11 +144,11 @@
           <label for="crawlResponse">Accept Remote Crawl Requests</label>
           <input type="checkbox" id="crawlResponse" name="crawlResponse" #(crawlResponse)#::checked="checked" #(/crawlResponse)#/>
         </dt>
-		<dd>
-		  Perform web indexing upon request of another peer.<br />
-		  This works only if you are a senior peer.<br />
-		  <label for="acceptCrawlLimit">Load with a maximum of</label>
-		  <input id="acceptCrawlLimit" name="acceptCrawlLimit" type="text" size="3" maxlength="3" value="#[acceptCrawlLimit]#" /> pages per minute
+        <dd>
+          Perform web indexing upon request of another peer.<br />
+          This works only if you are a senior peer.<br />
+          <label for="acceptCrawlLimit">Load with a maximum of</label>
+          <input id="acceptCrawlLimit" name="acceptCrawlLimit" type="text" size="3" maxlength="3" value="#[acceptCrawlLimit]#" /> pages per minute
         </dd>
       </dl>
     </fieldset>

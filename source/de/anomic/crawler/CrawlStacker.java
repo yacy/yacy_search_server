@@ -213,7 +213,7 @@ public final class CrawlStacker extends Thread {
 
             // if the url was rejected we store it into the error URL db
             if (rejectReason != null) {
-                ZURL.Entry ee = sb.crawlQueues.errorURL.newEntry(entry, sb.wordIndex.seedDB.mySeed().hash, new Date(), 1, rejectReason);
+                ZURL.Entry ee = sb.crawlQueues.errorURL.newEntry(entry, sb.webIndex.seedDB.mySeed().hash, new Date(), 1, rejectReason);
                 ee.store();
                 sb.crawlQueues.errorURL.push(ee);
             }
@@ -401,7 +401,7 @@ public final class CrawlStacker extends Thread {
             return reason;
         }
         
-        CrawlProfile.entry profile = sb.profilesActiveCrawls.getEntry(entry.profileHandle());
+        CrawlProfile.entry profile = sb.webIndex.profilesActiveCrawls.getEntry(entry.profileHandle());
         if (profile == null) {
             String errorMsg = "LOST PROFILE HANDLE '" + entry.profileHandle() + "' for URL " + entry.url();
             log.logWarning(errorMsg);
@@ -460,7 +460,7 @@ public final class CrawlStacker extends Thread {
 
         // check if the url is double registered
         String dbocc = sb.crawlQueues.urlExists(entry.url().hash());
-        indexURLReference oldEntry = this.sb.wordIndex.getURL(entry.url().hash(), null, 0);
+        indexURLReference oldEntry = this.sb.webIndex.getURL(entry.url().hash(), null, 0);
         boolean recrawl = (oldEntry != null) && ((System.currentTimeMillis() - oldEntry.loaddate().getTime()) > profile.recrawlIfOlder());
         // do double-check
         if ((dbocc != null) && (!recrawl)) {
@@ -481,18 +481,18 @@ public final class CrawlStacker extends Thread {
         }
         
         // store information
-        boolean local = entry.initiator().equals(sb.wordIndex.seedDB.mySeed().hash);
+        boolean local = entry.initiator().equals(sb.webIndex.seedDB.mySeed().hash);
         boolean global = 
             (profile != null) &&
             (profile.remoteIndexing()) /* granted */ &&
             (entry.depth() == profile.generalDepth()) /* leaf node */ && 
             //(initiatorHash.equals(yacyCore.seedDB.mySeed.hash)) /* not proxy */ &&
             (
-                    (sb.wordIndex.seedDB.mySeed().isSenior()) ||
-                    (sb.wordIndex.seedDB.mySeed().isPrincipal())
+                    (sb.webIndex.seedDB.mySeed().isSenior()) ||
+                    (sb.webIndex.seedDB.mySeed().isPrincipal())
             ) /* qualified */;
         
-        if ((!local)&&(!global)&&(!profile.handle().equals(this.sb.defaultRemoteProfile.handle()))) {
+        if ((!local)&&(!global)&&(!profile.handle().equals(this.sb.webIndex.defaultRemoteProfile.handle()))) {
             this.log.logSevere("URL '" + entry.url().toString() + "' can neither be crawled local nor global.");
         }
         

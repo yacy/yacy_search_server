@@ -29,6 +29,7 @@ package de.anomic.plasma;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 
+import de.anomic.crawler.IndexingStack;
 import de.anomic.server.serverProfiling;
 import de.anomic.server.serverProfiling.Event;
 import de.anomic.yacy.yacyCore;
@@ -42,7 +43,7 @@ public class plasmaProfiling {
 
     public static long lastPPMUpdate = System.currentTimeMillis()- 30000;
 
-    public static void updateIndexedPage(yacySeed mySeed, plasmaSwitchboardQueue.QueueEntry entry) {
+    public static void updateIndexedPage(yacySeed mySeed, IndexingStack.QueueEntry entry) {
         if (System.currentTimeMillis() - lastPPMUpdate > 30000) {
             // we don't want to do this too often
             yacyCore.peerActions.updateMySeed();

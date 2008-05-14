@@ -202,14 +202,14 @@ public class yacysearch {
                 
                 // delete the index entry locally
                 final String delHash = post.get("deleteref", ""); // urlhash
-                sb.wordIndex.removeWordReferences(query[0], delHash);
+                sb.webIndex.removeWordReferences(query[0], delHash);
 
                 // make new news message with negative voting
                 HashMap<String, String> map = new HashMap<String, String>();
                 map.put("urlhash", delHash);
                 map.put("vote", "negative");
                 map.put("refid", "");
-                sb.wordIndex.newsPool.publishMyNews(yacyNewsRecord.newRecord(sb.wordIndex.seedDB.mySeed(), yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, map));
+                sb.webIndex.newsPool.publishMyNews(yacyNewsRecord.newRecord(sb.webIndex.seedDB.mySeed(), yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, map));
             }
 
             // if a plus-button was hit, create new voting message
@@ -219,7 +219,7 @@ public class yacysearch {
                     return prop;
                 }
                 final String recommendHash = post.get("recommendref", ""); // urlhash
-                indexURLReference urlentry = sb.wordIndex.getURL(recommendHash, null, 0);
+                indexURLReference urlentry = sb.webIndex.getURL(recommendHash, null, 0);
                 if (urlentry != null) {
                     indexURLReference.Components comp = urlentry.comp();
                     plasmaParserDocument document;
@@ -232,14 +232,14 @@ public class yacysearch {
                         map.put("description", ((document == null) ? comp.dc_title() : document.dc_title()).replace(',', ' '));
                         map.put("author", ((document == null) ? "" : document.dc_creator()));
                         map.put("tags", ((document == null) ? "" : document.dc_subject(' ')));
-                        sb.wordIndex.newsPool.publishMyNews(yacyNewsRecord.newRecord(sb.wordIndex.seedDB.mySeed(), yacyNewsPool.CATEGORY_SURFTIPP_ADD, map));
+                        sb.webIndex.newsPool.publishMyNews(yacyNewsRecord.newRecord(sb.webIndex.seedDB.mySeed(), yacyNewsPool.CATEGORY_SURFTIPP_ADD, map));
                         document.close();
                     }
                 }
             }
 
             // prepare search properties
-            final boolean yacyonline = ((sb.wordIndex.seedDB != null) && (sb.wordIndex.seedDB.mySeed() != null) && (sb.wordIndex.seedDB.mySeed().getPublicAddress() != null));
+            final boolean yacyonline = ((sb.webIndex.seedDB != null) && (sb.webIndex.seedDB.mySeed() != null) && (sb.webIndex.seedDB.mySeed().getPublicAddress() != null));
             final boolean globalsearch = (global) && (yacyonline) && (sb.getConfigBool(plasmaSwitchboard.INDEX_RECEIVE_ALLOW, false));
         
             // do the search
@@ -282,7 +282,7 @@ public class yacysearch {
                 theQuery.setOffset(0); // in case that this is a new search, always start without a offset 
                 offset = 0;
             }
-            plasmaSearchEvent theSearch = plasmaSearchEvent.getEvent(theQuery, ranking, sb.wordIndex, sb.crawlResults, (sb.isRobinsonMode()) ? sb.clusterhashes : null, false);
+            plasmaSearchEvent theSearch = plasmaSearchEvent.getEvent(theQuery, ranking, sb.webIndex, sb.crawlResults, (sb.isRobinsonMode()) ? sb.clusterhashes : null, false);
             
             // generate result object
             serverLog.logFine("LOCAL_SEARCH", "SEARCH TIME AFTER ORDERING OF SEARCH RESULTS: " + ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");

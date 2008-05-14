@@ -47,6 +47,7 @@ package de.anomic.yacy;
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 
 import de.anomic.kelondro.kelondroColumn;
@@ -167,6 +168,7 @@ public class yacyNewsQueue {
     
     public Iterator<yacyNewsRecord> records(boolean up) {
         // iterates yacyNewsRecord-type objects
+        if (queueStack == null) return new HashSet<yacyNewsRecord>().iterator();
         return new newsIterator(up);
     }
     
