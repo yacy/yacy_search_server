@@ -4,8 +4,8 @@
 //
 //This is a part of YaCy, a peer-to-peer based web search engine
 //
-//$LastChangedDate: 2006-04-02 22:40:07 +0200 (So, 02 Apr 2006) $
-//$LastChangedRevision: 1986 $
+//$LastChangedDate: 2008-05-16 00:44:07 +0200 (Fr, 16 May 2008) $
+//$LastChangedRevision: 4806 $
 //$LastChangedBy: apfelmaennchen $
 //
 //LICENSE
