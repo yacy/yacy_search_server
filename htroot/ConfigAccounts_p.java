@@ -52,18 +52,47 @@ import java.util.Iterator;
 
 import de.anomic.data.userDB;
 import de.anomic.http.httpHeader;
+import de.anomic.http.httpd;
+import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
-public class User_p {
+public class ConfigAccounts_p {
     
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
         serverObjects prop = new serverObjects();
         plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
         userDB.Entry entry=null;
 
+        // admin password
+        boolean localhostAccess = sb.getConfigBool("adminAccountForLocalhost", false);
+        if ((post != null) && (post.containsKey("setAdmin"))) {
+            localhostAccess = post.get("access", "").equals("localhost");
+            String user   = (post == null) ? "" : (String) post.get("adminuser", "");
+            String pw1    = (post == null) ? "" : (String) post.get("adminpw1", "");
+            String pw2    = (post == null) ? "" : (String) post.get("adminpw2", "");
+            sb.setConfig("adminAccountForLocalhost", localhostAccess);
+            // if an localhost access is configured, check if a local password is given
+            // if not, set a random password
+            if (post != null && localhostAccess && env.getConfig(httpd.ADMIN_ACCOUNT_B64MD5, "").length() == 0) {
+                // make a 'random' password
+                env.setConfig(httpd.ADMIN_ACCOUNT_B64MD5, "0000" + serverCodings.encodeMD5Hex(System.getProperties().toString() + System.currentTimeMillis()));
+                env.setConfig("adminAccount", "");
+            }
+            // may be overwritten if new password is given
+            if ((user.length() > 0) && (pw1.length() > 3) && (pw1.equals(pw2))) {
+                // check passed. set account:
+                env.setConfig(httpd.ADMIN_ACCOUNT_B64MD5, serverCodings.encodeMD5Hex(kelondroBase64Order.standardCoder.encodeString(user + ":" + pw1)));
+                env.setConfig("adminAccount", "");
+            }
+        }
+        prop.put("localhost.checked", (localhostAccess) ? 1 : 0);
+        prop.put("account.checked", (localhostAccess) ? 0 : 1);
+        prop.put("statusPassword", localhostAccess ? "0" : "1");
+        prop.put("defaultUser", "admin");
+        
         //default values
         prop.put("current_user", "newuser");
         prop.put("username", "");
@@ -83,8 +112,8 @@ public class User_p {
         prop.put("rights", i);
         
         prop.put("users", "0");
-
-        if(sb.userDB == null)
+        
+        if (sb.userDB == null)
             return prop;
         
         if(post == null){
@@ -122,9 +151,9 @@ public class User_p {
 
             
             String username=(String)post.get("username");
-            String pw=(String)post.get("password");
+            String pw1=(String)post.get("password");
             String pw2=(String)post.get("password2");
-            if(! pw.equals(pw2)){
+            if(! pw1.equals(pw2)){
                 prop.put("error", "2"); //PW does not match
                 return prop;
             }
@@ -140,8 +169,8 @@ public class User_p {
             HashMap<String, String> mem=new HashMap<String, String>();
             if( post.get("current_user").equals("newuser")){ //new user
                 
-				if(!pw.equals("")){ //change only if set
-	                mem.put(userDB.Entry.MD5ENCODED_USERPWD_STRING, serverCodings.encodeMD5Hex(username+":"+pw));
+				if(!pw1.equals("")){ //change only if set
+	                mem.put(userDB.Entry.MD5ENCODED_USERPWD_STRING, serverCodings.encodeMD5Hex(username+":"+pw1));
 				}
 				mem.put(userDB.Entry.USER_FIRSTNAME, firstName);
 				mem.put(userDB.Entry.USER_LASTNAME, lastName);
@@ -166,8 +195,8 @@ public class User_p {
                 entry = sb.userDB.getEntry(username);
 				if(entry != null){
 	                try{
-						if(! pw.equals("")){
-			                entry.setProperty(userDB.Entry.MD5ENCODED_USERPWD_STRING, serverCodings.encodeMD5Hex(username+":"+pw));
+						if(! pw1.equals("")){
+			                entry.setProperty(userDB.Entry.MD5ENCODED_USERPWD_STRING, serverCodings.encodeMD5Hex(username+":"+pw1));
 						}
 						entry.setProperty(userDB.Entry.USER_FIRSTNAME, firstName);
 						entry.setProperty(userDB.Entry.USER_LASTNAME, lastName);

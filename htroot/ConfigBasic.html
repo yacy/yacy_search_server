@@ -17,7 +17,7 @@
   <body id="ConfigBasic">
   #%env/templates/header.template%#
   #%env/templates/submenuConfig.template%#
-    <h2>Access Configuration</h2>
+    <h2>Basic Configuration</h2>
     <p>
       Your YaCy Peer needs some basic information to operate properly
     </p>
@@ -31,36 +31,9 @@
             <input type="radio" name="language" value="default" id="lang_en" #(langEnglish)#::checked="checked"#(/langEnglish)# /><label for="lang_en">English</label>
           </fieldset>
         </li>
+
         <li>
-          #(statusPassword)#<img src="/env/grafics/ok.png" height="16" width="16" alt="warning" />&nbsp;Access to localhost granted without password::<img src="/env/grafics/ok.png" height="16" width="16" alt="ok" />&nbsp;Password is set#(/statusPassword)#<br />          
-            <fieldset>
-            <legend>
-            <input type="radio" name="access" id="access" value="localhost"#(localhost.checked)#:: checked="checked"#(/localhost.checked)# />
-            <label for="localhost">Access from localhost without account</label>
-            </legend>
-            Access to your peer from your own computer (localhost access) is granted. No need to configure an administration account.
-            </fieldset>
-            
-            <fieldset>
-            <legend>
-            <input type="radio" name="access" id="access" value="account"#(account.checked)#:: checked="checked"#(/account.checked)# />
-            <label for="account">Access only with account</label>
-            </legend>
-            You need this only if you want a remote access to your peer.
-            <dl class="userConfig">
-              <dt><label for="adminuser">Peer User:</label></dt>
-              <dd><input type="text" name="adminuser" id="adminuser" value="#[defaultUser]#" size="16" maxlength="32" /></dd>
-              <dt><label for="adminpw1">New Peer Password:</label></dt>
-              <dd><input type="password" name="adminpw1" id="adminpw1" value="" size="16" maxlength="32" /></dd>
-              <dt><label for="adminpw2">Repeat Peer Password:</label></dt>
-              <dd><input type="password" name="adminpw2" id="adminpw2" value="" size="16" maxlength="32" /></dd>
-            </dl>
-            </fieldset>
-            
-      
-        </li>
-        <li>
-          #(statusName)#<img src="/env/grafics/bad.png" height="16" width="16" alt="warning" />&nbsp;Your peer name has not been customized; please set your own peer name::<img src="/env/grafics/ok.png" height="16" width="16" alt="ok" />&nbsp;You have a nice peer name#(/statusName)#<br />
+          #(statusName)#<img src="/env/grafics/bad.png" height="16" width="16" alt="warning" />&nbsp;Your peer name has not been customized; please set your own peer name::<img src="/env/grafics/ok.png" height="16" width="16" alt="ok" />&nbsp;You may change your peer name#(/statusName)#<br />
           <fieldset>
             <dl>
               <dt><label for="peername">Peer Name: </label></dt>

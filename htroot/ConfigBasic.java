@@ -52,11 +52,8 @@ import java.util.regex.Pattern;
 
 import de.anomic.data.translator;
 import de.anomic.http.httpHeader;
-import de.anomic.http.httpd;
 import de.anomic.http.httpdFileHandler;
-import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.server.serverCodings;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDomains;
 import de.anomic.server.serverInstantBusyThread;
@@ -100,12 +97,6 @@ public class ConfigBasic {
             translator.changeLang(env, langPath, post.get("language", "default") + ".lng");
         }
         
-        // password settings
-        boolean localhostAccess = (post == null) ? sb.getConfigBool("adminAccountForLocalhost", false) : post.get("access", "").equals("localhost");
-        String user   = (post == null) ? "" : (String) post.get("adminuser", "");
-        String pw1    = (post == null) ? "" : (String) post.get("adminpw1", "");
-        String pw2    = (post == null) ? "" : (String) post.get("adminpw2", "");
-        
         // peer name settings
         String peerName = (post == null) ? env.getConfig("peerName","") : (String) post.get("peername", "");
         
@@ -114,24 +105,6 @@ public class ConfigBasic {
 		if (post != null && Integer.parseInt((String) post.get("port")) > 1023) {
 			port = post.get("port", "8080");
 		}
-        
-        // admin password
-		sb.setConfig("adminAccountForLocalhost", localhostAccess);
-		prop.put("localhost.checked", (localhostAccess) ? 1 : 0);
-		prop.put("account.checked", (localhostAccess) ? 0 : 1);
-		// if an localhost access is configured, check if a local password is given
-		// if not, set a random password
-		if (post != null && localhostAccess && env.getConfig(httpd.ADMIN_ACCOUNT_B64MD5, "").length() == 0) {
-		    // make a 'random' password
-		    env.setConfig(httpd.ADMIN_ACCOUNT_B64MD5, "0000" + serverCodings.encodeMD5Hex(System.getProperties().toString() + System.currentTimeMillis()));
-            env.setConfig("adminAccount", "");
-		}
-		// may be overwritten if new password is given
-		if ((user.length() > 0) && (pw1.length() > 3) && (pw1.equals(pw2))) {
-            // check passed. set account:
-            env.setConfig(httpd.ADMIN_ACCOUNT_B64MD5, serverCodings.encodeMD5Hex(kelondroBase64Order.standardCoder.encodeString(user + ":" + pw1)));
-            env.setConfig("adminAccount", "");
-        }
 
         // check if peer name already exists
         yacySeed oldSeed = sb.webIndex.seedDB.lookupByName(peerName);
@@ -184,7 +157,6 @@ public class ConfigBasic {
         }
         
         prop.put("statusName", properName ? "1" : "0");
-        prop.put("statusPassword", localhostAccess ? "0" : "1");
         prop.put("statusPort", properPort ? "1" : "0");
         if (reconnect) {
             prop.put("nextStep", NEXTSTEP_RECONNECT);
@@ -198,7 +170,6 @@ public class ConfigBasic {
         
         // set default values       
         prop.put("defaultName", env.getConfig("peerName", ""));
-        prop.put("defaultUser", "admin");
         prop.put("defaultPort", env.getConfig("port", "8080"));
         lang = env.getConfig("locale.language", "default"); // re-assign lang, may have changed
         if (lang.equals("default")) {

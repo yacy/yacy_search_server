@@ -25,6 +25,36 @@
     <p class="error">Username too short. Username must be >= 4 Characters.</p>
     #(/error)#
     
+    <fieldset><legend>Admin Account</legend>
+      <form action="ConfigAccounts_p.html" method="post">
+          <fieldset>
+            <legend>
+            <input type="radio" name="access" id="access" value="localhost"#(localhost.checked)#:: checked="checked"#(/localhost.checked)# />
+            <label for="localhost">Access from localhost without account</label>
+            </legend>
+            Access to your peer from your own computer (localhost access) is granted. No need to configure an administration account.
+            </fieldset>
+            
+            <fieldset>
+            <legend>
+            <input type="radio" name="access" id="access" value="account"#(account.checked)#:: checked="checked"#(/account.checked)# />
+            <label for="account">Access only with qualified account</label>
+            </legend>
+            You need this only if you want a remote access to your peer.
+            <dl class="userConfig">
+              <dt><label for="adminuser">Peer User:</label></dt>
+              <dd><input type="text" name="adminuser" id="adminuser" value="#[defaultUser]#" size="16" maxlength="32" /></dd>
+              <dt><label for="adminpw1">New Peer Password:</label></dt>
+              <dd><input type="password" name="adminpw1" id="adminpw1" value="" size="16" maxlength="32" /></dd>
+              <dt><label for="adminpw2">Repeat Peer Password:</label></dt>
+              <dd><input type="password" name="adminpw2" id="adminpw2" value="" size="16" maxlength="32" /></dd>
+            </dl>
+          </fieldset>
+          <input type="submit" name="setAdmin" value="Define Administrator" />
+      </form>
+    </fieldset>
+    
+    <fieldset><legend>User Accounts</legend>
 	<form action="User_p.html">
       <fieldset><legend>Select user</legend>
         <dl>
@@ -44,7 +74,7 @@
       </fieldset>
     </form>
     
-    <form action="User_p.html" method="post">
+    <form action="ConfigAccounts_p.html" method="post">
       <fieldset><legend>Edit current user: #[username]#</legend>
         <!-- Hidden(text for debugging): <input type="text" name="current_user" value="#[current_user]#" readonly> -->
         <input type="hidden" name="current_user" value="#[current_user]#" />
@@ -76,6 +106,8 @@
         </dl>
       </fieldset>
     </form>
+    </fieldset>
+    
 #%env/templates/footer.template%#
 </body>
 </html>
