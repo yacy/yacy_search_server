@@ -109,7 +109,7 @@ public class ConfigNetwork_p {
                     } else if (indexDistribute && indexReceive) {
                         commit = 1;
                     } else {
-                        prop.put("commitDHTNoGlobalSearch", "1");
+                        if (!indexReceive) prop.put("commitDHTNoGlobalSearch", "1");
                         commit = 1;
                     }
                     if (!crawlResponse) {

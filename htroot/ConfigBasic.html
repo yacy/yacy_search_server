@@ -25,15 +25,28 @@
     <form action="ConfigBasic.html" method="post" enctype="multipart/form-data">
       <ol>
         <li>
-          <img src="/env/grafics/ok.png" height="32" width="32" alt="ok" />&nbsp;Select a language for the interface:<br />
+          <img src="/env/grafics/ok.png" height="16" width="16" alt="ok" />&nbsp;Select a language for the interface:<br />
           <fieldset>
             <input type="radio" name="language" id="lang_de" value="de" #(langDeutsch)#::checked="checked"#(/langDeutsch)# /><label for="lang_de">Deutsch</label>&nbsp;
             <input type="radio" name="language" value="default" id="lang_en" #(langEnglish)#::checked="checked"#(/langEnglish)# /><label for="lang_en">English</label>
           </fieldset>
         </li>
         <li>
-          #(statusPassword)#<img src="/env/grafics/bad.png" height="32" width="32" alt="warning" />&nbsp;Please set a password for your peer to protect your settings (> 3 characters); if this is successful you will be asked to log in with these values immediately.::<img src="/env/grafics/ok.png" height="32" width="32" alt="ok" />&nbsp;Password is set#(/statusPassword)#<br />
-          <fieldset>
+          #(statusPassword)#<img src="/env/grafics/ok.png" height="16" width="16" alt="warning" />&nbsp;Access to localhost granted without password::<img src="/env/grafics/ok.png" height="16" width="16" alt="ok" />&nbsp;Password is set#(/statusPassword)#<br />          
+            <fieldset>
+            <legend>
+            <input type="radio" name="access" id="access" value="localhost"#(localhost.checked)#:: checked="checked"#(/localhost.checked)# />
+            <label for="localhost">Access from localhost without account</label>
+            </legend>
+            Access to your peer from your own computer (localhost access) is granted. No need to configure an administration account.
+            </fieldset>
+            
+            <fieldset>
+            <legend>
+            <input type="radio" name="access" id="access" value="account"#(account.checked)#:: checked="checked"#(/account.checked)# />
+            <label for="account">Access only with account</label>
+            </legend>
+            You need this only if you want a remote access to your peer.
             <dl class="userConfig">
               <dt><label for="adminuser">Peer User:</label></dt>
               <dd><input type="text" name="adminuser" id="adminuser" value="#[defaultUser]#" size="16" maxlength="32" /></dd>
@@ -42,10 +55,12 @@
               <dt><label for="adminpw2">Repeat Peer Password:</label></dt>
               <dd><input type="password" name="adminpw2" id="adminpw2" value="" size="16" maxlength="32" /></dd>
             </dl>
-          </fieldset>
+            </fieldset>
+            
+      
         </li>
         <li>
-          #(statusName)#<img src="/env/grafics/bad.png" height="32" width="32" alt="warning" />&nbsp;Your peer name has not been customized; please set your own peer name::<img src="/env/grafics/ok.png" height="32" width="32" alt="ok" />&nbsp;You have a nice peer name#(/statusName)#<br />
+          #(statusName)#<img src="/env/grafics/bad.png" height="16" width="16" alt="warning" />&nbsp;Your peer name has not been customized; please set your own peer name::<img src="/env/grafics/ok.png" height="16" width="16" alt="ok" />&nbsp;You have a nice peer name#(/statusName)#<br />
           <fieldset>
             <dl>
               <dt><label for="peername">Peer Name: </label></dt>
@@ -56,7 +71,7 @@
           </fieldset>
         </li>
         <li>
-          #(statusPort)#<img src="/env/grafics/bad.png" height="32" width="32" alt="warning" />&nbsp;Your peer cannot be reached from outside (which is not fatal, but would be good for the YaCy network); please open your firewall for this port and/or set a virtual server option in your router to allow connections on this port.::<img src="/env/grafics/ok.png" height="32" width="32" alt="ok" />&nbsp;Your peer can be reached by other peers#(/statusPort)#<br />
+          #(statusPort)#<img src="/env/grafics/bad.png" height="16" width="16" alt="warning" />&nbsp;Your peer cannot be reached from outside (which is not fatal, but would be good for the YaCy network); please open your firewall for this port and/or set a virtual server option in your router to allow connections on this port.::<img src="/env/grafics/ok.png" height="16" width="16" alt="ok" />&nbsp;Your peer can be reached by other peers#(/statusPort)#<br />
           <fieldset>
             <dl>
               <dt><label for="port">Peer Port: </label></dt>

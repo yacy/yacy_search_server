@@ -303,21 +303,15 @@ public final class httpdFileHandler {
             
             int pos = path.lastIndexOf(".");
             
-            if ((!clientIP.equals("localhost")) &&
-                (!clientIP.startsWith("0:0:0:0:0:0:0:1")) &&
-                (path.substring(0,(pos==-1)?path.length():pos)).endsWith("_p") &&
-                (adminAccountBase64MD5.length() != 0)) {
-                //authentication required
-                //userDB
-                if(sb.userDB.hasAdminRight(authorization, conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP), requestHeader.getHeaderCookies())){
-                    //Authentication successful. remove brute-force flag
-                    serverCore.bfHost.remove(conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP));
-                //static
-                }else if(authorization != null && httpd.staticAdminAuthenticated(authorization.trim().substring(6), switchboard)==4){
-                    //Authentication successful. remove brute-force flag
-                    serverCore.bfHost.remove(conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP));
-                //no auth
-                }else if (authorization == null) {
+            boolean adminAccountForLocalhost = sb.getConfigBool("adminAccountForLocalhost", false);
+            boolean accessFromLocalhost = clientIP.equals("localhost") || clientIP.startsWith("0:0:0:0:0:0:0:1");
+            boolean grantedForLocalhost = adminAccountForLocalhost && accessFromLocalhost;
+            boolean protectedPage = (path.substring(0,(pos==-1)?path.length():pos)).endsWith("_p");
+            boolean accountEmpty = adminAccountBase64MD5.length() == 0;
+            
+            if (!grantedForLocalhost && protectedPage && !accountEmpty) {
+                // authentication required
+                if (authorization == null) {
                     // no authorization given in response. Ask for that
                     httpHeader headers = getDefaultHeaders(path);
                     headers.put(httpHeader.WWW_AUTHENTICATE,"Basic realm=\"admin log-in\"");
@@ -327,6 +321,11 @@ public final class httpdFileHandler {
                     //TODO: separate errorpage Wrong Login / No Login
                     httpd.sendRespondError(conProp, out, 5, 401, "Wrong Authentication", "", new File("proxymsg/authfail.inc"), tp, null, headers);
                     return;
+                } else if (
+                    (httpd.staticAdminAuthenticated(authorization.trim().substring(6), switchboard) == 4) ||
+                    (sb.userDB.hasAdminRight(authorization, conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP), requestHeader.getHeaderCookies()))) {
+                    //Authentication successful. remove brute-force flag
+                    serverCore.bfHost.remove(conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP));
                 } else {
                     // a wrong authentication was given or the userDB user does not have admin access. Ask again
                     serverLog.logInfo("HTTPD", "Wrong log-in for account 'admin' in http file handler for path '" + path + "' from host '" + clientIP + "'");
@@ -342,7 +341,6 @@ public final class httpdFileHandler {
                     return;
                 }
             }
-        
         
             // parse arguments
             serverObjects args = new serverObjects();

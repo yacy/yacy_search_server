@@ -353,10 +353,21 @@ serverAccountBase64MD5=
 # settings through the web interface
 # should be set to a secret. By default it is without a password
 # but you are encouraged to set it to another value on the page
-# http://localhost:8080/
+# http://localhost:8080/ConfigBasic.html
 #adminAccount=admin:mysecretpassword
 adminAccount=
 adminAccountBase64MD5=
+
+# special access handling for users from localhost:
+# access from localhost may be granted with administration authority
+# if this flag is set. It is set to true by default to make usage of YaCy easy
+# if you use YaCy on a headless server, you should set this to false
+# or configure this on http://localhost:8080/ConfigBasic.html
+# during the first 10 minutes of operation of YaCy;
+# if the admin account password is still empty after 10 minutes a random
+# password is generated an access is then ONLY from localhost, which will cause
+# inaccessibility for installations on headless servers.
+adminAccountForLocalhost=true
 
 # if you are running a principal peer, you must update the following variables
 # The upload method that should be used to upload the seed-list file to
@@ -424,7 +435,7 @@ yacyDebugMode=false
 #staticIP if you have a static IP, you can use this setting
 staticIP=
 
-# each time the proxy starts up, it can trigger the local browser to show the
+# each time YaCy starts up, it can trigger the local browser to show the
 # status page. This is active by default, to make it easier for first-time
 # users to understand what this application does. You can disable browser
 # pop-up here or set a different start page, like the search page

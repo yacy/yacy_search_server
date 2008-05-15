@@ -29,6 +29,7 @@
          if(document.ConfigForm.network[0].checked) {
             document.ConfigForm.indexDistribute.checked = true;
             document.ConfigForm.indexReceive.checked = true;
+            document.ConfigForm.crawlResponse.checked = true;
          }
       }
     //-->
@@ -45,11 +46,11 @@
     #(/commit)#
     #(commitCrawlPlea)#::<div class="error">P2P operation can run without remote indexing, but runs better with remote indexing switched on. Please switch 'Accept Remote Crawl Requests' on.</div>#(/commitCrawlPlea)#
     #(commitDHTIsRobinson)#::<div class="error">For P2P operation, at least DHT distribution or DHT receive (or both) must be set. You have thus defined a Robinson configuration.</div>#(/commitDHTIsRobinson)#
-    #(commitDHTNoGlobalSearch)#::<div class="error">Global Search in P2P configuration is only allowed, if both, index receive and distribution is switched on. You have a P2P configuration, but are not allowed to search other peers.</div>#(/commitDHTNoGlobalSearch)#
+    #(commitDHTNoGlobalSearch)#::<div class="error">Global Search in P2P configuration is only allowed, if index receive is switched on. You have a P2P configuration, but are not allowed to search other peers.</div>#(/commitDHTNoGlobalSearch)#
     #(commitRobinson)#::<div class="commit">For Robinson Mode, index distribution and receive is switched off.</div>#(/commitRobinson)#
     #(commitRobinsonWithRemoteIndexing)#::<div class="commit">This Robinson Mode switches remote indexing on, but limits targets to peers within the same cluster. Remote indexing requests from peers within the same cluster are accepted.</div>#(/commitRobinsonWithRemoteIndexing)#
     #(commitRobinsonWithoutRemoteIndexing)#::<div class="commit">This Robinson Mode does not allow any remote indexing (neither requests remote indexing, nor accepts it).</div>#(/commitRobinsonWithoutRemoteIndexing)#
-    <form name="ConfigForm" method="post" action="ConfigNetwork_p.html" enctype="multipart/form-data" accept-charset="UTF-8">
+    <form name="NetworkForm" method="post" action="ConfigNetwork_p.html" enctype="multipart/form-data" accept-charset="UTF-8">
     <fieldset>
       <legend>
         <label for="domain">Network and Domain Specification</label>

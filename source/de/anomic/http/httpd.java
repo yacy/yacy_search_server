@@ -296,9 +296,9 @@ public final class httpd implements serverHandler {
     }
     
     public static int staticAdminAuthenticated(String authorization, serverSwitch<?> sw) {
-        if (authorization==null) return 1;
+        // the authorization string must be given with the truncated 6 bytes at the beginning
+        if (authorization == null) return 1;
         //if (authorization.length() < 6) return 1; // no authentication information given
-        //authorization = authorization.trim().substring(6);
         String adminAccountBase64MD5 = sw.getConfig(ADMIN_ACCOUNT_B64MD5, "");
         if (adminAccountBase64MD5.length() == 0) return 2; // no passwrd stored
         if (adminAccountBase64MD5.equals(serverCodings.encodeMD5Hex(authorization))) return 4; // hard-authenticated, all ok

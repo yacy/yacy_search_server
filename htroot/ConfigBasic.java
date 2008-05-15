@@ -65,12 +65,12 @@ import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacySeed;
 
 public class ConfigBasic {
-    private static final int NEXTSTEP_FINISHED = 0;
-    private static final int NEXTSTEP_PWD = 1;
-    private static final int NEXTSTEP_PEERNAME = 2;
-    private static final int NEXTSTEP_PEERPORT = 3;
-    private static final int NEXTSTEP_RECONNECT = 4;
     
+    private static final int NEXTSTEP_FINISHED  = 0;
+    //private static final int NEXTSTEP_PWD       = 1;
+    private static final int NEXTSTEP_PEERNAME  = 2;
+    private static final int NEXTSTEP_PEERPORT  = 3;
+    private static final int NEXTSTEP_RECONNECT = 4;
     
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
         
@@ -101,6 +101,7 @@ public class ConfigBasic {
         }
         
         // password settings
+        boolean localhostAccess = (post == null) ? sb.getConfigBool("adminAccountForLocalhost", false) : post.get("access", "").equals("localhost");
         String user   = (post == null) ? "" : (String) post.get("adminuser", "");
         String pw1    = (post == null) ? "" : (String) post.get("adminpw1", "");
         String pw2    = (post == null) ? "" : (String) post.get("adminpw2", "");
@@ -110,18 +111,26 @@ public class ConfigBasic {
         
         // port settings
         String port = env.getConfig("port", "8080"); //this allows a low port, but it will only get one, if the user edits the config himself.
-		if(post!=null && Integer.parseInt((String)post.get("port"))>1023){
+		if (post != null && Integer.parseInt((String) post.get("port")) > 1023) {
 			port = post.get("port", "8080");
 		}
         
         // admin password
-        if ((user.length() > 0) && (pw1.length() > 3) && (pw1.equals(pw2))) {
+		sb.setConfig("adminAccountForLocalhost", localhostAccess);
+		prop.put("localhost.checked", (localhostAccess) ? 1 : 0);
+		prop.put("account.checked", (localhostAccess) ? 0 : 1);
+		// if an localhost access is configured, check if a local password is given
+		// if not, set a random password
+		if (post != null && localhostAccess && env.getConfig(httpd.ADMIN_ACCOUNT_B64MD5, "").length() == 0) {
+		    // make a 'random' password
+		    env.setConfig(httpd.ADMIN_ACCOUNT_B64MD5, "0000" + serverCodings.encodeMD5Hex(System.getProperties().toString() + System.currentTimeMillis()));
+            env.setConfig("adminAccount", "");
+		}
+		// may be overwritten if new password is given
+		if ((user.length() > 0) && (pw1.length() > 3) && (pw1.equals(pw2))) {
             // check passed. set account:
             env.setConfig(httpd.ADMIN_ACCOUNT_B64MD5, serverCodings.encodeMD5Hex(kelondroBase64Order.standardCoder.encodeString(user + ":" + pw1)));
             env.setConfig("adminAccount", "");
-            // authenticate immediately
-            //prop.put("AUTHENTICATE", "admin log-in"); 
-            //return prop;
         }
 
         // check if peer name already exists
@@ -166,22 +175,19 @@ public class ConfigBasic {
         }
         
         // check if values are proper
-        boolean properPW = (env.getConfig("adminAccount", "").length() == 0) && (env.getConfig(httpd.ADMIN_ACCOUNT_B64MD5, "").length() > 0);
         boolean properName = (env.getConfig("peerName","").length() >= 3) && (!(yacySeed.isDefaultPeerName(env.getConfig("peerName",""))));
         boolean properPort = (sb.webIndex.seedDB.mySeed().isSenior()) || (sb.webIndex.seedDB.mySeed().isPrincipal());
         
-        if ((properPW) && (env.getConfig("defaultFiles", "").startsWith("ConfigBasic.html,"))) {
+        if ((env.getConfig("defaultFiles", "").startsWith("ConfigBasic.html,"))) {
         	    env.setConfig("defaultFiles", env.getConfig("defaultFiles", "").substring(17));
             httpdFileHandler.initDefaultPath();
         }
         
         prop.put("statusName", properName ? "1" : "0");
-        prop.put("statusPassword", properPW ? "1" : "0");
+        prop.put("statusPassword", localhostAccess ? "0" : "1");
         prop.put("statusPort", properPort ? "1" : "0");
         if (reconnect) {
             prop.put("nextStep", NEXTSTEP_RECONNECT);
-        } else if (!properPW) {
-            prop.put("nextStep", NEXTSTEP_PWD);
         } else if (!properName) {
             prop.put("nextStep", NEXTSTEP_PEERNAME);
         } else if (!properPort) {

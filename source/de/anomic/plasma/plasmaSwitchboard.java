@@ -148,6 +148,7 @@ import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.plasma.parser.ParserException;
 import de.anomic.server.serverAbstractSwitch;
 import de.anomic.server.serverBusyThread;
+import de.anomic.server.serverCodings;
 import de.anomic.server.serverDomains;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverInstantBusyThread;
@@ -1139,7 +1140,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         moreMemory.schedule(new MoreMemory(), 300000, 600000);
         
         deployThread(CLEANUP, "Cleanup", "simple cleaning process for monitoring information", null,
-        new serverInstantBusyThread(this, CLEANUP_METHOD_START, CLEANUP_METHOD_JOBCOUNT, CLEANUP_METHOD_FREEMEM), 10000); // all 5 Minutes
+        new serverInstantBusyThread(this, CLEANUP_METHOD_START, CLEANUP_METHOD_JOBCOUNT, CLEANUP_METHOD_FREEMEM), 600000); // all 5 Minutes, wait 10 minutes until first run
         deployThread(CRAWLSTACK, "Crawl URL Stacker", "process that checks url for double-occurrences and for allowance/disallowance by robots.txt", null,
         new serverInstantBusyThread(crawlStacker, CRAWLSTACK_METHOD_START, CRAWLSTACK_METHOD_JOBCOUNT, CRAWLSTACK_METHOD_FREEMEM), 8000);
         deployThread(INDEXER, "Indexing", "thread that either initiates a parsing/indexing queue, distributes the index into the DHT, stores parsed documents or flushes the index cache", "/IndexCreateIndexingQueue_p.html",
@@ -1774,6 +1775,13 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         try {
             boolean hasDoneSomething = false;
             
+            // set a random password if no password is configured
+            if (getConfigBool("adminAccountForLocalhost", false) && getConfig(httpd.ADMIN_ACCOUNT_B64MD5, "").length() == 0) {
+                // make a 'random' password
+                setConfig(httpd.ADMIN_ACCOUNT_B64MD5, "0000" + serverCodings.encodeMD5Hex(System.getProperties().toString() + System.currentTimeMillis()));
+                setConfig("adminAccount", "");
+            }
+            
             // close unused connections
             JakartaCommonsHttpClient.cleanup();
 
@@ -2254,15 +2262,20 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
 
     public int adminAuthenticated(httpHeader header) {
         
-        //String adminAccountBase64MD5 = getConfig(httpd.ADMIN_ACCOUNT_B64MD5, "");
+        // authorization for localhost, only if flag is set to grant localhost access as admin
+        String clientIP = (String) header.get(httpHeader.CONNECTION_PROP_CLIENTIP, "");
+        boolean accessFromLocalhost = clientIP.equals("localhost") || clientIP.startsWith("0:0:0:0:0:0:0:1");
+        if (getConfigBool("adminAccountForLocalhost", false) && accessFromLocalhost) return 3; // soft-authenticated for localhost
+        
+        // get the authorization string from the header
         String authorization = ((String) header.get(httpHeader.AUTHORIZATION, "xxxxxx")).trim().substring(6);
         
         // security check against too long authorization strings
         if (authorization.length() > 256) return 0; 
         
         // authorization by encoded password, only for localhost access
-        String clientIP = (String) header.get(httpHeader.CONNECTION_PROP_CLIENTIP, "");
-        if ((clientIP.equals("localhost") || clientIP.startsWith("0:0:0:0:0:0:0:1")) /*&& (adminAccountBase64MD5.equals(authorization))*/) return 3; // soft-authenticated for localhost
+        String adminAccountBase64MD5 = getConfig(httpd.ADMIN_ACCOUNT_B64MD5, "");
+        if (accessFromLocalhost && (adminAccountBase64MD5.equals(authorization))) return 3; // soft-authenticated for localhost
 
         // authorization by hit in userDB
         if (userDB.hasAdminRight((String) header.get(httpHeader.AUTHORIZATION, "xxxxxx"), ((String) header.get(httpHeader.CONNECTION_PROP_CLIENTIP, "")), header.getHeaderCookies())) return 4; //return, because 4=max
