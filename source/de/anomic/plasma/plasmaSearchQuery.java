@@ -198,7 +198,7 @@ public final class plasmaSearchQuery {
     }
     
     public boolean isLocal() {
-        return this.domType != SEARCHDOM_LOCAL;
+        return this.domType == SEARCHDOM_LOCAL;
     }
     
     public static TreeSet<String> hashes2Set(String query) {
