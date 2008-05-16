@@ -367,7 +367,7 @@ adminAccountBase64MD5=
 # if the admin account password is still empty after 10 minutes a random
 # password is generated an access is then ONLY from localhost, which will cause
 # inaccessibility for installations on headless servers.
-adminAccountForLocalhost=true
+adminAccountForLocalhost=false
 
 # if you are running a principal peer, you must update the following variables
 # The upload method that should be used to upload the seed-list file to
