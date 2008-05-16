@@ -230,22 +230,49 @@ Private Queue==Privater Puffer
 Public Queue==&Ouml;ffentlicher Puffer
 #-----------------------------
 
+#File: ConfigAccounts_p.html
+#---------------------------
+User Accounts==Benutzerkonten
+User Administration==Benutzerverwaltung
+User created:==Benutzer erstellt:
+User changed:==Benutzer ge&auml;ndert:
+Generic error.==Genereller Fehler.
+Passwords do not match.==Passw&ouml;rter stimmen nicht &uuml;berein.
+Username too short. Username must be \>\= 4 Characters.==Benutzername zu kurz. Benutzername muss l&auml;nger als vier Zeichen sein.
+Admin Account==Admin Konto
+Access from localhost without account==Zugriff von localhost ohne Konto
+Access to your peer from your own computer \(localhost access\) is granted. No need to configure an administration account.==Der Zugriff von Ihrem Computer (localhost Zugang) ist garantiert. Sie brauchen kein Administratorkonto erstellen.
+Access only with qualified account==Zugriff nur mit berechtigtem Konto
+You need this only if you want a remote access to your peer.==Sie ben&ouml;tigen dies nur, wenn Sie Fernzugriff auf Ihren Peer haben wollen.
+Peer User:==Peer Benutzer:
+New Peer Password:==Neues Peer Passwort:
+Repeat Peer Password:==Wiederhole Peer Passwort:
+"Define Administrator"=="Administrator festlegen"
+Select user==Benutzer w&auml;hlen
+New user==Neuer Benutzer
+Edit User==Benutzer bearbeiten
+Delete User==Benutzer l&ouml;schen
+Edit current user:==Aktuellen Benutzer bearbeiten:
+Username</label>==Benutzername</label>
+Password</label>==Passwort</label>
+Repeat password==Passwort wiederholen
+First name==Vorname
+Last name==Nachname
+Address==Adresse
+Rights==Rechte
+Timelimit==Zeitlimit
+Time used==Verbrauchte Zeit
+Save User==Benutzer speichern
+#-----------------------------
+
 #File: ConfigBasic.html
 #---------------------------
 Access Configuration==Zugangseinstellungen
 Your YaCy Peer needs some basic information to operate properly==Ihr YaCy-Peer ben&ouml;tigt einige Grundinformationen um korrekt zu funktionieren
 Select a language for the interface==W&auml;hlen Sie eine Sprache f&uuml;r das Interface
-Your peer name has not been customized==Ihr Peername wurde noch nicht angepasst
-please set your own peer name==bitte setzen Sie einen eigenen Peernamen ein
-You have a nice peer name==Sie haben einen sch&ouml;nen Peernamen
-Peer Name:==Peer-Name:
-Please set a password for your peer to protect your settings==Bitte setzen Sie ein Passwort f&uuml;r Ihren Peer um Ihre Einstellungen zu sch&uuml;tzen
-> 3 characters==mehr als 3 Zeichen
-if this is successful you will be asked to log in with these values immediately==Falls dies erfolgreich ist werden Sie sofort gebeten sich mit diesen Angaben einzuloggen
-Password is set==Passwort wurde gesetzt
-Peer User:==Peer-Nutzer:
-New Peer Password:==Neues Peer-Passwort:
-Repeat Peer Password:==Peer-Passwort bestätigen:
+Your peer name has not been customized; please set your own peer name==Ihr Peername wurde noch nicht angepasst; bitte setzen Sie einen eigenen Peernamen ein
+You may change your peer name==Sie k&ouml;nnen Ihren Peernamen &auml;ndern
+Peer Name:==Peername:
 Your peer cannot be reached from outside==Ihr Peer kann nicht von au&szlig;en erreicht werden
 which is not fatal, but would be good for the YaCy network==was nicht schlimm ist, aber anders wäre für das YaCy-Netzwerk noch besser
 please open your firewall for this port and/or set a virtual server option in your router to allow connections on this port==Bitte &ouml;ffnen Sie Ihre Firewall auf diesem Port und/oder stellen Sie einen virtuellen Server in Ihrem Router ein um Verbindungen auf diesem Port zu erlauben
@@ -294,7 +321,7 @@ Accepted Changes==&Auml;nderungen gespeichert
 Inapplicable Setting Combination==unpassende Einstellungskombination
 P2P operation can run without remote indexing, but runs better with remote indexing switched on. Please switch 'Accept Remote Crawl Requests' on==P2P-T&auml;tigkeit l&auml;uft ohne Remote-Indexierung, aber funktioniert besser, wenn diese eingeschaltet ist. Bitte aktivieren Sie 'Remote Crawling akzeptieren'
 For P2P operation, at least DHT distribution or DHT receive \(or both\) must be set. You have thus defined a Robinson configuration==F&uuml;r P2P-T&auml;tigkeit muss mindestens DHT-Verteilung oder DHT-Empfang (oder beides) aktiviert sein. Ansonsten haben Sie einen Robinson-Peer definiert
-Global Search in P2P configuration is only allowed, if both, index receive and distribution is switched on. You have a P2P configuration, but are not allowed to search other peers==Die globale Suche im P2P-Modus ist nur erlaubt, wenn DHT-Empfang und -Versand aktiviert wurden. Sie sind im P2P-Modus, aber Sie d&uuml;rfen keine anderen Peers durchsuchen
+Global Search in P2P configuration is only allowed, if index receive is switched on. You have a P2P configuration, but are not allowed to search other peers.==Die globale Suche im P2P-Modus ist nur erlaubt, wenn der Index-Empfang aktiviert ist. Sie sind im P2P-Modus, aber Sie d&uuml;rfen keine anderen Peers durchsuchen.
 For Robinson Mode, index distribution and receive is switched off==Im Robinson-Modus werden Indexverteilung und -empfang deaktiviert
 This Robinson Mode switches remote indexing on, but limits targets to peers within the same cluster. Remote indexing requests from peers within the same cluster are accepted==Dieser Robinson-Modus aktiviert Remote-Indexierung, aber beschr&auml;nkt die Anfragen auf Peers des selben Clusters. Nur Remote-Indexierungsanfragen von Peers des selben Clusters werden akzeptiert
 This Robinson Mode does not allow any remote indexing \(neither requests remote indexing, nor accepts it\)==Dieser Robinson-Modus erlaubt keinerlei Remote-Indexierung (es wird weder Remote-Indexierung angefragt, noch akzeptiert)
@@ -307,6 +334,7 @@ Network Nick==Netzwerk Nick
 Long Description==Lange Beschreibung
 Indexing Domain==Indexierungs Domain
 #DHT==DHT
+"Change Network"=="Netzwerk wechseln"
 Distributed Computing Network for Domain==Verteilte Netzwerk f&uuml;r Domain
 You can configure if you want to participate at the global YaCy network or if you want to have your==Sie k&ouml;nnen einstellen, ob Sie am globalen YaCy-Netzwerk teilnehmen wollen oder ob Sie einen eigenen
 own separate search cluster with or without connection to the global network. You may also define==separaten Such-Cluster, mit oder ohne Verbindung zum globalen Netz, haben m&ouml;chten. Sie k&ouml;nnen auch
@@ -1618,7 +1646,6 @@ Content Parser Settings==Inhalt Parser Einstellungen
 Crawler Settings==Crawler Einstellungen
 HTTP Networking==HTTP Netzwerk
 #Remote Proxy \(optional\)==Remote Proxy (optional)
-Port Forwarding \(optional\)==Port Weiterleitung (optional)
 Seed Upload Settings==Seed Upload Einstellungen
 Message Forwarding \(optional\)==Nachrichten Weiterleitung (optional)
 
@@ -1905,13 +1932,6 @@ Your message forwarding settings have been changed.==Ihre Nachrichten Weiterleit
 Message Forwarding Support is:==Nachrichten Weiterleitungs Unterst&uml;tzung:
 Message Forwarding Command:==Nachrichten Weiterleitungskommando:
 Recipient Address:==Empf&auml;nger Adresse:
-Your port forwarding settings have been changed.==Ihre Port Weiterleitungs-Einstellungen wurden ge&auml;ndert.
-Port Forwarding Support is:==Port Weiterleitungs Unterst&uuml;tzung ist:
-Port Forwarding Port:==Port Weiterleitungs Port:
-Port Forwarding Host:==Port Weiterleitungs Host:
-Port Forwarding uses proxy:==Port Weiterleitung benutzt Proxy:
-Port Forwarding Settings changed, but something is wrong.==Port Weiterleitungs-Einstellungen wurden ge&auml;ndert. aber etwas ist falsch.
-Port Forwarding was deactivated automatically.==Port Weiterleitung wurde automatisch deaktiviert.
 Please return to the settings page and modify the data.==Bitte kehren Sie zu den Einstellungen zur&uuml;ck und modifizieren Sie die Daten.
 You are now <strong>event-based online</strong>.==Sie sind nun im  <strong>aktivit&auml;tsbasierten Modus</strong>.
 After a short while you should see the effect on the==Nach kurzer Zeit k&ouml;nnen Sie die &Auml;nderungen auf der
@@ -2101,29 +2121,27 @@ Show surftips to everyone==Zeige Surftipps allen Benutzern
 "create Threaddump"=="Threaddump erstellen"
 #-----------------------------
 
-#File: User_p.html
-#---------------------------
-User Administration==Benutzerverwaltung
-Select user==Benutzer w&auml;hlen
-New user==Neuer Benutzer
-Edit User==Benutzer bearbeiten
-Delete User==Benutzer l&ouml;schen
-Edit current user:==Aktuellen Benutzer bearbeiten:
-Username</label>==Benutzername</label>
-Password</label>==Passwort</label>
-Repeat password==Passwort wiederholen
-First name==Vorname
-Last name==Nachname
-Address==Adresse
-Rights==Rechte
-Timelimit==Zeitlimit
-Time used==Verbrauchte Zeit
-Save User==Benutzer speichern
-User created:==Benutzer erstellt:
-User changed:==Benutzer ge&auml;ndert:
-Generic error.==Genereller Fehler.
-Passwords do not match.==Passw&ouml;rter stimmen nicht &uuml;berein.
-Username too short. Username must be \>\= 4 Characters.==Benutzername zu kurz. Benutzername muss länger als 4 Buchstaben sein.
+#File: User.html
+#-----------------------------
+User Page==Benutzer Seite
+You are not logged in.<br />==Sie sind nicht angemeldet.<br /> 
+Username:==Benutzername:
+Password: <input==Passwort: <input
+You are currently logged in as==Sie sind nun angemeldet als
+You have used==Sie haben bereits
+minutes of your onlinetime limit of==Minuten Ihres Online-Zeitlimits von
+minutes per day.==Minuten pro Tag verbraucht.
+old Password==altes Passwort
+new Password==neues Passwort
+new Password\(repetition\)==neues Passwort (Wiederholung)
+"Change"=="&Auml;ndern"
+You are currently logged in as admin.==Sie sind derzeit als Administrator angemeldet.
+value="logout"==value="abmelden"
+\(after logout you will be prompted for your password again. simply click "cancel"\)==(nach dem Abmelden werden Sie erneut nach dem Passwort gefragt. Klicken Sie einfach auf abbrechen)
+Password was changed.==Das Passwort wurde gewechselt.
+Old Password is wrong.==Das alte Passwort ist falsch.
+New Password and its repetition do not match.==Das neue Passwort und die Wiederholung stimmen nicht überein.
+New Password is empty.==Das neue Passwort ist leer.
 #-----------------------------
 
 #File: ViewFile.html
@@ -2181,7 +2199,7 @@ This is the Profile of==Dies ist das Profil von
 #Skype==Skype
 Comment==Kommentar
 View this profile as==Zeige dieses Profil als 
-or==oder
+> or==> oder
 #vCard==vCard
 #-----------------------------
 
@@ -2434,14 +2452,14 @@ Blacklist Cleaner==Blacklist aufr&auml;umen
 #---------------------------
 Peer Administration Console==Peer Administrations Konsole
 #Status==Status
-Access Config==Eingangskonfiguration
+Basic Configuration==Eingangskonfiguration
+>Accounts==>Konten
 >Language==>Sprache
 User Profile==Benutzer Profil
 >Skins==>Skin Auswahl
 System Update==System Aktualisierung
->Network==>Netzwerk
+Network Configuration==Netzwerk Konfiguration
 Local robots.txt==Lokale robots.txt
-User Administration==Benutzer Verwaltung
 Peer Appearance Profile==Peer Erscheinungsbild
 Advanced Settings==Erweiterte Einstellungen
 Advanced Properties==Erweitertes Verhalten
