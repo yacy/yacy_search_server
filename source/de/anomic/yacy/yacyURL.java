@@ -756,7 +756,12 @@ public class yacyURL implements Serializable {
     
     // checks for local/global IP range and local IP
     public boolean isLocal() {
-        if (this.hash == null) synchronized (this) {this.hash = urlHashComputation();}
+        if (this.hash == null) {
+            if (this.host.startsWith("0:0:0:0:0:0:0:1") || this.host.equals("127.0.0.1")) return true;
+            synchronized (this) {
+                this.hash = urlHashComputation();
+            }
+        }
         return domDomain(this.hash) == 7;
     }
     

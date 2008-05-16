@@ -147,9 +147,8 @@ public final class plasmaSearchQuery {
 		this.maxDistance = maxDistance;
 		this.prefer = prefer;
 		this.contentdom = contentdom;
-		this.linesPerPage = lines;
-		this.offset = offset;
-		//this.maximumTime = Math.min(6000, maximumTime);
+		this.linesPerPage = Math.min(100, lines);
+		this.offset = Math.min(100, offset);
 		this.urlMask = urlMask;
 		this.domType = domType;
         this.zonecode = domainzone;

@@ -196,7 +196,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
         InetAddress uAddr = s.getInetAddress();
         if (uAddr.isAnyLocalAddress()) return "localhost";
         String cIP = uAddr.getHostAddress();
-        if (cIP.equals("0:0:0:0:0:0:0:1")) cIP = "localhost";
+        if (cIP.startsWith("0:0:0:0:0:0:0:1")) cIP = "localhost";
         if (cIP.equals("127.0.0.1")) cIP = "localhost";
         return cIP;
     }

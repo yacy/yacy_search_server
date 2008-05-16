@@ -56,6 +56,7 @@ public final class plasmaSearchRankingProcess {
     public  static kelondroBinSearch[] ybrTables = null; // block-rank tables
     public  static final int maxYBR = 3; // the lower this value, the faster the search
     private static boolean useYBR = true;
+    private static final int maxDoubleDom = 20;
     
     private kelondroSortStack<indexRWIVarEntry> stack;
     private HashMap<String, kelondroSortStack<indexRWIVarEntry>> doubleDomCache; // key = domhash (6 bytes); value = like stack
@@ -259,7 +260,7 @@ public final class plasmaSearchRankingProcess {
             m = this.doubleDomCache.get(domhash);
             if (m == null) {
                 // first appearance of dom
-                m = new kelondroSortStack<indexRWIVarEntry>(-1);
+                m = new kelondroSortStack<indexRWIVarEntry>(maxDoubleDom);
                 this.doubleDomCache.put(domhash, m);
                 return rwi;
             }

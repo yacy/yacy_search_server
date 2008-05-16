@@ -28,6 +28,9 @@ package de.anomic.crawler;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -35,6 +38,9 @@ import de.anomic.server.logging.serverLog;
 
 public final class ProtocolLoader {
 
+    private static final long minDelay = 250; // milliseconds; 4 accesses per second
+    private static final ConcurrentHashMap<String, Long> accessTime = new ConcurrentHashMap<String, Long>(); // to protect targets from DDoS
+    
     private plasmaSwitchboard sb;
     private serverLog log;
     private HashSet<String> supportedProtocols;
@@ -64,7 +70,30 @@ public final class ProtocolLoader {
     public plasmaHTCache.Entry load(CrawlEntry entry, String parserMode) {
         // getting the protocol of the next URL                
         String protocol = entry.url().getProtocol();
+        String host = entry.url().getHost();
         
+        // check access time
+        if (!entry.url().isLocal()) {
+            Long lastAccess = accessTime.get(host);
+            long wait = 0;
+            if (lastAccess != null) wait = Math.max(0, minDelay + lastAccess.longValue() - System.currentTimeMillis());
+            if (wait > 0) {
+                // force a sleep here. Instead just sleep we clean up the accessTime map
+                long untilTime = System.currentTimeMillis() + wait;
+                Iterator<Map.Entry<String, Long>> i = accessTime.entrySet().iterator();
+                Map.Entry<String, Long> e;
+                while (i.hasNext()) {
+                    e = i.next();
+                    if (System.currentTimeMillis() > untilTime) break;
+                    if (System.currentTimeMillis() - e.getValue().longValue() > minDelay) i.remove();
+                }
+                if (System.currentTimeMillis() < untilTime)
+                    try {Thread.sleep(untilTime - System.currentTimeMillis());} catch (InterruptedException ee) {}
+            }
+        }
+        accessTime.put(host, System.currentTimeMillis());
+        
+        // load resource
         if ((protocol.equals("http") || (protocol.equals("https")))) return httpLoader.load(entry, parserMode);
         if (protocol.equals("ftp")) return ftpLoader.load(entry);
         
