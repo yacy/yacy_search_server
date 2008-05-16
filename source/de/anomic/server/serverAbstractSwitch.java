@@ -43,11 +43,11 @@ package de.anomic.server;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import de.anomic.server.logging.serverLog;
@@ -68,7 +68,7 @@ public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
     private   HashMap<InetAddress, String>           authorization;
     private   TreeMap<String, serverBusyThread>      workerThreads;
     private   TreeMap<String, serverSwitchAction>    switchActions;
-    protected HashMap<String, TreeMap<Long, String>> accessTracker; // mappings from requesting host to an ArrayList of serverTrack-entries
+    protected ConcurrentHashMap<String, TreeMap<Long, String>> accessTracker; // mappings from requesting host to an ArrayList of serverTrack-entries
     private   LinkedBlockingQueue<E> cacheStack;
     
     public serverAbstractSwitch(File rootPath, String initPath, String configPath, boolean applyPro) {
@@ -148,7 +148,7 @@ public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
 
         // other settings
         authorization = new HashMap<InetAddress, String>();
-        accessTracker = new HashMap<String, TreeMap<Long, String>>();
+        accessTracker = new ConcurrentHashMap<String, TreeMap<Long, String>>();
 
         // init thread control
         workerThreads = new TreeMap<String, serverBusyThread>();
@@ -177,14 +177,10 @@ public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
         if (accessPath == null) accessPath="NULL";
         TreeMap<Long, String> access = accessTracker.get(host);
         if (access == null) access = new TreeMap<Long, String>();
-        synchronized (access) {
-            access.put(new Long(System.currentTimeMillis()), accessPath);
+        access.put(new Long(System.currentTimeMillis()), accessPath);
 
-            // write back to tracker
-            try {
-                accessTracker.put(host, clearTooOldAccess(access));
-            } catch (ConcurrentModificationException e) {};
-        }
+        // write back to tracker
+        accessTracker.put(host, clearTooOldAccess(access));
     }
     
     public TreeMap<Long, String> accessTrack(String host) {
@@ -192,20 +188,17 @@ public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
         
         TreeMap<Long, String> access = accessTracker.get(host);
         if (access == null) return null;
-        synchronized (access) {
-            // clear too old entries
-            int oldsize = access.size();
-            if ((access = clearTooOldAccess(access)).size() != oldsize) {
-                // write back to tracker
-                if (access.size() == 0) {
-                    accessTracker.remove(host);
-                } else {
-                    accessTracker.put(host, access);
-                }
+        // clear too old entries
+        if ((access = clearTooOldAccess(access)).size() != access.size()) {
+            // write back to tracker
+            if (access.size() == 0) {
+                accessTracker.remove(host);
+            } else {
+                accessTracker.put(host, access);
             }
-        
-            return access;
         }
+        
+        return access;
     }
     
     private TreeMap<Long, String> clearTooOldAccess(TreeMap<Long, String> access) {
@@ -215,9 +208,7 @@ public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
     public Iterator<String> accessHosts() {
         // returns an iterator of hosts in tracker (String)
     	HashMap<String, TreeMap<Long, String>> accessTrackerClone = new HashMap<String, TreeMap<Long, String>>();
-    	try {
-    		accessTrackerClone.putAll(accessTracker);
-    	} catch (ConcurrentModificationException e) {}
+    	accessTrackerClone.putAll(accessTracker);
     	return accessTrackerClone.keySet().iterator();
     }
 

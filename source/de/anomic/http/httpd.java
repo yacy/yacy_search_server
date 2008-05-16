@@ -733,7 +733,7 @@ public final class httpd implements serverHandler {
         // reseting the empty request counter
         this.emptyRequestCount = 0;
         
-        // counting the amount of received requests within this permanent conneciton
+        // counting the amount of received requests within this permanent connection
         this.prop.setProperty(httpHeader.CONNECTION_PROP_KEEP_ALIVE_COUNT, Integer.toString(++this.keepAliveRequestCount));
         
         // setting the client-IP
