@@ -75,7 +75,7 @@
 jQuery(function() {
     jQuery.getFeed({
         url: '/yacysearch.rss' + $.query.toString(),
-        success: function(feed) {            
+        success: function(feed) {
             jQuery('#result').prepend('<h3>'
             + '<a href="'
             + feed.link
@@ -84,7 +84,7 @@ jQuery(function() {
             + '</a>'
             + '</h3>');            
             var html = '';            
-            for(var i = 0; i < feed.items.length && i < 5; i++) {            
+            for(var i = 0; i < feed.items.length; i++) {            
                 var item = feed.items[i];                
                 html += '<h4>'
                 + '<a href="'
@@ -108,7 +108,7 @@ jQuery(function() {
 		force:true,
 		axis:'y',
 		lazy:true,
-		interval:5000, 
+		interval:3000, 
 		step:1 
 	});	
 });
