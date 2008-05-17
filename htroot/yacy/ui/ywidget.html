@@ -1,0 +1,123 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link media="screen" type="text/css" href="css/base.css" rel="stylesheet" />
+<title>YaCy Widget</title>
+<style type="text/css">
+	.ywidget  {
+		font-family: Helvetica,Arial,sans-serif;
+		width: 250px;
+	}
+	.ywidget div {
+		background-color: white;
+		margin-bottom : 10px;
+		border: none;	
+		margin: 0px;
+		padding: 10px;
+		border: 1px solid black;
+		text-decoration: none;	
+		font-size: 11px;		
+		height: 200px;
+		overflow:hidden;	
+	}
+	.ywidget h3 {
+		display:block;
+		padding:5px 15px;
+		margin-top: 0;
+		margin-bottom: 0px;		
+		background: url(img/box250.png) no-repeat;
+		border-top: 1px solid #FFFFFF;
+		border-bottom: 1px solid #999;	
+	}
+	.ywidget h3 a {
+		cursor:pointer;
+		text-decoration: none;
+		font-weight: bold;
+		font-size: 14px;
+		color: black;
+		height: 50px;
+		overflow:hidden;
+	}
+	.ywidget p.desc {
+	  	font-style:italic;
+		font-size: 0.9em;
+	  	color: #808080;
+	  	line-height: 1.0em;
+	  	margin-bottom:-0.5em;
+	}
+	.ywidget h4 {	
+		margin:2px;
+		margin-bottom: -0.6em;
+	    font-size: 1.0em;
+	    line-height: 0.5em
+	    text-decoration: none;
+	}
+	.ywidget h4 a {	
+	    color:#239AFF; 
+		text-decoration: none;
+	}
+	.ywidget p.date {
+		font-size: 0.9em;
+	  	line-height: 1.0em;
+	  	margin-bottom:0.8em;
+	  	color:#20A020;	  	
+	}
+
+</style>
+<script src="js/jquery-1.2.3.min.js" type="text/javascript"></script>
+<script src="js/jquery.jfeed.js" type="text/javascript""></script>
+<script src="js/jquery.scrollTo-min.js" type="text/javascript""></script>
+<script src="js/jquery.serialScroll-min.js" type="text/javascript""></script>
+<script src="js/jquery.query-1.2.3.js" type="text/javascript""></script>
+<script type="text/javascript">
+jQuery(function() {
+    jQuery.getFeed({
+        url: '/yacysearch.rss' + $.query.toString(),
+        success: function(feed) {            
+            jQuery('#result').prepend('<h3>'
+            + '<a href="'
+            + feed.link
+            + '">'
+            + feed.title
+            + '</a>'
+            + '</h3>');            
+            var html = '';            
+            for(var i = 0; i < feed.items.length && i < 5; i++) {            
+                var item = feed.items[i];                
+                html += '<h4>'
+                + '<a href="'
+                + item.link
+                + '">'
+                + item.title
+                + '</a>'
+                + '</h4>';                
+                html += '<p class="desc">'
+                + item.description                               
+                html += '</p><p class="date">'
+                + item.updated
+                + '</p>';
+            }            
+            jQuery('#items').append(html);        	
+        }    
+    });    
+	$('#items').serialScroll({
+		items:'h4',
+		duration:700,
+		force:true,
+		axis:'y',
+		lazy:true,
+		interval:5000, 
+		step:1 
+	});	
+});
+</script>
+
+</head>
+<body>
+	<div id="result" class="ywidget">		
+		<div id="items"></div>
+	</div>
+</body>
+</html>
