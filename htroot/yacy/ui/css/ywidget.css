@@ -2,7 +2,7 @@
 		font-family: Helvetica,Arial,sans-serif;
 		width: 250px;
 	}
-	.ywidget div {
+	.ywidget div.items {
 		background-color: white;
 		margin-bottom : 10px;
 		border: none;	
@@ -10,38 +10,49 @@
 		padding: 10px;
 		border: 1px solid black;
 		text-decoration: none;	
-		font-size: 11px;		
+		font-size: 0.7em;		
 		height: 200px;
 		overflow:hidden;	
 	}
-	.ywidget h3 {
+	.ywidget div.nav {
 		display:block;
-		padding:5px 15px;
+		padding:3px 12px;
+		margin-top: 0px;
+		margin-bottom: 0px;		
+		background: url(../img/box250f.png) no-repeat;
+		background-position: bottom;
+		border-bottom: 1px solid #FFFFFF;
+		border-top: 1px solid #999;
+		text-align: right;
+	}
+	.ywidget div.head {
+		display:block;
+		padding:3px 12px;
 		margin-top: 0;
 		margin-bottom: 0px;		
 		background: url(../img/box250.png) no-repeat;
+		background-position: top;
 		border-top: 1px solid #FFFFFF;
-		border-bottom: 1px solid #999;	
+		border-bottom: 1px solid #999;
+		white-space: nowrap;
+		text-overflow:ellipsis;
+		overflow:hidden;	
 	}
-	.ywidget h3 a {
+	.ywidget .head a {
 		cursor:pointer;
 		text-decoration: none;
 		font-weight: bold;
-		font-size: 14px;
+		font-size: 0.8em;
 		color: black;
-		height: 50px;
-		overflow:hidden;
 	}
 	.ywidget p.desc {
 	  	font-style:italic;
-		font-size: 0.9em;
 	  	color: #808080;
 	  	line-height: 1.0em;
 	  	margin-bottom:-0.5em;
 	}
 	.ywidget h4 {		
 		margin-bottom: -0.6em;
-	    font-size: 1.0em;
 	    line-height: 0.5em
 	    text-decoration: none;
 	}
@@ -50,8 +61,11 @@
 		text-decoration: none;
 	}
 	.ywidget p.date {
-		font-size: 0.9em;
 	  	line-height: 1.0em;
 	  	margin-bottom:0.8em;
 	  	color:#20A020;	  	
+	}
+	.ywidget img {
+		padding: 2px 2px 2px 2px;
+  		vertical-align: middle;  	
 	}

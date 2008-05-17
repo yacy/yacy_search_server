@@ -17,13 +17,14 @@ jQuery(function() {
     jQuery.getFeed({
         url: '/yacysearch.rss' + $.query.toString(),
         success: function(feed) {
-            jQuery('#result').prepend('<h3>'
-            + '<a href="'
+            jQuery('#result').prepend('<div class="head">'            
+            + '<img src="img-2/rss.png" alt="rss"/>'
+            + ' <a href="'
             + feed.link
             + '">'
             + feed.title
-            + '</a>'
-            + '</h3>');            
+            + '</a>'            
+            + '</div>');            
             var html = '';            
             for(var i = 0; i < feed.items.length; i++) {            
                 var item = feed.items[i];                
@@ -45,20 +46,24 @@ jQuery(function() {
     });    
 	$('#items').serialScroll({
 		items:'h4',
-		duration:700,
-		force:true,
+		duration:900,
+		cycle: true,		
+		force: true,
 		axis:'y',
 		lazy:true,
-		interval:3000, 
+		interval:2000, 
 		step:1 
-	});	
+	});		
 });
 </script>
 
 </head>
 <body>
 	<div id="result" class="ywidget">		
-		<div id="items"></div>
+		<div id="items" class="items"></div>
+		<div id="nav" class="nav">
+			<img src="img-2/info.png" alt="Info" />			
+		</div>				
 	</div>
 </body>
 </html>
