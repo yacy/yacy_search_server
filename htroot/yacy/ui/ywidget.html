@@ -13,12 +13,23 @@
 <script src="js/jquery.serialScroll-min.js" type="text/javascript""></script>
 <script src="js/jquery.query-1.2.3.js" type="text/javascript""></script>
 <script type="text/javascript">
-jQuery(function() {
+$(document).ready(function() {
+    $('#settings').hide();
+    $('#info').bind('click', function() {
+    	$('.items').slideToggle('fast');
+    });
+    var url = $.query.get('rss');
+    if (url == '') {
+    	url = '/yacysearch.rss';
+    }
+    $.query.destructiveRemove("rss");    
     jQuery.getFeed({
-        url: '/yacysearch.rss' + $.query.toString(),
+        url: url + $.query.toString(),        
         success: function(feed) {
             jQuery('#result').prepend('<div class="head">'            
-            + '<img src="img-2/rss.png" alt="rss"/>'
+            + '<a href="http://www.yacy.net">'
+            + '<img src="img/yacy-logo.png" height="20" border="0" alt="YaCy"/>'
+            + '</a>'
             + ' <a href="'
             + feed.link
             + '">'
@@ -61,9 +72,55 @@ jQuery(function() {
 <body>
 	<div id="result" class="ywidget">		
 		<div id="items" class="items"></div>
+		<div id="settings" class="items">
+			<label for="rss">RSS Feed:</label>
+			<br />
+			<input class="input" name="rss" value="" type="text" size="16" maxlength="80" />
+			<img src="img-2/question_blue.png" alt="help" title="help" />
+			<br />
+			<label for="query">Query:</label>
+			<br />
+			<input class="input" name="query" value="" type="text" size="16" maxlength="80" />
+			<img src="img-2/question_blue.png" alt="help" title="help" />
+			<br />
+			<table>
+				<tr>
+					<td>
+						<label for="interval">Scroll intervall:</label>
+						<br />
+						<input class="select" name="intervall" value="2000" type="text" size="8" maxlength="5" />						
+					</td>
+					<td>
+						<label for="duration">Scroll duration:</label>
+						<br />
+						<input class="select" name="duration" value="900" type="text" size="8" maxlength="5" />									
+					</td>
+				</tr>				
+				<tr>
+					<td style="width:55%">
+						<label for="cycle">Scroll cycle:</label>
+						<br />
+						<select class="select" id="cycle" name="cycle">
+							<option value="true" selected="selected">on</option>
+							<option value="false" >off</option>										
+						</select>							
+					</td>
+					<td>
+						<label for="step">Scroll step:</label>
+						<br />
+						<select class="select" id="step" name="step">
+							<option value="1" selected="selected">1</option>
+							<option value="2r" >2</option>
+							<option value="3" >3</option>
+							<option value="3" >4</option>										
+						</select>												
+					</td>
+				</tr>
+			</table>			
+		</div>			
 		<div id="nav" class="nav">
-			<img src="img-2/info.png" alt="Info" />			
-		</div>				
-	</div>
+			<img src="img-2/info.png" id="info" class="clickable" alt="Info" />			
+		</div>
+	</div>	
 </body>
 </html>

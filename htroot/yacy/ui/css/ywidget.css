@@ -3,16 +3,15 @@
 		width: 250px;
 	}
 	.ywidget div.items {
-		background-color: white;
-		margin-bottom : 10px;
-		border: none;	
 		margin: 0px;
 		padding: 10px;
+		background-color: white;
+		height: 200px;
+		overflow:hidden;
+		border: none;	
 		border: 1px solid black;
 		text-decoration: none;	
-		font-size: 0.7em;		
-		height: 200px;
-		overflow:hidden;	
+		font-size: 0.7em;	
 	}
 	.ywidget div.nav {
 		display:block;
@@ -27,7 +26,8 @@
 	}
 	.ywidget div.head {
 		display:block;
-		padding:3px 12px;
+		padding-left:5px;
+		padding-top:4px;
 		margin-top: 0;
 		margin-bottom: 0px;		
 		background: url(../img/box250.png) no-repeat;
@@ -52,6 +52,7 @@
 	  	margin-bottom:-0.5em;
 	}
 	.ywidget h4 {		
+		padding-top: 10px;
 		margin-bottom: -0.6em;
 	    line-height: 0.5em
 	    text-decoration: none;
@@ -62,10 +63,29 @@
 	}
 	.ywidget p.date {
 	  	line-height: 1.0em;
-	  	margin-bottom:0.8em;
+	  	margin-bottom:0.8em;	  	
 	  	color:#20A020;	  	
 	}
 	.ywidget img {
-		padding: 2px 2px 2px 2px;
+		padding: 4px 4px 4px 4px;
   		vertical-align: middle;  	
+	}
+	.ywidget img.clickable {
+		cursor:pointer;
+	}
+	.input {
+		width: 180px;  
+		margin-bottom: .5em;
+		padding: 2px 5px;
+		border: 1px solid #CCCCCC;
+		font: normal small Arial, Helvetica, sans-serif;
+		color: #999999;
+	}
+	.select {
+	  	width: 75px;  
+	  	margin-bottom: .5em;
+	  	padding: 2px 5px;
+	  	border: 1px solid #CCCCCC;
+	  	font: normal small Arial, Helvetica, sans-serif;
+	  	color: #999999;
 	}
