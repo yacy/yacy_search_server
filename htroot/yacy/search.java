@@ -121,6 +121,29 @@ public final class search {
         	return prop;
         }
         
+        // check the search tracker
+        TreeSet<Long> trackerHandles = sb.remoteSearchTracker.get(client);
+        if (trackerHandles == null) trackerHandles = new TreeSet<Long>();
+        boolean block = false;
+        if (trackerHandles.tailSet(new Long(System.currentTimeMillis() -   6000)).size() >  1) try {
+            Thread.sleep(3000);
+            block = true;
+        } catch (InterruptedException e) { e.printStackTrace(); }
+        if (trackerHandles.tailSet(new Long(System.currentTimeMillis() -  60000)).size() > 12) try {
+            Thread.sleep(10000);
+            block = true;
+        } catch (InterruptedException e) { e.printStackTrace(); }
+        if (trackerHandles.tailSet(new Long(System.currentTimeMillis() - 600000)).size() > 36) try {
+            Thread.sleep(30000);
+            block = true;
+        } catch (InterruptedException e) { e.printStackTrace(); }
+        if (block) {
+            prop.put("links", "");
+            prop.put("linkcount", "0");
+            prop.put("references", "");
+            return prop;
+        }
+        
         // tell all threads to do nothing for a specific time
         sb.intermissionAllThreads(3000);
 
@@ -291,10 +314,11 @@ public final class search {
         theQuery.urlretrievaltime = (theSearch == null) ? 0 : theSearch.getURLRetrievalTime();
         theQuery.snippetcomputationtime = (theSearch == null) ? 0 : theSearch.getSnippetComputationTime();
         sb.remoteSearches.add(theQuery);
-        TreeSet<Long> handles = sb.remoteSearchTracker.get(client);
-        if (handles == null) handles = new TreeSet<Long>();
-        handles.add(theQuery.handle);
-        sb.remoteSearchTracker.put(client, handles);
+        
+        // update the search tracker
+        trackerHandles.add(theQuery.handle);
+        sb.remoteSearchTracker.put(client, trackerHandles);
+        
         
         // log
         yacyCore.log.logInfo("EXIT HASH SEARCH: " +

@@ -93,11 +93,11 @@ public class yacysearch {
         
         // get query
         String querystring = (post == null) ? "" : post.get("query", post.get("search", "")).trim(); // SRU compliance
+        final serverObjects prop = new serverObjects();
         
         boolean rss = (post == null) ? false : post.get("rss", "false").equals("true");
         if ((post == null) || (env == null) || (querystring.length() == 0) || (!searchAllowed)) {
             // we create empty entries for template strings
-            final serverObjects prop = new serverObjects();
             prop.put("searchagain", "0");
             prop.put("input", input);
             prop.put("display", display);
@@ -174,8 +174,24 @@ public class yacysearch {
         // patch until better search profiles are available
         if ((contentdomCode != plasmaSearchQuery.CONTENTDOM_TEXT) && (itemsPerPage <= 32)) itemsPerPage = 32;
         
-        serverObjects prop = new serverObjects();
-        if (post.get("cat", "href").equals("href")) {
+        // check the search tracker
+        TreeSet<Long> trackerHandles = sb.localSearchTracker.get(client);
+        if (trackerHandles == null) trackerHandles = new TreeSet<Long>();
+        boolean block = false;
+        if (trackerHandles.tailSet(new Long(System.currentTimeMillis() -   3000)).size() >  1) try {
+            Thread.sleep(3000);
+            block = true;
+        } catch (InterruptedException e) { e.printStackTrace(); }
+        if (trackerHandles.tailSet(new Long(System.currentTimeMillis() -  60000)).size() > 12) try {
+            Thread.sleep(10000);
+            block = true;
+        } catch (InterruptedException e) { e.printStackTrace(); }
+        if (trackerHandles.tailSet(new Long(System.currentTimeMillis() - 600000)).size() > 36) try {
+            Thread.sleep(30000);
+            block = true;
+        } catch (InterruptedException e) { e.printStackTrace(); }
+        
+        if ((!block) && (post.get("cat", "href").equals("href"))) {
 
             final TreeSet<String>[] query = plasmaSearchQuery.cleanQuery(querystring); // converts also umlaute
             boolean near = (query[0].contains("near")) && (querystring.indexOf("NEAR") >= 0);
@@ -302,12 +318,11 @@ public class yacysearch {
             theQuery.urlretrievaltime = theSearch.getURLRetrievalTime();
             theQuery.snippetcomputationtime = theSearch.getSnippetComputationTime();
             sb.localSearches.add(theQuery);
-            TreeSet<Long> handles = sb.localSearchTracker.get(client);
-            if (handles == null) handles = new TreeSet<Long>();
-            handles.add(theQuery.handle);
-            sb.localSearchTracker.put(client, handles);
             
-            prop = new serverObjects();
+            // update the search tracker
+            trackerHandles.add(theQuery.handle);
+            sb.localSearchTracker.put(client, trackerHandles);
+            
             int totalcount = theSearch.getRankingResult().getLocalResourceSize() + theSearch.getRankingResult().getRemoteResourceSize();
             prop.put("num-results_offset", offset);
             prop.put("num-results_itemscount", "0");

@@ -58,7 +58,8 @@ public class result {
         String promoteSearchPageGreeting = env.getConfig("promoteSearchPageGreeting", "");
         if (env.getConfigBool("promoteSearchPageGreeting.useNetworkName", false)) promoteSearchPageGreeting = env.getConfig("network.unit.description", "");
         if (promoteSearchPageGreeting.length() == 0) promoteSearchPageGreeting = "P2P WEB SEARCH";
-
+        String client = (String) header.get(httpHeader.CONNECTION_PROP_CLIENTIP); // the search client who initiated the search
+        
         // get query
         String querystring = (post == null) ? "" : post.get("search", "").trim();
         final serverObjects prop = new serverObjects();
@@ -143,7 +144,24 @@ public class result {
         // patch until better search profiles are available
         if ((contentdomCode != plasmaSearchQuery.CONTENTDOM_TEXT) && (itemsPerPage <= 32)) itemsPerPage = 32;
         
-        if (post.get("cat", "href").equals("href")) {
+        // check the search tracker
+        TreeSet<Long> trackerHandles = sb.localSearchTracker.get(client);
+        if (trackerHandles == null) trackerHandles = new TreeSet<Long>();
+        boolean block = false;
+        if (trackerHandles.tailSet(new Long(System.currentTimeMillis() -   3000)).size() >  1) try {
+            Thread.sleep(3000);
+            block = true;
+        } catch (InterruptedException e) { e.printStackTrace(); }
+        if (trackerHandles.tailSet(new Long(System.currentTimeMillis() -  60000)).size() > 12) try {
+            Thread.sleep(10000);
+            block = true;
+        } catch (InterruptedException e) { e.printStackTrace(); }
+        if (trackerHandles.tailSet(new Long(System.currentTimeMillis() - 600000)).size() > 36) try {
+            Thread.sleep(30000);
+            block = true;
+        } catch (InterruptedException e) { e.printStackTrace(); }
+        
+        if ((!block) && (post.get("cat", "href").equals("href"))) {
 
             final TreeSet<String>[] query = plasmaSearchQuery.cleanQuery(querystring); // converts also umlaute
             boolean near = (query[0].contains("near")) && (querystring.indexOf("NEAR") >= 0);
@@ -166,7 +184,6 @@ public class result {
             final boolean globalsearch = (global) && (yacyonline) && (sb.getConfigBool(plasmaSwitchboard.INDEX_RECEIVE_ALLOW, false));
         
             // do the search
-            String client = (String) header.get(httpHeader.CONNECTION_PROP_CLIENTIP); // the search client who initiated the search
             TreeSet<String> queryHashes = indexWord.words2hashes(query[0]);
             plasmaSearchQuery theQuery = new plasmaSearchQuery(
         			querystring,
@@ -226,10 +243,10 @@ public class result {
             theQuery.urlretrievaltime = theSearch.getURLRetrievalTime();
             theQuery.snippetcomputationtime = theSearch.getSnippetComputationTime();
             sb.localSearches.add(theQuery);
-            TreeSet<Long> handles = sb.localSearchTracker.get(client);
-            if (handles == null) handles = new TreeSet<Long>();
-            handles.add(theQuery.handle);
-            sb.localSearchTracker.put(client, handles);
+
+            // update the search tracker
+            trackerHandles.add(theQuery.handle);
+            sb.localSearchTracker.put(client, trackerHandles);
             
             int totalcount = theSearch.getRankingResult().getLocalResourceSize() + theSearch.getRankingResult().getRemoteResourceSize();
             prop.put("num-results_offset", offset);
