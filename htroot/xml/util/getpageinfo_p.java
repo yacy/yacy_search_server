@@ -100,10 +100,19 @@ public class getpageinfo_p {
                     
                     // put keywords
                     String list[]=scraper.getKeywords();
+                    int count = 0;
                     for(int i=0;i<list.length;i++){
-                    	prop.putHTML("tags_"+i+"_tag", list[i]);
+                    	String tag = list[i];
+                    	if (!tag.equals("")) {
+                    		while (i<(list.length-1) && !list[i+1].equals("")) {
+                    			i++;
+                    			tag += " "+list[i];                    			
+                    		}                    	                 	
+                    		prop.putHTML("tags_"+count+"_tag", tag);
+                    		count++;
+                    	}
                     }
-                    prop.put("tags", list.length);
+                    prop.put("tags", count);
 
                 } catch (MalformedURLException e) { /* ignore this */
                 } catch (IOException e) { /* ignore this */
