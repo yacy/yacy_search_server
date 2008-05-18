@@ -312,5 +312,11 @@ dl.pairs dt {
 .basic h3.selected {
 	
 }
+#tagcloud a {
+	cursor:pointer;		
+}
+#tagcloud a:hover {
+	background-color:#e6EEEE;		
+}
 
 
