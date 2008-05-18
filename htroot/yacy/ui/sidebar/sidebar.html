@@ -20,7 +20,13 @@
 						.appendTo('#tagcloud')
 						.bind('click', function() {
 							qtag = $(this).text();
-							$('#container ul').tabs("load", 2);							
+							$("select[@name='resource']").setValue('ymarks');
+							$("input[@name='search']").setValue(qtag);
+							if (tabid == "#Bookmarks") {
+								$('#container ul').tabs("load", 2);
+							} else {
+								$('#container ul').tabs('select',2);
+							}							
 						});																										
 				}); //close each(
 			}

@@ -59,33 +59,37 @@
 		$tabs.tabs()   	
 			.bind('select.ui-tabs', function(e, ui) {
 				/* set global variable tabid */
-				tabid = '#' + ui.panel.id;
-				
-				/* set query string */				
-				var search = $(tabid).attr('search');
-				var contentdom = $(tabid).attr('contentdom');
-				var count = $(tabid).attr('count');
-				var offset = $(tabid).attr('offset');
-				var resource = $(tabid).attr('resource');
-				var constraint= $(tabid).attr('constraint');
-				var prefermaskfilter = $(tabid).attr('prefermaskfilter');
-				var urlmaskfilter = $(tabid).attr('urlmaskfilter');
+				tabid = '#' + ui.panel.id;				
+				if (tabid == "#Bookmarks") {
+					$("select[@name='resource']").setValue('ymarks');
+					$("input[@name='search']").setValue(qtag);									
+				} else {				
+					/* set query string */				
+					var search = $(tabid).attr('search');
+					var contentdom = $(tabid).attr('contentdom');
+					var count = $(tabid).attr('count');
+					var offset = $(tabid).attr('offset');
+					var resource = $(tabid).attr('resource');
+					var constraint= $(tabid).attr('constraint');
+					var prefermaskfilter = $(tabid).attr('prefermaskfilter');
+					var urlmaskfilter = $(tabid).attr('urlmaskfilter');
 
-				query = $(tabid).attr('resource')
-					+"&search="+search
-					+"&contentdom="+contentdom
-					+"&count="+count
-					+"&offset="+offset
-					+"&constraint="+constraint
-					+"&prefermaskfilter="+prefermaskfilter
-					+"&urlmaskfilter="+urlmaskfilter;
-				$("input[@name='search']").setValue(search);
-				$("select[@name='itemsPerPage']").setValue(count);
-				$("select[@name='contentdom']").setValue(contentdom);
-				$("select[@name='constraint']").setValue(constraint);
-				$("input[@name='prefermaskfilter']").setValue(prefermaskfilter);
-				$("input[@name='urlmaskfilter']").setValue(urlmaskfilter);
-				$('#yoptions').trigger('update');
+					query = $(tabid).attr('resource')
+						+"&search="+search
+						+"&contentdom="+contentdom
+						+"&count="+count
+						+"&offset="+offset
+						+"&constraint="+constraint
+						+"&prefermaskfilter="+prefermaskfilter
+						+"&urlmaskfilter="+urlmaskfilter;
+					$("input[@name='search']").setValue(search);
+					$("select[@name='itemsPerPage']").setValue(count);
+					$("select[@name='contentdom']").setValue(contentdom);
+					$("select[@name='constraint']").setValue(constraint);
+					$("input[@name='prefermaskfilter']").setValue(prefermaskfilter);
+					$("input[@name='urlmaskfilter']").setValue(urlmaskfilter);
+					$('#yoptions').trigger('update');
+				}
 		});
 			 
 		/* Load Sidebar */
@@ -95,10 +99,19 @@
 		
 		/* Load Search Result into new Tab */
 		$('#searchbox').submit(function() {			
-			var tabnr = $('#container > ul').tabs('length');			
-			var tabname = $("input[@name='search']").getValue();			
-			$tabs.tabs('add', "ysearch.html", '*' + tabname);
-			$tabs.tabs('select',tabnr);
+			if ($("select[@name='resource']").getValue() == "ymarks") {								
+				qtag = $("input[@name='search']").getValue();
+				if (tabid == "#Bookmarks") {
+					$tabs.tabs("load", 2);
+				} else {
+					$tabs.tabs('select',2);
+				}						
+			} else {			
+				var tabnr = $('#container > ul').tabs('length');			
+				var tabname = $("input[@name='search']").getValue();			
+				$tabs.tabs('add', "ysearch.html", '*' + tabname);
+				$tabs.tabs('select',tabnr);
+			}
 			return false;
 		});
 		
