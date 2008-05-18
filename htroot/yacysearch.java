@@ -192,15 +192,16 @@ public class yacysearch {
         } catch (InterruptedException e) { e.printStackTrace(); }
         
         if ((!block) && (post.get("cat", "href").equals("href"))) {
-
-            final TreeSet<String>[] query = plasmaSearchQuery.cleanQuery(querystring); // converts also umlaute
-            boolean near = (query[0].contains("near")) && (querystring.indexOf("NEAR") >= 0);
-            if (near) {
-            	query[0].remove("near");
-            }
+            
             plasmaSearchRankingProfile ranking = sb.getRanking();
-            if (near) {
+            final TreeSet<String>[] query = plasmaSearchQuery.cleanQuery(querystring); // converts also umlaute
+            if ((query[0].contains("near")) && (querystring.indexOf("NEAR") >= 0)) {
+            	query[0].remove("near");
             	ranking.coeff_worddistance = plasmaSearchRankingProfile.COEFF_MAX;
+            }
+            if ((query[0].contains("recent")) && (querystring.indexOf("RECENT") >= 0)) {
+                query[0].remove("recent");
+                ranking.coeff_date = plasmaSearchRankingProfile.COEFF_MAX;
             }
             	
             // filter out stopwords
