@@ -256,8 +256,7 @@ public final class httpd implements serverHandler {
     }
     
     /**
-     * This funciton is used to determine if a persistent connection was requested by the
-     * client.
+     * This function is used to determine if a persistent connection was requested by the client.
      * @param header the received http-headers
      * @return <code>true</code> if a persistent connection was requested or <code>false</code> otherwise
      */
@@ -300,7 +299,7 @@ public final class httpd implements serverHandler {
         if (authorization == null) return 1;
         //if (authorization.length() < 6) return 1; // no authentication information given
         String adminAccountBase64MD5 = sw.getConfig(ADMIN_ACCOUNT_B64MD5, "");
-        if (adminAccountBase64MD5.length() == 0) return 2; // no passwrd stored
+        if (adminAccountBase64MD5.length() == 0) return 2; // no password stored
         if (adminAccountBase64MD5.equals(serverCodings.encodeMD5Hex(authorization))) return 4; // hard-authenticated, all ok
         return 1;
     }

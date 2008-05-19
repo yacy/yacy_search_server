@@ -60,6 +60,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.Collator;
 import java.util.Date;
 import java.util.HashMap;
@@ -392,6 +393,17 @@ public final class httpHeader extends TreeMap<String, String> implements Map<Str
             return parsedDate;
         }
         return null;
+    }
+    
+    public String referer() {
+        return (String) get(httpHeader.REFERER, "");
+    }
+    
+    public String refererHost() {
+        String  refererHost = "";
+        String referer = referer();
+        if (referer.length() > 0) try { refererHost = (new URL(referer)).getHost(); } catch (MalformedURLException e) {}
+        return refererHost;
     }
     
     public String mime() {

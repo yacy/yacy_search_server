@@ -149,6 +149,7 @@ import de.anomic.plasma.parser.ParserException;
 import de.anomic.server.serverAbstractSwitch;
 import de.anomic.server.serverBusyThread;
 import de.anomic.server.serverCodings;
+import de.anomic.server.serverCore;
 import de.anomic.server.serverDomains;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverInstantBusyThread;
@@ -2264,7 +2265,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         
         // authorization for localhost, only if flag is set to grant localhost access as admin
         String clientIP = (String) header.get(httpHeader.CONNECTION_PROP_CLIENTIP, "");
-        boolean accessFromLocalhost = clientIP.equals("localhost") || clientIP.startsWith("0:0:0:0:0:0:0:1");
+        String refererHost = header.refererHost();
+        boolean accessFromLocalhost = serverCore.isLocalhost(clientIP) && (refererHost.length() == 0 || serverCore.isLocalhost(refererHost));
         if (getConfigBool("adminAccountForLocalhost", false) && accessFromLocalhost) return 3; // soft-authenticated for localhost
         
         // get the authorization string from the header

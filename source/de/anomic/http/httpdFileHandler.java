@@ -304,7 +304,8 @@ public final class httpdFileHandler {
             int pos = path.lastIndexOf(".");
             
             boolean adminAccountForLocalhost = sb.getConfigBool("adminAccountForLocalhost", false);
-            boolean accessFromLocalhost = clientIP.equals("localhost") || clientIP.startsWith("0:0:0:0:0:0:0:1");
+            String refererHost = requestHeader.refererHost();
+            boolean accessFromLocalhost = serverCore.isLocalhost(clientIP) && (refererHost.length() == 0 || serverCore.isLocalhost(refererHost));
             boolean grantedForLocalhost = adminAccountForLocalhost && accessFromLocalhost;
             boolean protectedPage = (path.substring(0,(pos==-1)?path.length():pos)).endsWith("_p");
             boolean accountEmpty = adminAccountBase64MD5.length() == 0;
@@ -640,6 +641,7 @@ public final class httpdFileHandler {
                                 if (authorization != null) {
                                     serverLog.logInfo("HTTPD", "dynamic log-in for account 'admin' in http file handler for path '" + path + "' from host '" + clientIP + "'");
                                     Integer attempts = (Integer) serverCore.bfHost.get(clientIP);
+                                    if (attempts != null) try {Thread.sleep(1000 * attempts.intValue());} catch (InterruptedException e) {}
                                     if (attempts == null)
                                         serverCore.bfHost.put(clientIP, new Integer(1));
                                     else
