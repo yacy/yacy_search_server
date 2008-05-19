@@ -440,7 +440,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
             s.interrupt();
             s.close();
         }
-        this.busySessions = null;
+        this.busySessions.clear();
         
         this.log.logConfig("* terminated");
     }
@@ -918,11 +918,9 @@ public final class serverCore extends serverAbstractBusyThread implements server
         if (currentThread.isInterrupted()) throw new InterruptedException();  
         if ((currentThread instanceof serverCore.Session) && ((serverCore.Session)currentThread).isStopped()) throw new InterruptedException();
     }
-    public void reconnect() {
-        this.reconnect(5000);
-    }
+    
     public void reconnect(int delay) {
-        Thread restart = new Restarter();
+        Thread restart = new Restarter(delay);
         restart.start();
     }
     
@@ -930,6 +928,9 @@ public final class serverCore extends serverAbstractBusyThread implements server
     public class Restarter extends Thread { 
         public serverCore theServerCore = null;
         public int delay = 5000;
+        public Restarter(int delay) {
+            this.delay = delay;
+        }
         public void run() {
             // waiting for a while
             try {
@@ -940,10 +941,10 @@ public final class serverCore extends serverAbstractBusyThread implements server
             }
             
             // signaling restart
-            serverCore.this.forceRestart = true;
+            forceRestart = true;
             
             // closing socket to notify the thread
-            serverCore.this.close();
+            close();
         }
     }
     

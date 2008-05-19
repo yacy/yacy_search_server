@@ -141,7 +141,7 @@ public class SettingsAck_p {
                     
                     env.setConfig("port", port);
                     
-                    theServerCore.reconnect();                    
+                    theServerCore.reconnect(5000);                    
                 } catch (SocketException e) {
                     prop.put("info", "26");
                     return prop;
