@@ -34,6 +34,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.server.serverCore;
 import de.anomic.server.logging.serverLog;
 
 public final class ProtocolLoader {
@@ -71,6 +72,10 @@ public final class ProtocolLoader {
         // getting the protocol of the next URL                
         String protocol = entry.url().getProtocol();
         String host = entry.url().getHost();
+        
+        // check if this loads a page from localhost, which must be prevented to protect the server
+        // against attacks to the administration interface when localhost access is granted
+        if (serverCore.isLocalhost(host) && sb.getConfigBool("adminAccountForLocalhost", false)) return null;
         
         // check access time
         if (!entry.url().isLocal()) {

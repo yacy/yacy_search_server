@@ -42,8 +42,10 @@ import java.util.Random;
 import de.anomic.crawler.ResultImages;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.yacy.yacyURL;
 
 public class Collage {
     private static           int fifoMax  = 20;
@@ -98,20 +100,30 @@ public class Collage {
         
         if (fifoSize > 0) {
             prop.put("imgurl", "1");        
-        
-            for (int i = 0; i < fifoSize; i++)
-              prop.put("imgurl_list_" + i + "_url",
-                       "<a href=\"" + origins[i].baseURL.toNormalform(true, false) + "\">"
-                       + "<img src=\"" + origins[i].imageEntry.url().toNormalform(true, false) + "\" "
+            int c = 0;
+            for (int i = 0; i < fifoSize; i++) {
+             
+                yacyURL baseURL = origins[i].baseURL;
+                yacyURL imageURL = origins[i].imageEntry.url();
+                
+                // check if this loads a page from localhost, which must be prevented to protect the server
+                // against attacks to the administration interface when localhost access is granted
+                if ((serverCore.isLocalhost(baseURL.getHost()) || serverCore.isLocalhost(imageURL.getHost())) &&
+                    sb.getConfigBool("adminAccountForLocalhost", false)) continue;
+                
+                prop.put("imgurl_list_" + c + "_url",
+                       "<a href=\"" + baseURL.toNormalform(true, false) + "\">"
+                       + "<img src=\"" + imageURL.toNormalform(true, false) + "\" "
                        + "style=\""
                        + ((imgWidth[i] == 0 || imgHeight[i] == 0) ? "" : "width:" + imgWidth[i] + "px;height:" + imgHeight[i] + "px;")
                        + "position:absolute;top:" + imgPosY[i]
                        + "px;left:" + imgPosX[i]
                        + "px;z-index:" + imgZIndex[i] + "\""
-                       + "title=\"" + origins[i].baseURL.toNormalform(true, false) + "\">"
+                       + "title=\"" + baseURL.toNormalform(true, false) + "\">"
                        + "</a><br>");
-
-            prop.put("imgurl_list", fifoSize);
+                c++;
+            }
+            prop.put("imgurl_list", c);
         } else {
             prop.put("imgurl", "0");
         }
