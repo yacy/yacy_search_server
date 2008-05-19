@@ -131,7 +131,7 @@ public class Status {
         }
 
         // password protection
-        if (sb.getConfig(httpd.ADMIN_ACCOUNT_B64MD5, "").length() == 0) {
+        if ((sb.getConfig(httpd.ADMIN_ACCOUNT_B64MD5, "").length() == 0) && (!sb.getConfigBool("adminAccountForLocalhost", false))) {
             prop.put("protection", "0"); // not protected
             prop.put("urgentSetPassword", "1");
         } else {
