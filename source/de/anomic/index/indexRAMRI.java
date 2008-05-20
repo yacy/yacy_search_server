@@ -42,22 +42,22 @@ public final class indexRAMRI implements indexRI, indexRIReader {
     private final kelondroMScoreCluster<String> hashScore;
     private final kelondroMScoreCluster<String> hashDate;
     private long  initTime;
-    private int   cacheMaxCount;
-    public  int   cacheReferenceCountLimit;
-    public  long  cacheReferenceAgeLimit;
+    private int   cacheEntityMaxCount;       // the maximum number of cache slots for RWI entries
+    public  int   cacheReferenceCountLimit;  // the maximum number of references to a single RWI entity
+    public  long  cacheReferenceAgeLimit;    // the maximum age (= time not changed) of a RWI entity
     private final serverLog log;
     private File indexHeapFile;
     private indexContainerHeap heap;
     
     @SuppressWarnings("unchecked")
-    public indexRAMRI(File databaseRoot, kelondroRow payloadrow, int wCacheReferenceCountLimitInit, long wCacheReferenceAgeLimitInit, String oldArrayName, String newHeapName, serverLog log) {
+    public indexRAMRI(File databaseRoot, kelondroRow payloadrow, int entityCacheMaxSize, int wCacheReferenceCountLimitInit, long wCacheReferenceAgeLimitInit, String oldArrayName, String newHeapName, serverLog log) {
 
         // creates a new index cache
         // the cache has a back-end where indexes that do not fit in the cache are flushed
         this.hashScore = new kelondroMScoreCluster<String>();
         this.hashDate  = new kelondroMScoreCluster<String>();
         this.initTime = System.currentTimeMillis();
-        this.cacheMaxCount = 10000;
+        this.cacheEntityMaxCount = entityCacheMaxSize;
         this.cacheReferenceCountLimit = wCacheReferenceCountLimitInit;
         this.cacheReferenceAgeLimit = wCacheReferenceAgeLimitInit;
         this.log = log;
@@ -109,11 +109,11 @@ public final class indexRAMRI implements indexRI, indexRIReader {
     }
 
     public void setMaxWordCount(int maxWords) {
-        this.cacheMaxCount = maxWords;
+        this.cacheEntityMaxCount = maxWords;
     }
     
     public int getMaxWordCount() {
-        return this.cacheMaxCount;
+        return this.cacheEntityMaxCount;
     }
     
     public int size() {

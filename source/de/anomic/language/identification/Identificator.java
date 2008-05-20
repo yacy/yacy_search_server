@@ -118,8 +118,8 @@ public final class Identificator {
             }
         }
         
-        //calculate percentage
-        Iterator iter = testStat.keySet().iterator();
+        // calculate percentage
+        Iterator<Character> iter = testStat.keySet().iterator();
         Character character;
         Character maxChar = null;
         float value = 0;

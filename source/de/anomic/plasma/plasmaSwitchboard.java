@@ -853,10 +853,15 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         this.workPath   = getConfigPath(WORK_PATH, WORK_PATH_DEFAULT);
         this.log.logConfig("Work Path:    " + this.workPath.toString());
         
+        // set a high maximum cache size to current size; this is adopted later automatically
+        int wordCacheMaxCount = Math.max((int) getConfigLong(WORDCACHE_INIT_COUNT, 30000),
+                                         (int) getConfigLong(WORDCACHE_MAX_COUNT, 20000));
+        setConfig(WORDCACHE_MAX_COUNT, Integer.toString(wordCacheMaxCount));
+        
         // start indexing management
         log.logConfig("Starting Indexing Management");
         String networkName = getConfig("network.unit.name", "");
-        webIndex = new plasmaWordIndex(networkName, log, indexPrimaryPath, indexSecondaryPath);
+        webIndex = new plasmaWordIndex(networkName, log, indexPrimaryPath, indexSecondaryPath, wordCacheMaxCount);
         crawlResults = new ResultURLs();
         
         // start yacy core
@@ -983,12 +988,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         
         //Init bookmarks DB
         initBookmarks();
-        
-        // set a high maximum cache size to current size; this is adopted later automatically
-        int wordCacheMaxCount = Math.max((int) getConfigLong(WORDCACHE_INIT_COUNT, 30000),
-                                         (int) getConfigLong(WORDCACHE_MAX_COUNT, 20000));
-        setConfig(WORDCACHE_MAX_COUNT, Integer.toString(wordCacheMaxCount));
-        webIndex.setMaxWordCount(wordCacheMaxCount);
         
         // set a maximum amount of memory for the caches
         // long memprereq = Math.max(getConfigLong(INDEXER_MEMPREREQ, 0), wordIndex.minMem());
@@ -1249,6 +1248,43 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         sb.acceptGlobalURLs = "global.any".indexOf(sb.getConfig("network.unit.domain", "global")) >= 0;
         sb.acceptLocalURLs = "local.any".indexOf(sb.getConfig("network.unit.domain", "global")) >= 0;
         
+    }
+    
+    public void switchNetwork(String networkDefinition) {
+        // pause crawls
+        boolean lcp = crawlJobIsPaused(CRAWLJOB_LOCAL_CRAWL);
+        if (!lcp) pauseCrawlJob(CRAWLJOB_LOCAL_CRAWL);
+        boolean rcp = crawlJobIsPaused(CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
+        if (!rcp) pauseCrawlJob(CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
+        // trigger online caution
+        proxyLastAccess = System.currentTimeMillis() + 60000; // at least 1 minute online caution to prevent unnecessary action on database meanwhile
+        // switch the networks
+        synchronized (this.webIndex) {
+            this.webIndex.close();
+            setConfig("network.unit.definition", networkDefinition);
+            overwriteNetworkDefinition(this);
+            File indexPrimaryPath = getConfigPath(INDEX_PRIMARY_PATH, INDEX_PATH_DEFAULT);
+            File indexSecondaryPath = (getConfig(INDEX_SECONDARY_PATH, "").length() == 0) ? indexPrimaryPath : new File(getConfig(INDEX_SECONDARY_PATH, ""));
+            int wordCacheMaxCount = (int) getConfigLong(WORDCACHE_MAX_COUNT, 20000);
+            this.webIndex = new plasmaWordIndex(getConfig("network.unit.name", ""), getLog(), indexPrimaryPath, indexSecondaryPath, wordCacheMaxCount);
+        }
+        // start up crawl jobs again
+        if (lcp) continueCrawlJob(CRAWLJOB_LOCAL_CRAWL);
+        if (rcp) continueCrawlJob(CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
+        // check status of account configuration: when local url crawling is allowed, it is not allowed
+        // that an automatic authorization of localhost is done, because in this case crawls from local
+        // addresses are blocked to prevent attack szenarios where remote pages contain links to localhost
+        // addresses that can steer a YaCy peer
+        if ((this.acceptLocalURLs) && (getConfigBool("adminAccountForLocalhost", false))) {
+            setConfig("adminAccountForLocalhost", false);
+            if (getConfig(httpd.ADMIN_ACCOUNT_B64MD5, "").startsWith("0000")) {
+                // the password was set automatically with a random value.
+                // We must remove that here to prevent that a user cannot log in any more
+                setConfig(httpd.ADMIN_ACCOUNT_B64MD5, "");
+                // after this a message must be generated to alert the user to set a new password
+                log.logInfo("RANDOM PASSWORD REMOVED! User must set a new password");
+            }
+        }
     }
     
     public void initMessages() {
@@ -1777,7 +1813,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             boolean hasDoneSomething = false;
             
             // set a random password if no password is configured
-            if (getConfigBool("adminAccountForLocalhost", false) && getConfig(httpd.ADMIN_ACCOUNT_B64MD5, "").length() == 0) {
+            if (!this.acceptLocalURLs && getConfigBool("adminAccountForLocalhost", false) && getConfig(httpd.ADMIN_ACCOUNT_B64MD5, "").length() == 0) {
                 // make a 'random' password
                 setConfig(httpd.ADMIN_ACCOUNT_B64MD5, "0000" + serverCodings.encodeMD5Hex(System.getProperties().toString() + System.currentTimeMillis()));
                 setConfig("adminAccount", "");

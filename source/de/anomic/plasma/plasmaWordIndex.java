@@ -73,8 +73,8 @@ public final class plasmaWordIndex implements indexRI {
 
     // environment constants
     public  static final long wCacheMaxAge    = 1000 * 60 * 30; // milliseconds; 30 minutes
-    public  static final int  wCacheMaxChunk  =   800;          // maximum number of references for each urlhash
-    public  static final int  lowcachedivisor =  1200;
+    public  static final int  wCacheMaxChunk  =  800;           // maximum number of references for each urlhash
+    public  static final int  lowcachedivisor = 1200;
     public  static final int  maxCollectionPartition = 7;       // should be 7
     
 
@@ -96,7 +96,7 @@ public final class plasmaWordIndex implements indexRI {
     public        yacySeedDB               seedDB;
     public        yacyNewsPool             newsPool;
     private       File                     primaryRoot, secondaryRoot;
-    public        IndexingStack        queuePreStack;
+    public        IndexingStack            queuePreStack;
     public        CrawlProfile             profilesActiveCrawls, profilesPassiveCrawls;
     public  CrawlProfile.entry             defaultProxyProfile;
     public  CrawlProfile.entry             defaultRemoteProfile;
@@ -104,7 +104,7 @@ public final class plasmaWordIndex implements indexRI {
     public  CrawlProfile.entry             defaultMediaSnippetLocalProfile, defaultMediaSnippetGlobalProfile;
     private File                           queuesRoot;
     
-    public plasmaWordIndex(String networkName, serverLog log, File indexPrimaryRoot, File indexSecondaryRoot) {
+    public plasmaWordIndex(String networkName, serverLog log, File indexPrimaryRoot, File indexSecondaryRoot, int entityCacheMaxSize) {
         this.log = log;
         this.primaryRoot = new File(indexPrimaryRoot, networkName);
         this.secondaryRoot = new File(indexSecondaryRoot, networkName);
@@ -127,8 +127,8 @@ public final class plasmaWordIndex implements indexRI {
         
         File textindexcache = new File(indexPrimaryTextLocation, "RICACHE");
         if (!(textindexcache.exists())) textindexcache.mkdirs();
-        this.dhtOutCache = new indexRAMRI(textindexcache, indexRWIRowEntry.urlEntryRow, wCacheMaxChunk, wCacheMaxAge, "dump1.array", "index.dhtout.heap", log);
-        this.dhtInCache  = new indexRAMRI(textindexcache, indexRWIRowEntry.urlEntryRow, wCacheMaxChunk, wCacheMaxAge, "dump2.array", "index.dhtin.heap", log);
+        this.dhtOutCache = new indexRAMRI(textindexcache, indexRWIRowEntry.urlEntryRow, entityCacheMaxSize, wCacheMaxChunk, wCacheMaxAge, "dump1.array", "index.dhtout.heap", log);
+        this.dhtInCache  = new indexRAMRI(textindexcache, indexRWIRowEntry.urlEntryRow, entityCacheMaxSize, wCacheMaxChunk, wCacheMaxAge, "dump2.array", "index.dhtin.heap", log);
         
         // create collections storage path
         File textindexcollections = new File(indexPrimaryTextLocation, "RICOLLECTION");

@@ -73,21 +73,43 @@ public class ConfigAccounts_p {
             String user   = (post == null) ? "" : (String) post.get("adminuser", "");
             String pw1    = (post == null) ? "" : (String) post.get("adminpw1", "");
             String pw2    = (post == null) ? "" : (String) post.get("adminpw2", "");
-            sb.setConfig("adminAccountForLocalhost", localhostAccess);
-            // if an localhost access is configured, check if a local password is given
-            // if not, set a random password
-            if (post != null && localhostAccess && env.getConfig(httpd.ADMIN_ACCOUNT_B64MD5, "").length() == 0) {
-                // make a 'random' password
-                env.setConfig(httpd.ADMIN_ACCOUNT_B64MD5, "0000" + serverCodings.encodeMD5Hex(System.getProperties().toString() + System.currentTimeMillis()));
-                env.setConfig("adminAccount", "");
-            }
+
             // may be overwritten if new password is given
             if ((user.length() > 0) && (pw1.length() > 3) && (pw1.equals(pw2))) {
                 // check passed. set account:
                 env.setConfig(httpd.ADMIN_ACCOUNT_B64MD5, serverCodings.encodeMD5Hex(kelondroBase64Order.standardCoder.encodeString(user + ":" + pw1)));
                 env.setConfig("adminAccount", "");
             }
+            
+            if (localhostAccess) {
+                if (sb.acceptLocalURLs) {
+                    // in this case it is not allowed to use a localhostAccess option
+                    prop.put("commitIntranetWarning", 1);
+                    localhostAccess = false;
+                    sb.setConfig("adminAccountForLocalhost", false);
+                } else {
+                    sb.setConfig("adminAccountForLocalhost", true);
+                    // if an localhost access is configured, check if a local password is given
+                    // if not, set a random password
+                    if (post != null && env.getConfig(httpd.ADMIN_ACCOUNT_B64MD5, "").length() == 0) {
+                        // make a 'random' password
+                        env.setConfig(httpd.ADMIN_ACCOUNT_B64MD5, "0000" + serverCodings.encodeMD5Hex(System.getProperties().toString() + System.currentTimeMillis()));
+                        env.setConfig("adminAccount", "");
+                    }
+                }
+            } else {
+                sb.setConfig("adminAccountForLocalhost", false);
+                if (env.getConfig(httpd.ADMIN_ACCOUNT_B64MD5, "").startsWith("0000")) {
+                    // make shure that the user can still use the interface after a random password was set
+                    env.setConfig(httpd.ADMIN_ACCOUNT_B64MD5, "");
+                }
+            }
         }
+        
+        if (env.getConfig(httpd.ADMIN_ACCOUNT_B64MD5, "").length() == 0 && !env.getConfigBool("adminAccountForLocalhost", false)) {
+            prop.put("passwordNotSetWarning", 1);
+        }
+        
         prop.put("localhost.checked", (localhostAccess) ? 1 : 0);
         prop.put("account.checked", (localhostAccess) ? 0 : 1);
         prop.put("statusPassword", localhostAccess ? "0" : "1");

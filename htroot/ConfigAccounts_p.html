@@ -24,7 +24,9 @@
     ::
     <p class="error">Username too short. Username must be >= 4 Characters.</p>
     #(/error)#
-    
+    #(commitIntranetWarning)#::<div class="error">With an intranet indexing configuration it is not allowed to authentify automatically from localhost!</div>#(/commitIntranetWarning)#
+    #(passwordNotSetWarning)#::<div class="error">No password is set for the administration account. Please define a password for the admin account.</div>#(/passwordNotSetWarning)#
+
     <fieldset><legend>Admin Account</legend>
       <form action="ConfigAccounts_p.html" method="post">
           <fieldset>

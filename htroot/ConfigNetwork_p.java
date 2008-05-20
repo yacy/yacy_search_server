@@ -29,8 +29,8 @@ import java.io.File;
 import java.util.HashSet;
 
 import de.anomic.http.httpHeader;
+import de.anomic.http.httpd;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.server.serverBusyThread;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverFileUtils;
@@ -60,25 +60,11 @@ public class ConfigNetwork_p {
                 } else {
                     // shut down old network and index, start up new network and index
                     commit = 1;
-                    // pause crawls
-                    boolean lcp = sb.crawlJobIsPaused(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL);
-                    if (!lcp) sb.pauseCrawlJob(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL);
-                    boolean rcp = sb.crawlJobIsPaused(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
-                    if (!rcp) sb.pauseCrawlJob(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
-                    // trigger online caution
-                    sb.proxyLastAccess = System.currentTimeMillis() + 60000; // at least 1 minute online caution to prevent unnecessary action on database meanwhile
-                    // switch the networks
-                    synchronized (sb.webIndex) {
-                        sb.webIndex.close();
-                        sb.setConfig("network.unit.definition", networkDefinition);
-                        plasmaSwitchboard.overwriteNetworkDefinition(sb);
-                        File indexPrimaryPath = sb.getConfigPath(plasmaSwitchboard.INDEX_PRIMARY_PATH, plasmaSwitchboard.INDEX_PATH_DEFAULT);
-                        File indexSecondaryPath = (sb.getConfig(plasmaSwitchboard.INDEX_SECONDARY_PATH, "").length() == 0) ? indexPrimaryPath : new File(sb.getConfig(plasmaSwitchboard.INDEX_SECONDARY_PATH, ""));
-                        sb.webIndex = new plasmaWordIndex(sb.getConfig("network.unit.name", ""), sb.getLog(), indexPrimaryPath, indexSecondaryPath);
+                    sb.switchNetwork(networkDefinition);
+                    // check if the password is given
+                    if (sb.getConfig(httpd.ADMIN_ACCOUNT_B64MD5, "").length() == 0) {
+                        prop.put("commitPasswordWarning", "1");
                     }
-                    // start up crawl jobs again
-                    if (lcp) sb.continueCrawlJob(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL);
-                    if (rcp) sb.continueCrawlJob(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
                 }
             }
             
