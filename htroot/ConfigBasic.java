@@ -52,6 +52,7 @@ import java.util.regex.Pattern;
 
 import de.anomic.data.translator;
 import de.anomic.http.httpHeader;
+import de.anomic.http.httpd;
 import de.anomic.http.httpdFileHandler;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
@@ -64,7 +65,7 @@ import de.anomic.yacy.yacySeed;
 public class ConfigBasic {
     
     private static final int NEXTSTEP_FINISHED  = 0;
-    //private static final int NEXTSTEP_PWD       = 1;
+    private static final int NEXTSTEP_PWD       = 1;
     private static final int NEXTSTEP_PEERNAME  = 2;
     private static final int NEXTSTEP_PEERPORT  = 3;
     private static final int NEXTSTEP_RECONNECT = 4;
@@ -146,8 +147,73 @@ public class ConfigBasic {
         } else {
             prop.put("reconnect", "0");
         }
+
+        // set a use case
+        String networkName = sb.getConfig("network.unit.name", "");
+        if (post != null && post.containsKey("usecase")) {
+            boolean indexDistribute = sb.getConfig(plasmaSwitchboard.INDEX_DIST_ALLOW, "true").equals("true");
+            boolean indexReceive = sb.getConfig(plasmaSwitchboard.INDEX_RECEIVE_ALLOW, "true").equals("true");
+
+            if (post.get("usecase", "").equals("freeworld")) {
+                if (networkName.equals("freeworld")) {
+                    if (!indexDistribute && !indexReceive) {
+                        // switch from robinson mode to p2p mode
+                        sb.setConfig(plasmaSwitchboard.INDEX_DIST_ALLOW, true);
+                        sb.setConfig(plasmaSwitchboard.INDEX_RECEIVE_ALLOW, true);
+                    }
+                } else {
+                    // switch from intranet to p2p mode
+                    sb.switchNetwork("defaults/yacy.network.freeworld.unit");
+                    sb.setConfig(plasmaSwitchboard.INDEX_DIST_ALLOW, true);
+                    sb.setConfig(plasmaSwitchboard.INDEX_RECEIVE_ALLOW, true);
+                }
+            }
+            if (post.get("usecase", "").equals("portal")) {
+                if (networkName.equals("freeworld")) {
+                    if (indexDistribute || indexReceive) {
+                        // switch from p2p mode to robinson mode
+                        sb.setConfig(plasmaSwitchboard.INDEX_DIST_ALLOW, false);
+                        sb.setConfig(plasmaSwitchboard.INDEX_RECEIVE_ALLOW, false);
+                    }
+                } else {
+                    // switch from intranet to robinson mode
+                    sb.switchNetwork("defaults/yacy.network.freeworld.unit");
+                    sb.setConfig(plasmaSwitchboard.INDEX_DIST_ALLOW, false);
+                    sb.setConfig(plasmaSwitchboard.INDEX_RECEIVE_ALLOW, false);
+                }
+            }
+            if (post.get("usecase", "").equals("intranet")) {
+                if (!networkName.equals("intranet")) {
+                    // switch from p2p or robinson mode to intranet mode
+                    sb.switchNetwork("defaults/yacy.network.intranet.unit");
+                    sb.setConfig(plasmaSwitchboard.INDEX_DIST_ALLOW, true);
+                    sb.setConfig(plasmaSwitchboard.INDEX_RECEIVE_ALLOW, true);
+                }
+            }
+        }
+        
+        networkName = sb.getConfig("network.unit.name", "");
+        if (networkName.equals("freeworld")) {
+            prop.put("setUseCase", 1);
+            boolean indexDistribute = sb.getConfig(plasmaSwitchboard.INDEX_DIST_ALLOW, "true").equals("true");
+            boolean indexReceive = sb.getConfig(plasmaSwitchboard.INDEX_RECEIVE_ALLOW, "true").equals("true");
+            if (indexDistribute || indexReceive) {
+                // p2p mode
+                prop.put("setUseCase_freeworldChecked", 1);
+            } else {
+                // robinson mode
+                prop.put("setUseCase_portalChecked", 1);
+            }
+        } else if (networkName.equals("intranet")) {
+            prop.put("setUseCase", 1);
+            prop.put("setUseCase_intranetChecked", 1);
+        } else {
+            prop.put("setUseCase", 0);
+        }
+        prop.put("setUseCase_port", port);
         
         // check if values are proper
+        boolean properPassword = (sb.getConfig(httpd.ADMIN_ACCOUNT_B64MD5, "").length() > 0) || sb.getConfigBool("adminAccountForLocalhost", false);
         boolean properName = (env.getConfig("peerName","").length() >= 3) && (!(yacySeed.isDefaultPeerName(env.getConfig("peerName",""))));
         boolean properPort = (sb.webIndex.seedDB.mySeed().isSenior()) || (sb.webIndex.seedDB.mySeed().isPrincipal());
         
@@ -162,6 +228,8 @@ public class ConfigBasic {
             prop.put("nextStep", NEXTSTEP_RECONNECT);
         } else if (!properName) {
             prop.put("nextStep", NEXTSTEP_PEERNAME);
+        } else if (!properPassword) {
+            prop.put("nextStep", NEXTSTEP_PWD);
         } else if (!properPort) {
             prop.put("nextStep", NEXTSTEP_PEERPORT);
         } else {

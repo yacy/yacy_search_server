@@ -1271,6 +1271,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         // start up crawl jobs again
         if (lcp) continueCrawlJob(CRAWLJOB_LOCAL_CRAWL);
         if (rcp) continueCrawlJob(CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
+        this.log.logInfo("switched network to " + networkDefinition);
         // check status of account configuration: when local url crawling is allowed, it is not allowed
         // that an automatic authorization of localhost is done, because in this case crawls from local
         // addresses are blocked to prevent attack szenarios where remote pages contain links to localhost

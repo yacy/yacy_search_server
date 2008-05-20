@@ -32,6 +32,28 @@
           </fieldset>
         </li>
 
+		#(setUseCase)#::
+		<li>
+          <img src="/env/grafics/ok.png" height="16" width="16" alt="ok" />&nbsp;Use Case: what do you want to do with YaCy:<br />
+          <fieldset>
+            <dl>
+              <dt>Community-based web search</dt>
+              <dd>
+                <input type="radio" name="usecase" value="freeworld" id="usecaseFreeworld" #(freeworldChecked)#::checked="checked"#(/freeworldChecked)# /> <label for="usecaseFreeworld">join and support the global network 'freeworld', search the web with a uncensored user-owned search network</label>
+              </dd>
+              <dt>Search portal for your own web pages</dt>
+              <dd>
+                <input type="radio" name="usecase" value="portal" id="usecasePortal" #(portalChecked)#::checked="checked"#(/portalChecked)# /> <label for="usecasePortal">your YaCy installation behaves independently from other peers and you define your own web index by starting your own web crawl. This can be used to search your own web pages or to define a topic-oriented search portal.</label>
+              </dd>
+              <dt>Intranet Indexing</dt>
+              <dd>
+                <input type="radio" name="usecase" value="intranet" id="usecaseIntranet" #(intranetChecked)#::checked="checked"#(/intranetChecked)# /> <label for="usecaseIntranet">create a search portal for your intranet web pages, or pages that are placed at DATA/HTDOCS/repository and can be accessed at <a href="http://localhost:#[port]#/repository/">http://localhost:#[port]#/repository</a></label>
+              </dd>
+            </dl>
+          </fieldset>
+        </li>
+        #(/setUseCase)#
+        
         <li>
           #(statusName)#<img src="/env/grafics/bad.png" height="16" width="16" alt="warning" />&nbsp;Your peer name has not been customized; please set your own peer name::<img src="/env/grafics/ok.png" height="16" width="16" alt="ok" />&nbsp;You may change your peer name#(/statusName)#<br />
           <fieldset>
@@ -43,6 +65,7 @@
             </dl>
           </fieldset>
         </li>
+        
         <li>
           #(statusPort)#<img src="/env/grafics/bad.png" height="16" width="16" alt="warning" />&nbsp;Your peer cannot be reached from outside (which is not fatal, but would be good for the YaCy network); please open your firewall for this port and/or set a virtual server option in your router to allow connections on this port.::<img src="/env/grafics/ok.png" height="16" width="16" alt="ok" />&nbsp;Your peer can be reached by other peers#(/statusPort)#<br />
           <fieldset>
@@ -74,7 +97,7 @@
       <li>just <a href="Network.html">monitor at the network page</a> what the other peers are doing</li>
     </ul>::
     <!-- [1]: password not proper -->
-    <p>You did not set a user name and/or a password. Some pages are protected by passwords. You should set a password here to secure your YaCy peer.</p>::
+    <p>You did not set a user name and/or a password. Some pages are protected by passwords. You should set a password at the <a href="Accounts_p.html">Accounts Menu</a> to secure your YaCy peer.</p>::
     <!-- [2]: peername not proper -->
     <p>Your Peer name is a default name; please set an individual peer name.</p>::
     <!-- [3]: port not proper -->

@@ -104,35 +104,35 @@ public class ConfigNetwork_p {
                 }
                 
                 if (indexDistribute) {
-                    sb.setConfig(plasmaSwitchboard.INDEX_DIST_ALLOW, "true");
+                    sb.setConfig(plasmaSwitchboard.INDEX_DIST_ALLOW, true);
                 } else {
-                    sb.setConfig(plasmaSwitchboard.INDEX_DIST_ALLOW, "false");
+                    sb.setConfig(plasmaSwitchboard.INDEX_DIST_ALLOW, false);
                 }
     
                 if (post.get("indexDistributeWhileCrawling","").equals("on")) {
-                    sb.setConfig(plasmaSwitchboard.INDEX_DIST_ALLOW_WHILE_CRAWLING, "true");
+                    sb.setConfig(plasmaSwitchboard.INDEX_DIST_ALLOW_WHILE_CRAWLING, true);
                 } else {
-                    sb.setConfig(plasmaSwitchboard.INDEX_DIST_ALLOW_WHILE_CRAWLING, "false");
+                    sb.setConfig(plasmaSwitchboard.INDEX_DIST_ALLOW_WHILE_CRAWLING, false);
                 }
     
                 if (post.get("indexDistributeWhileIndexing","").equals("on")) {
-                    sb.setConfig(plasmaSwitchboard.INDEX_DIST_ALLOW_WHILE_INDEXING, "true");
+                    sb.setConfig(plasmaSwitchboard.INDEX_DIST_ALLOW_WHILE_INDEXING, true);
                 } else {
-                    sb.setConfig(plasmaSwitchboard.INDEX_DIST_ALLOW_WHILE_INDEXING, "false");
+                    sb.setConfig(plasmaSwitchboard.INDEX_DIST_ALLOW_WHILE_INDEXING, false);
                 }
     
                 if (indexReceive) {
-                    sb.setConfig("allowReceiveIndex", "true");
+                    sb.setConfig(plasmaSwitchboard.INDEX_RECEIVE_ALLOW, true);
                     sb.webIndex.seedDB.mySeed().setFlagAcceptRemoteIndex(true);
                 } else {
-                    sb.setConfig("allowReceiveIndex", "false");
+                    sb.setConfig(plasmaSwitchboard.INDEX_RECEIVE_ALLOW, false);
                     sb.webIndex.seedDB.mySeed().setFlagAcceptRemoteIndex(false);
                 }
     
                 if (post.get("indexReceiveBlockBlacklist", "").equals("on")) {
-                    sb.setConfig("indexReceiveBlockBlacklist", "true");
+                    sb.setConfig("indexReceiveBlockBlacklist", true);
                 } else {
-                    sb.setConfig("indexReceiveBlockBlacklist", "false");
+                    sb.setConfig("indexReceiveBlockBlacklist", false);
                 }
                     
                 if (post.containsKey("peertags")) {
@@ -173,7 +173,7 @@ public class ConfigNetwork_p {
         prop.put("acceptCrawlLimit", RTCppm);
         
         boolean indexDistribute = sb.getConfig(plasmaSwitchboard.INDEX_DIST_ALLOW, "true").equals("true");
-        boolean indexReceive = sb.getConfig("allowReceiveIndex", "true").equals("true");
+        boolean indexReceive = sb.getConfig(plasmaSwitchboard.INDEX_RECEIVE_ALLOW, "true").equals("true");
         prop.put("indexDistributeChecked", (indexDistribute) ? "1" : "0");
         prop.put("indexDistributeWhileCrawling.on", (sb.getConfig(plasmaSwitchboard.INDEX_DIST_ALLOW_WHILE_CRAWLING, "true").equals("true")) ? "1" : "0");
         prop.put("indexDistributeWhileCrawling.off", (sb.getConfig(plasmaSwitchboard.INDEX_DIST_ALLOW_WHILE_CRAWLING, "true").equals("true")) ? "0" : "1");

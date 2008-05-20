@@ -174,8 +174,12 @@ public final class httpdFileHandler {
             // create a htDocsPath: user defined pages
             if (htDocsPath == null) {
                 htDocsPath = switchboard.getConfigPath(plasmaSwitchboard.HTDOCS_PATH, plasmaSwitchboard.HTDOCS_PATH_DEFAULT);
-                if (!(htDocsPath.exists())) htDocsPath.mkdir();
+                if (!(htDocsPath.exists())) htDocsPath.mkdirs();
             }
+            
+            // create a repository path
+            File repository = new File(htDocsPath, "repository");
+            if (!repository.exists()) repository.mkdirs();
             
             // create a htTemplatePath
             if (htTemplatePath == null) {
