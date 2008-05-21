@@ -395,11 +395,18 @@ public final class yacyClient {
         try {
             /* a long time-out is needed */
             final byte[] result = wput("http://" + target.getClusterAddress() + "/yacy/urls.xml", target.getHexHash() + ".yacyh", post, 60000); 
-            
-            RSSFeed feed = RSSReader.parse(result).getFeed();
+            RSSReader reader = RSSReader.parse(result);
+            if (reader == null) {
+                yacyCore.log.logWarning("yacyClient.queryRemoteCrawlURLs failed asking peer '" + target.getName() + "': probably bad response from remote peer (1), reader == null");
+                target.put(yacySeed.RCOUNT, "0");
+                seedDB.update(target.hash, target); // overwrite number of remote-available number to avoid that this peer is called again (until update is done by peer ping)
+                //e.printStackTrace();
+                return null;
+            }
+            RSSFeed feed = reader.getFeed();
             if (feed == null) {
                 // case where the rss reader does not understand the content
-                yacyCore.log.logWarning("yacyClient.queryRemoteCrawlURLs failed asking peer '" + target.getName() + "': probably bad response from remote peer");
+                yacyCore.log.logWarning("yacyClient.queryRemoteCrawlURLs failed asking peer '" + target.getName() + "': probably bad response from remote peer (2)");
                 System.out.println("***DEBUG*** rss input = " + new String(result));
                 target.put(yacySeed.RCOUNT, "0");
                 seedDB.update(target.hash, target); // overwrite number of remote-available number to avoid that this peer is called again (until update is done by peer ping)
