@@ -11,7 +11,7 @@ For %%X in (libx/*.jar) Do Call %0 CPGEN libx\%%X
 REM Please change the "javastart" settings in the web-interface "Basic Configuration" -> "Advanced" 
 set jmx=
 set jms=
-set javacmd=-Xmx64m -Xms10m
+set javacmd=-Xmx120m -Xms120m
 set priolvl=0
 set priority=/NORMAL
 if exist DATA\SETTINGS\httpProxy.conf GoTo :RENAMEINDEX
@@ -36,6 +36,7 @@ start "YaCy" %priority% /B /WAIT java %javacmd% -classpath %CLASSPATH% yacy
 
 if not exist DATA\yacy.restart GoTo :END
 del DATA\yacy.restart
+GoTo :GETSTARTOPTS
 
 Rem PUBLIC is now freeworld (r4575)
 :RENAMEINDEX

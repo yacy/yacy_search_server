@@ -52,6 +52,8 @@ public class ConfigUpdate_p {
             if (post.containsKey("update")) {
                 prop.put("forwardToSteering", "1");
                 prop.put("forwardToSteering_release",post.get("releaseinstall", ""));
+                prop.put("deploys", "1");
+                prop.put("candeploy", "2"); // display nothing else
                 return prop;
             }
             
@@ -117,7 +119,7 @@ public class ConfigUpdate_p {
         }
         
         // set if this should be visible
-        if (serverSystem.canExecUnix) {
+        if (serverSystem.canExecUnix || serverSystem.isWindows) {
             // we can deploy a new system with (i.e.)
             // cd DATA/RELEASE;tar xfz $1;cp -Rf yacy/* ../../;rm -Rf yacy
             prop.put("candeploy", "1");

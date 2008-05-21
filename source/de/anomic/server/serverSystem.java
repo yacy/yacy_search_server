@@ -69,6 +69,7 @@ public final class serverSystem {
     public static boolean isMacArchitecture = false;
     public static boolean isUnixFS = false;
     public static boolean canExecUnix = false;
+    public static boolean isWindows = false;
 
     // calculated system constants
     public static int maxPathLength = 65535;
@@ -99,7 +100,8 @@ public final class serverSystem {
 
 	isMacArchitecture = ((systemOS == systemMacOSC) || (systemOS == systemMacOSX));
 	isUnixFS = ((systemOS == systemMacOSX) || (systemOS == systemUnix));
-        canExecUnix = ((isUnixFS) || (!((systemOS == systemMacOSC) || (systemOS == systemWindows))));
+    canExecUnix = ((isUnixFS) || (!((systemOS == systemMacOSC) || (systemOS == systemWindows))));
+    isWindows = (systemOS == systemWindows);
 
 	// set up the MRJ Methods through reflection
 	if (isMacArchitecture) try {
@@ -121,13 +123,13 @@ public final class serverSystem {
 	    macMRJFileUtils = null; macMRJOSType = null;
 	}
     
-        // set up maximum path length accoring to system
-        if (systemOS == systemWindows) maxPathLength = 255; else maxPathLength = 65535;
+        // set up maximum path length according to system
+        if (isWindows) maxPathLength = 255; else maxPathLength = 65535;
     }
 
-    public static boolean isWindows() {
+/*    public static boolean isWindows() {
         return systemOS == systemWindows;
-    }
+    }*/
     
     public static Object getMacOSTS(String s) {
 	if ((isMacArchitecture) && (macMRJFileUtils != null)) try {
@@ -330,19 +332,30 @@ public final class serverSystem {
 
     public static void deployScript(File scriptFile, String theScript) throws IOException {
         serverFileUtils.copy(theScript.getBytes(), scriptFile);
-        try {
-            Runtime.getRuntime().exec("chmod 755 " + scriptFile.getAbsolutePath().replaceAll(" ", "\\ ")).waitFor();
-        } catch (InterruptedException e) {
-            serverLog.logSevere("DEPLOY", "deploy of script file failed. file = " + scriptFile.getAbsolutePath(), e);
-            throw new IOException(e.getMessage());
+        if(!isWindows){ // set executable
+	        try {
+	            Runtime.getRuntime().exec("chmod 755 " + scriptFile.getAbsolutePath().replaceAll(" ", "\\ ")).waitFor();
+	        } catch (InterruptedException e) {
+	            serverLog.logSevere("DEPLOY", "deploy of script file failed. file = " + scriptFile.getAbsolutePath(), e);
+	            throw new IOException(e.getMessage());
+	        }
         }
     }
     
     public static void execAsynchronous(File scriptFile) throws IOException {
-        // runs a unix/linux script as separate thread
-        File starterFile = new File(scriptFile.getAbsolutePath().replaceAll(" ", "\\ ") + ".starter.sh");
-        //deployScript(starterFile, "touch restart.starter.startet1");
-        deployScript(starterFile, "#!/bin/sh" + serverCore.LF_STRING + scriptFile.getAbsolutePath().replaceAll(" ", "\\ ") + " &" + serverCore.LF_STRING);
+        // runs a script as separate thread
+    	String starterFileExtension = null;
+    	String script = null;
+    	if(isWindows){
+    		starterFileExtension = ".starter.bat";
+    		// TODO: use /K to debug
+    		script = "start /MIN CMD /C " + scriptFile.getAbsolutePath().replaceAll(" ", "\\ ");
+    	} else { // unix/linux
+    		starterFileExtension = ".starter.sh";
+	        script = "#!/bin/sh" + serverCore.LF_STRING + scriptFile.getAbsolutePath().replaceAll(" ", "\\ ") + " &" + serverCore.LF_STRING;
+    	}
+    	File starterFile = new File(scriptFile.getAbsolutePath().replaceAll(" ", "\\ ") + starterFileExtension);
+    	deployScript(starterFile, script);
         try {
             Runtime.getRuntime().exec(starterFile.getAbsolutePath().replaceAll(" ", "\\ ")).waitFor();
         } catch (InterruptedException e) {

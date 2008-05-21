@@ -10,9 +10,11 @@
     #%env/templates/submenuConfig.template%#
 	<h2>System Update</h2>
 	
+	#(deploys)#::Release will be installed. Please wait.#(/deploys)#
+	
     #(candeploy)#
     This servlet can only be used on operation systems that are currently supported for deploy functions.
-    If you see this message this means that your operation sytem ist not supported.
+    If you see this message this means that your operation system is not supported. 
     ::
       <fieldset>
       <legend>Manual System Update</legend>
@@ -100,6 +102,7 @@
       <dt>Last Deploy</dt><dd><p>#(lastdeploy)#never::#[time]##(/lastdeploy)#</p></dd>
       </dl>
       </fieldset>
+      ::
     #(/candeploy)#
     
     #%env/templates/footer.template%#

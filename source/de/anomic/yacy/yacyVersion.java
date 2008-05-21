@@ -50,6 +50,7 @@ import de.anomic.server.serverCore;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverSystem;
 import de.anomic.server.logging.serverLog;
+import de.anomic.tools.tarTools;
 
 public final class yacyVersion implements Comparator<yacyVersion>, Comparable<yacyVersion> {
     
@@ -370,7 +371,7 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
     public static void restart() {
         plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
         
-        if (System.getProperty("os.name").toLowerCase().startsWith("win")) {
+        if (serverSystem.isWindows) {
             // create yacy.restart file which is used in Windows startscript
             final File yacyRestart = new File(sb.getRootPath(), "DATA/yacy.restart");
             if (!yacyRestart.exists()) {
@@ -414,35 +415,78 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
             plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
             String apphome = sb.getRootPath().toString();
             serverLog.logInfo("UPDATE", "INITIATED");
-            String script =
-                "#!/bin/sh" + serverCore.LF_STRING +
-                "cd " + sb.getRootPath() + "/DATA/RELEASE/" + serverCore.LF_STRING +
-                ((releaseFile.getName().endsWith(".gz")) ?
-                        // test gz-file for integrity and tar xfz then
-                       ("if gunzip -t " + releaseFile.getAbsolutePath() + serverCore.LF_STRING +
-                        "then" + serverCore.LF_STRING + 
-                        "gunzip -c " + releaseFile.getAbsolutePath() + " | tar xf -" + serverCore.LF_STRING) :
-                        // just tar xf the file, no integrity test possible?
-                       ("tar xf " + releaseFile.getAbsolutePath() + serverCore.LF_STRING)
-                ) +
-                "while [ -f ../yacy.running ]; do" + serverCore.LF_STRING +
-                "sleep 1" + serverCore.LF_STRING +
-                "done" + serverCore.LF_STRING +
-                "cp -Rf yacy/* " + apphome + serverCore.LF_STRING +
-                "rm -Rf yacy" + serverCore.LF_STRING +
-                ((releaseFile.getName().endsWith(".gz")) ?
-                        // else-case of gunzip -t test: if failed, just restart
-                       ("else" + serverCore.LF_STRING +
-                        "while [ -f ../yacy.running ]; do" + serverCore.LF_STRING +
-                        "sleep 1" + serverCore.LF_STRING +
-                        "done" + serverCore.LF_STRING +
-                        "fi" + serverCore.LF_STRING) :
-                        // in case that we did not made the integrity test, there is no else case
-                        ""
-                ) +
-                "cd " + apphome + serverCore.LF_STRING +
-                "nohup ./startYACY.sh > /dev/null" + serverCore.LF_STRING;
-            File scriptFile = new File(sb.getRootPath(), "DATA/RELEASE/update.sh");
+            try{
+            tarTools.unTar(tarTools.getInputStream(releaseFile), sb.getRootPath() + "/DATA/RELEASE/".replace("/", File.separator));
+            } catch (Exception e){
+            	serverLog.logSevere("UNTAR", "failed", e);
+            }
+            String script = null;
+            String scriptFileName = null;
+            if(serverSystem.isWindows){
+            	script = 
+            		// TODO: does YaCy delete this file after 2nd update-shutdown? "Die Batchdatei kann nicht gefunden werden."
+	            	"@echo off" + serverCore.LF_STRING +
+	            	"title YaCy updater" + serverCore.LF_STRING +
+	            	"echo YACY UPDATER" + serverCore.LF_STRING +
+	            	"echo working..." + serverCore.LF_STRING +
+	            	"cd " + apphome + "/DATA/RELEASE/".replace("/", File.separator) + serverCore.LF_STRING +
+	
+	            	":WAIT" + serverCore.LF_STRING +
+	            	"ping -n 2 127.0.0.1 >nul" + serverCore.LF_STRING +
+	            	"IF exist ..\\yacy.running goto WAIT" + serverCore.LF_STRING +
+	
+	            	"IF not exist yacy goto NODATA" + serverCore.LF_STRING +
+	
+	            	"cd yacy" + serverCore.LF_STRING +
+	            	"xcopy *.* " + apphome + " /E /Y >nul" + serverCore.LF_STRING +
+	            	// /E - all subdirectories
+	            	// /Y - don't ask
+	            	"cd .." + serverCore.LF_STRING +
+	            	"rd yacy /S /Q" + serverCore.LF_STRING +
+	            	// /S delete tree
+	            	// /Q don't ask
+	            	"goto END" + serverCore.LF_STRING +
+	
+	            	":NODATA" + serverCore.LF_STRING +
+	            	"echo YACY UPDATER ERROR: NO UPDATE SOURCE FILES ON FILESYSTEM" + serverCore.LF_STRING +
+	            	"pause" + serverCore.LF_STRING +
+	
+	            	":END" + serverCore.LF_STRING +
+	            	"cd " + apphome + serverCore.LF_STRING +
+	            	"start /MIN CMD /C startYACY.bat" + serverCore.LF_STRING;
+            	scriptFileName = "update.bat";
+            } else { // unix/linux
+	            script =
+	                "#!/bin/sh" + serverCore.LF_STRING +
+	                "cd " + sb.getRootPath() + "/DATA/RELEASE/" + serverCore.LF_STRING +
+	/*                ((releaseFile.getName().endsWith(".gz")) ?
+	                        // test gz-file for integrity and tar xfz then
+	                       ("if gunzip -t " + releaseFile.getAbsolutePath() + serverCore.LF_STRING +
+	                        "then" + serverCore.LF_STRING + 
+	                        "gunzip -c " + releaseFile.getAbsolutePath() + " | tar xf -" + serverCore.LF_STRING) :
+	                        // just tar xf the file, no integrity test possible?
+	                       ("tar xf " + releaseFile.getAbsolutePath() + serverCore.LF_STRING)
+	                ) +*/
+	                "while [ -f ../yacy.running ]; do" + serverCore.LF_STRING +
+	                "sleep 1" + serverCore.LF_STRING +
+	                "done" + serverCore.LF_STRING +
+	                "cp -Rf yacy/* " + apphome + serverCore.LF_STRING +
+	                "rm -Rf yacy" + serverCore.LF_STRING +
+	/*                ((releaseFile.getName().endsWith(".gz")) ?
+	                        // else-case of gunzip -t test: if failed, just restart
+	                       ("else" + serverCore.LF_STRING +
+	                        "while [ -f ../yacy.running ]; do" + serverCore.LF_STRING +
+	                        "sleep 1" + serverCore.LF_STRING +
+	                        "done" + serverCore.LF_STRING +
+	                        "fi" + serverCore.LF_STRING) :
+	                        // in case that we did not made the integrity test, there is no else case
+	                        ""
+	                ) +*/
+	                "cd " + apphome + serverCore.LF_STRING +
+	                "nohup ./startYACY.sh > /dev/null" + serverCore.LF_STRING;
+	            scriptFileName = "update.sh";
+            }
+            File scriptFile = new File(sb.getRootPath(), "DATA/RELEASE/".replace("/", File.separator) + scriptFileName); 
             serverSystem.deployScript(scriptFile, script);
             serverLog.logInfo("UPDATE", "wrote update-script to " + scriptFile.getAbsolutePath());
             serverSystem.execAsynchronous(scriptFile);

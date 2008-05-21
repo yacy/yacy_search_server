@@ -86,7 +86,7 @@ public class Steering {
         if (post.containsKey("update")) {
             boolean devenvironment = yacyVersion.combined2prettyVersion(sb.getConfig("version","0.1")).startsWith("dev");
             String releaseFileName = post.get("releaseinstall", "");
-            File releaseFile = new File(sb.getRootPath(), "DATA/RELEASE/" + releaseFileName);
+            File releaseFile = new File(sb.getRootPath(), "DATA/RELEASE/".replace("/", File.separator) + releaseFileName);
             if ((!devenvironment) && (releaseFile.length() > 0) && (releaseFile.exists())) {
                 yacyVersion.deployRelease(releaseFile);
             }
