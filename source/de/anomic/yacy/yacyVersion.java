@@ -370,10 +370,38 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
     
     public static void restart() {
         plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
+        String apphome = sb.getRootPath().toString();
         
         if (serverSystem.isWindows) {
+        	File startType = new File(sb.getRootPath(), "DATA/yacy.noconsole");
+        	String starterFile = "startYACY.bat";
+        	if (startType.exists()) starterFile = "startYACY_noconsole.bat"; // startType noconsole
+        	
+        	try{
+                serverLog.logInfo("RESTART", "INITIATED");
+        		String script =
+	            	"@echo off" + serverCore.LF_STRING +
+	            	"title YaCy restarter" + serverCore.LF_STRING +
+	            	"echo YACY RESTARTER" + serverCore.LF_STRING +
+	            	"echo working..." + serverCore.LF_STRING +
+	            	"cd " + apphome + "/DATA/RELEASE/".replace("/", File.separator) + serverCore.LF_STRING +
+	            	":WAIT" + serverCore.LF_STRING +
+	            	"ping -n 2 127.0.0.1 >nul" + serverCore.LF_STRING +
+	            	"IF exist ..\\yacy.running goto WAIT" + serverCore.LF_STRING +
+	            	"cd " + apphome + serverCore.LF_STRING +
+	            	"start /MIN CMD /C " + starterFile + serverCore.LF_STRING;
+	            File scriptFile = new File(sb.getRootPath(), "DATA/RELEASE/restart.bat".replace("/", File.separator));
+	            serverSystem.deployScript(scriptFile, script);
+	            serverLog.logInfo("RESTART", "wrote restart-script to " + scriptFile.getAbsolutePath());
+	            serverSystem.execAsynchronous(scriptFile);
+	            serverLog.logInfo("RESTART", "script is running");
+	            sb.terminate(5000);
+	        } catch (IOException e) {
+	            serverLog.logSevere("RESTART", "restart failed", e);
+	        }
+        
             // create yacy.restart file which is used in Windows startscript
-            final File yacyRestart = new File(sb.getRootPath(), "DATA/yacy.restart");
+/*            final File yacyRestart = new File(sb.getRootPath(), "DATA/yacy.restart");
             if (!yacyRestart.exists()) {
                 try {
                     yacyRestart.createNewFile();
@@ -381,7 +409,7 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
                 } catch (IOException e) {
                     serverLog.logSevere("SHUTDOWN", "restart failed", e);
                 }
-            }
+            }*/
             
         }
 
@@ -434,9 +462,9 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
 	            	":WAIT" + serverCore.LF_STRING +
 	            	"ping -n 2 127.0.0.1 >nul" + serverCore.LF_STRING +
 	            	"IF exist ..\\yacy.running goto WAIT" + serverCore.LF_STRING +
-	
+	            	// Error: "Die Batchdatei kann nicht gefunden werden."
 	            	"IF not exist yacy goto NODATA" + serverCore.LF_STRING +
-	
+
 	            	"cd yacy" + serverCore.LF_STRING +
 	            	"xcopy *.* " + apphome + " /E /Y >nul" + serverCore.LF_STRING +
 	            	// /E - all subdirectories

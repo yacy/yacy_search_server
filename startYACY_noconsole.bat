@@ -1,6 +1,10 @@
 @Echo Off
 title YaCy
 
+REM setting startup type for proper restart
+if not exist DATA md DATA
+echo . >DATA\yacy.noconsole
+
 If %1.==CPGEN. GoTo :CPGEN
 
 Rem Generating the proper classpath unsing loops and labels

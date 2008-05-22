@@ -1,6 +1,8 @@
 @Echo Off
 title YaCy
 
+if exist DATA\yacy.noconsole del DATA\yacy.noconsole
+
 If %1.==CPGEN. GoTo :CPGEN
 
 Rem Generating the proper classpath unsing loops and labels
