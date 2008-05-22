@@ -268,8 +268,16 @@ Save User==Benutzer speichern
 #File: ConfigBasic.html
 #---------------------------
 Access Configuration==Zugangseinstellungen
+Basic Configuration==Eingangskonfiguration
 Your YaCy Peer needs some basic information to operate properly==Ihr YaCy-Peer ben&ouml;tigt einige Grundinformationen um korrekt zu funktionieren
 Select a language for the interface==W&auml;hlen Sie eine Sprache f&uuml;r das Interface
+Use Case: what do you want to do with YaCy:==Anwendungsfall: Was Sie mit YaCy tun wollen:
+Community-based web search==Gemeinschafts-basierte Web Suche
+join and support the global network 'freeworld', search the web with an uncensored user-owned search network==treten Sie dem globalen Netzwerk 'freeworld' bei und unterst&uuml;tzen Sie es, durchsuchen Sie das Internet mit einem unzensierten, von den Benutzern gestalteten Suchnetzwerk  
+Search portal for your own web pages==Suchportal f&uuml;r Ihre eigene Internetseiten
+your YaCy installation behaves independently from other peers and you define your own web index by starting your own web crawl. This can be used to search your own web pages or to define a topic-oriented search portal.==Ihre YaCy Installation verh&auml;lt sich unabh&auml;ngug von den anderen Peers und Sie k&ouml;nnen Ihren eigenen Index bestimmen, indem Sie einen eigenen Web-Crawl starten. Dies kann benutzt werden, um Ihre eigenen Internetseiten zu durchsuchen oder ein Themen-basiertes Portal aufzubauen. 
+Intranet Indexing==Intranet Indexierung
+create a search portal for your intranet web pages, or pages that are placed at DATA/HTDOCS/repository and can be accessed at <a href="http://localhost:#\[port\]#/repository/">http://localhost:#\[port\]#/repository</a>==erstellt ein Suchportal f&uuml;r Ihre Intranet Webseiten, oder Seiten, die unter DATA/HTDOCS/repository gespeichert und unter <a href="http://localhost:#[port]#/repository/">http://localhost:#[port]#/repository</a> erreichbar sind.
 Your peer name has not been customized; please set your own peer name==Ihr Peername wurde noch nicht angepasst; bitte setzen Sie einen eigenen Peernamen ein
 You may change your peer name==Sie k&ouml;nnen Ihren Peernamen &auml;ndern
 Peer Name:==Peername:
@@ -290,7 +298,6 @@ monitor at the network page</a> what the other peers are doing==auf der Netzwerk
 Your Peer name is a default name; please set an individual peer name.==Ihr Peer-Name ist ein Standardname; bitte stellen Sie einen individuellen Namen ein.
 You did not set a user name and/or a password.==Sie haben keinen Nutzernamen und/oder kein Passwort gesetzt.
 Some pages are protected by passwords.==Einige Seiten sind passwortgesch&uuml;tzt.
-You should set a password here to secure your YaCy peer.==Sie sollten hier ein Passwort einstellen um Ihren YaCy-Peer zu sichern.
 You did not open a port in your firewall or your router does not forward the server port to your peer.==Sie haben keinen Port in Ihrer Firewall ge&ouml;ffnet oder Ihr Router leitet den Server-Port nicht zu Ihrem Peer weiter.
 This is needed if you want to fully participate in the YaCy network.==Dies ist jedoch erforderlich, wenn Sie vollst&auml;ndig am YaCy-Netzwerk teilhaben m&ouml;chten.
 You can also use your peer without opening it, but this is not recomended.==Sie k&ouml;nnen Ihren Peer auch nutzen ohne ihn zu &ouml;ffnen, dies wird jedoch nicht empfohlen.
@@ -2127,12 +2134,13 @@ User Page==Benutzer Seite
 You are not logged in.<br />==Sie sind nicht angemeldet.<br /> 
 Username:==Benutzername:
 Password: <input==Passwort: <input
+"login"=="anmelden"
 You are currently logged in as==Sie sind nun angemeldet als
 You have used==Sie haben bereits
 minutes of your onlinetime limit of==Minuten Ihres Online-Zeitlimits von
 minutes per day.==Minuten pro Tag verbraucht.
 old Password==altes Passwort
-new Password==neues Passwort
+new Password<==neues Passwort<
 new Password\(repetition\)==neues Passwort (Wiederholung)
 "Change"=="&Auml;ndern"
 You are currently logged in as admin.==Sie sind derzeit als Administrator angemeldet.
