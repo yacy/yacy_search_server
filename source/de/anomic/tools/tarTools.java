@@ -1,6 +1,5 @@
 // tarTools.java
-// (C) 2007 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
-// contributed by David Wieditz; d.wieditz@gmx.de
+// (C) 2008 by David Wieditz; d.wieditz@gmx.de
 // first published 21.05.2008 on http://yacy.net
 //
 // This is a part of YaCy, a peer-to-peer based web search engine

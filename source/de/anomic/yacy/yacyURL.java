@@ -178,6 +178,11 @@ public class yacyURL implements Serializable {
         this.host = baseURL.host;
         this.port = baseURL.port;
         this.userInfo = baseURL.userInfo;
+        if (relPath.startsWith("//")) {
+            // a "network-path reference" as defined in rfc2396 denotes
+            // a relative path that uses the protocol from the base url
+            relPath = baseURL.protocol + ":" + relPath;
+        }
         if (relPath.toLowerCase().startsWith("javascript:")) {
             this.path = baseURL.path;
         } else if (
