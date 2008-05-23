@@ -4,7 +4,7 @@
 // first published on http://www.yacy.net
 // Braunschweig, Germany, 2008
 //
-// $LastChangedDate: 2008-05-18 23:00:00 +0200 (Di, 18 Mai 2008) $
+// $LastChangedDate: 2008-05-23 23:00:00 +0200 (Fr, 23 Mai 2008) $
 // $LastChangedRevision: 4824 $
 // $LastChangedBy: low012 $
 //
@@ -43,37 +43,19 @@
 
 package de.anomic.language.identification;
 
-import java.io.File;
-import java.io.FilenameFilter;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
 /**
  * This class can try to identify the language a text is written in.
- * It has been implemented as a Singleton since it has to access several
- * files on instanciation which should be avoided since it is very slow.
  */
 public final class Identificator {
 
-    private List<LanguageStatistics> languages = new Vector<LanguageStatistics>();
-    private String languageDir = "langstats";  // directory that contains language files
+    private LanguageStatisticsHolder languages;
     
-    private static Identificator instance;
-    
-    private Identificator() {
-        addAllLanguagesInDirectory(languageDir);
-    }
-    
-    /**
-     * method to get an instance of this class, should be used insted of <b>new Identificator()</b>
-     * @return an instance of the class Identificator
-     */
-    public synchronized static Identificator getInstance() {
-        if (instance == null) {
-            instance = new Identificator();
-        }
-        return instance;
+    public Identificator() {
+        languages = LanguageStatisticsHolder.getInstance();
     }
     
     /**
@@ -196,23 +178,5 @@ public final class Identificator {
         return ret;
         
     }
-    
-    /**
-     * Reads all language files from a directory.
-     * @param directory the directory that contains the language files
-     */
-    private void addAllLanguagesInDirectory(String directory) {
-        
-        File folder = new File(directory);
-        FilenameFilter filter = new LanguageFilenameFilter();
-        File[] allLanguageFiles = folder.listFiles(filter);
-        
-        for (int i = 0; i < allLanguageFiles.length; i++) {
-            if(allLanguageFiles[i].isFile()) {
-                languages.add(new LanguageStatistics(allLanguageFiles[i]));
-            }
-        }
-    }
-    
     
 }
