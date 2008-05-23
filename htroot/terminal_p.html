@@ -38,7 +38,11 @@ function init() {
 <div id="outer">
 
 <div id="location">
-<a href="http://yacy.net"><img src="/Banner.png?textcolor=ffffff&bgcolor=000000&bordercolor=aaaaaa" alt="YaCy" width="468" height="60" border="0" align="middle"></a>
+<a href="http://yacy.net"><img src="/Banner.png?textcolor=ffffff&bgcolor=000000&bordercolor=aaaaaa" alt="YaCy" width="468" height="60" border="0" align="bottom"></a>&nbsp;&nbsp;&nbsp;&nbsp;
+<a href="/index.html">&lt;Search Form&gt;</a>&nbsp;&nbsp;&nbsp;&nbsp;
+<a href="/CrawlStartExpert_p.html">&lt;Crawl Start&gt;</a>&nbsp;&nbsp;&nbsp;&nbsp;
+<a href="/Status.html">&lt;Status Page&gt;</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<a href="/Steering.html?shutdown=" onclick="return confirm('Confirm Shutdown')>&lt;Shutdown&gt;</a>
 </div>
 
 <div class="bars"></div>
@@ -65,16 +69,6 @@ function init() {
 
 
 <div id="right"> <!-- start right side -->
-
-<h1>Resource Monitor</h1>
-<a href="/PerformanceGraph.png" onclick="return hs.expand(this)"><img src="/PerformanceGraph.png" width="330" height="120" border="0" name="graph" alt="PerformanceGraph"/></a>
-<a href="/WebStructurePicture_p.png?host=auto&depth=2&width=660&height=240&nodes=100&time=1000" onclick="return hs.expand(this)"><img src="/WebStructurePicture_p.png?host=auto&depth=2&width=660&height=240&nodes=100&time=1000" width="330" height="120" border="0" alt="WebStructurePicture"/></a>
-
-<h1>Network Monitor</h1>
-<div style="text-align:left;margin:0;padding:0;">
-<a href="/NetworkPicture.png?width=660&height=360&bgcolor=000000" onclick="return hs.expand(this)"><img src="/NetworkPicture.png?width=660&height=360&bgcolor=000000" width="330" height="180" border="0" alt="The yacy Network" /></a>
-<embed src="http://maps.amung.us/flash/flashsrv.php?k=qp3j5gox&type=emb.swf" quality="high" pluginspage="http://www.macromedia.com/go/getflashplayer" wmode="transparent" allowScriptAccess="always" allowNetworking="all" type="application/x-shockwave-flash" flashvars="wausitehash=qp3j5gox&map=night&pin=star-orange&link=no" width="330" />
-</div>
 
 <h1>Domain Monitor</h1>
 <div style="text-align:left;margin:0;padding:0;">
@@ -132,6 +126,16 @@ function init() {
 			<!--[if !IE]> -->
 				</object>
 			<!--<![endif]-->
+</div>
+
+<h1>Resource Monitor</h1>
+<a href="/PerformanceGraph.png" onclick="return hs.expand(this)"><img src="/PerformanceGraph.png" width="330" height="120" border="0" name="graph" alt="PerformanceGraph"/></a>
+<a href="/WebStructurePicture_p.png?host=auto&depth=2&width=660&height=240&nodes=100&time=1000" onclick="return hs.expand(this)"><img src="/WebStructurePicture_p.png?host=auto&depth=2&width=660&height=240&nodes=100&time=1000" width="330" height="120" border="0" alt="WebStructurePicture"/></a>
+
+<h1>Network Monitor</h1>
+<div style="text-align:left;margin:0;padding:0;">
+<a href="/NetworkPicture.png?width=660&height=360&bgcolor=000000" onclick="return hs.expand(this)"><img src="/NetworkPicture.png?width=660&height=360&bgcolor=000000" width="330" height="180" border="0" alt="The yacy Network" /></a>
+<embed src="http://maps.amung.us/flash/flashsrv.php?k=qp3j5gox&type=emb.swf" quality="high" pluginspage="http://www.macromedia.com/go/getflashplayer" wmode="transparent" allowScriptAccess="always" allowNetworking="all" type="application/x-shockwave-flash" flashvars="wausitehash=qp3j5gox&map=night&pin=star-orange&link=no" width="330" />
 </div>
 
 </div> <!-- end right side -->
