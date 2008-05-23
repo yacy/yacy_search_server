@@ -151,59 +151,42 @@ public class ConfigBasic {
         // set a use case
         String networkName = sb.getConfig("network.unit.name", "");
         if (post != null && post.containsKey("usecase")) {
-            boolean indexDistribute = sb.getConfig(plasmaSwitchboard.INDEX_DIST_ALLOW, "true").equals("true");
-            boolean indexReceive = sb.getConfig(plasmaSwitchboard.INDEX_RECEIVE_ALLOW, "true").equals("true");
-
             if (post.get("usecase", "").equals("freeworld")) {
-                if (networkName.equals("freeworld")) {
-                    if (!indexDistribute && !indexReceive) {
-                        // switch from robinson mode to p2p mode
-                        sb.setConfig(plasmaSwitchboard.INDEX_DIST_ALLOW, true);
-                        sb.setConfig(plasmaSwitchboard.INDEX_RECEIVE_ALLOW, true);
-                    }
-                } else {
-                    // switch from intranet to p2p mode
+                if (!networkName.equals("freeworld")) {
+                    // switch to freeworld network
                     sb.switchNetwork("defaults/yacy.network.freeworld.unit");
-                    sb.setConfig(plasmaSwitchboard.INDEX_DIST_ALLOW, true);
-                    sb.setConfig(plasmaSwitchboard.INDEX_RECEIVE_ALLOW, true);
                 }
+                // switch to p2p mode
+                sb.setConfig(plasmaSwitchboard.INDEX_DIST_ALLOW, true);
+                sb.setConfig(plasmaSwitchboard.INDEX_RECEIVE_ALLOW, true);
             }
             if (post.get("usecase", "").equals("portal")) {
-                if (networkName.equals("freeworld")) {
-                    if (indexDistribute || indexReceive) {
-                        // switch from p2p mode to robinson mode
-                        sb.setConfig(plasmaSwitchboard.INDEX_DIST_ALLOW, false);
-                        sb.setConfig(plasmaSwitchboard.INDEX_RECEIVE_ALLOW, false);
-                    }
-                } else {
-                    // switch from intranet to robinson mode
-                    sb.switchNetwork("defaults/yacy.network.freeworld.unit");
-                    sb.setConfig(plasmaSwitchboard.INDEX_DIST_ALLOW, false);
-                    sb.setConfig(plasmaSwitchboard.INDEX_RECEIVE_ALLOW, false);
+                if (!networkName.equals("webportal")) {
+                    // switch to webportal network
+                    sb.switchNetwork("defaults/yacy.network.webportal.unit");
                 }
+                // switch to robinson mode
+                sb.setConfig(plasmaSwitchboard.INDEX_DIST_ALLOW, false);
+                sb.setConfig(plasmaSwitchboard.INDEX_RECEIVE_ALLOW, false);
             }
             if (post.get("usecase", "").equals("intranet")) {
                 if (!networkName.equals("intranet")) {
-                    // switch from p2p or robinson mode to intranet mode
+                    // switch to intranet network
                     sb.switchNetwork("defaults/yacy.network.intranet.unit");
-                    sb.setConfig(plasmaSwitchboard.INDEX_DIST_ALLOW, true);
-                    sb.setConfig(plasmaSwitchboard.INDEX_RECEIVE_ALLOW, true);
                 }
+                // switch to p2p mode: enable ad-hoc networks between intranet users
+                sb.setConfig(plasmaSwitchboard.INDEX_DIST_ALLOW, true);
+                sb.setConfig(plasmaSwitchboard.INDEX_RECEIVE_ALLOW, true);
             }
         }
         
         networkName = sb.getConfig("network.unit.name", "");
         if (networkName.equals("freeworld")) {
             prop.put("setUseCase", 1);
-            boolean indexDistribute = sb.getConfig(plasmaSwitchboard.INDEX_DIST_ALLOW, "true").equals("true");
-            boolean indexReceive = sb.getConfig(plasmaSwitchboard.INDEX_RECEIVE_ALLOW, "true").equals("true");
-            if (indexDistribute || indexReceive) {
-                // p2p mode
-                prop.put("setUseCase_freeworldChecked", 1);
-            } else {
-                // robinson mode
-                prop.put("setUseCase_portalChecked", 1);
-            }
+            prop.put("setUseCase_freeworldChecked", 1);
+        } else if (networkName.equals("webportal")) {
+            prop.put("setUseCase", 1);
+            prop.put("setUseCase_portalChecked", 1);
         } else if (networkName.equals("intranet")) {
             prop.put("setUseCase", 1);
             prop.put("setUseCase_intranetChecked", 1);
