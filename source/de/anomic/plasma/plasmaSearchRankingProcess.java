@@ -56,7 +56,7 @@ public final class plasmaSearchRankingProcess {
     public  static kelondroBinSearch[] ybrTables = null; // block-rank tables
     public  static final int maxYBR = 3; // the lower this value, the faster the search
     private static boolean useYBR = true;
-    private static final int maxDoubleDom = 20;
+    private static final int maxDoubleDomAll = 20, maxDoubleDomSpecial = 10000;
     
     private kelondroSortStack<indexRWIVarEntry> stack;
     private HashMap<String, kelondroSortStack<indexRWIVarEntry>> doubleDomCache; // key = domhash (6 bytes); value = like stack
@@ -260,7 +260,7 @@ public final class plasmaSearchRankingProcess {
             m = this.doubleDomCache.get(domhash);
             if (m == null) {
                 // first appearance of dom
-                m = new kelondroSortStack<indexRWIVarEntry>(maxDoubleDom);
+                m = new kelondroSortStack<indexRWIVarEntry>((query.specialRights) ? maxDoubleDomSpecial : maxDoubleDomAll);
                 this.doubleDomCache.put(domhash, m);
                 return rwi;
             }
@@ -298,7 +298,7 @@ public final class plasmaSearchRankingProcess {
         while ((stack.size() > 0) || (size() > 0)) {
                 if (((stack.size() == 0) && (size() == 0))) break;
                 kelondroSortStack<indexRWIVarEntry>.stackElement obrwi = bestRWI(skipDoubleDom);
-                if (obrwi == null) continue; // *** ? this happenened and the thread was suspended silently. cause?
+                if (obrwi == null) continue; // *** ? this happened and the thread was suspended silently. cause?
                 indexURLReference u = wordIndex.getURL(obrwi.element.urlHash(), obrwi.element, obrwi.weight.longValue());
                 if (u != null) {
                     indexURLReference.Components comp = u.comp();

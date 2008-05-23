@@ -138,7 +138,7 @@ public class yacysearch {
         }
         if (sb.facilityDB != null) try { sb.facilityDB.update("zeitgeist", querystring, post); } catch (Exception e) {}
 
-        int itemsPerPage = post.getInt("maximumRecords", post.getInt("count", 10)); // SRU syntax with old property as alternative
+        int itemsPerPage = Math.max((authenticated) ? 1000 : 10, post.getInt("maximumRecords", post.getInt("count", 10))); // SRU syntax with old property as alternative
         int offset = post.getInt("startRecord", post.getInt("offset", 0));
         
         boolean global = (post == null) ? true : post.get("resource", "global").equals("global");
@@ -280,7 +280,8 @@ public class yacysearch {
                     constraint,
                     true,
                     yacyURL.TLD_any_zone_filter,
-                    client);
+                    client,
+                    authenticated);
             serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(theQuery.id(true), plasmaSearchEvent.INITIALIZATION, 0, 0));
             
             // tell all threads to do nothing for a specific time

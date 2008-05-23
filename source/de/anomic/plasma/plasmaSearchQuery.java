@@ -96,7 +96,8 @@ public final class plasmaSearchQuery {
     // values that are set after a search:
     public int resultcount; // number of found results
     public long searchtime, urlretrievaltime, snippetcomputationtime; // time to perform the search, to get all the urls, and to compute the snippets
-
+    public boolean specialRights; // is true if the user has a special authorization and my use more database-extensive options
+    
     public plasmaSearchQuery(String queryString,
     						 int lines,
     		                 plasmaSearchRankingProfile ranking,
@@ -128,10 +129,12 @@ public final class plasmaSearchQuery {
         this.host = null;
         this.remotepeer = null;
         this.handle = new Long(System.currentTimeMillis());
+        this.specialRights = false;
     }
     
     public plasmaSearchQuery(
-		String queryString, TreeSet<String> queryHashes, TreeSet<String> excludeHashes, 
+		String queryString, TreeSet<String> queryHashes,
+		TreeSet<String> excludeHashes, 
         plasmaSearchRankingProfile ranking,
         int maxDistance, String prefer, int contentdom,
         boolean onlineSnippetFetch,
@@ -139,7 +142,8 @@ public final class plasmaSearchQuery {
         int domType, String domGroupName, int domMaxTargets,
         kelondroBitfield constraint, boolean allofconstraint,
         int domainzone,
-        String host) {
+        String host,
+        boolean specialRights) {
 		this.queryString = queryString;
 		this.queryHashes = queryHashes;
 		this.excludeHashes = excludeHashes;
@@ -147,8 +151,8 @@ public final class plasmaSearchQuery {
 		this.maxDistance = maxDistance;
 		this.prefer = prefer;
 		this.contentdom = contentdom;
-		this.linesPerPage = Math.min(100, lines);
-		this.offset = Math.min(100, offset);
+		this.linesPerPage = Math.min((specialRights) ? 1000 : 10, lines);
+		this.offset = Math.min((specialRights) ? 10000 : 100, offset);
 		this.urlMask = urlMask;
 		this.domType = domType;
         this.zonecode = domainzone;
@@ -159,6 +163,7 @@ public final class plasmaSearchQuery {
 		this.host = host;
         this.remotepeer = null;
 		this.handle = new Long(System.currentTimeMillis());
+		this.specialRights = specialRights;
     }
     
     public int neededResults() {

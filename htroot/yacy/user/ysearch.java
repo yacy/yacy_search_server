@@ -107,8 +107,9 @@ public class ysearch {
         }
         if (sb.facilityDB != null) try { sb.facilityDB.update("zeitgeist", querystring, post); } catch (Exception e) {}
 
-        int itemsPerPage = post.getInt("count", 10);
-        int offset = post.getInt("offset", 0);
+        int itemsPerPage = Math.max((authenticated) ? 1000 : 10, post.getInt("maximumRecords", post.getInt("count", 10))); // SRU syntax with old property as alternative
+        int offset = post.getInt("startRecord", post.getInt("offset", 0));
+        
         boolean global = (post == null) ? true : post.get("resource", "global").equals("global");
         final boolean indexof = post.get("indexof","").equals("on"); 
         String urlmask = "";
@@ -205,7 +206,8 @@ public class ysearch {
                     constraint,
                     true,
                     domainzone,
-                    client);
+                    client,
+                    authenticated);
 
             
             // tell all threads to do nothing for a specific time
