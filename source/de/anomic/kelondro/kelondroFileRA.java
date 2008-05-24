@@ -57,6 +57,7 @@ public final class kelondroFileRA extends kelondroAbstractRA implements kelondro
 
     public kelondroFileRA(File file) throws IOException, FileNotFoundException {
         this.name = file.getName();
+        this.file = file;
         RAFile = new RandomAccessFile(file, "rw");
     }	
     

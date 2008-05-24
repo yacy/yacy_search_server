@@ -65,6 +65,7 @@ public class kelondroNIOFileRA extends kelondroAbstractRA implements kelondroRA 
 
     public kelondroNIOFileRA(File file, boolean mapBody, long tailMaxSize) throws IOException {
         this.name = file.getName();
+        this.file = file;
         this.seekPos = 0;
         this.bodyOffset = headSize;
         if (bodyOffset >= file.length()) {

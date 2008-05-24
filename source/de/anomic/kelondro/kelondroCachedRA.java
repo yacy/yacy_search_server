@@ -58,6 +58,7 @@ public class kelondroCachedRA extends kelondroAbstractRA implements kelondroRA {
     public kelondroCachedRA(kelondroRA ra, int cachesize, int elementsize) {
 	this.ra  = ra;
         this.name = ra.name();
+        this.file = ra.file();
         this.cacheMemory = new HashMap<Integer, byte[]>();
         this.cacheScore = new kelondroMScoreCluster<Integer>();
         this.cacheElementSize = elementsize;

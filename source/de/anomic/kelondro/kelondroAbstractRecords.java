@@ -405,7 +405,8 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
 
     public void clear() throws IOException {
         kelondroRA ra = this.entryFile.getRA();
-        File f = new File(ra.name());
+        File f = ra.file();
+        assert f != null;
         this.entryFile.close();
         f.delete();
         ra = new kelondroFileRA(f);

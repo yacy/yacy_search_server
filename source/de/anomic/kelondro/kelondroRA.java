@@ -50,6 +50,7 @@
 
 package de.anomic.kelondro;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -58,6 +59,7 @@ public interface kelondroRA {
 
     // logging support
     public String name();
+    public File   file();
     
     // pseudo-native methods:
     public long length() throws IOException;

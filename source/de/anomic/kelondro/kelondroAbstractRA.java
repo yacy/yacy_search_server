@@ -47,6 +47,7 @@ package de.anomic.kelondro;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashMap;
@@ -59,8 +60,12 @@ abstract class kelondroAbstractRA implements kelondroRA {
 
     // logging support
     protected String name = null;
+    protected File file = null;
     public String name() {
         return name;
+    }
+    public File file() {
+        return file;
     }
 
     // pseudo-native methods:
