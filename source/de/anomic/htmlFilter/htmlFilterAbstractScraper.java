@@ -411,9 +411,17 @@ public abstract class htmlFilterAbstractScraper implements htmlFilterScraper {
     }
 
     private static char[] transscript(char[] code) {
-        String t = (String) trans.get(new String(code)); 
-        if (t == null) return new char[0];
-        return t.toCharArray();
+        if (code[1] == '#') {
+            if (code[2] == 'x' || code[2] == 'X') {
+                return new char[] {(char) Integer.parseInt((new String(code)).substring(3, code.length - 1), 16)};
+            } else {
+                return new char[] {(char) Integer.parseInt((new String(code)).substring(2, code.length - 1))};
+            }
+        } else {
+            String t = (String) trans.get(new String(code)); 
+            if (t == null) return new char[0];
+            return t.toCharArray();
+        }
     }
 
     protected static serverCharBuffer transscriptAll(serverCharBuffer bb) {
