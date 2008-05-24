@@ -72,7 +72,11 @@ import de.anomic.yacy.yacyURL;
 
 public final class HTTPLoader {
 
-    public static final int DEFAULT_CRAWLING_RETRY_COUNT = 5;
+    private static final String DEFAULT_ENCODING = "gzip,deflate";
+    private static final String DEFAULT_LANGUAGE = "en-us,en;q=0.5";
+    private static final String DEFAULT_CHARSET = "ISO-8859-1,utf-8;q=0.7,*;q=0.7";
+    private static final long   DEFAULT_MAXFILESIZE = 1024 * 1024 * 10;
+    public  static final int    DEFAULT_CRAWLING_RETRY_COUNT = 5;
     private static final String crawlerUserAgent = "yacybot (" + HttpClient.getSystemOST() +") http://yacy.net/bot.html";
     
     /**
@@ -83,11 +87,11 @@ public final class HTTPLoader {
     /**
      * The maximum allowed file size
      */
-    private long maxFileSize = -1;
+    //private long maxFileSize = -1;
     
-    private String acceptEncoding;
-    private String acceptLanguage;
-    private String acceptCharset;
+    //private String acceptEncoding;
+    //private String acceptLanguage;
+    //private String acceptCharset;
     private plasmaSwitchboard sb;
     private serverLog log;
     
@@ -97,15 +101,7 @@ public final class HTTPLoader {
         
         // refreshing timeout value
         this.socketTimeout = (int) sb.getConfigLong("crawler.clientTimeout", 10000);
-        
-        // maximum allowed file size
-        this.maxFileSize = sb.getConfigLong("crawler.http.maxFileSize", -1);
-        
-        // some http header values
-        this.acceptEncoding = sb.getConfig("crawler.http.acceptEncoding", "gzip,deflate");
-        this.acceptLanguage = sb.getConfig("crawler.http.acceptLanguage","en-us,en;q=0.5");
-        this.acceptCharset  = sb.getConfig("crawler.http.acceptCharset","ISO-8859-1,utf-8;q=0.7,*;q=0.7");
-            }
+    }
 
     /**
      * @param entry
@@ -164,14 +160,10 @@ public final class HTTPLoader {
             requestHeader.put(httpHeader.USER_AGENT, crawlerUserAgent);
             yacyURL refererURL = null;
             if (entry.referrerhash() != null) refererURL = sb.getURL(entry.referrerhash());
-            if (refererURL != null)
-                requestHeader.put(httpHeader.REFERER, refererURL.toNormalform(true, true));
-            if (this.acceptLanguage != null && this.acceptLanguage.length() > 0)
-                requestHeader.put(httpHeader.ACCEPT_LANGUAGE, this.acceptLanguage);
-            if (this.acceptCharset != null && this.acceptCharset.length() > 0)
-                requestHeader.put(httpHeader.ACCEPT_CHARSET, this.acceptCharset);
-            if (this.acceptEncoding != null && this.acceptEncoding.length() > 0)
-                requestHeader.put(httpHeader.ACCEPT_ENCODING, this.acceptEncoding);
+            if (refererURL != null) requestHeader.put(httpHeader.REFERER, refererURL.toNormalform(true, true));
+            requestHeader.put(httpHeader.ACCEPT_LANGUAGE, sb.getConfig("crawler.http.acceptLanguage", DEFAULT_LANGUAGE));
+            requestHeader.put(httpHeader.ACCEPT_CHARSET, sb.getConfig("crawler.http.acceptCharset", DEFAULT_CHARSET));
+            requestHeader.put(httpHeader.ACCEPT_ENCODING, sb.getConfig("crawler.http.acceptEncoding", DEFAULT_ENCODING));
 
             // HTTP-Client
             JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(socketTimeout, requestHeader, null);
@@ -224,15 +216,13 @@ public final class HTTPLoader {
                             // getting content length
                             long contentLength = res.getResponseHeader().contentLength();
                             
-                            // check the maximum allowed file size                            
-                            if (this.maxFileSize > -1) {                                
-                                if (contentLength == -1) {
-                                    fos = new httpdBoundedSizeOutputStream(fos,this.maxFileSize);                     
-                                } else if (contentLength > this.maxFileSize) {
-                                    this.log.logInfo("REJECTED URL " + entry.url() + " because file size '" + contentLength + "' exceeds max filesize limit of " + this.maxFileSize + " bytes.");
-                                    sb.crawlQueues.errorURL.newEntry(entry, sb.webIndex.seedDB.mySeed().hash, new Date(), 1, ErrorURL.DENIED_FILESIZE_LIMIT_EXCEEDED);                    
-                                    return null;
-                                }
+                            // check the maximum allowed file size                     
+                            if (contentLength == -1) {
+                                fos = new httpdBoundedSizeOutputStream(fos, sb.getConfigLong("crawler.http.maxFileSize", DEFAULT_MAXFILESIZE));                     
+                            } else if (contentLength > sb.getConfigLong("crawler.http.maxFileSize", DEFAULT_MAXFILESIZE)) {
+                                this.log.logInfo("REJECTED URL " + entry.url() + " because file size '" + contentLength + "' exceeds max filesize limit of " + sb.getConfigLong("crawler.http.maxFileSize", DEFAULT_MAXFILESIZE) + " bytes.");
+                                sb.crawlQueues.errorURL.newEntry(entry, sb.webIndex.seedDB.mySeed().hash, new Date(), 1, ErrorURL.DENIED_FILESIZE_LIMIT_EXCEEDED);                    
+                                return null;
                             }
 
                             // we write the new cache entry to file system directly
@@ -332,7 +322,7 @@ public final class HTTPLoader {
                 this.log.logInfo("CRAWLER Interruption detected because of server shutdown.");
                 failreason = ErrorURL.DENIED_SERVER_SHUTDOWN;
             } else if (e instanceof httpdLimitExceededException) {
-                this.log.logWarning("CRAWLER Max file size limit '" + this.maxFileSize + "' exceeded while downloading URL " + entry.url());
+                this.log.logWarning("CRAWLER Max file size limit '" + sb.getConfigLong("crawler.http.maxFileSize", DEFAULT_MAXFILESIZE) + "' exceeded while downloading URL " + entry.url());
                 failreason = ErrorURL.DENIED_FILESIZE_LIMIT_EXCEEDED;                    
             } else if (e instanceof MalformedURLException) {
                 this.log.logWarning("CRAWLER Malformed URL '" + entry.url().toString() + "' detected. ");
@@ -358,7 +348,6 @@ public final class HTTPLoader {
                 this.log.logWarning("CRAWLER Problems detected while receiving gzip encoded content from '" + entry.url().toString() +
                 "'. Retrying request without using gzip content encoding.");
                 failreason = ErrorURL.DENIED_CONTENT_DECODING_ERROR;
-                this.acceptEncoding = null;
             } else if ((errorMsg != null) && (errorMsg.indexOf("The host did not accept the connection within timeout of") >= 0)) {
                 this.log.logWarning("CRAWLER Timeout while trying to connect to '" + entry.url().toString() +
                 "'. Retrying request.");
