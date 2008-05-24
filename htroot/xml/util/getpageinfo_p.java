@@ -74,7 +74,7 @@ public class getpageinfo_p {
             String url=(String) post.get("url");
 			if(url.toLowerCase().startsWith("ftp://")){
 				prop.put("robots-allowed", "1");
-				prop.putHTML("title", "FTP: "+url);
+				prop.putHTML("title", "FTP: "+url, true);
                 return prop;
 			} else if (!(url.toLowerCase().startsWith("http://") || url.toLowerCase().startsWith("https://"))) {
                 url = "http://" + url;
@@ -93,7 +93,7 @@ public class getpageinfo_p {
                     writer.close();
                     
                     // put the document title 
-                    prop.putHTML("title", scraper.getTitle());
+                    prop.putHTML("title", scraper.getTitle(), true);
                     
                     // put the favicon that belongs to the document
                     prop.put("favicon", (scraper.getFavicon()==null) ? "" : scraper.getFavicon().toString());
@@ -108,7 +108,7 @@ public class getpageinfo_p {
                     			i++;
                     			tag += " "+list[i];                    			
                     		}                    	                 	
-                    		prop.putHTML("tags_"+count+"_tag", tag);
+                    		prop.putHTML("tags_"+count+"_tag", tag, true);
                     		count++;
                     	}
                     }
@@ -127,7 +127,7 @@ public class getpageinfo_p {
                     
                     // get the sitemap URL of the domain
                     yacyURL sitemapURL = robotsParser.getSitemapURL(theURL);
-                    prop.putHTML("sitemap", (sitemapURL==null)?"":sitemapURL.toString());
+                    prop.putHTML("sitemap", (sitemapURL==null)?"":sitemapURL.toString(), true);
                 } catch (MalformedURLException e) {}
             }
             
