@@ -210,11 +210,15 @@ public final class hello {
                 seeds.ensureCapacity((ySeeds.size() + 1) * 768);
                 Iterator<yacySeed> si = ySeeds.values().iterator();
                 yacySeed s;
+                String seedString;
                 while (si.hasNext()) {
                 	s = si.next();
                     if ((s != null) && (s.isProper() == null)) try {
-                        seeds.append("seed").append(count).append('=').append(s.genSeedStr(key)).append(serverCore.CRLF_STRING);
-                        count++;
+                        seedString = s.genSeedStr(key);
+                        if (seedString != null) {
+                            seeds.append("seed").append(count).append('=').append(seedString).append(serverCore.CRLF_STRING);
+                            count++;
+                        }
                     } catch (ConcurrentModificationException e) {
                         e.printStackTrace();
                     }

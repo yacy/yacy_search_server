@@ -51,6 +51,7 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.security.MessageDigest;
 import java.util.Collections;
+import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -199,10 +200,21 @@ public final class serverCodings {
         synchronized (m) {
             final StringBuffer buf = new StringBuffer(20 * m.size());
             if (braces) { buf.append("{"); }
-            for (Entry<String, String> e: m.entrySet()) {
-                buf.append(e.getKey()).append('=');
-                if (e.getValue() != null) { buf.append(e.getValue()); }
-                buf.append(separator);
+            int retry = 10;
+            critical: while (retry > 0) {
+                try {
+                    for (Entry<String, String> e: m.entrySet()) {
+                        buf.append(e.getKey()).append('=');
+                        if (e.getValue() != null) { buf.append(e.getValue()); }
+                        buf.append(separator);
+                    }
+                    break critical; // success
+                } catch (ConcurrentModificationException e) {
+                    // retry
+                    buf.setLength(1);
+                    retry--;
+                }
+                buf.setLength(1); // fail
             }
             if (buf.length() > 1) { buf.setLength(buf.length() - 1); } // remove last separator
             if (braces) { buf.append("}"); }
