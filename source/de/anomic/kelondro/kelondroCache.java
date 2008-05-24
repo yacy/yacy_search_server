@@ -431,8 +431,8 @@ public class kelondroCache implements kelondroIndex {
         return index.filename();
     }
 
-	public void reset() throws IOException {
-		this.index.reset();
+	public void clear() throws IOException {
+		this.index.clear();
 		init();
 	}
 

@@ -145,8 +145,8 @@ public class kelondroMapObjects extends kelondroObjects {
         if (doubleaccfields != null) for (int i = 0; i < doubleaccfields.length; i++) accMap.put(doubleaccfields[i], doubleaccumulator[i]);
     }
 
-    public void reset() throws IOException {
-    	super.reset();
+    public void clear() throws IOException {
+    	super.clear();
         if (sortfields == null) sortClusterMap = null; else {
             sortClusterMap = new HashMap<String, kelondroMScoreCluster<String>>();
             for (int i = 0; i < sortfields.length; i++) {

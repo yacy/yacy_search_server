@@ -59,6 +59,14 @@ public class indexCollectionRI implements indexRI {
         }
     }
     
+    public void clear() {
+        try {
+            collectionIndex.clear();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    
     public long getUpdateTime(String wordHash) {
         indexContainer entries = getContainer(wordHash, null);
         if (entries == null) return 0;

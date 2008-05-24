@@ -49,6 +49,10 @@ public class kelondroBytesLongMap {
         return index.row();
     }
     
+    public void clear() throws IOException {
+        index.clear();
+    }
+    
     public synchronized long getl(byte[] key) throws IOException {
         assert (key != null);
         kelondroRow.Entry indexentry = index.get(key);

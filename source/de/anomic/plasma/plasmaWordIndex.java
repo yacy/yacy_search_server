@@ -190,7 +190,18 @@ public final class plasmaWordIndex implements indexRI {
         newsPool = new yacyNewsPool(networkRoot);
     }
     
-
+    public void clear() {
+        dhtInCache.clear();
+        dhtOutCache.clear();
+        collections.clear();
+        try {
+            referenceURL.clear();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        queuePreStack.clear();
+    }
+    
     private void initActiveCrawlProfiles() {
         this.defaultProxyProfile = null;
         this.defaultRemoteProfile = null;
@@ -213,7 +224,7 @@ public final class plasmaWordIndex implements indexRI {
                 if (name.equals(CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA)) this.defaultMediaSnippetGlobalProfile = profile;
             }
         } catch (Exception e) {
-            this.profilesActiveCrawls.resetDatabase();
+            this.profilesActiveCrawls.clear();
             this.defaultProxyProfile = null;
             this.defaultRemoteProfile = null;
             this.defaultTextSnippetLocalProfile = null;

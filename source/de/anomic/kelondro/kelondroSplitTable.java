@@ -143,7 +143,7 @@ public class kelondroSplitTable implements kelondroIndex {
         }
     }
     
-    public void reset() throws IOException {
+    public void clear() throws IOException {
     	this.close();
     	String[] l = path.list();
     	for (int i = 0; i < l.length; i++) {

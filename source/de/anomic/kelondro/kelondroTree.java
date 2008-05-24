@@ -159,8 +159,8 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
         super.setLogger(log);
     }
 
-    public void reset() throws IOException {
-    	super.reset();
+    public void clear() throws IOException {
+    	super.clear();
         setHandle(root, null); 
 	}
     

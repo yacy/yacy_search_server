@@ -72,7 +72,7 @@ public class CrawlProfile {
         profileTable = new kelondroMapObjects(dyn, 500);
     }
     
-    public void resetDatabase() {
+    public void clear() {
         // deletes the profile database and creates a new one
         if (profileTable != null) profileTable.close();
         if (!(profileTableFile.delete())) throw new RuntimeException("cannot delete crawl profile database");
@@ -110,7 +110,7 @@ public class CrawlProfile {
             try {
                 return handleIterator.hasNext();
             } catch (kelondroException e) {
-                resetDatabase();
+                clear();
                 return false;
             }
         }
@@ -119,7 +119,7 @@ public class CrawlProfile {
                 lastkey = (String) handleIterator.next();
                 return getEntry(lastkey);
             } catch (kelondroException e) {
-                resetDatabase();
+                clear();
                 return null;
             }
         }
@@ -127,7 +127,7 @@ public class CrawlProfile {
             if (lastkey != null) try {
                 removeEntry(lastkey);
             } catch (kelondroException e) {
-                resetDatabase();
+                clear();
             }
         }
     }
@@ -143,7 +143,7 @@ public class CrawlProfile {
         try {
             profileTable.set(ne.handle(), ne.map());
         } catch (kelondroException e) {
-            resetDatabase();
+            clear();
             try {
                 profileTable.set(ne.handle(), ne.map());
             } catch (IOException ee) {
@@ -151,7 +151,7 @@ public class CrawlProfile {
                 System.exit(0);
             }
         } catch (IOException e) {
-            resetDatabase();
+            clear();
             try {
                 profileTable.set(ne.handle(), ne.map());
             } catch (IOException ee) {
@@ -182,7 +182,7 @@ public class CrawlProfile {
         try {
             profileTable.set(ne.handle(), ne.map());
         } catch (kelondroException e) {
-            resetDatabase();
+            clear();
             try {
                 profileTable.set(ne.handle(), ne.map());
             } catch (IOException ee) {
@@ -190,7 +190,7 @@ public class CrawlProfile {
                 System.exit(0);
             }
         } catch (IOException e) {
-            resetDatabase();
+            clear();
             try {
                 profileTable.set(ne.handle(), ne.map());
             } catch (IOException ee) {

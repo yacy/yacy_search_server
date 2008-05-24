@@ -170,6 +170,13 @@ public class kelondroCollectionIndex {
         }
     }
     
+    public void clear() throws IOException {
+        index.clear();
+        for (kelondroFixedWidthArray array: arrays.values()) {
+            array.clear();
+        }
+    }
+    
     private void openAllArrayFiles(boolean indexGeneration, kelondroByteOrder indexOrder) throws IOException {
         
         String[] list = this.path.list();

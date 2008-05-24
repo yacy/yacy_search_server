@@ -48,8 +48,8 @@ public class kelondroObjects {
         this.cachesize = cachesize;
     }
     
-    public void reset() throws IOException {
-    	this.dyn.reset();
+    public void clear() throws IOException {
+    	this.dyn.clear();
         this.cache = new HashMap<String, kelondroObjectsEntry>();
         this.cacheScore = new kelondroMScoreCluster<String>();
     }

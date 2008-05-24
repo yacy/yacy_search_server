@@ -62,6 +62,13 @@ public final class kelondroMScoreCluster<E> {
         encnt = 0;
     }
     
+    public void clear() {
+        refkeyDB.clear();
+        keyrefDB.clear();
+        gcount = 0;
+        encnt = 0;
+    }
+    
     public static final String shortDateFormatString = "yyyyMMddHHmmss";
     public static final SimpleDateFormat shortFormatter = new SimpleDateFormat(shortDateFormatString);
     public static final long minutemillis = 60000;

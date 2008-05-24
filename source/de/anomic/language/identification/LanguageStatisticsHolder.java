@@ -54,6 +54,8 @@ import java.util.Vector;
  */
 public class LanguageStatisticsHolder extends Vector<LanguageStatistics> {
 
+    private static final long serialVersionUID = -887517724227204705L;
+
     private String languageDir = "langstats";  // directory that contains language files    
     
     private static LanguageStatisticsHolder instance;

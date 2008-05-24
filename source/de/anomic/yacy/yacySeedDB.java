@@ -1031,7 +1031,7 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
             	// eergency reset
             	yacyCore.log.logSevere("seed-db emergency reset", e);
             	try {
-					database.reset();
+					database.clear();
 					nextSeed = null;
 					return null;
 				} catch (IOException e1) {

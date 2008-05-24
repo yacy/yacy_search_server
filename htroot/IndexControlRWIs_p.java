@@ -104,7 +104,13 @@ public class IndexControlRWIs_p {
                     prop.put("searchresult_wordhash", keyhash);
                 }
             }
-
+            
+            // delete everything
+            if (post.containsKey("deletecomplete")) {
+                sb.webIndex.clear();
+                post.remove("deletecomplete");
+            }
+    
             // delete word
             if (post.containsKey("keyhashdeleteall")) {
                 if (delurl || delurlref) {

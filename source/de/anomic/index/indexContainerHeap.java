@@ -88,6 +88,12 @@ public final class indexContainerHeap {
         this.readOnlyMode = false;
     }
     
+    public void clear() throws IOException {
+        if (index != null) index.clear();
+        if (cache != null) cache.clear();
+        initWriteMode();
+    }
+    
     /**
      * initializes the heap in read/write mode without reading of a dump first
      * another dump reading afterwards is not possible

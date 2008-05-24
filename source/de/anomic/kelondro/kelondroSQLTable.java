@@ -297,7 +297,7 @@ public class kelondroSQLTable implements kelondroIndex {
         return new int[]{0,0,0,0,0,0,0,0,0,0};
     }
 
-    public void reset() {
+    public void clear() {
         // TODO Auto-generated method stub
         
     }

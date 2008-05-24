@@ -64,6 +64,11 @@ public final class indexRepositoryReference {
         urlIndexFile = new kelondroSplitTable(this.location, "urls", indexURLReference.rowdef, false);
     }
 
+    public void clear() throws IOException {
+        if (exportthread != null) exportthread.interrupt();
+        urlIndexFile.clear();
+    }
+    
     public int size() {
         return urlIndexFile.size();
     }

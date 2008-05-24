@@ -123,9 +123,9 @@ public class kelondroDyn {
         }
     }
     
-    public void reset() throws IOException {
+    public void clear() throws IOException {
     	String name = this.index.filename();
-    	this.index.reset();
+    	this.index.clear();
     	this.buffer = new kelondroObjectBuffer(name);
     }
     

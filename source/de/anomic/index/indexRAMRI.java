@@ -79,6 +79,21 @@ public final class indexRAMRI implements indexRI, indexRIReader {
             heap.initWriteMode();
         }
     }
+    
+    /**
+     * clear the content
+     * @throws IOException 
+     */
+    public void clear() {
+        hashScore.clear();
+        hashDate.clear();
+        initTime = System.currentTimeMillis();
+        try {
+            heap.clear();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     public int minMem() {
         // there is no specific large array that needs to be maintained
@@ -280,5 +295,8 @@ public final class indexRAMRI implements indexRI, indexRIReader {
         } catch (IOException e){
             log.logSevere("unable to dump cache: " + e.getMessage(), e);
         }
+        heap = null;
+        hashScore.clear();
+        hashDate.clear();
     }
 }

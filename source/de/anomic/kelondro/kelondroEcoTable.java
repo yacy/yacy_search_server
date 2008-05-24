@@ -516,7 +516,7 @@ public class kelondroEcoTable implements kelondroIndex {
         return lr;
     }
 
-    public void reset() throws IOException {
+    public void clear() throws IOException {
         File f = file.filename();
         file.close();
         f.delete();

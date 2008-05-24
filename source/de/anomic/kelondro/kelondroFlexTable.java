@@ -129,7 +129,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
     	}
     }
     
-    public void reset() throws IOException {
+    public void clear() throws IOException {
     	super.reset();
     	RAMIndex = true;
         index = new kelondroBytesIntMap(super.row().column(0).cellwidth, super.rowdef.objectOrder, 0);

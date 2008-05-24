@@ -403,7 +403,7 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
         writeOrderType();
     }
 
-    public void reset() throws IOException {
+    public void clear() throws IOException {
         kelondroRA ra = this.entryFile.getRA();
         File f = new File(ra.name());
         this.entryFile.close();

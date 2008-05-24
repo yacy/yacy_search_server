@@ -43,7 +43,7 @@ public class kelondroRAMIndex implements kelondroIndex {
         reset(initialspace);
     }
     
-    public void reset() {
+    public void clear() {
 		reset(0);
 	}
     
