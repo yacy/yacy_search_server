@@ -72,6 +72,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
     private static final HashSet<String> linkTags0 = new HashSet<String>(9,0.99f);
     private static final HashSet<String> linkTags1 = new HashSet<String>(7,0.99f);
 
+    // all these tags must be given in lowercase, because the tags from the files are compared in lowercase
     static {
         linkTags0.add("img");
         linkTags0.add("base");

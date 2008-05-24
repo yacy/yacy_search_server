@@ -231,7 +231,7 @@ public final class htmlFilterWriter extends Writer {
         }
         
         // it's a tag! which one?
-        if ((opening) || (!(tag.equals(filterTag)))) {
+        if ((opening) || (!(tag.equalsIgnoreCase(filterTag)))) {
             // this tag is not our concern. just add it
             filterCont.append(genTag0raw(tag, opening, content));
             return new char[0];
