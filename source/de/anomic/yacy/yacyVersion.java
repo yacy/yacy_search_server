@@ -373,7 +373,7 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
         String apphome = sb.getRootPath().toString();
         
         if (serverSystem.isWindows) {
-        	File startType = new File(sb.getRootPath(), "DATA/yacy.noconsole");
+        	File startType = new File(sb.getRootPath(), "DATA/yacy.noconsole".replace("/", File.separator));
         	String starterFile = "startYACY.bat";
         	if (startType.exists()) starterFile = "startYACY_noconsole.bat"; // startType noconsole
         	
@@ -451,8 +451,10 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
             String script = null;
             String scriptFileName = null;
             if(serverSystem.isWindows){
+            	File startType = new File(sb.getRootPath(), "DATA/yacy.noconsole".replace("/", File.separator));
+            	String starterFile = "startYACY.bat";
+            	if (startType.exists()) starterFile = "startYACY_noconsole.bat"; // startType noconsole
             	script = 
-            		// TODO: does YaCy delete this file after 2nd update-shutdown? "Die Batchdatei kann nicht gefunden werden."
 	            	"@echo off" + serverCore.LF_STRING +
 	            	"title YaCy updater" + serverCore.LF_STRING +
 	            	"echo YACY UPDATER" + serverCore.LF_STRING +
@@ -462,7 +464,6 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
 	            	":WAIT" + serverCore.LF_STRING +
 	            	"ping -n 2 127.0.0.1 >nul" + serverCore.LF_STRING +
 	            	"IF exist ..\\yacy.running goto WAIT" + serverCore.LF_STRING +
-	            	// Error: "Die Batchdatei kann nicht gefunden werden."
 	            	"IF not exist yacy goto NODATA" + serverCore.LF_STRING +
 
 	            	"cd yacy" + serverCore.LF_STRING +
@@ -481,7 +482,7 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
 	
 	            	":END" + serverCore.LF_STRING +
 	            	"cd " + apphome + serverCore.LF_STRING +
-	            	"start /MIN CMD /C startYACY.bat" + serverCore.LF_STRING;
+	            	"start /MIN CMD /C " + starterFile + serverCore.LF_STRING;
             	scriptFileName = "update.bat";
             } else { // unix/linux
 	            script =

@@ -149,7 +149,10 @@ public class ConfigUpdate_p {
                 downloadedreleases.add(release);
             } catch (RuntimeException e) {
                 // not a valid release
-                new File(sb.releasePath, downloaded[j]).deleteOnExit(); // can be also a restart- or deploy-file
+            	// can be also a restart- or deploy-file
+                File invalid = new File(sb.releasePath, downloaded[j]);
+                if (!invalid.getName().contains(".bat")) // Windows doesn't like deleted scripts
+                	invalid.deleteOnExit(); 
             }
         }
         dflt = (downloadedreleases.size() == 0) ? null : downloadedreleases.last();

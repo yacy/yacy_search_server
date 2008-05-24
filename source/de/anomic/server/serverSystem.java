@@ -348,7 +348,7 @@ public final class serverSystem {
     	String script = null;
     	if(isWindows){
     		starterFileExtension = ".starter.bat";
-    		// TODO: use /K to debug, /C for release
+    		// use /K to debug, /C for release
     		script = "start /MIN CMD /C " + scriptFile.getAbsolutePath().replaceAll(" ", "\\ ");
     	} else { // unix/linux
     		starterFileExtension = ".starter.sh";
