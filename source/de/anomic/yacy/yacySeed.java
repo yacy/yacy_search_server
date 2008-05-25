@@ -860,16 +860,16 @@ public class yacySeed {
         if (ip == null) return "IP is null";
         if (ip.length() < 8) return "IP is too short: " + ip;
         if (!natLib.isProper(ip)) return "IP is not proper: " + ip; //this does not work with staticIP
-        if (ip.equals("localhost") || ip.equals("127.0.0.1") || (ip.startsWith("0:0:0:0:0:0:0:1"))) return "IP for localhost rejected";
+        if (ip.equals("localhost") || ip.startsWith("127.") || (ip.startsWith("0:0:0:0:0:0:0:1"))) return "IP for localhost rejected";
         
         // seedURL
         final String seedURL = this.dna.get(SEEDLIST);
         if (seedURL != null && seedURL.length() > 0) {
-            if (!seedURL.startsWith("http://") && !seedURL.startsWith("http://")) return "wrong protocol for seedURL";
+            if (!seedURL.startsWith("http://") && !seedURL.startsWith("https://")) return "wrong protocol for seedURL";
             try {
                 URL url = new URL(seedURL);
                 String host = url.getHost();
-                if (host.equals("localhost") || host.equals("127.0.0.1") || (host.startsWith("0:0:0:0:0:0:0:1"))) return "seedURL in localhost rejected";
+                if (host.equals("localhost") || host.startsWith("127.") || (host.startsWith("0:0:0:0:0:0:0:1"))) return "seedURL in localhost rejected";
             } catch (MalformedURLException e) {
                 return "seedURL malformed";
             }

@@ -201,7 +201,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
     }
     
     public static final boolean isLocalhost(String hostname) {
-        return hostname.equals("localhost") || hostname.equals("127.0.0.1") || hostname.startsWith("0:0:0:0:0:0:0:1");
+        return hostname.equals("localhost") || hostname.startsWith("127.") || hostname.startsWith("0:0:0:0:0:0:0:1");
     }
 
     // class initializer
