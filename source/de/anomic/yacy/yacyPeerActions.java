@@ -177,8 +177,8 @@ public class yacyPeerActions {
                         lc = 0;
                         while (enu.hasNext()) {
                             ys = yacySeed.genRemoteSeed((String) enu.next(), null);
-                            if ((ys != null) && (ys.isProper() == null) &&
-                                    ((!seedDB.mySeedIsDefined()) || (seedDB.mySeed().hash != ys.hash))) {
+                            if ((ys != null) &&
+                                ((!seedDB.mySeedIsDefined()) || (seedDB.mySeed().hash != ys.hash))) {
                                 if (connectPeer(ys, false)) lc++;
                                 //seedDB.writeMap(ys.hash, ys.getMap(), "init");
                                 //System.out.println("BOOTSTRAP: received peer " + ys.get(yacySeed.NAME, "anonymous") + "/" + ys.getAddress());
