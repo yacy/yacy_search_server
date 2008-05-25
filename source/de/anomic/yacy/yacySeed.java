@@ -64,6 +64,8 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -166,6 +168,7 @@ public class yacySeed {
     public static final String CRTCNT    = "CRTCnt";
     public static final String IP        = "IP";
     public static final String PORT      = "Port";
+    public static final String SEEDLIST  = "seedURL";
     /** zero-value */
     public static final String ZERO      = "0";
     
@@ -815,26 +818,62 @@ public class yacySeed {
         return hash;
     }
 
-    public static yacySeed genRemoteSeed(String seedStr, String key, boolean properTest) {
+    public static yacySeed genRemoteSeed(String seedStr, String key) {
         // this method is used to convert the external representation of a seed into a seed object
-//      yacyCore.log.logFinest("genRemoteSeed: seedStr=" + seedStr + " key=" + key);
+        // yacyCore.log.logFinest("genRemoteSeed: seedStr=" + seedStr + " key=" + key);
+
+        // check protocol and syntax of seed
         if (seedStr == null) { return null; }
         final String seed = crypt.simpleDecode(seedStr, key);
         if (seed == null) { return null; }
+        
+        // extract hash
         final HashMap<String, String> dna = serverCodings.string2map(seed, ",");
-        String peerName = dna.get(yacySeed.NAME);
-        if (peerName == null) return null;
-        dna.put(yacySeed.NAME, checkPeerName(peerName));
-        final String hash = (String) dna.remove(yacySeed.HASH);
+        final String hash = dna.remove(yacySeed.HASH);
         final yacySeed resultSeed = new yacySeed(hash, dna);
-        if (properTest) {
-            final String testResult = resultSeed.isProper();
-            if (testResult != null) {
-                yacyCore.log.logFinest("seed is not proper (" + testResult + "): " + resultSeed);
-                return null;
+
+        // check semantics of content
+        final String testResult = resultSeed.isProper();
+        if (testResult != null) {
+            yacyCore.log.logFinest("seed is not proper (" + testResult + "): " + resultSeed);
+            return null;
+        }
+        
+        // seed ok
+        return resultSeed;
+    }
+
+    public final String isProper() {
+        // checks if everything is ok with that seed
+        
+        // check hash
+        if (this.hash == null) return "hash is null";
+        if (this.hash.length() != yacySeedDB.commonHashLength) return "wrong hash length (" + this.hash.length() + ")";
+
+        // name
+        String peerName = this.dna.get(yacySeed.NAME);
+        if (peerName == null) return "no peer name given";
+        dna.put(yacySeed.NAME, checkPeerName(peerName));
+        
+        // check IP
+        final String ip = (String) this.dna.get(yacySeed.IP);
+        if (ip == null) return "IP is null";
+        if (ip.length() < 8) return "IP is too short: " + ip;
+        if (!natLib.isProper(ip)) return "IP is not proper: " + ip; //this does not work with staticIP
+
+        // seedURL
+        final String seedURL = this.dna.get(SEEDLIST);
+        if (seedURL != null && seedURL.length() > 0) {
+            if (!seedURL.startsWith("http://") && !seedURL.startsWith("http://")) return "wrong protocol for seedURL";
+            try {
+                URL url = new URL(seedURL);
+                String host = url.getHost();
+                if (host.equals("localhost") || host.equals("127.0.0.1") || (host.startsWith("0:0:0:0:0:0:0:1"))) return "seedURL in localhost rejected";
+            } catch (MalformedURLException e) {
+                return "seedURL malformed";
             }
         }
-        return resultSeed;
+        return null;
     }
 
     public final String toString() {
@@ -859,21 +898,6 @@ public class yacySeed {
         return crypt.simpleEncode(this.toString(), key, method);
     }
 
-    public final boolean isPeerOK() {
-        return this.hash != null && this.isProper() == null;
-    }
-
-    public final String isProper() {
-        // checks if everything is ok with that seed
-        if (this.hash == null) { return "hash is null"; }
-        if (this.hash.length() != yacySeedDB.commonHashLength) { return "wrong hash length (" + this.hash.length() + ")"; }
-        final String ip = (String) this.dna.get(yacySeed.IP);
-        if (ip == null) { return "IP is null"; }
-        if (ip.length() < 8) { return "IP is too short: " + ip; }
-        if (!natLib.isProper(ip)) { return "IP is not proper: " + ip; } //this does not work with staticIP
-        return null;
-    }
-
     public final void save(File f) throws IOException {
         final String out = this.genSeedStr('p', null);
         final FileWriter fw = new FileWriter(f);
@@ -886,7 +910,7 @@ public class yacySeed {
         final char[] b = new char[(int) f.length()];
         fr.read(b, 0, b.length);
         fr.close();
-        return genRemoteSeed(new String(b), null, false);
+        return genRemoteSeed(new String(b), null);
     }
 
     @SuppressWarnings("unchecked")

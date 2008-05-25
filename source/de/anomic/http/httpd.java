@@ -197,7 +197,7 @@ public final class httpd implements serverHandler {
         this.userAddress = session.userAddress; // client InetAddress
         this.clientIP = this.userAddress.getHostAddress();
         if (this.userAddress.isAnyLocalAddress()) this.clientIP = "localhost";
-        if (this.clientIP.equals("0:0:0:0:0:0:0:1")) this.clientIP = "localhost";
+        if (this.clientIP.startsWith("0:0:0:0:0:0:0:1")) this.clientIP = "localhost";
         if (this.clientIP.equals("127.0.0.1")) this.clientIP = "localhost";
         final String proxyClient = switchboard.getConfig("proxyClient", "*");
         final String serverClient = switchboard.getConfig("serverClient", "*");

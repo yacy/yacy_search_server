@@ -91,7 +91,7 @@ public final class hello {
             prop.put("message", "your seed is too long (" + seed.length() + ")");
             return prop;
         }
-        final yacySeed remoteSeed = yacySeed.genRemoteSeed(seed, key, false);
+        final yacySeed remoteSeed = yacySeed.genRemoteSeed(seed, key);
 
 //      System.out.println("YACYHELLO: REMOTESEED=" + ((remoteSeed == null) ? "NULL" : remoteSeed.toString()));
         if ((remoteSeed == null) || (remoteSeed.hash == null)) {

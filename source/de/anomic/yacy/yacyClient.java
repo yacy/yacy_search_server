@@ -148,7 +148,7 @@ public final class yacyClient {
         	if (seed.length() > yacySeed.maxsize) {
             	yacyCore.log.logInfo("hello/client 0: rejected contacting seed; too large (" + seed.length() + " > " + yacySeed.maxsize + ")");
             } else {
-            	otherPeer = yacySeed.genRemoteSeed(seed, salt, true);
+            	otherPeer = yacySeed.genRemoteSeed(seed, salt);
             	if (otherPeer == null || !otherPeer.hash.equals(otherHash)) {
             		yacyCore.log.logFine("yacyClient.publishMySeed: consistency error: other peer '" + ((otherPeer==null)?"unknown":otherPeer.getName()) + "' wrong");
             		return -1; // no success
@@ -214,7 +214,7 @@ public final class yacyClient {
         	if (seedStr.length() > yacySeed.maxsize) {
             	yacyCore.log.logInfo("hello/client: rejected contacting seed; too large (" + seedStr.length() + " > " + yacySeed.maxsize + ")");
             } else {
-            	if (yacyCore.peerActions.peerArrival(yacySeed.genRemoteSeed(seedStr, salt, true), (i == 1))) count++;
+            	if (yacyCore.peerActions.peerArrival(yacySeed.genRemoteSeed(seedStr, salt), (i == 1))) count++;
             }
         }
         return count;
@@ -323,7 +323,7 @@ public final class yacyClient {
             
             if (result == null || result.size() == 0) { return null; }
             //final Date remoteTime = yacyCore.parseUniversalDate((String) result.get(yacySeed.MYTIME)); // read remote time
-            return yacySeed.genRemoteSeed((String) result.get("response"), salt, true);
+            return yacySeed.genRemoteSeed((String) result.get("response"), salt);
         } catch (Exception e) {
             yacyCore.log.logSevere("yacyClient.querySeed error:" + e.getMessage());
             return null;

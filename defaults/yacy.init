@@ -381,9 +381,6 @@ adminAccountForLocalhost=true
 #
 seedUploadMethod=none
 
-# The URL to the seed list file 
-seedURL=
-
 # This is the most common method to upload the seed-list
 #  
 # This is an ftp account with all relevant information.

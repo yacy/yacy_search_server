@@ -116,10 +116,6 @@ public class yacyPeerActions {
         seedDB.mySeed().put(yacySeed.SCOUNT, Integer.toString(seedDB.sizeConnected())); // the number of seeds that the peer has stored
         seedDB.mySeed().put(yacySeed.CCOUNT, Double.toString(((int) ((seedDB.sizeConnected() + seedDB.sizeDisconnected() + seedDB.sizePotential()) * 60.0 / (uptime + 1.01)) * 100) / 100.0)); // the number of clients that the peer connects (as connects/hour)
         seedDB.mySeed().put(yacySeed.VERSION, sb.getConfig("version", ""));
-        if (seedDB.mySeed().get(yacySeed.PEERTYPE,"").equals(yacySeed.PEERTYPE_PRINCIPAL)) {
-            // attach information about seed location
-            seedDB.mySeed().put("seedURL", sb.getConfig("seedURL", ""));
-        }
         seedDB.mySeed().setFlagDirectConnect(true);
         seedDB.mySeed().setLastSeenUTC();
         seedDB.mySeed().put(yacySeed.UTC, serverDate.UTCDiffString());
@@ -180,7 +176,7 @@ public class yacyPeerActions {
                         enu = seedList.iterator();
                         lc = 0;
                         while (enu.hasNext()) {
-                            ys = yacySeed.genRemoteSeed((String) enu.next(), null, true);
+                            ys = yacySeed.genRemoteSeed((String) enu.next(), null);
                             if ((ys != null) && (ys.isProper() == null) &&
                                     ((!seedDB.mySeedIsDefined()) || (seedDB.mySeed().hash != ys.hash))) {
                                 if (connectPeer(ys, false)) lc++;

@@ -56,6 +56,7 @@ import de.anomic.plasma.parser.ParserInfo;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
+import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacySeedUploader;
 
 public final class Settings_p {
@@ -63,6 +64,7 @@ public final class Settings_p {
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
         // return variable that accumulates replacements
         serverObjects prop = new serverObjects();
+        plasmaSwitchboard sb = (plasmaSwitchboard) env;
         
         //if (post == null) System.out.println("POST: NULL"); else System.out.println("POST: " + post.toString());
         
@@ -222,7 +224,7 @@ public final class Settings_p {
         }
         
         // general settings
-        prop.put("seedURL", env.getConfig("seedURL", ""));
+        prop.put("seedURL", sb.webIndex.seedDB.mySeed().get(yacySeed.SEEDLIST, ""));
         
         /*
          * Message forwarding configuration
@@ -234,7 +236,6 @@ public final class Settings_p {
         /*
          * Parser Configuration
          */
-        plasmaSwitchboard sb = (plasmaSwitchboard)env;
         
         HashMap<String, plasmaParserConfig> configList = plasmaParser.getParserConfigList();        
         plasmaParserConfig[] configArray = (plasmaParserConfig[]) configList.values().toArray(new plasmaParserConfig[configList.size()]);

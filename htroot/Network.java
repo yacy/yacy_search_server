@@ -161,7 +161,7 @@ public class Network {
                 prop.putNum("table_my-totalqph", Math.round(6000d * sb.totalQPM) / 100d);
                 prop.putNum("table_my-seeds", Long.parseLong(seed.get(yacySeed.SCOUNT, "0")));
                 prop.putNum("table_my-connects", Double.parseDouble(seed.get(yacySeed.CCOUNT, "0")));
-                prop.put("table_my-url", seed.get("seedURL", ""));
+                prop.put("table_my-url", seed.get(yacySeed.SEEDLIST, ""));
                 
                 // generating the location string
                 prop.putHTML("table_my-location", HttpClient.generateLocation());
@@ -406,7 +406,7 @@ public class Network {
                             } else if(seed.isPrincipal()) {
                                 prop.put(STR_TABLE_LIST + conCount + "_type", 2);
                             }
-                            prop.putHTML(STR_TABLE_LIST + conCount + "_type_url", seed.get("seedURL", "http://nowhere/"));
+                            prop.putHTML(STR_TABLE_LIST + conCount + "_type_url", seed.get(yacySeed.SEEDLIST, "http://nowhere/"));
 
                             final long lastseen = Math.abs((System.currentTimeMillis() - seed.getLastSeenUTC()) / 1000 / 60);
                             if (page == 2 || lastseen > 1440) { // Passive Peers should be passive, also Peers without contact greater than an day
