@@ -860,7 +860,8 @@ public class yacySeed {
         if (ip == null) return "IP is null";
         if (ip.length() < 8) return "IP is too short: " + ip;
         if (!natLib.isProper(ip)) return "IP is not proper: " + ip; //this does not work with staticIP
-
+        if (ip.equals("localhost") || ip.equals("127.0.0.1") || (ip.startsWith("0:0:0:0:0:0:0:1"))) return "IP for localhost rejected";
+        
         // seedURL
         final String seedURL = this.dna.get(SEEDLIST);
         if (seedURL != null && seedURL.length() > 0) {
@@ -875,7 +876,7 @@ public class yacySeed {
         }
         return null;
     }
-
+    
     public final String toString() {
         synchronized (this.dna) {
             this.dna.put(yacySeed.HASH, this.hash);                         // set hash into seed code structure
