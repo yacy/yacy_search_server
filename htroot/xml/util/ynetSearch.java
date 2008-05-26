@@ -1,5 +1,5 @@
 ///xml/util/ynetSearch.java
-//(C) 2008 by Stefan Fšrster; sof@gmx.de, Hamburg, Germany
+//(C) 2008 by Stefan Foerster; sof@gmx.de, Hamburg, Germany
 //first published 15.05.2008 on http://yacy.net
 //
 //This is a part of YaCy, a peer-to-peer based web search engine
