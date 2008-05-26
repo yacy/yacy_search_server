@@ -858,7 +858,7 @@ public class yacySeed {
         // check IP
         final String ip = (String) this.dna.get(yacySeed.IP);
         if (ip == null) return "IP is null";
-        if (ip.length() < 8) return "IP is too short: " + ip;
+        if (ip.length() > 0 && ip.length() < 8) return "IP is too short: " + ip;
         if (!natLib.isProper(ip)) return "IP is not proper: " + ip; //this does not work with staticIP
         if (ip.equals("localhost") || ip.startsWith("127.") || (ip.startsWith("0:0:0:0:0:0:0:1"))) return "IP for localhost rejected";
         
