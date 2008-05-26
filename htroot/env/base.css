@@ -600,6 +600,13 @@ form.search.small {
   text-align:left;
 }
 
+input {
+margin:0.2em;
+margin-top:0px;
+margin-bottom:0px;
+vertical-align:bottom;
+}
+
 /*----------
 <table>, <tr>, <th>, <td>
 */
