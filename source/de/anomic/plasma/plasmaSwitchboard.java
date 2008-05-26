@@ -1257,7 +1257,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         boolean rcp = crawlJobIsPaused(CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
         if (!rcp) pauseCrawlJob(CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
         // trigger online caution
-        proxyLastAccess = System.currentTimeMillis() + 60000; // at least 1 minute online caution to prevent unnecessary action on database meanwhile
+        proxyLastAccess = System.currentTimeMillis() + 10000; // at least 10 seconds online caution to prevent unnecessary action on database meanwhile
         // switch the networks
         synchronized (this.webIndex) {
             this.webIndex.close();
@@ -1268,9 +1268,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             int wordCacheMaxCount = (int) getConfigLong(WORDCACHE_MAX_COUNT, 20000);
             this.webIndex = new plasmaWordIndex(getConfig("network.unit.name", ""), getLog(), indexPrimaryPath, indexSecondaryPath, wordCacheMaxCount);
         }
-        // start up crawl jobs again
-        if (lcp) continueCrawlJob(CRAWLJOB_LOCAL_CRAWL);
-        if (rcp) continueCrawlJob(CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
+        // start up crawl jobs
+        continueCrawlJob(CRAWLJOB_LOCAL_CRAWL);
+        continueCrawlJob(CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
         this.log.logInfo("switched network to " + networkDefinition);
         // check status of account configuration: when local url crawling is allowed, it is not allowed
         // that an automatic authorization of localhost is done, because in this case crawls from local
