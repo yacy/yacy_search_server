@@ -38,19 +38,14 @@
           <fieldset>
           <table border="0">
           <tr>
-            <td width="33%">Community-based web search</td>
-          	<td width="33%">Search portal for your own web pages</td>
-          	<td width="33%">Intranet Indexing</td>
+            <td width="33%"><input type="radio" name="usecase" value="freeworld" id="usecaseFreeworld" #(freeworldChecked)#::checked="checked"#(/freeworldChecked)# /><label for="usecaseFreeworld">Community-based web search</label></td>
+          	<td width="33%"><input type="radio" name="usecase" value="portal" id="usecasePortal" #(portalChecked)#::checked="checked"#(/portalChecked)# /><label for="usecasePortal">Search portal for your own web pages</label></td>
+          	<td width="33%"><input type="radio" name="usecase" value="intranet" id="usecaseIntranet" #(intranetChecked)#::checked="checked"#(/intranetChecked)# /><label for="usecaseIntranet">Intranet Indexing</label></td>
           </tr>
           <tr>
-            <td><img src="/env/grafics/usecase_freeworld.png"</td>
-            <td><img src="/env/grafics/usecase_webportal.png"</td>
-            <td><img src="/env/grafics/usecase_intranet.png"</td>
-          </tr>
-          <tr>
-            <td align="center"><input type="radio" name="usecase" value="freeworld" id="usecaseFreeworld" #(freeworldChecked)#::checked="checked"#(/freeworldChecked)# /></td>
-            <td align="center"><input type="radio" name="usecase" value="portal" id="usecasePortal" #(portalChecked)#::checked="checked"#(/portalChecked)# /></td>
-            <td align="center"><input type="radio" name="usecase" value="intranet" id="usecaseIntranet" #(intranetChecked)#::checked="checked"#(/intranetChecked)# /></td>
+            <td><label for="usecaseFreeworld"><img src="/env/grafics/usecase_freeworld.png" /></label></td>
+            <td><label for="usecasePortal"><img src="/env/grafics/usecase_webportal.png" /></label></td>
+            <td><label for="usecaseIntranet"><img src="/env/grafics/usecase_intranet.png" /></label></td>
           </tr>
           <tr>
             <td><label for="usecaseFreeworld">join and support the global network 'freeworld', search the web with an uncensored user-owned search network</label></td>
