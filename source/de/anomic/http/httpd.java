@@ -1249,7 +1249,8 @@ public final class httpd implements serverHandler {
             o.close(); o = null;
 
             if(header == null)
-                header = new httpHeader();            
+                header = new httpHeader();
+            header.put(httpHeader.CONNECTION_PROP_PROXY_RESPOND_STATUS, Integer.toString(httpStatusCode));
             header.put(httpHeader.DATE, systemDate);
             header.put(httpHeader.CONTENT_TYPE, "text/html");
             header.put(httpHeader.CONTENT_LENGTH, Integer.toString(result.length));
