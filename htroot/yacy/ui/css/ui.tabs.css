@@ -116,18 +116,18 @@
 
 /* close button */
 .close {
-        display: none;
-        position: absolute;
-        top: 8px;
-        right: 7px;
-        z-index: 2000;
-        width: 12px;
-        height: 12px;
+	display: none;
+    position: absolute;
+    top: 8px;
+    right: 7px;
+    z-index: 2000;
+    width: 12px;
+    height: 12px;
 	border: 0;
-
+	cursor: pointer;
 }
 .ui-tabs-selected .close {
-        display: block;
+    display: block;
 }
 
 

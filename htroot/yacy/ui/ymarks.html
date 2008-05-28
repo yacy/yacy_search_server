@@ -1,4 +1,3 @@
-
 <script type="text/javascript">
    //<![CDATA[
 	$(document).ready(function() {     	
@@ -25,41 +24,62 @@
 						 var icon = '<img src="img-2/lock.png" alt="private bookmark" title="private bookmark"/>'
 					}				
 					$('<tr></tr')
-						.html('<td><input type="checkbox" value="true" /></td><td>' +icon+ '</td><td><h3 class="linktitle">' +title+ '</h3><p class="desc">' +desc+ '</p><p class="url"><a href="' +link+ '">' +link+ '</a></p><td>' +tags+ ' </td><td>' +date+ '</td><td><a href="/Bookmarks.html?edit=' +hash+ '"><img src="img-2/pencil.png" alt="edit bookmark" title="edit bookmark" /></a><img src="img-2/cancel.png" alt="delete bookmark" title="delete bookmark"/></td>')						
+						.html('<td><input type="checkbox" value="true" /></td><td>' +icon+ '</td><td><h3 class="linktitle">' +title+ '</h3><p class="desc">' +desc+ '</p><p class="url"><a href="' +link+ '">' +link+ '</a></p><td>' +tags+ ' </td><td>' +date+ '</td><td><a href="'+hash+'" class="yeditTrigger"><img src="img-2/pencil.png" alt="edit bookmark" title="edit bookmark" /></a><img src="img-2/cancel.png" alt="delete bookmark" title="delete bookmark"/></td>')						
 						.appendTo('#ymarks tbody');																						
 				}); //close each(
 				$('#ymarks') 
     				.tablesorter({widgets: ['zebra']}) 
-    				.tablesorterPager({container: $('#pager'), size: 5, positionFixed: false});				
+    				.tablesorterPager({container: $('#pager'), size: 5, positionFixed: false});
+    			$('#yedit').jqm({
+				    trigger: '.yeditTrigger',
+				    overlay: 30, 
+				    overlayClass: 'whiteOverlay',
+				    onShow: function(hash){$('<p></p>').html(hash.t).appendTo('.jqmdMSG'); hash.w.show();}
+				}).jqDrag('.jqDrag');				
 			}
-		}); //close $.ajax(				
+		}); //close $.ajax(							
 	});
   //]]>
 </script>
 
-<!-- Table -->		
-		<table class="ytable" id="ymarks" summary="YaCy Bookmarks">
-			<colgroup>
-				<col width="25"/>
-				<col width="25"/>
-				<col width="425"/>
-				<col width="150"/>
-				<col width="150"/>
-				<col width="25"/>								
-			</colgroup>
-			<thead>
-			  <tr>			 
-				<th class="{sorter: false}"></th>
-				<th></th>
-				<th>Title</th>
-				<th>Tags</th>				
-				<th>Date</th>
-				<th class="{sorter: false}"></th>							
-			  </tr>
-			</thead>			
-			<tbody>			
-			</tbody>
-		</table>
+<!-- Display Bookmarks Table -->		
+<table class="ytable" id="ymarks" summary="YaCy Bookmarks">
+	<colgroup>
+		<col width="25"/>
+		<col width="25"/>
+		<col width="425"/>
+		<col width="150"/>
+		<col width="150"/>
+		<col width="25"/>								
+	</colgroup>
+	<thead>
+	  <tr>			 
+		<th class="{sorter: false}"></th>
+		<th></th>
+		<th>Title</th>
+		<th>Tags</th>				
+		<th>Date</th>
+		<th class="{sorter: false}"></th>							
+	  </tr>
+	</thead>			
+	<tbody>			
+	</tbody>
+</table>
+
+<!-- Edit Bookmarks -->			
+<div id="yedit" class="jqmDialog">
+	<div class="jqmdTC jqDrag">
+		Edit Bookmark
+	</div>
+	<div class="jqmdBC">	
+		<div class="jqmdMSG">
+			Edit bookmark dialog is not functional yet!	 
+			<br /><br />
+			At least it seems possible to transport the edit bookmark link and hash into the dialog window...
+		</div>
+	</div>
+	<input type="image" src="img-2/cancel.png" class="jqmdX jqmClose" />
+</div>
 
 
 
