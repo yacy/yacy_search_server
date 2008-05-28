@@ -9,9 +9,9 @@
 			url: query,
 			dataType: "xml",
 			success: function(xml) {
-				var totalResults = parseInt($(xml).find('totalResults').text().replace(".","","g"));
-				var startIndex = parseInt($(xml).find('startIndex').text());				
-				var itemsPerPage = parseInt($(xml).find('itemsPerPage').text());
+				var totalResults = parseInt($(xml).find('opensearch\\:totalResults').text().replace(".","","g"));
+				var startIndex = parseInt($(xml).find('opensearch\\:startIndex').text());				
+				var itemsPerPage = parseInt($(xml).find('opensearch\\:itemsPerPage').text());
 				var query = $(xml).find('Query').attr('searchTerms');				
 				var endIndex = startIndex+itemsPerPage;				
 				if (endIndex > totalResults) {
