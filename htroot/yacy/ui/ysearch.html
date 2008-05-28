@@ -9,9 +9,16 @@
 			url: query,
 			dataType: "xml",
 			success: function(xml) {
-				var totalResults = parseInt($(xml).find('opensearch\\:totalResults').text().replace(".","","g"));
-				var startIndex = parseInt($(xml).find('opensearch\\:startIndex').text());				
-				var itemsPerPage = parseInt($(xml).find('opensearch\\:itemsPerPage').text());
+				alert($.browser.version);
+				if ($.browser.mozilla && ($.browser.version > 1.8)) {
+					var totalResults = parseInt($(xml).find('opensearch\\:totalResults').text().replace(".","","g"));
+					var startIndex = parseInt($(xml).find('opensearch\\:startIndex').text());				
+					var itemsPerPage = parseInt($(xml).find('opensearch\\:itemsPerPage').text());
+				} else {
+					var totalResults = parseInt($(xml).find('totalResults').text().replace(".","","g"));
+					var startIndex = parseInt($(xml).find('startIndex').text());				
+					var itemsPerPage = parseInt($(xml).find('itemsPerPage').text());
+				}
 				var query = $(xml).find('Query').attr('searchTerms');				
 				var endIndex = startIndex+itemsPerPage;				
 				if (endIndex > totalResults) {
@@ -39,16 +46,16 @@
 					var guid = $(this).find('guid').text();
 					$('<div class="searchresults"></div>')
 						.html('<h3 class="linktitle"><a href="' +link+ '">' +title+ '</a></h3><p class="snippet">' +desc+ '</p><p class="url"><a href="' +link+ '" id="' +guid+ '" >' +link+ '</a></p>')						
-						.prependTo(tabid);
-					$(".linktitle a").faviconize({
-						position: "before",
-						defaultImage: "img-2/article.png",
-						className: "favicon"				
-					});					
+						.prependTo(tabid);										
 				}); //close each(
+				$(".linktitle a").faviconize({
+					position: "before",
+					defaultImage: "img-2/article.png",
+					className: "favicon"
+				});	
 			}
 		}); //close $.ajax(
-		function loadContents(page_id, jq) {        	
+		function loadContents(page_id, jq) {
 			var $tabs = $('#container ul');
 			var count = $(tabid).attr('count');		
 			var offset = ((page_id*count)+1);
@@ -63,11 +70,11 @@
 				+"&prefermaskfilter="+$(tabid).attr('prefermaskfilter')
 				+"&urlmaskfilter="+$(tabid).attr('urlmaskfilter');
 			
-			var selected = $tabs.data('selected.ui-tabs');		
+			var selected = $tabs.data('selected.tabs');
 			$tabs.tabs("load", selected);			
 			$('#pagination').trigger("update");
 			return false;
-		}		
+		}					
 	 }); //close $(
   //]]>
 </script>
