@@ -471,7 +471,7 @@ public final class httpdFileHandler {
                     for (int i = 0; i < list.length; i++) {
                         f = new File(dir, list[i]);
                         if (f.isDirectory()) {
-                            sb.append("    <li><a href=\"" + path + list[i] + "\">" + list[i] + "/</a><br></li>\n");
+                            sb.append("    <li><a href=\"" + path + list[i] + "/\">" + list[i] + "/</a><br></li>\n");
                         } else {
                             if (list[i].endsWith("html") || (list[i].endsWith("htm"))) {
                                 scraper = htmlFilterContentScraper.parseResource(f);
