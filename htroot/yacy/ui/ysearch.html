@@ -2,14 +2,11 @@
   //<![CDATA[
 	$(function() {				
 		$("#side3").accordion("activate", 0);
-		var pagination = tabid + " .pagination";		
-		$('<div class="pagination"></div>').html('[loading...]').appendTo(tabid);
 		$.ajax({
 			type: "GET",
 			url: query,
 			dataType: "xml",
-			success: function(xml) {
-				alert($.browser.version);
+			success: function(xml) {				
 				if ($.browser.mozilla && ($.browser.version > 1.8)) {
 					var totalResults = parseInt($(xml).find('opensearch\\:totalResults').text().replace(".","","g"));
 					var startIndex = parseInt($(xml).find('opensearch\\:startIndex').text());				
@@ -30,14 +27,7 @@
     				var currentPage = ((startIndex-1)/itemsPerPage);
   				} else {
     				var currentPage = 0;
-  				}  				
-				$(pagination).pagination(totalResults, {
-					current_page:currentPage,
-					items_per_page:itemsPerPage,
-					num_edge_entries:1,
-					num_display_entries:10,
-					callback: loadContents
-				});	
+  				}	
 												
 				$(xml).find('item').each(function(){					
 					var title = $(this).find('title').text();
@@ -46,8 +36,19 @@
 					var guid = $(this).find('guid').text();
 					$('<div class="searchresults"></div>')
 						.html('<h3 class="linktitle"><a href="' +link+ '">' +title+ '</a></h3><p class="snippet">' +desc+ '</p><p class="url"><a href="' +link+ '" id="' +guid+ '" >' +link+ '</a></p>')						
-						.prependTo(tabid);										
+						.appendTo(tabid);										
 				}); //close each(
+				
+				var pagination = tabid + " .pagination";		
+				$('<div class="pagination"></div>').html('[loading...]').appendTo(tabid);	
+				$(pagination).pagination(totalResults, {
+					current_page:currentPage,
+					items_per_page:itemsPerPage,
+					num_edge_entries:1,
+					num_display_entries:10,
+					callback: loadContents
+				});
+
 				$(".linktitle a").faviconize({
 					position: "before",
 					defaultImage: "img-2/article.png",
