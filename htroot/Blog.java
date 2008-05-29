@@ -105,7 +105,7 @@ public class Blog {
         final int num   = post.getInt("num",10);  //indicates how many entries should be shown
 
         if(!hasRights){
-            final userDB.Entry userentry = sb.userDB.proxyAuth((String)header.get("Authorization", "xxxxxx"));
+            final userDB.Entry userentry = sb.userDB.proxyAuth((String)header.get(httpHeader.AUTHORIZATION, "xxxxxx"));
             if(userentry != null && userentry.hasRight(userDB.Entry.BLOG_RIGHT)){
                 hasRights=true;
             } else if(post.containsKey("login")) {

@@ -77,7 +77,7 @@ public class CrawlResults {
         if (((tabletype > 0) && (tabletype < 6)) ||
             (post.containsKey("clearlist")) ||
             (post.containsKey("deleteentry"))) {
-            String authorization = ((String) header.get("Authorization", "xxxxxx"));
+            String authorization = ((String) header.get(httpHeader.AUTHORIZATION, "xxxxxx"));
             if (authorization.length() != 0) {
                 if (! sb.verifyAuthentication(header, true)){
                     // force log-in (again, because wrong password was given)

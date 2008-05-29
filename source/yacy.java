@@ -536,7 +536,7 @@ public final class yacy {
 
         // send 'wget' to web interface
         httpHeader requestHeader = new httpHeader();
-        requestHeader.put("Authorization", "realm=" + encodedPassword); // for http-authentify
+        requestHeader.put(httpHeader.AUTHORIZATION, "realm=" + encodedPassword); // for http-authentify
         JakartaCommonsHttpClient con = new JakartaCommonsHttpClient(10000, requestHeader, null);
         JakartaCommonsHttpResponse res = null;
         try {

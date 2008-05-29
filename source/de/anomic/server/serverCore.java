@@ -359,7 +359,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
                 this.log.logWarning("SLOWING DOWN ACCESS FOR BRUTE-FORCE PREVENTION FROM " + cIP + ", ATTEMPT " + attempts.intValue());
                 // add a delay to make brute-force harder
                 announceThreadBlockApply();
-                try {Thread.sleep(attempts.intValue() * 2000);} catch (InterruptedException e) {}
+                try {Thread.sleep(attempts.intValue() /*BFPATCH*/);} catch (InterruptedException e) {}
                 announceThreadBlockRelease();
                 if ((attempts.intValue() >= 10) && (this.denyHost != null)) {
                     this.denyHost.put(cIP, "deny");
