@@ -42,6 +42,7 @@
   <property name="data" location="DATA"/>
   <property name="lib" location="lib"/>
   <property name="libx" location="libx"/>
+  <property name="libt" location="libt"/>
   <property name="build" location="classes"/>
   <property name="htroot" location="htroot"/>
   <property name="locales" location="locales"/>
@@ -53,6 +54,7 @@
   <property name="release_ext" location="${release}/EXT"/>
   <property name="svnEntriesFile" location=".svn/entries"/>
   <property name="defaults" location="defaults"/>
+  <property name="DESTDIR" value="DESTDIR"/>
 
   <!-- determining if the sourcecode of the yacybar is available -->
   <condition property="yacyBarDirExists">
@@ -479,6 +481,165 @@
 
   </target>
 
+  <target name="copyMain4SourceDist" depends="init,clean">
+    <!-- copy main class files -->
+    <copy todir="${release_source}/classes" failonerror="false">
+      <fileset dir="${build}">
+        <include name="**/*.*"/>
+        <!-- excluding all additional content parsers -->
+        <exclude name="de/anomic/plasma/parser/*/*"/>
+        <!-- excluding all additional seed uploaders -->
+        <exclude name="de/anomic/yacy/seedUpload/**"/>
+        <!-- ecluding rss Reader class -->
+        <exclude name="de/anomic/data/rssReader.*"/>
+      </fileset>
+
+      <!-- copy standard seed uploaders -->
+      <fileset dir="${build}">
+        <include name="de/anomic/yacy/seedUpload/yacySeedUploadFile.class"/>
+        <include name="de/anomic/yacy/seedUpload/yacySeedUploadFtp.class"/>
+      </fileset>
+    </copy>
+
+    <!-- copy libs -->
+    <copy todir="${release_source}/lib">
+      <fileset dir="${lib}" 
+               includes="**/*"/>
+               
+    </copy>
+    <copy todir="${release_source}/libx">
+      <fileset dir="${libx}" 
+               includes="**/*"/>
+               
+    </copy>
+    <copy todir="${release_source}/libt">
+      <fileset dir="${libt}" 
+               includes="**/*"/>
+               
+    </copy>
+
+    <!-- copy configuration files -->
+    <copy todir="${release_source}">
+      <fileset dir=".">
+        <include name="yacy.logging"/>
+        <include name="yacy.yellow"/>
+        <include name="yacy.badwords.example"/>
+        <include name="yacy.stopwords"/>
+        <include name="yacy.parser"/>
+        <include name="httpd.mime"/>
+        <include name="superseed.txt"/>
+      </fileset>
+    </copy>
+
+  	<!-- copy defaults -->
+  	    <copy todir="${release_source}/defaults">
+  	      <fileset dir="${defaults}" 
+  	               includes="**/*"/>
+  	    </copy>
+
+  	<!-- copy Unix wrappers -->
+    <copy todir="${release_source}">
+      <fileset dir=".">
+        <include name="startYACY.sh"/>
+        <include name="stopYACY.sh"/>
+        <include name="killYACY.sh"/>
+        <include name="restart.sh"/>
+        <include name="startYACY.command"/>
+        <include name="stopYACY.command"/>
+      </fileset>
+    </copy>
+
+    <!-- copy other wrappers -->
+    <copy todir="${release_source}">
+      <fileset dir=".">
+        <include name="startYACY.bat"/>
+        <include name="startYACY_noconsole.bat"/>
+        <include name="stopYACY.bat"/>
+      	<!--
+        <include name="startYACY_Win9x.bat"/>
+        <include name="startYACY_noconsole_Win9x.bat"/>
+        <include name="stopYACY_Win9x.bat"/>
+        -->
+      </fileset>
+    </copy>
+    <copy todir="${release_source}" file="yacy.exe" failonerror="false"/>
+
+    <!-- copy locales  -->
+    <copy todir="${release_source}/locales">
+      <fileset dir="${locales}">
+        <include name="*"/>
+      </fileset>
+    </copy>
+
+    <!-- copy skins  -->
+    <copy todir="${release_source}/skins">
+      <fileset dir="${skins}">
+        <include name="*"/>
+      </fileset>
+    </copy>
+
+    <!-- copy documentation -->
+    <copy todir="${release_source}">
+      <fileset dir=".">
+        <include name="readme.txt"/>
+        <include name="gpl.txt"/>
+        <include name="ChangeLog"/>
+      </fileset>
+    </copy>
+
+    <!-- copy source code -->
+    <copy todir="${release_source}/source">
+      <fileset dir="${src}">
+        <include name="**/*.*"/>
+        <!-- excluding sources for additional content parsers -->
+        <exclude name="de/anomic/plasma/parser/*/*"/>
+        <!-- excluding sources for additional seed uploaders -->
+        <exclude name="de/anomic/yacy/seedUpload/yacySeedUpload**"/>
+        <!-- ecluding rss Reader class -->
+        <exclude name="de/anomic/data/rssReader.*"/>
+      </fileset>
+      <fileset dir="${src}">
+        <include name="de/anomic/yacy/seedUpload/yacySeedUploadFile.java"/>
+        <include name="de/anomic/yacy/seedUpload/yacySeedUploadFtp.java"/>
+      </fileset>
+    </copy>
+
+    <!-- copy server pages -->
+    <copy todir="${release_source}/htroot">
+      <fileset dir="${htroot}">
+        <include name="**/*"/>
+        <exclude name="yacy/seedUpload/**"/>
+      </fileset>
+      <fileset dir="${htroot}">
+        <include name="yacy/seedUpload/yacySeedUploadFile.html"/>
+        <include name="yacy/seedUpload/yacySeedUploadFtp.html"/>
+      </fileset>
+    </copy>
+
+    <!-- copy add-on's -->
+    <copy todir="${release_source}/addon">
+      <fileset dir="${addon}">
+        <include name="**/*"/>
+      </fileset>
+    </copy>
+
+    <!-- copy ranking files -->
+    <copy todir="${release_source}/ranking">
+      <fileset dir="${ranking}">
+        <include name="**/*"/>
+      </fileset>
+    </copy>
+
+    <!-- copy development tools -->
+    <copy todir="${release_source}">
+      <fileset dir=".">
+        <include name="build.xml"/>
+        <include name="build.properties"/>
+      </fileset>
+    </copy>
+
+  </target>
+
   <!-- ======================================================================================================= 
        making a release file for yacy 
        ======================================================================================================= -->
@@ -527,6 +688,24 @@
     <delete dir="${release}/SPECS" failonerror="false" />
   </target>
 
+  <target name="sdist" depends="copyMain4SourceDist" description="make for standard source YaCy">
+    <tar destfile="${release}/${sourceReleaseFile}" compression="gzip" defaultexcludes="yes" longfile="fail">
+
+      <!-- packing all files into a gzipped tar -->
+      <tarfileset dir="${release_source}" prefix="${releaseFileParentDir}/" dirmode="${accessRightsDir}" mode="${accessRightsExecutable}">
+        <include name="**/*.sh"/>
+        <include name="**/*.command"/>
+      </tarfileset>
+      <tarfileset dir="${release_source}" prefix="${releaseFileParentDir}/" dirmode="${accessRightsDir}" mode="${accessRightsFile}" >
+        <include name="**/*.*"/>
+        <exclude name="**/*.sh"/>
+        <exclude name="**/*.command"/>
+      </tarfileset>
+    </tar>
+
+    <delete dir="${release_source}"/>
+  </target>
+
   <!-- make clean -->
   <target name="clean" description="make clean">
     <delete dir="${release_main}" failonerror="false"/>
@@ -534,11 +713,124 @@
     <delete file="${build}/yacy.java" failonerror="false"/>
     <delete file="yacy.jar" failonerror="false"/>
     <delete file="yacy.exe" failonerror="false"/>
+    <delete file="lib/svnRevNr.jar" failonerror="false"/>
     <delete failonerror="false">
       <fileset dir="${src}" includes="**/*.class" />
       <fileset dir="${build}" includes="**/*.class" />
       <fileset dir="${htroot}" includes="**/*.class" />
     </delete>
+  </target>
+
+  <target name="installonlinux" depends="compileMain,build-jar">
+    <!-- copy main class files -->
+    <copy todir="${DESTDIR}/usr/share/java/">
+      <fileset dir=".">
+        <include name="yacy.jar"/>
+      </fileset>
+    </copy>
+
+    <!-- copy libs -->
+    <copy todir="${DESTDIR}/usr/share/java/yacy/">
+      <fileset dir="${lib}" 
+               includes="**/*"/>
+    </copy>
+    <copy todir="${DESTDIR}/usr/share/java/yacy/">
+      <fileset dir="${libx}" 
+               includes="**/*"/>
+    </copy>
+
+    <!-- copy configuration files -->
+    <copy todir="${DESTDIR}/usr/share/yacy">
+      <fileset dir=".">
+        <include name="yacy.logging"/>
+        <include name="yacy.yellow"/>
+        <include name="yacy.badwords.example"/>
+        <include name="yacy.stopwords"/>
+        <include name="yacy.parser"/>
+        <include name="httpd.mime"/>
+        <include name="superseed.txt"/>
+      </fileset>
+    </copy>
+
+  	<!-- copy defaults -->
+	<copy todir="${DESTDIR}/usr/share/yacy/defaults">
+  	      <fileset dir="${defaults}" 
+  	               includes="**/*"/>
+  	    </copy>
+
+  	<!-- copy Unix wrappers -->
+    <copy todir="${DESTDIR}/usr/share/yacy">
+      <fileset dir=".">
+        <include name="startYACY.sh"/>
+        <include name="stopYACY.sh"/>
+        <include name="killYACY.sh"/>
+        <include name="restart.sh"/>
+      </fileset>
+    </copy>
+      <chmod file="${DESTDIR}/usr/share/yacy/startYACY.sh" perm="ugo+rx"/>
+      <chmod file="${DESTDIR}/usr/share/yacy/stopYACY.sh" perm="ugo+rx"/>
+      <chmod file="${DESTDIR}/usr/share/yacy/killYACY.sh" perm="ugo+rx"/>
+      <chmod file="${DESTDIR}/usr/share/yacy/restart.sh" perm="ugo+rx"/>
+
+    <!-- copy locales  -->
+    <copy todir="${DESTDIR}/usr/share/yacy/locales">
+      <fileset dir="${locales}">
+        <include name="*"/>
+      </fileset>
+    </copy>
+
+    <!-- copy skins  -->
+    <copy todir="${DESTDIR}/usr/share/yacy/skins">
+      <fileset dir="${skins}">
+        <include name="*"/>
+      </fileset>
+    </copy>
+
+    <!-- copy documentation -->
+    <copy todir="${DESTDIR}/usr/share/doc/yacy">
+      <fileset dir=".">
+        <include name="readme.txt"/>
+        <include name="gpl.txt"/>
+        <include name="ChangeLog"/>
+      </fileset>
+    </copy>
+
+    <!-- copy server pages -->
+    <copy todir="${DESTDIR}/usr/share/yacy/htroot">
+      <fileset dir="${htroot}">
+        <include name="**/*"/>
+        <exclude name="yacy/seedUpload/**"/>
+      </fileset>
+      <fileset dir="${htroot}">
+        <include name="yacy/seedUpload/yacySeedUploadFile.html"/>
+        <include name="yacy/seedUpload/yacySeedUploadFtp.html"/>
+      </fileset>
+    </copy>
+
+    <!-- copy ranking files -->
+    <copy todir="${DESTDIR}/usr/share/yacy/ranking">
+      <fileset dir="${ranking}">
+        <include name="**/*"/>
+      </fileset>
+    </copy>
+
+    <!-- work around a feature/bug :( -->
+    <mkdir dir="${DESTDIR}/usr/share/yacy/xlib" />
+
+    <!-- prepare /var/lib/yacy -->
+
+    <mkdir dir="${DESTDIR}/var/lib/yacy" />
+    <mkdir dir="${DESTDIR}/var/lib/yacy/LOG" />
+    <mkdir dir="${DESTDIR}/var/lib/yacy/SETTINGS" />
+    <mkdir dir="${DESTDIR}/etc" />
+    <mkdir dir="${DESTDIR}/var/log" />
+    <symlink link="${DESTDIR}/usr/share/yacy/DATA"
+	    resource="../../../var/lib/yacy"/>
+    <symlink link="${DESTDIR}/etc/yacy"
+	    resource="../var/lib/yacy/SETTINGS"/>
+    <symlink link="${DESTDIR}/var/log/yacy"
+	    resource="../lib/yacy/LOG"/>
+
   </target>
 
   <!-- run YaCy (needed for NetBeans4) -->
