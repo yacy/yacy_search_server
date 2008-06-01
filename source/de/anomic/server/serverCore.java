@@ -123,7 +123,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
     /**
      * for brute-force prevention
      */
-    public static HashMap<String, Integer> bfHost = new HashMap<String, Integer>();
+    public static ConcurrentHashMap<String, Integer> bfHost = new ConcurrentHashMap<String, Integer>();
     
     // class variables
     /**

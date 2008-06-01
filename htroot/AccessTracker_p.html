@@ -9,8 +9,7 @@
     #%env/templates/submenuAccessTracker.template%#
     #(page)#
     <h2>Server Access Overview</h2>
-    <p>This is a list of requests to the local http server within the last hour.</p>
-    <p>Showing #[num]# requests.</p>
+    <p>This is a list of #[num]# requests to the local http server within the last hour.</p>
     <table border="0" cellpadding="2" cellspacing="1">
       <tr class="TableHeader">
         <td rowspan="2">Host</td>
@@ -31,6 +30,19 @@
         <td>#[countHour]#</td>
       </tr>
       #{/list}#
+    </table>
+    <p>The following hosts are registered as source for brute-force requests to protected pages</p>
+    <table border="0" cellpadding="2" cellspacing="1">
+      <tr class="TableHeader">
+        <td>Host</td>
+        <td>Access Times</td>
+      </tr>
+      #{bflist}#
+      <tr class="TableCell#(dark)#Light::Dark#(/dark)#">
+        <td>#[host]#</td>
+        <td>#[accesstimes]#</td>
+      </tr>
+      #{/bflist}#
     </table>
     ::
     <h2>Server Access Details</h2>

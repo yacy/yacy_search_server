@@ -37,6 +37,7 @@ import de.anomic.http.httpHeader;
 import de.anomic.net.natLib;
 import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.server.serverCore;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -82,6 +83,17 @@ public class AccessTracker_p {
             }
             } catch (ConcurrentModificationException e) {} // we dont want to synchronize this
             prop.put("page_list", entCount);
+            
+            entCount = 0;
+            try {
+            for (Map.Entry<String, Integer> bfe: serverCore.bfHost.entrySet()) {
+                prop.putHTML("page_bflist_" + entCount + "_host", bfe.getKey());
+                prop.putNum("page_bflist_" + entCount + "_countSecond", bfe.getValue());
+                entCount++;
+            }
+            } catch (ConcurrentModificationException e) {} // we dont want to synchronize this
+            prop.put("page_vflist", entCount);
+            
             prop.put("page_num", entCount);
         }
         if (page == 1) {
