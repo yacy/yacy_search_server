@@ -105,7 +105,12 @@ legend {
   text-align:center;
 }
 
-
+input {
+margin:0.2em;
+margin-top:0px;
+margin-bottom:0px;
+vertical-align:text-bottom;
+}
 
 /* --------------- global classes --------------------- */
 
@@ -598,13 +603,6 @@ form.search {
 }
 form.search.small {
   text-align:left;
-}
-
-input {
-margin:0.2em;
-margin-top:0px;
-margin-bottom:0px;
-vertical-align:bottom;
 }
 
 /*----------

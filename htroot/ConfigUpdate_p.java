@@ -151,7 +151,7 @@ public class ConfigUpdate_p {
                 // not a valid release
             	// can be also a restart- or deploy-file
                 File invalid = new File(sb.releasePath, downloaded[j]);
-                if (!invalid.getName().contains(".bat")) // Windows doesn't like deleted scripts
+                if (!(invalid.getName().endsWith(".bat") || invalid.getName().endsWith(".sh"))) // Windows & Linux don't like deleted scripts while execution!
                 	invalid.deleteOnExit(); 
             }
         }
