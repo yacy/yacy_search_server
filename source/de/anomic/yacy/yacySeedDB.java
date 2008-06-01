@@ -157,19 +157,23 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
             mySeed = yacySeed.load(myOwnSeedFile);
         } catch (IOException e) {
             // create new identity
+            serverLog.logSevere("SEEDDB", "could not load stored mySeed.txt from " + myOwnSeedFile.toString() + ": " + e.getMessage() + ". creating new seed.", e);
             mySeed = yacySeed.genLocalSeed(this);
             try {
                 mySeed.save(myOwnSeedFile);
             } catch (IOException ee) {
+                serverLog.logSevere("SEEDDB", "error saving mySeed.txt (1) to " + myOwnSeedFile.toString() + ": " + ee.getMessage(), ee);
                 ee.printStackTrace();
                 System.exit(-1);
             }
         } else {
             // create new identity
+            serverLog.logInfo("SEEDDB", "could not find stored mySeed.txt at " + myOwnSeedFile.toString() + ": " + ". creating new seed.");
             mySeed = yacySeed.genLocalSeed(this);
             try {
                 mySeed.save(myOwnSeedFile);
             } catch (IOException ee) {
+                serverLog.logSevere("SEEDDB", "error saving mySeed.txt (2) to " + myOwnSeedFile.toString() + ": " + ee.getMessage(), ee);
                 ee.printStackTrace();
                 System.exit(-1);
             }
