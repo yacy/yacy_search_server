@@ -1823,6 +1823,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             // close unused connections
             JakartaCommonsHttpClient.cleanup();
 
+            // clean up too old connection information
+            super.cleanupAccessTracker(1000 * 60 * 60);
+            
             // do transmission of CR-files
             checkInterruption();
             int count = rankingOwnDistribution.size() / 100;

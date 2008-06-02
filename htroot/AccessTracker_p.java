@@ -81,7 +81,7 @@ public class AccessTracker_p {
                 prop.putNum("page_list_" + entCount + "_countHour", access.tailMap(new Long(System.currentTimeMillis() - 1000 * 60 * 60)).size());
                 entCount++;
             }
-            } catch (ConcurrentModificationException e) {} // we dont want to synchronize this
+            } catch (ConcurrentModificationException e) {} // we don't want to synchronize this
             prop.put("page_list", entCount);
             prop.put("page_num", entCount);
             
@@ -112,7 +112,7 @@ public class AccessTracker_p {
 							prop.putHTML("page_list_" + entCount + "_path", (String) entry.getValue());
 							entCount++;
 						}
-					} catch (ConcurrentModificationException e) {} // we dont want to synchronize this
+					} catch (ConcurrentModificationException e) {} // we don't want to synchronize this
 				}
 			} else {
                 try {

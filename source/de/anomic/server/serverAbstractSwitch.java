@@ -172,6 +172,16 @@ public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
 	return log;
     }
     
+    /*
+     * remove all entries from the access tracker where the age of the last access is greater than the given timeout
+     */
+    public void cleanupAccessTracker(long timeout) {
+        Iterator<Map.Entry<String, TreeMap<Long, String>>> i = accessTracker.entrySet().iterator();
+        while (i.hasNext()) {
+            if (i.next().getValue().tailMap(new Long(System.currentTimeMillis() - timeout)).size() == 0) i.remove();
+        }
+    }
+    
     public void track(String host, String accessPath) {
         // learn that a specific host has accessed a specific path
         if (accessPath == null) accessPath="NULL";
