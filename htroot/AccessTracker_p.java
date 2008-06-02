@@ -83,6 +83,7 @@ public class AccessTracker_p {
             }
             } catch (ConcurrentModificationException e) {} // we dont want to synchronize this
             prop.put("page_list", entCount);
+            prop.put("page_num", entCount);
             
             entCount = 0;
             try {
@@ -92,9 +93,7 @@ public class AccessTracker_p {
                 entCount++;
             }
             } catch (ConcurrentModificationException e) {} // we dont want to synchronize this
-            prop.put("page_vflist", entCount);
-            
-            prop.put("page_num", entCount);
+            prop.put("page_bflist", entCount);
         }
         if (page == 1) {
             String host = (post == null) ? "" : post.get("host", "");
