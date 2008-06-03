@@ -199,12 +199,11 @@ public class Status {
             prop.putNum("peerStatistics_principalConnects", yacyCore.peerActions.principalConnects);
             prop.putNum("peerStatistics_disconnects", yacyCore.peerActions.disconnects);
             prop.put("peerStatistics_connects", yFormatter.number(sb.webIndex.seedDB.mySeed().get(yacySeed.CCOUNT, "0")));
+            thisHash = sb.webIndex.seedDB.mySeed().hash;
             if (sb.webIndex.seedDB.mySeed().getPublicAddress() == null) {
-                thisHash = sb.webIndex.seedDB.mySeed().hash;
                 prop.put("peerAddress", "0"); // not assigned + instructions
                 prop.put("warningGoOnline", "1");
             } else {
-                thisHash = sb.webIndex.seedDB.mySeed().hash;
                 prop.put("peerAddress", "1"); // Address
                 prop.put("peerAddress_address", sb.webIndex.seedDB.mySeed().getPublicAddress());
                 prop.putHTML("peerAddress_peername", sb.getConfig("peerName", "<nameless>").toLowerCase(), true);

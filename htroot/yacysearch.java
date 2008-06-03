@@ -93,6 +93,7 @@ public class yacysearch {
         
         // get query
         String querystring = (post == null) ? "" : post.get("query", post.get("search", "")).trim(); // SRU compliance
+        boolean fetchSnippets = post.get("verify", "true").equals("true");
         final serverObjects prop = new serverObjects();
         
         boolean rss = (post == null) ? false : post.get("rss", "false").equals("true");
@@ -269,7 +270,7 @@ public class yacysearch {
                     maxDistance,
                     prefermask,
                     contentdomCode,
-                    true,
+                    fetchSnippets,
                     itemsPerPage,
                     offset,
                     urlmask,

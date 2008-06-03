@@ -1071,7 +1071,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
          **/
         rankingOn = getConfig(RANKING_DIST_ON, "true").equals("true") && networkName.equals("freeworld");
         rankingOwnDistribution = new plasmaRankingDistribution(log, webIndex.seedDB, new File(rankingPath, getConfig(RANKING_DIST_0_PATH, plasmaRankingDistribution.CR_OWN)), (int) getConfigLong(RANKING_DIST_0_METHOD, plasmaRankingDistribution.METHOD_ANYSENIOR), (int) getConfigLong(RANKING_DIST_0_METHOD, 0), getConfig(RANKING_DIST_0_TARGET, ""));
-        rankingOtherDistribution = new plasmaRankingDistribution(log, webIndex.seedDB, new File(rankingPath, getConfig(RANKING_DIST_1_PATH, plasmaRankingDistribution.CR_OTHER)), (int) getConfigLong(RANKING_DIST_1_METHOD, plasmaRankingDistribution.METHOD_MIXEDSENIOR), (int) getConfigLong(RANKING_DIST_1_METHOD, 30), getConfig(RANKING_DIST_1_TARGET, "kaskelix.de:8080,yacy.dyndns.org:8000,suma-lab.de:8080"));
+        rankingOtherDistribution = new plasmaRankingDistribution(log, webIndex.seedDB, new File(rankingPath, getConfig(RANKING_DIST_1_PATH, plasmaRankingDistribution.CR_OTHER)), (int) getConfigLong(RANKING_DIST_1_METHOD, plasmaRankingDistribution.METHOD_MIXEDSENIOR), (int) getConfigLong(RANKING_DIST_1_METHOD, 30), getConfig(RANKING_DIST_1_TARGET, "kaskelix.de:8080,yacy.dyndns.org:8000"));
         
         // init facility DB
         /*

@@ -218,7 +218,7 @@ public final class plasmaSearchEvent {
                     if (url == null) continue;
                     //System.out.println("***DEBUG*** SEARCH RESULT URL=" + url.toNormalform(false, false));
                 
-                    resultEntry = obtainResultEntry(uentry, (snippetComputationAllTime < 100) ? 1 : 0);
+                    resultEntry = obtainResultEntry(uentry, 0 /*(snippetComputationAllTime < 100) ? 1 : 0*/);
                     if (resultEntry == null) continue; // the entry had some problems, cannot be used
                     urlRetrievalAllTime += resultEntry.dbRetrievalTime;
                     snippetComputationAllTime += resultEntry.snippetComputationTime;

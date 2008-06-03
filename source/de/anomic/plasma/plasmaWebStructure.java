@@ -47,8 +47,8 @@ public class plasmaWebStructure {
 
     public static int maxCRLDump = 500000;
     public static int maxCRGDump = 200000;
-    public static int maxref = 200; // maximum number of references, to avoid overflow when a large link farm occurs (i.e. wikipedia)
-    public static int maxhosts = 4000; // maximum number of hosts in web structure map
+    public static int maxref = 300; // maximum number of references, to avoid overflow when a large link farm occurs (i.e. wikipedia)
+    public static int maxhosts = 8000; // maximum number of hosts in web structure map
     
     private StringBuffer crg;     // global citation references
     private serverLog    log;
