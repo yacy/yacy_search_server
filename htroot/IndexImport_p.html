@@ -8,8 +8,11 @@
   <body id="IndexImport">
     #%env/templates/header.template%#
     #%env/templates/submenuIndexControl.template%#
-    <h2>Index DB Import</h2>
+<!--
+	<h2>Index DB Import</h2>
     <p>The local index currently consists of (at least) #[wcount]# reverse word indexes and #[ucount]# URL references.</p>
+//-->
+    <h2>Crawling Queue Import</h2>
     #(error)#<!-- 0 -->
       ::<!-- 1 -->
         <p class="error">#[error_msg]#</p>
