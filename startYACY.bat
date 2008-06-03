@@ -34,6 +34,8 @@ Echo **  GET HELP for YaCy: see www.yacy-websearch.net/wiki and forum.yacy.de   
 Echo *******************************************************************************
 Echo  ^>^> YaCy started as daemon process. Administration at http://localhost:%port% ^<^<
 
+title YaCy - http://localhost:%port%
+
 start "YaCy" %priority% /B /WAIT java %javacmd% -classpath %CLASSPATH% yacy
 
 if not exist DATA\yacy.restart GoTo :END
