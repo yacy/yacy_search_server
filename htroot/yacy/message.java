@@ -124,7 +124,7 @@ public final class message {
                 return prop;
             }
             //Date remoteTime = yacyCore.parseUniversalDate((String) post.get(yacySeed.MYTIME)); // read remote time
-            yacySeed otherSeed = yacySeed.genRemoteSeed(otherSeedString, key);
+            yacySeed otherSeed = yacySeed.genRemoteSeed(otherSeedString, key, false);
 
             String subject = crypt.simpleDecode(post.get("subject", ""), key); // message's subject
             String message = crypt.simpleDecode(post.get("message", ""), key); // message body

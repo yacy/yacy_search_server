@@ -306,7 +306,7 @@ public class WatchCrawler_p {
                                     // enqueuing the url for crawling
                                     sb.crawlStacker.enqueueEntry(
                                             nexturl, 
-                                            null, 
+                                            "", 
                                             sb.webIndex.seedDB.mySeed().hash, 
                                             (String) e.getValue(), 
                                             new Date(), 

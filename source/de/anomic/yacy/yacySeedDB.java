@@ -452,7 +452,7 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
     public long countPotentialRWI() { return seedPotentialDB.getLongAcc(yacySeed.ICOUNT); }
 
     public synchronized void addConnected(yacySeed seed) {
-        if ((seed == null) || (seed.isProper() != null)) return;
+        if ((seed == null) || (seed.isProper(false) != null)) return;
         //seed.put(yacySeed.LASTSEEN, yacyCore.shortFormatter.format(new Date(yacyCore.universalTime())));
         try {
             nameLookupCache.put(seed.getName(), seed);
@@ -506,7 +506,7 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
             seedActiveDB.remove(seed.hash);
             seedPassiveDB.remove(seed.hash);
         } catch (Exception e) {}
-    if (seed.isProper() != null) return;
+    if (seed.isProper(false) != null) return;
     //seed.put(yacySeed.LASTSEEN, yacyCore.shortFormatter.format(new Date(yacyCore.universalTime())));
         try {
             HashMap<String, String> seedPropMap = seed.getMap();
@@ -628,7 +628,7 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
         		seed = (yacySeed) e.next();
         		if (seed != null) {
         			name = seed.getName().toLowerCase();
-        			if (seed.isProper() == null) nameLookupCache.put(name, seed);
+        			if (seed.isProper(false) == null) nameLookupCache.put(name, seed);
         			if (name.equals(peerName)) return seed;
         		}
         	}
@@ -636,7 +636,7 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
         // check local seed
         if (this.mySeed == null) initMySeed();
         name = mySeed.getName().toLowerCase();
-        if (mySeed.isProper() == null) nameLookupCache.put(name, mySeed);
+        if (mySeed.isProper(false) == null) nameLookupCache.put(name, mySeed);
         if (name.equals(peerName)) return mySeed;
         // nothing found
         return null;
@@ -687,7 +687,7 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
                             addressStr = addressStr.substring(0,pos);
                         }
                         seedIPAddress = InetAddress.getByName(addressStr);
-                        if (seed.isProper() == null) ipLookupCache.put(seedIPAddress, new SoftReference<yacySeed>(seed));
+                        if (seed.isProper(false) == null) ipLookupCache.put(seedIPAddress, new SoftReference<yacySeed>(seed));
                         if (seedIPAddress.equals(peerIP)) return seed;
                     }
                 } catch (UnknownHostException ex) {}
@@ -716,7 +716,7 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
                             addressStr = addressStr.substring(0,pos);
                         }
                         seedIPAddress = InetAddress.getByName(addressStr);
-                        if (seed.isProper() == null) ipLookupCache.put(seedIPAddress, new SoftReference<yacySeed>(seed));
+                        if (seed.isProper(false) == null) ipLookupCache.put(seedIPAddress, new SoftReference<yacySeed>(seed));
                         if (seedIPAddress.equals(peerIP)) return seed;
                     }
                 } catch (UnknownHostException ex) {}
@@ -739,7 +739,7 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
                             addressStr = addressStr.substring(0,pos);
                         }
                         seedIPAddress = InetAddress.getByName(addressStr);
-                        if (seed.isProper() == null) ipLookupCache.put(seedIPAddress, new SoftReference<yacySeed>(seed));
+                        if (seed.isProper(false) == null) ipLookupCache.put(seedIPAddress, new SoftReference<yacySeed>(seed));
                         if (seedIPAddress.equals(peerIP)) return seed;
                     }
                 } catch (UnknownHostException ex) {}
@@ -755,7 +755,7 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
                 addressStr = addressStr.substring(0,pos);
             }
             seedIPAddress = InetAddress.getByName(addressStr);
-            if (mySeed.isProper() == null) ipLookupCache.put(seedIPAddress,  new SoftReference<yacySeed>(mySeed));
+            if (mySeed.isProper(false) == null) ipLookupCache.put(seedIPAddress,  new SoftReference<yacySeed>(mySeed));
             if (seedIPAddress.equals(peerIP)) return mySeed;
             // nothing found
             return null;

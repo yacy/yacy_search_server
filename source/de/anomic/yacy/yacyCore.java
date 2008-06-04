@@ -411,7 +411,7 @@ public class yacyCore {
 
                 final String address = seed.getClusterAddress();
                 log.logFine("HELLO #" + i + " to peer '" + seed.get(yacySeed.NAME, "") + "' at " + address); // debug
-                String seederror = seed.isProper();
+                String seederror = seed.isProper(false);
                 if ((address == null) || (seederror != null)) {
                     // we don't like that address, delete it
                     sb.webIndex.peerActions.peerDeparture(seed, "peer ping to peer resulted in address = " + address + "; seederror = " + seederror);
@@ -504,7 +504,7 @@ public class yacyCore {
             sb.webIndex.seedDB.saveMySeed();
 
             // if we have an address, we do nothing
-            if (sb.webIndex.seedDB.mySeed().isProper() == null && !force) { return 0; }
+            if (sb.webIndex.seedDB.mySeed().isProper(true) == null && !force) { return 0; }
             if (newSeeds > 0) return newSeeds;
             
             // still no success: ask own NAT or internet responder

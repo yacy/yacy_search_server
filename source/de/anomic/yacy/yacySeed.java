@@ -818,7 +818,7 @@ public class yacySeed {
         return hash;
     }
 
-    public static yacySeed genRemoteSeed(String seedStr, String key) {
+    public static yacySeed genRemoteSeed(String seedStr, String key, boolean ownSeed) {
         // this method is used to convert the external representation of a seed into a seed object
         // yacyCore.log.logFinest("genRemoteSeed: seedStr=" + seedStr + " key=" + key);
 
@@ -833,7 +833,7 @@ public class yacySeed {
         final yacySeed resultSeed = new yacySeed(hash, dna);
 
         // check semantics of content
-        final String testResult = resultSeed.isProper();
+        final String testResult = resultSeed.isProper(ownSeed);
         if (testResult != null) {
             yacyCore.log.logFinest("seed is not proper (" + testResult + "): " + resultSeed);
             return null;
@@ -843,7 +843,7 @@ public class yacySeed {
         return resultSeed;
     }
 
-    public final String isProper() {
+    public final String isProper(boolean checkOwnIP) {
         // checks if everything is ok with that seed
         
         // check hash
@@ -856,11 +856,14 @@ public class yacySeed {
         dna.put(yacySeed.NAME, checkPeerName(peerName));
         
         // check IP
-        final String ip = (String) this.dna.get(yacySeed.IP);
-        if (ip == null) return "IP is null";
-        if (ip.length() > 0 && ip.length() < 8) return "IP is too short: " + ip;
-        if (!natLib.isProper(ip)) return "IP is not proper: " + ip; //this does not work with staticIP
-        if (ip.equals("localhost") || ip.startsWith("127.") || (ip.startsWith("0:0:0:0:0:0:0:1"))) return "IP for localhost rejected";
+        if (!checkOwnIP) {
+            // checking of IP is omitted if we read the own seed file        
+            final String ip = (String) this.dna.get(yacySeed.IP);
+            if (ip == null) return "IP is null";
+            if (ip.length() > 0 && ip.length() < 8) return "IP is too short: " + ip;
+            if (!natLib.isProper(ip)) return "IP is not proper: " + ip; //this does not work with staticIP
+            if (ip.equals("localhost") || ip.startsWith("127.") || (ip.startsWith("0:0:0:0:0:0:0:1"))) return "IP for localhost rejected";
+        }
         
         // seedURL
         final String seedURL = this.dna.get(SEEDLIST);
@@ -911,7 +914,10 @@ public class yacySeed {
         final char[] b = new char[(int) f.length()];
         fr.read(b, 0, b.length);
         fr.close();
-        return genRemoteSeed(new String(b), null);
+        yacySeed mySeed = genRemoteSeed(new String(b), null, true);
+        if (mySeed == null) return null;
+        mySeed.dna.put(yacySeed.IP, ""); // set own IP as unknown
+        return mySeed;
     }
 
     @SuppressWarnings("unchecked")

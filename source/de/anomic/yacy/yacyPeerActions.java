@@ -82,7 +82,7 @@ public class yacyPeerActions {
             yacyCore.log.logSevere("connect: WRONG seed (NULL)");
             return false;
         }
-        final String error = seed.isProper();
+        final String error = seed.isProper(false);
         if (error != null) {
             yacyCore.log.logSevere("connect: WRONG seed (" + seed.getName() + "/" + seed.hash + "): " + error);
             return false;

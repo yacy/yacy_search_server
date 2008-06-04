@@ -2711,7 +2711,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
                         enu = seedList.iterator();
                         lc = 0;
                         while (enu.hasNext()) {
-                            ys = yacySeed.genRemoteSeed((String) enu.next(), null);
+                            ys = yacySeed.genRemoteSeed((String) enu.next(), null, false);
                             if ((ys != null) &&
                                 ((!webIndex.seedDB.mySeedIsDefined()) || (webIndex.seedDB.mySeed().hash != ys.hash))) {
                                 if (webIndex.peerActions.connectPeer(ys, false)) lc++;

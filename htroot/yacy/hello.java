@@ -86,12 +86,19 @@ public final class hello {
         int  count = 0;
         try {count = (countStr == null) ? 0 : Integer.parseInt(countStr);} catch (NumberFormatException e) {count = 0;}
 //      final Date remoteTime = yacyCore.parseUniversalDate((String) post.get(MYTIME)); // read remote time
+        final String clientip = (String) header.get(httpHeader.CONNECTION_PROP_CLIENTIP, "<unknown>"); // read an artificial header addendum
+        InetAddress ias = serverDomains.dnsResolve(clientip);
+        if (ias == null) {
+            prop.put("message", "cannot resolve your IP from your reported location " + clientip);
+            return prop;
+        }
         if (seed.length() > yacySeed.maxsize) {
         	yacyCore.log.logInfo("hello/server: rejected contacting seed; too large (" + seed.length() + " > " + yacySeed.maxsize + ")");
             prop.put("message", "your seed is too long (" + seed.length() + ")");
             return prop;
         }
-        final yacySeed remoteSeed = yacySeed.genRemoteSeed(seed, key);
+        final yacySeed remoteSeed = yacySeed.genRemoteSeed(seed, key, true);
+        remoteSeed.setIP(ias.toString());
 
 //      System.out.println("YACYHELLO: REMOTESEED=" + ((remoteSeed == null) ? "NULL" : remoteSeed.toString()));
         if ((remoteSeed == null) || (remoteSeed.hash == null)) {
@@ -104,12 +111,6 @@ public final class hello {
 //      if ((properTest != null) && (! properTest.substring(0,1).equals("IP"))) { return null; }
 
         // we easily know the caller's IP:
-        final String clientip = (String) header.get(httpHeader.CONNECTION_PROP_CLIENTIP, "<unknown>"); // read an artificial header addendum
-        InetAddress ias = serverDomains.dnsResolve(clientip);
-        if (ias == null) {
-            prop.put("message", "cannot resolve your IP from your reported location " + clientip);
-            return prop;
-        }
         final String userAgent = (String) header.get(httpHeader.USER_AGENT, "<unknown>");
         final String reportedip = remoteSeed.get(yacySeed.IP, "");
         final String reportedPeerType = remoteSeed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_JUNIOR);
@@ -178,7 +179,7 @@ public final class hello {
             remoteSeed.put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_JUNIOR);
             yacyCore.log.logInfo("hello: responded remote junior peer '" + remoteSeed.getName() + "' from " + reportedip);
             // no connection here, instead store junior in connection cache
-            if ((remoteSeed.hash != null) && (remoteSeed.isProper() == null)) {
+            if ((remoteSeed.hash != null) && (remoteSeed.isProper(false) == null)) {
                 sb.webIndex.peerActions.peerPing(remoteSeed);
             }
         }
@@ -212,7 +213,7 @@ public final class hello {
                 String seedString;
                 while (si.hasNext()) {
                 	s = si.next();
-                    if ((s != null) && (s.isProper() == null)) try {
+                    if ((s != null) && (s.isProper(false) == null)) try {
                         seedString = s.genSeedStr(key);
                         if (seedString != null) {
                             seeds.append("seed").append(count).append('=').append(seedString).append(serverCore.CRLF_STRING);

@@ -306,11 +306,10 @@ public class plasmaSnippetCache {
                 // download resource using the crawler and keep resource in memory if possible
                 plasmaHTCache.Entry entry = plasmaSwitchboard.getSwitchboard().crawlQueues.loadResourceFromWeb(url, timeout, true, true, reindexing);
                 
-                // place entry on crawl queue
-                plasmaHTCache.push(entry);
-                
                 // getting resource metadata (e.g. the http headers for http resources)
                 if (entry != null) {
+                    // place entry on crawl queue
+                    plasmaHTCache.push(entry);
                     resInfo = entry.getDocumentInfo();
                     
                     // read resource body (if it is there)

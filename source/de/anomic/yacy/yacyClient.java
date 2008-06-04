@@ -148,7 +148,7 @@ public final class yacyClient {
         	if (seed.length() > yacySeed.maxsize) {
             	yacyCore.log.logInfo("hello/client 0: rejected contacting seed; too large (" + seed.length() + " > " + yacySeed.maxsize + ")");
             } else {
-            	otherPeer = yacySeed.genRemoteSeed(seed, salt);
+            	otherPeer = yacySeed.genRemoteSeed(seed, salt, false);
             	if (otherPeer == null || !otherPeer.hash.equals(otherHash)) {
             		yacyCore.log.logFine("yacyClient.publishMySeed: consistency error: other peer '" + ((otherPeer==null)?"unknown":otherPeer.getName()) + "' wrong");
             		return -1; // no success
@@ -196,7 +196,7 @@ public final class yacyClient {
         if (mySeed.orVirgin().equals(yacySeed.PEERTYPE_VIRGIN))
             mySeed.put(yacySeed.PEERTYPE, mytype);
 
-        final String error = mySeed.isProper();
+        final String error = mySeed.isProper(true);
         if (error != null) {
             yacyCore.log.logSevere("yacyClient.publishMySeed mySeed error - not proper: " + error);
             return -1;
@@ -214,7 +214,7 @@ public final class yacyClient {
         	if (seedStr.length() > yacySeed.maxsize) {
             	yacyCore.log.logInfo("hello/client: rejected contacting seed; too large (" + seedStr.length() + " > " + yacySeed.maxsize + ")");
             } else {
-            	if (peerActions.peerArrival(yacySeed.genRemoteSeed(seedStr, salt), (i == 1))) count++;
+            	if (peerActions.peerArrival(yacySeed.genRemoteSeed(seedStr, salt, false), (i == 1))) count++;
             }
         }
         return count;
@@ -323,7 +323,7 @@ public final class yacyClient {
             
             if (result == null || result.size() == 0) { return null; }
             //final Date remoteTime = yacyCore.parseUniversalDate((String) result.get(yacySeed.MYTIME)); // read remote time
-            return yacySeed.genRemoteSeed((String) result.get("response"), salt);
+            return yacySeed.genRemoteSeed((String) result.get("response"), salt, false);
         } catch (Exception e) {
             yacyCore.log.logSevere("yacyClient.querySeed error:" + e.getMessage());
             return null;

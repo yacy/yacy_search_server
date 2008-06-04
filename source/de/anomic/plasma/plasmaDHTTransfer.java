@@ -92,6 +92,7 @@ public class plasmaDHTTransfer extends Thread {
         super(new ThreadGroup("TransferIndexThreadGroup"), "TransferIndexWorker_" + destSeed.getName());
         this.log = log;
         this.seedDB = seedDB;
+        this.peerActions = peerActions;
         this.gzipBody4Transfer = gzipBody;
         this.timeout4Transfer = timeout;
         this.dhtChunk = dhtChunk;

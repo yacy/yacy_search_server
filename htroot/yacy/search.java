@@ -150,7 +150,7 @@ public final class search {
         TreeSet<String> abstractSet = ((abstracts.length() == 0) || (abstracts.equals("auto"))) ? null : plasmaSearchQuery.hashes2Set(abstracts);
         
         // store accessing peer
-        yacySeed remoteSeed = yacySeed.genRemoteSeed(oseed, key);
+        yacySeed remoteSeed = yacySeed.genRemoteSeed(oseed, key, false);
         if (sb.webIndex.seedDB == null) {
             yacyCore.log.logSevere("yacy.search: seed cache not initialized");
         } else {
