@@ -38,7 +38,6 @@ import de.anomic.server.serverSwitch;
 import de.anomic.xml.RSSFeed;
 import de.anomic.xml.RSSMessage;
 import de.anomic.yacy.yacyClient;
-import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyURL;
 
@@ -106,7 +105,7 @@ public class rct_p {
         yacySeed seed;
         int hc = 0;
         if (sb.webIndex.seedDB != null && sb.webIndex.seedDB.sizeConnected() > 0) {
-            Iterator<yacySeed> e = yacyCore.peerActions.dhtAction.getProvidesRemoteCrawlURLs();
+            Iterator<yacySeed> e = sb.webIndex.peerActions.dhtAction.getProvidesRemoteCrawlURLs();
             while (e.hasNext()) {
                 seed = e.next();
                 if (seed != null) {

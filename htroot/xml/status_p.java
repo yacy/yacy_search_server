@@ -47,7 +47,6 @@ import de.anomic.server.serverMemory;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverProcessor;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyCore;
 
 public class status_p {
     
@@ -59,7 +58,7 @@ public class status_p {
         if (post == null || !post.containsKey("html"))
             prop.setLocalized(false);
         prop.put("rejected", "0");
-        yacyCore.peerActions.updateMySeed();
+        sb.updateMySeed();
         final int  cacheOutSize = sb.webIndex.dhtOutCacheSize();
         final long cacheMaxSize = sb.getConfigLong(plasmaSwitchboard.WORDCACHE_MAX_COUNT, 10000);
         prop.putNum("ppm", sb.webIndex.seedDB.mySeed().getPPM());

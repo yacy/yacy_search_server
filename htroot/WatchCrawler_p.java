@@ -105,13 +105,30 @@ public class WatchCrawler_p {
                 } else {
                     // set new properties
                     boolean fullDomain = post.get("range", "wide").equals("domain"); // special property in simple crawl start
+                    boolean subPath    = post.get("range", "wide").equals("subpath"); // special property in simple crawl start
                     
+                    String crawlingStart = post.get("crawlingURL","").trim(); // the crawljob start url
+
+                    // adding the prefix http:// if necessary
+                    int pos = crawlingStart.indexOf("://");
+                    if (pos == -1) crawlingStart = "http://" + crawlingStart;
+
+                    // normalizing URL
+                    yacyURL crawlingStartURL = null;
+                    try {crawlingStartURL = new yacyURL(crawlingStart, null);} catch (MalformedURLException e1) {}
+                    crawlingStart = (crawlingStartURL == null) ? null : crawlingStartURL.toNormalform(true, true);
+                    
+                    // set the crawling filter
                     String newcrawlingfilter = post.get("crawlingFilter", ".*");
                     if (newcrawlingfilter.length() < 2) newcrawlingfilter = ".*"; // avoid that all urls are filtered out if bad value was submitted
+                    
+                    if (crawlingStartURL!= null && fullDomain) {
+                        newcrawlingfilter = ".*" + crawlingStartURL.getHost() + ".*";
+                    }
+                    if (crawlingStart!= null && subPath && (pos = crawlingStart.lastIndexOf("/")) > 0) {
+                        newcrawlingfilter = crawlingStart.substring(0, pos + 1) + ".*";
+                    }
                     env.setConfig("crawlingFilter", newcrawlingfilter);
-                    if (fullDomain) try {
-                        newcrawlingfilter = ".*" + (new yacyURL(post.get("crawlingURL",""), null)).getHost() + ".*";
-                    } catch (MalformedURLException e) {}
                     
                     boolean crawlOrder = post.get("crawlOrder", "off").equals("on");
                     env.setConfig("crawlOrder", (crawlOrder) ? "true" : "false");
@@ -157,18 +174,6 @@ public class WatchCrawler_p {
                     
                     String crawlingMode = post.get("crawlingMode","url");
                     if (crawlingMode.equals(CRAWLING_MODE_URL)) {
-                        // getting the crawljob start url
-                        String crawlingStart = post.get("crawlingURL","");
-                        crawlingStart = crawlingStart.trim();
-                        
-                        // adding the prefix http:// if necessary
-                        int pos = crawlingStart.indexOf("://");
-                        if (pos == -1) crawlingStart = "http://" + crawlingStart;
-
-                        // normalizing URL
-                        yacyURL crawlingStartURL = null;
-                        try {crawlingStartURL = new yacyURL(crawlingStart, null);} catch (MalformedURLException e1) {}
-                        crawlingStart = (crawlingStartURL == null) ? null : crawlingStartURL.toNormalform(true, true);
                         
                         // check if pattern matches
                         if ((crawlingStart == null) /* || (!(crawlingStart.matches(newcrawlingfilter))) */) {

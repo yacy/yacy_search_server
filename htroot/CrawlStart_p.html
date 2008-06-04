@@ -16,7 +16,7 @@
     You can define URLs as start points for Web page crawling and start crawling here. "Crawling" means that YaCy will download the given website, extract all links in it and then download the content behind these links. This is repeated as long as specified under "Crawling Depth".
     </p>
     
-    <form action="WatchCrawler_p.html" method="post" enctype="multipart/form-data">
+    <form action="WatchCrawler_p.html" method="get" enctype="multipart/form-data">
       <table border="0" cellpadding="5" cellspacing="1">
         <tr class="TableHeader">
           <td><strong>Attribut</strong></td>
@@ -53,9 +53,8 @@
             </table>
           </td>
           <td colspan="3">
-            Existing start URLs are re-crawled.
-            Other already visited URLs are sorted out as "double".
-            A complete re-crawl will be available soon.
+            Existing start URLs are always re-crawled.
+            Other already visited URLs are sorted out as "double", if they are not allowed using the re-crawl option.
           </td>
         </tr>
         <tr valign="top" class="TableCellLight">
@@ -72,9 +71,10 @@
         <tr valign="top" class="TableCellDark">
           <td><label for="crawlingFilter">Crawling Filter</label>:</td>
           <td>
-			<input name="crawlingFilter" id="crawlingFilter" type="text" size="20" maxlength="100" value="#[crawlingFilter]#" />
-			<input type="radio" name="range" value="wide" checked="checked" />Use filter&nbsp;&nbsp;|&nbsp;&nbsp;
-			<input type="radio" name="range" value="domain" />Restrict to start domain
+			<input type="radio" name="range" value="wide" checked="checked" />Use filter&nbsp;&nbsp;
+			<input name="crawlingFilter" id="crawlingFilter" type="text" size="20" maxlength="100" value="#[crawlingFilter]#" /><br />
+			<input type="radio" name="range" value="domain" />Restrict to start domain<br />
+			<input type="radio" name="range" value="subpath" />Restrict to sub-path
 		  </td>
           <td>
             The filter is an emacs-like regular expression that must match with the URLs which are used to be crawled; default is 'catch all'.

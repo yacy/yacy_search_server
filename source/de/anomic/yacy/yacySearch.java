@@ -165,7 +165,7 @@ public class yacySearch extends Thread {
     	//return (yacySeed[]) l.toArray();
     }
     
-    private static yacySeed[] selectSearchTargets(yacySeedDB seedDB, Set<String> wordhashes, int seedcount) {
+    private static yacySeed[] selectSearchTargets(yacySeedDB seedDB, yacyPeerActions peerActions, Set<String> wordhashes, int seedcount) {
         // find out a specific number of seeds, that would be relevant for the given word hash(es)
         // the result is ordered by relevance: [0] is most relevant
         // the seedcount is the maximum number of wanted results
@@ -185,7 +185,7 @@ public class yacySearch extends Thread {
         Iterator<String> iter = wordhashes.iterator();
         while (iter.hasNext()) {
             wordhash = iter.next();
-            dhtEnum = yacyCore.peerActions.dhtAction.getDHTSeeds(true, wordhash, (float) 0.0);
+            dhtEnum = peerActions.dhtAction.getDHTSeeds(true, wordhash, (float) 0.0);
             c = seedcount;
             while (dhtEnum.hasNext() && c > 0) {
                 seed = (yacySeed) dhtEnum.next();
@@ -265,7 +265,7 @@ public class yacySearch extends Thread {
         if (wordIndex.seedDB.mySeed() == null || wordIndex.seedDB.mySeed().getPublicAddress() == null) { return null; }
 
         // prepare seed targets and threads
-        final yacySeed[] targetPeers = (clusterselection == null) ? selectSearchTargets(wordIndex.seedDB, plasmaSearchQuery.hashes2Set(wordhashes), targets) : selectClusterPeers(wordIndex.seedDB, clusterselection);
+        final yacySeed[] targetPeers = (clusterselection == null) ? selectSearchTargets(wordIndex.seedDB, wordIndex.peerActions, plasmaSearchQuery.hashes2Set(wordhashes), targets) : selectClusterPeers(wordIndex.seedDB, clusterselection);
         if (targetPeers == null) return new yacySearch[0];
         targets = targetPeers.length;
         if (targets == 0) return new yacySearch[0];

@@ -1,8 +1,7 @@
 <div class="SubMenu">
   <h3>Start a Web Crawl</h3>
     <ul class="SubMenu">
-      <li><a href="/CrawlStartSimple_p.html" class="MenuItemLink lock">Crawl Start (easy)</a></li>
-      <li><a href="/CrawlStartExpert_p.html" class="MenuItemLink lock">Crawl Start (expert)</a></li>
+      <li><a href="/CrawlStart_p.html" class="MenuItemLink lock">Crawl Start</a></li>
       <li><a href="/CrawlProfileEditor_p.html" class="MenuItemLink lock">Crawl Profile Editor</a></li>
       <li><a href="/WatchCrawler_p.html" class="MenuItemLink lock">Crawler Queues</a></li>
     </ul>

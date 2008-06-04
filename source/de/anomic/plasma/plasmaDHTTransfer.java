@@ -46,7 +46,7 @@ import java.util.HashMap;
 
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyClient;
-import de.anomic.yacy.yacyCore;
+import de.anomic.yacy.yacyPeerActions;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacySeedDB;
 
@@ -74,6 +74,7 @@ public class plasmaDHTTransfer extends Thread {
 
     // other fields
     private yacySeedDB seedDB;
+    private yacyPeerActions peerActions;
     private int maxRetry;
     private int transferMode = TRANSFER_MODE_DISTRIBUTION;
     serverLog log;
@@ -81,6 +82,7 @@ public class plasmaDHTTransfer extends Thread {
     public plasmaDHTTransfer(
             serverLog log,
             yacySeedDB seedDB,
+            yacyPeerActions peerActions,
             yacySeed destSeed, 
             plasmaDHTChunk dhtChunk, 
             boolean gzipBody, 
@@ -209,7 +211,7 @@ public class plasmaDHTTransfer extends Thread {
                 this.transferStatusMessage = "Transfer to peer " + this.seed.getName() + ":" + this.seed.hash + " failed:'" + error + "', Trying to reconnect ...";
                 
                 // force disconnection of peer
-                yacyCore.peerActions.peerDeparture(this.seed, "DHT Transfer: " + this.transferStatusMessage);
+                peerActions.peerDeparture(this.seed, "DHT Transfer: " + this.transferStatusMessage);
                 this.log.logWarning(this.transferStatusMessage);
                 
                 // calculate pause time
@@ -240,7 +242,7 @@ public class plasmaDHTTransfer extends Thread {
                         return;
 
                     // doing a peer ping to the remote seed
-                    int added = yacyClient.publishMySeed(this.seedDB.mySeed(), this.seed.getPublicAddress(), this.seed.hash);
+                    int added = yacyClient.publishMySeed(this.seedDB.mySeed(), this.peerActions, this.seed.getPublicAddress(), this.seed.hash);
                     if (added < 0) {
                         // inc. retry counter
                         retryCount++;

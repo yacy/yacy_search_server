@@ -179,6 +179,11 @@ public final class CrawlStacker extends Thread {
         }
     }
     
+    public void clear() throws IOException {
+        this.urlEntryHashCache.clear();
+        this.urlEntryCache.clear();
+    }
+    
     public void close() {
         if (this.dbtype == QUEUE_DB_TYPE_RAM) {
             this.log.logInfo("Shutdown. Flushing remaining " + size() + " crawl stacker job entries. please wait.");

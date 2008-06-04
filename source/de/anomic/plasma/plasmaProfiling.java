@@ -29,29 +29,14 @@ package de.anomic.plasma;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 
-import de.anomic.crawler.IndexingStack;
 import de.anomic.server.serverProfiling;
 import de.anomic.server.serverProfiling.Event;
-import de.anomic.yacy.yacyCore;
-import de.anomic.yacy.yacySeed;
 import de.anomic.ymage.ymageChart;
 import de.anomic.ymage.ymageMatrix;
 
 public class plasmaProfiling {
     
     private static ymageChart bufferChart = null;
-
-    public static long lastPPMUpdate = System.currentTimeMillis()- 30000;
-
-    public static void updateIndexedPage(yacySeed mySeed, IndexingStack.QueueEntry entry) {
-        if (System.currentTimeMillis() - lastPPMUpdate > 30000) {
-            // we don't want to do this too often
-            yacyCore.peerActions.updateMySeed();
-            serverProfiling.update("ppm", new Long(mySeed.getPPM()));
-            lastPPMUpdate = System.currentTimeMillis();
-        }
-        serverProfiling.update("indexed", entry.url().toNormalform(true, false));
-    }
     
     public static long maxPayload(String eventname, long min) {
     	Iterator<Event> i = serverProfiling.history(eventname);

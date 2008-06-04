@@ -82,6 +82,11 @@ public class ZURL {
         return urlIndex.size() ;
     }
     
+    public void clear() throws IOException {
+        urlIndex.clear();
+        stack.clear();
+    }
+
     public void close() {
         if (urlIndex != null) {
             urlIndex.close();

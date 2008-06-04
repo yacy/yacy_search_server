@@ -76,6 +76,11 @@ public class yacyDHTAction {
         }
     }
    
+    public void close() {
+        // the seedDB should be cleared elsewhere
+        seedCrawlReady = null;
+    }
+    
     public Iterator<yacySeed> getDHTSeeds(boolean up, String firstHash, float minVersion) {
         // enumerates seed-type objects: all seeds with starting point in the middle, rotating at the end/beginning
         return new seedDHTEnum(up, firstHash, minVersion);

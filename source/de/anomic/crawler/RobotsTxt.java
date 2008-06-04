@@ -80,6 +80,10 @@ public class RobotsTxt {
         robotsTable = new kelondroMapObjects(new kelondroDyn(robotsTableFile, true, true, 256, 512, '_', kelondroNaturalOrder.naturalOrder, false, false, true), 100);
     }
     
+    public void clear() throws IOException {
+        this.robotsTable.clear();
+    }
+    
     public void close() {
         this.robotsTable.close();
     }

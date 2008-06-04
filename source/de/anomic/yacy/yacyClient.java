@@ -91,7 +91,7 @@ import de.anomic.xml.RSSReader;
 
 public final class yacyClient {
 
-    public static int publishMySeed(yacySeed mySeed, String address, String otherHash) {
+    public static int publishMySeed(yacySeed mySeed, yacyPeerActions peerActions, String address, String otherHash) {
         // this is called to enrich the seed information by
         // - own address (if peer is behind a nat/router)
         // - check peer type (virgin/junior/senior/principal)
@@ -214,7 +214,7 @@ public final class yacyClient {
         	if (seedStr.length() > yacySeed.maxsize) {
             	yacyCore.log.logInfo("hello/client: rejected contacting seed; too large (" + seedStr.length() + " > " + yacySeed.maxsize + ")");
             } else {
-            	if (yacyCore.peerActions.peerArrival(yacySeed.genRemoteSeed(seedStr, salt), (i == 1))) count++;
+            	if (peerActions.peerArrival(yacySeed.genRemoteSeed(seedStr, salt), (i == 1))) count++;
             }
         }
         return count;
@@ -1075,7 +1075,7 @@ public final class yacyClient {
         try {
             final plasmaSwitchboard sb = new plasmaSwitchboard(new File(args[0]), "httpProxy.init", "DATA/SETTINGS/yacy.conf", false);
             /*final yacyCore core =*/ new yacyCore(sb);
-            yacyCore.peerActions.loadSeedLists();
+            sb.loadSeedLists();
             final yacySeed target = sb.webIndex.seedDB.getConnected(args[1]);
             final String wordhashe = indexWord.word2hash("test");
             //System.out.println("permission=" + permissionMessage(args[1]));

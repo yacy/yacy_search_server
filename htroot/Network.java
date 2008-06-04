@@ -63,7 +63,6 @@ import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyClient;
-import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacyNewsRecord;
 import de.anomic.yacy.yacySeed;
@@ -109,7 +108,7 @@ public class Network {
             yacySeed seed = sb.webIndex.seedDB.mySeed();
             if (sb.webIndex.seedDB.mySeed() != null){ //our Peer
                 // update seed info
-                yacyCore.peerActions.updateMySeed();
+                sb.updateMySeed();
                 
                 long LCount;
                 long ICount;
@@ -213,8 +212,8 @@ public class Network {
                 map.put(yacySeed.PORT,post.get("peerPort"));
                 yacySeed peer = new yacySeed(post.get("peerHash"),map);
 
-                yacyCore.peerActions.updateMySeed();
-                final int added = yacyClient.publishMySeed(sb.webIndex.seedDB.mySeed(), peer.getPublicAddress(), peer.hash);
+                sb.updateMySeed();
+                final int added = yacyClient.publishMySeed(sb.webIndex.seedDB.mySeed(), sb.webIndex.peerActions, peer.getPublicAddress(), peer.hash);
 
                 if (added <= 0) {
                     prop.put("table_comment",1);
@@ -261,7 +260,7 @@ public class Network {
                 } else {
                     // add temporary the own seed to the database
                     if (iAmActive) {
-                        yacyCore.peerActions.updateMySeed();
+                        sb.updateMySeed();
                         sb.webIndex.seedDB.addConnected(sb.webIndex.seedDB.mySeed());
                     }
 
@@ -379,7 +378,7 @@ public class Network {
                                 userAgent = httpClient.getUserAgent();
                                 location = HttpClient.generateLocation();
                             } else {
-                               userAgent = yacyCore.peerActions.getUserAgent(seed.getIP());
+                               userAgent = sb.webIndex.peerActions.getUserAgent(seed.getIP());
                                location = parseLocationInUserAgent(userAgent);
                             }
                             prop.put(STR_TABLE_LIST + conCount + "_location", location);

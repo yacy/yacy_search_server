@@ -83,7 +83,6 @@ public class yacyCore {
     // statics
     public static final ThreadGroup publishThreadGroup = new ThreadGroup("publishThreadGroup");
     public static final HashMap<String, String> seedUploadMethods = new HashMap<String, String>();
-    public static yacyPeerActions peerActions = null;
     public static final serverLog log = new serverLog("YACY");
     public static long lastOnlineTime = 0;
     /** pseudo-random key derived from a time-interval while YaCy startup*/
@@ -120,9 +119,6 @@ public class yacyCore {
         peernews.addMessage(new RSSMessage("YaCy started", "", ""));
 
         loadSeedUploadMethods();
-
-        // deploy peer actions
-        peerActions = new yacyPeerActions(sb.webIndex.seedDB, sb);
 
         log.logConfig("CORE INITIALIZED");
         // ATTENTION, VERY IMPORTANT: before starting the thread, the httpd yacy server must be running!
@@ -225,12 +221,12 @@ public class yacyCore {
         }
 
         // before publishing, update some seed data
-        peerActions.updateMySeed();
+        sb.updateMySeed();
 
         // publish own seed to other peer, this can every peer, but makes only sense for senior peers
         if (sb.webIndex.seedDB.sizeConnected() == 0) {
             // reload the seed lists
-            peerActions.loadSeedLists();
+            sb.loadSeedLists();
             log.logInfo("re-initialized seed list. received " + sb.webIndex.seedDB.sizeConnected() + " new peer(s)");
         }
         final int newSeeds = publishMySeed(false);
@@ -273,12 +269,12 @@ public class yacyCore {
 
         public final void run() {
             try {
-                this.added = yacyClient.publishMySeed(sb.webIndex.seedDB.mySeed(), seed.getClusterAddress(), seed.hash);
+                this.added = yacyClient.publishMySeed(sb.webIndex.seedDB.mySeed(), sb.webIndex.peerActions, seed.getClusterAddress(), seed.hash);
                 if (this.added < 0) {
                     // no or wrong response, delete that address
                     String cause = "peer ping to peer resulted in error response (added < 0)";
                     log.logInfo("publish: disconnected " + this.seed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR) + " peer '" + this.seed.getName() + "' from " + this.seed.getPublicAddress() + ": " + cause);
-                    peerActions.peerDeparture(this.seed, cause);
+                    sb.webIndex.peerActions.peerDeparture(this.seed, cause);
                 } else {
                     // success! we have published our peer to a senior peer
                     // update latest news from the other peer
@@ -293,14 +289,14 @@ public class yacyCore {
                                     " peer '" + this.seed.getName() + "' at " + this.seed.getPublicAddress() + " with old LastSeen: '" +
                                     serverDate.formatShortSecond(new Date(newSeed.getLastSeenUTC())) + "'");
                                 newSeed.setLastSeenUTC();
-                                peerActions.peerArrival(newSeed, true);
+                                sb.webIndex.peerActions.peerArrival(newSeed, true);
                             } else {
                                 log.logFine("publish: recently handshaked " + this.seed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR) +
                                     " peer '" + this.seed.getName() + "' at " + this.seed.getPublicAddress() + " with old LastSeen: '" +
                                     serverDate.formatShortSecond(new Date(newSeed.getLastSeenUTC())) + "', this is more recent: '" +
                                     serverDate.formatShortSecond(new Date(this.seed.getLastSeenUTC())) + "'");
                                 this.seed.setLastSeenUTC();
-                                peerActions.peerArrival(this.seed, true);
+                                sb.webIndex.peerActions.peerArrival(this.seed, true);
                             }
                         }
                     } else {
@@ -418,7 +414,7 @@ public class yacyCore {
                 String seederror = seed.isProper();
                 if ((address == null) || (seederror != null)) {
                     // we don't like that address, delete it
-                    peerActions.peerDeparture(seed, "peer ping to peer resulted in address = " + address + "; seederror = " + seederror);
+                    sb.webIndex.peerActions.peerDeparture(seed, "peer ping to peer resulted in address = " + address + "; seederror = " + seederror);
                     sync.P();
                 } else {
                     // starting a new publisher thread

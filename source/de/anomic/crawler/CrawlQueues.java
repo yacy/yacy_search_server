@@ -46,7 +46,6 @@ import de.anomic.server.logging.serverLog;
 import de.anomic.xml.RSSFeed;
 import de.anomic.xml.RSSMessage;
 import de.anomic.yacy.yacyClient;
-import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyURL;
 
@@ -113,6 +112,27 @@ public class CrawlQueues {
             if (w.entry.url().hash().equals(urlhash)) return w.entry.url();
         }
         return null;
+    }
+    
+    public void clear() {
+        // wait for all workers to finish
+        for (crawlWorker w: workers.values()) {
+            w.interrupt();
+        }
+        // TODO: wait some more time until all threads are finished
+        workers.clear();
+        remoteCrawlProviderHashes.clear();
+        noticeURL.clear();
+        try {
+            errorURL.clear();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            delegatedURL.clear();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
     
     public void close() {
@@ -263,7 +283,7 @@ public class CrawlQueues {
             (remoteTriggeredCrawlJobSize() == 0) &&
             (sb.queueSize() < 10)) {
             if (sb.webIndex.seedDB != null && sb.webIndex.seedDB.sizeConnected() > 0) {
-                Iterator<yacySeed> e = yacyCore.peerActions.dhtAction.getProvidesRemoteCrawlURLs();
+                Iterator<yacySeed> e = sb.webIndex.peerActions.dhtAction.getProvidesRemoteCrawlURLs();
                 while (e.hasNext()) {
                     seed = e.next();
                     if (seed != null) {

@@ -61,7 +61,6 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverProcessor;
 import de.anomic.server.serverSwitch;
 import de.anomic.tools.yFormatter;
-import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyVersion;
 
@@ -119,7 +118,7 @@ public class Status {
         }
         
         // update seed info
-        yacyCore.peerActions.updateMySeed();
+        sb.updateMySeed();
 
         boolean adminaccess = sb.adminAuthenticated(header) >= 2;
         if (adminaccess) {
@@ -194,10 +193,7 @@ public class Status {
             prop.putNum("peerStatistics_queriesperhour", Math.round(6000d * sb.webIndex.seedDB.mySeed().getQPM()) / 100d);
             prop.putNum("peerStatistics_links", sb.webIndex.seedDB.mySeed().getLinkCount());
             prop.put("peerStatistics_words", yFormatter.number(sb.webIndex.seedDB.mySeed().get(yacySeed.ICOUNT, "0")));
-            prop.putNum("peerStatistics_juniorConnects", yacyCore.peerActions.juniorConnects);
-            prop.putNum("peerStatistics_seniorConnects", yacyCore.peerActions.seniorConnects);
-            prop.putNum("peerStatistics_principalConnects", yacyCore.peerActions.principalConnects);
-            prop.putNum("peerStatistics_disconnects", yacyCore.peerActions.disconnects);
+            prop.putNum("peerStatistics_disconnects", sb.webIndex.peerActions.disconnects);
             prop.put("peerStatistics_connects", yFormatter.number(sb.webIndex.seedDB.mySeed().get(yacySeed.CCOUNT, "0")));
             thisHash = sb.webIndex.seedDB.mySeed().hash;
             if (sb.webIndex.seedDB.mySeed().getPublicAddress() == null) {

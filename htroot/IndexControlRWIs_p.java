@@ -108,6 +108,17 @@ public class IndexControlRWIs_p {
             // delete everything
             if (post.containsKey("deletecomplete")) {
                 sb.webIndex.clear();
+                sb.crawlQueues.clear();
+                try {
+                    sb.crawlStacker.clear();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                try {
+                    plasmaSwitchboard.robots.clear();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
                 post.remove("deletecomplete");
             }
     
@@ -309,7 +320,7 @@ public class IndexControlRWIs_p {
                 sb.webIndex.removeEntries(keyhash, urlHashes);
             }
         
-            if (prop.getInt("searchresult", 0) == 3) plasmaSearchAPI.listHosts(prop, keyhash);
+            if (prop.getInt("searchresult", 0) == 3) plasmaSearchAPI.listHosts(prop, keyhash, sb.webIndex.peerActions);
         }
         
 

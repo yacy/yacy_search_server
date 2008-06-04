@@ -77,13 +77,18 @@ public class NoticedURL {
     //private kelondroStack musicStack;     // links pointing to music resources
 
     public NoticedURL(File cachePath) {
-        super();
         coreStack = new Balancer(cachePath, "urlNoticeCoreStack", false);
         limitStack = new Balancer(cachePath, "urlNoticeLimitStack", false);
         //overhangStack = new plasmaCrawlBalancer(overhangStackFile);
         remoteStack = new Balancer(cachePath, "urlNoticeRemoteStack", false);
     }
 
+    public void clear() {
+        coreStack.clear();
+        limitStack.clear();
+        remoteStack.clear();
+    }
+    
     public void close() {
         if (coreStack != null) {
             coreStack.close();

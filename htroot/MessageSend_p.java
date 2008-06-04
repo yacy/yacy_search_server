@@ -54,7 +54,6 @@ import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyClient;
-import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 
 public class MessageSend_p {
@@ -108,7 +107,7 @@ public class MessageSend_p {
                 prop.put("mode_permission", "0");
 
                 if (targetPeer != null) {
-                    yacyCore.peerActions.peerDeparture(targetPeer, "peer responded upon message send request: " + response);
+                    sb.webIndex.peerActions.peerDeparture(targetPeer, "peer responded upon message send request: " + response);
                 }
             } else {
                 prop.put("mode_permission", "1");

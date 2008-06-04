@@ -150,6 +150,7 @@ import de.anomic.server.serverAbstractSwitch;
 import de.anomic.server.serverBusyThread;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverCore;
+import de.anomic.server.serverDate;
 import de.anomic.server.serverDomains;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverInstantBusyThread;
@@ -178,7 +179,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     public static int xstackCrawlSlots      = 2000;
     
     private int       dhtTransferIndexCount = 100;    
-    
+    public static long lastPPMUpdate = System.currentTimeMillis()- 30000;
+
     // we must distinguish the following cases: resource-load was initiated by
     // 1) global crawling: the index is extern, not here (not possible here)
     // 2) result of search queries, some indexes are here (not possible here)
@@ -867,7 +869,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         // start yacy core
         log.logConfig("Starting YaCy Protocol Core");
         this.yc = new yacyCore(this);
-        serverInstantBusyThread.oneTimeJob(yacyCore.peerActions, "loadSeedLists", yacyCore.log, 0);
+        serverInstantBusyThread.oneTimeJob(this, "loadSeedLists", yacyCore.log, 0);
         long startedSeedListAquisition = System.currentTimeMillis();
         
         // set up local robots.txt
@@ -1258,6 +1260,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         if (!rcp) pauseCrawlJob(CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
         // trigger online caution
         proxyLastAccess = System.currentTimeMillis() + 10000; // at least 10 seconds online caution to prevent unnecessary action on database meanwhile
+        // clean search events which have cached relations to the old index
+        plasmaSearchEvent.cleanupEvents(true);
         // switch the networks
         synchronized (this.webIndex) {
             this.webIndex.close();
@@ -2206,7 +2210,13 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         indexedPages++;
         
         // update profiling info
-        plasmaProfiling.updateIndexedPage(webIndex.seedDB.mySeed(), queueEntry);
+        if (System.currentTimeMillis() - lastPPMUpdate > 30000) {
+            // we don't want to do this too often
+            updateMySeed();
+            serverProfiling.update("ppm", new Long(webIndex.seedDB.mySeed().getPPM()));
+            lastPPMUpdate = System.currentTimeMillis();
+        }
+        serverProfiling.update("indexed", queueEntry.url().toNormalform(true, false));
         
         // if this was performed for a remote crawl request, notify requester
         yacySeed initiatorPeer = queueEntry.initiatorPeer();
@@ -2511,7 +2521,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         try {
             // find a list of DHT-peers
             double maxDist = 0.2;
-            ArrayList<yacySeed> seeds = yacyCore.peerActions.dhtAction.getDHTTargets(webIndex.seedDB, log, peerCount, Math.min(8, (int) (this.webIndex.seedDB.sizeConnected() * maxDist)), dhtChunk.firstContainer().getWordHash(), dhtChunk.lastContainer().getWordHash(), maxDist);
+            ArrayList<yacySeed> seeds = webIndex.peerActions.dhtAction.getDHTTargets(webIndex.seedDB, log, peerCount, Math.min(8, (int) (this.webIndex.seedDB.sizeConnected() * maxDist)), dhtChunk.firstContainer().getWordHash(), dhtChunk.lastContainer().getWordHash(), maxDist);
             if (seeds.size() < peerCount) {
                 log.logWarning("found not enough (" + seeds.size() + ") peers for distribution for dhtchunk [" + dhtChunk.firstContainer().getWordHash() + " .. " + dhtChunk.lastContainer().getWordHash() + "]");
                 return false;
@@ -2537,7 +2547,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
                     checkInterruption();
                                         
                     if (seedIter.hasNext()) {
-                        plasmaDHTTransfer t = new plasmaDHTTransfer(log, webIndex.seedDB, (yacySeed)seedIter.next(), dhtChunk,gzipBody,timeout,retries);
+                        plasmaDHTTransfer t = new plasmaDHTTransfer(log, webIndex.seedDB, webIndex.peerActions, (yacySeed)seedIter.next(), dhtChunk,gzipBody,timeout,retries);
                         t.start();
                         transfer.add(t);
                     } else {
@@ -2607,6 +2617,122 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         ee.store();
         // push it onto the stack
         crawlQueues.errorURL.push(ee);
+    }
+    
+    public void updateMySeed() {
+        if (getConfig("peerName", "anomic").equals("anomic")) {
+            // generate new peer name
+            setConfig("peerName", yacySeed.makeDefaultPeerName());
+        }
+        webIndex.seedDB.mySeed().put(yacySeed.NAME, getConfig("peerName", "nameless"));
+        webIndex.seedDB.mySeed().put(yacySeed.PORT, Integer.toString(serverCore.getPortNr(getConfig("port", "8080"))));
+        
+        long uptime = (System.currentTimeMillis() - serverCore.startupTime) / 1000;
+        long uptimediff = uptime - lastseedcheckuptime;
+        long indexedcdiff = indexedPages - lastindexedPages;
+        //double requestcdiff = requestedQueries - lastrequestedQueries;
+        if (uptimediff > 300 || uptimediff <= 0 || lastseedcheckuptime == -1 ) {
+            lastseedcheckuptime = uptime;
+            lastindexedPages = indexedPages;
+            lastrequestedQueries = requestedQueries;
+        }
+        
+        //the speed of indexing (pages/minute) of the peer
+        totalPPM = (int) (indexedPages * 60 / Math.max(uptime, 1));
+        webIndex.seedDB.mySeed().put(yacySeed.ISPEED, Long.toString(Math.round(Math.max((float) indexedcdiff, 0f) * 60f / Math.max((float) uptimediff, 1f))));
+        totalQPM = requestedQueries * 60d / Math.max((double) uptime, 1d);
+        webIndex.seedDB.mySeed().put(yacySeed.RSPEED, Double.toString(totalQPM /*Math.max((float) requestcdiff, 0f) * 60f / Math.max((float) uptimediff, 1f)*/ ));
+        
+        webIndex.seedDB.mySeed().put(yacySeed.UPTIME, Long.toString(uptime/60)); // the number of minutes that the peer is up in minutes/day (moving average MA30)
+        webIndex.seedDB.mySeed().put(yacySeed.LCOUNT, Integer.toString(webIndex.countURL())); // the number of links that the peer has stored (LURL's)
+        webIndex.seedDB.mySeed().put(yacySeed.NCOUNT, Integer.toString(crawlQueues.noticeURL.size())); // the number of links that the peer has noticed, but not loaded (NURL's)
+        webIndex.seedDB.mySeed().put(yacySeed.RCOUNT, Integer.toString(crawlQueues.noticeURL.stackSize(NoticedURL.STACK_TYPE_LIMIT))); // the number of links that the peer provides for remote crawling (ZURL's)
+        webIndex.seedDB.mySeed().put(yacySeed.ICOUNT, Integer.toString(webIndex.size())); // the minimum number of words that the peer has indexed (as it says)
+        webIndex.seedDB.mySeed().put(yacySeed.SCOUNT, Integer.toString(webIndex.seedDB.sizeConnected())); // the number of seeds that the peer has stored
+        webIndex.seedDB.mySeed().put(yacySeed.CCOUNT, Double.toString(((int) ((webIndex.seedDB.sizeConnected() + webIndex.seedDB.sizeDisconnected() + webIndex.seedDB.sizePotential()) * 60.0 / (uptime + 1.01)) * 100) / 100.0)); // the number of clients that the peer connects (as connects/hour)
+        webIndex.seedDB.mySeed().put(yacySeed.VERSION, getConfig("version", ""));
+        webIndex.seedDB.mySeed().setFlagDirectConnect(true);
+        webIndex.seedDB.mySeed().setLastSeenUTC();
+        webIndex.seedDB.mySeed().put(yacySeed.UTC, serverDate.UTCDiffString());
+        webIndex.seedDB.mySeed().setFlagAcceptRemoteCrawl(getConfig("crawlResponse", "").equals("true"));
+        webIndex.seedDB.mySeed().setFlagAcceptRemoteIndex(getConfig("allowReceiveIndex", "").equals("true"));
+        //mySeed.setFlagAcceptRemoteIndex(true);
+    }
+
+    public void loadSeedLists() {
+        // uses the superseed to initialize the database with known seeds
+        
+        yacySeed          ys;
+        String            seedListFileURL;
+        yacyURL           url;
+        ArrayList<String> seedList;
+        Iterator<String>  enu;
+        int               lc;
+        int               sc = webIndex.seedDB.sizeConnected();
+        httpHeader        header;
+        
+        yacyCore.log.logInfo("BOOTSTRAP: " + sc + " seeds known from previous run");
+        
+        // - use the superseed to further fill up the seedDB
+        int ssc = 0, c = 0;
+        while (true) {
+            if (Thread.currentThread().isInterrupted()) break;
+            seedListFileURL = sb.getConfig("network.unit.bootstrap.seedlist" + c, "");
+            if (seedListFileURL.length() == 0) break;
+            c++;
+            if (
+                    seedListFileURL.startsWith("http://") || 
+                    seedListFileURL.startsWith("https://")
+            ) {
+                // load the seed list
+                try {
+                    httpHeader reqHeader = new httpHeader();
+                    reqHeader.put(httpHeader.PRAGMA,"no-cache");
+                    reqHeader.put(httpHeader.CACHE_CONTROL,"no-cache");
+                    
+                    url = new yacyURL(seedListFileURL, null);
+                    long start = System.currentTimeMillis();
+                    header = HttpClient.whead(url.toString(), reqHeader); 
+                    long loadtime = System.currentTimeMillis() - start;
+                    if (header == null) {
+                        if (loadtime > getConfigLong("bootstrapLoadTimeout", 6000)) {
+                            yacyCore.log.logWarning("BOOTSTRAP: seed-list URL " + seedListFileURL + " not available, time-out after " + loadtime + " milliseconds");
+                        } else {
+                            yacyCore.log.logWarning("BOOTSTRAP: seed-list URL " + seedListFileURL + " not available, no content");
+                        }
+                    } else if (header.lastModified() == null) {
+                        yacyCore.log.logWarning("BOOTSTRAP: seed-list URL " + seedListFileURL + " not usable, last-modified is missing");
+                    } else if ((header.age() > 86400000) && (ssc > 0)) {
+                        yacyCore.log.logInfo("BOOTSTRAP: seed-list URL " + seedListFileURL + " too old (" + (header.age() / 86400000) + " days)");
+                    } else {
+                        ssc++;
+                        final byte[] content = HttpClient.wget(url.toString(), reqHeader, null, (int) getConfigLong("bootstrapLoadTimeout", 6000));
+                        seedList = nxTools.strings(content, "UTF-8");
+                        enu = seedList.iterator();
+                        lc = 0;
+                        while (enu.hasNext()) {
+                            ys = yacySeed.genRemoteSeed((String) enu.next(), null);
+                            if ((ys != null) &&
+                                ((!webIndex.seedDB.mySeedIsDefined()) || (webIndex.seedDB.mySeed().hash != ys.hash))) {
+                                if (webIndex.peerActions.connectPeer(ys, false)) lc++;
+                                //seedDB.writeMap(ys.hash, ys.getMap(), "init");
+                                //System.out.println("BOOTSTRAP: received peer " + ys.get(yacySeed.NAME, "anonymous") + "/" + ys.getAddress());
+                                //lc++;
+                            }
+                        }
+                        yacyCore.log.logInfo("BOOTSTRAP: " + lc + " seeds from seed-list URL " + seedListFileURL + ", AGE=" + (header.age() / 3600000) + "h");
+                    }
+                    
+                } catch (IOException e) {
+                    // this is when wget fails, commonly because of timeout
+                    yacyCore.log.logWarning("BOOTSTRAP: failed (1) to load seeds from seed-list URL " + seedListFileURL + ": " + e.getMessage());
+                } catch (Exception e) {
+                    // this is when wget fails; may be because of missing internet connection
+                    yacyCore.log.logSevere("BOOTSTRAP: failed (2) to load seeds from seed-list URL " + seedListFileURL + ": " + e.getMessage(), e);
+                }
+            }
+        }
+        yacyCore.log.logInfo("BOOTSTRAP: " + (webIndex.seedDB.sizeConnected() - sc) + " new seeds while bootstraping.");
     }
     
     public void checkInterruption() throws InterruptedException {

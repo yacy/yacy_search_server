@@ -38,7 +38,7 @@ import de.anomic.index.indexURLReference;
 import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
-import de.anomic.yacy.yacyCore;
+import de.anomic.yacy.yacyPeerActions;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyURL;
 
@@ -67,12 +67,12 @@ public class plasmaSearchAPI {
         return b;
     }
     
-    public static void listHosts(serverObjects prop, String startHash) {
+    public static void listHosts(serverObjects prop, String startHash, yacyPeerActions peerActions) {
         // list known hosts
         yacySeed seed;
         int hc = 0;
         prop.put("searchresult_keyhash", startHash);
-        Iterator<yacySeed> e = yacyCore.peerActions.dhtAction.getAcceptRemoteIndexSeeds(startHash);
+        Iterator<yacySeed> e = peerActions.dhtAction.getAcceptRemoteIndexSeeds(startHash);
         while (e.hasNext()) {
             seed = (yacySeed) e.next();
             if (seed != null) {

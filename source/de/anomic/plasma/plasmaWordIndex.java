@@ -66,6 +66,7 @@ import de.anomic.xml.RSSFeed;
 import de.anomic.xml.RSSMessage;
 import de.anomic.yacy.yacyDHTAction;
 import de.anomic.yacy.yacyNewsPool;
+import de.anomic.yacy.yacyPeerActions;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyURL;
 
@@ -103,7 +104,8 @@ public final class plasmaWordIndex implements indexRI {
     public  CrawlProfile.entry             defaultTextSnippetLocalProfile, defaultTextSnippetGlobalProfile;
     public  CrawlProfile.entry             defaultMediaSnippetLocalProfile, defaultMediaSnippetGlobalProfile;
     private File                           queuesRoot;
-    
+    public  yacyPeerActions                peerActions;
+
     public plasmaWordIndex(String networkName, serverLog log, File indexPrimaryRoot, File indexSecondaryRoot, int entityCacheMaxSize) {
         this.log = log;
         this.primaryRoot = new File(indexPrimaryRoot, networkName);
@@ -185,9 +187,12 @@ public final class plasmaWordIndex implements indexRI {
                 new File(networkRoot, "seed.pot.db"),
                 mySeedFile
                 );
-
+        
         // create or init news database
         newsPool = new yacyNewsPool(networkRoot);
+        
+        // deploy peer actions
+        this.peerActions = new yacyPeerActions(seedDB, newsPool);
     }
     
     public void clear() {
@@ -710,6 +715,7 @@ public final class plasmaWordIndex implements indexRI {
         newsPool.close();
         profilesActiveCrawls.close();
         queuePreStack.close();
+        peerActions.close();
     }
     
     public indexContainer deleteContainer(String wordHash) {

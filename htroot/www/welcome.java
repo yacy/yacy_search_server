@@ -57,7 +57,6 @@ import de.anomic.server.serverCore;
 import de.anomic.server.serverDomains;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 
 public class welcome {
@@ -69,7 +68,7 @@ public class welcome {
         final serverObjects prop = new serverObjects();
 
         // update seed info
-        yacyCore.peerActions.updateMySeed();
+        sb.updateMySeed();
 
         prop.putHTML("peername", env.getConfig("peerName", "<nameless>"));
         prop.putHTML("peerdomain", env.getConfig("peerName", "<nameless>").toLowerCase());

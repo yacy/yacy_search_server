@@ -230,7 +230,7 @@ public class plasmaDHTFlush extends Thread {
                     
                     // handover chunk to transfer worker
                     if ((newDHTChunk.containerSize() > 0) || (newDHTChunk.getStatus() == plasmaDHTChunk.chunkStatus_FILLED)) {
-                        this.worker = new plasmaDHTTransfer(this.log, this.wordIndex.seedDB, this.seed, newDHTChunk, this.gzipBody4Transfer, this.timeout4Transfer, 5);
+                        this.worker = new plasmaDHTTransfer(this.log, this.wordIndex.seedDB, this.wordIndex.peerActions, this.seed, newDHTChunk, this.gzipBody4Transfer, this.timeout4Transfer, 5);
                         this.worker.setTransferMode(plasmaDHTTransfer.TRANSFER_MODE_FLUSH);
                         this.worker.start();
                     }
