@@ -65,6 +65,9 @@ import de.anomic.yacy.yacyVersion;
 
 public final class hello {
 
+    // example:
+    // http://localhost:8080/yacy/hello.html?count=1&seed=p|{Hash=sCJ6Tq8T0N9x,IPType=&empty;,Port=8080,IP=,Uptime=8,rI=190,Version=0.10004882,PeerType=junior,UTC=+0200,RCount=0,sI=0,LastSeen=20080605103333,Name=intratest,CCount=5.0,SCount=40,news=,USpeed=0,CRTCnt=0,CRWCnt=0,BDate=20080605081349,rU=190,LCount=187,dct=1212668923654,ICount=2,sU=0,ISpeed=0,RSpeed=0.0,NCount=0,Flags=oooo}
+    
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) throws InterruptedException {
         plasmaSwitchboard sb = (plasmaSwitchboard) env;
         serverObjects prop = new serverObjects();
@@ -98,8 +101,7 @@ public final class hello {
             return prop;
         }
         final yacySeed remoteSeed = yacySeed.genRemoteSeed(seed, key, true);
-        remoteSeed.setIP(ias.toString());
-
+        
 //      System.out.println("YACYHELLO: REMOTESEED=" + ((remoteSeed == null) ? "NULL" : remoteSeed.toString()));
         if ((remoteSeed == null) || (remoteSeed.hash == null)) {
             prop.put("message", "cannot parse your seed");
@@ -136,7 +138,8 @@ public final class hello {
             remoteSeed.setIP(reportedip);
             urls = yacyClient.queryUrlCount(remoteSeed);
         } else {
-            prop.put("yourip", "unknown");
+            prop.put("yourip", (ias == null) ? "" : ias.getHostAddress());
+            remoteSeed.setIP((ias == null) ? "" : ias.getHostAddress());
         }
 
         // if the previous attempt (using the reported ip address) was not successful, try the ip where 

@@ -2706,7 +2706,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
                         yacyCore.log.logInfo("BOOTSTRAP: seed-list URL " + seedListFileURL + " too old (" + (header.age() / 86400000) + " days)");
                     } else {
                         ssc++;
-                        final byte[] content = HttpClient.wget(url.toString(), reqHeader, null, (int) getConfigLong("bootstrapLoadTimeout", 6000));
+                        final byte[] content = HttpClient.wget(url.toString(), reqHeader, null, (int) getConfigLong("bootstrapLoadTimeout", 20000));
                         seedList = nxTools.strings(content, "UTF-8");
                         enu = seedList.iterator();
                         lc = 0;

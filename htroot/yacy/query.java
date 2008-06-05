@@ -55,15 +55,19 @@ import de.anomic.yacy.yacyNetwork;
 
 public final class query {
 
+    // example:
+    // http://localhost:8080/yacy/query.html?youare=sCJ6Tq8T0N9x&object=lurlcount
+    
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> ss) {
         if (post == null || ss == null) { return null; }
 
         // return variable that accumulates replacements
         final plasmaSwitchboard sb = (plasmaSwitchboard) ss;
         final serverObjects prop = new serverObjects();
-        if ((post == null) || (ss == null)) return prop;
-        if (!yacyNetwork.authentifyRequest(post, ss)) return prop;
-        
+        if ((post == null) || (ss == null) || !yacyNetwork.authentifyRequest(post, ss)) {
+            prop.put("response", "-1"); // request rejected
+            return prop;
+        }
         
         if ((sb.isRobinsonMode()) &&
             (!sb.isPublicRobinson()) &&

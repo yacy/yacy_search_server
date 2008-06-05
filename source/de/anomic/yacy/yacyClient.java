@@ -117,9 +117,10 @@ public final class yacyClient {
             // generate request
             post.add(new StringPart("count", "20"));
             post.add(new StringPart("seed", mySeed.genSeedStr(salt)));
-            yacyCore.log.logFine("yacyClient.publishMySeed thread '" + Thread.currentThread().getName() + "' contacting peer at " + address);
             // send request
-            byte[] content = wput("http://" + address + "/yacy/hello.html", yacySeed.b64Hash2hexHash(otherHash) + ".yacyh", post, 10000, false);
+            long start = System.currentTimeMillis();
+            byte[] content = wput("http://" + address + "/yacy/hello.html", yacySeed.b64Hash2hexHash(otherHash) + ".yacyh", post, 15000, false);
+            yacyCore.log.logInfo("yacyClient.publishMySeed thread '" + Thread.currentThread().getName() + "' contacted peer at " + address + ", received " + ((content == null) ? "null" : content.length) + " bytes, time = " + (System.currentTimeMillis() - start) + " milliseconds");
             result = nxTools.table(content, "UTF-8");
             break;
         } catch (Exception e) {
