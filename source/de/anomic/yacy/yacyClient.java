@@ -727,9 +727,7 @@ public final class yacyClient {
         
         // send request
         try {
-            // TODO is targetAddress == url.getHost()?
-            final yacyURL url = new yacyURL("http://" + targetAddress + "/yacy/transfer.html", null);
-            final byte[] content = wput("http://" + targetAddress + "/yacy/transfer.html", url.getHost(), post, 10000);
+            final byte[] content = wput("http://" + targetAddress + "/yacy/transfer.html", targetAddress, post, 10000);
             final HashMap<String, String> result = nxTools.table(content, "UTF-8");
             return result;
         } catch (Exception e) {
@@ -753,9 +751,7 @@ public final class yacyClient {
         
         // send request
         try {
-            // TODO is targetAddress == url.getHost()?
-            final yacyURL url = new yacyURL("http://" + targetAddress + "/yacy/transfer.html", null);
-            final byte[] content = wput("http://" + targetAddress + "/yacy/transfer.html", url.getHost(), post, 20000);
+            final byte[] content = wput("http://" + targetAddress + "/yacy/transfer.html", targetAddress, post, 20000);
             final HashMap<String, String> result = nxTools.table(content, "UTF-8");
             return result;
         } catch (Exception e) {
