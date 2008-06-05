@@ -37,14 +37,13 @@ import de.anomic.server.logging.serverLog;
  * some methods must be implemented (the "socket-layer")
  */
 public abstract class HttpClient {
-    
+
     /**
      * provide system information for client identification
      */
-    private static final String systemOST =
-        System.getProperty("os.arch", "no-os-arch") + " " + System.getProperty("os.name", "no-os-name") +
-                " " + System.getProperty("os.version", "no-os-version") + "; " + "java " +
-                System.getProperty("java.version", "no-java-version") + "; " + generateLocation();
+    private static final String systemOST = System.getProperty("os.arch", "no-os-arch") + " " +
+            System.getProperty("os.name", "no-os-name") + " " + System.getProperty("os.version", "no-os-version") +
+            "; " + "java " + System.getProperty("java.version", "no-java-version") + "; " + generateLocation();
 
     /**
      * generating the location string
@@ -99,7 +98,7 @@ public abstract class HttpClient {
     public static byte[] wget(final String uri, final String vhost) {
         return wget(uri, null, vhost);
     }
-    
+
     /**
      * Gets a page (as raw bytes) aborting after timeout
      * 
@@ -129,12 +128,12 @@ public abstract class HttpClient {
      * @param header
      * @param vhost
      * @return
-     * @assert uri != null
+     * @require uri != null
      */
-    public static byte[] wget(final String uri, httpHeader header, final String vhost) {
+    public static byte[] wget(final String uri, final httpHeader header, final String vhost) {
         return wget(uri, header, vhost, 10000);
     }
-    
+
     /**
      * Gets a page (as raw bytes) addressing vhost at host in uri with specified header and timeout
      * 
@@ -144,7 +143,7 @@ public abstract class HttpClient {
      * @param timeout in milliseconds
      * @return
      */
-    public static byte[] wget(final String uri, httpHeader header, final String vhost, int timeout) {
+    public static byte[] wget(final String uri, httpHeader header, final String vhost, final int timeout) {
         assert uri != null : "precondition violated: uri != null";
         final JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(timeout, null, null);
 
@@ -206,7 +205,7 @@ public abstract class HttpClient {
         } catch (final IOException e) {
             serverLog.logWarning("HTTPC", "whead(" + uri + ") failed: " + e.getMessage());
         } finally {
-            if(response != null) {
+            if (response != null) {
                 response.closeStream();
             }
         }

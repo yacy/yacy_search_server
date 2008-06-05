@@ -68,6 +68,7 @@ import de.anomic.server.logging.serverLog;
  * 
  */
 public class JakartaCommonsHttpClient {
+
     /**
      * "the HttpClient instance and connection manager should be shared among all threads for maximum efficiency."
      * (Concurrent execution of HTTP methods, http://hc.apache.org/httpclient-3.x/performance.html)
@@ -99,7 +100,7 @@ public class JakartaCommonsHttpClient {
 
         // accept self-signed or untrusted certificates
         Protocol.registerProtocol("https", new Protocol("https",
-                (ProtocolSocketFactory) new EasySSLProtocolSocketFactory(), 443));
+                (ProtocolSocketFactory) new AcceptEverythingSSLProtcolSocketFactory(), 443));
 
         /**
          * set network timeout properties. see: http://java.sun.com/j2se/1.5.0/docs/guide/net/properties.html These
@@ -166,7 +167,7 @@ public class JakartaCommonsHttpClient {
      * @see de.anomic.http.HttpClient#setHeader(de.anomic.http.httpHeader)
      */
     public void setHeader(final httpHeader header) {
-        this.headers = convertHeaders(header);
+        headers = convertHeaders(header);
     }
 
     /*
@@ -184,7 +185,7 @@ public class JakartaCommonsHttpClient {
      * @param follow
      */
     public void setFollowRedirects(final boolean follow) {
-        this.followRedirects = follow;
+        followRedirects = follow;
     }
 
     /*
@@ -205,7 +206,7 @@ public class JakartaCommonsHttpClient {
      */
     public JakartaCommonsHttpResponse GET(final String uri) throws IOException {
         final HttpMethod get = new GetMethod(uri);
-        get.setFollowRedirects(this.followRedirects);
+        get.setFollowRedirects(followRedirects);
         return execute(get);
     }
 
@@ -220,7 +221,7 @@ public class JakartaCommonsHttpClient {
     public JakartaCommonsHttpResponse HEAD(final String uri) throws IOException {
         assert uri != null : "precondition violated: uri != null";
         final HttpMethod head = new HeadMethod(uri);
-        head.setFollowRedirects(this.followRedirects);
+        head.setFollowRedirects(followRedirects);
         return execute(head);
     }
 
@@ -374,7 +375,7 @@ public class JakartaCommonsHttpClient {
     private JakartaCommonsHttpResponse execute(final HttpMethod method) throws IOException, HttpException {
         assert method != null : "precondition violated: method != null";
         // set header
-        for (final Header header : this.headers) {
+        for (final Header header : headers) {
             method.setRequestHeader(header);
         }
 
@@ -418,9 +419,9 @@ public class JakartaCommonsHttpClient {
         } catch (final URIException e) {
             // should not happen, because method is already executed
         }
-        final String query = (method.getQueryString() != null) ? "?" + method.getQueryString() : "";
-        return new HttpConnectionInfo(protocol, (port == -1 || port == 80) ? host : host + ":" + port,
-                method.getName() + " " + method.getPath() + query, method.hashCode(), System.currentTimeMillis());
+        final String query = method.getQueryString() != null ? "?" + method.getQueryString() : "";
+        return new HttpConnectionInfo(protocol, port == -1 || port == 80 ? host : host + ":" + port, method.getName() +
+                " " + method.getPath() + query, method.hashCode(), System.currentTimeMillis());
     }
 
     /**
@@ -452,9 +453,9 @@ public class JakartaCommonsHttpClient {
      */
     private httpRemoteProxyConfig getProxyConfig(final String hostname) {
         final httpRemoteProxyConfig hostProxyConfig;
-        if (this.proxyConfig != null) {
+        if (proxyConfig != null) {
             // client specific
-            hostProxyConfig = httpdProxyHandler.getProxyConfig(hostname, this.proxyConfig);
+            hostProxyConfig = httpdProxyHandler.getProxyConfig(hostname, proxyConfig);
         } else {
             // default settings
             hostProxyConfig = httpdProxyHandler.getProxyConfig(hostname, 0);
@@ -518,7 +519,7 @@ public class JakartaCommonsHttpClient {
     public static void main(final String[] args) {
         JakartaCommonsHttpResponse resp = null;
         String url = args[0];
-        if (!(url.toUpperCase().startsWith("HTTP://"))) {
+        if (!url.toUpperCase().startsWith("HTTP://")) {
             url = "http://" + url;
         }
         try {
@@ -572,15 +573,6 @@ public class JakartaCommonsHttpClient {
     }
 
     /**
-     * number of active connections
-     * 
-     * @return
-     */
-    public static int connectionCount() {
-        return conManager.getConnectionsInPool();
-    }
-
-    /**
      * remove unused connections
      */
     public static void cleanup() {
@@ -592,5 +584,14 @@ public class JakartaCommonsHttpClient {
             conManager.deleteClosedConnections();
             HttpConnectionInfo.cleanUp();
         }
+    }
+
+    /**
+     * number of active connections
+     * 
+     * @return
+     */
+    public static int connectionCount() {
+        return conManager.getConnectionsInPool();
     }
 }
