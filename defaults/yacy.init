@@ -437,10 +437,8 @@ staticIP=
 # users to understand what this application does. You can disable browser
 # pop-up here or set a different start page, like the search page
 # the browser type is optional and works only under certain conditions
-#browserPopUpTrigger=false
 browserPopUpTrigger=true
-#browserPopUpPage=index.html
-browserPopUpPage=Status.html
+browserPopUpPage=ConfigBasic.html
 browserPopUpApplication=netscape
 
 # index sharing attributes: by default, sharing is on.
@@ -595,8 +593,8 @@ javastart_priority__pro=0
 # flushed to disc; this may last some minutes.
 wordCacheMaxCount = 30000
 wordCacheInitCount = 30000
-wordCacheMaxCount__pro = 60000
-wordCacheInitCount__pro = 60000
+wordCacheMaxCount__pro = 100000
+wordCacheInitCount__pro = 100000
 
 # Specifies if yacy can be used as transparent http proxy.
 # 

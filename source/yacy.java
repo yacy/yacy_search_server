@@ -353,7 +353,7 @@ public final class yacy {
                     // open the browser window
                     final boolean browserPopUpTrigger = sb.getConfig("browserPopUpTrigger", "true").equals("true");
                     if (browserPopUpTrigger) {
-                        String  browserPopUpPage        = sb.getConfig("browserPopUpPage", "ConfigBasic.html");
+                        String  browserPopUpPage      = sb.getConfig("browserPopUpPage", "ConfigBasic.html");
                         //boolean properPW = (sb.getConfig("adminAccount", "").length() == 0) && (sb.getConfig(httpd.ADMIN_ACCOUNT_B64MD5, "").length() > 0);
                         //if (!properPW) browserPopUpPage = "ConfigBasic.html";
                         final String  browserPopUpApplication = sb.getConfig("browserPopUpApplication", "netscape");

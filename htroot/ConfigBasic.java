@@ -201,7 +201,8 @@ public class ConfigBasic {
         boolean properPort = (sb.webIndex.seedDB.mySeed().isSenior()) || (sb.webIndex.seedDB.mySeed().isPrincipal());
         
         if ((env.getConfig("defaultFiles", "").startsWith("ConfigBasic.html,"))) {
-        	    env.setConfig("defaultFiles", env.getConfig("defaultFiles", "").substring(17));
+        	env.setConfig("defaultFiles", env.getConfig("defaultFiles", "").substring(17));
+        	env.setConfig("browserPopUpPage", "Status.html");
             httpdFileHandler.initDefaultPath();
         }
         
