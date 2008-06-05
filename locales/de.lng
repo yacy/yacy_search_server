@@ -24,13 +24,16 @@
 #File: AccessTracker_p.html
 #---------------------------
 Server Access Overview==Server Zugriff &Uuml;berblick
-This is a list of requests to the local http server within the last hour.==Dies ist eine Liste aller Anfragen, die an den lokalen http Server innerhalb der letzten Stunde gestellt wurden.
+This is a list of \#\[num\]\# requests to the local http server within the last hour.==Dies ist eine Liste von #[num]# Anfragen, die an den lokalen http Server innerhalb der letzten Stunde gestellt wurden.
 Showing \#\[num\]\# requests.==Gezeigt werden #[num]# Anfragen.
 Access Count During==Erfasster Zugriff w&auml;hrend der
 last Second==letzten Sekunde
 last Minute==letzten Minute
 last 10 Minutes==letzten 10 Minuten
 last Hour==letzten Stunde
+The following hosts are registered as source for brute-force requests to protected pages==Die folgenden Hosts wurden als Quelle von Brute-Force Attacken auf gesch&uuml;tzte Seiten erkannt 
+#>Host==>Host
+Access Times==Zugriffszeiten
 Server Access Details==Server Zugriffs Details
 Local Search Log==Lokale Suche Log
 Local Search Host Tracker==Lokale Suche Host Tracker
@@ -80,15 +83,17 @@ not shared::shared==nicht freigegeben::freigegeben
 New list==Neue Liste
 "create"=="anlegen"
 Settings for this list==Einstellungen dieser Liste
-Save==Speichern
+"Save"=="Speichern"
 Share/don't share this list==Liste freigeben/nicht freigeben
 Delete this list==Liste l&ouml;schen
 Edit this list==Diese Liste bearbeiten
 These are the domain name / path patterns in this blacklist:==Dies sind die Domainnamen / -pfade die in der Blacklist sind:
 You can select them here for deletion==Sie k&ouml;nnen sie einzeln zum L&ouml;schen w&auml;hlen
-Delete URL pattern==URL aus der Liste l&ouml;schen
-"Move URL pattern to"=="Verschiebe URL zu"
-Add URL pattern==F&uuml;ge URL hinzu
+"Delete URL pattern"=="URL-Eintrag aus der Liste l&ouml;schen"
+"Edit URL pattern"=="URL-Eintrag bearbeiten"
+"Save URL pattern"=="URL-Eintrag speichern"
+"Move URL pattern to"=="URL verschieben zu"
+Add URL pattern==URL hinzuf&uuml;gen
 Import blacklist items from...==Importiere Blacklist von...
 other YaCy peers:==anderen YaCy Peers:
 file:==Datei:
@@ -637,7 +642,7 @@ Title==Titel
 "delete"=="L&ouml;schen"
 #-----------------------------
 
-#File: CrawlStartExpert_p.html
+#File: CrawlStart_p.html
 #---------------------------
 Crawl Start \(expert\)==Crawl Start (Experte)
 Expert Crawl Start==Experten Crawl Start
@@ -707,47 +712,9 @@ so they can omit starting a crawl with the same start point.==damit sie es verme
 Exclude <em>static</em> Stop-Words==<em>Statische</em> Stop-Words ausschlie&szlig;en
 This can be useful to circumvent that extremely common words are added to the database, i.e. \"the\", \"he\", \"she\", \"it\"... To exclude all words given in the file <tt>yacy.stopwords</tt> from indexing,==Dies ist sinnvoll, um zu verhindern, dass extrem h&auml;ufig vorkommende W&ouml;rter wie z.B. "der", "die", "das", "und", "er", "sie" etc in die Datenbank aufgenommen werden. Um alle W&ouml;rter von der Indexierung auszuschliessen, die in der Datei <tt>yacy.stopwords</tt> enthalten sind,
 check this box.==aktivieren Sie diese Box.
-Existing start URLs are re-crawled.==Die existierende Start URL wird wieder gecrawlt.
 Other already visited URLs are sorted out as \"double\".==Andere bereits besuchte Seiten werden als 'doppelt' aussortiert.
-A complete re-crawl will be available soon.==Ein kompletter Re-Crawl wird bald m&ouml;glich sein.
 "Start New Crawl"=="Neuen Crawl starten"
 Depth</label>:==Tiefe</label>:
-#-----------------------------
-
-#File: CrawlStartSimple_p.html
-#---------------------------
-Crawl Start \(easy\)==Crawl Start (Anf&auml;nger)
-Easy Crawl Start==Einfacher Crawl Start
-Start Crawling Job:==Starte Crawling Aufgabe:
-You can define URLs as start points for Web page crawling and start crawling here.==Sie k&ouml;nnen hier URLs angeben, die gecrawlt werden sollen und dann das Crawling starten. 
-\"Crawling\" means that YaCy will download the given website, extract all links in it=="Crawling" bedeutet, dass YaCy die angegebene Webseite runterl&auml;dt, alle Links extrahiert
-and then download the content behind these links.==und dann den Inhalt hinter diesen Links runterl&auml;dt.
-This is repeated as long as specified under \"Crawling Depth\".==Dies wird solange wiederholt wie unter "Crawling Tiefe" angegeben.
-#Attribut==Attribut
-Value==Wert
-Description</strong>==Beschreibung</strong>
-Starting Point:==Startpunkt:
-Enter here the start url of the web crawl.==Geben Sie hier den Startpunkt f&uuml;r Ihren Web Crawl ein.
-Crawling Range==Crawling Bereich
-Wide: depth==Umfang: Tiefe
-Complete Domain==Komplette Domain
-The range defines if the crawl shall consider a complete domain, or a wide crawl up to a specific depth.==Der Bereich definiert, ob der Crawl eine komplette Domain oder einen Bereich bis zu einer bestimmten Tiefe crawlen soll.  
-"Start New Distributed Crawl \(will be visible at other peers\)"=="Einen neuen verteilten Crawl (sichtbar f&uuml;r alle anderen Peers) starten" 
-Recently started remote crawls in progress:==Gerade gestartetes Indexieren auf anderen Peers in Bearbeitung:
-Start Time==Startzeit
-Peer Name==Peer Name
-Start URL==Start URL
-Intention/Description==Absicht/Beschreibung
-Depth</strong>==Tiefe</strong>
-Accept==Akzeptiere
-\#no::yes\#==#nein::ja#
-Recently started remote crawls, finished:==Gerade gestartete Remote-Crawls anderer Peers, beendete:
-Recently started remote crawls, finished:</strong></p>
-Remote Crawling Peers:==Remote-Crawl Peers:
-No remote crawl peers available.==Kein Peer zum Remote-Crawl erreichbar.
-peers available for remote crawling.==Peers erreichbar zum Remote-Crawling.
-Idle Peers==Unt&auml;tige Peers
-Busy Peers==Besch&auml;tigte Peers
 #-----------------------------
 
 
@@ -893,6 +860,10 @@ Retrieve by Word:<==Abfrage nach Wort:<
 Retrieve by Word-Hash==Abfrage nach Wort-Hash
 "Show URL Entries for Word-Hash"=="URL Eintr&auml;ge f&uuml;r Wort-Hash zeigen"
 "Generate List"=="Liste erstellen"
+Cleanup==Aufr&auml;umen
+Index Deletion<br />\(deletes all words and all urls\)==Index L&ouml;schung<br />(l&ouml;scht alle W&ouml;rter und alle URLs)
+"Delete index"=="Index l&ouml;schen" 
+Confirm: You want to delete the complete index==Best&auml;tigen: Sie wollen den kompletten Index l&ouml;schen
 No entry for word \'\#\[word\]\#\'==Keinen Eintrag zu Wort '#[word]#'
 No entry for word hash==Keinen Eintrag zu Wort-Hash
 Search result==Suchergebnis
@@ -1099,6 +1070,7 @@ Delete==L&ouml;schen
 #File: IndexImport_p.html
 #---------------------------
 YaCy \'\#\[clientname\]\#\': Index Import==YaCy '#[clientname]#': Index Import
+Crawling Queue Import==Crawling Puffer Import
 Index DB Import==Index Datenbank Import
 The local index currently consists of \(at least\) \#\[wcount\]\# reverse word indexes and \#\[ucount\]\# URL references.==Der lokale Index besteht zur Zeit aus (mindestens) #[wcount]# W&ouml;rtern und #[ucount]# URLs.
 Import Job with the same path already started.==Ein Import mit dem selben Pfad ist bereits gestartet.
@@ -1992,10 +1964,9 @@ Console Status==Konsolen Status
 Log-in as administrator to see full status==Als Administrator einloggen, f&uuml;r kompletten Status
 Welcome to YaCy!==Willkommen bei YaCy!
 Your settings are _not_ protected!</strong>==Ihre Einstellungen sind _nicht_ mit einem Kennwort gesch&uuml;tzt!</strong>
-Please open the <a href="ConfigBasic.html">settings</a> page <strong>immediately</strong>==Bitte &ouml;ffnen Sie die <a href="ConfigBasic.html">Einstellungen-Seite</a> <strong>sofort</strong>
+Please open the <a href="ConfigAccounts_p.html">accounts configuration</a> page <strong>immediately</strong>==Bitte &ouml;ffnen Sie die <a href="ConfigAccounts_p.html">Benutzerverwaltung</a> <strong>sofort</strong>
 and set an administration password.==und geben Sie ein Administrator Passwort ein.
 You have not published your peer seed yet. This happens automatically, just wait.==Ihr Peer ist dem Netzwerk noch nicht bekannt. Warten Sie noch ein wenig, dies geschieht automatisch.
-While you have this status you are not allowed to search other peers.==W&auml;hrend Sie diesen Status haben, ist es Ihnen nicht erlaubt andere Peers zu durchsuchen.
 The peer must go online to get a peer address.==Ihr Peer muss online gehen, um eine Adresse zu bekommen.
 You cannot be reached from outside.==Ihr Peer kann nicht von au&szlig;en erreicht werden.
 A possible reason is that you are behind a firewall, NAT or Router.==Ein m&ouml;glicher Grund ist, dass Sie sich hinter einer Firewall, NAT oder einem Router befinden.
@@ -2121,6 +2092,25 @@ provided by YaCy peers using public bookmarks, link votes and crawl start points
 "authentication required"=="Autorisierung erforderlich"
 Hide surftips for users without autorization==Verberge Surftipps f&uuml;r Benutzer ohne Autorisierung
 Show surftips to everyone==Zeige Surftipps allen Benutzern
+#-----------------------------
+
+#File: terminal_p.html
+#-----------------------------
+#YaCy System Monitor==YaCy System Monitor
+div id="location">
+Search Form==Suchformular
+Crawl Start==Crawl starten
+Status Page==Status Seite
+Confirm Shutdown==Herunterfahren best&auml;tigen
+>&lt;Shutdown==>&lt;Herunterfahren
+Event Terminal==Ereignis Terminal
+Image Terminal==Bilder Terminal
+#Domain Monitor==Domain Monitor
+"Loading Processing software..."=="Processing Software wird geladen..."
+This browser does not have a Java Plug-in.==Dieser Browser besitzt kein Java Plug-In.
+Get the latest Java Plug-in here.==Holen Sie sich das neueste Java Plug-In hier.
+Resource Monitor==Ressourcen Monitor
+Network Monitor==Netzwerk Monitor
 #-----------------------------
 
 #File: Threaddump_p.html
@@ -2489,7 +2479,7 @@ Outgoing&nbsp;Cookies==Ausgehende Cookies
 #Index Administration==Index Administration
 #RWI Admin==RWI Admin
 URL Reference Admin==URL Referenzen Admin
-#Index Import==Index Import
+Queue Import==Puffer Import
 #Index Transfer==Index Transfer
 Index Cleaner==Index Aufr&auml;umer
 #-----------------------------
@@ -2497,8 +2487,7 @@ Index Cleaner==Index Aufr&auml;umer
 #File: env/templates/submenuIndexCreate.template
 #---------------------------
 Start a Web Crawl==Starte einen Web Crawl
-Crawl Start \(easy\)==Crawl starten (Anf&auml;nger)
-Crawl Start \(expert\)==Crawl starten (Experte)
+Crawl Start==Crawl starten
 Crawl Profile Editor==Crawl Profil Editor
 Crawler Queues==Crawler Puffer
 Control Queues==Kontrolle des Puffers
