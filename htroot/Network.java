@@ -208,8 +208,8 @@ public class Network {
                 }
 
                 final HashMap<String, String> map = new HashMap<String, String>();
-                map.put(yacySeed.IP,post.get("peerIP"));
-                map.put(yacySeed.PORT,post.get("peerPort"));
+                map.put(yacySeed.IP, post.get("peerIP"));
+                map.put(yacySeed.PORT, post.get("peerPort"));
                 yacySeed peer = new yacySeed(post.get("peerHash"),map);
 
                 sb.updateMySeed();
@@ -384,7 +384,7 @@ public class Network {
                             prop.put(STR_TABLE_LIST + conCount + "_location", location);
                             if (complete) {
                                 prop.put(STR_TABLE_LIST + conCount + "_complete", 1);
-                                prop.put(STR_TABLE_LIST + conCount + "_complete_ip", seed.get(yacySeed.IP, "-") );
+                                prop.put(STR_TABLE_LIST + conCount + "_complete_ip", seed.getIP() );
                                 prop.put(STR_TABLE_LIST + conCount + "_complete_port", seed.get(yacySeed.PORT, "-") );
                                 prop.put(STR_TABLE_LIST + conCount + "_complete_hash", seed.hash);
                                 prop.put(STR_TABLE_LIST + conCount + "_complete_age", seed.getAge());

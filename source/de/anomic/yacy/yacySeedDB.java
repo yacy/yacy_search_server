@@ -179,7 +179,7 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
             }
         }
         
-        mySeed.put(yacySeed.IP, "");       // we delete the old information to see what we have now
+        mySeed.setIP("");       // we delete the old information to see what we have now
         mySeed.put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN); // markup startup condition
     }
 

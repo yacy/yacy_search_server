@@ -257,8 +257,8 @@ public class yacysearch {
             }
 
             // prepare search properties
-            final boolean yacyonline = ((sb.webIndex.seedDB != null) && (sb.webIndex.seedDB.mySeed() != null) && (sb.webIndex.seedDB.mySeed().getPublicAddress() != null));
-            final boolean globalsearch = (global) && (yacyonline) && (sb.getConfigBool(plasmaSwitchboard.INDEX_RECEIVE_ALLOW, false));
+            //final boolean yacyonline = ((sb.webIndex.seedDB != null) && (sb.webIndex.seedDB.mySeed() != null) && (sb.webIndex.seedDB.mySeed().getPublicAddress() != null));
+            final boolean globalsearch = (global) /* && (yacyonline)*/ && (sb.getConfigBool(plasmaSwitchboard.INDEX_RECEIVE_ALLOW, false));
         
             // do the search
             TreeSet<String> queryHashes = indexWord.words2hashes(query[0]);

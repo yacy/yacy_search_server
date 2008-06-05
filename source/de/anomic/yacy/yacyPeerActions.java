@@ -194,7 +194,7 @@ public class yacyPeerActions {
                 return true;
             } else {
                 // the seed is new
-                if ((seedDB.mySeedIsDefined()) && (seed.get(yacySeed.IP, "127.0.0.1").equals(this.seedDB.mySeed().get(yacySeed.IP, "127.0.0.1")))) {
+                if ((seedDB.mySeedIsDefined()) && (seed.getIP().equals(this.seedDB.mySeed().getIP()))) {
                     // seed from the same IP as the calling client: can be
                     // the case if there runs another one over a NAT
                     yacyCore.log.logFine("connect: saved NEW seed (myself IP) " + seed.getPublicAddress());

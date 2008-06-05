@@ -172,7 +172,7 @@ public class yacyCore {
             yacyCore.log.logDebug("***DEBUG publishSeedList: I can reach myself");
         */
 
-        if ((sb.webIndex.seedDB.lastSeedUpload_myIP.equals(sb.webIndex.seedDB.mySeed().get(yacySeed.IP, "127.0.0.1"))) &&
+        if ((sb.webIndex.seedDB.lastSeedUpload_myIP.equals(sb.webIndex.seedDB.mySeed().getIP())) &&
             (sb.webIndex.seedDB.lastSeedUpload_seedDBSize == sb.webIndex.seedDB.sizeConnected()) &&
             (canReachMyself()) &&
             (System.currentTimeMillis() - sb.webIndex.seedDB.lastSeedUpload_timeStamp < 1000 * 60 * 60 * 24) &&
@@ -514,7 +514,7 @@ public class yacyCore {
             //if (ip.equals("")) ip = natLib.retrieveIP(DI604use, DI604pw);
             
             // yacyCore.log.logDebug("DEBUG: new IP=" + ip);
-            sb.webIndex.seedDB.mySeed().put(yacySeed.IP, ip);
+            if (yacySeed.isProperIP(ip) == null) sb.webIndex.seedDB.mySeed().setIP(ip);
             if (sb.webIndex.seedDB.mySeed().get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_JUNIOR).equals(yacySeed.PEERTYPE_JUNIOR)) // ???????????????
                 sb.webIndex.seedDB.mySeed().put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR); // to start bootstraping, we need to be recognised as PEERTYPE_SENIOR peer
             log.logInfo("publish: no recipient found, our address is " +
@@ -741,7 +741,7 @@ public class yacyCore {
         } finally {
             sb.webIndex.seedDB.lastSeedUpload_seedDBSize = sb.webIndex.seedDB.sizeConnected();
             sb.webIndex.seedDB.lastSeedUpload_timeStamp = System.currentTimeMillis();
-            sb.webIndex.seedDB.lastSeedUpload_myIP = sb.webIndex.seedDB.mySeed().get(yacySeed.IP, "127.0.0.1");
+            sb.webIndex.seedDB.lastSeedUpload_myIP = sb.webIndex.seedDB.mySeed().getIP();
         }
     }
 

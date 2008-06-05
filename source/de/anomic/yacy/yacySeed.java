@@ -357,7 +357,6 @@ public class yacySeed {
         } else return dflt;
     }
 
-    public final void setIP()              { dna.put(yacySeed.IP, ""); }
     public final void setIP(String ip)     { dna.put(yacySeed.IP, ip); }
     public final void setPort(String port) { dna.put(yacySeed.PORT, port); }
     public final void setType(String type) { dna.put(yacySeed.PEERTYPE, type); }
@@ -858,11 +857,8 @@ public class yacySeed {
         // check IP
         if (!checkOwnIP) {
             // checking of IP is omitted if we read the own seed file        
-            final String ip = (String) this.dna.get(yacySeed.IP);
-            if (ip == null) return "IP is null";
-            if (ip.length() > 0 && ip.length() < 8) return "IP is too short: " + ip;
-            if (!natLib.isProper(ip)) return "IP is not proper: " + ip; //this does not work with staticIP
-            if (ip.equals("localhost") || ip.startsWith("127.") || (ip.startsWith("0:0:0:0:0:0:0:1"))) return "IP for localhost rejected";
+            final String ipCheck = isProperIP(this.dna.get(yacySeed.IP));
+            if (ipCheck != null) return ipCheck;
         }
         
         // seedURL
@@ -880,6 +876,15 @@ public class yacySeed {
         return null;
     }
     
+    public static final String isProperIP(String ipString) {
+        // returns null if ipString is proper, a string with the cause otervise
+        if (ipString == null) return "IP is null";
+        if (ipString.length() > 0 && ipString.length() < 8) return "IP is too short: " + ipString;
+        if (!natLib.isProper(ipString)) return "IP is not proper: " + ipString; //this does not work with staticIP
+        if (ipString.equals("localhost") || ipString.startsWith("127.") || (ipString.startsWith("0:0:0:0:0:0:0:1"))) return "IP for localhost rejected";
+        return null;
+    }
+
     public final String toString() {
         synchronized (this.dna) {
             this.dna.put(yacySeed.HASH, this.hash);                         // set hash into seed code structure

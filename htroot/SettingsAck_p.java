@@ -252,7 +252,7 @@ public class SettingsAck_p {
             } else {
                 serverCore.useStaticIP = true;
             }
-            sb.webIndex.seedDB.mySeed().put(yacySeed.IP, staticIP);
+            if (yacySeed.isProperIP(staticIP) == null) sb.webIndex.seedDB.mySeed().setIP(staticIP);
             env.setConfig("staticIP", staticIP);
 
             // server access data

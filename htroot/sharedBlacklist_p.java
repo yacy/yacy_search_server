@@ -107,7 +107,7 @@ public class sharedBlacklist_p {
                 if( sb.webIndex.seedDB != null ){ //no nullpointer error..
                     yacySeed seed = sb.webIndex.seedDB.getConnected(Hash); 
                     if (seed != null) {
-                        String IP = seed.get(yacySeed.IP, "127.0.0.1"); 
+                        String IP = seed.getIP(); 
                         String Port = seed.get(yacySeed.PORT, "8080");
                         String peerName = seed.get(yacySeed.NAME, "<" + IP + ":" + Port + ">");
                         prop.putHTML("page_source", peerName);

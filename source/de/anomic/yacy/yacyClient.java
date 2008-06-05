@@ -119,7 +119,7 @@ public final class yacyClient {
             post.add(new StringPart("seed", mySeed.genSeedStr(salt)));
             yacyCore.log.logFine("yacyClient.publishMySeed thread '" + Thread.currentThread().getName() + "' contacting peer at " + address);
             // send request
-            byte[] content = wput("http://" + address + "/yacy/hello.html", yacySeed.b64Hash2hexHash(otherHash) + ".yacyh", post);
+            byte[] content = wput("http://" + address + "/yacy/hello.html", yacySeed.b64Hash2hexHash(otherHash) + ".yacyh", post, 10000, false);
             result = nxTools.table(content, "UTF-8");
             break;
         } catch (Exception e) {
@@ -159,9 +159,11 @@ public final class yacyClient {
         // set my own seed according to new information
         // we overwrite our own IP number only
         if (serverCore.useStaticIP) {
-            mySeed.put(yacySeed.IP, serverDomains.myPublicIP());
+            mySeed.setIP(serverDomains.myPublicIP());
         } else {
-            mySeed.put(yacySeed.IP, (String) result.get("yourip"));
+            String myIP = result.get("yourip");
+            String properIP = yacySeed.isProperIP(myIP);
+            if (properIP == null) mySeed.setIP(myIP);
         }
 
         // change our seed-type
@@ -218,19 +220,6 @@ public final class yacyClient {
             }
         }
         return count;
-    }
-
-    /**
-     * send data to the server named by vhost
-     * 
-     * @param address address of the server
-     * @param vhost name of the server at address which should respond
-     * @param post data to send (name-value-pairs)
-     * @return response body
-     * @throws IOException
-     */
-    private static byte[] wput(final String url, String vhost, final List<Part> post) throws IOException {
-        return wput(url, vhost, post, 10000, false);
     }
 
     /**
@@ -302,11 +291,11 @@ public final class yacyClient {
      * @return
      * @throws IOException
      */
-    private static byte[] postToFile(final yacySeed target, final String filename, final List<Part> post) throws IOException {
-        return wput("http://" + target.getClusterAddress() + "/yacy/" + filename, target.getHexHash() + ".yacyh", post);
+    private static byte[] postToFile(final yacySeed target, final String filename, final List<Part> post, int timeout) throws IOException {
+        return wput("http://" + target.getClusterAddress() + "/yacy/" + filename, target.getHexHash() + ".yacyh", post, timeout, false);
     }
-    private static byte[] postToFile(yacySeedDB seedDB, final String targetHash, final String filename, final List<Part> post) throws IOException {
-        return wput("http://" + targetAddress(seedDB, targetHash) + "/yacy/" + filename, yacySeed.b64Hash2hexHash(targetHash)+ ".yacyh", post);
+    private static byte[] postToFile(yacySeedDB seedDB, final String targetHash, final String filename, final List<Part> post, int timeout) throws IOException {
+        return wput("http://" + targetAddress(seedDB, targetHash) + "/yacy/" + filename, yacySeed.b64Hash2hexHash(targetHash)+ ".yacyh", post, timeout, false);
     }
 
     public static yacySeed querySeed(yacySeed target, String seedHash) {
@@ -318,7 +307,7 @@ public final class yacyClient {
             
         // send request
         try {
-            byte[] content = postToFile(target, "query.html", post);
+            byte[] content = postToFile(target, "query.html", post, 10000);
             final HashMap<String, String> result = nxTools.table(content, "UTF-8");
             
             if (result == null || result.size() == 0) { return null; }
@@ -340,7 +329,7 @@ public final class yacyClient {
             
         // send request
         try {
-            byte[] content = postToFile(target, "query.html", post);
+            byte[] content = postToFile(target, "query.html", post, 5000);
             final HashMap<String, String> result = nxTools.table(content, "UTF-8");
             
             if (result == null || result.size() == 0) { return -1; }
@@ -363,7 +352,7 @@ public final class yacyClient {
         
         // send request
         try {
-            byte[] content = postToFile(target, "query.html", post);
+            byte[] content = postToFile(target, "query.html", post, 5000);
             final HashMap<String, String> result = nxTools.table(content, "UTF-8");
             
             if ((result == null) || (result.size() == 0)) return -1;
@@ -675,7 +664,7 @@ public final class yacyClient {
         
         // send request
         try {
-            final byte[] content = postToFile(seedDB, targetHash, "message.html", post); 
+            final byte[] content = postToFile(seedDB, targetHash, "message.html", post, 5000); 
             final HashMap<String, String> result = nxTools.table(content, "UTF-8");
             return result;
         } catch (Exception e) {
@@ -702,7 +691,7 @@ public final class yacyClient {
 
         // send request
         try {
-            final byte[] content = postToFile(seedDB, targetHash, "message.html", post);
+            final byte[] content = postToFile(seedDB, targetHash, "message.html", post, 20000);
             final HashMap<String, String> result = nxTools.table(content, "UTF-8");
             return result;
         } catch (Exception e) {
@@ -740,7 +729,7 @@ public final class yacyClient {
         try {
             // TODO is targetAddress == url.getHost()?
             final yacyURL url = new yacyURL("http://" + targetAddress + "/yacy/transfer.html", null);
-            final byte[] content = wput("http://" + targetAddress + "/yacy/transfer.html", url.getHost(), post);
+            final byte[] content = wput("http://" + targetAddress + "/yacy/transfer.html", url.getHost(), post, 10000);
             final HashMap<String, String> result = nxTools.table(content, "UTF-8");
             return result;
         } catch (Exception e) {
@@ -841,7 +830,7 @@ public final class yacyClient {
             
         // send request
         try {
-            byte[] content = wput("http://" + address + "/yacy/crawlReceipt.html", target.getHexHash() + ".yacyh", post);
+            byte[] content = wput("http://" + address + "/yacy/crawlReceipt.html", target.getHexHash() + ".yacyh", post, 10000);
             return nxTools.table(content, "UTF-8");
         } catch (Exception e) {
             // most probably a network time-out exception
@@ -1052,7 +1041,7 @@ public final class yacyClient {
         String address = targetSeed.getClusterAddress();
         if (address == null) { address = "localhost:8080"; }
         try {
-            final byte[] content = wput("http://" + address + "/yacy/profile.html", targetSeed.getHexHash() + ".yacyh", post);
+            final byte[] content = wput("http://" + address + "/yacy/profile.html", targetSeed.getHexHash() + ".yacyh", post, 5000);
             return nxTools.table(content, "UTF-8");
         } catch (Exception e) {
             yacyCore.log.logSevere("yacyClient.getProfile error:" + e.getMessage());

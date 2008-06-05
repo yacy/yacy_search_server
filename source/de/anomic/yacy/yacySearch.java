@@ -262,7 +262,7 @@ public class yacySearch extends Thread {
             kelondroBitfield constraint,
             TreeMap<String, String> clusterselection) {
         // check own peer status
-        if (wordIndex.seedDB.mySeed() == null || wordIndex.seedDB.mySeed().getPublicAddress() == null) { return null; }
+        //if (wordIndex.seedDB.mySeed() == null || wordIndex.seedDB.mySeed().getPublicAddress() == null) { return null; }
 
         // prepare seed targets and threads
         final yacySeed[] targetPeers = (clusterselection == null) ? selectSearchTargets(wordIndex.seedDB, wordIndex.peerActions, plasmaSearchQuery.hashes2Set(wordhashes), targets) : selectClusterPeers(wordIndex.seedDB, clusterselection);

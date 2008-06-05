@@ -112,7 +112,7 @@ public final class hello {
 
         // we easily know the caller's IP:
         final String userAgent = (String) header.get(httpHeader.USER_AGENT, "<unknown>");
-        final String reportedip = remoteSeed.get(yacySeed.IP, "");
+        final String reportedip = remoteSeed.getIP();
         final String reportedPeerType = remoteSeed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_JUNIOR);
         final float clientversion = remoteSeed.getVersion();
 
@@ -133,7 +133,7 @@ public final class hello {
             
             // try first the reportedip, since this may be a connect from a port-forwarding host
             prop.put("yourip", reportedip);
-            remoteSeed.put(yacySeed.IP, reportedip);
+            remoteSeed.setIP(reportedip);
             urls = yacyClient.queryUrlCount(remoteSeed);
         } else {
             prop.put("yourip", "unknown");
@@ -152,7 +152,7 @@ public final class hello {
         		serverCore.checkInterruption();
                 
                 prop.put("yourip", clientip);
-                remoteSeed.put(yacySeed.IP, clientip);
+                remoteSeed.setIP(clientip);
                 urls = yacyClient.queryUrlCount(remoteSeed);
         	}
         }
