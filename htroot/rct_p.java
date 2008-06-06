@@ -79,15 +79,15 @@ public class rct_p {
 
                             if (reasonString == null) {
                                 // done
-                                env.getLog().logInfo("crawlOrder: added remote crawl url: " + url.toNormalform(true, false));
+                                env.getLog().logInfo("crawlOrder: added remote crawl url: " + urlToString(url));
                             } else if (reasonString.startsWith("double")) {
                                 // case where we have already the url loaded;
-                                env.getLog().logInfo("crawlOrder: ignored double remote crawl url: " + url.toNormalform(true, false));
+                                env.getLog().logInfo("crawlOrder: ignored double remote crawl url: " + urlToString(url));
                             } else {
-                                env.getLog().logInfo("crawlOrder: ignored [" + reasonString + "] remote crawl url: " + url.toNormalform(true, false));
+                                env.getLog().logInfo("crawlOrder: ignored [" + reasonString + "] remote crawl url: " + urlToString(url));
                             }
                         } else {
-                            env.getLog().logWarning("crawlOrder: Rejected URL '" + url.toNormalform(true, false) + "': " + urlRejectReason);
+                            env.getLog().logWarning("crawlOrder: Rejected URL '" + urlToString(url) + "': " + urlRejectReason);
                         }
                     }
                 }
@@ -98,6 +98,14 @@ public class rct_p {
 
         // return rewrite properties
         return prop;
+    }
+
+    /**
+     * @param url
+     * @return
+     */
+    private static String urlToString(yacyURL url) {
+        return (url == null ? "null" : url.toNormalform(true, false));
     }
     
     private static void listHosts(plasmaSwitchboard sb, serverObjects prop) {

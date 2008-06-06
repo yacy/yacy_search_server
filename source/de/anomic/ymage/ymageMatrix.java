@@ -245,7 +245,7 @@ public class ymageMatrix {
         double angle = (x1 - x0 > 0) ? Math.atan(((double) (y0 - y1)) / ((double) (x1 - x0))) : Math.PI - Math.atan(((double) (y0 - y1)) / ((double) (x0 - x1)));
         // now find two more points in between
         // first calculate the radius' of the points
-        double ra = Math.sqrt((double) ((x0 - x1) * (x0 - x1) + (y0 - y1) * (y0 - y1))); // from a known point x1, y1
+        double ra = Math.sqrt(((x0 - x1) * (x0 - x1) + (y0 - y1) * (y0 - y1))); // from a known point x1, y1
         double rb = ra - radius - distance;
         double rc = rb - radius;
         //System.out.println("CONTROL angle = " + angle);
@@ -594,9 +594,9 @@ public class ymageMatrix {
                 }
 
                 // calculating the average
-                rgbR = (int) (rgbR / numberOfNeighbours);
-                rgbG = (int) (rgbG / numberOfNeighbours);
-                rgbB = (int) (rgbB / numberOfNeighbours);
+                rgbR = (rgbR / numberOfNeighbours);
+                rgbG = (rgbG / numberOfNeighbours);
+                rgbB = (rgbB / numberOfNeighbours);
                 
                 rgb = (rgbR << 16) | (rgbG << 8) | rgbB;
                 

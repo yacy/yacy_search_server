@@ -74,7 +74,7 @@ public abstract class indexAbstractReferenceBlacklist implements indexReferenceB
         
         Iterator<String> iter = BLACKLIST_TYPES.iterator();
         while (iter.hasNext()) {
-            String blacklistType = (String) iter.next();
+            String blacklistType = iter.next();
             //this.hostpaths.put(blacklistType, new HashMap<String, ArrayList<String>>());
             this.hostpaths_matchable.put(blacklistType, new HashMap<String, ArrayList<String>>());
             this.hostpaths_notmatchable.put(blacklistType, new HashMap<String, ArrayList<String>>());

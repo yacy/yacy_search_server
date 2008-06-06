@@ -95,7 +95,7 @@ public abstract class kelondroAbstractIOChunks {
     public synchronized short readShort(long pos) throws IOException {
         byte[] b = new byte[2];
         this.readFully(pos, b, 0, 2);
-        return (short) ((((int) b[0] & 0xFF) << 8) | (((int) b[1] & 0xFF) << 0));
+        return (short) (((b[0] & 0xFF) << 8) | ((b[1] & 0xFF) << 0));
     }
 
     public synchronized void writeShort(long pos, final int v) throws IOException {
@@ -107,7 +107,7 @@ public abstract class kelondroAbstractIOChunks {
     public synchronized int readInt(long pos) throws IOException {
         byte[] b = new byte[4];
         this.readFully(pos, b, 0, 4);
-        return (((int) b[0] & 0xFF) << 24) | (((int) b[1] & 0xFF) << 16) | (((int) b[2] & 0xFF) << 8) | ((int) b[3] & 0xFF);
+        return ((b[0] & 0xFF) << 24) | ((b[1] & 0xFF) << 16) | ((b[2] & 0xFF) << 8) | (b[3] & 0xFF);
     }
 
     public synchronized void writeInt(long pos, final int v) throws IOException {

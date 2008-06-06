@@ -228,7 +228,7 @@ public final class indexRepositoryReference {
             Iterator<String> eiter2 = damagedURLS.iterator();
             String urlHash;
             while (eiter2.hasNext()) {
-                urlHash = (String) eiter2.next();
+                urlHash = eiter2.next();
 
                 // trying to fix the invalid URL
                 String oldUrlStr = null;
@@ -258,13 +258,13 @@ public final class indexRepositoryReference {
                             }
                         }
 
-                        if (res.getStatusCode() == 200) {
+                        if (res != null && res.getStatusCode() == 200) {
                             entry.setCol(1, newUrl.toString().getBytes());
                             urlIndexFile.put(entry);
                             log.logInfo("UrlDB-Entry with urlHash '" + urlHash + "' corrected\n\tURL: " + oldUrlStr + " -> " + newUrlStr);
                         } else {
                             remove(urlHash);
-                            log.logInfo("UrlDB-Entry with urlHash '" + urlHash + "' removed\n\tURL: " + oldUrlStr + "\n\tConnection Status: " + res.getStatusLine());
+                            log.logInfo("UrlDB-Entry with urlHash '" + urlHash + "' removed\n\tURL: " + oldUrlStr + "\n\tConnection Status: " + (res == null ? "null" : res.getStatusLine()));
                         }
                     }
                 } catch (Exception e) {

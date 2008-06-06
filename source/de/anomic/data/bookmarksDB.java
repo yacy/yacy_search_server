@@ -177,7 +177,7 @@ public class bookmarksDB {
     		}
     	}
     	folders.add("\uffff");
-    	return (Iterator<String>) folders.iterator();    	
+    	return folders.iterator();    	
     }
     
     public static String cleanTagsString(String tagsString){
@@ -286,7 +286,7 @@ public class bookmarksDB {
         Iterator<Bookmark> it=bookmarkIterator(true);
         Bookmark bm;
         while(it.hasNext()){
-            bm=(Bookmark)it.next();
+            bm=it.next();
             if(priv || bm.getPublic()){
             	set.add(bm.getUrlHash());
             }
@@ -424,7 +424,7 @@ public class bookmarksDB {
     	Iterator<Tag> it = tagIterator(true);
     	Tag tag;
     	while(it.hasNext()){
-    		tag=(Tag) it.next();
+    		tag=it.next();
     		if(priv ||tag.hasPublicItems()){
     			set.add(tag);
     		}
@@ -500,7 +500,7 @@ public class bookmarksDB {
         Tag tag;
         String[] tags;
         while(it.hasNext()){
-            bookmark=(Bookmark) it.next();            
+            bookmark=it.next();            
             tags = cleanTagsString(bookmark.getTagsString() + bookmark.getFoldersString()).split(",");
             tag=null;
             for(int i=0;i<tags.length;i++){
@@ -534,7 +534,7 @@ public class bookmarksDB {
         String date;
         bookmarksDate bmDate;
         while(it.hasNext()){
-            bookmark=(Bookmark) it.next();
+            bookmark=it.next();
             date = (new SimpleDateFormat("yyyy-MM-dd")).format(new Date(bookmark.getTimeStamp()));
             bmDate=getDate(date);
             if(bmDate==null){
@@ -563,7 +563,7 @@ public class bookmarksDB {
             Set<String> tags = new HashSet<String>(); 
             String tagsString;            
             while (it.hasNext()) {							// looping through all bookmarks which were tagged with oldName
-                bookmark = getBookmark((String) it.next());
+                bookmark = getBookmark(it.next());
                 tagsString = bookmark.getTagsString();				
                 // Set<String> tags is difficult with case sensitivity, so I tried 
                 // Set<String> tags = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER), but it didn't do the trick :-(
@@ -616,7 +616,7 @@ public class bookmarksDB {
     	Iterator<yacyURL> it = links.keySet().iterator();
     	while (it.hasNext()) {
     		url= it.next();
-    		title=(String) links.get(url);
+    		title=links.get(url);
     		serverLog.logInfo("BOOKMARKS", "links.get(url)");
     		if(title.equals("")){//cannot be displayed
     			title=url.toString();
@@ -905,7 +905,7 @@ public class bookmarksDB {
             super(map);
             this.urlHash=urlHash;
             if(map.containsKey(BOOKMARK_TAGS))
-                tags=listManager.string2set((String) map.get(BOOKMARK_TAGS));
+                tags=listManager.string2set(map.get(BOOKMARK_TAGS));
             else
                 tags=new HashSet<String>();
             loadTimestamp();
@@ -954,7 +954,7 @@ public class bookmarksDB {
         }
 
         public Bookmark(kelondroObjectsMapEntry map) throws MalformedURLException {
-            this((new yacyURL((String)map.map().get(BOOKMARK_URL), null)).hash(), map.map());
+            this((new yacyURL(map.map().get(BOOKMARK_URL), null)).hash(), map.map());
         }
         
         Map<String, String> toMap() {
@@ -1171,7 +1171,7 @@ public class bookmarksDB {
         
         public Bookmark next() {
             try {
-                return getBookmark((String) this.bookmarkIter.next());
+                return getBookmark(this.bookmarkIter.next());
             } catch (kelondroException e) {
                 //resetDatabase();
                 return null;

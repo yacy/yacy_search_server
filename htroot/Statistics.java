@@ -81,7 +81,7 @@ public class Statistics {
                     while ((it.hasNext()) && (count < maxCount)) {
                         map = it.next();
                         if (count >= maxCount) break;
-                        urlString = (String) map.get("key");
+                        urlString = map.get("key");
                         try { url = new yacyURL(urlString, null); } catch (MalformedURLException e) { url = null; }
                         if ((url != null) && (!url.isLocal())) {
                             prop.put("page_backlinks_list_" + count + "_dark", dark ? "1" : "0");

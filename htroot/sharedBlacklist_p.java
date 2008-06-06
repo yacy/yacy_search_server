@@ -83,7 +83,7 @@ public class sharedBlacklist_p {
         // getting the name of the destination blacklist
         String selectedBlacklistName = "";
         if( post != null && post.containsKey("currentBlacklist") ){
-            selectedBlacklistName = (String)post.get("currentBlacklist");
+            selectedBlacklistName = post.get("currentBlacklist");
         }else{
             selectedBlacklistName = "shared.black";
         }
@@ -100,7 +100,7 @@ public class sharedBlacklist_p {
                  * ====================================================== */
                 
                 // getting the source peer hash
-                String Hash = (String) post.get("hash");
+                String Hash = post.get("hash");
                 
                 // generate the download URL
                 String downloadURL = null;
@@ -142,7 +142,7 @@ public class sharedBlacklist_p {
                  * Download the blacklist from URL
                  * ====================================================== */
                 
-                String downloadURL = (String)post.get("url");
+                String downloadURL = post.get("url");
                 prop.putHTML("page_source", downloadURL);
 
                 try {
@@ -157,7 +157,7 @@ public class sharedBlacklist_p {
                 /* ======================================================
                  * Import the blacklist from file
                  * ====================================================== */
-                String sourceFileName = (String)post.get("file");
+                String sourceFileName = post.get("file");
                 prop.put("page_source", sourceFileName);
                 
                 File sourceFile = new File(listManager.listsPath, sourceFileName);
@@ -183,10 +183,10 @@ public class sharedBlacklist_p {
                     pw = new PrintWriter(new FileWriter(new File(listManager.listsPath, selectedBlacklistName), true));
                     
                     // loop through the received entry list
-                    int num = Integer.parseInt( (String)post.get("num") );
+                    int num = Integer.parseInt( post.get("num") );
                     for(int i=0;i < num; i++){ 
                         if( post.containsKey("item" + i) ){
-                            String newItem = (String)post.get("item" + i);
+                            String newItem = post.get("item" + i);
                             
                             //This should not be needed...
                             if ( newItem.startsWith("http://") ){
@@ -234,7 +234,7 @@ public class sharedBlacklist_p {
                 HashSet<String> Blacklist = new HashSet<String>(listManager.getListArray(new File(listManager.listsPath, selectedBlacklistName)));
                 
                 // sort the loaded blacklist
-                String[] sortedlist = (String[])otherBlacklist.toArray(new String[otherBlacklist.size()]);
+                String[] sortedlist = otherBlacklist.toArray(new String[otherBlacklist.size()]);
                 Arrays.sort(sortedlist);
                 
                 int count = 0;

@@ -37,9 +37,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
-import de.anomic.kelondro.kelondroByteOrder;
-import de.anomic.kelondro.kelondroBytesLongMap;
-
 public final class kelondroHeap {
 
     private kelondroBytesLongMap index;
@@ -60,7 +57,7 @@ public final class kelondroHeap {
         this.ordering = ordering;
         this.heapFile = heapFile;
         if (!(heapFile.exists())) throw new IOException("file " + heapFile + " does not exist");
-        if (heapFile.length() >= (long) Integer.MAX_VALUE) throw new IOException("file " + heapFile + " too large, index can only be crated for files less than 2GB");
+        if (heapFile.length() >= Integer.MAX_VALUE) throw new IOException("file " + heapFile + " too large, index can only be crated for files less than 2GB");
         
         this.index = new kelondroBytesLongMap(keylength, this.ordering, 0);
         DataInputStream is = null;
@@ -90,10 +87,10 @@ public final class kelondroHeap {
                 break loop; // terminate loop
             }
             keystring = new String(key);
-            seek += (long) keystring.length();
+            seek += keystring.length();
         
             // skip content
-            seek += (long) reclen;
+            seek += reclen;
             while (reclen > 0) reclen -= is.skip(reclen);
             
             // store access address to entry

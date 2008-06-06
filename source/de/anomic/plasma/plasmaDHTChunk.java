@@ -218,12 +218,12 @@ public class plasmaDHTChunk {
             int wholesize;
 
             urlCache = new HashMap<String, indexURLReference>();
-            final double maximumDistance = ((double) peerRedundancy * 2) / ((double) wordIndex.seedDB.sizeConnected());
+            final double maximumDistance = ((double) peerRedundancy * 2) / (wordIndex.seedDB.sizeConnected());
             final long timeout = (maxtime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxtime;
             while (
                     (maxcount > refcount) &&
                     (indexContainerIterator.hasNext()) &&
-                    ((container = (indexContainer) indexContainerIterator.next()) != null) &&
+                    ((container = indexContainerIterator.next()) != null) &&
                     (container.size() > 0) &&
                     ((tmpContainers.size() == 0) ||
                      (yacyDHTAction.dhtDistance(container.getWordHash(), tmpContainers.get(0).getWordHash()) < maximumDistance)) &&
@@ -275,7 +275,7 @@ public class plasmaDHTChunk {
                 }
             }
             // create result
-            indexContainers = (indexContainer[]) tmpContainers.toArray(new indexContainer[tmpContainers.size()]);
+            indexContainers = tmpContainers.toArray(new indexContainer[tmpContainers.size()]);
 //[C[16GwGuFzwffp] has 1 entries, C[16hGKMAl0w97] has 9 entries, C[17A8cDPF6SfG] has 9 entries, C[17Kdj__WWnUy] has 1 entries, C[1
             if ((indexContainers == null) || (indexContainers.length == 0)) {
                 if (this.log.isFine()) log.logFine("No index available for index transfer, hash start-point " + startPointHash);

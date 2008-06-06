@@ -63,7 +63,6 @@ import de.anomic.server.serverSwitch;
 import de.anomic.tools.yFormatter;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyVersion;
-import de.anomic.yacy.resourceObserver;
 
 public class Status {
 
@@ -85,14 +84,14 @@ public class Status {
                 prop.put("LOCATION","");
                 return prop;
             } else if (post.containsKey("pauseCrawlJob")) {
-        		String jobType = (String) post.get("jobType");
+        		String jobType = post.get("jobType");
         		if (jobType.equals("localCrawl")) 
                     sb.pauseCrawlJob(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL);
         		else if (jobType.equals("remoteTriggeredCrawl")) 
                     sb.pauseCrawlJob(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
         		redirect = true;
         	} else if (post.containsKey("continueCrawlJob")) {
-        		String jobType = (String) post.get("jobType");
+        		String jobType = post.get("jobType");
         		if (jobType.equals("localCrawl")) 
                     sb.continueCrawlJob(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL);
         		else if (jobType.equals("remoteTriggeredCrawl")) 
@@ -103,7 +102,7 @@ public class Status {
         		httpdByteCountOutputStream.resetCount();
         		redirect = true;
         	} else if (post.containsKey("popup")) {
-                String trigger_enabled = (String) post.get("popup");
+                String trigger_enabled = post.get("popup");
                 if (trigger_enabled.equals("false")) {
                     sb.setConfig("browserPopUpTrigger", "false");
                 } else if (trigger_enabled.equals("true")){

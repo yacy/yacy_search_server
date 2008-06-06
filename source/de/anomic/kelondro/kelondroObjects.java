@@ -98,7 +98,7 @@ public class kelondroObjects {
         // load map from cache
         assert key != null;
         if (cache == null) return null; // case may appear during shutdown
-        kelondroObjectsEntry map = (kelondroObjectsEntry) cache.get(key);
+        kelondroObjectsEntry map = cache.get(key);
         if (map != null) return map;
 
         // load map from kra
@@ -126,7 +126,7 @@ public class kelondroObjects {
         if (cache == null) return; // may appear during shutdown
         if (cache.size() >= cachesize) {
             // delete one entry
-            final String delkey = (String) cacheScore.getMinObject();
+            final String delkey = cacheScore.getMinObject();
             cacheScore.deleteScore(delkey);
             cache.remove(delkey);
         }
@@ -184,7 +184,7 @@ public class kelondroObjects {
         }
 
         public kelondroObjectsEntry next() {
-            final String nextKey = (String) keyIterator.next();
+            final String nextKey = keyIterator.next();
             if (nextKey == null) {
                 finish = true;
                 return null;

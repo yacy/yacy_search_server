@@ -220,7 +220,7 @@ public class cryptbig {
 	    String method;
 	    Iterator<String> i = methods.iterator();
 	    while (i.hasNext()) {
-		method = (String) i.next();
+		method = i.next();
 		System.out.print(method + " : ");
 		try {
 		    cryptbig crypter = new cryptbig("abrakadabra", method);
@@ -352,7 +352,12 @@ public class cryptbig {
 	    System.err.println("ERROR: file '" + inFileName + "' not found");
 	} catch (IOException e) {
 	    System.err.println("ERROR: IO trouble");
-	    try {fin.close(); fout.close();} catch (Exception ee) {}
+	    try { if(fin != null) {
+	        fin.close();
+	    }} catch (Exception ee) {}
+	    try { if(fout != null) {
+	        fout.close();
+	    }} catch (Exception ee) {}
 	}
     }
 	

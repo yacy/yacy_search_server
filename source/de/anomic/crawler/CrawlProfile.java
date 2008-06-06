@@ -116,7 +116,7 @@ public class CrawlProfile {
         }
         public entry next() {
             try {
-                lastkey = (String) handleIterator.next();
+                lastkey = handleIterator.next();
                 return getEntry(lastkey);
             } catch (kelondroException e) {
                 clear();
@@ -301,7 +301,7 @@ public class CrawlProfile {
         
         public entry(HashMap<String, String> mem) {
             this.mem = mem;
-            this.doms = (HashMap<String, DomProfile>) domsCache.get(this.mem.get(HANDLE));
+            this.doms = domsCache.get(this.mem.get(HANDLE));
             if (this.doms == null) this.doms = new HashMap<String, DomProfile>();
         }
         
@@ -309,27 +309,27 @@ public class CrawlProfile {
             return mem;
         }
         public String handle() {
-            String r = (String) mem.get(HANDLE);
+            String r = mem.get(HANDLE);
             if (r == null) return null; else return r;
         }
         public String name() {
-            String r = (String) mem.get(NAME);
+            String r = mem.get(NAME);
             if (r == null) return ""; else return r;
         }
         public String startURL() {
-            String r = (String) mem.get(START_URL);
+            String r = mem.get(START_URL);
             if (r == null) return null; else return r;
         }
         public String generalFilter() {
-            String r = (String) mem.get(GENERAL_FILTER);
+            String r = mem.get(GENERAL_FILTER);
             if (r == null) return ".*"; else return r;
         }
         public String specificFilter() {
-            String r = (String) mem.get(SPECIFIC_FILTER);
+            String r = mem.get(SPECIFIC_FILTER);
             if (r == null) return ".*"; else return r;
         }
         public int generalDepth() {
-            String r = (String) mem.get(GENERAL_DEPTH);
+            String r = mem.get(GENERAL_DEPTH);
             if (r == null) return 0; else try {
                 return Integer.parseInt(r);
             } catch (NumberFormatException e) {
@@ -337,7 +337,7 @@ public class CrawlProfile {
             }
         }
         public int specificDepth() {
-            String r = (String) mem.get(SPECIFIC_DEPTH);
+            String r = mem.get(SPECIFIC_DEPTH);
             if (r == null) return 0; else try {
                 return Integer.parseInt(r);
             } catch (NumberFormatException e) {
@@ -347,7 +347,7 @@ public class CrawlProfile {
         public long recrawlIfOlder() {
             // returns a long (millis) that is the minimum age that
             // an antry must have to be re-crawled
-            String r = (String) mem.get(RECRAWL_IF_OLDER);
+            String r = mem.get(RECRAWL_IF_OLDER);
             if (r == null) return Long.MAX_VALUE; else try {
                 long l = Long.parseLong(r) * 60000L;
                 return (l < 0) ? Long.MAX_VALUE : l;
@@ -359,7 +359,7 @@ public class CrawlProfile {
             // if the depth is equal or less to this depth,
             // then the current url feeds with its domain the crawl filter
             // if this is -1, all domains are feeded
-            String r = (String) mem.get(DOM_FILTER_DEPTH);
+            String r = mem.get(DOM_FILTER_DEPTH);
             if (r == null) return Integer.MAX_VALUE; else try {
                 int i = Integer.parseInt(r);
                 if (i < 0) return Integer.MAX_VALUE;
@@ -371,7 +371,7 @@ public class CrawlProfile {
         public int domMaxPages() {
             // this is the maximum number of pages that are crawled for a single domain
             // if -1, this means no limit
-            String r = (String) mem.get(DOM_MAX_PAGES);
+            String r = mem.get(DOM_MAX_PAGES);
             if (r == null) return Integer.MAX_VALUE; else try {
                 int i = Integer.parseInt(r);
                 if (i < 0) return Integer.MAX_VALUE;
@@ -381,44 +381,44 @@ public class CrawlProfile {
             }
         }
         public boolean crawlingQ() {
-            String r = (String) mem.get(CRAWLING_Q);
+            String r = mem.get(CRAWLING_Q);
             if (r == null) return false; else return (r.equals(Boolean.TRUE.toString()));
         }
         public boolean indexText() {
-            String r = (String) mem.get(INDEX_TEXT);
+            String r = mem.get(INDEX_TEXT);
             if (r == null) return true; else return (r.equals(Boolean.TRUE.toString()));
         }
         public boolean indexMedia() {
-            String r = (String) mem.get(INDEX_MEDIA);
+            String r = mem.get(INDEX_MEDIA);
             if (r == null) return true; else return (r.equals(Boolean.TRUE.toString()));
         }
         public boolean storeHTCache() {
-            String r = (String) mem.get(STORE_HTCACHE);
+            String r = mem.get(STORE_HTCACHE);
             if (r == null) return false; else return (r.equals(Boolean.TRUE.toString()));
         }
         public boolean storeTXCache() {
-            String r = (String) mem.get(STORE_TXCACHE);
+            String r = mem.get(STORE_TXCACHE);
             if (r == null) return false; else return (r.equals(Boolean.TRUE.toString()));
         }
         public boolean remoteIndexing() {
-            String r = (String) mem.get(REMOTE_INDEXING);
+            String r = mem.get(REMOTE_INDEXING);
             if (r == null) return false; else return (r.equals(Boolean.TRUE.toString()));
         }
         public boolean excludeStaticStopwords() {
-            String r = (String) mem.get(XSSTOPW);
+            String r = mem.get(XSSTOPW);
             if (r == null) return false; else return (r.equals(Boolean.TRUE.toString()));
         }
         public boolean excludeDynamicStopwords() {
-            String r = (String) mem.get(XDSTOPW);
+            String r = mem.get(XDSTOPW);
             if (r == null) return false; else return (r.equals(Boolean.TRUE.toString()));
         }
         public boolean excludeParentStopwords() {
-            String r = (String) mem.get(XPSTOPW);
+            String r = mem.get(XPSTOPW);
             if (r == null) return false; else return (r.equals(Boolean.TRUE.toString()));
         }
         public void domInc(String domain, String referrer, int depth) {
             synchronized (domain.intern()) {
-                DomProfile dp = (DomProfile) doms.get(domain);
+                DomProfile dp = doms.get(domain);
                 if (dp == null) {
                     // new domain
                     doms.put(domain, new DomProfile(referrer, depth));
@@ -434,7 +434,7 @@ public class CrawlProfile {
             int max = domFilterDepth();
             if (max == Integer.MAX_VALUE) return true;
             synchronized (domain.intern()) {
-                DomProfile dp = (DomProfile) doms.get(domain);
+                DomProfile dp = doms.get(domain);
                 if (dp == null) {
                     return 0 < max;
                 } else {
@@ -447,7 +447,7 @@ public class CrawlProfile {
             int max = domMaxPages();
             if (max == Integer.MAX_VALUE) return true;
             synchronized (domain.intern()) {
-                DomProfile dp = (DomProfile) doms.get(domain);
+                DomProfile dp = doms.get(domain);
                 if (dp == null) {
                     return 0 < max;
                 } else {

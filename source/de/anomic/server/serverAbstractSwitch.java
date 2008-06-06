@@ -98,7 +98,7 @@ public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
     	if (applyPro) {
         	i = new HashMap<String, String>(initProps).keySet().iterator(); // clone the map to avoid concurrent modification exceptions
         	while (i.hasNext()) {
-        		prop = (String) i.next();
+        		prop = i.next();
         		if (prop.endsWith("__pro")) {
         			initProps.put(prop.substring(0, prop.length() - 5), initProps.get(prop));
         		}
@@ -107,7 +107,7 @@ public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
         // delete the 'pro' init settings
         i = initProps.keySet().iterator();
         while (i.hasNext()) {
-        	prop = (String) i.next();
+        	prop = i.next();
         	if (prop.endsWith("__pro")) {
         		i.remove();
         	}
@@ -379,7 +379,7 @@ public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
     }
 
     public void undeployAction(String actionName) {
-	serverSwitchAction action = (serverSwitchAction) switchActions.get(actionName);
+	serverSwitchAction action = switchActions.get(actionName);
 	action.close();
 	switchActions.remove(actionName);
 	log.logInfo("Undeployed Action '" + action.getShortDescription() + "', (" + switchActions.size() + " actions registered)");
@@ -515,7 +515,7 @@ public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
 
     public String getAuthentifyUser(InetAddress host) {
 	// read user name according to host addresses
-	String a = (String) authorization.get(host);
+	String a = authorization.get(host);
 	if (a == null) return null;
 	int p = a.indexOf("@");
 	if (p < 0) return null;
@@ -524,7 +524,7 @@ public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
 
     public String getAuthentifyRights(InetAddress host) {
 	// read access rigths according to host addresses
-	String a = (String) authorization.get(host);
+	String a = authorization.get(host);
 	if (a == null) return null;
 	int p = a.indexOf("@");
 	if (p < 0) return null;

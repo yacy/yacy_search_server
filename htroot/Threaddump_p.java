@@ -48,6 +48,11 @@
 // javac -classpath .:../Classes Blacklist_p.java
 // if the shell's current path is HTROOT
 
+import java.io.File;
+import java.io.IOException;
+import java.util.Date;
+import java.util.Map;
+
 import de.anomic.data.htmlTools;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -56,12 +61,6 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.tools.nxTools;
 import de.anomic.yacy.yacyVersion;
-
-import java.util.Map;
-import java.lang.StringBuffer;
-import java.util.Date;
-import java.io.File;
-import java.io.IOException;
 
 public class Threaddump_p {
 

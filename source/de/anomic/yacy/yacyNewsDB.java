@@ -118,7 +118,7 @@ public class yacyNewsDB {
         }
 
         public yacyNewsRecord next() {
-            return b2r((kelondroRow.Entry) rowIterator.next());
+            return b2r(rowIterator.next());
         }
 
         public void remove() {

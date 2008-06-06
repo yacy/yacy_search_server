@@ -45,7 +45,7 @@ public class kelondroMapObjects extends kelondroObjects {
         this(dyn, cachesize, null, null, null, null, null);
     }
     
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "null" })
 	public kelondroMapObjects(kelondroDyn dyn, int cachesize, String[] sortfields, String[] longaccfields, String[] doubleaccfields, Method externalInitializer, Object externalHandler) {
         super(dyn, cachesize);
         
@@ -240,7 +240,7 @@ public class kelondroMapObjects extends kelondroObjects {
         for (int i = 0; i < sortfields.length; i++) {
             cell = map.get(sortfields[i]);
             if (cell != null) {
-                cluster = (kelondroMScoreCluster<String>) sortClusterMap.get(sortfields[i]);
+                cluster = sortClusterMap.get(sortfields[i]);
                 cluster.setScore(key, kelondroMScoreCluster.object2score(cell));
                 sortClusterMap.put(sortfields[i], cluster);
             }

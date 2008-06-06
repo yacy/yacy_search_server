@@ -125,7 +125,7 @@ public final class hello {
         }
         
         int urls = -1;
-        if (sb.clusterhashes != null) remoteSeed.setAlternativeAddress((String) sb.clusterhashes.get(remoteSeed.hash));
+        if (sb.clusterhashes != null) remoteSeed.setAlternativeAddress(sb.clusterhashes.get(remoteSeed.hash));
         
         // if the remote client has reported its own IP address and the client supports
         // the port forwarding feature (if client version >= 0.383) then we try to 
@@ -138,8 +138,8 @@ public final class hello {
             remoteSeed.setIP(reportedip);
             urls = yacyClient.queryUrlCount(remoteSeed);
         } else {
-            prop.put("yourip", (ias == null) ? "" : ias.getHostAddress());
-            remoteSeed.setIP((ias == null) ? "" : ias.getHostAddress());
+            prop.put("yourip", ias.getHostAddress());
+            remoteSeed.setIP(ias.getHostAddress());
         }
 
         // if the previous attempt (using the reported ip address) was not successful, try the ip where 
@@ -187,7 +187,7 @@ public final class hello {
             }
         }
         sb.webIndex.peerActions.setUserAgent(clientip, userAgent);
-        if (!((String)prop.get(yacySeed.YOURTYPE)).equals(reportedPeerType)) {
+        if (!(prop.get(yacySeed.YOURTYPE)).equals(reportedPeerType)) {
             yacyCore.log.logInfo("hello: changing remote peer '" + remoteSeed.getName() +
                                                            "' [" + reportedip +
                                              "] peerType from '" + reportedPeerType +

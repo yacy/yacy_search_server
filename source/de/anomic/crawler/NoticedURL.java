@@ -49,8 +49,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 
-import de.anomic.crawler.Balancer;
-import de.anomic.crawler.CrawlEntry;
 import de.anomic.server.logging.serverLog;
 
 public class NoticedURL {
@@ -255,7 +253,7 @@ public class NoticedURL {
                 break;
             }
         }
-        return (CrawlEntry[]) list.toArray(new CrawlEntry[list.size()]);
+        return list.toArray(new CrawlEntry[list.size()]);
     }
     
     public Iterator<CrawlEntry> iterator(int stackType) {

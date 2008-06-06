@@ -62,7 +62,7 @@ public class blacklists_p {
                 
                 count=0;
                 for (int j=0;j<list.size();++j){
-                    String nextEntry = (String)list.get(j);
+                    String nextEntry = list.get(j);
                     
                     if (nextEntry.length() == 0) continue;
                     if (nextEntry.startsWith("#")) continue;

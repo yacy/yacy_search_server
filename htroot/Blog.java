@@ -86,7 +86,7 @@ public class Blog {
         prop.put("display", 1); // Fixed to 1
 
         
-        final boolean xml = ((String)header.get(httpHeader.CONNECTION_PROP_PATH)).endsWith(".xml");
+        final boolean xml = (header.get(httpHeader.CONNECTION_PROP_PATH)).endsWith(".xml");
         final String address = sb.webIndex.seedDB.mySeed().getPublicAddress();
 
         if(hasRights) {

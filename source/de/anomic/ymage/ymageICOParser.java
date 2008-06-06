@@ -101,11 +101,9 @@ public class ymageICOParser {
         FileInputStream fis = null;
         try {
             fis = new FileInputStream(in);
+            fis.read(file);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
-        }
-        try {
-            fis.read(file);
         } catch (IOException e) {
             e.printStackTrace();
         }

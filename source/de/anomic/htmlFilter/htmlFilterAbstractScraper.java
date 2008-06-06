@@ -418,7 +418,7 @@ public abstract class htmlFilterAbstractScraper implements htmlFilterScraper {
                 return new char[] {(char) Integer.parseInt((new String(code)).substring(2, code.length - 1))};
             }
         } else {
-            String t = (String) trans.get(new String(code)); 
+            String t = trans.get(new String(code)); 
             if (t == null) return new char[0];
             return t.toCharArray();
         }
@@ -445,7 +445,7 @@ public abstract class htmlFilterAbstractScraper implements htmlFilterScraper {
         while ((p0 = bb.indexOf(lb, p0)) >= 0) {
             p1 = bb.indexOf(rb, p0);
             if (p1 >= 0) {
-                bb = ((serverCharBuffer)new serverCharBuffer(bb.getChars(0, p0), bb.length() + p0 - p1 + 1).trim().append(32)).append(new serverCharBuffer(bb.getChars(p1 + 1)).trim());
+                bb = (new serverCharBuffer(bb.getChars(0, p0), bb.length() + p0 - p1 + 1).trim().append(32)).append(new serverCharBuffer(bb.getChars(p1 + 1)).trim());
             } else {
                 bb = new serverCharBuffer(bb.getChars(0, p0), bb.length()).trim().append(new serverCharBuffer(bb.getChars(p0 + 1)).trim());
             }

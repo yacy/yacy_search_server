@@ -163,14 +163,14 @@ public class IndexControlURLs_p {
         // generate list
         if (post.containsKey("urlhashsimilar")) {
             try {
-                final Iterator<indexURLReference> entryIt = new kelondroRotateIterator<indexURLReference>(sb.webIndex.entriesURL(true, urlhash), new String(kelondroBase64Order.zero(urlhash.length())), sb.webIndex.size()); 
+                final Iterator<indexURLReference> entryIt = new kelondroRotateIterator<indexURLReference>(sb.webIndex.entriesURL(true, urlhash), new String(kelondroBase64Order.zero((urlhash == null ? 0 : urlhash.length()))), sb.webIndex.size()); 
                 StringBuffer result = new StringBuffer("Sequential List of URL-Hashes:<br />");
                 indexURLReference entry;
                 int i = 0;
                 int rows = 0, cols = 0;
                 prop.put("urlhashsimilar", "1");
                 while (entryIt.hasNext() && i < 256) {
-                    entry = (indexURLReference) entryIt.next();
+                    entry = entryIt.next();
                     if (entry == null) break;
                     prop.put("urlhashsimilar_rows_"+rows+"_cols_"+cols+"_urlHash", entry.hash());
                     cols++;

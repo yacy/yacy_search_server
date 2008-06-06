@@ -212,7 +212,7 @@ public class kelondroCollectionIndex {
                 long lastlog = start;
                 int count = 0;
                 while (ei.hasNext()) {
-                    aentry = (kelondroRow.EntryIndex) ei.next();
+                    aentry = ei.next();
                     key = aentry.getColBytes(0);
                     assert (key != null);
                     if (key == null) continue; // skip deleted entries
@@ -278,7 +278,7 @@ public class kelondroCollectionIndex {
             Map<String, String> props = new HashMap<String, String>();
             if (propfile.exists()) {
                 props = serverFileUtils.loadHashMap(propfile);
-                String stored_rowdef = (String) props.get("rowdef");
+                String stored_rowdef = props.get("rowdef");
                 if ((stored_rowdef == null) || (!(rowdef.subsumes(new kelondroRow(stored_rowdef, rowdef.objectOrder, 0))))) {
                     System.out.println("FATAL ERROR: stored rowdef '" + stored_rowdef + "' does not match with new rowdef '" + 
                             rowdef + "' for array cluster '" + path + "/" + filenameStub + "'");
@@ -314,7 +314,7 @@ public class kelondroCollectionIndex {
     
     private kelondroFixedWidthArray getArray(int partitionNumber, int serialNumber, kelondroByteOrder indexOrder, int chunksize) {
         String accessKey = partitionNumber + "-" + chunksize;
-        kelondroFixedWidthArray array = (kelondroFixedWidthArray) arrays.get(accessKey);
+        kelondroFixedWidthArray array = arrays.get(accessKey);
         if (array != null) return array;
         try {
             array = openArrayFile(partitionNumber, serialNumber, indexOrder, true);
@@ -390,7 +390,7 @@ public class kelondroCollectionIndex {
         indexrow.setCol(idx_col_chunkcount, collection.size());
         indexrow.setCol(idx_col_clusteridx, (byte) partitionNumber);
         indexrow.setCol(idx_col_flags, (byte) 0);
-        indexrow.setCol(idx_col_indexpos, (long) newRowNumber);
+        indexrow.setCol(idx_col_indexpos, newRowNumber);
         indexrow.setCol(idx_col_lastread, kelondroRowCollection.daysSince2000(System.currentTimeMillis()));
         indexrow.setCol(idx_col_lastwrote, kelondroRowCollection.daysSince2000(System.currentTimeMillis()));
 
@@ -416,7 +416,7 @@ public class kelondroCollectionIndex {
         // store the new row number in the index
         indexrow.setCol(idx_col_chunkcount, collection.size());
         indexrow.setCol(idx_col_clusteridx, (byte) partitionNumber);
-        indexrow.setCol(idx_col_indexpos, (long) rowNumber);
+        indexrow.setCol(idx_col_indexpos, rowNumber);
         indexrow.setCol(idx_col_lastwrote, kelondroRowCollection.daysSince2000(System.currentTimeMillis()));
 
         // after calling this method there must be a index.put(indexrow);
@@ -470,7 +470,7 @@ public class kelondroCollectionIndex {
         //int oldchunksize       = (int) indexrow.getColLong(idx_col_chunksize);  // needed only for migration
         int oldchunkcount      = (int) indexrow.getColLong(idx_col_chunkcount); // the number if rows in the collection
         int oldrownumber       = (int) indexrow.getColLong(idx_col_indexpos);   // index of the entry in array
-        int oldPartitionNumber = (int) indexrow.getColByte(idx_col_clusteridx); // points to array file
+        int oldPartitionNumber = indexrow.getColByte(idx_col_clusteridx); // points to array file
         assert (oldPartitionNumber >= arrayIndex(oldchunkcount));
 
         int newPartitionNumber = arrayIndex(collection.size());
@@ -508,13 +508,13 @@ public class kelondroCollectionIndex {
         } else {
             // merge with the old collection
             // attention! this modifies the indexrow entry which must be written with index.put(indexrow) afterwards!
-            kelondroRowCollection collection = (kelondroRowCollection) container;
+            kelondroRowCollection collection = container;
             
             // read old information
             int oldchunksize       = (int) indexrow.getColLong(idx_col_chunksize);  // needed only for migration
             int oldchunkcount      = (int) indexrow.getColLong(idx_col_chunkcount); // the number if rows in the collection
             int oldrownumber       = (int) indexrow.getColLong(idx_col_indexpos);   // index of the entry in array
-            int oldPartitionNumber = (int) indexrow.getColByte(idx_col_clusteridx); // points to array file
+            int oldPartitionNumber = indexrow.getColByte(idx_col_clusteridx); // points to array file
             assert (oldPartitionNumber >= arrayIndex(oldchunkcount)) : "oldPartitionNumber = " + oldPartitionNumber + ", arrayIndex(oldchunkcount) = " + arrayIndex(oldchunkcount);
             int oldSerialNumber = 0;
 
@@ -598,7 +598,7 @@ public class kelondroCollectionIndex {
             // now delete randomly more entries from the survival collection
             i = collection.rows();
             while (i.hasNext()) {
-                entry = (kelondroRow.Entry) i.next();
+                entry = i.next();
                 ref = entry.getColBytes(0);
                 if (rand.nextInt() % 4 != 0) {
                     t2 = System.currentTimeMillis();
@@ -648,7 +648,7 @@ public class kelondroCollectionIndex {
         int oldchunksize       = (int) indexrow.getColLong(idx_col_chunksize);  // needed only for migration
         int oldchunkcount      = (int) indexrow.getColLong(idx_col_chunkcount); // the number if rows in the collection
         int oldrownumber       = (int) indexrow.getColLong(idx_col_indexpos);   // index of the entry in array
-        int oldPartitionNumber = (int) indexrow.getColByte(idx_col_clusteridx); // points to array file
+        int oldPartitionNumber = indexrow.getColByte(idx_col_clusteridx); // points to array file
         assert (oldPartitionNumber >= arrayIndex(oldchunkcount));
 
         int removed = 0;
@@ -728,7 +728,7 @@ public class kelondroCollectionIndex {
         int chunksize       = (int) indexrow.getColLong(idx_col_chunksize);
         int chunkcount      = (int) indexrow.getColLong(idx_col_chunkcount);
         int rownumber       = (int) indexrow.getColLong(idx_col_indexpos);
-        int partitionnumber = (int) indexrow.getColByte(idx_col_clusteridx);
+        int partitionnumber = indexrow.getColByte(idx_col_clusteridx);
         assert(partitionnumber >= arrayIndex(chunkcount)) : "partitionnumber = " + partitionnumber + ", arrayIndex(chunkcount) = " + arrayIndex(chunkcount);
         int serialnumber = 0;
         
@@ -762,7 +762,7 @@ public class kelondroCollectionIndex {
             indexEntry.setCol(idx_col_chunkcount, collection.size());
             indexEntry.setCol(idx_col_clusteridx, (byte) clusteridx);
             indexEntry.setCol(idx_col_flags, (byte) 0);
-            indexEntry.setCol(idx_col_indexpos, (long) rownumber);
+            indexEntry.setCol(idx_col_indexpos, rownumber);
             indexEntry.setCol(idx_col_lastread, kelondroRowCollection.daysSince2000(System.currentTimeMillis()));
             indexEntry.setCol(idx_col_lastwrote, kelondroRowCollection.daysSince2000(System.currentTimeMillis()));
             index.put(indexEntry);
@@ -804,7 +804,7 @@ public class kelondroCollectionIndex {
         }
 
         public Object[] next() {
-            kelondroRow.Entry indexrow = (kelondroRow.Entry) indexRowIterator.next();
+            kelondroRow.Entry indexrow = indexRowIterator.next();
             assert (indexrow != null);
             if (indexrow == null) return null;
             try {

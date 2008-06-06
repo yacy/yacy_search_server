@@ -152,7 +152,7 @@ public class kelondroXMLTables {
             if (l == null)
                 throw new RuntimeException("Microtables.get: table does not exist");
             if (l.containsKey(key))
-                return (String) l.get(key);
+                return l.get(key);
             else
                 return deflt;
         }

@@ -245,7 +245,7 @@ public class IndexControlRWIs_p {
                     int rows = 0, cols = 0;
                     prop.put("keyhashsimilar", "1");
                     while (containerIt.hasNext() && i < 256) {
-                        container = (indexContainer) containerIt.next();
+                        container = containerIt.next();
                         prop.put("keyhashsimilar_rows_"+rows+"_cols_"+cols+"_wordHash", container.getWordHash());
                         cols++;
                         if (cols==8) {

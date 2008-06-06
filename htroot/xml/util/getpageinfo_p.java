@@ -49,7 +49,6 @@ import java.io.IOException;
 import java.io.Writer;
 import java.net.MalformedURLException;
 
-
 import de.anomic.data.robotsParser;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterWriter;
@@ -70,8 +69,8 @@ public class getpageinfo_p {
         String actions="title";
         if(post!=null && post.containsKey("url")){
             if(post.containsKey("actions"))
-                actions=(String)post.get("actions");
-            String url=(String) post.get("url");
+                actions=post.get("actions");
+            String url=post.get("url");
 			if(url.toLowerCase().startsWith("ftp://")){
 				prop.put("robots-allowed", "1");
 				prop.putHTML("title", "FTP: "+url, true);

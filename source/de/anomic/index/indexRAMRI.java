@@ -152,7 +152,7 @@ public final class indexRAMRI implements indexRI, indexRIReader {
     public synchronized String maxScoreWordHash() {
         if (heap.size() == 0) return null;
         try {
-            return (String) hashScore.getMaxObject();
+            return hashScore.getMaxObject();
         } catch (Exception e) {
             log.logSevere("flushFromMem: " + e.getMessage(), e);
         }
@@ -169,24 +169,24 @@ public final class indexRAMRI implements indexRI, indexRIReader {
             String hash = null;
             int count = hashScore.getMaxScore();
             if ((count >= cacheReferenceCountLimit) &&
-                ((hash = (String) hashScore.getMaxObject()) != null)) {
+                ((hash = hashScore.getMaxObject()) != null)) {
                 // we MUST flush high-score entries, because a loop deletes entries in cache until this condition fails
                 // in this cache we MUST NOT check wCacheMinAge
                 return hash;
             }
             long oldestTime = longEmit(hashDate.getMinScore());
             if (((System.currentTimeMillis() - oldestTime) > cacheReferenceAgeLimit) &&
-                ((hash = (String) hashDate.getMinObject()) != null)) {
+                ((hash = hashDate.getMinObject()) != null)) {
                 // flush out-dated entries
                 return hash;
             }
             // cases with respect to memory situation
             if (serverMemory.free() < 100000) {
                 // urgent low-memory case
-                hash = (String) hashScore.getMaxObject(); // flush high-score entries (saves RAM)
+                hash = hashScore.getMaxObject(); // flush high-score entries (saves RAM)
             } else {
                 // not-efficient-so-far case. cleans up unnecessary cache slots
-                hash = (String) hashDate.getMinObject(); // flush oldest entries
+                hash = hashDate.getMinObject(); // flush oldest entries
             }
             if (hash == null) {
                 heap.wordContainers(null, false).next();

@@ -51,7 +51,6 @@ import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-//import de.anomic.htmlFilter.*;
 
 public class IndexShare_p {
 

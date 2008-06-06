@@ -423,8 +423,8 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         System.out.print("INPUT-ITERATOR: ");
         kelondroRow.Entry entry;
         while (ii.hasNext()) {
-            entry = (kelondroRow.Entry) ii.next();
-            s = new String((byte[]) entry.getColBytes(0)).trim();
+            entry = ii.next();
+            s = new String(entry.getColBytes(0)).trim();
             System.out.print(s + ", ");
             if (s.equals("drei")) ii.remove();
         }

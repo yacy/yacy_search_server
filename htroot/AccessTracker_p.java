@@ -58,7 +58,7 @@ public class AccessTracker_p {
      
         // return variable that accumulates replacements
         serverObjects prop = new serverObjects();
-        prop.setLocalized(!((String)header.get("PATH")).endsWith(".xml"));
+        prop.setLocalized(!(header.get("PATH")).endsWith(".xml"));
         int page = 0;
         if (post != null) page = post.getInt("page", 0);
         prop.put("page", page);
@@ -72,7 +72,7 @@ public class AccessTracker_p {
             int entCount = 0;
             try {
             while ((entCount < maxCount) && (i.hasNext())) {
-                host = (String) i.next();
+                host = i.next();
                 access = sb.accessTrack(host);
                 prop.putHTML("page_list_" + entCount + "_host", host);
                 prop.putNum("page_list_" + entCount + "_countSecond", access.tailMap(new Long(System.currentTimeMillis() - 1000)).size());
@@ -108,8 +108,8 @@ public class AccessTracker_p {
 						while (ii.hasNext()) {
 							entry = ii.next();
 							prop.putHTML("page_list_" + entCount + "_host", host);
-							prop.put("page_list_" + entCount + "_date", serverDate.formatShortSecond(new Date(((Long) entry.getKey()).longValue())));
-							prop.putHTML("page_list_" + entCount + "_path", (String) entry.getValue());
+							prop.put("page_list_" + entCount + "_date", serverDate.formatShortSecond(new Date((entry.getKey()).longValue())));
+							prop.putHTML("page_list_" + entCount + "_path", entry.getValue());
 							entCount++;
 						}
 					} catch (ConcurrentModificationException e) {} // we don't want to synchronize this
@@ -118,14 +118,14 @@ public class AccessTracker_p {
                 try {
                 	Iterator<String> i = sb.accessHosts();
                     while ((entCount < maxCount) && (i.hasNext())) {
-						host = (String) i.next();
+						host = i.next();
 						access = sb.accessTrack(host);
 						Iterator<Map.Entry<Long, String>> ii = treemapclone(access).entrySet().iterator();
 						while (ii.hasNext()) {
 							entry = ii.next();
 							prop.putHTML("page_list_" + entCount + "_host", host);
-							prop.put("page_list_" + entCount + "_date", serverDate.formatShortSecond(new Date(((Long) entry.getKey()).longValue())));
-							prop.putHTML("page_list_" + entCount + "_path", (String) entry.getValue());
+							prop.put("page_list_" + entCount + "_date", serverDate.formatShortSecond(new Date((entry.getKey()).longValue())));
+							prop.putHTML("page_list_" + entCount + "_path", entry.getValue());
 							entCount++;
 						}
 					}

@@ -126,21 +126,21 @@ public class kelondroNIOFileRA extends kelondroAbstractRA implements kelondroRA 
     public int read() throws IOException {
         int r;
         if (seekPos < bodyOffset) {
-            r = 0xFF & ((int) bufferHead.get((int) seekPos));
+            r = 0xFF & (bufferHead.get((int) seekPos));
         } else if (seekPos < tailOffset) {
             if (mapBody) {
-                r = 0xFF & ((int) bufferBody.get((int) (seekPos - bodyOffset)));
+                r = 0xFF & (bufferBody.get((int) (seekPos - bodyOffset)));
             } else {
                 RAFile.seek(seekPos);
                 r = RAFile.read();
             }
         } else if (seekPos < (tailOffset + tailCurrSize)) {
-            r = 0xFF & ((int) bufferTail.get((int) (seekPos - tailOffset)));
+            r = 0xFF & (bufferTail.get((int) (seekPos - tailOffset)));
         } else {
             r = -1;
             while (growTail(seekPos)) {
                 if (seekPos < (tailOffset + tailCurrSize)) {
-                    r = 0xFF & ((int) bufferTail.get((int) (seekPos - tailOffset)));
+                    r = 0xFF & (bufferTail.get((int) (seekPos - tailOffset)));
                     break;
                 } else {
                     RAFile.seek(seekPos);

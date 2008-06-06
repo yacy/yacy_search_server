@@ -55,7 +55,6 @@ import java.util.TreeMap;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.cache.IResourceInfo;
-import de.anomic.plasma.cache.ResourceInfoFactory;
 import de.anomic.server.serverDate;
 import de.anomic.yacy.yacyURL;
 
@@ -200,7 +199,7 @@ public class ResourceInfo implements IResourceInfo {
 
         // -pragma in cached response
         if (this.responseHeader.containsKey(httpHeader.PRAGMA) &&
-            ((String) this.responseHeader.get(httpHeader.PRAGMA)).toUpperCase().equals("NO-CACHE")) {
+            (this.responseHeader.get(httpHeader.PRAGMA)).toUpperCase().equals("NO-CACHE")) {
             return "Denied_(pragma_no_cache)";
         }
 
@@ -224,7 +223,7 @@ public class ResourceInfo implements IResourceInfo {
 
         // -cache-control in cached response
         // the cache-control has many value options.
-        String cacheControl = (String) this.responseHeader.get(httpHeader.CACHE_CONTROL);
+        String cacheControl = this.responseHeader.get(httpHeader.CACHE_CONTROL);
         if (cacheControl != null) {
             cacheControl = cacheControl.trim().toUpperCase();
             /* we have the following cases for cache-control:
@@ -291,7 +290,7 @@ public class ResourceInfo implements IResourceInfo {
             // -pragma in response
             // if we have a pragma non-cache, we don't cache. usually if this is wanted from
             // the server, it makes sense
-            String cacheControl = (String) this.responseHeader.get(httpHeader.PRAGMA);
+            String cacheControl = this.responseHeader.get(httpHeader.PRAGMA);
             if (cacheControl != null && cacheControl.trim().toUpperCase().equals("NO-CACHE")) { return "controlled_no_cache"; }
 
             // -expires in response
@@ -300,7 +299,7 @@ public class ResourceInfo implements IResourceInfo {
 
             // -cache-control in response
             // the cache-control has many value options.
-            cacheControl = (String) this.responseHeader.get(httpHeader.CACHE_CONTROL);
+            cacheControl = this.responseHeader.get(httpHeader.CACHE_CONTROL);
             if (cacheControl != null) {
                 cacheControl = cacheControl.trim().toUpperCase();
                 if (cacheControl.startsWith("MAX-AGE=")) {
@@ -334,10 +333,10 @@ public class ResourceInfo implements IResourceInfo {
             if (this.requestHeader.containsKey(httpHeader.RANGE)) { return false; }
 
             // if the client requests a un-cached copy of the resource ...
-            cacheControl = (String) this.requestHeader.get(httpHeader.PRAGMA);
+            cacheControl = this.requestHeader.get(httpHeader.PRAGMA);
             if (cacheControl != null && cacheControl.trim().toUpperCase().equals("NO-CACHE")) { return false; }
 
-            cacheControl = (String) this.requestHeader.get(httpHeader.CACHE_CONTROL);
+            cacheControl = this.requestHeader.get(httpHeader.CACHE_CONTROL);
             if (cacheControl != null) {
                 cacheControl = cacheControl.trim().toUpperCase();
                 if (cacheControl.startsWith("NO-CACHE") || cacheControl.startsWith("MAX-AGE=0")) { return false; }
@@ -377,7 +376,7 @@ public class ResourceInfo implements IResourceInfo {
         // logically, we would not need to care about no-cache pragmas in cached response headers,
         // because they cannot exist since they are not written to the cache.
         // So this IF should always fail..
-        cacheControl = (String) this.responseHeader.get(httpHeader.PRAGMA); 
+        cacheControl = this.responseHeader.get(httpHeader.PRAGMA); 
         if (cacheControl != null && cacheControl.trim().toUpperCase().equals("NO-CACHE")) { return false; }
 
         // see for documentation also:
@@ -396,7 +395,7 @@ public class ResourceInfo implements IResourceInfo {
             if (expires.before(new Date(serverDate.correctedUTCTime()))) { return false; }
         }
         Date lastModified = this.responseHeader.lastModified();
-        cacheControl = (String) this.responseHeader.get(httpHeader.CACHE_CONTROL);
+        cacheControl = this.responseHeader.get(httpHeader.CACHE_CONTROL);
         if (cacheControl == null && lastModified == null && expires == null) { return false; }
 
         // -lastModified in cached response
@@ -460,7 +459,7 @@ public class ResourceInfo implements IResourceInfo {
         return (this.requestHeader == null) 
         ? false 
         : this.requestHeader.containsKey(httpHeader.X_YACY_INDEX_CONTROL) &&
-          ((String)this.requestHeader.get(httpHeader.X_YACY_INDEX_CONTROL)).toUpperCase().equals("NO-INDEX");
+          (this.requestHeader.get(httpHeader.X_YACY_INDEX_CONTROL)).toUpperCase().equals("NO-INDEX");
     }
     
     public httpHeader getRequestHeader() {

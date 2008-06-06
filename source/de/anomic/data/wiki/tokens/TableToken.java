@@ -72,6 +72,7 @@ public class TableToken extends AbstractToken {
 		for (int i=1, j, a; i<t.length-1; i++) {
 			if (t[i].startsWith("|-")) {
 				if (trOpen) sb.append("\t</tr>\n");
+				// TODO is this assignment correct? (please comment) Or should it be a comparison? (please correct)
 				if (trOpen = (i < t.length - 2)) sb.append("\t<tr>\n");
 			} else if (t[i].startsWith("||")) {
 				tds = t[i].split("\\|\\|");
@@ -129,7 +130,7 @@ public class TableToken extends AbstractToken {
         				(key.equals("summary")) ||
         				(key.equals("bgcolor") && value.matches("#{0,1}[0-9a-fA-F]{1,6}|[a-zA-Z]{3,}")) ||
         				((key.equals("width") || key.equals("height")) && value.matches("\\d+%{0,1}")) ||
-                        ((posVals = (String[])ps.get(key)) != null && Arrays.binarySearch(posVals, value) >= 0) ||
+                        ((posVals = ps.get(key)) != null && Arrays.binarySearch(posVals, value) >= 0) ||
         				(Arrays.binarySearch(tps, key) >= 0 && value.matches("\\d+"))
         		) {
                 	addPair(key, value, sb);

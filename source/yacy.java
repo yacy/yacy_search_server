@@ -68,10 +68,10 @@ import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 
 import de.anomic.data.translator;
 import de.anomic.http.HttpClient;
+import de.anomic.http.JakartaCommonsHttpClient;
 import de.anomic.http.JakartaCommonsHttpResponse;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpd;
-import de.anomic.http.JakartaCommonsHttpClient;
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexRWIRowEntry;
@@ -600,7 +600,7 @@ public final class yacy {
         String h;
         kelondroMScoreCluster<String> hs = new kelondroMScoreCluster<String>();
         while (ef.hasMoreElements()) {
-            f = (File) ef.nextElement();
+            f = ef.nextElement();
             h = f.getName().substring(0, yacySeedDB.commonHashLength);
             hs.addScore(h, (int) f.length());
         }
@@ -660,7 +660,7 @@ public final class yacy {
                     Iterator<indexRWIRowEntry> wordIdxEntries = wordIdxContainer.entries();
                     indexRWIEntry iEntry;
                     while (wordIdxEntries.hasNext()) {
-                        iEntry = (indexRWIEntry) wordIdxEntries.next();
+                        iEntry = wordIdxEntries.next();
                         String urlHash = iEntry.urlHash();                    
                         if ((currentUrlDB.exists(urlHash)) && (!minimizedUrlDB.exists(urlHash))) try {
                             indexURLReference urlEntry = currentUrlDB.load(urlHash, null, 0);                       
@@ -768,7 +768,7 @@ public final class yacy {
                 count = count - wordset.size();
                 BufferedWriter bw = new BufferedWriter(new PrintWriter(new FileWriter(wordlist)));
                 while (wordset.size() > 0) {
-                    word = (String) wordset.first();
+                    word = wordset.first();
                     bw.write(word + "\n");
                     wordset.remove(word);
                 }
@@ -845,13 +845,15 @@ public final class yacy {
                 File file = new File(root, targetName + ".zip");
                 ZipOutputStream bos = new ZipOutputStream(new FileOutputStream(file));
                 bos.putNextEntry(zipEntry);
-                while (indexContainerIterator.hasNext()) {
-                    counter++;
-                    container = indexContainerIterator.next();
-                    bos.write((container.getWordHash()).getBytes());
-                    bos.write(serverCore.CRLF);
-                    if (counter % 500 == 0) {
-                        log.logInfo("Found " + counter + " Hashs until now. Last found Hash: " + container.getWordHash());
+                if(indexContainerIterator != null) {
+                    while (indexContainerIterator.hasNext()) {
+                        counter++;
+                        container = indexContainerIterator.next();
+                        bos.write((container.getWordHash()).getBytes());
+                        bos.write(serverCore.CRLF);
+                        if (counter % 500 == 0) {
+                            log.logInfo("Found " + counter + " Hashs until now. Last found Hash: " + container.getWordHash());
+                        }
                     }
                 }
                 bos.flush();
@@ -860,19 +862,21 @@ public final class yacy {
                 log.logInfo("Writing Hashlist to TXT-file: " + targetName + ".txt");
                 File file = new File(root, targetName + ".txt");
                 BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
-                while (indexContainerIterator.hasNext()) {
-                    counter++;
-                    container = indexContainerIterator.next();
-                    bos.write((container.getWordHash()).getBytes());
-                    bos.write(serverCore.CRLF);
-                    if (counter % 500 == 0) {
-                        log.logInfo("Found " + counter + " Hashs until now. Last found Hash: " + container.getWordHash());
+                if(indexContainerIterator != null) {
+                    while (indexContainerIterator.hasNext()) {
+                        counter++;
+                        container = indexContainerIterator.next();
+                        bos.write((container.getWordHash()).getBytes());
+                        bos.write(serverCore.CRLF);
+                        if (counter % 500 == 0) {
+                            log.logInfo("Found " + counter + " Hashs until now. Last found Hash: " + container.getWordHash());
+                        }
                     }
                 }
                 bos.flush();
                 bos.close();
             }
-            log.logInfo("Total number of Hashs: " + counter + ". Last found Hash: " + container.getWordHash());
+            log.logInfo("Total number of Hashs: " + counter + ". Last found Hash: " + (container == null ? "null" : container.getWordHash()));
         } catch (IOException e) {
             log.logSevere("IOException", e);
         }
@@ -900,11 +904,11 @@ public final class yacy {
                 it = db.maps(true, false);
                 while (it.hasNext()) {
                     Map<String, String> dna = it.next();
-                    String peerHash = (String) dna.get("key");
+                    String peerHash = dna.get("key");
                     if (peerHash.length() < yacySeedDB.commonHashLength) {
-                        String peerName = (String) dna.get("Name");
-                        String peerIP = (String) dna.get("IP");
-                        String peerPort = (String) dna.get("Port");
+                        String peerName = dna.get("Name");
+                        String peerIP = dna.get("IP");
+                        String peerPort = dna.get("Port");
                         
                         while (peerHash.length() < yacySeedDB.commonHashLength) { peerHash = peerHash + "_"; }                        
                         System.err.println("Invalid Peer-Hash found in '" + dbFileNames[i] + "': " + peerName + ":" +  peerHash + ", http://" + peerIP + ":" + peerPort);

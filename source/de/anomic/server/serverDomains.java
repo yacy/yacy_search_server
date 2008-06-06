@@ -423,7 +423,7 @@ public class serverDomains {
         host = host.toLowerCase().trim();        
         
         // trying to resolve host by doing a name cache lookup
-        InetAddress ip = (InetAddress) nameCacheHit.get(host);
+        InetAddress ip = nameCacheHit.get(host);
         if (ip != null) return ip;
         
         if (nameCacheMiss.contains(host)) return null;
@@ -435,7 +435,7 @@ public class serverDomains {
         host = host.toLowerCase().trim();        
         
         // trying to resolve host by doing a name cache lookup
-        InetAddress ip = (InetAddress) nameCacheHit.get(host);
+        InetAddress ip = nameCacheHit.get(host);
         if (ip != null) return ip;
         
         if (nameCacheMiss.contains(host)) return null;
@@ -462,7 +462,7 @@ public class serverDomains {
                 }
             }
             
-            if (doCaching) {
+            if (doCaching && ip != null) {
                 // remove old entries
                 flushHitNameCache();
                 
@@ -514,7 +514,7 @@ public class serverDomains {
         int cutofftime = intTime(System.currentTimeMillis()) - maxNameCacheHitAge;
         String k;
         while ((nameCacheHitAges.size() > maxNameCacheHitSize) || (nameCacheHitAges.getMinScore() < cutofftime)) {
-            k = (String) nameCacheHitAges.getMinObject();
+            k = nameCacheHitAges.getMinObject();
             if (nameCacheHit.remove(k) == null) break; // ensure termination
             nameCacheHitAges.deleteScore(k);
         }
@@ -528,7 +528,7 @@ public class serverDomains {
         int cutofftime = intTime(System.currentTimeMillis()) - maxNameCacheMissAge;
         String k;
         while ((nameCacheMissAges.size() > maxNameCacheMissSize) || (nameCacheMissAges.getMinScore() < cutofftime)) {
-            k = (String) nameCacheMissAges.getMinObject();
+            k = nameCacheMissAges.getMinObject();
             if (!nameCacheMiss.remove(k)) break; // ensure termination
             nameCacheMissAges.deleteScore(k);
         }

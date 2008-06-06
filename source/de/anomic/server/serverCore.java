@@ -300,7 +300,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
                             Enumeration<InetAddress> addresses = interf.getInetAddresses();
                             if (addresses != null) {
                                 while (addresses.hasMoreElements()) {
-                                    InetAddress address = (InetAddress)addresses.nextElement();
+                                    InetAddress address = addresses.nextElement();
                                     if (address instanceof Inet4Address) {
                                         hostName = address.getHostAddress();
                                         break;
@@ -353,7 +353,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
             String cIP = clientAddress(controlSocket);
             //System.out.println("server bfHosts=" + bfHost.toString());
             if (bfHost.get(cIP) != null) {
-                Integer attempts = (Integer) bfHost.get(cIP);
+                Integer attempts = bfHost.get(cIP);
                 if (attempts == null) attempts = new Integer(1); else attempts = new Integer(attempts.intValue() + 1);
                 bfHost.put(cIP, attempts);
                 this.log.logWarning("SLOWING DOWN ACCESS FOR BRUTE-FORCE PREVENTION FROM " + cIP + ", ATTEMPT " + attempts.intValue());
@@ -728,7 +728,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
 //                                        this.commandObj = (serverHandler) serverCore.this.handlerPrototype.clone();
 //                                    }
                                 
-                                this.commandObj = (serverHandler) serverCore.this.handlerPrototype.clone();
+                                this.commandObj = serverCore.this.handlerPrototype.clone();
                             }
                             
                             // initializing the session

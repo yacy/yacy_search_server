@@ -310,8 +310,8 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
         private synchronized void checkConsistency() {
             if ((debugmode) && (entryFile != null)) try { // in debug mode
                 long efl = entryFile.length();
-                assert ((efl - POS_NODES) % ((long) recordsize)) == 0 : "rest = " + ((entryFile.length()  - POS_NODES) % ((long) recordsize)) + ", USEDC = " + this.USEDC + ", FREEC = " + this.FREEC  + ", recordsize = " + recordsize + ", file = " + filename;
-                long calculated_used = (efl - POS_NODES) / ((long) recordsize);
+                assert ((efl - POS_NODES) % (recordsize)) == 0 : "rest = " + ((entryFile.length()  - POS_NODES) % (recordsize)) + ", USEDC = " + this.USEDC + ", FREEC = " + this.FREEC  + ", recordsize = " + recordsize + ", file = " + filename;
+                long calculated_used = (efl - POS_NODES) / (recordsize);
                 if (calculated_used != this.USEDC + this.FREEC) logFailure("INCONSISTENCY in USED computation: calculated_used = " + calculated_used + ", USEDC = " + this.USEDC + ", FREEC = " + this.FREEC  + ", recordsize = " + recordsize + ", file = " + filename);
             } catch (IOException e) {
                 assert false;
@@ -849,7 +849,7 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
         Iterator<kelondroHandle> dhi = dh.iterator();
         kelondroHandle h;
         while (dhi.hasNext()) {
-            h = (kelondroHandle) dhi.next();
+            h = dhi.next();
             System.out.print(h.index + ", ");
         }
         System.out.println("\n--");
@@ -885,7 +885,7 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
                 return null;
             }
             try {
-                kelondroNode n = (kelondroNode) nodeIterator.next();
+                kelondroNode n = nodeIterator.next();
                 return row().newEntryIndex(n.getValueRow(), n.handle().index);
             } catch (IOException e) {
                 throw new kelondroException(filename, e.getMessage());
@@ -995,11 +995,11 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
             if (pos.index >= (bulkstart + bulksize)) {
                 bulkstart = pos.index;
                 int maxlength = Math.min(USAGE.allCount() - bulkstart, bulksize);
-                if ((((long) POS_NODES) + ((long) bulkstart) * ((long) recordsize)) < 0)
+                if (((POS_NODES) + ((long) bulkstart) * ((long) recordsize)) < 0)
                     serverLog.logSevere("kelondroCachedRecords", "DEBUG: negative offset. POS_NODES = " + POS_NODES + ", bulkstart = " + bulkstart + ", recordsize = " + recordsize);
                 if ((maxlength * recordsize) < 0)
                     serverLog.logSevere("kelondroCachedRecords", "DEBUG: negative length. maxlength = " + maxlength + ", recordsize = " + recordsize);
-                entryFile.readFully(((long) POS_NODES) + ((long) bulkstart) * ((long) recordsize), bulk, 0, maxlength * recordsize);
+                entryFile.readFully((POS_NODES) + ((long) bulkstart) * ((long) recordsize), bulk, 0, maxlength * recordsize);
             }
             /* POS_NODES = 302, bulkstart = 3277, recordsize = 655386
                POS_NODES = 302, bulkstart = 820, recordsize = 2621466

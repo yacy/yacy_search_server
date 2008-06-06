@@ -38,7 +38,7 @@ public class kelondroRotateIterator<E> implements kelondroCloneableIterator<E> {
         this.a = a;
         this.modifier = modifier;
         this.terminationCount = terminationCount;
-        this.clone = (kelondroCloneableIterator<E>) a.clone(modifier);
+        this.clone = a.clone(modifier);
         this.nempty = this.clone.hasNext();
     }
     
@@ -55,7 +55,7 @@ public class kelondroRotateIterator<E> implements kelondroCloneableIterator<E> {
     	// it must be taken care that a calling method has a termination predicate different
     	// from the hasNext() method
         if (!(a.hasNext())) {
-            a = (kelondroCloneableIterator<E>) clone.clone(modifier);
+            a = clone.clone(modifier);
             assert a.hasNext();
         }
         terminationCount--;

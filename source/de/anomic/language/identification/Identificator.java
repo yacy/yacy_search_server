@@ -107,7 +107,7 @@ public final class Identificator {
         float value = 0;
         float max = 0;
         while (iter.hasNext()) {
-            character = (Character) iter.next();
+            character = iter.next();
             value = testStat.get(character);
             if (value > max) {
                 maxChar = character;
@@ -140,7 +140,7 @@ public final class Identificator {
 
             while (iter.hasNext()) {
                 minimum = 100.1f;
-                character = (Character) iter.next();
+                character = iter.next();
                 valueCharacter = testStat.get(character);
                 for (int i = 0; i < relevantLanguages.size(); i++) {
                     value = languages.get(relevantLanguages.get(i)).get(character);

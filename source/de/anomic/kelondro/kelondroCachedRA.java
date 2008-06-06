@@ -87,13 +87,13 @@ public class kelondroCachedRA extends kelondroAbstractRA implements kelondroRA {
     
     private byte[] readCache(int cacheNr) throws IOException {
         Integer cacheNrI = new Integer(cacheNr);
-        byte[] cache = (byte[]) cacheMemory.get(cacheNrI);
+        byte[] cache = cacheMemory.get(cacheNrI);
         if (cache == null) {
             if (cacheMemory.size() >= cacheMaxElements) {
                 // delete elements in buffer if buffer too big
                 Iterator<Integer> it = cacheScore.scores(true);
-                Integer element = (Integer) it.next();
-                writeCache((byte[]) cacheMemory.get(element), element.intValue());
+                Integer element = it.next();
+                writeCache(cacheMemory.get(element), element.intValue());
                 cacheMemory.remove(element);
                 int age = cacheScore.deleteScore(element);
                 de.anomic.server.logging.serverLog.logFine("CACHE: " + name, "GC; age=" + ((((int) (0xFFFFFFFFL & System.currentTimeMillis())) - age) / 1000));
@@ -186,7 +186,7 @@ public class kelondroCachedRA extends kelondroAbstractRA implements kelondroRA {
         Iterator<Integer> it = cacheScore.scores(true);
         while (it.hasNext()) {
             Integer element = it.next();
-            writeCache((byte[]) cacheMemory.get(element), element.intValue());
+            writeCache(cacheMemory.get(element), element.intValue());
             cacheMemory.remove(element);
         }
         ra.close();

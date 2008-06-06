@@ -44,7 +44,7 @@ public class FeedReader_p {
         if (post != null) {
             yacyURL url;
             try {
-                url = new yacyURL((String) post.get("url"), null);
+                url = new yacyURL(post.get("url"), null);
             } catch (MalformedURLException e) {
                 prop.put("page", "2");
                 return prop;

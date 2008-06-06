@@ -480,7 +480,7 @@ public class plasmaSnippetCache {
         
         // flush cache if cache is full
         while (snippetsCache.size() > maxCache) {
-            key = (String) snippetsScore.getMinObject();
+            key = snippetsScore.getMinObject();
             snippetsScore.deleteScore(key);
             snippetsCache.remove(key);
         }

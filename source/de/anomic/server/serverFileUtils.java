@@ -438,11 +438,13 @@ public final class serverFileUtils {
             zos.putNextEntry(new ZipEntry(name + ".txt"));
             os = zos;
         }
-        for (Iterator<String> i = set.iterator(); i.hasNext(); ) {
-            os.write((i.next().toString()).getBytes());
-            if (sep != null) os.write(sep.getBytes());
+        if(os != null) {
+            for (Iterator<String> i = set.iterator(); i.hasNext(); ) {
+                os.write((i.next().toString()).getBytes());
+                if (sep != null) os.write(sep.getBytes());
+            }
+            os.close();
         }
-        os.close();
         file.delete();
         tf.renameTo(file);
     }
@@ -461,18 +463,20 @@ public final class serverFileUtils {
             zos.putNextEntry(new ZipEntry(name + ".txt"));
             os = zos;
         }
-        Iterator<kelondroRow.Entry> i = set.rows();
-        String key;
-        if (i.hasNext()) {
-            key = new String(i.next().getColBytes(0));
-            os.write(key.getBytes());
+        if(os != null) {
+            Iterator<kelondroRow.Entry> i = set.rows();
+            String key;
+            if (i.hasNext()) {
+                key = new String(i.next().getColBytes(0));
+                os.write(key.getBytes());
+            }
+            while (i.hasNext()) {
+                key = new String((i.next()).getColBytes(0));
+                if (sep != null) os.write(sep.getBytes());
+                os.write(key.getBytes());
+            }
+            os.close();
         }
-        while (i.hasNext()) {
-            key = new String(((kelondroRow.Entry) i.next()).getColBytes(0));
-            if (sep != null) os.write(sep.getBytes());
-            os.write(key.getBytes());
-        }
-        os.close();
         file.delete();
         tf.renameTo(file);
     }

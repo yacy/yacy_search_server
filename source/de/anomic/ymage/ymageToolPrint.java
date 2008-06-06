@@ -45,7 +45,7 @@ public class ymageToolPrint {
     };
 
     private static void print(ymageMatrix matrix, int x, int y, int angle, char letter) {
-        int index = (int) letter - 0x20;
+        int index = letter - 0x20;
         if (index >= font.length) return;
         long character = font[index];
         long row;

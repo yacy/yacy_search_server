@@ -87,8 +87,8 @@ public class Collage {
                 origins[fifoPos] = nextOrigin;
                 
                 float scale = rand.nextFloat() * 1.5f + 1;
-                imgWidth[fifoPos]  = (int) (((float)nextOrigin.imageEntry.width()) / scale);
-                imgHeight[fifoPos] = (int) (((float)nextOrigin.imageEntry.height()) / scale);
+                imgWidth[fifoPos]  = (int) ((nextOrigin.imageEntry.width()) / scale);
+                imgHeight[fifoPos] = (int) ((nextOrigin.imageEntry.height()) / scale);
 
                 imgPosX[fifoPos]   = rand.nextInt((imgWidth[fifoPos] == 0) ? posXMax / 2 : Math.max(1, posXMax - imgWidth[fifoPos]));
                 imgPosY[fifoPos]   = rand.nextInt((imgHeight[fifoPos] == 0) ? posYMax / 2 : Math.max(1, posYMax - imgHeight[fifoPos]));

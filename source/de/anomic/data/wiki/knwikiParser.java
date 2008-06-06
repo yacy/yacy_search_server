@@ -165,7 +165,7 @@ public class knwikiParser implements wikiParser {
                     }
                 }
         r.add("hr");
-        BEs = (String[])r.toArray(new String[r.size()]);
+        BEs = r.toArray(new String[r.size()]);
         
         Text[] tt = Text.split2Texts(text, "[=", "=]");
         for (int i=0; i<tt.length; i+=2)
@@ -274,7 +274,7 @@ public class knwikiParser implements wikiParser {
 				escaped = !escaped;
 			}
 			r.add(resolve2Text(text, escaped, (escaped) ? j : (j > 0) ? j + endLen : 0, -1, escapeEnd));
-			return (Text[])r.toArray(new Text[r.size()]);
+			return r.toArray(new Text[r.size()]);
 		}
 		
 		private static Text resolve2Text(String text, boolean escaped, int from, int to, String escapeEnd) {

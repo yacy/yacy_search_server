@@ -79,36 +79,38 @@ public class get {
     				prop.put("AUTHENTICATE","admin log-in");
     			}
     		} 
-    	}
     	   			
-    	if(post.containsKey("top")) {    				
-    		String s_top = (String) post.get("top");
-    		top = Integer.parseInt(s_top);    				
-    	}
-    	if(post.containsKey("sort")) {
-    		String sort = (String) post.get("sort");
-    		if (sort.equals("size"))
-    			comp = SORT_SIZE;
-    	}    				
-		if(post.containsKey("tag")) {
-			tagName=(String) post.get("tag");    			
-			if (!tagName.equals("")) {
-				it = switchboard.bookmarksDB.getTagIterator(tagName, isAdmin, comp, top);						
-			} 
-		} else {
-				it = switchboard.bookmarksDB.getTagIterator(isAdmin, comp, top);
-		}    	 	
+        	if(post.containsKey("top")) {    				
+        		String s_top = post.get("top");
+        		top = Integer.parseInt(s_top);    				
+        	}
+        	if(post.containsKey("sort")) {
+        		String sort = post.get("sort");
+        		if (sort.equals("size"))
+        			comp = SORT_SIZE;
+        	}    				
+        }
+    	if(post != null && post.containsKey("tag")) {
+    	    tagName=post.get("tag");    			
+    	    if (!tagName.equals("")) {
+    	        it = switchboard.bookmarksDB.getTagIterator(tagName, isAdmin, comp, top);						
+    	    } 
+    	} else {
+    	    it = switchboard.bookmarksDB.getTagIterator(isAdmin, comp, top);
+    	}    	 	
 
         // Iterator<bookmarksDB.Tag> it = switchboard.bookmarksDB.getTagIterator(isAdmin);
         
         int count=0;
-        bookmarksDB.Tag tag;
-        while (it.hasNext()) {
-            tag = it.next();
-            if(!tag.getTagName().startsWith("/")) {						// ignore folder tags
-            	prop.putHTML("tags_"+count+"_name", tag.getTagName(), true);
-            	prop.put("tags_"+count+"_count", tag.size());
-            	count++;
+        if(it != null) {
+            bookmarksDB.Tag tag;
+            while (it.hasNext()) {
+                tag = it.next();
+                if(!tag.getTagName().startsWith("/")) {						// ignore folder tags
+                	prop.putHTML("tags_"+count+"_name", tag.getTagName(), true);
+                	prop.put("tags_"+count+"_count", tag.size());
+                	count++;
+                }
             }
         }
         prop.put("tags", count);

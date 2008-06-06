@@ -90,7 +90,7 @@ public final class kelondroBufferedIOChunks extends kelondroAbstractIOChunks imp
 
         // do the read
         synchronized (this.buffer) {
-            byte[] bb = (byte[]) buffer.get(new Long(pos));
+            byte[] bb = buffer.get(new Long(pos));
             if (bb == null) {
                 // entry not known, read directly from IO
                 synchronized (this.ra) {
@@ -136,15 +136,15 @@ public final class kelondroBufferedIOChunks extends kelondroAbstractIOChunks imp
             if (buffer.size() == 0) return;
             Iterator<Map.Entry<Long, byte[]>> i = buffer.entrySet().iterator();
             Map.Entry<Long, byte[]> entry = i.next();
-            long lastPos = ((Long) entry.getKey()).longValue();
-            byte[] lastChunk = (byte[]) entry.getValue();
+            long lastPos = (entry.getKey()).longValue();
+            byte[] lastChunk = entry.getValue();
             long nextPos;
             byte[] nextChunk, tmpChunk;
             synchronized (this.ra) {
                 while (i.hasNext()) {
                     entry = i.next();
-                    nextPos = ((Long) entry.getKey()).longValue();
-                    nextChunk = (byte[]) entry.getValue();
+                    nextPos = (entry.getKey()).longValue();
+                    nextChunk = entry.getValue();
                     if (lastPos + lastChunk.length == nextPos) {
                         // try to combine the new chunk with the previous chunk
                         //System.out.println("combining chunks pos0=" + lastPos + ", chunk0.length=" + lastChunk.length + ", pos1=" + nextPos + ", chunk1.length=" + nextChunk.length);

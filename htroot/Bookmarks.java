@@ -137,7 +137,7 @@ public class Bookmarks {
     				prop.put("AUTHENTICATE","admin log-in");
     			}
     		}else if(post.containsKey("mode")){
-    			String mode=(String) post.get("mode");            
+    			String mode=post.get("mode");            
     			if(mode.equals("add")){
     				prop.put("mode", "2");
     			}else if(mode.equals("importxml")){
@@ -146,11 +146,11 @@ public class Bookmarks {
     				prop.put("mode", "4");
     			}
     		}else if(post.containsKey("add")){ //add an Entry
-    			String url=(String) post.get("url");
-    			String title=(String) post.get("title");
-    			String description=(String) post.get("description");
-    			String tagsString = (String)post.get("tags");
-    			String pathString = (String)post.get("path");
+    			String url=post.get("url");
+    			String title=post.get("title");
+    			String description=post.get("description");
+    			String tagsString = post.get("tags");
+    			String pathString = post.get("path");
     			tagsString=tagsString+","+pathString;
     			if(tagsString.equals("")){
     				tagsString="unsorted"; //default tag
@@ -163,13 +163,13 @@ public class Bookmarks {
     				if(user!=null){ 
     					bookmark.setOwner(user.getUserName());
     				}
-    				if(((String) post.get("public")).equals("public")){
+    				if((post.get("public")).equals("public")){
     					bookmark.setPublic(true);
     					publishNews(url, title, description, tagsString);
     				}else{
     					bookmark.setPublic(false);
     				}
-    				if(post.containsKey("feed") && ((String) post.get("feed")).equals("feed")){
+    				if(post.containsKey("feed") && (post.get("feed")).equals("feed")){
     					bookmark.setFeed(true);
     				}else{
     					bookmark.setFeed(false);
@@ -180,15 +180,15 @@ public class Bookmarks {
     	                    //ERROR
     			}
     		}else if(post.containsKey("edit")){
-    			String urlHash=(String) post.get("edit");
+    			String urlHash=post.get("edit");
     			prop.put("mode", "2");
     			if (urlHash.length() == 0) {
     				prop.put("mode_edit", "0"); // create mode
-    				prop.putHTML("mode_title", (String) post.get("title"));
-    				prop.putHTML("mode_description", (String) post.get("description"));
-    				prop.put("mode_url", (String) post.get("url"));
-    				prop.putHTML("mode_tags", (String) post.get("tags"));
-    				prop.putHTML("mode_path", (String) post.get("path"));
+    				prop.putHTML("mode_title", post.get("title"));
+    				prop.putHTML("mode_description", post.get("description"));
+    				prop.put("mode_url", post.get("url"));
+    				prop.putHTML("mode_tags", post.get("tags"));
+    				prop.putHTML("mode_path", post.get("path"));
     				prop.put("mode_public", "0");
     				prop.put("mode_feed", "0");
     			} else {
@@ -233,37 +233,37 @@ public class Bookmarks {
                 }
     		} else if(post.containsKey("htmlfile")){
     			boolean isPublic=false;
-    			if(((String) post.get("public")).equals("public")){
+    			if((post.get("public")).equals("public")){
     				isPublic=true;
     			}
-    			String tags=(String) post.get("tags");
+    			String tags=post.get("tags");
     			if(tags.equals("")){
     				tags="unsorted";
     			}
     			serverLog.logInfo("BOOKMARKS", "I try to import bookmarks from HTML-file");
     			try {
-    				File file=new File((String)post.get("htmlfile"));    			
+    				File file=new File(post.get("htmlfile"));    			
     				sb.bookmarksDB.importFromBookmarks(new yacyURL(file) , post.get("htmlfile$file"), tags, isPublic);
     			} catch (MalformedURLException e) {}
     			serverLog.logInfo("BOOKMARKS", "success!!");
     		}else if(post.containsKey("xmlfile")){
     			boolean isPublic=false;
-    			if(((String) post.get("public")).equals("public")){
+    			if((post.get("public")).equals("public")){
     				isPublic=true;
     			}
     			sb.bookmarksDB.importFromXML(post.get("xmlfile$file"), isPublic);
     		}else if(post.containsKey("delete")){
-    			String urlHash=(String) post.get("delete");
+    			String urlHash=post.get("delete");
     			sb.bookmarksDB.removeBookmark(urlHash);
     		}
     		if(post.containsKey("tag")){
-    			tagName=(String) post.get("tag");
+    			tagName=post.get("tag");
     		}
     		if(post.containsKey("start")){
-    			start=Integer.parseInt((String) post.get("start"));
+    			start=Integer.parseInt(post.get("start"));
     		}
     		if(post.containsKey("num")){
-    			max_count=Integer.parseInt((String) post.get("num"));
+    			max_count=Integer.parseInt(post.get("num"));
     		}
     	} // END if(post != null)
     	
@@ -304,7 +304,7 @@ public class Bookmarks {
        	
        	count=0;
        	while(count<max_count && it.hasNext()){
-       		bookmark=sb.bookmarksDB.getBookmark((String)it.next());
+       		bookmark=sb.bookmarksDB.getBookmark(it.next());
        		if(bookmark!=null){
        			if(bookmark.getFeed() && isAdmin)
        				prop.put("bookmarks_"+count+"_link", "/FeedReader_p.html?url="+bookmark.getUrl());
@@ -376,7 +376,7 @@ public class Bookmarks {
         	it = sb.bookmarksDB.getTagIterator(tagName, isAdmin, comp, max);
         }
        	while(it.hasNext()){
-       		tag=(Tag) it.next();
+       		tag=it.next();
        		if ((!tag.getTagName().startsWith("/")) && (!tag.getTagName().equals(""))) {
        			prop.putHTML(id+"_"+count+"_name", tag.getFriendlyName());
        			prop.putHTML(id+"_"+count+"_tag", tag.getTagName());
@@ -419,7 +419,7 @@ public class Bookmarks {
     		count++;    
     		Iterator<String> bit=sb.bookmarksDB.getBookmarksIterator(fn, isAdmin);
     		while(bit.hasNext()){
-    			bookmark=sb.bookmarksDB.getBookmark((String)bit.next());
+    			bookmark=sb.bookmarksDB.getBookmark(bit.next());
     			prop.put("folderlist_"+count+"_folder", "<li><a href=\""+bookmark.getUrl()+"\" title=\""+bookmark.getDescription()+"\">"+ bookmark.getTitle()+"</a></li>");
     			count++;
     		}    	

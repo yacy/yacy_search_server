@@ -100,7 +100,7 @@ public final class message {
 
         if ((sb.isRobinsonMode()) &&
         	 (!((sb.isPublicRobinson()) ||
-        	    (sb.isInMyCluster((String)header.get(httpHeader.CONNECTION_PROP_CLIENTIP)))))) {
+        	    (sb.isInMyCluster(header.get(httpHeader.CONNECTION_PROP_CLIENTIP)))))) {
             // if we are a robinson cluster, answer only if this client is known by our network definition
         	prop.put("response", "-1"); // request rejected
             return prop;

@@ -184,7 +184,7 @@ public class plasmaSearchRankingProfile {
     
     private static int parseMap(HashMap<String, Integer> coeff, String attr, int dflt) {
         if (coeff.containsKey(attr)) try {
-            return ((Integer) coeff.get(attr)).intValue();
+            return (coeff.get(attr)).intValue();
         } catch (NumberFormatException e) {
             return dflt;
         } else {

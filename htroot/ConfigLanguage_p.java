@@ -82,17 +82,17 @@ public class ConfigLanguage_p {
 
         if (post != null){
             //change language
-            if(post.containsKey("use_button") && (String)post.get("language") != null){
-                translator.changeLang(env, langPath, (String)post.get("language"));
+            if(post.containsKey("use_button") && post.get("language") != null){
+                translator.changeLang(env, langPath, post.get("language"));
 
                 //delete language file
             }else if(post.containsKey("delete")){
-                File langfile= new File(langPath, (String)post.get("language"));
+                File langfile= new File(langPath, post.get("language"));
                 langfile.delete();
 
                 //load language file from URL
             } else if (post.containsKey("url")){
-                String url = (String)post.get("url");
+                String url = post.get("url");
                 ArrayList<String> langVector;
                 try{
                     yacyURL u = new yacyURL(url, null);
@@ -115,7 +115,7 @@ public class ConfigLanguage_p {
                     prop.put("status", "2");//error saving the language file
                     return prop;
                 }
-                if(post.containsKey("use_lang") && ((String)post.get("use_lang")).equals("on")){
+                if(post.containsKey("use_lang") && (post.get("use_lang")).equals("on")){
                     translator.changeLang(env, langPath, url.substring(url.lastIndexOf("/"), url.length()));
                 }
             }
@@ -136,7 +136,7 @@ public class ConfigLanguage_p {
             if(langFiles[i].endsWith(".lng")){
                 //+1 because of the virtual entry "default" at top
                 langKey = langFiles[i].substring(0, langFiles[i].length() -4);
-                langName = (String) langNames.get(langKey);
+                langName = langNames.get(langKey);
                 prop.put("langlist_"+(i+1)+"_file", langFiles[i]);
                 prop.put("langlist_"+(i+1)+"_name", ((langName == null) ? langKey : langName));
                 if(env.getConfig("locale.language", "default").equals(langKey)) {

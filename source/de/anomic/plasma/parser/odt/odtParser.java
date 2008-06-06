@@ -116,7 +116,7 @@ public class odtParser extends AbstractParser implements Parser {
                 checkInterruption();
                 
                 // getting the next zip file entry
-                ZipEntry zipEntry= (ZipEntry) zipEnum.nextElement();
+                ZipEntry zipEntry= zipEnum.nextElement();
                 String entryName = zipEntry.getName();
                 
                 // content.xml contains the document content in xml format

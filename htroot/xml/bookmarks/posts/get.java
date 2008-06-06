@@ -43,10 +43,10 @@ public class get {
         //String url=""; //urlfilter not yet implemented
         
         if(post != null && post.containsKey("tag")){
-            tag=(String) post.get("tag");
+            tag=post.get("tag");
         }
         if(post != null && post.containsKey("date")){
-            date=(String)post.get("date");
+            date=post.get("date");
         }else{
             date=serverDate.formatISO8601(new Date(System.currentTimeMillis()));
         }

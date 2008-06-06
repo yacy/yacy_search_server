@@ -134,7 +134,7 @@ public class kelondroBase64Order extends kelondroAbstractOrder<byte[]> implement
     }
     
     public final char encodeByte(byte b) {
-        return (char) alpha[b];
+        return alpha[b];
     }
 
     public final byte decodeByte(char b) {
@@ -208,12 +208,12 @@ public class kelondroBase64Order extends kelondroAbstractOrder<byte[]> implement
         int pos = 0;
         long l;
         while (in.length - pos >= 3) {
-            l = ((((0XffL & (long) in[pos]) << 8) + (0XffL & (long) in[pos + 1])) << 8) + (0XffL & (long) in[pos + 2]);
+            l = ((((0XffL & in[pos]) << 8) + (0XffL & in[pos + 1])) << 8) + (0XffL & in[pos + 2]);
             pos += 3;
             out = out.append(encodeLong(l, 4));
         }
         // now there may be remaining bytes
-        if (in.length % 3 != 0) out = out.append((in.length % 3 == 2) ? encodeLong((((0XffL & (long) in[pos]) << 8) + (0XffL & (long) in[pos + 1])) << 8, 4).substring(0, 3) : encodeLong((((0XffL & (long) in[pos])) << 8) << 8, 4).substring(0, 2));
+        if (in.length % 3 != 0) out = out.append((in.length % 3 == 2) ? encodeLong((((0XffL & in[pos]) << 8) + (0XffL & in[pos + 1])) << 8, 4).substring(0, 3) : encodeLong((((0XffL & in[pos])) << 8) << 8, 4).substring(0, 2));
         if (rfc1113compliant) while (out.length() % 4 > 0) out.append("=");
         // return result
         return new String(out);

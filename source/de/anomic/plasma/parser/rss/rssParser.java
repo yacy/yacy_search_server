@@ -63,8 +63,8 @@ import de.anomic.server.serverByteBuffer;
 import de.anomic.server.serverCharBuffer;
 import de.anomic.server.serverFileUtils;
 import de.anomic.xml.RSSFeed;
-import de.anomic.xml.RSSReader;
 import de.anomic.xml.RSSMessage;
+import de.anomic.xml.RSSReader;
 import de.anomic.yacy.yacyURL;
 
 public class rssParser extends AbstractParser implements Parser {
@@ -173,7 +173,7 @@ public class rssParser extends AbstractParser implements Parser {
                     null,
                     feedTitle,
                     (authors.length() > 0)?authors.toString(1,authors.length()):"",
-                    (String[]) feedSections.toArray(new String[feedSections.size()]),
+                    feedSections.toArray(new String[feedSections.size()]),
                     feedDescription,
                     text.getBytes(),
                     anchors,

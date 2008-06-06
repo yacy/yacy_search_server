@@ -108,7 +108,7 @@ public class BlacklistCleaner_p {
         }
         
         if (post.containsKey("listNames")) {
-            blacklistToUse = (String)post.get("listNames"); 
+            blacklistToUse = post.get("listNames"); 
             if (blacklistToUse.length() == 0 || !listManager.listSetContains("listManager.listsPath", blacklistToUse))
                 prop.put("results", "2");
         }
@@ -186,7 +186,7 @@ public class BlacklistCleaner_p {
         if (useKeys) {
             Iterator<String> it =  post.keySet().iterator();
             while (it.hasNext()) {
-                if ((s = (String)it.next()).indexOf(prefix) == 0) {
+                if ((s = it.next()).indexOf(prefix) == 0) {
                     r.add(s.substring(prefix.length()));
                 }
             }
@@ -196,7 +196,7 @@ public class BlacklistCleaner_p {
             while (it.hasNext()) {
                 entry = it.next();
                 if (entry.getKey().indexOf(prefix) == 0) {
-                    r.add((String) entry.getValue());
+                    r.add(entry.getValue());
                 }
             }
         }
@@ -215,7 +215,7 @@ public class BlacklistCleaner_p {
         if (blEngine instanceof indexDefaultReferenceBlacklist) {
             int slashPos;
             while (it.hasNext()) {
-                s = ((String)it.next()).trim();
+                s = (it.next()).trim();
                 
                 // check for double-occurance
                 if (ok.contains(s)) {
@@ -306,7 +306,7 @@ public class BlacklistCleaner_p {
             }    
         }
         if (list != null){
-            listManager.writeList(new File(listManager.listsPath, blacklistToUse), (String[])list.toArray(new String[list.size()]));
+            listManager.writeList(new File(listManager.listsPath, blacklistToUse), list.toArray(new String[list.size()]));
         }
         return entries.length;
     }

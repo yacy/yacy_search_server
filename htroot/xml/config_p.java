@@ -42,8 +42,8 @@ public class config_p {
         
         //change a Key
         if(post != null && post.containsKey("key") && post.containsKey("value")){
-            key=(String)post.get("key");
-            final String value=(String)post.get("value");
+            key=post.get("key");
+            final String value=post.get("value");
             if(!key.equals("")){
                 env.setConfig(key, value);
             }
@@ -60,7 +60,7 @@ public class config_p {
         
         int count=0;
         while(keys.hasNext()){
-            key = (String) keys.next();
+            key = keys.next();
             prop.putHTML("options_"+count+"_key", key);
             prop.putHTML("options_"+count+"_value", env.getConfig(key, "ERROR"));
             count++;        

@@ -92,7 +92,7 @@ public class kelondroMapTable {
     }
 
     public synchronized void update(String tablename, String key, HashMap<String, String> map) throws IOException {
-        kelondroMapObjects table = (kelondroMapObjects) mTables.get(tablename);
+        kelondroMapObjects table = mTables.get(tablename);
         if (table == null) throw new RuntimeException("kelondroTables.update: map table '" + tablename + "' does not exist.");
         if (key.length() > table.keySize()) key = key.substring(0, table.keySize());
         table.set(key, map);
@@ -100,45 +100,45 @@ public class kelondroMapTable {
     }
     
     public synchronized void update(String tablename, kelondroRow.Entry row /* first element is the unique key = index */) throws IOException {
-        kelondroIndex tree = (kelondroIndex) tTables.get(tablename);
+        kelondroIndex tree = tTables.get(tablename);
         if (tree == null) throw new RuntimeException("kelondroTables.update: tree table '" + tablename + "' does not exist.");
         tree.put(row);
         tTables.put(tablename, tree);
     }
     
     public synchronized Map<String, String> selectMap(String tablename, String key) {
-        kelondroMapObjects table = (kelondroMapObjects) mTables.get(tablename);
+        kelondroMapObjects table = mTables.get(tablename);
         if (table == null) throw new RuntimeException("kelondroTables.selectMap: map table '" + tablename + "' does not exist.");
         if (key.length() > table.keySize()) key = key.substring(0, table.keySize());
         return table.getMap(key);
     }
 
     public synchronized kelondroRow.Entry selectByte(String tablename, String key) throws IOException {
-        kelondroIndex tree = (kelondroIndex) tTables.get(tablename);
+        kelondroIndex tree = tTables.get(tablename);
         if (tree == null) throw new RuntimeException("kelondroTables.selectByte: tree table '" + tablename + "' does not exist.");
         return tree.get(key.getBytes());
     }
 
     public synchronized kelondroMapObjects.mapIterator /* of Map-Elements */ maps(String tablename, boolean up, boolean rotating) throws IOException {
-        kelondroMapObjects table = (kelondroMapObjects) mTables.get(tablename);
+        kelondroMapObjects table = mTables.get(tablename);
         if (table == null) throw new RuntimeException("kelondroTables.maps: map table '" + tablename + "' does not exist.");
         return table.maps(up, rotating);
     }
     
     public synchronized kelondroMapObjects.mapIterator /* of Map-Elements */ maps(String tablename, boolean up, boolean rotating, byte[] firstKey, byte[] secondKey) throws IOException {
-        kelondroMapObjects table = (kelondroMapObjects) mTables.get(tablename);
+        kelondroMapObjects table = mTables.get(tablename);
         if (table == null) throw new RuntimeException("kelondroTables.maps: map table '" + tablename + "' does not exist.");
         return table.maps(up, rotating, firstKey, secondKey);
     }
     
     public synchronized kelondroMapObjects.mapIterator /* of Map-Elements */ maps(String tablename, boolean up, String field) {
-        kelondroMapObjects table = (kelondroMapObjects) mTables.get(tablename);
+        kelondroMapObjects table = mTables.get(tablename);
         if (table == null) throw new RuntimeException("kelondroTables.maps: map table '" + tablename + "' does not exist.");
         return table.maps(up, field);
     }
     
     public synchronized kelondroCloneableIterator<kelondroRow.Entry> /* of kelondroRow.Entry-Elements */ rows(String tablename, boolean up, boolean rotating, byte[] firstKey, byte[] secondKey) throws IOException {
-       kelondroIndex tree = (kelondroIndex) tTables.get(tablename);
+       kelondroIndex tree = tTables.get(tablename);
         if (tree == null) throw new RuntimeException("kelondroTables.bytes: tree table '" + tablename + "' does not exist.");
         kelondroCloneableIterator<kelondroRow.Entry> i = tree.rows(up, firstKey);
         if (rotating) return new kelondroRotateIterator<kelondroRow.Entry>(i, secondKey, tree.size()); else return i;
@@ -147,33 +147,33 @@ public class kelondroMapTable {
     // if you need the long-values from a row-iteration, please use kelondroRecords.bytes2long to convert from byte[] to long
     
     public synchronized void delete(String tablename, String key) throws IOException {
-        kelondroMapObjects table = (kelondroMapObjects) mTables.get(tablename);
+        kelondroMapObjects table = mTables.get(tablename);
         if (key.length() > table.keySize()) key = key.substring(0, table.keySize());
         if (table != null) {table.remove(key); mTables.put(tablename, table); return;}
       
-        kelondroIndex Tree = (kelondroIndex) tTables.get(tablename);
+        kelondroIndex Tree = tTables.get(tablename);
         if (Tree != null) {Tree.remove(key.getBytes(), false); tTables.put(tablename, Tree); return;}
         
         throw new RuntimeException("kelondroTables.delete: table '" + tablename + "' does not exist.");
     }
     
     public synchronized long longAccumulator(String tablename, String field) {
-        kelondroMapObjects table = (kelondroMapObjects) mTables.get(tablename);
+        kelondroMapObjects table = mTables.get(tablename);
         if (table == null) throw new RuntimeException("kelondroTables.accumulator: map table '" + tablename + "' does not exist.");
         return table.getLongAcc(field);
     }
     
     public synchronized double doubleAccumulator(String tablename, String field) {
-        kelondroMapObjects table = (kelondroMapObjects) mTables.get(tablename);
+        kelondroMapObjects table = mTables.get(tablename);
         if (table == null) throw new RuntimeException("kelondroTables.accumulator: map table '" + tablename + "' does not exist.");
         return table.getDoubleAcc(field);
     }
     
     public synchronized int size(String tablename) {
-        kelondroMapObjects table = (kelondroMapObjects) mTables.get(tablename);
+        kelondroMapObjects table = mTables.get(tablename);
         if (table != null) return table.size();
         
-        kelondroIndex Tree = (kelondroIndex) tTables.get(tablename);
+        kelondroIndex Tree = tTables.get(tablename);
         if (Tree != null) return Tree.size();
         
         throw new RuntimeException("kelondroTables.accumulator: table '" + tablename + "' does not exist.");
@@ -181,11 +181,11 @@ public class kelondroMapTable {
     
     public void close() {
         Iterator<kelondroMapObjects> tablesIt = mTables.values().iterator();
-        while (tablesIt.hasNext()) ((kelondroMapObjects) tablesIt.next()).close();
+        while (tablesIt.hasNext()) (tablesIt.next()).close();
         mTables = null;
         
         Iterator<kelondroIndex> TreeIt = tTables.values().iterator();
-        while (TreeIt.hasNext()) ((kelondroIndex) TreeIt.next()).close();
+        while (TreeIt.hasNext()) (TreeIt.next()).close();
         tTables = null;
     }
     

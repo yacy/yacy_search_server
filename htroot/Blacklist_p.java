@@ -117,7 +117,7 @@ prop.putHTML("asd", "0");
 				else prop.put("testlist_url","not valid");
             }
         	if (post.containsKey("selectList")) {
-                blacklistToUse = (String)post.get("selectedListName"); 
+                blacklistToUse = post.get("selectedListName"); 
                 if (blacklistToUse != null && blacklistToUse.length() == 0) blacklistToUse = null;
             }
             if (post.containsKey("createNewList")) {
@@ -125,7 +125,7 @@ prop.putHTML("asd", "0");
                  * Creation of a new blacklist
                  * =========================================================== */
                 
-                blacklistToUse = (String)post.get("newListName");
+                blacklistToUse = post.get("newListName");
                 if (blacklistToUse.trim().length() == 0) {
                     prop.put("LOCATION","");
                     return prop;
@@ -151,7 +151,7 @@ prop.putHTML("asd", "0");
                  * Delete a blacklist
                  * =========================================================== */                
                 
-                blacklistToUse = (String)post.get("selectedListName");
+                blacklistToUse = post.get("selectedListName");
                 if (blacklistToUse == null || blacklistToUse.trim().length() == 0) {
                     prop.put("LOCATION","");
                     return prop;
@@ -177,7 +177,7 @@ prop.putHTML("asd", "0");
                  * Activate/Deactivate a blacklist
                  * =========================================================== */                   
                 
-                blacklistToUse = (String)post.get("selectedListName");
+                blacklistToUse = post.get("selectedListName");
                 if (blacklistToUse == null || blacklistToUse.trim().length() == 0) {
                     prop.put("LOCATION", "");
                     return prop;
@@ -199,7 +199,7 @@ prop.putHTML("asd", "0");
                  * Share a blacklist
                  * =========================================================== */                   
                 
-                blacklistToUse = (String)post.get("selectedListName");
+                blacklistToUse = post.get("selectedListName");
                 if (blacklistToUse == null || blacklistToUse.trim().length() == 0) {
                     prop.put("LOCATION", "");
                     return prop;
@@ -213,8 +213,8 @@ prop.putHTML("asd", "0");
                 }
             } else if (post.containsKey("deleteBlacklistEntry")) {
                 
-                String temp = deleteBlacklistEntry((String)post.get("currentBlacklist"),
-                        (String)post.get("selectedEntry"), header, supportedBlacklistTypes);
+                String temp = deleteBlacklistEntry(post.get("currentBlacklist"),
+                        post.get("selectedEntry"), header, supportedBlacklistTypes);
                 if (temp != null) {
                     prop.put("LOCATION", temp);
                     return prop;
@@ -222,8 +222,8 @@ prop.putHTML("asd", "0");
 
             } else if (post.containsKey("addBlacklistEntry")) {
 
-                String temp = addBlacklistEntry((String)post.get("currentBlacklist"),
-                        (String)post.get("newEntry"), header, supportedBlacklistTypes);
+                String temp = addBlacklistEntry(post.get("currentBlacklist"),
+                        post.get("newEntry"), header, supportedBlacklistTypes);
                 if (temp != null) {
                     prop.put("LOCATION", temp);
                     return prop;
@@ -234,8 +234,8 @@ prop.putHTML("asd", "0");
                 /* ===========================================================
                  * First add entry to blacklist item moves to
                  * =========================================================== */
-                String temp = addBlacklistEntry((String)post.get("targetBlacklist"),
-                        (String)post.get("selectedEntry"), header, supportedBlacklistTypes);
+                String temp = addBlacklistEntry(post.get("targetBlacklist"),
+                        post.get("selectedEntry"), header, supportedBlacklistTypes);
                 if (temp != null) {
                     prop.put("LOCATION", temp);
                     return prop;
@@ -244,8 +244,8 @@ prop.putHTML("asd", "0");
                 /* ===========================================================
                  * Then delete item from blacklist it is moved away from
                  * =========================================================== */
-                temp = deleteBlacklistEntry((String)post.get("currentBlacklist"),
-                        (String)post.get("selectedEntry"), header, supportedBlacklistTypes);
+                temp = deleteBlacklistEntry(post.get("currentBlacklist"),
+                        post.get("selectedEntry"), header, supportedBlacklistTypes);
                 if (temp != null) {
                     prop.put("LOCATION", temp);
                     return prop;
@@ -258,8 +258,8 @@ prop.putHTML("asd", "0");
                     /* ===========================================================
                      * First delete old item from blacklist
                      * =========================================================== */
-                    String temp = deleteBlacklistEntry((String)post.get("currentBlacklist"),
-                            (String)post.get("selectedBlacklistEntry"), header, supportedBlacklistTypes);
+                    String temp = deleteBlacklistEntry(post.get("currentBlacklist"),
+                            post.get("selectedBlacklistEntry"), header, supportedBlacklistTypes);
                     if (temp != null) {
                         prop.put("LOCATION", temp);
                         return prop;
@@ -268,8 +268,8 @@ prop.putHTML("asd", "0");
                     /* ===========================================================
                      * Thent add new entry to blacklist
                      * =========================================================== */
-                    temp = addBlacklistEntry((String)post.get("currentBlacklist"),
-                            (String)post.get("editedBlacklistEntry"), header, supportedBlacklistTypes);
+                    temp = addBlacklistEntry(post.get("currentBlacklist"),
+                            post.get("editedBlacklistEntry"), header, supportedBlacklistTypes);
                     if (temp != null) {
                         prop.put("LOCATION", temp);
                         return prop;
@@ -277,8 +277,8 @@ prop.putHTML("asd", "0");
 
                 } else {
 
-                    String selectedEntry = (String)post.get("selectedEntry");
-                    String currentBlacklist = (String)post.get("currentBlacklist");
+                    String selectedEntry = post.get("selectedEntry");
+                    String currentBlacklist = post.get("currentBlacklist");
                     if (selectedEntry != null && currentBlacklist != null) {
                         prop.put(DISABLED + "edit_item", selectedEntry);
                         prop.put(DISABLED + "edit_currentBlacklist", currentBlacklist);
@@ -327,7 +327,7 @@ prop.putHTML("asd", "0");
 	                TreeMap<String, String> hostList = new TreeMap<String, String>();
 	                final Iterator<yacySeed> e = sb.webIndex.seedDB.seedsConnected(true, false, null, (float) 0.0);
 	                while (e.hasNext()) {
-	                    yacySeed seed = (yacySeed) e.next();
+	                    yacySeed seed = e.next();
 	                    if (seed != null) hostList.put(seed.get(yacySeed.NAME, "nameless"),seed.hash);
 	                }
 	
@@ -462,12 +462,12 @@ prop.putHTML("asd", "0");
         // delete the old entry from file
         if (list != null) {
             for (int i=0; i < list.size(); i++) {
-                if (((String)list.get(i)).equals(oldEntry)) {
+                if ((list.get(i)).equals(oldEntry)) {
                     list.remove(i);
                     break;
                 }
             }
-            listManager.writeList(new File(listManager.listsPath, blacklistToUse), (String[])list.toArray(new String[list.size()]));
+            listManager.writeList(new File(listManager.listsPath, blacklistToUse), list.toArray(new String[list.size()]));
         }
 
         // remove the entry from the running blacklist engine

@@ -267,7 +267,7 @@ public class plasmaDHTTransfer extends Thread {
         Object transferRWIResult = result.get("resultTransferRWI");
         assert transferRWIResult instanceof HashMap;
         if (transferRWIResult != null && ((HashMap<String, String>) transferRWIResult).containsKey("pause")) {
-            String pauseStr = (String) ((HashMap<String, String>) transferRWIResult).get("pause");
+            String pauseStr = ((HashMap<String, String>) transferRWIResult).get("pause");
             try { pause = Integer.valueOf(pauseStr).intValue(); } catch (NumberFormatException numEx){}
             if (pause < 0) pause = 5000;
             else if (pause > 30000) pause = 30000;

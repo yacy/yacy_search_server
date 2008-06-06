@@ -145,7 +145,7 @@ public final class yacyClient {
         String seed;
         if ((otherHash != null) &&
             (otherHash.length() > 0) &&
-            ((seed = (String) result.get("seed0")) != null)) {
+            ((seed = result.get("seed0")) != null)) {
         	if (seed.length() > yacySeed.maxsize) {
             	yacyCore.log.logInfo("hello/client 0: rejected contacting seed; too large (" + seed.length() + " > " + yacySeed.maxsize + ")");
             } else {
@@ -168,7 +168,7 @@ public final class yacyClient {
         }
 
         // change our seed-type
-        String mytype = (String) result.get(yacySeed.YOURTYPE);
+        String mytype = result.get(yacySeed.YOURTYPE);
         if (mytype == null) { mytype = ""; }        
         yacyAccessible accessible = new yacyAccessible();
         if (mytype.equals(yacySeed.PEERTYPE_SENIOR)||mytype.equals(yacySeed.PEERTYPE_PRINCIPAL)) {
@@ -211,7 +211,7 @@ public final class yacyClient {
         int i = 0;
         int count = 0;
         String seedStr;
-        while ((seedStr = (String) result.get("seed" + i++)) != null) {
+        while ((seedStr = result.get("seed" + i++)) != null) {
             // integrate new seed into own database
             // the first seed, "seed0" is the seed of the responding peer
         	if (seedStr.length() > yacySeed.maxsize) {
@@ -313,7 +313,7 @@ public final class yacyClient {
             
             if (result == null || result.size() == 0) { return null; }
             //final Date remoteTime = yacyCore.parseUniversalDate((String) result.get(yacySeed.MYTIME)); // read remote time
-            return yacySeed.genRemoteSeed((String) result.get("response"), salt, false);
+            return yacySeed.genRemoteSeed(result.get("response"), salt, false);
         } catch (Exception e) {
             yacyCore.log.logSevere("yacyClient.querySeed error:" + e.getMessage());
             return null;
@@ -334,7 +334,7 @@ public final class yacyClient {
             final HashMap<String, String> result = nxTools.table(content, "UTF-8");
             
             if (result == null || result.size() == 0) { return -1; }
-            return Integer.parseInt((String) result.get("response"));
+            return Integer.parseInt(result.get("response"));
         } catch (Exception e) {
             yacyCore.log.logSevere("yacyClient.queryRWICount error:" + e.getMessage());
             return -1;
@@ -357,7 +357,7 @@ public final class yacyClient {
             final HashMap<String, String> result = nxTools.table(content, "UTF-8");
             
             if ((result == null) || (result.size() == 0)) return -1;
-            final String resp = (String) result.get("response");
+            final String resp = result.get("response");
             if (resp == null) {
                 return -1;
             } else try {
@@ -530,7 +530,7 @@ public final class yacyClient {
 		String[] urls = new String[results];
 		for (int n = 0; n < results; n++) {
 			// get one single search result
-			urlEntry = indexURLReference.importEntry((String) result.get("resource" + n));
+			urlEntry = indexURLReference.importEntry(result.get("resource" + n));
 			if (urlEntry == null) continue;
 			assert (urlEntry.hash().length() == 12) : "urlEntry.hash() = " + urlEntry.hash();
 			if (urlEntry.hash().length() != 12) continue; // bad url hash
@@ -592,7 +592,7 @@ public final class yacyClient {
             containerCache.insertRanked(container[0], false, joincount); // one is enough
             
             // integrate remote topwords
-            String references = (String) result.get("references");
+            String references = result.get("references");
             yacyCore.log.logInfo("remote search (client): peer " + target.getName() + " sent references " + references);
             if (references != null) {
                 // add references twice, so they can be countet (must have at least 2 entries)
@@ -613,7 +613,7 @@ public final class yacyClient {
 				if (entry.getKey().startsWith("indexabstract.")) {
 					wordhash = entry.getKey().substring(14);
 					synchronized (abstractCache) {
-						singleAbstract = (TreeMap<String, String>) abstractCache.get(wordhash); // a mapping from url-hashes to a string of peer-hashes
+						singleAbstract = abstractCache.get(wordhash); // a mapping from url-hashes to a string of peer-hashes
 						if (singleAbstract == null) singleAbstract = new TreeMap<String, String>();
 						ci = new serverByteBuffer(entry.getValue().getBytes());
 						//System.out.println("DEBUG-ABSTRACTFETCH: for word hash " + wordhash + " received " + ci.toString());
@@ -632,7 +632,7 @@ public final class yacyClient {
         // generate statistics
 		long searchtime;
 		try {
-			searchtime = Integer.parseInt((String) result.get("searchtime"));
+			searchtime = Integer.parseInt(result.get("searchtime"));
 		} catch (NumberFormatException e) {
 			searchtime = totalrequesttime;
 		}
@@ -764,19 +764,19 @@ public final class yacyClient {
     public static String transfer(String targetAddress, String filename, byte[] file) {
         HashMap<String, String> phase1 = transferPermission(targetAddress, file.length, filename);
         if (phase1 == null) return "no connection to remote address " + targetAddress + "; phase 1";
-        String access = (String) phase1.get("access");
-        String nextaddress = (String) phase1.get("address");
-        String protocol = (String) phase1.get("protocol");
+        String access = phase1.get("access");
+        String nextaddress = phase1.get("address");
+        String protocol = phase1.get("protocol");
         //String path = (String) phase1.get("path");
         //String maxsize = (String) phase1.get("maxsize");
-        String response = (String) phase1.get("response");
+        String response = phase1.get("response");
         if ((response == null) || (protocol == null) || (access == null)) return "wrong return values from other peer; phase 1";
         if (!(response.equals("ok"))) return "remote peer rejected transfer: " + response;
         String accesscode = serverCodings.encodeMD5Hex(kelondroBase64Order.standardCoder.encodeString(access));
         if (protocol.equals("http")) {
             HashMap<String, String> phase2 = transferStore(nextaddress, accesscode, filename, file);
             if (phase2 == null) return "no connection to remote address " + targetAddress + "; phase 2";
-            response = (String) phase2.get("response");
+            response = phase2.get("response");
             if (response == null) return "wrong return values from other peer; phase 2";
             if (!(response.equals("ok"))) {
                 return "remote peer failed with transfer: " + response;
@@ -848,7 +848,7 @@ public final class yacyClient {
             for (int i = 0; i < indexes.length; i++) {
                 eenum = indexes[i].entries();
                 while (eenum.hasNext()) {
-                    entry = (indexRWIEntry) eenum.next();
+                    entry = eenum.next();
                     if (urlCache.get(entry.urlHash()) == null) {
                         yacyCore.log.logFine("DEBUG transferIndex: to-send url hash '" + entry.urlHash() + "' is not contained in urlCache");
                     }
@@ -865,7 +865,7 @@ public final class yacyClient {
             }        
             if (in.containsKey("indexPayloadSize")) payloadSize += Integer.parseInt(in.get("indexPayloadSize"));
             
-            String result = (String) in.get("result");
+            String result = in.get("result");
             if (result == null) { 
                 resultObj.put("result", "no_result_1"); 
                 return resultObj;
@@ -878,7 +878,7 @@ public final class yacyClient {
             }
             
             // in now contains a list of unknown hashes
-            final String uhss = (String) in.get("unknownURL");
+            final String uhss = in.get("unknownURL");
             if (uhss == null) {
                 resultObj.put("result","no_unknownURL_tag_in_response");
                 return resultObj;
@@ -891,7 +891,7 @@ public final class yacyClient {
             // extract the urlCache from the result
             indexURLReference[] urls = new indexURLReference[uhs.length];
             for (int i = 0; i < uhs.length; i++) {
-                urls[i] = (indexURLReference) urlCache.get(uhs[i]);
+                urls[i] = urlCache.get(uhs[i]);
                 if (urls[i] == null) {
                     yacyCore.log.logFine("DEBUG transferIndex: requested url hash '" + uhs[i] + "', unknownURL='" + uhss + "'");
                 }
@@ -906,7 +906,7 @@ public final class yacyClient {
             }
             if (in.containsKey("urlPayloadSize")) payloadSize += Integer.parseInt(in.get("urlPayloadSize"));
             
-            result = (String) in.get("result");
+            result = in.get("result");
             if (result == null) {
                 resultObj.put("result","no_result_2");
                 return resultObj;
@@ -947,7 +947,7 @@ public final class yacyClient {
         for (int i = 0; i < indexes.length; i++) {
             eenum = indexes[i].entries();
             while (eenum.hasNext()) {
-                entry = (indexRWIEntry) eenum.next();
+                entry = eenum.next();
                 entrypost.append(indexes[i].getWordHash()) 
                          .append(entry.toPropertyForm()) 
                          .append(serverCore.CRLF_STRING);

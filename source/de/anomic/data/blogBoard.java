@@ -264,7 +264,7 @@ public class blogBoard {
         Iterator<BlogEntry> iterator = blogIterator(true);
         BlogEntry blogEntry;
         while(iterator.hasNext()){
-            blogEntry=(BlogEntry)iterator.next();
+            blogEntry=iterator.next();
             if(priv || blogEntry.isPublic()){
                 set.add(blogEntry.getKey());
             }
@@ -300,7 +300,7 @@ public class blogBoard {
         
         public BlogEntry next() {
             try {
-                return readBlogEntry((String) this.blogIter.next());
+                return readBlogEntry(this.blogIter.next());
             } catch (kelondroException e) {
                 //resetDatabase();
                 return null;

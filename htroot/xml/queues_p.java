@@ -54,8 +54,8 @@ import java.util.Iterator;
 import java.util.Locale;
 
 import de.anomic.crawler.CrawlEntry;
-import de.anomic.crawler.NoticedURL;
 import de.anomic.crawler.IndexingStack;
+import de.anomic.crawler.NoticedURL;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;

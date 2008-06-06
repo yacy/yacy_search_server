@@ -297,7 +297,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         // construct a title string, even if the document has no title
         
         // some documents have a title tag as meta tag
-        String s = (String) metas.get("title");
+        String s = metas.get("title");
         
         // try to construct the title with the content of the title tag
         if (title.length() > 0) {
@@ -314,7 +314,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         
         // otherwise take any headline
         for (int i = 0; i < 4; i++) {
-            if (headlines[i].size() > 0) return (String) headlines[i].get(0);
+            if (headlines[i].size() > 0) return headlines[i].get(0);
         }
         
         // take description tag
@@ -331,7 +331,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
     public String[] getHeadlines(int i) {
         assert ((i >= 1) && (i <= 4));
         String[] s = new String[headlines[i - 1].size()];
-        for (int j = 0; j < headlines[i - 1].size(); j++) s[j] = (String) headlines[i - 1].get(j);
+        for (int j = 0; j < headlines[i - 1].size(); j++) s[j] = headlines[i - 1].get(j);
         return s;
     }
     
@@ -415,7 +415,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
     }
     
     public int getRefreshSeconds() {
-        String s = (String) metas.get("refresh");
+        String s = metas.get("refresh");
         if (s == null) return 9999; else try {
             int pos = s.indexOf(';');
             if (pos < 0) return 9999;
@@ -427,7 +427,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
     }
 
     public String getRefreshPath() {
-        String s = (String) metas.get("refresh");
+        String s = metas.get("refresh");
         if (s == null) return ""; else {
             int pos = s.indexOf(';');
             if (pos < 0) return "";

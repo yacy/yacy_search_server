@@ -51,8 +51,8 @@
 import java.io.PrintStream;
 import java.util.Date;
 
-import de.anomic.crawler.NoticeURLImporter;
 import de.anomic.crawler.Importer;
+import de.anomic.crawler.NoticeURLImporter;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverByteBuffer;
@@ -104,7 +104,7 @@ public final class IndexImport_p {
                     (post.containsKey("continueIndexDbImport"))
             ) {
                 // getting the job nr of the thread
-                String jobID = (String) post.get("jobNr");
+                String jobID = post.get("jobNr");
                 Importer importer = switchboard.dbImportManager.getImporterByID(Integer.valueOf(jobID).intValue());
                 if (importer != null) {
                     if (post.containsKey("stopIndexDbImport")) {

@@ -84,7 +84,7 @@ public final class kelondroMScoreCluster<E> {
         if (o instanceof Integer) return ((Integer) o).intValue();
         if (o instanceof Long) {
             long l = ((Long) o).longValue();
-            if (l < (long) Integer.MAX_VALUE) return (int) l;
+            if (l < Integer.MAX_VALUE) return (int) l;
             o = ((Long) o).toString();
         }
         if (o instanceof Double) {
@@ -141,7 +141,7 @@ public final class kelondroMScoreCluster<E> {
     }
     
     private long scoreKey(int elementNr, int elementCount) {
-        return (((long) (elementCount & 0xFFFFFFFFL)) << 32) | ((long) (elementNr & 0xFFFFFFFFL));
+        return (((elementCount & 0xFFFFFFFFL)) << 32) | ((elementNr & 0xFFFFFFFFL));
     }
     
     public synchronized long totalCount() {
@@ -348,8 +348,8 @@ public final class kelondroMScoreCluster<E> {
             Long key;
             int score = (max + min) / 2;
             while (keyrefDBcopy.size() > 0) {
-                key = (Long) ((up) ? keyrefDBcopy.firstKey() : keyrefDBcopy.lastKey());
-                n = (E) keyrefDBcopy.remove(key);
+                key = ((up) ? keyrefDBcopy.firstKey() : keyrefDBcopy.lastKey());
+                n = keyrefDBcopy.remove(key);
                 score = (int) ((key.longValue() & 0xFFFFFFFF00000000L) >> 32);
                 if ((score >= min) && (score <= max)) return;
                 if (((up) && (score > max)) || ((!(up)) && (score < min))) {

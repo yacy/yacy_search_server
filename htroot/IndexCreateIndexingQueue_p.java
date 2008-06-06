@@ -46,8 +46,8 @@
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import de.anomic.crawler.ZURL;
 import de.anomic.crawler.IndexingStack;
+import de.anomic.crawler.ZURL;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -70,7 +70,7 @@ public class IndexCreateIndexingQueue_p {
         if (post != null) {
             if (post.containsKey("limit")) {
                 try {
-                    showLimit = Integer.valueOf((String)post.get("limit")).intValue();
+                    showLimit = Integer.valueOf(post.get("limit")).intValue();
                 } catch (NumberFormatException e) {}
             }    
             
@@ -93,7 +93,7 @@ public class IndexCreateIndexingQueue_p {
                     } 
                 } catch (Exception e) {}
             } else if (post.containsKey("deleteEntry")) {
-                String urlHash = (String) post.get("deleteEntry");
+                String urlHash = post.get("deleteEntry");
                 try {
                     sb.webIndex.queuePreStack.remove(urlHash);
                 } catch (Exception e) {}
@@ -131,7 +131,7 @@ public class IndexCreateIndexingQueue_p {
             for (int i = 0; (i < count) && (entryCount < showLimit); i++) {
 
                 boolean inProcess = i < inProcessCount;
-                pcentry = (IndexingStack.QueueEntry) entryList.get(i);
+                pcentry = entryList.get(i);
                 if ((pcentry != null)&&(pcentry.url() != null)) {
                     long entrySize = pcentry.size();
                     totalSize += entrySize;

@@ -100,9 +100,9 @@ public class plasmaRankingCRProcess {
         int FUDate, FDDate, LUDate, UCount, PCount, ACount, VCount, Vita;
         kelondroBitfield acc_flags, new_flags;
         while (el.hasNext()) {
-            key = (String) el.next();
+            key = el.next();
             new_entry = source_cr.getEntry(key);
-            new_flags = new kelondroBitfield(kelondroBase64Order.enhancedCoder.encodeLong((long) new_entry.getAttr("Flags", 0), 1).getBytes());
+            new_flags = new kelondroBitfield(kelondroBase64Order.enhancedCoder.encodeLong(new_entry.getAttr("Flags", 0), 1).getBytes());
             // enrich information with additional values
             if ((acc_entry = acc.getEntry(key)) != null) {
                 FUDate = (int) acc_entry.getAttr("FUDate", 0);
@@ -123,7 +123,7 @@ public class plasmaRankingCRProcess {
                 VCount += (new_flags.get(3)) ? 1 : 0;
                 
                 // 'OR' the flags
-                acc_flags = new kelondroBitfield(kelondroBase64Order.enhancedCoder.encodeLong((long) acc_entry.getAttr("Flags", 0), 1).getBytes());
+                acc_flags = new kelondroBitfield(kelondroBase64Order.enhancedCoder.encodeLong(acc_entry.getAttr("Flags", 0), 1).getBytes());
                 for (int i = 0; i < 6; i++) {
                     if (new_flags.get(i)) acc_flags.set(i, true);
                 }
@@ -143,14 +143,14 @@ public class plasmaRankingCRProcess {
             // make plausibility check?
             
             // insert into accumulator
-            acc_entry.setAttr("FUDate", (long) FUDate);
-            acc_entry.setAttr("FDDate", (long) FDDate);
-            acc_entry.setAttr("LUDate", (long) LUDate);
-            acc_entry.setAttr("UCount", (long) UCount);
-            acc_entry.setAttr("PCount", (long) PCount);
-            acc_entry.setAttr("ACount", (long) ACount);
-            acc_entry.setAttr("VCount", (long) VCount);
-            acc_entry.setAttr("Vita", (long) Vita);
+            acc_entry.setAttr("FUDate", FUDate);
+            acc_entry.setAttr("FDDate", FDDate);
+            acc_entry.setAttr("LUDate", LUDate);
+            acc_entry.setAttr("UCount", UCount);
+            acc_entry.setAttr("PCount", PCount);
+            acc_entry.setAttr("ACount", ACount);
+            acc_entry.setAttr("VCount", VCount);
+            acc_entry.setAttr("Vita", Vita);
             acc.putEntrySmall(acc_entry);
         }
         
@@ -174,9 +174,9 @@ public class plasmaRankingCRProcess {
         int FUDate, FDDate, LUDate, UCount, PCount, ACount, VCount, Vita;
         kelondroBitfield acc_flags, new_flags;
         while (el.hasNext()) {
-            key = (String) el.next();
+            key = el.next();
             new_entry = source_cr.getEntry(key);
-            new_flags = new kelondroBitfield(kelondroBase64Order.enhancedCoder.encodeLong((long) new_entry.getAttr("Flags", 0), 1).getBytes());
+            new_flags = new kelondroBitfield(kelondroBase64Order.enhancedCoder.encodeLong(new_entry.getAttr("Flags", 0), 1).getBytes());
             // enrich information with additional values
             if ((acc_entry = acc.get(key.getBytes())) != null) {
                 FUDate = (int) acc_entry.getColLong("FUDate", 0);
@@ -222,20 +222,21 @@ public class plasmaRankingCRProcess {
             // make plausibility check?
             
             // insert into accumulator
-            acc_entry.setCol("FUDate", (long) FUDate);
-            acc_entry.setCol("FDDate", (long) FDDate);
-            acc_entry.setCol("LUDate", (long) LUDate);
-            acc_entry.setCol("UCount", (long) UCount);
-            acc_entry.setCol("PCount", (long) PCount);
-            acc_entry.setCol("ACount", (long) ACount);
-            acc_entry.setCol("VCount", (long) VCount);
-            acc_entry.setCol("Vita", (long) Vita);
+            acc_entry.setCol("FUDate", FUDate);
+            acc_entry.setCol("FDDate", FDDate);
+            acc_entry.setCol("LUDate", LUDate);
+            acc_entry.setCol("UCount", UCount);
+            acc_entry.setCol("PCount", PCount);
+            acc_entry.setCol("ACount", ACount);
+            acc_entry.setCol("VCount", VCount);
+            acc_entry.setCol("Vita", Vita);
             acc.put(acc_entry);
         }
         
         return true;
     }
     
+    @SuppressWarnings("null")
     public static void accumulate(File from_dir, File tmp_dir, File err_dir, File bkp_dir, File to_file, int max_files, boolean newdb) throws IOException {
         if (!(from_dir.isDirectory())) {
             System.out.println("source path " + from_dir + " is not a directory.");
@@ -414,7 +415,7 @@ public class plasmaRankingCRProcess {
             while (j.hasNext()) {
                 // get domain of anchors
                 entry = j.next();
-                anchor = (String) entry.getColString(0, null);
+                anchor = entry.getColString(0, null);
                 if (anchor.length() == 6) anchorDom = anchor; else anchorDom = anchor.substring(6);
 
                 // update domain-specific entry

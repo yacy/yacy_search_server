@@ -71,8 +71,9 @@ public class LogalizerHandler extends Handler {
         configure();
     }    
 
+    @SuppressWarnings("null")
     private HashMap<String, Object> loadParsers() {
-        HashMap<String, Object> parsers = new HashMap<String, Object>();
+        HashMap<String, Object> logParsers = new HashMap<String, Object>();
         try {
             if (debug) System.out.println("Searching for additional content parsers in package " + logParserPackage);
             // getting an uri to the parser subpackage
@@ -83,7 +84,8 @@ public class LogalizerHandler extends Handler {
             //System.out.println(parserDir.toString());
             String [] parserDirFiles = parserDir.list(parserNameFilter);
             if(parserDirFiles == null && debug) {
-                System.out.println("Can't find any parsers in "+parserDir.getAbsolutePath());
+                System.err.println("Can't find any parsers in "+parserDir.getAbsolutePath());
+                parserDirFiles = new String[0];
             }
             //System.out.println(parserDirFiles.length);
             for (int i=0; i<parserDirFiles.length; i++) {
@@ -96,7 +98,7 @@ public class LogalizerHandler extends Handler {
                     if (theParser instanceof LogParser) {
                         LogParser theLogParser = (LogParser) theParser;
                         //System.out.println(bla.getName() + " is a logParser");
-                        parsers.put(theLogParser.getParserType(), theParser);
+                        logParsers.put(theLogParser.getParserType(), theParser);
                         
                         if (debug) System.out.println("Added " + theLogParser.getClass().getName() + " as " + theLogParser.getParserType() + " Parser.");
                     }
@@ -116,7 +118,7 @@ public class LogalizerHandler extends Handler {
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
-        return parsers;
+        return logParsers;
     }
     
     /**

@@ -113,17 +113,17 @@ public class ConfigSkins_p {
 	
 	if (post != null){
 		//change skin
-		if(post.containsKey("use_button") && (String)post.get("skin") != null){
-			changeSkin(switchboard, skinPath, (String)post.get("skin"));
+		if(post.containsKey("use_button") && post.get("skin") != null){
+			changeSkin(switchboard, skinPath, post.get("skin"));
 			
 		//delete skin
 		}else if(post.containsKey("delete")){
-			File skinfile= new File(skinPath, (String)post.get("skin"));
+			File skinfile= new File(skinPath, post.get("skin"));
 			skinfile.delete();
 
 		//load skin from URL
 		} else if (post.containsKey("url")){
-			String url = (String)post.get("url");
+			String url = post.get("url");
 			ArrayList<String> skinVector;
 			try {
                 yacyURL u = new yacyURL(url, null);
@@ -146,7 +146,7 @@ public class ConfigSkins_p {
 				prop.put("status", "2");//error saving the skin
 				return prop;
 			}
-			if (post.containsKey("use_skin") && ((String)post.get("use_skin")).equals("on")){
+			if (post.containsKey("use_skin") && (post.get("use_skin")).equals("on")){
 				changeSkin(switchboard, skinPath, url.substring(url.lastIndexOf("/"), url.length()));
 			}
 		}

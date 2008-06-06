@@ -89,11 +89,11 @@ public class yacysearch {
         String promoteSearchPageGreeting = env.getConfig("promoteSearchPageGreeting", "");
         if (env.getConfigBool("promoteSearchPageGreeting.useNetworkName", false)) promoteSearchPageGreeting = env.getConfig("network.unit.description", "");
         if (promoteSearchPageGreeting.length() == 0) promoteSearchPageGreeting = "P2P WEB SEARCH";
-        String client = (String) header.get(httpHeader.CONNECTION_PROP_CLIENTIP); // the search client who initiated the search
+        String client = header.get(httpHeader.CONNECTION_PROP_CLIENTIP); // the search client who initiated the search
         
         // get query
         String querystring = (post == null) ? "" : post.get("query", post.get("search", "")).trim(); // SRU compliance
-        boolean fetchSnippets = post.get("verify", "true").equals("true");
+        boolean fetchSnippets = (post == null || post.get("verify", "true").equals("true"));
         final serverObjects prop = new serverObjects();
         
         boolean rss = (post == null) ? false : post.get("rss", "false").equals("true");
@@ -143,17 +143,17 @@ public class yacysearch {
         int offset = post.getInt("startRecord", post.getInt("offset", 0));
         
         boolean global = (post == null) ? true : post.get("resource", "global").equals("global");
-        final boolean indexof = post.get("indexof","").equals("on"); 
+        final boolean indexof = (post != null && post.get("indexof","").equals("on")); 
         String urlmask = "";
-        if (post.containsKey("urlmask") && post.get("urlmask").equals("no")) {
+        if (post != null && post.containsKey("urlmask") && post.get("urlmask").equals("no")) {
             urlmask = ".*";
         } else {
-            urlmask = (post.containsKey("urlmaskfilter")) ? (String) post.get("urlmaskfilter") : ".*";
+            urlmask = (post != null && post.containsKey("urlmaskfilter")) ? (String) post.get("urlmaskfilter") : ".*";
         }
-        String prefermask = post.get("prefermaskfilter", "");
+        String prefermask = (post == null ? "" : post.get("prefermaskfilter", ""));
         if ((prefermask.length() > 0) && (prefermask.indexOf(".*") < 0)) prefermask = ".*" + prefermask + ".*";
 
-        kelondroBitfield constraint = ((post.containsKey("constraint")) && (post.get("constraint", "").length() > 0)) ? new kelondroBitfield(4, post.get("constraint", "______")) : null;
+        kelondroBitfield constraint = (post != null && post.containsKey("constraint") && post.get("constraint", "").length() > 0) ? new kelondroBitfield(4, post.get("constraint", "______")) : null;
         if (indexof) {
             constraint = new kelondroBitfield(4);
             constraint.set(plasmaCondenser.flag_cat_indexof, true);
@@ -170,7 +170,7 @@ public class yacysearch {
         if (clustersearch) global = true; // switches search on, but search target is limited to cluster nodes
         
         // find search domain
-        int contentdomCode = plasmaSearchQuery.contentdomParser(post.get("contentdom", "text"));
+        int contentdomCode = plasmaSearchQuery.contentdomParser((post == null ? "text" : post.get("contentdom", "text")));
         
         // patch until better search profiles are available
         if ((contentdomCode != plasmaSearchQuery.CONTENTDOM_TEXT) && (itemsPerPage <= 32)) itemsPerPage = 32;
@@ -192,7 +192,7 @@ public class yacysearch {
             block = true;
         } catch (InterruptedException e) { e.printStackTrace(); }
         
-        if ((!block) && (post.get("cat", "href").equals("href"))) {
+        if ((!block) && (post == null || post.get("cat", "href").equals("href"))) {
             
             plasmaSearchRankingProfile ranking = sb.getRanking();
             final TreeSet<String>[] query = plasmaSearchQuery.cleanQuery(querystring); // converts also umlaute
@@ -212,7 +212,7 @@ public class yacysearch {
             }
 
             // if a minus-button was hit, remove a special reference first
-            if (post.containsKey("deleteref")) {
+            if (post != null && post.containsKey("deleteref")) {
                 if (!sb.verifyAuthentication(header, true)) {
                     prop.put("AUTHENTICATE", "admin log-in"); // force log-in
                     return prop;
@@ -231,7 +231,7 @@ public class yacysearch {
             }
 
             // if a plus-button was hit, create new voting message
-            if (post.containsKey("recommendref")) {
+            if (post != null && post.containsKey("recommendref")) {
                 if (!sb.verifyAuthentication(header, true)) {
                     prop.put("AUTHENTICATE", "admin log-in"); // force log-in
                     return prop;
@@ -247,9 +247,9 @@ public class yacysearch {
                         HashMap<String, String> map = new HashMap<String, String>();
                         map.put("url", comp.url().toNormalform(false, true).replace(',', '|'));
                         map.put("title", comp.dc_title().replace(',', ' '));
-                        map.put("description", ((document == null) ? comp.dc_title() : document.dc_title()).replace(',', ' '));
-                        map.put("author", ((document == null) ? "" : document.dc_creator()));
-                        map.put("tags", ((document == null) ? "" : document.dc_subject(' ')));
+                        map.put("description", document.dc_title().replace(',', ' '));
+                        map.put("author", document.dc_creator());
+                        map.put("tags", document.dc_subject(' '));
                         sb.webIndex.newsPool.publishMyNews(yacyNewsRecord.newRecord(sb.webIndex.seedDB.mySeed(), yacyNewsPool.CATEGORY_SURFTIPP_ADD, map));
                         document.close();
                     }
@@ -380,7 +380,7 @@ public class yacysearch {
             }
 
             if (prop == null || prop.size() == 0) {
-                if (post.get("search", "").length() < 3) {
+                if (post == null || post.get("search", "").length() < 3) {
                     prop.put("num-results", "2"); // no results - at least 3 chars
                 } else {
                     prop.put("num-results", "1"); // no results
@@ -414,7 +414,7 @@ public class yacysearch {
         prop.putHTML("input_prefermaskfilter", prefermask);
         prop.put("input_indexof", (indexof) ? "on" : "off");
         prop.put("input_constraint", (constraint == null) ? "" : constraint.exportB64());
-        prop.put("input_contentdom", post.get("contentdom", "text"));
+        prop.put("input_contentdom", (post == null ? "text" : post.get("contentdom", "text")));
         prop.put("input_contentdomCheckText", (contentdomCode == plasmaSearchQuery.CONTENTDOM_TEXT) ? "1" : "0");
         prop.put("input_contentdomCheckAudio", (contentdomCode == plasmaSearchQuery.CONTENTDOM_AUDIO) ? "1" : "0");
         prop.put("input_contentdomCheckVideo", (contentdomCode == plasmaSearchQuery.CONTENTDOM_VIDEO) ? "1" : "0");

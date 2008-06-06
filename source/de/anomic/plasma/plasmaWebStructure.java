@@ -303,7 +303,7 @@ public class plasmaWebStructure {
             dom = reference.substring(i * 12 + 6, (i + 1) * 12);
             c = 0;
             if (refs.containsKey(dom)) {
-                c = ((Integer) refs.get(dom)).intValue();
+                c = (refs.get(dom)).intValue();
             }
             refs.put(dom, new Integer(++c));
         }

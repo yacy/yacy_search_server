@@ -198,7 +198,7 @@ public class loaderThreads {
             try {
                 while ((this.run) && (line < lines.size())) {
                     // parse line and construct a property
-                    s = (String) lines.get(line);
+                    s = lines.get(line);
                     if ((s != null) && ((p = s.indexOf('=')) > 0)) {
                         key = s.substring(0, p).trim();
                         value = s.substring(p + 1).trim();

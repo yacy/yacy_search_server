@@ -72,7 +72,7 @@ public class indexRWIEntryOrder {
             Iterator<Map.Entry<String, Integer>> di = mmf1.domcount().entrySet().iterator();
             while (di.hasNext()) {
             	entry = di.next();
-            	this.doms.addScore(entry.getKey(), ((Integer) entry.getValue()).intValue());
+            	this.doms.addScore(entry.getKey(), (entry.getValue()).intValue());
             }
             try {mmf0.join();} catch (InterruptedException e) {} // wait for fork thread to finish
             if (this.min == null) this.min = mmf0.entryMin.clone(); else this.min.min(mmf0.entryMin);
@@ -80,7 +80,7 @@ public class indexRWIEntryOrder {
             di = mmf0.domcount().entrySet().iterator();
             while (di.hasNext()) {
             	entry = di.next();
-            	this.doms.addScore(entry.getKey(), ((Integer) entry.getValue()).intValue());
+            	this.doms.addScore(entry.getKey(), (entry.getValue()).intValue());
             }
             result = mmf0.decodedContainer();
             result.addAll(mmf1.decodedContainer());
@@ -96,7 +96,7 @@ public class indexRWIEntryOrder {
             Iterator<Map.Entry<String, Integer>> di = mmf.domcount().entrySet().iterator();
             while (di.hasNext()) {
             	entry = di.next();
-            	this.doms.addScore(entry.getKey(), ((Integer) entry.getValue()).intValue());
+            	this.doms.addScore(entry.getKey(), (entry.getValue()).intValue());
             }
             result = mmf.decodedContainer();
             //long s1= System.currentTimeMillis(), sc = Math.max(1, s1 - s0);
@@ -186,7 +186,7 @@ public class indexRWIEntryOrder {
                 if (this.entryMax == null) this.entryMax = iEntry.clone(); else this.entryMax.max(iEntry);
                 // update domcount
                 dom = iEntry.urlHash().substring(6);
-                count = (Integer) doms.get(dom);
+                count = doms.get(dom);
                 if (count == null) {
                 	doms.put(dom, int1);
                 } else {

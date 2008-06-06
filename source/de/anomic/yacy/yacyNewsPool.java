@@ -323,13 +323,13 @@ public class yacyNewsPool {
         if (record.created().getTime() == 0) return;
         Map<String, String> attributes = record.attributes();
         if (attributes.containsKey("url")){
-            if (plasmaSwitchboard.urlBlacklist.isListed(indexReferenceBlacklist.BLACKLIST_NEWS, new yacyURL((String) attributes.get("url"), null))){
+            if (plasmaSwitchboard.urlBlacklist.isListed(indexReferenceBlacklist.BLACKLIST_NEWS, new yacyURL(attributes.get("url"), null))){
                 System.out.println("DEBUG: ignored news-entry url blacklisted: " + attributes.get("url"));
                 return;
             }
         }
         if (attributes.containsKey("startURL")){
-            if (plasmaSwitchboard.urlBlacklist.isListed(indexReferenceBlacklist.BLACKLIST_NEWS, new yacyURL((String) attributes.get("startURL"), null))){
+            if (plasmaSwitchboard.urlBlacklist.isListed(indexReferenceBlacklist.BLACKLIST_NEWS, new yacyURL(attributes.get("startURL"), null))){
                 System.out.println("DEBUG: ignored news-entry url blacklisted: " + attributes.get("startURL"));
                 return;
             }
@@ -359,7 +359,7 @@ public class yacyNewsPool {
                 if (Thread.currentThread().isInterrupted()) throw new InterruptedException("Shutdown in progress");
                 
                 // get next news record
-                record = (yacyNewsRecord) i.next();
+                record = i.next();
                 if (automaticProcessP(seedDB, record)) {
                     this.processedNews.push(record);
                     i.remove();
@@ -411,7 +411,7 @@ public class yacyNewsPool {
         while (i.hasNext()) {
             record = i.next();
             if ((record != null) && (record.category().equals(category))) {
-                s = (String) record.attributes().get(key);
+                s = record.attributes().get(key);
                 if ((s != null) && (s.equals(value))) return record;
             }
         }
@@ -506,7 +506,7 @@ public class yacyNewsPool {
         if (toqueue == null) return 0;
         int c = 0;
         while (i.hasNext()) {
-            record = (yacyNewsRecord) i.next();
+            record = i.next();
             if (record == null) continue;
             toqueue.push(record);
             c++;

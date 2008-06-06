@@ -183,16 +183,16 @@ public class vcfParser extends AbstractParser implements Parser {
                         
                         // using the name of the current version as section headline
                         if (parsedData.containsKey("FN")) {
-                            parsedNames.add(name = (String)parsedData.get("FN"));
+                            parsedNames.add(name = parsedData.get("FN"));
                         } else if (parsedData.containsKey("N")) {
-                            parsedNames.add(name = (String)parsedData.get("N"));
+                            parsedNames.add(name = parsedData.get("N"));
                         } else {
                             parsedNames.add(name = "unknown name");
                         }
                         
                         // getting the vcard title
                         if (parsedData.containsKey("TITLE")) {
-                            parsedNames.add(title = (String) parsedData.get("TITLE"));
+                            parsedNames.add(title = parsedData.get("TITLE"));
                         }
                         
                         if (parsedTitle.length() > 0) parsedTitle.append(", ");
@@ -203,7 +203,7 @@ public class vcfParser extends AbstractParser implements Parser {
                         // the text representation of the vCard
                         Iterator<String> iter = parsedData.values().iterator();  
                         while (iter.hasNext()) {
-                            value = (String) iter.next();
+                            value = iter.next();
                             parsedDataText.append(value).append("\r\n");
                         }
                         parsedDataText.append("\r\n");
@@ -236,7 +236,7 @@ public class vcfParser extends AbstractParser implements Parser {
                 }
             }
 
-            String[] sections = (String[]) parsedNames.toArray(new String[parsedNames.size()]);
+            String[] sections = parsedNames.toArray(new String[parsedNames.size()]);
             byte[] text = parsedDataText.toString().getBytes();
             plasmaParserDocument theDoc = new plasmaParserDocument(
                     location,                   // url of the source document

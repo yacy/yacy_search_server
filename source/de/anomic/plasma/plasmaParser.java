@@ -466,7 +466,7 @@ public final class plasmaParser {
                     try {
                         // trying to load the parser class by its name
                         Class<?> parserClass = Class.forName(fullClassName);
-                        Object theParser0 = (Parser) parserClass.newInstance();
+                        Object theParser0 = parserClass.newInstance();
                         if (!(theParser0 instanceof Parser)) continue;
                         Parser theParser = (Parser) theParser0;
                         
@@ -493,12 +493,12 @@ public final class plasmaParser {
                         parserInfo.parserClassName = fullClassName;
                         parserInfo.libxDependencies = neededLibx;
                         parserInfo.supportedMimeTypes = supportedMimeTypes;
-                        parserInfo.parserVersionNr = ((Parser)theParser).getVersion();
-                        parserInfo.parserName = ((Parser) theParser).getName();
+                        parserInfo.parserVersionNr = (theParser).getVersion();
+                        parserInfo.parserName = (theParser).getName();
                         
                         Iterator<String> mimeTypeIterator = supportedMimeTypes.keySet().iterator();
                         while (mimeTypeIterator.hasNext()) {
-                            String mimeType = (String) mimeTypeIterator.next();
+                            String mimeType = mimeTypeIterator.next();
                             availableParserList.put(mimeType, parserInfo);
                             serverLog.logInfo("PARSER", "Found functional parser for mimeType '" + mimeType + "'." +
                                               "\n\tName:    " + parserInfo.parserName + 
@@ -755,7 +755,7 @@ public final class plasmaParser {
             ParserInfo parserInfo = null;
             synchronized (plasmaParser.availableParserList) {
     	        if (plasmaParser.availableParserList.containsKey(mimeType)) {
-                    parserInfo = (ParserInfo)plasmaParser.availableParserList.get(mimeType);
+                    parserInfo = plasmaParser.availableParserList.get(mimeType);
     	            parserClassName = parserInfo.parserClassName;
     	        } else {
                     return null;
@@ -977,14 +977,14 @@ public final class plasmaParser {
         if (url == null) throw new NullPointerException();
         
         if (parserMode.equals(PARSER_MODE_IMAGE)) return true;
-        plasmaParserConfig config = (plasmaParserConfig) parserConfigList.get(parserMode);
+        plasmaParserConfig config = parserConfigList.get(parserMode);
         return (config == null)?false:config.supportedContent(url, mimeType);
     }
 
     public static void initParseableMimeTypes(String parserMode, String configStr) {
         if (!PARSER_MODE.contains(parserMode)) throw new IllegalArgumentException();
         
-        plasmaParserConfig config = (plasmaParserConfig) parserConfigList.get(parserMode);
+        plasmaParserConfig config = parserConfigList.get(parserMode);
         if (config == null) {
             config = new plasmaParserConfig(parserMode);
             parserConfigList.put(parserMode, config);
@@ -995,7 +995,7 @@ public final class plasmaParser {
     public static String[] setEnabledParserList(String parserMode, Set<String> mimeTypeSet) {
         if (!PARSER_MODE.contains(parserMode)) throw new IllegalArgumentException();
         
-        plasmaParserConfig config = (plasmaParserConfig) parserConfigList.get(parserMode);
+        plasmaParserConfig config = parserConfigList.get(parserMode);
         if (config == null) {
             config = new plasmaParserConfig(parserMode);
             parserConfigList.put(parserMode, config);

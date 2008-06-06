@@ -226,7 +226,7 @@ public final class HTTPLoader {
                             }
 
                             // we write the new cache entry to file system directly
-                            ((JakartaCommonsHttpResponse)res).setAccountingName("CRAWLER");
+                            (res).setAccountingName("CRAWLER");
                             byte[] responseBody = res.getData();
                             fos.write(responseBody);
                             htCache.setCacheArray(responseBody);
@@ -256,7 +256,7 @@ public final class HTTPLoader {
             } else if (res.getStatusLine().startsWith("30")) {
                     if (res.getResponseHeader().containsKey(httpHeader.LOCATION)) {
                         // getting redirection URL
-                        String redirectionUrlString = (String) res.getResponseHeader().get(httpHeader.LOCATION);
+                        String redirectionUrlString = res.getResponseHeader().get(httpHeader.LOCATION);
                         redirectionUrlString = redirectionUrlString.trim();
 
                         if (redirectionUrlString.length() == 0) {

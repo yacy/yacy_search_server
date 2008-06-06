@@ -68,7 +68,7 @@ public final class search {
         serverObjects prop = new serverObjects();
         if ((post == null) || (env == null)) return prop;
         if (!yacyNetwork.authentifyRequest(post, env)) return prop;
-        String client = (String) header.get(httpHeader.CONNECTION_PROP_CLIENTIP);
+        String client = header.get(httpHeader.CONNECTION_PROP_CLIENTIP);
 
         //System.out.println("yacy: search received request = " + post.toString());
 
@@ -113,7 +113,7 @@ public final class search {
 
         if ((sb.isRobinsonMode()) &&
              	 (!((sb.isPublicRobinson()) ||
-             	    (sb.isInMyCluster((String)header.get(httpHeader.CONNECTION_PROP_CLIENTIP)))))) {
+             	    (sb.isInMyCluster(header.get(httpHeader.CONNECTION_PROP_CLIENTIP)))))) {
                  // if we are a robinson cluster, answer only if this client is known by our network definition
         	prop.put("links", "");
             prop.put("linkcount", "0");
@@ -219,16 +219,16 @@ public final class search {
                 Iterator<Map.Entry<String, Integer>> i = theSearch.IACount.entrySet().iterator();
                 while (i.hasNext()) {
                     entry = i.next();
-                    indexcount.append("indexcount.").append((String) entry.getKey()).append('=').append(((Integer) entry.getValue()).toString()).append(serverCore.CRLF_STRING);
+                    indexcount.append("indexcount.").append(entry.getKey()).append('=').append((entry.getValue()).toString()).append(serverCore.CRLF_STRING);
                 }
                 if (abstractSet != null) {
                     // if a specific index-abstract is demanded, attach it here
                     Iterator<String> j = abstractSet.iterator();
                     String wordhash;
                     while (j.hasNext()) {
-                        wordhash = (String) j.next();
-                        indexabstractContainercount += ((Integer) theSearch.IACount.get(wordhash)).intValue();
-                        indexabstract.append("indexabstract." + wordhash + "=").append((String) theSearch.IAResults.get(wordhash)).append(serverCore.CRLF_STRING);
+                        wordhash = j.next();
+                        indexabstractContainercount += (theSearch.IACount.get(wordhash)).intValue();
+                        indexabstract.append("indexabstract." + wordhash + "=").append(theSearch.IAResults.get(wordhash)).append(serverCore.CRLF_STRING);
                     }
                 }
                 prop.put("indexcount", indexcount.toString());
@@ -249,12 +249,12 @@ public final class search {
                     prop.put("indexabstract", "");
                 } else if (abstracts.equals("auto")) {
                     // automatically attach the index abstract for the index that has the most references. This should be our target dht position
-                    indexabstractContainercount += ((Integer) theSearch.IACount.get(theSearch.IAmaxcounthash)).intValue();
-                    indexabstract.append("indexabstract." + theSearch.IAmaxcounthash + "=").append((String) theSearch.IAResults.get(theSearch.IAmaxcounthash)).append(serverCore.CRLF_STRING);
+                    indexabstractContainercount += (theSearch.IACount.get(theSearch.IAmaxcounthash)).intValue();
+                    indexabstract.append("indexabstract." + theSearch.IAmaxcounthash + "=").append(theSearch.IAResults.get(theSearch.IAmaxcounthash)).append(serverCore.CRLF_STRING);
                     if ((theSearch.IAneardhthash != null) && (!(theSearch.IAneardhthash.equals(theSearch.IAmaxcounthash)))) {
                         // in case that the neardhthash is different from the maxcounthash attach also the neardhthash-container
-                        indexabstractContainercount += ((Integer) theSearch.IACount.get(theSearch.IAneardhthash)).intValue();
-                        indexabstract.append("indexabstract." + theSearch.IAneardhthash + "=").append((String) theSearch.IAResults.get(theSearch.IAneardhthash)).append(serverCore.CRLF_STRING);
+                        indexabstractContainercount += (theSearch.IACount.get(theSearch.IAneardhthash)).intValue();
+                        indexabstract.append("indexabstract." + theSearch.IAneardhthash + "=").append(theSearch.IAResults.get(theSearch.IAneardhthash)).append(serverCore.CRLF_STRING);
                     }
                     //System.out.println("DEBUG-ABSTRACTGENERATION: maxcounthash = " + maxcounthash);
                     //System.out.println("DEBUG-ABSTRACTGENERATION: neardhthash  = "+ neardhthash);
@@ -269,7 +269,7 @@ public final class search {
             StringBuffer refstr = new StringBuffer();
             Iterator<String> j = ws.iterator();
             while (j.hasNext()) {
-                refstr.append(",").append((String) j.next());
+                refstr.append(",").append(j.next());
             }
             prop.put("references", (refstr.length() > 0) ? refstr.substring(1) : refstr.toString());
             serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(theQuery.id(true), "reference collection", ws.size(), System.currentTimeMillis() - timer));

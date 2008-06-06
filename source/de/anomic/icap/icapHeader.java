@@ -140,7 +140,7 @@ public class icapHeader extends TreeMap<String, String> implements Map<String, S
     public boolean allow(int statusCode) {
         if (!super.containsKey("Allow")) return false;
                 
-        String allow = (String)get("Allow");
+        String allow = get("Allow");
         return (allow.indexOf(Integer.toString(statusCode))!=-1); 
     }    
     
@@ -175,7 +175,7 @@ public class icapHeader extends TreeMap<String, String> implements Map<String, S
         
         if ((icapStatusText == null)||(icapStatusText.length()==0)) {
             if (icapVersion.equals("ICAP/1.0") && icapHeader.icap1_0.containsKey(Integer.toString(icapStatusCode))) 
-                icapStatusText = (String) icapHeader.icap1_0.get(Integer.toString(icapStatusCode));
+                icapStatusText = icapHeader.icap1_0.get(Integer.toString(icapStatusCode));
         }
         
         StringBuffer theHeader = new StringBuffer();        
@@ -191,7 +191,7 @@ public class icapHeader extends TreeMap<String, String> implements Map<String, S
         char tag;
         int count;
         while (i.hasNext()) {
-            key = (String) i.next();
+            key = i.next();
             tag = key.charAt(0);
             if ((tag != '*') && (tag != '#')) { // '#' in key is reserved for proxy attributes as artificial header values
                 count = keyCount(key);

@@ -518,7 +518,7 @@ public class LogParserPLASMA implements LogParser{
         System.out.println("DHT: Sended " + DHTSendURLs + " URLs via DHT.");
         System.out.println("DHT: DHT Transfers send to " + DHTPeerNames.size() + " Peernames with " + DHTPeerHashs.size() + " Peerhashs.");
         System.out.println("DHT: Totally selected " + DHTSelectionWordsCount + " words in " + DHTSelectionWordsTimeCount + " seconds (" + (float)DHTSelectionWordsCount/DHTSelectionWordsTimeCount + " words/s)");
-        System.out.println("DHT: Selected " + DHTSelectionTargetCount + " possible DHT Targets (min. Distance: " + minDHTDist + " max. Distance: " + maxDHTDist + " avg. Distance: " + ((double)avgDHTDist/DHTSelectionTargetCount));
+        System.out.println("DHT: Selected " + DHTSelectionTargetCount + " possible DHT Targets (min. Distance: " + minDHTDist + " max. Distance: " + maxDHTDist + " avg. Distance: " + (avgDHTDist/DHTSelectionTargetCount));
         System.out.println("DHT: " + busyPeerCount + " times a targetpeer was too busy to accept a transfer.");
         System.out.println("DHT: " + notEnoughDHTPeers + " times there were not enought targetpeers for the selected DHTChunk");
         System.out.println("DHT: IndexDistribution failed " + failedIndexDistributionCount + " times.");

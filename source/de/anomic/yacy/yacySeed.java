@@ -77,7 +77,6 @@ import de.anomic.index.indexWord;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.net.natLib;
 import de.anomic.server.serverCodings;
-import de.anomic.server.serverCore;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverDomains;
 import de.anomic.server.serverSystem;
@@ -190,7 +189,7 @@ public class yacySeed {
         // create a seed with a pre-defined hash map
         this.hash = theHash;
         this.dna = theDna;
-        final String flags = (String) this.dna.get(yacySeed.FLAGS);
+        final String flags = this.dna.get(yacySeed.FLAGS);
         if ((flags == null) || (flags.length() != 4)) { this.dna.put(yacySeed.FLAGS, yacySeed.FLAGSZERO); }
         this.available = 0;
         this.dna.put(yacySeed.NAME, checkPeerName(get(yacySeed.NAME, "&empty;")));
@@ -353,7 +352,7 @@ public class yacySeed {
         } else if (o instanceof Long) {
             return ((Long) o).longValue();
         } else if (o instanceof Integer) {
-            return (long) ((Integer) o).intValue();
+            return ((Integer) o).intValue();
         } else return dflt;
     }
 
@@ -384,25 +383,25 @@ public class yacySeed {
     }
 
     public final void incSI(int count) {
-        String v = (String) this.dna.get(yacySeed.INDEX_OUT);
+        String v = this.dna.get(yacySeed.INDEX_OUT);
         if (v == null) { v = yacySeed.ZERO; }
         dna.put(yacySeed.INDEX_OUT, Integer.toString(Integer.parseInt(v) + count));
     }
 
     public final void incRI(int count) {
-        String v = (String) this.dna.get(yacySeed.INDEX_IN);
+        String v = this.dna.get(yacySeed.INDEX_IN);
         if (v == null) { v = yacySeed.ZERO; }
         dna.put(yacySeed.INDEX_IN, Integer.toString(Integer.parseInt(v) + count));
     }
 
     public final void incSU(int count) {
-        String v = (String) this.dna.get(yacySeed.URL_OUT);
+        String v = this.dna.get(yacySeed.URL_OUT);
         if (v == null) { v = yacySeed.ZERO; }
         dna.put(yacySeed.URL_OUT, Integer.toString(Integer.parseInt(v) + count));
     }
 
     public final void incRU(int count) {
-        String v = (String) this.dna.get(yacySeed.URL_IN);
+        String v = this.dna.get(yacySeed.URL_IN);
         if (v == null) { v = yacySeed.ZERO; }
         dna.put(yacySeed.URL_IN, Integer.toString(Integer.parseInt(v) + count));
     }
@@ -476,13 +475,13 @@ public class yacySeed {
      * either the IP or the port could be retrieved from this yacySeed object
      */
     public final String getPublicAddress() {
-        String ip = (String) this.dna.get(yacySeed.IP);
+        String ip = this.dna.get(yacySeed.IP);
         if (ip == null) { return null; }
         if (ip.length() < 8) { return null; } // 10.0.0.0
         // if (ip.equals(yacyCore.seedDB.mySeed.dna.get(yacySeed.IP))) ip = "127.0.0.1";
         // if (this.hash.equals("xxxxxxxxxxxx")) return "192.168.100.1:3300";
         
-        final String port = (String) this.dna.get(yacySeed.PORT);
+        final String port = this.dna.get(yacySeed.PORT);
         if ((port == null) || (port.length() < 2)) return null;
 
         return ip + ":" + port;
@@ -498,7 +497,7 @@ public class yacySeed {
     public final String getClusterAddress() {
     	if (this.alternativeIP == null) return getPublicAddress();
     			
-        final String port = (String) this.dna.get(yacySeed.PORT);
+        final String port = this.dna.get(yacySeed.PORT);
         if ((port == null) || (port.length() < 2)) return null;
 
         return this.alternativeIP + ":" + port;
@@ -513,7 +512,7 @@ public class yacySeed {
     
     /** @return the portnumber of this seed or <code>-1</code> if not present */
     public final int getPort() {
-        final String port = (String) this.dna.get(yacySeed.PORT);
+        final String port = this.dna.get(yacySeed.PORT);
         if (port == null) return -1;
         /*if (port.length() < 2) return -1; It is possible to use port 0-9*/
         return Integer.parseInt(port);
@@ -525,7 +524,7 @@ public class yacySeed {
      * the difference to <code>+0130</code> if not present or <code>0</code> if an error occured during conversion
      */
     public final long getUTCDiff() {
-        String utc = (String) this.dna.get(yacySeed.UTC);
+        String utc = this.dna.get(yacySeed.UTC);
         if (utc == null) { utc = "+0130"; }
         try {
             return serverDate.UTCDiff(utc);
@@ -595,7 +594,7 @@ public class yacySeed {
         Set<String> tags = serverCodings.string2set(get(PEERTAGS, ""), "|");
         Iterator<String> i = tags.iterator();
         while (i.hasNext()) {
-        	if (searchHashes.contains(indexWord.word2hash((String) i.next()))) return true;
+        	if (searchHashes.contains(indexWord.word2hash(i.next()))) return true;
         }
         return false;
     }

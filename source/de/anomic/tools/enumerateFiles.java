@@ -88,9 +88,9 @@ public class enumerateFiles implements Enumeration<File> {
                     t = null;
                 }
             }
-            if ((hierarchy.size() == 0) || (t.size() == 0)) return null; // this is the end
+            if ((hierarchy.size() == 0) || (t == null || t.size() == 0)) return null; // this is the end
             // fetch value
-            if (incOrder) f = (File) t.first(); else f = (File) t.last();
+            if (incOrder) f = t.first(); else f = t.last();
             t.remove(f);
             // if the value represents another folder, we step into the next hierarchy
             if (f.isDirectory()) {

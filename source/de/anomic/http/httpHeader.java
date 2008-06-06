@@ -364,7 +364,7 @@ public final class httpHeader extends TreeMap<String, String> implements Map<Str
             String key, value;
             while (i.hasNext()) {
                 key = i.next();
-                value = (String) get(key);
+                value = get(key);
                 fos.write((key + "=" + value + "\r\n").getBytes());
             }
             fos.flush();
@@ -388,7 +388,7 @@ public final class httpHeader extends TreeMap<String, String> implements Map<Str
     
     private Date headerDate(String kind) {
         if (containsKey(kind)) {
-            Date parsedDate = serverDate.parseHTTPDate((String) get(kind));
+            Date parsedDate = serverDate.parseHTTPDate(get(kind));
             if (parsedDate == null) parsedDate = new Date();
             return parsedDate;
         }
@@ -452,7 +452,7 @@ public final class httpHeader extends TreeMap<String, String> implements Map<Str
     
     public Object ifRange() {
         if (containsKey(httpHeader.IF_RANGE)) {
-            Date rangeDate = serverDate.parseHTTPDate((String) get(httpHeader.IF_RANGE));
+            Date rangeDate = serverDate.parseHTTPDate(get(httpHeader.IF_RANGE));
             if (rangeDate != null) 
                 return rangeDate;
             
@@ -475,7 +475,7 @@ public final class httpHeader extends TreeMap<String, String> implements Map<Str
     public long contentLength() {
         if (containsKey(httpHeader.CONTENT_LENGTH)) {
             try {
-                return Long.parseLong((String) get(httpHeader.CONTENT_LENGTH));
+                return Long.parseLong(get(httpHeader.CONTENT_LENGTH));
             } catch (NumberFormatException e) {
                 return -1;
             }
@@ -485,12 +485,12 @@ public final class httpHeader extends TreeMap<String, String> implements Map<Str
 
     public boolean acceptGzip() {
         return ((containsKey(httpHeader.ACCEPT_ENCODING)) &&
-                (((String) get(httpHeader.ACCEPT_ENCODING)).toUpperCase().indexOf("GZIP")) != -1);        
+                ((get(httpHeader.ACCEPT_ENCODING)).toUpperCase().indexOf("GZIP")) != -1);        
     }
     
     public boolean gzip() {
         return ((containsKey(httpHeader.CONTENT_ENCODING)) &&
-		(((String) get(httpHeader.CONTENT_ENCODING)).toUpperCase().startsWith("GZIP")));
+		((get(httpHeader.CONTENT_ENCODING)).toUpperCase().startsWith("GZIP")));
     }
     
     public static Object[] parseResponseLine(String respLine) {
@@ -797,7 +797,7 @@ public final class httpHeader extends TreeMap<String, String> implements Map<Str
         if (!prop.getProperty(CONNECTION_PROP_HOST).equals(virtualHost)) return;
         
         // TODO: we could have problems with connections from extern here ...
-        String dstHostSocket = (String) header.get(httpHeader.HOST);
+        String dstHostSocket = header.get(httpHeader.HOST);
         prop.setProperty(CONNECTION_PROP_HOST,(httpd.isThisHostName(dstHostSocket)?virtualHost:dstHostSocket));
     }
     /*

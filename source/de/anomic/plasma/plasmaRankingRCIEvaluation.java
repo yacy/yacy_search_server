@@ -98,7 +98,7 @@ public class plasmaRankingRCIEvaluation {
     
     public static long sum(int[] c) {
         long s = 0;
-        for (int i = 0; i < c.length; i++) s += (long) c[i];
+        for (int i = 0; i < c.length; i++) s += c[i];
         return s;
     }
     
@@ -161,7 +161,7 @@ public class plasmaRankingRCIEvaluation {
         String key;
         kelondroAttrSeq.Entry entry;
         while (i.hasNext()) {
-            key = (String) i.next();
+            key = i.next();
             entry = rci.getEntry(key);
             ranked[orderIntoYBI(partition, entry.getSeqSet().size())].add(key);
         }

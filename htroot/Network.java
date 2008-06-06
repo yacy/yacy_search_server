@@ -78,7 +78,7 @@ public class Network {
         
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
-        prop.setLocalized(!((String)header.get("PATH")).endsWith(".xml"));
+        prop.setLocalized(!(header.get("PATH")).endsWith(".xml"));
         prop.putHTML("page_networkTitle", sb.getConfig("network.unit.description", "unspecified"));
         prop.putHTML("page_networkName", sb.getConfig("network.unit.name", "unspecified"));
         final boolean overview = (post == null) || (post.get("page", "0").equals("0"));
@@ -195,7 +195,7 @@ public class Network {
             }
             prop.put("table", 2); // triggers overview
             prop.put("page", 0);
-        } else if (Integer.parseInt(post.get("page", "1")) == 4) {
+        } else if (post != null && Integer.parseInt(post.get("page", "1")) == 4) {
             prop.put("table", 4); // triggers overview
             prop.put("page", 4);          
 
@@ -242,8 +242,8 @@ public class Network {
             }
         } else {
             // generate table
-            final int page = Integer.parseInt(post.get("page", "1"));
-            final int maxCount = Integer.parseInt(post.get("maxCount", "300"));
+            final int page = (post == null ? 1 : Integer.parseInt(post.get("page", "1")));
+            final int maxCount = (post == null ? 300 : Integer.parseInt(post.get("maxCount", "300")));
             int conCount = 0;            
             if (sb.webIndex.seedDB == null) {
                 prop.put("table", 0);//no remote senior/principal proxies known"
@@ -288,12 +288,14 @@ public class Network {
 
                     boolean dark = true;
                     yacySeed seed;
-                    final boolean complete = post.containsKey("ip");
+                    final boolean complete = (post != null && post.containsKey("ip"));
                     Iterator<yacySeed> e = null;
+                    final boolean order = (post != null && post.get("order", "down").equals("up"));
+                    final String sort = (post == null ? null : post.get("sort", null));
                     switch (page) {
-                        case 1 : e = sb.webIndex.seedDB.seedsSortedConnected(post.get("order", "down").equals("up"), post.get("sort", yacySeed.LCOUNT)); break;
-                        case 2 : e = sb.webIndex.seedDB.seedsSortedDisconnected(post.get("order", "down").equals("up"), post.get("sort", yacySeed.LASTSEEN)); break;
-                        case 3 : e = sb.webIndex.seedDB.seedsSortedPotential(post.get("order", "down").equals("up"), post.get("sort", yacySeed.LASTSEEN)); break;
+                        case 1 : e = sb.webIndex.seedDB.seedsSortedConnected(order, (sort == null ? yacySeed.LCOUNT : sort)); break;
+                        case 2 : e = sb.webIndex.seedDB.seedsSortedDisconnected(order, (sort == null ? yacySeed.LASTSEEN : sort)); break;
+                        case 3 : e = sb.webIndex.seedDB.seedsSortedPotential(order, (sort == null ? yacySeed.LASTSEEN : sort)); break;
                         default: break;
                     }
                     String startURL;
@@ -303,22 +305,21 @@ public class Network {
                     int PPM;
                     double QPM;
                     Pattern peerSearchPattern = null;
-                    String wrongregex = null;
                     prop.put("regexerror", 0);
                     prop.put("regexerror_wrongregex", (String)null);
-                    if (post.containsKey("search")) {
+                    if (post != null && post.containsKey("search")) {
                         try {
                             peerSearchPattern = Pattern.compile(post.get("match", ""), Pattern.CASE_INSENSITIVE);
                         } catch (PatternSyntaxException pse){
-                            wrongregex = pse.getPattern();
                             prop.put("regexerror", 1);
-                            prop.putHTML("regexerror_wrongregex", wrongregex);
+                            prop.putHTML("regexerror_wrongregex", pse.getPattern());
                         }
                     }
+                    if(e != null) {
                     while (e.hasNext() && conCount < maxCount) {
-                        seed = (yacySeed) e.next();
+                        seed = e.next();
                         if (seed != null) {
-                            if((post.containsKey("search"))  && (wrongregex == null)) {
+                            if((post != null && post.containsKey("search"))  && peerSearchPattern != null /*(wrongregex == null)*/) {
                                 boolean abort = true;
                                 Matcher m = peerSearchPattern.matcher (seed.getName());
                                 if (m.find ()) {
@@ -348,20 +349,20 @@ public class Network {
                                 prop.put(STR_TABLE_LIST + conCount + "_updatedWiki", 0);
                             } else {
                                 prop.put(STR_TABLE_LIST + conCount + "_updatedWiki", 1);
-                                prop.putHTML(STR_TABLE_LIST + conCount + "_updatedWiki_page", (String) wikiMap.get("page"));
+                                prop.putHTML(STR_TABLE_LIST + conCount + "_updatedWiki_page", wikiMap.get("page"));
                                 prop.put(STR_TABLE_LIST + conCount + "_updatedWiki_address", seed.getPublicAddress());
                             }
                             if ((blogMap = updatedBlog.get(seed.hash)) == null) {
                                 prop.put(STR_TABLE_LIST + conCount + "_updatedBlog", 0);
                             } else {
                                 prop.put(STR_TABLE_LIST + conCount + "_updatedBlog", 1);
-                                prop.putHTML(STR_TABLE_LIST + conCount + "_updatedBlog_page", (String) blogMap.get("page"));
-                                prop.putHTML(STR_TABLE_LIST + conCount + "_updatedBlog_subject", (String) blogMap.get("subject"));
+                                prop.putHTML(STR_TABLE_LIST + conCount + "_updatedBlog_page", blogMap.get("page"));
+                                prop.putHTML(STR_TABLE_LIST + conCount + "_updatedBlog_subject", blogMap.get("subject"));
                                 prop.put(STR_TABLE_LIST + conCount + "_updatedBlog_address", seed.getPublicAddress());
                             }
                             PPM = seed.getPPM();
                             QPM = seed.getQPM();
-                            if (((startURL = (String) isCrawling.get(seed.hash)) != null) && (PPM >= 4)) {
+                            if (((startURL = isCrawling.get(seed.hash)) != null) && (PPM >= 4)) {
                                 prop.put(STR_TABLE_LIST + conCount + "_isCrawling", 1);
                                 prop.put(STR_TABLE_LIST + conCount + "_isCrawling_page", startURL);
                             }
@@ -462,6 +463,7 @@ public class Network {
                             conCount++;
                         } // seed != null
                     } // while
+                    }
                     if (iAmActive) { sb.webIndex.seedDB.removeMySeed(); }
                     prop.putNum("table_list", conCount);
                     prop.put("table", 1);
@@ -472,7 +474,7 @@ public class Network {
             }
             prop.put("page", page);
             prop.put("table_page", page);
-            prop.putHTML("table_searchpattern", post.get("match", ""));
+            prop.putHTML("table_searchpattern", (post == null ? "" : post.get("match", "")));
             switch (page) {
                 case 1 : prop.putHTML("table_peertype", "senior/principal"); break;
                 case 2 : prop.putHTML("table_peertype", "senior/principal"); break;

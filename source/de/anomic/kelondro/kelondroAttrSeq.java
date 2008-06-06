@@ -194,7 +194,7 @@ public class kelondroAttrSeq {
         Object v;
         while (i.hasNext()) {
             entry = i.next();
-            k = (String) entry.getKey();
+            k = entry.getKey();
             v = entry.getValue();
             sb.append(k); sb.append('=');
             if (v instanceof String) sb.append((String) v);
@@ -293,7 +293,7 @@ public class kelondroAttrSeq {
             prop_pos = new int[l.size()];
             p = 0;
             for (int i = 0; i < l.size(); i++) {
-                a = (kelondroColumn) l.get(i);
+                a = l.get(i);
                 prop_names[i] = a.nickname;
                 prop_len[i] = a.cellwidth;
                 prop_pos[i] = p;
@@ -313,7 +313,7 @@ public class kelondroAttrSeq {
             seq_pos = new int[l.size()];
             p = 0;
             for (int i = 0; i < l.size(); i++) {
-                a = (kelondroColumn) l.get(i);
+                a = l.get(i);
                 seq_names[i] = a.nickname;
                 seq_len[i] = a.cellwidth;
                 seq_pos[i] = p;
@@ -392,7 +392,7 @@ public class kelondroAttrSeq {
         }
         
         public long getAttr(String key, long dflt) {
-            Long i = (Long) attrs.get(key);
+            Long i = attrs.get(key);
             if (i == null) return dflt;
             return i.longValue();
         }
@@ -427,14 +427,14 @@ public class kelondroAttrSeq {
             StringBuffer sb = new StringBuffer(100 + structure.seq_len[0] * seq.size());
             Long val;
             for (int i = 0; i < structure.prop_names.length; i++) {
-                val = (Long) attrs.get(structure.prop_names[i]);
+                val = attrs.get(structure.prop_names[i]);
                 sb.append(kelondroBase64Order.enhancedCoder.encodeLongSmart((val == null) ? 0 : val.longValue(), structure.prop_len[i]));
             }
             sb.append('|');
             Iterator<String> q = seq.iterator();
             //long[] seqattrs;
             while (q.hasNext()) {
-                sb.append((String) q.next());
+                sb.append(q.next());
                 //seqattrs = (long[]) entry.getValue();
                 /*
                 for (int i = 1; i < structure.seq_names.length; i++) {

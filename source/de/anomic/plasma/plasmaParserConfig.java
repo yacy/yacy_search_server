@@ -48,14 +48,12 @@
 package de.anomic.plasma;
 
 import java.util.Arrays;
-import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Set;
 
 import de.anomic.plasma.parser.Parser;
-import de.anomic.plasma.parser.ParserInfo;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyURL;
 
@@ -158,12 +156,12 @@ public class plasmaParserConfig {
         if (mimeTypeSet != null) {
             Iterator<String> mimeTypes = mimeTypeSet.iterator();
             while (mimeTypes.hasNext()) {
-                String mimeType = (String) mimeTypes.next();
+                String mimeType = mimeTypes.next();
                 if (plasmaParser.availableParserList.containsKey(mimeType)) {
                     Parser theParser = null;
                     try {
                         // getting the parser
-                        theParser = plasmaParser.makeParser(((ParserInfo)plasmaParser.availableParserList.get(mimeType)).parserClassName);
+                        theParser = plasmaParser.makeParser((plasmaParser.availableParserList.get(mimeType)).parserClassName);
                         
                         // getting a list of mimeTypes that the parser supports
                         Hashtable<String, String> parserSupportsMimeTypes = theParser.getSupportedMimeTypes();
@@ -199,7 +197,7 @@ public class plasmaParserConfig {
             this.supportedFileExt.addAll(newSupportedFileExt);
         }
 
-        return (String[])newEnabledParsers.toArray(new String[newEnabledParsers.size()]);
+        return newEnabledParsers.toArray(new String[newEnabledParsers.size()]);
     }
     
     @SuppressWarnings("unchecked")

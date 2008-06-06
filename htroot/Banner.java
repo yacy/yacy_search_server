@@ -44,18 +44,19 @@
 // the intact and unchanged copyright notice.
 // Contributions and changes to the program code must be marked as such.
 
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+
+import javax.imageio.ImageIO;
+
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaGrafics;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.ymage.ymageMatrix;
 import de.anomic.yacy.yacySeed;
-
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import javax.imageio.ImageIO;
+import de.anomic.ymage.ymageMatrix;
 
 /** draw a banner with information about the peer */
 public class Banner {

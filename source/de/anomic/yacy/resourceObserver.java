@@ -39,15 +39,13 @@
 
 package de.anomic.yacy;
 
-import java.lang.String;
 import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
 import java.util.Iterator;
+import java.util.Map;
 
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.logging.serverLog;
-import de.anomic.tools.diskUsage;
+import de.anomic.tools.DiskUsage;
 
 public final class resourceObserver {
     // The minimal free space on every used volume, for now set to 100 MB.
@@ -62,7 +60,7 @@ public final class resourceObserver {
     private final int CHECK_MEMORY_USAGE_FREQ = 1;
     
     private serverLog log = new serverLog("RESOURCE OBSERVER");
-    private diskUsage du;
+    private DiskUsage du;
     private plasmaSwitchboard sb;
 
     private int checkDiskUsageCount;
@@ -72,7 +70,7 @@ public final class resourceObserver {
     
     public resourceObserver(plasmaSwitchboard sb) {
         this.sb = sb;
-        du = new diskUsage(sb);
+        du = new DiskUsage(sb);
         
         if (!du.getUsable ())
             this.log.logWarning("Disk usage returned: " + du.getErrorMessage());

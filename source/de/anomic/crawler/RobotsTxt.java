@@ -158,7 +158,7 @@ public class RobotsTxt {
             
             if (this.mem.containsKey(DISALLOW_PATH_LIST)) {
                 this.disallowPathList = new LinkedList<String>();
-                String csPl = (String) this.mem.get(DISALLOW_PATH_LIST);
+                String csPl = this.mem.get(DISALLOW_PATH_LIST);
                 if (csPl.length() > 0){
                     String[] pathArray = csPl.split(ROBOTS_DB_PATH_SEPARATOR);
                     if ((pathArray != null)&&(pathArray.length > 0)) {
@@ -221,7 +221,7 @@ public class RobotsTxt {
         
         public Date getLoadedDate() {
             if (this.mem.containsKey(LOADED_DATE)) {
-                return new Date(Long.valueOf((String) this.mem.get(LOADED_DATE)).longValue());
+                return new Date(Long.valueOf(this.mem.get(LOADED_DATE)).longValue());
             }
             return null;
         }
@@ -234,21 +234,21 @@ public class RobotsTxt {
         
         public Date getModDate() {
             if (this.mem.containsKey(MOD_DATE)) {
-                return new Date(Long.valueOf((String) this.mem.get(MOD_DATE)).longValue());
+                return new Date(Long.valueOf(this.mem.get(MOD_DATE)).longValue());
             }
             return null;
         }        
         
         public String getETag() {
             if (this.mem.containsKey(ETAG)) {
-                return (String) this.mem.get(ETAG);
+                return this.mem.get(ETAG);
             }
             return null;
         }          
         
         public Integer getCrawlDelay() {
             if (this.mem.containsKey(CRAWL_DELAY)) {
-                return Integer.valueOf((String)this.mem.get(CRAWL_DELAY));
+                return Integer.valueOf(this.mem.get(CRAWL_DELAY));
             }
             return null;        	
         }

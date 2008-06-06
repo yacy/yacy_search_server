@@ -198,7 +198,7 @@ public class CrawlQueues {
         }
         
         // if crawling was paused we have to wait until we wer notified to continue
-        Object[] status = (Object[]) sb.crawlJobsStatus.get(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL);
+        Object[] status = sb.crawlJobsStatus.get(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL);
         synchronized(status[plasmaSwitchboard.CRAWLJOB_SYNC]) {
             if (((Boolean)status[plasmaSwitchboard.CRAWLJOB_STATUS]).booleanValue()) {
                 try {
@@ -299,7 +299,7 @@ public class CrawlQueues {
         seed = null;
         String hash = null;
         while ((seed == null) && (remoteCrawlProviderHashes.size() > 0)) {
-            hash = (String) remoteCrawlProviderHashes.remove(remoteCrawlProviderHashes.size() - 1);
+            hash = remoteCrawlProviderHashes.remove(remoteCrawlProviderHashes.size() - 1);
             if (hash == null) continue;
             seed = sb.webIndex.seedDB.get(hash);
             if (seed == null) continue;
@@ -344,18 +344,26 @@ public class CrawlQueues {
 
                 if (reasonString == null) {
                     // done
-                    log.logInfo("crawlOrder: added remote crawl url: " + url.toNormalform(true, false));
+                    log.logInfo("crawlOrder: added remote crawl url: " + urlToString(url));
                 } else if (reasonString.startsWith("double")) {
                     // case where we have already the url loaded;
-                    log.logInfo("crawlOrder: ignored double remote crawl url: " + url.toNormalform(true, false));
+                    log.logInfo("crawlOrder: ignored double remote crawl url: " + urlToString(url));
                 } else {
-                    log.logInfo("crawlOrder: ignored [" + reasonString + "] remote crawl url: " + url.toNormalform(true, false));
+                    log.logInfo("crawlOrder: ignored [" + reasonString + "] remote crawl url: " + urlToString(url));
                 }
             } else {
-                log.logWarning("crawlOrder: Rejected URL '" + url.toNormalform(true, false) + "': " + urlRejectReason);
+                log.logWarning("crawlOrder: Rejected URL '" + urlToString(url) + "': " + urlRejectReason);
             }
         }
         return true;
+    }
+
+    /**
+     * @param url
+     * @return
+     */
+    private String urlToString(yacyURL url) {
+        return (url == null ? "null" : url.toNormalform(true, false));
     }
     
     public int limitCrawlJobSize() {
@@ -389,7 +397,7 @@ public class CrawlQueues {
         }
 
         // if crawling was paused we have to wait until we wer notified to continue
-        Object[] status = (Object[]) sb.crawlJobsStatus.get(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
+        Object[] status = sb.crawlJobsStatus.get(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
         synchronized(status[plasmaSwitchboard.CRAWLJOB_SYNC]) {
             if (((Boolean)status[plasmaSwitchboard.CRAWLJOB_STATUS]).booleanValue()) {
                 try {

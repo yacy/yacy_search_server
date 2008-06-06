@@ -68,14 +68,14 @@ public class ViewLog_p {
         String filter = ".*.*";
         
         if(post != null){
-            if(post.containsKey("mode") && ((String)post.get("mode")).equals("reversed")){
+            if(post.containsKey("mode") && (post.get("mode")).equals("reversed")){
                 reversed=true;
             }
             if(post.containsKey("lines")){
-                lines = Integer.parseInt((String)post.get("lines"));
+                lines = Integer.parseInt(post.get("lines"));
             }
             if(post.containsKey("filter")){
-                filter = (String)post.get("filter");
+                filter = post.get("filter");
             }
         }
         

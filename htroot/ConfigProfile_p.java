@@ -77,18 +77,18 @@ public class ConfigProfile_p {
         }
 
         if (post != null && post.containsKey("set")) {
-            profile.setProperty("name", (String)post.get("name"));
-            profile.setProperty("nickname", (String)post.get("nickname"));
-            profile.setProperty("homepage", (String)post.get("homepage"));
-            profile.setProperty("email", (String)post.get("email"));
+            profile.setProperty("name", post.get("name"));
+            profile.setProperty("nickname", post.get("nickname"));
+            profile.setProperty("homepage", post.get("homepage"));
+            profile.setProperty("email", post.get("email"));
 
-            profile.setProperty("icq", (String)post.get("icq"));
-            profile.setProperty("jabber", (String)post.get("jabber"));
-            profile.setProperty("yahoo", (String)post.get("yahoo"));
-            profile.setProperty("msn", (String)post.get("msn"));
-            profile.setProperty("skype", (String)post.get("skype"));
+            profile.setProperty("icq", post.get("icq"));
+            profile.setProperty("jabber", post.get("jabber"));
+            profile.setProperty("yahoo", post.get("yahoo"));
+            profile.setProperty("msn", post.get("msn"));
+            profile.setProperty("skype", post.get("skype"));
 
-            profile.setProperty("comment", (String)post.get("comment"));
+            profile.setProperty("comment", post.get("comment"));
 
 
             prop.putHTML("name", profile.getProperty("name", ""));

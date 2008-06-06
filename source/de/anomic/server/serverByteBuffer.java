@@ -105,7 +105,7 @@ public final class serverByteBuffer extends OutputStream {
 
     public serverByteBuffer(File f) throws IOException {
     // initially fill the byte buffer with the content of a file
-    if (f.length() > (long) Integer.MAX_VALUE) throw new IOException("file is too large for buffering");
+    if (f.length() > Integer.MAX_VALUE) throw new IOException("file is too large for buffering");
 
     length = (int) f.length();
     buffer = new byte[length];

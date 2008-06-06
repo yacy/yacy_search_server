@@ -74,8 +74,8 @@ public final class IndexTransfer_p {
                     prop.put("running_status","Disconnected peer");
                 } else {                    
                     boolean deleteIndex = post.get("deleteIndex", "0").equals("1");
-                    if(prop.containsKey("overwriteIP") && ! ((String)prop.get("overwriteIP")).equals("")){
-                        seed.setIP((String) prop.get("overwriteIP"));
+                    if(prop.containsKey("overwriteIP") && ! (prop.get("overwriteIP")).equals("")){
+                        seed.setIP(prop.get("overwriteIP"));
                     }
                     sb.startTransferWholeIndex(seed,deleteIndex);
                     prop.put("LOCATION","");
@@ -139,7 +139,7 @@ public final class IndexTransfer_p {
             
             String hostName = null;
             try {
-                while ((hostName = (String) hostList.firstKey()) != null) {
+                while ((hostName = hostList.firstKey()) != null) {
                     prop.put("running_hosts_" + hc + "_hosthash", hostList.get(hostName));
                     prop.putHTML("running_hosts_" + hc + "_hostname", /*seed.hash + " " +*/ hostName);
                     hc++;                

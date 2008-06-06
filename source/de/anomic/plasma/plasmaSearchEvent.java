@@ -320,7 +320,7 @@ public final class plasmaSearchEvent {
             (query.constraint.get(plasmaCondenser.flag_cat_indexof)) &&
             (!(comp.dc_title().startsWith("Index of")))) {
             final Iterator<String> wi = query.queryHashes.iterator();
-            while (wi.hasNext()) wordIndex.removeEntry((String) wi.next(), page.hash());
+            while (wi.hasNext()) wordIndex.removeEntry(wi.next(), page.hash());
             registerFailure(page.hash(), "index-of constraint not fullfilled");
             return null;
         }
@@ -450,7 +450,7 @@ public final class plasmaSearchEvent {
     }
 
     public static plasmaSearchEvent getEvent(String eventID) {
-        return (plasmaSearchEvent) lastEvents.get(eventID);
+        return lastEvents.get(eventID);
     }
     
     public static plasmaSearchEvent getEvent(
@@ -690,7 +690,7 @@ public final class plasmaSearchEvent {
                     peer = peers.substring(j, j + 12);
                     if ((peer.equals(mypeerhash)) && (mypeercount++ > 1)) continue;
                     //if (peers.indexOf(peer) < j) continue; // avoid doubles that may appear in the abstractJoin
-                    urls = (String) secondarySearchURLs.get(peer);
+                    urls = secondarySearchURLs.get(peer);
                     urls = (urls == null) ? url : urls + url;
                     secondarySearchURLs.put(peer, urls);
                 }
@@ -706,7 +706,7 @@ public final class plasmaSearchEvent {
                 entry1 = i1.next();
                 peer = entry1.getKey();
                 if (peer.equals(mypeerhash)) continue; // we dont need to ask ourself
-                urls = (String) entry1.getValue();
+                urls = entry1.getValue();
                 words = wordsFromPeer(peer, urls);
                 //System.out.println("DEBUG-INDEXABSTRACT ***: peer " + peer + "   has urls: " + urls);
                 //System.out.println("DEBUG-INDEXABSTRACT ***: peer " + peer + " from words: " + words);
@@ -735,7 +735,7 @@ public final class plasmaSearchEvent {
                 hasURL = true;
                 for (int j = 0; j < urls.length(); j = j + 12) {
                     url = urls.substring(j, j + 12);
-                    peerlist = (String) urlPeerlist.get(url);
+                    peerlist = urlPeerlist.get(url);
                     p = (peerlist == null) ? -1 : peerlist.indexOf(peerhash);
                     if ((p < 0) || (p % 12 != 0)) {
                         hasURL = false;

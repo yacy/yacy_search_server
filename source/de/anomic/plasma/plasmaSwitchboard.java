@@ -108,18 +108,17 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import de.anomic.crawler.CrawlEntry;
-import de.anomic.crawler.ErrorURL;
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.CrawlQueues;
+import de.anomic.crawler.CrawlStacker;
+import de.anomic.crawler.ErrorURL;
+import de.anomic.crawler.ImporterManager;
+import de.anomic.crawler.IndexingStack;
 import de.anomic.crawler.NoticedURL;
 import de.anomic.crawler.ResultImages;
 import de.anomic.crawler.ResultURLs;
 import de.anomic.crawler.RobotsTxt;
-import de.anomic.crawler.CrawlStacker;
-import de.anomic.crawler.ProtocolLoader;
 import de.anomic.crawler.ZURL;
-import de.anomic.crawler.ImporterManager;
-import de.anomic.crawler.IndexingStack;
 import de.anomic.data.URLLicense;
 import de.anomic.data.blogBoard;
 import de.anomic.data.blogBoardComments;
@@ -136,7 +135,6 @@ import de.anomic.http.httpRemoteProxyConfig;
 import de.anomic.http.httpd;
 import de.anomic.http.httpdProxyHandler;
 import de.anomic.http.httpdRobotsTxtConfig;
-import de.anomic.index.indexDefaultReferenceBlacklist;
 import de.anomic.index.indexReferenceBlacklist;
 import de.anomic.index.indexURLReference;
 import de.anomic.kelondro.kelondroBitfield;
@@ -1648,12 +1646,13 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     
     public void enQueue(IndexingStack.QueueEntry job) {
         assert job != null;
+        // TODO this should not be possible?!
         if (!(job instanceof IndexingStack.QueueEntry)) {
             System.out.println("Internal error at plasmaSwitchboard.enQueue: wrong job type");
-            System.exit(0);
+            System.exit(1);
         }
         try {
-            webIndex.queuePreStack.push((IndexingStack.QueueEntry) job);
+            webIndex.queuePreStack.push(job);
         } catch (IOException e) {
             log.logSevere("IOError in plasmaSwitchboard.enQueue: " + e.getMessage(), e);
         }
@@ -1907,13 +1906,13 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
                 		deleteQueue.add(seed.hash);
                 	}
                 }
-                for(int i=0;i<deleteQueue.size();++i) this.webIndex.seedDB.removeDisconnected((String)deleteQueue.get(i));
+                for(int i=0;i<deleteQueue.size();++i) this.webIndex.seedDB.removeDisconnected(deleteQueue.get(i));
                 deleteQueue.clear();
                 e = this.webIndex.seedDB.seedsSortedPotential(true,yacySeed.LASTSEEN);
                 checkInterruption();
                 //clean potential seeds
                 while(e.hasNext()) {
-                	seed = (yacySeed)e.next();
+                	seed = e.next();
                 	if(seed != null) {
                 		//list is sorted -> break when peers are too young to delete
                 		if(seed.getLastSeenUTC() > (System.currentTimeMillis()-deleteOldSeedsTime))
@@ -1921,7 +1920,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
                 		deleteQueue.add(seed.hash);
                 	}
                 }
-                for (int i = 0; i < deleteQueue.size(); ++i) this.webIndex.seedDB.removePotential((String)deleteQueue.get(i));
+                for (int i = 0; i < deleteQueue.size(); ++i) this.webIndex.seedDB.removePotential(deleteQueue.get(i));
             }
             
             // check if update is available and
@@ -1989,7 +1988,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
      * @param jobType 
      */
     public void pauseCrawlJob(String jobType) {
-        Object[] status = (Object[])this.crawlJobsStatus.get(jobType);
+        Object[] status = this.crawlJobsStatus.get(jobType);
         synchronized(status[CRAWLJOB_SYNC]) {
             status[CRAWLJOB_STATUS] = Boolean.TRUE;
         }
@@ -2001,7 +2000,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
      * @param jobType 
      */
     public void continueCrawlJob(String jobType) {
-        Object[] status = (Object[])this.crawlJobsStatus.get(jobType);
+        Object[] status = this.crawlJobsStatus.get(jobType);
         synchronized(status[CRAWLJOB_SYNC]) {
             if (((Boolean)status[CRAWLJOB_STATUS]).booleanValue()) {
                 status[CRAWLJOB_STATUS] = Boolean.FALSE;
@@ -2016,7 +2015,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
      * @return <code>true</code> if crawling was paused or <code>false</code> otherwise
      */
     public boolean crawlJobIsPaused(String jobType) {
-        Object[] status = (Object[])this.crawlJobsStatus.get(jobType);
+        Object[] status = this.crawlJobsStatus.get(jobType);
         synchronized(status[CRAWLJOB_SYNC]) {
             return ((Boolean)status[CRAWLJOB_STATUS]).booleanValue();
         }
@@ -2231,7 +2230,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         yacySeed initiatorPeer = queueEntry.initiatorPeer();
         if ((processCase == PROCESSCASE_6_GLOBAL_CRAWLING) && (initiatorPeer != null)) {
             log.logInfo("Sending crawl receipt for '" + queueEntry.url().toNormalform(false, true) + "' to " + initiatorPeer.getName());
-            if (clusterhashes != null) initiatorPeer.setAlternativeAddress((String) clusterhashes.get(initiatorPeer.hash));
+            if (clusterhashes != null) initiatorPeer.setAlternativeAddress(clusterhashes.get(initiatorPeer.hash));
             // start a thread for receipt sending to avoid a blocking here
             new Thread(new receiptSending(initiatorPeer, newEntry)).start();
         }
@@ -2556,7 +2555,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
                     checkInterruption();
                                         
                     if (seedIter.hasNext()) {
-                        plasmaDHTTransfer t = new plasmaDHTTransfer(log, webIndex.seedDB, webIndex.peerActions, (yacySeed)seedIter.next(), dhtChunk,gzipBody,timeout,retries);
+                        plasmaDHTTransfer t = new plasmaDHTTransfer(log, webIndex.seedDB, webIndex.peerActions, seedIter.next(), dhtChunk,gzipBody,timeout,retries);
                         t.start();
                         transfer.add(t);
                     } else {
@@ -2648,8 +2647,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         
         //the speed of indexing (pages/minute) of the peer
         totalPPM = (int) (indexedPages * 60 / Math.max(uptime, 1));
-        webIndex.seedDB.mySeed().put(yacySeed.ISPEED, Long.toString(Math.round(Math.max((float) indexedcdiff, 0f) * 60f / Math.max((float) uptimediff, 1f))));
-        totalQPM = requestedQueries * 60d / Math.max((double) uptime, 1d);
+        webIndex.seedDB.mySeed().put(yacySeed.ISPEED, Long.toString(Math.round(Math.max(indexedcdiff, 0f) * 60f / Math.max(uptimediff, 1f))));
+        totalQPM = requestedQueries * 60d / Math.max(uptime, 1d);
         webIndex.seedDB.mySeed().put(yacySeed.RSPEED, Double.toString(totalQPM /*Math.max((float) requestcdiff, 0f) * 60f / Math.max((float) uptimediff, 1f)*/ ));
         
         webIndex.seedDB.mySeed().put(yacySeed.UPTIME, Long.toString(uptime/60)); // the number of minutes that the peer is up in minutes/day (moving average MA30)
@@ -2720,7 +2719,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
                         enu = seedList.iterator();
                         lc = 0;
                         while (enu.hasNext()) {
-                            ys = yacySeed.genRemoteSeed((String) enu.next(), null, false);
+                            ys = yacySeed.genRemoteSeed(enu.next(), null, false);
                             if ((ys != null) &&
                                 ((!webIndex.seedDB.mySeedIsDefined()) || (webIndex.seedDB.mySeed().hash != ys.hash))) {
                                 if (webIndex.peerActions.connectPeer(ys, false)) lc++;

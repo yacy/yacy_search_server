@@ -33,7 +33,7 @@ public class ImporterManager {
     }
     
     public Importer[] getFinishedImporter() {
-        return (Importer[]) this.finishedJobs.toArray(new Importer[this.finishedJobs.size()]);
+        return this.finishedJobs.toArray(new Importer[this.finishedJobs.size()]);
     }
     
     public Importer getImporterByID(int jobID) {

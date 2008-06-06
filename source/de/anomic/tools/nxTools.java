@@ -63,7 +63,7 @@ public class nxTools {
     	String line;
     	HashMap<String, String> props = new HashMap<String, String>(list.size());
     	while (i.hasMoreElements()) {
-    		line = ((String) i.nextElement()).trim();
+    		line = (i.nextElement()).trim();
     		pos = line.indexOf("=");
     		if (pos > 0) props.put(line.substring(0, pos).trim(), line.substring(pos + 1).trim());
     	}
@@ -93,7 +93,7 @@ public class nxTools {
         String line;
         HashMap<String, String> props = new HashMap<String, String>(list.size());
         while (i.hasNext()) {
-            line = ((String) i.next()).trim();
+            line = (i.next()).trim();
             if (line.startsWith("#")) continue; // exclude comments
             //System.out.println("NXTOOLS_PROPS - LINE:" + line);
             pos = line.indexOf("=");
@@ -108,7 +108,7 @@ public class nxTools {
 		String line;
 		Vector<String> result = new Vector<String>();
 		while (i.hasMoreElements()) {
-			line = (String) i.nextElement();
+			line = i.nextElement();
 			if (line.indexOf(pattern) >= 0) {
 				result.add(line);
 				ac = afterContext + 1;
@@ -126,7 +126,7 @@ public class nxTools {
         String line;
         ArrayList<String> result = new ArrayList<String>();
         while (i.hasNext()) {
-            line = (String) i.next();
+            line = i.next();
             if (line.indexOf(pattern) >= 0) {
             result.add(line);
             ac = afterContext + 1;
@@ -140,12 +140,12 @@ public class nxTools {
 
     public static String tail1(Vector<String> list) {
     	if ((list == null) || (list.size() == 0)) return "";
-    	return (String) list.lastElement();
+    	return list.lastElement();
     }
     
     public static String tail1(ArrayList<String> list) {
         if ((list == null) || (list.size() == 0)) return "";
-        return (String) list.get(list.size()-1);
+        return list.get(list.size()-1);
         }
 
     public static String awk(String sentence, String separator, int count) {

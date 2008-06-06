@@ -104,13 +104,13 @@ public class kelondroMSetTools {
         if (orderMap.size() == 0) return new TreeMap<A, B>();
         
         // we now must pairwise build up a conjunction of these maps
-        Long k = (Long) orderMap.firstKey(); // the smallest, which means, the one with the least entries
-        TreeMap<A, B> mapA, mapB, joinResult = (TreeMap<A, B>) orderMap.remove(k);
+        Long k = orderMap.firstKey(); // the smallest, which means, the one with the least entries
+        TreeMap<A, B> mapA, mapB, joinResult = orderMap.remove(k);
         while ((orderMap.size() > 0) && (joinResult.size() > 0)) {
             // take the first element of map which is a result and combine it with result
-            k = (Long) orderMap.firstKey(); // the next smallest...
+            k = orderMap.firstKey(); // the next smallest...
             mapA = joinResult;
-            mapB = (TreeMap<A, B>) orderMap.remove(k);
+            mapB = orderMap.remove(k);
             joinResult = joinConstructiveByTest(mapA, mapB, concatStrings); // TODO: better with enumeration?
             // free resources
             mapA = null;

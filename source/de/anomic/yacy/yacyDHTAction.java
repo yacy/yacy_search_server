@@ -69,7 +69,7 @@ public class yacyDHTAction {
             Iterator<yacySeed> en = seedDB.seedsConnected(true, false, null, (float) 0.0);
             yacySeed ys;
             while (en.hasNext()) {
-                ys = (yacySeed) en.next();
+                ys = en.next();
                 if ((ys != null) && (ys.getVersion() >= ((float) 0.3))) seedCrawlReady.setScore(ys.hash, yacyCore.yacyTime());
             }
         } catch (IllegalArgumentException e) {
@@ -151,7 +151,7 @@ public class yacyDHTAction {
             yacySeed s;
             try {
                 while (se.hasNext()) {
-                    s = (yacySeed) se.next();
+                    s = se.next();
                     if (s == null) return null;
                     if (s.getLong(yacySeed.RCOUNT, 0) > 0) return s;
                 }
@@ -201,7 +201,7 @@ public class yacyDHTAction {
             yacySeed s;
             try {
                 while (se.hasNext()) {
-                    s = (yacySeed) se.next();
+                    s = se.next();
                     if (s == null) return null;
                     if (s.getFlagAcceptRemoteIndex()) return s;
                 }
@@ -249,7 +249,7 @@ public class yacyDHTAction {
         private yacySeed nextInternal() {
             yacySeed s;
             while (se.hasNext()) {
-                s = (yacySeed) se.next();
+                s = se.next();
                 if (s == null) return null;
                 s.available = seedCrawlReady.getScore(s.hash);
                 if (available) {
@@ -290,7 +290,7 @@ public class yacyDHTAction {
             hash = i.next();
         	yacySeed seed = seedDB.getConnected(hash);
         	if (seed == null) continue;
-            seed.setAlternativeAddress((String) clusterhashes.get(hash));
+            seed.setAlternativeAddress(clusterhashes.get(hash));
         	return seed;
         }
         return null;
@@ -333,7 +333,7 @@ public class yacyDHTAction {
         if (d > 0) {
             return d; // case where the word is 'before' the peer
         } else {
-            return ((double) 1) + d; // wrap-around case
+            return (1) + d; // wrap-around case
         }
     }
     
@@ -372,19 +372,17 @@ public class yacyDHTAction {
         int maxloop = Math.min(100, seedDB.sizeConnected()); // to ensure termination
         if (log != null) log.logInfo("Collecting DHT target peers for first_hash = " + firstKey + ", last_hash = " + lastKey);
         while ((e.hasNext()) && (seeds.size() < (primaryPeerCount + reservePeerCount)) && (maxloop-- > 0)) {
-            seed = (yacySeed) e.next();
-            if (seeds != null) {
-            	firstdist = yacyDHTAction.dhtDistance(seed.hash, firstKey);
-            	lastdist = yacyDHTAction.dhtDistance(seed.hash, lastKey);
-                if (lastdist > maxDist) {
-                    if (log != null) log.logFine("Discarded too distant DHT target peer " + seed.getName() + ":" + seed.hash + ", distance2first = " + firstdist + ", distance2last = " + lastdist);
-                } else if (doublecheck.contains(seed.hash)) {
-                    if (log != null) log.logFine("Discarded double DHT target peer " + seed.getName() + ":" + seed.hash + ", distance2first = " + firstdist + ", distance2last = " + lastdist);
-                } else {
-                    if (log != null) log.logInfo("Selected  " + ((seeds.size() < primaryPeerCount) ? "primary" : "reserve") + "  DHT target peer " + seed.getName() + ":" + seed.hash + ", distance2first = " + firstdist + ", distance2last = " + lastdist);
-                    seeds.add(seed);
-                    doublecheck.add(seed.hash);
-                }
+            seed = e.next();
+        	firstdist = yacyDHTAction.dhtDistance(seed.hash, firstKey);
+        	lastdist = yacyDHTAction.dhtDistance(seed.hash, lastKey);
+            if (lastdist > maxDist) {
+                if (log != null) log.logFine("Discarded too distant DHT target peer " + seed.getName() + ":" + seed.hash + ", distance2first = " + firstdist + ", distance2last = " + lastdist);
+            } else if (doublecheck.contains(seed.hash)) {
+                if (log != null) log.logFine("Discarded double DHT target peer " + seed.getName() + ":" + seed.hash + ", distance2first = " + firstdist + ", distance2last = " + lastdist);
+            } else {
+                if (log != null) log.logInfo("Selected  " + ((seeds.size() < primaryPeerCount) ? "primary" : "reserve") + "  DHT target peer " + seed.getName() + ":" + seed.hash + ", distance2first = " + firstdist + ", distance2last = " + lastdist);
+                seeds.add(seed);
+                doublecheck.add(seed.hash);
             }
         }
         e = null; // finish enumeration

@@ -120,7 +120,7 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
         } catch (NumberFormatException e) {
             throw new RuntimeException("release file name '" + release + "' is not valid, '" + comp[0] + "' should be a float number");
         }
-        this.mainRelease = ((int) (this.releaseNr * (float) 1000)) % 10 == 0;
+        this.mainRelease = ((int) (this.releaseNr * 1000)) % 10 == 0;
         //System.out.println("Release version " + this.releaseNr + " is " + ((this.mainRelease) ? "main" : "std"));
         this.dateStamp = comp[1];
         if (this.dateStamp.length() != 8) {
@@ -236,7 +236,7 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
                 // consider a main release
                 if ((Float.toString(latestmain.releaseNr).matches(blacklist))) {
                     yacyCore.log.logInfo(
-                            "rulebasedUpdateInfo: latest dev " + latestdev.name +
+                            "rulebasedUpdateInfo: latest dev " + (latestdev == null ? "null" : latestdev.name) +
                             " matches with blacklist '" + blacklist + "'");
                     return null;
                 }
@@ -283,17 +283,17 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
     
     private static DevMain getReleases(yacyURL location, boolean force) {
         // get release info from a internet resource
-        DevMain latestRelease = latestReleases.get(location);
+        DevMain locLatestRelease = latestReleases.get(location);
         if (force ||
-            (latestRelease == null) /*||
+            (locLatestRelease == null) /*||
             ((latestRelease[0].size() == 0) &&
              (latestRelease[1].size() == 0) &&
              (latestRelease[2].size() == 0) &&
              (latestRelease[3].size() == 0) )*/) {
-            latestRelease = allReleaseFrom(location);
-            latestReleases.put(location, latestRelease);
+            locLatestRelease = allReleaseFrom(location);
+            latestReleases.put(location, locLatestRelease);
         }
-        return latestRelease;
+        return locLatestRelease;
     }
     
     private static DevMain allReleaseFrom(yacyURL url) {
@@ -355,7 +355,7 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
             if ((!download.exists()) || (download.length() == 0)) throw new IOException("wget of url " + release.url + " failed");
         } catch (IOException e) {
             serverLog.logSevere("yacyVersion", "download of " + release.name + " failed: " + e.getMessage());
-            if (download.exists()) download.delete();
+            if (download != null && download.exists()) download.delete();
             download = null;
         } finally {
             if (res != null) {
@@ -562,7 +562,7 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
      * @return String with the combined version.
      */
      public static double versvn2combinedVersion(double version, int svn) {
-        return (Math.rint((version*100000000.0) + ((double)svn))/100000000);
+        return (Math.rint((version*100000000.0) + (svn))/100000000);
      }
      
      public static void main(String[] args) {

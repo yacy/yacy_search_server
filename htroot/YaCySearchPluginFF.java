@@ -61,7 +61,7 @@ public class YaCySearchPluginFF {
         serverObjects prop = new serverObjects();
         
         // getting the http host header
-        String hostSocket = (String) header.get(httpHeader.CONNECTION_PROP_HOST);
+        String hostSocket = header.get(httpHeader.CONNECTION_PROP_HOST);
         
         String host = hostSocket;
         int port = 80, pos = hostSocket.indexOf(":");        

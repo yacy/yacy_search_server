@@ -120,7 +120,7 @@ public class Messages_p {
         }
 
         if (action.equals("delete")) {
-            String key = post.get("object", "");
+            String key = (post == null ? "" : post.get("object", ""));
             sb.messageDB.remove(key);
             action = "list";
         }
@@ -145,7 +145,7 @@ public class Messages_p {
                     prop.putHTML("mode_messages_"+count+"_key", key, true);
                     prop.put("mode_messages_"+count+"_hash", message.authorHash());
 
-                    if (((String)header.get(httpHeader.CONNECTION_PROP_PATH)).endsWith(".rss")) {
+                    if ((header.get(httpHeader.CONNECTION_PROP_PATH)).endsWith(".rss")) {
                     	// set the peer address
                     	prop.put("mode_messages_"+count+"_peerAddress", peerAddress);
 
@@ -172,7 +172,7 @@ public class Messages_p {
 
         if (action.equals("view")) {
             prop.put("mode", "1"); //view
-            String key = post.get("object", "");
+            String key = (post == null ? "" : post.get("object", ""));
             message = sb.messageDB.read(key);
             if (message == null) throw new NullPointerException("Message with ID " + key + " does not exist");
 

@@ -81,7 +81,7 @@ public final class serverClassLoader extends ClassLoader {
         // try to load the class
         synchronized(classFileName.intern()) {
             // first try: take the class out of the cache, denoted by the classname    
-            Class<?> c = (Class<?>) this.classes.get(classfile);
+            Class<?> c = this.classes.get(classfile);
             if (c != null) return c;
             
             // consider classkey as a file and extract the file name

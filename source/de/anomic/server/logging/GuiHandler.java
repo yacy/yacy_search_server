@@ -164,7 +164,7 @@ public class GuiHandler extends Handler{
             }
         }
         
-        return (LogRecord[]) tempBuffer.toArray(new LogRecord[tempBuffer.size()]);
+        return tempBuffer.toArray(new LogRecord[tempBuffer.size()]);
     }    
     
     public synchronized String getLog(boolean reversed, int lineCount) { 
@@ -210,7 +210,7 @@ public class GuiHandler extends Handler{
                     record = this.buffer[ix];
                     logMessages.add(logFormatter.format(record));                
                 }             
-            return (String[])logMessages.toArray(new String[logMessages.size()]);
+            return logMessages.toArray(new String[logMessages.size()]);
         } catch (Exception ex) {
             // We don't want to throw an exception here, but we
             // report the exception to any registered ErrorManager.

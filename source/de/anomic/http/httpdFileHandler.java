@@ -138,21 +138,21 @@ public final class httpdFileHandler {
     private static final serverLog theLogger = new serverLog("FILEHANDLER");
     
     static {
-        final serverSwitch<?> switchboard = plasmaSwitchboard.getSwitchboard();
-        useTemplateCache = switchboard.getConfig("enableTemplateCache","true").equalsIgnoreCase("true");
+        final serverSwitch<?> theSwitchboard = plasmaSwitchboard.getSwitchboard();
+        useTemplateCache = theSwitchboard.getConfig("enableTemplateCache","true").equalsIgnoreCase("true");
         templateCache = (useTemplateCache)? new HashMap<File, SoftReference<byte[]>>() : new HashMap<File, SoftReference<byte[]>>(0);
         templateMethodCache = (useTemplateCache) ? new HashMap<File, SoftReference<Method>>() : new HashMap<File, SoftReference<Method>>(0);
         
         if (httpdFileHandler.switchboard == null) {
-            httpdFileHandler.switchboard = switchboard;
+            httpdFileHandler.switchboard = theSwitchboard;
             
             if (mimeTable.size() == 0) {
                 // load the mime table
-                String mimeTablePath = switchboard.getConfig("mimeConfig","");
+                String mimeTablePath = theSwitchboard.getConfig("mimeConfig","");
                 BufferedInputStream mimeTableInputStream = null;
                 try {
                     serverLog.logConfig("HTTPDFiles", "Loading mime mapping file " + mimeTablePath);
-                    mimeTableInputStream = new BufferedInputStream(new FileInputStream(new File(switchboard.getRootPath(), mimeTablePath)));
+                    mimeTableInputStream = new BufferedInputStream(new FileInputStream(new File(theSwitchboard.getRootPath(), mimeTablePath)));
                     mimeTable.load(mimeTableInputStream);
                 } catch (Exception e) {                
                     serverLog.logSevere("HTTPDFiles", "ERROR: path to configuration file or configuration invalid\n" + e);
@@ -167,13 +167,13 @@ public final class httpdFileHandler {
             
             // create a htRootPath: system pages
             if (htRootPath == null) {
-                htRootPath = new File(switchboard.getRootPath(), switchboard.getConfig("htRootPath","htroot"));
+                htRootPath = new File(theSwitchboard.getRootPath(), theSwitchboard.getConfig("htRootPath","htroot"));
                 if (!(htRootPath.exists())) htRootPath.mkdir();
             }
             
             // create a htDocsPath: user defined pages
             if (htDocsPath == null) {
-                htDocsPath = switchboard.getConfigPath(plasmaSwitchboard.HTDOCS_PATH, plasmaSwitchboard.HTDOCS_PATH_DEFAULT);
+                htDocsPath = theSwitchboard.getConfigPath(plasmaSwitchboard.HTDOCS_PATH, plasmaSwitchboard.HTDOCS_PATH_DEFAULT);
                 if (!(htDocsPath.exists())) htDocsPath.mkdirs();
             }
             
@@ -183,15 +183,15 @@ public final class httpdFileHandler {
             
             // create a htTemplatePath
             if (htTemplatePath == null) {
-                htTemplatePath = switchboard.getConfigPath("htTemplatePath","htroot/env/templates");
+                htTemplatePath = theSwitchboard.getConfigPath("htTemplatePath","htroot/env/templates");
                 if (!(htTemplatePath.exists())) htTemplatePath.mkdir();
             }
             //This is now handles by #%env/templates/foo%#
             //if (templates.size() == 0) templates.putAll(httpTemplate.loadTemplates(htTemplatePath));
             
             // create htLocaleDefault, htLocalePath
-            if (htDefaultPath == null) htDefaultPath = switchboard.getConfigPath("htDefaultPath", "htroot");
-            if (htLocalePath == null) htLocalePath = switchboard.getConfigPath("locale.translated_html", "DATA/LOCALE/htroot");
+            if (htDefaultPath == null) htDefaultPath = theSwitchboard.getConfigPath("htDefaultPath", "htroot");
+            if (htLocalePath == null) htLocalePath = theSwitchboard.getConfigPath("locale.translated_html", "DATA/LOCALE/htroot");
         }
         
     }
@@ -302,7 +302,7 @@ public final class httpdFileHandler {
             }
             
             // check permission/granted access
-            String authorization = (String) requestHeader.get(httpHeader.AUTHORIZATION);
+            String authorization = requestHeader.get(httpHeader.AUTHORIZATION);
             if (authorization != null && authorization.length() == 0) authorization = null;
             String adminAccountBase64MD5 = switchboard.getConfig(httpd.ADMIN_ACCOUNT_B64MD5, "");
             
@@ -335,7 +335,7 @@ public final class httpdFileHandler {
                 } else {
                     // a wrong authentication was given or the userDB user does not have admin access. Ask again
                     serverLog.logInfo("HTTPD", "Wrong log-in for account 'admin' in http file handler for path '" + path + "' from host '" + clientIP + "'");
-                    Integer attempts = (Integer) serverCore.bfHost.get(clientIP);
+                    Integer attempts = serverCore.bfHost.get(clientIP);
                     if (attempts == null)
                         serverCore.bfHost.put(clientIP, new Integer(1));
                     else
@@ -350,7 +350,7 @@ public final class httpdFileHandler {
         
             // parse arguments
             serverObjects args = new serverObjects();
-            int argc;
+            int argc = 0;
             if (argsString == null) {
                 // no args here, maybe a POST with multipart extension
                 int length = 0;
@@ -365,7 +365,7 @@ public final class httpdFileHandler {
                         length = -1;
                         gzipBody = new GZIPInputStream(body);
                     } else if (requestHeader.containsKey(httpHeader.CONTENT_LENGTH)) {
-                        length = Integer.parseInt((String) requestHeader.get(httpHeader.CONTENT_LENGTH));
+                        length = Integer.parseInt(requestHeader.get(httpHeader.CONTENT_LENGTH));
                     }
     //                } else {
     //                    httpd.sendRespondError(conProp,out,4,403,null,"bad post values",null); 
@@ -374,7 +374,7 @@ public final class httpdFileHandler {
                     
                     // if its a POST, it can be either multipart or as args in the body
                     if ((requestHeader.containsKey(httpHeader.CONTENT_TYPE)) &&
-                            (((String) requestHeader.get(httpHeader.CONTENT_TYPE)).toLowerCase().startsWith("multipart"))) {
+                            (requestHeader.get(httpHeader.CONTENT_TYPE).toLowerCase().startsWith("multipart"))) {
                         // parse multipart
                         HashMap<String, byte[]> files = httpd.parseMultipart(requestHeader, args, (gzipBody!=null)?gzipBody:body, length);
                         // integrate these files into the args
@@ -386,7 +386,7 @@ public final class httpdFileHandler {
                                 args.put(entry.getKey() + "$file", entry.getValue());
                             }
                         }
-                        argc = Integer.parseInt((String) requestHeader.get("ARGC"));
+                        argc = Integer.parseInt(requestHeader.get("ARGC"));
                     } else {
                         // parse args in body
                         argc = httpd.parseArgs(args, (gzipBody!=null)?gzipBody:body, length);
@@ -403,7 +403,7 @@ public final class httpdFileHandler {
             }
         
             // check for cross site scripting - attacks in request arguments
-            if (argc > 0) {
+            if (args != null && argc > 0) {
                 // check all values for occurrences of script values
                 Iterator<String> e = args.values().iterator(); // enumeration of values
                 String val;
@@ -458,8 +458,8 @@ public final class httpdFileHandler {
                 
                 //no defaultfile, send a dirlisting
                 if (targetFile == null || !targetFile.exists()) {
-                    StringBuffer sb = new StringBuffer();
-                    sb.append("<html>\n<head>\n</head>\n<body>\n<h1>Index of " + path + "</h1>\n  <ul>\n");
+                    StringBuffer aBuffer = new StringBuffer();
+                    aBuffer.append("<html>\n<head>\n</head>\n<body>\n<h1>Index of " + path + "</h1>\n  <ul>\n");
                     File dir = new File(htDocsPath, path);
                     String[] list = dir.list();
                     if (list == null) list = new String[0]; // should not occur!
@@ -472,7 +472,7 @@ public final class httpdFileHandler {
                     for (int i = 0; i < list.length; i++) {
                         f = new File(dir, list[i]);
                         if (f.isDirectory()) {
-                            sb.append("    <li><a href=\"" + path + list[i] + "/\">" + list[i] + "/</a><br></li>\n");
+                            aBuffer.append("    <li><a href=\"" + path + list[i] + "/\">" + list[i] + "/</a><br></li>\n");
                         } else {
                             if (list[i].endsWith("html") || (list[i].endsWith("htm"))) {
                                 scraper = htmlFilterContentScraper.parseResource(f);
@@ -496,20 +496,20 @@ public final class httpdFileHandler {
                             } else {
                                 size = (sz / 1024 / 1024) + " MB";
                             }
-                            sb.append("    <li>");
-                            if ((headline != null) && (headline.length() > 0)) sb.append("<a href=\"" + list[i] + "\"><b>" + headline + "</b></a><br>");
-                            sb.append("<a href=\"" + path + list[i] + "\">" + list[i] + "</a><br>");
-                            if ((author != null) && (author.length() > 0)) sb.append("Author: " + author + "<br>");
-                            if ((description != null) && (description.length() > 0)) sb.append("Description: " + description + "<br>");
-                            sb.append(serverDate.formatShortDay(new Date(f.lastModified())) + ", " + size + ((images > 0) ? ", " + images + " images" : "") + ((links > 0) ? ", " + links + " links" : "") + "<br></li>\n");
+                            aBuffer.append("    <li>");
+                            if ((headline != null) && (headline.length() > 0)) aBuffer.append("<a href=\"" + list[i] + "\"><b>" + headline + "</b></a><br>");
+                            aBuffer.append("<a href=\"" + path + list[i] + "\">" + list[i] + "</a><br>");
+                            if ((author != null) && (author.length() > 0)) aBuffer.append("Author: " + author + "<br>");
+                            if ((description != null) && (description.length() > 0)) aBuffer.append("Description: " + description + "<br>");
+                            aBuffer.append(serverDate.formatShortDay(new Date(f.lastModified())) + ", " + size + ((images > 0) ? ", " + images + " images" : "") + ((links > 0) ? ", " + links + " links" : "") + "<br></li>\n");
                         }
                     }
-                    sb.append("  </ul>\n</body>\n</html>\n");
+                    aBuffer.append("  </ul>\n</body>\n</html>\n");
 
                     // write the list to the client
-                    httpd.sendRespondHeader(conProp, out, httpVersion, 200, null, "text/html", sb.length(), new Date(dir.lastModified()), null, new httpHeader(), null, null, true);
+                    httpd.sendRespondHeader(conProp, out, httpVersion, 200, null, "text/html", aBuffer.length(), new Date(dir.lastModified()), null, new httpHeader(), null, null, true);
                     if (!method.equals(httpHeader.METHOD_HEAD)) {
-                        out.write(sb.toString().getBytes());
+                        out.write(aBuffer.toString().getBytes());
                     }
                     return;
                 }
@@ -645,7 +645,7 @@ public final class httpdFileHandler {
                                 // handle brute-force protection
                                 if (authorization != null) {
                                     serverLog.logInfo("HTTPD", "dynamic log-in for account 'admin' in http file handler for path '" + path + "' from host '" + clientIP + "'");
-                                    Integer attempts = (Integer) serverCore.bfHost.get(clientIP);
+                                    Integer attempts = serverCore.bfHost.get(clientIP);
                                     if (attempts == null)
                                         serverCore.bfHost.put(clientIP, new Integer(1));
                                     else
@@ -700,7 +700,7 @@ public final class httpdFileHandler {
                             // read from cache
                             SoftReference<byte[]> ref = templateCache.get(targetFile);
                             if (ref != null) {
-                                templateContent = (byte[]) ref.get();
+                                templateContent = ref.get();
                                 if (templateContent == null) templateCache.remove(targetFile);
                             }
 
@@ -816,7 +816,7 @@ public final class httpdFileHandler {
                         if ((ifRange == null)||
                             (ifRange instanceof Date && targetFile.lastModified() == ((Date)ifRange).getTime()) ||
                             (ifRange instanceof String && ifRange.equals(targetMD5))) {
-                            String rangeHeaderVal = ((String) requestHeader.get(httpHeader.RANGE)).trim();
+                            String rangeHeaderVal = requestHeader.get(httpHeader.RANGE).trim();
                             if (rangeHeaderVal.startsWith("bytes=")) {
                                 String rangesVal = rangeHeaderVal.substring("bytes=".length());
                                 String[] ranges = rangesVal.split(",");
@@ -992,7 +992,7 @@ public final class httpdFileHandler {
             if (useTemplateCache) {                
                 SoftReference<Method> ref = templateMethodCache.get(classFile);
                 if (ref != null) {
-                    m = (Method) ref.get();
+                    m = ref.get();
                     if (m == null) {
                         templateMethodCache.remove(classFile);
                     } else {

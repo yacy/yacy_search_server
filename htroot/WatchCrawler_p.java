@@ -176,7 +176,7 @@ public class WatchCrawler_p {
                     if (crawlingMode.equals(CRAWLING_MODE_URL)) {
                         
                         // check if pattern matches
-                        if ((crawlingStart == null) /* || (!(crawlingStart.matches(newcrawlingfilter))) */) {
+                        if ((crawlingStart == null || crawlingStartURL == null) /* || (!(crawlingStart.matches(newcrawlingfilter))) */) {
                             // print error message
                             prop.put("info", "4"); //crawlfilter does not match url
                             prop.putHTML("info_newcrawlingfilter", newcrawlingfilter);
@@ -208,7 +208,7 @@ public class WatchCrawler_p {
                             if (reasonString == null) {
                                 // liftoff!
                                 prop.put("info", "8");//start msg
-                                prop.putHTML("info_crawlingURL", ((String) post.get("crawlingURL")));
+                                prop.putHTML("info_crawlingURL", (post.get("crawlingURL")));
                                 
                                 // generate a YaCyNews if the global flag was set
                                 if (crawlOrder) {
@@ -230,7 +230,7 @@ public class WatchCrawler_p {
                                 
                             } else {
                                 prop.put("info", "5"); //Crawling failed
-                                prop.putHTML("info_crawlingURL", ((String) post.get("crawlingURL")));
+                                prop.putHTML("info_crawlingURL", (post.get("crawlingURL")));
                                 prop.putHTML("info_reasonString", reasonString);
                                 
                                 ZURL.Entry ee = sb.crawlQueues.errorURL.newEntry(
@@ -267,7 +267,7 @@ public class WatchCrawler_p {
                     } else if (crawlingMode.equals(CRAWLING_MODE_FILE)) {
                         if (post.containsKey("crawlingFile")) {
                             // getting the name of the uploaded file
-                            String fileName = (String) post.get("crawlingFile");  
+                            String fileName = post.get("crawlingFile");  
                             try {
                                 // check if the crawl filter works correctly
                                 Pattern.compile(newcrawlingfilter);
@@ -308,7 +308,7 @@ public class WatchCrawler_p {
                                             nexturl, 
                                             "", 
                                             sb.webIndex.seedDB.mySeed().hash, 
-                                            (String) e.getValue(), 
+                                            e.getValue(), 
                                             new Date(), 
                                             0, 
                                             profile);

@@ -147,7 +147,7 @@ public final class transferRWI {
             Iterator<String> i = v.iterator();
             while (i.hasNext()) {
                 serverCore.checkInterruption();
-                estring = (String) i.next();
+                estring = i.next();
                 
                 // check if RWI entry is well-formed
                 p = estring.indexOf("{");

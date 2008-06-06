@@ -118,7 +118,7 @@ public class ViewProfile {
                 } catch (IOException e) {}
                 
                 // try to get the profile from remote peer
-                if (sb.clusterhashes != null) seed.setAlternativeAddress((String) sb.clusterhashes.get(seed.hash));
+                if (sb.clusterhashes != null) seed.setAlternativeAddress(sb.clusterhashes.get(seed.hash));
                 profile = yacyClient.getProfile(seed);
                 
                 // if profile did not arrive, say that peer is disconnected

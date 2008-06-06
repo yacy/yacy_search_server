@@ -46,29 +46,18 @@
 
 package de.anomic.tools;
 
-import java.lang.String;
-import java.lang.Long;
-import java.lang.ProcessBuilder;
-import java.lang.Process;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.Iterator;
-import java.util.ArrayList;
-
 import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.IOException;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 import de.anomic.plasma.plasmaSwitchboard;
 
 public class diskUsage {
 
-    private static final HashMap<String, long[]> diskUsage = new HashMap<String, long[]>();
+    private static final HashMap<String, long[]> diskUsages = new HashMap<String, long[]>();
     
     private static final ArrayList<String> allVolumes = new ArrayList<String>();
     private static final ArrayList<String> allMountPoints = new ArrayList<String>();
@@ -124,7 +113,7 @@ public class diskUsage {
 
     public diskUsage (plasmaSwitchboard sb) {
         errorMessage = null;
-        this.sb = sb;
+        diskUsage.sb = sb;
         usedOS = getOS();
         if (usedOS == -1) {
             usable = false;
@@ -172,7 +161,7 @@ public class diskUsage {
             dfUnix(false);
         else
             dfWindows ();            
-        return diskUsage;
+        return diskUsages;
     }
 
     public boolean getUsable () {
@@ -196,7 +185,7 @@ public class diskUsage {
 
     private void dfUnix(boolean getVolumesOnly) {
         if (!getVolumesOnly)
-            diskUsage.clear ();
+            diskUsages.clear ();
 
         // -k    set blocksize to 1024
         //   confirmed with tests:
@@ -270,7 +259,7 @@ nextLine:
                         try { vals[1] = new Long(tokens[3]); } catch (NumberFormatException e) { break nextLine; }
                         vals[0] *= 1024;
                         vals[1] *= 1024;
-                        diskUsage.put (yacyUsedMountPoints.get(i), vals);
+                        diskUsages.put (yacyUsedMountPoints.get(i), vals);
                     }
                 }
             }
@@ -393,7 +382,7 @@ nextLine:
             long[] vals = new long[2];
             vals[0] = -1;
             try { vals[1] = new Long(tokens[2].replaceAll("[.,]", "")); } catch (NumberFormatException e) {continue;}
-            diskUsage.put (yacyUsedVolumes.get(i), vals);
+            diskUsages.put (yacyUsedVolumes.get(i), vals);
         }
     }
 

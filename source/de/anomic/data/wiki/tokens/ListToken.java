@@ -73,7 +73,7 @@ public class ListToken extends AbstractToken {
 			if (this.recursion) r.add(this.listBlockElement);
 			if (this.listElement != null) r.add(this.listElement);
 		}
-		blockElements = (String[])r.toArray(new String[r.size()]);
+		blockElements = r.toArray(new String[r.size()]);
 	}
 	
 	public ListToken(char firstChar, String listBlockElement, String listElement) {
@@ -87,7 +87,7 @@ public class ListToken extends AbstractToken {
 			if (this.recursion) r.add(this.listBlockElement);
 			if (this.listElement != null) r.add(this.listElement);
 		}
-		blockElements = (String[])r.toArray(new String[r.size()]);
+		blockElements = r.toArray(new String[r.size()]);
 	}
 	
 	public ListToken(char firstChar, String listBlockElement, String listElement, boolean recursion) {
@@ -101,7 +101,7 @@ public class ListToken extends AbstractToken {
 			if (this.recursion) r.add(this.listBlockElement);
 			if (this.listElement != null) r.add(this.listElement);
 		}
-		blockElements = (String[])r.toArray(new String[r.size()]);
+		blockElements = r.toArray(new String[r.size()]);
 	}
 	
 	protected void parse() {

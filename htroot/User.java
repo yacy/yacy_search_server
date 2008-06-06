@@ -109,8 +109,8 @@ public class User{
         //TODO: this does not work for a static admin, yet.
         }else if(post != null && post.containsKey("username") && post.containsKey("password")){
             //entry=sb.userDB.passwordAuth((String)post.get("username"), (String)post.get("password"), (String)header.get(httpHeader.CONNECTION_PROP_CLIENTIP, "xxxxxx"));
-            String username=(String)post.get("username");
-            String password=(String)post.get("password");
+            String username=post.get("username");
+            String password=post.get("password");
             
             entry=sb.userDB.passwordAuth(username, password);
             boolean staticAdmin = sb.getConfig(httpd.ADMIN_ACCOUNT_B64MD5, "").equals(
@@ -134,7 +134,7 @@ public class User{
                 prop.put("logged-in_identified-by", "1");
                 prop.put("logged-in_username", username);
                 if(post.containsKey("returnto")){
-                    prop.put("LOCATION", (String)post.get("returnto"));
+                    prop.put("LOCATION", post.get("returnto"));
                 }
             }
         }

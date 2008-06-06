@@ -62,7 +62,7 @@ public class kelondroIntBytesMap {
     
     public byte[] getb(int ii) {
         assert ii >= 0 : "i = " + ii;
-    	byte[] key = kelondroNaturalOrder.encodeLong((long) ii, 4);
+    	byte[] key = kelondroNaturalOrder.encodeLong(ii, 4);
         if (index0 != null) {
             if (index1 == null) {
                 // finish initialization phase
@@ -82,7 +82,7 @@ public class kelondroIntBytesMap {
     public byte[] putb(int ii, byte[] value) {
         assert ii >= 0 : "i = " + ii;
         assert value != null;
-        byte[] key = kelondroNaturalOrder.encodeLong((long) ii, 4);
+        byte[] key = kelondroNaturalOrder.encodeLong(ii, 4);
         if (index0 != null) {
             if (index1 == null) {
                 // finish initialization phase
@@ -104,7 +104,7 @@ public class kelondroIntBytesMap {
         assert (index1 != null);
         
         kelondroRow.Entry newentry = rowdef.newEntry();
-        newentry.setCol(0, (long) ii);
+        newentry.setCol(0, ii);
         newentry.setCol(1, value);
         kelondroRow.Entry oldentry = index1.put(newentry);
         if (oldentry == null) return null;
@@ -116,7 +116,7 @@ public class kelondroIntBytesMap {
         assert ii >= 0 : "i = " + ii;
         assert value != null;
         kelondroRow.Entry newentry = index0.row().newEntry();
-        newentry.setCol(0, (long) ii);
+        newentry.setCol(0, ii);
         newentry.setCol(1, value);
         index0.addUnique(newentry);
     }
@@ -124,7 +124,7 @@ public class kelondroIntBytesMap {
     public byte[] removeb(int ii) {
         assert ii >= 0 : "i = " + ii;
         
-        byte[] key = kelondroNaturalOrder.encodeLong((long) ii, 4);
+        byte[] key = kelondroNaturalOrder.encodeLong(ii, 4);
         if (index0 != null) {
             if (index1 == null) {
                 // finish initialization phase
@@ -239,7 +239,7 @@ public class kelondroIntBytesMap {
 			if ((ra.size() > 0) && (random.nextLong() % 7 == 0)) {
 				rc++;
 				p = Math.abs(random.nextInt()) % ra.size();
-				R = (Long) ra.get(p);
+				R = ra.get(p);
 				//System.out.println("remove " + R.longValue());
 				jcontrol.remove(R);
 				kcontrol.removeb((int) R.longValue());

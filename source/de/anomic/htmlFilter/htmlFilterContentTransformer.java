@@ -120,7 +120,7 @@ public class htmlFilterContentTransformer extends htmlFilterAbstractTransformer 
         if (text == null || bluelist == null) return false;
         String lc = new String(text).toLowerCase();
         for (int i = 0; i < bluelist.size(); i++) {
-            if (lc.indexOf((String) bluelist.get(i)) >= 0) return true;
+            if (lc.indexOf(bluelist.get(i)) >= 0) return true;
         }
         return false;
     }

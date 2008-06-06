@@ -48,11 +48,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-
-import de.anomic.server.serverCachedFileOutputStream;
-import de.anomic.server.serverFileUtils;
-import de.anomic.yacy.yacyURL;
-
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -65,6 +60,9 @@ import java.util.TreeSet;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterImageEntry;
 import de.anomic.plasma.parser.Parser;
+import de.anomic.server.serverCachedFileOutputStream;
+import de.anomic.server.serverFileUtils;
+import de.anomic.yacy.yacyURL;
 
 public class plasmaParserDocument {
     
@@ -181,7 +179,7 @@ dc_rights
         String s;
         for (int i = 0; i < this.keywords.size(); i++) {
             if (this.keywords.get(i) == null) continue;
-            s = ((String)this.keywords.get(i)).trim();
+            s = (this.keywords.get(i)).trim();
             if (s.length() > 0) hs.add(s.toLowerCase());
         }
         if (hs.size() == 0) return "";
@@ -222,7 +220,7 @@ dc_rights
     
     public String[] getSectionTitles() {
         if (sections != null) {
-            return (String[])sections.toArray(new String[this.sections.size()]);
+            return sections.toArray(new String[this.sections.size()]);
         } else {
             return new String[] { dc_title() };
         }
@@ -353,7 +351,7 @@ dc_rights
             url = entry.getKey();
             if (url == null) continue;
             u = url.toNormalform(true, false);
-            if ((u != null) && (u.startsWith("mailto:"))) {
+            if (u.startsWith("mailto:")) {
                 emaillinks.put(u.substring(7), entry.getValue());
             } else {
                 extpos = u.lastIndexOf(".");
@@ -366,13 +364,13 @@ dc_rights
                     if (plasmaParser.mediaExtContains(ext)) {
                         // this is not a normal anchor, its a media link
                         if (plasmaParser.imageExtContains(ext)) {
-                            htmlFilterContentScraper.addImage(collectedImages, new htmlFilterImageEntry(url, (String) entry.getValue(), -1, -1));
+                            htmlFilterContentScraper.addImage(collectedImages, new htmlFilterImageEntry(url, entry.getValue(), -1, -1));
                         }
-                        else if (plasmaParser.audioExtContains(ext)) audiolinks.put(url, (String)entry.getValue());
-                        else if (plasmaParser.videoExtContains(ext)) videolinks.put(url, (String)entry.getValue());
-                        else if (plasmaParser.appsExtContains(ext)) applinks.put(url, (String)entry.getValue());
+                        else if (plasmaParser.audioExtContains(ext)) audiolinks.put(url, entry.getValue());
+                        else if (plasmaParser.videoExtContains(ext)) videolinks.put(url, entry.getValue());
+                        else if (plasmaParser.appsExtContains(ext)) applinks.put(url, entry.getValue());
                     } else {
-                        hyperlinks.put(url, (String) entry.getValue());
+                        hyperlinks.put(url, entry.getValue());
                     }
                 }
             }

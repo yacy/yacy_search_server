@@ -63,19 +63,19 @@ public class kelondroHandle implements Comparable<kelondroHandle> {
     }
 
     public int compare(kelondroHandle h0, kelondroHandle h1) {
-        assert (((kelondroHandle) h0).index != NUL);
-        assert (((kelondroHandle) h1).index != NUL);
-        if (((kelondroHandle) h0).index < ((kelondroHandle) h1).index) return -1;
-        if (((kelondroHandle) h0).index > ((kelondroHandle) h1).index) return 1;
+        assert ((h0).index != NUL);
+        assert ((h1).index != NUL);
+        if ((h0).index < (h1).index) return -1;
+        if ((h0).index > (h1).index) return 1;
         return 0;
     }
 
     public int compareTo(kelondroHandle h) {
         // this is needed for a TreeMap
         assert (index != NUL) : "this.index is NUL in compareTo";
-        assert (((kelondroHandle) h).index != NUL) : "handle.index is NUL in compareTo";
-        if (index < ((kelondroHandle) h).index) return -1;
-        if (index > ((kelondroHandle) h).index) return 1;
+        assert ((h).index != NUL) : "handle.index is NUL in compareTo";
+        if (index < (h).index) return -1;
+        if (index > (h).index) return 1;
         return 0;
     }
 

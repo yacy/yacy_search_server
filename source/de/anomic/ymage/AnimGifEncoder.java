@@ -243,7 +243,7 @@ public class AnimGifEncoder {
          *  table and the complete output size.
          */
         for (int i = 0; i < m_ima_ar.size(); i++) {
-            AnIma   ai = (AnIma) m_ima_ar.get(i);
+            AnIma   ai = m_ima_ar.get(i);
             genImage(ai);
             ai.m_rgb    = null;
         }
@@ -307,7 +307,7 @@ public class AnimGifEncoder {
         if(m_color_ix >= 256)
             throw new IOException("More than 255 colors in this GIF are not allowed.");
         m_ccolor_ar[i] = color;
-        m_cindex_ar[i] = (short) m_color_ix;
+        m_cindex_ar[i] = m_color_ix;
         return m_color_ix++;
     }
     
@@ -447,7 +447,7 @@ public class AnimGifEncoder {
                 short   ii = map[rcolor + 0x80];
                 if (ii == -1){                          // Unknown map?
                     //-- New color. Get it's translated RGB value,
-                    int rix = (int)rcolor & 0xff;       // Translate to unsigned
+                    int rix = rcolor & 0xff;       // Translate to unsigned
                     int rgb = cm.getRGB(rix);           // Get RGB value for this input index,
                     if(rgb >= 0) {                      // Transparant color?
                         //-- If there is a transparant color index use it...

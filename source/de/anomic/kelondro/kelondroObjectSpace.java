@@ -59,7 +59,7 @@ public class kelondroObjectSpace {
     private static void incAlive(int size) {
         final Integer s = new Integer(size);
         synchronized (aliveNow) {
-            final Integer x = (Integer) aliveNow.get(s);
+            final Integer x = aliveNow.get(s);
             if (x == null) aliveNow.put(s, new Integer(1)); else aliveNow.put(s, new Integer(x.intValue() + 1));
         }
     }

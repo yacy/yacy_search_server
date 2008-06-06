@@ -58,7 +58,7 @@ public class indexDefaultReferenceBlacklist extends indexAbstractReferenceBlackl
         // try to match complete domain
         if (!matched && (app = blacklistMapMatched.get(hostlow)) != null) {
             for (int i=app.size()-1; !matched && i>-1; i--) {
-                pp = (String)app.get(i);
+                pp = app.get(i);
                 matched |= ((pp.equals("*")) || (path.matches(pp)));
             }
         }
@@ -68,13 +68,13 @@ public class indexDefaultReferenceBlacklist extends indexAbstractReferenceBlackl
         while (!matched && (index = hostlow.indexOf('.', index + 1)) != -1) {
             if ((app = blacklistMapMatched.get(hostlow.substring(0, index + 1) + "*")) != null) {
                 for (int i=app.size()-1; !matched && i>-1; i--) {
-                    pp = (String)app.get(i);
+                    pp = app.get(i);
                     matched |= ((pp.equals("*")) || (path.matches(pp)));
                 }
             }
             if ((app = blacklistMapMatched.get(hostlow.substring(0, index))) != null) {
                 for (int i=app.size()-1; !matched && i>-1; i--) {
-                    pp = (String)app.get(i);
+                    pp = app.get(i);
                     matched |= ((pp.equals("*")) || (path.matches(pp)));
                 }
             }
@@ -83,13 +83,13 @@ public class indexDefaultReferenceBlacklist extends indexAbstractReferenceBlackl
         while (!matched && (index = hostlow.lastIndexOf('.', index - 1)) != -1) {
             if ((app = blacklistMapMatched.get("*" + hostlow.substring(index, hostlow.length()))) != null) {
                 for (int i=app.size()-1; !matched && i>-1; i--) {
-                    pp = (String)app.get(i);
+                    pp = app.get(i);
                     matched |= ((pp.equals("*")) || (path.matches(pp)));
                 }
             }
             if ((app = blacklistMapMatched.get(hostlow.substring(index +1, hostlow.length()))) != null) {
                 for (int i=app.size()-1; !matched && i>-1; i--) {
-                    pp = (String)app.get(i);
+                    pp = app.get(i);
                     matched |= ((pp.equals("*")) || (path.matches(pp)));
                 }
             }

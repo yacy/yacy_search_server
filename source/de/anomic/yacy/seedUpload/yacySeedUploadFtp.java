@@ -77,7 +77,7 @@ public class yacySeedUploadFtp implements yacySeedUploader {
                 return log;
             } 
             throw new Exception ("Seed upload settings not configured properly. password-len=" +
-                    seedFTPPassword.length() + ", filePath=" +
+                    (seedFTPPassword == null ? "null" : seedFTPPassword.length()) + ", filePath=" +
                     seedFTPPath);
         } catch (Exception e) {
             throw e;

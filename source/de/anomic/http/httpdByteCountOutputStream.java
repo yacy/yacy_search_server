@@ -121,7 +121,7 @@ public class httpdByteCountOutputStream extends BufferedOutputStream {
     public static long getAccountCount(String accountName) {
         synchronized (syncObject) {
             if (byteCountInfo.containsKey(accountName)) {
-                return ((Long)byteCountInfo.get(accountName)).longValue();
+                return (byteCountInfo.get(accountName)).longValue();
             }
             return 0;
         }
@@ -143,7 +143,7 @@ public class httpdByteCountOutputStream extends BufferedOutputStream {
             if (this.byteCountAccountName != null) {
                 long lastByteCount = 0;
                 if (byteCountInfo.containsKey(this.byteCountAccountName)) {
-                    lastByteCount = ((Long)byteCountInfo.get(this.byteCountAccountName)).longValue();
+                    lastByteCount = (byteCountInfo.get(this.byteCountAccountName)).longValue();
                 }
                 lastByteCount += this.byteCount;
                 byteCountInfo.put(this.byteCountAccountName,new Long(lastByteCount));

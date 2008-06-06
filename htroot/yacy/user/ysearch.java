@@ -58,7 +58,7 @@ public class ysearch {
         String promoteSearchPageGreeting = env.getConfig("promoteSearchPageGreeting", "");
         if (env.getConfigBool("promoteSearchPageGreeting.useNetworkName", false)) promoteSearchPageGreeting = env.getConfig("network.unit.description", "");
         if (promoteSearchPageGreeting.length() == 0) promoteSearchPageGreeting = "P2P WEB SEARCH";
-        String client = (String) header.get(httpHeader.CONNECTION_PROP_CLIENTIP); // the search client who initiated the search
+        String client = header.get(httpHeader.CONNECTION_PROP_CLIENTIP); // the search client who initiated the search
         
         // get query
         String querystring = (post == null) ? "" : post.get("search", "").trim();
@@ -111,23 +111,23 @@ public class ysearch {
         int offset = post.getInt("startRecord", post.getInt("offset", 0));
         
         boolean global = (post == null) ? true : post.get("resource", "global").equals("global");
-        final boolean indexof = post.get("indexof","").equals("on"); 
+        final boolean indexof = (post != null && post.get("indexof","").equals("on")); 
         String urlmask = "";
-        if (post.containsKey("urlmask") && post.get("urlmask").equals("no")) {
+        if (post != null && post.containsKey("urlmask") && post.get("urlmask").equals("no")) {
             urlmask = ".*";
         } else {
-            urlmask = (post.containsKey("urlmaskfilter")) ? (String) post.get("urlmaskfilter") : ".*";
+            urlmask = (post != null && post.containsKey("urlmaskfilter")) ? (String) post.get("urlmaskfilter") : ".*";
         }
-        String prefermask = post.get("prefermaskfilter", "");
+        String prefermask = (post == null ? "" : post.get("prefermaskfilter", ""));
         if ((prefermask.length() > 0) && (prefermask.indexOf(".*") < 0)) prefermask = ".*" + prefermask + ".*";
 
-        kelondroBitfield constraint = ((post.containsKey("constraint")) && (post.get("constraint", "").length() > 0)) ? new kelondroBitfield(4, post.get("constraint", "______")) : null;
+        kelondroBitfield constraint = (post != null && post.containsKey("constraint") && post.get("constraint", "").length() > 0) ? new kelondroBitfield(4, post.get("constraint", "______")) : null;
         if (indexof) {
             constraint = new kelondroBitfield(4);
             constraint.set(plasmaCondenser.flag_cat_indexof, true);
         }
         
-        int domainzone = post.getInt("zone", yacyURL.TLD_any_zone_filter);
+        int domainzone = (post == null ? yacyURL.TLD_any_zone_filter : post.getInt("zone", yacyURL.TLD_any_zone_filter));
         
         // SEARCH
         //final boolean indexDistributeGranted = sb.getConfig(plasmaSwitchboard.INDEX_DIST_ALLOW, "true").equals("true");
@@ -140,7 +140,7 @@ public class ysearch {
         if (clustersearch) global = true; // switches search on, but search target is limited to cluster nodes
         
         // find search domain
-        int contentdomCode = plasmaSearchQuery.contentdomParser(post.get("contentdom", "text"));
+        int contentdomCode = plasmaSearchQuery.contentdomParser((post == null ? "text" : post.get("contentdom", "text")));
         
         // patch until better search profiles are available
         if ((contentdomCode != plasmaSearchQuery.CONTENTDOM_TEXT) && (itemsPerPage <= 32)) itemsPerPage = 32;
@@ -162,7 +162,7 @@ public class ysearch {
             block = true;
         } catch (InterruptedException e) { e.printStackTrace(); }
         
-        if ((!block) && (post.get("cat", "href").equals("href"))) {
+        if ((!block) && (post == null || post.get("cat", "href").equals("href"))) {
 
             plasmaSearchRankingProfile ranking = sb.getRanking();
             final TreeSet<String>[] query = plasmaSearchQuery.cleanQuery(querystring); // converts also umlaute
@@ -280,7 +280,7 @@ public class ysearch {
             }
 
             if (prop == null || prop.size() == 0) {
-                if (post.get("search", "").length() < 3) {
+                if (post == null || post.get("search", "").length() < 3) {
                     prop.put("num-results", "2"); // no results - at least 3 chars
                 } else {
                     prop.put("num-results", "1"); // no results
@@ -314,7 +314,7 @@ public class ysearch {
         prop.putHTML("input_prefermaskfilter", prefermask);
         prop.put("input_indexof", (indexof) ? "on" : "off");
         prop.put("input_constraint", (constraint == null) ? "" : constraint.exportB64());
-        prop.put("input_contentdom", post.get("contentdom", "text"));
+        prop.put("input_contentdom", (post == null ? "text" : post.get("contentdom", "text")));
         prop.put("input_contentdomCheckText", (contentdomCode == plasmaSearchQuery.CONTENTDOM_TEXT) ? "1" : "0");
         prop.put("input_contentdomCheckAudio", (contentdomCode == plasmaSearchQuery.CONTENTDOM_AUDIO) ? "1" : "0");
         prop.put("input_contentdomCheckVideo", (contentdomCode == plasmaSearchQuery.CONTENTDOM_VIDEO) ? "1" : "0");

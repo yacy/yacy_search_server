@@ -119,7 +119,7 @@ public class kelondroCache implements kelondroIndex {
         // returns a map for each file in the tracker;
         // the map represents properties for each record oobjects,
         // i.e. for cache memory allocation
-        kelondroCache theObjectsCache = (kelondroCache) objectTracker.get(filename);
+        kelondroCache theObjectsCache = objectTracker.get(filename);
         return theObjectsCache.memoryStats();
     }
     
@@ -354,7 +354,7 @@ public class kelondroCache implements kelondroIndex {
         Iterator<Entry> i = rows.iterator();
         int c = 0;
         while (i.hasNext()) {
-            if (addUnique((Entry) i.next())) c++;
+            if (addUnique(i.next())) c++;
         }
         return c;
     }

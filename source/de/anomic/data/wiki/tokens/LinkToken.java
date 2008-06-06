@@ -176,7 +176,7 @@ public class LinkToken extends AbstractToken {
             if ((hash = it.next()) != null)
                 if ((bm = this.sb.bookmarksDB.getBookmark(hash)) != null)
                     r.add(new Link(bm.getUrl(), bm.getTitle(), bm.getDescription()));
-        return (Link[]) r.toArray(new Link[r.size()]);
+        return r.toArray(new Link[r.size()]);
     }
     
     private static class Link {

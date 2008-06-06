@@ -162,7 +162,7 @@ public class kelondroCachedRecords extends kelondroAbstractRecords implements ke
         // returns a map for each file in the tracker;
         // the map represents properties for each record oobjects,
         // i.e. for cache memory allocation
-        kelondroCachedRecords theRecord = (kelondroCachedRecords) recordTracker.get(filename);
+        kelondroCachedRecords theRecord = recordTracker.get(filename);
         return theRecord.memoryStats();
     }
     
@@ -273,7 +273,7 @@ public class kelondroCachedRecords extends kelondroAbstractRecords implements ke
         Iterator<kelondroNode> i = new contentNodeIterator(-1);
         kelondroNode n;
         while (i.hasNext()) {
-            n = (kelondroNode) i.next();
+            n = i.next();
             System.out.println("NODE: " + n.toString());
         }
     }
@@ -317,7 +317,7 @@ public class kelondroCachedRecords extends kelondroAbstractRecords implements ke
 
         public CacheNode(byte[] rowinstance) throws IOException {
             // this initializer is used to create nodes from bulk-read byte arrays
-            assert ((rowinstance == null) || (rowinstance.length == ROW.objectsize)) : "bulkchunk.length = " + rowinstance.length + ", ROW.width(0) = " + ROW.width(0);
+            assert ((rowinstance == null) || (rowinstance.length == ROW.objectsize)) : "bulkchunk.length = " + (rowinstance == null ? "null" : rowinstance.length) + ", ROW.width(0) = " + ROW.width(0);
             this.handle = new kelondroHandle(USAGE.allocatePayload(rowinstance));
             
             // create empty chunks
@@ -359,7 +359,7 @@ public class kelondroCachedRecords extends kelondroAbstractRecords implements ke
             } else {
                 changed = true;
             }
-            assert ((bulkchunk == null) || (bulkchunk.length - offset >= recordsize)) : "bulkchunk.length = " + bulkchunk.length + ", offset = " + offset + ", recordsize = " + recordsize;
+            assert ((bulkchunk == null) || (bulkchunk.length - offset >= recordsize)) : "bulkchunk.length = " + (bulkchunk == null ? "null" : bulkchunk.length) + ", offset = " + offset + ", recordsize = " + recordsize;
             
             // create empty chunks
             this.headChunk = new byte[headchunksize];
@@ -538,7 +538,7 @@ public class kelondroCachedRecords extends kelondroAbstractRecords implements ke
                 // load all values from the database file
                 this.tailChunk = new byte[tailchunksize];
                 // read values
-                entryFile.readFully(seekpos(this.handle) + (long) headchunksize, this.tailChunk, 0, this.tailChunk.length);
+                entryFile.readFully(seekpos(this.handle) + headchunksize, this.tailChunk, 0, this.tailChunk.length);
             }
 
             // create return value

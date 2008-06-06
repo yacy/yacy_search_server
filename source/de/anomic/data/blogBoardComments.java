@@ -261,7 +261,7 @@ public class blogBoardComments {
                 record.put("subject", kelondroBase64Order.enhancedCoder.encode(subject));
         }
         public byte[] getSubject() {
-            String subject = (String) record.get("subject");
+            String subject = record.get("subject");
             if (subject == null) return new byte[0];
             byte[] subject_bytes = kelondroBase64Order.enhancedCoder.decode(subject, "de.anomic.data.blogBoardComments.subject()");
             if (subject_bytes == null) return "".getBytes();
@@ -274,7 +274,7 @@ public class blogBoardComments {
         }
         public Date getDate() {
             try {
-                String date = (String) record.get("date");
+                String date = record.get("date");
                 if (date == null) {
                     serverLog.logFinest("Blog", "ERROR: date field missing in blogBoard");
                     return new Date();
@@ -288,7 +288,7 @@ public class blogBoardComments {
         }
         
         public String getTimestamp() {
-            String timestamp = (String) record.get("date");
+            String timestamp = record.get("date");
             if (timestamp == null) {
                 serverLog.logFinest("Blog", "ERROR: date field missing in blogBoard");
                 return dateString(new Date());
@@ -302,7 +302,7 @@ public class blogBoardComments {
                 record.put("author", kelondroBase64Order.enhancedCoder.encode(author));
         }
         public byte[] getAuthor() {
-            String author = (String) record.get("author");
+            String author = record.get("author");
             if (author == null) 
                 return new byte[0];
             byte[] author_byte = kelondroBase64Order.enhancedCoder.decode(author, "de.anomic.data.blogBoardComments.author()");
@@ -316,7 +316,7 @@ public class blogBoardComments {
             record.put("ip", ip);
         }
         public String getIp() {
-            String ip = (String) record.get("ip");
+            String ip = record.get("ip");
             if (ip == null) 
                 return "127.0.0.1";
             return ip;
@@ -328,7 +328,7 @@ public class blogBoardComments {
                 record.put("page", kelondroBase64Order.enhancedCoder.encode(page));
         }
         public byte[] getPage() {
-            String page = (String) record.get("page");
+            String page = record.get("page");
             if (page == null) 
                 return new byte[0];
             byte[] page_byte = kelondroBase64Order.enhancedCoder.decode(page, "de.anomic.data.blogBoardComments.page()");

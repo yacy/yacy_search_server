@@ -63,7 +63,7 @@ public class News {
         plasmaSwitchboard sb = (plasmaSwitchboard) env;
         serverObjects prop = new serverObjects();
         boolean overview = (post == null) || (post.get("page", "0").equals("0"));
-        int tableID = (overview) ? -1 : Integer.parseInt(post.get("page", "0")) - 1;
+        int tableID = (overview) ? -1 : (post == null ? 0 : Integer.parseInt(post.get("page", "0"))) - 1;
 
         // execute commands
         if (post != null) {
@@ -146,8 +146,8 @@ public class News {
                     if (attributeMap.size() > 0) {
 	                    Iterator<String> attributeKeys = attributeMap.keySet().iterator();
 	                    while (attributeKeys.hasNext()) {
-	                    	String key = (String) attributeKeys.next();
-	                    	String value = (String) attributeMap.get(key);
+	                    	String key = attributeKeys.next();
+	                    	String value = attributeMap.get(key);
 	                    	prop.put("table_list_" + i + "_attributes_" + j + "_name",key);
 	                    	prop.putHTML("table_list_" + i + "_attributes_" + j + "_value",value);
 	                    	j++;

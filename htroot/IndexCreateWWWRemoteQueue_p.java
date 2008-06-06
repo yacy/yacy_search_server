@@ -73,7 +73,7 @@ public class IndexCreateWWWRemoteQueue_p {
         if (post != null) {
             if (post.containsKey("limit")) {
                 try {
-                    showLimit = Integer.parseInt((String)post.get("limit"));
+                    showLimit = Integer.parseInt(post.get("limit"));
                 } catch (NumberFormatException e) {  }
             }  
             
@@ -91,7 +91,7 @@ public class IndexCreateWWWRemoteQueue_p {
                 prop.put("info", "3"); // crawling queue cleared
                 prop.putNum("info_numEntries", c);
             } else if (post.containsKey("deleteEntry")) {
-                String urlHash = (String) post.get("deleteEntry");
+                String urlHash = post.get("deleteEntry");
                 sb.crawlQueues.noticeURL.removeByURLHash(urlHash);
                 prop.put("LOCATION","");
                 return prop;

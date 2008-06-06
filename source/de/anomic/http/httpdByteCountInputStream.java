@@ -128,7 +128,7 @@ public class httpdByteCountInputStream extends FilterInputStream {
     public static long getAccountCount(String accountName) {
         synchronized (syncObject) {
             if (byteCountInfo.containsKey(accountName)) {
-                return ((Long)byteCountInfo.get(accountName)).longValue();
+                return (byteCountInfo.get(accountName)).longValue();
             }
             return 0;
         }

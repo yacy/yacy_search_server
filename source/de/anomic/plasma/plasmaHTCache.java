@@ -59,7 +59,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.StringBuffer;
 import java.net.InetAddress;
 import java.util.Date;
 import java.util.HashMap;
@@ -481,7 +480,7 @@ public final class plasmaHTCache {
         while (fileEnum.hasMoreElements()) {
             if (Thread.currentThread().isInterrupted()) return;
             fileCount++;
-            File nextFile = (File) fileEnum.nextElement();
+            File nextFile = fileEnum.nextElement();
             long nextFileModDate = nextFile.lastModified();
             //System.out.println("Cache: " + dom(f));
             doms.incScore(dom(nextFile));
@@ -518,7 +517,7 @@ public final class plasmaHTCache {
         fileCount = 0;
         while ((doms.size() > 0) && (fileCount < 50) && ((System.currentTimeMillis() - start) < 60000)) {
             if (Thread.currentThread().isInterrupted()) return;
-            dom = (String) doms.getMaxObject();
+            dom = doms.getMaxObject();
             InetAddress ip = serverDomains.dnsResolve(dom);
             if (ip == null) continue;
             result += ", " + dom + "=" + ip.getHostAddress();
@@ -942,6 +941,7 @@ public final class plasmaHTCache {
         );
     }
 
+    @SuppressWarnings("null")
     public Entry(Date initDate, 
             int depth, 
             yacyURL url,

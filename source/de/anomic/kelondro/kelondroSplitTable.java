@@ -131,15 +131,17 @@ public class kelondroSplitTable implements kelondroIndex {
             
             // open next biggest table
             t.remove(maxf);
-            date = maxf.substring(tablename.length() + 1);
-            f = new File(path, maxf);
-            if (f.isDirectory()) {
-                // this is a kelonodroFlex table
-                table = new kelondroCache(new kelondroFlexTable(path, maxf, rowdef, 0, resetOnFail));
-            } else {
-                table = new kelondroEcoTable(f, rowdef, kelondroEcoTable.tailCacheUsageAuto, EcoFSBufferSize, 0);
+            if(maxf != null) {
+                date = maxf.substring(tablename.length() + 1);
+                f = new File(path, maxf);
+                if (f.isDirectory()) {
+                    // this is a kelonodroFlex table
+                    table = new kelondroCache(new kelondroFlexTable(path, maxf, rowdef, 0, resetOnFail));
+                } else {
+                    table = new kelondroEcoTable(f, rowdef, kelondroEcoTable.tailCacheUsageAuto, EcoFSBufferSize, 0);
+                }
+                tables.put(date, table);
             }
-            tables.put(date, table);
         }
     }
     
@@ -187,7 +189,7 @@ public class kelondroSplitTable implements kelondroIndex {
         kelondroProfile[] profiles = new kelondroProfile[tables.size()];
         Iterator<kelondroIndex> i = tables.values().iterator();
         int c = 0;
-        while (i.hasNext()) profiles[c++] = ((kelondroIndex) i.next()).profile();
+        while (i.hasNext()) profiles[c++] = (i.next()).profile();
         return kelondroProfile.consolidate(profiles);
     }
     
@@ -228,7 +230,7 @@ public class kelondroSplitTable implements kelondroIndex {
         if ((entryDate == null) || (entryDate.after(new Date()))) entryDate = new Date(); // fix date
         String suffix = dateSuffix(entryDate);
         if (suffix == null) return null;
-        kelondroIndex table = (kelondroIndex) tables.get(suffix);
+        kelondroIndex table = tables.get(suffix);
         if (table == null) {
             // open table
             File f = new File(path, tablename + "." + suffix);
@@ -317,7 +319,7 @@ public class kelondroSplitTable implements kelondroIndex {
         if ((entryDate == null) || (entryDate.after(new Date()))) entryDate = new Date(); // fix date
         String suffix = dateSuffix(entryDate);
         if (suffix == null) return false;
-        kelondroIndex table = (kelondroIndex) tables.get(suffix);
+        kelondroIndex table = tables.get(suffix);
         if (table == null) {
             // make new table
             if (serverMemory.request(minimumRAM4Eco, true)) {
@@ -366,7 +368,7 @@ public class kelondroSplitTable implements kelondroIndex {
         kelondroIndex table, maxtable = null;
         int maxcount = -1;
         while (i.hasNext()) {
-            table = (kelondroIndex) i.next();
+            table = i.next();
             if (table.size() > maxcount) {
                 maxtable = table;
                 maxcount = table.size();

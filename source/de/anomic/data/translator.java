@@ -111,7 +111,7 @@ public class translator {
 		String forFile="";
 
 		while(it.hasNext()){
-			line = (String)it.next();
+			line = it.next();
 			if(! line.startsWith("#")){
 				splitted = line.split("==", 2);
 				if(splitted.length == 2){
@@ -191,7 +191,7 @@ public class translator {
              it=exts.iterator();
              rightExtension=false;
              while(it.hasNext()){
-                 if(sourceFiles[i].getName().endsWith((String) it.next())){
+                 if(sourceFiles[i].getName().endsWith(it.next())){
                      rightExtension=true;
                      break;
                  }

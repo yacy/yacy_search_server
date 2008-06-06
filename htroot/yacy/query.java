@@ -71,7 +71,7 @@ public final class query {
         
         if ((sb.isRobinsonMode()) &&
             (!sb.isPublicRobinson()) &&
-            (!sb.isInMyCluster((String)header.get(httpHeader.CONNECTION_PROP_CLIENTIP)))) {
+            (!sb.isInMyCluster(header.get(httpHeader.CONNECTION_PROP_CLIENTIP)))) {
         	// if we are a robinson cluster, answer only if we are public robinson peers,
         	// or we are a private cluster and the requester is in our cluster.
           	// if we don't answer, the remote peer will recognize us as junior peer,

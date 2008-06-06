@@ -140,7 +140,7 @@ public final class indexContainerHeap {
         assert this.index == null;
         this.backupFile = heapFile;
         if (!(heapFile.exists())) throw new IOException("file " + heapFile + " does not exist");
-        if (heapFile.length() >= (long) Integer.MAX_VALUE) throw new IOException("file " + heapFile + " too large, index can only be crated for files less than 2GB");
+        if (heapFile.length() >= Integer.MAX_VALUE) throw new IOException("file " + heapFile + " too large, index can only be crated for files less than 2GB");
         if (log != null) log.logInfo("creating index for rwi heap '" + heapFile.getName() + "'");
         
         long start = System.currentTimeMillis();
@@ -165,11 +165,11 @@ public final class indexContainerHeap {
                     break loop; // terminate loop
                 }
                 wordHash = new String(word);
-                seek += (long) wordHash.length();
+                seek += wordHash.length();
             
                 // read collection
                 try {
-                    seek += (long) kelondroRowSet.skipNextRowSet(is, payloadrow);
+                    seek += kelondroRowSet.skipNextRowSet(is, payloadrow);
                 } catch (IOException e) {
                     break loop; // terminate loop
                 }
@@ -204,9 +204,9 @@ public final class indexContainerHeap {
                         for (int i = 0; i < payloadrow.primaryKeyLength - wordHash.length(); i++) os.write(0);
                     }
                     os.write(container.exportCollection());
+                    urlcount += container.size();
                 }
                 wordcount++;
-                urlcount += container.size();
             }
         }
         os.flush();
@@ -316,12 +316,12 @@ public final class indexContainerHeap {
 
         public indexContainer next() {
             if (iterator.hasNext()) {
-                return ((indexContainer) iterator.next()).topLevelClone();
+                return (iterator.next()).topLevelClone();
             } else {
                 // rotation iteration
                 if (rot) {
                     iterator = cache.values().iterator();
-                    return ((indexContainer) iterator.next()).topLevelClone();
+                    return (iterator.next()).topLevelClone();
                 } else {
                     return null;
                 }
@@ -411,7 +411,7 @@ public final class indexContainerHeap {
     public synchronized boolean removeReference(String wordHash, String urlHash) {
         assert this.cache != null;
         assert !this.readOnlyMode;
-        indexContainer c = (indexContainer) cache.get(wordHash);
+        indexContainer c = cache.get(wordHash);
         if ((c != null) && (c.remove(urlHash) != null)) {
             // removal successful
             if (c.size() == 0) {
@@ -428,7 +428,7 @@ public final class indexContainerHeap {
         assert this.cache != null;
         assert !this.readOnlyMode;
         if (urlHashes.size() == 0) return 0;
-        indexContainer c = (indexContainer) cache.get(wordHash);
+        indexContainer c = cache.get(wordHash);
         int count;
         if ((c != null) && ((count = c.removeEntries(urlHashes)) > 0)) {
             // removal successful
@@ -451,7 +451,7 @@ public final class indexContainerHeap {
         
         // put new words into cache
         String wordHash = container.getWordHash();
-        indexContainer entries = (indexContainer) cache.get(wordHash); // null pointer exception? wordhash != null! must be cache==null
+        indexContainer entries = cache.get(wordHash); // null pointer exception? wordhash != null! must be cache==null
         if (entries == null) {
             entries = container.topLevelClone();
             added = entries.size();
@@ -468,7 +468,7 @@ public final class indexContainerHeap {
     public synchronized void addEntry(String wordHash, indexRWIRowEntry newEntry) {
         assert this.cache != null;
         assert !this.readOnlyMode;
-        indexContainer container = (indexContainer) cache.get(wordHash);
+        indexContainer container = cache.get(wordHash);
         if (container == null) container = new indexContainer(wordHash, this.payloadrow, 1);
         container.put(newEntry);
         cache.put(wordHash, container);

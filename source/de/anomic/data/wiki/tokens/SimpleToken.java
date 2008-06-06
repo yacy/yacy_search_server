@@ -72,7 +72,7 @@ public class SimpleToken extends AbstractToken {
 				if (definitionList[i] != null)
 					for (j = 0; j < definitionList[i].length; j++)
 						r.add(definitionList[i][j]);
-			this.blockElements = (String[]) r.toArray(new String[r.size()]);
+			this.blockElements = r.toArray(new String[r.size()]);
 		} else {
 			this.blockElements = null;
 		}

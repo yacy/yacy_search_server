@@ -869,19 +869,15 @@ public class ftpc {
                 }
 
                 // copy finished. close source file
-                if (source != null) {
-                    try {
-                        source.close();
-                    } catch (final IOException e) {
-                    }
+                try {
+                    source.close();
+                } catch (final IOException e) {
                 }
             }
             // close the output file
-            if (dest != null) {
-                try {
-                    dest.close();
-                } catch (final IOException e) {
-                }
+            try {
+                dest.close();
+            } catch (final IOException e) {
             }
 
             // if we come to this point then everything went fine
@@ -928,14 +924,16 @@ public class ftpc {
             return true;
         }
         int bytes_read = 0;
+        FileOutputStream dest = null;
+        FileInputStream source = null;
         try {
             // open output file
-            final FileOutputStream dest = new FileOutputStream(dest_file);
+            dest = new FileOutputStream(dest_file);
             final byte[] buffer = new byte[1024];
 
             // open the source file
             final File source_file = new File(args[1]);
-            final FileInputStream source = new FileInputStream(source_file);
+            source = new FileInputStream(source_file);
 
             // start with the copy of one source file
             while (true) {
@@ -946,6 +944,9 @@ public class ftpc {
                 dest.write(buffer, 0, bytes_read);
             }
 
+        } catch (final FileNotFoundException e) {
+        } catch (final IOException e) {
+        } finally {
             // copy finished. close source file
             if (source != null) {
                 try {
@@ -961,8 +962,6 @@ public class ftpc {
                 } catch (final IOException e) {
                 }
             }
-        } catch (final FileNotFoundException e) {
-        } catch (final IOException e) {
         }
         return true;
     }

@@ -43,7 +43,6 @@
 
 package de.anomic.language.identification;
 
-import de.anomic.server.logging.serverLog;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -52,6 +51,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+
+import de.anomic.server.logging.serverLog;
 
 /**
  * This class can store statistical data of a language.
@@ -149,8 +150,9 @@ public class LanguageStatistics {
         } catch (IOException ex) {
             logger.logWarning("ERROR: problems reading file '" + file.getName() + "'", ex);
         } finally {
-            try {
+            try { if(reader != null) {
                 reader.close();
+            }
             } catch (IOException ex) {
                 logger.logWarning("ERROR: IO trouble ", ex);
             }

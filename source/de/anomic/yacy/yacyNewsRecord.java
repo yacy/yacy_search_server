@@ -132,9 +132,9 @@ public class yacyNewsRecord {
         if (attributes.toString().length() > attributesMaxLength) throw new IllegalArgumentException("attributes length (" + attributes.toString().length() + ") exceeds maximum (" + attributesMaxLength + ")");
         this.category = (attributes.containsKey("cat")) ? (String) attributes.get("cat") : "";
         if (category.length() > categoryStringLength) throw new IllegalArgumentException("category length (" + category.length() + ") exceeds maximum (" + categoryStringLength + ")");
-        this.received = (attributes.containsKey("rec")) ? serverDate.parseShortSecond((String) attributes.get("rec"), serverDate.UTCDiffString()) : new Date();
-        this.created = (attributes.containsKey("cre")) ? serverDate.parseShortSecond((String) attributes.get("cre"), serverDate.UTCDiffString()) : new Date();
-        this.distributed = (attributes.containsKey("dis")) ? Integer.parseInt((String) attributes.get("dis")) : 0;
+        this.received = (attributes.containsKey("rec")) ? serverDate.parseShortSecond(attributes.get("rec"), serverDate.UTCDiffString()) : new Date();
+        this.created = (attributes.containsKey("cre")) ? serverDate.parseShortSecond(attributes.get("cre"), serverDate.UTCDiffString()) : new Date();
+        this.distributed = (attributes.containsKey("dis")) ? Integer.parseInt(attributes.get("dis")) : 0;
         this.originator = (attributes.containsKey("ori")) ? (String) attributes.get("ori") : "";
         removeStandards();
     }
@@ -217,7 +217,7 @@ public class yacyNewsRecord {
     }
     
     public String attribute(String key, String dflt) {
-        String s = (String) attributes.get(key);
+        String s = attributes.get(key);
         if ((s == null) || (s.length() == 0)) return dflt;
         return s;
     }

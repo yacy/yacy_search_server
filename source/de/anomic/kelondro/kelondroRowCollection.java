@@ -494,7 +494,7 @@ public class kelondroRowCollection {
         Iterator<kelondroRow.Entry> i = rows();
         kelondroRow.Entry row;
         while (i.hasNext()) {
-            row = (kelondroRow.Entry) i.next();
+            row = i.next();
             if (!(keys.contains(row.getColString(0, null)))) i.remove();
         }
     }
@@ -797,7 +797,7 @@ public class kelondroRowCollection {
         StringBuffer s = new StringBuffer();
         Iterator<kelondroRow.Entry> i = rows();
         if (i.hasNext()) s.append(i.next().toString());
-        while (i.hasNext()) s.append(", " + ((kelondroRow.Entry) i.next()).toString());
+        while (i.hasNext()) s.append(", " + (i.next()).toString());
         return new String(s);
     }
 

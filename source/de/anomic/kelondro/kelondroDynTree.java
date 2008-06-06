@@ -82,7 +82,7 @@ public class kelondroDynTree {
     
     public void close() throws IOException {
         Iterator<String> e = treeRAHandles.keySet().iterator();
-        while (e.hasNext()) closeTree((String) e.next());
+        while (e.hasNext()) closeTree(e.next());
         int size = table.sizeDyn();
         table.close();
         if (size == 0) this.file.delete();
@@ -120,7 +120,7 @@ public class kelondroDynTree {
     }
     
     protected void closeTree(String key) throws IOException {
-        kelondroRA ra = (kelondroRA) treeRAHandles.get(key);
+        kelondroRA ra = treeRAHandles.get(key);
         if (ra != null) {
             ra.close();
             treeRAHandles.remove(key);
@@ -128,7 +128,7 @@ public class kelondroDynTree {
     }
     
     protected void removeTree(String key) throws IOException {
-        kelondroRA ra = (kelondroRA) treeRAHandles.get(key);
+        kelondroRA ra = treeRAHandles.get(key);
         if (ra != null) {
             ra.close();
             treeRAHandles.remove(key);
@@ -152,7 +152,7 @@ public class kelondroDynTree {
         }
         
         public kelondroRow.Entry get(byte[] key) throws IOException {
-            kelondroRow.Entry entry = (kelondroRow.Entry) tcache.get(new String(key));
+            kelondroRow.Entry entry = tcache.get(new String(key));
             if (entry == null) {
                 kelondroTree t = getTree(this.tablename);
                 entry = t.get(key);
@@ -205,7 +205,7 @@ public class kelondroDynTree {
             String key;
             while (e.hasNext()) {
                 key = e.next();
-                entry = (kelondroRow.Entry) this.tbuffer.get(key);
+                entry = this.tbuffer.get(key);
                 t.put(entry);
             }
             t.close();
@@ -217,7 +217,7 @@ public class kelondroDynTree {
    
     // read cached
     public synchronized kelondroRow.Entry get(String tablename, byte[] key) throws IOException {
-        treeCache tc = (treeCache) cache.get(table);
+        treeCache tc = cache.get(table);//FIXME shouldn't this be tablename (key is a String) - danielr 2008-06-06
         if (tc == null) {
             tc = new treeCache(tablename);
             cache.put(tablename, tc);
@@ -227,11 +227,11 @@ public class kelondroDynTree {
     
     // write buffered
     public synchronized void put(String tablename, kelondroRow.Entry newrow) {
-        treeBuffer tb = (treeBuffer) buffer.get(tablename);
+        treeBuffer tb = buffer.get(tablename);
         if (tb == null) {
             tb = new treeBuffer(tablename);
         }
-        treeCache tc = (treeCache) cache.get(table);
+        treeCache tc = cache.get(table);
         if (tc == null) {
             tc = new treeCache(tablename);
             cache.put(tablename, tc);
@@ -242,11 +242,11 @@ public class kelondroDynTree {
     }
     
     public synchronized void remove(String tablename, byte[] key) {
-        treeBuffer tb = (treeBuffer) buffer.get(tablename);
+        treeBuffer tb = buffer.get(tablename);
         if (tb == null) {
             tb = new treeBuffer(tablename);
         }
-        treeCache tc = (treeCache) cache.get(table);
+        treeCache tc = cache.get(table);
         if (tc == null) {
             tc = new treeCache(tablename);
             cache.put(tablename, tc);
@@ -275,7 +275,7 @@ public class kelondroDynTree {
         treeBuffer tb;
         while (e.hasNext()) {
             tablename = e.next();
-            tb = (treeBuffer) buffer.get(tablename);
+            tb = buffer.get(tablename);
             if ((System.currentTimeMillis() - tb.timestamp > this.maxageBuffer) ||
                 (tb.tbuffer.size() > this.maxsizeBuffer) ||
                 (buffer.size() > this.maxcountBuffer)) {

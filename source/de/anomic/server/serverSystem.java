@@ -180,7 +180,7 @@ public final class serverSystem {
 	String type = getMacFSType(f);
 	if ((type == null) || (type.equals(blankTypeString))) return false;
 	String ext = name.substring(dot + 1).toLowerCase();
-	String oldType = (String) macFSTypeCache.get(ext);
+	String oldType = macFSTypeCache.get(ext);
 	if ((oldType != null) && (oldType.equals(type))) return false;
 	macFSTypeCache.put(ext, type);
 	return true;
@@ -193,7 +193,7 @@ public final class serverSystem {
 	// check creator
 	String creator = getMacFSCreator(f);
 	if ((creator == null) || (creator.equals(blankTypeString))) return false;
-	String oldCreator = (String) macFSCreatorCache.get(name);
+	String oldCreator = macFSCreatorCache.get(name);
 	if ((oldCreator != null) && (oldCreator.equals(creator))) return false;
 	macFSCreatorCache.put(name, creator);
 	return true;
@@ -206,7 +206,7 @@ public final class serverSystem {
 	// reconstruct file type
 	int dot = name.lastIndexOf(".");
 	if ((dot < 0) || (dot + 1 >= name.length())) return false;
-	String type = (String) macFSTypeCache.get(name.substring(dot + 1).toLowerCase());
+	String type = macFSTypeCache.get(name.substring(dot + 1).toLowerCase());
 	if (type == null) return false;
 	String oldType = getMacFSType(f);
 	if ((oldType != null) && (oldType.equals(type))) return false;
@@ -219,7 +219,7 @@ public final class serverSystem {
 	String name = f.toString();
 
 	// reconstruct file creator
-	String creator = (String) macFSCreatorCache.get(name);
+	String creator = macFSCreatorCache.get(name);
 	if (creator == null) return false;
 	String oldCreator = getMacFSCreator(f);
 	if ((oldCreator != null) && (oldCreator.equals(creator))) return false;

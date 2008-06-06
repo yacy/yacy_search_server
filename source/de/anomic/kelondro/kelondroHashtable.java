@@ -215,7 +215,7 @@ public class kelondroHashtable {
         newhkrow.setCol(0, hash.key());
         newhkrow.setCol(1, rowentry.bytes());
         hashArray.set(rowNumber, newhkrow);
-        return hashArray.row().newEntry(oldhkrow.getColBytes(1));
+        return (oldhkrow == null ? null : hashArray.row().newEntry(oldhkrow.getColBytes(1)));
     }
     
     private Object[] search(Hash hash) throws IOException {

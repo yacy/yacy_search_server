@@ -32,7 +32,6 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-import de.anomic.crawler.CrawlEntry;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroEcoTable;
 import de.anomic.kelondro.kelondroFlexWidthArray;
@@ -124,7 +123,7 @@ public class ZURL {
         String urlhash;
         synchronized (stack) {
             if (pos >= stack.size()) return null;
-            urlhash = (String) stack.get(pos);
+            urlhash = stack.get(pos);
         }
         if (urlhash == null) return null;
         return getEntry(urlhash);
@@ -261,7 +260,7 @@ public class ZURL {
         }
 
         public Entry next() throws RuntimeException {
-            kelondroRow.Entry e = (kelondroRow.Entry) i.next();
+            kelondroRow.Entry e = i.next();
             if (e == null) return null;
             try {
                 return new Entry(e);

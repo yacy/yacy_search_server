@@ -172,7 +172,7 @@ public final class plasmaCondenser {
                 entry = i.next();
                 if ((entry == null) || (entry.getKey() == null)) continue;
                 insertTextToWords(entry.getKey().toNormalform(false, false), 98, indexRWIEntry.flag_app_dc_identifier, RESULT_FLAGS);
-                insertTextToWords((String) entry.getValue(), 98, indexRWIEntry.flag_app_dc_description, RESULT_FLAGS);
+                insertTextToWords(entry.getValue(), 98, indexRWIEntry.flag_app_dc_description, RESULT_FLAGS);
             }
         } else {
             this.RESULT_NUMB_WORDS = 0;
@@ -187,7 +187,7 @@ public final class plasmaCondenser {
             while (i.hasNext()) {
                 entry = i.next();
                 insertTextToWords(entry.getKey().toNormalform(false, false), 99, flag_cat_hasaudio, RESULT_FLAGS);
-                insertTextToWords((String) entry.getValue(), 99, flag_cat_hasaudio, RESULT_FLAGS);
+                insertTextToWords(entry.getValue(), 99, flag_cat_hasaudio, RESULT_FLAGS);
             }
 
             // video
@@ -195,7 +195,7 @@ public final class plasmaCondenser {
             while (i.hasNext()) {
                 entry = i.next();
                 insertTextToWords(entry.getKey().toNormalform(false, false), 99, flag_cat_hasvideo, RESULT_FLAGS);
-                insertTextToWords((String) entry.getValue(), 99, flag_cat_hasvideo, RESULT_FLAGS);
+                insertTextToWords(entry.getValue(), 99, flag_cat_hasvideo, RESULT_FLAGS);
             }
 
             // applications
@@ -203,7 +203,7 @@ public final class plasmaCondenser {
             while (i.hasNext()) {
                 entry = i.next();
                 insertTextToWords(entry.getKey().toNormalform(false, false), 99, flag_cat_hasapp, RESULT_FLAGS);
-                insertTextToWords((String) entry.getValue(), 99, flag_cat_hasapp, RESULT_FLAGS);
+                insertTextToWords(entry.getValue(), 99, flag_cat_hasapp, RESULT_FLAGS);
             }
 
             // images
@@ -223,7 +223,7 @@ public final class plasmaCondenser {
                 we = k.next();
                 wprop = we.getValue();
                 if (wprop.flags == null) {
-                    wprop.flags = (kelondroBitfield) RESULT_FLAGS.clone();
+                    wprop.flags = RESULT_FLAGS.clone();
                     words.put(we.getKey(), wprop);
                 }
             }
@@ -247,10 +247,10 @@ public final class plasmaCondenser {
         }
         int pip = 0;
         while (wordenum.hasMoreElements()) {
-            word = (new String((StringBuffer) wordenum.nextElement())).toLowerCase();
-            wprop = (indexWord) words.get(word);
+            word = (new String(wordenum.nextElement())).toLowerCase();
+            wprop = words.get(word);
             if (wprop == null) wprop = new indexWord(0, pip, phrase);
-            if (wprop.flags == null) wprop.flags = (kelondroBitfield) flagstemplate.clone();
+            if (wprop.flags == null) wprop.flags = flagstemplate.clone();
             wprop.flags.set(flagpos, true);
             words.put(word, wprop);
             pip++;
@@ -321,7 +321,7 @@ public final class plasmaCondenser {
         // read source
         sievedWordsEnum wordenum = new sievedWordsEnum(is, charset, wordminsize);
         while (wordenum.hasMoreElements()) {
-            word = (new String((StringBuffer) wordenum.nextElement())).toLowerCase(); // TODO: does toLowerCase work for non ISO-8859-1 chars?
+            word = (new String(wordenum.nextElement())).toLowerCase(); // TODO: does toLowerCase work for non ISO-8859-1 chars?
             //System.out.println("PARSED-WORD " + word);
             
             //This is useful for testing what YaCy "sees" of a website.
@@ -355,8 +355,8 @@ public final class plasmaCondenser {
                     // store to the words a link to this sentence
                     it = currsentwords.iterator();
                     while (it.hasNext()) {
-                        k = (String) it.next();
-                        wsp = (indexWord) words.get(k);
+                        k = it.next();
+                        wsp = words.get(k);
                         wsp.check(idx);
                         words.put(k, wsp);
                     }
@@ -379,14 +379,14 @@ public final class plasmaCondenser {
                 currsentwords.add(word);
                 if (words.containsKey(word)) {
                     // word already exists
-                    wsp = (indexWord) words.get(word);
+                    wsp = words.get(word);
                     wordHandle = wsp.posInText;
                     wsp.inc();
                 } else {
                     // word does not yet exist, create new word entry
                     wordHandle = wordHandleCount++;
                     wsp = new indexWord(wordHandle, wordInSentenceCounter, sentences.size() + 100);
-                    wsp.flags = (kelondroBitfield) RESULT_FLAGS.clone();
+                    wsp.flags = RESULT_FLAGS.clone();
                 }
                 words.put(word, wsp);
                 // we now have the unique handle of the word, put it into the sentence:
@@ -399,7 +399,7 @@ public final class plasmaCondenser {
             allsentencecounter++;
             sentence.insert(0, "."); // append at beginning
             if (sentences.containsKey(sentence)) {
-                psp = (indexPhrase) sentences.get(sentence);
+                psp = sentences.get(sentence);
                 psp.inc();
                 sentences.put(sentence, psp);
             } else {
@@ -430,7 +430,7 @@ public final class plasmaCondenser {
                 sentence = (StringBuffer) o;
                 wc = (sentence.length() - 1) / numlength;
                 s = new String[wc + 2];
-                psp = (indexPhrase) sentences.get(sentence);
+                psp = sentences.get(sentence);
                 s[0] = intString(psp.occurrences(), numlength); // number of occurrences of this sentence
                 s[1] = sentence.substring(0, 1); // the termination symbol of this sentence
                 for (int i = 0; i < wc; i++) {
@@ -522,7 +522,7 @@ public final class plasmaCondenser {
             StringBuffer s;
             char c;
             loop: while (e.hasMoreElements()) {
-                s = (StringBuffer) e.nextElement();
+                s = e.nextElement();
                 if ((s.length() == 1) && (htmlFilterContentScraper.punctuation(s.charAt(0)))) return s;
                 if ((s.length() < ml) && (!(s.equals("of")))) continue loop;
                 for (int i = 0; i < s.length(); i++) {
@@ -572,7 +572,7 @@ public final class plasmaCondenser {
             char c;
             while (s.length() == 0) {
                 if (e.hasNext()) {
-                    r = (StringBuffer) e.next();
+                    r = e.next();
                     if (r == null) return null;
                     r = trim(r);
                     sb = new StringBuffer(r.length() * 2);

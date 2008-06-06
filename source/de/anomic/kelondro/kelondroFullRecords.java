@@ -86,7 +86,7 @@ public class kelondroFullRecords extends kelondroAbstractRecords {
 
         public EcoNode(byte[] rowinstance) throws IOException {
             // this initializer is used to create nodes from bulk-read byte arrays
-            assert ((rowinstance == null) || (rowinstance.length == ROW.objectsize)) : "bulkchunk.length = " + rowinstance.length + ", ROW.width(0) = " + ROW.width(0);
+            assert ((rowinstance == null) || (rowinstance.length == ROW.objectsize)) : "bulkchunk.length = " + (rowinstance == null ? "null" : rowinstance.length) + ", ROW.width(0) = " + ROW.width(0);
             this.handle = new kelondroHandle(USAGE.allocatePayload(rowinstance));
             
             // create chunks
@@ -118,7 +118,7 @@ public class kelondroFullRecords extends kelondroAbstractRecords {
             } else {
                 changed = true;
             }
-            assert ((bulkchunk == null) || (bulkchunk.length - offset >= recordsize)) : "bulkchunk.length = " + bulkchunk.length + ", offset = " + offset + ", recordsize = " + recordsize;
+            assert ((bulkchunk == null) || (bulkchunk.length - offset >= recordsize)) : "bulkchunk.length = " + (bulkchunk == null ? "null" : bulkchunk.length) + ", offset = " + offset + ", recordsize = " + recordsize;
             
             /*if ((offset == 0) && (overhead == 0) && ((bulkchunk == null) || (bulkchunk.length == ROW.objectsize()))) {
                 this.ohChunk = new byte[0];
@@ -236,7 +236,7 @@ public class kelondroFullRecords extends kelondroAbstractRecords {
                 // load all values from the database file
                 this.bodyChunk = new byte[ROW.objectsize];
                 // read values
-                entryFile.readFully(seekpos(this.handle) + (long) overhead, this.bodyChunk, 0, this.bodyChunk.length);
+                entryFile.readFully(seekpos(this.handle) + overhead, this.bodyChunk, 0, this.bodyChunk.length);
             }
 
             return this.bodyChunk;

@@ -100,8 +100,8 @@ public class kelondroEcoTable implements kelondroIndex {
             int fileSize = (int) tableSize(tablefile, rowdef.objectsize);
             
             // initialize index and copy table
-            int  records = (int) Math.max(fileSize, initialSpace);
-            long neededRAM4table = ((long) records) * (((long) rowdef.objectsize) + 4L) * 3L;
+            int  records = Math.max(fileSize, initialSpace);
+            long neededRAM4table = (records) * ((rowdef.objectsize) + 4L) * 3L;
             table = ((neededRAM4table < maxarraylength) &&
                      ((useTailCache == tailCacheForceUsage) ||
                       ((useTailCache == tailCacheUsageAuto) && (serverMemory.free() > neededRAM4table + 200 * 1024 * 1024)))) ?

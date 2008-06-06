@@ -90,7 +90,7 @@ public final class transfer {
             // reject unknown peers: this does not appear fair, but anonymous senders are dangerous
             // reject paths that contain '..' because they are dangerous
             if (otherseed == null) sb.getLog().logFine("RankingTransmission: rejected unknown peer '" + otherpeer + "', current IP " + header.get(httpHeader.CONNECTION_PROP_CLIENTIP, "unknown"));
-            if (filename.indexOf("..") >= 0) sb.getLog().logFine("RankingTransmission: rejected wrong path '" + filename + "' from peer " + otherseed.getName() + "/" + otherseed.getPublicAddress()+ ", current IP " + header.get(httpHeader.CONNECTION_PROP_CLIENTIP, "unknown"));
+            if (filename.indexOf("..") >= 0) sb.getLog().logFine("RankingTransmission: rejected wrong path '" + filename + "' from peer " + (otherseed == null ? "null" : otherseed.getName() + "/" + otherseed.getPublicAddress()) + ", current IP " + header.get(httpHeader.CONNECTION_PROP_CLIENTIP, "unknown"));
             return prop;
         }
         
@@ -123,7 +123,7 @@ public final class transfer {
                 String md5 = post.get("md5", "");   // one-time authentication
                 //java.util.HashMap perm = sb.rankingPermissions;
                 //System.out.println("PERMISSIONDEBUG: accesscode=" + accesscode + ", permissions=" + perm.toString());
-                String grantedFile = (String) sb.rankingPermissions.get(accesscode);
+                String grantedFile = sb.rankingPermissions.get(accesscode);
                 prop.put("process_tt", "");
                 if ((grantedFile == null) || (!(grantedFile.equals(filename)))) {
                     // fraud-access of this interface

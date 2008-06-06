@@ -101,8 +101,8 @@ public class MessageSend_p {
             }
 
             prop.putHTML("mode_permission_peerName", peerName, true);
-            String response = (result == null) ? "-1" : (String) result.get("response");
-            if ((response == null) || (response.equals("-1"))) {
+            String response = (result == null) ? null : (String) result.get("response");
+            if (response == null || result == null) {
                 // we don't have permission or other peer does not exist
                 prop.put("mode_permission", "0");
 
@@ -114,8 +114,8 @@ public class MessageSend_p {
 
                 // write input form
                 try {
-                    int messagesize = Integer.parseInt((String) result.get("messagesize"));
-                    int attachmentsize = Integer.parseInt((String) result.get("attachmentsize"));
+                    int messagesize = Integer.parseInt(result.get("messagesize"));
+                    int attachmentsize = Integer.parseInt(result.get("attachmentsize"));
 
                     prop.putHTML("mode_permission_response", response, true);
                     prop.put("mode_permission_messagesize", messagesize);
@@ -153,7 +153,7 @@ public class MessageSend_p {
                 HashMap<String, String> result = yacyClient.postMessage(sb.webIndex.seedDB, hash, subject, mb);
 
                 //message has been sent
-                prop.put("mode_status_response", (String) result.get("response"));
+                prop.put("mode_status_response", result.get("response"));
 
             } catch (NumberFormatException e) {
                 prop.put("mode_status", "1");

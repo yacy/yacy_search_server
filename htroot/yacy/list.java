@@ -57,7 +57,7 @@ public final class list {
             yacySeed bla = sb.webIndex.seedDB.get(post.get("iam", ""));
             if (bla != null) otherPeerName = bla.getName();
         }
-        if (otherPeerName == null) otherPeerName = (String)header.get(httpHeader.CONNECTION_PROP_CLIENTIP);
+        if (otherPeerName == null) otherPeerName = header.get(httpHeader.CONNECTION_PROP_CLIENTIP);
         
         if ((sb.isRobinsonMode()) && (!sb.isInMyCluster(otherPeerName))) {
             // if we are a robinson cluster, answer only if this client is known by our network definition

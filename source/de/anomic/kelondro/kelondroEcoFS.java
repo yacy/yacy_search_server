@@ -90,7 +90,7 @@ public class kelondroEcoFS {
                 // should not happen
                 e.printStackTrace();
             }
-            try { fos.close(); } catch (IOException e) {}
+            try { if (fos != null) fos.close(); } catch (IOException e) {}
         }
         
         // open an existing table file
@@ -102,8 +102,8 @@ public class kelondroEcoFS {
         }
         
         // initialize cache and buffer
-        cache = new byte[Math.max(1, (int) (maxReadCache / recordsize)) * recordsize];
-        buffer = new byte[Math.max(1, (int) (maxWriteBuffer / recordsize)) * recordsize];
+        cache = new byte[Math.max(1, (maxReadCache / recordsize)) * recordsize];
+        buffer = new byte[Math.max(1, (maxWriteBuffer / recordsize)) * recordsize];
         this.buffercount = 0;
         
         // first-time read of cache
@@ -119,7 +119,7 @@ public class kelondroEcoFS {
         if (!tablefile.exists()) return 0;
         long size = tablefile.length();
         assert size % recordsize == 0;
-        return size / (long) recordsize;
+        return size / recordsize;
     }
     
     /**
@@ -127,7 +127,7 @@ public class kelondroEcoFS {
      * @throws IOException
      */
     public synchronized long size() throws IOException {
-        return filesize() + (long) this.buffercount;
+        return filesize() + this.buffercount;
     }
     
     public File filename() {
@@ -139,7 +139,7 @@ public class kelondroEcoFS {
      * @throws IOException
      */
     private long filesize() throws IOException {
-        return raf.length() / (long) recordsize;
+        return raf.length() / recordsize;
     }
 
     /**
@@ -200,7 +200,7 @@ public class kelondroEcoFS {
         if (this.cachecount == 0) return;
         
         // copy records from file to cache
-        raf.seek((long) this.recordsize * (long) index);
+        raf.seek(this.recordsize * index);
         raf.read(this.cache, 0, this.recordsize * this.cachecount);
     }
 
@@ -280,7 +280,7 @@ public class kelondroEcoFS {
         if (p >= 0) {
             // write entry to the cache and to the file
             System.arraycopy(b, start, this.cache, p * this.recordsize, this.recordsize);
-            raf.seek((long) index * (long) this.recordsize);
+            raf.seek(index * this.recordsize);
             raf.write(b, start, this.recordsize);
             return;
         }
@@ -309,7 +309,7 @@ public class kelondroEcoFS {
         } else {
             // write the record directly to the file,
             // do not care about the cache; this case was checked before
-            raf.seek((long) index * (long) this.recordsize);
+            raf.seek(index * this.recordsize);
             raf.write(b, start, this.recordsize);
         }
     }
@@ -413,7 +413,7 @@ public class kelondroEcoFS {
             
             // write zero bytes to the cache and to the file
             System.arraycopy(zero, 0, this.cache, p * this.recordsize, this.recordsize);
-            this.raf.seek((long) index * (long) this.recordsize);
+            this.raf.seek(index * this.recordsize);
             this.raf.write(zero, 0, this.recordsize);
             return;
         }
@@ -446,7 +446,7 @@ public class kelondroEcoFS {
         if (p >= 0) {
             // write zero bytes to the cache and to the file
             System.arraycopy(zero, 0, this.cache, p * this.recordsize, this.recordsize);
-            raf.seek((long) index * (long) this.recordsize);
+            raf.seek(index * this.recordsize);
             raf.write(zero, 0, this.recordsize);
             return;
         }
@@ -456,7 +456,7 @@ public class kelondroEcoFS {
             return;
         }
         
-        raf.seek((long) index * (long) this.recordsize);
+        raf.seek(index * this.recordsize);
         raf.write(zero, 0, this.recordsize);
     }
     
@@ -502,7 +502,7 @@ public class kelondroEcoFS {
             System.arraycopy(this.cache, p * this.recordsize, b, start, this.recordsize); 
             // shrink cache and file
             assert this.buffercount == 0;
-            this.raf.setLength((long) (s - 1) * (long) this.recordsize);
+            this.raf.setLength((s - 1) * this.recordsize);
             this.cachecount--;
             return;
         }
@@ -540,7 +540,7 @@ public class kelondroEcoFS {
         if (p >= 0) {
             // shrink cache and file
             assert this.buffercount == 0;
-            this.raf.setLength((long) (s - 1) * (long) this.recordsize);
+            this.raf.setLength((s - 1) * this.recordsize);
             this.cachecount--;
             return;
         }
@@ -552,7 +552,7 @@ public class kelondroEcoFS {
         }
         // check if file should shrink
         assert this.buffercount == 0;
-        this.raf.setLength((long) (s - 1) * (long) this.recordsize);
+        this.raf.setLength((s - 1) * this.recordsize);
     }
     
     public static class ChunkIterator implements Iterator<byte[]> {

@@ -73,7 +73,7 @@ public class disorderSet extends HashSet<String> implements Set<String> {
     public static void main(String[] args) {
         disorderSet ds = new disorderSet();
         for (int i = 0; i < args.length; i++) ds.add(args[i]);
-        for (int i = 0; i < args.length * 3; i++) System.out.print((String) ds.any() + " ");
+        for (int i = 0; i < args.length * 3; i++) System.out.print(ds.any() + " ");
         System.out.println();
     }
 

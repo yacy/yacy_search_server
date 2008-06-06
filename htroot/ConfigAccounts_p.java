@@ -144,10 +144,10 @@ public class ConfigAccounts_p {
             //user != current_user
             //user=from userlist
             //current_user = edited user
-        } else if(post.containsKey("user") && !((String)post.get("user")).equals("newuser")){
+        } else if(post.containsKey("user") && !(post.get("user")).equals("newuser")){
             if(post.containsKey("change_user")){
                 //defaults for newuser are set above                
-                entry=sb.userDB.getEntry((String)post.get("user"));
+                entry=sb.userDB.getEntry(post.get("user"));
                 // program crashes if a submit with emty username was made on previous mask and the user clicked on the 
                 // link: "If you want to manage more Users, return to the user page." (parameter "user" is empty)
                 if (entry != null) {
@@ -164,29 +164,29 @@ public class ConfigAccounts_p {
                     }
                     prop.put("rights", i);
                 }
-            }else if( post.containsKey("delete_user") && !((String)post.get("user")).equals("newuser") ){
-                sb.userDB.removeEntry((String)post.get("user"));
+            }else if( post.containsKey("delete_user") && !(post.get("user")).equals("newuser") ){
+                sb.userDB.removeEntry(post.get("user"));
             }
         } else if(post.containsKey("change")) { //New User / edit User
             prop.put("text", "0");
             prop.put("error", "0");
 
             
-            String username=(String)post.get("username");
-            String pw1=(String)post.get("password");
-            String pw2=(String)post.get("password2");
+            String username=post.get("username");
+            String pw1=post.get("password");
+            String pw2=post.get("password2");
             if(! pw1.equals(pw2)){
                 prop.put("error", "2"); //PW does not match
                 return prop;
             }
-            String firstName=(String)post.get("firstname");
-            String lastName=(String)post.get("lastname");
-            String address=(String)post.get("address");
-            String timeLimit=(String)post.get("timelimit");
-            String timeUsed=(String)post.get("timeused");
+            String firstName=post.get("firstname");
+            String lastName=post.get("lastname");
+            String address=post.get("address");
+            String timeLimit=post.get("timelimit");
+            String timeUsed=post.get("timeused");
             HashMap<String, String> rightsSet=new HashMap<String, String>();
             for(i=0;i<rights.length;i++){
-        	    		rightsSet.put(rights[i], post.containsKey(rights[i])&&((String)post.get(rights[i])).equals("on") ? "true" : "false");
+        	    		rightsSet.put(rights[i], post.containsKey(rights[i])&&(post.get(rights[i])).equals("on") ? "true" : "false");
             }
             HashMap<String, String> mem=new HashMap<String, String>();
             if( post.get("current_user").equals("newuser")){ //new user

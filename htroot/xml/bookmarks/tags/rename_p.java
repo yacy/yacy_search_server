@@ -59,7 +59,7 @@ public class rename_p {
         prop.put("result", "0");//error
         //rename tags
         if(post != null && post.containsKey("old") && post.containsKey("new")){
-            if(switchboard.bookmarksDB.renameTag((String)post.get("old"), (String)post.get("new")))
+            if(switchboard.bookmarksDB.renameTag(post.get("old"), post.get("new")))
                 prop.put("result", "1");//success
         }
         // return rewrite properties

@@ -329,8 +329,8 @@ public class dbtest {
                             profiles = ((kelondroTree) table_test).profiles();
                             System.out.println("Cache Delta: " + kelondroProfile.delta(profiles[0], cacheProfileAcc).toString());
                             System.out.println("IO    Delta: " + kelondroProfile.delta(profiles[1],    ioProfileAcc).toString());
-                            cacheProfileAcc = (kelondroProfile) profiles[0].clone();
-                               ioProfileAcc = (kelondroProfile) profiles[1].clone();
+                            cacheProfileAcc = profiles[0].clone();
+                               ioProfileAcc = profiles[1].clone();
                         }
                     }
                 }
@@ -413,11 +413,13 @@ public class dbtest {
                 kelondroCloneableIterator<kelondroRow.Entry> i = null;
                 if (table_test instanceof kelondroTree) i = ((kelondroTree) table_test).rows(true, null);
                 if (table_test instanceof kelondroSQLTable) i = ((kelondroSQLTable) table_test).rows(true, null);
-                kelondroRow.Entry row;
-                while (i.hasNext()) {
-                    row = i.next();
-                    for (int j = 0; j < row.columns(); j++) System.out.print(row.getColString(j, null) + ",");
-                    System.out.println();
+                if(i != null) {
+                    kelondroRow.Entry row;
+                    while (i.hasNext()) {
+                        row = i.next();
+                        for (int j = 0; j < row.columns(); j++) System.out.print(row.getColString(j, null) + ",");
+                        System.out.println();
+                    }
                 }
             }
             
@@ -457,11 +459,11 @@ public class dbtest {
                     if ((ra.size() > 0) && (random.nextLong() % 7 == 0)) {
                         rc++;
                         p = Math.abs(random.nextInt()) % ra.size();
-                        R = (Long) ra.get(p);
+                        R = ra.get(p);
                         jcontrol.remove(R);
                         kcontrol.removeb((int) R.longValue());
                         System.out.println("remove: " + R.longValue());
-                        serverInstantBusyThread.oneTimeJob(new RemoveJob(table_test, table_reference, ((Long) ra.remove(p)).longValue()), 0, 50);
+                        serverInstantBusyThread.oneTimeJob(new RemoveJob(table_test, table_reference, (ra.remove(p)).longValue()), 0, 50);
                     }
                 }
                 System.out.println("removed: " + rc + ", size of jcontrol set: " + jcontrol.size() + ", size of kcontrol set: " + kcontrol.size());
@@ -498,10 +500,10 @@ public class dbtest {
                     if ((ra.size() > 0) && (random.nextLong() % 7 == 0)) {
                         rc++;
                         p = Math.abs(random.nextInt()) % ra.size();
-                        R = (Long) ra.get(p);
+                        R = ra.get(p);
                         jcontrol.remove(R);
                         kcontrol.removeb((int) R.longValue());
-                        new RemoveJob(table_test, table_reference, ((Long) ra.remove(p)).longValue()).run();
+                        new RemoveJob(table_test, table_reference, (ra.remove(p)).longValue()).run();
                     }
                 }
                 try {Thread.sleep(1000);} catch (InterruptedException e) {}

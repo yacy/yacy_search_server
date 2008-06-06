@@ -73,7 +73,7 @@ public class serverProfiling extends Thread {
     
     public static void update(String eventName, Object eventPayload) {
     	// get event history container
-    	int counter = eventCounter.containsKey(eventName) ? ((Integer) eventCounter.get(eventName)).intValue() : 0;
+    	int counter = eventCounter.containsKey(eventName) ? (eventCounter.get(eventName)).intValue() : 0;
     	if (historyMaps.containsKey(eventName)) {
     	    ConcurrentLinkedQueue<Event> history = historyMaps.get(eventName);
 

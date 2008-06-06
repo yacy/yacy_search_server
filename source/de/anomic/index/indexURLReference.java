@@ -207,7 +207,7 @@ public class indexURLReference {
         String ETag = crypt.simpleDecode(prop.getProperty("ETag", ""), null); if (ETag == null) ETag = "";
         
         this.entry = rowdef.newEntry();
-        this.entry.setCol(col_hash, url.hash(), null);
+        this.entry.setCol(col_hash, url.hash(), null); // FIXME potential null pointer access
         this.entry.setCol(col_comp, encodeComp(url, descr, dc_creator, tags, ETag));
         try {
             encodeDate(col_mod, serverDate.parseShortDay(prop.getProperty("mod", "20000101")));
@@ -321,12 +321,12 @@ public class indexURLReference {
     public indexURLReference.Components comp() {
         ArrayList<String> cl = nxTools.strings(this.entry.getCol("comp", null), "UTF-8");
         return new indexURLReference.Components(
-                (cl.size() > 0) ? ((String) cl.get(0)).trim() : "",
+                (cl.size() > 0) ? (cl.get(0)).trim() : "",
                 hash(),
-                (cl.size() > 1) ? ((String) cl.get(1)).trim() : "",
-                (cl.size() > 2) ? ((String) cl.get(2)).trim() : "",
-                (cl.size() > 3) ? ((String) cl.get(3)).trim() : "",
-                (cl.size() > 4) ? ((String) cl.get(4)).trim() : "");
+                (cl.size() > 1) ? (cl.get(1)).trim() : "",
+                (cl.size() > 2) ? (cl.get(2)).trim() : "",
+                (cl.size() > 3) ? (cl.get(3)).trim() : "",
+                (cl.size() > 4) ? (cl.get(4)).trim() : "");
     }
     
     public Date moddate() {

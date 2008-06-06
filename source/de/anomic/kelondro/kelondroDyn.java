@@ -195,7 +195,7 @@ public class kelondroDyn {
             int c;
             kelondroRow.Entry nt;
             while (ri.hasNext()) {
-                nt = (kelondroRow.Entry) ri.next();
+                nt = ri.next();
                 if (nt == null) return null;
                 g = nt.getColBytes(0);
                 if (g == null) return null;

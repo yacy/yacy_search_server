@@ -31,7 +31,7 @@ public class xbel {
     			}
     		}
         	if(post.containsKey("tag")) {
-    			String tagName=(String) post.get("tag");    			
+    			String tagName=post.get("tag");    			
     			prop.put("folder", tagName);
     			if (!tagName.equals("")) {
     				Iterator<String> bit=switchboard.bookmarksDB.getBookmarksIterator(tagName, isAdmin);

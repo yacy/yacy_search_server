@@ -51,7 +51,7 @@ public class plasmaSearchAPI {
         if (post.get("allurl", "").equals("on")) return null;
         if (post.get("flags") != null) {
             if (post.get("flags","").length() == 0) return null;
-            return new kelondroBitfield(4, (String) post.get("flags"));
+            return new kelondroBitfield(4, post.get("flags"));
         }
         if (post.get("description", "").equals("on")) b.set(indexRWIEntry.flag_app_dc_description, true);
         if (post.get("title", "").equals("on")) b.set(indexRWIEntry.flag_app_dc_title, true);
@@ -74,7 +74,7 @@ public class plasmaSearchAPI {
         prop.put("searchresult_keyhash", startHash);
         Iterator<yacySeed> e = peerActions.dhtAction.getAcceptRemoteIndexSeeds(startHash);
         while (e.hasNext()) {
-            seed = (yacySeed) e.next();
+            seed = e.next();
             if (seed != null) {
                 prop.put("searchresult_hosts_" + hc + "_hosthash", seed.hash);
                 prop.putHTML("searchresult_hosts_" + hc + "_hostname", seed.hash + " " + seed.get(yacySeed.NAME, "nameless"));
@@ -181,7 +181,7 @@ public class plasmaSearchAPI {
             }
             Iterator<String> iter = ranked.miss(); // iterates url hash strings
             while (iter.hasNext()) {
-                us = (String) iter.next();
+                us = iter.next();
                 prop.put("genUrlList_urlList_"+i+"_urlExists", "0");
                 prop.put("genUrlList_urlList_"+i+"_urlExists_urlhxCount", i);
                 prop.putHTML("genUrlList_urlList_"+i+"_urlExists_urlhxValue", us);

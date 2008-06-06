@@ -246,7 +246,7 @@ public class messageBoard {
         
         public void findNext() {
             while (allIter.hasNext()) {
-                nextKey = (String) allIter.next();
+                nextKey = allIter.next();
                 if (this.category==null || nextKey.startsWith(this.category)) return;
             }
             nextKey = null;

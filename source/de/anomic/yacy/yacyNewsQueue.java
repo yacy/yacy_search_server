@@ -186,7 +186,7 @@ public class yacyNewsQueue {
         }
 
         public yacyNewsRecord next() {
-            kelondroRow.Entry row = (kelondroRow.Entry) stackNodeIterator.next();
+            kelondroRow.Entry row = stackNodeIterator.next();
             try {
                 return b2r(row);
             } catch (IOException e) {

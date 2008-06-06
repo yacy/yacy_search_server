@@ -108,7 +108,7 @@ public class Ranking_p {
     	String key;
     	int i, j = 0;
     	while (it.hasNext()) {
-    		key = (String)it.next();
+    		key = it.next();
     		prop.put("attr" + attrExtension + "_" + j + "_name", rankingParameters.get(key.substring(prefix.length())));
     		prop.put("attr" + attrExtension + "_" + j + "_nameorg", key);
     		prop.put("attr" + attrExtension + "_" + j + "_select", maxRankingRange);
@@ -117,13 +117,13 @@ public class Ranking_p {
     			prop.put("attr" + attrExtension + "_" + j + "_select_" + i + "_value", i);
     			try {
 					prop.put("attr" + attrExtension + "_" + j + "_select_" + i + "_checked",
-							(i == Integer.valueOf((String)map.get(key)).intValue()) ? "1" : "0");
+							(i == Integer.valueOf(map.get(key)).intValue()) ? "1" : "0");
 				} catch (NumberFormatException e) {
 					prop.put("attr" + attrExtension + "_" + j + "_select_" + i + "_checked", "0");
 				}
     		}
     		prop.put("attr" + attrExtension + "_" + j + "_value",
-    				Integer.valueOf((String)map.get(key)).intValue());
+    				Integer.valueOf(map.get(key)).intValue());
     		j++;
     	}
     }

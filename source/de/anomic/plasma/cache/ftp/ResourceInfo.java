@@ -51,7 +51,6 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import de.anomic.plasma.cache.IResourceInfo;
-import de.anomic.plasma.cache.ResourceInfoFactory;
 import de.anomic.yacy.yacyURL;
 
 public class ResourceInfo implements IResourceInfo {
@@ -100,12 +99,12 @@ public class ResourceInfo implements IResourceInfo {
     }
 
     public String getMimeType() {
-        return (String) ((this.propertyMap == null) ? null : this.propertyMap.get(MIMETYPE));        
+        return ((this.propertyMap == null) ? null : this.propertyMap.get(MIMETYPE));        
     }
 
     public Date getModificationDate() {
         if (this.propertyMap == null || !this.propertyMap.containsKey(MODIFICATION_DATE)) return new Date();
-        return new Date(Long.valueOf((String) this.propertyMap.get(MODIFICATION_DATE)).longValue());
+        return new Date(Long.valueOf(this.propertyMap.get(MODIFICATION_DATE)).longValue());
     }
 
     public yacyURL getRefererUrl() {

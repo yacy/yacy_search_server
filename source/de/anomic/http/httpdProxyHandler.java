@@ -626,7 +626,7 @@ public final class httpdProxyHandler {
                         cacheEntry.setCacheArray(cacheArray);
                         plasmaHTCache.push(cacheEntry);
                         conProp.setProperty(httpHeader.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_MISS");
-                    } else if (sizeBeforeDelete == cacheArray.length) {
+                    } else if (cacheArray != null && sizeBeforeDelete == cacheArray.length) {
                         // before we came here we deleted a cache entry
                         cacheArray = null;
                         //cacheEntry.status = plasmaHTCache.CACHE_STALE_RELOAD_BAD;
@@ -818,7 +818,7 @@ public final class httpdProxyHandler {
                 if (( !transformer.isIdentityTransformer()) &&
                         (ext == null || !plasmaParser.supportedHTMLFileExtContains(url)) &&
                         (plasmaParser.HTMLParsableMimeTypesContains(cachedResponseHeader.mime()))) {
-                    hfos = new htmlFilterWriter(outStream, charSet, null, transformer, (ext.length() == 0));
+                    hfos = new htmlFilterWriter(outStream, charSet, null, transformer, (ext == null || ext.length() == 0));
                 } else {
                     hfos = outStream;
                 }
@@ -1373,18 +1373,16 @@ public final class httpdProxyHandler {
                     } else {
                         // analyse remoteProxyNoProxy;
                         // set either remoteProxyAllowProxySet or remoteProxyDisallowProxySet accordingly
-                        boolean allowed = true;
                         synchronized (remProxyConfig) {
                             for (final String pattern :remProxyConfig.getProxyNoProxyPatterns()) {
                                 if (server.matches(pattern)) {
                                     // disallow proxy for this server
-                                    allowed = false;
                                     remProxyConfig.remoteProxyDisallowProxySet.add(server);
                                     remProxyConfig = null;
                                     break;
                                 }
                             }
-                            if (allowed) {
+                            if (remProxyConfig != null) {
                                 // no pattern matches: allow server
                                 remProxyConfig.remoteProxyAllowProxySet.add(server);
                             }
@@ -1643,7 +1641,7 @@ public final class httpdProxyHandler {
 
             // getting header set by other proxies in the chain
             StringBuffer viaValue = new StringBuffer();
-            if (header.containsKey(httpHeader.VIA)) viaValue.append((String)header.get(httpHeader.VIA));
+            if (header.containsKey(httpHeader.VIA)) viaValue.append(header.get(httpHeader.VIA));
             if (viaValue.length() > 0) viaValue.append(", ");
               
             // appending info about this peer

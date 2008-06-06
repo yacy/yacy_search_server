@@ -109,9 +109,9 @@ public class icapd implements serverHandler {
         return new icapd();
     }
     
-    public void initSession(Session session) throws IOException {
-        this.session = session;
-        this.userAddress = session.userAddress; // client InetAddress
+    public void initSession(Session aSession) throws IOException {
+        this.session = aSession;
+        this.userAddress = aSession.userAddress; // client InetAddress
         this.clientIP = this.userAddress.getHostAddress();
         if (this.userAddress.isAnyLocalAddress()) this.clientIP = "localhost";
         if (this.clientIP.startsWith("0:0:0:0:0:0:0:1")) this.clientIP = "localhost";
@@ -258,7 +258,7 @@ public class icapd implements serverHandler {
              * Reading the various message parts into buffers
              * ========================================================================= */
             ByteArrayInputStream reqHdrStream = null, resHdrStream = null, resBodyStream = null;
-            String[] encapsulated = ((String) reqHeader.get(icapHeader.ENCAPSULATED)).split(",");
+            String[] encapsulated = (reqHeader.get(icapHeader.ENCAPSULATED)).split(",");
             int prevLength = 0, currLength=0;
             for (int i=0; i < encapsulated.length; i++) {  
                 // reading the request header
@@ -333,14 +333,18 @@ public class icapd implements serverHandler {
                         "\nRequest Method: " + httpReqProps.getProperty(httpHeader.CONNECTION_PROP_METHOD) + 
                         "\nRequest Line:   " + httpRequestLine);
                 reader.close();
-                reqHdrStream.close();
+                if(reqHdrStream != null) {
+                    reqHdrStream.close();
+                }
                 return;
             }
             
             // reading all request headers
             httpHeader httpReqHeader = httpHeader.readHttpHeader(reader); 
             reader.close();
-            reqHdrStream.close();
+            if(reqHdrStream != null) {
+                reqHdrStream.close();
+            }
             
             // handle transparent proxy support: this function call is needed to set the host property properly
             httpHeader.handleTransparentProxySupport(httpReqHeader,httpReqProps,virtualHost,true);
@@ -363,14 +367,18 @@ public class icapd implements serverHandler {
                                  "\nRequest Line:  " + httpRequestLine + 
                                  "\nResponse Line: " + httpRespStatusLine);
                 reader.close();
-                resHdrStream.close();
+                if(resHdrStream != null) {
+                    resHdrStream.close();
+                }
                 return;
             }
             
             // reading all response headers
             httpHeader httpResHeader = httpHeader.readHttpHeader(reader);
             reader.close();
-            resHdrStream.close();
+            if(resHdrStream != null) {
+                resHdrStream.close();
+            }
             
             if (!plasmaParser.supportedContent(plasmaParser.PARSER_MODE_ICAP, httpRequestURL, httpResHeader.mime())) {
                 this.log.logInfo("Wrong mimeType or fileExtension for indexing:" +
@@ -409,7 +417,9 @@ public class icapd implements serverHandler {
             
             // copy the response body into the file
             serverFileUtils.copy(resBodyStream,cacheFile);
-            resBodyStream.close(); resBodyStream = null;
+            if(resBodyStream != null) {
+                resBodyStream.close(); resBodyStream = null;
+            }
             
             // indexing the response
             plasmaHTCache.push(cacheEntry);    

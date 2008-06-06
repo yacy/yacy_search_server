@@ -53,9 +53,9 @@ import de.anomic.index.indexReferenceBlacklist;
 import de.anomic.index.indexURLReference;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
+import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.server.serverDate;
 import de.anomic.xml.RSSFeed;
 import de.anomic.xml.RSSMessage;
 import de.anomic.yacy.yacyCore;
@@ -108,7 +108,7 @@ public final class transferURL {
                 serverCore.checkInterruption();
                 
                 // read new lurl-entry
-                urls = (String) post.get("url" + i);
+                urls = post.get("url" + i);
                 if (urls == null) {
                     yacyCore.log.logFine("transferURL: got null URL-string from peer " + otherPeerName);
                     blocked++;

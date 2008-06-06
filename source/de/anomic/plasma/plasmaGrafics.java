@@ -214,7 +214,7 @@ public class plasmaGrafics {
         Iterator<yacySeed> e = seedDB.seedsConnected(true, false, null, (float) 0.0);
         
         while (e.hasNext() && count < maxCount) {
-            seed = (yacySeed) e.next();
+            seed = e.next();
             if (seed != null) {
                 drawNetworkPicturePeer(networkPicture, width / 2, height / 2 + 20, innerradius, outerradius, seed, COL_ACTIVE_DOT, COL_ACTIVE_LINE, COL_ACTIVE_TEXT, corona);
                 count++;
@@ -226,7 +226,7 @@ public class plasmaGrafics {
         count = 0;
         e = seedDB.seedsSortedDisconnected(false, yacySeed.LASTSEEN);
         while (e.hasNext() && count < maxCount) {
-            seed = (yacySeed) e.next();
+            seed = e.next();
             if (seed != null) {
                 lastseen = Math.abs((System.currentTimeMillis() - seed.getLastSeenUTC()) / 1000 / 60);
                 if (lastseen > passiveLimit) break; // we have enough, this list is sorted so we don't miss anything
@@ -240,7 +240,7 @@ public class plasmaGrafics {
         count = 0;
         e = seedDB.seedsSortedPotential(false, yacySeed.LASTSEEN);
         while (e.hasNext() && count < maxCount) {
-            seed = (yacySeed) e.next();
+            seed = e.next();
             if (seed != null) {
                 lastseen = Math.abs((System.currentTimeMillis() - seed.getLastSeenUTC()) / 1000 / 60);
                 if (lastseen > potentialLimit) break; // we have enough, this list is sorted so we don't miss anything
@@ -394,8 +394,8 @@ public class plasmaGrafics {
         ymageToolPrint.print(bannerPicture, 285, 52, 0, "SPEED:   " + addTrailingBlanks(nppm + " PAGES/MINUTE", exprlength), -1);
 
         if (logo != null) {
-            int x = (int)(100/2 - logo.getWidth()/2);
-            int y = (int)(height/2 - logo.getHeight()/2);
+            int x = (100/2 - logo.getWidth()/2);
+            int y = (height/2 - logo.getHeight()/2);
             bannerPicture.insertBitmap(logo, x, y, 0, 0, ymageMatrix.FILTER_ANTIALIASING);
         }
 

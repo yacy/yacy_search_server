@@ -47,7 +47,6 @@
 // javac -classpath .:../classes ConfigBasic_p.java
 // if the shell's current path is HTROOT
 
-import java.lang.Integer;
 import java.util.regex.Pattern;
 
 import de.anomic.data.translator;
@@ -103,7 +102,7 @@ public class ConfigBasic {
         
         // port settings
         String port = env.getConfig("port", "8080"); //this allows a low port, but it will only get one, if the user edits the config himself.
-		if (post != null && Integer.parseInt((String) post.get("port")) > 1023) {
+		if (post != null && Integer.parseInt(post.get("port")) > 1023) {
 			port = post.get("port", "8080");
 		}
 
@@ -127,7 +126,7 @@ public class ConfigBasic {
             
             String host = null;
             if (header.containsKey(httpHeader.HOST)) {
-                host = (String)header.get(httpHeader.HOST);
+                host = header.get(httpHeader.HOST);
                 int idx = host.indexOf(":");
                 if (idx != -1) host = host.substring(0,idx);
             } else {

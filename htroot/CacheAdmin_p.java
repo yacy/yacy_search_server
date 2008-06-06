@@ -185,7 +185,7 @@ public class CacheAdmin_p {
                         if (sentences != null)
                         	while (sentences.hasNext()) {
                         		prop.putHTML("info_type_lines_" + i + "_line",
-                        				new String((StringBuffer) sentences.next()).replaceAll("\n", "").trim());
+                        				new String(sentences.next()).replaceAll("\n", "").trim());
     	                        i++;
     	                    }
                         prop.put("info_type_lines", i);

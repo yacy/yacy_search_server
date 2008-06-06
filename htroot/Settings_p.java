@@ -238,7 +238,7 @@ public final class Settings_p {
          */
         
         HashMap<String, plasmaParserConfig> configList = plasmaParser.getParserConfigList();        
-        plasmaParserConfig[] configArray = (plasmaParserConfig[]) configList.values().toArray(new plasmaParserConfig[configList.size()]);
+        plasmaParserConfig[] configArray = configList.values().toArray(new plasmaParserConfig[configList.size()]);
         
         HashSet<ParserInfo> parserInfos = new HashSet<ParserInfo>(sb.parser.getAvailableParserList().values());
         

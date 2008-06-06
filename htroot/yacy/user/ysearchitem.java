@@ -174,7 +174,7 @@ public class ysearchitem {
                 plasmaSnippetCache.MediaSnippet ms;
                 int c = 0;
                 for (int i = 0; i < media.size(); i++) {
-                    ms = (plasmaSnippetCache.MediaSnippet) media.get(i);
+                    ms = media.get(i);
                     prop.putHTML("content_items_" + i + "_href", ms.href.toNormalform(true, false));
                     prop.putHTML("content_items_" + i + "_hrefshort", nxTools.shortenURLString(ms.href.toNormalform(true, false), urllength));
                     prop.putHTML("content_items_" + i + "_name", shorten(ms.name, namelength));

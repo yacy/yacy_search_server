@@ -75,8 +75,8 @@ public class CrawlResults {
         
         // check if authorization is needed and/or given
         if (((tabletype > 0) && (tabletype < 6)) ||
-            (post.containsKey("clearlist")) ||
-            (post.containsKey("deleteentry"))) {
+            (post != null && (post.containsKey("clearlist") ||
+            post.containsKey("deleteentry")))) {
             String authorization = ((String) header.get(httpHeader.AUTHORIZATION, "xxxxxx"));
             if (authorization.length() != 0) {
                 if (! sb.verifyAuthentication(header, true)){
@@ -91,6 +91,7 @@ public class CrawlResults {
             }
         }
 
+        if(post != null) {
         // custom number of lines
         if (post.containsKey("count")) {
             lines = Integer.parseInt(post.get("count", "500"));
@@ -122,6 +123,7 @@ public class CrawlResults {
             if (post.get("st").equals("0")) showTitle = false; else showTitle = true;
         if (post.get("su") != null)
             if (post.get("su").equals("0")) showURL = false; else showURL = true;
+        } // end != null
 
         // create table
         if (tabletype == 0) {

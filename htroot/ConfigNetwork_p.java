@@ -136,7 +136,7 @@ public class ConfigNetwork_p {
                 }
                     
                 if (post.containsKey("peertags")) {
-                    sb.webIndex.seedDB.mySeed().setPeerTags(serverCodings.string2set(normalizedList((String) post.get("peertags")), ","));
+                    sb.webIndex.seedDB.mySeed().setPeerTags(serverCodings.string2set(normalizedList(post.get("peertags")), ","));
                 }
                 
                 sb.setConfig("cluster.mode", post.get("cluster.mode", "publicpeer"));

@@ -117,7 +117,7 @@ public class kelondroMergeIterator<E> implements kelondroCloneableIterator<E> {
         if (c == 0) {
             try {
                 //System.out.print("MERGE OF " + na.toString() + " AND " + nb.toString() + ": ");
-                s = (E) this.merger.invoke(null, new Object[]{(Object) na, (Object) nb});
+                s = (E) this.merger.invoke(null, new Object[]{na, nb});
                 //System.out.println("RESULT IS " + s.toString());
             } catch (IllegalArgumentException e) {
                 e.printStackTrace();

@@ -63,7 +63,7 @@ public interface indexReferenceBlacklist {
         public String[] getFileNamesUnified() {
             HashSet<String> hs = new HashSet<String>(Arrays.asList(this.filename.split(",")));
             
-            return (String[]) hs.toArray(new String[hs.size()]);
+            return hs.toArray(new String[hs.size()]);
         }
         
         public String getType() { return this.type; }

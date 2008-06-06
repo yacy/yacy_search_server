@@ -92,12 +92,12 @@ public class htmlFilterImageEntry implements Comparable<htmlFilterImageEntry> {
         // assuming that hashCode would return a 'perfect hash' this method would
         // create a total ordering on images with respect on the image size
         assert (url != null);
-        if (this.url.toNormalform(true, true).equals(((htmlFilterImageEntry) h).url.toNormalform(true, true))) return 0;
+        if (this.url.toNormalform(true, true).equals((h).url.toNormalform(true, true))) return 0;
         int thc = this.hashCode();
-        int ohc = ((htmlFilterImageEntry) h).hashCode();
+        int ohc = (h).hashCode();
         if (thc < ohc) return -1;
         if (thc > ohc) return 1;
-        return this.url.toString().compareTo(((htmlFilterImageEntry) h).url.toString());
+        return this.url.toString().compareTo((h).url.toString());
     }
     
     public boolean equals(htmlFilterImageEntry o) {

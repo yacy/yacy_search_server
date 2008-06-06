@@ -100,7 +100,7 @@ public class IndexingStack {
             kelondroBase64Order.enhancedCoder.encodeLong((entry.ifModifiedSince == null) ? 0 : entry.ifModifiedSince.getTime(), 11).getBytes(),
             new byte[]{entry.flags},
             (entry.initiator == null) ? "".getBytes() : entry.initiator.getBytes(),
-            kelondroBase64Order.enhancedCoder.encodeLong((long) entry.depth, rowdef.width(5)).getBytes(),
+            kelondroBase64Order.enhancedCoder.encodeLong(entry.depth, rowdef.width(5)).getBytes(),
             (entry.profileHandle == null) ? "".getBytes() : entry.profileHandle.getBytes(),
             (entry.anchorName == null) ? "-".getBytes("UTF-8") : entry.anchorName.getBytes("UTF-8")
         }));
@@ -118,7 +118,7 @@ public class IndexingStack {
         kelondroRow.Entry rowentry;
         QueueEntry entry;
         while (i.hasNext()) {
-            rowentry = (kelondroRow.Entry) i.next();
+            rowentry = i.next();
             entry = new QueueEntry(rowentry);
             if (entry.urlHash().equals(urlHash)) {
                 i.remove();
@@ -167,7 +167,7 @@ public class IndexingStack {
         }
 
         public QueueEntry next() {
-            return new QueueEntry((kelondroRow.Entry) rows.next());
+            return new QueueEntry(rows.next());
         }
 
         public void remove() {

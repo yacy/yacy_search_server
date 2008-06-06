@@ -179,8 +179,8 @@ public final class kelondroNaturalOrder extends kelondroAbstractOrder<byte[]> im
         final int bl = Math.min(blength, b.length - boffset);
         int aa, bb;
         while ((i < al) && (i < bl)) {
-            aa = 0xff & (int) a[i + aoffset];
-            bb = 0xff & (int) b[i + boffset];
+            aa = 0xff & a[i + aoffset];
+            bb = 0xff & b[i + boffset];
             if (aa > bb) return 1;
             if (aa < bb) return -1;
             // else the bytes are equal and it may go on yet undecided

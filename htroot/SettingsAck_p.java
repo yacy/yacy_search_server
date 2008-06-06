@@ -84,7 +84,7 @@ public class SettingsAck_p {
         plasmaSwitchboard sb = (plasmaSwitchboard) env;
         
         // get referer for backlink
-        String referer = (String) header.get(httpHeader.REFERER);
+        String referer = header.get(httpHeader.REFERER);
         prop.put("referer", (referer == null) ? "Settings_p.html" : referer); 
         
         //if (post == null) System.out.println("POST: NULL"); else System.out.println("POST: " + post.toString());
@@ -97,9 +97,9 @@ public class SettingsAck_p {
         // admin password
         if (post.containsKey("adminaccount")) {
             // read and process data
-            String user   = (String) post.get("adminuser");
-            String pw1    = (String) post.get("adminpw1");
-            String pw2    = (String) post.get("adminpw2");
+            String user   = post.get("adminuser");
+            String pw1    = post.get("adminpw1");
+            String pw2    = post.get("adminpw2");
             // do checks
             if ((user == null) || (pw1 == null) || (pw2 == null)) {
                 prop.put("info", "1");//error with submitted information
@@ -127,7 +127,7 @@ public class SettingsAck_p {
             /* 
              * set new port
              */
-            String port = (String) post.get("port");
+            String port = post.get("port");
             prop.putHTML("info_port", port);
             if (!env.getConfig("port", port).equals(port)) {
                 // validation port
@@ -151,11 +151,11 @@ public class SettingsAck_p {
             }
             
             // read and process data
-            String filter = ((String) post.get("proxyfilter")).trim();
+            String filter = (post.get("proxyfilter")).trim();
 			String use_proxyAccounts="";
 			if(post.containsKey("use_proxyaccounts")){
 				//needed? or set to true by default?
-	            use_proxyAccounts = (((String) post.get("use_proxyaccounts")).equals("on") ? "true" : "false" );
+	            use_proxyAccounts = ((post.get("use_proxyaccounts")).equals("on") ? "true" : "false" );
 			}else{
 				use_proxyAccounts = "false";
 			}
@@ -238,7 +238,7 @@ public class SettingsAck_p {
         if (post.containsKey("serveraccount")) {
 
             // static IP
-            String staticIP =  ((String) post.get("staticIP")).trim();
+            String staticIP =  (post.get("staticIP")).trim();
             if (staticIP.startsWith("http://")) {
                 if (staticIP.length() > 7) { staticIP = staticIP.substring(7); } else { staticIP = ""; }
             } else if (staticIP.startsWith("https://")) {
@@ -256,7 +256,7 @@ public class SettingsAck_p {
             env.setConfig("staticIP", staticIP);
 
             // server access data
-            String filter = ((String) post.get("serverfilter")).trim();
+            String filter = (post.get("serverfilter")).trim();
             /*String user   = (String) post.get("serveruser");
             String pw1    = (String) post.get("serverpw1");
             String pw2    = (String) post.get("serverpw2");*/
@@ -406,9 +406,9 @@ public class SettingsAck_p {
         if (post.containsKey("seedSettings")) {
             // getting the currently used uploading method
             String oldSeedUploadMethod = env.getConfig("seedUploadMethod","none");
-            String newSeedUploadMethod = (String)post.get("seedUploadMethod");
+            String newSeedUploadMethod = post.get("seedUploadMethod");
             String oldSeedURLStr = sb.webIndex.seedDB.mySeed().get(yacySeed.SEEDLIST, "");
-            String newSeedURLStr = (String) post.get("seedURL");
+            String newSeedURLStr = post.get("seedURL");
             
             boolean seedUrlChanged = !oldSeedURLStr.equals(newSeedURLStr);
             boolean uploadMethodChanged = !oldSeedUploadMethod.equals(newSeedUploadMethod);
@@ -496,13 +496,13 @@ public class SettingsAck_p {
          */
         if (post.containsKey("msgForwarding")) {
             env.setConfig("msgForwardingEnabled",post.containsKey("msgForwardingEnabled")?"true":"false");
-            env.setConfig("msgForwardingCmd",(String) post.get("msgForwardingCmd"));
-            env.setConfig("msgForwardingTo",(String) post.get("msgForwardingTo"));
+            env.setConfig("msgForwardingCmd",post.get("msgForwardingCmd"));
+            env.setConfig("msgForwardingTo",post.get("msgForwardingTo"));
             
             prop.put("info", "21");
             prop.put("info_msgForwardingEnabled", post.containsKey("msgForwardingEnabled") ? "on" : "off");
-            prop.put("info_msgForwardingCmd", (String) post.get("msgForwardingCmd"));
-            prop.putHTML("info_msgForwardingTo", (String) post.get("msgForwardingTo"));
+            prop.put("info_msgForwardingCmd", post.get("msgForwardingCmd"));
+            prop.putHTML("info_msgForwardingTo", post.get("msgForwardingTo"));
             
             return prop;
         }
@@ -566,7 +566,7 @@ public class SettingsAck_p {
         if (post.containsKey("crawlerSettings")) {
             
             // getting Crawler Timeout
-            String timeoutStr = (String) post.get("crawler.clientTimeout");
+            String timeoutStr = post.get("crawler.clientTimeout");
             if (timeoutStr==null||timeoutStr.length()==0) timeoutStr = "10000";
             
             int crawlerTimeout;
@@ -581,7 +581,7 @@ public class SettingsAck_p {
             }
             
             // getting maximum http file size
-            String maxSizeStr = (String) post.get("crawler.http.maxFileSize");
+            String maxSizeStr = post.get("crawler.http.maxFileSize");
             if (maxSizeStr==null||maxSizeStr.length()==0) timeoutStr = "-1";
             
             long maxHttpSize;
@@ -595,7 +595,7 @@ public class SettingsAck_p {
             }
             
             // getting maximum ftp file size
-            maxSizeStr = (String) post.get("crawler.ftp.maxFileSize");
+            maxSizeStr = post.get("crawler.ftp.maxFileSize");
             if (maxSizeStr==null||maxSizeStr.length()==0) timeoutStr = "-1";
             
             long maxFtpSize;

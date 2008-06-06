@@ -136,7 +136,7 @@ public class CrawlProfileEditor_p {
 					eentry tee;
 					while (lit.hasNext()) {
 						tee = lit.next();
-						String cval = (String) selentry.map().get(tee.name);
+						String cval = selentry.map().get(tee.name);
 						String val = (tee.type == eentry.BOOLEAN) ? Boolean.toString(post.containsKey(tee.name)) : post.get(tee.name, cval);
 						if (!cval.equals(val)) sb.webIndex.profilesActiveCrawls.changeEntry(selentry, tee.name, val);
 					}

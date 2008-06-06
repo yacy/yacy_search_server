@@ -181,8 +181,8 @@ public final class ConsoleOutErrHandler extends Handler{
         super.setFormatter(newFormatter);
         if (newFormatter == null) return;
         try {
-            this.stdOutHandler.setFormatter((Formatter)newFormatter.getClass().newInstance());
-            this.stdErrHandler.setFormatter((Formatter)newFormatter.getClass().newInstance());
+            this.stdOutHandler.setFormatter(newFormatter.getClass().newInstance());
+            this.stdErrHandler.setFormatter(newFormatter.getClass().newInstance());
         } catch (Exception e) {
             throw new SecurityException(e.getMessage());
         }
@@ -192,8 +192,8 @@ public final class ConsoleOutErrHandler extends Handler{
         super.setFilter(newFilter);
         if (newFilter == null) return;
         try {
-            this.stdOutHandler.setFilter((Filter)newFilter.getClass().newInstance());
-            this.stdErrHandler.setFilter((Filter)newFilter.getClass().newInstance());
+            this.stdOutHandler.setFilter(newFilter.getClass().newInstance());
+            this.stdErrHandler.setFilter(newFilter.getClass().newInstance());
         } catch (Exception e) {
             throw new SecurityException(e.getMessage());
         }

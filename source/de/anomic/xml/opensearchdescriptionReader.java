@@ -199,12 +199,12 @@ public class opensearchdescriptionReader extends DefaultHandler {
 
     public Item getItem(int i) {
         // retrieve item by order number
-        return getItem((String) itemsGUID.get(i));
+        return getItem(itemsGUID.get(i));
     }
 
     public Item getItem(String guid) {
         // retrieve item by guid
-        return (Item) items.get(guid);
+        return items.get(guid);
     }
 
     public int items() {

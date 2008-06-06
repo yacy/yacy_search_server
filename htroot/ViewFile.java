@@ -87,7 +87,7 @@ public class ViewFile {
         plasmaSwitchboard sb = (plasmaSwitchboard)env;     
 
         if (post != null && post.containsKey("words"))
-            prop.putHTML("error_words", (String)post.get("words"));
+            prop.putHTML("error_words", post.get("words"));
         else {
             prop.put("error", "1");
             prop.put("viewmode", "0");    
@@ -392,7 +392,7 @@ public class ViewFile {
             prop.put("viewMode_links_" + c + "_nr", c);
             prop.put("viewMode_links_" + c + "_dark", ((dark) ? 1 : 0));
             prop.putHTML("viewMode_links_" + c + "_type", name);
-            prop.put("viewMode_links_" + c + "_text", markup(wordArray, (String) entry.getValue()));
+            prop.put("viewMode_links_" + c + "_text", markup(wordArray, entry.getValue()));
             prop.put("viewMode_links_" + c + "_link", markup(wordArray, entry.getKey().toNormalform(true, false)));
             prop.put("viewMode_links_" + c + "_url", entry.getKey().toNormalform(true, false));
             prop.putHTML("viewMode_links_" + c + "_attr", "");

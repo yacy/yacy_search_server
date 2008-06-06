@@ -65,7 +65,7 @@ public class all {
         
         Iterator<String> it;
         if(post != null && post.containsKey("tag")){
-            it=switchboard.bookmarksDB.getBookmarksIterator((String) post.get("tag"), isAdmin);
+            it=switchboard.bookmarksDB.getBookmarksIterator(post.get("tag"), isAdmin);
         }else{
             it=switchboard.bookmarksDB.getBookmarksIterator(isAdmin);
         }
@@ -77,7 +77,7 @@ public class all {
         bookmarksDB.Bookmark bookmark;
         Date date;
         while(it.hasNext()){
-            bookmark=switchboard.bookmarksDB.getBookmark((String) it.next());
+            bookmark=switchboard.bookmarksDB.getBookmark(it.next());
             prop.putHTML("posts_"+count+"_url", bookmark.getUrl(), true);
             prop.putHTML("posts_"+count+"_title", bookmark.getTitle(), true);
             prop.putHTML("posts_"+count+"_description", bookmark.getDescription(), true);

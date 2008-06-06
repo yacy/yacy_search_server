@@ -131,7 +131,7 @@ public class yacysearchitem {
                     int hintcount = 0;
                     final Iterator<String> iter = topwords.iterator();
                     while (iter.hasNext()) {
-                        word = (String) iter.next();
+                        word = iter.next();
                         if (word != null) {
                             prop.putHTML("rssreferences_words_" + hintcount + "_word", word);
                         }
@@ -146,8 +146,8 @@ public class yacysearchitem {
                     int hintcount = 0;
                     final Iterator<String> iter = topwords.iterator();
                     while (iter.hasNext()) {
-                        word = (String) iter.next();
-                        if ((theQuery == null) || (theQuery.queryString == null)) break;
+                        word = iter.next();
+                        if (/*(theQuery == null) ||*/ (theQuery.queryString == null)) break;
                         if (word != null) {
                             prop.putHTML("references_words_" + hintcount + "_word", word);
                             prop.putHTML("references_words_" + hintcount + "_newsearch", theQuery.queryString.replace(' ', '+') + "+" + word);
@@ -267,7 +267,7 @@ public class yacysearchitem {
                 plasmaSnippetCache.MediaSnippet ms;
                 int c = 0;
                 for (int i = 0; i < media.size(); i++) {
-                    ms = (plasmaSnippetCache.MediaSnippet) media.get(i);
+                    ms = media.get(i);
                     prop.putHTML("content_items_" + i + "_href", ms.href.toNormalform(true, false));
                     prop.putHTML("content_items_" + i + "_hrefshort", nxTools.shortenURLString(ms.href.toNormalform(true, false), urllength));
                     prop.putHTML("content_items_" + i + "_name", shorten(ms.name, namelength));

@@ -181,7 +181,7 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
      * replaced in the returned String.
      */
     public String putHTML(String key, String value, boolean forXML) {
-        return (String) put(key, htmlTools.encodeUnicode2html(value, true, forXML));
+        return put(key, htmlTools.encodeUnicode2html(value, true, forXML));
     }
 
     /**
@@ -193,7 +193,7 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
      * @return the String value added to the map.
      */
     public String putNum(String key, long value) {
-        return (String) this.put(key, yFormatter.number(value, this.localized));
+        return this.put(key, yFormatter.number(value, this.localized));
     }
 
     /**
@@ -201,7 +201,7 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
      * @see #putNum(String, long)
      */
     public String putNum(String key, double value) {
-        return (String) this.put(key, yFormatter.number(value, this.localized));
+        return this.put(key, yFormatter.number(value, this.localized));
     }
 
     /**
@@ -209,34 +209,34 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
      * @see #putNum(String, long)
      */
     public String putNum(String key, String value) {
-        return (String) this.put(key, yFormatter.number(value));
+        return this.put(key, yFormatter.number(value));
     }
 
     
     public String putWiki(String key, String wikiCode){
-        return (String) this.put(key, plasmaSwitchboard.wikiParser.transform(wikiCode));
+        return this.put(key, plasmaSwitchboard.wikiParser.transform(wikiCode));
     }
     public String putWiki(String key, byte[] wikiCode) {
         try {
-            return (String) this.put(key, plasmaSwitchboard.wikiParser.transform(wikiCode));
+            return this.put(key, plasmaSwitchboard.wikiParser.transform(wikiCode));
         } catch (UnsupportedEncodingException e) {
-            return (String) this.put(key, "Internal error pasting wiki-code: " + e.getMessage());
+            return this.put(key, "Internal error pasting wiki-code: " + e.getMessage());
         }
     }
     public String putWiki(String key, String wikiCode, String publicAddress) {
-        return (String) this.put(key, plasmaSwitchboard.wikiParser.transform(wikiCode, publicAddress));
+        return this.put(key, plasmaSwitchboard.wikiParser.transform(wikiCode, publicAddress));
     }
     public String putWiki(String key, byte[] wikiCode, String publicAddress) {
         try {
-            return (String) this.put(key, plasmaSwitchboard.wikiParser.transform(wikiCode, "UTF-8", publicAddress));
+            return this.put(key, plasmaSwitchboard.wikiParser.transform(wikiCode, "UTF-8", publicAddress));
         } catch (UnsupportedEncodingException e) {
-            return (String) this.put(key, "Internal error pasting wiki-code: " + e.getMessage());
+            return this.put(key, "Internal error pasting wiki-code: " + e.getMessage());
         }
     }
 
     // inc variant: for counters
     public long inc(String key) {
-        String c = (String) super.get(key);
+        String c = super.get(key);
         if (c == null) c = "0";
         long l = Long.parseLong(c) + 1;
         super.put(key, Long.toString(l));
@@ -256,7 +256,7 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
     }
 
     public int getInt(String key, int dflt) {
-        String s = (String) super.get(key);
+        String s = super.get(key);
         if (s == null) return dflt;
         try {
             return Integer.parseInt(s);
@@ -266,7 +266,7 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
     }
 
     public long getLong(String key, long dflt) {
-        String s = (String) super.get(key);
+        String s = super.get(key);
         if (s == null) return dflt;
         try {
             return Long.parseLong(s);
@@ -276,7 +276,7 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
     }
 
     public double getDouble(String key, double dflt) {
-        String s = (String) super.get(key);
+        String s = super.get(key);
         if (s == null) return dflt;
         try {
             return Double.parseDouble(s);
@@ -294,11 +294,11 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
         String key;
         while (e.hasNext()) {
             key = e.next();
-            if (key.matches(keyMapper)) v.add((String) get(key));
+            if (key.matches(keyMapper)) v.add(get(key));
         }
         // make a String[]
         String[] result = new String[v.size()];
-        for (int i = 0; i < v.size(); i++) result[i] = (String) v.get(i);
+        for (int i = 0; i < v.size(); i++) result[i] = v.get(i);
         return result;
     }
 

@@ -341,7 +341,7 @@ public class yacyCore {
                 Map<String, String> ch = plasmaSwitchboard.getSwitchboard().clusterhashes;
                 seeds = sb.webIndex.seedDB.seedsByAge(true, attempts - ((ch == null) ? 0 : ch.size())); // best for fast connection
                 // add also all peers from cluster if this is a public robinson cluster
-                if (plasmaSwitchboard.getSwitchboard().clusterhashes != null) {
+                if (ch != null) {
                     Iterator<Map.Entry<String, String>> i = ch.entrySet().iterator();
                     String hash;
                     Map.Entry<String, String> entry;
@@ -349,12 +349,12 @@ public class yacyCore {
                     while (i.hasNext()) {
                         entry = i.next();
                         hash = entry.getKey();
-                        seed = (yacySeed) seeds.get(hash);
+                        seed = seeds.get(hash);
                         if (seed == null) {
                             seed = sb.webIndex.seedDB.get(hash);
                             if (seed == null) continue;
                         }
-                        seed.setAlternativeAddress((String) entry.getValue());
+                        seed.setAlternativeAddress(entry.getValue());
                         seeds.put(hash, seed);
                 	}
                 }
@@ -402,7 +402,7 @@ public class yacyCore {
             // going through the peer list and starting a new publisher thread for each peer
             int i = 0;
             while (si.hasNext()) {
-                seed = (yacySeed) si.next();
+                seed = si.next();
                 if (seed == null) {
                     sync.P();
                     continue;
@@ -457,7 +457,7 @@ public class yacyCore {
                 dbSize = amIAccessibleDB.size();
                 Iterator<String> ai = amIAccessibleDB.keySet().iterator();
                 while (ai.hasNext()) {
-                    yacyAccessible ya = (yacyAccessible) amIAccessibleDB.get(ai.next());
+                    yacyAccessible ya = amIAccessibleDB.get(ai.next());
                     if (ya.lastUpdated < cutofftime) {
                         ai.remove();
                     } else {
@@ -572,7 +572,7 @@ public class yacyCore {
         String className = null;
         synchronized (yacyCore.seedUploadMethods) {
             if (yacyCore.seedUploadMethods.containsKey(methodname)) {
-                className = (String) yacyCore.seedUploadMethods.get(methodname);
+                className = yacyCore.seedUploadMethods.get(methodname);
             }
         }
 

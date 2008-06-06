@@ -153,7 +153,7 @@ public final class userDB {
 		return null;
 	}
         public Entry getUser(httpHeader header){
-            return getUser((String) header.get(httpHeader.AUTHORIZATION), (String)header.get(httpHeader.CONNECTION_PROP_CLIENTIP), header.getHeaderCookies());
+            return getUser(header.get(httpHeader.AUTHORIZATION), header.get(httpHeader.CONNECTION_PROP_CLIENTIP), header.getHeaderCookies());
         }
         public Entry getUser(String auth, String ip, String cookies){
         Entry entry=null;
@@ -343,7 +343,7 @@ public final class userDB {
             if (mem == null) this.mem = new HashMap<String, String>();
             else this.mem = mem;            
             
-            if (!mem.containsKey(AUTHENTICATION_METHOD))this.mem.put(AUTHENTICATION_METHOD,"yacy");
+            if (mem == null || !mem.containsKey(AUTHENTICATION_METHOD))this.mem.put(AUTHENTICATION_METHOD,"yacy");
 			this.oldDate=Calendar.getInstance();
 			this.newDate=Calendar.getInstance();
         }
@@ -605,7 +605,7 @@ public final class userDB {
         }
         public Entry next() {
             try {
-                return getEntry((String) this.userIter.next());
+                return getEntry(this.userIter.next());
             } catch (kelondroException e) {
                 resetDatabase();
                 return null;

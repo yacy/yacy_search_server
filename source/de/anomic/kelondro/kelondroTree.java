@@ -439,7 +439,7 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
                         parentBalance--;
                         path = "R" + path;
                     }
-                    increasedHight = ((java.lang.Math.abs((int) parentBalance) - java.lang.Math.abs((int) prevHight)) > 0);
+                    increasedHight = ((java.lang.Math.abs(parentBalance) - java.lang.Math.abs(prevHight)) > 0);
                     parentNode.setOHByte(balance, parentBalance);
                     commitNode(parentNode);
                     
@@ -449,7 +449,7 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
                     if (!(increasedHight)) break; // finished
                     
                     // check rotation need
-                    if (java.lang.Math.abs((int) parentBalance) > 1) {
+                    if (java.lang.Math.abs(parentBalance) > 1) {
                         // rotate and stop then
                         //System.out.println("* DB DEBUG: " + path.substring(0,2) + " ROTATION AT NODE " + parentNode.handle().toString() + ": BALANCE=" + parentOHByte[balance]);
                         if (path.startsWith("LL")) {
@@ -977,7 +977,7 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
                         while ((nodeStack.size() != 0) && (parentpointer == ((up) ? rightchild : leftchild))) {
                             //System.out.println("step up");
                             // go on, walk up further
-                            stacktop = (Object[]) nodeStack.removeLast(); // top of stack: Node/parentpointer pair
+                            stacktop = nodeStack.removeLast(); // top of stack: Node/parentpointer pair
                             parentNode = (CacheNode) stacktop[0];
                             parentpointer = ((Integer) stacktop[1]).intValue();
                         }
@@ -1030,7 +1030,7 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
         synchronized (this) {
             Iterator<CacheNode> i = (firstKey == null) ? new nodeIterator(up, rotating) : new nodeIterator(up, rotating, firstKey, including);
             while ((set.size() < count) && (i.hasNext())) {
-                n = (kelondroNode) i.next();
+                n = i.next();
                 if ((n != null) && (n.getKey() != null)) set.add(new String(n.getKey()));
             }
         }
@@ -1253,7 +1253,7 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
             linelength = width / (thisline.size() * 2);
             nextline = new Vector<kelondroHandle>();
             for (int i = 0; i < thisline.size(); i++) {
-                handle = (kelondroHandle) thisline.elementAt(i);
+                handle = thisline.elementAt(i);
                 if (handle == null) {
                     node = null;
                     key = "[..]";
@@ -1288,7 +1288,7 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
         if ((thisline != null) && (width >= 0)) {
             linelength = width / thisline.size();
             for (int i = 0; i < thisline.size(); i++) {
-                handle = (kelondroHandle) thisline.elementAt(i);
+                handle = thisline.elementAt(i);
                 if (handle == null) {
                     node = null;
                     key = "NULL";
@@ -1421,7 +1421,7 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
  
     public static String[] permutations(int letters) {
         String p = "";
-        for (int i = 0; i < letters; i++) p = p + ((char) (((int)'A') + i));
+        for (int i = 0; i < letters; i++) p = p + ((char) (('A') + i));
         return permutations(p);
     }
     public static String[] permutations(String source) {
@@ -1544,7 +1544,7 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
             System.out.println("elements: " + c);
             Iterator<kelondroRow.Entry> i = tt.rows(true, testWord('G'));
             for (int j = 0; j < c; j++) {
-                System.out.println("Row " + j + ": " + new String(((kelondroRow.Entry) i.next()).getColBytes(0)));
+                System.out.println("Row " + j + ": " + new String((i.next()).getColBytes(0)));
             }
             System.out.println("TERMINATED");
         } catch (IOException e) {

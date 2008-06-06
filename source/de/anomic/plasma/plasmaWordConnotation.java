@@ -66,11 +66,17 @@ public class plasmaWordConnotation {
     private void addSingleRef(String word, String reference) throws IOException {
         //word = word.toLowerCase();
         //reference = reference.toLowerCase();
+        // TODO what if there is no record? Should a new one be created? danielr 2008-06-06
         kelondroRow.Entry record = refDB.get(word, reference.getBytes());
-        long c;
-        if (record == null) c = 0; else c = record.getColLong(1);
-        record.setCol(1, c++);
+        if(record != null) {
+            final long c = record.getColLong(1) + 1;
+            record.setCol(1, c);
+        }
         refDB.put(word, record);
+//        long c;
+//        if (record == null) c = 0; else c = record.getColLong(1);
+//        record.setCol(1, c++);
+//        refDB.put(word, record);
     }
     
     public void addSentence(String[] words) throws IOException {

@@ -179,7 +179,7 @@ public class Balancer {
         CrawlEntry crawlEntry;
         long terminate = (timeout > 0) ? System.currentTimeMillis() + timeout : Long.MAX_VALUE;
         while (i.hasNext() && (System.currentTimeMillis() < terminate)) {
-            rowEntry = (kelondroRow.Entry) i.next();
+            rowEntry = i.next();
             crawlEntry = new CrawlEntry(rowEntry);
             if (crawlEntry.profileHandle().equals(profileHandle)) {
                 urlHashes.add(crawlEntry.url().hash());
@@ -214,7 +214,7 @@ public class Balancer {
         Iterator<String> i = urlRAMStack.iterator();
         String h;
         while (i.hasNext()) {
-           h = (String) i.next();
+           h = i.next();
            if (urlHashes.contains(h)) i.remove();
        }
        
@@ -299,7 +299,7 @@ public class Balancer {
                     if (ram) {
                         urlRAMStack.add(list.removeFirst());
                     } else try {
-                        urlFileStack.push(urlFileStack.row().newEntry(new byte[][] { ((String) list.removeFirst()).getBytes() }));
+                        urlFileStack.push(urlFileStack.row().newEntry(new byte[][] { (list.removeFirst()).getBytes() }));
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -312,11 +312,11 @@ public class Balancer {
     private void flushAllRamStack() throws IOException {
         // this flushes only the ramStack to the fileStack, but does not flush the domainStacks
         for (int i = 0; i < urlRAMStack.size() / 2; i++) {
-            urlFileStack.push(urlFileStack.row().newEntry(new byte[][]{((String) urlRAMStack.get(i)).getBytes()}));
-            urlFileStack.push(urlFileStack.row().newEntry(new byte[][]{((String) urlRAMStack.get(urlRAMStack.size() - i - 1)).getBytes()}));
+            urlFileStack.push(urlFileStack.row().newEntry(new byte[][]{(urlRAMStack.get(i)).getBytes()}));
+            urlFileStack.push(urlFileStack.row().newEntry(new byte[][]{(urlRAMStack.get(urlRAMStack.size() - i - 1)).getBytes()}));
         }
         if (urlRAMStack.size() % 2 == 1) 
-            urlFileStack.push(urlFileStack.row().newEntry(new byte[][]{((String) urlRAMStack.get(urlRAMStack.size() / 2)).getBytes()}));
+            urlFileStack.push(urlFileStack.row().newEntry(new byte[][]{(urlRAMStack.get(urlRAMStack.size() / 2)).getBytes()}));
     }
     
     public synchronized void push(CrawlEntry entry) throws IOException {
@@ -358,7 +358,7 @@ public class Balancer {
         
         // 1st: check ramStack
         if (urlRAMStack.size() > 0) {
-            result = (String) urlRAMStack.remove(0);
+            result = urlRAMStack.remove(0);
         }
         
         // 2nd-a: check domainStacks for latest arrivals
@@ -374,12 +374,12 @@ public class Balancer {
             LinkedList<String> domlist;
             while (i.hasNext()) {
                 entry = i.next();
-                domhash = (String) entry.getKey();
+                domhash = entry.getKey();
                 delta = lastAccessDelta(domhash);
                 if (delta == Integer.MAX_VALUE) {
                     // a brand new domain - we take it
                     domlist = entry.getValue();
-                    result = (String) domlist.removeFirst();
+                    result = domlist.removeFirst();
                     if (domlist.size() == 0) i.remove();
                     break;
                 }
@@ -391,7 +391,7 @@ public class Balancer {
             if (maxdelta > maximumAge) {
                 // success - we found an entry from a domain that has not been used for a long time
                 domlist = domainStacks.get(maxhash);
-                result = (String) domlist.removeFirst();
+                result = domlist.removeFirst();
                 if (domlist.size() == 0) domainStacks.remove(maxhash);
             }
         }
@@ -420,12 +420,12 @@ public class Balancer {
             long delta;
             String maxhash = null;
             while (hitlist.size() > 0) {
-                domhash = (String) hitlist.remove(hitlist.lastKey());
+                domhash = hitlist.remove(hitlist.lastKey());
                 if (maxhash == null) maxhash = domhash; // remember first entry
                 delta = lastAccessDelta(domhash);
                 if (delta > minimumGlobalDelta) {
                     domlist = domainStacks.get(domhash);
-                    result = (String) domlist.removeFirst();
+                    result = domlist.removeFirst();
                     if (domlist.size() == 0) domainStacks.remove(domhash);
                     break;
                 }
@@ -434,7 +434,7 @@ public class Balancer {
             // if we did yet not choose any entry, we simply take that one with the most entries
             if ((result == null) && (maxhash != null)) {
                 domlist = domainStacks.get(maxhash);
-                result = (String) domlist.removeFirst();
+                result = domlist.removeFirst();
                 if (domlist.size() == 0) domainStacks.remove(maxhash);
             }
         }
@@ -532,7 +532,7 @@ public class Balancer {
             }
         }
         if (dist >= urlRAMStack.size()) return null;
-        String urlhash = (String) urlRAMStack.get(dist);
+        String urlhash = urlRAMStack.get(dist);
         kelondroRow.Entry entry = urlFileIndex.get(urlhash.getBytes());
         if (entry == null) {
             if (kelondroAbstractRecords.debugmode) serverLog.logWarning("PLASMA BALANCER", "no entry in index for urlhash " + urlhash);
@@ -558,7 +558,7 @@ public class Balancer {
         }
 
         public CrawlEntry next() {
-            kelondroRow.Entry entry = (kelondroRow.Entry) rowIterator.next();
+            kelondroRow.Entry entry = rowIterator.next();
             try {
                 return (entry == null) ? null : new CrawlEntry(entry);
             } catch (IOException e) {

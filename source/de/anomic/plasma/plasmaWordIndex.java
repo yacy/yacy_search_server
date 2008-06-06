@@ -93,7 +93,7 @@ public final class plasmaWordIndex implements indexRI {
     private final indexRAMRI               dhtOutCache, dhtInCache;
     private final indexCollectionRI        collections;          // new database structure to replace AssortmentCluster and FileCluster
     private       serverLog                log;
-    private       indexRepositoryReference referenceURL;
+    indexRepositoryReference referenceURL;
     public        yacySeedDB               seedDB;
     public        yacyNewsPool             newsPool;
     private       File                     primaryRoot, secondaryRoot;
@@ -636,7 +636,9 @@ public final class plasmaWordIndex implements indexRI {
                     lm = e.lastModified();
                 }
             }
-            container.addUnique(elm.toKelondroEntry());
+            if(elm != null) {
+                container.addUnique(elm.toKelondroEntry());
+            }
         }
         if (container.size() < beforeDouble) System.out.println("*** DEBUG DOUBLECHECK - removed " + (beforeDouble - container.size()) + " index entries from word container " + container.getWordHash());
 
@@ -654,7 +656,7 @@ public final class plasmaWordIndex implements indexRI {
             while (i.hasNext()) {
             
                 // get next word hash:
-                singleHash = (String) i.next();
+                singleHash = i.next();
             
                 // retrieve index
                 singleContainer = getContainer(singleHash, urlselection);
@@ -744,7 +746,7 @@ public final class plasmaWordIndex implements indexRI {
         Iterator<String> i = wordHashes.iterator();
         int count = 0;
         while (i.hasNext()) {
-            if (removeEntry((String) i.next(), urlHash)) count++;
+            if (removeEntry(i.next(), urlHash)) count++;
         }
         return count;
     }
@@ -770,7 +772,7 @@ public final class plasmaWordIndex implements indexRI {
         // this is mainly used when correcting a index after a search
         Iterator<String> i = wordHashes.iterator();
         while (i.hasNext()) {
-            removeEntries((String) i.next(), urlHashes);
+            removeEntries(i.next(), urlHashes);
         }
     }
     
@@ -781,7 +783,7 @@ public final class plasmaWordIndex implements indexRI {
         int count = 0;
         while (iter.hasNext()) {
             // delete the URL reference in this word index
-            if (removeEntry(indexWord.word2hash((String) iter.next()), urlhash)) count++;
+            if (removeEntry(indexWord.word2hash(iter.next()), urlhash)) count++;
         }
         return count;
     }
@@ -935,7 +937,7 @@ public final class plasmaWordIndex implements indexRI {
             Iterator<indexContainer> indexContainerIterator = indexContainerSet(startHash, false, false, 100).iterator();
             while (indexContainerIterator.hasNext() && run) {
                 waiter();
-                container = (indexContainer) indexContainerIterator.next();
+                container = indexContainerIterator.next();
                 Iterator<indexRWIRowEntry> containerIterator = container.entries();
                 wordHashNow = container.getWordHash();
                 while (containerIterator.hasNext() && run) {
@@ -965,7 +967,7 @@ public final class plasmaWordIndex implements indexRI {
                     TreeSet<indexContainer> containers = indexContainerSet(container.getWordHash(), false, false, 100);
                     indexContainerIterator = containers.iterator();
                     // Make sure we don't get the same wordhash twice, but don't skip a word
-                    if ((indexContainerIterator.hasNext()) && (!container.getWordHash().equals(((indexContainer) indexContainerIterator.next()).getWordHash()))) {
+                    if ((indexContainerIterator.hasNext()) && (!container.getWordHash().equals(indexContainerIterator.next().getWordHash()))) {
                         indexContainerIterator = containers.iterator();
                     }
                 }

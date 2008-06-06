@@ -114,7 +114,7 @@ public final class CrawlStacker extends Thread {
             Iterator<kelondroRow.Entry> rows = this.urlEntryCache.rows(true, null);
             kelondroRow.Entry entry;
             while (rows.hasNext()) {
-                entry = (kelondroRow.Entry) rows.next();
+                entry = rows.next();
                 if (entry == null) {
                     System.out.println("ERROR! null element found");
                     continue;
@@ -149,7 +149,7 @@ public final class CrawlStacker extends Thread {
             while (!Thread.currentThread().isInterrupted()) { // action loop
                 if (dnsfetchHosts.size() == 0) synchronized (this) { wait(); }
                 synchronized (dnsfetchHosts) {
-                    nextHost = (String) dnsfetchHosts.remove(dnsfetchHosts.size() - 1);
+                    nextHost = dnsfetchHosts.remove(dnsfetchHosts.size() - 1);
                 }
                 try {
                     serverDomains.dnsResolve(nextHost);
@@ -344,7 +344,7 @@ public final class CrawlStacker extends Thread {
         String urlHash = null;
         kelondroRow.Entry entry = null;
         synchronized (this.urlEntryHashCache) {
-            urlHash = (String) this.urlEntryHashCache.removeFirst();
+            urlHash = this.urlEntryHashCache.removeFirst();
             if (urlHash == null) throw new IOException("urlHash is null");
             entry = this.urlEntryCache.remove(urlHash.getBytes(), false);
         }
@@ -411,10 +411,10 @@ public final class CrawlStacker extends Thread {
             String errorMsg = "LOST PROFILE HANDLE '" + entry.profileHandle() + "' for URL " + entry.url();
             log.logWarning(errorMsg);
             return errorMsg;
-        }
+        } else {
         
         // filter deny
-        if ((entry.depth() > 0) && (profile != null) && (!(entry.url().toString().matches(profile.generalFilter())))) {
+        if ((entry.depth() > 0) && (!(entry.url().toString().matches(profile.generalFilter())))) {
             reason = ErrorURL.DENIED_URL_DOES_NOT_MATCH_FILTER;
 
             if (this.log.isFine()) this.log.logFine("URL '" + entry.url().toString() + "' does not match crawling filter '" + profile.generalFilter() + "'. " +
@@ -432,7 +432,7 @@ public final class CrawlStacker extends Thread {
         }
         
         // deny post properties
-        if ((entry.url().isPOST()) && (profile != null) && (!(profile.crawlingQ())))  {
+        if (entry.url().isPOST() && !(profile.crawlingQ()))  {
             reason = ErrorURL.DENIED_POST_URL;
 
             if (this.log.isFine()) this.log.logFine("URL '" + entry.url().toString() + "' is post URL. " + 
@@ -480,7 +480,7 @@ public final class CrawlStacker extends Thread {
         }
 
         // show potential re-crawl
-        if (recrawl) {
+        if (recrawl && oldEntry != null) {
             if (this.log.isFine()) this.log.logFine("RE-CRAWL of URL '" + entry.url().toString() + "': this url was crawled " +
                     ((System.currentTimeMillis() - oldEntry.loaddate().getTime()) / 60000 / 60 / 24) + " days ago.");
         }
@@ -488,7 +488,6 @@ public final class CrawlStacker extends Thread {
         // store information
         boolean local = entry.initiator().equals(sb.webIndex.seedDB.mySeed().hash);
         boolean global = 
-            (profile != null) &&
             (profile.remoteIndexing()) /* granted */ &&
             (entry.depth() == profile.generalDepth()) /* leaf node */ && 
             //(initiatorHash.equals(yacyCore.seedDB.mySeed.hash)) /* not proxy */ &&
@@ -497,7 +496,7 @@ public final class CrawlStacker extends Thread {
                     (sb.webIndex.seedDB.mySeed().isPrincipal())
             ) /* qualified */;
         
-        if ((!local)&&(!global)&&(!profile.handle().equals(this.sb.webIndex.defaultRemoteProfile.handle()))) {
+        if (!local && !global && !profile.handle().equals(this.sb.webIndex.defaultRemoteProfile.handle())) {
             this.log.logSevere("URL '" + entry.url().toString() + "' can neither be crawled local nor global.");
         }
         
@@ -507,6 +506,7 @@ public final class CrawlStacker extends Thread {
                 ((local) ? NoticedURL.STACK_TYPE_CORE : NoticedURL.STACK_TYPE_REMOTE)) /*local/remote stack*/,
                 entry);
         return null;
+        }
     }
     
 }

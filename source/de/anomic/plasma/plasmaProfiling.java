@@ -94,7 +94,7 @@ public class plasmaProfiling {
             i = serverProfiling.history("memory");
             x0 = 1;
             while (i.hasNext()) {
-                event = (serverProfiling.Event) i.next();
+                event = i.next();
                 time = event.time - now;
                 bytes = ((Long) event.payload).longValue();
                 x1 = (int) (time/1000);

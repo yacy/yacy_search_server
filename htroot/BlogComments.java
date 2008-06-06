@@ -196,13 +196,13 @@ public class BlogComments {
         }
 
         if(hasRights && post.containsKey("delete") && post.containsKey("page") && post.containsKey("comment")) {
-            if(page.removeComment((String) post.get("comment"))) {
-                sb.blogCommentDB.delete((String) post.get("comment"));
+            if(page.removeComment(post.get("comment"))) {
+                sb.blogCommentDB.delete(post.get("comment"));
             }
         }
 
         if(hasRights && post.containsKey("allow") && post.containsKey("page") && post.containsKey("comment")) {
-            blogBoardComments.CommentEntry entry = sb.blogCommentDB.read((String) post.get("comment"));
+            blogBoardComments.CommentEntry entry = sb.blogCommentDB.read(post.get("comment"));
             entry.allow();
             sb.blogCommentDB.write(entry);
         }

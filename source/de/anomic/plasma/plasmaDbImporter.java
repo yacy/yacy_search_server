@@ -108,7 +108,7 @@ public class plasmaDbImporter extends AbstractImporter implements Importer {
                 indexContainer newContainer = null;
                 try {
                     this.wordCounter++;
-                    newContainer = (indexContainer) indexContainerIterator.next();
+                    newContainer = indexContainerIterator.next();
                     this.wordHash = newContainer.getWordHash();
                     
                     // loop throug the entities of the container and get the
@@ -120,7 +120,7 @@ public class plasmaDbImporter extends AbstractImporter implements Importer {
                         if (isAborted()) break;
 
                         // getting next word index entry
-                        importWordIdxEntry = (indexRWIEntry) importWordIdxEntries.next();
+                        importWordIdxEntry = importWordIdxEntries.next();
                         String urlHash = importWordIdxEntry.urlHash();
                         entityUrls.add(urlHash);
                     }
@@ -207,7 +207,7 @@ public class plasmaDbImporter extends AbstractImporter implements Importer {
                     TreeSet<indexContainer> containers = this.importWordIndex.indexContainerSet(this.wordHash, false, false, 100);
                     indexContainerIterator = containers.iterator();
                     // Make sure we don't get the same wordhash twice, but don't skip a word
-                    if ((indexContainerIterator.hasNext())&&(!this.wordHash.equals(((indexContainer) indexContainerIterator.next()).getWordHash()))) {
+                    if ((indexContainerIterator.hasNext())&&(!this.wordHash.equals((indexContainerIterator.next()).getWordHash()))) {
                         indexContainerIterator = containers.iterator();
                     }
                 }

@@ -372,7 +372,7 @@ public final class robotsParser{
             }
         }
         
-        if (robotsTxt4Host.isDisallowed(nexturl.getFile())) {
+        if (robotsTxt4Host != null && robotsTxt4Host.isDisallowed(nexturl.getFile())) {
             return true;        
         }        
         return false;
@@ -423,7 +423,7 @@ public final class robotsParser{
                 } else {
 
                     // getting some metadata
-                    eTag = res.getResponseHeader().containsKey(httpHeader.ETAG)?((String)res.getResponseHeader().get(httpHeader.ETAG)).trim():null;
+                    eTag = res.getResponseHeader().containsKey(httpHeader.ETAG)?(res.getResponseHeader().get(httpHeader.ETAG)).trim():null;
                     lastMod = res.getResponseHeader().lastModified();                    
                     
                     // if the robots.txt file was not changed we break here
@@ -448,22 +448,22 @@ public final class robotsParser{
                 return null;
             } else if (res.getStatusLine().startsWith("3")) {
                 // getting redirection URL
-                String redirectionUrlString = (String) res.getResponseHeader().get(httpHeader.LOCATION);
+                String redirectionUrlString = res.getResponseHeader().get(httpHeader.LOCATION);
                 if (redirectionUrlString==null) {
                     serverLog.logFinest("ROBOTS","robots.txt could not be downloaded from URL '" + robotsURL + "' because of missing redirecton header. [" + res.getStatusLine() + "].");
                     robotsTxt = null;                    
+                } else {
+                
+                    redirectionUrlString = redirectionUrlString.trim();
+                    
+                    // generating the new URL object
+                    yacyURL redirectionUrl = yacyURL.newURL(robotsURL, redirectionUrlString);      
+                    
+                    // following the redirection
+                    serverLog.logFinest("ROBOTS","Redirection detected for robots.txt with URL '" + robotsURL + "'." + 
+                            "\nRedirecting request to: " + redirectionUrl);
+                    return downloadRobotsTxt(redirectionUrl,redirectionCount,entry);
                 }
-                
-                redirectionUrlString = redirectionUrlString.trim();
-                
-                // generating the new URL object
-                yacyURL redirectionUrl = yacyURL.newURL(robotsURL, redirectionUrlString);      
-                
-                // following the redirection
-                serverLog.logFinest("ROBOTS","Redirection detected for robots.txt with URL '" + robotsURL + "'." + 
-                        "\nRedirecting request to: " + redirectionUrl);
-                return downloadRobotsTxt(redirectionUrl,redirectionCount,entry);
-                
             } else if (res.getStatusCode() == 401 || res.getStatusCode() == 403) {
                 accessCompletelyRestricted = true;
                 serverLog.logFinest("ROBOTS","Access to Robots.txt not allowed on URL '" + robotsURL + "'.");

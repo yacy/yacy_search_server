@@ -37,8 +37,6 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-import de.anomic.kelondro.kelondroRow.Entry;
-
 /*
  * Commands to create a database using mysql:
  * 
@@ -174,7 +172,7 @@ public class kelondroSQLTable implements kelondroIndex {
 
     public synchronized void putMultiple(List<kelondroRow.Entry> rows) throws IOException {
         Iterator<kelondroRow.Entry> i = rows.iterator();
-        while (i.hasNext()) put((Entry) i.next());
+        while (i.hasNext()) put(i.next());
     }
     
     public kelondroRow.Entry put(kelondroRow.Entry row, Date entryDate) throws IOException {

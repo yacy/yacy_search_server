@@ -128,7 +128,7 @@ public class yacySearch extends Thread {
     public static String set2string(Set<String> hashes) {
         String wh = "";
         final Iterator<String> iter = hashes.iterator();
-        while (iter.hasNext()) { wh = wh + (String) iter.next(); }
+        while (iter.hasNext()) { wh = wh + iter.next(); }
         return wh;
     }
 
@@ -188,7 +188,7 @@ public class yacySearch extends Thread {
             dhtEnum = peerActions.dhtAction.getDHTSeeds(true, wordhash, (float) 0.0);
             c = seedcount;
             while (dhtEnum.hasNext() && c > 0) {
-                seed = (yacySeed) dhtEnum.next();
+                seed = dhtEnum.next();
                 if (seed == null) continue;
                 distance = yacyDHTAction.dhtDistance(seed.hash, wordhash);
                 if (distance > 0.2) continue; // catch bug in peer selection
@@ -239,7 +239,7 @@ public class yacySearch extends Thread {
         c = 0;
         iter = ranking.scores(false); // higher are better
         while (iter.hasNext() && c < result.length) {
-            seed = (yacySeed) seeds.get((String) iter.next());
+            seed = seeds.get(iter.next());
             seed.selectscore = c;
             serverLog.logFine("PLASMA", "selectPeers/_lineup_: " + seed.hash + ":" + seed.getName() + " is choice " + c);
             result[c++] = seed;
@@ -292,7 +292,7 @@ public class yacySearch extends Thread {
         // prepare seed targets and threads
         final yacySeed targetPeer = wordIndex.seedDB.getConnected(targethash);
         if (targetPeer == null) return null;
-        if (clusterselection != null) targetPeer.setAlternativeAddress((String) clusterselection.get(targetPeer.hash));
+        if (clusterselection != null) targetPeer.setAlternativeAddress(clusterselection.get(targetPeer.hash));
         yacySearch searchThread = new yacySearch(wordhashes, excludehashes, urlhashes, "", "", 0, 9999, true, 0, targetPeer,
                                              wordIndex, crawlResults, containerCache, new TreeMap<String, TreeMap<String, String>>(), blacklist, rankingProfile, constraint);
         searchThread.start();

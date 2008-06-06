@@ -110,7 +110,7 @@ public class PKCS12Tool {
          
         Enumeration<String> pkcs12Aliases = aliases();
         while (pkcs12Aliases.hasMoreElements()) {
-           String strAlias = (String)pkcs12Aliases.nextElement();
+           String strAlias = pkcs12Aliases.nextElement();
            System.err.println("Importing Alias '" + strAlias + "'");
 
            if (this.kspkcs12.isKeyEntry(strAlias)) {

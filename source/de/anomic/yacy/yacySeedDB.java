@@ -373,7 +373,7 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
     public yacySeed anySeedVersion(float minVersion) {
         // return just any seed that has a specific minimum version number
         Iterator<yacySeed> e = seedsConnected(true, true, yacySeed.randomHash(), minVersion);
-        return (yacySeed) e.next();
+        return e.next();
     }
 
     public HashMap<String, yacySeed> seedsByAge(boolean up, int count) {
@@ -404,7 +404,7 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
             int c = 0;
             while ((c < count) && (it.hasNext())) {
             	c++;
-            	ys = getConnected((String) it.next());
+            	ys = getConnected(it.next());
             	if ((ys != null) && (ys.hash != null)) result.put(ys.hash, ys);
             }
             return result;
@@ -617,7 +617,7 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
         }
         
         // then try to use the cache
-        yacySeed seed = (yacySeed) nameLookupCache.get(peerName);
+        yacySeed seed = nameLookupCache.get(peerName);
         if (seed != null) return seed;
 
         // enumerate the cache and simultanous insert values
@@ -625,7 +625,7 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
     	for (int table = 0; table < 2; table++) {
             Iterator<yacySeed> e = (table == 0) ? seedsConnected(true, false, null, (float) 0.0) : seedsDisconnected(true, false, null, (float) 0.0);
         	while (e.hasNext()) {
-        		seed = (yacySeed) e.next();
+        		seed = e.next();
         		if (seed != null) {
         			name = seed.getName().toLowerCase();
         			if (seed.isProper(false) == null) nameLookupCache.put(name, seed);
@@ -661,7 +661,7 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
         // then try to use the cache
         SoftReference<yacySeed> ref = ipLookupCache.get(peerIP);
         if (ref != null) {        
-            seed = (yacySeed) ref.get();
+            seed = ref.get();
             if (seed != null) return seed;
         }
 
@@ -675,7 +675,7 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
             Iterator<yacySeed> e = seedsConnected(true, false, null, (float) 0.0);
             while (e.hasNext()) {
                 try {
-                    seed = (yacySeed) e.next();
+                    seed = e.next();
                     if (seed != null) {
                         addressStr = seed.getPublicAddress();
                         if (addressStr == null) {
@@ -704,7 +704,7 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
 
             while (e.hasNext()) {
                 try {
-                    seed = (yacySeed) e.next();
+                    seed = e.next();
                     if (seed != null) {
                         addressStr = seed.getPublicAddress();
                         if (addressStr == null) {
@@ -733,7 +733,7 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
 
             while (e.hasNext()) {
                 try {
-                    seed = (yacySeed) e.next();
+                    seed = e.next();
                     if ((seed != null) && ((addressStr = seed.getPublicAddress()) != null)) {
                         if ((pos = addressStr.indexOf(":"))!= -1) {
                             addressStr = addressStr.substring(0,pos);
@@ -788,7 +788,7 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
             yacySeed ys;
             Iterator<yacySeed> se = seedsConnected(true, false, null, (float) 0.0);
             while (se.hasNext()) {
-                ys = (yacySeed) se.next();
+                ys = se.next();
                 if (ys != null) {
                     line = ys.genSeedStr(null);
                     v.add(line);
@@ -895,7 +895,7 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
         serverLog.logFine("YACY","SaveSeedList: Comparing local and uploades seed-list entries ...");
         int i;
         for (i = 0; i < uv.size(); i++) {
-        	if (!(((String) uv.get(i)).equals((String) check.get(i)))) return "Element at position " + i + " is different.";
+        	if (!((uv.get(i)).equals(check.get(i)))) return "Element at position " + i + " is different.";
         }
         
         // no difference found
@@ -1011,7 +1011,7 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
             try {
                 HashMap<String, String> dna = it.next();
                 if (dna == null) return null;
-                String hash = (String) dna.remove("key");
+                String hash = dna.remove("key");
                 //while (hash.length() < commonHashLength) { hash = hash + "_"; }
                 return new yacySeed(hash, dna);
             } catch (Exception e) {

@@ -185,7 +185,7 @@ public class indexContainer extends kelondroRowSet {
         }
 
         public indexRWIRowEntry next() {
-            kelondroRow.Entry rentry = (kelondroRow.Entry) rowEntryIterator.next();
+            kelondroRow.Entry rentry = rowEntryIterator.next();
             if (rentry == null) return null;
             return new indexRWIRowEntry(rentry);
         }
@@ -239,7 +239,7 @@ public class indexContainer extends kelondroRowSet {
         int count = 0;
         while (i.hasNext()) {
             // get next entity:
-            singleContainer = (indexContainer) i.next();
+            singleContainer = i.next();
             
             // check result
             if ((singleContainer == null) || (singleContainer.size() == 0)) return null; // as this is a cunjunction of searches, we have no result if any word is not known
@@ -254,13 +254,13 @@ public class indexContainer extends kelondroRowSet {
         
         // the map now holds the search results in order of number of hits per word
         // we now must pairwise build up a conjunction of these sets
-        Long k = (Long) map.firstKey(); // the smallest, which means, the one with the least entries
-        indexContainer searchA, searchB, searchResult = (indexContainer) map.remove(k);
+        Long k = map.firstKey(); // the smallest, which means, the one with the least entries
+        indexContainer searchA, searchB, searchResult = map.remove(k);
         while ((map.size() > 0) && (searchResult.size() > 0)) {
             // take the first element of map which is a result and combine it with result
-            k = (Long) map.firstKey(); // the next smallest...
+            k = map.firstKey(); // the next smallest...
             searchA = searchResult;
-            searchB = (indexContainer) map.remove(k);
+            searchB = map.remove(k);
             searchResult = indexContainer.joinConstructive(searchA, searchB, maxDistance);
             // free resources
             searchA = null;
@@ -279,7 +279,7 @@ public class indexContainer extends kelondroRowSet {
         
         Iterator<indexContainer> i = containers.iterator();
         while (i.hasNext()) {
-        	pivot = excludeDestructive(pivot, (indexContainer) i.next());
+        	pivot = excludeDestructive(pivot, i.next());
         	if ((pivot == null) || (pivot.size() == 0)) return null;
         }
         
@@ -403,7 +403,7 @@ public class indexContainer extends kelondroRowSet {
         Iterator<indexRWIRowEntry> se = (iterate_pivot) ? pivot.entries() : excl.entries();
         indexRWIEntry ie0, ie1;
             while (se.hasNext()) {
-                ie0 = (indexRWIEntry) se.next();
+                ie0 = se.next();
                 ie1 = excl.get(ie0.urlHash());
                 if ((ie0 != null) && (ie1 != null)) {
                     assert (ie0.urlHash().length() == keylength) : "ie0.urlHash() = " + ie0.urlHash();
@@ -471,7 +471,7 @@ public class indexContainer extends kelondroRowSet {
                 iEntry = i.next();
                 if ((excludeContainer != null) && (excludeContainer.get(iEntry.urlHash()) != null)) continue; // do not include urls that are in excludeContainer
                 dom = iEntry.urlHash().substring(6);
-                if ((paths = (String) doms.get(dom)) == null) {
+                if ((paths = doms.get(dom)) == null) {
                     doms.put(dom, iEntry.urlHash().substring(0, 6));
                 } else {
                     doms.put(dom, paths + iEntry.urlHash().substring(0, 6));
@@ -487,9 +487,9 @@ public class indexContainer extends kelondroRowSet {
         Map.Entry<String, String> entry;
         while (i.hasNext()) {
             entry = i.next();
-            bb.append((String) entry.getKey());
+            bb.append(entry.getKey());
             bb.append(':');
-            bb.append((String) entry.getValue());
+            bb.append(entry.getValue());
             if (System.currentTimeMillis() > timeout)
                 break;
             if (i.hasNext())

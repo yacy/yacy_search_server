@@ -411,7 +411,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         public kelondroRow.Entry next() {
             kelondroRow.Entry idxEntry = null;
             while ((indexIterator.hasNext()) && (idxEntry == null)) {
-                idxEntry = (kelondroRow.Entry) indexIterator.next();
+                idxEntry = indexIterator.next();
             }
             if (idxEntry == null) {
                 serverLog.logSevere("kelondroFlexTable.rowIterator: " + tablename, "indexIterator returned null");
@@ -445,7 +445,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         // returns a map for each file in the tracker;
         // the map represents properties for each record oobjects,
         // i.e. for cache memory allocation
-        kelondroFlexTable theFlexTable = (kelondroFlexTable) tableTracker.get(filename);
+        kelondroFlexTable theFlexTable = tableTracker.get(filename);
         return theFlexTable.profile();
     }
     
@@ -453,7 +453,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         // returns a map for each file in the tracker;
         // the map represents properties for each record objects,
         // i.e. for cache memory allocation
-        kelondroFlexTable theFlexTable = (kelondroFlexTable) tableTracker.get(filename);
+        kelondroFlexTable theFlexTable = tableTracker.get(filename);
         return theFlexTable.memoryStats();
     }
     

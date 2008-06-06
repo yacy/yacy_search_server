@@ -86,9 +86,9 @@ public class Wiki {
         prop.put("display", display);
         
         String access = sb.getConfig("WikiAccess", "admin");
-        String pagename = post.get("page", "start");
-        String ip = post.get(httpHeader.CONNECTION_PROP_CLIENTIP, "127.0.0.1");
-        String author = post.get("author", "anonymous");
+        String pagename = get(post, "page", "start");
+        String ip = get(post, httpHeader.CONNECTION_PROP_CLIENTIP, "127.0.0.1");
+        String author = get(post, "author", "anonymous");
         if (author.equals("anonymous")) {
             author = wikiBoard.guessAuthor(ip);
             if (author == null) {
@@ -97,7 +97,7 @@ public class Wiki {
             }
         }
         
-        if (post.containsKey("access")) {
+        if (post != null && post.containsKey("access")) {
             // only the administrator may change the access right
             if (!sb.verifyAuthentication(header, true)) {
                 // check access right for admin
@@ -113,7 +113,7 @@ public class Wiki {
 
         wikiBoard.entry page = sb.wikiDB.read(pagename);
         
-        if (post.containsKey("submit")) {
+        if (post != null && post.containsKey("submit")) {
             
             if ((access.equals("admin") && (!sb.verifyAuthentication(header, true)))) {
                 // check access right for admin
@@ -140,7 +140,7 @@ public class Wiki {
             prop.put("LOCATION", "/Wiki.html?page=" + pagename);
         }
 
-        if (post.containsKey("edit")) {
+        if (post != null && post.containsKey("edit")) {
             if ((access.equals("admin") && (!sb.verifyAuthentication(header, true)))) {
                 // check access right for admin
                 prop.put("AUTHENTICATE", "admin log-in"); // force log-in
@@ -157,7 +157,7 @@ public class Wiki {
         }
 
         //contributed by [MN]
-        else if (post.containsKey("preview")) {
+        else if (post != null && post.containsKey("preview")) {
             // preview the page
             prop.put("mode", "2");//preview
             prop.putHTML("mode_pagename", pagename);
@@ -168,7 +168,7 @@ public class Wiki {
         }
         //end contrib of [MN]
 
-        else if (post.containsKey("index")) {
+        else if (post != null && post.containsKey("index")) {
             // view an index
             prop.put("mode", "3"); //Index
             String subject;
@@ -193,7 +193,7 @@ public class Wiki {
             prop.putHTML("mode_pagename", pagename);
         }
         
-        else if (post.containsKey("diff")) {
+        else if (post != null && post.containsKey("diff")) {
             // Diff
             prop.put("mode", "4");
             prop.putHTML("mode_page", pagename);
@@ -276,5 +276,18 @@ public class Wiki {
 
         // return rewrite properties
         return prop;
+    }
+
+
+    /**
+     * get key from post, use dflt if (not present or post == null)
+     * 
+     * @param post
+     * @param string
+     * @param string2
+     * @return
+     */
+    private static String get(serverObjects post, String key, String dflt) {
+        return (post == null ? dflt : post.get(key, dflt));
     }
 }

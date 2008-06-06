@@ -94,7 +94,7 @@ public class sidebar_navigation {
                 int hintcount = 0;
                 final Iterator<String> iter = topwords.iterator();
                 while (iter.hasNext()) {
-                    word = (String) iter.next();
+                    word = iter.next();
                     if (word != null) {
                         prop.putHTML("rssreferences_words_" + hintcount + "_word", word);
                     }
@@ -109,8 +109,8 @@ public class sidebar_navigation {
                 int hintcount = 0;
                 final Iterator<String> iter = topwords.iterator();
                 while (iter.hasNext()) {
-                    word = (String) iter.next();
-                    if ((theQuery == null) || (theQuery.queryString == null)) break;
+                    word = iter.next();
+                    if (/*(theQuery == null) ||*/ (theQuery.queryString == null)) break;
                     if (word != null) {
                         prop.putHTML("navigation_topwords_words_" + hintcount + "_word", word);
                         prop.putHTML("navigation_topwords_words_" + hintcount + "_newsearch", theQuery.queryString.replace(' ', '+') + "+" + word);

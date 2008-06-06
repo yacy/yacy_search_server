@@ -151,12 +151,12 @@ public class crawlHandler extends DefaultHandler {
 
     public Startpoint getStartpoint(int i) {
         // retrieve item by order number
-        return getStartpoint((String) startpointsGUID.get(i));
+        return getStartpoint(startpointsGUID.get(i));
     }
 
     public Startpoint getStartpoint(String guid) {
         // retrieve item by guid
-        return (Startpoint) startpoints.get(guid);
+        return startpoints.get(guid);
     }
 
     public int startpoints() {
@@ -176,47 +176,47 @@ public class crawlHandler extends DefaultHandler {
         }
         
         public String getAuthor() {
-            return (String) map.get("author");
+            return map.get("author");
         }
         
         public String getCopyright() {
-            return (String) map.get("copyright");
+            return map.get("copyright");
         }
         
         public String getCategory() {
-            return (String) map.get("category");
+            return map.get("category");
         }
         
         public String getTitle() {
-            return (String) map.get("title");
+            return map.get("title");
         }
         
         public String getLink() {
-            return (String) map.get("link");
+            return map.get("link");
         }
         
         public String getLanguage() {
-            return (String) map.get("language");
+            return map.get("language");
         }
         
         public String getDescription() {
-            return (String) map.get("description");
+            return map.get("description");
         }
         
         public String getCreator() {
-            return (String) map.get("creator");
+            return map.get("creator");
         }
         
         public String getPubDate() {
-            return (String) map.get("pubDate");
+            return map.get("pubDate");
         }
         
         public String getGuid() {
-            return (String) map.get("guid");
+            return map.get("guid");
         }
         
         public String getDocs() {
-            return (String) map.get("docs");
+            return map.get("docs");
         }
     }
     
@@ -234,47 +234,47 @@ public class crawlHandler extends DefaultHandler {
         }
         
         public String getAuthor() {
-            return (String) map.get("author");
+            return map.get("author");
         }
         
         public String getCopyright() {
-            return (String) map.get("copyright");
+            return map.get("copyright");
         }
         
         public String getCategory() {
-            return (String) map.get("category");
+            return map.get("category");
         }
         
         public String getTitle() {
-            return (String) map.get("title");
+            return map.get("title");
         }
         
         public String getLink() {
-            return (String) map.get("link");
+            return map.get("link");
         }
         
         public String getLanguage() {
-            return (String) map.get("language");
+            return map.get("language");
         }
         
         public String getDescription() {
-            return (String) map.get("description");
+            return map.get("description");
         }
         
         public String getCreator() {
-            return (String) map.get("creator");
+            return map.get("creator");
         }
         
         public String getPubDate() {
-            return (String) map.get("pubDate");
+            return map.get("pubDate");
         }
         
         public String getGuid() {
-            return (String) map.get("guid");
+            return map.get("guid");
         }
         
         public String getDocs() {
-            return (String) map.get("docs");
+            return map.get("docs");
         }
     }
 }

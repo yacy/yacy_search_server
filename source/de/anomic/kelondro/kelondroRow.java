@@ -87,7 +87,7 @@ public final class kelondroRow {
         this.objectsize = 0;
         for (int i = 0; i < l.size(); i++) {
             this.colstart[i] = this.objectsize;
-            this.row[i] = (kelondroColumn) l.get(i);
+            this.row[i] = l.get(i);
             this.objectsize += this.row[i].cellwidth;
         }
         this.primaryKeyIndex = primaryKey;
@@ -323,7 +323,7 @@ public final class kelondroRow {
         public final int compareTo(Entry o) {
             // compares only the content of the primary key
             if (objectOrder == null) throw new kelondroException("objects cannot be compared, no order given");
-            return objectOrder.compare(this.getPrimaryKeyBytes(), ((Entry) o).getPrimaryKeyBytes());
+            return objectOrder.compare(this.getPrimaryKeyBytes(), (o).getPrimaryKeyBytes());
         }
         
         public final boolean equals(Entry otherEntry) {
@@ -367,14 +367,14 @@ public final class kelondroRow {
         
         public final void setCol(String nickname, char c) {
             if (nickref == null) genNickRef();
-            Object[] ref = (Object[]) nickref.get(nickname);
+            Object[] ref = nickref.get(nickname);
             if (ref == null) return;
             rowinstance[offset + ((Integer) ref[1]).intValue()] = (byte) c;
         }
         
         public final void setCol(String nickname, byte[] cell) {
             if (nickref == null) genNickRef();
-            Object[] ref = (Object[]) nickref.get(nickname);
+            Object[] ref = nickref.get(nickname);
             if (ref == null) return;
             kelondroColumn col = (kelondroColumn) ref[0];
             setCol(col.encoder, ((Integer) ref[1]).intValue(), col.cellwidth, cell);
@@ -432,7 +432,7 @@ public final class kelondroRow {
         
         public final void setCol(String nickname, long cell) {
             if (nickref == null) genNickRef();
-            Object[] ref = (Object[]) nickref.get(nickname);
+            Object[] ref = nickref.get(nickname);
             if (ref == null) return;
             kelondroColumn col = (kelondroColumn) ref[0];
             setCol(col.encoder, offset + ((Integer) ref[1]).intValue(), col.cellwidth, cell);
@@ -460,7 +460,7 @@ public final class kelondroRow {
         
         public final byte[] getCol(String nickname, byte[] dflt) {
             if (nickref == null) genNickRef();
-            Object[] ref = (Object[]) nickref.get(nickname);
+            Object[] ref = nickref.get(nickname);
             if (ref == null) return dflt;
             kelondroColumn col = (kelondroColumn) ref[0];
             byte[] cell = new byte[col.cellwidth];
@@ -470,7 +470,7 @@ public final class kelondroRow {
         
         public final String getColString(String nickname, String dflt, String encoding) {
             if (nickref == null) genNickRef();
-            Object[] ref = (Object[]) nickref.get(nickname);
+            Object[] ref = nickref.get(nickname);
             if (ref == null) return dflt;
             kelondroColumn col = (kelondroColumn) ref[0];
             return getColString(col.encoder, ((Integer) ref[1]).intValue(), col.cellwidth, encoding);
@@ -497,7 +497,7 @@ public final class kelondroRow {
         
         public final long getColLong(String nickname, long dflt) {
             if (nickref == null) genNickRef();
-            Object[] ref = (Object[]) nickref.get(nickname);
+            Object[] ref = nickref.get(nickname);
             if (ref == null) return dflt;
             kelondroColumn col = (kelondroColumn) ref[0];
             int clstrt = ((Integer) ref[1]).intValue();
@@ -533,7 +533,7 @@ public final class kelondroRow {
         
         public final byte getColByte(String nickname, byte dflt) {
             if (nickref == null) genNickRef();
-            Object[] ref = (Object[]) nickref.get(nickname);
+            Object[] ref = nickref.get(nickname);
             if (ref == null) return dflt;
             return rowinstance[offset + ((Integer) ref[1]).intValue()];
         }

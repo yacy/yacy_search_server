@@ -41,7 +41,7 @@ public class sidebar_history {
     
         // list search history
         Iterator<plasmaSearchQuery> i = sb.localSearches.iterator();
-        String client = (String) header.get(httpHeader.CONNECTION_PROP_CLIENTIP);
+        String client = header.get(httpHeader.CONNECTION_PROP_CLIENTIP);
         plasmaSearchQuery query;
         int c = 0;
         HashSet<String> visibleQueries = new HashSet<String>();

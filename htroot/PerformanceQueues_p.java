@@ -69,13 +69,13 @@ public class PerformanceQueues_p {
         String threadName;
         serverBusyThread thread;
         
-        boolean xml = ((String)header.get("PATH")).endsWith(".xml");
+        boolean xml = (header.get("PATH")).endsWith(".xml");
         prop.setLocalized(!xml);
         
         // calculate totals
         long blocktime_total = 0, sleeptime_total = 0, exectime_total = 0;
         while (threads.hasNext()) {
-            threadName = (String) threads.next();
+            threadName = threads.next();
             thread = switchboard.getThread(threadName);
             blocktime_total += thread.getBlockTime();
             sleeptime_total += thread.getSleepTime();
@@ -93,7 +93,7 @@ public class PerformanceQueues_p {
         int c = 0;
         long idleCycles, busyCycles, memshortageCycles;
         while (threads.hasNext()) {
-            threadName = (String) threads.next();
+            threadName = threads.next();
             thread = switchboard.getThread(threadName);
             
             // set values to templates
@@ -149,9 +149,9 @@ public class PerformanceQueues_p {
                 switchboard.setConfig(threadName + "_memprereq", memprereq);
             } if ((post != null) && (post.containsKey("submitdefault"))) {
                 // load with new values
-                idlesleep = Long.parseLong(d((String) defaultSettings.get(threadName + "_idlesleep"), "1000"));
-                busysleep = Long.parseLong(d((String) defaultSettings.get(threadName + "_busysleep"),  "100"));
-                memprereq = Long.parseLong(d((String) defaultSettings.get(threadName + "_memprereq"),    "0"));
+                idlesleep = Long.parseLong(d(defaultSettings.get(threadName + "_idlesleep"), "1000"));
+                busysleep = Long.parseLong(d(defaultSettings.get(threadName + "_busysleep"),  "100"));
+                memprereq = Long.parseLong(d(defaultSettings.get(threadName + "_memprereq"),    "0"));
 
                 // check values to prevent short-cut loops
                 if (idlesleep < 1000) idlesleep = 1000;
