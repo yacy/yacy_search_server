@@ -123,9 +123,8 @@ public class diskUsage {
             // some kind of *nix
             if (usedOS <= UNIX_END) {
                 dfUnix (true);
-                for (int i = 0; i < allMountPoints.size(); i++){
+                for (int i = 0; i < allMountPoints.size(); i++)
                     usedVolumes.add(false);
-                }
                 
                 checkVolumesInUseUnix ("DATA");
                 checkMapedSubDirs ();
@@ -141,6 +140,8 @@ public class diskUsage {
             } else {
                 checkWindowsCommandVersion();
                 getAllVolumesWindows ();
+                for (int i = 0; i < allVolumes.size(); i++)
+                    usedVolumes.add(false);
                 checkStartVolume();
                 checkMapedSubDirs ();
                 for (int i = 0; i < allVolumes.size(); i++){
@@ -368,7 +369,7 @@ nextLine:
           return;
           
         int index = -1;
-        try { index = allVolumes.indexOf(path.substring(0, 1)); } catch (IndexOutOfBoundsException e) { return; }
+        try { index = usedVolumes.indexOf(path.substring(0, 1)); } catch (IndexOutOfBoundsException e) { return; }
         if (index > -1)
             usedVolumes.set(index, true);
     }
