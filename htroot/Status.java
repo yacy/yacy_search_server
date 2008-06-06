@@ -63,6 +63,7 @@ import de.anomic.server.serverSwitch;
 import de.anomic.tools.yFormatter;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyVersion;
+import de.anomic.yacy.resourceObserver;
 
 public class Status {
 
@@ -136,6 +137,15 @@ public class Status {
         } else {
             prop.put("protection", "1"); // protected
         }
+        
+        // free disk space
+        if ((adminaccess) && (!sb.observer.getDisksOK()))
+        {
+            String minFree = serverMemory.bytesToString(sb.observer.getMinFreeDiskSpace());
+            prop.put("warningDiskSpaceLow", "1");
+            prop.put("warningDiskSpaceLow_minSpace", minFree);
+        }
+        
         
         // version information
         String versionstring = yacyVersion.combined2prettyVersion(sb.getConfig("version","0.1"));

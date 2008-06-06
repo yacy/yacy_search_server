@@ -165,6 +165,7 @@ import de.anomic.server.serverThread;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.crypt;
 import de.anomic.tools.nxTools;
+import de.anomic.yacy.resourceObserver;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNewsPool;
@@ -227,6 +228,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     public  plasmaParser                   parser;
     public  volatile long                  proxyLastAccess, localSearchLastAccess, remoteSearchLastAccess;
     public  yacyCore                       yc;
+    public  resourceObserver               observer;
     public  userDB                         userDB;
     public  bookmarksDB                    bookmarksDB;
     public  plasmaWebStructure             webStructure;
@@ -1113,6 +1115,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             this.log.logSevere("Unable to load wiki parser, the wiki won't work", e);
         }
         
+        // initializing the resourceObserver
+        this.observer = new resourceObserver(this);
+        
         // initializing the stackCrawlThread
         this.crawlStacker = new CrawlStacker(this, this.plasmaPath, (int) getConfigLong("tableTypeForPreNURL", 0), (((int) getConfigLong("tableTypeForPreNURL", 0) == 0) && (getConfigLong(CRAWLSTACK_BUSYSLEEP, 0) <= 100)));
         //this.sbStackCrawlThread = new plasmaStackCrawlThread(this,this.plasmaPath,ramPreNURL);
@@ -1967,6 +1972,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
 */
             // update the cluster set
             this.clusterhashes = this.webIndex.seedDB.clusterHashes(getConfig("cluster.peers.yacydomain", ""));
+            
+            
+            // after all clean up is done, check the resource usage
+            observer.resourceObserverJob();
             
             return hasDoneSomething;
         } catch (InterruptedException e) {
