@@ -45,7 +45,7 @@ import java.util.Map;
 
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.logging.serverLog;
-import de.anomic.tools.DiskUsage;
+import de.anomic.tools.diskUsage;
 
 public final class resourceObserver {
     // The minimal free space on every used volume, for now set to 100 MB.
@@ -60,7 +60,7 @@ public final class resourceObserver {
     private final int CHECK_MEMORY_USAGE_FREQ = 1;
     
     private serverLog log = new serverLog("RESOURCE OBSERVER");
-    private DiskUsage du;
+    private diskUsage du;
     private plasmaSwitchboard sb;
 
     private int checkDiskUsageCount;
@@ -70,7 +70,7 @@ public final class resourceObserver {
     
     public resourceObserver(plasmaSwitchboard sb) {
         this.sb = sb;
-        du = new DiskUsage(sb);
+        du = new diskUsage(sb);
         
         if (!du.getUsable ())
             this.log.logWarning("Disk usage returned: " + du.getErrorMessage());

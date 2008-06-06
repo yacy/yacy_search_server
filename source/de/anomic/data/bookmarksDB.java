@@ -322,7 +322,7 @@ public class bookmarksDB {
 	// -------------------------------------------------
     
     // returning the number of tags
-    public int tagsSize(){					// TODO: shouldn't this be public int tagSize()
+    public int tagsSize(){
         return tagSize(false);
     }
     
@@ -336,7 +336,7 @@ public class bookmarksDB {
      * load/retrieve an object of type Tag from the tagsTable (also save it in tagCache)
      * @param hash an object of type String, containing a tagHash
      */
-    public Tag loadTag(String hash){	// TODO: check if loadTag() could be private
+    private Tag loadTag(String hash){
         HashMap<String, String> map;
         Tag ret=null;
         map = tagsTable.getMap(hash);
