@@ -52,6 +52,7 @@
   <property name="htdocsWWW" location="${data}/HTDOCS/www"/>
   <property name="release_main" location="${release}/MAIN"/>
   <property name="release_ext" location="${release}/EXT"/>
+  <property name="release_windows" location="${release}/WINDOWS"/>
   <property name="svnEntriesFile" location=".svn/entries"/>
   <property name="defaults" location="defaults"/>
   <property name="DESTDIR" value="DESTDIR"/>
@@ -368,7 +369,6 @@
         <include name="yacy.stopwords"/>
         <include name="yacy.parser"/>
         <include name="httpd.mime"/>
-        <include name="superseed.txt"/>
       </fileset>
     </copy>
 
@@ -425,6 +425,8 @@
         <include name="readme.txt"/>
         <include name="gpl.txt"/>
         <include name="ChangeLog"/>
+      	<include name="AUTHORS"/>
+      	<include name="COPYRIGHT"/>
       </fileset>
     </copy>
 
@@ -584,6 +586,8 @@
         <include name="readme.txt"/>
         <include name="gpl.txt"/>
         <include name="ChangeLog"/>
+      	<include name="AUTHORS"/>
+      	<include name="COPYRIGHT"/>
       </fileset>
     </copy>
 
@@ -672,7 +676,7 @@
         <include name="**/*.command"/>
       </tarfileset>
       <tarfileset dir="${release_main}" prefix="${releaseFileParentDir}/" dirmode="${accessRightsDir}" mode="${accessRightsFile}" >
-        <include name="**/*.*"/>
+        <include name="**/*"/>
         <exclude name="**/*.sh"/>
         <exclude name="**/*.command"/>
       </tarfileset>
@@ -684,7 +688,7 @@
 
     <delete dir="${release_main}"/>
     <delete dir="${release_ext}"/>
-    <delete dir="${release}/WINDOWS" failonerror="false" />
+    <delete dir="${release_windows}" failonerror="false" />
     <delete dir="${release}/SPECS" failonerror="false" />
   </target>
 
@@ -697,7 +701,7 @@
         <include name="**/*.command"/>
       </tarfileset>
       <tarfileset dir="${release_source}" prefix="${releaseFileParentDir}/" dirmode="${accessRightsDir}" mode="${accessRightsFile}" >
-        <include name="**/*.*"/>
+        <include name="**/*"/>
         <exclude name="**/*.sh"/>
         <exclude name="**/*.command"/>
       </tarfileset>
@@ -1007,24 +1011,28 @@
 
     <delete dir="${release}/SPECS" failonerror="false" />
     <delete dir="${release}/RPMS" failonerror="false" />
-    <delete dir="${release}/WINDOWS" failonerror="false" />
+    <delete dir="${release_windows}" failonerror="false" />
     <delete dir="${release_ext}" failonerror="false" />
   </target>
 
   <!-- Alias -->
   <target name="distWinInstaller" depends="winInstallerExe">
   </target>
-  <target name="winInstallerExe" depends="all" description="Creates the windows installer.exe">
+	
+  <target name="winInstallerExe" depends="compileExtensions,copyMain4Dist,copyExt4Dist" description="Creates the windows installer.exe">
     <!-- http://nsisant.sourceforge.net/ -->
-    <copy file="yacy.nsi" tofile="${release}/WINDOWS/yacy.nsi" overwrite="true" filtering="true" />
+    <mkdir dir="${release_windows}" />
+    <copy file="yacy.nsi" tofile="${release_windows}/yacy.nsi" overwrite="true" filtering="true" />
     <taskdef name="nsis" classname="net.sf.nsisant.Task">
       <classpath location="nsisant-1.2.jar"/>
     </taskdef>
-    <mkdir dir="${release}/WINDOWS" />
-    <nsis script="${release}/WINDOWS/yacy.nsi" nocd="yes" />
-    <move file="${release}/WINDOWS/yacy_v${releaseVersion}_${DSTAMP}_${releaseNr}.exe"
+    <nsis script="${release_windows}/yacy.nsi" nocd="yes" />
+    <move file="${release_windows}/yacy_v${releaseVersion}_${DSTAMP}_${releaseNr}.exe"
           tofile="${release}/yacy_v${releaseVersion}_${DSTAMP}_${releaseNr}.exe" />
-    <delete dir="${release}/WINDOWS" failonerror="false" />
+  	
+    <delete dir="${release_main}"/>
+    <delete dir="${release_ext}"/>
+    <delete dir="${release_windows}" failonerror="false" />
   </target>
 
 </project>

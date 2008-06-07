@@ -1,20 +1,24 @@
 ;yacy.nsi
 ;--------
 ;(C) 2004-2006 by Alexander Schier
+;(C) 2008 by David Wieditz
 
 Name "YaCy"
+Icon "RELEASE\MAIN\addon\YaCy.ico"
+UninstallIcon "${NSISDIR}\Contrib\Graphics\Icons\orange-uninstall.ico"
 
-OutFile "RELEASE/WINDOWS/yacy_v@REPL_VERSION@_@REPL_DATE@_@REPL_REVISION_NR@.exe"
+
+OutFile "RELEASE\WINDOWS\yacy_v@REPL_VERSION@_@REPL_DATE@_@REPL_REVISION_NR@.exe"
 InstallDir $PROGRAMFILES\YaCy
+InstallDirRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\YaCy" "UninstallString"
 
-SetCompress auto
-SetCompressor bzip2
+SetCompressor /SOLID LZMA
 
 InstType /CUSTOMSTRING=Custom
 
-InstType "Minimal"
+#InstType "Minimal"
 InstType "Normal"
-InstType "Full"
+#InstType "Full"
 
 ; The text to prompt the user to enter a directory
 ComponentText "This will install YaCy v@REPL_VERSION@ (Build @REPL_DATE@) on your computer. Select which optional things you want to be installed."
@@ -22,48 +26,52 @@ ComponentText "This will install YaCy v@REPL_VERSION@ (Build @REPL_DATE@) on you
 #DirText "If an old version was installed into another location (eg. AnomicHTTPProxy), you have to move the DATA Directory to the new location."
 DirText "Choose a directory to install into:"
 
-LicenseText "You must agree to this license to install YaCy"
+LicenseText "You must agree to this license to install YaCy."
 LicenseData "gpl.txt"
 
 Section "Binaries (required)"
 	SectionIn 1 2 3 RO
 	SetOutPath $INSTDIR
+	
+	File /r "RELEASE\MAIN\*"
+	File /r "RELEASE\EXT\*"
+/*
 	#main files
-	File "httpd.mime"
 	File "startYACY.bat"
-	File "startYACY_Win9x.bat"
-	File "startYACY_noconsole_Win9x.bat"
 	File "startYACY_noconsole.bat"
 	File "stopYACY.bat"
-	File "stopYACY_Win9x.bat"
-	#File "httpProxy.command" ##Apple
-	#File "httpProxy.sh"      ##UNIX
-	File "yacy.yellow"
-	File "yacy.stopwords"
-	File "yacy.badwords.example"
+	#File "startYACY_Win9x.bat"
+	#File "startYACY_noconsole_Win9x.bat"
+	#File "stopYACY_Win9x.bat"
 	
+	File "httpd.mime"
+	File "yacy.badwords.example"
+	File "yacy.logging"
+	File "yacy.stopwords"
+	File "yacy.yellow"
+
+	#texts
+	File "AUTHORS"
+	File "COPYRIGHT"
+	File "gpl.txt"
+	File "readme.txt"
+	File "ChangeLog"
+
 	#defaults
 	SetOutPath "$INSTDIR\defaults"
 	File /r "defaults\*"
-
-	#texts
-	File "readme.txt"
-	File "gpl.txt"
-	File "superseed.txt"
-	File "yacy.stopwords"
-	File "yacy.logging"
-	File "ChangeLog"
-	File "AUTHORS"
-	File "COPYRIGHT"
-	File "yacy.stopwords.de"
+	
+	#classes
+	SetOutPath "$INSTDIR\classes"
+	File /r "classes\*"
 	
 	#lib
 	SetOutPath "$INSTDIR\lib"
 	File /r "lib\*"
 
-	#classes
-	SetOutPath "$INSTDIR\classes"
-	File /r "classes\*"
+	#libx
+	SetOutPath "$INSTDIR\libx"
+	File /r "libx\*"
 
 	#locales
 	SetOutPath "$INSTDIR\locales"
@@ -131,15 +139,16 @@ Section "Binaries (required)"
 	File /r "ranking\*"
 
 	SetOutPath $INSTDIR
+*/
 
 
-
-	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\YACY" "DisplayName" "YACY"
-	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\YACY" "UninstallString" '"$INSTDIR\uninstall.exe"'
+	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\YaCy" "DisplayName" "YaCy"
+	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\YaCy" "UninstallString" '"$INSTDIR\uninstall.exe"'
 	WriteUninstaller "uninstall.exe"
 
 SectionEnd
 
+/*
 Section "Addons"
 	SectionIn 2 3
 	SetOutPath $INSTDIR\addon
@@ -147,6 +156,7 @@ Section "Addons"
 
 	SetOutPath $INSTDIR
 SectionEnd
+*/
 
 #Section "Docs"
 #	SectionIn 2 3
@@ -155,7 +165,7 @@ SectionEnd
 #
 #	SetOutPath $INSTDIR
 #SectionEnd
-
+/*
 Section "Development"
 	SectionIn 3
 	SetOutPath $INSTDIR\source
@@ -174,20 +184,19 @@ Section "Development"
 	File "htroot\htdocsdefault\*.java"
 	SetOutPath "$INSTDIR\htroot\www"
 	File "htroot\www\*.java"
+	
 SectionEnd
-
+*/
 Section "Shortcuts in the Start Menu"
 	SectionIn 1 2 3
 	SetOutPath "$INSTDIR"
-	CreateDirectory "$SMPROGRAMS\YACY"
-	CreateShortCut "$SMPROGRAMS\YACY\start YACY.pif" "$INSTDIR\startYACY.bat"
-	CreateShortCut "$SMPROGRAMS\YACY\start YACY(no console).pif" "$INSTDIR\startYACY_noconsole.bat"
-	CreateShortCut "$SMPROGRAMS\YACY\stop YACY.pif" "$INSTDIR\stopYACY.bat"
-	CreateShortCut "$SMPROGRAMS\YACY\Readme.lnk" "$INSTDIR\readme.txt"
-	CreateShortCut "$SMPROGRAMS\YACY\Uninstall.lnk" "$INSTDIR\Uninstall.exe"
-	SetOutPath "$SMPROGRAMS\YACY"
-	File "addon\YACY-Search.url"
-	SetOutPath "$INSTDIR"
+	CreateDirectory "$SMPROGRAMS\YaCy"
+	CreateShortCut "$SMPROGRAMS\YaCy\start YaCy.lnk" "$INSTDIR\startYACY.bat" "" "$INSTDIR\addon\YaCy.ico"
+	CreateShortCut "$SMPROGRAMS\YaCy\start YaCy (no console).lnk" "$INSTDIR\startYACY_noconsole.bat" "" "$INSTDIR\addon\YaCy.ico"
+	CreateShortCut "$SMPROGRAMS\YaCy\stop YaCy.lnk" "$INSTDIR\stopYACY.bat" "" "$INSTDIR\addon\YaCy.ico"
+	CreateShortCut "$SMPROGRAMS\YaCy\Readme.lnk" "$INSTDIR\readme.txt"
+	CreateShortCut "$SMPROGRAMS\YaCy\Uninstall.lnk" "$INSTDIR\Uninstall.exe"
+	CreateShortCut "$SMPROGRAMS\YaCy\YaCy-Search.lnk" "$INSTDIR\addon\YaCy-Search.url" "" "$INSTDIR\addon\YaCy.ico"
 SectionEnd
 
 #Section "YACY on the Desktop"
@@ -196,40 +205,41 @@ SectionEnd
 #	CreateShortCut "$DESKTOP\start YACY.lnk" ""
 #SectionEnd
 
-Section "YaCy-Console on the Desktop"
+Section "YaCy on the Desktop"
 	SectionIn 1 2 3
-	SetOutPath "$INSTDIR"
-	CreateShortCut "$DESKTOP\YaCy-Console.pif" "$INSTDIR\startYACY.bat"
+	CreateShortCut "$DESKTOP\YaCy.lnk" "$INSTDIR\startYACY.bat" "" "$INSTDIR\addon\YaCy.ico"
+SectionEnd
+
+Section "Searchpage on the Desktop"
+	CreateShortCut "$DESKTOP\YaCy-Search.lnk" "$INSTDIR\addon\YaCy-Search.url" "" "$INSTDIR\addon\YaCy.ico"
 SectionEnd
 
 Section "Searchpage in the Quicklaunch"
 	SectionIn 1 2 3
-	SetOutPath $QUICKLAUNCH
-	File "addon\YACY-Search.url"
-	SetOutPath $INSTDIR
+	CreateShortCut "$QUICKLAUNCH\YaCy-Search.lnk" "$INSTDIR\addon\YaCy-Search.url" "" "$INSTDIR\addon\YaCy.ico"
 SectionEnd
 
-Section "Searchpage on the Desktop"
-	SetOutPath $DESKTOP
-	File "addon\YACY-Search.url"
-	SetOutPath $INSTDIR
-SectionEnd
-
-Section "Proxy-Console in Startup"
-	SetOutPath "$INSTDIR"
-	CreateShortCut "$SMSTARTUP\YACY-Console.pif" "$INSTDIR\startYACY.bat"
+Section "YaCy in Startup"
+	CreateShortCut "$SMSTARTUP\start YaCy (no console).lnk" "$INSTDIR\startYACY_noconsole.bat" "" "$INSTDIR\addon\YaCy.ico"
 SectionEnd
 
 Section "Uninstall"
-	DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\YACY"
 
-	RMDir /r "$INSTDIR\classes"
-	RMDir /r "$INSTDIR\lib"
-	RMDir /r "$INSTDIR\doc"
-	RMDir /r "$INSTDIR\htroot"
-	RMDir /r "$INSTDIR\locales"
-	RMDir /r "$INSTDIR\source"
+	MessageBox MB_YESNO|MB_ICONQUESTION "Do you really want to uninstall YaCy?" IDNO nouninstall
+
+	DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\YaCy"
+
 	RMDir /r "$INSTDIR\addon"
+	RMDir /r "$INSTDIR\classes"
+	RMDir /r "$INSTDIR\defaults"
+#	RMDir /r "$INSTDIR\doc"
+	RMDir /r "$INSTDIR\htroot"
+	RMDir /r "$INSTDIR\lib"
+	RMDir /r "$INSTDIR\libx"
+	RMDir /r "$INSTDIR\locales"
+	RMDir /r "$INSTDIR\ranking"
+	RMDir /r "$INSTDIR\skins"
+	RMDir /r "$INSTDIR\source"
 	Delete "$INSTDIR\*.*"
 
 	MessageBox MB_YESNO|MB_ICONQUESTION "Do you want to keep the Data (i.e. if you want to reinstall later)?" IDYES keepdata
@@ -239,9 +249,11 @@ Section "Uninstall"
 	
 	#or jump to this
 	keepdata:
-	RMDir /r "$SMPROGRAMS\YACY"
-	Delete "$QUICKLAUNCH\YACY-Search.url"
-	Delete "$DESKTOP\YACY-Search.url"
-	Delete "$DESKTOP\YACY-Console.pif"
-	Delete "$SMSTARTUP\YACY-Console.pif"
+	RMDir /r "$SMPROGRAMS\YaCy"
+	Delete "$QUICKLAUNCH\YaCy-Search.lnk"
+	Delete "$DESKTOP\YaCy.lnk"
+	Delete "$DESKTOP\YaCy-Search.lnk"
+	Delete "$SMSTARTUP\start YaCy (no console).lnk"
+	
+	nouninstall:
 SectionEnd
