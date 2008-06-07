@@ -66,7 +66,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import de.anomic.kelondro.kelondroBase64Order;
-import de.anomic.kelondro.kelondroDyn;
+import de.anomic.kelondro.kelondroBLOBTree;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMapObjects;
 import de.anomic.kelondro.kelondroNaturalOrder;
@@ -83,7 +83,7 @@ public class blogBoard {
     public blogBoard(File actpath) {
     		new File(actpath.getParent()).mkdir();
         if (database == null) {
-            database = new kelondroMapObjects(new kelondroDyn(actpath, true, true, keyLength, recordSize, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 500);
+            database = new kelondroMapObjects(new kelondroBLOBTree(actpath, true, true, keyLength, recordSize, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 500);
         }
     }
     public int size() {

@@ -33,15 +33,15 @@ import java.util.Iterator;
 
 public class kelondroObjects {
 
-    private kelondroDyn dyn;
+    private kelondroBLOBTree blob;
     private kelondroMScoreCluster<String> cacheScore;
     private HashMap<String, kelondroObjectsEntry> cache;
     private long startup;
     private int cachesize;
 
 
-    public kelondroObjects(kelondroDyn dyn, int cachesize) {
-        this.dyn = dyn;
+    public kelondroObjects(kelondroBLOBTree blob, int cachesize) {
+        this.blob = blob;
         this.cache = new HashMap<String, kelondroObjectsEntry>();
         this.cacheScore = new kelondroMScoreCluster<String>();
         this.startup = System.currentTimeMillis();
@@ -49,13 +49,13 @@ public class kelondroObjects {
     }
     
     public void clear() throws IOException {
-    	this.dyn.clear();
+    	this.blob.clear();
         this.cache = new HashMap<String, kelondroObjectsEntry>();
         this.cacheScore = new kelondroMScoreCluster<String>();
     }
 
     public int keySize() {
-        return dyn.row().width(0);
+        return blob.keylength();
     }
 
     public synchronized void set(String key, kelondroObjectsEntry newMap) throws IOException {
@@ -65,7 +65,7 @@ public class kelondroObjects {
         if (cacheScore == null) return; // may appear during shutdown
 
         // write entry
-        kelondroRA kra = dyn.getRA(key);
+        kelondroRA kra = blob.getRA(key);
         newMap.write(kra);
         kra.close();
 
@@ -86,7 +86,7 @@ public class kelondroObjects {
         cache.remove(key);
 
         // remove from file
-        dyn.remove(key);
+        blob.remove(key);
     }
 
     public synchronized kelondroObjectsEntry get(final String key) throws IOException {
@@ -102,10 +102,10 @@ public class kelondroObjects {
         if (map != null) return map;
 
         // load map from kra
-        if (!(dyn.existsDyn(key))) return null;
+        if (!(blob.exist(key))) return null;
         
         // read object
-        kelondroRA kra = dyn.getRA(key);
+        kelondroRA kra = blob.getRA(key);
         map = new kelondroObjectsMapEntry(kra);
         kra.close();
 
@@ -134,13 +134,13 @@ public class kelondroObjects {
 
     public synchronized kelondroCloneableIterator<String> keys(final boolean up, final boolean rotating) throws IOException {
         // simple enumeration of key names without special ordering
-        return dyn.dynKeys(up, rotating);
+        return blob.keys(up, rotating);
     }
 
     public synchronized kelondroCloneableIterator<String> keys(final boolean up, final boolean rotating, final byte[] firstKey, final byte[] secondKey) throws IOException {
         // simple enumeration of key names without special ordering
-        kelondroCloneableIterator<String> i = dyn.dynKeys(up, firstKey);
-        if (rotating) return new kelondroRotateIterator<String>(i, secondKey, dyn.sizeDyn()); else return i;
+        kelondroCloneableIterator<String> i = blob.keys(up, firstKey);
+        if (rotating) return new kelondroRotateIterator<String>(i, secondKey, blob.size()); else return i;
     }
 
 
@@ -153,7 +153,7 @@ public class kelondroObjects {
     }
 
     public synchronized int size() {
-        return dyn.sizeDyn();
+        return blob.size();
     }
 
     public void close() {
@@ -164,7 +164,7 @@ public class kelondroObjects {
         cacheScore = null;
 
         // close file
-        dyn.close();
+        blob.close();
     }
 
     public class objectIterator implements Iterator<kelondroObjectsEntry> {

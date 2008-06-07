@@ -72,7 +72,7 @@ import java.util.regex.Pattern;
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.http.httpHeader;
 import de.anomic.kelondro.kelondroBase64Order;
-import de.anomic.kelondro.kelondroDyn;
+import de.anomic.kelondro.kelondroBLOBTree;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroMapObjects;
 import de.anomic.plasma.cache.IResourceInfo;
@@ -279,7 +279,7 @@ public final class plasmaHTCache {
     private static void openResponseHeaderDB() {
         // open the response header database
         File dbfile = new File(cachePath, DB_NAME);
-        responseHeaderDB = new kelondroMapObjects(new kelondroDyn(dbfile, true, true, yacySeedDB.commonHashLength, 150, '#', kelondroBase64Order.enhancedCoder, false, false, true), 500);
+        responseHeaderDB = new kelondroMapObjects(new kelondroBLOBTree(dbfile, true, true, yacySeedDB.commonHashLength, 150, '#', kelondroBase64Order.enhancedCoder, false, false, true), 500);
     }
     
     private static void deleteOldHTCache(File directory) {

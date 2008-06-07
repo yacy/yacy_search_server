@@ -76,7 +76,7 @@ import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterWriter;
 import de.anomic.index.indexWord;
 import de.anomic.kelondro.kelondroCloneableIterator;
-import de.anomic.kelondro.kelondroDyn;
+import de.anomic.kelondro.kelondroBLOBTree;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMapObjects;
 import de.anomic.kelondro.kelondroNaturalOrder;
@@ -116,17 +116,17 @@ public class bookmarksDB {
         tagCache=new HashMap<String, Tag>();
         bookmarksFile.getParentFile().mkdirs();
         //this.bookmarksTable = new kelondroMap(kelondroDyn.open(bookmarksFile, bufferkb * 1024, preloadTime, 12, 256, '_', true, false));
-        this.bookmarksTable = new kelondroObjects(new kelondroDyn(bookmarksFile, true, true, 12, 256, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 1000);
+        this.bookmarksTable = new kelondroObjects(new kelondroBLOBTree(bookmarksFile, true, true, 12, 256, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 1000);
 
         // tags
         tagsFile.getParentFile().mkdirs();
         boolean tagsFileExisted = tagsFile.exists();
-        this.tagsTable = new kelondroMapObjects(new kelondroDyn(tagsFile, true, true, 12, 256, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 500);
+        this.tagsTable = new kelondroMapObjects(new kelondroBLOBTree(tagsFile, true, true, 12, 256, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 500);
         if (!tagsFileExisted) rebuildTags();
 
         // dates
         boolean datesExisted = datesFile.exists();
-        this.datesTable = new kelondroMapObjects(new kelondroDyn(datesFile, true, true, 20, 256, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 500);
+        this.datesTable = new kelondroMapObjects(new kelondroBLOBTree(datesFile, true, true, 20, 256, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 500);
         if (!datesExisted) rebuildDates();
 
     }

@@ -50,7 +50,7 @@ import java.util.Iterator;
 import java.util.TimeZone;
 
 import de.anomic.kelondro.kelondroBase64Order;
-import de.anomic.kelondro.kelondroDyn;
+import de.anomic.kelondro.kelondroBLOBTree;
 import de.anomic.kelondro.kelondroMapObjects;
 import de.anomic.kelondro.kelondroNaturalOrder;
 
@@ -72,7 +72,7 @@ public class messageBoard {
     public messageBoard(File path) {
         new File(path.getParent()).mkdir();
         if (database == null) {
-            database = new kelondroMapObjects(new kelondroDyn(path, true, true, categoryLength + dateFormat.length() + 2, recordSize, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 500);
+            database = new kelondroMapObjects(new kelondroBLOBTree(path, true, true, categoryLength + dateFormat.length() + 2, recordSize, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 500);
         }
         sn = 0;
     }

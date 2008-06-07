@@ -50,7 +50,7 @@ import java.util.Iterator;
 import java.util.TimeZone;
 
 import de.anomic.kelondro.kelondroBase64Order;
-import de.anomic.kelondro.kelondroDyn;
+import de.anomic.kelondro.kelondroBLOBTree;
 import de.anomic.kelondro.kelondroMapObjects;
 import de.anomic.kelondro.kelondroNaturalOrder;
 
@@ -73,11 +73,11 @@ public class wikiBoard {
     public wikiBoard(File actpath, File bkppath) {
         new File(actpath.getParent()).mkdirs();
         if (datbase == null) {
-            datbase = new kelondroMapObjects(new kelondroDyn(actpath, true, true, keyLength, recordSize, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 500);
+            datbase = new kelondroMapObjects(new kelondroBLOBTree(actpath, true, true, keyLength, recordSize, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 500);
         }
         new File(bkppath.getParent()).mkdirs();
         if (bkpbase == null) {
-            bkpbase = new kelondroMapObjects(new kelondroDyn(bkppath, true, true, keyLength + dateFormat.length(), recordSize, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 500);
+            bkpbase = new kelondroMapObjects(new kelondroBLOBTree(bkppath, true, true, keyLength + dateFormat.length(), recordSize, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 500);
         }
     }
 

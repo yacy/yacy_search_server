@@ -41,12 +41,12 @@ public class kelondroMapObjects extends kelondroObjects {
     private HashMap<String, Object> accMap; // to store accumulations of specific fields
     private int elementCount;
     
-    public kelondroMapObjects(kelondroDyn dyn, int cachesize) {
+    public kelondroMapObjects(kelondroBLOBTree dyn, int cachesize) {
         this(dyn, cachesize, null, null, null, null, null);
     }
     
 	@SuppressWarnings({ "unchecked", "null" })
-	public kelondroMapObjects(kelondroDyn dyn, int cachesize, String[] sortfields, String[] longaccfields, String[] doubleaccfields, Method externalInitializer, Object externalHandler) {
+	public kelondroMapObjects(kelondroBLOBTree dyn, int cachesize, String[] sortfields, String[] longaccfields, String[] doubleaccfields, Method externalInitializer, Object externalHandler) {
         super(dyn, cachesize);
         
         // create fast ordering clusters and acc fields
@@ -85,7 +85,7 @@ public class kelondroMapObjects extends kelondroObjects {
 
         // fill cluster and accumulator with values
         if ((sortfields != null) || (longaccfields != null) || (doubleaccfields != null)) try {
-            kelondroCloneableIterator<String> it = dyn.dynKeys(true, false);
+            kelondroCloneableIterator<String> it = dyn.keys(true, false);
             String mapname;
             Object cell;
             long valuel;

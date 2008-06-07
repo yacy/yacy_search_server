@@ -76,9 +76,9 @@ public class kelondroMapTable {
         if (mTables.containsKey(tablename)) throw new RuntimeException("kelondroTables.declareMap: table '" + tablename + "' declared twice.");
         if (tTables.containsKey(tablename)) throw new RuntimeException("kelondroTables.declareMap: table '" + tablename + "' declared already in other context.");
         File tablefile = new File(tablesPath, "table." + tablename + ".mdb");
-        kelondroDyn dyn;
+        kelondroBLOBTree dyn;
         if (!(tablefile.exists())) tablefile.getParentFile().mkdirs();
-        dyn = new kelondroDyn(tablefile, true, true, keysize, nodesize, fillChar, objectOrder, true, false, resetOnFail);
+        dyn = new kelondroBLOBTree(tablefile, true, true, keysize, nodesize, fillChar, objectOrder, true, false, resetOnFail);
         kelondroMapObjects map = new kelondroMapObjects(dyn, cacheslots, sortfields, longaccfields, doubleaccfields, null, null);
         mTables.put(tablename, map);
     }

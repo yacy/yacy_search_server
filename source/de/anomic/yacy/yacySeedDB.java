@@ -66,7 +66,7 @@ import de.anomic.http.httpHeader;
 import de.anomic.http.httpd;
 import de.anomic.http.httpdAlternativeDomainNames;
 import de.anomic.kelondro.kelondroBase64Order;
-import de.anomic.kelondro.kelondroDyn;
+import de.anomic.kelondro.kelondroBLOBTree;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroMapObjects;
@@ -258,11 +258,11 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
             initializeHandlerMethod = null;
         }
         try {
-            return new kelondroMapObjects(new kelondroDyn(seedDBFile, true, true, commonHashLength, 480, '#', kelondroBase64Order.enhancedCoder, usetree, false, true), 500, sortFields, longaccFields, doubleaccFields, initializeHandlerMethod, this);
+            return new kelondroMapObjects(new kelondroBLOBTree(seedDBFile, true, true, commonHashLength, 480, '#', kelondroBase64Order.enhancedCoder, usetree, false, true), 500, sortFields, longaccFields, doubleaccFields, initializeHandlerMethod, this);
         } catch (Exception e) {
             // try again
-            kelondroDyn.delete(seedDBFile);
-            return new kelondroMapObjects(new kelondroDyn(seedDBFile, true, true, commonHashLength, 480, '#', kelondroBase64Order.enhancedCoder, usetree, false, true), 500, sortFields, longaccFields, doubleaccFields, initializeHandlerMethod, this);
+            kelondroBLOBTree.delete(seedDBFile);
+            return new kelondroMapObjects(new kelondroBLOBTree(seedDBFile, true, true, commonHashLength, 480, '#', kelondroBase64Order.enhancedCoder, usetree, false, true), 500, sortFields, longaccFields, doubleaccFields, initializeHandlerMethod, this);
         }
     }
     
