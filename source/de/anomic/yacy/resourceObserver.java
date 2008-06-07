@@ -136,7 +136,7 @@ public final class resourceObserver {
             String key = entry.getKey();
             long[] val = entry.getValue();
             if (val[1] < MIN_FREE_DISK_SPACE) {
-                this.log.logWarning("Volume: " + key + " free space to low");
+                this.log.logWarning("Volume " + key + ": free space is too low");
                 below = true;
             }
         }
