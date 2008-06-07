@@ -353,17 +353,27 @@ public class kelondroMapObjects extends kelondroObjects {
 
         Iterator<String> keyIterator;
         boolean finish;
+        HashMap<String, String> n;
 
         public mapIterator(Iterator<String> keyIterator) {
             this.keyIterator = keyIterator;
             this.finish = false;
+            this.n = next0();
         }
 
         public boolean hasNext() {
-            return (!(finish)) && (keyIterator != null) && (keyIterator.hasNext());
+            return this.n != null;
         }
 
         public HashMap<String, String> next() {
+            HashMap<String, String> n1 = n;
+            n = next0();
+            return n1;
+        }
+        
+        private HashMap<String, String> next0() {
+            if (finish) return null;
+            if (keyIterator == null) return null;
             String nextKey;
             HashMap<String, String> map;
             while (keyIterator.hasNext()) {
@@ -377,7 +387,7 @@ public class kelondroMapObjects extends kelondroObjects {
                 map.put("key", nextKey);
                 return map;
             }
-            throw new kelondroException("no more elements available");
+            return null;
         }
 
         public void remove() {
