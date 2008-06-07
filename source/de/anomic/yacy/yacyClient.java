@@ -966,7 +966,7 @@ public final class yacyClient {
         post.add(new StringPart("entryc", Integer.toString(indexcount)));
         post.add(new StringPart("indexes", entrypost.toString()));  
         try {
-            final byte[] content = wput("http://" + address + "/yacy/transferRWI.html", targetSeed.getHexHash() + ".yacyh", post, gzipBody);
+            final byte[] content = wput("http://" + address + "/yacy/transferRWI.html", targetSeed.getHexHash() + ".yacyh", post, timeout, gzipBody);
             final ArrayList<String> v = nxTools.strings(content, "UTF-8");
             // this should return a list of urlhashes that are unknown
             if ((v != null) && (v.size() > 0)) {
@@ -1012,7 +1012,7 @@ public final class yacyClient {
         }
         post.add(new StringPart("urlc", Integer.toString(urlc)));
         try {
-            final byte[] content = wput("http://" + address + "/yacy/transferURL.html", targetSeed.getHexHash() + ".yacyh", post, gzipBody);
+            final byte[] content = wput("http://" + address + "/yacy/transferURL.html", targetSeed.getHexHash() + ".yacyh", post, timeout, gzipBody);
             final ArrayList<String> v = nxTools.strings(content, "UTF-8");
             
             if ((v != null) && (v.size() > 0)) {
