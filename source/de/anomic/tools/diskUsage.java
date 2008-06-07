@@ -364,14 +364,26 @@ nextLine:
         File file = new File("DATA");
 
         String path = null;
-        try { path = file.getCanonicalPath().toString(); } catch (IOException e) { return; }
+        try { path = file.getCanonicalPath().toString(); } catch (IOException e) {
+            errorMessage = "Cant get DATA directory";
+            usable = false;
+            return;
+        }
         if (path.length() < 6)
           return;
           
         int index = -1;
-        try { index = usedVolumes.indexOf(path.substring(0, 1)); } catch (IndexOutOfBoundsException e) { return; }
+        try { index = allVolumes.indexOf(path.substring(0, 1)); } catch (IndexOutOfBoundsException e) {
+            errorMessage = "Start volume not found in all volumes";
+            usable = false;
+            return;
+        }
         if (index > -1)
             usedVolumes.set(index, true);
+        else {
+            errorMessage = "No start volume found";
+            usable = false;
+        }
     }
 
     public void dfWindows () {
