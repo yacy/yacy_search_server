@@ -101,6 +101,7 @@ public class Collage {
         if (fifoSize > 0) {
             prop.put("imgurl", "1");        
             int c = 0;
+            int yOffset = embed ? 0 : 70;
             for (int i = 0; i < fifoSize; i++) {
              
                 yacyURL baseURL = origins[i].baseURL;
@@ -111,14 +112,17 @@ public class Collage {
                 if ((serverCore.isLocalhost(baseURL.getHost()) || serverCore.isLocalhost(imageURL.getHost())) &&
                     sb.getConfigBool("adminAccountForLocalhost", false)) continue;
                 
+                long z = imgZIndex[i];
                 prop.put("imgurl_list_" + c + "_url",
                        "<a href=\"" + baseURL.toNormalform(true, false) + "\">"
                        + "<img src=\"" + imageURL.toNormalform(true, false) + "\" "
                        + "style=\""
                        + ((imgWidth[i] == 0 || imgHeight[i] == 0) ? "" : "width:" + imgWidth[i] + "px;height:" + imgHeight[i] + "px;")
-                       + "position:absolute;top:" + imgPosY[i]
+                       + "position:absolute;top:" + (imgPosY[i] + yOffset)
                        + "px;left:" + imgPosX[i]
-                       + "px;z-index:" + imgZIndex[i] + "\""
+                       + "px;z-index:" + z + "\" "
+                       + "id=\"col" + z + "\" "
+                       + "onmouseover=\"raise(" + z + ")\" onmouseout=\"lower(" + z + ")\" "
                        + "title=\"" + baseURL.toNormalform(true, false) + "\">"
                        + "</a><br>");
                 c++;

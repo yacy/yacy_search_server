@@ -17,6 +17,24 @@ form dd {
 }
 </style>
 <meta http-equiv="REFRESH" content="#[refresh]#" />
+<script type="text/javascript">
+var CollageLastImageZIndex;
+
+function raise (element)
+{
+  var img = document.getElementById("col" + element);
+
+  CollageLastImageZIndex = img.style.zIndex;
+  img.style.zIndex = 0xffff;
+}
+
+function lower (element)
+{
+  var img = document.getElementById("col" + element);
+
+  img.style.zIndex = CollageLastImageZIndex;
+}
+</script>
 </head>
 <body>
 #(emb)#
