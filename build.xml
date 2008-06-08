@@ -427,6 +427,7 @@
         <include name="ChangeLog"/>
       	<include name="AUTHORS"/>
       	<include name="COPYRIGHT"/>
+      	<include name="NOTICE"/>
       </fileset>
     </copy>
 
@@ -588,6 +589,7 @@
         <include name="ChangeLog"/>
       	<include name="AUTHORS"/>
       	<include name="COPYRIGHT"/>
+      	<include name="NOTICE"/>
       </fileset>
     </copy>
 
@@ -657,7 +659,7 @@
         <include name="**/*.command"/>
       </tarfileset>
       <tarfileset dir="${release_main}" prefix="${releaseFileParentDir}/" dirmode="${accessRightsDir}" mode="${accessRightsFile}" >
-        <include name="**/*.*"/>
+        <include name="**/*"/>
         <exclude name="**/*.sh"/>
         <exclude name="**/*.command"/>
       </tarfileset>
@@ -742,7 +744,6 @@
         <include name="yacy.stopwords"/>
         <include name="yacy.parser"/>
         <include name="httpd.mime"/>
-        <include name="superseed.txt"/>
       </fileset>
     </copy>
 
@@ -786,6 +787,9 @@
         <include name="readme.txt"/>
         <include name="gpl.txt"/>
         <include name="ChangeLog"/>
+      	<include name="AUTHORS"/>
+      	<include name="COPYRIGHT"/>
+      	<include name="NOTICE"/>
       </fileset>
     </copy>
 
