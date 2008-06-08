@@ -733,16 +733,6 @@
       </fileset>
     </copy>
 
-    <!-- copy libs -->
-    <copy todir="${DESTDIR}/usr/share/java/yacy/">
-      <fileset dir="${lib}" 
-               includes="**/*"/>
-    </copy>
-    <copy todir="${DESTDIR}/usr/share/java/yacy/">
-      <fileset dir="${libx}" 
-               includes="**/*"/>
-    </copy>
-
     <!-- copy configuration files -->
     <copy todir="${DESTDIR}/usr/share/yacy">
       <fileset dir=".">
