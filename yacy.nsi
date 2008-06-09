@@ -3,7 +3,8 @@
 ;(C) 2004-2006 by Alexander Schier
 ;(C) 2008 by David Wieditz
 
-!define JRE_VERSION "1.6"
+!define JRE_VERSION6 "1.6"
+!define JRE_VERSION5 "1.5"
 !define JRE_URL "http://javadl.sun.com/webapps/download/AutoDL?BundleId=18714&/jre-6u5-windows-i586-p.exe"
 
 Name "YaCy"
@@ -264,7 +265,7 @@ SectionEnd
 
 Function GetJRE
 # based on http://nsis.sourceforge.net/Simple_Java_Runtime_Download_Script
-	MessageBox MB_OK "YaCy uses Java ${JRE_VERSION}. It will now be downloaded and installed."
+	MessageBox MB_OK "YaCy uses Java ${JRE_VERSION6}. It will now be downloaded and installed."
 
 	StrCpy $2 "$TEMP\Java Runtime Environment.exe"
 	nsisdl::download /TIMEOUT=30000 ${JRE_URL} $2
@@ -278,7 +279,8 @@ FunctionEnd
 
 Function DetectJRE
 	ReadRegStr $2 HKLM "SOFTWARE\JavaSoft\Java Runtime Environment" "CurrentVersion"
-	StrCmp $2 ${JRE_VERSION} doneDetectJRE
+	StrCmp $2 ${JRE_VERSION6} doneDetectJRE
+	StrCmp $2 ${JRE_VERSION5} doneDetectJRE
 	Call GetJRE
 	doneDetectJRE:
 FunctionEnd
