@@ -1983,7 +1983,7 @@ You are running a server in senior mode and you support the global internet inde
 which you can also <a href="index.html">search yourself</a>.==den Sie auch selbst <a href="index.html">durchsuchen</a> k&ouml;nnen.
 You have a principal peer because you publish your seed-list to a public accessible server==Sie haben einen Principal Peer, weil Sie Ihre Seed-Liste auf einen &ouml;ffentlich zug&auml;nglichen Server hoch laden,
 where it can be retrieved using the URL==von wo aus sie unter folgender Adresse erreichbar ist:
-Your Web Page Indexer is idle. You can start your own web crawl <a href="CrawlStartSimple_p.html">here</a>==Ihr Webseiten Indexierer ist unt&auml;tig. Sie k&ouml;nnen <a href="CrawlStartSimple_p.html">hier</a> einen Web Crawl starten 
+Your Web Page Indexer is idle. You can start your own web crawl <a href="CrawlStart_p.html">here</a>==Ihr Webseiten Indexierer ist unt&auml;tig. Sie k&ouml;nnen <a href="CrawlStart_p.html">hier</a> einen Web Crawl starten 
 Your Web Page Indexer is busy. You can <a href="WatchCrawler_p.html">monitor your web crawl</a> here.==Ihr Webseiten Indexierer ist besch&auml;ftigt. Sie k&ouml;nnen Ihren Web Crawl <a href="WatchCrawler_p.html">hier</a> kontrollieren
 #-----------------------------
 
