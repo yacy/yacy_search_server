@@ -3,6 +3,9 @@
 ;(C) 2004-2006 by Alexander Schier
 ;(C) 2008 by David Wieditz
 
+!define JRE_VERSION "1.6"
+!define JRE_URL "http://javadl.sun.com/webapps/download/AutoDL?BundleId=18714&/jre-6u5-windows-i586-p.exe"
+
 Name "YaCy"
 Icon "RELEASE\MAIN\addon\YaCy.ico"
 UninstallIcon "${NSISDIR}\Contrib\Graphics\Icons\orange-uninstall.ico"
@@ -146,6 +149,7 @@ Section "Binaries (required)"
 	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\YaCy" "UninstallString" '"$INSTDIR\uninstall.exe"'
 	WriteUninstaller "uninstall.exe"
 
+	Call DetectJRE
 SectionEnd
 
 /*
@@ -257,3 +261,24 @@ Section "Uninstall"
 	
 	nouninstall:
 SectionEnd
+
+Function GetJRE
+# based on http://nsis.sourceforge.net/Simple_Java_Runtime_Download_Script
+	MessageBox MB_OK "YaCy uses Java ${JRE_VERSION}. It will now be downloaded and installed."
+
+	StrCpy $2 "$TEMP\Java Runtime Environment.exe"
+	nsisdl::download /TIMEOUT=30000 ${JRE_URL} $2
+	Pop $R0 ;Get the return value
+		StrCmp $R0 "success" +3
+		MessageBox MB_OK "Download failed: $R0"
+		Return
+	ExecWait $2
+	Delete $2
+FunctionEnd
+
+Function DetectJRE
+	ReadRegStr $2 HKLM "SOFTWARE\JavaSoft\Java Runtime Environment" "CurrentVersion"
+	StrCmp $2 ${JRE_VERSION} doneDetectJRE
+	Call GetJRE
+	doneDetectJRE:
+FunctionEnd
