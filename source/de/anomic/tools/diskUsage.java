@@ -352,7 +352,7 @@ nextLine:
     }
     
     private void getAllVolumesWindows () {
-        for (char c = 'A'; c <= 'Z'; c++) {
+        for (char c = 'C'; c <= 'Z'; c++) { // A and B are reserved for floppy on Windows
             String dirName = c + ":\\";
             if (dfWindowsGetConsoleOutput (dirName) != null) {
                 allVolumes.add(String.valueOf(c));
