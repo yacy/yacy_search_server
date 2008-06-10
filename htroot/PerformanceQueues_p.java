@@ -44,6 +44,7 @@
 //if the shell's current path is HTROOT
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -58,12 +59,31 @@ import de.anomic.server.serverThread;
 import de.anomic.tools.yFormatter;
 
 public class PerformanceQueues_p {
+    /**
+     * list of pre-defined settings: filename -> description
+     */
+    private final static Map<String, String> performanceProfiles = new HashMap<String, String>(4, 0.9f);
+    static {
+        // no sorted output!
+        performanceProfiles.put("defaults/background.settings", "slow (background)");
+        performanceProfiles.put("defaults/normal.settings", "not so fast");
+        performanceProfiles.put("defaults/yacy.init", "fast (YaCy only)");
+    }
+    
     
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> sb) {
         // return variable that accumulates replacements
         plasmaSwitchboard switchboard = (plasmaSwitchboard) sb;
         serverObjects prop = new serverObjects();
         File defaultSettingsFile = new File(switchboard.getRootPath(), "defaults/yacy.init");
+        if(post != null && post.containsKey("defaultFile")) {
+            // TODO check file-path!
+            final File value = new File(switchboard.getRootPath(), post.get("defaultFile", "defaults/yacy.init"));
+            // check if value is readable file
+            if(value.exists() && value.isFile() && value.canRead()) {
+                defaultSettingsFile = value;
+            }
+        }
         Map<String, String> defaultSettings = ((post == null) || (!(post.containsKey("submitdefault")))) ? null : serverFileUtils.loadHashMap(defaultSettingsFile);
         Iterator<String> threads = switchboard.threadNames();
         String threadName;
@@ -181,6 +201,15 @@ public class PerformanceQueues_p {
             c++;
         }
         prop.put("table", c);
+        
+        // performance profiles
+        c = 0;
+        for(String filename: performanceProfiles.keySet()) {
+            prop.put("profile_" + c + "_filename", filename);
+            prop.put("profile_" + c + "_description", performanceProfiles.get(filename));
+            c++;
+        }
+        prop.put("profile", c);
         
         if ((post != null) && (post.containsKey("cacheSizeSubmit"))) {
             int wordCacheMaxCount = post.getInt("wordCacheMaxCount", 20000);

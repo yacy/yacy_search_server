@@ -57,9 +57,15 @@
       #{/table}#
       <tr class="TableCellLight">
         <td align="left" colspan="19">
-        <input type="submit" name="submitdelay" value="Submit New Delay Values" />&nbsp;&nbsp;&nbsp;
-        <input type="submit" name="submitdefault" value="Reset To Default Values" />&nbsp;&nbsp;&nbsp;
-        Changes take effect immediately</td>
+          <input type="submit" name="submitdelay" value="Submit New Delay Values" />&nbsp;&nbsp;&nbsp;
+          Changes take effect immediately<br/>
+          <input type="submit" name="submitdefault" value="Use Default Profile:" />
+          <select type="submit" name="defaultFile">
+           #{profile}#
+            <option value="#[filename]#">#[description]#</option>
+           #{/profile}#
+          </select>
+        </td>
       </tr>
     </table>
   </form>
