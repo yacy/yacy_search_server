@@ -8,8 +8,6 @@
 	<classpathentry kind="src" path="htroot/yacy/ui"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/tar.jar"/>
-	<classpathentry kind="lib" path="libx/axis-ant.jar"/>
-	<classpathentry kind="lib" path="libx/axis.jar"/>
 	<classpathentry kind="lib" path="libx/bzip2.jar"/>
 	<classpathentry kind="lib" path="libx/commons-discovery.jar"/>
 	<classpathentry kind="lib" path="libx/commons-jxpath-1.1.jar"/>

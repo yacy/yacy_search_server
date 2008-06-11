@@ -276,6 +276,7 @@ nextLine:
         String dir;
         
         for (int i = 0; i < fileList.length; i++) {
+            // ATTENTION! THIS LOOP NEEDS A TIME-OUT
             if (fileList[i].isDirectory()) {
                 try {
                     dir = fileList[i].getCanonicalPath();

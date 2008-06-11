@@ -70,6 +70,7 @@ public final class resourceObserver {
     
     public resourceObserver(plasmaSwitchboard sb) {
         this.sb = sb;
+        this.log.logInfo("initializing the resource observer");
         du = new diskUsage(sb);
         
         if (!du.getUsable ())

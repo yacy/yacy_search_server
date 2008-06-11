@@ -372,6 +372,9 @@ dc_rights
                     } else {
                         hyperlinks.put(url, entry.getValue());
                     }
+                } else {
+                    // a path to a directory
+                    hyperlinks.put(url, entry.getValue());
                 }
             }
         }

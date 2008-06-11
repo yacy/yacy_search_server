@@ -179,6 +179,8 @@ public class yacysearch {
         TreeSet<Long> trackerHandles = sb.localSearchTracker.get(client);
         if (trackerHandles == null) trackerHandles = new TreeSet<Long>();
         boolean block = false;
+        if (global || fetchSnippets) {
+            // in case that we do a global search or we want to fetch snippets, we check for DoS cases
         if (trackerHandles.tailSet(new Long(System.currentTimeMillis() -   3000)).size() >  1) try {
             Thread.sleep(3000);
             block = true;
@@ -191,6 +193,7 @@ public class yacysearch {
             Thread.sleep(30000);
             block = true;
         } catch (InterruptedException e) { e.printStackTrace(); }
+        }
         
         if ((!block) && (post == null || post.get("cat", "href").equals("href"))) {
             
