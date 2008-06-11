@@ -16,6 +16,7 @@ set jms=
 set javacmd=-Xmx120m -Xms120m
 set priolvl=0
 set priority=/NORMAL
+set port=8080
 if exist DATA\SETTINGS\httpProxy.conf GoTo :RENAMEINDEX
 if exist DATA\SETTINGS\yacy.conf GoTo :GETSTARTOPTS
 
@@ -63,7 +64,6 @@ for /F "tokens=1,2 delims==" %%i in (DATA\SETTINGS\yacy.conf) do (
 )
 if defined jmx set javacmd=-%jmx%
 if defined jms set javacmd=-%jms% %javacmd%
-if not defined port set port=8080
 if defined priolvl (
     if %priolvl% == 20 set priority=/LOW
     if %priolvl% == 10 set priority=/BELOWNORMAL
