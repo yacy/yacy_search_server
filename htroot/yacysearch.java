@@ -116,6 +116,7 @@ public class yacysearch {
             prop.put("input_constraint", "");
             prop.put("input_cat", "href");
             prop.put("input_depth", "0");
+            prop.put("input_verify", "true");
             prop.put("input_contentdom", "text");
             prop.put("input_contentdomCheckText", "1");
             prop.put("input_contentdomCheckAudio", "0");
@@ -417,6 +418,7 @@ public class yacysearch {
         prop.putHTML("input_prefermaskfilter", prefermask);
         prop.put("input_indexof", (indexof) ? "on" : "off");
         prop.put("input_constraint", (constraint == null) ? "" : constraint.exportB64());
+        prop.put("input_verify", (fetchSnippets) ? "true" : "false");
         prop.put("input_contentdom", (post == null ? "text" : post.get("contentdom", "text")));
         prop.put("input_contentdomCheckText", (contentdomCode == plasmaSearchQuery.CONTENTDOM_TEXT) ? "1" : "0");
         prop.put("input_contentdomCheckAudio", (contentdomCode == plasmaSearchQuery.CONTENTDOM_AUDIO) ? "1" : "0");

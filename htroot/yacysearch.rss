@@ -8,11 +8,11 @@
 	<channel>
 		<title>YaCy P2P-Search for #[rss_query]#</title>
 		<description>Search for #[rss_query]#</description>
-		<link>#[searchBaseURL]#?search=#[rss_queryenc]#&amp;resource=#[input_resource]#&amp;contentdom=#[input_contentdom]#</link>
+		<link>#[searchBaseURL]#?query=#[rss_queryenc]#&amp;resource=#[input_resource]#&amp;contentdom=#[input_contentdom]#&amp;verify=#[input_verify]#</link>
 		<image>
 			<url>#[rssYacyImageURL]#</url>
 			<title>Search for #[rss_query]#</title>
-			<link>#[searchBaseURL]#?search=#[rss_queryenc]#&amp;resource=#[input_resource]#&amp;contentdom=#[input_contentdom]#</link>
+			<link>#[searchBaseURL]#?query=#[rss_queryenc]#&amp;resource=#[input_resource]#&amp;contentdom=#[input_contentdom]#&amp;verify=#[input_verify]#</link>
 		</image>
 		<opensearch:totalResults>#[num-results_totalcount]#</opensearch:totalResults>
 		<opensearch:startIndex>#[num-results_offset]#</opensearch:startIndex>
