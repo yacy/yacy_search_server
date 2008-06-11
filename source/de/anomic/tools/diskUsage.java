@@ -49,14 +49,19 @@ package de.anomic.tools;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 
+// FIXME entfernen
+import de.anomic.server.logging.serverLog;
 import de.anomic.plasma.plasmaSwitchboard;
 
 public class diskUsage {
-
+// FIXME entfernen
+    private serverLog log = new serverLog("DISK USAGE");
     private static final HashMap<String, long[]> diskUsages = new HashMap<String, long[]>();
     
     private static final ArrayList<String> allVolumes = new ArrayList<String>();
@@ -71,6 +76,7 @@ public class diskUsage {
     private static boolean usable;
     private static String windowsCommand;
     private static String errorMessage;
+    private static boolean consoleError;
     
 
         // Unix-like
@@ -215,28 +221,21 @@ public class diskUsage {
         if (usedOS != TRU64 && usedOS != HAIKU)
             processArgs.add("-l");
 
-        ProcessBuilder processBuilder = new ProcessBuilder(processArgs);
-        Process process;
-        try {
-            process = processBuilder.start();
-        } catch (IOException e){
-            errorMessage = "The system command df returned with an error";
-            usable = false;
-            return;
-        }
-        
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader (process.getInputStream ()));
-        String line;
-        while (true) {
-            try {
-                line = bufferedReader.readLine ();
-            } catch (IOException e) {
+        ArrayList<String> lines = getConsoleOutput(processArgs);
+        if (consoleError) {
+            errorMessage = "df:";
+            Iterator<String> iter = lines.iterator();
+            while (iter.hasNext()){
+                errorMessage += "\n" + iter.next();
                 usable = false;
                 return;
             }
-            if (line == null)
-                break;
-              if (! line.startsWith ("/"))
+        }
+
+        Iterator<String> iter = lines.iterator();
+        while (iter.hasNext()){
+            String line = iter.next();
+            if (! line.startsWith ("/"))
                 continue;
             String[] tokens = line.split(" ++", 6);
             if (tokens.length < 6)
@@ -443,6 +442,80 @@ nextLine:
                 usedVolumes.set(i, true);
                 return;
             }
+        }
+    }
+
+
+    private ArrayList<String> getConsoleOutput (ArrayList<String> processArgs) {
+        ArrayList<String> list = new ArrayList<String>();
+        ProcessBuilder processBuilder = new ProcessBuilder(processArgs);
+        Process process = null;
+        consoleInterface inputStream = null;
+        consoleInterface errorStream = null;
+        consoleError = false;
+
+        try {
+            process = processBuilder.start();;
+
+            inputStream = new consoleInterface(process.getInputStream());
+            errorStream = new consoleInterface(process.getErrorStream());
+
+            inputStream.start();
+            errorStream.start();
+
+            int retval = process.waitFor();
+
+        } catch(IOException iox) {
+            consoleError = true;
+            log.logWarning("logpoint 0 " + iox.getMessage());
+            list.add(iox.getMessage());
+            return list;
+        } catch(InterruptedException ix) {
+            consoleError = true;
+            log.logWarning("logpoint 1 " + ix.getMessage());
+            list.add(ix.getMessage());
+            return list;
+        }
+        list = inputStream.getOutput();
+        if (list.isEmpty()) {
+            consoleError = true;
+            log.logWarning("logpoint 2 ");
+            return errorStream.getOutput();
+        } else
+            return list;
+    }
+
+    public class consoleInterface extends Thread
+    {
+        private InputStream stream;
+        private boolean getInputStream;
+        private ArrayList<String> output;
+
+        public consoleInterface (InputStream stream)
+        {
+            this.stream = stream;
+            output = new ArrayList<String>();
+        }
+
+        public void run() {
+            try {
+                InputStreamReader input = new InputStreamReader(stream);
+                BufferedReader buffer = new BufferedReader(input);
+                String line = null;
+                int tries = 1000;
+                while (tries-- > 0) {
+                    if (buffer.ready())
+                        break;
+                }
+                log.logInfo("logpoint 3 " + tries + " tries");
+                while((line = buffer.readLine()) != null) {
+                        output.add(line);
+                }
+            } catch(IOException ix) { log.logWarning("logpoint 4 " +  ix.getMessage());}
+        }
+        
+        public ArrayList<String> getOutput(){
+            return output;
         }
     }
 }

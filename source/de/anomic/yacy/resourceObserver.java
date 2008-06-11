@@ -108,6 +108,12 @@ public final class resourceObserver {
                 sb.pauseCrawlJob(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
             }
         }
+        else {
+            if (du.getUsable ())
+                this.log.logInfo("run completed; everything in order");
+            else
+                this.log.logInfo("The observer is out of order");
+        }
         return true;
     }
     
