@@ -131,7 +131,6 @@ public class diskUsage {
                 dfUnix (true);
                 for (int i = 0; i < allMountPoints.size(); i++)
                     usedVolumes.add(false);
-                
                 checkVolumesInUseUnix ("DATA");
                 checkMapedSubDirs ();
                 
@@ -283,7 +282,9 @@ nextLine:
                     usable = false;
                     break;
                 }
-                if (!dir.endsWith ("HTCACHE")) {
+                if (!dir.endsWith ("HTCACHE")
+                    && !dir.endsWith ("LOCALE")
+                    && !dir.endsWith ("RELEASE")) {
                     checkVolumesInUseUnix (dir);
                 } else {
                     checkPathUsage (dir);
