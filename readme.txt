@@ -8,9 +8,11 @@ under certain conditions; see file gpl.txt for details.
 
 WHAT IS THIS?
 
-This is a Peer-to-Peer - based Web Search Engine.
-There is no search central, the YaCy users create a web search network.
-You can also use this software to set up your own search portal.
+This is a Open Source Web Search Engine.
+It can use a Peer-to-Peer protocol to create a distributed search engine
+without a search central.
+You can also use this software to set up your own search portal, for your
+intranet or the internet.
 
 
 WHERE IS THE DOCUMENTATION?
@@ -33,7 +35,7 @@ WHAT CAN I DO WITH THIS SOFTWARE?
 
 DEPENDENCIES? WHAT OTHER SOFTWARE DO I NEED?
 
-You need java 1.4.2 or later to run YaCy.
+You need java 1.5 or later to run YaCy.
 Please download it from http://java.sun.com
 NO OTHER SOFTWARE IS REQUIRED!
 (you don't need apache, tomcat or mysql or whatever)
@@ -89,5 +91,5 @@ feel free to ask the author for a business proposal to customize YaCy
 according to your needs. We also provide integration solutions if the
 software is about to be integrated into your enterprise application.
 
-Germany, Frankfurt a.M., 19.07.2007
+Germany, Frankfurt a.M., 12.06.2008
 Michael Peter Christen
