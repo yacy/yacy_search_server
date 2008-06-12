@@ -284,7 +284,9 @@ nextLine:
                 }
                 if (!dir.endsWith ("HTCACHE")
                     && !dir.endsWith ("LOCALE")
-                    && !dir.endsWith ("RELEASE")) {
+                    && !dir.endsWith ("RANKING")
+                    && !dir.endsWith ("RELEASE")
+                    && !dir.endsWith ("collection.0028.commons")) {
                     checkVolumesInUseUnix (dir);
                 } else {
                     checkPathUsage (dir);
