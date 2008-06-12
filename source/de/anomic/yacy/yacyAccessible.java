@@ -58,18 +58,14 @@ public class yacyAccessible {
     public boolean IWasAccessed;
     
     /**
-     * updates Shortcut /addon/YaCy-Search.url
+     * updates Shortcut /addon/YaCy-Search.html
      * @param newPort
      */
     public static void setNewPortLink(int newPort){
     	try {
         	plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
-        	File shortcut = new File(sb.getRootPath() + "/addon/YaCy-Search.url".replace("/", File.separator));
-        	// FIXME (doesn't work) try destroying some Windows cache
-        	shortcut.delete();
-        	String content =
-        		"[InternetShortcut]" + serverCore.LF_STRING +
-        		"URL=http://localhost:" + newPort + "/" + serverCore.LF_STRING;
+        	File shortcut = new File(sb.getRootPath() + "/addon/YaCy-Search.html".replace("/", File.separator));
+        	String content = "<meta http-equiv=\"refresh\" content=\"0;url=http://localhost:" + newPort + "/\">";
         	serverFileUtils.copy(content.getBytes(), shortcut);
 		} catch (Exception e) {
 			return;

@@ -143,8 +143,7 @@ public class ConfigBasic {
             prop.put("nextStep_sslSupport", theServerCore.withSSL() ? "1" : "0");
             
             // generate new shortcut (used for Windows)
-            //yacyAccessible.setNewPortLink(Integer.parseInt(port));
-            // TODO: Windows doesn't open new location even when new content is written to file (some cache seem to be active)
+            yacyAccessible.setNewPortLink(Integer.parseInt(port));
             
             // force reconnection in 7 seconds
             theServerCore.reconnect(7000);

@@ -201,7 +201,7 @@ Section "Shortcuts in the Start Menu"
 	CreateShortCut "$SMPROGRAMS\YaCy\stop YaCy.lnk" "$INSTDIR\stopYACY.bat" "" "$INSTDIR\addon\YaCy.ico"
 	CreateShortCut "$SMPROGRAMS\YaCy\Readme.lnk" "$INSTDIR\readme.txt"
 	CreateShortCut "$SMPROGRAMS\YaCy\Uninstall.lnk" "$INSTDIR\Uninstall.exe"
-	CreateShortCut "$SMPROGRAMS\YaCy\YaCy-Search.lnk" "$INSTDIR\addon\YaCy-Search.url" "" "$INSTDIR\addon\YaCy.ico"
+	CreateShortCut "$SMPROGRAMS\YaCy\YaCy-Search.lnk" "$INSTDIR\addon\YaCy-Search.html" "" "$INSTDIR\addon\YaCy.ico"
 SectionEnd
 
 #Section "YACY on the Desktop"
@@ -216,12 +216,12 @@ Section "YaCy on the Desktop"
 SectionEnd
 
 Section "Searchpage on the Desktop"
-	CreateShortCut "$DESKTOP\YaCy-Search.lnk" "$INSTDIR\addon\YaCy-Search.url" "" "$INSTDIR\addon\YaCy.ico"
+	CreateShortCut "$DESKTOP\YaCy-Search.lnk" "$INSTDIR\addon\YaCy-Search.html" "" "$INSTDIR\addon\YaCy.ico"
 SectionEnd
 
 Section "Searchpage in the Quicklaunch"
 	SectionIn 1 2 3
-	CreateShortCut "$QUICKLAUNCH\YaCy-Search.lnk" "$INSTDIR\addon\YaCy-Search.url" "" "$INSTDIR\addon\YaCy.ico"
+	CreateShortCut "$QUICKLAUNCH\YaCy-Search.lnk" "$INSTDIR\addon\YaCy-Search.html" "" "$INSTDIR\addon\YaCy.ico"
 SectionEnd
 
 Section "YaCy in Startup"
