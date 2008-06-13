@@ -1384,7 +1384,7 @@ Short Mem<br />Cycles==Durchl.<br />ohne ausr. Speicher
 Minimum of<br />Required Memory==Mindestens<br />ben&ouml;tigter Speicher
 Full Description==vollst&auml;ndige Beschreibung
 Submit New Delay Values==Neue Verz&ouml;gerungswerte speichern
-Reset To Default Values==Standardwerte wiederherstellen
+"Use Default Profile:"=="Standard Profil benutzen:"
 Changes take effect immediately==&Auml;nderungen werden sofort wirksam
 Cache Settings:==Cache Einstellungen:
 Cache Type==Cache Typ
@@ -1972,9 +1972,12 @@ You cannot be reached from outside.==Ihr Peer kann nicht von au&szlig;en erreich
 A possible reason is that you are behind a firewall, NAT or Router.==Ein m&ouml;glicher Grund ist, dass Sie sich hinter einer Firewall, NAT oder einem Router befinden.
 But you can <a href="index.html">search the internet</a> using the other peers'==Trotzdem k&ouml;nnen Sie <a href="index.html">das Internet durchsuchen</a>, indem Sie den globalen Index
 global index on your own search page.==der anderen Peers von Ihrer Suchseite aus benutzen.
+"bad"=="schlecht"
 We encourage you to open your firewall for the port you configured \(usually: 8080\),==Wir m&ouml;chten Sie ermutigen den Port, den Sie f&uuml;r YaCy eingestellt haben (Vorgabe: 8080) in Ihrer Firewall zu &ouml;ffnen,
 or to set up a 'virtual server' in your router settings \(often called DMZ\).==oder einen "virtuellen Server" in Ihrem Router aufzusetzten (oft auch DMZ genannt).
 Please be fair, contribute your own index to the global index.==Bitte seien Sie fair und tragen Sie Ihren Teil zum globalen Index bei!
+Free disk space is lower than \#\[minSpace\]\#. Crawling has been disabled. Please fix==Der freie Festplattenspeicher ist geringer als #[minSpace]#. Crawling wurde deaktiviert. Bitte beheben Sie 
+it as soon as possible and restart YaCy.==dieses Problem so schnell wie m&ouml;glich und starten Sie YaCy neu.
 Latest public version is==Die neueste stabile Version ist
 You can download a more recent version of YaCy. Click here to install this update and restart YaCy:==Sie k&ouml;nnen eine aktuellere Version von YaCy herunterladen. Klicken Sie hier, um dieses Update zu installieren und YaCy neu zu starten: 
 #"Update YaCy"=="Update YaCy"
@@ -2624,4 +2627,38 @@ Welcome to your own web page<br />in the <strong>YaCy Network==Willkommen auf Ih
 THIS IS A DEMONSTRATION PAGE FOR YOUR OWN INDIVIDUAL WEB SERVER!==DIES IST EINE DEMONSTRATIONSSEITE F&Uuml;R IHREN EIGENEN WEB SERVER!
 PLEASE REPLACE THIS PAGE BY PUTTING A FILE index.html INTO THE PATH==BITTE ERSETZEN SIE DIESE SEITE, INDEM SIE EINE DATEI MIT DEM NAMEN index.html IM VERZEICHNIS
 &lt;YaCy-application-home&gt;<strong>\#\[wwwpath\]\#</strong>==&lt;YaCy-Programmpfad&gt;<strong>#[wwwpath]#</strong> ABLEGEN.
+#-----------------------------
+
+#File: yacy/ui/index.html
+#-----------------------------
+YaCy Search==YaCy Suche
+"Search"=="Suchen"
+>text==>Text
+>image==>Bilder
+>audio==>Audio
+>video==>Video
+>application==>Anwendungen
+freeworld==freeworld
+local peer==lokaler Peer
+bookmarks==Lesezeichen
+sciencenet==ScienceNet
+"Welcome"=="Willkommen"
+>Welcome==>Willkommen
+#"Ranking"=="Ranking"
+#>Ranking==>Ranking
+"Bookmarks"=="Lesezeichen"
+>Bookmarks==>Lesezeichen				
+#-----------------------------
+
+#File: yacy/ui/ymarks.html
+#-----------------------------
+"public bookmark"=="&ouml;ffentliches Lesezeichen"
+"private bookmark"=="privates Lesezeichen"
+"edit bookmark"=="Lesezeichen bearbeiten"
+"delete bookmark"=="Lesezeichen l&ouml;schen"
+"YaCy Bookmarks"=="YaCy Lesezeichen"
+>Title==>Titel
+>Tags==>Tags
+>Date==>Datum
+Edit Bookmark==Lesezeichen bearbeiten
 #-----------------------------
