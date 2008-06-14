@@ -11,9 +11,11 @@ Name "YaCy"
 Icon "RELEASE\MAIN\addon\YaCy.ico"
 UninstallIcon "${NSISDIR}\Contrib\Graphics\Icons\orange-uninstall.ico"
 
+#requested execution level on Vista
+RequestExecutionLevel user
 
 OutFile "RELEASE\WINDOWS\yacy_v@REPL_VERSION@_@REPL_DATE@_@REPL_REVISION_NR@.exe"
-InstallDir $PROGRAMFILES\YaCy
+InstallDir "$PROFILE\YaCy"
 InstallDirRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\YaCy" "UninstallString"
 
 SetCompressor /SOLID LZMA
@@ -194,14 +196,14 @@ SectionEnd
 */
 Section "Shortcuts in the Start Menu"
 	SectionIn 1 2 3
-	SetOutPath "$INSTDIR"
+	SetShellVarContext current
 	CreateDirectory "$SMPROGRAMS\YaCy"
 	CreateShortCut "$SMPROGRAMS\YaCy\start YaCy.lnk" "$INSTDIR\startYACY.bat" "" "$INSTDIR\addon\YaCy.ico"
 	CreateShortCut "$SMPROGRAMS\YaCy\start YaCy (no console).lnk" "$INSTDIR\startYACY_noconsole.bat" "" "$INSTDIR\addon\YaCy.ico"
 	CreateShortCut "$SMPROGRAMS\YaCy\stop YaCy.lnk" "$INSTDIR\stopYACY.bat" "" "$INSTDIR\addon\YaCy.ico"
 	CreateShortCut "$SMPROGRAMS\YaCy\Readme.lnk" "$INSTDIR\readme.txt"
 	CreateShortCut "$SMPROGRAMS\YaCy\Uninstall.lnk" "$INSTDIR\Uninstall.exe"
-	CreateShortCut "$SMPROGRAMS\YaCy\YaCy-Search.lnk" "$INSTDIR\addon\YaCy-Search.html" "" "$INSTDIR\addon\YaCy.ico"
+	CreateShortCut "$SMPROGRAMS\YaCy\YaCy-Search.lnk" "$INSTDIR\addon\YaCy-Search.bat" "" "$INSTDIR\addon\YaCy.ico" "" SW_SHOWMINIMIZED
 SectionEnd
 
 #Section "YACY on the Desktop"
@@ -212,27 +214,34 @@ SectionEnd
 
 Section "YaCy on the Desktop"
 	SectionIn 1 2 3
+	SetShellVarContext current
 	CreateShortCut "$DESKTOP\YaCy.lnk" "$INSTDIR\startYACY.bat" "" "$INSTDIR\addon\YaCy.ico"
 SectionEnd
 
 Section "Searchpage on the Desktop"
-	CreateShortCut "$DESKTOP\YaCy-Search.lnk" "$INSTDIR\addon\YaCy-Search.html" "" "$INSTDIR\addon\YaCy.ico"
+	SetShellVarContext current
+	CreateShortCut "$DESKTOP\YaCy-Search.lnk" "$INSTDIR\addon\YaCy-Search.bat" "" "$INSTDIR\addon\YaCy.ico" "" SW_SHOWMINIMIZED
 SectionEnd
 
 Section "Searchpage in the Quicklaunch"
 	SectionIn 1 2 3
-	CreateShortCut "$QUICKLAUNCH\YaCy-Search.lnk" "$INSTDIR\addon\YaCy-Search.html" "" "$INSTDIR\addon\YaCy.ico"
+	SetShellVarContext current
+	CreateShortCut "$QUICKLAUNCH\YaCy-Search.lnk" "$INSTDIR\addon\YaCy-Search.bat" "" "$INSTDIR\addon\YaCy.ico" "" SW_SHOWMINIMIZED
 SectionEnd
 
 Section "YaCy in Startup"
+	SetShellVarContext current
 	CreateShortCut "$SMSTARTUP\start YaCy (no console).lnk" "$INSTDIR\startYACY_noconsole.bat" "" "$INSTDIR\addon\YaCy.ico"
 SectionEnd
 
 Section "Uninstall"
-
+	IfFileExists "$INSTDIR\DATA\yacy.running" 0 +3
+	MessageBox MB_ICONSTOP "YaCy is still running. Please stop YaCy first."
+	Goto nouninstall
+	
 	MessageBox MB_YESNO|MB_ICONQUESTION "Do you really want to uninstall YaCy?" IDNO nouninstall
 
-	DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\YaCy"
+	SetShellVarContext current
 
 	RMDir /r "$INSTDIR\addon"
 	RMDir /r "$INSTDIR\classes"
@@ -260,6 +269,7 @@ Section "Uninstall"
 	Delete "$DESKTOP\YaCy-Search.lnk"
 	Delete "$SMSTARTUP\start YaCy (no console).lnk"
 	
+	DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\YaCy"
 	nouninstall:
 SectionEnd
 

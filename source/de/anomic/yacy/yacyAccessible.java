@@ -70,4 +70,19 @@ public class yacyAccessible {
 			return;
 		}
     }
+    
+    /**
+     * updates Shortcut /addon/YaCy-Search.bat
+     * @param newPort
+     */
+    public static void setNewPortBat(int newPort){
+    	try {
+        	plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
+        	File shortcut = new File(sb.getRootPath() + "/addon/YaCy-Search.bat".replace("/", File.separator));
+        	String content = "rundll32 url.dll,FileProtocolHandler \"http://localhost:" + newPort + "\"";
+        	serverFileUtils.copy(content.getBytes(), shortcut);
+		} catch (Exception e) {
+			return;
+		}
+    }
 }

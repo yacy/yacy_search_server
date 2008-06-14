@@ -143,6 +143,7 @@ public class ConfigBasic {
             prop.put("nextStep_sslSupport", theServerCore.withSSL() ? "1" : "0");
             
             // generate new shortcut (used for Windows)
+            yacyAccessible.setNewPortBat(Integer.parseInt(port));
             yacyAccessible.setNewPortLink(Integer.parseInt(port));
             
             // force reconnection in 7 seconds
