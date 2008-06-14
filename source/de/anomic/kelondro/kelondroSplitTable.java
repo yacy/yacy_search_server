@@ -50,6 +50,7 @@ import java.util.concurrent.TimeUnit;
 import de.anomic.server.NamePrefixThreadFactory;
 import de.anomic.server.serverMemory;
 import de.anomic.server.serverProcessor;
+import de.anomic.server.logging.serverLog;
 
 public class kelondroSplitTable implements kelondroIndex {
 
@@ -137,8 +138,10 @@ public class kelondroSplitTable implements kelondroIndex {
                 f = new File(path, maxf);
                 if (f.isDirectory()) {
                     // this is a kelonodroFlex table
+                    serverLog.logInfo("kelondroSplitTable", "opening partial flex table " + path);
                     table = new kelondroCache(new kelondroFlexTable(path, maxf, rowdef, 0, resetOnFail));
                 } else {
+                    serverLog.logInfo("kelondroSplitTable", "opening partial eco table " + f);
                     table = new kelondroEcoTable(f, rowdef, kelondroEcoTable.tailCacheUsageAuto, EcoFSBufferSize, 0);
                 }
                 tables.put(date, table);
