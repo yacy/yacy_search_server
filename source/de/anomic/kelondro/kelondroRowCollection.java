@@ -571,10 +571,7 @@ public class kelondroRowCollection {
         		// wenn pivot < S: pivot befindet sich in sortierter Sequenz von L bis S - 1
         		// d.h. alle Werte von L bis pivot sind kleiner als das pivot
         		// zu finden ist ein minimales p <= q so dass chunk[p] >= pivot        		
-        		if (oldpivot != pivot) {
-        			compiledPivot = compilePivot(pivot);
-        			oldpivot = pivot;
-        		}
+        		if (compiledPivot == null) compiledPivot = compilePivot(pivot);
         		if ((pivot < S) && (p < pivot)) {
         			//System.out.println("+++ saved " + (pivot - p) + " comparisments");
         			p = pivot;
@@ -587,6 +584,7 @@ public class kelondroRowCollection {
         		if (p <= q) {
         			oldpivot = pivot;
         			pivot = swap(p, q, pivot, swapspace);
+        			if (pivot != oldpivot) compiledPivot = null; // must be computed again
         			p++;
         			q--;
         		}
@@ -798,7 +796,7 @@ public class kelondroRowCollection {
         assert (this.rowdef.objectOrder != null);
         if (i == j) return 0;
         assert (this.rowdef.primaryKeyIndex == 0) : "this.sortColumn = " + this.rowdef.primaryKeyIndex;
-        int colstart = (this.rowdef.primaryKeyIndex < 0) ? 0 : this.rowdef.colstart[this.rowdef.primaryKeyIndex];
+        int colstart = (this.rowdef.primaryKeyIndex <= 0) ? 0 : this.rowdef.colstart[this.rowdef.primaryKeyIndex];
         //assert (!bugappearance(chunkcache, i * this.rowdef.objectsize + colstart, this.rowdef.primaryKeyLength));
         //assert (!bugappearance(chunkcache, j * this.rowdef.objectsize + colstart, this.rowdef.primaryKeyLength));
         int c = this.rowdef.objectOrder.compare(
@@ -816,7 +814,7 @@ public class kelondroRowCollection {
         assert (this.rowdef.objectOrder != null);
         assert (this.rowdef.objectOrder instanceof kelondroBase64Order);
         assert (this.rowdef.primaryKeyIndex == 0) : "this.sortColumn = " + this.rowdef.primaryKeyIndex;
-        int colstart = (this.rowdef.primaryKeyIndex < 0) ? 0 : this.rowdef.colstart[this.rowdef.primaryKeyIndex];
+        int colstart = (this.rowdef.primaryKeyIndex <= 0) ? 0 : this.rowdef.colstart[this.rowdef.primaryKeyIndex];
         //assert (!bugappearance(chunkcache, i * this.rowdef.objectsize + colstart, this.rowdef.primaryKeyLength));
         return ((kelondroBase64Order) this.rowdef.objectOrder).compilePivot(chunkcache, i * this.rowdef.objectsize + colstart, this.rowdef.primaryKeyLength);
     }
@@ -834,7 +832,7 @@ public class kelondroRowCollection {
         assert (this.rowdef.objectOrder != null);
         assert (this.rowdef.objectOrder instanceof kelondroBase64Order);
         assert (this.rowdef.primaryKeyIndex == 0) : "this.sortColumn = " + this.rowdef.primaryKeyIndex;
-        int colstart = (this.rowdef.primaryKeyIndex < 0) ? 0 : this.rowdef.colstart[this.rowdef.primaryKeyIndex];
+        int colstart = (this.rowdef.primaryKeyIndex <= 0) ? 0 : this.rowdef.colstart[this.rowdef.primaryKeyIndex];
         //assert (!bugappearance(chunkcache, j * this.rowdef.objectsize + colstart, this.rowdef.primaryKeyLength));
         int c = ((kelondroBase64Order) this.rowdef.objectOrder).comparePivot(
         		compiledPivot,
@@ -847,18 +845,18 @@ public class kelondroRowCollection {
     protected synchronized int compare(byte[] a, int astart, int alength, int chunknumber) {
         assert (chunknumber < chunkcount);
         int l = Math.min(this.rowdef.primaryKeyLength, Math.min(a.length - astart, alength));
-        return rowdef.objectOrder.compare(a, astart, l, chunkcache, chunknumber * this.rowdef.objectsize + ((rowdef.primaryKeyIndex < 0) ? 0 : this.rowdef.colstart[rowdef.primaryKeyIndex]), this.rowdef.primaryKeyLength);
+        return rowdef.objectOrder.compare(a, astart, l, chunkcache, chunknumber * this.rowdef.objectsize + ((rowdef.primaryKeyIndex <= 0) ? 0 : this.rowdef.colstart[rowdef.primaryKeyIndex]), this.rowdef.primaryKeyLength);
     }
     
     protected synchronized boolean match(byte[] a, int astart, int alength, int chunknumber) {
         if (chunknumber >= chunkcount) return false;
         int i = 0;
-        int p = chunknumber * this.rowdef.objectsize + ((rowdef.primaryKeyIndex < 0) ? 0 : this.rowdef.colstart[rowdef.primaryKeyIndex]);
+        int p = chunknumber * this.rowdef.objectsize + ((rowdef.primaryKeyIndex <= 0) ? 0 : this.rowdef.colstart[rowdef.primaryKeyIndex]);
         final int len = Math.min(this.rowdef.primaryKeyLength, Math.min(alength, a.length - astart));
         while (i < len) if (a[astart + i++] != chunkcache[p++]) return false;
         return ((len == this.rowdef.primaryKeyLength) || (chunkcache[len] == 0)) ;
     }
-    
+
     public synchronized void close() {
         chunkcache = null;
     }
