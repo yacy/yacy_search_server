@@ -78,8 +78,8 @@ import de.anomic.index.indexRWIRowEntry;
 import de.anomic.index.indexRepositoryReference;
 import de.anomic.index.indexURLReference;
 import de.anomic.index.indexWord;
-import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroBLOBTree;
+import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroMapObjects;
 import de.anomic.kelondro.kelondroRowCollection;
@@ -198,14 +198,15 @@ public final class yacy {
 			}
             
             // setting up logging
-            f = new File(homePath, "DATA/LOG/"); if (!(f.exists())) f.mkdirs();
-            if (!((new File(homePath, "DATA/LOG/yacy.logging")).exists())) try {
-                serverFileUtils.copy(new File(homePath, "yacy.logging"), new File(homePath, "DATA/LOG/yacy.logging"));
+            f = new File(homePath, "DATA/LOG/yacy.logging");
+            if (!(new File(f.getPath()).exists())) f.mkdirs();
+            if (!f.exists()) try {
+                serverFileUtils.copy(new File(homePath, "yacy.logging"), f);
             }catch (IOException e){
                 System.out.println("could not copy yacy.logging");
             }
             try{
-                serverLog.configureLogging(homePath, new File(homePath, "DATA/LOG/yacy.logging"));
+                serverLog.configureLogging(homePath, f);
             } catch (IOException e) {
                 System.out.println("could not find logging properties in homePath=" + homePath);
                 e.printStackTrace();

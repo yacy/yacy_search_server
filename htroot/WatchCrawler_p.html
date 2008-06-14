@@ -12,7 +12,7 @@
 #%env/templates/header.template%#
 #%env/templates/submenuIndexCreate.template%#
 <h2>Crawler Queues</h2>
-<p> Next update in <input type="text" id="nextUpdate" onfocus="changeInterval()" onblur="newInterval()" size="2" /> seconds. <img src="/env/grafics/empty.gif" name="ajax" alt="empty"/>
+<p> Next update in <input type="text" id="nextUpdate" onfocus="changeInterval()" onblur="newInterval()" size="2" /> seconds. <img src="/env/grafics/empty.gif" name="ajax" alt="empty"/><noscript>(Please enable JavaScript to automatically update this page!)</noscript>
 </p>
       <table border="0" cellpadding="2" cellspacing="1" class="watchCrawler">
         <tbody>
@@ -24,19 +24,19 @@
           </tr>
           <tr class="TableCellLight"> 
             <td align="left">Indexing</td>
-            <td align="right"><span id="indexingqueuesize">&nbsp;&nbsp;&nbsp;</span></td>
+            <td align="right"><span id="indexingqueuesize">#[indexingSize]#</span></td>
             <td>&nbsp;</td>
-            <td align="right"><span id="indexingqueuemax">&nbsp;&nbsp;&nbsp;</span></td>
+            <td align="right"><span id="indexingqueuemax">#[indexingMax]#</span></td>
           </tr>
           <tr class="TableCellLight"> 
             <td align="left">Loader</td>
-            <td align="right"><span id="loaderqueuesize">&nbsp;&nbsp;&nbsp;</span></td>
+            <td align="right"><span id="loaderqueuesize">#[loaderSize]#</span></td>
             <td>&nbsp;</td>
-            <td align="right"><span id="loaderqueuemax">&nbsp;&nbsp;&nbsp;</span></td>
+            <td align="right"><span id="loaderqueuemax">#[loaderMax]#</span></td>
           </tr>
           <tr class="TableCellLight"> 
             <td align="left">Local Crawler</td>
-            <td align="right"><span id="localcrawlerqueuesize">&nbsp;&nbsp;&nbsp;</span></td>
+            <td align="right"><span id="localcrawlerqueuesize">#[localCrawlSize]#</span></td>
             <td>
               <a href="" id="localcrawlerstateA">
                 <img src="" alt="" style="width:12px; height:12px;" id="localcrawlerstateIMG" />
@@ -46,7 +46,7 @@
           </tr>
           <tr class="TableCellLight"> 
             <td align="left">Limit Crawler</td>
-            <td align="right"><span id="limitcrawlerqueuesize">&nbsp;&nbsp;&nbsp;</span></td>
+            <td align="right"><span id="limitcrawlerqueuesize">#[limitCrawlSize]#</span></td>
             <td>
               <a href="" title="" id="limitcrawlerstateA">
                 <img src="" alt="" style="width:12px; height:12px;" id="limitcrawlerstateIMG" />
@@ -56,7 +56,7 @@
           </tr>
           <tr class="TableCellLight"> 
             <td align="left">Remote Crawler</td>
-            <td align="right"><span id="remotecrawlerqueuesize">&nbsp;&nbsp;&nbsp;</span></td>
+            <td align="right"><span id="remotecrawlerqueuesize">#[remoteCrawlSize]#</span></td>
             <td>
               <a href="" title="" id="remotecrawlerstateA">
                 <img src="" alt="" style="width:12px; height:12px;" id="remotecrawlerstateIMG" />
@@ -90,11 +90,11 @@
           </tr>
           <tr class="TableCellLight"> 
             <td align="left">Pages (URLs)</td>
-            <td align="right"><span id="urldbsize">&nbsp;&nbsp;&nbsp;</span></td>
+            <td align="right"><span id="urldbsize">#[urlpublictextSize]#</span></td>
           </tr>
           <tr class="TableCellLight"> 
             <td align="left">RWIs (Words)</td>
-            <td align="right"><span id="rwidbsize">&nbsp;&nbsp;&nbsp;</span></td>
+            <td align="right"><span id="rwidbsize">#[rwipublictextSize]#</span></td>
           </tr>
         </tbody>
       </table>

@@ -47,6 +47,7 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import de.anomic.server.NamePrefixThreadFactory;
 import de.anomic.server.serverMemory;
 import de.anomic.server.serverProcessor;
 
@@ -80,7 +81,7 @@ public class kelondroSplitTable implements kelondroIndex {
     public void init(boolean resetOnFail) {
 
         // init the thread pool for the keeperOf executor service
-        this.executor = new ThreadPoolExecutor(serverProcessor.useCPU + 1, serverProcessor.useCPU + 1, 10, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
+        this.executor = new ThreadPoolExecutor(serverProcessor.useCPU + 1, serverProcessor.useCPU + 1, 10, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(), new NamePrefixThreadFactory(tablename));
         
         // initialized tables map
         this.tables = new HashMap<String, kelondroIndex>();

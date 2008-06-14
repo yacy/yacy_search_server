@@ -135,7 +135,7 @@ public class kelondroBLOBTree implements kelondroBLOB {
         return key.getBytes();
     }
 
-    private String origKey(byte[] rawKey) {
+    String origKey(byte[] rawKey) {
         int n = keylen - 1;
         if (n >= rawKey.length) n = rawKey.length - 1;
         while ((n > 0) && (rawKey[n] == (byte) fillChar)) n--;
@@ -227,7 +227,7 @@ public class kelondroBLOBTree implements kelondroBLOB {
         }
     }
 
-    private synchronized int get(String key, int pos) throws IOException {
+    synchronized int get(String key, int pos) throws IOException {
         int reccnt = pos / reclen;
         // read within a single record
         byte[] buf = getValueCached(elementKey(key, reccnt));

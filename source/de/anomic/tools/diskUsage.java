@@ -55,13 +55,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import de.anomic.plasma.plasmaSwitchboard;
 // FIXME entfernen
 import de.anomic.server.logging.serverLog;
-import de.anomic.plasma.plasmaSwitchboard;
 
 public class diskUsage {
 // FIXME entfernen
-    private serverLog log = new serverLog("DISK USAGE");
+    serverLog log = new serverLog("DISK USAGE");
     private static final HashMap<String, long[]> diskUsages = new HashMap<String, long[]>();
     
     private static final ArrayList<String> allVolumes = new ArrayList<String>();
@@ -458,7 +458,7 @@ nextLine:
         consoleError = false;
 
         try {
-            process = processBuilder.start();;
+            process = processBuilder.start();
 
             inputStream = new consoleInterface(process.getInputStream());
             errorStream = new consoleInterface(process.getErrorStream());
@@ -466,7 +466,7 @@ nextLine:
             inputStream.start();
             errorStream.start();
 
-            int retval = process.waitFor();
+            /*int retval =*/ process.waitFor();
 
         } catch(IOException iox) {
             consoleError = true;

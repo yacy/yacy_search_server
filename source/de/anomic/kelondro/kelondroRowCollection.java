@@ -38,6 +38,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import de.anomic.server.NamePrefixThreadFactory;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverMemory;
 import de.anomic.server.serverProcessor;
@@ -54,7 +55,7 @@ public class kelondroRowCollection {
     
     static {
         if (serverProcessor.useCPU > 1) {
-            sortingthreadexecutor = Executors.newCachedThreadPool();
+            sortingthreadexecutor = Executors.newCachedThreadPool(new NamePrefixThreadFactory("sorting"));
         } else {
             sortingthreadexecutor = null;
         }

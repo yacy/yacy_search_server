@@ -50,7 +50,6 @@ package de.anomic.yacy;
 import java.io.File;
 
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.server.serverCore;
 import de.anomic.server.serverFileUtils;
 
 public class yacyAccessible {

@@ -65,9 +65,8 @@ public class PerformanceQueues_p {
     private final static Map<String, String> performanceProfiles = new HashMap<String, String>(4, 0.9f);
     static {
         // no sorted output!
-        performanceProfiles.put("defaults/background.settings", "slow (background)");
-        performanceProfiles.put("defaults/normal.settings", "not so fast");
-        performanceProfiles.put("defaults/yacy.init", "fast (YaCy only)");
+        performanceProfiles.put("defaults/yacy.init", "default (crawl)");
+        performanceProfiles.put("defaults/performance_dht.profile", "prefer DHT");
     }
     
     
@@ -112,6 +111,10 @@ public class PerformanceQueues_p {
         threads = switchboard.threadNames();
         int c = 0;
         long idleCycles, busyCycles, memshortageCycles;
+        // set profile?
+        final double multiplier = (post != null) && post.containsKey("multiplier") ? post.getDouble("multiplier", 1) : 1;
+        final boolean setProfile = (post != null && post.containsKey("submitdefault"));
+        final boolean setDelay = (post != null) && (post.containsKey("submitdelay"));
         while (threads.hasNext()) {
             threadName = threads.next();
             thread = switchboard.getThread(threadName);
@@ -151,7 +154,7 @@ public class PerformanceQueues_p {
             prop.putNum("table_" + c + "_execpercycle", (busyCycles == 0) ? -1 : exectime / busyCycles);
             prop.putNum("table_" + c + "_memusepercycle", (busyCycles == 0) ? -1 : memuse / busyCycles / 1024);
             
-            if ((post != null) && (post.containsKey("submitdelay"))) {
+            if (setDelay) {
                 // load with new values
                 idlesleep = post.getLong(threadName + "_idlesleep", 1000);
                 busysleep = post.getLong(threadName + "_busysleep",  100);
@@ -162,16 +165,12 @@ public class PerformanceQueues_p {
                 if (idlesleep < 1000) idlesleep = 1000;
                 if (threadName.equals("10_httpd")) { idlesleep = 0; busysleep = 0; memprereq = 0; }
                 
-                // on-the-fly re-configuration
-                switchboard.setThreadPerformance(threadName, idlesleep, busysleep, memprereq);
-                switchboard.setConfig(threadName + "_idlesleep", idlesleep);
-                switchboard.setConfig(threadName + "_busysleep", busysleep);
-                switchboard.setConfig(threadName + "_memprereq", memprereq);
-            } if ((post != null) && (post.containsKey("submitdefault"))) {
+                onTheFlyReconfiguration(switchboard, threadName, idlesleep, busysleep, memprereq);
+            } if (setProfile) {
                 // load with new values
-                idlesleep = Long.parseLong(d(defaultSettings.get(threadName + "_idlesleep"), "1000"));
-                busysleep = Long.parseLong(d(defaultSettings.get(threadName + "_busysleep"),  "100"));
-                memprereq = Long.parseLong(d(defaultSettings.get(threadName + "_memprereq"),    "0"));
+                idlesleep = (long) (Long.parseLong(d(defaultSettings.get(threadName + "_idlesleep"), "1000")) * multiplier);
+                busysleep = (long) (Long.parseLong(d(defaultSettings.get(threadName + "_busysleep"),  "100")) * multiplier);
+                memprereq = (long) (Long.parseLong(d(defaultSettings.get(threadName + "_memprereq"),    "0")) * multiplier);
 
                 // check values to prevent short-cut loops
                 if (idlesleep < 1000) idlesleep = 1000;
@@ -180,11 +179,7 @@ public class PerformanceQueues_p {
                 if ((threadName.equals("61_globalcrawltrigger")) && (busysleep < 100)) busysleep = 100;
                 if ((threadName.equals("62_remotetriggeredcrawl")) && (busysleep < 100)) busysleep = 100;
 
-                // on-the-fly re-configuration
-                switchboard.setThreadPerformance(threadName, idlesleep, busysleep, memprereq);
-                switchboard.setConfig(threadName + "_idlesleep", idlesleep);
-                switchboard.setConfig(threadName + "_busysleep", busysleep);
-                switchboard.setConfig(threadName + "_memprereq", memprereq);
+                onTheFlyReconfiguration(switchboard, threadName, idlesleep, busysleep, memprereq);
             } else {
                 // load with old values
                 idlesleep = Long.parseLong(switchboard.getConfig(threadName + "_idlesleep" , "1000"));
@@ -300,6 +295,22 @@ public class PerformanceQueues_p {
         
         // return rewrite values for templates
         return prop;
+    }
+
+    /**
+     * @param switchboard
+     * @param threadName
+     * @param idlesleep
+     * @param busysleep
+     * @param memprereq
+     */
+    private static void onTheFlyReconfiguration(plasmaSwitchboard switchboard, String threadName, long idlesleep,
+            long busysleep, long memprereq) {
+        // on-the-fly re-configuration
+        switchboard.setThreadPerformance(threadName, idlesleep, busysleep, memprereq);
+        switchboard.setConfig(threadName + "_idlesleep", idlesleep);
+        switchboard.setConfig(threadName + "_busysleep", busysleep);
+        switchboard.setConfig(threadName + "_memprereq", memprereq);
     }
     
     private static String d(String a, String b) {

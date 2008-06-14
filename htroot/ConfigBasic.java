@@ -59,8 +59,8 @@ import de.anomic.server.serverDomains;
 import de.anomic.server.serverInstantBusyThread;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyAccessible;
+import de.anomic.yacy.yacySeed;
 
 public class ConfigBasic {
     

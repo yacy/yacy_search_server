@@ -35,6 +35,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import xml.queues_p;
 import de.anomic.crawler.CrawlEntry;
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.SitemapImporter;
@@ -62,14 +63,13 @@ public class WatchCrawler_p {
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
         // return variable that accumulates replacements
         plasmaSwitchboard sb = (plasmaSwitchboard) env;
-        serverObjects prop = new serverObjects();
+        // inital values for AJAX Elements (without JavaScript) 
+        serverObjects prop = queues_p.respond(header, post, env);
         prop.put("forwardToCrawlStart", "0");
         
-        if (post == null) {
-            // not a crawl start, only monitoring
-            prop.put("info", "0");
-        } else {
-            prop.put("info", "0");
+        prop.put("info", "0");
+        if (post != null) {
+            // a crawl start
             
             if ((post.containsKey("autoforward")) &&
                 (sb.crawlQueues.coreCrawlJobSize() == 0) &&

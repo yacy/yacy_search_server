@@ -56,7 +56,7 @@ public class serverProcessor<J extends serverProcessorJob> {
         this.input = new LinkedBlockingQueue<J>(inputQueueSize);
         this.output = output;
         this.poolsize = poolsize;
-        executor = Executors.newCachedThreadPool();
+        executor = Executors.newCachedThreadPool(new NamePrefixThreadFactory(jobExec));
         for (int i = 0; i < poolsize; i++) {
             executor.submit(new serverInstantBlockingThread<J>(env, jobExec, input, output));
         }

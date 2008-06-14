@@ -60,11 +60,11 @@
           <input type="submit" name="submitdelay" value="Submit New Delay Values" />&nbsp;&nbsp;&nbsp;
           Changes take effect immediately<br/>
           <input type="submit" name="submitdefault" value="Use Default Profile:" />
-          <select type="submit" name="defaultFile">
+          <select name="defaultFile">
            #{profile}#
             <option value="#[filename]#">#[description]#</option>
            #{/profile}#
-          </select>
+          </select> and use <select name="multiplier"><option value="0.5">200 %</option><option value="0.75">150 %</option><option value="1" selected="selected">100 %</option><option value="2">50 %</option><option value="3">33 %</option><option value="10">10 %</option></select> of the defiend performance.
         </td>
       </tr>
     </table>
