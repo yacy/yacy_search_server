@@ -269,6 +269,7 @@ public class kelondroRowCollection {
         assert (index >= 0) : "get: access with index " + index + " is below zero";
         assert (index < chunkcount) : "get: access with index " + index + " is above chunkcount " + chunkcount + "; sortBound = " + sortBound;
         assert (index * rowdef.objectsize < chunkcache.length);
+        assert sortBound <= chunkcount : "sortBound = " + sortBound + ", chunkcount = " + chunkcount;
         if ((chunkcache == null) || (rowdef == null)) return null; // case may appear during shutdown
         kelondroRow.Entry entry;
         int addr = index * rowdef.objectsize;
@@ -341,19 +342,6 @@ public class kelondroRowCollection {
         this.lastTimeWrote = System.currentTimeMillis();
         return true;
     }
-    /*
-    private static boolean bugappearance(byte[] a, int astart, int alength) {
-        // check strange appearances of '@[B', which is not a b64-value or any other hash fragment
-        if (astart + 3 > alength) return false;
-        loop: for (int i = astart; i <= alength - 3; i++) {
-            if (a[i    ] != 64) continue loop;
-            if (a[i + 1] != 91) continue loop;
-            if (a[i + 2] != 66) continue loop;
-            return true;
-        }
-        return false;
-    }
-    */
     
     public synchronized final void addAllUnique(kelondroRowCollection c) {
         if (c == null) return;
@@ -380,11 +368,12 @@ public class kelondroRowCollection {
         assert sortBound <= chunkcount : "sortBound = " + sortBound + ", chunkcount = " + chunkcount;
         if (keepOrder && (p < sortBound)) {
             // remove by shift (quite expensive for big collections)
+            int addr = p * this.rowdef.objectsize;
             System.arraycopy(
-                    chunkcache, (p + 1) * this.rowdef.objectsize,
-                    chunkcache, p * this.rowdef.objectsize,
+                    chunkcache, addr + this.rowdef.objectsize,
+                    chunkcache, addr,
                     (chunkcount - p - 1) * this.rowdef.objectsize);
-            sortBound--;
+            sortBound--; // this is only correct if p < sortBound, but this was already checked above
         } else {
             // remove by copying the top-element to the remove position
             if (p != chunkcount - 1) {
@@ -395,7 +384,7 @@ public class kelondroRowCollection {
             }
             // we moved the last element to the remove position: (p+1)st element
             // only the first p elements keep their order (element p is already outside the order)
-            if (sortBound >= p) sortBound = p;
+            if (sortBound > p) sortBound = p;
         }
         chunkcount--;
         this.lastTimeWrote = System.currentTimeMillis();
@@ -944,9 +933,9 @@ public class kelondroRowCollection {
     	System.out.println("uniq d     : " + (t6 - t5) + " nanoseconds, " + d(testsize, (t6 - t5)) + " entries/nanoseconds");
     	random = new Random(0);
     	kelondroRowSet e = new kelondroRowSet(r, testsize);
-    	/*for (int i = 0; i < testsize; i++) {
-    		//e.put(r.newEntry(randomHash().getBytes()));
-    	}*/
+    	for (int i = 0; i < testsize; i++) {
+    		e.put(r.newEntry(randomHash().getBytes()));
+    	}
     	long t7 = System.nanoTime();
     	System.out.println("create e   : " + (t7 - t6) + " nanoseconds, " + d(testsize, (t7 - t6)) + " entries/nanoseconds");
     	e.sort();
@@ -967,13 +956,15 @@ public class kelondroRowCollection {
     	random = new Random(0);
     	boolean allfound = true;
         for (int i = 0; i < testsize; i++) {
-            if (e.get(randomHash().getBytes()) == null) {
+            String rh = randomHash();
+            if (e.get(rh.getBytes()) == null) {
                 allfound = false;
+                System.out.println("not found hash " + rh + " at attempt " + i);
                 break;
             }
         }
-        long t13 = System.currentTimeMillis();
-        System.out.println("e allfound = " + ((allfound) ? "true" : "false") + ": " + (t13 - t12) + " milliseconds");
+        long t13 = System.nanoTime();
+        System.out.println("e allfound = " + ((allfound) ? "true" : "false") + ": " + (t13 - t12) + " nanoseconds");
         boolean noghosts = true;
         for (int i = 0; i < testsize; i++) {
             if (e.get(randomHash().getBytes()) != null) {
@@ -981,8 +972,8 @@ public class kelondroRowCollection {
                 break;
             }
         }
-        long t14 = System.currentTimeMillis();
-        System.out.println("e noghosts = " + ((noghosts) ? "true" : "false") + ": " + (t14 - t13) + " milliseconds");
+        long t14 = System.nanoTime();
+        System.out.println("e noghosts = " + ((noghosts) ? "true" : "false") + ": " + (t14 - t13) + " nanoseconds");
         System.out.println("Result size: c = " + c.size() + ", d = " + d.size() + ", e = " + e.size());
     	System.out.println();
     	if (sortingthreadexecutor != null) sortingthreadexecutor.shutdown();

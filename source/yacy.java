@@ -198,16 +198,16 @@ public final class yacy {
 			}
             
             // setting up logging
-            f = new File(homePath, "DATA/LOG/yacy.logging");
-            final File logPath =new File(f.getPath());
-            if (!logPath.exists()) logPath.mkdirs();
-            if (!f.exists()) try {
-                serverFileUtils.copy(new File(homePath, "yacy.logging"), f);
-            }catch (IOException e){
+			f = new File(homePath, "DATA/LOG/");
+			if (!f.exists()) f.mkdirs();
+			f = new File(homePath, "DATA/LOG/yacy.logging");
+			if (!f.exists()) try {
+			    serverFileUtils.copy(new File(homePath, "yacy.logging"), f);
+            } catch (IOException e){
                 System.out.println("could not copy yacy.logging");
             }
             try{
-                serverLog.configureLogging(homePath, f);
+                serverLog.configureLogging(homePath, new File(homePath, "DATA/LOG/yacy.logging"));
             } catch (IOException e) {
                 System.out.println("could not find logging properties in homePath=" + homePath);
                 e.printStackTrace();

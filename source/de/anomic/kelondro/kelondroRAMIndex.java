@@ -137,11 +137,13 @@ public class kelondroRAMIndex implements kelondroIndex {
         // if the new entry is within the initialization part, just delete it
         kelondroRow.Entry indexentry = index0.remove(key, keepOrder);
         if (indexentry != null) {
-            assert index0.remove(key, true) == null; // check if remove worked
+            assert index0.get(key) == null; // check if remove worked
             return indexentry;
         }
         // else remove it from the index1
-        return index1.remove(key, keepOrder);
+        kelondroRow.Entry removed = index1.remove(key, keepOrder);
+        assert index1.get(key) == null : "removed " + ((removed == null) ? " is null" : " is not null") + ", and index entry still exists"; // check if remove worked
+        return removed;
     }
 
     public synchronized kelondroRow.Entry removeOne() {
