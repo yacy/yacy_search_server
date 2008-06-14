@@ -199,7 +199,8 @@ public final class yacy {
             
             // setting up logging
             f = new File(homePath, "DATA/LOG/yacy.logging");
-            if (!(new File(f.getPath()).exists())) f.mkdirs();
+            final File logPath =new File(f.getPath());
+            if (!logPath.exists()) logPath.mkdirs();
             if (!f.exists()) try {
                 serverFileUtils.copy(new File(homePath, "yacy.logging"), f);
             }catch (IOException e){
