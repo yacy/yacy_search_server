@@ -331,7 +331,7 @@ public class kelondroBase64Order extends kelondroAbstractOrder<byte[]> implement
             acc = ahpla[ac];
             assert (acc >= 0) : "acc = " + acc + ", a = " + serverLog.arrayList(a, aoffset, al) + "/" + new String(a, aoffset, al) + ", aoffset = 0x" + Integer.toHexString(aoffset) + ", i = " + i + "\n" + serverLog.table(a, 16, aoffset);
             bcc = ahpla[bc];
-            assert (bcc >= 0) : "bcc = " + bcc + ", b = " + serverLog.arrayList(b, boffset, al) + "/" + new String(b, boffset, al) + ", boffset = 0x" + Integer.toHexString(boffset) + ", i = " + i + "\n" + serverLog.table(b, 16, boffset);
+            assert (bcc >= 0) : "bcc = " + bcc + ", b = " + serverLog.arrayList(b, boffset, bl) + "/" + new String(b, boffset, bl) + ", boffset = 0x" + Integer.toHexString(boffset) + ", i = " + i + "\n" + serverLog.table(b, 16, boffset);
             if (acc > bcc) return 1;
             if (acc < bcc) return -1;
             // else the bytes are equal and it may go on yet undecided
@@ -351,9 +351,16 @@ public class kelondroBase64Order extends kelondroAbstractOrder<byte[]> implement
         int i = 0;
         final int bl = Math.min(blength, b.length - boffset);
         byte acc, bcc;
+        assert boffset >= 0;
+        assert boffset < b.length;
+        assert boffset + Math.min(bl, compiledPivot.length) - 1 >= 0;
+        assert boffset + Math.min(bl, compiledPivot.length) - 1 < b.length;
         while ((i < compiledPivot.length) && (i < bl)) {
             acc = compiledPivot[i];
+            assert boffset + i >= 0;
+            assert boffset + i < b.length;
             bcc = ahpla[b[boffset + i]];
+            assert (bcc >= 0) : "bcc = " + bcc + ", b = " + serverLog.arrayList(b, boffset, bl) + "/" + new String(b, boffset, bl) + ", boffset = 0x" + Integer.toHexString(boffset) + ", i = " + i + "\n" + serverLog.table(b, 16, boffset);
             if (acc > bcc) return 1;
             if (acc < bcc) return -1;
             // else the bytes are equal and it may go on yet undecided
