@@ -355,11 +355,15 @@ public class kelondroBase64Order extends kelondroAbstractOrder<byte[]> implement
         assert boffset < b.length;
         assert boffset + Math.min(bl, compiledPivot.length) - 1 >= 0;
         assert boffset + Math.min(bl, compiledPivot.length) - 1 < b.length;
+        byte bb;
         while ((i < compiledPivot.length) && (i < bl)) {
             acc = compiledPivot[i];
             assert boffset + i >= 0;
             assert boffset + i < b.length;
-            bcc = ahpla[b[boffset + i]];
+            bb = b[boffset + i];
+            assert bb >= 0;
+            assert bb < 128;
+            bcc = ahpla[bb];
             assert (bcc >= 0) : "bcc = " + bcc + ", b = " + serverLog.arrayList(b, boffset, bl) + "/" + new String(b, boffset, bl) + ", boffset = 0x" + Integer.toHexString(boffset) + ", i = " + i + "\n" + serverLog.table(b, 16, boffset);
             if (acc > bcc) return 1;
             if (acc < bcc) return -1;
@@ -376,8 +380,12 @@ public class kelondroBase64Order extends kelondroAbstractOrder<byte[]> implement
     public final byte[] compilePivot(byte[] a, int aoffset, int alength) {
         assert (aoffset + alength <= a.length) : "a.length = " + a.length + ", aoffset = " + aoffset + ", alength = " + alength;
         byte[] cp = new byte[Math.min(alength, a.length - aoffset)];
+        byte aa;
         for (int i = cp.length - 1; i >= 0; i--) {
-            cp[i] = ahpla[a[aoffset + i]];
+            aa = a[aoffset + i];
+            assert aa >= 0;
+            assert aa < 128;
+            cp[i] = ahpla[aa];
             assert cp[i] != -1;
         }
         return cp;
