@@ -63,6 +63,7 @@ import de.anomic.plasma.plasmaSearchRankingProfile;
 import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
+import de.anomic.server.serverMemory;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverProfiling;
 import de.anomic.server.serverSwitch;
@@ -197,6 +198,11 @@ public class yacysearch {
         }
         
         if ((!block) && (post == null || post.get("cat", "href").equals("href"))) {
+            // check available memory and clean up if necessary
+            if (!serverMemory.request(8000000L, false)) {
+                sb.webIndex.clearCache();
+                plasmaSearchEvent.cleanupEvents(true);
+            }
             
             plasmaSearchRankingProfile ranking = sb.getRanking();
             final TreeSet<String>[] query = plasmaSearchQuery.cleanQuery(querystring); // converts also umlaute

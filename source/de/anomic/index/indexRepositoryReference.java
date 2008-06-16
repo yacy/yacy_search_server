@@ -61,9 +61,13 @@ public final class indexRepositoryReference {
     public indexRepositoryReference(File indexSecondaryPath) {
         super();
         this.location = new File(indexSecondaryPath, "TEXT");        
-        urlIndexFile = new kelondroSplitTable(this.location, "urls", indexURLReference.rowdef, false);
+        urlIndexFile = new kelondroCache(new kelondroSplitTable(this.location, "urls", indexURLReference.rowdef, false));
     }
 
+    public void clearCache() {
+        if (urlIndexFile instanceof kelondroCache) ((kelondroCache) urlIndexFile).clearCache();
+    }
+    
     public void clear() throws IOException {
         if (exportthread != null) exportthread.interrupt();
         urlIndexFile.clear();

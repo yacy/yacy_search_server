@@ -93,7 +93,7 @@ public final class plasmaWordIndex implements indexRI {
     private final indexRAMRI               dhtOutCache, dhtInCache;
     private final indexCollectionRI        collections;          // new database structure to replace AssortmentCluster and FileCluster
     private       serverLog                log;
-    indexRepositoryReference referenceURL;
+    indexRepositoryReference               referenceURL;
     public        yacySeedDB               seedDB;
     public        yacyNewsPool             newsPool;
     private       File                     primaryRoot, secondaryRoot;
@@ -195,6 +195,10 @@ public final class plasmaWordIndex implements indexRI {
         this.peerActions = new yacyPeerActions(seedDB, newsPool);
     }
     
+    public void clearCache() {
+        referenceURL.clearCache();
+    }
+
     public void clear() {
         dhtInCache.clear();
         dhtOutCache.clear();

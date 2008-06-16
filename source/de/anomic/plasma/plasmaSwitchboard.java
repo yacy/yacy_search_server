@@ -1661,6 +1661,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     public void deQueueFreeMem() {
         // flush some entries from the RAM cache
         webIndex.flushCacheSome();
+        // empty some caches
+        webIndex.clearCache();
+        plasmaSearchEvent.cleanupEvents(true);
         // adopt maximum cache size to current size to prevent that further OutOfMemoryErrors occur
 /*      int newMaxCount = Math.max(1200, Math.min((int) getConfigLong(WORDCACHE_MAX_COUNT, 1200), wordIndex.dhtOutCacheSize()));
         setConfig(WORDCACHE_MAX_COUNT, Integer.toString(newMaxCount));
@@ -1820,6 +1823,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     public boolean cleanupJob() {
         try {
             boolean hasDoneSomething = false;
+            
+            // clear caches if necessary
+            if (!serverMemory.request(8000000L, false)) {
+                webIndex.clearCache();
+                plasmaSearchEvent.cleanupEvents(true);
+            }
             
             // set a random password if no password is configured
             if (!this.acceptLocalURLs && getConfigBool("adminAccountForLocalhost", false) && getConfig(httpd.ADMIN_ACCOUNT_B64MD5, "").length() == 0) {

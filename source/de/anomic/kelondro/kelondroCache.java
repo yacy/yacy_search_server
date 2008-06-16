@@ -51,8 +51,8 @@ public class kelondroCache implements kelondroIndex {
 
     // static object tracker; stores information about object cache usage
     private static final TreeMap<String, kelondroCache> objectTracker = new TreeMap<String, kelondroCache>();
-    private static long memStopGrow    = 10000000; // a limit for the node cache to stop growing if less than this memory amount is available
-    private static long memStartShrink =  6000000; // a limit for the node cache to start with shrinking if less than this memory amount is available
+    private static long memStopGrow    = 12 * 1024 * 1024; // a limit for the node cache to stop growing if less than this memory amount is available
+    private static long memStartShrink =  8 * 1024 * 1024; // a limit for the node cache to start with shrinking if less than this memory amount is available
     
     // class objects
     private kelondroRowSet readHitCache;
@@ -180,6 +180,11 @@ public class kelondroCache implements kelondroIndex {
         return true;
     }
     
+    public synchronized void clearCache() {
+        readMissCache.clear();
+        readHitCache.clear();
+    }
+    
     public synchronized void close() {
         index.close();
         readHitCache = null;
@@ -187,7 +192,27 @@ public class kelondroCache implements kelondroIndex {
     }
 
     public boolean has(byte[] key) throws IOException {
-        return (get(key) != null);
+        // first look into the miss cache
+        if (readMissCache != null) {
+            if (readMissCache.get(key) != null) {
+                this.hasnotHit++;
+                return false;
+            } else {
+                this.hasnotMiss++;
+            }
+        }
+
+        // then try the hit cache and the buffers
+        if (readHitCache != null) {
+            if (readHitCache.get(key) != null) {
+                this.readHit++;
+                return true;
+            }
+        }
+        
+        // finally ask the back-end index
+        this.readMiss++;
+        return index.has(key);
     }
     
     public synchronized Entry get(byte[] key) throws IOException {
@@ -212,7 +237,7 @@ public class kelondroCache implements kelondroIndex {
             }
         }
         
-        // finally ask the backend index
+        // finally ask the back-end index
         this.readMiss++;
         entry = index.get(key);
         // learn from result
@@ -289,9 +314,8 @@ public class kelondroCache implements kelondroIndex {
 
     public synchronized Entry put(Entry row, Date entryDate) throws IOException {
         // a put with a date is bad for the cache: the date cannot be handled
-        // The write buffer does not work here, because it does not store dates.
-        
-        throw new UnsupportedOperationException("put with date is inefficient in kelondroCache");
+        // we omit the date here and use the current Date everywhere
+        return this.put(row);
     }
 
     public synchronized boolean addUnique(Entry row) throws IOException {
