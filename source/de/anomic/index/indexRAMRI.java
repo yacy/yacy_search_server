@@ -28,6 +28,7 @@ package de.anomic.index;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Set;
 
 import de.anomic.kelondro.kelondroCloneableIterator;
@@ -159,7 +160,7 @@ public final class indexRAMRI implements indexRI, indexRIReader {
         return null;
     }
     
-    public synchronized String bestFlushWordHash() {
+    private String bestFlushWordHash() {
         // select appropriate hash
         // we have 2 different methods to find a good hash:
         // - the oldest entry in the cache
@@ -189,7 +190,8 @@ public final class indexRAMRI implements indexRI, indexRIReader {
                 hash = hashDate.getMinObject(); // flush oldest entries
             }
             if (hash == null) {
-                heap.wordContainers(null, false).next();
+                indexContainer ic = heap.wordContainers(null, false).next();
+                if (ic != null) hash = ic.getWordHash();
             }
             return hash;
         } catch (Exception e) {
@@ -198,6 +200,23 @@ public final class indexRAMRI implements indexRI, indexRIReader {
         return null;
     }
 
+    public synchronized ArrayList<indexContainer> bestFlushContainers(int count) {
+        ArrayList<indexContainer> containerList = new ArrayList<indexContainer>();
+        String hash;
+        indexContainer container;
+        for (int i = 0; i < count; i++) {
+            hash = bestFlushWordHash();
+            if (hash == null) return containerList;
+            container = heap.delete(hash);
+            assert (container != null);
+            if (container == null) return containerList;
+            hashScore.deleteScore(hash);
+            hashDate.deleteScore(hash);
+            containerList.add(container);
+        }
+        return containerList;
+    }
+    
     private int intTime(long longTime) {
         return (int) Math.max(0, ((longTime - initTime) / 1000));
     }

@@ -90,15 +90,6 @@ public final class ResultURLs {
         assert executorHash != null;
         if (e == null) { return; }
         try {
-//            switch (stackType) {
-//                case 0: break;
-//                case 1: externResultStack.add(e.hash() + initiatorHash + executorHash); break;
-//                case 2: searchResultStack.add(e.hash() + initiatorHash + executorHash); break;
-//                case 3: transfResultStack.add(e.hash() + initiatorHash + executorHash); break;
-//                case 4: proxyResultStack.add(e.hash() + initiatorHash + executorHash); break;
-//                case 5: lcrawlResultStack.add(e.hash() + initiatorHash + executorHash); break;
-//                case 6: gcrawlResultStack.add(e.hash() + initiatorHash + executorHash); break;
-//            }
             final List<String> resultStack = getStack(stackType);
             if(resultStack != null) {
                 resultStack.add(e.hash() + initiatorHash + executorHash);
@@ -121,54 +112,18 @@ public final class ResultURLs {
         } else {
             return -1;
         }
-//        switch (stack) {
-//            case 1: return externResultStack.size();
-//            case 2: return searchResultStack.size();
-//            case 3: return transfResultStack.size();
-//            case 4: return proxyResultStack.size();
-//            case 5: return lcrawlResultStack.size();
-//            case 6: return gcrawlResultStack.size();
-//        }
-//        return -1;
     }
 
     public synchronized String getUrlHash(int stack, int pos) {
         return getHashNo(stack, pos, 0);
-//        switch (stack) {
-//            case 1: return (externResultStack.get(pos)).substring(0, yacySeedDB.commonHashLength);
-//            case 2: return (searchResultStack.get(pos)).substring(0, yacySeedDB.commonHashLength);
-//            case 3: return (transfResultStack.get(pos)).substring(0, yacySeedDB.commonHashLength);
-//            case 4: return (proxyResultStack.get(pos)).substring(0, yacySeedDB.commonHashLength);
-//            case 5: return (lcrawlResultStack.get(pos)).substring(0, yacySeedDB.commonHashLength);
-//            case 6: return (gcrawlResultStack.get(pos)).substring(0, yacySeedDB.commonHashLength);
-//        }
-//        return null;
     }
 
     public synchronized String getInitiatorHash(int stack, int pos) {
         return getHashNo(stack, pos, 1);
-//        switch (stack) {
-//            case 1: return (externResultStack.get(pos)).substring(yacySeedDB.commonHashLength, yacySeedDB.commonHashLength * 2);
-//            case 2: return (searchResultStack.get(pos)).substring(yacySeedDB.commonHashLength, yacySeedDB.commonHashLength * 2);
-//            case 3: return (transfResultStack.get(pos)).substring(yacySeedDB.commonHashLength, yacySeedDB.commonHashLength * 2);
-//            case 4: return (proxyResultStack.get(pos)).substring(yacySeedDB.commonHashLength, yacySeedDB.commonHashLength * 2);
-//            case 5: return (lcrawlResultStack.get(pos)).substring(yacySeedDB.commonHashLength, yacySeedDB.commonHashLength * 2);
-//            case 6: return (gcrawlResultStack.get(pos)).substring(yacySeedDB.commonHashLength, yacySeedDB.commonHashLength * 2);
-//        }
-//        return null;
     }
 
     public synchronized String getExecutorHash(final int stack, int pos) {
         return getHashNo(stack, pos, 2);
-//      switch (stack) {
-//      case 1: return (externResultStack.get(pos)).substring(yacySeedDB.commonHashLength * 2, yacySeedDB.commonHashLength * 3);
-//      case 2: return (searchResultStack.get(pos)).substring(yacySeedDB.commonHashLength * 2, yacySeedDB.commonHashLength * 3);
-//      case 3: return (transfResultStack.get(pos)).substring(yacySeedDB.commonHashLength * 2, yacySeedDB.commonHashLength * 3);
-//      case 4: return (proxyResultStack.get(pos)).substring(yacySeedDB.commonHashLength * 2, yacySeedDB.commonHashLength * 3);
-//      case 5: return (lcrawlResultStack.get(pos)).substring(yacySeedDB.commonHashLength * 2, yacySeedDB.commonHashLength * 3);
-//      case 6: return (gcrawlResultStack.get(pos)).substring(yacySeedDB.commonHashLength * 2, yacySeedDB.commonHashLength * 3);
-//  }
-//  return null;
     }
     
     /**
@@ -221,6 +176,7 @@ public final class ResultURLs {
         
         final List<String> resultStack = getStack(stack);
         if(resultStack != null) {
+            assert pos < resultStack.size() : "pos = " + pos + ", resultStack.size() = " + resultStack.size();
             if(pos < resultStack.size()) {
                 return resultStack.get(pos);
             } else {

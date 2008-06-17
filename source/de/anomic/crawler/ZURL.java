@@ -141,11 +141,7 @@ public class ZURL {
     }
 
     public boolean exists(String urlHash) {
-        try {
-            return urlIndex.has(urlHash.getBytes());
-        } catch (IOException e) {
-            return false;
-        }
+        return urlIndex.has(urlHash.getBytes());
     }
     
     public void clearStack() {

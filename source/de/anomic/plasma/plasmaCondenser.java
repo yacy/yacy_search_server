@@ -358,7 +358,7 @@ public final class plasmaCondenser {
                         k = it.next();
                         wsp = words.get(k);
                         wsp.check(idx);
-                        words.put(k, wsp);
+                        words.put(k, wsp); // is that necessary?
                     }
                 }
                 sentence = new StringBuffer(100);

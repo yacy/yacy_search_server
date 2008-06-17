@@ -230,12 +230,7 @@ public class Balancer {
     }
     
     public synchronized boolean has(String urlhash) {
-        try {
-            return urlFileIndex.has(urlhash.getBytes());
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        }
+        return urlFileIndex.has(urlhash.getBytes());
     }
     
     public boolean notEmpty() {
@@ -345,7 +340,7 @@ public class Balancer {
         urlFileIndex.put(entry.toRow());
         
         // check size of domainStacks and flush
-        if ((domainStacks.size() > 20) || (sizeDomainStacks() > 1000)) {
+        if ((domainStacks.size() > 100) || (sizeDomainStacks() > 1000)) {
             flushOnceDomStacks(1, urlRAMStack.size() < 100); // when the ram stack is small, flush it there
         }
     }

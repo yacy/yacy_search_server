@@ -345,10 +345,15 @@ public class kelondroEcoTable implements kelondroIndex {
         return rowdef.newEntry(b);
     }
 
-    public synchronized boolean has(byte[] key) throws IOException {
-        assert file.size() == index.size() + fail : "file.size() = " + file.size() + ", index.size() = " + index.size();
+    public synchronized boolean has(byte[] key) {
+        try {
+            assert file.size() == index.size() + fail : "file.size() = " + file.size() + ", index.size() = " + index.size();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         assert ((table == null) || (table.size() == index.size()));
-        return index.geti(key) >= 0;
+        return index.has(key);
     }
 
     public synchronized kelondroCloneableIterator<byte[]> keys(boolean up, byte[] firstKey) throws IOException {

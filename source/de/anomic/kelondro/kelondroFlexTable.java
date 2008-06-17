@@ -147,12 +147,12 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         return RAMIndex;
     }
     
-    public synchronized boolean has(byte[] key) throws IOException {
+    public synchronized boolean has(byte[] key) {
         // it is not recommended to implement or use a has predicate unless
         // it can be ensured that it causes no IO
         if ((kelondroAbstractRecords.debugmode) && (RAMIndex != true)) serverLog.logWarning("kelondroFlexTable", "RAM index warning in file " + super.tablename);
         assert this.size() == index.size() : "content.size() = " + this.size() + ", index.size() = " + index.size();
-        return index.geti(key) >= 0;
+        return index.has(key);
     }
     
     private kelondroBytesIntMap initializeRamIndex(int initialSpace) {

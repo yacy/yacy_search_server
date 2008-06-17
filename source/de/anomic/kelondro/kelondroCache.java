@@ -191,7 +191,7 @@ public class kelondroCache implements kelondroIndex {
         readMissCache = null;
     }
 
-    public boolean has(byte[] key) throws IOException {
+    public boolean has(byte[] key) {
         // first look into the miss cache
         if (readMissCache != null) {
             if (readMissCache.get(key) != null) {

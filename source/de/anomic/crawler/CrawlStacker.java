@@ -238,6 +238,11 @@ public final class CrawlStacker extends Thread {
             int currentdepth, 
             CrawlProfile.entry profile) {
         if (profile == null) return;
+        
+        // check first before we create a big object
+        if (this.urlEntryCache.has(nexturl.hash().getBytes())) return;
+
+        // now create the big object before we enter the synchronized block
         CrawlEntry newEntry = new CrawlEntry(
                     initiatorHash,
                     nexturl,
@@ -249,15 +254,15 @@ public final class CrawlStacker extends Thread {
                     0,
                     0
                     );
-
         if (newEntry == null) return;
+        kelondroRow.Entry newEntryRow = newEntry.toRow();
                 
-        synchronized(this.urlEntryHashCache) {                    
+        synchronized(this.urlEntryHashCache) {
             kelondroRow.Entry oldValue;
             boolean hostknown = true;
             if (prequeue) hostknown = prefetchHost(nexturl.getHost());
             try {
-                oldValue = this.urlEntryCache.put(newEntry.toRow());
+                oldValue = this.urlEntryCache.put(newEntryRow);
             } catch (IOException e) {
                 oldValue = null;
             }                        
@@ -346,7 +351,7 @@ public final class CrawlStacker extends Thread {
         synchronized (this.urlEntryHashCache) {
             urlHash = this.urlEntryHashCache.removeFirst();
             if (urlHash == null) throw new IOException("urlHash is null");
-            entry = this.urlEntryCache.remove(urlHash.getBytes(), false);
+            entry = this.urlEntryCache.remove(urlHash.getBytes(), true);
         }
 
         if ((urlHash == null) || (entry == null)) return null;

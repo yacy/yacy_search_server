@@ -151,11 +151,7 @@ public final class indexRepositoryReference {
 
     public synchronized boolean exists(String urlHash) {
         if (urlIndexFile == null) return false; // case may happen during shutdown
-        try {
-            return urlIndexFile.has(urlHash.getBytes());
-        } catch (IOException e) {
-            return false;
-        }
+        return urlIndexFile.has(urlHash.getBytes());
     }
 
     public kelondroCloneableIterator<indexURLReference> entries(boolean up, String firstHash) throws IOException {

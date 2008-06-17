@@ -139,7 +139,7 @@ public class kelondroSplitTable implements kelondroIndex {
                 if (f.isDirectory()) {
                     // this is a kelonodroFlex table
                     serverLog.logInfo("kelondroSplitTable", "opening partial flex table " + path);
-                    table = new kelondroCache(new kelondroFlexTable(path, maxf, rowdef, 0, resetOnFail));
+                    table = new kelondroFlexTable(path, maxf, rowdef, 0, resetOnFail);
                 } else {
                     serverLog.logInfo("kelondroSplitTable", "opening partial eco table " + f);
                     table = new kelondroEcoTable(f, rowdef, kelondroEcoTable.tailCacheUsageAuto, EcoFSBufferSize, 0);
@@ -209,7 +209,7 @@ public class kelondroSplitTable implements kelondroIndex {
         return this.rowdef;
     }
     
-    public boolean has(byte[] key) throws IOException {
+    public boolean has(byte[] key) {
         return keeperOf(key) != null;
     }
     
@@ -276,19 +276,13 @@ public class kelondroSplitTable implements kelondroIndex {
             try {
                 cs.submit(new Callable<kelondroIndex>() {
                     public kelondroIndex call() {
-                        try {
-                            if (table.has(key)) return table; else return dummyIndex;
-                        } catch (IOException e) {
-                            return dummyIndex;
-                        }
+                        if (table.has(key)) return table; else return dummyIndex;
                     }
                 });
             } catch (RejectedExecutionException e) {
                 // the executor is either shutting down or the blocking queue is full
                 // execute the search direct here without concurrency
-                try {
-                    if (table.has(key)) return table;
-                } catch (IOException ee) {}
+                if (table.has(key)) return table;
                 rejected++;
             }
         }

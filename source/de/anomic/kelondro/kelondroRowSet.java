@@ -109,7 +109,10 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
 	}
    
     public synchronized boolean has(byte[] key) {
-        return (get(key) != null);
+        long handle = profile.startRead();
+        int index = find(key, 0, key.length);
+        profile.stopRead(handle);
+        return index >= 0;
     }
     
     public synchronized kelondroRow.Entry get(byte[] key) {

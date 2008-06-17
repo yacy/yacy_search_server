@@ -502,19 +502,8 @@ public final class plasmaWordIndex implements indexRI {
             }
         }
         count = count - containerList.size();
-        for (int i = 0; i < count; i++) { // possible position of outOfMemoryError ?
-            synchronized (ram) {
-                if (ram.size() == 0) break;
-                if (serverMemory.available() < collections.minMem()) break; // protect memory during flush
-                
-                // select one word to flush
-                wordHash = ram.bestFlushWordHash();
-                
-                // move one container from ram to flush list
-                if (wordHash == null) c = null; else c = ram.deleteContainer(wordHash);
-            }
-            if (c != null) containerList.add(c);
-        }
+        containerList.addAll(ram.bestFlushContainers(count));
+        
         // flush the containers
         for (indexContainer container : containerList) collections.addEntries(container);
         //System.out.println("DEBUG-Finished flush of " + count + " entries from RAM to DB in " + (System.currentTimeMillis() - start) + " milliseconds");

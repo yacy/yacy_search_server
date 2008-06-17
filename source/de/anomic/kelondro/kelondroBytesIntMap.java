@@ -49,6 +49,11 @@ public class kelondroBytesIntMap {
         return index.row();
     }
     
+    public synchronized boolean has(byte[] key) {
+        assert (key != null);
+        return index.has(key);
+    }
+    
     public synchronized int geti(byte[] key) throws IOException {
         assert (key != null);
         kelondroRow.Entry indexentry = index.get(key);

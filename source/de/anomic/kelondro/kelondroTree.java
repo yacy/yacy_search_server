@@ -170,7 +170,7 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
         n.commit();
     }
 
-    public boolean has(byte[] key) throws IOException {
+    public boolean has(byte[] key) {
         throw new UnsupportedOperationException("has should not be used with kelondroTree.");
     }
     

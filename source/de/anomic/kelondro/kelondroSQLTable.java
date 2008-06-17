@@ -135,8 +135,12 @@ public class kelondroSQLTable implements kelondroIndex {
         return this.rowdef;
     }
     
-    public boolean has(byte[] key) throws IOException {
-        return (get(key) != null);
+    public boolean has(byte[] key) {
+        try {
+            return (get(key) != null);
+        } catch (IOException e) {
+            return false;
+        }
     }
     
     public ArrayList<kelondroRowCollection> removeDoubles() {
