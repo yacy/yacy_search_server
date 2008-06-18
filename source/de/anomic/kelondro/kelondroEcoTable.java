@@ -176,7 +176,7 @@ public class kelondroEcoTable implements kelondroIndex {
                 byte[] record = new byte[rowdef.objectsize];
                 key = new byte[rowdef.primaryKeyLength];
                 for (Integer[] ds: doubles) {
-                    file.get(ds[0].longValue(), record, 0);
+                    file.get(ds[0].intValue(), record, 0);
                     System.arraycopy(record, 0, key, 0, rowdef.primaryKeyLength);
                     if (!index.addi(key, ds[0].intValue())) fail++;
                 }
@@ -254,6 +254,10 @@ public class kelondroEcoTable implements kelondroIndex {
         return map;
     }
     
+    public boolean usesFullCopy() {
+        return this.table != null;
+    }
+    
     public static int staticRAMIndexNeed(File f, kelondroRow rowdef) {
         return (int) ((rowdef.primaryKeyLength + 4) * tableSize(f, rowdef.objectsize) * kelondroRowCollection.growfactor);
     }
@@ -284,17 +288,31 @@ public class kelondroEcoTable implements kelondroIndex {
         return c;
     }
 
+    /**
+     * remove double-entries from the table
+     * this process calls the underlying removeDoubles() method from the table index
+     * and 
+     */
     public synchronized ArrayList<kelondroRowCollection> removeDoubles() throws IOException {
+        assert file.size() == index.size() + fail : "file.size() = " + file.size() + ", index.size() = " + index.size();
         ArrayList<kelondroRowCollection> report = new ArrayList<kelondroRowCollection>();
         kelondroRowSet rows;
         TreeSet<Integer> d = new TreeSet<Integer>();
         byte[] b = new byte[rowdef.objectsize];
+        Integer L;
+        kelondroRow.Entry inconsistentEntry;
+        // iterate over all entries that have inconsistent index references
         for (Integer[] is: index.removeDoubles()) {
+            // 'is' is the set of all indexes, that have the same reference
+            // we collect that entries now here
             rows = new kelondroRowSet(this.rowdef, is.length);
             for (int j = 0; j < is.length; j++) {
-                d.add(is[j]);
-                file.get(is[j].intValue(), b, 0); // TODO: fix IndexOutOfBoundsException here
-                rows.addUnique(rowdef.newEntry(b));
+                L = is[j];
+                assert L.intValue() < file.size() : "L.intValue() = " + L.intValue() + ", file.size = " + file.size(); // prevent ooBounds Exception
+                d.add(L);
+                file.get(L.intValue(), b, 0); // TODO: fix IndexOutOfBoundsException here
+                inconsistentEntry = rowdef.newEntry(b);
+                rows.addUnique(inconsistentEntry);
             }
             report.add(rows);
         }
@@ -305,6 +323,7 @@ public class kelondroEcoTable implements kelondroIndex {
             d.remove(s);
             this.removeInFile(s.intValue());
         }
+        assert file.size() == index.size() + fail : "file.size() = " + file.size() + ", index.size() = " + index.size();
         return report;
     }
     

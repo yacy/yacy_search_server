@@ -268,10 +268,10 @@ public class kelondroCollectionIndex {
         // open/create index table
         File f = new File(path, filenameStub + ".index");
         kelondroRow indexRowdef = indexRow(keylength, indexOrder);
-        
+        kelondroIndex theindex;
         if (f.isDirectory()) {
             // use a flextable
-            kelondroIndex theindex = new kelondroCache(new kelondroFlexTable(path, filenameStub + ".index", indexRowdef, initialSpace, true));
+            theindex = new kelondroCache(new kelondroFlexTable(path, filenameStub + ".index", indexRowdef, initialSpace, true));
         
             // save/check property file for this array
             File propfile = propertyFile(path, filenameStub, loadfactor, rowdef.objectsize);
@@ -287,14 +287,19 @@ public class kelondroCollectionIndex {
             }
             props.put("rowdef", rowdef.toString());
             serverFileUtils.saveMap(propfile, props, "CollectionIndex properties");
-        
-            return theindex;
         } else {
             // open a ecotable
             long records = f.length() / indexRowdef.objectsize;
             long necessaryRAM4fullTable = minimumRAM4Eco + (indexRowdef.objectsize + 4) * records * 3 / 2;
-            return new kelondroEcoTable(f, indexRowdef, (serverMemory.request(necessaryRAM4fullTable, false)) ? kelondroEcoTable.tailCacheUsageAuto : kelondroEcoTable.tailCacheDenyUsage, EcoFSBufferSize, initialSpace);
+            boolean fullCache = serverMemory.request(necessaryRAM4fullTable, false);
+            if (fullCache) {
+                theindex = new kelondroEcoTable(f, indexRowdef, kelondroEcoTable.tailCacheUsageAuto, EcoFSBufferSize, initialSpace);
+                if (!((kelondroEcoTable) theindex).usesFullCopy()) theindex = new kelondroCache(theindex);
+            } else {
+                theindex = new kelondroCache(new kelondroEcoTable(f, indexRowdef, kelondroEcoTable.tailCacheDenyUsage, EcoFSBufferSize, initialSpace));
+            }
         }
+        return theindex;
     }
     
     private kelondroFixedWidthArray openArrayFile(int partitionNumber, int serialNumber, kelondroByteOrder indexOrder, boolean create) throws IOException {

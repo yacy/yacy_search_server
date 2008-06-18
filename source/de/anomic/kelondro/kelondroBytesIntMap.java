@@ -85,13 +85,16 @@ public class kelondroBytesIntMap {
         ArrayList<Integer[]> report = new ArrayList<Integer[]>();
         Integer[] is;
         Iterator<kelondroRow.Entry> ei;
-        int c;
+        int c, i;
+        int initialSize = this.size();
         for (kelondroRowCollection delset: index.removeDoubles()) {
             is = new Integer[delset.size()];
             ei = delset.rows();
             c = 0;
             while (ei.hasNext()) {
-                is[c++] = new Integer((int) ei.next().getColLong(1));
+                i = (int) ei.next().getColLong(1);
+                assert i < initialSize : "i = " + i + ", initialSize = " + initialSize;
+                is[c++] = new Integer(i);
             }
             report.add(is);
         }
