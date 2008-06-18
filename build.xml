@@ -481,6 +481,14 @@
         <include name="build.properties"/>
       </fileset>
     </copy>
+  	
+    <!-- copy searchtest -->
+    <copy todir="${release_main}/bin">
+      <fileset dir="bin">
+        <include name="searchtest.*"/>
+        <include name="localsearch.sh"/>
+      </fileset>
+    </copy>
 
   </target>
 
@@ -641,6 +649,14 @@
       <fileset dir=".">
         <include name="build.xml"/>
         <include name="build.properties"/>
+      </fileset>
+    </copy>
+  	
+    <!-- copy searchtest -->
+    <copy todir="${release_main}/bin">
+      <fileset dir="bin">
+        <include name="searchtest.*"/>
+        <include name="localsearch.sh"/>
       </fileset>
     </copy>
 
