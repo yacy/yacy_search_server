@@ -53,10 +53,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.List;
 
 import de.anomic.plasma.plasmaSwitchboard;
-// FIXME entfernen
 import de.anomic.server.logging.serverLog;
 
 public class diskUsage {
@@ -64,12 +63,12 @@ public class diskUsage {
     serverLog log = new serverLog("DISK USAGE");
     private static final HashMap<String, long[]> diskUsages = new HashMap<String, long[]>();
     
-    private static final ArrayList<String> allVolumes = new ArrayList<String>();
-    private static final ArrayList<String> allMountPoints = new ArrayList<String>();
-    private static final ArrayList<Boolean> usedVolumes = new ArrayList<Boolean>();
+    private static final List<String> allVolumes = new ArrayList<String>();
+    private static final List<String> allMountPoints = new ArrayList<String>();
+    private static final List<Boolean> usedVolumes = new ArrayList<Boolean>();
     
-    private static final ArrayList<String> yacyUsedVolumes = new ArrayList<String>();
-    private static final ArrayList<String> yacyUsedMountPoints = new ArrayList<String>();
+    private static final List<String> yacyUsedVolumes = new ArrayList<String>();
+    private static final List<String> yacyUsedMountPoints = new ArrayList<String>();
     
     private static plasmaSwitchboard sb;
     private static int usedOS;
@@ -117,7 +116,7 @@ public class diskUsage {
     //  public API  //
     //////////////////
 
-    public diskUsage (plasmaSwitchboard sb) {
+    public diskUsage (final plasmaSwitchboard sb) {
         errorMessage = null;
         diskUsage.sb = sb;
         usedOS = getOS();
@@ -170,7 +169,7 @@ public class diskUsage {
         return diskUsages;
     }
 
-    public boolean getUsable () {
+    public boolean isUsable () {
         return usable;
     }
     
@@ -208,7 +207,7 @@ public class diskUsage {
         // please report all successes or fails for non-confirmed systems to
         // detlef!reichl()gmx!org. Thanks!
         
-        ArrayList<String> processArgs = new ArrayList<String>();
+        final List<String> processArgs = new ArrayList<String>();
         processArgs.add("df");
         processArgs.add("-k");
         // Some systems need the additional -P parameter to return the data in Posix format.
@@ -220,23 +219,20 @@ public class diskUsage {
         if (usedOS != TRU64 && usedOS != HAIKU)
             processArgs.add("-l");
 
-        ArrayList<String> lines = getConsoleOutput(processArgs);
+        final List<String> lines = getConsoleOutput(processArgs);
         if (consoleError) {
             errorMessage = "df:";
-            Iterator<String> iter = lines.iterator();
-            while (iter.hasNext()){
-                errorMessage += "\n" + iter.next();
-                usable = false;
-                return;
+            for (final String line: lines){
+                errorMessage += "\n" + line;
             }
+            usable = false;
+            return;
         }
 
-        Iterator<String> iter = lines.iterator();
-        while (iter.hasNext()){
-            String line = iter.next();
-            if (! line.startsWith ("/"))
+        for (final String line: lines){
+            if (line.charAt(0) != '/')
                 continue;
-            String[] tokens = line.split(" ++", 6);
+            final String[] tokens = line.split(" +", 6);
             if (tokens.length < 6)
                 continue;
 nextLine:
@@ -245,7 +241,7 @@ nextLine:
                     if (tokens[5].trim().compareTo(allMountPoints.get(i)) > 0) {
                         allMountPoints.add(i, tokens[5].trim());
                         allVolumes.add(i, tokens[0]);
-                        break nextLine;
+                        break nextLine;// TODO what does this mean? continue? stop parsing lines? --danielr
                     }
                 }
                 allMountPoints.add(allMountPoints.size(), tokens[5]);
@@ -253,9 +249,9 @@ nextLine:
             } else { 
                 for (int i = 0; i < yacyUsedVolumes.size(); i++){
                     if (yacyUsedVolumes.get(i).equals(tokens[0])) {
-                        long[] vals = new long[2];
-                        try { vals[0] = new Long(tokens[1]); } catch (NumberFormatException e) { break nextLine; }
-                        try { vals[1] = new Long(tokens[3]); } catch (NumberFormatException e) { break nextLine; }
+                        final long[] vals = new long[2];
+                        try { vals[0] = new Long(tokens[1]); } catch (final NumberFormatException e) { break nextLine; }
+                        try { vals[1] = new Long(tokens[3]); } catch (final NumberFormatException e) { break nextLine; }
                         vals[0] *= 1024;
                         vals[1] *= 1024;
                         diskUsages.put (yacyUsedMountPoints.get(i), vals);
@@ -267,34 +263,34 @@ nextLine:
 
 
 
-    private void checkVolumesInUseUnix (String path) {
-        File file = new File(path);
-        File[] fileList = file.listFiles();
+    private void checkVolumesInUseUnix (final String path) {
+        final File file = new File(path);
+        final File[] fileList = file.listFiles();
         String base;
         String dir;
         
-        for (int i = 0; i < fileList.length; i++) {
+        for (final File element : fileList) {
             // ATTENTION! THIS LOOP NEEDS A TIME-OUT
-            if (fileList[i].isDirectory()) {
+            if (element.isDirectory()) {
                 try {
-                    dir = fileList[i].getCanonicalPath();
-                } catch (IOException e) {
+                    dir = element.getCanonicalPath();
+                } catch (final IOException e) {
                     usable = false;
                     break;
                 }
-                if (!dir.endsWith ("HTCACHE")
-                    && !dir.endsWith ("LOCALE")
-                    && !dir.endsWith ("RANKING")
-                    && !dir.endsWith ("RELEASE")
-                    && !dir.endsWith ("collection.0028.commons")) {
-                    checkVolumesInUseUnix (dir);
-                } else {
+                if (dir.endsWith ("HTCACHE")
+                        || dir.endsWith ("LOCALE")
+                        || dir.endsWith ("RANKING")
+                        || dir.endsWith ("RELEASE")
+                        || dir.endsWith ("collection.0028.commons")) {
                     checkPathUsage (dir);
+                } else {
+                    checkVolumesInUseUnix (dir);
                 }
             } else {
                 try {
-                    base = fileList[i].getCanonicalPath();
-                } catch (IOException e) {
+                    base = element.getCanonicalPath();
+                } catch (final IOException e) {
                     usable = false;
                     break;
                 }
@@ -311,12 +307,11 @@ nextLine:
    
    private void checkWindowsCommandVersion () {
         windowsCommand = null;
-        String os = System.getProperty("os.name").toLowerCase();
-        String[] oses = {"windows 95", "windows 98", "windows me"};
+        final String os = System.getProperty("os.name").toLowerCase();
+        final String[] oses = {"windows 95", "windows 98", "windows me"};
         
-        for (int i = 0; i < oses.length; i++)
-        {
-            if (os.indexOf(oses[i]) >= 0){
+        for (final String element : oses) {
+            if (os.indexOf(element) >= 0){
                 windowsCommand = "command.com";
                 break;
             }
@@ -325,27 +320,27 @@ nextLine:
             windowsCommand = "cmd.exe";
     }
     
-    private String dfWindowsGetConsoleOutput (String device) {
-        ArrayList<String> processArgs = new ArrayList<String>();
+    private String dfWindowsGetConsoleOutput (final String device) {
+        final List<String> processArgs = new ArrayList<String>();
         processArgs.add(windowsCommand);
         processArgs.add("/c");
         processArgs.add("dir");
         processArgs.add(device);
         
 
-        ProcessBuilder processBuilder = new ProcessBuilder(processArgs);
+        final ProcessBuilder processBuilder = new ProcessBuilder(processArgs);
         Process process;
         try {
             process = processBuilder.start();
-        } catch (IOException e) {return null;}
+        } catch (final IOException e) {return null;}
 
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+        final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
         String line;
         String lastLine = null;
         while (true) {
             try {
                 line = bufferedReader.readLine ();
-            } catch (IOException e) { return null; }
+            } catch (final IOException e) { return null; }
             if (line == null)
               break;
             if (line.trim().length() > 0)
@@ -355,8 +350,9 @@ nextLine:
     }
     
     private void getAllVolumesWindows () {
+        String dirName;
         for (char c = 'C'; c <= 'Z'; c++) { // A and B are reserved for floppy on Windows
-            String dirName = c + ":\\";
+            dirName = c + ":\\";
             if (dfWindowsGetConsoleOutput (dirName) != null) {
                 allVolumes.add(String.valueOf(c));
             }
@@ -364,10 +360,10 @@ nextLine:
     }
 
     private void checkStartVolume() {
-        File file = new File("DATA");
+        final File file = new File("DATA");
 
         String path = null;
-        try { path = file.getCanonicalPath().toString(); } catch (IOException e) {
+        try { path = file.getCanonicalPath().toString(); } catch (final IOException e) {
             errorMessage = "Cant get DATA directory";
             usable = false;
             return;
@@ -376,7 +372,7 @@ nextLine:
           return;
           
         int index = -1;
-        try { index = allVolumes.indexOf(path.substring(0, 1)); } catch (IndexOutOfBoundsException e) {
+        try { index = allVolumes.indexOf(path.substring(0, 1)); } catch (final IndexOutOfBoundsException e) {
             errorMessage = "Start volume not found in all volumes";
             usable = false;
             return;
@@ -392,12 +388,12 @@ nextLine:
     public void dfWindows () {
         for (int i = 0; i < yacyUsedVolumes.size(); i++){
             // in yacyUsedMountPoints aendern
-            String line = dfWindowsGetConsoleOutput(yacyUsedVolumes.get(i) + ":\\");
-            String[] tokens = line.trim().split(" ++");
+            final String line = dfWindowsGetConsoleOutput(yacyUsedVolumes.get(i) + ":\\");
+            final String[] tokens = line.trim().split(" ++");
             
-            long[] vals = new long[2];
+            final long[] vals = new long[2];
             vals[0] = -1;
-            try { vals[1] = new Long(tokens[2].replaceAll("[.,]", "")); } catch (NumberFormatException e) {continue;}
+            try { vals[1] = new Long(tokens[2].replaceAll("[.,]", "")); } catch (final NumberFormatException e) {continue;}
             diskUsages.put (yacyUsedVolumes.get(i), vals);
         }
     }
@@ -409,7 +405,7 @@ nextLine:
    /////////////
 
     private int getOS () {
-        String os = System.getProperty("os.name").toLowerCase();
+        final String os = System.getProperty("os.name").toLowerCase();
         for (int i = 0; i < OSname.length; i++)
         {
             if (os.indexOf(OSname[i]) >= 0)
@@ -422,24 +418,25 @@ nextLine:
     private void checkMapedSubDirs () {
         //  FIXME whats about the secondary path???
         //   = (getConfig(plasmaSwitchboard.INDEX_SECONDARY_PATH, "");
-        String[] pathes =  {plasmaSwitchboard.HTDOCS_PATH,        
+        final String[] pathes =  {plasmaSwitchboard.HTDOCS_PATH,        
                             plasmaSwitchboard.INDEX_PRIMARY_PATH,
                             plasmaSwitchboard.LISTS_PATH,
                             plasmaSwitchboard.PLASMA_PATH,
                             plasmaSwitchboard.RANKING_PATH,
                             plasmaSwitchboard.WORK_PATH};
 
-        for (int i = 0; i < pathes.length; i++) {
-            String path = null;
+        String path;
+        for (final String element : pathes) {
+            path = null;
             try {
-                path = sb.getConfigPath(pathes[i], "").getCanonicalPath().toString();
-            } catch (IOException e) { continue; }
+                path = sb.getConfigPath(element, "").getCanonicalPath().toString();
+            } catch (final IOException e) { continue; }
             if (path.length() > 0)
                 checkPathUsage (path);
         }
     }
     
-    private void checkPathUsage (String path) {
+    private void checkPathUsage (final String path) {
         for (int i = 0; i < allMountPoints.size(); i++){
             if (path.startsWith (allMountPoints.get(i))) {
                 usedVolumes.set(i, true);
@@ -449,9 +446,8 @@ nextLine:
     }
 
 
-    private ArrayList<String> getConsoleOutput (ArrayList<String> processArgs) {
-        ArrayList<String> list = new ArrayList<String>();
-        ProcessBuilder processBuilder = new ProcessBuilder(processArgs);
+    private List<String> getConsoleOutput (final List<String> processArgs) {
+        final ProcessBuilder processBuilder = new ProcessBuilder(processArgs);
         Process process = null;
         consoleInterface inputStream = null;
         consoleInterface errorStream = null;
@@ -460,26 +456,28 @@ nextLine:
         try {
             process = processBuilder.start();
 
-            inputStream = new consoleInterface(process.getInputStream());
-            errorStream = new consoleInterface(process.getErrorStream());
+            inputStream = new consoleInterface(process.getInputStream(), "input");
+            errorStream = new consoleInterface(process.getErrorStream(), "error");
 
             inputStream.start();
             errorStream.start();
 
             /*int retval =*/ process.waitFor();
 
-        } catch(IOException iox) {
+        } catch(final IOException iox) {
             consoleError = true;
             log.logWarning("logpoint 0 " + iox.getMessage());
+            List<String> list = new ArrayList<String>();
             list.add(iox.getMessage());
             return list;
-        } catch(InterruptedException ix) {
+        } catch(final InterruptedException ix) {
             consoleError = true;
             log.logWarning("logpoint 1 " + ix.getMessage());
+            List<String> list = new ArrayList<String>();
             list.add(ix.getMessage());
             return list;
         }
-        list = inputStream.getOutput();
+        List<String> list = inputStream.getOutput();
         if (list.isEmpty()) {
             consoleError = true;
             log.logWarning("logpoint 2 ");
@@ -490,35 +488,52 @@ nextLine:
 
     public class consoleInterface extends Thread
     {
-        private InputStream stream;
-        private boolean getInputStream;
-        private ArrayList<String> output;
+        private final InputStream stream;
+        private final List<String> output = new ArrayList<String>();
+        private final String name;
+        private boolean done = false;
 
-        public consoleInterface (InputStream stream)
+        public consoleInterface (final InputStream stream, String name)
         {
             this.stream = stream;
-            output = new ArrayList<String>();
+            this.name = name;
         }
 
         public void run() {
             try {
-                InputStreamReader input = new InputStreamReader(stream);
-                BufferedReader buffer = new BufferedReader(input);
+                final InputStreamReader input = new InputStreamReader(stream);
+                final BufferedReader buffer = new BufferedReader(input);
                 String line = null;
-                int tries = 1000;
-                while (tries-- > 0) {
+                int tries = 0;
+                while (tries < 1000) {
+                    tries++;
+                    try {
+                        Thread.sleep(1);
+                    } catch (InterruptedException e) {
+                        // just stop sleeping
+                    }
                     if (buffer.ready())
                         break;
                 }
-                log.logInfo("logpoint 3 " + tries + " tries");
+                log.logInfo("logpoint 3 "+ name +" needed " + tries + " tries");
                 while((line = buffer.readLine()) != null) {
                         output.add(line);
                 }
-            } catch(IOException ix) { log.logWarning("logpoint 4 " +  ix.getMessage());}
+                log.logInfo("logpoint 4 output done of '"+ name +"'");
+                done  = true;
+            } catch(final IOException ix) { log.logWarning("logpoint 5 " +  ix.getMessage());}
         }
         
-        public ArrayList<String> getOutput(){
+        public List<String> getOutput(){
+            log.logInfo("logpoint 6 getOutput() of '"+ name +"' requested");
+            while(!isDone()) {
+                // wait
+            }
             return output;
+        }
+        
+        private boolean isDone() {
+            return done;
         }
     }
 }

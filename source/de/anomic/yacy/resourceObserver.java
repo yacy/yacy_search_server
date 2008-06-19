@@ -40,7 +40,6 @@
 package de.anomic.yacy;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import de.anomic.plasma.plasmaSwitchboard;
@@ -59,21 +58,21 @@ public final class resourceObserver {
     // The memory usage should be checked on every run
     private final int CHECK_MEMORY_USAGE_FREQ = 1;
     
-    private serverLog log = new serverLog("RESOURCE OBSERVER");
-    private diskUsage du;
-    private plasmaSwitchboard sb;
+    private final serverLog log = new serverLog("RESOURCE OBSERVER");
+    private final diskUsage du;
+    private final plasmaSwitchboard sb;
 
     private int checkDiskUsageCount;
     private int checkMemoryUsageCount;
     private boolean disksOK;
     private boolean memoryOK;
     
-    public resourceObserver(plasmaSwitchboard sb) {
+    public resourceObserver(final plasmaSwitchboard sb) {
         this.sb = sb;
         this.log.logInfo("initializing the resource observer");
         du = new diskUsage(sb);
         
-        if (!du.getUsable ())
+        if (!du.isUsable ())
             this.log.logWarning("Disk usage returned: " + du.getErrorMessage());
         
         checkDiskUsageCount = 0;
@@ -82,7 +81,7 @@ public final class resourceObserver {
         memoryOK = true;
     }
 
-    public boolean resourceObserverJob() {
+    public void resourceObserverJob() {
         checkDiskUsageCount++;
         checkMemoryUsageCount++;
         boolean tmpDisksOK = true;
@@ -109,12 +108,11 @@ public final class resourceObserver {
             }
         }
         else {
-            if (du.getUsable ())
+            if (du.isUsable ())
                 this.log.logInfo("run completed; everything in order");
             else
                 this.log.logInfo("The observer is out of order");
         }
-        return true;
     }
     
     public boolean getDisksOK () {
@@ -125,25 +123,28 @@ public final class resourceObserver {
         return memoryOK;
     }
     
+    /**
+     * @return amount of space that should be kept free
+     */
     public long getMinFreeDiskSpace () {
         return MIN_FREE_DISK_SPACE;
     }
     
+    /**
+     * @return enough disk space availabe?
+     */
     private boolean checkDisks() {
         boolean below = false;    
     
-        if (!du.getUsable ())
+        if (!du.isUsable ())
             return true;
         
-        HashMap<String, long[]> usage = du.getDiskUsage();
-        Iterator<Map.Entry<String, long[]>> iter = usage.entrySet().iterator();
-        Map.Entry<String, long[]> entry;
-        while (iter.hasNext()) {
-            entry = iter.next ();
-            String key = entry.getKey();
-            long[] val = entry.getValue();
+        final HashMap<String, long[]> usage = du.getDiskUsage();
+        long[] val;
+        for (Map.Entry<String, long[]> entry: usage.entrySet()) {
+            val = entry.getValue();
             if (val[1] < MIN_FREE_DISK_SPACE) {
-                this.log.logWarning("Volume " + key + ": free space is too low");
+                this.log.logWarning("Volume " + entry.getKey() + ": free space is too low");
                 below = true;
             }
         }
