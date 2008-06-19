@@ -281,8 +281,11 @@ public final class indexRAMRI implements indexRI, indexRIReader {
         if (c > 0) {
             // removal successful
             if (heap.has(wordHash)) {
-                hashScore.decScore(wordHash);
+                hashScore.addScore(wordHash, -c);
                 hashDate.setScore(wordHash, intTime(System.currentTimeMillis()));
+            } else {
+                hashScore.deleteScore(wordHash);
+                hashDate.deleteScore(wordHash);
             }
             return c;
         }
