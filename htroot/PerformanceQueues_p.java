@@ -154,12 +154,16 @@ public class PerformanceQueues_p {
             prop.putNum("table_" + c + "_execpercycle", (busyCycles == 0) ? -1 : exectime / busyCycles);
             prop.putNum("table_" + c + "_memusepercycle", (busyCycles == 0) ? -1 : memuse / busyCycles / 1024);
             
+            // load with old values
+            idlesleep = switchboard.getConfigLong(threadName + "_idlesleep" , 1000);
+            busysleep = switchboard.getConfigLong(threadName + "_busysleep",   100);
+            memprereq = switchboard.getConfigLong(threadName + "_memprereq",     0);
             if (setDelay) {
                 // load with new values
-                idlesleep = post.getLong(threadName + "_idlesleep", 1000);
-                busysleep = post.getLong(threadName + "_busysleep",  100);
-                memprereq = post.getLong(threadName + "_memprereq",    0) * 1024;
-                if (memprereq == 0) memprereq = sb.getConfigLong(threadName + "_memprereq", 0);
+                idlesleep = post.getLong(threadName + "_idlesleep", idlesleep);
+                busysleep = post.getLong(threadName + "_busysleep", busysleep);
+                memprereq = post.getLong(threadName + "_memprereq", memprereq) * 1024;
+                if (memprereq == 0) memprereq = switchboard.getConfigLong(threadName + "_memprereq", 0);
                     
                 // check values to prevent short-cut loops
                 if (idlesleep < 1000) idlesleep = 1000;
@@ -168,9 +172,9 @@ public class PerformanceQueues_p {
                 onTheFlyReconfiguration(switchboard, threadName, idlesleep, busysleep, memprereq);
             } if (setProfile) {
                 // load with new values
-                idlesleep = (long) (Long.parseLong(d(defaultSettings.get(threadName + "_idlesleep"), "1000")) * multiplier);
-                busysleep = (long) (Long.parseLong(d(defaultSettings.get(threadName + "_busysleep"),  "100")) * multiplier);
-                memprereq = (long) (Long.parseLong(d(defaultSettings.get(threadName + "_memprereq"),    "0")) * multiplier);
+                idlesleep = (long) (Long.parseLong(d(defaultSettings.get(threadName + "_idlesleep"), String.valueOf(idlesleep))) * multiplier);
+                busysleep = (long) (Long.parseLong(d(defaultSettings.get(threadName + "_busysleep"), String.valueOf(busysleep))) * multiplier);
+                memprereq = (long) (Long.parseLong(d(defaultSettings.get(threadName + "_memprereq"), String.valueOf(memprereq))) * multiplier);
 
                 // check values to prevent short-cut loops
                 if (idlesleep < 1000) idlesleep = 1000;
@@ -180,11 +184,6 @@ public class PerformanceQueues_p {
                 if ((threadName.equals("62_remotetriggeredcrawl")) && (busysleep < 100)) busysleep = 100;
 
                 onTheFlyReconfiguration(switchboard, threadName, idlesleep, busysleep, memprereq);
-            } else {
-                // load with old values
-                idlesleep = Long.parseLong(switchboard.getConfig(threadName + "_idlesleep" , "1000"));
-                busysleep = Long.parseLong(switchboard.getConfig(threadName + "_busysleep",   "100"));
-                memprereq = Long.parseLong(switchboard.getConfig(threadName + "_memprereq",     "0"));
             }
             prop.put("table_" + c + "_idlesleep", idlesleep);
             prop.put("table_" + c + "_busysleep", busysleep);

@@ -13,12 +13,6 @@
 20_dhtdistribution_idlesleep=5000
 20_dhtdistribution_busysleep=2000
 20_dhtdistribution_memprereq=6291456
-30_peerping_idlesleep=120000
-30_peerping_busysleep=120000
-30_peerping_memprereq=1048576
-40_peerseedcycle_idlesleep=1800000
-40_peerseedcycle_busysleep=1200000
-40_peerseedcycle_memprereq=2097152
 50_localcrawl_idlesleep=4000
 50_localcrawl_busysleep=500
 50_localcrawl_busysleep__pro=100
@@ -44,7 +38,4 @@
 82_crawlstack_idlesleep=5000
 82_crawlstack_busysleep=1
 82_crawlstack_memprereq=1048576
-90_cleanup_idlesleep=300000
-90_cleanup_busysleep=300000
-90_cleanup_memprereq=0
 
