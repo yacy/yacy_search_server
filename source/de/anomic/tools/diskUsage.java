@@ -279,6 +279,7 @@ nextLine:
                     break;
                 }
                 if (dir.endsWith ("HTCACHE")
+		        || dir.endsWith ("HTDOCS")
                         || dir.endsWith ("LOCALE")
                         || dir.endsWith ("RANKING")
                         || dir.endsWith ("RELEASE")
