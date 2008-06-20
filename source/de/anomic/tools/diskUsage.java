@@ -59,7 +59,6 @@ import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.logging.serverLog;
 
 public class diskUsage {
-// FIXME entfernen
     serverLog log = new serverLog("DISK USAGE");
     private static final HashMap<String, long[]> diskUsages = new HashMap<String, long[]>();
     
@@ -89,26 +88,26 @@ public class diskUsage {
     private final int LINUX = 7;                  // all kind of linux
     private final int MAC_OS_X = 8;               // Apple
     private final int MINIX = 9;                  // don't know if there even is a JRE for minix...
-    private final int SOLARIS = 10;               // SUN  The latest SunOS version is from 1990 and that is much
-                                                  //      older as Java 1.5. So we can ignore it.
-    private final int UNICOS = 11;                // cray
+    private final int SOLARIS = 10;               // SUN
+    private final int SUNOS = 11;                 // The latest SunOS version is from 1990 but the Solaris java refferer remains SunOS
+    private final int UNICOS = 12;                // cray
 
     private final int UNIX_END = UNICOS;
 
         // Windows dos based
-    private final int WINDOWS_95 = 12;
-    private final int WINDOWS_98 = 13;
-    private final int WINDOWS_ME = 14;
+    private final int WINDOWS_95 = 13;
+    private final int WINDOWS_98 = 14;
+    private final int WINDOWS_ME = 15;
     
         // Windows WinNT based
-    private final int WINDOWS_NT = 15;
-    private final int WINDOWS_2000 = 16;
-    private final int WINDOWS_XP = 17;
-    private final int WINDOWS_SERVER = 18;
-    private final int WINDOWS_VISTA = 19;
+    private final int WINDOWS_NT = 16;
+    private final int WINDOWS_2000 = 17;
+    private final int WINDOWS_XP = 18;
+    private final int WINDOWS_SERVER = 19;
+    private final int WINDOWS_VISTA = 20;
     
     String[] OSname =   {"aix", "bs2000", "bsd", "haiku", "hp-ux", "tru64", "irix", "linux", "mac os x", "minix",
-                         "solaris", "unicos",
+                         "solaris", "sunos", "unicos",
                          "windows 95", "windows 98", "windows me",
                          "windows nt", "windows 2000", "windows xp", "windows server", "windows vista"};
     
@@ -143,15 +142,8 @@ public class diskUsage {
             // all Windows version
             } else {
                 checkWindowsCommandVersion();
-                getAllVolumesWindows ();
-                for (int i = 0; i < allVolumes.size(); i++)
-                    usedVolumes.add(false);
                 checkStartVolume();
                 checkMapedSubDirs ();
-                for (int i = 0; i < allVolumes.size(); i++){
-                    if (usedVolumes.get(i) == true)
-                        yacyUsedVolumes.add(allVolumes.get (i));
-                }
             }
             if (yacyUsedVolumes.size() < 1)
                 usable = false;
@@ -241,7 +233,7 @@ nextLine:
                     if (tokens[5].trim().compareTo(allMountPoints.get(i)) > 0) {
                         allMountPoints.add(i, tokens[5].trim());
                         allVolumes.add(i, tokens[0]);
-                        break nextLine;// TODO what does this mean? continue? stop parsing lines? --danielr
+                        break nextLine;
                     }
                 }
                 allMountPoints.add(allMountPoints.size(), tokens[5]);
@@ -270,7 +262,6 @@ nextLine:
         String dir;
         
         for (final File element : fileList) {
-            // ATTENTION! THIS LOOP NEEDS A TIME-OUT
             if (element.isDirectory()) {
                 try {
                     dir = element.getCanonicalPath();
@@ -279,12 +270,12 @@ nextLine:
                     break;
                 }
                 if (dir.endsWith ("HTCACHE")
-		        || dir.endsWith ("HTDOCS")
+                        || dir.endsWith ("HTDOCS")
                         || dir.endsWith ("LOCALE")
                         || dir.endsWith ("RANKING")
                         || dir.endsWith ("RELEASE")
                         || dir.endsWith ("collection.0028.commons")) {
-                    checkPathUsage (dir);
+                    checkPathUsageUnix (dir);
                 } else {
                     checkVolumesInUseUnix (dir);
                 }
@@ -295,7 +286,7 @@ nextLine:
                     usable = false;
                     break;
                 }
-                checkPathUsage (base);
+                checkPathUsageUnix (base);
             }
         }
     }
@@ -321,45 +312,6 @@ nextLine:
             windowsCommand = "cmd.exe";
     }
     
-    private String dfWindowsGetConsoleOutput (final String device) {
-        final List<String> processArgs = new ArrayList<String>();
-        processArgs.add(windowsCommand);
-        processArgs.add("/c");
-        processArgs.add("dir");
-        processArgs.add(device);
-        
-
-        final ProcessBuilder processBuilder = new ProcessBuilder(processArgs);
-        Process process;
-        try {
-            process = processBuilder.start();
-        } catch (final IOException e) {return null;}
-
-        final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-        String line;
-        String lastLine = null;
-        while (true) {
-            try {
-                line = bufferedReader.readLine ();
-            } catch (final IOException e) { return null; }
-            if (line == null)
-              break;
-            if (line.trim().length() > 0)
-                lastLine = line;
-        }
-        return lastLine;
-    }
-    
-    private void getAllVolumesWindows () {
-        String dirName;
-        for (char c = 'C'; c <= 'Z'; c++) { // A and B are reserved for floppy on Windows
-            dirName = c + ":\\";
-            if (dfWindowsGetConsoleOutput (dirName) != null) {
-                allVolumes.add(String.valueOf(c));
-            }
-        }    
-    }
-
     private void checkStartVolume() {
         final File file = new File("DATA");
 
@@ -371,34 +323,46 @@ nextLine:
         }
         if (path.length() < 6)
           return;
-          
-        int index = -1;
-        try { index = allVolumes.indexOf(path.substring(0, 1)); } catch (final IndexOutOfBoundsException e) {
-            errorMessage = "Start volume not found in all volumes";
-            usable = false;
-            return;
-        }
-        if (index > -1)
-            usedVolumes.set(index, true);
-        else {
-            errorMessage = "No start volume found";
-            usable = false;
-        }
+        yacyUsedVolumes.add(path.substring(0, 1));
     }
 
     public void dfWindows () {
         for (int i = 0; i < yacyUsedVolumes.size(); i++){
-            // in yacyUsedMountPoints aendern
-            final String line = dfWindowsGetConsoleOutput(yacyUsedVolumes.get(i) + ":\\");
-            final String[] tokens = line.trim().split(" ++");
+            final List<String> processArgs = new ArrayList<String>();
+            processArgs.add(windowsCommand);
+            processArgs.add("/c");
+            processArgs.add("dir");
+            processArgs.add(yacyUsedVolumes.get(i) + ":\\");
+
+            final List<String> lines = getConsoleOutput(processArgs);
+            if (consoleError) {
+                errorMessage = "df:";
+                for (final String line: lines){
+                    errorMessage += "\n" + line;
+                }
+                usable = false;
+                return;
+            }
             
-            final long[] vals = new long[2];
+            String line = "";
+            for (int l = lines.size() - 1; l >= 0; l--) {
+                line = lines.get(l).trim();
+                if (line.length() > 0)
+                    break;
+            }
+            if (line.length() == 0) {
+                errorMessage = "unable to get free size of volume " + yacyUsedVolumes.get(i);
+                usable = false;
+                return;
+            }
+
+            String[] tokens = line.trim().split(" ++");
+            long[] vals = new long[2];
             vals[0] = -1;
             try { vals[1] = new Long(tokens[2].replaceAll("[.,]", "")); } catch (final NumberFormatException e) {continue;}
             diskUsages.put (yacyUsedVolumes.get(i), vals);
         }
     }
-
    
    
    /////////////
@@ -432,12 +396,16 @@ nextLine:
             try {
                 path = sb.getConfigPath(element, "").getCanonicalPath().toString();
             } catch (final IOException e) { continue; }
-            if (path.length() > 0)
-                checkPathUsage (path);
+            if (path.length() > 0) {
+                if (usedOS <= UNIX_END)
+                    checkPathUsageUnix (path);
+                else
+                    checkPathUsageWindows (path);
+            }
         }
     }
     
-    private void checkPathUsage (final String path) {
+    private void checkPathUsageUnix (final String path) {
         for (int i = 0; i < allMountPoints.size(); i++){
             if (path.startsWith (allMountPoints.get(i))) {
                 usedVolumes.set(i, true);
@@ -446,6 +414,17 @@ nextLine:
         }
     }
 
+    private void checkPathUsageWindows (final String path) {
+        int index = -1;
+        String sub = path.substring(0, 1);
+        try { index = yacyUsedVolumes.indexOf(sub); } catch (IndexOutOfBoundsException e) {
+            errorMessage = "internal error while checking used windows volumes";
+            usable = false;
+            return;
+        }
+        if (index < 0)
+            yacyUsedVolumes.add(sub);
+    }
 
     private List<String> getConsoleOutput (final List<String> processArgs) {
         final ProcessBuilder processBuilder = new ProcessBuilder(processArgs);
