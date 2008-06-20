@@ -11,7 +11,7 @@ Name "YaCy"
 Icon "RELEASE\MAIN\addon\YaCy.ico"
 UninstallIcon "${NSISDIR}\Contrib\Graphics\Icons\orange-uninstall.ico"
 
-#requested execution level on Vista
+;requested execution level on Vista
 RequestExecutionLevel user
 
 OutFile "RELEASE\WINDOWS\yacy_v@REPL_VERSION@_@REPL_DATE@_@REPL_REVISION_NR@.exe"
@@ -29,7 +29,6 @@ InstType "Normal"
 ; The text to prompt the user to enter a directory
 ComponentText "This will install YaCy v@REPL_VERSION@ (Build @REPL_DATE@) on your computer. Select which optional things you want to be installed."
 ; The text to prompt the user to enter a directory
-#DirText "If an old version was installed into another location (eg. AnomicHTTPProxy), you have to move the DATA Directory to the new location."
 DirText "Choose a directory to install into:"
 
 LicenseText "You must agree to this license to install YaCy."
@@ -41,112 +40,6 @@ Section "Binaries (required)"
 	
 	File /r "RELEASE\MAIN\*"
 	File /r "RELEASE\EXT\*"
-/*
-	#main files
-	File "startYACY.bat"
-	File "startYACY_noconsole.bat"
-	File "stopYACY.bat"
-	#File "startYACY_Win9x.bat"
-	#File "startYACY_noconsole_Win9x.bat"
-	#File "stopYACY_Win9x.bat"
-	
-	File "httpd.mime"
-	File "yacy.badwords.example"
-	File "yacy.logging"
-	File "yacy.stopwords"
-	File "yacy.yellow"
-
-	#texts
-	File "AUTHORS"
-	File "COPYRIGHT"
-	File "gpl.txt"
-	File "readme.txt"
-	File "ChangeLog"
-
-	#defaults
-	SetOutPath "$INSTDIR\defaults"
-	File /r "defaults\*"
-	
-	#classes
-	SetOutPath "$INSTDIR\classes"
-	File /r "classes\*"
-	
-	#lib
-	SetOutPath "$INSTDIR\lib"
-	File /r "lib\*"
-
-	#libx
-	SetOutPath "$INSTDIR\libx"
-	File /r "libx\*"
-
-	#locales
-	SetOutPath "$INSTDIR\locales"
-	File /r "locales\*"
-
-	#skins
-	SetOutPath "$INSTDIR\skins"
-	File /r "skins\*"
-
-	#ranking
-	SetOutPath "$INSTDIR\ranking"
-	File /r "ranking\*"
-
-	#htroot non devel
-	SetOutPath "$INSTDIR\htroot"
-	File "htroot\*.html"
-	File "htroot\*.inc"
-	File "htroot\*.soap"
-	File "htroot\*.xml"
-	File "htroot\*.xsl"
-	File "htroot\*.rss"
-	File "htroot\*.csv"
-	File "htroot\*.class"
-	File "htroot\*.ico"
-    File "htroot\*.bmp"
-    File "htroot\*.gif"
-    File "htroot\*.png"
-    File "htroot\*.src" #firefox plugin
-	#File "htroot\*.gif"
-	File "htroot\*.pac" #proxy autoconfig
-
-	#yacy non-devel
-	SetOutPath "$INSTDIR\htroot\yacy"
-	File "htroot\yacy\*.html"
-	File "htroot\yacy\*.class"
-
-	#yacy javascript
-	SetOutPath "$INSTDIR\htroot\js"
-	File "htroot\js\*.js"
-
-	SetOutPath "$INSTDIR\htroot\www"
-	File "htroot\www\*.html"
-	File "htroot\www\*.class"
-
-	#yacy xml
-    #TODO: Split in source/binary
-	SetOutPath "$INSTDIR\htroot\xml"
-	File /r "htroot\xml\*"
-
-	#proxymsg non-devel
-	SetOutPath "$INSTDIR\htroot\proxymsg"
-	File "htroot\proxymsg\*.html"
-	File "htroot\proxymsg\*.inc"
-
-	#templates
-	SetOutPath "$INSTDIR\htroot\env"
-	File /r "htroot\env\*"
-
-	#htdocs default
-	SetOutPath "$INSTDIR\htroot\htdocsdefault"
-	File "htroot\htdocsdefault\*.html"
-	File "htroot\htdocsdefault\*.class"
-
-	SetOutPath "$INSTDIR\ranking"
-	File /r "ranking\*"
-
-	SetOutPath $INSTDIR
-*/
-
 
 	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\YaCy" "DisplayName" "YaCy"
 	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\YaCy" "UninstallString" '"$INSTDIR\uninstall.exe"'
@@ -155,45 +48,6 @@ Section "Binaries (required)"
 	Call DetectJRE
 SectionEnd
 
-/*
-Section "Addons"
-	SectionIn 2 3
-	SetOutPath $INSTDIR\addon
-	File /r "addon\*"
-
-	SetOutPath $INSTDIR
-SectionEnd
-*/
-
-#Section "Docs"
-#	SectionIn 2 3
-#	SetOutPath $INSTDIR\doc
-#	File /r "doc\*"
-#
-#	SetOutPath $INSTDIR
-#SectionEnd
-/*
-Section "Development"
-	SectionIn 3
-	SetOutPath $INSTDIR\source
-
-	File /r "source\*"
-
-	SetOutPath $INSTDIR
-	File "build.xml"
-	File "build.properties"
-	
-	SetOutPath "$INSTDIR\htroot"
-	File "htroot\*.java"
-	SetOutPath "$INSTDIR\htroot\yacy"
-	File "htroot\yacy\*.java"
-	SetOutPath "$INSTDIR\htroot\htdocsdefault"
-	File "htroot\htdocsdefault\*.java"
-	SetOutPath "$INSTDIR\htroot\www"
-	File "htroot\www\*.java"
-	
-SectionEnd
-*/
 Section "Shortcuts in the Start Menu"
 	SectionIn 1 2 3
 	SetShellVarContext current
@@ -205,12 +59,6 @@ Section "Shortcuts in the Start Menu"
 	CreateShortCut "$SMPROGRAMS\YaCy\Uninstall.lnk" "$INSTDIR\Uninstall.exe"
 	CreateShortCut "$SMPROGRAMS\YaCy\YaCy-Search.lnk" "$INSTDIR\addon\YaCy-Search.bat" "" "$INSTDIR\addon\YaCy.ico" "" SW_SHOWMINIMIZED
 SectionEnd
-
-#Section "YACY on the Desktop"
-#	SectionIn 1 2 3
-#	SetOutPath "$INSTDIR"
-#	CreateShortCut "$DESKTOP\start YACY.lnk" ""
-#SectionEnd
 
 Section "YaCy on the Desktop"
 	SectionIn 1 2 3
@@ -246,7 +94,6 @@ Section "Uninstall"
 	RMDir /r "$INSTDIR\addon"
 	RMDir /r "$INSTDIR\classes"
 	RMDir /r "$INSTDIR\defaults"
-#	RMDir /r "$INSTDIR\doc"
 	RMDir /r "$INSTDIR\htroot"
 	RMDir /r "$INSTDIR\lib"
 	RMDir /r "$INSTDIR\libx"
@@ -258,10 +105,10 @@ Section "Uninstall"
 
 	MessageBox MB_YESNO|MB_ICONQUESTION "Do you want to keep the Data (i.e. if you want to reinstall later)?" IDYES keepdata
 	
-	#delete all
+	;delete all
 	RMDir /r "$INSTDIR"
 	
-	#or jump to this
+	;or jump to this
 	keepdata:
 	RMDir /r "$SMPROGRAMS\YaCy"
 	Delete "$QUICKLAUNCH\YaCy-Search.lnk"
@@ -274,7 +121,7 @@ Section "Uninstall"
 SectionEnd
 
 Function GetJRE
-# based on http://nsis.sourceforge.net/Simple_Java_Runtime_Download_Script
+; based on http://nsis.sourceforge.net/Simple_Java_Runtime_Download_Script
 	MessageBox MB_OK "YaCy uses Java ${JRE_VERSION6}. It will now be downloaded and installed."
 
 	StrCpy $2 "$TEMP\Java Runtime Environment.exe"
