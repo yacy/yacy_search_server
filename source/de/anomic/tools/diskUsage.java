@@ -527,7 +527,9 @@ nextLine:
         public List<String> getOutput(){
             log.logInfo("logpoint 6 getOutput() of '"+ name +"' requested");
             while(!isDone()) {
-                // wait
+                try {
+                    Thread.sleep(1);
+                } catch (InterruptedException e) {}
             }
             return output;
         }
