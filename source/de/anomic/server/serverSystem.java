@@ -349,7 +349,7 @@ public final class serverSystem {
     	if(isWindows){
     		starterFileExtension = ".starter.bat";
     		// use /K to debug, /C for release
-    		script = "start /MIN CMD /C " + scriptFile.getAbsolutePath().replaceAll(" ", "\\ ");
+    		script = "start /MIN CMD /C \"" + scriptFile.getAbsolutePath() + "\"";
     	} else { // unix/linux
     		starterFileExtension = ".starter.sh";
 	        script = "#!/bin/sh" + serverCore.LF_STRING + scriptFile.getAbsolutePath().replaceAll(" ", "\\ ") + " &" + serverCore.LF_STRING;
