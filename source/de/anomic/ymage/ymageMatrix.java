@@ -75,7 +75,7 @@ public class ymageMatrix {
     }
     
     public ymageMatrix(int width, int height, byte drawMode, long backgroundColor) {
-        if (!(serverMemory.request(1024 * 1024 + 3 * width * height, false))) throw new RuntimeException("ymage: not enough memory (" + serverMemory.available() + ") available");
+        if (!(serverMemory.request(1024L * 1024L + 3 * width * height, false))) throw new RuntimeException("ymage: not enough memory (" + serverMemory.available() + ") available");
         this.width = width;
         this.height = height;
         this.backgroundCol = backgroundColor;
