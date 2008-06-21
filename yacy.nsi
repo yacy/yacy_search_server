@@ -121,15 +121,28 @@ Section "Uninstall"
 SectionEnd
 
 Function GetJRE
-; based on http://nsis.sourceforge.net/Simple_Java_Runtime_Download_Script
-	MessageBox MB_OK "YaCy uses Java ${JRE_VERSION6}. It will now be downloaded and installed."
-
-	StrCpy $2 "$TEMP\Java Runtime Environment.exe"
+; based on http://nsis.sourceforge.net/Simple_Java_Runtime_Download_Script	
+	MessageBox MB_OK "YaCy uses Java ${JRE_VERSION6}. \
+	It will now be downloaded and installed."
+	
+	userInfo::getAccountType
+	Pop $0
+		StrCmp $0 "Admin" +3
+		MessageBox MB_ICONEXCLAMATION "You need to install Java on Administrator privileges. \
+		It will now be downloaded to the shared documents folder. \
+		YaCy won't run without Java."
+	
+	SetShellVarContext all
+	StrCpy $2 "$DOCUMENTS\Java Runtime Environment (install for YaCy).exe"
+	SetShellVarContext current
 	nsisdl::download /TIMEOUT=30000 ${JRE_URL} $2
 	Pop $R0 ;Get the return value
 		StrCmp $R0 "success" +3
 		MessageBox MB_OK "Download failed: $R0"
 		Return
+	StrCmp $0 "Admin" +4
+		CreateShortCut "$DESKTOP\Install Java for YaCy.lnk" "$2"
+		Return ; don't delete if not admin
 	ExecWait $2
 	Delete $2
 FunctionEnd
