@@ -615,7 +615,7 @@ public class kelondroRowCollection {
         }
     }
     
-    private final int partition(int L, int R, int S, byte[] swapspace) {
+    final int partition(int L, int R, int S, byte[] swapspace) {
 		// L is the first element in the sequence
         // R is the right bound of the sequence, and outside of the sequence
         // S is the bound of the sorted elements in the sequence

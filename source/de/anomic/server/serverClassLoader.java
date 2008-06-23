@@ -45,8 +45,14 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 
-public final class serverClassLoader extends ClassLoader {
+import de.anomic.server.logging.serverLog;
 
+public final class serverClassLoader extends ClassLoader {
+    /**
+     * directory of class files
+     */
+    private static final String HTROOT = "htroot/";
+    private final static String baseDir = System.getProperty("user.dir");
     private final HashMap<File, Class<?>> classes;
 
     public serverClassLoader() {
@@ -77,7 +83,6 @@ public final class serverClassLoader extends ClassLoader {
         } catch (IOException e) {
             throw new ClassNotFoundException("Unable to resolve the classfile path");
         }
-        
         // try to load the class
         synchronized(classFileName.intern()) {
             // first try: take the class out of the cache, denoted by the classname    
@@ -89,10 +94,29 @@ public final class serverClassLoader extends ClassLoader {
             // this file cannot exist for real, since we stripped off the .class
             // we constructed the classfile for the only purpose to strip off the name:
             
-            // get the class name out of the classfile
-            String classname = classfile.getName();
-            int p = classname.indexOf(".");
-            classname = classname.substring(0, p);
+            /* get the class name out of the classfile */
+            // make classFileName relative
+            classFileName = classFileName.substring(classFileName.indexOf(baseDir) + baseDir.length());
+            // special source dirs
+            if(classFileName.contains(HTROOT)) {
+                classFileName = classFileName.substring(classFileName.indexOf(HTROOT) + HTROOT.length());
+            }
+            
+            String packge = "";
+            final int endPackage = classFileName.lastIndexOf(File.separatorChar);
+            if(endPackage != -1) {
+                packge = classFileName.substring(0, endPackage);
+                // the files under htroot/yacy are all in 'default package'!
+                if(packge.startsWith("yacy")) {
+                    packge = "";
+                }
+                if(packge.length() > 0) {
+                    packge.replace(File.separatorChar, '.');
+                    packge += ".";
+                }
+            }
+            int p = classFileName.indexOf(".", endPackage);
+            String classname = packge + classFileName.substring(endPackage + 1, p);
             
             // now that we have the name, we can create the real class file
             //classfile = new File(classkey + ".class");
@@ -126,6 +150,7 @@ public final class serverClassLoader extends ClassLoader {
             } catch (LinkageError ee) {
                 c = findLoadedClass(classname);
                 if (c!=null) return c;                
+                serverLog.logSevere("ClassLoader", "class "+ classname +" not defined: "+ ee);
             } catch (IOException ee) {
                 //System.out.println("INTERNAL ERROR2 in cachedClassLoader: " + ee.getMessage());
                 throw new ClassNotFoundException(classfile.toString());
