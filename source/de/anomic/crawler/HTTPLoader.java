@@ -59,6 +59,7 @@ import de.anomic.http.JakartaCommonsHttpClient;
 import de.anomic.http.JakartaCommonsHttpResponse;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpdBoundedSizeOutputStream;
+import de.anomic.http.httpdByteCountOutputStream;
 import de.anomic.http.httpdLimitExceededException;
 import de.anomic.index.indexReferenceBlacklist;
 import de.anomic.plasma.plasmaHTCache;
@@ -154,6 +155,7 @@ public final class HTTPLoader {
         
         // take a file from the net
         plasmaHTCache.Entry htCache = null;
+        final long maxFileSize = sb.getConfigLong("crawler.http.maxFileSize", DEFAULT_MAXFILESIZE);
         try {
             // create a request header
             httpHeader requestHeader = new httpHeader();
@@ -217,10 +219,16 @@ public final class HTTPLoader {
                             long contentLength = res.getResponseHeader().contentLength();
                             
                             // check the maximum allowed file size                     
-                            if (contentLength == -1) {
-                                fos = new httpdBoundedSizeOutputStream(fos, sb.getConfigLong("crawler.http.maxFileSize", DEFAULT_MAXFILESIZE));                     
-                            } else if (contentLength > sb.getConfigLong("crawler.http.maxFileSize", DEFAULT_MAXFILESIZE)) {
-                                this.log.logInfo("REJECTED URL " + entry.url() + " because file size '" + contentLength + "' exceeds max filesize limit of " + sb.getConfigLong("crawler.http.maxFileSize", DEFAULT_MAXFILESIZE) + " bytes.");
+                            if (contentLength == -1 || maxFileSize == -1) {
+                                if(maxFileSize == -1) {
+                                    // unlimited
+                                    fos = new httpdByteCountOutputStream(fos);
+                                } else {
+                                    // check filesize while loading page
+                                    fos = new httpdBoundedSizeOutputStream(fos, maxFileSize);                     
+                                }
+                            } else if (contentLength > maxFileSize) {
+                                this.log.logInfo("REJECTED URL " + entry.url() + " because file size '" + contentLength + "' exceeds max filesize limit of " + maxFileSize + " bytes.");
                                 sb.crawlQueues.errorURL.newEntry(entry, sb.webIndex.seedDB.mySeed().hash, new Date(), 1, ErrorURL.DENIED_FILESIZE_LIMIT_EXCEEDED);                    
                                 return null;
                             }
@@ -322,7 +330,7 @@ public final class HTTPLoader {
                 this.log.logInfo("CRAWLER Interruption detected because of server shutdown.");
                 failreason = ErrorURL.DENIED_SERVER_SHUTDOWN;
             } else if (e instanceof httpdLimitExceededException) {
-                this.log.logWarning("CRAWLER Max file size limit '" + sb.getConfigLong("crawler.http.maxFileSize", DEFAULT_MAXFILESIZE) + "' exceeded while downloading URL " + entry.url());
+                this.log.logWarning("CRAWLER Max file size limit '" + maxFileSize + "' exceeded while downloading URL " + entry.url());
                 failreason = ErrorURL.DENIED_FILESIZE_LIMIT_EXCEEDED;                    
             } else if (e instanceof MalformedURLException) {
                 this.log.logWarning("CRAWLER Malformed URL '" + entry.url().toString() + "' detected. ");

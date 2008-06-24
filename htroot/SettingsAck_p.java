@@ -587,6 +587,9 @@ public class SettingsAck_p {
             long maxHttpSize;
             try {
                 maxHttpSize = Integer.valueOf(maxSizeStr).intValue();
+                if(maxHttpSize < 0) {
+                    maxHttpSize = -1;
+                }
                 env.setConfig("crawler.http.maxFileSize", Long.toString(maxHttpSize));
             } catch (NumberFormatException e) {
                 prop.put("info", "30");

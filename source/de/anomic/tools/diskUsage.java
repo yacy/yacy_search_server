@@ -499,13 +499,11 @@ nextLine:
                 while((line = buffer.readLine()) != null) {
                         output.add(line);
                 }
-                log.logInfo("logpoint 4 output done of '"+ name +"'");
                 done  = true;
-            } catch(final IOException ix) { log.logWarning("logpoint 5 " +  ix.getMessage());}
+            } catch(final IOException ix) { log.logWarning("logpoint 4 " +  ix.getMessage());}
         }
         
         public List<String> getOutput(){
-            log.logInfo("logpoint 6 getOutput() of '"+ name +"' requested");
             while(!isDone()) {
                 try {
                     Thread.sleep(1);

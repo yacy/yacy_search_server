@@ -48,7 +48,7 @@ import java.io.OutputStream;
 
 public class httpdBoundedSizeOutputStream extends httpdByteCountOutputStream {
 
-    protected long maxSize = 0;
+    protected final long maxSize;
 
     public httpdBoundedSizeOutputStream(OutputStream outputStream, long sizeLimit) {
         this(outputStream,0,sizeLimit);
