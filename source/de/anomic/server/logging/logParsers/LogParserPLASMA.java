@@ -156,22 +156,28 @@ public class LogParserPLASMA implements LogParser{
     /** total amount of indexed anchors - <strong>Integer</strong> */
     public static final String INDEXED_ANCHORS          = "indexedAnchors";
     
-    /** total time needed for stacking the site of an indexing - <strong>Integer</strong> */
-    public static final String INDEXED_STACK_TIME       = "indexedStackingTime";
+//    /** total time needed for stacking the site of an indexing - <strong>Integer</strong> */
+//    public static final String INDEXED_STACK_TIME       = "indexedStackingTime";
+//    
+//    /** total time needed for parsing during indexing - <strong>Integer</strong> */
+//    public static final String INDEXED_PARSE_TIME       = "indexedParsingTime";
+//    
+//    /** total time needed for the actual indexing during indexing - <strong>Integer</strong> */
+//    public static final String INDEXED_INDEX_TIME       = "indexedIndexingTime";
+//    
+//    /** total time needed for storing the results of an indexing - <strong>Integer</strong> */
+//    public static final String INDEXED_STORE_TIME       = "indexedStorageTime";
     
-    /** total time needed for parsing during indexing - <strong>Integer</strong> */
-    public static final String INDEXED_PARSE_TIME       = "indexedParsingTime";
+    /** total time needed for storing the results of a link indexing - <strong>Integer</strong> */
+    public static final String INDEXED_LINKSTORE_TIME       = "indexedLinkStorageTime";
     
-    /** total time needed for the actual indexing during indexing - <strong>Integer</strong> */
-    public static final String INDEXED_INDEX_TIME       = "indexedIndexingTime";
-    
-    /** total time needed for storing the results of an indexing - <strong>Integer</strong> */
-    public static final String INDEXED_STORE_TIME       = "indexedStorageTime";
+    /** total time needed for storing the results of a word indexing - <strong>Integer</strong> */
+    public static final String INDEXED_INDEXSTORE_TIME       = "indexedIndexStorageTime";
     
     /** accumulated time needed to parse the log entries up to now (in ms)*/
     public static final String TOTAL_PARSER_TIME        = "totalParserTime";
     
-    /** times the parser was called, respectively amount of independant log-lines */
+    /** times the parser was called, respectively amount of independent log-lines */
     public static final String TOTAL_PARSER_RUNS        = "totalParserRuns";
     
     
@@ -207,7 +213,8 @@ public class LogParserPLASMA implements LogParser{
             "\\*Indexed (\\d+) words in URL [\\w:.&/%-~;$\u00A7@=]* \\[[\\w_-]{12}\\]\\r?\\n?" + 
             "\\tDescription: +([\\w-\\.,:!='\"|/+@\\(\\) \\t]*)\\r?\\n?" +
             "\\tMimeType: ([\\w_~/-]*) \\| Charset: ([\\w-]*) \\| Size: (\\d+) bytes \\| Anchors: (\\d+)\\r?\\n?" +
-            "\\tStackingTime:[ ]*(\\d+) ms \\| ParsingTime:[ ]*(\\d+) ms \\| IndexingTime: (\\d+) ms \\| StorageTime: (\\d+) ms");
+    		"\\tLinkStorageTime: (\\d+) ms \\| indexStorageTime: (\\d+) ms");
+            //"\\tStackingTime:[ ]*(\\d+) ms \\| ParsingTime:[ ]*(\\d+) ms \\| IndexingTime: (\\d+) ms \\| StorageTime: (\\d+) ms");
 
     private int urlSum=0;
     private int urlReqSum=0;
@@ -243,10 +250,12 @@ public class LogParserPLASMA implements LogParser{
     private int indexedWordSum = 0;
     private int indexedSiteSizeSum = 0;
     private int indexedAnchorsCount = 0;
-    private int indexedStackingTime = 0;
-    private int indexedParsingTime = 0;
-    private int indexedIndexingTime = 0;
-    private int indexedStorageTime = 0;
+    private int indexedLinkStorageTime = 0;
+    private int indexedIndexStorageTime = 0;
+//    private int indexedStackingTime = 0;
+//    private int indexedParsingTime = 0;
+//    private int indexedIndexingTime = 0;
+//    private int indexedStorageTime = 0;
     private long totalParserTime = 0;
     private int totalParserRuns = 0;
     
@@ -385,15 +394,17 @@ public class LogParserPLASMA implements LogParser{
             }
             m = adv1.matcher (logLine);
             
-            if (m.find() && m.groupCount() >= 10) {
+            if (m.find() && m.groupCount() >= 8) {
                 indexedSites++;
                 indexedWordSum += Integer.parseInt(m.group(1));
                 indexedSiteSizeSum += Integer.parseInt(m.group(5));
                 indexedAnchorsCount += Integer.parseInt(m.group(6));
-                indexedStackingTime += Integer.parseInt(m.group(7));
-                indexedParsingTime += Integer.parseInt(m.group(8));
-                indexedIndexingTime += Integer.parseInt(m.group(9));
-                indexedStorageTime += Integer.parseInt(m.group(10));
+                indexedLinkStorageTime += Integer.parseInt(m.group(7));
+                indexedIndexStorageTime += Integer.parseInt(m.group(8));
+//                indexedStackingTime += Integer.parseInt(m.group(7));
+//                indexedParsingTime += Integer.parseInt(m.group(8));
+//                indexedIndexingTime += Integer.parseInt(m.group(9));
+//                indexedStorageTime += Integer.parseInt(m.group(10));
                 totalParserTime += (System.currentTimeMillis() - start);
                 totalParserRuns++;
                 return 0;
@@ -477,10 +488,12 @@ public class LogParserPLASMA implements LogParser{
         results.put(INDEXED_WORDS           , new Integer(indexedWordSum));
         results.put(INDEXED_SITES_SIZE      , new Integer(indexedSiteSizeSum));
         results.put(INDEXED_ANCHORS         , new Integer(indexedAnchorsCount));
-        results.put(INDEXED_STACK_TIME      , new Integer(indexedStackingTime));
-        results.put(INDEXED_PARSE_TIME      , new Integer(indexedParsingTime));
-        results.put(INDEXED_INDEX_TIME      , new Integer(indexedIndexingTime));
-        results.put(INDEXED_STORE_TIME      , new Integer(indexedStorageTime));
+//        results.put(INDEXED_STACK_TIME      , new Integer(indexedStackingTime));
+//        results.put(INDEXED_PARSE_TIME      , new Integer(indexedParsingTime));
+//        results.put(INDEXED_INDEX_TIME      , new Integer(indexedIndexingTime));
+//        results.put(INDEXED_STORE_TIME      , new Integer(indexedStorageTime));
+        results.put(INDEXED_LINKSTORE_TIME , new Integer(indexedLinkStorageTime));
+        results.put(INDEXED_INDEXSTORE_TIME, new Integer(indexedIndexStorageTime));
         results.put(TOTAL_PARSER_TIME      , new Long(totalParserTime));
         results.put(TOTAL_PARSER_RUNS      , new Integer(totalParserRuns));
         return results;
@@ -498,14 +511,16 @@ public class LogParserPLASMA implements LogParser{
         if(rankingDistributionCount == 0) rankingDistributionCount = 1;
         if(DHTSelectionWordsTimeCount == 0) DHTSelectionWordsTimeCount = 1;
         if(indexedSites != 0) indexedSites++;
-        System.out.println("INDEXER: Indexed " + indexedSites + " sites in " + (indexedStackingTime + indexedParsingTime + indexedIndexingTime + indexedStorageTime) + " milliseconds.");
+        System.out.println("INDEXER: Indexed " + indexedSites + " sites in " + (indexedLinkStorageTime + indexedIndexStorageTime) + " milliseconds.");
         System.out.println("INDEXER: Indexed " + indexedWordSum + " words on " + indexedSites + " sites. (avg. words per site: " + (indexedWordSum / indexedSites) + ").");
         System.out.println("INDEXER: Total Size of indexed sites: " + indexedSiteSizeSum + " bytes (avg. size per site: " + (indexedSiteSizeSum / indexedSites) + " bytes).");
         System.out.println("INDEXER: Total Number of Anchors found: " + indexedAnchorsCount + "(avg. Anchors per site: " + (indexedAnchorsCount / indexedSites) + ").");
-        System.out.println("INDEXER: Total StackingTime: " + indexedStackingTime + " milliseconds (avg. StackingTime: " + (indexedStackingTime / indexedSites) + " milliseconds).");
-        System.out.println("INDEXER: Total ParsingTime: " + indexedParsingTime + " milliseconds (avg. ParsingTime: " + (indexedParsingTime / indexedSites) + " milliseconds).");
-        System.out.println("INDEXER: Total IndexingTime: " + indexedIndexingTime + " milliseconds (avg. IndexingTime: " + (indexedIndexingTime / indexedSites) + " milliseconds).");
-        System.out.println("INDEXER: Total StorageTime: " + indexedStorageTime + " milliseconds (avg. StorageTime: " + (indexedStorageTime / indexedSites) + " milliseconds)."); 
+        System.out.println("INDEXER: Total LinkStorageTime: " + indexedLinkStorageTime + " milliseconds (avg. StorageTime: " + (indexedLinkStorageTime / indexedSites) + " milliseconds)."); 
+        System.out.println("INDEXER: Total indexStorageTime: " + indexedIndexStorageTime + " milliseconds (avg. StorageTime: " + (indexedIndexStorageTime / indexedSites) + " milliseconds)."); 
+//        System.out.println("INDEXER: Total StackingTime: " + indexedStackingTime + " milliseconds (avg. StackingTime: " + (indexedStackingTime / indexedSites) + " milliseconds).");
+//        System.out.println("INDEXER: Total ParsingTime: " + indexedParsingTime + " milliseconds (avg. ParsingTime: " + (indexedParsingTime / indexedSites) + " milliseconds).");
+//        System.out.println("INDEXER: Total IndexingTime: " + indexedIndexingTime + " milliseconds (avg. IndexingTime: " + (indexedIndexingTime / indexedSites) + " milliseconds).");
+//        System.out.println("INDEXER: Total StorageTime: " + indexedStorageTime + " milliseconds (avg. StorageTime: " + (indexedStorageTime / indexedSites) + " milliseconds)."); 
         if(urlSum != 0) urlSum++;
         System.out.println("DHT: Recieved " + urlSum + " Urls in " + urlTimeSum + " ms. Blocked " + blockedURLSum + " URLs.");
         System.out.println("DHT: " + urlTimeSum / urlSum + " milliseconds per URL.");            
