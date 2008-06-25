@@ -190,8 +190,8 @@ public class LogParserPLASMA implements LogParser{
     private static final Pattern i2_2 = Pattern.compile("Received (\\d*) Entries (\\d*) Words \\[[\\w-_]{12} .. [\\w-_]{12}\\]/[\\w.-]* from [\\w-_]{12}:[\\w-_]*, processed in (\\d*) milliseconds, requesting (\\d*)/(\\d*) URLs, blocked (\\d*) RWIs");
     private static final Pattern i3 = Pattern.compile("Index transfer of (\\d*) words \\[[\\w-_]{12} .. [\\w-_]{12}\\] to peer ([\\w-_]*):([\\w-_]{12}) in (\\d*) seconds successful \\((\\d*) words/s, (\\d*) Bytes\\)");
     private static final Pattern i4 = Pattern.compile("Index transfer of (\\d*) entries (\\d*) words \\[[\\w-_]{12} .. [\\w-_]{12}\\] and (\\d*) URLs to peer ([\\w-_]*):([\\w-_]{12}) in (\\d*) seconds successful \\((\\d*) words/s, (\\d*) Bytes\\)");
-    private static final Pattern i5 = Pattern.compile("Selected \\w* DHT target peer ([\\w-_]*):([\\w-_]{12}), distance = ([\\w.-]*)");
-    private static final Pattern i6 = Pattern.compile("Rejecting RWIs from peer ([\\w-_]{12}):([\\w-_]*)/([\\w.]*) ([\\w. ]*)");
+    private static final Pattern i5 = Pattern.compile("Selected  \\w*  DHT target peer ([\\w-_]*):([\\w-_]{12}), distance2first = ([\\w.-]*), distance2last = ([\\w.-]*)");
+    private static final Pattern i6 = Pattern.compile("Rejecting RWIs from peer ([\\w-_]{12}):([\\w-_]*)/([\\w.]*). ([\\w. ]*)");
     private static final Pattern i7 = Pattern.compile("DHT distribution: transfer to peer [\\w-]* finished.");
     private static final Pattern i8 = Pattern.compile("Index selection of (\\d*) words \\[[\\w-_]{12} .. [\\w-_]{12}\\] in (\\d*) seconds");
     private static final Pattern i9 = Pattern.compile("RankingDistribution - transmitted file [\\w-:.\\\\]* to [\\w.]*:\\d* successfully in (\\d)* seconds");
@@ -320,9 +320,9 @@ public class LogParserPLASMA implements LogParser{
             }
             m = i5.matcher (logLine);
             
-            if (m.find () && m.groupCount() >= 3) {
-                minDHTDist = Math.min(minDHTDist, Double.parseDouble(m.group(3)));
-                maxDHTDist = Math.max(maxDHTDist, Double.parseDouble(m.group(3)));
+            if (m.find () && m.groupCount() >= 4) {
+                minDHTDist = Math.min(minDHTDist, Math.min(Double.parseDouble(m.group(3)), Double.parseDouble(m.group(4))));
+                maxDHTDist = Math.max(maxDHTDist, Math.max(Double.parseDouble(m.group(3)), Double.parseDouble(m.group(4))));
                 avgDHTDist += Double.parseDouble(m.group(3));
                 DHTSelectionTargetCount++;
                 totalParserTime += (System.currentTimeMillis() - start);
