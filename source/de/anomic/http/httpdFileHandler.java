@@ -671,6 +671,7 @@ public final class httpdFileHandler {
                             tp.put(servletProperties.PEER_STAT_UPTIME, ((System.currentTimeMillis() -  serverCore.startupTime) / 1000) / 60); // uptime in minutes
                             tp.putHTML(servletProperties.PEER_STAT_CLIENTNAME, switchboard.getConfig("peerName", "anomic"));
                             tp.put(servletProperties.PEER_STAT_MYTIME, serverDate.formatShortSecond());
+                            tp.put(servletProperties.MENU_SIMPLE, sb.getConfig(servletProperties.MENU_SIMPLE, "1"));
                             //System.out.println("respond props: " + ((tp == null) ? "null" : tp.toString())); // debug
                         } catch (InvocationTargetException e) {
                             if (e.getCause() instanceof InterruptedException) {

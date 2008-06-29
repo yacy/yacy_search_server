@@ -8,7 +8,7 @@
       <li><a href="/index.html?display=1" accesskey="s" class="MenuItemLink">Search Page (standard)</a></li>
       <li><a href="/yacy/user/ysearch.html?display=1" accesskey="s" class="MenuItemLink">Search Page (alternative)</a></li>
       <li><a href="/yacy/ui/" accesskey="s" class="MenuItemLink">Search Page (Rich Client)</a></li>
-      <li><a href="/Ranking_p.html" class="MenuItemLink lock">Ranking Config</a></li>
+      #(menuSimple)#<li><a href="/Ranking_p.html" class="MenuItemLink lock">Ranking Config</a></li>::#(/menuSimple)#
       <li><a href="/Surftips.html?display=1" class="MenuItemLink">Surftips</a></li>
       <li><a href="/Wiki.html?display=1" class="MenuItemLink">Publication</a></li>
       <li><a href="/Bookmarks.html" class="MenuItemLink">Bookmarks</a></li>
@@ -20,11 +20,12 @@
     <ul class="menu">
       <li><a href="/WatchCrawler_p.html?autoforward=" class="MenuItemLink lock">Crawl Start &amp; Monitoring</a></li>
       <li><a href="/CrawlResults.html?process=5&amp;autoforward=" class="MenuItemLink">Crawl Results</a></li>
-      <li><a href="/IndexControlRWIs_p.html" class="MenuItemLink lock">Index Administration</a></li>
-      <li><a href="/Blacklist_p.html" class="MenuItemLink lock">Filter &amp; Blacklists</a></li>
+      #(menuSimple)#<li><a href="/IndexControlRWIs_p.html" class="MenuItemLink lock">Index Administration</a></li>::#(/menuSimple)#
+      #(menuSimple)#<li><a href="/Blacklist_p.html" class="MenuItemLink lock">Filter &amp; Blacklists</a></li>::#(/menuSimple)#
       <li><a href="/ProxyIndexingMonitor_p.html" class="MenuItemLink lock">Indexing with Proxy</a></li>
     </ul>
   </li>
+  #(menuSimple)#
   <li class="menugroup" id="menugroupMonitoring">
     <h3>Monitoring</h3>
     <ul class="menu">
@@ -36,12 +37,14 @@
       <li><a href="/CookieMonitorIncoming_p.html" class="MenuItemLink lock">Cookies in Proxy</a></li>
     </ul>
   </li>
+  ::
+  #(/menuSimple)#
   <li class="menugroup" id="menugroupPeerControl">
     <h3>Peer Control</h3>
     <ul class="menu">
       <li><a href="/Status.html" class="MenuItemLink">Admin Console</a></li>
-      <li><a href="/terminal_p.html" accesskey="t" class="MenuItemLink lock">Terminal</a></li>
-      <li><a href="/Messages_p.html" class="MenuItemLink lock">Messages <img src="/notifier.gif" alt="New Messages" /></a></li>
+      #(menuSimple)#<li><a href="/terminal_p.html" accesskey="t" class="MenuItemLink lock">Terminal</a></li>::#(/menuSimple)#
+      #(menuSimple)#<li><a href="/Messages_p.html" class="MenuItemLink lock">Messages <img src="/notifier.gif" alt="New Messages" /></a></li>::#(/menuSimple)#
       <li><a href="/Steering.html?restart=" class="MenuItemLink lock" onclick="return confirm('Confirm Restart')">Re-Start</a></li>
       <li><a href="/Steering.html?shutdown=" class="MenuItemLink lock" onclick="return confirm('Confirm Shutdown')">Shutdown</a></li>
     </ul>

@@ -1646,11 +1646,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     
     public void enQueue(IndexingStack.QueueEntry job) {
         assert job != null;
-        // TODO this should not be possible?!
-        if (!(job instanceof IndexingStack.QueueEntry)) {
-            System.out.println("Internal error at plasmaSwitchboard.enQueue: wrong job type");
-            System.exit(1);
-        }
         try {
             webIndex.queuePreStack.push(job);
         } catch (IOException e) {

@@ -859,3 +859,7 @@ routing.deleteOldSeeds.permission = true
 routing.deleteOldSeeds.permission__pro = true
 routing.deleteOldSeeds.time = 7
 routing.deleteOldSeeds.time__pro = 30
+
+# show simple menu (1) or all possible entries (0)?
+menuSimple = 1
+

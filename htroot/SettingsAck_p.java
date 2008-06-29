@@ -244,6 +244,7 @@ public class SettingsAck_p {
             } else if (staticIP.startsWith("https://")) {
                 if (staticIP.length() > 8) { staticIP = staticIP.substring(8); } else { staticIP = ""; }
             }
+            // TODO IPv6 support!
             if (staticIP.indexOf(":") > 0) {
                 staticIP = staticIP.substring(0, staticIP.indexOf(":"));
             }

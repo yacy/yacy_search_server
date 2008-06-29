@@ -5,24 +5,30 @@
     <li><a href="/ConfigBasic.html" class="MenuItemLink lock">Basic Configuration</a></li>
     <li><a href="/ConfigAccounts_p.html" class="MenuItemLink lock">Accounts</a></li>
     <li><a href="/ConfigProfile_p.html" class="MenuItemLink lock">User Profile</a></li>
-    <li><a href="/ConfigPeerProfile_p.html" class="MenuItemLink lock">Peer Appearance Profile</a></li>
-    <li><a href="/ConfigLanguage_p.html" class="MenuItemLink lock">Language</a></li>
+    #(menuSimple)#<li><a href="/ConfigPeerProfile_p.html" class="MenuItemLink lock">Peer Appearance Profile</a></li>::#(/menuSimple)#
+    #(menuSimple)#<li><a href="/ConfigLanguage_p.html" class="MenuItemLink lock">Language</a></li>::#(/menuSimple)#
     <li><a href="/ConfigSkins_p.html" class="MenuItemLink lock">Skins</a></li>
   </ul>
 </div>
 <div class="SubMenu">
   <ul class="SubMenu">
+    #(menuSimple)#
     <li><a href="/ConfigNetwork_p.html" class="MenuItemLink lock">Network Configuration</a></li>
     <li><a href="/ConfigRobotsTxt_p.html" class ="MenuItemLink lock">Local robots.txt</a></li>
     <li><a href="/Settings_p.html" class="MenuItemLink lock">Advanced Settings</a></li>
     <li><a href="/ConfigProperties_p.html" class="MenuItemLink lock">Advanced Properties</a></li>
+    ::
+    #(/menuSimple)#
     <li><a href="/ConfigUpdate_p.html" class="MenuItemLink lock">System Update</a></li>
   </ul>
 </div>
 <div class="SubMenu">
   <ul class="SubMenu">
     <li><a href="/PerformanceQueues_p.html" class="MenuItemLink lock">Queues Performance Settings</a></li>
+    #(menuSimple)#
     <li><a href="/PerformanceMemory_p.html" class="MenuItemLink lock">Memory Settings for Database Caches</a></li>
     <li><a href="/PerformanceSearch_p.html" class="MenuItemLink lock">Timing Settings for Search Sequence</a></li>
+    ::
+    #(/menuSimple)#
   </ul>
 </div>

@@ -89,6 +89,13 @@
             </dl>
           </fieldset>
         </li>
+        <li>
+          (optional) How many options do you wish to see?
+          <fieldset>
+            <input type="radio" name="menuSimple" id="simpleMenu" value="1" #(menuSimple)#::checked="checked"#(/menuSimple)# /><label for="simpleMenu">show only important options</label>&nbsp;
+            <input type="radio" name="menuSimple" id="fullMenu" value="0" #(menuSimple)#checked="checked"::#(/menuSimple)# /><label for="fullMenu">show all options</label>
+          </fieldset>
+        </li>
       </ol>
       <fieldset>&nbsp;&nbsp;&nbsp;&nbsp;<input type="submit" name="set" value="Set Configuration" /></fieldset>
     </form>
@@ -98,7 +105,7 @@
     <p>Your basic configuration is complete! You can now (for example):</p>
     <ul>
       <li><a href="index.html">start an uncensored search</a>;</li>
-      <li><a href="CrawlStartSimple_p.html">start your own crawl</a> and contribute to the global index, or create your own private web index;</li>
+      <li><a href="CrawlStart_p.html">start your own crawl</a> and contribute to the global index, or create your own private web index;</li>
       <li><a href="ConfigProfile_p.html">set a personal peer profile</a> (optional settings);</li>
       <li>just <a href="Network.html">monitor at the network page</a> what the other peers are doing</li>
     </ul>::

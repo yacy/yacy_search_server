@@ -59,6 +59,7 @@ import de.anomic.server.serverDomains;
 import de.anomic.server.serverInstantBusyThread;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.server.servletProperties;
 import de.anomic.yacy.yacyAccessible;
 import de.anomic.yacy.yacySeed;
 
@@ -223,6 +224,12 @@ public class ConfigBasic {
         } else {
             prop.put("nextStep", NEXTSTEP_FINISHED);
         }
+        
+        
+        if (post != null && post.containsKey(servletProperties.MENU_SIMPLE)) {
+            sb.setConfig(servletProperties.MENU_SIMPLE, post.get(servletProperties.MENU_SIMPLE, "1"));
+        }
+        prop.put(servletProperties.MENU_SIMPLE, sb.getConfig(servletProperties.MENU_SIMPLE, "1"));
         
         // set default values       
         prop.put("defaultName", env.getConfig("peerName", ""));
