@@ -35,8 +35,6 @@ public class servletProperties extends serverObjects {
     public static final String PEER_STAT_MYTIME = "mytime";
     public static final String PEER_STAT_CLIENTNAME = "clientname";
 
-    public static final String MENU_SIMPLE = "menuSimple";
-
     private String prefix="";
     
     private  httpHeader outgoingHeader;

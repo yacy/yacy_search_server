@@ -226,11 +226,6 @@ public class ConfigBasic {
         }
         
         
-        if (post != null && post.containsKey(servletProperties.MENU_SIMPLE)) {
-            sb.setConfig(servletProperties.MENU_SIMPLE, post.get(servletProperties.MENU_SIMPLE, "1"));
-        }
-        prop.put(servletProperties.MENU_SIMPLE, sb.getConfig(servletProperties.MENU_SIMPLE, "1"));
-        
         // set default values       
         prop.put("defaultName", env.getConfig("peerName", ""));
         prop.put("defaultPort", env.getConfig("port", "8080"));

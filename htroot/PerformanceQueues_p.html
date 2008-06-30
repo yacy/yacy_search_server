@@ -9,15 +9,11 @@
   #%env/templates/submenuConfig.template%#
   <h2>Performance Settings of Queues and Processes</h2>
   
-  #(menuSimple)#
   <p>
     <strong>Scheduled tasks overview and waiting time settings:</strong>
   </p>
-  ::
-  #(/menuSimple)#
   <form action="PerformanceQueues_p.html" method="post" enctype="multipart/form-data">
     <table border="0" cellpadding="2" cellspacing="1">
-  #(menuSimple)#
       <tr class="TableHeader" valign="bottom">
         <td>Thread</td>
         <td>Queue Size</td>
@@ -59,11 +55,9 @@
         <td align="left">#[longdescr]##(recommendation)#::<br/>recommended: #[value]# kbytes#(/recommendation)#</td>
       </tr>
       #{/table}#
-  ::
-  #(/menuSimple)#
       <tr class="TableCellLight">
         <td align="left" colspan="19">
-          #(menuSimple)#<input type="submit" name="submitdelay" value="Submit New Delay Values" />&nbsp;&nbsp;&nbsp;::#(/menuSimple)#
+          <input type="submit" name="submitdelay" value="Submit New Delay Values" />&nbsp;&nbsp;&nbsp;
           Changes take effect immediately<br/>
           <input type="submit" name="submitdefault" value="Use Default Profile:" />
           <select name="defaultFile">
@@ -158,7 +152,6 @@
     </table>
   </form>
   
-  #(menuSimple)#
   <p>
     <strong>Thread pool settings:</strong>
   </p>
@@ -190,8 +183,6 @@
       </tr>
     </table>
   </form>
-  ::
-  #(/menuSimple)#
   
   <form action="PerformanceQueues_p.html" method="post" enctype="multipart/form-data">
     <fieldset><legend>YaCy Priority Settings</legend>
@@ -208,7 +199,6 @@
     </fieldset>
   </form>
   
-  #(menuSimple)#
   <form action="PerformanceQueues_p.html" method="post" enctype="multipart/form-data">
     <fieldset><legend>Proxy Performance Settings</legend>
       <p>
@@ -230,8 +220,6 @@
       </dl>
     </fieldset>
   </form>
-  ::
-  #(/menuSimple)#
   
   #%env/templates/footer.template%#
   </body>
