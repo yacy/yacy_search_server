@@ -39,6 +39,8 @@
 
 package de.anomic.yacy;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -51,7 +53,7 @@ public final class resourceObserver {
     // TODO make it configurable
     private final static long MIN_FREE_DISK_SPACE = 100L /* MiB */ * 1024L * 1024L;
     // Unknown for now
-    private final static long MIN_FREE_MEMORY = 0;
+    //private final static long MIN_FREE_MEMORY = 0;
     // We are called with the cleanup job every five minutes;
     // the disk usage should be checked with every run
     private final int CHECK_DISK_USAGE_FREQ = 1;
@@ -59,7 +61,6 @@ public final class resourceObserver {
     private final int CHECK_MEMORY_USAGE_FREQ = 1;
     
     private final serverLog log = new serverLog("RESOURCE OBSERVER");
-    private final diskUsage du;
     private final plasmaSwitchboard sb;
 
     private int checkDiskUsageCount;
@@ -67,13 +68,31 @@ public final class resourceObserver {
     private boolean disksOK;
     private boolean memoryOK;
     
-    public resourceObserver(final plasmaSwitchboard sb) {
+    public resourceObserver(plasmaSwitchboard sb) {
         this.sb = sb;
         this.log.logInfo("initializing the resource observer");
-        du = new diskUsage(sb);
+
+        ArrayList<String> pathsToCheck = new ArrayList<String>();
+        //  FIXME whats about the secondary path???
+        //   = (getConfig(plasmaSwitchboard.INDEX_SECONDARY_PATH, "");
+        final String[] pathes =  {plasmaSwitchboard.HTDOCS_PATH,        
+                            plasmaSwitchboard.INDEX_PRIMARY_PATH,
+                            plasmaSwitchboard.LISTS_PATH,
+                            plasmaSwitchboard.PLASMA_PATH,
+                            plasmaSwitchboard.RANKING_PATH,
+                            plasmaSwitchboard.WORK_PATH};
+        String path;
+        for (final String element : pathes) {
+            try {
+                path = sb.getConfigPath(element, "").getCanonicalPath().toString();
+                if (path.length() > 0) pathsToCheck.add(path);
+            } catch (final IOException e) {}
+        }
         
-        if (!du.isUsable ())
-            this.log.logWarning("Disk usage returned: " + du.getErrorMessage());
+        diskUsage.init(pathsToCheck);
+        
+        if (!diskUsage.isUsable ())
+            this.log.logWarning("Disk usage returned: " + diskUsage.getErrorMessage());
         
         checkDiskUsageCount = 0;
         checkMemoryUsageCount = 0;
@@ -108,7 +127,7 @@ public final class resourceObserver {
             }
         }
         else {
-            if (du.isUsable ())
+            if (diskUsage.isUsable())
                 this.log.logInfo("run completed; everything in order");
             else
                 this.log.logInfo("The observer is out of order");
@@ -131,20 +150,21 @@ public final class resourceObserver {
     }
     
     /**
-     * @return enough disk space availabe?
+     * @return enough disk space available?
      */
     private boolean checkDisks() {
         boolean below = false;    
     
-        if (!du.isUsable ())
+        if (!diskUsage.isUsable ())
             return true;
         
-        final HashMap<String, long[]> usage = du.getDiskUsage();
+        final HashMap<String, long[]> usage = diskUsage.getDiskUsage();
         long[] val;
         for (Map.Entry<String, long[]> entry: usage.entrySet()) {
             val = entry.getValue();
+            this.log.logInfo("df of Volume " + entry.getKey() + ": " + (val[1] / 1024 / 1024) + " MB");
             if (val[1] < MIN_FREE_DISK_SPACE) {
-                this.log.logWarning("Volume " + entry.getKey() + ": free space is too low");
+                this.log.logWarning("Volume " + entry.getKey() + ": free space (" + (val[1] / 1024 / 1024) + " MB) is too low (< " + (MIN_FREE_DISK_SPACE / 1024 / 1024) + " MB)");
                 below = true;
             }
         }

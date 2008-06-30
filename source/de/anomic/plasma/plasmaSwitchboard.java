@@ -876,9 +876,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         this.robotstxtConfig = httpdRobotsTxtConfig.init(this);
         
         // setting timestamp of last proxy access
-        this.proxyLastAccess = System.currentTimeMillis() - 60000;
-        this.localSearchLastAccess = System.currentTimeMillis() - 60000;
-        this.remoteSearchLastAccess = System.currentTimeMillis() - 60000;
+        this.proxyLastAccess = System.currentTimeMillis() - 10000;
+        this.localSearchLastAccess = System.currentTimeMillis() - 10000;
+        this.remoteSearchLastAccess = System.currentTimeMillis() - 10000;
         this.webStructure = new plasmaWebStructure(log, rankingPath, "LOCAL/010_cr/", getConfig("CRDist0Path", plasmaRankingDistribution.CR_OWN), new File(plasmaPath, "webStructure.map"));
         
         // configuring list path
@@ -1115,6 +1115,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         
         // initializing the resourceObserver
         this.observer = new resourceObserver(this);
+        // run the oberver here a first time
+        this.observer.resourceObserverJob();
         
         // initializing the stackCrawlThread
         this.crawlStacker = new CrawlStacker(this, this.plasmaPath, (int) getConfigLong("tableTypeForPreNURL", 0), (((int) getConfigLong("tableTypeForPreNURL", 0) == 0) && (getConfigLong(CRAWLSTACK_BUSYSLEEP, 0) <= 100)));

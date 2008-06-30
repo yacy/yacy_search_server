@@ -46,22 +46,17 @@
 
 package de.anomic.tools;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.Semaphore;
 
-import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.logging.serverLog;
 
 public class diskUsage {
-    serverLog log = new serverLog("DISK USAGE");
-    private static final HashMap<String, long[]> diskUsages = new HashMap<String, long[]>();
+    
+    private static serverLog log = new serverLog("DISK USAGE");
     
     private static final List<String> allVolumes = new ArrayList<String>();
     private static final List<String> allMountPoints = new ArrayList<String>();
@@ -70,44 +65,45 @@ public class diskUsage {
     private static final List<String> yacyUsedVolumes = new ArrayList<String>();
     private static final List<String> yacyUsedMountPoints = new ArrayList<String>();
     
-    private static plasmaSwitchboard sb;
-    private static int usedOS;
-    private static boolean usable;
-    private static String windowsCommand;
-    private static String errorMessage;
-    private static boolean consoleError;
+    private static int usedOS = -1;
+    private static boolean usable = false;
+    private static String windowsCommand = null;
+    private static String errorMessage = "";
+    private static boolean consoleError = false;
     
 
         // Unix-like
-    private final int AIX = 0;                    // IBM
-    private final int BS2000 = 1;                 // Fujitsu Siemens (oficial BS2000/OSD)
-    private final int BSD = 2;                    // all kind of BSD
-    private final int HAIKU = 3;                  // like BeOS; does not have a JRE til now, but they are working on it
-    private final int HP_UX = 4;                  // Hewlett-Packard
-    private final int TRU64 = 5;                  // Hewlett-Packard
-    private final int IRIX = 6;                   // sgi
-    private final int LINUX = 7;                  // all kind of linux
-    private final int MAC_OS_X = 8;               // Apple
-    private final int MINIX = 9;                  // don't know if there even is a JRE for minix...
-    private final int SOLARIS = 10;               // SUN
-    private final int SUNOS = 11;                 // The latest SunOS version is from 1990 but the Solaris java refferer remains SunOS
-    private final int UNICOS = 12;                // cray
+    private static final int AIX = 0;                    // IBM
+    private static final int BS2000 = 1;                 // Fujitsu Siemens (oficial BS2000/OSD)
+    //private static final int BSD = 2;                    // all kind of BSD
+    private static final int HAIKU = 3;                  // like BeOS; does not have a JRE til now, but they are working on it
+    //private static final int HP_UX = 4;                  // Hewlett-Packard
+    private static final int TRU64 = 5;                  // Hewlett-Packard
+    //private static final int IRIX = 6;                   // sgi
+    //private static final int LINUX = 7;                  // all kind of linux
+    //private static final int MAC_OS_X = 8;               // Apple
+    private static final int MINIX = 9;                  // don't know if there even is a JRE for minix...
+    //private static final int SOLARIS = 10;               // SUN
+    //private static final int SUNOS = 11;                 // The latest SunOS version is from 1990 but the Solaris java refferer remains SunOS
+    private static final int UNICOS = 12;                // cray
 
-    private final int UNIX_END = UNICOS;
+    private static final int UNIX_END = UNICOS;
 
         // Windows dos based
-    private final int WINDOWS_95 = 13;
-    private final int WINDOWS_98 = 14;
-    private final int WINDOWS_ME = 15;
+    //private static final int WINDOWS_95 = 13;
+    //private static final int WINDOWS_98 = 14;
+    //private static final int WINDOWS_ME = 15;
     
         // Windows WinNT based
-    private final int WINDOWS_NT = 16;
-    private final int WINDOWS_2000 = 17;
-    private final int WINDOWS_XP = 18;
-    private final int WINDOWS_SERVER = 19;
-    private final int WINDOWS_VISTA = 20;
+    //private static final int WINDOWS_NT = 16;
+    //private static final int WINDOWS_2000 = 17;
+    //private static final int WINDOWS_XP = 18;
+    //private static final int WINDOWS_SERVER = 19;
+    //private static final int WINDOWS_VISTA = 20;
     
-    String[] OSname =   {"aix", "bs2000", "bsd", "haiku", "hp-ux", "tru64", "irix", "linux", "mac os x", "minix",
+    // don't change order of names!
+    private static final String[] OSname =   {
+                         "aix", "bs2000", "bsd", "haiku", "hp-ux", "tru64", "irix", "linux", "mac os x", "minix",
                          "solaris", "sunos", "unicos",
                          "windows 95", "windows 98", "windows me",
                          "windows nt", "windows 2000", "windows xp", "windows server", "windows vista"};
@@ -116,22 +112,22 @@ public class diskUsage {
     //  public API  //
     //////////////////
 
-    public diskUsage (final plasmaSwitchboard sb) {
+    public static void init(ArrayList<String> pathsToCheck) {
         errorMessage = null;
-        diskUsage.sb = sb;
+        if (usedOS >= 0) return; // prevent double initialization
         usedOS = getOS();
         if (usedOS == -1) {
             usable = false;
         } else {
             usable = true;
 
-            // some kind of *nix
             if (usedOS <= UNIX_END) {
-                dfUnix (true);
+                // some kind of *nix
+                dfUnixGetVolumes();
                 for (int i = 0; i < allMountPoints.size(); i++)
                     usedVolumes.add(false);
                 checkVolumesInUseUnix ("DATA");
-                checkMapedSubDirs ();
+                checkMappedSubDirs(pathsToCheck);
                 
                 for (int i = 0; i < allVolumes.size(); i++){
                     if (usedVolumes.get(i) == true) {
@@ -139,52 +135,94 @@ public class diskUsage {
                         yacyUsedMountPoints.add(allMountPoints.get (i));
                     }
                 }
-
-            // all Windows version
             } else {
-                checkWindowsCommandVersion();
+                // all Windows versions
+                initWindowsCommandVersion();
                 checkStartVolume();
-                checkMapedSubDirs ();
+                checkMappedSubDirs(pathsToCheck);
             }
             if (yacyUsedVolumes.size() < 1)
                 usable = false;
         }
     }
 
-    public HashMap<String, long[]> getDiskUsage () {
+    public static HashMap<String, long[]> getDiskUsage () {
         if (!usable)
             return null;
         
         if (usedOS <= UNIX_END)
-            dfUnix(false);
+            return dfUnix();
         else
-            dfWindows ();            
-        return diskUsages;
+            return dfWindows();
     }
 
-    public boolean isUsable () {
+    public static boolean isUsable () {
         return usable;
     }
     
-    public String getErrorMessage () {
+    public static String getErrorMessage () {
         return errorMessage;
     }
     
-    public int getNumUsedVolumes () {
+    public static int getNumUsedVolumes () {
         return yacyUsedVolumes.size();
     }
-
-
-
 
     ////////////
     //  Unix  //
     ////////////
 
-    private void dfUnix(boolean getVolumesOnly) {
-        if (!getVolumesOnly)
-            diskUsages.clear ();
+    private static HashMap<String, long[]> dfUnix() {
+        HashMap<String, long[]> diskUsages = new HashMap<String, long[]>();
+        final List<String> lines = dfUnixExec();
+        if (consoleError) {
+            errorMessage = "df:";
+            for (final String line: lines){
+                errorMessage += "\n" + line;
+            }
+            usable = false;
+            return diskUsages;
+        }
 
+        nextLine: for (final String line: lines){
+            if (line.charAt(0) != '/') continue;
+            final String[] tokens = line.split(" +", 6);
+            if (tokens.length < 6) continue;
+            for (int i = 0; i < yacyUsedVolumes.size(); i++){
+                if (yacyUsedVolumes.get(i).equals(tokens[0])) {
+                    final long[] vals = new long[2];
+                    try { vals[0] = new Long(tokens[1]); } catch (final NumberFormatException e) { continue nextLine; }
+                    try { vals[1] = new Long(tokens[3]); } catch (final NumberFormatException e) { continue nextLine; }
+                    vals[0] *= 1024;
+                    vals[1] *= 1024;
+                    diskUsages.put(yacyUsedMountPoints.get(i), vals);
+                }
+            }
+        }
+        return diskUsages;
+    }
+    
+    private static void dfUnixGetVolumes() {
+        final List<String> lines = dfUnixExec();
+
+        nextLine: for (final String line: lines){
+            if (line.charAt(0) != '/') continue;
+            final String[] tokens = line.split(" +", 6);
+            if (tokens.length < 6) continue;
+            for (int i = 0; i < allMountPoints.size(); i++) {
+                if (tokens[5].trim().compareTo(allMountPoints.get(i)) > 0) {
+                    allMountPoints.add(i, tokens[5].trim());
+                    allVolumes.add(i, tokens[0]);
+                    continue nextLine;
+                }
+            }
+            allMountPoints.add(allMountPoints.size(), tokens[5]);
+            allVolumes.add(allVolumes.size(), tokens[0]);
+        }
+    }
+    
+    private static List<String> dfUnixExec() {
+        
         // -k    set blocksize to 1024
         //   confirmed with tests:
         //     Linux
@@ -219,44 +257,13 @@ public class diskUsage {
                 errorMessage += "\n" + line;
             }
             usable = false;
-            return;
+            lines.clear();
         }
 
-        for (final String line: lines){
-            if (line.charAt(0) != '/')
-                continue;
-            final String[] tokens = line.split(" +", 6);
-            if (tokens.length < 6)
-                continue;
-nextLine:
-            if (getVolumesOnly) {
-                for (int i = 0; i < allMountPoints.size(); i++) {
-                    if (tokens[5].trim().compareTo(allMountPoints.get(i)) > 0) {
-                        allMountPoints.add(i, tokens[5].trim());
-                        allVolumes.add(i, tokens[0]);
-                        break nextLine;
-                    }
-                }
-                allMountPoints.add(allMountPoints.size(), tokens[5]);
-                allVolumes.add(allVolumes.size(), tokens[0]);
-            } else { 
-                for (int i = 0; i < yacyUsedVolumes.size(); i++){
-                    if (yacyUsedVolumes.get(i).equals(tokens[0])) {
-                        final long[] vals = new long[2];
-                        try { vals[0] = new Long(tokens[1]); } catch (final NumberFormatException e) { break nextLine; }
-                        try { vals[1] = new Long(tokens[3]); } catch (final NumberFormatException e) { break nextLine; }
-                        vals[0] *= 1024;
-                        vals[1] *= 1024;
-                        diskUsages.put (yacyUsedMountPoints.get(i), vals);
-                    }
-                }
-            }
-        }
+        return lines;
     }
 
-
-
-    private void checkVolumesInUseUnix (final String path) {
+    private static void checkVolumesInUseUnix (final String path) {
         final File file = new File(path);
         final File[] fileList = file.listFiles();
         String base;
@@ -292,13 +299,11 @@ nextLine:
         }
     }
 
-
-
    ///////////////
    //  Windows  //
    ///////////////
    
-   private void checkWindowsCommandVersion () {
+   private static void initWindowsCommandVersion () {
         windowsCommand = null;
         final String os = System.getProperty("os.name").toLowerCase();
         final String[] oses = {"windows 95", "windows 98", "windows me"};
@@ -313,7 +318,7 @@ nextLine:
             windowsCommand = "cmd.exe";
     }
     
-    private void checkStartVolume() {
+    private static void checkStartVolume() {
         final File file = new File("DATA");
 
         String path = null;
@@ -327,7 +332,8 @@ nextLine:
         yacyUsedVolumes.add(path.substring(0, 1));
     }
 
-    public void dfWindows () {
+    public static HashMap<String, long[]> dfWindows() {
+        HashMap<String, long[]> diskUsages = new HashMap<String, long[]>();
         for (int i = 0; i < yacyUsedVolumes.size(); i++){
             final List<String> processArgs = new ArrayList<String>();
             processArgs.add(windowsCommand);
@@ -342,7 +348,7 @@ nextLine:
                     errorMessage += "\n" + line;
                 }
                 usable = false;
-                return;
+                return diskUsages;
             }
             
             String line = "";
@@ -354,7 +360,7 @@ nextLine:
             if (line.length() == 0) {
                 errorMessage = "unable to get free size of volume " + yacyUsedVolumes.get(i);
                 usable = false;
-                return;
+                return diskUsages;
             }
 
             String[] tokens = line.trim().split(" ++");
@@ -363,14 +369,14 @@ nextLine:
             try { vals[1] = new Long(tokens[2].replaceAll("[.,]", "")); } catch (final NumberFormatException e) {continue;}
             diskUsages.put (yacyUsedVolumes.get(i), vals);
         }
+        return diskUsages;
     }
-   
    
    /////////////
    // common  //
    /////////////
 
-    private int getOS () {
+    private static int getOS () {
         final String os = System.getProperty("os.name").toLowerCase();
         for (int i = 0; i < OSname.length; i++)
         {
@@ -381,32 +387,16 @@ nextLine:
         return -1;
     }
 
-    private void checkMapedSubDirs () {
-        //  FIXME whats about the secondary path???
-        //   = (getConfig(plasmaSwitchboard.INDEX_SECONDARY_PATH, "");
-        final String[] pathes =  {plasmaSwitchboard.HTDOCS_PATH,        
-                            plasmaSwitchboard.INDEX_PRIMARY_PATH,
-                            plasmaSwitchboard.LISTS_PATH,
-                            plasmaSwitchboard.PLASMA_PATH,
-                            plasmaSwitchboard.RANKING_PATH,
-                            plasmaSwitchboard.WORK_PATH};
-
-        String path;
-        for (final String element : pathes) {
-            path = null;
-            try {
-                path = sb.getConfigPath(element, "").getCanonicalPath().toString();
-            } catch (final IOException e) { continue; }
-            if (path.length() > 0) {
-                if (usedOS <= UNIX_END)
-                    checkPathUsageUnix (path);
-                else
-                    checkPathUsageWindows (path);
-            }
+    private static void checkMappedSubDirs (ArrayList<String> pathsToCheck) {
+        for (final String path : pathsToCheck) {
+            if (usedOS <= UNIX_END)
+                checkPathUsageUnix (path);
+            else
+                checkPathUsageWindows (path);
         }
     }
     
-    private void checkPathUsageUnix (final String path) {
+    private static void checkPathUsageUnix (final String path) {
         for (int i = 0; i < allMountPoints.size(); i++){
             if (path.startsWith (allMountPoints.get(i))) {
                 usedVolumes.set(i, true);
@@ -415,9 +405,9 @@ nextLine:
         }
     }
 
-    private void checkPathUsageWindows (final String path) {
+    private static void checkPathUsageWindows (final String path) {
         int index = -1;
-        String sub = path.substring(0, 1);
+        String sub = path.substring(0, 1); // ?? nur ein character?
         try { index = yacyUsedVolumes.indexOf(sub); } catch (IndexOutOfBoundsException e) {
             errorMessage = "internal error while checking used windows volumes";
             usable = false;
@@ -427,7 +417,7 @@ nextLine:
             yacyUsedVolumes.add(sub);
     }
 
-    private List<String> getConsoleOutput (final List<String> processArgs) {
+    private static List<String> getConsoleOutput (final List<String> processArgs) {
         final ProcessBuilder processBuilder = new ProcessBuilder(processArgs);
         Process process = null;
         consoleInterface inputStream = null;
@@ -437,8 +427,8 @@ nextLine:
         try {
             process = processBuilder.start();
 
-            inputStream = new consoleInterface(process.getInputStream(), "input");
-            errorStream = new consoleInterface(process.getErrorStream(), "error");
+            inputStream = new consoleInterface(process.getInputStream(), "input", log);
+            errorStream = new consoleInterface(process.getErrorStream(), "error", log);
 
             inputStream.start();
             errorStream.start();
@@ -467,74 +457,5 @@ nextLine:
             return list;
     }
 
-    public class consoleInterface extends Thread
-    {
-        private final InputStream stream;
-        private final List<String> output = new ArrayList<String>();
-        private final Semaphore dataIsRead = new Semaphore(1);
-        /**
-         * FIXME just for debugging 
-         */
-        private final String name;
-
-        public consoleInterface (final InputStream stream, String name)
-        {
-            this.stream = stream;
-            this.name = name;
-            // block reading {@see getOutput()}
-            try {
-                dataIsRead.acquire();
-            } catch (InterruptedException e) {
-                // this should never happen because this is a constructor
-                e.printStackTrace();
-            }
-        }
-
-        public void run() {
-            // a second run adds data! a output.clear() maybe needed
-            try {
-                final InputStreamReader input = new InputStreamReader(stream);
-                final BufferedReader buffer = new BufferedReader(input);
-                String line = null;
-                int tries = 0;
-                while (tries < 1000) {
-                    tries++;
-                    try {
-                        // may block!
-                        Thread.sleep(1);
-                    } catch (InterruptedException e) {
-                        // just stop sleeping
-                    }
-                    if (buffer.ready())
-                        break;
-                }
-                log.logInfo("logpoint 3 "+ name +" needed " + tries + " tries");
-                while((line = buffer.readLine()) != null) {
-                        output.add(line);
-                }
-                dataIsRead.release();
-            } catch(final IOException ix) { log.logWarning("logpoint 6 " +  ix.getMessage());}
-        }
-        
-        /**
-         * waits until the stream is read and returns all data
-         * 
-         * @return lines of text in stream
-         */
-        public List<String> getOutput(){
-            // wait that data is ready
-            try {
-                log.logInfo("logpoint 4 waiting for data of '"+ name +"'");
-                final long start = System.currentTimeMillis();
-                dataIsRead.acquire();
-                log.logInfo("logpoint 5 data ready for '"+ name +"' after "+ (System.currentTimeMillis() - start) +" ms");
-            } catch (InterruptedException e) {
-                // after interrupt just return what is available (maybe nothing)
-            }
-            // is just for checking availability, so release it immediatly
-            dataIsRead.release();
-            return output;
-        }
-    }
 }
 

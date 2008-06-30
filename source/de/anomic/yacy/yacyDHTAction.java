@@ -373,6 +373,7 @@ public class yacyDHTAction {
         if (log != null) log.logInfo("Collecting DHT target peers for first_hash = " + firstKey + ", last_hash = " + lastKey);
         while ((e.hasNext()) && (seeds.size() < (primaryPeerCount + reservePeerCount)) && (maxloop-- > 0)) {
             seed = e.next();
+            if (seed == null || seed.hash == null) continue;
         	firstdist = yacyDHTAction.dhtDistance(seed.hash, firstKey);
         	lastdist = yacyDHTAction.dhtDistance(seed.hash, lastKey);
             if (lastdist > maxDist) {
