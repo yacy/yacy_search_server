@@ -176,7 +176,8 @@ public class yacySearch extends Thread {
         
         // put in seeds according to dht
         final kelondroMScoreCluster<String> ranking = new kelondroMScoreCluster<String>();
-        final HashMap<String, yacySeed> seeds = new HashMap<String, yacySeed>();
+        final HashMap<String, yacySeed> regularSeeds = new HashMap<String, yacySeed>();
+        final HashMap<String, yacySeed> robinsonSeeds = new HashMap<String, yacySeed>();
         yacySeed seed;
         Iterator<yacySeed> dhtEnum;         
         int c;
@@ -195,15 +196,14 @@ public class yacySearch extends Thread {
                 if (!seed.getFlagAcceptRemoteIndex()) continue; // probably a robinson peer
                 serverLog.logFine("PLASMA", "selectPeers/DHTorder: " + seed.hash + ":" + seed.getName() + "/" + distance + " for wordhash " + wordhash + ", score " + c);
                 ranking.addScore(seed.hash, c--);
-                seeds.put(seed.hash, seed);
+                regularSeeds.put(seed.hash, seed);
             }
         }
 
         // put in seeds according to size of peer
         dhtEnum = seedDB.seedsSortedConnected(false, yacySeed.ICOUNT);
-        c = seedcount;
+        c = Math.min(seedDB.sizeConnected(), seedcount);
         int score;
-        if (c > seedDB.sizeConnected()) { c = seedDB.sizeConnected(); }
         while (dhtEnum.hasNext() && c > 0) {
             seed = dhtEnum.next();
             if (seed == null) continue;
@@ -211,7 +211,7 @@ public class yacySearch extends Thread {
             score = (int) Math.round(Math.random() * ((c / 3) + 3));
             serverLog.logFine("PLASMA", "selectPeers/RWIcount: " + seed.hash + ":" + seed.getName() + ", RWIcount=" + seed.get(yacySeed.ICOUNT,"") + ", score " + score);
             ranking.addScore(seed.hash, score);
-            seeds.put(seed.hash, seed);
+            regularSeeds.put(seed.hash, seed);
             c--;
         }
 
@@ -221,28 +221,43 @@ public class yacySearch extends Thread {
         while (dhtEnum.hasNext()) {
         	seed = dhtEnum.next();
             if (seed == null) continue;
-            if (seed.matchPeerTags(wordhashes)) { // access robinson peers with matching tag
-            	serverLog.logInfo("PLASMA", "selectPeers/PeerTags: " + seed.hash + ":" + seed.getName() + ", is specialized peer for " + seed.getPeerTags().toString());
-            	ranking.addScore(seed.hash, seedcount);
-            	seeds.put(seed.hash, seed);
-            }
-            if (seed.getAge() < 1) { // the 'workshop feature'
-            	serverLog.logInfo("PLASMA", "selectPeers/Age: " + seed.hash + ":" + seed.getName() + ", is newbie, age = " + seed.getAge());
-            	ranking.addScore(seed.hash, seedcount);
-            	seeds.put(seed.hash, seed);
+            if (seed.getFlagAcceptRemoteIndex()) {
+                // enhance ranking for regular peers
+                if (seed.matchPeerTags(wordhashes)) { // access robinson peers with matching tag
+                    serverLog.logInfo("PLASMA", "selectPeers/PeerTags: " + seed.hash + ":" + seed.getName() + ", is specialized peer for " + seed.getPeerTags().toString());
+                    ranking.addScore(seed.hash, seedcount);
+                    regularSeeds.put(seed.hash, seed);
+                }
+                if (seed.getAge() < 1) { // the 'workshop feature'
+                    serverLog.logInfo("PLASMA", "selectPeers/Age: " + seed.hash + ":" + seed.getName() + ", is newbie, age = " + seed.getAge());
+                    ranking.addScore(seed.hash, seedcount);
+                    regularSeeds.put(seed.hash, seed);
+                }
+            } else {
+                // this is a robinson peer
+                // in case the peer has more than a million urls, take it as search target
+                if (seed.getLinkCount() > 1000000) {
+                    regularSeeds.remove(seed.hash);
+                    ranking.deleteScore(seed.hash);
+                    robinsonSeeds.put(seed.hash, seed);
+                }
             }
         }
         
         // evaluate the ranking score and select seeds
-        if (ranking.size() < seedcount) { seedcount = ranking.size(); }
-        yacySeed[] result = new yacySeed[seedcount];
+        seedcount = Math.min(ranking.size(), seedcount);
+        yacySeed[] result = new yacySeed[seedcount + robinsonSeeds.size()];
         c = 0;
         iter = ranking.scores(false); // higher are better
-        while (iter.hasNext() && c < result.length) {
-            seed = seeds.get(iter.next());
+        while (iter.hasNext() && c < seedcount) {
+            seed = regularSeeds.get(iter.next());
             seed.selectscore = c;
-            serverLog.logFine("PLASMA", "selectPeers/_lineup_: " + seed.hash + ":" + seed.getName() + " is choice " + c);
+            serverLog.logInfo("PLASMA", "selectPeers/_lineup_: " + seed.hash + ":" + seed.getName() + " is choice " + c);
             result[c++] = seed;
+        }
+        for (yacySeed s: robinsonSeeds.values()) {
+            serverLog.logInfo("PLASMA", "selectPeers/_robinson_: " + s.hash + ":" + s.getName() + " is choice " + c);
+            result[c++] = s;
         }
 
 //      System.out.println("DEBUG yacySearch.selectPeers = " + seedcount + " seeds:"); for (int i = 0; i < seedcount; i++) System.out.println(" #" + i + ":" + result[i]); // debug
