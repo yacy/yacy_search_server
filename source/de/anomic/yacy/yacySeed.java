@@ -591,7 +591,9 @@ public class yacySeed {
     }
 
     public boolean matchPeerTags(Set<String> searchHashes) {
-        Set<String> tags = serverCodings.string2set(get(PEERTAGS, ""), "|");
+        String peertags = get(PEERTAGS, "");
+        if (peertags.equals("*")) return true;
+        Set<String> tags = serverCodings.string2set(peertags, "|");
         Iterator<String> i = tags.iterator();
         while (i.hasNext()) {
         	if (searchHashes.contains(indexWord.word2hash(i.next()))) return true;

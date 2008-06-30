@@ -177,6 +177,7 @@ public class yacySearch extends Thread {
         // put in seeds according to dht
         final kelondroMScoreCluster<String> ranking = new kelondroMScoreCluster<String>();
         final HashMap<String, yacySeed> regularSeeds = new HashMap<String, yacySeed>();
+        final HashMap<String, yacySeed> matchingSeeds = new HashMap<String, yacySeed>();
         final HashMap<String, yacySeed> robinsonSeeds = new HashMap<String, yacySeed>();
         yacySeed seed;
         Iterator<yacySeed> dhtEnum;         
@@ -225,38 +226,47 @@ public class yacySearch extends Thread {
                 // enhance ranking for regular peers
                 if (seed.matchPeerTags(wordhashes)) { // access robinson peers with matching tag
                     serverLog.logInfo("PLASMA", "selectPeers/PeerTags: " + seed.hash + ":" + seed.getName() + ", is specialized peer for " + seed.getPeerTags().toString());
-                    ranking.addScore(seed.hash, seedcount);
-                    regularSeeds.put(seed.hash, seed);
+                    regularSeeds.remove(seed.hash);
+                    ranking.deleteScore(seed.hash);
+                    matchingSeeds.put(seed.hash, seed);
                 }
                 if (seed.getAge() < 1) { // the 'workshop feature'
                     serverLog.logInfo("PLASMA", "selectPeers/Age: " + seed.hash + ":" + seed.getName() + ", is newbie, age = " + seed.getAge());
-                    ranking.addScore(seed.hash, seedcount);
-                    regularSeeds.put(seed.hash, seed);
+                    regularSeeds.remove(seed.hash);
+                    ranking.deleteScore(seed.hash);
+                    matchingSeeds.put(seed.hash, seed);
                 }
             } else {
                 // this is a robinson peer
                 // in case the peer has more than a million urls, take it as search target
-                if (seed.getLinkCount() > 1000000) {
+                if (seed.getLinkCount() > 1000000 || seed.matchPeerTags(wordhashes)) {
                     regularSeeds.remove(seed.hash);
                     ranking.deleteScore(seed.hash);
-                    robinsonSeeds.put(seed.hash, seed);
+                    if (seed.matchPeerTags(wordhashes))
+                        matchingSeeds.put(seed.hash, seed);
+                    else
+                        robinsonSeeds.put(seed.hash, seed);
                 }
             }
         }
         
         // evaluate the ranking score and select seeds
         seedcount = Math.min(ranking.size(), seedcount);
-        yacySeed[] result = new yacySeed[seedcount + robinsonSeeds.size()];
+        yacySeed[] result = new yacySeed[seedcount + robinsonSeeds.size() + matchingSeeds.size()];
         c = 0;
         iter = ranking.scores(false); // higher are better
         while (iter.hasNext() && c < seedcount) {
             seed = regularSeeds.get(iter.next());
             seed.selectscore = c;
-            serverLog.logInfo("PLASMA", "selectPeers/_lineup_: " + seed.hash + ":" + seed.getName() + " is choice " + c);
+            serverLog.logInfo("PLASMA", "selectPeers/_dht_: " + seed.hash + ":" + seed.getName() + " is choice " + c);
             result[c++] = seed;
         }
         for (yacySeed s: robinsonSeeds.values()) {
             serverLog.logInfo("PLASMA", "selectPeers/_robinson_: " + s.hash + ":" + s.getName() + " is choice " + c);
+            result[c++] = s;
+        }
+        for (yacySeed s: matchingSeeds.values()) {
+            serverLog.logInfo("PLASMA", "selectPeers/_match_: " + s.hash + ":" + s.getName() + " is choice " + c);
             result[c++] = s;
         }
 
