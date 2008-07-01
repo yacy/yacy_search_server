@@ -384,8 +384,7 @@ public class WatchCrawler_p {
         if (crawlingIfOlderUnit.equals("month")) return recrawlIfOlderNumber * 60 * 24 * 30;
         if (crawlingIfOlderUnit.equals("day")) return recrawlIfOlderNumber * 60 * 24;
         if (crawlingIfOlderUnit.equals("hour")) return recrawlIfOlderNumber * 60;
-        if (crawlingIfOlderUnit.equals("minute")) return recrawlIfOlderNumber;
-        return -1;
+        return recrawlIfOlderNumber;
     }
     
     private static void setPerformance(plasmaSwitchboard sb, serverObjects post) {
