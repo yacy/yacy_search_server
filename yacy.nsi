@@ -5,7 +5,7 @@
 
 !define JRE_VERSION6 "1.6"
 !define JRE_VERSION5 "1.5"
-!define JRE_URL "http://javadl.sun.com/webapps/download/AutoDL?BundleId=18714&/jre-6u5-windows-i586-p.exe"
+!define JRE_URL "http://javadl.sun.com/webapps/download/AutoDL?BundleId=20288" ;jre-6u6-windows-i586-p.exe
 
 Name "YaCy"
 Icon "RELEASE\MAIN\addon\YaCy.ico"
