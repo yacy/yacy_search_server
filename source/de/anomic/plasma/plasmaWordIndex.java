@@ -510,37 +510,6 @@ public final class plasmaWordIndex implements indexRI {
         return containerList.size();
     }
     
-    private static final int hour = 3600000;
-    private static final int day  = 86400000;
-    
-    public static int microDateDays(Date modified) {
-        return microDateDays(modified.getTime());
-    }
-    
-    public static int microDateDays(long modified) {
-        // this calculates a virtual age from a given date
-        // the purpose is to have an age in days of a given modified date
-        // from a fixed standpoint in the past
-        // one day has 60*60*24 seconds = 86400 seconds
-        // we take mod 64**3 = 262144, this is the mask of the storage
-        return (int) ((modified / day) % 262144);
-    }
-        
-    public static String microDateHoursStr(long time) {
-        return kelondroBase64Order.enhancedCoder.encodeLong(microDateHoursInt(time), 3);
-    }
-    
-    public static int microDateHoursInt(long time) {
-        return (int) ((time / hour) % 262144);
-    }
-    
-    public static int microDateHoursAge(String mdhs) {
-        return microDateHoursInt(System.currentTimeMillis()) - (int) kelondroBase64Order.enhancedCoder.decodeLong(mdhs);
-    }
-    
-    public static long reverseMicroDateDays(int microDateDays) {
-        return ((long) microDateDays) * ((long) day);
-    }
     
     public int addPageIndex(yacyURL url, Date urlModified, int size, plasmaParserDocument document, plasmaCondenser condenser, String language, char doctype, int outlinksSame, int outlinksOther) {
         // this is called by the switchboard to put in a new page into the index

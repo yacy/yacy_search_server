@@ -194,6 +194,7 @@ public class IndexingStack {
     }
    
     public Collection<QueueEntry> getActiveQueueEntries() {
+        // todo: check dead entries?
         return this.queueInProcess.values();
     }
     

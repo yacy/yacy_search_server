@@ -55,6 +55,7 @@ import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroCollectionIndex;
 import de.anomic.kelondro.kelondroFlexTable;
 import de.anomic.kelondro.kelondroIndex;
+import de.anomic.kelondro.kelondroMicroDate;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroRowSet;
 import de.anomic.server.serverDate;
@@ -131,8 +132,8 @@ public class plasmaRankingCRProcess {
             } else {
                 // initialize counters and dates
                 acc_entry = acc.newEntry(key, new_entry.getAttrs(), new_entry.getSeqSet());
-                FUDate = plasmaWordIndex.microDateHoursInt(System.currentTimeMillis()); // first update date
-                FDDate = plasmaWordIndex.microDateHoursInt(System.currentTimeMillis()); // very difficult to compute; this is only a quick-hack
+                FUDate = kelondroMicroDate.microDateHoursInt(System.currentTimeMillis()); // first update date
+                FDDate = kelondroMicroDate.microDateHoursInt(System.currentTimeMillis()); // very difficult to compute; this is only a quick-hack
                 LUDate = (int) new_entry.getAttr("VDate", 0);
                 UCount = 0;
                 PCount = (new_flags.get(1)) ? 1 : 0;
@@ -210,8 +211,8 @@ public class plasmaRankingCRProcess {
                     acc_entry.setCol(i, new_entry.getAttr(acc.row().column(i).nickname, 0));
                 }
                 seq.put(key.getBytes(), new_entry.getSeqCollection());
-                FUDate = plasmaWordIndex.microDateHoursInt(System.currentTimeMillis()); // first update date
-                FDDate = plasmaWordIndex.microDateHoursInt(System.currentTimeMillis()); // very difficult to compute; this is only a quick-hack
+                FUDate = kelondroMicroDate.microDateHoursInt(System.currentTimeMillis()); // first update date
+                FDDate = kelondroMicroDate.microDateHoursInt(System.currentTimeMillis()); // very difficult to compute; this is only a quick-hack
                 LUDate = (int) new_entry.getAttr("VDate", 0);
                 UCount = 0;
                 PCount = (new_flags.get(1)) ? 1 : 0;

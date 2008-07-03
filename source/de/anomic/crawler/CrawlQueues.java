@@ -261,7 +261,7 @@ public class CrawlQueues {
             return false;
         }
         
-        if (sb.webIndex.queuePreStack.size() >= (int) sb.getConfigLong(plasmaSwitchboard.INDEXER_SLOTS, 30)) {
+        if (sb.webIndex.queuePreStack.size() >= (int) sb.getConfigLong(plasmaSwitchboard.INDEXER_SLOTS, 30) / 2) {
             if (this.log.isFine()) log.logFine("remoteCrawlLoaderJob: too many processes in indexing queue, dismissed (" + "sbQueueSize=" + sb.webIndex.queuePreStack.size() + ")");
             return false;
         }
@@ -276,12 +276,21 @@ public class CrawlQueues {
             return false;
         }
         
+        if (remoteTriggeredCrawlJobSize() > 0) {
+            if (this.log.isFine()) log.logFine("remoteCrawlLoaderJob: the remote-triggered crawl job queue is filled, omitting processing");
+            return false;
+        }
+        
+        /*
+        if (coreCrawlJobSize() > 0) {
+            if (this.log.isFine()) log.logFine("remoteCrawlLoaderJob: a local crawl is running, omitting processing");
+            return false;
+        }
+        */
+        
         // check if we have an entry in the provider list, otherwise fill the list
         yacySeed seed;
-        if ((remoteCrawlProviderHashes.size() == 0) &&
-            (coreCrawlJobSize() == 0) &&
-            (remoteTriggeredCrawlJobSize() == 0) &&
-            (sb.queueSize() < 10)) {
+        if (remoteCrawlProviderHashes.size() == 0) {
             if (sb.webIndex.seedDB != null && sb.webIndex.seedDB.sizeConnected() > 0) {
                 Iterator<yacySeed> e = sb.webIndex.peerActions.dhtAction.getProvidesRemoteCrawlURLs();
                 while (e.hasNext()) {

@@ -62,9 +62,9 @@ public class NoticedURL {
     public static final int STACK_TYPE_MOVIE    = 12; // put on movie stack
     public static final int STACK_TYPE_MUSIC    = 13; // put on music stack
 
-    private static final long minimumLocalDelta  =   0; // the minimum time difference between access of the same local domain
-    private static final long minimumGlobalDelta = 333; // the minimum time difference between access of the same global domain
-    private static final long maximumDomAge   =  60000; // the maximum age of a domain until it is used for another crawl attempt
+    private static final long minimumLocalDeltaInit  =   0; // the minimum time difference between access of the same local domain
+    private static final long minimumGlobalDeltaInit = 500; // the minimum time difference between access of the same global domain
+    private static final long maximumDomAge       =  60000; // the maximum age of a domain until it is used for another crawl attempt
     
     private Balancer coreStack;      // links found by crawling to depth-1
     private Balancer limitStack;     // links found by crawling at target depth
@@ -73,14 +73,34 @@ public class NoticedURL {
     //private kelondroStack imageStack;     // links pointing to image resources
     //private kelondroStack movieStack;     // links pointing to movie resources
     //private kelondroStack musicStack;     // links pointing to music resources
-
+    private long minimumLocalDelta;
+    private long minimumGlobalDelta;
+    
     public NoticedURL(File cachePath) {
-        coreStack = new Balancer(cachePath, "urlNoticeCoreStack", false);
-        limitStack = new Balancer(cachePath, "urlNoticeLimitStack", false);
+        this.coreStack = new Balancer(cachePath, "urlNoticeCoreStack", false);
+        this.limitStack = new Balancer(cachePath, "urlNoticeLimitStack", false);
         //overhangStack = new plasmaCrawlBalancer(overhangStackFile);
-        remoteStack = new Balancer(cachePath, "urlNoticeRemoteStack", false);
+        this.remoteStack = new Balancer(cachePath, "urlNoticeRemoteStack", false);
+        this.minimumLocalDelta = minimumLocalDeltaInit;
+        this.minimumGlobalDelta = minimumGlobalDeltaInit;
     }
 
+    public long getMinimumLocalDelta() {
+        return this.minimumLocalDelta;
+    }
+    
+    public long getMinimumGlobalDelta() {
+        return this.minimumGlobalDelta;
+    }
+    
+    public void setMinimumLocalDelta(long newDelta) {
+        this.minimumLocalDelta = Math.max(minimumLocalDeltaInit, newDelta);
+    }
+    
+    public void setMinimumGlobalDelta(long newDelta) {
+        this.minimumGlobalDelta = Math.max(minimumGlobalDeltaInit, newDelta);
+    }
+    
     public void clear() {
         coreStack.clear();
         limitStack.clear();
@@ -185,7 +205,7 @@ public class NoticedURL {
         return removed;
     }
     
-    public CrawlEntry[] top(int stackType, int count) {
+    public ArrayList<CrawlEntry> top(int stackType, int count) {
         switch (stackType) {
             case STACK_TYPE_CORE:     return top(coreStack, count);
             case STACK_TYPE_LIMIT:    return top(limitStack, count);
@@ -240,20 +260,16 @@ public class NoticedURL {
         throw new IOException("balancer stack is empty");
     }
     
-    private CrawlEntry[] top(Balancer balancer, int count) {
+    private ArrayList<CrawlEntry> top(Balancer balancer, int count) {
         // this is a filo - top
         if (count > balancer.size()) count = balancer.size();
-        ArrayList<CrawlEntry> list = new ArrayList<CrawlEntry>(count);
-        for (int i = 0; i < count; i++) {
-            try {
-                CrawlEntry entry = balancer.top(i);
-                if (entry == null) break;
-                list.add(entry);
-            } catch (IOException e) {
-                break;
-            }
+        ArrayList<CrawlEntry> list;
+        try {
+            list = balancer.top(count);
+        } catch (IOException e) {
+            list = new ArrayList<CrawlEntry>(0);
         }
-        return list.toArray(new CrawlEntry[list.size()]);
+        return list;
     }
     
     public Iterator<CrawlEntry> iterator(int stackType) {

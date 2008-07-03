@@ -1019,6 +1019,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         // start a loader
         log.logConfig("Starting Crawl Loader");
         this.crawlQueues = new CrawlQueues(this, plasmaPath);
+        this.crawlQueues.noticeURL.setMinimumLocalDelta(this.getConfigLong("minimumLocalDelta", this.crawlQueues.noticeURL.getMinimumLocalDelta()));
+        this.crawlQueues.noticeURL.setMinimumGlobalDelta(this.getConfigLong("minimumGlobalDelta", this.crawlQueues.noticeURL.getMinimumGlobalDelta()));
                 
         /*
          * Creating sync objects and loading status for the crawl jobs
@@ -2388,19 +2390,19 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         thread = getThread(CRAWLJOB_LOCAL_CRAWL);
         if (thread != null) {
         	setConfig(CRAWLJOB_LOCAL_CRAWL_BUSYSLEEP , thread.setBusySleep(newBusySleep));
-        	thread.setIdleSleep(1000);
+        	thread.setIdleSleep(2000);
         }
         
         thread = getThread(PROXY_CACHE_ENQUEUE);
         if (thread != null) {
             setConfig(PROXY_CACHE_ENQUEUE_BUSYSLEEP , thread.setBusySleep(0));
-            thread.setIdleSleep(1000);
+            thread.setIdleSleep(2000);
         }
         
         thread = getThread(INDEXER);
         if (thread != null) {
-            setConfig(INDEXER_BUSYSLEEP , thread.setBusySleep(newBusySleep / 2));
-            thread.setIdleSleep(1000);
+            setConfig(INDEXER_BUSYSLEEP , thread.setBusySleep(newBusySleep / 8));
+            thread.setIdleSleep(2000);
         }
         
     }

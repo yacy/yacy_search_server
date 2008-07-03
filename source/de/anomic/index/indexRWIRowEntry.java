@@ -29,9 +29,9 @@ package de.anomic.index;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroColumn;
+import de.anomic.kelondro.kelondroMicroDate;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroRow.Entry;
-import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.yacy.yacySeedDB;
 
 public final class indexRWIRowEntry implements indexRWIEntry {
@@ -112,8 +112,8 @@ public final class indexRWIRowEntry implements indexRWIEntry {
         assert (urlHash.length() == 12) : "urlhash = " + urlHash;
         if ((language == null) || (language.length() != urlEntryRow.width(col_language))) language = "uk";
         this.entry = urlEntryRow.newEntry();
-        int mddlm = plasmaWordIndex.microDateDays(lastmodified);
-        int mddct = plasmaWordIndex.microDateDays(updatetime);
+        int mddlm = kelondroMicroDate.microDateDays(lastmodified);
+        int mddct = kelondroMicroDate.microDateDays(updatetime);
         this.entry.setCol(col_urlhash, urlHash, null);
         this.entry.setCol(col_lastModified, mddlm);
         this.entry.setCol(col_freshUntil, Math.max(0, mddlm + (mddct - mddlm) * 2)); // TTL computation
@@ -158,11 +158,6 @@ public final class indexRWIRowEntry implements indexRWIEntry {
         this.entry = rentry;
     }
     
-    public static int days(long time) {
-        // calculates the number of days since 1.1.1970 and returns this as 4-byte array
-        return (int) (time / 86400000);
-    }
-    
     public indexRWIRowEntry clone() {
         byte[] b = new byte[urlEntryRow.objectsize];
         System.arraycopy(entry.bytes(), 0, b, 0, urlEntryRow.objectsize);
@@ -186,11 +181,11 @@ public final class indexRWIRowEntry implements indexRWIEntry {
     }
 
     public long lastModified() {
-        return plasmaWordIndex.reverseMicroDateDays((int) this.entry.getColLong(col_lastModified));
+        return kelondroMicroDate.reverseMicroDateDays((int) this.entry.getColLong(col_lastModified));
     }
     
     public long freshUntil() {
-        return plasmaWordIndex.reverseMicroDateDays((int) this.entry.getColLong(col_freshUntil));
+        return kelondroMicroDate.reverseMicroDateDays((int) this.entry.getColLong(col_freshUntil));
     }
 
     public int hitcount() {

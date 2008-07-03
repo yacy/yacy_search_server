@@ -38,6 +38,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import de.anomic.kelondro.kelondroBase64Order;
+import de.anomic.kelondro.kelondroMicroDate;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.logging.serverLog;
@@ -119,8 +120,8 @@ public class plasmaWebStructure {
         // append this reference to buffer
         // generate header info
         String head = url.hash() + "=" +
-        plasmaWordIndex.microDateHoursStr(docDate.getTime()) +          // latest update timestamp of the URL
-        plasmaWordIndex.microDateHoursStr(System.currentTimeMillis()) + // last visit timestamp of the URL
+        kelondroMicroDate.microDateHoursStr(docDate.getTime()) +          // latest update timestamp of the URL
+        kelondroMicroDate.microDateHoursStr(System.currentTimeMillis()) + // last visit timestamp of the URL
         kelondroBase64Order.enhancedCoder.encodeLongSmart(LCount, 2) +  // count of links to local resources
         kelondroBase64Order.enhancedCoder.encodeLongSmart(GCount, 2) +  // count of links to global resources
         kelondroBase64Order.enhancedCoder.encodeLongSmart(document.getImages().size(), 2) + // count of Images in document

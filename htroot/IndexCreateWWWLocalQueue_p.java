@@ -44,6 +44,7 @@
 // if the shell's current path is HTROOT
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Locale;
@@ -171,7 +172,7 @@ public class IndexCreateWWWLocalQueue_p {
             prop.put("crawler-queue", "0");
         } else {
             prop.put("crawler-queue", "1");
-            CrawlEntry[] crawlerList = sb.crawlQueues.noticeURL.top(NoticedURL.STACK_TYPE_CORE, (int) (showLimit * 1.20));
+            ArrayList<CrawlEntry> crawlerList = sb.crawlQueues.noticeURL.top(NoticedURL.STACK_TYPE_CORE, (int) (showLimit * 1.20));
 
             CrawlEntry urle;
             boolean dark = true;
@@ -179,8 +180,8 @@ public class IndexCreateWWWLocalQueue_p {
             String profileHandle;
             CrawlProfile.entry profileEntry;
             int i;
-            for (i = 0; (i < crawlerList.length) && (showNum < showLimit); i++) {
-                urle = crawlerList[i];
+            for (i = 0; (i < crawlerList.size()) && (showNum < showLimit); i++) {
+                urle = crawlerList.get(i);
                 if ((urle != null)&&(urle.url()!=null)) {
                     initiator = sb.webIndex.seedDB.getConnected(urle.initiator());
                     profileHandle = urle.profileHandle();

@@ -69,7 +69,6 @@ public class PerformanceQueues_p {
         performanceProfiles.put("defaults/performance_dht.profile", "prefer DHT");
     }
     
-    
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> sb) {
         // return variable that accumulates replacements
         plasmaSwitchboard switchboard = (plasmaSwitchboard) sb;
@@ -252,6 +251,19 @@ public class PerformanceQueues_p {
             switchboard.setConfig(plasmaSwitchboard.LOCALSEACH_ONLINE_CAUTION_DELAY, Integer.toString(post.getInt("crawlPauseLocalsearch", 30000)));
             switchboard.setConfig(plasmaSwitchboard.REMOTESEARCH_ONLINE_CAUTION_DELAY, Integer.toString(post.getInt("crawlPauseRemotesearch", 30000)));
         }
+        
+        if ((post != null) && (post.containsKey("minimumDeltaSubmit"))) {
+            long minimumLocalDelta = post.getLong("minimumLocalDelta", switchboard.crawlQueues.noticeURL.getMinimumLocalDelta());
+            long minimumGlobalDelta = post.getLong("minimumGlobalDelta", switchboard.crawlQueues.noticeURL.getMinimumGlobalDelta());
+            switchboard.setConfig("minimumLocalDelta", minimumLocalDelta);
+            switchboard.setConfig("minimumGlobalDelta", minimumGlobalDelta);
+            switchboard.crawlQueues.noticeURL.setMinimumLocalDelta(minimumLocalDelta);
+            switchboard.crawlQueues.noticeURL.setMinimumGlobalDelta(minimumGlobalDelta);
+        }
+        
+        // delta settings
+        prop.put("minimumLocalDelta", switchboard.crawlQueues.noticeURL.getMinimumLocalDelta());
+        prop.put("minimumGlobalDelta", switchboard.crawlQueues.noticeURL.getMinimumGlobalDelta());
         
         // table cache settings
         prop.putNum("urlCacheSize", switchboard.webIndex.getURLwriteCacheSize());  

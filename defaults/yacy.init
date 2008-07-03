@@ -206,6 +206,15 @@ proxyCacheSize__pro = 1024
 # storage place for new releases
 releases = DATA/RELEASE
 
+# time limits for the crawler:
+# these times (milliseconds) are the shortest times for an access of the crawler to the same domain
+# the crawler may read files faster than that, but never from the same domain faster than these time intervals
+# a delta of 500 milliseconds means that no more than two files are taken from the same server
+# there is a hard-coded limit which prevents that the used time is shorter that these default times
+# the time-limits are distinguished for local and global crawls: there is no limit for an intranet-crawl.
+minimumLocalDelta = 0
+minimumGlobalDelta = 500
+
 # the following mime-types are the whitelist for indexing
 #
 # parseableMimeTypes.HTML: specifies mime-types that can be indexed with built-in html parser

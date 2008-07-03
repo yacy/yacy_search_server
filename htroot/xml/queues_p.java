@@ -181,13 +181,13 @@ public class queues_p {
     }
     
     
-    public static final void addNTable(plasmaSwitchboard sb, serverObjects prop, String tableName, CrawlEntry[] crawlerList) {
+    public static final void addNTable(plasmaSwitchboard sb, serverObjects prop, String tableName, ArrayList<CrawlEntry> crawlerList) {
 
         int showNum = 0;
         CrawlEntry urle;
         yacySeed initiator;
-        for (int i = 0; i < crawlerList.length; i++) {
-            urle = crawlerList[i];
+        for (int i = 0; i < crawlerList.size(); i++) {
+            urle = crawlerList.get(i);
             if ((urle != null) && (urle.url() != null)) {
                 initiator = sb.webIndex.seedDB.getConnected(urle.initiator());
                 prop.put(tableName + "_" + showNum + "_profile", urle.profileHandle());

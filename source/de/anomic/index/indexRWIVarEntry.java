@@ -27,7 +27,7 @@
 package de.anomic.index;
 
 import de.anomic.kelondro.kelondroBitfield;
-import de.anomic.plasma.plasmaWordIndex;
+import de.anomic.kelondro.kelondroMicroDate;
 
 public class indexRWIVarEntry implements indexRWIEntry {
 
@@ -62,8 +62,8 @@ public class indexRWIVarEntry implements indexRWIEntry {
             double   termfrequency
     ) {
         if ((language == null) || (language.length() != 2)) language = "uk";
-        int mddlm = plasmaWordIndex.microDateDays(lastmodified);
-        int mddct = plasmaWordIndex.microDateDays(updatetime);
+        int mddlm = kelondroMicroDate.microDateDays(lastmodified);
+        int mddct = kelondroMicroDate.microDateDays(updatetime);
         this.flags = flags;
         this.freshUntil = Math.max(0, mddlm + (mddct - mddlm) * 2);
         this.lastModified = lastmodified;

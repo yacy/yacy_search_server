@@ -233,9 +233,11 @@ public final class yacyClient {
      * @return response body
      * @throws IOException
      */
+    /*
     private static byte[] wput(final String url, String vhost, final List<Part> post, boolean gzipBody) throws IOException {
         return wput(url, vhost, post, 10000, gzipBody);
     }
+    */
     /**
      * send data to the server named by vhost
      * 

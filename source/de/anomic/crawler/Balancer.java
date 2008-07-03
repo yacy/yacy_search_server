@@ -116,6 +116,21 @@ public class Balancer {
         // create a stack for newly entered entries
         if (!(cachePath.exists())) cachePath.mkdir(); // make the path
         openFileIndex();
+        if (urlFileStack.size() != urlFileIndex.size() || (urlFileIndex.size() < 10000 && urlFileIndex.size() > 0)) {
+            // fix the file stack
+            serverLog.logInfo("Balancer", "re-creating the " + stackname + " balancer stack, size = " + urlFileIndex.size() + ((urlFileStack.size() == urlFileIndex.size()) ? "" : " (the old stack size was wrong)" ));
+            urlFileStack = kelondroStack.reset(urlFileStack);
+            try {
+                Iterator<byte[]> i = urlFileIndex.keys(true, null);
+                byte[] hash;
+                while (i.hasNext()) {
+                    hash = i.next();
+                    pushHash(new String(hash));
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public synchronized void close() {
@@ -134,7 +149,7 @@ public class Balancer {
     
     public void finalize() {
         if (urlFileStack != null) {
-            serverLog.logWarning("plasmaCrawlBalancer", "crawl stack " + stackname + " closed by finalizer");
+            serverLog.logWarning("Balancer", "crawl stack " + stackname + " closed by finalizer");
             close();
         }
     }
@@ -321,23 +336,28 @@ public class Balancer {
             return;
         }
         
+        // add to index
+        urlFileIndex.put(entry.toRow());
+        
+        // add the hash to a queue
+        pushHash(entry.url().hash());
+    }
+    
+    private void pushHash(String hash) throws IOException {
         // extend domain stack
-        String dom = entry.url().hash().substring(6);
+        String dom = hash.substring(6);
         LinkedList<String> domainList = domainStacks.get(dom);
         if (domainList == null) {
             // create new list
             domainList = new LinkedList<String>();
             synchronized (domainStacks) {
-                domainList.add(entry.url().hash());
+                domainList.add(hash);
                 domainStacks.put(dom, domainList);
             }
         } else {
             // extend existent domain list
-            domainList.addLast(entry.url().hash());
+            domainList.addLast(hash);
         }
-        
-        // add to index
-        urlFileIndex.put(entry.toRow());
         
         // check size of domainStacks and flush
         if ((domainStacks.size() > 100) || (sizeDomainStacks() > 1000)) {
@@ -507,16 +527,16 @@ public class Balancer {
         if (lastAccess == null) return Long.MAX_VALUE; // never accessed
         return System.currentTimeMillis() - lastAccess.time();
     }
-    
-    public synchronized CrawlEntry top(int dist) throws IOException {
+
+    public synchronized ArrayList<CrawlEntry> top(int count) throws IOException {
         // if we need to flush anything, then flush the domain stack first,
         // to avoid that new urls get hidden by old entries from the file stack
         if (urlRAMStack == null) return null;
-        while ((domainStacksNotEmpty()) && (urlRAMStack.size() <= dist)) {
+        while ((domainStacksNotEmpty()) && (urlRAMStack.size() <= count)) {
             // flush only that much as we need to display
             flushOnceDomStacks(0, true); 
         }
-        while ((urlFileStack != null) && (urlRAMStack.size() <= dist) && (urlFileStack.size() > 0)) {
+        while ((urlFileStack != null) && (urlRAMStack.size() <= count) && (urlFileStack.size() > 0)) {
             // flush some entries from disc to ram stack
             try {
                 kelondroRow.Entry t = urlFileStack.pop();
@@ -526,16 +546,18 @@ public class Balancer {
                 break;
             }
         }
-        if (dist >= urlRAMStack.size()) return null;
-        String urlhash = urlRAMStack.get(dist);
-        kelondroRow.Entry entry = urlFileIndex.get(urlhash.getBytes());
-        if (entry == null) {
-            if (kelondroAbstractRecords.debugmode) serverLog.logWarning("PLASMA BALANCER", "no entry in index for urlhash " + urlhash);
-            return null;
+        
+        count = Math.min(count, urlRAMStack.size());
+        ArrayList<CrawlEntry> list = new ArrayList<CrawlEntry>();
+        for (int i = 0; i < count; i++) {
+            String urlhash = urlRAMStack.get(i);
+            kelondroRow.Entry entry = urlFileIndex.get(urlhash.getBytes());
+            if (entry == null) break;
+            list.add(new CrawlEntry(entry));
         }
-        return new CrawlEntry(entry);
+        return list;
     }
-
+    
     public synchronized Iterator<CrawlEntry> iterator() throws IOException {
         return new EntryIterator();
     }
