@@ -26,7 +26,7 @@
           </dd>
           <dd>
             <input type="submit" name="use_button" value="Use" />
-            <input type="submit" name="delete" value="Delete" />
+            <input type="submit" name="delete_button" value="Delete" />
           </dd>
         </dl>
       </fieldset>
@@ -40,14 +40,63 @@
           
           <dt><label for="use_url">Use this skin</label></dt>
           <dd><input type="checkbox" name="use_skin" id="use_url" value="on" checked="checked" /></dd>
-          <dd><input type="submit" value="install" /></dd>
+          <dd><input type="submit" name="install_button" value="Install" /></dd>
         </dl>
       </fieldset>
     </form>
+    
     #(status)#
     ::<p><strong>Unable to get URL: #[url]#</strong></p>
     ::<p><strong>Error saving the skin.</strong></p>
     #(/status)#
+    
+    <p>
+      The search page may be customized. You can change the 'corporate identity'-images, the greeting line
+      and a link to a home page that is reached when the 'corporate identity'-images are clicked.
+    </p>
+    <form action="ConfigSkins_p.html">
+      <fieldset>
+        <dl>
+          <dt>Greeting Line</dt>
+          <dd><input type="text" name="promoteSearchPageGreeting" value="#[promoteSearchPageGreeting]#" size="60" /></dd>
+          
+          <dt>URL of Home Page</dt>
+          <dd><input type="text" name="promoteSearchPageGreeting.homepage" value="#[promoteSearchPageGreeting.homepage]#" size="60" /></dd>
+          
+          <dt>URL of a Small Corporate Image</dt>
+          <dd><input type="text" name="promoteSearchPageGreeting.smallImage" value="#[promoteSearchPageGreeting.smallImage]#" size="60" /></dd>
+          
+          <dt>URL of a Large Corporate Image</dt>
+          <dd><input type="text" name="promoteSearchPageGreeting.largeImage" value="#[promoteSearchPageGreeting.largeImage]#" size="60" /></dd>
+          
+          <dd><input type="submit" name="searchpage_button" value="Change Search Page" /></dd>
+        </dl>
+      </fieldset>
+    </form>
+    
+    <p>
+      The search page can be integrated in your own web pages with an iframe. Simply use the following code:
+    <p>
+    <pre>
+      &lt;iframe name="target"
+       src="http://#[myaddress]#/index.html?display=2&amp;resource=local"
+       width="100%"
+       height="560"
+       frameborder="0"
+       scrolling="auto"
+       id="target"&gt; 
+      &lt;/iframe&gt;  
+    </pre>
+    This would look like:
+    <iframe name="target"
+       src="http://#[myaddress]#/index.html?display=2&amp;resource=local"
+       width="100%"
+       height="560"
+       frameborder="0"
+       scrolling="auto"
+       id="target">
+      </iframe>
+    
     #%env/templates/footer.template%#
   </body>
 </html>

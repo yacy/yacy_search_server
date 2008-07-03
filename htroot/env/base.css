@@ -385,10 +385,9 @@ div.head h1 {
 h2.yacy { /* The heading in index.html */
   margin:10px auto;
   text-align:center;
-  padding-top:130px;
+  padding-top:20px;
   width:256px;
   min-width:256px; /*min-width does not exist in IE 5.5, 6 and Safari */
-  background:url(/env/grafics/YaCyLogo_120ppi.png) top center no-repeat;
 }
 
 div.welcome { /* The heading in Status.html */

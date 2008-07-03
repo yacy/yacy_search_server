@@ -78,14 +78,13 @@ public class index {
         if (cds.equals("image")) contentdom = plasmaSearchQuery.CONTENTDOM_IMAGE;
         if (cds.equals("app")) contentdom = plasmaSearchQuery.CONTENTDOM_APP;
         
-        //long mylinks = 0;
-        prop.putNum("links", sb.webIndex.seedDB.mySeed().getLinkCount());
-        
         // we create empty entries for template strings
         String promoteSearchPageGreeting = env.getConfig("promoteSearchPageGreeting", "");
         if (env.getConfigBool("promoteSearchPageGreeting.useNetworkName", false)) promoteSearchPageGreeting = env.getConfig("network.unit.description", "");
-        if (promoteSearchPageGreeting.length() == 0) promoteSearchPageGreeting = "P2P WEB SEARCH";
+        if (promoteSearchPageGreeting.length() == 0) promoteSearchPageGreeting = "P2P Web Search";
         prop.putHTML("promoteSearchPageGreeting", promoteSearchPageGreeting);
+        prop.put("promoteSearchPageGreeting.homepage", sb.getConfig("promoteSearchPageGreeting.homepage", ""));
+        prop.put("promoteSearchPageGreeting.largeImage", sb.getConfig("promoteSearchPageGreeting.largeImage", ""));
         prop.putHTML("former", former);
         prop.put("num-results", "0");
         prop.put("excluded", "0");
@@ -117,7 +116,6 @@ public class index {
         prop.put("contentdomCheckVideo", (contentdom == plasmaSearchQuery.CONTENTDOM_VIDEO) ? "1" : "0");
         prop.put("contentdomCheckImage", (contentdom == plasmaSearchQuery.CONTENTDOM_IMAGE) ? "1" : "0");
         prop.put("contentdomCheckApp", (contentdom == plasmaSearchQuery.CONTENTDOM_APP) ? "1" : "0");
-        
         // online caution timing
         sb.localSearchLastAccess = System.currentTimeMillis();
         

@@ -94,6 +94,7 @@ public class IndexingStack {
 
     public synchronized void push(QueueEntry entry) throws IOException {
         if (entry == null) return;
+        if (sbQueueStack == null) return; // may occur during shutdown
         sbQueueStack.push(sbQueueStack.row().newEntry(new byte[][]{
             entry.url.toString().getBytes(),
             (entry.referrerHash == null) ? "".getBytes() : entry.referrerHash.getBytes(),

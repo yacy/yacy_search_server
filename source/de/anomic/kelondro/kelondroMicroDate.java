@@ -61,4 +61,8 @@ public class kelondroMicroDate {
     public static long reverseMicroDateDays(long microDateDays) {
         return Math.min(System.currentTimeMillis(), microDateDays * day);
     }
+    
+    public static void main(String[] args) {
+        
+    }
 }

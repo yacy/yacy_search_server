@@ -177,9 +177,10 @@ public class Balancer {
     
     public synchronized CrawlEntry get(String urlhash) throws IOException {
         assert urlhash != null;
+        if (urlFileIndex == null) return null; // case occurrs during shutdown
         kelondroRow.Entry entry = urlFileIndex.get(urlhash.getBytes());
-       if (entry == null) return null;
-       return new CrawlEntry(entry);
+        if (entry == null) return null;
+        return new CrawlEntry(entry);
     }
     
     public synchronized int removeAllByProfileHandle(String profileHandle, long timeout) throws IOException {

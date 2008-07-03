@@ -7,7 +7,7 @@
     <link rel="search" type="application/opensearchdescription+xml" title="YaCy Search on '#[clientname]#'" href="opensearchdescription.xml" /> 
     <script type="text/javascript" src="js/html.js"></script>
   </head>
-  <body id="index" onload="document.getElementById('search').focus()">
+  <body id="index">
     #(display)#
     #%env/templates/simpleheader.template%#
     ::
@@ -17,6 +17,7 @@
     #(/display)#
 
     <h2 class="yacy">
+    <a href="#[promoteSearchPageGreeting.homepage]#" class="yacylogo"><img src="#[promoteSearchPageGreeting.largeImage]#" alt="yacy" align="center"/></a><br /><br />
       #[promoteSearchPageGreeting]#
     </h2>
   
@@ -103,7 +104,6 @@
         </tr>
       </table>
       #(/searchoptions)#
-      <p>This peer holds #[links]# URLs</p>
     </form>
     #(searchoptions)#::
     <form action="index.html" method="get" class="search">

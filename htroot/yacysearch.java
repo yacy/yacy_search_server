@@ -89,7 +89,7 @@ public class yacysearch {
         int input = (post == null) ? 2 : post.getInt("input", 2);
         String promoteSearchPageGreeting = env.getConfig("promoteSearchPageGreeting", "");
         if (env.getConfigBool("promoteSearchPageGreeting.useNetworkName", false)) promoteSearchPageGreeting = env.getConfig("network.unit.description", "");
-        if (promoteSearchPageGreeting.length() == 0) promoteSearchPageGreeting = "P2P WEB SEARCH";
+        if (promoteSearchPageGreeting.length() == 0) promoteSearchPageGreeting = "P2P Web Search";
         String client = header.get(httpHeader.CONNECTION_PROP_CLIENTIP); // the search client who initiated the search
         
         // get query
@@ -98,6 +98,9 @@ public class yacysearch {
         final serverObjects prop = new serverObjects();
         
         boolean rss = (post == null) ? false : post.get("rss", "false").equals("true");
+        prop.put("input_promoteSearchPageGreeting", promoteSearchPageGreeting);
+        prop.put("input_promoteSearchPageGreeting.homepage", sb.getConfig("promoteSearchPageGreeting.homepage", ""));
+        prop.put("input_promoteSearchPageGreeting.smallImage", sb.getConfig("promoteSearchPageGreeting.smallImage", ""));
         if ((post == null) || (env == null) || (querystring.length() == 0) || (!searchAllowed)) {
             // we create empty entries for template strings
             prop.put("searchagain", "0");
@@ -105,7 +108,6 @@ public class yacysearch {
             prop.put("display", display);
             prop.put("input_input", input);
             prop.put("input_display", display);
-            prop.put("input_promoteSearchPageGreeting", promoteSearchPageGreeting);
             prop.put("input_former", "");
             prop.put("former", "");
             prop.put("input_count", "10");
@@ -414,7 +416,6 @@ public class yacysearch {
         prop.put("display", display);
         prop.put("input_input", input);
         prop.put("input_display", display);
-        prop.put("input_promoteSearchPageGreeting", promoteSearchPageGreeting);
         prop.putHTML("input_former", querystring);
         //prop.put("former", post.get("search", ""));
         prop.put("input_count", itemsPerPage);

@@ -243,9 +243,13 @@ parseableExt=html,htm,txt,php,shtml,asp,aspx,jsp
 # These strings appear in the Web Mask of the YACY search client
 # Set these Strings to cusomize your peer and give any message to
 # other peer users
-promoteSearchPageGreeting =
+promoteSearchPageGreeting = P2P Web Search
 # if the following property is set to true, the network name is used as greeting
 promoteSearchPageGreeting.useNetworkName = false
+# the following attributes can be used to define a custom image and home page on the search page
+promoteSearchPageGreeting.homepage = http://yacy.net
+promoteSearchPageGreeting.largeImage = /env/grafics/YaCyLogo_120ppi.png
+promoteSearchPageGreeting.smallImage = /env/grafics/YaCyLogo_60ppi.png
 
 # the path to the PLASMA database of the web spider
 dbPath=DATA/PLASMADB
