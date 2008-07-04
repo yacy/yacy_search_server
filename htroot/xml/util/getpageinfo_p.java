@@ -49,6 +49,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.net.MalformedURLException;
 
+import de.anomic.crawler.HTTPLoader;
 import de.anomic.data.robotsParser;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterWriter;
@@ -60,6 +61,7 @@ import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyURL;
 
 public class getpageinfo_p {
+    
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
         serverObjects prop = new serverObjects();
         prop.put("sitemap", "");
@@ -81,7 +83,9 @@ public class getpageinfo_p {
             if (actions.indexOf("title")>=0) {
                 try {
                     yacyURL u = new yacyURL(url, null);
-                    byte[] r = HttpClient.wget(u.toString());
+                    httpHeader reqHeader = new httpHeader();
+                    reqHeader.put(httpHeader.USER_AGENT, HTTPLoader.crawlerUserAgent);
+                    byte[] r = HttpClient.wget(u.toString(), reqHeader, 5000);
                     if (r == null) return prop;
                     String contentString=new String(r);
                     

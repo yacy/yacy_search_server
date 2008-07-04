@@ -546,7 +546,7 @@ public class JakartaCommonsHttpClient {
                 // wget
                 System.out.println("wget " + url);
                 System.out.println("--------------------------------------");
-                System.out.println(new String(de.anomic.http.HttpClient.wget(url)));
+                System.out.println(new String(de.anomic.http.HttpClient.wget(url, null, 10000)));
             }
         } catch (final IOException e) {
             e.printStackTrace();

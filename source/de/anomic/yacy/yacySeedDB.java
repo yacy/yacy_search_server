@@ -60,6 +60,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
+import de.anomic.crawler.HTTPLoader;
 import de.anomic.http.JakartaCommonsHttpClient;
 import de.anomic.http.JakartaCommonsHttpResponse;
 import de.anomic.http.httpHeader;
@@ -849,7 +850,8 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
         // Configure http headers
         httpHeader reqHeader = new httpHeader();
         reqHeader.put(httpHeader.PRAGMA, "no-cache");
-        reqHeader.put(httpHeader.CACHE_CONTROL, "no-cache"); // httpc uses HTTP/1.0 is this necessary?            
+        reqHeader.put(httpHeader.CACHE_CONTROL, "no-cache"); // httpc uses HTTP/1.0 is this necessary?
+        reqHeader.put(httpHeader.USER_AGENT, HTTPLoader.yacyUserAgent);
         
         // init http-client
         JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(10000, reqHeader, null);

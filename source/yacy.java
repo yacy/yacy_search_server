@@ -439,7 +439,7 @@ public final class yacy {
                     if (server.isAlive()) try {
                         // TODO only send request, don't read response (cause server is already down resulting in error)
                         yacyURL u = new yacyURL((server.withSSL()?"https":"http")+"://localhost:" + serverCore.getPortNr(port), null);
-                        HttpClient.wget(u.toString()); // kick server
+                        HttpClient.wget(u.toString(), null, 10000); // kick server
                         serverLog.logConfig("SHUTDOWN", "sent termination signal to server socket");
                     } catch (IOException ee) {
                         serverLog.logConfig("SHUTDOWN", "termination signal to server socket missed (server shutdown, ok)");

@@ -112,6 +112,7 @@ import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.CrawlQueues;
 import de.anomic.crawler.CrawlStacker;
 import de.anomic.crawler.ErrorURL;
+import de.anomic.crawler.HTTPLoader;
 import de.anomic.crawler.ImporterManager;
 import de.anomic.crawler.IndexingStack;
 import de.anomic.crawler.NoticedURL;
@@ -2703,8 +2704,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
                 // load the seed list
                 try {
                     httpHeader reqHeader = new httpHeader();
-                    reqHeader.put(httpHeader.PRAGMA,"no-cache");
-                    reqHeader.put(httpHeader.CACHE_CONTROL,"no-cache");
+                    reqHeader.put(httpHeader.PRAGMA, "no-cache");
+                    reqHeader.put(httpHeader.CACHE_CONTROL, "no-cache");
+                    reqHeader.put(httpHeader.USER_AGENT, HTTPLoader.yacyUserAgent);
                     
                     url = new yacyURL(seedListFileURL, null);
                     long start = System.currentTimeMillis();
@@ -2722,7 +2724,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
                         yacyCore.log.logInfo("BOOTSTRAP: seed-list URL " + seedListFileURL + " too old (" + (header.age() / 86400000) + " days)");
                     } else {
                         ssc++;
-                        final byte[] content = HttpClient.wget(url.toString(), reqHeader, null, (int) getConfigLong("bootstrapLoadTimeout", 20000));
+                        final byte[] content = HttpClient.wget(url.toString(), reqHeader, (int) getConfigLong("bootstrapLoadTimeout", 20000));
                         seedList = nxTools.strings(content, "UTF-8");
                         enu = seedList.iterator();
                         lc = 0;
@@ -2787,10 +2789,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     public static Map<String, String> loadHashMap(yacyURL url) {
         try {
             // sending request
-            final HashMap<String, String> result = nxTools.table(
-                    HttpClient.wget(url.toString())
-                    , "UTF-8");
-    
+            httpHeader reqHeader = new httpHeader();
+            reqHeader.put(httpHeader.USER_AGENT, HTTPLoader.yacyUserAgent);
+            final HashMap<String, String> result = nxTools.table(HttpClient.wget(url.toString(), reqHeader, 10000), "UTF-8");
             if (result == null) return new HashMap<String, String>();
             return result;
         } catch (Exception e) {

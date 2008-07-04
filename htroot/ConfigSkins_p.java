@@ -33,6 +33,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import de.anomic.crawler.HTTPLoader;
 import de.anomic.data.listManager;
 import de.anomic.http.HttpClient;
 import de.anomic.http.httpHeader;
@@ -88,7 +89,9 @@ public class ConfigSkins_p {
                 ArrayList<String> skinVector;
                 try {
                     yacyURL u = new yacyURL(url, null);
-                    skinVector = nxTools.strings(HttpClient.wget(u.toString()), "UTF-8");
+                    httpHeader reqHeader = new httpHeader();
+                    reqHeader.put(httpHeader.USER_AGENT, HTTPLoader.yacyUserAgent);
+                    skinVector = nxTools.strings(HttpClient.wget(u.toString(), reqHeader, 10000), "UTF-8");
                 } catch (IOException e) {
                     prop.put("status", "1");// unable to get URL
                     prop.put("status_url", url);

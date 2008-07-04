@@ -78,7 +78,8 @@ public final class HTTPLoader {
     private static final String DEFAULT_CHARSET = "ISO-8859-1,utf-8;q=0.7,*;q=0.7";
     private static final long   DEFAULT_MAXFILESIZE = 1024 * 1024 * 10;
     public  static final int    DEFAULT_CRAWLING_RETRY_COUNT = 5;
-    private static final String crawlerUserAgent = "yacybot (" + HttpClient.getSystemOST() +") http://yacy.net/bot.html";
+    public  static final String crawlerUserAgent = "yacybot (" + HttpClient.getSystemOST() +") http://yacy.net/bot.html";
+    public  static final String yacyUserAgent = "yacy (" + HttpClient.getSystemOST() +") yacy.net";
     
     /**
      * The socket timeout that should be used

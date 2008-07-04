@@ -40,13 +40,13 @@
 
 package de.anomic.tools;
 
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
+import de.anomic.crawler.HTTPLoader;
 import de.anomic.http.HttpClient;
+import de.anomic.http.httpHeader;
 import de.anomic.http.httpRemoteProxyConfig;
-import de.anomic.http.httpdProxyHandler;
 import de.anomic.yacy.yacyURL;
 
 public class loaderThreads {
@@ -141,7 +141,9 @@ public class loaderThreads {
 
         public void run() {
             try {
-                page = HttpClient.wget(url.toString(), timeout);
+                httpHeader reqHeader = new httpHeader();
+                reqHeader.put(httpHeader.USER_AGENT, HTTPLoader.crawlerUserAgent);
+                page = HttpClient.wget(url.toString(), reqHeader, timeout);
                 loaded = true;
                 process.feed(page);
                 if (process.status() == loaderCore.STATUS_FAILED) {
@@ -223,6 +225,7 @@ public class loaderThreads {
         }
     }
     
+    /*
     public static void main(String[] args) {
         httpdProxyHandler.setRemoteProxyConfig(httpRemoteProxyConfig.init("192.168.1.122", 3128));
         loaderThreads loader = new loaderThreads();
@@ -232,5 +235,5 @@ public class loaderThreads {
             
         }
     }
-    
+    */
 }

@@ -76,6 +76,7 @@ import java.util.logging.LogManager;
 import java.util.logging.Logger;
 import java.util.zip.GZIPOutputStream;
 
+import de.anomic.crawler.HTTPLoader;
 import de.anomic.htmlFilter.htmlFilterContentTransformer;
 import de.anomic.htmlFilter.htmlFilterTransformer;
 import de.anomic.htmlFilter.htmlFilterWriter;
@@ -113,7 +114,6 @@ public final class httpdProxyHandler {
      * *The* remote Proxy configuration
      */
     private static httpRemoteProxyConfig remoteProxyConfig = null;
-    private static final String proxyUserAgent = "yacy (" + HttpClient.getSystemOST() +") yacy.net";
     private static File htRootPath = null;
 
     //private Properties connectionProperties = null;
@@ -1618,7 +1618,7 @@ public final class httpdProxyHandler {
     private static synchronized String generateUserAgent(httpHeader requestHeaders) {
         userAgentStr.setLength(0);
         
-        String browserUserAgent = (String) requestHeaders.get(httpHeader.USER_AGENT, proxyUserAgent);
+        String browserUserAgent = (String) requestHeaders.get(httpHeader.USER_AGENT, HTTPLoader.yacyUserAgent);
         int pos = browserUserAgent.lastIndexOf(')');
         if (pos >= 0) {
             userAgentStr

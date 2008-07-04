@@ -59,9 +59,11 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import de.anomic.crawler.CrawlEntry;
 import de.anomic.crawler.CrawlProfile;
+import de.anomic.crawler.HTTPLoader;
 import de.anomic.crawler.ZURL;
 import de.anomic.http.JakartaCommonsHttpClient;
 import de.anomic.http.JakartaCommonsHttpResponse;
+import de.anomic.http.httpHeader;
 import de.anomic.http.httpdByteCountInputStream;
 import de.anomic.index.indexURLReference;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -169,7 +171,9 @@ public class SitemapParser extends DefaultHandler {
      */
     public void parse() {
         // download document
-        JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(5000, null, null);
+        httpHeader header = new httpHeader();
+        header.put(httpHeader.USER_AGENT, HTTPLoader.crawlerUserAgent);
+        JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(5000, header, null);
         JakartaCommonsHttpResponse res = null;
         try {
             res = client.GET(siteMapURL.toString());

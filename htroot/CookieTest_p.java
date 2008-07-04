@@ -54,7 +54,7 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.servletProperties;
 
-public class CookieTest {
+public class CookieTest_p {
 
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
       
@@ -69,7 +69,7 @@ public class CookieTest {
         
         final servletProperties prop = new servletProperties();
         if(post.containsKey("act")&&post.get("act").equals("clear_cookie")) {
-         httpHeader outgoingHeader = new httpHeader();
+            httpHeader outgoingHeader = new httpHeader();
         	Iterator<Map.Entry<String, String>> it = header.entrySet().iterator();
         	Map.Entry<String, String> e;
         	while (it.hasNext()) {

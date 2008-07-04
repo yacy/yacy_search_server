@@ -78,62 +78,7 @@ public abstract class HttpClient {
         return JakartaCommonsHttpClient.date2String(date);
     }
 
-    /**
-     * Gets a page (as raw bytes)
-     * 
-     * @param uri
-     * @return
-     */
-    public static byte[] wget(final String uri) {
-        return wget(uri, null, null);
-    }
-
-    /**
-     * Gets a page (as raw bytes) addressing vhost at host in uri
-     * 
-     * @param uri
-     * @param vhost used if host in uri cannot be resolved (yacy tld)
-     * @return
-     */
-    public static byte[] wget(final String uri, final String vhost) {
-        return wget(uri, null, vhost);
-    }
-
-    /**
-     * Gets a page (as raw bytes) aborting after timeout
-     * 
-     * @param uri
-     * @param timeout in milliseconds
-     * @return
-     */
-    public static byte[] wget(final String uri, final int timeout) {
-        return wget(uri, null, null, timeout);
-    }
-
-    /**
-     * Gets a page (as raw bytes) with specified header
-     * 
-     * @param uri
-     * @param header
-     * @return
-     */
-    public static byte[] wget(final String uri, final httpHeader header) {
-        return wget(uri, header, null);
-    }
-
-    /**
-     * Gets a page (as raw bytes) addressing vhost at host in uri with specified header
-     * 
-     * @param uri
-     * @param header
-     * @param vhost
-     * @return
-     * @require uri != null
-     */
-    public static byte[] wget(final String uri, final httpHeader header, final String vhost) {
-        return wget(uri, header, vhost, 10000);
-    }
-
+    
     /**
      * Gets a page (as raw bytes) addressing vhost at host in uri with specified header and timeout
      * 
@@ -143,13 +88,13 @@ public abstract class HttpClient {
      * @param timeout in milliseconds
      * @return
      */
-    public static byte[] wget(final String uri, httpHeader header, final String vhost, final int timeout) {
+    public static byte[] wget(final String uri, final httpHeader header, int timeout) {
+        return wget(uri, header, timeout, null);
+    }
+    public static byte[] wget(final String uri, httpHeader header, final int timeout, final String vhost) {
         assert uri != null : "precondition violated: uri != null";
-        final JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(timeout, null, null);
-
-        // set header
-        header = addHostHeader(header, vhost);
-        client.setHeader(header);
+        addHostHeader(header, vhost);
+        final JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(timeout, header, null);
 
         // do the request
         try {
@@ -168,7 +113,7 @@ public abstract class HttpClient {
      * @param vhost
      * @return
      */
-    private static httpHeader addHostHeader(httpHeader header, final String vhost) {
+    private static void addHostHeader(httpHeader header, final String vhost) {
         if (vhost != null) {
             if (header != null) {
                 header = new httpHeader();
@@ -176,7 +121,6 @@ public abstract class HttpClient {
             // set host-header
             header.add(httpHeader.HOST, vhost);
         }
-        return header;
     }
 
     /**

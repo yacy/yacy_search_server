@@ -61,8 +61,10 @@ import java.util.Properties;
 
 import javax.swing.event.EventListenerList;
 
+import de.anomic.crawler.HTTPLoader;
 import de.anomic.data.htmlTools;
 import de.anomic.http.HttpClient;
+import de.anomic.http.httpHeader;
 import de.anomic.server.serverCharBuffer;
 import de.anomic.server.serverFileUtils;
 import de.anomic.yacy.yacyURL;
@@ -507,7 +509,9 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
     
     public static htmlFilterContentScraper parseResource(yacyURL location) throws IOException {
         // load page
-        byte[] page = HttpClient.wget(location.toString());
+        httpHeader reqHeader = new httpHeader();
+        reqHeader.put(httpHeader.USER_AGENT, HTTPLoader.crawlerUserAgent);
+        byte[] page = HttpClient.wget(location.toString(), reqHeader, 10000);
         if (page == null) throw new IOException("no response from url " + location.toString());
         
         // scrape content

@@ -56,6 +56,7 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Date;
 
+import de.anomic.crawler.HTTPLoader;
 import de.anomic.crawler.RobotsTxt;
 import de.anomic.http.HttpClient;
 import de.anomic.http.JakartaCommonsHttpClient;
@@ -392,6 +393,9 @@ public final class robotsParser{
         
         // if we previously have downloaded this robots.txt then we can set the if-modified-since header
         httpHeader reqHeaders = new httpHeader();
+        
+        // add yacybot user agent
+        reqHeaders.put(httpHeader.USER_AGENT, HTTPLoader.crawlerUserAgent);
         
         // adding referer
         reqHeaders.put(httpHeader.REFERER, (yacyURL.newURL(robotsURL,"/")).toNormalform(true, true));

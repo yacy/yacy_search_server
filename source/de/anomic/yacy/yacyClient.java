@@ -60,6 +60,7 @@ import org.apache.commons.httpclient.methods.multipart.FilePart;
 import org.apache.commons.httpclient.methods.multipart.Part;
 import org.apache.commons.httpclient.methods.multipart.StringPart;
 
+import de.anomic.crawler.HTTPLoader;
 import de.anomic.crawler.ResultURLs;
 import de.anomic.http.HttpClient;
 import de.anomic.http.JakartaCommonsHttpClient;
@@ -263,13 +264,11 @@ public final class yacyClient {
      * @throws IOException
      */
     private static byte[] wput(final String url, String vhost, final List<Part> post, final int timeout, boolean gzipBody) throws IOException {
-        JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(timeout, null, null);
-        client.setProxy(proxyConfig());
-        
-        // address vhost
         httpHeader header = new httpHeader();
-        header.add(httpHeader.HOST, vhost);
-        client.setHeader(header);
+        header.put(httpHeader.USER_AGENT, HTTPLoader.yacyUserAgent);
+        header.put(httpHeader.HOST, vhost);
+        JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(timeout, header, null);
+        client.setProxy(proxyConfig());
         
         JakartaCommonsHttpResponse res = null;
         byte[] content = null;
@@ -1068,6 +1067,8 @@ public final class yacyClient {
             final String wordhashe = indexWord.word2hash("test");
             //System.out.println("permission=" + permissionMessage(args[1]));
             
+            httpHeader reqHeader = new httpHeader();
+            reqHeader.put(httpHeader.USER_AGENT, HTTPLoader.crawlerUserAgent);
             final byte[] content = HttpClient.wget(
                                               "http://" + target.getPublicAddress() + "/yacy/search.html" +
                                                       "?myseed=" + sb.webIndex.seedDB.mySeed().genSeedStr(null) +
@@ -1077,7 +1078,7 @@ public final class yacyClient {
                                                       "&resource=global" +
                                                       "&query=" + wordhashe +
                                                       "&network.unit.name=" + plasmaSwitchboard.getSwitchboard().getConfig("network.unit.name", yacySeed.DFLT_NETWORK_UNIT),
-                                                      target.getHexHash() + ".yacyh");            
+                                                      reqHeader, 10000, target.getHexHash() + ".yacyh");            
             final HashMap<String, String> result = nxTools.table(content, "UTF-8");
             System.out.println("Result=" + result.toString());
         } catch (Exception e) {

@@ -54,6 +54,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import de.anomic.crawler.HTTPLoader;
 import de.anomic.data.listManager;
 import de.anomic.data.translator;
 import de.anomic.http.HttpClient;
@@ -96,7 +97,9 @@ public class ConfigLanguage_p {
                 ArrayList<String> langVector;
                 try{
                     yacyURL u = new yacyURL(url, null);
-                    langVector = nxTools.strings(HttpClient.wget(u.toString()), "UTF-8");
+                    httpHeader reqHeader = new httpHeader();
+                    reqHeader.put(httpHeader.USER_AGENT, HTTPLoader.yacyUserAgent);
+                    langVector = nxTools.strings(HttpClient.wget(u.toString(), reqHeader, 10000), "UTF-8");
                 }catch(IOException e){
                     prop.put("status", "1");//unable to get url
                     prop.put("status_url", url);

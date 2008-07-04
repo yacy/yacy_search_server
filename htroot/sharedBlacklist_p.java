@@ -55,6 +55,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 
+import de.anomic.crawler.HTTPLoader;
 import de.anomic.data.listManager;
 import de.anomic.http.HttpClient;
 import de.anomic.http.httpHeader;
@@ -128,10 +129,11 @@ public class sharedBlacklist_p {
                         httpHeader reqHeader = new httpHeader();
                         reqHeader.put(httpHeader.PRAGMA,"no-cache");
                         reqHeader.put(httpHeader.CACHE_CONTROL,"no-cache");
-
+                        reqHeader.put(httpHeader.USER_AGENT, HTTPLoader.yacyUserAgent);
+                        
                         // get List
                         yacyURL u = new yacyURL(downloadURL, null);
-                        otherBlacklist = nxTools.strings(HttpClient.wget(u.toString(), reqHeader), "UTF-8"); 
+                        otherBlacklist = nxTools.strings(HttpClient.wget(u.toString(), reqHeader, 1000), "UTF-8"); 
                     } catch (Exception e) {
                         prop.put("status", STATUS_PEER_UNKNOWN);
                         prop.put("page", "1");
@@ -147,7 +149,9 @@ public class sharedBlacklist_p {
 
                 try {
                     yacyURL u = new yacyURL(downloadURL, null);
-                    otherBlacklist = nxTools.strings(HttpClient.wget(u.toString()), "UTF-8"); //get List
+                    httpHeader reqHeader = new httpHeader();
+                    reqHeader.put(httpHeader.USER_AGENT, HTTPLoader.yacyUserAgent);
+                    otherBlacklist = nxTools.strings(HttpClient.wget(u.toString(), reqHeader, 10000), "UTF-8"); //get List
                 } catch (Exception e) {
                     prop.put("status", STATUS_URL_PROBLEM);
                     prop.putHTML("status_address",downloadURL);
