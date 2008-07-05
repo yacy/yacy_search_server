@@ -218,7 +218,7 @@ public class Balancer {
         int s = urlFileIndex.size();
         int removedCounter = 0;
         for (String urlhash: urlHashes) {
-            kelondroRow.Entry entry = urlFileIndex.remove(urlhash.getBytes(), false);
+            kelondroRow.Entry entry = urlFileIndex.remove(urlhash.getBytes());
             if (entry != null) removedCounter++;
         }
         if (removedCounter == 0) return 0;
@@ -431,7 +431,7 @@ public class Balancer {
                 hitlist.put(new Integer(domlist.size() * 100 + count++), domhash);
             }
             
-            // now iterate in descending order an fetch that one,
+            // now iterate in descending order and fetch that one,
             // that is acceptable by the minimumDelta constraint
             long delta;
             String maxhash = null;
@@ -491,7 +491,7 @@ public class Balancer {
         long delta = lastAccessDelta(result);
         assert delta >= 0: "delta = " + delta;
         int s = urlFileIndex.size();
-        kelondroRow.Entry rowEntry = urlFileIndex.remove(result.getBytes(), false);
+        kelondroRow.Entry rowEntry = urlFileIndex.remove(result.getBytes());
         assert (rowEntry == null) || (urlFileIndex.size() + 1 == s) : "urlFileIndex.size() = " + urlFileIndex.size() + ", s = " + s + ", result = " + result;
         if (rowEntry == null) {
             serverLog.logSevere("PLASMA BALANCER", "get() found a valid urlhash, but failed to fetch the corresponding url entry - total size = " + size() + ", fileStack.size() = " + urlFileStack.size() + ", ramStack.size() = " + urlRAMStack.size() + ", domainStacks.size() = " + domainStacks.size());
@@ -500,11 +500,12 @@ public class Balancer {
             assert urlFileIndex.size() + 1 == s : "urlFileIndex.size() = " + urlFileIndex.size() + ", s = " + s + ", result = " + result;
         }
         CrawlEntry crawlEntry = new CrawlEntry(rowEntry);
-        long minimumDelta = (crawlEntry.url().isLocal()) ? minimumLocalDelta : minimumGlobalDelta;
-        RobotsTxt.Entry robotsEntry = plasmaSwitchboard.robots.getEntry(crawlEntry.url().getHost());
-        Integer hostDelay = (robotsEntry == null) ? null : robotsEntry.getCrawlDelay();
-        long genericDelta = ((robotsEntry == null) || (hostDelay == null)) ? minimumDelta : Math.max(minimumDelta, hostDelay.intValue() * 1000);
-        genericDelta = Math.min(10000, genericDelta); // prevent that ta robots file can stop our indexer completely
+        long genericDelta = Math.min(
+                              15000,
+                              Math.max(
+                                (crawlEntry.url().isLocal()) ? minimumLocalDelta : minimumGlobalDelta,
+                                plasmaSwitchboard.getSwitchboard().robots.crawlDelay(crawlEntry.url().getHost()) * 1000)
+                            ); // prevent that that robots file can stop our indexer completely
         if (delta < genericDelta) {
             // force a busy waiting here
             // in best case, this should never happen if the balancer works propertly
@@ -540,7 +541,13 @@ public class Balancer {
         while ((urlFileStack != null) && (urlRAMStack.size() <= count) && (urlFileStack.size() > 0)) {
             // flush some entries from disc to ram stack
             try {
+                // one from the top:
                 kelondroRow.Entry t = urlFileStack.pop();
+                if (t == null) break;
+                urlRAMStack.add(new String(t.getColBytes(0)));
+                if (urlFileStack.size() == 0) break;
+                // one from the bottom:
+                t = urlFileStack.pot();
                 if (t == null) break;
                 urlRAMStack.add(new String(t.getColBytes(0)));
             } catch (IOException e) {

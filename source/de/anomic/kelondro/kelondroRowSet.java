@@ -158,12 +158,12 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         return oldentry;
     }
 
-    private synchronized kelondroRow.Entry remove(byte[] a, int start, int length, boolean keepOrder) {
+    private synchronized kelondroRow.Entry remove(byte[] a, int start, int length) {
         int index = find(a, start, length);
         if (index < 0) return null;
         //System.out.println("remove: chunk found at index position (before remove) " + index + ", inset=" + serverLog.arrayList(super.chunkcache, super.rowdef.objectsize() * index, length + 10) + ", searchkey=" + serverLog.arrayList(a, start, length));
         kelondroRow.Entry entry = super.get(index, true);
-        super.removeRow(index, keepOrder);
+        super.removeRow(index, true);
         //System.out.println("remove: chunk found at index position (after  remove) " + index + ", inset=" + serverLog.arrayList(super.chunkcache, super.rowdef.objectsize() * index, length) + ", searchkey=" + serverLog.arrayList(a, start, length));
         int findagainindex = 0;
         //System.out.println("kelondroRowSet.remove");
@@ -171,8 +171,8 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         return entry;
     }
 
-    public kelondroRow.Entry remove(byte[] a, boolean keepOrder) {
-        return remove(a, 0, a.length, keepOrder);
+    public kelondroRow.Entry remove(byte[] a) {
+        return remove(a, 0, a.length);
     }
 
     private int find(byte[] a, int astart, int alength) {
@@ -420,7 +420,7 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         for (int ii = 0; ii < test.length; ii++) d.add(test[ii].getBytes());
         for (int ii = 0; ii < test.length; ii++) d.add(test[ii].getBytes());
         d.sort();
-        d.remove("fuenf".getBytes(), 0, 5, false);
+        d.remove("fuenf".getBytes(), 0, 5);
         Iterator<kelondroRow.Entry> ii = d.rows();
         String s;
         System.out.print("INPUT-ITERATOR: ");
@@ -518,11 +518,11 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
             key = randomHash(random);
             c.put(c.rowdef.newEntry(new byte[][]{key, key}));
             if (i % 1000 == 0) {
-                for (int j = 0; j < delkeys.length; j++) c.remove(delkeys[j], true);
+                for (int j = 0; j < delkeys.length; j++) c.remove(delkeys[j]);
                 c.sort();
             }
         }
-        for (int j = 0; j < delkeys.length; j++) c.remove(delkeys[j], true);
+        for (int j = 0; j < delkeys.length; j++) c.remove(delkeys[j]);
         c.sort();
         random = new Random(0);
         for (int i = 0; i < testsize; i++) {

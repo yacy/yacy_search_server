@@ -462,10 +462,9 @@ public class kelondroEcoTable implements kelondroIndex {
         }
     }
     
-    public synchronized Entry remove(byte[] key, boolean keepOrder) throws IOException {
+    public synchronized Entry remove(byte[] key) throws IOException {
         assert file.size() == index.size() + fail : "file.size() = " + file.size() + ", index.size() = " + index.size();
         assert ((table == null) || (table.size() == index.size()));
-        assert keepOrder == false; // this class cannot keep the order during a remove
         assert key.length == rowdef.primaryKeyLength;
         int i = index.geti(key);
         if (i == -1) return null; // nothing to do
@@ -679,7 +678,7 @@ public class kelondroEcoTable implements kelondroIndex {
                     tt = testTable(testFile, s[i], testcase);
                     // delete by permutation j
                     for (int elt = 0; elt < s[j].length(); elt++) {
-                        tt.remove(kelondroTree.testWord(s[j].charAt(elt)), false);
+                        tt.remove(kelondroTree.testWord(s[j].charAt(elt)));
                         if (kelondroTree.countElements(tt) != tt.size()) {
                             System.out.println("ERROR! wrong size for probe tree " + s[i] + "; probe delete " + s[j] + "; position " + elt);
                         }

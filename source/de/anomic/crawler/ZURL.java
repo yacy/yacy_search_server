@@ -108,7 +108,7 @@ public class ZURL {
     public boolean remove(String hash) {
         if (hash == null) return false;
         try {
-            urlIndex.remove(hash.getBytes(), false);
+            urlIndex.remove(hash.getBytes());
             return true;
         } catch (IOException e) {
             return false;

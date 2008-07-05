@@ -50,11 +50,11 @@ import java.io.Writer;
 import java.net.MalformedURLException;
 
 import de.anomic.crawler.HTTPLoader;
-import de.anomic.data.robotsParser;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterWriter;
 import de.anomic.http.HttpClient;
 import de.anomic.http.httpHeader;
+import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -63,6 +63,7 @@ import de.anomic.yacy.yacyURL;
 public class getpageinfo_p {
     
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
+        plasmaSwitchboard sb = (plasmaSwitchboard) env;
         serverObjects prop = new serverObjects();
         prop.put("sitemap", "");
         prop.put("title", "");
@@ -84,7 +85,7 @@ public class getpageinfo_p {
                 try {
                     yacyURL u = new yacyURL(url, null);
                     httpHeader reqHeader = new httpHeader();
-                    reqHeader.put(httpHeader.USER_AGENT, HTTPLoader.crawlerUserAgent);
+                    reqHeader.put(httpHeader.USER_AGENT, HTTPLoader.yacyUserAgent); // do not set the crawler user agent, because this page was loaded by manual entering of the url
                     byte[] r = HttpClient.wget(u.toString(), reqHeader, 5000);
                     if (r == null) return prop;
                     String contentString=new String(r);
@@ -126,10 +127,10 @@ public class getpageinfo_p {
                     yacyURL theURL = new yacyURL(url, null);
                 	
                 	// determine if crawling of the current URL is allowed
-                	prop.put("robots-allowed", robotsParser.isDisallowed(theURL) ? "0" : "1");
+                	prop.put("robots-allowed", sb.robots.isDisallowed(theURL) ? "0" : "1");
                     
                     // get the sitemap URL of the domain
-                    yacyURL sitemapURL = robotsParser.getSitemapURL(theURL);
+                    yacyURL sitemapURL = sb.robots.getSitemapURL(theURL);
                     prop.putHTML("sitemap", (sitemapURL==null)?"":sitemapURL.toString(), true);
                 } catch (MalformedURLException e) {}
             }

@@ -142,7 +142,6 @@ import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroCache;
 import de.anomic.kelondro.kelondroCachedRecords;
 import de.anomic.kelondro.kelondroMSetTools;
-import de.anomic.kelondro.kelondroMapTable;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.plasma.parser.ParserException;
 import de.anomic.server.serverAbstractSwitch;
@@ -218,12 +217,11 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     public  wikiBoard                      wikiDB;
     public  blogBoard                      blogDB;
     public  blogBoardComments              blogCommentDB;
-    public  static RobotsTxt               robots = null;
+    public  RobotsTxt                      robots;
     public  boolean                        rankingOn;
     public  plasmaRankingDistribution      rankingOwnDistribution;
     public  plasmaRankingDistribution      rankingOtherDistribution;
     public  HashMap<String, Object[]>      outgoingCookies, incomingCookies;
-    public  kelondroMapTable               facilityDB;
     public  plasmaParser                   parser;
     public  volatile long                  proxyLastAccess, localSearchLastAccess, remoteSearchLastAccess;
     public  yacyCore                       yc;
@@ -838,7 +836,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         
         // load the network definition
         overwriteNetworkDefinition(this);
-        
+
         // load values from configs        
         this.plasmaPath   = getConfigPath(PLASMA_PATH, PLASMA_PATH_DEFAULT);
         this.log.logConfig("Plasma DB Path: " + this.plasmaPath.toString());
@@ -948,7 +946,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         if (YBRPath.exists()) {
             plasmaSearchRankingProcess.loadYBR(YBRPath, 15);
         }
-        
         
         // loading the robots.txt db
         this.log.logConfig("Initializing robots.txt DB");
@@ -1632,7 +1629,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         userDB.close();
         bookmarksDB.close();
         messageDB.close();
-        if (facilityDB != null) facilityDB.close();
         crawlStacker.close();
         robots.close();
         parser.close();

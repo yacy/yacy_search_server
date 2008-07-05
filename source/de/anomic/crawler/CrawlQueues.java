@@ -36,7 +36,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import de.anomic.data.robotsParser;
 import de.anomic.kelondro.kelondroFlexWidthArray;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaParser;
@@ -516,7 +515,7 @@ public class CrawlQueues {
             try {
                 // checking robots.txt for http(s) resources
                 this.entry.setStatus("worker-checkingrobots");
-                if ((entry.url().getProtocol().equals("http") || entry.url().getProtocol().equals("https")) && robotsParser.isDisallowed(entry.url())) {
+                if ((entry.url().getProtocol().equals("http") || entry.url().getProtocol().equals("https")) && sb.robots.isDisallowed(entry.url())) {
                     if (log.isFine()) log.logFine("Crawling of URL '" + entry.url().toString() + "' disallowed by robots.txt.");
                     ZURL.Entry eentry = errorURL.newEntry(
                             this.entry,

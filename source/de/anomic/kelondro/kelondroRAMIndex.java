@@ -131,17 +131,16 @@ public class kelondroRAMIndex implements kelondroIndex {
 	    return index0.removeDoubles();
 	}
 	
-    public synchronized kelondroRow.Entry remove(byte[] key, boolean keepOrder) {
-        assert keepOrder == true; // if this is false, the index must be re-ordered so many times which will cause a major CPU usage
-    	finishInitialization();
+    public synchronized kelondroRow.Entry remove(byte[] key) {
+        finishInitialization();
         // if the new entry is within the initialization part, just delete it
-        kelondroRow.Entry indexentry = index0.remove(key, keepOrder);
+        kelondroRow.Entry indexentry = index0.remove(key);
         if (indexentry != null) {
             assert index0.get(key) == null; // check if remove worked
             return indexentry;
         }
         // else remove it from the index1
-        kelondroRow.Entry removed = index1.remove(key, keepOrder);
+        kelondroRow.Entry removed = index1.remove(key);
         assert index1.get(key) == null : "removed " + ((removed == null) ? " is null" : " is not null") + ", and index entry still exists"; // check if remove worked
         return removed;
     }

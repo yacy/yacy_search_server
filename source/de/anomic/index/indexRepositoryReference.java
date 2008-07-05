@@ -142,7 +142,7 @@ public final class indexRepositoryReference {
     public synchronized boolean remove(String urlHash) {
         if (urlHash == null) return false;
         try {
-            kelondroRow.Entry r = urlIndexFile.remove(urlHash.getBytes(), false);
+            kelondroRow.Entry r = urlIndexFile.remove(urlHash.getBytes());
             return r != null;
         } catch (IOException e) {
             return false;

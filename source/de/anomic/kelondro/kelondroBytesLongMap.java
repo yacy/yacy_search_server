@@ -100,7 +100,7 @@ public class kelondroBytesLongMap {
     
     public synchronized long removel(byte[] key) throws IOException {
         assert (key != null);
-        kelondroRow.Entry indexentry = index.remove(key, true); // keeping the order will prevent multiple re-sorts
+        kelondroRow.Entry indexentry = index.remove(key);
         if (indexentry == null) return -1;
         return indexentry.getColLong(1);
     }

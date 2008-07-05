@@ -69,7 +69,7 @@ public interface kelondroIndex {
     public boolean addUnique(kelondroRow.Entry row) throws IOException; // no double-check
     public int addUniqueMultiple(List<kelondroRow.Entry> rows) throws IOException; // no double-check
     public ArrayList<kelondroRowCollection> removeDoubles() throws IOException; // removes all elements that are double (to be used after all addUnique)
-    public kelondroRow.Entry remove(byte[] key, boolean keepOrder) throws IOException;
+    public kelondroRow.Entry remove(byte[] key) throws IOException;
     public kelondroRow.Entry removeOne() throws IOException;
     public kelondroCloneableIterator<byte[]> keys(boolean up, byte[] firstKey) throws IOException; // iterates only the key
     public kelondroCloneableIterator<kelondroRow.Entry> rows(boolean up, byte[] firstKey) throws IOException; // iterates the whole row

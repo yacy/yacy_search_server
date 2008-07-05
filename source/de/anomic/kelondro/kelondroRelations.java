@@ -148,7 +148,7 @@ public class kelondroRelations {
     public byte[] removeRelation(String name, byte[] key) throws IOException {
         kelondroIndex table = getRelation(name);
         if (table == null) return null;
-        kelondroRow.Entry entry = table.remove(key, false);
+        kelondroRow.Entry entry = table.remove(key);
         if (entry == null) return null;
         return entry.getColBytes(3);
     }

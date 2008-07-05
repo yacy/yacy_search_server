@@ -56,7 +56,6 @@ import java.util.regex.PatternSyntaxException;
 
 import de.anomic.crawler.HTTPLoader;
 import de.anomic.http.HttpClient;
-import de.anomic.http.JakartaCommonsHttpClient;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCodings;

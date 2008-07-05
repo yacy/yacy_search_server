@@ -632,8 +632,8 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
     }
     
     // Removes the mapping for this key from this map if present (optional operation).
-    public kelondroRow.Entry remove(byte[] key, boolean keepOrder) throws IOException {
-        // keepOrder cannot have any effect: the order inside the database file cannot be maintained, but iteration over objects will always maintain the object order
+    public kelondroRow.Entry remove(byte[] key) throws IOException {
+        // the order inside the database file cannot be maintained, but iteration over objects will always maintain the object order
         // therefore keepOrder should be true, because the effect is always given, while the data structure does not maintain order
         // delete from database
         synchronized(writeSearchObj) {
@@ -1106,7 +1106,7 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
         
         public void remove() {
             if (lastKey != null) try {
-                kelondroTree.this.remove(lastKey, true);
+                kelondroTree.this.remove(lastKey);
             } catch (IOException e) {
                 // do nothing
             }
@@ -1178,7 +1178,7 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
         
         public void remove() {
             if (lastKey != null) try {
-                kelondroTree.this.remove(lastKey, true);
+                kelondroTree.this.remove(lastKey);
             } catch (IOException e) {
                 // do nothing
             }
@@ -1329,9 +1329,9 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
                     fm.put("abc3".getBytes(), dummy); fm.put("bcd3".getBytes(), dummy);
                     fm.put("def3".getBytes(), dummy); fm.put("bab3".getBytes(), dummy);
                     fm.print();
-                    fm.remove("def1".getBytes(), true); fm.remove("bab1".getBytes(), true);
-                    fm.remove("abc2".getBytes(), true); fm.remove("bcd2".getBytes(), true);
-                    fm.remove("def2".getBytes(), true); fm.remove("bab2".getBytes(), true);
+                    fm.remove("def1".getBytes()); fm.remove("bab1".getBytes());
+                    fm.remove("abc2".getBytes()); fm.remove("bcd2".getBytes());
+                    fm.remove("def2".getBytes()); fm.remove("bab2".getBytes());
                     fm.put("def1".getBytes(), dummy); fm.put("bab1".getBytes(), dummy);
                     fm.put("abc2".getBytes(), dummy); fm.put("bcd2".getBytes(), dummy);
                     fm.put("def2".getBytes(), dummy); fm.put("bab2".getBytes(), dummy);
@@ -1349,7 +1349,7 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
 	    } else if (args.length == 3) {
 		if (args[0].equals("-d")) {
 		    kelondroTree fm = new kelondroTree(new File(args[1]), true, 10, new kelondroRow("byte[] a-4, byte[] b-4", kelondroNaturalOrder.naturalOrder, 0));
-		    fm.remove(args[2].getBytes(), true);
+		    fm.remove(args[2].getBytes());
 		    fm.close();
 		} else if (args[0].equals("-i")) {
 		    kelondroTree fm = new kelondroTree(new File(args[1]), true, 10, new kelondroRow("byte[] a-4, byte[] b-4", kelondroNaturalOrder.naturalOrder, 0));
@@ -1474,7 +1474,7 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
                         // delete one
                         c = d.charAt((int) (System.currentTimeMillis() % d.length()));
                         b = testWord(c);
-                        tt.remove(b, true);
+                        tt.remove(b);
                         d = d.substring(0, d.indexOf(c)) + d.substring(d.indexOf(c) + 1);
                         t = t + c;
                         System.out.println("removed " + new String(b));
@@ -1528,8 +1528,8 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
             b = testWord('C'); tt.put(b, b); //tt.print();
             b = testWord('D'); tt.put(b, b); //tt.print();
             b = testWord('A'); tt.put(b, b); //tt.print();
-            b = testWord('D'); tt.remove(b, true); //tt.print();
-            b = testWord('B'); tt.remove(b, true); //tt.print();
+            b = testWord('D'); tt.remove(b); //tt.print();
+            b = testWord('B'); tt.remove(b); //tt.print();
             b = testWord('B'); tt.put(b, b); //tt.print();
             b = testWord('D'); tt.put(b, b);
             b = testWord('E'); tt.put(b, b);
@@ -1618,7 +1618,7 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
                     //tt.print();
                     // delete by permutation j
                     for (int elt = 0; elt < s[j].length(); elt++) {
-                        tt.remove(testWord(s[j].charAt(elt)), true);
+                        tt.remove(testWord(s[j].charAt(elt)));
                         //tt.print();
                         if (countElements(tt) != tt.size()) {
                             System.out.println("ERROR! wrong size for probe tree " + s[i] + "; probe delete " + s[j] + "; position " + elt);

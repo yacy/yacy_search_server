@@ -276,7 +276,7 @@ public class kelondroCache implements kelondroIndex {
         
         // remove entry from miss- and hit-cache
         if (readMissCache != null) {
-            if (readMissCache.remove(key, true) != null) {
+            if (readMissCache.remove(key) != null) {
                 this.hasnotHit++;
                 // the entry does not exist before
                 index.put(row); // write to backend
@@ -328,7 +328,7 @@ public class kelondroCache implements kelondroIndex {
         
         // remove entry from miss- and hit-cache
         if (readMissCache != null) {
-            this.readMissCache.remove(key, true);
+            this.readMissCache.remove(key);
             this.hasnotDelete++;
             // the entry does not exist before
             boolean added = index.addUnique(row); // write to backend
@@ -362,7 +362,7 @@ public class kelondroCache implements kelondroIndex {
         
         // remove entry from miss- and hit-cache
         if (readMissCache != null) {
-            this.readMissCache.remove(key, true);
+            this.readMissCache.remove(key);
             this.hasnotDelete++;
         }
 
@@ -388,7 +388,7 @@ public class kelondroCache implements kelondroIndex {
         // todo: remove reported entries from the cache!!!
     }
     
-    public synchronized Entry remove(byte[] key, boolean keepOrder) throws IOException {
+    public synchronized Entry remove(byte[] key) throws IOException {
         checkMissSpace();
         
         // add entry to miss-cache
@@ -405,7 +405,7 @@ public class kelondroCache implements kelondroIndex {
         
         // remove entry from hit-cache
         if (readHitCache != null) {
-            Entry entry = readHitCache.remove(key, true);
+            Entry entry = readHitCache.remove(key);
             if (entry == null) {
                 this.readMiss++;
             } else {
@@ -414,7 +414,7 @@ public class kelondroCache implements kelondroIndex {
             }
         }
         
-        return index.remove(key, false);
+        return index.remove(key);
     }
 
     public synchronized Entry removeOne() throws IOException {
@@ -429,7 +429,7 @@ public class kelondroCache implements kelondroIndex {
             if (dummy == null) this.hasnotUnique++; else this.hasnotDouble++;
         }
         if (readHitCache != null) {
-            kelondroRow.Entry dummy = readHitCache.remove(key, true);
+            kelondroRow.Entry dummy = readHitCache.remove(key);
             if (dummy != null) this.cacheDelete++;
         }
         return entry;

@@ -355,10 +355,10 @@ public class kelondroSplitTable implements kelondroIndex {
         return report;
     }
     
-    public synchronized kelondroRow.Entry remove(byte[] key, boolean keepOrder) throws IOException {
+    public synchronized kelondroRow.Entry remove(byte[] key) throws IOException {
         kelondroIndex table = keeperOf(key);
         if (table == null) return null;
-        return table.remove(key, keepOrder);
+        return table.remove(key);
     }
     
     public synchronized kelondroRow.Entry removeOne() throws IOException {

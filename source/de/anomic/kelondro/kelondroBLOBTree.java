@@ -324,7 +324,7 @@ public class kelondroBLOBTree implements kelondroBLOB {
         int recpos = 0;
         byte[] k;
         while (index.get(k = elementKey(key, recpos)) != null) {
-            index.remove(k, false);
+            index.remove(k);
             buffer.remove(k);
             recpos++;
         }

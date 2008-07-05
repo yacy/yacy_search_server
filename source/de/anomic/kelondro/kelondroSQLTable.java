@@ -186,7 +186,7 @@ public class kelondroSQLTable implements kelondroIndex {
     public kelondroRow.Entry put(kelondroRow.Entry row) throws IOException {
         try {
             
-            kelondroRow.Entry oldEntry = remove(row.getColBytes(0), false);            
+            kelondroRow.Entry oldEntry = remove(row.getColBytes(0));            
             
             String sqlQuery = new String
             (
@@ -223,7 +223,7 @@ public class kelondroSQLTable implements kelondroIndex {
         throw new UnsupportedOperationException();
     }
     
-    public kelondroRow.Entry remove(byte[] key, boolean keepOrder) throws IOException {
+    public kelondroRow.Entry remove(byte[] key) throws IOException {
         try {
             
             kelondroRow.Entry entry =  this.get(key);

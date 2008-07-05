@@ -351,7 +351,7 @@ public final class CrawlStacker extends Thread {
         synchronized (this.urlEntryHashCache) {
             urlHash = this.urlEntryHashCache.removeFirst();
             if (urlHash == null) throw new IOException("urlHash is null");
-            entry = this.urlEntryCache.remove(urlHash.getBytes(), true);
+            entry = this.urlEntryCache.remove(urlHash.getBytes());
         }
 
         if ((urlHash == null) || (entry == null)) return null;

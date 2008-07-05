@@ -88,7 +88,7 @@ public class yacyNewsDB {
     }
 
     public void remove(String id) throws IOException {
-        news.remove(id.getBytes(), false);
+        news.remove(id.getBytes());
     }
 
     public synchronized yacyNewsRecord put(yacyNewsRecord record) throws IOException {

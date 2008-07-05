@@ -115,7 +115,7 @@ public class IndexControlRWIs_p {
                     e.printStackTrace();
                 }
                 try {
-                    plasmaSwitchboard.robots.clear();
+                    sb.robots.clear();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
