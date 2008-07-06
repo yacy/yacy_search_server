@@ -46,18 +46,22 @@ package de.anomic.server.logging;
 
 import java.io.File;
 import java.io.FilenameFilter;
-import java.net.URI;
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.ArrayList;
 import java.util.logging.Handler;
 import java.util.logging.LogManager;
 import java.util.logging.LogRecord;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 import de.anomic.plasma.plasmaParser;
 import de.anomic.server.logging.logParsers.LogParser;
+import de.anomic.tools.ListDirs;
 
 public class LogalizerHandler extends Handler {
 
@@ -80,17 +84,17 @@ public class LogalizerHandler extends Handler {
             String packageURI = plasmaParser.class.getResource("/"+logParserPackage.replace('.','/')).toString();
             if (debug) System.out.println("LogParser directory is " + packageURI);
             
-            File parserDir = new File(new URI(packageURI));
-            //System.out.println(parserDir.toString());
-            String [] parserDirFiles = parserDir.list(parserNameFilter);
-            if(parserDirFiles == null && debug) {
-                System.err.println("Can't find any parsers in "+parserDir.getAbsolutePath());
-                parserDirFiles = new String[0];
+            ListDirs parserDir = new ListDirs(packageURI);
+            ArrayList<String> parserDirFiles = parserDir.listFiles(".*\\.class");
+            if(parserDirFiles.size() == 0 && debug) {
+                System.out.println("Can't find any parsers in "+parserDir.toString());
             }
-            //System.out.println(parserDirFiles.length);
-            for (int i=0; i<parserDirFiles.length; i++) {
-                String tmp = parserDirFiles[i].substring(0,parserDirFiles[i].indexOf(".class"));
-                Class<?> tempClass = Class.forName(logParserPackage+"."+tmp);
+	    for(String filename: parserDirFiles) {
+		final Pattern patternGetClassName = Pattern.compile(".*/([^/]+)\\.class");
+		Matcher matcherClassName = patternGetClassName.matcher(filename);
+		matcherClassName.find();
+                String className = matcherClassName.group(1);
+                Class<?> tempClass = Class.forName(logParserPackage+"."+className);
                 if (tempClass.isInterface()) {
                     if (debug) System.out.println(tempClass.getName() + " is an Interface");
                 } else {
@@ -114,6 +118,8 @@ public class LogalizerHandler extends Handler {
         } catch (InstantiationException e) {
             e.printStackTrace();
         } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
             e.printStackTrace();
         } catch (URISyntaxException e) {
             e.printStackTrace();

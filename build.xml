@@ -929,6 +929,7 @@
         <pathelement location="${htroot}"/>
         <pathelement location="${lib}/tar.jar" />
         <pathelement location="${libx}" />
+        <fileset dir="${lib}" includes="**/*.jar" />
         <fileset dir="${libx}" includes="**/*.jar" />
       </classpath>
       <arg line="-stop"/>

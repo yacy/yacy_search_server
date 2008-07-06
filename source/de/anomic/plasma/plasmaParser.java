@@ -38,6 +38,7 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -49,6 +50,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 import de.anomic.crawler.ErrorURL;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
@@ -63,6 +66,7 @@ import de.anomic.plasma.parser.ParserInfo;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyURL;
+import de.anomic.tools.ListDirs;
 
 public final class plasmaParser {
     public static final String PARSER_MODE_PROXY         = "PROXY";
@@ -438,87 +442,83 @@ public final class plasmaParser {
             serverLog.logInfo("PARSER","Searching for additional content parsers in package " + plasmaParserPkgName);
             
             // getting an uri to the parser subpackage
-            String packageURI = plasmaParser.class.getResource("/"+plasmaParserPkgName.replace('.','/')).toString();
+            String packageURI = plasmaParser.class.getResource("/"+plasmaParserPkgName.replace('.','/')).toString() + "/";
             serverLog.logFine("PARSER", "Parser directory is " + packageURI);
-            
-            // open the parser directory
-            File parserDir = new File(new URI(packageURI));
-            if ((parserDir == null) || (!parserDir.exists()) || (!parserDir.isDirectory())) return;
             
             /*
              * loop through all subdirectories and test if we can
              * find an additional parser class
              */
-            File[] parserDirectories = parserDir.listFiles(parserDirectoryFilter);
-            if (parserDirectories == null) return;
-            
-            for (int parserDirNr=0; parserDirNr< parserDirectories.length; parserDirNr++) {
-                File currentDir = parserDirectories[parserDirNr];
-                serverLog.logFine("PARSER", "Searching in directory " + currentDir.toString());
+	    ListDirs parserDir = new ListDirs(packageURI);
+            ArrayList<String> parserClasses = parserDir.listFiles(".*/parser/[^/]+/[^/]+Parser\\.class");
+	    if (parserClasses == null) return;
+
+	    final Pattern patternGetClassName = Pattern.compile(".*/([^/]+)\\.class");
+	    final Pattern patternGetFullClassName = Pattern.compile(".*(/[^/]+/[^/]+)\\.class");
                 
-                String[] parserClasses = currentDir.list(parserFileNameFilter);
-                if (parserClasses == null) continue;
-                
-                for (int parserNr=0; parserNr<parserClasses.length; parserNr++) {
-                    serverLog.logFine("PARSER", "Testing parser class " + parserClasses[parserNr]);
-                    String className = parserClasses[parserNr].substring(0,parserClasses[parserNr].indexOf(".class"));
-                    String fullClassName = plasmaParserPkgName + "." + currentDir.getName() + "." + className;
-                    try {
-                        // trying to load the parser class by its name
-                        Class<?> parserClass = Class.forName(fullClassName);
-                        Object theParser0 = parserClass.newInstance();
-                        if (!(theParser0 instanceof Parser)) continue;
-                        Parser theParser = (Parser) theParser0;
-                        
-                        // testing if all needed libx libraries are available
-                        String[] neededLibx = theParser.getLibxDependences();
-                        StringBuffer neededLibxBuf = new StringBuffer();
-                        if (neededLibx != null) {
-                            for (int libxId=0; libxId < neededLibx.length; libxId++) {
-                                if (javaClassPath.indexOf(neededLibx[libxId]) == -1) {
-                                    throw new Exception("Missing dependency detected: '" + neededLibx[libxId] + "'.");
-                                }
-                                neededLibxBuf.append(neededLibx[libxId])
-                                             .append(",");
-                            }
-                            if (neededLibxBuf.length()>0) neededLibxBuf.deleteCharAt(neededLibxBuf.length()-1);
-                        }
-                        
-                        // loading the list of mime-types that are supported by this parser class
-                        Hashtable<String, String> supportedMimeTypes = theParser.getSupportedMimeTypes();
-                        
-                        // creating a parser info object
-                        ParserInfo parserInfo = new ParserInfo();
-                        parserInfo.parserClass = parserClass;
-                        parserInfo.parserClassName = fullClassName;
-                        parserInfo.libxDependencies = neededLibx;
-                        parserInfo.supportedMimeTypes = supportedMimeTypes;
-                        parserInfo.parserVersionNr = (theParser).getVersion();
-                        parserInfo.parserName = (theParser).getName();
-                        
-                        Iterator<String> mimeTypeIterator = supportedMimeTypes.keySet().iterator();
-                        while (mimeTypeIterator.hasNext()) {
-                            String mimeType = mimeTypeIterator.next();
-                            availableParserList.put(mimeType, parserInfo);
-                            serverLog.logInfo("PARSER", "Found functional parser for mimeType '" + mimeType + "'." +
-                                              "\n\tName:    " + parserInfo.parserName + 
-                                              "\n\tVersion: " + parserInfo.parserVersionNr + 
-                                              "\n\tClass:   " + parserInfo.parserClassName +
-                                              ((neededLibxBuf.length()>0)?"\n\tDependencies: " + neededLibxBuf.toString():""));
-                        }
-                        
-                    } catch (Exception e) { /* we can ignore this for the moment */
-                        serverLog.logWarning("PARSER", "Parser '" + className + "' doesn't work correctly and will be ignored.\n [" + e.getClass().getName() + "]: " + e.getMessage());
-                        e.printStackTrace();
-                    } catch (Error e) { /* we can ignore this for the moment */
-                        serverLog.logWarning("PARSER", "Parser '" + className + "' doesn't work correctly and will be ignored.\n [" + e.getClass().getName() + "]: " + e.getMessage());
-                        e.printStackTrace();
-                    }
-                }
-            }
+            for (String parserClassFile: parserClasses) {
+		serverLog.logFine("PARSER", "Testing parser class " + parserClassFile);
+		Matcher matcherClassName = patternGetClassName.matcher(parserClassFile);
+		matcherClassName.find();
+		String className = matcherClassName.group(1);
+		Matcher matcherFullClassName = patternGetFullClassName.matcher(parserClassFile);
+		matcherFullClassName.find();
+		String fullClassName = plasmaParserPkgName + matcherFullClassName.group(1).replace("/", ".");
+		try {
+		    // trying to load the parser class by its name
+		    Class<?> parserClass = Class.forName(fullClassName);
+		    Object theParser0 = parserClass.newInstance();
+		    if (!(theParser0 instanceof Parser)) continue;
+		    Parser theParser = (Parser) theParser0;
+		    
+		    // testing if all needed libx libraries are available
+		    String[] neededLibx = theParser.getLibxDependences();
+		    StringBuffer neededLibxBuf = new StringBuffer();
+		    if (neededLibx != null) {
+			for (int libxId=0; libxId < neededLibx.length; libxId++) {
+			    if (javaClassPath.indexOf(neededLibx[libxId]) == -1) {
+				throw new Exception("Missing dependency detected: '" + neededLibx[libxId] + "'.");
+			    }
+			    neededLibxBuf.append(neededLibx[libxId])
+					 .append(",");
+			}
+			if (neededLibxBuf.length()>0) neededLibxBuf.deleteCharAt(neededLibxBuf.length()-1);
+		    }
+		    
+		    // loading the list of mime-types that are supported by this parser class
+		    Hashtable<String, String> supportedMimeTypes = theParser.getSupportedMimeTypes();
+		    
+		    // creating a parser info object
+		    ParserInfo parserInfo = new ParserInfo();
+		    parserInfo.parserClass = parserClass;
+		    parserInfo.parserClassName = fullClassName;
+		    parserInfo.libxDependencies = neededLibx;
+		    parserInfo.supportedMimeTypes = supportedMimeTypes;
+		    parserInfo.parserVersionNr = (theParser).getVersion();
+		    parserInfo.parserName = (theParser).getName();
+		    
+		    Iterator<String> mimeTypeIterator = supportedMimeTypes.keySet().iterator();
+		    while (mimeTypeIterator.hasNext()) {
+			String mimeType = mimeTypeIterator.next();
+			availableParserList.put(mimeType, parserInfo);
+			serverLog.logInfo("PARSER", "Found functional parser for mimeType '" + mimeType + "'." +
+					  "\n\tName:    " + parserInfo.parserName + 
+					  "\n\tVersion: " + parserInfo.parserVersionNr + 
+					  "\n\tClass:   " + parserInfo.parserClassName +
+					  ((neededLibxBuf.length()>0)?"\n\tDependencies: " + neededLibxBuf.toString():""));
+		    }
+		    
+		} catch (Exception e) { /* we can ignore this for the moment */
+		    serverLog.logWarning("PARSER", "Parser '" + className + "' doesn't work correctly and will be ignored.\n [" + e.getClass().getName() + "]: " + e.getMessage());
+		    e.printStackTrace();
+		} catch (Error e) { /* we can ignore this for the moment */
+		    serverLog.logWarning("PARSER", "Parser '" + className + "' doesn't work correctly and will be ignored.\n [" + e.getClass().getName() + "]: " + e.getMessage());
+		    e.printStackTrace();
+		}
+	    }
             
         } catch (Exception e) {
-            serverLog.logSevere("PARSER", "Unable to determine all installed parsers. " + e.getMessage());
+            serverLog.logSevere("PARSER", "Unable to determine all installed parsers. " + e.toString());
         }
     }
     
