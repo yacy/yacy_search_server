@@ -42,8 +42,11 @@
 
 package de.anomic.plasma;
 
+import de.anomic.kelondro.kelondroBase64Order;
+import de.anomic.server.serverCodings;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySeed;
+import de.anomic.yacy.yacySeedDB;
 
 public class plasmaDHTFlush extends Thread {
         private yacySeed seed = null;
@@ -178,7 +181,11 @@ public class plasmaDHTFlush extends Thread {
                     if (nothingSelected(newDHTChunk)) {
                         if (this.sb.webIndex.size() > 0 && this.delete) {
                             // if there are still words in the index we try it again now
-                            this.startPointHash = "AAAAAAAAAAAA";
+                        	if((iteration % 10L) == 0) { // seems to be blocked, try another startpoint
+                        		this.startPointHash = kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(Long.toString(System.currentTimeMillis()))).substring(2, 2 + yacySeedDB.commonHashLength);
+                        	} else {
+                        		this.startPointHash = "AAAAAAAAAAAA";
+                        	}   
                         } else {                            
                             // otherwise we could end transfer now
                             if (this.log.isFine()) this.log.logFine("No index available for index transfer, hash start-point " + this.startPointHash);
