@@ -294,9 +294,10 @@ public class kelondroCollectionIndex {
             boolean fullCache = serverMemory.request(necessaryRAM4fullTable, false);
             if (fullCache) {
                 theindex = new kelondroEcoTable(f, indexRowdef, kelondroEcoTable.tailCacheUsageAuto, EcoFSBufferSize, initialSpace);
-                if (!((kelondroEcoTable) theindex).usesFullCopy()) theindex = new kelondroCache(theindex);
+                //if (!((kelondroEcoTable) theindex).usesFullCopy()) theindex = new kelondroCache(theindex);
             } else {
-                theindex = new kelondroCache(new kelondroEcoTable(f, indexRowdef, kelondroEcoTable.tailCacheDenyUsage, EcoFSBufferSize, initialSpace));
+                //theindex = new kelondroCache(new kelondroEcoTable(f, indexRowdef, kelondroEcoTable.tailCacheDenyUsage, EcoFSBufferSize, initialSpace));
+                theindex = new kelondroEcoTable(f, indexRowdef, kelondroEcoTable.tailCacheDenyUsage, EcoFSBufferSize, initialSpace);
             }
         }
         return theindex;

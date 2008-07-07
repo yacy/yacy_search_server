@@ -225,7 +225,7 @@ public class yacysearchitem {
                     ((yacyURL.probablyRootURL(result.hash())) ? ", probablyRootURL" : "") + 
                     (((wordURL = yacyURL.probablyWordURL(result.hash(), query[0])) != null) ? ", probablyWordURL=" + wordURL.toNormalform(false, true) : ""));
             plasmaSnippetCache.TextSnippet snippet = result.textSnippet();
-            prop.put("content_snippet", (snippet == null) ? "(snippet not found)" : snippet.getLineMarked(theQuery.queryHashes));
+            prop.put("content_snippet", (snippet == null) ? "" : snippet.getLineMarked(theQuery.queryHashes));
             serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(theQuery.id(true), plasmaSearchEvent.FINALIZATION + "-" + item, 0, 0));
             
             return prop;

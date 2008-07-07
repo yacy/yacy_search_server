@@ -94,7 +94,7 @@ public class yacysearch {
         
         // get query
         String querystring = (post == null) ? "" : post.get("query", post.get("search", "")).trim(); // SRU compliance
-        boolean fetchSnippets = (post == null || post.get("verify", "true").equals("true"));
+        boolean fetchSnippets = (post != null && post.get("verify", "false").equals("true"));
         final serverObjects prop = new serverObjects();
         
         boolean rss = (post == null) ? false : post.get("rss", "false").equals("true");
@@ -391,7 +391,7 @@ public class yacysearch {
             }
 
             if (prop == null || prop.size() == 0) {
-                if (post == null || post.get("search", "").length() < 3) {
+                if (post == null || post.get("query", post.get("search", "")).length() < 3) {
                     prop.put("num-results", "2"); // no results - at least 3 chars
                 } else {
                     prop.put("num-results", "1"); // no results
@@ -416,7 +416,6 @@ public class yacysearch {
         prop.put("input_input", input);
         prop.put("input_display", display);
         prop.putHTML("input_former", querystring);
-        //prop.put("former", post.get("search", ""));
         prop.put("input_count", itemsPerPage);
         prop.put("input_offset", offset);
         prop.put("input_resource", global ? "global" : "local");
@@ -446,8 +445,8 @@ public class yacysearch {
         return
         "<a href=\"yacysearch.html?display=" + display +
         "&amp;search=" + theQuery.queryString(true) +
-        "&amp;count="+ theQuery.displayResults() +
-        "&amp;offset=" + (page * theQuery.displayResults()) +
+        "&amp;maximumRecords="+ theQuery.displayResults() +
+        "&amp;startRecord=" + (page * theQuery.displayResults()) +
         "&amp;resource=" + ((theQuery.isLocal()) ? "local" : "global") +
         "&amp;urlmaskfilter=" + theQuery.urlMask +
         "&amp;prefermaskfilter=" + theQuery.prefer +

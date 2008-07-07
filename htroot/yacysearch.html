@@ -25,12 +25,13 @@
 	::
     <form class="search small" action="yacysearch.html" method="get" accept-charset="UTF-8">
       <fieldset class="yacys">
-        <input id="search" name="search" type="text" size="50" maxlength="80" value="#[former]#" onclick="document.getElementById('Enter').value = 'Search'" />
+        <input id="search" name="query" type="text" size="50" maxlength="80" value="#[former]#" onclick="document.getElementById('Enter').value = 'Search'" />
         <input id="Enter" type="submit" name="Enter" value="Search" />
         <input type="hidden" name="contentdom" value="#[contentdom]#" />
         <input type="hidden" name="former" value="#[former]#" />
-        <input type="hidden" name="count" value="#[count]#" />
-        <input type="hidden" name="offset" value="#[offset]#" />
+        <input type="hidden" name="verify" value="#[verify]#" />
+        <input type="hidden" name="maximumRecords" value="#[count]#" />
+        <input type="hidden" name="startRecord" value="#[offset]#" />
         <input type="hidden" name="resource" value="#[resource]#" />
         <input type="hidden" name="urlmaskfilter" value="#[urlmaskfilter]#" />
         <input type="hidden" name="prefermaskfilter" value="#[prefermaskfilter]#" />
@@ -47,7 +48,7 @@
       <p class="yacylogo"><a href="#[promoteSearchPageGreeting.homepage]#" class="yacylogo"><img src="#[promoteSearchPageGreeting.smallImage]#" alt="yacy" /></a></p>
       <h2>#[promoteSearchPageGreeting]#</h2>
       <fieldset class="yacys">
-              <input id="search" name="search" type="text" size="50" maxlength="80" value="#[former]#" onclick="document.getElementById('Enter').value = 'Search'" />
+              <input id="search" name="query" type="text" size="50" maxlength="80" value="#[former]#" onclick="document.getElementById('Enter').value = 'Search'" />
               <input id="Enter" type="submit" name="Enter" value="Search" /> &nbsp;
               <a href="index.html?display=#[display]#&amp;input=#[input]#&amp;searchoptions=1&amp;count=#[count]#&amp;resource=#[resource]#&amp;time=#[time]#&amp;urlmaskfilter=#[urlmaskfilter]#&amp;prefermaskfilter=#[prefermaskfilter]#&amp;cat=#[cat]#&amp;constraint=#[constraint]#&amp;contentdom=#[contentdom]#&amp;former=#[former]#">more options</a>
           <div class="yacysearch">
@@ -63,8 +64,9 @@
               <label for="appl">Applications</label>
            </div>
         <input type="hidden" name="former" value="#[former]#" />
-        <input type="hidden" name="count" value="#[count]#" />
-        <input type="hidden" name="offset" value="#[offset]#" />
+        <input type="hidden" name="maximumRecords" value="#[count]#" />
+        <input type="hidden" name="startRecord" value="#[offset]#" />
+        <input type="hidden" name="verify" value="#[verify]#" />
         <input type="hidden" name="resource" value="#[resource]#" />
         <input type="hidden" name="urlmaskfilter" value="#[urlmaskfilter]#" />
         <input type="hidden" name="prefermaskfilter" value="#[prefermaskfilter]#" />
