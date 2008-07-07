@@ -47,7 +47,7 @@ public class opensearchdescriptionReader extends DefaultHandler {
     
     // statics for item generation and automatic categorization
     static int guidcount = 0;
-    private static final String recordTag = "OpenSearchDescription";
+    //private static final String recordTag = "OpenSearchDescription";
     private static final String[] tagsDef = new String[]{
         "ShortName",
         "LongName",
@@ -94,7 +94,7 @@ public class opensearchdescriptionReader extends DefaultHandler {
     }
     
     // class variables
-    private Item channel, item;
+    private Item channel;
     private StringBuffer buffer;
     private boolean parsingChannel;
     private String imageURL;
@@ -106,7 +106,6 @@ public class opensearchdescriptionReader extends DefaultHandler {
         itemsGUID = new ArrayList<String>();
         items = new HashMap<String, Item>();
         buffer = new StringBuffer();
-        item = null;
         channel = null;
         parsingChannel = false;
     }

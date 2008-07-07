@@ -30,14 +30,11 @@ package de.anomic.plasma;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileFilter;
 import java.io.FileInputStream;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -127,21 +124,25 @@ public final class plasmaParser {
      * which seems to be additional content parsers.
      * Currently the filenames of all content parser classes must end with <code>Parser.class</code> 
      */
+    /*
     private static final FilenameFilter parserFileNameFilter = new FilenameFilter() {
         public boolean accept(File dir, String name) {
             return name.endsWith("Parser.class");
         }
     };
+    */
     
     /**
      * This {@link FileFilter} is used to get all subpackages
      * of the parser package.
      */
+    /*
     private static final FileFilter parserDirectoryFilter = new FileFilter() {
         public boolean accept(File file) {
             return file.isDirectory();
         }
-    };    
+    };
+    */    
     
     /**
      * Initializing the 

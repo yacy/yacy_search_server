@@ -27,9 +27,6 @@
 package de.anomic.tools;
 
 import java.io.File;
-import java.io.FilenameFilter;
-import java.io.FileFilter;
-import java.io.InputStream;
 import java.util.jar.JarFile;
 import java.util.jar.JarEntry;
 import java.util.Enumeration;
@@ -37,8 +34,6 @@ import java.util.ArrayList;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.io.IOException;
-
-import de.anomic.server.logging.serverLog;
 
 public class ListDirs {
 
@@ -73,9 +68,9 @@ public class ListDirs {
 	private ArrayList<String> getAllFiles() {
 		ArrayList<String> files = new ArrayList<String>(50);
 		if(isJar) {
-			Enumeration entries = JarFileObject.entries();
+			Enumeration<JarEntry> entries = JarFileObject.entries();
 			while(entries.hasMoreElements()) {
-				JarEntry entry = (JarEntry)entries.nextElement();
+				JarEntry entry = entries.nextElement();
 				String entryname = entry.getName();
 				if(entryname.startsWith(pathInJar) && entryname.charAt(entryname.length()-1)!='/') {
 					files.add(entryname);

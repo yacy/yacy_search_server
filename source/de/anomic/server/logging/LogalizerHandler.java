@@ -44,8 +44,6 @@
 
 package de.anomic.server.logging;
 
-import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.HashMap;
@@ -182,10 +180,11 @@ public class LogalizerHandler extends Handler {
         // TODO Auto-generated method stub
 
     }
-    
+    /*  
     private static final FilenameFilter parserNameFilter = new FilenameFilter() {
         public boolean accept(File dir, String name) {
             return name.matches(".*.class");
         }
     };
+    */
 }
