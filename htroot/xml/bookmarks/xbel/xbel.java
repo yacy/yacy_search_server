@@ -9,6 +9,7 @@ import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.data.htmlTools;
 
 public class xbel {
 
@@ -68,7 +69,7 @@ public class xbel {
     	if(fn.startsWith(root)){
     		prop.put("xbel_"+count+"_elements", "<folder id=\""+bookmarksDB.tagHash(fn)+"\">");
     		count++;
-    		prop.put("xbel_"+count+"_elements", "<title>"+fn.replaceFirst(root+"/*","")+"</title>");   		
+    		prop.put("xbel_"+count+"_elements", "<title>" + htmlTools.encodeUnicode2xml(fn.replaceFirst(root+"/*","")) + "</title>");   		
     		count++;    
     		Iterator<String> bit=switchboard.bookmarksDB.getBookmarksIterator(fn, isAdmin);
     		count = print_XBEL(bit, count);
@@ -90,17 +91,21 @@ public class xbel {
     	while(bit.hasNext()){    			
 			bookmark=switchboard.bookmarksDB.getBookmark(bit.next());
 			date=new Date(bookmark.getTimeStamp());
-			prop.put("xbel_"+count+"_elements", "<bookmark id=\""+bookmark.getUrlHash()+"\" href=\""+bookmark.getUrl()+"\" added=\""+serverDate.formatISO8601(date)+"\">");   		
+			prop.put("xbel_"+count+"_elements", "<bookmark id=\"" + bookmark.getUrlHash()
+					+ "\" href=\"" + htmlTools.encodeUnicode2xml(bookmark.getUrl())
+					+ "\" added=\"" + htmlTools.encodeUnicode2xml(serverDate.formatISO8601(date))+"\">");
     		count++; 
     		prop.put("xbel_"+count+"_elements", "<title>");
     		count++;
-    		prop.putHTML("xbel_"+count+"_elements", bookmark.getTitle(),true);   		
+    		prop.putHTML("xbel_"+count+"_elements", bookmark.getTitle(), true);   		
     		count++; 
     		prop.put("xbel_"+count+"_elements", "</title>");
     		count++;
     		prop.put("xbel_"+count+"_elements", "<info>");   		
     		count++;
-    		prop.put("xbel_"+count+"_elements", "<metadata owner=\"Mozilla\" ShortcutURL=\""+bookmark.getTagsString().replaceAll("/.*,", "").toLowerCase()+"\"/>");   		
+    		prop.put("xbel_"+count+"_elements", "<metadata owner=\"Mozilla\" ShortcutURL=\""
+				+ htmlTools.encodeUnicode2xml(bookmark.getTagsString().replaceAll("/.*,", "").toLowerCase())
+				+ "\"/>");   		
     		count++;
     		prop.put("xbel_"+count+"_elements", "<metadata owner=\"YaCy\" public=\""+Boolean.toString(bookmark.getPublic())+"\"/>");   		
     		count++;
@@ -108,7 +113,7 @@ public class xbel {
     		count++;
     		prop.put("xbel_"+count+"_elements", "<desc>");
     		count++;
-    		prop.putHTML("xbel_"+count+"_elements", bookmark.getDescription(),true);   		
+    		prop.putHTML("xbel_"+count+"_elements", bookmark.getDescription(), true);   		
     		count++; 
     		prop.put("xbel_"+count+"_elements", "</desc>");
     		count++;
