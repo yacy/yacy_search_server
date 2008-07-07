@@ -27,22 +27,26 @@
 
 package de.anomic.kelondro;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 public class kelondroObjects {
 
-    private kelondroBLOBTree blob;
+    private kelondroBLOB blob;
     private kelondroMScoreCluster<String> cacheScore;
-    private HashMap<String, kelondroObjectsEntry> cache;
+    private HashMap<String, HashMap<String, String>> cache;
     private long startup;
     private int cachesize;
 
 
-    public kelondroObjects(kelondroBLOBTree blob, int cachesize) {
+    public kelondroObjects(kelondroBLOB blob, int cachesize) {
         this.blob = blob;
-        this.cache = new HashMap<String, kelondroObjectsEntry>();
+        this.cache = new HashMap<String, HashMap<String, String>>();
         this.cacheScore = new kelondroMScoreCluster<String>();
         this.startup = System.currentTimeMillis();
         this.cachesize = cachesize;
@@ -50,7 +54,7 @@ public class kelondroObjects {
     
     public void clear() throws IOException {
     	this.blob.clear();
-        this.cache = new HashMap<String, kelondroObjectsEntry>();
+        this.cache = new HashMap<String, HashMap<String, String>>();
         this.cacheScore = new kelondroMScoreCluster<String>();
     }
 
@@ -58,16 +62,46 @@ public class kelondroObjects {
         return blob.keylength();
     }
 
-    public synchronized void set(String key, kelondroObjectsEntry newMap) throws IOException {
+
+    private static String map2string(final Map<String, String> map, final String comment) throws IOException {
+        final Iterator<Map.Entry<String, String>> iter = map.entrySet().iterator();
+        Map.Entry<String, String> entry;
+        final StringBuffer bb = new StringBuffer(map.size() * 40);
+        bb.append("# ").append(comment).append("\r\n");
+        while (iter.hasNext()) {
+            entry = iter.next();
+            bb.append(entry.getKey()).append('=');
+            if (entry.getValue() != null) { bb.append(entry.getValue()); }
+            bb.append("\r\n");
+        }
+        bb.append("# EOF\r\n");
+        return bb.toString();
+    }
+
+    private static HashMap<String, String> string2map(String s) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(s.getBytes())));
+        final HashMap<String, String> map = new HashMap<String, String>();
+        String line;
+        int pos;
+        while ((line = br.readLine()) != null) { // very slow readLine????
+            line = line.trim();
+            if (line.equals("# EOF")) return map;
+            if ((line.length() == 0) || (line.charAt(0) == '#')) continue;
+            pos = line.indexOf("=");
+            if (pos < 0) continue;
+            map.put(line.substring(0, pos), line.substring(pos + 1));
+        }
+        return map;
+    }
+    
+    public synchronized void set(String key, HashMap<String, String> newMap) throws IOException {
         assert (key != null);
         assert (key.length() > 0);
         assert (newMap != null);
         if (cacheScore == null) return; // may appear during shutdown
 
         // write entry
-        kelondroRA kra = blob.getRA(key);
-        newMap.write(kra);
-        kra.close();
+        blob.put(key, map2string(newMap, "").getBytes());
 
         // check for space in cache
         checkCacheSpace();
@@ -89,25 +123,25 @@ public class kelondroObjects {
         blob.remove(key);
     }
 
-    public synchronized kelondroObjectsEntry get(final String key) throws IOException {
+    public synchronized HashMap<String, String> get(final String key) throws IOException {
         if (key == null) return null;
         return get(key, true);
     }
 
-    protected synchronized kelondroObjectsEntry get(final String key, final boolean storeCache) throws IOException {
+    protected synchronized HashMap<String, String> get(final String key, final boolean storeCache) throws IOException {
         // load map from cache
         assert key != null;
         if (cache == null) return null; // case may appear during shutdown
-        kelondroObjectsEntry map = cache.get(key);
+        HashMap<String, String> map = cache.get(key);
         if (map != null) return map;
 
         // load map from kra
-        if (!(blob.exist(key))) return null;
+        if (!(blob.has(key))) return null;
         
         // read object
-        kelondroRA kra = blob.getRA(key);
-        map = new kelondroObjectsMapEntry(kra);
-        kra.close();
+        byte[] b = blob.get(key);
+        if (b == null) return null;
+        map = string2map(new String(b));
 
         if (storeCache) {
             // cache it also
@@ -167,7 +201,7 @@ public class kelondroObjects {
         blob.close();
     }
 
-    public class objectIterator implements Iterator<kelondroObjectsEntry> {
+    public class objectIterator implements Iterator<HashMap<String, String>> {
         // enumerates Map-Type elements
         // the key is also included in every map that is returned; it's key is 'key'
 
@@ -183,14 +217,14 @@ public class kelondroObjects {
             return (!(finish)) && (keyIterator.hasNext());
         }
 
-        public kelondroObjectsEntry next() {
+        public HashMap<String, String> next() {
             final String nextKey = keyIterator.next();
             if (nextKey == null) {
                 finish = true;
                 return null;
             }
             try {
-                final kelondroObjectsEntry obj = get(nextKey);
+                final HashMap<String, String> obj = get(nextKey);
                 if (obj == null) throw new kelondroException("no more elements available");
                 return obj;
             } catch (IOException e) {

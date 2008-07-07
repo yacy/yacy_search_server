@@ -41,12 +41,12 @@ public class kelondroMapObjects extends kelondroObjects {
     private HashMap<String, Object> accMap; // to store accumulations of specific fields
     private int elementCount;
     
-    public kelondroMapObjects(kelondroBLOBTree dyn, int cachesize) {
+    public kelondroMapObjects(kelondroBLOB dyn, int cachesize) {
         this(dyn, cachesize, null, null, null, null, null);
     }
     
 	@SuppressWarnings({ "unchecked", "null" })
-	public kelondroMapObjects(kelondroBLOBTree dyn, int cachesize, String[] sortfields, String[] longaccfields, String[] doubleaccfields, Method externalInitializer, Object externalHandler) {
+	public kelondroMapObjects(kelondroBLOB dyn, int cachesize, String[] sortfields, String[] longaccfields, String[] doubleaccfields, Method externalInitializer, Object externalHandler) {
         super(dyn, cachesize);
         
         // create fast ordering clusters and acc fields
@@ -189,7 +189,7 @@ public class kelondroMapObjects extends kelondroObjects {
             }
         }
         
-        super.set(key, new kelondroObjectsMapEntry(newMap));
+        super.set(key, newMap);
         
         // update sortCluster
         if (sortClusterMap != null) updateSortCluster(key, newMap);
@@ -269,9 +269,9 @@ public class kelondroMapObjects extends kelondroObjects {
     
     public HashMap<String, String> getMap(String key) {
         try {
-            kelondroObjectsMapEntry mapEntry = (kelondroObjectsMapEntry) super.get(key);
+            HashMap<String, String> mapEntry = super.get(key);
             if (mapEntry == null) return null;
-            return mapEntry.map();
+            return mapEntry;
         } catch (IOException e) {
             e.printStackTrace();
             return null;
@@ -280,9 +280,9 @@ public class kelondroMapObjects extends kelondroObjects {
     
     protected Map<String, String> getMap(String key, boolean cache) {
         try {
-            kelondroObjectsMapEntry mapEntry = (kelondroObjectsMapEntry) super.get(key, cache);
+            HashMap<String, String> mapEntry = super.get(key, cache);
             if (mapEntry == null) return null;
-            return mapEntry.map();
+            return mapEntry;
         } catch (IOException e) {
             e.printStackTrace();
             return null;

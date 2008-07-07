@@ -81,7 +81,6 @@ import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMapObjects;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroObjects;
-import de.anomic.kelondro.kelondroObjectsMapEntry;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.logging.serverLog;
@@ -227,7 +226,7 @@ public class bookmarksDB {
     // adding a bookmark to the bookmarksDB
     public void saveBookmark(Bookmark bookmark){
     	try {
-    		bookmarksTable.set(bookmark.getUrlHash(), bookmark);
+    		bookmarksTable.set(bookmark.getUrlHash(), bookmark.entry);
         } catch (IOException e) {
         	// TODO Auto-generated catch block
         	e.printStackTrace();
@@ -241,9 +240,8 @@ public class bookmarksDB {
     
     public Bookmark getBookmark(String urlHash){
         try {
-            kelondroObjectsMapEntry map = (kelondroObjectsMapEntry)bookmarksTable.get(urlHash);
+            HashMap<String, String> map = bookmarksTable.get(urlHash);
             if (map == null) return null;
-            if (map instanceof Bookmark) return (Bookmark)map;
             return new Bookmark(map);
         } catch (IOException e) {
             return null;
@@ -888,7 +886,7 @@ public class bookmarksDB {
     /**
      * Subclass of bookmarksDB, which provides the Bookmark object-type
      */
-    public class Bookmark extends kelondroObjectsMapEntry {
+    public class Bookmark {
         public static final String BOOKMARK_URL="bookmarkUrl";
         public static final String BOOKMARK_TITLE="bookmarkTitle";
         public static final String BOOKMARK_DESCRIPTION="bookmarkDesc";
@@ -900,9 +898,10 @@ public class bookmarksDB {
         private String urlHash;
         private Set<String> tags;
         private long timestamp;
+        HashMap<String, String> entry;
         
         public Bookmark(String urlHash, HashMap<String, String> map) {
-            super(map);
+            this.entry = map;
             this.urlHash=urlHash;
             if(map.containsKey(BOOKMARK_TAGS))
                 tags=listManager.string2set(map.get(BOOKMARK_TAGS));
@@ -912,7 +911,7 @@ public class bookmarksDB {
         }
         
         public Bookmark(String url){
-            super();
+            entry = new HashMap<String, String>();
             if(!url.toLowerCase().startsWith("http://") && !url.toLowerCase().startsWith("https://")){
                 url="http://"+url;
             }
@@ -938,7 +937,7 @@ public class bookmarksDB {
         }
         
         public Bookmark(String urlHash, yacyURL url) {
-            super();
+            entry = new HashMap<String, String>();
             this.urlHash=urlHash;
             entry.put(BOOKMARK_URL, url.toNormalform(false, true));
             tags=new HashSet<String>();
@@ -946,18 +945,18 @@ public class bookmarksDB {
         }
         
         public Bookmark(String urlHash, String url) {
-            super();
+            entry = new HashMap<String, String>();
             this.urlHash=urlHash;
             entry.put(BOOKMARK_URL, url);
             tags=new HashSet<String>();
             timestamp=System.currentTimeMillis();
         }
 
-        public Bookmark(kelondroObjectsMapEntry map) throws MalformedURLException {
-            this((new yacyURL(map.map().get(BOOKMARK_URL), null)).hash(), map.map());
+        public Bookmark(HashMap<String, String> map) throws MalformedURLException {
+            this((new yacyURL(map.get(BOOKMARK_URL), null)).hash(), map);
         }
         
-        Map<String, String> toMap() {
+        private Map<String, String> toMap() {
             entry.put(BOOKMARK_TAGS, listManager.collection2string(tags));
             entry.put(BOOKMARK_TIMESTAMP, String.valueOf(this.timestamp));
             return entry;

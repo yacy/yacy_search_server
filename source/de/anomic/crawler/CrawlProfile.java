@@ -48,6 +48,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 
+import de.anomic.kelondro.kelondroBLOB;
 import de.anomic.kelondro.kelondroBLOBTree;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroCloneableIterator;
@@ -68,7 +69,7 @@ public class CrawlProfile {
     public CrawlProfile(File file) {
         this.profileTableFile = file;
         profileTableFile.getParentFile().mkdirs();
-        kelondroBLOBTree dyn = new kelondroBLOBTree(profileTableFile, true, true, yacySeedDB.commonHashLength, 2000, '#', kelondroNaturalOrder.naturalOrder, false, false, true);
+        kelondroBLOB dyn = new kelondroBLOBTree(profileTableFile, true, true, yacySeedDB.commonHashLength, 2000, '#', kelondroNaturalOrder.naturalOrder, false, false, true);
         profileTable = new kelondroMapObjects(dyn, 500);
     }
     
@@ -77,7 +78,7 @@ public class CrawlProfile {
         if (profileTable != null) profileTable.close();
         if (!(profileTableFile.delete())) throw new RuntimeException("cannot delete crawl profile database");
         profileTableFile.getParentFile().mkdirs();
-        kelondroBLOBTree dyn = new kelondroBLOBTree(profileTableFile, true, true, yacySeedDB.commonHashLength, 2000, '#', kelondroNaturalOrder.naturalOrder, false, false, true);
+        kelondroBLOB dyn = new kelondroBLOBTree(profileTableFile, true, true, yacySeedDB.commonHashLength, 2000, '#', kelondroNaturalOrder.naturalOrder, false, false, true);
         profileTable = new kelondroMapObjects(dyn, 500);
     }
     

@@ -38,8 +38,6 @@
 package de.anomic.kelondro;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Iterator;
 
@@ -227,7 +225,7 @@ public class kelondroBLOBTree implements kelondroBLOB {
         }
     }
 
-    synchronized int get(String key, int pos) throws IOException {
+    private synchronized int get(String key, int pos) throws IOException {
         int reccnt = pos / reclen;
         // read within a single record
         byte[] buf = getValueCached(elementKey(key, reccnt));
@@ -235,6 +233,12 @@ public class kelondroBLOBTree implements kelondroBLOB {
         int recpos = pos % reclen;
         if (buf.length <= recpos) return -1;
         return buf[recpos] & 0xFF;
+    }
+    
+    public synchronized byte[] get(String key) throws IOException {
+        kelondroRA ra = getRA(key);
+        if (ra == null) return null;
+        return ra.readFully();
     }
     
     public synchronized byte[] get(String key, int pos, int len) throws IOException {
@@ -281,6 +285,10 @@ public class kelondroBLOBTree implements kelondroBLOB {
         return result;
     }
 
+    public synchronized void put(String key, byte[] b) throws IOException {
+        put(key, 0, b, 0, b.length);
+    }
+    
     public synchronized void put(String key, int pos, byte[] b, int off, int len) throws IOException {
         int recpos = pos % reclen;
         int reccnt = pos / reclen;
@@ -331,7 +339,7 @@ public class kelondroBLOBTree implements kelondroBLOB {
         //segmentCount--; writeSegmentCount();
     }
 
-    public synchronized boolean exist(String key) throws IOException {
+    public synchronized boolean has(String key) throws IOException {
         return (key != null) && (getValueCached(elementKey(key, 0)) != null);
     }
 
@@ -393,60 +401,6 @@ public class kelondroBLOBTree implements kelondroBLOB {
         }
 
     }
-
-    public static void writeFile(kelondroBLOB blob, String key, File f) throws IOException {
-        // reads a file from the FS and writes it into the database
-        kelondroRA kra = null;
-        FileInputStream fis = null;
-        try {
-            kra = blob.getRA(key);
-            byte[] buffer = new byte[1024];
-            byte[] result = new byte[(int) f.length()];
-            fis = new FileInputStream(f);
-            int i;
-            int pos = 0;
-            while ((i = fis.read(buffer)) > 0) {
-                System.arraycopy(buffer, 0, result, pos, i);
-                pos += i;
-            }
-            fis.close();
-            kra.writeArray(result);
-        } finally {
-            if (fis != null)
-                try {
-                    fis.close();
-                } catch (Exception e) {
-                }
-            if (kra != null)
-                try {
-                    kra.close();
-                } catch (Exception e) {
-                }
-        }
-    }
-    
-    public static void readFile(kelondroBLOB blob, String key, File f) throws IOException {
-        // reads a file from the DB and writes it to the FS
-        kelondroRA kra = null;
-        FileOutputStream fos = null;
-        try {
-            kra = blob.getRA(key);
-            byte[] result = kra.readArray();
-            fos = new FileOutputStream(f);
-            fos.write(result);
-        } finally {
-            if (fos != null)
-                try {
-                    fos.close();
-                } catch (Exception e) {
-                }
-            if (kra != null)
-                try {
-                    kra.close();
-                } catch (Exception e) {
-                }
-        }
-    }
     
     public synchronized void close() {
         index.close();
@@ -469,22 +423,6 @@ public class kelondroBLOBTree implements kelondroBLOB {
                 kd.close();
             } catch (IOException e) {
                 e.printStackTrace();
-            }
-        }
-        if (args.length == 4) {
-            boolean writeFile = (args[0].equals("-db2f"));
-            File db = new File(args[1]);
-            String key = args[2];
-            File f = new File(args[3]);
-            kelondroBLOBTree kd;
-            try {
-                kd = new kelondroBLOBTree(db, true, true, 80, 200, '_', kelondroNaturalOrder.naturalOrder, false, false, true);
-                if (writeFile)
-                    readFile(kd, key, f);
-                else
-                    writeFile(kd, key, f);
-            } catch (IOException e) {
-                System.out.println("ERROR: " + e.toString());
             }
         }
     }
