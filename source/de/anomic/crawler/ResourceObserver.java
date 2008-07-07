@@ -1,43 +1,5 @@
-// resourceObserver.java
-// -----------------------
-// part of YaCy
-// (C) by Detlef Reichl; detlef!reichl()gmx!org
-// Pforzheim, Germany, 2008
-//
-// This program is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation; either version 2 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-//
-// Using this software in any meaning (reading, learning, copying, compiling,
-// running) means that you agree that the Author(s) is (are) not responsible
-// for cost, loss of data or any harm that may be caused directly or indirectly
-// by usage of this softare or this documentation. The usage of this software
-// is on your own risk. The installation and usage (starting/running) of this
-// software may allow other people or application to access your computer and
-// any attached devices and is highly dependent on the configuration of the
-// software which must be done by the user of the software; the author(s) is
-// (are) also not responsible for proper configuration and usage of the
-// software, even if provoked by documentation provided together with
-// the software.
-//
-// Any changes to this file according to the GPL as documented in the file
-// gpl.txt aside this file in the shipment you received can be done to the
-// lines that follows this copyright notice here, but changes must not be
-// done inside the copyright notive above. A re-distribution must contain
-// the intact and unchanged copyright notice.
-// Contributions and changes to the program code must be marked as such.
+package de.anomic.crawler;
 
-package de.anomic.yacy;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -48,7 +10,7 @@ import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.diskUsage;
 
-public final class resourceObserver {
+public final class ResourceObserver {
     // The minimal free space on every used volume, for now set to 100 MB.
     // TODO make it configurable
     private final static long MIN_FREE_DISK_SPACE = 100L /* MiB */ * 1024L * 1024L;
@@ -68,7 +30,7 @@ public final class resourceObserver {
     private boolean disksOK;
     private boolean memoryOK;
     
-    public resourceObserver(plasmaSwitchboard sb) {
+    public ResourceObserver(plasmaSwitchboard sb) {
         this.sb = sb;
         this.log.logInfo("initializing the resource observer");
 
@@ -91,7 +53,7 @@ public final class resourceObserver {
         
         diskUsage.init(pathsToCheck);
         
-        if (!diskUsage.isUsable ())
+        if (!diskUsage.isUsable())
             this.log.logWarning("Disk usage returned: " + diskUsage.getErrorMessage());
         
         checkDiskUsageCount = 0;
@@ -130,7 +92,7 @@ public final class resourceObserver {
             if (diskUsage.isUsable())
                 this.log.logInfo("run completed; everything in order");
             else
-                this.log.logInfo("The observer is out of order");
+                this.log.logInfo("The observer is out of order: " + diskUsage.getErrorMessage());
         }
     }
     

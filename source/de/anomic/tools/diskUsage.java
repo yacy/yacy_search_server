@@ -4,6 +4,8 @@
 // (C) by Detlef Reichl; detlef!reichl()gmx!org
 // Pforzheim, Germany, 2008
 //
+// [MC] made many changes to remove side-effect-based routines towards a more functional programming style
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -17,25 +19,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-//
-// Using this software in any meaning (reading, learning, copying, compiling,
-// running) means that you agree that the Author(s) is (are) not responsible
-// for cost, loss of data or any harm that may be caused directly or indirectly
-// by usage of this softare or this documentation. The usage of this software
-// is on your own risk. The installation and usage (starting/running) of this
-// software may allow other people or application to access your computer and
-// any attached devices and is highly dependent on the configuration of the
-// software which must be done by the user of the software; the author(s) is
-// (are) also not responsible for proper configuration and usage of the
-// software, even if provoked by documentation provided together with
-// the software.
-//
-// Any changes to this file according to the GPL as documented in the file
-// gpl.txt aside this file in the shipment you received can be done to the
-// lines that follows this copyright notice here, but changes must not be
-// done inside the copyright notive above. A re-distribution must contain
-// the intact and unchanged copyright notice.
-// Contributions and changes to the program code must be marked as such.
 
 
 // The HashMap contains the following values:
@@ -66,10 +49,8 @@ public class diskUsage {
     private static final List<String> yacyUsedMountPoints = new ArrayList<String>();
     
     private static int usedOS = -1;
-    private static boolean usable = false;
+    private static String usageError = null;
     private static String windowsCommand = null;
-    private static String errorMessage = "";
-    private static boolean consoleError = false;
     
 
         // Unix-like
@@ -113,13 +94,12 @@ public class diskUsage {
     //////////////////
 
     public static void init(ArrayList<String> pathsToCheck) {
-        errorMessage = null;
         if (usedOS >= 0) return; // prevent double initialization
         usedOS = getOS();
         if (usedOS == -1) {
-            usable = false;
+            return;
         } else {
-            usable = true;
+            usageError = null;
 
             if (usedOS <= UNIX_END) {
                 // some kind of *nix
@@ -142,13 +122,12 @@ public class diskUsage {
                 checkMappedSubDirs(pathsToCheck);
             }
             if (yacyUsedVolumes.size() < 1)
-                usable = false;
+                usageError = "found no volumes";
         }
     }
 
     public static HashMap<String, long[]> getDiskUsage () {
-        if (!usable)
-            return null;
+        if (usageError != null) return null;
         
         if (usedOS <= UNIX_END)
             return dfUnix();
@@ -156,16 +135,16 @@ public class diskUsage {
             return dfWindows();
     }
 
-    public static boolean isUsable () {
-        return usable;
-    }
-    
-    public static String getErrorMessage () {
-        return errorMessage;
+    public static boolean isUsable() {
+        return usageError == null;
     }
     
     public static int getNumUsedVolumes () {
         return yacyUsedVolumes.size();
+    }
+    
+    public static String getErrorMessage() {
+        return usageError;
     }
 
     ////////////
@@ -174,54 +153,54 @@ public class diskUsage {
 
     private static HashMap<String, long[]> dfUnix() {
         HashMap<String, long[]> diskUsages = new HashMap<String, long[]>();
-        final List<String> lines = dfUnixExec();
-        if (consoleError) {
-            errorMessage = "df:";
-            for (final String line: lines){
-                errorMessage += "\n" + line;
-            }
-            usable = false;
-            return diskUsages;
-        }
-
-        nextLine: for (final String line: lines){
-            if (line.charAt(0) != '/') continue;
-            final String[] tokens = line.split(" +", 6);
-            if (tokens.length < 6) continue;
-            for (int i = 0; i < yacyUsedVolumes.size(); i++){
-                if (yacyUsedVolumes.get(i).equals(tokens[0])) {
-                    final long[] vals = new long[2];
-                    try { vals[0] = new Long(tokens[1]); } catch (final NumberFormatException e) { continue nextLine; }
-                    try { vals[1] = new Long(tokens[3]); } catch (final NumberFormatException e) { continue nextLine; }
-                    vals[0] *= 1024;
-                    vals[1] *= 1024;
-                    diskUsages.put(yacyUsedMountPoints.get(i), vals);
+        try {
+            final List<String> lines = dfUnixExec();
+            nextLine: for (final String line: lines){
+                if (line.charAt(0) != '/') continue;
+                final String[] tokens = line.split(" +", 6);
+                if (tokens.length < 6) continue;
+                for (int i = 0; i < yacyUsedVolumes.size(); i++){
+                    if (yacyUsedVolumes.get(i).equals(tokens[0])) {
+                        final long[] vals = new long[2];
+                        try { vals[0] = new Long(tokens[1]); } catch (final NumberFormatException e) { continue nextLine; }
+                        try { vals[1] = new Long(tokens[3]); } catch (final NumberFormatException e) { continue nextLine; }
+                        vals[0] *= 1024;
+                        vals[1] *= 1024;
+                        diskUsages.put(yacyUsedMountPoints.get(i), vals);
+                    }
                 }
             }
+            return diskUsages;
+        } catch (IOException e) {
+            usageError = "dfUnix: " + e.getMessage();
+            return diskUsages;
         }
-        return diskUsages;
     }
     
     private static void dfUnixGetVolumes() {
-        final List<String> lines = dfUnixExec();
+        try {
+            final List<String> lines = dfUnixExec();
 
-        nextLine: for (final String line: lines){
-            if (line.charAt(0) != '/') continue;
-            final String[] tokens = line.split(" +", 6);
-            if (tokens.length < 6) continue;
-            for (int i = 0; i < allMountPoints.size(); i++) {
-                if (tokens[5].trim().compareTo(allMountPoints.get(i)) > 0) {
-                    allMountPoints.add(i, tokens[5].trim());
-                    allVolumes.add(i, tokens[0]);
-                    continue nextLine;
+            nextLine: for (final String line: lines){
+                if (line.charAt(0) != '/') continue;
+                final String[] tokens = line.split(" +", 6);
+                if (tokens.length < 6) continue;
+                for (int i = 0; i < allMountPoints.size(); i++) {
+                    if (tokens[5].trim().compareTo(allMountPoints.get(i)) > 0) {
+                        allMountPoints.add(i, tokens[5].trim());
+                        allVolumes.add(i, tokens[0]);
+                        continue nextLine;
+                    }
                 }
+                allMountPoints.add(allMountPoints.size(), tokens[5]);
+                allVolumes.add(allVolumes.size(), tokens[0]);
             }
-            allMountPoints.add(allMountPoints.size(), tokens[5]);
-            allVolumes.add(allVolumes.size(), tokens[0]);
+        } catch (IOException e) {
+            usageError = "error during dfUnixGetVolumes: " + e.getMessage();
         }
     }
     
-    private static List<String> dfUnixExec() {
+    private static List<String> dfUnixExec() throws IOException {
         
         // -k    set blocksize to 1024
         //   confirmed with tests:
@@ -251,15 +230,6 @@ public class diskUsage {
             processArgs.add("-l");
 
         final List<String> lines = getConsoleOutput(processArgs);
-        if (consoleError) {
-            errorMessage = "df:";
-            for (final String line: lines){
-                errorMessage += "\n" + line;
-            }
-            usable = false;
-            lines.clear();
-        }
-
         return lines;
     }
 
@@ -274,7 +244,7 @@ public class diskUsage {
                 try {
                     dir = element.getCanonicalPath();
                 } catch (final IOException e) {
-                    usable = false;
+                    usageError = "checkVolumesInUseUnix(1): " + e.getMessage();
                     break;
                 }
                 if (dir.endsWith ("HTCACHE")
@@ -291,7 +261,7 @@ public class diskUsage {
                 try {
                     base = element.getCanonicalPath();
                 } catch (final IOException e) {
-                    usable = false;
+                    usageError = "checkVolumesInUseUnix(2): " + e.getMessage();
                     break;
                 }
                 checkPathUsageUnix (base);
@@ -323,8 +293,7 @@ public class diskUsage {
 
         String path = null;
         try { path = file.getCanonicalPath().toString(); } catch (final IOException e) {
-            errorMessage = "Cant get DATA directory";
-            usable = false;
+            usageError = "Cant get DATA directory";
             return;
         }
         if (path.length() < 6)
@@ -341,33 +310,29 @@ public class diskUsage {
             processArgs.add("dir");
             processArgs.add(yacyUsedVolumes.get(i) + ":\\");
 
-            final List<String> lines = getConsoleOutput(processArgs);
-            if (consoleError) {
-                errorMessage = "df:";
-                for (final String line: lines){
-                    errorMessage += "\n" + line;
+            try {
+                final List<String> lines = getConsoleOutput(processArgs);
+
+                String line = "";
+                for (int l = lines.size() - 1; l >= 0; l--) {
+                    line = lines.get(l).trim();
+                    if (line.length() > 0) break;
                 }
-                usable = false;
+                if (line.length() == 0) {
+                    usageError = "unable to get free size of volume " + yacyUsedVolumes.get(i);
+                    return diskUsages;
+                }
+
+                String[] tokens = line.trim().split(" ++");
+                long[] vals = new long[2];
+                vals[0] = -1;
+                try { vals[1] = new Long(tokens[2].replaceAll("[.,]", "")); } catch (final NumberFormatException e) {continue;}
+                diskUsages.put (yacyUsedVolumes.get(i), vals);
+            } catch (IOException e) {
+                usageError = "dfWindows: " + e.getMessage();
                 return diskUsages;
             }
             
-            String line = "";
-            for (int l = lines.size() - 1; l >= 0; l--) {
-                line = lines.get(l).trim();
-                if (line.length() > 0)
-                    break;
-            }
-            if (line.length() == 0) {
-                errorMessage = "unable to get free size of volume " + yacyUsedVolumes.get(i);
-                usable = false;
-                return diskUsages;
-            }
-
-            String[] tokens = line.trim().split(" ++");
-            long[] vals = new long[2];
-            vals[0] = -1;
-            try { vals[1] = new Long(tokens[2].replaceAll("[.,]", "")); } catch (final NumberFormatException e) {continue;}
-            diskUsages.put (yacyUsedVolumes.get(i), vals);
         }
         return diskUsages;
     }
@@ -376,14 +341,14 @@ public class diskUsage {
    // common  //
    /////////////
 
-    private static int getOS () {
+    private static int getOS() {
         final String os = System.getProperty("os.name").toLowerCase();
         for (int i = 0; i < OSname.length; i++)
         {
             if (os.indexOf(OSname[i]) >= 0)
                 return i;
         }
-        errorMessage = "unknown operating system (" + System.getProperty("os.name") + ")";
+        usageError = "unknown operating system (" + System.getProperty("os.name") + ")";
         return -1;
     }
 
@@ -405,24 +370,24 @@ public class diskUsage {
         }
     }
 
-    private static void checkPathUsageWindows (final String path) {
+    private static void checkPathUsageWindows(final String path) {
         int index = -1;
         String sub = path.substring(0, 1); // ?? nur ein character?
-        try { index = yacyUsedVolumes.indexOf(sub); } catch (IndexOutOfBoundsException e) {
-            errorMessage = "internal error while checking used windows volumes";
-            usable = false;
+        try {
+            index = yacyUsedVolumes.indexOf(sub);
+        } catch (IndexOutOfBoundsException e) {
+            usageError = "internal error while checking used windows volumes";
             return;
         }
         if (index < 0)
             yacyUsedVolumes.add(sub);
     }
 
-    private static List<String> getConsoleOutput (final List<String> processArgs) {
+    private static List<String> getConsoleOutput(final List<String> processArgs) throws IOException {
         final ProcessBuilder processBuilder = new ProcessBuilder(processArgs);
         Process process = null;
         consoleInterface inputStream = null;
         consoleInterface errorStream = null;
-        consoleError = false;
 
         try {
             process = processBuilder.start();
@@ -435,24 +400,18 @@ public class diskUsage {
 
             /*int retval =*/ process.waitFor();
 
-        } catch(final IOException iox) {
-            consoleError = true;
+        } catch (final IOException iox) {
             log.logWarning("logpoint 0 " + iox.getMessage());
-            List<String> list = new ArrayList<String>();
-            list.add(iox.getMessage());
-            return list;
-        } catch(final InterruptedException ix) {
-            consoleError = true;
+            throw new IOException(iox.getMessage());
+        } catch (final InterruptedException ix) {
             log.logWarning("logpoint 1 " + ix.getMessage());
-            List<String> list = new ArrayList<String>();
-            list.add(ix.getMessage());
-            return list;
+            throw new IOException(ix.getMessage());
         }
         List<String> list = inputStream.getOutput();
         if (list.isEmpty()) {
-            consoleError = true;
-            log.logWarning("logpoint 2 ");
-            return errorStream.getOutput();
+            String error = errorStream.getOutput().toString();
+            log.logWarning("logpoint 2: "+ error);
+            throw new IOException("empty list: " + error);
         } else
             return list;
     }

@@ -85,6 +85,7 @@
 
 package de.anomic.plasma;
 
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -120,6 +121,7 @@ import de.anomic.crawler.ResultImages;
 import de.anomic.crawler.ResultURLs;
 import de.anomic.crawler.RobotsTxt;
 import de.anomic.crawler.ZURL;
+import de.anomic.crawler.ResourceObserver;
 import de.anomic.data.URLLicense;
 import de.anomic.data.blogBoard;
 import de.anomic.data.blogBoardComments;
@@ -163,7 +165,6 @@ import de.anomic.server.serverThread;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.crypt;
 import de.anomic.tools.nxTools;
-import de.anomic.yacy.resourceObserver;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNewsPool;
@@ -225,7 +226,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     public  plasmaParser                   parser;
     public  volatile long                  proxyLastAccess, localSearchLastAccess, remoteSearchLastAccess;
     public  yacyCore                       yc;
-    public  resourceObserver               observer;
+    public  ResourceObserver               observer;
     public  userDB                         userDB;
     public  bookmarksDB                    bookmarksDB;
     public  plasmaWebStructure             webStructure;
@@ -1114,7 +1115,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         }
         
         // initializing the resourceObserver
-        this.observer = new resourceObserver(this);
+        this.observer = new ResourceObserver(this);
         // run the oberver here a first time
         this.observer.resourceObserverJob();
         
