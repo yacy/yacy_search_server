@@ -173,11 +173,11 @@ public class Wiki {
             prop.put("mode", "3"); //Index
             String subject;
             try {
-                Iterator<String> i = sb.wikiDB.keys(true);
+                Iterator<byte[]> i = sb.wikiDB.keys(true);
                 wikiBoard.entry entry;
                 int count=0;
                 while (i.hasNext()) {
-                    subject = i.next();
+                    subject = new String(i.next());
                     entry = sb.wikiDB.read(subject);
                     prop.putHTML("mode_pages_"+count+"_name",wikiBoard.webalize(subject));
                     prop.putHTML("mode_pages_"+count+"_subject", subject);
@@ -200,14 +200,14 @@ public class Wiki {
             prop.putHTML("mode_error_page", pagename);
             
             try {
-                Iterator<String> it = sb.wikiDB.keysBkp(true);
+                Iterator<byte[]> it = sb.wikiDB.keysBkp(true);
                 wikiBoard.entry entry;
                 wikiBoard.entry oentry = null;
                 wikiBoard.entry nentry = null;
                 int count = 0;
                 boolean oldselected = false, newselected = false;
                 while (it.hasNext()) {
-                    entry = sb.wikiDB.readBkp(it.next());
+                    entry = sb.wikiDB.readBkp(new String(it.next()));
                     prop.put("mode_error_versions_" + count + "_date", wikiBoard.dateString(entry.date()));
                     prop.put("mode_error_versions_" + count + "_fdate", dateString(entry.date()));
                     if (wikiBoard.dateString(entry.date()).equals(post.get("old", null))) {

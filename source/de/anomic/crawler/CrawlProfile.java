@@ -101,7 +101,7 @@ public class CrawlProfile {
     
     public class profileIterator implements Iterator<entry> {
         // the iterator iterates all keys, which are byte[] objects
-        kelondroCloneableIterator<String> handleIterator;
+        kelondroCloneableIterator<byte[]> handleIterator;
         String lastkey;
         public profileIterator(boolean up) throws IOException {
             handleIterator = profileTable.keys(up, false);
@@ -117,7 +117,7 @@ public class CrawlProfile {
         }
         public entry next() {
             try {
-                lastkey = handleIterator.next();
+                lastkey = new String(handleIterator.next());
                 return getEntry(lastkey);
             } catch (kelondroException e) {
                 clear();

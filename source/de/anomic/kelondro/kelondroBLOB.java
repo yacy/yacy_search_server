@@ -28,8 +28,6 @@ package de.anomic.kelondro;
 
 import java.io.IOException;
 
-import de.anomic.kelondro.kelondroBLOBTree.keyIterator;
-
 public interface kelondroBLOB {
     
     /**
@@ -57,7 +55,7 @@ public interface kelondroBLOB {
      * @return
      * @throws IOException
      */
-    public kelondroCloneableIterator<String> keys(boolean up, boolean rotating) throws IOException;
+    public kelondroCloneableIterator<byte[]> keys(boolean up, boolean rotating) throws IOException;
     
     /**
      * iterate over all keys
@@ -66,7 +64,7 @@ public interface kelondroBLOB {
      * @return
      * @throws IOException
      */
-    public keyIterator keys(boolean up, byte[] firstKey) throws IOException;
+    public kelondroCloneableIterator<byte[]> keys(boolean up, byte[] firstKey) throws IOException;
     
     /**
      * check if a specific key is in the database
@@ -74,7 +72,7 @@ public interface kelondroBLOB {
      * @return
      * @throws IOException
      */
-    public boolean has(String key) throws IOException;
+    public boolean has(byte[] key) throws IOException;
     
     /**
      * retrieve the whole BLOB from the table
@@ -82,17 +80,7 @@ public interface kelondroBLOB {
      * @return
      * @throws IOException
      */
-    public byte[] get(String key) throws IOException;
-    
-    /**
-     * retrieve a fragment of a BLOB from the table
-     * @param key  the primary key
-     * @param pos  the position within the BLOB fragment
-     * @param len  the length of the fragment
-     * @return
-     * @throws IOException
-     */
-    public byte[] get(String key, int pos, int len) throws IOException;
+    public byte[] get(byte[] key) throws IOException;
     
     /**
      * write a whole byte array as BLOB to the table
@@ -100,25 +88,14 @@ public interface kelondroBLOB {
      * @param b
      * @throws IOException
      */
-    public void put(String key, byte[] b) throws IOException;
-    
-    /**
-     * write a fragment of a BLOB to the table
-     * @param key  the primary key
-     * @param pos  the position of the BLOB fragment
-     * @param b    a byte array
-     * @param off  the offset within the array where the BLOB fragment starts
-     * @param len  the length of the fragment
-     * @throws IOException
-     */
-    public void put(String key, int pos, byte[] b, int off, int len) throws IOException;
+    public void put(byte[] key, byte[] b) throws IOException;
     
     /**
      * remove a BLOB
      * @param key  the primary key
      * @throws IOException
      */
-    public void remove(String key) throws IOException;
+    public void remove(byte[] key) throws IOException;
     
     /**
      * close the BLOB table

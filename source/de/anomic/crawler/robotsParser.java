@@ -46,6 +46,7 @@ package de.anomic.crawler;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -85,25 +86,26 @@ public final class robotsParser{
      * at the Moment it only creates a list of Deny Paths
      */
     
-    public static Object[] parse(File robotsFile) throws IOException {
+    public static Object[] parse(File robotsFile) {
         BufferedReader reader = null;
         try {
             reader = new BufferedReader(new FileReader(robotsFile));
-            return parse(reader);
-        } finally {
             if (reader != null) try{reader.close();}catch(Exception e){/* ignore this */}
+            return parse(reader);
+        } catch (FileNotFoundException e1) {
         }
+        return new Object[]{new ArrayList<String>(), "", new Integer(0)};
     }
     
     @SuppressWarnings("unchecked")
-    public static Object[] parse(byte[] robotsTxt) throws IOException {
+    public static Object[] parse(byte[] robotsTxt) {
         if ((robotsTxt == null)||(robotsTxt.length == 0)) return new Object[]{new ArrayList(0),null,null};
         ByteArrayInputStream bin = new ByteArrayInputStream(robotsTxt);
         BufferedReader reader = new BufferedReader(new InputStreamReader(bin));
         return parse(reader);
     }
     
-    public static Object[] parse(BufferedReader reader) throws IOException{
+    public static Object[] parse(BufferedReader reader) {
         ArrayList<String> deny4AllAgents = new ArrayList<String>();
         ArrayList<String> deny4YaCyAgent = new ArrayList<String>();
         
@@ -115,102 +117,104 @@ public final class robotsParser{
                 rule4YaCyFound = false,
                 inBlock = false;        
         
-        while ((line = reader.readLine()) != null) {
-            line = line.trim();
-            lineUpper = line.toUpperCase();
-            
-            if (line.length() == 0) {
-                // OLD: we have reached the end of the rule block
-                // rule4Yacy = false; inBlock = false;
+        try {
+            while ((line = reader.readLine()) != null) {
+                line = line.trim();
+                lineUpper = line.toUpperCase();
                 
-                // NEW: just ignore it
-            } else if (line.startsWith(ROBOTS_COMMENT)) {
-                // we can ignore this. Just a comment line
-            } else if (lineUpper.startsWith(ROBOTS_SITEMAP)) {
-                pos = line.indexOf(" ");
-                if (pos != -1) {
-                    sitemap = line.substring(pos).trim();
-                }
-            } else if (lineUpper.startsWith(ROBOTS_USER_AGENT)) {
-                
-                if (inBlock) {
-                    // we have detected the start of a new block
-                    inBlock = false;
-                    isRuleBlock4AllAgents = false;
-                    isRuleBlock4YaCyAgent = false;
-                    crawlDelay = null; // each block has a separate delay
-                }
-                
-                // cutting off comments at the line end
-                pos = line.indexOf(ROBOTS_COMMENT);
-                if (pos != -1) line = line.substring(0,pos).trim();
-                
-                // replacing all tabs with spaces
-                line = line.replaceAll("\t"," ");
-                
-                // getting out the robots name
-                pos = line.indexOf(" ");
-                if (pos != -1) {
-                    String userAgent = line.substring(pos).trim();
-                    isRuleBlock4AllAgents |= userAgent.equals("*");
-                    isRuleBlock4YaCyAgent |= userAgent.toLowerCase().indexOf("yacy") >=0;
-                    if (isRuleBlock4YaCyAgent) rule4YaCyFound = true;
-                }
-            } else if (lineUpper.startsWith(ROBOTS_CRAWL_DELAY)) {
-                pos = line.indexOf(" ");
-                if (pos != -1) {
-                	try {
-                		crawlDelay = Integer.valueOf(line.substring(pos).trim());
-                	} catch (NumberFormatException e) {
-                		// invalid crawling delay
-                	}
-                } 
-            } else if (lineUpper.startsWith(ROBOTS_DISALLOW) || 
-                       lineUpper.startsWith(ROBOTS_ALLOW)) {
-                inBlock = true;
-                boolean isDisallowRule = lineUpper.startsWith(ROBOTS_DISALLOW);
-                
-                if (isRuleBlock4YaCyAgent || isRuleBlock4AllAgents) {
+                if (line.length() == 0) {
+                    // OLD: we have reached the end of the rule block
+                    // rule4Yacy = false; inBlock = false;
+                    
+                    // NEW: just ignore it
+                } else if (line.startsWith(ROBOTS_COMMENT)) {
+                    // we can ignore this. Just a comment line
+                } else if (lineUpper.startsWith(ROBOTS_SITEMAP)) {
+                    pos = line.indexOf(" ");
+                    if (pos != -1) {
+                        sitemap = line.substring(pos).trim();
+                    }
+                } else if (lineUpper.startsWith(ROBOTS_USER_AGENT)) {
+                    
+                    if (inBlock) {
+                        // we have detected the start of a new block
+                        inBlock = false;
+                        isRuleBlock4AllAgents = false;
+                        isRuleBlock4YaCyAgent = false;
+                        crawlDelay = null; // each block has a separate delay
+                    }
+                    
                     // cutting off comments at the line end
                     pos = line.indexOf(ROBOTS_COMMENT);
                     if (pos != -1) line = line.substring(0,pos).trim();
-                                       
-                    // cutting of tailing *
-                    if (line.endsWith("*")) line = line.substring(0,line.length()-1);
                     
                     // replacing all tabs with spaces
                     line = line.replaceAll("\t"," ");
                     
-                    // getting the path
+                    // getting out the robots name
                     pos = line.indexOf(" ");
                     if (pos != -1) {
+                        String userAgent = line.substring(pos).trim();
+                        isRuleBlock4AllAgents |= userAgent.equals("*");
+                        isRuleBlock4YaCyAgent |= userAgent.toLowerCase().indexOf("yacy") >=0;
+                        if (isRuleBlock4YaCyAgent) rule4YaCyFound = true;
+                    }
+                } else if (lineUpper.startsWith(ROBOTS_CRAWL_DELAY)) {
+                    pos = line.indexOf(" ");
+                    if (pos != -1) {
+                    	try {
+                    		crawlDelay = Integer.valueOf(line.substring(pos).trim());
+                    	} catch (NumberFormatException e) {
+                    		// invalid crawling delay
+                    	}
+                    } 
+                } else if (lineUpper.startsWith(ROBOTS_DISALLOW) || 
+                           lineUpper.startsWith(ROBOTS_ALLOW)) {
+                    inBlock = true;
+                    boolean isDisallowRule = lineUpper.startsWith(ROBOTS_DISALLOW);
+                    
+                    if (isRuleBlock4YaCyAgent || isRuleBlock4AllAgents) {
+                        // cutting off comments at the line end
+                        pos = line.indexOf(ROBOTS_COMMENT);
+                        if (pos != -1) line = line.substring(0,pos).trim();
+                                           
+                        // cutting of tailing *
+                        if (line.endsWith("*")) line = line.substring(0,line.length()-1);
+                        
+                        // replacing all tabs with spaces
+                        line = line.replaceAll("\t"," ");
+                        
                         // getting the path
-                        String path = line.substring(pos).trim();
-                        
-                        // unencoding all special charsx
-                        try {
-                            path = URLDecoder.decode(path,"UTF-8");
-                        } catch (Exception e) {
-                            /* 
-                             * url decoding failed. E.g. because of
-                             * "Incomplete trailing escape (%) pattern"
-                             */
+                        pos = line.indexOf(" ");
+                        if (pos != -1) {
+                            // getting the path
+                            String path = line.substring(pos).trim();
+                            
+                            // unencoding all special charsx
+                            try {
+                                path = URLDecoder.decode(path,"UTF-8");
+                            } catch (Exception e) {
+                                /* 
+                                 * url decoding failed. E.g. because of
+                                 * "Incomplete trailing escape (%) pattern"
+                                 */
+                            }
+                            
+                            // escaping all occurences of ; because this char is used as special char in the Robots DB
+                            path = path.replaceAll(RobotsTxt.ROBOTS_DB_PATH_SEPARATOR,"%3B");                    
+                            
+                            // adding it to the pathlist
+                            if (!isDisallowRule) path = "!" + path;
+                            if (isRuleBlock4AllAgents) deny4AllAgents.add(path);
+                            if (isRuleBlock4YaCyAgent) deny4YaCyAgent.add(path);
                         }
-                        
-                        // escaping all occurences of ; because this char is used as special char in the Robots DB
-                        path = path.replaceAll(RobotsTxt.ROBOTS_DB_PATH_SEPARATOR,"%3B");                    
-                        
-                        // adding it to the pathlist
-                        if (!isDisallowRule) path = "!" + path;
-                        if (isRuleBlock4AllAgents) deny4AllAgents.add(path);
-                        if (isRuleBlock4YaCyAgent) deny4YaCyAgent.add(path);
                     }
                 }
             }
-        }
+        } catch (IOException e) {}
         
         ArrayList<String> denyList = (rule4YaCyFound) ? deny4YaCyAgent : deny4AllAgents;
-        return new Object[]{denyList,sitemap,crawlDelay};
+        return new Object[]{denyList, sitemap, crawlDelay};
     }
     
 }

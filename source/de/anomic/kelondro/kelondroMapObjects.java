@@ -85,7 +85,7 @@ public class kelondroMapObjects extends kelondroObjects {
 
         // fill cluster and accumulator with values
         if ((sortfields != null) || (longaccfields != null) || (doubleaccfields != null)) try {
-            kelondroCloneableIterator<String> it = dyn.keys(true, false);
+            kelondroCloneableIterator<byte[]> it = dyn.keys(true, false);
             String mapname;
             Object cell;
             long valuel;
@@ -93,8 +93,8 @@ public class kelondroMapObjects extends kelondroObjects {
             Map<String, String> map;
             this.elementCount = 0;
             while (it.hasNext()) {
-                mapname = it.next();
-                map = getMap(mapname);
+                mapname = new String(it.next());
+                map = getMap(new String(mapname));
                 if (map == null) break;
                 
                 if (sortfields != null) for (int i = 0; i < sortfields.length; i++) {
@@ -299,13 +299,37 @@ public class kelondroMapObjects extends kelondroObjects {
         }
     }
     
-    public synchronized Iterator<String> keys(final boolean up, /* sorted by */ String field) {
+    public synchronized Iterator<byte[]> keys(final boolean up, /* sorted by */ String field) {
         // sorted iteration using the sortClusters
         if (sortClusterMap == null) return null;
         final kelondroMScoreCluster<String> cluster = sortClusterMap.get(field);
         if (cluster == null) return null; // sort field does not exist
         //System.out.println("DEBUG: cluster for field " + field + ": " + cluster.toString());
-        return cluster.scores(up);
+        return new string2bytearrayIterator(cluster.scores(up));
+    }
+    
+    public class string2bytearrayIterator implements Iterator<byte[]> {
+
+        Iterator<String> s;
+        
+        public string2bytearrayIterator(Iterator<String> s) {
+            this.s = s;
+        }
+        
+        public boolean hasNext() {
+            return s.hasNext();
+        }
+
+        public byte[] next() {
+            String r = s.next();
+            if (r == null) return null;
+            return r.getBytes();
+        }
+
+        public void remove() {
+            s.remove();
+        }
+        
     }
     
     public synchronized mapIterator maps(final boolean up, final String field) {
@@ -351,11 +375,11 @@ public class kelondroMapObjects extends kelondroObjects {
         // enumerates Map-Type elements
         // the key is also included in every map that is returned; it's key is 'key'
 
-        Iterator<String> keyIterator;
+        Iterator<byte[]> keyIterator;
         boolean finish;
         HashMap<String, String> n;
 
-        public mapIterator(Iterator<String> keyIterator) {
+        public mapIterator(Iterator<byte[]> keyIterator) {
             this.keyIterator = keyIterator;
             this.finish = false;
             this.n = next0();
@@ -377,7 +401,7 @@ public class kelondroMapObjects extends kelondroObjects {
             String nextKey;
             HashMap<String, String> map;
             while (keyIterator.hasNext()) {
-                nextKey = keyIterator.next();
+                nextKey = new String(keyIterator.next());
                 if (nextKey == null) {
                     finish = true;
                     return null;

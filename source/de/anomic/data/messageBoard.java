@@ -234,7 +234,7 @@ public class messageBoard {
 
     public class catIter implements Iterator<String> {
     
-        Iterator<String> allIter = null;
+        Iterator<byte[]> allIter = null;
         String nextKey = null;
         String category = "";
         
@@ -246,7 +246,7 @@ public class messageBoard {
         
         public void findNext() {
             while (allIter.hasNext()) {
-                nextKey = allIter.next();
+                nextKey = new String(allIter.next());
                 if (this.category==null || nextKey.startsWith(this.category)) return;
             }
             nextKey = null;

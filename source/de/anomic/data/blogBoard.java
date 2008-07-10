@@ -227,7 +227,7 @@ public class blogBoard {
 			database.remove(key);
 		} catch (IOException e) { }
     }
-    public Iterator<String> keys(boolean up) throws IOException {
+    public Iterator<byte[]> keys(boolean up) throws IOException {
         return database.keys(up, false);
     }
     /**
@@ -282,7 +282,7 @@ public class blogBoard {
      * Subclass of blogBoard, which provides the blogIterator object-type
      */
     public class BlogIterator implements Iterator<BlogEntry> {
-        Iterator<String> blogIter;
+        Iterator<byte[]> blogIter;
         blogBoard.BlogEntry nextEntry;
         public BlogIterator(boolean up) throws IOException {
             this.blogIter = blogBoard.this.database.keys(up, false);
@@ -300,7 +300,7 @@ public class blogBoard {
         
         public BlogEntry next() {
             try {
-                return readBlogEntry(this.blogIter.next());
+                return readBlogEntry(new String(this.blogIter.next()));
             } catch (kelondroException e) {
                 //resetDatabase();
                 return null;

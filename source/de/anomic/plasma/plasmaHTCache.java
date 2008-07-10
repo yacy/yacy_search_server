@@ -71,6 +71,8 @@ import java.util.regex.Pattern;
 
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.http.httpHeader;
+import de.anomic.kelondro.kelondroBLOB;
+import de.anomic.kelondro.kelondroBLOBHeap;
 import de.anomic.kelondro.kelondroBLOBTree;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroMScoreCluster;
@@ -92,7 +94,7 @@ import de.anomic.yacy.yacyURL;
 
 public final class plasmaHTCache {
     
-    public static final String DB_NAME = "responseHeader2.db";
+    public static final String DB_NAME = "responseHeader.heap";
     
     private static final int stackLimit = 150; // if we exceed that limit, we do not check idle
     public  static final long oneday = 1000 * 60 * 60 * 24; // milliseconds of a day
@@ -279,7 +281,17 @@ public final class plasmaHTCache {
     private static void openResponseHeaderDB() {
         // open the response header database
         File dbfile = new File(cachePath, DB_NAME);
-        responseHeaderDB = new kelondroMapObjects(new kelondroBLOBTree(dbfile, true, true, yacySeedDB.commonHashLength, 150, '#', kelondroBase64Order.enhancedCoder, false, false, true), 500);
+        kelondroBLOB blob = null;
+        if (DB_NAME.endsWith("heap")) {
+            try {
+                blob = new kelondroBLOBHeap(dbfile, yacySeedDB.commonHashLength, kelondroBase64Order.enhancedCoder);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            blob = new kelondroBLOBTree(dbfile, true, true, yacySeedDB.commonHashLength, 150, '#', kelondroBase64Order.enhancedCoder, false, false, true);
+        }
+        responseHeaderDB = new kelondroMapObjects(blob, 500);
     }
     
     private static void deleteOldHTCache(File directory) {
@@ -895,7 +907,7 @@ public final class plasmaHTCache {
             String initiator,
             CrawlProfile.entry profile
     ) {
-        return new Entry(
+        Entry entry = new Entry(
                 initDate, 
                 depth, 
                 url,
@@ -905,6 +917,8 @@ public final class plasmaHTCache {
                 initiator, 
                 profile
         );
+        entry.writeResourceInfo();
+        return entry;
     }
 
     public final static class Entry {
@@ -1039,11 +1053,14 @@ public final class plasmaHTCache {
         return this.resInfo;
     }
     
-    public boolean writeResourceInfo() {
+    private boolean writeResourceInfo() {
         if (this.resInfo == null) return false;
         try {
             HashMap<String, String> hm = new HashMap<String, String>();
             hm.putAll(this.resInfo.getMap());
+            hm.put("@@URL", this.url.toNormalform(false, false));
+            hm.put("@@DEPTH", Integer.toString(this.depth));
+            if (this.initiator != null) hm.put("@@INITIATOR", this.initiator);
             responseHeaderDB.set(this.url.hash(), hm);
         } catch (Exception e) {
             resetResponseHeaderDB();

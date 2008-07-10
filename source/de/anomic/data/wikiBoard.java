@@ -316,11 +316,11 @@ public class wikiBoard {
     }
      */
 
-    public Iterator<String> keys(boolean up) throws IOException {
+    public Iterator<byte[]> keys(boolean up) throws IOException {
         return datbase.keys(up, false);
     }
 
-    public Iterator<String> keysBkp(boolean up) throws IOException {
+    public Iterator<byte[]> keysBkp(boolean up) throws IOException {
         return bkpbase.keys(up, false);
     }
 }

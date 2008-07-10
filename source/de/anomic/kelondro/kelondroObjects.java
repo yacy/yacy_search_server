@@ -35,6 +35,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import de.anomic.server.serverDate;
+
 public class kelondroObjects {
 
     private kelondroBLOB blob;
@@ -57,11 +59,6 @@ public class kelondroObjects {
         this.cache = new HashMap<String, HashMap<String, String>>();
         this.cacheScore = new kelondroMScoreCluster<String>();
     }
-
-    public int keySize() {
-        return blob.keylength();
-    }
-
 
     private static String map2string(final Map<String, String> map, final String comment) throws IOException {
         final Iterator<Map.Entry<String, String>> iter = map.entrySet().iterator();
@@ -99,9 +96,10 @@ public class kelondroObjects {
         assert (key.length() > 0);
         assert (newMap != null);
         if (cacheScore == null) return; // may appear during shutdown
-
+        while (key.length() < blob.keylength()) key += "_";
+        
         // write entry
-        blob.put(key, map2string(newMap, "").getBytes());
+        blob.put(key.getBytes(), map2string(newMap, "W" + serverDate.formatShortSecond() + " ").getBytes());
 
         // check for space in cache
         checkCacheSpace();
@@ -114,13 +112,14 @@ public class kelondroObjects {
     public synchronized void remove(String key) throws IOException {
         // update elementCount
         if (key == null) return;
+        while (key.length() < blob.keylength()) key += "_";
         
         // remove from cache
         cacheScore.deleteScore(key);
         cache.remove(key);
 
         // remove from file
-        blob.remove(key);
+        blob.remove(key.getBytes());
     }
 
     public synchronized HashMap<String, String> get(final String key) throws IOException {
@@ -128,18 +127,20 @@ public class kelondroObjects {
         return get(key, true);
     }
 
-    protected synchronized HashMap<String, String> get(final String key, final boolean storeCache) throws IOException {
+    protected synchronized HashMap<String, String> get(String key, final boolean storeCache) throws IOException {
         // load map from cache
         assert key != null;
         if (cache == null) return null; // case may appear during shutdown
+        while (key.length() < blob.keylength()) key += "_";
+        
         HashMap<String, String> map = cache.get(key);
         if (map != null) return map;
 
         // load map from kra
-        if (!(blob.has(key))) return null;
+        if (!(blob.has(key.getBytes()))) return null;
         
         // read object
-        byte[] b = blob.get(key);
+        byte[] b = blob.get(key.getBytes());
         if (b == null) return null;
         map = string2map(new String(b));
 
@@ -166,15 +167,15 @@ public class kelondroObjects {
         }
     }
 
-    public synchronized kelondroCloneableIterator<String> keys(final boolean up, final boolean rotating) throws IOException {
+    public synchronized kelondroCloneableIterator<byte[]> keys(final boolean up, final boolean rotating) throws IOException {
         // simple enumeration of key names without special ordering
         return blob.keys(up, rotating);
     }
 
-    public synchronized kelondroCloneableIterator<String> keys(final boolean up, final boolean rotating, final byte[] firstKey, final byte[] secondKey) throws IOException {
+    public synchronized kelondroCloneableIterator<byte[]> keys(final boolean up, final boolean rotating, final byte[] firstKey, final byte[] secondKey) throws IOException {
         // simple enumeration of key names without special ordering
-        kelondroCloneableIterator<String> i = blob.keys(up, firstKey);
-        if (rotating) return new kelondroRotateIterator<String>(i, secondKey, blob.size()); else return i;
+        kelondroCloneableIterator<byte[]> i = blob.keys(up, firstKey);
+        if (rotating) return new kelondroRotateIterator<byte[]>(i, secondKey, blob.size()); else return i;
     }
 
 
@@ -205,10 +206,10 @@ public class kelondroObjects {
         // enumerates Map-Type elements
         // the key is also included in every map that is returned; it's key is 'key'
 
-        Iterator<String> keyIterator;
+        Iterator<byte[]> keyIterator;
         boolean finish;
 
-        public objectIterator(Iterator<String> keyIterator) {
+        public objectIterator(Iterator<byte[]> keyIterator) {
             this.keyIterator = keyIterator;
             this.finish = false;
         }
@@ -218,13 +219,13 @@ public class kelondroObjects {
         }
 
         public HashMap<String, String> next() {
-            final String nextKey = keyIterator.next();
+            final byte[] nextKey = keyIterator.next();
             if (nextKey == null) {
                 finish = true;
                 return null;
             }
             try {
-                final HashMap<String, String> obj = get(nextKey);
+                final HashMap<String, String> obj = get(new String(nextKey));
                 if (obj == null) throw new kelondroException("no more elements available");
                 return obj;
             } catch (IOException e) {

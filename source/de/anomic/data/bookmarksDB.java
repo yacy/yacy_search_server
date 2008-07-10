@@ -1108,7 +1108,7 @@ public class bookmarksDB {
      * Subclass of bookmarksDB, which provides the tagIterator object-type
      */
     public class tagIterator implements Iterator<Tag> {
-        kelondroCloneableIterator<String> tagIter;
+        kelondroCloneableIterator<byte[]> tagIter;
         bookmarksDB.Tag nextEntry;
         
         public tagIterator(boolean up) throws IOException {
@@ -1128,7 +1128,7 @@ public class bookmarksDB {
         
         public Tag next() {
             try {
-                return getTag(this.tagIter.next());
+                return getTag(new String(this.tagIter.next()));
             } catch (kelondroException e) {
                 //resetDatabase();
                 return null;
@@ -1151,7 +1151,7 @@ public class bookmarksDB {
      * Subclass of bookmarksDB, which provides the bookmarkIterator object-type
      */
     public class bookmarkIterator implements Iterator<Bookmark> {
-        Iterator<String> bookmarkIter;
+        Iterator<byte[]> bookmarkIter;
         bookmarksDB.Bookmark nextEntry;
         public bookmarkIterator(boolean up) throws IOException {
             //flushBookmarkCache(); //XXX: this will cost performance
@@ -1170,7 +1170,7 @@ public class bookmarksDB {
         
         public Bookmark next() {
             try {
-                return getBookmark(this.bookmarkIter.next());
+                return getBookmark(new String(this.bookmarkIter.next()));
             } catch (kelondroException e) {
                 //resetDatabase();
                 return null;

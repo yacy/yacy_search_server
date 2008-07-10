@@ -588,7 +588,7 @@ public final class userDB {
 
     public class userIterator implements Iterator<Entry> {
         // the iterator iterates all userNames
-        kelondroCloneableIterator<String> userIter;
+        kelondroCloneableIterator<byte[]> userIter;
         userDB.Entry nextEntry;
         
         public userIterator(boolean up) throws IOException {
@@ -605,7 +605,7 @@ public final class userDB {
         }
         public Entry next() {
             try {
-                return getEntry(this.userIter.next());
+                return getEntry(new String(this.userIter.next()));
             } catch (kelondroException e) {
                 resetDatabase();
                 return null;

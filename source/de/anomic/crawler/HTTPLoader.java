@@ -240,6 +240,7 @@ public final class HTTPLoader {
                             fos.write(responseBody);
                             htCache.setCacheArray(responseBody);
                             plasmaHTCache.writeFileAnnouncement(cacheFile);
+                            //htCache.writeResourceInfo(); // write header to header BLOB-database
                         } finally {
                             if (fos!=null)try{fos.close();}catch(Exception e){/* ignore this */}
                         }

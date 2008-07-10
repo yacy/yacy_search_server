@@ -218,7 +218,7 @@ public class blogBoardComments {
 			database.remove(key);
 		} catch (IOException e) { }
     }
-    public Iterator<String> keys(boolean up) throws IOException {
+    public Iterator<byte[]> keys(boolean up) throws IOException {
         return database.keys(up, false);
     }
 

@@ -43,7 +43,6 @@
 //the intact and unchanged copyright notice.
 //Contributions and changes to the program code must be marked as such.
 
-
 package de.anomic.crawler;
 
 import java.io.BufferedInputStream;
@@ -62,6 +61,8 @@ import de.anomic.http.HttpClient;
 import de.anomic.http.JakartaCommonsHttpClient;
 import de.anomic.http.JakartaCommonsHttpResponse;
 import de.anomic.http.httpHeader;
+import de.anomic.kelondro.kelondroBLOB;
+import de.anomic.kelondro.kelondroBLOBHeap;
 import de.anomic.kelondro.kelondroBLOBTree;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMapObjects;
@@ -81,7 +82,17 @@ public class RobotsTxt {
     public RobotsTxt(File robotsTableFile) {
         this.robotsTableFile = robotsTableFile;
         robotsTableFile.getParentFile().mkdirs();
-        robotsTable = new kelondroMapObjects(new kelondroBLOBTree(robotsTableFile, true, true, 256, 512, '_', kelondroNaturalOrder.naturalOrder, false, false, true), 100);
+        kelondroBLOB blob = null;
+        if (robotsTableFile.getName().endsWith(".heap")) {
+            try {
+                blob = new kelondroBLOBHeap(robotsTableFile, 64, kelondroNaturalOrder.naturalOrder);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            blob = new kelondroBLOBTree(robotsTableFile, true, true, 256, 512, '_', kelondroNaturalOrder.naturalOrder, false, false, true);
+        }
+        robotsTable = new kelondroMapObjects(blob, 100);
     }
     
     private void resetDatabase() {
@@ -352,24 +363,27 @@ public class RobotsTxt {
         return crawlDelay;      
     }
     
+    //private static final HashSet<String> loadedRobots = new HashSet<String>(); // only for debugging
+    
     @SuppressWarnings("unchecked")
     public boolean isDisallowed(yacyURL nexturl) {
         if (nexturl == null) throw new IllegalArgumentException();               
         
         // generating the hostname:poart string needed to do a DB lookup
         String urlHostPort = getHostPort(nexturl);
-        
-        // do a DB lookup to determine if the robots data is already available
-        RobotsTxt.Entry robotsTxt4Host = getEntry(urlHostPort);
-
-        // if we have not found any data or the data is older than 7 days, we need to load it from the remote server
-        if (
-            (robotsTxt4Host == null) || 
-            (robotsTxt4Host.getLoadedDate() == null) ||
-            (System.currentTimeMillis() - robotsTxt4Host.getLoadedDate().getTime() > 7*24*60*60*1000)
-           ) {
-            synchronized(this) {
-                
+        RobotsTxt.Entry robotsTxt4Host = null;
+        synchronized(this) {
+            
+            // do a DB lookup to determine if the robots data is already available
+            robotsTxt4Host = getEntry(urlHostPort);
+    
+            // if we have not found any data or the data is older than 7 days, we need to load it from the remote server
+            if (
+                (robotsTxt4Host == null) || 
+                (robotsTxt4Host.getLoadedDate() == null) ||
+                (System.currentTimeMillis() - robotsTxt4Host.getLoadedDate().getTime() > 7*24*60*60*1000)
+               ) {
+                    
                 // generating the proper url to download the robots txt
                 yacyURL robotsURL = null;
                 try {                 
@@ -380,56 +394,60 @@ public class RobotsTxt {
                 }
                 
                 Object[] result = null;
-                boolean accessCompletelyRestricted = false;
-                byte[] robotsTxt = null;
-                String eTag = null;
-                Date modDate = null;
-                try { 
-                    serverLog.logFine("ROBOTS","Trying to download the robots.txt file from URL '" + robotsURL + "'.");
-                    result = downloadRobotsTxt(robotsURL,5,robotsTxt4Host);
-                    
-                    if (result != null) {
-                        accessCompletelyRestricted = ((Boolean)result[DOWNLOAD_ACCESS_RESTRICTED]).booleanValue();
-                        robotsTxt = (byte[])result[DOWNLOAD_ROBOTS_TXT];
-                        eTag = (String) result[DOWNLOAD_ETAG];
-                        modDate = (Date) result[DOWNLOAD_MODDATE];
-                    } else if (robotsTxt4Host != null) {
-                        robotsTxt4Host.setLoadedDate(new Date());
-                        addEntry(robotsTxt4Host);
-                    }
+                serverLog.logFine("ROBOTS","Trying to download the robots.txt file from URL '" + robotsURL + "'.");
+                try {
+                    result = downloadRobotsTxt(robotsURL, 5, robotsTxt4Host);
                 } catch (Exception e) {
-                    serverLog.logSevere("ROBOTS","Unable to download the robots.txt file from URL '" + robotsURL + "'. " + e.getMessage());
+                    result = null;
                 }
+                /*
+                assert !loadedRobots.contains(robotsURL.toNormalform(false, false)) :
+                    "robots-url=" + robotsURL.toString() +
+                    ", robots=" + ((result == null || result[DOWNLOAD_ROBOTS_TXT] == null) ? "NULL" : new String((byte[]) result[DOWNLOAD_ROBOTS_TXT])) +
+                    ", robotsTxt4Host=" + ((robotsTxt4Host == null) ? "NULL" : robotsTxt4Host.getLoadedDate().toString());
+                loadedRobots.add(robotsURL.toNormalform(false, false));
+                */
                 
-                if ((robotsTxt4Host==null)||((robotsTxt4Host!=null)&&(result!=null))) {
-                    ArrayList<String> denyPath = null;
-                    String sitemap = null;
-                    Integer crawlDelay = null;
-                    if (accessCompletelyRestricted) {
+                if (result == null) {
+                    // no robots.txt available, make an entry to prevent that the robots loading is done twice
+                    if (robotsTxt4Host == null) {
+                        // generate artificial entry
+                        robotsTxt4Host = new Entry(
+                                urlHostPort, 
+                                new ArrayList<String>(), 
+                                new Date(),
+                                new Date(),
+                                null,
+                                null,
+                                new Integer(0));
+                    } else {
+                        robotsTxt4Host.setLoadedDate(new Date());
+                    }
+                    
+                    // store the data into the robots DB
+                    addEntry(robotsTxt4Host);
+                } else {
+                    Object[] parserResult = robotsParser.parse((byte[]) result[DOWNLOAD_ROBOTS_TXT]);
+                    ArrayList<String> denyPath = (ArrayList<String>) parserResult[0];
+                    if (((Boolean) result[DOWNLOAD_ACCESS_RESTRICTED]).booleanValue()) {
                         denyPath = new ArrayList<String>();
                         denyPath.add("/");
-                    } else {
-                        // parsing the robots.txt Data and converting it into an arraylist
-                        try {
-                            Object[] parserResult = robotsParser.parse(robotsTxt);
-                            denyPath = (ArrayList<String>) parserResult[0];
-                            sitemap = (String) parserResult[1];
-                            crawlDelay = (Integer) parserResult[2];
-                        } catch (IOException e) {
-                            serverLog.logSevere("ROBOTS","Unable to parse the robots.txt file from URL '" + robotsURL + "'.");
-                        }
-                    } 
+                    }
                     
-                    // storing the data into the robots DB
-                    robotsTxt4Host = addEntry(urlHostPort,denyPath,new Date(),modDate,eTag,sitemap,crawlDelay);
+                    // store the data into the robots DB
+                    robotsTxt4Host = addEntry(
+                            urlHostPort,
+                            denyPath,
+                            new Date(),
+                            (Date) result[DOWNLOAD_MODDATE],
+                            (String) result[DOWNLOAD_ETAG],
+                            (String) parserResult[1],
+                            (Integer) parserResult[2]);
                 }
             }
         }
         
-        if (robotsTxt4Host != null && robotsTxt4Host.isDisallowed(nexturl.getFile())) {
-            return true;        
-        }        
-        return false;
+        return robotsTxt4Host.isDisallowed(nexturl.getFile());
     }
     
     private static Object[] downloadRobotsTxt(yacyURL robotsURL, int redirectionCount, RobotsTxt.Entry entry) throws Exception {

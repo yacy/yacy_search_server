@@ -91,8 +91,9 @@ public final class kelondroMScoreCluster<E> {
             double d = 1000d * ((Double) o).doubleValue();
             return (int) Math.round(d);
         }
-        String s = "";
+        String s = null;
         if (o instanceof String) s = (String) o;
+        if (o instanceof byte[]) s = new String((byte[]) o);
         
         // this can be used to calculate a score from a string
         if ((s == null) || (s.length() == 0) || (s.charAt(0) == '-')) return 0;

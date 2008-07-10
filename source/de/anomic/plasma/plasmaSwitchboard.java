@@ -809,7 +809,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
      * 
      * @see plasmaSwitchboard#PLASMA_PATH for the folder this file lies in
      */
-    public static final String DBFILE_CRAWL_ROBOTS      = "crawlRobotsTxt1.db";
+    public static final String DBFILE_CRAWL_ROBOTS      = "crawlRobotsTxt.heap";
     /**
      * <p><code>public static final String <strong>DBFILE_USER</strong> = "DATA/SETTINGS/user.db"</code></p>
      * <p>Path to the user-DB, beginning from the YaCy-installation's top-folder. It holds all rights the created
@@ -1556,10 +1556,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
          * b) the content should be indexed
          * ========================================================================= */        
         if (((entry.profile() != null) && (entry.profile().storeHTCache())) || (doIndexing && isSupportedContent)) {
-            // store response header            
+            // store response header
+            /*
             if (entry.writeResourceInfo()) {
                 this.log.logInfo("WROTE HEADER for " + entry.cacheFile());
-            }        
+            }
+            */
             
             // work off unwritten files
             if (entry.cacheArray() != null) {
