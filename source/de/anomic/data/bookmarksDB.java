@@ -445,11 +445,11 @@ public class bookmarksDB {
     	}    	
     	return set.iterator();
     }
-    
+    /*
     public Iterator<Tag> getTagIterator(String tagName, boolean priv){
      	return getTagIterator(tagName, priv, SORT_ALPHA);
     }
-    
+    */
     public Iterator<Tag> getTagIterator(String tagName, boolean priv, int comp){
     	Comparator<Tag> c;    	
     	if (comp == SORT_SIZE) c = new tagSizeComparator();

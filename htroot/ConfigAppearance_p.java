@@ -44,7 +44,7 @@ import de.anomic.server.serverSwitch;
 import de.anomic.tools.nxTools;
 import de.anomic.yacy.yacyURL;
 
-public class ConfigSkins_p {
+public class ConfigAppearance_p {
 
 	public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
         serverObjects prop = new serverObjects();
@@ -114,11 +114,17 @@ public class ConfigSkins_p {
                     changeSkin(sb, skinPath, url.substring(url.lastIndexOf("/"), url.length()));
                 }
             }
-            if (post.containsKey("searchpage_button")) {
+            if (post.containsKey("searchpage_set")) {
                 sb.setConfig("promoteSearchPageGreeting", post.get("promoteSearchPageGreeting", ""));
                 sb.setConfig("promoteSearchPageGreeting.homepage", post.get("promoteSearchPageGreeting.homepage", ""));
                 sb.setConfig("promoteSearchPageGreeting.largeImage", post.get("promoteSearchPageGreeting.largeImage", ""));
                 sb.setConfig("promoteSearchPageGreeting.smallImage", post.get("promoteSearchPageGreeting.smallImage", ""));
+            }
+            if (post.containsKey("searchpage_default")) {
+                sb.setConfig("promoteSearchPageGreeting", "P2P Web Search");
+                sb.setConfig("promoteSearchPageGreeting.homepage", "http://yacy.net");
+                sb.setConfig("promoteSearchPageGreeting.largeImage", "/env/grafics/YaCyLogo_120ppi.png");
+                sb.setConfig("promoteSearchPageGreeting.smallImage", "/env/grafics/YaCyLogo_60ppi.png");
             }
             
         }

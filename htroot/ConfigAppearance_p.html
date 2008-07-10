@@ -6,13 +6,17 @@
   </head>
   <body id="ConfigSkins">
     #%env/templates/header.template%#
-    #%env/templates/submenuConfig.template%#
-    <h2>Skin Selection</h2>
+    #%env/templates/submenuCustomizationIntegration.template%#
+    <h2>Appearance and Integration</h2>
     <p>
-      You can change the appearance of YaCy with skins. Select one of the default skins, download new skins, or create your own skin.
+      You can change the appearance of YaCy with skins
+      and the default icons and links on the search page can be replaced with you own.
     </p>
     
-    <form action="ConfigSkins_p.html">
+    <h3>Skin Selection</h3>
+    <p>
+      Select one of the default skins, download new skins, or create your own skin.
+    </p><form action="ConfigAppearance_p.html">
       <fieldset>
         <dl>
           <dt><label for="cur_skin">Current skin</label>:</dt>
@@ -32,7 +36,7 @@
       </fieldset>
     </form>
     
-    <form action="ConfigSkins_p.html">
+    <form action="ConfigAppearance_p.html">
       <fieldset>
         <dl>
           <dt><label for="url">Install new skin from URL</label>:</dt>
@@ -50,11 +54,13 @@
     ::<p><strong>Error saving the skin.</strong></p>
     #(/status)#
     
+    
+    <h3>Search Page Integration</h3>
     <p>
       The search page may be customized. You can change the 'corporate identity'-images, the greeting line
       and a link to a home page that is reached when the 'corporate identity'-images are clicked.
     </p>
-    <form action="ConfigSkins_p.html">
+    <form action="ConfigAppearance_p.html">
       <fieldset>
         <dl>
           <dt>Greeting Line</dt>
@@ -69,7 +75,10 @@
           <dt>URL of a Large Corporate Image</dt>
           <dd><input type="text" name="promoteSearchPageGreeting.largeImage" value="#[promoteSearchPageGreeting.largeImage]#" size="60" /></dd>
           
-          <dd><input type="submit" name="searchpage_button" value="Change Search Page" /></dd>
+          <dd>
+            <input type="submit" name="searchpage_set" value="Change Search Page" />&nbsp;&nbsp;
+            <input type="submit" name="searchpage_default" value="Set to Default Values" />
+          </dd>
         </dl>
       </fieldset>
     </form>
