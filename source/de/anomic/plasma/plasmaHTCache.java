@@ -401,15 +401,15 @@ public final class plasmaHTCache {
        return false;
     }
 
-    private static boolean deleteFileandDirs(File obj, String msg) {
-        if (deleteFile(obj)) {
-            log.logInfo("DELETED " + msg + " CACHE: " + obj.toString());
-            obj = obj.getParentFile();
+    private static boolean deleteFileandDirs(File path, String msg) {
+        if (deleteFile(path)) {
+            log.logInfo("DELETED " + msg + " CACHE: " + path.toString());
+            path = path.getParentFile(); // returns null if the path does not have a parent
             // If the has been emptied, remove it
-            // Loop as long as we produce empty driectoriers, but stop at HTCACHE
-            while ((!(obj.equals(cachePath))) && (obj.isDirectory()) && (obj.list().length == 0)) {
-                if (obj.delete()) if (log.isFine()) log.logFine("DELETED EMPTY DIRECTORY : " + obj.toString());
-                obj = obj.getParentFile();
+            // Loop as long as we produce empty directories, but stop at HTCACHE
+            while (path != null && !(path.equals(cachePath)) && path.isDirectory() && path.list().length == 0) { // NPE
+                if (path.delete()) if (log.isFine()) log.logFine("DELETED EMPTY DIRECTORY : " + path.toString());
+                path = path.getParentFile(); // returns null if the path does not have a parent
             }
             return true;
          }
