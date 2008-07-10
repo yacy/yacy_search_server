@@ -93,7 +93,7 @@ public class consoleInterface extends Thread
                 if (buffer.ready())
                     break;
             }
-            log.logInfo("logpoint 3 "+ name +" needed " + tries + " tries");
+            //log.logInfo("logpoint 3 "+ name +" needed " + tries + " tries");
             while((line = buffer.readLine()) != null) {
                     output.add(line);
             }
@@ -109,10 +109,10 @@ public class consoleInterface extends Thread
     public List<String> getOutput(){
         // wait that data is ready
         try {
-            log.logInfo("logpoint 4 waiting for data of '"+ name +"'");
-            final long start = System.currentTimeMillis();
+            //log.logInfo("logpoint 4 waiting for data of '"+ name +"'");
+            //final long start = System.currentTimeMillis();
             dataIsRead.acquire();
-            log.logInfo("logpoint 5 data ready for '"+ name +"' after "+ (System.currentTimeMillis() - start) +" ms");
+            //log.logInfo("logpoint 5 data ready for '"+ name +"' after "+ (System.currentTimeMillis() - start) +" ms");
         } catch (InterruptedException e) {
             // after interrupt just return what is available (maybe nothing)
         }
