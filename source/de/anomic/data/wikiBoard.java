@@ -51,7 +51,7 @@ import java.util.TimeZone;
 
 import de.anomic.kelondro.kelondroBLOBTree;
 import de.anomic.kelondro.kelondroBase64Order;
-import de.anomic.kelondro.kelondroMapObjects;
+import de.anomic.kelondro.kelondroMapDataMining;
 import de.anomic.kelondro.kelondroNaturalOrder;
 
 public class wikiBoard {
@@ -66,18 +66,18 @@ public class wikiBoard {
         SimpleFormatter.setTimeZone(TimeZone.getTimeZone("GMT"));
     }
 
-    kelondroMapObjects datbase = null;
-    kelondroMapObjects bkpbase = null;
+    kelondroMapDataMining datbase = null;
+    kelondroMapDataMining bkpbase = null;
     static HashMap<String, String> authors = new HashMap<String, String>();
 
     public wikiBoard(File actpath, File bkppath) {
         new File(actpath.getParent()).mkdirs();
         if (datbase == null) {
-            datbase = new kelondroMapObjects(new kelondroBLOBTree(actpath, true, true, keyLength, recordSize, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 500);
+            datbase = new kelondroMapDataMining(new kelondroBLOBTree(actpath, true, true, keyLength, recordSize, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 500);
         }
         new File(bkppath.getParent()).mkdirs();
         if (bkpbase == null) {
-            bkpbase = new kelondroMapObjects(new kelondroBLOBTree(bkppath, true, true, keyLength + dateFormat.length(), recordSize, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 500);
+            bkpbase = new kelondroMapDataMining(new kelondroBLOBTree(bkppath, true, true, keyLength + dateFormat.length(), recordSize, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 500);
         }
     }
 
@@ -277,9 +277,9 @@ public class wikiBoard {
             //System.out.println("key = " + page.key);
             //System.out.println("oldDate = " + oldDate);
             //System.out.println("record = " + oldEntry.record.toString());
-            bkpbase.set(page.key + dateString(oldDate), oldEntry.record);
+            bkpbase.put(page.key + dateString(oldDate), oldEntry.record);
             // write the new page
-            datbase.set(page.key, page.record);
+            datbase.put(page.key, page.record);
             return page.key;
         } catch (IOException e) {
             return null;
@@ -290,7 +290,7 @@ public class wikiBoard {
         return read(key, datbase);
     }
 
-    entry read(String key, kelondroMapObjects base) {
+    entry read(String key, kelondroMapDataMining base) {
         try {
             key = normalize(key);
             if (key.length() > keyLength) key = key.substring(0, keyLength);

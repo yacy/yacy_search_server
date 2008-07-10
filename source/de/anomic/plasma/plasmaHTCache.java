@@ -22,25 +22,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-//
-// Using this software in any meaning (reading, learning, copying, compiling,
-// running) means that you agree that the Author(s) is (are) not responsible
-// for cost, loss of data or any harm that may be caused directly or indirectly
-// by usage of this softare or this documentation. The usage of this software
-// is on your own risk. The installation and usage (starting/running) of this
-// software may allow other people or application to access your computer and
-// any attached devices and is highly dependent on the configuration of the
-// software which must be done by the user of the software; the author(s) is
-// (are) also not responsible for proper configuration and usage of the
-// software, even if provoked by documentation provided together with
-// the software.
-//
-// Any changes to this file according to the GPL as documented in the file
-// gpl.txt aside this file in the shipment you received can be done to the
-// lines that follows this copyright notice here, but changes must not be
-// done inside the copyright notive above. A re-distribution must contain
-// the intact and unchanged copyright notice.
-// Contributions and changes to the program code must be marked as such.
 
 /*
    Class documentation:
@@ -76,7 +57,7 @@ import de.anomic.kelondro.kelondroBLOBHeap;
 import de.anomic.kelondro.kelondroBLOBTree;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroMScoreCluster;
-import de.anomic.kelondro.kelondroMapObjects;
+import de.anomic.kelondro.kelondroMapDataMining;
 import de.anomic.plasma.cache.IResourceInfo;
 import de.anomic.plasma.cache.ResourceInfoFactory;
 import de.anomic.plasma.cache.UnsupportedProtocolException;
@@ -99,7 +80,7 @@ public final class plasmaHTCache {
     private static final int stackLimit = 150; // if we exceed that limit, we do not check idle
     public  static final long oneday = 1000 * 60 * 60 * 24; // milliseconds of a day
 
-    static kelondroMapObjects responseHeaderDB = null;
+    private static kelondroMapDataMining responseHeaderDB = null;
     private static final ConcurrentLinkedQueue<Entry> cacheStack = new ConcurrentLinkedQueue<Entry>();
     private static final ConcurrentHashMap<String, File> cacheAge = new ConcurrentHashMap<String, File>(); // a <date+hash, cache-path> - relation
     public static long curCacheSize = 0;
@@ -291,7 +272,7 @@ public final class plasmaHTCache {
         } else {
             blob = new kelondroBLOBTree(dbfile, true, true, yacySeedDB.commonHashLength, 150, '#', kelondroBase64Order.enhancedCoder, false, false, true);
         }
-        responseHeaderDB = new kelondroMapObjects(blob, 500);
+        responseHeaderDB = new kelondroMapDataMining(blob, 500);
     }
     
     private static void deleteOldHTCache(File directory) {
@@ -1061,7 +1042,7 @@ public final class plasmaHTCache {
             hm.put("@@URL", this.url.toNormalform(false, false));
             hm.put("@@DEPTH", Integer.toString(this.depth));
             if (this.initiator != null) hm.put("@@INITIATOR", this.initiator);
-            responseHeaderDB.set(this.url.hash(), hm);
+            responseHeaderDB.put(this.url.hash(), hm);
         } catch (Exception e) {
             resetResponseHeaderDB();
             return false;

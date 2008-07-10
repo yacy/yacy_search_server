@@ -34,19 +34,19 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-public class kelondroMapObjects extends kelondroObjects {
+public class kelondroMapDataMining extends kelondroMap {
 
     private String[] sortfields, longaccfields, doubleaccfields;
     private HashMap<String, kelondroMScoreCluster<String>> sortClusterMap; // a String-kelondroMScoreCluster - relation
     private HashMap<String, Object> accMap; // to store accumulations of specific fields
     private int elementCount;
     
-    public kelondroMapObjects(kelondroBLOB dyn, int cachesize) {
+    public kelondroMapDataMining(kelondroBLOB dyn, int cachesize) {
         this(dyn, cachesize, null, null, null, null, null);
     }
     
 	@SuppressWarnings({ "unchecked", "null" })
-	public kelondroMapObjects(kelondroBLOB dyn, int cachesize, String[] sortfields, String[] longaccfields, String[] doubleaccfields, Method externalInitializer, Object externalHandler) {
+	public kelondroMapDataMining(kelondroBLOB dyn, int cachesize, String[] sortfields, String[] longaccfields, String[] doubleaccfields, Method externalInitializer, Object externalHandler) {
         super(dyn, cachesize);
         
         // create fast ordering clusters and acc fields
@@ -172,7 +172,7 @@ public class kelondroMapObjects extends kelondroObjects {
         this.elementCount = 0;
     }
     
-    public synchronized void set(String key, HashMap<String, String> newMap) throws IOException {
+    public synchronized void put(String key, HashMap<String, String> newMap) throws IOException {
         assert (key != null);
         assert (key.length() > 0);
         assert (newMap != null);
@@ -189,7 +189,7 @@ public class kelondroMapObjects extends kelondroObjects {
             }
         }
         
-        super.set(key, newMap);
+        super.put(key, newMap);
         
         // update sortCluster
         if (sortClusterMap != null) updateSortCluster(key, newMap);

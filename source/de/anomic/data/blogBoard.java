@@ -68,7 +68,7 @@ import org.xml.sax.SAXException;
 import de.anomic.kelondro.kelondroBLOBTree;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroException;
-import de.anomic.kelondro.kelondroMapObjects;
+import de.anomic.kelondro.kelondroMapDataMining;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.server.serverDate;
 import de.anomic.server.logging.serverLog;
@@ -78,12 +78,12 @@ public class blogBoard {
     public  static final int keyLength = 64;
     private static final int recordSize = 512;
     
-    kelondroMapObjects database = null;
+    kelondroMapDataMining database = null;
     
     public blogBoard(File actpath) {
     		new File(actpath.getParent()).mkdir();
         if (database == null) {
-            database = new kelondroMapObjects(new kelondroBLOBTree(actpath, true, true, keyLength, recordSize, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 500);
+            database = new kelondroMapDataMining(new kelondroBLOBTree(actpath, true, true, keyLength, recordSize, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 500);
         }
     }
     public int size() {
@@ -128,7 +128,7 @@ public class blogBoard {
      */
     public String writeBlogEntry(BlogEntry page) {
         try {
-            database.set(page.key, page.record);
+            database.put(page.key, page.record);
             return page.key;
         } catch (IOException e) {
             return null;
@@ -137,7 +137,7 @@ public class blogBoard {
     public BlogEntry readBlogEntry(String key) {
         return readBlogEntry(key, database);
     }
-    private BlogEntry readBlogEntry(String key, kelondroMapObjects base) {
+    private BlogEntry readBlogEntry(String key, kelondroMapDataMining base) {
     	key = normalize(key);
         if (key.length() > keyLength) 
             key = key.substring(0, keyLength);

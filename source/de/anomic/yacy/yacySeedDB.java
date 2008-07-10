@@ -70,7 +70,7 @@ import de.anomic.kelondro.kelondroBLOBTree;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMScoreCluster;
-import de.anomic.kelondro.kelondroMapObjects;
+import de.anomic.kelondro.kelondroMapDataMining;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDate;
@@ -107,7 +107,7 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
     // class objects
     protected File seedActiveDBFile, seedPassiveDBFile, seedPotentialDBFile;
     protected File myOwnSeedFile;
-    protected kelondroMapObjects seedActiveDB, seedPassiveDB, seedPotentialDB;
+    protected kelondroMapDataMining seedActiveDB, seedPassiveDB, seedPotentialDB;
     
     public int lastSeedUpload_seedDBSize = 0;
     public long lastSeedUpload_timeStamp = System.currentTimeMillis();
@@ -238,7 +238,7 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
     }
     
     @SuppressWarnings("unchecked")
-    private synchronized kelondroMapObjects openSeedTable(File seedDBFile) {
+    private synchronized kelondroMapDataMining openSeedTable(File seedDBFile) {
         final boolean usetree = false;
         new File(seedDBFile.getParent()).mkdirs();
         Class[] args;
@@ -259,15 +259,15 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
             initializeHandlerMethod = null;
         }
         try {
-            return new kelondroMapObjects(new kelondroBLOBTree(seedDBFile, true, true, commonHashLength, 480, '#', kelondroBase64Order.enhancedCoder, usetree, false, true), 500, sortFields, longaccFields, doubleaccFields, initializeHandlerMethod, this);
+            return new kelondroMapDataMining(new kelondroBLOBTree(seedDBFile, true, true, commonHashLength, 480, '#', kelondroBase64Order.enhancedCoder, usetree, false, true), 500, sortFields, longaccFields, doubleaccFields, initializeHandlerMethod, this);
         } catch (Exception e) {
             // try again
             kelondroBLOBTree.delete(seedDBFile);
-            return new kelondroMapObjects(new kelondroBLOBTree(seedDBFile, true, true, commonHashLength, 480, '#', kelondroBase64Order.enhancedCoder, usetree, false, true), 500, sortFields, longaccFields, doubleaccFields, initializeHandlerMethod, this);
+            return new kelondroMapDataMining(new kelondroBLOBTree(seedDBFile, true, true, commonHashLength, 480, '#', kelondroBase64Order.enhancedCoder, usetree, false, true), 500, sortFields, longaccFields, doubleaccFields, initializeHandlerMethod, this);
         }
     }
     
-    protected synchronized kelondroMapObjects resetSeedTable(kelondroMapObjects seedDB, File seedDBFile) {
+    protected synchronized kelondroMapDataMining resetSeedTable(kelondroMapDataMining seedDB, File seedDBFile) {
         // this is an emergency function that should only be used if any problem with the
         // seed.db is detected
         yacyCore.log.logFine("seed-db " + seedDBFile.toString() + " reset (on-the-fly)");
@@ -459,7 +459,7 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
             nameLookupCache.put(seed.getName(), seed);
             HashMap<String, String> seedPropMap = seed.getMap();
             synchronized(seedPropMap) {
-                seedActiveDB.set(seed.hash, seedPropMap);
+                seedActiveDB.put(seed.hash, seedPropMap);
             }
             seedPassiveDB.remove(seed.hash);
             seedPotentialDB.remove(seed.hash);
@@ -486,7 +486,7 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
         try {
             HashMap<String, String> seedPropMap = seed.getMap();
             synchronized(seedPropMap) {
-                seedPassiveDB.set(seed.hash, seedPropMap);
+                seedPassiveDB.put(seed.hash, seedPropMap);
             }
         } catch (IOException e) {
             yacyCore.log.logSevere("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
@@ -512,7 +512,7 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
         try {
             HashMap<String, String> seedPropMap = seed.getMap();
             synchronized(seedPropMap) {
-                seedPotentialDB.set(seed.hash, seedPropMap);
+                seedPotentialDB.put(seed.hash, seedPropMap);
             }
     } catch (IOException e) {
         yacyCore.log.logSevere("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
@@ -564,7 +564,7 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
     }
     }
         
-    private yacySeed get(String hash, kelondroMapObjects database) {
+    private yacySeed get(String hash, kelondroMapDataMining database) {
         if (hash == null) return null;
         if ((this.mySeed != null) && (hash.equals(mySeed.hash))) return mySeed;
         HashMap<String, String> entry = database.getMap(hash);
@@ -599,13 +599,13 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
         }
         
         yacySeed s = get(hash, seedActiveDB);
-        if (s != null) try { seedActiveDB.set(hash, seed.getMap()); return;} catch (IOException e) {}
+        if (s != null) try { seedActiveDB.put(hash, seed.getMap()); return;} catch (IOException e) {}
         
         s = get(hash, seedPassiveDB);
-        if (s != null) try { seedPassiveDB.set(hash, seed.getMap()); return;} catch (IOException e) {}
+        if (s != null) try { seedPassiveDB.put(hash, seed.getMap()); return;} catch (IOException e) {}
         
         s = get(hash, seedPotentialDB);
-        if (s != null) try { seedPotentialDB.set(hash, seed.getMap()); return;} catch (IOException e) {}
+        if (s != null) try { seedPotentialDB.put(hash, seed.getMap()); return;} catch (IOException e) {}
     }
     
     public yacySeed lookupByName(String peerName) {
@@ -959,12 +959,12 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
 
     class seedEnum implements Iterator<yacySeed> {
         
-        kelondroMapObjects.mapIterator it;
+        kelondroMapDataMining.mapIterator it;
         yacySeed nextSeed;
-        kelondroMapObjects database;
+        kelondroMapDataMining database;
         float minVersion;
         
-        public seedEnum(boolean up, boolean rot, byte[] firstKey, byte[] secondKey, kelondroMapObjects database, float minVersion) {
+        public seedEnum(boolean up, boolean rot, byte[] firstKey, byte[] secondKey, kelondroMapDataMining database, float minVersion) {
             this.database = database;
             this.minVersion = minVersion;
             try {
@@ -989,7 +989,7 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
             }
         }
         
-        public seedEnum(boolean up, String field, kelondroMapObjects database) {
+        public seedEnum(boolean up, String field, kelondroMapDataMining database) {
             this.database = database;
             try {
                 it = database.maps(up, field);

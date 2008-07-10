@@ -59,7 +59,7 @@ import de.anomic.kelondro.kelondroBLOBTree;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroCloneableIterator;
 import de.anomic.kelondro.kelondroException;
-import de.anomic.kelondro.kelondroMapObjects;
+import de.anomic.kelondro.kelondroMapDataMining;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.server.serverCodings;
 
@@ -68,7 +68,7 @@ public final class userDB {
     public static final int USERNAME_MAX_LENGTH = 128;
     public static final int USERNAME_MIN_LENGTH = 4;
     
-    kelondroMapObjects userTable;
+    kelondroMapDataMining userTable;
     private final File userTableFile;
 	HashMap<String, String> ipUsers = new HashMap<String, String>();
     HashMap<String, Object> cookieUsers = new HashMap<String, Object>();
@@ -76,7 +76,7 @@ public final class userDB {
     public userDB(File userTableFile) {
         this.userTableFile = userTableFile;
         userTableFile.getParentFile().mkdirs();
-        this.userTable = new kelondroMapObjects(new kelondroBLOBTree(userTableFile, true, true, 128, 256, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 10);
+        this.userTable = new kelondroMapDataMining(new kelondroBLOBTree(userTableFile, true, true, 128, 256, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 10);
     }
     
     void resetDatabase() {
@@ -84,7 +84,7 @@ public final class userDB {
         if (userTable != null) userTable.close();
         if (!(userTableFile.delete())) throw new RuntimeException("cannot delete user database");
         userTableFile.getParentFile().mkdirs();
-        userTable = new kelondroMapObjects(new kelondroBLOBTree(userTableFile, true, true, 256, 512, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 10);
+        userTable = new kelondroMapDataMining(new kelondroBLOBTree(userTableFile, true, true, 256, 512, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 10);
     }
     
     public void close() {
@@ -117,7 +117,7 @@ public final class userDB {
     
     public String addEntry(Entry entry) {
         try {
-            userTable.set(entry.userName,entry.mem);
+            userTable.put(entry.userName,entry.mem);
             return entry.userName;
         } catch (IOException e) {
             return null;
@@ -474,7 +474,7 @@ public final class userDB {
 			}
             
             try {
-                userDB.this.userTable.set(getUserName(), this.mem); 
+                userDB.this.userTable.put(getUserName(), this.mem); 
             } catch(Exception e){
                 e.printStackTrace();
             }
@@ -491,7 +491,7 @@ public final class userDB {
         
         public void setProperty(String propName, String newValue) throws IOException {
             this.mem.put(propName,  newValue);
-            userDB.this.userTable.set(getUserName(), this.mem);
+            userDB.this.userTable.put(getUserName(), this.mem);
         }
         
         public String getProperty(String propName, String defaultValue) {

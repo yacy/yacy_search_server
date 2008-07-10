@@ -78,9 +78,9 @@ import de.anomic.index.indexWord;
 import de.anomic.kelondro.kelondroBLOBTree;
 import de.anomic.kelondro.kelondroCloneableIterator;
 import de.anomic.kelondro.kelondroException;
-import de.anomic.kelondro.kelondroMapObjects;
+import de.anomic.kelondro.kelondroMapDataMining;
 import de.anomic.kelondro.kelondroNaturalOrder;
-import de.anomic.kelondro.kelondroObjects;
+import de.anomic.kelondro.kelondroMap;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.logging.serverLog;
@@ -96,14 +96,14 @@ public class bookmarksDB {
 	final static int SHOW_ALL = -1;
 	
 	// bookmarks
-    kelondroObjects bookmarksTable;		// kelondroMap bookmarksTable;
+    kelondroMap bookmarksTable;		// kelondroMap bookmarksTable;
     
     // tags
-    kelondroMapObjects tagsTable;
+    kelondroMapDataMining tagsTable;
     HashMap<String, Tag> tagCache;					
     
     // dates
-    kelondroMapObjects datesTable;
+    kelondroMapDataMining datesTable;
 
     
 	// ------------------------------------
@@ -115,17 +115,17 @@ public class bookmarksDB {
         tagCache=new HashMap<String, Tag>();
         bookmarksFile.getParentFile().mkdirs();
         //this.bookmarksTable = new kelondroMap(kelondroDyn.open(bookmarksFile, bufferkb * 1024, preloadTime, 12, 256, '_', true, false));
-        this.bookmarksTable = new kelondroObjects(new kelondroBLOBTree(bookmarksFile, true, true, 12, 256, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 1000);
+        this.bookmarksTable = new kelondroMap(new kelondroBLOBTree(bookmarksFile, true, true, 12, 256, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 1000);
 
         // tags
         tagsFile.getParentFile().mkdirs();
         boolean tagsFileExisted = tagsFile.exists();
-        this.tagsTable = new kelondroMapObjects(new kelondroBLOBTree(tagsFile, true, true, 12, 256, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 500);
+        this.tagsTable = new kelondroMapDataMining(new kelondroBLOBTree(tagsFile, true, true, 12, 256, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 500);
         if (!tagsFileExisted) rebuildTags();
 
         // dates
         boolean datesExisted = datesFile.exists();
-        this.datesTable = new kelondroMapObjects(new kelondroBLOBTree(datesFile, true, true, 20, 256, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 500);
+        this.datesTable = new kelondroMapDataMining(new kelondroBLOBTree(datesFile, true, true, 20, 256, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 500);
         if (!datesExisted) rebuildDates();
 
     }
@@ -226,7 +226,7 @@ public class bookmarksDB {
     // adding a bookmark to the bookmarksDB
     public void saveBookmark(Bookmark bookmark){
     	try {
-    		bookmarksTable.set(bookmark.getUrlHash(), bookmark.entry);
+    		bookmarksTable.put(bookmark.getUrlHash(), bookmark.entry);
         } catch (IOException e) {
         	// TODO Auto-generated catch block
         	e.printStackTrace();
@@ -362,7 +362,7 @@ public class bookmarksDB {
     public void storeTag(Tag tag){
         try {
             if(tag.size() >0){
-                bookmarksDB.this.tagsTable.set(tag.getTagHash(), tag.getMap());
+                bookmarksDB.this.tagsTable.put(tag.getTagHash(), tag.getMap());
             }else{
                 bookmarksDB.this.tagsTable.remove(tag.getTagHash());
             }
@@ -867,7 +867,7 @@ public class bookmarksDB {
         public void setDatesTable(){
             try {
                 if(this.size() >0){
-                    bookmarksDB.this.datesTable.set(getDateString(), mem);
+                    bookmarksDB.this.datesTable.put(getDateString(), mem);
                 }else{
                     bookmarksDB.this.datesTable.remove(getDateString());
                 }

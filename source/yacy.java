@@ -81,7 +81,7 @@ import de.anomic.index.indexWord;
 import de.anomic.kelondro.kelondroBLOBTree;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroMScoreCluster;
-import de.anomic.kelondro.kelondroMapObjects;
+import de.anomic.kelondro.kelondroMapDataMining;
 import de.anomic.kelondro.kelondroRowCollection;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaWordIndex;
@@ -900,9 +900,9 @@ public final class yacy {
             String[] dbFileNames = {"seed.new.db","seed.old.db","seed.pot.db"};
             for (int i=0; i < dbFileNames.length; i++) {
                 File dbFile = new File(yacyDBPath,dbFileNames[i]);
-                kelondroMapObjects db = new kelondroMapObjects(new kelondroBLOBTree(dbFile, true, true, yacySeedDB.commonHashLength, 480, '#', kelondroBase64Order.enhancedCoder, true, false, true), 500, yacySeedDB.sortFields, yacySeedDB.longaccFields, yacySeedDB.doubleaccFields, null, null);
+                kelondroMapDataMining db = new kelondroMapDataMining(new kelondroBLOBTree(dbFile, true, true, yacySeedDB.commonHashLength, 480, '#', kelondroBase64Order.enhancedCoder, true, false, true), 500, yacySeedDB.sortFields, yacySeedDB.longaccFields, yacySeedDB.doubleaccFields, null, null);
                 
-                kelondroMapObjects.mapIterator it;
+                kelondroMapDataMining.mapIterator it;
                 it = db.maps(true, false);
                 while (it.hasNext()) {
                     Map<String, String> dna = it.next();

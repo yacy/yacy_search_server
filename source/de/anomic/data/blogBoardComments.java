@@ -66,7 +66,7 @@ import org.xml.sax.SAXException;
 
 import de.anomic.kelondro.kelondroBLOBTree;
 import de.anomic.kelondro.kelondroBase64Order;
-import de.anomic.kelondro.kelondroMapObjects;
+import de.anomic.kelondro.kelondroMapDataMining;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.server.logging.serverLog;
 
@@ -81,11 +81,11 @@ public class blogBoardComments {
     static {
         SimpleFormatter.setTimeZone(TimeZone.getTimeZone("GMT"));
     }
-    private kelondroMapObjects database = null;
+    private kelondroMapDataMining database = null;
     public blogBoardComments(File actpath) {
     		new File(actpath.getParent()).mkdir();
         if (database == null) {
-            database = new kelondroMapObjects(new kelondroBLOBTree(actpath, true, true, keyLength, recordSize, '_', kelondroNaturalOrder.naturalOrder, false, false, false), 500);
+            database = new kelondroMapDataMining(new kelondroBLOBTree(actpath, true, true, keyLength, recordSize, '_', kelondroNaturalOrder.naturalOrder, false, false, false), 500);
         }
     }
     public int size() {
@@ -120,7 +120,7 @@ public class blogBoardComments {
     public String write(CommentEntry page) {
         // writes a new page and returns key
     	try {
-    	    database.set(page.key, page.record);
+    	    database.put(page.key, page.record);
     	    return page.key;
     	} catch (IOException e) {
     	    return null;
@@ -130,7 +130,7 @@ public class blogBoardComments {
         //System.out.println("DEBUG: read from blogBoardComments");
         return read(key, database);
     }
-    private CommentEntry read(String key, kelondroMapObjects base) {
+    private CommentEntry read(String key, kelondroMapDataMining base) {
         key = normalize(key);
         if (key.length() > keyLength) key = key.substring(0, keyLength);
         HashMap<String, String> record = base.getMap(key);

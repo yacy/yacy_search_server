@@ -65,7 +65,7 @@ import de.anomic.kelondro.kelondroBLOB;
 import de.anomic.kelondro.kelondroBLOBHeap;
 import de.anomic.kelondro.kelondroBLOBTree;
 import de.anomic.kelondro.kelondroException;
-import de.anomic.kelondro.kelondroMapObjects;
+import de.anomic.kelondro.kelondroMapDataMining;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.server.serverByteBuffer;
 import de.anomic.server.serverFileUtils;
@@ -76,7 +76,7 @@ public class RobotsTxt {
     
     public static final String ROBOTS_DB_PATH_SEPARATOR = ";";    
     
-    kelondroMapObjects robotsTable;
+    kelondroMapDataMining robotsTable;
     private final File robotsTableFile;
     
     public RobotsTxt(File robotsTableFile) {
@@ -92,7 +92,7 @@ public class RobotsTxt {
         } else {
             blob = new kelondroBLOBTree(robotsTableFile, true, true, 256, 512, '_', kelondroNaturalOrder.naturalOrder, false, false, true);
         }
-        robotsTable = new kelondroMapObjects(blob, 100);
+        robotsTable = new kelondroMapDataMining(blob, 100);
     }
     
     private void resetDatabase() {
@@ -100,7 +100,7 @@ public class RobotsTxt {
         if (robotsTable != null) robotsTable.close();
         if (!(robotsTableFile.delete())) throw new RuntimeException("cannot delete robots.txt database");
         robotsTableFile.getParentFile().mkdirs();
-        robotsTable = new kelondroMapObjects(new kelondroBLOBTree(robotsTableFile, true, true, 256, 512, '_', kelondroNaturalOrder.naturalOrder, false, false, true), 100);
+        robotsTable = new kelondroMapDataMining(new kelondroBLOBTree(robotsTableFile, true, true, 256, 512, '_', kelondroNaturalOrder.naturalOrder, false, false, true), 100);
     }
     
     public void clear() throws IOException {
@@ -151,7 +151,7 @@ public class RobotsTxt {
     private String addEntry(Entry entry) {
         // writes a new page and returns key
         try {
-            this.robotsTable.set(entry.hostName, entry.mem);
+            this.robotsTable.put(entry.hostName, entry.mem);
             return entry.hostName;
         } catch (IOException e) {
             return null;

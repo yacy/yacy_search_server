@@ -53,7 +53,7 @@ import de.anomic.kelondro.kelondroBLOBTree;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroCloneableIterator;
 import de.anomic.kelondro.kelondroException;
-import de.anomic.kelondro.kelondroMapObjects;
+import de.anomic.kelondro.kelondroMapDataMining;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.server.serverCodings;
 import de.anomic.yacy.yacySeedDB;
@@ -63,14 +63,14 @@ public class CrawlProfile {
     
     static HashMap<String, Map<String, DomProfile>> domsCache = new HashMap<String, Map<String, DomProfile>>();
     
-    kelondroMapObjects profileTable;
+    kelondroMapDataMining profileTable;
     private File profileTableFile;
     
     public CrawlProfile(File file) {
         this.profileTableFile = file;
         profileTableFile.getParentFile().mkdirs();
         kelondroBLOB dyn = new kelondroBLOBTree(profileTableFile, true, true, yacySeedDB.commonHashLength, 2000, '#', kelondroNaturalOrder.naturalOrder, false, false, true);
-        profileTable = new kelondroMapObjects(dyn, 500);
+        profileTable = new kelondroMapDataMining(dyn, 500);
     }
     
     public void clear() {
@@ -79,7 +79,7 @@ public class CrawlProfile {
         if (!(profileTableFile.delete())) throw new RuntimeException("cannot delete crawl profile database");
         profileTableFile.getParentFile().mkdirs();
         kelondroBLOB dyn = new kelondroBLOBTree(profileTableFile, true, true, yacySeedDB.commonHashLength, 2000, '#', kelondroNaturalOrder.naturalOrder, false, false, true);
-        profileTable = new kelondroMapObjects(dyn, 500);
+        profileTable = new kelondroMapDataMining(dyn, 500);
     }
     
     public void close() {
@@ -142,11 +142,11 @@ public class CrawlProfile {
     public entry newEntry(HashMap<String, String> mem) {
         entry ne = new entry(mem);
         try {
-            profileTable.set(ne.handle(), ne.map());
+            profileTable.put(ne.handle(), ne.map());
         } catch (kelondroException e) {
             clear();
             try {
-                profileTable.set(ne.handle(), ne.map());
+                profileTable.put(ne.handle(), ne.map());
             } catch (IOException ee) {
                 e.printStackTrace();
                 System.exit(0);
@@ -154,7 +154,7 @@ public class CrawlProfile {
         } catch (IOException e) {
             clear();
             try {
-                profileTable.set(ne.handle(), ne.map());
+                profileTable.put(ne.handle(), ne.map());
             } catch (IOException ee) {
                 e.printStackTrace();
                 System.exit(0);
@@ -181,11 +181,11 @@ public class CrawlProfile {
                              remoteIndexing,
                              xsstopw, xdstopw, xpstopw);
         try {
-            profileTable.set(ne.handle(), ne.map());
+            profileTable.put(ne.handle(), ne.map());
         } catch (kelondroException e) {
             clear();
             try {
-                profileTable.set(ne.handle(), ne.map());
+                profileTable.put(ne.handle(), ne.map());
             } catch (IOException ee) {
                 e.printStackTrace();
                 System.exit(0);
@@ -193,7 +193,7 @@ public class CrawlProfile {
         } catch (IOException e) {
             clear();
             try {
-                profileTable.set(ne.handle(), ne.map());
+                profileTable.put(ne.handle(), ne.map());
             } catch (IOException ee) {
                 e.printStackTrace();
                 System.exit(0);
@@ -210,7 +210,7 @@ public class CrawlProfile {
 
     public void changeEntry(entry e, String propName, String newValue) throws IOException {
         e.mem.put(propName,  newValue);
-        profileTable.set(e.handle(), e.mem);
+        profileTable.put(e.handle(), e.mem);
     }
     
     public static class DomProfile {

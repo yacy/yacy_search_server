@@ -37,7 +37,7 @@ import java.util.Map;
 
 import de.anomic.server.serverDate;
 
-public class kelondroObjects {
+public class kelondroMap {
 
     private kelondroBLOB blob;
     private kelondroMScoreCluster<String> cacheScore;
@@ -45,15 +45,26 @@ public class kelondroObjects {
     private long startup;
     private int cachesize;
 
-
-    public kelondroObjects(kelondroBLOB blob, int cachesize) {
+    public kelondroMap(kelondroBLOB blob, int cachesize) {
         this.blob = blob;
         this.cache = new HashMap<String, HashMap<String, String>>();
         this.cacheScore = new kelondroMScoreCluster<String>();
         this.startup = System.currentTimeMillis();
         this.cachesize = cachesize;
     }
+   
+    /**
+     * ask for the length of the primary key
+     * @return the length of the key
+     */
+    public int keylength() {
+        return this.blob.keylength();
+    }
     
+    /**
+     * clears the content of the database
+     * @throws IOException
+     */
     public void clear() throws IOException {
     	this.blob.clear();
         this.cache = new HashMap<String, HashMap<String, String>>();
@@ -91,7 +102,13 @@ public class kelondroObjects {
         return map;
     }
     
-    public synchronized void set(String key, HashMap<String, String> newMap) throws IOException {
+    /**
+     * write a whole byte array as Map to the table
+     * @param key  the primary key
+     * @param newMap
+     * @throws IOException
+     */
+    public synchronized void put(String key, HashMap<String, String> newMap) throws IOException {
         assert (key != null);
         assert (key.length() > 0);
         assert (newMap != null);
@@ -109,6 +126,11 @@ public class kelondroObjects {
         cache.put(key, newMap);
     }
 
+    /**
+     * remove a Map
+     * @param key  the primary key
+     * @throws IOException
+     */
     public synchronized void remove(String key) throws IOException {
         // update elementCount
         if (key == null) return;
@@ -121,7 +143,26 @@ public class kelondroObjects {
         // remove from file
         blob.remove(key.getBytes());
     }
+    
+    /**
+     * check if a specific key is in the database
+     * @param key  the primary key
+     * @return
+     * @throws IOException
+     */
+    public boolean has(String key) throws IOException {
+        assert key != null;
+        if (cache == null) return false; // case may appear during shutdown
+        while (key.length() < blob.keylength()) key += "_";
+        return this.blob.has(key.getBytes());
+    }
 
+    /**
+     * retrieve the whole Map from the table
+     * @param key  the primary key
+     * @return
+     * @throws IOException
+     */
     public synchronized HashMap<String, String> get(final String key) throws IOException {
         if (key == null) return null;
         return get(key, true);
@@ -167,11 +208,29 @@ public class kelondroObjects {
         }
     }
 
+    /**
+     * iterator over all keys
+     * @param up
+     * @param rotating
+     * @return
+     * @throws IOException
+     */
     public synchronized kelondroCloneableIterator<byte[]> keys(final boolean up, final boolean rotating) throws IOException {
         // simple enumeration of key names without special ordering
         return blob.keys(up, rotating);
     }
-
+    
+    /**
+     * iterate over all keys
+     * @param up
+     * @param firstKey
+     * @return
+     * @throws IOException
+     */
+    public kelondroCloneableIterator<byte[]> keys(boolean up, byte[] firstKey) throws IOException {
+        return keys(up, false, firstKey, null);
+    }
+    
     public synchronized kelondroCloneableIterator<byte[]> keys(final boolean up, final boolean rotating, final byte[] firstKey, final byte[] secondKey) throws IOException {
         // simple enumeration of key names without special ordering
         kelondroCloneableIterator<byte[]> i = blob.keys(up, firstKey);
@@ -187,10 +246,17 @@ public class kelondroObjects {
         return new objectIterator(keys(up, rotating, firstKey, secondKey));
     }
 
+    /**
+     * ask for the number of entries
+     * @return the number of entries in the table
+     */
     public synchronized int size() {
         return blob.size();
     }
 
+    /**
+     * close the Map table
+     */
     public void close() {
         // finish queue
         //writeWorker.terminate(true);
@@ -238,4 +304,5 @@ public class kelondroObjects {
             throw new UnsupportedOperationException();
         }
     } // class mapIterator
+    
 }
