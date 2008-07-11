@@ -105,7 +105,7 @@ public class yacyCore {
 
     public static int yacyTime() {
         // the time since startup of yacy in seconds
-        return (int) ((System.currentTimeMillis() - serverCore.startupTime) / 1000);
+        return Math.max(0, (int) ((System.currentTimeMillis() - serverCore.startupTime) / 1000));
     }
 
     public yacyCore(plasmaSwitchboard sb) {
