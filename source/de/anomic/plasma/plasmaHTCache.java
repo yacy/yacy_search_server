@@ -57,7 +57,7 @@ import de.anomic.kelondro.kelondroBLOBHeap;
 import de.anomic.kelondro.kelondroBLOBTree;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroMScoreCluster;
-import de.anomic.kelondro.kelondroMapDataMining;
+import de.anomic.kelondro.kelondroMap;
 import de.anomic.plasma.cache.IResourceInfo;
 import de.anomic.plasma.cache.ResourceInfoFactory;
 import de.anomic.plasma.cache.UnsupportedProtocolException;
@@ -80,7 +80,7 @@ public final class plasmaHTCache {
     private static final int stackLimit = 150; // if we exceed that limit, we do not check idle
     public  static final long oneday = 1000 * 60 * 60 * 24; // milliseconds of a day
 
-    private static kelondroMapDataMining responseHeaderDB = null;
+    private static kelondroMap responseHeaderDB = null;
     private static final ConcurrentLinkedQueue<Entry> cacheStack = new ConcurrentLinkedQueue<Entry>();
     private static final ConcurrentHashMap<String, File> cacheAge = new ConcurrentHashMap<String, File>(); // a <date+hash, cache-path> - relation
     public static long curCacheSize = 0;
@@ -272,7 +272,7 @@ public final class plasmaHTCache {
         } else {
             blob = new kelondroBLOBTree(dbfile, true, true, yacySeedDB.commonHashLength, 150, '#', kelondroBase64Order.enhancedCoder, false, false, true);
         }
-        responseHeaderDB = new kelondroMapDataMining(blob, 500);
+        responseHeaderDB = new kelondroMap(blob, 500);
     }
     
     private static void deleteOldHTCache(File directory) {

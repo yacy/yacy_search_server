@@ -51,7 +51,7 @@ import java.util.TimeZone;
 
 import de.anomic.kelondro.kelondroBLOBTree;
 import de.anomic.kelondro.kelondroBase64Order;
-import de.anomic.kelondro.kelondroMapDataMining;
+import de.anomic.kelondro.kelondroMap;
 import de.anomic.kelondro.kelondroNaturalOrder;
 
 public class messageBoard {
@@ -66,13 +66,13 @@ public class messageBoard {
         SimpleFormatter.setTimeZone(TimeZone.getTimeZone("GMT"));
     }
 
-    kelondroMapDataMining database = null;
+    kelondroMap database = null;
     private int sn = 0;
 
     public messageBoard(File path) {
         new File(path.getParent()).mkdir();
         if (database == null) {
-            database = new kelondroMapDataMining(new kelondroBLOBTree(path, true, true, categoryLength + dateFormat.length() + 2, recordSize, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 500);
+            database = new kelondroMap(new kelondroBLOBTree(path, true, true, categoryLength + dateFormat.length() + 2, recordSize, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 500);
         }
         sn = 0;
     }

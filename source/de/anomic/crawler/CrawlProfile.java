@@ -53,7 +53,7 @@ import de.anomic.kelondro.kelondroBLOBTree;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroCloneableIterator;
 import de.anomic.kelondro.kelondroException;
-import de.anomic.kelondro.kelondroMapDataMining;
+import de.anomic.kelondro.kelondroMap;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.server.serverCodings;
 import de.anomic.yacy.yacySeedDB;
@@ -63,14 +63,14 @@ public class CrawlProfile {
     
     static HashMap<String, Map<String, DomProfile>> domsCache = new HashMap<String, Map<String, DomProfile>>();
     
-    kelondroMapDataMining profileTable;
+    kelondroMap profileTable;
     private File profileTableFile;
     
     public CrawlProfile(File file) {
         this.profileTableFile = file;
         profileTableFile.getParentFile().mkdirs();
         kelondroBLOB dyn = new kelondroBLOBTree(profileTableFile, true, true, yacySeedDB.commonHashLength, 2000, '#', kelondroNaturalOrder.naturalOrder, false, false, true);
-        profileTable = new kelondroMapDataMining(dyn, 500);
+        profileTable = new kelondroMap(dyn, 500);
     }
     
     public void clear() {
@@ -79,7 +79,7 @@ public class CrawlProfile {
         if (!(profileTableFile.delete())) throw new RuntimeException("cannot delete crawl profile database");
         profileTableFile.getParentFile().mkdirs();
         kelondroBLOB dyn = new kelondroBLOBTree(profileTableFile, true, true, yacySeedDB.commonHashLength, 2000, '#', kelondroNaturalOrder.naturalOrder, false, false, true);
-        profileTable = new kelondroMapDataMining(dyn, 500);
+        profileTable = new kelondroMap(dyn, 500);
     }
     
     public void close() {

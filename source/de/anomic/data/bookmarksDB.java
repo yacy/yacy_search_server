@@ -78,7 +78,6 @@ import de.anomic.index.indexWord;
 import de.anomic.kelondro.kelondroBLOBTree;
 import de.anomic.kelondro.kelondroCloneableIterator;
 import de.anomic.kelondro.kelondroException;
-import de.anomic.kelondro.kelondroMapDataMining;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroMap;
 import de.anomic.server.serverDate;
@@ -99,11 +98,11 @@ public class bookmarksDB {
     kelondroMap bookmarksTable;		// kelondroMap bookmarksTable;
     
     // tags
-    kelondroMapDataMining tagsTable;
+    kelondroMap tagsTable;
     HashMap<String, Tag> tagCache;					
     
     // dates
-    kelondroMapDataMining datesTable;
+    kelondroMap datesTable;
 
     
 	// ------------------------------------
@@ -120,12 +119,12 @@ public class bookmarksDB {
         // tags
         tagsFile.getParentFile().mkdirs();
         boolean tagsFileExisted = tagsFile.exists();
-        this.tagsTable = new kelondroMapDataMining(new kelondroBLOBTree(tagsFile, true, true, 12, 256, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 500);
+        this.tagsTable = new kelondroMap(new kelondroBLOBTree(tagsFile, true, true, 12, 256, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 500);
         if (!tagsFileExisted) rebuildTags();
 
         // dates
         boolean datesExisted = datesFile.exists();
-        this.datesTable = new kelondroMapDataMining(new kelondroBLOBTree(datesFile, true, true, 20, 256, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 500);
+        this.datesTable = new kelondroMap(new kelondroBLOBTree(datesFile, true, true, 20, 256, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 500);
         if (!datesExisted) rebuildDates();
 
     }

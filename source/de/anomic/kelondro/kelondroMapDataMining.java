@@ -41,10 +41,6 @@ public class kelondroMapDataMining extends kelondroMap {
     private HashMap<String, Object> accMap; // to store accumulations of specific fields
     private int elementCount;
     
-    public kelondroMapDataMining(kelondroBLOB dyn, int cachesize) {
-        this(dyn, cachesize, null, null, null, null, null);
-    }
-    
 	@SuppressWarnings({ "unchecked", "null" })
 	public kelondroMapDataMining(kelondroBLOB dyn, int cachesize, String[] sortfields, String[] longaccfields, String[] doubleaccfields, Method externalInitializer, Object externalHandler) {
         super(dyn, cachesize);

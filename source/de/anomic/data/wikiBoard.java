@@ -51,7 +51,7 @@ import java.util.TimeZone;
 
 import de.anomic.kelondro.kelondroBLOBTree;
 import de.anomic.kelondro.kelondroBase64Order;
-import de.anomic.kelondro.kelondroMapDataMining;
+import de.anomic.kelondro.kelondroMap;
 import de.anomic.kelondro.kelondroNaturalOrder;
 
 public class wikiBoard {
@@ -66,18 +66,18 @@ public class wikiBoard {
         SimpleFormatter.setTimeZone(TimeZone.getTimeZone("GMT"));
     }
 
-    kelondroMapDataMining datbase = null;
-    kelondroMapDataMining bkpbase = null;
+    kelondroMap datbase = null;
+    kelondroMap bkpbase = null;
     static HashMap<String, String> authors = new HashMap<String, String>();
 
     public wikiBoard(File actpath, File bkppath) {
         new File(actpath.getParent()).mkdirs();
         if (datbase == null) {
-            datbase = new kelondroMapDataMining(new kelondroBLOBTree(actpath, true, true, keyLength, recordSize, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 500);
+            datbase = new kelondroMap(new kelondroBLOBTree(actpath, true, true, keyLength, recordSize, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 500);
         }
         new File(bkppath.getParent()).mkdirs();
         if (bkpbase == null) {
-            bkpbase = new kelondroMapDataMining(new kelondroBLOBTree(bkppath, true, true, keyLength + dateFormat.length(), recordSize, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 500);
+            bkpbase = new kelondroMap(new kelondroBLOBTree(bkppath, true, true, keyLength + dateFormat.length(), recordSize, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 500);
         }
     }
 
@@ -290,7 +290,7 @@ public class wikiBoard {
         return read(key, datbase);
     }
 
-    entry read(String key, kelondroMapDataMining base) {
+    entry read(String key, kelondroMap base) {
         try {
             key = normalize(key);
             if (key.length() > keyLength) key = key.substring(0, keyLength);
