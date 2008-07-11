@@ -241,6 +241,20 @@ public class Balancer {
            if (urlHashes.contains(h)) j.remove();
        }
        
+       // iterate through the domain stacks
+       Iterator<Map.Entry<String, LinkedList<String>>> k = domainStacks.entrySet().iterator();
+       Map.Entry<String, LinkedList<String>> se;
+       LinkedList<String> stack;
+       while (k.hasNext()) {
+           se = k.next();
+           stack = se.getValue();
+           i = stack.iterator();
+           while (i.hasNext()) {
+               if (urlHashes.contains(i.next())) i.remove();
+           }
+           if (stack.size() == 0) k.remove();
+       }
+       
        return removedCounter;
     }
     
@@ -256,13 +270,15 @@ public class Balancer {
     
     public int size() {
         int componentsize = urlFileIndex.size();
+        /*
         assert componentsize == urlFileStack.size() + urlRAMStack.size() + sizeDomainStacks() :
 		        "size wrong in " + stackname +
 		        " - urlFileIndex = " + urlFileIndex.size() +
-		        ", componentsize = " + componentsize +
+		        ", componentsize = " + urlFileStack.size() + urlRAMStack.size() + sizeDomainStacks() +
                 " = (urlFileStack = " + urlFileStack.size() +
 		        ", urlRAMStack = " + urlRAMStack.size() +
 		        ", sizeDomainStacks = " + sizeDomainStacks() + ")";
+		*/
         return componentsize;
     }
     
