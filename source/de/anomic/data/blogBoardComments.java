@@ -133,7 +133,12 @@ public class blogBoardComments {
     private CommentEntry read(String key, kelondroMapDataMining base) {
         key = normalize(key);
         if (key.length() > keyLength) key = key.substring(0, keyLength);
-        HashMap<String, String> record = base.getMap(key);
+        HashMap<String, String> record;
+        try {
+            record = base.get(key);
+        } catch (IOException e) {
+            record = null;
+        }
         if (record == null) return newEntry(key, "".getBytes(), "anonymous".getBytes(), "127.0.0.1", new Date(), "".getBytes());
         return new CommentEntry(key, record);
     }

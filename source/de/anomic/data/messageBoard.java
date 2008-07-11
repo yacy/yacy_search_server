@@ -216,7 +216,12 @@ public class messageBoard {
     }
     
     public entry read(String key) {
-        HashMap<String, String> record = database.getMap(key);
+        HashMap<String, String> record;
+        try {
+            record = database.get(key);
+        } catch (IOException e) {
+            return null;
+        }
 	    return new entry(key, record);
     }
     

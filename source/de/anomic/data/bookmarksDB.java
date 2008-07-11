@@ -337,7 +337,11 @@ public class bookmarksDB {
     private Tag loadTag(String hash){
         HashMap<String, String> map;
         Tag ret=null;
-        map = tagsTable.getMap(hash);
+        try {
+            map = tagsTable.get(hash);
+        } catch (IOException e) {
+            return null;
+        }
         if(map!=null){
             ret=new Tag(hash, map);
             tagCache.put(hash, ret);
@@ -520,7 +524,11 @@ public class bookmarksDB {
     
     public bookmarksDate getDate(String date){
     	HashMap<String, String> map;
-        map=datesTable.getMap(date);
+        try {
+            map=datesTable.get(date);
+        } catch (IOException e) {
+            map = null;
+        }
         if(map==null) return new bookmarksDate(date);
         return new bookmarksDate(date, map);
     }

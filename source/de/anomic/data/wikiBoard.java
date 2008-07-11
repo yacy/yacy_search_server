@@ -294,7 +294,7 @@ public class wikiBoard {
         try {
             key = normalize(key);
             if (key.length() > keyLength) key = key.substring(0, keyLength);
-            HashMap<String, String> record = base.getMap(key);
+            HashMap<String, String> record = base.get(key);
             if (record == null) return newEntry(key, "anonymous", "127.0.0.1", "New Page", "".getBytes());
             return new entry(key, record);
         } catch (IOException e) {

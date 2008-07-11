@@ -105,7 +105,12 @@ public final class userDB {
         if(userName.length()>128){
             userName=userName.substring(0, 127);
         }
-        HashMap<String, String> record = userTable.getMap(userName);
+        HashMap<String, String> record;
+        try {
+            record = userTable.get(userName);
+        } catch (IOException e) {
+            return null;
+        }
         if (record == null) return null;
         return new Entry(userName, record);
     }    

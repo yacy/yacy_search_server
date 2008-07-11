@@ -562,7 +562,12 @@ public final class plasmaHTCache {
     public static IResourceInfo loadResourceInfo(yacyURL url) throws UnsupportedProtocolException, IllegalAccessException {    
         
         // loading data from database
-        Map<String, String> hdb = responseHeaderDB.getMap(url.hash());
+        Map<String, String> hdb;
+        try {
+            hdb = responseHeaderDB.get(url.hash());
+        } catch (IOException e) {
+            return null;
+        }
         if (hdb == null) return null;
         
         // generate the cached object
@@ -746,7 +751,12 @@ public final class plasmaHTCache {
             }
             if (url != null) return url;
             // try responseHeaderDB
-            Map<String, String> hdb = responseHeaderDB.getMap(urlHash);
+            Map<String, String> hdb;
+            try {
+                hdb = responseHeaderDB.get(urlHash);
+            } catch (IOException e1) {
+                hdb = null;
+            }
             if (hdb != null) {
                 Object origRequestLine = hdb.get(httpHeader.X_YACY_ORIGINAL_REQUEST_LINE);
                 if ((origRequestLine != null)&&(origRequestLine instanceof String)) {

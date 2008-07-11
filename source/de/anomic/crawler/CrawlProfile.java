@@ -203,7 +203,12 @@ public class CrawlProfile {
     }
     
     public entry getEntry(String handle) {
-        HashMap<String, String> m = profileTable.getMap(handle);
+        HashMap<String, String> m;
+        try {
+            m = profileTable.get(handle);
+        } catch (IOException e) {
+            return null;
+        }
         if (m == null) return null;
         return new entry(m);
     }

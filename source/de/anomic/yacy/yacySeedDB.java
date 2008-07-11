@@ -542,7 +542,7 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
         
     public boolean hasConnected(String hash) {
     try {
-        return (seedActiveDB.get(hash) != null);
+        return seedActiveDB.has(hash);
     } catch (IOException e) {
         return false;
     }
@@ -550,7 +550,7 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
 
     public boolean hasDisconnected(String hash) {
     try {
-        return (seedPassiveDB.get(hash) != null);
+        return seedPassiveDB.has(hash);
     } catch (IOException e) {
         return false;
     }
@@ -558,7 +558,7 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
  
     public boolean hasPotential(String hash) {
     try {
-        return (seedPotentialDB.get(hash) != null);
+        return seedPotentialDB.has(hash);
     } catch (IOException e) {
         return false;
     }
@@ -567,7 +567,12 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
     private yacySeed get(String hash, kelondroMapDataMining database) {
         if (hash == null) return null;
         if ((this.mySeed != null) && (hash.equals(mySeed.hash))) return mySeed;
-        HashMap<String, String> entry = database.getMap(hash);
+        HashMap<String, String> entry;
+        try {
+            entry = database.get(hash);
+        } catch (IOException e) {
+            entry = null;
+        }
         if (entry == null) return null;
         return new yacySeed(hash, entry);
     }

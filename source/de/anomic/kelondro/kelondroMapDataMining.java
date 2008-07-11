@@ -94,7 +94,7 @@ public class kelondroMapDataMining extends kelondroMap {
             this.elementCount = 0;
             while (it.hasNext()) {
                 mapname = new String(it.next());
-                map = getMap(new String(mapname));
+                map = super.get(new String(mapname));
                 if (map == null) break;
                 
                 if (sortfields != null) for (int i = 0; i < sortfields.length; i++) {
@@ -179,7 +179,7 @@ public class kelondroMapDataMining extends kelondroMap {
 
         // update elementCount
         if ((longaccfields != null) || (doubleaccfields != null)) {
-            final Map<String, String> oldMap = getMap(key, false);
+            final Map<String, String> oldMap = super.get(key, false);
             if (oldMap == null) {
                 // new element
                 elementCount++;
@@ -252,7 +252,7 @@ public class kelondroMapDataMining extends kelondroMap {
         
         // update elementCount
         if ((sortfields != null) || (longaccfields != null) || (doubleaccfields != null)) {
-            final Map<String, String> map = getMap(key);
+            final Map<String, String> map = super.get(key);
             if (map != null) {
                 // update count
                 elementCount--;
@@ -265,28 +265,6 @@ public class kelondroMapDataMining extends kelondroMap {
             }
         }
         super.remove(key);
-    }
-    
-    public HashMap<String, String> getMap(String key) {
-        try {
-            HashMap<String, String> mapEntry = super.get(key);
-            if (mapEntry == null) return null;
-            return mapEntry;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-    
-    protected Map<String, String> getMap(String key, boolean cache) {
-        try {
-            HashMap<String, String> mapEntry = super.get(key, cache);
-            if (mapEntry == null) return null;
-            return mapEntry;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
     }
     
     private void deleteSortCluster(final String key) {
@@ -406,7 +384,11 @@ public class kelondroMapDataMining extends kelondroMap {
                     finish = true;
                     return null;
                 }
-                map = getMap(nextKey);
+                try {
+                    map = get(nextKey);
+                } catch (IOException e) {
+                    break;
+                }
                 if (map == null) continue; // circumvention of a modified exception
                 map.put("key", nextKey);
                 return map;

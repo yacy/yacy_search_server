@@ -117,12 +117,15 @@ public class RobotsTxt {
     
     private Entry getEntry(String hostName) {
         try {
-            HashMap<String, String> record = this.robotsTable.getMap(hostName);
+            HashMap<String, String> record = this.robotsTable.get(hostName);
             if (record == null) return null;
             return new Entry(hostName, record);
         } catch (kelondroException e) {
         	resetDatabase();
         	return null;
+        } catch (IOException e) {
+            resetDatabase();
+            return null;
         }
     }
     
