@@ -92,7 +92,9 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
             
                 // read length of the following record without the length of the record size bytes
                 reclen = file.readInt();
-            
+                assert reclen > 0;
+                if (reclen == 0) break loop; // very bad file inconsistency
+                
                 // read key
                 file.readFully(key);
                 
@@ -104,7 +106,7 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
             // check if this record is empty
             if (key == null || key[0] == 0) {
                 // it is an empty record, store to free list
-                free.add(new Long[]{new Long(seek), new Long(reclen)});
+                if (reclen > 0) free.add(new Long[]{new Long(seek), new Long(reclen)});
             } else {
                 // store key and access address of entry in index
                 try {

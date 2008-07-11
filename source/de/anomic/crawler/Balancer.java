@@ -52,7 +52,6 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.TreeMap;
 
-import de.anomic.kelondro.kelondroAbstractRecords;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroEcoTable;
 import de.anomic.kelondro.kelondroIndex;
@@ -255,22 +254,15 @@ public class Balancer {
         return urlRAMStack.size() > 0 || urlFileStack.size() > 0 || domainStacksNotEmpty();
     }
     
-    public synchronized int size() {
-        int componentsize = urlFileStack.size() + urlRAMStack.size() + sizeDomainStacks();
-        if (componentsize != urlFileIndex.size()) {
-		    // here is urlIndexFile.size() always smaller. why?
-		    if (kelondroAbstractRecords.debugmode) {
-		        serverLog.logWarning("BALANCER", "size wrong in " + stackname +
-		                " - urlFileIndex = " + urlFileIndex.size() +
-		                ", componentsize = " + componentsize +
-                        " = (urlFileStack = " + urlFileStack.size() +
-		                ", urlRAMStack = " + urlRAMStack.size() +
-		                ", sizeDomainStacks = " + sizeDomainStacks() + ")");
-		    }
-		    if ((componentsize == 0) && (urlFileIndex.size() > 0)) {
-		        resetFileIndex();
-		    }
-		}
+    public int size() {
+        int componentsize = urlFileIndex.size();
+        assert componentsize == urlFileStack.size() + urlRAMStack.size() + sizeDomainStacks() :
+		        "size wrong in " + stackname +
+		        " - urlFileIndex = " + urlFileIndex.size() +
+		        ", componentsize = " + componentsize +
+                " = (urlFileStack = " + urlFileStack.size() +
+		        ", urlRAMStack = " + urlRAMStack.size() +
+		        ", sizeDomainStacks = " + sizeDomainStacks() + ")";
         return componentsize;
     }
     
@@ -504,7 +496,7 @@ public class Balancer {
                               15000,
                               Math.max(
                                 (crawlEntry.url().isLocal()) ? minimumLocalDelta : minimumGlobalDelta,
-                                plasmaSwitchboard.getSwitchboard().robots.crawlDelay(crawlEntry.url().getHost()) * 1000)
+                                plasmaSwitchboard.getSwitchboard().robots.crawlDelay(crawlEntry.url()) * 1000)
                             ); // prevent that that robots file can stop our indexer completely
         if (delta < genericDelta) {
             // force a busy waiting here
