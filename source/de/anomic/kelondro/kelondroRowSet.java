@@ -186,6 +186,7 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         
         if ((this.rowdef.objectOrder != null) && (this.rowdef.objectOrder instanceof kelondroBase64Order) && (this.sortBound > 4000)) {
             // first try to find in sorted area
+            assert this.rowdef.objectOrder.wellformed(a, astart, alength) : "not wellformed: " + new String(a, astart, alength);
             final byte[] compiledPivot = compilePivot(a, astart, alength);
             int p = binarySearchCompiledPivot(compiledPivot);
             if (p >= 0) return p;

@@ -176,7 +176,7 @@ public class Balancer {
     
     public synchronized CrawlEntry get(String urlhash) throws IOException {
         assert urlhash != null;
-        if (urlFileIndex == null) return null; // case occurrs during shutdown
+        if (urlFileIndex == null) return null; // case occurs during shutdown
         kelondroRow.Entry entry = urlFileIndex.get(urlhash.getBytes());
         if (entry == null) return null;
         return new CrawlEntry(entry);

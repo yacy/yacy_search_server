@@ -101,6 +101,7 @@ public class CrawlQueues {
     
     public yacyURL getURL(String urlhash) {
         assert urlhash != null;
+        if (urlhash == null || urlhash.length() == 0) return null;
         CrawlEntry ne = noticeURL.get(urlhash);
         if (ne != null) return ne.url();
         ZURL.Entry ee = delegatedURL.getEntry(urlhash);
