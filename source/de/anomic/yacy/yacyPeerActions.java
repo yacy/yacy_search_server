@@ -267,6 +267,7 @@ public class yacyPeerActions {
     }
     
     public void setUserAgent(String IP, String userAgent) {
+        if (userAgents == null) return; // case can happen during shutdown
         userAgents.put(IP, userAgent);
     }
     
