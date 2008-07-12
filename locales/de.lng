@@ -30,7 +30,7 @@ Access Count During==Erfasster Zugriff w&auml;hrend der
 last Second==letzten Sekunde
 last Minute==letzten Minute
 last 10 Minutes==letzten 10 Minuten
-last Hour==letzten Stunde
+last Hour==letzte Stunde
 The following hosts are registered as source for brute-force requests to protected pages==Die folgenden Hosts wurden als Quelle von Brute-Force Attacken auf gesch&uuml;tzte Seiten erkannt 
 #>Host==>Host
 Access Times==Zugriffszeiten
@@ -235,6 +235,35 @@ Private Queue==Privater Puffer
 Public Queue==&Ouml;ffentlicher Puffer
 #-----------------------------
 
+#File: ConfigAppearance_p.html
+#---------------------------
+Appearance and Integration==Erscheinungsbild und Integration
+You can change the appearance of YaCy with skins==Sie k&ouml;nnen hier das Erscheinungsbild von YaCy mit Skins &auml;ndern
+and the default icons and links on the search page can be replaced with you own.==und die standard Grafiken und Links auf der Suchseite durch Ihre eigenen ersetzen.
+Skin Selection==Skinauswahl
+Select one of the default skins, download new skins, or create your own skin.==W&auml;hlen Sie einen der mitgelieferten Skins, laden Sie einen neuen herunter oder basteln Sie sich selber einen neuen Skin. 
+Current skin==Aktueller Skin
+Available Skins==Verf&uuml;gbare Skins 
+"Use"=="Benutzen"
+"Delete"=="L&ouml;schen"
+Install new skin from URL==Installiere einen neuen Skin von folgender URL
+Use this skin==Benutze diesen Skin
+"Install"=="Installieren"
+Unable to get URL:==Nicht m&ouml;glich die angegebene Datei von folgender URL zu installieren:
+Error saving the skin.==Es trat ein Fehler beim Speichern des Skins auf.
+Search Page Integration==Suchseite Integration
+The search page may be customized. You can change the 'corporate identity'-images, the greeting line==Die Suchseite darf angepasst werden. Sie k&ouml;nnen die "corporate identity"-Grafiken, die Begr&uuml;ssungszeile 
+and a link to a home page that is reached when the 'corporate identity'-images are clicked.==und den Link zu der Homepage, die erreicht wird, wenn auf die "corporate identity"-Grafik geklickt wird, &auml;ndern.
+Greeting Line==Begr&uuml;ssungszeile
+URL of Home Page==Homepage URL
+URL of a Small Corporate Image==URL der kleinen Grafik
+URL of a Large Corporate Image==URL der grossen Grafik
+"Change Search Page"=="Suchseite &auml;ndern"
+"Set to Default Values"=="Standardwerte wiederherstellen"
+The search page can be integrated in your own web pages with an iframe. Simply use the following code:==Die Suchseite kann mit einem iframe in Ihre eigene Website integriert werden. Benutzen Sie einfach folgenden Code:
+This would look like:==Das wird dann so aussehen:
+#-----------------------------
+
 #File: ConfigAccounts_p.html
 #---------------------------
 User Accounts==Benutzerkonten
@@ -412,14 +441,6 @@ You can use==Sie können
 here.==im Profil benutzen.
 #-----------------------------
 
-#File: ConfigPeerProfile_p.html
-#---------------------------
-Peer Profile==Peer Profil
-This defines visual attributes of the search interfaces.==Dies definiert sichtbare Eigenschaften der Such-Schnittstelle.
-Greeting Line \(<a href="index.html">visible above the search field</a>\)==Begr&uuml;ssungszeile (<a href="index.html">sichtbar &uuml;ber dem Suchformular</a>)
-"Save"=="Speichern"
-#-----------------------------
-
 #File: ConfigProperties_p.html
 #---------------------------
 Advanced Config==Erweiterte Einstellungen
@@ -447,21 +468,6 @@ Public bookmarks==der öffentlichen Bookmarks
 Home Page==der Home-Page
 File Share==des File-Shares
 Save restrictions==Beschränkungen speichern
-#-----------------------------
-
-#File: ConfigSkins_p.html
-#---------------------------
-Skin Selection==Skinauswahl
-You can change the appearance of YaCy with skins. Select one of the default skins, download new skins, or create your own skin.==Sie k&ouml;nnen hier das Aussehen von YaCy mit Skins &auml;ndern. W&auml;hlen Sie einen der mitgelieferten Skins, laden Sie einen neuen herunter oder basteln Sie sich selber einen neuen Skin.
-Current skin==Aktueller Skin
-Available Skins==Verf&uuml;gbare Skins
-"Use"=="Benutzen"
-"Delete"=="L&ouml;schen"
-Install new skin from URL==Installiere einen neuen Skin von folgender URL
-Use this skin==Benutze diesen Skin
-"install"=="Installieren"
-Unable to get URL:==Nicht m&ouml;glich die angegebene Datei von folgender URL zu installieren:
-Error saving the skin.==Es trat ein Fehler beim Speichern des Skins auf.
 #-----------------------------
 
 #File: ConfigUpdate_p.html
@@ -673,7 +679,6 @@ Year\(s\)==Jahr(e)
 Month\(s\)==Monat(e)
 Day\(s\)==Tag(e)
 Hour\(s\)==Stunde(n)
-Minute\(s\)==Minute(n)
 If you use this option, web pages that are already existent in your database are crawled and indexed again.==Ist diese Option aktiviert, werden bereits in Ihrer Datenbank existierende Internetseite erneut gecrawlt und indexiert.
 It depends on the age of the last crawl if this is done or not: if the last crawl is older than the given==Es h&auml;ngt vom Alter des letzten Crawls ab, ob dies getan oder nicht getan wird: wenn der letzte Crawl &auml;lter als das angegebene
 date, the page is crawled again, otherwise it is treated as 'double' and not loaded or indexed again.==Datum ist, wird die Seite erneut gecrawlet, sonst wird sie als 'double' markiert und weder geladen noch indexiert.
@@ -819,7 +824,6 @@ show all==alle zeigen
 Prefer mask==Vorzugsmaske
 Constraints==Einschr&auml;nkungen
 only index pages==Nur Index Seiten
-This peer holds \#\[links\]\# URLs==Dieser Peer speichert #[links]# URLs.
 "authentication required"=="Autorisierung erforderlich"
 Disable search function for users without authorization==Suchfunktion f&uuml;r Benutzer ohne Autorisierung sperren
 Enable web search to everyone==Suchfunktion f&uuml;r alle Nutzer erlauben
@@ -1166,8 +1170,10 @@ Error saving the language file.==Es trat ein Fehler beim Speichern der Sprachdat
 
 #File: LogStatistics_p.html
 #---------------------------
-Log Statistics==Log Statistik
-Needed \#\[totalParserTime\]\# \#\[totalParserTimeUnit\]\# to parse \#\[totalParserRuns\]\# Entries\#\(avgExists\)\#:: \(\#\[avgParserRunsPerMinute\]\#/sec\)==#[totalParserTime]# #[totalParserTimeUnit]# gebraucht, um #[totalParserRuns]# Eintr&auml;ge zu durchsuchen#(avgExists)#:: (#[avgParserRunsPerMinute]#/Sek).
+: Log Statistics==: Logstatistik
+>Log Statistics==>Logstatistik
+Needed \#\[totalParserTime\]\# \#\[totalParserTimeUnit\]\# to parse \#\[totalParserRuns\]\# Entries\#\(avgExists\)\#:: \(\#\[avgParserRunsPerMinute\]\#/sec\)==Es wurden #[totalParserTime]# #[totalParserTimeUnit]# gebraucht, um #[totalParserRuns]# Eintr&auml;ge zu durchsuchen#(avgExists)#:: (#[avgParserRunsPerMinute]#/Sek).
+To enable Log Statistics open DATA/LOG/yacy.logging and set "de.anomic.server.logging.LogalizerHandler.enabled = true".==Um die Logstatistik zu aktivieren, &ouml;ffnen Sie DATA/LOG/yacy.logging und setzten Sie "de.anomic.server.logging.LogalizerHandler.enabled = true". 
 #DHT==DHT
 #URLs==URLs
 URLs Received:==Empfangene URLs:
@@ -2416,6 +2422,7 @@ News Monitor==News Anzeige
 Cookies in Proxy==Cookies per Proxy
 Peer Control==Peer Kontrolle
 Admin Console==Admin Konsole
+Customization &amp; Integration==Anpassung &amp; Integration 
 >Messages==>Nachrichten
 "New Messages"=="Neue Nachrichten"
 Confirm Restart==Best&auml;tige Neustart
@@ -2457,18 +2464,13 @@ Peer Administration Console==Peer Administrations Konsole
 #Status==Status
 Basic Configuration==Eingangskonfiguration
 >Accounts==>Konten
->Language==>Sprache
-User Profile==Benutzer Profil
->Skins==>Skin Auswahl
 System Update==System Aktualisierung
 Network Configuration==Netzwerk Konfiguration
-Local robots.txt==Lokale robots.txt
-Peer Appearance Profile==Peer Erscheinungsbild
 Advanced Settings==Erweiterte Einstellungen
 Advanced Properties==Erweitertes Verhalten
-Queues Performance Settings==Performanceeinstellungen f&uuml;r Puffer und Prozesse
-Memory Settings for Database Caches==Performanceeinstellungen f&uuml;r Speicher
-Timing Settings for Search Sequence==Timing-Einstellungen des Suchablaufs
+Queue Performance==Performanceeinstellungen f&uuml;r Puffer
+Memory for Database Caches==Performanceeinstellungen f&uuml;r Speicher
+Timing for Search Sequence==Timing-Einstellungen des Suchablaufs
 #-----------------------------
 
 #File: env/templates/submenuCookie.template
@@ -2478,6 +2480,14 @@ Incoming&nbsp;Cookies==Eingehende Cookies
 Outgoing&nbsp;Cookies==Ausgehende Cookies
 #-----------------------------
 
+#File: env/templates/submenuCustomizationIntegration.template
+#---------------------------
+Customization &amp; Integration==Anpassung &amp; Integration 
+>Appearance==>Erscheinungsbild
+User Profile==Benutzerprofil
+>Language==>Sprache
+Local robots.txt==Lokale robots.txt
+#-----------------------------
 
 #File: env/templates/submenuIndexControl.template
 #---------------------------
@@ -2508,14 +2518,6 @@ Media Crawl Queues==Medien Crawl-Puffer
 >Movies==>Filme
 >Music==>Musik
 
-#File: env/templates/submenuPerformance.template
-#---------------------------
-Performance Menu==Performance Men&uuml;
-Queues Performance Settings==Puffer Performance Einstellungen
-Memory Settings for Database Caches==Speicher Einstellungen des Datenbank Caches
-Timing Settings for Search Sequence==Zeit Einstellungen f&uuml;r die Such Sequenz
-#-----------------------------
-
 #File: env/templates/submenuPublication.template
 #---------------------------
 Publication==Ver&ouml;ffentlichung
@@ -2528,7 +2530,7 @@ File Hosting==Datei Freigabe
 #---------------------------
 Server Log Menu==Server Log Men&uuml;
 #Server Log==Server Log
-Log Statistics==Log Statistik
+Log Statistics==Logstatistik
 #-----------------------------
 
 #File: env/templates/submenuWebStructure.template
