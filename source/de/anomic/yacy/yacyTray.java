@@ -71,7 +71,7 @@ public class yacyTray implements ActionListener, ItemListener {
 		final String iconpath = sb.getRootPath().toString() + "/addon/YaCy_TrayIcon.gif".replace("/", File.separator);
 		final ImageIcon i = new ImageIcon(iconpath);
 		
-		// the menu is disabled because of visibility conflicts on windows (tested on xp)
+		// the menu is disabled because of visibility conflicts on windows with jre6
 		// anyway the code might be a template for future use
         if (showmenu) {
 			// this is the popup menu

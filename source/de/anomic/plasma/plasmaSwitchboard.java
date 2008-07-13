@@ -86,6 +86,7 @@
 package de.anomic.plasma;
 
 
+import java.awt.GraphicsEnvironment;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -117,11 +118,11 @@ import de.anomic.crawler.HTTPLoader;
 import de.anomic.crawler.ImporterManager;
 import de.anomic.crawler.IndexingStack;
 import de.anomic.crawler.NoticedURL;
+import de.anomic.crawler.ResourceObserver;
 import de.anomic.crawler.ResultImages;
 import de.anomic.crawler.ResultURLs;
 import de.anomic.crawler.RobotsTxt;
 import de.anomic.crawler.ZURL;
-import de.anomic.crawler.ResourceObserver;
 import de.anomic.data.URLLicense;
 import de.anomic.data.blogBoard;
 import de.anomic.data.blogBoardComments;
@@ -161,6 +162,7 @@ import de.anomic.server.serverProcessorJob;
 import de.anomic.server.serverProfiling;
 import de.anomic.server.serverSemaphore;
 import de.anomic.server.serverSwitch;
+import de.anomic.server.serverSystem;
 import de.anomic.server.serverThread;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.crypt;
@@ -834,20 +836,17 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         setLog(new serverLog("PLASMA"));
         if (applyPro) this.log.logInfo("This is the pro-version of YaCy");
         
-        // make system tray TODO: enable
-//        try {
-//        	final boolean trayIcon = getConfig("trayIcon", "false").equals("true");
-//        	if (trayIcon) {
-//				System.setProperty("java.awt.headless", "false");
-//				yacytray = new yacyTray(this, false);
-//			}
-//		} catch (Exception e) {
-//			try{
-//				yacytray.removeTray();
-//			} finally {
-//				System.setProperty("java.awt.headless", "true");
-//			}
-//		}
+        // make system tray
+        // TODO: make tray on linux
+        try {
+        	final boolean trayIcon = getConfig("trayIcon", "false").equals("true");
+        	if (trayIcon && serverSystem.isWindows) {
+				System.setProperty("java.awt.headless", "false");
+				yacytray = new yacyTray(this, false);
+			}
+		} catch (Exception e) {
+			System.setProperty("java.awt.headless", "true");
+		}
 		        
         // remote proxy configuration
         httpdProxyHandler.setRemoteProxyConfig(httpRemoteProxyConfig.init(this)); // TODO refactoring
@@ -1659,7 +1658,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         crawlQueues.close();
         log.logConfig("SWITCHBOARD SHUTDOWN STEP 3: sending termination signal to database manager (stand by...)");
         webIndex.close();
-//        if(System.getProperty("java.awt.headless") == "false") yacytray.removeTray(); TODO: enable
+        if(serverSystem.isWindows && !GraphicsEnvironment.isHeadless()) yacytray.removeTray();
         log.logConfig("SWITCHBOARD SHUTDOWN TERMINATED");
     }
     
