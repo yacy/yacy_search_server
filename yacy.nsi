@@ -36,7 +36,14 @@ LicenseData "gpl.txt"
 
 Section "Binaries (required)"
 	SectionIn 1 2 3 RO
-	Call ClearShortcuts
+	
+	;clear old shortcuts
+	SetShellVarContext current
+	RMDir /r "$SMPROGRAMS\YaCy"
+	Delete "$QUICKLAUNCH\YaCy-Search.lnk" ;old
+	Delete "$DESKTOP\YaCy-Search.lnk" ;old
+	Delete "$SMSTARTUP\start YaCy (no console).lnk" ;old
+	
 	SetOutPath $INSTDIR
 	
 	File /r "RELEASE\MAIN\*"
@@ -98,22 +105,13 @@ Section "Uninstall"
 	
 	;or jump to this
 	keepdata:
-	Call ClearShortcuts
+	RMDir /r "$SMPROGRAMS\YaCy"
+	Delete "$DESKTOP\YaCy.lnk"
+	Delete "$SMSTARTUP\YaCy.lnk"
 	
 	DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\YaCy"
 	nouninstall:
 SectionEnd
-
-Function ClearShortcuts
-	SetShellVarContext current
-	
-	RMDir /r "$SMPROGRAMS\YaCy"
-	Delete "$DESKTOP\YaCy.lnk"
-	Delete "$SMSTARTUP\YaCy.lnk"
-	Delete "$QUICKLAUNCH\YaCy-Search.lnk" ;old
-	Delete "$DESKTOP\YaCy-Search.lnk" ;old
-	Delete "$SMSTARTUP\start YaCy (no console).lnk" ;old
-FunctionEnd
 
 Function GetJRE
 ; based on http://nsis.sourceforge.net/Simple_Java_Runtime_Download_Script	
