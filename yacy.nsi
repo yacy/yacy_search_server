@@ -36,6 +36,7 @@ LicenseData "gpl.txt"
 
 Section "Binaries (required)"
 	SectionIn 1 2 3 RO
+	Call ClearShortcuts
 	SetOutPath $INSTDIR
 	
 	File /r "RELEASE\MAIN\*"
@@ -52,12 +53,10 @@ Section "Shortcuts in the Start Menu"
 	SectionIn 1 2 3
 	SetShellVarContext current
 	CreateDirectory "$SMPROGRAMS\YaCy"
-	CreateShortCut "$SMPROGRAMS\YaCy\start YaCy.lnk" "$INSTDIR\startYACY.bat" "" "$INSTDIR\addon\YaCy.ico"
-	CreateShortCut "$SMPROGRAMS\YaCy\start YaCy (no console).lnk" "$INSTDIR\startYACY_noconsole.bat" "" "$INSTDIR\addon\YaCy.ico"
-	CreateShortCut "$SMPROGRAMS\YaCy\stop YaCy.lnk" "$INSTDIR\stopYACY.bat" "" "$INSTDIR\addon\YaCy.ico"
+	CreateShortCut "$SMPROGRAMS\YaCy\YaCy.lnk" "$INSTDIR\startYACY.bat" "" "$INSTDIR\addon\YaCy.ico"
+	CreateShortCut "$SMPROGRAMS\YaCy\stop.lnk" "$INSTDIR\stopYACY.bat" "" "$INSTDIR\addon\YaCy.ico"
 	CreateShortCut "$SMPROGRAMS\YaCy\Readme.lnk" "$INSTDIR\readme.txt"
 	CreateShortCut "$SMPROGRAMS\YaCy\Uninstall.lnk" "$INSTDIR\Uninstall.exe"
-	CreateShortCut "$SMPROGRAMS\YaCy\YaCy-Search.lnk" "$INSTDIR\addon\YaCy-Search.bat" "" "$INSTDIR\addon\YaCy.ico" "" SW_SHOWMINIMIZED
 SectionEnd
 
 Section "YaCy on the Desktop"
@@ -66,20 +65,9 @@ Section "YaCy on the Desktop"
 	CreateShortCut "$DESKTOP\YaCy.lnk" "$INSTDIR\startYACY.bat" "" "$INSTDIR\addon\YaCy.ico"
 SectionEnd
 
-Section "Searchpage on the Desktop"
-	SetShellVarContext current
-	CreateShortCut "$DESKTOP\YaCy-Search.lnk" "$INSTDIR\addon\YaCy-Search.bat" "" "$INSTDIR\addon\YaCy.ico" "" SW_SHOWMINIMIZED
-SectionEnd
-
-Section "Searchpage in the Quicklaunch"
-	SectionIn 1 2 3
-	SetShellVarContext current
-	CreateShortCut "$QUICKLAUNCH\YaCy-Search.lnk" "$INSTDIR\addon\YaCy-Search.bat" "" "$INSTDIR\addon\YaCy.ico" "" SW_SHOWMINIMIZED
-SectionEnd
-
 Section "YaCy in Startup"
 	SetShellVarContext current
-	CreateShortCut "$SMSTARTUP\start YaCy (no console).lnk" "$INSTDIR\startYACY_noconsole.bat" "" "$INSTDIR\addon\YaCy.ico"
+	CreateShortCut "$SMSTARTUP\YaCy.lnk" "$INSTDIR\startYACY.bat" "" "$INSTDIR\addon\YaCy.ico"
 SectionEnd
 
 Section "Uninstall"
@@ -110,15 +98,22 @@ Section "Uninstall"
 	
 	;or jump to this
 	keepdata:
-	RMDir /r "$SMPROGRAMS\YaCy"
-	Delete "$QUICKLAUNCH\YaCy-Search.lnk"
-	Delete "$DESKTOP\YaCy.lnk"
-	Delete "$DESKTOP\YaCy-Search.lnk"
-	Delete "$SMSTARTUP\start YaCy (no console).lnk"
+	Call ClearShortcuts
 	
 	DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\YaCy"
 	nouninstall:
 SectionEnd
+
+Function ClearShortcuts
+	SetShellVarContext current
+	
+	RMDir /r "$SMPROGRAMS\YaCy"
+	Delete "$DESKTOP\YaCy.lnk"
+	Delete "$SMSTARTUP\YaCy.lnk"
+	Delete "$QUICKLAUNCH\YaCy-Search.lnk" ;old
+	Delete "$DESKTOP\YaCy-Search.lnk" ;old
+	Delete "$SMSTARTUP\start YaCy (no console).lnk" ;old
+FunctionEnd
 
 Function GetJRE
 ; based on http://nsis.sourceforge.net/Simple_Java_Runtime_Download_Script	
@@ -128,7 +123,7 @@ Function GetJRE
 	userInfo::getAccountType
 	Pop $0
 		StrCmp $0 "Admin" +3
-		MessageBox MB_ICONEXCLAMATION "You need to install Java on Administrator privileges. \
+		MessageBox MB_ICONEXCLAMATION "You need Administrator privileges to install Java. \
 		It will now be downloaded to the shared documents folder. \
 		YaCy won't run without Java."
 	
