@@ -454,6 +454,9 @@ browserPopUpTrigger=true
 browserPopUpPage=ConfigBasic.html
 browserPopUpApplication=netscape
 
+# defines if the YaCy icon appears in the system tray on supported platforms
+trayIcon=true
+
 # index sharing attributes: by default, sharing is on.
 # If you want to use YaCy only for local indexing (robinson mode),
 # you may switch this off

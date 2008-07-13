@@ -47,6 +47,15 @@
     Enabled <a href="Status.html?popup=false">[Disable]</a>
     #(/popup)#
     </dd>
+    
+    <dt>Tray-Icon</dt>
+    <dd>
+    #(tray)#
+    Disabled <a href="Status.html?tray=true">[Enable]</a>
+    ::
+    Enabled <a href="Status.html?tray=false">[Disable]</a>
+    #(/tray)#
+    </dd>
       
     <dt><a href="PerformanceMemory_p.html">Memory Usage</a></dt>
     <dd>

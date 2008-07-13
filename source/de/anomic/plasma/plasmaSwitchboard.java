@@ -170,6 +170,7 @@ import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacyNewsRecord;
 import de.anomic.yacy.yacySeed;
+import de.anomic.yacy.yacyTray;
 import de.anomic.yacy.yacyURL;
 import de.anomic.yacy.yacyVersion;
 
@@ -200,6 +201,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     public static indexReferenceBlacklist urlBlacklist = null;
     
     public static wikiParser wikiParser = null;
+    
+    public yacyTray yacytray;
     
     // storage management
     public  File                           htCachePath;
@@ -831,6 +834,21 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         setLog(new serverLog("PLASMA"));
         if (applyPro) this.log.logInfo("This is the pro-version of YaCy");
         
+        // make system tray
+        try {
+        	final boolean trayIcon = getConfig("trayIcon", "false").equals("true");
+        	if (trayIcon) {
+				System.setProperty("java.awt.headless", "false");
+				yacytray = new yacyTray(this, false);
+			}
+		} catch (Exception e) {
+			try{
+				yacytray.removeTray();
+			} finally {
+				System.setProperty("java.awt.headless", "true");
+			}
+		}
+		        
         // remote proxy configuration
         httpdProxyHandler.setRemoteProxyConfig(httpRemoteProxyConfig.init(this)); // TODO refactoring
         this.log.logConfig("Remote proxy configuration:\n" + httpdProxyHandler.getRemoteProxyConfig().toString());
@@ -1641,6 +1659,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         crawlQueues.close();
         log.logConfig("SWITCHBOARD SHUTDOWN STEP 3: sending termination signal to database manager (stand by...)");
         webIndex.close();
+        if(System.getProperty("java.awt.headless") == "false") yacytray.removeTray();
         log.logConfig("SWITCHBOARD SHUTDOWN TERMINATED");
     }
     

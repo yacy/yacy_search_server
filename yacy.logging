@@ -23,6 +23,8 @@ SESSION-POOL.level = INFO
 CRAWLER-POOL.level = INFO
 STACKCRAWL.level = INFO
 MEMORY.level = INFO
+sun.awt.level = OFF
+java.awt.level = OFF
 
 # List of global handlers
 handlers = java.util.logging.FileHandler,\

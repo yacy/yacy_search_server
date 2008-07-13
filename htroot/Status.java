@@ -109,6 +109,14 @@ public class Status {
                     sb.setConfig("browserPopUpTrigger", "true");
                 }
                 redirect = true;
+        	} else if (post.containsKey("tray")) {
+                String trigger_enabled = post.get("tray");
+                if (trigger_enabled.equals("false")) {
+                    sb.setConfig("trayIcon", "false");
+                } else if (trigger_enabled.equals("true")){
+                    sb.setConfig("trayIcon", "true");
+                }
+                redirect = true;
         	}
         	
         	if (redirect) {
@@ -272,6 +280,12 @@ public class Status {
             prop.put("popup", "0");
         } else {
             prop.put("popup", "1");
+        }
+        
+        if (sb.getConfig("trayIcon", "false").equals("false")) {
+            prop.put("tray", "0");
+        } else {
+            prop.put("tray", "1");
         }
 
         if (sb.getConfig("onlineMode", "1").equals("0")) {
