@@ -395,7 +395,7 @@
     <copy todir="${release_main}">
       <fileset dir=".">
         <include name="startYACY.bat"/>
-        <include name="startYACY_noconsole.bat"/>
+        <include name="startYACY_debug.bat"/>
         <include name="stopYACY.bat"/>
       	<!--
         <include name="startYACY_Win9x.bat"/>
