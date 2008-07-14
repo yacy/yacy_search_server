@@ -159,6 +159,7 @@ public class CrawlResults {
             String cachepath, urlstr, urltxt;
             yacySeed initiatorSeed, executorSeed;
             indexURLReference urle;
+            indexURLReference.Components comp;
 
             int i, cnt = 0;
             for (i = sb.crawlResults.getStackSize(tabletype) - 1; i >= (sb.crawlResults.getStackSize(tabletype) - lines); i--) {
@@ -174,8 +175,9 @@ public class CrawlResults {
                         urlstr = null;
                         urltxt = null;
                         cachepath = null;
+                        comp = null;
                     } else {
-                        indexURLReference.Components comp = urle.comp();
+                        comp = urle.comp();
                         urlstr = comp.url().toNormalform(false, true);
                         urltxt = nxTools.shortenURLString(urlstr, 72); // shorten the string text like a URL
                         cachepath = plasmaHTCache.getCachePath(new yacyURL(urlstr, null)).toString().replace('\\', '/').substring(plasmaHTCache.cachePath.toString().length() + 1);
@@ -205,13 +207,13 @@ public class CrawlResults {
                     } else
                         prop.put("table_indexed_" + cnt + "_showExec", "0");
 
-                    if (showDate) {
+                    if (showDate && urle != null) {
                         prop.put("table_indexed_" + cnt + "_showDate", "1");
                         prop.put("table_indexed_" + cnt + "_showDate_modified", daydate(urle.moddate()));
                     } else
                         prop.put("table_indexed_" + cnt + "_showDate", "0");
 
-                    if (showWords) {
+                    if (showWords && urle != null) {
                         prop.put("table_indexed_" + cnt + "_showWords", "1");
                         prop.put("table_indexed_" + cnt + "_showWords_count", urle.wordCount());
                     } else
@@ -224,11 +226,12 @@ public class CrawlResults {
                         } else {
                             prop.put("table_indexed_" + cnt + "_showTitle_available", "1");
 
-                            if (comp.dc_title() == null || comp.dc_title().trim().length() == 0)
+                            if (comp == null || comp.dc_title() == null || comp.dc_title().trim().length() == 0)
                                 prop.put("table_indexed_" + cnt + "_showTitle_available_nodescr", "0");
-                            else
+                            else {
                                 prop.put("table_indexed_" + cnt + "_showTitle_available_nodescr", "1");
-                            prop.putHTML("table_indexed_" + cnt + "_showTitle_available_nodescr_urldescr", comp.dc_title());
+                                prop.putHTML("table_indexed_" + cnt + "_showTitle_available_nodescr_urldescr", comp.dc_title());
+                            }
 
                             prop.put("table_indexed_" + cnt + "_showTitle_available_cachepath", cachepath);
                             prop.putHTML("table_indexed_" + cnt + "_showTitle_available_urltitle", urlstr);
