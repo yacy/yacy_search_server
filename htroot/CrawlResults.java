@@ -169,14 +169,20 @@ public class CrawlResults {
 //              serverLog.logFinest("PLASMA", "plasmaCrawlLURL/genTableProps urlHash=" + urlHash);
                 try {
                     urle = sb.webIndex.getURL(urlHash, null, 0);
-                    indexURLReference.Components comp = urle.comp();
+                    if(urle == null) {
+                        serverLog.logWarning("PLASMA", "CrawlResults: URL not in index for crawl result "+ i +" with hash "+ urlHash);
+                        urlstr = null;
+                        urltxt = null;
+                        cachepath = null;
+                    } else {
+                        indexURLReference.Components comp = urle.comp();
+                        urlstr = comp.url().toNormalform(false, true);
+                        urltxt = nxTools.shortenURLString(urlstr, 72); // shorten the string text like a URL
+                        cachepath = plasmaHTCache.getCachePath(new yacyURL(urlstr, null)).toString().replace('\\', '/').substring(plasmaHTCache.cachePath.toString().length() + 1);
+                    }
 //                  serverLog.logFinest("PLASMA", "plasmaCrawlLURL/genTableProps urle=" + urle.toString());
                     initiatorSeed = sb.webIndex.seedDB.getConnected(initiatorHash);
                     executorSeed = sb.webIndex.seedDB.getConnected(executorHash);
-
-                    urlstr = comp.url().toNormalform(false, true);
-                    urltxt = nxTools.shortenURLString(urlstr, 72); // shorten the string text like a URL
-                    cachepath = plasmaHTCache.getCachePath(new yacyURL(urlstr, null)).toString().replace('\\', '/').substring(plasmaHTCache.cachePath.toString().length() + 1);
 
                     prop.put("table_indexed_" + cnt + "_dark", (dark) ? "1" : "0");
                     if (showControl) {
