@@ -378,8 +378,8 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
         
         if (serverSystem.isWindows) {
         	File startType = new File(sb.getRootPath(), "DATA/yacy.noconsole".replace("/", File.separator));
-        	String starterFile = "startYACY.bat";
-        	if (startType.exists()) starterFile = "startYACY_noconsole.bat"; // startType noconsole
+        	String starterFile = "startYACY_debug.bat";
+        	if (startType.exists()) starterFile = "startYACY.bat"; // startType noconsole
         	
         	try{
                 serverLog.logInfo("RESTART", "INITIATED");
@@ -456,8 +456,8 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
             String scriptFileName = null;
             if(serverSystem.isWindows){
             	File startType = new File(sb.getRootPath(), "DATA/yacy.noconsole".replace("/", File.separator));
-            	String starterFile = "startYACY.bat";
-            	if (startType.exists()) starterFile = "startYACY_noconsole.bat"; // startType noconsole
+            	String starterFile = "startYACY_debug.bat";
+            	if (startType.exists()) starterFile = "startYACY.bat"; // startType noconsole
             	script = 
 	            	"@echo off" + serverCore.LF_STRING +
 	            	"title YaCy updater" + serverCore.LF_STRING +
