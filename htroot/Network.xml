@@ -30,6 +30,7 @@
     <seeds>#[seeds]#</seeds>
     <connects>#[connects]#</connects>
     <address>#[ip]#:#[port]#</address>
+    <useragent>#[userAgent]#</useragent>
     #(/complete)#    
   </peer>
 #{/list}#
