@@ -44,6 +44,9 @@ import de.anomic.xml.RSSFeed;
 import de.anomic.xml.RSSMessage;
 import de.anomic.yacy.yacyURL;
 
+/**
+ * FIXME this is a duplicate of yacysearch.java!
+ */
 public class ysearch {
 
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
