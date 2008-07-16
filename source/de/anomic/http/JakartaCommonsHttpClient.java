@@ -277,8 +277,6 @@ public class JakartaCommonsHttpClient {
         }
         RequestEntity data = new MultipartRequestEntity(parts, post.getParams());
         if (gzipBody) {
-            serverLog.logFinest("HTTPD", "POST should be gzip, going to pack data with content length " +
-                    data.getContentLength());
             // cache data and gzip it
             final ByteArrayOutputStream zippedBytes = new ByteArrayOutputStream();
             final GZIPOutputStream toZip = new GZIPOutputStream(zippedBytes);
@@ -287,7 +285,6 @@ public class JakartaCommonsHttpClient {
             toZip.flush();
             // use compressed data as body (not setting content length according to RFC 2616 HTTP/1.1, section 4.4)
             data = new ByteArrayRequestEntity(zippedBytes.toByteArray(), data.getContentType());
-            serverLog.logFinest("HTTPD", "gzipped POST has content length " + data.getContentLength());
 
             post.setRequestHeader(httpHeader.CONTENT_ENCODING, httpHeader.CONTENT_ENCODING_GZIP);
         }
