@@ -25,7 +25,6 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 package de.anomic.http;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -43,6 +42,7 @@ import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.URIException;
+import org.apache.commons.httpclient.methods.ByteArrayRequestEntity;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.HeadMethod;
 import org.apache.commons.httpclient.methods.InputStreamRequestEntity;
@@ -152,7 +152,6 @@ public class JakartaCommonsHttpClient {
 
     /*
      * (non-Javadoc)
-     * 
      * @see de.anomic.http.HttpClient#setProxy(de.anomic.http.httpRemoteProxyConfig)
      */
     public void setProxy(final httpRemoteProxyConfig proxyConfig) {
@@ -163,7 +162,6 @@ public class JakartaCommonsHttpClient {
 
     /*
      * (non-Javadoc)
-     * 
      * @see de.anomic.http.HttpClient#setHeader(de.anomic.http.httpHeader)
      */
     public void setHeader(final httpHeader header) {
@@ -172,7 +170,6 @@ public class JakartaCommonsHttpClient {
 
     /*
      * (non-Javadoc)
-     * 
      * @see de.anomic.http.HttpClient#setTimeout(int)
      */
     public void setTimeout(final int timeout) {
@@ -190,7 +187,6 @@ public class JakartaCommonsHttpClient {
 
     /*
      * (non-Javadoc)
-     * 
      * @see de.anomic.http.HttpClient#getUserAgent()
      */
     public String getUserAgent() {
@@ -281,6 +277,8 @@ public class JakartaCommonsHttpClient {
         }
         RequestEntity data = new MultipartRequestEntity(parts, post.getParams());
         if (gzipBody) {
+            serverLog.logFinest("HTTPD", "POST should be gzip, going to pack data with content length " +
+                    data.getContentLength());
             // cache data and gzip it
             final ByteArrayOutputStream zippedBytes = new ByteArrayOutputStream();
             final GZIPOutputStream toZip = new GZIPOutputStream(zippedBytes);
@@ -288,8 +286,8 @@ public class JakartaCommonsHttpClient {
             toZip.finish();
             toZip.flush();
             // use compressed data as body (not setting content length according to RFC 2616 HTTP/1.1, section 4.4)
-            data = new InputStreamRequestEntity(new ByteArrayInputStream(zippedBytes.toByteArray()), -1, data
-                    .getContentType());
+            data = new ByteArrayRequestEntity(zippedBytes.toByteArray(), data.getContentType());
+            serverLog.logFinest("HTTPD", "gzipped POST has content length " + data.getContentLength());
 
             post.setRequestHeader(httpHeader.CONTENT_ENCODING, httpHeader.CONTENT_ENCODING_GZIP);
         }
@@ -302,7 +300,6 @@ public class JakartaCommonsHttpClient {
 
     /*
      * (non-Javadoc)
-     * 
      * @see de.anomic.http.HttpClient#CONNECT(java.lang.String, int, de.anomic.http.httpHeader)
      */
     public JakartaCommonsHttpResponse CONNECT(final String host, final int port) throws IOException {
