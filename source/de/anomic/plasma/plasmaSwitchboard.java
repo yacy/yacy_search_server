@@ -1658,7 +1658,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         crawlQueues.close();
         log.logConfig("SWITCHBOARD SHUTDOWN STEP 3: sending termination signal to database manager (stand by...)");
         webIndex.close();
-        if(serverSystem.isWindows && !GraphicsEnvironment.isHeadless()) yacytray.removeTray();
+        if(yacyTray.isShown) yacytray.removeTray();
         log.logConfig("SWITCHBOARD SHUTDOWN TERMINATED");
     }
     

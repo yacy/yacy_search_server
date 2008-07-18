@@ -48,7 +48,10 @@ public class yacyTray implements ActionListener, ItemListener {
 	private boolean testing = false;
 	
 	plasmaSwitchboard sb;
-		
+	
+	public static boolean isShown = false;
+	public static boolean lockBrowserPopup = true;
+	
 	private long t1;
 
     final private static SystemTray tray = SystemTray.getDefaultSystemTray();
@@ -111,11 +114,16 @@ public class yacyTray implements ActionListener, ItemListener {
             }
         });        
         tray.addTrayIcon(ti);
+        isShown = true;
     }
 	
 	private void trayClickAction(){	//detect doubleclick
 		if(System.currentTimeMillis() - t1 < 500){
-			openBrowser("");
+			if (lockBrowserPopup) {
+				displayBalloonMessage("YaCy","Please wait until YaCy is started.");
+			} else {
+				openBrowser("");
+			}
 			t1 = 0; //protecting against tripleclick
 		} else { t1 = System.currentTimeMillis(); }
 	}
@@ -127,6 +135,7 @@ public class yacyTray implements ActionListener, ItemListener {
 	
 	public void removeTray(){
 		tray.removeTrayIcon(ti);
+		isShown = false;
 	}
 	
 	public void displayBalloonMessage(String title, String message){

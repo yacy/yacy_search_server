@@ -96,6 +96,7 @@ import de.anomic.tools.enumerateFiles;
 import de.anomic.tools.yFormatter;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacySeedDB;
+import de.anomic.yacy.yacyTray;
 import de.anomic.yacy.yacyURL;
 import de.anomic.yacy.yacyVersion;
 
@@ -361,6 +362,9 @@ public final class yacy {
                         final String  browserPopUpApplication = sb.getConfig("browserPopUpApplication", "netscape");
                         serverSystem.openBrowser((server.withSSL()?"https":"http") + "://localhost:" + serverCore.getPortNr(port) + "/" + browserPopUpPage, browserPopUpApplication);
                     }
+                    
+                    // unlock yacyTray browser popup
+                    yacyTray.lockBrowserPopup = false;
 
                     // Copy the shipped locales into DATA, existing files are overwritten
                     final File locale_work   = sb.getConfigPath("locale.work", "DATA/LOCALE/locales");
