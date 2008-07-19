@@ -127,7 +127,7 @@ public final class httpdProxyHandler {
     static {
         // Doing logger initialization
         try {
-            serverLog.logInfo("PROXY","Configuring proxy access logging ...");            
+            theLogger.logInfo("Configuring proxy access logging ...");            
             
             // getting the logging manager
             LogManager manager = LogManager.getLogManager();
@@ -159,15 +159,15 @@ public final class httpdProxyHandler {
                 proxyLogger.addHandler(txtLog);     
                 
                 doAccessLogging = true; 
-                serverLog.logInfo("PROXY","Proxy access logging configuration done." + 
+                theLogger.logInfo("Proxy access logging configuration done." + 
                                   "\n\tFilename: " + pattern + 
                                   "\n\tLimit: " + limitStr + 
                                   "\n\tCount: " + countStr);
             } else {
-                serverLog.logInfo("PROXY","Proxy access logging is deactivated.");
+                theLogger.logInfo("Proxy access logging is deactivated.");
             }
         } catch (Exception e) { 
-            serverLog.logSevere("PROXY","Unable to configure proxy access logging.",e);        
+            theLogger.logSevere("Unable to configure proxy access logging.",e);        
         }
         
         switchboard = plasmaSwitchboard.getSwitchboard();
@@ -227,21 +227,6 @@ public final class httpdProxyHandler {
     private static final StringBuffer userAgentStr = new StringBuffer();
     
     
-    private static String domain(String host) {
-        String domain = host;
-        int pos = domain.lastIndexOf(".");
-        if (pos >= 0) {
-            // truncate from last part
-            domain = domain.substring(0, pos);
-            pos = domain.lastIndexOf(".");
-            if (pos >= 0) {
-                // truncate from first part
-                domain = domain.substring(pos + 1);
-            }
-        }
-        return domain;
-    }
-    
     public static void handleOutgoingCookies(httpHeader requestHeader, String targethost, String clienthost) {
         /*
          The syntax for the header is:
@@ -294,8 +279,9 @@ public final class httpdProxyHandler {
      * @see de.anomic.http.httpdHandler#doGet(java.util.Properties, de.anomic.http.httpHeader, java.io.OutputStream)
      */
     public static void doGet(Properties conProp, httpHeader requestHeader, OutputStream respond) {
-
+        httpdByteCountOutputStream countedRespond = null;
         try {
+            final int reqID = requestHeader.hashCode();
             // remembering the starting time of the request
             final Date requestDate = new Date(); // remember the time...
             conProp.put(httpHeader.CONNECTION_PROP_REQUEST_START,new Long(requestDate.getTime()));
@@ -303,7 +289,7 @@ public final class httpdProxyHandler {
             switchboard.proxyLastAccess = System.currentTimeMillis();
 
             // using an ByteCount OutputStream to count the send bytes (needed for the logfile)
-            respond = new httpdByteCountOutputStream(respond,conProp.getProperty(httpHeader.CONNECTION_PROP_REQUESTLINE).length() + 2,"PROXY");
+            countedRespond = new httpdByteCountOutputStream(respond,conProp.getProperty(httpHeader.CONNECTION_PROP_REQUESTLINE).length() + 2,"PROXY");
 
             String host = conProp.getProperty(httpHeader.CONNECTION_PROP_HOST);
             String path = conProp.getProperty(httpHeader.CONNECTION_PROP_PATH);           // always starts with leading '/'
@@ -315,6 +301,8 @@ public final class httpdProxyHandler {
             yacyURL url = null;
             try {
                 url = httpHeader.getRequestURL(conProp);
+                theLogger.logFine(reqID +" GET "+ url);
+                theLogger.logFinest(reqID +"    header: "+ requestHeader);
 
                 //redirector
                 if (redirectorEnabled){
@@ -328,6 +316,7 @@ public final class httpdProxyHandler {
                             url = new yacyURL(newUrl, null);
                         } catch(MalformedURLException e){}//just keep the old one
                     }
+                    theLogger.logFinest(reqID +"    using redirector to "+ url);
                     conProp.setProperty(httpHeader.CONNECTION_PROP_HOST, url.getHost()+":"+url.getPort());
                     conProp.setProperty(httpHeader.CONNECTION_PROP_PATH, url.getPath());
                     requestHeader.put(httpHeader.HOST, url.getHost()+":"+url.getPort());
@@ -336,8 +325,8 @@ public final class httpdProxyHandler {
             } catch (MalformedURLException e) {
                 String errorMsg = "ERROR: internal error with url generation: host=" +
                                   host + ", port=" + port + ", path=" + path + ", args=" + args;
-                serverLog.logSevere("PROXY", errorMsg);
-                httpd.sendRespondError(conProp,respond,4,501,null,errorMsg,e);
+                theLogger.logSevere(errorMsg);
+                httpd.sendRespondError(conProp,countedRespond,4,501,null,errorMsg,e);
                 return;
             }
 
@@ -361,22 +350,16 @@ public final class httpdProxyHandler {
             String hostlow = host.toLowerCase();
             if (args != null) { path = path + "?" + args; }
             if (plasmaSwitchboard.urlBlacklist.isListed(indexReferenceBlacklist.BLACKLIST_PROXY, hostlow, path)) {
-                httpd.sendRespondError(conProp,respond,4,403,null,
-                        "URL '" + hostlow + "' blocked by yacy proxy (blacklisted)",null);
                 theLogger.logInfo("AGIS blocking of host '" + hostlow + "'");
+                httpd.sendRespondError(conProp,countedRespond,4,403,null,
+                        "URL '" + hostlow + "' blocked by yacy proxy (blacklisted)",null);
                 return;
             }
 
             // handle outgoing cookies
             handleOutgoingCookies(requestHeader, host, ip);
 
-            // set another userAgent, if not yellowlisted
-            if ((yellowList != null) && (!(yellowList.contains(domain(hostlow))))) {
-                // change the User-Agent
-                requestHeader.put(httpHeader.USER_AGENT, generateUserAgent(requestHeader));
-            }
-            
-            addXForwardedForHeader(conProp, requestHeader);
+            prepareRequestHeader(conProp, requestHeader, hostlow);
             
             // decide whether to use a cache entry or connect to the network
             File cacheFile = plasmaHTCache.getCachePath(url);
@@ -429,14 +412,18 @@ public final class httpdProxyHandler {
             );
             if (yacyCore.getOnlineMode() == 0) {
             	if (cacheExists) {
-            		fulfillRequestFromCache(conProp,url,ext,requestHeader,cachedResponseHeader,cacheFile,respond);
+            	    theLogger.logFinest(reqID +"    fulfill request from cache");
+            	    fulfillRequestFromCache(conProp,url,ext,requestHeader,cachedResponseHeader,cacheFile,countedRespond);
             	} else {
-            		httpd.sendRespondError(conProp,respond,4,404,null,"URL not availabe in Cache",null);
+                    theLogger.logInfo("URL not availabe in Cache"+" and not in online-mode!");
+                    httpd.sendRespondError(conProp,countedRespond,4,404,null,"URL not availabe in Cache",null);
             	}
             } else if (cacheExists && cacheEntry.shallUseCacheForProxy()) {
-                fulfillRequestFromCache(conProp,url,ext,requestHeader,cachedResponseHeader,cacheFile,respond);
+                theLogger.logFinest(reqID +"    fulfill request from cache");
+                fulfillRequestFromCache(conProp,url,ext,requestHeader,cachedResponseHeader,cacheFile,countedRespond);
             } else {            
-                fulfillRequestFromWeb(conProp,url,ext,requestHeader,cachedResponseHeader,cacheFile,respond);
+                theLogger.logFinest(reqID +"    fulfill request from web");
+                fulfillRequestFromWeb(conProp,url,ext,requestHeader,cachedResponseHeader,cacheFile,countedRespond);
             }
            
         } catch (Exception e) {
@@ -446,7 +433,7 @@ public final class httpdProxyHandler {
                     forceConnectionClose(conProp);
                 } else if (!conProp.containsKey(httpHeader.CONNECTION_PROP_PROXY_RESPOND_HEADER)) {
                     String errorMsg = "Unexpected Error. " + e.getClass().getName() + ": " + e.getMessage(); 
-                    httpd.sendRespondError(conProp,respond,4,501,null,errorMsg,e);
+                    httpd.sendRespondError(conProp,countedRespond,4,501,null,errorMsg,e);
                     theLogger.logSevere(errorMsg);
                 } else {
                     forceConnectionClose(conProp);                    
@@ -455,11 +442,11 @@ public final class httpdProxyHandler {
                 forceConnectionClose(conProp);
             }            
         } finally {
-            try { respond.flush(); } catch (Exception e) {}
-            if (respond instanceof httpdByteCountOutputStream) ((httpdByteCountOutputStream)respond).finish();
+            try { if(countedRespond != null) countedRespond.flush(); else if(respond != null) respond.flush(); } catch (Exception e) {}
+            if (countedRespond != null) countedRespond.finish();
             
             conProp.put(httpHeader.CONNECTION_PROP_REQUEST_END,new Long(System.currentTimeMillis()));
-            conProp.put(httpHeader.CONNECTION_PROP_PROXY_RESPOND_SIZE,new Long(((httpdByteCountOutputStream)respond).getCount()));
+            conProp.put(httpHeader.CONNECTION_PROP_PROXY_RESPOND_SIZE,(countedRespond != null) ? new Long(countedRespond.getCount()) : -1L);
             logProxyAccess(conProp);
         }
     }
@@ -471,6 +458,7 @@ public final class httpdProxyHandler {
         
         JakartaCommonsHttpResponse res = null;                
         try {
+            final int reqID = requestHeader.hashCode();
 
             String host =    conProp.getProperty(httpHeader.CONNECTION_PROP_HOST);
             String path =    conProp.getProperty(httpHeader.CONNECTION_PROP_PATH);     // always starts with leading '/'
@@ -487,7 +475,7 @@ public final class httpdProxyHandler {
             }            
             
             // resolve yacy and yacyh domains
-            String yAddress = (httpd.alternativeResolver == null) ? null : httpd.alternativeResolver.resolve(host);
+            String yAddress = resolveYacyDomains(host);
             
             // re-calc the url path
             String remotePath = (args == null) ? path : (path + "?" + args); // with leading '/'
@@ -498,19 +486,17 @@ public final class httpdProxyHandler {
                     (!(remotePath.startsWith("/env"))) // this is the special path, staying always at root-level
             ) remotePath = yAddress.substring(pos) + remotePath;            
             
-            prepareRequestHeader(requestHeader, httpVer);
-            
-            // setup HTTP-client
-            final JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(timeout, requestHeader, null);
-            client.setFollowRedirects(false);
+            modifyProxyHeaders(requestHeader, httpVer);
             
             final String connectHost = hostPart(host, port, yAddress);
             final String getUrl = "http://"+ connectHost + remotePath;
-            client.setProxy(getProxyConfig(connectHost));
+            
+            final JakartaCommonsHttpClient client = setupHttpClient(requestHeader, connectHost);
             
             // send request
             try {
             res = client.GET(getUrl);
+            theLogger.logFinest(reqID +"    response status: "+ res.getStatusLine());
             conProp.put(httpHeader.CONNECTION_PROP_CLIENT_REQUEST_HEADER,requestHeader);
             
             final httpHeader responseHeader = res.getResponseHeader();
@@ -559,13 +545,13 @@ public final class httpdProxyHandler {
                     (plasmaParser.supportedHTMLContent(url,responseHeader.mime()))
                 ) {
                 // make a transformer
-                theLogger.logFine("create transformer for URL " + url);
+                theLogger.logFine(reqID +" create transformer for URL " + url);
                 //hfos = new htmlFilterOutputStream((gzippedOut != null) ? gzippedOut : ((chunkedOut != null)? chunkedOut : respond), null, transformer, (ext.length() == 0));
                 final String charSet = httpHeader.getCharSet(responseHeader);
                 hfos = new htmlFilterWriter(outStream,charSet, null, transformer, (ext.length() == 0));
             } else {
                 // simply pass through without parsing
-                theLogger.logFine("create passthrough for URL " + url + ", extension '" + ext + "', mime-type '" + responseHeader.mime() + "'");
+                theLogger.logFine(reqID +" create passthrough for URL " + url + ", extension '" + ext + "', mime-type '" + responseHeader.mime() + "'");
                 hfos = new OutputStreamWriter(outStream, httpHeader.getCharSet(res.getResponseHeader()));
             }
             
@@ -579,6 +565,7 @@ public final class httpdProxyHandler {
                 responseHeader.put(httpHeader.TRANSFER_ENCODING, "chunked");
             }
             
+            theLogger.logFinest(reqID +"    sending response header: "+ responseHeader);
             httpd.sendRespondHeader(
                     conProp,
                     respond,
@@ -616,7 +603,7 @@ public final class httpdProxyHandler {
                     } else {
                         cacheArray = null;
                     }
-                    theLogger.logFine("writeContent of " + url + " produced cacheArray = " + ((cacheArray == null) ? "null" : ("size=" + cacheArray.length)));
+                    theLogger.logFine(reqID +" writeContent of " + url + " produced cacheArray = " + ((cacheArray == null) ? "null" : ("size=" + cacheArray.length)));
 
                     if (hfos instanceof htmlFilterWriter) ((htmlFilterWriter) hfos).finalize();
 
@@ -645,7 +632,7 @@ public final class httpdProxyHandler {
                     cacheFile.getParentFile().mkdirs();
                     writeContent(res, new BufferedWriter(hfos), new FileOutputStream(cacheFile));
                     if (hfos instanceof htmlFilterWriter) ((htmlFilterWriter) hfos).finalize();
-                    theLogger.logFine("for write-file of " + url + ": contentLength = " + contentLength + ", sizeBeforeDelete = " + sizeBeforeDelete);
+                    theLogger.logFine(reqID +" for write-file of " + url + ": contentLength = " + contentLength + ", sizeBeforeDelete = " + sizeBeforeDelete);
                     plasmaHTCache.writeFileAnnouncement(cacheFile);
                     if (sizeBeforeDelete == -1) {
                         // totally fresh file
@@ -668,7 +655,7 @@ public final class httpdProxyHandler {
                 }
             } else {
                 // no caching
-                theLogger.logFine(cacheFile.toString() + " not cached." +
+                theLogger.logFine(reqID +" "+ cacheFile.toString() + " not cached." +
                         " StoreError=" + ((storeError==null)?"None":storeError) + 
                         " StoreHTCache=" + storeHTCache + 
                         " SupportetContent=" + isSupportedContent);
@@ -708,49 +695,6 @@ public final class httpdProxyHandler {
         }
     }
 
-    /**
-     * determines in which form the response should be send and sets header accordingly
-     * if the content length is not set we need to use chunked content encoding 
-     * Implemented:
-     * if !content-length
-     *  switch httpVer
-     *    case 0.9:
-     *    case 1.0:
-     *      close connection after transfer
-     *      break;
-     *    default:
-     *      new ChunkedStream around respond
-     * end if
-     * 
-     * @param conProp
-     * @param responseHeader
-     * @param statusCode
-     * @param respond
-     * @return
-     */
-    private static httpChunkedOutputStream setTransferEncoding(Properties conProp, final httpHeader responseHeader,
-            int statusCode, OutputStream respond) {
-        final String httpVer = conProp.getProperty(httpHeader.CONNECTION_PROP_HTTP_VER);
-        httpChunkedOutputStream chunkedOut = null;
-        // gzipped response is ungzipped an therefor the length is unknown
-        if (responseHeader.gzip() || responseHeader.contentLength() < 0) {
-            // according to http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
-            // a 204,304 message must not contain a message body.
-            // Therefore we need to set the content-length to 0.
-            if (statusCode == 204 || statusCode == 304) {
-                responseHeader.put(httpHeader.CONTENT_LENGTH, "0");
-            } else {
-                if (httpVer.equals(httpHeader.HTTP_VERSION_0_9) || httpVer.equals(httpHeader.HTTP_VERSION_1_0)) {
-                    forceConnectionClose(conProp);
-                } else {
-                    chunkedOut = new httpChunkedOutputStream(respond);
-                }
-                responseHeader.remove(httpHeader.CONTENT_LENGTH);
-            }
-        }
-        return chunkedOut;
-    }
-
     private static void fulfillRequestFromCache(
             Properties conProp, 
             yacyURL url,
@@ -769,7 +713,7 @@ public final class httpdProxyHandler {
         
         // we respond on the request by using the cache, the cache is fresh        
         try {
-            prepareRequestHeader(cachedResponseHeader, httpVer);
+            modifyProxyHeaders(cachedResponseHeader, httpVer);
             
             // replace date field in old header by actual date, this is according to RFC
             cachedResponseHeader.put(httpHeader.DATE, HttpClient.dateString(new Date()));
@@ -874,42 +818,12 @@ public final class httpdProxyHandler {
         }
     }
 
-    private static void removeHopByHopHeaders(httpHeader headers) {
-        /*
-         - Trailers
-         */
-        
-        headers.remove(httpHeader.CONNECTION);
-        headers.remove(httpHeader.KEEP_ALIVE);
-        headers.remove(httpHeader.UPGRADE);
-        headers.remove(httpHeader.TE);
-        headers.remove(httpHeader.PROXY_CONNECTION);
-        headers.remove(httpHeader.PROXY_AUTHENTICATE);
-        headers.remove(httpHeader.PROXY_AUTHORIZATION);
-        
-        // special headers inserted by squid
-        headers.remove(httpHeader.X_CACHE);
-        headers.remove(httpHeader.X_CACHE_LOOKUP);     
-        
-        // remove transfer encoding header
-        headers.remove(httpHeader.TRANSFER_ENCODING);
-        
-        //removing yacy status headers
-        headers.remove(httpHeader.X_YACY_KEEP_ALIVE_REQUEST_COUNT);
-        headers.remove(httpHeader.X_YACY_ORIGINAL_REQUEST_LINE);
-    }
-        
-    private static void forceConnectionClose(Properties conProp) {
-        if (conProp != null) {
-            conProp.setProperty(httpHeader.CONNECTION_PROP_PERSISTENT,"close");            
-        }
-    }
-    
     public static void doHead(Properties conProp, httpHeader requestHeader, OutputStream respond) {
         
         JakartaCommonsHttpResponse res = null;
         yacyURL url = null;
         try {
+            final int reqID = requestHeader.hashCode();
             // remembering the starting time of the request
             Date requestDate = new Date(); // remember the time...
             conProp.put(httpHeader.CONNECTION_PROP_REQUEST_START,new Long(requestDate.getTime()));
@@ -937,10 +851,12 @@ public final class httpdProxyHandler {
             } catch (MalformedURLException e) {
                 String errorMsg = "ERROR: internal error with url generation: host=" +
                                   host + ", port=" + port + ", path=" + path + ", args=" + args;
-                serverLog.logSevere("PROXY", errorMsg);
+                theLogger.logSevere(errorMsg);
                 httpd.sendRespondError(conProp,respond,4,501,null,errorMsg,e);
                 return;
             } 
+            theLogger.logFine(reqID +" HEAD "+ url);
+            theLogger.logFinest(reqID +"    header: "+ requestHeader);
             
             // check the blacklist, inspired by [AS]: respond a 404 for all AGIS (all you get is shit) servers
             String hostlow = host.toLowerCase();
@@ -955,34 +871,27 @@ public final class httpdProxyHandler {
                 return;
             }                   
             
-            // set another userAgent, if not yellow-listed
-            if (!(yellowList.contains(domain(hostlow)))) {
-                // change the User-Agent
-                requestHeader.put(httpHeader.USER_AGENT, generateUserAgent(requestHeader));
-            }
-            
-            addXForwardedForHeader(conProp, requestHeader);
+            prepareRequestHeader(conProp, requestHeader, hostlow);
             
             // resolve yacy and yacyh domains
-            String yAddress = (httpd.alternativeResolver == null) ? null : httpd.alternativeResolver.resolve(host);
+            String yAddress = resolveYacyDomains(host);
             
             // attach possible yacy-sublevel-domain
             if ((yAddress != null) && ((pos = yAddress.indexOf("/")) >= 0)) remotePath = yAddress.substring(pos) + remotePath;
             
-            prepareRequestHeader(requestHeader, httpVer);            
-            
-            // setup HTTP-client
-            JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(timeout, requestHeader, null);
-            client.setFollowRedirects(false);
+            modifyProxyHeaders(requestHeader, httpVer);            
             
             // generate request-url
             final String connectHost = hostPart(host, port, yAddress);
             final String getUrl = "http://"+ connectHost + remotePath;
-            client.setProxy(getProxyConfig(connectHost));
+            theLogger.logFinest(reqID +"    using url: "+ getUrl);
+            
+            final JakartaCommonsHttpClient client = setupHttpClient(requestHeader, connectHost);
             
             // send request
             try {
             res = client.HEAD(getUrl);
+            theLogger.logFinest(reqID +"    response status: "+ res.getStatusLine());
             
             // determine if it's an internal error of the httpc
             final httpHeader responseHeader = res.getResponseHeader();
@@ -993,6 +902,7 @@ public final class httpdProxyHandler {
             prepareResponseHeader(responseHeader, res.getHttpVer());
 
             // sending the server respond back to the client
+            theLogger.logFinest(reqID +"    sending response header: "+ responseHeader);
             httpd.sendRespondHeader(conProp,respond,httpVer,res.getStatusCode(),res.getStatusLine().substring(4),responseHeader);
             respond.flush();
             } finally {
@@ -1006,23 +916,14 @@ public final class httpdProxyHandler {
         }
     }
 
-    /**
-     * @param host
-     * @param port
-     * @param yAddress
-     * @return
-     */
-    private static String hostPart(String host, int port, String yAddress) {
-        final String connectHost = (yAddress == null) ? host +":"+ port : yAddress;
-        return connectHost;
-    }
-    
     public static void doPost(Properties conProp, httpHeader requestHeader, OutputStream respond, InputStream body) throws IOException {
         assert conProp != null : "precondition violated: conProp != null";
         assert requestHeader != null : "precondition violated: requestHeader != null";
         assert body != null : "precondition violated: body != null";
         yacyURL url = null;
+        httpdByteCountOutputStream countedRespond = null;
         try {
+            final int reqID = requestHeader.hashCode();
             // remembering the starting time of the request
             Date requestDate = new Date(); // remember the time...
             conProp.put(httpHeader.CONNECTION_PROP_REQUEST_START,new Long(requestDate.getTime()));
@@ -1030,7 +931,7 @@ public final class httpdProxyHandler {
             switchboard.proxyLastAccess = System.currentTimeMillis();
             
             // using an ByteCount OutputStream to count the send bytes
-            respond = new httpdByteCountOutputStream(respond,conProp.getProperty(httpHeader.CONNECTION_PROP_REQUESTLINE).length() + 2,"PROXY");
+            countedRespond  = new httpdByteCountOutputStream(respond,conProp.getProperty(httpHeader.CONNECTION_PROP_REQUESTLINE).length() + 2,"PROXY");
                         
             String host    = conProp.getProperty(httpHeader.CONNECTION_PROP_HOST);
             String path    = conProp.getProperty(httpHeader.CONNECTION_PROP_PATH);
@@ -1050,21 +951,16 @@ public final class httpdProxyHandler {
             } catch (MalformedURLException e) {
                 String errorMsg = "ERROR: internal error with url generation: host=" +
                                   host + ", port=" + port + ", path=" + path + ", args=" + args;
-                serverLog.logSevere("PROXY", errorMsg);
-                httpd.sendRespondError(conProp,respond,4,501,null,errorMsg,e);
+                theLogger.logSevere(errorMsg);
+                httpd.sendRespondError(conProp,countedRespond,4,501,null,errorMsg,e);
                 return;
             }                             
+            theLogger.logFine(reqID +" POST "+ url);
+            theLogger.logFinest(reqID +"    header: "+ requestHeader);
             
-            // set another userAgent, if not yellowlisted
-            if (!(yellowList.contains(domain(host).toLowerCase()))) {
-                // change the User-Agent
-                requestHeader.put(httpHeader.USER_AGENT, generateUserAgent(requestHeader));
-            }
+            prepareRequestHeader(conProp, requestHeader, host.toLowerCase());
             
-            addXForwardedForHeader(conProp, requestHeader);
-            
-            // resolve yacy and yacyh domains
-            String yAddress = (httpd.alternativeResolver == null) ? null : httpd.alternativeResolver.resolve(host);
+            String yAddress = resolveYacyDomains(host);
             
             // re-calc the url path
             String remotePath = (args == null) ? path : (path + "?" + args);
@@ -1072,15 +968,13 @@ public final class httpdProxyHandler {
             // attach possible yacy-sublevel-domain
             if ((yAddress != null) && ((pos = yAddress.indexOf("/")) >= 0)) remotePath = yAddress.substring(pos) + remotePath;
                   
-            prepareRequestHeader(requestHeader, httpVer); 
-            
-            // setup HTTP-client
-            JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(timeout, requestHeader, null);
-            client.setFollowRedirects(false);
+            modifyProxyHeaders(requestHeader, httpVer); 
             
             final String connectHost = hostPart(host, port, yAddress);
-            client.setProxy(getProxyConfig(connectHost));
             final String getUrl = "http://"+ connectHost + remotePath;
+            theLogger.logFinest(reqID +"    using url: "+ getUrl);
+            
+            final JakartaCommonsHttpClient client = setupHttpClient(requestHeader, connectHost);
             
             // check input
             if(body == null) {
@@ -1100,6 +994,7 @@ public final class httpdProxyHandler {
             try {
             // sending the request
             res = client.POST(getUrl, body);
+            theLogger.logFinest(reqID +"    response status: "+ res.getStatusLine());
             
             final httpHeader responseHeader = res.getResponseHeader();
             // determine if it's an internal error of the httpc
@@ -1107,7 +1002,7 @@ public final class httpdProxyHandler {
                 throw new Exception(res.getStatusLine());
             }                                  
             
-            final httpChunkedOutputStream chunked = setTransferEncoding(conProp, responseHeader, res.getStatusCode(), respond);
+            final httpChunkedOutputStream chunked = setTransferEncoding(conProp, responseHeader, res.getStatusCode(), countedRespond);
             
             prepareResponseHeader(responseHeader, res.getHttpVer()); 
             
@@ -1117,8 +1012,9 @@ public final class httpdProxyHandler {
             }
             
             // sending response headers
+            theLogger.logFinest(reqID +"    sending response header: "+ responseHeader);
             httpd.sendRespondHeader(conProp,
-                                    respond,
+                                    countedRespond,
                                     httpVer,
                                     res.getStatusCode(),
                                     res.getStatusLine().substring(4), // status text
@@ -1135,9 +1031,9 @@ public final class httpdProxyHandler {
             }
             if (chunked != null)  chunked.finish();
             */
-            writeContent(res, new BufferedWriter(new OutputStreamWriter((chunked != null) ? chunked : respond)));
+            writeContent(res, new BufferedWriter(new OutputStreamWriter((chunked != null) ? chunked : countedRespond)));
             
-            respond.flush();
+            countedRespond.flush();
             } finally {
                 // if opened ...
                 if(res != null) {
@@ -1146,15 +1042,130 @@ public final class httpdProxyHandler {
                 }
             }
         } catch (Exception e) {
-            handleProxyException(e,conProp,respond,url);                 
+            handleProxyException(e,conProp,countedRespond,url);                 
         } finally {
-            respond.flush();
-            if (respond instanceof httpdByteCountOutputStream) ((httpdByteCountOutputStream)respond).finish();           
+            if(countedRespond != null) {
+                countedRespond.flush();
+                countedRespond.finish();
+            }
+            if(respond != null) {
+                respond.flush();
+            }
             
             conProp.put(httpHeader.CONNECTION_PROP_REQUEST_END,new Long(System.currentTimeMillis()));
-            conProp.put(httpHeader.CONNECTION_PROP_PROXY_RESPOND_SIZE,new Long(((httpdByteCountOutputStream)respond).getCount()));
+            conProp.put(httpHeader.CONNECTION_PROP_PROXY_RESPOND_SIZE,(countedRespond != null) ? new Long(countedRespond.getCount()) : -1L);
             logProxyAccess(conProp);
         }
+    }
+
+    /**
+     * resolve yacy and yacyh domains
+     * 
+     * @param host
+     * @return
+     */
+    private static String resolveYacyDomains(String host) {
+        return (httpd.alternativeResolver == null) ? null : httpd.alternativeResolver.resolve(host);
+    }
+
+    /**
+     * @param host
+     * @param port
+     * @param yAddress
+     * @return
+     */
+    private static String hostPart(String host, int port, String yAddress) {
+        final String connectHost = (yAddress == null) ? host +":"+ port : yAddress;
+        return connectHost;
+    }
+
+    /**
+     * @param conProp
+     * @param requestHeader
+     * @param hostlow
+     */
+    private static void prepareRequestHeader(Properties conProp, httpHeader requestHeader, String hostlow) {
+        // set another userAgent, if not yellow-listed
+        if ((yellowList != null) && (!(yellowList.contains(domain(hostlow))))) {
+            // change the User-Agent
+            requestHeader.put(httpHeader.USER_AGENT, generateUserAgent(requestHeader));
+        }
+        
+        addXForwardedForHeader(conProp, requestHeader);
+    }
+
+    private static String domain(String host) {
+        String domain = host;
+        int pos = domain.lastIndexOf(".");
+        if (pos >= 0) {
+            // truncate from last part
+            domain = domain.substring(0, pos);
+            pos = domain.lastIndexOf(".");
+            if (pos >= 0) {
+                // truncate from first part
+                domain = domain.substring(pos + 1);
+            }
+        }
+        return domain;
+    }
+
+    /**
+     * creates a new HttpClient and sets parameters according to proxy needs
+     * 
+     * @param requestHeader
+     * @return
+     */
+    private static JakartaCommonsHttpClient setupHttpClient(final httpHeader requestHeader, final String connectHost) {
+        // setup HTTP-client
+        final JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(timeout, requestHeader, null);
+        client.setFollowRedirects(false);
+        // cookies are handled by the user's browser
+        client.setIgnoreCookies(true);
+        client.setProxy(getProxyConfig(connectHost));
+        return client;
+    }
+
+    /**
+     * determines in which form the response should be send and sets header accordingly
+     * if the content length is not set we need to use chunked content encoding 
+     * Implemented:
+     * if !content-length
+     *  switch httpVer
+     *    case 0.9:
+     *    case 1.0:
+     *      close connection after transfer
+     *      break;
+     *    default:
+     *      new ChunkedStream around respond
+     * end if
+     * 
+     * @param conProp
+     * @param responseHeader
+     * @param statusCode
+     * @param respond
+     * @return
+     */
+    private static httpChunkedOutputStream setTransferEncoding(Properties conProp, final httpHeader responseHeader,
+            int statusCode, OutputStream respond) {
+        final String httpVer = conProp.getProperty(httpHeader.CONNECTION_PROP_HTTP_VER);
+        httpChunkedOutputStream chunkedOut = null;
+        // gzipped response is ungzipped an therefor the length is unknown
+        if (responseHeader.gzip() || responseHeader.contentLength() < 0) {
+            // according to http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
+            // a 204,304 message must not contain a message body.
+            // Therefore we need to set the content-length to 0.
+            if (statusCode == 204 || statusCode == 304) {
+                responseHeader.put(httpHeader.CONTENT_LENGTH, "0");
+            } else {
+                if (httpVer.equals(httpHeader.HTTP_VERSION_0_9) || httpVer.equals(httpHeader.HTTP_VERSION_1_0)) {
+                    forceConnectionClose(conProp);
+                } else {
+                    chunkedOut = new httpChunkedOutputStream(respond);
+                }
+                responseHeader.remove(httpHeader.CONTENT_LENGTH);
+            }
+        }
+        return chunkedOut;
     }
 
     /**
@@ -1162,7 +1173,7 @@ public final class httpdProxyHandler {
      * @param responseHeader
      */
     private static void prepareResponseHeader(final httpHeader responseHeader, final String httpVer) {
-        prepareRequestHeader(responseHeader, httpVer);
+        modifyProxyHeaders(responseHeader, httpVer);
         
         correctContentEncoding(responseHeader);
     }
@@ -1197,21 +1208,67 @@ public final class httpdProxyHandler {
      * @param requestHeader
      * @param httpVer
      */
-    private static void prepareRequestHeader(final httpHeader requestHeader, final String httpVer) {
+    private static void modifyProxyHeaders(final httpHeader requestHeader, final String httpVer) {
         removeHopByHopHeaders(requestHeader);
         setViaHeader(requestHeader, httpVer);
     }
+
+    private static void removeHopByHopHeaders(httpHeader headers) {
+        /*
+         - Trailers
+         */
+        
+        headers.remove(httpHeader.CONNECTION);
+        headers.remove(httpHeader.KEEP_ALIVE);
+        headers.remove(httpHeader.UPGRADE);
+        headers.remove(httpHeader.TE);
+        headers.remove(httpHeader.PROXY_CONNECTION);
+        headers.remove(httpHeader.PROXY_AUTHENTICATE);
+        headers.remove(httpHeader.PROXY_AUTHORIZATION);
+        
+        // special headers inserted by squid
+        headers.remove(httpHeader.X_CACHE);
+        headers.remove(httpHeader.X_CACHE_LOOKUP);     
+        
+        // remove transfer encoding header
+        headers.remove(httpHeader.TRANSFER_ENCODING);
+        
+        //removing yacy status headers
+        headers.remove(httpHeader.X_YACY_KEEP_ALIVE_REQUEST_COUNT);
+        headers.remove(httpHeader.X_YACY_ORIGINAL_REQUEST_LINE);
+    }
+
+    private static void setViaHeader(httpHeader header, String httpVer) {
+        if (!switchboard.getConfigBool("proxy.sendViaHeader", true)) return;
+        String myAddress = (httpd.alternativeResolver == null) ? null : httpd.alternativeResolver.myAlternativeAddress();
+        if (myAddress != null) {
     
+            // getting header set by other proxies in the chain
+            StringBuffer viaValue = new StringBuffer();
+            if (header.containsKey(httpHeader.VIA)) viaValue.append(header.get(httpHeader.VIA));
+            if (viaValue.length() > 0) viaValue.append(", ");
+              
+            // appending info about this peer
+            viaValue
+            .append(httpVer).append(" ")
+            .append(myAddress).append(" ")
+            .append("(YaCy ").append(switchboard.getConfig("vString", "0.0")).append(")");
+            
+            // storing header back
+            header.put(httpHeader.VIA, new String(viaValue));
+        }
+    }
+
     public static void doConnect(Properties conProp, de.anomic.http.httpHeader requestHeader, InputStream clientIn, OutputStream clientOut) throws IOException {
         
         switchboard.proxyLastAccess = System.currentTimeMillis();
-
+    
         String host = conProp.getProperty(httpHeader.CONNECTION_PROP_HOST);
         String httpVersion = conProp.getProperty(httpHeader.CONNECTION_PROP_HTTP_VER);
         String path = conProp.getProperty(httpHeader.CONNECTION_PROP_PATH);
         final String args = conProp.getProperty(httpHeader.CONNECTION_PROP_ARGS);
         if (args != null) { path = path + "?" + args; }
-
+    
         int port, pos;
         if ((pos = host.indexOf(":")) < 0) {
             port = 80;
@@ -1219,7 +1276,7 @@ public final class httpdProxyHandler {
             port = Integer.parseInt(host.substring(pos + 1));
             host = host.substring(0, pos);
         }
-
+    
         // check the blacklist
         // blacklist idea inspired by [AS]:
         // respond a 404 for all AGIS ("all you get is shit") servers
@@ -1231,7 +1288,7 @@ public final class httpdProxyHandler {
             forceConnectionClose(conProp);
             return;
         }
-
+    
         // possibly branch into PROXY-PROXY connection
         final httpRemoteProxyConfig proxyConfig = getRemoteProxyConfig();
         if (
@@ -1241,12 +1298,12 @@ public final class httpdProxyHandler {
         ) {
             JakartaCommonsHttpClient remoteProxy = new JakartaCommonsHttpClient(timeout, requestHeader, proxyConfig);
             remoteProxy.setFollowRedirects(false); // should not be needed, but safe is safe 
-
+    
             JakartaCommonsHttpResponse response = null;
             try {
                 response = remoteProxy.CONNECT(host, port);
                 // outputs a logline to the serverlog with the current status
-                serverLog.logInfo("HttpdProxyHandler", "RESPONSE: status=" + response.getStatusLine() + ", header=" + response.getResponseHeader().toString());
+                theLogger.logInfo("CONNECT-RESPONSE: status=" + response.getStatusLine() + ", header=" + response.getResponseHeader().toString());
                 // (response.getStatusLine().charAt(0) == '2') || (response.getStatusLine().charAt(0) == '3')
                 final boolean success = response.getStatusCode() >= 200 && response.getStatusCode() <= 399;
                 if (success) {
@@ -1270,7 +1327,7 @@ public final class httpdProxyHandler {
                 }
             }
         }
-
+    
         // try to establish connection to remote host
         Socket sslSocket = new Socket(host, port);
         sslSocket.setSoTimeout(timeout); // waiting time for write
@@ -1306,7 +1363,7 @@ public final class httpdProxyHandler {
         sc.interrupt();
         // ...hope they have terminated...
     }
-    
+
     public static class Mediate extends Thread {
         
         boolean terminate;
@@ -1519,6 +1576,12 @@ public final class httpdProxyHandler {
         
     }
     
+    private static void forceConnectionClose(Properties conProp) {
+        if (conProp != null) {
+            conProp.setProperty(httpHeader.CONNECTION_PROP_PERSISTENT,"close");            
+        }
+    }
+
     private static serverObjects unknownHostHandling(Properties conProp) throws Exception {
         serverObjects detailedErrorMsgMap = new serverObjects();
         
@@ -1632,27 +1695,6 @@ public final class httpdProxyHandler {
         }
         
         return new String(userAgentStr);
-    }
-    
-    private static void setViaHeader(httpHeader header, String httpVer) {
-        if (!switchboard.getConfigBool("proxy.sendViaHeader", true)) return;
-        String myAddress = (httpd.alternativeResolver == null) ? null : httpd.alternativeResolver.myAlternativeAddress();
-        if (myAddress != null) {
-
-            // getting header set by other proxies in the chain
-            StringBuffer viaValue = new StringBuffer();
-            if (header.containsKey(httpHeader.VIA)) viaValue.append(header.get(httpHeader.VIA));
-            if (viaValue.length() > 0) viaValue.append(", ");
-              
-            // appending info about this peer
-            viaValue
-            .append(httpVer).append(" ")
-            .append(myAddress).append(" ")
-            .append("(YaCy ").append(switchboard.getConfig("vString", "0.0")).append(")");
-            
-            // storing header back
-            header.put(httpHeader.VIA, new String(viaValue));
-        }
     }
     
     /**

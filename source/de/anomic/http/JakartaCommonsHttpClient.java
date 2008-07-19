@@ -29,6 +29,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.zip.GZIPOutputStream;
@@ -42,6 +43,7 @@ import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.URIException;
+import org.apache.commons.httpclient.cookie.CookiePolicy;
 import org.apache.commons.httpclient.methods.ByteArrayRequestEntity;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.HeadMethod;
@@ -119,6 +121,10 @@ public class JakartaCommonsHttpClient {
 
     /**
      * every x milliseconds do a cleanup (close old connections)
+     * 
+     * minimal intervall the cleanUp is done (in this time after a cleanup no second one is done)
+     * 
+     * this is the time the method is callable, not the time it is called
      */
     private static final int cleanupIntervall = 60000;
     /**
@@ -135,6 +141,7 @@ public class JakartaCommonsHttpClient {
     private Header[] headers = new Header[0];
     private httpRemoteProxyConfig proxyConfig = null;
     private boolean followRedirects = true;
+    private boolean ignoreCookies = false;
 
     /**
      * constructs a new Client with given parameters
@@ -185,6 +192,19 @@ public class JakartaCommonsHttpClient {
         followRedirects = follow;
     }
 
+    /**
+     * <p>by default Cookies are accepted and used autmatically</p>
+     * 
+     * <q cite="http://hc.apache.org/httpclient-3.x/cookies.html">HttpClient supports automatic management of cookies, including allowing the server to set cookies and
+     * automatically return them to the server when required.</q>
+     * <cite>HttpClient Cookie Guide</cite>
+     * 
+     * @param ignoreCookies
+     */
+    public void setIgnoreCookies(final boolean ignoreCookies) {
+        this.ignoreCookies = ignoreCookies;
+    }
+
     /*
      * (non-Javadoc)
      * @see de.anomic.http.HttpClient#getUserAgent()
@@ -210,7 +230,6 @@ public class JakartaCommonsHttpClient {
      * This method gets only the header of a page.
      * 
      * @param uri The URI to the page whose header should be get.
-     * @param requestHeader Prefilled httpHeader.
      * @return Instance of response with the content.
      * @throws IOException
      */
@@ -368,6 +387,10 @@ public class JakartaCommonsHttpClient {
      */
     private JakartaCommonsHttpResponse execute(final HttpMethod method) throws IOException, HttpException {
         assert method != null : "precondition violated: method != null";
+        // ignore cookies
+        if(ignoreCookies) {
+            method.getParams().setCookiePolicy(CookiePolicy.IGNORE_COOKIES);
+        }
         // set header
         for (final Header header : headers) {
             method.setRequestHeader(header);
@@ -382,6 +405,9 @@ public class JakartaCommonsHttpClient {
         HttpConnectionInfo.addConnection(generateConInfo(method));
 
         // execute (send request)
+        serverLog.logFine("HTTPC", "executing " + method.hashCode() + " " + method.getName() + " " + method.getURI());
+        serverLog.logFinest("HTTPC", "->" + method.hashCode() + " request headers " +
+                Arrays.toString(method.getRequestHeaders()));
         try {
             if (hostConfig == null) {
                 apacheHttpClient.executeMethod(method);
@@ -393,6 +419,8 @@ public class JakartaCommonsHttpClient {
             HttpConnectionInfo.removeConnection(generateConInfo(method));
             throw e;
         }
+        serverLog.logFinest("HTTPC", "<-" + method.hashCode() + " response headers " +
+                Arrays.toString(method.getResponseHeaders()));
 
         // return response
         return new JakartaCommonsHttpResponse(method);
