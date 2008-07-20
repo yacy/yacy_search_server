@@ -135,29 +135,23 @@ public class ConfigBasic {
         // set a use case
         String networkName = sb.getConfig("network.unit.name", "");
         if (post != null && post.containsKey("usecase")) {
-            if (post.get("usecase", "").equals("freeworld")) {
-                if (!networkName.equals("freeworld")) {
-                    // switch to freeworld network
-                    sb.switchNetwork("defaults/yacy.network.freeworld.unit");
-                }
+            if (post.get("usecase", "").equals("freeworld") && !networkName.equals("freeworld")) {
+                // switch to freeworld network
+                sb.switchNetwork("defaults/yacy.network.freeworld.unit");
                 // switch to p2p mode
                 sb.setConfig(plasmaSwitchboard.INDEX_DIST_ALLOW, true);
                 sb.setConfig(plasmaSwitchboard.INDEX_RECEIVE_ALLOW, true);
             }
-            if (post.get("usecase", "").equals("portal")) {
-                if (!networkName.equals("webportal")) {
-                    // switch to webportal network
-                    sb.switchNetwork("defaults/yacy.network.webportal.unit");
-                }
+            if (post.get("usecase", "").equals("portal") && !networkName.equals("webportal")) {
+                // switch to webportal network
+                sb.switchNetwork("defaults/yacy.network.webportal.unit");
                 // switch to robinson mode
                 sb.setConfig(plasmaSwitchboard.INDEX_DIST_ALLOW, false);
                 sb.setConfig(plasmaSwitchboard.INDEX_RECEIVE_ALLOW, false);
             }
-            if (post.get("usecase", "").equals("intranet")) {
-                if (!networkName.equals("intranet")) {
-                    // switch to intranet network
-                    sb.switchNetwork("defaults/yacy.network.intranet.unit");
-                }
+            if (post.get("usecase", "").equals("intranet") && !networkName.equals("intranet")) {
+                // switch to intranet network
+                sb.switchNetwork("defaults/yacy.network.intranet.unit");
                 // switch to p2p mode: enable ad-hoc networks between intranet users
                 sb.setConfig(plasmaSwitchboard.INDEX_DIST_ALLOW, true);
                 sb.setConfig(plasmaSwitchboard.INDEX_RECEIVE_ALLOW, true);
