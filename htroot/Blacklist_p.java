@@ -1,7 +1,7 @@
 // Blacklist_p.java 
 // -----------------------
 // part of YaCy
-// (C) by Michael Peter Christen; mc@anomic.de
+// (C) by Michael Peter Christen; mc@yacy.net
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2004
 //

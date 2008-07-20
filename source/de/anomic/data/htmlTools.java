@@ -1,6 +1,6 @@
 // htmlTools.java
 // -----------------------
-// (C) by Michael Peter Christen; mc@anomic.de, 
+// (C) by Michael Peter Christen; mc@yacy.net, 
 // (C) by Jan Sandbrink (NN), Franz Brausse (FB, karlchenofhell),
 // (C) by Bjoern 'fuchs' Krombholz (fuchsi)
 // first published on http://www.yacy.net

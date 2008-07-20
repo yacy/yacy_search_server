@@ -1,7 +1,7 @@
 //autoconfig.pac 
 //-----------------------
 //part of YaCy
-//(C) by Michael Peter Christen; mc@anomic.de
+//(C) by Michael Peter Christen; mc@yacy.net
 //first published on http://www.anomic.de
 //Frankfurt, Germany, 2004
 //last major change: 12.07.2004

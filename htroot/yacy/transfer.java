@@ -1,7 +1,7 @@
 // transfer.java 
 // -----------------------
 // part of YaCy caching proxy
-// (C) by Michael Peter Christen; mc@anomic.de
+// (C) by Michael Peter Christen; mc@yacy.net
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2004
 // created 07.11.2005

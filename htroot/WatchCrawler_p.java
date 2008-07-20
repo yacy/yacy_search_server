@@ -1,5 +1,5 @@
 // WatchCrawler_p.java
-// (C) 2006 by Michael Peter Christen; mc@anomic.de, Frankfurt a. M., Germany
+// (C) 2006 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 18.12.2006 on http://www.anomic.de
 // this file was created using the an implementation from IndexCreate_p.java, published 02.12.2004
 //

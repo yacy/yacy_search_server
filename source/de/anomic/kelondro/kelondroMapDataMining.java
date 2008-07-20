@@ -1,6 +1,6 @@
 // kelondroMapObjects.java
 // -----------------------
-// (C) 29.01.2007 by Michael Peter Christen; mc@anomic.de, Frankfurt a. M., Germany
+// (C) 29.01.2007 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 2004 as part of kelondroMap on http://www.anomic.de
 //
 // This is a part of YaCy, a peer-to-peer based web search engine

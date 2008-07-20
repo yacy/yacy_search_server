@@ -1,6 +1,6 @@
 // indexRI.java
 // -----------------------------
-// (C) 2005 by Michael Peter Christen; mc@anomic.de, Frankfurt a. M., Germany
+// (C) 2005 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 6.5.2005 on http://www.anomic.de
 //
 // This is a part of YaCy, a peer-to-peer based web search engine

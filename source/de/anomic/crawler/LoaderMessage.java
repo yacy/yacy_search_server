@@ -1,7 +1,7 @@
 //plasmaCrawlLoaderMessage.java 
 //------------------------
 //part of YaCy
-//(C) by Michael Peter Christen; mc@anomic.de
+//(C) by Michael Peter Christen; mc@yacy.net
 //first published on http://www.anomic.de
 //Frankfurt, Germany, 2004
 //last major change: 21.04.2005 by Martin Thelian

@@ -1,5 +1,5 @@
 // plasmaCrawlEURL.java
-// (C) 2004 by Michael Peter Christen; mc@anomic.de, Frankfurt a. M., Germany
+// (C) 2004 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 09.08.2004 on http://www.anomic.de
 //
 // This is a part of YaCy, a peer-to-peer based web search engine

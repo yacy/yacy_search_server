@@ -1,5 +1,5 @@
 // kelondroProfile.java
-// (C) 2006 by Michael Peter Christen; mc@anomic.de, Frankfurt a. M., Germany
+// (C) 2006 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 23.06.2006 on http://www.anomic.de
 //
 // This is a part of the kelondro database,
