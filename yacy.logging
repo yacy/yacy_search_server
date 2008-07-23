@@ -23,6 +23,7 @@ SESSION-POOL.level = INFO
 CRAWLER-POOL.level = INFO
 STACKCRAWL.level = INFO
 MEMORY.level = INFO
+HTTPC.level = INFO
 sun.awt.level = OFF
 java.awt.level = OFF
 
