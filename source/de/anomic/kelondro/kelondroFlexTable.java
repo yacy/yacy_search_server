@@ -471,7 +471,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
             serverLog.logWarning("kelondroFlexTable", "close(): file '" + this.filename + "' was not tracked with record tracker.");
         }
         if ((index != null) && (this.size() != ((index == null) ? 0 : index.size()))) {
-        	serverLog.logSevere("kelondroFlexTable", "close(): inconsistent content/index size. content.size() = " + this.size() + ", index.size() = " + ((index == null) ? 0 : index.size()));
+            serverLog.logSevere("kelondroFlexTable", this.filename + " close(): inconsistent content/index size. content.size() = " + this.size() + ", index.size() = " + ((index == null) ? 0 : index.size()));
         }
         
         if (index != null) {index.close(); index = null;}
