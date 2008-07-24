@@ -86,7 +86,6 @@
 package de.anomic.plasma;
 
 
-import java.awt.GraphicsEnvironment;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;

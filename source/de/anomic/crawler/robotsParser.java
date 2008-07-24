@@ -22,13 +22,13 @@
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+// extended to return structured objects instead of a Object[] and
+// extended to return a Allow-List by Michael Christen, 21.07.2008
+
 package de.anomic.crawler;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URLDecoder;
@@ -52,7 +52,9 @@ import java.util.ArrayList;
  *      - Robot Exclusion Standard Revisited 
  *        See: http://www.kollar.com/robots.html
  */
-public final class robotsParser{
+
+public final class robotsParser {
+    
 	public static final String ROBOTS_USER_AGENT = "User-agent:".toUpperCase();
     public static final String ROBOTS_DISALLOW = "Disallow:".toUpperCase();
     public static final String ROBOTS_ALLOW = "Allow:".toUpperCase();
@@ -60,41 +62,47 @@ public final class robotsParser{
     public static final String ROBOTS_SITEMAP = "Sitemap:".toUpperCase();
     public static final String ROBOTS_CRAWL_DELAY = "Crawl-Delay:".toUpperCase();
     
-    /*public robotsParser(URL robotsUrl){
-     }*/
-    /*
-     * this parses the robots.txt.
-     * at the Moment it only creates a list of Deny Paths
-     */
+    private ArrayList<String> allowList;
+    private ArrayList<String> denyList;
+    private String sitemap;
+    private int crawlDelay;
     
-    public static Object[] parse(File robotsFile) {
-        BufferedReader reader = null;
-        try {
-            reader = new BufferedReader(new FileReader(robotsFile));
-            if (reader != null) try{reader.close();}catch(Exception e){/* ignore this */}
-            return parse(reader);
-        } catch (FileNotFoundException e1) {
+    public robotsParser(byte[] robotsTxt) {
+        if ((robotsTxt == null)||(robotsTxt.length == 0)) {
+            allowList = new ArrayList<String>(0);
+            denyList = new ArrayList<String>(0);
+            sitemap = "";
+            crawlDelay = 0;
+        } else {
+            ByteArrayInputStream bin = new ByteArrayInputStream(robotsTxt);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(bin));
+            parse(reader);
         }
-        return new Object[]{new ArrayList<String>(), "", new Integer(0)};
     }
     
-    @SuppressWarnings("unchecked")
-    public static Object[] parse(byte[] robotsTxt) {
-        if ((robotsTxt == null)||(robotsTxt.length == 0)) return new Object[]{new ArrayList(0),null,null};
-        ByteArrayInputStream bin = new ByteArrayInputStream(robotsTxt);
-        BufferedReader reader = new BufferedReader(new InputStreamReader(bin));
-        return parse(reader);
+    public robotsParser(BufferedReader reader) {
+        if (reader == null) {
+            allowList = new ArrayList<String>(0);
+            denyList = new ArrayList<String>(0);
+            sitemap = "";
+            crawlDelay = 0;
+        } else {
+            parse(reader);
+        }
     }
     
-    public static Object[] parse(BufferedReader reader) {
+    private void parse(BufferedReader reader) {
         ArrayList<String> deny4AllAgents = new ArrayList<String>();
         ArrayList<String> deny4YaCyAgent = new ArrayList<String>();
+        ArrayList<String> allow4AllAgents = new ArrayList<String>();
+        ArrayList<String> allow4YaCyAgent = new ArrayList<String>();
         
         int pos;
-        String line = null, lineUpper = null, sitemap = null;
-        Integer crawlDelay = null;
-        boolean isRuleBlock4AllAgents = false,
-                isRuleBlock4YaCyAgent = false,
+        String line = null, lineUpper = null;
+        sitemap = null;
+        crawlDelay = 0;
+        boolean isRule4AllAgents = false,
+                isRule4YaCyAgent = false,
                 rule4YaCyFound = false,
                 inBlock = false;        
         
@@ -120,9 +128,9 @@ public final class robotsParser{
                     if (inBlock) {
                         // we have detected the start of a new block
                         inBlock = false;
-                        isRuleBlock4AllAgents = false;
-                        isRuleBlock4YaCyAgent = false;
-                        crawlDelay = null; // each block has a separate delay
+                        isRule4AllAgents = false;
+                        isRule4YaCyAgent = false;
+                        crawlDelay = 0; // each block has a separate delay
                     }
                     
                     // cutting off comments at the line end
@@ -136,15 +144,15 @@ public final class robotsParser{
                     pos = line.indexOf(" ");
                     if (pos != -1) {
                         String userAgent = line.substring(pos).trim();
-                        isRuleBlock4AllAgents |= userAgent.equals("*");
-                        isRuleBlock4YaCyAgent |= userAgent.toLowerCase().indexOf("yacy") >=0;
-                        if (isRuleBlock4YaCyAgent) rule4YaCyFound = true;
+                        isRule4AllAgents |= userAgent.equals("*");
+                        isRule4YaCyAgent |= userAgent.toLowerCase().indexOf("yacy") >=0;
+                        if (isRule4YaCyAgent) rule4YaCyFound = true;
                     }
                 } else if (lineUpper.startsWith(ROBOTS_CRAWL_DELAY)) {
                     pos = line.indexOf(" ");
                     if (pos != -1) {
                     	try {
-                    		crawlDelay = Integer.valueOf(line.substring(pos).trim());
+                    		crawlDelay = Integer.parseInt(line.substring(pos).trim());
                     	} catch (NumberFormatException e) {
                     		// invalid crawling delay
                     	}
@@ -154,7 +162,7 @@ public final class robotsParser{
                     inBlock = true;
                     boolean isDisallowRule = lineUpper.startsWith(ROBOTS_DISALLOW);
                     
-                    if (isRuleBlock4YaCyAgent || isRuleBlock4AllAgents) {
+                    if (isRule4YaCyAgent || isRule4AllAgents) {
                         // cutting off comments at the line end
                         pos = line.indexOf(ROBOTS_COMMENT);
                         if (pos != -1) line = line.substring(0,pos).trim();
@@ -185,17 +193,36 @@ public final class robotsParser{
                             path = path.replaceAll(RobotsTxt.ROBOTS_DB_PATH_SEPARATOR,"%3B");                    
                             
                             // adding it to the pathlist
-                            if (!isDisallowRule) path = "!" + path;
-                            if (isRuleBlock4AllAgents) deny4AllAgents.add(path);
-                            if (isRuleBlock4YaCyAgent) deny4YaCyAgent.add(path);
+                            if (isDisallowRule) {
+                                if (isRule4AllAgents) deny4AllAgents.add(path);
+                                if (isRule4YaCyAgent) deny4YaCyAgent.add(path);
+                            } else {
+                                if (isRule4AllAgents) allow4AllAgents.add(path);
+                                if (isRule4YaCyAgent) allow4YaCyAgent.add(path);
+                            }
                         }
                     }
                 }
             }
         } catch (IOException e) {}
         
-        ArrayList<String> denyList = (rule4YaCyFound) ? deny4YaCyAgent : deny4AllAgents;
-        return new Object[]{denyList, sitemap, crawlDelay};
+        allowList = (rule4YaCyFound) ? allow4YaCyAgent : allow4AllAgents;
+        denyList = (rule4YaCyFound) ? deny4YaCyAgent : deny4AllAgents;
     }
     
+    public int crawlDelay() {
+        return this.crawlDelay;
+    }
+    
+    public String sitemap() {
+        return this.sitemap;
+    }
+    
+    public ArrayList<String> allowList() {
+        return this.allowList;
+    }
+    
+    public ArrayList<String> denyList() {
+        return this.denyList;
+    }
 }

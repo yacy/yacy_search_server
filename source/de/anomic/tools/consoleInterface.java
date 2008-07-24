@@ -38,15 +38,15 @@ public class consoleInterface extends Thread
     /**
      * FIXME just for debugging 
      */
-    private final String name;
+    //private final String name;
     private serverLog log;
     
 
-    public consoleInterface (final InputStream stream, String name, serverLog log)
+    public consoleInterface(final InputStream stream, String name, serverLog log)
     {
         this.log = log;
         this.stream = stream;
-        this.name = name;
+        //this.name = name;
         // block reading {@see getOutput()}
         try {
             dataIsRead.acquire();

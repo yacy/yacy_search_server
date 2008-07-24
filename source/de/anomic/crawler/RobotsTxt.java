@@ -180,6 +180,7 @@ public class RobotsTxt {
                         robotsTxt4Host = new Entry(
                                 urlHostPort, 
                                 new ArrayList<String>(), 
+                                new ArrayList<String>(), 
                                 new Date(),
                                 new Date(),
                                 null,
@@ -192,8 +193,8 @@ public class RobotsTxt {
                     // store the data into the robots DB
                     addEntry(robotsTxt4Host);
                 } else {
-                    Object[] parserResult = robotsParser.parse((byte[]) result[DOWNLOAD_ROBOTS_TXT]);
-                    ArrayList<String> denyPath = (ArrayList<String>) parserResult[0];
+                    robotsParser parserResult = new robotsParser((byte[]) result[DOWNLOAD_ROBOTS_TXT]);
+                    ArrayList<String> denyPath = parserResult.denyList();
                     if (((Boolean) result[DOWNLOAD_ACCESS_RESTRICTED]).booleanValue()) {
                         denyPath = new ArrayList<String>();
                         denyPath.add("/");
@@ -202,12 +203,13 @@ public class RobotsTxt {
                     // store the data into the robots DB
                     robotsTxt4Host = addEntry(
                             urlHostPort,
+                            parserResult.allowList(),
                             denyPath,
                             new Date(),
                             (Date) result[DOWNLOAD_MODDATE],
                             (String) result[DOWNLOAD_ETAG],
-                            (String) parserResult[1],
-                            (Integer) parserResult[2]);
+                            parserResult.sitemap(),
+                            parserResult.crawlDelay());
                 }
             }
         }
@@ -223,15 +225,16 @@ public class RobotsTxt {
     
     private Entry addEntry(
     		String hostName, 
-    		ArrayList<String> disallowPathList, 
-    		Date loadedDate, 
+    		ArrayList<String> allowPathList, 
+    		ArrayList<String> denyPathList, 
+            Date loadedDate, 
     		Date modDate, 
     		String eTag, 
     		String sitemap,
-    		Integer crawlDelay
+    		int crawlDelay
     ) {
         Entry entry = new Entry(
-                hostName, disallowPathList, loadedDate, modDate,
+                hostName, allowPathList, denyPathList, loadedDate, modDate,
                 eTag, sitemap, crawlDelay);
         addEntry(entry);
         return entry;
@@ -248,16 +251,17 @@ public class RobotsTxt {
     }    
     
     public class Entry {
+        public static final String ALLOW_PATH_LIST    = "allow";
         public static final String DISALLOW_PATH_LIST = "disallow";
-        public static final String LOADED_DATE = "date";
-        public static final String MOD_DATE = "modDate";
-        public static final String ETAG = "etag";
-        public static final String SITEMAP = "sitemap";
-        public static final String CRAWL_DELAY = "crawlDelay";
+        public static final String LOADED_DATE        = "date";
+        public static final String MOD_DATE           = "modDate";
+        public static final String ETAG               = "etag";
+        public static final String SITEMAP            = "sitemap";
+        public static final String CRAWL_DELAY        = "crawlDelay";
         
-        // this is a simple record structure that hold all properties of a single crawl start
+        // this is a simple record structure that holds all properties of a single crawl start
         HashMap<String, String> mem;
-        private LinkedList<String> disallowPathList;
+        private LinkedList<String> allowPathList, denyPathList;
         String hostName;
         
         public Entry(String hostName, HashMap<String, String> mem) {
@@ -265,42 +269,67 @@ public class RobotsTxt {
             this.mem = mem; 
             
             if (this.mem.containsKey(DISALLOW_PATH_LIST)) {
-                this.disallowPathList = new LinkedList<String>();
+                this.denyPathList = new LinkedList<String>();
                 String csPl = this.mem.get(DISALLOW_PATH_LIST);
                 if (csPl.length() > 0){
                     String[] pathArray = csPl.split(ROBOTS_DB_PATH_SEPARATOR);
                     if ((pathArray != null)&&(pathArray.length > 0)) {
-                        this.disallowPathList.addAll(Arrays.asList(pathArray));
+                        this.denyPathList.addAll(Arrays.asList(pathArray));
                     }
                 }
             } else {
-                this.disallowPathList = new LinkedList<String>();
+                this.denyPathList = new LinkedList<String>();
+            }
+            if (this.mem.containsKey(ALLOW_PATH_LIST)) {
+                this.allowPathList = new LinkedList<String>();
+                String csPl = this.mem.get(ALLOW_PATH_LIST);
+                if (csPl.length() > 0){
+                    String[] pathArray = csPl.split(ROBOTS_DB_PATH_SEPARATOR);
+                    if ((pathArray != null)&&(pathArray.length > 0)) {
+                        this.allowPathList.addAll(Arrays.asList(pathArray));
+                    }
+                }
+            } else {
+                this.allowPathList = new LinkedList<String>();
             }
         }  
         
         public Entry(
                 String hostName, 
+                ArrayList<String> allowPathList, 
                 ArrayList<String> disallowPathList, 
                 Date loadedDate,
                 Date modDate,
                 String eTag,
                 String sitemap,
-                Integer crawlDelay
+                int crawlDelay
         ) {
             if ((hostName == null) || (hostName.length() == 0)) throw new IllegalArgumentException("The hostname is missing");
             
             this.hostName = hostName.trim().toLowerCase();
-            this.disallowPathList = new LinkedList<String>();
+            this.allowPathList = new LinkedList<String>();
+            this.denyPathList = new LinkedList<String>();
             
             this.mem = new HashMap<String, String>(5);
             if (loadedDate != null) this.mem.put(LOADED_DATE,Long.toString(loadedDate.getTime()));
             if (modDate != null) this.mem.put(MOD_DATE,Long.toString(modDate.getTime()));
             if (eTag != null) this.mem.put(ETAG,eTag);
             if (sitemap != null) this.mem.put(SITEMAP,sitemap);
-            if (crawlDelay != null) this.mem.put(CRAWL_DELAY,crawlDelay.toString());
+            if (crawlDelay != 0) this.mem.put(CRAWL_DELAY, Integer.toString(crawlDelay));
+            
+            if ((allowPathList != null)&&(allowPathList.size()>0)) {
+                this.allowPathList.addAll(allowPathList);
+                
+                StringBuffer pathListStr = new StringBuffer();
+                for (int i=0; i<allowPathList.size();i++) {
+                    pathListStr.append(allowPathList.get(i))
+                               .append(ROBOTS_DB_PATH_SEPARATOR);
+                }
+                this.mem.put(ALLOW_PATH_LIST,pathListStr.substring(0,pathListStr.length()-1));
+            }
             
             if ((disallowPathList != null)&&(disallowPathList.size()>0)) {
-                this.disallowPathList.addAll(disallowPathList);
+                this.denyPathList.addAll(disallowPathList);
                 
                 StringBuffer pathListStr = new StringBuffer();
                 for (int i=0; i<disallowPathList.size();i++) {
@@ -364,21 +393,16 @@ public class RobotsTxt {
         }
         
         public boolean isDisallowed(String path) {
-            if ((this.mem == null) || (this.disallowPathList.size() == 0)) return false;   
+            if ((this.mem == null) || (this.denyPathList.size() == 0)) return false;   
             
             // if the path is null or empty we set it to /
             if ((path == null) || (path.length() == 0)) path = "/";            
             // escaping all occurences of ; because this char is used as special char in the Robots DB
             else  path = path.replaceAll(ROBOTS_DB_PATH_SEPARATOR,"%3B");
             
-            
-            Iterator<String> pathIter = this.disallowPathList.iterator();
+            Iterator<String> pathIter = this.denyPathList.iterator();
             while (pathIter.hasNext()) {
                 String nextPath = pathIter.next();
-                // allow rule
-                if (nextPath.startsWith("!") && nextPath.length() > 1 && path.startsWith(nextPath.substring(1))) {
-                    return false;
-                }
                     
                 // disallow rule
                 if (path.startsWith(nextPath)) {
