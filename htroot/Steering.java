@@ -33,6 +33,7 @@ import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.yacy.yacyTray;
 import de.anomic.yacy.yacyVersion;
 
 public class Steering {
@@ -54,13 +55,14 @@ public class Steering {
         if (post.containsKey("shutdown")) {
             sb.terminate(5000);
             prop.put("info", "3");
+            if(yacyTray.isShown) sb.yacytray.displayBalloonMessage("Shutdown", "YaCy will terminate after working off all scheduled tasks.");
             return prop;
         }
 
         if (post.containsKey("restart")) {
             yacyVersion.restart();
             prop.put("info", "4");
-
+            if(yacyTray.isShown) sb.yacytray.displayBalloonMessage("Restart", "YaCy will restart after working off all scheduled tasks.");
             return prop;
         }
         
@@ -73,7 +75,7 @@ public class Steering {
             }
             prop.put("info", "5");
             prop.put("info_release", releaseFileName);
-
+            if(yacyTray.isShown) sb.yacytray.displayBalloonMessage("Update", "YaCy will be restarted after installation.");
             return prop;
         }
         return prop;

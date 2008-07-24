@@ -60,8 +60,8 @@ Section "Shortcuts in the Start Menu"
 	SectionIn 1 2 3
 	SetShellVarContext current
 	CreateDirectory "$SMPROGRAMS\YaCy"
-	CreateShortCut "$SMPROGRAMS\YaCy\YaCy.lnk" "$INSTDIR\startYACY.bat" "" "$INSTDIR\addon\YaCy.ico"
-	CreateShortCut "$SMPROGRAMS\YaCy\stop.lnk" "$INSTDIR\stopYACY.bat" "" "$INSTDIR\addon\YaCy.ico"
+	CreateShortCut "$SMPROGRAMS\YaCy\YaCy.lnk" "$INSTDIR\startYACY.bat" "" "$INSTDIR\addon\YaCy.ico" "" SW_SHOWMINIMIZED
+	CreateShortCut "$SMPROGRAMS\YaCy\stop.lnk" "$INSTDIR\stopYACY.bat" "" "$INSTDIR\addon\YaCy.ico" "" SW_SHOWMINIMIZED
 	CreateShortCut "$SMPROGRAMS\YaCy\Readme.lnk" "$INSTDIR\readme.txt"
 	CreateShortCut "$SMPROGRAMS\YaCy\Uninstall.lnk" "$INSTDIR\Uninstall.exe"
 SectionEnd
@@ -69,12 +69,12 @@ SectionEnd
 Section "YaCy on the Desktop"
 	SectionIn 1 2 3
 	SetShellVarContext current
-	CreateShortCut "$DESKTOP\YaCy.lnk" "$INSTDIR\startYACY.bat" "" "$INSTDIR\addon\YaCy.ico"
+	CreateShortCut "$DESKTOP\YaCy.lnk" "$INSTDIR\startYACY.bat" "" "$INSTDIR\addon\YaCy.ico" "" SW_SHOWMINIMIZED
 SectionEnd
 
 Section "YaCy in Startup"
 	SetShellVarContext current
-	CreateShortCut "$SMSTARTUP\YaCy.lnk" "$INSTDIR\startYACY.bat" "" "$INSTDIR\addon\YaCy.ico"
+	CreateShortCut "$SMSTARTUP\YaCy.lnk" "$INSTDIR\startYACY.bat" "" "$INSTDIR\addon\YaCy.ico" "" SW_SHOWMINIMIZED
 SectionEnd
 
 Section "Uninstall"
