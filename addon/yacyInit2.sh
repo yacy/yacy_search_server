@@ -3,12 +3,12 @@
 # init script for the HTTP Proxy: YaCy
 #
 # Provided by Matthias Kempka, 26.12.2004
-# edited by Loom, 2008-07-21
+# edited by DanielR, 2008-07-21
 
 # installation directory
-DAEMON_DIR=/home/daniel/workspace/yacy
+DAEMON_DIR=/path/to/yacy
 # set to the user whose rights the proxy will gain
-USER=daniel
+USER=yacyUser
 # Default niceness if not set in config file
 NICE_VAL=0
 
