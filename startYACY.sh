@@ -2,6 +2,7 @@
 JAVA="`which java`"
 CONFIGFILE="DATA/SETTINGS/yacy.conf"
 LOGFILE="yacy.log"
+PIDFILE="yacy.pid"
 OS="`uname`"
 
 #check if OS is Sun Solaris or one of the OpenSolaris distributions and use different version of id if necessary
@@ -126,9 +127,9 @@ if [ $DEBUG -eq 1 ] #debug
 then
 	cmdline="$JAVA $JAVA_ARGS -Djava.awt.headless=true -classpath $CLASSPATH yacy"
 elif [ $LOGGING -eq 1 ];then #logging
-	cmdline="$JAVA $JAVA_ARGS -Djava.awt.headless=true -classpath $CLASSPATH yacy >> yacy.log &"
+	cmdline="$JAVA $JAVA_ARGS -Djava.awt.headless=true -classpath $CLASSPATH yacy >> yacy.log & echo \$! > $PIDFILE"
 else
-	cmdline="$JAVA $JAVA_ARGS -Djava.awt.headless=true -classpath $CLASSPATH yacy >> /dev/null &"
+	cmdline="$JAVA $JAVA_ARGS -Djava.awt.headless=true -classpath $CLASSPATH yacy >> /dev/null & echo \$! > $PIDFILE"
 fi
 if [ $PRINTONLY -eq 1 ];then
 	echo $cmdline
