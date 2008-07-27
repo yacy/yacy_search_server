@@ -1465,7 +1465,8 @@ Memory Settings==Speicher Einstellungen
 Memory reserved for JVM==F&uuml;r JVM reservierter Speicher
 "Set"=="Setzen"
 Accepted change. This will take effect after <strong>restart</strong> of YaCy==&Auml;nderung akzeptiert. Diese werden erst nach einem <strong>Neustart</strong> von YaCy wirksam
-auto-reload graph==Graphik automatisch neuladen
+auto-reload graph==Grafik automatisch neu laden
+show memory tables==Zeige Speicher-Tabellen
 EcoTable RAM Index:==EcoTabelle RAM Index:
 >Size==>Gr&ouml;sse
 >Key==>Schl&uuml;ssel
