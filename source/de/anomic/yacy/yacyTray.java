@@ -59,7 +59,7 @@ public class yacyTray implements ActionListener, ItemListener {
     
 	public yacyTray(plasmaSwitchboard sb, boolean showmenu) {
 		this.sb = sb;
-		final SystemTray tray = SystemTray.getDefaultSystemTray();
+		tray = SystemTray.getDefaultSystemTray();
 		
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
