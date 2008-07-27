@@ -31,16 +31,16 @@
       <form action="ConfigAccounts_p.html" method="post">
           <fieldset>
             <legend>
-            <input type="radio" name="access" id="access" value="localhost"#(localhost.checked)#:: checked="checked"#(/localhost.checked)# />
-            <label for="localhost">Access from localhost without account</label>
+            <input type="radio" name="access" id="access_localhost" value="localhost"#(localhost.checked)#:: checked="checked"#(/localhost.checked)# />
+            <label for="access_localhost">Access from localhost without account</label>
             </legend>
             Access to your peer from your own computer (localhost access) is granted. No need to configure an administration account.
             </fieldset>
             
             <fieldset>
             <legend>
-            <input type="radio" name="access" id="access" value="account"#(account.checked)#:: checked="checked"#(/account.checked)# />
-            <label for="account">Access only with qualified account</label>
+            <input type="radio" name="access" id="access_account" value="account"#(account.checked)#:: checked="checked"#(/account.checked)# />
+            <label for="access_account">Access only with qualified account</label>
             </legend>
             You need this only if you want a remote access to your peer.
             <dl class="userConfig">
