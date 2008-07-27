@@ -253,9 +253,11 @@ public class plasmaDHTFlush extends Thread {
             this.chunkSize-=100;
         } else if (selectionTime < transferTime){
             this.chunkSize +=100;
-        } else if (selectionTime >= selectionTime && this.chunkSize>200){
+        } else if (selectionTime >= transferTime && this.chunkSize>200){
             this.chunkSize-=100;
-        }    
+        } else if (this.chunkSize <= 3){
+        	this.chunkSize = 500;
+        }
     }
 
     private static boolean nothingSelected(plasmaDHTChunk newDHTChunk) {
