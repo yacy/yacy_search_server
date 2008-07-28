@@ -40,7 +40,7 @@
     <h3>Peer Control</h3>
     <ul class="menu">
       <li><a href="/Status.html" class="MenuItemLink">Admin Console</a></li>
-      <li><a href="/ConfigAppearance_p.html" class="MenuItemLink">Customization &amp; Integration</a></li>
+      <li><a href="/ConfigAppearance_p.html" class="MenuItemLink lock">Customization &amp; Integration</a></li>
       <li><a href="/terminal_p.html" accesskey="t" class="MenuItemLink lock">Terminal</a></li>
       <li><a href="/Messages_p.html" class="MenuItemLink lock">Messages <img src="/notifier.gif" alt="New Messages" /></a></li>
       <li><a href="/Steering.html?restart=" class="MenuItemLink lock" onclick="return confirm('Confirm Restart')">Re-Start</a></li>
