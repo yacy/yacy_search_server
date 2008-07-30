@@ -542,6 +542,7 @@ filterOutStopwordsFromTopwords=true
 # the prereq-value is a memory pre-requisite: that much bytes must
 # be available/free in the heap; othervise the loop is not executed
 # and another idlesleep is performed
+performanceProfile=defaults/yacy.init
 20_dhtdistribution_idlesleep=30000
 20_dhtdistribution_busysleep=10000
 20_dhtdistribution_memprereq=6291456

@@ -95,6 +95,9 @@ public class PerformanceQueues_p {
         final double multiplier = (post != null) && post.containsKey("multiplier") ? post.getDouble("multiplier", 1) : 1;
         final boolean setProfile = (post != null && post.containsKey("submitdefault"));
         final boolean setDelay = (post != null) && (post.containsKey("submitdelay"));
+        // save used settings file to config
+        if (setProfile) switchboard.setConfig("performanceProfile", post.get("defaultFile", "defaults/yacy.init"));
+        
         while (threads.hasNext()) {
             threadName = threads.next();
             thread = switchboard.getThread(threadName);
@@ -178,9 +181,11 @@ public class PerformanceQueues_p {
         
         // performance profiles
         c = 0;
+        final String usedfile = switchboard.getConfig("performanceProfile", "defaults/yacy.init");
         for(String filename: performanceProfiles.keySet()) {
             prop.put("profile_" + c + "_filename", filename);
             prop.put("profile_" + c + "_description", performanceProfiles.get(filename));
+            prop.put("profile_" + c + "_used", usedfile.equalsIgnoreCase(filename) ? "1" : "0");
             c++;
         }
         prop.put("profile", c);
