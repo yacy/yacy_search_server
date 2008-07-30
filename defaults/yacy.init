@@ -639,6 +639,9 @@ proxy.sendViaHeader=true
 # Specifies if the proxy should send the X-Forwarded-For header
 proxy.sendXForwardedForHeader=true
 
+# Enable cookie monitoring
+proxy.monitorCookies=false
+
 # msgForwarding: Specifies if yacy should forward received messages via
 # email to the configured email address
 msgForwardingEnabled=false

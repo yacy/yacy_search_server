@@ -26,6 +26,12 @@
       </tr>
       #{/list}#
     </table>
+    <form action="" method="post" >
+      <fieldset>
+        #(monitorCookies.off)#::<input type="submit" name="enableCookieMonitoring" value="Enable Cookie Monitoring"/>#(/monitorCookies.off)#
+        #(monitorCookies.on)#::<input type="submit" name="disableCookieMonitoring" value="Disable Cookie Monitoring"/>#(/monitorCookies.on)#
+      </fieldset>
+    </form>
     #%env/templates/footer.template%#
   </body>
 </html>

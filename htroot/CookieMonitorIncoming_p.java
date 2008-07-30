@@ -42,6 +42,19 @@ public class CookieMonitorIncoming_p {
         // return variable that accumulates replacements
         serverObjects prop = new serverObjects();
 
+	// handle on/off button
+        if(post != null) {
+            if(post.containsKey("enableCookieMonitoring")) {
+                switchboard.setConfig("proxy.monitorCookies", true);
+            } else if (post.containsKey("disableCookieMonitoring")) {
+                switchboard.setConfig("proxy.monitorCookies", false);
+		switchboard.incomingCookies.clear();
+		switchboard.outgoingCookies.clear();
+            } 
+        }
+        prop.put("monitorCookies.on", switchboard.getConfigBool("proxy.monitorCookies", false) ? "1":"0");
+        prop.put("monitorCookies.off", !switchboard.getConfigBool("proxy.monitorCookies", false) ? "1":"0");
+
         int maxCount = 100;
         int entCount = 0;
         int tmpCount = 0;
@@ -80,6 +93,7 @@ public class CookieMonitorIncoming_p {
         prop.put("list", entCount);
         prop.put("num", entCount);
         prop.put("total", switchboard.incomingCookies.size());
+
         // return rewrite properties
         return prop;
     }

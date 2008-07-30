@@ -240,10 +240,12 @@ public final class httpdProxyHandler {
          path            =       "$Path" "=" value
          domain          =       "$Domain" "=" value
          */
-        if (requestHeader.containsKey(httpHeader.COOKIE)) {
-            Object[] entry = new Object[]{new Date(), clienthost, requestHeader.getMultiple(httpHeader.COOKIE)};
-            synchronized(switchboard.outgoingCookies) {
-                switchboard.outgoingCookies.put(targethost, entry);
+        if (switchboard.getConfigBool("proxy.monitorCookies", false)) {
+            if (requestHeader.containsKey(httpHeader.COOKIE)) {
+                Object[] entry = new Object[]{new Date(), clienthost, requestHeader.getMultiple(httpHeader.COOKIE)};
+                synchronized(switchboard.outgoingCookies) {
+                    switchboard.outgoingCookies.put(targethost, entry);
+                }
             }
         }
     }
@@ -264,10 +266,12 @@ public final class httpdProxyHandler {
          |       "Secure"
          |       "Version" "=" 1*DIGIT
          */
-        if (respondHeader.containsKey(httpHeader.SET_COOKIE)) {
-            Object[] entry = new Object[]{new Date(), targetclient, respondHeader.getMultiple(httpHeader.SET_COOKIE)};
-            synchronized(switchboard.incomingCookies) {
-                switchboard.incomingCookies.put(serverhost, entry);
+        if (switchboard.getConfigBool("proxy.monitorCookies", false)) {
+            if (respondHeader.containsKey(httpHeader.SET_COOKIE)) {
+                Object[] entry = new Object[]{new Date(), targetclient, respondHeader.getMultiple(httpHeader.SET_COOKIE)};
+                synchronized(switchboard.incomingCookies) {
+                    switchboard.incomingCookies.put(serverhost, entry);
+                }
             }
         }
     }
