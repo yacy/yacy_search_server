@@ -299,7 +299,8 @@ public final class serverSystem {
             if (p.exitValue() != 0) throw new RuntimeException("EXEC ERROR: " + errorResponse(p));
             } else if (systemOS == systemWindows) {
             // see forum at http://forum.java.sun.com/thread.jsp?forum=57&thread=233364&message=838441
-            cmd = "rundll32 url.dll,FileProtocolHandler \"" + url + "\"";
+            if (System.getProperty("os.name").contains("2000")) cmd = "rundll32 url.dll,FileProtocolHandler " + url;
+            else cmd = "rundll32 url.dll,FileProtocolHandler \"" + url + "\"";
             //cmd = "cmd.exe /c start javascript:document.location='" + url + "'";
             p = Runtime.getRuntime().exec(cmd);
             p.waitFor();
