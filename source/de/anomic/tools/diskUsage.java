@@ -98,32 +98,31 @@ public class diskUsage {
         usedOS = getOS();
         if (usedOS == -1) {
             return;
-        } else {
-            usageError = null;
-
-            if (usedOS <= UNIX_END) {
-                // some kind of *nix
-                dfUnixGetVolumes();
-                for (int i = 0; i < allMountPoints.size(); i++)
-                    usedVolumes.add(false);
-                checkVolumesInUseUnix ("DATA");
-                checkMappedSubDirs(pathsToCheck);
-                
-                for (int i = 0; i < allVolumes.size(); i++){
-                    if (usedVolumes.get(i) == true) {
-                        yacyUsedVolumes.add(allVolumes.get (i));
-                        yacyUsedMountPoints.add(allMountPoints.get (i));
-                    }
-                }
-            } else {
-                // all Windows versions
-                initWindowsCommandVersion();
-                checkStartVolume();
-                checkMappedSubDirs(pathsToCheck);
-            }
-            if (yacyUsedVolumes.size() < 1)
-                usageError = "found no volumes";
         }
+        usageError = null;
+
+        if (usedOS <= UNIX_END) {
+            // some kind of *nix
+            dfUnixGetVolumes();
+            for (int i = 0; i < allMountPoints.size(); i++)
+                usedVolumes.add(false);
+            checkVolumesInUseUnix ("DATA");
+            checkMappedSubDirs(pathsToCheck);
+            
+            for (int i = 0; i < allVolumes.size(); i++){
+                if (usedVolumes.get(i) == true) {
+                    yacyUsedVolumes.add(allVolumes.get (i));
+                    yacyUsedMountPoints.add(allMountPoints.get (i));
+                }
+            }
+        } else {
+            // all Windows versions
+            initWindowsCommandVersion();
+            checkStartVolume();
+            checkMappedSubDirs(pathsToCheck);
+        }
+        if (yacyUsedVolumes.size() < 1)
+            usageError = "found no volumes";
     }
 
     public static HashMap<String, long[]> getDiskUsage () {
@@ -392,8 +391,8 @@ public class diskUsage {
         try {
             process = processBuilder.start();
 
-            inputStream = new consoleInterface(process.getInputStream(), "input", log);
-            errorStream = new consoleInterface(process.getErrorStream(), "error", log);
+            inputStream = new consoleInterface(process.getInputStream(), log);
+            errorStream = new consoleInterface(process.getErrorStream(), log);
 
             inputStream.start();
             errorStream.start();
@@ -412,8 +411,8 @@ public class diskUsage {
             final String error = errorStream.getOutput().toString();
             log.logWarning("logpoint 2: "+ error);
             throw new IOException("empty list: " + error);
-        } else
-            return list;
+        }
+        return list;
     }
 
 }

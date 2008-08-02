@@ -139,7 +139,7 @@ public class kelondroRelations {
         return entry.getColBytes(3);
     }
     
-    public boolean hasRelation(final String name, final byte[] key) throws IOException {
+    public boolean hasRelation(final String name, final byte[] key) {
         final kelondroIndex table = getRelation(name);
         if (table == null) return false;
         return table.has(key);

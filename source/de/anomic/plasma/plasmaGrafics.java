@@ -171,11 +171,11 @@ public class plasmaGrafics {
 
     private static void drawNetworkPicture(final yacySeedDB seedDB, final int width, final int height, final int passiveLimit, final int potentialLimit, final int maxCount, final boolean corona, final String networkName, final String networkTitle, final String bgcolor) {
 
+        if (seedDB == null) return; // no other peers known
+        
         final int innerradius = Math.min(width, height) / 5;
         int outerradius = innerradius + innerradius * seedDB.sizeConnected() / 100;
         if (outerradius > innerradius * 2) outerradius = innerradius * 2;
-
-        if (seedDB == null) return; // no other peers known
 
         networkPicture = new ymageMatrix(width, height, (bgcolor.equals("000000")) ? ymageMatrix.MODE_ADD : ymageMatrix.MODE_SUB, bgcolor);
 
@@ -251,7 +251,7 @@ public class plasmaGrafics {
         if (name.length() > longestName) longestName = name.length();
         final int angle = (int) (360 * seed.dhtPosition());
         //System.out.println("Seed " + seed.hash + " has distance " + seed.dhtDistance() + ", angle = " + angle);
-        int linelength = 20 + outerradius * (20 * (name.length() - shortestName) / (longestName - shortestName) + (Math.abs(seed.hash.hashCode()) % 20)) / 60;
+        int linelength = 20 + outerradius * (20 * (name.length() - shortestName) / (longestName - shortestName) + Math.abs(seed.hash.hashCode() % 20)) / 60;
         if (linelength > outerradius) linelength = outerradius;
         int dotsize = 6 + 2 * (int) (seed.getLinkCount() / 500000L);
         if (dotsize > 18) dotsize = 18;

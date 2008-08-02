@@ -129,8 +129,8 @@ public final class plasmaWordIndex implements indexRI {
         
         final File textindexcache = new File(indexPrimaryTextLocation, "RICACHE");
         if (!(textindexcache.exists())) textindexcache.mkdirs();
-        this.dhtOutCache = new indexRAMRI(textindexcache, indexRWIRowEntry.urlEntryRow, entityCacheMaxSize, wCacheMaxChunk, wCacheMaxAge, "dump1.array", "index.dhtout.heap", log);
-        this.dhtInCache  = new indexRAMRI(textindexcache, indexRWIRowEntry.urlEntryRow, entityCacheMaxSize, wCacheMaxChunk, wCacheMaxAge, "dump2.array", "index.dhtin.heap", log);
+        this.dhtOutCache = new indexRAMRI(textindexcache, indexRWIRowEntry.urlEntryRow, entityCacheMaxSize, wCacheMaxChunk, wCacheMaxAge, "index.dhtout.heap", log);
+        this.dhtInCache  = new indexRAMRI(textindexcache, indexRWIRowEntry.urlEntryRow, entityCacheMaxSize, wCacheMaxChunk, wCacheMaxAge, "index.dhtin.heap", log);
         
         // create collections storage path
         final File textindexcollections = new File(indexPrimaryTextLocation, "RICOLLECTION");
@@ -511,10 +511,21 @@ public final class plasmaWordIndex implements indexRI {
     }
     
     
-    public int addPageIndex(final yacyURL url, final Date urlModified, final int size, final plasmaParserDocument document, final plasmaCondenser condenser, final String language, final char doctype, final int outlinksSame, final int outlinksOther) {
-        // this is called by the switchboard to put in a new page into the index
-        // use all the words in one condenser object to simultanous create index entries
-        
+    /**
+     * this is called by the switchboard to put in a new page into the index
+     * use all the words in one condenser object to simultanous create index entries
+     * 
+     * @param url
+     * @param urlModified
+     * @param document
+     * @param condenser
+     * @param language
+     * @param doctype
+     * @param outlinksSame
+     * @param outlinksOther
+     * @return
+     */
+    public int addPageIndex(final yacyURL url, final Date urlModified, final plasmaParserDocument document, final plasmaCondenser condenser, final String language, final char doctype, final int outlinksSame, final int outlinksOther) {
         int wordCount = 0;
         final int urlLength = url.toNormalform(true, true).length();
         final int urlComps = htmlFilterContentScraper.urlComps(url.toString()).length;
@@ -607,9 +618,16 @@ public final class plasmaWordIndex implements indexRI {
         return container;
     }
 
-    public HashMap<String, indexContainer> getContainers(final Set<String> wordHashes, final Set<String> urlselection, final boolean deleteIfEmpty, final boolean interruptIfEmpty) {
-        // return map of wordhash:indexContainer
-        
+    /**
+     * return map of wordhash:indexContainer
+     * 
+     * @param wordHashes
+     * @param urlselection
+     * @param deleteIfEmpty
+     * @param interruptIfEmpty
+     * @return
+     */
+    public HashMap<String, indexContainer> getContainers(final Set<String> wordHashes, final Set<String> urlselection, final boolean interruptIfEmpty) {
         // retrieve entities that belong to the hashes
         final HashMap<String, indexContainer> containers = new HashMap<String, indexContainer>(wordHashes.size());
         String singleHash;
@@ -639,13 +657,11 @@ public final class plasmaWordIndex implements indexRI {
         HashMap<String, indexContainer> inclusionContainers = (query.queryHashes.size() == 0) ? new HashMap<String, indexContainer>(0) : getContainers(
                         query.queryHashes,
                         urlselection,
-                        true,
                         true);
         if ((inclusionContainers.size() != 0) && (inclusionContainers.size() < query.queryHashes.size())) inclusionContainers = new HashMap<String, indexContainer>(0); // prevent that only a subset is returned
         final HashMap<String, indexContainer> exclusionContainers = (inclusionContainers.size() == 0) ? new HashMap<String, indexContainer>(0) : getContainers(
                 query.excludeHashes,
                 urlselection,
-                true,
                 true);
         return new HashMap[]{inclusionContainers, exclusionContainers};
     }
@@ -816,7 +832,6 @@ public final class plasmaWordIndex implements indexRI {
         final int words = addPageIndex(
                 entry.url(),                                  // document url
                 docDate,                                      // document mod date
-                (int) entry.size(),                           // document size
                 document,                                     // document content
                 condenser,                                    // document condenser
                 yacyURL.language(entry.url()),                // document language
@@ -849,9 +864,8 @@ public final class plasmaWordIndex implements indexRI {
         final kelondroCloneableIterator<indexContainer> i = wordContainers(startHash, ram);
         if (rot) {
             return new kelondroRotateIterator<indexContainer>(i, new String(kelondroBase64Order.zero(startHash.length())), dhtOutCache.size() + ((ram) ? 0 : collections.size()));
-        } else {
-            return i;
         }
+        return i;
     }
 
     public synchronized kelondroCloneableIterator<indexContainer> wordContainers(final String startWordHash, final boolean ram) {
@@ -859,14 +873,13 @@ public final class plasmaWordIndex implements indexRI {
         containerOrder.rotate(emptyContainer(startWordHash, 0));
         if (ram) {
             return dhtOutCache.wordContainers(startWordHash, false);
-        } else {
-            return new kelondroMergeIterator<indexContainer>(
-                            dhtOutCache.wordContainers(startWordHash, false),
-                            collections.wordContainers(startWordHash, false),
-                            containerOrder,
-                            indexContainer.containerMergeMethod,
-                            true);
         }
+        return new kelondroMergeIterator<indexContainer>(
+                dhtOutCache.wordContainers(startWordHash, false),
+                collections.wordContainers(startWordHash, false),
+                containerOrder,
+                indexContainer.containerMergeMethod,
+                true);
     }
     
 

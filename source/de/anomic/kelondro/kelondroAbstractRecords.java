@@ -221,40 +221,39 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
                         USAGE.USEDC++;
                         writeused(false);
                         return index;
-                    } else {
-                        // re-use record from free-list
-                        USAGE.USEDC++;
-                        USAGE.FREEC--;
-                        // take link
-                        int index = USAGE.FREEH.index;
-                        if (index == kelondroHandle.NUL) {
-                            serverLog.logSevere("kelondroTray/" + filename, "INTERNAL ERROR (DATA INCONSISTENCY): re-use of records failed, lost " + (USAGE.FREEC + 1) + " records.");
-                            // try to heal..
-                            USAGE.USEDC = USAGE.allCount() + 1;
-                            USAGE.FREEC = 0;
-                            index = USAGE.USEDC - 1;
-                        } else {
-                            //System.out.println("*DEBUG* ALLOCATED DELETED INDEX " + index);
-                            // check for valid seek position
-                            final long seekp = seekpos(USAGE.FREEH);
-                            if (seekp >= entryFile.length()) {
-                                // this is a severe inconsistency. try to heal..
-                                serverLog.logSevere("kelondroTray/" + filename, "new Handle: lost " + USAGE.FREEC + " marked nodes; seek position " + seekp + "/" + USAGE.FREEH.index + " out of file size " + entryFile.length() + "/" + ((entryFile.length() - POS_NODES) / recordsize));
-                                index = USAGE.allCount(); // a place at the end of the file
-                                USAGE.USEDC += USAGE.FREEC; // to avoid that non-empty records at the end are overwritten
-                                USAGE.FREEC = 0; // discard all possible empty nodes
-                                USAGE.FREEH.index = kelondroHandle.NUL;
-                            } else {
-                                // read link to next element of FREEH chain
-                                USAGE.FREEH.index = entryFile.readInt(seekp);
-                                assert ((USAGE.FREEH.index == kelondroHandle.NUL) && (USAGE.FREEC == 0)) || seekpos(USAGE.FREEH) < entryFile.length() : "allocatePayload: USAGE.FREEH.index = " + USAGE.FREEH.index + ", seekp = " + seekp;
-                            }
-                        }
-                        USAGE.writeused(false);
-                        USAGE.writefree();
-                        entryFile.write(seekpos(index) + overhead, chunk, 0, ROW.objectsize); // overwrite space
-                        return index;
                     }
+                    // re-use record from free-list
+                    USAGE.USEDC++;
+                    USAGE.FREEC--;
+                    // take link
+                    int index = USAGE.FREEH.index;
+                    if (index == kelondroHandle.NUL) {
+                        serverLog.logSevere("kelondroTray/" + filename, "INTERNAL ERROR (DATA INCONSISTENCY): re-use of records failed, lost " + (USAGE.FREEC + 1) + " records.");
+                        // try to heal..
+                        USAGE.USEDC = USAGE.allCount() + 1;
+                        USAGE.FREEC = 0;
+                        index = USAGE.USEDC - 1;
+                    } else {
+                        //System.out.println("*DEBUG* ALLOCATED DELETED INDEX " + index);
+                        // check for valid seek position
+                        final long seekp = seekpos(USAGE.FREEH);
+                        if (seekp >= entryFile.length()) {
+                            // this is a severe inconsistency. try to heal..
+                            serverLog.logSevere("kelondroTray/" + filename, "new Handle: lost " + USAGE.FREEC + " marked nodes; seek position " + seekp + "/" + USAGE.FREEH.index + " out of file size " + entryFile.length() + "/" + ((entryFile.length() - POS_NODES) / recordsize));
+                            index = USAGE.allCount(); // a place at the end of the file
+                            USAGE.USEDC += USAGE.FREEC; // to avoid that non-empty records at the end are overwritten
+                            USAGE.FREEC = 0; // discard all possible empty nodes
+                            USAGE.FREEH.index = kelondroHandle.NUL;
+                        } else {
+                            // read link to next element of FREEH chain
+                            USAGE.FREEH.index = entryFile.readInt(seekp);
+                            assert ((USAGE.FREEH.index == kelondroHandle.NUL) && (USAGE.FREEC == 0)) || seekpos(USAGE.FREEH) < entryFile.length() : "allocatePayload: USAGE.FREEH.index = " + USAGE.FREEH.index + ", seekp = " + seekp;
+                        }
+                    }
+                    USAGE.writeused(false);
+                    USAGE.writefree();
+                    entryFile.write(seekpos(index) + overhead, chunk, 0, ROW.objectsize); // overwrite space
+                    return index;
                 }
             //}
         }
@@ -673,8 +672,8 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
     // custom texts
     public final void setText(final int pos, byte[] text) throws IOException {
         if (pos >= TXTPROPS.length) throw new IllegalArgumentException("setText: text array exceeded");
-        if (text.length > TXTPROPW) throw new IllegalArgumentException("setText: text lemgth exceeded");
         if (text == null) text = new byte[0];
+        if (text.length > TXTPROPW) throw new IllegalArgumentException("setText: text lemgth exceeded");
         TXTPROPS[pos] = text;
         entryFile.write(POS_TXTPROPS + TXTPROPW * pos, text);
     }

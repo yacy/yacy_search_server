@@ -135,9 +135,8 @@ public class LinkToken extends AbstractToken {
     private String formatHref(final String link) {
         if (link.indexOf("://") == -1) {        // DATA/HTDOCS-link
             return "http://" + this.localhost + "/share/" + link;
-        } else {                                // 'normal' link
-            return link;
         }
+        return link;
     }
     
     private StringBuffer appendLinks(final Link[] links, final StringBuffer sb) {

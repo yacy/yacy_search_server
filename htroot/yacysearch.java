@@ -43,6 +43,7 @@ import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSearchRankingProfile;
 import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverMemory;
 import de.anomic.server.serverObjects;
@@ -250,7 +251,7 @@ public class yacysearch {
 
             // prepare search properties
             //final boolean yacyonline = ((sb.webIndex.seedDB != null) && (sb.webIndex.seedDB.mySeed() != null) && (sb.webIndex.seedDB.mySeed().getPublicAddress() != null));
-            final boolean globalsearch = (global) /* && (yacyonline)*/ && (sb.getConfigBool(plasmaSwitchboard.INDEX_RECEIVE_ALLOW, false));
+            final boolean globalsearch = (global) /* && (yacyonline)*/ && (sb.getConfigBool(plasmaSwitchboardConstants.INDEX_RECEIVE_ALLOW, false));
         
             // do the search
             final TreeSet<String> queryHashes = indexWord.words2hashes(query[0]);

@@ -248,13 +248,14 @@ public class indexURLReference {
     }
 
     public static indexURLReference importEntry(final String propStr) {
-        if (propStr != null && propStr.startsWith("{") && propStr.endsWith("}")) try {
+        if (propStr == null || !propStr.startsWith("{") || !propStr.endsWith("}")) {
+            return null;
+        }
+        try {
             return new indexURLReference(serverCodings.s2p(propStr.substring(1, propStr.length() - 1)));
         } catch (final kelondroException e) {
                 // wrong format
                 return null;
-        } else {
-            return null;
         }
     }
 

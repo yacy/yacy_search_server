@@ -79,61 +79,70 @@ public class RSSMessage {
     
     public String getAuthor() {
         final String s =  map.get("author");
-        if (s == null) return ""; else return s;
+        return emptyStringOnNull(s);
     }
     
     public String getCopyright() {
         final String s =  map.get("copyright");
-        if (s == null) return ""; else return s;
+        return emptyStringOnNull(s);
     }
     
     public String getCategory() {
         final String s = map.get("category");
-        if (s == null) return ""; else return s;
+        return emptyStringOnNull(s);
     }
     
     public String getTitle() {
         final String s = map.get("title");
-        if (s == null) return ""; else return s;
+        return emptyStringOnNull(s);
     }
     
     public String getLink() {
         final String s =  map.get("link");
-        if (s == null) return ""; else return s;
+        return emptyStringOnNull(s);
     }
     
     public String getReferrer() {
         final String s = map.get("referrer");
-        if (s == null) return ""; else return s;
+        return emptyStringOnNull(s);
     }
     
     public String getLanguage() {
         final String s =  map.get("language");
-        if (s == null) return ""; else return s;
+        return emptyStringOnNull(s);
     }
     
     public String getDescription() {
         final String s =  map.get("description");
-        if (s == null) return ""; else return s;
+        return emptyStringOnNull(s);
     }
     
     public String getCreator() {
         final String s =  map.get("creator");
-        if (s == null) return ""; else return s;
+        return emptyStringOnNull(s);
     }
     
     public String getPubDate() {
         final String s =  map.get("pubDate");
-        if (s == null) return ""; else return s;
+        return emptyStringOnNull(s);
     }
     
     public String getGuid() {
         final String s =  map.get("guid");
-        if (s == null) return ""; else return s;
+        return emptyStringOnNull(s);
     }
     
     public String getDocs() {
         final String s =  map.get("docs");
-        if (s == null) return ""; else return s;
+        return emptyStringOnNull(s);
+    }
+
+    /**
+     * @param s
+     * @return
+     */
+    private String emptyStringOnNull(final String s) {
+        if (s == null) return "";
+        return s;
     }
 }

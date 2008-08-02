@@ -40,7 +40,7 @@ public class kelondroIntBytesMap {
 	
     private final kelondroRow rowdef;
     private final kelondroRowSet index0;
-	private kelondroRowSet	index1;
+    private kelondroRowSet index1;
     private final kelondroOrder<kelondroRow.Entry> entryOrder;
     
     public kelondroIntBytesMap(final int payloadSize, final int initSize) {
@@ -53,8 +53,7 @@ public class kelondroIntBytesMap {
     public long memoryNeededForGrow() {
         if (index1 == null) 
             return index0.memoryNeededForGrow();
-        else
-            return index1.memoryNeededForGrow();
+        return index1.memoryNeededForGrow();
     }
     
     public kelondroRow row() {
@@ -239,7 +238,7 @@ public class kelondroIntBytesMap {
 			if (random.nextLong() % 5 == 0) ra.add(new Long(r));
 			if ((ra.size() > 0) && (random.nextLong() % 7 == 0)) {
 				rc++;
-				p = Math.abs(random.nextInt()) % ra.size();
+				p = Math.abs(random.nextInt() % ra.size());
 				R = ra.get(p);
 				//System.out.println("remove " + R.longValue());
 				jcontrol.remove(R);

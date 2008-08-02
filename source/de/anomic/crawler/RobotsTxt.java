@@ -100,7 +100,6 @@ public class RobotsTxt {
         return this.robotsTable.size();
     }
     
-    @SuppressWarnings("unchecked")
     private Entry getEntry(final String urlHostPort, final boolean fetchOnlineIfNotAvailableOrNotFresh) {
         // this method will always return a non-null value
         Entry robotsTxt4Host = null;

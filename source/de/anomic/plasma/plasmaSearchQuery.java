@@ -264,9 +264,8 @@ public final class plasmaSearchQuery {
     public String queryString(final boolean encodeHTML) {
     	if(encodeHTML){
     		return htmlTools.encodeUnicode2html(this.queryString, true);
-    	} else  {
-    		return this.queryString;
     	}
+    	return this.queryString;
     }
     
     public TreeSet<String>[] queryWords() {
@@ -284,9 +283,8 @@ public final class plasmaSearchQuery {
         // generate a string that identifies a search so results can be re-used in a cache
         if (anonymized) {
             return anonymizedQueryHashes(this.queryHashes) + "-" + anonymizedQueryHashes(this.excludeHashes) + "*" + this.contentdom + "*" + this.zonecode + "*" + indexWord.word2hash(this.ranking.toExternalString());
-        } else {
-            return hashSet2hashString(this.queryHashes) + "-" + hashSet2hashString(this.excludeHashes) + "*" + this.contentdom + "*" + this.zonecode + "*" + indexWord.word2hash(this.ranking.toExternalString());
         }
+        return hashSet2hashString(this.queryHashes) + "-" + hashSet2hashString(this.excludeHashes) + "*" + this.contentdom + "*" + this.zonecode + "*" + indexWord.word2hash(this.ranking.toExternalString());
     }
     
 }

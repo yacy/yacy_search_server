@@ -28,7 +28,6 @@
 package de.anomic.plasma;
 
 import java.util.Arrays;
-import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;

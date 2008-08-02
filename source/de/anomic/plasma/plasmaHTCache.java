@@ -912,6 +912,13 @@ public final class plasmaHTCache {
         return entry;
     }
 
+    /**
+     * @return the responseHeaderDB
+     */
+    static kelondroMap getResponseHeaderDB() {
+        return responseHeaderDB;
+    }
+
     public final static class Entry {
 
     // the class objects
@@ -1044,7 +1051,7 @@ public final class plasmaHTCache {
         return this.resInfo;
     }
     
-    private boolean writeResourceInfo() {
+    boolean writeResourceInfo() {
         if (this.resInfo == null) return false;
         try {
             final HashMap<String, String> hm = new HashMap<String, String>();
@@ -1052,7 +1059,7 @@ public final class plasmaHTCache {
             hm.put("@@URL", this.url.toNormalform(false, false));
             hm.put("@@DEPTH", Integer.toString(this.depth));
             if (this.initiator != null) hm.put("@@INITIATOR", this.initiator);
-            responseHeaderDB.put(this.url.hash(), hm);
+            getResponseHeaderDB().put(this.url.hash(), hm);
         } catch (final Exception e) {
             resetResponseHeaderDB();
             return false;

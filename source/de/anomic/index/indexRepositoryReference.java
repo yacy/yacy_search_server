@@ -104,7 +104,7 @@ public final class indexRepositoryReference {
         }
     }
 
-    public synchronized void store(indexURLReference entry) throws IOException {
+    public synchronized void store(final indexURLReference entry) throws IOException {
         // Check if there is a more recent Entry already in the DB
         indexURLReference oldEntry;
         try {
@@ -121,7 +121,8 @@ public final class indexRepositoryReference {
             // the fetched oldEntry is better, so return its properties instead of the new ones
             // this.urlHash = oldEntry.urlHash; // unnecessary, should be the same
             // this.url = oldEntry.url; // unnecessary, should be the same
-            entry = oldEntry;
+            // doesn't make sense, since no return value:
+            //entry = oldEntry;
             return; // this did not need to be stored, but is updated
         }
 
@@ -129,12 +130,13 @@ public final class indexRepositoryReference {
     }
 
     public synchronized indexURLReference newEntry(final String propStr) {
-        if (propStr != null && propStr.startsWith("{") && propStr.endsWith("}")) try {
+        if (propStr == null || !propStr.startsWith("{") || !propStr.endsWith("}")) {
+            return null;
+        }
+        try {
             return new indexURLReference(serverCodings.s2p(propStr.substring(1, propStr.length() - 1)));
         } catch (final kelondroException e) {
             // wrong format
-            return null;
-        } else {
             return null;
         }
     }

@@ -68,10 +68,12 @@ public class crypt {
     public crypt(final String pbe, final String salt) {
     this(pbe, salt, defaultMethod);
     }
-    private crypt(final String pbe, String salt, final String method) {
+    private crypt(final String pbe, final String salt, final String method) {
     // a Password-Based Encryption. The SecretKey is created on the fly
+        /* salt currently not used
         if (salt.length() > 8) salt = salt.substring(0,8);
         if (salt.length() < 8) salt = (salt + "XXXXXXXX").substring(0,8);
+        */
 
         // Create a cipher and initialize it for encrypting end decrypting
         cryptMethod = method;

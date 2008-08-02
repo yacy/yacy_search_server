@@ -65,6 +65,7 @@ import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroMapDataMining;
 import de.anomic.kelondro.kelondroRowCollection;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDate;
@@ -268,7 +269,7 @@ public final class yacy {
 
             // create some directories
             final File htRootPath = new File(homePath, sb.getConfig("htRootPath", "htroot"));
-            final File htDocsPath = sb.getConfigPath(plasmaSwitchboard.HTDOCS_PATH, plasmaSwitchboard.HTDOCS_PATH_DEFAULT);
+            final File htDocsPath = sb.getConfigPath(plasmaSwitchboardConstants.HTDOCS_PATH, plasmaSwitchboardConstants.HTDOCS_PATH_DEFAULT);
             if (!(htDocsPath.exists())) htDocsPath.mkdir();
             //final File htTemplatePath = new File(homePath, sb.getConfig("htTemplatePath","htdocs"));
 

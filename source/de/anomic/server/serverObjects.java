@@ -115,9 +115,8 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
     public double put(final String key, final double value) {
         if (null == this.put(key, Double.toString(value))) {
             return Double.NaN;
-        } else {
-            return value;
         }
+        return value;
     }
 
     /**
@@ -127,9 +126,8 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
     public long put(final String key, final long value) {
         if (null == this.put(key, Long.toString(value))) {
             return 0;
-        } else {
-            return value;
         }
+        return value;
     }
 
     public String put(final String key, final java.util.Date value) {
@@ -227,13 +225,15 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
     // new get with default objects
     public Object get(final String key, final Object dflt) {
         final Object result = super.get(key);
-        if (result == null) return dflt; else return result;
+        if (result == null) return dflt;
+        return result;
     }
 
     // string variant
     public String get(final String key, final String dflt) {
         final Object result = super.get(key);
-        if (result == null) return dflt; else return (String) result;
+        if (result == null) return dflt;
+        return (String) result;
     }
 
     public int getInt(final String key, final int dflt) {

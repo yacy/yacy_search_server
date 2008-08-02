@@ -19,7 +19,7 @@ import de.anomic.server.logging.serverLog;
 import de.anomic.server.serverCore.Session;
 import de.anomic.yacy.yacyURL;
 
-public class urlRedirectord implements serverHandler {
+public class urlRedirectord implements serverHandler, Cloneable {
     
     private serverCore.Session session;
     private static plasmaSwitchboard sb = null;

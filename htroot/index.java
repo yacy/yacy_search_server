@@ -32,6 +32,7 @@
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -65,8 +66,8 @@ public class index {
         final String cat = (post == null) ? "href" : post.get("cat", "href");
         final int type = (post == null) ? 0 : post.getInt("type", 0);
         
-        final boolean indexDistributeGranted = sb.getConfigBool(plasmaSwitchboard.INDEX_DIST_ALLOW, true);
-        final boolean indexReceiveGranted = sb.getConfigBool(plasmaSwitchboard.INDEX_RECEIVE_ALLOW, true);
+        final boolean indexDistributeGranted = sb.getConfigBool(plasmaSwitchboardConstants.INDEX_DIST_ALLOW, true);
+        final boolean indexReceiveGranted = sb.getConfigBool(plasmaSwitchboardConstants.INDEX_RECEIVE_ALLOW, true);
         //global = global && indexDistributeGranted && indexReceiveGranted;
         
         // search domain

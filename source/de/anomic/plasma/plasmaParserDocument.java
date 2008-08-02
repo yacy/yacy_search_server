@@ -151,7 +151,9 @@ dc_rights
     }
 
     public String dc_creator() {
-        if (creator != null) return creator.toString(); else return new String();
+        if (creator == null)
+            return new String();
+        return creator.toString();
     }
     
     public String dc_subject(final char separator) {
@@ -172,7 +174,9 @@ dc_rights
     }
     
     public String dc_description() {
-        if (description != null) return description.toString(); else return dc_title();
+        if (description == null)
+            return dc_title();
+        return description.toString();
     }
     
     public String dc_publisher() {
@@ -200,11 +204,10 @@ dc_rights
     }
     
     public String[] getSectionTitles() {
-        if (sections != null) {
-            return sections.toArray(new String[this.sections.size()]);
-        } else {
+        if (sections == null) {
             return new String[] { dc_title() };
         }
+        return sections.toArray(new String[this.sections.size()]);
     }
 
     public InputStream getText() {
@@ -237,9 +240,8 @@ dc_rights
                 final serverCachedFileOutputStream ffbaos = (serverCachedFileOutputStream)this.text;
                 if (ffbaos.isFallback()) {
                     return serverFileUtils.read(ffbaos.getContent());
-                } else {
-                    return ffbaos.getContentBAOS();
                 }
+                return ffbaos.getContentBAOS();
             }
         } catch (final Exception e) {
             e.printStackTrace();

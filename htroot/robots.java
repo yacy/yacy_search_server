@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpdRobotsTxtConfig;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.servletProperties;
@@ -31,7 +32,7 @@ public class robots {
             if (rbc.isProfileDisallowed()) prop.put(httpdRobotsTxtConfig.ALL + "_" + httpdRobotsTxtConfig.PROFILE, "1");
             
             if (rbc.isLockedDisallowed() || rbc.isDirsDisallowed()) {
-                final ArrayList<String>[] p = getFiles(env.getConfig(plasmaSwitchboard.HTROOT_PATH, plasmaSwitchboard.HTROOT_PATH_DEFAULT));
+                final ArrayList<String>[] p = getFiles(env.getConfig(plasmaSwitchboardConstants.HTROOT_PATH, plasmaSwitchboardConstants.HTROOT_PATH_DEFAULT));
                 if (rbc.isLockedDisallowed()) {
                     prop.put(httpdRobotsTxtConfig.ALL + "_" + httpdRobotsTxtConfig.LOCKED, p[0].size());
                     for (int i=0; i<p[0].size(); i++)

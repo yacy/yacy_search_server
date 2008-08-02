@@ -210,13 +210,12 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
                 if (match(key, astart, alength, i)) return i;
             }
             return -1;
-        } else {
-            // we dont do a special handling of kelondroBase64Order here, because tests showed that this produces too much overhead
-            for (int i = leftBorder; i < rightBound; i++) {
-                if (compare(key, astart, alength, i) == 0) return i;
-            }
-            return -1;
         }
+        // we dont do a special handling of kelondroBase64Order here, because tests showed that this produces too much overhead
+        for (int i = leftBorder; i < rightBound; i++) {
+            if (compare(key, astart, alength, i) == 0) return i;
+        }
+        return -1;
     }
     
     private int iterativeSearchCompiledPivot(final byte[] compiledPivot, final int leftBorder, final int rightBound) {
@@ -300,7 +299,7 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         private final boolean up;
         private final byte[] first;
         private int p;
-		final int	bound;
+        final int bound;
         
         public keyIterator(final boolean up, final byte[] firstKey) {
             // see that all elements are sorted
@@ -356,7 +355,7 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         private final boolean up;
         private final byte[] first;
         private int p;
-		final int	bound;
+        final int bound;
         
         public rowIterator(final boolean up, final byte[] firstKey) {
             // see that all elements are sorted

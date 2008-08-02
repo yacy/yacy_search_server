@@ -77,9 +77,8 @@ public class serverCachedFileOutputStream extends ByteArrayOutputStream {
             return true;
         } catch (final IOException e) {
             throw new RuntimeException("error falling back to file", e);
-        } else {
-            return false;
         }
+        return false;
     }
     
     public void fallback() throws IOException {
@@ -133,9 +132,8 @@ public class serverCachedFileOutputStream extends ByteArrayOutputStream {
         if (this.isFallback) {
             final InputStream is = new FileInputStream(this.fallbackFile);
             return (this.buffered) ? new BufferedInputStream(is) : is;
-        } else {
-            return new ByteArrayInputStream(this.buf);
         }
+        return new ByteArrayInputStream(this.buf);
     }
     
     public byte[] getContentBAOS() {

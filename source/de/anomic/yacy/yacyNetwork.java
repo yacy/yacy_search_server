@@ -32,8 +32,8 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.httpclient.methods.multipart.Part;
-import org.apache.commons.httpclient.methods.multipart.StringPart;
 
+import de.anomic.http.DefaultCharsetStringPart;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverDate;
@@ -75,18 +75,18 @@ public class yacyNetwork {
         // put in all the essentials for routing and network authentification
 		// generate a session key
         final ArrayList<Part> post = new ArrayList<Part>();
-        post.add(new StringPart("key", salt));
+        post.add(new DefaultCharsetStringPart("key", salt));
         
         // just standard identification essentials
-		post.add(new StringPart("iam", sb.webIndex.seedDB.mySeed().hash));
-		if (targetHash != null) post.add(new StringPart("youare", targetHash));
+		post.add(new DefaultCharsetStringPart("iam", sb.webIndex.seedDB.mySeed().hash));
+		if (targetHash != null) post.add(new DefaultCharsetStringPart("youare", targetHash));
         
         // time information for synchronization
-		post.add(new StringPart("mytime", serverDate.formatShortSecond(new Date())));
-		post.add(new StringPart("myUTC", Long.toString(System.currentTimeMillis())));
+		post.add(new DefaultCharsetStringPart("mytime", serverDate.formatShortSecond(new Date())));
+		post.add(new DefaultCharsetStringPart("myUTC", Long.toString(System.currentTimeMillis())));
 
         // network identification
-        post.add(new StringPart("network.unit.name", plasmaSwitchboard.getSwitchboard().getConfig("network.unit.name", yacySeed.DFLT_NETWORK_UNIT)));
+        post.add(new DefaultCharsetStringPart("network.unit.name", plasmaSwitchboard.getSwitchboard().getConfig("network.unit.name", yacySeed.DFLT_NETWORK_UNIT)));
 
         // authentification essentials
         final String authentificationControl = sb.getConfig("network.unit.protocol.control", "uncontrolled");
@@ -96,7 +96,7 @@ public class yacyNetwork {
                 // generate an authentification essential using the salt, the iam-hash and the network magic
                 final String magic = sb.getConfig("network.unit.protocol.request.authentification.essentials", "");
                 final String md5 = serverCodings.encodeMD5Hex(salt + sb.webIndex.seedDB.mySeed().hash + magic);
-                post.add(new StringPart("magicmd5", md5));
+                post.add(new DefaultCharsetStringPart("magicmd5", md5));
             }
         }        
         

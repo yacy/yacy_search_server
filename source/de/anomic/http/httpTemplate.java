@@ -378,11 +378,10 @@ public final class httpTemplate {
                                 }
                                 keyStream = new ByteArrayOutputStream(); //reset stream
                                 continue;
-                            }else{ //is not #(
-                                pis.unread(bb);//is processed in next loop
-                                bb = (hash);//will be added to text this loop
-                                //text += "#";
-                            }
+                            } //is not #(
+                            pis.unread(bb);//is processed in next loop
+                            bb = (hash);//will be added to text this loop
+                            //text += "#";
                         }else if( (bb & 0xFF) == ':' && others==0){//ignore :: in nested Expressions
                             bb=pis.read();
                             if( (bb & 0xFF) == ':'){
@@ -399,9 +398,8 @@ public final class httpTemplate {
                                 currentPattern++;
                                 text.clear();
                                 continue;
-                            }else{
-                                text.append(":".getBytes("UTF-8"));
                             }
+                            text.append(":".getBytes("UTF-8"));
                         }
                         if(!found){
                             text.append((byte)bb);

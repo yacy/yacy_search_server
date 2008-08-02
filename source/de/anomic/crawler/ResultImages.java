@@ -109,12 +109,11 @@ public class ResultImages {
     }
     
     public static int queueSize(final boolean privateEntryOnly) {
-        if (privateEntryOnly) {
-            return privateImageQueueHigh.size() + privateImageQueueLow.size();
-        } else {
-            return privateImageQueueHigh.size() + privateImageQueueLow.size() +
-                   publicImageQueueHigh.size() + publicImageQueueLow.size();
+        int publicSize = 0;
+        if (!privateEntryOnly) {
+            publicSize = publicImageQueueHigh.size() + publicImageQueueLow.size();
         }
+        return privateImageQueueHigh.size() + privateImageQueueLow.size() + publicSize;
     }
     
     public static int privateQueueHighSize() {

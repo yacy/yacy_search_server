@@ -156,12 +156,12 @@ public class nxTools {
 	while ((count >= 1) && (sentence.length() > 0)) {
 	    pos = sentence.indexOf(separator);
 	    if (pos < 0) {
-		if (count == 1) return sentence; else return null;
-	    } else {
-		if (count == 1) return sentence.substring(0, pos);
-		sentence = sentence.substring(pos + separator.length());
-		count--;
+		if (count == 1) return sentence;
+		return null;
 	    }
+	    if (count == 1) return sentence.substring(0, pos);
+	    sentence = sentence.substring(pos + separator.length());
+	    count--;
 	}
         return null;
     }
@@ -233,23 +233,22 @@ public class nxTools {
     public static String shortenURLString(final String url, final int len) {
         // This is contributed by Thomas Quella (borg-0300)
         if (url == null) { return null; }
-        int la = url.length();
-        if (la > len) {
+        int urlLen = url.length();
+        if (urlLen > len) {
             int cpos;
             cpos = url.indexOf("://");
             if (cpos >= 0) {
                 cpos = url.indexOf("/", cpos + 3);
-                if (cpos >= 0) {
-                    if (cpos < len-(len / 3)) { // at least 1/3 characters for the path
-                        final int lb = ((len - cpos) / 2) - 1;
-                        if (lb * 2 + 2 + cpos < len) { la--; } // if smaller(odd), half right path + 1
-                        return url.substring(0, cpos + lb).concat("..").concat(url.substring(la - lb));
-                    } else {
-                        return url.substring(0, len - 2).concat("..");
-                    }
-                } else { // very crazy domain or very short len
+                if (cpos < 0) { // very crazy domain or very short len
                     return url.substring(0, len - 2).concat("..");
-                } // no slash at end
+                }
+                if (cpos >= len-(len / 3)) {
+                    return url.substring(0, len - 2).concat("..");
+                }
+                // at least 1/3 characters for the path
+                final int lb = ((len - cpos) / 2) - 1;
+                if (lb * 2 + 2 + cpos < len) { urlLen--; } // if smaller(odd), half right path + 1
+                return url.substring(0, cpos + lb).concat("..").concat(url.substring(urlLen - lb));
             } // NO URL !?
         } // URL < len
         return url;

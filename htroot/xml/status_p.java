@@ -24,6 +24,7 @@ import de.anomic.http.httpHeader;
 import de.anomic.http.httpdByteCountInputStream;
 import de.anomic.http.httpdByteCountOutputStream;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.server.serverMemory;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverProcessor;
@@ -41,7 +42,7 @@ public class status_p {
         prop.put("rejected", "0");
         sb.updateMySeed();
         final int  cacheOutSize = sb.webIndex.dhtOutCacheSize();
-        final long cacheMaxSize = sb.getConfigLong(plasmaSwitchboard.WORDCACHE_MAX_COUNT, 10000);
+        final long cacheMaxSize = sb.getConfigLong(plasmaSwitchboardConstants.WORDCACHE_MAX_COUNT, 10000);
         prop.putNum("ppm", sb.webIndex.seedDB.mySeed().getPPM());
         prop.putNum("qpm", sb.webIndex.seedDB.mySeed().getQPM());
         prop.putNum("wordCacheSize", sb.webIndex.dhtOutCacheSize() + sb.webIndex.dhtInCacheSize());

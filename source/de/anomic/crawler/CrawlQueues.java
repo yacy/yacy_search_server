@@ -40,6 +40,7 @@ import de.anomic.kelondro.kelondroFlexWidthArray;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.server.serverDate;
 import de.anomic.server.logging.serverLog;
 import de.anomic.xml.RSSFeed;
@@ -166,8 +167,8 @@ public class CrawlQueues {
     public boolean coreCrawlJob() {
         
         final boolean robinsonPrivateCase = ((sb.isRobinsonMode()) && 
-                (!sb.getConfig(plasmaSwitchboard.CLUSTER_MODE, "").equals(plasmaSwitchboard.CLUSTER_MODE_PUBLIC_CLUSTER)) &&
-                (!sb.getConfig(plasmaSwitchboard.CLUSTER_MODE, "").equals(plasmaSwitchboard.CLUSTER_MODE_PRIVATE_CLUSTER)));
+                (!sb.getConfig(plasmaSwitchboardConstants.CLUSTER_MODE, "").equals(plasmaSwitchboardConstants.CLUSTER_MODE_PUBLIC_CLUSTER)) &&
+                (!sb.getConfig(plasmaSwitchboardConstants.CLUSTER_MODE, "").equals(plasmaSwitchboardConstants.CLUSTER_MODE_PRIVATE_CLUSTER)));
         
         if (((robinsonPrivateCase) || (coreCrawlJobSize() <= 20)) && (limitCrawlJobSize() > 0)) {
             // move some tasks to the core crawl job so we have something to do
@@ -176,7 +177,7 @@ public class CrawlQueues {
                 noticeURL.shift(NoticedURL.STACK_TYPE_LIMIT, NoticedURL.STACK_TYPE_CORE);
             }
             log.logInfo("shifted " + toshift + " jobs from global crawl to local crawl (coreCrawlJobSize()=" + coreCrawlJobSize() +
-                    ", limitCrawlJobSize()=" + limitCrawlJobSize() + ", cluster.mode=" + sb.getConfig(plasmaSwitchboard.CLUSTER_MODE, "") +
+                    ", limitCrawlJobSize()=" + limitCrawlJobSize() + ", cluster.mode=" + sb.getConfig(plasmaSwitchboardConstants.CLUSTER_MODE, "") +
                     ", robinsonMode=" + ((sb.isRobinsonMode()) ? "on" : "off"));
         }
         
@@ -184,11 +185,11 @@ public class CrawlQueues {
             //log.logDebug("CoreCrawl: queue is empty");
             return false;
         }
-        if (sb.webIndex.queuePreStack.size() >= (int) sb.getConfigLong(plasmaSwitchboard.INDEXER_SLOTS, 30)) {
+        if (sb.webIndex.queuePreStack.size() >= (int) sb.getConfigLong(plasmaSwitchboardConstants.INDEXER_SLOTS, 30)) {
             if (this.log.isFine()) log.logFine("CoreCrawl: too many processes in indexing queue, dismissed (" + "sbQueueSize=" + sb.webIndex.queuePreStack.size() + ")");
             return false;
         }
-        if (this.size() >= sb.getConfigLong(plasmaSwitchboard.CRAWLER_THREADS_ACTIVE_MAX, 10)) {
+        if (this.size() >= sb.getConfigLong(plasmaSwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX, 10)) {
             if (this.log.isFine()) log.logFine("CoreCrawl: too many processes in loader queue, dismissed (" + "cacheLoader=" + this.size() + ")");
             return false;
         }
@@ -198,11 +199,11 @@ public class CrawlQueues {
         }
         
         // if crawling was paused we have to wait until we wer notified to continue
-        final Object[] status = sb.crawlJobsStatus.get(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL);
-        synchronized(status[plasmaSwitchboard.CRAWLJOB_SYNC]) {
-            if (((Boolean)status[plasmaSwitchboard.CRAWLJOB_STATUS]).booleanValue()) {
+        final Object[] status = sb.crawlJobsStatus.get(plasmaSwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
+        synchronized(status[plasmaSwitchboardConstants.CRAWLJOB_SYNC]) {
+            if (((Boolean)status[plasmaSwitchboardConstants.CRAWLJOB_STATUS]).booleanValue()) {
                 try {
-                    status[plasmaSwitchboard.CRAWLJOB_SYNC].wait();
+                    status[plasmaSwitchboardConstants.CRAWLJOB_SYNC].wait();
                 }
                 catch (final InterruptedException e) {return false;}
             }
@@ -261,12 +262,12 @@ public class CrawlQueues {
             return false;
         }
         
-        if (sb.webIndex.queuePreStack.size() >= (int) sb.getConfigLong(plasmaSwitchboard.INDEXER_SLOTS, 30) / 2) {
+        if (sb.webIndex.queuePreStack.size() >= (int) sb.getConfigLong(plasmaSwitchboardConstants.INDEXER_SLOTS, 30) / 2) {
             if (this.log.isFine()) log.logFine("remoteCrawlLoaderJob: too many processes in indexing queue, dismissed (" + "sbQueueSize=" + sb.webIndex.queuePreStack.size() + ")");
             return false;
         }
         
-        if (this.size() >= sb.getConfigLong(plasmaSwitchboard.CRAWLER_THREADS_ACTIVE_MAX, 10)) {
+        if (this.size() >= sb.getConfigLong(plasmaSwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX, 10)) {
             if (this.log.isFine()) log.logFine("remoteCrawlLoaderJob: too many processes in loader queue, dismissed (" + "cacheLoader=" + this.size() + ")");
             return false;
         }
@@ -392,11 +393,11 @@ public class CrawlQueues {
             //log.logDebug("GlobalCrawl: queue is empty");
             return false;
         }
-        if (sb.webIndex.queuePreStack.size() >= (int) sb.getConfigLong(plasmaSwitchboard.INDEXER_SLOTS, 30)) {
+        if (sb.webIndex.queuePreStack.size() >= (int) sb.getConfigLong(plasmaSwitchboardConstants.INDEXER_SLOTS, 30)) {
             if (this.log.isFine()) log.logFine("GlobalCrawl: too many processes in indexing queue, dismissed (" + "sbQueueSize=" + sb.webIndex.queuePreStack.size() + ")");
             return false;
         }
-        if (this.size() >= sb.getConfigLong(plasmaSwitchboard.CRAWLER_THREADS_ACTIVE_MAX, 10)) {
+        if (this.size() >= sb.getConfigLong(plasmaSwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX, 10)) {
             if (this.log.isFine()) log.logFine("GlobalCrawl: too many processes in loader queue, dismissed (" + "cacheLoader=" + this.size() + ")");
             return false;
         }        
@@ -406,11 +407,11 @@ public class CrawlQueues {
         }
 
         // if crawling was paused we have to wait until we wer notified to continue
-        final Object[] status = sb.crawlJobsStatus.get(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
-        synchronized(status[plasmaSwitchboard.CRAWLJOB_SYNC]) {
-            if (((Boolean)status[plasmaSwitchboard.CRAWLJOB_STATUS]).booleanValue()) {
+        final Object[] status = sb.crawlJobsStatus.get(plasmaSwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
+        synchronized(status[plasmaSwitchboardConstants.CRAWLJOB_SYNC]) {
+            if (((Boolean)status[plasmaSwitchboardConstants.CRAWLJOB_STATUS]).booleanValue()) {
                 try {
-                    status[plasmaSwitchboard.CRAWLJOB_SYNC].wait();
+                    status[plasmaSwitchboardConstants.CRAWLJOB_SYNC].wait();
                 }
                 catch (final InterruptedException e){ return false;}
             }

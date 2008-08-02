@@ -64,7 +64,7 @@ public class kelondroEcoFS {
      */
     private int cachecount, buffercount;
     private byte[] cache, buffer;
-	final byte[]	zero;
+    final byte[] zero;
     
     /**
      * stay below hard disc cache (is that necessary?)

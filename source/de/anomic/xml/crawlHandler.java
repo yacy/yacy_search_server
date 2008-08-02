@@ -109,7 +109,7 @@ public class crawlHandler extends DefaultHandler {
         }
     }
 
-    public void startElement(final String uri, final String name, final String tag, final Attributes atts) {
+    public void startElement(final String tag) {
         if ("channel".equals(tag)) {
             channel = new Startpoint();
             parsingAttributes = true;

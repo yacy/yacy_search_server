@@ -129,11 +129,7 @@ public class indexCollectionRI implements indexRI {
     }
 
     public boolean hasContainer(final String wordHash) {
-        try {
-            return collectionIndex.has(wordHash.getBytes());
-        } catch (final IOException e) {
-            return false;
-        }
+        return collectionIndex.has(wordHash.getBytes());
     }
     
     public indexContainer getContainer(final String wordHash, final Set<String> urlselection) {

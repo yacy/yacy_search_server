@@ -62,17 +62,17 @@ public final class serverDate {
     private static final Calendar CAL_GMT = Calendar.getInstance(TZ_GMT, Locale.US);
 
     /** Date formatter/parser for minimal yyyyMMdd pattern */
-    public static final SimpleDateFormat FORMAT_SHORT_DAY    = new SimpleDateFormat(PATTERN_SHORT_DAY);
+    private static final SimpleDateFormat FORMAT_SHORT_DAY    = new SimpleDateFormat(PATTERN_SHORT_DAY);
     /** Date formatter/parser for minimal yyyyMMddHHmmss pattern */
-    public static final SimpleDateFormat FORMAT_SHORT_SECOND = new SimpleDateFormat(PATTERN_SHORT_SECOND);
+    private static final SimpleDateFormat FORMAT_SHORT_SECOND = new SimpleDateFormat(PATTERN_SHORT_SECOND);
     /** Date formatter/parser for minimal yyyyMMddHHmmssSSS pattern */
-    public static final SimpleDateFormat FORMAT_SHORT_MILSEC = new SimpleDateFormat(PATTERN_SHORT_MILSEC);
+    private static final SimpleDateFormat FORMAT_SHORT_MILSEC = new SimpleDateFormat(PATTERN_SHORT_MILSEC);
     
     /** Date formatter/non-sloppy parser for W3C datetime (ISO8601) in GMT/UTC */
-    public static final SimpleDateFormat FORMAT_ISO8601      = new SimpleDateFormat(PATTERN_ISO8601);
+    private static final SimpleDateFormat FORMAT_ISO8601      = new SimpleDateFormat(PATTERN_ISO8601);
     
     /** Date formatter/parser for standard compliant HTTP header dates (RFC 1123) */
-    public static final SimpleDateFormat FORMAT_RFC1123      = new SimpleDateFormat(PATTERN_RFC1123, Locale.US); 
+    private static final SimpleDateFormat FORMAT_RFC1123      = new SimpleDateFormat(PATTERN_RFC1123, Locale.US); 
 
     /**
      * RFC 2616 requires that HTTP clients are able to parse all 3 different
@@ -462,20 +462,21 @@ public final class serverDate {
         if (diff.length() < 2) diff = "0" + diff;
         diff = Integer.toString(oh) + diff;
         if (diff.length() < 4) diff = "0" + diff;
-        if (offsetHours >= 0) {
-            return "+" + diff;
-        } else {
+        if (offsetHours < 0) {
             return "-" + diff;
         }
+        return "+" + diff;
     }
 
     public static long UTCDiff() {
         // DST_OFFSET is dependent on the time of the Calendar, so it has to be updated
         // to get the correct current offset
-        thisCalendar.setTimeInMillis(System.currentTimeMillis());
-        final long zoneOffsetHours = thisCalendar.get(Calendar.ZONE_OFFSET);
-        final long DSTOffsetHours = thisCalendar.get(Calendar.DST_OFFSET);
-        return zoneOffsetHours + DSTOffsetHours;
+        synchronized(thisCalendar) {
+            thisCalendar.setTimeInMillis(System.currentTimeMillis());
+            final long zoneOffsetHours = thisCalendar.get(Calendar.ZONE_OFFSET);
+            final long DSTOffsetHours = thisCalendar.get(Calendar.DST_OFFSET);
+            return zoneOffsetHours + DSTOffsetHours;
+        }
     }
     
     public static long UTCDiff(final String diffString) {
@@ -610,7 +611,8 @@ public final class serverDate {
     public static long remainingTime(final long start, final long due, final long minimum) {
         if (due < 0) return -1;
         final long r = due + start - System.currentTimeMillis();
-        if (r <= 0) return minimum; else return r;
+        if (r <= 0) return minimum;
+        return r;
     }
     
     public static void main(final String[] args) {
@@ -621,7 +623,7 @@ public final class serverDate {
         System.out.println("serverDate : " + new serverDate().toString());
         System.out.println("  JavaDate : " + DateFormat.getDateInstance().format(new Date()));
         System.out.println("serverDate0: " + new serverDate(0).toShortString(false));
-        System.out.println("  JavaDate0: " + FORMAT_SHORT_SECOND.format(new Date(0)));
+        System.out.println("  JavaDate0: " + format(FORMAT_SHORT_SECOND, new Date(0)));
         System.out.println("serverDate0: " + new serverDate(0).toString());
         System.out.println("  JavaDate0: " + DateFormat.getDateInstance().format(new Date(0)));
         // parse test
@@ -641,7 +643,7 @@ public final class serverDate {
         System.out.println("time for " + cycles + " calls to serverDate:" + (System.currentTimeMillis() - start) + " milliseconds");
         
         start = System.currentTimeMillis();
-        for (int i = 0; i < cycles; i++) testresult[i] = FORMAT_SHORT_SECOND.format(new Date());
+        for (int i = 0; i < cycles; i++) testresult[i] = format(FORMAT_SHORT_SECOND, new Date());
         System.out.println("time for " + cycles + " calls to   javaDate:" + (System.currentTimeMillis() - start) + " milliseconds");
     }    
 }

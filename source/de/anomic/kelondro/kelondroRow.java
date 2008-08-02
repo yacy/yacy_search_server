@@ -61,7 +61,7 @@ public final class kelondroRow {
         this.primaryKeyLength = (primaryKey < 0) ? this.objectsize : row[primaryKeyIndex].cellwidth;
     }
 
-    public kelondroRow(final String structure, final kelondroByteOrder objectOrder, final int primaryKey) {
+    public kelondroRow(String structure, final kelondroByteOrder objectOrder, final int primaryKey) {
         assert (objectOrder != null);
         this.objectOrder = objectOrder;
         // define row with row syntax
@@ -340,11 +340,10 @@ public final class kelondroRow {
         public final byte[] bytes() {
             if ((offset == 0) && (rowinstance.length == objectsize)) {
                 return rowinstance;
-            } else {
-                final byte[] tmp = new byte[objectsize];
-                System.arraycopy(rowinstance, offset, tmp, 0, objectsize);
-                return tmp;
             }
+            final byte[] tmp = new byte[objectsize];
+            System.arraycopy(rowinstance, offset, tmp, 0, objectsize);
+            return tmp;
         }
         
         public final void writeToArray(final byte[] target, final int targetOffset) {
@@ -488,8 +487,7 @@ public final class kelondroRow {
             try {
                 if ((encoding == null) || (encoding.length() == 0))
                     return new String(rowinstance, offset + clstrt, length);
-                else
-                    return new String(rowinstance, offset + clstrt, length, encoding);
+                return new String(rowinstance, offset + clstrt, length, encoding);
             } catch (final UnsupportedEncodingException e) {
                 return "";
             }

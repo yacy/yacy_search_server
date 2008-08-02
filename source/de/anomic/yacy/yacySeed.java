@@ -58,14 +58,13 @@ import de.anomic.index.indexWord;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.net.natLib;
 import de.anomic.server.serverCodings;
-import de.anomic.server.serverCore;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverDomains;
 import de.anomic.server.serverSystem;
 import de.anomic.tools.bitfield;
 import de.anomic.tools.crypt;
 
-public class yacySeed {
+public class yacySeed implements Cloneable {
 
     public static final int maxsize = 4096;
     /**
@@ -252,9 +251,9 @@ public class yacySeed {
      * @param name
      * @return a checked name without "<" and ">"
      */
-    private static String checkPeerName(final String name) {
-        name.replaceAll("<", "_");
-        name.replaceAll(">", "_");
+    private static String checkPeerName(String name) {
+        name = name.replaceAll("<", "_");
+        name = name.replaceAll(">", "_");
         return name;
     }
     

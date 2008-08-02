@@ -104,7 +104,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
     /**
      * for brute-force prevention
      */
-    public static ConcurrentHashMap<String, Integer> bfHost = new ConcurrentHashMap<String, Integer>();
+    public static final ConcurrentHashMap<String, Integer> bfHost = new ConcurrentHashMap<String, Integer>();
     
     // class variables
     /**
@@ -890,7 +890,8 @@ public final class serverCore extends serverAbstractBusyThread implements server
     	while ((l = is.read(buffer)) > 0) {os.write(buffer, 0, l);}
     	os.write(CRLF);
     	os.flush();
-    	if (bufferSize > 80) return "<LONG STREAM>"; else return new String(buffer);
+    	if (bufferSize > 80) return "<LONG STREAM>";
+    	return new String(buffer);
     }
     
     protected void finalize() throws Throwable {

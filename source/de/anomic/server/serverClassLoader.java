@@ -91,7 +91,7 @@ public final class serverClassLoader extends ClassLoader {
                     packge = "";
                 }
                 if(packge.length() > 0) {
-                    packge.replace(File.separatorChar, '.');
+                    packge = packge.replace(File.separatorChar, '.');
                     packge += ".";
                 }
             }

@@ -236,16 +236,15 @@ public class ftpc {
                         .booleanValue());
             } catch (final InvocationTargetException e) {
                 if (e.getMessage() != null) {
-                if (notConnected()) {
-                    // the error was probably caused because there is no
-                    // connection
-                    errPrintln("not connected. no effect.");
-                    e.printStackTrace(err);
+                    if (notConnected()) {
+                        // the error was probably caused because there is no
+                        // connection
+                        errPrintln("not connected. no effect.");
+                        e.printStackTrace(err);
+                    } else {
+                        errPrintln("ftp internal exception: target exception " + e);
+                    }
                     return ret;
-                } else {
-                    errPrintln("ftp internal exception: target exception " + e);
-                    return ret;
-                }
                 }
             } catch (final IllegalAccessException e) {
                 errPrintln("ftp internal exception: wrong access " + e);
@@ -1407,37 +1406,36 @@ public class ftpc {
 
         // get status code
         final int status = getStatus(reply);
-
-        // starting data transaction
-        if (status == 1) {
-            final Socket data = getDataSocket();
-            final BufferedReader ClientStream = new BufferedReader(new InputStreamReader(data.getInputStream()));
-
-            // read file system data
-            String line;
-            final ArrayList<String> files = new ArrayList<String>();
-            while ((line = ClientStream.readLine()) != null) {
-                if (!line.startsWith("total ")) {
-                    files.add(line);
-                }
-            }
-
-            // after stream is empty we should get control completion echo
-            reply = receive();
-
-            // boolean success = !isNotPositiveCompletion(reply);
-
-            // shutdown connection
-            ClientStream.close(); // Closing the returned InputStream will
-            closeDataSocket(); // close the associated socket.
-
-            // if (!success) throw new IOException(reply);
-
-            files.trimToSize();
-            return files;
-        } else {
+        if (status != 1) {
             throw new IOException(reply);
         }
+        
+        // starting data transaction
+        final Socket data = getDataSocket();
+        final BufferedReader ClientStream = new BufferedReader(new InputStreamReader(data.getInputStream()));
+
+        // read file system data
+        String line;
+        final ArrayList<String> files = new ArrayList<String>();
+        while ((line = ClientStream.readLine()) != null) {
+            if (!line.startsWith("total ")) {
+                files.add(line);
+            }
+        }
+
+        // after stream is empty we should get control completion echo
+        reply = receive();
+
+        // boolean success = !isNotPositiveCompletion(reply);
+
+        // shutdown connection
+        ClientStream.close(); // Closing the returned InputStream will
+        closeDataSocket(); // close the associated socket.
+
+        // if (!success) throw new IOException(reply);
+
+        files.trimToSize();
+        return files;
     }
 
     public boolean MDIR() {
@@ -1775,14 +1773,13 @@ public class ftpc {
         // read status of the command from the control port
         final String reply = receive();
 
-        // starting data transaction
-        if (getStatusCode(reply) == 213) {
-            try {
-                return Integer.parseInt(reply.substring(4));
-            } catch (final NumberFormatException e) {
-                throw new IOException(reply);
-            }
-        } else {
+        if (getStatusCode(reply) != 213) {
+            throw new IOException(reply);
+        }
+        
+        try {
+            return Integer.parseInt(reply.substring(4));
+        } catch (final NumberFormatException e) {
             throw new IOException(reply);
         }
     }
@@ -2541,7 +2538,7 @@ public class ftpc {
     public StringBuilder dirhtml(String remotePath) {
         // returns a directory listing using an existing connection
         try {
-            if(isFolder(remotePath) && !"/".equals(remotePath.charAt(remotePath.length()-1))) {
+            if(isFolder(remotePath) && '/' != remotePath.charAt(remotePath.length()-1)) {
                 remotePath += '/';
             }
             final List<String> list = list(remotePath, true);
@@ -2636,7 +2633,7 @@ public class ftpc {
         FileOutputStream fos;
         try {
             fos = new FileOutputStream(file);
-            fos.write((new String(page)).getBytes());
+            fos.write(page.toString().getBytes());
             fos.close();
         } catch (final FileNotFoundException e) {
             e.printStackTrace();

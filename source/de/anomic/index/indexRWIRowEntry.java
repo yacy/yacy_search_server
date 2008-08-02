@@ -34,11 +34,11 @@ import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroRow.Entry;
 import de.anomic.yacy.yacySeedDB;
 
-public final class indexRWIRowEntry implements indexRWIEntry {
+public final class indexRWIRowEntry implements indexRWIEntry, Cloneable {
 
     // this object stores attributes to URL references inside RWI collections
 
-    public static kelondroRow urlEntryRow = new kelondroRow(new kelondroColumn[]{
+    public static final kelondroRow urlEntryRow = new kelondroRow(new kelondroColumn[]{
             new kelondroColumn("h", kelondroColumn.celltype_string,    kelondroColumn.encoder_bytes, yacySeedDB.commonHashLength, "urlhash"),
             new kelondroColumn("a", kelondroColumn.celltype_cardinal,  kelondroColumn.encoder_b256,  2, "lastModified"),
             new kelondroColumn("s", kelondroColumn.celltype_cardinal,  kelondroColumn.encoder_b256,  2, "freshUntil"),

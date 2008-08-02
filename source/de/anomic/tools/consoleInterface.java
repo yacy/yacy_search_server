@@ -35,18 +35,13 @@ public class consoleInterface extends Thread
     private final InputStream stream;
     private final List<String> output = new ArrayList<String>();
     private final Semaphore dataIsRead = new Semaphore(1);
-    /**
-     * FIXME just for debugging 
-     */
-    //private final String name;
     private final serverLog log;
     
 
-    public consoleInterface(final InputStream stream, final String name, final serverLog log)
+    public consoleInterface(final InputStream stream, final serverLog log)
     {
         this.log = log;
         this.stream = stream;
-        //this.name = name;
         // block reading {@see getOutput()}
         try {
             dataIsRead.acquire();
@@ -74,7 +69,6 @@ public class consoleInterface extends Thread
                 if (buffer.ready())
                     break;
             }
-            //log.logInfo("logpoint 3 "+ name +" needed " + tries + " tries");
             while((line = buffer.readLine()) != null) {
                     output.add(line);
             }
@@ -90,10 +84,7 @@ public class consoleInterface extends Thread
     public List<String> getOutput(){
         // wait that data is ready
         try {
-            //log.logInfo("logpoint 4 waiting for data of '"+ name +"'");
-            //final long start = System.currentTimeMillis();
             dataIsRead.acquire();
-            //log.logInfo("logpoint 5 data ready for '"+ name +"' after "+ (System.currentTimeMillis() - start) +" ms");
         } catch (final InterruptedException e) {
             // after interrupt just return what is available (maybe nothing)
         }

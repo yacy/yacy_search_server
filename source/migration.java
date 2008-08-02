@@ -25,6 +25,7 @@ import de.anomic.data.listManager;
 import de.anomic.http.httpd;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.logging.serverLog;
 
@@ -95,7 +96,7 @@ public class migration {
         }
         final File skinsDir=sb.getConfigPath("skinPath", "DATA/SKINS");
         final File skinFile=new File(skinsDir, skin+".css");
-        final File htdocsPath=new File(sb.getConfigPath(plasmaSwitchboard.HTDOCS_PATH, plasmaSwitchboard.HTROOT_PATH_DEFAULT), "env");
+        final File htdocsPath=new File(sb.getConfigPath(plasmaSwitchboardConstants.HTDOCS_PATH, plasmaSwitchboardConstants.HTROOT_PATH_DEFAULT), "env");
         final File styleFile=new File(htdocsPath, "style.css");
         if(!skinFile.exists()){
             if(styleFile.exists()){

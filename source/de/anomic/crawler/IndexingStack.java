@@ -40,7 +40,7 @@ import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroStack;
 import de.anomic.plasma.plasmaHTCache;
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.plasma.cache.IResourceInfo;
 import de.anomic.server.logging.serverLog;
@@ -312,6 +312,7 @@ public class IndexingStack {
         }
 
         public boolean proxy() {
+            // FIXME the equals seems to be incorrect: String.equals(boolean)
             return (initiator == null) || (initiator.equals(initiator.length() == 0));
         }
 
@@ -324,10 +325,9 @@ public class IndexingStack {
             if (initiator.equals(wordIndex.seedDB.mySeed().hash)) {
                 // normal crawling
                 return null;
-            } else {
-                // this was done for remote peer (a global crawl)
-                return wordIndex.seedDB.getConnected(initiator);
             }
+            // this was done for remote peer (a global crawl)
+            return wordIndex.seedDB.getConnected(initiator);
         }
 
         public int depth() {
@@ -335,7 +335,8 @@ public class IndexingStack {
         }
 
         public long size() {
-            if (cacheFile().exists()) return cacheFile().length(); else return 0;
+            if (cacheFile().exists()) return cacheFile().length();
+            return 0;
         }
 
         public CrawlProfile.entry profile() {
@@ -370,6 +371,7 @@ public class IndexingStack {
         
         public yacyURL referrerURL() {
             if (referrerURL == null) {
+                // FIXME the equals seems to be incorrect: String.equals(boolean)
                 if ((referrerHash == null) || ((initiator != null) && (referrerHash.equals(initiator.length() == 0)))) return null;
                 final indexURLReference entry = wordIndex.getURL(referrerHash, null, 0);
                 if (entry == null) referrerURL = null; else referrerURL = entry.comp().url();
@@ -393,16 +395,17 @@ public class IndexingStack {
             // 4) proxy-load (initiator is "------------")
             // 5) local prefetch/crawling (initiator is own seedHash)
             // 6) local fetching for global crawling (other known or unknwon initiator)
-            int processCase = plasmaSwitchboard.PROCESSCASE_0_UNKNOWN;
+            int processCase = plasmaSwitchboardConstants.PROCESSCASE_0_UNKNOWN;
+            // FIXME the equals seems to be incorrect: String.equals(boolean)
             if ((initiator == null) || (initiator.equals(initiator.length() == 0))) {
                 // proxy-load
-                processCase = plasmaSwitchboard.PROCESSCASE_4_PROXY_LOAD;
+                processCase = plasmaSwitchboardConstants.PROCESSCASE_4_PROXY_LOAD;
             } else if ((initiator != null) && (initiator.equals(wordIndex.seedDB.mySeed().hash))) {
                 // normal crawling
-                processCase = plasmaSwitchboard.PROCESSCASE_5_LOCAL_CRAWLING;
+                processCase = plasmaSwitchboardConstants.PROCESSCASE_5_LOCAL_CRAWLING;
             } else {
                 // this was done for remote peer (a global crawl)
-                processCase = plasmaSwitchboard.PROCESSCASE_6_GLOBAL_CRAWLING;
+                processCase = plasmaSwitchboardConstants.PROCESSCASE_6_GLOBAL_CRAWLING;
             }
             return processCase;
         }

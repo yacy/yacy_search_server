@@ -88,11 +88,10 @@ public final class ResultURLs {
     
     public synchronized int getStackSize(final int stack) {
         final List<String> resultStack = getStack(stack);
-        if(resultStack != null) {
-            return resultStack.size();
-        } else {
+        if(resultStack == null) {
             return -1;
         }
+        return resultStack.size();
     }
 
     public synchronized String getUrlHash(final int stack, final int pos) {
@@ -128,21 +127,19 @@ public final class ResultURLs {
     public synchronized String getHashNo(final int stack, final int pos, final int index) {
         final String result = getResultStackAt(stack, pos);
         if(result != null) {
-            if(yacySeedDB.commonHashLength * 3 <= result.length()) {
-                return result.substring(yacySeedDB.commonHashLength * index, yacySeedDB.commonHashLength * (index + 1));
-            } else {
+            if(result.length() < yacySeedDB.commonHashLength * 3) {
                 serverLog.logSevere("ResultURLs", "unexpected error: result of stack is too short: "+ result.length());
-                if(yacySeedDB.commonHashLength * 2 < result.length()) {
-                    // return what is there
-                    return result.substring(yacySeedDB.commonHashLength * 2);
-                } else {
+                if(result.length() <= yacySeedDB.commonHashLength * 2) {
                     return null;
                 }
+                // return what is there
+                return result.substring(yacySeedDB.commonHashLength * 2);
             }
+            return result.substring(yacySeedDB.commonHashLength * index, yacySeedDB.commonHashLength * (index + 1));
         } else if(isValidStack(stack)) {
             serverLog.logSevere("ResultURLs", "unexpected error: result of stack is null: "+ stack +","+ pos);
         }
-        return null;
+        return result;
     }
 
     /**
@@ -156,15 +153,17 @@ public final class ResultURLs {
         assert pos >= 0 : "precondition violated: " + pos + " >= 0";
         
         final List<String> resultStack = getStack(stack);
-        if(resultStack != null) {
-            assert pos < resultStack.size() : "pos = " + pos + ", resultStack.size() = " + resultStack.size();
-            if(pos < resultStack.size()) {
-                return resultStack.get(pos);
-            } else {
-                serverLog.logSevere("ResultURLs", "unexpected error: Index out of Bounds "+ pos +" of "+ resultStack.size());
-            }
+        
+        if(resultStack == null) {
+            return null;
         }
-        return null;
+        assert pos < resultStack.size() : "pos = " + pos + ", resultStack.size() = " + resultStack.size();
+        if(pos >= resultStack.size()) {
+            serverLog.logSevere("ResultURLs", "unexpected error: Index out of Bounds "+ pos +" of "+ resultStack.size());
+            return null;
+        }
+        
+        return resultStack.get(pos);
     }
 
     /**
@@ -208,11 +207,10 @@ public final class ResultURLs {
 //        }
 //        return prevElement != null;
         final List<String> resultStack = getStack(stack);
-        if(resultStack != null) {
-            return resultStack.remove(pos) != null;
-        } else {
+        if(resultStack == null) {
             return false;
         }
+        return resultStack.remove(pos) != null;
     }
 
     public synchronized void clearStack(final int stack) {

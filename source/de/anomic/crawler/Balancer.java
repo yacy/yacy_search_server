@@ -333,7 +333,7 @@ public class Balancer {
         pushHash(entry.url().hash());
     }
     
-    private void pushHash(final String hash) throws IOException {
+    private void pushHash(final String hash) {
         // extend domain stack
         final String dom = hash.substring(6);
         LinkedList<String> domainList = domainStacks.get(dom);
@@ -485,9 +485,9 @@ public class Balancer {
         if (rowEntry == null) {
             serverLog.logSevere("PLASMA BALANCER", "get() found a valid urlhash, but failed to fetch the corresponding url entry - total size = " + size() + ", fileStack.size() = " + urlFileStack.size() + ", ramStack.size() = " + urlRAMStack.size() + ", domainStacks.size() = " + domainStacks.size());
             return null;
-        } else {
-            assert urlFileIndex.size() + 1 == s : "urlFileIndex.size() = " + urlFileIndex.size() + ", s = " + s + ", result = " + result;
         }
+        assert urlFileIndex.size() + 1 == s : "urlFileIndex.size() = " + urlFileIndex.size() + ", s = " + s + ", result = " + result;
+        
         final CrawlEntry crawlEntry = new CrawlEntry(rowEntry);
         final long genericDelta = Math.min(
                               15000,

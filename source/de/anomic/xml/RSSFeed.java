@@ -48,7 +48,7 @@ public class RSSFeed implements Iterable<RSSMessage> {
      * the following private channels are declared to prevent that an access to the feed servlet
      * gets results from news channels that are not for the public
      */
-    public static HashSet<String> privateChannels = new HashSet<String>();
+    public static final HashSet<String> privateChannels = new HashSet<String>();
     static {
         privateChannels.add(LOCALSEARCH);
         privateChannels.add(LOCALINDEXING);

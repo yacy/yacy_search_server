@@ -350,22 +350,7 @@ public class SettingsAck_p {
             /* ====================================================================
              * Enabling settings
              * ==================================================================== */
-            httpdProxyHandler.setRemoteProxyConfig(httpRemoteProxyConfig.init(sb));            
-            
-//            httpdProxyHandler.remoteProxyUse = post.get("remoteProxyUse", "").equals("on");
-//            httpdProxyHandler.remoteProxyHost = post.get("remoteProxyHost", "");
-//            try {
-//                httpdProxyHandler.remoteProxyPort = Integer.parseInt((String) post.get("remoteProxyPort", ""));
-//            } catch (NumberFormatException e) {
-//                httpdProxyHandler.remoteProxyPort = 3128;
-//            }
-//            httpdProxyHandler.remoteProxyNoProxy = (String) post.get("remoteProxyNoProxy", "");
-//            httpdProxyHandler.remoteProxyNoProxyPatterns = httpdProxyHandler.remoteProxyNoProxy.split(",");
-//            env.setConfig("remoteProxyHost", httpdProxyHandler.remoteProxyHost);
-//            env.setConfig("remoteProxyPort", Integer.toString(httpdProxyHandler.remoteProxyPort));
-//            env.setConfig("remoteProxyNoProxy", httpdProxyHandler.remoteProxyNoProxy);
-//            env.setConfig("remoteProxyUse", (httpdProxyHandler.remoteProxyUse) ? "true" : "false");
-            
+            httpRemoteProxyConfig.init(sb);            
             
             prop.put("info", "15"); // The remote-proxy setting has been changed
             return prop;
@@ -439,6 +424,8 @@ public class SettingsAck_p {
                     for (int i=0; i<configOptions.length; i++) {
                         final String newSettings = post.get(configOptions[i],"");
                         final String oldSettings = env.getConfig(configOptions[i],"");
+                        // FIXME should this be: nC = nC && newSettings.equals()
+                        //         or (current): nC = nC & newSettings.equals()
                         nothingChanged &= newSettings.equals(oldSettings); 
                         if (!nothingChanged) {
                             env.setConfig(configOptions[i],newSettings);

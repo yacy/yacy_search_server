@@ -609,7 +609,8 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
     public byte[] put(final byte[] key, final byte[] value) throws IOException {
         final kelondroRow.Entry row = row().newEntry(new byte[][]{key, value});
         final kelondroRow.Entry ret = put(row);
-        if (ret == null) return null; else return ret.getColBytes(0);
+        if (ret == null) return null;
+        return ret.getColBytes(0);
     }
     
     // Removes the mapping for this key from this map if present (optional operation).
@@ -624,9 +625,8 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
                 final kelondroRow.Entry values = row().newEntry(result.getValueRow());
                 remove(result, writeSearchObj.getParent());
                 return values;
-            } else {
-                return null;
             }
+            return null;
         }
     }
 
@@ -845,17 +845,15 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
                 if (c == 0) {
                     if (including) {
                         break; // correct + finished
-                    } else {
-                        if (hasNext()) next(); else nextNode = null;
-                        break; // corrected + finished
                     }
+                    if (hasNext()) next(); else nextNode = null;
+                    break; // corrected + finished
                 } else if (c < 0) {
                     if (up) {
                         break; // correct + finished
-                    } else {
-                        // firstKey < nextNode.getKey(): correct once
-                        if (hasNext()) next(); else nextNode = null;
                     }
+                    // firstKey < nextNode.getKey(): correct once
+                    if (hasNext()) next(); else nextNode = null;
                 } else if (c > 0) {
                     if (up) {
                         // firstKey > nextNode.getKey(): correct once
@@ -891,11 +889,6 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
                 if (searchNode == null) throw new kelondroException(filename, "nodeIterator.init: start node does not exist (node null)");
             }
             // now every parent node to the start node is on the stack
-        }
-        
-        public void finalize() {
-            nextNode = null;
-            nodeStack = null;
         }
             
         public boolean hasNext() {
@@ -1229,7 +1222,7 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
         kelondroHandle handle;
         kelondroNode node;
         int linelength;
-		final int width = (1 << (height - 1)) * (row().width(0) + 1);
+        final int width = (1 << (height - 1)) * (row().width(0) + 1);
         String key;
         for (int h = 1; h < height; h++) {
             linelength = width / (thisline.size() * 2);

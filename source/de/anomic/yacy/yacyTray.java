@@ -118,7 +118,7 @@ public class yacyTray implements ActionListener, ItemListener {
         isShown = true;
     }
 	
-	private void trayClickAction(){	//detect doubleclick
+	void trayClickAction(){	//detect doubleclick
 		if(System.currentTimeMillis() - t1 < 500){
 			if (lockBrowserPopup) {
 				displayBalloonMessage("YaCy","Please wait until YaCy is started.");
@@ -129,7 +129,7 @@ public class yacyTray implements ActionListener, ItemListener {
 		} else { t1 = System.currentTimeMillis(); }
 	}
 	
-	private void openBrowser(final String browserPopUpPage){
+	void openBrowser(final String browserPopUpPage){
 		// no need for https, because we are on localhost
 		serverSystem.openBrowser("http://localhost:" + sb.getConfig("port", "8080") + "/" + browserPopUpPage);
 	}

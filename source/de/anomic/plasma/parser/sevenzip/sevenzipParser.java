@@ -112,9 +112,8 @@ public class sevenzipParser extends AbstractParser implements Parser {
             serverFileUtils.copy(source, cfos);
             if (cfos.isFallback()) {
                 return parse(location, mimeType, charset, cfos.getContentFile());
-            } else {
-                return parse(location, mimeType, charset, cfos.getContentBAOS());
             }
+            return parse(location, mimeType, charset, cfos.getContentBAOS());
         } catch (final IOException e) {
             throw new ParserException("error processing 7zip archive", location, e);
         }

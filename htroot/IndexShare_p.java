@@ -30,6 +30,7 @@
 //import de.anomic.tools.*;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -51,7 +52,7 @@ public class IndexShare_p {
         }
         
         if (post.containsKey("indexsharesetting")) {
-            switchboard.setConfig(plasmaSwitchboard.INDEX_DIST_ALLOW, (post.containsKey("distribute")) ? "true" : "false");
+            switchboard.setConfig(plasmaSwitchboardConstants.INDEX_DIST_ALLOW, (post.containsKey("distribute")) ? "true" : "false");
             switchboard.setConfig("allowReceiveIndex", (post.containsKey("receive")) ? "true" : "false");
             switchboard.setConfig("defaultLinkReceiveFrequency", post.get("linkfreq", "30"));
             switchboard.setConfig("defaultWordReceiveFrequency", post.get("wordfreq", "10"));

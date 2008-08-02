@@ -46,6 +46,7 @@ import de.anomic.index.indexReferenceBlacklist;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.plasma.cache.IResourceInfo;
 import de.anomic.plasma.cache.http.ResourceInfo;
 import de.anomic.server.serverSystem;
@@ -226,13 +227,13 @@ public final class HTTPLoader {
                             if (fos!=null)try{fos.close();}catch(final Exception e){/* ignore this */}
                         }
                         
-                        return htCache;
                     } else {
                         // if the response has not the right file type then reject file
                         this.log.logInfo("REJECTED WRONG MIME/EXT TYPE " + res.getResponseHeader().mime() + " for URL " + entry.url().toString());
                         sb.crawlQueues.errorURL.newEntry(entry, sb.webIndex.seedDB.mySeed().hash, new Date(), 1, ErrorURL.DENIED_WRONG_MIMETYPE_OR_EXT);
-                        return null;
+                        htCache = null;
                     }
+                    return htCache;
                 } catch (final SocketException e) {
                     // this may happen if the client suddenly closes its connection
                     // maybe the user has stopped loading
@@ -364,8 +365,8 @@ public final class HTTPLoader {
             } else if ((errorMsg != null) && (errorMsg.indexOf("There is not enough space on the disk") >= 0)) {
                 this.log.logSevere("CRAWLER Not enough space on the disk detected while crawling '" + entry.url().toString() + "'. " +
                 "Pausing crawlers. ");
-                sb.pauseCrawlJob(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL);
-                sb.pauseCrawlJob(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
+                sb.pauseCrawlJob(plasmaSwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
+                sb.pauseCrawlJob(plasmaSwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
                 failreason = ErrorURL.DENIED_OUT_OF_DISK_SPACE;
             } else if ((errorMsg != null) && (errorMsg.indexOf("Network is unreachable") >=0)) {
                 this.log.logSevere("CRAWLER Network is unreachable while trying to crawl URL '" + entry.url().toString() + "'. ");

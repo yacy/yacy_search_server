@@ -270,8 +270,7 @@ public class CrawlResults {
     private static String daydate(final Date date) {
         if (date == null) {
             return "";
-        } else {
-            return dayFormatter.format(date);
         }
+        return dayFormatter.format(date);
     }
 }

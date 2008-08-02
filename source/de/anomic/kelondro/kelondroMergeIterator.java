@@ -52,15 +52,6 @@ public class kelondroMergeIterator<E> implements kelondroCloneableIterator<E> {
         return new kelondroMergeIterator<E>(a.clone(modifier), b.clone(modifier), comp, merger, up);
     }
     
-    public void finalize() {
-        // call finalizer of embedded objects
-        a = null;
-        b = null;
-        na = null;
-        nb = null;
-        comp = null;
-    }
-    
     private void nexta() {
         try {
             if ((a != null) && (a.hasNext())) na = a.next(); else na = null;
@@ -144,25 +135,23 @@ public class kelondroMergeIterator<E> implements kelondroCloneableIterator<E> {
         return new kelondroMergeIterator<A>(one, cascade(iiterators, c, merger, up), c, merger, up);
     }
     
-    public static Method simpleMerge = null;
+    public static final Method simpleMerge;
     static {
+        Method meth = null;
         try {
             final Class<?> c = Class.forName("de.anomic.kelondro.kelondroMergeIterator");
-            simpleMerge = c.getMethod("mergeEqualByReplace", new Class[]{Object.class, Object.class});
+            meth = c.getMethod("mergeEqualByReplace", new Class[]{Object.class, Object.class});
         } catch (final SecurityException e) {
             System.out.println("Error while initializing simpleMerge: " + e.getMessage());
-            simpleMerge = null;
+            meth = null;
         } catch (final ClassNotFoundException e) {
             System.out.println("Error while initializing simpleMerge: " + e.getMessage());
-            simpleMerge = null;
+            meth = null;
         } catch (final NoSuchMethodException e) {
             System.out.println("Error while initializing simpleMerge: " + e.getMessage());
-            simpleMerge = null;
+            meth = null;
         }
-    }
-    
-    public static Object mergeEqualByReplace(final Object a, final Object b) {
-        return a;
+        simpleMerge = meth; 
     }
     
 }

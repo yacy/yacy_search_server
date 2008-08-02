@@ -32,6 +32,7 @@ import java.io.IOException;
 
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.logging.serverLog;
@@ -76,14 +77,14 @@ public class ProxyIndexingMonitor_p {
                 
                 // added proxyCache, proxyCacheSize - Borg-0300
                 // proxyCache - check and create the directory
-                oldProxyCachePath = env.getConfig(plasmaSwitchboard.HTCACHE_PATH, plasmaSwitchboard.HTCACHE_PATH_DEFAULT);
-                newProxyCachePath = post.get("proxyCache", plasmaSwitchboard.HTCACHE_PATH_DEFAULT);
+                oldProxyCachePath = env.getConfig(plasmaSwitchboardConstants.HTCACHE_PATH, plasmaSwitchboardConstants.HTCACHE_PATH_DEFAULT);
+                newProxyCachePath = post.get("proxyCache", plasmaSwitchboardConstants.HTCACHE_PATH_DEFAULT);
                 newProxyCachePath = newProxyCachePath.replace('\\', '/');
                 if (newProxyCachePath.endsWith("/")) {
                     newProxyCachePath = newProxyCachePath.substring(0, newProxyCachePath.length() - 1);
                 }
-                env.setConfig(plasmaSwitchboard.HTCACHE_PATH, newProxyCachePath);
-                final File cache = env.getConfigPath(plasmaSwitchboard.HTCACHE_PATH, oldProxyCachePath);
+                env.setConfig(plasmaSwitchboardConstants.HTCACHE_PATH, newProxyCachePath);
+                final File cache = env.getConfigPath(plasmaSwitchboardConstants.HTCACHE_PATH, oldProxyCachePath);
                 if (!cache.isDirectory() && !cache.isFile()) cache.mkdirs();
 
                 // proxyCacheSize 
@@ -150,7 +151,7 @@ public class ProxyIndexingMonitor_p {
         prop.put("proxyIndexingRemote", env.getConfig("proxyIndexingRemote", "").equals("true") ? "1" : "0");
         prop.put("proxyIndexingLocalText", env.getConfig("proxyIndexingLocalText", "").equals("true") ? "1" : "0");
         prop.put("proxyIndexingLocalMedia", env.getConfig("proxyIndexingLocalMedia", "").equals("true") ? "1" : "0");
-        prop.put("proxyCache", env.getConfig(plasmaSwitchboard.HTCACHE_PATH, plasmaSwitchboard.HTCACHE_PATH_DEFAULT));
+        prop.put("proxyCache", env.getConfig(plasmaSwitchboardConstants.HTCACHE_PATH, plasmaSwitchboardConstants.HTCACHE_PATH_DEFAULT));
         prop.put("proxyCacheSize", env.getConfig("proxyCacheSize", "64"));
         // return rewrite properties
         return prop;

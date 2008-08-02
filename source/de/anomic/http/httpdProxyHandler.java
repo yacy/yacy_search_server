@@ -84,6 +84,7 @@ import de.anomic.index.indexReferenceBlacklist;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.plasma.cache.IResourceInfo;
 import de.anomic.plasma.cache.http.ResourceInfo;
 import de.anomic.server.serverCore;
@@ -110,10 +111,6 @@ public final class httpdProxyHandler {
     private static BufferedReader redirectorReader = null;
 
     private static htmlFilterTransformer transformer = null;
-    /**
-     * *The* remote Proxy configuration
-     */
-    private static httpRemoteProxyConfig remoteProxyConfig = null;
     private static File htRootPath = null;
 
     //private Properties connectionProperties = null;
@@ -184,11 +181,10 @@ public final class httpdProxyHandler {
             
         // load a transformer
         transformer = new htmlFilterContentTransformer();
-        transformer.init(new File(switchboard.getRootPath(), switchboard.getConfig(plasmaSwitchboard.LIST_BLUE, "")).toString());
+        transformer.init(new File(switchboard.getRootPath(), switchboard.getConfig(plasmaSwitchboardConstants.LIST_BLUE, "")).toString());
             
-        String f;
         // load the yellow-list
-        f = switchboard.getConfig("proxyYellowList", null);
+        final String f = switchboard.getConfig("proxyYellowList", null);
         if (f != null) {
             yellowList = serverFileUtils.loadList(new File(f)); 
             theLogger.logConfig("loaded yellow-list from file " + f + ", " + yellowList.size() + " entries");
@@ -1117,6 +1113,7 @@ public final class httpdProxyHandler {
      * creates a new HttpClient and sets parameters according to proxy needs
      * 
      * @param requestHeader
+     * @param connectHost may be 'host:port' or 'host:port/path'
      * @return
      */
     private static JakartaCommonsHttpClient setupHttpClient(final httpHeader requestHeader, final String connectHost) {
@@ -1125,7 +1122,7 @@ public final class httpdProxyHandler {
         client.setFollowRedirects(false);
         // cookies are handled by the user's browser
         client.setIgnoreCookies(true);
-        client.setProxy(getProxyConfig(connectHost));
+        client.setProxy(httpRemoteProxyConfig.getProxyConfigForURI(connectHost));
         return client;
     }
 
@@ -1294,7 +1291,7 @@ public final class httpdProxyHandler {
         }
     
         // possibly branch into PROXY-PROXY connection
-        final httpRemoteProxyConfig proxyConfig = getRemoteProxyConfig();
+        final httpRemoteProxyConfig proxyConfig = httpRemoteProxyConfig.getRemoteProxyConfig();
         if (
                 (proxyConfig != null) &&
                 (proxyConfig.useProxy()) &&
@@ -1405,82 +1402,6 @@ public final class httpdProxyHandler {
         }
     }
     
-    /**
-     * checks if proxy-config exists for server (is allowed and not denied)
-     * 
-     * @param server
-     * @param port not used (only to indicate that server is plain address)
-     * @return proxy which should be used or null if no proxy should be used
-     */
-    public static httpRemoteProxyConfig getProxyConfig(final String server, final int port) {
-        return getProxyConfig(server, getRemoteProxyConfig());
-    }
-
-    /**
-     * checks if proxy-config is allowed and not denied
-     * 
-     * @param server
-     * @param remProxyConfig
-     * @return proxy which should be used or null if no proxy should be used
-     */
-    public static httpRemoteProxyConfig getProxyConfig(final String server, httpRemoteProxyConfig remProxyConfig) {
-        // possible remote proxy
-        // check no-proxy rule
-        if (remProxyConfig != null) {
-            if (remProxyConfig.useProxy()) {
-                if (!(remProxyConfig.remoteProxyAllowProxySet.contains(server))) {
-                    if (remProxyConfig.remoteProxyDisallowProxySet.contains(server)) {
-                        remProxyConfig = null;
-                    } else {
-                        // analyse remoteProxyNoProxy;
-                        // set either remoteProxyAllowProxySet or remoteProxyDisallowProxySet accordingly
-                        synchronized (remProxyConfig) {
-                            for (final String pattern :remProxyConfig.getProxyNoProxyPatterns()) {
-                                if (server.matches(pattern)) {
-                                    // disallow proxy for this server
-                                    remProxyConfig.remoteProxyDisallowProxySet.add(server);
-                                    remProxyConfig = null;
-                                    break;
-                                }
-                            }
-                            if (remProxyConfig != null) {
-                                // no pattern matches: allow server
-                                remProxyConfig.remoteProxyAllowProxySet.add(server);
-                            }
-                        }
-                    }
-                }
-            } else {
-                // not enabled
-                remProxyConfig = null;
-            }
-        }
-
-        return remProxyConfig;
-    }
-    
-    /**
-     * gets proxy config for full adress (without protocol (ie. "http://"))
-     * @param address full address with host and optionally port or path <host>:<port>/<path>
-     * @return null if no proxy should be used
-     */
-    public static httpRemoteProxyConfig getProxyConfig(final String address) {
-        // host goes to port
-        int p = address.indexOf(":");
-        if (p < 0) {
-            // no port, so host goes to path
-            p = address.indexOf("/");
-        }
-        // host should have minimum 1 character ;) 
-        if(p > 0) {
-            final String server = address.substring(0, p);
-            return getProxyConfig(server, 0);
-        } else {
-            // check if full address is in allow/deny-list
-            return getProxyConfig(address, 0);
-        }
-    }
-
     private static void handleProxyException(final Exception e, final Properties conProp, final OutputStream respond, final yacyURL url) {
         // this may happen if 
         // - the targeted host does not exist 
@@ -1787,20 +1708,6 @@ public final class httpdProxyHandler {
         
         // sending the logging message to the logger
         proxyLog.logFine(logMessage.toString());
-    }
-
-    /**
-     * @param remoteProxyConfig the remoteProxyConfig to set
-     */
-    public static synchronized void setRemoteProxyConfig(final httpRemoteProxyConfig remoteProxyConfig) {
-        httpdProxyHandler.remoteProxyConfig = remoteProxyConfig;
-    }
-
-    /**
-     * @return the remoteProxyConfig
-     */
-    public static httpRemoteProxyConfig getRemoteProxyConfig() {
-        return remoteProxyConfig;
     }
     
 }

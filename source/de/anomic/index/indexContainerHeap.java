@@ -317,15 +317,13 @@ public final class indexContainerHeap {
         public indexContainer next() {
             if (iterator.hasNext()) {
                 return (iterator.next()).topLevelClone();
-            } else {
-                // rotation iteration
-                if (rot) {
-                    iterator = cache.values().iterator();
-                    return (iterator.next()).topLevelClone();
-                } else {
-                    return null;
-                }
             }
+            // rotation iteration
+            if (!rot) {
+                return null;
+            }
+            iterator = cache.values().iterator();
+            return (iterator.next()).topLevelClone();
         }
 
         public void remove() {
@@ -356,9 +354,8 @@ public final class indexContainerHeap {
                 e.printStackTrace();
                 return false;
             }
-        } else {
-            return this.cache.containsKey(key);
         }
+        return this.cache.containsKey(key);
     }
     
     /**
@@ -390,9 +387,9 @@ public final class indexContainerHeap {
         } catch (final IOException e) {
             log.logSevere("error accessing entry in heap file " + this.backupFile + ": " + e.getMessage());
             return null;
-        } else {
-            return this.cache.get(key);
         }
+        
+        return this.cache.get(key);
     }
     
     /**

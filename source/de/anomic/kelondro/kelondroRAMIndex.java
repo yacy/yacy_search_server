@@ -110,10 +110,9 @@ public class kelondroRAMIndex implements kelondroIndex {
         if (index1 == null) {
             // we are in the initialization phase
         	return index0.addUnique(entry);
-        } else {
-        	// initialization is over, add to secondary index
-        	return index1.addUnique(entry);
         }
+        // initialization is over, add to secondary index
+        return index1.addUnique(entry);
     }
 
 	public int addUniqueMultiple(final List<Entry> rows) {

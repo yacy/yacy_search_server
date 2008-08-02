@@ -65,7 +65,7 @@ public class QuickCrawlLink_p {
             
             //String host = hostSocket;
             int port = 80;
-			final int pos = hostSocket.indexOf(":");
+            final int pos = hostSocket.indexOf(":");
             if (pos != -1) {
                 port = Integer.parseInt(hostSocket.substring(pos + 1));
                 //host = hostSocket.substring(0, pos);

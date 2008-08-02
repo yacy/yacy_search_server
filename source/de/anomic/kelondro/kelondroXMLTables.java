@@ -132,10 +132,9 @@ public class kelondroXMLTables {
             final Hashtable<String, String> l = tables.get(table);
             if (l == null)
                 throw new RuntimeException("Microtables.get: table does not exist");
-            if (l.containsKey(key))
-                return l.get(key);
-            else
+            if (!l.containsKey(key))
                 return deflt;
+            return l.get(key);
         }
         return null;
     }

@@ -194,11 +194,11 @@ public class kelondroCache implements kelondroIndex {
     public boolean has(final byte[] key) {
         // first look into the miss cache
         if (readMissCache != null) {
-            if (readMissCache.get(key) != null) {
+            if (readMissCache.get(key) == null) {
+                this.hasnotMiss++;
+            } else {
                 this.hasnotHit++;
                 return false;
-            } else {
-                this.hasnotMiss++;
             }
         }
 
@@ -218,11 +218,11 @@ public class kelondroCache implements kelondroIndex {
     public synchronized Entry get(final byte[] key) throws IOException {
         // first look into the miss cache
         if (readMissCache != null) {
-            if (readMissCache.get(key) != null) {
+            if (readMissCache.get(key) == null) {
+                this.hasnotMiss++;
+            } else {
                 this.hasnotHit++;
                 return null;
-            } else {
-                this.hasnotMiss++;
             }
         }
 
@@ -247,13 +247,13 @@ public class kelondroCache implements kelondroIndex {
                 if (dummy == null) this.hasnotUnique++; else this.hasnotDouble++;
             }
             return null;
-        } else {
-            if ((checkHitSpace()) && (readHitCache != null)) {
-                final kelondroRow.Entry dummy = readHitCache.put(entry);
-                if (dummy == null) this.writeUnique++; else this.writeDouble++;
-            }
-            return entry;
         }
+        
+        if ((checkHitSpace()) && (readHitCache != null)) {
+            final kelondroRow.Entry dummy = readHitCache.put(entry);
+            if (dummy == null) this.writeUnique++; else this.writeDouble++;
+        }
+        return entry;
     }
 
     public synchronized void putMultiple(final List<Entry> rows) throws IOException {

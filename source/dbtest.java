@@ -458,7 +458,7 @@ public class dbtest {
                     }
                     if ((ra.size() > 0) && (random.nextLong() % 7 == 0)) {
                         rc++;
-                        p = Math.abs(random.nextInt()) % ra.size();
+                        p = Math.abs(random.nextInt() % ra.size());
                         R = ra.get(p);
                         jcontrol.remove(R);
                         kcontrol.removeb((int) R.longValue());
@@ -499,7 +499,7 @@ public class dbtest {
                     }
                     if ((ra.size() > 0) && (random.nextLong() % 7 == 0)) {
                         rc++;
-                        p = Math.abs(random.nextInt()) % ra.size();
+                        p = Math.abs(random.nextInt() % ra.size());
                         R = ra.get(p);
                         jcontrol.remove(R);
                         kcontrol.removeb((int) R.longValue());

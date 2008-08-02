@@ -34,8 +34,7 @@ class LanguageFilenameFilter implements FilenameFilter {
     public boolean accept(final File dir, final String name) {
         if (name.matches(".+\\."+fileExtension)) {
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 }

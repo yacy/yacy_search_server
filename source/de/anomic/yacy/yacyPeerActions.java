@@ -152,42 +152,41 @@ public class yacyPeerActions {
             yacyCore.log.logFine("connect: returned KNOWN " + peerType + " peer '" + seed.getName() + "' from " + seed.getPublicAddress());
             this.seedDB.addConnected(seed);
             return true;
-        } else {
-            final yacySeed connectedSeed = this.seedDB.getConnected(seed.hash);
-            if (connectedSeed != null) {
-                // the seed is known: this is an update
-                try {
-                    // if the old LastSeen date is later then the other
-                    // info, then we reject the info
-                    if ((ctimeUTC0 < (connectedSeed.getLastSeenUTC())) && (!direct)) {
-                        yacyCore.log.logFine("connect: rejecting old info about peer '" + seed.getName() + "'");
-                        return false;
-                    }
-
-                    /*if (connectedSeed.getName() != seed.getName()) {
-                        // TODO: update seed name lookup cache
-                    }*/
-                } catch (final NumberFormatException e) {
-                    yacyCore.log.logFine("connect: rejecting wrong peer '" + seed.getName() + "' from " + seed.getPublicAddress() + ". Cause: " + e.getMessage());
+        }
+        final yacySeed connectedSeed = this.seedDB.getConnected(seed.hash);
+        if (connectedSeed != null) {
+            // the seed is known: this is an update
+            try {
+                // if the old LastSeen date is later then the other
+                // info, then we reject the info
+                if ((ctimeUTC0 < (connectedSeed.getLastSeenUTC())) && (!direct)) {
+                    yacyCore.log.logFine("connect: rejecting old info about peer '" + seed.getName() + "'");
                     return false;
                 }
-                yacyCore.log.logFine("connect: updated KNOWN " + ((direct) ? "direct " : "") + peerType + " peer '" + seed.getName() + "' from " + seed.getPublicAddress());
-                seedDB.addConnected(seed);
-                return true;
-            } else {
-                // the seed is new
-                if ((seedDB.mySeedIsDefined()) && (seed.getIP().equals(this.seedDB.mySeed().getIP()))) {
-                    // seed from the same IP as the calling client: can be
-                    // the case if there runs another one over a NAT
-                    yacyCore.log.logFine("connect: saved NEW seed (myself IP) " + seed.getPublicAddress());
-                } else {
-                    // completely new seed
-                    yacyCore.log.logFine("connect: saved NEW " + peerType + " peer '" + seed.getName() + "' from " + seed.getPublicAddress());
-                }
-                this.seedDB.addConnected(seed);
-                return true;
+
+                /*if (connectedSeed.getName() != seed.getName()) {
+                    // TODO: update seed name lookup cache
+                }*/
+            } catch (final NumberFormatException e) {
+                yacyCore.log.logFine("connect: rejecting wrong peer '" + seed.getName() + "' from " + seed.getPublicAddress() + ". Cause: " + e.getMessage());
+                return false;
             }
+            yacyCore.log.logFine("connect: updated KNOWN " + ((direct) ? "direct " : "") + peerType + " peer '" + seed.getName() + "' from " + seed.getPublicAddress());
+            seedDB.addConnected(seed);
+            return true;
         }
+        
+        // the seed is new
+        if ((seedDB.mySeedIsDefined()) && (seed.getIP().equals(this.seedDB.mySeed().getIP()))) {
+            // seed from the same IP as the calling client: can be
+            // the case if there runs another one over a NAT
+            yacyCore.log.logFine("connect: saved NEW seed (myself IP) " + seed.getPublicAddress());
+        } else {
+            // completely new seed
+            yacyCore.log.logFine("connect: saved NEW " + peerType + " peer '" + seed.getName() + "' from " + seed.getPublicAddress());
+        }
+        this.seedDB.addConnected(seed);
+        return true;
     }
 
     public boolean peerArrival(final yacySeed peer, final boolean direct) {

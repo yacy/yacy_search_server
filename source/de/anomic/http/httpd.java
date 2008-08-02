@@ -35,7 +35,6 @@ import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
-import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.Date;
@@ -70,7 +69,7 @@ import de.anomic.yacy.yacyURL;
  * these methods parse the command line and decide wether to call
  * a proxy servlet or a file server servlet 
  */
-public final class httpd implements serverHandler {
+public final class httpd implements serverHandler, Cloneable {
     
     /**
      * <p><code>public static final String <strong>ADMIN_ACCOUNT_B64MD5</strong> = "adminAccountBase64MD5"</code></p>
@@ -99,8 +98,8 @@ public final class httpd implements serverHandler {
     public static final String copyright = "[ HTTP SERVER: AnomicHTTPD v" + vDATE + " by Michael Christen / www.anomic.de ]";
     public static final String hline = "-------------------------------------------------------------------------------";
     
-    public static HashMap<String, String> reverseMappingCache = new HashMap<String, String>();
-    private static plasmaSwitchboard switchboard = null;
+    public static final HashMap<String, String> reverseMappingCache = new HashMap<String, String>();
+    private static volatile plasmaSwitchboard switchboard = null;
     private static String virtualHost = null;
     
     public static boolean keepAliveSupport = false;
@@ -331,9 +330,8 @@ public final class httpd implements serverHandler {
         if ((pos = host.indexOf(":")) < 0) {
             // default port 80
             return false; // not allowed
-        } else {
-            if (Integer.parseInt(host.substring(pos + 1)) == 80) return false;
         }
+        if (Integer.parseInt(host.substring(pos + 1)) == 80) return false;
         
         // the access path must be into the yacy protocol path; it must start with 'yacy'
         if (!(this.prop.getProperty(httpHeader.CONNECTION_PROP_PATH, "").startsWith("/yacy/"))) return false;
@@ -440,12 +438,12 @@ public final class httpd implements serverHandler {
         return serverCore.RESUME_CONNECTION;
     }
     
-    public Boolean TRACE(final String arg) throws IOException {
+    public Boolean TRACE() throws IOException {
         sendRespondError(this.prop,this.session.out,0,501,null,"TRACE method not implemented",null);
         return serverCore.TERMINATE_CONNECTION;
     }
     
-    public Boolean OPTIONS(final String arg) throws IOException {
+    public Boolean OPTIONS() throws IOException {
         sendRespondError(this.prop,this.session.out,0,501,null,"OPTIONS method not implemented",null);
         return serverCore.TERMINATE_CONNECTION;
     }    
@@ -661,7 +659,7 @@ public final class httpd implements serverHandler {
         int port = 443;
         if (pos >= 0) {
             port = Integer.parseInt(arg.substring(pos + 1));
-            arg = arg.substring(0, pos);
+            //the offcut: arg = arg.substring(0, pos);
         }       
         
         // setting other connection properties
@@ -1047,7 +1045,6 @@ public final class httpd implements serverHandler {
     }
     
     public static final void sendRespondBody(
-            final Properties conProp,
             final OutputStream respond,
             final byte[] body
     ) throws IOException {
@@ -1135,7 +1132,7 @@ public final class httpd implements serverHandler {
             final String method = conProp.getProperty(httpHeader.CONNECTION_PROP_METHOD);
             
             int port = 80;
-			final int pos = host.indexOf(":");        
+            final int pos = host.indexOf(":");        
             if (pos != -1) {
                 port = Integer.parseInt(host.substring(pos + 1));
                 host = host.substring(0, pos);

@@ -38,7 +38,7 @@ public class serverInstantBlockingThread<J extends serverProcessorJob> extends s
     private final Long   handle;
     private static int handleCounter = 0;
     public static int instantThreadCounter = 0;
-    public static ConcurrentHashMap<Long, String> jobs = new ConcurrentHashMap<Long, String>();
+    public static final ConcurrentHashMap<Long, String> jobs = new ConcurrentHashMap<Long, String>();
     
     public serverInstantBlockingThread(final Object env, final String jobExec, final BlockingQueue<J> input, final serverProcessor<J> output) {
         // jobExec is the name of a method of the object 'env' that executes the one-step-run

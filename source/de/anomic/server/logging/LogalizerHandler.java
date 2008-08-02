@@ -54,7 +54,6 @@ public class LogalizerHandler extends Handler {
         configure();
     }    
 
-    @SuppressWarnings("null")
     private HashMap<String, Object> loadParsers() {
         final HashMap<String, Object> logParsers = new HashMap<String, Object>();
         try {

@@ -240,7 +240,8 @@ public class ymageBMPParser {
 
         private final int fill4(final int x) {
             final int r = x % 4;
-            if (r == 0) return 0; else return 4 - r;
+            if (r == 0) return 0;
+            return 4 - r;
         }
     }
     

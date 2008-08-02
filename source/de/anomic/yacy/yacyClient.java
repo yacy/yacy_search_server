@@ -56,18 +56,17 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.apache.commons.httpclient.methods.multipart.ByteArrayPartSource;
-import org.apache.commons.httpclient.methods.multipart.FilePart;
 import org.apache.commons.httpclient.methods.multipart.Part;
-import org.apache.commons.httpclient.methods.multipart.StringPart;
 
 import de.anomic.crawler.HTTPLoader;
 import de.anomic.crawler.ResultURLs;
+import de.anomic.http.DefaultCharsetFilePart;
+import de.anomic.http.DefaultCharsetStringPart;
 import de.anomic.http.HttpClient;
 import de.anomic.http.JakartaCommonsHttpClient;
 import de.anomic.http.JakartaCommonsHttpResponse;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpRemoteProxyConfig;
-import de.anomic.http.httpdProxyHandler;
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexRWIRowEntry;
@@ -92,32 +91,37 @@ import de.anomic.xml.RSSReader;
 
 public final class yacyClient {
 
+    /**
+     * this is called to enrich the seed information by
+     * - own address (if peer is behind a nat/router)
+     * - check peer type (virgin/junior/senior/principal)
+     * 
+     * to do this, we send a 'Hello' to another peer
+     * this carries the following information:
+     * 'iam' - own hash
+     * 'youare' - remote hash, to verify that we are correct
+     * 'key' - a session key that the remote peer may use to answer
+     * and the own seed string
+     * we expect the following information to be send back:
+     * - 'yourip' the ip of the connection peer (we)
+     * - 'yourtype' the type of this peer that the other peer checked by asking for a specific word
+     * and the remote seed string
+     * 
+     * one exceptional failure case is when we know the other's peers hash, the other peers responds correctly
+     * but they appear to be another peer by comparisment of the other peer's hash
+     * this works of course only if we know the other peer's hash.
+     * 
+     * @return the number of new seeds 
+     */
     public static int publishMySeed(final yacySeed mySeed, final yacyPeerActions peerActions, final String address, final String otherHash) {
-        // this is called to enrich the seed information by
-        // - own address (if peer is behind a nat/router)
-        // - check peer type (virgin/junior/senior/principal)
-        // to do this, we send a 'Hello' to another peer
-        // this carries the following information:
-        // 'iam' - own hash
-        // 'youare' - remote hash, to verify that we are correct
-        // 'key' - a session key that the remote peer may use to answer
-        // and the own seed string
-        // we expect the following information to be send back:
-        // - 'yourip' the ip of the connection peer (we)
-        // - 'yourtype' the type of this peer that the other peer checked by asking for a specific word
-        // and the remote seed string
-        // the number of new seeds are returned
-        // one exceptional failure case is when we know the other's peers hash, the other peers responds correctly
-        // but they appear to be another peer by comparisment of the other peer's hash
-        // this works of course only if we know the other peer's hash.
         
         HashMap<String, String> result = null;
         final String salt = crypt.randomSalt();
         final List<Part> post = yacyNetwork.basicRequestPost(plasmaSwitchboard.getSwitchboard(), null, salt);
         for (int retry = 0; retry < 4; retry++) try {
             // generate request
-            post.add(new StringPart("count", "20"));
-            post.add(new StringPart("seed", mySeed.genSeedStr(salt)));
+            post.add(new DefaultCharsetStringPart("count", "20"));
+            post.add(new DefaultCharsetStringPart("seed", mySeed.genSeedStr(salt)));
             // send request
             final long start = System.currentTimeMillis();
             final byte[] content = wput("http://" + address + "/yacy/hello.html", yacySeed.b64Hash2hexHash(otherHash) + ".yacyh", post, 15000, false);
@@ -128,10 +132,9 @@ public final class yacyClient {
             if (Thread.currentThread().isInterrupted()) {
                 yacyCore.log.logWarning("yacyClient.publishMySeed thread '" + Thread.currentThread().getName() + "' interrupted.");
                 return -1;
-            } else {
-                yacyCore.log.logWarning("yacyClient.publishMySeed thread '" + Thread.currentThread().getName() + "' exception: " + e.getMessage() + "; retry = " + retry);
-                // try again (go into loop)
             }
+            yacyCore.log.logWarning("yacyClient.publishMySeed thread '" + Thread.currentThread().getName() + "' exception: " + e.getMessage() + "; retry = " + retry);
+            // try again (go into loop)
             result = null;
         }
         
@@ -304,8 +307,8 @@ public final class yacyClient {
         // prepare request
         final String salt = crypt.randomSalt();
         final List<Part> post = yacyNetwork.basicRequestPost(plasmaSwitchboard.getSwitchboard(), target.hash, salt);
-        post.add(new StringPart("object", "seed"));
-        post.add(new StringPart("env", seedHash));
+        post.add(new DefaultCharsetStringPart("object", "seed"));
+        post.add(new DefaultCharsetStringPart("env", seedHash));
             
         // send request
         try {
@@ -325,9 +328,9 @@ public final class yacyClient {
         // prepare request
         final String salt = crypt.randomSalt();
         final List<Part> post = yacyNetwork.basicRequestPost(plasmaSwitchboard.getSwitchboard(), target.hash, salt);
-        post.add(new StringPart("object", "rwicount"));
-        post.add(new StringPart("ttl", "0"));
-        post.add(new StringPart("env", wordHash));
+        post.add(new DefaultCharsetStringPart("object", "rwicount"));
+        post.add(new DefaultCharsetStringPart("ttl", "0"));
+        post.add(new DefaultCharsetStringPart("env", wordHash));
             
         // send request
         try {
@@ -348,9 +351,9 @@ public final class yacyClient {
         // prepare request
         final String salt = crypt.randomSalt();
         final List<Part> post = yacyNetwork.basicRequestPost(plasmaSwitchboard.getSwitchboard(), target.hash, salt);
-        post.add(new StringPart("object", "lurlcount"));
-        post.add(new StringPart("ttl", "0"));
-        post.add(new StringPart("env", ""));
+        post.add(new DefaultCharsetStringPart("object", "lurlcount"));
+        post.add(new DefaultCharsetStringPart("ttl", "0"));
+        post.add(new DefaultCharsetStringPart("env", ""));
         
         // send request
         try {
@@ -361,7 +364,8 @@ public final class yacyClient {
             final String resp = result.get("response");
             if (resp == null) {
                 return -1;
-            } else try {
+            }
+            try {
                 return Integer.parseInt(resp);
             } catch (final NumberFormatException e) {
                 return -1;
@@ -379,8 +383,8 @@ public final class yacyClient {
         // prepare request
         final String salt = crypt.randomSalt();
         final List<Part> post = yacyNetwork.basicRequestPost(plasmaSwitchboard.getSwitchboard(), target.hash, salt);
-        post.add(new StringPart("call", "remotecrawl"));
-        post.add(new StringPart("count", Integer.toString(count)));
+        post.add(new DefaultCharsetStringPart("call", "remotecrawl"));
+        post.add(new DefaultCharsetStringPart("count", Integer.toString(count)));
         
         // send request
         try {
@@ -450,21 +454,21 @@ public final class yacyClient {
         // prepare request
         final String salt = crypt.randomSalt();
         final List<Part> post = yacyNetwork.basicRequestPost(plasmaSwitchboard.getSwitchboard(), target.hash, salt);
-        post.add(new StringPart("myseed", mySeed.genSeedStr(salt)));
-        post.add(new StringPart("count", Integer.toString(Math.max(10, count))));
-        post.add(new StringPart("resource", ((global) ? "global" : "local")));
-        post.add(new StringPart("partitions", Integer.toString(partitions)));
-        post.add(new StringPart("query", wordhashes));
-        post.add(new StringPart("exclude", excludehashes));
-        post.add(new StringPart("duetime", "1000"));
-        post.add(new StringPart("urls", urlhashes));
-        post.add(new StringPart("prefer", prefer));
-        post.add(new StringPart("filter", filter));
-        post.add(new StringPart("ttl", "0"));
-        post.add(new StringPart("maxdist", Integer.toString(maxDistance)));
-        post.add(new StringPart("profile", crypt.simpleEncode(rankingProfile.toExternalString())));
-        post.add(new StringPart("constraint", (constraint == null) ? "" : constraint.exportB64()));
-        if (abstractCache != null) post.add(new StringPart("abstracts", "auto"));
+        post.add(new DefaultCharsetStringPart("myseed", mySeed.genSeedStr(salt)));
+        post.add(new DefaultCharsetStringPart("count", Integer.toString(Math.max(10, count))));
+        post.add(new DefaultCharsetStringPart("resource", ((global) ? "global" : "local")));
+        post.add(new DefaultCharsetStringPart("partitions", Integer.toString(partitions)));
+        post.add(new DefaultCharsetStringPart("query", wordhashes));
+        post.add(new DefaultCharsetStringPart("exclude", excludehashes));
+        post.add(new DefaultCharsetStringPart("duetime", "1000"));
+        post.add(new DefaultCharsetStringPart("urls", urlhashes));
+        post.add(new DefaultCharsetStringPart("prefer", prefer));
+        post.add(new DefaultCharsetStringPart("filter", filter));
+        post.add(new DefaultCharsetStringPart("ttl", "0"));
+        post.add(new DefaultCharsetStringPart("maxdist", Integer.toString(maxDistance)));
+        post.add(new DefaultCharsetStringPart("profile", crypt.simpleEncode(rankingProfile.toExternalString())));
+        post.add(new DefaultCharsetStringPart("constraint", (constraint == null) ? "" : constraint.exportB64()));
+        if (abstractCache != null) post.add(new DefaultCharsetStringPart("abstracts", "auto"));
         final long timestamp = System.currentTimeMillis();
 
         // send request
@@ -662,7 +666,7 @@ public final class yacyClient {
         // prepare request
         final String salt = crypt.randomSalt();
         final List<Part> post = yacyNetwork.basicRequestPost(plasmaSwitchboard.getSwitchboard(), targetHash, salt);
-        post.add(new StringPart("process", "permission"));
+        post.add(new DefaultCharsetStringPart("process", "permission"));
         
         // send request
         try {
@@ -682,13 +686,13 @@ public final class yacyClient {
         // prepare request
         final String salt = crypt.randomSalt();
         final List<Part> post = yacyNetwork.basicRequestPost(plasmaSwitchboard.getSwitchboard(), targetHash, salt);
-        post.add(new StringPart("process", "post"));
-        post.add(new StringPart("myseed", seedDB.mySeed().genSeedStr(salt)));
-        post.add(new StringPart("subject", subject));
+        post.add(new DefaultCharsetStringPart("process", "post"));
+        post.add(new DefaultCharsetStringPart("myseed", seedDB.mySeed().genSeedStr(salt)));
+        post.add(new DefaultCharsetStringPart("subject", subject));
         try {
-            post.add(new StringPart("message", new String(message, "UTF-8")));
+            post.add(new DefaultCharsetStringPart("message", new String(message, "UTF-8")));
         } catch (final UnsupportedEncodingException e) {
-            post.add(new StringPart("message", new String(message)));
+            post.add(new DefaultCharsetStringPart("message", new String(message)));
         }
 
         // send request
@@ -721,11 +725,11 @@ public final class yacyClient {
         // prepare request
         final String salt = crypt.randomSalt();
         final List<Part> post = yacyNetwork.basicRequestPost(plasmaSwitchboard.getSwitchboard(), null, salt);
-        post.add(new StringPart("process", "permission"));
-        post.add(new StringPart("purpose", "crcon"));
-        post.add(new StringPart("filename", filename));
-        post.add(new StringPart("filesize", Long.toString(filesize)));
-        post.add(new StringPart("can-send-protocol", "http"));
+        post.add(new DefaultCharsetStringPart("process", "permission"));
+        post.add(new DefaultCharsetStringPart("purpose", "crcon"));
+        post.add(new DefaultCharsetStringPart("filename", filename));
+        post.add(new DefaultCharsetStringPart("filesize", Long.toString(filesize)));
+        post.add(new DefaultCharsetStringPart("can-send-protocol", "http"));
         
         // send request
         try {
@@ -744,12 +748,12 @@ public final class yacyClient {
         // prepare request
         final String salt = crypt.randomSalt();
         final List<Part> post = yacyNetwork.basicRequestPost(plasmaSwitchboard.getSwitchboard(), null, salt);
-        post.add(new StringPart("process", "store"));
-        post.add(new StringPart("purpose", "crcon"));
-        post.add(new StringPart("filesize", Long.toString(file.length)));
-        post.add(new StringPart("md5", serverCodings.encodeMD5Hex(file)));
-        post.add(new StringPart("access", access));
-        post.add(new FilePart("filename", new ByteArrayPartSource(filename, file)));
+        post.add(new DefaultCharsetStringPart("process", "store"));
+        post.add(new DefaultCharsetStringPart("purpose", "crcon"));
+        post.add(new DefaultCharsetStringPart("filesize", Long.toString(file.length)));
+        post.add(new DefaultCharsetStringPart("md5", serverCodings.encodeMD5Hex(file)));
+        post.add(new DefaultCharsetStringPart("access", access));
+        post.add(new DefaultCharsetFilePart("filename", new ByteArrayPartSource(filename, file)));
         
         // send request
         try {
@@ -815,12 +819,12 @@ public final class yacyClient {
         // prepare request
         final String salt = crypt.randomSalt();
         final List<Part> post = yacyNetwork.basicRequestPost(plasmaSwitchboard.getSwitchboard(), target.hash, salt);
-        post.add(new StringPart("process", process));
-        post.add(new StringPart("urlhash", ((entry == null) ? "" : entry.hash())));
-        post.add(new StringPart("result", result));
-        post.add(new StringPart("reason", reason));
-        post.add(new StringPart("wordh", wordhashes));
-        post.add(new StringPart("lurlEntry", ((entry == null) ? "" : crypt.simpleEncode(entry.toString(), salt))));
+        post.add(new DefaultCharsetStringPart("process", process));
+        post.add(new DefaultCharsetStringPart("urlhash", ((entry == null) ? "" : entry.hash())));
+        post.add(new DefaultCharsetStringPart("result", result));
+        post.add(new DefaultCharsetStringPart("reason", reason));
+        post.add(new DefaultCharsetStringPart("wordh", wordhashes));
+        post.add(new DefaultCharsetStringPart("lurlEntry", ((entry == null) ? "" : crypt.simpleEncode(entry.toString(), salt))));
         
         // determining target address
         final String address = target.getClusterAddress();
@@ -929,7 +933,7 @@ public final class yacyClient {
 
     private static HashMap<String, String> transferRWI(final yacySeedDB seedDB, final yacySeed targetSeed, final indexContainer[] indexes, boolean gzipBody, final int timeout) {
         final String address = targetSeed.getPublicAddress();
-        if (address == null) { return null; }
+        if (address == null) { yacyCore.log.logWarning("no address for transferRWI"); return null; }
 
         // prepare post values
         final String salt = crypt.randomSalt();
@@ -939,7 +943,7 @@ public final class yacyClient {
         if (gzipBody && (targetSeed.getVersion() < yacyVersion.YACY_SUPPORTS_GZIP_POST_REQUESTS_CHUNKED)) {
             gzipBody = false;
         }
-        post.add(new StringPart("wordc", Integer.toString(indexes.length)));
+        post.add(new DefaultCharsetStringPart("wordc", Integer.toString(indexes.length)));
         
         int indexcount = 0;
         final StringBuffer entrypost = new StringBuffer(indexes.length*73);
@@ -964,8 +968,8 @@ public final class yacyClient {
             return result;
         }
 
-        post.add(new StringPart("entryc", Integer.toString(indexcount)));
-        post.add(new StringPart("indexes", entrypost.toString()));  
+        post.add(new DefaultCharsetStringPart("entryc", Integer.toString(indexcount)));
+        post.add(new DefaultCharsetStringPart("indexes", entrypost.toString()));  
         try {
             final byte[] content = wput("http://" + address + "/yacy/transferRWI.html", targetSeed.getHexHash() + ".yacyh", post, timeout, gzipBody);
             final ArrayList<String> v = nxTools.strings(content, "UTF-8");
@@ -1005,13 +1009,13 @@ public final class yacyClient {
             if (urls[i] != null) {
                 resource = urls[i].toString();                
                 if (resource != null) {
-                    post.add(new StringPart("url" + urlc, resource));
+                    post.add(new DefaultCharsetStringPart("url" + urlc, resource));
                     urlPayloadSize += resource.length();
                     urlc++;
                 }
             }
         }
-        post.add(new StringPart("urlc", Integer.toString(urlc)));
+        post.add(new DefaultCharsetStringPart("urlc", Integer.toString(urlc)));
         try {
             final byte[] content = wput("http://" + address + "/yacy/transferURL.html", targetSeed.getHexHash() + ".yacyh", post, timeout, gzipBody);
             final ArrayList<String> v = nxTools.strings(content, "UTF-8");
@@ -1052,7 +1056,7 @@ public final class yacyClient {
      * @return
      */
     private static final httpRemoteProxyConfig proxyConfig() {
-        final httpRemoteProxyConfig p = httpdProxyHandler.getRemoteProxyConfig();
+        final httpRemoteProxyConfig p = httpRemoteProxyConfig.getRemoteProxyConfig();
         return ((p != null) && (p.useProxy()) && (p.useProxy4Yacy())) ? p : null;
     }
 
@@ -1100,11 +1104,11 @@ public final class yacyClient {
             }
             final String vhost = url.getHost();
             final int timeout = 10000;
-            final boolean gzipBody = true;
+            final boolean gzipBody = false;
             // data
             final List<Part> post = new ArrayList<Part>();
-            post.add(new StringPart("process", "permission"));
-            post.add(new StringPart("purpose", "crcon"));
+            post.add(new DefaultCharsetStringPart("process", "permission"));
+            post.add(new DefaultCharsetStringPart("purpose", "crcon"));
             //post.add(new FilePart("filename", new ByteArrayPartSource(filename, file)));
             // do it!
             try {

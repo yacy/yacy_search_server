@@ -122,12 +122,11 @@ public class kelondroNIOFileRA extends kelondroAbstractRA implements kelondroRA 
             while (growTail(seekPos)) {
                 if (seekPos < (tailOffset + tailCurrSize)) {
                     r = 0xFF & (bufferTail.get((int) (seekPos - tailOffset)));
-                    break;
                 } else {
                     RAFile.seek(seekPos);
                     r = RAFile.read();
-                    break;
                 }
+                break;
             }
         }
         seekPos++;
@@ -155,12 +154,11 @@ public class kelondroNIOFileRA extends kelondroAbstractRA implements kelondroRA 
                 if (seekPos < (tailOffset + tailCurrSize)) {
                     bufferTail.put((int) (seekPos - tailOffset), (byte) (b & 0xff));
                     wroteTail = true;
-                    break;
                 } else {
                     RAFile.seek(seekPos);
                     RAFile.write(b);
-                    break;
                 }
+                break;
             }
         }
         seekPos++;

@@ -118,15 +118,13 @@ public class indexContainer extends kelondroRowSet {
         final kelondroRow.Entry oldEntryRow = this.put(entry.toKelondroEntry());
         if (oldEntryRow == null) {
             return true;
-        } else {
-            final indexRWIRowEntry oldEntry = new indexRWIRowEntry(oldEntryRow);
-            if (entry.isOlder(oldEntry)) { // A more recent Entry is already in this container
-                this.put(oldEntry.toKelondroEntry()); // put it back
-                return false;
-            } else {
-                return true;
-            }
         }
+        final indexRWIRowEntry oldEntry = new indexRWIRowEntry(oldEntryRow);
+        if (entry.isOlder(oldEntry)) { // A more recent Entry is already in this container
+            this.put(oldEntry.toKelondroEntry()); // put it back
+            return false;
+        }
+        return true;
     }
 
     public int putAllRecent(final indexContainer c) {
@@ -196,21 +194,23 @@ public class indexContainer extends kelondroRowSet {
         
     }
     
-    public static Method containerMergeMethod = null;
+    public static final Method containerMergeMethod;
     static {
+        Method meth = null;
         try {
             final Class<?> c = Class.forName("de.anomic.index.indexContainer");
-            containerMergeMethod = c.getMethod("mergeUnique", new Class[]{Object.class, Object.class});
+            meth = c.getMethod("mergeUnique", new Class[]{Object.class, Object.class});
         } catch (final SecurityException e) {
             System.out.println("Error while initializing containerMerge.SecurityException: " + e.getMessage());
-            containerMergeMethod = null;
+            meth = null;
         } catch (final ClassNotFoundException e) {
             System.out.println("Error while initializing containerMerge.ClassNotFoundException: " + e.getMessage());
-            containerMergeMethod = null;
+            meth = null;
         } catch (final NoSuchMethodException e) {
             System.out.println("Error while initializing containerMerge.NoSuchMethodException: " + e.getMessage());
-            containerMergeMethod = null;
+            meth = null;
         }
+        containerMergeMethod = meth;
     }
 
     public static indexContainer joinExcludeContainers(
@@ -309,9 +309,8 @@ public class indexContainer extends kelondroRowSet {
                 return joinConstructiveByTest(i1, i2, maxDistance);
             else
                 return joinConstructiveByTest(i2, i1, maxDistance);
-        } else {
-            return joinConstructiveByEnumeration(i1, i2, maxDistance);
         }
+        return joinConstructiveByEnumeration(i1, i2, maxDistance);
     }
     
     private static indexContainer joinConstructiveByTest(final indexContainer small, final indexContainer large, final int maxDistance) {
@@ -390,9 +389,8 @@ public class indexContainer extends kelondroRowSet {
         // start most efficient method
         if (stepsEnum > stepsTest) {
             return excludeDestructiveByTest(pivot, excl);
-        } else {
-            return excludeDestructiveByEnumeration(pivot, excl);
         }
+        return excludeDestructiveByEnumeration(pivot, excl);
     }
     
     private static indexContainer excludeDestructiveByTest(final indexContainer pivot, final indexContainer excl) {

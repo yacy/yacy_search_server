@@ -73,9 +73,8 @@ public class SimpleToken extends AbstractToken {
 		if (this.content == null) {
 			if (this.text == null) {
 				throw new IllegalArgumentException();
-			} else {
-				setText(this.text, 0);
 			}
+			setText(this.text, 0);
 		}
 		if (!this.parsed) parse();
 		return this.markup;

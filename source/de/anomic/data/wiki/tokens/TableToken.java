@@ -53,8 +53,8 @@ public class TableToken extends AbstractToken {
 		for (int i=1, j, a; i<t.length-1; i++) {
 			if (t[i].startsWith("|-")) {
 				if (trOpen) sb.append("\t</tr>\n");
-				// TODO is this assignment correct? (please comment) Or should it be a comparison? (please correct)
-				if (trOpen = (i < t.length - 2)) sb.append("\t<tr>\n");
+				trOpen = (i < t.length - 2);
+				if (trOpen) sb.append("\t<tr>\n");
 			} else if (t[i].startsWith("||")) {
 				tds = t[i].split("\\|\\|");
 				for (j=0; j<tds.length; j++) {

@@ -553,18 +553,18 @@ public class serverDomains {
         final Integer i = TLDID.get(tld);
         if (i == null) {
             return (isLocal(host)) ? 7 : TLD_Generic_ID;
-        } else {
-            return i.intValue();
         }
+        return i.intValue();
     }
      
-    public static boolean isLocal(String host) {
+    public static boolean isLocal(final String host) {
 
         // attention! because this method does a dns resolve to look up an IP address,
         // the result may be very slow. Consider 100 milliseconds per access
         
         assert (host != null);
 
+        // FIXME IPv4 only
         // check local ip addresses
         if (host.equals("localhost") || host.startsWith("127")
                 || host.startsWith("192.168")
@@ -602,7 +602,7 @@ public class serverDomains {
         final InetAddress clientAddress = dnsResolve(host);
         if (clientAddress != null) {
             if ((clientAddress.isAnyLocalAddress()) || (clientAddress.isLoopbackAddress())) return true;
-            if (host.charAt(0) > '9') host = clientAddress.getHostAddress();
+            // FIXME !!host is not read after this!!: if (host.charAt(0) > '9') host = clientAddress.getHostAddress();
         }
 
         // finally check if there are other local IP adresses that are not in

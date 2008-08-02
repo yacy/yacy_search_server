@@ -51,7 +51,7 @@ public final class indexRAMRI implements indexRI, indexRIReader {
     private indexContainerHeap heap;
     
     @SuppressWarnings("unchecked")
-    public indexRAMRI(final File databaseRoot, final kelondroRow payloadrow, final int entityCacheMaxSize, final int wCacheReferenceCountLimitInit, final long wCacheReferenceAgeLimitInit, final String oldArrayName, final String newHeapName, final serverLog log) {
+    public indexRAMRI(final File databaseRoot, final kelondroRow payloadrow, final int entityCacheMaxSize, final int wCacheReferenceCountLimitInit, final long wCacheReferenceAgeLimitInit, final String newHeapName, final serverLog log) {
 
         // creates a new index cache
         // the cache has a back-end where indexes that do not fit in the cache are flushed

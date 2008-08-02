@@ -110,7 +110,7 @@ public class plasmaDHTFlush extends Thread {
         public int getTransferedEntrySpeed() {
             long transferTime = System.currentTimeMillis() - this.startingTime;
             if (transferTime <= 0) transferTime = 1;
-            return (int) ((1000L * (long) this.transferedEntryCount) / transferTime);
+            return (int) ((1000L * this.transferedEntryCount) / transferTime);
         }
         
         public yacySeed getSeed() {

@@ -414,14 +414,12 @@ public abstract class htmlFilterAbstractScraper implements htmlFilterScraper {
         if (code[1] == '#') {
             if (code[2] == 'x' || code[2] == 'X') {
                 return new char[] {(char) Integer.parseInt((new String(code)).substring(3, code.length - 1), 16)};
-            } else {
-                return new char[] {(char) Integer.parseInt((new String(code)).substring(2, code.length - 1))};
             }
-        } else {
-            final String t = trans.get(new String(code)); 
-            if (t == null) return new char[0];
-            return t.toCharArray();
+            return new char[] {(char) Integer.parseInt((new String(code)).substring(2, code.length - 1))};
         }
+        final String t = trans.get(new String(code)); 
+        if (t == null) return new char[0];
+        return t.toCharArray();
     }
 
     protected static serverCharBuffer transscriptAll(serverCharBuffer bb) {

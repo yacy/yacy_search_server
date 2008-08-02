@@ -65,8 +65,8 @@ public final class serverSystem {
     private static Method      macSetFileCreator = null;
     private static Method      macSetFileType = null;
     private static Method      macOpenURL = null;
-    public  static Hashtable<String, String> macFSTypeCache = null;
-    public  static Hashtable<String, String> macFSCreatorCache = null;
+    public  static final Hashtable<String, String> macFSTypeCache = new Hashtable<String, String>();
+    public  static final Hashtable<String, String> macFSCreatorCache = new Hashtable<String, String>();
 
     // static initialization
     static {
@@ -97,8 +97,6 @@ public final class serverSystem {
 	    final byte[] nullb = new byte[4];
 	    for (int i = 0; i < 4; i++) nullb[i] = 0;
 	    macMRJOSNullObj = macMRJOSTypeConstructor.newInstance(new Object[] {new String(nullb)});
-	    macFSTypeCache = new Hashtable<String, String>();
-	    macFSCreatorCache = new Hashtable<String, String>();
 	} catch (final Exception e) {
 	    //e.printStackTrace();
 	    macMRJFileUtils = null; macMRJOSType = null;
@@ -115,28 +113,33 @@ public final class serverSystem {
     public static Object getMacOSTS(final String s) {
 	if ((isMacArchitecture) && (macMRJFileUtils != null)) try {
 	    if ((s == null) || (s.equals(blankTypeString))) return macMRJOSNullObj;
-	    else return macMRJOSTypeConstructor.newInstance(new Object[] {s});
+	    return macMRJOSTypeConstructor.newInstance(new Object[] {s});
 	} catch (final Exception e) {
 	    return macMRJOSNullObj;
-	} else return null;
+	}
+	return null;
     }
 
     public static String getMacFSType(final File f) {
 	if ((isMacArchitecture) && (macMRJFileUtils != null)) try {
 	    final String s = macGetFileType.invoke(null, new Object[] {f}).toString();
-	    if ((s == null) || (s.charAt(0) == 0)) return blankTypeString; else return s;
+	    if ((s == null) || (s.charAt(0) == 0)) return blankTypeString;
+	    return s;
 	} catch (final Exception e) {
 	    return null;
-	} else return null;
+	}
+	return null;
     }
 
     public static String getMacFSCreator(final File f) {
 	if ((isMacArchitecture) && (macMRJFileUtils != null)) try {
 	    final String s = macGetFileCreator.invoke(null, new Object[] {f}).toString();
-	    if ((s == null) || (s.charAt(0) == 0)) return blankTypeString; else return s;
+	    if ((s == null) || (s.charAt(0) == 0)) return blankTypeString;
+	    return s;
 	} catch (final Exception e) {
 	    return null;
-	} else return null;
+	}
+	return null;
     }
 
     public static void setMacFSType(final File f, final String t) {

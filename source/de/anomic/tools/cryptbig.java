@@ -390,10 +390,12 @@ public class cryptbig {
 	if (b64dec == null) return null; // error in input string (inconsistency)
 	final byte[] dec = c.decryptArray(b64dec);
 	if (dec == null) return null;
-	if (gzFlag)
-	    return gzip.gunzipString(dec);
-	else
-	    try {return new String(dec,"UTF8");} catch (final UnsupportedEncodingException e) {return null;}
+	if (gzFlag) return gzip.gunzipString(dec);
+	try {
+	    return new String(dec,"UTF8");
+	} catch (final UnsupportedEncodingException e) {
+	    return null;
+	}
 
     }
 

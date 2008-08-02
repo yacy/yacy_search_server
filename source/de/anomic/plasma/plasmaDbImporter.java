@@ -137,28 +137,27 @@ public class plasmaDbImporter extends AbstractImporter implements Importer {
                                 notBoundEntryCounter++;
                                 newContainer.remove(urlHash);
                                 continue;
-                            } else {
-                                // we need to import the url
+                            }
+                            // we need to import the url
 
-                                // getting the url entry
-                                final indexURLReference urlEntry = this.importWordIndex.getURL(urlHash, null, 0);
-                                if (urlEntry != null) {
+                            // getting the url entry
+                            final indexURLReference urlEntry = this.importWordIndex.getURL(urlHash, null, 0);
+                            if (urlEntry != null) {
 
-                                    /* write it into the home url db */
-                                    homeWordIndex.putURL(urlEntry);
-                                    importedUrlBuffer.add(urlHash);
-                                    this.urlCounter++;
+                                /* write it into the home url db */
+                                homeWordIndex.putURL(urlEntry);
+                                importedUrlBuffer.add(urlHash);
+                                this.urlCounter++;
 
-                                    if (this.urlCounter % 500 == 0) {
-                                        this.log.logFine(this.urlCounter + " URLs processed so far.");
-                                    }
-
-                                } else {
-                                    unknownUrlBuffer.add(urlHash);
-                                    notBoundEntryCounter++;
-                                    newContainer.remove(urlHash);
-                                    continue;
+                                if (this.urlCounter % 500 == 0) {
+                                    this.log.logFine(this.urlCounter + " URLs processed so far.");
                                 }
+
+                            } else {
+                                unknownUrlBuffer.add(urlHash);
+                                notBoundEntryCounter++;
+                                newContainer.remove(urlHash);
+                                continue;
                             }
                         //} else {
                             // already known url

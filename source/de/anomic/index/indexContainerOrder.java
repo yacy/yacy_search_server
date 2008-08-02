@@ -29,7 +29,7 @@ package de.anomic.index;
 import de.anomic.kelondro.kelondroAbstractOrder;
 import de.anomic.kelondro.kelondroOrder;
 
-public class indexContainerOrder extends kelondroAbstractOrder<indexContainer> implements kelondroOrder<indexContainer> {
+public class indexContainerOrder extends kelondroAbstractOrder<indexContainer> implements kelondroOrder<indexContainer>, Cloneable {
 
     private final kelondroOrder<byte[]> embeddedOrder;
 

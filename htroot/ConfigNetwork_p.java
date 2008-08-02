@@ -31,6 +31,7 @@ import java.util.HashSet;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpd;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.server.serverBusyThread;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverFileUtils;
@@ -104,28 +105,28 @@ public class ConfigNetwork_p {
                 }
                 
                 if (indexDistribute) {
-                    sb.setConfig(plasmaSwitchboard.INDEX_DIST_ALLOW, true);
+                    sb.setConfig(plasmaSwitchboardConstants.INDEX_DIST_ALLOW, true);
                 } else {
-                    sb.setConfig(plasmaSwitchboard.INDEX_DIST_ALLOW, false);
+                    sb.setConfig(plasmaSwitchboardConstants.INDEX_DIST_ALLOW, false);
                 }
     
                 if (post.get("indexDistributeWhileCrawling","").equals("on")) {
-                    sb.setConfig(plasmaSwitchboard.INDEX_DIST_ALLOW_WHILE_CRAWLING, true);
+                    sb.setConfig(plasmaSwitchboardConstants.INDEX_DIST_ALLOW_WHILE_CRAWLING, true);
                 } else {
-                    sb.setConfig(plasmaSwitchboard.INDEX_DIST_ALLOW_WHILE_CRAWLING, false);
+                    sb.setConfig(plasmaSwitchboardConstants.INDEX_DIST_ALLOW_WHILE_CRAWLING, false);
                 }
     
                 if (post.get("indexDistributeWhileIndexing","").equals("on")) {
-                    sb.setConfig(plasmaSwitchboard.INDEX_DIST_ALLOW_WHILE_INDEXING, true);
+                    sb.setConfig(plasmaSwitchboardConstants.INDEX_DIST_ALLOW_WHILE_INDEXING, true);
                 } else {
-                    sb.setConfig(plasmaSwitchboard.INDEX_DIST_ALLOW_WHILE_INDEXING, false);
+                    sb.setConfig(plasmaSwitchboardConstants.INDEX_DIST_ALLOW_WHILE_INDEXING, false);
                 }
     
                 if (indexReceive) {
-                    sb.setConfig(plasmaSwitchboard.INDEX_RECEIVE_ALLOW, true);
+                    sb.setConfig(plasmaSwitchboardConstants.INDEX_RECEIVE_ALLOW, true);
                     sb.webIndex.seedDB.mySeed().setFlagAcceptRemoteIndex(true);
                 } else {
-                    sb.setConfig(plasmaSwitchboard.INDEX_RECEIVE_ALLOW, false);
+                    sb.setConfig(plasmaSwitchboardConstants.INDEX_RECEIVE_ALLOW, false);
                     sb.webIndex.seedDB.mySeed().setFlagAcceptRemoteIndex(false);
                 }
     
@@ -148,9 +149,9 @@ public class ConfigNetwork_p {
                     newppm = Math.max(1, Integer.parseInt(post.get("acceptCrawlLimit", "1")));
                 } catch (final NumberFormatException e) {}
                 final long newBusySleep = Math.max(100, 60000 / newppm);
-                final serverBusyThread rct = sb.getThread(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
+                final serverBusyThread rct = sb.getThread(plasmaSwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
                 rct.setBusySleep(newBusySleep);
-                sb.setConfig(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_BUSYSLEEP, Long.toString(newBusySleep));
+                sb.setConfig(plasmaSwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_BUSYSLEEP, Long.toString(newBusySleep));
                 
                 sb.setConfig("cluster.peers.ipport", checkIPPortList(post.get("cluster.peers.ipport", "")));
                 sb.setConfig("cluster.peers.yacydomain", checkYaCyDomainList(post.get("cluster.peers.yacydomain", "")));
@@ -167,18 +168,18 @@ public class ConfigNetwork_p {
         prop.put("crawlResponse", sb.getConfigBool("crawlResponse", false) ? "1" : "0");
         long RTCbusySleep = 100;
         try {
-            RTCbusySleep = Math.max(1, Integer.parseInt(env.getConfig(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_BUSYSLEEP, "100")));
+            RTCbusySleep = Math.max(1, Integer.parseInt(env.getConfig(plasmaSwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_BUSYSLEEP, "100")));
         } catch (final NumberFormatException e) {}
         final int RTCppm = (int) (60000L / RTCbusySleep);
         prop.put("acceptCrawlLimit", RTCppm);
         
-        final boolean indexDistribute = sb.getConfig(plasmaSwitchboard.INDEX_DIST_ALLOW, "true").equals("true");
-        final boolean indexReceive = sb.getConfig(plasmaSwitchboard.INDEX_RECEIVE_ALLOW, "true").equals("true");
+        final boolean indexDistribute = sb.getConfig(plasmaSwitchboardConstants.INDEX_DIST_ALLOW, "true").equals("true");
+        final boolean indexReceive = sb.getConfig(plasmaSwitchboardConstants.INDEX_RECEIVE_ALLOW, "true").equals("true");
         prop.put("indexDistributeChecked", (indexDistribute) ? "1" : "0");
-        prop.put("indexDistributeWhileCrawling.on", (sb.getConfig(plasmaSwitchboard.INDEX_DIST_ALLOW_WHILE_CRAWLING, "true").equals("true")) ? "1" : "0");
-        prop.put("indexDistributeWhileCrawling.off", (sb.getConfig(plasmaSwitchboard.INDEX_DIST_ALLOW_WHILE_CRAWLING, "true").equals("true")) ? "0" : "1");
-        prop.put("indexDistributeWhileIndexing.on", (sb.getConfig(plasmaSwitchboard.INDEX_DIST_ALLOW_WHILE_INDEXING, "true").equals("true")) ? "1" : "0");
-        prop.put("indexDistributeWhileIndexing.off", (sb.getConfig(plasmaSwitchboard.INDEX_DIST_ALLOW_WHILE_INDEXING, "true").equals("true")) ? "0" : "1");
+        prop.put("indexDistributeWhileCrawling.on", (sb.getConfig(plasmaSwitchboardConstants.INDEX_DIST_ALLOW_WHILE_CRAWLING, "true").equals("true")) ? "1" : "0");
+        prop.put("indexDistributeWhileCrawling.off", (sb.getConfig(plasmaSwitchboardConstants.INDEX_DIST_ALLOW_WHILE_CRAWLING, "true").equals("true")) ? "0" : "1");
+        prop.put("indexDistributeWhileIndexing.on", (sb.getConfig(plasmaSwitchboardConstants.INDEX_DIST_ALLOW_WHILE_INDEXING, "true").equals("true")) ? "1" : "0");
+        prop.put("indexDistributeWhileIndexing.off", (sb.getConfig(plasmaSwitchboardConstants.INDEX_DIST_ALLOW_WHILE_INDEXING, "true").equals("true")) ? "0" : "1");
         prop.put("indexReceiveChecked", (indexReceive) ? "1" : "0");
         prop.put("indexReceiveBlockBlacklistChecked.on", (sb.getConfig("indexReceiveBlockBlacklist", "true").equals("true")) ? "1" : "0");
         prop.put("indexReceiveBlockBlacklistChecked.off", (sb.getConfig("indexReceiveBlockBlacklist", "true").equals("true")) ? "0" : "1");
@@ -232,7 +233,8 @@ public class ConfigNetwork_p {
             if ((s[i].endsWith(".yacyh")) || (s[i].endsWith(".yacy")) ||
                 (s[i].indexOf(".yacyh=") > 0) || (s[i].indexOf(".yacy=") > 0)) input += "," + s[i];
         }
-        if (input.length() == 0) return input; else return input.substring(1);
+        if (input.length() == 0) return input;
+        return input.substring(1);
     }
     
     public static String checkIPPortList(String input) {
@@ -242,6 +244,7 @@ public class ConfigNetwork_p {
         for (int i = 0; i < s.length; i++) {
             if (s[i].indexOf(':') >= 9) input += "," + s[i];
         }
-        if (input.length() == 0) return input; else return input.substring(1);
+        if (input.length() == 0) return input;
+        return input.substring(1);
     }
 }

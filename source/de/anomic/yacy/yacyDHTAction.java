@@ -89,20 +89,21 @@ public class yacyDHTAction {
         public yacySeed next() {
             if (steps == 0) return null;
             steps--;
-            if ((e1 != null) && (e1.hasNext())) {
-            	final yacySeed n = e1.next();
-                if (!(e1.hasNext())) {
-                    e1 = null;
-                    e2 = seedDB.seedsConnected(up, false, null, minVersion);
-                }
-                return n;
-            } else {
+            
+            if (e1 == null || !e1.hasNext()) {
                 if (e2 == null) {
                     e1 = null;
                     e2 = seedDB.seedsConnected(up, false, null, minVersion);
                 }
                 return e2.next();
             }
+            
+            final yacySeed n = e1.next();
+            if (!(e1.hasNext())) {
+                e1 = null;
+                e2 = seedDB.seedsConnected(up, false, null, minVersion);
+            }
+            return n;
         }
 
         public void remove() {
@@ -313,9 +314,8 @@ public class yacyDHTAction {
         final double d = hashDistance(peer, word);
         if (d > 0) {
             return d; // case where the word is 'before' the peer
-        } else {
-            return (1) + d; // wrap-around case
         }
+        return 1 + d; // wrap-around case
     }
     
     private static double hashDistance(final String from, final String to) {

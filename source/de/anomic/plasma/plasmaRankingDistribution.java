@@ -78,7 +78,9 @@ public final class plasmaRankingDistribution {
     }
     
     public int size() {
-        if ((sourcePath.exists()) && (sourcePath.isDirectory())) return sourcePath.list().length; else return 0;
+        if ((sourcePath.exists()) && (sourcePath.isDirectory()))
+            return sourcePath.list().length;
+        return 0;
     }
 
     public boolean transferRanking(int count) throws InterruptedException {

@@ -51,18 +51,8 @@ public class kelondroRowCollection {
     private static final int isortlimit = 20;
     static final Integer dummy = new Integer(0);
     
-    public static ExecutorService sortingthreadexecutor = null;
-    public static ExecutorService partitionthreadexecutor = null;
-    
-    static {
-        if (serverProcessor.useCPU > 1) {
-            sortingthreadexecutor = Executors.newCachedThreadPool(new NamePrefixThreadFactory("sorting"));
-            partitionthreadexecutor = Executors.newCachedThreadPool(new NamePrefixThreadFactory("partition"));
-        } else {
-            sortingthreadexecutor = null;
-            partitionthreadexecutor = null;
-        }
-    }
+    public static final ExecutorService sortingthreadexecutor = (serverProcessor.useCPU > 1) ? Executors.newCachedThreadPool(new NamePrefixThreadFactory("sorting")) : null;
+    public static final ExecutorService partitionthreadexecutor = (serverProcessor.useCPU > 1) ? Executors.newCachedThreadPool(new NamePrefixThreadFactory("partition")) : null;
     
     protected byte[]        chunkcache;
     protected int           chunkcount;
@@ -923,7 +913,8 @@ public class kelondroRowCollection {
     }
     
     private static long d(final long a, final long b) {
-    	if (b == 0) return a; else return a / b;
+    	if (b == 0) return a;
+    	return a / b;
     }
     
     private static Random random = null;

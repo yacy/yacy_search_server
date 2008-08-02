@@ -104,7 +104,7 @@ public class yacyCore {
         if (staticIP.length() != 0 && yacySeed.isProperIP(staticIP) == null) {
             serverCore.useStaticIP = true;
             sb.webIndex.seedDB.mySeed().setIP(staticIP);
-            System.out.println("+-+ DEBUG staticIP set to "+ staticIP);
+            log.logInfo("staticIP set to "+ staticIP);
         } else {
             serverCore.useStaticIP = false;
         }

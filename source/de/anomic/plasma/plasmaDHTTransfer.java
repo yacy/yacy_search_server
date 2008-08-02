@@ -134,7 +134,7 @@ public class plasmaDHTTransfer extends Thread {
          */
         this.transferStatus = plasmaDHTChunk.chunkStatus_RUNNING;
         long retryCount = 0;
-		final long start = System.currentTimeMillis();
+        final long start = System.currentTimeMillis();
         while (true) {
             // testing if we were aborted
             if (this.isAborted()) return;

@@ -34,7 +34,7 @@ public final class serverInstantBusyThread extends serverAbstractBusyThread impl
     private final Long   handle;
     
     public static int instantThreadCounter = 0;
-    public static TreeMap<Long, String> jobs = new TreeMap<Long, String>();
+    public static final TreeMap<Long, String> jobs = new TreeMap<Long, String>();
     
     public serverInstantBusyThread(final Object env, final String jobExec, final String jobCount, final String freemem) {
         // jobExec is the name of a method of the object 'env' that executes the one-step-run

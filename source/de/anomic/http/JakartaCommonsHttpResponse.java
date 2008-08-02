@@ -26,13 +26,14 @@
 
 package de.anomic.http;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpMethod;
+
+import de.anomic.server.serverFileUtils;
 
 /**
  * container for http-response data
@@ -93,14 +94,7 @@ public class JakartaCommonsHttpResponse {
             try {
                 instream = getDataAsStream();
                 if (instream != null) {
-                    final ByteArrayOutputStream outstream = new ByteArrayOutputStream();
-                    final byte[] buffer = new byte[4096];
-                    int len;
-                    while ((len = instream.read(buffer)) > 0) {
-                        outstream.write(buffer, 0, len);
-                    }
-                    outstream.close();
-                    responseBody = outstream.toByteArray();
+                    responseBody = serverFileUtils.read(instream);
                 }
             } finally {
                 if (instream != null) {
@@ -118,15 +112,15 @@ public class JakartaCommonsHttpResponse {
      */
     public InputStream getDataAsStream() throws IOException {
         InputStream inStream = method.getResponseBodyAsStream();
-        if(inStream != null) {
-            if (getResponseHeader().gzip()) {
-                inStream = new GZIPInputStream(inStream);
-            }
-            // count bytes for overall http-statistics
-            return new httpdByteCountInputStream(inStream, incomingAccountingName);
-        } else {
+        if(inStream == null) {
             return null;
         }
+        
+        if (getResponseHeader().gzip()) {
+            inStream = new GZIPInputStream(inStream);
+        }
+        // count bytes for overall http-statistics
+        return new httpdByteCountInputStream(inStream, incomingAccountingName);
     }
 
     /*

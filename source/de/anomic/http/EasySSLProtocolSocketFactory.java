@@ -183,16 +183,17 @@ public class EasySSLProtocolSocketFactory implements SecureProtocolSocketFactory
         }
         final int timeout = params.getConnectionTimeout();
         final SocketFactory socketfactory = getSSLContext().getSocketFactory();
+        final Socket socket;
         if (timeout == 0) {
-            return socketfactory.createSocket(host, port, localAddress, localPort);
+            socket = socketfactory.createSocket(host, port, localAddress, localPort);
         } else {
-            final Socket socket = socketfactory.createSocket();
+            socket = socketfactory.createSocket();
             final SocketAddress localaddr = new InetSocketAddress(localAddress, localPort);
             final SocketAddress remoteaddr = new InetSocketAddress(host, port);
             socket.bind(localaddr);
             socket.connect(remoteaddr, timeout);
-            return socket;
         }
+        return socket;
     }
 
     /**

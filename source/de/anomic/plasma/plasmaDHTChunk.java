@@ -164,9 +164,8 @@ public class plasmaDHTChunk {
         // if that fails, take simply the best start point
         if (bestHash == null) {
             return wordIndex.seedDB.mySeed().hash.substring(0, 11) + "z";
-        } else {
-            return bestHash;
         }
+        return bestHash;
     }
 
     private void selectTransferContainers(final String hash, final int mincount, final int maxcount, final int maxtime) throws InterruptedException {        

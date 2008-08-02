@@ -55,7 +55,7 @@ import de.anomic.yacy.yacyURL;
 /**
  * @author theli
  */
-public class icapd implements serverHandler {
+public class icapd implements serverHandler, Cloneable {
     
     
     private serverCore.Session session;  // holds the session object of the calling class
@@ -178,7 +178,7 @@ public class icapd implements serverHandler {
         return this.prop.getProperty(icapHeader.CONNECTION_PROP_PERSISTENT).equals("keep-alive") ? serverCore.RESUME_CONNECTION : serverCore.TERMINATE_CONNECTION;
     }
     
-    public Boolean REQMOD(final String arg) {
+    public Boolean REQMOD() {
         return serverCore.TERMINATE_CONNECTION;
     }    
     

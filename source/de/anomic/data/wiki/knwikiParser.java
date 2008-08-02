@@ -231,8 +231,7 @@ public class knwikiParser implements wikiParser {
 		public String getText() {
 			if (this.nl)
 				return escapeNewLine + this.text;
-			else
-				return this.text;
+			return this.text;
 		}
 		
 		public String toString() { return this.text; }

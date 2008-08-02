@@ -74,8 +74,8 @@ public class plasmaProfiling {
         // draw ppm
         Iterator<Event> i = serverProfiling.history("ppm");
         long time;
-		final long now = System.currentTimeMillis();
-		long bytes;
+        final long now = System.currentTimeMillis();
+        long bytes;
         int x0 = 1, x1, y0 = 0, y1, ppm;
         serverProfiling.Event event;
         try {

@@ -264,8 +264,8 @@ public class Punycode
      * 
      */
     private static final long serialVersionUID = 1L;
-    public static String OVERFLOW = "Overflow.";
-    public static String BAD_INPUT = "Bad input.";
+    public static final String OVERFLOW = "Overflow.";
+    public static final String BAD_INPUT = "Bad input.";
 
     /**
      * Creates a new PunycodeException.

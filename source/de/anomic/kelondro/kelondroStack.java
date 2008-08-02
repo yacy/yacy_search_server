@@ -281,8 +281,7 @@ public final class kelondroStack extends kelondroFullRecords {
     public String hp(final kelondroHandle h) {
         if (h == null)
             return "NULL";
-        else
-            return h.toString();
+        return h.toString();
     }
 
     public void print() throws IOException {

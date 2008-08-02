@@ -208,10 +208,9 @@ public final class plasmaParser {
         final LinkedList<String> extensions = new LinkedList<String>();
         if ((extString == null) || (extString.length() == 0)) {
             return extensions;
-        } else {
-            final String[] xs = extString.split(",");
-            for (int i = 0; i < xs.length; i++) extensions.add(xs[i].toLowerCase().trim());
         }
+        final String[] xs = extString.split(",");
+        for (int i = 0; i < xs.length; i++) extensions.add(xs[i].toLowerCase().trim());
         return extensions;
     }
     
@@ -364,7 +363,7 @@ public final class plasmaParser {
     	if (encoding.startsWith("WINDOWS")) encoding = "windows" + encoding.substring(7);
     	
     	// fix wrong fill characters
-    	encoding.replaceAll("_", "-");
+    	encoding = encoding.replaceAll("_", "-");
 
         if (encoding.matches("GB[_-]?2312([-_]80)?")) return "GB2312";
         if (encoding.matches(".*UTF[-_]?8.*")) return "UTF-8";

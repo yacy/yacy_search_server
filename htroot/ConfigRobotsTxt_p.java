@@ -32,6 +32,7 @@
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpdRobotsTxtConfig;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.servletProperties;
@@ -60,7 +61,7 @@ public class ConfigRobotsTxt_p {
                 rbc.setSurftipsDisallowed(post.containsKey(httpdRobotsTxtConfig.SURFTIPS));
                 rbc.setWikiDisallowed(post.containsKey(httpdRobotsTxtConfig.WIKI));
                 rbc.setProfileDisallowed(post.containsKey(httpdRobotsTxtConfig.PROFILE));
-                env.setConfig(plasmaSwitchboard.ROBOTS_TXT, rbc.toString());
+                env.setConfig(plasmaSwitchboardConstants.ROBOTS_TXT, rbc.toString());
             }
         }
         

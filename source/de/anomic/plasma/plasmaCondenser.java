@@ -505,7 +505,7 @@ public final class plasmaCondenser {
             loop: while (e.hasMoreElements()) {
                 s = e.nextElement();
                 if ((s.length() == 1) && (htmlFilterContentScraper.punctuation(s.charAt(0)))) return s;
-                if ((s.length() < ml) && (!(s.equals("of")))) continue loop;
+                if ((s.length() < ml) && (!(s.toString().equals("of")))) continue loop;
                 for (int i = 0; i < s.length(); i++) {
                     c = s.charAt(i);
                     // TODO: Bugfix needed for UTF-8
@@ -651,12 +651,11 @@ public final class plasmaCondenser {
         public StringBuffer next() {
             if (buffer == null) {
                 return null;
-            } else {
-                counter = counter + buffer.length() + 1;
-                final StringBuffer r = buffer;
-                buffer = nextElement0();
-                return r;
             }
+            counter = counter + buffer.length() + 1;
+            final StringBuffer r = buffer;
+            buffer = nextElement0();
+            return r;
         }
 
         public int count() {
@@ -678,7 +677,8 @@ public final class plasmaCondenser {
             nextChar = reader.read();
             //System.out.print((char) nextChar); // DEBUG    
             if (nextChar < 0) {
-                if (s.length() == 0) return null; else break;
+                if (s.length() == 0) return null;
+                break;
             }
             c = (char) nextChar;
             if (pre && ((c == (char) 10) || (c == (char) 13))) break;

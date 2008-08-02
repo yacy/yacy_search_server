@@ -32,7 +32,6 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import de.anomic.plasma.cache.IResourceInfo;
-import de.anomic.plasma.cache.ResourceInfoFactory;
 import de.anomic.yacy.yacyURL;
 
 public class ResourceInfo implements IResourceInfo {
@@ -41,7 +40,7 @@ public class ResourceInfo implements IResourceInfo {
     public static final String MODIFICATION_DATE = "modificationDate";
     
     private final yacyURL objectURL;
-	private yacyURL	refererURL;
+    private yacyURL refererURL;
     private final TreeMap<String, String> propertyMap; 
     
     /**

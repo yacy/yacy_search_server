@@ -286,13 +286,12 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         if (title.length() > 0) {
             if (s == null) {
                 return title;
-            } else {
-                if ((title.compareToIgnoreCase(s) == 0) || (title.indexOf(s) >= 0)) return s; else return title + ": " + s;
             }
-        } else {
-            if (s != null) {
-                return s;
-            }
+            if ((title.compareToIgnoreCase(s) == 0) || (title.indexOf(s) >= 0)) return s;
+            return title + ": " + s;
+        }
+        if (s != null) {
+            return s;
         }
         
         // otherwise take any headline
@@ -363,12 +362,14 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
     public String getDescription() {
         String s = metas.get("description");
         if (s == null) s = metas.get("dc.description");
-        if (s == null) return ""; else return s;
+        if (s == null) return "";
+        return s;
     }
     
     public String getContentType() {
         final String s = metas.get("content-type");
-        if (s == null) return ""; else return s;
+        if (s == null) return "";
+        return s;
     }
     
     public String getAuthor() {
@@ -392,14 +393,14 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         if (s == null) s = "";
         if (s.length() == 0) {
             return getTitle().toLowerCase().split(splitrex);
-        } else {
-            return s.split(" |,");
         }
+        return s.split(" |,");
     }
     
     public int getRefreshSeconds() {
         final String s = metas.get("refresh");
-        if (s == null) return 9999; else try {
+        if (s == null) return 9999;
+        try {
             final int pos = s.indexOf(';');
             if (pos < 0) return 9999;
             final int i = Integer.parseInt(s.substring(0, pos));
@@ -411,12 +412,13 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
 
     public String getRefreshPath() {
         String s = metas.get("refresh");
-        if (s == null) return ""; else {
-            final int pos = s.indexOf(';');
-            if (pos < 0) return "";
-            s = s.substring(pos + 1);
-            if (s.toLowerCase().startsWith("url=")) return s.substring(4).trim(); else return "";
-        }
+        if (s == null) return "";
+        
+        final int pos = s.indexOf(';');
+        if (pos < 0) return "";
+        s = s.substring(pos + 1);
+        if (s.toLowerCase().startsWith("url=")) return s.substring(4).trim();
+        return "";
     }
 
     /*

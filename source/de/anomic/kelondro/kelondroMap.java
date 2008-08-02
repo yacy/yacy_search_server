@@ -71,7 +71,7 @@ public class kelondroMap {
         this.cacheScore = new kelondroMScoreCluster<String>();
     }
 
-    private static String map2string(final Map<String, String> map, final String comment) throws IOException {
+    private static String map2string(final Map<String, String> map, final String comment) {
         final Iterator<Map.Entry<String, String>> iter = map.entrySet().iterator();
         Map.Entry<String, String> entry;
         final StringBuffer bb = new StringBuffer(map.size() * 40);
@@ -234,7 +234,8 @@ public class kelondroMap {
     public synchronized kelondroCloneableIterator<byte[]> keys(final boolean up, final boolean rotating, final byte[] firstKey, final byte[] secondKey) throws IOException {
         // simple enumeration of key names without special ordering
         final kelondroCloneableIterator<byte[]> i = blob.keys(up, firstKey);
-        if (rotating) return new kelondroRotateIterator<byte[]>(i, secondKey, blob.size()); else return i;
+        if (rotating) return new kelondroRotateIterator<byte[]>(i, secondKey, blob.size());
+        return i;
     }
 
 

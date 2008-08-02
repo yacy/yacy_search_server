@@ -34,7 +34,7 @@ public final class kelondroBufferedIOChunks extends kelondroAbstractIOChunks imp
 
     protected kelondroRA ra;
     private final long bufferMaxSize;
-	private long	bufferCurrSize;
+    private long bufferCurrSize;
     private final long commitTimeout;
     private final TreeMap<Long, byte[]> buffer;
     private long lastCommit = 0;

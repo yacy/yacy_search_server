@@ -285,7 +285,7 @@ public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
 
             // return value
             if (s == null) return dflt;
-            else return (String) s;
+            return (String) s;
         }
     }
     

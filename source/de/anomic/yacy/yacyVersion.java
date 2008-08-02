@@ -71,7 +71,7 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
     // this static information should be overwritten by network-specific locations
     // for details see defaults/yacy.network.freeworld.unit
     private static HashMap<yacyURL, DevMain> latestReleases = new HashMap<yacyURL, DevMain>();
-    public  static ArrayList<yacyURL> latestReleaseLocations = new ArrayList<yacyURL>(); // will be initialized with value in defaults/yacy.network.freeworld.unit
+    public  final static ArrayList<yacyURL> latestReleaseLocations = new ArrayList<yacyURL>(); // will be initialized with value in defaults/yacy.network.freeworld.unit
     
     // private static release info about this release; is generated only once and can be retrieved by thisVersion()
     private static yacyVersion thisVersion = null;
@@ -160,9 +160,8 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
         if(obj instanceof yacyVersion) {
             final yacyVersion v = (yacyVersion) obj;
             return (this.svn == v.svn) && (this.url.toNormalform(true, true).equals(v.url.toNormalform(true, true)));
-        } else {
-            return false;
         }
+        return false;
     }
     
     public int hashCode() {
@@ -225,14 +224,13 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
                 ((latestmain == null) || (latestdev.compareTo(latestmain) > 0)) &&
                 (!(Float.toString(latestdev.releaseNr).matches(blacklist)))) {
                 // consider a dev-release
-                if (latestdev.compareTo(thisVersion()) > 0) {
-                    return latestdev;
-                } else {
+                if (latestdev.compareTo(thisVersion()) <= 0) {
                     yacyCore.log.logInfo(
                             "rulebasedUpdateInfo: latest dev " + latestdev.name +
                             " is not more recent than installed release " + thisVersion().name);
                     return null;
                 }
+                return latestdev;
             }
             if (latestmain != null) {
                 // consider a main release
@@ -242,12 +240,13 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
                             " matches with blacklist '" + blacklist + "'");
                     return null;
                 }
-                if (latestmain.compareTo(thisVersion()) > 0) return latestmain; else {
+                if (latestmain.compareTo(thisVersion()) <= 0) {
                     yacyCore.log.logInfo(
                             "rulebasedUpdateInfo: latest main " + latestmain.name +
                             " is not more recent than installed release (1) " + thisVersion().name);
                     return null;
                 }
+                return latestmain;
             }
         }
         if ((concept.equals("main")) && (latestmain != null)) {
@@ -258,12 +257,13 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
                         " matches with blacklist'" + blacklist + "'");
                 return null;
             }
-            if (latestmain.compareTo(thisVersion()) > 0) return latestmain; else {
+            if (latestmain.compareTo(thisVersion()) <= 0) {
                 yacyCore.log.logInfo(
                         "rulebasedUpdateInfo: latest main " + latestmain.name +
                         " is not more recent than installed release (2) " + thisVersion().name);
                 return null; 
             }
+            return latestmain;
         }
         yacyCore.log.logInfo("rulebasedUpdateInfo: failed to find more recent release");
         return null;

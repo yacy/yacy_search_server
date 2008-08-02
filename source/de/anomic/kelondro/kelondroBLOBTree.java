@@ -197,7 +197,8 @@ public class kelondroBLOBTree implements kelondroBLOB {
         // iterates only the keys of the Nodes
         // enumerated objects are of type String
         final keyIterator i = new keyIterator(index.rows(up, null));
-        if (rotating) return new kelondroRotateIterator<byte[]>(i, null, index.size()); else return i;
+        if (rotating) return new kelondroRotateIterator<byte[]>(i, null, index.size());
+        return i;
     }
 
     public synchronized kelondroCloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) throws IOException {
@@ -226,7 +227,7 @@ public class kelondroBLOBTree implements kelondroBLOB {
         }
     }
 
-    private synchronized int get(final String key, final int pos) throws IOException {
+    synchronized int get(final String key, final int pos) throws IOException {
         final int reccnt = pos / reclen;
         // read within a single record
         final byte[] buf = getValueCached(elementKey(key, reccnt));
@@ -242,7 +243,7 @@ public class kelondroBLOBTree implements kelondroBLOB {
         return ra.readFully();
     }
     
-    private synchronized byte[] get(final String key, final int pos, final int len) throws IOException {
+    synchronized byte[] get(final String key, final int pos, final int len) throws IOException {
         final int recpos = pos % reclen;
         final int reccnt = pos / reclen;
         byte[] segment1;
@@ -290,7 +291,7 @@ public class kelondroBLOBTree implements kelondroBLOB {
         put(new String(key), 0, b, 0, b.length);
     }
     
-    private synchronized void put(final String key, final int pos, final byte[] b, final int off, final int len) throws IOException {
+    synchronized void put(final String key, final int pos, final byte[] b, final int off, final int len) throws IOException {
         final int recpos = pos % reclen;
         final int reccnt = pos / reclen;
         byte[] buf;
@@ -327,7 +328,7 @@ public class kelondroBLOBTree implements kelondroBLOB {
         }
     }
 
-    private synchronized void put(final String key, final int pos, final int b) throws IOException {
+    synchronized void put(final String key, final int pos, final int b) throws IOException {
         final int recpos = pos % reclen;
         final int reccnt = pos / reclen;
         byte[] buf;

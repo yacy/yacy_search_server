@@ -126,6 +126,7 @@ public final class serverFileUtils {
                 dest.write(buffer, 0, n);
                 count += n;
             }
+            dest.flush();
         } catch (final Exception e) {
             // an "sun.io.MalformedInputException: Missing byte-order mark" - exception may occur here
             throw new IOException(e.getMessage());

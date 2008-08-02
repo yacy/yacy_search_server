@@ -110,14 +110,13 @@ public class yacyURL implements Serializable {
                 final int q = url.indexOf('@', p + 3);
                 if (q < 0) {
                     throw new MalformedURLException("wrong email address: " + url);
-                } else {
-                    userInfo = url.substring(p + 1, q);
-                    host = url.substring(q + 1);
-                    path = null;
-                    port = -1;
-                    quest = null;
-                    ref = null;
                 }
+                userInfo = url.substring(p + 1, q);
+                host = url.substring(q + 1);
+                path = null;
+                port = -1;
+                quest = null;
+                ref = null;
             } else {
                 throw new MalformedURLException("unknown protocol: " + url);
             }
@@ -151,9 +150,8 @@ public class yacyURL implements Serializable {
             (relPath.startsWith("file://")) ||
             (relPath.startsWith("smb://"))) {
             return new yacyURL(relPath, null);
-        } else {
-            return new yacyURL(new yacyURL(baseURL, null), relPath);
         }
+        return new yacyURL(new yacyURL(baseURL, null), relPath);
     }
     
     public static yacyURL newURL(final yacyURL baseURL, final String relPath) throws MalformedURLException {
@@ -164,9 +162,8 @@ public class yacyURL implements Serializable {
             (relPath.startsWith("file://")) ||
             (relPath.startsWith("smb://"))) {
             return new yacyURL(relPath, null);
-        } else {
-            return new yacyURL(baseURL, relPath);
         }
+        return new yacyURL(baseURL, relPath);
     }
     
     private yacyURL(final yacyURL baseURL, String relPath) throws MalformedURLException {
@@ -197,9 +194,8 @@ public class yacyURL implements Serializable {
         } else if (baseURL.path.endsWith("/")) {
             if (relPath.startsWith("#") || relPath.startsWith("?")) {
                 throw new MalformedURLException("relative path malformed: " + relPath);
-            } else {
-                this.path = baseURL.path + relPath;
             }
+            this.path = baseURL.path + relPath;
         } else {
             if (relPath.startsWith("#") || relPath.startsWith("?")) {
                 this.path = baseURL.path + relPath;
@@ -538,10 +534,11 @@ public class yacyURL implements Serializable {
     }
     
     public String toNormalform(final boolean stripReference, final boolean stripAmp) {
-        if (stripAmp)
-            return toNormalform(!stripReference).replaceAll("&amp;", "&");
-        else
-            return toNormalform(!stripReference);
+        String result = toNormalform(!stripReference); 
+        if (stripAmp) {
+            result = result.replaceAll("&amp;", "&");
+        }
+        return result;
     }
     
     private String toNormalform(final boolean includeReference) {
@@ -568,14 +565,18 @@ public class yacyURL implements Serializable {
                this.getHost().toLowerCase() + ((defaultPort) ? ("") : (":" + this.port)) + path;
     }
     
-    public boolean equals(final yacyURL other) {
-        return (((this.protocol == other.protocol) || (this.protocol.equals(other.protocol))) &&
-                ((this.host     == other.host    ) || (this.host.equals(other.host))) &&
-                ((this.userInfo == other.userInfo) || (this.userInfo.equals(other.userInfo))) &&
-                ((this.path     == other.path    ) || (this.path.equals(other.path))) &&
-                ((this.quest    == other.quest   ) || (this.quest.equals(other.quest))) &&
-                ((this.ref      == other.ref     ) || (this.ref.equals(other.ref))) &&
-                ((this.port     == other.port    )));
+    public boolean equals(final Object other) {
+        if(other != null && other instanceof yacyURL) {
+            final yacyURL otherURL = (yacyURL) other;
+            return (((this.protocol == otherURL.protocol) || (this.protocol.equals(otherURL.protocol))) &&
+                    ((this.host     == otherURL.host    ) || (this.host.equals(otherURL.host))) &&
+                    ((this.userInfo == otherURL.userInfo) || (this.userInfo.equals(otherURL.userInfo))) &&
+                    ((this.path     == otherURL.path    ) || (this.path.equals(otherURL.path))) &&
+                    ((this.quest    == otherURL.quest   ) || (this.quest.equals(otherURL.quest))) &&
+                    ((this.ref      == otherURL.ref     ) || (this.ref.equals(otherURL.ref))) &&
+                    ((this.port     == otherURL.port    )));
+        }
+        return super.equals(other);
     }
     
     /**

@@ -52,10 +52,9 @@ public class servletProperties extends serverObjects {
     }
     
     public httpHeader getOutgoingHeader() {
-        if(outgoingHeader!=null)
-            return outgoingHeader;
-        else
+        if(outgoingHeader == null)
             return new httpHeader();
+        return outgoingHeader;
     }
     
     public void setPrefix(final String myprefix) {

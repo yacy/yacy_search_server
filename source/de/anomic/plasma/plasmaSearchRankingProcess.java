@@ -203,11 +203,10 @@ public final class plasmaSearchRankingProcess {
                 // if we already have enough entries, insert only such that are necessary to get a better result
                 if (stack.bottom(r.longValue())) {
                     continue;
-                } else {
-                    // double-check
-                    if (urlhashes.containsKey(iEntry.urlHash())) continue;
-                    stack.push(iEntry, r);
                 }
+                // double-check
+                if (urlhashes.containsKey(iEntry.urlHash())) continue;
+                stack.push(iEntry, r);
             }
             
             // increase counter for statistics

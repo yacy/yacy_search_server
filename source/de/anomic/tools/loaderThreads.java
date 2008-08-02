@@ -72,19 +72,19 @@ public class loaderThreads {
     public void terminateThread(final String name) {
         final loaderThread t = (loaderThread) threads.get(name);
         if (t == null) throw new RuntimeException("no such thread: " + name);
-        else t.terminate();
+        t.terminate();
     }
     
     public int threadCompleted(final String name) {
         final loaderThread t = (loaderThread) threads.get(name);
         if (t == null) throw new RuntimeException("no such thread: " + name);
-        else return t.completed();
+        return t.completed();
     }
     
     public int threadStatus(final String name) {
         final loaderThread t = (loaderThread) threads.get(name);
         if (t == null) throw new RuntimeException("no such thread: " + name);
-        else return t.status();
+        return t.status();
     }
     
     public int completed() {
@@ -102,7 +102,7 @@ public class loaderThreads {
     public Exception threadError(final String name) {
         final loaderThread t = (loaderThread) threads.get(name);
         if (t == null) throw new RuntimeException("no such thread: " + name);
-        else return t.error();
+        return t.error();
     }
 
     protected class loaderThread extends Thread {
@@ -193,11 +193,10 @@ public class loaderThreads {
                 }
                 if (line == lines.size()) {
                     this.status = STATUS_COMPLETED;
-                    return;
                 } else {
                     this.status = STATUS_ABORTED;
-                    return;
                 }
+                return;
             } catch (final Exception e) {
                 this.status = STATUS_FAILED;
                 this.error = e;

@@ -31,6 +31,7 @@ import java.io.File;
 import de.anomic.data.listManager;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -50,7 +51,7 @@ public final class list {
         if (!yacyNetwork.authentifyRequest(post, env)) return prop;
         
         final String col = post.get("col", "");
-        final File listsPath = env.getConfigPath(plasmaSwitchboard.LISTS_PATH, plasmaSwitchboard.LISTS_PATH_DEFAULT);
+        final File listsPath = env.getConfigPath(plasmaSwitchboardConstants.LISTS_PATH, plasmaSwitchboardConstants.LISTS_PATH_DEFAULT);
         
         String otherPeerName = null;
         if (post.containsKey("iam")) {

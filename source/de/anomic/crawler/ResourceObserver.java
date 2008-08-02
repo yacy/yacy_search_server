@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.diskUsage;
 
@@ -57,12 +58,12 @@ public final class ResourceObserver {
         final ArrayList<String> pathsToCheck = new ArrayList<String>();
         //  FIXME whats about the secondary path???
         //   = (getConfig(plasmaSwitchboard.INDEX_SECONDARY_PATH, "");
-        final String[] pathes =  {plasmaSwitchboard.HTDOCS_PATH,        
-                            plasmaSwitchboard.INDEX_PRIMARY_PATH,
-                            plasmaSwitchboard.LISTS_PATH,
-                            plasmaSwitchboard.PLASMA_PATH,
-                            plasmaSwitchboard.RANKING_PATH,
-                            plasmaSwitchboard.WORK_PATH};
+        final String[] pathes =  {plasmaSwitchboardConstants.HTDOCS_PATH,        
+                            plasmaSwitchboardConstants.INDEX_PRIMARY_PATH,
+                            plasmaSwitchboardConstants.LISTS_PATH,
+                            plasmaSwitchboardConstants.PLASMA_PATH,
+                            plasmaSwitchboardConstants.RANKING_PATH,
+                            plasmaSwitchboardConstants.WORK_PATH};
         String path;
         for (final String element : pathes) {
             try {
@@ -99,13 +100,13 @@ public final class ResourceObserver {
         }
         
         if (!tmpDisksOK || !tmpMemoryOK) {
-            if (!sb.crawlJobIsPaused(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL)) {
+            if (!sb.crawlJobIsPaused(plasmaSwitchboardConstants.CRAWLJOB_LOCAL_CRAWL)) {
                 this.log.logInfo("disabling local crawls");
-                sb.pauseCrawlJob(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL);
+                sb.pauseCrawlJob(plasmaSwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
             }
-            if (!sb.crawlJobIsPaused(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL)) {
+            if (!sb.crawlJobIsPaused(plasmaSwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL)) {
                 this.log.logInfo("disabling remote triggered crawls");
-                sb.pauseCrawlJob(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
+                sb.pauseCrawlJob(plasmaSwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
             }
         }
         else {

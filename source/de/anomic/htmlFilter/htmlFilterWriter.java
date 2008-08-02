@@ -494,12 +494,13 @@ public final class htmlFilterWriter extends Writer {
     public static void main(final String[] args) {
         // takes one argument: a file name 
         if (args.length != 1) return;
+        // TODO: this does not work at the moment
+        System.out.println("this does not work at the moment");
+        System.exit(0);
         final char[] buffer = new char[512];
         try {
             final htmlFilterContentScraper scraper = new htmlFilterContentScraper(new yacyURL("http://localhost:8080", null));
             final htmlFilterTransformer transformer = new htmlFilterContentTransformer();            
-            // TODO: this does not work at the moment
-            System.exit(0);
             final Reader is = new FileReader(args[0]);
             final FileOutputStream fos = new FileOutputStream(new File(args[0] + ".out"));
             final Writer os = new htmlFilterWriter(fos, "UTF-8",scraper, transformer, false);

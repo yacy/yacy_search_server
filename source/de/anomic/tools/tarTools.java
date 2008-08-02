@@ -42,9 +42,8 @@ public class tarTools {
 	public static InputStream getInputStream(final String tarFileName) throws Exception{
 		if(tarFileName.endsWith(".gz")){
 			return new GZIPInputStream(new FileInputStream(new File(tarFileName)));
-		} else {
-			return new FileInputStream(new File(tarFileName));
 		}
+		return new FileInputStream(new File(tarFileName));
 	}
 
 	public static InputStream getInputStream(final File tarFileName) throws Exception{

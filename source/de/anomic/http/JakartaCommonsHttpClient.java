@@ -39,7 +39,6 @@ import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.URIException;
@@ -289,21 +288,14 @@ public class JakartaCommonsHttpClient {
 
         final Part[] parts;
         if (multiparts != null) {
-            parts = multiparts.toArray(new Part[0]);
+            parts = multiparts.toArray(new Part[multiparts.size()]);
         } else {
             // nothing to POST
             parts = new Part[0];
         }
         RequestEntity data = new MultipartRequestEntity(parts, post.getParams());
         if (gzipBody) {
-            // cache data and gzip it
-            final ByteArrayOutputStream zippedBytes = new ByteArrayOutputStream();
-            final GZIPOutputStream toZip = new GZIPOutputStream(zippedBytes);
-            data.writeRequest(toZip);
-            toZip.finish();
-            toZip.flush();
-            // use compressed data as body (not setting content length according to RFC 2616 HTTP/1.1, section 4.4)
-            data = new ByteArrayRequestEntity(zippedBytes.toByteArray(), data.getContentType());
+            data = zipRequest(data);
 
             post.setRequestHeader(httpHeader.CONTENT_ENCODING, httpHeader.CONTENT_ENCODING_GZIP);
         }
@@ -312,6 +304,26 @@ public class JakartaCommonsHttpClient {
         // exception
         post.setFollowRedirects(false);
         return execute(post);
+    }
+
+    /**
+     * <p>stores the data of the request in a new ByteArrayRequestEntity</p>
+     * 
+     * <p>when the request is send make sure to set content-encoding-header to gzip!</p>
+     * 
+     * @param data
+     * @return a ByteArrayRequestEntitiy with gzipped data
+     * @throws IOException
+     */
+    private RequestEntity zipRequest(final RequestEntity data) throws IOException {
+        // cache data and gzip it
+        final ByteArrayOutputStream zippedBytes = new ByteArrayOutputStream();
+        final GZIPOutputStream toZip = new GZIPOutputStream(zippedBytes);
+        data.writeRequest(toZip);
+        toZip.finish();
+        toZip.flush();
+        // use compressed data as body (not setting content length according to RFC 2616 HTTP/1.1, section 4.4)
+        return new ByteArrayRequestEntity(zippedBytes.toByteArray(), data.getContentType());
     }
 
     /*
@@ -383,22 +395,13 @@ public class JakartaCommonsHttpClient {
      * @param method
      * @return
      * @throws IOException
-     * @throws HttpException
      */
-    private JakartaCommonsHttpResponse execute(final HttpMethod method) throws IOException, HttpException {
+    private JakartaCommonsHttpResponse execute(final HttpMethod method) throws IOException {
         assert method != null : "precondition violated: method != null";
-        // ignore cookies
-        if(ignoreCookies) {
-            method.getParams().setCookiePolicy(CookiePolicy.IGNORE_COOKIES);
-        }
-        // set header
-        for (final Header header : headers) {
-            method.setRequestHeader(header);
-        }
+        checkIgnoreCookies(method);
+        setHeader(method);
 
-        // set proxy
-        final httpRemoteProxyConfig hostProxyConfig = getProxyConfig(method.getURI().getHost());
-        addProxyAuth(method, hostProxyConfig);
+        final httpRemoteProxyConfig hostProxyConfig = setProxy(method);
         final HostConfiguration hostConfig = getProxyHostConfig(hostProxyConfig);
 
         // statistics
@@ -424,6 +427,50 @@ public class JakartaCommonsHttpClient {
 
         // return response
         return new JakartaCommonsHttpResponse(method);
+    }
+
+    /**
+     * @param method
+     * @return
+     * @throws URIException
+     */
+    private httpRemoteProxyConfig setProxy(final HttpMethod method) throws URIException {
+        String host = null;
+        // set proxy
+        try {
+            host  = method.getURI().getHost();
+        } catch (final URIException e) {
+            serverLog.logWarning("HTTPC", "could not extract host of uri: "+ e.getMessage());
+            throw e;
+        }
+        final httpRemoteProxyConfig hostProxyConfig = getProxyConfig(host);
+        final String scheme = method.getURI().getScheme();
+        if(scheme != null && scheme.toLowerCase().startsWith("https") && !hostProxyConfig.useProxy4SSL()) {
+            // do not use proxy for HTTPS
+            return null;
+        }
+        addProxyAuth(method, hostProxyConfig);
+        return hostProxyConfig;
+    }
+
+    /**
+     * @param method
+     */
+    private void setHeader(final HttpMethod method) {
+        // set header
+        for (final Header header : headers) {
+            method.setRequestHeader(header);
+        }
+    }
+
+    /**
+     * @param method
+     */
+    private void checkIgnoreCookies(final HttpMethod method) {
+        // ignore cookies
+        if(ignoreCookies) {
+            method.getParams().setCookiePolicy(CookiePolicy.IGNORE_COOKIES);
+        }
     }
 
     /**
@@ -477,10 +524,10 @@ public class JakartaCommonsHttpClient {
         final httpRemoteProxyConfig hostProxyConfig;
         if (proxyConfig != null) {
             // client specific
-            hostProxyConfig = httpdProxyHandler.getProxyConfig(hostname, proxyConfig);
+            hostProxyConfig = proxyConfig.useForHost(hostname) ? proxyConfig : null;
         } else {
             // default settings
-            hostProxyConfig = httpdProxyHandler.getProxyConfig(hostname, 0);
+            hostProxyConfig = httpRemoteProxyConfig.getProxyConfigForHost(hostname);
         }
         return hostProxyConfig;
     }
@@ -490,16 +537,17 @@ public class JakartaCommonsHttpClient {
      * @return current host-config with additional proxy set or null if no proxy should be used
      */
     private HostConfiguration getProxyHostConfig(final httpRemoteProxyConfig hostProxyConfig) {
+        final HostConfiguration hostConfig;
         // generate http-configuration
         if (hostProxyConfig != null && hostProxyConfig.useProxy()) {
             // new config based on client (default)
-            final HostConfiguration hostConfig = new HostConfiguration(apacheHttpClient.getHostConfiguration());
+            hostConfig = new HostConfiguration(apacheHttpClient.getHostConfiguration());
             // add proxy
             hostConfig.setProxy(hostProxyConfig.getProxyHost(), hostProxyConfig.getProxyPort());
-            return hostConfig;
         } else {
-            return null;
+            hostConfig = null;
         }
+        return hostConfig;
     }
 
     /**
@@ -548,7 +596,7 @@ public class JakartaCommonsHttpClient {
             if (args.length > 1 && "post".equals(args[1])) {
                 // POST
                 final ArrayList<Part> files = new ArrayList<Part>();
-                files.add(new FilePart("myfile.txt", new ByteArrayPartSource("myfile.txt", "this is not a file ;)"
+                files.add(new DefaultCharsetFilePart("myfile.txt", new ByteArrayPartSource("myfile.txt", "this is not a file ;)"
                         .getBytes())));
                 files.add(new FilePart("anotherfile.raw", new ByteArrayPartSource("anotherfile.raw",
                         "this is not a binary file ;)".getBytes())));

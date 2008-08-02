@@ -31,6 +31,7 @@ import java.util.Map;
 
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.server.serverBusyThread;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverFileUtils;
@@ -96,7 +97,7 @@ public class PerformanceQueues_p {
         final boolean setProfile = (post != null && post.containsKey("submitdefault"));
         final boolean setDelay = (post != null) && (post.containsKey("submitdelay"));
         // save used settings file to config
-        if (setProfile) switchboard.setConfig("performanceProfile", post.get("defaultFile", "defaults/yacy.init"));
+        if (setProfile && post != null) switchboard.setConfig("performanceProfile", post.get("defaultFile", "defaults/yacy.init"));
         
         while (threads.hasNext()) {
             threadName = threads.next();
@@ -141,7 +142,7 @@ public class PerformanceQueues_p {
             idlesleep = switchboard.getConfigLong(threadName + "_idlesleep" , 1000);
             busysleep = switchboard.getConfigLong(threadName + "_busysleep",   100);
             memprereq = switchboard.getConfigLong(threadName + "_memprereq",     0);
-            if (setDelay) {
+            if (setDelay && post != null) {
                 // load with new values
                 idlesleep = post.getLong(threadName + "_idlesleep", idlesleep);
                 busysleep = post.getLong(threadName + "_busysleep", busysleep);
@@ -192,11 +193,11 @@ public class PerformanceQueues_p {
         
         if ((post != null) && (post.containsKey("cacheSizeSubmit"))) {
             final int wordCacheMaxCount = post.getInt("wordCacheMaxCount", 20000);
-            switchboard.setConfig(plasmaSwitchboard.WORDCACHE_MAX_COUNT, Integer.toString(wordCacheMaxCount));
+            switchboard.setConfig(plasmaSwitchboardConstants.WORDCACHE_MAX_COUNT, Integer.toString(wordCacheMaxCount));
             switchboard.webIndex.setMaxWordCount(wordCacheMaxCount);
             
-            final int wordCacheInitCount = post.getInt(plasmaSwitchboard.WORDCACHE_INIT_COUNT, 30000);
-            switchboard.setConfig(plasmaSwitchboard.WORDCACHE_INIT_COUNT, Integer.toString(wordCacheInitCount));
+            final int wordCacheInitCount = post.getInt(plasmaSwitchboardConstants.WORDCACHE_INIT_COUNT, 30000);
+            switchboard.setConfig(plasmaSwitchboardConstants.WORDCACHE_INIT_COUNT, Integer.toString(wordCacheInitCount));
         }
         
         if ((post != null) && (post.containsKey("poolConfig"))) {
@@ -208,7 +209,7 @@ public class PerformanceQueues_p {
             int maxBusy = Integer.parseInt(post.get("Crawler Pool_maxActive","8"));
             
             // storing the new values into configfile
-            switchboard.setConfig(plasmaSwitchboard.CRAWLER_THREADS_ACTIVE_MAX,maxBusy);
+            switchboard.setConfig(plasmaSwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX,maxBusy);
             //switchboard.setConfig("crawler.MinIdleThreads",minIdle);
             
             /* 
@@ -233,9 +234,9 @@ public class PerformanceQueues_p {
         }
         
         if ((post != null) && (post.containsKey("onlineCautionSubmit"))) {
-            switchboard.setConfig(plasmaSwitchboard.PROXY_ONLINE_CAUTION_DELAY, Integer.toString(post.getInt("crawlPauseProxy", 30000)));
-            switchboard.setConfig(plasmaSwitchboard.LOCALSEACH_ONLINE_CAUTION_DELAY, Integer.toString(post.getInt("crawlPauseLocalsearch", 30000)));
-            switchboard.setConfig(plasmaSwitchboard.REMOTESEARCH_ONLINE_CAUTION_DELAY, Integer.toString(post.getInt("crawlPauseRemotesearch", 30000)));
+            switchboard.setConfig(plasmaSwitchboardConstants.PROXY_ONLINE_CAUTION_DELAY, Integer.toString(post.getInt("crawlPauseProxy", 30000)));
+            switchboard.setConfig(plasmaSwitchboardConstants.LOCALSEACH_ONLINE_CAUTION_DELAY, Integer.toString(post.getInt("crawlPauseLocalsearch", 30000)));
+            switchboard.setConfig(plasmaSwitchboardConstants.REMOTESEARCH_ONLINE_CAUTION_DELAY, Integer.toString(post.getInt("crawlPauseRemotesearch", 30000)));
         }
         
         if ((post != null) && (post.containsKey("minimumDeltaSubmit"))) {
@@ -264,11 +265,11 @@ public class PerformanceQueues_p {
         prop.putNum("minAgeOfWCache", switchboard.webIndex.minAgeOfDHTOutCache() / 1000 / 60); // minutes
         prop.putNum("minAgeOfKCache", switchboard.webIndex.minAgeOfDHTInCache() / 1000 / 60); // minutes
         prop.putNum("maxWaitingWordFlush", switchboard.getConfigLong("maxWaitingWordFlush", 180));
-        prop.put("wordCacheMaxCount", switchboard.getConfigLong(plasmaSwitchboard.WORDCACHE_MAX_COUNT, 20000));
-        prop.put("wordCacheInitCount", switchboard.getConfigLong(plasmaSwitchboard.WORDCACHE_INIT_COUNT, 30000));
-        prop.put("crawlPauseProxy", switchboard.getConfigLong(plasmaSwitchboard.PROXY_ONLINE_CAUTION_DELAY, 30000));
-        prop.put("crawlPauseLocalsearch", switchboard.getConfigLong(plasmaSwitchboard.LOCALSEACH_ONLINE_CAUTION_DELAY, 30000));
-        prop.put("crawlPauseRemotesearch", switchboard.getConfigLong(plasmaSwitchboard.REMOTESEARCH_ONLINE_CAUTION_DELAY, 30000));
+        prop.put("wordCacheMaxCount", switchboard.getConfigLong(plasmaSwitchboardConstants.WORDCACHE_MAX_COUNT, 20000));
+        prop.put("wordCacheInitCount", switchboard.getConfigLong(plasmaSwitchboardConstants.WORDCACHE_INIT_COUNT, 30000));
+        prop.put("crawlPauseProxy", switchboard.getConfigLong(plasmaSwitchboardConstants.PROXY_ONLINE_CAUTION_DELAY, 30000));
+        prop.put("crawlPauseLocalsearch", switchboard.getConfigLong(plasmaSwitchboardConstants.LOCALSEACH_ONLINE_CAUTION_DELAY, 30000));
+        prop.put("crawlPauseRemotesearch", switchboard.getConfigLong(plasmaSwitchboardConstants.REMOTESEARCH_ONLINE_CAUTION_DELAY, 30000));
         prop.putNum("crawlPauseProxyCurrent", (System.currentTimeMillis() - switchboard.proxyLastAccess) / 1000);
         prop.putNum("crawlPauseLocalsearchCurrent", (System.currentTimeMillis() - switchboard.localSearchLastAccess) / 1000);
         prop.putNum("crawlPauseRemotesearchCurrent", (System.currentTimeMillis() - switchboard.remoteSearchLastAccess) / 1000);

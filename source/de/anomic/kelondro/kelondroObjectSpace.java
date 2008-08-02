@@ -63,9 +63,8 @@ public class kelondroObjectSpace {
         }
     }
     
-    public static void recycle(byte[] b) {
+    public static void recycle(final byte[] b) {
         if ((b.length < minSize) || (b.length > maxSize)) {
-            b = null;
             return;
         }
         decAlive(b.length);
@@ -80,7 +79,6 @@ public class kelondroObjectSpace {
                 buf.add(b);
             }
         }
-        b = null;
     }
     
     public static TreeMap<Integer, Integer> statAlive() {

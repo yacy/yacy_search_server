@@ -29,7 +29,7 @@ package de.anomic.index;
 import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroMicroDate;
 
-public class indexRWIVarEntry implements indexRWIEntry {
+public class indexRWIVarEntry implements indexRWIEntry, Cloneable {
 
     public kelondroBitfield flags;
     public long freshUntil, lastModified;

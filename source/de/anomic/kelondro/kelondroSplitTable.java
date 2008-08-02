@@ -276,7 +276,8 @@ public class kelondroSplitTable implements kelondroIndex {
             try {
                 cs.submit(new Callable<kelondroIndex>() {
                     public kelondroIndex call() {
-                        if (table.has(key)) return table; else return dummyIndex;
+                        if (table.has(key)) return table;
+                        return dummyIndex;
                     }
                 });
             } catch (final RejectedExecutionException e) {
@@ -374,9 +375,8 @@ public class kelondroSplitTable implements kelondroIndex {
         }
         if (maxtable == null) {
             return null;
-        } else {
-            return maxtable.removeOne();
         }
+        return maxtable.removeOne();
     }
     
     public synchronized kelondroCloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) throws IOException {

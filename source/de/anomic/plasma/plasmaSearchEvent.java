@@ -870,11 +870,10 @@ public final class plasmaSearchEvent {
         }
         public String resource() {
             // generate transport resource
-            if ((textSnippet != null) && (textSnippet.exists())) {
-                return urlentry.toString(textSnippet.getLineRaw());
-            } else {
+            if ((textSnippet == null) || (!textSnippet.exists())) {
                 return urlentry.toString();
             }
+            return urlentry.toString(textSnippet.getLineRaw());
         }
     }
 }

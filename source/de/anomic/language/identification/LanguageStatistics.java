@@ -90,10 +90,9 @@ public class LanguageStatistics {
      */
     public final float get(final char letter) {
         if (stats.containsKey(letter)) {
-           return stats.get(letter);
-        } else {
-            return 0;
+            return stats.get(letter);
         }
+        return 0;
     }
 
     /**
@@ -149,9 +148,8 @@ public class LanguageStatistics {
     public boolean contains(final Character character) {
         if (stats.containsKey(character)) {
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
     
     /**

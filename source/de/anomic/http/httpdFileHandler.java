@@ -80,6 +80,7 @@ import java.util.zip.GZIPOutputStream;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.server.serverByteBuffer;
 import de.anomic.server.serverClassLoader;
 import de.anomic.server.serverCore;
@@ -153,7 +154,7 @@ public final class httpdFileHandler {
             
             // create a htDocsPath: user defined pages
             if (htDocsPath == null) {
-                htDocsPath = theSwitchboard.getConfigPath(plasmaSwitchboard.HTDOCS_PATH, plasmaSwitchboard.HTDOCS_PATH_DEFAULT);
+                htDocsPath = theSwitchboard.getConfigPath(plasmaSwitchboardConstants.HTDOCS_PATH, plasmaSwitchboardConstants.HTDOCS_PATH_DEFAULT);
                 if (!(htDocsPath.exists())) htDocsPath.mkdirs();
             }
             
@@ -1014,8 +1015,8 @@ public final class httpdFileHandler {
         return result;
     }
 
-    public void doConnect(final Properties conProp, final httpHeader requestHeader, final InputStream clientIn, final OutputStream clientOut) {
-        throw new UnsupportedOperationException();
-    }
+//    public void doConnect(Properties conProp, httpHeader requestHeader, InputStream clientIn, OutputStream clientOut) {
+//        throw new UnsupportedOperationException();
+//    }
     
 }

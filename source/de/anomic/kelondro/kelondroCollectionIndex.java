@@ -705,7 +705,7 @@ public class kelondroCollectionIndex {
         return (int) indexrow.getColLong(idx_col_chunkcount);
     }
     
-    public synchronized boolean has(final byte[] key) throws IOException {
+    public synchronized boolean has(final byte[] key) {
         return index.has(key);
     }
     

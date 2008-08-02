@@ -186,7 +186,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
 		kelondroNode node;
 		kelondroRow.Entry indexentry;
 		int i, c = 0;
-		final int all = super.col[0].size();
+        final int all = super.col[0].size();
 		final long start = System.currentTimeMillis();
 		long last = start;
 		while (content.hasNext()) {
@@ -283,7 +283,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         final kelondroRow.Entry oldentry = super.get(pos);
         assert this.size() == index.size() : "content.size() = " + this.size() + ", index.size() = " + index.size();
         if (oldentry == null) {
-        	serverLog.logSevere("kelondroFlexTable", "put(): index failure; the index pointed to a cell which is empty. content.size() = " + this.size() + ", index.size() = " + ((index == null) ? 0 : index.size()));
+        	serverLog.logSevere("kelondroFlexTable", "put(): index failure; the index pointed to a cell which is empty. content.size() = " + this.size() + ", index.size() = " + index.size());
         	// patch bug ***** FIND CAUSE! (see also: remove)
         	final int oldindex = index.removei(key);
         	assert oldindex >= 0;

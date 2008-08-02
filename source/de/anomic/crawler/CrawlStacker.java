@@ -397,7 +397,7 @@ public final class CrawlStacker extends Thread {
             final String errorMsg = "LOST PROFILE HANDLE '" + entry.profileHandle() + "' for URL " + entry.url();
             log.logWarning(errorMsg);
             return errorMsg;
-        } else {
+        }
         
         // filter deny
         if ((entry.depth() > 0) && (!(entry.url().toString().matches(profile.generalFilter())))) {
@@ -492,7 +492,6 @@ public final class CrawlStacker extends Thread {
                 ((local) ? NoticedURL.STACK_TYPE_CORE : NoticedURL.STACK_TYPE_REMOTE)) /*local/remote stack*/,
                 entry);
         return null;
-        }
     }
     
 }

@@ -39,6 +39,7 @@ import de.anomic.crawler.IndexingStack;
 import de.anomic.crawler.NoticedURL;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacySeed;
@@ -67,8 +68,8 @@ public class queues_p {
         yacySeed initiator;
         
         //indexing queue
-        prop.putNum("indexingSize", sb.getThread(plasmaSwitchboard.INDEXER).getJobCount() + sb.webIndex.queuePreStack.getActiveQueueSize());
-        prop.putNum("indexingMax", (int) sb.getConfigLong(plasmaSwitchboard.INDEXER_SLOTS, 30));
+        prop.putNum("indexingSize", sb.getThread(plasmaSwitchboardConstants.INDEXER).getJobCount() + sb.webIndex.queuePreStack.getActiveQueueSize());
+        prop.putNum("indexingMax", (int) sb.getConfigLong(plasmaSwitchboardConstants.INDEXER_SLOTS, 30));
         prop.putNum("urlpublictextSize", sb.webIndex.countURL());
         prop.putNum("rwipublictextSize", sb.webIndex.size());
         if ((sb.webIndex.queuePreStack.size() == 0) && (sb.webIndex.queuePreStack.getActiveQueueSize() == 0)) {
@@ -117,7 +118,7 @@ public class queues_p {
         
         //loader queue
         prop.put("loaderSize", Integer.toString(sb.crawlQueues.size()));        
-        prop.put("loaderMax", sb.getConfig(plasmaSwitchboard.CRAWLER_THREADS_ACTIVE_MAX, "10"));
+        prop.put("loaderMax", sb.getConfig(plasmaSwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX, "10"));
         if (sb.crawlQueues.size() == 0) {
             prop.put("list-loader", "0");
         } else {
@@ -136,8 +137,8 @@ public class queues_p {
         }
         
         //local crawl queue
-        prop.putNum("localCrawlSize", Integer.toString(sb.getThread(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL).getJobCount()));
-        prop.put("localCrawlState", sb.crawlJobIsPaused(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL) ? STATE_PAUSED : STATE_RUNNING);
+        prop.putNum("localCrawlSize", Integer.toString(sb.getThread(plasmaSwitchboardConstants.CRAWLJOB_LOCAL_CRAWL).getJobCount()));
+        prop.put("localCrawlState", sb.crawlJobIsPaused(plasmaSwitchboardConstants.CRAWLJOB_LOCAL_CRAWL) ? STATE_PAUSED : STATE_RUNNING);
         int stackSize = sb.crawlQueues.noticeURL.stackSize(NoticedURL.STACK_TYPE_CORE);
         addNTable(sb, prop, "list-local", sb.crawlQueues.noticeURL.top(NoticedURL.STACK_TYPE_CORE, Math.min(10, stackSize)));
 
@@ -147,8 +148,8 @@ public class queues_p {
         stackSize = sb.crawlQueues.noticeURL.stackSize(NoticedURL.STACK_TYPE_LIMIT);
 
         //global crawl queue
-        prop.putNum("remoteCrawlSize", Integer.toString(sb.getThread(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL).getJobCount()));
-        prop.put("remoteCrawlState", sb.crawlJobIsPaused(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL) ? STATE_PAUSED : STATE_RUNNING);
+        prop.putNum("remoteCrawlSize", Integer.toString(sb.getThread(plasmaSwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL).getJobCount()));
+        prop.put("remoteCrawlState", sb.crawlJobIsPaused(plasmaSwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL) ? STATE_PAUSED : STATE_RUNNING);
         stackSize = sb.crawlQueues.noticeURL.stackSize(NoticedURL.STACK_TYPE_LIMIT);
 
         if (stackSize == 0) {

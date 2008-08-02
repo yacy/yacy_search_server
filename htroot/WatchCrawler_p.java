@@ -44,6 +44,7 @@ import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterWriter;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -82,9 +83,9 @@ public class WatchCrawler_p {
                 // continue queue
                 final String queue = post.get("continue", "");
                 if (queue.equals("localcrawler")) {
-                    sb.continueCrawlJob(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL);
+                    sb.continueCrawlJob(plasmaSwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
                 } else if (queue.equals("remotecrawler")) {
-                    sb.continueCrawlJob(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
+                    sb.continueCrawlJob(plasmaSwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
                 }
             }
 
@@ -92,9 +93,9 @@ public class WatchCrawler_p {
                 // pause queue
                 final String queue = post.get("pause", "");
                 if (queue.equals("localcrawler")) {
-                    sb.pauseCrawlJob(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL);
+                    sb.pauseCrawlJob(plasmaSwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
                 } else if (queue.equals("remotecrawler")) {
-                    sb.pauseCrawlJob(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
+                    sb.pauseCrawlJob(plasmaSwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
                 }
             }
             
@@ -293,7 +294,7 @@ public class WatchCrawler_p {
                                 final CrawlProfile.entry profile = sb.webIndex.profilesActiveCrawls.newEntry(fileName, crawlURL, newcrawlingfilter, newcrawlingfilter, newcrawlingdepth, newcrawlingdepth, crawlingIfOlder, crawlingDomFilterDepth, crawlingDomMaxPages, crawlingQ, indexText, indexMedia, storeHTCache, true, crawlOrder, xsstopw, xdstopw, xpstopw);
                                 
                                 // pause local crawl here
-                                sb.pauseCrawlJob(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL);
+                                sb.pauseCrawlJob(plasmaSwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
                                 
                                 // loop through the contained links
                                 final Iterator<Map.Entry<yacyURL, String>> linkiterator = hyperlinks.entrySet().iterator();
@@ -326,7 +327,7 @@ public class WatchCrawler_p {
                                 prop.putHTML("info_error", e.getMessage());
                                 e.printStackTrace();
                             }
-                            sb.continueCrawlJob(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL);
+                            sb.continueCrawlJob(plasmaSwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
                         }
                     } else if (crawlingMode.equals(CRAWLING_MODE_SITEMAP)) { 
                     	String sitemapURLStr = null;
@@ -367,7 +368,7 @@ public class WatchCrawler_p {
         }
         
         // performance settings
-        final long LCbusySleep = Integer.parseInt(env.getConfig(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL_BUSYSLEEP, "100"));
+        final long LCbusySleep = Integer.parseInt(env.getConfig(plasmaSwitchboardConstants.CRAWLJOB_LOCAL_CRAWL_BUSYSLEEP, "100"));
         final int LCppm = (int) (60000L / Math.max(1,LCbusySleep));
         prop.put("crawlingSpeedMaxChecked", (LCppm >= 1000) ? "1" : "0");
         prop.put("crawlingSpeedCustChecked", ((LCppm > 10) && (LCppm < 1000)) ? "1" : "0");
@@ -389,7 +390,7 @@ public class WatchCrawler_p {
     
     private static void setPerformance(final plasmaSwitchboard sb, final serverObjects post) {
         final String crawlingPerformance = post.get("crawlingPerformance","custom");
-        final long LCbusySleep = Integer.parseInt(sb.getConfig(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL_BUSYSLEEP, "100"));
+        final long LCbusySleep = Integer.parseInt(sb.getConfig(plasmaSwitchboardConstants.CRAWLJOB_LOCAL_CRAWL_BUSYSLEEP, "100"));
         int wantedPPM = (LCbusySleep == 0) ? 6000 : (int) (60000L / LCbusySleep);
         try {
             wantedPPM = Integer.parseInt(post.get("customPPM", Integer.toString(wantedPPM)));

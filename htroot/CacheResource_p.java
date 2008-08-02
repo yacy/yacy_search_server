@@ -29,6 +29,7 @@ import java.io.IOException;
 
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -42,7 +43,7 @@ public class CacheResource_p {
         final String path = ((post == null) ? "" : post.get("path", ""));
 
         // we dont need check the path, because we have do that in plasmaSwitchboard.java - Borg-0300
-        final File cache = switchboard.getConfigPath(plasmaSwitchboard.HTCACHE_PATH, plasmaSwitchboard.HTCACHE_PATH_DEFAULT);
+        final File cache = switchboard.getConfigPath(plasmaSwitchboardConstants.HTCACHE_PATH, plasmaSwitchboardConstants.HTCACHE_PATH_DEFAULT);
 
         final File f = new File(cache, path);
         byte[] resource;

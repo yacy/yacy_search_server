@@ -489,42 +489,49 @@ public final class userDB {
         /**
          * @deprecated use hasRight(UPLOAD_RIGHT) instead
          */
+        @Deprecated
         public boolean hasUploadRight() {
             return this.hasRight(UPLOAD_RIGHT);
         }
         /**
          * @deprecated use hasRight(DOWNLOAD_RIGHT) instead
          */
+        @Deprecated
         public boolean hasDownloadRight() {
         	return this.hasRight(DOWNLOAD_RIGHT);
         }
         /**
          * @deprecated use hasRight(PROXY_RIGHT) instead
          */
+        @Deprecated
         public boolean hasProxyRight() {
         	return this.hasRight(PROXY_RIGHT);
         }
         /**
          * @deprecated use hasRight(ADMIN_RIGHT) instead
          */
+        @Deprecated
         public boolean hasAdminRight() {
         	return this.hasRight(ADMIN_RIGHT);
         }
         /**
          * @deprecated use hasRight(BLOG_RIGHT) instead
          */
+        @Deprecated
         public boolean hasBlogRight() {
         	return this.hasRight(BLOG_RIGHT);
         }
         /**
          * @deprecated use hasRight(WIKIADMIN_RIGHT) instead
          */
+        @Deprecated
         public boolean hasWikiAdminRight() {
         	return this.hasRight(WIKIADMIN_RIGHT);
         }
         /**
          * @deprecated use hasRight(BOOKMARK_RIGHT) instead
          */
+        @Deprecated
         public boolean hasBookmarkRight() {
         	return this.hasRight(BOOKMARK_RIGHT);
         }

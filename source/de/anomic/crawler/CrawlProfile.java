@@ -297,27 +297,32 @@ public class CrawlProfile {
         }
         public String handle() {
             final String r = mem.get(HANDLE);
-            if (r == null) return null; else return r;
+            //if (r == null) return null;
+            return r;
         }
         public String name() {
             final String r = mem.get(NAME);
-            if (r == null) return ""; else return r;
+            if (r == null) return "";
+            return r;
         }
         public String startURL() {
             final String r = mem.get(START_URL);
-            if (r == null) return null; else return r;
+            return r;
         }
         public String generalFilter() {
             final String r = mem.get(GENERAL_FILTER);
-            if (r == null) return ".*"; else return r;
+            if (r == null) return ".*";
+            return r;
         }
         public String specificFilter() {
             final String r = mem.get(SPECIFIC_FILTER);
-            if (r == null) return ".*"; else return r;
+            if (r == null) return ".*";
+            return r;
         }
         public int generalDepth() {
             final String r = mem.get(GENERAL_DEPTH);
-            if (r == null) return 0; else try {
+            if (r == null) return 0;
+            try {
                 return Integer.parseInt(r);
             } catch (final NumberFormatException e) {
                 return 0;
@@ -325,7 +330,8 @@ public class CrawlProfile {
         }
         public int specificDepth() {
             final String r = mem.get(SPECIFIC_DEPTH);
-            if (r == null) return 0; else try {
+            if (r == null) return 0;
+            try {
                 return Integer.parseInt(r);
             } catch (final NumberFormatException e) {
                 return 0;
@@ -335,7 +341,8 @@ public class CrawlProfile {
             // returns a long (millis) that is the minimum age that
             // an antry must have to be re-crawled
             final String r = mem.get(RECRAWL_IF_OLDER);
-            if (r == null) return Long.MAX_VALUE; else try {
+            if (r == null) return Long.MAX_VALUE;
+            try {
                 final long l = Long.parseLong(r) * 60000L;
                 return (l < 0) ? Long.MAX_VALUE : l;
             } catch (final NumberFormatException e) {
@@ -347,7 +354,8 @@ public class CrawlProfile {
             // then the current url feeds with its domain the crawl filter
             // if this is -1, all domains are feeded
             final String r = mem.get(DOM_FILTER_DEPTH);
-            if (r == null) return Integer.MAX_VALUE; else try {
+            if (r == null) return Integer.MAX_VALUE;
+            try {
                 final int i = Integer.parseInt(r);
                 if (i < 0) return Integer.MAX_VALUE;
                 return i;
@@ -359,7 +367,8 @@ public class CrawlProfile {
             // this is the maximum number of pages that are crawled for a single domain
             // if -1, this means no limit
             final String r = mem.get(DOM_MAX_PAGES);
-            if (r == null) return Integer.MAX_VALUE; else try {
+            if (r == null) return Integer.MAX_VALUE;
+            try {
                 final int i = Integer.parseInt(r);
                 if (i < 0) return Integer.MAX_VALUE;
                 return i;
@@ -369,39 +378,48 @@ public class CrawlProfile {
         }
         public boolean crawlingQ() {
             final String r = mem.get(CRAWLING_Q);
-            if (r == null) return false; else return (r.equals(Boolean.TRUE.toString()));
+            if (r == null) return false;
+            return (r.equals(Boolean.TRUE.toString()));
         }
         public boolean indexText() {
             final String r = mem.get(INDEX_TEXT);
-            if (r == null) return true; else return (r.equals(Boolean.TRUE.toString()));
+            if (r == null) return true;
+            return (r.equals(Boolean.TRUE.toString()));
         }
         public boolean indexMedia() {
             final String r = mem.get(INDEX_MEDIA);
-            if (r == null) return true; else return (r.equals(Boolean.TRUE.toString()));
+            if (r == null) return true;
+            return (r.equals(Boolean.TRUE.toString()));
         }
         public boolean storeHTCache() {
             final String r = mem.get(STORE_HTCACHE);
-            if (r == null) return false; else return (r.equals(Boolean.TRUE.toString()));
+            if (r == null) return false;
+            return (r.equals(Boolean.TRUE.toString()));
         }
         public boolean storeTXCache() {
             final String r = mem.get(STORE_TXCACHE);
-            if (r == null) return false; else return (r.equals(Boolean.TRUE.toString()));
+            if (r == null) return false;
+            return (r.equals(Boolean.TRUE.toString()));
         }
         public boolean remoteIndexing() {
             final String r = mem.get(REMOTE_INDEXING);
-            if (r == null) return false; else return (r.equals(Boolean.TRUE.toString()));
+            if (r == null) return false;
+            return (r.equals(Boolean.TRUE.toString()));
         }
         public boolean excludeStaticStopwords() {
             final String r = mem.get(XSSTOPW);
-            if (r == null) return false; else return (r.equals(Boolean.TRUE.toString()));
+            if (r == null) return false;
+            return (r.equals(Boolean.TRUE.toString()));
         }
         public boolean excludeDynamicStopwords() {
             final String r = mem.get(XDSTOPW);
-            if (r == null) return false; else return (r.equals(Boolean.TRUE.toString()));
+            if (r == null) return false;
+            return (r.equals(Boolean.TRUE.toString()));
         }
         public boolean excludeParentStopwords() {
             final String r = mem.get(XPSTOPW);
-            if (r == null) return false; else return (r.equals(Boolean.TRUE.toString()));
+            if (r == null) return false;
+            return (r.equals(Boolean.TRUE.toString()));
         }
         public void domInc(final String domain, final String referrer, final int depth) {
             synchronized (domain.intern()) {
@@ -424,9 +442,8 @@ public class CrawlProfile {
                 final DomProfile dp = doms.get(domain);
                 if (dp == null) {
                     return 0 < max;
-                } else {
-                    return dp.depth <= max;
                 }
+                return dp.depth <= max;
             }
         }
 
@@ -437,9 +454,8 @@ public class CrawlProfile {
                 final DomProfile dp = doms.get(domain);
                 if (dp == null) {
                     return 0 < max;
-                } else {
-                    return dp.count <= max;
                 }
+                return dp.count <= max;
             }
         }
         public int domSize() {

@@ -47,6 +47,7 @@ import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.plasma.cache.IResourceInfo;
 import de.anomic.plasma.cache.UnsupportedProtocolException;
 import de.anomic.server.serverFileUtils;
@@ -192,7 +193,7 @@ public class CacheAdmin_p {
             }
 
             // generate sorted dir/file listing
-            final String[] list = dir.list(new Filter(switchboard.getConfigPath(plasmaSwitchboard.HTCACHE_PATH, plasmaSwitchboard.HTCACHE_PATH_DEFAULT)));
+            final String[] list = dir.list(new Filter(switchboard.getConfigPath(plasmaSwitchboardConstants.HTCACHE_PATH, plasmaSwitchboardConstants.HTCACHE_PATH_DEFAULT)));
             tree.ensureCapacity((list == null) ? 70 : (list.length + 1) * 256);
             linkPathString(prop, ((pathString.length() == 0) ? ("/") : (pathString)), true); 
             if (list == null) {
@@ -202,7 +203,7 @@ public class CacheAdmin_p {
                 final TreeSet<String> dList = new TreeSet<String>();
                 final TreeSet<String> fList = new TreeSet<String>();
                 final int size = list.length - 1;
-				int i;
+                int i;
                 for (i = size; i >= 0 ; i--) { // Rueckwaerts ist schneller
                     if (new File(dir, list[i]).isDirectory())
                         dList.add(list[i]);
