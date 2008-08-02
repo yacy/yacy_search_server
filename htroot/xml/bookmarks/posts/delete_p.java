@@ -32,10 +32,10 @@ import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyURL;
 
 public class delete_p {
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
         // return variable that accumulates replacements
-        plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
-        serverObjects prop = new serverObjects();
+        final plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
+        final serverObjects prop = new serverObjects();
         if(post!= null){
         	try {
                 if( post.containsKey("url") && switchboard.bookmarksDB.removeBookmark((new yacyURL(post.get("url", "nourl"), null)).hash())) {
@@ -45,7 +45,7 @@ public class delete_p {
                 }else{
                 	prop.put("result", "0");
                 }
-            } catch (MalformedURLException e) {
+            } catch (final MalformedURLException e) {
                 prop.put("result", "0");
             }
         }else{

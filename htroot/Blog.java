@@ -51,11 +51,11 @@ public class Blog {
         private static SimpleDateFormat SimpleFormatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         // TODO: make userdefined date/time-strings (localisation)
 
-    public static String dateString(Date date) {
+    public static String dateString(final Date date) {
         return SimpleFormatter.format(date);
     }
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final serverObjects prop = new serverObjects();
         blogBoard.BlogEntry page = null;
@@ -115,7 +115,7 @@ public class Blog {
         byte[] author;
         try {
             author = StrAuthor.getBytes("UTF-8");
-        } catch (UnsupportedEncodingException e) {
+        } catch (final UnsupportedEncodingException e) {
             author = StrAuthor.getBytes();
         }
 
@@ -138,7 +138,7 @@ public class Blog {
             byte[] content;
             try {
                 content = post.get("content", "").getBytes("UTF-8");
-            } catch (UnsupportedEncodingException e) {
+            } catch (final UnsupportedEncodingException e) {
                 content = post.get("content", "").getBytes();
             }
 
@@ -158,7 +158,7 @@ public class Blog {
             byte[] subject;
             try {
                 subject = StrSubject.getBytes("UTF-8");
-            } catch (UnsupportedEncodingException e) {
+            } catch (final UnsupportedEncodingException e) {
                 subject = StrSubject.getBytes();
             }
 
@@ -184,7 +184,7 @@ public class Blog {
                     prop.put("mode_pageid", page.getKey());
                     prop.putHTML("mode_subject", new String(page.getSubject(), "UTF-8"), xml);
                     prop.put("mode_page-code", new String(page.getPage(), "UTF-8"));
-                } catch (UnsupportedEncodingException e) {}
+                } catch (final UnsupportedEncodingException e) {}
             }
             else {
                 prop.put("mode", "3"); //access denied (no rights)
@@ -198,7 +198,7 @@ public class Blog {
                 prop.putHTML("mode_pageid", pagename, xml);
                 try {
                     prop.putHTML("mode_author", new String(author, "UTF-8"), xml);
-                } catch (UnsupportedEncodingException e) {
+                } catch (final UnsupportedEncodingException e) {
                     prop.putHTML("mode_author", new String(author), xml);
                 }
                 prop.putHTML("mode_subject", post.get("subject",""), xml);
@@ -216,12 +216,12 @@ public class Blog {
                 prop.put("mode_pageid", pagename);
                 try {
                     prop.putHTML("mode_author",new String(page.getAuthor(), "UTF-8"), xml);
-                } catch (UnsupportedEncodingException e) {
+                } catch (final UnsupportedEncodingException e) {
                     prop.putHTML("mode_author",new String(page.getAuthor()), xml);
                 }
                 try {
                     prop.putHTML("mode_subject",new String(page.getSubject(),"UTF-8"), xml);
-                } catch (UnsupportedEncodingException e) {
+                } catch (final UnsupportedEncodingException e) {
                     prop.putHTML("mode_subject",new String(page.getSubject()), xml);
                 }
             }
@@ -322,14 +322,14 @@ public class Blog {
         // subject
         try {
             prop.putHTML("mode_entries_" + number + "_subject", new String(entry.getSubject(),"UTF-8"), xml);
-        } catch (UnsupportedEncodingException e) {
+        } catch (final UnsupportedEncodingException e) {
             prop.putHTML("mode_entries_" + number + "_subject", new String(entry.getSubject()), xml);
         }
 
         // author
         try {
             prop.putHTML("mode_entries_" + number + "_author", new String(entry.getAuthor(),"UTF-8"), xml);
-        } catch (UnsupportedEncodingException e) {
+        } catch (final UnsupportedEncodingException e) {
             prop.putHTML("mode_entries_" + number + "_author", new String(entry.getAuthor()), xml);
         }
 

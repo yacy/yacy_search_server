@@ -60,17 +60,17 @@ public class RobotsTxt {
     
     kelondroMap robotsTable;
     private final File robotsTableFile;
-    private ConcurrentHashMap<String, Long> syncObjects;
+    private final ConcurrentHashMap<String, Long> syncObjects;
     //private static final HashSet<String> loadedRobots = new HashSet<String>(); // only for debugging
     
-    public RobotsTxt(File robotsTableFile) {
+    public RobotsTxt(final File robotsTableFile) {
         this.robotsTableFile = robotsTableFile;
         robotsTableFile.getParentFile().mkdirs();
         kelondroBLOB blob = null;
         if (robotsTableFile.getName().endsWith(".heap")) {
             try {
                 blob = new kelondroBLOBHeap(robotsTableFile, 64, kelondroNaturalOrder.naturalOrder);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 e.printStackTrace();
             }
         } else {
@@ -101,15 +101,15 @@ public class RobotsTxt {
     }
     
     @SuppressWarnings("unchecked")
-    private Entry getEntry(String urlHostPort, boolean fetchOnlineIfNotAvailableOrNotFresh) {
+    private Entry getEntry(final String urlHostPort, final boolean fetchOnlineIfNotAvailableOrNotFresh) {
         // this method will always return a non-null value
         Entry robotsTxt4Host = null;
         try {
-            HashMap<String, String> record = this.robotsTable.get(urlHostPort);
+            final HashMap<String, String> record = this.robotsTable.get(urlHostPort);
             if (record != null) robotsTxt4Host = new Entry(urlHostPort, record);
-        } catch (kelondroException e) {
+        } catch (final kelondroException e) {
         	resetDatabase();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             resetDatabase();
         }
         
@@ -134,11 +134,11 @@ public class RobotsTxt {
                 // check the robots table again for all threads that come here because they waited for another one
                 // to complete a download
                 try {
-                    HashMap<String, String> record = this.robotsTable.get(urlHostPort);
+                    final HashMap<String, String> record = this.robotsTable.get(urlHostPort);
                     if (record != null) robotsTxt4Host = new Entry(urlHostPort, record);
-                } catch (kelondroException e) {
+                } catch (final kelondroException e) {
                     resetDatabase();
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     resetDatabase();
                 }
                 if (robotsTxt4Host != null &&
@@ -151,7 +151,7 @@ public class RobotsTxt {
                 yacyURL robotsURL = null;
                 try {                 
                     robotsURL = new yacyURL("http://" + urlHostPort + "/robots.txt", null);
-                } catch (MalformedURLException e) {
+                } catch (final MalformedURLException e) {
                     serverLog.logSevere("ROBOTS","Unable to generate robots.txt URL for host:port '" + urlHostPort + "'.");
                     robotsURL = null;
                 }
@@ -161,7 +161,7 @@ public class RobotsTxt {
                     serverLog.logFine("ROBOTS","Trying to download the robots.txt file from URL '" + robotsURL + "'.");
                     try {
                         result = downloadRobotsTxt(robotsURL, 5, robotsTxt4Host);
-                    } catch (Exception e) {
+                    } catch (final Exception e) {
                         result = null;
                     }
                 }
@@ -193,7 +193,7 @@ public class RobotsTxt {
                     // store the data into the robots DB
                     addEntry(robotsTxt4Host);
                 } else {
-                    robotsParser parserResult = new robotsParser((byte[]) result[DOWNLOAD_ROBOTS_TXT]);
+                    final robotsParser parserResult = new robotsParser((byte[]) result[DOWNLOAD_ROBOTS_TXT]);
                     ArrayList<String> denyPath = parserResult.denyList();
                     if (((Boolean) result[DOWNLOAD_ACCESS_RESTRICTED]).booleanValue()) {
                         denyPath = new ArrayList<String>();
@@ -217,35 +217,35 @@ public class RobotsTxt {
         return robotsTxt4Host;
     }
     
-    public int crawlDelay(yacyURL theURL) {
-        String urlHostPort = getHostPort(theURL);
-        RobotsTxt.Entry robotsEntry = getEntry(urlHostPort, true);
+    public int crawlDelay(final yacyURL theURL) {
+        final String urlHostPort = getHostPort(theURL);
+        final RobotsTxt.Entry robotsEntry = getEntry(urlHostPort, true);
         return robotsEntry.getCrawlDelay();
     }
     
     private Entry addEntry(
-    		String hostName, 
-    		ArrayList<String> allowPathList, 
-    		ArrayList<String> denyPathList, 
-            Date loadedDate, 
-    		Date modDate, 
-    		String eTag, 
-    		String sitemap,
-    		int crawlDelay
+    		final String hostName, 
+    		final ArrayList<String> allowPathList, 
+    		final ArrayList<String> denyPathList, 
+            final Date loadedDate, 
+    		final Date modDate, 
+    		final String eTag, 
+    		final String sitemap,
+    		final int crawlDelay
     ) {
-        Entry entry = new Entry(
+        final Entry entry = new Entry(
                 hostName, allowPathList, denyPathList, loadedDate, modDate,
                 eTag, sitemap, crawlDelay);
         addEntry(entry);
         return entry;
     }
     
-    private String addEntry(Entry entry) {
+    private String addEntry(final Entry entry) {
         // writes a new page and returns key
         try {
             this.robotsTable.put(entry.hostName, entry.mem);
             return entry.hostName;
-        } catch (IOException e) {
+        } catch (final IOException e) {
             return null;
         }
     }    
@@ -264,15 +264,15 @@ public class RobotsTxt {
         private LinkedList<String> allowPathList, denyPathList;
         String hostName;
         
-        public Entry(String hostName, HashMap<String, String> mem) {
+        public Entry(final String hostName, final HashMap<String, String> mem) {
             this.hostName = hostName.toLowerCase();
             this.mem = mem; 
             
             if (this.mem.containsKey(DISALLOW_PATH_LIST)) {
                 this.denyPathList = new LinkedList<String>();
-                String csPl = this.mem.get(DISALLOW_PATH_LIST);
+                final String csPl = this.mem.get(DISALLOW_PATH_LIST);
                 if (csPl.length() > 0){
-                    String[] pathArray = csPl.split(ROBOTS_DB_PATH_SEPARATOR);
+                    final String[] pathArray = csPl.split(ROBOTS_DB_PATH_SEPARATOR);
                     if ((pathArray != null)&&(pathArray.length > 0)) {
                         this.denyPathList.addAll(Arrays.asList(pathArray));
                     }
@@ -282,9 +282,9 @@ public class RobotsTxt {
             }
             if (this.mem.containsKey(ALLOW_PATH_LIST)) {
                 this.allowPathList = new LinkedList<String>();
-                String csPl = this.mem.get(ALLOW_PATH_LIST);
+                final String csPl = this.mem.get(ALLOW_PATH_LIST);
                 if (csPl.length() > 0){
-                    String[] pathArray = csPl.split(ROBOTS_DB_PATH_SEPARATOR);
+                    final String[] pathArray = csPl.split(ROBOTS_DB_PATH_SEPARATOR);
                     if ((pathArray != null)&&(pathArray.length > 0)) {
                         this.allowPathList.addAll(Arrays.asList(pathArray));
                     }
@@ -295,14 +295,14 @@ public class RobotsTxt {
         }  
         
         public Entry(
-                String hostName, 
-                ArrayList<String> allowPathList, 
-                ArrayList<String> disallowPathList, 
-                Date loadedDate,
-                Date modDate,
-                String eTag,
-                String sitemap,
-                int crawlDelay
+                final String hostName, 
+                final ArrayList<String> allowPathList, 
+                final ArrayList<String> disallowPathList, 
+                final Date loadedDate,
+                final Date modDate,
+                final String eTag,
+                final String sitemap,
+                final int crawlDelay
         ) {
             if ((hostName == null) || (hostName.length() == 0)) throw new IllegalArgumentException("The hostname is missing");
             
@@ -320,7 +320,7 @@ public class RobotsTxt {
             if ((allowPathList != null)&&(allowPathList.size()>0)) {
                 this.allowPathList.addAll(allowPathList);
                 
-                StringBuffer pathListStr = new StringBuffer();
+                final StringBuffer pathListStr = new StringBuffer();
                 for (int i=0; i<allowPathList.size();i++) {
                     pathListStr.append(allowPathList.get(i))
                                .append(ROBOTS_DB_PATH_SEPARATOR);
@@ -331,7 +331,7 @@ public class RobotsTxt {
             if ((disallowPathList != null)&&(disallowPathList.size()>0)) {
                 this.denyPathList.addAll(disallowPathList);
                 
-                StringBuffer pathListStr = new StringBuffer();
+                final StringBuffer pathListStr = new StringBuffer();
                 for (int i=0; i<disallowPathList.size();i++) {
                     pathListStr.append(disallowPathList.get(i))
                                .append(ROBOTS_DB_PATH_SEPARATOR);
@@ -341,7 +341,7 @@ public class RobotsTxt {
         }
         
         public String toString() {
-            StringBuffer str = new StringBuffer();
+            final StringBuffer str = new StringBuffer();
             str.append((this.hostName==null)?"null":this.hostName)
                .append(": ");
             
@@ -363,7 +363,7 @@ public class RobotsTxt {
             return null;
         }
         
-        public void setLoadedDate(Date newLoadedDate) {
+        public void setLoadedDate(final Date newLoadedDate) {
             if (newLoadedDate != null) {
                 this.mem.put(LOADED_DATE,Long.toString(newLoadedDate.getTime()));
             }
@@ -386,7 +386,7 @@ public class RobotsTxt {
         public int getCrawlDelay() {
             if (this.mem.containsKey(CRAWL_DELAY)) try {
                 return Integer.parseInt(this.mem.get(CRAWL_DELAY));
-            } catch (NumberFormatException e) {
+            } catch (final NumberFormatException e) {
                 return 0;
             }
             return 0;        	
@@ -400,9 +400,9 @@ public class RobotsTxt {
             // escaping all occurences of ; because this char is used as special char in the Robots DB
             else  path = path.replaceAll(ROBOTS_DB_PATH_SEPARATOR,"%3B");
             
-            Iterator<String> pathIter = this.denyPathList.iterator();
+            final Iterator<String> pathIter = this.denyPathList.iterator();
             while (pathIter.hasNext()) {
-                String nextPath = pathIter.next();
+                final String nextPath = pathIter.next();
                     
                 // disallow rule
                 if (path.startsWith(nextPath)) {
@@ -421,16 +421,16 @@ public class RobotsTxt {
     public static final int DOWNLOAD_ETAG = 2;
     public static final int DOWNLOAD_MODDATE = 3;
     
-    private static final String getHostPort(yacyURL theURL) {
+    private static final String getHostPort(final yacyURL theURL) {
         String urlHostPort = null;
-        int port = getPort(theURL);
+        final int port = getPort(theURL);
         urlHostPort = theURL.getHost() + ":" + port;
         urlHostPort = urlHostPort.toLowerCase().intern();    
         
         return urlHostPort;
     }
     
-    private static final int getPort(yacyURL theURL) {
+    private static final int getPort(final yacyURL theURL) {
         int port = theURL.getPort();
         if (port == -1) {
             if (theURL.getProtocol().equalsIgnoreCase("http")) {
@@ -443,48 +443,48 @@ public class RobotsTxt {
         return port;
     }
    
-    public yacyURL getSitemapURL(yacyURL theURL) {
+    public yacyURL getSitemapURL(final yacyURL theURL) {
         if (theURL == null) throw new IllegalArgumentException(); 
         yacyURL sitemapURL = null;
         
         // generating the hostname:poart string needed to do a DB lookup
-        String urlHostPort = getHostPort(theURL);
-        RobotsTxt.Entry robotsTxt4Host = this.getEntry(urlHostPort, true);
+        final String urlHostPort = getHostPort(theURL);
+        final RobotsTxt.Entry robotsTxt4Host = this.getEntry(urlHostPort, true);
                        
         try {
-            String sitemapUrlStr = robotsTxt4Host.getSitemap();
+            final String sitemapUrlStr = robotsTxt4Host.getSitemap();
             if (sitemapUrlStr != null) sitemapURL = new yacyURL(sitemapUrlStr, null);
-        } catch (MalformedURLException e) {/* ignore this */}
+        } catch (final MalformedURLException e) {/* ignore this */}
         
         return sitemapURL;
     }
     
-    public Integer getCrawlDelay(yacyURL theURL) {
+    public Integer getCrawlDelay(final yacyURL theURL) {
         if (theURL == null) throw new IllegalArgumentException(); 
         Integer crawlDelay = null;
         
         // generating the hostname:poart string needed to do a DB lookup
-        String urlHostPort = getHostPort(theURL);
-        RobotsTxt.Entry robotsTxt4Host = getEntry(urlHostPort, true);
+        final String urlHostPort = getHostPort(theURL);
+        final RobotsTxt.Entry robotsTxt4Host = getEntry(urlHostPort, true);
                        
         try {
             crawlDelay = robotsTxt4Host.getCrawlDelay();
-        } catch (NumberFormatException e) {/* ignore this */}
+        } catch (final NumberFormatException e) {/* ignore this */}
         
         return crawlDelay;      
     }
     
-    public boolean isDisallowed(yacyURL nexturl) {
+    public boolean isDisallowed(final yacyURL nexturl) {
         if (nexturl == null) throw new IllegalArgumentException();               
         
         // generating the hostname:port string needed to do a DB lookup
-        String urlHostPort = getHostPort(nexturl);
+        final String urlHostPort = getHostPort(nexturl);
         RobotsTxt.Entry robotsTxt4Host = null;
         robotsTxt4Host = getEntry(urlHostPort, true);
         return robotsTxt4Host.isDisallowed(nexturl.getFile());
     }
     
-    private static Object[] downloadRobotsTxt(yacyURL robotsURL, int redirectionCount, RobotsTxt.Entry entry) throws Exception {
+    private static Object[] downloadRobotsTxt(final yacyURL robotsURL, int redirectionCount, final RobotsTxt.Entry entry) throws Exception {
         
         if (redirectionCount < 0) return new Object[]{Boolean.FALSE,null,null};
         redirectionCount--;
@@ -508,14 +508,14 @@ public class RobotsTxt {
         if (entry != null) {
             oldEtag = entry.getETag();
             reqHeaders = new httpHeader();
-            Date modDate = entry.getModDate();
+            final Date modDate = entry.getModDate();
             if (modDate != null) reqHeaders.put(httpHeader.IF_MODIFIED_SINCE,HttpClient.dateString(entry.getModDate()));
             
         }
         
         // setup http-client
         //TODO: adding Traffic statistic for robots download?
-        JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(10000, reqHeaders, null);
+        final JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(10000, reqHeaders, null);
         JakartaCommonsHttpResponse res = null;
         try {
             // sending the get request
@@ -542,7 +542,7 @@ public class RobotsTxt {
                     }
                     
                     // downloading the content
-                    serverByteBuffer sbb = new serverByteBuffer();
+                    final serverByteBuffer sbb = new serverByteBuffer();
                     try {
                         serverFileUtils.copyToStream(new BufferedInputStream(res.getDataAsStream()), new BufferedOutputStream(sbb));
                     } finally {
@@ -566,7 +566,7 @@ public class RobotsTxt {
                     redirectionUrlString = redirectionUrlString.trim();
                     
                     // generating the new URL object
-                    yacyURL redirectionUrl = yacyURL.newURL(robotsURL, redirectionUrlString);      
+                    final yacyURL redirectionUrl = yacyURL.newURL(robotsURL, redirectionUrlString);      
                     
                     // following the redirection
                     serverLog.logFinest("ROBOTS","Redirection detected for robots.txt with URL '" + robotsURL + "'." + 
@@ -580,7 +580,7 @@ public class RobotsTxt {
                 serverLog.logFinest("ROBOTS","robots.txt could not be downloaded from URL '" + robotsURL + "'. [" + res.getStatusLine() + "].");
                 robotsTxt = null;
             }        
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw e;
         } finally {
             if(res != null) {

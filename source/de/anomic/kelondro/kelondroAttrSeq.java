@@ -49,8 +49,8 @@ import de.anomic.server.serverMemory;
 public class kelondroAttrSeq {
     
     // class objects
-    private File file;
-    private Map<String, Object> entries; // value may be of type String or of type Entry
+    private final File file;
+    private final Map<String, Object> entries; // value may be of type String or of type Entry
     protected Structure structure;
     private String name;
     private long created;
@@ -58,7 +58,7 @@ public class kelondroAttrSeq {
     // optional logger
     protected Logger theLogger = null;
     
-    public kelondroAttrSeq(File file, boolean tree) throws IOException {
+    public kelondroAttrSeq(final File file, final boolean tree) throws IOException {
         this.file = file;
         this.structure = null;
         this.created = -1;
@@ -67,7 +67,7 @@ public class kelondroAttrSeq {
         readAttrFile(file);
     }
 
-    public kelondroAttrSeq(String name, String struct, boolean tree) {
+    public kelondroAttrSeq(final String name, final String struct, final boolean tree) {
         this.file = null;
         this.structure = new Structure(struct);
         this.created = System.currentTimeMillis();
@@ -75,25 +75,25 @@ public class kelondroAttrSeq {
         this.entries = (tree) ? (Map<String, Object>) new TreeMap<String, Object>() : (Map<String, Object>) new HashMap<String, Object>();
     }
         
-    public void setLogger(Logger newLogger) {
+    public void setLogger(final Logger newLogger) {
         this.theLogger = newLogger;
     }
     
-    public void logInfo(String message) {
+    public void logInfo(final String message) {
         if (this.theLogger == null)
             System.err.println("ATTRSEQ INFO for file " + this.file + ": " + message);
         else
             this.theLogger.info("ATTRSEQ INFO for file " + this.file + ": " + message);
     }
     
-    public void logWarning(String message) {
+    public void logWarning(final String message) {
         if (this.theLogger == null)
             System.err.println("ATTRSEQ WARNING for file " + this.file + ": " + message);
         else
             this.theLogger.warning("ATTRSEQ WARNING for file " + this.file + ": " + message);
     }
     
-    private void readAttrFile(File loadfile) throws IOException {
+    private void readAttrFile(final File loadfile) throws IOException {
         BufferedReader br = null;
         int p;
         if (loadfile.toString().endsWith(".gz")) {
@@ -162,14 +162,14 @@ public class kelondroAttrSeq {
         return this.created;
     }
     
-    public void toFile(File out) throws IOException {
+    public void toFile(final File out) throws IOException {
         // generate header
-        StringBuffer sb = new StringBuffer(2000);
+        final StringBuffer sb = new StringBuffer(2000);
         sb.append("# Name=" + this.name); sb.append((char) 13); sb.append((char) 10);
         sb.append("# Created=" + this.created); sb.append((char) 13); sb.append((char) 10);
         sb.append("# Structure=" + this.structure.toString()); sb.append((char) 13); sb.append((char) 10);
         sb.append("# ---"); sb.append((char) 13); sb.append((char) 10);
-        Iterator<Map.Entry<String, Object>> i = entries.entrySet().iterator();
+        final Iterator<Map.Entry<String, Object>> i = entries.entrySet().iterator();
         Map.Entry<String, Object> entry;
         String k;
         Object v;
@@ -193,11 +193,11 @@ public class kelondroAttrSeq {
         return entries.keySet().iterator();
     }
     
-    public Entry newEntry(String pivot, boolean tree) {
+    public Entry newEntry(final String pivot, final boolean tree) {
         return new Entry(pivot, new HashMap<String, Long>(), (tree) ? (Set<String>) new TreeSet<String>() : (Set<String>) new HashSet<String>());
     }
     
-    public Entry newEntry(String pivot, HashMap<String, Long> props, Set<String> seq) {
+    public Entry newEntry(final String pivot, final HashMap<String, Long> props, final Set<String> seq) {
         return new Entry(pivot, props, seq);
     }
     
@@ -207,27 +207,27 @@ public class kelondroAttrSeq {
     }
     */
     
-    public void putEntry(Entry entry) {
+    public void putEntry(final Entry entry) {
         if (shortmem())
             entries.put(entry.pivot, entry.toString());
         else
             entries.put(entry.pivot, entry);
     }
     
-    public void putEntrySmall(Entry entry) {
+    public void putEntrySmall(final Entry entry) {
         entries.put(entry.pivot, entry.toString());
     }
     
-    public Entry getEntry(String pivot) {
-        Object e = entries.get(pivot);
+    public Entry getEntry(final String pivot) {
+        final Object e = entries.get(pivot);
         if (e == null) return null;
         if (e instanceof String) return new Entry(pivot, (String) e, false);
         if (e instanceof Entry) return (Entry) e;
         return null;
     }
    
-    public Entry removeEntry(String pivot) {
-        Object e = entries.remove(pivot);
+    public Entry removeEntry(final String pivot) {
+        final Object e = entries.remove(pivot);
         if (e == null) return null;
         if (e instanceof String) return new Entry(pivot, (String) e, false);
         if (e instanceof Entry) return (Entry) e;
@@ -252,7 +252,7 @@ public class kelondroAttrSeq {
             // parse pivot definition:
             int p = structure.indexOf(",'='");
             if (p < 0) return;
-            String pivot = structure.substring(0, p);
+            final String pivot = structure.substring(0, p);
             structure = structure.substring(p + 5);
             kelondroColumn a = new kelondroColumn(pivot);
             pivot_name = a.nickname;
@@ -262,7 +262,7 @@ public class kelondroAttrSeq {
             p = structure.indexOf(",'|'");
             if (p < 0) return;
             ArrayList<kelondroColumn> l = new ArrayList<kelondroColumn>();
-            String attr = structure.substring(0, p);
+            final String attr = structure.substring(0, p);
             String seqs = structure.substring(p + 5);
             StringTokenizer st = new StringTokenizer(attr, ",");
             while (st.hasMoreTokens()) {
@@ -302,7 +302,7 @@ public class kelondroAttrSeq {
             }
             
             // generate rowdef for seq row definition
-            StringBuffer rowdef = new StringBuffer();
+            final StringBuffer rowdef = new StringBuffer();
             rowdef.append("byte[] ");
             rowdef.append(seq_names[0]);
             rowdef.append('-');
@@ -318,7 +318,7 @@ public class kelondroAttrSeq {
         }
         
         public String toString() {
-            StringBuffer sb = new StringBuffer(100);
+            final StringBuffer sb = new StringBuffer(100);
             sb.append('<'); sb.append(pivot_name); sb.append('-'); sb.append(Integer.toString(pivot_len)); sb.append(">,'=',");
             if (prop_names.length > 0) {
                 for (int i = 0; i < prop_names.length; i++) {
@@ -340,13 +340,13 @@ public class kelondroAttrSeq {
         HashMap<String, Long> attrs;
         Set<String>           seq;
         
-        public Entry(String pivot, HashMap<String, Long> attrs, Set<String> seq) {
+        public Entry(final String pivot, final HashMap<String, Long> attrs, final Set<String> seq) {
             this.pivot = pivot;
             this.attrs = attrs;
             this.seq = seq;
         }
         
-        public Entry(String pivot, String attrseq, boolean tree) {
+        public Entry(final String pivot, final String attrseq, final boolean tree) {
             this.pivot = pivot;
             attrs = new HashMap<String, Long>();
             seq = (tree) ? (Set<String>) new TreeSet<String>() : (Set<String>) new HashSet<String>();
@@ -372,13 +372,13 @@ public class kelondroAttrSeq {
             return attrs;
         }
         
-        public long getAttr(String key, long dflt) {
-            Long i = attrs.get(key);
+        public long getAttr(final String key, final long dflt) {
+            final Long i = attrs.get(key);
             if (i == null) return dflt;
             return i.longValue();
         }
         
-        public void setAttr(String key, long attr) {
+        public void setAttr(final String key, final long attr) {
             attrs.put(key, new Long(attr));
         }
         
@@ -387,32 +387,32 @@ public class kelondroAttrSeq {
         }
         
         public kelondroRowCollection getSeqCollection() {
-            kelondroRowCollection collection = new kelondroRowCollection(structure.seqrow, seq.size());
-            Iterator<String> i = seq.iterator();
+            final kelondroRowCollection collection = new kelondroRowCollection(structure.seqrow, seq.size());
+            final Iterator<String> i = seq.iterator();
             while (i.hasNext()) {
                 collection.addUnique(structure.seqrow.newEntry(i.next().getBytes()));
             }
             return collection;
         }
         
-        public void setSeq(Set<String> seq) {
+        public void setSeq(final Set<String> seq) {
             this.seq = seq;
         }
         
-        public void addSeq(String s/*, long[] seqattrs*/) {
+        public void addSeq(final String s/*, long[] seqattrs*/) {
             this.seq.add(s/*, seqattrs*/);
         }
         
         public String toString() {
             // creates only the attribute field and the sequence, not the pivot
-            StringBuffer sb = new StringBuffer(100 + structure.seq_len[0] * seq.size());
+            final StringBuffer sb = new StringBuffer(100 + structure.seq_len[0] * seq.size());
             Long val;
             for (int i = 0; i < structure.prop_names.length; i++) {
                 val = attrs.get(structure.prop_names[i]);
                 sb.append(kelondroBase64Order.enhancedCoder.encodeLongSmart((val == null) ? 0 : val.longValue(), structure.prop_len[i]));
             }
             sb.append('|');
-            Iterator<String> q = seq.iterator();
+            final Iterator<String> q = seq.iterator();
             //long[] seqattrs;
             while (q.hasNext()) {
                 sb.append(q.next());
@@ -436,24 +436,24 @@ public class kelondroAttrSeq {
         return shortmemstate;
     }
     
-    public static void transcode(File from_file, File to_file) throws IOException {
-        kelondroAttrSeq crp = new kelondroAttrSeq(from_file, true);
+    public static void transcode(final File from_file, final File to_file) throws IOException {
+        final kelondroAttrSeq crp = new kelondroAttrSeq(from_file, true);
         //crp.toFile(new File(args[1]));
-        kelondroAttrSeq cro = new kelondroAttrSeq(crp.name + "/Transcoded from " + crp.file.getName(), crp.structure.toString(), true);
-        Iterator<String> i = crp.entries.keySet().iterator();
+        final kelondroAttrSeq cro = new kelondroAttrSeq(crp.name + "/Transcoded from " + crp.file.getName(), crp.structure.toString(), true);
+        final Iterator<String> i = crp.entries.keySet().iterator();
         while (i.hasNext()) {
             cro.putEntry(crp.getEntry(i.next()));
         }
         cro.toFile(to_file);
     }
     
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         // java -classpath source de.anomic.kelondro.kelondroPropFile -transcode DATA/RANKING/GLOBAL/CRG-test-unsorted-original.cr DATA/RANKING/GLOBAL/CRG-test-generated.cr
         try {
             if ((args.length == 3) && (args[0].equals("-transcode"))) {
                 transcode(new File(args[1]), new File(args[2]));
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             e.printStackTrace();
         }
     }

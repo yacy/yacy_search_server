@@ -44,9 +44,9 @@ public class RSSReader extends DefaultHandler {
     
     // class variables
     private RSSMessage item;
-    private StringBuffer buffer;
+    private final StringBuffer buffer;
     private boolean parsingChannel, parsingImage, parsingItem;
-    private RSSFeed theChannel;
+    private final RSSFeed theChannel;
     
     public RSSReader() {
         theChannel = new RSSFeed();
@@ -57,29 +57,29 @@ public class RSSReader extends DefaultHandler {
         parsingItem = false;
     }
     
-    public RSSReader(String path) {
+    public RSSReader(final String path) {
         this();
         try {
-            SAXParserFactory factory = SAXParserFactory.newInstance();
-            SAXParser saxParser = factory.newSAXParser();
+            final SAXParserFactory factory = SAXParserFactory.newInstance();
+            final SAXParser saxParser = factory.newSAXParser();
             saxParser.parse(path, this);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             e.printStackTrace();
         }
     }
     
-    public RSSReader(InputStream stream) {
+    public RSSReader(final InputStream stream) {
         this();
         try {
-            SAXParserFactory factory = SAXParserFactory.newInstance();
-            SAXParser saxParser = factory.newSAXParser();
+            final SAXParserFactory factory = SAXParserFactory.newInstance();
+            final SAXParser saxParser = factory.newSAXParser();
             saxParser.parse(stream, this);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             e.printStackTrace();
         }
     }
     
-    public static RSSReader parse(byte[] a) {
+    public static RSSReader parse(final byte[] a) {
 
         // check integrity of array
         if ((a == null) || (a.length == 0)) {
@@ -94,28 +94,28 @@ public class RSSReader extends DefaultHandler {
             serverLog.logWarning("rssReader", "response does not contain valid xml");
             return null;
         }
-        String end = new String(a, a.length - 10, 10);
+        final String end = new String(a, a.length - 10, 10);
         if (end.indexOf("rss") < 0) {
             serverLog.logWarning("rssReader", "response incomplete");
             return null;
         }
         
         // make input stream
-        ByteArrayInputStream bais = new ByteArrayInputStream(a);
+        final ByteArrayInputStream bais = new ByteArrayInputStream(a);
         
         // parse stream
         RSSReader reader = null;
         try {
             reader = new RSSReader(bais);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             serverLog.logWarning("rssReader", "parse exception: " + e);
             return null;
         }
-        try { bais.close(); } catch (IOException e) {}
+        try { bais.close(); } catch (final IOException e) {}
         return reader;
     }
 
-    public void startElement(String uri, String name, String tag, Attributes atts) throws SAXException {
+    public void startElement(final String uri, final String name, final String tag, final Attributes atts) throws SAXException {
         if ("channel".equals(tag)) {
             item = new RSSMessage();
             parsingChannel = true;
@@ -127,7 +127,7 @@ public class RSSReader extends DefaultHandler {
         }
     }
 
-    public void endElement(String uri, String name, String tag) {
+    public void endElement(final String uri, final String name, final String tag) {
         if (tag == null) return;
         if ("channel".equals(tag)) {
             parsingChannel = false;
@@ -138,21 +138,21 @@ public class RSSReader extends DefaultHandler {
         } else if ("image".equals(tag)) {
             parsingImage = false;
         } else if ((parsingImage) && (parsingChannel)) {
-            String value = buffer.toString().trim();
+            final String value = buffer.toString().trim();
             buffer.setLength(0);
             if ("url".equals(tag)) theChannel.setImage(value);
         } else if (parsingItem)  {
-            String value = buffer.toString().trim();
+            final String value = buffer.toString().trim();
             buffer.setLength(0);
             if (RSSMessage.tags.contains(tag)) item.setValue(tag, value);
         } else if (parsingChannel) {
-            String value = buffer.toString().trim();
+            final String value = buffer.toString().trim();
             buffer.setLength(0);
             if (RSSMessage.tags.contains(tag)) item.setValue(tag, value);
         }
     }
 
-    public void characters(char ch[], int start, int length) {
+    public void characters(final char ch[], final int start, final int length) {
         if (parsingItem || parsingChannel) {
             buffer.append(ch, start, length);
         }

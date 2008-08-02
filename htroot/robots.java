@@ -12,7 +12,7 @@ import de.anomic.server.servletProperties;
 
 public class robots {
     
-    public static servletProperties respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
+    public static servletProperties respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
         final servletProperties prop = new servletProperties();
         final httpdRobotsTxtConfig rbc = ((plasmaSwitchboard)env).robotstxtConfig;
         
@@ -49,7 +49,7 @@ public class robots {
     }
     
     @SuppressWarnings("unchecked")
-    private static ArrayList<String>[] getFiles(String htrootPath) {
+    private static ArrayList<String>[] getFiles(final String htrootPath) {
         final File htroot = new File(htrootPath);
         if (!htroot.exists()) return null;
         final ArrayList<String> htrootFiles = new ArrayList<String>();

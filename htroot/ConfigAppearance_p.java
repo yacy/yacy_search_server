@@ -46,10 +46,10 @@ import de.anomic.yacy.yacyURL;
 
 public class ConfigAppearance_p {
 
-	public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
-        serverObjects prop = new serverObjects();
-        plasmaSwitchboard sb = (plasmaSwitchboard) env;
-        String skinPath = new File(env.getRootPath(), env.getConfig("skinPath", "DATA/SKINS")).toString();
+	public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+        final serverObjects prop = new serverObjects();
+        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        final String skinPath = new File(env.getRootPath(), env.getConfig("skinPath", "DATA/SKINS")).toString();
 
         // Fallback
         prop.put("currentskin", "");
@@ -66,7 +66,7 @@ public class ConfigAppearance_p {
             try {
                 serverFileUtils.copy(new File(env.getRootPath(), "htroot/env/style.css"), new File(skinPath, "default.css"));
                 env.setConfig("currentSkin", "default");
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 e.printStackTrace();
             }
         }
@@ -79,34 +79,34 @@ public class ConfigAppearance_p {
             }
             if (post.containsKey("delete_button")) {
                 // delete skin
-                File skinfile = new File(skinPath, post.get("skin"));
+                final File skinfile = new File(skinPath, post.get("skin"));
                 skinfile.delete();
 
             }
             if (post.containsKey("install_button")) {
                 // load skin from URL
-                String url = post.get("url");
+                final String url = post.get("url");
                 ArrayList<String> skinVector;
                 try {
-                    yacyURL u = new yacyURL(url, null);
-                    httpHeader reqHeader = new httpHeader();
+                    final yacyURL u = new yacyURL(url, null);
+                    final httpHeader reqHeader = new httpHeader();
                     reqHeader.put(httpHeader.USER_AGENT, HTTPLoader.yacyUserAgent);
                     skinVector = nxTools.strings(HttpClient.wget(u.toString(), reqHeader, 10000), "UTF-8");
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     prop.put("status", "1");// unable to get URL
                     prop.put("status_url", url);
                     return prop;
                 }
                 try {
-                    Iterator<String> it = skinVector.iterator();
-                    File skinFile = new File(skinPath, url.substring(url.lastIndexOf("/"), url.length()));
-                    BufferedWriter bw = new BufferedWriter(new PrintWriter(new FileWriter(skinFile)));
+                    final Iterator<String> it = skinVector.iterator();
+                    final File skinFile = new File(skinPath, url.substring(url.lastIndexOf("/"), url.length()));
+                    final BufferedWriter bw = new BufferedWriter(new PrintWriter(new FileWriter(skinFile)));
 
                     while (it.hasNext()) {
                         bw.write(it.next() + "\n");
                     }
                     bw.close();
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     prop.put("status", "2");// error saving the skin
                     return prop;
                 }
@@ -152,17 +152,17 @@ public class ConfigAppearance_p {
         return prop;
     }
 
-    private static boolean changeSkin(plasmaSwitchboard sb, String skinPath, String skin) {
-        File htdocsDir = new File(sb.getConfigPath("htDocsPath", "DATA/HTDOCS"), "env");
-        File styleFile = new File(htdocsDir, "style.css");
-        File skinFile = new File(skinPath, skin);
+    private static boolean changeSkin(final plasmaSwitchboard sb, final String skinPath, final String skin) {
+        final File htdocsDir = new File(sb.getConfigPath("htDocsPath", "DATA/HTDOCS"), "env");
+        final File styleFile = new File(htdocsDir, "style.css");
+        final File skinFile = new File(skinPath, skin);
 
         styleFile.getParentFile().mkdirs();
         try {
             serverFileUtils.copy(skinFile, styleFile);
             sb.setConfig("currentSkin", skin.substring(0, skin.length() - 4));
             return true;
-        } catch (IOException e) {
+        } catch (final IOException e) {
             return false;
         }
     }

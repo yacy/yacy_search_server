@@ -34,12 +34,13 @@ import java.util.TreeMap;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.cache.IResourceInfo;
+import de.anomic.plasma.cache.ResourceInfoFactory;
 import de.anomic.server.serverDate;
 import de.anomic.yacy.yacyURL;
 
 public class ResourceInfo implements IResourceInfo {
-    private yacyURL url;
-    private httpHeader responseHeader;
+    private final yacyURL url;
+    private final httpHeader responseHeader;
     private httpHeader requestHeader;
     
     /**
@@ -47,7 +48,7 @@ public class ResourceInfo implements IResourceInfo {
      * @param objectURL
      * @param objectInfo
      */
-    public ResourceInfo(yacyURL objectURL, Map<String, String> objectInfo) {
+    public ResourceInfo(final yacyURL objectURL, final Map<String, String> objectInfo) {
         if (objectURL == null) throw new NullPointerException();
         if (objectInfo == null) throw new NullPointerException();
         
@@ -58,7 +59,7 @@ public class ResourceInfo implements IResourceInfo {
         this.responseHeader =  new httpHeader(null, objectInfo);
     }
 
-    public ResourceInfo(yacyURL objectURL, httpHeader requestHeaders, httpHeader responseHeaders) {
+    public ResourceInfo(final yacyURL objectURL, final httpHeader requestHeaders, final httpHeader responseHeaders) {
         if (objectURL == null) throw new NullPointerException();
         if (responseHeaders == null) throw new NullPointerException();  
         
@@ -82,7 +83,7 @@ public class ResourceInfo implements IResourceInfo {
         String mimeType = this.responseHeader.mime();
         mimeType = mimeType.trim().toLowerCase();
         
-        int pos = mimeType.indexOf(';');
+        final int pos = mimeType.indexOf(';');
         return ((pos < 0) ? mimeType : mimeType.substring(0, pos));          
     }
     
@@ -110,7 +111,7 @@ public class ResourceInfo implements IResourceInfo {
         if (this.requestHeader == null) return null;
         try {
             return new yacyURL((String) this.requestHeader.get(httpHeader.REFERER, ""), null);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             return null;
         }        
     }
@@ -129,7 +130,7 @@ public class ResourceInfo implements IResourceInfo {
         return this.url.hash();
     }
     
-    public void setRequestHeader(httpHeader reqestHeader) {
+    public void setRequestHeader(final httpHeader reqestHeader) {
         this.requestHeader = reqestHeader;
     }
 
@@ -137,7 +138,7 @@ public class ResourceInfo implements IResourceInfo {
      * @see de.anomic.plasma.cache.IResourceInfo#shallIndexCacheForCrawler()
      */
     public String shallIndexCacheForCrawler() {
-        String mimeType = this.getMimeType();
+        final String mimeType = this.getMimeType();
         if (plasmaHTCache.isPicture(mimeType)) { return "Media_Content_(Picture)"; }
         if (!plasmaHTCache.isText(mimeType)) { return "Media_Content_(not_text)"; }
         return null;
@@ -152,7 +153,7 @@ public class ResourceInfo implements IResourceInfo {
         // thus we do not care about it here for indexing                
         
         // a picture cannot be indexed
-        String mimeType = this.getMimeType();
+        final String mimeType = this.getMimeType();
         if (plasmaHTCache.isPicture(mimeType)) {
             return "Media_Content_(Picture)";
         }
@@ -162,7 +163,7 @@ public class ResourceInfo implements IResourceInfo {
 
         // -if-modified-since in request
         // if the page is fresh at the very moment we can index it
-        Date ifModifiedSince = getModificationDate();
+        final Date ifModifiedSince = getModificationDate();
         if ((ifModifiedSince != null) && (this.responseHeader.containsKey(httpHeader.LAST_MODIFIED))) {
             // parse date
             Date d = this.responseHeader.lastModified();
@@ -229,7 +230,7 @@ public class ResourceInfo implements IResourceInfo {
                         //System.out.println("***not indexed because cache-control");
                         return "Stale_(expired_by_cache-control)";
                     }
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     return "Error_(" + e.getMessage() + ")";
                 }
             }
@@ -283,15 +284,15 @@ public class ResourceInfo implements IResourceInfo {
                 cacheControl = cacheControl.trim().toUpperCase();
                 if (cacheControl.startsWith("MAX-AGE=")) {
                     // we need also the load date
-                    Date date = this.responseHeader.date();
+                    final Date date = this.responseHeader.date();
                     if (date == null) return "stale_no_date_given_in_response";
                     try {
-                        long ttl = 1000 * Long.parseLong(cacheControl.substring(8)); // milliseconds to live
+                        final long ttl = 1000 * Long.parseLong(cacheControl.substring(8)); // milliseconds to live
                         if (serverDate.correctedUTCTime() - date.getTime() > ttl) {
                             //System.out.println("***not indexed because cache-control");
                             return "stale_expired";
                         }
-                    } catch (Exception e) {
+                    } catch (final Exception e) {
                         return "stale_error_" + e.getMessage() + ")";
                     }
                 }
@@ -336,7 +337,7 @@ public class ResourceInfo implements IResourceInfo {
                 if (d2.after(d1)) { return false; }
             }
 
-            String mimeType = this.getMimeType();
+            final String mimeType = this.getMimeType();
             if (!plasmaHTCache.isPicture(mimeType)) {
                 // -cookies in request
                 // unfortunately, we should reload in case of a cookie
@@ -368,12 +369,12 @@ public class ResourceInfo implements IResourceInfo {
 
         // -expires in cached response
         // the expires value gives us a very easy hint when the cache is stale
-        Date expires = this.responseHeader.expires();
+        final Date expires = this.responseHeader.expires();
         if (expires != null) {
 //          System.out.println("EXPIRES-TEST: expires=" + expires + ", NOW=" + serverDate.correctedGMTDate() + ", url=" + url);
             if (expires.before(new Date(serverDate.correctedUTCTime()))) { return false; }
         }
-        Date lastModified = this.responseHeader.lastModified();
+        final Date lastModified = this.responseHeader.lastModified();
         cacheControl = this.responseHeader.get(httpHeader.CACHE_CONTROL);
         if (cacheControl == null && lastModified == null && expires == null) { return false; }
 
@@ -386,7 +387,7 @@ public class ResourceInfo implements IResourceInfo {
         Date date = this.responseHeader.date();
         if (lastModified != null) {
             if (date == null) { date = new Date(serverDate.correctedUTCTime()); }
-            long age = date.getTime() - lastModified.getTime();
+            final long age = date.getTime() - lastModified.getTime();
             if (age < 0) { return false; }
             // TTL (Time-To-Live) is age/10 = (d2.getTime() - d1.getTime()) / 10
             // the actual living-time is serverDate.correctedGMTDate().getTime() - d2.getTime()
@@ -413,7 +414,7 @@ public class ResourceInfo implements IResourceInfo {
                     if (serverDate.correctedUTCTime() - date.getTime() > ttl) {
                         return false;
                     }
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     return false;
                 }
             }
@@ -421,7 +422,7 @@ public class ResourceInfo implements IResourceInfo {
         return true;
     }
 
-    public boolean validResponseStatus(String responseStatus) {
+    public boolean validResponseStatus(final String responseStatus) {
         return responseStatus.startsWith("200") ||
                responseStatus.startsWith("203");
     }

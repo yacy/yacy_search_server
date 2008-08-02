@@ -74,11 +74,11 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
     protected       int                readAheadChunkSize = 100;
     protected       long               lastIteratorCount = readAheadChunkSize;
     
-    public kelondroTree(File file, boolean useNodeCache, long preloadTime, kelondroRow rowdef) throws IOException {
+    public kelondroTree(final File file, final boolean useNodeCache, final long preloadTime, final kelondroRow rowdef) throws IOException {
         this(file, useNodeCache, preloadTime, rowdef, rowdef.columns() /* txtProps */, 80 /* txtPropWidth */);
     }
 
-    public kelondroTree(File file, boolean useNodeCache, long preloadTime, kelondroRow rowdef, int txtProps, int txtPropsWidth) throws IOException {
+    public kelondroTree(final File file, final boolean useNodeCache, final long preloadTime, final kelondroRow rowdef, final int txtProps, final int txtPropsWidth) throws IOException {
         // opens an existing tree file or creates a new tree file
         super(file, useNodeCache, preloadTime,
               thisOHBytes, thisOHHandles, rowdef,
@@ -91,20 +91,20 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
         this.loopDetectionOrder = new kelondroByteOrder.StringOrder(rowdef.objectOrder);
     }
     
-    public static final kelondroTree open(File file, boolean useNodeCache, long preloadTime, kelondroRow rowdef) {
+    public static final kelondroTree open(final File file, final boolean useNodeCache, final long preloadTime, final kelondroRow rowdef) {
         return open(file, useNodeCache, preloadTime, rowdef, rowdef.columns() /* txtProps */, 80 /* txtPropWidth */);
     }
     
-    public static final kelondroTree open(File file, boolean useNodeCache, long preloadTime, kelondroRow rowdef, int txtProps, int txtPropsWidth) {
+    public static final kelondroTree open(final File file, final boolean useNodeCache, final long preloadTime, final kelondroRow rowdef, final int txtProps, final int txtPropsWidth) {
         // opens new or existing file; in case that any error occur the file is deleted again and it is tried to create the file again
         // if that fails, the method returns null
         try {
             return new kelondroTree(file, useNodeCache, preloadTime, rowdef, txtProps, txtPropsWidth);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             file.delete();
             try {
                 return new kelondroTree(file, useNodeCache, preloadTime, rowdef, txtProps, txtPropsWidth);
-            } catch (IOException ee) {
+            } catch (final IOException ee) {
                 log.severe("cannot open or create file " + file.toString());
                 e.printStackTrace();
                 ee.printStackTrace();
@@ -113,19 +113,19 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
         }
     }
     
-    public kelondroTree(kelondroRA ra, String filename, boolean useNodeCache, long preloadTime, kelondroRow rowdef, boolean exitOnFail) {
+    public kelondroTree(final kelondroRA ra, final String filename, final boolean useNodeCache, final long preloadTime, final kelondroRow rowdef, final boolean exitOnFail) {
         // this creates a new tree within a kelondroRA
         this(ra, filename, useNodeCache, preloadTime, rowdef, new kelondroNaturalOrder(true), rowdef.columns() /* txtProps */, 80 /* txtPropWidth */, exitOnFail);
     }
 
-    public kelondroTree(kelondroRA ra, String filename, boolean useNodeCache, long preloadTime, kelondroRow rowdef, kelondroByteOrder objectOrder, int txtProps, int txtPropsWidth, boolean exitOnFail) {
+    public kelondroTree(final kelondroRA ra, final String filename, final boolean useNodeCache, final long preloadTime, final kelondroRow rowdef, final kelondroByteOrder objectOrder, final int txtProps, final int txtPropsWidth, final boolean exitOnFail) {
         // this creates a new tree within a kelondroRA
         super(ra, filename, useNodeCache, preloadTime,
               thisOHBytes, thisOHHandles, rowdef,
               thisFHandles, txtProps, txtPropsWidth, exitOnFail);
         try {
             setHandle(root, null); // define the root value
-        } catch (IOException e) {
+        } catch (final IOException e) {
             super.logFailure("cannot set root handle / " + e.getMessage());
             if (exitOnFail) System.exit(-1);
             throw new RuntimeException("cannot set root handle / " + e.getMessage());
@@ -134,7 +134,7 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
         this.loopDetectionOrder = new kelondroByteOrder.StringOrder(rowdef.objectOrder);
     }
     
-    public kelondroTree(kelondroRA ra, String filename, boolean useNodeCache, long preloadTime) throws IOException {
+    public kelondroTree(final kelondroRA ra, final String filename, final boolean useNodeCache, final long preloadTime) throws IOException {
         // this opens a file with an existing tree in a kelondroRA
         super(ra, filename, useNodeCache, preloadTime);
         super.setLogger(log);
@@ -145,18 +145,18 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
         setHandle(root, null); 
 	}
     
-    private void commitNode(kelondroNode n) throws IOException {
+    private void commitNode(final kelondroNode n) throws IOException {
         //kelondroHandle left = n.getOHHandle(leftchild);
         //kelondroHandle right = n.getOHHandle(rightchild);
         n.commit();
     }
 
-    public boolean has(byte[] key) {
+    public boolean has(final byte[] key) {
         throw new UnsupportedOperationException("has should not be used with kelondroTree.");
     }
     
     // Returns the value to which this map maps the specified key.
-    public kelondroRow.Entry get(byte[] key) throws IOException {
+    public kelondroRow.Entry get(final byte[] key) throws IOException {
         kelondroRow.Entry result;
         synchronized (writeSearchObj) {
             writeSearchObj.process(key);
@@ -193,7 +193,7 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
         protected Search() {
         }
 
-        protected void process(byte[] key) throws IOException {
+        protected void process(final byte[] key) throws IOException {
             // searchs the database for the key and stores the result in the thisHandle
             // if the key was found, then found=true, thisHandle and leftchild is set;
             // else found=false and thisHandle and leftchild is undefined
@@ -218,13 +218,13 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
             found = false;
             int c;
             
-            TreeSet<String> visitedNodeKeys = new TreeSet<String>(loopDetectionOrder); // to detect loops
+            final TreeSet<String> visitedNodeKeys = new TreeSet<String>(loopDetectionOrder); // to detect loops
             // System.out.println("Starting Compare Loop in Database " + filename); // debug
             while (thisHandle != null) {
                 try {
                     parentnode = thenode;
                     thenode = new CacheNode(thisHandle, thenode, (child == -1) ? leftchild : rightchild, true);
-                } catch (IllegalArgumentException e) {
+                } catch (final IllegalArgumentException e) {
                     logWarning("kelondroTree.Search.process: fixed a broken handle");
                     found = false;
                     return;
@@ -312,23 +312,23 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
         }
     }
 
-    public synchronized boolean isChild(kelondroNode childn, kelondroNode parentn, int child) {
+    public synchronized boolean isChild(final kelondroNode childn, final kelondroNode parentn, final int child) {
         if (childn == null) throw new IllegalArgumentException("isLeftChild: Node parameter is NULL");
-        kelondroHandle lc = parentn.getOHHandle(child);
+        final kelondroHandle lc = parentn.getOHHandle(child);
         if (lc == null) return false;
         return (lc.equals(childn.handle()));
     }
     
-    public synchronized void putMultiple(List<Entry> rows) throws IOException {
-        Iterator<Entry> i = rows.iterator();
+    public synchronized void putMultiple(final List<Entry> rows) throws IOException {
+        final Iterator<Entry> i = rows.iterator();
         while (i.hasNext()) put(i.next());
     }
     
-    public kelondroRow.Entry put(kelondroRow.Entry row, Date entryDate) throws IOException {
+    public kelondroRow.Entry put(final kelondroRow.Entry row, final Date entryDate) throws IOException {
         return put(row);
     }
     
-    public kelondroRow.Entry put(kelondroRow.Entry newrow) throws IOException {
+    public kelondroRow.Entry put(final kelondroRow.Entry newrow) throws IOException {
         assert (newrow != null);
         assert (newrow.columns() == row().columns());
         assert (!(serverLog.allZero(newrow.getPrimaryKeyBytes())));
@@ -341,7 +341,7 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
             writeSearchObj.process(newrow.getColBytes(0));
             if (writeSearchObj.found()) {
                 // a node with this key exist. simply overwrite the content and return old content
-                kelondroNode e = writeSearchObj.getMatcher();
+                final kelondroNode e = writeSearchObj.getMatcher();
                 result = row().newEntry(e.getValueRow());
                 e.setValueRow(newrow.bytes());
                 commitNode(e);
@@ -351,7 +351,7 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
                 if (getHandle(root) != null)
                     throw new kelondroException(filename, "tried to create root node twice");
                 // we dont have any Nodes in the file, so start here to create one
-                kelondroNode e = new CacheNode(newrow.bytes());
+                final kelondroNode e = new CacheNode(newrow.bytes());
                 // write the propetries
                 e.setOHByte(magic,   (byte) 1);
                 e.setOHByte(balance, (byte) 0);
@@ -442,14 +442,14 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
                             break;
                         }
                         if (path.startsWith("RL")) {
-                            kelondroHandle parentHandle = parentNode.handle();
+                            final kelondroHandle parentHandle = parentNode.handle();
                             LL_RightRotation(theNode, new CacheNode(theNode.getOHHandle(leftchild), theNode, leftchild, false));
                             parentNode = new CacheNode(parentHandle, null, 0, false); // reload the parent node
                             RR_LeftRotation(parentNode, new CacheNode(parentNode.getOHHandle(rightchild), parentNode, rightchild, false));
                             break;
                         }
                         if (path.startsWith("LR")) {
-                            kelondroHandle parentHandle = parentNode.handle();
+                            final kelondroHandle parentHandle = parentNode.handle();
                             RR_LeftRotation(theNode, new CacheNode(theNode.getOHHandle(rightchild), theNode, rightchild, false));
                             parentNode = new CacheNode(parentHandle, null, 0, false); // reload the parent node
                             LL_RightRotation(parentNode, new CacheNode(parentNode.getOHHandle(leftchild), parentNode, leftchild, false));
@@ -470,18 +470,18 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
         return result;
     }
 
-    public synchronized boolean addUnique(kelondroRow.Entry row) throws IOException {
-        int s = this.size();
+    public synchronized boolean addUnique(final kelondroRow.Entry row) throws IOException {
+        final int s = this.size();
         this.put(row);
         return this.size() > s;
     }
     
-    public synchronized void addUnique(kelondroRow.Entry row, Date entryDate) throws IOException {
+    public synchronized void addUnique(final kelondroRow.Entry row, final Date entryDate) throws IOException {
         this.put(row, entryDate);
     }
     
-    public synchronized int addUniqueMultiple(List<kelondroRow.Entry> rows) throws IOException {
-        Iterator<kelondroRow.Entry> i = rows.iterator();
+    public synchronized int addUniqueMultiple(final List<kelondroRow.Entry> rows) throws IOException {
+        final Iterator<kelondroRow.Entry> i = rows.iterator();
         int c = 0;
         while (i.hasNext()) {
             if (addUnique(i.next())) c++;
@@ -489,14 +489,14 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
         return c;
     }
     
-    private void assignChild(kelondroNode parentNode, kelondroNode childNode, int childType) throws IOException {
+    private void assignChild(final kelondroNode parentNode, final kelondroNode childNode, final int childType) throws IOException {
         parentNode.setOHHandle(childType, childNode.handle());
         childNode.setOHHandle(parent, parentNode.handle());
         commitNode(parentNode);
         commitNode(childNode);
     }
 
-    private void replace(kelondroNode oldNode, kelondroNode oldNodeParent, kelondroNode newNode) throws IOException {
+    private void replace(final kelondroNode oldNode, final kelondroNode oldNodeParent, final kelondroNode newNode) throws IOException {
 	// this routine looks where the oldNode is connected to, and replaces
 	// the anchor's link to the oldNode by the newNode-link
 	// the new link gets the anchor as parent link assigned
@@ -533,24 +533,24 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
 	// if the oldNode is not needed any more, it can be disposed (check childs first).
     }
 
-    private static byte max0(byte b) {
+    private static byte max0(final byte b) {
         if (b > 0) return b;
         return 0;
     }
 
-    private static byte min0(byte b) {
+    private static byte min0(final byte b) {
         if (b < 0) return b;
         return 0;
     }
 
-    private void LL_RightRotation(kelondroNode parentNode, CacheNode childNode) throws IOException {
+    private void LL_RightRotation(final kelondroNode parentNode, final CacheNode childNode) throws IOException {
         // replace the parent node; the parent is afterwards unlinked
-        kelondroHandle p2Handle = parentNode.getOHHandle(parent);
-        kelondroNode p2Node = (p2Handle == null) ? null : new CacheNode(p2Handle, null, 0, false);
+        final kelondroHandle p2Handle = parentNode.getOHHandle(parent);
+        final kelondroNode p2Node = (p2Handle == null) ? null : new CacheNode(p2Handle, null, 0, false);
         replace(parentNode, p2Node, childNode);
 
         // set the left son of the parent to the right son of the childNode
-        kelondroHandle childOfChild = childNode.getOHHandle(rightchild);
+        final kelondroHandle childOfChild = childNode.getOHHandle(rightchild);
         if (childOfChild == null) {
             parentNode.setOHHandle(leftchild, null);
         } else {
@@ -564,8 +564,8 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
         // - newBal(leftChild) = oldBal(leftChild) - 1 + min(newBal(parent), 0)
         byte parentBalance = parentNode.getOHByte(balance);
         byte childBalance = childNode.getOHByte(balance);
-        byte oldBalParent = parentBalance;
-        byte oldBalChild = childBalance;
+        final byte oldBalParent = parentBalance;
+        final byte oldBalChild = childBalance;
         parentBalance = (byte) (oldBalParent - 1 - max0(oldBalChild));
         childBalance = (byte) (oldBalChild - 1 + min0(parentBalance));
         parentNode.setOHByte(balance, parentBalance);
@@ -574,14 +574,14 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
         commitNode(childNode);
     }
 
-    private void RR_LeftRotation(kelondroNode parentNode, CacheNode childNode) throws IOException {
+    private void RR_LeftRotation(final kelondroNode parentNode, final CacheNode childNode) throws IOException {
         // replace the parent node; the parent is afterwards unlinked
-        kelondroHandle p2Handle = parentNode.getOHHandle(parent);
-        kelondroNode p2Node = (p2Handle == null) ? null : new CacheNode(p2Handle, null, 0, false);
+        final kelondroHandle p2Handle = parentNode.getOHHandle(parent);
+        final kelondroNode p2Node = (p2Handle == null) ? null : new CacheNode(p2Handle, null, 0, false);
         replace(parentNode, p2Node, childNode);
 
         // set the left son of the parent to the right son of the childNode
-        kelondroHandle childOfChild = childNode.getOHHandle(leftchild);
+        final kelondroHandle childOfChild = childNode.getOHHandle(leftchild);
         if (childOfChild == null) {
             parentNode.setOHHandle(rightchild, null);
         } else {
@@ -595,8 +595,8 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
         // - newBal(rightChild) = oldBal(rightChild) + 1 + max(newBal(parent), 0)
         byte parentBalance = parentNode.getOHByte(balance);
         byte childBalance = childNode.getOHByte(balance);
-        byte oldBalParent = parentBalance;
-        byte oldBalChild = childBalance;
+        final byte oldBalParent = parentBalance;
+        final byte oldBalChild = childBalance;
         parentBalance = (byte) (oldBalParent + 1 - min0(oldBalChild));
         childBalance = (byte) (oldBalChild + 1 + max0(parentBalance));
         parentNode.setOHByte(balance, parentBalance);
@@ -606,22 +606,22 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
     }
 
     // Associates the specified value with the specified key in this map
-    public byte[] put(byte[] key, byte[] value) throws IOException {
-        kelondroRow.Entry row = row().newEntry(new byte[][]{key, value});
-        kelondroRow.Entry ret = put(row);
+    public byte[] put(final byte[] key, final byte[] value) throws IOException {
+        final kelondroRow.Entry row = row().newEntry(new byte[][]{key, value});
+        final kelondroRow.Entry ret = put(row);
         if (ret == null) return null; else return ret.getColBytes(0);
     }
     
     // Removes the mapping for this key from this map if present (optional operation).
-    public kelondroRow.Entry remove(byte[] key) throws IOException {
+    public kelondroRow.Entry remove(final byte[] key) throws IOException {
         // the order inside the database file cannot be maintained, but iteration over objects will always maintain the object order
         // therefore keepOrder should be true, because the effect is always given, while the data structure does not maintain order
         // delete from database
         synchronized(writeSearchObj) {
             writeSearchObj.process(key);
             if (writeSearchObj.found()) {
-                CacheNode result = writeSearchObj.getMatcher();
-                kelondroRow.Entry values = row().newEntry(result.getValueRow());
+                final CacheNode result = writeSearchObj.getMatcher();
+                final kelondroRow.Entry values = row().newEntry(result.getValueRow());
                 remove(result, writeSearchObj.getParent());
                 return values;
             } else {
@@ -633,8 +633,8 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
     public kelondroRow.Entry removeOne() throws IOException {
         // removes just any entry and removes that entry
         synchronized(writeSearchObj) {
-            CacheNode theOne = lastNode();
-            kelondroRow.Entry values = row().newEntry(theOne.getValueRow());
+            final CacheNode theOne = lastNode();
+            final kelondroRow.Entry values = row().newEntry(theOne.getValueRow());
             remove(theOne, null);
             return values;
         }
@@ -644,7 +644,7 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
         while (size() > 0) remove(lastNode(), null);
     }
     
-    private void remove(CacheNode node, kelondroNode parentOfNode) throws IOException {
+    private void remove(CacheNode node, final kelondroNode parentOfNode) throws IOException {
         // there are three cases when removing a node
         // - the node is a leaf - it can be removed easily
         // - the node has one child - the child replaces the node
@@ -671,7 +671,7 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
 	    replace(node, parentOfNode, new CacheNode(node.getOHHandle(rightchild), node, rightchild, false));
 	} else {
 	    // difficult case: node has two children
-	    CacheNode repl = lastNode(new CacheNode(node.getOHHandle(leftchild), node, leftchild, false));
+	    final CacheNode repl = lastNode(new CacheNode(node.getOHHandle(leftchild), node, leftchild, false));
 	    //System.out.println("last node is " + repl.toString());
 	    // we remove that replacement node and put it where the node was
 	    // this seems to be recursive, but is not since the replacement
@@ -691,7 +691,7 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
                 try {
                     childnode = new CacheNode(repl.getOHHandle(leftchild), repl, leftchild, false);
                     replace(repl, new CacheNode(repl.getOHHandle(parent), null, 0, false), childnode);
-                } catch (IllegalArgumentException e) {
+                } catch (final IllegalArgumentException e) {
                     // now treat the situation as if that link had been null before
                     n = new CacheNode(repl.getOHHandle(parent), null, 0, false); // parent node of replacement node
                     h = n.getOHHandle(leftchild);
@@ -704,7 +704,7 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
                 try {
                     childnode = new CacheNode(repl.getOHHandle(rightchild), repl, rightchild, false);
                     replace(repl, new CacheNode(repl.getOHHandle(parent), null, 0, false), childnode);
-                } catch (IllegalArgumentException e) {
+                } catch (final IllegalArgumentException e) {
                     // now treat the situation as if that link had been null before
                     n = new CacheNode(repl.getOHHandle(parent), null, 0, false); // parent node of replacement node
                     h = n.getOHHandle(leftchild);
@@ -719,10 +719,10 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
 	    //System.out.println("node after reload is " + node.toString());
             
             // now plant in the replha node
-	    byte b = node.getOHByte(balance); // save balance of disappearing node
-        kelondroHandle parentHandle = node.getOHHandle(parent);
-        kelondroHandle leftchildHandle = node.getOHHandle(leftchild);
-        kelondroHandle rightchildHandle = node.getOHHandle(rightchild);
+	    final byte b = node.getOHByte(balance); // save balance of disappearing node
+        final kelondroHandle parentHandle = node.getOHHandle(parent);
+        final kelondroHandle leftchildHandle = node.getOHHandle(leftchild);
+        final kelondroHandle rightchildHandle = node.getOHHandle(rightchild);
 	    replace(node, parentOfNode, repl);
 	    repl.setOHByte(balance, b); // restore balance
 	    repl.setOHHandle(parent, parentHandle); // restore handles
@@ -748,7 +748,7 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
     }
 
     protected CacheNode firstNode() throws IOException {
-        kelondroHandle h = getHandle(root);
+        final kelondroHandle h = getHandle(root);
         if (h == null) return null;
         return firstNode(new CacheNode(h, null, 0, true));
     }
@@ -756,7 +756,7 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
     protected CacheNode firstNode(CacheNode node) throws IOException {
         if (node == null) throw new IllegalArgumentException("firstNode: node=null"); 
         kelondroHandle h = node.getOHHandle(leftchild);
-        HashSet<String> visitedNodeKeys = new HashSet<String>(); // to detect loops
+        final HashSet<String> visitedNodeKeys = new HashSet<String>(); // to detect loops
         String nodeKey;
         while (h != null) {
             try {
@@ -764,7 +764,7 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
                 nodeKey = new String(node.getKey());
                 if (visitedNodeKeys.contains(nodeKey)) throw new kelondroException(this.filename, "firstNode: database contains loops: '" + nodeKey + "' appears twice.");
                 visitedNodeKeys.add(nodeKey);
-            } catch (IllegalArgumentException e) {
+            } catch (final IllegalArgumentException e) {
                 // return what we have
                 return node;
             }
@@ -774,7 +774,7 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
     }
     
     protected CacheNode lastNode() throws IOException {
-        kelondroHandle h = getHandle(root);
+        final kelondroHandle h = getHandle(root);
         if (h == null) return null;
         return lastNode(new CacheNode(h, null, 0, true));
     }
@@ -782,7 +782,7 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
     protected CacheNode lastNode(CacheNode node) throws IOException {
         if (node == null) throw new IllegalArgumentException("lastNode: node=null"); 
         kelondroHandle h = node.getOHHandle(rightchild);
-        HashSet<String> visitedNodeKeys = new HashSet<String>(); // to detect loops
+        final HashSet<String> visitedNodeKeys = new HashSet<String>(); // to detect loops
         String nodeKey;
         while (h != null) {
 	    try {
@@ -790,7 +790,7 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
                 nodeKey = new String(node.getKey());
                 if (visitedNodeKeys.contains(nodeKey)) throw new kelondroException(this.filename, "lastNode: database contains loops: '" + nodeKey + "' appears twice.");
                 visitedNodeKeys.add(nodeKey);
-            } catch (IllegalArgumentException e) {
+            } catch (final IllegalArgumentException e) {
                 // return what we have
                 return node;
             }
@@ -807,7 +807,7 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
         LinkedList<Object[]> nodeStack;
         int count;
         
-        public nodeIterator(boolean up, boolean rotating) throws IOException {
+        public nodeIterator(final boolean up, final boolean rotating) throws IOException {
             this.count = 0;
             this.up = up;
             this.rot = rotating;
@@ -816,17 +816,17 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
             init((up) ? firstNode() : lastNode());
         }
         
-        public nodeIterator(boolean up, boolean rotating, byte[] firstKey, boolean including) throws IOException {
+        public nodeIterator(final boolean up, final boolean rotating, final byte[] firstKey, final boolean including) throws IOException {
             this.count = 0;
             this.up = up;
             this.rot = rotating;
 
-            Search search = new Search();
+            final Search search = new Search();
             search.process(firstKey);
             if (search.found()) {
                 init(search.getMatcher());
             } else {
-                CacheNode nn = search.getParent();
+                final CacheNode nn = search.getParent();
                 if (nn == null) {
                     this.nextNode = null;
                 } else {
@@ -841,7 +841,7 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
             // correct nextNode upon start
             // this happens, if the start node was not proper, or could not be found
             while ((nextNode != null) && (nextNode.getKey() != null)) {
-                int c = row().objectOrder.compare(firstKey, nextNode.getKey());
+                final int c = row().objectOrder.compare(firstKey, nextNode.getKey());
                 if (c == 0) {
                     if (including) {
                         break; // correct + finished
@@ -867,7 +867,7 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
             }
         }
         
-        private void init(CacheNode start) throws IOException {
+        private void init(final CacheNode start) throws IOException {
             this.nextNode = start;
             
             // fill node stack for start node
@@ -877,7 +877,7 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
             if (searchHandle == null) {nextNode = null; return;}
 
             CacheNode searchNode = new CacheNode(searchHandle, null, 0, false);            
-            byte[] startKey = start.getKey();
+            final byte[] startKey = start.getKey();
             int c, ct;
             while ((c = row().objectOrder.compare(startKey, searchNode.getKey())) != 0) {
                 // the current 'thisNode' is not the start node, put it on the stack
@@ -906,12 +906,12 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
             count++;
             if ((rot) && (nextNode == null)) try {
                 init((up) ? firstNode() : lastNode());
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw new kelondroException(filename, "io-error while rot");
             }
             if (nextNode == null) throw new kelondroException(filename, "nodeIterator.next: no more entries available");
             if ((count > size()) && (!(rot))) throw new kelondroException(filename, "nodeIterator.next: internal loopback; database corrupted");
-            CacheNode ret = nextNode;
+            final CacheNode ret = nextNode;
             
             // middle-case
             try {
@@ -920,7 +920,7 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
                 if (childHandle != null) {
                     //System.out.println("go to other leg, stack size=" + nodeStack.size());
                     // we have walked one leg of the tree; now go to the other one: step down to next child
-                    HashSet<kelondroHandle> visitedNodeHandles = new HashSet<kelondroHandle>(); // to detect loops
+                    final HashSet<kelondroHandle> visitedNodeHandles = new HashSet<kelondroHandle>(); // to detect loops
                     nodeStack.addLast(new Object[]{nextNode, new Integer(childtype)});
                     nextNode = new CacheNode(childHandle, nextNode, childtype, false);
                     childtype = (up) ? leftchild : rightchild;
@@ -936,7 +936,7 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
                         try {
                             nodeStack.addLast(new Object[]{nextNode, new Integer(childtype)});
                             nextNode = new CacheNode(childHandle, nextNode, childtype, false);
-                        } catch (IllegalArgumentException e) {
+                        } catch (final IllegalArgumentException e) {
                             // return what we have
                             nodeStack.removeLast();
                             return ret;
@@ -969,7 +969,7 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
                         }
                     }
                 }
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 nextNode = null;
             }
             
@@ -981,16 +981,16 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
         }
     }
 
-    public TreeMap<String, kelondroRow.Entry> rowMap(boolean up, byte[] firstKey, boolean including, int count) throws IOException {
+    public TreeMap<String, kelondroRow.Entry> rowMap(final boolean up, final byte[] firstKey, final boolean including, final int count) throws IOException {
         // returns an ordered map of keys/row relations; key objects are of type String, value objects are of type byte[][]
-        kelondroByteOrder setOrder = (kelondroByteOrder) row().objectOrder.clone();
+        final kelondroByteOrder setOrder = (kelondroByteOrder) row().objectOrder.clone();
         setOrder.direction(up);
         setOrder.rotate(firstKey);
-        TreeMap<String, kelondroRow.Entry> rows = new TreeMap<String, kelondroRow.Entry>(this.loopDetectionOrder);
+        final TreeMap<String, kelondroRow.Entry> rows = new TreeMap<String, kelondroRow.Entry>(this.loopDetectionOrder);
         CacheNode n;
         String key;
         synchronized (this) {
-            Iterator<CacheNode> i = (firstKey == null) ? new nodeIterator(up, false) : new nodeIterator(up, false, firstKey, including);
+            final Iterator<CacheNode> i = (firstKey == null) ? new nodeIterator(up, false) : new nodeIterator(up, false, firstKey, including);
             while ((rows.size() < count) && (i.hasNext())) {
                 n = i.next();
                 if (n == null) return rows;
@@ -1001,15 +1001,15 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
         return rows;
     }
     
-    public TreeSet<String> keySet(boolean up, boolean rotating, byte[] firstKey, boolean including, int count) throws IOException {
+    public TreeSet<String> keySet(final boolean up, final boolean rotating, final byte[] firstKey, final boolean including, final int count) throws IOException {
         // returns an ordered set of keys; objects are of type String
-        kelondroByteOrder setOrder = (kelondroByteOrder) row().objectOrder.clone();
+        final kelondroByteOrder setOrder = (kelondroByteOrder) row().objectOrder.clone();
         setOrder.direction(up);
         setOrder.rotate(firstKey);
-        TreeSet<String> set = new TreeSet<String>(this.loopDetectionOrder);
+        final TreeSet<String> set = new TreeSet<String>(this.loopDetectionOrder);
         kelondroNode n;
         synchronized (this) {
-            Iterator<CacheNode> i = (firstKey == null) ? new nodeIterator(up, rotating) : new nodeIterator(up, rotating, firstKey, including);
+            final Iterator<CacheNode> i = (firstKey == null) ? new nodeIterator(up, rotating) : new nodeIterator(up, rotating, firstKey, including);
             while ((set.size() < count) && (i.hasNext())) {
                 n = i.next();
                 if ((n != null) && (n.getKey() != null)) set.add(new String(n.getKey()));
@@ -1018,7 +1018,7 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
         return set;
     }
     
-    public kelondroCloneableIterator<kelondroRow.Entry> rows(boolean up, byte[] firstKey) throws IOException {
+    public kelondroCloneableIterator<kelondroRow.Entry> rows(final boolean up, final byte[] firstKey) throws IOException {
         // iterates the rows of the Nodes
         // enumerated objects are of type byte[][]
         // iterates the elements in a sorted way.
@@ -1036,7 +1036,7 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
         Iterator<Map.Entry<String, kelondroRow.Entry>> bufferIterator;
         long guessedCountLimit;
         
-        public rowIterator(boolean up, byte[] firstKey, long guessedCountLimit) throws IOException {
+        public rowIterator(final boolean up, final byte[] firstKey, final long guessedCountLimit) throws IOException {
             this.guessedCountLimit = guessedCountLimit;
             inc = up;
             count = 0;
@@ -1049,10 +1049,10 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
             lastIteratorCount = 0;
         }
         
-		public rowIterator clone(Object secondStart) {
+		public rowIterator clone(final Object secondStart) {
             try {
                 return new rowIterator(inc, (byte[]) secondStart, guessedCountLimit);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 return null;
             }
         }
@@ -1063,7 +1063,7 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
         
         public kelondroRow.Entry next() {
             if (!(bufferIterator.hasNext())) return null;
-            Map.Entry<String, kelondroRow.Entry> entry = bufferIterator.next();
+            final Map.Entry<String, kelondroRow.Entry> entry = bufferIterator.next();
             lastKey = entry.getKey().getBytes();
             
             // check if this was the last entry in the rowBuffer
@@ -1073,7 +1073,7 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
                     lastKey[lastKey.length - 1]++; // ***BUG??? FIXME
                     rowBuffer = rowMap(inc, lastKey, false, chunkSize);
                     bufferIterator = rowBuffer.entrySet().iterator();
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     rowBuffer = null;
                     bufferIterator = null;
                 }
@@ -1088,14 +1088,14 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
         public void remove() {
             if (lastKey != null) try {
                 kelondroTree.this.remove(lastKey);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 // do nothing
             }
         }
         
     }
 
-	public kelondroCloneableIterator<byte[]> keys(boolean up, byte[] firstKey) throws IOException {
+	public kelondroCloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) throws IOException {
 		return new keyIterator(up, firstKey, this.size());
 	}
 	
@@ -1109,7 +1109,7 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
         Iterator<String> bufferIterator;
         long guessedCountLimit;
         
-        public keyIterator(boolean up, byte[] firstKey, long guessedCountLimit) throws IOException {
+        public keyIterator(final boolean up, final byte[] firstKey, final long guessedCountLimit) throws IOException {
             this.guessedCountLimit = guessedCountLimit;
             inc = up;
             count = 0;
@@ -1122,10 +1122,10 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
             lastIteratorCount = 0;
         }
         
-		public keyIterator clone(Object secondStart) {
+		public keyIterator clone(final Object secondStart) {
             try {
                 return new keyIterator(inc, (byte[]) secondStart, guessedCountLimit);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 return null;
             }
         }
@@ -1145,7 +1145,7 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
                     lastKey[lastKey.length - 1]++; // ***BUG??? FIXME
                     keyBuffer = keySet(inc, false, lastKey, false, chunkSize);
                     bufferIterator = keyBuffer.iterator();
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     keyBuffer = null;
                     bufferIterator = null;
                 }
@@ -1160,21 +1160,21 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
         public void remove() {
             if (lastKey != null) try {
                 kelondroTree.this.remove(lastKey);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 // do nothing
             }
         }
         
     }
 
-    public int imp(File file, String separator) throws IOException {
+    public int imp(final File file, final String separator) throws IOException {
 	// imports a value-separated file, returns number of records that have been read
 
-	RandomAccessFile f = new RandomAccessFile(file,"r");
+	final RandomAccessFile f = new RandomAccessFile(file,"r");
 	String s;
 	StringTokenizer st;
 	int recs = 0;
-    kelondroRow.Entry buffer = row().newEntry();
+    final kelondroRow.Entry buffer = row().newEntry();
 	int c;
 	int line = 0;
 	while ((s = f.readLine()) != null) {
@@ -1201,34 +1201,35 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
 
     public synchronized int height() {
         try {
-            kelondroHandle h = getHandle(root);
+            final kelondroHandle h = getHandle(root);
             if (h == null) return 0;
             return height(new CacheNode(h, null, 0, false));
-        } catch (IOException e) {
+        } catch (final IOException e) {
             return 0;
         }
     }
     
-    private int height(CacheNode node) throws IOException {
+    private int height(final CacheNode node) throws IOException {
         if (node == null) return 0;
         kelondroHandle h = node.getOHHandle(leftchild);
-        int hl = (h == null) ? 0 : height(new CacheNode(h, node, leftchild, false));
+        final int hl = (h == null) ? 0 : height(new CacheNode(h, node, leftchild, false));
         h = node.getOHHandle(rightchild);
-        int hr = (h == null) ? 0 : height(new CacheNode(h, node, rightchild, false));
+        final int hr = (h == null) ? 0 : height(new CacheNode(h, node, rightchild, false));
         if (hl > hr) return hl + 1;
         return hr + 1;
     }
     
     public void print() throws IOException {
         super.print();
-        int height = height();
+        final int height = height();
         System.out.println("HEIGHT = " + height);
         Vector<kelondroHandle> thisline = new Vector<kelondroHandle>();
         thisline.add(getHandle(root));
         Vector<kelondroHandle> nextline;
         kelondroHandle handle;
         kelondroNode node;
-        int linelength, width = (1 << (height - 1)) * (row().width(0) + 1);
+        int linelength;
+		final int width = (1 << (height - 1)) * (row().width(0) + 1);
         String key;
         for (int h = 1; h < height; h++) {
             linelength = width / (thisline.size() * 2);
@@ -1284,7 +1285,7 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
 	System.out.println();
     }
     
-    public static void cmd(String[] args) {
+    public static void cmd(final String[] args) {
 	System.out.print("kelondroTree ");
 	for (int i = 0; i < args.length; i++) System.out.print(args[i] + " ");
 	System.out.println("");
@@ -1297,10 +1298,10 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
 	    } else if (args.length == 1) {
 		if (args[0].equals("-t")) {
                     // test script
-                    File testFile = new File("test.db");
+                    final File testFile = new File("test.db");
                     while (testFile.exists()) testFile.delete();
-                    kelondroTree fm = new kelondroTree(testFile, true, 10, new kelondroRow("byte[] a-4, byte[] b-4", kelondroNaturalOrder.naturalOrder, 0));
-                    byte[] dummy = "".getBytes();
+                    final kelondroTree fm = new kelondroTree(testFile, true, 10, new kelondroRow("byte[] a-4, byte[] b-4", kelondroNaturalOrder.naturalOrder, 0));
+                    final byte[] dummy = "".getBytes();
                     fm.put("abc0".getBytes(), dummy); fm.put("bcd0".getBytes(), dummy);
                     fm.put("def0".getBytes(), dummy); fm.put("bab0".getBytes(), dummy);
                     fm.put("abc1".getBytes(), dummy); fm.put("bcd1".getBytes(), dummy);
@@ -1321,7 +1322,7 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
 		    ret = null;
 		}
 	    } else if (args.length == 2) {
-		kelondroTree fm = new kelondroTree(new File(args[1]), true, 10, new kelondroRow("byte[] a-4, byte[] b-4", kelondroNaturalOrder.naturalOrder, 0));
+		final kelondroTree fm = new kelondroTree(new File(args[1]), true, 10, new kelondroRow("byte[] a-4, byte[] b-4", kelondroNaturalOrder.naturalOrder, 0));
 		if (args[0].equals("-v")) {
 		    fm.print();
 		    ret = null;
@@ -1329,16 +1330,16 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
 		fm.close();
 	    } else if (args.length == 3) {
 		if (args[0].equals("-d")) {
-		    kelondroTree fm = new kelondroTree(new File(args[1]), true, 10, new kelondroRow("byte[] a-4, byte[] b-4", kelondroNaturalOrder.naturalOrder, 0));
+		    final kelondroTree fm = new kelondroTree(new File(args[1]), true, 10, new kelondroRow("byte[] a-4, byte[] b-4", kelondroNaturalOrder.naturalOrder, 0));
 		    fm.remove(args[2].getBytes());
 		    fm.close();
 		} else if (args[0].equals("-i")) {
-		    kelondroTree fm = new kelondroTree(new File(args[1]), true, 10, new kelondroRow("byte[] a-4, byte[] b-4", kelondroNaturalOrder.naturalOrder, 0));
-		    int i = fm.imp(new File(args[1]),";");
+		    final kelondroTree fm = new kelondroTree(new File(args[1]), true, 10, new kelondroRow("byte[] a-4, byte[] b-4", kelondroNaturalOrder.naturalOrder, 0));
+		    final int i = fm.imp(new File(args[1]),";");
 		    fm.close();
 		    ret = (i + " records imported").getBytes();
 		} else if (args[0].equals("-s")) {
-		    String db = args[2];
+		    final String db = args[2];
 		    BufferedReader f = null;
             try {
                 f = new BufferedReader(new FileReader(args[1]));
@@ -1353,18 +1354,18 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
                 }
                 ret = null;
             } finally {
-                if (f != null) try {f.close();}catch(Exception e){}
+                if (f != null) try {f.close();}catch(final Exception e){}
             }
 		} else if (args[0].equals("-g")) {
-		    kelondroTree fm = new kelondroTree(new File(args[1]), true, 10, new kelondroRow("byte[] a-4, byte[] b-4", kelondroNaturalOrder.naturalOrder, 0));
-		    kelondroRow.Entry ret2 = fm.get(args[2].getBytes());
+		    final kelondroTree fm = new kelondroTree(new File(args[1]), true, 10, new kelondroRow("byte[] a-4, byte[] b-4", kelondroNaturalOrder.naturalOrder, 0));
+		    final kelondroRow.Entry ret2 = fm.get(args[2].getBytes());
 		    ret = ((ret2 == null) ? null : ret2.getColBytes(1)); 
 		    fm.close();
 		} else if (args[0].equals("-n")) {
-		    kelondroTree fm = new kelondroTree(new File(args[1]), true, 10, new kelondroRow("byte[] a-4, byte[] b-4", kelondroNaturalOrder.naturalOrder, 0));
+		    final kelondroTree fm = new kelondroTree(new File(args[1]), true, 10, new kelondroRow("byte[] a-4, byte[] b-4", kelondroNaturalOrder.naturalOrder, 0));
 		    //byte[][] keys = fm.getSequentialKeys(args[2].getBytes(), 500, true);
-                    Iterator<kelondroRow.Entry> rowIt = fm.rows(true, (args[2].length() == 0) ? null : args[2].getBytes());
-                    Vector<String> v = new Vector<String>();
+                    final Iterator<kelondroRow.Entry> rowIt = fm.rows(true, (args[2].length() == 0) ? null : args[2].getBytes());
+                    final Vector<String> v = new Vector<String>();
                     while (rowIt.hasNext()) v.add(rowIt.next().getColString(0, null));
                     ret = v.toString().getBytes(); 
 		    fm.close();
@@ -1372,13 +1373,13 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
 	    } else if (args.length == 4) {
 		if (args[0].equals("-c")) {
 		    // create <keylen> <valuelen> <filename>
-		    File f = new File(args[3]);
+		    final File f = new File(args[3]);
 		    if (f.exists()) f.delete();
-            kelondroRow lens = new kelondroRow("byte[] key-" + Integer.parseInt(args[1]) + ", byte[] value-" + Integer.parseInt(args[2]), kelondroNaturalOrder.naturalOrder, 0);
-		    kelondroTree fm = new kelondroTree(f, true, 10, lens);
+            final kelondroRow lens = new kelondroRow("byte[] key-" + Integer.parseInt(args[1]) + ", byte[] value-" + Integer.parseInt(args[2]), kelondroNaturalOrder.naturalOrder, 0);
+		    final kelondroTree fm = new kelondroTree(f, true, 10, lens);
 		    fm.close();
 		} else if (args[0].equals("-u")) {
-		    kelondroTree fm = new kelondroTree(new File(args[1]), true, 10, new kelondroRow("byte[] a-4, byte[] b-4", kelondroNaturalOrder.naturalOrder, 0));
+		    final kelondroTree fm = new kelondroTree(new File(args[1]), true, 10, new kelondroRow("byte[] a-4, byte[] b-4", kelondroNaturalOrder.naturalOrder, 0));
 		    ret = fm.put(args[1].getBytes(), args[2].getBytes());
 		    fm.close();
 		}
@@ -1387,12 +1388,12 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
 		System.out.println("NULL");
 	    else
 		System.out.println(new String(ret));
-	} catch (Exception e) {
+	} catch (final Exception e) {
 	    e.printStackTrace();
 	}
     }
     
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         //cmd(args);
         //iterationtest();
         //bigtest(Integer.parseInt(args[0]));
@@ -1400,17 +1401,17 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
         //smalltest();
     }
  
-    public static String[] permutations(int letters) {
+    public static String[] permutations(final int letters) {
         String p = "";
         for (int i = 0; i < letters; i++) p = p + ((char) (('A') + i));
         return permutations(p);
     }
-    public static String[] permutations(String source) {
+    public static String[] permutations(final String source) {
         if (source.length() == 0) return new String[0];
         if (source.length() == 1) return new String[]{source};
-        char c = source.charAt(0);
-        String[] recres = permutations(source.substring(1));
-        String[] result = new String[source.length() * recres.length];
+        final char c = source.charAt(0);
+        final String[] recres = permutations(source.substring(1));
+        final String[] result = new String[source.length() * recres.length];
         for (int perm = 0; perm < recres.length; perm++) {
             result[perm * source.length()] = c + recres[perm];
             for (int pos = 1; pos < source.length() - 1; pos++) {
@@ -1421,17 +1422,17 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
         return result;
     }
     
-    public static byte[] testWord(char c) {
+    public static byte[] testWord(final char c) {
         return new byte[]{(byte) c, 32, 32, 32};
     }
     
-    public static void randomtest(int elements) {
+    public static void randomtest(final int elements) {
         System.out.println("random " + elements + ":");
-        String s = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".substring(0, elements);
+        final String s = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".substring(0, elements);
         String t, d;
         char c;
         kelondroTree tt = null;
-        File testFile = new File("test.db");
+        final File testFile = new File("test.db");
         byte[] b;
         try {
             int steps = 0;
@@ -1492,18 +1493,18 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
                 tt.close();
             }
             
-        } catch (Exception e) {
+        } catch (final Exception e) {
             e.printStackTrace();
-            if (tt != null) try {tt.print();} catch (IOException ee) {}
+            if (tt != null) try {tt.print();} catch (final IOException ee) {}
             System.out.println("TERMINATED");
         }
     }
     
     public static void smalltest() {
-        File f = new File("test.db");
+        final File f = new File("test.db");
         if (f.exists()) f.delete();
         try {
-            kelondroTree tt = new kelondroTree(f, true, 10, new kelondroRow("byte[] a-4, byte[] b-4", kelondroNaturalOrder.naturalOrder, 0));
+            final kelondroTree tt = new kelondroTree(f, true, 10, new kelondroRow("byte[] a-4, byte[] b-4", kelondroNaturalOrder.naturalOrder, 0));
             byte[] b;
             b = testWord('B'); tt.put(b, b); //tt.print();
             b = testWord('C'); tt.put(b, b); //tt.print();
@@ -1521,14 +1522,14 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
             b = testWord('J'); tt.put(b, b);
             b = testWord('K'); tt.put(b, b);
             b = testWord('L'); tt.put(b, b);
-            int c = countElements(tt);
+            final int c = countElements(tt);
             System.out.println("elements: " + c);
-            Iterator<kelondroRow.Entry> i = tt.rows(true, testWord('G'));
+            final Iterator<kelondroRow.Entry> i = tt.rows(true, testWord('G'));
             for (int j = 0; j < c; j++) {
                 System.out.println("Row " + j + ": " + new String((i.next()).getColBytes(0)));
             }
             System.out.println("TERMINATED");
-        } catch (IOException e) {
+        } catch (final IOException e) {
             e.printStackTrace();
         }
     }
@@ -1566,9 +1567,9 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
     }
     */
     
-    public static kelondroTree testTree(File f, String testentities) throws IOException {
+    public static kelondroTree testTree(final File f, final String testentities) throws IOException {
         if (f.exists()) f.delete();
-        kelondroTree tt = new kelondroTree(f, false, 10, new kelondroRow("byte[] a-4, byte[] b-4", kelondroNaturalOrder.naturalOrder, 0));
+        final kelondroTree tt = new kelondroTree(f, false, 10, new kelondroRow("byte[] a-4, byte[] b-4", kelondroNaturalOrder.naturalOrder, 0));
         byte[] b;
         for (int i = 0; i < testentities.length(); i++) {
             b = testWord(testentities.charAt(i));
@@ -1577,12 +1578,12 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
         return tt;
     }
     
-   public static void bigtest(int elements) {
+   public static void bigtest(final int elements) {
         System.out.println("starting big test with " + elements + " elements:");
-        long start = System.currentTimeMillis();
-        String[] s = permutations(elements);
+        final long start = System.currentTimeMillis();
+        final String[] s = permutations(elements);
         kelondroTree tt;
-        File testFile = new File("test.db");
+        final File testFile = new File("test.db");
         try {
             for (int i = 0; i < s.length; i++) {
                 System.out.println("*** probing tree " + i + " for permutation " + s[i]);
@@ -1624,16 +1625,16 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
                 }
             }
             System.out.println("FINISHED test after " + ((System.currentTimeMillis() - start) / 1000) + " seconds.");
-        } catch (Exception e) {
+        } catch (final Exception e) {
             e.printStackTrace();
             System.out.println("TERMINATED");
         }
     }
     
-    public static int countElements(kelondroIndex t) {
+    public static int countElements(final kelondroIndex t) {
         int count = 0;
         try {
-            Iterator<kelondroRow.Entry> iter = t.rows(true, null);
+            final Iterator<kelondroRow.Entry> iter = t.rows(true, null);
             kelondroRow.Entry row;
             while (iter.hasNext()) {
                 count++;
@@ -1642,7 +1643,7 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
                 // else System.out.println("counted element: " + new
                 // String(n.getKey()));
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
         }
         return count;
     }

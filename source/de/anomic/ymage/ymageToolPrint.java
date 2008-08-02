@@ -44,8 +44,8 @@ public class ymageToolPrint {
     	0x0000000EC2E0ECL,0x0000000EC2E030L,0x0000000FF2E3FCL,0x000F0B8B80B80FL,0x00300C0300C030L,0x03C0B80B8B83C0L,0x0000B83BB0B800L,0x03FFC0F03C0FFFL
     };
 
-    private static void print(ymageMatrix matrix, int x, int y, int angle, char letter) {
-        int index = letter - 0x20;
+    private static void print(final ymageMatrix matrix, int x, int y, final int angle, final char letter) {
+        final int index = letter - 0x20;
         if (index >= font.length) return;
         long character = font[index];
         long row;
@@ -74,7 +74,7 @@ public class ymageToolPrint {
         }
     }
     
-    public static void print(ymageMatrix matrix, int x, int y, int angle, String message, int align) {
+    public static void print(final ymageMatrix matrix, final int x, final int y, final int angle, final String message, final int align) {
         // align = -1 : left
         // align =  1 : right
         // align =  0 : center
@@ -95,9 +95,9 @@ public class ymageToolPrint {
     
     
     private static final int arcDist = 8;
-    public static void arcPrint(ymageMatrix matrix, int cx, int cy, int radius, int angle, String message) {
-        int x = cx + (int) ((radius + 1) * Math.cos(Math.PI * angle / 180));
-        int y = cy - (int) ((radius + 1) * Math.sin(Math.PI * angle / 180));
+    public static void arcPrint(final ymageMatrix matrix, final int cx, final int cy, final int radius, final int angle, final String message) {
+        final int x = cx + (int) ((radius + 1) * Math.cos(Math.PI * angle / 180));
+        final int y = cy - (int) ((radius + 1) * Math.sin(Math.PI * angle / 180));
         int yp = y + 3;
         if ((angle > arcDist) && (angle < 180 - arcDist)) yp = y;
         if ((angle > 180 + arcDist) && (angle < 360 - arcDist)) yp = y + 6;

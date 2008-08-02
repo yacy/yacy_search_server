@@ -29,9 +29,9 @@ import de.anomic.server.serverSwitch;
 public class version {
     
     
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
         // return variable that accumulates replacements
-        serverObjects prop = new serverObjects();
+        final serverObjects prop = new serverObjects();
         
         prop.put("version", env.getConfig("version", "0.0"));
         prop.put("svnRev", env.getConfig("svnRevision", "0"));

@@ -72,7 +72,7 @@ public class plasmaGrafics {
         private long execTime = 0;
         private float fraction = 0;
         
-        public CircleThreadPiece(String pieceName, Color color) {
+        public CircleThreadPiece(final String pieceName, final Color color) {
             this.pieceName = pieceName;
             this.color = color;
         }
@@ -83,13 +83,13 @@ public class plasmaGrafics {
         public long getExecTime() { return this.execTime; }
         public String getPieceName() { return this.pieceName; }
         
-        public void addExecTime(long execTime) { this.execTime += execTime; }
+        public void addExecTime(final long execTime) { this.execTime += execTime; }
         public void reset() {
             this.execTime = 0;
             this.fraction = 0;
         }
-        public void setExecTime(long execTime) { this.execTime = execTime; }
-        public void setFraction(long totalBusyTime) {
+        public void setExecTime(final long execTime) { this.execTime = execTime; }
+        public void setFraction(final long totalBusyTime) {
             this.fraction = (float)this.execTime / (float)totalBusyTime;
         }
     }
@@ -106,22 +106,22 @@ public class plasmaGrafics {
     private static BufferedImage logo = null;               // [MN]
     private static long          bannerPictureDate = 0;     // [MN]
 
-    public static ymageMatrix getSearchEventPicture(yacySeedDB seedDB, String eventID) {
-        plasmaSearchEvent event = plasmaSearchEvent.getEvent(eventID);
+    public static ymageMatrix getSearchEventPicture(final yacySeedDB seedDB, final String eventID) {
+        final plasmaSearchEvent event = plasmaSearchEvent.getEvent(eventID);
         if (event == null) return null;
-        yacySearch[] primarySearches = event.getPrimarySearchThreads();
-        yacySearch[] secondarySearches = event.getSecondarySearchThreads();
+        final yacySearch[] primarySearches = event.getPrimarySearchThreads();
+        final yacySearch[] secondarySearches = event.getSecondarySearchThreads();
         if (primarySearches == null) return null; // this was a local search and there are no threads
 
         // get a copy of a recent network picture
-        ymageMatrix eventPicture = getNetworkPicture(seedDB, 120000, plasmaSwitchboard.getSwitchboard().getConfig("network.unit.name", "unspecified"), plasmaSwitchboard.getSwitchboard().getConfig("network.unit.description", "unspecified"), COL_BACKGROUND);
+        final ymageMatrix eventPicture = getNetworkPicture(seedDB, 120000, plasmaSwitchboard.getSwitchboard().getConfig("network.unit.name", "unspecified"), plasmaSwitchboard.getSwitchboard().getConfig("network.unit.description", "unspecified"), COL_BACKGROUND);
         //if (eventPicture instanceof ymageMatrix) eventPicture = (ymageMatrix) eventPicture; //new ymageMatrix((ymageMatrix) eventPicture);
         // TODO: fix cloning of ymageMatrix pictures
         
         // get dimensions
-        int cr = Math.min(eventPicture.getWidth(), eventPicture.getHeight()) / 5 - 20;
-        int cx = eventPicture.getWidth() / 2;
-        int cy = eventPicture.getHeight() / 2;
+        final int cr = Math.min(eventPicture.getWidth(), eventPicture.getHeight()) / 5 - 20;
+        final int cx = eventPicture.getWidth() / 2;
+        final int cy = eventPicture.getHeight() / 2;
 
         String hash;
         int angle;
@@ -146,8 +146,8 @@ public class plasmaGrafics {
         }
         
         // draw in the search target
-        plasmaSearchQuery query = event.getQuery();
-        Iterator<String> i = query.queryHashes.iterator();
+        final plasmaSearchQuery query = event.getQuery();
+        final Iterator<String> i = query.queryHashes.iterator();
         eventPicture.setColor(ymageMatrix.GREY);
         while (i.hasNext()) {
             hash = i.next();
@@ -158,20 +158,20 @@ public class plasmaGrafics {
         return eventPicture;
     }
 
-    public static ymageMatrix getNetworkPicture(yacySeedDB seedDB, long maxAge, String networkName, String networkTitle, String bgcolor) {
+    public static ymageMatrix getNetworkPicture(final yacySeedDB seedDB, final long maxAge, final String networkName, final String networkTitle, final String bgcolor) {
         return getNetworkPicture(seedDB, maxAge, 640, 480, 300, 300, 1000, true, networkName, networkTitle, bgcolor);
     }
 
-    public static ymageMatrix getNetworkPicture(yacySeedDB seedDB, long maxAge, int width, int height, int passiveLimit, int potentialLimit, int maxCount, boolean corona, String networkName, String networkTitle, String bgcolor) {
+    public static ymageMatrix getNetworkPicture(final yacySeedDB seedDB, final long maxAge, final int width, final int height, final int passiveLimit, final int potentialLimit, final int maxCount, final boolean corona, final String networkName, final String networkTitle, final String bgcolor) {
         if ((networkPicture == null) || ((System.currentTimeMillis() - networkPictureDate) > maxAge)) {
             drawNetworkPicture(seedDB, width, height, passiveLimit, potentialLimit, maxCount, corona, networkName, networkTitle, bgcolor);
         }
         return networkPicture;
     }
 
-    private static void drawNetworkPicture(yacySeedDB seedDB, int width, int height, int passiveLimit, int potentialLimit, int maxCount, boolean corona, String networkName, String networkTitle, String bgcolor) {
+    private static void drawNetworkPicture(final yacySeedDB seedDB, final int width, final int height, final int passiveLimit, final int potentialLimit, final int maxCount, final boolean corona, final String networkName, final String networkTitle, final String bgcolor) {
 
-        int innerradius = Math.min(width, height) / 5;
+        final int innerradius = Math.min(width, height) / 5;
         int outerradius = innerradius + innerradius * seedDB.sizeConnected() / 100;
         if (outerradius > innerradius * 2) outerradius = innerradius * 2;
 
@@ -245,11 +245,11 @@ public class plasmaGrafics {
         networkPictureDate = System.currentTimeMillis();
     }
 
-    private static void drawNetworkPicturePeer(ymageMatrix img, int x, int y, int innerradius, int outerradius, yacySeed seed, String colorDot, String colorLine, String colorText, boolean corona) {
-        String name = seed.getName().toUpperCase() /*+ ":" + seed.hash + ":" + (((double) ((int) (100 * (((double) yacySeed.dhtPosition(seed.hash)) / ((double) yacySeed.maxDHTDistance))))) / 100.0)*/;
+    private static void drawNetworkPicturePeer(final ymageMatrix img, final int x, final int y, final int innerradius, final int outerradius, final yacySeed seed, final String colorDot, final String colorLine, final String colorText, final boolean corona) {
+        final String name = seed.getName().toUpperCase() /*+ ":" + seed.hash + ":" + (((double) ((int) (100 * (((double) yacySeed.dhtPosition(seed.hash)) / ((double) yacySeed.maxDHTDistance))))) / 100.0)*/;
         if (name.length() < shortestName) shortestName = name.length();
         if (name.length() > longestName) longestName = name.length();
-        int angle = (int) (360 * seed.dhtPosition());
+        final int angle = (int) (360 * seed.dhtPosition());
         //System.out.println("Seed " + seed.hash + " has distance " + seed.dhtDistance() + ", angle = " + angle);
         int linelength = 20 + outerradius * (20 * (name.length() - shortestName) / (longestName - shortestName) + (Math.abs(seed.hash.hashCode()) % 20)) / 60;
         if (linelength > outerradius) linelength = outerradius;
@@ -273,7 +273,7 @@ public class plasmaGrafics {
             long strength;
             img.setColor("303030");
             img.arcArc(x, y, innerradius, angle, dotsize + 1, dotsize + 1, 0, 360);
-            int waveradius = innerradius / 2;
+            final int waveradius = innerradius / 2;
             for (int r = 0; r < waveradius; r++) {
                 strength = (waveradius - r) * (long) (0x08 * ppm10 * (1.0 + Math.sin(Math.PI * 16 * r / waveradius))) / waveradius;
                 //System.out.println("r = " + r + ", Strength = " + strength);
@@ -283,24 +283,24 @@ public class plasmaGrafics {
         }
     }
     
-    public static BufferedImage getPeerLoadPicture(long maxAge, int width, int height, CircleThreadPiece[] pieces, CircleThreadPiece fillRest) {
+    public static BufferedImage getPeerLoadPicture(final long maxAge, final int width, final int height, final CircleThreadPiece[] pieces, final CircleThreadPiece fillRest) {
         if ((peerloadPicture == null) || ((System.currentTimeMillis() - peerloadPictureDate) > maxAge)) {
             drawPeerLoadPicture(width, height, pieces, fillRest);
         }
         return peerloadPicture;
     }
     
-    private static void drawPeerLoadPicture(int width, int height, CircleThreadPiece[] pieces, CircleThreadPiece fillRest) {
+    private static void drawPeerLoadPicture(final int width, final int height, final CircleThreadPiece[] pieces, final CircleThreadPiece fillRest) {
     	//prepare image
     	peerloadPicture = new BufferedImage(width,height,BufferedImage.TYPE_INT_RGB);
-        Graphics2D g = peerloadPicture.createGraphics();
+        final Graphics2D g = peerloadPicture.createGraphics();
         g.setBackground(COL_LOAD_BG);
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g.clearRect(0,0,width,height);
         
-        int circ_w = Math.min(width,height)-20; //width of the circle (r*2)
-        int circ_x = width-circ_w-10;           //x-coordinate of circle-left
-        int circ_y = 10;                        //y-coordinate of circle-top
+        final int circ_w = Math.min(width,height)-20; //width of the circle (r*2)
+        final int circ_x = width-circ_w-10;           //x-coordinate of circle-left
+        final int circ_y = 10;                        //y-coordinate of circle-top
         int curr_angle = 0;                       //remember current angle
         
         int i;
@@ -327,7 +327,7 @@ public class plasmaGrafics {
         peerloadPictureDate = System.currentTimeMillis();
     }
     
-    private static void drawLegendLine(Graphics2D g, int x, int y, String caption, Color item_color) {
+    private static void drawLegendLine(final Graphics2D g, final int x, final int y, final String caption, final Color item_color) {
     	g.setColor(item_color);
     	g.fillRect(x, y-LEGEND_BOX_SIZE, LEGEND_BOX_SIZE, LEGEND_BOX_SIZE);
     	g.setColor(COL_BORDER);
@@ -338,7 +338,7 @@ public class plasmaGrafics {
     }
 
     //[MN]
-    public static ymageMatrix getBannerPicture(long maxAge, int width, int height, String bgcolor, String textcolor, String bordercolor, String name, long links, long words, String type, int ppm, String network, int peers, long nlinks, long nwords, double nqph, long nppm) {
+    public static ymageMatrix getBannerPicture(final long maxAge, final int width, final int height, final String bgcolor, final String textcolor, final String bordercolor, final String name, final long links, final long words, final String type, final int ppm, final String network, final int peers, final long nlinks, final long nwords, final double nqph, final long nppm) {
         if ((bannerPicture == null) || ((System.currentTimeMillis() - bannerPictureDate) > maxAge)) {
             drawBannerPicture(width, height, bgcolor, textcolor, bordercolor, name, links, words, type, ppm, network, peers, nlinks, nwords, nqph, nppm, logo);
         }
@@ -346,7 +346,7 @@ public class plasmaGrafics {
     }    
     
     //[MN]
-    public static ymageMatrix getBannerPicture(long maxAge, int width, int height, String bgcolor, String textcolor, String bordercolor, String name, long links, long words, String type, int ppm, String network, int peers, long nlinks, long nwords, double nqph, long nppm, BufferedImage newLogo) {
+    public static ymageMatrix getBannerPicture(final long maxAge, final int width, final int height, final String bgcolor, final String textcolor, final String bordercolor, final String name, final long links, final long words, final String type, final int ppm, final String network, final int peers, final long nlinks, final long nwords, final double nqph, final long nppm, final BufferedImage newLogo) {
         if ((bannerPicture == null) || ((System.currentTimeMillis() - bannerPictureDate) > maxAge)) {
             drawBannerPicture(width, height, bgcolor, textcolor, bordercolor, name, links, words, type, ppm, network, peers, nlinks, nwords, nqph, nppm, newLogo);
         }
@@ -354,9 +354,9 @@ public class plasmaGrafics {
     }
 
     //[MN]
-    private static void drawBannerPicture(int width, int height, String bgcolor, String textcolor, String bordercolor, String name, long links, long words, String type, int ppm, String network, int peers, long nlinks, long nwords, double nqph, long nppm, BufferedImage newLogo) {
+    private static void drawBannerPicture(final int width, final int height, final String bgcolor, final String textcolor, final String bordercolor, final String name, final long links, final long words, final String type, final int ppm, final String network, final int peers, final long nlinks, final long nwords, final double nqph, final long nppm, final BufferedImage newLogo) {
 
-        int exprlength = 19;
+        final int exprlength = 19;
         logo = newLogo;
         bannerPicture = new ymageMatrix(width, height, ymageMatrix.MODE_REPLACE, bgcolor);
 
@@ -375,8 +375,8 @@ public class plasmaGrafics {
         ymageToolPrint.print(bannerPicture, 285, 52, 0, "SPEED:   " + addTrailingBlanks(nppm + " PAGES/MINUTE", exprlength), -1);
 
         if (logo != null) {
-            int x = (100/2 - logo.getWidth()/2);
-            int y = (height/2 - logo.getHeight()/2);
+            final int x = (100/2 - logo.getWidth()/2);
+            final int y = (height/2 - logo.getHeight()/2);
             bannerPicture.insertBitmap(logo, x, y, 0, 0, ymageMatrix.FILTER_ANTIALIASING);
         }
 
@@ -400,12 +400,12 @@ public class plasmaGrafics {
     }
 
     //[MN]
-    private static String addBlanksAndDots(long input, int length) {
+    private static String addBlanksAndDots(final long input, final int length) {
         return addBlanksAndDots(input + "", length);
     }
 
     //[MN]
-    private static String addBlanksAndDots(String input, int length) {
+    private static String addBlanksAndDots(String input, final int length) {
         input = addDots(input);
         input = addTrailingBlanks(input,length);
         return input;

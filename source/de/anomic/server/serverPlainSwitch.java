@@ -30,11 +30,11 @@ import java.io.File;
 
 public class serverPlainSwitch<E> extends serverAbstractSwitch<E> implements serverSwitch<E> {
 
-    public serverPlainSwitch(File rootPath, String initPath, String configPath, boolean applyPro) {
+    public serverPlainSwitch(final File rootPath, final String initPath, final String configPath, final boolean applyPro) {
         super(rootPath, initPath, configPath, applyPro);
     }
 
-    public serverObjects action(String actionName, serverObjects actionInput) {
+    public serverObjects action(final String actionName, final serverObjects actionInput) {
         // no actions
         return null;
     }

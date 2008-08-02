@@ -62,7 +62,7 @@ public class listManager {
      * @param setName name of the ListSet
      * @return a ListSet from configuration file
      */
-    public static Set<String> getListSet(String setName) {
+    public static Set<String> getListSet(final String setName) {
         return string2set(switchboard.getConfig(setName, ""));
     }
 
@@ -73,8 +73,8 @@ public class listManager {
      * @param setName name of the ListSet.
      * @param listName name of the element to remove from the ListSet.
      */
-    public static void removeFromListSet(String setName, String listName) {
-        Set<String> listSet = getListSet(setName);
+    public static void removeFromListSet(final String setName, final String listName) {
+        final Set<String> listSet = getListSet(setName);
         
         if (listSet.size() > 0) {
             listSet.remove(listName);
@@ -92,8 +92,8 @@ public class listManager {
      * @param setName
      * @param newListName
      */
-    public static void updateListSet(String setName, String newListName) {
-        Set<String> listSet = getListSet(setName);
+    public static void updateListSet(final String setName, final String newListName) {
+        final Set<String> listSet = getListSet(setName);
         listSet.add(newListName);
 
         switchboard.setConfig(setName, collection2string(listSet));
@@ -105,8 +105,8 @@ public class listManager {
      * @return <code>true</code> if the ListSet "setName" contains an element
      *         "listName", <code>false</code> otherwise.
      */
-    public static boolean listSetContains(String setName, String listName) {
-        Set<String> Lists =  getListSet(setName);
+    public static boolean listSetContains(final String setName, final String listName) {
+        final Set<String> Lists =  getListSet(setName);
 
         return Lists.contains(listName);
     }
@@ -120,9 +120,9 @@ public class listManager {
      * @param listFile the file
      * @return the resulting array as an ArrayList
      */
-    public static ArrayList<String> getListArray(File listFile){
+    public static ArrayList<String> getListArray(final File listFile){
         String line;
-        ArrayList<String> list = new ArrayList<String>();
+        final ArrayList<String> list = new ArrayList<String>();
         int count = 0;
         BufferedReader br = null;
         try {
@@ -133,10 +133,10 @@ public class listManager {
                 count++;
             }
             br.close();
-        } catch(IOException e) {
+        } catch(final IOException e) {
             // list is empty
         } finally {
-            if (br!=null) try { br.close(); } catch (Exception e) {}
+            if (br!=null) try { br.close(); } catch (final Exception e) {}
         }
         return list;
     }
@@ -148,17 +148,17 @@ public class listManager {
      * @param out the String to write
      * @return returns <code>true</code> if successful, <code>false</code> otherwise
      */
-    public static boolean writeList(File listFile, String out) {
+    public static boolean writeList(final File listFile, final String out) {
         BufferedWriter bw = null;
         try {
             bw = new BufferedWriter(new PrintWriter(new FileWriter(listFile)));
             bw.write(out);
             bw.close();
             return true;
-        } catch(IOException e) {
+        } catch(final IOException e) {
             return false;
         } finally {
-            if (bw!=null) try { bw.close(); } catch (Exception e) {}
+            if (bw!=null) try { bw.close(); } catch (final Exception e) {}
         }
     }
 
@@ -169,8 +169,8 @@ public class listManager {
      * @param list the Array to write
      * @return returns <code>true</code> if successful, <code>false</code> otherwise
      */
-    public static boolean writeList(File listFile, String[] list){
-        StringBuffer out = new StringBuffer();
+    public static boolean writeList(final File listFile, final String[] list){
+        final StringBuffer out = new StringBuffer();
         for(int i=0;i < list.length; i++){
             out
             .append(list[i])
@@ -180,8 +180,8 @@ public class listManager {
     }
 
     // same as below
-    public static String getListString(String filename, boolean withcomments) {        
-        File listFile = new File(listsPath ,filename);
+    public static String getListString(final String filename, final boolean withcomments) {        
+        final File listFile = new File(listsPath ,filename);
         return getListString(listFile, withcomments);
     }
 
@@ -192,8 +192,8 @@ public class listManager {
      * @param withcomments If <code>false</code> ignore lines starting with '#'.
      * @return String representation of the file content.
      */
-    public static String getListString(File listFile, boolean withcomments){
-        StringBuffer temp = new StringBuffer();
+    public static String getListString(final File listFile, final boolean withcomments){
+        final StringBuffer temp = new StringBuffer();
         
         BufferedReader br = null;        
         try{
@@ -210,16 +210,16 @@ public class listManager {
                 }
             }
             br.close();
-        } catch (IOException e) {
+        } catch (final IOException e) {
         } finally {
-            if (br!=null) try { br.close(); } catch (Exception e) {}
+            if (br!=null) try { br.close(); } catch (final Exception e) {}
         }
 
         return new String(temp);
     }
 
     // get a Directory Listing as a String Array
-    public static String[] getDirListing(String dirname){
+    public static String[] getDirListing(final String dirname){
         final File dir = new File(dirname);
         return getDirListing(dir);
     }
@@ -231,7 +231,7 @@ public class listManager {
      * it will be created.
      * @return array of file names
      */
-    public static String[] getDirListing(File dir){
+    public static String[] getDirListing(final File dir){
         String[] fileListString;
         File[] fileList;
 
@@ -250,7 +250,7 @@ public class listManager {
     }    
 
     // same as below
-    public static ArrayList<File> getDirsRecursive(File dir, String notdir){
+    public static ArrayList<File> getDirsRecursive(final File dir, final String notdir){
         return getDirsRecursive(dir, notdir, true);
     }
     
@@ -259,7 +259,7 @@ public class listManager {
      *
      * Warning: untested
      */
-    public static ArrayList<File> getDirsRecursive(File dir, String notdir, boolean excludeDotfiles){
+    public static ArrayList<File> getDirsRecursive(final File dir, final String notdir, final boolean excludeDotfiles){
         final File[] dirList = dir.listFiles();
         final ArrayList<File> resultList = new ArrayList<File>();
         ArrayList<File> recursive;
@@ -288,11 +288,11 @@ public class listManager {
      * @param col a Collection of Strings.
      * @return String with elements from set separated by comma.
      */
-    public static String collection2string(Collection<String> col){
-        StringBuffer str = new StringBuffer();
+    public static String collection2string(final Collection<String> col){
+        final StringBuffer str = new StringBuffer();
         
         if (col != null && (col.size() > 0)) {
-            Iterator<String> it = col.iterator();
+            final Iterator<String> it = col.iterator();
             str.append(it.next());
             while(it.hasNext()) {
                 str.append(",").append(it.next());
@@ -305,7 +305,7 @@ public class listManager {
     /**
      * @see listManager#string2vector(String)
      */
-    public static ArrayList<String> string2arraylist(String string){
+    public static ArrayList<String> string2arraylist(final String string){
         ArrayList<String> l;
 
         if (string != null && string.length() > 0) {
@@ -323,7 +323,7 @@ public class listManager {
      * @param string list of comma separated Strings
      * @return resulting Set or empty Set if string is <code>null</code>
      */
-    public static Set<String> string2set(String string){
+    public static Set<String> string2set(final String string){
         HashSet<String> set;
         
         if (string != null) {
@@ -342,7 +342,7 @@ public class listManager {
      * @param string list of comma separated Strings
      * @return resulting Vector or empty Vector if string is <code>null</code>
      */
-    public static Vector<String> string2vector(String string){
+    public static Vector<String> string2vector(final String string){
         Vector<String> v;
 
         if (string != null) {
@@ -360,12 +360,12 @@ public class listManager {
      * Load or reload all active Blacklists
      */
     public static void reloadBlacklists(){
-        String supportedBlacklistTypesStr = indexAbstractReferenceBlacklist.BLACKLIST_TYPES_STRING;
-        String[] supportedBlacklistTypes = supportedBlacklistTypesStr.split(",");
+        final String supportedBlacklistTypesStr = indexAbstractReferenceBlacklist.BLACKLIST_TYPES_STRING;
+        final String[] supportedBlacklistTypes = supportedBlacklistTypesStr.split(",");
         
-        ArrayList<blacklistFile> blacklistFiles = new ArrayList<blacklistFile>(supportedBlacklistTypes.length);
+        final ArrayList<blacklistFile> blacklistFiles = new ArrayList<blacklistFile>(supportedBlacklistTypes.length);
         for (int i=0; i < supportedBlacklistTypes.length; i++) {
-            blacklistFile blFile = new blacklistFile(
+            final blacklistFile blFile = new blacklistFile(
                     switchboard.getConfig(
                     supportedBlacklistTypes[i] + ".BlackLists", switchboard.getConfig("BlackLists.DefaultList", "url.default.black")),
                     supportedBlacklistTypes[i]);

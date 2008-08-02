@@ -55,10 +55,10 @@ import de.anomic.yacy.yacyURL;
 
 public class IndexControlRWIs_p {
     
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
         // return variable that accumulates replacements
-        plasmaSwitchboard sb = (plasmaSwitchboard) env;
-        serverObjects prop = new serverObjects();
+        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        final serverObjects prop = new serverObjects();
 
         prop.putHTML("keystring", "");
         prop.put("keyhash", "");
@@ -74,15 +74,15 @@ public class IndexControlRWIs_p {
         
         if (post != null) {
             // default values
-            String keystring = post.get("keystring", "").trim();
+            final String keystring = post.get("keystring", "").trim();
             String keyhash = post.get("keyhash", "").trim();
             prop.putHTML("keystring", keystring);
             prop.put("keyhash", keyhash);
 
             // read values from checkboxes
             String[] urlx = post.getAll("urlhx.*");
-            boolean delurl    = post.containsKey("delurl");
-            boolean delurlref = post.containsKey("delurlref");
+            final boolean delurl    = post.containsKey("delurl");
+            final boolean delurlref = post.containsKey("delurlref");
 
             if (post.containsKey("keystringsearch")) {
                 keyhash = indexWord.word2hash(keystring);
@@ -111,12 +111,12 @@ public class IndexControlRWIs_p {
                 sb.crawlQueues.clear();
                 try {
                     sb.crawlStacker.clear();
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     e.printStackTrace();
                 }
                 try {
                     sb.robots.clear();
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     e.printStackTrace();
                 }
                 post.remove("deletecomplete");
@@ -128,7 +128,7 @@ public class IndexControlRWIs_p {
                     // generate an urlx array
                     indexContainer index = null;
                     index = sb.webIndex.getContainer(keyhash, null);
-                    Iterator<indexRWIRowEntry> en = index.entries();
+                    final Iterator<indexRWIRowEntry> en = index.entries();
                     int i = 0;
                     urlx = new String[index.size()];
                     while (en.hasNext()) {
@@ -159,7 +159,7 @@ public class IndexControlRWIs_p {
                         sb.urlRemove(urlx[i]);
                     }
                 }
-                Set<String> urlHashes = new HashSet<String>();
+                final Set<String> urlHashes = new HashSet<String>();
                 for (int i = 0; i < urlx.length; i++) urlHashes.add(urlx[i]);
                 sb.webIndex.removeEntries(keyhash, urlHashes);
                 // this shall lead to a presentation of the list; so handle that the remaining program
@@ -172,8 +172,8 @@ public class IndexControlRWIs_p {
                 if (keystring.length() == 0 || !indexWord.word2hash(keystring).equals(keyhash)) {
                     prop.put("keystring", "&lt;not possible to compute word from hash&gt;");
                 }
-                kelondroBitfield flags = plasmaSearchAPI.compileFlags(post);
-                int count = (post.get("lines", "all").equals("all")) ? -1 : post.getInt("lines", -1);
+                final kelondroBitfield flags = plasmaSearchAPI.compileFlags(post);
+                final int count = (post.get("lines", "all").equals("all")) ? -1 : post.getInt("lines", -1);
                 final plasmaSearchRankingProcess ranking = plasmaSearchAPI.genSearchresult(prop, sb, keyhash, flags);
                 plasmaSearchAPI.genURLList(prop, keyhash, keystring, ranking, flags, count);
             }
@@ -203,12 +203,12 @@ public class IndexControlRWIs_p {
                 // prepare index
                 indexContainer index;
                 String result;
-                long starttime = System.currentTimeMillis();
+                final long starttime = System.currentTimeMillis();
                 index = sb.webIndex.getContainer(keyhash, null);
                 // built urlCache
-                Iterator<indexRWIRowEntry> urlIter = index.entries();
-                HashMap<String, indexURLReference> knownURLs = new HashMap<String, indexURLReference>();
-                HashSet<String> unknownURLEntries = new HashSet<String>();
+                final Iterator<indexRWIRowEntry> urlIter = index.entries();
+                final HashMap<String, indexURLReference> knownURLs = new HashMap<String, indexURLReference>();
+                final HashSet<String> unknownURLEntries = new HashSet<String>();
                 indexRWIEntry iEntry;
                 indexURLReference lurl;
                 while (urlIter.hasNext()) {
@@ -223,9 +223,9 @@ public class IndexControlRWIs_p {
                 }
                 
                 // transport to other peer
-                String gzipBody = sb.getConfig("indexControl.gzipBody","false");
-                int timeout = (int) sb.getConfigLong("indexControl.timeout",60000);
-                HashMap<String, Object> resultObj = yacyClient.transferIndex(
+                final String gzipBody = sb.getConfig("indexControl.gzipBody","false");
+                final int timeout = (int) sb.getConfigLong("indexControl.timeout",60000);
+                final HashMap<String, Object> resultObj = yacyClient.transferIndex(
                              sb.webIndex.seedDB,
                              seed,
                              new indexContainer[]{index},
@@ -261,17 +261,17 @@ public class IndexControlRWIs_p {
             }
             
             if (post.containsKey("blacklist")) {
-                String blacklist = post.get("blacklist", "");
-                Set<String> urlHashes = new HashSet<String>();
+                final String blacklist = post.get("blacklist", "");
+                final Set<String> urlHashes = new HashSet<String>();
                 if (post.containsKey("blacklisturls")) {
                     PrintWriter pw;
                     try {
-                        String[] supportedBlacklistTypes = env.getConfig("BlackLists.types", "").split(",");
+                        final String[] supportedBlacklistTypes = env.getConfig("BlackLists.types", "").split(",");
                         pw = new PrintWriter(new FileWriter(new File(listManager.listsPath, blacklist), true));
                         yacyURL url;
                         for (int i=0; i<urlx.length; i++) {
                             urlHashes.add(urlx[i]);
-                            indexURLReference e = sb.webIndex.getURL(urlx[i], null, 0);
+                            final indexURLReference e = sb.webIndex.getURL(urlx[i], null, 0);
                             sb.webIndex.removeURL(urlx[i]);
                             if (e != null) {
                                 url = e.comp().url();
@@ -287,19 +287,19 @@ public class IndexControlRWIs_p {
                             }
                         }
                         pw.close();
-                    } catch (IOException e) {
+                    } catch (final IOException e) {
                     }
                 }
                 
                 if (post.containsKey("blacklistdomains")) {
                     PrintWriter pw;
                     try {
-                        String[] supportedBlacklistTypes = indexAbstractReferenceBlacklist.BLACKLIST_TYPES_STRING.split(",");
+                        final String[] supportedBlacklistTypes = indexAbstractReferenceBlacklist.BLACKLIST_TYPES_STRING.split(",");
                         pw = new PrintWriter(new FileWriter(new File(listManager.listsPath, blacklist), true));
                         yacyURL url;
                         for (int i=0; i<urlx.length; i++) {
                             urlHashes.add(urlx[i]);
-                            indexURLReference e = sb.webIndex.getURL(urlx[i], null, 0);
+                            final indexURLReference e = sb.webIndex.getURL(urlx[i], null, 0);
                             sb.webIndex.removeURL(urlx[i]);
                             if (e != null) {
                                 url = e.comp().url();
@@ -314,7 +314,7 @@ public class IndexControlRWIs_p {
                             }
                         }
                         pw.close();
-                    } catch (IOException e) {
+                    } catch (final IOException e) {
                     }
                 }
                 sb.webIndex.removeEntries(keyhash, urlHashes);

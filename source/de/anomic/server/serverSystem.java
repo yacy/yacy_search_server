@@ -71,8 +71,8 @@ public final class serverSystem {
     // static initialization
     static {
 	// check operation system type
-	Properties sysprop = System.getProperties();
-	String sysname = sysprop.getProperty("os.name","").toLowerCase();
+	final Properties sysprop = System.getProperties();
+	final String sysname = sysprop.getProperty("os.name","").toLowerCase();
 	if (sysname.startsWith("mac os x")) systemOS = systemMacOSX;
 	else if (sysname.startsWith("mac os")) systemOS = systemMacOSC;
 	else if (sysname.startsWith("windows")) systemOS = systemWindows;
@@ -94,12 +94,12 @@ public final class serverSystem {
 	    macSetFileCreator = macMRJFileUtils.getMethod("setFileCreator", new Class[] {Class.forName("java.io.File"), macMRJOSType});
 	    macMRJOSTypeConstructor = macMRJOSType.getConstructor(new Class[] {Class.forName("java.lang.String")});
 	    macOpenURL = macMRJFileUtils.getMethod("openURL", new Class[] {Class.forName("java.lang.String")});
-	    byte[] nullb = new byte[4];
+	    final byte[] nullb = new byte[4];
 	    for (int i = 0; i < 4; i++) nullb[i] = 0;
 	    macMRJOSNullObj = macMRJOSTypeConstructor.newInstance(new Object[] {new String(nullb)});
 	    macFSTypeCache = new Hashtable<String, String>();
 	    macFSCreatorCache = new Hashtable<String, String>();
-	} catch (Exception e) {
+	} catch (final Exception e) {
 	    //e.printStackTrace();
 	    macMRJFileUtils = null; macMRJOSType = null;
 	}
@@ -112,97 +112,97 @@ public final class serverSystem {
         return systemOS == systemWindows;
     }*/
     
-    public static Object getMacOSTS(String s) {
+    public static Object getMacOSTS(final String s) {
 	if ((isMacArchitecture) && (macMRJFileUtils != null)) try {
 	    if ((s == null) || (s.equals(blankTypeString))) return macMRJOSNullObj;
 	    else return macMRJOSTypeConstructor.newInstance(new Object[] {s});
-	} catch (Exception e) {
+	} catch (final Exception e) {
 	    return macMRJOSNullObj;
 	} else return null;
     }
 
-    public static String getMacFSType(File f) {
+    public static String getMacFSType(final File f) {
 	if ((isMacArchitecture) && (macMRJFileUtils != null)) try {
-	    String s = macGetFileType.invoke(null, new Object[] {f}).toString();
+	    final String s = macGetFileType.invoke(null, new Object[] {f}).toString();
 	    if ((s == null) || (s.charAt(0) == 0)) return blankTypeString; else return s;
-	} catch (Exception e) {
+	} catch (final Exception e) {
 	    return null;
 	} else return null;
     }
 
-    public static String getMacFSCreator(File f) {
+    public static String getMacFSCreator(final File f) {
 	if ((isMacArchitecture) && (macMRJFileUtils != null)) try {
-	    String s = macGetFileCreator.invoke(null, new Object[] {f}).toString();
+	    final String s = macGetFileCreator.invoke(null, new Object[] {f}).toString();
 	    if ((s == null) || (s.charAt(0) == 0)) return blankTypeString; else return s;
-	} catch (Exception e) {
+	} catch (final Exception e) {
 	    return null;
 	} else return null;
     }
 
-    public static void setMacFSType(File f, String t) {
+    public static void setMacFSType(final File f, final String t) {
 	if ((isMacArchitecture) && (macMRJFileUtils != null)) try {
 	    macSetFileType.invoke(null, new Object[] {f, getMacOSTS(t)});
-	} catch (Exception e) {/*System.out.println(e.getMessage()); e.printStackTrace();*/}
+	} catch (final Exception e) {/*System.out.println(e.getMessage()); e.printStackTrace();*/}
     }
 
-    public static void setMacFSCreator(File f, String t) {
+    public static void setMacFSCreator(final File f, final String t) {
 	if ((isMacArchitecture) && (macMRJFileUtils != null)) try {
 	    macSetFileCreator.invoke(null, new Object[] {f, getMacOSTS(t)});
-	} catch (Exception e) {/*System.out.println(e.getMessage()); e.printStackTrace();*/}
+	} catch (final Exception e) {/*System.out.println(e.getMessage()); e.printStackTrace();*/}
     }
 
-    public static boolean aquireMacFSType(File f) {
+    public static boolean aquireMacFSType(final File f) {
 	if ((!(isMacArchitecture)) || (macMRJFileUtils == null)) return false;
-	String name = f.toString();
+	final String name = f.toString();
 
 	// check file type
-	int dot = name.lastIndexOf(".");
+	final int dot = name.lastIndexOf(".");
 	if ((dot < 0) || (dot + 1 >= name.length())) return false;
-	String type = getMacFSType(f);
+	final String type = getMacFSType(f);
 	if ((type == null) || (type.equals(blankTypeString))) return false;
-	String ext = name.substring(dot + 1).toLowerCase();
-	String oldType = macFSTypeCache.get(ext);
+	final String ext = name.substring(dot + 1).toLowerCase();
+	final String oldType = macFSTypeCache.get(ext);
 	if ((oldType != null) && (oldType.equals(type))) return false;
 	macFSTypeCache.put(ext, type);
 	return true;
     }
 
-    public static boolean aquireMacFSCreator(File f) {
+    public static boolean aquireMacFSCreator(final File f) {
 	if ((!(isMacArchitecture)) || (macMRJFileUtils == null)) return false;
-	String name = f.toString();
+	final String name = f.toString();
 
 	// check creator
-	String creator = getMacFSCreator(f);
+	final String creator = getMacFSCreator(f);
 	if ((creator == null) || (creator.equals(blankTypeString))) return false;
-	String oldCreator = macFSCreatorCache.get(name);
+	final String oldCreator = macFSCreatorCache.get(name);
 	if ((oldCreator != null) && (oldCreator.equals(creator))) return false;
 	macFSCreatorCache.put(name, creator);
 	return true;
     }
 
-    public static boolean applyMacFSType(File f) {
+    public static boolean applyMacFSType(final File f) {
 	if ((!(isMacArchitecture)) || (macMRJFileUtils == null)) return false;
-	String name = f.toString();
+	final String name = f.toString();
 
 	// reconstruct file type
-	int dot = name.lastIndexOf(".");
+	final int dot = name.lastIndexOf(".");
 	if ((dot < 0) || (dot + 1 >= name.length())) return false;
-	String type = macFSTypeCache.get(name.substring(dot + 1).toLowerCase());
+	final String type = macFSTypeCache.get(name.substring(dot + 1).toLowerCase());
 	if (type == null) return false;
-	String oldType = getMacFSType(f);
+	final String oldType = getMacFSType(f);
 	if ((oldType != null) && (oldType.equals(type))) return false;
 	setMacFSType(f, type);
 	return getMacFSType(f).equals(type);
     }
 
-    public static boolean applyMacFSCreator(File f) {
+    public static boolean applyMacFSCreator(final File f) {
 	if ((!(isMacArchitecture)) || (macMRJFileUtils == null)) return false;
-	String name = f.toString();
+	final String name = f.toString();
 
 	// reconstruct file creator
-	String creator = macFSCreatorCache.get(name);
+	final String creator = macFSCreatorCache.get(name);
 	if (creator == null) return false;
-	String oldCreator = getMacFSCreator(f);
+	final String oldCreator = getMacFSCreator(f);
 	if ((oldCreator != null) && (oldCreator.equals(creator))) return false;
 	//System.out.println("***Setting creator for " + f.toString() + " to " + creator);
 	setMacFSCreator(f, creator);
@@ -238,15 +238,15 @@ public final class serverSystem {
 	return s;
     }
 
-    private static String errorResponse(Process p) {
-	BufferedReader err = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+    private static String errorResponse(final Process p) {
+	final BufferedReader err = new BufferedReader(new InputStreamReader(p.getErrorStream()));
 	String line, error = "";
 	try {
 	    while ((line = err.readLine()) != null) {
 		error = line + "\n";
 	    }
 	    return error;
-	} catch (IOException e) {
+	} catch (final IOException e) {
 	    return null;
 	}
     }
@@ -270,11 +270,11 @@ public final class serverSystem {
     }
     */
 
-    public static void openBrowser(String url) {
+    public static void openBrowser(final String url) {
 	openBrowser(url, "firefox");
     }
 
-    public static void openBrowser(String url, String app) {
+    public static void openBrowser(final String url, final String app) {
 	try {
 	    String cmd;
 	    Process p;
@@ -307,24 +307,24 @@ public final class serverSystem {
             if (p.exitValue() != 0) throw new RuntimeException("EXEC ERROR: " + errorResponse(p));
             }
 	    }
-	} catch (Exception e) {
+	} catch (final Exception e) {
 	    System.out.println("please start your browser and open the following location: " + url);
 	}
     }
 
-    public static void deployScript(File scriptFile, String theScript) throws IOException {
+    public static void deployScript(final File scriptFile, final String theScript) throws IOException {
         serverFileUtils.copy(theScript.getBytes(), scriptFile);
         if(!isWindows){ // set executable
 	        try {
 	            Runtime.getRuntime().exec("chmod 755 " + scriptFile.getAbsolutePath().replaceAll(" ", "\\ ")).waitFor();
-	        } catch (InterruptedException e) {
+	        } catch (final InterruptedException e) {
 	            serverLog.logSevere("DEPLOY", "deploy of script file failed. file = " + scriptFile.getAbsolutePath(), e);
 	            throw new IOException(e.getMessage());
 	        }
         }
     }
     
-    public static void execAsynchronous(File scriptFile) throws IOException {
+    public static void execAsynchronous(final File scriptFile) throws IOException {
         // runs a script as separate thread
     	String starterFileExtension = null;
     	String script = null;
@@ -336,34 +336,34 @@ public final class serverSystem {
     		starterFileExtension = ".starter.sh";
 	        script = "#!/bin/sh" + serverCore.LF_STRING + scriptFile.getAbsolutePath().replaceAll(" ", "\\ ") + " &" + serverCore.LF_STRING;
     	}
-    	File starterFile = new File(scriptFile.getAbsolutePath().replaceAll(" ", "\\ ") + starterFileExtension);
+    	final File starterFile = new File(scriptFile.getAbsolutePath().replaceAll(" ", "\\ ") + starterFileExtension);
     	deployScript(starterFile, script);
         try {
             Runtime.getRuntime().exec(starterFile.getAbsolutePath().replaceAll(" ", "\\ ")).waitFor();
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
             throw new IOException(e.getMessage());
         }
         starterFile.delete();
     }
     
-    public static Vector<String> execSynchronous(String command) throws IOException {
+    public static Vector<String> execSynchronous(final String command) throws IOException {
         // runs a unix/linux command and returns output as Vector of Strings
         // this method blocks until the command is executed
-        Process p = Runtime.getRuntime().exec(command);
-        BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
+        final Process p = Runtime.getRuntime().exec(command);
+        final BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
         String text;
-        Vector<String> output = new Vector<String>();
+        final Vector<String> output = new Vector<String>();
         while ((text = in.readLine()) != null) {
             output.add(text);
         }
         return output;
     }
     
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
 	//try{System.getProperties().list(new PrintStream(new FileOutputStream(new File("system.properties.txt"))));} catch (FileNotFoundException e) {}
 	//System.out.println("nullstr=" + macMRJOSNullObj.toString());
 	if (args[0].equals("-f")) {
-	    File f = new File(args[1]);
+	    final File f = new File(args[1]);
 	    System.out.println("File " + f.toString() + ": creator = " + getMacFSCreator(f) + "; type = " + getMacFSType(f));
 	}
 	if (args[0].equals("-u")) {

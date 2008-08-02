@@ -90,15 +90,15 @@ public class CrawlEntry {
      * @param forkfactor sum of anchors of all ancestors
      */
     public CrawlEntry(
-                 String initiator, 
-                 yacyURL url, 
-                 String referrerhash, 
-                 String name, 
-                 Date appdate,
-                 String profileHandle,
-                 int depth, 
-                 int anchors, 
-                 int forkfactor
+                 final String initiator, 
+                 final yacyURL url, 
+                 final String referrerhash, 
+                 final String name, 
+                 final Date appdate,
+                 final String profileHandle,
+                 final int depth, 
+                 final int anchors, 
+                 final int forkfactor
     ) {
         // create new entry and store it into database
         assert appdate != null;
@@ -124,13 +124,13 @@ public class CrawlEntry {
         this.initialHash   = url.hashCode();
     }
     
-    public CrawlEntry(kelondroRow.Entry entry) throws IOException {
+    public CrawlEntry(final kelondroRow.Entry entry) throws IOException {
         assert (entry != null);
         insertEntry(entry);
     }
 
-    private void insertEntry(kelondroRow.Entry entry) throws IOException {
-        String urlstring = entry.getColString(2, null);
+    private void insertEntry(final kelondroRow.Entry entry) throws IOException {
+        final String urlstring = entry.getColString(2, null);
         if (urlstring == null) throw new IOException ("url string is null");
         this.initiator = entry.getColString(1, null);
         this.url = new yacyURL(urlstring, entry.getColString(0, null));
@@ -156,7 +156,7 @@ public class CrawlEntry {
         return this.initialHash;
     }
     
-    public void setStatus(String s) {
+    public void setStatus(final String s) {
         this.status = s;
     }
     
@@ -164,25 +164,25 @@ public class CrawlEntry {
         return this.status;
     }
     
-    private static String normalizeHandle(int h) {
+    private static String normalizeHandle(final int h) {
         String d = Integer.toHexString(h);
         while (d.length() < rowdef.width(11)) d = "0" + d;
         return d;
     }
     
     public kelondroRow.Entry toRow() {
-        byte[] appdatestr = kelondroNaturalOrder.encodeLong(appdate, rowdef.width(5));
-        byte[] loaddatestr = kelondroNaturalOrder.encodeLong(loaddate, rowdef.width(12));
-        byte[] serverdatestr = kelondroNaturalOrder.encodeLong(serverdate, rowdef.width(13));
-        byte[] imsdatestr = kelondroNaturalOrder.encodeLong(imsdate, rowdef.width(14));
+        final byte[] appdatestr = kelondroNaturalOrder.encodeLong(appdate, rowdef.width(5));
+        final byte[] loaddatestr = kelondroNaturalOrder.encodeLong(loaddate, rowdef.width(12));
+        final byte[] serverdatestr = kelondroNaturalOrder.encodeLong(serverdate, rowdef.width(13));
+        final byte[] imsdatestr = kelondroNaturalOrder.encodeLong(imsdate, rowdef.width(14));
         // store the hash in the hash cache
         byte[] namebytes;
         try {
             namebytes = this.name.getBytes("UTF-8");
-        } catch (UnsupportedEncodingException e) {
+        } catch (final UnsupportedEncodingException e) {
             namebytes = this.name.getBytes();
         }
-        byte[][] entry = new byte[][] {
+        final byte[][] entry = new byte[][] {
                 this.url.hash().getBytes(),
                 (initiator == null) ? "".getBytes() : this.initiator.getBytes(),
                 this.url.toString().getBytes(),
@@ -206,7 +206,7 @@ public class CrawlEntry {
         return url;
     }
     
-    public void redirectURL(yacyURL redirectedURL) {
+    public void redirectURL(final yacyURL redirectedURL) {
         // replace old URL by new one. This should only be used in case of url redirection
         this.url = redirectedURL;
     }

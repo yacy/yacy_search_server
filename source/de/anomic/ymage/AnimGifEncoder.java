@@ -75,13 +75,13 @@ public class AnimGifEncoder {
     private boolean         m_default_interlace = false;
 
     /** The default delay time, */
-    private int             m_default_delay = 100;
+    private final int             m_default_delay = 100;
 
     /** Set when looping the set is requested. */
     private boolean         m_loop  = true;
 
     /** The outputstream to write the image to. */
-    private OutputStream    m_os;
+    private final OutputStream    m_os;
 
     /** The (current) list of images to embed in the GIF */
     private ArrayList<AnIma> m_ima_ar;
@@ -107,14 +107,14 @@ public class AnimGifEncoder {
     /**
      *  This constructor creates an empty default codec.
      */
-    public AnimGifEncoder(OutputStream os) {
+    public AnimGifEncoder(final OutputStream os) {
         m_os    = os;
     }
 
     /**
      *  Creates a codec and specify interlace (not implemented yet).
      */
-    public AnimGifEncoder(OutputStream os, boolean interlace) {
+    public AnimGifEncoder(final OutputStream os, final boolean interlace) {
         m_os    = os;
         m_default_interlace = interlace;
     }
@@ -130,7 +130,7 @@ public class AnimGifEncoder {
      *  specified.
      *  </p>
      */
-    public void setLoop(boolean loop) {
+    public void setLoop(final boolean loop) {
         m_loop = loop;
     }
 
@@ -161,8 +161,8 @@ public class AnimGifEncoder {
      *  is released, and only the pixelset remains until the encode call is
      *  made. Calling encode will release the pixelset.
      */
-    public void add(Image ima, int delaytime, boolean interlace, int px, int py) throws IOException {
-        AnIma   ai      = new AnIma();
+    public void add(final Image ima, final int delaytime, final boolean interlace, final int px, final int py) throws IOException {
+        final AnIma   ai      = new AnIma();
         ai.m_delay      = delaytime;
         ai.m_interlace  = interlace;
         ai.m_x          = px;
@@ -188,14 +188,14 @@ public class AnimGifEncoder {
     /**
      *  Adds the specified image to the list of images.
      */
-    public void add(Image ima) throws IOException {
+    public void add(final Image ima) throws IOException {
         add(ima, m_ima_ar == null ? 0 : m_default_delay, m_default_interlace, 0, 0);
     }
 
     /**
      *  Adds the specified image to the list of images.
      */
-    public void add(Image ima, int delay) throws IOException {
+    public void add(final Image ima, final int delay) throws IOException {
         add(ima, delay, m_default_interlace, 0, 0);
     }
 
@@ -205,17 +205,17 @@ public class AnimGifEncoder {
     /**
      *  Writes a string as a #of bytes to the output stream.
      */
-    private void utStr(String str) throws IOException {
-        byte[] buf = str.getBytes();
+    private void utStr(final String str) throws IOException {
+        final byte[] buf = str.getBytes();
         m_os.write( buf );
     }
 
-    private void utWord(int val) throws IOException {
+    private void utWord(final int val) throws IOException {
         utByte( (byte) ( val & 0xff));
         utByte( (byte) (( val >> 8 ) & 0xff ));
     }
 
-    private void utByte(byte b) throws IOException {
+    private void utByte(final byte b) throws IOException {
         m_os.write( b );
     }
 
@@ -243,7 +243,7 @@ public class AnimGifEncoder {
          *  table and the complete output size.
          */
         for (int i = 0; i < m_ima_ar.size(); i++) {
-            AnIma   ai = m_ima_ar.get(i);
+            final AnIma   ai = m_ima_ar.get(i);
             genImage(ai);
             ai.m_rgb    = null;
         }
@@ -282,7 +282,7 @@ public class AnimGifEncoder {
      *  stored it throws a too many colors exception.
      *  The function returns the index code for the color.
      */
-    private short findColorIndex(int color) throws IOException {
+    private short findColorIndex(final int color) throws IOException {
         //-- 1. Primary hash..
         int     i = (color & 0x7fffffff) % CHSIZE;
 
@@ -293,7 +293,7 @@ public class AnimGifEncoder {
         if(m_ccolor_ar[i] != 0)                 // Bucket is full?
         {
             //-- This was a clash. Locate a new bucket & look for another match!
-            int disp = CHSIZE - i;
+            final int disp = CHSIZE - i;
             do
             {
                 i   -= disp;
@@ -318,7 +318,7 @@ public class AnimGifEncoder {
      *  Checks if the image lies in the current complete image, else it extends
      *  the source image.
      */
-    private void checkTotalSize(AnIma ai) {
+    private void checkTotalSize(final AnIma ai) {
         int     t;
 
         t = ai.m_w + ai.m_x;                    // Get end-X of image,
@@ -343,7 +343,7 @@ public class AnimGifEncoder {
      *  the image, and an 8-bit "image" containing, for each pixel, the index
      *  into that color table. They also set the transparant color to use.
      */
-    private void preCode(AnIma ai, Image ima) throws IOException {
+    private void preCode(final AnIma ai, final Image ima) throws IOException {
         //-- Call the appropriate encoder depending on the image type.
         if(ima instanceof BufferedImage)
             precodeBuffered(ai, (BufferedImage) ima);
@@ -357,7 +357,7 @@ public class AnimGifEncoder {
      *  decoder. If the image is not implemented we fall back to the generic
      *  method.
      */
-    private void precodeBuffered(AnIma ai, BufferedImage bi) throws IOException {
+    private void precodeBuffered(final AnIma ai, final BufferedImage bi) throws IOException {
         //-- 1. Handle all shared tasks...
         ai.m_w  = bi.getWidth();
         ai.m_h  = bi.getHeight();
@@ -366,7 +366,7 @@ public class AnimGifEncoder {
 
         //-- 2. Optimize for known types...
         boolean done= false;
-        int bt  = bi.getType();
+        final int bt  = bi.getType();
         switch(bt)
         {
             case BufferedImage.TYPE_BYTE_INDEXED:   done = precodeByteIndexed(ai, bi);  break;
@@ -382,11 +382,11 @@ public class AnimGifEncoder {
         precodeImage(ai, bi);
     }
 
-    private int getBiOffset(Raster ras, PixelInterleavedSampleModel sm, int x, int y) {
+    private int getBiOffset(final Raster ras, final PixelInterleavedSampleModel sm, final int x, final int y) {
         return (y-ras.getSampleModelTranslateY()) * sm.getScanlineStride() + x-ras.getSampleModelTranslateX();
     }
 
-    private int getBiOffset(Raster ras, SinglePixelPackedSampleModel sm, int x, int y) {
+    private int getBiOffset(final Raster ras, final SinglePixelPackedSampleModel sm, final int x, final int y) {
         return (y-ras.getSampleModelTranslateY()) * sm.getScanlineStride() + x-ras.getSampleModelTranslateX();
     }
 
@@ -396,24 +396,24 @@ public class AnimGifEncoder {
     /**
      *  Encodes TYPE_BYTE_INDEXED images.
      */
-    private boolean precodeByteIndexed(AnIma ai, BufferedImage bi) throws IOException {
+    private boolean precodeByteIndexed(final AnIma ai, final BufferedImage bi) throws IOException {
         //-- Get the colormodel, the raster, the databuffer and the samplemodel
-        ColorModel  tcm = bi.getColorModel();
+        final ColorModel  tcm = bi.getColorModel();
         if(! (tcm instanceof IndexColorModel)) return false;
-        IndexColorModel cm  = (IndexColorModel) tcm;
+        final IndexColorModel cm  = (IndexColorModel) tcm;
 
-        Raster      ras = bi.getRaster();
-        SampleModel tsm = ras.getSampleModel();
+        final Raster      ras = bi.getRaster();
+        final SampleModel tsm = ras.getSampleModel();
         if(! (tsm instanceof PixelInterleavedSampleModel)) return false;
-        PixelInterleavedSampleModel sm  = (PixelInterleavedSampleModel) tsm;
+        final PixelInterleavedSampleModel sm  = (PixelInterleavedSampleModel) tsm;
 
-        DataBuffer  dbt = ras.getDataBuffer();
+        final DataBuffer  dbt = ras.getDataBuffer();
         if(dbt.getDataType() != DataBuffer.TYPE_BYTE) return false;
         if(dbt.getNumBanks() != 1) return false;
-        DataBufferByte  db  = (DataBufferByte) dbt;
+        final DataBufferByte  db  = (DataBufferByte) dbt;
 
         //-- Prepare the color mapping
-        short[] map = new short[256];                   // Alternate lookup table
+        final short[] map = new short[256];                   // Alternate lookup table
         for(int i = 0; i < 256; i++)                    // Set all entries to unused,
             map[i] = -1;
 
@@ -423,23 +423,23 @@ public class AnimGifEncoder {
          *  one. One fun thing: we only have to COPY all pixels, since we're
          *  already byte-packed.
          */
-        int     endoff  = ai.m_w * ai.m_h;              // Output image size,
-        byte[]  par     = new byte[endoff];             // Byte-indexed output array,
+        final int     endoff  = ai.m_w * ai.m_h;              // Output image size,
+        final byte[]  par     = new byte[endoff];             // Byte-indexed output array,
         int     doff    = 0;                            // Destination offset,
 
         //-- source
         int     soff    = getBiOffset(ras, sm, 0, 0);
-        byte[]  px      = db.getData(0);                // Get the pixelset,
-        int     esoff   = getBiOffset(ras, sm, ai.m_w-1, ai.m_h-1);                 // calc end offset,
-        int     iw      = sm.getScanlineStride();       // Increment width = databuf's width
+        final byte[]  px      = db.getData(0);                // Get the pixelset,
+        final int     esoff   = getBiOffset(ras, sm, ai.m_w-1, ai.m_h-1);                 // calc end offset,
+        final int     iw      = sm.getScanlineStride();       // Increment width = databuf's width
 
         while(soff < esoff) {                           // For all scan lines,
         
-            int     xe = soff + ai.m_w;                 // End for this line
+            final int     xe = soff + ai.m_w;                 // End for this line
             while(soff < xe) {                          // While within this line
                 //-- (continue) collect a run,
-                int rs  = soff;                         // Save run start
-                byte    rcolor  = px[soff++];           // First color
+                final int rs  = soff;                         // Save run start
+                final byte    rcolor  = px[soff++];           // First color
                 while(soff < xe && px[soff] == rcolor)  // Run till eoln or badclor
                     soff++;
 
@@ -447,7 +447,7 @@ public class AnimGifEncoder {
                 short   ii = map[rcolor + 0x80];
                 if (ii == -1){                          // Unknown map?
                     //-- New color. Get it's translated RGB value,
-                    int rix = rcolor & 0xff;       // Translate to unsigned
+                    final int rix = rcolor & 0xff;       // Translate to unsigned
                     int rgb = cm.getRGB(rix);           // Get RGB value for this input index,
                     if(rgb >= 0) {                      // Transparant color?
                         //-- If there is a transparant color index use it...
@@ -465,8 +465,8 @@ public class AnimGifEncoder {
                 }
 
                 //-- Always write this run.
-                int     dep = doff + (soff - rs);   // End output pos
-                byte    idx = (byte) ii;
+                final int     dep = doff + (soff - rs);   // End output pos
+                final byte    idx = (byte) ii;
                 while(doff < dep)
                     par[doff++] = idx;              // Fill output.
             }
@@ -485,18 +485,18 @@ public class AnimGifEncoder {
     /**
      *  Encodes INT pixel-packed images.
      */
-    private boolean precodeIntPacked(AnIma ai, BufferedImage bi) throws IOException {
+    private boolean precodeIntPacked(final AnIma ai, final BufferedImage bi) throws IOException {
         //-- Get the colormodel, the raster, the databuffer and the samplemodel
-        ColorModel  cm  = bi.getColorModel();
-        Raster      ras = bi.getRaster();
-        SampleModel tsm = ras.getSampleModel();
+        final ColorModel  cm  = bi.getColorModel();
+        final Raster      ras = bi.getRaster();
+        final SampleModel tsm = ras.getSampleModel();
         if(! (tsm instanceof SinglePixelPackedSampleModel)) return false;
-        SinglePixelPackedSampleModel    sm  = (SinglePixelPackedSampleModel) tsm;
+        final SinglePixelPackedSampleModel    sm  = (SinglePixelPackedSampleModel) tsm;
 
-        DataBuffer  dbt = ras.getDataBuffer();
+        final DataBuffer  dbt = ras.getDataBuffer();
         if(dbt.getDataType() != DataBuffer.TYPE_INT) return false;
         if(dbt.getNumBanks() != 1) return false;
-        DataBufferInt   db  = (DataBufferInt) dbt;
+        final DataBufferInt   db  = (DataBufferInt) dbt;
 
         /*
          *  Prepare the run: get all constants e.a. The mechanism runs thru
@@ -504,24 +504,24 @@ public class AnimGifEncoder {
          *  one. One fun thing: we only have to COPY all pixels, since we're
          *  already byte-packed.
          */
-        int     endoff  = ai.m_w * ai.m_h;              // Output image size,
-        byte[]  par     = new byte[endoff];             // Byte-indexed output array,
+        final int     endoff  = ai.m_w * ai.m_h;              // Output image size,
+        final byte[]  par     = new byte[endoff];             // Byte-indexed output array,
         int     doff    = 0;                            // Destination offset,
         byte    ii;
 
         //-- source
         int     soff    = getBiOffset(ras, sm, 0, 0);
-        int[]   px      = db.getData(0);                // Get the pixelset,
-        int     esoff   = getBiOffset(ras, sm, ai.m_w-1, ai.m_h-1);                 // calc end offset,
-        int     iw      = sm.getScanlineStride();       // Increment width = databuf's width
+        final int[]   px      = db.getData(0);                // Get the pixelset,
+        final int     esoff   = getBiOffset(ras, sm, ai.m_w-1, ai.m_h-1);                 // calc end offset,
+        final int     iw      = sm.getScanlineStride();       // Increment width = databuf's width
 
         while(soff < esoff) {                            // For all scan lines,
         
-            int     xe = soff + ai.m_w;                 // End for this line
+            final int     xe = soff + ai.m_w;                 // End for this line
             while (soff < xe) {                         // While within this line
                 //-- (continue) collect a run,
-                int rs  = soff;                         // Save run start
-                int rcolor  = px[soff++];               // First color
+                final int rs  = soff;                         // Save run start
+                final int rcolor  = px[soff++];               // First color
                 while(soff < xe && px[soff] == rcolor)  // Run till eoln or badclor
                     soff++;
 
@@ -541,7 +541,7 @@ public class AnimGifEncoder {
                 }
 
                 //-- Always write this run.
-                int     dep = doff + (soff - rs);   // End output pos
+                final int     dep = doff + (soff - rs);   // End output pos
                 while(doff < dep)
                     par[doff++] = ii;               // Fill output.
             }
@@ -561,18 +561,18 @@ public class AnimGifEncoder {
     /**
      *  Encodes SHORT pixel-packed images.
      */
-    private boolean precodeShortPacked(AnIma ai, BufferedImage bi) throws IOException {
+    private boolean precodeShortPacked(final AnIma ai, final BufferedImage bi) throws IOException {
         //-- Get the colormodel, the raster, the databuffer and the samplemodel
-        ColorModel  cm  = bi.getColorModel();
-        Raster      ras = bi.getRaster();
-        SampleModel tsm = ras.getSampleModel();
+        final ColorModel  cm  = bi.getColorModel();
+        final Raster      ras = bi.getRaster();
+        final SampleModel tsm = ras.getSampleModel();
         if(! (tsm instanceof SinglePixelPackedSampleModel)) return false;
-        SinglePixelPackedSampleModel    sm  = (SinglePixelPackedSampleModel) tsm;
+        final SinglePixelPackedSampleModel    sm  = (SinglePixelPackedSampleModel) tsm;
 
-        DataBuffer  dbt = ras.getDataBuffer();
+        final DataBuffer  dbt = ras.getDataBuffer();
         if(dbt.getDataType() != DataBuffer.TYPE_SHORT) return false;
         if(dbt.getNumBanks() != 1) return false;
-        DataBufferShort db  = (DataBufferShort) dbt;
+        final DataBufferShort db  = (DataBufferShort) dbt;
 
         /*
          *  Prepare the run: get all constants e.a. The mechanism runs thru
@@ -580,25 +580,25 @@ public class AnimGifEncoder {
          *  one. One fun thing: we only have to COPY all pixels, since we're
          *  already byte-packed.
          */
-        int     endoff  = ai.m_w * ai.m_h;              // Output image size,
-        byte[]  par     = new byte[endoff];             // Byte-indexed output array,
+        final int     endoff  = ai.m_w * ai.m_h;              // Output image size,
+        final byte[]  par     = new byte[endoff];             // Byte-indexed output array,
         int     doff    = 0;                            // Destination offset,
         byte    ii;
 
         //-- source
         int     soff    = getBiOffset(ras, sm, 0, 0);
-        short[] px      = db.getData(0);                // Get the pixelset,
-        int     esoff   = getBiOffset(ras, sm, ai.m_w-1, ai.m_h-1);                 // calc end offset,
-        int     iw      = sm.getScanlineStride();       // Increment width = databuf's width
+        final short[] px      = db.getData(0);                // Get the pixelset,
+        final int     esoff   = getBiOffset(ras, sm, ai.m_w-1, ai.m_h-1);                 // calc end offset,
+        final int     iw      = sm.getScanlineStride();       // Increment width = databuf's width
 
         while(soff < esoff)                             // For all scan lines,
         {
-            int     xe = soff + ai.m_w;                 // End for this line
+            final int     xe = soff + ai.m_w;                 // End for this line
             while(soff < xe)                            // While within this line
             {
                 //-- (continue) collect a run,
-                int rs  = soff;                         // Save run start
-                short   rcolor  = px[soff++];           // First color
+                final int rs  = soff;                         // Save run start
+                final short   rcolor  = px[soff++];           // First color
                 while(soff < xe && px[soff] == rcolor)  // Run till eoln or badclor
                     soff++;
 
@@ -622,7 +622,7 @@ public class AnimGifEncoder {
                 }
 
                 //-- Always write this run.
-                int     dep = doff + (soff - rs);   // End output pos
+                final int     dep = doff + (soff - rs);   // End output pos
                 while(doff < dep)
                     par[doff++] = ii;               // Fill output.
             }
@@ -644,7 +644,7 @@ public class AnimGifEncoder {
      *  Using a generic Image, this uses a PixelGrabber to get an integer
      *  pixel array.
      */
-    private void precodeImage(AnIma ai, Image ima) throws IOException {
+    private void precodeImage(final AnIma ai, final Image ima) throws IOException {
         int[]       px;
 
         //-- Wait for the image to arrive,
@@ -654,7 +654,7 @@ public class AnimGifEncoder {
         {
             mt.waitForAll();                            // Be use all are loaded,
         }
-        catch(InterruptedException x)
+        catch(final InterruptedException x)
         {
             throw new IOException("Interrupted load of image");
         }
@@ -668,10 +668,10 @@ public class AnimGifEncoder {
         checkTotalSize(ai);
 
         //-- Grab pixels & convert to 8-bit pixelset.
-        PixelGrabber    pg  = new PixelGrabber(ima, 0, 0, ai.m_w, ai.m_h, true);
+        final PixelGrabber    pg  = new PixelGrabber(ima, 0, 0, ai.m_w, ai.m_h, true);
         try {
             pg.grabPixels();
-        } catch(InterruptedException x) {
+        } catch(final InterruptedException x) {
             throw new IOException("Interrupted load of image");
         }
         px = (int[]) pg.getPixels();    // Get the pixels,
@@ -685,10 +685,10 @@ public class AnimGifEncoder {
      *  for the combined GIF. The index of the color is then used in the 8-bit
      *  pixelset for this image.
      */
-    private void translateColorsByArray(AnIma a, int[] px) throws IOException {
+    private void translateColorsByArray(final AnIma a, final int[] px) throws IOException {
         int         off;
         byte[]      par;
-        int         endoff  = a.m_w * a.m_h;    // Total #pixels in image
+        final int         endoff  = a.m_w * a.m_h;    // Total #pixels in image
         int         rstart, rcolor;             // Run data.
         byte        newc;
 
@@ -717,7 +717,7 @@ public class AnimGifEncoder {
             else
             {
                 //-- Not transparant- is an index known for this color?
-                int     i = (rcolor & 0x7fffffff) % CHSIZE;
+                final int     i = (rcolor & 0x7fffffff) % CHSIZE;
 
                 if(m_ccolor_ar[i] == rcolor)                // Bucket found?
                     newc = (byte)m_cindex_ar[i];
@@ -742,10 +742,10 @@ public class AnimGifEncoder {
      */
     private void genColorTable() throws IOException {
         // Turn colors into colormap entries.
-        int nelem = 1 << m_color_bits;
-        byte[] reds = new byte[nelem];
-        byte[] grns = new byte[nelem];
-        byte[] blus = new byte[nelem];
+        final int nelem = 1 << m_color_bits;
+        final byte[] reds = new byte[nelem];
+        final byte[] grns = new byte[nelem];
+        final byte[] blus = new byte[nelem];
 
         //-- Now enumerate the color table.
         for (int i = CHSIZE; --i >= 0;) {           // Count backwards (faster)
@@ -787,7 +787,7 @@ public class AnimGifEncoder {
         //-- Logical Screen Descriptor Block
         utWord(m_w);                                // Collated width & height of all images
         utWord(m_h);
-        byte    b = (byte)(0xF0 | (m_color_bits-1));// There IS a color map, 8 bits per color source resolution. not sorted,
+        final byte    b = (byte)(0xF0 | (m_color_bits-1));// There IS a color map, 8 bits per color source resolution. not sorted,
         utByte(b);                                  // Packet fields,
         utByte((byte)0);                            // Background Color Index assumed 0.
         utByte((byte)0);                            // Pixel aspect ratio 1:1: zero always works...
@@ -819,7 +819,7 @@ public class AnimGifEncoder {
     /**
      *  Writes a single image instance.
      */
-    private void genImage(AnIma ai) throws IOException {
+    private void genImage(final AnIma ai) throws IOException {
         //-- Write out a Graphic Control Extension for transparent colour & repeat, if necessary,
         if(m_transparant_ix != -1 || m_ima_ar.size() > 1) {
             byte transpar;
@@ -848,7 +848,7 @@ public class AnimGifEncoder {
         utByte((byte) (ai.m_interlace ? 0x40 : 0)); // Packed fields: interlaced Y/N, no local table no sort,
 
         //-- The table-based image data...
-        int initcodesz = m_color_bits <= 1 ? 2 : m_color_bits;
+        final int initcodesz = m_color_bits <= 1 ? 2 : m_color_bits;
         utByte((byte) initcodesz);                  // Output initial LZH code size, min. 2 bits,
         genCompressed(ai, initcodesz+1);            // Generate the compressed data,
         utByte((byte) 0);                           // Zero-length packet (end series)
@@ -871,7 +871,7 @@ public class AnimGifEncoder {
     /** End index within above index. */
     private int             m_px_endix;
 
-    private void genCompressed(AnIma a, int initcodesz) throws IOException {
+    private void genCompressed(final AnIma a, final int initcodesz) throws IOException {
         //-- Set all globals to retrieve pixel data quickly. $$TODO: Interlaced
         m_curr_pixels   = a.m_rgb;
         m_px_ix         = 0;
@@ -981,7 +981,7 @@ public class AnimGifEncoder {
     int maxcode;            // maximum code, given n_bits
     int maxmaxcode = 1 << BITS; // should NEVER generate this code
 
-    final int MAXCODE( int n_bits ) {
+    final int MAXCODE( final int n_bits ) {
         return ( 1 << n_bits ) - 1;
     }
 
@@ -1034,7 +1034,7 @@ public class AnimGifEncoder {
             0x01FF, 0x03FF, 0x07FF, 0x0FFF,
             0x1FFF, 0x3FFF, 0x7FFF, 0xFFFF };
 
-    void output(int code) throws IOException {
+    void output(final int code) throws IOException {
         cur_accum |= ( code << cur_bits );
         cur_bits += n_bits;
 
@@ -1097,7 +1097,7 @@ public class AnimGifEncoder {
     }
 
     // reset code table
-    void cl_hash( int hsize ) {
+    void cl_hash( final int hsize ) {
         for(int i = hsize; --i >= 0;)
             htab[i] = -1;
     }
@@ -1117,7 +1117,7 @@ public class AnimGifEncoder {
 
     // Add a character to the end of the current packet, and if it is 254
     // characters, flush the packet to disk.
-    void char_out(byte c) throws IOException {
+    void char_out(final byte c) throws IOException {
         accum[a_count++] = c;
         if ( a_count >= 254 )
             flush_char();
@@ -1133,24 +1133,24 @@ public class AnimGifEncoder {
     }
     
     // test method for ymage classes
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         System.setProperty("java.awt.headless", "true");
         
-        ymageMatrix m = new ymageMatrix(200, 300, ymageMatrix.MODE_SUB, "FFFFFF");
+        final ymageMatrix m = new ymageMatrix(200, 300, ymageMatrix.MODE_SUB, "FFFFFF");
         ymageMatrix.demoPaint(m);
-        File file = new File("/Users/admin/Desktop/testimage.gif");
+        final File file = new File("/Users/admin/Desktop/testimage.gif");
         
         OutputStream os;
         try {
             os = new FileOutputStream(file);
-            AnimGifEncoder age = new AnimGifEncoder(os);
+            final AnimGifEncoder age = new AnimGifEncoder(os);
             age.add(m.getImage());
             age.add(m.getImage());
             age.encode();
             os.close();
-        } catch (FileNotFoundException e) {
+        } catch (final FileNotFoundException e) {
             e.printStackTrace();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             e.printStackTrace();
         }
     }
@@ -1163,7 +1163,7 @@ class GifColorEntry {
     /** The colortable [palette] entry number for this color */
     public int      m_index;
 
-    public GifColorEntry(int col, int ix) {
+    public GifColorEntry(final int col, final int ix) {
         m_color = col;
         m_index = ix;
     }

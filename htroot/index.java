@@ -37,13 +37,13 @@ import de.anomic.server.serverSwitch;
 
 public class index {
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final serverObjects prop = new serverObjects();
         
         // access control
         boolean publicPage = sb.getConfigBool("publicSearchpage", true);
-        boolean authorizedAccess = sb.verifyAuthentication(header, false);
+        final boolean authorizedAccess = sb.verifyAuthentication(header, false);
         if ((post != null) && (post.containsKey("publicPage"))) {
             if (!authorizedAccess) {
                 prop.put("AUTHENTICATE", "admin log-in"); // force log-in
@@ -53,7 +53,7 @@ public class index {
             sb.setConfig("publicSearchpage", publicPage);
         }
         
-        boolean global = (post == null) ? true : post.get("resource", "global").equals("global");
+        final boolean global = (post == null) ? true : post.get("resource", "global").equals("global");
         final boolean authenticated = sb.adminAuthenticated(header) >= 2;
         final int display = ((post == null) || (!authenticated)) ? 0 : post.getInt("display", 0);
         final int searchoptions = (post == null) ? 0 : post.getInt("searchoptions", 0);
@@ -71,7 +71,7 @@ public class index {
         
         // search domain
         int contentdom = plasmaSearchQuery.CONTENTDOM_TEXT;
-        String cds = (post == null) ? "text" : post.get("contentdom", "text");
+        final String cds = (post == null) ? "text" : post.get("contentdom", "text");
         if (cds.equals("text")) contentdom = plasmaSearchQuery.CONTENTDOM_TEXT;
         if (cds.equals("audio")) contentdom = plasmaSearchQuery.CONTENTDOM_AUDIO;
         if (cds.equals("video")) contentdom = plasmaSearchQuery.CONTENTDOM_VIDEO;

@@ -77,7 +77,7 @@ public abstract class AbstractParser implements Parser{
     /**
      * The Constructor of this class.
      */
-	public AbstractParser(String[] libxDependencies) {
+	public AbstractParser(final String[] libxDependencies) {
 		super();
         this.libxDependencies = libxDependencies;
 	}
@@ -87,7 +87,7 @@ public abstract class AbstractParser implements Parser{
      * This value is needed by some parsers to decide
      * if the parsed text could be hold in memory
      */
-    public void setContentLength(long length) {
+    public void setContentLength(final long length) {
         this.contentLength = length;
     }
 
@@ -96,12 +96,12 @@ public abstract class AbstractParser implements Parser{
      * @throws InterruptedException if the parser was interrupted
      */
     public static final void checkInterruption() throws InterruptedException {
-        Thread currentThread = Thread.currentThread();
+        final Thread currentThread = Thread.currentThread();
         if ((currentThread instanceof serverThread) && ((serverThread)currentThread).shutdownInProgress()) throw new InterruptedException("Shutdown in progress ...");
         if (currentThread.isInterrupted()) throw new InterruptedException("Shutdown in progress ...");    
     }
     
-    public final File createTempFile(String name) throws IOException {
+    public final File createTempFile(final String name) throws IOException {
         String parserClassName = this.getClass().getName();
         int idx = parserClassName.lastIndexOf(".");
         if (idx != -1) {
@@ -110,35 +110,35 @@ public abstract class AbstractParser implements Parser{
                     
         // getting the file extension
         idx = name.lastIndexOf("/");
-        String fileName = (idx != -1) ? name.substring(idx+1) : name;        
+        final String fileName = (idx != -1) ? name.substring(idx+1) : name;        
         
         idx = fileName.lastIndexOf(".");
-        String fileExt = (idx > -1) ? fileName.substring(idx+1) : "";
+        final String fileExt = (idx > -1) ? fileName.substring(idx+1) : "";
         
         // creates the temp file
-        File tempFile = File.createTempFile(parserClassName + "_" + ((idx>-1)?fileName.substring(0,idx):fileName), (fileExt.length()>0)?"."+fileExt:fileExt);
+        final File tempFile = File.createTempFile(parserClassName + "_" + ((idx>-1)?fileName.substring(0,idx):fileName), (fileExt.length()>0)?"."+fileExt:fileExt);
         return tempFile;
     }
     
-    public int parseDir(yacyURL location, String prefix, File dir, plasmaParserDocument doc)
+    public int parseDir(final yacyURL location, final String prefix, final File dir, final plasmaParserDocument doc)
             throws ParserException, InterruptedException, IOException {
         if (!dir.isDirectory())
             throw new ParserException("tried to parse ordinary file " + dir + " as directory", location);
         
-        String[] files = dir.list();
+        final String[] files = dir.list();
         int result = 0;
         for (int i=0; i<files.length; i++) {
             checkInterruption();
-            File file = new File(dir, files[i]);
+            final File file = new File(dir, files[i]);
             this.theLogger.logFine("parsing file " + location + "#" + file + " in archive...");
             if (file.isDirectory()) {
                 result += parseDir(location, prefix, file, doc);
             } else try {
-                yacyURL url = yacyURL.newURL(location, "/" + prefix + "/"
+                final yacyURL url = yacyURL.newURL(location, "/" + prefix + "/"
                         // XXX: workaround for relative paths within document
                         + file.getPath().substring(file.getPath().indexOf(File.separatorChar) + 1)
                         + "/" + file.getName());
-                plasmaParserDocument subdoc = new plasmaParser().parseSource(
+                final plasmaParserDocument subdoc = new plasmaParser().parseSource(
                         url,
                         plasmaParser.getMimeTypeByFileExt(files[i].substring(files[i].indexOf('.') + 1)),
                         null, file);
@@ -146,7 +146,7 @@ public abstract class AbstractParser implements Parser{
                 doc.addSubDocument(subdoc);
                 subdoc.close();
                 result++;
-            } catch (ParserException e) {
+            } catch (final ParserException e) {
                 this.theLogger.logInfo("unable to parse file " + file + " in " + location + ", skipping");
             }
         }
@@ -166,10 +166,10 @@ public abstract class AbstractParser implements Parser{
 	 * @see de.anomic.plasma.parser.Parser#parse(de.anomic.net.URL, java.lang.String, byte[])
 	 */
 	public plasmaParserDocument parse(
-            yacyURL location, 
-            String mimeType,
-            String charset,
-            byte[] source
+            final yacyURL location, 
+            final String mimeType,
+            final String charset,
+            final byte[] source
     ) throws ParserException, InterruptedException {
         ByteArrayInputStream contentInputStream = null;
         try {
@@ -183,7 +183,7 @@ public abstract class AbstractParser implements Parser{
                 try {
                     contentInputStream.close();
                     contentInputStream = null;
-                } catch (Exception e){ /* ignore this */}
+                } catch (final Exception e){ /* ignore this */}
             }
         }
 	}
@@ -201,10 +201,10 @@ public abstract class AbstractParser implements Parser{
 	 * @see de.anomic.plasma.parser.Parser#parse(de.anomic.net.URL, java.lang.String, java.io.File)
 	 */
 	public plasmaParserDocument parse(
-            yacyURL location, 
-            String mimeType,
-            String charset,
-			File sourceFile
+            final yacyURL location, 
+            final String mimeType,
+            final String charset,
+			final File sourceFile
 	) throws ParserException, InterruptedException {
         BufferedInputStream contentInputStream = null;
         try {
@@ -216,10 +216,10 @@ public abstract class AbstractParser implements Parser{
             
             // parse the stream
             return this.parse(location, mimeType, charset, contentInputStream);
-        } catch (FileNotFoundException e) {
+        } catch (final FileNotFoundException e) {
             throw new ParserException("Unexpected error while parsing file. " + e.getMessage(),location); 
         } finally {
-            if (contentInputStream != null) try{contentInputStream.close();}catch(Exception e){/* ignore this */}
+            if (contentInputStream != null) try{contentInputStream.close();}catch(final Exception e){/* ignore this */}
         }
 	}
     
@@ -248,7 +248,7 @@ public abstract class AbstractParser implements Parser{
     /**
      * Setting the logger that should be used by this parser class ...
      */
-    public void setLogger(serverLog log) {
+    public void setLogger(final serverLog log) {
         this.theLogger = log;
     }
     

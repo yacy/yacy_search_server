@@ -51,8 +51,8 @@ import de.anomic.server.logging.serverLog;
 
 public final class indexContainerHeap {
 
-    private kelondroRow payloadrow;
-    private serverLog log;
+    private final kelondroRow payloadrow;
+    private final serverLog log;
     private kelondroBytesLongMap index;
     SortedMap<String, indexContainer> cache;
     private File backupFile;
@@ -79,7 +79,7 @@ public final class indexContainerHeap {
      * @param payloadrow
      * @param log
      */
-    public indexContainerHeap(kelondroRow payloadrow, serverLog log) {
+    public indexContainerHeap(final kelondroRow payloadrow, final serverLog log) {
         this.payloadrow = payloadrow;
         this.log = log;
         this.cache = null;
@@ -110,14 +110,14 @@ public final class indexContainerHeap {
      * @param heapFile
      * @throws IOException
      */
-    public void initWriteMode(File heapFile) throws IOException {
+    public void initWriteMode(final File heapFile) throws IOException {
         this.readOnlyMode = false;
         if (log != null) log.logInfo("restoring dump for rwi heap '" + heapFile.getName() + "'");
-        long start = System.currentTimeMillis();
+        final long start = System.currentTimeMillis();
         this.cache = Collections.synchronizedSortedMap(new TreeMap<String, indexContainer>(new kelondroByteOrder.StringOrder(payloadrow.getOrdering())));
         int urlCount = 0;
         synchronized (cache) {
-            for (indexContainer container : new heapFileEntries(heapFile, this.payloadrow)) {
+            for (final indexContainer container : new heapFileEntries(heapFile, this.payloadrow)) {
                 if (container == null) break;
                 cache.put(container.getWordHash(), container);
                 urlCount += container.size();
@@ -134,7 +134,7 @@ public final class indexContainerHeap {
      * @param heapFile
      * @throws IOException 
      */
-    public void initReadMode(File heapFile) throws IOException {
+    public void initReadMode(final File heapFile) throws IOException {
         this.readOnlyMode = true;
         assert this.cache == null;
         assert this.index == null;
@@ -143,12 +143,12 @@ public final class indexContainerHeap {
         if (heapFile.length() >= Integer.MAX_VALUE) throw new IOException("file " + heapFile + " too large, index can only be crated for files less than 2GB");
         if (log != null) log.logInfo("creating index for rwi heap '" + heapFile.getName() + "'");
         
-        long start = System.currentTimeMillis();
+        final long start = System.currentTimeMillis();
         this.index = new kelondroBytesLongMap(payloadrow.primaryKeyLength, (kelondroByteOrder) payloadrow.getOrdering(), 0);
         DataInputStream is = null;
-        long urlCount = 0;
+        final long urlCount = 0;
         String wordHash;
-        byte[] word = new byte[payloadrow.primaryKeyLength];
+        final byte[] word = new byte[payloadrow.primaryKeyLength];
         long seek = 0, seek0;
         synchronized (index) {
             is = new DataInputStream(new BufferedInputStream(new FileInputStream(heapFile), 64*1024));
@@ -161,7 +161,7 @@ public final class indexContainerHeap {
                 // read word
                 try {
                     is.readFully(word);
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     break loop; // terminate loop
                 }
                 wordHash = new String(word);
@@ -170,7 +170,7 @@ public final class indexContainerHeap {
                 // read collection
                 try {
                     seek += kelondroRowSet.skipNextRowSet(is, payloadrow);
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     break loop; // terminate loop
                 }
                 index.addl(word, seek0);
@@ -180,19 +180,19 @@ public final class indexContainerHeap {
         if (log != null) log.logInfo("finished rwi heap indexing: " + urlCount + " word/URL relations in " + ((System.currentTimeMillis() - start) / 1000) + " seconds");
     }
     
-    public void dump(File heapFile) throws IOException {
+    public void dump(final File heapFile) throws IOException {
         assert this.cache != null;
         if (log != null) log.logInfo("creating rwi heap dump '" + heapFile.getName() + "', " + cache.size() + " rwi's");
         if (heapFile.exists()) heapFile.delete();
-        DataOutputStream os = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(heapFile), 64 * 1024));
-        long startTime = System.currentTimeMillis();
+        final DataOutputStream os = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(heapFile), 64 * 1024));
+        final long startTime = System.currentTimeMillis();
         long wordcount = 0, urlcount = 0;
         String wordHash;
         indexContainer container;
 
         // write wCache
         synchronized (cache) {
-            for (Map.Entry<String, indexContainer> entry: cache.entrySet()) {
+            for (final Map.Entry<String, indexContainer> entry: cache.entrySet()) {
                 // get entries
                 wordHash = entry.getKey();
                 container = entry.getValue();
@@ -231,7 +231,7 @@ public final class indexContainerHeap {
         kelondroRow payloadrow;
         indexContainer nextContainer;
         
-        public heapFileEntries(File heapFile, kelondroRow payloadrow) throws IOException {
+        public heapFileEntries(final File heapFile, final kelondroRow payloadrow) throws IOException {
             if (!(heapFile.exists())) throw new IOException("file " + heapFile + " does not exist");
             is = new DataInputStream(new BufferedInputStream(new FileInputStream(heapFile), 64*1024));
             word = new byte[payloadrow.primaryKeyLength];
@@ -247,13 +247,13 @@ public final class indexContainerHeap {
             try {
                 is.readFully(word);
                 return new indexContainer(new String(word), kelondroRowSet.importRowSet(is, payloadrow));
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 return null;
             }
         }
         
         public indexContainer next() {
-            indexContainer n = this.nextContainer;
+            final indexContainer n = this.nextContainer;
             this.nextContainer = next0();
             return n;
         }
@@ -267,7 +267,7 @@ public final class indexContainerHeap {
         }
         
         public void close() {
-            if (is != null) try { is.close(); } catch (IOException e) {}
+            if (is != null) try { is.close(); } catch (final IOException e) {}
             is = null;
         }
         
@@ -281,7 +281,7 @@ public final class indexContainerHeap {
      * in the cache, so that manipulations of the iterated objects do not change
      * objects in the cache.
      */
-    public synchronized kelondroCloneableIterator<indexContainer> wordContainers(String startWordHash, boolean rot) {
+    public synchronized kelondroCloneableIterator<indexContainer> wordContainers(final String startWordHash, final boolean rot) {
         return new heapCacheIterator(startWordHash, rot);
     }
 
@@ -296,16 +296,16 @@ public final class indexContainerHeap {
         // so this class simulates wCache.tailMap(startWordHash).values().iterator()
         // plus the mentioned features
         
-        private boolean rot;
+        private final boolean rot;
         private Iterator<indexContainer> iterator;
         
-        public heapCacheIterator(String startWordHash, boolean rot) {
+        public heapCacheIterator(final String startWordHash, final boolean rot) {
             this.rot = rot;
             this.iterator = (startWordHash == null) ? cache.values().iterator() : cache.tailMap(startWordHash).values().iterator();
             // The collection's iterator will return the values in the order that their corresponding keys appear in the tree.
         }
         
-        public heapCacheIterator clone(Object secondWordHash) {
+        public heapCacheIterator clone(final Object secondWordHash) {
             return new heapCacheIterator((String) secondWordHash, rot);
         }
         
@@ -344,7 +344,7 @@ public final class indexContainerHeap {
      * @param key
      * @return true, if the key is used in the heap; false othervise
      */
-    public boolean has(String key) {
+    public boolean has(final String key) {
         if (this.readOnlyMode) {
             assert index != null;
             assert index.row().primaryKeyLength == key.length();
@@ -352,7 +352,7 @@ public final class indexContainerHeap {
             // check if the index contains the key
             try {
                 return index.getl(key.getBytes()) >= 0;
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 e.printStackTrace();
                 return false;
             }
@@ -366,28 +366,28 @@ public final class indexContainerHeap {
      * @param key
      * @return the indexContainer if one exist, null otherwise
      */
-    public indexContainer get(String key) {
+    public indexContainer get(final String key) {
         if (this.readOnlyMode) try {
             assert index != null;
             assert index.row().primaryKeyLength == key.length();
             
             // check if the index contains the key
-            long pos = index.getl(key.getBytes());
+            final long pos = index.getl(key.getBytes());
             if (pos < 0) return null;
             
             // access the file and read the container
-            RandomAccessFile raf = new RandomAccessFile(backupFile, "r");
-            byte[] word = new byte[index.row().primaryKeyLength];
+            final RandomAccessFile raf = new RandomAccessFile(backupFile, "r");
+            final byte[] word = new byte[index.row().primaryKeyLength];
             
             raf.seek(pos);
             raf.read(word);
             assert key.equals(new String(word));
             
             // read collection
-            indexContainer container = new indexContainer(key, kelondroRowSet.importRowSet(raf, payloadrow));
+            final indexContainer container = new indexContainer(key, kelondroRowSet.importRowSet(raf, payloadrow));
             raf.close();
             return container;
-        } catch (IOException e) {
+        } catch (final IOException e) {
             log.logSevere("error accessing entry in heap file " + this.backupFile + ": " + e.getMessage());
             return null;
         } else {
@@ -400,7 +400,7 @@ public final class indexContainerHeap {
      * @param wordHash
      * @return the indexContainer if the cache contained the container, null othervise
      */
-    public synchronized indexContainer delete(String wordHash) {
+    public synchronized indexContainer delete(final String wordHash) {
         // returns the index that had been deleted
         assert this.cache != null;
         assert !this.readOnlyMode;
@@ -408,10 +408,10 @@ public final class indexContainerHeap {
     }
 
     
-    public synchronized boolean removeReference(String wordHash, String urlHash) {
+    public synchronized boolean removeReference(final String wordHash, final String urlHash) {
         assert this.cache != null;
         assert !this.readOnlyMode;
-        indexContainer c = cache.get(wordHash);
+        final indexContainer c = cache.get(wordHash);
         if ((c != null) && (c.remove(urlHash) != null)) {
             // removal successful
             if (c.size() == 0) {
@@ -424,11 +424,11 @@ public final class indexContainerHeap {
         return false;
     }
     
-    public synchronized int removeReferences(String wordHash, Set<String> urlHashes) {
+    public synchronized int removeReferences(final String wordHash, final Set<String> urlHashes) {
         assert this.cache != null;
         assert !this.readOnlyMode;
         if (urlHashes.size() == 0) return 0;
-        indexContainer c = cache.get(wordHash);
+        final indexContainer c = cache.get(wordHash);
         int count;
         if ((c != null) && ((count = c.removeEntries(urlHashes)) > 0)) {
             // removal successful
@@ -442,7 +442,7 @@ public final class indexContainerHeap {
         return 0;
     }
  
-    public synchronized int add(indexContainer container) {
+    public synchronized int add(final indexContainer container) {
         // this puts the entries into the cache
         int added = 0;
         if ((container == null) || (container.size() == 0)) return 0;
@@ -450,7 +450,7 @@ public final class indexContainerHeap {
         assert !this.readOnlyMode;
         
         // put new words into cache
-        String wordHash = container.getWordHash();
+        final String wordHash = container.getWordHash();
         indexContainer entries = cache.get(wordHash); // null pointer exception? wordhash != null! must be cache==null
         if (entries == null) {
             entries = container.topLevelClone();
@@ -465,7 +465,7 @@ public final class indexContainerHeap {
         return added;
     }
 
-    public synchronized void addEntry(String wordHash, indexRWIRowEntry newEntry) {
+    public synchronized void addEntry(final String wordHash, final indexRWIRowEntry newEntry) {
         assert this.cache != null;
         assert !this.readOnlyMode;
         indexContainer container = cache.get(wordHash);

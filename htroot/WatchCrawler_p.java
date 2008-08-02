@@ -60,11 +60,11 @@ public class WatchCrawler_p {
     // this servlet does NOT create the WatchCrawler page content!
     // this servlet starts a web crawl. The interface for entering the web crawl parameters is in IndexCreate_p.html
     
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
         // return variable that accumulates replacements
-        plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         // inital values for AJAX Elements (without JavaScript) 
-        serverObjects prop = queues_p.respond(header, post, env);
+        final serverObjects prop = queues_p.respond(header, post, env);
         prop.put("forwardToCrawlStart", "0");
         
         prop.put("info", "0");
@@ -80,7 +80,7 @@ public class WatchCrawler_p {
             
             if (post.containsKey("continue")) {
                 // continue queue
-                String queue = post.get("continue", "");
+                final String queue = post.get("continue", "");
                 if (queue.equals("localcrawler")) {
                     sb.continueCrawlJob(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL);
                 } else if (queue.equals("remotecrawler")) {
@@ -90,7 +90,7 @@ public class WatchCrawler_p {
 
             if (post.containsKey("pause")) {
                 // pause queue
-                String queue = post.get("pause", "");
+                final String queue = post.get("pause", "");
                 if (queue.equals("localcrawler")) {
                     sb.pauseCrawlJob(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL);
                 } else if (queue.equals("remotecrawler")) {
@@ -104,8 +104,8 @@ public class WatchCrawler_p {
                     prop.put("info", "3");
                 } else {
                     // set new properties
-                    boolean fullDomain = post.get("range", "wide").equals("domain"); // special property in simple crawl start
-                    boolean subPath    = post.get("range", "wide").equals("subpath"); // special property in simple crawl start
+                    final boolean fullDomain = post.get("range", "wide").equals("domain"); // special property in simple crawl start
+                    final boolean subPath    = post.get("range", "wide").equals("subpath"); // special property in simple crawl start
                     
                     String crawlingStart = post.get("crawlingURL","").trim(); // the crawljob start url
 
@@ -115,7 +115,7 @@ public class WatchCrawler_p {
 
                     // normalizing URL
                     yacyURL crawlingStartURL = null;
-                    try {crawlingStartURL = new yacyURL(crawlingStart, null);} catch (MalformedURLException e1) {}
+                    try {crawlingStartURL = new yacyURL(crawlingStart, null);} catch (final MalformedURLException e1) {}
                     crawlingStart = (crawlingStartURL == null) ? null : crawlingStartURL.toNormalform(true, true);
                     
                     // set the crawling filter
@@ -130,49 +130,49 @@ public class WatchCrawler_p {
                     }
                     env.setConfig("crawlingFilter", newcrawlingfilter);
                     
-                    boolean crawlOrder = post.get("crawlOrder", "off").equals("on");
+                    final boolean crawlOrder = post.get("crawlOrder", "off").equals("on");
                     env.setConfig("crawlOrder", (crawlOrder) ? "true" : "false");
                     
                     int newcrawlingdepth = Integer.parseInt(post.get("crawlingDepth", "8"));
                     env.setConfig("crawlingDepth", Integer.toString(newcrawlingdepth));
                     if ((crawlOrder) && (newcrawlingdepth > 8)) newcrawlingdepth = 8;
                     
-                    boolean crawlingIfOlderCheck = post.get("crawlingIfOlderCheck", "off").equals("on");
-                    int crawlingIfOlderNumber = Integer.parseInt(post.get("crawlingIfOlderNumber", "-1"));
-                    String crawlingIfOlderUnit = post.get("crawlingIfOlderUnit","year");
-                    int crawlingIfOlder = recrawlIfOlderC(crawlingIfOlderCheck, crawlingIfOlderNumber, crawlingIfOlderUnit);                    
+                    final boolean crawlingIfOlderCheck = post.get("crawlingIfOlderCheck", "off").equals("on");
+                    final int crawlingIfOlderNumber = Integer.parseInt(post.get("crawlingIfOlderNumber", "-1"));
+                    final String crawlingIfOlderUnit = post.get("crawlingIfOlderUnit","year");
+                    final int crawlingIfOlder = recrawlIfOlderC(crawlingIfOlderCheck, crawlingIfOlderNumber, crawlingIfOlderUnit);                    
                     env.setConfig("crawlingIfOlder", crawlingIfOlder);
                     
-                    boolean crawlingDomFilterCheck = post.get("crawlingDomFilterCheck", "off").equals("on");
-                    int crawlingDomFilterDepth = (crawlingDomFilterCheck) ? Integer.parseInt(post.get("crawlingDomFilterDepth", "-1")) : -1;
+                    final boolean crawlingDomFilterCheck = post.get("crawlingDomFilterCheck", "off").equals("on");
+                    final int crawlingDomFilterDepth = (crawlingDomFilterCheck) ? Integer.parseInt(post.get("crawlingDomFilterDepth", "-1")) : -1;
                     env.setConfig("crawlingDomFilterDepth", Integer.toString(crawlingDomFilterDepth));
                     
-                    boolean crawlingDomMaxCheck = post.get("crawlingDomMaxCheck", "off").equals("on");
-                    int crawlingDomMaxPages = (crawlingDomMaxCheck) ? Integer.parseInt(post.get("crawlingDomMaxPages", "-1")) : -1;
+                    final boolean crawlingDomMaxCheck = post.get("crawlingDomMaxCheck", "off").equals("on");
+                    final int crawlingDomMaxPages = (crawlingDomMaxCheck) ? Integer.parseInt(post.get("crawlingDomMaxPages", "-1")) : -1;
                     env.setConfig("crawlingDomMaxPages", Integer.toString(crawlingDomMaxPages));
                     
-                    boolean crawlingQ = post.get("crawlingQ", "off").equals("on");
+                    final boolean crawlingQ = post.get("crawlingQ", "off").equals("on");
                     env.setConfig("crawlingQ", (crawlingQ) ? "true" : "false");
                     
-                    boolean indexText = post.get("indexText", "off").equals("on");
+                    final boolean indexText = post.get("indexText", "off").equals("on");
                     env.setConfig("indexText", (indexText) ? "true" : "false");
                     
-                    boolean indexMedia = post.get("indexMedia", "off").equals("on");
+                    final boolean indexMedia = post.get("indexMedia", "off").equals("on");
                     env.setConfig("indexMedia", (indexMedia) ? "true" : "false");
                     
-                    boolean storeHTCache = post.get("storeHTCache", "off").equals("on");
+                    final boolean storeHTCache = post.get("storeHTCache", "off").equals("on");
                     env.setConfig("storeHTCache", (storeHTCache) ? "true" : "false");
                     
-                    boolean xsstopw = post.get("xsstopw", "off").equals("on");
+                    final boolean xsstopw = post.get("xsstopw", "off").equals("on");
                     env.setConfig("xsstopw", (xsstopw) ? "true" : "false");
                     
-                    boolean xdstopw = post.get("xdstopw", "off").equals("on");
+                    final boolean xdstopw = post.get("xdstopw", "off").equals("on");
                     env.setConfig("xdstopw", (xdstopw) ? "true" : "false");
                     
-                    boolean xpstopw = post.get("xpstopw", "off").equals("on");
+                    final boolean xpstopw = post.get("xpstopw", "off").equals("on");
                     env.setConfig("xpstopw", (xpstopw) ? "true" : "false");
                     
-                    String crawlingMode = post.get("crawlingMode","url");
+                    final String crawlingMode = post.get("crawlingMode","url");
                     if (crawlingMode.equals(CRAWLING_MODE_URL)) {
                         
                         // check if pattern matches
@@ -188,22 +188,22 @@ public class WatchCrawler_p {
                             
                             // stack request
                             // first delete old entry, if exists
-                            yacyURL url = new yacyURL(crawlingStart, null);
-                            String urlhash = url.hash();
+                            final yacyURL url = new yacyURL(crawlingStart, null);
+                            final String urlhash = url.hash();
                             sb.webIndex.removeURL(urlhash);
                             sb.crawlQueues.noticeURL.removeByURLHash(urlhash);
                             sb.crawlQueues.errorURL.remove(urlhash);
                             
                             // stack url
                             sb.webIndex.profilesPassiveCrawls.removeEntry(crawlingStartURL.hash()); // if there is an old entry, delete it
-                            CrawlProfile.entry pe = sb.webIndex.profilesActiveCrawls.newEntry(
+                            final CrawlProfile.entry pe = sb.webIndex.profilesActiveCrawls.newEntry(
                                     crawlingStartURL.getHost(), crawlingStartURL, newcrawlingfilter, newcrawlingfilter,
                                     newcrawlingdepth, newcrawlingdepth,
                                     crawlingIfOlder, crawlingDomFilterDepth, crawlingDomMaxPages,
                                     crawlingQ,
                                     indexText, indexMedia,
                                     storeHTCache, true, crawlOrder, xsstopw, xdstopw, xpstopw);
-                            String reasonString = sb.crawlStacker.stackCrawl(url, null, sb.webIndex.seedDB.mySeed().hash, "CRAWLING-ROOT", new Date(), 0, pe);
+                            final String reasonString = sb.crawlStacker.stackCrawl(url, null, sb.webIndex.seedDB.mySeed().hash, "CRAWLING-ROOT", new Date(), 0, pe);
                             
                             if (reasonString == null) {
                                 // liftoff!
@@ -212,7 +212,7 @@ public class WatchCrawler_p {
                                 
                                 // generate a YaCyNews if the global flag was set
                                 if (crawlOrder) {
-                                    Map<String, String> m = new HashMap<String, String>(pe.map()); // must be cloned
+                                    final Map<String, String> m = new HashMap<String, String>(pe.map()); // must be cloned
                                     m.remove("specificDepth");
                                     m.remove("indexText");
                                     m.remove("indexMedia");
@@ -233,7 +233,7 @@ public class WatchCrawler_p {
                                 prop.putHTML("info_crawlingURL", (post.get("crawlingURL")));
                                 prop.putHTML("info_reasonString", reasonString);
                                 
-                                ZURL.Entry ee = sb.crawlQueues.errorURL.newEntry(
+                                final ZURL.Entry ee = sb.crawlQueues.errorURL.newEntry(
                                         new CrawlEntry(
                                                 sb.webIndex.seedDB.mySeed().hash, 
                                                 crawlingStartURL, 
@@ -252,11 +252,11 @@ public class WatchCrawler_p {
                                 ee.store();
                                 sb.crawlQueues.errorURL.push(ee);
                             }
-                        } catch (PatternSyntaxException e) {
+                        } catch (final PatternSyntaxException e) {
                             prop.put("info", "4"); //crawlfilter does not match url
                             prop.putHTML("info_newcrawlingfilter", newcrawlingfilter);
                             prop.putHTML("info_error", e.getMessage());
-                        } catch (Exception e) {
+                        } catch (final Exception e) {
                             // mist
                             prop.put("info", "6");//Error with url
                             prop.putHTML("info_crawlingStart", crawlingStart);
@@ -267,39 +267,39 @@ public class WatchCrawler_p {
                     } else if (crawlingMode.equals(CRAWLING_MODE_FILE)) {
                         if (post.containsKey("crawlingFile")) {
                             // getting the name of the uploaded file
-                            String fileName = post.get("crawlingFile");  
+                            final String fileName = post.get("crawlingFile");  
                             try {
                                 // check if the crawl filter works correctly
                                 Pattern.compile(newcrawlingfilter);
                                 
                                 // loading the file content
-                                File file = new File(fileName);
+                                final File file = new File(fileName);
                                 
                                 // getting the content of the bookmark file
-                                String fileString = post.get("crawlingFile$file");
+                                final String fileString = post.get("crawlingFile$file");
                                 
                                 // parsing the bookmark file and fetching the headline and contained links
-                                htmlFilterContentScraper scraper = new htmlFilterContentScraper(new yacyURL(file));
+                                final htmlFilterContentScraper scraper = new htmlFilterContentScraper(new yacyURL(file));
                                 //OutputStream os = new htmlFilterOutputStream(null, scraper, null, false);
-                                Writer writer = new htmlFilterWriter(null,null,scraper,null,false);
+                                final Writer writer = new htmlFilterWriter(null,null,scraper,null,false);
                                 serverFileUtils.copy(fileString, writer);
                                 writer.close();
                                 
                                 //String headline = scraper.getHeadline();
-                                Map<yacyURL, String> hyperlinks = scraper.getAnchors();
+                                final Map<yacyURL, String> hyperlinks = scraper.getAnchors();
                                 
                                 // creating a crawler profile
-                                yacyURL crawlURL = new yacyURL("file://" + file.toString(), null);
-                                CrawlProfile.entry profile = sb.webIndex.profilesActiveCrawls.newEntry(fileName, crawlURL, newcrawlingfilter, newcrawlingfilter, newcrawlingdepth, newcrawlingdepth, crawlingIfOlder, crawlingDomFilterDepth, crawlingDomMaxPages, crawlingQ, indexText, indexMedia, storeHTCache, true, crawlOrder, xsstopw, xdstopw, xpstopw);
+                                final yacyURL crawlURL = new yacyURL("file://" + file.toString(), null);
+                                final CrawlProfile.entry profile = sb.webIndex.profilesActiveCrawls.newEntry(fileName, crawlURL, newcrawlingfilter, newcrawlingfilter, newcrawlingdepth, newcrawlingdepth, crawlingIfOlder, crawlingDomFilterDepth, crawlingDomMaxPages, crawlingQ, indexText, indexMedia, storeHTCache, true, crawlOrder, xsstopw, xdstopw, xpstopw);
                                 
                                 // pause local crawl here
                                 sb.pauseCrawlJob(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL);
                                 
                                 // loop through the contained links
-                                Iterator<Map.Entry<yacyURL, String>> linkiterator = hyperlinks.entrySet().iterator();
+                                final Iterator<Map.Entry<yacyURL, String>> linkiterator = hyperlinks.entrySet().iterator();
                                 yacyURL nexturl;
                                 while (linkiterator.hasNext()) {
-                                    Map.Entry<yacyURL, String> e = linkiterator.next();
+                                    final Map.Entry<yacyURL, String> e = linkiterator.next();
                                     nexturl = e.getKey();
                                     if (nexturl == null) continue;
                                     
@@ -314,12 +314,12 @@ public class WatchCrawler_p {
                                             profile);
                                 }
                                
-                            } catch (PatternSyntaxException e) {
+                            } catch (final PatternSyntaxException e) {
                                 // print error message
                                 prop.put("info", "4"); //crawlfilter does not match url
                                 prop.putHTML("info_newcrawlingfilter", newcrawlingfilter);
                                 prop.putHTML("info_error", e.getMessage());
-                            } catch (Exception e) {
+                            } catch (final Exception e) {
                                 // mist
                                 prop.put("info", "7");//Error with file
                                 prop.putHTML("info_crawlingStart", fileName);
@@ -333,10 +333,10 @@ public class WatchCrawler_p {
                     	try {
                     		// getting the sitemap URL
                     		sitemapURLStr = post.get("sitemapURL","");
-                    		yacyURL sitemapURL = new yacyURL(sitemapURLStr, null);
+                    		final yacyURL sitemapURL = new yacyURL(sitemapURLStr, null);
                             
                     		// create a new profile
-                    		CrawlProfile.entry pe = sb.webIndex.profilesActiveCrawls.newEntry(
+                    		final CrawlProfile.entry pe = sb.webIndex.profilesActiveCrawls.newEntry(
                     				sitemapURLStr, sitemapURL, newcrawlingfilter, newcrawlingfilter,
                     				newcrawlingdepth, newcrawlingdepth,
                     				crawlingIfOlder, crawlingDomFilterDepth, crawlingDomMaxPages,
@@ -345,12 +345,12 @@ public class WatchCrawler_p {
                     				storeHTCache, true, crawlOrder, xsstopw, xdstopw, xpstopw);
                     		
                     		// create a new sitemap importer
-                    		SitemapImporter importerThread = new SitemapImporter(sb, sb.dbImportManager, new yacyURL(sitemapURLStr, null), pe);
+                    		final SitemapImporter importerThread = new SitemapImporter(sb, sb.dbImportManager, new yacyURL(sitemapURLStr, null), pe);
                     		if (importerThread != null) {
                     		    importerThread.setJobID(sb.dbImportManager.generateUniqueJobID());
                     			importerThread.startIt();
                     		}
-                    	} catch (Exception e) {
+                    	} catch (final Exception e) {
                     		// mist
                     		prop.put("info", "6");//Error with url
                     		prop.putHTML("info_crawlingStart", sitemapURLStr);
@@ -367,8 +367,8 @@ public class WatchCrawler_p {
         }
         
         // performance settings
-        long LCbusySleep = Integer.parseInt(env.getConfig(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL_BUSYSLEEP, "100"));
-        int LCppm = (int) (60000L / Math.max(1,LCbusySleep));
+        final long LCbusySleep = Integer.parseInt(env.getConfig(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL_BUSYSLEEP, "100"));
+        final int LCppm = (int) (60000L / Math.max(1,LCbusySleep));
         prop.put("crawlingSpeedMaxChecked", (LCppm >= 1000) ? "1" : "0");
         prop.put("crawlingSpeedCustChecked", ((LCppm > 10) && (LCppm < 1000)) ? "1" : "0");
         prop.put("crawlingSpeedMinChecked", (LCppm <= 10) ? "1" : "0");
@@ -378,7 +378,7 @@ public class WatchCrawler_p {
         return prop;
     }
 
-    private static int recrawlIfOlderC(boolean recrawlIfOlderCheck, int recrawlIfOlderNumber, String crawlingIfOlderUnit) {
+    private static int recrawlIfOlderC(final boolean recrawlIfOlderCheck, final int recrawlIfOlderNumber, final String crawlingIfOlderUnit) {
         if (!recrawlIfOlderCheck) return -1;
         if (crawlingIfOlderUnit.equals("year")) return recrawlIfOlderNumber * 60 * 24 * 365;
         if (crawlingIfOlderUnit.equals("month")) return recrawlIfOlderNumber * 60 * 24 * 30;
@@ -387,13 +387,13 @@ public class WatchCrawler_p {
         return recrawlIfOlderNumber;
     }
     
-    private static void setPerformance(plasmaSwitchboard sb, serverObjects post) {
-        String crawlingPerformance = post.get("crawlingPerformance","custom");
-        long LCbusySleep = Integer.parseInt(sb.getConfig(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL_BUSYSLEEP, "100"));
+    private static void setPerformance(final plasmaSwitchboard sb, final serverObjects post) {
+        final String crawlingPerformance = post.get("crawlingPerformance","custom");
+        final long LCbusySleep = Integer.parseInt(sb.getConfig(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL_BUSYSLEEP, "100"));
         int wantedPPM = (LCbusySleep == 0) ? 6000 : (int) (60000L / LCbusySleep);
         try {
             wantedPPM = Integer.parseInt(post.get("customPPM", Integer.toString(wantedPPM)));
-        } catch (NumberFormatException e) {}
+        } catch (final NumberFormatException e) {}
         if (crawlingPerformance.equals("minimum")) wantedPPM = 10;
         if (crawlingPerformance.equals("maximum")) wantedPPM = 6000;
         sb.setPerformance(wantedPPM);

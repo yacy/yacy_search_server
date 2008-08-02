@@ -44,24 +44,24 @@ public class indexContainer extends kelondroRowSet {
 
     private String wordHash;
 
-    public indexContainer(String wordHash, kelondroRowSet collection) {
+    public indexContainer(final String wordHash, final kelondroRowSet collection) {
         super(collection);
         this.wordHash = wordHash;
     }
     
-    public indexContainer(String wordHash, kelondroRow rowdef, int objectCount) {
+    public indexContainer(final String wordHash, final kelondroRow rowdef, final int objectCount) {
         super(rowdef, objectCount);
         this.wordHash = wordHash;
         this.lastTimeWrote = 0;
     }
     
     public indexContainer topLevelClone() {
-        indexContainer newContainer = new indexContainer(this.wordHash, this.rowdef, this.size());
+        final indexContainer newContainer = new indexContainer(this.wordHash, this.rowdef, this.size());
         newContainer.addAllUnique(this);
         return newContainer;
     }
     
-    public void setWordHash(String newWordHash) {
+    public void setWordHash(final String newWordHash) {
         this.wordHash = newWordHash;
     }
 
@@ -73,13 +73,13 @@ public class indexContainer extends kelondroRowSet {
         return wordHash;
     }
     
-    public void add(indexRWIRowEntry entry) {
+    public void add(final indexRWIRowEntry entry) {
         // add without double-occurrence test
         assert entry.toKelondroEntry().objectsize() == super.rowdef.objectsize;
         this.addUnique(entry.toKelondroEntry());
     }
     
-    public void add(indexRWIEntry entry, long updateTime) {
+    public void add(final indexRWIEntry entry, final long updateTime) {
         // add without double-occurrence test
         if (entry instanceof indexRWIRowEntry) {
             assert ((indexRWIRowEntry) entry).toKelondroEntry().objectsize() == super.rowdef.objectsize;
@@ -90,7 +90,7 @@ public class indexContainer extends kelondroRowSet {
         this.lastTimeWrote = updateTime;
     }
     
-    public static final indexContainer mergeUnique(indexContainer a, boolean aIsClone, indexContainer b, boolean bIsClone) {
+    public static final indexContainer mergeUnique(final indexContainer a, final boolean aIsClone, final indexContainer b, final boolean bIsClone) {
         if ((aIsClone) && (bIsClone)) {
             if (a.size() > b.size()) return (indexContainer) mergeUnique(a, b); else return (indexContainer) mergeUnique(b, a);
         }
@@ -99,27 +99,27 @@ public class indexContainer extends kelondroRowSet {
         if (a.size() > b.size()) return (indexContainer) mergeUnique(a, b); else return (indexContainer) mergeUnique(b, a);
     }
     
-    public static Object mergeUnique(Object a, Object b) {
-        indexContainer c = (indexContainer) a;
+    public static Object mergeUnique(final Object a, final Object b) {
+        final indexContainer c = (indexContainer) a;
         c.addAllUnique((indexContainer) b);
         return c;
     }
     
-    public indexRWIEntry put(indexRWIRowEntry entry) {
+    public indexRWIEntry put(final indexRWIRowEntry entry) {
         assert entry.toKelondroEntry().objectsize() == super.rowdef.objectsize;
-        kelondroRow.Entry r = super.put(entry.toKelondroEntry());
+        final kelondroRow.Entry r = super.put(entry.toKelondroEntry());
         if (r == null) return null;
         return new indexRWIRowEntry(r);
     }
     
-    public boolean putRecent(indexRWIRowEntry entry) {
+    public boolean putRecent(final indexRWIRowEntry entry) {
         assert entry.toKelondroEntry().objectsize() == super.rowdef.objectsize;
         // returns true if the new entry was added, false if it already existed
-        kelondroRow.Entry oldEntryRow = this.put(entry.toKelondroEntry());
+        final kelondroRow.Entry oldEntryRow = this.put(entry.toKelondroEntry());
         if (oldEntryRow == null) {
             return true;
         } else {
-            indexRWIRowEntry oldEntry = new indexRWIRowEntry(oldEntryRow);
+            final indexRWIRowEntry oldEntry = new indexRWIRowEntry(oldEntryRow);
             if (entry.isOlder(oldEntry)) { // A more recent Entry is already in this container
                 this.put(oldEntry.toKelondroEntry()); // put it back
                 return false;
@@ -129,17 +129,17 @@ public class indexContainer extends kelondroRowSet {
         }
     }
 
-    public int putAllRecent(indexContainer c) {
+    public int putAllRecent(final indexContainer c) {
         // adds all entries in c and checks every entry for double-occurrence
         // returns the number of new elements
         if (c == null) return 0;
         int x = 0;
         synchronized (c) {
-            Iterator<indexRWIRowEntry> i = c.entries();
+            final Iterator<indexRWIRowEntry> i = c.entries();
             while (i.hasNext()) {
                 try {
                     if (putRecent(i.next())) x++;
-                } catch (ConcurrentModificationException e) {
+                } catch (final ConcurrentModificationException e) {
                     e.printStackTrace();
                 }
             }
@@ -148,21 +148,21 @@ public class indexContainer extends kelondroRowSet {
         return x;
     }
     
-    public indexRWIEntry get(String urlHash) {
-        kelondroRow.Entry entry = this.get(urlHash.getBytes());
+    public indexRWIEntry get(final String urlHash) {
+        final kelondroRow.Entry entry = this.get(urlHash.getBytes());
         if (entry == null) return null;
         return new indexRWIRowEntry(entry);
     }
 
-    public indexRWIEntry remove(String urlHash) {
-        kelondroRow.Entry entry = remove(urlHash.getBytes());
+    public indexRWIEntry remove(final String urlHash) {
+        final kelondroRow.Entry entry = remove(urlHash.getBytes());
         if (entry == null) return null;
         return new indexRWIRowEntry(entry);
     }
 
-    public int removeEntries(Set<String> urlHashes) {
+    public int removeEntries(final Set<String> urlHashes) {
         int count = 0;
-        Iterator<String> i = urlHashes.iterator();
+        final Iterator<String> i = urlHashes.iterator();
         while (i.hasNext()) count += (remove(i.next()) == null) ? 0 : 1;
         return count;
     }
@@ -185,7 +185,7 @@ public class indexContainer extends kelondroRowSet {
         }
 
         public indexRWIRowEntry next() {
-            kelondroRow.Entry rentry = rowEntryIterator.next();
+            final kelondroRow.Entry rentry = rowEntryIterator.next();
             if (rentry == null) return null;
             return new indexRWIRowEntry(rentry);
         }
@@ -199,43 +199,43 @@ public class indexContainer extends kelondroRowSet {
     public static Method containerMergeMethod = null;
     static {
         try {
-            Class<?> c = Class.forName("de.anomic.index.indexContainer");
+            final Class<?> c = Class.forName("de.anomic.index.indexContainer");
             containerMergeMethod = c.getMethod("mergeUnique", new Class[]{Object.class, Object.class});
-        } catch (SecurityException e) {
+        } catch (final SecurityException e) {
             System.out.println("Error while initializing containerMerge.SecurityException: " + e.getMessage());
             containerMergeMethod = null;
-        } catch (ClassNotFoundException e) {
+        } catch (final ClassNotFoundException e) {
             System.out.println("Error while initializing containerMerge.ClassNotFoundException: " + e.getMessage());
             containerMergeMethod = null;
-        } catch (NoSuchMethodException e) {
+        } catch (final NoSuchMethodException e) {
             System.out.println("Error while initializing containerMerge.NoSuchMethodException: " + e.getMessage());
             containerMergeMethod = null;
         }
     }
 
     public static indexContainer joinExcludeContainers(
-            Collection<indexContainer> includeContainers,
-            Collection<indexContainer> excludeContainers,
-            int maxDistance) {
+            final Collection<indexContainer> includeContainers,
+            final Collection<indexContainer> excludeContainers,
+            final int maxDistance) {
         // join a search result and return the joincount (number of pages after join)
 
         // since this is a conjunction we return an empty entity if any word is not known
         if (includeContainers == null) return plasmaWordIndex.emptyContainer(null, 0);
 
         // join the result
-        indexContainer rcLocal = indexContainer.joinContainers(includeContainers, maxDistance);
+        final indexContainer rcLocal = indexContainer.joinContainers(includeContainers, maxDistance);
         if (rcLocal == null) return plasmaWordIndex.emptyContainer(null, 0);
         excludeContainers(rcLocal, excludeContainers);
         
         return rcLocal;
     }
     
-    public static indexContainer joinContainers(Collection<indexContainer> containers, int maxDistance) {
+    public static indexContainer joinContainers(final Collection<indexContainer> containers, final int maxDistance) {
         
         // order entities by their size
-        TreeMap<Long, indexContainer> map = new TreeMap<Long, indexContainer>();
+        final TreeMap<Long, indexContainer> map = new TreeMap<Long, indexContainer>();
         indexContainer singleContainer;
-        Iterator<indexContainer> i = containers.iterator();
+        final Iterator<indexContainer> i = containers.iterator();
         int count = 0;
         while (i.hasNext()) {
             // get next entity:
@@ -272,12 +272,12 @@ public class indexContainer extends kelondroRowSet {
         return searchResult;
     }
     
-    public static indexContainer excludeContainers(indexContainer pivot, Collection<indexContainer> containers) {
+    public static indexContainer excludeContainers(indexContainer pivot, final Collection<indexContainer> containers) {
         
         // check if there is any result
         if ((containers == null) || (containers.size() == 0)) return pivot; // no result, nothing found
         
-        Iterator<indexContainer> i = containers.iterator();
+        final Iterator<indexContainer> i = containers.iterator();
         while (i.hasNext()) {
         	pivot = excludeDestructive(pivot, i.next());
         	if ((pivot == null) || (pivot.size() == 0)) return null;
@@ -293,15 +293,15 @@ public class indexContainer extends kelondroRowSet {
         return l;
     }
     
-    public static indexContainer joinConstructive(indexContainer i1, indexContainer i2, int maxDistance) {
+    public static indexContainer joinConstructive(final indexContainer i1, final indexContainer i2, final int maxDistance) {
         if ((i1 == null) || (i2 == null)) return null;
         if ((i1.size() == 0) || (i2.size() == 0)) return null;
         
         // decide which method to use
-        int high = ((i1.size() > i2.size()) ? i1.size() : i2.size());
-        int low  = ((i1.size() > i2.size()) ? i2.size() : i1.size());
-        int stepsEnum = 10 * (high + low - 1);
-        int stepsTest = 12 * log2(high) * low;
+        final int high = ((i1.size() > i2.size()) ? i1.size() : i2.size());
+        final int low  = ((i1.size() > i2.size()) ? i2.size() : i1.size());
+        final int stepsEnum = 10 * (high + low - 1);
+        final int stepsTest = 12 * log2(high) * low;
         
         // start most efficient method
         if (stepsEnum > stepsTest) {
@@ -314,13 +314,13 @@ public class indexContainer extends kelondroRowSet {
         }
     }
     
-    private static indexContainer joinConstructiveByTest(indexContainer small, indexContainer large, int maxDistance) {
+    private static indexContainer joinConstructiveByTest(final indexContainer small, final indexContainer large, final int maxDistance) {
         System.out.println("DEBUG: JOIN METHOD BY TEST");
         assert small.rowdef.equals(large.rowdef) : "small = " + small.rowdef.toString() + "; large = " + large.rowdef.toString();
-        int keylength = small.rowdef.width(0);
+        final int keylength = small.rowdef.width(0);
         assert (keylength == large.rowdef.width(0));
-        indexContainer conj = new indexContainer(null, small.rowdef, 0); // start with empty search result
-        Iterator<indexRWIRowEntry> se = small.entries();
+        final indexContainer conj = new indexContainer(null, small.rowdef, 0); // start with empty search result
+        final Iterator<indexRWIRowEntry> se = small.entries();
         indexRWIVarEntry ie0;
         indexRWIEntry ie1;
         while (se.hasNext()) {
@@ -337,16 +337,16 @@ public class indexContainer extends kelondroRowSet {
         return conj;
     }
     
-    private static indexContainer joinConstructiveByEnumeration(indexContainer i1, indexContainer i2, int maxDistance) {
+    private static indexContainer joinConstructiveByEnumeration(final indexContainer i1, final indexContainer i2, final int maxDistance) {
         System.out.println("DEBUG: JOIN METHOD BY ENUMERATION");
         assert i1.rowdef.equals(i2.rowdef) : "i1 = " + i1.rowdef.toString() + "; i2 = " + i2.rowdef.toString();
-        int keylength = i1.rowdef.width(0);
+        final int keylength = i1.rowdef.width(0);
         assert (keylength == i2.rowdef.width(0));
-        indexContainer conj = new indexContainer(null, i1.rowdef, 0); // start with empty search result
+        final indexContainer conj = new indexContainer(null, i1.rowdef, 0); // start with empty search result
         if (!((i1.rowdef.getOrdering().signature().equals(i2.rowdef.getOrdering().signature())) &&
               (i1.rowdef.primaryKeyIndex == i2.rowdef.primaryKeyIndex))) return conj; // ordering must be equal
-        Iterator<indexRWIRowEntry> e1 = i1.entries();
-        Iterator<indexRWIRowEntry> e2 = i2.entries();
+        final Iterator<indexRWIRowEntry> e1 = i1.entries();
+        final Iterator<indexRWIRowEntry> e2 = i2.entries();
         int c;
         if ((e1.hasNext()) && (e2.hasNext())) {
             indexRWIVarEntry ie1;
@@ -375,17 +375,17 @@ public class indexContainer extends kelondroRowSet {
         return conj;
     }
     
-    public static indexContainer excludeDestructive(indexContainer pivot, indexContainer excl) {
+    public static indexContainer excludeDestructive(final indexContainer pivot, final indexContainer excl) {
         if (pivot == null) return null;
         if (excl == null) return pivot;
         if (pivot.size() == 0) return null;
         if (excl.size() == 0) return pivot;
         
         // decide which method to use
-        int high = ((pivot.size() > excl.size()) ? pivot.size() : excl.size());
-        int low  = ((pivot.size() > excl.size()) ? excl.size() : pivot.size());
-        int stepsEnum = 10 * (high + low - 1);
-        int stepsTest = 12 * log2(high) * low;
+        final int high = ((pivot.size() > excl.size()) ? pivot.size() : excl.size());
+        final int low  = ((pivot.size() > excl.size()) ? excl.size() : pivot.size());
+        final int stepsEnum = 10 * (high + low - 1);
+        final int stepsTest = 12 * log2(high) * low;
         
         // start most efficient method
         if (stepsEnum > stepsTest) {
@@ -395,12 +395,12 @@ public class indexContainer extends kelondroRowSet {
         }
     }
     
-    private static indexContainer excludeDestructiveByTest(indexContainer pivot, indexContainer excl) {
+    private static indexContainer excludeDestructiveByTest(final indexContainer pivot, final indexContainer excl) {
         assert pivot.rowdef.equals(excl.rowdef) : "small = " + pivot.rowdef.toString() + "; large = " + excl.rowdef.toString();
-        int keylength = pivot.rowdef.width(0);
+        final int keylength = pivot.rowdef.width(0);
         assert (keylength == excl.rowdef.width(0));
-        boolean iterate_pivot = pivot.size() < excl.size();
-        Iterator<indexRWIRowEntry> se = (iterate_pivot) ? pivot.entries() : excl.entries();
+        final boolean iterate_pivot = pivot.size() < excl.size();
+        final Iterator<indexRWIRowEntry> se = (iterate_pivot) ? pivot.entries() : excl.entries();
         indexRWIEntry ie0, ie1;
             while (se.hasNext()) {
                 ie0 = se.next();
@@ -414,14 +414,14 @@ public class indexContainer extends kelondroRowSet {
         return pivot;
     }
     
-    private static indexContainer excludeDestructiveByEnumeration(indexContainer pivot, indexContainer excl) {
+    private static indexContainer excludeDestructiveByEnumeration(final indexContainer pivot, final indexContainer excl) {
         assert pivot.rowdef.equals(excl.rowdef) : "i1 = " + pivot.rowdef.toString() + "; i2 = " + excl.rowdef.toString();
-        int keylength = pivot.rowdef.width(0);
+        final int keylength = pivot.rowdef.width(0);
         assert (keylength == excl.rowdef.width(0));
         if (!((pivot.rowdef.getOrdering().signature().equals(excl.rowdef.getOrdering().signature())) &&
               (pivot.rowdef.primaryKeyIndex == excl.rowdef.primaryKeyIndex))) return pivot; // ordering must be equal
-        Iterator<indexRWIRowEntry> e1 = pivot.entries();
-        Iterator<indexRWIRowEntry> e2 = excl.entries();
+        final Iterator<indexRWIRowEntry> e1 = pivot.entries();
+        final Iterator<indexRWIRowEntry> e2 = excl.entries();
         int c;
         if ((e1.hasNext()) && (e2.hasNext())) {
             indexRWIVarEntry ie1;
@@ -459,12 +459,12 @@ public class indexContainer extends kelondroRowSet {
     }
     
 
-    public static final serverByteBuffer compressIndex(indexContainer inputContainer, indexContainer excludeContainer, long maxtime) {
+    public static final serverByteBuffer compressIndex(final indexContainer inputContainer, final indexContainer excludeContainer, final long maxtime) {
         // collect references according to domains
-        long timeout = (maxtime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxtime;
-        TreeMap<String, String> doms = new TreeMap<String, String>();
+        final long timeout = (maxtime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxtime;
+        final TreeMap<String, String> doms = new TreeMap<String, String>();
         synchronized (inputContainer) {
-            Iterator<indexRWIRowEntry> i = inputContainer.entries();
+            final Iterator<indexRWIRowEntry> i = inputContainer.entries();
             indexRWIEntry iEntry;
             String dom, paths;
             while (i.hasNext()) {
@@ -481,9 +481,9 @@ public class indexContainer extends kelondroRowSet {
             }
         }
         // construct a result string
-        serverByteBuffer bb = new serverByteBuffer(inputContainer.size() * 6);
+        final serverByteBuffer bb = new serverByteBuffer(inputContainer.size() * 6);
         bb.append('{');
-        Iterator<Map.Entry<String, String>> i = doms.entrySet().iterator();
+        final Iterator<Map.Entry<String, String>> i = doms.entrySet().iterator();
         Map.Entry<String, String> entry;
         while (i.hasNext()) {
             entry = i.next();
@@ -499,7 +499,7 @@ public class indexContainer extends kelondroRowSet {
         return bb;
     }
 
-    public static final void decompressIndex(TreeMap<String, String> target, serverByteBuffer ci, String peerhash) {
+    public static final void decompressIndex(final TreeMap<String, String> target, serverByteBuffer ci, final String peerhash) {
         // target is a mapping from url-hashes to a string of peer-hashes
         if ((ci.byteAt(0) == '{') && (ci.byteAt(ci.length() - 1) == '}')) {
             //System.out.println("DEBUG-DECOMPRESS: input is " + ci.toString());

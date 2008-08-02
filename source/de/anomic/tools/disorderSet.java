@@ -45,14 +45,14 @@ public class disorderSet extends HashSet<String> implements Set<String> {
             if (this.size() == 0) return null;
             // fill up the queue
             dh = new disorderHeap();
-            Iterator<String> elements = this.iterator();
+            final Iterator<String> elements = this.iterator();
             while (elements.hasNext()) dh.add(elements.next());
         }
         return dh.remove();
     }
 
-    public static void main(String[] args) {
-        disorderSet ds = new disorderSet();
+    public static void main(final String[] args) {
+        final disorderSet ds = new disorderSet();
         for (int i = 0; i < args.length; i++) ds.add(args[i]);
         for (int i = 0; i < args.length * 3; i++) System.out.print(ds.any() + " ");
         System.out.println();

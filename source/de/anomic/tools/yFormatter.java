@@ -53,7 +53,7 @@ public final class yFormatter {
      * @param locale the {@link Locale} to set or <code>null</code> to set the special
      * empty locale to create unformatted numbers
      */
-    public static void setLocale(Locale locale) {
+    public static void setLocale(final Locale locale) {
         numForm = (locale == null ? cleanNumForm : NumberFormat.getInstance(locale));
         initDefaults();
     }
@@ -61,8 +61,8 @@ public final class yFormatter {
     /**
      * @param lang an ISO 639 language code which is used to generate a {@link Locale}
      */
-    public static void setLocale(String lang) {
-        String l = (lang.equalsIgnoreCase("default") ? "en" : lang.toLowerCase());
+    public static void setLocale(final String lang) {
+        final String l = (lang.equalsIgnoreCase("default") ? "en" : lang.toLowerCase());
         
         setLocale(l.equals("none") ? null : new Locale(l));
     }
@@ -73,17 +73,17 @@ public final class yFormatter {
         numForm.setMaximumFractionDigits(2);    // 2 decimal digits for float/double
     }
 
-    public static String number(double d, boolean localized) {
+    public static String number(final double d, final boolean localized) {
         return (localized ? number(d) : cleanNumForm.format(d));
     }
-    public static String number(double d) {
+    public static String number(final double d) {
         return numForm.format(d);
     }
 
-    public static String number(long l, boolean localized) {
+    public static String number(final long l, final boolean localized) {
         return (localized ? number(l) : cleanNumForm.format(l));
     }
-    public static String number(long l) {
+    public static String number(final long l) {
         return numForm.format(l);
     }
 
@@ -94,7 +94,7 @@ public final class yFormatter {
      * @param s string to parse into a number and reformat
      * @return the formatted number as a String or "-" in case of a parsing error
      */
-    public static String number(String s) {
+    public static String number(final String s) {
         String ret = null;
         try {
             if (s.indexOf('.') == -1) {
@@ -102,7 +102,7 @@ public final class yFormatter {
             } else {
                 ret = number(Double.parseDouble(s));
             }
-        } catch (NumberFormatException e) { /* empty */ }
+        } catch (final NumberFormatException e) { /* empty */ }
         
         return (ret == null ? "-" : ret);
     }

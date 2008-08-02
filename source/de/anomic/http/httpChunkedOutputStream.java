@@ -36,7 +36,7 @@ import de.anomic.server.serverFileUtils;
 public final class httpChunkedOutputStream extends FilterOutputStream {
     private boolean finished = false; 
     
-    public httpChunkedOutputStream(OutputStream out) {
+    public httpChunkedOutputStream(final OutputStream out) {
         super(out);
     }
     
@@ -55,7 +55,7 @@ public final class httpChunkedOutputStream extends FilterOutputStream {
         }
     }
     
-    public void write(byte[] b) throws IOException {
+    public void write(final byte[] b) throws IOException {
         if (this.finished) throw new IOException("ChunkedOutputStream already finalized.");        
         if (b.length == 0) return;
             
@@ -66,7 +66,7 @@ public final class httpChunkedOutputStream extends FilterOutputStream {
         this.out.flush();
     }
     
-    public void write(byte[] b, int off, int len) throws IOException {
+    public void write(final byte[] b, final int off, final int len) throws IOException {
         if (this.finished) throw new IOException("ChunkedOutputStream already finalized.");
         if (len == 0) return;
         
@@ -77,7 +77,7 @@ public final class httpChunkedOutputStream extends FilterOutputStream {
         this.out.flush();
     }
     
-    public void write(serverByteBuffer b, int off, int len) throws IOException {
+    public void write(final serverByteBuffer b, final int off, final int len) throws IOException {
         if (this.finished) throw new IOException("ChunkedOutputStream already finalized.");
         if (len == 0) return;
         
@@ -88,9 +88,9 @@ public final class httpChunkedOutputStream extends FilterOutputStream {
         this.out.flush();
     }
     
-    public void write(InputStream b) throws IOException {
+    public void write(final InputStream b) throws IOException {
         if (this.finished) throw new IOException("ChunkedOutputStream already finalized.");
-        int len = b.available();
+        final int len = b.available();
         if (len == 0) return;
         
         this.out.write(Integer.toHexString(len).getBytes());
@@ -100,7 +100,7 @@ public final class httpChunkedOutputStream extends FilterOutputStream {
         this.out.flush();
     }
     
-    public void write(int b) throws IOException {
+    public void write(final int b) throws IOException {
         if (this.finished) throw new IOException("ChunkedOutputStream already finalized.");
         
         this.out.write("1".getBytes());

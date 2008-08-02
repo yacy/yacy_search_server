@@ -32,7 +32,7 @@ public class kelondroHandle implements Comparable<kelondroHandle> {
 
     protected int index;
 
-    protected kelondroHandle(int i) {
+    protected kelondroHandle(final int i) {
         assert (i == NUL) || (i >= 0) : "node handle index too low: " + i;
         //assert (i == NUL) || (i < USAGE.allCount()) : "node handle index too high: " + i + ", USEDC=" + USAGE.USEDC + ", FREEC=" + USAGE.FREEC;
         this.index = i;
@@ -50,19 +50,19 @@ public class kelondroHandle implements Comparable<kelondroHandle> {
         return s;
     }
 
-    public boolean equals(kelondroHandle h) {
+    public boolean equals(final kelondroHandle h) {
         assert (index != NUL);
         assert (h.index != NUL);
         return (this.index == h.index);
     }
 
-    public boolean equals(Object h) {
+    public boolean equals(final Object h) {
         assert (index != NUL);
         assert (((kelondroHandle) h).index != NUL);
         return (h instanceof kelondroHandle && this.index == ((kelondroHandle) h).index);
     }
 
-    public int compare(kelondroHandle h0, kelondroHandle h1) {
+    public int compare(final kelondroHandle h0, final kelondroHandle h1) {
         assert ((h0).index != NUL);
         assert ((h1).index != NUL);
         if ((h0).index < (h1).index) return -1;
@@ -70,7 +70,7 @@ public class kelondroHandle implements Comparable<kelondroHandle> {
         return 0;
     }
 
-    public int compareTo(kelondroHandle h) {
+    public int compareTo(final kelondroHandle h) {
         // this is needed for a TreeMap
         assert (index != NUL) : "this.index is NUL in compareTo";
         assert ((h).index != NUL) : "handle.index is NUL in compareTo";

@@ -95,7 +95,7 @@ public final class serverDate {
         CAL_GMT.setTimeInMillis(0);
         
         for (int i = 0; i < serverDate.FORMATS_HTTP.length; i++) {
-            SimpleDateFormat f = serverDate.FORMATS_HTTP[i];
+            final SimpleDateFormat f = serverDate.FORMATS_HTTP[i];
             f.setTimeZone(TZ_GMT);
             f.set2DigitYearStart(CAL_GMT.getTime());
         }
@@ -119,7 +119,7 @@ public final class serverDate {
         for(int i = 0; i < FORMATS_HTTP.length; i++) {
             try {
                 return parse(FORMATS_HTTP[i], s);
-            } catch (ParseException e) {
+            } catch (final ParseException e) {
                 // on ParseException try again with next parser
             }
         }
@@ -137,7 +137,7 @@ public final class serverDate {
      * @param date The Date instance to transform.
      * @return A fixed width (20 chars) ISO8601 date String.
      */
-    public static String formatISO8601(Date date){
+    public static String formatISO8601(final Date date){
             return format(FORMAT_ISO8601, date);
     }
 
@@ -161,13 +161,13 @@ public final class serverDate {
      * @return
      * @throws ParseException
      */
-    public static Date parseISO8601(String s) throws ParseException {
-        Calendar cal = Calendar.getInstance(TZ_GMT, Locale.US);
+    public static Date parseISO8601(final String s) throws ParseException {
+        final Calendar cal = Calendar.getInstance(TZ_GMT, Locale.US);
         cal.clear();
         
         // split 2007-12-19T10:20:30.789+0500 into its parts
         // correct: yyyy['-'MM['-'dd['T'HH':'MM[':'ss['.'SSS]]('Z'|ZZZZZ)]]]
-        StringTokenizer t = new StringTokenizer(s, "-T:.Z+", true);
+        final StringTokenizer t = new StringTokenizer(s, "-T:.Z+", true);
         if (s == null || t.countTokens() == 0)
             throw new ParseException("parseISO8601: Cannot parse '" + s + "'", 0);
         
@@ -190,7 +190,7 @@ public final class serverDate {
             // timezone token, too.
             // hour
             if (t.nextToken().equals("T")) {
-                int hour = Integer.parseInt(t.nextToken());
+                final int hour = Integer.parseInt(t.nextToken());
                 // no error, got hours
                 int min = 0;
                 int sec = 0;
@@ -234,9 +234,9 @@ public final class serverDate {
                 cal.set(Calendar.SECOND, sec);
                 cal.set(Calendar.MILLISECOND, msec);
             }
-        } catch (NoSuchElementException e) {
+        } catch (final NoSuchElementException e) {
             // ignore this as it is perfectly fine to have non-complete date in this format
-        } catch (Exception e) {
+        } catch (final Exception e) {
             // catch all Exceptions and return what we parsed so far
             serverLog.logInfo("SERVER", "parseISO8601: DATE ERROR with: '" + s + "' got so far: '" + cal.toString());
         }
@@ -264,7 +264,7 @@ public final class serverDate {
      * @see #formatShortDay()
      * @param date the Date to transform
      */
-    public static String formatShortDay(Date date) {
+    public static String formatShortDay(final Date date) {
         return format(FORMAT_SHORT_DAY, date);
     }
 
@@ -276,7 +276,7 @@ public final class serverDate {
      * @param date the Date to transform
      * @param tz a TimeZone the resulting date String should be aligned to.
      */
-    public static String formatShortDay(Date date, TimeZone tz) {
+    public static String formatShortDay(final Date date, final TimeZone tz) {
         return format(FORMAT_SHORT_DAY, date, tz);
     }
 
@@ -287,7 +287,7 @@ public final class serverDate {
      * @throws ParseException The exception is thrown if an error occured during while parsing
      * the String.
      */
-    public static Date parseShortDay(String timeString) throws ParseException {
+    public static Date parseShortDay(final String timeString) throws ParseException {
         return parse(FORMAT_SHORT_DAY, timeString);
     }
 
@@ -303,14 +303,14 @@ public final class serverDate {
     /**
      * Identical to {@link #formatShortDay(Date)}, but for short second format.
      */
-    public static String formatShortSecond(Date date) {
+    public static String formatShortSecond(final Date date) {
         return format(FORMAT_SHORT_SECOND, date);
     }
     
     /**
      * Identical to {@link #formatShortDay(Date, TimeZone)}, but for short second format.
      */
-    public static String formatShortSecond(Date date, TimeZone tz) {
+    public static String formatShortSecond(final Date date, final TimeZone tz) {
         return format(FORMAT_SHORT_SECOND, date, tz);
     }
     
@@ -320,7 +320,7 @@ public final class serverDate {
      * plus a 6 digit day time value, like "20071218233510". The String should be in GMT/UTC to
      * get a correct Date.
      */
-    public static Date parseShortSecond(String timeString) throws ParseException {
+    public static Date parseShortSecond(final String timeString) throws ParseException {
             return parse(FORMAT_SHORT_SECOND, timeString);
     }
 
@@ -328,7 +328,7 @@ public final class serverDate {
      * Like {@link #parseShortSecond(String)} using additional timezone information provided in an
      * offset String, like "+0100" for CET.
      */
-    public static Date parseShortSecond(String remoteTimeString, String remoteUTCOffset) {
+    public static Date parseShortSecond(final String remoteTimeString, final String remoteUTCOffset) {
         // FIXME: This method returns an incorrect date, check callers!
         // ex: de.anomic.server.serverDate.parseShortSecond("20070101120000", "+0200").toGMTString()
         // => 1 Jan 2007 13:00:00 GMT
@@ -336,10 +336,10 @@ public final class serverDate {
         if (remoteUTCOffset == null || remoteUTCOffset.length() == 0) { return new Date(); }
         try {
             return new Date(parse(FORMAT_SHORT_SECOND, remoteTimeString).getTime() - serverDate.UTCDiff() + serverDate.UTCDiff(remoteUTCOffset));
-        } catch (java.text.ParseException e) {
+        } catch (final java.text.ParseException e) {
             serverLog.logFinest("parseUniversalDate", e.getMessage() + ", remoteTimeString=[" + remoteTimeString + "]");
             return new Date();
-        } catch (java.lang.NumberFormatException e) {
+        } catch (final java.lang.NumberFormatException e) {
             serverLog.logFinest("parseUniversalDate", e.getMessage() + ", remoteTimeString=[" + remoteTimeString + "]");
             return new Date();
         }
@@ -350,15 +350,15 @@ public final class serverDate {
      * Format a time inteval in milliseconds into a String of the form
      * X 'day'['s'] HH':'mm
      */
-    public static String formatInterval(long millis) {
+    public static String formatInterval(final long millis) {
         try {
-            long mins = millis / 60000;
+            final long mins = millis / 60000;
             
-            StringBuffer uptime = new StringBuffer();
+            final StringBuffer uptime = new StringBuffer();
             
-            int uptimeDays  = (int) (Math.floor(mins/1440));
-            int uptimeHours = (int) (Math.floor(mins/60)%24);
-            int uptimeMins  = (int) mins%60;
+            final int uptimeDays  = (int) (Math.floor(mins/1440));
+            final int uptimeHours = (int) (Math.floor(mins/60)%24);
+            final int uptimeMins  = (int) mins%60;
             
             uptime.append(uptimeDays)
                   .append(((uptimeDays == 1)?" day ":" days "))
@@ -369,14 +369,14 @@ public final class serverDate {
                   .append(uptimeMins);            
             
             return uptime.toString();       
-        } catch (Exception e) {
+        } catch (final Exception e) {
             return "unknown";
         }
     }
     
     /** called by all public format...(..., TimeZone) methods */
-    private static String format(SimpleDateFormat format, Date date, TimeZone tz) {
-        TimeZone bakTZ = format.getTimeZone();
+    private static String format(final SimpleDateFormat format, final Date date, final TimeZone tz) {
+        final TimeZone bakTZ = format.getTimeZone();
         String result;
         
         synchronized (format) {
@@ -389,14 +389,14 @@ public final class serverDate {
     }
 
     /** called by all public format...(...) methods */
-    private static String format(SimpleDateFormat format, Date date) {
+    private static String format(final SimpleDateFormat format, final Date date) {
         synchronized (format) {
             return format.format(date);
         }
     }
 
     /** calles by all public parse...(...) methods */
-    private static Date parse(SimpleDateFormat format, String dateString) throws ParseException {
+    private static Date parse(final SimpleDateFormat format, final String dateString) throws ParseException {
         synchronized (format) {
             return format.parse(dateString);
         }
@@ -455,9 +455,9 @@ public final class serverDate {
         // since there are some places on earth where there is a time shift of half an hour
         // we need too show also the minutes of the time shift
         // Examples: http://www.timeanddate.com/library/abbreviations/timezones/
-        long offsetHours = UTCDiff();
-        int om = Math.abs((int) (offsetHours / minuteMillis)) % 60;
-        int oh = Math.abs((int) (offsetHours / hourMillis));
+        final long offsetHours = UTCDiff();
+        final int om = Math.abs((int) (offsetHours / minuteMillis)) % 60;
+        final int oh = Math.abs((int) (offsetHours / hourMillis));
         String diff = Integer.toString(om);
         if (diff.length() < 2) diff = "0" + diff;
         diff = Integer.toString(oh) + diff;
@@ -473,19 +473,19 @@ public final class serverDate {
         // DST_OFFSET is dependent on the time of the Calendar, so it has to be updated
         // to get the correct current offset
         thisCalendar.setTimeInMillis(System.currentTimeMillis());
-        long zoneOffsetHours = thisCalendar.get(Calendar.ZONE_OFFSET);
-        long DSTOffsetHours = thisCalendar.get(Calendar.DST_OFFSET);
+        final long zoneOffsetHours = thisCalendar.get(Calendar.ZONE_OFFSET);
+        final long DSTOffsetHours = thisCalendar.get(Calendar.DST_OFFSET);
         return zoneOffsetHours + DSTOffsetHours;
     }
     
-    public static long UTCDiff(String diffString) {
+    public static long UTCDiff(final String diffString) {
         if (diffString.length() != 5) throw new IllegalArgumentException("UTC String malformed (wrong size):" + diffString);
         boolean ahead = true;
         if (diffString.charAt(0) == '+') ahead = true;
         else if (diffString.charAt(0) == '-') ahead = false;
         else throw new IllegalArgumentException("UTC String malformed (wrong sign):" + diffString);
-        long oh = Long.parseLong(diffString.substring(1, 3));
-        long om = Long.parseLong(diffString.substring(3));
+        final long oh = Long.parseLong(diffString.substring(1, 3));
+        final long om = Long.parseLong(diffString.substring(3));
         return ((ahead) ? (long) 1 : (long) -1) * (oh * hourMillis + om * minuteMillis);
     }
     
@@ -498,7 +498,7 @@ public final class serverDate {
         this(System.currentTimeMillis());
     }
     
-    public serverDate(long utime) {
+    public serverDate(final long utime) {
         // set the time as the difference, measured in milliseconds,
         // between the current time and midnight, January 1, 1970 UTC/GMT
         this.utime = utime;
@@ -528,36 +528,36 @@ public final class serverDate {
         this.dow = (int) (((utime / dayMillis) + 3) % 7);
     }
         
-    public serverDate(String datestring) throws java.text.ParseException {
+    public serverDate(final String datestring) throws java.text.ParseException {
         // parse a date string; othervise throw a java.text.ParseException
         if ((datestring.length() == 14) || (datestring.length() == 17)) {
             // parse a ShortString
-            try {years = Integer.parseInt(datestring.substring(0, 4)) - 1970;} catch (NumberFormatException e) {
+            try {years = Integer.parseInt(datestring.substring(0, 4)) - 1970;} catch (final NumberFormatException e) {
                 throw new java.text.ParseException("serverDate '" + datestring + "' wrong year", 0);
             }
             if (years < 0) throw new java.text.ParseException("serverDate '" + datestring + "' wrong year", 0);
-            try {months = Integer.parseInt(datestring.substring(4, 6)) - 1;} catch (NumberFormatException e) {
+            try {months = Integer.parseInt(datestring.substring(4, 6)) - 1;} catch (final NumberFormatException e) {
                 throw new java.text.ParseException("serverDate '" + datestring + "' wrong month", 4);
             }
             if ((months < 0) || (months > 11)) throw new java.text.ParseException("serverDate '" + datestring + "' wrong month", 4);
-            try {days = Integer.parseInt(datestring.substring(6, 8)) - 1;} catch (NumberFormatException e) {
+            try {days = Integer.parseInt(datestring.substring(6, 8)) - 1;} catch (final NumberFormatException e) {
                 throw new java.text.ParseException("serverDate '" + datestring + "' wrong day", 6);
             }
             if ((days < 0) || (days > 30)) throw new java.text.ParseException("serverDate '" + datestring + "' wrong day", 6);
-            try {hours = Integer.parseInt(datestring.substring(8, 10));} catch (NumberFormatException e) {
+            try {hours = Integer.parseInt(datestring.substring(8, 10));} catch (final NumberFormatException e) {
                 throw new java.text.ParseException("serverDate '" + datestring + "' wrong hour", 8);
             }
             if ((hours < 0) || (hours > 23)) throw new java.text.ParseException("serverDate '" + datestring + "' wrong hour", 8);
-            try {minutes = Integer.parseInt(datestring.substring(10, 12));} catch (NumberFormatException e) {
+            try {minutes = Integer.parseInt(datestring.substring(10, 12));} catch (final NumberFormatException e) {
                 throw new java.text.ParseException("serverDate '" + datestring + "' wrong minute", 10);
             }
             if ((minutes < 0) || (minutes > 59)) throw new java.text.ParseException("serverDate '" + datestring + "' wrong minute", 10);
-            try {seconds = Integer.parseInt(datestring.substring(12, 14));} catch (NumberFormatException e) {
+            try {seconds = Integer.parseInt(datestring.substring(12, 14));} catch (final NumberFormatException e) {
                 throw new java.text.ParseException("serverDate '" + datestring + "' wrong second", 12);
             }
             if ((seconds < 0) || (seconds > 59)) throw new java.text.ParseException("serverDate '" + datestring + "' wrong second", 12);
             if (datestring.length() == 17) {
-                try {milliseconds = Integer.parseInt(datestring.substring(14, 17));} catch (NumberFormatException e) {
+                try {milliseconds = Integer.parseInt(datestring.substring(14, 17));} catch (final NumberFormatException e) {
                     throw new java.text.ParseException("serverDate '" + datestring + "' wrong millisecond", 14);
                 }
             } else {
@@ -578,9 +578,9 @@ public final class serverDate {
                ", day-of-week=" + wkday[dow];
     }
     
-    public String toShortString(boolean millis) {
+    public String toShortString(final boolean millis) {
         // returns a "yyyyMMddHHmmssSSS"
-        byte[] result = new byte[(millis) ? 17 : 14];
+        final byte[] result = new byte[(millis) ? 17 : 14];
         int x = 1970 + years;
         result[ 0] = (byte) (48 + (x / 1000)); x = x % 1000;
         result[ 1] = (byte) (48 + (x / 100)); x = x % 100;
@@ -607,13 +607,13 @@ public final class serverDate {
         return new String(result);
     }
     
-    public static long remainingTime(long start, long due, long minimum) {
+    public static long remainingTime(final long start, final long due, final long minimum) {
         if (due < 0) return -1;
-        long r = due + start - System.currentTimeMillis();
+        final long r = due + start - System.currentTimeMillis();
         if (r <= 0) return minimum; else return r;
     }
     
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         //System.out.println("kelondroDate is (" + new kelondroDate().toString() + ")");
         System.out.println("offset is " + (UTCDiff()/1000/60/60) + " hours, javaDate is " + new Date() + ", correctedDate is " + new Date(correctedUTCTime()));
         System.out.println("serverDate : " + new serverDate().toShortString(false));
@@ -628,14 +628,14 @@ public final class serverDate {
         try {
             System.out.println("serverDate re-parse short: " + new serverDate(new serverDate().toShortString(false)).toShortString(true));
             System.out.println("serverDate re-parse long : " + new serverDate(new serverDate().toShortString(true)).toShortString(true));
-        } catch (java.text.ParseException e) {
+        } catch (final java.text.ParseException e) {
             System.out.println("Parse Exception: " + e.getMessage() + ", pos " + e.getErrorOffset());
         }
         //String testresult;
-        int cycles = 10000;
+        final int cycles = 10000;
         long start;
         
-        String[] testresult = new String[10000];
+        final String[] testresult = new String[10000];
         start = System.currentTimeMillis();
         for (int i = 0; i < cycles; i++) testresult[i] = new serverDate().toShortString(false);
         System.out.println("time for " + cycles + " calls to serverDate:" + (System.currentTimeMillis() - start) + " milliseconds");

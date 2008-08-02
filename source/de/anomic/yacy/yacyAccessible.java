@@ -41,13 +41,13 @@ public class yacyAccessible {
      * updates Shortcut /addon/YaCy-Search.html
      * @param newPort
      */
-    public static void setNewPortLink(int newPort){
+    public static void setNewPortLink(final int newPort){
     	try {
-        	plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
-        	File shortcut = new File(sb.getRootPath() + "/addon/YaCy-Search.html".replace("/", File.separator));
-        	String content = "<meta http-equiv=\"refresh\" content=\"0;url=http://localhost:" + newPort + "/\">";
+        	final plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
+        	final File shortcut = new File(sb.getRootPath() + "/addon/YaCy-Search.html".replace("/", File.separator));
+        	final String content = "<meta http-equiv=\"refresh\" content=\"0;url=http://localhost:" + newPort + "/\">";
         	serverFileUtils.copy(content.getBytes(), shortcut);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			return;
 		}
     }
@@ -56,13 +56,13 @@ public class yacyAccessible {
      * updates Shortcut /addon/YaCy-Search.bat
      * @param newPort
      */
-    public static void setNewPortBat(int newPort){
+    public static void setNewPortBat(final int newPort){
     	try {
-        	plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
-        	File shortcut = new File(sb.getRootPath() + "/addon/YaCy-Search.bat".replace("/", File.separator));
-        	String content = "rundll32 url.dll,FileProtocolHandler \"http://localhost:" + newPort + "\"";
+        	final plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
+        	final File shortcut = new File(sb.getRootPath() + "/addon/YaCy-Search.bat".replace("/", File.separator));
+        	final String content = "rundll32 url.dll,FileProtocolHandler \"http://localhost:" + newPort + "\"";
         	serverFileUtils.copy(content.getBytes(), shortcut);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			return;
 		}
     }

@@ -41,7 +41,7 @@ public class kelondroSortStack<E> {
     protected HashSet<Integer> instack; // keeps track which element has been on the stack or is now in the offstack
     protected int maxsize;
     
-    public kelondroSortStack(int maxsize) {
+    public kelondroSortStack(final int maxsize) {
         // the maxsize is the maximum number of entries in the stack
         // if this is set to -1, the size is unlimited
         this.onstack = new TreeMap<Long, E>();
@@ -53,11 +53,11 @@ public class kelondroSortStack<E> {
         return this.onstack.size();
     }
     
-    public void push(stackElement se) {
+    public void push(final stackElement se) {
         push(se.element, se.weight);
     }
     
-    public synchronized void push(E element, Long weight) {
+    public synchronized void push(final E element, Long weight) {
         if (exists(element)) return;
         
         // manipulate weight in such a way that it has no conflicts
@@ -79,8 +79,8 @@ public class kelondroSortStack<E> {
     public synchronized stackElement top() {
         // returns the element that is currently on top of the stack
         if (this.onstack.isEmpty()) return null;
-        Long w = this.onstack.firstKey();
-        E element = this.onstack.get(w);
+        final Long w = this.onstack.firstKey();
+        final E element = this.onstack.get(w);
         return new stackElement(element, w);
     }
     
@@ -89,24 +89,24 @@ public class kelondroSortStack<E> {
         // it is removed and added to the offstack list
         // this is exactly the same as element(offstack.size())
         if (this.onstack.isEmpty()) return null;
-        Long w = this.onstack.firstKey();
-        E element = this.onstack.remove(w);
-        stackElement se = new stackElement(element, w);
+        final Long w = this.onstack.firstKey();
+        final E element = this.onstack.remove(w);
+        final stackElement se = new stackElement(element, w);
         return se;
     }
     
-    public boolean exists(E element) {
+    public boolean exists(final E element) {
         // uses the hashCode of the element to find out of the element had been on the list or the stack
         return this.instack.contains(new Integer(element.hashCode()));
     }
     
-    public boolean exists(int hashcode) {
+    public boolean exists(final int hashcode) {
         // uses the hashCode of the element to find out of the element had been on the list or the stack
         return this.instack.contains(new Integer(hashcode));
     }
     
-    public stackElement get(int hashcode) {
-        Iterator<Map.Entry<Long, E>> i = this.onstack.entrySet().iterator();
+    public stackElement get(final int hashcode) {
+        final Iterator<Map.Entry<Long, E>> i = this.onstack.entrySet().iterator();
         Map.Entry<Long, E> entry;
         while (i.hasNext()) {
             entry = i.next();
@@ -115,8 +115,8 @@ public class kelondroSortStack<E> {
         return null;
     }
     
-    public stackElement remove(int hashcode) {
-        Iterator<Map.Entry<Long, E>> i = this.onstack.entrySet().iterator();
+    public stackElement remove(final int hashcode) {
+        final Iterator<Map.Entry<Long, E>> i = this.onstack.entrySet().iterator();
         Map.Entry<Long, E> entry;
         stackElement se;
         while (i.hasNext()) {
@@ -130,7 +130,7 @@ public class kelondroSortStack<E> {
         return null;
     }
     
-    public boolean bottom(long weight) {
+    public boolean bottom(final long weight) {
         // returns true if the element with that weight would be on the bottom of the stack after inserting
         return weight > this.onstack.lastKey().longValue();
     }
@@ -138,7 +138,7 @@ public class kelondroSortStack<E> {
     public class stackElement {
         public Long weight;
         public E element;
-        public stackElement(E element, Long weight) {
+        public stackElement(final E element, final Long weight) {
             this.element = element;
             this.weight = weight;
         }

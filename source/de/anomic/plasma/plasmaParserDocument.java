@@ -47,17 +47,17 @@ import de.anomic.yacy.yacyURL;
 
 public class plasmaParserDocument {
     
-    private yacyURL source;               // the source url
-    private String mimeType;              // mimeType as taken from http header
-    private String charset;               // the charset of the document
-    private List<String> keywords;        // most resources provide a keyword field
-    private StringBuffer title;           // a document title, taken from title or h1 tag; shall appear as headline of search result
-    private StringBuffer creator;         // author or copyright
-    private List<String> sections;        // if present: more titles/headlines appearing in the document
-    private StringBuffer description;     // an abstract, if present: short content description
+    private final yacyURL source;               // the source url
+    private final String mimeType;              // mimeType as taken from http header
+    private final String charset;               // the charset of the document
+    private final List<String> keywords;        // most resources provide a keyword field
+    private final StringBuffer title;           // a document title, taken from title or h1 tag; shall appear as headline of search result
+    private final StringBuffer creator;         // author or copyright
+    private final List<String> sections;        // if present: more titles/headlines appearing in the document
+    private final StringBuffer description;     // an abstract, if present: short content description
     private Object text;                  // the clear text, all that is visible
-    private Map<yacyURL, String> anchors; // all links embedded as clickeable entities (anchor tags)
-    private HashMap<String, htmlFilterImageEntry> images; // all visible pictures in document
+    private final Map<yacyURL, String> anchors; // all links embedded as clickeable entities (anchor tags)
+    private final HashMap<String, htmlFilterImageEntry> images; // all visible pictures in document
     // the anchors and images - Maps are URL-to-EntityDescription mappings.
     // The EntityDescription appear either as visible text in anchors or as alternative
     // text in image tags.
@@ -68,10 +68,10 @@ public class plasmaParserDocument {
     private InputStream textStream;
     private int inboundLinks, outboundLinks; // counters for inbound and outbound links, are counted after calling notifyWebStructure
     
-    protected plasmaParserDocument(yacyURL location, String mimeType, String charset,
-                    String[] keywords, String title, String author,
-                    String[] sections, String abstrct,
-                    Object text, Map<yacyURL, String> anchors, HashMap<String, htmlFilterImageEntry> images) {
+    protected plasmaParserDocument(final yacyURL location, final String mimeType, final String charset,
+                    final String[] keywords, final String title, final String author,
+                    final String[] sections, final String abstrct,
+                    final Object text, final Map<yacyURL, String> anchors, final HashMap<String, htmlFilterImageEntry> images) {
         this.source = location;
         this.mimeType = (mimeType == null) ? "application/octet-stream" : mimeType;
         this.charset = charset;
@@ -93,7 +93,7 @@ public class plasmaParserDocument {
         
         if (text == null) try {
             this.text = new serverCachedFileOutputStream(Parser.MAX_KEEP_IN_MEMORY_SIZE);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             e.printStackTrace();
             this.text = new StringBuffer();
         } else {
@@ -101,28 +101,28 @@ public class plasmaParserDocument {
         }
     }
     
-    public plasmaParserDocument(yacyURL location, String mimeType, String charset) {
+    public plasmaParserDocument(final yacyURL location, final String mimeType, final String charset) {
         this(location, mimeType, charset, null, null, null, null, null, (Object)null, null, null);
     }
     
-    public plasmaParserDocument(yacyURL location, String mimeType, String charset,
-                    String[] keywords, String title, String author,
-                    String[] sections, String abstrct,
-                    byte[] text, Map<yacyURL, String> anchors, HashMap<String, htmlFilterImageEntry> images) {
+    public plasmaParserDocument(final yacyURL location, final String mimeType, final String charset,
+                    final String[] keywords, final String title, final String author,
+                    final String[] sections, final String abstrct,
+                    final byte[] text, final Map<yacyURL, String> anchors, final HashMap<String, htmlFilterImageEntry> images) {
         this(location, mimeType, charset, keywords, title, author, sections, abstrct, (Object)text, anchors, images);
     }
     
-    public plasmaParserDocument(yacyURL location, String mimeType, String charset,
-            String[] keywords, String title, String author,
-            String[] sections, String abstrct,
-            File text, Map<yacyURL, String> anchors, HashMap<String, htmlFilterImageEntry> images) {
+    public plasmaParserDocument(final yacyURL location, final String mimeType, final String charset,
+            final String[] keywords, final String title, final String author,
+            final String[] sections, final String abstrct,
+            final File text, final Map<yacyURL, String> anchors, final HashMap<String, htmlFilterImageEntry> images) {
         this(location, mimeType, charset, keywords, title, author, sections, abstrct, (Object)text, anchors, images);
     }
     
-    public plasmaParserDocument(yacyURL location, String mimeType, String charset,
-            String[] keywords, String title, String author,
-            String[] sections, String abstrct,
-            serverCachedFileOutputStream text, Map<yacyURL, String> anchors, HashMap<String, htmlFilterImageEntry> images) {
+    public plasmaParserDocument(final yacyURL location, final String mimeType, final String charset,
+            final String[] keywords, final String title, final String author,
+            final String[] sections, final String abstrct,
+            final serverCachedFileOutputStream text, final Map<yacyURL, String> anchors, final HashMap<String, htmlFilterImageEntry> images) {
         this(location, mimeType, charset, keywords, title, author, sections, abstrct, (Object)text, anchors, images);
     }
 
@@ -154,9 +154,9 @@ dc_rights
         if (creator != null) return creator.toString(); else return new String();
     }
     
-    public String dc_subject(char separator) {
+    public String dc_subject(final char separator) {
         // sort out doubles and empty words
-        TreeSet<String> hs = new TreeSet<String>();
+        final TreeSet<String> hs = new TreeSet<String>();
         String s;
         for (int i = 0; i < this.keywords.size(); i++) {
             if (this.keywords.get(i) == null) continue;
@@ -165,8 +165,8 @@ dc_rights
         }
         if (hs.size() == 0) return "";
         // generate a new list
-        StringBuffer sb = new StringBuffer(this.keywords.size() * 6);
-        Iterator<String> i = hs.iterator();
+        final StringBuffer sb = new StringBuffer(this.keywords.size() * 6);
+        final Iterator<String> i = hs.iterator();
         while (i.hasNext()) sb.append(i.next()).append(separator);
         return sb.substring(0, sb.length() - 1);
     }
@@ -219,7 +219,7 @@ dc_rights
                 return ((serverCachedFileOutputStream)this.text).getContent();
             }
             return this.textStream;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             e.printStackTrace();
         }
         return null; 
@@ -234,14 +234,14 @@ dc_rights
             } else if (this.text instanceof byte[]) {
                 return (byte[])this.text;
             } else if (this.text instanceof serverCachedFileOutputStream) {
-                serverCachedFileOutputStream ffbaos = (serverCachedFileOutputStream)this.text;
+                final serverCachedFileOutputStream ffbaos = (serverCachedFileOutputStream)this.text;
                 if (ffbaos.isFallback()) {
                     return serverFileUtils.read(ffbaos.getContent());
                 } else {
                     return ffbaos.getContentBAOS();
                 }
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             e.printStackTrace();
         }
         return new byte[0];             
@@ -258,9 +258,9 @@ dc_rights
         return -1; 
     }
     
-    public Iterator<StringBuffer> getSentences(boolean pre) {
+    public Iterator<StringBuffer> getSentences(final boolean pre) {
         if (this.text == null) return null;
-        plasmaCondenser.sentencesFromInputStreamEnum e = plasmaCondenser.sentencesFromInputStream(getText(), this.charset);
+        final plasmaCondenser.sentencesFromInputStreamEnum e = plasmaCondenser.sentencesFromInputStream(getText(), this.charset);
         e.pre(pre);
         return e;
     }
@@ -319,13 +319,13 @@ dc_rights
         String u;
         int extpos, qpos;
         String ext = null;
-        Iterator<Map.Entry<yacyURL, String>> i = anchors.entrySet().iterator();
+        final Iterator<Map.Entry<yacyURL, String>> i = anchors.entrySet().iterator();
         hyperlinks = new HashMap<yacyURL, String>();
         videolinks = new HashMap<yacyURL, String>();
         audiolinks = new HashMap<yacyURL, String>();
         applinks   = new HashMap<yacyURL, String>();
         emaillinks = new HashMap<String, String>();
-        HashMap<String, htmlFilterImageEntry> collectedImages = new HashMap<String, htmlFilterImageEntry>(); // this is a set that is collected now and joined later to the imagelinks
+        final HashMap<String, htmlFilterImageEntry> collectedImages = new HashMap<String, htmlFilterImageEntry>(); // this is a set that is collected now and joined later to the imagelinks
         Map.Entry<yacyURL, String> entry;
         while (i.hasNext()) {
             entry = i.next();
@@ -381,7 +381,7 @@ dc_rights
         this.resorted = true;
     }
     
-    public void addSubDocument(plasmaParserDocument doc) throws IOException {
+    public void addSubDocument(final plasmaParserDocument doc) throws IOException {
         this.sections.addAll(Arrays.asList(doc.getSectionTitles()));
         
         if (this.title.length() > 0) this.title.append('\n');
@@ -412,12 +412,12 @@ dc_rights
     /**
      * @param faviconURL the {@link URL} to the favicon that belongs to the document
      */
-    public void setFavicon(yacyURL faviconURL) {
+    public void setFavicon(final yacyURL faviconURL) {
     	this.favicon = faviconURL;
     }
     
-    public void notifyWebStructure(plasmaWebStructure webStructure, plasmaCondenser condenser, Date docDate) {
-        Integer[] ioLinks = webStructure.generateCitationReference(this, condenser, docDate); // [outlinksSame, outlinksOther]
+    public void notifyWebStructure(final plasmaWebStructure webStructure, final plasmaCondenser condenser, final Date docDate) {
+        final Integer[] ioLinks = webStructure.generateCitationReference(this, condenser, docDate); // [outlinksSame, outlinksOther]
         this.inboundLinks = ioLinks[0].intValue();
         this.outboundLinks = ioLinks[1].intValue();
     }
@@ -437,7 +437,7 @@ dc_rights
         if (this.textStream != null) {
             try {
                 this.textStream.close();
-            } catch (Exception e) { 
+            } catch (final Exception e) { 
                 /* ignore this */
             } finally {
                 this.textStream = null;
@@ -448,7 +448,7 @@ dc_rights
         if ((this.text != null) && (this.text instanceof File)) {
             try { 
                 ((File)this.text).delete(); 
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 /* ignore this */
             } finally {
                 this.text = null;

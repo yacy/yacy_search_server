@@ -50,13 +50,13 @@ import de.anomic.yacy.yacySeed;
 public class ViewProfile {
 
     @SuppressWarnings("unchecked")
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
-        serverObjects prop = new serverObjects();
-        plasmaSwitchboard sb = (plasmaSwitchboard) env;
-        boolean authenticated = sb.adminAuthenticated(header) >= 2;
-        int display = ((post == null) || (!authenticated)) ? 0 : post.getInt("display", 0);
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch env) {
+        final serverObjects prop = new serverObjects();
+        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        final boolean authenticated = sb.adminAuthenticated(header) >= 2;
+        final int display = ((post == null) || (!authenticated)) ? 0 : post.getInt("display", 0);
         prop.put("display", display);
-        String hash = (post == null) ? null : (String) post.get("hash");
+        final String hash = (post == null) ? null : (String) post.get("hash");
         
         if ((hash == null) || (sb.webIndex.seedDB == null)) {
             // wrong access
@@ -70,13 +70,13 @@ public class ViewProfile {
         String address = null;
         if (hash.equals("localhash")) {
             // read the profile from local peer
-            Properties p = new Properties();
+            final Properties p = new Properties();
             FileInputStream fileIn = null;
             try {
                 fileIn = new FileInputStream(new File("DATA/SETTINGS/profile.txt"));
                 p.load(fileIn);        
-            } catch(IOException e) {} finally {
-                if (fileIn != null) try { fileIn.close(); fileIn = null; } catch (Exception e) {}
+            } catch(final IOException e) {} finally {
+                if (fileIn != null) try { fileIn.close(); fileIn = null; } catch (final Exception e) {}
             }
             profile = new HashMap();
             profile.putAll(p);
@@ -94,9 +94,9 @@ public class ViewProfile {
             } else {
                 // process news if existent
                 try {
-                    yacyNewsRecord record = sb.webIndex.newsPool.getByOriginator(yacyNewsPool.INCOMING_DB, yacyNewsPool.CATEGORY_PROFILE_UPDATE, seed.hash);
+                    final yacyNewsRecord record = sb.webIndex.newsPool.getByOriginator(yacyNewsPool.INCOMING_DB, yacyNewsPool.CATEGORY_PROFILE_UPDATE, seed.hash);
                     if (record != null) sb.webIndex.newsPool.moveOff(yacyNewsPool.INCOMING_DB, record.id());
-                } catch (IOException e) {}
+                } catch (final IOException e) {}
                 
                 // try to get the profile from remote peer
                 if (sb.clusterhashes != null) seed.setAlternativeAddress(sb.clusterhashes.get(seed.hash));
@@ -123,7 +123,7 @@ public class ViewProfile {
         }
         Map.Entry entry;
         // all known keys which should be set as they are
-        HashSet<String> knownKeys = new HashSet<String>();
+        final HashSet<String> knownKeys = new HashSet<String>();
         knownKeys.add("name");
         knownKeys.add("nickname");
         // knownKeys.add("homepage");//+http
@@ -136,7 +136,7 @@ public class ViewProfile {
         knownKeys.add("comment");        
 
         //empty values
-        Iterator<String> it = knownKeys.iterator();
+        final Iterator<String> it = knownKeys.iterator();
         while (it.hasNext()) {
             prop.put("success_" + it.next(), "0");
         }
@@ -145,7 +145,7 @@ public class ViewProfile {
         int numUnknown = 0;
         while (i.hasNext()) {
             entry = (Map.Entry) i.next();
-            String key = ((String) entry.getKey());
+            final String key = ((String) entry.getKey());
             String value = new String();
 
             // this prevents broken links ending in <br>

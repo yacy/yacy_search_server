@@ -68,22 +68,22 @@ public class pptParser extends AbstractParser implements Parser {
      * parses the source documents and returns a plasmaParserDocument containing
      * all extracted information about the parsed document
      */ 
-    public plasmaParserDocument parse(yacyURL location, String mimeType,
-            String charset, InputStream source) throws ParserException,
+    public plasmaParserDocument parse(final yacyURL location, final String mimeType,
+            final String charset, final InputStream source) throws ParserException,
             InterruptedException {
         try {
             /*
              * create new PowerPointExtractor and extract text and notes
              * of the document
              */
-            PowerPointExtractor pptExtractor = new PowerPointExtractor(new BufferedInputStream(source));
-            String contents = pptExtractor.getText(true, true);
+            final PowerPointExtractor pptExtractor = new PowerPointExtractor(new BufferedInputStream(source));
+            final String contents = pptExtractor.getText(true, true);
             
             /*
              * create the plasmaParserDocument for the database
              * and set shortText and bodyText properly
              */
-            plasmaParserDocument theDoc = new plasmaParserDocument(
+            final plasmaParserDocument theDoc = new plasmaParserDocument(
                     location,
                     mimeType,
                     "UTF-8",
@@ -100,13 +100,13 @@ public class pptParser extends AbstractParser implements Parser {
                     null,
                     null);
             return theDoc;
-        } catch (Exception e) { 
+        } catch (final Exception e) { 
             if (e instanceof InterruptedException) throw (InterruptedException) e;
 
             /*
              * an unexpected error occurred, log it and throw a ParserException
              */            
-            String errorMsg = "Unable to parse the ppt document '" + location + "':" + e.getMessage();
+            final String errorMsg = "Unable to parse the ppt document '" + location + "':" + e.getMessage();
             this.theLogger.logSevere(errorMsg);            
             throw new ParserException(errorMsg, location);
         }

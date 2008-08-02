@@ -78,7 +78,7 @@ public class kelondroRowCollection {
     private static final int exp_order_bound = 5;
     private static final int exp_collection  = 6;
     
-    public kelondroRowCollection(kelondroRowCollection rc) {
+    public kelondroRowCollection(final kelondroRowCollection rc) {
         this.rowdef = rc.rowdef;
         this.chunkcache = rc.chunkcache;
         this.chunkcount = rc.chunkcount;
@@ -87,7 +87,7 @@ public class kelondroRowCollection {
         this.lastTimeWrote = rc.lastTimeWrote;
     }
     
-    public kelondroRowCollection(kelondroRow rowdef, int objectCount) {
+    public kelondroRowCollection(final kelondroRow rowdef, final int objectCount) {
         this.rowdef = rowdef;
         this.chunkcache = new byte[objectCount * rowdef.objectsize];
         this.chunkcount = 0;
@@ -96,7 +96,7 @@ public class kelondroRowCollection {
         this.lastTimeWrote = System.currentTimeMillis();
     }
      
-    public kelondroRowCollection(kelondroRow rowdef, int objectCount, byte[] cache, int sortBound) {
+    public kelondroRowCollection(final kelondroRow rowdef, final int objectCount, final byte[] cache, final int sortBound) {
         this.rowdef = rowdef;
         this.chunkcache = cache;
         this.chunkcount = objectCount;
@@ -105,10 +105,10 @@ public class kelondroRowCollection {
         this.lastTimeWrote = System.currentTimeMillis();
     }
     
-    public kelondroRowCollection(kelondroRow rowdef, kelondroRow.Entry exportedCollectionRowEnvironment, int columnInEnvironment) {
+    public kelondroRowCollection(final kelondroRow rowdef, final kelondroRow.Entry exportedCollectionRowEnvironment, final int columnInEnvironment) {
         this.rowdef = rowdef;
-        int chunkcachelength = exportedCollectionRowEnvironment.cellwidth(columnInEnvironment) - exportOverheadSize;
-        kelondroRow.Entry exportedCollection = exportRow(chunkcachelength).newEntry(exportedCollectionRowEnvironment, columnInEnvironment);
+        final int chunkcachelength = exportedCollectionRowEnvironment.cellwidth(columnInEnvironment) - exportOverheadSize;
+        final kelondroRow.Entry exportedCollection = exportRow(chunkcachelength).newEntry(exportedCollectionRowEnvironment, columnInEnvironment);
         this.chunkcount = (int) exportedCollection.getColLong(exp_chunkcount);
         //assert (this.chunkcount <= chunkcachelength / rowdef.objectsize) : "chunkcount = " + this.chunkcount + ", chunkcachelength = " + chunkcachelength + ", rowdef.objectsize = " + rowdef.objectsize;
         if ((this.chunkcount > chunkcachelength / rowdef.objectsize)) {
@@ -117,7 +117,7 @@ public class kelondroRowCollection {
         }
         this.lastTimeRead = (exportedCollection.getColLong(exp_last_read) + 10957) * day;
         this.lastTimeWrote = (exportedCollection.getColLong(exp_last_wrote) + 10957) * day;
-        String sortOrderKey = exportedCollection.getColString(exp_order_type, null);
+        final String sortOrderKey = exportedCollection.getColString(exp_order_type, null);
         kelondroByteOrder oldOrder = null;
         if ((sortOrderKey == null) || (sortOrderKey.equals("__"))) {
             oldOrder = null;
@@ -146,19 +146,19 @@ public class kelondroRowCollection {
    
     private static final kelondroRow exportMeasureRow = exportRow(0 /* no relevance */);
 
-    protected static final int sizeOfExportedCollectionRows(kelondroRow.Entry exportedCollectionRowEnvironment, int columnInEnvironment) {
-    	kelondroRow.Entry exportedCollectionEntry = exportMeasureRow.newEntry(exportedCollectionRowEnvironment, columnInEnvironment);
-    	int chunkcount = (int) exportedCollectionEntry.getColLong(exp_chunkcount);
+    protected static final int sizeOfExportedCollectionRows(final kelondroRow.Entry exportedCollectionRowEnvironment, final int columnInEnvironment) {
+    	final kelondroRow.Entry exportedCollectionEntry = exportMeasureRow.newEntry(exportedCollectionRowEnvironment, columnInEnvironment);
+    	final int chunkcount = (int) exportedCollectionEntry.getColLong(exp_chunkcount);
         return chunkcount;
     }
     
     private static final long day = 1000 * 60 * 60 * 24;
     
-    public static int daysSince2000(long time) {
+    public static int daysSince2000(final long time) {
         return (int) (time / day) - 10957;
     }
     
-    private static kelondroRow exportRow(int chunkcachelength) {
+    private static kelondroRow exportRow(final int chunkcachelength) {
         // find out the size of this collection
         return new kelondroRow(
                 "int size-4 {b256}," +
@@ -178,8 +178,8 @@ public class kelondroRowCollection {
         // returns null if the collection is empty
         trim(false);
         assert this.size() * this.rowdef.objectsize == this.chunkcache.length;
-        kelondroRow row = exportRow(chunkcache.length);
-        kelondroRow.Entry entry = row.newEntry();
+        final kelondroRow row = exportRow(chunkcache.length);
+        final kelondroRow.Entry entry = row.newEntry();
         assert (sortBound <= chunkcount) : "sortBound = " + sortBound + ", chunkcount = " + chunkcount;
         assert (this.chunkcount <= chunkcache.length / rowdef.objectsize) : "chunkcount = " + this.chunkcount + ", chunkcache.length = " + chunkcache.length + ", rowdef.objectsize = " + rowdef.objectsize;
         entry.setCol(exp_chunkcount, this.chunkcount);
@@ -192,23 +192,23 @@ public class kelondroRowCollection {
         return entry.bytes();
     }
     
-    public static kelondroRowCollection importCollection(InputStream is, kelondroRow rowdef) throws IOException {
-        byte[] byte2 = new byte[2];
-        byte[] byte4 = new byte[4];
-        is.read(byte4); int size = (int) kelondroNaturalOrder.decodeLong(byte4);
+    public static kelondroRowCollection importCollection(final InputStream is, final kelondroRow rowdef) throws IOException {
+        final byte[] byte2 = new byte[2];
+        final byte[] byte4 = new byte[4];
+        is.read(byte4); final int size = (int) kelondroNaturalOrder.decodeLong(byte4);
         is.read(byte2); //short lastread = (short) kelondroNaturalOrder.decodeLong(byte2);
         is.read(byte2); //short lastwrote = (short) kelondroNaturalOrder.decodeLong(byte2);
         is.read(byte2); //String orderkey = new String(byte2);
-        is.read(byte2); short ordercol = (short) kelondroNaturalOrder.decodeLong(byte2);
-        is.read(byte2); short orderbound = (short) kelondroNaturalOrder.decodeLong(byte2);
+        is.read(byte2); final short ordercol = (short) kelondroNaturalOrder.decodeLong(byte2);
+        is.read(byte2); final short orderbound = (short) kelondroNaturalOrder.decodeLong(byte2);
         assert rowdef.primaryKeyIndex == ordercol;
-        byte[] chunkcache = new byte[size * rowdef.objectsize];
-        int c = is.read(chunkcache);
+        final byte[] chunkcache = new byte[size * rowdef.objectsize];
+        final int c = is.read(chunkcache);
         assert c == chunkcache.length;
         return new kelondroRowCollection(rowdef, size, chunkcache, orderbound);
     }
     
-    public void saveCollection(File file) throws IOException {
+    public void saveCollection(final File file) throws IOException {
         serverFileUtils.copy(exportCollection(), file);
     }
 
@@ -216,8 +216,8 @@ public class kelondroRowCollection {
         return this.rowdef;
     }
     
-    private final void ensureSize(int elements) {
-        int needed = elements * rowdef.objectsize;
+    private final void ensureSize(final int elements) {
+        final int needed = elements * rowdef.objectsize;
         if (chunkcache.length >= needed) return;
         byte[] newChunkcache = new byte[(int) (needed * growfactor)]; // increase space
         System.arraycopy(chunkcache, 0, newChunkcache, 0, chunkcache.length);
@@ -229,7 +229,7 @@ public class kelondroRowCollection {
         return (long) ((((long) (chunkcount + 1)) * ((long) rowdef.objectsize)) * growfactor);
     }
     
-    public synchronized void trim(boolean plusGrowFactor) {
+    public synchronized void trim(final boolean plusGrowFactor) {
         if (chunkcache.length == 0) return;
         int needed = chunkcount * rowdef.objectsize;
         if (plusGrowFactor) needed = (int) (needed * growfactor);
@@ -255,7 +255,7 @@ public class kelondroRowCollection {
         return lastTimeWrote;
     }
     
-    public synchronized final byte[] getKey(int index) {
+    public synchronized final byte[] getKey(final int index) {
         assert (index >= 0) : "get: access with index " + index + " is below zero";
         assert (index < chunkcount) : "get: access with index " + index + " is above chunkcount " + chunkcount + "; sortBound = " + sortBound;
         assert (index * rowdef.objectsize < chunkcache.length);
@@ -263,19 +263,19 @@ public class kelondroRowCollection {
         if (index >= chunkcount) return null;
         if ((index + 1) * rowdef.objectsize > chunkcache.length) return null; // the whole chunk does not fit into the chunkcache
         this.lastTimeRead = System.currentTimeMillis();
-        byte[] b = new byte[this.rowdef.width(0)];
+        final byte[] b = new byte[this.rowdef.width(0)];
         System.arraycopy(chunkcache, index * rowdef.objectsize, b, 0, b.length);
         return b;
     }
     
-    public final kelondroRow.Entry get(int index, boolean clone) {
+    public final kelondroRow.Entry get(final int index, final boolean clone) {
         assert (index >= 0) : "get: access with index " + index + " is below zero";
         assert (index < chunkcount) : "get: access with index " + index + " is above chunkcount " + chunkcount + "; sortBound = " + sortBound;
         assert (index * rowdef.objectsize < chunkcache.length);
         assert sortBound <= chunkcount : "sortBound = " + sortBound + ", chunkcount = " + chunkcount;
         if ((chunkcache == null) || (rowdef == null)) return null; // case may appear during shutdown
         kelondroRow.Entry entry;
-        int addr = index * rowdef.objectsize;
+        final int addr = index * rowdef.objectsize;
         synchronized (this) {
             if (index >= chunkcount) return null;
             if (addr + rowdef.objectsize > chunkcache.length) return null; // the whole chunk does not fit into the chunkcache
@@ -285,7 +285,7 @@ public class kelondroRowCollection {
         return entry;
     }
     
-    public synchronized final void set(int index, kelondroRow.Entry a) {
+    public synchronized final void set(final int index, final kelondroRow.Entry a) {
         assert (index >= 0) : "set: access with index " + index + " is below zero";
         ensureSize(index + 1);
         a.writeToArray(chunkcache, index * rowdef.objectsize);
@@ -293,7 +293,7 @@ public class kelondroRowCollection {
         this.lastTimeWrote = System.currentTimeMillis();
     }
     
-    public final void insertUnique(int index, kelondroRow.Entry a) {
+    public final void insertUnique(final int index, final kelondroRow.Entry a) {
         assert (a != null);
 
         if (index < chunkcount) {
@@ -306,14 +306,14 @@ public class kelondroRowCollection {
         set(index, a);
     }
     
-    public synchronized boolean addUnique(kelondroRow.Entry row) {
-        byte[] r = row.bytes();
+    public synchronized boolean addUnique(final kelondroRow.Entry row) {
+        final byte[] r = row.bytes();
         return addUnique(r, 0, r.length);
     }
 
-    public synchronized int addUniqueMultiple(List<kelondroRow.Entry> rows) {
+    public synchronized int addUniqueMultiple(final List<kelondroRow.Entry> rows) {
         assert this.sortBound == 0 : "sortBound = " + this.sortBound + ", chunkcount = " + this.chunkcount;
-        Iterator<kelondroRow.Entry> i = rows.iterator();
+        final Iterator<kelondroRow.Entry> i = rows.iterator();
         int c = 0;
         while (i.hasNext()) {
             if (addUnique(i.next())) c++;
@@ -321,11 +321,11 @@ public class kelondroRowCollection {
         return c;
     }
     
-    public synchronized void add(byte[] a) {
+    public synchronized void add(final byte[] a) {
         addUnique(a, 0, a.length);
     }
     
-    private final boolean addUnique(byte[] a, int astart, int alength) {
+    private final boolean addUnique(final byte[] a, final int astart, final int alength) {
         assert (a != null);
         assert (astart >= 0) && (astart < a.length) : " astart = " + a;
         assert (!(serverLog.allZero(a, astart, alength))) : "a = " + serverLog.arrayList(a, astart, alength);
@@ -338,7 +338,7 @@ public class kelondroRowCollection {
         }
         */
         //assert (!(bugappearance(a, astart, alength))) : "a = " + serverLog.arrayList(a, astart, alength);
-        int l = Math.min(rowdef.objectsize, Math.min(alength, a.length - astart));
+        final int l = Math.min(rowdef.objectsize, Math.min(alength, a.length - astart));
         ensureSize(chunkcount + 1);
         System.arraycopy(a, astart, chunkcache, rowdef.objectsize * chunkcount, l);
         chunkcount++;
@@ -346,7 +346,7 @@ public class kelondroRowCollection {
         return true;
     }
     
-    public synchronized final void addAllUnique(kelondroRowCollection c) {
+    public synchronized final void addAllUnique(final kelondroRowCollection c) {
         if (c == null) return;
         assert(rowdef.objectsize == c.rowdef.objectsize);
         ensureSize(chunkcount + c.size());
@@ -364,14 +364,14 @@ public class kelondroRowCollection {
      * @param p element at this position will be removed
      * @param keepOrder keep the order of remaining entries
      */
-    protected synchronized final void removeRow(int p, boolean keepOrder) {
+    protected synchronized final void removeRow(final int p, final boolean keepOrder) {
         assert p >= 0 : "p = " + p;
         assert p < chunkcount : "p = " + p + ", chunkcount = " + chunkcount;
         assert chunkcount > 0 : "chunkcount = " + chunkcount;
         assert sortBound <= chunkcount : "sortBound = " + sortBound + ", chunkcount = " + chunkcount;
         if (keepOrder && (p < sortBound)) {
             // remove by shift (quite expensive for big collections)
-            int addr = p * this.rowdef.objectsize;
+            final int addr = p * this.rowdef.objectsize;
             System.arraycopy(
                     chunkcache, addr + this.rowdef.objectsize,
                     chunkcache, addr,
@@ -396,7 +396,7 @@ public class kelondroRowCollection {
     public synchronized kelondroRow.Entry removeOne() {
     	// removes the last entry from the collection
         if (chunkcount == 0) return null;
-        kelondroRow.Entry r = get(chunkcount - 1, true);
+        final kelondroRow.Entry r = get(chunkcount - 1, true);
         if (chunkcount == sortBound) sortBound--;
         chunkcount--;
         this.lastTimeWrote = System.currentTimeMillis();
@@ -481,10 +481,10 @@ public class kelondroRowCollection {
         }
     }
     
-    public synchronized void select(Set<String> keys) {
+    public synchronized void select(final Set<String> keys) {
         // removes all entries but the ones given by urlselection
         if ((keys == null) || (keys.isEmpty())) return;
-        Iterator<kelondroRow.Entry> i = rows();
+        final Iterator<kelondroRow.Entry> i = rows();
         kelondroRow.Entry row;
         while (i.hasNext()) {
             row = i.next();
@@ -501,29 +501,29 @@ public class kelondroRowCollection {
             assert this.isSorted();
             return;
         }
-        byte[] swapspace = new byte[this.rowdef.objectsize];
-        int p = partition(0, this.chunkcount, this.sortBound, swapspace);
+        final byte[] swapspace = new byte[this.rowdef.objectsize];
+        final int p = partition(0, this.chunkcount, this.sortBound, swapspace);
         if ((sortingthreadexecutor != null) &&
             (!sortingthreadexecutor.isShutdown()) &&
             (serverProcessor.useCPU > 1) && 
             (this.chunkcount > 8000)) {
         	// sort this using multi-threading
-            Future<Integer> part0 = partitionthreadexecutor.submit(new partitionthread(this, 0, p, 0));
-            Future<Integer> part1 = partitionthreadexecutor.submit(new partitionthread(this, p, this.chunkcount, p));
+            final Future<Integer> part0 = partitionthreadexecutor.submit(new partitionthread(this, 0, p, 0));
+            final Future<Integer> part1 = partitionthreadexecutor.submit(new partitionthread(this, p, this.chunkcount, p));
             try {
-                int p0 = part0.get().intValue();
-                Future<Object> sort0 = sortingthreadexecutor.submit(new qsortthread(this, 0, p0, 0));
-                Future<Object> sort1 = sortingthreadexecutor.submit(new qsortthread(this, p0, p, p0));
-                int p1 = part1.get().intValue();
-                Future<Object> sort2 = sortingthreadexecutor.submit(new qsortthread(this, p, p1, p));
-                Future<Object> sort3 = sortingthreadexecutor.submit(new qsortthread(this, p1, this.chunkcount, p1));
+                final int p0 = part0.get().intValue();
+                final Future<Object> sort0 = sortingthreadexecutor.submit(new qsortthread(this, 0, p0, 0));
+                final Future<Object> sort1 = sortingthreadexecutor.submit(new qsortthread(this, p0, p, p0));
+                final int p1 = part1.get().intValue();
+                final Future<Object> sort2 = sortingthreadexecutor.submit(new qsortthread(this, p, p1, p));
+                final Future<Object> sort3 = sortingthreadexecutor.submit(new qsortthread(this, p1, this.chunkcount, p1));
                 sort0.get();
                 sort1.get();
                 sort2.get();
                 sort3.get();
-            } catch (InterruptedException e) {
+            } catch (final InterruptedException e) {
                 e.printStackTrace();
-            } catch (ExecutionException e) {
+            } catch (final ExecutionException e) {
                 e.printStackTrace();
             }
         } else {
@@ -543,22 +543,22 @@ public class kelondroRowCollection {
             assert this.isSorted();
             return;
         }
-        byte[] swapspace = new byte[this.rowdef.objectsize];
-        int p = partition(0, this.chunkcount, this.sortBound, swapspace);
+        final byte[] swapspace = new byte[this.rowdef.objectsize];
+        final int p = partition(0, this.chunkcount, this.sortBound, swapspace);
         if ((sortingthreadexecutor != null) &&
             (!sortingthreadexecutor.isShutdown()) &&
             (serverProcessor.useCPU > 1) && 
             (this.chunkcount > 4000)) {
             // sort this using multi-threading
-            Future<Object> part = sortingthreadexecutor.submit(new qsortthread(this, 0, p, 0));
+            final Future<Object> part = sortingthreadexecutor.submit(new qsortthread(this, 0, p, 0));
             //CompletionService<Object> sortingthreadcompletion = new ExecutorCompletionService<Object>(sortingthreadexecutor);
             //Future<Object> part = sortingthreadcompletion.submit(new qsortthread(this, 0, p, 0));
             qsort(p + 1, this.chunkcount, 0, swapspace);
             try {
                 part.get();
-            } catch (InterruptedException e) {
+            } catch (final InterruptedException e) {
                 e.printStackTrace();
-            } catch (ExecutionException e) {
+            } catch (final ExecutionException e) {
                 e.printStackTrace();
             }
         } else {
@@ -573,7 +573,7 @@ public class kelondroRowCollection {
         kelondroRowCollection rc;
         int L, R, S;
         
-    	public qsortthread(kelondroRowCollection rc, int L, int R, int S) {
+    	public qsortthread(final kelondroRowCollection rc, final int L, final int R, final int S) {
     	    this.rc = rc;
     	    this.L = L;
     	    this.R = R;
@@ -586,13 +586,13 @@ public class kelondroRowCollection {
         }
     }
     
-    final void qsort(int L, int R, int S, byte[] swapspace) {
+    final void qsort(final int L, final int R, final int S, final byte[] swapspace) {
     	if (R - L < isortlimit) {
             isort(L, R, swapspace);
             return;
         }
     	assert R > L: "L = " + L + ", R = " + R + ", S = " + S;
-		int p = partition(L, R, S, swapspace);
+		final int p = partition(L, R, S, swapspace);
 		assert p >= L: "L = " + L + ", R = " + R + ", S = " + S + ", p = " + p;
 		assert p < R: "L = " + L + ", R = " + R + ", S = " + S + ", p = " + p;
 		qsort(L, p, 0, swapspace);
@@ -603,7 +603,7 @@ public class kelondroRowCollection {
         kelondroRowCollection rc;
         int L, R, S;
         
-        public partitionthread(kelondroRowCollection rc, int L, int R, int S) {
+        public partitionthread(final kelondroRowCollection rc, final int L, final int R, final int S) {
             this.rc = rc;
             this.L = L;
             this.R = R;
@@ -615,7 +615,7 @@ public class kelondroRowCollection {
         }
     }
     
-    final int partition(int L, int R, int S, byte[] swapspace) {
+    final int partition(final int L, final int R, int S, final byte[] swapspace) {
 		// L is the first element in the sequence
         // R is the right bound of the sequence, and outside of the sequence
         // S is the bound of the sorted elements in the sequence
@@ -684,13 +684,13 @@ public class kelondroRowCollection {
         return p;
     }
 	
-    private final int pivot(int L, int R, int S, byte[] swapspace) {
+    private final int pivot(final int L, final int R, final int S, final byte[] swapspace) {
         if ((S == 0) || (S < L)) {
             // the collection has no ordering
             // or
             // the collection has an ordering, but this is not relevant for this pivot
             // because the ordered zone is outside of ordering zone
-            int m = picMiddle(new int[]{L, (3 * L + R - 1) / 4, (L + R - 1) / 2, (L + 3 * R - 3) / 4, R - 1}, 5);
+            final int m = picMiddle(new int[]{L, (3 * L + R - 1) / 4, (L + R - 1) / 2, (L + 3 * R - 3) / 4, R - 1}, 5);
             assert L <= m;
             assert m < R;
             return m;
@@ -698,7 +698,7 @@ public class kelondroRowCollection {
         if (S < R) {
             // the collection has an ordering
             // and part of the ordered zone is inside the to-be-ordered zone
-            int m = picMiddle(new int[]{L, L + (S - L) / 3, (L + R - 1) / 2, S, R - 1}, 5);
+            final int m = picMiddle(new int[]{L, L + (S - L) / 3, (L + R - 1) / 2, S, R - 1}, 5);
             assert L <= m;
             assert m < R;
             return m;
@@ -710,10 +710,10 @@ public class kelondroRowCollection {
         return (L + R - 1) / 2;
     }
 
-    private final int picMiddle(int[] list, int len) {
+    private final int picMiddle(final int[] list, int len) {
         assert len % 2 == 1;
         assert len <= list.length;
-        int cut = list.length / 2;
+        final int cut = list.length / 2;
         for (int i = 0; i < cut; i++) {remove(list, len, min(list, len)); len--;}
         for (int i = 0; i < cut; i++) {remove(list, len, max(list, len)); len--;}
         // the remaining element must be the middle element
@@ -721,12 +721,12 @@ public class kelondroRowCollection {
         return list[0];
     }
     
-    private final void remove(int[] list, int len, int idx) {
+    private final void remove(final int[] list, final int len, final int idx) {
         if (idx == len - 1) return;
         list[idx] = list[len - 1]; // shift last element to front
     }
     
-    private final int min(int[] list, int len) {
+    private final int min(final int[] list, int len) {
         assert len > 0;
         int f = 0;
         while (len-- > 0) {
@@ -735,7 +735,7 @@ public class kelondroRowCollection {
         return f;
     }
     
-    private final int max(int[] list, int len) {
+    private final int max(final int[] list, int len) {
         assert len > 0;
         int f = 0;
         while (len-- > 0) {
@@ -744,13 +744,13 @@ public class kelondroRowCollection {
         return f;
     }
     
-    private final void isort(int L, int R, byte[] swapspace) {
+    private final void isort(final int L, final int R, final byte[] swapspace) {
         for (int i = L + 1; i < R; i++)
             for (int j = i; j > L && compare(j - 1, j) > 0; j--)
                 swap(j, j - 1, 0, swapspace);
     }
 
-    private final int swap(int i, int j, int p, byte[] swapspace) {
+    private final int swap(final int i, final int j, final int p, final byte[] swapspace) {
         if (i == j) return p;
         System.arraycopy(chunkcache, this.rowdef.objectsize * i, swapspace, 0, this.rowdef.objectsize);
         System.arraycopy(chunkcache, this.rowdef.objectsize * j, chunkcache, this.rowdef.objectsize * i, this.rowdef.objectsize);
@@ -767,7 +767,7 @@ public class kelondroRowCollection {
         // by the large number of memory movements.
         if (chunkcount < 2) return;
         int i = chunkcount - 2;
-        long t = System.currentTimeMillis(); // for time-out
+        final long t = System.currentTimeMillis(); // for time-out
         int d = 0;
         boolean u = true;
         try {
@@ -782,7 +782,7 @@ public class kelondroRowCollection {
                     throw new RuntimeException("uniq() time-out at " + i + " (backwards) from " + chunkcount + " elements after " + (System.currentTimeMillis() - t) + " milliseconds; " + d + " deletions so far");
                 }
             }
-        } catch (RuntimeException e) {
+        } catch (final RuntimeException e) {
             serverLog.logWarning("kelondroRowCollection", e.getMessage(), e);
         } finally {
             if (!u) this.sort();
@@ -795,7 +795,7 @@ public class kelondroRowCollection {
         // in contrast to uniq() this removes also the remaining, non-double entry that had a double-occurrence to the others
         // all removed chunks are returned in an array
         this.sort();
-        ArrayList<kelondroRowCollection> report = new ArrayList<kelondroRowCollection>();
+        final ArrayList<kelondroRowCollection> report = new ArrayList<kelondroRowCollection>();
         if (chunkcount < 2) return report;
         int i = chunkcount - 2;
         int d = 0;
@@ -820,7 +820,7 @@ public class kelondroRowCollection {
                 }
                 i--;
             }
-        } catch (RuntimeException e) {
+        } catch (final RuntimeException e) {
             serverLog.logWarning("kelondroRowCollection", e.getMessage(), e);
         } finally {
             if (!u) this.sort();
@@ -843,24 +843,24 @@ public class kelondroRowCollection {
     }
     
     public synchronized String toString() {
-        StringBuffer s = new StringBuffer();
-        Iterator<kelondroRow.Entry> i = rows();
+        final StringBuffer s = new StringBuffer();
+        final Iterator<kelondroRow.Entry> i = rows();
         if (i.hasNext()) s.append(i.next().toString());
         while (i.hasNext()) s.append(", " + (i.next()).toString());
         return new String(s);
     }
 
-    private final int compare(int i, int j) {
+    private final int compare(final int i, final int j) {
         assert (chunkcount * this.rowdef.objectsize <= chunkcache.length) : "chunkcount = " + chunkcount + ", objsize = " + this.rowdef.objectsize + ", chunkcache.length = " + chunkcache.length;
         assert (i >= 0) && (i < chunkcount) : "i = " + i + ", chunkcount = " + chunkcount;
         assert (j >= 0) && (j < chunkcount) : "j = " + j + ", chunkcount = " + chunkcount;
         assert (this.rowdef.objectOrder != null);
         if (i == j) return 0;
         assert (this.rowdef.primaryKeyIndex == 0) : "this.sortColumn = " + this.rowdef.primaryKeyIndex;
-        int colstart = (this.rowdef.primaryKeyIndex <= 0) ? 0 : this.rowdef.colstart[this.rowdef.primaryKeyIndex];
+        final int colstart = (this.rowdef.primaryKeyIndex <= 0) ? 0 : this.rowdef.colstart[this.rowdef.primaryKeyIndex];
         //assert (!bugappearance(chunkcache, i * this.rowdef.objectsize + colstart, this.rowdef.primaryKeyLength));
         //assert (!bugappearance(chunkcache, j * this.rowdef.objectsize + colstart, this.rowdef.primaryKeyLength));
-        int c = this.rowdef.objectOrder.compare(
+        final int c = this.rowdef.objectOrder.compare(
                 chunkcache,
                 i * this.rowdef.objectsize + colstart,
                 this.rowdef.primaryKeyLength,
@@ -870,32 +870,32 @@ public class kelondroRowCollection {
         return c;
     }
     
-    protected final byte[] compilePivot(int i) {
+    protected final byte[] compilePivot(final int i) {
         assert (i >= 0) && (i < chunkcount) : "i = " + i + ", chunkcount = " + chunkcount;
         assert (this.rowdef.objectOrder != null);
         assert (this.rowdef.objectOrder instanceof kelondroBase64Order);
         assert (this.rowdef.primaryKeyIndex == 0) : "this.sortColumn = " + this.rowdef.primaryKeyIndex;
-        int colstart = (this.rowdef.primaryKeyIndex <= 0) ? 0 : this.rowdef.colstart[this.rowdef.primaryKeyIndex];
+        final int colstart = (this.rowdef.primaryKeyIndex <= 0) ? 0 : this.rowdef.colstart[this.rowdef.primaryKeyIndex];
         //assert (!bugappearance(chunkcache, i * this.rowdef.objectsize + colstart, this.rowdef.primaryKeyLength));
         return ((kelondroBase64Order) this.rowdef.objectOrder).compilePivot(chunkcache, i * this.rowdef.objectsize + colstart, this.rowdef.primaryKeyLength);
     }
     
-    protected final byte[] compilePivot(byte[] a, int astart, int alength) {
+    protected final byte[] compilePivot(final byte[] a, final int astart, final int alength) {
         assert (this.rowdef.objectOrder != null);
         assert (this.rowdef.objectOrder instanceof kelondroBase64Order);
         assert (this.rowdef.primaryKeyIndex == 0) : "this.sortColumn = " + this.rowdef.primaryKeyIndex;
         return ((kelondroBase64Order) this.rowdef.objectOrder).compilePivot(a, astart, alength);
     }
     
-    protected final int comparePivot(byte[] compiledPivot, int j) {
+    protected final int comparePivot(final byte[] compiledPivot, final int j) {
         assert (chunkcount * this.rowdef.objectsize <= chunkcache.length) : "chunkcount = " + chunkcount + ", objsize = " + this.rowdef.objectsize + ", chunkcache.length = " + chunkcache.length;
         assert (j >= 0) && (j < chunkcount) : "j = " + j + ", chunkcount = " + chunkcount;
         assert (this.rowdef.objectOrder != null);
         assert (this.rowdef.objectOrder instanceof kelondroBase64Order);
         assert (this.rowdef.primaryKeyIndex == 0) : "this.sortColumn = " + this.rowdef.primaryKeyIndex;
-        int colstart = (this.rowdef.primaryKeyIndex <= 0) ? 0 : this.rowdef.colstart[this.rowdef.primaryKeyIndex];
+        final int colstart = (this.rowdef.primaryKeyIndex <= 0) ? 0 : this.rowdef.colstart[this.rowdef.primaryKeyIndex];
         //assert (!bugappearance(chunkcache, j * this.rowdef.objectsize + colstart, this.rowdef.primaryKeyLength));
-        int c = ((kelondroBase64Order) this.rowdef.objectOrder).comparePivot(
+        final int c = ((kelondroBase64Order) this.rowdef.objectOrder).comparePivot(
         		compiledPivot,
                 chunkcache,
                 j * this.rowdef.objectsize + colstart,
@@ -903,13 +903,13 @@ public class kelondroRowCollection {
         return c;
     }
 
-    protected synchronized int compare(byte[] a, int astart, int alength, int chunknumber) {
+    protected synchronized int compare(final byte[] a, final int astart, final int alength, final int chunknumber) {
         assert (chunknumber < chunkcount);
-        int l = Math.min(this.rowdef.primaryKeyLength, Math.min(a.length - astart, alength));
+        final int l = Math.min(this.rowdef.primaryKeyLength, Math.min(a.length - astart, alength));
         return rowdef.objectOrder.compare(a, astart, l, chunkcache, chunknumber * this.rowdef.objectsize + ((rowdef.primaryKeyIndex <= 0) ? 0 : this.rowdef.colstart[rowdef.primaryKeyIndex]), this.rowdef.primaryKeyLength);
     }
     
-    protected synchronized boolean match(byte[] a, int astart, int alength, int chunknumber) {
+    protected synchronized boolean match(final byte[] a, final int astart, final int alength, final int chunknumber) {
         if (chunknumber >= chunkcount) return false;
         int i = 0;
         int p = chunknumber * this.rowdef.objectsize + ((rowdef.primaryKeyIndex <= 0) ? 0 : this.rowdef.colstart[rowdef.primaryKeyIndex]);
@@ -922,7 +922,7 @@ public class kelondroRowCollection {
         chunkcache = null;
     }
     
-    private static long d(long a, long b) {
+    private static long d(final long a, final long b) {
     	if (b == 0) return a; else return a / b;
     }
     
@@ -934,8 +934,8 @@ public class kelondroRowCollection {
     		kelondroBase64Order.enhancedCoder.encodeLong(random.nextLong(), 4);
     }
     
-    public static void test(int testsize) {
-    	kelondroRow r = new kelondroRow(new kelondroColumn[]{
+    public static void test(final int testsize) {
+    	final kelondroRow r = new kelondroRow(new kelondroColumn[]{
     			new kelondroColumn("hash", kelondroColumn.celltype_string, kelondroColumn.encoder_bytes, yacySeedDB.commonHashLength, "hash")},
     			kelondroBase64Order.enhancedCoder, 0);
     	
@@ -945,9 +945,9 @@ public class kelondroRowCollection {
     	a.add("BBBBBBBBBBBB".getBytes());
     	a.add("BBBBBBBBBBBB".getBytes());
     	a.add("CCCCCCCCCCCC".getBytes());
-    	ArrayList<kelondroRowCollection> del = a.removeDoubles();
+    	final ArrayList<kelondroRowCollection> del = a.removeDoubles();
     	System.out.println(del + "rows double");
-    	Iterator<kelondroRow.Entry> j = a.rows();
+    	final Iterator<kelondroRow.Entry> j = a.rows();
     	while (j.hasNext()) System.out.println(new String(j.next().bytes()));
     	
         System.out.println("kelondroRowCollection test with size = " + testsize);
@@ -962,7 +962,7 @@ public class kelondroRowCollection {
         long t1 = System.nanoTime();
         System.out.println("create a   : " + (t1 - t0) + " nanoseconds, " + d(testsize, (t1 - t0)) + " entries/nanoseconds; a.size() = " + a.size());
         
-    	kelondroRowCollection c = new kelondroRowCollection(r, testsize);
+    	final kelondroRowCollection c = new kelondroRowCollection(r, testsize);
     	random = new Random(0);
     	t0 = System.nanoTime();
     	for (int i = 0; i < testsize; i++) {
@@ -970,59 +970,59 @@ public class kelondroRowCollection {
     	}
     	t1 = System.nanoTime();
     	System.out.println("create c   : " + (t1 - t0) + " nanoseconds, " + d(testsize, (t1 - t0)) + " entries/nanoseconds");
-    	kelondroRowCollection d = new kelondroRowCollection(r, testsize);
+    	final kelondroRowCollection d = new kelondroRowCollection(r, testsize);
     	for (int i = 0; i < testsize; i++) {
     		d.add(c.get(i, false).getColBytes(0));
     	}
-    	long t2 = System.nanoTime();
+    	final long t2 = System.nanoTime();
     	System.out.println("copy c -> d: " + (t2 - t1) + " nanoseconds, " + d(testsize, (t2 - t1)) + " entries/nanoseconds");
     	serverProcessor.useCPU = 1;
     	c.sort();
-    	long t3 = System.nanoTime();
+    	final long t3 = System.nanoTime();
     	System.out.println("sort c (1) : " + (t3 - t2) + " nanoseconds, " + d(testsize, (t3 - t2)) + " entries/nanoseconds");
     	serverProcessor.useCPU = 2;
     	d.sort();
-    	long t4 = System.nanoTime();
+    	final long t4 = System.nanoTime();
     	System.out.println("sort d (2) : " + (t4 - t3) + " nanoseconds, " + d(testsize, (t4 - t3)) + " entries/nanoseconds");
     	c.uniq();
-    	long t5 = System.nanoTime();
+    	final long t5 = System.nanoTime();
     	System.out.println("uniq c     : " + (t5 - t4) + " nanoseconds, " + d(testsize, (t5 - t4)) + " entries/nanoseconds");
     	d.uniq();
-    	long t6 = System.nanoTime();
+    	final long t6 = System.nanoTime();
     	System.out.println("uniq d     : " + (t6 - t5) + " nanoseconds, " + d(testsize, (t6 - t5)) + " entries/nanoseconds");
     	random = new Random(0);
-    	kelondroRowSet e = new kelondroRowSet(r, testsize);
+    	final kelondroRowSet e = new kelondroRowSet(r, testsize);
     	for (int i = 0; i < testsize; i++) {
     		e.put(r.newEntry(randomHash().getBytes()));
     	}
-    	long t7 = System.nanoTime();
+    	final long t7 = System.nanoTime();
     	System.out.println("create e   : " + (t7 - t6) + " nanoseconds, " + d(testsize, (t7 - t6)) + " entries/nanoseconds");
     	e.sort();
-    	long t8 = System.nanoTime();
+    	final long t8 = System.nanoTime();
     	System.out.println("sort e (2) : " + (t8 - t7) + " nanoseconds, " + d(testsize, (t8 - t7)) + " entries/nanoseconds");
     	e.uniq();
-    	long t9 = System.nanoTime();
+    	final long t9 = System.nanoTime();
     	System.out.println("uniq e     : " + (t9 - t8) + " nanoseconds, " + d(testsize, (t9 - t8)) + " entries/nanoseconds");
-    	boolean cis = c.isSorted();
-    	long t10 = System.nanoTime();
+    	final boolean cis = c.isSorted();
+    	final long t10 = System.nanoTime();
     	System.out.println("c isSorted = " + ((cis) ? "true" : "false") + ": " + (t10 - t9) + " nanoseconds");
-    	boolean dis = d.isSorted();
-    	long t11 = System.nanoTime();
+    	final boolean dis = d.isSorted();
+    	final long t11 = System.nanoTime();
     	System.out.println("d isSorted = " + ((dis) ? "true" : "false") + ": " + (t11 - t10) + " nanoseconds");
-    	boolean eis = e.isSorted();
-    	long t12 = System.nanoTime();
+    	final boolean eis = e.isSorted();
+    	final long t12 = System.nanoTime();
     	System.out.println("e isSorted = " + ((eis) ? "true" : "false") + ": " + (t12 - t11) + " nanoseconds");
     	random = new Random(0);
     	boolean allfound = true;
         for (int i = 0; i < testsize; i++) {
-            String rh = randomHash();
+            final String rh = randomHash();
             if (e.get(rh.getBytes()) == null) {
                 allfound = false;
                 System.out.println("not found hash " + rh + " at attempt " + i);
                 break;
             }
         }
-        long t13 = System.nanoTime();
+        final long t13 = System.nanoTime();
         System.out.println("e allfound = " + ((allfound) ? "true" : "false") + ": " + (t13 - t12) + " nanoseconds");
         boolean noghosts = true;
         for (int i = 0; i < testsize; i++) {
@@ -1031,14 +1031,14 @@ public class kelondroRowCollection {
                 break;
             }
         }
-        long t14 = System.nanoTime();
+        final long t14 = System.nanoTime();
         System.out.println("e noghosts = " + ((noghosts) ? "true" : "false") + ": " + (t14 - t13) + " nanoseconds");
         System.out.println("Result size: c = " + c.size() + ", d = " + d.size() + ", e = " + e.size());
     	System.out.println();
     	if (sortingthreadexecutor != null) sortingthreadexecutor.shutdown();
     }
     
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
     	//test(1000);
     	test(50000);
     	//test(100000);

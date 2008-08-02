@@ -45,11 +45,11 @@ public class serverProcessor<J extends serverProcessorJob> {
     private Object environment;
     private String methodName;
     
-    public serverProcessor(Object env, String jobExec, int inputQueueSize, serverProcessor<J> output) {
+    public serverProcessor(final Object env, final String jobExec, final int inputQueueSize, final serverProcessor<J> output) {
         this(env, jobExec, inputQueueSize, output, useCPU + 1);
     }
 
-    public serverProcessor(Object env, String jobExec, int inputQueueSize, serverProcessor<J> output, int poolsize) {
+    public serverProcessor(final Object env, final String jobExec, final int inputQueueSize, final serverProcessor<J> output, final int poolsize) {
         // start a fixed number of executors that handle entries in the process queue
         this.environment = env;
         this.methodName = jobExec;
@@ -67,19 +67,19 @@ public class serverProcessor<J extends serverProcessorJob> {
     }
     
     @SuppressWarnings("unchecked")
-    public void enQueue(J in) throws InterruptedException {
+    public void enQueue(final J in) throws InterruptedException {
         // ensure that enough job executors are running
         if ((this.input == null) || (executor == null) || (executor.isShutdown()) || (executor.isTerminated())) {
             // execute serialized without extra thread
             serverLog.logWarning("PROCESSOR", "executing job " + environment.getClass().getName() + "." + methodName + " serialized");
             try {
-                J out = (J) serverInstantBlockingThread.execMethod(this.environment, this.methodName).invoke(environment, new Object[]{in});
+                final J out = (J) serverInstantBlockingThread.execMethod(this.environment, this.methodName).invoke(environment, new Object[]{in});
                 if ((out != null) && (output != null)) output.enQueue(out);
-            } catch (IllegalArgumentException e) {
+            } catch (final IllegalArgumentException e) {
                 e.printStackTrace();
-            } catch (IllegalAccessException e) {
+            } catch (final IllegalAccessException e) {
                 e.printStackTrace();
-            } catch (InvocationTargetException e) {
+            } catch (final InvocationTargetException e) {
                 e.printStackTrace();
             }
             return;
@@ -89,19 +89,19 @@ public class serverProcessor<J extends serverProcessorJob> {
     }
     
     @SuppressWarnings("unchecked")
-    public void shutdown(long millisTimeout) {
+    public void shutdown(final long millisTimeout) {
         if (executor == null) return;
         if (executor.isShutdown()) return;
         // put poison pills into the queue
         for (int i = 0; i < poolsize; i++) {
             try {
                 input.put((J) serverProcessorJob.poisonPill); // put a poison pill into the queue which will kill the job
-            } catch (InterruptedException e) { }
+            } catch (final InterruptedException e) { }
         }
         // wait for shutdown
         try {
             executor.awaitTermination(millisTimeout, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException e) {}
+        } catch (final InterruptedException e) {}
         executor.shutdown();
         this.executor = null;
         this.input = null;

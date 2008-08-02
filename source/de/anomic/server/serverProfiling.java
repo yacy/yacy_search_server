@@ -52,10 +52,10 @@ public class serverProfiling extends Thread {
     	systemProfiler.running = false;
     }
 
-    private long delaytime;
+    private final long delaytime;
     private boolean running;
     
-    public serverProfiling(long time) {
+    public serverProfiling(final long time) {
     	this.delaytime = time;
     	running = true;
     }
@@ -65,17 +65,17 @@ public class serverProfiling extends Thread {
     		update("memory", new Long(serverMemory.used()));
     		try {
 				Thread.sleep(this.delaytime);
-			} catch (InterruptedException e) {
+			} catch (final InterruptedException e) {
 				this.running = false;
 			}
     	}
     }
     
-    public static void update(String eventName, Object eventPayload) {
+    public static void update(final String eventName, final Object eventPayload) {
     	// get event history container
     	int counter = eventCounter.containsKey(eventName) ? (eventCounter.get(eventName)).intValue() : 0;
     	if (historyMaps.containsKey(eventName)) {
-    	    ConcurrentLinkedQueue<Event> history = historyMaps.get(eventName);
+    	    final ConcurrentLinkedQueue<Event> history = historyMaps.get(eventName);
 
             // update entry
             history.add(new Event(counter, eventPayload));
@@ -84,14 +84,14 @@ public class serverProfiling extends Thread {
             
             // clean up too old entries
             Event e;
-            long now = System.currentTimeMillis();
+            final long now = System.currentTimeMillis();
             while (history.size() > 0) {
                 e = history.peek();
                 if (now - e.time < 600000) break;
                 history.poll();
             }
     	} else {
-    	    ConcurrentLinkedQueue<Event> history = new ConcurrentLinkedQueue<Event>();
+    	    final ConcurrentLinkedQueue<Event> history = new ConcurrentLinkedQueue<Event>();
 
             // update entry
             history.add(new Event(counter, eventPayload));
@@ -103,7 +103,7 @@ public class serverProfiling extends Thread {
     	}
     }
     
-    public static Iterator<Event> history(String eventName) {
+    public static Iterator<Event> history(final String eventName) {
     	return (historyMaps.containsKey(eventName) ? (historyMaps.get(eventName)) : new ConcurrentLinkedQueue<Event>()).iterator();
     }
 
@@ -112,7 +112,7 @@ public class serverProfiling extends Thread {
         public Object payload;
         public long time;
 
-        public Event(int count, Object payload) {
+        public Event(final int count, final Object payload) {
             this.count = count;
             this.payload = payload;
             this.time = System.currentTimeMillis();

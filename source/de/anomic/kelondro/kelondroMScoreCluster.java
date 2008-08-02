@@ -58,18 +58,18 @@ public final class kelondroMScoreCluster<E> {
     static {
         try {
             date2000 = shortFormatter.parse("20000101000000").getTime();
-        } catch (ParseException e) {}
+        } catch (final ParseException e) {}
     }
     
     public static int object2score(Object o) {
         if (o instanceof Integer) return ((Integer) o).intValue();
         if (o instanceof Long) {
-            long l = ((Long) o).longValue();
+            final long l = ((Long) o).longValue();
             if (l < Integer.MAX_VALUE) return (int) l;
             o = ((Long) o).toString();
         }
         if (o instanceof Double) {
-            double d = 1000d * ((Double) o).doubleValue();
+            final double d = 1000d * ((Double) o).doubleValue();
             return (int) Math.round(d);
         }
         String s = null;
@@ -95,7 +95,7 @@ public final class kelondroMScoreCluster<E> {
                 return 0;
             }
             return (int) l;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             // try it lex
             int len = s.length();
             if (len > 5) len = 5;
@@ -122,7 +122,7 @@ public final class kelondroMScoreCluster<E> {
         for (int i = 128; i < 256; i++) plainByteArray[i] = (byte) (i & 0X20);
     }
     
-    private long scoreKey(int elementNr, int elementCount) {
+    private long scoreKey(final int elementNr, final int elementCount) {
         return (((elementCount & 0xFFFFFFFFL)) << 32) | ((elementNr & 0xFFFFFFFFL));
     }
     
@@ -134,23 +134,23 @@ public final class kelondroMScoreCluster<E> {
         return refkeyDB.size();
     }
     
-    public synchronized void incScore(E[] objs) {
+    public synchronized void incScore(final E[] objs) {
         for (int i = 0; i < objs.length; i++) addScore(objs[i], 1);
     }
     
-    public synchronized void decScore(E[] objs) {
+    public synchronized void decScore(final E[] objs) {
         for (int i = 0; i < objs.length; i++) addScore(objs[i], -1);
     }
     
-    public synchronized void incScore(E obj) {
+    public synchronized void incScore(final E obj) {
         addScore(obj, 1);
     }
     
-    public synchronized void decScore(E obj) {
+    public synchronized void decScore(final E obj) {
         addScore(obj, -1);
     }
     
-    public synchronized void setScore(E obj, int newScore) {
+    public synchronized void setScore(final E obj, final int newScore) {
         if (obj == null) return;
         //System.out.println("setScore " + obj.getClass().getName());
         Long usk = refkeyDB.remove(obj); // get unique score key, old entry is not needed any more
@@ -169,9 +169,9 @@ public final class kelondroMScoreCluster<E> {
             keyrefDB.remove(usk);
             
             // get previous handle and score
-            long c = usk.longValue();
-            int oldScore = (int) ((c & 0xFFFFFFFF00000000L) >> 32);
-            int oldHandle = (int) (c & 0xFFFFFFFFL);
+            final long c = usk.longValue();
+            final int oldScore = (int) ((c & 0xFFFFFFFF00000000L) >> 32);
+            final int oldHandle = (int) (c & 0xFFFFFFFFL);
             gcount -= oldScore;
             
             // set new value
@@ -184,7 +184,7 @@ public final class kelondroMScoreCluster<E> {
         gcount += newScore;
     }
     
-    public synchronized void addScore(E obj, int incrementScore) {
+    public synchronized void addScore(final E obj, final int incrementScore) {
         if (obj == null) return;
         //System.out.println("setScore " + obj.getClass().getName());
         Long usk = refkeyDB.remove(obj); // get unique score key, old entry is not needed any more
@@ -203,12 +203,12 @@ public final class kelondroMScoreCluster<E> {
             keyrefDB.remove(usk);
             
             // get previous handle and score
-            long c = usk.longValue();
-            int oldScore = (int) ((c & 0xFFFFFFFF00000000L) >> 32);
-            int oldHandle = (int) (c & 0xFFFFFFFFL);
+            final long c = usk.longValue();
+            final int oldScore = (int) ((c & 0xFFFFFFFF00000000L) >> 32);
+            final int oldHandle = (int) (c & 0xFFFFFFFFL);
             
             // set new value
-            int newValue = oldScore + incrementScore;
+            final int newValue = oldScore + incrementScore;
             if (newValue < 0) throw new kelondroOutOfLimitsException(newValue);
             usk = new Long(scoreKey(oldHandle, newValue)); // generates an unique key for a specific score
             refkeyDB.put(obj, usk);
@@ -220,18 +220,18 @@ public final class kelondroMScoreCluster<E> {
         gcount += incrementScore;
     }
     
-    public synchronized int deleteScore(E obj) {
+    public synchronized int deleteScore(final E obj) {
         // deletes entry and returns previous score
         if (obj == null) return 0;
         //System.out.println("setScore " + obj.getClass().getName());
-        Long usk = refkeyDB.remove(obj); // get unique score key, old entry is not needed any more
+        final Long usk = refkeyDB.remove(obj); // get unique score key, old entry is not needed any more
         if (usk == null) return 0;
 
         // delete old entry
         keyrefDB.remove(usk);
         
         // get previous handle and score
-        int oldScore = (int) ((usk.longValue() & 0xFFFFFFFF00000000L) >> 32);
+        final int oldScore = (int) ((usk.longValue() & 0xFFFFFFFF00000000L) >> 32);
 
         // decrease overall counter
         gcount -= oldScore;
@@ -239,13 +239,13 @@ public final class kelondroMScoreCluster<E> {
         return oldScore;        
     }
 
-    public synchronized boolean existsScore(E obj) {
+    public synchronized boolean existsScore(final E obj) {
         return (refkeyDB.get(obj) != null);
     }
     
-    public synchronized int getScore(E obj) {
+    public synchronized int getScore(final E obj) {
         if (obj == null) return 0;
-        Long cs = refkeyDB.get(obj);
+        final Long cs = refkeyDB.get(obj);
         if (cs == null) return 0;
         return (int) ((cs.longValue() & 0xFFFFFFFF00000000L) >> 32);
     }
@@ -272,15 +272,15 @@ public final class kelondroMScoreCluster<E> {
         return keyrefDB.get(keyrefDB.firstKey());
     }
     
-    public synchronized E[] getScores(int maxCount, boolean up) {
+    public synchronized E[] getScores(final int maxCount, final boolean up) {
         return getScores(maxCount, up, Integer.MIN_VALUE, Integer.MAX_VALUE);
     }
     
     @SuppressWarnings("unchecked")
-	public synchronized E[] getScores(int maxCount, boolean up, int minScore, int maxScore) {
+	public synchronized E[] getScores(int maxCount, final boolean up, final int minScore, final int maxScore) {
         if (maxCount > refkeyDB.size()) maxCount = refkeyDB.size();
         E[] s = (E[]) new Object[maxCount];
-        Iterator<E> it = scores(up, minScore, maxScore);
+        final Iterator<E> it = scores(up, minScore, maxScore);
         int i = 0;
         while ((i < maxCount) && (it.hasNext())) s[i++] = it.next();
         if (i < maxCount) {
@@ -297,12 +297,12 @@ public final class kelondroMScoreCluster<E> {
         return refkeyDB + " / " + keyrefDB;
     }
     
-    public synchronized Iterator<E> scores(boolean up) {
+    public synchronized Iterator<E> scores(final boolean up) {
         if (up) return new simpleScoreIterator<E>();
         return new reverseScoreIterator<E>();
     }
     
-    public synchronized Iterator<E> scores(boolean up, int minScore, int maxScore) {
+    public synchronized Iterator<E> scores(final boolean up, final int minScore, final int maxScore) {
         return new komplexScoreIterator<E>(up, minScore, maxScore);
     }
     
@@ -314,7 +314,7 @@ public final class kelondroMScoreCluster<E> {
         int min, max;
         
 		@SuppressWarnings("unchecked")
-		public komplexScoreIterator(boolean up, int minScore, int maxScore) {
+		public komplexScoreIterator(final boolean up, final int minScore, final int maxScore) {
             this.up = up;
             this.min = minScore;
             this.max = maxScore;
@@ -344,7 +344,7 @@ public final class kelondroMScoreCluster<E> {
         }
         
         public E next() {
-            E o = n;
+            final E o = n;
             internalNext();
             return o;
         }
@@ -371,13 +371,13 @@ public final class kelondroMScoreCluster<E> {
         public E next() {
             key = view.lastKey();
             view = view.headMap(key);
-            E value = keyrefDB.get(key);
+            final E value = keyrefDB.get(key);
             //System.out.println("cluster reverse iterator: score = " + ((((Long) key).longValue() & 0xFFFFFFFF00000000L) >> 32) + ", handle = " + (((Long) key).longValue() & 0xFFFFFFFFL) + ", value = " + value);
             return value;
         }
         
         public void remove() {
-            Object val = keyrefDB.remove(key);
+            final Object val = keyrefDB.remove(key);
             if (val != null) refkeyDB.remove(val);
         }
         
@@ -409,9 +409,9 @@ public final class kelondroMScoreCluster<E> {
         
     }
         
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         
-        String t = "ZZZZZZZZZZ";
+        final String t = "ZZZZZZZZZZ";
         System.out.println("score of " + t + ": " + object2score(t));
         if (args.length > 0) {
             System.out.println("score of " + args[0] + ": " + object2score(args[0]));
@@ -419,15 +419,15 @@ public final class kelondroMScoreCluster<E> {
         }
         
         System.out.println("Test for Score: start");
-        kelondroMScoreCluster<String> s = new kelondroMScoreCluster<String>();
+        final kelondroMScoreCluster<String> s = new kelondroMScoreCluster<String>();
         long c = 0;
 
         // create cluster
-        long time = System.currentTimeMillis();
-        Random random = new Random(1234);
+        final long time = System.currentTimeMillis();
+        final Random random = new Random(1234);
         int r;
-        int count = 20;
-        int[] mem = new int[count];
+        final int count = 20;
+        final int[] mem = new int[count];
         
         for (int x = 0; x < 100; x++) {
             for (int i = 0; i < count; i++) {

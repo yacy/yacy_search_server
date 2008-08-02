@@ -33,11 +33,11 @@ public class migration {
     public static final int USE_WORK_DIR=1389; //wiki & messages in DATA/WORK
     public static final int TAGDB_WITH_TAGHASH=1635; //tagDB keys are tagHashes instead of plain tagname.
     public static final int NEW_OVERLAYS=4422;
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
 
     }
 
-    public static void migrate(plasmaSwitchboard sb, int fromRev, int toRev){
+    public static void migrate(final plasmaSwitchboard sb, final int fromRev, final int toRev){
         if(fromRev < toRev){
             if(fromRev < TAGDB_WITH_TAGHASH){
                 migrateBookmarkTagsDB(sb);
@@ -55,7 +55,7 @@ public class migration {
     /*
      * remove the static defaultfiles. We use them through a overlay now.
      */
-    public static void migrateDefaultFiles(plasmaSwitchboard sb){
+    public static void migrateDefaultFiles(final plasmaSwitchboard sb){
         File file=new File(sb.htDocsPath, "share/dir.html");
         if(file.exists())
             file.delete();
@@ -75,7 +75,7 @@ public class migration {
         if(file.exists())
             file.delete();
     }
-    public static void installSkins(plasmaSwitchboard sb){
+    public static void installSkins(final plasmaSwitchboard sb){
         final File skinsPath = sb.getConfigPath("skinPath", "DATA/SKINS");
         final File defaultSkinsPath = new File(sb.getRootPath(), "skins");
         if(defaultSkinsPath.exists()){
@@ -85,7 +85,7 @@ public class migration {
                 if(skinFiles[i].endsWith(".css")){
                     try{
                         serverFileUtils.copy(new File(defaultSkinsPath, skinFiles[i]), new File(skinsPath, skinFiles[i]));
-                    }catch(IOException e){}
+                    }catch(final IOException e){}
                 }
             }
         }
@@ -93,10 +93,10 @@ public class migration {
         if(skin.equals("")){
             skin="default";
         }
-        File skinsDir=sb.getConfigPath("skinPath", "DATA/SKINS");
-        File skinFile=new File(skinsDir, skin+".css");
-        File htdocsPath=new File(sb.getConfigPath(plasmaSwitchboard.HTDOCS_PATH, plasmaSwitchboard.HTROOT_PATH_DEFAULT), "env");
-        File styleFile=new File(htdocsPath, "style.css");
+        final File skinsDir=sb.getConfigPath("skinPath", "DATA/SKINS");
+        final File skinFile=new File(skinsDir, skin+".css");
+        final File htdocsPath=new File(sb.getConfigPath(plasmaSwitchboard.HTDOCS_PATH, plasmaSwitchboard.HTROOT_PATH_DEFAULT), "env");
+        final File styleFile=new File(htdocsPath, "style.css");
         if(!skinFile.exists()){
             if(styleFile.exists()){
                 serverLog.logInfo("MIGRATION", "Skin "+skin+" not found. Keeping old skin.");
@@ -108,21 +108,21 @@ public class migration {
                 styleFile.getParentFile().mkdirs();
                 serverFileUtils.copy(skinFile, styleFile);
                 serverLog.logInfo("MIGRATION", "copied new Skinfile");
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 serverLog.logSevere("MIGRATION", "Cannot copy skinfile.");
             }
         }
     }
-    public static void migrateBookmarkTagsDB(plasmaSwitchboard sb){
+    public static void migrateBookmarkTagsDB(final plasmaSwitchboard sb){
         sb.bookmarksDB.close();
-        File tagsDBFile=new File(sb.workPath, "bookmarkTags.db");
+        final File tagsDBFile=new File(sb.workPath, "bookmarkTags.db");
         if(tagsDBFile.exists()){
             tagsDBFile.delete();
             serverLog.logInfo("MIGRATION", "Migrating bookmarkTags.db to use wordhashs as keys.");
         }
         sb.initBookmarks();
     }
-    public static void migrateWorkFiles(plasmaSwitchboard sb){
+    public static void migrateWorkFiles(final plasmaSwitchboard sb){
         File file=new File(sb.getRootPath(), "DATA/SETTINGS/wiki.db");
         File file2;
         if (file.exists()) {
@@ -132,7 +132,7 @@ public class migration {
             try {
                 serverFileUtils.copy(file, file2);
                 file.delete();
-            } catch (IOException e) {
+            } catch (final IOException e) {
             }
             
             file = new File(sb.getRootPath(), "DATA/SETTINGS/wiki-bkp.db");
@@ -142,7 +142,7 @@ public class migration {
                 try {
                     serverFileUtils.copy(file, file2);
                     file.delete();
-                } catch (IOException e) {}        
+                } catch (final IOException e) {}        
             }
             sb.initWiki();
         }
@@ -156,12 +156,12 @@ public class migration {
             try {
                 serverFileUtils.copy(file, file2);
                 file.delete();
-            } catch (IOException e) {}
+            } catch (final IOException e) {}
             sb.initMessages();
         }
     }
 
-    public static void presetPasswords(plasmaSwitchboard sb) {
+    public static void presetPasswords(final plasmaSwitchboard sb) {
         // set preset accounts/passwords
         String acc;
         if ((acc = sb.getConfig("serverAccount", "")).length() > 0) {
@@ -196,7 +196,7 @@ public class migration {
         }
     }
 
-    public static void migrateSwitchConfigSettings(plasmaSwitchboard sb) {
+    public static void migrateSwitchConfigSettings(final plasmaSwitchboard sb) {
         
         // migration for additional parser settings
         String value = "";

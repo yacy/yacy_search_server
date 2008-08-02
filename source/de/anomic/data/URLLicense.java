@@ -36,17 +36,17 @@ public class URLLicense {
     // this class defines a license-generation for URLs
     // it is used in case of snippet- and preview-Image-fetching to grant also non-authorized users the usage of a image-fetcher servlet
 
-    private Random random;
-    private HashMap<String, yacyURL> permissions;
-    private int keylen;
+    private final Random random;
+    private final HashMap<String, yacyURL> permissions;
+    private final int keylen;
     
-    public URLLicense(int keylen) {
+    public URLLicense(final int keylen) {
         this.permissions = new HashMap<String, yacyURL>();
         this.random = new Random(System.currentTimeMillis());
         this.keylen = keylen;
     }
     
-    public String aquireLicense(yacyURL url) {
+    public String aquireLicense(final yacyURL url) {
         // generate license key
         String license = "";
         while (license.length() < keylen) license += Integer.toHexString(random.nextInt());
@@ -59,7 +59,7 @@ public class URLLicense {
         return license;
     }
     
-    public yacyURL releaseLicense(String license) {
+    public yacyURL releaseLicense(final String license) {
         yacyURL url = null;
         synchronized (permissions) {
             url = permissions.remove(license);

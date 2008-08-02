@@ -48,7 +48,7 @@ import de.anomic.yacy.yacySeed;
 
 public final class transferRWI {
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) throws InterruptedException {
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) throws InterruptedException {
         
         // return variable that accumulates replacements
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
@@ -66,15 +66,15 @@ public final class transferRWI {
         final int entryc      = post.getInt("entryc", 0);                 // number of entries in indexes
         byte[] indexes        = post.get("indexes", "").getBytes();       // the indexes, as list of word entries
         boolean granted       = sb.getConfig("allowReceiveIndex", "false").equals("true");
-        boolean blockBlacklist = sb.getConfig("indexReceiveBlockBlacklist", "false").equals("true");
-        boolean checkLimit    = sb.getConfigBool("indexDistribution.transferRWIReceiptLimitEnabled", true);
+        final boolean blockBlacklist = sb.getConfig("indexReceiveBlockBlacklist", "false").equals("true");
+        final boolean checkLimit    = sb.getConfigBool("indexDistribution.transferRWIReceiptLimitEnabled", true);
         final long cachelimit = sb.getConfigLong("indexDistribution.dhtReceiptLimit", 10000);
         final yacySeed otherPeer = sb.webIndex.seedDB.get(iam);
         final String otherPeerName = iam + ":" + ((otherPeer == null) ? "NULL" : (otherPeer.getName() + "/" + otherPeer.getVersion()));                
         
         // response values
         String       result      = "ok";
-        StringBuffer unknownURLs = new StringBuffer();
+        final StringBuffer unknownURLs = new StringBuffer();
         int          pause       = 10000;
         
         if ((youare == null) || (!youare.equals(sb.webIndex.seedDB.mySeed().hash))) {
@@ -121,11 +121,11 @@ public final class transferRWI {
             indexRWIRowEntry iEntry;
             final HashSet<String> unknownURL = new HashSet<String>();
             final HashSet<String> knownURL = new HashSet<String>();
-            String[] wordhashes = new String[v.size()];
+            final String[] wordhashes = new String[v.size()];
             int received = 0;
             int blocked = 0;
             int receivedURL = 0;
-            Iterator<String> i = v.iterator();
+            final Iterator<String> i = v.iterator();
             while (i.hasNext()) {
                 serverCore.checkInterruption();
                 estring = i.next();
@@ -160,7 +160,7 @@ public final class transferRWI {
                         unknownURL.add(urlHash);
                     }
                     receivedURL++;
-                } catch (Exception ex) {
+                } catch (final Exception ex) {
                     sb.getLog().logWarning(
                                 "transferRWI: DB-Error while trying to determine if URL with hash '" +
                                 urlHash + "' is known.", ex);

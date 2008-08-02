@@ -42,25 +42,25 @@ public class sidebar_navigation {
 
     private static final int MAX_TOPWORDS = 24;
     
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
         final serverObjects prop = new serverObjects();
         
-        String eventID = post.get("eventID", "");
-        boolean rss = post.get("rss", "false").equals("true");
+        final String eventID = post.get("eventID", "");
+        final boolean rss = post.get("rss", "false").equals("true");
         
         // default settings for blank item
         prop.put("navigation", "0");
         prop.put("rssreferences", "0");
         
         // find search event
-        plasmaSearchEvent theSearch = plasmaSearchEvent.getEvent(eventID);
+        final plasmaSearchEvent theSearch = plasmaSearchEvent.getEvent(eventID);
         if (theSearch == null) {
             // the event does not exist, show empty page
             return prop;
         }
-        plasmaSearchQuery theQuery = theSearch.getQuery();
-        int offset = theQuery.neededResults() - theQuery.displayResults();
-        int totalcount = theSearch.getRankingResult().getLocalResourceSize() + theSearch.getRankingResult().getRemoteResourceSize();
+        final plasmaSearchQuery theQuery = theSearch.getQuery();
+        final int offset = theQuery.neededResults() - theQuery.displayResults();
+        final int totalcount = theSearch.getRankingResult().getLocalResourceSize() + theSearch.getRankingResult().getRemoteResourceSize();
     
         // attach the bottom line with search references (topwords)
         final Set<String> references = theSearch.references(20);
@@ -68,7 +68,7 @@ public class sidebar_navigation {
             // get the topwords
             final TreeSet<String> topwords = new TreeSet<String>(kelondroNaturalOrder.naturalComparator);
             String tmp = "";
-            Iterator<String> i = references.iterator();
+            final Iterator<String> i = references.iterator();
             while (i.hasNext()) {
                 tmp = i.next();
                 if (tmp.matches("[a-z]+")) {
@@ -149,13 +149,13 @@ public class sidebar_navigation {
         prop.put("navigation_languagezone", (z) ? "1" : "0");
         
         // compose page navigation
-        StringBuffer resnav = new StringBuffer();
-        int thispage = offset / theQuery.displayResults();
+        final StringBuffer resnav = new StringBuffer();
+        final int thispage = offset / theQuery.displayResults();
         if (thispage == 0) resnav.append("&lt;&nbsp;"); else {
             resnav.append(navurla(thispage - 1, theQuery));
             resnav.append("<strong>&lt;</strong></a>&nbsp;");
         }
-        int numberofpages = Math.min(10, Math.max(thispage + 2, totalcount / theQuery.displayResults()));
+        final int numberofpages = Math.min(10, Math.max(thispage + 2, totalcount / theQuery.displayResults()));
         for (int j = 0; j < numberofpages; j++) {
             if (j == thispage) {
                 resnav.append("<strong>");
@@ -177,7 +177,7 @@ public class sidebar_navigation {
         return prop;
     }
     
-    private static String navurla(int page, plasmaSearchQuery theQuery) {
+    private static String navurla(final int page, final plasmaSearchQuery theQuery) {
         return
         "<a href=\"ysearch.html?search=" + theQuery.queryString(true) +
         "&amp;count="+ theQuery.displayResults() +
@@ -190,7 +190,7 @@ public class sidebar_navigation {
         "&amp;former=" + theQuery.queryString(true) + "\">";
     }
     
-    private static void domzone(serverObjects prop, String zonename, int zonecount, plasmaSearchQuery theQuery) {
+    private static void domzone(final serverObjects prop, final String zonename, final int zonecount, final plasmaSearchQuery theQuery) {
         prop.put("navigation_languagezone_" + zonename + "_count", zonecount);
         prop.putHTML("navigation_languagezone_" + zonename + "_search", theQuery.queryString.replace(' ', '+'));
         prop.put("navigation_languagezone_" + zonename + "_offset", "0");

@@ -61,24 +61,24 @@ public class sevenzipParser extends AbstractParser implements Parser {
         super.parserName = "7zip Archive Parser";
     }
     
-    public plasmaParserDocument parse(yacyURL location, String mimeType, String charset,
-            IInStream source, long maxRamSize) throws ParserException, InterruptedException {
-        plasmaParserDocument doc = new plasmaParserDocument(location, mimeType, charset);
+    public plasmaParserDocument parse(final yacyURL location, final String mimeType, final String charset,
+            final IInStream source, final long maxRamSize) throws ParserException, InterruptedException {
+        final plasmaParserDocument doc = new plasmaParserDocument(location, mimeType, charset);
         Handler archive;
         super.theLogger.logFine("opening 7zip archive...");
         try {
             archive = new Handler(source);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new ParserException("error opening 7zip archive", location, e);
         }
         checkInterruption();
-        SZParserExtractCallback aec = new SZParserExtractCallback(super.theLogger, archive,
+        final SZParserExtractCallback aec = new SZParserExtractCallback(super.theLogger, archive,
                 maxRamSize, doc, location.getFile());
         super.theLogger.logFine("processing archive contents...");
         try {
             archive.Extract(null, -1, 0, aec);
             return doc;   
-        } catch (IOException e) {
+        } catch (final IOException e) {
             if (e.getCause() instanceof InterruptedException)
                 throw (InterruptedException)e.getCause();
             if (e.getCause() instanceof ParserException)
@@ -87,35 +87,35 @@ public class sevenzipParser extends AbstractParser implements Parser {
                     "error processing 7zip archive at internal file: " + aec.getCurrentFilePath(),
                     location, e);
         } finally {
-            try { archive.close(); } catch (IOException e) {  }
+            try { archive.close(); } catch (final IOException e) {  }
         }
     }
     
-    public plasmaParserDocument parse(yacyURL location, String mimeType, String charset,
-            byte[] source) throws ParserException, InterruptedException {
+    public plasmaParserDocument parse(final yacyURL location, final String mimeType, final String charset,
+            final byte[] source) throws ParserException, InterruptedException {
         return parse(location, mimeType, charset, new ByteArrayIInStream(source), Parser.MAX_KEEP_IN_MEMORY_SIZE - source.length);
     }
     
-    public plasmaParserDocument parse(yacyURL location, String mimeType, String charset,
-            File sourceFile) throws ParserException, InterruptedException {
+    public plasmaParserDocument parse(final yacyURL location, final String mimeType, final String charset,
+            final File sourceFile) throws ParserException, InterruptedException {
         try {
             return parse(location, mimeType, charset, new MyRandomAccessFile(sourceFile, "r"), Parser.MAX_KEEP_IN_MEMORY_SIZE);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new ParserException("error processing 7zip archive", location, e);
         }
     }
     
-    public plasmaParserDocument parse(yacyURL location, String mimeType, String charset,
-            InputStream source) throws ParserException, InterruptedException {
+    public plasmaParserDocument parse(final yacyURL location, final String mimeType, final String charset,
+            final InputStream source) throws ParserException, InterruptedException {
         try {
-            serverCachedFileOutputStream cfos = new serverCachedFileOutputStream(Parser.MAX_KEEP_IN_MEMORY_SIZE);
+            final serverCachedFileOutputStream cfos = new serverCachedFileOutputStream(Parser.MAX_KEEP_IN_MEMORY_SIZE);
             serverFileUtils.copy(source, cfos);
             if (cfos.isFallback()) {
                 return parse(location, mimeType, charset, cfos.getContentFile());
             } else {
                 return parse(location, mimeType, charset, cfos.getContentBAOS());
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new ParserException("error processing 7zip archive", location, e);
         }
     }

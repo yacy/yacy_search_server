@@ -55,25 +55,25 @@ public class rssDetector implements MagicDetector {
     }
 
     @SuppressWarnings("unchecked")
-    public String[] process(File file, int offset, int length, long bitmask, char comparator, String mimeType, Map params) {
+    public String[] process(final File file, final int offset, final int length, final long bitmask, final char comparator, final String mimeType, final Map params) {
         FileInputStream fileInput = null;
         try {
             fileInput = new FileInputStream(file);
             return detect(fileInput);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             return null;
         } finally {
-            if (fileInput != null) try { fileInput.close(); } catch (Exception e) { /* ignore this */ }
+            if (fileInput != null) try { fileInput.close(); } catch (final Exception e) { /* ignore this */ }
         }
     }
 
     @SuppressWarnings("unchecked")
-    public String[] process(byte[] data, int offset, int length, long bitmask, char comparator, String mimeType, Map params) {
-        ByteArrayInputStream input = new ByteArrayInputStream(data);
+    public String[] process(final byte[] data, final int offset, final int length, final long bitmask, final char comparator, final String mimeType, final Map params) {
+        final ByteArrayInputStream input = new ByteArrayInputStream(data);
         return detect(input);
     }
     
-    private String[] detect(InputStream input) {
+    private String[] detect(final InputStream input) {
         return new String[]{"application/rss+xml"};
     }
 

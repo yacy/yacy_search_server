@@ -26,7 +26,7 @@ import de.anomic.server.serverCodings;
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 public class genpw {
-	public static void main(String[] args){
+	public static void main(final String[] args){
         String username="";
         String password="";
         if(args.length==2){
@@ -39,11 +39,11 @@ public class genpw {
                 username="admin";
             }
             if(args.length<1){
-                BufferedReader br=new BufferedReader(new InputStreamReader(System.in));
+                final BufferedReader br=new BufferedReader(new InputStreamReader(System.in));
                 username="admin";
                 try {
                     password=br.readLine();
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     System.err.println("IOException while reading from stdin");
                     System.exit(1);
                 }

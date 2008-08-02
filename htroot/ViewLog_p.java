@@ -41,8 +41,8 @@ import de.anomic.server.logging.LogalizerHandler;
 
 public class ViewLog_p {
     
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
-        serverObjects prop = new serverObjects();
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+        final serverObjects prop = new serverObjects();
         String[] log = new String[0];
         boolean reversed = false;
         int maxlines = 400, lines = 200;
@@ -61,8 +61,8 @@ public class ViewLog_p {
         }
         
         
-        Logger logger = Logger.getLogger("");
-        Handler[] handlers = logger.getHandlers();
+        final Logger logger = Logger.getLogger("");
+        final Handler[] handlers = logger.getHandlers();
         boolean displaySubmenu = false;
         for (int i=0; i<handlers.length; i++) {
             if (handlers[i] instanceof GuiHandler) {
@@ -83,9 +83,9 @@ public class ViewLog_p {
         // trying to compile the regular expression filter expression
         Matcher filterMatcher = null;
         try {
-        	Pattern filterPattern = Pattern.compile(filter,Pattern.MULTILINE);
+        	final Pattern filterPattern = Pattern.compile(filter,Pattern.MULTILINE);
         	filterMatcher = filterPattern.matcher("");
-        } catch (PatternSyntaxException e) {
+        } catch (final PatternSyntaxException e) {
         	e.printStackTrace();
         }
         
@@ -93,7 +93,7 @@ public class ViewLog_p {
         int level = 0;
         int lc = 0;
         for (int i=0; i < log.length; i++) {
-            String nextLogLine = log[i].trim();
+            final String nextLogLine = log[i].trim();
             
             if (filterMatcher != null) {
             	filterMatcher.reset(nextLogLine);

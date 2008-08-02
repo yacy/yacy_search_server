@@ -42,18 +42,18 @@ public class Punycode
    * @param input Unicode string.
    * @return Punycoded string.
    */
-  public static String encode(String input)
+  public static String encode(final String input)
     throws PunycodeException
   {
     int n = INITIAL_N;
     int delta = 0;
     int bias = INITIAL_BIAS;
-    StringBuffer output = new StringBuffer();
+    final StringBuffer output = new StringBuffer();
 
     // Copy all basic code points to the output
     int b = 0;
     for (int i = 0; i < input.length(); i++) {
-      char c = input.charAt(i);
+      final char c = input.charAt(i);
       if (isBasic(c)) {
 	output.append(c);
 	b++;
@@ -71,7 +71,7 @@ public class Punycode
 
       // Find the minimum code point >= n
       for (int i = 0; i < input.length(); i++) {
-	int c = input.charAt(i);
+	final int c = input.charAt(i);
 	if (c >= n && c < m) {
 	  m = c;
 	}
@@ -84,7 +84,7 @@ public class Punycode
       n = m;
 
       for (int j = 0; j < input.length(); j++) {
-	int c = input.charAt(j);
+	final int c = input.charAt(j);
 	if (c < n) {
 	  delta++;
 	  if (0 == delta) {
@@ -130,18 +130,18 @@ public class Punycode
    * @param input Punycode string
    * @return Unicode string.
    */
-  public static String decode(String input)
+  public static String decode(final String input)
     throws PunycodeException
   {
     int n = INITIAL_N;
     int i = 0;
     int bias = INITIAL_BIAS;
-    StringBuffer output = new StringBuffer();
+    final StringBuffer output = new StringBuffer();
 
     int d = input.lastIndexOf(DELIMITER);
     if (d > 0) {
       for (int j = 0; j < d; j++) {
-	char c = input.charAt(j);
+	final char c = input.charAt(j);
 	if (!isBasic(c)) {
 	  throw new PunycodeException(PunycodeException.BAD_INPUT);
 	}
@@ -153,15 +153,15 @@ public class Punycode
     }
 
     while (d < input.length()) {
-      int oldi = i;
+      final int oldi = i;
       int w = 1;
 
       for (int k = BASE; ; k += BASE) {
 	if (d == input.length()) {
 	  throw new PunycodeException(PunycodeException.BAD_INPUT);
 	}
-	int c = input.charAt(d++);
-	int digit = codepoint2digit(c);
+	final int c = input.charAt(d++);
+	final int digit = codepoint2digit(c);
 	if (digit > (Integer.MAX_VALUE - i) / w) {
 	  throw new PunycodeException(PunycodeException.OVERFLOW);
 	}
@@ -197,7 +197,7 @@ public class Punycode
     return output.toString();
   }
 
-  public final static int adapt(int delta, int numpoints, boolean first)
+  public final static int adapt(int delta, final int numpoints, final boolean first)
   {
     if (first) {
       delta = delta / DAMP;
@@ -216,20 +216,20 @@ public class Punycode
     return k + ((BASE - TMIN + 1) * delta) / (delta + SKEW);
   }
 
-  public final static boolean isBasic(char c)
+  public final static boolean isBasic(final char c)
   {
     return c < 0x80;
   }
 
   // the following method has been added by Michael Christen
-  public static boolean isBasic(String input) {
+  public static boolean isBasic(final String input) {
       for (int j = 0; j < input.length(); j++) {
           if (!isBasic(input.charAt(j))) return false;
       }
       return true;
   }
   
-  public final static int digit2codepoint(int d)
+  public final static int digit2codepoint(final int d)
     throws PunycodeException
   {
     if (d < 26) {
@@ -243,7 +243,7 @@ public class Punycode
     }
   }
 
-  public final static int codepoint2digit(int c)
+  public final static int codepoint2digit(final int c)
     throws PunycodeException
   {
     if (c - '0' < 10) {
@@ -272,7 +272,7 @@ public class Punycode
      *
      * @param m message.
      */
-    public PunycodeException(String m)
+    public PunycodeException(final String m)
     {
       super(m);
     }

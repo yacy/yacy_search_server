@@ -67,20 +67,20 @@ public final class robotsParser {
     private String sitemap;
     private int crawlDelay;
     
-    public robotsParser(byte[] robotsTxt) {
+    public robotsParser(final byte[] robotsTxt) {
         if ((robotsTxt == null)||(robotsTxt.length == 0)) {
             allowList = new ArrayList<String>(0);
             denyList = new ArrayList<String>(0);
             sitemap = "";
             crawlDelay = 0;
         } else {
-            ByteArrayInputStream bin = new ByteArrayInputStream(robotsTxt);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(bin));
+            final ByteArrayInputStream bin = new ByteArrayInputStream(robotsTxt);
+            final BufferedReader reader = new BufferedReader(new InputStreamReader(bin));
             parse(reader);
         }
     }
     
-    public robotsParser(BufferedReader reader) {
+    public robotsParser(final BufferedReader reader) {
         if (reader == null) {
             allowList = new ArrayList<String>(0);
             denyList = new ArrayList<String>(0);
@@ -91,11 +91,11 @@ public final class robotsParser {
         }
     }
     
-    private void parse(BufferedReader reader) {
-        ArrayList<String> deny4AllAgents = new ArrayList<String>();
-        ArrayList<String> deny4YaCyAgent = new ArrayList<String>();
-        ArrayList<String> allow4AllAgents = new ArrayList<String>();
-        ArrayList<String> allow4YaCyAgent = new ArrayList<String>();
+    private void parse(final BufferedReader reader) {
+        final ArrayList<String> deny4AllAgents = new ArrayList<String>();
+        final ArrayList<String> deny4YaCyAgent = new ArrayList<String>();
+        final ArrayList<String> allow4AllAgents = new ArrayList<String>();
+        final ArrayList<String> allow4YaCyAgent = new ArrayList<String>();
         
         int pos;
         String line = null, lineUpper = null;
@@ -143,7 +143,7 @@ public final class robotsParser {
                     // getting out the robots name
                     pos = line.indexOf(" ");
                     if (pos != -1) {
-                        String userAgent = line.substring(pos).trim();
+                        final String userAgent = line.substring(pos).trim();
                         isRule4AllAgents |= userAgent.equals("*");
                         isRule4YaCyAgent |= userAgent.toLowerCase().indexOf("yacy") >=0;
                         if (isRule4YaCyAgent) rule4YaCyFound = true;
@@ -153,14 +153,14 @@ public final class robotsParser {
                     if (pos != -1) {
                     	try {
                     		crawlDelay = Integer.parseInt(line.substring(pos).trim());
-                    	} catch (NumberFormatException e) {
+                    	} catch (final NumberFormatException e) {
                     		// invalid crawling delay
                     	}
                     } 
                 } else if (lineUpper.startsWith(ROBOTS_DISALLOW) || 
                            lineUpper.startsWith(ROBOTS_ALLOW)) {
                     inBlock = true;
-                    boolean isDisallowRule = lineUpper.startsWith(ROBOTS_DISALLOW);
+                    final boolean isDisallowRule = lineUpper.startsWith(ROBOTS_DISALLOW);
                     
                     if (isRule4YaCyAgent || isRule4AllAgents) {
                         // cutting off comments at the line end
@@ -182,7 +182,7 @@ public final class robotsParser {
                             // unencoding all special charsx
                             try {
                                 path = URLDecoder.decode(path,"UTF-8");
-                            } catch (Exception e) {
+                            } catch (final Exception e) {
                                 /* 
                                  * url decoding failed. E.g. because of
                                  * "Incomplete trailing escape (%) pattern"
@@ -204,7 +204,7 @@ public final class robotsParser {
                     }
                 }
             }
-        } catch (IOException e) {}
+        } catch (final IOException e) {}
         
         allowList = (rule4YaCyFound) ? allow4YaCyAgent : allow4AllAgents;
         denyList = (rule4YaCyFound) ? deny4YaCyAgent : deny4AllAgents;

@@ -50,14 +50,14 @@ public final class plasmaRankingDistribution {
     public static final int METHOD_FIXEDADDRESS   = 99;
     
     private final serverLog log;
-    private File sourcePath;     // where to load CR-files
+    private final File sourcePath;     // where to load CR-files
     private int method;          // of peer selection
     private int percentage;      // to select any other peer
     private String address[];      // of fixed other peer
-    private yacySeedDB seedDB;
+    private final yacySeedDB seedDB;
     private static Random random = new Random(System.currentTimeMillis());
     
-    public plasmaRankingDistribution(serverLog log, yacySeedDB seedDB, File sourcePath, int method, int percentage, String addresses) {
+    public plasmaRankingDistribution(final serverLog log, final yacySeedDB seedDB, final File sourcePath, final int method, final int percentage, final String addresses) {
         this.log        = log;
         this.seedDB     = seedDB;
         this.sourcePath = sourcePath;
@@ -71,7 +71,7 @@ public final class plasmaRankingDistribution {
         while (st.hasMoreTokens()) {this.address[c++] = st.nextToken();}
     }
 
-    public void setMethod(int method, int percentage, String address[]) {
+    public void setMethod(final int method, final int percentage, final String address[]) {
         this.method     = method;
         this.percentage = percentage;
         this.address    = address;
@@ -100,7 +100,7 @@ public final class plasmaRankingDistribution {
             return false;
         }
         
-        String[] outfiles = sourcePath.list();
+        final String[] outfiles = sourcePath.list();
         
         if (outfiles == null) {
             log.logFine("no ranking distribution: source path does not exist");
@@ -140,7 +140,7 @@ public final class plasmaRankingDistribution {
         return false;
     }
     
-    private boolean transferRankingAnySeed(File crfile, int trycount) throws InterruptedException {
+    private boolean transferRankingAnySeed(final File crfile, final int trycount) throws InterruptedException {
         yacySeed target = null;
         for (int j = 0; j < trycount; j++) {
             // check for interruption
@@ -150,13 +150,13 @@ public final class plasmaRankingDistribution {
             target = seedDB.anySeedVersion(yacyVersion.YACY_ACCEPTS_RANKING_TRANSMISSION);
             
             if (target == null) continue;
-            String targetaddress = target.getPublicAddress();
+            final String targetaddress = target.getPublicAddress();
             if (transferRankingAddress(crfile, targetaddress)) return true;
         }
         return false;
     }
     
-    private boolean transferRankingAddress(File crfile) throws InterruptedException {
+    private boolean transferRankingAddress(final File crfile) throws InterruptedException {
         // try all addresses
         for (int i = 0; i < this.address.length; i++) {
             // check for interruption
@@ -168,12 +168,12 @@ public final class plasmaRankingDistribution {
         return false;
     }
     
-    private boolean transferRankingAddress(File crfile, String address) {
+    private boolean transferRankingAddress(final File crfile, final String address) {
         // do the transfer
-        long starttime = System.currentTimeMillis();
+        final long starttime = System.currentTimeMillis();
         String result = "unknown";
         try {
-            byte[] b = serverFileUtils.read(crfile);
+            final byte[] b = serverFileUtils.read(crfile);
             result = yacyClient.transfer(address, crfile.getName(), b);
             if (result == null) {
                 log.logInfo("RankingDistribution - transmitted file " + crfile + " to " + address + " successfully in " + ((System.currentTimeMillis() - starttime) / 1000) + " seconds");
@@ -181,7 +181,7 @@ public final class plasmaRankingDistribution {
             } else {
                 log.logInfo("RankingDistribution - error transmitting file " + crfile + " to " + address + ": " + result);
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             log.logInfo("RankingDistribution - could not read file " + crfile + ": " + e.getMessage());
             result = "input file error: " + e.getMessage();
         }

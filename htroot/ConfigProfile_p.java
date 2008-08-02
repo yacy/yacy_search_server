@@ -44,17 +44,17 @@ import de.anomic.yacy.yacyNewsRecord;
 
 public class ConfigProfile_p {
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
-        plasmaSwitchboard sb = (plasmaSwitchboard) env;
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final serverObjects prop = new serverObjects();
         final Properties profile = new Properties();
         FileInputStream fileIn = null;
         try {
             fileIn = new FileInputStream(new File("DATA/SETTINGS/profile.txt"));
             profile.load(fileIn);
-        } catch(IOException e) {
+        } catch(final IOException e) {
         } finally {
-            if (fileIn != null) try { fileIn.close(); } catch (Exception e) {}
+            if (fileIn != null) try { fileIn.close(); } catch (final Exception e) {}
         }
 
         if (post != null && post.containsKey("set")) {
@@ -92,13 +92,13 @@ public class ConfigProfile_p {
                 profile.store(fileOut , null );
 
                 // generate a news message
-                Properties news = profile;
+                final Properties news = profile;
                 news.remove("comment");
                 sb.webIndex.newsPool.publishMyNews(yacyNewsRecord.newRecord(sb.webIndex.seedDB.mySeed(), yacyNewsPool.CATEGORY_PROFILE_UPDATE, news));
                 //yacyCore.newsPool.publishMyNews(new yacyNewsRecord(yacyNewsRecord.CATEGORY_PROFILE_UPDATE, profile));
-            } catch(IOException e) {
+            } catch(final IOException e) {
             } finally {
-                if (fileOut != null) try { fileOut.close(); } catch (Exception e) {}
+                if (fileOut != null) try { fileOut.close(); } catch (final Exception e) {}
             }
         }
 

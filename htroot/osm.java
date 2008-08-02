@@ -8,7 +8,7 @@ import de.anomic.ymage.ymageOSM;
 
 public class osm {
 
-    public static ymageMatrix respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
+    public static ymageMatrix respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
 
         int zoom = 10;
         double lat = 47.968056d;
@@ -20,7 +20,7 @@ public class osm {
             lon = post.getDouble("lon", lon);
         }
         
-        ymageOSM.tileCoordinates coord = new ymageOSM.tileCoordinates(lat, lon, zoom);
+        final ymageOSM.tileCoordinates coord = new ymageOSM.tileCoordinates(lat, lon, zoom);
         return ymageOSM.getCombinedTiles(coord);
    }
 

@@ -25,11 +25,11 @@ import de.anomic.yacy.yacyURL;
 
 public class htmlFilterImageEntry implements Comparable<htmlFilterImageEntry> {
 
-    private yacyURL url;
-    private String alt;
-    private int width, height;
+    private final yacyURL url;
+    private final String alt;
+    private final int width, height;
 
-    public htmlFilterImageEntry(yacyURL url, String alt, int width, int height) {
+    public htmlFilterImageEntry(final yacyURL url, final String alt, final int width, final int height) {
         this.url = url;
         this.alt = alt;
         this.width = width;
@@ -67,21 +67,21 @@ public class htmlFilterImageEntry implements Comparable<htmlFilterImageEntry> {
             return 0x7FFF0000 | (url.hashCode() & 0xFFFF);
     }
     
-    public int compareTo(htmlFilterImageEntry h) {
+    public int compareTo(final htmlFilterImageEntry h) {
         // this is needed if this object is stored in a TreeSet
         // this method uses the image-size ordering from the hashCode method
         // assuming that hashCode would return a 'perfect hash' this method would
         // create a total ordering on images with respect on the image size
         assert (url != null);
         if (this.url.toNormalform(true, true).equals((h).url.toNormalform(true, true))) return 0;
-        int thc = this.hashCode();
-        int ohc = (h).hashCode();
+        final int thc = this.hashCode();
+        final int ohc = (h).hashCode();
         if (thc < ohc) return -1;
         if (thc > ohc) return 1;
         return this.url.toString().compareTo((h).url.toString());
     }
     
-    public boolean equals(htmlFilterImageEntry o) {
+    public boolean equals(final htmlFilterImageEntry o) {
         return compareTo(o) == 0;
     }
 }

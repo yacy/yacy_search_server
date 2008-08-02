@@ -62,10 +62,10 @@ public class ViewFile {
     private static final String HIGHLIGHT_CSS = "searchHighlight";
     private static final int MAX_HIGHLIGHTS = 6;
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
 
-        serverObjects prop = new serverObjects();
-        plasmaSwitchboard sb = (plasmaSwitchboard)env;     
+        final serverObjects prop = new serverObjects();
+        final plasmaSwitchboard sb = (plasmaSwitchboard)env;     
 
         if (post != null && post.containsKey("words"))
             prop.putHTML("error_words", post.get("words"));
@@ -75,17 +75,17 @@ public class ViewFile {
             return prop;
         }
 
-        String viewMode = post.get("viewMode","sentences");
+        final String viewMode = post.get("viewMode","sentences");
         prop.put("error_vMode-" + viewMode, "1");
         
         yacyURL url = null;
         String descr = "";
-        int wordCount = 0;
+        final int wordCount = 0;
         int size = 0;
         boolean pre = false;
         
         // getting the url hash from which the content should be loaded
-        String urlHash = post.get("urlHash","");
+        final String urlHash = post.get("urlHash","");
         if (urlHash.length() > 0) {
             // getting the urlEntry that belongs to the url hash
             indexURLReference urlEntry = null;
@@ -97,7 +97,7 @@ public class ViewFile {
             }            
             
                 // gettin the url that belongs to the entry
-            indexURLReference.Components comp = urlEntry.comp();
+            final indexURLReference.Components comp = urlEntry.comp();
             if ((comp == null) || (comp.url() == null)) {
                 prop.put("error", "3");
                 prop.put("viewMode", VIEW_MODE_NO_TEXT);
@@ -112,7 +112,7 @@ public class ViewFile {
 
         // alternatively, get the url simply from a url String
         // this can be used as a simple tool to test the text parser
-        String urlString = post.get("url", "");
+        final String urlString = post.get("url", "");
         if (urlString.length() > 0) try {
             // this call forces the peer to download  web pages
             // it is therefore protected by the admin password
@@ -125,7 +125,7 @@ public class ViewFile {
             // define an url by post parameter
             url = new yacyURL(urlString, null);
             pre = post.get("pre", "false").equals("true");
-        } catch (MalformedURLException e) {}
+        } catch (final MalformedURLException e) {}
         
         
         if (url == null) {
@@ -148,7 +148,7 @@ public class ViewFile {
             plasmaHTCache.Entry entry = null;
             try {
                 entry = sb.crawlQueues.loadResourceFromWeb(url, 5000, false, true, false);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 prop.put("error", "4");
                 prop.putHTML("error_errorText", e.getMessage());
                 prop.put("viewMode", VIEW_MODE_NO_TEXT);
@@ -175,20 +175,20 @@ public class ViewFile {
             // try to load the metadata from cache
             try {
                 resInfo = plasmaHTCache.loadResourceInfo(url);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 /* ignore this */
             }
 
             // if the metadata was not cached try to load it from web
             if (resInfo == null) {
-                String protocol = url.getProtocol();
+                final String protocol = url.getProtocol();
                 if (!((protocol.equals("http") || protocol.equals("https")))) {
                     prop.put("error", "6");
                     prop.put("viewMode", VIEW_MODE_NO_TEXT);
                     return prop;
                 }
 
-                httpHeader responseHeader = HttpClient.whead(url.toString());
+                final httpHeader responseHeader = HttpClient.whead(url.toString());
                 if (responseHeader == null) {
                     prop.put("error", "4");
                     prop.put("error_errorText", "Unable to load resource metadata.");
@@ -197,7 +197,7 @@ public class ViewFile {
                 }
                 try {
                     resInfo = plasmaHTCache.getResourceInfoFactory().buildResourceInfoObj(url, responseHeader);
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     prop.put("error", "4");
                     prop.putHTML("error_errorText", e.getMessage());
                     prop.put("viewMode", VIEW_MODE_NO_TEXT);
@@ -209,7 +209,7 @@ public class ViewFile {
             resMime = resInfo.getMimeType();
         }
         
-        String[] wordArray = wordArray(post.get("words", null));
+        final String[] wordArray = wordArray(post.get("words", null));
 
         if (viewMode.equals("plain")) {
 
@@ -217,7 +217,7 @@ public class ViewFile {
             String content;
             try {
                 content = new String(serverFileUtils.read(resource), "UTF-8");
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 prop.put("error", "4");
                 prop.putHTML("error_errorText", e.getMessage());
                 prop.put("viewMode", VIEW_MODE_NO_TEXT);
@@ -226,7 +226,7 @@ public class ViewFile {
                 if (resource != null)
                     try {
                         resource.close();
-                    } catch (Exception e) {
+                    } catch (final Exception e) {
                         /* ignore this */
                     }
             }
@@ -250,7 +250,7 @@ public class ViewFile {
                     prop.put("viewMode", VIEW_MODE_NO_TEXT);
                     return prop;
                 }
-            } catch (ParserException e) {
+            } catch (final ParserException e) {
                 prop.put("error", "5");
                 prop.putHTML("error_errorText", e.getMessage());
                 prop.put("viewMode", VIEW_MODE_NO_TEXT);
@@ -259,7 +259,7 @@ public class ViewFile {
                 if (resource != null)
                     try {
                         resource.close();
-                    } catch (Exception e) {
+                    } catch (final Exception e) {
                         /* ignore this */
                     }
             }
@@ -267,7 +267,7 @@ public class ViewFile {
             resMime = document.dc_format();
             
             if (viewMode.equals("parsed")) {
-                String content = new String(document.getTextBytes());
+                final String content = new String(document.getTextBytes());
                 // content = wikiCode.replaceHTML(content); // added by Marc Nause
 
                 prop.put("viewMode", VIEW_MODE_AS_PARSED_TEXT);
@@ -304,8 +304,8 @@ public class ViewFile {
                 i += putMediaInfo(prop, wordArray, i, document.getAudiolinks(), "audio", (i % 2 == 0));
                 dark = (i % 2 == 0);
                 
-                HashMap<String, htmlFilterImageEntry> ts = document.getImages();
-                Iterator<htmlFilterImageEntry> tsi = ts.values().iterator();
+                final HashMap<String, htmlFilterImageEntry> ts = document.getImages();
+                final Iterator<htmlFilterImageEntry> tsi = ts.values().iterator();
                 htmlFilterImageEntry entry;
                 while (tsi.hasNext()) {
                     entry = tsi.next();
@@ -346,15 +346,15 @@ public class ViewFile {
             words = URLDecoder.decode(words, "UTF-8");
             w = words.substring(1, words.length() - 1).split(",");
             if (w.length == 0) return null;
-        } catch (UnsupportedEncodingException e) {}
+        } catch (final UnsupportedEncodingException e) {}
         return w;
     }
     
-    private static final String markup(String[] wordArray, String message) {
+    private static final String markup(final String[] wordArray, String message) {
         message = htmlTools.encodeUnicode2html(message, true);
         if (wordArray != null)
             for (int j = 0; j < wordArray.length; j++) {
-                String currentWord = wordArray[j].trim();
+                final String currentWord = wordArray[j].trim();
                 // TODO: replace upper-/lowercase words as well
                 message = message.replaceAll(currentWord,
                                 "<span class=\"" + HIGHLIGHT_CSS + ((j % MAX_HIGHLIGHTS) + 1) + "\">" +
@@ -364,8 +364,8 @@ public class ViewFile {
         return message;
     }
     
-    private static int putMediaInfo(serverObjects prop, String[] wordArray, int c, Map<yacyURL, String> media, String name, boolean dark) {
-        Iterator<Map.Entry<yacyURL, String>> mi = media.entrySet().iterator();
+    private static int putMediaInfo(final serverObjects prop, final String[] wordArray, int c, final Map<yacyURL, String> media, final String name, boolean dark) {
+        final Iterator<Map.Entry<yacyURL, String>> mi = media.entrySet().iterator();
         Map.Entry<yacyURL, String> entry;
         int i = 0;
         while (mi.hasNext()) {

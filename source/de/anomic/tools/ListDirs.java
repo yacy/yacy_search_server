@@ -27,23 +27,23 @@
 package de.anomic.tools;
 
 import java.io.File;
-import java.util.jar.JarFile;
-import java.util.jar.JarEntry;
-import java.util.Enumeration;
-import java.util.ArrayList;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 public class ListDirs {
 
 	private boolean isJar = false;
 	private File FileObject = null;
 	private JarFile JarFileObject = null;
-	private String uri;
+	private final String uri;
 	private String pathInJar;
 	
-	public ListDirs(String uri) throws IOException, URISyntaxException {
+	public ListDirs(final String uri) throws IOException, URISyntaxException {
 		this.uri = uri;
 		if(uri.startsWith("jar:")) {
 			isJar = true;
@@ -54,10 +54,10 @@ public class ListDirs {
 		}
 	}
 
-	public ArrayList<String> listFiles(String regex) {
-		ArrayList<String> files = getAllFiles();
-		ArrayList<String> classes = new ArrayList<String>();
-		for(String file: files) {
+	public ArrayList<String> listFiles(final String regex) {
+		final ArrayList<String> files = getAllFiles();
+		final ArrayList<String> classes = new ArrayList<String>();
+		for(final String file: files) {
 			if(file.matches(regex)) {
 				classes.add(file);
 			}
@@ -66,28 +66,28 @@ public class ListDirs {
 	}
 
 	private ArrayList<String> getAllFiles() {
-		ArrayList<String> files = new ArrayList<String>(50);
+		final ArrayList<String> files = new ArrayList<String>(50);
 		if(isJar) {
-			Enumeration<JarEntry> entries = JarFileObject.entries();
+			final Enumeration<JarEntry> entries = JarFileObject.entries();
 			while(entries.hasMoreElements()) {
-				JarEntry entry = entries.nextElement();
-				String entryname = entry.getName();
+				final JarEntry entry = entries.nextElement();
+				final String entryname = entry.getName();
 				if(entryname.startsWith(pathInJar) && entryname.charAt(entryname.length()-1)!='/') {
 					files.add(entryname);
 				}
 			}
 		} else {
-			for(File file: getFilesRecursive(FileObject)) {
+			for(final File file: getFilesRecursive(FileObject)) {
 				files.add(file.toString());
 			}
 		}
 		return files;
 	}
 
-	private ArrayList<File> getFilesRecursive(File start) {
-		File[] fileList = start.listFiles();
-		ArrayList<File> completeList = new ArrayList<File>();
-		for(File file: fileList) {
+	private ArrayList<File> getFilesRecursive(final File start) {
+		final File[] fileList = start.listFiles();
+		final ArrayList<File> completeList = new ArrayList<File>();
+		for(final File file: fileList) {
 			if(file.isDirectory()) {
 				completeList.addAll(getFilesRecursive(file));
 			} else {

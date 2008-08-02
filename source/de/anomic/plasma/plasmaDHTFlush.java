@@ -45,10 +45,10 @@ public class plasmaDHTFlush extends Thread {
         private final long startingTime = System.currentTimeMillis();
         private final plasmaSwitchboard sb;
         private plasmaDHTTransfer worker = null;
-        private serverLog log;
-        private plasmaWordIndex wordIndex;
+        private final serverLog log;
+        private final plasmaWordIndex wordIndex;
         
-        public plasmaDHTFlush(serverLog log, plasmaWordIndex wordIndex, yacySeed seed, boolean delete, boolean gzipBody, int timeout) {
+        public plasmaDHTFlush(final serverLog log, final plasmaWordIndex wordIndex, final yacySeed seed, final boolean delete, final boolean gzipBody, final int timeout) {
             super(new ThreadGroup("TransferIndexThreadGroup"),"TransferIndex_" + seed.getName());
             this.log = log;
             this.wordIndex = wordIndex;
@@ -65,7 +65,7 @@ public class plasmaDHTFlush extends Thread {
             this.performTransferWholeIndex();
         }
         
-        public void stopIt(boolean wait) throws InterruptedException {
+        public void stopIt(final boolean wait) throws InterruptedException {
             this.finished = true;
             if (this.worker != null) this.worker.stopIt();
             if (wait) this.join();
@@ -80,7 +80,7 @@ public class plasmaDHTFlush extends Thread {
         }
         
         public int[] getIndexCount() {
-            plasmaDHTTransfer workerThread = this.worker;
+            final plasmaDHTTransfer workerThread = this.worker;
             if (workerThread != null) {
                 return new int[]{this.chunkSize, workerThread.dhtChunk.indexCount()};
             }
@@ -100,7 +100,7 @@ public class plasmaDHTFlush extends Thread {
         }
         
         public float getTransferedContainerPercent() {
-            long currentWordsDBSize = this.sb.webIndex.size(); 
+            final long currentWordsDBSize = this.sb.webIndex.size(); 
             if (this.initialWordsDBSize == 0) return 100;
             else if (currentWordsDBSize >= this.initialWordsDBSize) return 0;
             //else return (float) ((initialWordsDBSize-currentWordsDBSize)/(initialWordsDBSize/100));
@@ -118,7 +118,7 @@ public class plasmaDHTFlush extends Thread {
         }
         
         public String[] getStatus() {
-            plasmaDHTTransfer workerThread = this.worker;
+            final plasmaDHTTransfer workerThread = this.worker;
             if (workerThread != null) {
                 return new String[]{this.status,workerThread.getStatusMessage()};
             }
@@ -126,7 +126,7 @@ public class plasmaDHTFlush extends Thread {
         }
         
         public String[] getRange() {
-            plasmaDHTTransfer workerThread = this.worker;
+            final plasmaDHTTransfer workerThread = this.worker;
             if (workerThread != null) {
                 return new String[]{"[" + this.oldStartingPointHash + ".." + this.startPointHash + "]",
                                     "[" + workerThread.dhtChunk.firstContainer().getWordHash() + ".." + workerThread.dhtChunk.lastContainer().getWordHash() + "]"};
@@ -210,7 +210,7 @@ public class plasmaDHTFlush extends Thread {
                         // deleting transfered words from index
                         if (this.delete) {
                             this.status = "Running: Deleting chunk " + iteration;
-                            String urlReferences = oldDHTChunk.deleteTransferIndexes();
+                            final String urlReferences = oldDHTChunk.deleteTransferIndexes();
                             if (this.log.isFine()) this.log.logFine("Deleted from " + oldDHTChunk.containerSize() + " transferred RWIs locally " + urlReferences + " URL references");
                         } 
                         oldDHTChunk = null;
@@ -226,14 +226,14 @@ public class plasmaDHTFlush extends Thread {
                 
                 // if we reach this point we were aborted by the user or by server shutdown
                 if (this.sb.webIndex.size() > 0) this.status = "aborted";
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 this.status = "Error: " + e.getMessage();
                 this.log.logWarning("Index transfer to peer " + this.seed.getName() + ":" + this.seed.hash + " failed:'" + e.getMessage() + "'",e);
                 
             } finally {
                 if (this.worker != null) {
                     this.worker.stopIt();
-                    try {this.worker.join();}catch(Exception e){}
+                    try {this.worker.join();}catch(final Exception e){}
                 }
             }
         }
@@ -243,10 +243,10 @@ public class plasmaDHTFlush extends Thread {
         this.chunkSize = this.worker.dhtChunk.indexCount();
         
         // getting the chunk selection time
-        long selectionTime = this.worker.dhtChunk.getSelectionTime();
+        final long selectionTime = this.worker.dhtChunk.getSelectionTime();
         
         // getting the chunk transfer time
-        long transferTime = this.worker.getTransferTime();
+        final long transferTime = this.worker.getTransferTime();
 
         // calculationg the new chunk size
         if (transferTime > 60*1000 && this.chunkSize>200) {
@@ -260,7 +260,7 @@ public class plasmaDHTFlush extends Thread {
         }
     }
 
-    private static boolean nothingSelected(plasmaDHTChunk newDHTChunk) {
+    private static boolean nothingSelected(final plasmaDHTChunk newDHTChunk) {
         return (newDHTChunk == null) ||
                (newDHTChunk.containerSize() == 0) ||
                (newDHTChunk.getStatus() == plasmaDHTChunk.chunkStatus_FAILED);        

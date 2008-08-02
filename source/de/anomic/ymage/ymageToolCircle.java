@@ -34,7 +34,7 @@ public class ymageToolCircle {
     private static int[][] circles = new int[0][];
 
     
-    private static int[] getCircleCoords(int radius) {
+    private static int[] getCircleCoords(final int radius) {
         if ((radius - 1) < circles.length) return circles[radius - 1];
         
         // read some lines from known circles
@@ -96,11 +96,11 @@ public class ymageToolCircle {
         return circles[radius - 1];
     }
     
-    public static void circle(ymageMatrix matrix, int xc, int yc, int radius) {
+    public static void circle(final ymageMatrix matrix, final int xc, final int yc, final int radius) {
         if (radius == 0) {
             matrix.plot(xc, yc);
         } else {
-            int[] c = getCircleCoords(radius);
+            final int[] c = getCircleCoords(radius);
             int x, y;
             for (int i = (c.length / 2) - 1; i >= 0; i--) {
                 x = c[2 * i    ];
@@ -113,15 +113,15 @@ public class ymageToolCircle {
         }
     }
     
-    public static void circle(ymageMatrix matrix, int xc, int yc, int radius, int fromArc, int toArc) {
+    public static void circle(final ymageMatrix matrix, final int xc, final int yc, final int radius, final int fromArc, final int toArc) {
         // draws only a part of a circle
         // arc is given in degree
         if (radius == 0) {
             matrix.plot(xc, yc);
         } else {
-            int[] c = getCircleCoords(radius);
-            int q = c.length / 2;
-            int[][] c4 = new int[q * 4][];
+            final int[] c = getCircleCoords(radius);
+            final int q = c.length / 2;
+            final int[][] c4 = new int[q * 4][];
             for (int i = 0; i < q; i++) {
                 c4[i        ] = new int[]{    c[2 * (i        )], -c[2 * (i        ) + 1] - 1}; // quadrant 1
                 c4[i +     q] = new int[]{1 - c[2 * (q - 1 - i)], -c[2 * (q - 1 - i) + 1] - 1}; // quadrant 2

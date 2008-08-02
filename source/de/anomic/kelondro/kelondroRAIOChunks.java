@@ -28,7 +28,7 @@ public final class kelondroRAIOChunks extends kelondroAbstractIOChunks implement
 
     protected kelondroRA ra;
     
-    public kelondroRAIOChunks(kelondroRA ra, String name) {
+    public kelondroRAIOChunks(final kelondroRA ra, final String name) {
         this.name = name;
         this.ra = ra;
     }
@@ -41,10 +41,10 @@ public final class kelondroRAIOChunks extends kelondroAbstractIOChunks implement
         return ra.length();
     }
     
-    public synchronized int read(long pos, byte[] b, int off, int len) throws IOException {
+    public synchronized int read(final long pos, final byte[] b, final int off, final int len) throws IOException {
         if (len == 0) return 0;
         this.ra.seek(pos);
-        long available = ra.available();
+        final long available = ra.available();
         if (available >= len) {
             return ra.read(b, off, len);
         } else if (available == 0) {
@@ -54,7 +54,7 @@ public final class kelondroRAIOChunks extends kelondroAbstractIOChunks implement
         }
     }
 
-    public synchronized void write(long pos, byte[] b, int off, int len) throws IOException {
+    public synchronized void write(final long pos, final byte[] b, final int off, final int len) throws IOException {
         this.ra.seek(pos);
         this.ra.write(b, off, len);
     }

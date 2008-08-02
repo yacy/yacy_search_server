@@ -31,19 +31,19 @@ import de.anomic.server.serverSwitch;
 
 public class ssitestservlet {
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
         
         //plasmaSwitchboard sb = (plasmaSwitchboard) env;
-        serverObjects prop = new serverObjects();
+        final serverObjects prop = new serverObjects();
         int delay = 0;
-        long start = System.currentTimeMillis();
+        final long start = System.currentTimeMillis();
         
         if (post != null) {
             delay = post.getInt("delay", 1000);
         }
         
         // make a delay to see how the ssi loads and displays this page
-        try {Thread.sleep(delay);} catch (InterruptedException e) {}
+        try {Thread.sleep(delay);} catch (final InterruptedException e) {}
         
         prop.put("delay", delay);
         prop.put("start", start);

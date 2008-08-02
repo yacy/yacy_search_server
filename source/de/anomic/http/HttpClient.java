@@ -88,10 +88,10 @@ public abstract class HttpClient {
      * @param timeout in milliseconds
      * @return
      */
-    public static byte[] wget(final String uri, final httpHeader header, int timeout) {
+    public static byte[] wget(final String uri, final httpHeader header, final int timeout) {
         return wget(uri, header, timeout, null);
     }
-    public static byte[] wget(final String uri, httpHeader header, final int timeout, final String vhost) {
+    public static byte[] wget(final String uri, final httpHeader header, final int timeout, final String vhost) {
         assert uri != null : "precondition violated: uri != null";
         addHostHeader(header, vhost);
         final JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(timeout, header, null);

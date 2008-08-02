@@ -37,10 +37,10 @@ import de.anomic.server.serverSwitch;
 
 public class ynetSearch {
 	
-	public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {        
-        plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
-        boolean isAdmin=switchboard.verifyAuthentication(header, true);
-        serverObjects prop = new serverObjects();              
+	public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {        
+        final plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
+        final boolean isAdmin=switchboard.verifyAuthentication(header, true);
+        final serverObjects prop = new serverObjects();              
                 
     	if(post != null){        
     		if(!isAdmin){
@@ -51,18 +51,18 @@ public class ynetSearch {
     		} else {
     			InputStream is = null;    			 
     			try { 	
-    				String s = post.get("url")+"&search="+post.get("search")+"&count="+post.get("count")+"&offset="+post.get("offset");    				   				
-    				URL url = new URL(s);     				
+    				final String s = post.get("url")+"&search="+post.get("search")+"&count="+post.get("count")+"&offset="+post.get("offset");    				   				
+    				final URL url = new URL(s);     				
     				is = url.openStream(); 
-    				String httpout = new Scanner(is).useDelimiter( "\\Z" ).next();
+    				final String httpout = new Scanner(is).useDelimiter( "\\Z" ).next();
     				prop.put("http", httpout);    		    	
     			} 
-    			catch ( Exception e ) { 
+    			catch ( final Exception e ) { 
     				prop.put("url", "error!");
     			} 
     			finally { 
     				if ( is != null ) 
-    					try { is.close(); } catch ( IOException e ) { } 
+    					try { is.close(); } catch ( final IOException e ) { } 
     			}
     		}
     	}    	  	

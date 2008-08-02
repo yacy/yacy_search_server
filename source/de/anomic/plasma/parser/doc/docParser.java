@@ -57,15 +57,15 @@ public class docParser extends AbstractParser implements Parser {
         this.parserName = "Word Document Parser";
 	}
 
-	public plasmaParserDocument parse(yacyURL location, String mimeType, String charset,
-			InputStream source) throws ParserException, InterruptedException {
+	public plasmaParserDocument parse(final yacyURL location, final String mimeType, final String charset,
+			final InputStream source) throws ParserException, InterruptedException {
 
         
 		try {	
-			  WordExtractor extractor = new WordExtractor();
-			  String contents = extractor.extractText(source);
+			  final WordExtractor extractor = new WordExtractor();
+			  final String contents = extractor.extractText(source);
 
-              plasmaParserDocument theDoc = new plasmaParserDocument(
+              final plasmaParserDocument theDoc = new plasmaParserDocument(
                       location,
                       mimeType,
                       "UTF-8",
@@ -83,7 +83,7 @@ public class docParser extends AbstractParser implements Parser {
                       null);
               
               return theDoc;             
-		} catch (Exception e) {			
+		} catch (final Exception e) {			
             if (e instanceof InterruptedException) throw (InterruptedException) e;
             if (e instanceof ParserException) throw (ParserException) e;
             

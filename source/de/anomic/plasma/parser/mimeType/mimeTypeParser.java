@@ -85,15 +85,15 @@ public class mimeTypeParser extends AbstractParser implements Parser {
     }
     
     @SuppressWarnings("unchecked")
-    public String getMimeType (File sourceFile) {
+    public String getMimeType (final File sourceFile) {
         String mimeType = null;
         
         try {           
-            MagicMatch match = Magic.getMagicMatch(sourceFile,true);        
+            final MagicMatch match = Magic.getMagicMatch(sourceFile,true);        
             
             // if a match was found we can return the new mimeType
             if (match!=null) {
-                Collection<MagicMatch> subMatches = match.getSubMatches();
+                final Collection<MagicMatch> subMatches = match.getSubMatches();
                 if ((subMatches != null) && (!subMatches.isEmpty())) {
                     mimeType = subMatches.iterator().next().getMimeType();
                 } else {
@@ -101,16 +101,16 @@ public class mimeTypeParser extends AbstractParser implements Parser {
                 }
                 return mimeType;
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             /* ignore this */
         }
         return null;        
     }
     
     @SuppressWarnings("unchecked")
-    public plasmaParserDocument parse(yacyURL location, String mimeType, String charset, File sourceFile) throws ParserException, InterruptedException {
+    public plasmaParserDocument parse(final yacyURL location, String mimeType, final String charset, final File sourceFile) throws ParserException, InterruptedException {
         
-        String orgMimeType = mimeType;
+        final String orgMimeType = mimeType;
         
         // determining the mime type of the file ...
         try {       
@@ -125,14 +125,14 @@ public class mimeTypeParser extends AbstractParser implements Parser {
             threadLoopDetection.put(Thread.currentThread(),new Integer(loopDepth.intValue()+1));
             
             // deactivating the logging for jMimeMagic
-            Logger jmimeMagicLogger = Logger.getLogger("net.sf.jmimemagic");
+            final Logger jmimeMagicLogger = Logger.getLogger("net.sf.jmimemagic");
             jmimeMagicLogger.setLevel(Level.OFF);
 
-            MagicMatch match = Magic.getMagicMatch(sourceFile,true,false);
+            final MagicMatch match = Magic.getMagicMatch(sourceFile,true,false);
             
             // if a match was found we can return the new mimeType
             if (match!=null) {
-                Collection<MagicMatch> subMatches = match.getSubMatches();
+                final Collection<MagicMatch> subMatches = match.getSubMatches();
                 if ((subMatches != null) && (!subMatches.isEmpty())) {
                     mimeType = subMatches.iterator().next().getMimeType();
                     if ((mimeType == null)||(mimeType.length() == 0)) mimeType = match.getMimeType();
@@ -148,19 +148,19 @@ public class mimeTypeParser extends AbstractParser implements Parser {
                 checkInterruption();
                 
                 // parsing the content using the determined mimetype
-                plasmaParser theParser = new plasmaParser();
+                final plasmaParser theParser = new plasmaParser();
                 return theParser.parseSource(location,mimeType,charset,sourceFile);
             }
             throw new ParserException("Unable to detect mimetype of resource (3).",location);
-        } catch (MagicMatchNotFoundException e) {
+        } catch (final MagicMatchNotFoundException e) {
             throw new ParserException("Unable to detect mimetype of resource (4).",location);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             if (e instanceof InterruptedException) throw (InterruptedException) e;
             if (e instanceof ParserException) throw (ParserException) e;
             
             throw new ParserException("Unexpected error while detect mimetype of resource. " + e.getMessage(),location); 
         } finally {
-            Integer loopDepth = threadLoopDetection.get(Thread.currentThread());                
+            final Integer loopDepth = threadLoopDetection.get(Thread.currentThread());                
             if (loopDepth.intValue() <= 1) {
                 threadLoopDetection.remove(Thread.currentThread());
             } else {
@@ -169,13 +169,13 @@ public class mimeTypeParser extends AbstractParser implements Parser {
         }
     }
     
-    public plasmaParserDocument parse(yacyURL location, String mimeType,String charset, InputStream source) throws ParserException, InterruptedException {
+    public plasmaParserDocument parse(final yacyURL location, final String mimeType,final String charset, final InputStream source) throws ParserException, InterruptedException {
         File dstFile = null;
         try {
             dstFile = File.createTempFile("mimeTypeParser",".tmp");
             serverFileUtils.copy(source,dstFile);
             return parse(location,mimeType,charset,dstFile);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new ParserException("Unexpected error while detect mimetype of resource. " + e.getMessage(),location);
         } finally {
             if (dstFile != null) {dstFile.delete();}            

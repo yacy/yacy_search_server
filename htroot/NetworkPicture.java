@@ -34,8 +34,8 @@ import de.anomic.ymage.ymageMatrix;
 /** draw a picture of the yacy network */
 public class NetworkPicture {
     
-    public static ymageMatrix respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
-        plasmaSwitchboard sb = (plasmaSwitchboard) env;
+    public static ymageMatrix respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         
         int width = 768;
         int height = 576;

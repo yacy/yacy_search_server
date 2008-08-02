@@ -46,10 +46,10 @@ public class serverMemory {
      * @param last time which must be passed since lased gc
      * @param info additional info for log
      */
-    public final synchronized static void gc(int last, String info) { // thq
-        long elapsed = System.currentTimeMillis() - lastGC;
+    public final synchronized static void gc(final int last, final String info) { // thq
+        final long elapsed = System.currentTimeMillis() - lastGC;
         if (elapsed > last) {
-            long free = free();
+            final long free = free();
             System.gc();
             lastGC = System.currentTimeMillis();
             if (log.isFine()) log.logInfo("[gc] before: " + bytesToString(free) + ", after: " + bytesToString(free()) + ", call: " + info);
@@ -147,7 +147,7 @@ public class serverMemory {
         long avail = available();
         if (avail >= size) return true;
         if (log.isFine()) {
-            String t = new Throwable("Stack trace").getStackTrace()[1].toString();
+            final String t = new Throwable("Stack trace").getStackTrace()[1].toString();
             log.logFine(t + " requested " + (size >> 10) + " KB, got " + (avail >> 10) + " KB");
         } 
         final long avg = getAverageGCFree();
@@ -179,7 +179,7 @@ public class serverMemory {
      * @param byteCount
      * @return formatted String with unit
      */
-    public static String bytesToString(long byteCount) {
+    public static String bytesToString(final long byteCount) {
         try {
             final StringBuffer byteString = new StringBuffer();
 
@@ -198,7 +198,7 @@ public class serverMemory {
             }
 
             return byteString.toString();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             return "unknown";
         }
     }
@@ -207,13 +207,13 @@ public class serverMemory {
      * main
      * @param args
      */
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         // try this with a jvm 1.4.2 and with a jvm 1.5 and compare results
-        int mb = 1024 * 1024;
+        final int mb = 1024 * 1024;
         System.out.println("vm: " + System.getProperty("java.vm.version"));
         System.out.println("computed max = " + (max() / mb) + " mb");
-        int alloc = 10000;
-        byte[][] x = new byte[100000][];
+        final int alloc = 10000;
+        final byte[][] x = new byte[100000][];
         for (int i = 0; i < 100000; i++) {
             x[i] = new byte[alloc];
             if (i % 100 == 0) System.out.println("used = " + (i * alloc / mb) +

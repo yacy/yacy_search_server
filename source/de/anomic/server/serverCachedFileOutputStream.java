@@ -44,17 +44,17 @@ public class serverCachedFileOutputStream extends ByteArrayOutputStream {
     protected boolean isFallback = false;
     protected OutputStream fallback = null;
     
-    public serverCachedFileOutputStream(long fallbackSize) throws IOException {
+    public serverCachedFileOutputStream(final long fallbackSize) throws IOException {
         this(fallbackSize, null, true, 32);
     }
     
-    public serverCachedFileOutputStream(long fallbackSize, File fallback, boolean buffered)
+    public serverCachedFileOutputStream(final long fallbackSize, final File fallback, final boolean buffered)
             throws IOException {
         this(fallbackSize, fallback, buffered, 32);
     }
     
-    public serverCachedFileOutputStream(long fallbackSize, File fallback, boolean buffered,
-            long size) throws IOException {
+    public serverCachedFileOutputStream(final long fallbackSize, final File fallback, final boolean buffered,
+            final long size) throws IOException {
         this.fallbackSize = fallbackSize;
         this.fallbackFile = (fallback == null) ? File.createTempFile(
                 serverCachedFileOutputStream.class.getName(),
@@ -63,19 +63,19 @@ public class serverCachedFileOutputStream extends ByteArrayOutputStream {
         checkFallback(size);
     }
     
-    public serverCachedFileOutputStream(long fallbackSize, File fallback, boolean buffered,
-            byte[] data) throws IOException {
+    public serverCachedFileOutputStream(final long fallbackSize, final File fallback, final boolean buffered,
+            final byte[] data) throws IOException {
         this(fallbackSize, fallback, buffered, 0);
         super.buf = data;
         super.count = data.length;
         checkFallback(this.size = data.length);
     }
     
-    protected boolean checkFallback(long size) {
+    protected boolean checkFallback(final long size) {
         if (size > this.fallbackSize) try {
             fallback();
             return true;
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new RuntimeException("error falling back to file", e);
         } else {
             return false;
@@ -90,7 +90,7 @@ public class serverCachedFileOutputStream extends ByteArrayOutputStream {
         } else if (this.fallbackFile.isDirectory()) {
             throw new IOException("cannot write on a directory");
         }
-        OutputStream os = new FileOutputStream(this.fallbackFile);
+        final OutputStream os = new FileOutputStream(this.fallbackFile);
         this.fallback = (this.buffered) ? new BufferedOutputStream(os) : os;
         serverFileUtils.copy(new ByteArrayInputStream(super.buf), this.fallback);
         super.buf = new byte[0];
@@ -102,20 +102,20 @@ public class serverCachedFileOutputStream extends ByteArrayOutputStream {
         return this.isFallback;
     }
     
-    public synchronized void write(int b) {
+    public synchronized void write(final int b) {
         if (checkFallback(++this.size)) try {
             this.fallback.write(b);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new RuntimeException("error writing to fallback", e);
         } else {
             super.write(b);
         }
     }
     
-    public synchronized void write(byte[] b, int off, int len) {
+    public synchronized void write(final byte[] b, final int off, final int len) {
         if (checkFallback(this.size += len)) try {
             this.fallback.write(b, off, len);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new RuntimeException("error writing to fallback", e);
         } else {
             super.write(b, off, len);
@@ -131,7 +131,7 @@ public class serverCachedFileOutputStream extends ByteArrayOutputStream {
     public InputStream getContent() throws IOException {
         close();
         if (this.isFallback) {
-            InputStream is = new FileInputStream(this.fallbackFile);
+            final InputStream is = new FileInputStream(this.fallbackFile);
             return (this.buffered) ? new BufferedInputStream(is) : is;
         } else {
             return new ByteArrayInputStream(this.buf);

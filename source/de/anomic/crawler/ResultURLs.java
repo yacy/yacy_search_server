@@ -66,7 +66,7 @@ public final class ResultURLs {
         gcrawlResultStack = new LinkedList<String>();
     }
 
-    public synchronized void stack(indexURLReference e, String initiatorHash, String executorHash, int stackType) {
+    public synchronized void stack(final indexURLReference e, final String initiatorHash, final String executorHash, final int stackType) {
         assert initiatorHash != null;
         assert executorHash != null;
         if (e == null) { return; }
@@ -76,17 +76,17 @@ public final class ResultURLs {
                 resultStack.add(e.hash() + initiatorHash + executorHash);
             }
             return;
-        } catch (Exception ex) {
+        } catch (final Exception ex) {
             System.out.println("INTERNAL ERROR in newEntry/2: " + ex.toString());
             return;
         }
     }
 
-    public synchronized void notifyGCrawl(String urlHash, String initiatorHash, String executorHash) {
+    public synchronized void notifyGCrawl(final String urlHash, final String initiatorHash, final String executorHash) {
         gcrawlResultStack.add(urlHash + initiatorHash + executorHash);
     }
     
-    public synchronized int getStackSize(int stack) {
+    public synchronized int getStackSize(final int stack) {
         final List<String> resultStack = getStack(stack);
         if(resultStack != null) {
             return resultStack.size();
@@ -95,15 +95,15 @@ public final class ResultURLs {
         }
     }
 
-    public synchronized String getUrlHash(int stack, int pos) {
+    public synchronized String getUrlHash(final int stack, final int pos) {
         return getHashNo(stack, pos, 0);
     }
 
-    public synchronized String getInitiatorHash(int stack, int pos) {
+    public synchronized String getInitiatorHash(final int stack, final int pos) {
         return getHashNo(stack, pos, 1);
     }
 
-    public synchronized String getExecutorHash(final int stack, int pos) {
+    public synchronized String getExecutorHash(final int stack, final int pos) {
         return getHashNo(stack, pos, 2);
     }
     
@@ -152,7 +152,7 @@ public final class ResultURLs {
      * @param pos
      * @return null if either stack or element do not exist
      */
-    private String getResultStackAt(final int stack, int pos) {
+    private String getResultStackAt(final int stack, final int pos) {
         assert pos >= 0 : "precondition violated: " + pos + " >= 0";
         
         final List<String> resultStack = getStack(stack);
@@ -196,7 +196,7 @@ public final class ResultURLs {
         return getStack(stack) != null;
     }
 
-    public synchronized boolean removeStack(int stack, int pos) {
+    public synchronized boolean removeStack(final int stack, final int pos) {
 //        Object prevElement = null;
 //        switch (stack) {
 //            case 1: prevElement = externResultStack.remove(pos); break;
@@ -215,7 +215,7 @@ public final class ResultURLs {
         }
     }
 
-    public synchronized void clearStack(int stack) {
+    public synchronized void clearStack(final int stack) {
         final List<String> resultStack = getStack(stack);
         if(resultStack != null) {
             resultStack.clear();
@@ -230,7 +230,7 @@ public final class ResultURLs {
 //        }
     }
 
-    public synchronized boolean remove(String urlHash) {
+    public synchronized boolean remove(final String urlHash) {
         if (urlHash == null) return false;
         for (int stack = 1; stack <= 6; stack++) {
             for (int i = getStackSize(stack) - 1; i >= 0; i--) {
@@ -247,7 +247,7 @@ public final class ResultURLs {
      * test and benchmark
      * @param args
      */
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         final ResultURLs results = new ResultURLs();
         try {
             final yacyURL url = new yacyURL("http", "www.yacy.net", 80, "/");
@@ -291,7 +291,7 @@ public final class ResultURLs {
                 }
             }
             System.out.println("benschmark: "+ (System.currentTimeMillis() - start) + " ms");
-        } catch (MalformedURLException e) {
+        } catch (final MalformedURLException e) {
             e.printStackTrace();
         }
     }

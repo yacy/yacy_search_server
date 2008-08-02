@@ -59,17 +59,17 @@ import de.anomic.server.serverDate;
 
 public class yacyNewsDB {
 
-    private File path;
+    private final File path;
     protected kelondroIndex news;
 
-    public yacyNewsDB(File path) {
+    public yacyNewsDB(final File path) {
         this.path = path;
         this.news = new kelondroEcoTable(path, yacyNewsRecord.rowdef, kelondroEcoTable.tailCacheUsageAuto, 10, 0);
         //this.news = new kelondroCache(kelondroTree.open(path, true, preloadTime, yacyNewsRecord.rowdef));
     }
 
     private void resetDB() {
-        try {close();} catch (Exception e) {}
+        try {close();} catch (final Exception e) {}
         if (path.exists()) path.delete();
         this.news = new kelondroEcoTable(path, yacyNewsRecord.rowdef, kelondroEcoTable.tailCacheUsageAuto, 10, 0);
     }
@@ -87,14 +87,14 @@ public class yacyNewsDB {
         return news.size();
     }
 
-    public void remove(String id) throws IOException {
+    public void remove(final String id) throws IOException {
         news.remove(id.getBytes());
     }
 
-    public synchronized yacyNewsRecord put(yacyNewsRecord record) throws IOException {
+    public synchronized yacyNewsRecord put(final yacyNewsRecord record) throws IOException {
         try {
             return b2r(news.put(r2b(record)));
-        } catch (kelondroException e) {
+        } catch (final kelondroException e) {
             resetDB();
             return b2r(news.put(r2b(record)));
         }
@@ -126,16 +126,16 @@ public class yacyNewsDB {
 
     }
 
-    public synchronized yacyNewsRecord get(String id) throws IOException {
+    public synchronized yacyNewsRecord get(final String id) throws IOException {
         try {
             return b2r(news.get(id.getBytes()));
-        } catch (kelondroException e) {
+        } catch (final kelondroException e) {
             resetDB();
             return null;
         }
     }
 
-    protected final static yacyNewsRecord b2r(kelondroRow.Entry b) {
+    protected final static yacyNewsRecord b2r(final kelondroRow.Entry b) {
         if (b == null) return null;
         return yacyNewsRecord.newRecord(
             b.getColString(0, null),
@@ -146,19 +146,19 @@ public class yacyNewsDB {
         );
     }
 
-    protected final kelondroRow.Entry r2b(yacyNewsRecord r) {
+    protected final kelondroRow.Entry r2b(final yacyNewsRecord r) {
         if (r == null) return null;
         try {
-            String attributes = r.attributes().toString();
+            final String attributes = r.attributes().toString();
             if (attributes.length() > yacyNewsRecord.attributesMaxLength) throw new IllegalArgumentException("attribute length=" + attributes.length() + " exceeds maximum size=" + yacyNewsRecord.attributesMaxLength);
-            kelondroRow.Entry entry = this.news.row().newEntry();
+            final kelondroRow.Entry entry = this.news.row().newEntry();
             entry.setCol(0, r.id().getBytes());
             entry.setCol(1, r.category().getBytes("UTF-8"));
             entry.setCol(2, (r.received() == null) ? null : serverDate.formatShortSecond(r.received()).getBytes());
             entry.setCol(3, kelondroBase64Order.enhancedCoder.encodeLong(r.distributed(), 2).getBytes());
             entry.setCol(4, attributes.getBytes("UTF-8"));
             return entry;
-        } catch(UnsupportedEncodingException e) {
+        } catch(final UnsupportedEncodingException e) {
             // ignore this. this should never occure
             return null;
         }

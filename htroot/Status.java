@@ -50,7 +50,7 @@ public class Status {
     private static final String SEEDSERVER = "seedServer";
     private static final String PEERSTATUS = "peerStatus";
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
@@ -65,14 +65,14 @@ public class Status {
                 prop.put("LOCATION","");
                 return prop;
             } else if (post.containsKey("pauseCrawlJob")) {
-        		String jobType = post.get("jobType");
+        		final String jobType = post.get("jobType");
         		if (jobType.equals("localCrawl")) 
                     sb.pauseCrawlJob(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL);
         		else if (jobType.equals("remoteTriggeredCrawl")) 
                     sb.pauseCrawlJob(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
         		redirect = true;
         	} else if (post.containsKey("continueCrawlJob")) {
-        		String jobType = post.get("jobType");
+        		final String jobType = post.get("jobType");
         		if (jobType.equals("localCrawl")) 
                     sb.continueCrawlJob(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL);
         		else if (jobType.equals("remoteTriggeredCrawl")) 
@@ -83,7 +83,7 @@ public class Status {
         		httpdByteCountOutputStream.resetCount();
         		redirect = true;
         	} else if (post.containsKey("popup")) {
-                String trigger_enabled = post.get("popup");
+                final String trigger_enabled = post.get("popup");
                 if (trigger_enabled.equals("false")) {
                     sb.setConfig("browserPopUpTrigger", "false");
                 } else if (trigger_enabled.equals("true")){
@@ -91,7 +91,7 @@ public class Status {
                 }
                 redirect = true;
         	} else if (post.containsKey("tray")) {
-                String trigger_enabled = post.get("tray");
+                final String trigger_enabled = post.get("tray");
                 if (trigger_enabled.equals("false")) {
                     sb.setConfig("trayIcon", "false");
                 } else if (trigger_enabled.equals("true")){
@@ -109,7 +109,7 @@ public class Status {
         // update seed info
         sb.updateMySeed();
 
-        boolean adminaccess = sb.adminAuthenticated(header) >= 2;
+        final boolean adminaccess = sb.adminAuthenticated(header) >= 2;
         if (adminaccess) {
             prop.put("showPrivateTable", "1");
             prop.put("privateStatusTable", "Status_p.inc");
@@ -129,19 +129,19 @@ public class Status {
         // free disk space
         if ((adminaccess) && (!sb.observer.getDisksOK()))
         {
-            String minFree = serverMemory.bytesToString(sb.observer.getMinFreeDiskSpace());
+            final String minFree = serverMemory.bytesToString(sb.observer.getMinFreeDiskSpace());
             prop.put("warningDiskSpaceLow", "1");
             prop.put("warningDiskSpaceLow_minSpace", minFree);
         }
         
         
         // version information
-        String versionstring = yacyVersion.combined2prettyVersion(sb.getConfig("version","0.1"));
+        final String versionstring = yacyVersion.combined2prettyVersion(sb.getConfig("version","0.1"));
         prop.put("versionpp", versionstring);
         double thisVersion = Double.parseDouble(sb.getConfig("version","0.1"));
         
         // cut off the SVN Rev in the Version
-        try {thisVersion = Math.round(thisVersion*1000.0)/1000.0;} catch (NumberFormatException e) {}
+        try {thisVersion = Math.round(thisVersion*1000.0)/1000.0;} catch (final NumberFormatException e) {}
 
         // place some more hints
         if ((adminaccess) && (sb.getThread(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL).getJobCount() == 0) && (sb.getThread(plasmaSwitchboard.INDEXER).getJobCount() == 0)) {
@@ -153,8 +153,8 @@ public class Status {
         }
         
         // hostname and port
-        String extendedPortString = sb.getConfig("port", "8080");
-        int pos = extendedPortString.indexOf(":"); 
+        final String extendedPortString = sb.getConfig("port", "8080");
+        final int pos = extendedPortString.indexOf(":"); 
         prop.put("port",serverCore.getPortNr(extendedPortString));
         if (pos!=-1) {
             prop.put("extPortFormat", "1");
@@ -289,21 +289,21 @@ public class Status {
         prop.put("trafficCrawler", serverMemory.bytesToString(httpdByteCountInputStream.getAccountCount("CRAWLER")));
 
         // connection information
-        serverCore httpd = (serverCore) sb.getThread("10_httpd");
+        final serverCore httpd = (serverCore) sb.getThread("10_httpd");
         prop.putNum("connectionsActive", httpd.getJobCount());
         prop.putNum("connectionsMax", httpd.getMaxSessionCount());
         
         // Queue information
-        int indexingJobCount = sb.getThread("80_indexing").getJobCount() + sb.webIndex.queuePreStack.getActiveQueueSize();
-        int indexingMaxCount = (int) sb.getConfigLong(plasmaSwitchboard.INDEXER_SLOTS, 30);
-        int indexingPercent = (indexingMaxCount==0)?0:indexingJobCount*100/indexingMaxCount;
+        final int indexingJobCount = sb.getThread("80_indexing").getJobCount() + sb.webIndex.queuePreStack.getActiveQueueSize();
+        final int indexingMaxCount = (int) sb.getConfigLong(plasmaSwitchboard.INDEXER_SLOTS, 30);
+        final int indexingPercent = (indexingMaxCount==0)?0:indexingJobCount*100/indexingMaxCount;
         prop.putNum("indexingQueueSize", indexingJobCount);
         prop.putNum("indexingQueueMax", indexingMaxCount);
         prop.put("indexingQueuePercent",(indexingPercent>100) ? 100 : indexingPercent);
         
-        int loaderJobCount = sb.crawlQueues.size();
-        int loaderMaxCount = Integer.parseInt(sb.getConfig(plasmaSwitchboard.CRAWLER_THREADS_ACTIVE_MAX, "10"));
-        int loaderPercent = (loaderMaxCount==0)?0:loaderJobCount*100/loaderMaxCount;
+        final int loaderJobCount = sb.crawlQueues.size();
+        final int loaderMaxCount = Integer.parseInt(sb.getConfig(plasmaSwitchboard.CRAWLER_THREADS_ACTIVE_MAX, "10"));
+        final int loaderPercent = (loaderMaxCount==0)?0:loaderJobCount*100/loaderMaxCount;
         prop.putNum("loaderQueueSize", loaderJobCount);
         prop.putNum("loaderQueueMax", loaderMaxCount);        
         prop.put("loaderQueuePercent", (loaderPercent>100) ? 100 : loaderPercent);

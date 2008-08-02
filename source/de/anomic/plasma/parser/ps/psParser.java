@@ -79,23 +79,23 @@ public class psParser extends AbstractParser implements Parser {
     public boolean testForPs2Ascii() {
         try {
             String procOutputLine = null;
-            StringBuffer procOutput = new StringBuffer();
+            final StringBuffer procOutput = new StringBuffer();
             
-            Process ps2asciiProc = Runtime.getRuntime().exec(new String[]{"ps2ascii", "--version"});
-            BufferedReader stdOut = new BufferedReader(new InputStreamReader(ps2asciiProc.getInputStream()));
+            final Process ps2asciiProc = Runtime.getRuntime().exec(new String[]{"ps2ascii", "--version"});
+            final BufferedReader stdOut = new BufferedReader(new InputStreamReader(ps2asciiProc.getInputStream()));
             while ((procOutputLine = stdOut.readLine()) != null) {
                 procOutput.append(procOutputLine).append(", ");
             }
-            int returnCode = ps2asciiProc.waitFor();
+            final int returnCode = ps2asciiProc.waitFor();
             return (returnCode == 0);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             if (this.theLogger != null) this.theLogger.logInfo("ps2ascii not found. Switching to java parser mode.");
             return false;
         }
     }
     
     
-    public plasmaParserDocument parse(yacyURL location, String mimeType, String charset, File sourceFile) throws ParserException, InterruptedException {
+    public plasmaParserDocument parse(final yacyURL location, final String mimeType, final String charset, final File sourceFile) throws ParserException, InterruptedException {
         
     	File outputFile = null;
         try { 
@@ -110,7 +110,7 @@ public class psParser extends AbstractParser implements Parser {
             }
             
             // return result
-            plasmaParserDocument theDoc = new plasmaParserDocument(
+            final plasmaParserDocument theDoc = new plasmaParserDocument(
                     location,
                     mimeType,
                     "UTF-8",
@@ -124,7 +124,7 @@ public class psParser extends AbstractParser implements Parser {
                     null);         
             
             return theDoc;
-        } catch (Exception e) {            
+        } catch (final Exception e) {            
             if (e instanceof InterruptedException) throw (InterruptedException) e;
             if (e instanceof ParserException) throw (ParserException) e;
             
@@ -136,7 +136,7 @@ public class psParser extends AbstractParser implements Parser {
         } 
     }    
     
-    public void parseUsingJava (File inputFile, File outputFile) throws Exception {
+    public void parseUsingJava (final File inputFile, final File outputFile) throws Exception {
         
         BufferedReader reader = null;
         BufferedWriter writer = null;
@@ -144,8 +144,8 @@ public class psParser extends AbstractParser implements Parser {
             reader = new BufferedReader(new FileReader(inputFile));
             writer = new BufferedWriter(new FileWriter(outputFile));
             
-            String versionInfoLine = reader.readLine();
-            String version = versionInfoLine.substring(versionInfoLine.length()-3);
+            final String versionInfoLine = reader.readLine();
+            final String version = versionInfoLine.substring(versionInfoLine.length()-3);
 
             int ichar = 0;
             boolean isComment = false;
@@ -175,7 +175,7 @@ public class psParser extends AbstractParser implements Parser {
                 }
               
             } else  if (version.startsWith("3")) {
-                StringBuffer stmt = new StringBuffer();
+                final StringBuffer stmt = new StringBuffer();
                 boolean isBMP = false;
                 boolean isStore = false;
                 int store = 0;
@@ -217,8 +217,8 @@ public class psParser extends AbstractParser implements Parser {
                 throw new Exception("Unsupported Postscript version '" + version + "'.");
             }            
         } finally {
-            if (reader != null) try { reader.close(); } catch (Exception e) {/* */}
-            if (writer != null) try { writer.close(); } catch (Exception e) {/* */}
+            if (reader != null) try { reader.close(); } catch (final Exception e) {/* */}
+            if (writer != null) try { writer.close(); } catch (final Exception e) {/* */}
         }
               
 
@@ -230,17 +230,17 @@ public class psParser extends AbstractParser implements Parser {
      * @param outputFile
      * @throws Exception
      */
-    private void parseUsingPS2ascii(File inputFile, File outputFile) throws Exception {
+    private void parseUsingPS2ascii(final File inputFile, final File outputFile) throws Exception {
     	int execCode = 0;
     	StringBuffer procErr = null;
     	try {
     		String procOutputLine = null;
-    		StringBuffer procOut = new StringBuffer();
+    		final StringBuffer procOut = new StringBuffer();
     		procErr = new StringBuffer();
     		
-    		Process ps2asciiProc = Runtime.getRuntime().exec(new String[]{"ps2ascii", inputFile.getAbsolutePath(),outputFile.getAbsolutePath()});
-    		BufferedReader stdOut = new BufferedReader(new InputStreamReader(ps2asciiProc.getInputStream()));
-    		BufferedReader stdErr = new BufferedReader(new InputStreamReader(ps2asciiProc.getErrorStream()));
+    		final Process ps2asciiProc = Runtime.getRuntime().exec(new String[]{"ps2ascii", inputFile.getAbsolutePath(),outputFile.getAbsolutePath()});
+    		final BufferedReader stdOut = new BufferedReader(new InputStreamReader(ps2asciiProc.getInputStream()));
+    		final BufferedReader stdErr = new BufferedReader(new InputStreamReader(ps2asciiProc.getErrorStream()));
     		while ((procOutputLine = stdOut.readLine()) != null) {
     			procOut.append(procOutputLine);
     		}
@@ -248,8 +248,8 @@ public class psParser extends AbstractParser implements Parser {
     			procErr.append(procOutputLine);
     		}
     		execCode = ps2asciiProc.waitFor();
-    	} catch (Exception e) {
-    		String errorMsg = "Unable to convert ps to ascii. " + e.getMessage();
+    	} catch (final Exception e) {
+    		final String errorMsg = "Unable to convert ps to ascii. " + e.getMessage();
     		this.theLogger.logSevere(errorMsg);
     		throw new Exception(errorMsg);
     	}
@@ -262,7 +262,7 @@ public class psParser extends AbstractParser implements Parser {
     	super.reset();
     }
 
-    public plasmaParserDocument parse(yacyURL location, String mimeType, String charset, InputStream source) throws ParserException, InterruptedException {
+    public plasmaParserDocument parse(final yacyURL location, final String mimeType, final String charset, final InputStream source) throws ParserException, InterruptedException {
         
         File tempFile = null;
         try {
@@ -275,13 +275,13 @@ public class psParser extends AbstractParser implements Parser {
             
             // parsing the file
             return parse(location,mimeType,charset,tempFile);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             if (e instanceof InterruptedException) throw (InterruptedException) e;
             if (e instanceof ParserException) throw (ParserException) e;        	
         	
             throw new ParserException("Unable to parse the ps file. " + e.getMessage(),location, e);
         } finally {
-            if (tempFile != null) try{ tempFile.delete(); }catch(Exception e) {/* */}
+            if (tempFile != null) try{ tempFile.delete(); }catch(final Exception e) {/* */}
         }
     }
 

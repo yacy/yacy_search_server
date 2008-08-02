@@ -48,10 +48,10 @@ import de.anomic.yacy.yacyURL;
 
 public class ConfigLanguage_p {
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
         //listManager.switchboard = (plasmaSwitchboard) env;
-        serverObjects prop = new serverObjects();
-        String langPath = env.getConfigPath("locale.work", "DATA/LOCALE/locales").getAbsolutePath();
+        final serverObjects prop = new serverObjects();
+        final String langPath = env.getConfigPath("locale.work", "DATA/LOCALE/locales").getAbsolutePath();
 
         //Fallback
         //prop.put("currentlang", ""); //is done by Translationtemplate
@@ -69,33 +69,33 @@ public class ConfigLanguage_p {
 
                 //delete language file
             }else if(post.containsKey("delete")){
-                File langfile= new File(langPath, post.get("language"));
+                final File langfile= new File(langPath, post.get("language"));
                 langfile.delete();
 
                 //load language file from URL
             } else if (post.containsKey("url")){
-                String url = post.get("url");
+                final String url = post.get("url");
                 ArrayList<String> langVector;
                 try{
-                    yacyURL u = new yacyURL(url, null);
-                    httpHeader reqHeader = new httpHeader();
+                    final yacyURL u = new yacyURL(url, null);
+                    final httpHeader reqHeader = new httpHeader();
                     reqHeader.put(httpHeader.USER_AGENT, HTTPLoader.yacyUserAgent);
                     langVector = nxTools.strings(HttpClient.wget(u.toString(), reqHeader, 10000), "UTF-8");
-                }catch(IOException e){
+                }catch(final IOException e){
                     prop.put("status", "1");//unable to get url
                     prop.put("status_url", url);
                     return prop;
                 }
                 try{
-                    Iterator<String> it = langVector.iterator();
-                    File langFile = new File(langPath, url.substring(url.lastIndexOf("/"), url.length()));
-                    BufferedWriter bw = new BufferedWriter(new PrintWriter(new FileWriter(langFile)));
+                    final Iterator<String> it = langVector.iterator();
+                    final File langFile = new File(langPath, url.substring(url.lastIndexOf("/"), url.length()));
+                    final BufferedWriter bw = new BufferedWriter(new PrintWriter(new FileWriter(langFile)));
 
                     while (it.hasNext()) {
                         bw.write(it.next() + "\n");
                     }
                     bw.close();
-                }catch(IOException e){
+                }catch(final IOException e){
                     prop.put("status", "2");//error saving the language file
                     return prop;
                 }
@@ -108,7 +108,7 @@ public class ConfigLanguage_p {
         //reread language files
         langFiles = listManager.getDirListing(langPath);
         int i;
-        HashMap<String, String> langNames = translator.langMap(env);
+        final HashMap<String, String> langNames = translator.langMap(env);
         String langKey, langName;
 
         //virtual entry

@@ -41,7 +41,7 @@ public class httpdByteCountInputStream extends FilterInputStream {
     protected long byteCount;
     private String byteCountAccountName = null; 
 
-    protected httpdByteCountInputStream(InputStream inputStream) {
+    protected httpdByteCountInputStream(final InputStream inputStream) {
         this(inputStream,null);
     }
     
@@ -49,7 +49,7 @@ public class httpdByteCountInputStream extends FilterInputStream {
      * Constructor of this class
      * @param inputStream the {@link InputStream} to read from
      */
-    public httpdByteCountInputStream(InputStream inputStream, String accountName) {
+    public httpdByteCountInputStream(final InputStream inputStream, final String accountName) {
         this(inputStream,0,accountName);
     }
     
@@ -58,24 +58,24 @@ public class httpdByteCountInputStream extends FilterInputStream {
      * @param inputStream the {@link InputStream} to read from
      * @param initByteCount to initialize the bytecount with a given value
      */
-    public httpdByteCountInputStream(InputStream inputStream, int initByteCount, String accountName) {
+    public httpdByteCountInputStream(final InputStream inputStream, final int initByteCount, final String accountName) {
         super(inputStream);
         this.byteCount = initByteCount;
         this.byteCountAccountName = accountName;
     }  
     
-    public int read(byte[] b) throws IOException {
-        int readCount = super.read(b);
+    public int read(final byte[] b) throws IOException {
+        final int readCount = super.read(b);
         if (readCount > 0) this.byteCount += readCount;
         return readCount;
     }
 
-    public int read(byte[] b, int off, int len) throws IOException {
+    public int read(final byte[] b, final int off, final int len) throws IOException {
         try {
-        int readCount = super.read(b, off, len);
+        final int readCount = super.read(b, off, len);
         if (readCount > 0) this.byteCount += readCount;
         return readCount;
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new IOException(e.getMessage() + "; b.length = " + b.length + ", off = " + off + ", len = " + len);
         }
     }
@@ -85,8 +85,8 @@ public class httpdByteCountInputStream extends FilterInputStream {
         return super.read();
     }
     
-    public long skip(long len) throws IOException {
-        long skipCount = super.skip(len);
+    public long skip(final long len) throws IOException {
+        final long skipCount = super.skip(len);
         if (skipCount > 0) this.byteCount += skipCount; 
         return skipCount;
     }
@@ -105,7 +105,7 @@ public class httpdByteCountInputStream extends FilterInputStream {
         }
     }
     
-    public static long getAccountCount(String accountName) {
+    public static long getAccountCount(final String accountName) {
         synchronized (syncObject) {
             if (byteCountInfo.containsKey(accountName)) {
                 return (byteCountInfo.get(accountName)).longValue();

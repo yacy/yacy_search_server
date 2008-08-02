@@ -33,9 +33,9 @@ public class SitemapImporter extends AbstractImporter implements Importer {
 
 	private SitemapParser parser = null;
 	private yacyURL sitemapURL = null;
-	private ImporterManager superviser;
+	private final ImporterManager superviser;
 	
-	public SitemapImporter(plasmaSwitchboard sb, ImporterManager importManager, yacyURL sitemapURL, CrawlProfile.entry profileEntry) throws ImporterException {
+	public SitemapImporter(final plasmaSwitchboard sb, final ImporterManager importManager, final yacyURL sitemapURL, final CrawlProfile.entry profileEntry) throws ImporterException {
 		super("sitemap");
 		this.superviser = importManager;
         try {
@@ -44,7 +44,7 @@ public class SitemapImporter extends AbstractImporter implements Importer {
             
             // creating the sitemap parser
             this.parser = new SitemapParser(sb, this.sitemapURL, profileEntry);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new ImporterException("Unable to initialize Importer",e);
         }
     }
@@ -52,8 +52,8 @@ public class SitemapImporter extends AbstractImporter implements Importer {
     
     
 	public long getEstimatedTime() {
-		long t = getElapsedTime();
-		int p = getProcessingStatusPercent();
+		final long t = getElapsedTime();
+		final int p = getProcessingStatusPercent();
 		return (p==0)?0:(t/p)*(100-p);
 	}
 
@@ -70,8 +70,8 @@ public class SitemapImporter extends AbstractImporter implements Importer {
 	public int getProcessingStatusPercent() {
 		if (this.parser == null) return 0;
 		
-		long total = this.parser.getTotalLength();
-		long processed = this.parser.getProcessedLength();
+		final long total = this.parser.getTotalLength();
+		final long processed = this.parser.getProcessedLength();
 		
 		if (total <= 1) return 0;		
 		return (int) ((processed*100)/ total);
@@ -81,7 +81,7 @@ public class SitemapImporter extends AbstractImporter implements Importer {
 	 * @see Importer#getStatus()
 	 */
 	public String getStatus() {
-        StringBuffer theStatus = new StringBuffer();
+        final StringBuffer theStatus = new StringBuffer();
         
         theStatus.append("#URLs=").append((this.parser==null)?0:this.parser.getUrlcount());
         

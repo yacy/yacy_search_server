@@ -50,21 +50,21 @@ import de.anomic.yacy.yacySeed;
 
 public final class Connections_p {    
     
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
         // return variable that accumulates replacements
-        plasmaSwitchboard sb = (plasmaSwitchboard) env;
-        serverObjects prop = new serverObjects();
+        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        final serverObjects prop = new serverObjects();
          
         
         // get the virtualHost string
-        String virtualHost = sb.getConfig("fileHost","localhost");
+        final String virtualHost = sb.getConfig("fileHost","localhost");
         
         // get the serverCore thread
-        serverThread httpd = sb.getThread("10_httpd");
+        final serverThread httpd = sb.getThread("10_httpd");
         
         /* waiting for all threads to finish */
         int threadCount  = serverCore.sessionThreadGroup.activeCount();    
-        Thread[] threadList = new Thread[((serverCore) httpd).getJobCount()];     
+        final Thread[] threadList = new Thread[((serverCore) httpd).getJobCount()];     
         threadCount = serverCore.sessionThreadGroup.enumerate(threadList);              
         
         // determines if name lookup should be done or not 
@@ -74,10 +74,10 @@ public final class Connections_p {
                 doNameLookup = true;
             }
             if (post.containsKey("closeSession")) {
-                String sessionName = post.get("closeSession",null);
+                final String sessionName = post.get("closeSession",null);
                 if (sessionName != null) {
                     for ( int currentThreadIdx = 0; currentThreadIdx < threadCount; currentThreadIdx++ )  {                        
-                        Thread currentThread = threadList[currentThreadIdx];
+                        final Thread currentThread = threadList[currentThreadIdx];
                         if (
                                 (currentThread != null) && 
                                 (currentThread instanceof serverCore.Session) && 
@@ -86,12 +86,12 @@ public final class Connections_p {
                         ){
                             // trying to gracefull stop session
                             ((Session)currentThread).setStopped(true);
-                            try { Thread.sleep(100); } catch (InterruptedException ex) {}
+                            try { Thread.sleep(100); } catch (final InterruptedException ex) {}
                             
                             // trying to interrupt session
                             if (currentThread.isAlive()) {
                                 currentThread.interrupt();
-                                try { Thread.sleep(100); } catch (InterruptedException ex) {}
+                                try { Thread.sleep(100); } catch (final InterruptedException ex) {}
                             } 
                             
                             // trying to close socket
@@ -101,7 +101,7 @@ public final class Connections_p {
                             
                             // waiting for session to finish
                             if (currentThread.isAlive()) {
-                                try { currentThread.join(500); } catch (InterruptedException ex) {}
+                                try { currentThread.join(500); } catch (final InterruptedException ex) {}
                             }
                         }
                     }
@@ -114,38 +114,38 @@ public final class Connections_p {
         int idx = 0, numActiveRunning = 0, numActivePending = 0;
         boolean dark = true;
         for ( int currentThreadIdx = 0; currentThreadIdx < threadCount; currentThreadIdx++ )  {
-            Thread currentThread = threadList[currentThreadIdx];
+            final Thread currentThread = threadList[currentThreadIdx];
             if ((currentThread != null) && (currentThread instanceof serverCore.Session) && (currentThread.isAlive())) {
                 // getting the session object
-                Session currentSession = ((Session)currentThread);
+                final Session currentSession = ((Session)currentThread);
                 
                 // getting the session runtime
-                long sessionTime = currentSession.getTime();
+                final long sessionTime = currentSession.getTime();
                 
                 // getting the request command line
                 boolean blockingRequest = false;
                 String commandLine = currentSession.getCommandLine();
                 if (commandLine == null) blockingRequest = true;                
-                int commandCount = currentSession.getCommandCount();
+                final int commandCount = currentSession.getCommandCount();
                 
                 // getting the source ip address and port
-                InetAddress userAddress = currentSession.getUserAddress();
-                int userPort = currentSession.getUserPort();
+                final InetAddress userAddress = currentSession.getUserAddress();
+                final int userPort = currentSession.getUserPort();
                 if (userAddress == null) continue;
                 
-                boolean isSSL = currentSession.isSSL();
+                final boolean isSSL = currentSession.isSSL();
                 
                 String dest = null;
                 String prot = null;
-                serverHandler cmdObj = currentSession.getCommandObj();
+                final serverHandler cmdObj = currentSession.getCommandObj();
                 if (cmdObj instanceof httpd) {
                     prot = isSSL ? "https":"http";
                     
                     // getting the http command object
-                    httpd currentHttpd =  (httpd)cmdObj;
+                    final httpd currentHttpd =  (httpd)cmdObj;
                     
                     // getting the connection properties of this session
-                    Properties conProp = (Properties) currentHttpd.getConProp().clone();
+                    final Properties conProp = (Properties) currentHttpd.getConProp().clone();
                     
                     // getting the destination host
                     dest = conProp.getProperty(httpHeader.CONNECTION_PROP_HOST);
@@ -153,7 +153,7 @@ public final class Connections_p {
                 } else if (cmdObj instanceof urlRedirectord) {
                     prot = "urlRedirector";
                     
-                    urlRedirectord urlRedir = (urlRedirectord)cmdObj;
+                    final urlRedirectord urlRedir = (urlRedirectord)cmdObj;
                     commandLine = urlRedir.getURL();
                 }                
                 
@@ -175,7 +175,7 @@ public final class Connections_p {
                 dark=!dark;
                 try {
                     prop.put("list_" + idx + "_sessionID",URLEncoder.encode(currentSession.getName(),"UTF8"));
-                } catch (UnsupportedEncodingException e) {
+                } catch (final UnsupportedEncodingException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
@@ -210,12 +210,12 @@ public final class Connections_p {
         prop.putNum("numActivePending", numActivePending);
         
         // client sessions
-        Set<HttpConnectionInfo> allConnections = HttpConnectionInfo.getAllConnections();
+        final Set<HttpConnectionInfo> allConnections = HttpConnectionInfo.getAllConnections();
         // TODO sorting
 //        Arrays.sort(a, httpc.connectionTimeComparatorInstance);
         int c = 0;
         synchronized (allConnections) {
-        for (HttpConnectionInfo conInfo: allConnections) {
+        for (final HttpConnectionInfo conInfo: allConnections) {
             prop.put("clientList_" + c + "_clientProtocol", conInfo.getProtocol());
             prop.putNum("clientList_" + c + "_clientLifetime", conInfo.getLifetime());
             prop.putNum("clientList_" + c + "_clientIdletime", conInfo.getIdletime());

@@ -39,7 +39,7 @@ public final class query {
     // example:
     // http://localhost:8080/yacy/query.html?youare=sCJ6Tq8T0N9x&object=lurlcount
     
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> ss) {
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> ss) {
         if (post == null || ss == null) { return null; }
 
         // return variable that accumulates replacements

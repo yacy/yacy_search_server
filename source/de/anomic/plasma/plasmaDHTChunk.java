@@ -99,7 +99,7 @@ public class plasmaDHTChunk {
         return urlCache;
     }
     
-    public void setStatus(int newStatus) {
+    public void setStatus(final int newStatus) {
         this.status = newStatus;
     }
     
@@ -107,7 +107,7 @@ public class plasmaDHTChunk {
         return this.status;
     }
     
-    public plasmaDHTChunk(serverLog log, plasmaWordIndex wordIndex, int minCount, int maxCount, int maxtime) {
+    public plasmaDHTChunk(final serverLog log, final plasmaWordIndex wordIndex, final int minCount, final int maxCount, final int maxtime) {
         try {
             this.log = log;
             this.wordIndex = wordIndex;
@@ -121,12 +121,12 @@ public class plasmaDHTChunk {
                 if (this.log.isFine()) log.logFine("Too few (" + this.idxCount + ") indexes selected for transfer.");
                 this.status = chunkStatus_FAILED;
             }
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
             this.status = chunkStatus_INTERRUPTED;
         }
     }
 
-    public plasmaDHTChunk(serverLog log, plasmaWordIndex wordIndex, int minCount, int maxCount, int maxtime, String startHash) {
+    public plasmaDHTChunk(final serverLog log, final plasmaWordIndex wordIndex, final int minCount, final int maxCount, final int maxtime, final String startHash) {
         try {
             this.log = log;
             this.wordIndex = wordIndex;
@@ -139,7 +139,7 @@ public class plasmaDHTChunk {
                 if (this.log.isFine()) log.logFine("Too few (" + this.idxCount + ") indexes selected for transfer.");
                 this.status = chunkStatus_FAILED;
             }
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
             this.status = chunkStatus_INTERRUPTED;
         }
     }
@@ -147,7 +147,7 @@ public class plasmaDHTChunk {
     private String selectTransferStart() {
         String startPointHash;
         // first try to select with increasing probality a good start point
-        double minimumDistance = ((double) peerRedundancy) / ((double) wordIndex.seedDB.sizeConnected());
+        final double minimumDistance = ((double) peerRedundancy) / ((double) wordIndex.seedDB.sizeConnected());
         double d, bestDistance = 0.0;
         String bestHash = null;
         for (int i = wordIndex.seedDB.sizeConnected() / 8; i > 0; i--) {
@@ -169,15 +169,15 @@ public class plasmaDHTChunk {
         }
     }
 
-    private void selectTransferContainers(String hash, int mincount, int maxcount, int maxtime) throws InterruptedException {        
+    private void selectTransferContainers(final String hash, final int mincount, final int maxcount, final int maxtime) throws InterruptedException {        
         try {
             this.selectionStartTime = System.currentTimeMillis();
-            int refcountRAM = selectTransferContainersResource(hash, true, maxcount, maxtime);
+            final int refcountRAM = selectTransferContainersResource(hash, true, maxcount, maxtime);
             if (refcountRAM >= mincount) {
                 if (this.log.isFine()) log.logFine("DHT selection from RAM: " + refcountRAM + " entries");
                 return;
             }
-            int refcountFile = selectTransferContainersResource(hash, false, maxcount, maxtime);
+            final int refcountFile = selectTransferContainersResource(hash, false, maxcount, maxtime);
             if (this.log.isFine()) log.logFine("DHT selection from FILE: " + refcountFile + " entries, RAM provided only " + refcountRAM + " entries");
             return;
         } finally {
@@ -185,7 +185,7 @@ public class plasmaDHTChunk {
         }
     }
 
-    private int selectTransferContainersResource(String hash, boolean ram, int maxcount, int maxtime) throws InterruptedException {
+    private int selectTransferContainersResource(final String hash, final boolean ram, final int maxcount, final int maxtime) throws InterruptedException {
         // if (maxcount > 500) { maxcount = 500; } // flooding & OOM reduce
         // the hash is a start hash from where the indexes are picked
         final ArrayList<indexContainer> tmpContainers = new ArrayList<indexContainer>(maxcount);
@@ -250,7 +250,7 @@ public class plasmaDHTChunk {
                     // use whats left
                     if (this.log.isFine()) log.logFine("Selected partial index (" + container.size() + " from " + wholesize + " URLs, " + notBoundCounter + " not bound) for word " + container.getWordHash());
                     tmpContainers.add(container);
-                } catch (kelondroException e) {
+                } catch (final kelondroException e) {
                     log.logSevere("plasmaWordIndexDistribution/2: deleted DB for word " + container.getWordHash(), e);
                     wordIndex.deleteContainer(container.getWordHash());
                 }
@@ -266,7 +266,7 @@ public class plasmaDHTChunk {
 
             this.status = chunkStatus_FILLED;
             return refcount;
-        } catch (kelondroException e) {
+        } catch (final kelondroException e) {
             log.logSevere("selectTransferIndexes database corrupted: " + e.getMessage(), e);
             indexContainers = new indexContainer[0];
             urlCache = new HashMap<String, indexURLReference>();
@@ -287,14 +287,14 @@ public class plasmaDHTChunk {
                 if (this.log.isFine()) log.logFine("Deletion of partial index #" + i + " not possible, entry is null");
                 continue;
             }
-            int c = this.indexContainers[i].size();
+            final int c = this.indexContainers[i].size();
             urlHashes = new HashSet<String>(this.indexContainers[i].size());
             urlIter = this.indexContainers[i].entries();
             while (urlIter.hasNext()) {
                 iEntry = urlIter.next();
                 urlHashes.add(iEntry.urlHash());
             }
-            String wordHash = indexContainers[i].getWordHash();
+            final String wordHash = indexContainers[i].getWordHash();
             count = wordIndex.removeEntriesExpl(this.indexContainers[i].getWordHash(), urlHashes);
             if (log.isFine()) 
                 if (this.log.isFine()) log.logFine("Deleted partial index (" + c + " URLs) for word " + wordHash + "; " + this.wordIndex.indexSize(wordHash) + " entries left");

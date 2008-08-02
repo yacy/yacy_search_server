@@ -43,10 +43,10 @@ public class ProxyIndexingMonitor_p {
 //      if (date == null) return ""; else return dayFormatter.format(date);
 //  }
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
         // return variable that accumulates replacements
-        plasmaSwitchboard sb = (plasmaSwitchboard) env;
-        serverObjects prop = new serverObjects();
+        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        final serverObjects prop = new serverObjects();
 
 //      int showIndexedCount = 20;
 //      boolean se = false;
@@ -65,13 +65,13 @@ public class ProxyIndexingMonitor_p {
                 if (newProxyPrefetchDepth < 0) newProxyPrefetchDepth = 0; 
                 if (newProxyPrefetchDepth > 20) newProxyPrefetchDepth = 20; // self protection ?
                 env.setConfig("proxyPrefetchDepth", Integer.toString(newProxyPrefetchDepth));
-                boolean proxyStoreHTCache = post.containsKey("proxyStoreHTCache");
+                final boolean proxyStoreHTCache = post.containsKey("proxyStoreHTCache");
                 env.setConfig("proxyStoreHTCache", (proxyStoreHTCache) ? "true" : "false");
-                boolean proxyIndexingRemote = post.containsKey("proxyIndexingRemote");
+                final boolean proxyIndexingRemote = post.containsKey("proxyIndexingRemote");
                 env.setConfig("proxyIndexingRemote", proxyIndexingRemote ? "true" : "false");
-                boolean proxyIndexingLocalText = post.containsKey("proxyIndexingLocalText");
+                final boolean proxyIndexingLocalText = post.containsKey("proxyIndexingLocalText");
                 env.setConfig("proxyIndexingLocalText", proxyIndexingLocalText ? "true" : "false");
-                boolean proxyIndexingLocalMedia = post.containsKey("proxyIndexingLocalMedia");
+                final boolean proxyIndexingLocalMedia = post.containsKey("proxyIndexingLocalMedia");
                 env.setConfig("proxyIndexingLocalMedia", proxyIndexingLocalMedia ? "true" : "false");
                 
                 // added proxyCache, proxyCacheSize - Borg-0300
@@ -132,13 +132,13 @@ public class ProxyIndexingMonitor_p {
                         prop.put("info_restart_return", "0");
                         if (!oldProxyCachePath.equals(newProxyCachePath)) prop.put("info_restart", "1");
 
-                    } catch (IOException e) {
+                    } catch (final IOException e) {
                         prop.put("info", "3"); //Error: errmsg
                         prop.putHTML("info_error", e.getMessage());
                     }
                 }
 
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 prop.put("info", "2"); //Error: errmsg
                 prop.putHTML("info_error", e.getMessage());
                 serverLog.logSevere("SERVLET", "ProxyIndexingMonitor.case3", e);
@@ -156,18 +156,18 @@ public class ProxyIndexingMonitor_p {
         return prop;
     }
 
-    public static long getLong(String value) {
+    public static long getLong(final String value) {
         try {
             return Long.parseLong(value);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             return 0;
         }
     }
 
-    public static String getStringLong(String value) {
+    public static String getStringLong(final String value) {
         try {
             return Long.toString(Long.parseLong(value));
-        } catch (Exception e) {
+        } catch (final Exception e) {
             return "0";
         }
     }

@@ -38,23 +38,23 @@ public abstract class kelondroAbstractOrder<A> implements kelondroOrder<A> {
     	return zero;
     }
     
-    public void direction(boolean ascending) {
+    public void direction(final boolean ascending) {
         asc = ascending;
     }
     
-    public long partition(A key, int forks) {
+    public long partition(final A key, final int forks) {
         final long d = (Long.MAX_VALUE / forks) + ((Long.MAX_VALUE % forks) + 1) / forks;
         return cardinal(key) / d;
     }
     
-    public void rotate(A newzero) {
+    public void rotate(final A newzero) {
         this.zero = newzero;
     }
     
-    public boolean equals(kelondroOrder<A> otherOrder) {
+    public boolean equals(final kelondroOrder<A> otherOrder) {
         if (otherOrder == null) return false;
-        String thisSig = this.signature();
-        String otherSig = otherOrder.signature();
+        final String thisSig = this.signature();
+        final String otherSig = otherOrder.signature();
         if ((thisSig == null) || (otherSig == null)) return false;
         return thisSig.equals(otherSig);
     }

@@ -43,11 +43,11 @@ public class SimpleToken extends AbstractToken {
 	private final String[][] definitionList;
 	private final String[] blockElements;
 	
-	public SimpleToken(char firstChar, char lastChar, String[][] definitionList, boolean isBlockElements) {
+	public SimpleToken(final char firstChar, final char lastChar, final String[][] definitionList, final boolean isBlockElements) {
 		this.definitionList = definitionList;
 		int i;
 		if (isBlockElements) {
-			ArrayList<String> r = new ArrayList<String>();
+			final ArrayList<String> r = new ArrayList<String>();
 			int j;
 			for (i = 0; i < definitionList.length; i++)
 				if (definitionList[i] != null)
@@ -89,12 +89,12 @@ public class SimpleToken extends AbstractToken {
 		this.parsed = true;
 	}
 	
-	protected String getMarkup(String[] es) {
+	protected String getMarkup(final String[] es) {
 		return getMarkup(es, false) + this.content + getMarkup(es, true);
 	}
 	
-	protected String getMarkup(String[] es, boolean closing) {
-		StringBuffer result = new StringBuffer();
+	protected String getMarkup(final String[] es, final boolean closing) {
+		final StringBuffer result = new StringBuffer();
 		// backwards if closing
 		for (
 				int i = (closing) ? es.length - 1 : 0, j;
@@ -117,12 +117,12 @@ public class SimpleToken extends AbstractToken {
 		return new String(result);
 	}
 	
-	public boolean setText(String text, int patternNr) {
+	public boolean setText(final String text, final int patternNr) {
 		this.text = text;
 		this.markup = null;
 		this.parsed = false;
 		if (text != null) {
-			Matcher m = getRegex()[0].matcher(text);
+			final Matcher m = getRegex()[0].matcher(text);
 			if (
 					(m.matches()) &&
 					(m.group(1).length() == m.group(3).length()) &&

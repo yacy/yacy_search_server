@@ -15,7 +15,7 @@ public abstract class AbstractImporter extends Thread implements Importer {
     protected long globalPauseDuration;
     protected String error;
 
-    public AbstractImporter(String theJobType) {
+    public AbstractImporter(final String theJobType) {
     	this.jobType = theJobType;
 
         // initializing the logger and setting a more verbose thread name
@@ -66,7 +66,7 @@ public abstract class AbstractImporter extends Thread implements Importer {
                 try {
                     this.wait();
                 }
-                catch (InterruptedException e){}
+                catch (final InterruptedException e){}
             }
         }
         
@@ -81,7 +81,7 @@ public abstract class AbstractImporter extends Thread implements Importer {
         return this.jobID;
     }
     
-    public void setJobID(int id) {
+    public void setJobID(final int id) {
     	if (this.jobID != -1) throw new IllegalStateException("job ID already assigned");
     	this.jobID = id;
     }

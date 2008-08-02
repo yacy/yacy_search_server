@@ -69,17 +69,17 @@ public class RSSFeed implements Iterable<RSSMessage> {
         maxsize = Integer.MAX_VALUE;
     }
 
-    public RSSFeed(int maxsize) {
+    public RSSFeed(final int maxsize) {
         this();
         this.maxsize = maxsize;
     }
 
-    public void setMaxsize(int maxsize) {
+    public void setMaxsize(final int maxsize) {
         this.maxsize = maxsize;
         while (messageQueue.size() > this.maxsize) pollMessage();
     }
     
-    public void setChannel(RSSMessage channelItem) {
+    public void setChannel(final RSSMessage channelItem) {
         this.channel = channelItem;
     }
     
@@ -87,7 +87,7 @@ public class RSSFeed implements Iterable<RSSMessage> {
         return channel;
     }
 
-    public void setImage(String imageURL) {
+    public void setImage(final String imageURL) {
         this.imageURL = imageURL;
     }
 
@@ -95,14 +95,14 @@ public class RSSFeed implements Iterable<RSSMessage> {
         return this.imageURL;
     }
     
-    public void addMessage(RSSMessage item) {
-        String guid = item.getGuid();
+    public void addMessage(final RSSMessage item) {
+        final String guid = item.getGuid();
         messageQueue.add(guid);
         messages.put(guid, item);
         while (messageQueue.size() > this.maxsize) pollMessage();
     }
     
-    public RSSMessage getMessage(String guid) {
+    public RSSMessage getMessage(final String guid) {
         // retrieve item by guid
         return messages.get(guid);
     }
@@ -118,7 +118,7 @@ public class RSSFeed implements Iterable<RSSMessage> {
     public RSSMessage pollMessage() {
         // retrieve and delete item
         if (messageQueue.size() == 0) return null;
-        String nextGUID = messageQueue.poll();
+        final String nextGUID = messageQueue.poll();
         if (nextGUID == null) return null;
         return messages.remove(nextGUID);
     }
@@ -155,8 +155,8 @@ public class RSSFeed implements Iterable<RSSMessage> {
      */
     private static final ConcurrentHashMap<String, RSSFeed> channels = new ConcurrentHashMap<String, RSSFeed>();
     
-    public static RSSFeed channels(String channelName) {
-        ConcurrentHashMap<String, RSSFeed> channelss = channels;
+    public static RSSFeed channels(final String channelName) {
+        final ConcurrentHashMap<String, RSSFeed> channelss = channels;
         RSSFeed feed = channelss.get(channelName);
         if (feed != null) return feed;
         feed = new RSSFeed();

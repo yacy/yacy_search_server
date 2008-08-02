@@ -35,13 +35,13 @@ import de.anomic.xml.RSSMessage;
 
 public class yacyPeerActions {
    
-    private yacySeedDB seedDB;
+    private final yacySeedDB seedDB;
     private HashMap<String, String> userAgents;
     public  long disconnects;
     public  yacyDHTAction dhtAction;
-    private yacyNewsPool newsPool;
+    private final yacyNewsPool newsPool;
     
-    public yacyPeerActions(yacySeedDB seedDB, yacyNewsPool newsPool) {
+    public yacyPeerActions(final yacySeedDB seedDB, final yacyNewsPool newsPool) {
         this.seedDB = seedDB;
         this.newsPool = newsPool;
         this.userAgents = new HashMap<String, String>();
@@ -57,7 +57,7 @@ public class yacyPeerActions {
         dhtAction.close();
     }
     
-    public synchronized boolean connectPeer(yacySeed seed, boolean direct) {
+    public synchronized boolean connectPeer(final yacySeed seed, final boolean direct) {
         // store a remote peer's seed
         // returns true if the peer is new and previously unknown
         if (seed == null) {
@@ -167,7 +167,7 @@ public class yacyPeerActions {
                     /*if (connectedSeed.getName() != seed.getName()) {
                         // TODO: update seed name lookup cache
                     }*/
-                } catch (NumberFormatException e) {
+                } catch (final NumberFormatException e) {
                     yacyCore.log.logFine("connect: rejecting wrong peer '" + seed.getName() + "' from " + seed.getPublicAddress() + ". Cause: " + e.getMessage());
                     return false;
                 }
@@ -190,9 +190,9 @@ public class yacyPeerActions {
         }
     }
 
-    public boolean peerArrival(yacySeed peer, boolean direct) {
+    public boolean peerArrival(final yacySeed peer, final boolean direct) {
         if (peer == null) return false;
-        boolean res = connectPeer(peer, direct);
+        final boolean res = connectPeer(peer, direct);
         if (res) {
             // perform all actions if peer is effective new
             dhtAction.processPeerArrival(peer, direct);
@@ -202,7 +202,7 @@ public class yacyPeerActions {
         return res;
     }
     
-    public void peerDeparture(yacySeed peer, String cause) {
+    public void peerDeparture(final yacySeed peer, final String cause) {
         if (peer == null) return;
         // we do this if we did not get contact with the other peer
         yacyCore.log.logFine("connect: no contact to a " + peer.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN) + " peer '" + peer.getName() + "' at " + peer.getPublicAddress() + ". Cause: " + cause);
@@ -216,7 +216,7 @@ public class yacyPeerActions {
         RSSFeed.channels(RSSFeed.PEERNEWS).addMessage(new RSSMessage(peer.getName() + " left the network", "", ""));
     }
     
-    public void peerPing(yacySeed peer) {
+    public void peerPing(final yacySeed peer) {
         if (peer == null) return;
         // this is called only if the peer has junior status
         seedDB.addPotential(peer);
@@ -225,35 +225,35 @@ public class yacyPeerActions {
         RSSFeed.channels(RSSFeed.PEERNEWS).addMessage(new RSSMessage(peer.getName() + " sent me a ping", "", ""));
     }
     
-    private void processPeerArrival(yacySeed peer, boolean direct) {
-        String recordString = peer.get("news", null);
+    private void processPeerArrival(final yacySeed peer, final boolean direct) {
+        final String recordString = peer.get("news", null);
         //System.out.println("### triggered news arrival from peer " + peer.getName() + ", news " + ((recordString == null) ? "empty" : "attached"));
         if ((recordString == null) || (recordString.length() == 0)) return;
-        String decodedString = de.anomic.tools.crypt.simpleDecode(recordString, "");
-        yacyNewsRecord record = yacyNewsRecord.newRecord(decodedString);
+        final String decodedString = de.anomic.tools.crypt.simpleDecode(recordString, "");
+        final yacyNewsRecord record = yacyNewsRecord.newRecord(decodedString);
         if (record != null) {
             //System.out.println("### news arrival from peer " + peer.getName() + ", decoded=" + decodedString + ", record=" + recordString + ", news=" + record.toString());
-            String cre1 = serverCodings.string2map(decodedString, ",").get("cre");
-            String cre2 = serverCodings.string2map(record.toString(), ",").get("cre");
+            final String cre1 = serverCodings.string2map(decodedString, ",").get("cre");
+            final String cre2 = serverCodings.string2map(record.toString(), ",").get("cre");
             if ((cre1 == null) || (cre2 == null) || (!(cre1.equals(cre2)))) {
                 System.out.println("### ERROR - cre are not equal: cre1=" + cre1 + ", cre2=" + cre2);
                 return;
             }
             try {
                 synchronized (this.newsPool) {this.newsPool.enqueueIncomingNews(record);}
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 serverLog.logSevere("YACY", "processPeerArrival", e);
             }
         }
     }
     
-    public void setUserAgent(String IP, String userAgent) {
+    public void setUserAgent(final String IP, final String userAgent) {
         if (userAgents == null) return; // case can happen during shutdown
         userAgents.put(IP, userAgent);
     }
     
-    public String getUserAgent(String IP) {
-        String userAgent = userAgents.get(IP);
+    public String getUserAgent(final String IP) {
+        final String userAgent = userAgents.get(IP);
         return (userAgent == null) ? "" : userAgent;
     }
 }

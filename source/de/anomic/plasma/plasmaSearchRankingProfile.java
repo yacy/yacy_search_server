@@ -76,7 +76,7 @@ public class plasmaSearchRankingProfile {
         coeff_urlcompintoplist, coeff_descrcompintoplist, coeff_prefer,
         coeff_termfrequency;
     
-    public plasmaSearchRankingProfile(int mediatype) {
+    public plasmaSearchRankingProfile(final int mediatype) {
         // set default-values
         coeff_domlength          = 11;
         coeff_ybr                = 9;
@@ -111,14 +111,14 @@ public class plasmaSearchRankingProfile {
         coeff_prefer             = 14;
     }
     
-    public plasmaSearchRankingProfile(String prefix, String profile) {
+    public plasmaSearchRankingProfile(final String prefix, final String profile) {
         this(plasmaSearchQuery.CONTENTDOM_TEXT); // set defaults
         if ((profile != null) && (profile.length() > 0)) {
             //parse external form
-            HashMap<String, Integer> coeff = new HashMap<String, Integer>();
-            String[] elts = ((profile.startsWith("{") && (profile.endsWith("}"))) ? profile.substring(1, profile.length() - 1) : profile).split(",");
+            final HashMap<String, Integer> coeff = new HashMap<String, Integer>();
+            final String[] elts = ((profile.startsWith("{") && (profile.endsWith("}"))) ? profile.substring(1, profile.length() - 1) : profile).split(",");
             int p;
-            int s = (prefix == null) ? 0 : prefix.length();
+            final int s = (prefix == null) ? 0 : prefix.length();
             String e;
             
             for (int i = 0; i < elts.length; i++) {
@@ -163,10 +163,10 @@ public class plasmaSearchRankingProfile {
         }
     }
     
-    private static int parseMap(HashMap<String, Integer> coeff, String attr, int dflt) {
+    private static int parseMap(final HashMap<String, Integer> coeff, final String attr, final int dflt) {
         if (coeff.containsKey(attr)) try {
             return (coeff.get(attr)).intValue();
-        } catch (NumberFormatException e) {
+        } catch (final NumberFormatException e) {
             return dflt;
         } else {
             return dflt;
@@ -177,14 +177,14 @@ public class plasmaSearchRankingProfile {
         return toExternalMap("").toString();
     }
     
-    public Map<String, String> toExternalMap(String prefix) {
-    	Map<String, String> ext = preToExternalMap(prefix);
+    public Map<String, String> toExternalMap(final String prefix) {
+    	final Map<String, String> ext = preToExternalMap(prefix);
     	ext.putAll(postToExternalMap(prefix));
     	return ext;
     }
     
-    public Map<String, String> preToExternalMap(String prefix) {
-        Map<String, String> ext = new HashMap<String, String>();
+    public Map<String, String> preToExternalMap(final String prefix) {
+        final Map<String, String> ext = new HashMap<String, String>();
         ext.put(prefix + DOMLENGTH, Integer.toString(coeff_domlength));
         ext.put(prefix + YBR, Integer.toString(coeff_ybr));
         ext.put(prefix + DATE, Integer.toString(coeff_date));
@@ -216,18 +216,18 @@ public class plasmaSearchRankingProfile {
         return ext;
     }
     
-    public Map<String, String> postToExternalMap(String prefix) {
-    	Map<String, String> ext = new HashMap<String, String>();
+    public Map<String, String> postToExternalMap(final String prefix) {
+    	final Map<String, String> ext = new HashMap<String, String>();
         ext.put(prefix + URLCOMPINTOPLIST, Integer.toString(coeff_urlcompintoplist));
         ext.put(prefix + DESCRCOMPINTOPLIST, Integer.toString(coeff_descrcompintoplist));
         ext.put(prefix + PREFER, Integer.toString(coeff_prefer));
         return ext;
     }
     
-    public String toExternalURLGet(String prefix) {
-        Iterator<Map.Entry<String, String>> i = toExternalMap("").entrySet().iterator();
+    public String toExternalURLGet(final String prefix) {
+        final Iterator<Map.Entry<String, String>> i = toExternalMap("").entrySet().iterator();
         Map.Entry<String, String> entry;
-        StringBuffer ext = new StringBuffer();
+        final StringBuffer ext = new StringBuffer();
         while (i.hasNext()) {
             entry = i.next();
             ext.append("&");

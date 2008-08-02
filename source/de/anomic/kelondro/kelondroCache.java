@@ -57,12 +57,12 @@ public class kelondroCache implements kelondroIndex {
     // class objects
     private kelondroRowSet readHitCache;
     private kelondroRowSet readMissCache;
-    private kelondroIndex  index;
+    private final kelondroIndex  index;
     private kelondroRow    keyrow;
     private int            readHit, readMiss, writeUnique, writeDouble, cacheDelete, cacheFlush;
     private int            hasnotHit, hasnotMiss, hasnotUnique, hasnotDouble, hasnotDelete;
     
-    public kelondroCache(kelondroIndex backupIndex) {
+    public kelondroCache(final kelondroIndex backupIndex) {
         this.index = backupIndex;
         init();
         objectTracker.put(backupIndex.filename(), this);
@@ -97,7 +97,7 @@ public class kelondroCache implements kelondroIndex {
         return index.profile(); // TODO: implement own profile and merge with global
     }
 
-    public static void setCacheGrowStati(long memStopGrowNew, long memStartShrinkNew) {
+    public static void setCacheGrowStati(final long memStopGrowNew, final long memStartShrinkNew) {
         memStopGrow = memStopGrowNew;
         memStartShrink =  memStartShrinkNew;
     }
@@ -115,17 +115,17 @@ public class kelondroCache implements kelondroIndex {
         return objectTracker.keySet().iterator();
     }
 
-    public static final Map<String, String> memoryStats(String filename) {
+    public static final Map<String, String> memoryStats(final String filename) {
         // returns a map for each file in the tracker;
         // the map represents properties for each record oobjects,
         // i.e. for cache memory allocation
-        kelondroCache theObjectsCache = objectTracker.get(filename);
+        final kelondroCache theObjectsCache = objectTracker.get(filename);
         return theObjectsCache.memoryStats();
     }
     
     private final Map<String, String> memoryStats() {
         // returns statistical data about this object
-        HashMap<String, String> map = new HashMap<String, String>();
+        final HashMap<String, String> map = new HashMap<String, String>();
         map.put("objectHitChunkSize", (readHitCache == null) ? "0" : Integer.toString(readHitCache.rowdef.objectsize));
         map.put("objectHitCacheCount", (readHitCache == null) ? "0" : Integer.toString(readHitCache.size()));
         map.put("objectHitMem", (readHitCache == null) ? "0" : Integer.toString((int) (readHitCache.rowdef.objectsize * readHitCache.size() * kelondroRowCollection.growfactor)));
@@ -167,7 +167,7 @@ public class kelondroCache implements kelondroIndex {
     
     private boolean checkHitSpace() {
         // returns true if it is allowed to write into this cache
-        int status = cacheGrowStatus();
+        final int status = cacheGrowStatus();
         if (status < 1) {
             if (readHitCache != null) {
                 readHitCache.clear();
@@ -191,7 +191,7 @@ public class kelondroCache implements kelondroIndex {
         readMissCache = null;
     }
 
-    public boolean has(byte[] key) {
+    public boolean has(final byte[] key) {
         // first look into the miss cache
         if (readMissCache != null) {
             if (readMissCache.get(key) != null) {
@@ -215,7 +215,7 @@ public class kelondroCache implements kelondroIndex {
         return index.has(key);
     }
     
-    public synchronized Entry get(byte[] key) throws IOException {
+    public synchronized Entry get(final byte[] key) throws IOException {
         // first look into the miss cache
         if (readMissCache != null) {
             if (readMissCache.get(key) != null) {
@@ -243,35 +243,35 @@ public class kelondroCache implements kelondroIndex {
         // learn from result
         if (entry == null) {
             if ((checkMissSpace()) && (readMissCache != null)) {
-                kelondroRow.Entry dummy = readMissCache.put(readMissCache.row().newEntry(key));
+                final kelondroRow.Entry dummy = readMissCache.put(readMissCache.row().newEntry(key));
                 if (dummy == null) this.hasnotUnique++; else this.hasnotDouble++;
             }
             return null;
         } else {
             if ((checkHitSpace()) && (readHitCache != null)) {
-                kelondroRow.Entry dummy = readHitCache.put(entry);
+                final kelondroRow.Entry dummy = readHitCache.put(entry);
                 if (dummy == null) this.writeUnique++; else this.writeDouble++;
             }
             return entry;
         }
     }
 
-    public synchronized void putMultiple(List<Entry> rows) throws IOException {
-        Iterator<Entry> i = rows.iterator();
+    public synchronized void putMultiple(final List<Entry> rows) throws IOException {
+        final Iterator<Entry> i = rows.iterator();
         while (i.hasNext()) put(i.next());
     }
     
-    public synchronized void putMultiple(List<Entry> rows, Date entryDate) throws IOException {
-        Iterator<Entry> i = rows.iterator();
+    public synchronized void putMultiple(final List<Entry> rows, final Date entryDate) throws IOException {
+        final Iterator<Entry> i = rows.iterator();
         while (i.hasNext()) put(i.next(), entryDate);
     }
     
-    public synchronized Entry put(Entry row) throws IOException {
+    public synchronized Entry put(final Entry row) throws IOException {
         assert (row != null);
         assert (row.columns() == row().columns());
         //assert (!(serverLog.allZero(row.getColBytes(index.primarykey()))));
         
-        byte[] key = row.getPrimaryKeyBytes();
+        final byte[] key = row.getPrimaryKeyBytes();
         checkHitSpace();
         
         // remove entry from miss- and hit-cache
@@ -281,7 +281,7 @@ public class kelondroCache implements kelondroIndex {
                 // the entry does not exist before
                 index.put(row); // write to backend
                 if (readHitCache != null) {
-                    kelondroRow.Entry dummy = readHitCache.put(row); // learn that entry
+                    final kelondroRow.Entry dummy = readHitCache.put(row); // learn that entry
                     if (dummy == null) this.writeUnique++; else this.writeDouble++;
                 }
                 return null;
@@ -297,7 +297,7 @@ public class kelondroCache implements kelondroIndex {
                     // write directly to backend index
                     index.put(row);
                     // learn from situation
-                    kelondroRow.Entry dummy = readHitCache.put(row); // overwrite old entry
+                    final kelondroRow.Entry dummy = readHitCache.put(row); // overwrite old entry
                     if (dummy == null) this.writeUnique++; else this.writeDouble++;
                     return entry;
             }
@@ -306,24 +306,24 @@ public class kelondroCache implements kelondroIndex {
         // the worst case: we must write to the back-end directly
         entry = index.put(row);
         if (readHitCache != null) {
-            kelondroRow.Entry dummy = readHitCache.put(row); // learn that entry
+            final kelondroRow.Entry dummy = readHitCache.put(row); // learn that entry
             if (dummy == null) this.writeUnique++; else this.writeDouble++;
         }
         return entry;
     }
 
-    public synchronized Entry put(Entry row, Date entryDate) throws IOException {
+    public synchronized Entry put(final Entry row, final Date entryDate) throws IOException {
         // a put with a date is bad for the cache: the date cannot be handled
         // we omit the date here and use the current Date everywhere
         return this.put(row);
     }
 
-    public synchronized boolean addUnique(Entry row) throws IOException {
+    public synchronized boolean addUnique(final Entry row) throws IOException {
         assert (row != null);
         assert (row.columns() == row().columns());
         //assert (!(serverLog.allZero(row.getColBytes(index.primarykey()))));
         
-        byte[] key = row.getPrimaryKeyBytes();
+        final byte[] key = row.getPrimaryKeyBytes();
         checkHitSpace();
         
         // remove entry from miss- and hit-cache
@@ -331,24 +331,24 @@ public class kelondroCache implements kelondroIndex {
             this.readMissCache.remove(key);
             this.hasnotDelete++;
             // the entry does not exist before
-            boolean added = index.addUnique(row); // write to backend
+            final boolean added = index.addUnique(row); // write to backend
             if (added && (readHitCache != null)) {
-                kelondroRow.Entry dummy = readHitCache.put(row); // learn that entry
+                final kelondroRow.Entry dummy = readHitCache.put(row); // learn that entry
                 if (dummy == null) this.writeUnique++; else this.writeDouble++;
             }
             return added;
         }
         
         // the worst case: we must write to the back-end directly
-        boolean added = index.addUnique(row);
+        final boolean added = index.addUnique(row);
         if (added && (readHitCache != null)) {
-            kelondroRow.Entry dummy = readHitCache.put(row); // learn that entry
+            final kelondroRow.Entry dummy = readHitCache.put(row); // learn that entry
             if (dummy == null) this.writeUnique++; else this.writeDouble++;
         }
         return added;
     }
 
-    public synchronized void addUnique(Entry row, Date entryDate) throws IOException {
+    public synchronized void addUnique(final Entry row, final Date entryDate) throws IOException {
         if (entryDate == null) {
             addUnique(row);
             return;
@@ -357,7 +357,7 @@ public class kelondroCache implements kelondroIndex {
         assert (row != null);
         assert (row.columns() == row().columns());
         
-        byte[] key = row.getPrimaryKeyBytes();
+        final byte[] key = row.getPrimaryKeyBytes();
         checkHitSpace();
         
         // remove entry from miss- and hit-cache
@@ -369,13 +369,13 @@ public class kelondroCache implements kelondroIndex {
         // the worst case: we must write to the backend directly
         index.addUnique(row);
         if (readHitCache != null) {
-            kelondroRow.Entry dummy = readHitCache.put(row); // learn that entry
+            final kelondroRow.Entry dummy = readHitCache.put(row); // learn that entry
             if (dummy == null) this.writeUnique++; else this.writeDouble++;
         }
     }
     
-    public synchronized int addUniqueMultiple(List<Entry> rows) throws IOException {
-        Iterator<Entry> i = rows.iterator();
+    public synchronized int addUniqueMultiple(final List<Entry> rows) throws IOException {
+        final Iterator<Entry> i = rows.iterator();
         int c = 0;
         while (i.hasNext()) {
             if (addUnique(i.next())) c++;
@@ -388,13 +388,13 @@ public class kelondroCache implements kelondroIndex {
         // todo: remove reported entries from the cache!!!
     }
     
-    public synchronized Entry remove(byte[] key) throws IOException {
+    public synchronized Entry remove(final byte[] key) throws IOException {
         checkMissSpace();
         
         // add entry to miss-cache
         if (readMissCache != null) {
             // set the miss cache; if there was already an entry we know that the return value must be null
-            kelondroRow.Entry dummy = readMissCache.put(readMissCache.row().newEntry(key));
+            final kelondroRow.Entry dummy = readMissCache.put(readMissCache.row().newEntry(key));
             if (dummy == null) {
                 this.hasnotUnique++;
             } else {
@@ -405,7 +405,7 @@ public class kelondroCache implements kelondroIndex {
         
         // remove entry from hit-cache
         if (readHitCache != null) {
-            Entry entry = readHitCache.remove(key);
+            final Entry entry = readHitCache.remove(key);
             if (entry == null) {
                 this.readMiss++;
             } else {
@@ -421,15 +421,15 @@ public class kelondroCache implements kelondroIndex {
         
         checkMissSpace();
         
-        Entry entry = index.removeOne();
+        final Entry entry = index.removeOne();
         if (entry == null) return null;
-        byte[] key = entry.getPrimaryKeyBytes();
+        final byte[] key = entry.getPrimaryKeyBytes();
         if (readMissCache != null) {
-            kelondroRow.Entry dummy = readMissCache.put(readMissCache.row().newEntry(key));
+            final kelondroRow.Entry dummy = readMissCache.put(readMissCache.row().newEntry(key));
             if (dummy == null) this.hasnotUnique++; else this.hasnotDouble++;
         }
         if (readHitCache != null) {
-            kelondroRow.Entry dummy = readHitCache.remove(key);
+            final kelondroRow.Entry dummy = readHitCache.remove(key);
             if (dummy != null) this.cacheDelete++;
         }
         return entry;
@@ -439,11 +439,11 @@ public class kelondroCache implements kelondroIndex {
         return index.row();
     }
 
-    public synchronized kelondroCloneableIterator<byte[]> keys(boolean up, byte[] firstKey) throws IOException {
+    public synchronized kelondroCloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) throws IOException {
         return index.keys(up, firstKey);
     }
 
-    public synchronized kelondroCloneableIterator<kelondroRow.Entry> rows(boolean up, byte[] firstKey) throws IOException {
+    public synchronized kelondroCloneableIterator<kelondroRow.Entry> rows(final boolean up, final byte[] firstKey) throws IOException {
         return index.rows(up, firstKey);
     }
 

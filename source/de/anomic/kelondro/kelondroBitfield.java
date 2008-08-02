@@ -34,18 +34,18 @@ public class kelondroBitfield implements Cloneable {
         this(0);
     }
     
-    public kelondroBitfield(byte[] b) {
+    public kelondroBitfield(final byte[] b) {
         if (b == null) this.bb = new byte[0]; else this.bb = b;
     }
     
-    public kelondroBitfield(int bytelength) {
+    public kelondroBitfield(final int bytelength) {
         this.bb= new byte[bytelength];
         for (int i = 0 ; i < bytelength; i++) bb[i] = 0;
     }
 
-    public kelondroBitfield(int bytelength, String exported) {
+    public kelondroBitfield(final int bytelength, final String exported) {
         // imports a b64-encoded bitfield
-        byte[] b = kelondroBase64Order.enhancedCoder.decode(exported, "de.anomic.kelondro.kelondroBitfield.kelondroBitfield(...)");
+        final byte[] b = kelondroBase64Order.enhancedCoder.decode(exported, "de.anomic.kelondro.kelondroBitfield.kelondroBitfield(...)");
         if (b.length == bytelength) {
             bb = b;
         } else {
@@ -56,14 +56,14 @@ public class kelondroBitfield implements Cloneable {
     }
     
     public kelondroBitfield clone() {
-        kelondroBitfield theClone = new kelondroBitfield(new byte[this.bb.length]);
+        final kelondroBitfield theClone = new kelondroBitfield(new byte[this.bb.length]);
         System.arraycopy(this.bb, 0, theClone.bb, 0, this.bb.length);
         return theClone;
     }
     
-    public void set(int pos, boolean value) {
+    public void set(final int pos, final boolean value) {
         assert (pos >= 0);
-        int slot = pos >> 3; // /8
+        final int slot = pos >> 3; // /8
         if (slot >= bb.length) {
             // extend capacity
             byte[] nb = new byte[slot + 1];
@@ -79,9 +79,9 @@ public class kelondroBitfield implements Cloneable {
         }
     }
     
-    public boolean get(int pos) {
+    public boolean get(final int pos) {
         assert (pos >= 0);
-        int slot = pos >> 3; // /8
+        final int slot = pos >> 3; // /8
         if (slot > bb.length) return false;
         return (bb[slot] & (1 << (pos % 8))) > 0;
     }
@@ -99,46 +99,46 @@ public class kelondroBitfield implements Cloneable {
     }
     
     public String toString() {
-        StringBuffer sb = new StringBuffer(length());
+        final StringBuffer sb = new StringBuffer(length());
         for (int i = length() - 1; i >= 0; i--) sb.append((this.get(i)) ? '1' : '0');
         return new String(sb);
     }
     
-    public boolean equals(kelondroBitfield x) {
+    public boolean equals(final kelondroBitfield x) {
         if (x.bb.length != bb.length) return false;
         for (int i = 0; i < bb.length; i++) if (bb[i] != x.bb[i]) return false;
         return true;
     }
     
-    public void and(kelondroBitfield x) {
-        int c = Math.min(x.length(), this.length());
+    public void and(final kelondroBitfield x) {
+        final int c = Math.min(x.length(), this.length());
         for (int i = 0; i < c; i++) set(i, this.get(i) && x.get(i));
     }
     
-    public void or(kelondroBitfield x) {
-        int c = Math.min(x.length(), this.length());
+    public void or(final kelondroBitfield x) {
+        final int c = Math.min(x.length(), this.length());
         for (int i = 0; i < c; i++) set(i, this.get(i) || x.get(i));
         if (x.length() > c) {
             for (int i = c; i < x.length(); i++) set(i, x.get(i));
         }
     }
     
-    public void xor(kelondroBitfield x) {
-        int c = Math.min(x.length(), this.length());
+    public void xor(final kelondroBitfield x) {
+        final int c = Math.min(x.length(), this.length());
         for (int i = 0; i < c; i++) set(i, this.get(i) != x.get(i));
         if (x.length() > c) {
             for (int i = c; i < x.length(); i++) set(i, x.get(i));
         }
     }
     
-    public boolean anyOf(kelondroBitfield x) {
-        int c = Math.min(x.length(), this.length());
+    public boolean anyOf(final kelondroBitfield x) {
+        final int c = Math.min(x.length(), this.length());
         for (int i = 0; i < c; i++) if ((x.get(i)) && (this.get(i))) return true;
         return false;
     }
     
-    public boolean allOf(kelondroBitfield x) {
-        int c = Math.min(x.length(), this.length());
+    public boolean allOf(final kelondroBitfield x) {
+        final int c = Math.min(x.length(), this.length());
         for (int i = 0; i < c; i++) if ((x.get(i)) && (!(this.get(i)))) return false;
         if (x.length() > c) {
             for (int i = c; i < x.length(); i++) if (x.get(i)) return false;
@@ -146,9 +146,9 @@ public class kelondroBitfield implements Cloneable {
         return true;
     }
     
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         kelondroBitfield test = new kelondroBitfield(4);
-        int l = test.length();
+        final int l = test.length();
         System.out.println("available: " + l);
         System.out.println("bevore:    " + test.toString());
         for (int i = 0; i < l/2; i++) {

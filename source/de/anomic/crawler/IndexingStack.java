@@ -53,10 +53,10 @@ public class IndexingStack {
     kelondroStack sbQueueStack;
     CrawlProfile profiles;
     plasmaWordIndex wordIndex;
-    private File sbQueueStackPath;
+    private final File sbQueueStackPath;
     ConcurrentHashMap<String, QueueEntry> queueInProcess;
     
-    public IndexingStack(plasmaWordIndex wordIndex, File sbQueueStackPath, CrawlProfile profiles) {
+    public IndexingStack(final plasmaWordIndex wordIndex, final File sbQueueStackPath, final CrawlProfile profiles) {
         this.sbQueueStackPath = sbQueueStackPath;
         this.profiles = profiles;
         this.wordIndex = wordIndex;
@@ -92,7 +92,7 @@ public class IndexingStack {
         return (sbQueueStack == null) ? 0 : sbQueueStack.size();
     }
 
-    public synchronized void push(QueueEntry entry) throws IOException {
+    public synchronized void push(final QueueEntry entry) throws IOException {
         if (entry == null) return;
         if (sbQueueStack == null) return; // may occur during shutdown
         sbQueueStack.push(sbQueueStack.row().newEntry(new byte[][]{
@@ -109,13 +109,13 @@ public class IndexingStack {
 
     public synchronized QueueEntry pop() throws IOException {
         if (sbQueueStack.size() == 0) return null;
-        kelondroRow.Entry b = sbQueueStack.pot();
+        final kelondroRow.Entry b = sbQueueStack.pot();
         if (b == null) return null;
         return new QueueEntry(b);
     }
 
-    public synchronized QueueEntry remove(String urlHash) {
-        Iterator<kelondroRow.Entry> i = sbQueueStack.stackIterator(true);
+    public synchronized QueueEntry remove(final String urlHash) {
+        final Iterator<kelondroRow.Entry> i = sbQueueStack.stackIterator(true);
         kelondroRow.Entry rowentry;
         QueueEntry entry;
         while (i.hasNext()) {
@@ -143,13 +143,13 @@ public class IndexingStack {
     protected void finalize() throws Throwable {
         try {
         close();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new IOException("plasmaSwitchboardQueue.finalize()" + e.getMessage());
     }
         super.finalize();
     }
 
-    public Iterator<QueueEntry> entryIterator(boolean up) {
+    public Iterator<QueueEntry> entryIterator(final boolean up) {
         // iterates the elements in an ordered way.
         // returns plasmaSwitchboardQueue.Entry - type Objects
         return new entryIterator(up);
@@ -159,7 +159,7 @@ public class IndexingStack {
 
         Iterator<kelondroRow.Entry> rows;
         
-        public entryIterator(boolean up) {
+        public entryIterator(final boolean up) {
             rows = sbQueueStack.stackIterator(up);
         }
 
@@ -176,16 +176,16 @@ public class IndexingStack {
         }
     }
     
-    public QueueEntry newEntry(yacyURL url, String referrer, Date ifModifiedSince, boolean requestWithCookie,
-                     String initiator, int depth, String profilehandle, String anchorName) {
+    public QueueEntry newEntry(final yacyURL url, final String referrer, final Date ifModifiedSince, final boolean requestWithCookie,
+                     final String initiator, final int depth, final String profilehandle, final String anchorName) {
         return new QueueEntry(url, referrer, ifModifiedSince, requestWithCookie, initiator, depth, profilehandle, anchorName);
     }
     
-    public void enQueueToActive(QueueEntry entry) {
+    public void enQueueToActive(final QueueEntry entry) {
         queueInProcess.put(entry.urlHash(), entry);
     }
     
-    public QueueEntry getActiveEntry(String urlhash) {
+    public QueueEntry getActiveEntry(final String urlhash) {
         // show one entry from the queue
         return this.queueInProcess.get(urlhash);
     }
@@ -222,8 +222,8 @@ public class IndexingStack {
         private IResourceInfo contentInfo;
         private yacyURL referrerURL;
 
-        public QueueEntry(yacyURL url, String referrer, Date ifModifiedSince, boolean requestWithCookie,
-                     String initiator, int depth, String profileHandle, String anchorName) {
+        public QueueEntry(final yacyURL url, final String referrer, final Date ifModifiedSince, final boolean requestWithCookie,
+                     final String initiator, final int depth, final String profileHandle, final String anchorName) {
             this.url = url;
             this.referrerHash = referrer;
             this.ifModifiedSince = ifModifiedSince;
@@ -239,12 +239,12 @@ public class IndexingStack {
             this.status = QUEUE_STATE_FRESH;
         }
 
-        public QueueEntry(kelondroRow.Entry row) {
-            long ims = row.getColLong(2);
-            byte flags = row.getColByte(3);
+        public QueueEntry(final kelondroRow.Entry row) {
+            final long ims = row.getColLong(2);
+            final byte flags = row.getColByte(3);
             try {
                 this.url = new yacyURL(row.getColString(0, "UTF-8"), null);
-            } catch (MalformedURLException e) {
+            } catch (final MalformedURLException e) {
                 this.url = null;
             }
             this.referrerHash = row.getColString(1, "UTF-8");
@@ -261,12 +261,12 @@ public class IndexingStack {
             this.status = QUEUE_STATE_FRESH;
         }
 
-        public QueueEntry(byte[][] row) throws IOException {
-            long ims = (row[2] == null) ? 0 : kelondroBase64Order.enhancedCoder.decodeLong(new String(row[2], "UTF-8"));
-            byte flags = (row[3] == null) ? 0 : row[3][0];
+        public QueueEntry(final byte[][] row) throws IOException {
+            final long ims = (row[2] == null) ? 0 : kelondroBase64Order.enhancedCoder.decodeLong(new String(row[2], "UTF-8"));
+            final byte flags = (row[3] == null) ? 0 : row[3][0];
             try {
                 this.url = new yacyURL(new String(row[0], "UTF-8"), null);
-            } catch (MalformedURLException e) {
+            } catch (final MalformedURLException e) {
                 this.url = null;
             }
             this.referrerHash = (row[1] == null) ? null : new String(row[1], "UTF-8");
@@ -283,7 +283,7 @@ public class IndexingStack {
             this.status = QUEUE_STATE_FRESH;
         }
         
-        public void updateStatus(int newStatus) {
+        public void updateStatus(final int newStatus) {
             this.status = newStatus;
         }
         
@@ -346,7 +346,7 @@ public class IndexingStack {
         private IResourceInfo getCachedObjectInfo() {
             if (this.contentInfo == null) try {
                 this.contentInfo = plasmaHTCache.loadResourceInfo(this.url);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 serverLog.logSevere("PLASMA", "responseHeader: failed to get header", e);
                 return null;
             }
@@ -354,24 +354,24 @@ public class IndexingStack {
         }
 
         public String getMimeType() {
-            IResourceInfo info = this.getCachedObjectInfo();
+            final IResourceInfo info = this.getCachedObjectInfo();
             return (info == null) ? null : info.getMimeType();
         }
         
         public String getCharacterEncoding() {
-            IResourceInfo info = this.getCachedObjectInfo();
+            final IResourceInfo info = this.getCachedObjectInfo();
             return (info == null) ? null : info.getCharacterEncoding();
         }
         
         public Date getModificationDate() {
-            IResourceInfo info = this.getCachedObjectInfo();
+            final IResourceInfo info = this.getCachedObjectInfo();
             return (info == null) ? new Date() : info.getModificationDate();            
         }
         
         public yacyURL referrerURL() {
             if (referrerURL == null) {
                 if ((referrerHash == null) || ((initiator != null) && (referrerHash.equals(initiator.length() == 0)))) return null;
-                indexURLReference entry = wordIndex.getURL(referrerHash, null, 0);
+                final indexURLReference entry = wordIndex.getURL(referrerHash, null, 0);
                 if (entry == null) referrerURL = null; else referrerURL = entry.comp().url();
             }
             return referrerURL;
@@ -494,7 +494,7 @@ public class IndexingStack {
 
             // a picture cannot be indexed
             if (getCachedObjectInfo() != null) {
-                String status = this.getCachedObjectInfo().shallIndexCacheForCrawler();
+                final String status = this.getCachedObjectInfo().shallIndexCacheForCrawler();
                 if (status != null) return status;
             }
             if (plasmaHTCache.noIndexingURL(url())) { return "Media_Content_(forbidden)"; }

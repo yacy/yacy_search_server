@@ -46,8 +46,8 @@ public class plasmaSearchAPI {
     // collection of static methods for a search servlet. Exists only to prevent that the same processes are defined more than once.
     
 
-    public static kelondroBitfield compileFlags(serverObjects post) {
-        kelondroBitfield b = new kelondroBitfield(4);
+    public static kelondroBitfield compileFlags(final serverObjects post) {
+        final kelondroBitfield b = new kelondroBitfield(4);
         if (post.get("allurl", "").equals("on")) return null;
         if (post.get("flags") != null) {
             if (post.get("flags","").length() == 0) return null;
@@ -67,12 +67,12 @@ public class plasmaSearchAPI {
         return b;
     }
     
-    public static void listHosts(serverObjects prop, String startHash, yacyPeerActions peerActions) {
+    public static void listHosts(final serverObjects prop, final String startHash, final yacyPeerActions peerActions) {
         // list known hosts
         yacySeed seed;
         int hc = 0;
         prop.put("searchresult_keyhash", startHash);
-        Iterator<yacySeed> e = peerActions.dhtAction.getAcceptRemoteIndexSeeds(startHash);
+        final Iterator<yacySeed> e = peerActions.dhtAction.getAcceptRemoteIndexSeeds(startHash);
         while (e.hasNext()) {
             seed = e.next();
             if (seed != null) {
@@ -84,9 +84,9 @@ public class plasmaSearchAPI {
         prop.put("searchresult_hosts", hc);
     }
 
-    public static plasmaSearchRankingProcess genSearchresult(serverObjects prop, plasmaSwitchboard sb, String keyhash, kelondroBitfield filter) {
-        plasmaSearchQuery query = new plasmaSearchQuery(keyhash, -1, sb.getRanking(), filter);
-        plasmaSearchRankingProcess ranked = new plasmaSearchRankingProcess(sb.webIndex, query, Integer.MAX_VALUE, 1);
+    public static plasmaSearchRankingProcess genSearchresult(final serverObjects prop, final plasmaSwitchboard sb, final String keyhash, final kelondroBitfield filter) {
+        final plasmaSearchQuery query = new plasmaSearchQuery(keyhash, -1, sb.getRanking(), filter);
+        final plasmaSearchRankingProcess ranked = new plasmaSearchRankingProcess(sb.webIndex, query, Integer.MAX_VALUE, 1);
         ranked.execQuery();
         
         if (ranked.filteredCount() == 0) {
@@ -110,7 +110,7 @@ public class plasmaSearchAPI {
         return ranked;
     }
     
-    public static void genURLList(serverObjects prop, String keyhash, String keystring, plasmaSearchRankingProcess ranked, kelondroBitfield flags, int maxlines) {
+    public static void genURLList(final serverObjects prop, final String keyhash, final String keystring, final plasmaSearchRankingProcess ranked, final kelondroBitfield flags, final int maxlines) {
         // search for a word hash and generate a list of url links
         prop.put("genUrlList_keyHash", keyhash);
         
@@ -179,7 +179,7 @@ public class plasmaSearchAPI {
                 i++;
                 if ((maxlines >= 0) && (i >= maxlines)) break;
             }
-            Iterator<String> iter = ranked.miss(); // iterates url hash strings
+            final Iterator<String> iter = ranked.miss(); // iterates url hash strings
             while (iter.hasNext()) {
                 us = iter.next();
                 prop.put("genUrlList_urlList_"+i+"_urlExists", "0");
@@ -194,7 +194,7 @@ public class plasmaSearchAPI {
         }
     }
     
-    public static void putBlacklists(serverObjects prop, String[] lists) {
+    public static void putBlacklists(final serverObjects prop, final String[] lists) {
         prop.put("genUrlList_blacklists", lists.length);
         for (int i=0; i<lists.length; i++)
             prop.put("genUrlList_blacklists_" + i + "_name", lists[i]);

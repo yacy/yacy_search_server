@@ -69,7 +69,7 @@ public class bzipParser extends AbstractParser implements Parser {
         return SUPPORTED_MIME_TYPES;
     }
     
-    public plasmaParserDocument parse(yacyURL location, String mimeType, String charset, InputStream source) throws ParserException, InterruptedException {
+    public plasmaParserDocument parse(final yacyURL location, final String mimeType, final String charset, final InputStream source) throws ParserException, InterruptedException {
         
         File tempFile = null;
         try {           
@@ -87,14 +87,14 @@ public class bzipParser extends AbstractParser implements Parser {
             }           
             
             int read = 0;
-            byte[] data = new byte[1024];
-            CBZip2InputStream zippedContent = new CBZip2InputStream(source);        
+            final byte[] data = new byte[1024];
+            final CBZip2InputStream zippedContent = new CBZip2InputStream(source);        
             
             tempFile = File.createTempFile("bunzip","tmp");
             tempFile.deleteOnExit();
             
             // creating a temp file to store the uncompressed data
-            FileOutputStream out = new FileOutputStream(tempFile);
+            final FileOutputStream out = new FileOutputStream(tempFile);
             
             // reading gzip file and store it uncompressed
             while((read = zippedContent.read(data, 0, 1024)) != -1) {
@@ -107,9 +107,9 @@ public class bzipParser extends AbstractParser implements Parser {
             checkInterruption();
             
             // creating a new parser class to parse the unzipped content
-            plasmaParser theParser = new plasmaParser();
+            final plasmaParser theParser = new plasmaParser();
             return theParser.parseSource(location,null,null,tempFile);
-        } catch (Exception e) {  
+        } catch (final Exception e) {  
             if (e instanceof InterruptedException) throw (InterruptedException) e;
             if (e instanceof ParserException) throw (ParserException) e;
             

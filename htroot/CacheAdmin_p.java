@@ -70,13 +70,13 @@ public class CacheAdmin_p {
     public static final class Filter implements FilenameFilter {
         private static final String EXCLUDE_NAME = plasmaHTCache.DB_NAME;
         private final File EXCLUDE_DIR;
-        public Filter(File path) { this.EXCLUDE_DIR = path; }
-        public boolean accept(File dir, String name) {
+        public Filter(final File path) { this.EXCLUDE_DIR = path; }
+        public boolean accept(final File dir, final String name) {
             return !dir.equals(EXCLUDE_DIR) && !name.equals(EXCLUDE_NAME);
         }
     }
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
         final plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
         final serverObjects prop = new serverObjects();
 
@@ -91,7 +91,7 @@ public class CacheAdmin_p {
                 pathString = "/";
                 file = new File(switchboard.htCachePath, pathString);
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             pathString = "/";
             file = new File(switchboard.htCachePath, pathString);
         }
@@ -134,10 +134,10 @@ public class CacheAdmin_p {
                     	// to retrieve all needed information
                         final htmlFilterContentScraper scraper = new htmlFilterContentScraper(url);
                         //final OutputStream os = new htmlFilterOutputStream(null, scraper, null, false);
-                        Writer writer = new htmlFilterWriter(null,null,scraper,null,false);                    
+                        final Writer writer = new htmlFilterWriter(null,null,scraper,null,false);                    
                         String sourceCharset = resInfo.getCharacterEncoding();
                         if (sourceCharset == null) sourceCharset = "UTF-8";
-                        String mimeType = resInfo.getMimeType();                    
+                        final String mimeType = resInfo.getMimeType();                    
                         serverFileUtils.copy(file, sourceCharset, writer);
                         writer.close();
                         
@@ -146,7 +146,7 @@ public class CacheAdmin_p {
                         prop.putHTML("info_type_title", scraper.getTitle());
                         
                         int i;
-                        String[] t = document.getSectionTitles();
+                        final String[] t = document.getSectionTitles();
                         prop.put("info_type_headlines", t.length);
                         for (i = 0; i < t.length; i++)
                         	prop.putHTML("info_type_headlines_" + i + "_headline",
@@ -173,11 +173,11 @@ public class CacheAdmin_p {
                         if (document != null) document.close();
                     }
                 }
-            } catch (IOException e) {
+            } catch (final IOException e) {
             	prop.put("info_type", NotCached);
-            } catch (UnsupportedProtocolException e) {
+            } catch (final UnsupportedProtocolException e) {
                 prop.put("info_type", ProtocolError);
-            } catch (IllegalAccessException e) {
+            } catch (final IllegalAccessException e) {
                 prop.put("info_type", SecurityError);
             }
         } else {
@@ -201,7 +201,8 @@ public class CacheAdmin_p {
             	prop.put("info_empty", "0");
                 final TreeSet<String> dList = new TreeSet<String>();
                 final TreeSet<String> fList = new TreeSet<String>();
-                int size = list.length - 1, i;
+                final int size = list.length - 1;
+				int i;
                 for (i = size; i >= 0 ; i--) { // Rueckwaerts ist schneller
                     if (new File(dir, list[i]).isDirectory())
                         dList.add(list[i]);
@@ -239,7 +240,7 @@ public class CacheAdmin_p {
         return prop;
     }
     
-    private static void formatHeader(serverObjects prop, Map<String, String> header) {
+    private static void formatHeader(final serverObjects prop, final Map<String, String> header) {
         if (header == null) {
             prop.put("info_header", "0");
         } else {
@@ -257,7 +258,7 @@ public class CacheAdmin_p {
         }
     }
 
-    private static void formatAnchor(serverObjects prop, Map<yacyURL, String> anchor, String extension) {
+    private static void formatAnchor(final serverObjects prop, final Map<yacyURL, String> anchor, final String extension) {
         final Iterator<Map.Entry<yacyURL, String>> iter = anchor.entrySet().iterator();
         String descr;
         Map.Entry<yacyURL, String> entry;
@@ -276,7 +277,7 @@ public class CacheAdmin_p {
         prop.put("info_type_use." + extension, (i == 0) ? 0 : 1);
     }
     
-    private static void formatEmail(serverObjects prop, Map<String, String> anchor, String extension) {
+    private static void formatEmail(final serverObjects prop, final Map<String, String> anchor, final String extension) {
         final Iterator<Map.Entry<String, String>> iter = anchor.entrySet().iterator();
         String descr;
         Map.Entry<String, String> entry;
@@ -295,7 +296,7 @@ public class CacheAdmin_p {
         prop.put("info_type_use." + extension, (i == 0) ? 0 : 1);
     }
 
-    private static void formatImageAnchor(serverObjects prop, HashMap<String, htmlFilterImageEntry> anchor) {
+    private static void formatImageAnchor(final serverObjects prop, final HashMap<String, htmlFilterImageEntry> anchor) {
         final Iterator<htmlFilterImageEntry> iter = anchor.values().iterator();
         htmlFilterImageEntry ie;
         prop.put("info_type_use.images_images", anchor.size());
@@ -310,7 +311,7 @@ public class CacheAdmin_p {
         prop.put("info_type_use.images", (i == 0) ? "0" : "1");
     }
 
-    private static void linkPathString(serverObjects prop, String path, boolean dir) {
+    private static void linkPathString(final serverObjects prop, final String path, final boolean dir) {
         final String[] elements = path.split("/");
         String dirs = "";
         int i, e, count = 0;

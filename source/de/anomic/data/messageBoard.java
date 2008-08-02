@@ -50,7 +50,7 @@ public class messageBoard {
     kelondroMap database = null;
     private int sn = 0;
 
-    public messageBoard(File path) {
+    public messageBoard(final File path) {
         new File(path.getParent()).mkdir();
         if (database == null) {
             database = new kelondroMap(new kelondroBLOBTree(path, true, true, categoryLength + dateFormat.length() + 2, recordSize, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 500);
@@ -80,10 +80,10 @@ public class messageBoard {
 	return s;
     }
 
-    public entry newEntry(String category,
-                          String authorName, String authorHash,
-                          String recName, String recHash,
-                          String subject, byte[] message) {
+    public entry newEntry(final String category,
+                          final String authorName, final String authorHash,
+                          final String recName, final String recHash,
+                          final String subject, final byte[] message) {
 	return new entry(category, authorName, authorHash, recName, recHash, subject, message);
     }
 
@@ -92,10 +92,10 @@ public class messageBoard {
 	String key; // composed by category and date
     HashMap<String, String> record; // contains author, target hash, subject and message
 
-	public entry(String category,
+	public entry(final String category,
                      String authorName, String authorHash,
                      String recName, String recHash,
-                     String subject, byte[] message) {
+                     String subject, final byte[] message) {
 	    record = new HashMap<String, String>();
 	    key = category;
 	    if (key.length() > categoryLength) key = key.substring(0, categoryLength);
@@ -118,7 +118,7 @@ public class messageBoard {
             record.put("read", "false");
 	}
 
-	entry(String key, HashMap<String, String> record) {
+	entry(final String key, final HashMap<String, String> record) {
 	    this.key = key;
 	    this.record = record;
 	}
@@ -130,7 +130,7 @@ public class messageBoard {
                 synchronized (SimpleFormatter) {
                     return SimpleFormatter.parse(c);
                 }
-	    } catch (ParseException e) {
+	    } catch (final ParseException e) {
 		return new Date();
 	    }
 	}
@@ -142,78 +142,78 @@ public class messageBoard {
 	}
 
 	public String author() {
-	    String a = record.get("author");
+	    final String a = record.get("author");
 	    if (a == null) return "anonymous";
         return a;
 	}
 
 	public String recipient() {
-	    String a = record.get("recipient");
+	    final String a = record.get("recipient");
 	    if (a == null) return "anonymous";
         return a;
 	}
 
 	public String authorHash() {
-	    String a = record.get("ahash");
+	    final String a = record.get("ahash");
 	    if (a == null) return null;
         return a;
 	}
 
 	public String recipientHash() {
-	    String a = record.get("rhash");
+	    final String a = record.get("rhash");
 	    if (a == null) return null;
         return a;
 	}
 
         public String subject() {
-	    String s = record.get("subject");
+	    final String s = record.get("subject");
 	    if (s == null) return "";
         return s;
 	}
 
 	public byte[] message() {
-	    String m = record.get("message");
+	    final String m = record.get("message");
 	    if (m == null) return new byte[0];
             record.put("read", "true");
 	    return kelondroBase64Order.enhancedCoder.decode(m, "de.anomic.data.messageBoard.message()");
 	}
         
         public boolean read() {
-            String r = record.get("read");
+            final String r = record.get("read");
             if (r == null) return false;
             if (r.equals("false")) return false;
             return true;
         }
     }
 
-    public String write(entry message) {
+    public String write(final entry message) {
         // writes a message and returns key
         try {
             database.put(message.key, message.record);
             return message.key;
-        } catch (IOException e) {
+        } catch (final IOException e) {
             return null;
         }
     }
     
-    public entry read(String key) {
+    public entry read(final String key) {
         HashMap<String, String> record;
         try {
             record = database.get(key);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             return null;
         }
 	    return new entry(key, record);
     }
     
-    public void remove(String key) {
+    public void remove(final String key) {
         try {
             database.remove(key);
-        } catch (IOException e) {
+        } catch (final IOException e) {
         }
     }
     
-    public Iterator<String> keys(String category, boolean up) throws IOException {
+    public Iterator<String> keys(final String category, final boolean up) throws IOException {
 	//return database.keys();
         return new catIter(category, up);
     }
@@ -224,7 +224,7 @@ public class messageBoard {
         String nextKey = null;
         String category = "";
         
-        public catIter(String category, boolean up) throws IOException {
+        public catIter(final String category, final boolean up) throws IOException {
             this.allIter = database.keys(up, false);
             this.category = category;
             findNext();
@@ -243,7 +243,7 @@ public class messageBoard {
         }
         
         public String next() {
-            String next = nextKey;
+            final String next = nextKey;
             findNext();
             return next;
         }

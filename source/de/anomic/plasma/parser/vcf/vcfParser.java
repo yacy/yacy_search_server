@@ -78,19 +78,19 @@ public class vcfParser extends AbstractParser implements Parser {
         return SUPPORTED_MIME_TYPES;
     }
     
-    public plasmaParserDocument parse(yacyURL location, String mimeType, String charset, InputStream source) throws ParserException, InterruptedException {
+    public plasmaParserDocument parse(final yacyURL location, final String mimeType, final String charset, final InputStream source) throws ParserException, InterruptedException {
         
         try {
-            StringBuffer parsedTitle = new StringBuffer();
-            StringBuffer parsedDataText = new StringBuffer();
-            HashMap<String, String> parsedData = new HashMap<String, String>();
-            HashMap<yacyURL, String> anchors = new HashMap<yacyURL, String>();
-            LinkedList<String> parsedNames = new LinkedList<String>();
+            final StringBuffer parsedTitle = new StringBuffer();
+            final StringBuffer parsedDataText = new StringBuffer();
+            final HashMap<String, String> parsedData = new HashMap<String, String>();
+            final HashMap<yacyURL, String> anchors = new HashMap<yacyURL, String>();
+            final LinkedList<String> parsedNames = new LinkedList<String>();
             
             boolean useLastLine = false;
             int lineNr = 0;
             String line = null;            
-            BufferedReader inputReader = (charset!=null)
+            final BufferedReader inputReader = (charset!=null)
                                        ? new BufferedReader(new InputStreamReader(source,charset))
                                        : new BufferedReader(new InputStreamReader(source));
             while (true) {
@@ -108,13 +108,13 @@ public class vcfParser extends AbstractParser implements Parser {
                 else if (line.length() == 0) continue;
                 
                 lineNr++;                
-                int pos = line.indexOf(":");
+                final int pos = line.indexOf(":");
                 if (pos != -1) {
-                    String key = line.substring(0,pos).trim().toUpperCase();
+                    final String key = line.substring(0,pos).trim().toUpperCase();
                     String value = line.substring(pos+1).trim();
                     
                     String encoding = null;
-                    String[] keyParts = key.split(";");
+                    final String[] keyParts = key.split(";");
                     if (keyParts.length > 1) {
                         for (int i=0; i < keyParts.length; i++) {
                             if (keyParts[i].toUpperCase().startsWith("ENCODING")) {
@@ -152,7 +152,7 @@ public class vcfParser extends AbstractParser implements Parser {
                                     } while (line.length()!=0);
                                     value = kelondroBase64Order.standardCoder.decodeString(value, "de.anomic.plasma.parser.vcf.vcfParser.parse(...)");
                                 }  
-                            } catch (Exception ey) {
+                            } catch (final Exception ey) {
                                 // Encoding error: This could occure e.g. if the base64 doesn't 
                                 // end with an empty newline
                                 // 
@@ -184,7 +184,7 @@ public class vcfParser extends AbstractParser implements Parser {
                         
                         // looping through the properties and add there values to
                         // the text representation of the vCard
-                        Iterator<String> iter = parsedData.values().iterator();  
+                        final Iterator<String> iter = parsedData.values().iterator();  
                         while (iter.hasNext()) {
                             value = iter.next();
                             parsedDataText.append(value).append("\r\n");
@@ -193,10 +193,10 @@ public class vcfParser extends AbstractParser implements Parser {
                         parsedData.clear();
                     } else if (key.toUpperCase().startsWith("URL")) {
                         try {
-                            yacyURL newURL = new yacyURL(value, null);
+                            final yacyURL newURL = new yacyURL(value, null);
                             anchors.put(newURL, newURL.toString());   
                             //parsedData.put(key,value);
-                        } catch (MalformedURLException ex) {/* ignore this */}                                                
+                        } catch (final MalformedURLException ex) {/* ignore this */}                                                
                     } else if (
                             !key.equalsIgnoreCase("BEGIN") &&
                             !key.equalsIgnoreCase("END") &&
@@ -219,9 +219,9 @@ public class vcfParser extends AbstractParser implements Parser {
                 }
             }
 
-            String[] sections = parsedNames.toArray(new String[parsedNames.size()]);
-            byte[] text = parsedDataText.toString().getBytes();
-            plasmaParserDocument theDoc = new plasmaParserDocument(
+            final String[] sections = parsedNames.toArray(new String[parsedNames.size()]);
+            final byte[] text = parsedDataText.toString().getBytes();
+            final plasmaParserDocument theDoc = new plasmaParserDocument(
                     location,                   // url of the source document
                     mimeType,                   // the documents mime type
                     null,
@@ -234,7 +234,7 @@ public class vcfParser extends AbstractParser implements Parser {
                     anchors,                    // a map of extracted anchors
                     null);                      // a treeset of image URLs
             return theDoc;
-        } catch (Exception e) { 
+        } catch (final Exception e) { 
             if (e instanceof InterruptedException) throw (InterruptedException) e;
             if (e instanceof ParserException) throw (ParserException) e;
             
@@ -247,19 +247,19 @@ public class vcfParser extends AbstractParser implements Parser {
         super.reset();
     }
     
-    public static final String decodeQuotedPrintable(String s) {
+    public static final String decodeQuotedPrintable(final String s) {
 		if (s == null) return null;
-		byte[] b = s.getBytes();
-		StringBuffer sb = new StringBuffer();
+		final byte[] b = s.getBytes();
+		final StringBuffer sb = new StringBuffer();
 		for (int i = 0; i < b.length; i++) {
-			int c = b[i];
+			final int c = b[i];
 			if (c == '=') {
 				try {
-					int u = Character.digit((char) b[++i], 16);
-					int l = Character.digit((char) b[++i], 16);
+					final int u = Character.digit((char) b[++i], 16);
+					final int l = Character.digit((char) b[++i], 16);
 					if (u == -1 || l == -1) throw new RuntimeException("bad quoted-printable encoding");
 					sb.append((char) ((u << 4) + l));
-				} catch (ArrayIndexOutOfBoundsException e) {
+				} catch (final ArrayIndexOutOfBoundsException e) {
 					throw new RuntimeException("bad quoted-printable encoding");
 				}
 			} else {
@@ -269,17 +269,17 @@ public class vcfParser extends AbstractParser implements Parser {
 		return sb.toString();
 	}
     
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         try {
-            yacyURL contentUrl = new yacyURL(args[0], null);
+            final yacyURL contentUrl = new yacyURL(args[0], null);
             
-            vcfParser testParser = new vcfParser();
-            httpHeader reqHeader = new httpHeader();
+            final vcfParser testParser = new vcfParser();
+            final httpHeader reqHeader = new httpHeader();
             reqHeader.put(httpHeader.USER_AGENT, HTTPLoader.crawlerUserAgent);
-            byte[] content = HttpClient.wget(contentUrl.toString(), reqHeader, 10000);
-            ByteArrayInputStream input = new ByteArrayInputStream(content);
+            final byte[] content = HttpClient.wget(contentUrl.toString(), reqHeader, 10000);
+            final ByteArrayInputStream input = new ByteArrayInputStream(content);
             testParser.parse(contentUrl, "text/x-vcard", "UTF-8",input);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             e.printStackTrace();
         }
     }

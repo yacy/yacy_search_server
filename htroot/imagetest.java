@@ -32,7 +32,7 @@ import de.anomic.ymage.ymageToolPrint;
 
 public class imagetest {
     
-    public static ymageMatrix respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
+    public static ymageMatrix respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
         /*
         BufferedImage bi = new BufferedImage(640, 400, BufferedImage.TYPE_INT_RGB); 
         Graphics2D g = bi.createGraphics();
@@ -64,7 +64,7 @@ public class imagetest {
         for (int i = 20; i < 100; i++) r.setPixel(i, 34, new int[]{0, 0, 255});
         return bi;
         */
-        ymageMatrix img = new ymageMatrix(800, 600, ymageMatrix.MODE_SUB, "FFFFFF");
+        final ymageMatrix img = new ymageMatrix(800, 600, ymageMatrix.MODE_SUB, "FFFFFF");
         img.setColor(ymageMatrix.GREY);
         for (int y = 0; y < 600; y = y + 50) ymageToolPrint.print(img, 0, 6 + y, 0, "" + y, -1);
         for (int x = 0; x < 800; x = x + 50) ymageToolPrint.print(img, x, 6    , 0, "" + x, -1);

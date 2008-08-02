@@ -56,27 +56,27 @@ public final class htmlFilterWriter extends Writer {
     public static final char singlequote = '\'';
     public static final char doublequote = '"';
 
-    private OutputStream outStream;
+    private final OutputStream outStream;
     private OutputStreamWriter out;
     private serverCharBuffer buffer;
     private String       filterTag;
     private Properties   filterOpts;
     private serverCharBuffer filterCont;
-    private htmlFilterScraper scraper;
-    private htmlFilterTransformer transformer;
+    private final htmlFilterScraper scraper;
+    private final htmlFilterTransformer transformer;
     private boolean inSingleQuote;
     private boolean inDoubleQuote;
     private boolean inComment;
     private boolean inScript;
     private boolean binaryUnsuspect;
-    private boolean passbyIfBinarySuspect;
+    private final boolean passbyIfBinarySuspect;
 
     public htmlFilterWriter(
-            OutputStream outStream,
-            String outputStreamCharset,
-            htmlFilterScraper scraper,
-            htmlFilterTransformer transformer,
-            boolean passbyIfBinarySuspect
+            final OutputStream outStream,
+            final String outputStreamCharset,
+            final htmlFilterScraper scraper,
+            final htmlFilterTransformer transformer,
+            final boolean passbyIfBinarySuspect
     ) throws UnsupportedEncodingException {
         this.outStream     = outStream;
         this.scraper       = scraper;
@@ -97,8 +97,8 @@ public final class htmlFilterWriter extends Writer {
         }        
     }
 
-    public static char[] genTag0raw(String tagname, boolean opening, char[] tagopts) {
-            serverCharBuffer bb = new serverCharBuffer(tagname.length() + tagopts.length + 3);
+    public static char[] genTag0raw(final String tagname, final boolean opening, final char[] tagopts) {
+            final serverCharBuffer bb = new serverCharBuffer(tagname.length() + tagopts.length + 3);
             bb.append((int)'<');
             if (!opening) {
                 bb.append((int)'/');
@@ -113,8 +113,8 @@ public final class htmlFilterWriter extends Writer {
             return bb.getChars();
     }
 
-    public static char[] genTag1raw(String tagname, char[] tagopts, char[] text) {
-            serverCharBuffer bb = new serverCharBuffer(2 * tagname.length() + tagopts.length + text.length + 5);
+    public static char[] genTag1raw(final String tagname, final char[] tagopts, final char[] text) {
+            final serverCharBuffer bb = new serverCharBuffer(2 * tagname.length() + tagopts.length + text.length + 5);
             bb.append((int)'<').append(tagname);
             if (tagopts.length > 0) {
 //              if (tagopts[0] == (byte) 32)
@@ -127,9 +127,9 @@ public final class htmlFilterWriter extends Writer {
             return bb.getChars();
     }
 
-    public static char[] genTag0(String tagname, Properties tagopts, char quotechar) {   
-            char[] tagoptsx = (tagopts.size() == 0) ? null : genOpts(tagopts, quotechar);
-            serverCharBuffer bb = new serverCharBuffer(tagname.length() + ((tagoptsx == null) ? 0 : (tagoptsx.length + 1)) + tagname.length() + 2);
+    public static char[] genTag0(final String tagname, final Properties tagopts, final char quotechar) {   
+            final char[] tagoptsx = (tagopts.size() == 0) ? null : genOpts(tagopts, quotechar);
+            final serverCharBuffer bb = new serverCharBuffer(tagname.length() + ((tagoptsx == null) ? 0 : (tagoptsx.length + 1)) + tagname.length() + 2);
             bb.append((int)'<').append(tagname);
             if (tagoptsx != null) {
                 bb.append(32);
@@ -139,17 +139,17 @@ public final class htmlFilterWriter extends Writer {
             return bb.getChars();          
     }
 
-    public static char[] genTag1(String tagname, Properties tagopts, char[] text, char quotechar) {  
-            char[] gt0 = genTag0(tagname, tagopts, quotechar);
-            serverCharBuffer cb = new serverCharBuffer(gt0, gt0.length + text.length + tagname.length() + 3);
+    public static char[] genTag1(final String tagname, final Properties tagopts, final char[] text, final char quotechar) {  
+            final char[] gt0 = genTag0(tagname, tagopts, quotechar);
+            final serverCharBuffer cb = new serverCharBuffer(gt0, gt0.length + text.length + tagname.length() + 3);
             cb.append(text).append((int)'<').append((int)'/').append(tagname).append((int)'>');
             return cb.getChars();        
     }
 
     // a helper method for pretty-printing of properties for html tags
-    public static char[] genOpts(Properties prop, char quotechar) {   
-            Enumeration<?> e = prop.propertyNames();
-            serverCharBuffer bb = new serverCharBuffer(prop.size() * 40);
+    public static char[] genOpts(final Properties prop, final char quotechar) {   
+            final Enumeration<?> e = prop.propertyNames();
+            final serverCharBuffer bb = new serverCharBuffer(prop.size() * 40);
             String key;
             while (e.hasMoreElements()) {
                 key = (String) e.nextElement();
@@ -161,7 +161,7 @@ public final class htmlFilterWriter extends Writer {
             return bb.getChars(); 
     }
 
-    private char[] filterTag(String tag, boolean opening, char[] content, char quotechar) {
+    private char[] filterTag(final String tag, final boolean opening, final char[] content, final char quotechar) {
 //      System.out.println("FILTER1: filterTag=" + ((filterTag == null) ? "null" : filterTag) + ", tag=" + tag + ", opening=" + ((opening) ? "true" : "false") + ", content=" + new String(content)); // debug
         if (filterTag == null) {
             // we are not collection tag text
@@ -232,7 +232,7 @@ public final class htmlFilterWriter extends Writer {
         return ret;
     }
 
-    private char[] filterFinalize(char quotechar) {
+    private char[] filterFinalize(final char quotechar) {
         if (filterTag == null) {
             return new char[0];
         }
@@ -251,7 +251,7 @@ public final class htmlFilterWriter extends Writer {
         return ret;
     }
 
-    private char[] filterSentence(char[] in, char quotechar) {
+    private char[] filterSentence(final char[] in, final char quotechar) {
         if (in.length == 0) return in;
 //      System.out.println("FILTER0: " + new String(in)); // debug
         // scan the string and parse structure
@@ -264,7 +264,7 @@ public final class htmlFilterWriter extends Writer {
                 // a closing tag
                 tagend = tagEnd(in, 2);
                 tag = new String(in, 2, tagend - 2); 
-                char[] text = new char[in.length - tagend - 1];
+                final char[] text = new char[in.length - tagend - 1];
                 System.arraycopy(in, tagend, text, 0, in.length - tagend - 1);
                 return filterTag(tag, false, text, quotechar);
             }
@@ -272,7 +272,7 @@ public final class htmlFilterWriter extends Writer {
             // an opening tag
             tagend = tagEnd(in, 1);
             tag = new String(in, 1, tagend - 1);    
-            char[] text = new char[in.length - tagend - 1];
+            final char[] text = new char[in.length - tagend - 1];
             System.arraycopy(in, tagend, text, 0, in.length - tagend - 1);
             return filterTag(tag, true, text, quotechar);
         }
@@ -281,7 +281,7 @@ public final class htmlFilterWriter extends Writer {
         return filterTag(null, true, in, quotechar);
     }
 
-    private static int tagEnd(char[] tag, int start) {
+    private static int tagEnd(final char[] tag, final int start) {
         char c;
         for (int i = start; i < tag.length; i++) {
             c = tag[i];
@@ -294,7 +294,7 @@ public final class htmlFilterWriter extends Writer {
         return tag.length - 1;
     }
 
-    public void write(int c) throws IOException {
+    public void write(final int c) throws IOException {
 //      System.out.println((char) c);
         if ((binaryUnsuspect) && (binaryHint((char)c))) {
             binaryUnsuspect = false;
@@ -340,7 +340,7 @@ public final class htmlFilterWriter extends Writer {
                 }
             } else if (inScript) {
                 buffer.append(c);
-                int bufferLength = buffer.length();
+                final int bufferLength = buffer.length();
                 if ((c == rb) && (bufferLength > 14) &&
                     (buffer.charAt(bufferLength - 8) == '/') &&
                     (buffer.charAt(bufferLength - 7) == 's') &&
@@ -424,11 +424,11 @@ public final class htmlFilterWriter extends Writer {
         }
     }
 
-    public void write(char b[]) throws IOException {
+    public void write(final char b[]) throws IOException {
         write(b, 0, b.length);
     }
 
-    public void write(char b[], int off, int len) throws IOException {
+    public void write(final char b[], final int off, final int len) throws IOException {
 //      System.out.println(new String(b, off, len));
         if ((off | len | (b.length - (len + off)) | (off + len)) < 0) throw new IndexOutOfBoundsException();
         for (int i = off ; i < (len - off) ; i++) this.write(b[i]);
@@ -449,15 +449,15 @@ public final class htmlFilterWriter extends Writer {
     }
 
     public void close() throws IOException {
-        char quotechar = (inSingleQuote) ? singlequote : doublequote;
+        final char quotechar = (inSingleQuote) ? singlequote : doublequote;
         if (buffer != null) {
             if (buffer.length() > 0) {
-                char[] filtered = filterSentence(buffer.getChars(), quotechar);
+                final char[] filtered = filterSentence(buffer.getChars(), quotechar);
                 if (out != null) out.write(filtered);
             }
             buffer = null;
         }
-        char[] finalized = filterFinalize(quotechar);
+        final char[] finalized = filterFinalize(quotechar);
         if (out != null) {
             if (finalized != null) out.write(finalized);
             out.flush();
@@ -491,27 +491,27 @@ public final class htmlFilterWriter extends Writer {
         return !binaryUnsuspect;
     }
 
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         // takes one argument: a file name 
         if (args.length != 1) return;
-        char[] buffer = new char[512];
+        final char[] buffer = new char[512];
         try {
-            htmlFilterContentScraper scraper = new htmlFilterContentScraper(new yacyURL("http://localhost:8080", null));
-            htmlFilterTransformer transformer = new htmlFilterContentTransformer();            
+            final htmlFilterContentScraper scraper = new htmlFilterContentScraper(new yacyURL("http://localhost:8080", null));
+            final htmlFilterTransformer transformer = new htmlFilterContentTransformer();            
             // TODO: this does not work at the moment
             System.exit(0);
-            Reader is = new FileReader(args[0]);
-            FileOutputStream fos = new FileOutputStream(new File(args[0] + ".out"));
-            Writer os = new htmlFilterWriter(fos, "UTF-8",scraper, transformer, false);
+            final Reader is = new FileReader(args[0]);
+            final FileOutputStream fos = new FileOutputStream(new File(args[0] + ".out"));
+            final Writer os = new htmlFilterWriter(fos, "UTF-8",scraper, transformer, false);
             int i;
             while ((i = is.read(buffer)) > 0) os.write(buffer, 0, i);
             os.close();
             fos.close();
             is.close();
             scraper.print();
-        } catch (MalformedURLException e) {
+        } catch (final MalformedURLException e) {
             e.printStackTrace();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             e.printStackTrace();
         }
     }

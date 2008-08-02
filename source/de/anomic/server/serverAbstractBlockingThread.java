@@ -33,10 +33,10 @@ public abstract class serverAbstractBlockingThread<J extends serverProcessorJob>
     private BlockingQueue<J> input = null;
     private serverProcessor<J> output = null;
 
-    public void setInputQueue(BlockingQueue<J> queue) {
+    public void setInputQueue(final BlockingQueue<J> queue) {
         this.input = queue;
     }
-    public void setOutputProcess(serverProcessor<J> processor) {
+    public void setOutputProcess(final serverProcessor<J> processor) {
         this.output = processor;
     }
     public BlockingQueue<J> getInputQueue() {
@@ -60,7 +60,7 @@ public abstract class serverAbstractBlockingThread<J extends serverProcessorJob>
                 // do job
                 timestamp = System.currentTimeMillis();
                 memstamp0 = serverMemory.used();
-                J in = this.input.take();
+                final J in = this.input.take();
                 if ((in == null) || (in.status == serverProcessorJob.STATUS_POISON)) {
                     // the poison pill: shutdown
                     // a null element is pushed to the queue on purpose to signal
@@ -68,7 +68,7 @@ public abstract class serverAbstractBlockingThread<J extends serverProcessorJob>
                     this.running = false;
                     break;
                 }
-                J out = this.job(in);
+                final J out = this.job(in);
                 if ((out != null) && (this.output != null)) this.output.enQueue(out);
                 // do memory and busy/idle-count/time monitoring
                 memstamp1 = serverMemory.used();
@@ -80,11 +80,11 @@ public abstract class serverAbstractBlockingThread<J extends serverProcessorJob>
                     if (busyCycles > 0) memuse += memuse / busyCycles;
                 }
                 busytime += System.currentTimeMillis() - timestamp;
-            } catch (InterruptedException e) {
+            } catch (final InterruptedException e) {
                 // don't ignore this: shut down
                 this.running = false;
                 break;
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 // handle exceptions: thread must not die on any unexpected exceptions
                 // if the exception is too bad it should call terminate()
                 this.jobExceptionHandler(e);
@@ -96,7 +96,7 @@ public abstract class serverAbstractBlockingThread<J extends serverProcessorJob>
         logSystem("thread '" + this.getName() + "' terminated.");
     }
     
-    private void logSystem(String text) {
+    private void logSystem(final String text) {
         if (log == null) serverLog.logConfig("THREAD-CONTROL", text);
         else log.logConfig(text);
     }

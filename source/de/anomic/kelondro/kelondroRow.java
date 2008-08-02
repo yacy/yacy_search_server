@@ -46,7 +46,7 @@ public final class kelondroRow {
     public    int                   primaryKeyIndex, primaryKeyLength;
     protected Map<String, Object[]> nickref = null; // a mapping from nicknames to Object[2]{kelondroColumn, Integer(colstart)}
     
-    public kelondroRow(kelondroColumn[] row, kelondroByteOrder objectOrder, int primaryKey) {
+    public kelondroRow(final kelondroColumn[] row, final kelondroByteOrder objectOrder, final int primaryKey) {
         assert objectOrder != null;
         this.objectOrder = objectOrder;
         this.row = row;
@@ -61,7 +61,7 @@ public final class kelondroRow {
         this.primaryKeyLength = (primaryKey < 0) ? this.objectsize : row[primaryKeyIndex].cellwidth;
     }
 
-    public kelondroRow(String structure, kelondroByteOrder objectOrder, int primaryKey) {
+    public kelondroRow(final String structure, final kelondroByteOrder objectOrder, final int primaryKey) {
         assert (objectOrder != null);
         this.objectOrder = objectOrder;
         // define row with row syntax
@@ -74,9 +74,9 @@ public final class kelondroRow {
         // parse property part definition:
         int p = structure.indexOf('|');
         if (p < 0) p = structure.length();
-        ArrayList<kelondroColumn> l = new ArrayList<kelondroColumn>();
-        String attr = structure.substring(0, p);
-        StringTokenizer st = new StringTokenizer(attr, ",");
+        final ArrayList<kelondroColumn> l = new ArrayList<kelondroColumn>();
+        final String attr = structure.substring(0, p);
+        final StringTokenizer st = new StringTokenizer(attr, ",");
         while (st.hasMoreTokens()) {
             l.add(new kelondroColumn(st.nextToken()));
         }
@@ -94,7 +94,7 @@ public final class kelondroRow {
         this.primaryKeyLength = (primaryKey < 0) ? this.objectsize : row[primaryKeyIndex].cellwidth;
     }
     
-    public final void setOrdering(kelondroByteOrder objectOrder, int primaryKey) {
+    public final void setOrdering(final kelondroByteOrder objectOrder, final int primaryKey) {
         assert (objectOrder != null);
         this.objectOrder = objectOrder;
         this.primaryKeyIndex = primaryKey;
@@ -119,22 +119,22 @@ public final class kelondroRow {
         return this.objectsize;
     }
     */
-    public final kelondroColumn column(int col) {
+    public final kelondroColumn column(final int col) {
         return row[col];
     }
     
-    public final int width(int column) {
+    public final int width(final int column) {
         return this.row[column].cellwidth;
     }
     
     public final int[] widths() {
-        int[] w = new int[this.row.length];
+        final int[] w = new int[this.row.length];
         for (int i = 0; i < this.row.length; i++) w[i] = row[i].cellwidth;
         return w;
     }
     
     public final String toString() {
-        StringBuffer s = new StringBuffer();
+        final StringBuffer s = new StringBuffer();
         s.append(row[0].toString());
         for (int i = 1; i < row.length; i++) {
             s.append(", ");
@@ -147,7 +147,7 @@ public final class kelondroRow {
         return new Entry();
     }
     
-    public final Entry newEntry(byte[] rowinstance) {
+    public final Entry newEntry(final byte[] rowinstance) {
         if (rowinstance == null) return null;
         //assert (rowinstance[0] != 0);
         assert (this.objectOrder.wellformed(rowinstance, 0, row[0].cellwidth)) : "rowinstance[0] = " + new String(rowinstance, 0, row[0].cellwidth) + " / " + serverLog.arrayList(rowinstance, 0, row[0].cellwidth);
@@ -155,14 +155,14 @@ public final class kelondroRow {
         return new Entry(rowinstance, false);
     }
     
-    public final Entry newEntry(Entry oldrow, int fromColumn) {
+    public final Entry newEntry(final Entry oldrow, final int fromColumn) {
         if (oldrow == null) return null;
         assert (oldrow.getColBytes(0)[0] != 0);
         assert (this.objectOrder.wellformed(oldrow.getColBytes(0), 0, row[0].cellwidth));
         return new Entry(oldrow, fromColumn, false);
     }
     
-    public final Entry newEntry(byte[] rowinstance, int start, boolean clone) {
+    public final Entry newEntry(final byte[] rowinstance, final int start, final boolean clone) {
         if (rowinstance == null) return null;
         //assert (rowinstance[0] != 0);
         assert (this.objectOrder.wellformed(rowinstance, start, row[0].cellwidth)) : "rowinstance = " + new String(rowinstance);
@@ -172,19 +172,19 @@ public final class kelondroRow {
         return new Entry(rowinstance, start, clone);
     }
     
-    public final Entry newEntry(byte[][] cells) {
+    public final Entry newEntry(final byte[][] cells) {
         if (cells == null) return null;
         assert (cells[0][0] != 0);
         assert (this.objectOrder.wellformed(cells[0], 0, row[0].cellwidth));
         return new Entry(cells);
     }
     
-    public final Entry newEntry(String external, boolean decimalCardinal) {
+    public final Entry newEntry(final String external, final boolean decimalCardinal) {
         if (external == null) return null;
         return new Entry(external, decimalCardinal);
     }
     
-    public final EntryIndex newEntryIndex(byte[] rowinstance, int index) {
+    public final EntryIndex newEntryIndex(final byte[] rowinstance, final int index) {
         if (rowinstance == null) return null;
         assert (rowinstance[0] != 0);
         assert (this.objectOrder.wellformed(rowinstance, 0, row[0].cellwidth));
@@ -194,11 +194,11 @@ public final class kelondroRow {
     public static class EntryComparator extends kelondroAbstractOrder<Entry> implements kelondroOrder<Entry>, Comparator<Entry> {
 
         kelondroByteOrder base;
-        public EntryComparator(kelondroByteOrder baseOrder) {
+        public EntryComparator(final kelondroByteOrder baseOrder) {
             this.base = baseOrder;
         }
         
-        public int compare(Entry a, Entry b) {
+        public int compare(final Entry a, final Entry b) {
             return a.compareTo(b);
         }
 
@@ -206,7 +206,7 @@ public final class kelondroRow {
             return new EntryComparator(base);
         }
 
-        public long cardinal(Entry key) {
+        public long cardinal(final Entry key) {
             return base.cardinal(key.getPrimaryKeyBytes());
         }
 
@@ -214,7 +214,7 @@ public final class kelondroRow {
             return base.signature();
         }
 
-        public boolean wellformed(Entry a) {
+        public boolean wellformed(final Entry a) {
             return base.wellformed(a.getPrimaryKeyBytes());
         }
 
@@ -231,15 +231,15 @@ public final class kelondroRow {
             offset = 0;
         }
         
-        public Entry(byte[] newrow, boolean forceclone) {
+        public Entry(final byte[] newrow, final boolean forceclone) {
             this(newrow, 0, forceclone);
         }
         
-        public Entry(Entry oldrow, int fromColumn, boolean forceclone) {
+        public Entry(final Entry oldrow, final int fromColumn, final boolean forceclone) {
             this(oldrow.rowinstance, oldrow.offset + oldrow.colstart(fromColumn), forceclone);
         }
         
-        public Entry(byte[] newrow, int start, boolean forceclone) {
+        public Entry(final byte[] newrow, final int start, final boolean forceclone) {
             if ((!forceclone) && (newrow.length - start >= objectsize)) {
                 this.rowinstance = newrow;
                 this.offset = start;
@@ -251,7 +251,7 @@ public final class kelondroRow {
             //for (int i = ll; i < objectsize; i++) this.rowinstance[i] = 0;
         }
         
-        public Entry(byte[][] cols) {
+        public Entry(final byte[][] cols) {
             assert row.length == cols.length : "cols.length = " + cols.length + ", row.length = " + row.length;
             this.rowinstance = new byte[objectsize];
             this.offset = 0;
@@ -271,10 +271,10 @@ public final class kelondroRow {
             }
         }
         
-        public Entry(String external, boolean decimalCardinal) {
+        public Entry(String external, final boolean decimalCardinal) {
             // parse external form
             if (external.charAt(0) == '{') external = external.substring(1, external.length() - 1);
-            String[] elts = external.split(",");
+            final String[] elts = external.split(",");
             if (nickref == null) genNickRef();
             String nick;
             int p;
@@ -290,7 +290,7 @@ public final class kelondroRow {
                         if ((decimalCardinal) && (row[i].celltype == kelondroColumn.celltype_cardinal)) {
                             try {
                                 setCol(nick, Long.parseLong(elts[i].substring(p + 1).trim()));
-                            } catch (NumberFormatException e) {
+                            } catch (final NumberFormatException e) {
                                 serverLog.logSevere("kelondroRow", "NumberFormatException for celltype_cardinal; row = " + i + ", celltype = " + row[i].celltype + ", encoder = " + row[i].encoder + ", value = '" + elts[i].substring(p + 1).trim() + "'");
                                 setCol(nick, 0);
                             }
@@ -298,7 +298,7 @@ public final class kelondroRow {
                             assert row[i].cellwidth == 1;
                             try {
                                 setCol(nick, new byte[]{(byte) Integer.parseInt(elts[i].substring(p + 1).trim())});
-                            } catch (NumberFormatException e) {
+                            } catch (final NumberFormatException e) {
                                 serverLog.logSevere("kelondroRow", "NumberFormatException for celltype_binary; row = " + i + ", celltype = " + row[i].celltype + ", encoder = " + row[i].encoder + ", value = '" + elts[i].substring(p + 1).trim() + "'");
                                 setCol(nick, new byte[]{0});
                             }
@@ -312,24 +312,24 @@ public final class kelondroRow {
             }
         }
 
-        protected final int colstart(int column) {
+        protected final int colstart(final int column) {
             return colstart[column];
         }
         
-        protected final int cellwidth(int column) {
+        protected final int cellwidth(final int column) {
             return row[column].cellwidth;
         }
         
-        public final int compareTo(Entry o) {
+        public final int compareTo(final Entry o) {
             // compares only the content of the primary key
             if (objectOrder == null) throw new kelondroException("objects cannot be compared, no order given");
             return objectOrder.compare(this.getPrimaryKeyBytes(), (o).getPrimaryKeyBytes());
         }
         
-        public final boolean equals(Entry otherEntry) {
+        public final boolean equals(final Entry otherEntry) {
             // compares the content of the complete entry
-            byte[] t = this.bytes();
-            byte[] o = otherEntry.bytes();
+            final byte[] t = this.bytes();
+            final byte[] o = otherEntry.bytes();
             if (o.length != t.length) return false;
             for (int i = 0; i < t.length; i++) {
                 if (t[i] != o[i]) return false;
@@ -341,13 +341,13 @@ public final class kelondroRow {
             if ((offset == 0) && (rowinstance.length == objectsize)) {
                 return rowinstance;
             } else {
-                byte[] tmp = new byte[objectsize];
+                final byte[] tmp = new byte[objectsize];
                 System.arraycopy(rowinstance, offset, tmp, 0, objectsize);
                 return tmp;
             }
         }
         
-        public final void writeToArray(byte[] target, int targetOffset) {
+        public final void writeToArray(final byte[] target, final int targetOffset) {
             // this method shall replace the byte()s where possible, bacause it may reduce the number of new byte[] allocations
             assert (targetOffset + objectsize <= target.length) : "targetOffset = " + targetOffset + ", target.length = " + target.length + ", objectsize = " + objectsize;
             System.arraycopy(rowinstance, offset, target, targetOffset, objectsize);
@@ -361,36 +361,36 @@ public final class kelondroRow {
             return objectsize;
         }
         
-        public final boolean empty(int column) {
+        public final boolean empty(final int column) {
             return rowinstance[offset + colstart[column]] == 0;
         }
         
-        public final void setCol(String nickname, char c) {
+        public final void setCol(final String nickname, final char c) {
             if (nickref == null) genNickRef();
-            Object[] ref = nickref.get(nickname);
+            final Object[] ref = nickref.get(nickname);
             if (ref == null) return;
             rowinstance[offset + ((Integer) ref[1]).intValue()] = (byte) c;
         }
         
-        public final void setCol(String nickname, byte[] cell) {
+        public final void setCol(final String nickname, final byte[] cell) {
             if (nickref == null) genNickRef();
-            Object[] ref = nickref.get(nickname);
+            final Object[] ref = nickref.get(nickname);
             if (ref == null) return;
-            kelondroColumn col = (kelondroColumn) ref[0];
+            final kelondroColumn col = (kelondroColumn) ref[0];
             setCol(col.encoder, ((Integer) ref[1]).intValue(), col.cellwidth, cell);
         }
         
-        public final void setCol(int column, byte[] cell) {
+        public final void setCol(final int column, final byte[] cell) {
             setCol(row[column].encoder, colstart[column], row[column].cellwidth, cell);
         }
         
-        public final void setCol(int column, char[] cell) {
-            int clstrt = colstart[column];
+        public final void setCol(final int column, final char[] cell) {
+            final int clstrt = colstart[column];
             for (int i = 0; i < cell.length; i++) rowinstance[offset + clstrt + i] = (byte) cell[i];
             for (int i = cell.length; i < row[column].cellwidth; i++) rowinstance[offset + clstrt + i] = 0;
         }
         
-        private final void setCol(int encoding, int clstrt, int length, byte[] cell) {
+        private final void setCol(final int encoding, final int clstrt, int length, final byte[] cell) {
             if (cell == null) {
                 while (length-- > 0) rowinstance[offset + clstrt + length] = 0;
             } else {
@@ -404,46 +404,46 @@ public final class kelondroRow {
             }
         }
         
-        public final void setCol(int column, byte c) {
+        public final void setCol(final int column, final byte c) {
             rowinstance[offset + colstart[column]] = c;
         }
         
-        public final void setCol(int column, String cell, String encoding) {
+        public final void setCol(final int column, final String cell, final String encoding) {
             if (encoding == null)
                 setCol(column, cell.getBytes());
             else
                 try {
                     setCol(column, (cell == null) ? null : cell.getBytes(encoding));
-                } catch (UnsupportedEncodingException e) {
+                } catch (final UnsupportedEncodingException e) {
                     e.printStackTrace();
                 }
         }
         
-        public final void setCol(String nick, String cell, String encoding) {
+        public final void setCol(final String nick, final String cell, final String encoding) {
             if (encoding == null)
                 setCol(nick, cell.getBytes());
             else
                 try {
                     setCol(nick, cell.getBytes(encoding));
-                } catch (UnsupportedEncodingException e) {
+                } catch (final UnsupportedEncodingException e) {
                     e.printStackTrace();
                 }
         }
         
-        public final void setCol(String nickname, long cell) {
+        public final void setCol(final String nickname, final long cell) {
             if (nickref == null) genNickRef();
-            Object[] ref = nickref.get(nickname);
+            final Object[] ref = nickref.get(nickname);
             if (ref == null) return;
-            kelondroColumn col = (kelondroColumn) ref[0];
+            final kelondroColumn col = (kelondroColumn) ref[0];
             setCol(col.encoder, offset + ((Integer) ref[1]).intValue(), col.cellwidth, cell);
         }
         
-        public final void setCol(int column, long cell) {
+        public final void setCol(final int column, final long cell) {
             // uses the column definition to choose the right encoding
             setCol(row[column].encoder, offset + colstart[column], row[column].cellwidth, cell);
         }
         
-        private final void setCol(int encoder, int offset, int length, long cell) {
+        private final void setCol(final int encoder, final int offset, final int length, final long cell) {
             switch (encoder) {
             case kelondroColumn.encoder_none:
                 throw new kelondroException("ROW", "setColLong has celltype none, no encoder given");
@@ -458,29 +458,29 @@ public final class kelondroRow {
             }
         }
         
-        public final byte[] getCol(String nickname, byte[] dflt) {
+        public final byte[] getCol(final String nickname, final byte[] dflt) {
             if (nickref == null) genNickRef();
-            Object[] ref = nickref.get(nickname);
+            final Object[] ref = nickref.get(nickname);
             if (ref == null) return dflt;
-            kelondroColumn col = (kelondroColumn) ref[0];
-            byte[] cell = new byte[col.cellwidth];
+            final kelondroColumn col = (kelondroColumn) ref[0];
+            final byte[] cell = new byte[col.cellwidth];
             System.arraycopy(rowinstance, offset + ((Integer) ref[1]).intValue(), cell, 0, cell.length);
             return cell;
         }
         
-        public final String getColString(String nickname, String dflt, String encoding) {
+        public final String getColString(final String nickname, final String dflt, final String encoding) {
             if (nickref == null) genNickRef();
-            Object[] ref = nickref.get(nickname);
+            final Object[] ref = nickref.get(nickname);
             if (ref == null) return dflt;
-            kelondroColumn col = (kelondroColumn) ref[0];
+            final kelondroColumn col = (kelondroColumn) ref[0];
             return getColString(col.encoder, ((Integer) ref[1]).intValue(), col.cellwidth, encoding);
         }
         
-        public final String getColString(int column, String encoding) {
+        public final String getColString(final int column, final String encoding) {
             return getColString(row[column].encoder, colstart[column], row[column].cellwidth, encoding);
         }
         
-        private final String getColString(int encoder, int clstrt, int length, String encoding) {
+        private final String getColString(final int encoder, final int clstrt, int length, final String encoding) {
             if (rowinstance[offset + clstrt] == 0) return null;
             if (length > rowinstance.length - offset - clstrt) length = rowinstance.length - offset - clstrt;
             while ((length > 0) && (rowinstance[offset + clstrt + length - 1] == 0)) length--;
@@ -490,26 +490,26 @@ public final class kelondroRow {
                     return new String(rowinstance, offset + clstrt, length);
                 else
                     return new String(rowinstance, offset + clstrt, length, encoding);
-            } catch (UnsupportedEncodingException e) {
+            } catch (final UnsupportedEncodingException e) {
                 return "";
             }
         }
         
-        public final long getColLong(String nickname, long dflt) {
+        public final long getColLong(final String nickname, final long dflt) {
             if (nickref == null) genNickRef();
-            Object[] ref = nickref.get(nickname);
+            final Object[] ref = nickref.get(nickname);
             if (ref == null) return dflt;
-            kelondroColumn col = (kelondroColumn) ref[0];
-            int clstrt = ((Integer) ref[1]).intValue();
+            final kelondroColumn col = (kelondroColumn) ref[0];
+            final int clstrt = ((Integer) ref[1]).intValue();
             return getColLong(col.encoder, clstrt, col.cellwidth);
         }
         
-        public final long getColLong(int column) {
+        public final long getColLong(final int column) {
             // uses the column definition to choose the right encoding
             return getColLong(row[column].encoder, colstart[column], row[column].cellwidth);
         }
         
-        protected final long getColLong(int encoder, int clstrt, int length) {
+        protected final long getColLong(final int encoder, final int clstrt, final int length) {
             switch (encoder) {
             case kelondroColumn.encoder_none:
                 throw new kelondroException("ROW", "getColLong has celltype none, no encoder given");
@@ -531,47 +531,47 @@ public final class kelondroRow {
             throw new kelondroException("ROW", "getColLong did not find appropriate encoding");
         }
         
-        public final byte getColByte(String nickname, byte dflt) {
+        public final byte getColByte(final String nickname, final byte dflt) {
             if (nickref == null) genNickRef();
-            Object[] ref = nickref.get(nickname);
+            final Object[] ref = nickref.get(nickname);
             if (ref == null) return dflt;
             return rowinstance[offset + ((Integer) ref[1]).intValue()];
         }
         
-        public final byte getColByte(int column) {
+        public final byte getColByte(final int column) {
             return rowinstance[offset + colstart[column]];
         }
         
         public final byte[] getPrimaryKeyBytes() {
-            byte[] c = new byte[primaryKeyLength];
+            final byte[] c = new byte[primaryKeyLength];
             System.arraycopy(rowinstance, offset + ((primaryKeyIndex < 0) ? 0 : colstart[primaryKeyIndex]), c, 0, primaryKeyLength);
             return c;
         }
         
-        public final byte[] getColBytes(int column) {
+        public final byte[] getColBytes(final int column) {
             assert offset + colstart[column] + row[column].cellwidth <= rowinstance.length :
                 "column = " + column + ", offset = " + offset + ", colstart[column] = " + colstart[column] + ", row[column].cellwidth() = " + row[column].cellwidth + ", rowinstance.length = " + rowinstance.length;
-            int w = row[column].cellwidth;
-            byte[] c = new byte[w];
+            final int w = row[column].cellwidth;
+            final byte[] c = new byte[w];
             System.arraycopy(rowinstance, offset + colstart[column], c, 0, w);
             return c;
         }
         
-        public final char[] getColChars(int column) {
-            int w = row[column].cellwidth;
-            char[] c = new char[w];
+        public final char[] getColChars(final int column) {
+            final int w = row[column].cellwidth;
+            final char[] c = new char[w];
             System.arraycopy(rowinstance, offset + colstart[column], c, 0, w);
             return c;
         }
         
-        public final void writeToArray(int column, byte[] target, int targetOffset) {
+        public final void writeToArray(final int column, final byte[] target, final int targetOffset) {
             // this method shall replace the getColBytes where possible, bacause it may reduce the number of new byte[] allocations
             assert (targetOffset + row[column].cellwidth <= target.length) : "targetOffset = " + targetOffset + ", target.length = " + target.length + ", row[column].cellwidth() = " + row[column].cellwidth;
             System.arraycopy(rowinstance, offset + colstart[column], target, targetOffset, row[column].cellwidth);
         }
         
-        public final String toPropertyForm(boolean includeBraces, boolean decimalCardinal, boolean longname) {
-            serverByteBuffer bb = new serverByteBuffer();
+        public final String toPropertyForm(final boolean includeBraces, final boolean decimalCardinal, final boolean longname) {
+            final serverByteBuffer bb = new serverByteBuffer();
             if (includeBraces) bb.append('{');
             for (int i = 0; i < row.length; i++) {
                 bb.append((longname) ? row[i].description : row[i].nickname);
@@ -603,8 +603,8 @@ public final class kelondroRow {
     }
     
     public final class EntryIndex extends Entry {
-        private int index;
-        public EntryIndex(byte[] row, int i) {
+        private final int index;
+        public EntryIndex(final byte[] row, final int i) {
             super(row, false);
             this.index = i;
         }
@@ -613,21 +613,21 @@ public final class kelondroRow {
         }
     }
     
-    public final static void long2bytes(long x, byte[] b, int offset, int length) {
+    public final static void long2bytes(long x, final byte[] b, final int offset, final int length) {
         for (int i = length - 1; i >= 0; i--) {
             b[offset + i] = (byte) (x & 0XFF);
             x >>= 8;
         }
     }
     
-    public final static long bytes2long(byte[] b, int offset, int length) {
+    public final static long bytes2long(final byte[] b, final int offset, final int length) {
         if (b == null) return 0;
         long x = 0;
         for (int i = 0; i < length; i++) x = (x << 8) | (0xff & b[offset + i]);
         return x;
     }
     
-    public final boolean subsumes(kelondroRow otherRow) {
+    public final boolean subsumes(final kelondroRow otherRow) {
         // returns true, if this row has at least all columns as the other row
         // and possibly some more
         if (this.objectsize < otherRow.objectsize) return false;
@@ -640,7 +640,7 @@ public final class kelondroRow {
         return true;
     }
     
-    public final boolean equals(kelondroRow otherRow) {
+    public final boolean equals(final kelondroRow otherRow) {
         if (this.objectsize != otherRow.objectsize) return false;
         if (this.columns() != otherRow.columns()) return false;
         for (int i = 0; i < otherRow.row.length; i++) {

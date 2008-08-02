@@ -31,29 +31,29 @@ import de.anomic.kelondro.kelondroOrder;
 
 public class indexContainerOrder extends kelondroAbstractOrder<indexContainer> implements kelondroOrder<indexContainer> {
 
-    private kelondroOrder<byte[]> embeddedOrder;
+    private final kelondroOrder<byte[]> embeddedOrder;
 
-    public indexContainerOrder(kelondroOrder<byte[]> embedOrder) {
+    public indexContainerOrder(final kelondroOrder<byte[]> embedOrder) {
         this.embeddedOrder = embedOrder;
     }
 
-    public boolean wellformed(indexContainer a) {
+    public boolean wellformed(final indexContainer a) {
         return embeddedOrder.wellformed(a.getWordHash().getBytes());
     }
     
-    public void direction(boolean ascending) {
+    public void direction(final boolean ascending) {
         this.embeddedOrder.direction(ascending);
     }
 
-    public long partition(byte[] key, int forks) {
+    public long partition(final byte[] key, final int forks) {
         return this.embeddedOrder.partition(key, forks);
     }
 
-    public int compare(indexContainer a, indexContainer b) {
+    public int compare(final indexContainer a, final indexContainer b) {
         return this.embeddedOrder.compare(a.getWordHash().getBytes(), b.getWordHash().getBytes());
     }
 
-    public void rotate(indexContainer zero) {
+    public void rotate(final indexContainer zero) {
         this.embeddedOrder.rotate(zero.getWordHash().getBytes());
         this.zero = new indexContainer(new String(this.embeddedOrder.zero()), zero);
     }
@@ -66,16 +66,16 @@ public class indexContainerOrder extends kelondroAbstractOrder<indexContainer> i
         return this.embeddedOrder.signature();
     }
 
-    public long cardinal(byte[] key) {
+    public long cardinal(final byte[] key) {
         return this.embeddedOrder.cardinal(key);
     }
     
-    public boolean equals(kelondroOrder<indexContainer> otherOrder) {
+    public boolean equals(final kelondroOrder<indexContainer> otherOrder) {
         if (!(otherOrder instanceof indexContainerOrder)) return false;
         return this.embeddedOrder.equals(((indexContainerOrder) otherOrder).embeddedOrder);
     }
 
-	public long cardinal(indexContainer key) {
+	public long cardinal(final indexContainer key) {
 		return this.embeddedOrder.cardinal(key.getWordHash().getBytes());
 	}
 

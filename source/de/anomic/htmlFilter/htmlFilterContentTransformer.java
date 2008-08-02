@@ -62,20 +62,20 @@ public class htmlFilterContentTransformer extends htmlFilterAbstractTransformer 
         super(linkTags0, linkTags1);
     }
 
-    public void init(String initarg) {
+    public void init(final String initarg) {
         if (bluelist == null) {
             // here, the init arg is used to load a list of blue-listed words
             bluelist = new ArrayList<String>();
-            File f = new File(initarg);
+            final File f = new File(initarg);
             if (f.canRead()) {
                 try {
-                    BufferedReader r = new BufferedReader(new FileReader(f));
+                    final BufferedReader r = new BufferedReader(new FileReader(f));
                     String s;
                     while ((s = r.readLine()) != null) {
                         if (!s.startsWith("#") && s.length() > 0) bluelist.add(s.toLowerCase());
                     }
                     r.close();
-                } catch (Exception e) {
+                } catch (final Exception e) {
                 }
                 // if (bluelist.size() == 0) System.out.println("BLUELIST is empty");
             }
@@ -87,7 +87,7 @@ public class htmlFilterContentTransformer extends htmlFilterAbstractTransformer 
     }
 
     private static char[] genBlueLetters(int length) {
-            serverCharBuffer bb = new serverCharBuffer(" <FONT COLOR=#0000FF>".toCharArray());
+            final serverCharBuffer bb = new serverCharBuffer(" <FONT COLOR=#0000FF>".toCharArray());
             length = length / 2;
             if (length > 10) length = 7;
             while (length-- > 0) {
@@ -97,20 +97,20 @@ public class htmlFilterContentTransformer extends htmlFilterAbstractTransformer 
             return bb.getChars();
     }
 
-    private boolean bluelistHit(char[] text) {
+    private boolean bluelistHit(final char[] text) {
         if (text == null || bluelist == null) return false;
-        String lc = new String(text).toLowerCase();
+        final String lc = new String(text).toLowerCase();
         for (int i = 0; i < bluelist.size(); i++) {
             if (lc.indexOf(bluelist.get(i)) >= 0) return true;
         }
         return false;
     }
 
-    public ArrayList<String> getStrings(byte[] text){
-        ArrayList<String> result = new ArrayList<String>();
+    public ArrayList<String> getStrings(final byte[] text){
+        final ArrayList<String> result = new ArrayList<String>();
         
-        serverByteBuffer sbb = new serverByteBuffer(text);
-        serverByteBuffer[] sbbs = httpTemplate.splitQuotations(sbb);
+        final serverByteBuffer sbb = new serverByteBuffer(text);
+        final serverByteBuffer[] sbbs = httpTemplate.splitQuotations(sbb);
         //sbb = new serverByteBuffer();
         for (int i = 0; i < sbbs.length; i++) {
             // TODO: avoid empty if statements
@@ -122,14 +122,14 @@ public class htmlFilterContentTransformer extends htmlFilterAbstractTransformer 
                 //sbb.append(sbbs[i]);
             } else {
                 // this is a text fragment, generate gettext quotation
-                int ws = sbbs[i].whitespaceStart(true);
-                int we = sbbs[i].whitespaceEnd(true);
+                final int ws = sbbs[i].whitespaceStart(true);
+                final int we = sbbs[i].whitespaceEnd(true);
                 result.add(new String(sbbs[i].getBytes(ws, we - ws)));
             }
         }
         return result;
     }
-    public char[] transformText(char[] text) {
+    public char[] transformText(final char[] text) {
         if (bluelist != null) {
             if (bluelistHit(text)) {
                 // System.out.println("FILTERHIT: " + text);
@@ -140,7 +140,7 @@ public class htmlFilterContentTransformer extends htmlFilterAbstractTransformer 
         return text;
     }
 
-    public char[] transformTag0(String tagname, Properties tagopts, char quotechar) {
+    public char[] transformTag0(final String tagname, final Properties tagopts, final char quotechar) {
         if (tagname.equals("img")) {
             // check bluelist
             if (bluelistHit(tagopts.getProperty("src", "").toCharArray())) return genBlueLetters(5);
@@ -156,7 +156,7 @@ public class htmlFilterContentTransformer extends htmlFilterAbstractTransformer 
         return htmlFilterWriter.genTag0(tagname, tagopts, quotechar);
     }
 
-    public char[] transformTag1(String tagname, Properties tagopts, char[] text, char quotechar) {
+    public char[] transformTag1(final String tagname, final Properties tagopts, final char[] text, final char quotechar) {
         if (bluelistHit(tagopts.getProperty("href","").toCharArray())) return genBlueLetters(text.length);
         if (bluelistHit(text)) return genBlueLetters(text.length);
         return htmlFilterWriter.genTag1(tagname, tagopts, text, quotechar);

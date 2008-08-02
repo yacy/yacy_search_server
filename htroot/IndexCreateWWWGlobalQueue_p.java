@@ -41,28 +41,28 @@ import de.anomic.yacy.yacySeed;
 public class IndexCreateWWWGlobalQueue_p {
     
     private static SimpleDateFormat dayFormatter = new SimpleDateFormat("yyyy/MM/dd", Locale.US);
-    private static String daydate(Date date) {
+    private static String daydate(final Date date) {
         if (date == null) return "";
         return dayFormatter.format(date);
     }
     
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
         // return variable that accumulates replacements
-        plasmaSwitchboard sb = (plasmaSwitchboard) env;
-        serverObjects prop = new serverObjects();
+        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        final serverObjects prop = new serverObjects();
  
         int showLimit = 100;
         if (post != null) {
             if (post.containsKey("limit")) {
                 try {
                     showLimit = Integer.valueOf(post.get("limit")).intValue();
-                } catch (NumberFormatException e) {}
+                } catch (final NumberFormatException e) {}
             }            
             
             if (post.containsKey("clearcrawlqueue")) {
-                int c = sb.crawlQueues.noticeURL.stackSize(NoticedURL.STACK_TYPE_LIMIT);
+                final int c = sb.crawlQueues.noticeURL.stackSize(NoticedURL.STACK_TYPE_LIMIT);
                 sb.crawlQueues.noticeURL.clear(NoticedURL.STACK_TYPE_LIMIT);
-                try { sb.cleanProfiles(); } catch (InterruptedException e) { /* Ignore this */}
+                try { sb.cleanProfiles(); } catch (final InterruptedException e) { /* Ignore this */}
                 /*
                 int c = 0;
                 while (switchboard.urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT) > 0) {
@@ -73,7 +73,7 @@ public class IndexCreateWWWGlobalQueue_p {
                 prop.put("info", "3");//crawling queue cleared
                 prop.putNum("info_numEntries", c);
             } else if (post.containsKey("deleteEntry")) {
-                String urlHash = post.get("deleteEntry");
+                final String urlHash = post.get("deleteEntry");
                 sb.crawlQueues.noticeURL.removeByURLHash(urlHash);
                 prop.put("LOCATION","");
                 return prop;
@@ -85,7 +85,7 @@ public class IndexCreateWWWGlobalQueue_p {
             prop.put("crawler-queue", "0");
         } else {
             prop.put("crawler-queue", "1");
-            ArrayList<CrawlEntry> crawlerList = sb.crawlQueues.noticeURL.top(NoticedURL.STACK_TYPE_LIMIT, showLimit);
+            final ArrayList<CrawlEntry> crawlerList = sb.crawlQueues.noticeURL.top(NoticedURL.STACK_TYPE_LIMIT, showLimit);
             
             CrawlEntry urle;
             boolean dark = true;

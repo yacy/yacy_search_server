@@ -36,11 +36,11 @@ public class kelondroException extends java.lang.RuntimeException {
         super("unspecific-error");
     }
     
-    public kelondroException(String message) {
+    public kelondroException(final String message) {
         super(message);
     }
     
-    public kelondroException(String database, String message) {
+    public kelondroException(final String database, final String message) {
         super(message + " in db '" + database + "'");
     }
 

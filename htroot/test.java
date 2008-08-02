@@ -6,9 +6,9 @@ public class test {
     
     // http://localhost:8080/test.xml?count=10
     
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
-        serverObjects prop = new serverObjects();
-        int count = Math.min(1000, (post == null) ? 0 : post.getInt("count", 0));
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+        final serverObjects prop = new serverObjects();
+        final int count = Math.min(1000, (post == null) ? 0 : post.getInt("count", 0));
         
         for (int i = 0; i < count; i++) {
             prop.put("item_" + i + "_text", Integer.toString(i));

@@ -47,9 +47,9 @@ public class loaderThreads {
     }
     
     public loaderThreads(
-            int timeout, 
-            String user, 
-            String password
+            final int timeout, 
+            final String user, 
+            final String password
     ) {
         this.timeout = timeout;
         this.user = user;
@@ -59,30 +59,30 @@ public class loaderThreads {
         this.failed = 0;
     }
     
-    public void newPropLoaderThread(String name, yacyURL url) {
+    public void newPropLoaderThread(final String name, final yacyURL url) {
         newThread(name, url, new propLoader());
     }
     
-    public void newThread(String name, yacyURL url, loaderProcess process) {
-        Thread t = new loaderThread(url, process);
+    public void newThread(final String name, final yacyURL url, final loaderProcess process) {
+        final Thread t = new loaderThread(url, process);
         threads.put(name, t);
         t.start();
     }
     
-    public void terminateThread(String name) {
-        loaderThread t = (loaderThread) threads.get(name);
+    public void terminateThread(final String name) {
+        final loaderThread t = (loaderThread) threads.get(name);
         if (t == null) throw new RuntimeException("no such thread: " + name);
         else t.terminate();
     }
     
-    public int threadCompleted(String name) {
-        loaderThread t = (loaderThread) threads.get(name);
+    public int threadCompleted(final String name) {
+        final loaderThread t = (loaderThread) threads.get(name);
         if (t == null) throw new RuntimeException("no such thread: " + name);
         else return t.completed();
     }
     
-    public int threadStatus(String name) {
-        loaderThread t = (loaderThread) threads.get(name);
+    public int threadStatus(final String name) {
+        final loaderThread t = (loaderThread) threads.get(name);
         if (t == null) throw new RuntimeException("no such thread: " + name);
         else return t.status();
     }
@@ -99,20 +99,20 @@ public class loaderThreads {
         return threads.size();
     }
     
-    public Exception threadError(String name) {
-        loaderThread t = (loaderThread) threads.get(name);
+    public Exception threadError(final String name) {
+        final loaderThread t = (loaderThread) threads.get(name);
         if (t == null) throw new RuntimeException("no such thread: " + name);
         else return t.error();
     }
 
     protected class loaderThread extends Thread {
-        private yacyURL url;
+        private final yacyURL url;
         private Exception error;
-        private loaderProcess process;
+        private final loaderProcess process;
         private byte[] page;
         private boolean loaded;
         
-        public loaderThread(yacyURL url, loaderProcess process) {
+        public loaderThread(final yacyURL url, final loaderProcess process) {
             this.url = url;
             this.process = process;
             this.error = null;
@@ -122,7 +122,7 @@ public class loaderThreads {
 
         public void run() {
             try {
-                httpHeader reqHeader = new httpHeader();
+                final httpHeader reqHeader = new httpHeader();
                 reqHeader.put(httpHeader.USER_AGENT, HTTPLoader.crawlerUserAgent);
                 page = HttpClient.wget(url.toString(), reqHeader, timeout);
                 loaded = true;
@@ -134,7 +134,7 @@ public class loaderThreads {
                     (process.status() == loaderCore.STATUS_FINALIZED)) completed++;
                 if ((process.status() == loaderCore.STATUS_ABORTED) ||
                     (process.status() == loaderCore.STATUS_FAILED)) failed++;
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 error = e;
                 failed++;
             }
@@ -171,13 +171,13 @@ public class loaderThreads {
             this.status = STATUS_READY;
         }
         
-        public synchronized void feed(byte[] v) {
+        public synchronized void feed(final byte[] v) {
             this.status = STATUS_RUNNING;
             this.completion = 1;
             int line = 0;
             String s, key, value;
             int p;
-            ArrayList<String> lines = nxTools.strings(v);
+            final ArrayList<String> lines = nxTools.strings(v);
             try {
                 while ((this.run) && (line < lines.size())) {
                     // parse line and construct a property
@@ -198,7 +198,7 @@ public class loaderThreads {
                     this.status = STATUS_ABORTED;
                     return;
                 }
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 this.status = STATUS_FAILED;
                 this.error = e;
                 return;

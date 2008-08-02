@@ -36,7 +36,7 @@ public class kelondroBufferedRA extends kelondroAbstractRA implements kelondroRA
         pos = 0;
     }
     
-    public kelondroBufferedRA(serverByteBuffer bb) {
+    public kelondroBufferedRA(final serverByteBuffer bb) {
         sbb = bb;
         pos = 0;
     }
@@ -61,23 +61,23 @@ public class kelondroBufferedRA extends kelondroAbstractRA implements kelondroRA
         return 0xff & sbb.byteAt((int) pos++);
     }
 
-    public int read(byte[] b, int off, int len) throws IOException {
-        byte[] g = sbb.getBytes((int) pos, len);
+    public int read(final byte[] b, final int off, final int len) throws IOException {
+        final byte[] g = sbb.getBytes((int) pos, len);
         pos += g.length;
         System.arraycopy(g, 0, b, off, g.length);
         return g.length;
     }
 
-    public void seek(long pos) throws IOException {
+    public void seek(final long pos) throws IOException {
         this.pos = pos;
     }
 
-    public void write(int b) throws IOException {
+    public void write(final int b) throws IOException {
         this.sbb.overwrite((int) pos, b);
         pos++;
     }
 
-    public void write(byte[] b, int off, int len) throws IOException {
+    public void write(final byte[] b, final int off, final int len) throws IOException {
         this.sbb.overwrite((int) pos, b, off, len);
         pos += len;
     }

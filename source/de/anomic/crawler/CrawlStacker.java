@@ -62,20 +62,20 @@ public final class CrawlStacker extends Thread {
     
     final serverLog log = new serverLog("STACKCRAWL");
     
-    private plasmaSwitchboard sb;
+    private final plasmaSwitchboard sb;
     private final LinkedList<String> urlEntryHashCache;
     private kelondroIndex urlEntryCache;
-    private File cacheStacksPath;
-    private int dbtype;
-    private boolean prequeue;
+    private final File cacheStacksPath;
+    private final int dbtype;
+    private final boolean prequeue;
     private long dnsHit, dnsMiss;
     private int alternateCount;
     
     
     // objects for the prefetch task
-    private ArrayList<String> dnsfetchHosts = new ArrayList<String>();    
+    private final ArrayList<String> dnsfetchHosts = new ArrayList<String>();    
     
-    public CrawlStacker(plasmaSwitchboard sb, File dbPath, int dbtype, boolean prequeue) {
+    public CrawlStacker(final plasmaSwitchboard sb, final File dbPath, final int dbtype, final boolean prequeue) {
         this.sb = sb;
         this.prequeue = prequeue;
         this.dnsHit = 0;
@@ -92,7 +92,7 @@ public final class CrawlStacker extends Thread {
         openDB();
         try {
             // loop through the list and fill the messageList with url hashs
-            Iterator<kelondroRow.Entry> rows = this.urlEntryCache.rows(true, null);
+            final Iterator<kelondroRow.Entry> rows = this.urlEntryCache.rows(true, null);
             kelondroRow.Entry entry;
             while (rows.hasNext()) {
                 entry = rows.next();
@@ -102,20 +102,20 @@ public final class CrawlStacker extends Thread {
                 }
                 this.urlEntryHashCache.add(entry.getColString(0, null));
             }
-        } catch (kelondroException e) {
+        } catch (final kelondroException e) {
             /* if we have an error, we start with a fresh database */
             CrawlStacker.this.log.logSevere("Unable to initialize crawl stacker queue, kelondroException:" + e.getMessage() + ". Reseting DB.\n", e);
 
             // deleting old db and creating a new db
-            try {this.urlEntryCache.close();} catch (Exception ex) {}
+            try {this.urlEntryCache.close();} catch (final Exception ex) {}
             deleteDB();
             openDB();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             /* if we have an error, we start with a fresh database */
             CrawlStacker.this.log.logSevere("Unable to initialize crawl stacker queue, IOException:" + e.getMessage() + ". Reseting DB.\n", e);
 
             // deleting old db and creating a new db
-            try {this.urlEntryCache.close();} catch (Exception ex) {}
+            try {this.urlEntryCache.close();} catch (final Exception ex) {}
             deleteDB();
             openDB();
         }
@@ -134,18 +134,18 @@ public final class CrawlStacker extends Thread {
                 }
                 try {
                     serverDomains.dnsResolve(nextHost);
-                } catch (Exception e) {}
+                } catch (final Exception e) {}
             }
-        } catch (InterruptedException e) {}
+        } catch (final InterruptedException e) {}
     }       
 
-    public boolean prefetchHost(String host) {
+    public boolean prefetchHost(final String host) {
         // returns true when the host was known in the dns cache.
         // If not, the host is stacked on the fetch stack and false is returned
         try {
             serverDomains.dnsResolveFromCache(host);
             return true;
-        } catch (UnknownHostException e) {
+        } catch (final UnknownHostException e) {
             synchronized (this) {
                 dnsfetchHosts.add(host);
                 notifyAll();
@@ -187,7 +187,7 @@ public final class CrawlStacker extends Thread {
         CrawlEntry entry;
         try {
             entry = dequeueEntry();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             e.printStackTrace();
             return false;
         }
@@ -195,15 +195,15 @@ public final class CrawlStacker extends Thread {
 
         try {
 
-            String rejectReason = sb.crawlStacker.stackCrawl(entry);
+            final String rejectReason = sb.crawlStacker.stackCrawl(entry);
 
             // if the url was rejected we store it into the error URL db
             if (rejectReason != null) {
-                ZURL.Entry ee = sb.crawlQueues.errorURL.newEntry(entry, sb.webIndex.seedDB.mySeed().hash, new Date(), 1, rejectReason);
+                final ZURL.Entry ee = sb.crawlQueues.errorURL.newEntry(entry, sb.webIndex.seedDB.mySeed().hash, new Date(), 1, rejectReason);
                 ee.store();
                 sb.crawlQueues.errorURL.push(ee);
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             CrawlStacker.this.log.logWarning("Error while processing stackCrawl entry.\n" + "Entry: " + entry.toString() + "Error: " + e.toString(), e);
             return false;
         }
@@ -211,20 +211,20 @@ public final class CrawlStacker extends Thread {
     }
     
     public void enqueueEntry(
-            yacyURL nexturl, 
-            String referrerhash, 
-            String initiatorHash, 
-            String name, 
-            Date loadDate, 
-            int currentdepth, 
-            CrawlProfile.entry profile) {
+            final yacyURL nexturl, 
+            final String referrerhash, 
+            final String initiatorHash, 
+            final String name, 
+            final Date loadDate, 
+            final int currentdepth, 
+            final CrawlProfile.entry profile) {
         if (profile == null) return;
         
         // check first before we create a big object
         if (this.urlEntryCache.has(nexturl.hash().getBytes())) return;
 
         // now create the big object before we enter the synchronized block
-        CrawlEntry newEntry = new CrawlEntry(
+        final CrawlEntry newEntry = new CrawlEntry(
                     initiatorHash,
                     nexturl,
                     referrerhash,
@@ -236,7 +236,7 @@ public final class CrawlStacker extends Thread {
                     0
                     );
         if (newEntry == null) return;
-        kelondroRow.Entry newEntryRow = newEntry.toRow();
+        final kelondroRow.Entry newEntryRow = newEntry.toRow();
                 
         synchronized(this.urlEntryHashCache) {
             kelondroRow.Entry oldValue;
@@ -244,7 +244,7 @@ public final class CrawlStacker extends Thread {
             if (prequeue) hostknown = prefetchHost(nexturl.getHost());
             try {
                 oldValue = this.urlEntryCache.put(newEntryRow);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 oldValue = null;
             }                        
             if (oldValue == null) {
@@ -277,7 +277,7 @@ public final class CrawlStacker extends Thread {
             //kelondroFlexWidthArray.delete(cacheStacksPath, stackfile);
         }
         if (this.dbtype == QUEUE_DB_TYPE_TREE) {
-            File cacheFile = new File(cacheStacksPath, stackfile);
+            final File cacheFile = new File(cacheStacksPath, stackfile);
             cacheFile.delete();
         }
     }
@@ -290,11 +290,11 @@ public final class CrawlStacker extends Thread {
         }
         if (this.dbtype == QUEUE_DB_TYPE_ECO) {
             cacheStacksPath.mkdirs();
-            File f = new File(cacheStacksPath, stackfile);
+            final File f = new File(cacheStacksPath, stackfile);
             try {
                 this.urlEntryCache = new kelondroEcoTable(f, CrawlEntry.rowdef, kelondroEcoTable.tailCacheUsageAuto, EcoFSBufferSize, 0);
                 //this.urlEntryCache = new kelondroCache(new kelondroFlexTable(cacheStacksPath, newCacheName, preloadTime, CrawlEntry.rowdef, 0, true));
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 e.printStackTrace();
                 // kill DB and try again
                 f.delete();
@@ -302,14 +302,14 @@ public final class CrawlStacker extends Thread {
                 try {
                     this.urlEntryCache = new kelondroEcoTable(f, CrawlEntry.rowdef, kelondroEcoTable.tailCacheUsageAuto, EcoFSBufferSize, 0);
                     //this.urlEntryCache = new kelondroCache(new kelondroFlexTable(cacheStacksPath, newCacheName, preloadTime, CrawlEntry.rowdef, 0, true));
-                } catch (Exception ee) {
+                } catch (final Exception ee) {
                     ee.printStackTrace();
                     System.exit(-1);
                 }
             }
         }
         if (this.dbtype == QUEUE_DB_TYPE_TREE) {
-            File cacheFile = new File(cacheStacksPath, stackfile);
+            final File cacheFile = new File(cacheStacksPath, stackfile);
             cacheFile.getParentFile().mkdirs();
             this.urlEntryCache = new kelondroCache(kelondroTree.open(cacheFile, true, 0, CrawlEntry.rowdef));
         }
@@ -339,13 +339,13 @@ public final class CrawlStacker extends Thread {
         return new CrawlEntry(entry);
     }
     
-    public String stackCrawl(yacyURL url, yacyURL referrer, String initiatorHash, String name, Date loadDate, int currentdepth, CrawlProfile.entry profile) {
+    public String stackCrawl(final yacyURL url, final yacyURL referrer, final String initiatorHash, final String name, final Date loadDate, final int currentdepth, final CrawlProfile.entry profile) {
         // stacks a crawl item. The position can also be remote
         // returns null if successful, a reason string if not successful
         //this.log.logFinest("stackCrawl: nexturlString='" + nexturlString + "'");
         
         // add the url into the crawling queue
-        CrawlEntry entry = new CrawlEntry(
+        final CrawlEntry entry = new CrawlEntry(
                 initiatorHash,                               // initiator, needed for p2p-feedback
                 url,                                         // url clear text string
                 (referrer == null) ? "" : referrer.hash(),   // last url in crawling queue
@@ -359,16 +359,16 @@ public final class CrawlStacker extends Thread {
         return stackCrawl(entry);
     }
     
-    public String stackCrawl(CrawlEntry entry) {
+    public String stackCrawl(final CrawlEntry entry) {
         // stacks a crawl item. The position can also be remote
         // returns null if successful, a reason string if not successful
         //this.log.logFinest("stackCrawl: nexturlString='" + nexturlString + "'");
         
-        long startTime = System.currentTimeMillis();
+        final long startTime = System.currentTimeMillis();
         String reason = null; // failure reason
 
         // check if the protocol is supported
-        String urlProtocol = entry.url().getProtocol();
+        final String urlProtocol = entry.url().getProtocol();
         if (!sb.crawlQueues.isSupportedProtocol(urlProtocol)) {
             reason = ErrorURL.DENIED_UNSUPPORTED_PROTOCOL;
             this.log.logSevere("Unsupported protocol in URL '" + entry.url().toString() + "'. " + 
@@ -377,7 +377,7 @@ public final class CrawlStacker extends Thread {
         }
 
         // check if ip is local ip address
-        String urlRejectReason = sb.acceptURL(entry.url());
+        final String urlRejectReason = sb.acceptURL(entry.url());
         if (urlRejectReason != null) {
             reason = "denied_(" + urlRejectReason + ")_domain=" + sb.getConfig("network.unit.domain", "unknown");
             if (this.log.isFine()) this.log.logFine(reason + "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
@@ -392,9 +392,9 @@ public final class CrawlStacker extends Thread {
             return reason;
         }
         
-        CrawlProfile.entry profile = sb.webIndex.profilesActiveCrawls.getEntry(entry.profileHandle());
+        final CrawlProfile.entry profile = sb.webIndex.profilesActiveCrawls.getEntry(entry.profileHandle());
         if (profile == null) {
-            String errorMsg = "LOST PROFILE HANDLE '" + entry.profileHandle() + "' for URL " + entry.url();
+            final String errorMsg = "LOST PROFILE HANDLE '" + entry.profileHandle() + "' for URL " + entry.url();
             log.logWarning(errorMsg);
             return errorMsg;
         } else {
@@ -426,7 +426,7 @@ public final class CrawlStacker extends Thread {
             return reason;
         }
         
-        yacyURL referrerURL = (entry.referrerhash() == null) ? null : sb.crawlQueues.getURL(entry.referrerhash());
+        final yacyURL referrerURL = (entry.referrerhash() == null) ? null : sb.crawlQueues.getURL(entry.referrerhash());
         
         // add domain to profile domain list
         if ((profile.domFilterDepth() != Integer.MAX_VALUE) || (profile.domMaxPages() != Integer.MAX_VALUE)) {
@@ -450,9 +450,9 @@ public final class CrawlStacker extends Thread {
         }
 
         // check if the url is double registered
-        String dbocc = sb.crawlQueues.urlExists(entry.url().hash());
-        indexURLReference oldEntry = this.sb.webIndex.getURL(entry.url().hash(), null, 0);
-        boolean recrawl = (oldEntry != null) && ((System.currentTimeMillis() - oldEntry.loaddate().getTime()) > profile.recrawlIfOlder());
+        final String dbocc = sb.crawlQueues.urlExists(entry.url().hash());
+        final indexURLReference oldEntry = this.sb.webIndex.getURL(entry.url().hash(), null, 0);
+        final boolean recrawl = (oldEntry != null) && ((System.currentTimeMillis() - oldEntry.loaddate().getTime()) > profile.recrawlIfOlder());
         // do double-check
         if ((dbocc != null) && (!recrawl)) {
             reason = ErrorURL.DOUBLE_REGISTERED + dbocc + ")";
@@ -472,8 +472,8 @@ public final class CrawlStacker extends Thread {
         }
         
         // store information
-        boolean local = entry.initiator().equals(sb.webIndex.seedDB.mySeed().hash);
-        boolean global = 
+        final boolean local = entry.initiator().equals(sb.webIndex.seedDB.mySeed().hash);
+        final boolean global = 
             (profile.remoteIndexing()) /* granted */ &&
             (entry.depth() == profile.generalDepth()) /* leaf node */ && 
             //(initiatorHash.equals(yacyCore.seedDB.mySeed.hash)) /* not proxy */ &&

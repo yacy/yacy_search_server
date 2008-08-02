@@ -43,39 +43,39 @@ import de.anomic.yacy.yacyURL;
 
 public class rct_p {
     
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
         // return variable that accumulates replacements
-        plasmaSwitchboard sb = (plasmaSwitchboard) env;
-        serverObjects prop = new serverObjects();
+        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        final serverObjects prop = new serverObjects();
 
         if (post != null) {
             if (post.containsKey("retrieve")) {
-                String peerhash = post.get("peer", null);
-                yacySeed seed = (peerhash == null) ? null : sb.webIndex.seedDB.getConnected(peerhash);
-                RSSFeed feed = (seed == null) ? null : yacyClient.queryRemoteCrawlURLs(sb.webIndex.seedDB, seed, 10);
+                final String peerhash = post.get("peer", null);
+                final yacySeed seed = (peerhash == null) ? null : sb.webIndex.seedDB.getConnected(peerhash);
+                final RSSFeed feed = (seed == null) ? null : yacyClient.queryRemoteCrawlURLs(sb.webIndex.seedDB, seed, 10);
                 if (feed != null) {
-                    for (RSSMessage item: feed) {
+                    for (final RSSMessage item: feed) {
                         //System.out.println("URL=" + item.getLink() + ", desc=" + item.getDescription() + ", pubDate=" + item.getPubDate());
                         
                         // put url on remote crawl stack
                         yacyURL url;
                         try {
                             url = new yacyURL(item.getLink(), null);
-                        } catch (MalformedURLException e) {
+                        } catch (final MalformedURLException e) {
                             url = null;
                         }
                         Date loaddate;
                         try {
                             loaddate = serverDate.parseShortSecond(item.getPubDate());
-                        } catch (ParseException e) {
+                        } catch (final ParseException e) {
                             loaddate = new Date();
                         }
-                        yacyURL referrer = null; // referrer needed!
-                        String urlRejectReason = sb.acceptURL(url);
+                        final yacyURL referrer = null; // referrer needed!
+                        final String urlRejectReason = sb.acceptURL(url);
                         if (urlRejectReason == null) {
                             // stack url
                             sb.getLog().logFinest("crawlOrder: stack: url='" + url + "'");
-                            String reasonString = sb.crawlStacker.stackCrawl(url, referrer, peerhash, "REMOTE-CRAWLING", loaddate, 0, sb.webIndex.defaultRemoteProfile);
+                            final String reasonString = sb.crawlStacker.stackCrawl(url, referrer, peerhash, "REMOTE-CRAWLING", loaddate, 0, sb.webIndex.defaultRemoteProfile);
 
                             if (reasonString == null) {
                                 // done
@@ -104,16 +104,16 @@ public class rct_p {
      * @param url
      * @return
      */
-    private static String urlToString(yacyURL url) {
+    private static String urlToString(final yacyURL url) {
         return (url == null ? "null" : url.toNormalform(true, false));
     }
     
-    private static void listHosts(plasmaSwitchboard sb, serverObjects prop) {
+    private static void listHosts(final plasmaSwitchboard sb, final serverObjects prop) {
         // list known hosts
         yacySeed seed;
         int hc = 0;
         if (sb.webIndex.seedDB != null && sb.webIndex.seedDB.sizeConnected() > 0) {
-            Iterator<yacySeed> e = sb.webIndex.peerActions.dhtAction.getProvidesRemoteCrawlURLs();
+            final Iterator<yacySeed> e = sb.webIndex.peerActions.dhtAction.getProvidesRemoteCrawlURLs();
             while (e.hasNext()) {
                 seed = e.next();
                 if (seed != null) {

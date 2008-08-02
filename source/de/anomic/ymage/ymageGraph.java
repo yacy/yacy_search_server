@@ -56,22 +56,22 @@ public class ymageGraph {
         bottommost = 1.0;
     }
     
-    public coordinate getPoint(String name) {
+    public coordinate getPoint(final String name) {
         return points.get(name);
     }
     
-    public coordinate[] getBorder(String name) {
-        int p = name.indexOf("$");
+    public coordinate[] getBorder(final String name) {
+        final int p = name.indexOf("$");
         if (p < 0) return null;
-        coordinate from = getPoint(name.substring(0, p));
-        coordinate to = getPoint(name.substring(p + 1));
+        final coordinate from = getPoint(name.substring(0, p));
+        final coordinate to = getPoint(name.substring(p + 1));
         if ((from == null) || (to == null)) return null;
         return new coordinate[] {from, to};
     }
     
-    public coordinate addPoint(String name, double x, double y, int layer) {
-        coordinate newc = new coordinate(x, y, layer);
-        coordinate oldc = points.put(name, newc);
+    public coordinate addPoint(final String name, final double x, final double y, final int layer) {
+        final coordinate newc = new coordinate(x, y, layer);
+        final coordinate oldc = points.put(name, newc);
         assert oldc == null; // all add shall be unique
         if (x > rightmost) rightmost = x;
         if (x < leftmost) leftmost = x;
@@ -80,13 +80,13 @@ public class ymageGraph {
         return newc;
     }
     
-    public boolean hasBorder(String fromPoint, String toPoint) {
+    public boolean hasBorder(final String fromPoint, final String toPoint) {
         return borders.contains(fromPoint + "-" + toPoint);
     }
     
-    public void setBorder(String fromPoint, String toPoint) {
-        coordinate from = points.get(fromPoint);
-        coordinate to = points.get(toPoint);
+    public void setBorder(final String fromPoint, final String toPoint) {
+        final coordinate from = points.get(fromPoint);
+        final coordinate to = points.get(toPoint);
         assert from != null;
         assert to != null;
         borders.add(fromPoint + "$" + toPoint);
@@ -95,7 +95,7 @@ public class ymageGraph {
     public class coordinate {
         public double x, y;
         public int layer;
-        public coordinate(double x, double y, int layer) {
+        public coordinate(final double x, final double y, final int layer) {
             assert x >= -1;
             assert x <=  1;
             assert y >= -1;
@@ -108,7 +108,7 @@ public class ymageGraph {
     
     public void print() {
         // for debug purpose: print out all coordinates
-        Iterator<Map.Entry<String, coordinate>> i = points.entrySet().iterator();
+        final Iterator<Map.Entry<String, coordinate>> i = points.entrySet().iterator();
         Map.Entry<String, coordinate> entry;
         String name;
         coordinate c;
@@ -118,7 +118,7 @@ public class ymageGraph {
             c = entry.getValue();
             System.out.println("point(" + c.x + ", " + c.y + ", " + c.layer + ") [" + name + "]");
         }
-        Iterator<String> j = borders.iterator();
+        final Iterator<String> j = borders.iterator();
         while (j.hasNext()) {
             System.out.println("border(" + j.next() + ")");
         }
@@ -130,13 +130,13 @@ public class ymageGraph {
     private static final long color_line = 0x333333;
     private static final long color_lineend = 0x666666;
     
-    public ymageMatrix draw(int width, int height, int leftborder, int rightborder, int topborder, int bottomborder) {
-        ymageMatrix image = new ymageMatrix(width, height, ymageMatrix.MODE_SUB, color_back);
-        double xfactor = ((rightmost - leftmost) == 0.0) ? 0.0 : (width - leftborder - rightborder) / (rightmost - leftmost);
-        double yfactor = ((topmost - bottommost) == 0.0) ? 0.0 : (height - topborder - bottomborder) / (topmost - bottommost);
+    public ymageMatrix draw(final int width, final int height, final int leftborder, final int rightborder, final int topborder, final int bottomborder) {
+        final ymageMatrix image = new ymageMatrix(width, height, ymageMatrix.MODE_SUB, color_back);
+        final double xfactor = ((rightmost - leftmost) == 0.0) ? 0.0 : (width - leftborder - rightborder) / (rightmost - leftmost);
+        final double yfactor = ((topmost - bottommost) == 0.0) ? 0.0 : (height - topborder - bottomborder) / (topmost - bottommost);
         
         // draw dots and names
-        Iterator<Map.Entry<String, coordinate>> i = points.entrySet().iterator();
+        final Iterator<Map.Entry<String, coordinate>> i = points.entrySet().iterator();
         Map.Entry<String, coordinate> entry;
         String name;
         coordinate c;
@@ -154,7 +154,7 @@ public class ymageGraph {
         }
         
         // draw lines
-        Iterator<String> j = borders.iterator();
+        final Iterator<String> j = borders.iterator();
         coordinate[] border;
         image.setColor(color_line);
         int x0, x1, y0, y1;

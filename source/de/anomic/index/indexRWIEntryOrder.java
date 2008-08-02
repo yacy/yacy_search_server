@@ -41,11 +41,11 @@ import de.anomic.yacy.yacyURL;
 
 public class indexRWIEntryOrder {
     private indexRWIVarEntry min, max;
-    private plasmaSearchRankingProfile ranking;
-    private kelondroMScoreCluster<String> doms; // collected for "authority" heuristic 
+    private final plasmaSearchRankingProfile ranking;
+    private final kelondroMScoreCluster<String> doms; // collected for "authority" heuristic 
     private int maxdomcount;
     
-    public indexRWIEntryOrder(plasmaSearchRankingProfile profile) {
+    public indexRWIEntryOrder(final plasmaSearchRankingProfile profile) {
         this.min = null;
         this.max = null;
         this.ranking = profile;
@@ -53,7 +53,7 @@ public class indexRWIEntryOrder {
         this.maxdomcount = 0;
     }
     
-    public ArrayList<indexRWIVarEntry> normalizeWith(indexContainer container) {
+    public ArrayList<indexRWIVarEntry> normalizeWith(final indexContainer container) {
         // normalize ranking: find minimum and maxiumum of separate ranking criteria
         assert (container != null);
         ArrayList<indexRWIVarEntry> result = null;
@@ -61,10 +61,10 @@ public class indexRWIEntryOrder {
         //long s0 = System.currentTimeMillis();
         if ((serverProcessor.useCPU > 1) && (container.size() > 600)) {
             // run minmax with two threads
-            int middle = container.size() / 2;
-            minmaxfinder mmf0 = new minmaxfinder(container, 0, middle);
+            final int middle = container.size() / 2;
+            final minmaxfinder mmf0 = new minmaxfinder(container, 0, middle);
             mmf0.start(); // fork here
-            minmaxfinder mmf1 = new minmaxfinder(container, middle, container.size());
+            final minmaxfinder mmf1 = new minmaxfinder(container, middle, container.size());
             mmf1.run(); // execute other fork in this thread
             if (this.min == null) this.min = mmf1.entryMin.clone(); else this.min.min(mmf1.entryMin);
             if (this.max == null) this.max = mmf1.entryMax.clone(); else this.max.max(mmf1.entryMax);
@@ -74,7 +74,7 @@ public class indexRWIEntryOrder {
             	entry = di.next();
             	this.doms.addScore(entry.getKey(), (entry.getValue()).intValue());
             }
-            try {mmf0.join();} catch (InterruptedException e) {} // wait for fork thread to finish
+            try {mmf0.join();} catch (final InterruptedException e) {} // wait for fork thread to finish
             if (this.min == null) this.min = mmf0.entryMin.clone(); else this.min.min(mmf0.entryMin);
             if (this.max == null) this.max = mmf0.entryMax.clone(); else this.max.max(mmf0.entryMax);
             di = mmf0.domcount().entrySet().iterator();
@@ -88,12 +88,12 @@ public class indexRWIEntryOrder {
             //System.out.println("***DEBUG*** indexRWIEntry.Order (2-THREADED): " + sc + " milliseconds for " + container.size() + " entries, " + (container.size() / sc) + " entries/millisecond");
         } else if (container.size() > 0) {
             // run minmax in one thread
-            minmaxfinder mmf = new minmaxfinder(container, 0, container.size());
+            final minmaxfinder mmf = new minmaxfinder(container, 0, container.size());
             mmf.run(); // execute without multi-threading
             if (this.min == null) this.min = mmf.entryMin.clone(); else this.min.min(mmf.entryMin);
             if (this.max == null) this.max = mmf.entryMax.clone(); else this.max.max(mmf.entryMax);
             Map.Entry<String, Integer> entry;
-            Iterator<Map.Entry<String, Integer>> di = mmf.domcount().entrySet().iterator();
+            final Iterator<Map.Entry<String, Integer>> di = mmf.domcount().entrySet().iterator();
             while (di.hasNext()) {
             	entry = di.next();
             	this.doms.addScore(entry.getKey(), (entry.getValue()).intValue());
@@ -106,17 +106,17 @@ public class indexRWIEntryOrder {
         return result;
     }
     
-    public int authority(String urlHash) {
+    public int authority(final String urlHash) {
     	return (doms.getScore(urlHash.substring(6)) << 8) / (1 + this.maxdomcount);
     }
 
-    public long cardinal(indexRWIVarEntry t) {
+    public long cardinal(final indexRWIVarEntry t) {
         //return Long.MAX_VALUE - preRanking(ranking, iEntry, this.entryMin, this.entryMax, this.searchWords);
         // the normalizedEntry must be a normalized indexEntry
-        kelondroBitfield flags = t.flags();
-        long tf = ((max.termFrequency() == min.termFrequency()) ? 0 : (((int)(((t.termFrequency()-min.termFrequency())*256.0)/(max.termFrequency() - min.termFrequency())))) << ranking.coeff_termfrequency);
+        final kelondroBitfield flags = t.flags();
+        final long tf = ((max.termFrequency() == min.termFrequency()) ? 0 : (((int)(((t.termFrequency()-min.termFrequency())*256.0)/(max.termFrequency() - min.termFrequency())))) << ranking.coeff_termfrequency);
         //System.out.println("tf(" + t.urlHash + ") = " + Math.floor(1000 * t.termFrequency()) + ", min = " + Math.floor(1000 * min.termFrequency()) + ", max = " + Math.floor(1000 * max.termFrequency()) + ", tf-normed = " + tf);
-        long r =
+        final long r =
              ((256 - yacyURL.domLengthNormalized(t.urlHash())) << ranking.coeff_domlength)
            + ((ranking.coeff_ybr > 12) ? ((256 - (plasmaSearchRankingProcess.ybr(t.urlHash()) << 4)) << ranking.coeff_ybr) : 0)
            + ((max.urlcomps()      == min.urlcomps()   )   ? 0 : (256 - (((t.urlcomps()     - min.urlcomps()     ) << 8) / (max.urlcomps()     - min.urlcomps())     )) << ranking.coeff_urlcomps)
@@ -155,13 +155,13 @@ public class indexRWIEntryOrder {
 
         indexRWIVarEntry entryMin;
         indexRWIVarEntry entryMax;
-        private indexContainer container;
-        private int start, end;
-        private HashMap<String, Integer> doms;
-        private Integer int1;
+        private final indexContainer container;
+        private final int start, end;
+        private final HashMap<String, Integer> doms;
+        private final Integer int1;
         ArrayList<indexRWIVarEntry> decodedEntries;
         
-        public minmaxfinder(indexContainer container, int start /*including*/, int end /*excluding*/) {
+        public minmaxfinder(final indexContainer container, final int start /*including*/, final int end /*excluding*/) {
             this.container = container;
             this.start = start;
             this.end = end;

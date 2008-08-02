@@ -40,11 +40,11 @@ public class kelondroNIOFileRA extends kelondroAbstractRA implements kelondroRA 
     protected boolean mapBody;
     protected boolean wroteHead, wroteBody, wroteTail;
     
-    public kelondroNIOFileRA(String file, boolean mapBody, long tailMaxSize) throws IOException {
+    public kelondroNIOFileRA(final String file, final boolean mapBody, final long tailMaxSize) throws IOException {
         this(new File(file), mapBody, tailMaxSize);
     }
 
-    public kelondroNIOFileRA(File file, boolean mapBody, long tailMaxSize) throws IOException {
+    public kelondroNIOFileRA(final File file, boolean mapBody, final long tailMaxSize) throws IOException {
         this.name = file.getName();
         this.file = file;
         this.seekPos = 0;
@@ -72,7 +72,7 @@ public class kelondroNIOFileRA extends kelondroAbstractRA implements kelondroRA 
                            ", bodyOffset = " + bodyOffset + ", tailOffset = " + tailOffset);
     }
 
-    private boolean growTail(long newPos) throws IOException {
+    private boolean growTail(final long newPos) throws IOException {
         if (newPos >= tailMaxSize) {
             System.out.println("cannot grow " + name);
             return false;
@@ -135,7 +135,7 @@ public class kelondroNIOFileRA extends kelondroAbstractRA implements kelondroRA 
     }
 
     // pseudo-native method write
-    public void write(int b) throws IOException {
+    public void write(final int b) throws IOException {
         if (seekPos < bodyOffset) {
             bufferHead.put((int) seekPos, (byte) (b & 0xff));
             wroteHead = true;
@@ -166,20 +166,20 @@ public class kelondroNIOFileRA extends kelondroAbstractRA implements kelondroRA 
         seekPos++;
     }
 
-    public int read(byte[] b, int off, int len) throws IOException {
+    public int read(final byte[] b, final int off, final int len) throws IOException {
 	for (int i = 0; i < len; i++) {
             b[off + i] = (byte) read();
         }
         return len;
     }
 
-    public void write(byte[] b, int off, int len) throws IOException {
+    public void write(final byte[] b, final int off, final int len) throws IOException {
 	for (int i = 0; i < len; i++) {
             write(b[off + i]);
         }
     }
 
-    public void seek(long pos) throws IOException {
+    public void seek(final long pos) throws IOException {
 	seekPos = pos;
     }
 
@@ -204,53 +204,53 @@ public class kelondroNIOFileRA extends kelondroAbstractRA implements kelondroRA 
     
     protected void finalize() throws Throwable {
         if (RAChannel != null) {
-            try {RAChannel.close();}catch(Exception e){}
+            try {RAChannel.close();}catch(final Exception e){}
         }
         if (RAFile != null) {
-            try {RAFile.close();}catch(Exception e){}
+            try {RAFile.close();}catch(final Exception e){}
         }
     }
     
     
-    public static void test1(kelondroRA ra) throws IOException {
+    public static void test1(final kelondroRA ra) throws IOException {
         for (int i = 0; i < 2048; i++) {
             ra.seek(i);
             ra.write(32);
         }
     }
     
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         // tests...
-        File f = new File("/yacy/nio.test.txt");
+        final File f = new File("/yacy/nio.test.txt");
         if (f.exists()) f.delete();
         
         System.out.println("* fill with blanks");
-        try { kelondroRA ra = new kelondroNIOFileRA(f, true, 2046); test1(ra); ra.close();
-        } catch (IOException e) { e.printStackTrace(); }
+        try { final kelondroRA ra = new kelondroNIOFileRA(f, true, 2046); test1(ra); ra.close();
+        } catch (final IOException e) { e.printStackTrace(); }
 
         System.out.println("* write in at head");
-        try { kelondroRA ra = new kelondroNIOFileRA(f, true, 10);
+        try { final kelondroRA ra = new kelondroNIOFileRA(f, true, 10);
             ra.seek(8); ra.write((byte) 'h');
             ra.close();
-        } catch (IOException e) { e.printStackTrace(); }
+        } catch (final IOException e) { e.printStackTrace(); }
         
         System.out.println("* write in at body");
-        try { kelondroRA ra = new kelondroNIOFileRA(f, true, 10);
+        try { final kelondroRA ra = new kelondroNIOFileRA(f, true, 10);
             ra.seek(1024); ra.write((byte) 'b');
             ra.close();
-        } catch (IOException e) { e.printStackTrace(); }
+        } catch (final IOException e) { e.printStackTrace(); }
         
         System.out.println("* write in at tail");
-         try { kelondroRA ra = new kelondroNIOFileRA(f, true, 10);
+         try { final kelondroRA ra = new kelondroNIOFileRA(f, true, 10);
             ra.seek(2048); ra.write((byte) 't');
             ra.close();
-        } catch (IOException e) { e.printStackTrace(); }
+        } catch (final IOException e) { e.printStackTrace(); }
         
         System.out.println("* write in behind tail");
-        try { kelondroRA ra = new kelondroNIOFileRA(f, true, 10);
+        try { final kelondroRA ra = new kelondroNIOFileRA(f, true, 10);
             ra.seek(2059); ra.write((byte) 'x');
             ra.close();
-        } catch (IOException e) { e.printStackTrace(); }
+        } catch (final IOException e) { e.printStackTrace(); }
     }
 
 }

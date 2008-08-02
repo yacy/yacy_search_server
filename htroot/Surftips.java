@@ -50,19 +50,19 @@ import de.anomic.yacy.yacyURL;
 
 public class Surftips {
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final serverObjects prop = new serverObjects();
         
-        boolean authenticated = sb.adminAuthenticated(header) >= 2;
-        int display = ((post == null) || (!authenticated)) ? 0 : post.getInt("display", 0);
+        final boolean authenticated = sb.adminAuthenticated(header) >= 2;
+        final int display = ((post == null) || (!authenticated)) ? 0 : post.getInt("display", 0);
         prop.put("display", display);
         
-        boolean showScore = ((post != null) && (post.containsKey("score")));
+        final boolean showScore = ((post != null) && (post.containsKey("score")));
         
         // access control
         boolean publicPage = sb.getConfigBool("publicSurftips", true);
-        boolean authorizedAccess = sb.verifyAuthentication(header, false);
+        final boolean authorizedAccess = sb.verifyAuthentication(header, false);
         if ((post != null) && (post.containsKey("publicPage"))) {
             if (!authorizedAccess) {
                 prop.put("AUTHENTICATE", "admin log-in"); // force log-in
@@ -82,7 +82,7 @@ public class Surftips {
                     return prop;
                 }
                 // make new news message with voting
-                HashMap<String, String> map = new HashMap<String, String>();
+                final HashMap<String, String> map = new HashMap<String, String>();
                 map.put("urlhash", hash);
                 map.put("vote", "negative");
                 map.put("refid", post.get("refid", ""));
@@ -94,7 +94,7 @@ public class Surftips {
                     return prop;
                 }
                 // make new news message with voting
-                HashMap<String, String> map = new HashMap<String, String>();
+                final HashMap<String, String> map = new HashMap<String, String>();
                 map.put("urlhash", hash);
                 map.put("url", crypt.simpleDecode(post.get("url", ""), null));
                 map.put("title", crypt.simpleDecode(post.get("title", ""), null));
@@ -106,20 +106,20 @@ public class Surftips {
             }
         
             // create surftips
-            HashMap<String, Integer> negativeHashes = new HashMap<String, Integer>(); // a mapping from an url hash to Integer (count of votes)
-            HashMap<String, Integer> positiveHashes = new HashMap<String, Integer>(); // a mapping from an url hash to Integer (count of votes)
+            final HashMap<String, Integer> negativeHashes = new HashMap<String, Integer>(); // a mapping from an url hash to Integer (count of votes)
+            final HashMap<String, Integer> positiveHashes = new HashMap<String, Integer>(); // a mapping from an url hash to Integer (count of votes)
             accumulateVotes(sb , negativeHashes, positiveHashes, yacyNewsPool.INCOMING_DB);
             //accumulateVotes(negativeHashes, positiveHashes, yacyNewsPool.OUTGOING_DB);
             //accumulateVotes(negativeHashes, positiveHashes, yacyNewsPool.PUBLISHED_DB);
-            kelondroMScoreCluster<String> ranking = new kelondroMScoreCluster<String>(); // score cluster for url hashes
-            kelondroRow rowdef = new kelondroRow("String url-255, String title-120, String description-120, String refid-" + (serverDate.PATTERN_SHORT_SECOND.length() + 12), kelondroNaturalOrder.naturalOrder, 0);
-            HashMap<String, Entry> surftips = new HashMap<String, Entry>(); // a mapping from an url hash to a kelondroRow.Entry with display properties
+            final kelondroMScoreCluster<String> ranking = new kelondroMScoreCluster<String>(); // score cluster for url hashes
+            final kelondroRow rowdef = new kelondroRow("String url-255, String title-120, String description-120, String refid-" + (serverDate.PATTERN_SHORT_SECOND.length() + 12), kelondroNaturalOrder.naturalOrder, 0);
+            final HashMap<String, Entry> surftips = new HashMap<String, Entry>(); // a mapping from an url hash to a kelondroRow.Entry with display properties
             accumulateSurftips(sb, surftips, ranking, rowdef, negativeHashes, positiveHashes, yacyNewsPool.INCOMING_DB);
             //accumulateSurftips(surftips, ranking, rowdef, negativeHashes, positiveHashes, yacyNewsPool.OUTGOING_DB);
             //accumulateSurftips(surftips, ranking, rowdef, negativeHashes, positiveHashes, yacyNewsPool.PUBLISHED_DB);
         
             // read out surftipp array and create property entries
-            Iterator<String> k = ranking.scores(false);
+            final Iterator<String> k = ranking.scores(false);
             int i = 0;
             kelondroRow.Entry row;
             String url, urlhash, refid, title, description;
@@ -135,7 +135,7 @@ public class Surftips {
                 try{
                 	if(plasmaSwitchboard.urlBlacklist.isListed(indexReferenceBlacklist.BLACKLIST_SURFTIPS ,new yacyURL(url, null)))
                 		continue;
-                }catch(MalformedURLException e){continue;};
+                }catch(final MalformedURLException e){continue;};
                 title = row.getColString(1,"UTF-8");
                 description = row.getColString(2,"UTF-8");
                 if ((url == null) || (title == null) || (description == null)) continue;
@@ -172,30 +172,30 @@ public class Surftips {
         return prop;
     }
 
-    private static int timeFactor(Date created) {
+    private static int timeFactor(final Date created) {
         return (int) Math.max(0, 10 - ((System.currentTimeMillis() - created.getTime()) / 24 / 60 / 60 / 1000));
     }
     
-    private static void accumulateVotes(plasmaSwitchboard sb, HashMap<String, Integer> negativeHashes, HashMap<String, Integer> positiveHashes, int dbtype) {
-        int maxCount = Math.min(1000, sb.webIndex.newsPool.size(dbtype));
+    private static void accumulateVotes(final plasmaSwitchboard sb, final HashMap<String, Integer> negativeHashes, final HashMap<String, Integer> positiveHashes, final int dbtype) {
+        final int maxCount = Math.min(1000, sb.webIndex.newsPool.size(dbtype));
         yacyNewsRecord record;
-        Iterator<yacyNewsRecord> recordIterator = sb.webIndex.newsPool.recordIterator(dbtype, true);
+        final Iterator<yacyNewsRecord> recordIterator = sb.webIndex.newsPool.recordIterator(dbtype, true);
         int j = 0;
         while ((recordIterator.hasNext()) && (j++ < maxCount)) {
             record = recordIterator.next();
             if (record == null) continue;
             
             if (record.category().equals(yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD)) {
-                String urlhash = record.attribute("urlhash", "");
-                String vote    = record.attribute("vote", "");
-                int factor = ((dbtype == yacyNewsPool.OUTGOING_DB) || (dbtype == yacyNewsPool.PUBLISHED_DB)) ? 2 : 1;
+                final String urlhash = record.attribute("urlhash", "");
+                final String vote    = record.attribute("vote", "");
+                final int factor = ((dbtype == yacyNewsPool.OUTGOING_DB) || (dbtype == yacyNewsPool.PUBLISHED_DB)) ? 2 : 1;
                 if (vote.equals("negative")) {
-                    Integer i = negativeHashes.get(urlhash);
+                    final Integer i = negativeHashes.get(urlhash);
                     if (i == null) negativeHashes.put(urlhash, new Integer(factor));
                     else negativeHashes.put(urlhash, new Integer(i.intValue() + factor));
                 }
                 if (vote.equals("positive")) {
-                    Integer i = positiveHashes.get(urlhash);
+                    final Integer i = positiveHashes.get(urlhash);
                     if (i == null) positiveHashes.put(urlhash, new Integer(factor));
                     else positiveHashes.put(urlhash, new Integer(i.intValue() + factor));
                 }
@@ -204,12 +204,12 @@ public class Surftips {
     }
     
     private static void accumulateSurftips(
-            plasmaSwitchboard sb,
-            HashMap<String, Entry> surftips, kelondroMScoreCluster<String> ranking, kelondroRow rowdef,
-            HashMap<String, Integer> negativeHashes, HashMap<String, Integer> positiveHashes, int dbtype) {
-        int maxCount = Math.min(1000, sb.webIndex.newsPool.size(dbtype));
+            final plasmaSwitchboard sb,
+            final HashMap<String, Entry> surftips, final kelondroMScoreCluster<String> ranking, final kelondroRow rowdef,
+            final HashMap<String, Integer> negativeHashes, final HashMap<String, Integer> positiveHashes, final int dbtype) {
+        final int maxCount = Math.min(1000, sb.webIndex.newsPool.size(dbtype));
         yacyNewsRecord record;
-        Iterator<yacyNewsRecord> recordIterator = sb.webIndex.newsPool.recordIterator(dbtype, true);
+        final Iterator<yacyNewsRecord> recordIterator = sb.webIndex.newsPool.recordIterator(dbtype, true);
         int j = 0;
         String url = "", urlhash;
         kelondroRow.Entry entry;
@@ -221,7 +221,7 @@ public class Surftips {
             
             entry = null;
             if (record.category().equals(yacyNewsPool.CATEGORY_CRAWL_START)) try {
-                String intention = record.attribute("intention", "");
+                final String intention = record.attribute("intention", "");
                 url = record.attribute("startURL", "");
                 if (url.length() < 12) continue;
                 entry = rowdef.newEntry(new byte[][]{
@@ -231,7 +231,7 @@ public class Surftips {
                                 record.id().getBytes()
                         });
                 score = 2 + Math.min(10, intention.length() / 4) + timeFactor(record.created());
-            } catch (IOException e) {}
+            } catch (final IOException e) {}
             
             if (record.category().equals(yacyNewsPool.CATEGORY_BOOKMARK_ADD)) try {
                 url = record.attribute("url", "");
@@ -243,7 +243,7 @@ public class Surftips {
                                 record.id().getBytes()
                         });
                 score = 8 + timeFactor(record.created());
-            } catch (IOException e) {}
+            } catch (final IOException e) {}
             
             if (record.category().equals(yacyNewsPool.CATEGORY_SURFTIPP_ADD)) try {
                 url = record.attribute("url", "");
@@ -255,7 +255,7 @@ public class Surftips {
                                 record.id().getBytes()
                         });
                 score = 5 + timeFactor(record.created());
-            } catch (IOException e) {}
+            } catch (final IOException e) {}
             
             if (record.category().equals(yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD)) try {
                 if (!(record.attribute("vote", "negative").equals("positive"))) continue;
@@ -268,7 +268,7 @@ public class Surftips {
                                 record.attribute("refid", "").getBytes()
                         });
                 score = 5 + timeFactor(record.created());
-            } catch (IOException e) {}
+            } catch (final IOException e) {}
             
             if (record.category().equals(yacyNewsPool.CATEGORY_WIKI_UPDATE)) try {
                 yacySeed seed = sb.webIndex.seedDB.getConnected(record.originator());
@@ -283,7 +283,7 @@ public class Surftips {
                         });
                     score = 4 + timeFactor(record.created());
                 }
-            } catch (IOException e) {}
+            } catch (final IOException e) {}
             
             if (record.category().equals(yacyNewsPool.CATEGORY_BLOG_ADD)) try {
                 yacySeed seed = sb.webIndex.seedDB.getConnected(record.originator());
@@ -298,19 +298,19 @@ public class Surftips {
                         });
                     score = 4 + timeFactor(record.created());
                 }
-            } catch (IOException e) {}
+            } catch (final IOException e) {}
 
             // add/subtract votes and write record
             if (entry != null) {
                 try {
                     urlhash = (new yacyURL(url, null)).hash();
-                } catch (MalformedURLException e) {
+                } catch (final MalformedURLException e) {
                     urlhash = null;
                 }
                 if (urlhash == null)
                     try {
                         urlhash = (new yacyURL("http://"+url, null)).hash();
-                    } catch (MalformedURLException e) {
+                    } catch (final MalformedURLException e) {
                         urlhash = null;
                     }
                 		if (urlhash == null) {

@@ -112,33 +112,33 @@ public class indexURLReference {
     /** of embedded links to applications */
     private static final int col_lapp     = 17;
     
-    private kelondroRow.Entry entry;
-    private String snippet;
+    private final kelondroRow.Entry entry;
+    private final String snippet;
     private indexRWIEntry word; // this is only used if the url is transported via remote search requests
-    private long ranking; // during generation of a search result this value is set
+    private final long ranking; // during generation of a search result this value is set
     
     public indexURLReference(
-            yacyURL url,
-            String dc_title,
-            String dc_creator,
-            String dc_subject,
-            String ETag,
-            Date mod,
-            Date load,
-            Date fresh,
-            String referrer,
-            byte[] md5,
-            long size,
-            int wc,
-            char dt,
-            kelondroBitfield flags,
-            String lang,
-            int llocal,
-            int lother,
-            int laudio,
-            int limage,
-            int lvideo,
-            int lapp) {
+            final yacyURL url,
+            final String dc_title,
+            final String dc_creator,
+            final String dc_subject,
+            final String ETag,
+            final Date mod,
+            final Date load,
+            final Date fresh,
+            final String referrer,
+            final byte[] md5,
+            final long size,
+            final int wc,
+            final char dt,
+            final kelondroBitfield flags,
+            final String lang,
+            final int llocal,
+            final int lother,
+            final int laudio,
+            final int limage,
+            final int lvideo,
+            final int lapp) {
         // create new entry and store it into database
         this.entry = rowdef.newEntry();
         this.entry.setCol(col_hash, url.hash(), null);
@@ -165,17 +165,17 @@ public class indexURLReference {
         this.ranking = 0;
     }
 
-    private void encodeDate(int col, Date d) {
+    private void encodeDate(final int col, final Date d) {
         // calculates the number of days since 1.1.1970 and returns this as 4-byte array
         this.entry.setCol(col, kelondroNaturalOrder.encodeLong(d.getTime() / 86400000, 4));
     }
 
-    private Date decodeDate(int col) {
+    private Date decodeDate(final int col) {
         return new Date(86400000 * this.entry.getColLong(col));
     }
     
-    public static byte[] encodeComp(yacyURL url, String dc_title, String dc_creator, String dc_subject, String ETag) {
-        serverCharBuffer s = new serverCharBuffer(200);
+    public static byte[] encodeComp(final yacyURL url, final String dc_title, final String dc_creator, final String dc_subject, final String ETag) {
+        final serverCharBuffer s = new serverCharBuffer(200);
         s.append(url.toNormalform(false, true)).append(10);
         s.append(dc_title).append(10);
         s.append(dc_creator).append(10);
@@ -184,21 +184,21 @@ public class indexURLReference {
         return s.toString().getBytes();
     }
     
-    public indexURLReference(kelondroRow.Entry entry, indexRWIEntry searchedWord, long ranking) {
+    public indexURLReference(final kelondroRow.Entry entry, final indexRWIEntry searchedWord, final long ranking) {
         this.entry = entry;
         this.snippet = null;
         this.word = searchedWord;
         this.ranking = ranking;
     }
 
-    public indexURLReference(Properties prop) {
+    public indexURLReference(final Properties prop) {
         // generates an plasmaLURLEntry using the properties from the argument
         // the property names must correspond to the one from toString
         //System.out.println("DEBUG-ENTRY: prop=" + prop.toString());
         yacyURL url;
         try {
             url = new yacyURL(crypt.simpleDecode(prop.getProperty("url", ""), null), prop.getProperty("hash"));
-        } catch (MalformedURLException e) {
+        } catch (final MalformedURLException e) {
             url = null;
         }
         String descr = crypt.simpleDecode(prop.getProperty("descr", ""), null); if (descr == null) descr = "";
@@ -211,17 +211,17 @@ public class indexURLReference {
         this.entry.setCol(col_comp, encodeComp(url, descr, dc_creator, tags, ETag));
         try {
             encodeDate(col_mod, serverDate.parseShortDay(prop.getProperty("mod", "20000101")));
-        } catch (ParseException e) {
+        } catch (final ParseException e) {
             encodeDate(col_mod, new Date());
         }
         try {
             encodeDate(col_load, serverDate.parseShortDay(prop.getProperty("load", "20000101")));
-        } catch (ParseException e) {
+        } catch (final ParseException e) {
             encodeDate(col_load, new Date());
         }
         try {
             encodeDate(col_fresh, serverDate.parseShortDay(prop.getProperty("fresh", "20000101")));
-        } catch (ParseException e) {
+        } catch (final ParseException e) {
             encodeDate(col_fresh, new Date());
         }
         this.entry.setCol(col_referrer, prop.getProperty("referrer", "").getBytes());
@@ -229,7 +229,7 @@ public class indexURLReference {
         this.entry.setCol(col_size, Integer.parseInt(prop.getProperty("size", "0")));
         this.entry.setCol(col_wc, Integer.parseInt(prop.getProperty("wc", "0")));
         this.entry.setCol(col_dt, new byte[]{(byte) prop.getProperty("dt", "t").charAt(0)});
-        String flags = prop.getProperty("flags", "AAAAAA");
+        final String flags = prop.getProperty("flags", "AAAAAA");
         this.entry.setCol(col_flags, (flags.length() > 6) ? plasmaSearchQuery.empty_constraint.bytes() : (new kelondroBitfield(4, flags)).bytes());
         this.entry.setCol(col_lang, prop.getProperty("lang", "uk").getBytes());
         this.entry.setCol(col_llocal, Integer.parseInt(prop.getProperty("llocal", "0")));
@@ -247,10 +247,10 @@ public class indexURLReference {
         this.ranking = 0;
     }
 
-    public static indexURLReference importEntry(String propStr) {
+    public static indexURLReference importEntry(final String propStr) {
         if (propStr != null && propStr.startsWith("{") && propStr.endsWith("}")) try {
             return new indexURLReference(serverCodings.s2p(propStr.substring(1, propStr.length() - 1)));
-        } catch (kelondroException e) {
+        } catch (final kelondroException e) {
                 // wrong format
                 return null;
         } else {
@@ -260,7 +260,7 @@ public class indexURLReference {
 
     private StringBuffer corePropList() {
         // generate a parseable string; this is a simple property-list
-        indexURLReference.Components comp = this.comp();
+        final indexURLReference.Components comp = this.comp();
         final StringBuffer s = new StringBuffer(300);
         //System.out.println("author=" + comp.author());
         try {
@@ -293,7 +293,7 @@ public class indexURLReference {
             }
             return s;
 
-        } catch (Exception e) {
+        } catch (final Exception e) {
             //          serverLog.logFailure("plasmaLURL.corePropList", e.getMessage());
             //          if (moddate == null) serverLog.logFailure("plasmaLURL.corePropList", "moddate=null");
             //          if (loaddate == null) serverLog.logFailure("plasmaLURL.corePropList", "loaddate=null");
@@ -319,7 +319,7 @@ public class indexURLReference {
     }
     
     public indexURLReference.Components comp() {
-        ArrayList<String> cl = nxTools.strings(this.entry.getCol("comp", null), "UTF-8");
+        final ArrayList<String> cl = nxTools.strings(this.entry.getCol("comp", null), "UTF-8");
         return new indexURLReference.Components(
                 (cl.size() > 0) ? (cl.get(0)).trim() : "",
                 hash(),
@@ -405,21 +405,21 @@ public class indexURLReference {
         return word;
     }
 
-    public boolean isOlder(indexURLReference other) {
+    public boolean isOlder(final indexURLReference other) {
         if (other == null) return false;
-        Date tmoddate = moddate();
-        Date omoddate = other.moddate();
+        final Date tmoddate = moddate();
+        final Date omoddate = other.moddate();
         if (tmoddate.before(omoddate)) return true;
         if (tmoddate.equals(omoddate)) {
-            Date tloaddate = loaddate();
-            Date oloaddate = other.loaddate();
+            final Date tloaddate = loaddate();
+            final Date oloaddate = other.loaddate();
             if (tloaddate.before(oloaddate)) return true;
             if (tloaddate.equals(oloaddate)) return true;
         }
         return false;
     }
 
-    public String toString(String snippet) {
+    public String toString(final String snippet) {
         // add information needed for remote transport
         final StringBuffer core = corePropList();
         if (core == null)
@@ -434,7 +434,7 @@ public class indexURLReference {
         //return "{" + core + ",snippet=" + crypt.simpleEncode(snippet) + "}";
     }
 
-    public CrawlEntry toBalancerEntry(String initiatorHash) {
+    public CrawlEntry toBalancerEntry(final String initiatorHash) {
         return new CrawlEntry(
                 initiatorHash, 
                 comp().url(), 
@@ -465,12 +465,12 @@ public class indexURLReference {
 
     public class Components {
         private yacyURL url;
-        private String dc_title, dc_creator, dc_subject, ETag;
+        private final String dc_title, dc_creator, dc_subject, ETag;
         
-        public Components(String url, String urlhash, String title, String author, String tags, String ETag) {
+        public Components(final String url, final String urlhash, final String title, final String author, final String tags, final String ETag) {
             try {
                 this.url = new yacyURL(url, urlhash);
-            } catch (MalformedURLException e) {
+            } catch (final MalformedURLException e) {
                 this.url = null;
             }
             this.dc_title = title;
@@ -478,7 +478,7 @@ public class indexURLReference {
             this.dc_subject = tags;
             this.ETag = ETag;
         }
-        public Components(yacyURL url, String descr, String author, String tags, String ETag) {
+        public Components(final yacyURL url, final String descr, final String author, final String tags, final String ETag) {
             this.url = url;
             this.dc_title = descr;
             this.dc_creator = author;

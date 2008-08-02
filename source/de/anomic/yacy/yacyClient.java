@@ -92,7 +92,7 @@ import de.anomic.xml.RSSReader;
 
 public final class yacyClient {
 
-    public static int publishMySeed(yacySeed mySeed, yacyPeerActions peerActions, String address, String otherHash) {
+    public static int publishMySeed(final yacySeed mySeed, final yacyPeerActions peerActions, final String address, final String otherHash) {
         // this is called to enrich the seed information by
         // - own address (if peer is behind a nat/router)
         // - check peer type (virgin/junior/senior/principal)
@@ -119,12 +119,12 @@ public final class yacyClient {
             post.add(new StringPart("count", "20"));
             post.add(new StringPart("seed", mySeed.genSeedStr(salt)));
             // send request
-            long start = System.currentTimeMillis();
-            byte[] content = wput("http://" + address + "/yacy/hello.html", yacySeed.b64Hash2hexHash(otherHash) + ".yacyh", post, 15000, false);
+            final long start = System.currentTimeMillis();
+            final byte[] content = wput("http://" + address + "/yacy/hello.html", yacySeed.b64Hash2hexHash(otherHash) + ".yacyh", post, 15000, false);
             yacyCore.log.logInfo("yacyClient.publishMySeed thread '" + Thread.currentThread().getName() + "' contacted peer at " + address + ", received " + ((content == null) ? "null" : content.length) + " bytes, time = " + (System.currentTimeMillis() - start) + " milliseconds");
             result = nxTools.table(content, "UTF-8");
             break;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             if (Thread.currentThread().isInterrupted()) {
                 yacyCore.log.logWarning("yacyClient.publishMySeed thread '" + Thread.currentThread().getName() + "' interrupted.");
                 return -1;
@@ -163,15 +163,15 @@ public final class yacyClient {
         if (serverCore.useStaticIP) {
             mySeed.setIP(serverDomains.myPublicIP());
         } else {
-            String myIP = result.get("yourip");
-            String properIP = yacySeed.isProperIP(myIP);
+            final String myIP = result.get("yourip");
+            final String properIP = yacySeed.isProperIP(myIP);
             if (properIP == null) mySeed.setIP(myIP);
         }
 
         // change our seed-type
         String mytype = result.get(yacySeed.YOURTYPE);
         if (mytype == null) { mytype = ""; }        
-        yacyAccessible accessible = new yacyAccessible();
+        final yacyAccessible accessible = new yacyAccessible();
         if (mytype.equals(yacySeed.PEERTYPE_SENIOR)||mytype.equals(yacySeed.PEERTYPE_PRINCIPAL)) {
             accessible.IWasAccessed = true;
             if (mySeed.isPrincipal()) {
@@ -249,7 +249,7 @@ public final class yacyClient {
      * @return response body
      * @throws IOException
      */
-    private static byte[] wput(final String url, String vhost, final List<Part> post, final int timeout) throws IOException {
+    private static byte[] wput(final String url, final String vhost, final List<Part> post, final int timeout) throws IOException {
         return wput(url, vhost, post, timeout, false);
     }
     /**
@@ -263,11 +263,11 @@ public final class yacyClient {
      * @return response body
      * @throws IOException
      */
-    private static byte[] wput(final String url, String vhost, final List<Part> post, final int timeout, boolean gzipBody) throws IOException {
-        httpHeader header = new httpHeader();
+    private static byte[] wput(final String url, final String vhost, final List<Part> post, final int timeout, final boolean gzipBody) throws IOException {
+        final httpHeader header = new httpHeader();
         header.put(httpHeader.USER_AGENT, HTTPLoader.yacyUserAgent);
         header.put(httpHeader.HOST, vhost);
-        JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(timeout, header, null);
+        final JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(timeout, header, null);
         client.setProxy(proxyConfig());
         
         JakartaCommonsHttpResponse res = null;
@@ -293,14 +293,14 @@ public final class yacyClient {
      * @return
      * @throws IOException
      */
-    private static byte[] postToFile(final yacySeed target, final String filename, final List<Part> post, int timeout) throws IOException {
+    private static byte[] postToFile(final yacySeed target, final String filename, final List<Part> post, final int timeout) throws IOException {
         return wput("http://" + target.getClusterAddress() + "/yacy/" + filename, target.getHexHash() + ".yacyh", post, timeout, false);
     }
-    private static byte[] postToFile(yacySeedDB seedDB, final String targetHash, final String filename, final List<Part> post, int timeout) throws IOException {
+    private static byte[] postToFile(final yacySeedDB seedDB, final String targetHash, final String filename, final List<Part> post, final int timeout) throws IOException {
         return wput("http://" + targetAddress(seedDB, targetHash) + "/yacy/" + filename, yacySeed.b64Hash2hexHash(targetHash)+ ".yacyh", post, timeout, false);
     }
 
-    public static yacySeed querySeed(yacySeed target, String seedHash) {
+    public static yacySeed querySeed(final yacySeed target, final String seedHash) {
         // prepare request
         final String salt = crypt.randomSalt();
         final List<Part> post = yacyNetwork.basicRequestPost(plasmaSwitchboard.getSwitchboard(), target.hash, salt);
@@ -309,19 +309,19 @@ public final class yacyClient {
             
         // send request
         try {
-            byte[] content = postToFile(target, "query.html", post, 10000);
+            final byte[] content = postToFile(target, "query.html", post, 10000);
             final HashMap<String, String> result = nxTools.table(content, "UTF-8");
             
             if (result == null || result.size() == 0) { return null; }
             //final Date remoteTime = yacyCore.parseUniversalDate((String) result.get(yacySeed.MYTIME)); // read remote time
             return yacySeed.genRemoteSeed(result.get("response"), salt, false);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             yacyCore.log.logSevere("yacyClient.querySeed error:" + e.getMessage());
             return null;
         }
     }
 
-    public static int queryRWICount(yacySeed target, String wordHash) {
+    public static int queryRWICount(final yacySeed target, final String wordHash) {
         // prepare request
         final String salt = crypt.randomSalt();
         final List<Part> post = yacyNetwork.basicRequestPost(plasmaSwitchboard.getSwitchboard(), target.hash, salt);
@@ -331,18 +331,18 @@ public final class yacyClient {
             
         // send request
         try {
-            byte[] content = postToFile(target, "query.html", post, 5000);
+            final byte[] content = postToFile(target, "query.html", post, 5000);
             final HashMap<String, String> result = nxTools.table(content, "UTF-8");
             
             if (result == null || result.size() == 0) { return -1; }
             return Integer.parseInt(result.get("response"));
-        } catch (Exception e) {
+        } catch (final Exception e) {
             yacyCore.log.logSevere("yacyClient.queryRWICount error:" + e.getMessage());
             return -1;
         }
     }
 
-    public static int queryUrlCount(yacySeed target) {        
+    public static int queryUrlCount(final yacySeed target) {        
         if (target == null) { return -1; }
         
         // prepare request
@@ -354,7 +354,7 @@ public final class yacyClient {
         
         // send request
         try {
-            byte[] content = postToFile(target, "query.html", post, 5000);
+            final byte[] content = postToFile(target, "query.html", post, 5000);
             final HashMap<String, String> result = nxTools.table(content, "UTF-8");
             
             if ((result == null) || (result.size() == 0)) return -1;
@@ -363,16 +363,16 @@ public final class yacyClient {
                 return -1;
             } else try {
                 return Integer.parseInt(resp);
-            } catch (NumberFormatException e) {
+            } catch (final NumberFormatException e) {
                 return -1;
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             yacyCore.log.logSevere("yacyClient.queryUrlCount error asking peer '" + target.getName() + "':" + e.toString());
             return -1;
         }
     }
 
-    public static RSSFeed queryRemoteCrawlURLs(yacySeedDB seedDB, yacySeed target, int count) {
+    public static RSSFeed queryRemoteCrawlURLs(final yacySeedDB seedDB, final yacySeed target, final int count) {
         // returns a list of 
         if (target == null) { return null; }
         
@@ -386,7 +386,7 @@ public final class yacyClient {
         try {
             /* a long time-out is needed */
             final byte[] result = wput("http://" + target.getClusterAddress() + "/yacy/urls.xml", target.getHexHash() + ".yacyh", post, 60000); 
-            RSSReader reader = RSSReader.parse(result);
+            final RSSReader reader = RSSReader.parse(result);
             if (reader == null) {
                 yacyCore.log.logWarning("yacyClient.queryRemoteCrawlURLs failed asking peer '" + target.getName() + "': probably bad response from remote peer (1), reader == null");
                 target.put(yacySeed.RCOUNT, "0");
@@ -394,7 +394,7 @@ public final class yacyClient {
                 //e.printStackTrace();
                 return null;
             }
-            RSSFeed feed = reader.getFeed();
+            final RSSFeed feed = reader.getFeed();
             if (feed == null) {
                 // case where the rss reader does not understand the content
                 yacyCore.log.logWarning("yacyClient.queryRemoteCrawlURLs failed asking peer '" + target.getName() + "': probably bad response from remote peer (2)");
@@ -405,31 +405,31 @@ public final class yacyClient {
                 return null;
             }
             return feed;
-        } catch (IOException e) {
+        } catch (final IOException e) {
             yacyCore.log.logSevere("yacyClient.queryRemoteCrawlURLs error asking peer '" + target.getName() + "':" + e.toString());
             return null;
         }
     }
 
     public static String[] search(
-            yacySeed mySeed,
-            String wordhashes,
-            String excludehashes,
-            String urlhashes,
-            String prefer,
-            String filter,
-            int count,
-            int maxDistance,
-            boolean global, 
-            int partitions,
-            yacySeed target,
-            plasmaWordIndex wordIndex,
-            ResultURLs crawlResults,
-            plasmaSearchRankingProcess containerCache,
-            Map<String, TreeMap<String, String>> abstractCache,
-            indexReferenceBlacklist blacklist,
-            plasmaSearchRankingProfile rankingProfile,
-            kelondroBitfield constraint
+            final yacySeed mySeed,
+            final String wordhashes,
+            final String excludehashes,
+            final String urlhashes,
+            final String prefer,
+            final String filter,
+            final int count,
+            final int maxDistance,
+            final boolean global, 
+            final int partitions,
+            final yacySeed target,
+            final plasmaWordIndex wordIndex,
+            final ResultURLs crawlResults,
+            final plasmaSearchRankingProcess containerCache,
+            final Map<String, TreeMap<String, String>> abstractCache,
+            final indexReferenceBlacklist blacklist,
+            final plasmaSearchRankingProfile rankingProfile,
+            final kelondroBitfield constraint
     ) {
         // send a search request to peer with remote Hash
         // this mainly converts the words into word hashes
@@ -471,7 +471,7 @@ public final class yacyClient {
         HashMap<String, String> result = null;
         try {
           	result = nxTools.table(wput("http://" + target.getClusterAddress() + "/yacy/search.html", target.getHexHash() + ".yacyh", post, 60000), "UTF-8");
-        } catch (IOException e) {
+        } catch (final IOException e) {
             yacyCore.log.logInfo("SEARCH failed, Peer: " + target.hash + ":" + target.getName() + " (" + e.getMessage() + "), score=" + target.selectscore + ", DHTdist=" + yacyDHTAction.dhtDistance(target.hash, wordhashes.substring(0, 12)));
             //yacyCore.peerActions.peerDeparture(target, "search request to peer created io exception: " + e.getMessage());
             return null;
@@ -512,7 +512,7 @@ public final class yacyClient {
         try {
             results = Integer.parseInt(result.get("count"));
             joincount = Integer.parseInt(result.get("joincount"));
-        } catch (NumberFormatException e) {
+        } catch (final NumberFormatException e) {
             yacyCore.log.logInfo("SEARCH failed FROM " + target.hash + ":" + target.getName() + ", wrong output format: " + e.getMessage());
             //yacyCore.peerActions.peerDeparture(target, "search request to peer created number format exception");
             return null;
@@ -521,27 +521,27 @@ public final class yacyClient {
 
 		// create containers
 		final int words = wordhashes.length() / yacySeedDB.commonHashLength;
-		indexContainer[] container = new indexContainer[words];
+		final indexContainer[] container = new indexContainer[words];
 		for (int i = 0; i < words; i++) {
 			container[i] = plasmaWordIndex.emptyContainer(wordhashes.substring(i * yacySeedDB.commonHashLength, (i + 1) * yacySeedDB.commonHashLength), count);
 		}
 
 		// insert results to containers
 		indexURLReference urlEntry;
-		String[] urls = new String[results];
+		final String[] urls = new String[results];
 		for (int n = 0; n < results; n++) {
 			// get one single search result
 			urlEntry = indexURLReference.importEntry(result.get("resource" + n));
 			if (urlEntry == null) continue;
 			assert (urlEntry.hash().length() == 12) : "urlEntry.hash() = " + urlEntry.hash();
 			if (urlEntry.hash().length() != 12) continue; // bad url hash
-			indexURLReference.Components comp = urlEntry.comp();
+			final indexURLReference.Components comp = urlEntry.comp();
 			if (blacklist.isListed(indexReferenceBlacklist.BLACKLIST_SEARCH, comp.url())) {
 				yacyCore.log.logInfo("remote search (client): filtered blacklisted url " + comp.url() + " from peer " + target.getName());
 				continue; // block with backlist
 			}
             
-			String urlRejectReason = plasmaSwitchboard.getSwitchboard().acceptURL(comp.url());
+			final String urlRejectReason = plasmaSwitchboard.getSwitchboard().acceptURL(comp.url());
             if (urlRejectReason != null) {
                 yacyCore.log.logInfo("remote search (client): rejected url '" + comp.url() + "' (" + urlRejectReason + ") from peer " + target.getName());
                 continue; // reject url outside of our domain
@@ -565,7 +565,7 @@ public final class yacyClient {
 			try {
 				wordIndex.putURL(urlEntry);
 				crawlResults.stack(urlEntry, mySeed.hash, target.hash, 2);
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				yacyCore.log.logSevere("could not store search result", e);
 				continue; // db-error
 			}
@@ -593,7 +593,7 @@ public final class yacyClient {
             containerCache.insertRanked(container[0], false, joincount); // one is enough
             
             // integrate remote topwords
-            String references = result.get("references");
+            final String references = result.get("references");
             yacyCore.log.logInfo("remote search (client): peer " + target.getName() + " sent references " + references);
             if (references != null) {
                 // add references twice, so they can be countet (must have at least 2 entries)
@@ -604,7 +604,7 @@ public final class yacyClient {
         
 		// read index abstract
 		if (abstractCache != null) {
-			Iterator<Map.Entry<String, String>> i = result.entrySet().iterator();
+			final Iterator<Map.Entry<String, String>> i = result.entrySet().iterator();
 			Map.Entry<String, String> entry;
 			TreeMap<String, String> singleAbstract;
 			String wordhash;
@@ -634,7 +634,7 @@ public final class yacyClient {
 		long searchtime;
 		try {
 			searchtime = Integer.parseInt(result.get("searchtime"));
-		} catch (NumberFormatException e) {
+		} catch (final NumberFormatException e) {
 			searchtime = totalrequesttime;
 		}
 		yacyCore.log.logFine("SEARCH "
@@ -655,7 +655,7 @@ public final class yacyClient {
 		return urls;
 	}
 
-    public static HashMap<String, String> permissionMessage(yacySeedDB seedDB, String targetHash) {
+    public static HashMap<String, String> permissionMessage(final yacySeedDB seedDB, final String targetHash) {
         // ask for allowed message size and attachement size
         // if this replies null, the peer does not answer
         
@@ -669,14 +669,14 @@ public final class yacyClient {
             final byte[] content = postToFile(seedDB, targetHash, "message.html", post, 5000); 
             final HashMap<String, String> result = nxTools.table(content, "UTF-8");
             return result;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             // most probably a network time-out exception
             yacyCore.log.logSevere("yacyClient.permissionMessage error:" + e.getMessage());
             return null;
         }
     }
 
-    public static HashMap<String, String> postMessage(yacySeedDB seedDB, String targetHash, String subject, byte[] message) {
+    public static HashMap<String, String> postMessage(final yacySeedDB seedDB, final String targetHash, final String subject, final byte[] message) {
         // this post a message to the remote message board
 
         // prepare request
@@ -687,7 +687,7 @@ public final class yacyClient {
         post.add(new StringPart("subject", subject));
         try {
             post.add(new StringPart("message", new String(message, "UTF-8")));
-        } catch (UnsupportedEncodingException e) {
+        } catch (final UnsupportedEncodingException e) {
             post.add(new StringPart("message", new String(message)));
         }
 
@@ -696,13 +696,13 @@ public final class yacyClient {
             final byte[] content = postToFile(seedDB, targetHash, "message.html", post, 20000);
             final HashMap<String, String> result = nxTools.table(content, "UTF-8");
             return result;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             yacyCore.log.logSevere("yacyClient.postMessage error:" + e.getMessage());
             return null;
         }
     }
     
-    public static String targetAddress(yacySeedDB seedDB, String targetHash) {
+    public static String targetAddress(final yacySeedDB seedDB, final String targetHash) {
         // find target address    
         String address;
         if (targetHash.equals(seedDB.mySeed().hash)) {
@@ -716,7 +716,7 @@ public final class yacyClient {
         return address;
     }
     
-    public static HashMap<String, String> transferPermission(String targetAddress, long filesize, String filename) {
+    public static HashMap<String, String> transferPermission(final String targetAddress, final long filesize, final String filename) {
 
         // prepare request
         final String salt = crypt.randomSalt();
@@ -732,14 +732,14 @@ public final class yacyClient {
             final byte[] content = wput("http://" + targetAddress + "/yacy/transfer.html", targetAddress, post, 10000);
             final HashMap<String, String> result = nxTools.table(content, "UTF-8");
             return result;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             // most probably a network time-out exception
             yacyCore.log.logSevere("yacyClient.permissionTransfer error:" + e.getMessage());
             return null;
         }
     }
 
-    public static HashMap<String, String> transferStore(String targetAddress, String access, String filename, byte[] file) {
+    public static HashMap<String, String> transferStore(final String targetAddress, final String access, final String filename, final byte[] file) {
         
         // prepare request
         final String salt = crypt.randomSalt();
@@ -756,26 +756,26 @@ public final class yacyClient {
             final byte[] content = wput("http://" + targetAddress + "/yacy/transfer.html", targetAddress, post, 20000);
             final HashMap<String, String> result = nxTools.table(content, "UTF-8");
             return result;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             yacyCore.log.logSevere("yacyClient.postMessage error:" + e.getMessage());
             return null;
         }
     }
     
-    public static String transfer(String targetAddress, String filename, byte[] file) {
-        HashMap<String, String> phase1 = transferPermission(targetAddress, file.length, filename);
+    public static String transfer(final String targetAddress, final String filename, final byte[] file) {
+        final HashMap<String, String> phase1 = transferPermission(targetAddress, file.length, filename);
         if (phase1 == null) return "no connection to remote address " + targetAddress + "; phase 1";
-        String access = phase1.get("access");
-        String nextaddress = phase1.get("address");
-        String protocol = phase1.get("protocol");
+        final String access = phase1.get("access");
+        final String nextaddress = phase1.get("address");
+        final String protocol = phase1.get("protocol");
         //String path = (String) phase1.get("path");
         //String maxsize = (String) phase1.get("maxsize");
         String response = phase1.get("response");
         if ((response == null) || (protocol == null) || (access == null)) return "wrong return values from other peer; phase 1";
         if (!(response.equals("ok"))) return "remote peer rejected transfer: " + response;
-        String accesscode = serverCodings.encodeMD5Hex(kelondroBase64Order.standardCoder.encodeString(access));
+        final String accesscode = serverCodings.encodeMD5Hex(kelondroBase64Order.standardCoder.encodeString(access));
         if (protocol.equals("http")) {
-            HashMap<String, String> phase2 = transferStore(nextaddress, accesscode, filename, file);
+            final HashMap<String, String> phase2 = transferStore(nextaddress, accesscode, filename, file);
             if (phase2 == null) return "no connection to remote address " + targetAddress + "; phase 2";
             response = phase2.get("response");
             if (response == null) return "wrong return values from other peer; phase 2";
@@ -787,7 +787,7 @@ public final class yacyClient {
         return "wrong protocol: " + protocol;
     }
 
-    public static HashMap<String, String> crawlReceipt(yacySeed mySeed, yacySeed target, String process, String result, String reason, indexURLReference entry, String wordhashes) {
+    public static HashMap<String, String> crawlReceipt(final yacySeed mySeed, final yacySeed target, final String process, final String result, final String reason, final indexURLReference entry, final String wordhashes) {
         assert (target != null);
         assert (mySeed != null);
         assert (mySeed != target);
@@ -828,18 +828,18 @@ public final class yacyClient {
             
         // send request
         try {
-            byte[] content = wput("http://" + address + "/yacy/crawlReceipt.html", target.getHexHash() + ".yacyh", post, 10000);
+            final byte[] content = wput("http://" + address + "/yacy/crawlReceipt.html", target.getHexHash() + ".yacyh", post, 10000);
             return nxTools.table(content, "UTF-8");
-        } catch (Exception e) {
+        } catch (final Exception e) {
             // most probably a network time-out exception
             yacyCore.log.logSevere("yacyClient.crawlReceipt error:" + e.getMessage());
             return null;
         }
     }
 
-    public static HashMap<String, Object> transferIndex(yacySeedDB seedDB, yacySeed targetSeed, indexContainer[] indexes, HashMap<String, indexURLReference> urlCache, boolean gzipBody, int timeout) {
+    public static HashMap<String, Object> transferIndex(final yacySeedDB seedDB, final yacySeed targetSeed, final indexContainer[] indexes, final HashMap<String, indexURLReference> urlCache, final boolean gzipBody, final int timeout) {
         
-        HashMap<String, Object> resultObj = new HashMap<String, Object>();
+        final HashMap<String, Object> resultObj = new HashMap<String, Object>();
         int payloadSize = 0;
         try {
             
@@ -890,7 +890,7 @@ public final class yacyClient {
             if (uhs.length == 0) { return resultObj; } // all url's known
             
             // extract the urlCache from the result
-            indexURLReference[] urls = new indexURLReference[uhs.length];
+            final indexURLReference[] urls = new indexURLReference[uhs.length];
             for (int i = 0; i < uhs.length; i++) {
                 urls[i] = urlCache.get(uhs[i]);
                 if (urls[i] == null) {
@@ -927,7 +927,7 @@ public final class yacyClient {
         }
     }
 
-    private static HashMap<String, String> transferRWI(yacySeedDB seedDB, yacySeed targetSeed, indexContainer[] indexes, boolean gzipBody, int timeout) {
+    private static HashMap<String, String> transferRWI(final yacySeedDB seedDB, final yacySeed targetSeed, final indexContainer[] indexes, boolean gzipBody, final int timeout) {
         final String address = targetSeed.getPublicAddress();
         if (address == null) { return null; }
 
@@ -978,13 +978,13 @@ public final class yacyClient {
             // return the transfered index data in bytes (for debugging only)
             result.put("indexPayloadSize", Integer.toString(entrypost.length()));
             return result;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             yacyCore.log.logSevere("yacyClient.transferRWI error:" + e.getMessage());
             return null;
         }
     }
 
-    private static HashMap<String, String> transferURL(yacySeedDB seedDB, yacySeed targetSeed, indexURLReference[] urls, boolean gzipBody, int timeout) {
+    private static HashMap<String, String> transferURL(final yacySeedDB seedDB, final yacySeed targetSeed, final indexURLReference[] urls, boolean gzipBody, final int timeout) {
         // this post a message to the remote message board
         final String address = targetSeed.getPublicAddress();
         if (address == null) { return null; }
@@ -1020,17 +1020,17 @@ public final class yacyClient {
                 seedDB.mySeed().incSU(urlc);
             }
             
-            HashMap<String, String> result = nxTools.table(v);
+            final HashMap<String, String> result = nxTools.table(v);
             // return the transfered url data in bytes (for debugging only)
             result.put("urlPayloadSize", Integer.toString(urlPayloadSize));            
             return result;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             yacyCore.log.logSevere("yacyClient.transferURL error:" + e.getMessage());
             return null;
         }
     }
 
-    public static HashMap<String, String> getProfile(yacySeed targetSeed) {
+    public static HashMap<String, String> getProfile(final yacySeed targetSeed) {
 
         // this post a message to the remote message board
         final String salt = crypt.randomSalt();
@@ -1041,7 +1041,7 @@ public final class yacyClient {
         try {
             final byte[] content = wput("http://" + address + "/yacy/profile.html", targetSeed.getHexHash() + ".yacyh", post, 5000);
             return nxTools.table(content, "UTF-8");
-        } catch (Exception e) {
+        } catch (final Exception e) {
             yacyCore.log.logSevere("yacyClient.getProfile error:" + e.getMessage());
             return null;
         }
@@ -1052,11 +1052,11 @@ public final class yacyClient {
      * @return
      */
     private static final httpRemoteProxyConfig proxyConfig() {
-        httpRemoteProxyConfig p = httpdProxyHandler.getRemoteProxyConfig();
+        final httpRemoteProxyConfig p = httpdProxyHandler.getRemoteProxyConfig();
         return ((p != null) && (p.useProxy()) && (p.useProxy4Yacy())) ? p : null;
     }
 
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         if(args.length > 1) {
         System.out.println("yacyClient Test");
         try {
@@ -1067,7 +1067,7 @@ public final class yacyClient {
             final String wordhashe = indexWord.word2hash("test");
             //System.out.println("permission=" + permissionMessage(args[1]));
             
-            httpHeader reqHeader = new httpHeader();
+            final httpHeader reqHeader = new httpHeader();
             reqHeader.put(httpHeader.USER_AGENT, HTTPLoader.crawlerUserAgent);
             final byte[] content = HttpClient.wget(
                                               "http://" + target.getPublicAddress() + "/yacy/search.html" +
@@ -1081,7 +1081,7 @@ public final class yacyClient {
                                                       reqHeader, 10000, target.getHexHash() + ".yacyh");            
             final HashMap<String, String> result = nxTools.table(content, "UTF-8");
             System.out.println("Result=" + result.toString());
-        } catch (Exception e) {
+        } catch (final Exception e) {
             e.printStackTrace();
         }
         System.exit(0);
@@ -1091,7 +1091,7 @@ public final class yacyClient {
             URL url = null;
             try {
                 url = new URL(args[0]);
-            } catch (MalformedURLException e) {
+            } catch (final MalformedURLException e) {
                 e.printStackTrace();
             }
             if(url == null) {
@@ -1110,7 +1110,7 @@ public final class yacyClient {
             try {
                 final byte[] response = wput(url.toString(), vhost, post, timeout, gzipBody);
                 System.out.println(new String(response));
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 e.printStackTrace();
             }
         }

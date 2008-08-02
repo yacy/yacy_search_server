@@ -39,21 +39,21 @@ import de.anomic.server.serverSwitch;
 
 public class ConfigNetwork_p {
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
         
-        plasmaSwitchboard sb = (plasmaSwitchboard) env;
-        serverObjects prop = new serverObjects();
+        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        final serverObjects prop = new serverObjects();
         int commit = 0;
         
         // load all options for network definitions
-        File networkBootstrapLocationsFile = new File(new File(sb.getRootPath(), "defaults"), "yacy.networks");
-        HashSet<String> networkBootstrapLocations = serverFileUtils.loadList(networkBootstrapLocationsFile);
+        final File networkBootstrapLocationsFile = new File(new File(sb.getRootPath(), "defaults"), "yacy.networks");
+        final HashSet<String> networkBootstrapLocations = serverFileUtils.loadList(networkBootstrapLocationsFile);
         
         
         if (post != null) {
             
             if (post.containsKey("changeNetwork")) {
-                String networkDefinition = post.get("networkDefinition", "defaults/yacy.network.freeworld.unit");
+                final String networkDefinition = post.get("networkDefinition", "defaults/yacy.network.freeworld.unit");
                 if (networkDefinition.equals(sb.getConfig("network.unit.definition", ""))) {
                     // no change
                     commit = 3;
@@ -74,8 +74,8 @@ public class ConfigNetwork_p {
                 // DHT control
                 boolean indexDistribute = post.get("indexDistribute", "").equals("on");
                 boolean indexReceive = post.get("indexReceive", "").equals("on");
-                boolean robinsonmode = post.get("network", "").equals("robinson");
-                String clustermode = post.get("cluster.mode", "publicpeer");
+                final boolean robinsonmode = post.get("network", "").equals("robinson");
+                final String clustermode = post.get("cluster.mode", "publicpeer");
                 if (robinsonmode) {
                     indexDistribute = false;
                     indexReceive = false;
@@ -146,9 +146,9 @@ public class ConfigNetwork_p {
                 int newppm = 1;
                 try {
                     newppm = Math.max(1, Integer.parseInt(post.get("acceptCrawlLimit", "1")));
-                } catch (NumberFormatException e) {}
-                long newBusySleep = Math.max(100, 60000 / newppm);
-                serverBusyThread rct = sb.getThread(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
+                } catch (final NumberFormatException e) {}
+                final long newBusySleep = Math.max(100, 60000 / newppm);
+                final serverBusyThread rct = sb.getThread(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
                 rct.setBusySleep(newBusySleep);
                 sb.setConfig(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_BUSYSLEEP, Long.toString(newBusySleep));
                 
@@ -168,12 +168,12 @@ public class ConfigNetwork_p {
         long RTCbusySleep = 100;
         try {
             RTCbusySleep = Math.max(1, Integer.parseInt(env.getConfig(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_BUSYSLEEP, "100")));
-        } catch (NumberFormatException e) {}
-        int RTCppm = (int) (60000L / RTCbusySleep);
+        } catch (final NumberFormatException e) {}
+        final int RTCppm = (int) (60000L / RTCbusySleep);
         prop.put("acceptCrawlLimit", RTCppm);
         
-        boolean indexDistribute = sb.getConfig(plasmaSwitchboard.INDEX_DIST_ALLOW, "true").equals("true");
-        boolean indexReceive = sb.getConfig(plasmaSwitchboard.INDEX_RECEIVE_ALLOW, "true").equals("true");
+        final boolean indexDistribute = sb.getConfig(plasmaSwitchboard.INDEX_DIST_ALLOW, "true").equals("true");
+        final boolean indexReceive = sb.getConfig(plasmaSwitchboard.INDEX_RECEIVE_ALLOW, "true").equals("true");
         prop.put("indexDistributeChecked", (indexDistribute) ? "1" : "0");
         prop.put("indexDistributeWhileCrawling.on", (sb.getConfig(plasmaSwitchboard.INDEX_DIST_ALLOW_WHILE_CRAWLING, "true").equals("true")) ? "1" : "0");
         prop.put("indexDistributeWhileCrawling.off", (sb.getConfig(plasmaSwitchboard.INDEX_DIST_ALLOW_WHILE_CRAWLING, "true").equals("true")) ? "0" : "1");
@@ -209,7 +209,7 @@ public class ConfigNetwork_p {
         prop.put("network.unit.dht", sb.getConfig("network.unit.dht", ""));
         networkBootstrapLocations.remove(sb.getConfig("network.unit.definition", ""));
         int c = 0;
-        for (String s: networkBootstrapLocations) prop.put("networks_" + c++ + "_network", s);
+        for (final String s: networkBootstrapLocations) prop.put("networks_" + c++ + "_network", s);
         prop.put("networks", c);
         
         return prop;
@@ -226,7 +226,7 @@ public class ConfigNetwork_p {
     
     public static String checkYaCyDomainList(String input) {
         input = normalizedList(input);
-        String[] s = input.split(",");
+        final String[] s = input.split(",");
         input = "";
         for (int i = 0; i < s.length; i++) {
             if ((s[i].endsWith(".yacyh")) || (s[i].endsWith(".yacy")) ||
@@ -237,7 +237,7 @@ public class ConfigNetwork_p {
     
     public static String checkIPPortList(String input) {
         input = normalizedList(input);
-        String[] s = input.split(",");
+        final String[] s = input.split(",");
         input = "";
         for (int i = 0; i < s.length; i++) {
             if (s[i].indexOf(':') >= 9) input += "," + s[i];

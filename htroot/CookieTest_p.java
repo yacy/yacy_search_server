@@ -37,7 +37,7 @@ import de.anomic.server.servletProperties;
 
 public class CookieTest_p {
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
       
 
         // case if no values are requested
@@ -50,16 +50,16 @@ public class CookieTest_p {
         
         final servletProperties prop = new servletProperties();
         if(post.containsKey("act")&&post.get("act").equals("clear_cookie")) {
-            httpHeader outgoingHeader = new httpHeader();
-        	Iterator<Map.Entry<String, String>> it = header.entrySet().iterator();
+            final httpHeader outgoingHeader = new httpHeader();
+        	final Iterator<Map.Entry<String, String>> it = header.entrySet().iterator();
         	Map.Entry<String, String> e;
         	while (it.hasNext()) {
         		e = it.next();
         		if (e.getKey().equals("Cookie")) {
-        			String coockie[]=e.getValue().toString().split(";");
+        			final String coockie[]=e.getValue().toString().split(";");
         			for(int i=0;i<coockie.length;i++)
         			{
-        				String nameValue[]=coockie[i].split("=");
+        				final String nameValue[]=coockie[i].split("=");
         				outgoingHeader.setCookie(nameValue[0].trim(),nameValue.length>1?(nameValue[1].trim()):"","Thu, 01-Jan-99 00:00:01 GMT");	
         			}
         		}
@@ -75,9 +75,9 @@ public class CookieTest_p {
         }
         else if(post.containsKey("act")&&post.get("act").equals("set_cookie"))
        {
-        String cookieName = post.get("cookie_name").toString().trim();
-        String cookieValue = post.get("cookie_value").toString().trim();
-        httpHeader outgoingHeader=new httpHeader();
+        final String cookieName = post.get("cookie_name").toString().trim();
+        final String cookieValue = post.get("cookie_value").toString().trim();
+        final httpHeader outgoingHeader=new httpHeader();
         
         outgoingHeader.setCookie(cookieName,cookieValue);
         prop.setOutgoingHeader(outgoingHeader);

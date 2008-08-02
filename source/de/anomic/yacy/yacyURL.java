@@ -52,7 +52,7 @@ public class yacyURL implements Serializable {
     private String protocol, host, userInfo, path, quest, ref, hash;
     private int port;
     
-    public yacyURL(String url, String hash) throws MalformedURLException {
+    public yacyURL(final String url, final String hash) throws MalformedURLException {
         if (url == null) throw new MalformedURLException("url string is null");
         
         parseURLString(url);
@@ -76,7 +76,7 @@ public class yacyURL implements Serializable {
         if (url.length() < p + 4) throw new MalformedURLException("URL not parseable: '" + url + "'");
         if (url.substring(p + 1, p + 3).equals("//")) {
             // identify host, userInfo and file for http and ftp protocol
-            int q = url.indexOf('/', p + 3);
+            final int q = url.indexOf('/', p + 3);
             int r;
             if (q < 0) {
                 if ((r = url.indexOf('@', p + 3)) < 0) {
@@ -107,7 +107,7 @@ public class yacyURL implements Serializable {
             // this is not a http or ftp url
             if (protocol.equals("mailto")) {
                 // parse email url
-                int q = url.indexOf('@', p + 3);
+                final int q = url.indexOf('@', p + 3);
                 if (q < 0) {
                     throw new MalformedURLException("wrong email address: " + url);
                 } else {
@@ -125,25 +125,25 @@ public class yacyURL implements Serializable {
         
         // handle international domains
         if (!Punycode.isBasic(host)) try {
-            int d1 = host.lastIndexOf('.');
+            final int d1 = host.lastIndexOf('.');
             if (d1 >= 0) {
-                String tld = host.substring(d1 + 1);
-                String dom = host.substring(0, d1);
-                int d0 = dom.lastIndexOf('.');
+                final String tld = host.substring(d1 + 1);
+                final String dom = host.substring(0, d1);
+                final int d0 = dom.lastIndexOf('.');
                 if (d0 >= 0) {
                     host = dom.substring(0, d0) + ".xn--" + Punycode.encode(dom.substring(d0 + 1)) + "." + tld;
                 } else {
                     host = "xn--" + Punycode.encode(dom) + "." + tld;
                 }
             }
-        } catch (PunycodeException e) {}
+        } catch (final PunycodeException e) {}
     }
 
-    public yacyURL(File file) throws MalformedURLException {
+    public yacyURL(final File file) throws MalformedURLException {
         this("file", "", -1, file.getAbsolutePath());
     }
 
-    public static yacyURL newURL(String baseURL, String relPath) throws MalformedURLException {
+    public static yacyURL newURL(final String baseURL, final String relPath) throws MalformedURLException {
         if ((baseURL == null) ||
             (relPath.startsWith("http://")) ||
             (relPath.startsWith("https://")) ||
@@ -156,7 +156,7 @@ public class yacyURL implements Serializable {
         }
     }
     
-    public static yacyURL newURL(yacyURL baseURL, String relPath) throws MalformedURLException {
+    public static yacyURL newURL(final yacyURL baseURL, final String relPath) throws MalformedURLException {
         if ((baseURL == null) ||
             (relPath.startsWith("http://")) ||
             (relPath.startsWith("https://")) ||
@@ -169,7 +169,7 @@ public class yacyURL implements Serializable {
         }
     }
     
-    private yacyURL(yacyURL baseURL, String relPath) throws MalformedURLException {
+    private yacyURL(final yacyURL baseURL, String relPath) throws MalformedURLException {
         if (baseURL == null) throw new MalformedURLException("base URL is null");
         if (relPath == null) throw new MalformedURLException("relPath is null");
 
@@ -204,7 +204,7 @@ public class yacyURL implements Serializable {
             if (relPath.startsWith("#") || relPath.startsWith("?")) {
                 this.path = baseURL.path + relPath;
             } else {
-                int q = baseURL.path.lastIndexOf('/');
+                final int q = baseURL.path.lastIndexOf('/');
                 if (q < 0) {
                     this.path = relPath;
                 } else {
@@ -221,7 +221,7 @@ public class yacyURL implements Serializable {
         escape();
     }
     
-    public yacyURL(String protocol, String host, int port, String path) throws MalformedURLException {
+    public yacyURL(final String protocol, final String host, final int port, final String path) throws MalformedURLException {
         if (protocol == null) throw new MalformedURLException("protocol is null");
         this.protocol = protocol;
         this.host = host;
@@ -247,8 +247,8 @@ public class yacyURL implements Serializable {
         /* by [MT] */
         if (path.length() == 0 || path.charAt(0) != '/') { path = "/" + path; }
 
-        Pattern pathPattern = Pattern.compile("(/[^/]+(?<!/\\.{1,2})/)[.]{2}(?=/|$)|/\\.(?=/)|/(?=/)");
-        Matcher matcher = pathPattern.matcher(path);
+        final Pattern pathPattern = Pattern.compile("(/[^/]+(?<!/\\.{1,2})/)[.]{2}(?=/|$)|/\\.(?=/)|/(?=/)");
+        final Matcher matcher = pathPattern.matcher(path);
         while (matcher.find()) {
             path = matcher.replaceAll("");
             matcher.reset(path);
@@ -272,7 +272,7 @@ public class yacyURL implements Serializable {
     }
     
     private void escapePath() {
-        String[] pathp = path.split("/", -1);
+        final String[] pathp = path.split("/", -1);
         String ptmp = "";
         for (int i = 0; i < pathp.length; i++) {
             ptmp += "/" + escape(pathp[i]);
@@ -285,7 +285,7 @@ public class yacyURL implements Serializable {
     }
     
     private void escapeQuest() {
-        String[] questp = quest.split("&", -1);
+        final String[] questp = quest.split("&", -1);
         String qtmp = "";
         for (int i = 0; i < questp.length; i++) {
             if (questp[i].indexOf('=') != -1) {
@@ -357,12 +357,12 @@ public class yacyURL implements Serializable {
      * @return The encoded string
      */
     // from: http://www.w3.org/International/URLUTF8Encoder.java
-    public static String escape(String s)
+    public static String escape(final String s)
     {
-        StringBuffer sbuf = new StringBuffer();
-        int len = s.length();
+        final StringBuffer sbuf = new StringBuffer();
+        final int len = s.length();
         for (int i = 0; i < len; i++) {
-            int ch = s.charAt(i);
+            final int ch = s.charAt(i);
             if ('A' <= ch && ch <= 'Z') {           // 'A'..'Z'
                 sbuf.append((char)ch);
             } else if ('a' <= ch && ch <= 'z') {    // 'a'..'z'
@@ -393,9 +393,9 @@ public class yacyURL implements Serializable {
     }
     
     // from: http://www.w3.org/International/unescape.java
-    public static String unescape(String s) {
-        StringBuffer sbuf = new StringBuffer();
-        int l  = s.length();
+    public static String unescape(final String s) {
+        final StringBuffer sbuf = new StringBuffer();
+        final int l  = s.length();
         int ch = -1;
         int b, sumb = 0;
         for (int i = 0, more = -1; i < l; i++) {
@@ -403,9 +403,9 @@ public class yacyURL implements Serializable {
             switch (ch = s.charAt(i)) {
                 case '%':
                     ch = s.charAt(++i) ;
-                    int hb = (Character.isDigit ((char) ch) ? ch - '0' : 10 + Character.toLowerCase((char) ch) - 'a') & 0xF;
+                    final int hb = (Character.isDigit ((char) ch) ? ch - '0' : 10 + Character.toLowerCase((char) ch) - 'a') & 0xF;
                     ch = s.charAt(++i) ;
-                    int lb = (Character.isDigit ((char) ch) ? ch - '0' : 10 + Character.toLowerCase ((char) ch) - 'a') & 0xF;
+                    final int lb = (Character.isDigit ((char) ch) ? ch - '0' : 10 + Character.toLowerCase ((char) ch) - 'a') & 0xF;
                     b = (hb << 4) | lb;
                     break;
                 case '+':
@@ -441,18 +441,18 @@ public class yacyURL implements Serializable {
         return sbuf.toString();
     }
     
-    private void identPort(String inputURL, int dflt) throws MalformedURLException {
+    private void identPort(final String inputURL, final int dflt) throws MalformedURLException {
         // identify ref in file
-        int r = this.host.indexOf(':');
+        final int r = this.host.indexOf(':');
         if (r < 0) {
             this.port = dflt;
         } else {            
             try {
-                String portStr = this.host.substring(r + 1);
+                final String portStr = this.host.substring(r + 1);
                 if (portStr.trim().length() > 0) this.port = Integer.parseInt(portStr);
                 else this.port =  -1;               
                 this.host = this.host.substring(0, r);
-            } catch (NumberFormatException e) {
+            } catch (final NumberFormatException e) {
                 throw new MalformedURLException("wrong port in host fragment '" + this.host + "' of input url '" + inputURL + "'");
             }
         }
@@ -460,7 +460,7 @@ public class yacyURL implements Serializable {
     
     private void identRef() {
         // identify ref in file
-        int r = path.indexOf('#');
+        final int r = path.indexOf('#');
         if (r < 0) {
             this.ref = null;
         } else {
@@ -471,7 +471,7 @@ public class yacyURL implements Serializable {
     
     private void identQuest() {
         // identify quest in file
-        int r = path.indexOf('?');
+        final int r = path.indexOf('?');
         if (r < 0) {
             this.quest = null;
         } else {
@@ -484,7 +484,7 @@ public class yacyURL implements Serializable {
         return getFile(true);
     }
     
-    public String getFile(boolean includeReference) {
+    public String getFile(final boolean includeReference) {
         // this is the path plus quest plus ref
         // if there is no quest and no ref the result is identical to getPath
         // this is defined according to http://java.sun.com/j2se/1.4.2/docs/api/java/net/URL.html#getFile()
@@ -495,7 +495,7 @@ public class yacyURL implements Serializable {
     public String getFileName() {
         // this is a method not defined in any sun api
         // it returns the last portion of a path without any reference
-        int p = path.lastIndexOf('/');
+        final int p = path.lastIndexOf('/');
         if (p < 0) return path;
         if (p == path.length() - 1) return ""; // no file name, this is a path to a directory
         return path.substring(p + 1); // the 'real' file name
@@ -537,14 +537,14 @@ public class yacyURL implements Serializable {
         return toNormalform(false, true);
     }
     
-    public String toNormalform(boolean stripReference, boolean stripAmp) {
+    public String toNormalform(final boolean stripReference, final boolean stripAmp) {
         if (stripAmp)
             return toNormalform(!stripReference).replaceAll("&amp;", "&");
         else
             return toNormalform(!stripReference);
     }
     
-    private String toNormalform(boolean includeReference) {
+    private String toNormalform(final boolean includeReference) {
         // generates a normal form of the URL
         boolean defaultPort = false;
         if (this.protocol.equals("mailto")) {
@@ -556,7 +556,7 @@ public class yacyURL implements Serializable {
         } else if (this.protocol.equals("https")) {
             if (this.port < 0 || this.port == 443) { defaultPort = true; }
         }
-        String path = resolveBackpath(this.getFile(includeReference));
+        final String path = resolveBackpath(this.getFile(includeReference));
         
         if (defaultPort) {
             return this.protocol + "://" +
@@ -568,7 +568,7 @@ public class yacyURL implements Serializable {
                this.getHost().toLowerCase() + ((defaultPort) ? ("") : (":" + this.port)) + path;
     }
     
-    public boolean equals(yacyURL other) {
+    public boolean equals(final yacyURL other) {
         return (((this.protocol == other.protocol) || (this.protocol.equals(other.protocol))) &&
                 ((this.host     == other.host    ) || (this.host.equals(other.host))) &&
                 ((this.userInfo == other.userInfo) || (this.userInfo.equals(other.userInfo))) &&
@@ -588,7 +588,7 @@ public class yacyURL implements Serializable {
         return this.toNormalform(true, false).hashCode();
     }
     
-    public int compareTo(Object h) {
+    public int compareTo(final Object h) {
         assert (h instanceof yacyURL);
         return this.toString().compareTo(((yacyURL) h).toString());
     }
@@ -598,7 +598,7 @@ public class yacyURL implements Serializable {
     }
 
     public boolean isCGI() {
-        String ls = path.toLowerCase();
+        final String ls = path.toLowerCase();
         return ((ls.indexOf(".cgi") >= 0) ||
                 (ls.indexOf(".exe") >= 0) ||
                 (ls.indexOf(";jsessionid=") >= 0) ||
@@ -610,15 +610,15 @@ public class yacyURL implements Serializable {
     
     // static methods from plasmaURL
 
-    public static final int flagTypeID(String hash) {
+    public static final int flagTypeID(final String hash) {
         return (kelondroBase64Order.enhancedCoder.decodeByte(hash.charAt(11)) & 32) >> 5;
     }
 
-    public static final int flagTLDID(String hash) {
+    public static final int flagTLDID(final String hash) {
         return (kelondroBase64Order.enhancedCoder.decodeByte(hash.charAt(11)) & 28) >> 2;
     }
 
-    public static final int flagLengthID(String hash) {
+    public static final int flagLengthID(final String hash) {
         return (kelondroBase64Order.enhancedCoder.decodeByte(hash.charAt(11)) & 3);
     }
 
@@ -634,8 +634,8 @@ public class yacyURL implements Serializable {
         
         assert this.hash == null; // should only be called if the hash was not computed bevore
 
-        int id = serverDomains.getDomainID(this.host); // id=7: tld is local
-        boolean isHTTP = this.protocol.equals("http");
+        final int id = serverDomains.getDomainID(this.host); // id=7: tld is local
+        final boolean isHTTP = this.protocol.equals("http");
         int p = this.host.lastIndexOf('.');
         String dom = (p > 0) ? dom = host.substring(0, p) : "";
         p = dom.lastIndexOf('.'); // locate subdomain
@@ -659,12 +659,12 @@ public class yacyURL implements Serializable {
 
         // we collected enough information to compute the fragments that are
         // basis for hashes
-        int l = dom.length();
-        int domlengthKey = (l <= 8) ? 0 : (l <= 12) ? 1 : (l <= 16) ? 2 : 3;
-        byte flagbyte = (byte) (((isHTTP) ? 0 : 32) | (id << 2) | domlengthKey);
+        final int l = dom.length();
+        final int domlengthKey = (l <= 8) ? 0 : (l <= 12) ? 1 : (l <= 16) ? 2 : 3;
+        final byte flagbyte = (byte) (((isHTTP) ? 0 : 32) | (id << 2) | domlengthKey);
 
         // combine the attributes
-        StringBuffer hash = new StringBuffer(12);
+        final StringBuffer hash = new StringBuffer(12);
         // form the 'local' part of the hash
         hash.append(kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(toNormalform(true, true))).substring(0, 5)); // 5 chars
         hash.append(subdomPortPath(subdom, port, rootpath)); // 1 char
@@ -676,35 +676,35 @@ public class yacyURL implements Serializable {
         return new String(hash);
     }
 
-    private static char subdomPortPath(String subdom, int port, String rootpath) {
+    private static char subdomPortPath(final String subdom, final int port, final String rootpath) {
         return kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(subdom + ":" + port + ":" + rootpath)).charAt(0);
     }
 
     private static final char rootURLFlag0 = subdomPortPath("", 80, "");
     private static final char rootURLFlag1 = subdomPortPath("www", 80, "");
 
-    public static final boolean probablyRootURL(String urlHash) {
+    public static final boolean probablyRootURL(final String urlHash) {
         return (urlHash.charAt(5) == rootURLFlag0) || (urlHash.charAt(5) == rootURLFlag1);
     }
 
-    private static String protocolHostPort(String protocol, String host, int port) {
+    private static String protocolHostPort(final String protocol, final String host, final int port) {
         return kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(protocol + ":" + host + ":" + port)).substring(0, 5);
     }
 
     private static String[] testTLDs = new String[] { "com", "net", "org", "uk", "fr", "de", "es", "it" };
 
-    public static final yacyURL probablyWordURL(String urlHash, TreeSet<String> words) {
-        Iterator<String> wi = words.iterator();
+    public static final yacyURL probablyWordURL(final String urlHash, final TreeSet<String> words) {
+        final Iterator<String> wi = words.iterator();
         String word;
         while (wi.hasNext()) {
             word = wi.next();
             if ((word == null) || (word.length() == 0)) continue;
-            String pattern = urlHash.substring(6, 11);
+            final String pattern = urlHash.substring(6, 11);
             for (int i = 0; i < testTLDs.length; i++) {
                 if (pattern.equals(protocolHostPort("http", "www." + word.toLowerCase() + "." + testTLDs[i], 80)))
                     try {
                         return new yacyURL("http://www." + word.toLowerCase() + "." + testTLDs[i], null);
-                    } catch (MalformedURLException e) {
+                    } catch (final MalformedURLException e) {
                         return null;
                     }
             }
@@ -712,20 +712,20 @@ public class yacyURL implements Serializable {
         return null;
     }
 
-    public static final boolean isWordRootURL(String givenURLHash, TreeSet<String> words) {
+    public static final boolean isWordRootURL(final String givenURLHash, final TreeSet<String> words) {
         if (!(probablyRootURL(givenURLHash))) return false;
-        yacyURL wordURL = probablyWordURL(givenURLHash, words);
+        final yacyURL wordURL = probablyWordURL(givenURLHash, words);
         if (wordURL == null) return false;
         if (wordURL.hash().equals(givenURLHash)) return true;
         return false;
     }
 
-    public static final int domLengthEstimation(String urlHash) {
+    public static final int domLengthEstimation(final String urlHash) {
         // generates an estimation of the original domain length
         assert (urlHash != null);
         assert (urlHash.length() == 12) : "urlhash = " + urlHash;
-        int flagbyte = kelondroBase64Order.enhancedCoder.decodeByte(urlHash.charAt(11));
-        int domLengthKey = flagbyte & 3;
+        final int flagbyte = kelondroBase64Order.enhancedCoder.decodeByte(urlHash.charAt(11));
+        final int domLengthKey = flagbyte & 3;
         switch (domLengthKey) {
         case 0:
             return 4;
@@ -739,22 +739,22 @@ public class yacyURL implements Serializable {
         return 20;
     }
 
-    public static int domLengthNormalized(String urlHash) {
+    public static int domLengthNormalized(final String urlHash) {
         return domLengthEstimation(urlHash) << 8 / 20;
     }
 
-    public static final int domDomain(String urlHash) {
+    public static final int domDomain(final String urlHash) {
         // returns the ID of the domain of the domain
         assert (urlHash != null);
         assert (urlHash.length() == 12) : "urlhash = " + urlHash;
         return (kelondroBase64Order.enhancedCoder.decodeByte(urlHash.charAt(11)) & 28) >> 2;
     }
 
-    public static boolean isDomDomain(String urlHash, int id) {
+    public static boolean isDomDomain(final String urlHash, final int id) {
         return domDomain(urlHash) == id;
     }
     
-    public static boolean matchesAnyDomDomain(String urlHash, int idset) {
+    public static boolean matchesAnyDomDomain(final String urlHash, final int idset) {
         // this is a boolean matching on a set of domDomains
         return (domDomain(urlHash) | idset) != 0;
     }
@@ -771,16 +771,16 @@ public class yacyURL implements Serializable {
     }
     
     // language calculation
-    public static String language(yacyURL url) {
+    public static String language(final yacyURL url) {
         String language = "uk";
-        String host = url.getHost();
-        int pos = host.lastIndexOf(".");
+        final String host = url.getHost();
+        final int pos = host.lastIndexOf(".");
         if ((pos > 0) && (host.length() - pos == 3)) language = host.substring(pos + 1).toLowerCase();
         return language;
     }
     
-    public static void main(String[] args) {
-        String[][] test = new String[][]{
+    public static void main(final String[] args) {
+        final String[][] test = new String[][]{
           new String[]{null, "http://www.anomic.de/home/test?x=1#home"},
           new String[]{null, "http://www.anomic.de/home/test?x=1"},
           new String[]{null, "http://www.anomic.de/home/test#home"},
@@ -813,11 +813,11 @@ public class yacyURL implements Serializable {
         for (int i = 0; i < test.length; i++) {
             environment = test[i][0];
             url = test[i][1];
-            try {aURL = yacyURL.newURL(environment, url);} catch (MalformedURLException e) {aURL = null;}
+            try {aURL = yacyURL.newURL(environment, url);} catch (final MalformedURLException e) {aURL = null;}
             if (environment == null) {
-                try {jURL = new java.net.URL(url);} catch (MalformedURLException e) {jURL = null;}
+                try {jURL = new java.net.URL(url);} catch (final MalformedURLException e) {jURL = null;}
             } else {
-                try {jURL = new java.net.URL(new java.net.URL(environment), url);} catch (MalformedURLException e) {jURL = null;}
+                try {jURL = new java.net.URL(new java.net.URL(environment), url);} catch (final MalformedURLException e) {jURL = null;}
             }
             
             // check equality to java.net.URL
@@ -837,7 +837,7 @@ public class yacyURL implements Serializable {
                     System.out.println("aURL0=" + aURL.toString());
                     System.out.println("aURL1=" + aURL1.toString());
                 }
-            } catch (MalformedURLException e) {
+            } catch (final MalformedURLException e) {
                 System.out.println("no stability for url:");
                 System.out.println("aURL0=" + aURL.toString());
                 System.out.println("aURL1 cannot be computed:" + e.getMessage());

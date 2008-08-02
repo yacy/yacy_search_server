@@ -71,20 +71,20 @@ public class yacySearch extends Thread {
     final private indexReferenceBlacklist blacklist;
     final private yacySeed targetPeer;
     private String[] urls;
-    private int count, maxDistance;
+    private final int count, maxDistance;
     final private plasmaSearchRankingProfile rankingProfile;
     final private String prefer, filter;
     final private kelondroBitfield constraint;
     ResultURLs crawlResults;
     
-    public yacySearch(String wordhashes, String excludehashes, String urlhashes, String prefer, String filter, int count, int maxDistance, 
-                      boolean global, int partitions, yacySeed targetPeer, plasmaWordIndex wordIndex,
-                      ResultURLs crawlResults,
-                      plasmaSearchRankingProcess containerCache,
-                      Map<String, TreeMap<String, String>> abstractCache,
-                      indexReferenceBlacklist blacklist,
-                      plasmaSearchRankingProfile rankingProfile,
-                      kelondroBitfield constraint) {
+    public yacySearch(final String wordhashes, final String excludehashes, final String urlhashes, final String prefer, final String filter, final int count, final int maxDistance, 
+                      final boolean global, final int partitions, final yacySeed targetPeer, final plasmaWordIndex wordIndex,
+                      final ResultURLs crawlResults,
+                      final plasmaSearchRankingProcess containerCache,
+                      final Map<String, TreeMap<String, String>> abstractCache,
+                      final indexReferenceBlacklist blacklist,
+                      final plasmaSearchRankingProfile rankingProfile,
+                      final kelondroBitfield constraint) {
         super("yacySearch_" + targetPeer.getName());
         //System.out.println("DEBUG - yacySearch thread " + this.getName() + " initialized " + ((urlhashes.length() == 0) ? "(primary)" : "(secondary)"));
         this.wordhashes = wordhashes;
@@ -115,7 +115,7 @@ public class yacySearch extends Thread {
                     blacklist, rankingProfile, constraint);
         if (urls != null) {
             // urls is an array of url hashes. this is only used for log output
-            StringBuffer urllist = new StringBuffer(this.urls.length * 13);
+            final StringBuffer urllist = new StringBuffer(this.urls.length * 13);
             for (int i = 0; i < this.urls.length; i++) urllist.append(this.urls[i]).append(' ');
             yacyCore.log.logInfo("REMOTE SEARCH - remote peer " + targetPeer.hash + ":" + targetPeer.getName() + " contributed " + urls.length + " links for word hash " + wordhashes + ": " + new String(urllist));
             wordIndex.seedDB.mySeed().incRI(urls.length);
@@ -125,7 +125,7 @@ public class yacySearch extends Thread {
         }
     }
 
-    public static String set2string(Set<String> hashes) {
+    public static String set2string(final Set<String> hashes) {
         String wh = "";
         final Iterator<String> iter = hashes.iterator();
         while (iter.hasNext()) { wh = wh + iter.next(); }
@@ -144,9 +144,9 @@ public class yacySearch extends Thread {
         return targetPeer;
     }
 
-    private static yacySeed[] selectClusterPeers(yacySeedDB seedDB, TreeMap<String, String> peerhashes) {
-    	Iterator<Map.Entry<String, String>> i = peerhashes.entrySet().iterator();
-    	ArrayList<yacySeed> l = new ArrayList<yacySeed>();
+    private static yacySeed[] selectClusterPeers(final yacySeedDB seedDB, final TreeMap<String, String> peerhashes) {
+    	final Iterator<Map.Entry<String, String>> i = peerhashes.entrySet().iterator();
+    	final ArrayList<yacySeed> l = new ArrayList<yacySeed>();
     	Map.Entry<String, String> entry;
     	yacySeed s;
     	while (i.hasNext()) {
@@ -157,7 +157,7 @@ public class yacySearch extends Thread {
     			l.add(s);
     		}
     	}
-    	yacySeed[] result = new yacySeed[l.size()];
+    	final yacySeed[] result = new yacySeed[l.size()];
     	for (int j = 0; j < l.size(); j++) {
     		result[j] = l.get(j);
     	}
@@ -165,7 +165,7 @@ public class yacySearch extends Thread {
     	//return (yacySeed[]) l.toArray();
     }
     
-    private static yacySeed[] selectSearchTargets(yacySeedDB seedDB, yacyPeerActions peerActions, Set<String> wordhashes, int seedcount) {
+    private static yacySeed[] selectSearchTargets(final yacySeedDB seedDB, final yacyPeerActions peerActions, final Set<String> wordhashes, int seedcount) {
         // find out a specific number of seeds, that would be relevant for the given word hash(es)
         // the result is ordered by relevance: [0] is most relevant
         // the seedcount is the maximum number of wanted results
@@ -252,7 +252,7 @@ public class yacySearch extends Thread {
         
         // evaluate the ranking score and select seeds
         seedcount = Math.min(ranking.size(), seedcount);
-        yacySeed[] result = new yacySeed[seedcount + robinsonSeeds.size() + matchingSeeds.size()];
+        final yacySeed[] result = new yacySeed[seedcount + robinsonSeeds.size() + matchingSeeds.size()];
         c = 0;
         iter = ranking.scores(false); // higher are better
         while (iter.hasNext() && c < seedcount) {
@@ -261,11 +261,11 @@ public class yacySearch extends Thread {
             serverLog.logInfo("PLASMA", "selectPeers/_dht_: " + seed.hash + ":" + seed.getName() + " is choice " + c);
             result[c++] = seed;
         }
-        for (yacySeed s: robinsonSeeds.values()) {
+        for (final yacySeed s: robinsonSeeds.values()) {
             serverLog.logInfo("PLASMA", "selectPeers/_robinson_: " + s.hash + ":" + s.getName() + " is choice " + c);
             result[c++] = s;
         }
-        for (yacySeed s: matchingSeeds.values()) {
+        for (final yacySeed s: matchingSeeds.values()) {
             serverLog.logInfo("PLASMA", "selectPeers/_match_: " + s.hash + ":" + s.getName() + " is choice " + c);
             result[c++] = s;
         }
@@ -275,17 +275,17 @@ public class yacySearch extends Thread {
     }
 
     public static yacySearch[] primaryRemoteSearches(
-            String wordhashes, String excludehashes, String urlhashes,
-            String prefer, String filter, int count, int maxDist,
-            plasmaWordIndex wordIndex,
-            ResultURLs crawlResults,
-            plasmaSearchRankingProcess containerCache,
-            Map<String, TreeMap<String, String>> abstractCache,
+            final String wordhashes, final String excludehashes, final String urlhashes,
+            final String prefer, final String filter, final int count, final int maxDist,
+            final plasmaWordIndex wordIndex,
+            final ResultURLs crawlResults,
+            final plasmaSearchRankingProcess containerCache,
+            final Map<String, TreeMap<String, String>> abstractCache,
             int targets,
-            indexReferenceBlacklist blacklist,
-            plasmaSearchRankingProfile rankingProfile,
-            kelondroBitfield constraint,
-            TreeMap<String, String> clusterselection) {
+            final indexReferenceBlacklist blacklist,
+            final plasmaSearchRankingProfile rankingProfile,
+            final kelondroBitfield constraint,
+            final TreeMap<String, String> clusterselection) {
         // check own peer status
         //if (wordIndex.seedDB.mySeed() == null || wordIndex.seedDB.mySeed().getPublicAddress() == null) { return null; }
 
@@ -294,7 +294,7 @@ public class yacySearch extends Thread {
         if (targetPeers == null) return new yacySearch[0];
         targets = targetPeers.length;
         if (targets == 0) return new yacySearch[0];
-        yacySearch[] searchThreads = new yacySearch[targets];
+        final yacySearch[] searchThreads = new yacySearch[targets];
         for (int i = 0; i < targets; i++) {
             searchThreads[i] = new yacySearch(wordhashes, excludehashes, urlhashes, prefer, filter, count, maxDist, true, targets, targetPeers[i],
                     wordIndex, crawlResults, containerCache, abstractCache, blacklist, rankingProfile, constraint);
@@ -304,13 +304,13 @@ public class yacySearch extends Thread {
         return searchThreads;
     }
     
-    public static yacySearch secondaryRemoteSearch(String wordhashes, String excludehashes, String urlhashes,
-            plasmaWordIndex wordIndex,
-            ResultURLs crawlResults,
-            plasmaSearchRankingProcess containerCache,
-            String targethash, indexReferenceBlacklist blacklist,
-            plasmaSearchRankingProfile rankingProfile,
-            kelondroBitfield constraint, TreeMap<String, String> clusterselection) {
+    public static yacySearch secondaryRemoteSearch(final String wordhashes, final String excludehashes, final String urlhashes,
+            final plasmaWordIndex wordIndex,
+            final ResultURLs crawlResults,
+            final plasmaSearchRankingProcess containerCache,
+            final String targethash, final indexReferenceBlacklist blacklist,
+            final plasmaSearchRankingProfile rankingProfile,
+            final kelondroBitfield constraint, final TreeMap<String, String> clusterselection) {
         // check own peer status
         if (wordIndex.seedDB.mySeed() == null || wordIndex.seedDB.mySeed().getPublicAddress() == null) { return null; }
 
@@ -318,13 +318,13 @@ public class yacySearch extends Thread {
         final yacySeed targetPeer = wordIndex.seedDB.getConnected(targethash);
         if (targetPeer == null) return null;
         if (clusterselection != null) targetPeer.setAlternativeAddress(clusterselection.get(targetPeer.hash));
-        yacySearch searchThread = new yacySearch(wordhashes, excludehashes, urlhashes, "", "", 0, 9999, true, 0, targetPeer,
+        final yacySearch searchThread = new yacySearch(wordhashes, excludehashes, urlhashes, "", "", 0, 9999, true, 0, targetPeer,
                                              wordIndex, crawlResults, containerCache, new TreeMap<String, TreeMap<String, String>>(), blacklist, rankingProfile, constraint);
         searchThread.start();
         return searchThread;
     }
     
-    public static int remainingWaiting(yacySearch[] searchThreads) {
+    public static int remainingWaiting(final yacySearch[] searchThreads) {
         if (searchThreads == null) return 0;
         int alive = 0;
         for (int i = 0; i < searchThreads.length; i++) {
@@ -334,7 +334,7 @@ public class yacySearch extends Thread {
         return alive;
     }
     
-    public static int collectedLinks(yacySearch[] searchThreads) {
+    public static int collectedLinks(final yacySearch[] searchThreads) {
         int links = 0;
         for (int i = 0; i < searchThreads.length; i++) {
             if (!(searchThreads[i].isAlive())) links += searchThreads[i].urls.length;
@@ -342,7 +342,7 @@ public class yacySearch extends Thread {
         return links;
     }
     
-    public static void interruptAlive(yacySearch[] searchThreads) {
+    public static void interruptAlive(final yacySearch[] searchThreads) {
         for (int i = 0; i < searchThreads.length; i++) {
             if (searchThreads[i].isAlive()) searchThreads[i].interrupt();
         }

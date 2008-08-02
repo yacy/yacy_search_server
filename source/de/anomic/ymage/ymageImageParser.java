@@ -8,8 +8,8 @@ import java.awt.Toolkit;
 
 public class ymageImageParser {
 
-    public static final Image parse(String filename, byte[] source) {
-        MediaTracker mediaTracker = new MediaTracker(new Container()); 
+    public static final Image parse(final String filename, final byte[] source) {
+        final MediaTracker mediaTracker = new MediaTracker(new Container()); 
         Image image;
         if (((filename.endsWith(".ico")) || (filename.endsWith(".bmp"))) && (ymageBMPParser.isBMP(source))) {
             // parse image with BMP parser
@@ -28,9 +28,9 @@ public class ymageImageParser {
             image = Toolkit.getDefaultToolkit().createImage(source);
         }
         
-        int handle = image.hashCode();
+        final int handle = image.hashCode();
         mediaTracker.addImage(image, handle); 
-        try {mediaTracker.waitForID(handle);} catch (InterruptedException e) {} 
+        try {mediaTracker.waitForID(handle);} catch (final InterruptedException e) {} 
         
         return image;
     }

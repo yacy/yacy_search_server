@@ -90,7 +90,7 @@ public final class plasmaCondenser {
     private static boolean[] invisibleChar = new boolean['z' - ' ' + 1];
     static {
         // initialize array of invisible charachters
-        String invisibleString = "\"$%&/()=`^+*#'-_:;,<>[]\\";
+        final String invisibleString = "\"$%&/()=`^+*#'-_:;,<>[]\\";
         for (int i = ' '; i <= 'z'; i++) {
             invisibleChar[i - ' '] = false;
         }
@@ -101,8 +101,8 @@ public final class plasmaCondenser {
     
     //private Properties analysis;
     private TreeMap<String, indexWord> words; // a string (the words) to (indexWord) - relation
-    private int wordminsize;
-    private int wordcut;
+    private final int wordminsize;
+    private final int wordcut;
 
     //public int RESULT_NUMB_TEXT_BYTES = -1;
     public int RESULT_NUMB_WORDS = -1;
@@ -111,7 +111,7 @@ public final class plasmaCondenser {
     public int RESULT_DIFF_SENTENCES = -1;
     public kelondroBitfield RESULT_FLAGS = new kelondroBitfield(4);
     
-    public plasmaCondenser(plasmaParserDocument document, boolean indexText, boolean indexMedia) throws UnsupportedEncodingException {
+    public plasmaCondenser(final plasmaParserDocument document, final boolean indexText, final boolean indexMedia) throws UnsupportedEncodingException {
         // if addMedia == true, then all the media links are also parsed and added to the words
         // added media words are flagged with the appropriate media flag
         this.wordminsize = 3;
@@ -142,13 +142,13 @@ public final class plasmaCondenser {
             insertTextToWords(document.dc_description(), 3, indexRWIEntry.flag_app_dc_description, RESULT_FLAGS);
             insertTextToWords(document.dc_creator(),   4, indexRWIEntry.flag_app_dc_creator, RESULT_FLAGS);
             // missing: tags!
-            String[] titles = document.getSectionTitles();
+            final String[] titles = document.getSectionTitles();
             for (int i = 0; i < titles.length; i++) {
                 insertTextToWords(titles[i], i + 10, indexRWIEntry.flag_app_emphasized, RESULT_FLAGS);
             }
             
             // anchors
-            Iterator<Map.Entry<yacyURL, String>> i = document.getAnchors().entrySet().iterator();
+            final Iterator<Map.Entry<yacyURL, String>> i = document.getAnchors().entrySet().iterator();
             while (i.hasNext()) {
                 entry = i.next();
                 if ((entry == null) || (entry.getKey() == null)) continue;
@@ -188,7 +188,7 @@ public final class plasmaCondenser {
             }
 
             // images
-            Iterator<htmlFilterImageEntry> j = document.getImages().values().iterator();
+            final Iterator<htmlFilterImageEntry> j = document.getImages().values().iterator();
             htmlFilterImageEntry ientry;
             while (j.hasNext()) {
                 ientry = j.next();
@@ -197,7 +197,7 @@ public final class plasmaCondenser {
             }
         
             // finally check all words for missing flag entry
-            Iterator<Map.Entry<String, indexWord>> k = words.entrySet().iterator();
+            final Iterator<Map.Entry<String, indexWord>> k = words.entrySet().iterator();
             indexWord wprop;
             Map.Entry<String, indexWord> we;
             while (k.hasNext()) {
@@ -217,13 +217,13 @@ public final class plasmaCondenser {
         if (document.getApplinks().size()   > 0) RESULT_FLAGS.set(flag_cat_hasapp,   true);
     }
     
-    private void insertTextToWords(String text, int phrase, int flagpos, kelondroBitfield flagstemplate) {
+    private void insertTextToWords(final String text, final int phrase, final int flagpos, final kelondroBitfield flagstemplate) {
         String word;
         indexWord wprop;
         sievedWordsEnum wordenum;
         try {
             wordenum = new sievedWordsEnum(new ByteArrayInputStream(text.getBytes()), "UTF-8", 3);
-        } catch (UnsupportedEncodingException e) {
+        } catch (final UnsupportedEncodingException e) {
             return;
         }
         int pip = 0;
@@ -240,11 +240,11 @@ public final class plasmaCondenser {
         }
     }
 
-    public plasmaCondenser(InputStream text, String charset) throws UnsupportedEncodingException {
+    public plasmaCondenser(final InputStream text, final String charset) throws UnsupportedEncodingException {
         this(text, charset, 3, 2);
     }
 
-    public plasmaCondenser(InputStream text, String charset, int wordminsize, int wordcut) throws UnsupportedEncodingException {
+    public plasmaCondenser(final InputStream text, final String charset, final int wordminsize, final int wordcut) throws UnsupportedEncodingException {
         this.wordminsize = wordminsize;
         this.wordcut = wordcut;
         // analysis = new Properties();
@@ -252,10 +252,10 @@ public final class plasmaCondenser {
         createCondensement(text, charset);
     }
     
-    public int excludeWords(TreeSet<String> stopwords) {
+    public int excludeWords(final TreeSet<String> stopwords) {
         // subtracts the given stopwords from the word list
         // the word list shrinkes. This returns the number of shrinked words
-        int oldsize = words.size();
+        final int oldsize = words.size();
         words = kelondroMSetTools.excludeConstructive(words, stopwords);
         return oldsize - words.size();
     }
@@ -265,14 +265,14 @@ public final class plasmaCondenser {
         return words;
     }
 
-    public String intString(int number, int length) {
+    public String intString(final int number, final int length) {
         String s = Integer.toString(number);
         while (s.length() < length) s = "0" + s;
         return s;
     }
 
-    private void createCondensement(InputStream is, String charset) throws UnsupportedEncodingException {
-        HashSet<String> currsentwords = new HashSet<String>();
+    private void createCondensement(final InputStream is, final String charset) throws UnsupportedEncodingException {
+        final HashSet<String> currsentwords = new HashSet<String>();
         StringBuffer sentence = new StringBuffer(100);
         String word = "";
         String k;
@@ -289,18 +289,18 @@ public final class plasmaCondenser {
         boolean comb_indexof = false, last_last = false, last_index = false;
         RandomAccessFile fa;
         final boolean dumpWords = false;
-        HashMap<StringBuffer, indexPhrase> sentences = new HashMap<StringBuffer, indexPhrase>();
+        final HashMap<StringBuffer, indexPhrase> sentences = new HashMap<StringBuffer, indexPhrase>();
         
         if (dumpWords) try {
             fa = new RandomAccessFile(new File("dump.txt"), "rw");
             fa.seek(fa.length());
-        } catch (IOException e) {
+        } catch (final IOException e) {
             e.printStackTrace();
             fa = null;
         }
         
         // read source
-        sievedWordsEnum wordenum = new sievedWordsEnum(is, charset, wordminsize);
+        final sievedWordsEnum wordenum = new sievedWordsEnum(is, charset, wordminsize);
         while (wordenum.hasMoreElements()) {
             word = (new String(wordenum.nextElement())).toLowerCase(); // TODO: does toLowerCase work for non ISO-8859-1 chars?
             //System.out.println("PARSED-WORD " + word);
@@ -309,7 +309,7 @@ public final class plasmaCondenser {
             if (dumpWords && fa != null) try {
 				fa.writeBytes(word);
 				fa.write(160);
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				e.printStackTrace();
 			}
             
@@ -391,7 +391,7 @@ public final class plasmaCondenser {
         if (dumpWords && fa != null) try {
             fa.write('\n');
             fa.close();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             e.printStackTrace();
         }
 
@@ -400,11 +400,11 @@ public final class plasmaCondenser {
         // we reconstruct the sentence hashtable
         // and order the entries by the number of the sentence
         // this structure is needed to replace double occurring words in sentences
-        Object[] orderedSentences = new Object[sentenceHandleCount];
+        final Object[] orderedSentences = new Object[sentenceHandleCount];
         String[] s;
         int wc;
         Object o;
-        Iterator<StringBuffer> sit = sentences.keySet().iterator();
+        final Iterator<StringBuffer> sit = sentences.keySet().iterator();
         while (sit.hasNext()) {
             o = sit.next();
             if (o != null) {
@@ -425,7 +425,7 @@ public final class plasmaCondenser {
         Map.Entry<String, indexWord> entry;
         // we search for similar words and reorganize the corresponding sentences
         // a word is similar, if a shortened version is equal
-        Iterator<Map.Entry<String, indexWord>> wi = words.entrySet().iterator(); // enumerates the keys in descending order
+        final Iterator<Map.Entry<String, indexWord>> wi = words.entrySet().iterator(); // enumerates the keys in descending order
         wordsearch: while (wi.hasNext()) {
             entry = wi.next();
             word = entry.getKey();
@@ -439,7 +439,7 @@ public final class plasmaCondenser {
                         // corresponding links
                         // in sentences that use this word
                         wsp1 = words.get(k);
-                        Iterator<Integer> it1 = wsp.phrases(); // we iterate over all sentences that refer to this word
+                        final Iterator<Integer> it1 = wsp.phrases(); // we iterate over all sentences that refer to this word
                         while (it1.hasNext()) {
                             idx = it1.next().intValue(); // number of a sentence
                             s = (String[]) orderedSentences[idx];
@@ -468,16 +468,16 @@ public final class plasmaCondenser {
         this.RESULT_DIFF_SENTENCES = sentenceHandleCount;
     }
 
-    public final static boolean invisible(char c) {
+    public final static boolean invisible(final char c) {
         // TODO: Bugfix for UTF-8: does this work for non ISO-8859-1 chars?
         if ((c < ' ') || (c > 'z')) return true;
         return invisibleChar[c - ' '];
     }
 
-    public static Enumeration<StringBuffer> wordTokenizer(String s, String charset, int minLength) {
+    public static Enumeration<StringBuffer> wordTokenizer(final String s, final String charset, final int minLength) {
         try {
             return new sievedWordsEnum(new ByteArrayInputStream(s.getBytes()), charset, minLength);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             return null;
         }
     }
@@ -489,13 +489,13 @@ public final class plasmaCondenser {
         unsievedWordsEnum e;
         int ml;
 
-        public sievedWordsEnum(InputStream is, String charset, int minLength) throws UnsupportedEncodingException {
+        public sievedWordsEnum(final InputStream is, final String charset, final int minLength) throws UnsupportedEncodingException {
             e = new unsievedWordsEnum(is, charset);
             buffer = nextElement0();
             ml = minLength;
         }
 
-        public void pre(boolean x) {
+        public void pre(final boolean x) {
             e.pre(x);
         }
         
@@ -524,7 +524,7 @@ public final class plasmaCondenser {
         }
 
         public StringBuffer nextElement() {
-            StringBuffer r = buffer;
+            final StringBuffer r = buffer;
             buffer = nextElement0();
             return r;
         }
@@ -537,13 +537,13 @@ public final class plasmaCondenser {
         sentencesFromInputStreamEnum e;
         StringBuffer s;
 
-        public unsievedWordsEnum(InputStream is, String charset) throws UnsupportedEncodingException {
+        public unsievedWordsEnum(final InputStream is, final String charset) throws UnsupportedEncodingException {
             e = new sentencesFromInputStreamEnum(is, charset);
             s = new StringBuffer(20);
             buffer = nextElement0();
         }
 
-        public void pre(boolean x) {
+        public void pre(final boolean x) {
             e.pre(x);
         }
         
@@ -569,7 +569,7 @@ public final class plasmaCondenser {
                     return null;
                 }
             }
-            int p = s.indexOf(" ");
+            final int p = s.indexOf(" ");
             if (p < 0) {
                 r = s;
                 s = new StringBuffer();
@@ -585,7 +585,7 @@ public final class plasmaCondenser {
         }
 
         public StringBuffer nextElement() {
-            StringBuffer r = buffer;
+            final StringBuffer r = buffer;
             buffer = nextElement0();
             return r;
         }
@@ -598,10 +598,10 @@ public final class plasmaCondenser {
         return sb;
     }
     
-    public static sentencesFromInputStreamEnum sentencesFromInputStream(InputStream is, String charset) {
+    public static sentencesFromInputStreamEnum sentencesFromInputStream(final InputStream is, final String charset) {
         try {
             return new sentencesFromInputStreamEnum(is, charset);
-        } catch (UnsupportedEncodingException e) {
+        } catch (final UnsupportedEncodingException e) {
             return null;
         }
     }
@@ -615,30 +615,30 @@ public final class plasmaCondenser {
         int counter = 0;
         boolean pre = false;
 
-        public sentencesFromInputStreamEnum(InputStream is, String charset) throws UnsupportedEncodingException {
+        public sentencesFromInputStreamEnum(final InputStream is, final String charset) throws UnsupportedEncodingException {
             raf = new BufferedReader((charset == null) ? new InputStreamReader(is) : new InputStreamReader(is, charset));
             buffer = nextElement0();
             counter = 0;
             pre = false;
         }
 
-        public void pre(boolean x) {
+        public void pre(final boolean x) {
             this.pre = x;
         }
         
         private StringBuffer nextElement0() {
             try {
-                StringBuffer s = readSentence(raf, pre);
+                final StringBuffer s = readSentence(raf, pre);
                 //System.out.println(" SENTENCE='" + s + "'"); // DEBUG 
                 if (s == null) {
                     raf.close();
                     return null;
                 }
                 return s;
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 try {
                     raf.close();
-                } catch (Exception ee) {
+                } catch (final Exception ee) {
                 }
                 return null;
             }
@@ -653,7 +653,7 @@ public final class plasmaCondenser {
                 return null;
             } else {
                 counter = counter + buffer.length() + 1;
-                StringBuffer r = buffer;
+                final StringBuffer r = buffer;
                 buffer = nextElement0();
                 return r;
             }
@@ -668,8 +668,8 @@ public final class plasmaCondenser {
         }
     }
 
-    static StringBuffer readSentence(Reader reader, boolean pre) throws IOException {
-        StringBuffer s = new StringBuffer(40);
+    static StringBuffer readSentence(final Reader reader, final boolean pre) throws IOException {
+        final StringBuffer s = new StringBuffer(40);
         int nextChar;
         char c, lc = ' '; // starting with ' ' as last character prevents that the result string starts with a ' '
         
@@ -697,36 +697,36 @@ public final class plasmaCondenser {
         return s;
     }
 
-    public static Map<String, indexWord> getWords(byte[] text, String charset) throws UnsupportedEncodingException {
+    public static Map<String, indexWord> getWords(final byte[] text, final String charset) throws UnsupportedEncodingException {
         // returns a word/indexWord relation map
         if (text == null) return null;
-        ByteArrayInputStream buffer = new ByteArrayInputStream(text);
+        final ByteArrayInputStream buffer = new ByteArrayInputStream(text);
         return new plasmaCondenser(buffer, charset, 2, 1).words();
     }
     
-    public static Map<String, indexWord> getWords(String text) {
+    public static Map<String, indexWord> getWords(final String text) {
         // returns a word/indexWord relation map
         if (text == null) return null;
-        ByteArrayInputStream buffer = new ByteArrayInputStream(text.getBytes());
+        final ByteArrayInputStream buffer = new ByteArrayInputStream(text.getBytes());
         try {
             return new plasmaCondenser(buffer, "UTF-8", 2, 1).words();
-        } catch (UnsupportedEncodingException e) {
+        } catch (final UnsupportedEncodingException e) {
             return null;
         }
     }
     
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         // read a property file and convert them into configuration lines
         try {
-            File f = new File(args[0]);
-            Properties p = new Properties();
+            final File f = new File(args[0]);
+            final Properties p = new Properties();
             p.load(new FileInputStream(f));
-            StringBuffer sb = new StringBuffer();
+            final StringBuffer sb = new StringBuffer();
             sb.append("{\n");
             for (int i = 0; i <= 15; i++) {
                 sb.append('"');
-                String s = p.getProperty("keywords" + i);
-                String[] l = s.split(",");
+                final String s = p.getProperty("keywords" + i);
+                final String[] l = s.split(",");
                 for (int j = 0; j < l.length; j++) {
                     sb.append(indexWord.word2hash(l[j]));
                 }
@@ -734,9 +734,9 @@ public final class plasmaCondenser {
             }
             sb.append("}\n");
             System.out.println(new String(sb));
-        } catch (FileNotFoundException e) {
+        } catch (final FileNotFoundException e) {
             e.printStackTrace();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             e.printStackTrace();
         }
         

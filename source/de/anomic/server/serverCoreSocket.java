@@ -40,7 +40,7 @@ public class serverCoreSocket extends Socket {
     private boolean isSSL = false;
     private String sslType = null;
     
-    public serverCoreSocket(Socket sock) throws IOException {
+    public serverCoreSocket(final Socket sock) throws IOException {
         this.sock = sock;
         
         // determine the socket type
@@ -56,10 +56,10 @@ public class serverCoreSocket extends Socket {
     }
     
     private void detectSSL() throws IOException {
-        InputStream in = getInputStream();    
+        final InputStream in = getInputStream();    
         
         // read the first 5 bytes to determine the protocol type
-        byte[] preRead = new byte[5];
+        final byte[] preRead = new byte[5];
         int read, count = 0;
         while ((count < preRead.length) && ((read = in.read()) != -1)) {
         	preRead[count] = (byte) read;
@@ -79,7 +79,7 @@ public class serverCoreSocket extends Socket {
             // SSL messages have two preceding bytes
             // byte nr 3 specifies the handshake type
             // 3 means "ClientHello"
-            int handshakeType = preRead[2] & 0x00FF;
+            final int handshakeType = preRead[2] & 0x00FF;
             if (handshakeType == 1) this.isSSL = true;
             idx = 3;
         }
@@ -183,7 +183,7 @@ public class serverCoreSocket extends Socket {
         return this.sock.isOutputShutdown();
     }    
     
-    public synchronized void setSoTimeout(int timeout) throws SocketException {
+    public synchronized void setSoTimeout(final int timeout) throws SocketException {
         this.sock.setSoTimeout(timeout);
     }
     

@@ -43,11 +43,11 @@ public class servletProperties extends serverObjects {
         super();
     }
     
-    public servletProperties(serverObjects so) {
+    public servletProperties(final serverObjects so) {
         super(so);
     }
     
-    public void setOutgoingHeader(httpHeader outgoingHeader) {
+    public void setOutgoingHeader(final httpHeader outgoingHeader) {
         this.outgoingHeader = outgoingHeader;
     }
     
@@ -58,35 +58,35 @@ public class servletProperties extends serverObjects {
             return new httpHeader();
     }
     
-    public void setPrefix(String myprefix) {
+    public void setPrefix(final String myprefix) {
         prefix=myprefix;
     }
     
-    public String put(String key, byte[] value) {
+    public String put(final String key, final byte[] value) {
         return super.put(prefix + key, value);
     }
     
-    public long put(String key, long value) {
+    public long put(final String key, final long value) {
         return super.put(prefix + key, value);
     }
     
-    public long inc(String key) {
+    public long inc(final String key) {
         return super.inc(prefix+key);
     }
     
-    public Object get(String key, Object dflt) {
+    public Object get(final String key, final Object dflt) {
         return super.get(prefix+key, dflt);
     }
     
-    public String get(String key, String dflt) {
+    public String get(final String key, final String dflt) {
         return super.get(prefix+key, dflt);
     }
     
-    public int getInt(String key, int dflt) {
+    public int getInt(final String key, final int dflt) {
         return super.getInt(prefix+key, dflt);
     }
     
-    public long getLong(String key, long dflt) {
+    public long getLong(final String key, final long dflt) {
         return super.getLong(prefix+key, dflt);
     }
 }

@@ -19,8 +19,8 @@ public class ymageDemoApplet extends Applet implements Runnable {
     ymageMatrix offGraphics;
 
     public void init() {
-        String str = getParameter("fps");
-        int fps = (str != null) ? Integer.parseInt(str) : 10;
+        final String str = getParameter("fps");
+        final int fps = (str != null) ? Integer.parseInt(str) : 10;
         delay = (fps > 0) ? (1000 / fps) : 100;
     }
 
@@ -31,11 +31,11 @@ public class ymageDemoApplet extends Applet implements Runnable {
 
     public void run() {
         while (Thread.currentThread() == animator) {
-            long time = System.currentTimeMillis();
+            final long time = System.currentTimeMillis();
             repaint();         
             try {
                 Thread.sleep(delay - System.currentTimeMillis() + time);
-            } catch (InterruptedException e) {
+            } catch (final InterruptedException e) {
                 break;
             }
         }
@@ -45,22 +45,22 @@ public class ymageDemoApplet extends Applet implements Runnable {
         animator = null;
     }
 
-    public void update(Graphics g) {
-        Dimension d = getSize();
+    public void update(final Graphics g) {
+        final Dimension d = getSize();
         offGraphics = new ymageMatrix(d.width, d.height, ymageMatrix.MODE_REPLACE, "FFFFFF");
         paintFrame(offGraphics);
         g.drawImage(offGraphics.getImage(), 0, 0, null);
     }
     
-    public void paint(Graphics g) {
+    public void paint(final Graphics g) {
         if (offGraphics != null) {
             g.drawImage(offGraphics.getImage(), 0, 0, null);
         }
     }
 
-    public void paintFrame(ymageMatrix m) {
+    public void paintFrame(final ymageMatrix m) {
         ymageMatrix.demoPaint(m);
-        int y = (int) (System.currentTimeMillis() / 10 % 300);
+        final int y = (int) (System.currentTimeMillis() / 10 % 300);
         m.setColor(ymageMatrix.GREY);
         ymageToolPrint.print(m, 0, y, 0, "Hello World", -1);
     }

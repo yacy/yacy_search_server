@@ -29,9 +29,9 @@ import java.io.IOException;
 public class httpdLimitExceededException extends IOException {
     
     private static final long serialVersionUID = 1L;
-    private long limit;
+    private final long limit;
     
-    public httpdLimitExceededException(String errorMsg, long limit) {
+    public httpdLimitExceededException(final String errorMsg, final long limit) {
         super(errorMsg);
         this.limit = limit;       
     }

@@ -47,9 +47,9 @@ public class ymageChart extends ymageMatrix {
     String name;
     String backgroundColor, foregroundColor;
     
-    public ymageChart(int width, int height, String backgroundColor, String foregroundColor, String lightColor,
-                      int leftborder, int rightborder, int topborder, int bottomborder,
-                      String name, String subline) {
+    public ymageChart(final int width, final int height, final String backgroundColor, final String foregroundColor, final String lightColor,
+                      final int leftborder, final int rightborder, final int topborder, final int bottomborder,
+                      final String name, final String subline) {
         super(width, height, ymageMatrix.MODE_REPLACE, backgroundColor);
         this.leftborder = leftborder;
         this.rightborder = rightborder;
@@ -68,7 +68,7 @@ public class ymageChart extends ymageMatrix {
         }
     }
     
-    public void declareDimension(int dimensionType, int scale, int pixelperscale, int offset, String colorNaming, String colorScale, String name) {
+    public void declareDimension(final int dimensionType, final int scale, final int pixelperscale, final int offset, final String colorNaming, final String colorScale, final String name) {
         if ((dimensionType == DIMENSION_LEFT) || (dimensionType == DIMENSION_RIGHT)) {
             drawVerticalScale((dimensionType == DIMENSION_LEFT), scale, pixelperscale, offset, colorNaming, colorScale, name);
         }
@@ -83,23 +83,23 @@ public class ymageChart extends ymageMatrix {
         tablenames[dimensionType] = name;
     }
     
-    public void chartDot(int dimension_x, int dimension_y, int coord_x, int coord_y, int dotsize) {
-        int x = (coord_x - offsets[dimension_x]) * pixels[dimension_x] / scales[dimension_x];
-        int y = (coord_y - offsets[dimension_y]) * pixels[dimension_y] / scales[dimension_y];
+    public void chartDot(final int dimension_x, final int dimension_y, final int coord_x, final int coord_y, final int dotsize) {
+        final int x = (coord_x - offsets[dimension_x]) * pixels[dimension_x] / scales[dimension_x];
+        final int y = (coord_y - offsets[dimension_y]) * pixels[dimension_y] / scales[dimension_y];
         if (dotsize == 1) plot(leftborder + x, height - bottomborder - y);
                       else dot(leftborder + x, height - bottomborder - y, dotsize, true);
     }
     
-    public void chartLine(int dimension_x, int dimension_y, int coord_x1, int coord_y1, int coord_x2, int coord_y2) {
-        int x1 = (coord_x1 - offsets[dimension_x]) * pixels[dimension_x] / scales[dimension_x];
-        int y1 = (coord_y1 - offsets[dimension_y]) * pixels[dimension_y] / scales[dimension_y];
-        int x2 = (coord_x2 - offsets[dimension_x]) * pixels[dimension_x] / scales[dimension_x];
-        int y2 = (coord_y2 - offsets[dimension_y]) * pixels[dimension_y] / scales[dimension_y];
+    public void chartLine(final int dimension_x, final int dimension_y, final int coord_x1, final int coord_y1, final int coord_x2, final int coord_y2) {
+        final int x1 = (coord_x1 - offsets[dimension_x]) * pixels[dimension_x] / scales[dimension_x];
+        final int y1 = (coord_y1 - offsets[dimension_y]) * pixels[dimension_y] / scales[dimension_y];
+        final int x2 = (coord_x2 - offsets[dimension_x]) * pixels[dimension_x] / scales[dimension_x];
+        final int y2 = (coord_y2 - offsets[dimension_y]) * pixels[dimension_y] / scales[dimension_y];
         line(leftborder + x1, height - bottomborder - y1, leftborder + x2, height - bottomborder - y2);
     }
     
-    private void drawHorizontalScale(boolean top, int scale, int pixelperscale, int offset, String colorNaming, String colorScale, String name) {
-        int y = (top) ? topborder : height - bottomborder;
+    private void drawHorizontalScale(final boolean top, final int scale, final int pixelperscale, final int offset, final String colorNaming, final String colorScale, final String name) {
+        final int y = (top) ? topborder : height - bottomborder;
         int x = leftborder;
         int s = offset;
         while (x < width - rightborder) {
@@ -118,8 +118,8 @@ public class ymageChart extends ymageMatrix {
         line(leftborder - 4, y, width - rightborder + 4, y);
     }
     
-    private void drawVerticalScale(boolean left, int scale, int pixelperscale, int offset, String colorNaming, String colorScale, String name) {
-        int x = (left) ? leftborder : width - rightborder;
+    private void drawVerticalScale(final boolean left, final int scale, final int pixelperscale, final int offset, final String colorNaming, final String colorScale, final String name) {
+        final int x = (left) ? leftborder : width - rightborder;
         int y = height - bottomborder;
         int s = offset;
         String s1;
@@ -142,15 +142,15 @@ public class ymageChart extends ymageMatrix {
         line(x, topborder - 4, x, height - bottomborder + 4);
     }
    
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         System.setProperty("java.awt.headless", "true");
-        boolean invers = false;
-        String bg = (invers) ? "000000" : "FFFFFF";
-        String fg = (invers) ? "FFFFFF" : "000000";
-        String scale = (invers) ? "333333" : "CCCCCC";
-        String green = (invers) ? "008800" : "008800";
-        String blue = (invers) ? "0000FF" : "0000FF";
-        ymageChart ip = new ymageChart(660, 240, bg, fg, fg, 30, 30, 20, 20, "PEER PERFORMANCE GRAPH: PAGES/MINUTE and USED MEMORY", "");
+        final boolean invers = false;
+        final String bg = (invers) ? "000000" : "FFFFFF";
+        final String fg = (invers) ? "FFFFFF" : "000000";
+        final String scale = (invers) ? "333333" : "CCCCCC";
+        final String green = (invers) ? "008800" : "008800";
+        final String blue = (invers) ? "0000FF" : "0000FF";
+        final ymageChart ip = new ymageChart(660, 240, bg, fg, fg, 30, 30, 20, 20, "PEER PERFORMANCE GRAPH: PAGES/MINUTE and USED MEMORY", "");
         ip.declareDimension(DIMENSION_BOTTOM, 60, 60, -600, fg, scale, "TIME/SECONDS");
         //ip.declareDimension(DIMENSION_TOP, 10, 40, "000000", null, "count");
         ip.declareDimension(DIMENSION_LEFT, 50, 40, 0, green, scale , "PPM [PAGES/MINUTE]");
@@ -165,12 +165,12 @@ public class ymageChart extends ymageMatrix {
         //ip.print(100, 100, 0, "1234", false);
         //ip.print(100, 100, 90, "TEXT", true);
         //ip.print(100, 100, 90, "1234", false);
-        File file = new File("/Users/admin/Desktop/testimage.png");
+        final File file = new File("/Users/admin/Desktop/testimage.png");
         try {
-            FileOutputStream fos = new FileOutputStream(file);
+            final FileOutputStream fos = new FileOutputStream(file);
             ImageIO.write(ip.getImage(), "png", fos);
             fos.close();
-        } catch (IOException e) {}
+        } catch (final IOException e) {}
         
     }
     

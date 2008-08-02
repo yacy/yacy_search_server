@@ -246,7 +246,7 @@ public final class httpHeader extends TreeMap<String, String> implements Map<Str
         this(null);
     }
 
-    public httpHeader(HashMap<String, String> reverseMappingCache) {
+    public httpHeader(final HashMap<String, String> reverseMappingCache) {
         // this creates a new TreeMap with a case insensitive mapping
         // to provide a put-method that translates given keys into their
         // 'proper' appearance, a translation cache is needed.
@@ -256,14 +256,14 @@ public final class httpHeader extends TreeMap<String, String> implements Map<Str
         this.reverseMappingCache = reverseMappingCache;
     }
 
-    public httpHeader(HashMap<String, String> reverseMappingCache, File f) throws IOException {
+    public httpHeader(final HashMap<String, String> reverseMappingCache, final File f) throws IOException {
         // creates also a case insensitive map and loads it initially
         // with some values
         super((Collator) insensitiveCollator.clone());
         this.reverseMappingCache = reverseMappingCache;
 
         // load with data
-        BufferedReader br = new BufferedReader(new FileReader(f));
+        final BufferedReader br = new BufferedReader(new FileReader(f));
         String line;
         int pos;
         while ((line = br.readLine()) != null) {
@@ -273,7 +273,7 @@ public final class httpHeader extends TreeMap<String, String> implements Map<Str
         br.close();
     }
 
-    public httpHeader(HashMap<String, String> reverseMappingCache, Map<String, String> othermap)  {
+    public httpHeader(final HashMap<String, String> reverseMappingCache, final Map<String, String> othermap)  {
         // creates a case insensitive map from another map
         super((Collator) insensitiveCollator.clone());
         this.reverseMappingCache = reverseMappingCache;
@@ -284,8 +284,8 @@ public final class httpHeader extends TreeMap<String, String> implements Map<Str
 
 
     // we override the put method to make use of the reverseMappingCache
-    public String put(String key, String value) {
-        String upperK = key.toUpperCase();
+    public String put(final String key, final String value) {
+        final String upperK = key.toUpperCase();
         
         if (reverseMappingCache == null) {
             return super.put(key, value);
@@ -297,19 +297,19 @@ public final class httpHeader extends TreeMap<String, String> implements Map<Str
         }
         
         // we put in without a cached key and store the key afterwards
-        String r = super.put(key, value);
+        final String r = super.put(key, value);
         reverseMappingCache.put(upperK, key);
         return r;
     }
 
     // to make the occurrence of multiple keys possible, we add them using a counter
-    public String add(String key, String value) {
-        int c = keyCount(key);
+    public String add(final String key, final String value) {
+        final int c = keyCount(key);
         if (c == 0) return put(key, value);
         return put("*" + key + "-" + c, value);
     }
     
-    public int keyCount(String key) {
+    public int keyCount(final String key) {
         if (!(containsKey(key))) return 0;
         int c = 1;
         while (containsKey("*" + key + "-" + c)) c++;
@@ -317,31 +317,31 @@ public final class httpHeader extends TreeMap<String, String> implements Map<Str
     }
     
     // a convenience method to access the map with fail-over defaults
-    public Object get(Object key, Object dflt) {
-        Object result = get(key);
+    public Object get(final Object key, final Object dflt) {
+        final Object result = get(key);
         if (result == null) return dflt;
         return result;
     }
 
     // return multiple results
-    public Object getSingle(Object key, int count) {
+    public Object getSingle(final Object key, final int count) {
         if (count == 0) return get(key, null);
         return get("*" + key + "-" + count, null);
     }
     
-    public Object[] getMultiple(String key) {
-        int count = keyCount(key);
-        Object[] result = new Object[count];
+    public Object[] getMultiple(final String key) {
+        final int count = keyCount(key);
+        final Object[] result = new Object[count];
         for (int i = 0; i < count; i++) result[i] = getSingle(key, i);
         return result;
     }
     
     // convenience methods for storing and loading to a file system
-    public void store(File f) throws IOException {
+    public void store(final File f) throws IOException {
         FileOutputStream fos = null;
         try {
             fos = new FileOutputStream(f);
-            Iterator<String> i = keySet().iterator();
+            final Iterator<String> i = keySet().iterator();
             String key, value;
             while (i.hasNext()) {
                 key = i.next();
@@ -350,7 +350,7 @@ public final class httpHeader extends TreeMap<String, String> implements Map<Str
             }
             fos.flush();
         } finally {
-            if (fos != null) try{fos.close();}catch(Exception e){}
+            if (fos != null) try{fos.close();}catch(final Exception e){}
         }
     }
 
@@ -367,7 +367,7 @@ public final class httpHeader extends TreeMap<String, String> implements Map<Str
 	  Server=Apache/1.3.26
 	*/
     
-    private Date headerDate(String kind) {
+    private Date headerDate(final String kind) {
         if (containsKey(kind)) {
             Date parsedDate = serverDate.parseHTTPDate(get(kind));
             if (parsedDate == null) parsedDate = new Date();
@@ -382,8 +382,8 @@ public final class httpHeader extends TreeMap<String, String> implements Map<Str
     
     public String refererHost() {
         String  refererHost = "";
-        String referer = referer();
-        if (referer.length() > 0) try { refererHost = (new URL(referer)).getHost(); } catch (MalformedURLException e) {}
+        final String referer = referer();
+        if (referer.length() > 0) try { refererHost = (new URL(referer)).getHost(); } catch (final MalformedURLException e) {}
         return refererHost;
     }
     
@@ -392,18 +392,18 @@ public final class httpHeader extends TreeMap<String, String> implements Map<Str
     }
     
     public String getCharacterEncoding() {
-        String mimeType = mime();
+        final String mimeType = mime();
        return extractCharsetFromMimetypeHeader(mimeType);
     }  
     
-    public static String extractCharsetFromMimetypeHeader(String mimeType) {
+    public static String extractCharsetFromMimetypeHeader(final String mimeType) {
         if (mimeType == null) return null;
         
-        String[] parts = mimeType.split(";");
+        final String[] parts = mimeType.split(";");
         if (parts == null || parts.length <= 1) return null;
         
         for (int i=1; i < parts.length; i++) {    
-            String param = parts[i].trim();
+            final String param = parts[i].trim();
             if (param.startsWith("charset=")) {
                 String charset = param.substring("charset=".length()).trim();
                 if (charset.startsWith("\"") || charset.startsWith("'")) charset = charset.substring(1);
@@ -433,7 +433,7 @@ public final class httpHeader extends TreeMap<String, String> implements Map<Str
     
     public Object ifRange() {
         if (containsKey(httpHeader.IF_RANGE)) {
-            Date rangeDate = serverDate.parseHTTPDate(get(httpHeader.IF_RANGE));
+            final Date rangeDate = serverDate.parseHTTPDate(get(httpHeader.IF_RANGE));
             if (rangeDate != null) 
                 return rangeDate;
             
@@ -447,8 +447,8 @@ public final class httpHeader extends TreeMap<String, String> implements Map<Str
     }
     
     public long age() {
-        Date lm = lastModified();
-        Date sd = date();
+        final Date lm = lastModified();
+        final Date sd = date();
         if (lm == null) return Long.MAX_VALUE;
         return ((sd == null) ? new Date() : sd).getTime() - lm.getTime();
     }
@@ -457,7 +457,7 @@ public final class httpHeader extends TreeMap<String, String> implements Map<Str
         if (containsKey(httpHeader.CONTENT_LENGTH)) {
             try {
                 return Long.parseLong(get(httpHeader.CONTENT_LENGTH));
-            } catch (NumberFormatException e) {
+            } catch (final NumberFormatException e) {
                 return -1;
             }
         }
@@ -474,7 +474,7 @@ public final class httpHeader extends TreeMap<String, String> implements Map<Str
 		((get(httpHeader.CONTENT_ENCODING)).toUpperCase().startsWith("GZIP")));
     }
     
-    public static Object[] parseResponseLine(String respLine) {
+    public static Object[] parseResponseLine(final String respLine) {
         
         if ((respLine == null) || (respLine.length() == 0)) {
             return new Object[]{"HTTP/1.0",new Integer(500),"status line parse error"};
@@ -499,7 +499,7 @@ public final class httpHeader extends TreeMap<String, String> implements Map<Str
         try {
             statusCode = Integer.valueOf((p < 0) ? status.trim() : status.substring(0,p).trim());
             statusText = (p < 0) ? "" : status.substring(p+1).trim();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             statusCode = new Integer(500);
             statusText = status;
         }
@@ -507,20 +507,20 @@ public final class httpHeader extends TreeMap<String, String> implements Map<Str
         return new Object[]{httpVer,statusCode,statusText};
     }
     
-    public static Properties parseRequestLine(String s, Properties prop, String virtualHost) {
-        int p = s.indexOf(" ");
+    public static Properties parseRequestLine(final String s, final Properties prop, final String virtualHost) {
+        final int p = s.indexOf(" ");
         if (p >= 0) {
-            String cmd = s.substring(0,p);
-            String args = s.substring(p+1);
+            final String cmd = s.substring(0,p);
+            final String args = s.substring(p+1);
             return parseRequestLine(cmd,args, prop,virtualHost);
         }
         return prop;
     }
     
-    public static Properties parseRequestLine(String cmd, String args, Properties prop, String virtualHost) {
+    public static Properties parseRequestLine(final String cmd, String args, final Properties prop, final String virtualHost) {
         
         // getting the last request line for debugging purposes
-        String prevRequestLine = prop.containsKey(CONNECTION_PROP_REQUESTLINE)?
+        final String prevRequestLine = prop.containsKey(CONNECTION_PROP_REQUESTLINE)?
                 prop.getProperty(CONNECTION_PROP_REQUESTLINE) : "";
         
         // reset property from previous run   
@@ -589,7 +589,7 @@ public final class httpHeader extends TreeMap<String, String> implements Map<Str
             } else {
                 // THIS IS THE "GOOD" CASE
                 // a perfect formulated url
-                String dstHostSocket = args.substring(0, sep);
+                final String dstHostSocket = args.substring(0, sep);
                 prop.setProperty(CONNECTION_PROP_HOST, (httpd.isThisHostName(dstHostSocket)?virtualHost:dstHostSocket));
                 path = args.substring(sep); // yes, including beginning "/"
             }
@@ -615,7 +615,7 @@ public final class httpHeader extends TreeMap<String, String> implements Map<Str
         String ext = "";  // default when no file extension
         sep = path.lastIndexOf(".");
         if (sep >= 0) {
-            int ancpos = path.indexOf("#", sep + 1);
+            final int ancpos = path.indexOf("#", sep + 1);
             if (ancpos  >= sep) {
                 // ex: /foo/bar.html#xy => html
                 ext = path.substring(sep + 1, ancpos).toLowerCase();
@@ -629,9 +629,9 @@ public final class httpHeader extends TreeMap<String, String> implements Map<Str
         return prop;
     }    
     
-    public static boolean supportChunkedEncoding(Properties conProp) {
+    public static boolean supportChunkedEncoding(final Properties conProp) {
     	// getting the http version of the client
-    	String httpVer = conProp.getProperty(CONNECTION_PROP_HTTP_VER); 
+    	final String httpVer = conProp.getProperty(CONNECTION_PROP_HTTP_VER); 
     	
     	// only clients with http version 1.1 supports chunk
         return !(httpVer.equals(HTTP_VERSION_0_9) || httpVer.equals(HTTP_VERSION_1_0));
@@ -643,9 +643,9 @@ public final class httpHeader extends TreeMap<String, String> implements Map<Str
      * @return a {@link httpHeader}-Object containing all parsed headers
      * @throws IOException
      */
-    public static httpHeader readHttpHeader(BufferedReader reader) throws IOException {
+    public static httpHeader readHttpHeader(final BufferedReader reader) throws IOException {
         // reading all request headers
-        httpHeader httpHeader = new httpHeader(httpd.reverseMappingCache);
+        final httpHeader httpHeader = new httpHeader(httpd.reverseMappingCache);
         int p;
         String line;
         while ((line = reader.readLine()) != null) {
@@ -658,10 +658,10 @@ public final class httpHeader extends TreeMap<String, String> implements Map<Str
         return httpHeader;
     }        
     
-    public static httpHeader readHeader(Properties prop, serverCore.Session theSession) throws IOException {
+    public static httpHeader readHeader(final Properties prop, final serverCore.Session theSession) throws IOException {
         
         // reading all headers
-        httpHeader header = new httpHeader(httpd.reverseMappingCache);
+        final httpHeader header = new httpHeader(httpd.reverseMappingCache);
         int p;
         String line;
         while ((line = theSession.readLineAsString()) != null) {
@@ -676,7 +676,7 @@ public final class httpHeader extends TreeMap<String, String> implements Map<Str
         /* 
          * doing some header validation here ...
          */
-        String httpVersion = prop.getProperty(httpHeader.CONNECTION_PROP_HTTP_VER, "HTTP/0.9");
+        final String httpVersion = prop.getProperty(httpHeader.CONNECTION_PROP_HTTP_VER, "HTTP/0.9");
         if (httpVersion.equals("HTTP/1.1") && !header.containsKey(httpHeader.HOST)) {
             // the HTTP/1.1 specification requires that an HTTP/1.1 server must reject any  
             // HTTP/1.1 message that does not contain a Host header.            
@@ -689,11 +689,11 @@ public final class httpHeader extends TreeMap<String, String> implements Map<Str
  
     
     public StringBuffer toHeaderString(
-            String httpVersion, 
-            int httpStatusCode, 
-            String httpStatusText) {
+            final String httpVersion, 
+            final int httpStatusCode, 
+            final String httpStatusText) {
         // creating a new buffer to store the header as string
-        StringBuffer theHeader = new StringBuffer();
+        final StringBuffer theHeader = new StringBuffer();
         
         // generating the header string
         this.toHeaderString(httpVersion,httpStatusCode,httpStatusText,theHeader);
@@ -705,9 +705,9 @@ public final class httpHeader extends TreeMap<String, String> implements Map<Str
     
     public void toHeaderString(
             String httpVersion, 
-            int httpStatusCode, 
+            final int httpStatusCode, 
             String httpStatusText, 
-            StringBuffer theHeader) {        
+            final StringBuffer theHeader) {        
         
         if (theHeader == null) throw new IllegalArgumentException();
         
@@ -730,7 +730,7 @@ public final class httpHeader extends TreeMap<String, String> implements Map<Str
                  .append(httpStatusText).append("\r\n");
         
         // write header
-        Iterator<String> i = keySet().iterator();
+        final Iterator<String> i = keySet().iterator();
         String key;
         char tag;
         int count;
@@ -748,10 +748,10 @@ public final class httpHeader extends TreeMap<String, String> implements Map<Str
         theHeader.append("\r\n");                
     }    
     
-    public static yacyURL getRequestURL(Properties conProp) throws MalformedURLException {
+    public static yacyURL getRequestURL(final Properties conProp) throws MalformedURLException {
         String host =    conProp.getProperty(httpHeader.CONNECTION_PROP_HOST);
-        String path =    conProp.getProperty(httpHeader.CONNECTION_PROP_PATH);     // always starts with leading '/'
-        String args =    conProp.getProperty(httpHeader.CONNECTION_PROP_ARGS);     // may be null if no args were given
+        final String path =    conProp.getProperty(httpHeader.CONNECTION_PROP_PATH);     // always starts with leading '/'
+        final String args =    conProp.getProperty(httpHeader.CONNECTION_PROP_ARGS);     // may be null if no args were given
         //String ip =      conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP); // the ip from the connecting peer
         
         int port, pos;        
@@ -762,11 +762,11 @@ public final class httpHeader extends TreeMap<String, String> implements Map<Str
             host = host.substring(0, pos);
         }
         
-        yacyURL url = new yacyURL("http", host, port, (args == null) ? path : path + "?" + args);
+        final yacyURL url = new yacyURL("http", host, port, (args == null) ? path : path + "?" + args);
         return url;
     }
 
-    public static void handleTransparentProxySupport(httpHeader header, Properties prop, String virtualHost, boolean isTransparentProxy) {   
+    public static void handleTransparentProxySupport(final httpHeader header, final Properties prop, final String virtualHost, final boolean isTransparentProxy) {   
         // transparent proxy support is only available for http 1.0 and above connections
         if (prop.getProperty(CONNECTION_PROP_HTTP_VER, "HTTP/0.9").equals("HTTP/0.9")) return;
         
@@ -778,7 +778,7 @@ public final class httpHeader extends TreeMap<String, String> implements Map<Str
         if (!prop.getProperty(CONNECTION_PROP_HOST).equals(virtualHost)) return;
         
         // TODO: we could have problems with connections from extern here ...
-        String dstHostSocket = header.get(httpHeader.HOST);
+        final String dstHostSocket = header.get(httpHeader.HOST);
         prop.setProperty(CONNECTION_PROP_HOST,(httpd.isThisHostName(dstHostSocket)?virtualHost:dstHostSocket));
     }
     /*
@@ -799,9 +799,9 @@ public final class httpHeader extends TreeMap<String, String> implements Map<Str
      * Implementation of Map.Entry. Structure that hold two values - exactly what we need!
      */
     class Entry implements Map.Entry<String, String> {
-        private String k;
+        private final String k;
         private String v;
-        Entry(String k, String v) {
+        Entry(final String k, final String v) {
             this.k = k;
             this.v = v;
         }
@@ -811,8 +811,8 @@ public final class httpHeader extends TreeMap<String, String> implements Map<Str
         public String getValue() {
             return v;
         }
-        public String setValue(String v) {
-            String r = this.v;
+        public String setValue(final String v) {
+            final String r = this.v;
             this.v = v;
             return r;
         }
@@ -829,7 +829,7 @@ public final class httpHeader extends TreeMap<String, String> implements Map<Str
      * @param secure If true cookie will be send only over safe connection such as https
      * @see further documentation: <a href="http://docs.sun.com/source/816-6408-10/cookies.htm">docs.sun.com</a>
      */
-    public void setCookie(String name, String value, String expires, String path, String domain, boolean secure)
+    public void setCookie(final String name, final String value, final String expires, final String path, final String domain, final boolean secure)
     {
          /*
          * TODO:Here every value can be validated for correctness if needed
@@ -855,7 +855,7 @@ public final class httpHeader extends TreeMap<String, String> implements Map<Str
      * Note: this cookie will be sent over each connection independend if it is safe connection or not.
      * @see further documentation: <a href="http://docs.sun.com/source/816-6408-10/cookies.htm">docs.sun.com</a>
      */
-    public void setCookie(String name, String value, String expires, String path, String domain)
+    public void setCookie(final String name, final String value, final String expires, final String path, final String domain)
     {
         setCookie( name,  value,  expires,  path,  domain, false);
     }
@@ -870,7 +870,7 @@ public final class httpHeader extends TreeMap<String, String> implements Map<Str
      * Note: this cookie will be sent over each connection independend if it is safe connection or not.
      * @see further documentation: <a href="http://docs.sun.com/source/816-6408-10/cookies.htm">docs.sun.com</a>
      */
-    public void setCookie(String name, String value, String expires, String path)
+    public void setCookie(final String name, final String value, final String expires, final String path)
     {
         setCookie( name,  value,  expires,  path,  null, false);
     }
@@ -884,7 +884,7 @@ public final class httpHeader extends TreeMap<String, String> implements Map<Str
      * Note: this cookie will be sent over each connection independend if it is safe connection or not.
      * @see further documentation: <a href="http://docs.sun.com/source/816-6408-10/cookies.htm">docs.sun.com</a>
      */
-    public void setCookie(String name, String value, String expires)
+    public void setCookie(final String name, final String value, final String expires)
     {
         setCookie( name,  value,  expires,  null,  null, false);
     }
@@ -897,15 +897,15 @@ public final class httpHeader extends TreeMap<String, String> implements Map<Str
      * Note: this cookie will be sent over each connection independend if it is safe connection or not. This cookie never expires
      * @see further documentation: <a href="http://docs.sun.com/source/816-6408-10/cookies.htm">docs.sun.com</a>
      */
-    public void setCookie(String name, String value )
+    public void setCookie(final String name, final String value )
     {
         setCookie( name,  value,  null,  null,  null, false);
     }
     public String getHeaderCookies(){
-        Iterator<Map.Entry<String, String>> it = this.entrySet().iterator();
+        final Iterator<Map.Entry<String, String>> it = this.entrySet().iterator();
         while(it.hasNext())
         {
-            Map.Entry<String, String> e = it.next();
+            final Map.Entry<String, String> e = it.next();
             //System.out.println(""+e.getKey()+" : "+e.getValue());
             if(e.getKey().equals("Cookie"))
             {
@@ -917,7 +917,7 @@ public final class httpHeader extends TreeMap<String, String> implements Map<Str
     public Vector<Entry> getCookieVector(){
         return cookies;
     }
-    public void setCookieVector(Vector<Entry> mycookies){
+    public void setCookieVector(final Vector<Entry> mycookies){
         cookies=mycookies;
     }
     /**

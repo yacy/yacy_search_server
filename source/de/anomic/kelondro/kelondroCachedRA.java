@@ -32,11 +32,11 @@ public class kelondroCachedRA extends kelondroAbstractRA implements kelondroRA {
     protected kelondroRA ra; 
     protected kelondroMScoreCluster<Integer> cacheScore;
     protected HashMap<Integer, byte[]> cacheMemory;
-    private int cacheMaxElements;
-    private int cacheElementSize;
+    private final int cacheMaxElements;
+    private final int cacheElementSize;
     private long seekpos;
     
-    public kelondroCachedRA(kelondroRA ra, int cachesize, int elementsize) {
+    public kelondroCachedRA(final kelondroRA ra, final int cachesize, final int elementsize) {
 	this.ra  = ra;
         this.name = ra.name();
         this.file = ra.file();
@@ -58,25 +58,25 @@ public class kelondroCachedRA extends kelondroAbstractRA implements kelondroRA {
         }
     }
     
-    private int cacheElementNumber(long address) {
+    private int cacheElementNumber(final long address) {
         return (int) address / cacheElementSize;
     }
     
-    private int cacheElementOffset(long address) {
+    private int cacheElementOffset(final long address) {
         return (int) address % cacheElementSize;
     }
     
-    private byte[] readCache(int cacheNr) throws IOException {
-        Integer cacheNrI = new Integer(cacheNr);
+    private byte[] readCache(final int cacheNr) throws IOException {
+        final Integer cacheNrI = new Integer(cacheNr);
         byte[] cache = cacheMemory.get(cacheNrI);
         if (cache == null) {
             if (cacheMemory.size() >= cacheMaxElements) {
                 // delete elements in buffer if buffer too big
-                Iterator<Integer> it = cacheScore.scores(true);
-                Integer element = it.next();
+                final Iterator<Integer> it = cacheScore.scores(true);
+                final Integer element = it.next();
                 writeCache(cacheMemory.get(element), element.intValue());
                 cacheMemory.remove(element);
-                int age = cacheScore.deleteScore(element);
+                final int age = cacheScore.deleteScore(element);
                 de.anomic.server.logging.serverLog.logFine("CACHE: " + name, "GC; age=" + ((((int) (0xFFFFFFFFL & System.currentTimeMillis())) - age) / 1000));
             }
             // add new element
@@ -90,9 +90,9 @@ public class kelondroCachedRA extends kelondroAbstractRA implements kelondroRA {
         return cache;
     }
     
-    private void writeCache(byte[] cache, int cacheNr) throws IOException {
+    private void writeCache(final byte[] cache, final int cacheNr) throws IOException {
         if (cache == null) return;
-        Integer cacheNrI = new Integer(cacheNr);
+        final Integer cacheNrI = new Integer(cacheNr);
         ra.seek(cacheNr * cacheElementSize);
         ra.write(cache, 0, cacheElementSize);
         cacheScore.setScore(cacheNrI, (int) (0xFFFFFFFFL & System.currentTimeMillis()));
@@ -100,27 +100,27 @@ public class kelondroCachedRA extends kelondroAbstractRA implements kelondroRA {
     
     // pseudo-native method read
     public int read() throws IOException {
-        int bn = cacheElementNumber(seekpos);
-        int offset = cacheElementOffset(seekpos);
+        final int bn = cacheElementNumber(seekpos);
+        final int offset = cacheElementOffset(seekpos);
         seekpos++;
         return 0xFF & readCache(bn)[offset];
     }
 
     // pseudo-native method write
-    public void write(int b) throws IOException {
-        int bn = cacheElementNumber(seekpos);
-        int offset = cacheElementOffset(seekpos);
-        byte[] cache = readCache(bn);
+    public void write(final int b) throws IOException {
+        final int bn = cacheElementNumber(seekpos);
+        final int offset = cacheElementOffset(seekpos);
+        final byte[] cache = readCache(bn);
         seekpos++;
         cache[offset] = (byte) b;
         //writeBuffer(buffer, bn);
     }
 
-    public int read(byte[] b, int off, int len) throws IOException {
-        int bn1 = cacheElementNumber(seekpos);
-        int bn2 = cacheElementNumber(seekpos + len - 1);
-        int offset = cacheElementOffset(seekpos);
-        byte[] buffer = readCache(bn1);
+    public int read(final byte[] b, final int off, final int len) throws IOException {
+        final int bn1 = cacheElementNumber(seekpos);
+        final int bn2 = cacheElementNumber(seekpos + len - 1);
+        final int offset = cacheElementOffset(seekpos);
+        final byte[] buffer = readCache(bn1);
         if (bn1 == bn2) {
             // simple case
             //System.out.println("C1: bn1=" + bn1 + ", offset=" + offset + ", off=" + off + ", len=" + len);
@@ -130,18 +130,18 @@ public class kelondroCachedRA extends kelondroAbstractRA implements kelondroRA {
         }
         
         // do recursively
-        int thislen = cacheElementSize - offset;
+        final int thislen = cacheElementSize - offset;
         //System.out.println("C2: bn1=" + bn1 + ", bn2=" + bn2 +", offset=" + offset + ", off=" + off + ", len=" + len + ", thislen=" + thislen);
         System.arraycopy(buffer, offset, b, off, thislen);
         seekpos += thislen;
         return thislen + read(b, off + thislen, len - thislen);
     }
 
-    public void write(byte[] b, int off, int len) throws IOException {
-        int bn1 = cacheElementNumber(seekpos);
-        int bn2 = cacheElementNumber(seekpos + len - 1);
-        int offset = cacheElementOffset(seekpos);
-        byte[] cache = readCache(bn1);
+    public void write(final byte[] b, final int off, final int len) throws IOException {
+        final int bn1 = cacheElementNumber(seekpos);
+        final int bn2 = cacheElementNumber(seekpos + len - 1);
+        final int offset = cacheElementOffset(seekpos);
+        final byte[] cache = readCache(bn1);
         if (bn1 == bn2) {
             // simple case
             System.arraycopy(b, off, cache, offset, len);
@@ -149,7 +149,7 @@ public class kelondroCachedRA extends kelondroAbstractRA implements kelondroRA {
             //writeBuffer(buffer, bn1);
         } else {
             // do recursively
-            int thislen = cacheElementSize - offset;
+            final int thislen = cacheElementSize - offset;
             System.arraycopy(b, off, cache, offset, thislen);
             seekpos += thislen;
             //writeBuffer(buffer, bn1);
@@ -157,16 +157,16 @@ public class kelondroCachedRA extends kelondroAbstractRA implements kelondroRA {
         }
     }
 
-    public void seek(long pos) throws IOException {
+    public void seek(final long pos) throws IOException {
         seekpos = pos;
     }
 
     public void close() throws IOException {
         // write all unwritten buffers
         if (cacheMemory == null) return;
-        Iterator<Integer> it = cacheScore.scores(true);
+        final Iterator<Integer> it = cacheScore.scores(true);
         while (it.hasNext()) {
-            Integer element = it.next();
+            final Integer element = it.next();
             writeCache(cacheMemory.get(element), element.intValue());
             cacheMemory.remove(element);
         }
@@ -178,6 +178,6 @@ public class kelondroCachedRA extends kelondroAbstractRA implements kelondroRA {
     public void finalize() {
         try {
             close();
-        } catch (IOException e) {}
+        } catch (final IOException e) {}
     }
 }

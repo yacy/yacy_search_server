@@ -35,9 +35,9 @@ public class IndexCleaner_p {
     private static indexRepositoryReference.BlacklistCleaner urldbCleanerThread = null;
     private static plasmaWordIndex.ReferenceCleaner indexCleanerThread = null;
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
-        serverObjects prop = new serverObjects();
-        plasmaSwitchboard sb = (plasmaSwitchboard) env;
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+        final serverObjects prop = new serverObjects();
+        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         prop.put("title", "DbCleanup_p");
         if (post!=null) {
             //prop.putHTML("bla", "post!=null");
@@ -86,7 +86,7 @@ public class IndexCleaner_p {
             prop.put("urldb_lastHash", urldbCleanerThread.lastHash);
             prop.put("urldb_threadAlive", urldbCleanerThread.isAlive() + "");
             prop.put("urldb_threadToString", urldbCleanerThread.toString());
-            double percent = ((double)urldbCleanerThread.blacklistedUrls/urldbCleanerThread.totalSearchedUrls)*100;
+            final double percent = ((double)urldbCleanerThread.blacklistedUrls/urldbCleanerThread.totalSearchedUrls)*100;
             prop.putNum("urldb_percent", percent);
         }
         if (indexCleanerThread!=null) {

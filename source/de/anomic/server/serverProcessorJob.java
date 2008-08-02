@@ -38,7 +38,7 @@ public class serverProcessorJob {
         this.status = STATUS_INITIATED;
     }
     
-    public serverProcessorJob(int status) {
+    public serverProcessorJob(final int status) {
         this.status = status;
     }
     

@@ -39,7 +39,7 @@ import de.anomic.server.logging.serverLog;
 
 public class tarTools {
 	
-	public static InputStream getInputStream(String tarFileName) throws Exception{
+	public static InputStream getInputStream(final String tarFileName) throws Exception{
 		if(tarFileName.endsWith(".gz")){
 			return new GZIPInputStream(new FileInputStream(new File(tarFileName)));
 		} else {
@@ -47,7 +47,7 @@ public class tarTools {
 		}
 	}
 
-	public static InputStream getInputStream(File tarFileName) throws Exception{
+	public static InputStream getInputStream(final File tarFileName) throws Exception{
 		return getInputStream(tarFileName.toString());
 	}
 	
@@ -57,16 +57,16 @@ public class tarTools {
 	 * @param untarDir destination path
 	 * @throws Exception (IOException or FileNotFoundException)
 	 */
-	public static void unTar(InputStream in, String untarDir) throws Exception{
+	public static void unTar(final InputStream in, final String untarDir) throws Exception{
 		serverLog.logInfo("UNTAR", "starting");
 		if(new File(untarDir).exists()){
-			TarInputStream tin = new TarInputStream(in);
+			final TarInputStream tin = new TarInputStream(in);
 			TarEntry tarEntry = tin.getNextEntry();
 			while(tarEntry != null){
-				File destPath = new File(untarDir + File.separator + tarEntry.getName());
+				final File destPath = new File(untarDir + File.separator + tarEntry.getName());
 				if (!tarEntry.isDirectory()) {
 					new File(destPath.getParent()).mkdirs(); // create missing subdirectories
-					FileOutputStream fout = new FileOutputStream(destPath);
+					final FileOutputStream fout = new FileOutputStream(destPath);
 					tin.copyEntryContents(fout);
 					fout.close();
 				} else {
@@ -81,13 +81,13 @@ public class tarTools {
 		serverLog.logInfo("UNTAR", "finished");
 	}
 	
-	public static void main(String args[]){
+	public static void main(final String args[]){
 		// @arg0 source
 		// @arg1 destination
 		if(args.length == 2){
 		try {
 			unTar(getInputStream(args[0]), args[1]);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			System.out.println(e);
 		}
 		} else {

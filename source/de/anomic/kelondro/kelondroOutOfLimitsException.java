@@ -30,11 +30,11 @@ public class kelondroOutOfLimitsException extends java.lang.RuntimeException {
         super("unspecific-error");
     }
     
-    public kelondroOutOfLimitsException(int expectedLimit, int actualSize) {
+    public kelondroOutOfLimitsException(final int expectedLimit, final int actualSize) {
         super("Object size is " + actualSize + "; it exceeds the size limit " + expectedLimit);
     }
     
-    public kelondroOutOfLimitsException(int actualSize) {
+    public kelondroOutOfLimitsException(final int actualSize) {
         super("Object size is " + actualSize + "; must not be negative");
     }
     

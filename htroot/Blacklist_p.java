@@ -54,19 +54,19 @@ public class Blacklist_p {
     private final static String BLACKLIST        = "blackLists_";
     private final static String BLACKLIST_SHARED = "BlackLists.Shared";
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
-        plasmaSwitchboard sb = (plasmaSwitchboard) env;
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         
         // initialize the list manager
         listManager.switchboard = (plasmaSwitchboard) env;
         listManager.listsPath = new File(listManager.switchboard.getRootPath(),listManager.switchboard.getConfig("listManager.listsPath", "DATA/LISTS"));
         
         // getting the list of supported blacklist types
-        String supportedBlacklistTypesStr = indexAbstractReferenceBlacklist.BLACKLIST_TYPES_STRING;
-        String[] supportedBlacklistTypes = supportedBlacklistTypesStr.split(",");        
+        final String supportedBlacklistTypesStr = indexAbstractReferenceBlacklist.BLACKLIST_TYPES_STRING;
+        final String[] supportedBlacklistTypes = supportedBlacklistTypesStr.split(",");        
         
         String blacklistToUse = null;
-        serverObjects prop = new serverObjects();
+        final serverObjects prop = new serverObjects();
         prop.putHTML("blacklistEngine", plasmaSwitchboard.urlBlacklist.getEngineInfo());
 prop.putHTML("asd", "0");        
         // do all post operations
@@ -79,7 +79,7 @@ prop.putHTML("asd", "0");
                 yacyURL testurl = null;
 				try {
 					testurl = new yacyURL(urlstring, null);
-				} catch (MalformedURLException e) { }
+				} catch (final MalformedURLException e) { }
 				if(testurl != null) {
 					prop.putHTML("testlist_url",testurl.toString());
 					if(plasmaSwitchboard.urlBlacklist.isListed(indexReferenceBlacklist.BLACKLIST_CRAWLER, testurl))
@@ -125,7 +125,7 @@ prop.putHTML("asd", "0");
                     for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
                         listManager.updateListSet(supportedBlacklistTypes[blTypes] + ".BlackLists",blacklistToUse);
                     }                                 
-                } catch (IOException e) {/* */}
+                } catch (final IOException e) {/* */}
                 
             } else if (post.containsKey("deleteList")) {
                 /* ===========================================================
@@ -138,7 +138,7 @@ prop.putHTML("asd", "0");
                     return prop;
                 }                   
                 
-                File BlackListFile = new File(listManager.listsPath, blacklistToUse);
+                final File BlackListFile = new File(listManager.listsPath, blacklistToUse);
                 BlackListFile.delete();
 
                 for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
@@ -194,7 +194,7 @@ prop.putHTML("asd", "0");
                 }
             } else if (post.containsKey("deleteBlacklistEntry")) {
                 
-                String temp = deleteBlacklistEntry(post.get("currentBlacklist"),
+                final String temp = deleteBlacklistEntry(post.get("currentBlacklist"),
                         post.get("selectedEntry"), header, supportedBlacklistTypes);
                 if (temp != null) {
                     prop.put("LOCATION", temp);
@@ -203,7 +203,7 @@ prop.putHTML("asd", "0");
 
             } else if (post.containsKey("addBlacklistEntry")) {
 
-                String temp = addBlacklistEntry(post.get("currentBlacklist"),
+                final String temp = addBlacklistEntry(post.get("currentBlacklist"),
                         post.get("newEntry"), header, supportedBlacklistTypes);
                 if (temp != null) {
                     prop.put("LOCATION", temp);
@@ -258,8 +258,8 @@ prop.putHTML("asd", "0");
 
                 } else {
 
-                    String selectedEntry = post.get("selectedEntry");
-                    String currentBlacklist = post.get("currentBlacklist");
+                    final String selectedEntry = post.get("selectedEntry");
+                    final String currentBlacklist = post.get("currentBlacklist");
                     if (selectedEntry != null && currentBlacklist != null) {
                         prop.put(DISABLED + "edit_item", selectedEntry);
                         prop.put(DISABLED + "edit_currentBlacklist", currentBlacklist);
@@ -271,7 +271,7 @@ prop.putHTML("asd", "0");
         }
 
         // loading all blacklist files located in the directory
-        String[] dirlist = listManager.getDirListing(listManager.listsPath);
+        final String[] dirlist = listManager.getDirListing(listManager.listsPath);
         
         // if we have not chosen a blacklist until yet we use the first file
         if (blacklistToUse == null && dirlist != null && dirlist.length > 0) {
@@ -285,12 +285,12 @@ prop.putHTML("asd", "0");
             final ArrayList<String> list = listManager.getListArray(new File(listManager.listsPath, blacklistToUse));
             
             // sort them
-            String[] sortedlist = new String[list.size()];
+            final String[] sortedlist = new String[list.size()];
             Arrays.sort(list.toArray(sortedlist));
             
             // display them
             for (int j=0;j<sortedlist.length;++j){
-                String nextEntry = sortedlist[j];
+                final String nextEntry = sortedlist[j];
                 
                 if (nextEntry.length() == 0) continue;
                 if (nextEntry.startsWith("#")) continue;
@@ -305,10 +305,10 @@ prop.putHTML("asd", "0");
 	        if (sb.webIndex.seedDB != null && sb.webIndex.seedDB.sizeConnected() > 0) { // no nullpointer error
 	            int peerCount = 0;
 	            try {
-	                TreeMap<String, String> hostList = new TreeMap<String, String>();
+	                final TreeMap<String, String> hostList = new TreeMap<String, String>();
 	                final Iterator<yacySeed> e = sb.webIndex.seedDB.seedsConnected(true, false, null, (float) 0.0);
 	                while (e.hasNext()) {
-	                    yacySeed seed = e.next();
+	                    final yacySeed seed = e.next();
 	                    if (seed != null) hostList.put(seed.get(yacySeed.NAME, "nameless"),seed.hash);
 	                }
 	
@@ -320,7 +320,7 @@ prop.putHTML("asd", "0");
 	                    hostList.remove(peername);
 	                    peerCount++;
 	                }
-	            } catch (Exception e) {/* */}
+	            } catch (final Exception e) {/* */}
 	            prop.put(DISABLED + "otherHosts", peerCount);
 	        }
         }
@@ -374,8 +374,8 @@ prop.putHTML("asd", "0");
      * @param newEntry the entry that is to be added
      * @return null if no error occured, else a String to put into LOCATION
      */
-    private static String addBlacklistEntry(String blacklistToUse, String newEntry, 
-            httpHeader header, String[] supportedBlacklistTypes) {
+    private static String addBlacklistEntry(final String blacklistToUse, String newEntry, 
+            final httpHeader header, final String[] supportedBlacklistTypes) {
 
         if (blacklistToUse == null || blacklistToUse.trim().length() == 0) {
             return "";
@@ -404,10 +404,10 @@ prop.putHTML("asd", "0");
             pw = new PrintWriter(new FileWriter(new File(listManager.listsPath, blacklistToUse), true));
             pw.println(newEntry);
             pw.close();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             e.printStackTrace();
         } finally {
-            if (pw != null) try { pw.close(); } catch (Exception e){ /* */}
+            if (pw != null) try { pw.close(); } catch (final Exception e){ /* */}
         }
 
         // add to blacklist
@@ -426,8 +426,8 @@ prop.putHTML("asd", "0");
      * @param oldEntry the entry that is to be deleted
      * @return null if no error occured, else a String to put into LOCATION
      */
-    private static String deleteBlacklistEntry(String blacklistToUse, String oldEntry, 
-            httpHeader header, String[] supportedBlacklistTypes) {
+    private static String deleteBlacklistEntry(final String blacklistToUse, String oldEntry, 
+            final httpHeader header, final String[] supportedBlacklistTypes) {
 
         if (blacklistToUse == null || blacklistToUse.trim().length() == 0) {
             return "";
@@ -438,7 +438,7 @@ prop.putHTML("asd", "0");
         }
 
         // load blacklist data from file
-        ArrayList<String> list = listManager.getListArray(new File(listManager.listsPath, blacklistToUse));
+        final ArrayList<String> list = listManager.getListArray(new File(listManager.listsPath, blacklistToUse));
 
         // delete the old entry from file
         if (list != null) {

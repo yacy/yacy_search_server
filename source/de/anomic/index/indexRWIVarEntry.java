@@ -41,29 +41,29 @@ public class indexRWIVarEntry implements indexRWIEntry {
                worddistance, wordsintext, wordsintitle;
     public double termFrequency;
     
-    public indexRWIVarEntry(String  urlHash,
-            int      urlLength,     // byte-length of complete URL
-            int      urlComps,      // number of path components
-            int      titleLength,   // length of description/length (longer are better?)
-            int      hitcount,      // how often appears this word in the text
-            int      wordcount,     // total number of words
-            int      phrasecount,   // total number of phrases
-            int      posintext,     // position of word in all words
-            int      posinphrase,   // position of word in its phrase
-            int      posofphrase,   // number of the phrase where word appears
-            long     lastmodified,  // last-modified time of the document where word appears
-            long     updatetime,    // update time; this is needed to compute a TTL for the word, so it can be removed easily if the TTL is short
+    public indexRWIVarEntry(final String  urlHash,
+            final int      urlLength,     // byte-length of complete URL
+            final int      urlComps,      // number of path components
+            final int      titleLength,   // length of description/length (longer are better?)
+            final int      hitcount,      // how often appears this word in the text
+            final int      wordcount,     // total number of words
+            final int      phrasecount,   // total number of phrases
+            final int      posintext,     // position of word in all words
+            final int      posinphrase,   // position of word in its phrase
+            final int      posofphrase,   // number of the phrase where word appears
+            final long     lastmodified,  // last-modified time of the document where word appears
+            final long     updatetime,    // update time; this is needed to compute a TTL for the word, so it can be removed easily if the TTL is short
             String   language,      // (guessed) language of document
-            char     doctype,       // type of document
-            int      outlinksSame,  // outlinks to same domain
-            int      outlinksOther, // outlinks to other domain
-            kelondroBitfield flags,  // attributes to the url and to the word according the url
-            int      worddistance,
-            double   termfrequency
+            final char     doctype,       // type of document
+            final int      outlinksSame,  // outlinks to same domain
+            final int      outlinksOther, // outlinks to other domain
+            final kelondroBitfield flags,  // attributes to the url and to the word according the url
+            final int      worddistance,
+            final double   termfrequency
     ) {
         if ((language == null) || (language.length() != 2)) language = "uk";
-        int mddlm = kelondroMicroDate.microDateDays(lastmodified);
-        int mddct = kelondroMicroDate.microDateDays(updatetime);
+        final int mddlm = kelondroMicroDate.microDateDays(lastmodified);
+        final int mddct = kelondroMicroDate.microDateDays(updatetime);
         this.flags = flags;
         this.freshUntil = Math.max(0, mddlm + (mddct - mddlm) * 2);
         this.lastModified = lastmodified;
@@ -86,7 +86,7 @@ public class indexRWIVarEntry implements indexRWIEntry {
         this.termFrequency = termfrequency;
     }
     
-    public indexRWIVarEntry(indexRWIRowEntry e) {
+    public indexRWIVarEntry(final indexRWIRowEntry e) {
         this.flags = e.flags();
         this.freshUntil = e.freshUntil();
         this.lastModified = e.lastModified();
@@ -110,7 +110,7 @@ public class indexRWIVarEntry implements indexRWIEntry {
     }
     
     public indexRWIVarEntry clone() {
-        indexRWIVarEntry c = new indexRWIVarEntry(
+        final indexRWIVarEntry c = new indexRWIVarEntry(
                 this.urlHash,
                 this.urllength,
                 this.urlcomps,
@@ -133,7 +133,7 @@ public class indexRWIVarEntry implements indexRWIEntry {
         return c;
     }
     
-    public void join(indexRWIVarEntry oe) {
+    public void join(final indexRWIVarEntry oe) {
         // combine the distance
         this.worddistance = this.worddistance + oe.worddistance + Math.abs(this.posintext - oe.posintext);
         this.posintext = Math.min(this.posintext, oe.posintext);
@@ -165,12 +165,12 @@ public class indexRWIVarEntry implements indexRWIEntry {
         return hitcount;
     }
 
-    public boolean isNewer(indexRWIEntry other) {
+    public boolean isNewer(final indexRWIEntry other) {
         assert false; // should not be used
         return false;
     }
 
-    public boolean isOlder(indexRWIEntry other) {
+    public boolean isOlder(final indexRWIEntry other) {
         assert false; // should not be used
         return false;
     }
@@ -262,7 +262,7 @@ public class indexRWIVarEntry implements indexRWIEntry {
         return this.termFrequency;
     }
     
-    public final void min(indexRWIVarEntry other) {
+    public final void min(final indexRWIVarEntry other) {
         int v;
         long w;
         double d;
@@ -284,7 +284,7 @@ public class indexRWIVarEntry implements indexRWIEntry {
         if (this.termFrequency > (d = other.termFrequency)) this.termFrequency = d;
     }
     
-    public final void max(indexRWIVarEntry other) {
+    public final void max(final indexRWIVarEntry other) {
         int v;
         long w;
         double d;
@@ -306,7 +306,7 @@ public class indexRWIVarEntry implements indexRWIEntry {
         if (this.termFrequency < (d = other.termFrequency)) this.termFrequency = d;
     }
 
-    public void join(indexRWIEntry oe) {
+    public void join(final indexRWIEntry oe) {
         // joins two entries into one entry
         
         // combine the distance

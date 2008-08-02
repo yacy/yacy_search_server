@@ -32,10 +32,10 @@ public class indexPhrase {
     // object carries statistics for words and sentences
     
     private int count;             // number of occurrences
-    private int handle;            // unique handle, is initialized with sentence counter
-    private HashSet<Integer> hash; //
+    private final int handle;            // unique handle, is initialized with sentence counter
+    private final HashSet<Integer> hash; //
 
-    public indexPhrase(int handle) {
+    public indexPhrase(final int handle) {
         this.count = 1;
         this.handle = handle;
         this.hash = new HashSet<Integer>();
@@ -53,7 +53,7 @@ public class indexPhrase {
         count++;
     }
 
-    public void check(int i) {
+    public void check(final int i) {
         hash.add(new Integer(i));
     }
 

@@ -46,10 +46,10 @@ import de.anomic.yacy.yacySeed;
 public final class transferURL {
 
     
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) throws InterruptedException {
-        long start = System.currentTimeMillis();
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) throws InterruptedException {
+        final long start = System.currentTimeMillis();
         long freshdate = 0;
-        try {freshdate = serverDate.parseShortDay("20061101").getTime();} catch (ParseException e1) {}
+        try {freshdate = serverDate.parseShortDay("20061101").getTime();} catch (final ParseException e1) {}
         
         // return variable that accumulates replacements
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
@@ -105,7 +105,7 @@ public final class transferURL {
                 }
                 
                 // check if entry is well-formed
-                indexURLReference.Components comp = lEntry.comp();
+                final indexURLReference.Components comp = lEntry.comp();
                 if (comp.url() == null) {
                     yacyCore.log.logWarning("transferURL: received invalid URL from peer " + otherPeerName + "\n\tURL Property: " + urls);
                     blocked++;
@@ -128,7 +128,7 @@ public final class transferURL {
                 }
                 
                 // check if the entry is in our network domain
-                String urlRejectReason = sb.acceptURL(comp.url());
+                final String urlRejectReason = sb.acceptURL(comp.url());
                 if (urlRejectReason != null) {
                     yacyCore.log.logFine("transferURL: blocked URL '" + comp.url() + "' (" + urlRejectReason + ") from peer " + otherPeerName);
                     lEntry = null;
@@ -142,7 +142,7 @@ public final class transferURL {
                     sb.crawlResults.stack(lEntry, iam, iam, 3);
                     yacyCore.log.logFine("transferURL: received URL '" + comp.url().toNormalform(false, true) + "' from peer " + otherPeerName);
                     received++;
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     e.printStackTrace();
                 }
             }

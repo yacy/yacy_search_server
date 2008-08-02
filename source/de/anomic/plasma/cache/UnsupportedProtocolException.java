@@ -11,11 +11,11 @@ public class UnsupportedProtocolException extends Exception {
     
     public static final String MESSAGE = "Unsupported protocol error: ";
     
-    public UnsupportedProtocolException(String protocol) {
+    public UnsupportedProtocolException(final String protocol) {
         super(MESSAGE + protocol);
     }
     
-    public UnsupportedProtocolException(String protocol, Throwable cause) {
+    public UnsupportedProtocolException(final String protocol, final Throwable cause) {
         super(MESSAGE + protocol, cause);
     }
 }

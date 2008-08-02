@@ -46,7 +46,7 @@ public interface indexReferenceBlacklist {
         private final String filename;
         private final String type;
         
-        public blacklistFile(String filename, String type) {
+        public blacklistFile(final String filename, final String type) {
             this.filename = filename;
             this.type = type;
         }
@@ -61,7 +61,7 @@ public interface indexReferenceBlacklist {
          * @return unified String array of file names
          */
         public String[] getFileNamesUnified() {
-            HashSet<String> hs = new HashSet<String>(Arrays.asList(this.filename.split(",")));
+            final HashSet<String> hs = new HashSet<String>(Arrays.asList(this.filename.split(",")));
             
             return hs.toArray(new String[hs.size()]);
         }

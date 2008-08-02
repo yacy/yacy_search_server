@@ -31,11 +31,11 @@ import de.anomic.server.serverSwitch;
 public class blacklists_p {
     
     
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
-        serverObjects prop = new serverObjects();
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+        final serverObjects prop = new serverObjects();
         
         listManager.listsPath = new File(listManager.switchboard.getRootPath(),listManager.switchboard.getConfig("listManager.listsPath", "DATA/LISTS"));
-        String[] dirlist = listManager.getDirListing(listManager.listsPath);
+        final String[] dirlist = listManager.getDirListing(listManager.listsPath);
         int blacklistCount=0;
         
         ArrayList<String> list;
@@ -50,7 +50,7 @@ public class blacklists_p {
                     prop.put("lists_" + blacklistCount + "_shared", "0");
                 }
                 
-                String[] types = indexAbstractReferenceBlacklist.BLACKLIST_TYPES_STRING.split(",");
+                final String[] types = indexAbstractReferenceBlacklist.BLACKLIST_TYPES_STRING.split(",");
                 for (int j=0; j<types.length; j++) {
                     prop.put("lists_" + blacklistCount + "_types_" + j + "_name", types[j]);
                     prop.put("lists_" + blacklistCount + "_types_" + j + "_value",
@@ -62,7 +62,7 @@ public class blacklists_p {
                 
                 count=0;
                 for (int j=0;j<list.size();++j){
-                    String nextEntry = list.get(j);
+                    final String nextEntry = list.get(j);
                     
                     if (nextEntry.length() == 0) continue;
                     if (nextEntry.startsWith("#")) continue;

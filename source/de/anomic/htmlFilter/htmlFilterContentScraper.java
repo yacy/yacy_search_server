@@ -78,12 +78,12 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
     // class variables: collectors for links
     private HashMap<yacyURL, String> anchors;
     private HashMap<String, htmlFilterImageEntry> images; // urlhash/image relation
-    private HashMap<String, String> metas;
+    private final HashMap<String, String> metas;
     private String title;
     //private String headline;
     private List<String>[] headlines;
     private serverCharBuffer content;
-    private EventListenerList htmlFilterEventListeners = new EventListenerList();
+    private final EventListenerList htmlFilterEventListeners = new EventListenerList();
     
     /**
      * {@link yacyURL} to the favicon that belongs to the document
@@ -96,7 +96,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
     private yacyURL root;
 
     @SuppressWarnings("unchecked")
-    public htmlFilterContentScraper(yacyURL root) {
+    public htmlFilterContentScraper(final yacyURL root) {
         // the root value here will not be used to load the resource.
         // it is only the reference for relative links
         super(linkTags0, linkTags1);
@@ -110,13 +110,13 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         this.content = new serverCharBuffer(1024);
     }
     
-    public final static boolean punctuation(char c) {
+    public final static boolean punctuation(final char c) {
         return (c == '.') || (c == '!') || (c == '?');
     }
     
-    public void scrapeText(char[] newtext, String insideTag) {
+    public void scrapeText(final char[] newtext, final String insideTag) {
         // System.out.println("SCRAPE: " + new String(newtext));
-        serverCharBuffer b = super.stripAll(new serverCharBuffer(newtext, newtext.length + 1)).trim();
+        final serverCharBuffer b = super.stripAll(new serverCharBuffer(newtext, newtext.length + 1)).trim();
         if ((insideTag != null) && (!(insideTag.equals("a")))) {
             // texts inside tags sometimes have no punctuation at the line end
             // this is bad for the text sematics, because it is not possible for the
@@ -131,33 +131,33 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
 
     public static final String splitrex = " |/|\\(|\\)|-|\\:|_|\\.|,|\\?|!|'|" + '"';
     public static String[] urlComps(String normalizedURL) {
-        int p = normalizedURL.indexOf("//");
+        final int p = normalizedURL.indexOf("//");
         if (p > 0) normalizedURL = normalizedURL.substring(p + 2);
         return normalizedURL.toLowerCase().split(splitrex); // word components of the url
     }
     
-    private yacyURL absolutePath(String relativePath) {
+    private yacyURL absolutePath(final String relativePath) {
         try {
             return yacyURL.newURL(root, relativePath);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             return null;
         }
     }
 
-    public void scrapeTag0(String tagname, Properties tagopts) {
+    public void scrapeTag0(final String tagname, final Properties tagopts) {
         if (tagname.equalsIgnoreCase("img")) {
             int width = -1, height = -1;
             try {
                 width = Integer.parseInt(tagopts.getProperty("width", "-1"));
                 height = Integer.parseInt(tagopts.getProperty("height", "-1"));
-            } catch (NumberFormatException e) {}
-            yacyURL url = absolutePath(tagopts.getProperty("src", ""));
-            htmlFilterImageEntry ie = new htmlFilterImageEntry(url, tagopts.getProperty("alt",""), width, height);
+            } catch (final NumberFormatException e) {}
+            final yacyURL url = absolutePath(tagopts.getProperty("src", ""));
+            final htmlFilterImageEntry ie = new htmlFilterImageEntry(url, tagopts.getProperty("alt",""), width, height);
             addImage(images, ie);
         }
         if (tagname.equalsIgnoreCase("base")) try {
             root = new yacyURL(tagopts.getProperty("href", ""), null);
-        } catch (MalformedURLException e) {}
+        } catch (final MalformedURLException e) {}
         if (tagname.equalsIgnoreCase("frame")) {
             anchors.put(absolutePath(tagopts.getProperty("src", "")), tagopts.getProperty("name",""));
         }
@@ -173,20 +173,20 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
             }
         }
         if (tagname.equalsIgnoreCase("area")) {
-            String areatitle = cleanLine(tagopts.getProperty("title",""));
+            final String areatitle = cleanLine(tagopts.getProperty("title",""));
             //String alt   = tagopts.getProperty("alt","");
-            String href  = tagopts.getProperty("href", "");
+            final String href  = tagopts.getProperty("href", "");
             if (href.length() > 0) anchors.put(absolutePath(href), areatitle);
         }
         if (tagname.equalsIgnoreCase("link")) {
-            yacyURL newLink = absolutePath(tagopts.getProperty("href", ""));
+            final yacyURL newLink = absolutePath(tagopts.getProperty("href", ""));
 
             if (newLink != null) {
-                String type = tagopts.getProperty("rel", "");
-                String linktitle = tagopts.getProperty("title", "");
+                final String type = tagopts.getProperty("rel", "");
+                final String linktitle = tagopts.getProperty("title", "");
 
                 if (type.equalsIgnoreCase("shortcut icon")) {
-                    htmlFilterImageEntry ie = new htmlFilterImageEntry(newLink, linktitle, -1,-1);
+                    final htmlFilterImageEntry ie = new htmlFilterImageEntry(newLink, linktitle, -1,-1);
                     images.put(ie.url().hash(), ie);    
                     this.favicon = newLink;
                 } else if (!type.equalsIgnoreCase("stylesheet") && !type.equalsIgnoreCase("alternate stylesheet")) {
@@ -199,7 +199,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
             anchors.put(absolutePath(tagopts.getProperty("src", "")), tagopts.getProperty("name",""));
         }
         if (tagname.equalsIgnoreCase("param")) {
-            String name = tagopts.getProperty("name", "");
+            final String name = tagopts.getProperty("name", "");
             if (name.equalsIgnoreCase("movie")) {
                 anchors.put(absolutePath(tagopts.getProperty("value", "")),name);
             }
@@ -210,18 +210,18 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         fireScrapeTag0(tagname, tagopts);
     }
     
-    public void scrapeTag1(String tagname, Properties tagopts, char[] text) {
+    public void scrapeTag1(final String tagname, final Properties tagopts, final char[] text) {
         // System.out.println("ScrapeTag1: tagname=" + tagname + ", opts=" + tagopts.toString() + ", text=" + new String(text));
         if ((tagname.equalsIgnoreCase("a")) && (text.length < 2048)) {
-            String href = tagopts.getProperty("href", "");
+            final String href = tagopts.getProperty("href", "");
             yacyURL url;
             if ((href.length() > 0) && ((url = absolutePath(href)) != null)) {
-                String f = url.getFile();
-                int p = f.lastIndexOf('.');
-                String type = (p < 0) ? "" : f.substring(p + 1);
+                final String f = url.getFile();
+                final int p = f.lastIndexOf('.');
+                final String type = (p < 0) ? "" : f.substring(p + 1);
                 if (type.equals("png") || type.equals("gif") || type.equals("jpg") || type.equals("jpeg")) {
                     // special handling of such urls: put them to the image urls
-                    htmlFilterImageEntry ie = new htmlFilterImageEntry(url, super.stripAll(new serverCharBuffer(text)).trim().toString(), -1, -1);
+                    final htmlFilterImageEntry ie = new htmlFilterImageEntry(url, super.stripAll(new serverCharBuffer(text)).trim().toString(), -1, -1);
                     addImage(images, ie);
                 } else {
                     anchors.put(url, super.stripAll(new serverCharBuffer(text)).trim().toString());
@@ -311,9 +311,9 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         return cleanLine(content.trim().toString());
     }
     
-    public String[] getHeadlines(int i) {
+    public String[] getHeadlines(final int i) {
         assert ((i >= 1) && (i <= 4));
-        String[] s = new String[headlines[i - 1].size()];
+        final String[] s = new String[headlines[i - 1].size()];
         for (int j = 0; j < headlines[i - 1].size(); j++) s[j] = headlines[i - 1].get(j);
         return s;
     }
@@ -322,10 +322,10 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         return this.getText("UTF-8");
     }
     
-    public byte[] getText(String charSet) {
+    public byte[] getText(final String charSet) {
         try {
             return content.toString().getBytes(charSet);
-        } catch (UnsupportedEncodingException e) {
+        } catch (final UnsupportedEncodingException e) {
             return content.toString().getBytes();
         }
     }
@@ -367,7 +367,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
     }
     
     public String getContentType() {
-        String s = metas.get("content-type");
+        final String s = metas.get("content-type");
         if (s == null) return ""; else return s;
     }
     
@@ -398,13 +398,13 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
     }
     
     public int getRefreshSeconds() {
-        String s = metas.get("refresh");
+        final String s = metas.get("refresh");
         if (s == null) return 9999; else try {
-            int pos = s.indexOf(';');
+            final int pos = s.indexOf(';');
             if (pos < 0) return 9999;
-            int i = Integer.parseInt(s.substring(0, pos));
+            final int i = Integer.parseInt(s.substring(0, pos));
             return i;
-        } catch (NumberFormatException e) {
+        } catch (final NumberFormatException e) {
             return 9999;
         }
     }
@@ -412,7 +412,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
     public String getRefreshPath() {
         String s = metas.get("refresh");
         if (s == null) return ""; else {
-            int pos = s.indexOf(';');
+            final int pos = s.indexOf(';');
             if (pos < 0) return "";
             s = s.substring(pos + 1);
             if (s.toLowerCase().startsWith("url=")) return s.substring(4).trim(); else return "";
@@ -445,20 +445,20 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         System.out.println("TEXT     :" + content.toString());
     }
 
-    public void registerHtmlFilterEventListener(htmlFilterEventListener listener) {
+    public void registerHtmlFilterEventListener(final htmlFilterEventListener listener) {
         if (listener != null) {
             this.htmlFilterEventListeners.add(htmlFilterEventListener.class, listener);
         }        
     }
 
-    public void deregisterHtmlFilterEventListener(htmlFilterEventListener listener) {
+    public void deregisterHtmlFilterEventListener(final htmlFilterEventListener listener) {
         if (listener != null) {
             this.htmlFilterEventListeners.remove(htmlFilterEventListener.class, listener);
         }        
     }
     
-    void fireScrapeTag0(String tagname, Properties tagopts) {
-        Object[] listeners = this.htmlFilterEventListeners.getListenerList();
+    void fireScrapeTag0(final String tagname, final Properties tagopts) {
+        final Object[] listeners = this.htmlFilterEventListeners.getListenerList();
         for (int i=0; i<listeners.length; i+=2) {
             if (listeners[i]==htmlFilterEventListener.class) {
                     ((htmlFilterEventListener)listeners[i+1]).scrapeTag0(tagname, tagopts);
@@ -466,8 +466,8 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         }
     }    
     
-    void fireScrapeTag1(String tagname, Properties tagopts, char[] text) {
-        Object[] listeners = this.htmlFilterEventListeners.getListenerList();
+    void fireScrapeTag1(final String tagname, final Properties tagopts, final char[] text) {
+        final Object[] listeners = this.htmlFilterEventListeners.getListenerList();
         for (int i=0; i<listeners.length; i+=2) {
             if (listeners[i]==htmlFilterEventListener.class) {
                     ((htmlFilterEventListener)listeners[i+1]).scrapeTag1(tagname, tagopts, text);
@@ -475,36 +475,36 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         }
     }
     
-    public static htmlFilterContentScraper parseResource(File file) throws IOException {
+    public static htmlFilterContentScraper parseResource(final File file) throws IOException {
         // load page
-        byte[] page = serverFileUtils.read(file);
+        final byte[] page = serverFileUtils.read(file);
         if (page == null) throw new IOException("no content in file " + file.toString());
         
         // scrape content
-        htmlFilterContentScraper scraper = new htmlFilterContentScraper(new yacyURL("http://localhost", null));
-        Writer writer = new htmlFilterWriter(null, null, scraper, null, false);
+        final htmlFilterContentScraper scraper = new htmlFilterContentScraper(new yacyURL("http://localhost", null));
+        final Writer writer = new htmlFilterWriter(null, null, scraper, null, false);
         serverFileUtils.copy(new ByteArrayInputStream(page), writer, "UTF-8");
         
         return scraper;
     }
     
-    public static htmlFilterContentScraper parseResource(yacyURL location) throws IOException {
+    public static htmlFilterContentScraper parseResource(final yacyURL location) throws IOException {
         // load page
-        httpHeader reqHeader = new httpHeader();
+        final httpHeader reqHeader = new httpHeader();
         reqHeader.put(httpHeader.USER_AGENT, HTTPLoader.crawlerUserAgent);
-        byte[] page = HttpClient.wget(location.toString(), reqHeader, 10000);
+        final byte[] page = HttpClient.wget(location.toString(), reqHeader, 10000);
         if (page == null) throw new IOException("no response from url " + location.toString());
         
         // scrape content
-        htmlFilterContentScraper scraper = new htmlFilterContentScraper(location);
-        Writer writer = new htmlFilterWriter(null, null, scraper, null, false);
+        final htmlFilterContentScraper scraper = new htmlFilterContentScraper(location);
+        final Writer writer = new htmlFilterWriter(null, null, scraper, null, false);
         serverFileUtils.copy(new ByteArrayInputStream(page), writer, "UTF-8");
         
         return scraper;
     }
     
-    public static void addAllImages(HashMap<String, htmlFilterImageEntry> a, HashMap<String, htmlFilterImageEntry> b) {
-        Iterator<Map.Entry<String, htmlFilterImageEntry>> i = b.entrySet().iterator();
+    public static void addAllImages(final HashMap<String, htmlFilterImageEntry> a, final HashMap<String, htmlFilterImageEntry> b) {
+        final Iterator<Map.Entry<String, htmlFilterImageEntry>> i = b.entrySet().iterator();
         Map.Entry<String, htmlFilterImageEntry> ie;
         while (i.hasNext()) {
             ie = i.next();
@@ -512,7 +512,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         }
     }
     
-    public static void addImage(HashMap<String, htmlFilterImageEntry> a, htmlFilterImageEntry ie) {
+    public static void addImage(final HashMap<String, htmlFilterImageEntry> a, final htmlFilterImageEntry ie) {
         if (a.containsKey(ie.url().hash())) {
             // in case of a collision, take that image that has the better image size tags
             if ((ie.height() > 0) && (ie.width() > 0)) a.put(ie.url().hash(), ie);

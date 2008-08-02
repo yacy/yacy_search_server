@@ -33,15 +33,16 @@ import java.util.TreeMap;
 public final class kelondroBufferedIOChunks extends kelondroAbstractIOChunks implements kelondroIOChunks {
 
     protected kelondroRA ra;
-    private long bufferMaxSize, bufferCurrSize;
-    private long commitTimeout;
-    private TreeMap<Long, byte[]> buffer;
+    private final long bufferMaxSize;
+	private long	bufferCurrSize;
+    private final long commitTimeout;
+    private final TreeMap<Long, byte[]> buffer;
     private long lastCommit = 0;
     
     private static final int overhead = 40;
     
     
-    public kelondroBufferedIOChunks(kelondroRA ra, String name, long buffer, long commitTimeout) {
+    public kelondroBufferedIOChunks(final kelondroRA ra, final String name, final long buffer, final long commitTimeout) {
         this.name = name;
         this.ra = ra;
         this.bufferMaxSize = buffer;
@@ -59,7 +60,7 @@ public final class kelondroBufferedIOChunks extends kelondroAbstractIOChunks imp
         return ra.length();
     }
     
-    public synchronized int read(long pos, byte[] b, int off, int len) throws IOException {
+    public synchronized int read(final long pos, final byte[] b, final int off, final int len) throws IOException {
         assert (b.length >= off + len): "read pos=" + pos  + ", b.length=" + b.length + ", off=" + off + ", len=" + len;
         
         // check commit time
@@ -71,7 +72,7 @@ public final class kelondroBufferedIOChunks extends kelondroAbstractIOChunks imp
 
         // do the read
         synchronized (this.buffer) {
-            byte[] bb = buffer.get(new Long(pos));
+            final byte[] bb = buffer.get(new Long(pos));
             if (bb == null) {
                 // entry not known, read directly from IO
                 synchronized (this.ra) {
@@ -91,13 +92,13 @@ public final class kelondroBufferedIOChunks extends kelondroAbstractIOChunks imp
         }
     }
 
-    public synchronized void write(long pos, byte[] b, int off, int len) throws IOException {
+    public synchronized void write(final long pos, final byte[] b, final int off, final int len) throws IOException {
         assert (b.length >= off + len): "write pos=" + pos + ", b.length=" + b.length + ", b='" + new String(b) + "', off=" + off + ", len=" + len;
 
         //if (len > 10) System.out.println("WRITE(" + name + ", " + pos + ", " + b.length + ", "  + off + ", "  + len + ")");
         
         // do the write into buffer
-        byte[] bb = kelondroObjectSpace.alloc(len);
+        final byte[] bb = kelondroObjectSpace.alloc(len);
         System.arraycopy(b, off, bb, 0, len);
         synchronized (buffer) {
             buffer.put(new Long(pos + off), bb);
@@ -115,7 +116,7 @@ public final class kelondroBufferedIOChunks extends kelondroAbstractIOChunks imp
     public synchronized void commit() throws IOException {
         synchronized (buffer) {
             if (buffer.size() == 0) return;
-            Iterator<Map.Entry<Long, byte[]>> i = buffer.entrySet().iterator();
+            final Iterator<Map.Entry<Long, byte[]>> i = buffer.entrySet().iterator();
             Map.Entry<Long, byte[]> entry = i.next();
             long lastPos = (entry.getKey()).longValue();
             byte[] lastChunk = entry.getValue();

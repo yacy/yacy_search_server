@@ -29,11 +29,11 @@ public final class serverSemaphore  {
     private long currentValue = 0;    
     private long maximumValue = Long.MAX_VALUE;
 
-    public serverSemaphore(long initialValue)  {
+    public serverSemaphore(final long initialValue)  {
         this(initialValue,Long.MAX_VALUE);
     }    
 
-    protected serverSemaphore(long initialValue, long maxValue) {
+    protected serverSemaphore(final long initialValue, final long maxValue) {
         /* some errorhandling */
         if (maxValue < initialValue) {
             throw new IllegalArgumentException("The semaphore maximum value must not be " +
@@ -61,7 +61,7 @@ public final class serverSemaphore  {
          if (this.currentValue < 0) {    
              try  { 
                  wait();
-             } catch(InterruptedException e) { 
+             } catch(final InterruptedException e) { 
                  this.currentValue++;
                  throw e;
              }

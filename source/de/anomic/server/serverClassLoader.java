@@ -41,7 +41,7 @@ public final class serverClassLoader extends ClassLoader {
         this.classes = new HashMap<File, Class<?>>();
     }
 
-    public serverClassLoader(ClassLoader parent) {
+    public serverClassLoader(final ClassLoader parent) {
         super(parent);
         classes = new HashMap<File, Class<?>>();
     }
@@ -50,7 +50,7 @@ public final class serverClassLoader extends ClassLoader {
         return super.getPackages();
     }
 
-    public Class<?> loadClass(File classfile) throws ClassNotFoundException {
+    public Class<?> loadClass(final File classfile) throws ClassNotFoundException {
         // we consider that the classkey can either be only the name of a class, or a partial or
         // complete path to a class file
         
@@ -60,7 +60,7 @@ public final class serverClassLoader extends ClassLoader {
         String classFileName = null;
         try {
             classFileName = classfile.getCanonicalPath();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new ClassNotFoundException("Unable to resolve the classfile path");
         }
         // try to load the class
@@ -95,8 +95,8 @@ public final class serverClassLoader extends ClassLoader {
                     packge += ".";
                 }
             }
-            int p = classFileName.indexOf(".", endPackage);
-            String classname = packge + classFileName.substring(endPackage + 1, p);
+            final int p = classFileName.indexOf(".", endPackage);
+            final String classname = packge + classFileName.substring(endPackage + 1, p);
             
             // now that we have the name, we can create the real class file
             //classfile = new File(classkey + ".class");
@@ -127,11 +127,11 @@ public final class serverClassLoader extends ClassLoader {
                 c = this.defineClass(null, b, 0, b.length);
                 resolveClass(c);
                 this.classes.put(classfile, c);
-            } catch (LinkageError ee) {
+            } catch (final LinkageError ee) {
                 c = findLoadedClass(classname);
                 if (c!=null) return c;                
                 serverLog.logSevere("ClassLoader", "class "+ classname +" not defined: "+ ee);
-            } catch (IOException ee) {
+            } catch (final IOException ee) {
                 //System.out.println("INTERNAL ERROR2 in cachedClassLoader: " + ee.getMessage());
                 throw new ClassNotFoundException(classfile.toString());
             }

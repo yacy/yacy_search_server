@@ -49,25 +49,25 @@ import de.anomic.yacy.yacyURL;
  */
 public class ysearch {
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         sb.localSearchLastAccess = System.currentTimeMillis();
         
-        boolean searchAllowed = sb.getConfigBool("publicSearchpage", true) || sb.verifyAuthentication(header, false);
-        boolean authenticated = sb.adminAuthenticated(header) >= 2;
+        final boolean searchAllowed = sb.getConfigBool("publicSearchpage", true) || sb.verifyAuthentication(header, false);
+        final boolean authenticated = sb.adminAuthenticated(header) >= 2;
         int display = (post == null) ? 0 : post.getInt("display", 0);
         if ((display == 1) && (!authenticated)) display = 0;
-        int input = (post == null) ? 2 : post.getInt("input", 2);
+        final int input = (post == null) ? 2 : post.getInt("input", 2);
         String promoteSearchPageGreeting = env.getConfig("promoteSearchPageGreeting", "");
         if (env.getConfigBool("promoteSearchPageGreeting.useNetworkName", false)) promoteSearchPageGreeting = env.getConfig("network.unit.description", "");
         if (promoteSearchPageGreeting.length() == 0) promoteSearchPageGreeting = "P2P WEB SEARCH";
-        String client = header.get(httpHeader.CONNECTION_PROP_CLIENTIP); // the search client who initiated the search
+        final String client = header.get(httpHeader.CONNECTION_PROP_CLIENTIP); // the search client who initiated the search
         
         // get query
         String querystring = (post == null) ? "" : post.get("search", "").trim();
         final serverObjects prop = new serverObjects();
         
-        boolean rss = (post == null) ? false : post.get("rss", "false").equals("true");
+        final boolean rss = (post == null) ? false : post.get("rss", "false").equals("true");
         if ((post == null) || (env == null) || (querystring.length() == 0) || (!searchAllowed)) {
             // we create empty entries for template strings
             prop.put("searchagain", "0");
@@ -129,7 +129,7 @@ public class ysearch {
             constraint.set(plasmaCondenser.flag_cat_indexof, true);
         }
         
-        int domainzone = (post == null ? yacyURL.TLD_any_zone_filter : post.getInt("zone", yacyURL.TLD_any_zone_filter));
+        final int domainzone = (post == null ? yacyURL.TLD_any_zone_filter : post.getInt("zone", yacyURL.TLD_any_zone_filter));
         
         // SEARCH
         //final boolean indexDistributeGranted = sb.getConfig(plasmaSwitchboard.INDEX_DIST_ALLOW, "true").equals("true");
@@ -142,7 +142,7 @@ public class ysearch {
         if (clustersearch) global = true; // switches search on, but search target is limited to cluster nodes
         
         // find search domain
-        int contentdomCode = plasmaSearchQuery.contentdomParser((post == null ? "text" : post.get("contentdom", "text")));
+        final int contentdomCode = plasmaSearchQuery.contentdomParser((post == null ? "text" : post.get("contentdom", "text")));
         
         // patch until better search profiles are available
         if ((contentdomCode != plasmaSearchQuery.CONTENTDOM_TEXT) && (itemsPerPage <= 32)) itemsPerPage = 32;
@@ -154,19 +154,19 @@ public class ysearch {
         if (trackerHandles.tailSet(new Long(System.currentTimeMillis() -   3000)).size() >  1) try {
             Thread.sleep(3000);
             block = true;
-        } catch (InterruptedException e) { e.printStackTrace(); }
+        } catch (final InterruptedException e) { e.printStackTrace(); }
         if (trackerHandles.tailSet(new Long(System.currentTimeMillis() -  60000)).size() > 12) try {
             Thread.sleep(10000);
             block = true;
-        } catch (InterruptedException e) { e.printStackTrace(); }
+        } catch (final InterruptedException e) { e.printStackTrace(); }
         if (trackerHandles.tailSet(new Long(System.currentTimeMillis() - 600000)).size() > 36) try {
             Thread.sleep(30000);
             block = true;
-        } catch (InterruptedException e) { e.printStackTrace(); }
+        } catch (final InterruptedException e) { e.printStackTrace(); }
         
         if ((!block) && (post == null || post.get("cat", "href").equals("href"))) {
 
-            plasmaSearchRankingProfile ranking = sb.getRanking();
+            final plasmaSearchRankingProfile ranking = sb.getRanking();
             final TreeSet<String>[] query = plasmaSearchQuery.cleanQuery(querystring); // converts also umlaute
             if ((query[0].contains("near")) && (querystring.indexOf("NEAR") >= 0)) {
                 query[0].remove("near");
@@ -188,8 +188,8 @@ public class ysearch {
             final boolean globalsearch = (global) && (yacyonline) && (sb.getConfigBool(plasmaSwitchboard.INDEX_RECEIVE_ALLOW, false));
         
             // do the search
-            TreeSet<String> queryHashes = indexWord.words2hashes(query[0]);
-            plasmaSearchQuery theQuery = new plasmaSearchQuery(
+            final TreeSet<String> queryHashes = indexWord.words2hashes(query[0]);
+            final plasmaSearchQuery theQuery = new plasmaSearchQuery(
         			querystring,
         			queryHashes,
         			indexWord.words2hashes(query[1]),
@@ -221,14 +221,14 @@ public class ysearch {
             // log
             serverLog.logInfo("LOCAL_SEARCH", "INIT WORD SEARCH: " + theQuery.queryString + ":" + theQuery.queryHashes + " - " + theQuery.neededResults() + " links to be computed, " + theQuery.displayResults() + " lines to be displayed");
             RSSFeed.channels(RSSFeed.LOCALSEARCH).addMessage(new RSSMessage("Local Search Request", theQuery.queryString, ""));
-            long timestamp = System.currentTimeMillis();
+            final long timestamp = System.currentTimeMillis();
 
             // create a new search event
             if (plasmaSearchEvent.getEvent(theQuery.id(false)) == null) {
                 theQuery.setOffset(0); // in case that this is a new search, always start without a offset 
                 offset = 0;
             }
-            plasmaSearchEvent theSearch = plasmaSearchEvent.getEvent(theQuery, ranking, sb.webIndex, sb.crawlResults, (sb.isRobinsonMode()) ? sb.clusterhashes : null, false);
+            final plasmaSearchEvent theSearch = plasmaSearchEvent.getEvent(theQuery, ranking, sb.webIndex, sb.crawlResults, (sb.isRobinsonMode()) ? sb.clusterhashes : null, false);
             
             // generate result object
             //serverLog.logFine("LOCAL_SEARCH", "SEARCH TIME AFTER ORDERING OF SEARCH RESULTS: " + (System.currentTimeMillis() - timestamp) + " ms");
@@ -253,7 +253,7 @@ public class ysearch {
             trackerHandles.add(theQuery.handle);
             sb.localSearchTracker.put(client, trackerHandles);
             
-            int totalcount = theSearch.getRankingResult().getLocalResourceSize() + theSearch.getRankingResult().getRemoteResourceSize();
+            final int totalcount = theSearch.getRankingResult().getLocalResourceSize() + theSearch.getRankingResult().getRemoteResourceSize();
             prop.put("num-results_offset", offset);
             prop.put("num-results_itemscount", "0");
             prop.put("num-results_itemsPerPage", itemsPerPage);

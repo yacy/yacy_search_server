@@ -45,8 +45,8 @@ public class WebStructurePicture_p {
     
     private static final double maxlongd = Long.MAX_VALUE;
     
-    public static ymageMatrix respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
-        plasmaSwitchboard sb = (plasmaSwitchboard) env;
+    public static ymageMatrix respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         
         int width = 768;
         int height = 576;
@@ -73,7 +73,7 @@ public class WebStructurePicture_p {
         if (depth < 0) depth = 0;
         
         // calculate target time
-        long timeout = (time < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + (time * 8 / 10);
+        final long timeout = (time < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + (time * 8 / 10);
         
         // find start point
         if ((host == null) || (host.length() == 0) || (host.equals("auto"))) {
@@ -91,11 +91,11 @@ public class WebStructurePicture_p {
             String hash = null;
             try {
                 hash = (new yacyURL("http://" + host, null)).hash().substring(6);
-            } catch (MalformedURLException e) {e.printStackTrace();}
+            } catch (final MalformedURLException e) {e.printStackTrace();}
             assert (sb.webStructure.references(hash) != null);
             
             // recursively find domains, up to a specific depth
-            ymageGraph graph = new ymageGraph();
+            final ymageGraph graph = new ymageGraph();
             if (host != null) place(graph, sb.webStructure, hash, host, nodes, timeout, 0.0, 0.0, 0, depth);
             //graph.print();
             
@@ -111,7 +111,7 @@ public class WebStructurePicture_p {
         
     }
     
-    private static final int place(ymageGraph graph, plasmaWebStructure structure, String centerhash, String centerhost, int maxnodes, long timeout, double x, double y, int nextlayer, int maxlayer) {
+    private static final int place(final ymageGraph graph, final plasmaWebStructure structure, final String centerhash, final String centerhost, int maxnodes, final long timeout, final double x, final double y, int nextlayer, final int maxlayer) {
         // returns the number of nodes that had been placed
         assert centerhost != null;
         ymageGraph.coordinate center = graph.getPoint(centerhost);
@@ -123,13 +123,13 @@ public class WebStructurePicture_p {
         }
         if (nextlayer == maxlayer) return mynodes;
         nextlayer++;
-        double radius = 1.0 / (1 << nextlayer);
-        Map<String, Integer> next = structure.references(centerhash);
+        final double radius = 1.0 / (1 << nextlayer);
+        final Map<String, Integer> next = structure.references(centerhash);
         Map.Entry<String, Integer> entry;
         String targethash, targethost;
         // first set points to next hosts
-        Iterator<Map.Entry<String, Integer>> i = next.entrySet().iterator();
-        ArrayList<String[]> targets = new ArrayList<String[]>();
+        final Iterator<Map.Entry<String, Integer>> i = next.entrySet().iterator();
+        final ArrayList<String[]> targets = new ArrayList<String[]>();
         int maxtargetrefs = 8, maxthisrefs = 8;
         int targetrefs, thisrefs;
         double rr, re;
@@ -145,7 +145,7 @@ public class WebStructurePicture_p {
             targets.add(new String[] {targethash, targethost});
             if (graph.getPoint(targethost) != null) continue;
             // set a new point. It is placed on a circle around the host point
-            double angle = kelondroBase64Order.enhancedCoder.cardinal((targethash + "____").getBytes()) / maxlongd * 2 * Math.PI;
+            final double angle = kelondroBase64Order.enhancedCoder.cardinal((targethash + "____").getBytes()) / maxlongd * 2 * Math.PI;
             //System.out.println("ANGLE = " + angle);
             rr = radius * 0.25 * (1 - targetrefs / maxtargetrefs);
             re = radius * 0.5 * (thisrefs / maxthisrefs);
@@ -154,14 +154,14 @@ public class WebStructurePicture_p {
             mynodes++;
         }
         // recursively set next hosts
-        Iterator<String[]> j = targets.iterator();
+        final Iterator<String[]> j = targets.iterator();
         String[] target;
         int nextnodes;
         while (j.hasNext()) {
             target = j.next();
             targethash = target[0];
             targethost = target[1];
-            ymageGraph.coordinate c = graph.getPoint(targethost);
+            final ymageGraph.coordinate c = graph.getPoint(targethost);
             assert c != null;
             nextnodes = ((maxnodes <= 0) || (System.currentTimeMillis() >= timeout)) ? 0 : place(graph, structure, targethash, targethost, maxnodes, timeout, c.x, c.y, nextlayer, maxlayer);
             mynodes += nextnodes;

@@ -78,10 +78,10 @@ public final class plasmaSearchQuery {
     public long searchtime, urlretrievaltime, snippetcomputationtime; // time to perform the search, to get all the urls, and to compute the snippets
     public boolean specialRights; // is true if the user has a special authorization and my use more database-extensive options
     
-    public plasmaSearchQuery(String queryString,
-    						 int lines,
-    		                 plasmaSearchRankingProfile ranking,
-    		                 kelondroBitfield constraint) {
+    public plasmaSearchQuery(final String queryString,
+    						 final int lines,
+    		                 final plasmaSearchRankingProfile ranking,
+    		                 final kelondroBitfield constraint) {
     	if ((queryString.length() == 12) && (kelondroBase64Order.enhancedCoder.wellformed(queryString.getBytes()))) {
     		this.queryString = null;
             this.queryHashes = new TreeSet<String>();
@@ -89,7 +89,7 @@ public final class plasmaSearchQuery {
             this.queryHashes.add(queryString);
     	} else {
     		this.queryString = queryString;
-    		TreeSet<String>[] cq = cleanQuery(queryString);
+    		final TreeSet<String>[] cq = cleanQuery(queryString);
     		this.queryHashes = indexWord.words2hashes(cq[0]);
     		this.excludeHashes = indexWord.words2hashes(cq[1]);
     	}
@@ -113,17 +113,17 @@ public final class plasmaSearchQuery {
     }
     
     public plasmaSearchQuery(
-		String queryString, TreeSet<String> queryHashes,
-		TreeSet<String> excludeHashes, 
-        plasmaSearchRankingProfile ranking,
-        int maxDistance, String prefer, int contentdom,
-        boolean onlineSnippetFetch,
-        int lines, int offset, String urlMask,
-        int domType, String domGroupName, int domMaxTargets,
-        kelondroBitfield constraint, boolean allofconstraint,
-        int domainzone,
-        String host,
-        boolean specialRights) {
+		final String queryString, final TreeSet<String> queryHashes,
+		final TreeSet<String> excludeHashes, 
+        final plasmaSearchRankingProfile ranking,
+        final int maxDistance, final String prefer, final int contentdom,
+        final boolean onlineSnippetFetch,
+        final int lines, final int offset, final String urlMask,
+        final int domType, final String domGroupName, final int domMaxTargets,
+        final kelondroBitfield constraint, final boolean allofconstraint,
+        final int domainzone,
+        final String host,
+        final boolean specialRights) {
 		this.queryString = queryString;
 		this.queryHashes = queryHashes;
 		this.excludeHashes = excludeHashes;
@@ -156,11 +156,11 @@ public final class plasmaSearchQuery {
         return this.linesPerPage;
     }
     
-    public void setOffset(int newOffset) {
+    public void setOffset(final int newOffset) {
         this.offset = newOffset;
     }
     
-    public static int contentdomParser(String dom) {
+    public static int contentdomParser(final String dom) {
         if (dom.equals("text")) return CONTENTDOM_TEXT;
         else if (dom.equals("image")) return CONTENTDOM_IMAGE;
         else if (dom.equals("audio")) return CONTENTDOM_AUDIO;
@@ -186,7 +186,7 @@ public final class plasmaSearchQuery {
         return this.domType == SEARCHDOM_LOCAL;
     }
     
-    public static TreeSet<String> hashes2Set(String query) {
+    public static TreeSet<String> hashes2Set(final String query) {
         if (query == null) return new TreeSet<String>(kelondroBase64Order.enhancedComparator);
         final TreeSet<String> keyhashes = new TreeSet<String>(kelondroBase64Order.enhancedComparator);
         for (int i = 0; i < (query.length() / yacySeedDB.commonHashLength); i++) {
@@ -195,17 +195,17 @@ public final class plasmaSearchQuery {
         return keyhashes;
     }
     
-    public static String hashSet2hashString(Set<String> hashes) {
-        Iterator<String> i = hashes.iterator();
-        StringBuffer sb = new StringBuffer(hashes.size() * yacySeedDB.commonHashLength);
+    public static String hashSet2hashString(final Set<String> hashes) {
+        final Iterator<String> i = hashes.iterator();
+        final StringBuffer sb = new StringBuffer(hashes.size() * yacySeedDB.commonHashLength);
         while (i.hasNext()) sb.append(i.next());
         return new String(sb);
     }
 
-    public static String anonymizedQueryHashes(Set<String> hashes) {
+    public static String anonymizedQueryHashes(final Set<String> hashes) {
         // create a more anonymized representation of euqery hashes for logging
-        Iterator<String> i = hashes.iterator();
-        StringBuffer sb = new StringBuffer(hashes.size() * (yacySeedDB.commonHashLength + 2) + 2);
+        final Iterator<String> i = hashes.iterator();
+        final StringBuffer sb = new StringBuffer(hashes.size() * (yacySeedDB.commonHashLength + 2) + 2);
         sb.append("[");
         String hash;
         if (i.hasNext()) {
@@ -220,10 +220,10 @@ public final class plasmaSearchQuery {
         return new String(sb);
     }
     
-    public static final boolean matches(String text, TreeSet<String> keyhashes) {
+    public static final boolean matches(final String text, final TreeSet<String> keyhashes) {
     	// returns true if any of the word hashes in keyhashes appear in the String text
     	// to do this, all words in the string must be recognized and transcoded to word hashes
-    	TreeSet<String> wordhashes = indexWord.words2hashes(plasmaCondenser.getWords(text).keySet());
+    	final TreeSet<String> wordhashes = indexWord.words2hashes(plasmaCondenser.getWords(text).keySet());
     	return kelondroMSetTools.anymatch(wordhashes, keyhashes);
     }
     
@@ -261,7 +261,7 @@ public final class plasmaSearchQuery {
         return new TreeSet[]{query, exclude};
     }
     
-    public String queryString(boolean encodeHTML) {
+    public String queryString(final boolean encodeHTML) {
     	if(encodeHTML){
     		return htmlTools.encodeUnicode2html(this.queryString, true);
     	} else  {
@@ -273,14 +273,14 @@ public final class plasmaSearchQuery {
         return cleanQuery(this.queryString);
     }
     
-    public void filterOut(Set<String> blueList) {
+    public void filterOut(final Set<String> blueList) {
         // filter out words that appear in this set
     	// this is applied to the queryHashes
-    	TreeSet<String> blues = indexWord.words2hashes(blueList);
+    	final TreeSet<String> blues = indexWord.words2hashes(blueList);
     	kelondroMSetTools.excludeDestructive(queryHashes, blues);
     }
 
-    public String id(boolean anonymized) {
+    public String id(final boolean anonymized) {
         // generate a string that identifies a search so results can be re-used in a cache
         if (anonymized) {
             return anonymizedQueryHashes(this.queryHashes) + "-" + anonymizedQueryHashes(this.excludeHashes) + "*" + this.contentdom + "*" + this.zonecode + "*" + indexWord.word2hash(this.ranking.toExternalString());

@@ -156,22 +156,22 @@ public final class httpTemplate {
         new Object[] {iOpen, iClose}
     };
 
-    public static serverByteBuffer[] splitQuotations(serverByteBuffer text) {
-        List<serverByteBuffer> l = splitQuotation(text, 0);
-        serverByteBuffer[] sbbs = new serverByteBuffer[l.size()];
+    public static serverByteBuffer[] splitQuotations(final serverByteBuffer text) {
+        final List<serverByteBuffer> l = splitQuotation(text, 0);
+        final serverByteBuffer[] sbbs = new serverByteBuffer[l.size()];
         for (int i = 0; i < l.size(); i++) sbbs[i] = l.get(i);
         return sbbs;
     }
 
     public static List<serverByteBuffer> splitQuotation(serverByteBuffer text, int qoff) {
-        ArrayList<serverByteBuffer> l = new ArrayList<serverByteBuffer>();
+        final ArrayList<serverByteBuffer> l = new ArrayList<serverByteBuffer>();
         if (qoff >= meta_quotation.length) {
             if (text.length() > 0) l.add(text);
             return l;
         }
         int p = -1, q;
-        byte[] left = (byte[]) ((Object[]) meta_quotation[qoff])[0];
-        byte[] right = (byte[]) ((Object[]) meta_quotation[qoff])[1];
+        final byte[] left = (byte[]) ((Object[]) meta_quotation[qoff])[0];
+        final byte[] right = (byte[]) ((Object[]) meta_quotation[qoff])[1];
         qoff++;
         while ((text.length() > 0) && ((p = text.indexOf(left)) >= 0)) {
             q = text.indexOf(right, p + 1);
@@ -205,7 +205,7 @@ public final class httpTemplate {
      * transfer until a specified pattern is found; everything but the pattern is transfered so far
      * the function returns true, if the pattern is found
      */
-    private static boolean transferUntil(PushbackInputStream i, OutputStream o, byte[] pattern) throws IOException {
+    private static boolean transferUntil(final PushbackInputStream i, final OutputStream o, final byte[] pattern) throws IOException {
         int b, bb;
         boolean equal;
         while ((b = i.read()) > 0) {
@@ -228,21 +228,21 @@ public final class httpTemplate {
         return false;
     }
 
-    public static void writeTemplate(InputStream in, OutputStream out, HashMap<String, String> pattern, byte[] dflt) throws IOException {
+    public static void writeTemplate(final InputStream in, final OutputStream out, final HashMap<String, String> pattern, final byte[] dflt) throws IOException {
         writeTemplate(in, out, pattern, dflt, new byte[0]);
     }
 
     /**
      * Reads a input stream, and writes the data with replaced templates on a output stream
      */
-    public static byte[] writeTemplate(InputStream in, OutputStream out, HashMap<String, String> pattern, byte[] dflt, byte[] prefix) throws IOException {
-        PushbackInputStream pis = new PushbackInputStream(in, 100);
+    public static byte[] writeTemplate(final InputStream in, final OutputStream out, final HashMap<String, String> pattern, final byte[] dflt, final byte[] prefix) throws IOException {
+        final PushbackInputStream pis = new PushbackInputStream(in, 100);
         ByteArrayOutputStream keyStream;
         byte[] key;
         byte[] multi_key;
         byte[] replacement;
         int bb;
-        serverByteBuffer structure=new serverByteBuffer();
+        final serverByteBuffer structure=new serverByteBuffer();
 
         while (transferUntil(pis, out, hasha)) {
             bb = pis.read();
@@ -273,13 +273,13 @@ public final class httpTemplate {
                             pis.unread(bb);
                         }
 
-                        byte[] text=keyStream.toByteArray(); //text between #{key}# an #{/key}#
+                        final byte[] text=keyStream.toByteArray(); //text between #{key}# an #{/key}#
                         int num=0;
-                        String patternKey = getPatternKey(prefix, multi_key);
+                        final String patternKey = getPatternKey(prefix, multi_key);
                         if(pattern.containsKey(patternKey) && pattern.get(patternKey) != null){
                             try{
                                 num=Integer.parseInt(pattern.get(patternKey)); // Key contains the iteration number as string
-                            }catch(NumberFormatException e){
+                            }catch(final NumberFormatException e){
                                 num=0;
                             }
                             //System.out.println(multi_key + ": " + num); //DEBUG
@@ -292,7 +292,7 @@ public final class httpTemplate {
                                  .append(Integer.toString(num).getBytes("UTF-8"))
                                  .append("\">\n".getBytes("UTF-8"));
                         for(int i=0;i < num;i++ ){
-                            PushbackInputStream pis2 = new PushbackInputStream(new ByteArrayInputStream(text));
+                            final PushbackInputStream pis2 = new PushbackInputStream(new ByteArrayInputStream(text));
                             //System.out.println("recursing with text(prefix="+ multi_key + "_" + i + "_" +"):"); //DEBUG
                             //System.out.println(text);
                             structure.append(writeTemplate(pis2, out, pattern, dflt, newPrefix(prefix,multi_key,i)));
@@ -304,7 +304,7 @@ public final class httpTemplate {
                 }
             }else if( (bb & 0xFF) == lrbr ){ //alternatives
                 int others=0;
-                serverByteBuffer text= new serverByteBuffer();
+                final serverByteBuffer text= new serverByteBuffer();
                 PushbackInputStream pis2;
 
                 transferUntil(pis, keyStream, aClose);
@@ -323,12 +323,12 @@ public final class httpTemplate {
                 boolean byName=false;
                 int whichPattern=0;
                 byte[] patternName = new byte[0];
-                String patternKey = getPatternKey(prefix, key);
+                final String patternKey = getPatternKey(prefix, key);
                 if(pattern.containsKey(patternKey) && pattern.get(patternKey) != null){
-                    String patternId=pattern.get(patternKey);
+                    final String patternId=pattern.get(patternKey);
                     try{
                         whichPattern=Integer.parseInt(patternId); //index
-                    }catch(NumberFormatException e){
+                    }catch(final NumberFormatException e){
                         whichPattern=0;
                         byName=true;
                         patternName=patternId.getBytes("UTF-8");
@@ -416,7 +416,7 @@ public final class httpTemplate {
                 if (transferUntil(pis, keyStream, pClose)) {
                     // pattern detected, write replacement
                     key = keyStream.toByteArray();
-                    String patternKey = getPatternKey(prefix, key);
+                    final String patternKey = getPatternKey(prefix, key);
                     replacement = replacePattern(patternKey, pattern, dflt); //replace
                     structure.append("<".getBytes("UTF-8")).append(key).append(" type=\"normal\">\n".getBytes("UTF-8"));
                     structure.append(replacement);
@@ -437,15 +437,15 @@ public final class httpTemplate {
                     return structure.getBytes();
                 }
             }else if( (bb & 0xFF) == ps){ //include
-                serverByteBuffer include = new serverByteBuffer();                
+                final serverByteBuffer include = new serverByteBuffer();                
                 keyStream = new ByteArrayOutputStream(); //reset stream
                 if(transferUntil(pis, keyStream, iClose)){
                     byte[] filename = keyStream.toByteArray();
                     //if(filename.startsWith( Character.toString((char)lbr) ) && filename.endsWith( Character.toString((char)rbr) )){ //simple pattern for filename
                     if((filename[0] == lbr) && (filename[filename.length-1] == rbr)){ //simple pattern for filename
-                        byte[] newFilename = new byte[filename.length-2];
+                        final byte[] newFilename = new byte[filename.length-2];
                         System.arraycopy(filename, 1, newFilename, 0, newFilename.length);
-                        String patternkey = getPatternKey(prefix, newFilename);
+                        final String patternkey = getPatternKey(prefix, newFilename);
                         filename= replacePattern(patternkey, pattern, dflt);
                     }
                     if (filename.length > 0 && !java.util.Arrays.equals(filename, dflt)) {
@@ -458,20 +458,20 @@ public final class httpTemplate {
                             while( (line = br.readLine()) != null ){
                                 include.append(line.getBytes("UTF-8")).append(de.anomic.server.serverCore.CRLF_STRING.getBytes("UTF-8"));
                             }
-                        } catch (IOException e) {
+                        } catch (final IOException e) {
                             //file not found?                    
                             serverLog.logSevere("FILEHANDLER","Include Error with file " + new String(filename, "UTF-8") + ": " + e.getMessage());
                         } finally {
-                            if (br != null) try { br.close(); br=null; } catch (Exception e) {}
+                            if (br != null) try { br.close(); br=null; } catch (final Exception e) {}
                         }
-                        PushbackInputStream pis2 = new PushbackInputStream(new ByteArrayInputStream(include.getBytes()));
+                        final PushbackInputStream pis2 = new PushbackInputStream(new ByteArrayInputStream(include.getBytes()));
                         structure.append("<fileinclude file=\"".getBytes("UTF-8")).append(filename).append(">\n".getBytes("UTF-8"));
                         structure.append(writeTemplate(pis2, out, pattern, dflt, prefix));
                         structure.append("</fileinclude>\n".getBytes("UTF-8"));
                     }
                 }
             }else{ //no match, but a single hash (output # + bb)
-                byte[] tmp=new byte[2];
+                final byte[] tmp=new byte[2];
                 tmp[0]=hash;
                 tmp[1]=(byte)bb;
                 serverFileUtils.copy(tmp, out);
@@ -481,7 +481,7 @@ public final class httpTemplate {
         return structure.getBytes();
     }
 
-    public static byte[] replacePattern(String key, HashMap<String, String> pattern, byte dflt[]) {
+    public static byte[] replacePattern(final String key, final HashMap<String, String> pattern, final byte dflt[]) {
         byte[] replacement;
         Object value;
         if (pattern.containsKey(key)) {
@@ -496,7 +496,7 @@ public final class httpTemplate {
                     //replacement = value.toString().getBytes();
                     replacement = value.toString().getBytes("UTF-8");
                 }
-            } catch (UnsupportedEncodingException e) {
+            } catch (final UnsupportedEncodingException e) {
                 replacement = dflt;
             }
         } else {
@@ -505,15 +505,15 @@ public final class httpTemplate {
         return replacement;
     }
 
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         // arg1 = test input; arg2 = replacement for pattern 'test'; arg3 = default replacement
         try {
-            InputStream i = new ByteArrayInputStream(args[0].getBytes());
-            HashMap<String, String> h = new HashMap<String, String>();
+            final InputStream i = new ByteArrayInputStream(args[0].getBytes());
+            final HashMap<String, String> h = new HashMap<String, String>();
             h.put("test", args[1]);
             writeTemplate(new PushbackInputStream(i, 100), System.out, h, args[2].getBytes());
             System.out.flush();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             e.printStackTrace();
         }
     }
@@ -523,32 +523,32 @@ public final class httpTemplate {
     public static HashMap<String, String> loadTemplates(File path) {
         // reads all templates from a path
         // we use only the folder from the given file path
-        HashMap<String, String> result = new HashMap<String, String>();
+        final HashMap<String, String> result = new HashMap<String, String>();
         if (path == null) return result;
         if (!(path.isDirectory())) path = path.getParentFile();
         if ((path == null) || (!(path.isDirectory()))) return result;
-        String[] templates = path.list();
+        final String[] templates = path.list();
         for (int i = 0; i < templates.length; i++) {
             if (templates[i].endsWith(".template")) 
                 try {
                     //System.out.println("TEMPLATE " + templates[i].substring(0, templates[i].length() - 9) + ": " + new String(buf, 0, c));
                     result.put(templates[i].substring(0, templates[i].length() - 9),
                             new String(serverFileUtils.read(new File(path, templates[i]))));
-                } catch (Exception e) {}
+                } catch (final Exception e) {}
         }
         return result;
     }
 
-    public static byte[] newPrefix(byte[] oldPrefix, byte[] key) {
-        serverByteBuffer newPrefix = new serverByteBuffer();
+    public static byte[] newPrefix(final byte[] oldPrefix, final byte[] key) {
+        final serverByteBuffer newPrefix = new serverByteBuffer();
         newPrefix.append(oldPrefix)
         .append(key)
         .append("_".getBytes());
         return newPrefix.getBytes();
     }
 
-    public static byte[] newPrefix(byte[] oldPrefix, byte[] multi_key, int i) {
-        serverByteBuffer newPrefix = new serverByteBuffer();
+    public static byte[] newPrefix(final byte[] oldPrefix, final byte[] multi_key, final int i) {
+        final serverByteBuffer newPrefix = new serverByteBuffer();
         try {        
             newPrefix.append(oldPrefix)
             .append(multi_key)
@@ -556,23 +556,23 @@ public final class httpTemplate {
             .append(Integer.toString(i).getBytes("UTF-8"))
             .append("_".getBytes());
 
-        } catch (UnsupportedEncodingException e) {}
+        } catch (final UnsupportedEncodingException e) {}
         return newPrefix.getBytes();
     }
 
-    public static String getPatternKey(byte[] prefix, byte[] key) {
-        serverByteBuffer patternKey = new serverByteBuffer();
+    public static String getPatternKey(final byte[] prefix, final byte[] key) {
+        final serverByteBuffer patternKey = new serverByteBuffer();
         patternKey.append(prefix)
                   .append(key);
         try {
             return new String(patternKey.getBytes(),"UTF-8");
-        } catch (UnsupportedEncodingException e) {
+        } catch (final UnsupportedEncodingException e) {
             return null;
         }
     }
     
-    public static byte[] appendBytes(byte[] b1, byte[] b2, byte[] b3, byte[] b4) {
-        serverByteBuffer byteArray = new serverByteBuffer();
+    public static byte[] appendBytes(final byte[] b1, final byte[] b2, final byte[] b3, final byte[] b4) {
+        final serverByteBuffer byteArray = new serverByteBuffer();
         byteArray.append(b1)
                  .append(b2);
         if (b3 != null) byteArray.append(b3);

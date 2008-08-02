@@ -53,8 +53,8 @@ public class Network {
 
     private static final String STR_TABLE_LIST = "table_list_";
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> switchboard) {
-        plasmaSwitchboard sb = (plasmaSwitchboard) switchboard;
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> switchboard) {
+        final plasmaSwitchboard sb = (plasmaSwitchboard) switchboard;
         final long start = System.currentTimeMillis();
         
         // return variable that accumulates replacements
@@ -86,7 +86,7 @@ public class Network {
             double myqph = 0d;
 
             // create own peer info
-            yacySeed seed = sb.webIndex.seedDB.mySeed();
+            final yacySeed seed = sb.webIndex.seedDB.mySeed();
             if (sb.webIndex.seedDB.mySeed() != null){ //our Peer
                 // update seed info
                 sb.updateMySeed();
@@ -98,7 +98,7 @@ public class Network {
                     LCount = Long.parseLong(seed.get(yacySeed.LCOUNT, "0"));
                     ICount = Long.parseLong(seed.get(yacySeed.ICOUNT, "0"));
                     RCount = Long.parseLong(seed.get(yacySeed.RCOUNT, "0"));
-                } catch (Exception e) {LCount = 0; ICount = 0; RCount = 0;}
+                } catch (final Exception e) {LCount = 0; ICount = 0; RCount = 0;}
 
                 // my-info
                 prop.putHTML("table_my-name", seed.get(yacySeed.NAME, "-") );
@@ -251,7 +251,7 @@ public class Network {
                     final HashMap<String, Map<String, String>> updatedBlog = new HashMap<String, Map<String, String>>();
                     final HashMap<String, String> isCrawling = new HashMap<String, String>();
                     yacyNewsRecord record;
-                    Iterator<yacyNewsRecord> recordIterator = sb.webIndex.newsPool.recordIterator(yacyNewsPool.INCOMING_DB, true);
+                    final Iterator<yacyNewsRecord> recordIterator = sb.webIndex.newsPool.recordIterator(yacyNewsPool.INCOMING_DB, true);
                     while (recordIterator.hasNext()) {
                         record = recordIterator.next();
                         if (record == null) {
@@ -291,7 +291,7 @@ public class Network {
                     if (post != null && post.containsKey("search")) {
                         try {
                             peerSearchPattern = Pattern.compile(post.get("match", ""), Pattern.CASE_INSENSITIVE);
-                        } catch (PatternSyntaxException pse){
+                        } catch (final PatternSyntaxException pse){
                             prop.put("regexerror", 1);
                             prop.putHTML("regexerror_wrongregex", pse.getPattern());
                         }
@@ -424,7 +424,7 @@ public class Network {
                             if (seed.getFlagAcceptRemoteIndex()) {
                                 prop.put(STR_TABLE_LIST + conCount + "_dhtreceive_peertags", "");
                             } else {
-                                String peertags = serverCodings.set2string(seed.getPeerTags(), ",", false);
+                                final String peertags = serverCodings.set2string(seed.getPeerTags(), ",", false);
                                 prop.putHTML(STR_TABLE_LIST + conCount + "_dhtreceive_peertags", ((peertags == null) || (peertags.length() == 0)) ? "no tags given" : ("tags = " + peertags));
                             }
                             prop.putHTML(STR_TABLE_LIST + conCount + "_version", yacyVersion.combined2prettyVersion(seed.get(yacySeed.VERSION, "0.1"), shortname));

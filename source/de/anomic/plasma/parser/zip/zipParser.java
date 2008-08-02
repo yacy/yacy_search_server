@@ -77,7 +77,7 @@ public class zipParser extends AbstractParser implements Parser {
         return SUPPORTED_MIME_TYPES;
     }
     
-    public plasmaParserDocument parse(yacyURL location, String mimeType, String charset, InputStream source) throws ParserException, InterruptedException {
+    public plasmaParserDocument parse(final yacyURL location, final String mimeType, final String charset, final InputStream source) throws ParserException, InterruptedException {
         
         long docTextLength = 0;
         OutputStream docText = null;
@@ -91,19 +91,19 @@ public class zipParser extends AbstractParser implements Parser {
                 docText = new serverByteBuffer();
             }
             
-            StringBuffer docKeywords = new StringBuffer();
-            StringBuffer docLongTitle = new StringBuffer();   
-            LinkedList<String> docSections = new LinkedList<String>();
-            StringBuffer docAbstrct = new StringBuffer();
-            Map<yacyURL, String> docAnchors = new HashMap<yacyURL, String>();
-            HashMap<String, htmlFilterImageEntry> docImages = new HashMap<String, htmlFilterImageEntry>(); 
+            final StringBuffer docKeywords = new StringBuffer();
+            final StringBuffer docLongTitle = new StringBuffer();   
+            final LinkedList<String> docSections = new LinkedList<String>();
+            final StringBuffer docAbstrct = new StringBuffer();
+            final Map<yacyURL, String> docAnchors = new HashMap<yacyURL, String>();
+            final HashMap<String, htmlFilterImageEntry> docImages = new HashMap<String, htmlFilterImageEntry>(); 
             
             // creating a new parser class to parse the unzipped content
-            plasmaParser theParser = new plasmaParser();            
+            final plasmaParser theParser = new plasmaParser();            
             
             // looping through the contained files
             ZipEntry entry;
-            ZipInputStream zippedContent = new ZipInputStream(source);                      
+            final ZipInputStream zippedContent = new ZipInputStream(source);                      
             while ((entry = zippedContent.getNextEntry()) !=null) {
                 // check for interruption
                 checkInterruption();                
@@ -112,14 +112,14 @@ public class zipParser extends AbstractParser implements Parser {
                 if (entry.isDirectory()) continue;
                 
                 // Get the entry name
-                String entryName = entry.getName();                
-                int idx = entryName.lastIndexOf(".");
+                final String entryName = entry.getName();                
+                final int idx = entryName.lastIndexOf(".");
                 
                 // getting the file extension
-                String entryExt = (idx > -1) ? entryName.substring(idx+1) : "";
+                final String entryExt = (idx > -1) ? entryName.substring(idx+1) : "";
                 
                 // trying to determine the mimeType per file extension   
-                String entryMime = plasmaParser.getMimeTypeByFileExt(entryExt);      
+                final String entryMime = plasmaParser.getMimeTypeByFileExt(entryExt);      
                 
                 // parsing the content
                 File subDocTempFile = null;
@@ -132,10 +132,10 @@ public class zipParser extends AbstractParser implements Parser {
                     
                     // parsing the zip file entry
                     subDoc = theParser.parseSource(yacyURL.newURL(location,"#" + entryName),entryMime,null, subDocTempFile);
-                } catch (ParserException e) {
+                } catch (final ParserException e) {
                     this.theLogger.logInfo("Unable to parse zip file entry '" + entryName + "'. " + e.getMessage());
                 } finally {
-                    if (subDocTempFile != null) try {subDocTempFile.delete(); } catch(Exception ex){/* ignore this */}
+                    if (subDocTempFile != null) try {subDocTempFile.delete(); } catch(final Exception ex){/* ignore this */}
                 }
                 if (subDoc == null) continue;
                 
@@ -196,17 +196,17 @@ public class zipParser extends AbstractParser implements Parser {
             }
             
             return result;
-        } catch (Exception e) {  
+        } catch (final Exception e) {  
             if (e instanceof InterruptedException) throw (InterruptedException) e;
             if (e instanceof ParserException) throw (ParserException) e;
             
             if (subDoc != null) subDoc.close();
             
             // close the writer
-            if (docText != null) try { docText.close(); } catch (Exception ex) {/* ignore this */}
+            if (docText != null) try { docText.close(); } catch (final Exception ex) {/* ignore this */}
             
             // delete the file
-            if (outputFile != null) try { outputFile.delete(); } catch (Exception ex)  {/* ignore this */}            
+            if (outputFile != null) try { outputFile.delete(); } catch (final Exception ex)  {/* ignore this */}            
             
             throw new ParserException("Unexpected error while parsing zip resource. " + e.getClass().getName() + ": "+ e.getMessage(),location);
         }

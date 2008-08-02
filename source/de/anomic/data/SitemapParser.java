@@ -34,6 +34,7 @@ import java.util.zip.GZIPInputStream;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+import org.apache.commons.httpclient.protocol.Protocol;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -115,7 +116,7 @@ public class SitemapParser extends DefaultHandler {
     /**
      * the logger
      */
-    private serverLog logger = new serverLog("SITEMAP");
+    private final serverLog logger = new serverLog("SITEMAP");
 
     /**
      * The location of the sitemap file
@@ -131,9 +132,9 @@ public class SitemapParser extends DefaultHandler {
      * last modification date of the {@link #nextURL}
      */
     private Date lastMod = null;
-    private plasmaSwitchboard sb;
+    private final plasmaSwitchboard sb;
     
-    public SitemapParser(plasmaSwitchboard sb, yacyURL sitemap, CrawlProfile.entry theCrawlingProfile) {
+    public SitemapParser(final plasmaSwitchboard sb, final yacyURL sitemap, final CrawlProfile.entry theCrawlingProfile) {
         assert sitemap != null;
         this.sb = sb;
         this.siteMapURL = sitemap;
@@ -152,9 +153,9 @@ public class SitemapParser extends DefaultHandler {
      */
     public void parse() {
         // download document
-        httpHeader header = new httpHeader();
+        final httpHeader header = new httpHeader();
         header.put(httpHeader.USER_AGENT, HTTPLoader.crawlerUserAgent);
-        JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(5000, header, null);
+        final JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(5000, header, null);
         JakartaCommonsHttpResponse res = null;
         try {
             res = client.GET(siteMapURL.toString());
@@ -165,7 +166,7 @@ public class SitemapParser extends DefaultHandler {
             }
 
             // getting some metadata
-            String contentMimeType = res.getResponseHeader().mime();
+            final String contentMimeType = res.getResponseHeader().mime();
             this.contentLength = res.getResponseHeader().contentLength();
 
             try {
@@ -176,17 +177,17 @@ public class SitemapParser extends DefaultHandler {
                     contentStream = new GZIPInputStream(contentStream);
                 }
 
-                httpdByteCountInputStream counterStream = new httpdByteCountInputStream(contentStream, null);
+                final httpdByteCountInputStream counterStream = new httpdByteCountInputStream(contentStream, null);
                 // parse it
                 this.logger.logInfo("Start parsing sitemap file " + this.siteMapURL + "\n\tMimeType: " + contentMimeType +
                         "\n\tLength:   " + this.contentLength);
-                SAXParser saxParser = SAXParserFactory.newInstance().newSAXParser();
+                final SAXParser saxParser = SAXParserFactory.newInstance().newSAXParser();
                 saxParser.parse(counterStream, this);
                 streamCounter += counterStream.getCount();
             } finally {
                 res.closeStream();
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             this.logger.logWarning("Unable to parse sitemap file " + this.siteMapURL, e);
         } finally {
             if (res != null) {
@@ -222,12 +223,12 @@ public class SitemapParser extends DefaultHandler {
      * @param qName qualified name
      * @see DefaultHandler#startElement(java.lang.String, java.lang.String, java.lang.String, org.xml.sax.Attributes)
      */
-    public void startElement(String namespaceURI, String localName, String qName, Attributes attrs) throws SAXException {
+    public void startElement(final String namespaceURI, final String localName, final String qName, final Attributes attrs) throws SAXException {
         this.currentElement = qName;
 
         // testing if the namespace is known
         if (qName.equalsIgnoreCase(SITEMAP_URLSET)) {
-            String namespace = attrs.getValue(SITEMAP_XMLNS);
+            final String namespace = attrs.getValue(SITEMAP_XMLNS);
             if ((namespace == null) ||
                     ((!namespace.equals(XMLNS_SITEMAPS_ORG)) && (!namespace.equals(XMLNS_SITEMAPS_GOOGLE))))
                 throw new SAXException("Unknown sitemap namespace: " + namespace);
@@ -240,7 +241,7 @@ public class SitemapParser extends DefaultHandler {
      * @throws SAXException
      * @see DefaultHandler#endElement(java.lang.String, java.lang.String, java.lang.String)
      */
-    public void endElement(String namespaceURI, String localName, String qName) throws SAXException {
+    public void endElement(final String namespaceURI, final String localName, final String qName) throws SAXException {
         this.currentElement = "";
 
         if (qName.equalsIgnoreCase(SITEMAP_URL)) {
@@ -253,17 +254,17 @@ public class SitemapParser extends DefaultHandler {
             try {
                 url = new yacyURL(this.nextURL, null);
                 nexturlhash = url.hash();
-            } catch (MalformedURLException e1) {
+            } catch (final MalformedURLException e1) {
             }
 
             // check if the url is known and needs to be recrawled
             if (this.lastMod != null) {
-                String dbocc = this.sb.urlExists(nexturlhash);
+                final String dbocc = this.sb.urlExists(nexturlhash);
                 if ((dbocc != null) && (dbocc.equalsIgnoreCase("loaded"))) {
                     // the url was already loaded. we need to check the date
-                    indexURLReference oldEntry = this.sb.webIndex.getURL(nexturlhash, null, 0);
+                    final indexURLReference oldEntry = this.sb.webIndex.getURL(nexturlhash, null, 0);
                     if (oldEntry != null) {
-                        Date modDate = oldEntry.moddate();
+                        final Date modDate = oldEntry.moddate();
                         // check if modDate is null
                         if (modDate.after(this.lastMod))
                             return;
@@ -283,7 +284,7 @@ public class SitemapParser extends DefaultHandler {
                     this.logger.logInfo("The URL '" + this.nextURL + "' can not be crawled. Reason: " + error);
 
                     // insert URL into the error DB
-                    ZURL.Entry ee = this.sb.crawlQueues.errorURL.newEntry(
+                    final ZURL.Entry ee = this.sb.crawlQueues.errorURL.newEntry(
                             new CrawlEntry(
                                     sb.webIndex.seedDB.mySeed().hash, 
                                     new yacyURL(this.nextURL, null), 
@@ -300,7 +301,7 @@ public class SitemapParser extends DefaultHandler {
                             error);
                     ee.store();
                     this.sb.crawlQueues.errorURL.push(ee);
-                } catch (MalformedURLException e) {/* ignore this */
+                } catch (final MalformedURLException e) {/* ignore this */
                 }
             } else {
                 this.logger.logInfo("New URL '" + this.nextURL + "' added for crawling.");
@@ -311,7 +312,7 @@ public class SitemapParser extends DefaultHandler {
         }
     }
 
-    public void characters(char[] buf, int offset, int len) throws SAXException {
+    public void characters(final char[] buf, final int offset, final int len) throws SAXException {
         if (this.currentElement.equalsIgnoreCase(SITEMAP_URL_LOC)) {
             // TODO: we need to decode the URL here
             this.nextURL = (new String(buf, offset, len)).trim();
@@ -320,16 +321,16 @@ public class SitemapParser extends DefaultHandler {
                 this.nextURL = null;
             }
         } else if (this.currentElement.equalsIgnoreCase(SITEMAP_URL_LASTMOD)) {
-            String dateStr = new String(buf, offset, len);
+            final String dateStr = new String(buf, offset, len);
             try {
                 this.lastMod = serverDate.parseISO8601(dateStr);
-            } catch (ParseException e) {
+            } catch (final ParseException e) {
                 this.logger.logInfo("Unable to parse datestring '" + dateStr + "'");
             }
         }
     }
 
-    private CrawlProfile.entry createProfile(String domainName, yacyURL sitemapURL) {
+    private CrawlProfile.entry createProfile(final String domainName, final yacyURL sitemapURL) {
         return this.sb.webIndex.profilesActiveCrawls.newEntry(domainName, sitemapURL,
         // crawlingFilter
                                                               ".*", ".*",

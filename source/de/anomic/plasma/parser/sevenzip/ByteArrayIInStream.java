@@ -31,12 +31,12 @@ import SevenZip.IInStream;
 public class ByteArrayIInStream extends IInStream {
     
     private class SeekableByteArrayInputStream extends ByteArrayInputStream {
-        public SeekableByteArrayInputStream(byte[] buf) { super(buf); }
-        public SeekableByteArrayInputStream(byte[] buf, int off, int len) { super(buf, off, len); }
+        public SeekableByteArrayInputStream(final byte[] buf) { super(buf); }
+        public SeekableByteArrayInputStream(final byte[] buf, final int off, final int len) { super(buf, off, len); }
         
         public int getPosition() { return super.pos; }
-        public void seekRelative(int offset) { seekAbsolute(super.pos + offset); }
-        public void seekAbsolute(int offset) {
+        public void seekRelative(final int offset) { seekAbsolute(super.pos + offset); }
+        public void seekAbsolute(final int offset) {
             if (offset > super.count)
                 throw new IndexOutOfBoundsException(Integer.toString(offset));
             super.pos = offset;
@@ -45,11 +45,11 @@ public class ByteArrayIInStream extends IInStream {
     
     private final SeekableByteArrayInputStream sbais;
     
-    public ByteArrayIInStream(byte[] buffer) {
+    public ByteArrayIInStream(final byte[] buffer) {
         this.sbais = new SeekableByteArrayInputStream(buffer);
     }
     
-    public long Seek(long offset, int origin) {
+    public long Seek(final long offset, final int origin) {
         switch (origin) {
             case STREAM_SEEK_SET: this.sbais.seekAbsolute((int)offset); break;
             case STREAM_SEEK_CUR: this.sbais.seekRelative((int)offset); break;
@@ -61,7 +61,7 @@ public class ByteArrayIInStream extends IInStream {
         return this.sbais.read();
     }
     
-    public int read(byte[] b, int off, int len) throws IOException {
+    public int read(final byte[] b, final int off, final int len) throws IOException {
         return this.sbais.read(b, off, len);
     }
 }

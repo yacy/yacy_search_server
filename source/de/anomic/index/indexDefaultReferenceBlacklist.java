@@ -35,7 +35,7 @@ import java.util.regex.PatternSyntaxException;
 
 public class indexDefaultReferenceBlacklist extends indexAbstractReferenceBlacklist implements indexReferenceBlacklist {
 
-    public indexDefaultReferenceBlacklist(File rootPath) {
+    public indexDefaultReferenceBlacklist(final File rootPath) {
         super(rootPath);
     }
 
@@ -43,12 +43,12 @@ public class indexDefaultReferenceBlacklist extends indexAbstractReferenceBlackl
         return "Default YaCy Blacklist Engine";
     }
 
-    public boolean isListed(String blacklistType, String hostlow, String path) {
+    public boolean isListed(final String blacklistType, final String hostlow, String path) {
         if (hostlow == null) throw new NullPointerException();
         if (path == null) throw new NullPointerException();
 
         // getting the proper blacklist
-        HashMap<String, ArrayList<String>> blacklistMapMatched = super.getBlacklistMap(blacklistType,true);
+        final HashMap<String, ArrayList<String>> blacklistMapMatched = super.getBlacklistMap(blacklistType,true);
 
         if (path.length() > 0 && path.charAt(0) == '/') path = path.substring(1);
         ArrayList<String> app;
@@ -98,8 +98,8 @@ public class indexDefaultReferenceBlacklist extends indexAbstractReferenceBlackl
 
         // loop over all Regexentrys
         if(!matched) {
-            HashMap<String, ArrayList<String>> blacklistMapNotMatched = super.getBlacklistMap(blacklistType,false);
-            for(String key: blacklistMapNotMatched.keySet()) {
+            final HashMap<String, ArrayList<String>> blacklistMapNotMatched = super.getBlacklistMap(blacklistType,false);
+            for(final String key: blacklistMapNotMatched.keySet()) {
                 try {
                 
                     if(Pattern.matches(key, hostlow)) {
@@ -109,7 +109,7 @@ public class indexDefaultReferenceBlacklist extends indexAbstractReferenceBlackl
                                 return true;
                         }
                     }
-                } catch (PatternSyntaxException e) {
+                } catch (final PatternSyntaxException e) {
                     //System.out.println(e.toString());
                 }
             }

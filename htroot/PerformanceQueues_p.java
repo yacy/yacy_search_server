@@ -50,10 +50,10 @@ public class PerformanceQueues_p {
         performanceProfiles.put("defaults/performance_dht.profile", "prefer DHT");
     }
     
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> sb) {
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> sb) {
         // return variable that accumulates replacements
-        plasmaSwitchboard switchboard = (plasmaSwitchboard) sb;
-        serverObjects prop = new serverObjects();
+        final plasmaSwitchboard switchboard = (plasmaSwitchboard) sb;
+        final serverObjects prop = new serverObjects();
         File defaultSettingsFile = new File(switchboard.getRootPath(), "defaults/yacy.init");
         if(post != null && post.containsKey("defaultFile")) {
             // TODO check file-path!
@@ -63,12 +63,12 @@ public class PerformanceQueues_p {
                 defaultSettingsFile = value;
             }
         }
-        Map<String, String> defaultSettings = ((post == null) || (!(post.containsKey("submitdefault")))) ? null : serverFileUtils.loadHashMap(defaultSettingsFile);
+        final Map<String, String> defaultSettings = ((post == null) || (!(post.containsKey("submitdefault")))) ? null : serverFileUtils.loadHashMap(defaultSettingsFile);
         Iterator<String> threads = switchboard.threadNames();
         String threadName;
         serverBusyThread thread;
         
-        boolean xml = (header.get("PATH")).endsWith(".xml");
+        final boolean xml = (header.get("PATH")).endsWith(".xml");
         prop.setLocalized(!xml);
         
         // calculate totals
@@ -182,7 +182,7 @@ public class PerformanceQueues_p {
         // performance profiles
         c = 0;
         final String usedfile = switchboard.getConfig("performanceProfile", "defaults/yacy.init");
-        for(String filename: performanceProfiles.keySet()) {
+        for(final String filename: performanceProfiles.keySet()) {
             prop.put("profile_" + c + "_filename", filename);
             prop.put("profile_" + c + "_description", performanceProfiles.get(filename));
             prop.put("profile_" + c + "_used", usedfile.equalsIgnoreCase(filename) ? "1" : "0");
@@ -191,11 +191,11 @@ public class PerformanceQueues_p {
         prop.put("profile", c);
         
         if ((post != null) && (post.containsKey("cacheSizeSubmit"))) {
-            int wordCacheMaxCount = post.getInt("wordCacheMaxCount", 20000);
+            final int wordCacheMaxCount = post.getInt("wordCacheMaxCount", 20000);
             switchboard.setConfig(plasmaSwitchboard.WORDCACHE_MAX_COUNT, Integer.toString(wordCacheMaxCount));
             switchboard.webIndex.setMaxWordCount(wordCacheMaxCount);
             
-            int wordCacheInitCount = post.getInt(plasmaSwitchboard.WORDCACHE_INIT_COUNT, 30000);
+            final int wordCacheInitCount = post.getInt(plasmaSwitchboard.WORDCACHE_INIT_COUNT, 30000);
             switchboard.setConfig(plasmaSwitchboard.WORDCACHE_INIT_COUNT, Integer.toString(wordCacheInitCount));
         }
         
@@ -214,10 +214,10 @@ public class PerformanceQueues_p {
             /* 
              * configuring the http pool 
              */
-            serverThread httpd = switchboard.getThread("10_httpd");
+            final serverThread httpd = switchboard.getThread("10_httpd");
             try {
                 maxBusy = Integer.parseInt(post.get("httpd Session Pool_maxActive","8"));
-            } catch (NumberFormatException e) {
+            } catch (final NumberFormatException e) {
                 maxBusy = 8;
             }
 
@@ -239,8 +239,8 @@ public class PerformanceQueues_p {
         }
         
         if ((post != null) && (post.containsKey("minimumDeltaSubmit"))) {
-            long minimumLocalDelta = post.getLong("minimumLocalDelta", switchboard.crawlQueues.noticeURL.getMinimumLocalDelta());
-            long minimumGlobalDelta = post.getLong("minimumGlobalDelta", switchboard.crawlQueues.noticeURL.getMinimumGlobalDelta());
+            final long minimumLocalDelta = post.getLong("minimumLocalDelta", switchboard.crawlQueues.noticeURL.getMinimumLocalDelta());
+            final long minimumGlobalDelta = post.getLong("minimumGlobalDelta", switchboard.crawlQueues.noticeURL.getMinimumGlobalDelta());
             switchboard.setConfig("minimumLocalDelta", minimumLocalDelta);
             switchboard.setConfig("minimumGlobalDelta", minimumGlobalDelta);
             switchboard.crawlQueues.noticeURL.setMinimumLocalDelta(minimumLocalDelta);
@@ -278,14 +278,14 @@ public class PerformanceQueues_p {
         prop.put("pool_0_maxActive", switchboard.getConfigLong("crawler.MaxActiveThreads", 0));
         prop.put("pool_0_numActive",switchboard.crawlQueues.size());
         
-        serverThread httpd = switchboard.getThread("10_httpd");
+        final serverThread httpd = switchboard.getThread("10_httpd");
         prop.put("pool_1_name", "httpd Session Pool");
         prop.put("pool_1_maxActive", ((serverCore)httpd).getMaxSessionCount());
         prop.put("pool_1_numActive", ((serverCore)httpd).getJobCount());
         
         prop.put("pool", "2");
         
-        long curr_prio = switchboard.getConfigLong("javastart_priority",0);
+        final long curr_prio = switchboard.getConfigLong("javastart_priority",0);
         prop.put("priority_normal",(curr_prio==0) ? "1" : "0");
         prop.put("priority_below",(curr_prio==10) ? "1" : "0");
         prop.put("priority_low",(curr_prio==20) ? "1" : "0");
@@ -301,8 +301,8 @@ public class PerformanceQueues_p {
      * @param busysleep
      * @param memprereq
      */
-    private static void onTheFlyReconfiguration(plasmaSwitchboard switchboard, String threadName, long idlesleep,
-            long busysleep, long memprereq) {
+    private static void onTheFlyReconfiguration(final plasmaSwitchboard switchboard, final String threadName, final long idlesleep,
+            final long busysleep, final long memprereq) {
         // on-the-fly re-configuration
         switchboard.setThreadPerformance(threadName, idlesleep, busysleep, memprereq);
         switchboard.setConfig(threadName + "_idlesleep", idlesleep);
@@ -310,7 +310,7 @@ public class PerformanceQueues_p {
         switchboard.setConfig(threadName + "_memprereq", memprereq);
     }
     
-    private static String d(String a, String b) {
+    private static String d(final String a, final String b) {
         return (a == null) ? b : a;
     }
 }

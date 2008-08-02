@@ -42,20 +42,20 @@ public class LogStatistics_p {
     private static final String RESULTS = "results_";
     
     @SuppressWarnings({ "unchecked", "boxing" })
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch env) {
         
         final serverObjects prop = new serverObjects();
-        Logger logger = Logger.getLogger("");
+        final Logger logger = Logger.getLogger("");
         
         
         
-        Handler[] handlers = logger.getHandlers();
+        final Handler[] handlers = logger.getHandlers();
         Hashtable<String, Object> r = null;
         boolean displaySubmenu = false;
         for (int i=0; i<handlers.length; i++) {
             if (handlers[i] instanceof LogalizerHandler) {
                 displaySubmenu = true;
-                LogalizerHandler h = ((LogalizerHandler)handlers[i]);
+                final LogalizerHandler h = ((LogalizerHandler)handlers[i]);
                 r = h.getParserResults(h.getParser(0));
                 break;
             }

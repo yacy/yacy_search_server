@@ -44,7 +44,7 @@ public class diff {
      * @param n the new <code>String</code>
      * @throws NullPointerException if one of the arguments is <code>null</code>
      */
-    public diff(String o, String n) {
+    public diff(final String o, final String n) {
         this(o, n, 1);
     }
     
@@ -57,7 +57,7 @@ public class diff {
      * @throws NullPointerException if <code>o</code> or <code>n</code> is
      * <code>null</code>
      */
-    public diff(String o, String n, int minConsecutive) {
+    public diff(final String o, final String n, final int minConsecutive) {
         if (o == null || n == null) throw new NullPointerException("neither o nor n must be null");
         this.o = new Comparable[o.length()];
         for (int i=0; i<o.length(); i++)
@@ -68,14 +68,14 @@ public class diff {
         parse((minConsecutive > 0) ? minConsecutive : 1);
     }
     
-    public diff(Object[] o, Object[] n, int minConsecutive) {
+    public diff(final Object[] o, final Object[] n, final int minConsecutive) {
         if (o == null || n == null) throw new NullPointerException("neither o nor n must be null");
         this.o = o;
         this.n = n;
         parse((minConsecutive > 0) ? minConsecutive : 1);
     }
     
-    private void parse(int minLength) {
+    private void parse(final int minLength) {
         /* Matrix: find as long diagonals as possible,
          *         delete the old horizontally and add the new vertically
          * 
@@ -99,7 +99,7 @@ public class diff {
          *    C| | | | | | | | | | | | | | | | |#| |
          *    E| | |#| | | | | | | | |#| | |#| | |#|
          */
-        boolean[][] matrix = new boolean[this.n.length][this.o.length];
+        final boolean[][] matrix = new boolean[this.n.length][this.o.length];
         for (int y=0; y<this.n.length; y++)
             for (int x=0; x<this.o.length; x++)
                 matrix[y][x] = this.o[x].equals(this.n[y]);
@@ -114,7 +114,7 @@ public class diff {
         addReplacementParts(s, t, this.o.length, this.n.length);
     }
     
-    private void addReplacementParts(int startx, int starty, int endx, int endy) {
+    private void addReplacementParts(final int startx, final int starty, final int endx, final int endy) {
         if (startx < endx) this.parts.add(new Part(Part.DELETED, startx, endx));
         if (starty < endy) this.parts.add(new Part(Part.ADDED, starty, endy));
     }
@@ -137,7 +137,7 @@ public class diff {
      * @param minLength the minimal desired length of a diagonal to find
      * @return a vector in the form <code>{ diagStartX, diagStartY, diagLength }</code> where <code> diagLength >= minLength</code>
      */
-    private static int[] findDiagonal(int x, int y, boolean[][] matrix, int minLength) {
+    private static int[] findDiagonal(final int x, final int y, final boolean[][] matrix, final int minLength) {
         int rx, ry, yy, xx, i;
         for (yy=y; yy<matrix.length; yy++)
             for (xx=x; xx<matrix[yy].length; xx++)
@@ -175,7 +175,7 @@ public class diff {
     public Part[] getParts() { return this.parts.toArray(new Part[this.parts.size()]); }
     
     public String toString() {
-        StringBuffer sb = new StringBuffer(this.parts.size() * 20);
+        final StringBuffer sb = new StringBuffer(this.parts.size() * 20);
         for (int j=0; j<this.parts.size(); j++)
             sb.append(this.parts.get(j).toString()).append("\n");
         return new String(sb);
@@ -198,7 +198,7 @@ public class diff {
         private final int posOld;
         private final int posNew;
         
-        Part(int action, int posOld, int posNew) {
+        Part(final int action, final int posOld, final int posNew) {
             this.action = action;
             this.posOld = posOld;
             this.posNew = posNew;
@@ -240,8 +240,8 @@ public class diff {
         }
     }
     
-    public static String toHTML(diff[] diffs) {
-        StringBuffer sb = new StringBuffer(diffs.length * 60);
+    public static String toHTML(final diff[] diffs) {
+        final StringBuffer sb = new StringBuffer(diffs.length * 60);
         diff.Part[] ps;
         for (int i=0; i<diffs.length; i++) {
             sb.append("<p class=\"diff\">\n");

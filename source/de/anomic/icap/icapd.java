@@ -89,7 +89,7 @@ public class icapd implements serverHandler {
         return new icapd();
     }
     
-    public void initSession(Session aSession) throws IOException {
+    public void initSession(final Session aSession) throws IOException {
         this.session = aSession;
         this.userAddress = aSession.userAddress; // client InetAddress
         this.clientIP = this.userAddress.getHostAddress();
@@ -103,7 +103,7 @@ public class icapd implements serverHandler {
         return null;
     }
     
-    public String error(Throwable e) {
+    public String error(final Throwable e) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -111,18 +111,18 @@ public class icapd implements serverHandler {
     public void reset() {
     }
     
-    public Boolean EMPTY(String arg) throws IOException {
+    public Boolean EMPTY(final String arg) throws IOException {
         // TODO Auto-generated method stub
         return serverCore.TERMINATE_CONNECTION;
     }
     
-    public Boolean UNKNOWN(String requestLine) throws IOException {
+    public Boolean UNKNOWN(final String requestLine) throws IOException {
         // TODO Auto-generated method stub
         return serverCore.TERMINATE_CONNECTION;
     }
     
     public icapHeader getDefaultHeaders() {
-        icapHeader newHeaders = new icapHeader();
+        final icapHeader newHeaders = new icapHeader();
         
         newHeaders.put(icapHeader.SERVER,"YaCy/" + switchboard.getConfig("vString",""));
         newHeaders.put(icapHeader.DATE, HttpClient.dateString(new Date()));
@@ -131,21 +131,21 @@ public class icapd implements serverHandler {
         return newHeaders;
     }
     
-    public Boolean OPTIONS(String arg) throws IOException {
+    public Boolean OPTIONS(final String arg) throws IOException {
         
-        BufferedOutputStream out = new BufferedOutputStream(this.session.out);   
+        final BufferedOutputStream out = new BufferedOutputStream(this.session.out);   
         
         // parsing the http request line
         parseRequestLine(icapHeader.METHOD_OPTIONS,arg);        
         
         // reading the headers
-        icapHeader icapReqHeader = icapHeader.readHeader(this.prop,this.session);
+        final icapHeader icapReqHeader = icapHeader.readHeader(this.prop,this.session);
         
         // determines if the connection should be kept alive
-        boolean persistent = handlePersistentConnection(icapReqHeader);              
+        final boolean persistent = handlePersistentConnection(icapReqHeader);              
         
         // setting the icap response headers
-        icapHeader resHeader = getDefaultHeaders();        
+        final icapHeader resHeader = getDefaultHeaders();        
         resHeader.put(icapHeader.ALLOW,"204");
         resHeader.put(icapHeader.ENCAPSULATED,"null-body=0");
         resHeader.put(icapHeader.MAX_CONNECTIONS,"1000");
@@ -158,7 +158,7 @@ public class icapd implements serverHandler {
 
         
         // determining the requested service and call it or send back an error message
-        String reqService = this.prop.getProperty(icapHeader.CONNECTION_PROP_PATH,"");
+        final String reqService = this.prop.getProperty(icapHeader.CONNECTION_PROP_PATH,"");
         if (reqService.equalsIgnoreCase("/resIndexing")) {
             resHeader.put(icapHeader.SERVICE, "YaCy ICAP Indexing Service 1.0");
             resHeader.put(icapHeader.METHODS,icapHeader.METHOD_RESPMOD);
@@ -171,49 +171,49 @@ public class icapd implements serverHandler {
         }
         
         
-        StringBuffer headerStringBuffer = resHeader.toHeaderString("ICAP/1.0",200,null);        
+        final StringBuffer headerStringBuffer = resHeader.toHeaderString("ICAP/1.0",200,null);        
         out.write(headerStringBuffer.toString().getBytes());
         out.flush();        
         
         return this.prop.getProperty(icapHeader.CONNECTION_PROP_PERSISTENT).equals("keep-alive") ? serverCore.RESUME_CONNECTION : serverCore.TERMINATE_CONNECTION;
     }
     
-    public Boolean REQMOD(String arg) {
+    public Boolean REQMOD(final String arg) {
         return serverCore.TERMINATE_CONNECTION;
     }    
     
-    public Boolean RESPMOD(String arg) {
+    public Boolean RESPMOD(final String arg) {
         try {
-            InputStream in = this.session.in;
-            OutputStream out = this.session.out;      
+            final InputStream in = this.session.in;
+            final OutputStream out = this.session.out;      
             
             // parsing the icap request line
             parseRequestLine(icapHeader.METHOD_RESPMOD,arg);        
             
             // reading the icap request header
-            icapHeader icapReqHeader = icapHeader.readHeader(this.prop,this.session);
+            final icapHeader icapReqHeader = icapHeader.readHeader(this.prop,this.session);
             
             // determines if the connection should be kept alive
             handlePersistentConnection(icapReqHeader);            
             
             // determining the requested service and call it or send back an error message
-            String reqService = this.prop.getProperty(icapHeader.CONNECTION_PROP_PATH,"");
+            final String reqService = this.prop.getProperty(icapHeader.CONNECTION_PROP_PATH,"");
             if (reqService.equalsIgnoreCase("/resIndexing")) {
                 indexingService(icapReqHeader,in,out);
             } else {
-                icapHeader icapResHeader = getDefaultHeaders();
+                final icapHeader icapResHeader = getDefaultHeaders();
                 icapResHeader.put(icapHeader.ENCAPSULATED,icapReqHeader.get(icapHeader.ENCAPSULATED));
                 icapResHeader.put(icapHeader.SERVICE, "YaCy ICAP Service 1.0");
                 // icapResHeader.put(icapHeader.CONNECTION, "close");    
                 
-                StringBuffer headerStringBuffer = icapResHeader.toHeaderString("ICAP/1.0",404,null);            
+                final StringBuffer headerStringBuffer = icapResHeader.toHeaderString("ICAP/1.0",404,null);            
                 out.write((new String(headerStringBuffer)).getBytes());
                 out.flush();    
             }
             
             
             
-        } catch (Exception e) {
+        } catch (final Exception e) {
             e.printStackTrace();
         } finally {
             
@@ -231,14 +231,14 @@ public class icapd implements serverHandler {
     }
     */
     
-    private void indexingService(icapHeader reqHeader, InputStream in, OutputStream out) {
+    private void indexingService(final icapHeader reqHeader, final InputStream in, final OutputStream out) {
         try {
             
             /* =========================================================================
              * Reading the various message parts into buffers
              * ========================================================================= */
             ByteArrayInputStream reqHdrStream = null, resHdrStream = null, resBodyStream = null;
-            String[] encapsulated = (reqHeader.get(icapHeader.ENCAPSULATED)).split(",");
+            final String[] encapsulated = (reqHeader.get(icapHeader.ENCAPSULATED)).split(",");
             int prevLength = 0, currLength=0;
             for (int i=0; i < encapsulated.length; i++) {  
                 // reading the request header
@@ -246,7 +246,7 @@ public class icapd implements serverHandler {
                     prevLength = currLength;
                     currLength = Integer.parseInt(encapsulated[i+1].split("=")[1]);
                     
-                    byte[] buffer = new byte[currLength-prevLength];
+                    final byte[] buffer = new byte[currLength-prevLength];
                     in.read(buffer, 0, buffer.length);
                     
                     reqHdrStream = new ByteArrayInputStream(buffer);
@@ -256,17 +256,17 @@ public class icapd implements serverHandler {
                     prevLength = currLength;
                     currLength = Integer.parseInt(encapsulated[i+1].split("=")[1]);
                     
-                    byte[] buffer = new byte[currLength-prevLength];
+                    final byte[] buffer = new byte[currLength-prevLength];
                     in.read(buffer, 0, buffer.length);
                     
                     resHdrStream = new ByteArrayInputStream(buffer);
                     
                     // reading the response body
                 } else if (encapsulated[i].indexOf("res-body")>=0) {
-                    httpChunkedInputStream chunkedIn = new httpChunkedInputStream(in);
-                    ByteArrayOutputStream bout = new ByteArrayOutputStream();
+                    final httpChunkedInputStream chunkedIn = new httpChunkedInputStream(in);
+                    final ByteArrayOutputStream bout = new ByteArrayOutputStream();
                     int l = 0,len = 0;
-                    byte[] buffer = new byte[2048];
+                    final byte[] buffer = new byte[2048];
                     while ((l = chunkedIn.read(buffer)) >= 0) {
                         len += l;
                         bout.write(buffer,0,l);
@@ -278,13 +278,13 @@ public class icapd implements serverHandler {
             /* =========================================================================
              * sending back the icap status
              * ========================================================================= */
-            icapHeader icapResHeader = getDefaultHeaders();            
+            final icapHeader icapResHeader = getDefaultHeaders();            
             if (reqHeader.allow(204)) {
                 icapResHeader.put(icapHeader.ENCAPSULATED,reqHeader.get(icapHeader.ENCAPSULATED));
                 icapResHeader.put(icapHeader.SERVICE, "YaCy ICAP Service 1.0");
                 // resHeader.put(icapHeader.CONNECTION, "close");    
                 
-                StringBuffer headerStringBuffer = icapResHeader.toHeaderString("ICAP/1.0",204,null);            
+                final StringBuffer headerStringBuffer = icapResHeader.toHeaderString("ICAP/1.0",204,null);            
                 out.write((new String(headerStringBuffer)).getBytes());
                 out.flush();
             } else {
@@ -292,7 +292,7 @@ public class icapd implements serverHandler {
                 icapResHeader.put(icapHeader.SERVICE, "YaCy ICAP Service 1.0");
                 // icapResHeader.put(icapHeader.CONNECTION, "close");    
                 
-                StringBuffer headerStringBuffer = icapResHeader.toHeaderString("ICAP/1.0",503,null);            
+                final StringBuffer headerStringBuffer = icapResHeader.toHeaderString("ICAP/1.0",503,null);            
                 out.write((new String(headerStringBuffer)).getBytes());
                 out.flush();                
             }
@@ -302,10 +302,10 @@ public class icapd implements serverHandler {
              * ========================================================================= */
             // reading the requestline
             BufferedReader reader = new BufferedReader(new InputStreamReader(reqHdrStream));
-            String httpRequestLine = reader.readLine();
+            final String httpRequestLine = reader.readLine();
             
             // parsing the requestline
-            Properties httpReqProps = new Properties();
+            final Properties httpReqProps = new Properties();
             httpHeader.parseRequestLine(httpRequestLine,httpReqProps,virtualHost);
             
             if (!httpReqProps.getProperty(httpHeader.CONNECTION_PROP_METHOD).equals(httpHeader.METHOD_GET)) {
@@ -320,7 +320,7 @@ public class icapd implements serverHandler {
             }
             
             // reading all request headers
-            httpHeader httpReqHeader = httpHeader.readHttpHeader(reader); 
+            final httpHeader httpReqHeader = httpHeader.readHttpHeader(reader); 
             reader.close();
             if(reqHdrStream != null) {
                 reqHdrStream.close();
@@ -330,16 +330,16 @@ public class icapd implements serverHandler {
             httpHeader.handleTransparentProxySupport(httpReqHeader,httpReqProps,virtualHost,true);
             
             // getting the request URL
-            yacyURL httpRequestURL = httpHeader.getRequestURL(httpReqProps);            
+            final yacyURL httpRequestURL = httpHeader.getRequestURL(httpReqProps);            
             
             /* =========================================================================
              * Parsing response data
              * ========================================================================= */
             // getting the response status
             reader = new BufferedReader(new InputStreamReader(resHdrStream));
-            String httpRespStatusLine = reader.readLine();
+            final String httpRespStatusLine = reader.readLine();
             
-            Object[] httpRespStatus = httpHeader.parseResponseLine(httpRespStatusLine);
+            final Object[] httpRespStatus = httpHeader.parseResponseLine(httpRespStatusLine);
             
             if (!(httpRespStatus[1].equals(new Integer(200)) || httpRespStatus[1].equals(new Integer(203)))) {
                 this.log.logInfo("Wrong status code for indexing:" +
@@ -354,7 +354,7 @@ public class icapd implements serverHandler {
             }
             
             // reading all response headers
-            httpHeader httpResHeader = httpHeader.readHttpHeader(reader);
+            final httpHeader httpResHeader = httpHeader.readHttpHeader(reader);
             reader.close();
             if(resHdrStream != null) {
                 resHdrStream.close();
@@ -373,8 +373,8 @@ public class icapd implements serverHandler {
              * ========================================================================= */
             
             // generating a htcache entry object
-            IResourceInfo resInfo = new ResourceInfo(httpRequestURL,httpReqHeader,httpResHeader);
-            plasmaHTCache.Entry cacheEntry = plasmaHTCache.newEntry(
+            final IResourceInfo resInfo = new ResourceInfo(httpRequestURL,httpReqHeader,httpResHeader);
+            final plasmaHTCache.Entry cacheEntry = plasmaHTCache.newEntry(
                     new Date(),  
                     0, 
                     httpRequestURL,
@@ -386,7 +386,7 @@ public class icapd implements serverHandler {
             );
             
             // getting the filename/path to store the response body
-            File cacheFile = plasmaHTCache.getCachePath(httpRequestURL);
+            final File cacheFile = plasmaHTCache.getCachePath(httpRequestURL);
             
             // if the file already exits we delete it
             if (cacheFile.isFile()) {
@@ -403,12 +403,12 @@ public class icapd implements serverHandler {
             
             // indexing the response
             plasmaHTCache.push(cacheEntry);    
-        } catch (Exception e) {
+        } catch (final Exception e) {
             e.printStackTrace();
         }
     }
     
-    private final void parseRequestLine(String cmd, String s) {
+    private final void parseRequestLine(final String cmd, final String s) {
         // parsing the requestlin
         icapHeader.parseRequestLine(cmd,s, this.prop,virtualHost);
         
@@ -419,7 +419,7 @@ public class icapd implements serverHandler {
         this.prop.setProperty(icapHeader.CONNECTION_PROP_KEEP_ALIVE_COUNT, Integer.toString(++this.keepAliveRequestCount));        
     }
     
-    private boolean handlePersistentConnection(icapHeader header) {
+    private boolean handlePersistentConnection(final icapHeader header) {
         
         if (!keepAliveSupport) {
             this.prop.put(icapHeader.CONNECTION_PROP_PERSISTENT,"close");

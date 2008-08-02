@@ -29,16 +29,16 @@ public abstract class htmlFilterAbstractTransformer implements htmlFilterTransfo
     private TreeSet<String> tags0;
     private TreeSet<String> tags1;
 
-    public htmlFilterAbstractTransformer(TreeSet<String> tags0, TreeSet<String> tags1) {
+    public htmlFilterAbstractTransformer(final TreeSet<String> tags0, final TreeSet<String> tags1) {
         this.tags0  = tags0;
         this.tags1  = tags1;
     }
 
-    public boolean isTag0(String tag) {
+    public boolean isTag0(final String tag) {
         return tags0.contains(tag);
     }
 
-    public boolean isTag1(String tag) {
+    public boolean isTag1(final String tag) {
         return tags1.contains(tag);
     }
 
@@ -51,11 +51,11 @@ public abstract class htmlFilterAbstractTransformer implements htmlFilterTransfo
     */
 
     // the other methods must take into account to construct the return value correctly
-    public char[] transformTag0(String tagname, Properties tagopts, char quotechar) {
+    public char[] transformTag0(final String tagname, final Properties tagopts, final char quotechar) {
         return htmlFilterWriter.genTag0(tagname, tagopts, quotechar);
     }
 
-    public char[] transformTag1(String tagname, Properties tagopts, char[] text, char quotechar) {
+    public char[] transformTag1(final String tagname, final Properties tagopts, final char[] text, final char quotechar) {
         return htmlFilterWriter.genTag1(tagname, tagopts, text, quotechar);
     }
 

@@ -89,14 +89,14 @@ public class yacyCore {
         return Math.max(0, (int) ((System.currentTimeMillis() - serverCore.startupTime) / 1000));
     }
 
-    public yacyCore(plasmaSwitchboard sb) {
-        long time = System.currentTimeMillis();
+    public yacyCore(final plasmaSwitchboard sb) {
+        final long time = System.currentTimeMillis();
 
         this.sb = sb;
         sb.setConfig("yacyStatus", "");
         
         // create a peer news channel
-        RSSFeed peernews = RSSFeed.channels(RSSFeed.PEERNEWS);
+        final RSSFeed peernews = RSSFeed.channels(RSSFeed.PEERNEWS);
         peernews.addMessage(new RSSMessage("YaCy started", "", ""));
         
         // ensure that correct IP is used
@@ -146,7 +146,7 @@ public class yacyCore {
         return onlineMode;
     }
 
-    public static void setOnlineMode(int newOnlineMode) {
+    public static void setOnlineMode(final int newOnlineMode) {
         onlineMode = newOnlineMode;
         return;
     }
@@ -242,12 +242,12 @@ public class yacyCore {
 
     protected class publishThread extends Thread {
         int added;
-        private yacySeed seed;
+        private final yacySeed seed;
         private final serverSemaphore sync;
         private final List<Thread> syncList;
 
-        public publishThread(ThreadGroup tg, yacySeed seed,
-                             serverSemaphore sync, List<Thread> syncList) throws InterruptedException {
+        public publishThread(final ThreadGroup tg, final yacySeed seed,
+                             final serverSemaphore sync, final List<Thread> syncList) throws InterruptedException {
             super(tg, "PublishSeed_" + seed.getName());
 
             this.sync = sync;
@@ -263,7 +263,7 @@ public class yacyCore {
                 this.added = yacyClient.publishMySeed(sb.webIndex.seedDB.mySeed(), sb.webIndex.peerActions, seed.getClusterAddress(), seed.hash);
                 if (this.added < 0) {
                     // no or wrong response, delete that address
-                    String cause = "peer ping to peer resulted in error response (added < 0)";
+                    final String cause = "peer ping to peer resulted in error response (added < 0)";
                     log.logInfo("publish: disconnected " + this.seed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR) + " peer '" + this.seed.getName() + "' from " + this.seed.getPublicAddress() + ": " + cause);
                     sb.webIndex.peerActions.peerDeparture(this.seed, cause);
                 } else {
@@ -271,7 +271,7 @@ public class yacyCore {
                     // update latest news from the other peer
                     log.logInfo("publish: handshaked " + this.seed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR) + " peer '" + this.seed.getName() + "' at " + this.seed.getPublicAddress());
                     // check if seed's lastSeen has been updated
-                    yacySeed newSeed = sb.webIndex.seedDB.getConnected(this.seed.hash);
+                    final yacySeed newSeed = sb.webIndex.seedDB.getConnected(this.seed.hash);
                     if (newSeed != null) {
                         if (newSeed.getLastSeenUTC() < (System.currentTimeMillis() - 10000)) {
                             // update last seed date
@@ -294,7 +294,7 @@ public class yacyCore {
                         log.logFine("publish: recently handshaked " + this.seed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR) + " peer '" + this.seed.getName() + "' at " + this.seed.getPublicAddress() + " not in connectedDB");
                     }
                 }
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 log.logSevere("publishThread: error with target seed " + seed.toString() + ": " + e.getMessage(), e);
             } finally {
                 this.syncList.add(this);
@@ -303,7 +303,7 @@ public class yacyCore {
         }
     }
 
-    private int publishMySeed(boolean force) {
+    private int publishMySeed(final boolean force) {
         try {
             // call this after the httpd was started up
 
@@ -329,11 +329,11 @@ public class yacyCore {
             // getting a list of peers to contact
             if (sb.webIndex.seedDB.mySeed().get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN).equals(yacySeed.PEERTYPE_VIRGIN)) {
                 if (attempts > PING_INITIAL) { attempts = PING_INITIAL; }
-                Map<String, String> ch = plasmaSwitchboard.getSwitchboard().clusterhashes;
+                final Map<String, String> ch = plasmaSwitchboard.getSwitchboard().clusterhashes;
                 seeds = sb.webIndex.seedDB.seedsByAge(true, attempts - ((ch == null) ? 0 : ch.size())); // best for fast connection
                 // add also all peers from cluster if this is a public robinson cluster
                 if (ch != null) {
-                    Iterator<Map.Entry<String, String>> i = ch.entrySet().iterator();
+                    final Iterator<Map.Entry<String, String>> i = ch.entrySet().iterator();
                     String hash;
                     Map.Entry<String, String> entry;
                     yacySeed seed;
@@ -364,7 +364,7 @@ public class yacyCore {
             if (seeds.size() < attempts) { attempts = seeds.size(); }
 
             // This will try to get Peers that are not currently in amIAccessibleDB
-            Iterator<yacySeed> si = seeds.values().iterator();
+            final Iterator<yacySeed> si = seeds.values().iterator();
             yacySeed seed;
 
             // include a YaCyNews record to my seed
@@ -375,7 +375,7 @@ public class yacyCore {
                 } else {
                     sb.webIndex.seedDB.mySeed().put("news", de.anomic.tools.crypt.simpleEncode(record.toString()));
                 }
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 log.logSevere("publishMySeed: problem with news encoding", e);
             }
             sb.webIndex.seedDB.mySeed().setUnusedFlags();
@@ -402,7 +402,7 @@ public class yacyCore {
 
                 final String address = seed.getClusterAddress();
                 log.logFine("HELLO #" + i + " to peer '" + seed.get(yacySeed.NAME, "") + "' at " + address); // debug
-                String seederror = seed.isProper(false);
+                final String seederror = seed.isProper(false);
                 if ((address == null) || (seederror != null)) {
                     // we don't like that address, delete it
                     sb.webIndex.peerActions.peerDeparture(seed, "peer ping to peer resulted in address = " + address + "; seederror = " + seederror);
@@ -446,9 +446,9 @@ public class yacyCore {
             final int dbSize;
             synchronized (amIAccessibleDB) {
                 dbSize = amIAccessibleDB.size();
-                Iterator<String> ai = amIAccessibleDB.keySet().iterator();
+                final Iterator<String> ai = amIAccessibleDB.keySet().iterator();
                 while (ai.hasNext()) {
-                    yacyAccessible ya = amIAccessibleDB.get(ai.next());
+                    final yacyAccessible ya = amIAccessibleDB.get(ai.next());
                     if (ya.lastUpdated < cutofftime) {
                         ai.remove();
                     } else {
@@ -501,7 +501,7 @@ public class yacyCore {
             // still no success: ask own NAT or internet responder
             //final boolean DI604use = switchboard.getConfig("DI604use", "false").equals("true");
             //final String  DI604pw  = switchboard.getConfig("DI604pw", "");
-            String  ip = sb.getConfig("staticIP", "");
+            final String  ip = sb.getConfig("staticIP", "");
             //if (ip.equals("")) ip = natLib.retrieveIP(DI604use, DI604pw);
             
             // yacyCore.log.logDebug("DEBUG: new IP=" + ip);
@@ -512,7 +512,7 @@ public class yacyCore {
                     ((sb.webIndex.seedDB.mySeed().getPublicAddress() == null) ? "unknown" : sb.webIndex.seedDB.mySeed().getPublicAddress()));
             sb.webIndex.seedDB.saveMySeed();
             return 0;
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
             try {
                 log.logInfo("publish: Interruption detected while publishing my seed.");
 
@@ -524,7 +524,7 @@ public class yacyCore {
                 yacyCore.publishThreadGroup.interrupt();
 
                 // waiting some time for the publishThreads to finish execution
-                try { Thread.sleep(500); } catch (InterruptedException ex) {}
+                try { Thread.sleep(500); } catch (final InterruptedException ex) {}
 
                 // getting the amount of remaining publishing threads
                 int threadCount  = yacyCore.publishThreadGroup.activeCount();
@@ -538,13 +538,13 @@ public class yacyCore {
 
                     if (currentThread.isAlive()) {
                         log.logFine("publish: Waiting for remaining publishing thread '" + currentThread.getName() + "' to finish shutdown");
-                        try { currentThread.join(500); } catch (InterruptedException ex) {}
+                        try { currentThread.join(500); } catch (final InterruptedException ex) {}
                     }
                 }
 
                 log.logInfo("publish: Shutdown off all remaining publishing thread finished.");
 
-            } catch (Exception ee) {
+            } catch (final Exception ee) {
                 log.logWarning("publish: Unexpected error while trying to shutdown all remaining publishing threads.", e);
             }
 
@@ -559,7 +559,7 @@ public class yacyCore {
         }
     }
 
-    public static yacySeedUploader getSeedUploader(String methodname) {
+    public static yacySeedUploader getSeedUploader(final String methodname) {
         String className = null;
         synchronized (yacyCore.seedUploadMethods) {
             if (yacyCore.seedUploadMethods.containsKey(methodname)) {
@@ -572,7 +572,7 @@ public class yacyCore {
             final Class<?> uploaderClass = Class.forName(className);
             final Object uploader = uploaderClass.newInstance();
             return (yacySeedUploader) uploader;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             return null;
         }
     }
@@ -591,7 +591,7 @@ public class yacyCore {
             }
 
             final String[] uploaderClasses = uploadersDir.list(new FilenameFilter() {
-                public boolean accept(File dir, String name) {
+                public boolean accept(final File dir, final String name) {
                     return name.startsWith("yacySeedUpload") && name.endsWith(".class");
                 }
             });
@@ -615,11 +615,11 @@ public class yacyCore {
                         }
                     }
                     availableUploaders.put(className.substring("yacySeedUpload".length()), fullClassName);
-                } catch (Exception e) { /* we can ignore this for the moment */
-                } catch (Error e)     { /* we can ignore this for the moment */
+                } catch (final Exception e) { /* we can ignore this for the moment */
+                } catch (final Error e)     { /* we can ignore this for the moment */
                 }
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
         } finally {
             synchronized (yacyCore.seedUploadMethods) {
                 yacyCore.seedUploadMethods.clear();
@@ -628,7 +628,7 @@ public class yacyCore {
         }
     }
 
-    public static boolean changeSeedUploadMethod(String method) {
+    public static boolean changeSeedUploadMethod(final String method) {
         if (method == null || method.length() == 0) { return false; }
 
         if (method.equalsIgnoreCase("none")) { return true; }
@@ -638,7 +638,7 @@ public class yacyCore {
         }
     }
 
-    public static final String saveSeedList(plasmaSwitchboard sb) {
+    public static final String saveSeedList(final plasmaSwitchboard sb) {
         try {
             // return an error if this is not successful, and NULL if everything is fine
             String logt;
@@ -672,7 +672,7 @@ public class yacyCore {
             //  determine the seed uploader that should be used ...
             if (seedUploadMethod.equalsIgnoreCase("none")) { return "no uploader specified"; }
 
-            yacySeedUploader uploader = getSeedUploader(seedUploadMethod);
+            final yacySeedUploader uploader = getSeedUploader(seedUploadMethod);
             if (uploader == null) {
                 final String errorMsg = "Unable to get the proper uploader-class for seed uploading method '" + seedUploadMethod + "'.";
                 log.logWarning("SaveSeedList: " + errorMsg);
@@ -691,7 +691,7 @@ public class yacyCore {
                     throw new MalformedURLException("Unsupported protocol.");
                 }
                 seedURL = new yacyURL(seedURLStr, null);
-            } catch (MalformedURLException e) {
+            } catch (final MalformedURLException e) {
                 final String errorMsg = "Malformed seed file URL '" + sb.webIndex.seedDB.mySeed().get(yacySeed.SEEDLIST, "") + "'. " + e.getMessage();
                 log.logWarning("SaveSeedList: " + errorMsg);
                 return errorMsg;
@@ -722,7 +722,7 @@ public class yacyCore {
                 // finally, set the principal status
                 sb.setConfig("yacyStatus", yacySeed.PEERTYPE_PRINCIPAL);
                 return null;
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 sb.webIndex.seedDB.mySeed().put(yacySeed.PEERTYPE, prevStatus);
                 sb.setConfig("yacyStatus", prevStatus);
                 final String errorMsg = "SaveSeedList: Seed upload failed (IO error): " + e.getMessage();

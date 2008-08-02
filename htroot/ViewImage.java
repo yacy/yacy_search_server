@@ -43,22 +43,22 @@ public class ViewImage {
     private static HashMap<String, Image> iconcache = new HashMap<String, Image>();
     private static String defaulticon = "htroot/env/grafics/dfltfvcn.ico";
     
-    public static Image respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
+    public static Image respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
         
-        plasmaSwitchboard sb = (plasmaSwitchboard)env;
+        final plasmaSwitchboard sb = (plasmaSwitchboard)env;
         
         // the url to the image can be either submitted with an url in clear text, or using a license key
         // if the url is given as clear text, the user must be authorized as admin
         // the license can be used also from non-authorized users
         
         String urlString = post.get("url", "");
-        String urlLicense = post.get("code", "");
-        boolean auth = ((String) header.get(httpHeader.CONNECTION_PROP_CLIENTIP, "")).equals("localhost") || sb.verifyAuthentication(header, true); // handle access rights
+        final String urlLicense = post.get("code", "");
+        final boolean auth = ((String) header.get(httpHeader.CONNECTION_PROP_CLIENTIP, "")).equals("localhost") || sb.verifyAuthentication(header, true); // handle access rights
         
         yacyURL url = null;
         if ((urlString.length() > 0) && (auth)) try {
             url = new yacyURL(urlString, null);
-        } catch (MalformedURLException e1) {
+        } catch (final MalformedURLException e1) {
             url = null;
         }
         
@@ -74,48 +74,48 @@ public class ViewImage {
         int height = post.getInt("height", 0);
         int maxwidth = post.getInt("maxwidth", 0);
         int maxheight = post.getInt("maxheight", 0);
-        int timeout = post.getInt("timeout", 5000);
+        final int timeout = post.getInt("timeout", 5000);
         
         // getting the image as stream
         Image scaled = iconcache.get(urlString);
         if (scaled == null) {
-            Object[] resource = plasmaSnippetCache.getResource(url, true, timeout, false, true);
+            final Object[] resource = plasmaSnippetCache.getResource(url, true, timeout, false, true);
             byte[] imgb = null;
             if (resource == null) {
                 if (urlString.endsWith(".ico")) {
                     // load default favicon dfltfvcn.ico
                     try {
                         imgb = serverFileUtils.read(new File(sb.getRootPath(), defaulticon));
-                    } catch (IOException e) {
+                    } catch (final IOException e) {
                         return null;
                     }
                 } else {
                     return null;
                 }
             } else {
-                InputStream imgStream = (InputStream) resource[0];
+                final InputStream imgStream = (InputStream) resource[0];
                 if (imgStream == null) return null;
 
                 // read image data
                 try {
                     imgb = serverFileUtils.read(imgStream);
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     return null;
                 } finally {
                     try {
                         imgStream.close();
-                    } catch (Exception e) {/* ignore this */}
+                    } catch (final Exception e) {/* ignore this */}
                 }
             }
 
             // read image
-            Image image = ymageImageParser.parse(urlString.toString(), imgb);
+            final Image image = ymageImageParser.parse(urlString.toString(), imgb);
 
             if ((auth) && ((width == 0) || (height == 0)) && (maxwidth == 0) && (maxheight == 0)) return image;
 
             // find original size
-            int h = image.getHeight(null);
-            int w = image.getWidth(null);
+            final int h = image.getHeight(null);
+            final int w = image.getWidth(null);
             
             // in case of not-authorized access shrink the image to prevent
             // copyright problems, so that images are not larger than thumbnails
@@ -133,8 +133,8 @@ public class ViewImage {
             // calculate width & height from maxwidth & maxheight
             if ((maxwidth < w) || (maxheight < h)) {
                 // scale image
-                double hs = (w <= maxwidth) ? 1.0 : ((double) maxwidth) / ((double) w);
-                double vs = (h <= maxheight) ? 1.0 : ((double) maxheight) / ((double) h);
+                final double hs = (w <= maxwidth) ? 1.0 : ((double) maxwidth) / ((double) w);
+                final double vs = (h <= maxheight) ? 1.0 : ((double) maxheight) / ((double) h);
                 double scale = Math.min(hs, vs);
                 if (!auth) scale = Math.min(scale, 0.6); // this is for copyright purpose
                 if (scale < 1.0) {
@@ -147,9 +147,9 @@ public class ViewImage {
                 
                 // compute scaled image
                 scaled = ((w == width) && (h == height)) ? image : image.getScaledInstance(width, height, Image.SCALE_AREA_AVERAGING);
-                MediaTracker mediaTracker = new MediaTracker(new Container());
+                final MediaTracker mediaTracker = new MediaTracker(new Container());
                 mediaTracker.addImage(scaled, 0);
-                try {mediaTracker.waitForID(0);} catch (InterruptedException e) {}
+                try {mediaTracker.waitForID(0);} catch (final InterruptedException e) {}
             } else {
                 // do not scale
                 width = w;

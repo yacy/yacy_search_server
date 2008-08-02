@@ -40,29 +40,29 @@ public class kelondroLock {
         apply(-1);
     }
 
-    public synchronized void apply(long millis) {
+    public synchronized void apply(final long millis) {
         // sets a lock that is valid for a specific time
         // if the time is over, the lock is released automatically
         if (locked()) {
             do {
                 try { wait(100); }
-                catch (InterruptedException e) { }
-                catch (Exception e) { e.printStackTrace(); }
+                catch (final InterruptedException e) { }
+                catch (final Exception e) { e.printStackTrace(); }
             } while (locked());
         }
         lock = true;
         releaseTime = (millis < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + millis;
     }
 
-    public synchronized boolean stay(long waitMillis, long lockMillis) {
+    public synchronized boolean stay(final long waitMillis, final long lockMillis) {
         // this tries to apply a lock, but does not block infinitely until
         // the lock is released. If after the given time the lock is not released
         // the method returns with false and no more lock is applied
         // if the lock was applied successfully, it returns with true
         if (locked()) {
             try { wait(waitMillis); }
-            catch (InterruptedException e) { }
-            catch (Exception e) { e.printStackTrace(); }
+            catch (final InterruptedException e) { }
+            catch (final Exception e) { e.printStackTrace(); }
             if (locked()) return false;
         }
         lock = true;

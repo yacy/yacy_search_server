@@ -97,14 +97,14 @@ public class Ranking_p {
         return prop;
     }
     
-    private static void putRanking(serverObjects prop, plasmaSearchRankingProfile rankingProfile, String prefix) {
+    private static void putRanking(final serverObjects prop, final plasmaSearchRankingProfile rankingProfile, final String prefix) {
     	putRanking(prop, rankingProfile.preToExternalMap(prefix), prefix, "Pre");
     	putRanking(prop, rankingProfile.postToExternalMap(prefix), prefix, "Post");
     }
     
-    private static void putRanking(serverObjects prop, Map<String, String> map, String prefix, String attrExtension) {
+    private static void putRanking(final serverObjects prop, final Map<String, String> map, final String prefix, final String attrExtension) {
     	prop.put("attr" + attrExtension, map.size());
-    	Iterator<String> it = map.keySet().iterator();
+    	final Iterator<String> it = map.keySet().iterator();
     	String key;
     	int i, j = 0;
     	while (it.hasNext()) {
@@ -118,7 +118,7 @@ public class Ranking_p {
     			try {
 					prop.put("attr" + attrExtension + "_" + j + "_select_" + i + "_checked",
 							(i == Integer.valueOf(map.get(key)).intValue()) ? "1" : "0");
-				} catch (NumberFormatException e) {
+				} catch (final NumberFormatException e) {
 					prop.put("attr" + attrExtension + "_" + j + "_select_" + i + "_checked", "0");
 				}
     		}
@@ -128,7 +128,7 @@ public class Ranking_p {
     	}
     }
     
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
 
         // clean up all search events
@@ -138,13 +138,13 @@ public class Ranking_p {
         if ((post == null) || (env == null)) {
             // we create empty entries for template strings
             final serverObjects prop = defaultValues();
-            plasmaSearchRankingProfile ranking = sb.getRanking();
+            final plasmaSearchRankingProfile ranking = sb.getRanking();
             putRanking(prop, ranking, "local");
             return prop;
         }
         
         if (post.containsKey("EnterRanking")) {
-            plasmaSearchRankingProfile ranking = new plasmaSearchRankingProfile("local", post.toString());
+            final plasmaSearchRankingProfile ranking = new plasmaSearchRankingProfile("local", post.toString());
             sb.setConfig("rankingProfile", crypt.simpleEncode(ranking.toExternalString()));
             final serverObjects prop = defaultValues();
             //prop.putAll(ranking.toExternalMap("local"));
@@ -154,14 +154,14 @@ public class Ranking_p {
         
         if (post.containsKey("ResetRanking")) {
             sb.setConfig("rankingProfile", "");
-            plasmaSearchRankingProfile ranking = new plasmaSearchRankingProfile(plasmaSearchQuery.CONTENTDOM_TEXT);
+            final plasmaSearchRankingProfile ranking = new plasmaSearchRankingProfile(plasmaSearchQuery.CONTENTDOM_TEXT);
             final serverObjects prop = defaultValues();
             //prop.putAll(ranking.toExternalMap("local"));
             putRanking(prop, ranking, "local");
             return prop;
         }
         
-        plasmaSearchRankingProfile localRanking = new plasmaSearchRankingProfile("local", post.toString());
+        final plasmaSearchRankingProfile localRanking = new plasmaSearchRankingProfile("local", post.toString());
         final serverObjects prop = new serverObjects();
         putRanking(prop, localRanking, "local");
         prop.putAll(localRanking.toExternalMap("local"));

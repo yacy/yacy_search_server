@@ -45,12 +45,12 @@ public class dbtest {
     public static byte[] randomHash(final long r0, final long r1) {
         // a long can have 64 bit, but a 12-byte hash can have 6 * 12 = 72 bits
         // so we construct a generic Hash using two long values
-        String s = (kelondroBase64Order.enhancedCoder.encodeLong(Math.abs(r0), 6) +
+        final String s = (kelondroBase64Order.enhancedCoder.encodeLong(Math.abs(r0), 6) +
                     kelondroBase64Order.enhancedCoder.encodeLong(Math.abs(r1), 6));
         return s.getBytes();
     }
     
-    public static byte[] randomHash(Random r) {
+    public static byte[] randomHash(final Random r) {
         return randomHash(r.nextLong(), r.nextLong());
     }
     
@@ -72,7 +72,7 @@ public class dbtest {
         }
 
         public boolean isValid() {
-            String s = new String(this.value).trim();
+            final String s = new String(this.value).trim();
             if (s.length() == 0) return false;
             final long source = new Long(s).longValue();
             return new String(this.key).equals(new String(randomHash(source, source)));
@@ -129,7 +129,7 @@ public class dbtest {
             try {
                 getTable_test().put(getTable_test().row().newEntry(new byte[][] { entry.getKey(), entry.getValue() , entry.getValue() }));
                 if (getTable_reference() != null) getTable_reference().put(getTable_test().row().newEntry(new byte[][] { entry.getKey(), entry.getValue() , entry.getValue() }));
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 System.err.println(e);
                 e.printStackTrace();
                 System.exit(0);
@@ -148,7 +148,7 @@ public class dbtest {
             try {
                 getTable_test().remove(entry.getKey());
                 if (getTable_reference() != null) getTable_reference().remove(entry.getKey());
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 System.err.println(e);
                 e.printStackTrace();
                 System.exit(0);
@@ -186,7 +186,7 @@ public class dbtest {
                     } */
                 }
                 }
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 System.err.println(e);
                 e.printStackTrace();
                 System.exit(0);
@@ -194,20 +194,20 @@ public class dbtest {
         }
     }
     
-    public static kelondroIndex selectTableType(String dbe, String tablename, kelondroRow testRow) throws Exception {
+    public static kelondroIndex selectTableType(final String dbe, final String tablename, final kelondroRow testRow) throws Exception {
         if (dbe.equals("kelondroRowSet")) {
             return new kelondroRowSet(testRow, 0);
         }
         if (dbe.equals("kelondroTree")) {
-            File tablefile = new File(tablename + ".kelondro.db");
+            final File tablefile = new File(tablename + ".kelondro.db");
             return new kelondroCache(new kelondroTree(tablefile, true, 0, testRow));
         }
         if (dbe.equals("kelondroFlexTable")) {
-            File tablepath = new File(tablename).getParentFile();
+            final File tablepath = new File(tablename).getParentFile();
             return new kelondroFlexTable(tablepath, new File(tablename).getName(), testRow, 0, true);
         }
         if (dbe.equals("kelondroSplitTable")) {
-            File tablepath = new File(tablename).getParentFile();
+            final File tablepath = new File(tablename).getParentFile();
             return new kelondroSplitTable(tablepath, new File(tablename).getName(), testRow, true);
         }
         if (dbe.equals("kelondroEcoTable")) {
@@ -222,7 +222,7 @@ public class dbtest {
         return null;
     }
     
-    public static boolean checkEquivalence(kelondroIndex test, kelondroIndex reference) throws IOException {
+    public static boolean checkEquivalence(final kelondroIndex test, final kelondroIndex reference) throws IOException {
         if (reference == null) return true;
         if (test.size() == reference.size()) {
             System.out.println("* Testing equivalence of test table to reference table, " + test.size() + " entries");
@@ -235,7 +235,7 @@ public class dbtest {
         
         Iterator<kelondroRow.Entry> i = test.rows(true, null);
         System.out.println("* Testing now by enumeration over test table");
-        long ts = System.currentTimeMillis();
+        final long ts = System.currentTimeMillis();
         while (i.hasNext()) {
             test_entry = i.next();
             reference_entry = reference.get(test_entry.getPrimaryKeyBytes());
@@ -247,7 +247,7 @@ public class dbtest {
         
         i = reference.rows(true, null);
         System.out.println("* Testing now by enumeration over reference table");
-        long rs = System.currentTimeMillis();
+        final long rs = System.currentTimeMillis();
         while (i.hasNext()) {
             reference_entry = i.next();
             test_entry = test.get(reference_entry.getPrimaryKeyBytes());
@@ -262,7 +262,7 @@ public class dbtest {
         return eq;
     }
     
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         System.setProperty("java.awt.headless", "true");
         
         System.out.println("*** YaCy Database Test");
@@ -270,7 +270,7 @@ public class dbtest {
         boolean assertionenabled = false;
         assert assertionenabled = true;
         if (assertionenabled) System.out.println("*** Asserts are enabled"); else System.out.println("*** HINT: YOU SHOULD ENABLE ASSERTS! (include -ea in start arguments");
-        long mb = serverMemory.available() / 1024 / 1024;
+        final long mb = serverMemory.available() / 1024 / 1024;
         System.out.println("*** RAM = " + mb + " MB");
         System.out.print(">java " +
                 ((assertionenabled) ? "-ea " : "") +
@@ -280,26 +280,26 @@ public class dbtest {
         System.out.println();
         
         // read command options
-        String command        = args[0]; // test command
-        String dbe_test       = args[1]; // the database engine that shall be tested
+        final String command        = args[0]; // test command
+        final String dbe_test       = args[1]; // the database engine that shall be tested
         String dbe_reference  = args[2]; // the reference database engine (may be null)
-        String tablename_test = args[3]; // name of test-table
+        final String tablename_test = args[3]; // name of test-table
         if (dbe_reference.toLowerCase().equals("null")) dbe_reference = null;
-        String tablename_reference = (dbe_reference == null) ? null : (tablename_test + ".reference");
+        final String tablename_reference = (dbe_reference == null) ? null : (tablename_test + ".reference");
         
         // start test
-        long startup = System.currentTimeMillis();
+        final long startup = System.currentTimeMillis();
         try {
             // create a memory profiler
-            memprofiler profiler = new memprofiler(1024, 320, 120, new File(tablename_test + ".profile.png"));
+            final memprofiler profiler = new memprofiler(1024, 320, 120, new File(tablename_test + ".profile.png"));
             profiler.start();
             
             // create the database access
-            kelondroRow testRow = new kelondroRow("byte[] key-" + keylength + ", byte[] dummy-" + keylength + ", value-" + valuelength, kelondroBase64Order.enhancedCoder, 0);
-            kelondroIndex table_test = selectTableType(dbe_test, tablename_test, testRow);
-            kelondroIndex table_reference = (dbe_reference == null) ? null : selectTableType(dbe_reference, tablename_reference, testRow);
+            final kelondroRow testRow = new kelondroRow("byte[] key-" + keylength + ", byte[] dummy-" + keylength + ", value-" + valuelength, kelondroBase64Order.enhancedCoder, 0);
+            final kelondroIndex table_test = selectTableType(dbe_test, tablename_test, testRow);
+            final kelondroIndex table_reference = (dbe_reference == null) ? null : selectTableType(dbe_reference, tablename_reference, testRow);
             
-            long afterinit = System.currentTimeMillis();
+            final long afterinit = System.currentTimeMillis();
             System.out.println("Test for db-engine " + dbe_test +  " started to create file " + tablename_test + " with test " + command);
             
             // execute command
@@ -312,9 +312,9 @@ public class dbtest {
                 // fill database with random entries;
                 // args: <number-of-entries> <random-startpoint>
                 // example: java -ea -Xmx200m fill kelondroEcoTable kelondroFlexTable filldbtest 50000 0 
-                long count = Long.parseLong(args[4]);
-                long randomstart = Long.parseLong(args[5]);
-                Random random = new Random(randomstart);
+                final long count = Long.parseLong(args[4]);
+                final long randomstart = Long.parseLong(args[5]);
+                final Random random = new Random(randomstart);
                 byte[] key;
                 kelondroProfile ioProfileAcc = new kelondroProfile();
                 kelondroProfile cacheProfileAcc = new kelondroProfile();
@@ -339,9 +339,9 @@ public class dbtest {
             if (command.equals("read")) {
                 // read the database and compare with random entries;
                 // args: <number-of-entries> <random-startpoint>
-                long count = Long.parseLong(args[4]);
-                long randomstart = Long.parseLong(args[5]);
-                Random random = new Random(randomstart);
+                final long count = Long.parseLong(args[4]);
+                final long randomstart = Long.parseLong(args[5]);
+                final Random random = new Random(randomstart);
                 kelondroRow.Entry entry;
                 byte[] key;
                 for (int i = 0; i < count; i++) {
@@ -370,8 +370,8 @@ public class dbtest {
                 // this is repeated without termination; after each loop
                 // the current ram is printed out
                 // args: <number-of-entries> <random-startpoint>
-                long count = Long.parseLong(args[4]);
-                long randomstart = Long.parseLong(args[5]);
+                final long count = Long.parseLong(args[4]);
+                final long randomstart = Long.parseLong(args[5]);
                 byte[] key;
                 Random random;
                 long start, write, remove;
@@ -437,16 +437,16 @@ public class dbtest {
                    Database size = 354 unique entries.
                    Execution time: open=1324, command=34032, close=1, total=35357
                  */
-                long writeCount = Long.parseLong(args[4]);
-                long readCount = Long.parseLong(args[5]);
-                long randomstart = Long.parseLong(args[6]);
+                final long writeCount = Long.parseLong(args[4]);
+                final long readCount = Long.parseLong(args[5]);
+                final long randomstart = Long.parseLong(args[6]);
                 final Random random = new Random(randomstart);
                 long r;
                 Long R;
                 int p, rc=0;
-                ArrayList<Long> ra = new ArrayList<Long>();
-                HashSet<Long> jcontrol = new HashSet<Long>();
-                kelondroIntBytesMap kcontrol = new kelondroIntBytesMap(1, 0);
+                final ArrayList<Long> ra = new ArrayList<Long>();
+                final HashSet<Long> jcontrol = new HashSet<Long>();
+                final kelondroIntBytesMap kcontrol = new kelondroIntBytesMap(1, 0);
                 for (int i = 0; i < writeCount; i++) {
                     r = Math.abs(random.nextLong() % 1000);
                     jcontrol.add(new Long(r));
@@ -468,25 +468,25 @@ public class dbtest {
                 }
                 System.out.println("removed: " + rc + ", size of jcontrol set: " + jcontrol.size() + ", size of kcontrol set: " + kcontrol.size());
                 while (serverInstantBusyThread.instantThreadCounter > 0) {
-                    try {Thread.sleep(1000);} catch (InterruptedException e) {} // wait for all tasks to finish
+                    try {Thread.sleep(1000);} catch (final InterruptedException e) {} // wait for all tasks to finish
                     System.out.println("count: "  + serverInstantBusyThread.instantThreadCounter + ", jobs: " + serverInstantBusyThread.jobs.toString());
                 }
-                try {Thread.sleep(6000);} catch (InterruptedException e) {}
+                try {Thread.sleep(6000);} catch (final InterruptedException e) {}
             }
             
             if (command.equals("stressSequential")) {
                 // 
                 // args: <number-of-writes> <number-of-reads> <random-startpoint>
-                long writeCount = Long.parseLong(args[4]);
-                long readCount = Long.parseLong(args[5]);
-                long randomstart = Long.parseLong(args[6]);
-                Random random = new Random(randomstart);
+                final long writeCount = Long.parseLong(args[4]);
+                final long readCount = Long.parseLong(args[5]);
+                final long randomstart = Long.parseLong(args[6]);
+                final Random random = new Random(randomstart);
                 long r;
                 Long R;
                 int p, rc=0;
-                ArrayList<Long> ra = new ArrayList<Long>();
-                HashSet<Long> jcontrol = new HashSet<Long>();
-                kelondroIntBytesMap kcontrol = new kelondroIntBytesMap(1, 0);
+                final ArrayList<Long> ra = new ArrayList<Long>();
+                final HashSet<Long> jcontrol = new HashSet<Long>();
+                final kelondroIntBytesMap kcontrol = new kelondroIntBytesMap(1, 0);
                 for (int i = 0; i < writeCount; i++) {
                     //if (i == 30) random = new Random(randomstart);
                     r = Math.abs(random.nextLong() % 1000);
@@ -506,13 +506,13 @@ public class dbtest {
                         new RemoveJob(table_test, table_reference, (ra.remove(p)).longValue()).run();
                     }
                 }
-                try {Thread.sleep(1000);} catch (InterruptedException e) {}
+                try {Thread.sleep(1000);} catch (final InterruptedException e) {}
                 System.out.println("removed: " + rc + ", size of jcontrol set: " + jcontrol.size() + ", size of kcontrol set: " + kcontrol.size());
             }
             
-            long aftercommand = System.currentTimeMillis();
+            final long aftercommand = System.currentTimeMillis();
             checkEquivalence(table_test, table_reference);
-            long afterequiv = System.currentTimeMillis();
+            final long afterequiv = System.currentTimeMillis();
             // final report
             System.out.println("Database size = " + table_test.size() + " unique entries.");
             
@@ -520,7 +520,7 @@ public class dbtest {
             table_test.close();
             if (table_reference != null) table_reference.close();
             
-            long afterclose = System.currentTimeMillis();
+            final long afterclose = System.currentTimeMillis();
             
             System.out.println("Execution time: open=" + (afterinit - startup) +
                     ", command=" + (aftercommand - afterinit) +
@@ -528,7 +528,7 @@ public class dbtest {
                     ", close=" + (afterclose - afterequiv) +
                     ", total=" + (afterclose - startup));
             profiler.terminate();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             e.printStackTrace();
         }
     }
@@ -541,12 +541,12 @@ final class memprofiler extends Thread {
     File outputFile;
     long start;
     
-    public memprofiler(int width, int height, int expectedTimeSeconds, File outputFile) {
+    public memprofiler(final int width, final int height, final int expectedTimeSeconds, final File outputFile) {
         this.outputFile = outputFile;
-        int expectedKilobytes = 20 * 1024;//(Runtime.getRuntime().totalMemory() / 1024);
+        final int expectedKilobytes = 20 * 1024;//(Runtime.getRuntime().totalMemory() / 1024);
         memChart = new ymageChart(width, height, "FFFFFF", "000000", "000000", 50, 20, 20, 20, "MEMORY CHART FROM EXECUTION AT " + new Date(), null);
-        int timescale = 10; // steps with each 10 seconds
-        int memscale = 1024;
+        final int timescale = 10; // steps with each 10 seconds
+        final int memscale = 1024;
         memChart.declareDimension(ymageChart.DIMENSION_BOTTOM, timescale, (width - 40) * timescale / expectedTimeSeconds, 0, "FFFFFF", "555555", "SECONDS");
         memChart.declareDimension(ymageChart.DIMENSION_LEFT, memscale, (height - 40) * memscale / expectedKilobytes, 0, "FFFFFF", "555555", "KILOBYTES");
         run = true;
@@ -563,17 +563,17 @@ final class memprofiler extends Thread {
             memChart.chartLine(ymageChart.DIMENSION_BOTTOM, ymageChart.DIMENSION_LEFT, seconds0, kilobytes0, seconds1, kilobytes1);
             seconds0 = seconds1;
             kilobytes0 = kilobytes1;
-            try {Thread.sleep(100);} catch (InterruptedException e) {}
+            try {Thread.sleep(100);} catch (final InterruptedException e) {}
         }
         try {
             ImageIO.write(memChart.getImage(), "png", outputFile);
-        } catch (IOException e) {}
+        } catch (final IOException e) {}
     }
     
     public void terminate() {
         run = false;
         while (this.isAlive()) {
-            try {Thread.sleep(1000);} catch (InterruptedException e) {}
+            try {Thread.sleep(1000);} catch (final InterruptedException e) {}
         }
     }
 }

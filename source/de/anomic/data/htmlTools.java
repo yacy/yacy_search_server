@@ -34,14 +34,14 @@ public class htmlTools {
       *               be transcoded. 
       * @return the string with all characters replaced by the corresponding character from array
       */
-    public static String encodeUnicode2html(String text, boolean includingAmpersand, boolean forXML) {
+    public static String encodeUnicode2html(final String text, final boolean includingAmpersand, final boolean forXML) {
         if (text == null) 
             return null;
         
-        int spos = (includingAmpersand ? 0 : 2);
+        final int spos = (includingAmpersand ? 0 : 2);
         // if (forXML), then only encode ampersand, quotation mark, less than and 
         // greather than which are the first 4 pairs in default mapping table
-        int epos = (forXML ? 8 : mapping.length);
+        final int epos = (forXML ? 8 : mapping.length);
 
         return encode(text, mapping, spos, epos);
     }
@@ -49,7 +49,7 @@ public class htmlTools {
     /**
      * Like {@link #encodeUnicode2html(String, boolean, boolean)} with <code>forXML = false</code>
      */
-    public static String encodeUnicode2html(String text, boolean includingAmpersand) {
+    public static String encodeUnicode2html(final String text, final boolean includingAmpersand) {
         return encodeUnicode2html(text, includingAmpersand, false);
     }
 
@@ -64,7 +64,7 @@ public class htmlTools {
      * @param text the original String
      * @return the encoded String
      */
-    public static String encodeUnicode2xml(String text) {
+    public static String encodeUnicode2xml(final String text) {
         return encodeUnicode2html(text, true, true);
     }
 
@@ -78,8 +78,8 @@ public class htmlTools {
      * @param epos The ending point, see above.
      * @return A copy of the original String with all entities defined in map replaced.
      */
-    public static String encode(String text, final String[] map, int spos, int epos) {
-        StringBuffer sb = new StringBuffer(text.length());
+    public static String encode(final String text, final String[] map, final int spos, final int epos) {
+        final StringBuffer sb = new StringBuffer(text.length());
         int textpos = 0;
         search: while (textpos < text.length()) {
             // find a (forward) mapping
@@ -98,10 +98,10 @@ public class htmlTools {
         return sb.toString();
     }
     
-    public static String decodeHtml2Unicode(String text) {
+    public static String decodeHtml2Unicode(final String text) {
         if (text == null) return null;
         int pos = 0;
-        StringBuffer sb = new StringBuffer(text.length());
+        final StringBuffer sb = new StringBuffer(text.length());
         search: while (pos < text.length()) {
             // find a reverse mapping. TODO: replace matching with hashtable(s)
             loop: for (int i = 0; i < mapping.length; i += 2) {
@@ -267,9 +267,9 @@ public class htmlTools {
         "\u00FF","&yuml;"
     };
     
-    public static void main(String[] args) {
-        String text = "Test-Text mit & um zyklische &uuml; &amp; Ersetzungen auszuschliessen";
-        String txet = encodeUnicode2html(text, true);
+    public static void main(final String[] args) {
+        final String text = "Test-Text mit & um zyklische &uuml; &amp; Ersetzungen auszuschliessen";
+        final String txet = encodeUnicode2html(text, true);
         System.out.println(txet);
         System.out.println(decodeHtml2Unicode(txet));
         if (decodeHtml2Unicode(txet).equals(text)) System.out.println("correct");

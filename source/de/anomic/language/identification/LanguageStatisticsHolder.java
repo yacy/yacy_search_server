@@ -37,7 +37,7 @@ public class LanguageStatisticsHolder extends Vector<LanguageStatistics> {
 
     private static final long serialVersionUID = -887517724227204705L;
 
-    private String languageDir = "langstats";  // directory that contains language files    
+    private final String languageDir = "langstats";  // directory that contains language files    
     
     private static LanguageStatisticsHolder instance;
     
@@ -61,11 +61,11 @@ public class LanguageStatisticsHolder extends Vector<LanguageStatistics> {
      * Reads all language files from a directory.
      * @param directory the directory that contains the language files
      */
-    private void addAllLanguagesInDirectory(String directory) {
+    private void addAllLanguagesInDirectory(final String directory) {
         
-        File folder = new File(directory);
-        FilenameFilter filter = new LanguageFilenameFilter();
-        File[] allLanguageFiles = folder.listFiles(filter);
+        final File folder = new File(directory);
+        final FilenameFilter filter = new LanguageFilenameFilter();
+        final File[] allLanguageFiles = folder.listFiles(filter);
         
         if (allLanguageFiles != null) {
             for (int i = 0; i < allLanguageFiles.length; i++) {

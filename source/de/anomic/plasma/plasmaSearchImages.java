@@ -35,24 +35,24 @@ import de.anomic.yacy.yacyURL;
 
 public final class plasmaSearchImages {
 
-    private HashMap<String, htmlFilterImageEntry> images;
+    private final HashMap<String, htmlFilterImageEntry> images;
     
-    public plasmaSearchImages(long maxTime, yacyURL url, int depth, boolean indexing) {
-        long start = System.currentTimeMillis();
+    public plasmaSearchImages(final long maxTime, final yacyURL url, final int depth, final boolean indexing) {
+        final long start = System.currentTimeMillis();
         this.images = new HashMap<String, htmlFilterImageEntry>();
         if (maxTime > 10) {
-            Object[] resource = plasmaSnippetCache.getResource(url, true, (int) maxTime, false, indexing);
-            InputStream res = (InputStream) resource[0];
-            Long resLength = (Long) resource[1];
+            final Object[] resource = plasmaSnippetCache.getResource(url, true, (int) maxTime, false, indexing);
+            final InputStream res = (InputStream) resource[0];
+            final Long resLength = (Long) resource[1];
             if (res != null) {
                 plasmaParserDocument document = null;
                 try {
                     // parse the document
                     document = plasmaSnippetCache.parseDocument(url, resLength.longValue(), res);
-                } catch (ParserException e) {
+                } catch (final ParserException e) {
                     // parsing failed
                 } finally {
-                    try { res.close(); } catch (Exception e) {/* ignore this */}
+                    try { res.close(); } catch (final Exception e) {/* ignore this */}
                 }
                 if (document == null) return;
                 
@@ -61,13 +61,13 @@ public final class plasmaSearchImages {
 
                 // add also links from pages one step deeper, if depth > 0
                 if (depth > 0) {
-                    Iterator<yacyURL> i = document.getHyperlinks().keySet().iterator();
+                    final Iterator<yacyURL> i = document.getHyperlinks().keySet().iterator();
                     String nexturlstring;
                     while (i.hasNext()) {
                         try {
                             nexturlstring = i.next().toNormalform(true, true);
                             addAll(new plasmaSearchImages(serverDate.remainingTime(start, maxTime, 10), new yacyURL(nexturlstring, null), depth - 1, indexing));
-                        } catch (MalformedURLException e1) {
+                        } catch (final MalformedURLException e1) {
                             e1.printStackTrace();
                         }
                     }
@@ -77,7 +77,7 @@ public final class plasmaSearchImages {
         }
     }
     
-    public void addAll(plasmaSearchImages m) {
+    public void addAll(final plasmaSearchImages m) {
         synchronized (m.images) {
             htmlFilterContentScraper.addAllImages(this.images, m.images);
         }

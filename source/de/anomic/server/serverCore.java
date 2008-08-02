@@ -124,10 +124,10 @@ public final class serverCore extends serverAbstractBusyThread implements server
     
     private SSLSocketFactory sslSocketFactory = null;
     private ServerSocket socket;           // listener
-    private int timeout;                   // connection time-out of the socket
+    private final int timeout;                   // connection time-out of the socket
     serverHandler handlerPrototype;        // the command class (a serverHandler) 
 
-    private serverSwitch<?> switchboard;   // the command class switchboard
+    private final serverSwitch<?> switchboard;   // the command class switchboard
     HashMap<String, String> denyHost;
     int commandMaxLength;
     private int maxBusySessions;
@@ -173,25 +173,25 @@ public final class serverCore extends serverAbstractBusyThread implements server
     }
     */
     
-    public static String clientAddress(Socket s) {
-        InetAddress uAddr = s.getInetAddress();
+    public static String clientAddress(final Socket s) {
+        final InetAddress uAddr = s.getInetAddress();
         if (uAddr.isAnyLocalAddress()) return "localhost";
         String cIP = uAddr.getHostAddress();
         if (isLocalhost(cIP)) cIP = "localhost";
         return cIP;
     }
     
-    public static final boolean isLocalhost(String hostname) {
+    public static final boolean isLocalhost(final String hostname) {
         return hostname.equals("localhost") || hostname.startsWith("127.") || hostname.startsWith("0:0:0:0:0:0:0:1");
     }
 
     // class initializer
     public serverCore( 
-            int timeout,
-            boolean blockAttack,
-            serverHandler handlerPrototype, 
-            serverSwitch<?> switchboard,
-            int commandMaxLength
+            final int timeout,
+            final boolean blockAttack,
+            final serverHandler handlerPrototype, 
+            final serverSwitch<?> switchboard,
+            final int commandMaxLength
     ) {
         this.timeout = timeout;
         
@@ -241,8 +241,8 @@ public final class serverCore extends serverAbstractBusyThread implements server
             // updating the port information
             //yacyCore.seedDB.mySeed.put(yacySeed.PORT,Integer.toString(bindAddress.getPort()));    
             //yacyCore.seedDB.mySeed().put(yacySeed.PORT, extendedPort);
-        } catch (Exception e) {
-            String errorMsg = "FATAL ERROR: " + e.getMessage() + " - probably root access rights needed. check port number";
+        } catch (final Exception e) {
+            final String errorMsg = "FATAL ERROR: " + e.getMessage() + " - probably root access rights needed. check port number";
             this.log.logSevere(errorMsg);
             System.out.println(errorMsg);             
             System.exit(0);
@@ -269,19 +269,19 @@ public final class serverCore extends serverAbstractBusyThread implements server
             extendedPortString = extendedPortString.substring(pos+1); 
             
             if (bindIP.startsWith("#")) {
-                String interfaceName = bindIP.substring(1);
+                final String interfaceName = bindIP.substring(1);
                 String hostName = null;
                 this.log.logFine("Trying to determine IP address of interface '" + interfaceName + "'.");                    
 
-                Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+                final Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
                 if (interfaces != null) {
                     while (interfaces.hasMoreElements()) {
-                        NetworkInterface interf = interfaces.nextElement();
+                        final NetworkInterface interf = interfaces.nextElement();
                         if (interf.getName().equalsIgnoreCase(interfaceName)) {
-                            Enumeration<InetAddress> addresses = interf.getInetAddresses();
+                            final Enumeration<InetAddress> addresses = interf.getInetAddresses();
                             if (addresses != null) {
                                 while (addresses.hasMoreElements()) {
-                                    InetAddress address = addresses.nextElement();
+                                    final InetAddress address = addresses.nextElement();
                                     if (address instanceof Inet4Address) {
                                         hostName = address.getHostAddress();
                                         break;
@@ -331,7 +331,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
             
             announceThreadBlockRelease();
             
-            String cIP = clientAddress(controlSocket);
+            final String cIP = clientAddress(controlSocket);
             //System.out.println("server bfHosts=" + bfHost.toString());
             if (bfHost.get(cIP) != null) {
                 Integer attempts = bfHost.get(cIP);
@@ -340,7 +340,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
                 this.log.logWarning("SLOWING DOWN ACCESS FOR BRUTE-FORCE PREVENTION FROM " + cIP + ", ATTEMPT " + attempts.intValue());
                 // add a delay to make brute-force harder
                 announceThreadBlockApply();
-                try {Thread.sleep(attempts.intValue() /*BFPATCH*/);} catch (InterruptedException e) {}
+                try {Thread.sleep(attempts.intValue() /*BFPATCH*/);} catch (final InterruptedException e) {}
                 announceThreadBlockRelease();
                 if ((attempts.intValue() >= 10) && (this.denyHost != null)) {
                     this.denyHost.put(cIP, "deny");
@@ -377,14 +377,14 @@ public final class serverCore extends serverAbstractBusyThread implements server
                 //controlSocket.setReceiveBufferSize(1440);
                 
                 // create session
-                Session connection = new Session(sessionThreadGroup, controlSocket, this.timeout);
+                final Session connection = new Session(sessionThreadGroup, controlSocket, this.timeout);
                 this.busySessions.put(connection, PRESENT);
             } else {
                 this.log.logWarning("ACCESS FROM " + cIP + " DENIED");
             }
             
             return true;
-        } catch (SocketException e) {
+        } catch (final SocketException e) {
             if (this.forceRestart) {
                 // reinitialize serverCore
                 init(); 
@@ -400,12 +400,12 @@ public final class serverCore extends serverAbstractBusyThread implements server
         Thread.interrupted();
         
         // shut down all busySessions
-        if (this.busySessions != null) for (Session session: this.busySessions.keySet()) {
+        if (this.busySessions != null) for (final Session session: this.busySessions.keySet()) {
             try {
                 session.interrupt();
-            } catch (SecurityException e ) {
+            } catch (final SecurityException e ) {
                 e.printStackTrace();
-            } catch (ConcurrentModificationException e) {
+            } catch (final ConcurrentModificationException e) {
                 e.printStackTrace();
             }
         }
@@ -414,13 +414,13 @@ public final class serverCore extends serverAbstractBusyThread implements server
         try {
             this.log.logInfo("Closing server socket ...");
             this.socket.close();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             this.log.logWarning("Unable to close the server socket."); 
         }
 
         // close all sessions
         this.log.logInfo("Closing server sessions ...");
-        if (this.busySessions != null) for (Session s: this.busySessions.keySet()) {
+        if (this.busySessions != null) for (final Session s: this.busySessions.keySet()) {
             s.interrupt();
             s.close();
         }
@@ -437,7 +437,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
         return this.maxBusySessions;
     }
     
-    public void setMaxSessionCount(int count) {
+    public void setMaxSessionCount(final int count) {
         this.maxBusySessions = count;
     }
     
@@ -455,7 +455,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
         
         private long start;                // startup time
         private serverHandler commandObj;
-        private HashMap<String, Object> commandObjMethodCache = new HashMap<String, Object>(5);
+        private final HashMap<String, Object> commandObjMethodCache = new HashMap<String, Object>(5);
         
     	private String request;            // current command line
     	private int commandCounter;        // for logging: number of commands in this session
@@ -470,7 +470,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
         public  int socketTimeout;
         public  int hashIndex;
 
-    	public Session(ThreadGroup theThreadGroup, Socket controlSocket, int socketTimeout) {
+    	public Session(final ThreadGroup theThreadGroup, final Socket controlSocket, final int socketTimeout) {
             super(theThreadGroup, controlSocket.getInetAddress().toString() + "@" + Long.toString(System.currentTimeMillis()));
             this.socketTimeout = socketTimeout;
             this.controlSocket = controlSocket;
@@ -510,7 +510,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
             return this.userPort;
         }
         
-        public void setStopped(boolean stopped) {
+        public void setStopped(final boolean stopped) {
             this.stopped = stopped;            
         }
         
@@ -526,7 +526,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
                         this.controlSocket.close();
                         serverCore.this.log.logInfo("Closing main socket of thread '" + this.getName() + "'");
                     }
-                } catch (Exception e) {}
+                } catch (final Exception e) {}
             }            
         }
         
@@ -538,7 +538,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
             return System.currentTimeMillis() - this.start;
         }
             
-    	public void setIdentity(String id) {
+    	public void setIdentity(final String id) {
     	    this.identity = id;
     	}
     
@@ -548,14 +548,14 @@ public final class serverCore extends serverAbstractBusyThread implements server
     	}
     	*/
     
-    	public void log(boolean outgoing, String request) {
+    	public void log(final boolean outgoing, final String request) {
     	    serverCore.this.log.logFine(this.userAddress.getHostAddress() + "/" + this.identity + " " +
     		     "[" + ((busySessions == null)? -1 : busySessions.size()) + ", " + this.commandCounter +
     		     ((outgoing) ? "] > " : "] < ") +
     		     request);
     	}
     
-    	public void writeLine(String messg) throws IOException {
+    	public void writeLine(final String messg) throws IOException {
     	    send(this.out, messg + CRLF_STRING);
     	    log(true, messg);
     	}
@@ -570,7 +570,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
          * @return the next requestline as string
          */
         public String readLineAsString() {
-            byte[] l = readLine();
+            final byte[] l = readLine();
             return (l == null) ? null: new String(l);
         }
     
@@ -616,7 +616,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
                 
                 // listen for commands
                 listen();
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 System.err.println("ERROR: (internal) " + e);        
             } finally {
                 try {
@@ -636,13 +636,13 @@ public final class serverCore extends serverAbstractBusyThread implements server
                     this.out.close();                   
                     
                     // sleep for a while
-                    try {Thread.sleep(1000);} catch (InterruptedException e) {}                                                           
+                    try {Thread.sleep(1000);} catch (final InterruptedException e) {}                                                           
                     
                     // close everything                    
                     this.controlSocket.close();
                     this.controlSocket = null;
                                       
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     e.printStackTrace();
                 }
                 if (busySessions != null) busySessions.remove(this);
@@ -665,7 +665,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
                 boolean terminate = false;
                 String reqCmd;
                 String reqProtocol = "HTTP";
-                Object[] stringParameter = new String[1];
+                final Object[] stringParameter = new String[1];
                 while ((this.in != null) && ((requestBytes = readLine()) != null)) {
                     this.setName("Session_" + this.userAddress.getHostAddress() + 
                             ":" + this.controlSocket.getPort() + 
@@ -680,7 +680,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
                         if (this.request.trim().length() == 0) this.request = "EMPTY";
                         
                         // getting the rest of the request parameters
-                        int pos = this.request.indexOf(' ');
+                        final int pos = this.request.indexOf(' ');
                         if (pos < 0) {
                             reqCmd = this.request.trim().toUpperCase();
                             stringParameter[0] = "";
@@ -728,7 +728,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
                             try {
                                 commandMethod = this.commandObj.getClass().getMethod(reqCmd, stringType);
                                 this.commandObjMethodCache.put(reqProtocol + "_" + reqCmd, commandMethod);
-                            } catch (NoSuchMethodException noMethod) {
+                            } catch (final NoSuchMethodException noMethod) {
                                 commandMethod = this.commandObj.getClass().getMethod("UNKNOWN", stringType);
                                 stringParameter[0] = this.request.trim();
                             }
@@ -766,11 +766,11 @@ public final class serverCore extends serverAbstractBusyThread implements server
                         }
                         if (terminate) break;
                         
-                    } catch (InvocationTargetException ite) {                        
+                    } catch (final InvocationTargetException ite) {                        
                         System.out.println("ERROR A " + this.userAddress.getHostAddress());
                         // we extract a target exception and let the thread survive
                         writeLine(this.commandObj.error(ite.getTargetException()));
-                    } catch (NoSuchMethodException nsme) {
+                    } catch (final NoSuchMethodException nsme) {
                         System.out.println("ERROR B " + this.userAddress.getHostAddress());
                         if (!this.userAddress.isSiteLocalAddress()) {
                             if (serverCore.this.denyHost != null) {
@@ -781,15 +781,15 @@ public final class serverCore extends serverAbstractBusyThread implements server
                         // the client requested a command that does not exist
                         //Object[] errorParameter = { nsme };
                         //writeLine((String) error.invoke(this.cmdObject, errorParameter));
-                    } catch (IllegalAccessException iae) {
+                    } catch (final IllegalAccessException iae) {
                         System.out.println("ERROR C " + this.userAddress.getHostAddress());
                         // wrong parameters: this an only be an internal problem
                         writeLine(this.commandObj.error(iae));
-                    } catch (java.lang.ClassCastException e) {
+                    } catch (final java.lang.ClassCastException e) {
                         System.out.println("ERROR D " + this.userAddress.getHostAddress());
                         // ??
                         writeLine(this.commandObj.error(e));
-                    } catch (Exception e) {
+                    } catch (final Exception e) {
                         System.out.println("ERROR E " + this.userAddress.getHostAddress());
                         // whatever happens: the thread has to survive!
                         writeLine("UNKNOWN REASON:" + this.commandObj.error(e));
@@ -798,7 +798,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
             } /* catch (java.lang.ClassNotFoundException e) {
                 System.out.println("Internal error: Wrapper class not found: " + e.getMessage());
                 System.exit(0);
-            } */ catch (java.io.IOException e) {
+            } */ catch (final java.io.IOException e) {
                 // connection interruption: more or less normal
             }
             //announceMoreExecTime(System.currentTimeMillis() - this.start);
@@ -825,10 +825,10 @@ public final class serverCore extends serverAbstractBusyThread implements server
      * @return A byte array representing one line of the input or 
      *         <code>null</null> if EOS reached.
      */
-    public static byte[] receive(PushbackInputStream pbis, int maxSize, boolean logerr) {
+    public static byte[] receive(final PushbackInputStream pbis, final int maxSize, final boolean logerr) {
 
         // reuse an existing linebuffer
-        serverByteBuffer readLineBuffer = new serverByteBuffer(80);
+        final serverByteBuffer readLineBuffer = new serverByteBuffer(80);
 
         int bufferSize = 0, b = 0;
         try {
@@ -861,31 +861,31 @@ public final class serverCore extends serverAbstractBusyThread implements server
             // EOS
             if (bufferSize == 0 && b == -1) return null;
             return readLineBuffer.getBytes();
-        } catch (ClosedByInterruptException e) {
+        } catch (final ClosedByInterruptException e) {
             if (logerr) serverLog.logSevere("SERVER", "receive interrupted - timeout");
             return null;            
-        } catch (IOException e) {
+        } catch (final IOException e) {
             if (logerr) serverLog.logSevere("SERVER", "receive interrupted - exception 2 = " + e.getMessage());
             return null;
         }
     }
 
-    public static void send(OutputStream os, String buf) throws IOException {
+    public static void send(final OutputStream os, final String buf) throws IOException {
     	os.write(buf.getBytes());
     	// TODO make sure there was no reason to add this additional newline
     	//os.write(CRLF);
     	os.flush();
     }
     
-    public static void send(OutputStream os, byte[] buf) throws IOException {
+    public static void send(final OutputStream os, final byte[] buf) throws IOException {
     	os.write(buf);
     	os.write(CRLF);
     	os.flush();
     }
         
-    public static String send(OutputStream os, InputStream is) throws IOException {
-    	int bufferSize = is.available();
-    	byte[] buffer = new byte[((bufferSize < 1) || (bufferSize > 4096)) ? 4096 : bufferSize];
+    public static String send(final OutputStream os, final InputStream is) throws IOException {
+    	final int bufferSize = is.available();
+    	final byte[] buffer = new byte[((bufferSize < 1) || (bufferSize > 4096)) ? 4096 : bufferSize];
     	int l;
     	while ((l = is.read(buffer)) > 0) {os.write(buffer, 0, l);}
     	os.write(CRLF);
@@ -898,13 +898,13 @@ public final class serverCore extends serverAbstractBusyThread implements server
     }
     
     public static final void checkInterruption() throws InterruptedException {
-        Thread currentThread = Thread.currentThread();
+        final Thread currentThread = Thread.currentThread();
         if (currentThread.isInterrupted()) throw new InterruptedException();  
         if ((currentThread instanceof serverCore.Session) && ((serverCore.Session)currentThread).isStopped()) throw new InterruptedException();
     }
     
-    public void reconnect(int delay) {
-        Thread restart = new Restarter(delay);
+    public void reconnect(final int delay) {
+        final Thread restart = new Restarter(delay);
         restart.start();
     }
     
@@ -912,14 +912,14 @@ public final class serverCore extends serverAbstractBusyThread implements server
     public class Restarter extends Thread { 
         public serverCore theServerCore = null;
         public int delay = 5000;
-        public Restarter(int delay) {
+        public Restarter(final int delay) {
             this.delay = delay;
         }
         public void run() {
             // waiting for a while
             try {
                 Thread.sleep(delay);
-            } catch (InterruptedException e) {
+            } catch (final InterruptedException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
@@ -938,19 +938,19 @@ public final class serverCore extends serverAbstractBusyThread implements server
         String keyStoreFileName = this.switchboard.getConfig("keyStore", "").trim();        
         
         // getting the keystore pwd
-        String keyStorePwd = this.switchboard.getConfig("keyStorePassword", "").trim();
+        final String keyStorePwd = this.switchboard.getConfig("keyStorePassword", "").trim();
         
         // take a look if we have something to import
-        String pkcs12ImportFile = this.switchboard.getConfig("pkcs12ImportFile", "").trim();
+        final String pkcs12ImportFile = this.switchboard.getConfig("pkcs12ImportFile", "").trim();
         if (pkcs12ImportFile.length() > 0) {
             this.log.logInfo("Import certificates from import file '" + pkcs12ImportFile + "'.");
             
             try {
                 // getting the password
-                String pkcs12ImportPwd = this.switchboard.getConfig("pkcs12ImportPwd", "").trim();
+                final String pkcs12ImportPwd = this.switchboard.getConfig("pkcs12ImportPwd", "").trim();
 
                 // creating tool to import cert
-                PKCS12Tool pkcsTool = new PKCS12Tool(pkcs12ImportFile,pkcs12ImportPwd);
+                final PKCS12Tool pkcsTool = new PKCS12Tool(pkcs12ImportFile,pkcs12ImportPwd);
 
                 // creating a new keystore file
                 if (keyStoreFileName.length() == 0) {
@@ -958,9 +958,9 @@ public final class serverCore extends serverAbstractBusyThread implements server
                     keyStoreFileName = "DATA/SETTINGS/myPeerKeystore";
                     
                     // creating an empty java keystore
-                    KeyStore ks = KeyStore.getInstance("JKS");
+                    final KeyStore ks = KeyStore.getInstance("JKS");
                     ks.load(null,keyStorePwd.toCharArray());
-                    FileOutputStream ksOut = new FileOutputStream(keyStoreFileName);
+                    final FileOutputStream ksOut = new FileOutputStream(keyStoreFileName);
                     ks.store(ksOut, keyStorePwd.toCharArray());
                     ksOut.close();
                     
@@ -978,7 +978,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
                 // deleting original import file
                 // TODO: should we do this
                 
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 this.log.logSevere("Unable to import certificate from import file '" + pkcs12ImportFile + "'.",e);
             }
         } else if (keyStoreFileName.length() == 0) return null;
@@ -990,28 +990,28 @@ public final class serverCore extends serverAbstractBusyThread implements server
             
             // creating a new keystore instance of type (java key store)
             this.log.logFine("Initializing keystore ...");
-            KeyStore ks = KeyStore.getInstance("JKS");
+            final KeyStore ks = KeyStore.getInstance("JKS");
             
             // loading keystore data from file
             this.log.logFine("Loading keystore file " + keyStoreFileName);
-            FileInputStream stream = new FileInputStream(keyStoreFileName);            
+            final FileInputStream stream = new FileInputStream(keyStoreFileName);            
             ks.load(stream, keyStorePwd.toCharArray());
             
             // creating a keystore factory
             this.log.logFine("Initializing key manager factory ...");
-            KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+            final KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
             kmf.init(ks,keyStorePwd.toCharArray());
             
             // initializing the ssl context
             this.log.logFine("Initializing SSL context ...");
-            SSLContext sslcontext = SSLContext.getInstance("TLS");
+            final SSLContext sslcontext = SSLContext.getInstance("TLS");
             sslcontext.init(kmf.getKeyManagers(), null, null);
             
-            SSLSocketFactory factory = sslcontext.getSocketFactory(); 
+            final SSLSocketFactory factory = sslcontext.getSocketFactory(); 
             this.log.logInfo("SSL support initialized successfully");
             return factory;
-        } catch (Exception e) {
-            String errorMsg = "FATAL ERROR: Unable to initialize the SSL Socket factory. " + e.getMessage();
+        } catch (final Exception e) {
+            final String errorMsg = "FATAL ERROR: Unable to initialize the SSL Socket factory. " + e.getMessage();
             this.log.logSevere(errorMsg);
             System.out.println(errorMsg);             
             System.exit(0); 
@@ -1019,7 +1019,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
         }
     }
     
-    public Socket negotiateSSL(Socket sock) throws Exception {
+    public Socket negotiateSSL(final Socket sock) throws Exception {
 
         SSLSocket sslsock;
         
@@ -1033,7 +1033,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
             sslsock.addHandshakeCompletedListener(
                     new HandshakeCompletedListener() {
                        public void handshakeCompleted(
-                          HandshakeCompletedEvent event) {
+                          final HandshakeCompletedEvent event) {
                           System.out.println("Handshake finished!");
                           System.out.println(
                           "\t CipherSuite:" + event.getCipherSuite());
@@ -1046,7 +1046,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
                  );             
             
             sslsock.setUseClientMode(false);
-            String[] suites = sslsock.getSupportedCipherSuites();
+            final String[] suites = sslsock.getSupportedCipherSuites();
             sslsock.setEnabledCipherSuites(suites);
 //            start handshake
             sslsock.startHandshake();
@@ -1054,7 +1054,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
             //String cipherSuite = sslsock.getSession().getCipherSuite();
             
             return sslsock;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw e;
         }
     }    

@@ -49,7 +49,7 @@ public class CrawlProfileEditor_p {
         public final boolean readonly;
         public final int type;
         
-        public eentry(String name, String label, boolean readonly, int type) {
+        public eentry(final String name, final String label, final boolean readonly, final int type) {
             this.name = name;
             this.label = label;
             this.readonly = readonly;
@@ -79,16 +79,16 @@ public class CrawlProfileEditor_p {
         labels.add(new eentry(entry.XPSTOPW,          "Parent stop-words",    false, eentry.BOOLEAN));
     }
     
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
         final servletProperties prop = new servletProperties();
         final plasmaSwitchboard sb = (plasmaSwitchboard)env;
         
         // read post for handle
-        String handle = (post == null) ? "" : post.get("handle", "");
+        final String handle = (post == null) ? "" : post.get("handle", "");
         if (post != null) {
             if (post.containsKey("terminate")) {
                 // termination of a crawl: shift the crawl from active to passive
-                CrawlProfile.entry entry = sb.webIndex.profilesActiveCrawls.getEntry(handle);
+                final CrawlProfile.entry entry = sb.webIndex.profilesActiveCrawls.getEntry(handle);
                 if (entry != null) sb.webIndex.profilesPassiveCrawls.newEntry(entry.map());
                 sb.webIndex.profilesActiveCrawls.removeEntry(handle);
                 // delete all entries from the crawl queue that are deleted here
@@ -132,15 +132,15 @@ public class CrawlProfileEditor_p {
         if ((post != null) && (selentry != null)) {
 			if (post.containsKey("submit")) {
 				try {
-					Iterator<eentry> lit = labels.iterator();
+					final Iterator<eentry> lit = labels.iterator();
 					eentry tee;
 					while (lit.hasNext()) {
 						tee = lit.next();
-						String cval = selentry.map().get(tee.name);
-						String val = (tee.type == eentry.BOOLEAN) ? Boolean.toString(post.containsKey(tee.name)) : post.get(tee.name, cval);
+						final String cval = selentry.map().get(tee.name);
+						final String val = (tee.type == eentry.BOOLEAN) ? Boolean.toString(post.containsKey(tee.name)) : post.get(tee.name, cval);
 						if (!cval.equals(val)) sb.webIndex.profilesActiveCrawls.changeEntry(selentry, tee.name, val);
 					}
-				} catch (IOException ex) {
+				} catch (final IOException ex) {
 					prop.put("error", "1");
 					prop.putHTML("error_message", ex.getMessage());
 				}
@@ -150,7 +150,7 @@ public class CrawlProfileEditor_p {
         // generate crawl profile table
         count = 0;
         boolean dark = true;
-        int domlistlength = (post == null) ? 160 : post.getInt("domlistlength", 160);
+        final int domlistlength = (post == null) ? 160 : post.getInt("domlistlength", 160);
         CrawlProfile.entry profile;
         // put active crawls into list
         it = sb.webIndex.profilesActiveCrawls.profiles(true);
@@ -185,11 +185,11 @@ public class CrawlProfileEditor_p {
         	prop.put("edit", "1");
 			prop.put("edit_name", selentry.name());
 			prop.put("edit_handle", selentry.handle());
-			Iterator<eentry> lit = labels.iterator();
+			final Iterator<eentry> lit = labels.iterator();
 			count = 0;
 			while (lit.hasNext()) {
-				eentry ee = lit.next();
-				String val = selentry.map().get(ee.name);
+				final eentry ee = lit.next();
+				final String val = selentry.map().get(ee.name);
 				prop.put("edit_entries_" + count + "_readonly", ee.readonly ? "1" : "0");
 				prop.put("edit_entries_" + count + "_readonly_name", ee.name);
 				prop.put("edit_entries_" + count + "_readonly_label", ee.label);
@@ -207,7 +207,7 @@ public class CrawlProfileEditor_p {
         return prop;
     }
     
-    private static void putProfileEntry(servletProperties prop, CrawlProfile.entry profile, boolean active, boolean dark, int count, int domlistlength) {
+    private static void putProfileEntry(final servletProperties prop, final CrawlProfile.entry profile, final boolean active, final boolean dark, final int count, final int domlistlength) {
         prop.put("crawlProfiles_" + count + "_dark", dark ? "1" : "0");
         prop.put("crawlProfiles_" + count + "_status", active ? "1" : "0");
         prop.put("crawlProfiles_" + count + "_name", profile.name());

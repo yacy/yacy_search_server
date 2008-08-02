@@ -34,35 +34,35 @@ public abstract class serverAbstractBusyThread extends serverAbstractThread impl
     private long idletime = 0, memprereq = 0;
     private long idleCycles = 0, busyCycles = 0, outofmemoryCycles = 0;
     private boolean intermissionObedient = true;
-    private Object syncObject = new Object();
+    private final Object syncObject = new Object();
     
-    protected final void announceMoreSleepTime(long millis) {
+    protected final void announceMoreSleepTime(final long millis) {
         this.idletime += millis;
     }
 
-    public final void setStartupSleep(long milliseconds) {
+    public final void setStartupSleep(final long milliseconds) {
         // sets a sleep time before execution of the job-loop
         startup = milliseconds;
     }
     
-    public final long setIdleSleep(long milliseconds) {
+    public final long setIdleSleep(final long milliseconds) {
         // sets a sleep time for pauses between two jobs
         idlePause = milliseconds;
         return milliseconds;
     }
     
-    public final long setBusySleep(long milliseconds) {
+    public final long setBusySleep(final long milliseconds) {
         // sets a sleep time for pauses between two jobs
         busyPause = milliseconds;
         return milliseconds;
     }
     
-    public void setMemPreReqisite(long freeBytes) {
+    public void setMemPreReqisite(final long freeBytes) {
         // sets minimum required amount of memory for the job execution
         memprereq = freeBytes;
     }
     
-    public void setObeyIntermission(boolean obey) {
+    public void setObeyIntermission(final boolean obey) {
         // defines if the thread should obey the intermission command
         intermissionObedient = obey;
     }
@@ -88,7 +88,7 @@ public abstract class serverAbstractBusyThread extends serverAbstractThread impl
         return this.idletime;
     }
     
-    public void intermission(long pause) {
+    public void intermission(final long pause) {
         if (pause == Long.MAX_VALUE)
             this.intermission = Long.MAX_VALUE;
         else
@@ -162,10 +162,10 @@ public abstract class serverAbstractBusyThread extends serverAbstractThread impl
                 timestamp = System.currentTimeMillis();
                 ratz((isBusy) ? this.busyPause : this.idlePause);
                 idletime += System.currentTimeMillis() - timestamp;
-            } catch (SocketException e) {
+            } catch (final SocketException e) {
                 // in case that a socket is interrupted, this method must die silently (shutdown)
                 this.log.logFine("socket-job interrupted: " + e.getMessage());
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 // handle exceptions: thread must not die on any unexpected exceptions
                 // if the exception is too bad it should call terminate()
                 this.jobExceptionHandler(e);
@@ -188,7 +188,7 @@ public abstract class serverAbstractBusyThread extends serverAbstractThread impl
         logSystem("thread '" + this.getName() + "' terminated.");
     }
 
-    private void ratz(long millis) {
+    private void ratz(final long millis) {
         try {/*
             if (this.syncObject != null) {
                 synchronized (this.syncObject) {
@@ -197,7 +197,7 @@ public abstract class serverAbstractBusyThread extends serverAbstractThread impl
             } else {*/
                 Thread.sleep(millis);
             //}
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
             if (this.log != null)
                 this.log.logConfig("thread '" + this.getName() + "' interrupted because of shutdown.");
         }
@@ -215,7 +215,7 @@ public abstract class serverAbstractBusyThread extends serverAbstractThread impl
         }
     }
     
-    private void logSystem(String text) {
+    private void logSystem(final String text) {
         if (log == null) serverLog.logConfig("THREAD-CONTROL", text);
         else log.logConfig(text);
     }

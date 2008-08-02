@@ -45,28 +45,28 @@ import de.anomic.yacy.yacySeed;
 
 public class AccessTracker_p {
     
-	private static final TreeMap<Long, String> treemapclone(TreeMap<Long, String> m) {
-		TreeMap<Long, String> accessClone = new TreeMap<Long, String>();
+	private static final TreeMap<Long, String> treemapclone(final TreeMap<Long, String> m) {
+		final TreeMap<Long, String> accessClone = new TreeMap<Long, String>();
 		try {
 			accessClone.putAll(m);
-		} catch (ConcurrentModificationException e) {}
+		} catch (final ConcurrentModificationException e) {}
 		return accessClone;
 	}
 	
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
-        plasmaSwitchboard sb = (plasmaSwitchboard) env;
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
      
         // return variable that accumulates replacements
-        serverObjects prop = new serverObjects();
+        final serverObjects prop = new serverObjects();
         prop.setLocalized(!(header.get("PATH")).endsWith(".xml"));
         int page = 0;
         if (post != null) page = post.getInt("page", 0);
         prop.put("page", page);
      
-        int maxCount = 1000;
+        final int maxCount = 1000;
         boolean dark = true;
         if (page == 0) {
-            Iterator<String> i = sb.accessHosts();
+            final Iterator<String> i = sb.accessHosts();
             String host;
             TreeMap<Long, String> access;
             int entCount = 0;
@@ -81,18 +81,18 @@ public class AccessTracker_p {
                 prop.putNum("page_list_" + entCount + "_countHour", access.tailMap(new Long(System.currentTimeMillis() - 1000 * 60 * 60)).size());
                 entCount++;
             }
-            } catch (ConcurrentModificationException e) {} // we don't want to synchronize this
+            } catch (final ConcurrentModificationException e) {} // we don't want to synchronize this
             prop.put("page_list", entCount);
             prop.put("page_num", entCount);
             
             entCount = 0;
             try {
-            for (Map.Entry<String, Integer> bfe: serverCore.bfHost.entrySet()) {
+            for (final Map.Entry<String, Integer> bfe: serverCore.bfHost.entrySet()) {
                 prop.putHTML("page_bflist_" + entCount + "_host", bfe.getKey());
                 prop.putNum("page_bflist_" + entCount + "_countSecond", bfe.getValue());
                 entCount++;
             }
-            } catch (ConcurrentModificationException e) {} // we dont want to synchronize this
+            } catch (final ConcurrentModificationException e) {} // we dont want to synchronize this
             prop.put("page_bflist", entCount);
         }
         if (page == 1) {
@@ -104,7 +104,7 @@ public class AccessTracker_p {
 				access = sb.accessTrack(host);
 				if (access != null) {
 					try {
-						Iterator<Map.Entry<Long, String>> ii = treemapclone(access).entrySet().iterator();
+						final Iterator<Map.Entry<Long, String>> ii = treemapclone(access).entrySet().iterator();
 						while (ii.hasNext()) {
 							entry = ii.next();
 							prop.putHTML("page_list_" + entCount + "_host", host);
@@ -112,15 +112,15 @@ public class AccessTracker_p {
 							prop.putHTML("page_list_" + entCount + "_path", entry.getValue());
 							entCount++;
 						}
-					} catch (ConcurrentModificationException e) {} // we don't want to synchronize this
+					} catch (final ConcurrentModificationException e) {} // we don't want to synchronize this
 				}
 			} else {
                 try {
-                	Iterator<String> i = sb.accessHosts();
+                	final Iterator<String> i = sb.accessHosts();
                     while ((entCount < maxCount) && (i.hasNext())) {
 						host = i.next();
 						access = sb.accessTrack(host);
-						Iterator<Map.Entry<Long, String>> ii = treemapclone(access).entrySet().iterator();
+						final Iterator<Map.Entry<Long, String>> ii = treemapclone(access).entrySet().iterator();
 						while (ii.hasNext()) {
 							entry = ii.next();
 							prop.putHTML("page_list_" + entCount + "_host", host);
@@ -129,13 +129,13 @@ public class AccessTracker_p {
 							entCount++;
 						}
 					}
-				} catch (ConcurrentModificationException e) {} // we dont want to synchronize this
+				} catch (final ConcurrentModificationException e) {} // we dont want to synchronize this
 			}
             prop.put("page_list", entCount);
             prop.put("page_num", entCount);
         }
         if ((page == 2) || (page == 4)) {
-            ArrayList<plasmaSearchQuery> array = (page == 2) ? sb.localSearches : sb.remoteSearches;
+            final ArrayList<plasmaSearchQuery> array = (page == 2) ? sb.localSearches : sb.remoteSearches;
             plasmaSearchQuery searchProfile;
             int m = Math.min(maxCount, array.size());
             long qcountSum = 0;
@@ -186,7 +186,7 @@ public class AccessTracker_p {
             prop.putNum("page_total", (page == 2) ? sb.localSearches.size() : sb.remoteSearches.size());
         }
         if ((page == 3) || (page == 5)) {
-            Iterator<Entry<String, TreeSet<Long>>> i = (page == 3) ? sb.localSearchTracker.entrySet().iterator() : sb.remoteSearchTracker.entrySet().iterator();
+            final Iterator<Entry<String, TreeSet<Long>>> i = (page == 3) ? sb.localSearchTracker.entrySet().iterator() : sb.remoteSearchTracker.entrySet().iterator();
             String host;
             TreeSet<Long> handles;
             int entCount = 0;
@@ -199,22 +199,22 @@ public class AccessTracker_p {
                 handles = entry.getValue();
                 
                 int dateCount = 0;
-                Iterator<Long> ii = handles.iterator();
+                final Iterator<Long> ii = handles.iterator();
                 while (ii.hasNext()) {
-                	Long timestamp = ii.next();
+                	final Long timestamp = ii.next();
                 	prop.put("page_list_" + entCount + "_dates_" + dateCount + "_date", serverDate.formatShortSecond(new Date(timestamp.longValue())));
                 	prop.put("page_list_" + entCount + "_dates_" + dateCount + "_timestamp", timestamp.toString());
                 	dateCount++;
                 }
                 prop.put("page_list_" + entCount + "_dates", dateCount);
-                int qph = handles.tailSet(new Long(System.currentTimeMillis() - 1000 * 60 * 60)).size();
+                final int qph = handles.tailSet(new Long(System.currentTimeMillis() - 1000 * 60 * 60)).size();
                 qphSum += qph;
                 prop.put("page_list_" + entCount + "_qph", qph);
                 
                 prop.put("page_list_" + entCount + "_dark", ((dark) ? 1 : 0) ); dark =! dark;
                 prop.putHTML("page_list_" + entCount + "_host", host);
                 if (page == 5) {
-                    yacySeed remotepeer = sb.webIndex.seedDB.lookupByIP(natLib.getInetAddress(host), true, true, true);
+                    final yacySeed remotepeer = sb.webIndex.seedDB.lookupByIP(natLib.getInetAddress(host), true, true, true);
                     prop.putHTML("page_list_" + entCount + "_peername", (remotepeer == null) ? "UNKNOWN" : remotepeer.getName());
                 }
                 prop.putNum("page_list_" + entCount + "_count", handles.size());
@@ -222,7 +222,7 @@ public class AccessTracker_p {
                 // next
                 entCount++;
             }
-            } catch (ConcurrentModificationException e) {} // we dont want to synchronize this
+            } catch (final ConcurrentModificationException e) {} // we dont want to synchronize this
             prop.put("page_list", entCount);
             prop.putNum("page_num", entCount);
             prop.putNum("page_total", (page == 3) ? sb.localSearches.size() : sb.remoteSearches.size());

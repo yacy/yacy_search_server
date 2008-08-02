@@ -50,15 +50,15 @@ public class ConfigBasic {
     private static final int NEXTSTEP_PEERPORT  = 3;
     private static final int NEXTSTEP_RECONNECT = 4;
     
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
         
         // return variable that accumulates replacements
-        plasmaSwitchboard sb = (plasmaSwitchboard) env;
-        serverObjects prop = new serverObjects();
-        String langPath = env.getConfigPath("locale.work", "DATA/LOCALE/locales").getAbsolutePath();
+        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        final serverObjects prop = new serverObjects();
+        final String langPath = env.getConfigPath("locale.work", "DATA/LOCALE/locales").getAbsolutePath();
         String lang = env.getConfig("locale.language", "default");
         
-        int authentication = sb.adminAuthenticated(header);
+        final int authentication = sb.adminAuthenticated(header);
         if (authentication < 2) {
             // must authenticate
             prop.put("AUTHENTICATE", "admin log-in"); 
@@ -79,7 +79,7 @@ public class ConfigBasic {
         }
         
         // peer name settings
-        String peerName = (post == null) ? env.getConfig("peerName","") : (String) post.get("peername", "");
+        final String peerName = (post == null) ? env.getConfig("peerName","") : (String) post.get("peername", "");
         
         // port settings
         String port = env.getConfig("port", "8080"); //this allows a low port, but it will only get one, if the user edits the config himself.
@@ -88,10 +88,10 @@ public class ConfigBasic {
 		}
 
         // check if peer name already exists
-        yacySeed oldSeed = sb.webIndex.seedDB.lookupByName(peerName);
+        final yacySeed oldSeed = sb.webIndex.seedDB.lookupByName(peerName);
         if ((oldSeed == null) && (!(env.getConfig("peerName", "").equals(peerName)))) {
             // the name is new
-        	boolean nameOK = Pattern.compile("[A-Za-z0-9\\-_]{3,80}").matcher(peerName).matches();
+        	final boolean nameOK = Pattern.compile("[A-Za-z0-9\\-_]{3,80}").matcher(peerName).matches();
             if (nameOK) env.setConfig("peerName", peerName);
         }
  
@@ -99,7 +99,7 @@ public class ConfigBasic {
         boolean reconnect = false;
         if (!env.getConfig("port", port).equals(port)) {
             // validate port
-            serverCore theServerCore = (serverCore) env.getThread("10_httpd");
+            final serverCore theServerCore = (serverCore) env.getThread("10_httpd");
             env.setConfig("port", port);
             
             // redirect the browser to the new port
@@ -108,7 +108,7 @@ public class ConfigBasic {
             String host = null;
             if (header.containsKey(httpHeader.HOST)) {
                 host = header.get(httpHeader.HOST);
-                int idx = host.indexOf(":");
+                final int idx = host.indexOf(":");
                 if (idx != -1) host = host.substring(0,idx);
             } else {
                 host = serverDomains.myPublicLocalIP().getHostAddress();
@@ -174,9 +174,9 @@ public class ConfigBasic {
         prop.put("setUseCase_port", port);
         
         // check if values are proper
-        boolean properPassword = (sb.getConfig(httpd.ADMIN_ACCOUNT_B64MD5, "").length() > 0) || sb.getConfigBool("adminAccountForLocalhost", false);
-        boolean properName = (env.getConfig("peerName","").length() >= 3) && (!(yacySeed.isDefaultPeerName(env.getConfig("peerName",""))));
-        boolean properPort = (sb.webIndex.seedDB.mySeed().isSenior()) || (sb.webIndex.seedDB.mySeed().isPrincipal());
+        final boolean properPassword = (sb.getConfig(httpd.ADMIN_ACCOUNT_B64MD5, "").length() > 0) || sb.getConfigBool("adminAccountForLocalhost", false);
+        final boolean properName = (env.getConfig("peerName","").length() >= 3) && (!(yacySeed.isDefaultPeerName(env.getConfig("peerName",""))));
+        final boolean properPort = (sb.webIndex.seedDB.mySeed().isSenior()) || (sb.webIndex.seedDB.mySeed().isPrincipal());
         
         if ((env.getConfig("defaultFiles", "").startsWith("ConfigBasic.html,"))) {
         	env.setConfig("defaultFiles", env.getConfig("defaultFiles", "").substring(17));

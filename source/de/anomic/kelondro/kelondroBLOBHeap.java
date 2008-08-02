@@ -39,14 +39,14 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
 
     private kelondroBytesLongMap index;    // key/seek relation for used records
     private ArrayList<gap>    free;     // list of {size, seek} pairs denoting space and position of free records
-    private File                 heapFile; // the file of the heap
-    private kelondroByteOrder    ordering; // the ordering on keys
+    private final File                 heapFile; // the file of the heap
+    private final kelondroByteOrder    ordering; // the ordering on keys
     private RandomAccessFile     file;     // a random access to the file
 
     public class gap {
         public long seek;
         public int size;
-        public gap(long seek, int size) {
+        public gap(final long seek, final int size) {
             this.seek = seek;
             this.size = size;
         }
@@ -82,14 +82,14 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
      * @param ordering
      * @throws IOException
      */
-    public kelondroBLOBHeap(File heapFile, int keylength, kelondroByteOrder ordering) throws IOException {
+    public kelondroBLOBHeap(final File heapFile, final int keylength, final kelondroByteOrder ordering) throws IOException {
         this.ordering = ordering;
         this.heapFile = heapFile;
         
         this.index = new kelondroBytesLongMap(keylength, this.ordering, 0);
         this.free = new ArrayList<gap>();
         this.file = new RandomAccessFile(heapFile, "rw");
-        byte[] key = new byte[keylength];
+        final byte[] key = new byte[keylength];
         int reclen;
         long seek = 0;
 
@@ -111,7 +111,7 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
                 // read key
                 file.readFully(key);
                 
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 // EOF reached
                 break loop; // terminate loop
             }
@@ -128,7 +128,7 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
                     } else {
                         serverLog.logWarning("kelondroBLOBHeap", "BLOB " + heapFile.getName() + ": skiped not wellformed key " + new String(key) + " at seek pos " + seek);
                     }
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     e.printStackTrace();
                     break loop;
                 }
@@ -141,7 +141,7 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
         if (this.free.size() > 1) {
             int merged = 0;
             gap lastFree, nextFree;
-            Iterator<gap> i = this.free.iterator();
+            final Iterator<gap> i = this.free.iterator();
             lastFree = i.next();
             while (i.hasNext()) {
                 nextFree = i.next();
@@ -193,14 +193,14 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
      * @param key
      * @return true if the key exists, false othervise
      */
-    public boolean has(byte[] key) {
+    public boolean has(final byte[] key) {
         assert index != null;
         assert index.row().primaryKeyLength == key.length;
         
         // check if the index contains the key
         try {
             return index.getl(key) >= 0;
-        } catch (IOException e) {
+        } catch (final IOException e) {
             e.printStackTrace();
             return false;
         }
@@ -212,7 +212,7 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
      * @param blob
      * @throws IOException
      */
-    private void add(byte[] key, byte[] blob) throws IOException {
+    private void add(final byte[] key, final byte[] blob) throws IOException {
         add(key, blob, 0, blob.length);
     }
     
@@ -222,12 +222,12 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
      * @param blob
      * @throws IOException
      */
-    private void add(byte[] key, byte[] blob, int offset, int len) throws IOException {
+    private void add(final byte[] key, final byte[] blob, final int offset, final int len) throws IOException {
         assert len > 0;
         assert index.row().primaryKeyLength == key.length;
         assert blob == null || blob.length - offset >= len;
         if ((blob == null) || (blob.length == 0)) return;
-        int pos = (int) file.length();
+        final int pos = (int) file.length();
         file.seek(file.length());
         file.writeInt(len + key.length);
         file.write(key);
@@ -241,23 +241,23 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
      * @return
      * @throws IOException
      */
-    public synchronized byte[] get(byte[] key) throws IOException {
+    public synchronized byte[] get(final byte[] key) throws IOException {
         assert index.row().primaryKeyLength == key.length;
         
         // check if the index contains the key
-        long pos = index.getl(key);
+        final long pos = index.getl(key);
         if (pos < 0) return null;
         
         // access the file and read the container
         file.seek(pos);
-        int len = file.readInt() - index.row().primaryKeyLength;
+        final int len = file.readInt() - index.row().primaryKeyLength;
         if (serverMemory.available() < len) {
             if (!serverMemory.request(len, false)) return null; // not enough memory available for this blob
         }
-        byte[] blob = new byte[len];
+        final byte[] blob = new byte[len];
         
         // read the key
-        byte[] keyf = new byte[index.row().primaryKeyLength];
+        final byte[] keyf = new byte[index.row().primaryKeyLength];
         file.readFully(keyf);
         assert this.ordering.compare(key, keyf) == 0;
         
@@ -276,7 +276,7 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
         free.clear();
         try {
             file.close();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             e.printStackTrace();
         }
         this.heapFile.delete();
@@ -291,7 +291,7 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
         free.clear();
         try {
             file.close();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             e.printStackTrace();
         }
         index = null;
@@ -313,7 +313,7 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
      * @param b
      * @throws IOException
      */
-    public synchronized void put(byte[] key, byte[] b) throws IOException {
+    public synchronized void put(final byte[] key, final byte[] b) throws IOException {
         assert key.length == index.row().primaryKeyLength;
         
         // first remove the old entry
@@ -324,7 +324,7 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
             // find the largest entry
             long lseek = -1;
             int  lsize = 0;
-            int reclen = b.length + index.row().primaryKeyLength;
+            final int reclen = b.length + index.row().primaryKeyLength;
             gap entry;
             Iterator<gap> i = this.free.iterator();
             while (i.hasNext()) {
@@ -333,7 +333,7 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
                     // we found an entry that has exactly the size that we need!
                     // we use that entry and stop looking for a larger entry
                     file.seek(entry.seek);
-                    int reclenf = file.readInt();
+                    final int reclenf = file.readInt();
                     assert reclenf == reclen;
                     file.write(key);
                     file.write(b);
@@ -373,7 +373,7 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
                 index.putl(key, lseek);
                 
                 // define the new empty entry
-                int newfreereclen = lsize - reclen - 4;
+                final int newfreereclen = lsize - reclen - 4;
                 assert newfreereclen > 0;
                 file.writeInt(newfreereclen);
                 
@@ -407,11 +407,11 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
      * @param key  the primary key
      * @throws IOException
      */
-    public synchronized void remove(byte[] key) throws IOException {
+    public synchronized void remove(final byte[] key) throws IOException {
         assert index.row().primaryKeyLength == key.length;
         
         // check if the index contains the key
-        long pos = index.getl(key);
+        final long pos = index.getl(key);
         if (pos < 0) return;
         
         // access the file and read the container
@@ -435,7 +435,7 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
      * @return
      * @throws IOException
      */
-    public synchronized kelondroCloneableIterator<byte[]> keys(boolean up, boolean rotating) throws IOException {
+    public synchronized kelondroCloneableIterator<byte[]> keys(final boolean up, final boolean rotating) throws IOException {
         return new kelondroRotateIterator<byte[]>(this.index.keys(up, null), null, 1);
     }
 
@@ -446,15 +446,15 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
      * @return
      * @throws IOException
      */
-    public synchronized kelondroCloneableIterator<byte[]> keys(boolean up, byte[] firstKey) throws IOException {
+    public synchronized kelondroCloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) throws IOException {
         return this.index.keys(up, firstKey);
     }
 
-    public static void main(String[] args) {
-        File f = new File("/Users/admin/blobtest.heap");
+    public static void main(final String[] args) {
+        final File f = new File("/Users/admin/blobtest.heap");
         try {
             //f.delete();
-            kelondroBLOBHeap heap = new kelondroBLOBHeap(f, 12, kelondroNaturalOrder.naturalOrder);
+            final kelondroBLOBHeap heap = new kelondroBLOBHeap(f, 12, kelondroNaturalOrder.naturalOrder);
             heap.put("aaaaaaaaaaaa".getBytes(), "eins zwei drei".getBytes());
             heap.put("aaaaaaaaaaab".getBytes(), "vier fuenf sechs".getBytes());
             heap.put("aaaaaaaaaaac".getBytes(), "sieben acht neun".getBytes());
@@ -462,7 +462,7 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
             heap.remove("aaaaaaaaaaab".getBytes());
             heap.remove("aaaaaaaaaaac".getBytes());
             heap.close();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             e.printStackTrace();
         }
     }

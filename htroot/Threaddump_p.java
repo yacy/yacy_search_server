@@ -48,21 +48,21 @@ public class Threaddump_p {
 	private static final serverObjects prop = new serverObjects();
 	private static plasmaSwitchboard sb = null;
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
 
     	prop.clear();
     	sb = (plasmaSwitchboard) env;
-    	StringBuffer buffer = new StringBuffer(1000);
+    	final StringBuffer buffer = new StringBuffer(1000);
     	
     	if (post != null && post.containsKey("createThreaddump")) {
-    	    boolean plain = post.get("plain", "false").equals("true");
-    	    int sleep = post.getInt("sleep", 0); // a sleep before creation of a thread dump can be used for profiling
-    	    if (sleep > 0) try {Thread.sleep(sleep);} catch (InterruptedException e) {}
+    	    final boolean plain = post.get("plain", "false").equals("true");
+    	    final int sleep = post.getInt("sleep", 0); // a sleep before creation of a thread dump can be used for profiling
+    	    if (sleep > 0) try {Thread.sleep(sleep);} catch (final InterruptedException e) {}
     	    prop.put("dump", "1");
         	// Thread dump
-        	Map<Thread,StackTraceElement[]> stackTraces = Thread.getAllStackTraces();
-        	Date dt = new Date();
-        	String versionstring = yacyVersion.combined2prettyVersion(sb.getConfig("version","0.1"));
+        	final Map<Thread,StackTraceElement[]> stackTraces = Thread.getAllStackTraces();
+        	final Date dt = new Date();
+        	final String versionstring = yacyVersion.combined2prettyVersion(sb.getConfig("version","0.1"));
         	
         	bufferappend(buffer, plain, "************* Start Thread Dump " + dt + " *******************");
         	bufferappend(buffer, plain, "");
@@ -89,14 +89,14 @@ public class Threaddump_p {
        	return prop;    // return from serverObjects respond()
     }    
     
-    private static void appendStackTraces(File rootPath, StringBuffer buffer, Map<Thread,StackTraceElement[]> stackTraces, boolean plain, Thread.State stateIn) {
+    private static void appendStackTraces(final File rootPath, final StringBuffer buffer, final Map<Thread,StackTraceElement[]> stackTraces, final boolean plain, final Thread.State stateIn) {
         bufferappend(buffer, plain, "THREADS WITH STATES: " + stateIn.toString());
         bufferappend(buffer, plain, "");
         
-        File classPath = new File(rootPath, "source");
+        final File classPath = new File(rootPath, "source");
   
-        for (Thread thread: stackTraces.keySet()) {
-            StackTraceElement[] stackTraceElements = stackTraces.get(thread);
+        for (final Thread thread: stackTraces.keySet()) {
+            final StackTraceElement[] stackTraceElements = stackTraces.get(thread);
             StackTraceElement ste;
             String line;
             String tracename = "";
@@ -130,25 +130,25 @@ public class Threaddump_p {
         bufferappend(buffer, plain, "");
     }
     
-    private static File getClassFile(File sourcePath, String classname) {
-        String classPath = classname.replace('.', '/') + ".java";
-        File file = new File(sourcePath, classPath);
+    private static File getClassFile(final File sourcePath, final String classname) {
+        final String classPath = classname.replace('.', '/') + ".java";
+        final File file = new File(sourcePath, classPath);
         return file;
     }
     
-    private static String getLine(File file, int line) {
+    private static String getLine(final File file, final int line) {
         // find class
         if (!file.exists()) return "";
         try {
-            String lineString = nxTools.line(serverFileUtils.read(file), line);
+            final String lineString = nxTools.line(serverFileUtils.read(file), line);
             if (lineString == null) return "@ERROR";
             return lineString;
-        } catch (IOException e) {
+        } catch (final IOException e) {
             return "@EXCEPTION: " + e.getMessage();
         }
     }
     
-    private static void bufferappend(StringBuffer buffer, boolean plain, String a) {
+    private static void bufferappend(final StringBuffer buffer, final boolean plain, final String a) {
         buffer.append(a);
         if (plain) {
             buffer.append("\n");

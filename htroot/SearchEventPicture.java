@@ -37,11 +37,11 @@ import de.anomic.ymage.ymageMatrix;
 
 public class SearchEventPicture {
     
-    public static ymageMatrix respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
-        plasmaSwitchboard sb = (plasmaSwitchboard) env;
-        String eventID = (String) header.get("event", plasmaSearchEvent.lastEventID);
+    public static ymageMatrix respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        final String eventID = (String) header.get("event", plasmaSearchEvent.lastEventID);
         if (eventID == null) return null;
-        ymageMatrix yp = plasmaGrafics.getSearchEventPicture(sb.webIndex.seedDB, eventID);
+        final ymageMatrix yp = plasmaGrafics.getSearchEventPicture(sb.webIndex.seedDB, eventID);
         if (yp == null) return new ymageMatrix(1, 1, ymageMatrix.MODE_SUB, "000000"); // empty image
         
         return yp;

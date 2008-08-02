@@ -44,15 +44,15 @@ import java.util.Map.Entry;
 
 public final class serverCodings {
 
-    public static String encodeHex(long in, int length) {
+    public static String encodeHex(final long in, final int length) {
         String s = Long.toHexString(in);
         while (s.length() < length) s = "0" + s;
         return s;
     }
     
-    public static String encodeOctal(byte[] in) {
+    public static String encodeOctal(final byte[] in) {
         if (in == null) return "";
-        StringBuffer result = new StringBuffer(in.length * 8 / 3);
+        final StringBuffer result = new StringBuffer(in.length * 8 / 3);
         for (int i = 0; i < in.length; i++) {
             if ((0Xff & in[i]) < 8) result.append('0');
             result.append(Integer.toOctalString(0Xff & in[i]));
@@ -60,9 +60,9 @@ public final class serverCodings {
         return new String(result);
     }
     
-    public static String encodeHex(byte[] in) {
+    public static String encodeHex(final byte[] in) {
         if (in == null) return "";
-        StringBuffer result = new StringBuffer(in.length * 2);
+        final StringBuffer result = new StringBuffer(in.length * 2);
         for (int i = 0; i < in.length; i++) {
             if ((0Xff & in[i]) < 16) result.append('0');
             result.append(Integer.toHexString(0Xff & in[i]));
@@ -70,86 +70,86 @@ public final class serverCodings {
         return new String(result);
     }
 
-    public static byte[] decodeHex(String hex) {
-        byte[] result = new byte[hex.length() / 2];
+    public static byte[] decodeHex(final String hex) {
+        final byte[] result = new byte[hex.length() / 2];
         for (int i = 0; i < result.length; i++) {
             result[i] = (byte) (16 * Integer.parseInt(hex.charAt(i * 2) + "", 16) + Integer.parseInt(hex.charAt(i * 2 + 1) + "", 16));
         }
         return result;
     }
     
-    public static String encodeMD5Hex(String key) {
+    public static String encodeMD5Hex(final String key) {
         // generate a hex representation from the md5 of a string
         return encodeHex(encodeMD5Raw(key));
     }
 
-    public static String encodeMD5Hex(File file) {
+    public static String encodeMD5Hex(final File file) {
         // generate a hex representation from the md5 of a file
         return encodeHex(encodeMD5Raw(file));
     }
 
-    public static String encodeMD5Hex(byte[] b) {
+    public static String encodeMD5Hex(final byte[] b) {
         // generate a hex representation from the md5 of a byte-array
         return encodeHex(encodeMD5Raw(b));
     }
 
-    public static byte[] encodeMD5Raw(String key) {
+    public static byte[] encodeMD5Raw(final String key) {
         try {
-            MessageDigest digest = MessageDigest.getInstance("MD5");
+            final MessageDigest digest = MessageDigest.getInstance("MD5");
             digest.reset();
             digest.update(key.getBytes());
             return digest.digest();
-        } catch (java.security.NoSuchAlgorithmException e) {
+        } catch (final java.security.NoSuchAlgorithmException e) {
             System.out.println("Internal Error at md5:" + e.getMessage());
         }
         return null;
     }
 
-    public static byte[] encodeMD5Raw(File file) {
+    public static byte[] encodeMD5Raw(final File file) {
 	try {
-	    MessageDigest digest = MessageDigest.getInstance("MD5");
+	    final MessageDigest digest = MessageDigest.getInstance("MD5");
 	    digest.reset();
-	    InputStream  in = new BufferedInputStream(new FileInputStream(file), 2048);
-	    byte[] buf = new byte[2048];
+	    final InputStream  in = new BufferedInputStream(new FileInputStream(file), 2048);
+	    final byte[] buf = new byte[2048];
 	    int n;
 	    while ((n = in.read(buf)) > 0) digest.update(buf, 0, n);
 	    in.close();
 	    // now compute the hex-representation of the md5 digest
 	    return digest.digest();
-	} catch (java.security.NoSuchAlgorithmException e) {
+	} catch (final java.security.NoSuchAlgorithmException e) {
 	    System.out.println("Internal Error at md5:" + e.getMessage());
-	} catch (java.io.FileNotFoundException e) {
+	} catch (final java.io.FileNotFoundException e) {
 	    System.out.println("file not found:" + file.toString());
 	    e.printStackTrace();
-	} catch (java.io.IOException e) {
+	} catch (final java.io.IOException e) {
 	    System.out.println("file error with " + file.toString() + ": " + e.getMessage());
 	}
 	return null;
     }
 
-    private static byte[] encodeMD5Raw(byte[] b) {
+    private static byte[] encodeMD5Raw(final byte[] b) {
 	try {
-	    MessageDigest digest = MessageDigest.getInstance("MD5");
+	    final MessageDigest digest = MessageDigest.getInstance("MD5");
 	    digest.reset();
-	    InputStream  in = new ByteArrayInputStream(b);
-	    byte[] buf = new byte[2048];
+	    final InputStream  in = new ByteArrayInputStream(b);
+	    final byte[] buf = new byte[2048];
 	    int n;
 	    while ((n = in.read(buf)) > 0) digest.update(buf, 0, n);
 	    in.close();
 	    // now compute the hex-representation of the md5 digest
 	    return digest.digest();
-	} catch (java.security.NoSuchAlgorithmException e) {
+	} catch (final java.security.NoSuchAlgorithmException e) {
 	    System.out.println("Internal Error at md5:" + e.getMessage());
-	} catch (java.io.IOException e) {
+	} catch (final java.io.IOException e) {
 	    System.out.println("byte[] error: " + e.getMessage());
 	}
 	return null;
     }
 
-    public static Properties s2p(String s) {
-	Properties p = new Properties();
+    public static Properties s2p(final String s) {
+	final Properties p = new Properties();
 	int pos;
-	StringTokenizer st = new StringTokenizer(s, ",");
+	final StringTokenizer st = new StringTokenizer(s, ",");
 	String token;
 	while (st.hasMoreTokens()) {
 	    token = st.nextToken().trim();
@@ -159,14 +159,14 @@ public final class serverCodings {
 	return p;
     }
     
-    public static HashMap<String, String> string2map(String string, String separator) {
+    public static HashMap<String, String> string2map(String string, final String separator) {
         // this can be used to parse a Map.toString() into a Map again
         if (string == null) return null;
-        HashMap<String, String> map = new HashMap<String, String>();
+        final HashMap<String, String> map = new HashMap<String, String>();
         int pos;
         if ((pos = string.indexOf("{")) >= 0) string = string.substring(pos + 1).trim();
         if ((pos = string.lastIndexOf("}")) >= 0) string = string.substring(0, pos).trim();
-        StringTokenizer st = new StringTokenizer(string, separator);
+        final StringTokenizer st = new StringTokenizer(string, separator);
         String token;
         while (st.hasMoreTokens()) {
             token = st.nextToken().trim();
@@ -176,7 +176,7 @@ public final class serverCodings {
         return map;
     }
 
-    public static String map2string(Map<String, String> m, String separator, boolean braces) {
+    public static String map2string(final Map<String, String> m, final String separator, final boolean braces) {
         // m must be synchronized to prevent that a ConcurrentModificationException occurs
         synchronized (m) {
             final StringBuffer buf = new StringBuffer(20 * m.size());
@@ -184,13 +184,13 @@ public final class serverCodings {
             int retry = 10;
             critical: while (retry > 0) {
                 try {
-                    for (Entry<String, String> e: m.entrySet()) {
+                    for (final Entry<String, String> e: m.entrySet()) {
                         buf.append(e.getKey()).append('=');
                         if (e.getValue() != null) { buf.append(e.getValue()); }
                         buf.append(separator);
                     }
                     break critical; // success
-                } catch (ConcurrentModificationException e) {
+                } catch (final ConcurrentModificationException e) {
                     // retry
                     buf.setLength(1);
                     retry--;
@@ -203,24 +203,24 @@ public final class serverCodings {
         }
     }
 
-    public static Set<String> string2set(String string, String separator) {
+    public static Set<String> string2set(String string, final String separator) {
         // this can be used to parse a Map.toString() into a Map again
         if (string == null) return null;
-        Set<String> set = Collections.synchronizedSet(new HashSet<String>());
+        final Set<String> set = Collections.synchronizedSet(new HashSet<String>());
         int pos;
         if ((pos = string.indexOf("{")) >= 0) string = string.substring(pos + 1).trim();
         if ((pos = string.lastIndexOf("}")) >= 0) string = string.substring(0, pos).trim();
-        StringTokenizer st = new StringTokenizer(string, separator);
+        final StringTokenizer st = new StringTokenizer(string, separator);
         while (st.hasMoreTokens()) {
             set.add(st.nextToken().trim());
         }
         return set;
     }
     
-    public static String set2string(Set<String> s, String separator, boolean braces) {
-        StringBuffer buf = new StringBuffer();
+    public static String set2string(final Set<String> s, final String separator, final boolean braces) {
+        final StringBuffer buf = new StringBuffer();
         if (braces) buf.append("{");
-        Iterator<String> i = s.iterator();
+        final Iterator<String> i = s.iterator();
         boolean hasNext = i.hasNext();
         while (hasNext) {
             buf.append(i.next().toString());
@@ -231,7 +231,7 @@ public final class serverCodings {
         return new String(buf);
     }
     
-    public static void main(String[] s) {
+    public static void main(final String[] s) {
         if (s.length == 0) {
             System.out.println("usage: -[ec|dc|es|ds|s2m] <arg>");
             System.exit(0);

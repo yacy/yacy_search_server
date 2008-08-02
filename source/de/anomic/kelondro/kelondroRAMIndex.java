@@ -33,11 +33,11 @@ import de.anomic.kelondro.kelondroRow.Entry;
 
 public class kelondroRAMIndex implements kelondroIndex {
     
-    private kelondroRow rowdef;
+    private final kelondroRow rowdef;
     private kelondroRowSet index0, index1;
-    private kelondroRow.EntryComparator entryComparator;
+    private final kelondroRow.EntryComparator entryComparator;
     
-    public kelondroRAMIndex(kelondroRow rowdef, int initialspace) {
+    public kelondroRAMIndex(final kelondroRow rowdef, final int initialspace) {
     	this.rowdef = rowdef;
     	this.entryComparator = new kelondroRow.EntryComparator(rowdef.objectOrder);
         reset(initialspace);
@@ -47,7 +47,7 @@ public class kelondroRAMIndex implements kelondroIndex {
 		reset(0);
 	}
     
-	public void reset(int initialspace) {
+	public void reset(final int initialspace) {
 	    this.index0 = null; // first flush RAM to make room
 		this.index0 = new kelondroRowSet(rowdef, initialspace);
         this.index1 = null; // to show that this is the initialization phase
@@ -66,26 +66,26 @@ public class kelondroRAMIndex implements kelondroIndex {
         }
     }
     
-    public synchronized kelondroRow.Entry get(byte[] key) {
+    public synchronized kelondroRow.Entry get(final byte[] key) {
         assert (key != null);
         finishInitialization();
-        kelondroRow.Entry indexentry = index0.get(key);
+        final kelondroRow.Entry indexentry = index0.get(key);
         if (indexentry != null) return indexentry;
         return index1.get(key);
     }
 
-	public boolean has(byte[] key) {
+	public boolean has(final byte[] key) {
 		assert (key != null);
         finishInitialization();
         if (index0.has(key)) return true;
         return index1.has(key);
 	}
     
-    public synchronized kelondroRow.Entry put(kelondroRow.Entry entry) {
+    public synchronized kelondroRow.Entry put(final kelondroRow.Entry entry) {
     	assert (entry != null);
     	finishInitialization();
         // if the new entry is within the initialization part, just overwrite it
-        kelondroRow.Entry indexentry = index0.get(entry.getPrimaryKeyBytes());
+        final kelondroRow.Entry indexentry = index0.get(entry.getPrimaryKeyBytes());
         if (indexentry != null) {
         	index0.put(entry);
             return indexentry;
@@ -94,18 +94,18 @@ public class kelondroRAMIndex implements kelondroIndex {
         return index1.put(entry);
     }
     
-	public Entry put(Entry row, Date entryDate) {
+	public Entry put(final Entry row, final Date entryDate) {
 		return put(row);
 	}
 	
-	public void putMultiple(List<Entry> rows) {
-		Iterator<Entry> i = rows.iterator();
+	public void putMultiple(final List<Entry> rows) {
+		final Iterator<Entry> i = rows.iterator();
 		while (i.hasNext()) {
 			put(i.next());
 		}
 	}
 
-	public synchronized boolean addUnique(kelondroRow.Entry entry) {    	
+	public synchronized boolean addUnique(final kelondroRow.Entry entry) {    	
     	assert (entry != null);
         if (index1 == null) {
             // we are in the initialization phase
@@ -116,8 +116,8 @@ public class kelondroRAMIndex implements kelondroIndex {
         }
     }
 
-	public int addUniqueMultiple(List<Entry> rows) {
-		Iterator<Entry> i = rows.iterator();
+	public int addUniqueMultiple(final List<Entry> rows) {
+		final Iterator<Entry> i = rows.iterator();
 		int c = 0;
 		while (i.hasNext()) {
 			if (addUnique(i.next())) c++;
@@ -131,16 +131,16 @@ public class kelondroRAMIndex implements kelondroIndex {
 	    return index0.removeDoubles();
 	}
 	
-    public synchronized kelondroRow.Entry remove(byte[] key) {
+    public synchronized kelondroRow.Entry remove(final byte[] key) {
         finishInitialization();
         // if the new entry is within the initialization part, just delete it
-        kelondroRow.Entry indexentry = index0.remove(key);
+        final kelondroRow.Entry indexentry = index0.remove(key);
         if (indexentry != null) {
             assert index0.get(key) == null; // check if remove worked
             return indexentry;
         }
         // else remove it from the index1
-        kelondroRow.Entry removed = index1.remove(key);
+        final kelondroRow.Entry removed = index1.remove(key);
         assert index1.get(key) == null : "removed " + ((removed == null) ? " is null" : " is not null") + ", and index entry still exists"; // check if remove worked
         return removed;
     }
@@ -166,7 +166,7 @@ public class kelondroRAMIndex implements kelondroIndex {
         return index0.size() + index1.size();
     }
     
-    public synchronized kelondroCloneableIterator<byte[]> keys(boolean up, byte[] firstKey) {
+    public synchronized kelondroCloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) {
         // returns the key-iterator of the underlying kelondroIndex
         if (index1 == null) {
             // finish initialization phase
@@ -192,7 +192,7 @@ public class kelondroRAMIndex implements kelondroIndex {
                 true);
     }
 
-    public synchronized kelondroCloneableIterator<kelondroRow.Entry> rows(boolean up, byte[] firstKey) {
+    public synchronized kelondroCloneableIterator<kelondroRow.Entry> rows(final boolean up, final byte[] firstKey) {
         // returns the row-iterator of the underlying kelondroIndex
         if (index1 == null) {
             // finish initialization phase

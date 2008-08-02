@@ -38,21 +38,21 @@ public class ParserException extends Exception
         super();
     }
 
-    public ParserException(String message, yacyURL url) {
+    public ParserException(final String message, final yacyURL url) {
         this(message,url,ErrorURL.DENIED_PARSER_ERROR);
     }    
     
-    public ParserException(String message, yacyURL url, String errorCode) {
+    public ParserException(final String message, final yacyURL url, final String errorCode) {
         super(message);
         this.errorCode = errorCode;
         this.url = url;
     }
 
-    public ParserException(String message, yacyURL url, Throwable cause) {
+    public ParserException(final String message, final yacyURL url, final Throwable cause) {
         this(message,url,cause,ErrorURL.DENIED_PARSER_ERROR);
     }
     
-    public ParserException(String message, yacyURL url, Throwable cause, String errorCode) {
+    public ParserException(final String message, final yacyURL url, final Throwable cause, final String errorCode) {
         super(message, cause);
         this.errorCode = errorCode;
         this.url = url;

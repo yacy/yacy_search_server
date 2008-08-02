@@ -33,13 +33,13 @@ import de.anomic.ymage.ymageMatrix;
 
 public class PerformanceGraph {
     
-    public static ymageMatrix respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
-        plasmaSwitchboard sb = (plasmaSwitchboard) env;
+    public static ymageMatrix respond(final httpHeader header, serverObjects post, final serverSwitch<?> env) {
+        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         
         if (post == null) post = new serverObjects();
         
-        int width = post.getInt("width", 660);
-        int height = post.getInt("height", 240);
+        final int width = post.getInt("width", 660);
+        final int height = post.getInt("height", 240);
         
         return plasmaProfiling.performanceGraph(width, height, sb.webIndex.countURL() + " URLS / " + sb.webIndex.collectionsSize() + " WORDS IN COLLECTIONS / " + sb.webIndex.cacheSize() + " WORDS IN CACHE");
     }

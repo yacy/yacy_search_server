@@ -69,12 +69,12 @@ public class crawlHandler extends DefaultHandler {
     private HashMap<String, Startpoint> startpoints; // a guid:Item map
     
     
-    public crawlHandler(String path) {
+    public crawlHandler(final String path) {
         init();
         parse(path);
     }
     
-    public crawlHandler(InputStream stream) {
+    public crawlHandler(final InputStream stream) {
         init();
         parse(stream);
     }
@@ -89,27 +89,27 @@ public class crawlHandler extends DefaultHandler {
         parsingStartpoint = false;
     }
     
-    private void parse(String path) {
+    private void parse(final String path) {
         try {
-            SAXParserFactory factory = SAXParserFactory.newInstance();
-            SAXParser saxParser = factory.newSAXParser();
+            final SAXParserFactory factory = SAXParserFactory.newInstance();
+            final SAXParser saxParser = factory.newSAXParser();
             saxParser.parse(path, this);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             e.printStackTrace();
         }
     }
     
-    private void parse(InputStream stream) {
+    private void parse(final InputStream stream) {
         try {
-            SAXParserFactory factory = SAXParserFactory.newInstance();
-            SAXParser saxParser = factory.newSAXParser();
+            final SAXParserFactory factory = SAXParserFactory.newInstance();
+            final SAXParser saxParser = factory.newSAXParser();
             saxParser.parse(stream, this);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             e.printStackTrace();
         }
     }
 
-    public void startElement(String uri, String name, String tag, Attributes atts) {
+    public void startElement(final String uri, final String name, final String tag, final Attributes atts) {
         if ("channel".equals(tag)) {
             channel = new Startpoint();
             parsingAttributes = true;
@@ -119,27 +119,27 @@ public class crawlHandler extends DefaultHandler {
         }
     }
 
-    public void endElement(String uri, String name, String tag) {
+    public void endElement(final String uri, final String name, final String tag) {
         if (tag == null) return;
         if ("channel".equals(tag)) {
             parsingAttributes = false;
         } else if ("item".equals(tag)) {
-            String guid = startpoint.getGuid();
+            final String guid = startpoint.getGuid();
             startpointsGUID.add(guid);
             startpoints.put(guid, startpoint);
             parsingStartpoint = false;
         } else if (parsingStartpoint)  {
-            String value = buffer.toString().trim();
+            final String value = buffer.toString().trim();
             buffer.setLength(0);
             if (startpointTagsSet.contains(tag)) startpoint.setValue(tag, value);
         } else if (parsingAttributes) {
-            String value = buffer.toString().trim();
+            final String value = buffer.toString().trim();
             buffer.setLength(0);
             if (startpointTagsSet.contains(tag)) channel.setValue(tag, value);
         }
     }
 
-    public void characters(char ch[], int start, int length) {
+    public void characters(final char ch[], final int start, final int length) {
         if (parsingStartpoint || parsingAttributes) {
             buffer.append(ch, start, length);
         }
@@ -149,12 +149,12 @@ public class crawlHandler extends DefaultHandler {
         return channel;
     }
 
-    public Startpoint getStartpoint(int i) {
+    public Startpoint getStartpoint(final int i) {
         // retrieve item by order number
         return getStartpoint(startpointsGUID.get(i));
     }
 
-    public Startpoint getStartpoint(String guid) {
+    public Startpoint getStartpoint(final String guid) {
         // retrieve item by guid
         return startpoints.get(guid);
     }
@@ -165,13 +165,13 @@ public class crawlHandler extends DefaultHandler {
     
     public static class Attributes {
         
-        private HashMap<String, String> map;
+        private final HashMap<String, String> map;
 
         public Attributes() {
             this.map = new HashMap<String, String>();
         }
         
-        public void setValue(String name, String value) {
+        public void setValue(final String name, final String value) {
             map.put(name, value);
         }
         
@@ -222,14 +222,14 @@ public class crawlHandler extends DefaultHandler {
     
     public static class Startpoint {
         
-        private HashMap<String, String> map;
+        private final HashMap<String, String> map;
 
         public Startpoint() {
             this.map = new HashMap<String, String>();
             this.map.put("guid", Long.toHexString(System.currentTimeMillis()) + ":" + guidcount++);
         }
         
-        public void setValue(String name, String value) {
+        public void setValue(final String name, final String value) {
             map.put(name, value);
         }
         

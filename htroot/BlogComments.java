@@ -53,13 +53,13 @@ public class BlogComments {
     private static SimpleDateFormat SimpleFormatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
     // TODO: make userdefined date/time-strings (localisation)
 
-    public static String dateString(Date date) {
+    public static String dateString(final Date date) {
         return SimpleFormatter.format(date);
     }
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
-        plasmaSwitchboard sb = (plasmaSwitchboard) env;
-        serverObjects prop = new serverObjects();
+    public static serverObjects respond(final httpHeader header, serverObjects post, final serverSwitch<?> env) {
+        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        final serverObjects prop = new serverObjects();
         blogBoard.BlogEntry page = null;
         boolean hasRights = sb.verifyAuthentication(header, true);
 
@@ -72,7 +72,7 @@ public class BlogComments {
         }
 
         if(!hasRights){
-            userDB.Entry userentry = sb.userDB.proxyAuth((String)header.get(httpHeader.AUTHORIZATION, "xxxxxx"));
+            final userDB.Entry userentry = sb.userDB.proxyAuth((String)header.get(httpHeader.AUTHORIZATION, "xxxxxx"));
             if(userentry != null && userentry.hasRight(userDB.Entry.BLOG_RIGHT)){
                 hasRights=true;
             }
@@ -82,8 +82,8 @@ public class BlogComments {
             }
         }
 
-        String pagename = post.get("page", "blog_default");
-        String ip = post.get(httpHeader.CONNECTION_PROP_CLIENTIP, "127.0.0.1");
+        final String pagename = post.get("page", "blog_default");
+        final String ip = post.get(httpHeader.CONNECTION_PROP_CLIENTIP, "127.0.0.1");
 
         String StrAuthor = post.get("author", "anonymous");
 
@@ -103,7 +103,7 @@ public class BlogComments {
         byte[] author;
         try {
             author = StrAuthor.getBytes("UTF-8");
-        } catch (UnsupportedEncodingException e) {
+        } catch (final UnsupportedEncodingException e) {
             author = StrAuthor.getBytes();
         }
 
@@ -124,22 +124,22 @@ public class BlogComments {
                 if(post.get("subject", "").equals("")) post.putHTML("subject", "no title");
                 try {
                     content = post.get("content", "").getBytes("UTF-8");
-                } catch (UnsupportedEncodingException e) {
+                } catch (final UnsupportedEncodingException e) {
                     content = post.get("content", "").getBytes();
                 }
 
-                Date date = null;
+                final Date date = null;
 
                 //set name for new entry or date for old entry
-                String StrSubject = post.get("subject", "");
+                final String StrSubject = post.get("subject", "");
                 byte[] subject;
                 try {
                     subject = StrSubject.getBytes("UTF-8");
-                } catch (UnsupportedEncodingException e) {
+                } catch (final UnsupportedEncodingException e) {
                     subject = StrSubject.getBytes();
                 }
-                String commentID = String.valueOf(System.currentTimeMillis());
-                BlogEntry blogEntry = sb.blogDB.readBlogEntry(pagename);
+                final String commentID = String.valueOf(System.currentTimeMillis());
+                final BlogEntry blogEntry = sb.blogDB.readBlogEntry(pagename);
                 blogEntry.addComment(commentID);
                 sb.blogDB.writeBlogEntry(blogEntry);
                 sb.blogCommentDB.write(sb.blogCommentDB.newEntry(commentID, subject, author, ip, date, content));
@@ -153,7 +153,7 @@ public class BlogComments {
                             sb.webIndex.seedDB.mySeed().hash,
                             sb.webIndex.seedDB.mySeed().getName(), sb.webIndex.seedDB.mySeed().hash,
                             "new blog comment: " + new String(blogEntry.getSubject(),"UTF-8"), content));
-                } catch (UnsupportedEncodingException e1) {
+                } catch (final UnsupportedEncodingException e1) {
                     sb.messageDB.write(msgEntry = sb.messageDB.newEntry(
                             "blogComment",
                             StrAuthor,
@@ -165,11 +165,11 @@ public class BlogComments {
                 messageForwardingViaEmail(sb, msgEntry);
 
                 // finally write notification
-                File notifierSource = new File(sb.getRootPath(), sb.getConfig("htRootPath","htroot") + "/env/grafics/message.gif");
-                File notifierDest   = new File(sb.getConfigPath("htDocsPath", "DATA/HTDOCS"), "notifier.gif");
+                final File notifierSource = new File(sb.getRootPath(), sb.getConfig("htRootPath","htroot") + "/env/grafics/message.gif");
+                final File notifierDest   = new File(sb.getConfigPath("htDocsPath", "DATA/HTDOCS"), "notifier.gif");
                 try {
                     serverFileUtils.copy(notifierSource, notifierDest);
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     serverLog.logSevere("MESSAGE", "NEW MESSAGE ARRIVED! (error: " + e.getMessage() + ")");
 
                 }
@@ -183,7 +183,7 @@ public class BlogComments {
         }
 
         if(hasRights && post.containsKey("allow") && post.containsKey("page") && post.containsKey("comment")) {
-            blogBoardComments.CommentEntry entry = sb.blogCommentDB.read(post.get("comment"));
+            final blogBoardComments.CommentEntry entry = sb.blogCommentDB.read(post.get("comment"));
             entry.allow();
             sb.blogCommentDB.write(entry);
         }
@@ -196,7 +196,7 @@ public class BlogComments {
             try {
                 prop.putHTML("mode_author", new String(author, "UTF-8"));
                 prop.putHTML("mode_allow_author", new String(author, "UTF-8"));
-            } catch (UnsupportedEncodingException e) {
+            } catch (final UnsupportedEncodingException e) {
                 prop.putHTML("mode_author", new String(author));
                 prop.putHTML("mode_allow_author", new String(author));
             }
@@ -215,13 +215,13 @@ public class BlogComments {
                 prop.put("mode_allow_pageid", pagename);
                 try {
                     prop.putHTML("mode_subject", new String(page.getSubject(),"UTF-8"));
-                } catch (UnsupportedEncodingException e) {
+                } catch (final UnsupportedEncodingException e) {
                     prop.putHTML("mode_subject", new String(page.getSubject()));
                 }
                 try {
                     prop.putHTML("mode_author", new String(page.getAuthor(),"UTF-8"));
                     prop.putHTML("mode_allow_author", new String(author, "UTF-8"));
-                } catch (UnsupportedEncodingException e) {
+                } catch (final UnsupportedEncodingException e) {
                     prop.putHTML("mode_author", new String(page.getAuthor()));
                     prop.putHTML("mode_allow_author", new String(author));
                 }
@@ -234,8 +234,8 @@ public class BlogComments {
                 }
                 //show all commments
                 try {
-                    Iterator<String> i = page.getComments().iterator();
-                    int commentMode = page.getCommentMode();
+                    final Iterator<String> i = page.getComments().iterator();
+                    final int commentMode = page.getCommentMode();
                     String pageid;
                     blogBoardComments.CommentEntry entry;
                     boolean xml = false;
@@ -249,7 +249,7 @@ public class BlogComments {
                     if(xml) num = 0;
                     if (start < 0) start = 0;       
                     if (start > 1) prev = true;
-                    int nextstart = start+num;      //indicates the starting offset for next results
+                    final int nextstart = start+num;      //indicates the starting offset for next results
                     int prevstart = start-num;      //indicates the starting offset for previous results
                     while(i.hasNext() && count < num) {
 
@@ -309,7 +309,7 @@ public class BlogComments {
                         prop.put("mode_preventries_num", num);
                         prop.put("mode_preventries_pageid", page.getKey());
                     } else prop.put("mode_preventries", "0");
-                } catch (IOException e) {
+                } catch (final IOException e) {
 
                 }
             }
@@ -319,19 +319,19 @@ public class BlogComments {
         return prop;
     }
 
-    private static void messageForwardingViaEmail(plasmaSwitchboard sb, messageBoard.entry msgEntry) {
+    private static void messageForwardingViaEmail(final plasmaSwitchboard sb, final messageBoard.entry msgEntry) {
         try {
             if (!Boolean.valueOf(sb.getConfig("msgForwardingEnabled","false")).booleanValue()) return;
 
             // getting the recipient address
-            String sendMailTo = sb.getConfig("msgForwardingTo","root@localhost").trim();
+            final String sendMailTo = sb.getConfig("msgForwardingTo","root@localhost").trim();
 
             // getting the sendmail configuration
-            String sendMailStr = sb.getConfig("msgForwardingCmd","/usr/bin/sendmail")+" "+sendMailTo;
-            String[] sendMail = sendMailStr.trim().split(" ");
+            final String sendMailStr = sb.getConfig("msgForwardingCmd","/usr/bin/sendmail")+" "+sendMailTo;
+            final String[] sendMail = sendMailStr.trim().split(" ");
 
             // building the message text
-            StringBuffer emailTxt = new StringBuffer();
+            final StringBuffer emailTxt = new StringBuffer();
             emailTxt.append("To: ")
             .append(sendMailTo)
             .append("\nFrom: ")
@@ -355,11 +355,11 @@ public class BlogComments {
             .append("\n===================================================================\n")
             .append(new String(msgEntry.message()));
 
-            Process process=Runtime.getRuntime().exec(sendMail);
-            PrintWriter email = new PrintWriter(process.getOutputStream());
+            final Process process=Runtime.getRuntime().exec(sendMail);
+            final PrintWriter email = new PrintWriter(process.getOutputStream());
             email.print(new String(emailTxt));
             email.close();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             yacyCore.log.logWarning("message: message forwarding via email failed. ",e);
         }
     }

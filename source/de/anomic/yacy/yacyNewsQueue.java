@@ -58,9 +58,9 @@ import de.anomic.server.serverDate;
 
 public class yacyNewsQueue {
 
-    private File path;
+    private final File path;
     kelondroStack queueStack;
-    private yacyNewsDB newsDB;
+    private final yacyNewsDB newsDB;
     
     public static final kelondroRow rowdef = new kelondroRow(new kelondroColumn[]{
             new kelondroColumn("newsid", kelondroColumn.celltype_string, kelondroColumn.encoder_bytes, yacyNewsRecord.idLength, "id = created + originator"),
@@ -69,14 +69,14 @@ public class yacyNewsQueue {
         kelondroNaturalOrder.naturalOrder, 0
     );
 
-    public yacyNewsQueue(File path, yacyNewsDB newsDB) {
+    public yacyNewsQueue(final File path, final yacyNewsDB newsDB) {
         this.path = path;
         this.newsDB = newsDB;
         this.queueStack = kelondroStack.open(path, rowdef);
     }
 
     private void resetDB() {
-        try {close();} catch (Exception e) {}
+        try {close();} catch (final Exception e) {}
         if (path.exists()) path.delete();
         queueStack = kelondroStack.open(path, rowdef);
     }
@@ -98,7 +98,7 @@ public class yacyNewsQueue {
         return queueStack.size();
     }
 
-    public synchronized void push(yacyNewsRecord entry) throws IOException {
+    public synchronized void push(final yacyNewsRecord entry) throws IOException {
         queueStack.push(r2b(entry, true));
     }
 
@@ -114,7 +114,7 @@ public class yacyNewsQueue {
 
     public synchronized yacyNewsRecord topInc() throws IOException {
         if (queueStack.size() == 0) return null;
-        yacyNewsRecord entry = pop();
+        final yacyNewsRecord entry = pop();
         if (entry != null) {
             entry.incDistribution();
             push(entry);
@@ -122,9 +122,9 @@ public class yacyNewsQueue {
         return entry;
     }
 
-    public synchronized yacyNewsRecord get(String id) {
+    public synchronized yacyNewsRecord get(final String id) {
         yacyNewsRecord record;
-        Iterator<yacyNewsRecord> i = records(true);
+        final Iterator<yacyNewsRecord> i = records(true);
         while (i.hasNext()) {
             record = i.next();
             if ((record != null) && (record.id().equals(id))) return record;
@@ -132,9 +132,9 @@ public class yacyNewsQueue {
         return null;
     }
 
-    public synchronized yacyNewsRecord remove(String id) {
+    public synchronized yacyNewsRecord remove(final String id) {
         yacyNewsRecord record;
-        Iterator<yacyNewsRecord> i = records(true);
+        final Iterator<yacyNewsRecord> i = records(true);
         while (i.hasNext()) {
             record = i.next();
             if ((record != null) && (record.id().equals(id))) {
@@ -145,28 +145,28 @@ public class yacyNewsQueue {
         return null;
     }
 
-    yacyNewsRecord b2r(kelondroRow.Entry b) throws IOException {
+    yacyNewsRecord b2r(final kelondroRow.Entry b) throws IOException {
         if (b == null) return null;
-        String id = b.getColString(0, null);
+        final String id = b.getColString(0, null);
         //Date touched = yacyCore.parseUniversalDate(new String(b[1]));
         return newsDB.get(id);
     }
 
-    private kelondroRow.Entry r2b(yacyNewsRecord r, boolean updateDB) throws IOException {
+    private kelondroRow.Entry r2b(final yacyNewsRecord r, final boolean updateDB) throws IOException {
         if (r == null) return null;
         if (updateDB) {
             newsDB.put(r);
         } else {
-            yacyNewsRecord r1 = newsDB.get(r.id());
+            final yacyNewsRecord r1 = newsDB.get(r.id());
             if (r1 == null) newsDB.put(r);
         }
-        kelondroRow.Entry b = queueStack.row().newEntry(new byte[][]{
+        final kelondroRow.Entry b = queueStack.row().newEntry(new byte[][]{
                 r.id().getBytes(),
                 serverDate.formatShortSecond(new Date()).getBytes()});
         return b;
     }
     
-    public Iterator<yacyNewsRecord> records(boolean up) {
+    public Iterator<yacyNewsRecord> records(final boolean up) {
         // iterates yacyNewsRecord-type objects
         if (queueStack == null) return new HashSet<yacyNewsRecord>().iterator();
         return new newsIterator(up);
@@ -177,7 +177,7 @@ public class yacyNewsQueue {
         
         Iterator<kelondroRow.Entry> stackNodeIterator;
         
-        public newsIterator(boolean up) {
+        public newsIterator(final boolean up) {
             stackNodeIterator = queueStack.stackIterator(up);
         }
         
@@ -186,10 +186,10 @@ public class yacyNewsQueue {
         }
 
         public yacyNewsRecord next() {
-            kelondroRow.Entry row = stackNodeIterator.next();
+            final kelondroRow.Entry row = stackNodeIterator.next();
             try {
                 return b2r(row);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 return null;
             }
         }

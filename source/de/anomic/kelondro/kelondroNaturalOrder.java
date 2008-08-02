@@ -32,26 +32,26 @@ public final class kelondroNaturalOrder extends kelondroAbstractOrder<byte[]> im
     
     public static final kelondroByteOrder naturalOrder = new kelondroNaturalOrder(true);
     public static final Comparator<String> naturalComparator = new kelondroByteOrder.StringOrder(naturalOrder);
-    public kelondroNaturalOrder(boolean ascending) {
+    public kelondroNaturalOrder(final boolean ascending) {
         this.asc = ascending;
         this.zero = null;
     }
     
-    public boolean wellformed(byte[] a) {
+    public boolean wellformed(final byte[] a) {
         return true;
     }
     
-    public boolean wellformed(byte[] a, int astart, int alength) {
+    public boolean wellformed(final byte[] a, final int astart, final int alength) {
         return true;
     }
     
     public final kelondroOrder<byte[]> clone() {
-        kelondroNaturalOrder o = new kelondroNaturalOrder(this.asc);
+        final kelondroNaturalOrder o = new kelondroNaturalOrder(this.asc);
         o.rotate(this.zero);
         return o;
     }
     
-    public static kelondroByteOrder orderBySignature(String signature) {
+    public static kelondroByteOrder orderBySignature(final String signature) {
         kelondroByteOrder oo = null;
         if (oo == null) oo = kelondroNaturalOrder.bySignature(signature);
         if (oo == null) oo = kelondroBase64Order.bySignature(signature);
@@ -59,7 +59,7 @@ public final class kelondroNaturalOrder extends kelondroAbstractOrder<byte[]> im
         return oo;
     }
     
-    public final static kelondroByteOrder bySignature(String signature) {
+    public final static kelondroByteOrder bySignature(final String signature) {
         if (signature.equals("nd")) return new kelondroNaturalOrder(false);
         if (signature.equals("nu")) return new kelondroNaturalOrder(true);
         return null;
@@ -71,7 +71,7 @@ public final class kelondroNaturalOrder extends kelondroAbstractOrder<byte[]> im
         return null;
     }
     
-    private final static long cardinalI(byte[] key) {
+    private final static long cardinalI(final byte[] key) {
         // returns a cardinal number in the range of 0 .. Long.MAX_VALUE
         long c = 0;
         int p = 0;
@@ -81,16 +81,16 @@ public final class kelondroNaturalOrder extends kelondroAbstractOrder<byte[]> im
         return c;
     }
     
-    public final long cardinal(byte[] key) {
+    public final long cardinal(final byte[] key) {
         if (this.zero == null) return cardinalI(key);
-        long zeroCardinal = cardinalI(this.zero);
-        long keyCardinal = cardinalI(key);
+        final long zeroCardinal = cardinalI(this.zero);
+        final long keyCardinal = cardinalI(key);
         if (keyCardinal > zeroCardinal) return keyCardinal - zeroCardinal;
         return Long.MAX_VALUE - keyCardinal + zeroCardinal;
     }
 
     public final static byte[] encodeLong(long c, int length) {
-        byte[] b = new byte[length];
+        final byte[] b = new byte[length];
         while (length > 0) {
             b[--length] = (byte) (c & 0xFF);
             c >>= 8;
@@ -98,7 +98,7 @@ public final class kelondroNaturalOrder extends kelondroAbstractOrder<byte[]> im
         return b;
     }
 
-    public final static void encodeLong(long c, byte[] b, int offset, int length) {
+    public final static void encodeLong(long c, final byte[] b, final int offset, int length) {
         assert offset + length <= b.length;
         while (length > 0) {
             b[--length + offset] = (byte) (c & 0xFF);
@@ -106,7 +106,7 @@ public final class kelondroNaturalOrder extends kelondroAbstractOrder<byte[]> im
         }
     }
 
-    public final static long decodeLong(byte[] s) {
+    public final static long decodeLong(final byte[] s) {
         if (s == null) return 0;
         long c = 0;
         int p = 0;
@@ -114,7 +114,7 @@ public final class kelondroNaturalOrder extends kelondroAbstractOrder<byte[]> im
         return c;
     }
     
-    public final static long decodeLong(byte[] s, int offset, int length) {
+    public final static long decodeLong(final byte[] s, int offset, final int length) {
         if (s == null) return 0;
         long c = 0;
         final int m = Math.min(s.length, offset + length);
@@ -122,7 +122,7 @@ public final class kelondroNaturalOrder extends kelondroAbstractOrder<byte[]> im
         return c;
     }
 
-    private static final int sig(int x) {
+    private static final int sig(final int x) {
         return (x > 0) ? 1 : (x < 0) ? -1 : 0;
     }
     
@@ -131,15 +131,15 @@ public final class kelondroNaturalOrder extends kelondroAbstractOrder<byte[]> im
     // is less than, equal to, or greater than the second.
     // two arrays are also equal if one array is a subset of the other's array
     // with filled-up char(0)-values
-    public final int compare(byte[] a, byte[] b) {
+    public final int compare(final byte[] a, final byte[] b) {
         return (asc) ? compare0(a, 0, a.length, b, 0, b.length) : compare0(b, 0, b.length, a, 0, a.length);
     }
 
-    public final int compare(byte[] a, int aoffset, int alength, byte[] b, int boffset, int blength) {
+    public final int compare(final byte[] a, final int aoffset, final int alength, final byte[] b, final int boffset, final int blength) {
         return (asc) ? compare0(a, aoffset, alength, b, boffset, blength) : compare0(b, boffset, blength, a, aoffset, alength);
     }
 
-    public final int compare0(byte[] a, int aoffset, int alength, byte[] b, int boffset, int blength) {
+    public final int compare0(final byte[] a, final int aoffset, final int alength, final byte[] b, final int boffset, final int blength) {
         if (zero == null) return compares(a, aoffset, alength, b, boffset, blength);
         // we have an artificial start point. check all combinations
         final int az = compares(a, aoffset, alength, zero, 0, zero.length); // -1 if a < z; 0 if a == z; 1 if a > z
@@ -148,13 +148,13 @@ public final class kelondroNaturalOrder extends kelondroAbstractOrder<byte[]> im
         return sig(az - bz);
     }
 
-    public static final boolean equal(byte[] a, byte[] b) {
+    public static final boolean equal(final byte[] a, final byte[] b) {
         if ((a == null) && (b == null)) return true;
         if ((a == null) || (b == null)) return false;
         return compares(a, 0, a.length, b, 0, b.length) == 0;
     }
    
-    public static final int compares(byte[] a, int aoffset, int alength, byte[] b, int boffset, int blength) {
+    public static final int compares(final byte[] a, final int aoffset, final int alength, final byte[] b, final int boffset, final int blength) {
         int i = 0;
         final int al = Math.min(alength, a.length - aoffset);
         final int bl = Math.min(blength, b.length - boffset);
@@ -174,11 +174,11 @@ public final class kelondroNaturalOrder extends kelondroAbstractOrder<byte[]> im
         return 0;
     }
 
-    public static void main(String[] args) {
-        byte[] t = new byte[12];
+    public static void main(final String[] args) {
+        final byte[] t = new byte[12];
         for (int i = 0; i < 12; i++) t[i] = (byte) 255;
         t[0] = (byte) 127;
-        kelondroOrder<byte[]> o = new kelondroNaturalOrder(true);
+        final kelondroOrder<byte[]> o = new kelondroNaturalOrder(true);
         System.out.println(o.partition(t, 16));
     }
     

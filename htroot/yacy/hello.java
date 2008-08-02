@@ -49,9 +49,9 @@ public final class hello {
     // example:
     // http://localhost:8080/yacy/hello.html?count=1&seed=p|{Hash=sCJ6Tq8T0N9x,IPType=&empty;,Port=8080,IP=,Uptime=8,rI=190,Version=0.10004882,PeerType=junior,UTC=+0200,RCount=0,sI=0,LastSeen=20080605103333,Name=intratest,CCount=5.0,SCount=40,news=,USpeed=0,CRTCnt=0,CRWCnt=0,BDate=20080605081349,rU=190,LCount=187,dct=1212668923654,ICount=2,sU=0,ISpeed=0,RSpeed=0.0,NCount=0,Flags=oooo}
     
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) throws InterruptedException {
-        plasmaSwitchboard sb = (plasmaSwitchboard) env;
-        serverObjects prop = new serverObjects();
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) throws InterruptedException {
+        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        final serverObjects prop = new serverObjects();
         prop.put("message", "none");
         if ((post == null) || (env == null)) {
             prop.put("message", "no post or no enviroment");
@@ -68,10 +68,10 @@ public final class hello {
         final String seed     = post.get("seed", "");
         final String countStr = post.get("count", "0");
         int  count = 0;
-        try {count = (countStr == null) ? 0 : Integer.parseInt(countStr);} catch (NumberFormatException e) {count = 0;}
+        try {count = (countStr == null) ? 0 : Integer.parseInt(countStr);} catch (final NumberFormatException e) {count = 0;}
 //      final Date remoteTime = yacyCore.parseUniversalDate((String) post.get(MYTIME)); // read remote time
         final String clientip = (String) header.get(httpHeader.CONNECTION_PROP_CLIENTIP, "<unknown>"); // read an artificial header addendum
-        InetAddress ias = serverDomains.dnsResolve(clientip);
+        final InetAddress ias = serverDomains.dnsResolve(clientip);
         if (ias == null) {
             prop.put("message", "cannot resolve your IP from your reported location " + clientip);
             return prop;
@@ -192,7 +192,7 @@ public final class hello {
             // attach other seeds
             if (ySeeds != null) {
                 seeds.ensureCapacity((ySeeds.size() + 1) * 768);
-                Iterator<yacySeed> si = ySeeds.values().iterator();
+                final Iterator<yacySeed> si = ySeeds.values().iterator();
                 yacySeed s;
                 String seedString;
                 while (si.hasNext()) {
@@ -203,7 +203,7 @@ public final class hello {
                             seeds.append("seed").append(count).append('=').append(seedString).append(serverCore.CRLF_STRING);
                             count++;
                         }
-                    } catch (ConcurrentModificationException e) {
+                    } catch (final ConcurrentModificationException e) {
                         e.printStackTrace();
                     }
                 }

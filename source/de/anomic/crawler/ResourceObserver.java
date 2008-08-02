@@ -50,11 +50,11 @@ public final class ResourceObserver {
     private boolean disksOK;
     private boolean memoryOK;
     
-    public ResourceObserver(plasmaSwitchboard sb) {
+    public ResourceObserver(final plasmaSwitchboard sb) {
         this.sb = sb;
         this.log.logInfo("initializing the resource observer");
 
-        ArrayList<String> pathsToCheck = new ArrayList<String>();
+        final ArrayList<String> pathsToCheck = new ArrayList<String>();
         //  FIXME whats about the secondary path???
         //   = (getConfig(plasmaSwitchboard.INDEX_SECONDARY_PATH, "");
         final String[] pathes =  {plasmaSwitchboard.HTDOCS_PATH,        
@@ -142,7 +142,7 @@ public final class ResourceObserver {
         
         final HashMap<String, long[]> usage = diskUsage.getDiskUsage();
         long[] val;
-        for (Map.Entry<String, long[]> entry: usage.entrySet()) {
+        for (final Map.Entry<String, long[]> entry: usage.entrySet()) {
             val = entry.getValue();
             this.log.logInfo("df of Volume " + entry.getKey() + ": " + (val[1] / 1024 / 1024) + " MB");
             if (val[1] < MIN_FREE_DISK_SPACE) {

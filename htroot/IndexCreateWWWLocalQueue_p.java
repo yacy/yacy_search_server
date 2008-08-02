@@ -46,7 +46,7 @@ import de.anomic.yacy.yacySeed;
 public class IndexCreateWWWLocalQueue_p {
     
     private static SimpleDateFormat dayFormatter = new SimpleDateFormat("yyyy/MM/dd", Locale.US);
-    private static String daydate(Date date) {
+    private static String daydate(final Date date) {
         if (date == null) return "";
         return dayFormatter.format(date);
     }
@@ -59,28 +59,28 @@ public class IndexCreateWWWLocalQueue_p {
     private static final int INITIATOR  = 5;
     private static final int MODIFIED   = 6;
     
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
         // return variable that accumulates replacements
-        plasmaSwitchboard sb = (plasmaSwitchboard) env;
-        serverObjects prop = new serverObjects();
+        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        final serverObjects prop = new serverObjects();
  
         int showLimit = 100;
         if (post != null) {
             if (post.containsKey("limit")) {
                 try {
                     showLimit = Integer.valueOf(post.get("limit")).intValue();
-                } catch (NumberFormatException e) {}
+                } catch (final NumberFormatException e) {}
             }
             
             if (post.containsKey("deleteEntries")) {
                 int c = 0;
                 
-                String pattern = post.get("pattern", ".*").trim();
+                final String pattern = post.get("pattern", ".*").trim();
                 final int option  = post.getInt("option", INVALID);
                 if (pattern.equals(".*")) {
                     c = sb.crawlQueues.noticeURL.stackSize(NoticedURL.STACK_TYPE_CORE);
                     sb.crawlQueues.noticeURL.clear(NoticedURL.STACK_TYPE_CORE);
-                    try { sb.cleanProfiles(); } catch (InterruptedException e) {/* ignore this */}
+                    try { sb.cleanProfiles(); } catch (final InterruptedException e) {/* ignore this */}
                 } else if (option > INVALID) {
                     Pattern compiledPattern = null;
                     try {
@@ -90,7 +90,7 @@ public class IndexCreateWWWLocalQueue_p {
                         if (option == PROFILE) {
                             // search and delete the crawl profile (_much_ faster, independant of queue size)
                             // XXX: what to do about the annoying LOST PROFILE messages in the log?
-                            Iterator<CrawlProfile.entry> it = sb.webIndex.profilesActiveCrawls.profiles(true);
+                            final Iterator<CrawlProfile.entry> it = sb.webIndex.profilesActiveCrawls.profiles(true);
                             CrawlProfile.entry entry;
                             while (it.hasNext()) {
                                 entry = it.next();
@@ -108,7 +108,7 @@ public class IndexCreateWWWLocalQueue_p {
                             }
                         } else {
                             // iterating through the list of URLs
-                            Iterator<CrawlEntry> iter = sb.crawlQueues.noticeURL.iterator(NoticedURL.STACK_TYPE_CORE);
+                            final Iterator<CrawlEntry> iter = sb.crawlQueues.noticeURL.iterator(NoticedURL.STACK_TYPE_CORE);
                             CrawlEntry entry;
                             while (iter.hasNext()) {
                                 if ((entry = iter.next()) == null) continue;
@@ -126,14 +126,14 @@ public class IndexCreateWWWLocalQueue_p {
                                 }
                                 
                                 if (value != null) {
-                                    Matcher matcher = compiledPattern.matcher(value);
+                                    final Matcher matcher = compiledPattern.matcher(value);
                                     if (matcher.find()) {
                                         sb.crawlQueues.noticeURL.removeByURLHash(entry.url().hash());
                                     }                                    
                                 }
                             }
                         }
-                    } catch (PatternSyntaxException e) {
+                    } catch (final PatternSyntaxException e) {
                         e.printStackTrace();
                     }
                 }
@@ -141,7 +141,7 @@ public class IndexCreateWWWLocalQueue_p {
                 prop.put("info", "3");//crawling queue cleared
                 prop.putNum("info_numEntries", c);
             } else if (post.containsKey("deleteEntry")) {
-                String urlHash = post.get("deleteEntry");
+                final String urlHash = post.get("deleteEntry");
                 sb.crawlQueues.noticeURL.removeByURLHash(urlHash);
                 prop.put("LOCATION","");
                 return prop;
@@ -153,7 +153,7 @@ public class IndexCreateWWWLocalQueue_p {
             prop.put("crawler-queue", "0");
         } else {
             prop.put("crawler-queue", "1");
-            ArrayList<CrawlEntry> crawlerList = sb.crawlQueues.noticeURL.top(NoticedURL.STACK_TYPE_CORE, (int) (showLimit * 1.20));
+            final ArrayList<CrawlEntry> crawlerList = sb.crawlQueues.noticeURL.top(NoticedURL.STACK_TYPE_CORE, (int) (showLimit * 1.20));
 
             CrawlEntry urle;
             boolean dark = true;

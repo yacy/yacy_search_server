@@ -30,20 +30,20 @@ import de.anomic.server.logging.serverLog;
 public final class serverInstantBusyThread extends serverAbstractBusyThread implements serverBusyThread {
     
     private Method jobExecMethod, jobCountMethod, freememExecMethod;
-    private Object environment;
-    private Long   handle;
+    private final Object environment;
+    private final Long   handle;
     
     public static int instantThreadCounter = 0;
     public static TreeMap<Long, String> jobs = new TreeMap<Long, String>();
     
-    public serverInstantBusyThread(Object env, String jobExec, String jobCount, String freemem) {
+    public serverInstantBusyThread(final Object env, final String jobExec, final String jobCount, final String freemem) {
         // jobExec is the name of a method of the object 'env' that executes the one-step-run
         // jobCount is the name of a method that returns the size of the job
         // freemem is the name of a method that tries to free memory and returns void
-        Class<?> theClass = (env instanceof Class) ? (Class<?>) env : env.getClass();
+        final Class<?> theClass = (env instanceof Class) ? (Class<?>) env : env.getClass();
         try {
             this.jobExecMethod = theClass.getMethod(jobExec, new Class[0]);
-        } catch (NoSuchMethodException e) {
+        } catch (final NoSuchMethodException e) {
             throw new RuntimeException("serverInstantThread, wrong declaration of jobExec: " + e.getMessage());
         }
         try {
@@ -52,7 +52,7 @@ public final class serverInstantBusyThread extends serverAbstractBusyThread impl
             else
                 this.jobCountMethod = theClass.getMethod(jobCount, new Class[0]);
             
-        } catch (NoSuchMethodException e) {
+        } catch (final NoSuchMethodException e) {
             throw new RuntimeException("serverInstantThread, wrong declaration of jobCount: " + e.getMessage());
         }
         try {
@@ -61,7 +61,7 @@ public final class serverInstantBusyThread extends serverAbstractBusyThread impl
             else
                 this.freememExecMethod = theClass.getMethod(freemem, new Class[0]);
             
-        } catch (NoSuchMethodException e) {
+        } catch (final NoSuchMethodException e) {
             throw new RuntimeException("serverInstantThread, wrong declaration of freemem: " + e.getMessage());
         }
         this.environment = (env instanceof Class) ? null : env;
@@ -72,16 +72,16 @@ public final class serverInstantBusyThread extends serverAbstractBusyThread impl
     public int getJobCount() {
         if (this.jobCountMethod == null) return Integer.MAX_VALUE;
         try {
-            Object result = jobCountMethod.invoke(environment, new Object[0]);
+            final Object result = jobCountMethod.invoke(environment, new Object[0]);
             if (result instanceof Integer)
                 return ((Integer) result).intValue();
             else
                 return -1;
-        } catch (IllegalAccessException e) {
+        } catch (final IllegalAccessException e) {
             return -1;
-        } catch (IllegalArgumentException e) {
+        } catch (final IllegalArgumentException e) {
             return -1;
-        } catch (InvocationTargetException e) {
+        } catch (final InvocationTargetException e) {
             serverLog.logSevere("BUSYTHREAD", "invocation serverInstantThread of thread '" + this.getName() + "': " + e.getMessage(), e);
             return -1;
         }
@@ -93,22 +93,22 @@ public final class serverInstantBusyThread extends serverAbstractBusyThread impl
         synchronized(jobs) {jobs.put(this.handle, this.getName());}
         boolean jobHasDoneSomething = false;
         try {
-            Object result = jobExecMethod.invoke(environment, new Object[0]);
+            final Object result = jobExecMethod.invoke(environment, new Object[0]);
             if (result == null) jobHasDoneSomething = true;
             else if (result instanceof Boolean) jobHasDoneSomething = ((Boolean) result).booleanValue();
-        } catch (IllegalAccessException e) {
+        } catch (final IllegalAccessException e) {
             serverLog.logSevere("BUSYTHREAD", "Internal Error in serverInstantThread.job: " + e.getMessage());
             serverLog.logSevere("BUSYTHREAD", "shutting down thread '" + this.getName() + "'");
             this.terminate(false);
-        } catch (IllegalArgumentException e) {
+        } catch (final IllegalArgumentException e) {
             serverLog.logSevere("BUSYTHREAD", "Internal Error in serverInstantThread.job: " + e.getMessage());
             serverLog.logSevere("BUSYTHREAD", "shutting down thread '" + this.getName() + "'");
             this.terminate(false);
-        } catch (InvocationTargetException e) {
-            String targetException = e.getTargetException().getMessage();
+        } catch (final InvocationTargetException e) {
+            final String targetException = e.getTargetException().getMessage();
             e.printStackTrace();
             serverLog.logSevere("BUSYTHREAD", "Runtime Error in serverInstantThread.job, thread '" + this.getName() + "': " + e.getMessage() + "; target exception: " + targetException, e.getTargetException());
-        } catch (OutOfMemoryError e) {
+        } catch (final OutOfMemoryError e) {
             serverLog.logSevere("BUSYTHREAD", "OutOfMemory Error in serverInstantThread.job, thread '" + this.getName() + "': " + e.getMessage());
             e.printStackTrace();
             freemem();
@@ -122,28 +122,28 @@ public final class serverInstantBusyThread extends serverAbstractBusyThread impl
         if (freememExecMethod == null) return;
         try {
             freememExecMethod.invoke(environment, new Object[0]);
-        } catch (IllegalAccessException e) {
+        } catch (final IllegalAccessException e) {
             serverLog.logSevere("BUSYTHREAD", "Internal Error in serverInstantThread.freemem: " + e.getMessage());
             serverLog.logSevere("BUSYTHREAD", "shutting down thread '" + this.getName() + "'");
             this.terminate(false);
-        } catch (IllegalArgumentException e) {
+        } catch (final IllegalArgumentException e) {
             serverLog.logSevere("BUSYTHREAD", "Internal Error in serverInstantThread.freemem: " + e.getMessage());
             serverLog.logSevere("BUSYTHREAD", "shutting down thread '" + this.getName() + "'");
             this.terminate(false);
-        } catch (InvocationTargetException e) {
-            String targetException = e.getTargetException().getMessage();
+        } catch (final InvocationTargetException e) {
+            final String targetException = e.getTargetException().getMessage();
             if (targetException.indexOf("heap space") > 0) e.getTargetException().printStackTrace();
             serverLog.logSevere("BUSYTHREAD", "Runtime Error in serverInstantThread.freemem, thread '" + this.getName() + "': " + e.getMessage() + "; target exception: " + targetException, e.getTargetException());
             e.getTargetException().printStackTrace();
-        } catch (OutOfMemoryError e) {
+        } catch (final OutOfMemoryError e) {
             serverLog.logSevere("BUSYTHREAD", "OutOfMemory Error in serverInstantThread.freemem, thread '" + this.getName() + "': " + e.getMessage());
             e.printStackTrace();
         }
     }
     
-    public static serverBusyThread oneTimeJob(Object env, String jobExec, serverLog log, long startupDelay) {
+    public static serverBusyThread oneTimeJob(final Object env, final String jobExec, final serverLog log, final long startupDelay) {
         // start the job and execute it once as background process
-        serverBusyThread thread = new serverInstantBusyThread(env, jobExec, null, null);
+        final serverBusyThread thread = new serverInstantBusyThread(env, jobExec, null, null);
         thread.setStartupSleep(startupDelay);
         thread.setIdleSleep(-1);
         thread.setBusySleep(-1);
@@ -153,14 +153,14 @@ public final class serverInstantBusyThread extends serverAbstractBusyThread impl
         return thread;
     }
     
-    public static serverThread oneTimeJob(Runnable thread, long startupDelay) {
-        serverLog log = new serverLog(thread.getClass().getName() + "/run");
+    public static serverThread oneTimeJob(final Runnable thread, final long startupDelay) {
+        final serverLog log = new serverLog(thread.getClass().getName() + "/run");
         log.setLevel(java.util.logging.Level.INFO);
         return oneTimeJob(thread, "run", log, startupDelay);
     }
     
-    public static serverThread oneTimeJob(Runnable thread, long startupDelay, int maxJobs) {
-        while (instantThreadCounter >= maxJobs) try {Thread.sleep(100);} catch (InterruptedException e) {break;}
+    public static serverThread oneTimeJob(final Runnable thread, final long startupDelay, final int maxJobs) {
+        while (instantThreadCounter >= maxJobs) try {Thread.sleep(100);} catch (final InterruptedException e) {break;}
         return oneTimeJob( thread, startupDelay);
     }
     

@@ -60,15 +60,15 @@ import de.anomic.yacy.yacyURL;
 
 public final class search {
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
         // return variable that accumulates replacements
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         sb.remoteSearchLastAccess = System.currentTimeMillis();
         
-        serverObjects prop = new serverObjects();
+        final serverObjects prop = new serverObjects();
         if ((post == null) || (env == null)) return prop;
         if (!yacyNetwork.authentifyRequest(post, env)) return prop;
-        String client = header.get(httpHeader.CONNECTION_PROP_CLIENTIP);
+        final String client = header.get(httpHeader.CONNECTION_PROP_CLIENTIP);
 
         //System.out.println("yacy: search received request = " + post.toString());
 
@@ -77,8 +77,8 @@ public final class search {
         final String  key    = post.get("key", "");    // transmission key for response
         final String  query  = post.get("query", "");  // a string of word hashes that shall be searched and combined
         final String  exclude= post.get("exclude", "");// a string of word hashes that shall not be within the search result
-        String  urls   = post.get("urls", "");         // a string of url hashes that are preselected for the search: no other may be returned
-        String abstracts = post.get("abstracts", "");  // a string of word hashes for abstracts that shall be generated, or 'auto' (for maxcount-word), or '' (for none)
+        final String  urls   = post.get("urls", "");         // a string of url hashes that are preselected for the search: no other may be returned
+        final String abstracts = post.get("abstracts", "");  // a string of word hashes for abstracts that shall be generated, or 'auto' (for maxcount-word), or '' (for none)
 //      final String  fwdep  = post.get("fwdep", "");  // forward depth. if "0" then peer may NOT ask another peer for more results
 //      final String  fwden  = post.get("fwden", "");  // forward deny, a list of seed hashes. They may NOT be target of forward hopping
         final int     count  = Math.min(100, post.getInt("count", 10)); // maximum number of wanted results
@@ -128,15 +128,15 @@ public final class search {
         if (trackerHandles.tailSet(new Long(System.currentTimeMillis() -   6000)).size() >  1) try {
             Thread.sleep(3000);
             block = true;
-        } catch (InterruptedException e) { e.printStackTrace(); }
+        } catch (final InterruptedException e) { e.printStackTrace(); }
         if (trackerHandles.tailSet(new Long(System.currentTimeMillis() -  60000)).size() > 12) try {
             Thread.sleep(10000);
             block = true;
-        } catch (InterruptedException e) { e.printStackTrace(); }
+        } catch (final InterruptedException e) { e.printStackTrace(); }
         if (trackerHandles.tailSet(new Long(System.currentTimeMillis() - 600000)).size() > 36) try {
             Thread.sleep(30000);
             block = true;
-        } catch (InterruptedException e) { e.printStackTrace(); }
+        } catch (final InterruptedException e) { e.printStackTrace(); }
         if (block) {
             prop.put("links", "");
             prop.put("linkcount", "0");
@@ -147,10 +147,10 @@ public final class search {
         // tell all threads to do nothing for a specific time
         sb.intermissionAllThreads(3000);
 
-        TreeSet<String> abstractSet = ((abstracts.length() == 0) || (abstracts.equals("auto"))) ? null : plasmaSearchQuery.hashes2Set(abstracts);
+        final TreeSet<String> abstractSet = ((abstracts.length() == 0) || (abstracts.equals("auto"))) ? null : plasmaSearchQuery.hashes2Set(abstracts);
         
         // store accessing peer
-        yacySeed remoteSeed = yacySeed.genRemoteSeed(oseed, key, false);
+        final yacySeed remoteSeed = yacySeed.genRemoteSeed(oseed, key, false);
         if (sb.webIndex.seedDB == null) {
             yacyCore.log.logSevere("yacy.search: seed cache not initialized");
         } else {
@@ -163,10 +163,10 @@ public final class search {
         final long timestamp = System.currentTimeMillis();
         
     	// prepare a search profile
-        plasmaSearchRankingProfile rankingProfile = (profile.length() == 0) ? new plasmaSearchRankingProfile(plasmaSearchQuery.contentdomParser(contentdom)) : new plasmaSearchRankingProfile("", profile);
+        final plasmaSearchRankingProfile rankingProfile = (profile.length() == 0) ? new plasmaSearchRankingProfile(plasmaSearchQuery.contentdomParser(contentdom)) : new plasmaSearchRankingProfile("", profile);
         
         // prepare an abstract result
-        StringBuffer indexabstract = new StringBuffer();
+        final StringBuffer indexabstract = new StringBuffer();
         int indexabstractContainercount = 0;
         int joincount = 0;
         plasmaSearchQuery theQuery = null;
@@ -178,17 +178,17 @@ public final class search {
             theQuery.domType = plasmaSearchQuery.SEARCHDOM_LOCAL;
             yacyCore.log.logInfo("INIT HASH SEARCH (abstracts only): " + plasmaSearchQuery.anonymizedQueryHashes(theQuery.queryHashes) + " - " + theQuery.displayResults() + " links");
 
-            long timer = System.currentTimeMillis();
-            Map<String, indexContainer>[] containers = sb.webIndex.localSearchContainers(theQuery, plasmaSearchQuery.hashes2Set(urls));
+            final long timer = System.currentTimeMillis();
+            final Map<String, indexContainer>[] containers = sb.webIndex.localSearchContainers(theQuery, plasmaSearchQuery.hashes2Set(urls));
             serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(theQuery.id(true), plasmaSearchEvent.COLLECTION, containers[0].size(), System.currentTimeMillis() - timer));
             if (containers != null) {
-                Iterator<Map.Entry<String, indexContainer>> ci = containers[0].entrySet().iterator();
+                final Iterator<Map.Entry<String, indexContainer>> ci = containers[0].entrySet().iterator();
                 Map.Entry<String, indexContainer> entry;
                 String wordhash;
                 while (ci.hasNext()) {
                     entry = ci.next();
                     wordhash = entry.getKey();
-                    indexContainer container = entry.getValue();
+                    final indexContainer container = entry.getValue();
                     indexabstractContainercount += container.size();
                     indexabstract.append("indexabstract." + wordhash + "=").append(indexContainer.compressIndex(container, null, 1000).toString()).append(serverCore.CRLF_STRING);                
                 }
@@ -214,16 +214,16 @@ public final class search {
                 prop.put("joincount", "0");
             } else {
                 // attach information about index abstracts
-                StringBuffer indexcount = new StringBuffer();
+                final StringBuffer indexcount = new StringBuffer();
                 Map.Entry<String, Integer> entry;
-                Iterator<Map.Entry<String, Integer>> i = theSearch.IACount.entrySet().iterator();
+                final Iterator<Map.Entry<String, Integer>> i = theSearch.IACount.entrySet().iterator();
                 while (i.hasNext()) {
                     entry = i.next();
                     indexcount.append("indexcount.").append(entry.getKey()).append('=').append((entry.getValue()).toString()).append(serverCore.CRLF_STRING);
                 }
                 if (abstractSet != null) {
                     // if a specific index-abstract is demanded, attach it here
-                    Iterator<String> j = abstractSet.iterator();
+                    final Iterator<String> j = abstractSet.iterator();
                     String wordhash;
                     while (j.hasNext()) {
                         wordhash = j.next();
@@ -264,10 +264,10 @@ public final class search {
             if (partitions > 0) sb.requestedQueries = sb.requestedQueries + 1d / partitions; // increase query counter
             
             // prepare reference hints
-            long timer = System.currentTimeMillis();
-            Set<String> ws = theSearch.references(10);
-            StringBuffer refstr = new StringBuffer();
-            Iterator<String> j = ws.iterator();
+            final long timer = System.currentTimeMillis();
+            final Set<String> ws = theSearch.references(10);
+            final StringBuffer refstr = new StringBuffer();
+            final Iterator<String> j = ws.iterator();
             while (j.hasNext()) {
                 refstr.append(",").append(j.next());
             }
@@ -286,8 +286,8 @@ public final class search {
 
         } else {
             // result is a List of urlEntry elements
-            long timer = System.currentTimeMillis();
-            StringBuffer links = new StringBuffer();
+            final long timer = System.currentTimeMillis();
+            final StringBuffer links = new StringBuffer();
             String resource = null;
             kelondroSortStack<plasmaSearchEvent.ResultEntry>.stackElement entry;
             for (int i = 0; i < accu.size(); i++) {

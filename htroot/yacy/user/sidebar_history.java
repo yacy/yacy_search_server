@@ -35,16 +35,16 @@ import de.anomic.server.serverSwitch;
 
 public class sidebar_history {
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final serverObjects prop = new serverObjects();
     
         // list search history
-        Iterator<plasmaSearchQuery> i = sb.localSearches.iterator();
-        String client = header.get(httpHeader.CONNECTION_PROP_CLIENTIP);
+        final Iterator<plasmaSearchQuery> i = sb.localSearches.iterator();
+        final String client = header.get(httpHeader.CONNECTION_PROP_CLIENTIP);
         plasmaSearchQuery query;
         int c = 0;
-        HashSet<String> visibleQueries = new HashSet<String>();
+        final HashSet<String> visibleQueries = new HashSet<String>();
         while (i.hasNext()) {
             query = i.next();
             if (query.resultcount == 0) continue;

@@ -57,11 +57,11 @@ public class kelondroBase64Order extends kelondroAbstractOrder<byte[]> implement
     public static final Comparator<String> standardComparator = new kelondroByteOrder.StringOrder(standardCoder);
     public static final Comparator<String> enhancedComparator = new kelondroByteOrder.StringOrder(enhancedCoder);
 
-    private boolean rfc1113compliant;
+    private final boolean rfc1113compliant;
     private final char[] alpha;
     private final byte[] ahpla;
 
-    public kelondroBase64Order(boolean up, boolean rfc1113compliant) {
+    public kelondroBase64Order(final boolean up, final boolean rfc1113compliant) {
         // if we choose not to be rfc1113compliant,
         // then we get shorter base64 results which are also filename-compatible
         this.rfc1113compliant = rfc1113compliant;
@@ -73,22 +73,22 @@ public class kelondroBase64Order extends kelondroAbstractOrder<byte[]> implement
     }
 
     public static byte[] zero(int length) {
-        byte[] z = new byte[length];
+        final byte[] z = new byte[length];
         while (length > 0) { length--; z[length] = (byte) alpha_standard[0]; }
         return z;
     }
     
     public kelondroOrder<byte[]> clone() {
-        kelondroBase64Order o = new kelondroBase64Order(this.asc, this.rfc1113compliant);
+        final kelondroBase64Order o = new kelondroBase64Order(this.asc, this.rfc1113compliant);
         o.rotate(zero);
         return o;
     }
     
-    public final boolean wellformed(byte[] a) {
+    public final boolean wellformed(final byte[] a) {
         return wellformed(a, 0, a.length);
     }
     
-    public final boolean wellformed(byte[] a, int astart, int alength) {
+    public final boolean wellformed(final byte[] a, final int astart, final int alength) {
         assert (astart + alength <= a.length) : "astart = " + astart + ", alength = " + alength + ", a.length = " + a.length;
         int b;
         for (int i = astart + alength - 1; i >= astart; i--) {
@@ -98,7 +98,7 @@ public class kelondroBase64Order extends kelondroAbstractOrder<byte[]> implement
         return true;
     }
     
-    public final static kelondroByteOrder bySignature(String signature) {
+    public final static kelondroByteOrder bySignature(final String signature) {
         if (signature.equals("Bd")) return new kelondroBase64Order(false, false);
         if (signature.equals("bd")) return new kelondroBase64Order(false, true);
         if (signature.equals("Bu")) return new kelondroBase64Order(true, false);
@@ -114,17 +114,17 @@ public class kelondroBase64Order extends kelondroAbstractOrder<byte[]> implement
         return null;
     }
     
-    public final char encodeByte(byte b) {
+    public final char encodeByte(final byte b) {
         return alpha[b];
     }
 
-    public final byte decodeByte(char b) {
+    public final byte decodeByte(final char b) {
         return ahpla[b];
     }
 
-    public final String encodeLongSmart(long c, int length) {
+    public final String encodeLongSmart(final long c, int length) {
         if (c >= max(length)) {
-            StringBuffer s = new StringBuffer(length);
+            final StringBuffer s = new StringBuffer(length);
             s.setLength(length);
             while (length > 0) s.setCharAt(--length, alpha[63]);
             return new String(s);
@@ -133,7 +133,7 @@ public class kelondroBase64Order extends kelondroAbstractOrder<byte[]> implement
     }
 
     public final String encodeLong(long c, int length) {
-        StringBuffer s = new StringBuffer(length);
+        final StringBuffer s = new StringBuffer(length);
         s.setLength(length);
         while (length > 0) {
             s.setCharAt(--length, alpha[(byte) (c & 0x3F)]);
@@ -142,7 +142,7 @@ public class kelondroBase64Order extends kelondroAbstractOrder<byte[]> implement
         return new String(s);
     }
 
-    public final void encodeLong(long c, byte[] b, int offset, int length) {
+    public final void encodeLong(long c, final byte[] b, final int offset, int length) {
         assert offset + length <= b.length;
         while (length > 0) {
             b[--length + offset] = (byte) alpha[(byte) (c & 0x3F)];
@@ -157,14 +157,14 @@ public class kelondroBase64Order extends kelondroAbstractOrder<byte[]> implement
         return c;
     }
 
-    public final long decodeLong(byte[] s, int offset, int length) {
+    public final long decodeLong(final byte[] s, final int offset, int length) {
         while ((length > 0) && (s[offset + length - 1] == '=')) length--;
         long c = 0;
         for (int i = 0; i < length; i++) c = (c << 6) | ahpla[s[offset + i]];
         return c;
     }
 
-    public static long max(int len) {
+    public static long max(final int len) {
         // computes the maximum number that can be coded with a base64-encoded
         // String of base len
         long c = 0;
@@ -172,10 +172,10 @@ public class kelondroBase64Order extends kelondroAbstractOrder<byte[]> implement
         return c;
     }
 
-    public final String encodeString(String in) {
+    public final String encodeString(final String in) {
         try {
             return encode(in.getBytes("UTF-8"));
-        } catch (UnsupportedEncodingException e) {
+        } catch (final UnsupportedEncodingException e) {
             return "";
         }
     }
@@ -183,7 +183,7 @@ public class kelondroBase64Order extends kelondroAbstractOrder<byte[]> implement
     // we will use this encoding to encode strings with 2^8 values to
     // b64-Strings
     // we will do that by grouping each three input bytes to four output bytes.
-    public final String encode(byte[] in) {
+    public final String encode(final byte[] in) {
         if (in.length == 0) return "";
         StringBuffer out = new StringBuffer(in.length / 3 * 4 + 3);
         int pos = 0;
@@ -200,23 +200,23 @@ public class kelondroBase64Order extends kelondroAbstractOrder<byte[]> implement
         return new String(out);
     }
 
-    public final String decodeString(String in, String info) {
+    public final String decodeString(final String in, final String info) {
         try {
             //return new String(decode(in), "ISO-8859-1");
             return new String(decode(in, info), "UTF-8");
-        } catch (java.io.UnsupportedEncodingException e) {
+        } catch (final java.io.UnsupportedEncodingException e) {
             System.out.println("internal error in base64: " + e.getMessage());
             return null;
         }
     }
 
-    public final byte[] decode(String in, String info) {
+    public final byte[] decode(String in, final String info) {
         if ((in == null) || (in.length() == 0)) return new byte[0];
         try {
             int posIn = 0;
             int posOut = 0;
             if (rfc1113compliant) while (in.charAt(in.length() - 1) == '=') in = in.substring(0, in.length() - 1);
-            byte[] out = new byte[in.length() / 4 * 3 + (((in.length() % 4) == 0) ? 0 : in.length() % 4 - 1)];
+            final byte[] out = new byte[in.length() / 4 * 3 + (((in.length() % 4) == 0) ? 0 : in.length() % 4 - 1)];
             long l;
             while (posIn + 3 < in.length()) {
                 l = decodeLong(in.substring(posIn, posIn + 4));
@@ -245,7 +245,7 @@ public class kelondroBase64Order extends kelondroAbstractOrder<byte[]> implement
                 }
             }
             return out;
-        } catch (ArrayIndexOutOfBoundsException e) {
+        } catch (final ArrayIndexOutOfBoundsException e) {
             // maybe the input was not base64
             // throw new RuntimeException("input probably not base64");
             if (this.log.isFine()) this.log.logFine("wrong string receive: " + in + ", call: " + info);
@@ -253,7 +253,7 @@ public class kelondroBase64Order extends kelondroAbstractOrder<byte[]> implement
         }
     }
 
-    private final long cardinalI(byte[] key) {
+    private final long cardinalI(final byte[] key) {
         // returns a cardinal number in the range of 0 .. Long.MAX_VALUE
         long c = 0;
         int p = 0;
@@ -263,36 +263,36 @@ public class kelondroBase64Order extends kelondroAbstractOrder<byte[]> implement
         return c;
     }
 
-    public final long cardinal(byte[] key) {
+    public final long cardinal(final byte[] key) {
         if (this.zero == null) return cardinalI(key);
-        long zeroCardinal = cardinalI(this.zero);
-        long keyCardinal = cardinalI(key);
+        final long zeroCardinal = cardinalI(this.zero);
+        final long keyCardinal = cardinalI(key);
         if (keyCardinal > zeroCardinal) return keyCardinal - zeroCardinal;
         return Long.MAX_VALUE - keyCardinal + zeroCardinal;
     }
     
-    private static final int sig(int x) {
+    private static final int sig(final int x) {
         return (x > 0) ? 1 : (x < 0) ? -1 : 0;
     }
     
-    public final int compare(byte[] a, byte[] b) {
+    public final int compare(final byte[] a, final byte[] b) {
         return (asc) ? compare0(a, 0, a.length, b, 0, b.length) : compare0(b, 0, b.length, a, 0, a.length);
     }
 
-    public final int compare(byte[] a, int aoffset, int alength, byte[] b, int boffset, int blength) {
+    public final int compare(final byte[] a, final int aoffset, final int alength, final byte[] b, final int boffset, final int blength) {
         return (asc) ? compare0(a, aoffset, alength, b, boffset, blength) : compare0(b, boffset, blength, a, aoffset, alength);
     }
     
-    public final int compare0(byte[] a, int aoffset, int alength, byte[] b, int boffset, int blength) {
+    public final int compare0(final byte[] a, final int aoffset, final int alength, final byte[] b, final int boffset, final int blength) {
         if (zero == null) return compares(a, aoffset, alength, b, boffset, blength);
         // we have an artificial start point. check all combinations
-        int az = compares(a, aoffset, alength, zero, 0, Math.min(alength, zero.length)); // -1 if a < z; 0 if a == z; 1 if a > z
-        int bz = compares(b, boffset, blength, zero, 0, Math.min(blength, zero.length)); // -1 if b < z; 0 if b == z; 1 if b > z
+        final int az = compares(a, aoffset, alength, zero, 0, Math.min(alength, zero.length)); // -1 if a < z; 0 if a == z; 1 if a > z
+        final int bz = compares(b, boffset, blength, zero, 0, Math.min(blength, zero.length)); // -1 if b < z; 0 if b == z; 1 if b > z
         if (az == bz) return compares(a, aoffset, alength, b, boffset, blength);
         return sig(az - bz);
     }
     
-    public final int compares(byte[] a, int aoffset, int alength, byte[] b, int boffset, int blength) {
+    public final int compares(final byte[] a, final int aoffset, final int alength, final byte[] b, final int boffset, final int blength) {
         assert (aoffset + alength <= a.length) : "a.length = " + a.length + ", aoffset = " + aoffset + ", alength = " + alength;
         assert (boffset + blength <= b.length) : "b.length = " + b.length + ", boffset = " + boffset + ", blength = " + blength;
         assert (ahpla.length == 128);
@@ -325,7 +325,7 @@ public class kelondroBase64Order extends kelondroAbstractOrder<byte[]> implement
         return 0;
     }
     
-    public final int comparePivot(byte[] compiledPivot, byte[] b, int boffset, int blength) {
+    public final int comparePivot(final byte[] compiledPivot, final byte[] b, final int boffset, final int blength) {
         assert zero == null;
         assert asc;
         assert (boffset + blength <= b.length) : "b.length = " + b.length + ", boffset = " + boffset + ", blength = " + blength;
@@ -358,9 +358,9 @@ public class kelondroBase64Order extends kelondroAbstractOrder<byte[]> implement
         return 0;
     }
     
-    public final byte[] compilePivot(byte[] a, int aoffset, int alength) {
+    public final byte[] compilePivot(final byte[] a, final int aoffset, final int alength) {
         assert (aoffset + alength <= a.length) : "a.length = " + a.length + ", aoffset = " + aoffset + ", alength = " + alength;
-        byte[] cp = new byte[Math.min(alength, a.length - aoffset)];
+        final byte[] cp = new byte[Math.min(alength, a.length - aoffset)];
         byte aa;
         for (int i = cp.length - 1; i >= 0; i--) {
             aa = a[aoffset + i];
@@ -372,8 +372,8 @@ public class kelondroBase64Order extends kelondroAbstractOrder<byte[]> implement
         return cp;
     }
 
-    public static void main(String[] s) {
-        kelondroBase64Order b64 = new kelondroBase64Order(true, true);
+    public static void main(final String[] s) {
+        final kelondroBase64Order b64 = new kelondroBase64Order(true, true);
         if (s.length == 0) {
             System.out.println("usage: -[ec|dc|es|ds|s2m] <arg>");
             System.exit(0);

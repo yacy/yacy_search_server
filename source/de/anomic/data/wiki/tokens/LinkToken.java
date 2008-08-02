@@ -81,17 +81,17 @@ public class LinkToken extends AbstractToken {
     private final plasmaSwitchboard sb;
 	private int patternNr = 0;
 	
-	public LinkToken(String localhost, String wikiPath, plasmaSwitchboard sb) {
+	public LinkToken(final String localhost, final String wikiPath, final plasmaSwitchboard sb) {
 		this.localhost = localhost;
 		this.wikiPath = wikiPath;
         this.sb = sb;
 	}
 	
 	protected void parse() throws wikiParserException {
-		StringBuffer sb = new StringBuffer();
+		final StringBuffer sb = new StringBuffer();
         if (this.patternNr < 0 || this.patternNr >= patterns.length)
             throw new wikiParserException("patternNr was not set correctly: " + this.patternNr);
-		Matcher m = patterns[this.patternNr].matcher(this.text);
+		final Matcher m = patterns[this.patternNr].matcher(this.text);
         if (!m.find())
             throw new wikiParserException("Didn't find match for: (" + this.patternNr + ") " + this.text);
         
@@ -104,7 +104,7 @@ public class LinkToken extends AbstractToken {
 				break;
                 
             case BKM:
-                Link[] links = getLinksFromBookmarkTag(m.group(2));
+                final Link[] links = getLinksFromBookmarkTag(m.group(2));
                 if (links == null) {
                     sb.append("<span class=\"error\">Couldn't find Bookmark-Tag '").append(m.group(2)).append("'.</span>");
                 } else {
@@ -132,7 +132,7 @@ public class LinkToken extends AbstractToken {
 		this.markup = new String(sb);
 	}
     
-    private String formatHref(String link) {
+    private String formatHref(final String link) {
         if (link.indexOf("://") == -1) {        // DATA/HTDOCS-link
             return "http://" + this.localhost + "/share/" + link;
         } else {                                // 'normal' link
@@ -140,17 +140,17 @@ public class LinkToken extends AbstractToken {
         }
     }
     
-    private StringBuffer appendLinks(Link[] links, StringBuffer sb) {
+    private StringBuffer appendLinks(final Link[] links, final StringBuffer sb) {
         for (int i=0; i<links.length; i++)
             sb.append(links[i].toString());
         return sb;
     }
     
-    private Link[] getLinksFromBookmarkTag(String tagName) {
-        Tag tag = this.sb.bookmarksDB.getTag(bookmarksDB.tagHash(tagName));
+    private Link[] getLinksFromBookmarkTag(final String tagName) {
+        final Tag tag = this.sb.bookmarksDB.getTag(bookmarksDB.tagHash(tagName));
         if (tag == null) return null;
-        ArrayList<Link> r = new ArrayList<Link>();
-        Iterator<String> it = tag.getUrlHashes().iterator();
+        final ArrayList<Link> r = new ArrayList<Link>();
+        final Iterator<String> it = tag.getUrlHashes().iterator();
         String hash;
         Bookmark bm;
         while (it.hasNext())
@@ -166,14 +166,14 @@ public class LinkToken extends AbstractToken {
         private final String title;
         private final String desc;
         
-        public Link(String href, String title, String desc) {
+        public Link(final String href, final String title, final String desc) {
             this.href = href;
             this.title = title;
             this.desc = desc;
         }
         
         public String toString() {
-            StringBuffer sb = new StringBuffer();
+            final StringBuffer sb = new StringBuffer();
             sb.append("<a href=\"").append(this.href).append("\"");
             if (this.title != null) sb.append(" title=\"").append(this.title).append("\"");
             sb.append(">");
@@ -186,7 +186,7 @@ public class LinkToken extends AbstractToken {
 	public String[] getBlockElementNames() { return null; }
 	public Pattern[] getRegex() { return patterns; }
 	
-	public boolean setText(String text, int patternNr) {
+	public boolean setText(final String text, final int patternNr) {
 		this.text = text;
 		this.patternNr = patternNr;
 		this.parsed = false;

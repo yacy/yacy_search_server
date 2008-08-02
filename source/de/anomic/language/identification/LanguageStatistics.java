@@ -48,7 +48,7 @@ public class LanguageStatistics {
     /** This map holds the character statistics of the language. */
     private Map<Character, Float> stats = new HashMap<Character, Float>();
 
-    LanguageStatistics(File file) {
+    LanguageStatistics(final File file) {
         loadStatisticsFromFile(file);
     }
 
@@ -105,7 +105,7 @@ public class LanguageStatistics {
         this.stats = statistics;
     }
     
-    public final boolean loadStatisticsFromFile(File file) {
+    public final boolean loadStatisticsFromFile(final File file) {
         boolean ret = true;
         BufferedReader reader = null;
         String line;
@@ -125,16 +125,16 @@ public class LanguageStatistics {
                 langName = langName.substring(0, langName.lastIndexOf("."));
             }
         
-        } catch (FileNotFoundException ex) {
+        } catch (final FileNotFoundException ex) {
             ret = false;
             logger.logWarning("ERROR: file '" + file.getName() + "' not found", ex);
-        } catch (IOException ex) {
+        } catch (final IOException ex) {
             logger.logWarning("ERROR: problems reading file '" + file.getName() + "'", ex);
         } finally {
             try { if(reader != null) {
                 reader.close();
             }
-            } catch (IOException ex) {
+            } catch (final IOException ex) {
                 logger.logWarning("ERROR: IO trouble ", ex);
             }
         }
@@ -146,7 +146,7 @@ public class LanguageStatistics {
      * @param character the character in question
      * @return true if language contains character, else false
      */
-    public boolean contains(Character character) {
+    public boolean contains(final Character character) {
         if (stats.containsKey(character)) {
             return true;
         } else {

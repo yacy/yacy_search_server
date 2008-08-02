@@ -33,11 +33,11 @@ public class kelondroMicroDate {
     private static final long hour = 3600000L;  // milliseconds of a hour
     private static final long day  = 86400000L; // milliseconds of a day
     
-    public static int microDateDays(Date modified) {
+    public static int microDateDays(final Date modified) {
         return microDateDays(modified.getTime());
     }
     
-    public static int microDateDays(long modified) {
+    public static int microDateDays(final long modified) {
         // this calculates a virtual age from a given date
         // the purpose is to have an age in days of a given modified date
         // from a fixed standpoint in the past
@@ -46,23 +46,23 @@ public class kelondroMicroDate {
         return (int) ((modified / day) % 262144L);
     }
         
-    public static String microDateHoursStr(long time) {
+    public static String microDateHoursStr(final long time) {
         return kelondroBase64Order.enhancedCoder.encodeLong(microDateHoursInt(time), 3);
     }
     
-    public static int microDateHoursInt(long time) {
+    public static int microDateHoursInt(final long time) {
         return (int) ((time / hour) % 262144L);
     }
     
-    public static int microDateHoursAge(String mdhs) {
+    public static int microDateHoursAge(final String mdhs) {
         return microDateHoursInt(System.currentTimeMillis()) - (int) kelondroBase64Order.enhancedCoder.decodeLong(mdhs);
     }
     
-    public static long reverseMicroDateDays(long microDateDays) {
+    public static long reverseMicroDateDays(final long microDateDays) {
         return Math.min(System.currentTimeMillis(), microDateDays * day);
     }
     
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         
     }
 }

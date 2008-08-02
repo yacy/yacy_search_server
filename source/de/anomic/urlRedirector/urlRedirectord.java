@@ -23,7 +23,7 @@ public class urlRedirectord implements serverHandler {
     
     private serverCore.Session session;
     private static plasmaSwitchboard sb = null;
-    private serverLog theLogger = new serverLog("URL-REDIRECTOR");
+    private final serverLog theLogger = new serverLog("URL-REDIRECTOR");
     private static CrawlProfile.entry profile = null;
     private String nextURL;
     
@@ -76,7 +76,7 @@ public class urlRedirectord implements serverHandler {
         return this.nextURL;
     }
     
-    public void initSession(Session theSession){
+    public void initSession(final Session theSession){
         // getting current session
         this.session = theSession;   
     }
@@ -85,7 +85,7 @@ public class urlRedirectord implements serverHandler {
         return null;
     }
     
-    public String error(Throwable e) {
+    public String error(final Throwable e) {
         return null;
     }
     
@@ -97,15 +97,15 @@ public class urlRedirectord implements serverHandler {
         this.session = null;
     }
     
-    public Boolean EMPTY(String arg) throws IOException {
+    public Boolean EMPTY(final String arg) throws IOException {
         return null;
     }
     
-    public Boolean UNKNOWN(String requestLine) throws IOException {
+    public Boolean UNKNOWN(final String requestLine) throws IOException {
         return null;
     }
     
-    public Boolean REDIRECTOR(String requestLine) {
+    public Boolean REDIRECTOR(final String requestLine) {
         try {
             
             boolean authenticated = false;
@@ -116,8 +116,8 @@ public class urlRedirectord implements serverHandler {
             this.session.controlSocket.setSoTimeout(0);                 
             
             String line = null;
-            BufferedReader inputReader = new BufferedReader(new InputStreamReader(this.session.in));
-            PrintWriter outputWriter = new PrintWriter(this.session.out);
+            final BufferedReader inputReader = new BufferedReader(new InputStreamReader(this.session.in));
+            final PrintWriter outputWriter = new PrintWriter(this.session.out);
             
             while ((line = inputReader.readLine()) != null) {
                 if (line.equals("EXIT")) {
@@ -130,7 +130,7 @@ public class urlRedirectord implements serverHandler {
                     userName = line.substring(line.indexOf(" ")).trim();
                 } else if (line.startsWith("PWD")) {
                     if (userName != null) {
-                        userDB.Entry userEntry = sb.userDB.getEntry(userName);
+                        final userDB.Entry userEntry = sb.userDB.getEntry(userName);
                         if (userEntry != null) {
                             md5Pwd = line.substring(line.indexOf(" ")).trim();
                             if (userEntry.getMD5EncodedUserPwd().equals(md5Pwd)) {
@@ -146,18 +146,18 @@ public class urlRedirectord implements serverHandler {
                     outputWriter.print("\r\n");
                     outputWriter.flush();
                 } else if (line.startsWith("DEPTH")) {
-                    int pos = line.indexOf(" ");
+                    final int pos = line.indexOf(" ");
                     if (pos != -1) {
-                        String newDepth = line.substring(pos).trim();
+                        final String newDepth = line.substring(pos).trim();
                         this.theLogger.logFine("Changing crawling depth to '" + newDepth + "'.");
                         sb.webIndex.profilesActiveCrawls.changeEntry(profile, "generalDepth",newDepth);
                     }
                     outputWriter.print("\r\n");
                     outputWriter.flush();
                 } else if (line.startsWith("CRAWLDYNAMIC")) {
-                    int pos = line.indexOf(" ");
+                    final int pos = line.indexOf(" ");
                     if (pos != -1) {
-                        String newValue = line.substring(pos).trim();
+                        final String newValue = line.substring(pos).trim();
                         this.theLogger.logFine("Changing crawl dynamic setting to '" + newValue + "'");
                         sb.webIndex.profilesActiveCrawls.changeEntry(profile, "crawlingQ",newValue);
                     }
@@ -168,7 +168,7 @@ public class urlRedirectord implements serverHandler {
                         return Boolean.FALSE;
                     }
                     
-                    int pos = line.indexOf(" ");
+                    final int pos = line.indexOf(" ");
                     this.nextURL = (pos != -1) ? line.substring(0,pos):line; 
                     
                     this.theLogger.logFine("Receiving request " + line);
@@ -178,10 +178,10 @@ public class urlRedirectord implements serverHandler {
                     String reasonString = null;
                     try {
                         // generating URL Object
-                        yacyURL reqURL = new yacyURL(this.nextURL, null);
+                        final yacyURL reqURL = new yacyURL(this.nextURL, null);
                         
                         // getting URL mimeType
-                        httpHeader header = HttpClient.whead(reqURL.toString()); 
+                        final httpHeader header = HttpClient.whead(reqURL.toString()); 
                         
                         if (plasmaParser.supportedContent(
                                 plasmaParser.PARSER_MODE_URLREDIRECTOR,
@@ -189,7 +189,7 @@ public class urlRedirectord implements serverHandler {
                                 header.mime())
                         ) {
                             // first delete old entry, if exists
-                            String urlhash = reqURL.hash();
+                            final String urlhash = reqURL.hash();
                             sb.webIndex.removeURL(urlhash);
                             sb.crawlQueues.noticeURL.removeByURLHash(urlhash);
                             sb.crawlQueues.errorURL.remove(urlhash);                            
@@ -207,7 +207,7 @@ public class urlRedirectord implements serverHandler {
                         } else {
                             reasonString = "Unsupporte file extension";
                         } 
-                    } catch (MalformedURLException badUrlEx) {
+                    } catch (final MalformedURLException badUrlEx) {
                         reasonString = "Malformed URL";
                     }
                         
@@ -222,7 +222,7 @@ public class urlRedirectord implements serverHandler {
             
             // Terminating connection
             return serverCore.TERMINATE_CONNECTION;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             this.theLogger.logSevere("Unexpected Error: " + e.getMessage(),e);
             return serverCore.TERMINATE_CONNECTION;
         }

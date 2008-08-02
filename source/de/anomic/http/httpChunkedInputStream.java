@@ -56,7 +56,7 @@ public final class httpChunkedInputStream extends InputStream {
     private boolean isClosed = false;
     
     
-    public httpChunkedInputStream(InputStream in) {
+    public httpChunkedInputStream(final InputStream in) {
         
         if (in == null)throw new IllegalArgumentException("InputStream must not be null");
         
@@ -78,7 +78,7 @@ public final class httpChunkedInputStream extends InputStream {
     }
     
     
-    public int read (byte[] b, int off, int len) throws IOException {
+    public int read (final byte[] b, final int off, int len) throws IOException {
         if (this.isClosed) throw new IOException("Inputstream already closed.");
         if (this.isEOF) return -1;
         
@@ -87,12 +87,12 @@ public final class httpChunkedInputStream extends InputStream {
             if (this.isEOF) return -1;
         }
         len = Math.min(len, this.currChunkSize - this.currPos);
-        int count = this.inputStream.read(b, off, len);
+        final int count = this.inputStream.read(b, off, len);
         this.currPos += count;
         return count;
     }
     
-    public int read (byte[] b) throws IOException {
+    public int read (final byte[] b) throws IOException {
         return read(b, 0, b.length);
     }
     
@@ -101,8 +101,8 @@ public final class httpChunkedInputStream extends InputStream {
      * @throws IOException If an IO error occurs.
      */
     private void readCRLF() throws IOException {
-        int cr = this.inputStream.read();
-        int lf = this.inputStream.read();
+        final int cr = this.inputStream.read();
+        final int lf = this.inputStream.read();
         if ((cr != CR) || (lf != LF)) { 
             throw new IOException("Malformed chunk. CRLF expected but '" + cr + lf + "' found");
         }
@@ -138,12 +138,12 @@ public final class httpChunkedInputStream extends InputStream {
                 if (bout.length() <= 2) break;
             } while(true);
             
-            ByteArrayInputStream bin = new ByteArrayInputStream(bout.getBytes());
+            final ByteArrayInputStream bin = new ByteArrayInputStream(bout.getBytes());
             reader = new BufferedReader(new InputStreamReader(bin));
             this.httpTrailer = httpHeader.readHttpHeader(reader);
         } finally {
-            if (reader != null) try {reader.close();}catch(Exception e){}
-            if (bout != null) try {bout.close();}catch(Exception e){}
+            if (reader != null) try {reader.close();}catch(final Exception e){}
+            if (bout != null) try {bout.close();}catch(final Exception e){}
         }
     }
     
@@ -154,10 +154,10 @@ public final class httpChunkedInputStream extends InputStream {
     private static int readChunkFromStream(final InputStream in) 
     throws IOException {           
         
-        serverByteBuffer baos = new serverByteBuffer();
+        final serverByteBuffer baos = new serverByteBuffer();
         int state = READ_CHUNK_STATE_NORMAL; 
         while (state != READ_CHUNK_STATE_FINISHED) {
-            int b = in.read();
+            final int b = in.read();
             if (b == -1) throw new IOException("Malformed chunk. Unexpected end");
             
             switch (state) {
@@ -202,7 +202,7 @@ public final class httpChunkedInputStream extends InputStream {
         int result;
         try {
             result = Integer.parseInt(baos.toString().trim(), 16);
-        } catch (NumberFormatException e) {
+        } catch (final NumberFormatException e) {
             throw new IOException ("Malformed chunk. Bad chunk size: " + baos.toString());
         }
         return result;
@@ -222,8 +222,8 @@ public final class httpChunkedInputStream extends InputStream {
     }
     
     
-    static void exhaustInputStream(InputStream inStream) throws IOException {
-        byte buffer[] = new byte[1024];
+    static void exhaustInputStream(final InputStream inStream) throws IOException {
+        final byte buffer[] = new byte[1024];
         while (inStream.read(buffer) >= 0) {
         }
     }

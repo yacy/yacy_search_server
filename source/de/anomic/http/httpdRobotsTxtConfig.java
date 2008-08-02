@@ -63,7 +63,7 @@ public final class httpdRobotsTxtConfig {
     
     public httpdRobotsTxtConfig() {  }
     
-    public httpdRobotsTxtConfig(String[] active) {
+    public httpdRobotsTxtConfig(final String[] active) {
         if (active == null) return;
         for (int i=0; i<active.length; i++) {
             if (active[i] == null) continue;
@@ -83,15 +83,15 @@ public final class httpdRobotsTxtConfig {
         }
     }
     
-    public static httpdRobotsTxtConfig init(serverSwitch<?> env) {
-        String cfg = env.getConfig(plasmaSwitchboard.ROBOTS_TXT, plasmaSwitchboard.ROBOTS_TXT_DEFAULT);
+    public static httpdRobotsTxtConfig init(final serverSwitch<?> env) {
+        final String cfg = env.getConfig(plasmaSwitchboard.ROBOTS_TXT, plasmaSwitchboard.ROBOTS_TXT_DEFAULT);
         if (cfg == null) return new httpdRobotsTxtConfig();
         return new httpdRobotsTxtConfig(cfg.split(","));
     }
     
     public String toString() {
         if (this.allDisallowed) return ALL;
-        StringBuffer sb = new StringBuffer();
+        final StringBuffer sb = new StringBuffer();
         if (this.blogDisallowed) sb.append(BLOG).append(",");
         if (this.bookmarksDisallowed) sb.append(BOOKMARKS).append(",");
         if (this.dirsDisallowed) sb.append(DIRS).append(",");
@@ -111,7 +111,7 @@ public final class httpdRobotsTxtConfig {
         return allDisallowed;
     }
 
-    public void setAllDisallowed(boolean allDisallowed) {
+    public void setAllDisallowed(final boolean allDisallowed) {
         this.allDisallowed = allDisallowed;
     }
 
@@ -119,7 +119,7 @@ public final class httpdRobotsTxtConfig {
         return lockedDisallowed || this.allDisallowed;
     }
 
-    public void setLockedDisallowed(boolean lockedDisallowed) {
+    public void setLockedDisallowed(final boolean lockedDisallowed) {
         this.lockedDisallowed = lockedDisallowed;
     }
 
@@ -127,7 +127,7 @@ public final class httpdRobotsTxtConfig {
         return dirsDisallowed || this.allDisallowed;
     }
 
-    public void setDirsDisallowed(boolean dirsDisallowed) {
+    public void setDirsDisallowed(final boolean dirsDisallowed) {
         this.dirsDisallowed = dirsDisallowed;
     }
 
@@ -135,7 +135,7 @@ public final class httpdRobotsTxtConfig {
         return blogDisallowed || this.allDisallowed;
     }
 
-    public void setBlogDisallowed(boolean blogDisallowed) {
+    public void setBlogDisallowed(final boolean blogDisallowed) {
         this.blogDisallowed = blogDisallowed;
     }
 
@@ -143,7 +143,7 @@ public final class httpdRobotsTxtConfig {
         return bookmarksDisallowed || this.allDisallowed;
     }
 
-    public void setBookmarksDisallowed(boolean bookmarksDisallowed) {
+    public void setBookmarksDisallowed(final boolean bookmarksDisallowed) {
         this.bookmarksDisallowed = bookmarksDisallowed;
     }
 
@@ -151,7 +151,7 @@ public final class httpdRobotsTxtConfig {
         return fileshareDisallowed || this.allDisallowed;
     }
 
-    public void setFileshareDisallowed(boolean fileshareDisallowed) {
+    public void setFileshareDisallowed(final boolean fileshareDisallowed) {
         this.fileshareDisallowed = fileshareDisallowed;
     }
 
@@ -159,7 +159,7 @@ public final class httpdRobotsTxtConfig {
         return homepageDisallowed || this.allDisallowed;
     }
 
-    public void setHomepageDisallowed(boolean homepageDisallowed) {
+    public void setHomepageDisallowed(final boolean homepageDisallowed) {
         this.homepageDisallowed = homepageDisallowed;
     }
 
@@ -167,7 +167,7 @@ public final class httpdRobotsTxtConfig {
         return networkDisallowed || this.allDisallowed;
     }
 
-    public void setNetworkDisallowed(boolean networkDisallowed) {
+    public void setNetworkDisallowed(final boolean networkDisallowed) {
         this.networkDisallowed = networkDisallowed;
     }
 
@@ -175,7 +175,7 @@ public final class httpdRobotsTxtConfig {
         return newsDisallowed || this.allDisallowed;
     }
 
-    public void setNewsDisallowed(boolean newsDisallowed) {
+    public void setNewsDisallowed(final boolean newsDisallowed) {
         this.newsDisallowed = newsDisallowed;
     }
 
@@ -183,7 +183,7 @@ public final class httpdRobotsTxtConfig {
         return statusDisallowed || this.allDisallowed;
     }
 
-    public void setStatusDisallowed(boolean statusDisallowed) {
+    public void setStatusDisallowed(final boolean statusDisallowed) {
         this.statusDisallowed = statusDisallowed;
     }
 
@@ -191,7 +191,7 @@ public final class httpdRobotsTxtConfig {
         return surftipsDisallowed || this.allDisallowed;
     }
 
-    public void setSurftipsDisallowed(boolean surftipsDisallowed) {
+    public void setSurftipsDisallowed(final boolean surftipsDisallowed) {
         this.surftipsDisallowed = surftipsDisallowed;
     }
 
@@ -199,7 +199,7 @@ public final class httpdRobotsTxtConfig {
         return wikiDisallowed || this.allDisallowed;
     }
 
-    public void setWikiDisallowed(boolean wikiDisallowed) {
+    public void setWikiDisallowed(final boolean wikiDisallowed) {
         this.wikiDisallowed = wikiDisallowed;
     }
     
@@ -207,7 +207,7 @@ public final class httpdRobotsTxtConfig {
         return profileDisallowed || this.allDisallowed;
     }
     
-    public void setProfileDisallowed(boolean profileDisallowed) {
+    public void setProfileDisallowed(final boolean profileDisallowed) {
         this.profileDisallowed = profileDisallowed;
     }
 }

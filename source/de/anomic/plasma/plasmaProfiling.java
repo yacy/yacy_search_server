@@ -38,8 +38,8 @@ public class plasmaProfiling {
     
     private static ymageChart bufferChart = null;
     
-    public static long maxPayload(String eventname, long min) {
-    	Iterator<Event> i = serverProfiling.history(eventname);
+    public static long maxPayload(final String eventname, final long min) {
+    	final Iterator<Event> i = serverProfiling.history(eventname);
         serverProfiling.Event event;
         long max = min, l;
         while (i.hasNext()) {
@@ -50,22 +50,22 @@ public class plasmaProfiling {
         return max;
     }
     
-    public static ymageMatrix performanceGraph(int width, int height, String subline) {        
+    public static ymageMatrix performanceGraph(final int width, final int height, final String subline) {        
         // find maximum values for automatic graph dimension adoption
-        int maxppm = (int) maxPayload("ppm", 25);
-        long maxbytes = maxPayload("memory", 110 * 1024 * 1024);
+        final int maxppm = (int) maxPayload("ppm", 25);
+        final long maxbytes = maxPayload("memory", 110 * 1024 * 1024);
         
         // declare graph and set dimensions
-        int leftborder = 30;
-        int rightborder = 30;
-        int topborder = 20;
-        int bottomborder = 20;
-        int leftscale = 50;
-        int rightscale = 100;
-        int bottomscale = 60;
-        int vspace = height - topborder - bottomborder;
-        int hspace = width - leftborder - rightborder;
-        int maxtime = 600;
+        final int leftborder = 30;
+        final int rightborder = 30;
+        final int topborder = 20;
+        final int bottomborder = 20;
+        final int leftscale = 50;
+        final int rightscale = 100;
+        final int bottomscale = 60;
+        final int vspace = height - topborder - bottomborder;
+        final int hspace = width - leftborder - rightborder;
+        final int maxtime = 600;
         ymageChart chart = new ymageChart(width, height, "FFFFFF", "000000", "AAAAAA", leftborder, rightborder, topborder, bottomborder, "PEER PERFORMANCE GRAPH: PAGES/MINUTE and USED MEMORY", subline);
         chart.declareDimension(ymageChart.DIMENSION_BOTTOM, bottomscale, hspace / (maxtime / bottomscale), -maxtime, "000000", "CCCCCC", "TIME/SECONDS");
         chart.declareDimension(ymageChart.DIMENSION_LEFT, leftscale, vspace * leftscale / maxppm, 0, "008800", null , "PPM [PAGES/MINUTE]");
@@ -73,7 +73,9 @@ public class plasmaProfiling {
         
         // draw ppm
         Iterator<Event> i = serverProfiling.history("ppm");
-        long time, now = System.currentTimeMillis(), bytes;
+        long time;
+		final long now = System.currentTimeMillis();
+		long bytes;
         int x0 = 1, x1, y0 = 0, y1, ppm;
         serverProfiling.Event event;
         try {
@@ -106,7 +108,7 @@ public class plasmaProfiling {
                 x0 = x1; y0 = y1;
             }
             bufferChart = chart;
-        } catch (ConcurrentModificationException cme) {
+        } catch (final ConcurrentModificationException cme) {
             chart = bufferChart;
         }
         
@@ -118,7 +120,7 @@ public class plasmaProfiling {
     	public long duration;
     	public int resultCount;
     	
-    	public searchEvent(String queryID, String processName, int resultCount, long duration) {
+    	public searchEvent(final String queryID, final String processName, final int resultCount, final long duration) {
     		this.queryID = queryID;
     		this.processName = processName;
     		this.resultCount = resultCount;

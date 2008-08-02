@@ -41,18 +41,18 @@ import de.anomic.server.serverSwitch;
 
 public class ConfigAccounts_p {
     
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
-        serverObjects prop = new serverObjects();
-        plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+        final serverObjects prop = new serverObjects();
+        final plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
         userDB.Entry entry=null;
 
         // admin password
         boolean localhostAccess = sb.getConfigBool("adminAccountForLocalhost", false);
         if ((post != null) && (post.containsKey("setAdmin"))) {
             localhostAccess = post.get("access", "").equals("localhost");
-            String user   = (post == null) ? "" : (String) post.get("adminuser", "");
-            String pw1    = (post == null) ? "" : (String) post.get("adminpw1", "");
-            String pw2    = (post == null) ? "" : (String) post.get("adminpw2", "");
+            final String user   = (post == null) ? "" : (String) post.get("adminuser", "");
+            final String pw1    = (post == null) ? "" : (String) post.get("adminpw1", "");
+            final String pw2    = (post == null) ? "" : (String) post.get("adminpw2", "");
 
             // may be overwritten if new password is given
             if ((user.length() > 0) && (pw1.length() > 3) && (pw1.equals(pw2))) {
@@ -103,8 +103,8 @@ public class ConfigAccounts_p {
         prop.put("address", "");
         prop.put("timelimit", "");
         prop.put("timeused", "");
-        String[] rightNames=userDB.Entry.RIGHT_NAMES.split(",");
-        String[] rights=userDB.Entry.RIGHT_TYPES.split(",");
+        final String[] rightNames=userDB.Entry.RIGHT_NAMES.split(",");
+        final String[] rights=userDB.Entry.RIGHT_TYPES.split(",");
         int i;
         for(i=0;i<rights.length;i++){
         		prop.put("rights_"+i+"_name", rights[i]);
@@ -152,23 +152,23 @@ public class ConfigAccounts_p {
             prop.put("error", "0");
 
             
-            String username=post.get("username");
-            String pw1=post.get("password");
-            String pw2=post.get("password2");
+            final String username=post.get("username");
+            final String pw1=post.get("password");
+            final String pw2=post.get("password2");
             if(! pw1.equals(pw2)){
                 prop.put("error", "2"); //PW does not match
                 return prop;
             }
-            String firstName=post.get("firstname");
-            String lastName=post.get("lastname");
-            String address=post.get("address");
-            String timeLimit=post.get("timelimit");
-            String timeUsed=post.get("timeused");
-            HashMap<String, String> rightsSet=new HashMap<String, String>();
+            final String firstName=post.get("firstname");
+            final String lastName=post.get("lastname");
+            final String address=post.get("address");
+            final String timeLimit=post.get("timelimit");
+            final String timeUsed=post.get("timeused");
+            final HashMap<String, String> rightsSet=new HashMap<String, String>();
             for(i=0;i<rights.length;i++){
         	    		rightsSet.put(rights[i], post.containsKey(rights[i])&&(post.get(rights[i])).equals("on") ? "true" : "false");
             }
-            HashMap<String, String> mem=new HashMap<String, String>();
+            final HashMap<String, String> mem=new HashMap<String, String>();
             if( post.get("current_user").equals("newuser")){ //new user
                 
 				if(!pw1.equals("")){ //change only if set
@@ -187,7 +187,7 @@ public class ConfigAccounts_p {
                     sb.userDB.addEntry(entry);
                     prop.putHTML("text_username", username);
                     prop.put("text", "1");
-                }catch(IllegalArgumentException e){
+                }catch(final IllegalArgumentException e){
                     prop.put("error", "3");
                 }
                 
@@ -207,7 +207,7 @@ public class ConfigAccounts_p {
 						entry.setProperty(userDB.Entry.TIME_USED, timeUsed);
 						for(i=0;i<rights.length;i++)
 							entry.setProperty(rights[i], rightsSet.get(rights[i]));
-		            }catch (IOException e){
+		            }catch (final IOException e){
 					}
                 }else{
 					prop.put("error", "1");
@@ -219,7 +219,7 @@ public class ConfigAccounts_p {
         }
 		
 		//Generate Userlist
-        Iterator<userDB.Entry> it = sb.userDB.iterator(true);
+        final Iterator<userDB.Entry> it = sb.userDB.iterator(true);
         int numUsers=0;
         while(it.hasNext()){
             entry = it.next();

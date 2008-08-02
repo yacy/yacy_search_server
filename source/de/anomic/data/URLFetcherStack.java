@@ -51,7 +51,7 @@ public class URLFetcherStack {
     private int popped = 0;
     private int pushed = 0;
     
-    public URLFetcherStack(File path) throws IOException {
+    public URLFetcherStack(final File path) throws IOException {
         this.db = new kelondroStack(new File(path, DBFILE), rowdef);
         this.log = new serverLog("URLFETCHERSTACK");
     }
@@ -64,14 +64,14 @@ public class URLFetcherStack {
         this.db.close();
     }
     
-    public boolean push(yacyURL url) {
+    public boolean push(final yacyURL url) {
         try {
             this.db.push(this.db.row().newEntry(
                     new byte[][] { url.toNormalform(true, true).getBytes() }
             ));
             this.pushed++;
             return true;
-        } catch (IOException e) {
+        } catch (final IOException e) {
             this.log.logSevere("error storing entry", e);
             return false;
         }
@@ -79,26 +79,26 @@ public class URLFetcherStack {
     
     public yacyURL pop() {
         try {
-            kelondroRow.Entry r = this.db.pop();
+            final kelondroRow.Entry r = this.db.pop();
             if (r == null) return null;
             final String url = r.getColString(0, null);
             try {
                 this.popped++;
                 return new yacyURL(url, null);
-            } catch (MalformedURLException e) {
+            } catch (final MalformedURLException e) {
                 this.log.logSevere("found invalid URL-entry: " + url);
                 return null;
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             this.log.logSevere("error retrieving entry", e);
             return null;
         }
     }
     
-    public String[] top(int count) {
+    public String[] top(final int count) {
         try {
             final ArrayList<String> ar = new ArrayList<String>();
-            Iterator<EntryIndex> it = db.contentRows(500);
+            final Iterator<EntryIndex> it = db.contentRows(500);
             kelondroRow.EntryIndex ei;
             for (int i=0; i<count && it.hasNext(); i++) {
                 ei = it.next();
@@ -106,7 +106,7 @@ public class URLFetcherStack {
                 ar.add(ei.getColString(0, null));
             }
             return ar.toArray(new String[ar.size()]);
-        } catch (kelondroException e) {
+        } catch (final kelondroException e) {
             this.log.logSevere("error retrieving entry", e);
             return null;
         }

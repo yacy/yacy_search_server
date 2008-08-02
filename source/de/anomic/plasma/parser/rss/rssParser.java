@@ -73,41 +73,41 @@ public class rssParser extends AbstractParser implements Parser {
         this.parserName = "Rich Site Summary/Atom Feed Parser"; 
 	}
 
-	public plasmaParserDocument parse(yacyURL location, String mimeType, String charset, InputStream source) throws ParserException, InterruptedException {
+	public plasmaParserDocument parse(final yacyURL location, final String mimeType, final String charset, final InputStream source) throws ParserException, InterruptedException {
 
         try {
-            LinkedList<String> feedSections = new LinkedList<String>();
-            HashMap<yacyURL, String> anchors = new HashMap<yacyURL, String>();
-            HashMap<String, htmlFilterImageEntry> images  = new HashMap<String, htmlFilterImageEntry>();
-            serverByteBuffer text = new serverByteBuffer();
-            serverCharBuffer authors = new serverCharBuffer();
+            final LinkedList<String> feedSections = new LinkedList<String>();
+            final HashMap<yacyURL, String> anchors = new HashMap<yacyURL, String>();
+            final HashMap<String, htmlFilterImageEntry> images  = new HashMap<String, htmlFilterImageEntry>();
+            final serverByteBuffer text = new serverByteBuffer();
+            final serverCharBuffer authors = new serverCharBuffer();
             
-            RSSFeed feed = new RSSReader(source).getFeed();
+            final RSSFeed feed = new RSSReader(source).getFeed();
             
             // getting the rss feed title and description
-            String feedTitle = feed.getChannel().getTitle();
+            final String feedTitle = feed.getChannel().getTitle();
 
             // getting feed creator
-			String feedCreator = feed.getChannel().getAuthor();
+			final String feedCreator = feed.getChannel().getAuthor();
 			if (feedCreator != null && feedCreator.length() > 0) authors.append(",").append(feedCreator);            
             
             // getting the feed description
-            String feedDescription = feed.getChannel().getDescription();
+            final String feedDescription = feed.getChannel().getDescription();
             
             if (feed.getImage() != null) {
-                yacyURL imgURL = new yacyURL(feed.getImage(), null);
+                final yacyURL imgURL = new yacyURL(feed.getImage(), null);
                 images.put(imgURL.hash(), new htmlFilterImageEntry(imgURL, feedTitle, -1, -1));
             }            
             
             // loop through the feed items
-            for (RSSMessage item: feed) {
+            for (final RSSMessage item: feed) {
                     // check for interruption
                     checkInterruption();
                     
-        			String itemTitle = item.getTitle();
-                    yacyURL    itemURL   = new yacyURL(item.getLink(), null);
-        			String itemDescr = item.getDescription();
-        			String itemCreator = item.getCreator();
+        			final String itemTitle = item.getTitle();
+                    final yacyURL    itemURL   = new yacyURL(item.getLink(), null);
+        			final String itemDescr = item.getDescription();
+        			final String itemCreator = item.getCreator();
         			if (itemCreator != null && itemCreator.length() > 0) authors.append(",").append(itemCreator);
                     
                     feedSections.add(itemTitle);
@@ -116,29 +116,29 @@ public class rssParser extends AbstractParser implements Parser {
                 	if ((text.length() != 0) && (text.byteAt(text.length() - 1) != 32)) text.append((byte) 32);
                 	text.append(new serverCharBuffer(htmlFilterAbstractScraper.stripAll(new serverCharBuffer(itemDescr.toCharArray()))).trim().toString()).append(' ');
                     
-                    String itemContent = item.getDescription();
+                    final String itemContent = item.getDescription();
                     if ((itemContent != null) && (itemContent.length() > 0)) {
                         
-                        htmlFilterContentScraper scraper = new htmlFilterContentScraper(itemURL);
-                        Writer writer = new htmlFilterWriter(null, null, scraper, null, false);
+                        final htmlFilterContentScraper scraper = new htmlFilterContentScraper(itemURL);
+                        final Writer writer = new htmlFilterWriter(null, null, scraper, null, false);
                         serverFileUtils.copy(new ByteArrayInputStream(itemContent.getBytes("UTF-8")), writer, "UTF-8");
                         
-                        String itemHeadline = scraper.getTitle();     
+                        final String itemHeadline = scraper.getTitle();     
                         if ((itemHeadline != null) && (itemHeadline.length() > 0)) {
                             feedSections.add(itemHeadline);
                         }
                         
-                        Map<yacyURL, String> itemLinks = scraper.getAnchors();
+                        final Map<yacyURL, String> itemLinks = scraper.getAnchors();
                         if ((itemLinks != null) && (itemLinks.size() > 0)) {
                             anchors.putAll(itemLinks);
                         }
                         
-                        HashMap<String, htmlFilterImageEntry> itemImages = scraper.getImages();
+                        final HashMap<String, htmlFilterImageEntry> itemImages = scraper.getImages();
                         if ((itemImages != null) && (itemImages.size() > 0)) {
                             htmlFilterContentScraper.addAllImages(images, itemImages);
                         }
                         
-                        byte[] extractedText = scraper.getText();
+                        final byte[] extractedText = scraper.getText();
                         if ((extractedText != null) && (extractedText.length > 0)) {
 							if ((text.length() != 0) && (text.byteAt(text.length() - 1) != 32)) text.append((byte) 32);
 							text.append(scraper.getText());
@@ -147,7 +147,7 @@ public class rssParser extends AbstractParser implements Parser {
                     }
             }
             
-            plasmaParserDocument theDoc = new plasmaParserDocument(
+            final plasmaParserDocument theDoc = new plasmaParserDocument(
                     location,
                     mimeType,
                     "UTF-8",
@@ -162,7 +162,7 @@ public class rssParser extends AbstractParser implements Parser {
             
             return theDoc;
             
-        } catch (Exception e) {
+        } catch (final Exception e) {
             if (e instanceof InterruptedException) throw (InterruptedException) e;
             if (e instanceof ParserException) throw (ParserException) e;
             

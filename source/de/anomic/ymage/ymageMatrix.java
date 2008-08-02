@@ -64,17 +64,17 @@ public class ymageMatrix {
     public static final byte FILTER_INVERT = 2;
     
     protected int            width, height;
-    private   BufferedImage  image;
-    private   WritableRaster grid;
-    private   int[]          defaultCol;
-    private   long           backgroundCol;
-    private   byte           defaultMode;
+    private final   BufferedImage  image;
+    private final   WritableRaster grid;
+    private final   int[]          defaultCol;
+    private final   long           backgroundCol;
+    private final   byte           defaultMode;
     
-    public ymageMatrix(int width, int height, byte drawMode, String backgroundColor) {
+    public ymageMatrix(final int width, final int height, final byte drawMode, final String backgroundColor) {
         this(width, height, drawMode, Long.parseLong(backgroundColor, 16));
     }
     
-    public ymageMatrix(int width, int height, byte drawMode, long backgroundColor) {
+    public ymageMatrix(final int width, final int height, final byte drawMode, final long backgroundColor) {
         if (!(serverMemory.request(1024 * 1024 + 3 * width * height, false))) throw new RuntimeException("ymage: not enough memory (" + serverMemory.available() + ") available");
         this.width = width;
         this.height = height;
@@ -100,7 +100,7 @@ public class ymageMatrix {
             bgG = (int) ((this.backgroundCol >> 8) & 0xff);
             bgB = (int) (this.backgroundCol & 0xff);
         //}
-        Graphics2D gr = image.createGraphics();
+        final Graphics2D gr = image.createGraphics();
         gr.setBackground(new Color(bgR, bgG, bgB));
         gr.clearRect(0, 0, width, height);
         /*
@@ -125,11 +125,11 @@ public class ymageMatrix {
         return height;
     }
     
-    public void setColor(long c) {
+    public void setColor(final long c) {
     	if (this.defaultMode == MODE_SUB) {
-    		int r = (int) (c >> 16);
-            int g = (int) ((c >> 8) & 0xff);
-            int b = (int) (c & 0xff);
+    		final int r = (int) (c >> 16);
+            final int g = (int) ((c >> 8) & 0xff);
+            final int b = (int) (c & 0xff);
             defaultCol[0] = (g + b) / 2;
             defaultCol[1] = (r + b) / 2;
             defaultCol[2] = (r + g) / 2;
@@ -141,17 +141,17 @@ public class ymageMatrix {
         
     }
     
-    public void setColor(String s) {
+    public void setColor(final String s) {
         setColor(Long.parseLong(s, 16));
     }
 
-    public void plot(int x, int y) {
+    public void plot(final int x, final int y) {
     	plot (x, y, 100);
     }
     
-    private int[] cc = new int[3];
+    private final int[] cc = new int[3];
     
-    public void plot(int x, int y, int intensity) {
+    public void plot(final int x, final int y, final int intensity) {
         if ((x < 0) || (x >= width)) return;
         if ((y < 0) || (y >= height)) return;
         synchronized (cc) {
@@ -196,7 +196,7 @@ public class ymageMatrix {
         }
     }
     
-    public void line(int Ax, int Ay, int Bx, int By) {
+    public void line(int Ax, int Ay, final int Bx, final int By) {
         // Bresenham's line drawing algorithm
         int dX = Math.abs(Bx-Ax);
         int dY = Math.abs(By-Ay);
@@ -204,8 +204,8 @@ public class ymageMatrix {
         if (Ax > Bx) Xincr=-1; else Xincr=1;
         if (Ay > By) Yincr=-1; else Yincr=1;
         if (dX >= dY) {
-            int dPr  = dY<<1;
-            int dPru = dPr - (dX<<1);
+            final int dPr  = dY<<1;
+            final int dPru = dPr - (dX<<1);
             int P    = dPr - dX;
             for (; dX>=0; dX--) {
                 plot(Ax, Ay);
@@ -219,8 +219,8 @@ public class ymageMatrix {
                 }
             }
         } else {
-            int dPr  = dX<<1;
-            int dPru = dPr - (dY<<1);
+            final int dPr  = dX<<1;
+            final int dPru = dPr - (dY<<1);
             int P    = dPr - dY;
             for (; dY>=0; dY--) {
                 plot(Ax, Ay);
@@ -236,38 +236,38 @@ public class ymageMatrix {
         }
     }
     
-    public void lineDot(int x0, int y0, int x1, int y1, int radius, int distance, long lineColor, long dotColor) {
+    public void lineDot(final int x0, final int y0, final int x1, final int y1, final int radius, final int distance, final long lineColor, final long dotColor) {
         // draw a line with a dot at the end.
         // the radius value is the radius of the dot
         // the distance value is the distance of the dot border to the endpoint
         
         // compute first the angle of the line between the points
-        double angle = (x1 - x0 > 0) ? Math.atan(((double) (y0 - y1)) / ((double) (x1 - x0))) : Math.PI - Math.atan(((double) (y0 - y1)) / ((double) (x0 - x1)));
+        final double angle = (x1 - x0 > 0) ? Math.atan(((double) (y0 - y1)) / ((double) (x1 - x0))) : Math.PI - Math.atan(((double) (y0 - y1)) / ((double) (x0 - x1)));
         // now find two more points in between
         // first calculate the radius' of the points
-        double ra = Math.sqrt(((x0 - x1) * (x0 - x1) + (y0 - y1) * (y0 - y1))); // from a known point x1, y1
-        double rb = ra - radius - distance;
-        double rc = rb - radius;
+        final double ra = Math.sqrt(((x0 - x1) * (x0 - x1) + (y0 - y1) * (y0 - y1))); // from a known point x1, y1
+        final double rb = ra - radius - distance;
+        final double rc = rb - radius;
         //System.out.println("CONTROL angle = " + angle);
         //System.out.println("CONTROL x1 = " + x1 + ", x1calc = " + ((x0 + ((int) ra * Math.cos(angle)))));
         //System.out.println("CONTROL y1 = " + y1 + ", y1calc = " + ((y0 - ((int) ra * Math.sin(angle)))));
         // the points are on a circle with radius rb and rc
-        int x2 = x0 + ((int) (rb * Math.cos(angle)));
-        int y2 = y0 - ((int) (rb * Math.sin(angle)));
-        int x3 = x0 + ((int) (rc * Math.cos(angle)));
-        int y3 = y0 - ((int) (rc * Math.sin(angle)));
+        final int x2 = x0 + ((int) (rb * Math.cos(angle)));
+        final int y2 = y0 - ((int) (rb * Math.sin(angle)));
+        final int x3 = x0 + ((int) (rc * Math.cos(angle)));
+        final int y3 = y0 - ((int) (rc * Math.sin(angle)));
         setColor(lineColor);
         line(x0, y0, x3, y3);
         setColor(dotColor);
         dot(x2, y2, radius, true);
     }
     
-    public int[] getColor(int x, int y) {
-        int[] c = new int[3];
+    public int[] getColor(final int x, final int y) {
+        final int[] c = new int[3];
         return grid.getPixel(x, y, c);
     }
 
-    public void dot(int x, int y, int radius, boolean filled) {
+    public void dot(final int x, final int y, final int radius, final boolean filled) {
         if (filled) {
             for (int r = radius; r >= 0; r--) ymageToolCircle.circle(this, x, y, r);
         } else {
@@ -275,27 +275,27 @@ public class ymageMatrix {
         }
     }
     
-    public void arc(int x, int y, int innerRadius, int outerRadius, int fromArc, int toArc) {
+    public void arc(final int x, final int y, final int innerRadius, final int outerRadius, final int fromArc, final int toArc) {
         for (int r = innerRadius; r <= outerRadius; r++) ymageToolCircle.circle(this, x, y, r, fromArc, toArc);
     }
 
-    public void arcLine(int cx, int cy, int innerRadius, int outerRadius, int angle) {
-        int xi = cx + (int) (innerRadius * Math.cos(Math.PI * angle / 180));
-        int yi = cy - (int) (innerRadius * Math.sin(Math.PI * angle / 180));
-        int xo = cx + (int) (outerRadius * Math.cos(Math.PI * angle / 180));
-        int yo = cy - (int) (outerRadius * Math.sin(Math.PI * angle / 180));
+    public void arcLine(final int cx, final int cy, final int innerRadius, final int outerRadius, final int angle) {
+        final int xi = cx + (int) (innerRadius * Math.cos(Math.PI * angle / 180));
+        final int yi = cy - (int) (innerRadius * Math.sin(Math.PI * angle / 180));
+        final int xo = cx + (int) (outerRadius * Math.cos(Math.PI * angle / 180));
+        final int yo = cy - (int) (outerRadius * Math.sin(Math.PI * angle / 180));
         line(xi, yi, xo, yo);
     }
     
-    public void arcDot(int cx, int cy, int arcRadius, int angle, int dotRadius) {
-        int x = cx + (int) (arcRadius * Math.cos(Math.PI * angle / 180));
-        int y = cy - (int) (arcRadius * Math.sin(Math.PI * angle / 180));
+    public void arcDot(final int cx, final int cy, final int arcRadius, final int angle, final int dotRadius) {
+        final int x = cx + (int) (arcRadius * Math.cos(Math.PI * angle / 180));
+        final int y = cy - (int) (arcRadius * Math.sin(Math.PI * angle / 180));
         dot(x, y, dotRadius, true);
     }
     
-    public void arcArc(int cx, int cy, int arcRadius, int angle, int innerRadius, int outerRadius, int fromArc, int toArc) {
-        int x = cx + (int) (arcRadius * Math.cos(Math.PI * angle / 180));
-        int y = cy - (int) (arcRadius * Math.sin(Math.PI * angle / 180));
+    public void arcArc(final int cx, final int cy, final int arcRadius, final int angle, final int innerRadius, final int outerRadius, final int fromArc, final int toArc) {
+        final int x = cx + (int) (arcRadius * Math.cos(Math.PI * angle / 180));
+        final int y = cy - (int) (arcRadius * Math.sin(Math.PI * angle / 180));
         arc(x, y, innerRadius, outerRadius, fromArc, toArc);
     }
     
@@ -306,7 +306,7 @@ public class ymageMatrix {
      * @param y the y value of the upper left coordinate in the ymageMatrix where the bitmap will be placed
      * @author Marc Nause
      */
-    public void insertBitmap(BufferedImage bitmap, int x, int y) {
+    public void insertBitmap(final BufferedImage bitmap, final int x, final int y) {
         insertBitmap(bitmap, x, y, -1);
     }
 
@@ -318,7 +318,7 @@ public class ymageMatrix {
      * @param filter chooses filter 
      * @author Marc Nause
      */
-    public void insertBitmap(BufferedImage bitmap, int x, int y, byte filter) {
+    public void insertBitmap(final BufferedImage bitmap, final int x, final int y, final byte filter) {
         insertBitmap(bitmap, x, y, -1, filter);
     }    
     
@@ -332,7 +332,7 @@ public class ymageMatrix {
      *  @param yy the y value of the pixel that determines which color is transparent
      *  @author Marc Nause
      */
-    public void insertBitmap(BufferedImage bitmap, int x, int y, int xx, int yy) {
+    public void insertBitmap(final BufferedImage bitmap, final int x, final int y, final int xx, final int yy) {
         insertBitmap(bitmap, x, y, bitmap.getRGB(xx, yy));
     }    
 
@@ -347,7 +347,7 @@ public class ymageMatrix {
      * @param filter chooses filter 
      * @author Marc Nause
      */
-    public void insertBitmap(BufferedImage bitmap, int x, int y, int xx, int yy, byte filter) {
+    public void insertBitmap(final BufferedImage bitmap, final int x, final int y, final int xx, final int yy, final byte filter) {
         insertBitmap(bitmap, x, y, bitmap.getRGB(xx, yy), filter);
     }        
     
@@ -360,11 +360,11 @@ public class ymageMatrix {
      * @param rgb the RGB value that will be transparent
      * @author Marc Nause
      */      
-    public void insertBitmap(BufferedImage bitmap, int x, int y, int transRGB) {
-        int heightSrc = bitmap.getHeight();
-        int widthSrc  = bitmap.getWidth();
-        int heightTgt = height;
-        int widthTgt  = width;
+    public void insertBitmap(final BufferedImage bitmap, final int x, final int y, final int transRGB) {
+        final int heightSrc = bitmap.getHeight();
+        final int widthSrc  = bitmap.getWidth();
+        final int heightTgt = height;
+        final int widthTgt  = width;
 
         int rgb;
         for (int i = 0; i < heightSrc; i++) {
@@ -390,24 +390,24 @@ public class ymageMatrix {
      * @param filter chooses filter 
      * @author Marc Nause
      */
-    public void insertBitmap(BufferedImage bitmap, int x, int y, int transRGB, byte filter) {
+    public void insertBitmap(final BufferedImage bitmap, final int x, final int y, final int transRGB, final byte filter) {
         insertBitmap(bitmap, x, y, transRGB);
 
-        int bitmapWidth = bitmap.getWidth();
-        int bitmapHeight = bitmap.getHeight();        
+        final int bitmapWidth = bitmap.getWidth();
+        final int bitmapHeight = bitmap.getHeight();        
         
         if (filter == FILTER_ANTIALIASING) {
             
             int transX = -1;
             int transY = -1;
-            int imageWidth = image.getWidth();
-            int imageHeight = image.getHeight();
+            final int imageWidth = image.getWidth();
+            final int imageHeight = image.getHeight();
             
             // find first pixel in bitmap that equals transRGB
             // and also lies in area of image that will be covered by bitmap
             int i = 0;
             int j = 0;
-            boolean found = false;
+            final boolean found = false;
             while ((i < bitmapWidth) && (i + x < imageWidth) && !found) {
                 while ((j < bitmapHeight) && (j + y < imageHeight) && !found) {
                     if (bitmap.getRGB(i, j) == transRGB) {
@@ -443,7 +443,7 @@ public class ymageMatrix {
      * @param rgb color of background
      * @author Marc Nause
      */
-    public void antialiasing(int lox, int loy, int rux, int ruy, int bgcolor) {
+    public void antialiasing(final int lox, final int loy, final int rux, final int ruy, final int bgcolor) {
         filter(lox, loy, rux, ruy, FILTER_ANTIALIASING, bgcolor);
     }
 
@@ -455,7 +455,7 @@ public class ymageMatrix {
      * @param ruy y value for right lower coordinate
      * @author Marc Nause
      */
-    public void blur(int lox, int loy, int rux, int ruy) {
+    public void blur(final int lox, final int loy, final int rux, final int ruy) {
         filter(lox, loy, rux, ruy, FILTER_BLUR, -1);
     }
 
@@ -467,7 +467,7 @@ public class ymageMatrix {
      * @param ruy y value for right lower coordinate
      * @author Marc Nause
      */
-    public void invert(int lox, int loy, int rux, int ruy) {
+    public void invert(final int lox, final int loy, final int rux, final int ruy) {
         filter(lox, loy, rux, ruy, FILTER_INVERT, -1);
     }
     
@@ -480,7 +480,7 @@ public class ymageMatrix {
      * @param filter chooses filter 
      * @author Marc Nause
      */
-    private void filter(int lox, int loy, int rux, int ruy, byte filter, int bgcolor) {
+    private void filter(int lox, int loy, int rux, int ruy, final byte filter, final int bgcolor) {
 
         // taking care that all values are legal
         if (lox < 0) { lox = 0; }
@@ -492,12 +492,12 @@ public class ymageMatrix {
         if (rux > width) { rux = width - 1; }
         if (ruy > height){ ruy = height - 1; }        
         if (lox > rux) {
-            int tmp = lox;
+            final int tmp = lox;
             lox = rux;
             rux = tmp;
         }
         if (loy > ruy) {
-            int tmp = loy;
+            final int tmp = loy;
             loy = ruy;
             ruy = tmp;
         }
@@ -507,10 +507,10 @@ public class ymageMatrix {
         int rgbG = 0;
         int rgbB = 0;
         int rgb = 0;
-        int width2 = rux - lox + 1;
-        int height2 = ruy - loy + 1;
+        final int width2 = rux - lox + 1;
+        final int height2 = ruy - loy + 1;
         boolean border = false;
-        BufferedImage image2 = new BufferedImage(width2, height2, BufferedImage.TYPE_INT_RGB);
+        final BufferedImage image2 = new BufferedImage(width2, height2, BufferedImage.TYPE_INT_RGB);
 
         for (int i = lox; i < rux + 1; i++) {
             for (int j = loy; j < ruy + 1; j++) {
@@ -609,7 +609,7 @@ public class ymageMatrix {
         
     }
     
-    public static void demoPaint(ymageMatrix m) {
+    public static void demoPaint(final ymageMatrix m) {
         m.setColor(GREY);
         m.line(0,  70, 100,  70); ymageToolPrint.print(m, 0,  65, 0, "Grey", -1);
         m.line(65, 0,   65, 300);
@@ -664,20 +664,20 @@ public class ymageMatrix {
     	protected serverByteBuffer buffer;
     	protected int              pixel;
     	protected long             access;
-    	public sbbBuffer(int width, int height) {
+    	public sbbBuffer(final int width, final int height) {
     		this.buffer = new serverByteBuffer();
     		this.access = System.currentTimeMillis();
     		this.pixel = width * height;
     	}
-    	public boolean enoughSize(int width, int height) {
+    	public boolean enoughSize(final int width, final int height) {
     		return this.pixel >= width * height;
     	}
-    	public boolean olderThan(long timeout) {
+    	public boolean olderThan(final long timeout) {
     		return System.currentTimeMillis() - this.access > timeout;
     	}
     }
     private static final ArrayList<sbbBuffer> sbbPool = new ArrayList<sbbBuffer>();
-    private static serverByteBuffer sbbFromPool(int width, int height, long timeout) {
+    private static serverByteBuffer sbbFromPool(final int width, final int height, final long timeout) {
     	// returns an Image object from the image pool
     	// if the pooled Image was created recently (before timeout), it is not used
     	synchronized (sbbPool) {
@@ -698,32 +698,32 @@ public class ymageMatrix {
     	}
     }
     
-    public static serverByteBuffer exportImage(BufferedImage image, String targetExt) {
+    public static serverByteBuffer exportImage(final BufferedImage image, final String targetExt) {
     	// generate an byte array from the given image
     	//serverByteBuffer baos = new serverByteBuffer();
-    	serverByteBuffer baos = sbbFromPool(image.getWidth(), image.getHeight(), 1000);
+    	final serverByteBuffer baos = sbbFromPool(image.getWidth(), image.getHeight(), 1000);
     	try {
     		ImageIO.write(image, targetExt, baos);
     		return baos;
-    	} catch (IOException e) {
+    	} catch (final IOException e) {
     		// should not happen
     		e.printStackTrace();
     		return null;
     	}
     }
     
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         // go into headless awt mode
         System.setProperty("java.awt.headless", "true");
         
-        ymageMatrix m = new ymageMatrix(200, 300, MODE_SUB, "FFFFFF");
+        final ymageMatrix m = new ymageMatrix(200, 300, MODE_SUB, "FFFFFF");
         demoPaint(m);
-        File file = new File("/Users/admin/Desktop/testimage.png");
+        final File file = new File("/Users/admin/Desktop/testimage.png");
         try {
-            FileOutputStream fos = new FileOutputStream(file);
+            final FileOutputStream fos = new FileOutputStream(file);
             ImageIO.write(m.getImage(), "png", fos);
             fos.close();
-        } catch (IOException e) {}
+        } catch (final IOException e) {}
         
         // open file automatically, works only on Mac OS X
         /*

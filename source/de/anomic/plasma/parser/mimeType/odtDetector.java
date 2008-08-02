@@ -57,13 +57,13 @@ public class odtDetector implements MagicDetector {
     }
 
     @SuppressWarnings("unchecked")
-    public String[] process(byte[] data, int offset, int length, long bitmask, char comparator, String mimeType, Map params) {
+    public String[] process(final byte[] data, final int offset, final int length, final long bitmask, final char comparator, final String mimeType, final Map params) {
         File dstFile = null;
         try {
             dstFile = File.createTempFile("mimeTypeParser",".tmp");
             serverFileUtils.copy(data,dstFile);
             return process(dstFile, offset, length, bitmask, comparator, mimeType, params);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             return null;
         } finally {
             if (dstFile != null) {dstFile.delete();}            
@@ -71,21 +71,21 @@ public class odtDetector implements MagicDetector {
     }
 
     @SuppressWarnings("unchecked")
-    public String[] process(File file, int offset, int length, long bitmask, char comparator, String mimeType, Map params) {
+    public String[] process(final File file, final int offset, final int length, final long bitmask, final char comparator, final String mimeType, final Map params) {
         try {
             // opening the zip file
-            ZipFile zipFile = new ZipFile(file);
+            final ZipFile zipFile = new ZipFile(file);
             
             // searching for a file named mimetype
-            ZipEntry mimeTypeInfo = zipFile.getEntry("mimetype");
+            final ZipEntry mimeTypeInfo = zipFile.getEntry("mimetype");
             if (mimeTypeInfo == null) return null;
             
             // read in the content of the file
-            InputStream zippedContent = zipFile.getInputStream(mimeTypeInfo); 
-            String realMimeType = new String(serverFileUtils.read(zippedContent, mimeTypeInfo.getSize()));
+            final InputStream zippedContent = zipFile.getInputStream(mimeTypeInfo); 
+            final String realMimeType = new String(serverFileUtils.read(zippedContent, mimeTypeInfo.getSize()));
             
             return new String[]{realMimeType};
-        } catch (Exception e) {
+        } catch (final Exception e) {
             return null;
         }
         

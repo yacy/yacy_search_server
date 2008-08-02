@@ -34,10 +34,10 @@ import de.anomic.server.serverSwitch;
 public class config_p {
     
     
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
         // return variable that accumulates replacements
         //plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
-        serverObjects prop = new serverObjects();
+        final serverObjects prop = new serverObjects();
         String key; 
         
         //change a Key
@@ -51,7 +51,7 @@ public class config_p {
         
         Iterator<String> keys = env.configKeys();
         
-        List<String> list = new ArrayList<String>(250);
+        final List<String> list = new ArrayList<String>(250);
         while(keys.hasNext()){
             list.add(keys.next());
         }

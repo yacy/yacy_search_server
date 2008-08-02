@@ -32,6 +32,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import de.anomic.plasma.cache.IResourceInfo;
+import de.anomic.plasma.cache.ResourceInfoFactory;
 import de.anomic.yacy.yacyURL;
 
 public class ResourceInfo implements IResourceInfo {
@@ -39,15 +40,16 @@ public class ResourceInfo implements IResourceInfo {
     public static final String MIMETYPE = "mimetype";
     public static final String MODIFICATION_DATE = "modificationDate";
     
-    private yacyURL objectURL, refererURL;
-    private TreeMap<String, String> propertyMap; 
+    private final yacyURL objectURL;
+	private yacyURL	refererURL;
+    private final TreeMap<String, String> propertyMap; 
     
     /**
      * Constructor used by the {@link ResourceInfoFactory}
      * @param objectURL
      * @param objectInfo
      */
-    public ResourceInfo(yacyURL objectURL, Map<String, String> objectInfo) {
+    public ResourceInfo(final yacyURL objectURL, final Map<String, String> objectInfo) {
         if (objectURL == null) throw new NullPointerException();
         if (objectInfo == null) throw new NullPointerException();
         
@@ -59,7 +61,7 @@ public class ResourceInfo implements IResourceInfo {
         this.propertyMap =  new TreeMap<String, String>(objectInfo);
     }    
     
-    public ResourceInfo(yacyURL objectURL, yacyURL refererUrl, String mimeType, Date fileDate) {
+    public ResourceInfo(final yacyURL objectURL, final yacyURL refererUrl, final String mimeType, final Date fileDate) {
         if (objectURL == null) throw new NullPointerException();
         
         // generating the url hash
@@ -124,7 +126,7 @@ public class ResourceInfo implements IResourceInfo {
         return false;
     }
 
-    public boolean validResponseStatus(String responseStatus) {
+    public boolean validResponseStatus(final String responseStatus) {
         return responseStatus != null && responseStatus.equalsIgnoreCase("OK");
     }
 

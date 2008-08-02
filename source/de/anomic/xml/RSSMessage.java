@@ -57,9 +57,9 @@ public class RSSMessage {
         }
     }
     
-    private HashMap<String, String> map;
+    private final HashMap<String, String> map;
 
-    public RSSMessage(String title, String description, String link) {
+    public RSSMessage(final String title, final String description, final String link) {
         this();
         setValue("title", title);
         setValue("description", description);
@@ -73,67 +73,67 @@ public class RSSMessage {
         this.map.put("guid", Long.toHexString(System.currentTimeMillis()) + ":" + guidcount++);
     }
     
-    public void setValue(String name, String value) {
+    public void setValue(final String name, final String value) {
         map.put(name, value);
     }
     
     public String getAuthor() {
-        String s =  map.get("author");
+        final String s =  map.get("author");
         if (s == null) return ""; else return s;
     }
     
     public String getCopyright() {
-        String s =  map.get("copyright");
+        final String s =  map.get("copyright");
         if (s == null) return ""; else return s;
     }
     
     public String getCategory() {
-        String s = map.get("category");
+        final String s = map.get("category");
         if (s == null) return ""; else return s;
     }
     
     public String getTitle() {
-        String s = map.get("title");
+        final String s = map.get("title");
         if (s == null) return ""; else return s;
     }
     
     public String getLink() {
-        String s =  map.get("link");
+        final String s =  map.get("link");
         if (s == null) return ""; else return s;
     }
     
     public String getReferrer() {
-        String s = map.get("referrer");
+        final String s = map.get("referrer");
         if (s == null) return ""; else return s;
     }
     
     public String getLanguage() {
-        String s =  map.get("language");
+        final String s =  map.get("language");
         if (s == null) return ""; else return s;
     }
     
     public String getDescription() {
-        String s =  map.get("description");
+        final String s =  map.get("description");
         if (s == null) return ""; else return s;
     }
     
     public String getCreator() {
-        String s =  map.get("creator");
+        final String s =  map.get("creator");
         if (s == null) return ""; else return s;
     }
     
     public String getPubDate() {
-        String s =  map.get("pubDate");
+        final String s =  map.get("pubDate");
         if (s == null) return ""; else return s;
     }
     
     public String getGuid() {
-        String s =  map.get("guid");
+        final String s =  map.get("guid");
         if (s == null) return ""; else return s;
     }
     
     public String getDocs() {
-        String s =  map.get("docs");
+        final String s =  map.get("docs");
         if (s == null) return ""; else return s;
     }
 }

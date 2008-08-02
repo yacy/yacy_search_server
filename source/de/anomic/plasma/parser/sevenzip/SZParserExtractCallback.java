@@ -51,8 +51,8 @@ public class SZParserExtractCallback extends ArchiveExtractCallback {
     private final plasmaParserDocument doc;
     private final String prefix;
     
-    public SZParserExtractCallback(serverLog logger, IInArchive handler,
-            long maxRamSize, plasmaParserDocument doc, String prefix) {
+    public SZParserExtractCallback(final serverLog logger, final IInArchive handler,
+            final long maxRamSize, final plasmaParserDocument doc, final String prefix) {
         super.Init(handler);
         this.log = logger;
         this.maxRamSize = maxRamSize;
@@ -61,7 +61,7 @@ public class SZParserExtractCallback extends ArchiveExtractCallback {
         this.prefix = prefix;
     }
     
-    public void PrepareOperation(int arg0) {
+    public void PrepareOperation(final int arg0) {
         this.extractMode = (arg0 == IInArchive.NExtract_NAskMode_kExtract);
         switch (arg0) {
             case IInArchive.NExtract_NAskMode_kExtract:
@@ -76,7 +76,7 @@ public class SZParserExtractCallback extends ArchiveExtractCallback {
         }
     }
 
-    public void SetOperationResult(int arg0) throws IOException {
+    public void SetOperationResult(final int arg0) throws IOException {
         if (arg0 != IInArchive.NExtract_NOperationResult_kOK) {
             this.NumErrors++;
             switch(arg0) {
@@ -97,8 +97,8 @@ public class SZParserExtractCallback extends ArchiveExtractCallback {
                 plasmaParserDocument theDoc;
                 // workaround for relative links in file, normally '#' shall be used behind the location, see
                 // below for reversion of the effects
-                yacyURL url = yacyURL.newURL(doc.dc_source(), this.prefix + "/" + super.filePath);
-                String mime = plasmaParser.getMimeTypeByFileExt(super.filePath.substring(super.filePath.lastIndexOf('.') + 1));
+                final yacyURL url = yacyURL.newURL(doc.dc_source(), this.prefix + "/" + super.filePath);
+                final String mime = plasmaParser.getMimeTypeByFileExt(super.filePath.substring(super.filePath.lastIndexOf('.') + 1));
                 if (this.cfos.isFallback()) {
                     theDoc = this.parser.parseSource(url, mime, null, this.cfos.getContentFile());
                 } else {
@@ -106,16 +106,16 @@ public class SZParserExtractCallback extends ArchiveExtractCallback {
                 }
                 
                 // revert the above workaround
-                Map<yacyURL, String> nanchors = new HashMap<yacyURL, String>(theDoc.getAnchors().size(), 1f);
-                Iterator<Map.Entry<yacyURL, String>> it = theDoc.getAnchors().entrySet().iterator();
+                final Map<yacyURL, String> nanchors = new HashMap<yacyURL, String>(theDoc.getAnchors().size(), 1f);
+                final Iterator<Map.Entry<yacyURL, String>> it = theDoc.getAnchors().entrySet().iterator();
                 Map.Entry<yacyURL, String> entry;
-                String base = doc.dc_source().toNormalform(false, true);
+                final String base = doc.dc_source().toNormalform(false, true);
                 String u;
                 while (it.hasNext()) {
                     entry = it.next();
                     u = entry.getKey().toNormalform(true, true);
                     if (u.startsWith(base + "/")) {
-                        String ref = "#" + u.substring(base.length() + 1);
+                        final String ref = "#" + u.substring(base.length() + 1);
                         this.log.logFinest("changing " + entry.getKey() + " to use reference " + ref);
                         nanchors.put(new yacyURL(base + ref, null), entry.getValue());
                     } else {
@@ -126,24 +126,24 @@ public class SZParserExtractCallback extends ArchiveExtractCallback {
                 theDoc.getAnchors().putAll(nanchors);
                 this.doc.addSubDocument(theDoc);
             }
-        } catch (ParserException e) {
-            IOException ex = new IOException("error parsing extracted content of " + super.filePath + ": " + e.getMessage());
+        } catch (final ParserException e) {
+            final IOException ex = new IOException("error parsing extracted content of " + super.filePath + ": " + e.getMessage());
             ex.initCause(e);
             throw ex;
-        } catch (InterruptedException e) {
-            IOException ex = new IOException("interrupted");
+        } catch (final InterruptedException e) {
+            final IOException ex = new IOException("interrupted");
             ex.initCause(e);
             throw ex;
         }
     }
     
-    public OutputStream GetStream(int index, int askExtractMode) throws IOException {
-        SevenZipEntry item = super.archiveHandler.getEntry(index);
+    public OutputStream GetStream(final int index, final int askExtractMode) throws IOException {
+        final SevenZipEntry item = super.archiveHandler.getEntry(index);
         super.filePath = item.getName();
         try {
             AbstractParser.checkInterruption();
-        } catch (InterruptedException e) {
-            IOException ex = new IOException("interrupted");
+        } catch (final InterruptedException e) {
+            final IOException ex = new IOException("interrupted");
             ex.initCause(e);
             throw ex;
         }

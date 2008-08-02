@@ -4,12 +4,12 @@ import java.util.Date;
 import java.util.Iterator;
 
 import de.anomic.data.bookmarksDB;
+import de.anomic.data.htmlTools;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.data.htmlTools;
 
 public class xbel {
 
@@ -17,7 +17,7 @@ public class xbel {
 	private static plasmaSwitchboard switchboard = null;
 	private static boolean isAdmin = false;	
 	
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
  
     	int count = 0;;
 
@@ -32,10 +32,10 @@ public class xbel {
     			}
     		}
         	if(post.containsKey("tag")) {
-    			String tagName=post.get("tag");    			
+    			final String tagName=post.get("tag");    			
     			prop.put("folder", tagName);
     			if (!tagName.equals("")) {
-    				Iterator<String> bit=switchboard.bookmarksDB.getBookmarksIterator(tagName, isAdmin);
+    				final Iterator<String> bit=switchboard.bookmarksDB.getBookmarksIterator(tagName, isAdmin);
     				count = print_XBEL(bit, count);
     				prop.put("xbel", count);
     				return prop;
@@ -50,7 +50,7 @@ public class xbel {
     
     }
 
-    private static int recurseFolders(Iterator<String> it, String root, int count, boolean next, String prev){
+    private static int recurseFolders(final Iterator<String> it, String root, int count, final boolean next, final String prev){
     	String fn="";    	
     	   	
     	if(next) fn = it.next().toString();    		
@@ -71,7 +71,7 @@ public class xbel {
     		count++;
     		prop.put("xbel_"+count+"_elements", "<title>" + htmlTools.encodeUnicode2xml(fn.replaceFirst(root+"/*","")) + "</title>");   		
     		count++;    
-    		Iterator<String> bit=switchboard.bookmarksDB.getBookmarksIterator(fn, isAdmin);
+    		final Iterator<String> bit=switchboard.bookmarksDB.getBookmarksIterator(fn, isAdmin);
     		count = print_XBEL(bit, count);
     		if(it.hasNext()){
     			count = recurseFolders(it, fn, count, true, fn);
@@ -85,7 +85,7 @@ public class xbel {
     	} 
     	return count;
     }
-    private static int print_XBEL(Iterator<String> bit, int count) {
+    private static int print_XBEL(final Iterator<String> bit, int count) {
     	bookmarksDB.Bookmark bookmark;
     	Date date;
     	while(bit.hasNext()){    			

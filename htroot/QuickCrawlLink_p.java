@@ -51,20 +51,21 @@ public class QuickCrawlLink_p {
      * @param env the serverSwitch object holding all runtime-data
      * @return the rewrite-properties for the template
      */
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
         
-        serverObjects prop = new serverObjects();
-        plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        final serverObjects prop = new serverObjects();
+        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         
         if (post == null) {
             // send back usage example
             prop.put("mode", "0");
             
             // getting the http host header
-            String hostSocket = header.get(httpHeader.CONNECTION_PROP_HOST);
+            final String hostSocket = header.get(httpHeader.CONNECTION_PROP_HOST);
             
             //String host = hostSocket;
-            int port = 80, pos = hostSocket.indexOf(":");
+            int port = 80;
+			final int pos = hostSocket.indexOf(":");
             if (pos != -1) {
                 port = Integer.parseInt(hostSocket.substring(pos + 1));
                 //host = hostSocket.substring(0, pos);
@@ -81,44 +82,44 @@ public class QuickCrawlLink_p {
         String crawlingStart = post.get("url",null);
         try {
             crawlingStart = URLDecoder.decode(crawlingStart, "UTF-8");
-        } catch (UnsupportedEncodingException e1) {
+        } catch (final UnsupportedEncodingException e1) {
             // TODO Auto-generated catch block
             e1.printStackTrace();
         }
         
         // getting the browser title
-        String title = post.get("title",null);
+        final String title = post.get("title",null);
         
         // getting other parameters if set
-        String crawlingFilter  = post.get("crawlingFilter", ".*");
-        int CrawlingDepth      = Integer.parseInt(post.get("crawlingDepth", "0"));        
-        boolean crawlDynamic   = post.get("crawlingQ", "").equals("on");
-        boolean indexText      = post.get("indexText", "on").equals("on");
-        boolean indexMedia      = post.get("indexMedia", "on").equals("on");
-        boolean storeHTCache   = post.get("storeHTCache", "").equals("on");
-        boolean remoteIndexing = post.get("crawlOrder", "").equals("on");
-        boolean xsstopw        = post.get("xsstopw", "").equals("on");
-        boolean xdstopw        = post.get("xdstopw", "").equals("on");
-        boolean xpstopw        = post.get("xpstopw", "").equals("on");
+        final String crawlingFilter  = post.get("crawlingFilter", ".*");
+        final int CrawlingDepth      = Integer.parseInt(post.get("crawlingDepth", "0"));        
+        final boolean crawlDynamic   = post.get("crawlingQ", "").equals("on");
+        final boolean indexText      = post.get("indexText", "on").equals("on");
+        final boolean indexMedia      = post.get("indexMedia", "on").equals("on");
+        final boolean storeHTCache   = post.get("storeHTCache", "").equals("on");
+        final boolean remoteIndexing = post.get("crawlOrder", "").equals("on");
+        final boolean xsstopw        = post.get("xsstopw", "").equals("on");
+        final boolean xdstopw        = post.get("xdstopw", "").equals("on");
+        final boolean xpstopw        = post.get("xpstopw", "").equals("on");
 
         prop.put("mode_url", (crawlingStart == null) ? "unknown" : crawlingStart);
         prop.putHTML("mode_title", (title == null) ? "unknown" : title);
         
         if (crawlingStart != null) {
             crawlingStart = crawlingStart.trim();
-            try {crawlingStart = new yacyURL(crawlingStart, null).toNormalform(true, true);} catch (MalformedURLException e1) {}
+            try {crawlingStart = new yacyURL(crawlingStart, null).toNormalform(true, true);} catch (final MalformedURLException e1) {}
             
             // check if url is proper
             yacyURL crawlingStartURL = null;
             try {
                 crawlingStartURL = new yacyURL(crawlingStart, null);
-            } catch (MalformedURLException e) {
+            } catch (final MalformedURLException e) {
                 prop.put("mode_status", "1");
                 prop.put("mode_code", "1");
                 return prop;
             }
                     
-            String urlhash = crawlingStartURL.hash();
+            final String urlhash = crawlingStartURL.hash();
             sb.webIndex.removeURL(urlhash);
             sb.crawlQueues.noticeURL.removeByURLHash(urlhash);
             sb.crawlQueues.errorURL.remove(urlhash);
@@ -146,7 +147,7 @@ public class QuickCrawlLink_p {
                         xdstopw,
                         xpstopw
                 );
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 // mist
                 prop.put("mode_status", "2");//Error with url
                 prop.put("mode_code", "2");

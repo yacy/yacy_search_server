@@ -2358,7 +2358,7 @@ public class ftpc {
 
             // after stream is empty we should get control completion echo
             reply = receive();
-            boolean success = (getStatus(reply) == 2);
+            final boolean success = (getStatus(reply) == 2);
 
             // shutdown remote client connection
             data.close();

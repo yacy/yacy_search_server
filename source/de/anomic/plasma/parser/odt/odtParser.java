@@ -78,7 +78,7 @@ public class odtParser extends AbstractParser implements Parser {
         return SUPPORTED_MIME_TYPES;
     }
     
-    public plasmaParserDocument parse(yacyURL location, String mimeType, String charset, File dest) throws ParserException, InterruptedException {
+    public plasmaParserDocument parse(final yacyURL location, final String mimeType, final String charset, final File dest) throws ParserException, InterruptedException {
         
         Writer writer = null;
         File writerFile = null;
@@ -90,8 +90,8 @@ public class odtParser extends AbstractParser implements Parser {
             String docAuthor      = null;
             
             // opening the file as zip file
-            ZipFile zipFile= new ZipFile(dest);
-            Enumeration<? extends ZipEntry> zipEnum = zipFile.entries();
+            final ZipFile zipFile= new ZipFile(dest);
+            final Enumeration<? extends ZipEntry> zipEnum = zipFile.entries();
             
             // looping through all containing files
             while (zipEnum.hasMoreElements()) {
@@ -99,12 +99,12 @@ public class odtParser extends AbstractParser implements Parser {
                 checkInterruption();
                 
                 // getting the next zip file entry
-                ZipEntry zipEntry= zipEnum.nextElement();
-                String entryName = zipEntry.getName();
+                final ZipEntry zipEntry= zipEnum.nextElement();
+                final String entryName = zipEntry.getName();
                 
                 // content.xml contains the document content in xml format
                 if (entryName.equals("content.xml")) {
-                    long contentSize = zipEntry.getSize();
+                    final long contentSize = zipEntry.getSize();
                     
                     // creating a writer for output
                     if ((contentSize == -1) || (contentSize > Parser.MAX_KEEP_IN_MEMORY_SIZE)) {
@@ -115,8 +115,8 @@ public class odtParser extends AbstractParser implements Parser {
                     }                    
                     
                     // extract data
-                    InputStream zipFileEntryStream = zipFile.getInputStream(zipEntry);
-                    OpenDocumentTextInputStream odStream = new OpenDocumentTextInputStream(zipFileEntryStream);
+                    final InputStream zipFileEntryStream = zipFile.getInputStream(zipEntry);
+                    final OpenDocumentTextInputStream odStream = new OpenDocumentTextInputStream(zipFileEntryStream);
                     serverFileUtils.copy(odStream, writer, "UTF-8");
                 
                     // close readers and writers
@@ -125,9 +125,9 @@ public class odtParser extends AbstractParser implements Parser {
                     
                 } else if (entryName.equals("meta.xml")) {
                     //  meta.xml contains metadata about the document
-                    InputStream zipFileEntryStream = zipFile.getInputStream(zipEntry);
-                    ODFMetaFileAnalyzer metaAnalyzer = new ODFMetaFileAnalyzer();
-                    OpenDocumentMetadata metaData = metaAnalyzer.analyzeMetaData(zipFileEntryStream);
+                    final InputStream zipFileEntryStream = zipFile.getInputStream(zipEntry);
+                    final ODFMetaFileAnalyzer metaAnalyzer = new ODFMetaFileAnalyzer();
+                    final OpenDocumentMetadata metaData = metaAnalyzer.analyzeMetaData(zipFileEntryStream);
                     docDescription = metaData.getDescription();
                     docKeywordStr  = metaData.getKeyword();
                     docShortTitle  = metaData.getTitle();
@@ -150,7 +150,7 @@ public class odtParser extends AbstractParser implements Parser {
             // create the parser document
             plasmaParserDocument theDoc = null;
             if (writer instanceof serverCharBuffer) {
-                byte[] contentBytes = ((serverCharBuffer)writer).toString().getBytes("UTF-8");
+                final byte[] contentBytes = ((serverCharBuffer)writer).toString().getBytes("UTF-8");
                 theDoc = new plasmaParserDocument(
                         location,
                         mimeType,
@@ -178,21 +178,21 @@ public class odtParser extends AbstractParser implements Parser {
                         null);
             }
             return theDoc;
-        } catch (Exception e) {            
+        } catch (final Exception e) {            
             if (e instanceof InterruptedException) throw (InterruptedException) e;
             if (e instanceof ParserException) throw (ParserException) e;
             
             // close the writer
-            if (writer != null) try { writer.close(); } catch (Exception ex) {/* ignore this */}
+            if (writer != null) try { writer.close(); } catch (final Exception ex) {/* ignore this */}
             
             // delete the file
-            if (writerFile != null) try { writerFile.delete(); } catch (Exception ex)  {/* ignore this */}            
+            if (writerFile != null) try { writerFile.delete(); } catch (final Exception ex)  {/* ignore this */}            
             
             throw new ParserException("Unexpected error while parsing odt file. " + e.getMessage(),location); 
         }
     }
     
-    public plasmaParserDocument parse(yacyURL location, String mimeType, String charset, InputStream source) throws ParserException, InterruptedException {
+    public plasmaParserDocument parse(final yacyURL location, final String mimeType, final String charset, final InputStream source) throws ParserException, InterruptedException {
         File dest = null;
         try {
             // creating a tempfile
@@ -204,13 +204,13 @@ public class odtParser extends AbstractParser implements Parser {
             
             // parsing the content
             return parse(location, mimeType, charset, dest);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             if (e instanceof InterruptedException) throw (InterruptedException) e;
             if (e instanceof ParserException) throw (ParserException) e;
             
             throw new ParserException("Unexpected error while parsing odt file. " + e.getMessage(),location); 
         } finally {
-            if (dest != null) try { dest.delete(); } catch (Exception e){/* ignore this */}
+            if (dest != null) try { dest.delete(); } catch (final Exception e){/* ignore this */}
         }
     }
     
@@ -219,28 +219,28 @@ public class odtParser extends AbstractParser implements Parser {
         super.reset();
     }
     
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         try {
             if (args.length != 1) return;
             
             // getting the content URL
-            yacyURL contentUrl = new yacyURL(args[0], null);
+            final yacyURL contentUrl = new yacyURL(args[0], null);
             
             // creating a new parser
-            odtParser testParser = new odtParser();
+            final odtParser testParser = new odtParser();
             
             // setting the parser logger
             testParser.setLogger(new serverLog("PARSER.ODT"));
             
             // downloading the document content
-            httpHeader reqHeader = new httpHeader();
+            final httpHeader reqHeader = new httpHeader();
             reqHeader.put(httpHeader.USER_AGENT, HTTPLoader.crawlerUserAgent);
-            byte[] content = HttpClient.wget(contentUrl.toString(), reqHeader, 10000);
-            ByteArrayInputStream input = new ByteArrayInputStream(content);
+            final byte[] content = HttpClient.wget(contentUrl.toString(), reqHeader, 10000);
+            final ByteArrayInputStream input = new ByteArrayInputStream(content);
             
             // parsing the document
             testParser.parse(contentUrl, "application/vnd.oasis.opendocument.text", null, input);            
-        } catch (Exception e) {
+        } catch (final Exception e) {
             e.printStackTrace();
         }
     }

@@ -57,7 +57,7 @@ public final class serverFileUtils {
 
     private static final int DEFAULT_BUFFER_SIZE = 1024; // this is also the maximum chunk size
     
-    public static long copy(InputStream source, OutputStream dest) throws IOException {
+    public static long copy(final InputStream source, final OutputStream dest) throws IOException {
         return copy(source, dest, -1);
     }
     
@@ -75,8 +75,8 @@ public final class serverFileUtils {
      * @see #copy(File source, OutputStream dest)
      * @see #copy(File source, File dest)
      */
-    public static long copy(InputStream source, OutputStream dest, long count) throws IOException {
-        byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];                
+    public static long copy(final InputStream source, final OutputStream dest, final long count) throws IOException {
+        final byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];                
         int chunkSize = (int) ((count > 0) ? Math.min(count, DEFAULT_BUFFER_SIZE) : DEFAULT_BUFFER_SIZE);
         
         int c; long total = 0;
@@ -96,29 +96,29 @@ public final class serverFileUtils {
         return total;
     }
     
-    public static int copy(File source, String inputCharset, Writer dest) throws IOException {
+    public static int copy(final File source, final String inputCharset, final Writer dest) throws IOException {
         InputStream fis = null;
         try {
             fis = new FileInputStream(source);
             return copy(fis, dest, inputCharset);
         } finally {
-            if (fis != null) try { fis.close(); } catch (Exception e) {}
+            if (fis != null) try { fis.close(); } catch (final Exception e) {}
         }
     }    
     
-    public static int copy(InputStream source, Writer dest, String inputCharset) throws IOException {
-        InputStreamReader reader = new InputStreamReader(source,inputCharset);
+    public static int copy(final InputStream source, final Writer dest, final String inputCharset) throws IOException {
+        final InputStreamReader reader = new InputStreamReader(source,inputCharset);
         return copy(reader,dest);
     }
     
-    public static int copy(String source, Writer dest) throws IOException {
+    public static int copy(final String source, final Writer dest) throws IOException {
         dest.write(source);
         dest.flush();
         return source.length();
     }
     
-    public static int copy(Reader source, Writer dest) throws IOException {        
-        char[] buffer = new char[DEFAULT_BUFFER_SIZE];
+    public static int copy(final Reader source, final Writer dest) throws IOException {        
+        final char[] buffer = new char[DEFAULT_BUFFER_SIZE];
         int count = 0;
         int n = 0;
         try {
@@ -126,14 +126,14 @@ public final class serverFileUtils {
                 dest.write(buffer, 0, n);
                 count += n;
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             // an "sun.io.MalformedInputException: Missing byte-order mark" - exception may occur here
             throw new IOException(e.getMessage());
         }
         return count;
     }
     
-    public static void copy(InputStream source, File dest) throws IOException {
+    public static void copy(final InputStream source, final File dest) throws IOException {
         copy(source,dest,-1);
     }
     
@@ -149,13 +149,13 @@ public final class serverFileUtils {
      * @see #copy(File source, OutputStream dest)
      * @see #copy(File source, File dest)
      */
-    public static void copy(InputStream source, File dest, long count) throws IOException {
+    public static void copy(final InputStream source, final File dest, final long count) throws IOException {
         FileOutputStream fos = null;
         try {
             fos = new FileOutputStream(dest);
             copy(source, fos, count);
         } finally {
-            if (fos != null) try {fos.close();} catch (Exception e) {}
+            if (fos != null) try {fos.close();} catch (final Exception e) {}
         }
     }
 
@@ -170,15 +170,15 @@ public final class serverFileUtils {
      * @see #copy(File source, OutputStream dest)
      * @see #copy(File source, File dest)
      */
-    public static void copyRange(File source, OutputStream dest, int start) throws IOException {
+    public static void copyRange(final File source, final OutputStream dest, final int start) throws IOException {
         InputStream fis = null;
         try {
             fis = new FileInputStream(source);
-            long skipped = fis.skip(start);
+            final long skipped = fis.skip(start);
             if (skipped != start) throw new IllegalStateException("Unable to skip '" + start + "' bytes. Only '" + skipped + "' bytes skipped.");
             copy(fis, dest, -1);
         } finally {
-            if (fis != null) try { fis.close(); } catch (Exception e) {}
+            if (fis != null) try { fis.close(); } catch (final Exception e) {}
         }
     }
 
@@ -192,13 +192,13 @@ public final class serverFileUtils {
      * @see #copyRange(File source, OutputStream dest, int start)
      * @see #copy(File source, File dest)
      */
-    public static void copy(File source, OutputStream dest) throws IOException {
+    public static void copy(final File source, final OutputStream dest) throws IOException {
         InputStream fis = null;
         try {
             fis = new FileInputStream(source);
             copy(fis, dest, -1);
         } finally {
-            if (fis != null) try { fis.close(); } catch (Exception e) {}
+            if (fis != null) try { fis.close(); } catch (final Exception e) {}
         }
     }
 
@@ -213,7 +213,7 @@ public final class serverFileUtils {
      * @see #copyRange(File source, OutputStream dest, int start)
      * @see #copy(File source, OutputStream dest)
      */
-    public static void copy(File source, File dest) throws IOException {
+    public static void copy(final File source, final File dest) throws IOException {
         FileInputStream fis = null;
         FileOutputStream fos = null;
         try {
@@ -221,26 +221,26 @@ public final class serverFileUtils {
             fos = new FileOutputStream(dest);
             copy(fis, fos, -1);
         } finally {
-            if (fis != null) try {fis.close();} catch (Exception e) {}
-            if (fos != null) try {fos.close();} catch (Exception e) {}
+            if (fis != null) try {fis.close();} catch (final Exception e) {}
+            if (fos != null) try {fos.close();} catch (final Exception e) {}
         }
     }
 
-    public static void copy(byte[] source, OutputStream dest) throws IOException {
+    public static void copy(final byte[] source, final OutputStream dest) throws IOException {
         dest.write(source, 0, source.length);
         dest.flush();
     }
     
-    public static void copy(byte[] source, File dest) throws IOException {
+    public static void copy(final byte[] source, final File dest) throws IOException {
         copy(new ByteArrayInputStream(source), dest);
     }
 
-    public static byte[] read(InputStream source) throws IOException {
+    public static byte[] read(final InputStream source) throws IOException {
         return read(source,-1);
     }
     
-    public static byte[] read(InputStream source, long count) throws IOException {
-        ByteArrayOutputStream baos = (count > 0) 
+    public static byte[] read(final InputStream source, final long count) throws IOException {
+        final ByteArrayOutputStream baos = (count > 0) 
                                    ? new ByteArrayOutputStream((int)count) 
                                    : new ByteArrayOutputStream();
         copy(source, baos, count);
@@ -250,20 +250,20 @@ public final class serverFileUtils {
         return baos.toByteArray();        
     }
 
-    public static byte[] read(File source) throws IOException {
-        byte[] buffer = new byte[(int) source.length()];
+    public static byte[] read(final File source) throws IOException {
+        final byte[] buffer = new byte[(int) source.length()];
         InputStream fis = null;
         try {
             fis = new FileInputStream(source);
             int p = 0, c;
             while ((c = fis.read(buffer, p, buffer.length - p)) > 0) p += c;
         } finally {
-            if (fis != null) try { fis.close(); } catch (Exception e) {}
+            if (fis != null) try { fis.close(); } catch (final Exception e) {}
         }
         return buffer;
     }
 
-    public static byte[] readAndZip(File source) throws IOException {
+    public static byte[] readAndZip(final File source) throws IOException {
         ByteArrayOutputStream byteOut = null;
         GZIPOutputStream zipOut = null;
         try {
@@ -273,29 +273,29 @@ public final class serverFileUtils {
             zipOut.close();
             return byteOut.toByteArray();
         } finally {
-            if (zipOut != null) try { zipOut.close(); } catch (Exception e) {}
-            if (byteOut != null) try { byteOut.close(); } catch (Exception e) {}
+            if (zipOut != null) try { zipOut.close(); } catch (final Exception e) {}
+            if (byteOut != null) try { byteOut.close(); } catch (final Exception e) {}
         }
     }
 
-    public static void writeAndGZip(byte[] source, File dest) throws IOException {
+    public static void writeAndGZip(final byte[] source, final File dest) throws IOException {
         FileOutputStream fos = null;
         try {
             fos = new FileOutputStream(dest);
             writeAndGZip(source, fos);
         } finally {
-            if (fos != null) try {fos.close();} catch (Exception e) {}
+            if (fos != null) try {fos.close();} catch (final Exception e) {}
         }
     }
 
-    public static void writeAndGZip(byte[] source, OutputStream dest) throws IOException {
+    public static void writeAndGZip(final byte[] source, final OutputStream dest) throws IOException {
         GZIPOutputStream zipOut = null;
         try {
             zipOut = new GZIPOutputStream(dest);
             copy(source, zipOut);
             zipOut.close();
         } finally {
-            if (zipOut != null) try { zipOut.close(); } catch (Exception e) {}
+            if (zipOut != null) try { zipOut.close(); } catch (final Exception e) {}
         }
     }
     
@@ -312,10 +312,10 @@ public final class serverFileUtils {
         if ((source.length > 1) && (((source[1] << 8) | source[0]) == GZIPInputStream.GZIP_MAGIC)) {
             System.out.println("DEBUG: uncompressGZipArray - uncompressing source");
             try {
-                ByteArrayInputStream byteInput = new ByteArrayInputStream(source);
-                ByteArrayOutputStream byteOutput = new ByteArrayOutputStream();
-                GZIPInputStream zippedContent = new GZIPInputStream(byteInput);
-                byte[] data = new byte[1024];
+                final ByteArrayInputStream byteInput = new ByteArrayInputStream(source);
+                final ByteArrayOutputStream byteOutput = new ByteArrayOutputStream();
+                final GZIPInputStream zippedContent = new GZIPInputStream(byteInput);
+                final byte[] data = new byte[1024];
                 int read = 0;
                 
                 // reading gzip file and store it uncompressed
@@ -326,7 +326,7 @@ public final class serverFileUtils {
                 byteOutput.close();   
                 
                 source = byteOutput.toByteArray();
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 if (!e.getMessage().equals("Not in GZIP format")) {
                     throw new IOException(e.getMessage());
                 }
@@ -336,8 +336,8 @@ public final class serverFileUtils {
         return source;
     }
 
-    public static HashSet<String> loadList(File file) {
-        HashSet<String> set = new HashSet<String>();
+    public static HashSet<String> loadList(final File file) {
+        final HashSet<String> set = new HashSet<String>();
         BufferedReader br = null;
         try {
             br = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
@@ -347,31 +347,31 @@ public final class serverFileUtils {
                 if ((line.length() > 0) && (!(line.startsWith("#")))) set.add(line.trim().toLowerCase());
             }
             br.close();
-        } catch (IOException e) {
+        } catch (final IOException e) {
         } finally {
-            if (br != null) try { br.close(); } catch (Exception e) {}
+            if (br != null) try { br.close(); } catch (final Exception e) {}
         }
         return set;
     }
 
-    public static Map<String, String> loadHashMap(File f) {
+    public static Map<String, String> loadHashMap(final File f) {
         // load props
         try {
-            byte[] b = read(f);
+            final byte[] b = read(f);
             return nxTools.table(nxTools.strings(b));
-        } catch (IOException e2) {
+        } catch (final IOException e2) {
             System.err.println("ERROR: " + f.toString() + " not found in settings path");
             return null;
         }
     }
     
-    public static void saveMap(File file, Map<String, String> props, String comment) throws IOException {
+    public static void saveMap(final File file, final Map<String, String> props, final String comment) throws IOException {
         PrintWriter pw = null;
-        File tf = new File(file.toString() + "." + (System.currentTimeMillis() % 1000));
+        final File tf = new File(file.toString() + "." + (System.currentTimeMillis() % 1000));
         pw = new PrintWriter(new BufferedOutputStream(new FileOutputStream(tf)));
         pw.println("# " + comment);
         String key, value;
-        for (Map.Entry<String, String> entry: props.entrySet()) {
+        for (final Map.Entry<String, String> entry: props.entrySet()) {
             key = entry.getKey();
             if (entry.getValue() == null) {
                 value = "";
@@ -386,41 +386,41 @@ public final class serverFileUtils {
         tf.renameTo(file);
     }
 
-    public static Set<String> loadSet(File file, int chunksize, boolean tree) throws IOException {
-        Set<String> set = (tree) ? (Set<String>) new TreeSet<String>() : (Set<String>) new HashSet<String>();
-        byte[] b = read(file);
+    public static Set<String> loadSet(final File file, final int chunksize, final boolean tree) throws IOException {
+        final Set<String> set = (tree) ? (Set<String>) new TreeSet<String>() : (Set<String>) new HashSet<String>();
+        final byte[] b = read(file);
         for (int i = 0; (i + chunksize) <= b.length; i++) {
             set.add(new String(b, i, chunksize));
         }
         return set;
     }
 
-    public static Set<String> loadSet(File file, String sep, boolean tree) throws IOException {
-        Set<String> set = (tree) ? (Set<String>) new TreeSet<String>() : (Set<String>) new HashSet<String>();
-        byte[] b = read(file);
-        StringTokenizer st = new StringTokenizer(new String(b, "UTF-8"), sep);
+    public static Set<String> loadSet(final File file, final String sep, final boolean tree) throws IOException {
+        final Set<String> set = (tree) ? (Set<String>) new TreeSet<String>() : (Set<String>) new HashSet<String>();
+        final byte[] b = read(file);
+        final StringTokenizer st = new StringTokenizer(new String(b, "UTF-8"), sep);
         while (st.hasMoreTokens()) {
             set.add(st.nextToken());
         }
         return set;
     }
 
-    public static void saveSet(File file, String format, Set<String> set, String sep) throws IOException {
-        File tf = new File(file.toString() + ".tmp" + (System.currentTimeMillis() % 1000));
+    public static void saveSet(final File file, final String format, final Set<String> set, final String sep) throws IOException {
+        final File tf = new File(file.toString() + ".tmp" + (System.currentTimeMillis() % 1000));
         OutputStream os = null;
         if ((format == null) || (format.equals("plain"))) {
             os = new BufferedOutputStream(new FileOutputStream(tf));
         } else if (format.equals("gzip")) {
             os = new GZIPOutputStream(new FileOutputStream(tf));
         } else if (format.equals("zip")) {
-            ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(file));
+            final ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(file));
             String name = file.getName();
             if (name.endsWith(".zip")) name = name.substring(0, name.length() - 4);
             zos.putNextEntry(new ZipEntry(name + ".txt"));
             os = zos;
         }
         if(os != null) {
-            for (Iterator<String> i = set.iterator(); i.hasNext(); ) {
+            for (final Iterator<String> i = set.iterator(); i.hasNext(); ) {
                 os.write((i.next().toString()).getBytes());
                 if (sep != null) os.write(sep.getBytes());
             }
@@ -430,22 +430,22 @@ public final class serverFileUtils {
         tf.renameTo(file);
     }
 
-    public static void saveSet(File file, String format, kelondroRowSet set, String sep) throws IOException {
-        File tf = new File(file.toString() + ".tmp" + (System.currentTimeMillis() % 1000));
+    public static void saveSet(final File file, final String format, final kelondroRowSet set, final String sep) throws IOException {
+        final File tf = new File(file.toString() + ".tmp" + (System.currentTimeMillis() % 1000));
         OutputStream os = null;
         if ((format == null) || (format.equals("plain"))) {
             os = new BufferedOutputStream(new FileOutputStream(tf));
         } else if (format.equals("gzip")) {
             os = new GZIPOutputStream(new FileOutputStream(tf));
         } else if (format.equals("zip")) {
-            ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(file));
+            final ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(file));
             String name = file.getName();
             if (name.endsWith(".zip")) name = name.substring(0, name.length() - 4);
             zos.putNextEntry(new ZipEntry(name + ".txt"));
             os = zos;
         }
         if(os != null) {
-            Iterator<kelondroRow.Entry> i = set.rows();
+            final Iterator<kelondroRow.Entry> i = set.rows();
             String key;
             if (i.hasNext()) {
                 key = new String(i.next().getColBytes(0));
@@ -467,17 +467,17 @@ public final class serverFileUtils {
     * @param from_dir    Directory which contents will be moved.
     * @param to_dir    Directory to move into. It must exist already.
     */
-    public static void moveAll(File from_dir, File to_dir) {
+    public static void moveAll(final File from_dir, final File to_dir) {
         if (!(from_dir.isDirectory())) return;
         if (!(to_dir.isDirectory())) return;
-        String[] list = from_dir.list();
+        final String[] list = from_dir.list();
         for (int i = 0; i < list.length; i++) (new File(from_dir, list[i])).renameTo(new File(to_dir, list[i]));
     }
     
 
     public static class dirlistComparator implements Comparator<File> {
         
-        public int compare(File file1, File file2) {
+        public int compare(final File file1, final File file2) {
             if (file1.isDirectory() && !file2.isDirectory()) {
                 return -1;
             } else if (!file1.isDirectory() && file2.isDirectory()) {
@@ -488,10 +488,10 @@ public final class serverFileUtils {
         }
     }    
 
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         try {
             writeAndGZip("ein zwei drei, Zauberei".getBytes(), new File("zauberei.txt.gz"));
-        } catch (IOException e) {
+        } catch (final IOException e) {
             e.printStackTrace();
         }
     }
@@ -503,7 +503,7 @@ public final class serverFileUtils {
      * @return number of copies bytes
      * @throws IOException
      */
-    public static int copyToStream(BufferedInputStream in, final BufferedOutputStream out) throws IOException {
+    public static int copyToStream(final BufferedInputStream in, final BufferedOutputStream out) throws IOException {
         int count = 0;
         // copy bytes
         int b;
@@ -523,7 +523,7 @@ public final class serverFileUtils {
      * @return number of copies bytes
      * @throws IOException
      */
-    public static int copyToStreams(BufferedInputStream in, final BufferedOutputStream out0, final BufferedOutputStream out1) throws IOException {
+    public static int copyToStreams(final BufferedInputStream in, final BufferedOutputStream out0, final BufferedOutputStream out1) throws IOException {
         assert out0 != null;
         assert out1 != null;
         

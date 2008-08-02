@@ -58,22 +58,22 @@ public final class plasmaSearchRankingProcess {
     private static boolean useYBR = true;
     private static final int maxDoubleDomAll = 20, maxDoubleDomSpecial = 10000;
     
-    private kelondroSortStack<indexRWIVarEntry> stack;
-    private HashMap<String, kelondroSortStack<indexRWIVarEntry>> doubleDomCache; // key = domhash (6 bytes); value = like stack
-    private HashMap<String, String> handover; // key = urlhash, value = urlstring; used for double-check of urls that had been handed over to search process
-    private plasmaSearchQuery query;
-    private int maxentries;
+    private final kelondroSortStack<indexRWIVarEntry> stack;
+    private final HashMap<String, kelondroSortStack<indexRWIVarEntry>> doubleDomCache; // key = domhash (6 bytes); value = like stack
+    private final HashMap<String, String> handover; // key = urlhash, value = urlstring; used for double-check of urls that had been handed over to search process
+    private final plasmaSearchQuery query;
+    private final int maxentries;
     private int remote_peerCount, remote_indexCount, remote_resourceSize, local_resourceSize;
-    private indexRWIEntryOrder order;
-    private ConcurrentHashMap<String, Integer> urlhashes; // map for double-check; String/Long relation, addresses ranking number (backreference for deletion)
-    private kelondroMScoreCluster<String> ref;  // reference score computation for the commonSense heuristic
-    private int[] flagcount; // flag counter
-    private TreeSet<String> misses; // contains url-hashes that could not been found in the LURL-DB
-    private plasmaWordIndex wordIndex;
+    private final indexRWIEntryOrder order;
+    private final ConcurrentHashMap<String, Integer> urlhashes; // map for double-check; String/Long relation, addresses ranking number (backreference for deletion)
+    private final kelondroMScoreCluster<String> ref;  // reference score computation for the commonSense heuristic
+    private final int[] flagcount; // flag counter
+    private final TreeSet<String> misses; // contains url-hashes that could not been found in the LURL-DB
+    private final plasmaWordIndex wordIndex;
     private HashMap<String, indexContainer>[] localSearchContainerMaps;
-    private int[] domZones;
+    private final int[] domZones;
     
-    public plasmaSearchRankingProcess(plasmaWordIndex wordIndex, plasmaSearchQuery query, int maxentries, int concurrency) {
+    public plasmaSearchRankingProcess(final plasmaWordIndex wordIndex, final plasmaSearchQuery query, final int maxentries, final int concurrency) {
         // we collect the urlhashes and construct a list with urlEntry objects
         // attention: if minEntries is too high, this method will not terminate within the maxTime
         // sortorder: 0 = hash, 1 = url, 2 = ranking
@@ -98,7 +98,7 @@ public final class plasmaSearchRankingProcess {
         for (int i = 0; i < 8; i++) {this.domZones[i] = 0;}
     }
     
-    public long ranking(indexRWIVarEntry word) {
+    public long ranking(final indexRWIVarEntry word) {
         return order.cardinal(word);
     }
     
@@ -114,7 +114,7 @@ public final class plasmaSearchRankingProcess {
         
         // join and exclude the local result
         timer = System.currentTimeMillis();
-        indexContainer index =
+        final indexContainer index =
             (this.localSearchContainerMaps == null) ?
               plasmaWordIndex.emptyContainer(null, 0) :
                   indexContainer.joinExcludeContainers(
@@ -122,7 +122,7 @@ public final class plasmaSearchRankingProcess {
                       this.localSearchContainerMaps[1].values(),
                       query.maxDistance);
         serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), plasmaSearchEvent.JOIN, index.size(), System.currentTimeMillis() - timer));
-        int joincount = index.size();
+        final int joincount = index.size();
         
         if ((index == null) || (joincount == 0)) {
             return;
@@ -131,7 +131,7 @@ public final class plasmaSearchRankingProcess {
         insertRanked(index, true, index.size());
     }
     
-    public void insertRanked(indexContainer index, boolean local, int fullResource) {
+    public void insertRanked(final indexContainer index, final boolean local, final int fullResource) {
         // we collect the urlhashes and construct a list with urlEntry objects
         // attention: if minEntries is too high, this method will not terminate within the maxTime
 
@@ -147,12 +147,12 @@ public final class plasmaSearchRankingProcess {
         long timer = System.currentTimeMillis();
         
         // normalize entries
-        ArrayList<indexRWIVarEntry> decodedEntries = this.order.normalizeWith(index);
+        final ArrayList<indexRWIVarEntry> decodedEntries = this.order.normalizeWith(index);
         serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), plasmaSearchEvent.NORMALIZING, index.size(), System.currentTimeMillis() - timer));
         
         // iterate over normalized entries and select some that are better than currently stored
         timer = System.currentTimeMillis();
-        Iterator<indexRWIVarEntry> i = decodedEntries.iterator();
+        final Iterator<indexRWIVarEntry> i = decodedEntries.iterator();
         indexRWIVarEntry iEntry;
         Long r;
         while (i.hasNext()) {
@@ -218,7 +218,7 @@ public final class plasmaSearchRankingProcess {
         serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), plasmaSearchEvent.PRESORT, index.size(), System.currentTimeMillis() - timer));
     }
 
-    private boolean testFlags(indexRWIEntry ientry) {
+    private boolean testFlags(final indexRWIEntry ientry) {
         if (query.constraint == null) return true;
         // test if ientry matches with filter
         // if all = true: let only entries pass that has all matching bits
@@ -247,7 +247,7 @@ public final class plasmaSearchRankingProcess {
     // - root-domain guessing to prefer the root domain over other urls if search word appears in domain name
     
     
-    private kelondroSortStack<indexRWIVarEntry>.stackElement bestRWI(boolean skipDoubleDom) {
+    private kelondroSortStack<indexRWIVarEntry>.stackElement bestRWI(final boolean skipDoubleDom) {
         // returns from the current RWI list the best entry and removes this entry from the list
         kelondroSortStack<indexRWIVarEntry> m;
         kelondroSortStack<indexRWIVarEntry>.stackElement rwi;
@@ -256,7 +256,7 @@ public final class plasmaSearchRankingProcess {
             if (rwi == null) continue; // in case that a synchronization problem occurred just go lazy over it
             if (!skipDoubleDom) return rwi;
             // check doubledom
-            String domhash = rwi.element.urlHash().substring(6);
+            final String domhash = rwi.element.urlHash().substring(6);
             m = this.doubleDomCache.get(domhash);
             if (m == null) {
                 // first appearance of dom
@@ -269,7 +269,7 @@ public final class plasmaSearchRankingProcess {
         }
         // no more entries in sorted RWI entries. Now take Elements from the doubleDomCache
         // find best entry from all caches
-        Iterator<kelondroSortStack<indexRWIVarEntry>> i = this.doubleDomCache.values().iterator();
+        final Iterator<kelondroSortStack<indexRWIVarEntry>> i = this.doubleDomCache.values().iterator();
         kelondroSortStack<indexRWIVarEntry>.stackElement bestEntry = null;
         kelondroSortStack<indexRWIVarEntry>.stackElement o;
         while (i.hasNext()) {
@@ -293,15 +293,15 @@ public final class plasmaSearchRankingProcess {
         return bestEntry;
     }
     
-    public indexURLReference bestURL(boolean skipDoubleDom) {
+    public indexURLReference bestURL(final boolean skipDoubleDom) {
         // returns from the current RWI list the best URL entry and removed this entry from the list
         while ((stack.size() > 0) || (size() > 0)) {
                 if (((stack.size() == 0) && (size() == 0))) break;
-                kelondroSortStack<indexRWIVarEntry>.stackElement obrwi = bestRWI(skipDoubleDom);
+                final kelondroSortStack<indexRWIVarEntry>.stackElement obrwi = bestRWI(skipDoubleDom);
                 if (obrwi == null) continue; // *** ? this happened and the thread was suspended silently. cause?
-                indexURLReference u = wordIndex.getURL(obrwi.element.urlHash(), obrwi.element, obrwi.weight.longValue());
+                final indexURLReference u = wordIndex.getURL(obrwi.element.urlHash(), obrwi.element, obrwi.weight.longValue());
                 if (u != null) {
-                    indexURLReference.Components comp = u.comp();
+                    final indexURLReference.Components comp = u.comp();
                     if (comp.url() != null) this.handover.put(u.hash(), comp.url().toNormalform(true, false)); // remember that we handed over this url
                     return u;
                 }
@@ -313,7 +313,7 @@ public final class plasmaSearchRankingProcess {
     public int size() {
         //assert sortedRWIEntries.size() == urlhashes.size() : "sortedRWIEntries.size() = " + sortedRWIEntries.size() + ", urlhashes.size() = " + urlhashes.size();
         int c = stack.size();
-        Iterator<kelondroSortStack<indexRWIVarEntry>> i = this.doubleDomCache.values().iterator();
+        final Iterator<kelondroSortStack<indexRWIVarEntry>> i = this.doubleDomCache.values().iterator();
         while (i.hasNext()) c += i.next().size();
         return c;
     }
@@ -349,8 +349,8 @@ public final class plasmaSearchRankingProcess {
         return this.local_resourceSize;
     }
     
-    public indexRWIEntry remove(String urlHash) {
-        kelondroSortStack<indexRWIVarEntry>.stackElement se = stack.remove(urlHash.hashCode());
+    public indexRWIEntry remove(final String urlHash) {
+        final kelondroSortStack<indexRWIVarEntry>.stackElement se = stack.remove(urlHash.hashCode());
         if (se == null) return null;
         urlhashes.remove(urlHash);
         return se.element;
@@ -360,18 +360,18 @@ public final class plasmaSearchRankingProcess {
         return this.misses.iterator();
     }
     
-    public Set<String> getReferences(int count) {
+    public Set<String> getReferences(final int count) {
         // create a list of words that had been computed by statistics over all
         // words that appeared in the url or the description of all urls
-        Object[] refs = ref.getScores(count, false, 2, Integer.MAX_VALUE);
-        TreeSet<String> s = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
+        final Object[] refs = ref.getScores(count, false, 2, Integer.MAX_VALUE);
+        final TreeSet<String> s = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
         for (int i = 0; i < refs.length; i++) {
             s.add((String) refs[i]);
         }
         return s;
     }
     
-    public void addReferences(String[] words) {
+    public void addReferences(final String[] words) {
         String word;
         for (int i = 0; i < words.length; i++) {
             word = words[i].toLowerCase();
@@ -382,11 +382,11 @@ public final class plasmaSearchRankingProcess {
         }
     }
     
-    protected void addReferences(plasmaSearchEvent.ResultEntry resultEntry) {
+    protected void addReferences(final plasmaSearchEvent.ResultEntry resultEntry) {
         // take out relevant information for reference computation
         if ((resultEntry.url() == null) || (resultEntry.title() == null)) return;
-        String[] urlcomps = htmlFilterContentScraper.urlComps(resultEntry.url().toNormalform(true, true)); // word components of the url
-        String[] descrcomps = resultEntry.title().toLowerCase().split(htmlFilterContentScraper.splitrex); // words in the description
+        final String[] urlcomps = htmlFilterContentScraper.urlComps(resultEntry.url().toNormalform(true, true)); // word components of the url
+        final String[] descrcomps = resultEntry.title().toLowerCase().split(htmlFilterContentScraper.splitrex); // words in the description
         
         // add references
         addReferences(urlcomps);
@@ -397,7 +397,7 @@ public final class plasmaSearchRankingProcess {
         return this.order;
     }
     
-    public static void loadYBR(File rankingPath, int count) {
+    public static void loadYBR(final File rankingPath, final int count) {
         // load ranking tables
         if (rankingPath.exists()) {
             ybrTables = new kelondroBinSearch[count];
@@ -413,7 +413,7 @@ public final class plasmaSearchRankingProcess {
                         ybrTables[i] = null;
                     }
                 }
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 ybrTables = null;
             }
         } else {
@@ -429,16 +429,16 @@ public final class plasmaSearchRankingProcess {
         return useYBR;
     }
     
-    public static void switchYBR(boolean usage) {
+    public static void switchYBR(final boolean usage) {
         useYBR = usage;
     }
     
-    public static int ybr(String urlHash) {
+    public static int ybr(final String urlHash) {
         // returns the YBR value in a range of 0..15, where 0 means best ranking and 15 means worst ranking
         if (ybrTables == null) return 15;
         if (!(useYBR)) return 15;
         final String domHash = urlHash.substring(6);
-        int m = Math.min(maxYBR, ybrTables.length);
+        final int m = Math.min(maxYBR, ybrTables.length);
         for (int i = 0; i < m; i++) {
             if ((ybrTables[i] != null) && (ybrTables[i].contains(domHash.getBytes()))) {
                 //System.out.println("YBR FOUND: " + urlHash + " (" + i + ")");
@@ -450,9 +450,9 @@ public final class plasmaSearchRankingProcess {
     }
     
     public long postRanking(
-                    Set<String> topwords,
-                    plasmaSearchEvent.ResultEntry rentry,
-                    int position) {
+                    final Set<String> topwords,
+                    final plasmaSearchEvent.ResultEntry rentry,
+                    final int position) {
 
         long r = (255 - position) << 8;
         
@@ -467,9 +467,9 @@ public final class plasmaSearchRankingProcess {
         if (rentry.title().matches(query.prefer)) r += 256 << query.ranking.coeff_prefer;
         
         // apply 'common-sense' heuristic using references
-        String urlstring = rentry.url().toNormalform(true, true);
-        String[] urlcomps = htmlFilterContentScraper.urlComps(urlstring);
-        String[] descrcomps = rentry.title().toLowerCase().split(htmlFilterContentScraper.splitrex);
+        final String urlstring = rentry.url().toNormalform(true, true);
+        final String[] urlcomps = htmlFilterContentScraper.urlComps(urlstring);
+        final String[] descrcomps = rentry.title().toLowerCase().split(htmlFilterContentScraper.splitrex);
         for (int j = 0; j < urlcomps.length; j++) {
             if (topwords.contains(urlcomps[j])) r += Math.max(1, 256 - urlstring.length()) << query.ranking.coeff_urlcompintoplist;
         }
@@ -478,9 +478,9 @@ public final class plasmaSearchRankingProcess {
         }
 
         // apply query-in-result matching
-        Set<String> urlcomph = indexWord.words2hashSet(urlcomps);
-        Set<String> descrcomph = indexWord.words2hashSet(descrcomps);
-        Iterator<String> shi = query.queryHashes.iterator();
+        final Set<String> urlcomph = indexWord.words2hashSet(urlcomps);
+        final Set<String> descrcomph = indexWord.words2hashSet(descrcomps);
+        final Iterator<String> shi = query.queryHashes.iterator();
         String queryhash;
         while (shi.hasNext()) {
             queryhash = shi.next();

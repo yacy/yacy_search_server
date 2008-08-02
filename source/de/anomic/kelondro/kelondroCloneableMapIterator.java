@@ -38,7 +38,7 @@ public class kelondroCloneableMapIterator<E> implements kelondroCloneableIterato
 	Iterator<E> iter;
 	
 
-	public kelondroCloneableMapIterator(TreeMap<E, ?> map, E start) {
+	public kelondroCloneableMapIterator(final TreeMap<E, ?> map, final E start) {
 		// map must contain eiter a byte[]/Object or a String/Object mapping.
 		// start must be either of type byte[] or String
         // this iterator iterates then only the key elements of the map
@@ -55,7 +55,7 @@ public class kelondroCloneableMapIterator<E> implements kelondroCloneableIterato
 	}
 	
 	@SuppressWarnings("unchecked")
-    public kelondroCloneableMapIterator<E> clone(Object modifier) {
+    public kelondroCloneableMapIterator<E> clone(final Object modifier) {
 		return new kelondroCloneableMapIterator(map, modifier);
 	}
 

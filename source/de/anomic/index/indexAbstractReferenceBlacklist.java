@@ -61,7 +61,7 @@ public abstract class indexAbstractReferenceBlacklist implements indexReferenceB
     protected HashMap<String, HashMap<String, ArrayList<String>>> hostpaths_matchable = null; // key=host, value=path; mapped url is http://host/path; path does not start with '/' here
     protected HashMap<String, HashMap<String, ArrayList<String>>> hostpaths_notmatchable = null; // key=host, value=path; mapped url is http://host/path; path does not start with '/' here
     
-    public indexAbstractReferenceBlacklist(File rootPath) {
+    public indexAbstractReferenceBlacklist(final File rootPath) {
         this.setRootPath(rootPath);
         
         this.blacklistRootPath = rootPath;
@@ -72,9 +72,9 @@ public abstract class indexAbstractReferenceBlacklist implements indexReferenceB
         this.hostpaths_notmatchable = new HashMap<String, HashMap<String, ArrayList<String>>>();
         this.cachedUrlHashs = new HashMap<String, Set<String>>();
         
-        Iterator<String> iter = BLACKLIST_TYPES.iterator();
+        final Iterator<String> iter = BLACKLIST_TYPES.iterator();
         while (iter.hasNext()) {
-            String blacklistType = iter.next();
+            final String blacklistType = iter.next();
             //this.hostpaths.put(blacklistType, new HashMap<String, ArrayList<String>>());
             this.hostpaths_matchable.put(blacklistType, new HashMap<String, ArrayList<String>>());
             this.hostpaths_notmatchable.put(blacklistType, new HashMap<String, ArrayList<String>>());
@@ -82,7 +82,7 @@ public abstract class indexAbstractReferenceBlacklist implements indexReferenceB
         }            
     }
     
-    public void setRootPath(File rootPath) {
+    public void setRootPath(final File rootPath) {
         if (rootPath == null) 
             throw new NullPointerException("The blacklist root path must not be null.");
         if (!rootPath.isDirectory()) 
@@ -93,14 +93,14 @@ public abstract class indexAbstractReferenceBlacklist implements indexReferenceB
         this.blacklistRootPath = rootPath;
     }
     
-    protected HashMap<String, ArrayList<String>> getBlacklistMap(String blacklistType,boolean matchable) {
+    protected HashMap<String, ArrayList<String>> getBlacklistMap(final String blacklistType,final boolean matchable) {
         if (blacklistType == null) throw new IllegalArgumentException();
         if (!BLACKLIST_TYPES.contains(blacklistType)) throw new IllegalArgumentException("Unknown blacklist type: "+blacklistType+".");        
         
         return (matchable)? this.hostpaths_matchable.get(blacklistType) : this.hostpaths_notmatchable.get(blacklistType);
     }
     
-    protected Set<String> getCacheUrlHashsSet(String blacklistType) {
+    protected Set<String> getCacheUrlHashsSet(final String blacklistType) {
         if (blacklistType == null) throw new IllegalArgumentException();
         if (!BLACKLIST_TYPES.contains(blacklistType)) throw new IllegalArgumentException("Unknown backlist type.");        
 
@@ -108,59 +108,59 @@ public abstract class indexAbstractReferenceBlacklist implements indexReferenceB
     }
     
     public void clear() {
-        for(HashMap<String, ArrayList<String>> entry: this.hostpaths_matchable.values()) {
+        for(final HashMap<String, ArrayList<String>> entry: this.hostpaths_matchable.values()) {
             entry.clear();
         }
-        for(HashMap<String, ArrayList<String>> entry: this.hostpaths_notmatchable.values()) {
+        for(final HashMap<String, ArrayList<String>> entry: this.hostpaths_notmatchable.values()) {
             entry.clear();
         }
-        for(Set<String> entry: this.cachedUrlHashs.values()) {
+        for(final Set<String> entry: this.cachedUrlHashs.values()) {
             entry.clear();
         }
     }
 
     public int size() {
         int size = 0;
-        for(String entry: this.hostpaths_matchable.keySet()) {
-            for(ArrayList<String> ientry: this.hostpaths_matchable.get(entry).values()) {
+        for(final String entry: this.hostpaths_matchable.keySet()) {
+            for(final ArrayList<String> ientry: this.hostpaths_matchable.get(entry).values()) {
                 size += ientry.size();
             }
         }
-        for(String entry: this.hostpaths_notmatchable.keySet()) {
-            for(ArrayList<String> ientry: this.hostpaths_notmatchable.get(entry).values()) {
+        for(final String entry: this.hostpaths_notmatchable.keySet()) {
+            for(final ArrayList<String> ientry: this.hostpaths_notmatchable.get(entry).values()) {
                 size += ientry.size();
             }
         }
         return size;
     }
     
-    public void loadList(blacklistFile[] blFiles, String sep) {        
+    public void loadList(final blacklistFile[] blFiles, final String sep) {        
         for (int j = 0; j < blFiles.length; j++) {
-            blacklistFile blf = blFiles[j];
+            final blacklistFile blf = blFiles[j];
             loadList(blf.getType(), blf.getFileName(), sep);
         }
     }
     
-    public void loadList(blacklistFile blFile, String sep) {
-        HashMap<String, ArrayList<String>> blacklistMapMatch = getBlacklistMap(blFile.getType(),true);
-        HashMap<String, ArrayList<String>> blacklistMapNotMatch = getBlacklistMap(blFile.getType(),false);
+    public void loadList(final blacklistFile blFile, final String sep) {
+        final HashMap<String, ArrayList<String>> blacklistMapMatch = getBlacklistMap(blFile.getType(),true);
+        final HashMap<String, ArrayList<String>> blacklistMapNotMatch = getBlacklistMap(blFile.getType(),false);
         Set<Map.Entry<String, ArrayList<String>>> loadedBlacklist;
         Map.Entry<String, ArrayList<String>> loadedEntry;
         ArrayList<String> paths;
         ArrayList<String> loadedPaths;
 
-        String[] fileNames = blFile.getFileNamesUnified();
+        final String[] fileNames = blFile.getFileNamesUnified();
         if (fileNames.length > 0) {
             for (int i = 0; i < fileNames.length; i++) {
                 // make sure all requested blacklist files exist
-                File file = new File(this.blacklistRootPath, fileNames[i]);
+                final File file = new File(this.blacklistRootPath, fileNames[i]);
                 try {
                     file.createNewFile();
-                } catch (IOException e) { /* */ }
+                } catch (final IOException e) { /* */ }
                 
                 // join all blacklists from files into one internal blacklist map
                 loadedBlacklist = kelondroMSetTools.loadMapMultiValsPerKey(file.toString(), sep).entrySet();
-                for (Iterator<Map.Entry<String, ArrayList<String>>> mi = loadedBlacklist.iterator(); mi.hasNext(); ) {
+                for (final Iterator<Map.Entry<String, ArrayList<String>>> mi = loadedBlacklist.iterator(); mi.hasNext(); ) {
                     loadedEntry = mi.next();
                     loadedPaths = loadedEntry.getValue();
                     
@@ -181,28 +181,28 @@ public abstract class indexAbstractReferenceBlacklist implements indexReferenceB
         }
     }
     
-    public void loadList(String blacklistType, String fileNames, String sep) {
+    public void loadList(final String blacklistType, final String fileNames, final String sep) {
         // method for not breaking older plasmaURLPattern interface
-        blacklistFile blFile = new blacklistFile(fileNames, blacklistType);
+        final blacklistFile blFile = new blacklistFile(fileNames, blacklistType);
         
         loadList(blFile, sep);
     }
     
-    public void removeAll(String blacklistType, String host) {
+    public void removeAll(final String blacklistType, final String host) {
         getBlacklistMap(blacklistType,true).remove(host);
         getBlacklistMap(blacklistType,false).remove(host);
     }
     
-    public void remove(String blacklistType, String host, String path) {
+    public void remove(final String blacklistType, final String host, final String path) {
         
-        HashMap<String, ArrayList<String>> blacklistMap = getBlacklistMap(blacklistType,true);
+        final HashMap<String, ArrayList<String>> blacklistMap = getBlacklistMap(blacklistType,true);
         ArrayList<String> hostList = blacklistMap.get(host);
         if(hostList != null) {
             hostList.remove(path);
             if (hostList.size() == 0)
                 blacklistMap.remove(host);
         }
-        HashMap<String, ArrayList<String>> blacklistMapNotMatch = getBlacklistMap(blacklistType,false);
+        final HashMap<String, ArrayList<String>> blacklistMapNotMatch = getBlacklistMap(blacklistType,false);
         hostList = blacklistMapNotMatch.get(host);
         if(hostList != null) {
             hostList.remove(path);
@@ -211,7 +211,7 @@ public abstract class indexAbstractReferenceBlacklist implements indexReferenceB
         }
 }   
 
-    public void add(String blacklistType, String host, String path) {
+    public void add(final String blacklistType, String host, String path) {
         if (host == null) throw new NullPointerException();
         if (path == null) throw new NullPointerException();
         
@@ -231,24 +231,24 @@ public abstract class indexAbstractReferenceBlacklist implements indexReferenceB
 
     public int blacklistCacheSize() {
         int size = 0;
-        Iterator<String> iter = this.cachedUrlHashs.keySet().iterator();
+        final Iterator<String> iter = this.cachedUrlHashs.keySet().iterator();
         while (iter.hasNext()) {
-            Set<String> blacklistMap = this.cachedUrlHashs.get(iter.next());
+            final Set<String> blacklistMap = this.cachedUrlHashs.get(iter.next());
             size += blacklistMap.size();
         }
         return size;        
     }
 
-    public boolean hashInBlacklistedCache(String blacklistType, String urlHash) {
-        Set<String> urlHashCache = getCacheUrlHashsSet(blacklistType);   
+    public boolean hashInBlacklistedCache(final String blacklistType, final String urlHash) {
+        final Set<String> urlHashCache = getCacheUrlHashsSet(blacklistType);   
         return urlHashCache.contains(urlHash);
     }
 
-    public boolean isListed(String blacklistType, yacyURL url) {
+    public boolean isListed(final String blacklistType, final yacyURL url) {
 
-        Set<String> urlHashCache = getCacheUrlHashsSet(blacklistType);        
+        final Set<String> urlHashCache = getCacheUrlHashsSet(blacklistType);        
         if (!urlHashCache.contains(url.hash())) {
-            boolean temp = isListed(blacklistType, url.getHost().toLowerCase(), url.getFile());
+            final boolean temp = isListed(blacklistType, url.getHost().toLowerCase(), url.getFile());
             if (temp) {
                 urlHashCache.add(url.hash());
             }
@@ -256,7 +256,7 @@ public abstract class indexAbstractReferenceBlacklist implements indexReferenceB
         }        
         return true;  
     }
-    public static boolean isMatchable (String host) {
+    public static boolean isMatchable (final String host) {
         try {
             if(Pattern.matches("^[a-z0-9.-]*$", host)) // simple Domain (yacy.net or www.yacy.net)
                 return true;
@@ -264,7 +264,7 @@ public abstract class indexAbstractReferenceBlacklist implements indexReferenceB
                 return true;
             if(Pattern.matches("^[a-z0-9-.]*\\.\\*$", host)) // ends with .* (not *. and befor * must be a dot)
                 return true;
-        } catch (PatternSyntaxException e) {
+        } catch (final PatternSyntaxException e) {
             //System.out.println(e.toString());
             return false;
         }

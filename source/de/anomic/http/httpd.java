@@ -35,6 +35,7 @@ import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.Date;
@@ -129,7 +130,7 @@ public final class httpd implements serverHandler {
     private final serverLog log = new serverLog("HTTPD");
 
     // class methods
-    public httpd(serverSwitch<?> s) {
+    public httpd(final serverSwitch<?> s) {
         // handler info
         httpd.switchboard = (plasmaSwitchboard)s;
         httpd.virtualHost = switchboard.getConfig("fileHost","localhost");
@@ -172,7 +173,7 @@ public final class httpd implements serverHandler {
      * Must be called at least once, but can be called again to re-use the object.
      * @see de.anomic.server.serverHandler#initSession(de.anomic.server.serverCore.Session)
      */
-    public void initSession(serverCore.Session newsession) throws IOException {
+    public void initSession(final serverCore.Session newsession) throws IOException {
         this.session = newsession;
         this.userAddress = session.userAddress; // client InetAddress
         this.clientIP = this.userAddress.getHostAddress();
@@ -197,10 +198,10 @@ public final class httpd implements serverHandler {
         this.serverAccountBase64MD5 = null;
     }
 
-    private static boolean match(String key, String latch) {
+    private static boolean match(final String key, final String latch) {
         // the latch is a comma-separated list of patterns
         // each pattern may contain one wildcard-character '*' which matches anything
-        StringTokenizer st = new StringTokenizer(latch,",");
+        final StringTokenizer st = new StringTokenizer(latch,",");
         String pattern;
         while (st.hasMoreTokens()) {
             pattern = st.nextToken();
@@ -226,11 +227,11 @@ public final class httpd implements serverHandler {
         return null;
     }
     
-    public String error(Throwable e) { // OBLIGATORIC FUNCTION
+    public String error(final Throwable e) { // OBLIGATORIC FUNCTION
         // return string in case of any error that occurs during communication
         // is always (but not only) called if an IO-dependent exception occurrs.
         this.log.logSevere("Unexpected Error. " + e.getClass().getName(),e);
-        String message = e.getMessage();
+        final String message = e.getMessage();
         if (message.indexOf("heap space") > 0) e.printStackTrace();
         return "501 Exception occurred: " + message;
     }
@@ -240,7 +241,7 @@ public final class httpd implements serverHandler {
      * @param header the received http-headers
      * @return <code>true</code> if a persistent connection was requested or <code>false</code> otherwise
      */
-    private boolean handlePersistentConnection(httpHeader header) {
+    private boolean handlePersistentConnection(final httpHeader header) {
         
         if (!keepAliveSupport) {
             this.prop.put(httpHeader.CONNECTION_PROP_PERSISTENT,"close");
@@ -248,7 +249,7 @@ public final class httpd implements serverHandler {
         }
         
         // getting the http version that is used by the client
-        String httpVersion = this.prop.getProperty(httpHeader.CONNECTION_PROP_HTTP_VER, "HTTP/0.9");
+        final String httpVersion = this.prop.getProperty(httpHeader.CONNECTION_PROP_HTTP_VER, "HTTP/0.9");
         
         // managing keep-alive: in HTTP/0.9 and HTTP/1.0 every connection is closed
         // afterwards. In HTTP/1.1 (and above, in the future?) connections are
@@ -260,10 +261,10 @@ public final class httpd implements serverHandler {
             persistent = false;
         }        
         
-        String transferEncoding = (String) header.get(httpHeader.TRANSFER_ENCODING, "identity");
-        boolean isPostRequest = this.prop.getProperty(httpHeader.CONNECTION_PROP_METHOD).equals(httpHeader.METHOD_POST);
-        boolean hasContentLength = header.containsKey(httpHeader.CONTENT_LENGTH);
-        boolean hasTransferEncoding = header.containsKey(httpHeader.TRANSFER_ENCODING) && !transferEncoding.equalsIgnoreCase("identity");
+        final String transferEncoding = (String) header.get(httpHeader.TRANSFER_ENCODING, "identity");
+        final boolean isPostRequest = this.prop.getProperty(httpHeader.CONNECTION_PROP_METHOD).equals(httpHeader.METHOD_POST);
+        final boolean hasContentLength = header.containsKey(httpHeader.CONTENT_LENGTH);
+        final boolean hasTransferEncoding = header.containsKey(httpHeader.TRANSFER_ENCODING) && !transferEncoding.equalsIgnoreCase("identity");
         
         // if the request does not contain a content-length we have to close the connection
         // independently of the value of the connection header
@@ -274,26 +275,26 @@ public final class httpd implements serverHandler {
         return persistent;
     }
     
-    public static int staticAdminAuthenticated(String authorization, serverSwitch<?> sw) {
+    public static int staticAdminAuthenticated(final String authorization, final serverSwitch<?> sw) {
         // the authorization string must be given with the truncated 6 bytes at the beginning
         if (authorization == null) return 1;
         //if (authorization.length() < 6) return 1; // no authentication information given
-        String adminAccountBase64MD5 = sw.getConfig(ADMIN_ACCOUNT_B64MD5, "");
+        final String adminAccountBase64MD5 = sw.getConfig(ADMIN_ACCOUNT_B64MD5, "");
         if (adminAccountBase64MD5.length() == 0) return 2; // no password stored
         if (adminAccountBase64MD5.equals(serverCodings.encodeMD5Hex(authorization))) return 4; // hard-authenticated, all ok
         return 1;
     }
     
-    private boolean handleServerAuthentication(httpHeader header) throws IOException {
+    private boolean handleServerAuthentication(final httpHeader header) throws IOException {
         // getting the http version that is used by the client
-        String httpVersion = this.prop.getProperty(httpHeader.CONNECTION_PROP_HTTP_VER, "HTTP/0.9");        
+        final String httpVersion = this.prop.getProperty(httpHeader.CONNECTION_PROP_HTTP_VER, "HTTP/0.9");        
         
         // reading the authentication settings from switchboard
         if (this.serverAccountBase64MD5 == null) 
             this.serverAccountBase64MD5 = switchboard.getConfig("serverAccountBase64MD5", "");
         
         if (this.serverAccountBase64MD5.length() > 0) {
-            String auth = header.get(httpHeader.AUTHORIZATION);
+            final String auth = header.get(httpHeader.AUTHORIZATION);
             if (auth == null) {
                 // authorization requested, but no authorizeation given in header. Ask for authenticate:
                 this.session.out.write((httpVersion + " 401 log-in required" + serverCore.CRLF_STRING +
@@ -317,14 +318,14 @@ public final class httpd implements serverHandler {
         return true;
     }
     
-    private boolean handleYaCyHopAuthentication(httpHeader header) {
+    private boolean handleYaCyHopAuthentication(final httpHeader header) {
         // check if the user has allowed that his/her peer is used for hops
         if (!this.allowYaCyHop) return false;
         
         // proxy hops must identify with 4 criteria:
         
         // the accessed port must not be port 80
-        String host = this.prop.getProperty(httpHeader.CONNECTION_PROP_HOST);
+        final String host = this.prop.getProperty(httpHeader.CONNECTION_PROP_HOST);
         if (host == null) return false;
         int pos;
         if ((pos = host.indexOf(":")) < 0) {
@@ -340,9 +341,9 @@ public final class httpd implements serverHandler {
         // the accessing client must identify with user:password, where
         // user = addressed peer name
         // pw = addressed peer hash (b64-hash)
-        String auth = (String) header.get(httpHeader.PROXY_AUTHORIZATION,"xxxxxx");
+        final String auth = (String) header.get(httpHeader.PROXY_AUTHORIZATION,"xxxxxx");
         if (alternativeResolver != null) {
-            String test = kelondroBase64Order.standardCoder.encodeString(alternativeResolver.myName() + ":" + alternativeResolver.myID());
+            final String test = kelondroBase64Order.standardCoder.encodeString(alternativeResolver.myName() + ":" + alternativeResolver.myID());
             if (!test.equals(auth.trim().substring(6))) return false;
         }
         
@@ -352,7 +353,7 @@ public final class httpd implements serverHandler {
         // furthermore, YaCy hops must not exceed a specific access frequency
         
         // check access requester frequency: protection against DoS against this peer
-        String requester = this.prop.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP);
+        final String requester = this.prop.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP);
         if (requester == null) return false;
         if (lastAccessDelta(YaCyHopAccessRequester, requester) < 10000) return false;
         YaCyHopAccessRequester.put(requester, new Long(System.currentTimeMillis()));
@@ -365,15 +366,15 @@ public final class httpd implements serverHandler {
         return true;
     }
 
-    private static long lastAccessDelta(HashMap<String, Long> accessTable, String domain) {
-        Long lastAccess = accessTable.get(domain);
+    private static long lastAccessDelta(final HashMap<String, Long> accessTable, final String domain) {
+        final Long lastAccess = accessTable.get(domain);
         if (lastAccess == null) return Long.MAX_VALUE; // never accessed
         return System.currentTimeMillis() - lastAccess.longValue();
     }
     
-    private boolean handleProxyAuthentication(httpHeader header) throws IOException {
+    private boolean handleProxyAuthentication(final httpHeader header) throws IOException {
         // getting the http version that is used by the client
-        String httpVersion = this.prop.getProperty("HTTP", "HTTP/0.9");            
+        final String httpVersion = this.prop.getProperty("HTTP", "HTTP/0.9");            
         
         // reading the authentication settings from switchboard
         if (!this.proxyAccounts_init) {
@@ -382,17 +383,17 @@ public final class httpd implements serverHandler {
 		}
         
         if (this.use_proxyAccounts) {
-            String auth = (String) header.get(httpHeader.PROXY_AUTHORIZATION,"xxxxxx");    
+            final String auth = (String) header.get(httpHeader.PROXY_AUTHORIZATION,"xxxxxx");    
             userDB.Entry entry=switchboard.userDB.ipAuth(this.clientIP);
 			if(entry == null){
 				entry=switchboard.userDB.proxyAuth(auth, this.clientIP);
 			}
             if(entry != null){
-                int returncode=entry.surfRight();
+                final int returncode=entry.surfRight();
 			    if(returncode==userDB.Entry.PROXY_ALLOK){
 				    return true;
 				}
-                serverObjects tp=new serverObjects();
+                final serverObjects tp=new serverObjects();
                 if(returncode==userDB.Entry.PROXY_TIMELIMIT_REACHED){
                     tp.put("limit", "1");//time per day
                     tp.put("limit_timelimit", entry.getTimeLimit());
@@ -415,7 +416,7 @@ public final class httpd implements serverHandler {
         return true;
     }
     
-    public Boolean UNKNOWN(String requestLine) throws IOException {
+    public Boolean UNKNOWN(final String requestLine) throws IOException {
         
         int pos;
         String unknownCommand = null, args = null;
@@ -434,30 +435,30 @@ public final class httpd implements serverHandler {
         return serverCore.TERMINATE_CONNECTION;
     }
     
-    public Boolean EMPTY(String arg) throws IOException {
+    public Boolean EMPTY(final String arg) throws IOException {
         if (++this.emptyRequestCount > 10) return serverCore.TERMINATE_CONNECTION;
         return serverCore.RESUME_CONNECTION;
     }
     
-    public Boolean TRACE(String arg) throws IOException {
+    public Boolean TRACE(final String arg) throws IOException {
         sendRespondError(this.prop,this.session.out,0,501,null,"TRACE method not implemented",null);
         return serverCore.TERMINATE_CONNECTION;
     }
     
-    public Boolean OPTIONS(String arg) throws IOException {
+    public Boolean OPTIONS(final String arg) throws IOException {
         sendRespondError(this.prop,this.session.out,0,501,null,"OPTIONS method not implemented",null);
         return serverCore.TERMINATE_CONNECTION;
     }    
     
     
-    public Boolean GET(String arg) {
+    public Boolean GET(final String arg) {
         try {
             // parsing the http request line
             parseRequestLine(httpHeader.METHOD_GET,arg);
             
             // we now know the HTTP version. depending on that, we read the header            
-            String httpVersion = this.prop.getProperty(httpHeader.CONNECTION_PROP_HTTP_VER, httpHeader.HTTP_VERSION_0_9);
-            httpHeader header = (httpVersion.equals(httpHeader.HTTP_VERSION_0_9)) 
+            final String httpVersion = this.prop.getProperty(httpHeader.CONNECTION_PROP_HTTP_VER, httpHeader.HTTP_VERSION_0_9);
+            final httpHeader header = (httpVersion.equals(httpHeader.HTTP_VERSION_0_9)) 
             			      ? new httpHeader(reverseMappingCache) 
                               : httpHeader.readHeader(this.prop,this.session);                  
             
@@ -491,7 +492,7 @@ public final class httpd implements serverHandler {
             }
             
             return this.prop.getProperty(httpHeader.CONNECTION_PROP_PERSISTENT).equals("keep-alive") ? serverCore.RESUME_CONNECTION : serverCore.TERMINATE_CONNECTION;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             logUnexpectedError(e);
             return serverCore.TERMINATE_CONNECTION;
         } finally {
@@ -499,11 +500,11 @@ public final class httpd implements serverHandler {
         }
     }
     
-    private void logUnexpectedError(Exception e) {
+    private void logUnexpectedError(final Exception e) {
         if (e instanceof InterruptedException) {
             this.log.logInfo("Interruption detected");
         } else {
-            String errorMsg = e.getMessage();
+            final String errorMsg = e.getMessage();
             if (errorMsg != null) {
                 if (errorMsg.startsWith("Socket closed")) {
                     this.log.logInfo("httpd shutdown detected ...");
@@ -521,13 +522,13 @@ public final class httpd implements serverHandler {
         }        
     }
 
-    public Boolean HEAD(String arg) {
+    public Boolean HEAD(final String arg) {
         try {
             parseRequestLine(httpHeader.METHOD_HEAD,arg);
             
             // we now know the HTTP version. depending on that, we read the header
             httpHeader header;
-            String httpVersion = this.prop.getProperty(httpHeader.CONNECTION_PROP_HTTP_VER, httpHeader.HTTP_VERSION_0_9);
+            final String httpVersion = this.prop.getProperty(httpHeader.CONNECTION_PROP_HTTP_VER, httpHeader.HTTP_VERSION_0_9);
             if (httpVersion.equals(httpHeader.HTTP_VERSION_0_9)) header = new httpHeader(reverseMappingCache);
             else  header = httpHeader.readHeader(this.prop,this.session);
             
@@ -563,7 +564,7 @@ public final class httpd implements serverHandler {
                 }
             }
             return this.prop.getProperty(httpHeader.CONNECTION_PROP_PERSISTENT).equals("keep-alive") ? serverCore.RESUME_CONNECTION : serverCore.TERMINATE_CONNECTION;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             logUnexpectedError(e);
             return serverCore.TERMINATE_CONNECTION;
         } finally {
@@ -571,13 +572,13 @@ public final class httpd implements serverHandler {
         }
     }
     
-    public Boolean POST(String arg) {
+    public Boolean POST(final String arg) {
         try {
             parseRequestLine(httpHeader.METHOD_POST,arg);
             
             // we now know the HTTP version. depending on that, we read the header
             httpHeader header;
-            String httpVersion = this.prop.getProperty(httpHeader.CONNECTION_PROP_HTTP_VER, httpHeader.HTTP_VERSION_0_9);
+            final String httpVersion = this.prop.getProperty(httpHeader.CONNECTION_PROP_HTTP_VER, httpHeader.HTTP_VERSION_0_9);
             if (httpVersion.equals(httpHeader.HTTP_VERSION_0_9))  header = new httpHeader(reverseMappingCache);
             else header = httpHeader.readHeader(this.prop,this.session);
             
@@ -632,7 +633,7 @@ public final class httpd implements serverHandler {
             }
             //return serverCore.RESUME_CONNECTION;
             return this.prop.getProperty(httpHeader.CONNECTION_PROP_PERSISTENT).equals("keep-alive") ? serverCore.RESUME_CONNECTION : serverCore.TERMINATE_CONNECTION;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             logUnexpectedError(e);
             return serverCore.TERMINATE_CONNECTION;
         } finally {
@@ -671,7 +672,7 @@ public final class httpd implements serverHandler {
         prop.setProperty(httpHeader.CONNECTION_PROP_URL, "");        
         
         // parse remaining lines
-        httpHeader header = httpHeader.readHeader(this.prop,this.session);               
+        final httpHeader header = httpHeader.readHeader(this.prop,this.session);               
         
         if (!(allowProxy)) {
             // not authorized through firewall blocking (ip does not match filter)          
@@ -699,14 +700,14 @@ public final class httpd implements serverHandler {
         return serverCore.TERMINATE_CONNECTION;
     }
     
-    private final void parseRequestLine(String cmd, String s) {
+    private final void parseRequestLine(final String cmd, final String s) {
         
         // parsing the header
         httpHeader.parseRequestLine(cmd,s,this.prop,virtualHost);
         
         // track the request
-        String path = this.prop.getProperty(httpHeader.CONNECTION_PROP_URL);
-        String args = this.prop.getProperty(httpHeader.CONNECTION_PROP_ARGS, "");
+        final String path = this.prop.getProperty(httpHeader.CONNECTION_PROP_URL);
+        final String args = this.prop.getProperty(httpHeader.CONNECTION_PROP_ARGS, "");
         switchboard.track(this.userAddress.getHostName(), (args.length() > 0) ? path + "?" + args : path);
         
         // reseting the empty request counter
@@ -723,7 +724,7 @@ public final class httpd implements serverHandler {
     // and also by the httpdFileHandler
     // but this belongs to the protocol handler, this class.
     
-    public static int parseArgs(serverObjects args, InputStream in, int length) throws IOException {
+    public static int parseArgs(final serverObjects args, final InputStream in, final int length) throws IOException {
         // this is a quick hack using a previously coded parseMultipart based on a buffer
         // should be replaced sometime by a 'right' implementation
         byte[] buffer = null;
@@ -740,12 +741,12 @@ public final class httpd implements serverHandler {
             bout.close(); bout = null;
         }
         
-        int argc = parseArgs(args, new String(buffer, "UTF-8"));
+        final int argc = parseArgs(args, new String(buffer, "UTF-8"));
         buffer = null;
         return argc;
     }
     
-    public static int parseArgs(serverObjects args, String argsString) {
+    public static int parseArgs(final serverObjects args, String argsString) {
         // this parses a arg string that can either be attached to a URL query
         // or can be given as result of a post method
         // the String argsString is supposed to be constructed as
@@ -793,7 +794,7 @@ public final class httpd implements serverHandler {
      */
     private static String parseArg(String s) {
         int pos = 0;
-        ByteArrayOutputStream baos = new ByteArrayOutputStream(s.length());
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream(s.length());
         
         while (pos < s.length()) {
             if (s.charAt(pos) == '+') {
@@ -803,8 +804,8 @@ public final class httpd implements serverHandler {
                 try {
                     if (s.length() >= pos + 6 && (s.charAt(pos + 1) == 'u' || s.charAt(pos + 1) == 'U')) {
                         // non-standard encoding of IE for unicode-chars
-                        int bh = Integer.parseInt(s.substring(pos + 2, pos + 4), 16);
-                        int bl = Integer.parseInt(s.substring(pos + 4, pos + 6), 16);
+                        final int bh = Integer.parseInt(s.substring(pos + 2, pos + 4), 16);
+                        final int bl = Integer.parseInt(s.substring(pos + 4, pos + 6), 16);
                         // TODO: needs conversion from UTF-16 to UTF-8
                         baos.write(bh);
                         baos.write(bl);
@@ -815,7 +816,7 @@ public final class httpd implements serverHandler {
                     } else {
                         baos.write(s.charAt(pos++));
                     }
-                } catch (NumberFormatException e) {
+                } catch (final NumberFormatException e) {
                     baos.write(s.charAt(pos++));
                 }
             } else if (s.charAt(pos) > 127) {
@@ -823,7 +824,7 @@ public final class httpd implements serverHandler {
                 try {
                     // don't write anything but url-encode the unicode char
                     s = s.substring(0, pos) + URLEncoder.encode(s.substring(pos, pos + 1), "UTF-8") + s.substring(pos + 1); 
-                } catch (UnsupportedEncodingException e) { return null; }
+                } catch (final UnsupportedEncodingException e) { return null; }
             } else {
                 baos.write(s.charAt(pos++));
             }
@@ -831,7 +832,7 @@ public final class httpd implements serverHandler {
         
         try {
             return new String(baos.toByteArray(), "UTF-8");
-        } catch (UnsupportedEncodingException e) { return null; }
+        } catch (final UnsupportedEncodingException e) { return null; }
     }
     
     // 06.01.2007: decode HTML entities by [FB]
@@ -840,7 +841,7 @@ public final class httpd implements serverHandler {
         s = htmlTools.decodeHtml2Unicode(s);
         
         // replace all other 
-        CharArrayWriter b = new CharArrayWriter(s.length());
+        final CharArrayWriter b = new CharArrayWriter(s.length());
         int end;
         for (int i=0; i<s.length(); i++) {
             if (s.charAt(i) == '&' && (end = s.indexOf(';', i + 1)) > i) {
@@ -858,7 +859,7 @@ public final class httpd implements serverHandler {
         return b.toString();
     }
     
-    public static HashMap<String, byte[]> parseMultipart(httpHeader header, serverObjects args, InputStream in, int length) throws IOException {
+    public static HashMap<String, byte[]> parseMultipart(final httpHeader header, final serverObjects args, final InputStream in, final int length) throws IOException {
         // this is a quick hack using a previously coded parseMultipart based on a buffer
         // should be replaced sometime by a 'right' implementation
 
@@ -882,22 +883,22 @@ public final class httpd implements serverHandler {
         }
         
         //System.out.println("MULTIPART-BUFFER=" + new String(buffer));
-        HashMap<String, byte[]> files = parseMultipart(header, args, buffer);
+        final HashMap<String, byte[]> files = parseMultipart(header, args, buffer);
         buffer = null;
         return files;
     }
     
-    public static HashMap<String, byte[]> parseMultipart(httpHeader header, serverObjects args, byte[] buffer) throws IOException {
+    public static HashMap<String, byte[]> parseMultipart(final httpHeader header, final serverObjects args, final byte[] buffer) throws IOException {
         // we parse a multipart message and put results into the properties
         // find/identify boundary marker
         //System.out.println("DEBUG parseMultipart = <<" + new String(buffer) + ">>");
-        String s = header.get(httpHeader.CONTENT_TYPE);
+        final String s = header.get(httpHeader.CONTENT_TYPE);
         if (s == null) return null;
         int q;
         int p = s.toLowerCase().indexOf("boundary=");
         if (p < 0) throw new IOException("boundary marker in multipart not found");
         // boundaries start with additional leading "--", see RFC1867
-        byte[] boundary = ("--" + s.substring(p + 9)).getBytes();
+        final byte[] boundary = ("--" + s.substring(p + 9)).getBytes();
         
         // eat up first boundary
         // the buffer must start with a boundary
@@ -907,15 +908,15 @@ public final class httpd implements serverHandler {
             throw new IOException("boundary not recognized: " + ((line == null) ? "NULL" : new String(line, "UTF-8")) + ", boundary = " + new String(boundary));
         
         // we need some constants
-        byte[] namec = (new String("name=")).getBytes();
-        byte[] filenamec = (new String("filename=")).getBytes();
+        final byte[] namec = (new String("name=")).getBytes();
+        final byte[] filenamec = (new String("filename=")).getBytes();
         //byte[] semicolonc = (new String(";")).getBytes();
-        byte[] quotec = new byte[] {(byte) '"'};
+        final byte[] quotec = new byte[] {(byte) '"'};
         
         // now loop over boundaries
         byte [] name;
         byte [] filename;
-        HashMap<String, byte[]> files = new HashMap<String, byte[]>();
+        final HashMap<String, byte[]> files = new HashMap<String, byte[]>();
         int argc = 0;
         //System.out.println("DEBUG: parsing multipart body:" + new String(buffer));
         while (pos < buffer.length) { // boundary enumerator
@@ -1009,7 +1010,7 @@ public final class httpd implements serverHandler {
      */
     
     static int nextPos = -1;        
-    private static byte[] readLine(int start, byte[] array) {
+    private static byte[] readLine(final int start, final byte[] array) {
         // read a string from an array; line ending is always CRLF
         // but we are also fuzzy with that: may also be only CR or LF
         // if no remaining CR, CRLF or LF can be found, return null
@@ -1018,12 +1019,12 @@ public final class httpd implements serverHandler {
         if (pos < 0) {pos = indexOf(start, array, new byte[] {serverCore.CR}); nextPos = pos + 1;}
         if (pos < 0) {pos = indexOf(start, array, new byte[] {serverCore.LF}); nextPos = pos + 1;}
         if (pos < 0) {nextPos = start; return null;}
-        byte[] result = new byte[pos - start];
+        final byte[] result = new byte[pos - start];
         java.lang.System.arraycopy(array, start, result, 0, pos - start);
         return result;
     }
     
-    public static int indexOf(int start, byte[] array, byte[] pattern) {
+    public static int indexOf(final int start, final byte[] array, final byte[] pattern) {
         // return a position of a pattern in an array
         if (start > array.length - pattern.length) return -1;
         if (pattern.length == 0) return start;
@@ -1033,7 +1034,7 @@ public final class httpd implements serverHandler {
         return -1;
     }
     
-    public static boolean equals(byte[] a, int aoff, byte[] b, int boff, int len) {
+    public static boolean equals(final byte[] a, final int aoff, final byte[] b, final int boff, final int len) {
         //System.out.println("equals: a = " + new String(a) + ", aoff = " + aoff + ", b = " + new String(b) + ", boff = " + boff + ", length = " + len);
         if ((aoff + len > a.length) || (boff + len > b.length)) return false;
         for (int i = 0; i < len; i++) if (a[aoff + i] != b[boff + i]) return false;
@@ -1046,9 +1047,9 @@ public final class httpd implements serverHandler {
     }
     
     public static final void sendRespondBody(
-            Properties conProp,
-            OutputStream respond,
-            byte[] body
+            final Properties conProp,
+            final OutputStream respond,
+            final byte[] body
     ) throws IOException {
         respond.write(body);
         respond.flush();        
@@ -1056,13 +1057,13 @@ public final class httpd implements serverHandler {
     
     
     public static final void sendRespondError(
-            Properties conProp,
-            OutputStream respond,
-            int errorcase,
-            int httpStatusCode,            
-            String httpStatusText,
-            String detailedErrorMsg,
-            Throwable stackTrace
+            final Properties conProp,
+            final OutputStream respond,
+            final int errorcase,
+            final int httpStatusCode,            
+            final String httpStatusText,
+            final String detailedErrorMsg,
+            final Throwable stackTrace
     ) throws IOException {
         sendRespondError(
                 conProp,
@@ -1079,13 +1080,13 @@ public final class httpd implements serverHandler {
     }
     
     public static final void sendRespondError(
-            Properties conProp,
-            OutputStream respond,
-            int httpStatusCode,            
-            String httpStatusText,
-            File detailedErrorMsgFile,
-            serverObjects detailedErrorMsgValues,
-            Throwable stackTrace
+            final Properties conProp,
+            final OutputStream respond,
+            final int httpStatusCode,            
+            final String httpStatusText,
+            final File detailedErrorMsgFile,
+            final serverObjects detailedErrorMsgValues,
+            final Throwable stackTrace
     ) throws IOException {
         sendRespondError(
                 conProp,
@@ -1102,15 +1103,15 @@ public final class httpd implements serverHandler {
     }
     
     public static final void sendRespondError(
-            Properties conProp,
-            OutputStream respond,
-            int errorcase,
-            int httpStatusCode,            
+            final Properties conProp,
+            final OutputStream respond,
+            final int errorcase,
+            final int httpStatusCode,            
             String httpStatusText,
-            String detailedErrorMsgText,
-            Object detailedErrorMsgFile,
-            serverObjects detailedErrorMsgValues,
-            Throwable stackTrace,
+            final String detailedErrorMsgText,
+            final Object detailedErrorMsgFile,
+            final serverObjects detailedErrorMsgValues,
+            final Throwable stackTrace,
             httpHeader header
     ) throws IOException {
         
@@ -1118,7 +1119,7 @@ public final class httpd implements serverHandler {
         ByteArrayOutputStream o = null;
         try {
             // setting the proper http status message
-            String httpVersion = conProp.getProperty(httpHeader.CONNECTION_PROP_HTTP_VER,"HTTP/1.1");
+            final String httpVersion = conProp.getProperty(httpHeader.CONNECTION_PROP_HTTP_VER,"HTTP/1.1");
             if ((httpStatusText == null)||(httpStatusText.length()==0)) {
                 if (httpVersion.equals("HTTP/1.0") && httpHeader.http1_0.containsKey(Integer.toString(httpStatusCode))) 
                     httpStatusText = httpHeader.http1_0.get(Integer.toString(httpStatusCode));
@@ -1129,11 +1130,12 @@ public final class httpd implements serverHandler {
             
             // generating the desired request url
             String host = conProp.getProperty(httpHeader.CONNECTION_PROP_HOST);
-            String path = conProp.getProperty(httpHeader.CONNECTION_PROP_PATH,"/");
-            String args = conProp.getProperty(httpHeader.CONNECTION_PROP_ARGS);
-            String method = conProp.getProperty(httpHeader.CONNECTION_PROP_METHOD);
+            final String path = conProp.getProperty(httpHeader.CONNECTION_PROP_PATH,"/");
+            final String args = conProp.getProperty(httpHeader.CONNECTION_PROP_ARGS);
+            final String method = conProp.getProperty(httpHeader.CONNECTION_PROP_METHOD);
             
-            int port = 80, pos = host.indexOf(":");        
+            int port = 80;
+			final int pos = host.indexOf(":");        
             if (pos != -1) {
                 port = Integer.parseInt(host.substring(pos + 1));
                 host = host.substring(0, pos);
@@ -1142,20 +1144,20 @@ public final class httpd implements serverHandler {
             String urlString;
             try {
                 urlString = (new yacyURL((method.equals(httpHeader.METHOD_CONNECT)?"https":"http"), host, port, (args == null) ? path : path + "?" + args)).toString();
-            } catch (MalformedURLException e) {
+            } catch (final MalformedURLException e) {
                 urlString = "invalid URL";
             }
 
             // set rewrite values
-            serverObjects tp = new serverObjects();
+            final serverObjects tp = new serverObjects();
 
 //            tp.put("host", serverCore.publicIP().getHostAddress());
 //            tp.put("port", switchboard.getConfig("port", "8080"));
 
-            String clientIP = conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP, "127.0.0.1");
+            final String clientIP = conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP, "127.0.0.1");
 
             // check if ip is local ip address
-            InetAddress hostAddress = serverDomains.dnsResolve(clientIP);
+            final InetAddress hostAddress = serverDomains.dnsResolve(clientIP);
             if (hostAddress == null) {
                 tp.put("host", serverDomains.myPublicLocalIP().getHostAddress());
                 tp.put("port", serverCore.getPortNr(switchboard.getConfig("port", "8080")));
@@ -1187,9 +1189,9 @@ public final class httpd implements serverHandler {
                     tp.put("errorMessageType_file", (detailedErrorMsgFile == null) ? "" : detailedErrorMsgFile.toString());
                     if ((detailedErrorMsgValues != null) && (detailedErrorMsgValues.size() > 0)) {
                         // rewriting the value-names and add the proper name prefix:
-                        Iterator<String> nameIter = detailedErrorMsgValues.keySet().iterator();
+                        final Iterator<String> nameIter = detailedErrorMsgValues.keySet().iterator();
                         while (nameIter.hasNext()) {
-                            String name = nameIter.next();
+                            final String name = nameIter.next();
                             tp.put("errorMessageType_" + name, detailedErrorMsgValues.get(name));
                         }                        
                     }                    
@@ -1203,7 +1205,7 @@ public final class httpd implements serverHandler {
             // building the stacktrace            
             if (stackTrace != null) {  
                 tp.put("printStackTrace",1);
-                serverByteBuffer errorMsg = new serverByteBuffer(100);
+                final serverByteBuffer errorMsg = new serverByteBuffer(100);
                 stackTrace.printStackTrace(new PrintStream(errorMsg));
                 tp.put("printStackTrace_exception", stackTrace.toString());
                 tp.put("printStackTrace_stacktrace", new String(errorMsg.getBytes(),"UTF-8"));
@@ -1213,11 +1215,11 @@ public final class httpd implements serverHandler {
             
             // Generated Tue, 23 Aug 2005 11:19:14 GMT by brain.wg (squid/2.5.STABLE3)
             // adding some system information
-            String systemDate = HttpClient.dateString(new Date());
+            final String systemDate = HttpClient.dateString(new Date());
             tp.put("date", systemDate);
             
             // rewrite the file
-            File htRootPath = new File(switchboard.getRootPath(), switchboard.getConfig("htRootPath","htroot"));
+            final File htRootPath = new File(switchboard.getRootPath(), switchboard.getConfig("htRootPath","htroot"));
             
             httpTemplate.writeTemplate(
                     fis = new FileInputStream(new File(htRootPath, "/proxymsg/error.html")), 
@@ -1225,7 +1227,7 @@ public final class httpd implements serverHandler {
                     tp, 
                     "-UNRESOLVED_PATTERN-".getBytes()
             );
-            byte[] result = o.toByteArray();
+            final byte[] result = o.toByteArray();
             o.close(); o = null;
 
             if(header == null)
@@ -1242,59 +1244,59 @@ public final class httpd implements serverHandler {
                 serverFileUtils.copy(result, respond);
             }
             respond.flush();
-        } catch (Exception e) { 
+        } catch (final Exception e) { 
             throw new IOException(e.getMessage());
         } finally {
-            if (fis != null) try { fis.close(); } catch (Exception e) {}
-            if (o != null)   try { o.close();   } catch (Exception e) {}
+            if (fis != null) try { fis.close(); } catch (final Exception e) {}
+            if (o != null)   try { o.close();   } catch (final Exception e) {}
         }     
     }
     
     public static final void sendRespondHeader(
-            Properties conProp,
-            OutputStream respond,
-            String httpVersion,
-            int httpStatusCode, 
-            String httpStatusText, 
-            long contentLength
+            final Properties conProp,
+            final OutputStream respond,
+            final String httpVersion,
+            final int httpStatusCode, 
+            final String httpStatusText, 
+            final long contentLength
     ) throws IOException { 
         sendRespondHeader(conProp,respond,httpVersion,httpStatusCode,httpStatusText,null,contentLength,null,null,null,null,null);
     }
     
     public static final void sendRespondHeader(
-            Properties conProp,
-            OutputStream respond,
-            String httpVersion,
-            int httpStatusCode, 
-            String httpStatusText, 
-            String contentType,
-            long contentLength,
-            Date moddate, 
-            Date expires,
-            httpHeader headers,
-            String contentEnc,
-            String transferEnc
+            final Properties conProp,
+            final OutputStream respond,
+            final String httpVersion,
+            final int httpStatusCode, 
+            final String httpStatusText, 
+            final String contentType,
+            final long contentLength,
+            final Date moddate, 
+            final Date expires,
+            final httpHeader headers,
+            final String contentEnc,
+            final String transferEnc
     ) throws IOException {    
         sendRespondHeader(conProp,respond,httpVersion,httpStatusCode,httpStatusText,contentType,contentLength,moddate,expires,headers,contentEnc,transferEnc,true);
     }
 
     public static final void sendRespondHeader(
-            Properties conProp,
-            OutputStream respond,
-            String httpVersion,
-            int httpStatusCode,
-            String httpStatusText,
+            final Properties conProp,
+            final OutputStream respond,
+            final String httpVersion,
+            final int httpStatusCode,
+            final String httpStatusText,
             String contentType,
-            long contentLength,
+            final long contentLength,
             Date moddate,
-            Date expires,
+            final Date expires,
             httpHeader headers,
-            String contentEnc,
-            String transferEnc,
-            boolean nocache
+            final String contentEnc,
+            final String transferEnc,
+            final boolean nocache
     ) throws IOException {
         
-        String reqMethod = conProp.getProperty(httpHeader.CONNECTION_PROP_METHOD);
+        final String reqMethod = conProp.getProperty(httpHeader.CONNECTION_PROP_METHOD);
         
         if ((transferEnc != null) && !httpVersion.equals(httpHeader.HTTP_VERSION_1_1)) { 
             throw new IllegalArgumentException("Transfer encoding is only supported for http/1.1 connections. The current connection version is " + httpVersion);
@@ -1312,7 +1314,7 @@ public final class httpd implements serverHandler {
         }
         
         if(headers==null) headers = new httpHeader();
-        Date now = new Date(System.currentTimeMillis());
+        final Date now = new Date(System.currentTimeMillis());
         
         headers.put(httpHeader.SERVER, "AnomicHTTPD (www.anomic.de)");
         headers.put(httpHeader.DATE, HttpClient.dateString(now));
@@ -1339,20 +1341,20 @@ public final class httpd implements serverHandler {
     }
     
     public static final void sendRespondHeader(
-            Properties conProp,
-            OutputStream respond,
-            String httpVersion,
-            int httpStatusCode,  
-            httpHeader header
+            final Properties conProp,
+            final OutputStream respond,
+            final String httpVersion,
+            final int httpStatusCode,  
+            final httpHeader header
     ) throws IOException {
         sendRespondHeader(conProp,respond,httpVersion,httpStatusCode,null,header);
     }
 
     public static final void sendRespondHeader(
-            Properties conProp,
-            OutputStream respond,
+            final Properties conProp,
+            final OutputStream respond,
             String httpVersion,
-            int httpStatusCode, 
+            final int httpStatusCode, 
             String httpStatusText, 
             httpHeader header
     ) throws IOException {
@@ -1371,7 +1373,7 @@ public final class httpd implements serverHandler {
                 else httpStatusText = "Unknown";
             }
             
-            StringBuffer headerStringBuffer = new StringBuffer(560);
+            final StringBuffer headerStringBuffer = new StringBuffer(560);
             
             // "HTTP/0.9" does not have a status line or header in the response
             if (! httpVersion.toUpperCase().equals(httpHeader.HTTP_VERSION_0_9)) {                
@@ -1408,11 +1410,11 @@ public final class httpd implements serverHandler {
                 	httpHeader outgoingHeader=requestProperties.getOutgoingHeader();
                 	if (outgoingHeader!=null)
                 	{*/
-                	Iterator<httpHeader.Entry> it = header.getCookies();
+                	final Iterator<httpHeader.Entry> it = header.getCookies();
                 	while(it.hasNext()) {
                 		//Append user properties to the main String
                 		//TODO: Should we check for user properites. What if they intersect properties that are already in header?
-                	    httpHeader.Entry e = it.next();
+                	    final httpHeader.Entry e = it.next();
                         headerStringBuffer.append(e.getKey()).append(": ").append(e.getValue()).append("\r\n");   
                 	}
                 	
@@ -1421,7 +1423,7 @@ public final class httpd implements serverHandler {
                 }*/
                 
                 // write header
-                Iterator<String> i = header.keySet().iterator();
+                final Iterator<String> i = header.keySet().iterator();
                 String key;
                 char tag;
                 int count;
@@ -1450,14 +1452,14 @@ public final class httpd implements serverHandler {
             
             conProp.put(httpHeader.CONNECTION_PROP_PROXY_RESPOND_HEADER,header);
             conProp.put(httpHeader.CONNECTION_PROP_PROXY_RESPOND_STATUS,Integer.toString(httpStatusCode));
-        } catch (Exception e) {
+        } catch (final Exception e) {
             // any interruption may be caused be network error or because the user has closed
             // the windows during transmission. We simply pass it as IOException
             throw new IOException(e.getMessage());
         }            
     }    
     
-    public static boolean shallTransportZipped(String path) {
+    public static boolean shallTransportZipped(final String path) {
         if ((path == null) || (path.length() == 0)) return true;
         
         int pos;
@@ -1467,7 +1469,7 @@ public final class httpd implements serverHandler {
         return true;
     }    
     
-    public void doUserAccounting(Properties conProps) {
+    public void doUserAccounting(final Properties conProps) {
         // TODO: validation of conprop fields
         // httpHeader.CONNECTION_PROP_USER
         // httpHeader.CONNECTION_PROP_CLIENTIP
@@ -1475,22 +1477,22 @@ public final class httpd implements serverHandler {
         // httpHeader.CONNECTION_PROP_PROXY_RESPOND_STATUS
     }
     
-    public static boolean isThisSeedIP(String hostName) {
+    public static boolean isThisSeedIP(final String hostName) {
         if ((hostName == null) || (hostName.length() == 0)) return false;
         
         // getting ip address and port of this seed
         if (alternativeResolver == null) return false;
         
         // resolve ip addresses
-        InetAddress seedInetAddress = serverDomains.dnsResolve(alternativeResolver.myIP());
-        InetAddress hostInetAddress = serverDomains.dnsResolve(hostName);
+        final InetAddress seedInetAddress = serverDomains.dnsResolve(alternativeResolver.myIP());
+        final InetAddress hostInetAddress = serverDomains.dnsResolve(hostName);
         if (seedInetAddress == null || hostInetAddress == null) return false;
         
         // if it's equal, the hostname points to this seed
         return (seedInetAddress.equals(hostInetAddress));        
     }
     
-    public static boolean isThisHostIP(String hostName) {
+    public static boolean isThisHostIP(final String hostName) {
         if ((hostName == null) || (hostName.length() == 0)) return false;
         
         boolean isThisHostIP = false;
@@ -1508,11 +1510,11 @@ public final class httpd implements serverHandler {
                     break;
                 }
             }  
-        } catch (Exception e) {}   
+        } catch (final Exception e) {}   
         return isThisHostIP;
     }    
     
-    public static boolean isThisHostIP(InetAddress clientAddress) {
+    public static boolean isThisHostIP(final InetAddress clientAddress) {
         if (clientAddress == null) return false;
         
         boolean isThisHostIP = false;
@@ -1526,11 +1528,11 @@ public final class httpd implements serverHandler {
                     break;
                 }
             }  
-        } catch (Exception e) {}   
+        } catch (final Exception e) {}   
         return isThisHostIP;
     }  
     
-    public static boolean isThisHostName(String hostName) {
+    public static boolean isThisHostName(final String hostName) {
         if ((hostName == null) || (hostName.length() == 0)) return false;
         
         try {                            
@@ -1539,7 +1541,7 @@ public final class httpd implements serverHandler {
             final Integer dstPort = (idx != -1) ? Integer.valueOf(hostName.substring(idx+1).trim()) : new Integer(80);
             
             // if the hostname endswith thisPeerName.yacy ...
-            String alternativeAddress = (alternativeResolver == null) ? null : alternativeResolver.myAlternativeAddress();
+            final String alternativeAddress = (alternativeResolver == null) ? null : alternativeResolver.myAlternativeAddress();
             if ((alternativeAddress != null) && (dstHost.endsWith(alternativeAddress))) {
                 return true;
             /* 
@@ -1558,7 +1560,7 @@ public final class httpd implements serverHandler {
             ) {
                  return true;                
             }
-        } catch (Exception e) {}    
+        } catch (final Exception e) {}    
         return false;
     }       
 }

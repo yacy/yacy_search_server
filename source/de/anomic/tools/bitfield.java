@@ -29,27 +29,27 @@ public class bitfield {
         this(0);
     }
     
-    public bitfield(int bytelength) {
+    public bitfield(final int bytelength) {
         this.bb= new byte[bytelength];
         for (int i = 0 ; i < bytelength; i++) bb[i] = 0;
     }
     
-    public bitfield(byte[] field) {
+    public bitfield(final byte[] field) {
         bb = field;
     }
     
-    private static byte setAtom(byte a, int pos) {
+    private static byte setAtom(final byte a, final int pos) {
         if ((pos > 5) || (pos < 0)) throw new RuntimeException("atom position out of bounds: " + pos);
         return (byte) ((64 | ((a + 16) | (1<<pos))) - 16);
     }
     
-    private static byte unsetAtom(byte a, int pos) {
+    private static byte unsetAtom(final byte a, final int pos) {
         if ((pos > 5) || (pos < 0)) throw new RuntimeException("atom position out of bounds: " + pos);
         return (byte) (((a + 16) & (0xff ^ (1<<pos))) - 16);
     }
     
-    public void set(int pos, boolean value) {
-        int slot = pos / 6;
+    public void set(final int pos, final boolean value) {
+        final int slot = pos / 6;
         if (pos < 0) throw new RuntimeException("position out of bounds: " + pos);
         if (slot > bb.length) {
             // extend capacity
@@ -62,8 +62,8 @@ public class bitfield {
         bb[slot] = (value) ? setAtom(bb[slot], pos % 6) : unsetAtom(bb[slot], pos % 6);
     }
     
-    public boolean get(int pos) {
-        int slot = pos / 6;
+    public boolean get(final int pos) {
+        final int slot = pos / 6;
         if (pos < 0) throw new RuntimeException("position out of bounds: " + pos);
         if (slot > bb.length) return false;
         return (bb[slot] & (1<<(pos%6))) > 0;
@@ -86,9 +86,9 @@ public class bitfield {
          */
     }
     
-    public static void main(String[] args) {
-        bitfield test = new bitfield(4);
-        int l = test.length();
+    public static void main(final String[] args) {
+        final bitfield test = new bitfield(4);
+        final int l = test.length();
         System.out.println("available: " + l);
         System.out.println("before:    " + test.toString());
         for (int i = 0; i < l/2; i++) {

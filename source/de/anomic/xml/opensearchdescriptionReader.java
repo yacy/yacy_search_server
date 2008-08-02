@@ -95,11 +95,11 @@ public class opensearchdescriptionReader extends DefaultHandler {
     
     // class variables
     private Item channel;
-    private StringBuffer buffer;
+    private final StringBuffer buffer;
     private boolean parsingChannel;
     private String imageURL;
-    private ArrayList<String> itemsGUID; // a list of GUIDs, so the items can be retrieved by a specific order
-    private HashMap<String, Item> items; // a guid:Item map
+    private final ArrayList<String> itemsGUID; // a list of GUIDs, so the items can be retrieved by a specific order
+    private final HashMap<String, Item> items; // a guid:Item map
     
     
     public opensearchdescriptionReader() {
@@ -110,29 +110,29 @@ public class opensearchdescriptionReader extends DefaultHandler {
         parsingChannel = false;
     }
     
-    public opensearchdescriptionReader(String path) {
+    public opensearchdescriptionReader(final String path) {
         this();
         try {
-            SAXParserFactory factory = SAXParserFactory.newInstance();
-            SAXParser saxParser = factory.newSAXParser();
+            final SAXParserFactory factory = SAXParserFactory.newInstance();
+            final SAXParser saxParser = factory.newSAXParser();
             saxParser.parse(path, this);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             e.printStackTrace();
         }
     }
     
-    public opensearchdescriptionReader(InputStream stream) {
+    public opensearchdescriptionReader(final InputStream stream) {
         this();
         try {
-            SAXParserFactory factory = SAXParserFactory.newInstance();
-            SAXParser saxParser = factory.newSAXParser();
+            final SAXParserFactory factory = SAXParserFactory.newInstance();
+            final SAXParser saxParser = factory.newSAXParser();
             saxParser.parse(stream, this);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             e.printStackTrace();
         }
     }
     
-    public static opensearchdescriptionReader parse(byte[] a) {
+    public static opensearchdescriptionReader parse(final byte[] a) {
 
         // check integrity of array
         if ((a == null) || (a.length == 0)) {
@@ -147,46 +147,46 @@ public class opensearchdescriptionReader extends DefaultHandler {
             serverLog.logWarning("opensearchdescriptionReader", "response does not contain valid xml");
             return null;
         }
-        String end = new String(a, a.length - 10, 10);
+        final String end = new String(a, a.length - 10, 10);
         if (end.indexOf("rss") < 0) {
             serverLog.logWarning("opensearchdescriptionReader", "response incomplete");
             return null;
         }
         
         // make input stream
-        ByteArrayInputStream bais = new ByteArrayInputStream(a);
+        final ByteArrayInputStream bais = new ByteArrayInputStream(a);
         
         // parse stream
         opensearchdescriptionReader reader = null;
         try {
             reader = new opensearchdescriptionReader(bais);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             serverLog.logWarning("opensearchdescriptionReader", "parse exception: " + e);
             return null;
         }
-        try { bais.close(); } catch (IOException e) {}
+        try { bais.close(); } catch (final IOException e) {}
         return reader;
     }
 
-    public void startElement(String uri, String name, String tag, Attributes atts) throws SAXException {
+    public void startElement(final String uri, final String name, final String tag, final Attributes atts) throws SAXException {
         if ("channel".equals(tag)) {
             channel = new Item();
             parsingChannel = true;
         }
     }
 
-    public void endElement(String uri, String name, String tag) {
+    public void endElement(final String uri, final String name, final String tag) {
         if (tag == null) return;
         if ("channel".equals(tag)) {
             parsingChannel = false;
         } else if (parsingChannel) {
-            String value = buffer.toString().trim();
+            final String value = buffer.toString().trim();
             buffer.setLength(0);
             if (tags.contains(tag)) channel.setValue(tag, value);
         }
     }
 
-    public void characters(char ch[], int start, int length) {
+    public void characters(final char ch[], final int start, final int length) {
         if (parsingChannel) {
             buffer.append(ch, start, length);
         }
@@ -196,12 +196,12 @@ public class opensearchdescriptionReader extends DefaultHandler {
         return channel;
     }
 
-    public Item getItem(int i) {
+    public Item getItem(final int i) {
         // retrieve item by order number
         return getItem(itemsGUID.get(i));
     }
 
-    public Item getItem(String guid) {
+    public Item getItem(final String guid) {
         // retrieve item by guid
         return items.get(guid);
     }
@@ -216,14 +216,14 @@ public class opensearchdescriptionReader extends DefaultHandler {
     
     public static class Item {
         
-        private HashMap<String, String> map;
+        private final HashMap<String, String> map;
 
         public Item() {
             this.map = new HashMap<String, String>();
             this.map.put("guid", Long.toHexString(System.currentTimeMillis()) + ":" + guidcount++);
         }
         
-        public void setValue(String name, String value) {
+        public void setValue(final String name, final String value) {
             map.put(name, value);
         }
     }

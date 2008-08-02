@@ -28,13 +28,13 @@ import java.util.Properties;
 
 public class whois {
 
-    public static Properties Whois(String dom) {
+    public static Properties Whois(final String dom) {
         try {
-            Process p = Runtime.getRuntime().exec("whois " + dom);
-            BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()));
+            final Process p = Runtime.getRuntime().exec("whois " + dom);
+            final BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()));
             String line, key, value, oldValue;
             int pos;
-            Properties result = new Properties();
+            final Properties result = new Properties();
             while ((line = br.readLine()) != null) {
                 pos = line.indexOf(":");
                 if (pos > 0) {
@@ -46,13 +46,13 @@ public class whois {
                 }
             }
             return result;
-        } catch (IOException e) {
+        } catch (final IOException e) {
             //e.printStackTrace();
             return null;
         }
     }
 
-    public static String evaluateWhois(Properties p) {
+    public static String evaluateWhois(final Properties p) {
         String info1, info2;
         info1 = p.getProperty("netname");
         info2 = p.getProperty("descr");

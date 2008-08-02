@@ -49,14 +49,14 @@ public class Wiki {
     //private static String numListLevel = "";
 
     private static SimpleDateFormat SimpleFormatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-    public static String dateString(Date date) {
+    public static String dateString(final Date date) {
         return SimpleFormatter.format(date);
     }
 
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) throws IOException {
-        plasmaSwitchboard sb = (plasmaSwitchboard) env;
-        serverObjects prop = new serverObjects();
+    public static serverObjects respond(final httpHeader header, serverObjects post, final serverSwitch<?> env) throws IOException {
+        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        final serverObjects prop = new serverObjects();
         if (post == null) {
             post = new serverObjects();
             post.put("page", "start");
@@ -67,8 +67,8 @@ public class Wiki {
         prop.put("display", display);
         
         String access = sb.getConfig("WikiAccess", "admin");
-        String pagename = get(post, "page", "start");
-        String ip = get(post, httpHeader.CONNECTION_PROP_CLIENTIP, "127.0.0.1");
+        final String pagename = get(post, "page", "start");
+        final String ip = get(post, httpHeader.CONNECTION_PROP_CLIENTIP, "127.0.0.1");
         String author = get(post, "author", "anonymous");
         if (author.equals("anonymous")) {
             author = wikiBoard.guessAuthor(ip);
@@ -106,13 +106,13 @@ public class Wiki {
             byte[] content;
             try {
                 content = post.get("content", "").getBytes("UTF-8");
-            } catch (UnsupportedEncodingException e) {
+            } catch (final UnsupportedEncodingException e) {
                 content = post.get("content", "").getBytes();
             }
-            wikiBoard.entry newEntry = sb.wikiDB.newEntry(pagename, author, ip, post.get("reason", "edit"), content);
+            final wikiBoard.entry newEntry = sb.wikiDB.newEntry(pagename, author, ip, post.get("reason", "edit"), content);
             sb.wikiDB.write(newEntry);
             // create a news message
-            HashMap<String, String> map = new HashMap<String, String>();
+            final HashMap<String, String> map = new HashMap<String, String>();
             map.put("page", pagename);
             map.put("author", author.replace(',', ' '));
             if (post.get("content", "").trim().length() > 0 && !page.page().equals(content))
@@ -134,7 +134,7 @@ public class Wiki {
                 prop.putHTML("mode_author", author);
                 prop.putHTML("mode_page-code", new String(page.page(), "UTF-8"));
                 prop.putHTML("mode_pagename", pagename);
-            } catch (UnsupportedEncodingException e) {}
+            } catch (final UnsupportedEncodingException e) {}
         }
 
         //contributed by [MN]
@@ -154,7 +154,7 @@ public class Wiki {
             prop.put("mode", "3"); //Index
             String subject;
             try {
-                Iterator<byte[]> i = sb.wikiDB.keys(true);
+                final Iterator<byte[]> i = sb.wikiDB.keys(true);
                 wikiBoard.entry entry;
                 int count=0;
                 while (i.hasNext()) {
@@ -167,7 +167,7 @@ public class Wiki {
                     count++;
                 }
                 prop.put("mode_pages", count);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 prop.put("mode_error", "1"); //IO Error reading Wiki
                 prop.putHTML("mode_error_message", e.getMessage());
             }
@@ -181,7 +181,7 @@ public class Wiki {
             prop.putHTML("mode_error_page", pagename);
             
             try {
-                Iterator<byte[]> it = sb.wikiDB.keysBkp(true);
+                final Iterator<byte[]> it = sb.wikiDB.keysBkp(true);
                 wikiBoard.entry entry;
                 wikiBoard.entry oentry = null;
                 wikiBoard.entry nentry = null;
@@ -224,7 +224,7 @@ public class Wiki {
                 if (nentry == null) nentry = entry;
                 if (post.containsKey("compare") && oentry != null && nentry != null) {
                     // TODO: split into paragraphs and compare them with the same diff-algo
-                    diff diff = new diff(
+                    final diff diff = new diff(
                             new String(oentry.page(), "UTF-8"),
                             new String(nentry.page(), "UTF-8"), 3);
                     prop.put("mode_versioning_diff", de.anomic.data.diff.toHTML(new diff[] { diff }));
@@ -237,7 +237,7 @@ public class Wiki {
                     prop.putWiki("mode_versioning_page", oentry.page());
                     prop.putHTML("mode_versioning_page-code", new String(oentry.page(), "UTF-8"));
                 }
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 prop.put("mode_error", "1"); //IO Error reading Wiki
                 prop.putHTML("mode_error_message", e.getMessage());
             }
@@ -268,7 +268,7 @@ public class Wiki {
      * @param string2
      * @return
      */
-    private static String get(serverObjects post, String key, String dflt) {
+    private static String get(final serverObjects post, final String key, final String dflt) {
         return (post == null ? dflt : post.get(key, dflt));
     }
 }

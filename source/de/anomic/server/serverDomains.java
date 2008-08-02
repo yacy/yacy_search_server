@@ -363,11 +363,11 @@ public class serverDomains {
     private static HashMap<String, Integer> TLDID = new HashMap<String, Integer>();
     //private static HashMap<String, String> TLDName = new HashMap<String, String>();
 
-    private static void insertTLDProps(String[] TLDList, int id) {
+    private static void insertTLDProps(final String[] TLDList, final int id) {
         int p;
         String tld;
         //String name;
-        Integer ID = new Integer(id);
+        final Integer ID = new Integer(id);
         for (int i = 0; i < TLDList.length; i++) {
             p = TLDList[i].indexOf('=');
             if (p > 0) {
@@ -408,7 +408,7 @@ public class serverDomains {
     * @param longTime Time in miliseconds since 01/01/1970 00:00 GMT
     * @return int seconds since startTime
     */
-    private static int intTime(long longTime) {
+    private static int intTime(final long longTime) {
         return (int) Math.max(0, ((longTime - startTime) / 1000));
     }
 
@@ -423,7 +423,7 @@ public class serverDomains {
         host = host.toLowerCase().trim();        
         
         // trying to resolve host by doing a name cache lookup
-        InetAddress ip = nameCacheHit.get(host);
+        final InetAddress ip = nameCacheHit.get(host);
         if (ip != null) return ip;
         
         if (nameCacheMiss.contains(host)) return null;
@@ -449,7 +449,7 @@ public class serverDomains {
             ) {
                 doCaching = false;
             } else {
-                Iterator<String> noCachingPatternIter = nameCacheNoCachingPatterns.iterator();
+                final Iterator<String> noCachingPatternIter = nameCacheNoCachingPatterns.iterator();
                 String nextPattern;
                 while (noCachingPatternIter.hasNext()) {
                     nextPattern = noCachingPatternIter.next();
@@ -473,7 +473,7 @@ public class serverDomains {
                 }
             }
             return ip;
-        } catch (UnknownHostException e) {
+        } catch (final UnknownHostException e) {
             // remove old entries
             flushMissNameCache();
             
@@ -511,7 +511,7 @@ public class serverDomains {
     * Removes old entries from the dns hit cache
     */
     public static void flushHitNameCache() {
-        int cutofftime = intTime(System.currentTimeMillis()) - maxNameCacheHitAge;
+        final int cutofftime = intTime(System.currentTimeMillis()) - maxNameCacheHitAge;
         String k;
         while ((nameCacheHitAges.size() > maxNameCacheHitSize) || (nameCacheHitAges.getMinScore() < cutofftime)) {
             k = nameCacheHitAges.getMinObject();
@@ -525,7 +525,7 @@ public class serverDomains {
      * Removes old entries from the dns miss cache
      */
      public static void flushMissNameCache() {
-        int cutofftime = intTime(System.currentTimeMillis()) - maxNameCacheMissAge;
+        final int cutofftime = intTime(System.currentTimeMillis()) - maxNameCacheMissAge;
         String k;
         while ((nameCacheMissAges.size() > maxNameCacheMissSize) || (nameCacheMissAges.getMinScore() < cutofftime)) {
             k = nameCacheMissAges.getMinObject();
@@ -539,18 +539,18 @@ public class serverDomains {
     static {
         try {
             localAddresses = InetAddress.getAllByName(InetAddress.getLocalHost().getHostName());
-        } catch (UnknownHostException e) {
+        } catch (final UnknownHostException e) {
             localAddresses = new InetAddress[0];
         }
     }
     
-    public static int getDomainID(String host) {
-        int p = host.lastIndexOf('.');
+    public static int getDomainID(final String host) {
+        final int p = host.lastIndexOf('.');
         String tld = "";
         if (p > 0) {
             tld = host.substring(p + 1);
         }
-        Integer i = TLDID.get(tld);
+        final Integer i = TLDID.get(tld);
         if (i == null) {
             return (isLocal(host)) ? 7 : TLD_Generic_ID;
         } else {
@@ -591,7 +591,7 @@ public class serverDomains {
             return true;
         
         // check the tld list
-        int p = host.lastIndexOf('.');
+        final int p = host.lastIndexOf('.');
         String tld = "";
         if (p > 0) {
             tld = host.substring(p + 1);
@@ -617,16 +617,16 @@ public class serverDomains {
     
     public static String myPublicIP() {
         // if a static IP was configured, we have to return it here ...
-        plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
+        final plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
         if (sb != null) {
-            String staticIP = sb.getConfig("staticIP", "");
+            final String staticIP = sb.getConfig("staticIP", "");
             if ((!staticIP.equals(""))) {
                 return staticIP;
             }
         }
 
         // otherwise we return the real IP address of this host
-        InetAddress pLIP = myPublicLocalIP();
+        final InetAddress pLIP = myPublicLocalIP();
         if (pLIP != null) return pLIP.getHostAddress();
         return null;
     }
@@ -636,21 +636,21 @@ public class serverDomains {
             String hostName;
             try {
                 hostName = InetAddress.getLocalHost().getHostName();
-            } catch (java.net.UnknownHostException e) {
+            } catch (final java.net.UnknownHostException e) {
                 hostName = "localhost"; // hopin' nothing serious happened only the hostname changed while running yacy
                 System.err.println("ERROR: (internal) " + e.getMessage());
             }
             // list all addresses
-            InetAddress[] ia = InetAddress.getAllByName(hostName);
+            final InetAddress[] ia = InetAddress.getAllByName(hostName);
             // for (int i = 0; i < ia.length; i++) System.out.println("IP: " +
             // ia[i].getHostAddress()); // DEBUG
             if (ia.length == 0) {
                 try {
                     return InetAddress.getLocalHost();
-                } catch (UnknownHostException e) {
+                } catch (final UnknownHostException e) {
                     try {
                         return InetAddress.getByName("127.0.0.1");
-                    } catch (UnknownHostException ee) {
+                    } catch (final UnknownHostException ee) {
                         return null;
                     }
                 }
@@ -681,7 +681,7 @@ public class serverDomains {
                 if (ia[i].getHostAddress().indexOf(":") < 0) return ia[i];
             }
             return ia[0];
-        } catch (java.net.UnknownHostException e) {
+        } catch (final java.net.UnknownHostException e) {
             System.err.println("ERROR: (internal) " + e.getMessage());
             return null;
         }

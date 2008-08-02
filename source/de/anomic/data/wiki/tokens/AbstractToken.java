@@ -47,5 +47,5 @@ public abstract class AbstractToken implements Token {
 	
 	public String getText() { return this.text; }
 	
-	public String toString() { try { return getMarkup(); } catch (wikiParserException e) { return null; } }
+	public String toString() { try { return getMarkup(); } catch (final wikiParserException e) { return null; } }
 }

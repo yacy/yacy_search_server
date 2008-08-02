@@ -62,12 +62,12 @@ public class yacyNewsRecord {
     public static final int categoryStringLength = 8;
     public static final int idLength = serverDate.PATTERN_SHORT_SECOND.length() + yacySeedDB.commonHashLength;
 
-    private String originator;  // hash of originating peer
-    private Date   created;     // Date when news was created by originator
-    private Date   received;    // Date when news was received here at this peer
-    private String category;    // keyword that adresses possible actions
+    private final String originator;  // hash of originating peer
+    private final Date   created;     // Date when news was created by originator
+    private final Date   received;    // Date when news was received here at this peer
+    private final String category;    // keyword that adresses possible actions
     private int    distributed; // counter that counts number of distributions of this news record
-    private Map<String, String> attributes;  // elemets of the news for a special category
+    private final Map<String, String> attributes;  // elemets of the news for a special category
 
     public static final int attributesMaxLength = maxNewsRecordLength
                                                   - idLength
@@ -84,50 +84,50 @@ public class yacyNewsRecord {
             kelondroNaturalOrder.naturalOrder, 0
     );
     
-    public static yacyNewsRecord newRecord(String newsString) {
+    public static yacyNewsRecord newRecord(final String newsString) {
         try {
             return new yacyNewsRecord(newsString);
-        } catch (IllegalArgumentException e) {
+        } catch (final IllegalArgumentException e) {
             yacyCore.log.logWarning("rejected bad yacy news record: " + e.getMessage());
             return null;
         }
     }
 
-    public static yacyNewsRecord newRecord(yacySeed mySeed, String category, Properties attributes) {
+    public static yacyNewsRecord newRecord(final yacySeed mySeed, final String category, final Properties attributes) {
         try {
-            HashMap<String, String> m = new HashMap<String, String>();
-            Iterator<Entry<Object, Object>> e = attributes.entrySet().iterator();
+            final HashMap<String, String> m = new HashMap<String, String>();
+            final Iterator<Entry<Object, Object>> e = attributes.entrySet().iterator();
             Map.Entry<Object, Object> entry;
             while (e.hasNext()) {
                 entry = e.next();
                 m.put((String) entry.getKey(), (String) entry.getValue());
             }
             return new yacyNewsRecord(mySeed, category, m);
-        } catch (IllegalArgumentException e) {
+        } catch (final IllegalArgumentException e) {
             yacyCore.log.logWarning("rejected bad yacy news record: " + e.getMessage());
             return null;
         }
     }
     
-    public static yacyNewsRecord newRecord(yacySeed mySeed, String category, Map<String, String> attributes) {
+    public static yacyNewsRecord newRecord(final yacySeed mySeed, final String category, final Map<String, String> attributes) {
         try {
             return new yacyNewsRecord(mySeed, category, attributes);
-        } catch (IllegalArgumentException e) {
+        } catch (final IllegalArgumentException e) {
             yacyCore.log.logWarning("rejected bad yacy news record: " + e.getMessage());
             return null;
         }
     }
     
-    public static yacyNewsRecord newRecord(String id, String category, Date received, int distributed, Map<String, String> attributes) {
+    public static yacyNewsRecord newRecord(final String id, final String category, final Date received, final int distributed, final Map<String, String> attributes) {
         try {
             return new yacyNewsRecord(id, category, received, distributed, attributes);
-        } catch (IllegalArgumentException e) {
+        } catch (final IllegalArgumentException e) {
             yacyCore.log.logWarning("rejected bad yacy news record: " + e.getMessage());
             return null;
         }
     }
     
-    public yacyNewsRecord(String newsString) {
+    public yacyNewsRecord(final String newsString) {
         this.attributes = serverCodings.string2map(newsString, ",");
         if (attributes.toString().length() > attributesMaxLength) throw new IllegalArgumentException("attributes length (" + attributes.toString().length() + ") exceeds maximum (" + attributesMaxLength + ")");
         this.category = (attributes.containsKey("cat")) ? (String) attributes.get("cat") : "";
@@ -139,7 +139,7 @@ public class yacyNewsRecord {
         removeStandards();
     }
 
-    public yacyNewsRecord(yacySeed mySeed, String category, Map<String, String> attributes) {
+    public yacyNewsRecord(final yacySeed mySeed, final String category, final Map<String, String> attributes) {
         if (category.length() > categoryStringLength) throw new IllegalArgumentException("category length (" + category.length() + ") exceeds maximum (" + categoryStringLength + ")");
         if (attributes.toString().length() > attributesMaxLength) throw new IllegalArgumentException("attributes length (" + attributes.toString().length() + ") exceeds maximum (" + attributesMaxLength + ")");
         this.attributes = attributes;
@@ -151,7 +151,7 @@ public class yacyNewsRecord {
         removeStandards();
     }
 
-    protected yacyNewsRecord(String id, String category, Date received, int distributed, Map<String, String> attributes) {
+    protected yacyNewsRecord(final String id, final String category, final Date received, final int distributed, final Map<String, String> attributes) {
         if (category.length() > categoryStringLength) throw new IllegalArgumentException("category length (" + category.length() + ") exceeds maximum (" + categoryStringLength + ")");
         if (attributes.toString().length() > attributesMaxLength) throw new IllegalArgumentException("attributes length (" + attributes.toString().length() + ") exceeds maximum (" + attributesMaxLength + ")");
         this.attributes = attributes;
@@ -179,7 +179,7 @@ public class yacyNewsRecord {
         if (this.created != null)    attributes.put("cre", serverDate.formatShortSecond(this.created));
         if (this.received != null)   attributes.put("rec", serverDate.formatShortSecond(this.received));
         attributes.put("dis", Integer.toString(this.distributed));
-        String theString = attributes.toString();
+        final String theString = attributes.toString();
         removeStandards();
         return theString;
     }
@@ -216,13 +216,13 @@ public class yacyNewsRecord {
         return attributes;
     }
     
-    public String attribute(String key, String dflt) {
-        String s = attributes.get(key);
+    public String attribute(final String key, final String dflt) {
+        final String s = attributes.get(key);
         if ((s == null) || (s.length() == 0)) return dflt;
         return s;
     }
 
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         System.out.println((newRecord(args[0])).toString());
     }
 }

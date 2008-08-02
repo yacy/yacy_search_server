@@ -38,21 +38,21 @@ public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
     private static final long maxTrackingTimeDefault = 1000 * 60 * 60; // store only access data from the last hour to save ram space
     
     // configuration management
-    private   File      configFile;
-    private   String    configComment;
-    private   File      rootPath;
+    private final   File      configFile;
+    private final   String    configComment;
+    private final   File      rootPath;
     protected serverLog log;
     protected int       serverJobs;
     protected long      maxTrackingTime;
     private   Map<String, String>                    configProps;
-    private   Map<String, String>                    configRemoved;
-    private   HashMap<InetAddress, String>           authorization;
-    private   TreeMap<String, serverBusyThread>      workerThreads;
-    private   TreeMap<String, serverSwitchAction>    switchActions;
+    private final   Map<String, String>                    configRemoved;
+    private final   HashMap<InetAddress, String>           authorization;
+    private final   TreeMap<String, serverBusyThread>      workerThreads;
+    private final   TreeMap<String, serverSwitchAction>    switchActions;
     protected ConcurrentHashMap<String, TreeMap<Long, String>> accessTracker; // mappings from requesting host to an ArrayList of serverTrack-entries
-    private   LinkedBlockingQueue<E> cacheStack;
+    private final   LinkedBlockingQueue<E> cacheStack;
     
-    public serverAbstractSwitch(File rootPath, String initPath, String configPath, boolean applyPro) {
+    public serverAbstractSwitch(final File rootPath, final String initPath, final String configPath, final boolean applyPro) {
         // we initialize the switchboard with a property file,
         // but maintain these properties then later in a new 'config' file
         // to reset all changed configs, the config file must
@@ -62,7 +62,7 @@ public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
         this.cacheStack = new LinkedBlockingQueue<E>();
     	this.rootPath = rootPath;
     	this.configComment = "This is an automatically generated file, updated by serverAbstractSwitch and initialized by " + initPath;
-        File initFile = new File(rootPath, initPath);
+        final File initFile = new File(rootPath, initPath);
         this.configFile = new File(rootPath, configPath); // propertiesFile(config);
         new File(configFile.getParent()).mkdir();
 
@@ -145,7 +145,7 @@ public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
     }
     
     // a logger for this switchboard
-    public void setLog(serverLog log) {
+    public void setLog(final serverLog log) {
 	this.log = log;
     }
 
@@ -156,14 +156,14 @@ public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
     /*
      * remove all entries from the access tracker where the age of the last access is greater than the given timeout
      */
-    public void cleanupAccessTracker(long timeout) {
-        Iterator<Map.Entry<String, TreeMap<Long, String>>> i = accessTracker.entrySet().iterator();
+    public void cleanupAccessTracker(final long timeout) {
+        final Iterator<Map.Entry<String, TreeMap<Long, String>>> i = accessTracker.entrySet().iterator();
         while (i.hasNext()) {
             if (i.next().getValue().tailMap(new Long(System.currentTimeMillis() - timeout)).size() == 0) i.remove();
         }
     }
     
-    public void track(String host, String accessPath) {
+    public void track(final String host, String accessPath) {
         // learn that a specific host has accessed a specific path
         if (accessPath == null) accessPath="NULL";
         TreeMap<Long, String> access = accessTracker.get(host);
@@ -176,7 +176,7 @@ public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
         }
     }
     
-    public TreeMap<Long, String> accessTrack(String host) {
+    public TreeMap<Long, String> accessTrack(final String host) {
         // returns mapping from Long(accesstime) to path
         
         TreeMap<Long, String> access = accessTracker.get(host);
@@ -195,19 +195,19 @@ public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
         return access;
     }
     
-    private TreeMap<Long, String> clearTooOldAccess(TreeMap<Long, String> access) {
+    private TreeMap<Long, String> clearTooOldAccess(final TreeMap<Long, String> access) {
         return new TreeMap<Long, String>(access.tailMap(new Long(System.currentTimeMillis() - maxTrackingTime)));
     }
     
     public Iterator<String> accessHosts() {
         // returns an iterator of hosts in tracker (String)
-    	HashMap<String, TreeMap<Long, String>> accessTrackerClone = new HashMap<String, TreeMap<Long, String>>();
+    	final HashMap<String, TreeMap<Long, String>> accessTrackerClone = new HashMap<String, TreeMap<Long, String>>();
     	accessTrackerClone.putAll(accessTracker);
     	return accessTrackerClone.keySet().iterator();
     }
 
-    public void setConfig(Map<String, String> otherConfigs) {
-        Iterator<Map.Entry<String, String>> i = otherConfigs.entrySet().iterator();
+    public void setConfig(final Map<String, String> otherConfigs) {
+        final Iterator<Map.Entry<String, String>> i = otherConfigs.entrySet().iterator();
         Map.Entry<String, String> entry;
         while (i.hasNext()) {
             entry = i.next();
@@ -215,22 +215,22 @@ public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
         }
     }
 
-    public void setConfig(String key, boolean value) {
+    public void setConfig(final String key, final boolean value) {
         setConfig(key, (value) ? "true" : "false");
     }
 
-    public void setConfig(String key, long value) {
+    public void setConfig(final String key, final long value) {
         setConfig(key, Long.toString(value));
     }
 
-    public void setConfig(String key, double value) {
+    public void setConfig(final String key, final double value) {
         setConfig(key, Double.toString(value));
     }
 
-    public void setConfig(String key, String value) {
+    public void setConfig(final String key, final String value) {
         // perform action before setting new value
-        Iterator<serverSwitchAction> bevore = switchActions.values().iterator();
-        Iterator<serverSwitchAction> after  = switchActions.values().iterator();
+        final Iterator<serverSwitchAction> bevore = switchActions.values().iterator();
+        final Iterator<serverSwitchAction> after  = switchActions.values().iterator();
         synchronized (configProps) {
             serverSwitchAction action;
             
@@ -238,13 +238,13 @@ public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
                 action = bevore.next();
                 try {
                     action.doBevoreSetConfig(key, value);
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     log.logSevere("serverAction bevoreSetConfig '" + action.getShortDescription() + "' failed with exception: " + e.getMessage());
                 }
             }
 
             // set the value
-            Object oldValue = configProps.put(key, value);
+            final Object oldValue = configProps.put(key, value);
             saveConfig();
 
             // perform actions afterwards
@@ -252,25 +252,25 @@ public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
                 action = after.next();
                 try {
                     action.doAfterSetConfig(key, value, (oldValue == null) ? null : (String) oldValue);
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     log.logSevere("serverAction afterSetConfig '" + action.getShortDescription() + "' failed with exception: " + e.getMessage());
                 }
             }
         }
     }
 
-    public void removeConfig(String key) {
+    public void removeConfig(final String key) {
     	configProps.remove(key);
     }
     
     /* (non-Javadoc)
      * @see de.anomic.server.serverSwitch#getConfig(java.lang.String, java.lang.String)
      */
-    public String getConfig(String key, String dflt) {
-        Iterator<serverSwitchAction> i = switchActions.values().iterator();
+    public String getConfig(final String key, final String dflt) {
+        final Iterator<serverSwitchAction> i = switchActions.values().iterator();
         synchronized (configProps) {
             // get the value
-            Object s = configProps.get(key);
+            final Object s = configProps.get(key);
 
             // do action
             serverSwitchAction action;
@@ -278,7 +278,7 @@ public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
                 action = i.next();
                 try {
                     action.doWhenGetConfig(key, (s == null) ? null : (String) s, dflt);
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     log.logSevere("serverAction whenGetConfig '" + action.getShortDescription() + "' failed with exception: " + e.getMessage());
                 }
             }
@@ -289,23 +289,23 @@ public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
         }
     }
     
-    public long getConfigLong(String key, long dflt) {
+    public long getConfigLong(final String key, final long dflt) {
         try {
             return Long.parseLong(getConfig(key, Long.toString(dflt)));
-        } catch (NumberFormatException e) {
+        } catch (final NumberFormatException e) {
             return dflt;
         }
     }
     
-    public double getConfigDouble(String key, double dflt) {
+    public double getConfigDouble(final String key, final double dflt) {
         try {
             return Double.parseDouble(getConfig(key, Double.toString(dflt)));
-        } catch (NumberFormatException e) {
+        } catch (final NumberFormatException e) {
             return dflt;
         }
     }
     
-    public boolean getConfigBool(String key, boolean dflt) {
+    public boolean getConfigBool(final String key, final boolean dflt) {
         return Boolean.valueOf(getConfig(key, Boolean.toString(dflt))).booleanValue();
     }
     
@@ -318,10 +318,10 @@ public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
      * returned File is derived from this setting only. Otherwise the path's file
      * is constructed from the applications root path + the relative path setting.
      */
-    public File getConfigPath(String key, String dflt) {
+    public File getConfigPath(final String key, final String dflt) {
         File ret;
-        String path = getConfig(key, dflt).replace('\\', '/');
-        File f = new File(path);
+        final String path = getConfig(key, dflt).replace('\\', '/');
+        final File f = new File(path);
         if (f == null) {
             ret = null;
         } else {
@@ -340,7 +340,7 @@ public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
             synchronized (configProps) {
                 serverFileUtils.saveMap(configFile, configProps, configComment);
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             System.out.println("ERROR: cannot write config file " + configFile.toString() + ": " + e.getMessage());
         }
     }
@@ -351,28 +351,28 @@ public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
     }
     
     // add/remove action listener
-    public void deployAction(String actionName, String actionShortDescription, String actionLongDescription,
-			     serverSwitchAction newAction) {
+    public void deployAction(final String actionName, final String actionShortDescription, final String actionLongDescription,
+			     final serverSwitchAction newAction) {
         newAction.setLog(log);
         newAction.setDescription(actionShortDescription, actionLongDescription);
         switchActions.put(actionName, newAction);
         log.logInfo("Deployed Action '" + actionShortDescription + "', (" + switchActions.size() + " actions registered)");
     }
 
-    public void undeployAction(String actionName) {
-	serverSwitchAction action = switchActions.get(actionName);
+    public void undeployAction(final String actionName) {
+	final serverSwitchAction action = switchActions.get(actionName);
 	action.close();
 	switchActions.remove(actionName);
 	log.logInfo("Undeployed Action '" + action.getShortDescription() + "', (" + switchActions.size() + " actions registered)");
     }
 
     public void deployThread(
-            String threadName,
-            String threadShortDescription,
-            String threadLongDescription,
-            String threadMonitorURL,
-            serverBusyThread newThread,
-            long startupDelay) {
+            final String threadName,
+            final String threadShortDescription,
+            final String threadLongDescription,
+            final String threadMonitorURL,
+            final serverBusyThread newThread,
+            final long startupDelay) {
         deployThread(threadName, threadShortDescription, threadLongDescription, threadMonitorURL,
                      newThread, startupDelay,
                      Long.parseLong(getConfig(threadName + "_idlesleep" ,     "100")), 
@@ -381,36 +381,36 @@ public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
     }
 
     public void deployThread(
-            String threadName,
-            String threadShortDescription,
-            String threadLongDescription,
-            String threadMonitorURL,
-            serverBusyThread newThread,
-            long startupDelay,
-            long initialIdleSleep,
-            long initialBusySleep,
-            long initialMemoryPreRequisite) {
+            final String threadName,
+            final String threadShortDescription,
+            final String threadLongDescription,
+            final String threadMonitorURL,
+            final serverBusyThread newThread,
+            final long startupDelay,
+            final long initialIdleSleep,
+            final long initialBusySleep,
+            final long initialMemoryPreRequisite) {
         if (newThread.isAlive()) throw new RuntimeException("undeployed threads must not live; they are started as part of the deployment");
         newThread.setStartupSleep(startupDelay);
         long x;
         try {
             x = Long.parseLong(getConfig(threadName + "_idlesleep" , "novalue"));
             newThread.setIdleSleep(x);
-        } catch (NumberFormatException e) {
+        } catch (final NumberFormatException e) {
             newThread.setIdleSleep(initialIdleSleep);
             setConfig(threadName + "_idlesleep", initialIdleSleep);
         }
         try {
             x = Long.parseLong(getConfig(threadName + "_busysleep" , "novalue"));
             newThread.setBusySleep(x);
-        } catch (NumberFormatException e) {
+        } catch (final NumberFormatException e) {
             newThread.setBusySleep(initialBusySleep);
             setConfig(threadName + "_busysleep", initialBusySleep);
         }
         try {
             x = Long.parseLong(getConfig(threadName + "_memprereq" , "novalue"));
             newThread.setMemPreReqisite(x);
-        } catch (NumberFormatException e) {
+        } catch (final NumberFormatException e) {
             newThread.setMemPreReqisite(initialMemoryPreRequisite);
             setConfig(threadName + "_memprereq", initialMemoryPreRequisite);
         }
@@ -421,12 +421,12 @@ public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
         if (workerThreads.containsKey(threadName)) newThread.start();
     }
 
-    public serverBusyThread getThread(String threadName) {
+    public serverBusyThread getThread(final String threadName) {
         return workerThreads.get(threadName);
     }
     
-    public void setThreadPerformance(String threadName, long idleMillis, long busyMillis, long memprereqBytes) {
-        serverBusyThread thread = workerThreads.get(threadName);
+    public void setThreadPerformance(final String threadName, final long idleMillis, final long busyMillis, final long memprereqBytes) {
+        final serverBusyThread thread = workerThreads.get(threadName);
         if (thread != null) {
             thread.setIdleSleep(idleMillis);
             thread.setBusySleep(busyMillis);
@@ -434,21 +434,21 @@ public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
         }
     }
     
-    public synchronized void terminateThread(String threadName, boolean waitFor) {
+    public synchronized void terminateThread(final String threadName, final boolean waitFor) {
         if (workerThreads.containsKey(threadName)) {
             ((serverThread) workerThreads.get(threadName)).terminate(waitFor);
             workerThreads.remove(threadName);
         }
     }
 
-    public void intermissionAllThreads(long pause) {
-        Iterator<String> e = workerThreads.keySet().iterator();
+    public void intermissionAllThreads(final long pause) {
+        final Iterator<String> e = workerThreads.keySet().iterator();
         while (e.hasNext()) {
             workerThreads.get(e.next()).intermission(pause);
         }
     }
     
-    public synchronized void terminateAllThreads(boolean waitFor) {
+    public synchronized void terminateAllThreads(final boolean waitFor) {
         Iterator<String> e = workerThreads.keySet().iterator();
         while (e.hasNext()) {
             ((serverThread) workerThreads.get(e.next())).terminate(false);
@@ -474,7 +474,7 @@ public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
         return cacheStack.peek();
     }
     
-    public void enQueue(E job) {
+    public void enQueue(final E job) {
         cacheStack.add(job);
     }
     
@@ -484,48 +484,48 @@ public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
 
     // authentification routines:
     
-    public void setAuthentify(InetAddress host, String user, String rights) {
+    public void setAuthentify(final InetAddress host, final String user, final String rights) {
         // sets access attributes according to host addresses
         authorization.put(host, user + "@" + rights);
     }
 
-    public void removeAuthentify(InetAddress host) {
+    public void removeAuthentify(final InetAddress host) {
         // remove access attributes according to host addresses
         authorization.remove(host);
     }
 
-    public String getAuthentifyUser(InetAddress host) {
+    public String getAuthentifyUser(final InetAddress host) {
 	// read user name according to host addresses
-	String a = authorization.get(host);
+	final String a = authorization.get(host);
 	if (a == null) return null;
-	int p = a.indexOf("@");
+	final int p = a.indexOf("@");
 	if (p < 0) return null;
 	return a.substring(0, p);
     }
 
-    public String getAuthentifyRights(InetAddress host) {
+    public String getAuthentifyRights(final InetAddress host) {
 	// read access rigths according to host addresses
-	String a = authorization.get(host);
+	final String a = authorization.get(host);
 	if (a == null) return null;
-	int p = a.indexOf("@");
+	final int p = a.indexOf("@");
 	if (p < 0) return null;
 	return a.substring(p + 1);
     }
 
-    public void addAuthentifyRight(InetAddress host, String right) {
-	String rights = getAuthentifyRights(host);
+    public void addAuthentifyRight(final InetAddress host, final String right) {
+	final String rights = getAuthentifyRights(host);
 	if (rights == null) {
 	    // create new authentification
 	    setAuthentify(host, "unknown", right);
 	} else {
 	    // add more authentification
-	    String user = getAuthentifyUser(host);
+	    final String user = getAuthentifyUser(host);
 	    setAuthentify(host, user, rights + right);
 	}	
     }
 
-    public boolean hasAuthentifyRight(InetAddress host, String right) {
-	String rights = getAuthentifyRights(host);
+    public boolean hasAuthentifyRight(final InetAddress host, final String right) {
+	final String rights = getAuthentifyRights(host);
 	if (rights == null) return false;
 	return rights.indexOf(right) >= 0;
     }
@@ -540,7 +540,7 @@ public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
 	return configProps.toString();
     }
 
-    public void handleBusyState(int jobs) {
+    public void handleBusyState(final int jobs) {
         serverJobs = jobs;
     }
 }

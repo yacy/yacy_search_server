@@ -59,18 +59,18 @@ public class rtfParser extends AbstractParser implements Parser {
         this.parserName = "Rich Text Format Parser";  
 	}
 
-	public plasmaParserDocument parse(yacyURL location, String mimeType, String charset, InputStream source) throws ParserException, InterruptedException {
+	public plasmaParserDocument parse(final yacyURL location, final String mimeType, final String charset, final InputStream source) throws ParserException, InterruptedException {
 
         
 		try {	
-            DefaultStyledDocument doc = new DefaultStyledDocument();
+            final DefaultStyledDocument doc = new DefaultStyledDocument();
             
-            RTFEditorKit theRtfEditorKit = new RTFEditorKit();               
+            final RTFEditorKit theRtfEditorKit = new RTFEditorKit();               
             theRtfEditorKit.read(source, doc, 0);            
             
-            String bodyText = doc.getText(0, doc.getLength());
+            final String bodyText = doc.getText(0, doc.getLength());
             
-            plasmaParserDocument theDoc = new plasmaParserDocument(
+            final plasmaParserDocument theDoc = new plasmaParserDocument(
                     location,
                     mimeType,
                     "UTF-8",
@@ -89,7 +89,7 @@ public class rtfParser extends AbstractParser implements Parser {
             
             return theDoc;             
 		}
-		catch (Exception e) {			
+		catch (final Exception e) {			
             if (e instanceof InterruptedException) throw (InterruptedException) e;
             if (e instanceof ParserException) throw (ParserException) e;
             

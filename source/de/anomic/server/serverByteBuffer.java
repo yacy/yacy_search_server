@@ -46,26 +46,26 @@ public final class serverByteBuffer extends OutputStream {
         offset = 0;
     }
     
-    public serverByteBuffer(int initLength) {
+    public serverByteBuffer(final int initLength) {
         this.buffer = new byte[initLength];
         this.length = 0;
         this.offset = 0;
     }        
     
-    public serverByteBuffer(byte[] bb) {
+    public serverByteBuffer(final byte[] bb) {
         buffer = bb;
         length = bb.length;
         offset = 0;
     }
 
-    public serverByteBuffer(byte[] bb, int initLength) {
+    public serverByteBuffer(final byte[] bb, final int initLength) {
         this.buffer = new byte[initLength];
         System.arraycopy(bb, 0, buffer, 0, bb.length);
         length = bb.length;
         offset = 0;
     }
     
-    public serverByteBuffer(byte[] bb, int of, int le) {
+    public serverByteBuffer(final byte[] bb, final int of, final int le) {
         if (of * 2 > bb.length) {
             buffer = new byte[le];
             System.arraycopy(bb, of, buffer, 0, le);
@@ -78,13 +78,13 @@ public final class serverByteBuffer extends OutputStream {
         }
     }
 
-    public serverByteBuffer(serverByteBuffer bb) {
+    public serverByteBuffer(final serverByteBuffer bb) {
         buffer = bb.buffer;
         length = bb.length;
         offset = bb.offset;
     }
 
-    public serverByteBuffer(File f) throws IOException {
+    public serverByteBuffer(final File f) throws IOException {
     // initially fill the byte buffer with the content of a file
     if (f.length() > Integer.MAX_VALUE) throw new IOException("file is too large for buffering");
 
@@ -93,7 +93,7 @@ public final class serverByteBuffer extends OutputStream {
     offset = 0;
 
     try {
-        FileInputStream fis = new FileInputStream(f);
+        final FileInputStream fis = new FileInputStream(f);
 //        byte[] buf = new byte[512];
 //        int p = 0;
 //        while ((l = fis.read(buf)) > 0) {
@@ -102,7 +102,7 @@ public final class serverByteBuffer extends OutputStream {
         /*int l =*/ fis.read(buffer);
 //        }
         fis.close();
-    } catch (FileNotFoundException e) {
+    } catch (final FileNotFoundException e) {
         throw new IOException("File not found: " + f.toString() + "; " + e.getMessage());
     }
     }
@@ -127,20 +127,20 @@ public final class serverByteBuffer extends OutputStream {
         offset = 0;
     }
 
-    public void write(int b) {
+    public void write(final int b) {
         write((byte) (b & 0xff));
     }
     
-    public void write(byte b) {
+    public void write(final byte b) {
         if (offset + length + 1 > buffer.length) grow();
         buffer[offset + length++] = b;
     }
     
-    public void write(byte[] bb) {
+    public void write(final byte[] bb) {
         write(bb, 0, bb.length);
     }
     
-    public void write(byte[] bb, int of, int le) {
+    public void write(final byte[] bb, final int of, final int le) {
         while (offset + length + le > buffer.length) grow();
         System.arraycopy(bb, of, buffer, offset + length, le);
         length += le;
@@ -148,70 +148,70 @@ public final class serverByteBuffer extends OutputStream {
     
     // overwrite does not increase the 'length' write position pointer!
     
-    public void overwrite(int pos, int b) {
+    public void overwrite(final int pos, final int b) {
         overwrite(pos, (byte) (b & 0xff));
     }
     
-    public void overwrite(int pos, byte b) {
+    public void overwrite(final int pos, final byte b) {
         if (offset + pos + 1 > buffer.length) grow();
         buffer[offset + pos] = b;
         if (pos >= length) length = pos + 1;
     }
     
-    public void overwrite(int pos, byte[] bb) {
+    public void overwrite(final int pos, final byte[] bb) {
         overwrite(pos, bb, 0, bb.length);
     }
     
-    public void overwrite(int pos, byte[] bb, int of, int le) {
+    public void overwrite(final int pos, final byte[] bb, final int of, final int le) {
         while (offset + pos + le > buffer.length) grow();
         System.arraycopy(bb, of, buffer, offset + pos, le);
         if (pos + le > length) length = pos + le;
     }
     
-    public serverByteBuffer append(byte b) {
+    public serverByteBuffer append(final byte b) {
         write(b);
         return this;
     }
 
-    public serverByteBuffer append(int i) {
+    public serverByteBuffer append(final int i) {
         write((byte) (i & 0xFF));
         return this;
     }
 
-    public serverByteBuffer append(byte[] bb) {
+    public serverByteBuffer append(final byte[] bb) {
         write(bb);
         return this;
     }
 
-    public serverByteBuffer append(byte[] bb, int of, int le) {
+    public serverByteBuffer append(final byte[] bb, final int of, final int le) {
         write(bb, of, le);
         return this;
     }
 
-    public serverByteBuffer append(String s) {
+    public serverByteBuffer append(final String s) {
         return append(s.getBytes());
     }
     
-    public serverByteBuffer append(String s, String charset) throws UnsupportedEncodingException {
+    public serverByteBuffer append(final String s, final String charset) throws UnsupportedEncodingException {
         return append(s.getBytes(charset));
     }    
 
-    public serverByteBuffer append(serverByteBuffer bb) {
+    public serverByteBuffer append(final serverByteBuffer bb) {
         return append(bb.buffer, bb.offset, bb.length);
     }
 
-    public serverByteBuffer append(Object o) {
+    public serverByteBuffer append(final Object o) {
         if (o instanceof String) return append((String) o);
         if (o instanceof byte[]) return append((byte[]) o);
         return null;
     }
     
-    public byte byteAt(int pos) {
+    public byte byteAt(final int pos) {
         if (pos > length) return -1;
         return buffer[offset + pos];
     }
 
-    public void deleteByteAt(int pos) {
+    public void deleteByteAt(final int pos) {
         if (pos < 0) return;
         if (pos >= length) return;
         if (pos == length - 1) {
@@ -221,21 +221,21 @@ public final class serverByteBuffer extends OutputStream {
         }
     }
     
-    public int indexOf(byte b) {
+    public int indexOf(final byte b) {
         return indexOf(b, 0);
     }
 
-    public int indexOf(byte[] bs) {
+    public int indexOf(final byte[] bs) {
         return indexOf(bs, 0);
     }
 
-    public int indexOf(byte b, int start) {
+    public int indexOf(final byte b, final int start) {
         if (start >= length) return -1;
         for (int i = start; i < length; i++) if (buffer[offset + i] == b) return i;
         return -1;
     }
 
-    public int indexOf(byte[] bs, int start) {
+    public int indexOf(final byte[] bs, final int start) {
         if (start + bs.length > length) return -1;
         loop: for (int i = start; i <= length - bs.length; i++) {
             // first test only first byte
@@ -252,16 +252,16 @@ public final class serverByteBuffer extends OutputStream {
         return -1;
     }
 
-    public int lastIndexOf(byte b) {
+    public int lastIndexOf(final byte b) {
         for (int i = length - 1; i >= 0; i--) if (buffer[offset + i] == b) return i;
         return -1;
     }
 
-    public boolean startsWith(byte[] bs) {
+    public boolean startsWith(final byte[] bs) {
         return startsWith(bs, 0);
     }
     
-    public boolean startsWith(byte[] bs, int start) {
+    public boolean startsWith(final byte[] bs, final int start) {
         if (length - start < bs.length) return false;
         for (int i = 0; i < bs.length; i++) {
             if (buffer[offset + i + start] != bs[i]) return false;
@@ -273,26 +273,26 @@ public final class serverByteBuffer extends OutputStream {
         return getBytes(0);
     }
 
-    public byte[] getBytes(int start) {
+    public byte[] getBytes(final int start) {
         return getBytes(start, this.length);
     }
     
-    public byte[] getBytes(int start, int len) {
+    public byte[] getBytes(final int start, final int len) {
         // start is inclusive, end is exclusive
         if (len > length) throw new IndexOutOfBoundsException("getBytes: len > length");
         if (start > length) throw new IndexOutOfBoundsException("getBytes: start > length");
         if ((start == 0) && (len == length) && (len == buffer.length)) return buffer;
-        byte[] tmp = new byte[len];
+        final byte[] tmp = new byte[len];
         System.arraycopy(buffer, offset + start, tmp, 0, len);
         return tmp;
     }
     
-    public serverByteBuffer trim(int start) {
+    public serverByteBuffer trim(final int start) {
         trim(start, this.length - start);
         return this;
     }
 
-    public serverByteBuffer trim(int start, int len) {
+    public serverByteBuffer trim(final int start, final int len) {
         if (start + len > this.length) throw new IndexOutOfBoundsException("trim: start + len > length; this.offset = " + this.offset + ", this.length = " + this.length + ", start = " + start + ", len = " + len);
         this.offset = this.offset + start;
         this.length = len;
@@ -309,7 +309,7 @@ public final class serverByteBuffer extends OutputStream {
         return trim(l, r - l + 1);
     }
     
-    public int isUTF8char(int start) {
+    public int isUTF8char(final int start) {
         // a sequence of bytes is a utf-8 character, if one of the following 4 conditions is true:
         // - ASCII equivalence range; (first) byte begins with zero
         // - first byte begins with 110, the following byte begins with 10
@@ -333,7 +333,7 @@ public final class serverByteBuffer extends OutputStream {
         return -1;
     }
 
-    public boolean isWhitespace(boolean includeNonLetterBytes) {
+    public boolean isWhitespace(final boolean includeNonLetterBytes) {
         // returns true, if trim() would result in an empty serverByteBuffer
         if (includeNonLetterBytes) {
             byte b;
@@ -347,7 +347,7 @@ public final class serverByteBuffer extends OutputStream {
         return true;
     }
     
-    public int whitespaceStart(boolean includeNonLetterBytes) {
+    public int whitespaceStart(final boolean includeNonLetterBytes) {
         // returns number of whitespace bytes at the beginning of text
         if (includeNonLetterBytes) {
             byte b;
@@ -361,7 +361,7 @@ public final class serverByteBuffer extends OutputStream {
         return length;
     }
     
-    public int whitespaceEnd(boolean includeNonLetterBytes) {
+    public int whitespaceEnd(final boolean includeNonLetterBytes) {
         // returns position of whitespace at the end of text
         if (includeNonLetterBytes) {
             byte b;
@@ -380,24 +380,24 @@ public final class serverByteBuffer extends OutputStream {
         return new String(buffer, offset, length);
     }
     
-    public String toString(String charsetName) {
+    public String toString(final String charsetName) {
         try {
             return new String(this.getBytes(),charsetName);
-        } catch (UnsupportedEncodingException e) {
+        } catch (final UnsupportedEncodingException e) {
             return new String(this.getBytes());
         }
     }
 
-    public String toString(int left, int rightbound) {
+    public String toString(final int left, final int rightbound) {
         return new String(buffer, offset + left, rightbound - left);
     }
 
-    public Properties propParser(String charset) {
+    public Properties propParser(final String charset) {
         // extract a=b or a="b" - relations from the buffer
         int pos = offset;
         int start;
         String key;
-        Properties p = new Properties();
+        final Properties p = new Properties();
         // eat up spaces at beginning
         while ((pos < length) && (buffer[pos] <= 32)) pos++;
         while (pos < length) {
@@ -407,7 +407,7 @@ public final class serverByteBuffer extends OutputStream {
             if (pos >= length) break; // this is the case if we found no equal
             try {
                 key = new String(buffer, start, pos - start,charset).trim().toLowerCase();
-            } catch (UnsupportedEncodingException e1) {
+            } catch (final UnsupportedEncodingException e1) {
                 key = new String(buffer, start, pos - start).trim().toLowerCase();
             }
             // we have a key
@@ -427,7 +427,7 @@ public final class serverByteBuffer extends OutputStream {
                 if (pos >= length) break; // this is the case if we found no parent doublequote
                 try {
                     p.setProperty(key, new String(buffer, start, pos - start,charset).trim());
-                } catch (UnsupportedEncodingException e) {
+                } catch (final UnsupportedEncodingException e) {
                     p.setProperty(key, new String(buffer, start, pos - start).trim());
                 } 
                 pos++;
@@ -439,7 +439,7 @@ public final class serverByteBuffer extends OutputStream {
                 if (pos >= length) break; // this is the case if we found no parent singlequote
                 try {
                     p.setProperty(key, new String(buffer, start, pos - start,charset).trim());
-                } catch (UnsupportedEncodingException e) {
+                } catch (final UnsupportedEncodingException e) {
                     p.setProperty(key, new String(buffer, start, pos - start).trim());
                 }
                 pos++;
@@ -449,7 +449,7 @@ public final class serverByteBuffer extends OutputStream {
                 while ((pos < length) && (buffer[pos] > 32)) pos++;
                 try {
                     p.setProperty(key, new String(buffer, start, pos - start,charset).trim());
-                } catch (UnsupportedEncodingException e) {
+                } catch (final UnsupportedEncodingException e) {
                     p.setProperty(key, new String(buffer, start, pos - start).trim());
                 }
             }
@@ -460,11 +460,11 @@ public final class serverByteBuffer extends OutputStream {
         return p;
     }
     
-    public static boolean equals(byte[] buffer, byte[] pattern) {
+    public static boolean equals(final byte[] buffer, final byte[] pattern) {
         return equals(buffer, 0, pattern);
     }
     
-    public static boolean equals(byte[] buffer, int offset, byte[] pattern) {
+    public static boolean equals(final byte[] buffer, final int offset, final byte[] pattern) {
         // compares two byte arrays: true, if pattern appears completely at offset position
         if (buffer.length < offset + pattern.length) return false;
         for (int i = 0; i < pattern.length; i++) if (buffer[offset + i] != pattern[i]) return false;
@@ -476,19 +476,19 @@ public final class serverByteBuffer extends OutputStream {
         this.offset = 0;
     }        
     
-    public void reset(int newSize) {  
+    public void reset(final int newSize) {  
         this.resize(newSize);
         this.reset();
     }         
      
-    public void resize(int newSize) {
+    public void resize(final int newSize) {
         if(newSize < 0) throw new IllegalArgumentException("Illegal array size: " + newSize);
-        byte[] v = new byte[newSize];
+        final byte[] v = new byte[newSize];
         System.arraycopy(this.buffer,0,v,0,newSize > this.buffer.length ? this.buffer.length : newSize);
         this.buffer = v;          
     }
     
-    public void writeTo(OutputStream dest) throws IOException {
+    public void writeTo(final OutputStream dest) throws IOException {
     	dest.write(this.buffer, this.offset, this.length);
         dest.flush();
     }

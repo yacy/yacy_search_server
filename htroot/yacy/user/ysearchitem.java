@@ -49,14 +49,14 @@ public class ysearchitem {
     private static final int namelength = 60;
     private static final int urllength = 120;
     
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final serverObjects prop = new serverObjects();
         
-        String eventID = post.get("eventID", "");
-        boolean rss = post.get("rss", "false").equals("true");
-        int item = post.getInt("item", -1);
-        boolean auth = ((String) header.get(httpHeader.CONNECTION_PROP_CLIENTIP, "")).equals("localhost") || sb.verifyAuthentication(header, true);
+        final String eventID = post.get("eventID", "");
+        final boolean rss = post.get("rss", "false").equals("true");
+        final int item = post.getInt("item", -1);
+        final boolean auth = ((String) header.get(httpHeader.CONNECTION_PROP_CLIENTIP, "")).equals("localhost") || sb.verifyAuthentication(header, true);
         
         // default settings for blank item
         prop.put("content", "0");
@@ -65,13 +65,13 @@ public class ysearchitem {
         prop.put("dynamic", "0");
         
         // find search event
-        plasmaSearchEvent theSearch = plasmaSearchEvent.getEvent(eventID);
+        final plasmaSearchEvent theSearch = plasmaSearchEvent.getEvent(eventID);
         if (theSearch == null) {
             // the event does not exist, show empty page
             return prop;
         }
-        plasmaSearchQuery theQuery = theSearch.getQuery();
-        int offset = theQuery.neededResults() - theQuery.displayResults();
+        final plasmaSearchQuery theQuery = theSearch.getQuery();
+        final int offset = theQuery.neededResults() - theQuery.displayResults();
         
         // dynamically update count values
         if (!rss) {
@@ -90,7 +90,7 @@ public class ysearchitem {
             // text search
 
             // generate result object
-            plasmaSearchEvent.ResultEntry result = theSearch.oneResult(item);
+            final plasmaSearchEvent.ResultEntry result = theSearch.oneResult(item);
             if (result == null) return prop; // no content
                 
             if (rss) {
@@ -108,11 +108,11 @@ public class ysearchitem {
             prop.putHTML("content_description", result.title());
             prop.put("content_url", result.urlstring());
         
-            int port=result.url().getPort();
+            final int port=result.url().getPort();
             yacyURL faviconURL;
             try {
                 faviconURL = new yacyURL(result.url().getProtocol() + "://" + result.url().getHost() + ((port != -1) ? (":" + String.valueOf(port)) : "") + "/favicon.ico", null);
-            } catch (MalformedURLException e1) {
+            } catch (final MalformedURLException e1) {
                 faviconURL = null;
             }
         
@@ -124,16 +124,16 @@ public class ysearchitem {
             prop.put("content_ybr", plasmaSearchRankingProcess.ybr(result.hash()));
             prop.putNum("content_size", result.filesize());
         
-            TreeSet<String>[] query = theQuery.queryWords();
+            final TreeSet<String>[] query = theQuery.queryWords();
             yacyURL wordURL = null;
             try {
                 prop.putHTML("content_words", URLEncoder.encode(query[0].toString(),"UTF-8"));
-            } catch (UnsupportedEncodingException e) {}
+            } catch (final UnsupportedEncodingException e) {}
             prop.putHTML("content_former", theQuery.queryString);
             prop.put("content_rankingprops", result.word().toPropertyForm() + ", domLengthEstimated=" + yacyURL.domLengthEstimation(result.hash()) +
                     ((yacyURL.probablyRootURL(result.hash())) ? ", probablyRootURL" : "") + 
                     (((wordURL = yacyURL.probablyWordURL(result.hash(), query[0])) != null) ? ", probablyWordURL=" + wordURL.toNormalform(false, true) : ""));
-            plasmaSnippetCache.TextSnippet snippet = result.textSnippet();
+            final plasmaSnippetCache.TextSnippet snippet = result.textSnippet();
             prop.put("content_snippet", (snippet == null) ? "(snippet not found)" : snippet.getLineMarked(theQuery.queryHashes));
             return prop;
         }
@@ -142,7 +142,7 @@ public class ysearchitem {
             // image search; shows thumbnails
 
             prop.put("content", theQuery.contentdom + 1); // switch on specific content
-            plasmaSnippetCache.MediaSnippet ms = theSearch.oneImage(item);
+            final plasmaSnippetCache.MediaSnippet ms = theSearch.oneImage(item);
             if (ms == null) {
                 prop.put("content_items", "0");
             } else {
@@ -164,11 +164,11 @@ public class ysearchitem {
             // any other media content
 
             // generate result object
-            plasmaSearchEvent.ResultEntry result = theSearch.oneResult(item);
+            final plasmaSearchEvent.ResultEntry result = theSearch.oneResult(item);
             if (result == null) return prop; // no content
             
             prop.put("content", theQuery.contentdom + 1); // switch on specific content
-            ArrayList<plasmaSnippetCache.MediaSnippet> media = result.mediaSnippets();
+            final ArrayList<plasmaSnippetCache.MediaSnippet> media = result.mediaSnippets();
             if (item == 0) col = true;
             if (media != null) {
                 plasmaSnippetCache.MediaSnippet ms;
@@ -192,9 +192,9 @@ public class ysearchitem {
         return prop;
     }
     
-    private static String shorten(String s, int length) {
+    private static String shorten(final String s, final int length) {
         if (s.length() <= length) return s;
-        int p = s.lastIndexOf('.');
+        final int p = s.lastIndexOf('.');
         if (p < 0) return s.substring(0, length - 3) + "...";
         return s.substring(0, length - (s.length() - p) - 3) + "..." + s.substring(p);
     }

@@ -208,10 +208,10 @@ public class LogParserPLASMA implements LogParser{
     private long DHTSendTraffic=0;
     private int DHTSendURLs=0;
     private int RWIRejectCount=0;
-    private HashSet<String> RWIRejectPeerNames = new HashSet<String>();
-    private HashSet<String> RWIRejectPeerHashs = new HashSet<String>();
-    private HashSet<String> DHTPeerNames = new HashSet<String>();
-    private HashSet<String> DHTPeerHashs = new HashSet<String>();
+    private final HashSet<String> RWIRejectPeerNames = new HashSet<String>();
+    private final HashSet<String> RWIRejectPeerHashs = new HashSet<String>();
+    private final HashSet<String> DHTPeerNames = new HashSet<String>();
+    private final HashSet<String> DHTPeerHashs = new HashSet<String>();
     private int DHTSelectionTargetCount = 0;
     private int DHTSelectionWordsCount = 0;
     private int DHTSelectionWordsTimeCount = 0;
@@ -240,8 +240,8 @@ public class LogParserPLASMA implements LogParser{
     private long totalParserTime = 0;
     private int totalParserRuns = 0;
     
-    public int parse(String logLevel, String logLine) {
-        long start = System.currentTimeMillis();
+    public int parse(final String logLevel, final String logLine) {
+        final long start = System.currentTimeMillis();
         if (logLevel.equals("INFO")){
             m = i1.matcher (logLine);
             
@@ -433,7 +433,7 @@ public class LogParserPLASMA implements LogParser{
     }
 
     public Hashtable<String, Object> getResults() {
-        Hashtable<String, Object> results = new Hashtable<String, Object>();
+        final Hashtable<String, Object> results = new Hashtable<String, Object>();
         results.put(PARSER_VERSION          , new Double(parserVersion));
         results.put(URLS_RECEIVED           , new Integer(urlSum));
         results.put(URLS_REQUESTED          , new Integer(urlReqSum));

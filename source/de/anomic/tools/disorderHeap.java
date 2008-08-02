@@ -36,31 +36,31 @@ public class disorderHeap implements Serializable {
         list = new LinkedList<String>();
     }
 
-    public disorderHeap(int numbers) {
+    public disorderHeap(final int numbers) {
         // create a disorder heap with numbers in it
         // the numbers are 0..numbers-1
         this();
         for (int i = 0; i < numbers; i++) add(Integer.toString(i));
     }
     
-    public synchronized void add(String element) {
+    public synchronized void add(final String element) {
         // add one element into the list at an arbitrary position
-        int pos = (int) ((System.currentTimeMillis() / 7) % (list.size() + 1));
+        final int pos = (int) ((System.currentTimeMillis() / 7) % (list.size() + 1));
         list.add(pos, element);
     }
 
     public synchronized String remove() {
         if (list.size() == 0) return null;
-        int pos = (int) ((System.currentTimeMillis() / 13) % list.size());
+        final int pos = (int) ((System.currentTimeMillis() / 13) % list.size());
         return list.remove(pos);
     }
 
     public synchronized int number() {
-        String n = this.remove();
+        final String n = this.remove();
         if (n == null) return -1;
         try {
             return Integer.parseInt(n);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             return -1;
     	}
     }
@@ -70,8 +70,8 @@ public class disorderHeap implements Serializable {
     }
 
 
-    public static void main(String[] args) {
-        disorderHeap ul = new disorderHeap();
+    public static void main(final String[] args) {
+        final disorderHeap ul = new disorderHeap();
         for (int i = 0; i < args.length; i++) ul.add(args[i]);
         for (int i = 0; i < args.length; i++) System.out.print(ul.remove() + " ");
         System.out.println();

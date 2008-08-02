@@ -32,8 +32,8 @@ import de.anomic.server.serverSwitch;
 
 public class opensearchdescription {
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
-        plasmaSwitchboard sb = (plasmaSwitchboard) env;
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         // generate message content for open search description
         String promoteSearchPageGreeting = env.getConfig("promoteSearchPageGreeting", "");
         if (env.getConfigBool("promoteSearchPageGreeting.useNetworkName", false)) promoteSearchPageGreeting = env.getConfig("network.unit.description", "");

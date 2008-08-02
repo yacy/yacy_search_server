@@ -59,13 +59,13 @@ public class SettingsAck_p {
     
     private static boolean nothingChanged = false;
     
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
         // return variable that accumulates replacements
-        serverObjects prop = new serverObjects();
-        plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        final serverObjects prop = new serverObjects();
+        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         
         // get referer for backlink
-        String referer = header.get(httpHeader.REFERER);
+        final String referer = header.get(httpHeader.REFERER);
         prop.put("referer", (referer == null) ? "Settings_p.html" : referer); 
         
         //if (post == null) System.out.println("POST: NULL"); else System.out.println("POST: " + post.toString());
@@ -78,9 +78,9 @@ public class SettingsAck_p {
         // admin password
         if (post.containsKey("adminaccount")) {
             // read and process data
-            String user   = post.get("adminuser");
-            String pw1    = post.get("adminpw1");
-            String pw2    = post.get("adminpw2");
+            final String user   = post.get("adminuser");
+            final String pw1    = post.get("adminpw1");
+            final String pw2    = post.get("adminpw2");
             // do checks
             if ((user == null) || (pw1 == null) || (pw2 == null)) {
                 prop.put("info", "1");//error with submitted information
@@ -108,14 +108,14 @@ public class SettingsAck_p {
             /* 
              * set new port
              */
-            String port = post.get("port");
+            final String port = post.get("port");
             prop.putHTML("info_port", port);
             if (!env.getConfig("port", port).equals(port)) {
                 // validation port
-                serverCore theServerCore = (serverCore) env.getThread("10_httpd");
+                final serverCore theServerCore = (serverCore) env.getThread("10_httpd");
                 try {
-                    InetSocketAddress theNewAddress = theServerCore.generateSocketAddress(port);
-                    String hostName = theNewAddress.getHostName();
+                    final InetSocketAddress theNewAddress = theServerCore.generateSocketAddress(port);
+                    final String hostName = theNewAddress.getHostName();
                     prop.put("info_restart", "1");
                     prop.put("info_restart_ip",(hostName.equals("0.0.0.0"))? "localhost" : hostName);
                     prop.put("info_restart_port", theNewAddress.getPort());
@@ -123,7 +123,7 @@ public class SettingsAck_p {
                     env.setConfig("port", port);
                     
                     theServerCore.reconnect(5000);                    
-                } catch (SocketException e) {
+                } catch (final SocketException e) {
                     prop.put("info", "26");
                     return prop;
                 }
@@ -160,13 +160,13 @@ public class SettingsAck_p {
                 int patternCount = 0;
                 String patternStr = null;
                 try {
-                    StringTokenizer st = new StringTokenizer(filter,",");                
+                    final StringTokenizer st = new StringTokenizer(filter,",");                
                     while (st.hasMoreTokens()) {
                         patternCount++;
                         patternStr = st.nextToken();
                         Pattern.compile(patternStr);
                     }
-                } catch (PatternSyntaxException e) {
+                } catch (final PatternSyntaxException e) {
                     prop.put("info", "27");
                     prop.putHTML("info_filter", filter);
                     prop.put("info_nr", patternCount);
@@ -262,13 +262,13 @@ public class SettingsAck_p {
                 int patternCount = 0;
                 String patternStr = null;
                 try {
-                    StringTokenizer st = new StringTokenizer(filter,",");
+                    final StringTokenizer st = new StringTokenizer(filter,",");
                     while (st.hasMoreTokens()) {
                         patternCount++;
                         patternStr = st.nextToken();
                         Pattern.compile(patternStr);
                     }
-                } catch (PatternSyntaxException e) {
+                } catch (final PatternSyntaxException e) {
                     prop.put("info", "27");
                     prop.putHTML("info_filter", filter);
                     prop.put("info_nr", patternCount);
@@ -316,23 +316,23 @@ public class SettingsAck_p {
             /* ====================================================================
              * Reading out the remote proxy settings 
              * ==================================================================== */
-            boolean useRemoteProxy = post.containsKey("remoteProxyUse");
-            boolean useRemoteProxy4Yacy = post.containsKey("remoteProxyUse4Yacy");
-            boolean useRemoteProxy4SSL = post.containsKey("remoteProxyUse4SSL");
+            final boolean useRemoteProxy = post.containsKey("remoteProxyUse");
+            final boolean useRemoteProxy4Yacy = post.containsKey("remoteProxyUse4Yacy");
+            final boolean useRemoteProxy4SSL = post.containsKey("remoteProxyUse4SSL");
             
-            String remoteProxyHost = post.get("remoteProxyHost", "");
-            String remoteProxyPortStr = post.get("remoteProxyPort", "");
+            final String remoteProxyHost = post.get("remoteProxyHost", "");
+            final String remoteProxyPortStr = post.get("remoteProxyPort", "");
             int remoteProxyPort = 0;
             try {
                 remoteProxyPort = Integer.parseInt(remoteProxyPortStr);
-            } catch (NumberFormatException e) {
+            } catch (final NumberFormatException e) {
                 remoteProxyPort = 3128;
             }
             
-            String remoteProxyUser = post.get("remoteProxyUser", "");
-            String remoteProxyPwd = post.get("remoteProxyPwd", "");
+            final String remoteProxyUser = post.get("remoteProxyUser", "");
+            final String remoteProxyPwd = post.get("remoteProxyPwd", "");
             
-            String remoteProxyNoProxyStr = post.get("remoteProxyNoProxy", "");
+            final String remoteProxyNoProxyStr = post.get("remoteProxyNoProxy", "");
             //String[] remoteProxyNoProxyPatterns = remoteProxyNoProxyStr.split(",");
             
             /* ====================================================================
@@ -387,12 +387,12 @@ public class SettingsAck_p {
         
         if (post.containsKey("seedSettings")) {
             // getting the currently used uploading method
-            String oldSeedUploadMethod = env.getConfig("seedUploadMethod","none");
-            String newSeedUploadMethod = post.get("seedUploadMethod");
-            String oldSeedURLStr = sb.webIndex.seedDB.mySeed().get(yacySeed.SEEDLIST, "");
-            String newSeedURLStr = post.get("seedURL");
+            final String oldSeedUploadMethod = env.getConfig("seedUploadMethod","none");
+            final String newSeedUploadMethod = post.get("seedUploadMethod");
+            final String oldSeedURLStr = sb.webIndex.seedDB.mySeed().get(yacySeed.SEEDLIST, "");
+            final String newSeedURLStr = post.get("seedURL");
             
-            boolean seedUrlChanged = !oldSeedURLStr.equals(newSeedURLStr);
+            final boolean seedUrlChanged = !oldSeedURLStr.equals(newSeedURLStr);
             boolean uploadMethodChanged = !oldSeedUploadMethod.equals(newSeedUploadMethod);
             if (uploadMethodChanged) {
                 uploadMethodChanged = yacyCore.changeSeedUploadMethod(newSeedUploadMethod);
@@ -423,22 +423,22 @@ public class SettingsAck_p {
          * Loop through the available seed uploaders to see if the 
          * configuration of one of them has changed 
          */
-        HashMap<String, String> uploaders = yacyCore.getSeedUploadMethods();
-        Iterator<String> uploaderKeys = uploaders.keySet().iterator();
+        final HashMap<String, String> uploaders = yacyCore.getSeedUploadMethods();
+        final Iterator<String> uploaderKeys = uploaders.keySet().iterator();
         while (uploaderKeys.hasNext()) {
             // getting the uploader module name
-            String uploaderName = uploaderKeys.next();
+            final String uploaderName = uploaderKeys.next();
             
             
             // determining if the user has reconfigured the settings of this uploader
             if (post.containsKey("seed" + uploaderName + "Settings")) {
                 nothingChanged = true;
-                yacySeedUploader theUploader = yacyCore.getSeedUploader(uploaderName);
-                String[] configOptions = theUploader.getConfigurationOptions();
+                final yacySeedUploader theUploader = yacyCore.getSeedUploader(uploaderName);
+                final String[] configOptions = theUploader.getConfigurationOptions();
                 if (configOptions != null) {
                     for (int i=0; i<configOptions.length; i++) {
-                        String newSettings = post.get(configOptions[i],"");
-                        String oldSettings = env.getConfig(configOptions[i],"");
+                        final String newSettings = post.get(configOptions[i],"");
+                        final String oldSettings = env.getConfig(configOptions[i],"");
                         nothingChanged &= newSettings.equals(oldSettings); 
                         if (!nothingChanged) {
                             env.setConfig(configOptions[i],newSettings);
@@ -495,22 +495,22 @@ public class SettingsAck_p {
         if (post.containsKey("parserSettings")) {
             post.remove("parserSettings");
             
-            Set<String> parserModes = plasmaParser.getParserConfigList().keySet();
-            HashMap<String, HashSet<String>> newConfigList = new HashMap<String, HashSet<String>>();     
+            final Set<String> parserModes = plasmaParser.getParserConfigList().keySet();
+            final HashMap<String, HashSet<String>> newConfigList = new HashMap<String, HashSet<String>>();     
             Iterator<String> parserModeIter = parserModes.iterator();
             while (parserModeIter.hasNext()) {
-                String currParserMode = parserModeIter.next();
+                final String currParserMode = parserModeIter.next();
                 newConfigList.put(currParserMode, new HashSet<String>());
             }
             
             // looping through all received settings
             int pos;
-            Iterator<String> keyEnum = post.keySet().iterator();
+            final Iterator<String> keyEnum = post.keySet().iterator();
             while (keyEnum.hasNext()) {                
-                String key = keyEnum.next();
+                final String key = keyEnum.next();
                 if ((pos = key.indexOf(".")) != -1) {
-                    String currParserMode = key.substring(0,pos).trim().toUpperCase();
-                    String currMimeType = key.substring(pos+1).replaceAll("\n", "");
+                    final String currParserMode = key.substring(0,pos).trim().toUpperCase();
+                    final String currMimeType = key.substring(pos+1).replaceAll("\n", "");
                     if (parserModes.contains(currParserMode)) {
                         HashSet<String> currEnabledMimeTypes;
                         assert (newConfigList.containsKey(currParserMode)) : "Unexpected Error";
@@ -521,11 +521,11 @@ public class SettingsAck_p {
             }
             
             int enabledMimesCount = 0;
-            StringBuffer currEnabledMimesTxt = new StringBuffer();
+            final StringBuffer currEnabledMimesTxt = new StringBuffer();
             parserModeIter = newConfigList.keySet().iterator();
             while (parserModeIter.hasNext()) {                
-                String currParserMode = parserModeIter.next();
-                String[] enabledMimes = plasmaParser.setEnabledParserList(currParserMode, newConfigList.get(currParserMode));
+                final String currParserMode = parserModeIter.next();
+                final String[] enabledMimes = plasmaParser.setEnabledParserList(currParserMode, newConfigList.get(currParserMode));
                 Arrays.sort(enabledMimes);
                 
                 currEnabledMimesTxt.setLength(0);
@@ -556,7 +556,7 @@ public class SettingsAck_p {
                 crawlerTimeout = Integer.valueOf(timeoutStr).intValue();
                 if (crawlerTimeout < 0) crawlerTimeout = 0;
                 env.setConfig("crawler.clientTimeout", Integer.toString(crawlerTimeout));
-            } catch (NumberFormatException e) {
+            } catch (final NumberFormatException e) {
                 prop.put("info", "29");
                 prop.put("info_crawler.clientTimeout",post.get("crawler.clientTimeout"));
                 return prop;
@@ -573,7 +573,7 @@ public class SettingsAck_p {
                     maxHttpSize = -1;
                 }
                 env.setConfig("crawler.http.maxFileSize", Long.toString(maxHttpSize));
-            } catch (NumberFormatException e) {
+            } catch (final NumberFormatException e) {
                 prop.put("info", "30");
                 prop.put("info_crawler.http.maxFileSize",post.get("crawler.http.maxFileSize"));
                 return prop;
@@ -587,7 +587,7 @@ public class SettingsAck_p {
             try {
                 maxFtpSize = Integer.valueOf(maxSizeStr).intValue();
                 env.setConfig("crawler.ftp.maxFileSize", Long.toString(maxFtpSize));
-            } catch (NumberFormatException e) {
+            } catch (final NumberFormatException e) {
                 prop.put("info", "31");
                 prop.put("info_crawler.ftp.maxFileSize",post.get("crawler.ftp.maxFileSize"));
                 return prop;

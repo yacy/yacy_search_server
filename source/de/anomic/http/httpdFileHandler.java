@@ -128,17 +128,17 @@ public final class httpdFileHandler {
             
             if (mimeTable.size() == 0) {
                 // load the mime table
-                String mimeTablePath = theSwitchboard.getConfig("mimeConfig","");
+                final String mimeTablePath = theSwitchboard.getConfig("mimeConfig","");
                 BufferedInputStream mimeTableInputStream = null;
                 try {
                     serverLog.logConfig("HTTPDFiles", "Loading mime mapping file " + mimeTablePath);
                     mimeTableInputStream = new BufferedInputStream(new FileInputStream(new File(theSwitchboard.getRootPath(), mimeTablePath)));
                     mimeTable.load(mimeTableInputStream);
-                } catch (Exception e) {                
+                } catch (final Exception e) {                
                     serverLog.logSevere("HTTPDFiles", "ERROR: path to configuration file or configuration invalid\n" + e);
                     System.exit(1);
                 } finally {
-                    if (mimeTableInputStream != null) try { mimeTableInputStream.close(); } catch (Exception e1) {}                
+                    if (mimeTableInputStream != null) try { mimeTableInputStream.close(); } catch (final Exception e1) {}                
                 }
             }
             
@@ -158,7 +158,7 @@ public final class httpdFileHandler {
             }
             
             // create a repository path
-            File repository = new File(htDocsPath, "repository");
+            final File repository = new File(htDocsPath, "repository");
             if (!repository.exists()) repository.mkdirs();
             
             // create a htTemplatePath
@@ -184,19 +184,19 @@ public final class httpdFileHandler {
     
     /** Returns a path to the localized or default file according to the locale.language (from he switchboard)
      * @param path relative from htroot */
-    public static File getLocalizedFile(String path){
+    public static File getLocalizedFile(final String path){
         return getLocalizedFile(path, switchboard.getConfig("locale.language","default"));
     }
     
     /** Returns a path to the localized or default file according to the parameter localeSelection
 	 * @param path relative from htroot
 	 * @param localeSelection language of localized file; locale.language from switchboard is used if localeSelection.equals("") */
-	public static File getLocalizedFile(String path, String localeSelection){
+	public static File getLocalizedFile(final String path, final String localeSelection){
         if (htDefaultPath == null) htDefaultPath = switchboard.getConfigPath("htDefaultPath","htroot");
         if (htLocalePath == null) htLocalePath = switchboard.getConfigPath("locale.translated_html","DATA/LOCALE/htroot");
 
         if (!(localeSelection.equals("default"))) {
-            File localePath = new File(htLocalePath, localeSelection + '/' + path);
+            final File localePath = new File(htLocalePath, localeSelection + '/' + path);
             if (localePath.exists())  // avoid "NoSuchFile" troubles if the "localeSelection" is misspelled
                 return localePath;
         }
@@ -221,8 +221,8 @@ public final class httpdFileHandler {
 //        out.flush();
 //    }
     
-    private static final httpHeader getDefaultHeaders(String path) {
-        httpHeader headers = new httpHeader();
+    private static final httpHeader getDefaultHeaders(final String path) {
+        final httpHeader headers = new httpHeader();
 		String ext;
 		int pos;
     	if ((pos = path.lastIndexOf('.')) < 0) {
@@ -238,28 +238,28 @@ public final class httpdFileHandler {
         return headers;
     }
     
-    public static void doGet(Properties conProp, httpHeader requestHeader, OutputStream response) {
+    public static void doGet(final Properties conProp, final httpHeader requestHeader, final OutputStream response) {
         doResponse(conProp, requestHeader, response, null);
     }
     
-    public static void doHead(Properties conProp, httpHeader requestHeader, OutputStream response) {
+    public static void doHead(final Properties conProp, final httpHeader requestHeader, final OutputStream response) {
         doResponse(conProp, requestHeader, response, null);
     }
     
-    public static void doPost(Properties conProp, httpHeader requestHeader, OutputStream response, InputStream body) {
+    public static void doPost(final Properties conProp, final httpHeader requestHeader, final OutputStream response, final InputStream body) {
         doResponse(conProp, requestHeader, response, body);
     }
     
-    public static void doResponse(Properties conProp, httpHeader requestHeader, OutputStream out, InputStream body) {
+    public static void doResponse(final Properties conProp, final httpHeader requestHeader, final OutputStream out, final InputStream body) {
         
         String path = null;
         try {
             // getting some connection properties            
-            String method = conProp.getProperty(httpHeader.CONNECTION_PROP_METHOD);
+            final String method = conProp.getProperty(httpHeader.CONNECTION_PROP_METHOD);
             path = conProp.getProperty(httpHeader.CONNECTION_PROP_PATH);
             String argsString = conProp.getProperty(httpHeader.CONNECTION_PROP_ARGS); // is null if no args were given
-            String httpVersion = conProp.getProperty(httpHeader.CONNECTION_PROP_HTTP_VER);
-            String clientIP = conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP, "unknown-host");
+            final String httpVersion = conProp.getProperty(httpHeader.CONNECTION_PROP_HTTP_VER);
+            final String clientIP = conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP, "unknown-host");
             
             // check hack attacks in path
             if (path.indexOf("..") >= 0) {
@@ -270,7 +270,7 @@ public final class httpdFileHandler {
             // url decoding of path
             try {
                 path = URLDecoder.decode(path, "UTF-8");
-            } catch (UnsupportedEncodingException e) {
+            } catch (final UnsupportedEncodingException e) {
                 // This should never occur
                 assert(false) : "UnsupportedEncodingException: " + e.getMessage();
             }
@@ -284,25 +284,25 @@ public final class httpdFileHandler {
             // check permission/granted access
             String authorization = requestHeader.get(httpHeader.AUTHORIZATION);
             if (authorization != null && authorization.length() == 0) authorization = null;
-            String adminAccountBase64MD5 = switchboard.getConfig(httpd.ADMIN_ACCOUNT_B64MD5, "");
+            final String adminAccountBase64MD5 = switchboard.getConfig(httpd.ADMIN_ACCOUNT_B64MD5, "");
             
             int pos = path.lastIndexOf(".");
             
-            boolean adminAccountForLocalhost = sb.getConfigBool("adminAccountForLocalhost", false);
-            String refererHost = requestHeader.refererHost();
-            boolean accessFromLocalhost = serverCore.isLocalhost(clientIP) && (refererHost.length() == 0 || serverCore.isLocalhost(refererHost));
-            boolean grantedForLocalhost = adminAccountForLocalhost && accessFromLocalhost;
-            boolean protectedPage = (path.substring(0,(pos==-1)?path.length():pos)).endsWith("_p");
-            boolean accountEmpty = adminAccountBase64MD5.length() == 0;
+            final boolean adminAccountForLocalhost = sb.getConfigBool("adminAccountForLocalhost", false);
+            final String refererHost = requestHeader.refererHost();
+            final boolean accessFromLocalhost = serverCore.isLocalhost(clientIP) && (refererHost.length() == 0 || serverCore.isLocalhost(refererHost));
+            final boolean grantedForLocalhost = adminAccountForLocalhost && accessFromLocalhost;
+            final boolean protectedPage = (path.substring(0,(pos==-1)?path.length():pos)).endsWith("_p");
+            final boolean accountEmpty = adminAccountBase64MD5.length() == 0;
             
             if (!grantedForLocalhost && protectedPage && !accountEmpty) {
                 // authentication required
                 if (authorization == null) {
                     // no authorization given in response. Ask for that
-                    httpHeader headers = getDefaultHeaders(path);
+                    final httpHeader headers = getDefaultHeaders(path);
                     headers.put(httpHeader.WWW_AUTHENTICATE,"Basic realm=\"admin log-in\"");
                     //httpd.sendRespondHeader(conProp,out,httpVersion,401,headers);
-                    servletProperties tp=new servletProperties();
+                    final servletProperties tp=new servletProperties();
                     tp.put("returnto", path);
                     //TODO: separate errorpage Wrong Login / No Login
                     httpd.sendRespondError(conProp, out, 5, 401, "Wrong Authentication", "", new File("proxymsg/authfail.inc"), tp, null, headers);
@@ -315,13 +315,13 @@ public final class httpdFileHandler {
                 } else {
                     // a wrong authentication was given or the userDB user does not have admin access. Ask again
                     serverLog.logInfo("HTTPD", "Wrong log-in for account 'admin' in http file handler for path '" + path + "' from host '" + clientIP + "'");
-                    Integer attempts = serverCore.bfHost.get(clientIP);
+                    final Integer attempts = serverCore.bfHost.get(clientIP);
                     if (attempts == null)
                         serverCore.bfHost.put(clientIP, new Integer(1));
                     else
                         serverCore.bfHost.put(clientIP, new Integer(attempts.intValue() + 1));
     
-                    httpHeader headers = getDefaultHeaders(path);
+                    final httpHeader headers = getDefaultHeaders(path);
                     headers.put(httpHeader.WWW_AUTHENTICATE,"Basic realm=\"admin log-in\"");
                     httpd.sendRespondHeader(conProp,out,httpVersion,401,headers);
                     return;
@@ -356,10 +356,10 @@ public final class httpdFileHandler {
                     if ((requestHeader.containsKey(httpHeader.CONTENT_TYPE)) &&
                             (requestHeader.get(httpHeader.CONTENT_TYPE).toLowerCase().startsWith("multipart"))) {
                         // parse multipart
-                        HashMap<String, byte[]> files = httpd.parseMultipart(requestHeader, args, (gzipBody!=null)?gzipBody:body, length);
+                        final HashMap<String, byte[]> files = httpd.parseMultipart(requestHeader, args, (gzipBody!=null)?gzipBody:body, length);
                         // integrate these files into the args
                         if (files != null) {
-                            Iterator<Map.Entry<String, byte[]>> fit = files.entrySet().iterator();
+                            final Iterator<Map.Entry<String, byte[]>> fit = files.entrySet().iterator();
                             Map.Entry<String, byte[]> entry;
                             while (fit.hasNext()) {
                                 entry = fit.next();
@@ -385,7 +385,7 @@ public final class httpdFileHandler {
             // check for cross site scripting - attacks in request arguments
             if (args != null && argc > 0) {
                 // check all values for occurrences of script values
-                Iterator<String> e = args.values().iterator(); // enumeration of values
+                final Iterator<String> e = args.values().iterator(); // enumeration of values
                 String val;
                 while (e.hasNext()) {
                     val = e.next();
@@ -421,7 +421,7 @@ public final class httpdFileHandler {
             }
             
             File   targetFile  = getLocalizedFile(path, localeSelection);
-            String targetExt   = conProp.getProperty("EXT","");
+            final String targetExt   = conProp.getProperty("EXT","");
             targetClass = rewriteClassFile(new File(htDefaultPath, path));
             if (path.endsWith("/")) {
                 String testpath;
@@ -438,9 +438,9 @@ public final class httpdFileHandler {
                 
                 //no defaultfile, send a dirlisting
                 if (targetFile == null || !targetFile.exists()) {
-                    StringBuffer aBuffer = new StringBuffer();
+                    final StringBuffer aBuffer = new StringBuffer();
                     aBuffer.append("<html>\n<head>\n</head>\n<body>\n<h1>Index of " + path + "</h1>\n  <ul>\n");
-                    File dir = new File(htDocsPath, path);
+                    final File dir = new File(htDocsPath, path);
                     String[] list = dir.list();
                     if (list == null) list = new String[0]; // should not occur!
                     File f;
@@ -515,7 +515,7 @@ public final class httpdFileHandler {
                     requestHeader.put(httpHeader.CONNECTION_PROP_PATH, path);
                     // in case that there are no args given, args = null or empty hashmap
                     img = invokeServlet(targetClass, requestHeader, args);
-                } catch (InvocationTargetException e) {
+                } catch (final InvocationTargetException e) {
                     theLogger.logSevere("INTERNAL ERROR: " + e.toString() + ":" +
                     e.getMessage() +
                     " target exception at " + targetClass + ": " +
@@ -529,12 +529,12 @@ public final class httpdFileHandler {
                     httpd.sendRespondError(conProp, out, 3, 404, "File not Found", null, null);
                 } else {
                     if (img instanceof ymageMatrix) {
-                        ymageMatrix yp = (ymageMatrix) img;
+                        final ymageMatrix yp = (ymageMatrix) img;
                         // send an image to client
                         targetDate = new Date(System.currentTimeMillis());
                         nocache = true;
-                        String mimeType = mimeTable.getProperty(targetExt, "text/html");
-                        serverByteBuffer result = ymageMatrix.exportImage(yp.getImage(), targetExt);
+                        final String mimeType = mimeTable.getProperty(targetExt, "text/html");
+                        final serverByteBuffer result = ymageMatrix.exportImage(yp.getImage(), targetExt);
 
                         // write the array to the client
                         httpd.sendRespondHeader(conProp, out, httpVersion, 200, null, mimeType, result.length(), targetDate, null, null, null, null, nocache);
@@ -543,18 +543,18 @@ public final class httpdFileHandler {
                         }
                     }
                     if (img instanceof Image) {
-                        Image i = (Image) img;
+                        final Image i = (Image) img;
                         // send an image to client
                         targetDate = new Date(System.currentTimeMillis());
                         nocache = true;
-                        String mimeType = mimeTable.getProperty(targetExt, "text/html");
+                        final String mimeType = mimeTable.getProperty(targetExt, "text/html");
 
                         // generate an byte array from the generated image
                         int width = i.getWidth(null); if (width < 0) width = 96; // bad hack
                         int height = i.getHeight(null); if (height < 0) height = 96; // bad hack
-                        BufferedImage bi = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+                        final BufferedImage bi = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
                         bi.createGraphics().drawImage(i, 0, 0, width, height, null); 
-                        serverByteBuffer result = ymageMatrix.exportImage(bi, targetExt);
+                        final serverByteBuffer result = ymageMatrix.exportImage(bi, targetExt);
 
                         // write the array to the client
                         httpd.sendRespondHeader(conProp, out, httpVersion, 200, null, mimeType, result.length(), targetDate, null, null, null, null, nocache);
@@ -580,8 +580,8 @@ public final class httpdFileHandler {
                 // we have found a file that can be written to the client
                 // if this file uses templates, then we use the template
                 // re-write - method to create an result
-                String mimeType = mimeTable.getProperty(targetExt,"text/html");
-                boolean zipContent = requestHeader.acceptGzip() && httpd.shallTransportZipped("." + conProp.getProperty("EXT",""));
+                final String mimeType = mimeTable.getProperty(targetExt,"text/html");
+                final boolean zipContent = requestHeader.acceptGzip() && httpd.shallTransportZipped("." + conProp.getProperty("EXT",""));
                 if (path.endsWith("html") || 
                         path.endsWith("xml") || 
                         path.endsWith("rdf") || 
@@ -611,7 +611,7 @@ public final class httpdFileHandler {
                             requestHeader.put(httpHeader.CONNECTION_PROP_CLIENTIP, conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP));
                             requestHeader.put(httpHeader.CONNECTION_PROP_PATH, path);
                             // in case that there are no args given, args = null or empty hashmap
-                            Object tmp = invokeServlet(targetClass, requestHeader, args);
+                            final Object tmp = invokeServlet(targetClass, requestHeader, args);
                             if (tmp == null) {
                                 // if no args given, then tp will be an empty Hashtable object (not null)
                                 tp = new servletProperties();
@@ -625,14 +625,14 @@ public final class httpdFileHandler {
                                 // handle brute-force protection
                                 if (authorization != null) {
                                     serverLog.logInfo("HTTPD", "dynamic log-in for account 'admin' in http file handler for path '" + path + "' from host '" + clientIP + "'");
-                                    Integer attempts = serverCore.bfHost.get(clientIP);
+                                    final Integer attempts = serverCore.bfHost.get(clientIP);
                                     if (attempts == null)
                                         serverCore.bfHost.put(clientIP, new Integer(1));
                                     else
                                         serverCore.bfHost.put(clientIP, new Integer(attempts.intValue() + 1));
                                 }
                                 // send authentication request to browser
-                                httpHeader headers = getDefaultHeaders(path);
+                                final httpHeader headers = getDefaultHeaders(path);
                                 headers.put(httpHeader.WWW_AUTHENTICATE,"Basic realm=\"" + tp.get(servletProperties.ACTION_AUTHENTICATE, "") + "\"");
                                 httpd.sendRespondHeader(conProp,out,httpVersion,401,headers);
                                 return;
@@ -640,7 +640,7 @@ public final class httpdFileHandler {
                                 String location = tp.get(servletProperties.ACTION_LOCATION, "");
                                 if (location.length() == 0) location = path;
                                 
-                                httpHeader headers = getDefaultHeaders(path);
+                                final httpHeader headers = getDefaultHeaders(path);
                                 headers.setCookieVector(tp.getOutgoingHeader().getCookieVector()); //put the cookies into the new header TODO: can we put all headerlines, without trouble?
                                 headers.put(httpHeader.LOCATION,location);
                                 httpd.sendRespondHeader(conProp,out,httpVersion,302,headers);
@@ -652,7 +652,7 @@ public final class httpdFileHandler {
                             tp.putHTML(servletProperties.PEER_STAT_CLIENTNAME, switchboard.getConfig("peerName", "anomic"));
                             tp.put(servletProperties.PEER_STAT_MYTIME, serverDate.formatShortSecond());
                             //System.out.println("respond props: " + ((tp == null) ? "null" : tp.toString())); // debug
-                        } catch (InvocationTargetException e) {
+                        } catch (final InvocationTargetException e) {
                             if (e.getCause() instanceof InterruptedException) {
                                 throw new InterruptedException(e.getCause().getMessage());
                             }                            
@@ -675,7 +675,7 @@ public final class httpdFileHandler {
                     // read the file/template
                     byte[] templateContent = null;
                     if (useTemplateCache) {
-                        long fileSize = targetFile.length();
+                        final long fileSize = targetFile.length();
                         if (fileSize <= 512 * 1024) {
                             // read from cache
                             SoftReference<byte[]> ref = templateCache.get(targetFile);
@@ -714,27 +714,27 @@ public final class httpdFileHandler {
                     // write the array to the client
                     // we can do that either in standard mode (whole thing completely) or in chunked mode
                     // since yacy clients do not understand chunked mode (yet), we use this only for communication with the administrator
-                    boolean yacyClient = requestHeader.userAgent().startsWith("yacy");
-                    boolean chunked = !method.equals(httpHeader.METHOD_HEAD) && !yacyClient && httpVersion.equals(httpHeader.HTTP_VERSION_1_1);
+                    final boolean yacyClient = requestHeader.userAgent().startsWith("yacy");
+                    final boolean chunked = !method.equals(httpHeader.METHOD_HEAD) && !yacyClient && httpVersion.equals(httpHeader.HTTP_VERSION_1_1);
                     if (chunked) {
                         // send page in chunks and parse SSIs
-                        serverByteBuffer o = new serverByteBuffer();
+                        final serverByteBuffer o = new serverByteBuffer();
                         // apply templates
                         httpTemplate.writeTemplate(fis, o, tp, "-UNRESOLVED_PATTERN-".getBytes("UTF-8"));
                         httpd.sendRespondHeader(conProp, out, httpVersion, 200, null, mimeType, -1, targetDate, null, tp.getOutgoingHeader(), null, "chunked", nocache);
                         // send the content in chunked parts, see RFC 2616 section 3.6.1
-                        httpChunkedOutputStream chos = new httpChunkedOutputStream(out);
+                        final httpChunkedOutputStream chos = new httpChunkedOutputStream(out);
                         httpSSI.writeSSI(o, chos, authorization, clientIP);
                         //chos.write(result);
                         chos.finish();
                     } else {
                         // send page as whole thing, SSIs are not possible
-                        String contentEncoding = (zipContent) ? "gzip" : null;
+                        final String contentEncoding = (zipContent) ? "gzip" : null;
                         // apply templates
-                        serverByteBuffer o1 = new serverByteBuffer();
+                        final serverByteBuffer o1 = new serverByteBuffer();
                         httpTemplate.writeTemplate(fis, o1, tp, "-UNRESOLVED_PATTERN-".getBytes("UTF-8"));
                         
-                        serverByteBuffer o = new serverByteBuffer();
+                        final serverByteBuffer o = new serverByteBuffer();
                         
                         if (zipContent) {
                             GZIPOutputStream zippedOut = new GZIPOutputStream(o);
@@ -754,7 +754,7 @@ public final class httpdFileHandler {
                                     targetDate, null, tp.getOutgoingHeader(),
                                     contentEncoding, null, nocache);
                         } else {
-                            byte[] result = o.getBytes(); // this interrupts streaming (bad idea!)
+                            final byte[] result = o.getBytes(); // this interrupts streaming (bad idea!)
                             httpd.sendRespondHeader(conProp, out,
                                     httpVersion, 200, null, mimeType, result.length,
                                     targetDate, null, tp.getOutgoingHeader(),
@@ -773,7 +773,7 @@ public final class httpdFileHandler {
                     
                     // reading the files md5 hash if availabe and use it as ETAG of the resource
                     String targetMD5 = null;
-                    File targetMd5File = new File(targetFile + ".md5");
+                    final File targetMd5File = new File(targetFile + ".md5");
                     try {
                         if (targetMd5File.exists()) {
                             //String description = null;
@@ -787,19 +787,19 @@ public final class httpdFileHandler {
                            // using the checksum as ETAG header
                            header.put(httpHeader.ETAG, targetMD5);
                         }
-                    } catch (IOException e) {
+                    } catch (final IOException e) {
                         e.printStackTrace();
                     }                        
                     
                     if (requestHeader.containsKey(httpHeader.RANGE)) {
-                        Object ifRange = requestHeader.ifRange();
+                        final Object ifRange = requestHeader.ifRange();
                         if ((ifRange == null)||
                             (ifRange instanceof Date && targetFile.lastModified() == ((Date)ifRange).getTime()) ||
                             (ifRange instanceof String && ifRange.equals(targetMD5))) {
-                            String rangeHeaderVal = requestHeader.get(httpHeader.RANGE).trim();
+                            final String rangeHeaderVal = requestHeader.get(httpHeader.RANGE).trim();
                             if (rangeHeaderVal.startsWith("bytes=")) {
-                                String rangesVal = rangeHeaderVal.substring("bytes=".length());
-                                String[] ranges = rangesVal.split(",");
+                                final String rangesVal = rangeHeaderVal.substring("bytes=".length());
+                                final String[] ranges = rangesVal.split(",");
                                 if ((ranges.length == 1)&&(ranges[0].endsWith("-"))) {
                                     rangeStartOffset = Integer.valueOf(ranges[0].substring(0,ranges[0].length()-1)).intValue();
                                     statusCode = 206;
@@ -812,9 +812,9 @@ public final class httpdFileHandler {
                     
                     // write the file to the client
                     targetDate = new Date(targetFile.lastModified());
-                    long   contentLength    = (zipContent)?-1:targetFile.length()-rangeStartOffset;
-                    String contentEncoding  = (zipContent)?"gzip":null;
-                    String transferEncoding = (!httpVersion.equals(httpHeader.HTTP_VERSION_1_1))?null:(zipContent)?"chunked":null;
+                    final long   contentLength    = (zipContent)?-1:targetFile.length()-rangeStartOffset;
+                    final String contentEncoding  = (zipContent)?"gzip":null;
+                    final String transferEncoding = (!httpVersion.equals(httpHeader.HTTP_VERSION_1_1))?null:(zipContent)?"chunked":null;
                     if (!httpVersion.equals(httpHeader.HTTP_VERSION_1_1) && zipContent) forceConnectionClose(conProp);
                     
                     httpd.sendRespondHeader(conProp, out, httpVersion, statusCode, null, mimeType, contentLength, targetDate, null, header, contentEncoding, transferEncoding, nocache);
@@ -844,13 +844,13 @@ public final class httpdFileHandler {
                         }
 
                         // flush all
-                        try {newOut.flush();}catch (Exception e) {}
+                        try {newOut.flush();}catch (final Exception e) {}
                         
                         // wait a little time until everything closes so that clients can read from the streams/sockets
                         if ((contentLength >= 0) && ((String)requestHeader.get(httpHeader.CONNECTION, "close")).indexOf("keep-alive") == -1) {
                             // in case that the client knows the size in advance (contentLength present) the waiting will have no effect on the interface performance
                             // but if the client waits on a connection interruption this will slow down.
-                            try {Thread.sleep(2000);} catch (InterruptedException e) {} // FIXME: is this necessary?
+                            try {Thread.sleep(2000);} catch (final InterruptedException e) {} // FIXME: is this necessary?
                         }
                     }
                     
@@ -864,15 +864,15 @@ public final class httpdFileHandler {
                 httpd.sendRespondError(conProp,out,3,404,"File not Found",null,null);
                 return;
             }
-        } catch (Exception e) {     
+        } catch (final Exception e) {     
             try {
                 // doing some errorhandling ...
                 int httpStatusCode = 400; 
-                String httpStatusText = null; 
-                StringBuffer errorMessage = new StringBuffer(); 
+                final String httpStatusText = null; 
+                final StringBuffer errorMessage = new StringBuffer(); 
                 Exception errorExc = null;            
                 
-                String errorMsg = e.getMessage();
+                final String errorMsg = e.getMessage();
                 if (
                         (e instanceof InterruptedException) ||
                         ((errorMsg != null) && (errorMsg.startsWith("Socket closed")) && (Thread.currentThread().isInterrupted()))
@@ -916,16 +916,16 @@ public final class httpdFileHandler {
                     theLogger.logWarning(new String(errorMessage),e);
                 }
                 
-            } catch (Exception ee) {
+            } catch (final Exception ee) {
                 forceConnectionClose(conProp);
             }            
             
         } finally {
-            try {out.flush();}catch (Exception e) {}
+            try {out.flush();}catch (final Exception e) {}
         }
     }
     
-    public static final File getOverlayedClass(String path) {
+    public static final File getOverlayedClass(final String path) {
         File targetClass;
         targetClass = rewriteClassFile(new File(htDefaultPath, path)); //works for default and localized files
         if (targetClass == null || !targetClass.exists()) {
@@ -935,7 +935,7 @@ public final class httpdFileHandler {
         return targetClass;
     }
 
-    public static final File getOverlayedFile(String path) {
+    public static final File getOverlayedFile(final String path) {
         File targetFile;
         targetFile = getLocalizedFile(path);
         if (!targetFile.exists()) {
@@ -944,33 +944,33 @@ public final class httpdFileHandler {
         return targetFile;
     }
     
-    private static final void forceConnectionClose(Properties conprop) {
+    private static final void forceConnectionClose(final Properties conprop) {
         if (conprop != null) {
             conprop.setProperty(httpHeader.CONNECTION_PROP_PERSISTENT,"close");            
         }
     }
 
-    private static final File rewriteClassFile(File template) {
+    private static final File rewriteClassFile(final File template) {
         try {
             String f = template.getCanonicalPath();
-            int p = f.lastIndexOf(".");
+            final int p = f.lastIndexOf(".");
             if (p < 0) return null;
             f = f.substring(0, p) + ".class";
             //System.out.println("constructed class path " + f);
-            File cf = new File(f);
+            final File cf = new File(f);
             if (cf.exists()) return cf;
             return null;
-        } catch (IOException e) {
+        } catch (final IOException e) {
             return null;
         }
     }
     
-    private static final Method rewriteMethod(File classFile) {                
+    private static final Method rewriteMethod(final File classFile) {                
         Method m = null;
         // now make a class out of the stream
         try {
             if (useTemplateCache) {                
-                SoftReference<Method> ref = templateMethodCache.get(classFile);
+                final SoftReference<Method> ref = templateMethodCache.get(classFile);
                 if (ref != null) {
                     m = ref.get();
                     if (m == null) {
@@ -982,8 +982,8 @@ public final class httpdFileHandler {
                 }          
             }
             
-            Class<?> c = provider.loadClass(classFile);
-            Class<?>[] params = new Class[] {
+            final Class<?> c = provider.loadClass(classFile);
+            final Class<?>[] params = new Class[] {
                     httpHeader.class,
                     serverObjects.class,
                     serverSwitch.class };
@@ -991,20 +991,20 @@ public final class httpdFileHandler {
             
             if (useTemplateCache) {
                 // storing the method into the cache
-                SoftReference<Method> ref = new SoftReference<Method>(m);
+                final SoftReference<Method> ref = new SoftReference<Method>(m);
                 templateMethodCache.put(classFile, ref);
             }
             
-        } catch (ClassNotFoundException e) {
+        } catch (final ClassNotFoundException e) {
             System.out.println("INTERNAL ERROR: class " + classFile + " is missing:" + e.getMessage()); 
-        } catch (NoSuchMethodException e) {
+        } catch (final NoSuchMethodException e) {
             System.out.println("INTERNAL ERROR: method respond not found in class " + classFile + ": " + e.getMessage());
         }
         //System.out.println("found method: " + m.toString());
         return m;
     }
     
-    public static final Object invokeServlet(File targetClass, httpHeader request, serverObjects args) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+    public static final Object invokeServlet(final File targetClass, final httpHeader request, final serverObjects args) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
         Object result;
         if (safeServletsMode) synchronized (switchboard) {
             result = rewriteMethod(targetClass).invoke(null, new Object[] {request, args, switchboard});
@@ -1014,7 +1014,7 @@ public final class httpdFileHandler {
         return result;
     }
 
-    public void doConnect(Properties conProp, httpHeader requestHeader, InputStream clientIn, OutputStream clientOut) {
+    public void doConnect(final Properties conProp, final httpHeader requestHeader, final InputStream clientIn, final OutputStream clientOut) {
         throw new UnsupportedOperationException();
     }
     

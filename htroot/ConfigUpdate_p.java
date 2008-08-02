@@ -40,7 +40,7 @@ import de.anomic.yacy.yacyVersion;
 
 public class ConfigUpdate_p {
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
@@ -59,11 +59,11 @@ public class ConfigUpdate_p {
             
             if (post.containsKey("downloadRelease")) {
                 // download a release
-                String release = post.get("releasedownload", "");
+                final String release = post.get("releasedownload", "");
                 if (release.length() > 0) {
                     try {
                         yacyVersion.downloadRelease(new yacyVersion(new yacyURL(release, null)));
-                    } catch (IOException e) {
+                    } catch (final IOException e) {
                         // TODO Auto-generated catch block
                         e.printStackTrace();
                     }
@@ -74,26 +74,26 @@ public class ConfigUpdate_p {
                 yacyVersion.allReleases(true);
             }
             if (post.containsKey("deleteRelease")) {
-                String release = post.get("releaseinstall", "");
+                final String release = post.get("releaseinstall", "");
                 if(release.length() > 0) {
                     try {
                         new File(sb.releasePath, release).delete();
-                    } catch (NullPointerException e) {
+                    } catch (final NullPointerException e) {
                         sb.getLog().logSevere("AUTO-UPDATE: could not delete release " + release + ": " + e.getMessage());
                     }
                 }
             }
          
             if (post.containsKey("autoUpdate")) {
-                yacyVersion updateVersion = yacyVersion.rulebasedUpdateInfo(true);
+                final yacyVersion updateVersion = yacyVersion.rulebasedUpdateInfo(true);
                 if (updateVersion == null) {
                     prop.put("candeploy_autoUpdate", "2"); // no more recent release found
                 } else {
                     // there is a version that is more recent. Load it and re-start with it
                     sb.getLog().logInfo("AUTO-UPDATE: downloading more recent release " + updateVersion.url);
-                    File downloaded = yacyVersion.downloadRelease(updateVersion);
+                    final File downloaded = yacyVersion.downloadRelease(updateVersion);
                     prop.put("candeploy_autoUpdate_downloadedRelease", updateVersion.name);
-                    boolean devenvironment = yacyVersion.combined2prettyVersion(sb.getConfig("version","0.1")).startsWith("dev");
+                    final boolean devenvironment = yacyVersion.combined2prettyVersion(sb.getConfig("version","0.1")).startsWith("dev");
                     if (devenvironment) {
                         sb.getLog().logInfo("AUTO-UPDATE: omiting update because this is a development environment");
                         prop.put("candeploy_autoUpdate", "3");
@@ -128,29 +128,29 @@ public class ConfigUpdate_p {
         }
         
         // version information
-        String versionstring = yacyVersion.combined2prettyVersion(sb.getConfig("version","0.1"));
+        final String versionstring = yacyVersion.combined2prettyVersion(sb.getConfig("version","0.1"));
         prop.put("candeploy_versionpp", versionstring);
-        boolean devenvironment = versionstring.startsWith("dev");
+        final boolean devenvironment = versionstring.startsWith("dev");
         double thisVersion = Double.parseDouble(sb.getConfig("version","0.1"));
         // cut off the SVN Rev in the Version
-        try {thisVersion = Math.round(thisVersion*1000.0)/1000.0;} catch (NumberFormatException e) {}
+        try {thisVersion = Math.round(thisVersion*1000.0)/1000.0;} catch (final NumberFormatException e) {}
 
             
         // list downloaded releases
         yacyVersion release, dflt;
-        String[] downloaded = sb.releasePath.list();
+        final String[] downloaded = sb.releasePath.list();
             
         prop.put("candeploy_deployenabled", (downloaded.length == 0) ? "0" : ((devenvironment) ? "1" : "2")); // prevent that a developer-version is over-deployed
           
-        TreeSet<yacyVersion> downloadedreleases = new TreeSet<yacyVersion>();
+        final TreeSet<yacyVersion> downloadedreleases = new TreeSet<yacyVersion>();
         for (int j = 0; j < downloaded.length; j++) {
             try {
                 release = new yacyVersion(downloaded[j]);
                 downloadedreleases.add(release);
-            } catch (RuntimeException e) {
+            } catch (final RuntimeException e) {
                 // not a valid release
             	// can be also a restart- or deploy-file
-                File invalid = new File(sb.releasePath, downloaded[j]);
+                final File invalid = new File(sb.releasePath, downloaded[j]);
                 if (!(invalid.getName().endsWith(".bat") || invalid.getName().endsWith(".sh"))) // Windows & Linux don't like deleted scripts while execution!
                 	invalid.deleteOnExit(); 
             }
@@ -168,7 +168,7 @@ public class ConfigUpdate_p {
         prop.put("candeploy_downloadedreleases", relcount);
 
         // list remotely available releases
-        yacyVersion.DevMain releasess = yacyVersion.allReleases(false);
+        final yacyVersion.DevMain releasess = yacyVersion.allReleases(false);
         relcount = 0;
         
         // main

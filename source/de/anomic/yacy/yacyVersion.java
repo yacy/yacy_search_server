@@ -84,7 +84,7 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
     public yacyURL url;
     public String name;
     
-    public yacyVersion(yacyURL url) {
+    public yacyVersion(final yacyURL url) {
         this(url.getFileName());
         this.url = url;
     }
@@ -113,13 +113,13 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
         }
         // now all release names have the form
         // ${releaseVersion}_${DSTAMP}_${releaseNr}
-        String[] comp = release.split("_"); // should be 3 parts
+        final String[] comp = release.split("_"); // should be 3 parts
         if (comp.length != 3) {
             throw new RuntimeException("release file name '" + release + "' is not valid, 3 information parts expected");
         }
         try {
             this.releaseNr = Float.parseFloat(comp[0]);
-        } catch (NumberFormatException e) {
+        } catch (final NumberFormatException e) {
             throw new RuntimeException("release file name '" + release + "' is not valid, '" + comp[0] + "' should be a float number");
         }
         this.mainRelease = ((int) (this.releaseNr * 1000)) % 10 == 0;
@@ -130,7 +130,7 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
         }
         try {
             this.svn = Integer.parseInt(comp[2]);
-        } catch (NumberFormatException e) {
+        } catch (final NumberFormatException e) {
             throw new RuntimeException("release file name '" + release + "' is not valid, '" + comp[2] + "' should be a integer number");
         }
         // finished! we parsed a relase string
@@ -138,27 +138,27 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
     
     public static final class DevMain {
         public TreeSet<yacyVersion> dev, main;
-        public DevMain(TreeSet<yacyVersion> dev, TreeSet<yacyVersion> main) {
+        public DevMain(final TreeSet<yacyVersion> dev, final TreeSet<yacyVersion> main) {
             this.dev = dev;
             this.main = main;
         }
     }
     
-    public int compareTo(yacyVersion obj) {
+    public int compareTo(final yacyVersion obj) {
         // returns 0 if this object is equal to the obj, -1 if this is smaller than obj and 1 if this is greater than obj
         return compare(this, obj);
     }
     
-    public int compare(yacyVersion v0, yacyVersion v1) {
+    public int compare(final yacyVersion v0, final yacyVersion v1) {
         // compare-operator for two yacyVersion objects
         // must be implemented to make it possible to put this object into
         // a ordered structure, like TreeSet or TreeMap
         return (new Integer(v0.svn)).compareTo(new Integer(v1.svn));
     }
     
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if(obj instanceof yacyVersion) {
-            yacyVersion v = (yacyVersion) obj;
+            final yacyVersion v = (yacyVersion) obj;
             return (this.svn == v.svn) && (this.url.toNormalform(true, true).equals(v.url.toNormalform(true, true)));
         } else {
             return false;
@@ -179,9 +179,9 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
     public static final yacyVersion thisVersion() {
         // construct a virtual release name for this release
         if (thisVersion == null) {
-            plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
+            final plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
             if (sb == null) return null;
-            boolean full = new File(sb.getRootPath(), "libx").exists();
+            final boolean full = new File(sb.getRootPath(), "libx").exists();
             thisVersion = new yacyVersion(
                 "yacy" + ((full) ? "" : "_emb") +
                 "_v" + sb.getConfig("version", "0.1") + "_" +
@@ -191,33 +191,33 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
         return thisVersion;
     }
     
-    public static final yacyVersion rulebasedUpdateInfo(boolean manual) {
+    public static final yacyVersion rulebasedUpdateInfo(final boolean manual) {
         // according to update properties, decide if we should retrieve update information
         // if true, the release that can be obtained is returned.
         // if false, null is returned
-        plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
+        final plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
         
         // check if update process allows update retrieve
-        String process = sb.getConfig("update.process", "manual");
+        final String process = sb.getConfig("update.process", "manual");
         if ((!manual) && (!process.equals("auto"))) {
             yacyCore.log.logInfo("rulebasedUpdateInfo: not an automatic update selected");
             return null; // no, its a manual or guided process
         }
         
         // check if the last retrieve time is a minimum time ago
-        long cycle = Math.max(1, sb.getConfigLong("update.cycle", 168)) * 60 * 60 * 1000; // update.cycle is hours
-        long timeLookup = sb.getConfigLong("update.time.lookup", System.currentTimeMillis());
+        final long cycle = Math.max(1, sb.getConfigLong("update.cycle", 168)) * 60 * 60 * 1000; // update.cycle is hours
+        final long timeLookup = sb.getConfigLong("update.time.lookup", System.currentTimeMillis());
         if ((!manual) && (timeLookup + cycle > System.currentTimeMillis())) {
             yacyCore.log.logInfo("rulebasedUpdateInfo: too early for a lookup for a new release (timeLookup = " + timeLookup + ", cycle = " + cycle + ", now = " + System.currentTimeMillis() + ")");
             return null; // no we have recently made a lookup
         }
         
         // check if we know that there is a release that is more recent than that which we are using
-        DevMain releasess = yacyVersion.allReleases(true);
-        yacyVersion latestmain = (releasess.main.size() == 0) ? null : releasess.main.last();
-        yacyVersion latestdev  = (releasess.dev.size() == 0) ? null : releasess.dev.last();
-        String concept = sb.getConfig("update.concept", "any");
-        String blacklist = sb.getConfig("update.blacklist", ".\\...[123]");
+        final DevMain releasess = yacyVersion.allReleases(true);
+        final yacyVersion latestmain = (releasess.main.size() == 0) ? null : releasess.main.last();
+        final yacyVersion latestdev  = (releasess.dev.size() == 0) ? null : releasess.dev.last();
+        final String concept = sb.getConfig("update.concept", "any");
+        final String blacklist = sb.getConfig("update.blacklist", ".\\...[123]");
         
         if ((manual) || (concept.equals("any"))) {
             // return a dev-release or a main-release
@@ -269,21 +269,21 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
         return null;
     }
     
-    public static DevMain allReleases(boolean force) {
+    public static DevMain allReleases(final boolean force) {
         // join the release infos
-        DevMain[] a = new DevMain[latestReleaseLocations.size()];
+        final DevMain[] a = new DevMain[latestReleaseLocations.size()];
         for (int j = 0; j < latestReleaseLocations.size(); j++) {
             a[j] = getReleases(latestReleaseLocations.get(j), force);
         }
-        TreeSet<yacyVersion> alldev = new TreeSet<yacyVersion>();
-        TreeSet<yacyVersion> allmain = new TreeSet<yacyVersion>();
+        final TreeSet<yacyVersion> alldev = new TreeSet<yacyVersion>();
+        final TreeSet<yacyVersion> allmain = new TreeSet<yacyVersion>();
         for (int j = 0; j < a.length; j++) if ((a[j] != null) && (a[j].dev != null)) alldev.addAll(a[j].dev);
         for (int j = 0; j < a.length; j++) if ((a[j] != null) && (a[j].main != null)) allmain.addAll(a[j].main);
             
         return new DevMain(alldev, allmain);
     }
     
-    private static DevMain getReleases(yacyURL location, boolean force) {
+    private static DevMain getReleases(final yacyURL location, final boolean force) {
         // get release info from a internet resource
         DevMain locLatestRelease = latestReleases.get(location);
         if (force ||
@@ -306,15 +306,15 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
         htmlFilterContentScraper scraper;
         try {
             scraper = htmlFilterContentScraper.parseResource(url);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             return null;
         }
         
         // analyse links in scraper resource, and find link to latest release in it
-        Map<yacyURL, String> anchors = scraper.getAnchors(); // a url (String) / name (String) relation
-        Iterator<yacyURL> i = anchors.keySet().iterator();
-        TreeSet<yacyVersion> devreleases = new TreeSet<yacyVersion>();
-        TreeSet<yacyVersion> mainreleases = new TreeSet<yacyVersion>();
+        final Map<yacyURL, String> anchors = scraper.getAnchors(); // a url (String) / name (String) relation
+        final Iterator<yacyURL> i = anchors.keySet().iterator();
+        final TreeSet<yacyVersion> devreleases = new TreeSet<yacyVersion>();
+        final TreeSet<yacyVersion> mainreleases = new TreeSet<yacyVersion>();
         yacyVersion release;
         while (i.hasNext()) {
             url = i.next();
@@ -323,7 +323,7 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
                 //System.out.println("r " + release.toAnchor());
                 if ( release.mainRelease) mainreleases.add(release);
                 if (!release.mainRelease) devreleases.add(release);
-            } catch (RuntimeException e) {
+            } catch (final RuntimeException e) {
                 // the release string was not well-formed.
                 // that might have been another link
                 // just dont care
@@ -334,18 +334,18 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
         return new DevMain(devreleases, mainreleases);
     }
     
-    public static File downloadRelease(yacyVersion release) {
-        File storagePath = plasmaSwitchboard.getSwitchboard().releasePath;
+    public static File downloadRelease(final yacyVersion release) {
+        final File storagePath = plasmaSwitchboard.getSwitchboard().releasePath;
         // load file
         File download = null;
-        httpHeader header = new httpHeader();
+        final httpHeader header = new httpHeader();
         header.put(httpHeader.USER_AGENT, HTTPLoader.yacyUserAgent);
-        JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(120000, header, null);
+        final JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(120000, header, null);
         JakartaCommonsHttpResponse res = null;
-        String name = release.url.getFileName();
+        final String name = release.url.getFileName();
         try {
             res = client.GET(release.url.toString());
-            boolean unzipped = res.getResponseHeader().gzip() && (res.getResponseHeader().mime().toLowerCase().equals("application/x-tar")); // if true, then the httpc has unzipped the file
+            final boolean unzipped = res.getResponseHeader().gzip() && (res.getResponseHeader().mime().toLowerCase().equals("application/x-tar")); // if true, then the httpc has unzipped the file
             if ((unzipped) && (name.endsWith(".tar.gz"))) {
                 download = new File(storagePath, name.substring(0, name.length() - 3));
             } else {
@@ -357,7 +357,7 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
                 res.closeStream();
             }
             if ((!download.exists()) || (download.length() == 0)) throw new IOException("wget of url " + release.url + " failed");
-        } catch (IOException e) {
+        } catch (final IOException e) {
             serverLog.logSevere("yacyVersion", "download of " + release.name + " failed: " + e.getMessage());
             if (download != null && download.exists()) download.delete();
             download = null;
@@ -373,17 +373,17 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
     
     
     public static void restart() {
-        plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
-        String apphome = sb.getRootPath().toString();
+        final plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
+        final String apphome = sb.getRootPath().toString();
         
         if (serverSystem.isWindows) {
-        	File startType = new File(sb.getRootPath(), "DATA/yacy.noconsole".replace("/", File.separator));
+        	final File startType = new File(sb.getRootPath(), "DATA/yacy.noconsole".replace("/", File.separator));
         	String starterFile = "startYACY_debug.bat";
         	if (startType.exists()) starterFile = "startYACY.bat"; // startType noconsole
         	
         	try{
                 serverLog.logInfo("RESTART", "INITIATED");
-        		String script =
+        		final String script =
 	            	"@echo off" + serverCore.LF_STRING +
 	            	"title YaCy restarter" + serverCore.LF_STRING +
 	            	"echo YACY RESTARTER" + serverCore.LF_STRING +
@@ -394,13 +394,13 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
 	            	"IF exist ..\\yacy.running goto WAIT" + serverCore.LF_STRING +
 	            	"cd " + apphome + serverCore.LF_STRING +
 	            	"start /MIN CMD /C " + starterFile + serverCore.LF_STRING;
-	            File scriptFile = new File(sb.getRootPath(), "DATA/RELEASE/restart.bat".replace("/", File.separator));
+	            final File scriptFile = new File(sb.getRootPath(), "DATA/RELEASE/restart.bat".replace("/", File.separator));
 	            serverSystem.deployScript(scriptFile, script);
 	            serverLog.logInfo("RESTART", "wrote restart-script to " + scriptFile.getAbsolutePath());
 	            serverSystem.execAsynchronous(scriptFile);
 	            serverLog.logInfo("RESTART", "script is running");
 	            sb.terminate(5000);
-	        } catch (IOException e) {
+	        } catch (final IOException e) {
 	            serverLog.logSevere("RESTART", "restart failed", e);
 	        }
         
@@ -421,7 +421,7 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
             // start a re-start daemon
             try {
                 serverLog.logInfo("RESTART", "INITIATED");
-                String script =
+                final String script =
                     "#!/bin/sh" + serverCore.LF_STRING +
                     "cd " + sb.getRootPath() + "/DATA/RELEASE/" + serverCore.LF_STRING +
                     "while [ -f ../yacy.running ]; do" + serverCore.LF_STRING +
@@ -429,33 +429,33 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
                     "done" + serverCore.LF_STRING +
                     "cd ../../" + serverCore.LF_STRING +
                     "nohup ./startYACY.sh > /dev/null" + serverCore.LF_STRING;
-                File scriptFile = new File(sb.getRootPath(), "DATA/RELEASE/restart.sh");
+                final File scriptFile = new File(sb.getRootPath(), "DATA/RELEASE/restart.sh");
                 serverSystem.deployScript(scriptFile, script);
                 serverLog.logInfo("RESTART", "wrote restart-script to " + scriptFile.getAbsolutePath());
                 serverSystem.execAsynchronous(scriptFile);
                 serverLog.logInfo("RESTART", "script is running");
                 sb.terminate(5000);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 serverLog.logSevere("RESTART", "restart failed", e);
             }
         }
     }
     
-    public static void deployRelease(File releaseFile) {
+    public static void deployRelease(final File releaseFile) {
         //byte[] script = ("cd " + plasmaSwitchboard.getSwitchboard().getRootPath() + ";while [ -e ../yacy.running ]; do sleep 1;done;tar xfz " + release + ";cp -Rf yacy/* ../../;rm -Rf yacy;cd ../../;startYACY.sh").getBytes();
         try {
-            plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
-            String apphome = sb.getRootPath().toString();
+            final plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
+            final String apphome = sb.getRootPath().toString();
             serverLog.logInfo("UPDATE", "INITIATED");
             try{
             tarTools.unTar(tarTools.getInputStream(releaseFile), sb.getRootPath() + "/DATA/RELEASE/".replace("/", File.separator));
-            } catch (Exception e){
+            } catch (final Exception e){
             	serverLog.logSevere("UNTAR", "failed", e);
             }
             String script = null;
             String scriptFileName = null;
             if(serverSystem.isWindows){
-            	File startType = new File(sb.getRootPath(), "DATA/yacy.noconsole".replace("/", File.separator));
+            	final File startType = new File(sb.getRootPath(), "DATA/yacy.noconsole".replace("/", File.separator));
             	String starterFile = "startYACY_debug.bat";
             	if (startType.exists()) starterFile = "startYACY.bat"; // startType noconsole
             	script = 
@@ -519,14 +519,14 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
 	                "nohup ./startYACY.sh > /dev/null" + serverCore.LF_STRING;
 	            scriptFileName = "update.sh";
             }
-            File scriptFile = new File(sb.getRootPath(), "DATA/RELEASE/".replace("/", File.separator) + scriptFileName); 
+            final File scriptFile = new File(sb.getRootPath(), "DATA/RELEASE/".replace("/", File.separator) + scriptFileName); 
             serverSystem.deployScript(scriptFile, script);
             serverLog.logInfo("UPDATE", "wrote update-script to " + scriptFile.getAbsolutePath());
             serverSystem.execAsynchronous(scriptFile);
             serverLog.logInfo("UPDATE", "script is running");
             sb.setConfig("update.time.deploy", System.currentTimeMillis());
             sb.terminate(5000);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             serverLog.logSevere("UPDATE", "update failed", e);
         }
     }
@@ -540,10 +540,10 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
      *         If the major version is &gt;= 0.11 - major version is replaced by "dev" and separated SVN-version by '/', e.g."dev/01818" <br> 
      *         "dev/00000" - If the input does not matcht the regular expression above 
      */
-     public static String combined2prettyVersion(String ver) {
+     public static String combined2prettyVersion(final String ver) {
          return combined2prettyVersion(ver, "");
      }
-     public static String combined2prettyVersion(String ver, String computerName) {
+     public static String combined2prettyVersion(final String ver, final String computerName) {
          final Matcher matcher = Pattern.compile("\\A(\\d+\\.\\d{1,3})(\\d{0,5})\\z").matcher(ver); 
 
          if (!matcher.find()) { 
@@ -551,7 +551,7 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
              return "dev/00000";
          }
          
-         String mainversion = (Double.parseDouble(matcher.group(1)) < 0.11 ? "dev" : matcher.group(1));
+         final String mainversion = (Double.parseDouble(matcher.group(1)) < 0.11 ? "dev" : matcher.group(1));
         String revision = matcher.group(2);
         for(int i=revision.length();i<5;++i) revision += "0";
         return mainversion+"/"+revision;
@@ -565,14 +565,14 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
      * @param svn Current version given from SVN.
      * @return String with the combined version.
      */
-     public static double versvn2combinedVersion(double version, int svn) {
+     public static double versvn2combinedVersion(final double version, final int svn) {
         return (Math.rint((version*100000000.0) + (svn))/100000000);
      }
      
-     public static void main(String[] args) {
+     public static void main(final String[] args) {
          System.out.println(thisVersion());
-         float base = (float) 0.53;
-         String blacklist = "....[123]";
+         final float base = (float) 0.53;
+         final String blacklist = "....[123]";
          String test;
          for (int i = 0; i < 20; i++) {
              test = Float.toString(base + (((float) i) / 1000));
@@ -586,18 +586,18 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
      * @param filesPath where all downloaded files reside
      * @param deleteAfterDays 
      */
-    public static void deleteOldDownloads(File filesPath, int deleteAfterDays) {
+    public static void deleteOldDownloads(final File filesPath, final int deleteAfterDays) {
         // list downloaded releases
         yacyVersion release;
-        String[] downloaded = filesPath.list();
+        final String[] downloaded = filesPath.list();
           
         // parse all filenames and put them in a sorted set
-        SortedSet<yacyVersion> downloadedreleases = new TreeSet<yacyVersion>();
+        final SortedSet<yacyVersion> downloadedreleases = new TreeSet<yacyVersion>();
         for (int j = 0; j < downloaded.length; j++) {
             try {
                 release = new yacyVersion(downloaded[j]);
                 downloadedreleases.add(release);
-            } catch (RuntimeException e) {
+            } catch (final RuntimeException e) {
                 // not a valid release
             }
         }
@@ -610,10 +610,10 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
             final yacyVersion latest = downloadedreleases.last();
             downloadedreleases.remove(latest);
             // if latest is a developer release, we also keep a main release
-            boolean keepMain = !latest.mainRelease;
+            final boolean keepMain = !latest.mainRelease;
             
             // remove old files
-            long now = System.currentTimeMillis();
+            final long now = System.currentTimeMillis();
             final long deleteAfterMillis = deleteAfterDays * 24 * 60 * 60000l;
             
             String lastMain = null;
@@ -629,7 +629,7 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
                 }
 
                 // check file age
-                File downloadedFile = new File(filesPath + File.separator + filename);
+                final File downloadedFile = new File(filesPath + File.separator + filename);
                 if (now - downloadedFile.lastModified() > deleteAfterMillis) {
                     // delete file
                     if (!downloadedFile.delete()) {

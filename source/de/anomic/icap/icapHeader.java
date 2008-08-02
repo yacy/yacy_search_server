@@ -117,21 +117,21 @@ public class icapHeader extends TreeMap<String, String> implements Map<String, S
         super(insensitiveCollator);
     }
     
-    public boolean allow(int statusCode) {
+    public boolean allow(final int statusCode) {
         if (!super.containsKey("Allow")) return false;
                 
-        String allow = get("Allow");
+        final String allow = get("Allow");
         return (allow.indexOf(Integer.toString(statusCode))!=-1); 
     }    
     
     // to make the occurrence of multiple keys possible, we add them using a counter
-    public String add(String key, String value) {
-        int c = keyCount(key);
+    public String add(final String key, final String value) {
+        final int c = keyCount(key);
         if (c == 0) return put(key, value);
         return put("*" + key + "-" + c, value);
     }
     
-    public int keyCount(String key) {
+    public int keyCount(final String key) {
         if (!(containsKey(key))) return 0;
         int c = 1;
         while (containsKey("*" + key + "-" + c)) c++;
@@ -139,26 +139,26 @@ public class icapHeader extends TreeMap<String, String> implements Map<String, S
     }
     
     // a convenience method to access the map with fail-over defaults
-    public Object get(Object key, Object dflt) {
-        Object result = get(key);
+    public Object get(final Object key, final Object dflt) {
+        final Object result = get(key);
         if (result == null) return dflt;
         return result;
     }
     
     // return multiple results
-    public Object getSingle(Object key, int count) {
+    public Object getSingle(final Object key, final int count) {
         if (count == 0) return get(key, null);
         return get("*" + key + "-" + count, null);
     }
     
-    public StringBuffer toHeaderString(String icapVersion, int icapStatusCode, String icapStatusText) {
+    public StringBuffer toHeaderString(final String icapVersion, final int icapStatusCode, String icapStatusText) {
         
         if ((icapStatusText == null)||(icapStatusText.length()==0)) {
             if (icapVersion.equals("ICAP/1.0") && icapHeader.icap1_0.containsKey(Integer.toString(icapStatusCode))) 
                 icapStatusText = icapHeader.icap1_0.get(Integer.toString(icapStatusCode));
         }
         
-        StringBuffer theHeader = new StringBuffer();        
+        final StringBuffer theHeader = new StringBuffer();        
         
         // write status line
         theHeader.append(icapVersion).append(" ")
@@ -166,7 +166,7 @@ public class icapHeader extends TreeMap<String, String> implements Map<String, S
                  .append(icapStatusText).append("\r\n");
         
         // write header
-        Iterator<String> i = keySet().iterator();
+        final Iterator<String> i = keySet().iterator();
         String key;
         char tag;
         int count;
@@ -187,7 +187,7 @@ public class icapHeader extends TreeMap<String, String> implements Map<String, S
         return theHeader;
     }
     
-    public static Properties parseRequestLine(String cmd, String s, Properties prop, String virtualHost) {
+    public static Properties parseRequestLine(final String cmd, String s, final Properties prop, final String virtualHost) {
         
         // reset property from previous run   
         prop.clear();
@@ -267,9 +267,9 @@ public class icapHeader extends TreeMap<String, String> implements Map<String, S
         
     }
     
-    public static icapHeader readHeader(Properties prop, serverCore.Session theSession) {
+    public static icapHeader readHeader(final Properties prop, final serverCore.Session theSession) {
         // reading all headers
-        icapHeader header = new icapHeader();
+        final icapHeader header = new icapHeader();
         int p;
         String line;
         while ((line = theSession.readLineAsString()) != null) {

@@ -4,11 +4,11 @@ public class ImporterException extends Exception {
 
     private static final long serialVersionUID = 6070972210596234670L;
 
-    public ImporterException(String message) {
+    public ImporterException(final String message) {
 		super(message);
 	}
 	
-    public ImporterException(String message, Throwable cause) {
+    public ImporterException(final String message, final Throwable cause) {
         super(message, cause);
     }	
 }

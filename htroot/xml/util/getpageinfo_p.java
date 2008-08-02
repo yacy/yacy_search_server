@@ -43,9 +43,9 @@ import de.anomic.yacy.yacyURL;
 
 public class getpageinfo_p {
     
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
-        plasmaSwitchboard sb = (plasmaSwitchboard) env;
-        serverObjects prop = new serverObjects();
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        final serverObjects prop = new serverObjects();
         prop.put("sitemap", "");
         prop.put("title", "");
         prop.put("favicon","");
@@ -64,16 +64,16 @@ public class getpageinfo_p {
             }
             if (actions.indexOf("title")>=0) {
                 try {
-                    yacyURL u = new yacyURL(url, null);
-                    httpHeader reqHeader = new httpHeader();
+                    final yacyURL u = new yacyURL(url, null);
+                    final httpHeader reqHeader = new httpHeader();
                     reqHeader.put(httpHeader.USER_AGENT, HTTPLoader.yacyUserAgent); // do not set the crawler user agent, because this page was loaded by manual entering of the url
-                    byte[] r = HttpClient.wget(u.toString(), reqHeader, 5000);
+                    final byte[] r = HttpClient.wget(u.toString(), reqHeader, 5000);
                     if (r == null) return prop;
-                    String contentString=new String(r);
+                    final String contentString=new String(r);
                     
-                    htmlFilterContentScraper scraper = new htmlFilterContentScraper(u);
+                    final htmlFilterContentScraper scraper = new htmlFilterContentScraper(u);
                     //OutputStream os = new htmlFilterOutputStream(null, scraper, null, false);
-                    Writer writer = new htmlFilterWriter(null,null,scraper,null,false);
+                    final Writer writer = new htmlFilterWriter(null,null,scraper,null,false);
                     serverFileUtils.copy(contentString,writer);
                     writer.close();
                     
@@ -84,7 +84,7 @@ public class getpageinfo_p {
                     prop.put("favicon", (scraper.getFavicon()==null) ? "" : scraper.getFavicon().toString());
                     
                     // put keywords
-                    String list[]=scraper.getKeywords();
+                    final String list[]=scraper.getKeywords();
                     int count = 0;
                     for(int i=0;i<list.length;i++){
                     	String tag = list[i];
@@ -99,21 +99,21 @@ public class getpageinfo_p {
                     }
                     prop.put("tags", count);
 
-                } catch (MalformedURLException e) { /* ignore this */
-                } catch (IOException e) { /* ignore this */
+                } catch (final MalformedURLException e) { /* ignore this */
+                } catch (final IOException e) { /* ignore this */
                 }
             }
             if(actions.indexOf("robots")>=0){
                 try {
-                    yacyURL theURL = new yacyURL(url, null);
+                    final yacyURL theURL = new yacyURL(url, null);
                 	
                 	// determine if crawling of the current URL is allowed
                 	prop.put("robots-allowed", sb.robots.isDisallowed(theURL) ? "0" : "1");
                     
                     // get the sitemap URL of the domain
-                    yacyURL sitemapURL = sb.robots.getSitemapURL(theURL);
+                    final yacyURL sitemapURL = sb.robots.getSitemapURL(theURL);
                     prop.putHTML("sitemap", (sitemapURL==null)?"":sitemapURL.toString(), true);
-                } catch (MalformedURLException e) {}
+                } catch (final MalformedURLException e) {}
             }
             
         }

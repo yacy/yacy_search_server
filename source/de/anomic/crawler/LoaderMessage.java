@@ -46,16 +46,16 @@ public final class LoaderMessage {
     
     // loadParallel(URL url, String referer, String initiator, int depth, plasmaCrawlProfile.entry profile) {
     public LoaderMessage(
-            yacyURL url,
-            String name,                       // the name of the url, from anchor tag <a>name</a>
-            String referer, 
-            String initiator, 
-            int depth, 
-            CrawlProfile.entry profile,
-            int crawlingPriority,
-            boolean acceptAllContent,
-            int timeout,
-            boolean keepInMemory
+            final yacyURL url,
+            final String name,                       // the name of the url, from anchor tag <a>name</a>
+            final String referer, 
+            final String initiator, 
+            final int depth, 
+            final CrawlProfile.entry profile,
+            final int crawlingPriority,
+            final boolean acceptAllContent,
+            final int timeout,
+            final boolean keepInMemory
     ) {
         this.url = url;
         this.name = name;
@@ -72,7 +72,7 @@ public final class LoaderMessage {
         this.result = null;
     } 
     
-    public void setError(String errorMessage) {
+    public void setError(final String errorMessage) {
         this.errorMessage = errorMessage;
     }
     
@@ -80,7 +80,7 @@ public final class LoaderMessage {
         return this.errorMessage;
     }
     
-    public void setResult(plasmaHTCache.Entry theResult) {
+    public void setResult(final plasmaHTCache.Entry theResult) {
         // store the result
         this.result = theResult;
         

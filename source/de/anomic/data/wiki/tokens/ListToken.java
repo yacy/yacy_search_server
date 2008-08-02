@@ -43,13 +43,13 @@ public class ListToken extends AbstractToken {
 	
 	protected int aktline = 0;
 	
-	public ListToken(char firstChar, String listBlockElement) {
+	public ListToken(final char firstChar, final String listBlockElement) {
 		this.firstChar = firstChar;
 		this.listBlockElement = listBlockElement;
 		this.listElement = "li";
 		this.recursion = true;
 		this.pattern = new Pattern[] { Pattern.compile("^[" + firstChar + "]([^\n]|\n[" + firstChar + "])*", Pattern.MULTILINE) };
-		ArrayList<String> r = new ArrayList<String>();
+		final ArrayList<String> r = new ArrayList<String>();
 		if (this.listBlockElement != null) {
 			if (this.recursion) r.add(this.listBlockElement);
 			if (this.listElement != null) r.add(this.listElement);
@@ -57,13 +57,13 @@ public class ListToken extends AbstractToken {
 		blockElements = r.toArray(new String[r.size()]);
 	}
 	
-	public ListToken(char firstChar, String listBlockElement, String listElement) {
+	public ListToken(final char firstChar, final String listBlockElement, final String listElement) {
 		this.firstChar = firstChar;
 		this.listBlockElement = listBlockElement;
 		this.listElement = listElement;
 		this.recursion = true;
 		this.pattern = new Pattern[] { Pattern.compile("^[" + firstChar + "]([^\n]|\n[" + firstChar + "])*", Pattern.MULTILINE) };
-		ArrayList<String> r = new ArrayList<String>();
+		final ArrayList<String> r = new ArrayList<String>();
 		if (this.listBlockElement != null) {
 			if (this.recursion) r.add(this.listBlockElement);
 			if (this.listElement != null) r.add(this.listElement);
@@ -71,13 +71,13 @@ public class ListToken extends AbstractToken {
 		blockElements = r.toArray(new String[r.size()]);
 	}
 	
-	public ListToken(char firstChar, String listBlockElement, String listElement, boolean recursion) {
+	public ListToken(final char firstChar, final String listBlockElement, final String listElement, final boolean recursion) {
 		this.firstChar = firstChar;
 		this.listBlockElement = listBlockElement;
 		this.listElement = listElement;
 		this.recursion = recursion;
 		this.pattern = new Pattern[] { Pattern.compile("^[" + firstChar + "]([^\n]|\n[" + firstChar + "])*", Pattern.MULTILINE) };
-		ArrayList<String> r = new ArrayList<String>();
+		final ArrayList<String> r = new ArrayList<String>();
 		if (this.listBlockElement != null) {
 			if (this.recursion) r.add(this.listBlockElement);
 			if (this.listElement != null) r.add(this.listElement);
@@ -86,13 +86,13 @@ public class ListToken extends AbstractToken {
 	}
 	
 	protected void parse() {
-		StringBuffer sb = new StringBuffer(this.text.length());
+		final StringBuffer sb = new StringBuffer(this.text.length());
 		parse(this.text.split("\n"), 0, sb);
 		this.markup = new String(sb);
 		this.parsed = true;
 	}
 	
-	protected StringBuffer parse(String[] t, int depth, StringBuffer sb) {
+	protected StringBuffer parse(final String[] t, final int depth, final StringBuffer sb) {
 		if (this.listBlockElement != null) sb.append("<").append(this.listBlockElement).append(">\n");
 		while (this.aktline < t.length && getGrade(t[this.aktline]) >= depth) {
 			if (recursion) for (int j=0; j<depth + 1; j++) sb.append("\t");
@@ -114,7 +114,7 @@ public class ListToken extends AbstractToken {
 		return sb;
 	}
 	
-	protected int getGrade(String t) {
+	protected int getGrade(final String t) {
 		int i = 0;
 		for (i=0; i<t.length(); i++)
 			if (t.charAt(i) != this.firstChar) break;
@@ -133,7 +133,7 @@ public class ListToken extends AbstractToken {
 		return this.firstChar;
 	}
 	
-	public boolean setText(String text, int patternNr) {
+	public boolean setText(final String text, final int patternNr) {
 		this.text = text;
 		this.markup = null;
 		this.parsed = false;

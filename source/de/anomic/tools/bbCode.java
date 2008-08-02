@@ -39,7 +39,7 @@ public class bbCode {
 	*@author Marc Nause
 	*@return String
 	*/
-	public String escapeHtml(String input){
+	public String escapeHtml(final String input){
 		String output = "";
 		int iter = 0;
 		
@@ -59,7 +59,7 @@ public class bbCode {
 	*@author Roland Ramthun
 	*@return String
 	*/
-	public String bb(String input){
+	public String bb(final String input){
 		String output = escapeHtml(input);
 		//Parse bold
 		output = output.replaceAll("\\[b\\]", "<b>");

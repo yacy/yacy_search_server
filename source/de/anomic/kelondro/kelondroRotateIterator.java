@@ -33,7 +33,7 @@ public class kelondroRotateIterator<E> implements kelondroCloneableIterator<E> {
     boolean nempty;
     int terminationCount;
     
-    public kelondroRotateIterator(kelondroCloneableIterator<E> a, Object modifier, int terminationCount) {
+    public kelondroRotateIterator(final kelondroCloneableIterator<E> a, final Object modifier, final int terminationCount) {
         // this works currently only for String-type key iterations
         this.a = a;
         this.modifier = modifier;
@@ -42,7 +42,7 @@ public class kelondroRotateIterator<E> implements kelondroCloneableIterator<E> {
         this.nempty = this.clone.hasNext();
     }
     
-	public kelondroRotateIterator<E> clone(Object modifier) {
+	public kelondroRotateIterator<E> clone(final Object modifier) {
         return new kelondroRotateIterator<E>(a, modifier, terminationCount - 1);
     }
     

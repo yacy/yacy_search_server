@@ -52,12 +52,12 @@ public class plasmaWebStructure {
     public static int maxhosts = 8000; // maximum number of hosts in web structure map
     
     private StringBuffer crg;     // global citation references
-    private serverLog    log;
-    private File         rankingPath, structureFile;
-    private String       crlFile, crgFile;
+    private final serverLog    log;
+    private final File         rankingPath, structureFile;
+    private final String       crlFile, crgFile;
     TreeMap<String, String> structure_old, structure_new; // <b64hash(6)>','<host> to <date-yyyymmdd(8)>{<target-b64hash(6)><target-count-hex(4)>}*
     
-    public plasmaWebStructure(serverLog log, File rankingPath, String crlFile, String crgFile, File structureFile) {
+    public plasmaWebStructure(final serverLog log, final File rankingPath, final String crlFile, final String crgFile, final File structureFile) {
         this.log = log;
         this.rankingPath = rankingPath;
         this.crlFile = crlFile;
@@ -68,21 +68,21 @@ public class plasmaWebStructure {
         this.structureFile = structureFile;
         
         // load web structure
-        Map<String, String> loadedStructure = (this.structureFile.exists()) ? serverFileUtils.loadHashMap(this.structureFile) : new TreeMap<String, String>();
+        final Map<String, String> loadedStructure = (this.structureFile.exists()) ? serverFileUtils.loadHashMap(this.structureFile) : new TreeMap<String, String>();
         if (loadedStructure != null) this.structure_old.putAll(loadedStructure);
         
         // delete out-dated entries in case the structure is too big
         if (this.structure_old.size() > maxhosts) {
         	// fill a set with last-modified - dates of the structure
-        	TreeSet<String> delset = new TreeSet<String>();
+        	final TreeSet<String> delset = new TreeSet<String>();
         	String key, value;
-        	for (Map.Entry<String, String> entry : this.structure_old.entrySet()) {
+        	for (final Map.Entry<String, String> entry : this.structure_old.entrySet()) {
         		key = entry.getKey();
         		value = entry.getValue();
         		delset.add(value.substring(0, 8) + key);
         	}
         	int delcount = this.structure_old.size() - (maxhosts * 9 / 10);
-        	Iterator<String> j = delset.iterator();
+        	final Iterator<String> j = delset.iterator();
         	while ((delcount > 0) && (j.hasNext())) {
         		this.structure_old.remove(j.next().substring(8));
         		delcount--;
@@ -90,16 +90,16 @@ public class plasmaWebStructure {
         }
     }
     
-    public Integer[] /*(outlinksSame, outlinksOther)*/ generateCitationReference(plasmaParserDocument document, plasmaCondenser condenser, Date docDate) {
-        yacyURL url = document.dc_source();
+    public Integer[] /*(outlinksSame, outlinksOther)*/ generateCitationReference(final plasmaParserDocument document, final plasmaCondenser condenser, final Date docDate) {
+        final yacyURL url = document.dc_source();
         
         // generate citation reference
-        Map<yacyURL, String> hl = document.getHyperlinks();
-        Iterator<yacyURL> it = hl.keySet().iterator();
+        final Map<yacyURL, String> hl = document.getHyperlinks();
+        final Iterator<yacyURL> it = hl.keySet().iterator();
         String nexturlhash;
-        StringBuffer cpg = new StringBuffer(12 * (hl.size() + 1) + 1);
-        StringBuffer cpl = new StringBuffer(12 * (hl.size() + 1) + 1);
-        String lhp = url.hash().substring(6); // local hash part
+        final StringBuffer cpg = new StringBuffer(12 * (hl.size() + 1) + 1);
+        final StringBuffer cpl = new StringBuffer(12 * (hl.size() + 1) + 1);
+        final String lhp = url.hash().substring(6); // local hash part
         int GCount = 0;
         int LCount = 0;
         while (it.hasNext()) {
@@ -119,7 +119,7 @@ public class plasmaWebStructure {
         
         // append this reference to buffer
         // generate header info
-        String head = url.hash() + "=" +
+        final String head = url.hash() + "=" +
         kelondroMicroDate.microDateHoursStr(docDate.getTime()) +          // latest update timestamp of the URL
         kelondroMicroDate.microDateHoursStr(System.currentTimeMillis()) + // last visit timestamp of the URL
         kelondroBase64Order.enhancedCoder.encodeLongSmart(LCount, 2) +  // count of links to local resources
@@ -151,15 +151,15 @@ public class plasmaWebStructure {
         return new Integer[] {new Integer(LCount), new Integer(GCount)};
     }
     
-    public void flushCitationReference(String type) {
+    public void flushCitationReference(final String type) {
         if (crg.length() < 12) return;
-        String filename = type.toUpperCase() + "-A-" + new serverDate().toShortString(true) + "." + crg.substring(0, 12) + ".cr.gz";
-        File path = new File(rankingPath, (type.equals("crl")) ? crlFile : crgFile);
+        final String filename = type.toUpperCase() + "-A-" + new serverDate().toShortString(true) + "." + crg.substring(0, 12) + ".cr.gz";
+        final File path = new File(rankingPath, (type.equals("crl")) ? crlFile : crgFile);
         path.mkdirs();
-        File file = new File(path, filename);
+        final File file = new File(path, filename);
         
         // generate header
-        StringBuffer header = new StringBuffer(200);
+        final StringBuffer header = new StringBuffer(200);
         header.append("# Name=YaCy " + ((type.equals("crl")) ? "Local" : "Global") + " Citation Reference Ticket"); header.append((char) 13); header.append((char) 10);
         header.append("# Created=" + System.currentTimeMillis()); header.append((char) 13); header.append((char) 10);
         header.append("# Structure=<Referee-12>,'=',<UDate-3>,<VDate-3>,<LCount-2>,<GCount-2>,<ICount-2>,<DCount-2>,<TLength-3>,<WACount-3>,<WUCount-3>,<Flags-1>,'|',*<Anchor-" + ((type.equals("crl")) ? "6" : "12") + ">"); header.append((char) 13); header.append((char) 10);
@@ -168,22 +168,22 @@ public class plasmaWebStructure {
         try {
             serverFileUtils.writeAndGZip(crg.toString().getBytes(), file);
             if (this.log.isFine()) log.logFine("wrote citation reference dump " + file.toString());
-        } catch (IOException e) {
+        } catch (final IOException e) {
             e.printStackTrace();
         }
     }
     
-    private static int refstr2count(String refs) {
+    private static int refstr2count(final String refs) {
         if ((refs == null) || (refs.length() <= 8)) return 0;
         assert (refs.length() - 8) % 10 == 0;
         return (refs.length() - 8) / 10;
     }
     
-    static Map<String, Integer> refstr2map(String refs) {
+    static Map<String, Integer> refstr2map(final String refs) {
         if ((refs == null) || (refs.length() <= 8)) return new HashMap<String, Integer>();
-        Map<String, Integer> map = new HashMap<String, Integer>();
+        final Map<String, Integer> map = new HashMap<String, Integer>();
         String c;
-        int refsc = refstr2count(refs);
+        final int refsc = refstr2count(refs);
         for (int i = 0; i < refsc; i++) {
             c = refs.substring(8 + i * 10, 8 + (i + 1) * 10);
             map.put(c.substring(0, 6), new Integer(Integer.parseInt(c.substring(6), 16)));
@@ -191,11 +191,11 @@ public class plasmaWebStructure {
         return map;
     }
     
-    private static String map2refstr(Map<String, Integer> map) {
-        StringBuffer s = new StringBuffer(map.size() * 10);
+    private static String map2refstr(final Map<String, Integer> map) {
+        final StringBuffer s = new StringBuffer(map.size() * 10);
         s.append(serverDate.formatShortDay(new Date()));
         String h;
-        for (Map.Entry<String, Integer> entry : map.entrySet()) {
+        for (final Map.Entry<String, Integer> entry : map.entrySet()) {
             s.append(entry.getKey());
             h = Integer.toHexString(entry.getValue().intValue());
             if (h.length() == 0) {
@@ -215,7 +215,7 @@ public class plasmaWebStructure {
         return s.toString();
     }
     
-    public Map<String, Integer> references(String domhash) {
+    public Map<String, Integer> references(final String domhash) {
         // returns a map with a domhash(String):refcount(Integer) relation
         assert domhash.length() == 6;
         SortedMap<String, String> tailMap;
@@ -223,7 +223,7 @@ public class plasmaWebStructure {
         synchronized (structure_old) {
             tailMap = structure_old.tailMap(domhash);
             if (!tailMap.isEmpty()) {
-                String key = tailMap.firstKey();
+                final String key = tailMap.firstKey();
                 if (key.startsWith(domhash)) {
                     h = refstr2map(tailMap.get(key));
                 }
@@ -232,7 +232,7 @@ public class plasmaWebStructure {
         synchronized (structure_new) {
             tailMap = structure_new.tailMap(domhash);
             if (!tailMap.isEmpty()) {
-                String key = tailMap.firstKey();
+                final String key = tailMap.firstKey();
                 if (key.startsWith(domhash)) {
                     h.putAll(refstr2map(tailMap.get(key)));
                 }
@@ -241,7 +241,7 @@ public class plasmaWebStructure {
         return h;
     }
     
-    public int referencesCount(String domhash) {
+    public int referencesCount(final String domhash) {
         // returns the number of domains that are referenced by this domhash
         assert domhash.length() == 6 : "domhash = " + domhash;
         SortedMap<String, String> tailMap;
@@ -249,7 +249,7 @@ public class plasmaWebStructure {
         synchronized (structure_old) {
             tailMap = structure_old.tailMap(domhash);
             if (!tailMap.isEmpty()) {
-                String key = tailMap.firstKey();
+                final String key = tailMap.firstKey();
                 if (key.startsWith(domhash)) {
                     c = refstr2count(tailMap.get(key));
                 }
@@ -258,7 +258,7 @@ public class plasmaWebStructure {
         synchronized (structure_new) {
             tailMap = structure_new.tailMap(domhash);
             if (!tailMap.isEmpty()) {
-                String key = tailMap.firstKey();
+                final String key = tailMap.firstKey();
                 if (key.startsWith(domhash)) {
                     c += refstr2count(tailMap.get(key));
                 }
@@ -267,14 +267,14 @@ public class plasmaWebStructure {
         return c;
     }
     
-    public String resolveDomHash2DomString(String domhash) {
+    public String resolveDomHash2DomString(final String domhash) {
         // returns the domain as string, null if unknown
         assert domhash.length() == 6;
         SortedMap<String, String> tailMap;
         synchronized(structure_old) {
             tailMap = structure_old.tailMap(domhash);
             if (!tailMap.isEmpty()) {
-                String key = tailMap.firstKey();
+                final String key = tailMap.firstKey();
                 if (key.startsWith(domhash)) {
                     return key.substring(7);
                 }
@@ -283,7 +283,7 @@ public class plasmaWebStructure {
         synchronized(structure_new) {
             tailMap = structure_new.tailMap(domhash);
             if (!tailMap.isEmpty()) {
-                String key = tailMap.firstKey();
+                final String key = tailMap.firstKey();
                 if (key.startsWith(domhash)) {
                     return key.substring(7);
                 }
@@ -292,11 +292,11 @@ public class plasmaWebStructure {
         return null;
     }
     
-    private void learn(yacyURL url, StringBuffer reference /*string of b64(12digits)-hashes*/) {
-        String domhash = url.hash().substring(6);
+    private void learn(final yacyURL url, final StringBuffer reference /*string of b64(12digits)-hashes*/) {
+        final String domhash = url.hash().substring(6);
 
         // parse the new reference string and join it with the stored references
-        Map<String, Integer> refs = references(domhash);
+        final Map<String, Integer> refs = references(domhash);
         assert reference.length() % 12 == 0;
         String dom;
         int c;
@@ -316,7 +316,7 @@ public class plasmaWebStructure {
 				// shrink the references: the entry with the smallest number of references is removed
 				int minrefcount = Integer.MAX_VALUE;
 				String minrefkey = null;
-				findloop: for (Map.Entry<String, Integer> entry : refs.entrySet()) {
+				findloop: for (final Map.Entry<String, Integer> entry : refs.entrySet()) {
 					if (entry.getValue().intValue() < minrefcount) {
 						minrefcount = entry.getValue().intValue();
 						minrefkey = entry.getKey();
@@ -336,12 +336,12 @@ public class plasmaWebStructure {
         }
     }
     
-    private static final void joinStructure(TreeMap<String, String> into, TreeMap<String, String> from) {
-        for (Map.Entry<String, String> e: from.entrySet()) {
+    private static final void joinStructure(final TreeMap<String, String> into, final TreeMap<String, String> from) {
+        for (final Map.Entry<String, String> e: from.entrySet()) {
             if (into.containsKey(e.getKey())) {
-                Map<String, Integer> s0 = refstr2map(into.get(e.getKey()));
-                Map<String, Integer> s1 = refstr2map(e.getValue());
-                for (Map.Entry<String, Integer> r: s1.entrySet()) {
+                final Map<String, Integer> s0 = refstr2map(into.get(e.getKey()));
+                final Map<String, Integer> s1 = refstr2map(e.getValue());
+                for (final Map.Entry<String, Integer> r: s1.entrySet()) {
                     if (s0.containsKey(r.getKey())) {
                         s0.put(r.getKey(), s0.get(r.getKey()).intValue() + r.getValue().intValue());
                     } else {
@@ -368,7 +368,7 @@ public class plasmaWebStructure {
             synchronized(structure_old) {
                 serverFileUtils.saveMap(this.structureFile, this.structure_old, "Web Structure Syntax: <b64hash(6)>','<host> to <date-yyyymmdd(8)>{<target-b64hash(6)><target-count-hex(4)>}*");
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             e.printStackTrace();
         }
     }
@@ -379,7 +379,7 @@ public class plasmaWebStructure {
         int refsize, maxref = 0;
         joinOldNew();
         synchronized(structure_new) {
-            for (Map.Entry<String, String> entry : structure_old.entrySet()) {
+            for (final Map.Entry<String, String> entry : structure_old.entrySet()) {
                 refsize = entry.getValue().length();
                 if (refsize > maxref) {
                     maxref = refsize;
@@ -390,17 +390,17 @@ public class plasmaWebStructure {
         return maxhost;
     }
     
-    public Iterator<structureEntry> structureEntryIterator(boolean latest) {
+    public Iterator<structureEntry> structureEntryIterator(final boolean latest) {
         // iterates objects of type structureEntry
         return new structureIterator(latest);
     }
     
     public class structureIterator implements Iterator<structureEntry> {
 
-        private Iterator<Map.Entry<String, String>> i;
+        private final Iterator<Map.Entry<String, String>> i;
         private structureEntry nextentry;
         
-        public structureIterator(boolean latest) {
+        public structureIterator(final boolean latest) {
             i = ((latest) ? structure_new : structure_old).entrySet().iterator();
             next0();
         }
@@ -430,7 +430,7 @@ public class plasmaWebStructure {
         }
         
         public structureEntry next() {
-            structureEntry r = nextentry;
+            final structureEntry r = nextentry;
             next0();
             return r;
         }
@@ -444,7 +444,7 @@ public class plasmaWebStructure {
     public class structureEntry {
         public String domhash, domain, date;
         public Map<String, Integer> references;
-        public structureEntry(String domhash, String domain, String date, Map<String, Integer> references) {
+        public structureEntry(final String domhash, final String domain, final String date, final Map<String, Integer> references) {
             this.domhash = domhash;
             this.domain = domain;
             this.date = date;

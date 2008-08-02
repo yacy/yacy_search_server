@@ -28,7 +28,7 @@ public abstract class serverSwitchAbstractAction {
     protected serverLog log = null;
     private String shortDescr = "", longDescr = "";
     
-    public void setDescription(String shortText, String longText) {
+    public void setDescription(final String shortText, final String longText) {
         // sets a visible description string
         this.shortDescr = shortText;
         this.longDescr  = longText;
@@ -44,7 +44,7 @@ public abstract class serverSwitchAbstractAction {
 	return this.longDescr;
     }
 
-    public void setLog(serverLog log) {
+    public void setLog(final serverLog log) {
         // defines a log where process states can be written to
         this.log = log;
     }

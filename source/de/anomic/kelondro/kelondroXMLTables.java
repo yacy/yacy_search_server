@@ -50,11 +50,11 @@ public class kelondroXMLTables {
     }
 
     @SuppressWarnings("unchecked")
-    public kelondroXMLTables(File file) throws IOException {
+    public kelondroXMLTables(final File file) throws IOException {
         this.propFile = file;
         this.timestamp = System.currentTimeMillis();
         if (propFile.exists()) {
-            XMLDecoder xmldec = new XMLDecoder(new FileInputStream(propFile));
+            final XMLDecoder xmldec = new XMLDecoder(new FileInputStream(propFile));
             tables = (Hashtable<String, Hashtable<String, String>>) xmldec.readObject();
             xmldec.close();
         } else {
@@ -62,7 +62,7 @@ public class kelondroXMLTables {
         }
     }
 
-    public void commit(File target) throws IOException {
+    public void commit(final File target) throws IOException {
         // this method is used if the Mircrotable was created without assigning
         // a file to it as an empty table the table then becomes file-based,
         // and write operation will be committed to the file
@@ -70,7 +70,7 @@ public class kelondroXMLTables {
         commit(true);
     }
 
-    private void commit(boolean force) throws IOException {
+    private void commit(final boolean force) throws IOException {
         // this function commits the data to a file
         // it does not save the data until a specific waiting-time has been lasted
         if ((force) || (System.currentTimeMillis() - timestamp > 10000)) {
@@ -80,10 +80,10 @@ public class kelondroXMLTables {
                 throw new RuntimeException("Microtables.commit: no file specified");
 
             // write first to a temporary file
-            File tmpFile = new File(this.propFile.toString() + ".tmp");
+            final File tmpFile = new File(this.propFile.toString() + ".tmp");
 
             // write file
-            XMLEncoder xmlenc = new XMLEncoder(new FileOutputStream(tmpFile));
+            final XMLEncoder xmlenc = new XMLEncoder(new FileOutputStream(tmpFile));
             xmlenc.writeObject(tables);
             xmlenc.close();
             
@@ -96,29 +96,29 @@ public class kelondroXMLTables {
         }
     }
 
-    public boolean hasTable(String table) {
+    public boolean hasTable(final String table) {
         return (tables.get(table) != null);
     }
 
-    public int sizeTable(String table) {
+    public int sizeTable(final String table) {
         // returns number of entries in table; if table does not exist -1
-        Hashtable<String, String> l = tables.get(table);
+        final Hashtable<String, String> l = tables.get(table);
         if (l == null) return -1;
         return l.size();
     }
 
-    public void createTable(String table) throws IOException {
+    public void createTable(final String table) throws IOException {
         // creates a new table
-        Hashtable<String, String> l = tables.get(table);
+        final Hashtable<String, String> l = tables.get(table);
         if (l != null)
             return; // we do not overwite
         tables.put(table, new Hashtable<String, String>());
         if (this.propFile != null) commit(false);
     }
 
-    public void set(String table, String key, String value) throws IOException {
+    public void set(final String table, final String key, String value) throws IOException {
         if (table != null) {
-            Hashtable<String, String> l = tables.get(table);
+            final Hashtable<String, String> l = tables.get(table);
             if (l == null) throw new RuntimeException("Microtables.set: table does not exist");
             if (value == null) value = "";
             l.put(key, value);
@@ -127,9 +127,9 @@ public class kelondroXMLTables {
             commit(false);
     }
 
-    public String get(String table, String key, String deflt) {
+    public String get(final String table, final String key, final String deflt) {
         if (table != null) {
-            Hashtable<String, String> l = tables.get(table);
+            final Hashtable<String, String> l = tables.get(table);
             if (l == null)
                 throw new RuntimeException("Microtables.get: table does not exist");
             if (l.containsKey(key))
@@ -140,9 +140,9 @@ public class kelondroXMLTables {
         return null;
     }
 
-    public boolean has(String table, String key) {
+    public boolean has(final String table, final String key) {
         if (table != null) {
-            Hashtable<String, String> l = tables.get(table);
+            final Hashtable<String, String> l = tables.get(table);
             if (l == null)
                 throw new RuntimeException("Microtables.has: table does not exist");
             return (l.containsKey(key));
@@ -150,9 +150,9 @@ public class kelondroXMLTables {
         return false;
     }
 
-    public Enumeration<String> keys(String table) {
+    public Enumeration<String> keys(final String table) {
         if (table != null) {
-            Hashtable<String, String> l = tables.get(table);
+            final Hashtable<String, String> l = tables.get(table);
             if (l == null)
                 throw new RuntimeException("Microtables.keys: table does not exist");
             return l.keys();

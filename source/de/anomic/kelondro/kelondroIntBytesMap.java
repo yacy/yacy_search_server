@@ -38,11 +38,12 @@ public class kelondroIntBytesMap {
 	// to index0 with addb, and a runtime-phase where data can only be written
 	// to index1 with putb.
 	
-    private kelondroRow rowdef;
-    private kelondroRowSet index0, index1;
-    private kelondroOrder<kelondroRow.Entry> entryOrder;
+    private final kelondroRow rowdef;
+    private final kelondroRowSet index0;
+	private kelondroRowSet	index1;
+    private final kelondroOrder<kelondroRow.Entry> entryOrder;
     
-    public kelondroIntBytesMap(int payloadSize, int initSize) {
+    public kelondroIntBytesMap(final int payloadSize, final int initSize) {
     	this.rowdef = new kelondroRow("Cardinal key-4 {b256}, byte[] payload-" + payloadSize, kelondroNaturalOrder.naturalOrder, 0);
     	this.index0 = new kelondroRowSet(rowdef, initSize);
     	this.index1 = null;
@@ -60,9 +61,9 @@ public class kelondroIntBytesMap {
         return index0.row();
     }
     
-    public byte[] getb(int ii) {
+    public byte[] getb(final int ii) {
         assert ii >= 0 : "i = " + ii;
-    	byte[] key = kelondroNaturalOrder.encodeLong(ii, 4);
+    	final byte[] key = kelondroNaturalOrder.encodeLong(ii, 4);
         if (index0 != null) {
             if (index1 == null) {
                 // finish initialization phase
@@ -70,19 +71,19 @@ public class kelondroIntBytesMap {
                 index0.uniq();
                 index1 = new kelondroRowSet(rowdef, 0); 
             }
-            kelondroRow.Entry indexentry = index0.get(key);
+            final kelondroRow.Entry indexentry = index0.get(key);
             if (indexentry != null) return indexentry.getColBytes(1);
         }
         assert (index1 != null);
-        kelondroRow.Entry indexentry = index1.get(key);
+        final kelondroRow.Entry indexentry = index1.get(key);
         if (indexentry == null) return null;
         return indexentry.getColBytes(1);
     }
     
-    public byte[] putb(int ii, byte[] value) {
+    public byte[] putb(final int ii, final byte[] value) {
         assert ii >= 0 : "i = " + ii;
         assert value != null;
-        byte[] key = kelondroNaturalOrder.encodeLong(ii, 4);
+        final byte[] key = kelondroNaturalOrder.encodeLong(ii, 4);
         if (index0 != null) {
             if (index1 == null) {
                 // finish initialization phase
@@ -90,9 +91,9 @@ public class kelondroIntBytesMap {
                 index0.uniq();
                 index1 = new kelondroRowSet(rowdef, 0); 
             }
-            kelondroRow.Entry indexentry = index0.get(key);
+            final kelondroRow.Entry indexentry = index0.get(key);
             if (indexentry != null) {
-                byte[] oldv = indexentry.getColBytes(1);
+                final byte[] oldv = indexentry.getColBytes(1);
                 indexentry.setCol(0, key);
                 indexentry.setCol(1, value);
                 index0.put(indexentry);
@@ -103,28 +104,28 @@ public class kelondroIntBytesMap {
         // at this point index1 cannot be null
         assert (index1 != null);
         
-        kelondroRow.Entry newentry = rowdef.newEntry();
+        final kelondroRow.Entry newentry = rowdef.newEntry();
         newentry.setCol(0, ii);
         newentry.setCol(1, value);
-        kelondroRow.Entry oldentry = index1.put(newentry);
+        final kelondroRow.Entry oldentry = index1.put(newentry);
         if (oldentry == null) return null;
         return oldentry.getColBytes(1);
     }
 
-    public void addb(int ii, byte[] value) {
+    public void addb(final int ii, final byte[] value) {
     	assert index1 == null; // valid only in init-phase
         assert ii >= 0 : "i = " + ii;
         assert value != null;
-        kelondroRow.Entry newentry = index0.row().newEntry();
+        final kelondroRow.Entry newentry = index0.row().newEntry();
         newentry.setCol(0, ii);
         newentry.setCol(1, value);
         index0.addUnique(newentry);
     }
     
-    public byte[] removeb(int ii) {
+    public byte[] removeb(final int ii) {
         assert ii >= 0 : "i = " + ii;
         
-        byte[] key = kelondroNaturalOrder.encodeLong(ii, 4);
+        final byte[] key = kelondroNaturalOrder.encodeLong(ii, 4);
         if (index0 != null) {
             if (index1 == null) {
                 // finish initialization phase
@@ -132,7 +133,7 @@ public class kelondroIntBytesMap {
                 index0.uniq();
                 index1 = new kelondroRowSet(rowdef, 0); 
             }
-            kelondroRow.Entry indexentry = index0.remove(key);
+            final kelondroRow.Entry indexentry = index0.remove(key);
             if (indexentry != null) {
                 return indexentry.getColBytes(1);
             }
@@ -141,21 +142,21 @@ public class kelondroIntBytesMap {
         // at this point index1 cannot be null
         assert (index1 != null);
         if (index1.size() == 0) return null;
-        kelondroRow.Entry indexentry = index1.remove(key);
+        final kelondroRow.Entry indexentry = index1.remove(key);
         if (indexentry == null) return null;
         return indexentry.getColBytes(1);
     }
     
     public byte[] removeoneb() {
         if ((index1 != null) && (index1.size() != 0)) {
-            kelondroRow.Entry indexentry = index1.removeOne();
+            final kelondroRow.Entry indexentry = index1.removeOne();
             assert (indexentry != null);
             if (indexentry == null) return null;
             //assert consistencyAnalysis0() : "consistency problem: " + consistencyAnalysis();
             return indexentry.getColBytes(1);
         }
         if ((index0 != null) && (index0.size() != 0)) {
-            kelondroRow.Entry indexentry = index0.removeOne();
+            final kelondroRow.Entry indexentry = index0.removeOne();
             assert (indexentry != null);
             if (indexentry == null) return null;
             //assert consistencyAnalysis0() : "consistency problem: " + consistencyAnalysis();
@@ -217,19 +218,19 @@ public class kelondroIntBytesMap {
         return kelondroProfile.consolidate(index0.profile(), index1.profile());
     }
     
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
     	boolean assertEnabled = false;
     	assert  assertEnabled = true;
     	System.out.println((assertEnabled) ? "asserts are enabled" : "enable asserts with 'java -ea'; not enabled yet");
-		long start = System.currentTimeMillis();
-		long randomstart = 0;
-		Random random = new Random(randomstart);
+		final long start = System.currentTimeMillis();
+		final long randomstart = 0;
+		final Random random = new Random(randomstart);
 		long r;
 		Long R;
 		int p, rc = 0;
-		ArrayList<Long> ra = new ArrayList<Long>();
-		HashSet<Long> jcontrol = new HashSet<Long>();
-		kelondroIntBytesMap kcontrol = new kelondroIntBytesMap(1, 0);
+		final ArrayList<Long> ra = new ArrayList<Long>();
+		final HashSet<Long> jcontrol = new HashSet<Long>();
+		final kelondroIntBytesMap kcontrol = new kelondroIntBytesMap(1, 0);
 		for (int i = 0; i < 1000000; i++) {
 			r = Math.abs(random.nextLong() % 10000);
 			//System.out.println("add " + r);

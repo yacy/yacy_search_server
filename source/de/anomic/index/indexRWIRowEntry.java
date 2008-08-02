@@ -88,32 +88,32 @@ public final class indexRWIRowEntry implements indexRWIEntry {
     private static final int col_reserve1      = 18; // i  1 reserve1
     private static final int col_reserve2      = 19; // k  1 reserve2
 
-    private kelondroRow.Entry entry;
+    private final kelondroRow.Entry entry;
     
-    public indexRWIRowEntry(String  urlHash,
-            int      urlLength,     // byte-length of complete URL
-            int      urlComps,      // number of path components
-            int      titleLength,   // length of description/length (longer are better?)
-            int      hitcount,      // how often appears this word in the text
-            int      wordcount,     // total number of words
-            int      phrasecount,   // total number of phrases
-            int      posintext,     // position of word in all words
-            int      posinphrase,   // position of word in its phrase
-            int      posofphrase,   // number of the phrase where word appears
-            long     lastmodified,  // last-modified time of the document where word appears
-            long     updatetime,    // update time; this is needed to compute a TTL for the word, so it can be removed easily if the TTL is short
+    public indexRWIRowEntry(final String  urlHash,
+            final int      urlLength,     // byte-length of complete URL
+            final int      urlComps,      // number of path components
+            final int      titleLength,   // length of description/length (longer are better?)
+            final int      hitcount,      // how often appears this word in the text
+            final int      wordcount,     // total number of words
+            final int      phrasecount,   // total number of phrases
+            final int      posintext,     // position of word in all words
+            final int      posinphrase,   // position of word in its phrase
+            final int      posofphrase,   // number of the phrase where word appears
+            final long     lastmodified,  // last-modified time of the document where word appears
+            final long     updatetime,    // update time; this is needed to compute a TTL for the word, so it can be removed easily if the TTL is short
             String   language,      // (guessed) language of document
-            char     doctype,       // type of document
-            int      outlinksSame,  // outlinks to same domain
-            int      outlinksOther, // outlinks to other domain
-            kelondroBitfield flags  // attributes to the url and to the word according the url
+            final char     doctype,       // type of document
+            final int      outlinksSame,  // outlinks to same domain
+            final int      outlinksOther, // outlinks to other domain
+            final kelondroBitfield flags  // attributes to the url and to the word according the url
     ) {
 
         assert (urlHash.length() == 12) : "urlhash = " + urlHash;
         if ((language == null) || (language.length() != urlEntryRow.width(col_language))) language = "uk";
         this.entry = urlEntryRow.newEntry();
-        int mddlm = kelondroMicroDate.microDateDays(lastmodified);
-        int mddct = kelondroMicroDate.microDateDays(updatetime);
+        final int mddlm = kelondroMicroDate.microDateDays(lastmodified);
+        final int mddct = kelondroMicroDate.microDateDays(updatetime);
         this.entry.setCol(col_urlhash, urlHash, null);
         this.entry.setCol(col_lastModified, mddlm);
         this.entry.setCol(col_freshUntil, Math.max(0, mddlm + (mddct - mddlm) * 2)); // TTL computation
@@ -136,30 +136,30 @@ public final class indexRWIRowEntry implements indexRWIEntry {
         this.entry.setCol(col_reserve2, 0);
     }
     
-    public indexRWIRowEntry(String urlHash, String code) {
+    public indexRWIRowEntry(final String urlHash, final String code) {
         // the code is the external form of the row minus the leading urlHash entry
         this.entry = urlEntryRow.newEntry((urlHash + code).getBytes());
     }
     
-    public indexRWIRowEntry(String external) {
+    public indexRWIRowEntry(final String external) {
         this.entry = urlEntryRow.newEntry(external, true);
     }
     
-    public indexRWIRowEntry(byte[] row) {
+    public indexRWIRowEntry(final byte[] row) {
         this.entry = urlEntryRow.newEntry(row);
     }
     
-    public indexRWIRowEntry(byte[] row, int offset, boolean clone) {
+    public indexRWIRowEntry(final byte[] row, final int offset, final boolean clone) {
         this.entry = urlEntryRow.newEntry(row, offset, clone);
     }
     
-    public indexRWIRowEntry(kelondroRow.Entry rentry) {
+    public indexRWIRowEntry(final kelondroRow.Entry rentry) {
         // FIXME: see if cloning is necessary
         this.entry = rentry;
     }
     
     public indexRWIRowEntry clone() {
-        byte[] b = new byte[urlEntryRow.objectsize];
+        final byte[] b = new byte[urlEntryRow.objectsize];
         System.arraycopy(entry.bytes(), 0, b, 0, urlEntryRow.objectsize);
         return new indexRWIRowEntry(b);
     }
@@ -252,13 +252,13 @@ public final class indexRWIRowEntry implements indexRWIEntry {
         return toPropertyForm();
     }
 
-    public boolean isNewer(indexRWIEntry other) {
+    public boolean isNewer(final indexRWIEntry other) {
         if (other == null) return true;
         if (this.lastModified() > other.lastModified()) return true;
         return false;
     }
  
-    public boolean isOlder(indexRWIEntry other) {
+    public boolean isOlder(final indexRWIEntry other) {
         if (other == null) return false;
         if (this.lastModified() < other.lastModified()) return true;
         return false;

@@ -13,7 +13,7 @@ import de.anomic.server.serverSwitch;
 
 public class PeerLoadPicture {
     
-    public static Image respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
+    public static Image respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
 
         int width = 800;
         int height = 600;
@@ -34,7 +34,7 @@ public class PeerLoadPicture {
         pieces.put(plasmaSwitchboard.INDEX_DIST, new CircleThreadPiece("DHT-Distribution", new Color(119, 136, 153)));
         pieces.put(plasmaSwitchboard.PEER_PING,  new CircleThreadPiece("YaCy Core",        new Color(255, 230, 160)));
         
-        Iterator<String> threads = env.threadNames();
+        final Iterator<String> threads = env.threadNames();
         String threadname;
         serverBusyThread thread;
         
@@ -51,7 +51,7 @@ public class PeerLoadPicture {
             if (showidle) idle.addExecTime(thread.getSleepTime());
             
             //count threadgroup-specific times
-            CircleThreadPiece piece = pieces.get(threadname);
+            final CircleThreadPiece piece = pieces.get(threadname);
             if (piece == null) {
                 misc.addExecTime(thread.getBlockTime()+thread.getExecTime());
             } else {
@@ -61,7 +61,7 @@ public class PeerLoadPicture {
         busy_time += idle.getExecTime();
         
         // set respective angles
-        Iterator<CircleThreadPiece> it = pieces.values().iterator();
+        final Iterator<CircleThreadPiece> it = pieces.values().iterator();
         CircleThreadPiece current;
         while (it.hasNext()) {
             current = it.next();

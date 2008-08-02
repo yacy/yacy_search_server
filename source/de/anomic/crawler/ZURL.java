@@ -57,12 +57,12 @@ public class ZURL {
 
     // the class object
     kelondroIndex urlIndex = null;
-    private LinkedList<String> stack = new LinkedList<String>(); // strings: url
+    private final LinkedList<String> stack = new LinkedList<String>(); // strings: url
     
-    public ZURL(File cachePath, String tablename, boolean startWithEmptyFile) {
+    public ZURL(final File cachePath, final String tablename, final boolean startWithEmptyFile) {
         // creates a new ZURL in a file
         cachePath.mkdirs();
-        File f = new File(cachePath, tablename);
+        final File f = new File(cachePath, tablename);
         if (startWithEmptyFile) {
             if (f.exists()) {
                 if (f.isDirectory()) kelondroFlexWidthArray.delete(cachePath, tablename); else f.delete();
@@ -94,10 +94,10 @@ public class ZURL {
     }
 
     public synchronized Entry newEntry(
-            CrawlEntry bentry,
-            String executor,
-            Date workdate,
-            int workcount,
+            final CrawlEntry bentry,
+            final String executor,
+            final Date workdate,
+            final int workcount,
             String anycause) {
         assert executor != null;
         assert executor.length() > 0;
@@ -105,21 +105,21 @@ public class ZURL {
         return new Entry(bentry, executor, workdate, workcount, anycause);
     }
 
-    public boolean remove(String hash) {
+    public boolean remove(final String hash) {
         if (hash == null) return false;
         try {
             urlIndex.remove(hash.getBytes());
             return true;
-        } catch (IOException e) {
+        } catch (final IOException e) {
             return false;
         }
     }
     
-    public synchronized void push(Entry e) {
+    public synchronized void push(final Entry e) {
         stack.add(e.hash());
     }
     
-    public Entry top(int pos) {
+    public Entry top(final int pos) {
         String urlhash;
         synchronized (stack) {
             if (pos >= stack.size()) return null;
@@ -129,18 +129,18 @@ public class ZURL {
         return getEntry(urlhash);
     }
    
-    public synchronized Entry getEntry(String urlhash) {
+    public synchronized Entry getEntry(final String urlhash) {
         try {
-            kelondroRow.Entry entry = urlIndex.get(urlhash.getBytes());
+            final kelondroRow.Entry entry = urlIndex.get(urlhash.getBytes());
             if (entry == null) return null;
             return new Entry(entry);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             e.printStackTrace();
             return null;
         }
     }
 
-    public boolean exists(String urlHash) {
+    public boolean exists(final String urlHash) {
         return urlIndex.has(urlHash.getBytes());
     }
     
@@ -155,18 +155,18 @@ public class ZURL {
     public class Entry {
 
         CrawlEntry bentry;    // the balancer entry
-        private String   executor;  // the crawling executor
-        private Date     workdate;  // the time when the url was last time tried to load
-        private int      workcount; // number of tryings
-        private String   anycause;  // string describing reason for load fail
+        private final String   executor;  // the crawling executor
+        private final Date     workdate;  // the time when the url was last time tried to load
+        private final int      workcount; // number of tryings
+        private final String   anycause;  // string describing reason for load fail
         private boolean  stored;
 
         public Entry(
-                CrawlEntry bentry,
-                String executor,
-                Date workdate,
-                int workcount,
-                String anycause) {
+                final CrawlEntry bentry,
+                final String executor,
+                final Date workdate,
+                final int workcount,
+                final String anycause) {
             // create new entry
             assert bentry != null;
             assert executor != null;
@@ -178,7 +178,7 @@ public class ZURL {
             stored = false;
         }
 
-        public Entry(kelondroRow.Entry entry) throws IOException {
+        public Entry(final kelondroRow.Entry entry) throws IOException {
             assert (entry != null);
             this.executor = entry.getColString(1, "UTF-8");
             this.workdate = new Date(entry.getColLong(2));
@@ -194,7 +194,7 @@ public class ZURL {
             // stores the values from the object variables into the database
             if (this.stored) return;
             if (this.bentry == null) return;
-            kelondroRow.Entry newrow = rowdef.newEntry();
+            final kelondroRow.Entry newrow = rowdef.newEntry();
             newrow.setCol(0, this.bentry.url().hash().getBytes());
             newrow.setCol(1, this.executor.getBytes());
             newrow.setCol(2, this.workdate.getTime());
@@ -204,7 +204,7 @@ public class ZURL {
             try {
                 if (urlIndex != null) urlIndex.put(newrow);
                 this.stored = true;
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 System.out.println("INTERNAL ERROR AT plasmaEURL:url2hash:" + e.toString());
             }
         }
@@ -245,7 +245,7 @@ public class ZURL {
         Iterator<kelondroRow.Entry> i;
         boolean error = false;
         
-        public kiter(boolean up, String firstHash) throws IOException {
+        public kiter(final boolean up, final String firstHash) throws IOException {
             i = urlIndex.rows(up, (firstHash == null) ? null : firstHash.getBytes());
             error = false;
         }
@@ -256,11 +256,11 @@ public class ZURL {
         }
 
         public Entry next() throws RuntimeException {
-            kelondroRow.Entry e = i.next();
+            final kelondroRow.Entry e = i.next();
             if (e == null) return null;
             try {
                 return new Entry(e);
-            } catch (IOException ex) {
+            } catch (final IOException ex) {
                 throw new RuntimeException("error '" + ex.getMessage() + "' for hash " + e.getColString(0, null));
             }
         }
@@ -271,7 +271,7 @@ public class ZURL {
         
     }
 
-    public Iterator<Entry> entries(boolean up, String firstHash) throws IOException {
+    public Iterator<Entry> entries(final boolean up, final String firstHash) throws IOException {
         // enumerates entry elements
         return new kiter(up, firstHash);
     }

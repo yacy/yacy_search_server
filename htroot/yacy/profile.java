@@ -43,10 +43,10 @@ import de.anomic.yacy.yacyNetwork;
 
 public final class profile {
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
         // return variable that accumulates replacements
-        serverObjects prop = new serverObjects();
-        plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        final serverObjects prop = new serverObjects();
+        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         if ((post == null) || (env == null)) return prop;
         if (!yacyNetwork.authentifyRequest(post, env)) return prop;
 
@@ -58,7 +58,7 @@ public final class profile {
             return prop;
         }
         
-        Properties profile = new Properties();
+        final Properties profile = new Properties();
         int count=0;
         String key="";
         String value="";
@@ -67,12 +67,12 @@ public final class profile {
         try {
             fileIn = new FileInputStream(new File("DATA/SETTINGS/profile.txt"));
             profile.load(fileIn);        
-        } catch(IOException e) {
+        } catch(final IOException e) {
         } finally {
-            if (fileIn != null) try { fileIn.close(); fileIn = null; } catch (Exception e) {}
+            if (fileIn != null) try { fileIn.close(); fileIn = null; } catch (final Exception e) {}
         }
 
-        Iterator<Object> it = profile.keySet().iterator();
+        final Iterator<Object> it = profile.keySet().iterator();
         while (it.hasNext()) {
             key = (String) it.next();
             value=profile.getProperty(key, "").replaceAll("\r","").replaceAll("\n","\\\\n");

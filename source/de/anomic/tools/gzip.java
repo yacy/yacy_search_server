@@ -40,67 +40,67 @@ public class gzip {
 
     private static serverLog logger = new serverLog("GZIP");
     
-    public static void gzipFile(String inFile, String outFile) {
+    public static void gzipFile(final String inFile, final String outFile) {
 	try {
-	    InputStream  fin  = new FileInputStream(inFile);
-	    OutputStream fout = new GZIPOutputStream(new FileOutputStream(outFile), 128);
+	    final InputStream  fin  = new FileInputStream(inFile);
+	    final OutputStream fout = new GZIPOutputStream(new FileOutputStream(outFile), 128);
 	    copy(fout, fin, 128);
 	    fin.close();
 	    fout.close();
-	} catch (FileNotFoundException e) {
+	} catch (final FileNotFoundException e) {
             //System.err.println("ERROR: file '" + inFile + "' not found");
 	    logger.logWarning("ERROR: file '" + inFile + "' not found", e);
-	} catch (IOException e) {
+	} catch (final IOException e) {
             //System.err.println("ERROR: IO trouble ");
             logger.logWarning("ERROR: IO trouble ",e);
 	}
     }
 
-    public static void gunzipFile(String inFile, String outFile) {
+    public static void gunzipFile(final String inFile, final String outFile) {
 	try {
-	    InputStream  fin  = new GZIPInputStream(new FileInputStream(inFile));
-	    OutputStream fout = new FileOutputStream(outFile);
+	    final InputStream  fin  = new GZIPInputStream(new FileInputStream(inFile));
+	    final OutputStream fout = new FileOutputStream(outFile);
 	    copy(fout, fin, 128);
 	    fin.close();
 	    fout.close();
-	} catch (FileNotFoundException e) {
+	} catch (final FileNotFoundException e) {
             //System.err.println("ERROR: file '" + inFile + "' not found");
 	    logger.logWarning("ERROR: file '" + inFile + "' not found", e);
-	} catch (IOException e) {
+	} catch (final IOException e) {
             //System.err.println("ERROR: IO trouble ");
             logger.logWarning("ERROR: IO trouble ",e);
 	}
     }
 
-    public static byte[] gzipString(String in) {
+    public static byte[] gzipString(final String in) {
 	try {
-	    InputStream  fin  = new ByteArrayInputStream(in.getBytes("UTF8"));
-	    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-	    OutputStream fout = new GZIPOutputStream(baos, 128);
+	    final InputStream  fin  = new ByteArrayInputStream(in.getBytes("UTF8"));
+	    final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+	    final OutputStream fout = new GZIPOutputStream(baos, 128);
 	    copy(fout, fin, 128);
 	    fin.close();
 	    fout.close();
 	    return baos.toByteArray();
-	} catch (IOException e) {
+	} catch (final IOException e) {
             //System.err.println("ERROR: IO trouble ");
 	    logger.logWarning("ERROR: IO trouble ",e);
 	    return null;
 	}
     }
 	
-    public static String gunzipString(byte[] in) throws IOException {
-	    InputStream  fin  = new GZIPInputStream(new ByteArrayInputStream(in));
-	    ByteArrayOutputStream fout = new ByteArrayOutputStream();
+    public static String gunzipString(final byte[] in) throws IOException {
+	    final InputStream  fin  = new GZIPInputStream(new ByteArrayInputStream(in));
+	    final ByteArrayOutputStream fout = new ByteArrayOutputStream();
 	    copy(fout, fin, 128);
 	    fin.close();
 	    fout.close();
 	    return new String(fout.toByteArray(), "UTF-8");
     }
 
-    private static void copy(OutputStream out, InputStream in, int bufferSize) throws IOException {
-	InputStream  bIn  = new BufferedInputStream(in, bufferSize);
-	OutputStream bOut = new BufferedOutputStream(out, bufferSize);
-	byte[] buf = new byte[bufferSize];
+    private static void copy(final OutputStream out, final InputStream in, final int bufferSize) throws IOException {
+	final InputStream  bIn  = new BufferedInputStream(in, bufferSize);
+	final OutputStream bOut = new BufferedOutputStream(out, bufferSize);
+	final byte[] buf = new byte[bufferSize];
 	int n;
 	while ((n = bIn.read(buf)) > 0) bOut.write(buf, 0, n);
 	bIn.close();
@@ -113,7 +113,7 @@ public class gzip {
     }
 
 
-    public static void main(String[] s) {
+    public static void main(final String[] s) {
 	if (s.length == 0) {
 	    help();
 	    System.exit(0);

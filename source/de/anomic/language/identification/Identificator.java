@@ -33,7 +33,7 @@ import java.util.Vector;
  */
 public final class Identificator {
 
-    private LanguageStatisticsHolder languages;
+    private final LanguageStatisticsHolder languages;
     
     public Identificator() {
         languages = LanguageStatisticsHolder.getInstance();
@@ -46,7 +46,7 @@ public final class Identificator {
      * @param text the text that is to be analyzed
      * @return the language or "unknown" if the method was not able to find out the language
      */
-    public String getLanguage(String text) {
+    public String getLanguage(final String text) {
         // only test the first 100000 characters of a text
         return getLanguage(text, 100000);
     }
@@ -58,12 +58,12 @@ public final class Identificator {
      * @param limit the number of characters that are supposed to be considered
      * @return the language or "unknown" if the method was not able to find out the language
      */
-    public String getLanguage(String text, int limit) {
+    public String getLanguage(final String text, final int limit) {
         
         String ret = null;
         
-        LanguageStatistics testStat = new LanguageStatistics("text");
-        char[] letter = new char[1];
+        final LanguageStatistics testStat = new LanguageStatistics("text");
+        final char[] letter = new char[1];
         float letters = 0;
         int upperLimit = text.length();
         if (upperLimit > limit) {
@@ -98,7 +98,7 @@ public final class Identificator {
         }
 
         // create list with relevant languages
-        List<Integer> relevantLanguages = new Vector <Integer>();
+        final List<Integer> relevantLanguages = new Vector <Integer>();
         for (int i = 0; i < languages.size(); i++) {
             
             // only languages that contain the most common character in the text will be tested
@@ -110,8 +110,8 @@ public final class Identificator {
         if (relevantLanguages.size() > 0) {
            
             // compare characters in text with characters in statistics
-            float[] offsetList = new float[relevantLanguages.size()];
-            int[] votesList = new int[relevantLanguages.size()];
+            final float[] offsetList = new float[relevantLanguages.size()];
+            final int[] votesList = new int[relevantLanguages.size()];
 
             iter = testStat.keySet().iterator();
             float minimum;

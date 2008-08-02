@@ -32,10 +32,10 @@ import de.anomic.server.serverSwitch;
 public class status_p {
     
     
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
         // return variable that accumulates replacements
-        plasmaSwitchboard sb = (plasmaSwitchboard) env;
-        serverObjects prop = new serverObjects();
+        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        final serverObjects prop = new serverObjects();
         if (post == null || !post.containsKey("html"))
             prop.setLocalized(false);
         prop.put("rejected", "0");

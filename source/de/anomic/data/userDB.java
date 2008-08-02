@@ -54,7 +54,7 @@ public final class userDB {
 	HashMap<String, String> ipUsers = new HashMap<String, String>();
     HashMap<String, Object> cookieUsers = new HashMap<String, Object>();
     
-    public userDB(File userTableFile) {
+    public userDB(final File userTableFile) {
         this.userTableFile = userTableFile;
         userTableFile.getParentFile().mkdirs();
         this.userTable = new kelondroMap(new kelondroBLOBTree(userTableFile, true, true, 128, 256, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 10);
@@ -76,10 +76,10 @@ public final class userDB {
         return userTable.size();
     }    
     
-    public void removeEntry(String hostName) {
+    public void removeEntry(final String hostName) {
         try {
             userTable.remove(hostName.toLowerCase());
-        } catch (IOException e) {}
+        } catch (final IOException e) {}
     }        
     
     public Entry getEntry(String userName) {
@@ -89,23 +89,23 @@ public final class userDB {
         HashMap<String, String> record;
         try {
             record = userTable.get(userName);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             return null;
         }
         if (record == null) return null;
         return new Entry(userName, record);
     }    
     
-    public Entry createEntry(String userName, HashMap<String, String> userProps) throws IllegalArgumentException{
-        Entry entry = new Entry(userName,userProps);
+    public Entry createEntry(final String userName, final HashMap<String, String> userProps) throws IllegalArgumentException{
+        final Entry entry = new Entry(userName,userProps);
         return entry;
     }
     
-    public String addEntry(Entry entry) {
+    public String addEntry(final Entry entry) {
         try {
             userTable.put(entry.userName,entry.mem);
             return entry.userName;
-        } catch (IOException e) {
+        } catch (final IOException e) {
             return null;
         }
     }    
@@ -122,8 +122,8 @@ public final class userDB {
         
         try{
             auth=kelondroBase64Order.standardCoder.decodeString(auth, "de.anomic.data.userDB.proxyAuth()");
-        }catch(RuntimeException e){} //no valid Base64
-        String[] tmp=auth.split(":");
+        }catch(final RuntimeException e){} //no valid Base64
+        final String[] tmp=auth.split(":");
         if(tmp.length == 2){
             entry=this.passwordAuth(tmp[0], tmp[1]);
 //            if(entry != null){
@@ -138,10 +138,10 @@ public final class userDB {
 		}
 		return null;
 	}
-        public Entry getUser(httpHeader header){
+        public Entry getUser(final httpHeader header){
             return getUser(header.get(httpHeader.AUTHORIZATION), header.get(httpHeader.CONNECTION_PROP_CLIENTIP), header.getHeaderCookies());
         }
-        public Entry getUser(String auth, String ip, String cookies){
+        public Entry getUser(final String auth, final String ip, final String cookies){
         Entry entry=null;
         if(auth != null)
             entry=proxyAuth(auth);
@@ -154,8 +154,8 @@ public final class userDB {
      * it tests both userDB and oldstyle adminpw.
      * @param auth the http-headerline for authorisation
      */
-    public boolean hasAdminRight(String auth, String ip, String cookies){
-        Entry entry=getUser(auth, ip, cookies);
+    public boolean hasAdminRight(final String auth, final String ip, final String cookies){
+        final Entry entry=getUser(auth, ip, cookies);
         if(entry != null)
             return entry.hasAdminRight();
         else if(entry != null && cookieAdminAuth(cookies))
@@ -169,8 +169,8 @@ public final class userDB {
 	 * @param auth a base64 Encoded String, which contains "username:pw".
 	 * @param ip an ip.
 	 */
-	public Entry proxyAuth(String auth, String ip){
-		Entry entry=proxyAuth(auth);
+	public Entry proxyAuth(final String auth, final String ip){
+		final Entry entry=proxyAuth(auth);
 		if(entry == null){
 			return null;
 		}
@@ -182,11 +182,11 @@ public final class userDB {
 	 * authenticate a user by ip, if he had used proxyAuth in the last 10 Minutes
 	 * @param ip the IP of the User
 	 */
-	public Entry ipAuth(String ip) {
+	public Entry ipAuth(final String ip) {
         if(this.ipUsers.containsKey(ip)){
-            String user=this.ipUsers.get(ip);
-            Entry entry=this.getEntry(user);
-            Long entryTimestamp=entry.getLastAccess();
+            final String user=this.ipUsers.get(ip);
+            final Entry entry=this.getEntry(user);
+            final Long entryTimestamp=entry.getLastAccess();
             if(entryTimestamp == null || (System.currentTimeMillis()-entryTimestamp.longValue()) > (1000*60*10) ){ //no timestamp or older than 10 Minutes
                 return null;
             }
@@ -194,21 +194,21 @@ public final class userDB {
         }
         return null;
 	}
-    public Entry passwordAuth(String user, String password){
-        Entry entry=this.getEntry(user);
+    public Entry passwordAuth(final String user, final String password){
+        final Entry entry=this.getEntry(user);
         if( entry != null && entry.getMD5EncodedUserPwd().equals(serverCodings.encodeMD5Hex(user+":"+password)) ){
                 if(entry.isLoggedOut()){
                     try{
                         entry.setProperty(Entry.LOGGED_OUT, "false");
-                    }catch(IOException e){}
+                    }catch(final IOException e){}
                     return null;
                 }
                 return entry;
         }
         return null;
     }
-    public Entry passwordAuth(String user, String password, String ip){
-        Entry entry=passwordAuth(user, password);
+    public Entry passwordAuth(final String user, final String password, final String ip){
+        final Entry entry=passwordAuth(user, password);
         if(entry == null){
             return null;
         }
@@ -216,52 +216,52 @@ public final class userDB {
         this.ipUsers.put(ip, entry.getUserName()); //XXX: This is insecure. TODO: use cookieauth
         return entry;
     }
-    public Entry md5Auth(String user, String md5){
-        Entry entry=this.getEntry(user);
+    public Entry md5Auth(final String user, final String md5){
+        final Entry entry=this.getEntry(user);
         if( entry != null && entry.getMD5EncodedUserPwd().equals(md5)){
             if(entry.isLoggedOut()){
                 try{
 				    entry.setProperty(Entry.LOGGED_OUT, "false");
-                }catch(IOException e){}
+                }catch(final IOException e){}
                 return null;
             }
 			return entry;
         }
 		return null;
     }
-    public Entry cookieAuth(String cookieString){
-        String token=getLoginToken(cookieString);
+    public Entry cookieAuth(final String cookieString){
+        final String token=getLoginToken(cookieString);
         if(cookieUsers.containsKey(token)){
-            Object entry=cookieUsers.get(token);
+            final Object entry=cookieUsers.get(token);
             if(entry instanceof Entry) //String would mean static Admin
                 return (Entry)entry;
         }
         return null;
     }
-    public boolean cookieAdminAuth(String cookieString){
-        String token=getLoginToken(cookieString);
+    public boolean cookieAdminAuth(final String cookieString){
+        final String token=getLoginToken(cookieString);
         if(cookieUsers.containsKey(token)){
-            Object entry=cookieUsers.get(token);
+            final Object entry=cookieUsers.get(token);
             if(entry instanceof String && entry.equals("admin"))
                 return true;
         }
         return false;
     }
-    public String getCookie(Entry entry){
-        Random r = new Random();
-        String token = Long.toString(Math.abs(r.nextLong()), 36);
+    public String getCookie(final Entry entry){
+        final Random r = new Random();
+        final String token = Long.toString(Math.abs(r.nextLong()), 36);
         cookieUsers.put(token, entry);
         return token;
     }
     public String getAdminCookie(){
-        Random r = new Random();
-        String token = Long.toString(Math.abs(r.nextLong()), 36);
+        final Random r = new Random();
+        final String token = Long.toString(Math.abs(r.nextLong()), 36);
         cookieUsers.put(token, "admin");
         return token;
     }
     
-    public static String getLoginToken(String cookies){
-        String[] cookie=cookies.split(";"); //TODO: Mozilla uses "; "
+    public static String getLoginToken(final String cookies){
+        final String[] cookie=cookies.split(";"); //TODO: Mozilla uses "; "
         String[] pair;
         for(int i=0;i<cookie.length;i++){
             pair=cookie[i].split("=");
@@ -271,7 +271,7 @@ public final class userDB {
         }
         return "";
     }
-    public void adminLogout(String logintoken){
+    public void adminLogout(final String logintoken){
         if(cookieUsers.containsKey(logintoken)){
             //XXX: We could check, if its == "admin", but we want to logout anyway.
             cookieUsers.remove(logintoken);
@@ -313,9 +313,9 @@ public final class userDB {
         // this is a simple record structure that hold all properties of a user
         HashMap<String, String> mem;
         String userName;
-		private Calendar oldDate, newDate;
+		private final Calendar oldDate, newDate;
         
-        public Entry(String userName, HashMap<String, String> mem) throws IllegalArgumentException {
+        public Entry(final String userName, final HashMap<String, String> mem) throws IllegalArgumentException {
             if ((userName == null) || (userName.length() == 0)) 
                 throw new IllegalArgumentException("Username needed.");
             if(userName.length()>128){
@@ -354,13 +354,13 @@ public final class userDB {
             if (this.mem.containsKey(TIME_USED)) {
                 try{
                     return Long.valueOf(this.mem.get(TIME_USED)).longValue();
-                }catch(NumberFormatException e){
+                }catch(final NumberFormatException e){
                     return 0;
                 }
             }
             try {
                 this.setProperty(TIME_USED,"0");
-            } catch (IOException e) {}
+            } catch (final IOException e) {}
             return 0;
         }
         
@@ -368,13 +368,13 @@ public final class userDB {
             if (this.mem.containsKey(TIME_LIMIT)) {
                 try{
                     return Long.valueOf(this.mem.get(TIME_LIMIT)).longValue();
-                }catch(NumberFormatException e){
+                }catch(final NumberFormatException e){
                     return 0;
                 }
             }
             try {
                 this.setProperty(TIME_LIMIT,"0");
-            } catch (IOException e) {}
+            } catch (final IOException e) {}
             return 0;
         }
         
@@ -384,7 +384,7 @@ public final class userDB {
             }
             try {
                 this.setProperty(TRAFFIC_SIZE,"0");
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 e.printStackTrace();
             }
             return 0;
@@ -394,14 +394,14 @@ public final class userDB {
             return (this.mem.containsKey(TRAFFIC_LIMIT)?Long.valueOf(this.mem.get(TRAFFIC_LIMIT)):null);
         }
         
-        public long updateTrafficSize(long responseSize) {
+        public long updateTrafficSize(final long responseSize) {
             if (responseSize < 0) throw new IllegalArgumentException("responseSize must be greater or equal zero.");
             
-            long currentTrafficSize = getTrafficSize();
-            long newTrafficSize = currentTrafficSize + responseSize;
+            final long currentTrafficSize = getTrafficSize();
+            final long newTrafficSize = currentTrafficSize + responseSize;
             try {
                 this.setProperty(TRAFFIC_SIZE,Long.toString(newTrafficSize));
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 e.printStackTrace();
             }
             return newTrafficSize;
@@ -412,7 +412,7 @@ public final class userDB {
         }        
         
         public int surfRight(){
-            long timeUsed=this.updateLastAccess(true);
+            final long timeUsed=this.updateLastAccess(true);
             if(this.hasProxyRight() == false)
                 return PROXY_NORIGHT;
 
@@ -425,13 +425,13 @@ public final class userDB {
             if(this.surfRight()==PROXY_ALLOK) return true;
             return false;
 		}
-        public long updateLastAccess(boolean incrementTimeUsed) {
+        public long updateLastAccess(final boolean incrementTimeUsed) {
 			return updateLastAccess(System.currentTimeMillis(), incrementTimeUsed);
 		}
-        public long updateLastAccess(long timeStamp, boolean incrementTimeUsed) {
+        public long updateLastAccess(final long timeStamp, final boolean incrementTimeUsed) {
             if (timeStamp < 0) throw new IllegalArgumentException();
             
-            Long lastAccess = this.getLastAccess();                                            
+            final Long lastAccess = this.getLastAccess();                                            
             long oldTimeUsed = getTimeUsed();
             long newTimeUsed = oldTimeUsed;            
             
@@ -461,7 +461,7 @@ public final class userDB {
             
             try {
                 userDB.this.userTable.put(getUserName(), this.mem); 
-            } catch(Exception e){
+            } catch(final Exception e){
                 e.printStackTrace();
             }
             return newTimeUsed;
@@ -475,15 +475,15 @@ public final class userDB {
             return this.mem;
         }
         
-        public void setProperty(String propName, String newValue) throws IOException {
+        public void setProperty(final String propName, final String newValue) throws IOException {
             this.mem.put(propName,  newValue);
             userDB.this.userTable.put(getUserName(), this.mem);
         }
         
-        public String getProperty(String propName, String defaultValue) {
+        public String getProperty(final String propName, final String defaultValue) {
             return (this.mem.containsKey(propName)?this.mem.get(propName):defaultValue);
         }
-        public boolean hasRight(String rightName){
+        public boolean hasRight(final String rightName){
         	return (this.mem.containsKey(rightName)?this.mem.get(rightName).equals("true"):false);
         }
         /**
@@ -531,25 +531,25 @@ public final class userDB {
         public boolean isLoggedOut(){
         	   return (this.mem.containsKey(LOGGED_OUT)?this.mem.get(LOGGED_OUT).equals("true"):false);
         }
-        public void logout(String ip, String logintoken){
+        public void logout(final String ip, final String logintoken){
             logout(ip);
             if(cookieUsers.containsKey(logintoken)){
                 cookieUsers.remove(logintoken);
             }
         }
-        public void logout(String ip){
+        public void logout(final String ip){
         	   try{
         		   setProperty(LOGGED_OUT, "true");
         		   if(ipUsers.containsKey(ip)){
         			   ipUsers.remove(ip);
         		   }
-        	   }catch(IOException e){}
+        	   }catch(final IOException e){}
         }
         public void logout(){
         		logout("xxxxxx");
         }
         public String toString() {
-            StringBuffer str = new StringBuffer();
+            final StringBuffer str = new StringBuffer();
             str.append((this.userName==null)?"null":this.userName)
             .append(": ");
             
@@ -562,11 +562,11 @@ public final class userDB {
         
     }
     
-    public Iterator<Entry> iterator(boolean up) {
+    public Iterator<Entry> iterator(final boolean up) {
         // enumerates users
         try {
             return new userIterator(up);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             return new HashSet<Entry>().iterator();
         }
     }
@@ -577,14 +577,14 @@ public final class userDB {
         kelondroCloneableIterator<byte[]> userIter;
         userDB.Entry nextEntry;
         
-        public userIterator(boolean up) throws IOException {
+        public userIterator(final boolean up) throws IOException {
             this.userIter = userDB.this.userTable.keys(up, false);
             this.nextEntry = null;
         }
         public boolean hasNext() {
             try {
                 return this.userIter.hasNext();
-            } catch (kelondroException e) {
+            } catch (final kelondroException e) {
                 resetDatabase();
                 return false;
             }
@@ -592,7 +592,7 @@ public final class userDB {
         public Entry next() {
             try {
                 return getEntry(new String(this.userIter.next()));
-            } catch (kelondroException e) {
+            } catch (final kelondroException e) {
                 resetDatabase();
                 return null;
             }
@@ -600,9 +600,9 @@ public final class userDB {
         public void remove() {
             if (this.nextEntry != null) {
                 try {
-                    Object userName = this.nextEntry.getUserName();
+                    final Object userName = this.nextEntry.getUserName();
                     if (userName != null) removeEntry((String) userName);
-                } catch (kelondroException e) {
+                } catch (final kelondroException e) {
                     resetDatabase();
                 }
             }

@@ -47,9 +47,9 @@ public class PerformanceMemory_p {
     private static final long MB = 1024 * KB;
     private static Map<String, String> defaultSettings = null;
         
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
         // return variable that accumulates replacements
-        serverObjects prop = new serverObjects();
+        final serverObjects prop = new serverObjects();
         if (defaultSettings == null) {
             defaultSettings = serverFileUtils.loadHashMap(new File(env.getRootPath(), "defaults/yacy.init"));
         }
@@ -57,7 +57,7 @@ public class PerformanceMemory_p {
         if (post != null) {
             int xmx = 96; // default maximum heap size
             if (post.containsKey("Xmx")) {
-                try { xmx = Integer.valueOf(post.get("Xmx", "64")).intValue(); } catch (NumberFormatException e){}
+                try { xmx = Integer.valueOf(post.get("Xmx", "64")).intValue(); } catch (final NumberFormatException e){}
                 env.setConfig("javastart_Xmx", "Xmx" + xmx + "m");
                 env.setConfig("javastart_Xms", "Xms" + xmx + "m");
                 prop.put("setStartupCommit", "1");
@@ -68,15 +68,15 @@ public class PerformanceMemory_p {
             }
         }
         
-        long memoryFreeNow = serverMemory.free();
-        long memoryFreeAfterInitBGC = Long.parseLong(env.getConfig("memoryFreeAfterInitBGC", "0"));
-        long memoryFreeAfterInitAGC = Long.parseLong(env.getConfig("memoryFreeAfterInitAGC", "0"));
-        long memoryFreeAfterStartup = Long.parseLong(env.getConfig("memoryFreeAfterStartup", "0"));
-        long memoryTotalNow = serverMemory.total();
-        long memoryTotalAfterInitBGC = Long.parseLong(env.getConfig("memoryTotalAfterInitBGC", "0"));
-        long memoryTotalAfterInitAGC = Long.parseLong(env.getConfig("memoryTotalAfterInitAGC", "0"));
-        long memoryTotalAfterStartup = Long.parseLong(env.getConfig("memoryTotalAfterStartup", "0"));
-        long memoryMax = serverMemory.max();
+        final long memoryFreeNow = serverMemory.free();
+        final long memoryFreeAfterInitBGC = Long.parseLong(env.getConfig("memoryFreeAfterInitBGC", "0"));
+        final long memoryFreeAfterInitAGC = Long.parseLong(env.getConfig("memoryFreeAfterInitAGC", "0"));
+        final long memoryFreeAfterStartup = Long.parseLong(env.getConfig("memoryFreeAfterStartup", "0"));
+        final long memoryTotalNow = serverMemory.total();
+        final long memoryTotalAfterInitBGC = Long.parseLong(env.getConfig("memoryTotalAfterInitBGC", "0"));
+        final long memoryTotalAfterInitAGC = Long.parseLong(env.getConfig("memoryTotalAfterInitAGC", "0"));
+        final long memoryTotalAfterStartup = Long.parseLong(env.getConfig("memoryTotalAfterStartup", "0"));
+        final long memoryMax = serverMemory.max();
         
         prop.putNum("memoryMax", memoryMax / MB);
         prop.putNum("memoryAvailAfterStartup", (memoryMax - memoryTotalAfterStartup + memoryFreeAfterStartup) / MB);
@@ -211,9 +211,9 @@ public class PerformanceMemory_p {
         prop.putNum("objectMissCacheTotalMem", totalmissmem / (1024 * 1024d));
 
         // parse initialization memory settings
-        String Xmx = env.getConfig("javastart_Xmx", "Xmx96m").substring(3);
+        final String Xmx = env.getConfig("javastart_Xmx", "Xmx96m").substring(3);
         prop.put("Xmx", Xmx.substring(0, Xmx.length() - 1));
-        String Xms = env.getConfig("javastart_Xms", "Xms96m").substring(3);
+        final String Xms = env.getConfig("javastart_Xms", "Xms96m").substring(3);
         prop.put("Xms", Xms.substring(0, Xms.length() - 1));
         
         // other caching structures

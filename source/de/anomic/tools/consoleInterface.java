@@ -39,10 +39,10 @@ public class consoleInterface extends Thread
      * FIXME just for debugging 
      */
     //private final String name;
-    private serverLog log;
+    private final serverLog log;
     
 
-    public consoleInterface(final InputStream stream, String name, serverLog log)
+    public consoleInterface(final InputStream stream, final String name, final serverLog log)
     {
         this.log = log;
         this.stream = stream;
@@ -50,7 +50,7 @@ public class consoleInterface extends Thread
         // block reading {@see getOutput()}
         try {
             dataIsRead.acquire();
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
             // this should never happen because this is a constructor
             e.printStackTrace();
         }
@@ -68,7 +68,7 @@ public class consoleInterface extends Thread
                 try {
                     // may block!
                     Thread.sleep(1);
-                } catch (InterruptedException e) {
+                } catch (final InterruptedException e) {
                     // just stop sleeping
                 }
                 if (buffer.ready())
@@ -94,7 +94,7 @@ public class consoleInterface extends Thread
             //final long start = System.currentTimeMillis();
             dataIsRead.acquire();
             //log.logInfo("logpoint 5 data ready for '"+ name +"' after "+ (System.currentTimeMillis() - start) +" ms");
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
             // after interrupt just return what is available (maybe nothing)
         }
         // is just for checking availability, so release it immediatly

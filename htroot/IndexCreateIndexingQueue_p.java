@@ -40,10 +40,10 @@ import de.anomic.yacy.yacyURL;
 
 public class IndexCreateIndexingQueue_p {
     
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
         // return variable that accumulates replacements
-        plasmaSwitchboard sb = (plasmaSwitchboard) env;
-        serverObjects prop = new serverObjects();
+        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        final serverObjects prop = new serverObjects();
         prop.put("rejected", "0");
         int showRejectedCount = 100;
         
@@ -52,7 +52,7 @@ public class IndexCreateIndexingQueue_p {
             if (post.containsKey("limit")) {
                 try {
                     showLimit = Integer.valueOf(post.get("limit")).intValue();
-                } catch (NumberFormatException e) {}
+                } catch (final NumberFormatException e) {}
             }    
             
             if (post.containsKey("clearRejected")) {
@@ -72,12 +72,12 @@ public class IndexCreateIndexingQueue_p {
                         }
                         sb.webIndex.queuePreStack.clear(); // reset file to clean up content completely
                     } 
-                } catch (Exception e) {}
+                } catch (final Exception e) {}
             } else if (post.containsKey("deleteEntry")) {
-                String urlHash = post.get("deleteEntry");
+                final String urlHash = post.get("deleteEntry");
                 try {
                     sb.webIndex.queuePreStack.remove(urlHash);
-                } catch (Exception e) {}
+                } catch (final Exception e) {}
                 prop.put("LOCATION","");
                 return prop;
             }
@@ -97,24 +97,24 @@ public class IndexCreateIndexingQueue_p {
             long totalSize = 0;
             
             // getting all entries that are currently in process
-            ArrayList<IndexingStack.QueueEntry> entryList = new ArrayList<IndexingStack.QueueEntry>();
+            final ArrayList<IndexingStack.QueueEntry> entryList = new ArrayList<IndexingStack.QueueEntry>();
             entryList.addAll(sb.webIndex.queuePreStack.getActiveQueueEntries());
-            int inProcessCount = entryList.size();
+            final int inProcessCount = entryList.size();
             
             // getting all enqueued entries
             if ((sb.webIndex.queuePreStack.size() > 0)) {
-                Iterator<IndexingStack.QueueEntry> i = sb.webIndex.queuePreStack.entryIterator(false);
+                final Iterator<IndexingStack.QueueEntry> i = sb.webIndex.queuePreStack.entryIterator(false);
                 while (i.hasNext()) entryList.add(i.next());
             }
                             
-            int count=entryList.size();
+            final int count=entryList.size();
             totalCount = count;
             for (int i = 0; (i < count) && (entryCount < showLimit); i++) {
 
-                boolean inProcess = i < inProcessCount;
+                final boolean inProcess = i < inProcessCount;
                 pcentry = entryList.get(i);
                 if ((pcentry != null)&&(pcentry.url() != null)) {
-                    long entrySize = pcentry.size();
+                    final long entrySize = pcentry.size();
                     totalSize += entrySize;
                     initiator = sb.webIndex.seedDB.getConnected(pcentry.initiator());
                     prop.put("indexing-queue_list_"+entryCount+"_dark", inProcess ? "2" : (dark ? "1" : "0"));

@@ -10,9 +10,9 @@ import de.anomic.server.serverSwitch;
 
 
 public class WatchWebStructure_p {
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
-        plasmaSwitchboard sb = (plasmaSwitchboard) env;
-        serverObjects prop = new serverObjects();
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        final serverObjects prop = new serverObjects();
         
         int width = 768;
         int height = 576;
@@ -32,7 +32,7 @@ public class WatchWebStructure_p {
         
         if (host.equals("auto")) {
         	// try to find the host from the crawl profiles
-        	Iterator<entry> it = sb.webIndex.profilesActiveCrawls.profiles(true);
+        	final Iterator<entry> it = sb.webIndex.profilesActiveCrawls.profiles(true);
             entry e;
             while (it.hasNext()) {
                 e = it.next();

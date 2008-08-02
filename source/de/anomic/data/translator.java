@@ -58,14 +58,14 @@ import de.anomic.tools.yFormatter;
  * Uses a Property like file with phrases or single words to translate a string or a file
  * */
 public class translator {
-	public static String translate(String source, Hashtable<String, String> translationList){
-		Enumeration<String> keys = translationList.keys();
+	public static String translate(final String source, final Hashtable<String, String> translationList){
+		final Enumeration<String> keys = translationList.keys();
 		String result = source;
 		String key = "";
 		while(keys.hasMoreElements()){
 			key = keys.nextElement();
-			Pattern pattern = Pattern.compile(key);
-			Matcher matcher = pattern.matcher(result);
+			final Pattern pattern = Pattern.compile(key);
+			final Matcher matcher = pattern.matcher(result);
 			if (matcher.find()) {
 				result = matcher.replaceAll(translationList.get(key));
 			} else {
@@ -81,12 +81,12 @@ public class translator {
 	 * @param translationFile the File, which contains the Lists
 	 * @return a Hashtable, which contains for each File a Hashtable with translations.
 	 */
-	public static Hashtable<String, Hashtable<String, String>> loadTranslationsLists(File translationFile){
-		Hashtable<String, Hashtable<String, String>> lists = new Hashtable<String, Hashtable<String, String>>(); //list of translationLists for different files.
+	public static Hashtable<String, Hashtable<String, String>> loadTranslationsLists(final File translationFile){
+		final Hashtable<String, Hashtable<String, String>> lists = new Hashtable<String, Hashtable<String, String>>(); //list of translationLists for different files.
 		Hashtable<String, String> translationList = new Hashtable<String, String>(); //current Translation Table
         
-		ArrayList<String> list = listManager.getListArray(translationFile);
-		Iterator<String> it = list.iterator();
+		final ArrayList<String> list = listManager.getListArray(translationFile);
+		final Iterator<String> it = list.iterator();
 		String line = "";
 		String[] splitted;
 		String forFile="";
@@ -119,12 +119,12 @@ public class translator {
 		return lists;
 	}
 
-	public static boolean translateFile(File sourceFile, File destFile, File translationFile){
-	    Hashtable<String, String> translationList = loadTranslationsLists(translationFile).get(sourceFile.getName());
+	public static boolean translateFile(final File sourceFile, final File destFile, final File translationFile){
+	    final Hashtable<String, String> translationList = loadTranslationsLists(translationFile).get(sourceFile.getName());
 		return translateFile(sourceFile, destFile, translationList);
 	}
 	
-	public static boolean translateFile(File sourceFile, File destFile, Hashtable<String, String> translationList){
+	public static boolean translateFile(final File sourceFile, final File destFile, final Hashtable<String, String> translationList){
 
 		String content = "";
 		String line = "";
@@ -135,10 +135,10 @@ public class translator {
 				content += line + de.anomic.server.serverCore.CRLF_STRING;
 			}
 			br.close();
-		}catch(IOException e){
+		}catch(final IOException e){
 			return false;
 		} finally {
-            if (br!=null)try{br.close();}catch(Exception e){}
+            if (br!=null)try{br.close();}catch(final Exception e){}
         }
         
 		content = translate(content, translationList);
@@ -147,24 +147,24 @@ public class translator {
 			bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(destFile),"UTF-8"));
 			bw.write(content);
 			bw.close();
-		}catch(IOException e){
+		}catch(final IOException e){
 			return false;
 		} finally {
-            if(bw!=null)try{bw.close();}catch(Exception e){}
+            if(bw!=null)try{bw.close();}catch(final Exception e){}
         }
 		
 		return true;
 	}
 
-	public static boolean translateFiles(File sourceDir, File destDir, File baseDir, File translationFile, String extensions){
-			Hashtable<String, Hashtable<String, String>> translationLists = loadTranslationsLists(translationFile);
+	public static boolean translateFiles(final File sourceDir, final File destDir, final File baseDir, final File translationFile, final String extensions){
+			final Hashtable<String, Hashtable<String, String>> translationLists = loadTranslationsLists(translationFile);
 			return translateFiles(sourceDir, destDir, baseDir, translationLists, extensions);
 	}
 
-	public static boolean translateFiles(File sourceDir, File destDir, File baseDir, Hashtable<String, Hashtable<String, String>> translationLists, String extensions){
+	public static boolean translateFiles(final File sourceDir, final File destDir, final File baseDir, final Hashtable<String, Hashtable<String, String>> translationLists, final String extensions){
 		destDir.mkdirs();
-		File[] sourceFiles = sourceDir.listFiles();
-        Vector<String> exts=listManager.string2vector(extensions);
+		final File[] sourceFiles = sourceDir.listFiles();
+        final Vector<String> exts=listManager.string2vector(extensions);
         boolean rightExtension;
         Iterator<String> it;
         String relativePath;
@@ -181,7 +181,7 @@ public class translator {
                 try{
                     relativePath=sourceFiles[i].getAbsolutePath().substring(baseDir.getAbsolutePath().length()+1); //+1 to get the "/"
                     relativePath = relativePath.replace(File.separatorChar, '/');
-                }catch(IndexOutOfBoundsException e){
+                }catch(final IndexOutOfBoundsException e){
 					serverLog.logSevere("TRANSLATOR", "Error creating relative Path for "+sourceFiles[i].getAbsolutePath());
                     relativePath="wrong path"; //not in translationLists
                 } 
@@ -202,10 +202,10 @@ public class translator {
 		return true;
 	}
 
-    public static boolean translateFilesRecursive(File sourceDir, File destDir, File translationFile, String extensions, String notdir){
-        ArrayList<File> dirList=listManager.getDirsRecursive(sourceDir, notdir);
+    public static boolean translateFilesRecursive(final File sourceDir, final File destDir, final File translationFile, final String extensions, final String notdir){
+        final ArrayList<File> dirList=listManager.getDirsRecursive(sourceDir, notdir);
         dirList.add(sourceDir);
-        Iterator<File> it=dirList.iterator();
+        final Iterator<File> it=dirList.iterator();
         File file=null;
         File file2=null;
         while(it.hasNext()){
@@ -219,9 +219,9 @@ public class translator {
         return true;
     }
 
-    public static HashMap<String, String> langMap(serverSwitch<?> env) {
-        String[] ms = env.getConfig("locale.lang", "").split(",");
-        HashMap<String, String> map = new HashMap<String, String>();
+    public static HashMap<String, String> langMap(final serverSwitch<?> env) {
+        final String[] ms = env.getConfig("locale.lang", "").split(",");
+        final HashMap<String, String> map = new HashMap<String, String>();
         int p;
         for (int i = 0; i < ms.length; i++) {
             p = ms[i].indexOf("/");
@@ -231,18 +231,18 @@ public class translator {
         return map;
     }
         
-    public static boolean changeLang(serverSwitch<?> env, String langPath, String lang) {
+    public static boolean changeLang(final serverSwitch<?> env, final String langPath, final String lang) {
         if ((lang.equals("default")) || (lang.equals("default.lng"))) {
             env.setConfig("locale.language", "default");
             return true;
         }
-        String htRootPath = env.getConfig("htRootPath", "htroot");
-        File sourceDir = new File(env.getRootPath(), htRootPath);
-        File destDir = new File(env.getConfigPath("locale.translated_html","DATA/LOCALE/htroot"), lang.substring(0, lang.length() - 4));// cut
+        final String htRootPath = env.getConfig("htRootPath", "htroot");
+        final File sourceDir = new File(env.getRootPath(), htRootPath);
+        final File destDir = new File(env.getConfigPath("locale.translated_html","DATA/LOCALE/htroot"), lang.substring(0, lang.length() - 4));// cut
         // .lng
         //File destDir = new File(env.getRootPath(), htRootPath + "/locale/" + lang.substring(0, lang.length() - 4));// cut
         // .lng
-        File translationFile = new File(langPath, lang);
+        final File translationFile = new File(langPath, lang);
 
         //if (translator.translateFiles(sourceDir, destDir, translationFile, "html")) {
         if(translator.translateFilesRecursive(sourceDir, destDir,
@@ -250,10 +250,10 @@ public class translator {
             env.setConfig("locale.language", lang.substring(0, lang.length() - 4));
             yFormatter.setLocale(env.getConfig("locale.language", "en"));
             try {
-                BufferedWriter bw = new BufferedWriter(new PrintWriter(new FileWriter(new File(destDir, "version"))));
+                final BufferedWriter bw = new BufferedWriter(new PrintWriter(new FileWriter(new File(destDir, "version"))));
                 bw.write(env.getConfig("svnRevision", "Error getting Version"));
                 bw.close();
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 // Error
             }
             return true;

@@ -35,22 +35,22 @@ import de.anomic.xml.RSSMessage;
 
 public class feed {
  
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
-        plasmaSwitchboard sb = (plasmaSwitchboard) env;
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
 
         // insert default values
-        serverObjects prop = new serverObjects();
+        final serverObjects prop = new serverObjects();
         prop.put("channel_title", "");
         prop.put("channel_description", "");
         prop.put("channel_pubDate", "");
         prop.put("item", "0");
 
         if ((post == null) || (env == null)) return prop;
-        boolean authorized = sb.verifyAuthentication(header, false);
+        final boolean authorized = sb.verifyAuthentication(header, false);
 
-        String channelNames = post.get("set");
+        final String channelNames = post.get("set");
         if (channelNames == null) return prop;
-        String[] channels = channelNames.split(","); // several channel names can be given and separated by comma
+        final String[] channels = channelNames.split(","); // several channel names can be given and separated by comma
 
         int messageCount = 0;
         int messageMaxCount = Math.min(post.getInt("count", 100), 1000);

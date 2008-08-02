@@ -70,8 +70,8 @@ public class BlacklistCleaner_p {
         indexDefaultReferenceBlacklist.class
     };
     
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
-        serverObjects prop = new serverObjects();
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+        final serverObjects prop = new serverObjects();
         
         // initialize the list manager
         listManager.switchboard = (plasmaSwitchboard) env;
@@ -79,8 +79,8 @@ public class BlacklistCleaner_p {
         String blacklistToUse = null;
         
         // getting the list of supported blacklist types
-        String supportedBlacklistTypesStr = indexAbstractReferenceBlacklist.BLACKLIST_TYPES_STRING;
-        String[] supportedBlacklistTypes = supportedBlacklistTypesStr.split(","); 
+        final String supportedBlacklistTypesStr = indexAbstractReferenceBlacklist.BLACKLIST_TYPES_STRING;
+        final String[] supportedBlacklistTypes = supportedBlacklistTypesStr.split(","); 
         
         if (post == null) {
             prop.put("results", "0");
@@ -108,13 +108,13 @@ public class BlacklistCleaner_p {
             }
             
             // list illegal entries
-            HashMap<String, Integer> ies = getIllegalEntries(blacklistToUse, supportedBlacklistTypes, plasmaSwitchboard.urlBlacklist);
+            final HashMap<String, Integer> ies = getIllegalEntries(blacklistToUse, supportedBlacklistTypes, plasmaSwitchboard.urlBlacklist);
             prop.put(RESULTS + "entries", ies.size());
             prop.putHTML(RESULTS + "blEngine", plasmaSwitchboard.urlBlacklist.getEngineInfo());
             prop.put(RESULTS + "disabled", (ies.size() == 0) ? "1" : "0");
             if (ies.size() > 0) {
                 prop.put(RESULTS + DISABLED + "entries", ies.size());
-                Iterator<String> it = ies.keySet().iterator();
+                final Iterator<String> it = ies.keySet().iterator();
                 int i = 0;
                 String s;
                 while (it.hasNext()) {
@@ -129,7 +129,7 @@ public class BlacklistCleaner_p {
         return prop;
     }
     
-    private static void putBlacklists(serverObjects prop, String[] lists, String selected) {
+    private static void putBlacklists(final serverObjects prop, final String[] lists, final String selected) {
         boolean supported = false;
         for (int i=0; i<supportedBLEngines.length && !supported; i++) {
             supported |= (plasmaSwitchboard.urlBlacklist.getClass() == supportedBLEngines[i]);
@@ -155,7 +155,7 @@ public class BlacklistCleaner_p {
         }
     }
     
-    private static String[] getByPrefix(serverObjects post, String prefix, boolean useKeys, boolean useHashSet) {
+    private static String[] getByPrefix(final serverObjects post, final String prefix, final boolean useKeys, final boolean useHashSet) {
         Collection<String> r;
         if (useHashSet) {
             r = new HashSet<String>();
@@ -165,14 +165,14 @@ public class BlacklistCleaner_p {
         
         String s;
         if (useKeys) {
-            Iterator<String> it =  post.keySet().iterator();
+            final Iterator<String> it =  post.keySet().iterator();
             while (it.hasNext()) {
                 if ((s = it.next()).indexOf(prefix) == 0) {
                     r.add(s.substring(prefix.length()));
                 }
             }
         } else {
-            Iterator<Map.Entry<String, String>> it = post.entrySet().iterator();
+            final Iterator<Map.Entry<String, String>> it = post.entrySet().iterator();
             Map.Entry<String, String> entry;
             while (it.hasNext()) {
                 entry = it.next();
@@ -185,12 +185,12 @@ public class BlacklistCleaner_p {
         return r.toArray(new String[r.size()]);
     }
     
-    private static HashMap<String, Integer>/* entry, error-code */ getIllegalEntries(String blacklistToUse, String[] supportedBlacklistTypes, indexReferenceBlacklist blEngine) {
-        HashMap<String, Integer> r = new HashMap<String, Integer>();
-        HashSet<String> ok = new HashSet<String>();
+    private static HashMap<String, Integer>/* entry, error-code */ getIllegalEntries(final String blacklistToUse, final String[] supportedBlacklistTypes, final indexReferenceBlacklist blEngine) {
+        final HashMap<String, Integer> r = new HashMap<String, Integer>();
+        final HashSet<String> ok = new HashSet<String>();
         
-        ArrayList<String> list = listManager.getListArray(new File(listManager.listsPath, blacklistToUse));
-        Iterator<String> it = list.iterator();
+        final ArrayList<String> list = listManager.getListArray(new File(listManager.listsPath, blacklistToUse));
+        final Iterator<String> it = list.iterator();
         String s, host, path;
         
         if (blEngine instanceof indexDefaultReferenceBlacklist) {
@@ -213,7 +213,7 @@ public class BlacklistCleaner_p {
                     path = s.substring(slashPos + 1);
                 }
                 
-                int i = host.indexOf("*");
+                final int i = host.indexOf("*");
                 
                 // check whether host begins illegally
                 if (!host.matches("([A-Za-z0-9_-]+|\\*)(\\.([A-Za-z0-9_-]+|\\*))*")) {
@@ -247,7 +247,7 @@ public class BlacklistCleaner_p {
                 // check for errors on regex-compiling path
                 try {
                     Pattern.compile(path);
-                } catch (PatternSyntaxException e) {
+                } catch (final PatternSyntaxException e) {
                     r.put(s, new Integer(ERR_PATH_REGEX));
                     continue;
                 }
@@ -257,9 +257,9 @@ public class BlacklistCleaner_p {
         return r;
     }
     
-    private static int removeEntries(String blacklistToUse, String[] supportedBlacklistTypes, String[] entries) {
+    private static int removeEntries(final String blacklistToUse, final String[] supportedBlacklistTypes, final String[] entries) {
         // load blacklist data from file
-        ArrayList<String> list = listManager.getListArray(new File(listManager.listsPath, blacklistToUse));
+        final ArrayList<String> list = listManager.getListArray(new File(listManager.listsPath, blacklistToUse));
         
         // delete the old entry from file
         String s;
@@ -274,12 +274,12 @@ public class BlacklistCleaner_p {
             // remove the entry from the running blacklist engine
             for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
                 if (listManager.listSetContains(supportedBlacklistTypes[blTypes] + ".BlackLists", blacklistToUse)) {
-                    String host = (s.indexOf("/") == -1) ? s : s.substring(0, s.indexOf("/"));
-                    String path = (s.indexOf("/") == -1) ? ".*" : s.substring(s.indexOf("/") + 1);
+                    final String host = (s.indexOf("/") == -1) ? s : s.substring(0, s.indexOf("/"));
+                    final String path = (s.indexOf("/") == -1) ? ".*" : s.substring(s.indexOf("/") + 1);
                     try {
                     plasmaSwitchboard.urlBlacklist.remove(supportedBlacklistTypes[blTypes],
                             host,path);
-                    } catch (RuntimeException e) {
+                    } catch (final RuntimeException e) {
                         //System.err.println(e.getMessage() + ": " + host + "/" + path);
                         serverLog.logSevere("BLACKLIST-CLEANER", e.getMessage() + ": " + host + "/" + path);
                     }
@@ -293,10 +293,10 @@ public class BlacklistCleaner_p {
     }
     
     private static int alterEntries(
-            String blacklistToUse,
-            String[] supportedBlacklistTypes,
-            String[] oldE,
-            String[] newE) {
+            final String blacklistToUse,
+            final String[] supportedBlacklistTypes,
+            final String[] oldE,
+            final String[] newE) {
         removeEntries(blacklistToUse, supportedBlacklistTypes, oldE);
         PrintWriter pw = null;
         try {
@@ -322,7 +322,7 @@ public class BlacklistCleaner_p {
                 }
             }
             pw.close();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             serverLog.logSevere("BLACKLIST-CLEANER", "error on writing altered entries to blacklist", e);
         }
         return newE.length;

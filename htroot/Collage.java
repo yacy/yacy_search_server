@@ -43,11 +43,11 @@ public class Collage {
     private static           long      imgZIndex[]   = new long[fifoMax];
     private static final     Random rand = new Random();
     
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
         final serverObjects prop = new serverObjects();
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final boolean authenticated = sb.verifyAuthentication(header, false);
-        ResultImages.OriginEntry nextOrigin = ResultImages.next(!authenticated);
+        final ResultImages.OriginEntry nextOrigin = ResultImages.next(!authenticated);
         int posXMax  = 800;
         int posYMax  = 500;
         boolean embed = false;
@@ -67,7 +67,7 @@ public class Collage {
                 fifoSize = fifoSize + 1 > fifoMax ? fifoMax : fifoSize + 1;
                 origins[fifoPos] = nextOrigin;
                 
-                float scale = rand.nextFloat() * 1.5f + 1;
+                final float scale = rand.nextFloat() * 1.5f + 1;
                 imgWidth[fifoPos]  = (int) ((nextOrigin.imageEntry.width()) / scale);
                 imgHeight[fifoPos] = (int) ((nextOrigin.imageEntry.height()) / scale);
 
@@ -82,18 +82,18 @@ public class Collage {
         if (fifoSize > 0) {
             prop.put("imgurl", "1");        
             int c = 0;
-            int yOffset = embed ? 0 : 70;
+            final int yOffset = embed ? 0 : 70;
             for (int i = 0; i < fifoSize; i++) {
              
-                yacyURL baseURL = origins[i].baseURL;
-                yacyURL imageURL = origins[i].imageEntry.url();
+                final yacyURL baseURL = origins[i].baseURL;
+                final yacyURL imageURL = origins[i].imageEntry.url();
                 
                 // check if this loads a page from localhost, which must be prevented to protect the server
                 // against attacks to the administration interface when localhost access is granted
                 if ((serverCore.isLocalhost(baseURL.getHost()) || serverCore.isLocalhost(imageURL.getHost())) &&
                     sb.getConfigBool("adminAccountForLocalhost", false)) continue;
                 
-                long z = imgZIndex[i];
+                final long z = imgZIndex[i];
                 prop.put("imgurl_list_" + c + "_url",
                        "<a href=\"" + baseURL.toNormalform(true, false) + "\">"
                        + "<img src=\"" + imageURL.toNormalform(true, false) + "\" "

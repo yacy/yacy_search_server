@@ -66,17 +66,17 @@ public class plasmaRankingCRProcess {
     public static final kelondroRow RCI_coli = new kelondroRow("byte[] RefereeDom-6", kelondroBase64Order.enhancedCoder, 0);
     public static final String RCI_colname = "RCI-a-coli";
 
-    private static boolean accumulate_upd(File f, kelondroAttrSeq acc) {
+    private static boolean accumulate_upd(final File f, final kelondroAttrSeq acc) {
         // open file
         kelondroAttrSeq source_cr = null;
         try {
             source_cr = new kelondroAttrSeq(f, false);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             return false;
         }
         
         // put elements in accumulator file
-        Iterator<String> el = source_cr.keys();
+        final Iterator<String> el = source_cr.keys();
         String key;
         kelondroAttrSeq.Entry new_entry, acc_entry;
         int FUDate, FDDate, LUDate, UCount, PCount, ACount, VCount, Vita;
@@ -139,17 +139,17 @@ public class plasmaRankingCRProcess {
         return true;
     }
     
-    private static boolean accumulate_upd(File f, kelondroIndex acc, kelondroCollectionIndex seq) throws IOException {
+    private static boolean accumulate_upd(final File f, final kelondroIndex acc, final kelondroCollectionIndex seq) throws IOException {
         // open file
         kelondroAttrSeq source_cr = null;
         try {
             source_cr = new kelondroAttrSeq(f, false);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             return false;
         }
         
         // put elements in accumulator file
-        Iterator<String> el = source_cr.keys();
+        final Iterator<String> el = source_cr.keys();
         String key;
         kelondroAttrSeq.Entry new_entry;
         kelondroRow.Entry acc_entry;
@@ -219,7 +219,7 @@ public class plasmaRankingCRProcess {
     }
     
     @SuppressWarnings("null")
-    public static void accumulate(File from_dir, File tmp_dir, File err_dir, File bkp_dir, File to_file, int max_files, boolean newdb) throws IOException {
+    public static void accumulate(final File from_dir, final File tmp_dir, final File err_dir, final File bkp_dir, final File to_file, int max_files, final boolean newdb) throws IOException {
         if (!(from_dir.isDirectory())) {
             System.out.println("source path " + from_dir + " is not a directory.");
             return;
@@ -242,7 +242,7 @@ public class plasmaRankingCRProcess {
         kelondroIndex newacc = null;
         kelondroCollectionIndex newseq = null;
         if (newdb) {
-            File path = to_file.getParentFile(); // path to storage place
+            final File path = to_file.getParentFile(); // path to storage place
             newacc = new kelondroFlexTable(path, CRG_accname, CRG_accrow, 0, false);
             newseq = new kelondroCollectionIndex(path, CRG_seqname, 12, kelondroBase64Order.enhancedCoder, 2, 9, CRG_colrow);
         } else {
@@ -258,7 +258,7 @@ public class plasmaRankingCRProcess {
         }        
         // collect source files
         File source_file = null;
-        String[] files = from_dir.list();
+        final String[] files = from_dir.list();
         if (files.length < max_files) max_files = files.length;
         for (int i = 0; i < max_files; i++) {
             // open file
@@ -301,7 +301,7 @@ public class plasmaRankingCRProcess {
                 tmp_file.renameTo(to_file);
             }
             serverFileUtils.moveAll(tmp_dir, bkp_dir);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             // move previously processed files back
             e.printStackTrace();
             serverFileUtils.moveAll(tmp_dir, from_dir);
@@ -309,12 +309,12 @@ public class plasmaRankingCRProcess {
         
     }
     
-    public static int genrci(File cr_in, File rci_out) throws IOException {
+    public static int genrci(File cr_in, final File rci_out) throws IOException {
         if (!(cr_in.exists())) return 0;
         kelondroAttrSeq cr = new kelondroAttrSeq(cr_in, false);
         //if (rci_out.exists()) rci_out.delete(); // we want only fresh rci here (during testing) 
         if (!(rci_out.exists())) {
-            kelondroAttrSeq rcix = new kelondroAttrSeq("Global Ranking Reverse Citation Index",
+            final kelondroAttrSeq rcix = new kelondroAttrSeq("Global Ranking Reverse Citation Index",
                     "<AnchorDom-6>,'='," +
                     "<UDate-3>," +
                     "'|',*<Referee-12>", false);
@@ -324,8 +324,8 @@ public class plasmaRankingCRProcess {
         
         // loop over all referees
         int count = 0;
-        int size = cr.size();
-        long start = System.currentTimeMillis();
+        final int size = cr.size();
+        final long start = System.currentTimeMillis();
         long l;
         final Iterator<String> i = cr.keys();
         String referee, anchor, anchorDom;
@@ -337,7 +337,7 @@ public class plasmaRankingCRProcess {
             cr_UDate = cr_entry.getAttr("UDate", 0);
             
             // loop over all anchors
-            Iterator<String> j = cr_entry.getSeqSet().iterator();
+            final Iterator<String> j = cr_entry.getSeqSet().iterator();
             while (j.hasNext()) {
                 // get domain of anchors
                 anchor = j.next();
@@ -371,15 +371,15 @@ public class plasmaRankingCRProcess {
         return count;
     }
     
-    public static int genrcix(File cr_path_in, File rci_path_out) throws IOException {
+    public static int genrcix(final File cr_path_in, final File rci_path_out) throws IOException {
         //kelondroFlexTable       acc = new kelondroFlexTable(cr_path_in, CRG_accname, kelondroBase64Order.enhancedCoder, 128 * 1024 * 1024, -1, CRG_accrow, true);
-        kelondroCollectionIndex seq = new kelondroCollectionIndex(cr_path_in, CRG_seqname, 12, kelondroBase64Order.enhancedCoder, 2, 9, CRG_colrow);
-        kelondroCollectionIndex rci = new kelondroCollectionIndex(rci_path_out, RCI_colname, 6, kelondroBase64Order.enhancedCoder, 2, 9, RCI_coli);
+        final kelondroCollectionIndex seq = new kelondroCollectionIndex(cr_path_in, CRG_seqname, 12, kelondroBase64Order.enhancedCoder, 2, 9, CRG_colrow);
+        final kelondroCollectionIndex rci = new kelondroCollectionIndex(rci_path_out, RCI_colname, 6, kelondroBase64Order.enhancedCoder, 2, 9, RCI_coli);
         
         // loop over all referees
         int count = 0;
-        int size = seq.size();
-        long start = System.currentTimeMillis();
+        final int size = seq.size();
+        final long start = System.currentTimeMillis();
         long l;
         final Iterator<Object[]> i = seq.keycollections(null, null, false);
         Object[] keycollection;
@@ -392,7 +392,7 @@ public class plasmaRankingCRProcess {
             cr_entry = (kelondroRowSet) keycollection[1];
             
             // loop over all anchors
-            Iterator<kelondroRow.Entry> j = cr_entry.rows();
+            final Iterator<kelondroRow.Entry> j = cr_entry.rows();
             kelondroRow.Entry entry;
             while (j.hasNext()) {
                 // get domain of anchors
@@ -421,45 +421,45 @@ public class plasmaRankingCRProcess {
         return count;
     }
     
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         // java -classpath source de.anomic.plasma.kelondroPropFile -transcode DATA/RANKING/GLOBAL/CRG-test-unsorted-original.cr DATA/RANKING/GLOBAL/CRG-test-generated.cr
         try {
             if ((args.length == 5) && (args[0].equals("-accumulate"))) {
                 accumulate(new File(args[1]), new File(args[2]), new File(args[3]), new File(args[4]), new File(args[5]), Integer.parseInt(args[6]), true);
             }
             if ((args.length == 2) && (args[0].equals("-accumulate"))) {
-                File root_path = new File(args[1]);
-                File from_dir = new File(root_path, "DATA/RANKING/GLOBAL/014_othercr");
-                File ready_dir = new File(root_path, "DATA/RANKING/GLOBAL/015_ready");
-                File tmp_dir = new File(root_path, "DATA/RANKING/GLOBAL/016_tmp");
-                File err_dir = new File(root_path, "DATA/RANKING/GLOBAL/017_err");
-                File acc_dir = new File(root_path, "DATA/RANKING/GLOBAL/018_acc");
-                String filename = "CRG-a-" + new serverDate().toShortString(true) + ".cr.gz";
-                File to_file = new File(root_path, "DATA/RANKING/GLOBAL/020_con0/" + filename);
+                final File root_path = new File(args[1]);
+                final File from_dir = new File(root_path, "DATA/RANKING/GLOBAL/014_othercr");
+                final File ready_dir = new File(root_path, "DATA/RANKING/GLOBAL/015_ready");
+                final File tmp_dir = new File(root_path, "DATA/RANKING/GLOBAL/016_tmp");
+                final File err_dir = new File(root_path, "DATA/RANKING/GLOBAL/017_err");
+                final File acc_dir = new File(root_path, "DATA/RANKING/GLOBAL/018_acc");
+                final String filename = "CRG-a-" + new serverDate().toShortString(true) + ".cr.gz";
+                final File to_file = new File(root_path, "DATA/RANKING/GLOBAL/020_con0/" + filename);
                 if (!(ready_dir.exists())) ready_dir.mkdirs();
                 if (!(tmp_dir.exists())) tmp_dir.mkdirs();
                 if (!(err_dir.exists())) err_dir.mkdirs();
                 if (!(acc_dir.exists())) acc_dir.mkdirs();
                 if (!(to_file.getParentFile().exists())) to_file.getParentFile().mkdirs();
                 serverFileUtils.moveAll(from_dir, ready_dir);
-                long start = System.currentTimeMillis();
-                int files = ready_dir.list().length;
+                final long start = System.currentTimeMillis();
+                final int files = ready_dir.list().length;
                 accumulate(ready_dir, tmp_dir, err_dir, acc_dir, to_file, 1000, true);
-                long seconds = java.lang.Math.max(1, (System.currentTimeMillis() - start) / 1000);
+                final long seconds = java.lang.Math.max(1, (System.currentTimeMillis() - start) / 1000);
                 System.out.println("Finished accumulate for " + files + " files in " + seconds + " seconds (" + (files / seconds) + " files/second)");
             }
             if ((args.length == 3) && (args[0].equals("-recycle"))) {
-                File root_path = new File(args[1]);
-                int max_age_hours = Integer.parseInt(args[2]);
-                File own_dir = new File(root_path, "DATA/RANKING/GLOBAL/010_owncr");
-                File acc_dir = new File(root_path, "DATA/RANKING/GLOBAL/018_acc");
-                File bkp_dir = new File(root_path, "DATA/RANKING/GLOBAL/019_bkp");
+                final File root_path = new File(args[1]);
+                final int max_age_hours = Integer.parseInt(args[2]);
+                final File own_dir = new File(root_path, "DATA/RANKING/GLOBAL/010_owncr");
+                final File acc_dir = new File(root_path, "DATA/RANKING/GLOBAL/018_acc");
+                final File bkp_dir = new File(root_path, "DATA/RANKING/GLOBAL/019_bkp");
                 if (!(own_dir.exists())) return;
                 if (!(acc_dir.exists())) return;
                 if (!(bkp_dir.exists())) bkp_dir.mkdirs();
-                String[] list = acc_dir.list();
-                long start = System.currentTimeMillis();
-                int files = list.length;
+                final String[] list = acc_dir.list();
+                final long start = System.currentTimeMillis();
+                final int files = list.length;
                 long d;
                 File f;
                 for (int i = 0; i < list.length; i++) {
@@ -476,23 +476,23 @@ public class plasmaRankingCRProcess {
                             serverFileUtils.copy(f, new File(own_dir, list[i]));
                             f.renameTo(new File(bkp_dir, list[i]));
                         }
-                    } catch (IOException e) {
+                    } catch (final IOException e) {
                         // there is something wrong with this file; delete it
                         System.out.println("file " + f.getName() + " is corrupted and deleted");
                         f.delete();
                     }
                 }
-                long seconds = java.lang.Math.max(1, (System.currentTimeMillis() - start) / 1000);
+                final long seconds = java.lang.Math.max(1, (System.currentTimeMillis() - start) / 1000);
                 System.out.println("Finished recycling of " + files + " files in " + seconds + " seconds (" + (files / seconds) + " files/second)");
             }
             if ((args.length == 2) && (args[0].equals("-genrci"))) {
-                File root_path = new File(args[1]);
-                File cr_filedir = new File(root_path, "DATA/RANKING/GLOBAL/020_con0");
-                File rci_filedir = new File(root_path, "DATA/RANKING/GLOBAL/030_rci0");
+                final File root_path = new File(args[1]);
+                final File cr_filedir = new File(root_path, "DATA/RANKING/GLOBAL/020_con0");
+                final File rci_filedir = new File(root_path, "DATA/RANKING/GLOBAL/030_rci0");
                 rci_filedir.mkdirs();
-                long start = System.currentTimeMillis();
-                int count = genrcix(cr_filedir, rci_filedir);
-                long seconds = java.lang.Math.max(1, (System.currentTimeMillis() - start) / 1000);
+                final long start = System.currentTimeMillis();
+                final int count = genrcix(cr_filedir, rci_filedir);
+                final long seconds = java.lang.Math.max(1, (System.currentTimeMillis() - start) / 1000);
                 System.out.println("Completed RCI generation: " + count + " citation references in " + seconds + " seconds (" + (count / seconds) + " CR-records/second)");                
             }
             /*
@@ -510,7 +510,7 @@ public class plasmaRankingCRProcess {
                 }
             }
             */
-        } catch (IOException e) {
+        } catch (final IOException e) {
             e.printStackTrace();
         }
     }

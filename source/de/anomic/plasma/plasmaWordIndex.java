@@ -92,29 +92,29 @@ public final class plasmaWordIndex implements indexRI {
     private final kelondroByteOrder        indexOrder = kelondroBase64Order.enhancedCoder;
     private final indexRAMRI               dhtOutCache, dhtInCache;
     private final indexCollectionRI        collections;          // new database structure to replace AssortmentCluster and FileCluster
-    private       serverLog                log;
+    private final       serverLog                log;
     indexRepositoryReference               referenceURL;
     public        yacySeedDB               seedDB;
     public        yacyNewsPool             newsPool;
-    private       File                     primaryRoot, secondaryRoot;
+    private final       File                     primaryRoot, secondaryRoot;
     public        IndexingStack            queuePreStack;
     public        CrawlProfile             profilesActiveCrawls, profilesPassiveCrawls;
     public  CrawlProfile.entry             defaultProxyProfile;
     public  CrawlProfile.entry             defaultRemoteProfile;
     public  CrawlProfile.entry             defaultTextSnippetLocalProfile, defaultTextSnippetGlobalProfile;
     public  CrawlProfile.entry             defaultMediaSnippetLocalProfile, defaultMediaSnippetGlobalProfile;
-    private File                           queuesRoot;
+    private final File                           queuesRoot;
     public  yacyPeerActions                peerActions;
 
-    public plasmaWordIndex(String networkName, serverLog log, File indexPrimaryRoot, File indexSecondaryRoot, int entityCacheMaxSize) {
+    public plasmaWordIndex(final String networkName, final serverLog log, final File indexPrimaryRoot, final File indexSecondaryRoot, final int entityCacheMaxSize) {
         this.log = log;
         this.primaryRoot = new File(indexPrimaryRoot, networkName);
         this.secondaryRoot = new File(indexSecondaryRoot, networkName);
         File indexPrimaryTextLocation = new File(this.primaryRoot, "TEXT");
         if (!indexPrimaryTextLocation.exists()) {
             // patch old index locations; the secondary path is patched in plasmaCrawlLURL
-            File oldPrimaryPath = new File(new File(indexPrimaryRoot, "PUBLIC"), "TEXT");
-            File oldPrimaryTextLocation = new File(new File(indexPrimaryRoot, "PUBLIC"), "TEXT");
+            final File oldPrimaryPath = new File(new File(indexPrimaryRoot, "PUBLIC"), "TEXT");
+            final File oldPrimaryTextLocation = new File(new File(indexPrimaryRoot, "PUBLIC"), "TEXT");
             if (oldPrimaryPath.exists() && oldPrimaryTextLocation.exists()) {
                 // move the text folder from the old location to the new location
                 assert !indexPrimaryTextLocation.exists();
@@ -127,13 +127,13 @@ public final class plasmaWordIndex implements indexRI {
             }
         }
         
-        File textindexcache = new File(indexPrimaryTextLocation, "RICACHE");
+        final File textindexcache = new File(indexPrimaryTextLocation, "RICACHE");
         if (!(textindexcache.exists())) textindexcache.mkdirs();
         this.dhtOutCache = new indexRAMRI(textindexcache, indexRWIRowEntry.urlEntryRow, entityCacheMaxSize, wCacheMaxChunk, wCacheMaxAge, "dump1.array", "index.dhtout.heap", log);
         this.dhtInCache  = new indexRAMRI(textindexcache, indexRWIRowEntry.urlEntryRow, entityCacheMaxSize, wCacheMaxChunk, wCacheMaxAge, "dump2.array", "index.dhtin.heap", log);
         
         // create collections storage path
-        File textindexcollections = new File(indexPrimaryTextLocation, "RICOLLECTION");
+        final File textindexcollections = new File(indexPrimaryTextLocation, "RICOLLECTION");
         if (!(textindexcollections.exists())) textindexcollections.mkdirs();
         this.collections = new indexCollectionRI(textindexcollections, "collection", maxCollectionPartition, indexRWIRowEntry.urlEntryRow);
 
@@ -144,10 +144,10 @@ public final class plasmaWordIndex implements indexRI {
         this.queuesRoot = new File(this.primaryRoot, "QUEUES");
         this.queuesRoot.mkdirs();
         this.log.logConfig("Initializing Crawl Profiles");
-        File profilesActiveFile = new File(queuesRoot, DBFILE_ACTIVE_CRAWL_PROFILES);
+        final File profilesActiveFile = new File(queuesRoot, DBFILE_ACTIVE_CRAWL_PROFILES);
         if (!profilesActiveFile.exists()) {
             // migrate old file
-            File oldFile = new File(new File(queuesRoot.getParentFile().getParentFile().getParentFile(), "PLASMADB"), "crawlProfilesActive1.db");
+            final File oldFile = new File(new File(queuesRoot.getParentFile().getParentFile().getParentFile(), "PLASMADB"), "crawlProfilesActive1.db");
             if (oldFile.exists()) oldFile.renameTo(profilesActiveFile);
         }
         this.profilesActiveCrawls = new CrawlProfile(profilesActiveFile);
@@ -155,10 +155,10 @@ public final class plasmaWordIndex implements indexRI {
         log.logConfig("Loaded active crawl profiles from file " + profilesActiveFile.getName() +
                 ", " + this.profilesActiveCrawls.size() + " entries" +
                 ", " + profilesActiveFile.length()/1024);
-        File profilesPassiveFile = new File(queuesRoot, DBFILE_PASSIVE_CRAWL_PROFILES);
+        final File profilesPassiveFile = new File(queuesRoot, DBFILE_PASSIVE_CRAWL_PROFILES);
         if (!profilesPassiveFile.exists()) {
             // migrate old file
-            File oldFile = new File(new File(queuesRoot.getParentFile().getParentFile().getParentFile(), "PLASMADB"), "crawlProfilesPassive1.db");
+            final File oldFile = new File(new File(queuesRoot.getParentFile().getParentFile().getParentFile(), "PLASMADB"), "crawlProfilesPassive1.db");
             if (oldFile.exists()) oldFile.renameTo(profilesPassiveFile);
         }
         this.profilesPassiveCrawls = new CrawlProfile(profilesPassiveFile);
@@ -167,19 +167,19 @@ public final class plasmaWordIndex implements indexRI {
                 ", " + profilesPassiveFile.length()/1024);
         
         // init queues
-        File preStackFile = new File(queuesRoot, "urlNoticePreStack");
+        final File preStackFile = new File(queuesRoot, "urlNoticePreStack");
         if (!preStackFile.exists()) {
             // migrate old file
-            File oldFile = new File(new File(queuesRoot.getParentFile().getParentFile().getParentFile(), "PLASMADB"), "switchboardQueue.stack");
+            final File oldFile = new File(new File(queuesRoot.getParentFile().getParentFile().getParentFile(), "PLASMADB"), "switchboardQueue.stack");
             if (oldFile.exists()) oldFile.renameTo(preStackFile);
         }
         this.queuePreStack = new IndexingStack(this, preStackFile, this.profilesActiveCrawls);
         
         // create or init seed cache
-        File networkRoot = new File(this.primaryRoot, "NETWORK");
+        final File networkRoot = new File(this.primaryRoot, "NETWORK");
         networkRoot.mkdirs();
-        File mySeedFile = new File(networkRoot, yacySeedDB.DBFILE_OWN_SEED);
-        File oldSeedFile = new File(new File(indexPrimaryRoot.getParentFile(), "YACYDB"), "mySeed.txt");
+        final File mySeedFile = new File(networkRoot, yacySeedDB.DBFILE_OWN_SEED);
+        final File oldSeedFile = new File(new File(indexPrimaryRoot.getParentFile(), "YACYDB"), "mySeed.txt");
         if (oldSeedFile.exists()) oldSeedFile.renameTo(mySeedFile);
         seedDB = new yacySeedDB(
                 new File(networkRoot, "seed.new.db"),
@@ -205,7 +205,7 @@ public final class plasmaWordIndex implements indexRI {
         collections.clear();
         try {
             referenceURL.clear();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             e.printStackTrace();
         }
         queuePreStack.clear();
@@ -218,7 +218,7 @@ public final class plasmaWordIndex implements indexRI {
         this.defaultTextSnippetGlobalProfile = null;
         this.defaultMediaSnippetLocalProfile = null;
         this.defaultMediaSnippetGlobalProfile = null;
-        Iterator<CrawlProfile.entry> i = this.profilesActiveCrawls.profiles(true);
+        final Iterator<CrawlProfile.entry> i = this.profilesActiveCrawls.profiles(true);
         CrawlProfile.entry profile;
         String name;
         try {
@@ -232,7 +232,7 @@ public final class plasmaWordIndex implements indexRI {
                 if (name.equals(CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA)) this.defaultMediaSnippetLocalProfile = profile;
                 if (name.equals(CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA)) this.defaultMediaSnippetGlobalProfile = profile;
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             this.profilesActiveCrawls.clear();
             this.defaultProxyProfile = null;
             this.defaultRemoteProfile = null;
@@ -281,7 +281,7 @@ public final class plasmaWordIndex implements indexRI {
     }
     
     private void resetProfiles() {
-        File pdb = new File(this.queuesRoot, DBFILE_ACTIVE_CRAWL_PROFILES);
+        final File pdb = new File(this.queuesRoot, DBFILE_ACTIVE_CRAWL_PROFILES);
         if (pdb.exists()) pdb.delete();
         profilesActiveCrawls = new CrawlProfile(pdb);
         initActiveCrawlProfiles();
@@ -311,30 +311,30 @@ public final class plasmaWordIndex implements indexRI {
                     hasDoneSomething = true;
                 }
             }
-        } catch (kelondroException e) {
+        } catch (final kelondroException e) {
             resetProfiles();
             hasDoneSomething = true;
         }
         return hasDoneSomething;
     }
     
-    public File getLocation(boolean primary) {
+    public File getLocation(final boolean primary) {
         return (primary) ? this.primaryRoot : this.secondaryRoot;
     }
 
-    public void putURL(indexURLReference entry) throws IOException {
+    public void putURL(final indexURLReference entry) throws IOException {
         this.referenceURL.store(entry);
     }
     
-    public indexURLReference getURL(String urlHash, indexRWIEntry searchedWord, long ranking) {
+    public indexURLReference getURL(final String urlHash, final indexRWIEntry searchedWord, final long ranking) {
         return this.referenceURL.load(urlHash, searchedWord, ranking);
     }
     
-    public boolean removeURL(String urlHash) {
+    public boolean removeURL(final String urlHash) {
         return this.referenceURL.remove(urlHash);
     }
         
-    public boolean existsURL(String urlHash) {
+    public boolean existsURL(final String urlHash) {
         return this.referenceURL.exists(urlHash);
     }
     
@@ -342,7 +342,7 @@ public final class plasmaWordIndex implements indexRI {
         return this.referenceURL.size();
     }
     
-    public Export exportURL(File f, String filter, int format, boolean dom) {
+    public Export exportURL(final File f, final String filter, final int format, final boolean dom) {
         return this.referenceURL.export(f, filter, format, dom);
     }
     
@@ -350,11 +350,11 @@ public final class plasmaWordIndex implements indexRI {
         return this.referenceURL.export();
     }
     
-    public kelondroCloneableIterator<indexURLReference> entriesURL(boolean up, String firstHash) throws IOException {
+    public kelondroCloneableIterator<indexURLReference> entriesURL(final boolean up, final String firstHash) throws IOException {
         return this.referenceURL.entries(up, firstHash);
     }
     
-    public indexRepositoryReference.BlacklistCleaner getURLCleaner(indexReferenceBlacklist blacklist) {
+    public indexRepositoryReference.BlacklistCleaner getURLCleaner(final indexReferenceBlacklist blacklist) {
         return this.referenceURL.getBlacklistCleaner(blacklist); // thread is not already started after this is called!
     }
     
@@ -398,24 +398,24 @@ public final class plasmaWordIndex implements indexRI {
         return dhtInCache.size();
     }
     
-    public long dhtCacheSizeBytes(boolean in) {
+    public long dhtCacheSizeBytes(final boolean in) {
         // calculate the real size in bytes of DHT-In/Out-Cache
         long cacheBytes = 0;
-        long entryBytes = indexRWIRowEntry.urlEntryRow.objectsize;
-        indexRAMRI cache = (in ? dhtInCache : dhtOutCache);
+        final long entryBytes = indexRWIRowEntry.urlEntryRow.objectsize;
+        final indexRAMRI cache = (in ? dhtInCache : dhtOutCache);
         synchronized (cache) {
-            Iterator<indexContainer> it = cache.wordContainers(null, false);
+            final Iterator<indexContainer> it = cache.wordContainers(null, false);
             while (it.hasNext()) cacheBytes += it.next().size() * entryBytes;
         }
         return cacheBytes;
     }
 
-    public void setMaxWordCount(int maxWords) {
+    public void setMaxWordCount(final int maxWords) {
         dhtOutCache.setMaxWordCount(maxWords);
         dhtInCache.setMaxWordCount(maxWords);
     }
 
-    public void dhtFlushControl(indexRAMRI theCache) {
+    public void dhtFlushControl(final indexRAMRI theCache) {
         // check for forced flush
         int l = 0;
         // flush elements that are too big. This flushing depends on the fact that the flush rule
@@ -431,17 +431,17 @@ public final class plasmaWordIndex implements indexRI {
         }
     }
     
-    public long getUpdateTime(String wordHash) {
-        indexContainer entries = getContainer(wordHash, null);
+    public long getUpdateTime(final String wordHash) {
+        final indexContainer entries = getContainer(wordHash, null);
         if (entries == null) return 0;
         return entries.updated();
     }
     
-    public static indexContainer emptyContainer(String wordHash, int elementCount) {
+    public static indexContainer emptyContainer(final String wordHash, final int elementCount) {
     	return new indexContainer(wordHash, indexRWIRowEntry.urlEntryRow, elementCount);
     }
 
-    public void addEntry(String wordHash, indexRWIRowEntry entry, long updateTime, boolean dhtInCase) {
+    public void addEntry(final String wordHash, final indexRWIRowEntry entry, final long updateTime, boolean dhtInCase) {
         // set dhtInCase depending on wordHash
         if ((!dhtInCase) && (yacyDHTAction.shallBeOwnWord(seedDB, wordHash))) dhtInCase = true;
         
@@ -455,11 +455,11 @@ public final class plasmaWordIndex implements indexRI {
         }
     }
     
-    public void addEntries(indexContainer entries) {
+    public void addEntries(final indexContainer entries) {
         addEntries(entries, false);
     }
     
-    public void addEntries(indexContainer entries, boolean dhtInCase) {
+    public void addEntries(final indexContainer entries, boolean dhtInCase) {
         assert (entries.row().objectsize == indexRWIRowEntry.urlEntryRow.objectsize);
         
         // set dhtInCase depending on wordHash
@@ -476,16 +476,16 @@ public final class plasmaWordIndex implements indexRI {
     }
 
     public int flushCacheSome() {
-    	int fo = flushCache(dhtOutCache, Math.max(1, dhtOutCache.size() / lowcachedivisor));
-    	int fi = flushCache(dhtInCache, Math.max(1, dhtInCache.size() / lowcachedivisor));
+    	final int fo = flushCache(dhtOutCache, Math.max(1, dhtOutCache.size() / lowcachedivisor));
+    	final int fi = flushCache(dhtInCache, Math.max(1, dhtInCache.size() / lowcachedivisor));
     	return fo + fi;
     }
     
-    private int flushCache(indexRAMRI ram, int count) {
+    private int flushCache(final indexRAMRI ram, int count) {
         if (count <= 0) return 0;
         
         String wordHash;
-        ArrayList<indexContainer> containerList = new ArrayList<indexContainer>();
+        final ArrayList<indexContainer> containerList = new ArrayList<indexContainer>();
         count = Math.min(5000, Math.min(count, ram.size()));
         boolean collectMax = true;
         indexContainer c;
@@ -505,22 +505,22 @@ public final class plasmaWordIndex implements indexRI {
         containerList.addAll(ram.bestFlushContainers(count));
         
         // flush the containers
-        for (indexContainer container : containerList) collections.addEntries(container);
+        for (final indexContainer container : containerList) collections.addEntries(container);
         //System.out.println("DEBUG-Finished flush of " + count + " entries from RAM to DB in " + (System.currentTimeMillis() - start) + " milliseconds");
         return containerList.size();
     }
     
     
-    public int addPageIndex(yacyURL url, Date urlModified, int size, plasmaParserDocument document, plasmaCondenser condenser, String language, char doctype, int outlinksSame, int outlinksOther) {
+    public int addPageIndex(final yacyURL url, final Date urlModified, final int size, final plasmaParserDocument document, final plasmaCondenser condenser, final String language, final char doctype, final int outlinksSame, final int outlinksOther) {
         // this is called by the switchboard to put in a new page into the index
         // use all the words in one condenser object to simultanous create index entries
         
         int wordCount = 0;
-        int urlLength = url.toNormalform(true, true).length();
-        int urlComps = htmlFilterContentScraper.urlComps(url.toString()).length;
+        final int urlLength = url.toNormalform(true, true).length();
+        final int urlComps = htmlFilterContentScraper.urlComps(url.toString()).length;
         
         // iterate over all words of context text
-        Iterator<Map.Entry<String, indexWord>> i = condenser.words().entrySet().iterator();
+        final Iterator<Map.Entry<String, indexWord>> i = condenser.words().entrySet().iterator();
         Map.Entry<String, indexWord> wentry;
         String word;
         indexRWIRowEntry ientry;
@@ -551,14 +551,14 @@ public final class plasmaWordIndex implements indexRI {
         return wordCount;
     }
 
-    public boolean hasContainer(String wordHash) {
+    public boolean hasContainer(final String wordHash) {
         if (dhtOutCache.hasContainer(wordHash)) return true;
         if (dhtInCache.hasContainer(wordHash)) return true;
         if (collections.hasContainer(wordHash)) return true;
         return false;
     }
     
-    public indexContainer getContainer(String wordHash, Set<String> urlselection) {
+    public indexContainer getContainer(final String wordHash, final Set<String> urlselection) {
         if ((wordHash == null) || (wordHash.length() != yacySeedDB.commonHashLength)) {
             // wrong input
             return null;
@@ -583,8 +583,8 @@ public final class plasmaWordIndex implements indexRI {
         if (container == null) return null;
         
         // check doubles
-        int beforeDouble = container.size();
-        ArrayList<kelondroRowCollection> d = container.removeDoubles();
+        final int beforeDouble = container.size();
+        final ArrayList<kelondroRowCollection> d = container.removeDoubles();
         kelondroRowCollection set;
         for (int i = 0; i < d.size(); i++) {
             // for each element in the double-set, take that one that is the most recent one
@@ -607,14 +607,14 @@ public final class plasmaWordIndex implements indexRI {
         return container;
     }
 
-    public HashMap<String, indexContainer> getContainers(Set<String> wordHashes, Set<String> urlselection, boolean deleteIfEmpty, boolean interruptIfEmpty) {
+    public HashMap<String, indexContainer> getContainers(final Set<String> wordHashes, final Set<String> urlselection, final boolean deleteIfEmpty, final boolean interruptIfEmpty) {
         // return map of wordhash:indexContainer
         
         // retrieve entities that belong to the hashes
-        HashMap<String, indexContainer> containers = new HashMap<String, indexContainer>(wordHashes.size());
+        final HashMap<String, indexContainer> containers = new HashMap<String, indexContainer>(wordHashes.size());
         String singleHash;
         indexContainer singleContainer;
-            Iterator<String> i = wordHashes.iterator();
+            final Iterator<String> i = wordHashes.iterator();
             while (i.hasNext()) {
             
                 // get next word hash:
@@ -632,7 +632,7 @@ public final class plasmaWordIndex implements indexRI {
     }
 
     @SuppressWarnings("unchecked")
-    public HashMap<String, indexContainer>[] localSearchContainers(plasmaSearchQuery query, Set<String> urlselection) {
+    public HashMap<String, indexContainer>[] localSearchContainers(final plasmaSearchQuery query, final Set<String> urlselection) {
         // search for the set of hashes and return a map of of wordhash:indexContainer containing the seach result
 
         // retrieve entities that belong to the hashes
@@ -642,7 +642,7 @@ public final class plasmaWordIndex implements indexRI {
                         true,
                         true);
         if ((inclusionContainers.size() != 0) && (inclusionContainers.size() < query.queryHashes.size())) inclusionContainers = new HashMap<String, indexContainer>(0); // prevent that only a subset is returned
-        HashMap<String, indexContainer> exclusionContainers = (inclusionContainers.size() == 0) ? new HashMap<String, indexContainer>(0) : getContainers(
+        final HashMap<String, indexContainer> exclusionContainers = (inclusionContainers.size() == 0) ? new HashMap<String, indexContainer>(0) : getContainers(
                 query.excludeHashes,
                 urlselection,
                 true,
@@ -662,7 +662,7 @@ public final class plasmaWordIndex implements indexRI {
         return dhtInCache.size() + dhtOutCache.size();
     }
     
-    public int indexSize(String wordHash) {
+    public int indexSize(final String wordHash) {
         int size = 0;
         size += dhtInCache.indexSize(wordHash);
         size += dhtOutCache.indexSize(wordHash);
@@ -682,8 +682,8 @@ public final class plasmaWordIndex implements indexRI {
         peerActions.close();
     }
     
-    public indexContainer deleteContainer(String wordHash) {
-        indexContainer c = new indexContainer(
+    public indexContainer deleteContainer(final String wordHash) {
+        final indexContainer c = new indexContainer(
                 wordHash,
                 indexRWIRowEntry.urlEntryRow,
                 dhtInCache.sizeContainer(wordHash) + dhtOutCache.sizeContainer(wordHash) + collections.indexSize(wordHash)
@@ -694,7 +694,7 @@ public final class plasmaWordIndex implements indexRI {
         return c;
     }
     
-    public boolean removeEntry(String wordHash, String urlHash) {
+    public boolean removeEntry(final String wordHash, final String urlHash) {
         boolean removed = false;
         removed = removed | (dhtInCache.removeEntry(wordHash, urlHash));
         removed = removed | (dhtOutCache.removeEntry(wordHash, urlHash));
@@ -702,10 +702,10 @@ public final class plasmaWordIndex implements indexRI {
         return removed;
     }
     
-    public int removeEntryMultiple(Set<String> wordHashes, String urlHash) {
+    public int removeEntryMultiple(final Set<String> wordHashes, final String urlHash) {
         // remove the same url hashes for multiple words
         // this is mainly used when correcting a index after a search
-        Iterator<String> i = wordHashes.iterator();
+        final Iterator<String> i = wordHashes.iterator();
         int count = 0;
         while (i.hasNext()) {
             if (removeEntry(i.next(), urlHash)) count++;
@@ -713,7 +713,7 @@ public final class plasmaWordIndex implements indexRI {
         return count;
     }
     
-    public int removeEntries(String wordHash, Set<String> urlHashes) {
+    public int removeEntries(final String wordHash, final Set<String> urlHashes) {
         int removed = 0;
         removed += dhtInCache.removeEntries(wordHash, urlHashes);
         removed += dhtOutCache.removeEntries(wordHash, urlHashes);
@@ -721,7 +721,7 @@ public final class plasmaWordIndex implements indexRI {
         return removed;
     }
     
-    public String removeEntriesExpl(String wordHash, Set<String> urlHashes) {
+    public String removeEntriesExpl(final String wordHash, final Set<String> urlHashes) {
         String removed = "";
         removed += dhtInCache.removeEntries(wordHash, urlHashes) + ", ";
         removed += dhtOutCache.removeEntries(wordHash, urlHashes) + ", ";
@@ -729,19 +729,19 @@ public final class plasmaWordIndex implements indexRI {
         return removed;
     }
     
-    public void removeEntriesMultiple(Set<String> wordHashes, Set<String> urlHashes) {
+    public void removeEntriesMultiple(final Set<String> wordHashes, final Set<String> urlHashes) {
         // remove the same url hashes for multiple words
         // this is mainly used when correcting a index after a search
-        Iterator<String> i = wordHashes.iterator();
+        final Iterator<String> i = wordHashes.iterator();
         while (i.hasNext()) {
             removeEntries(i.next(), urlHashes);
         }
     }
     
-    public int removeWordReferences(Set<String> words, String urlhash) {
+    public int removeWordReferences(final Set<String> words, final String urlhash) {
         // sequentially delete all word references
         // returns number of deletions
-        Iterator<String> iter = words.iterator();
+        final Iterator<String> iter = words.iterator();
         int count = 0;
         while (iter.hasNext()) {
             // delete the URL reference in this word index
@@ -750,13 +750,13 @@ public final class plasmaWordIndex implements indexRI {
         return count;
     }
     
-    public synchronized TreeSet<indexContainer> indexContainerSet(String startHash, boolean ram, boolean rot, int count) {
+    public synchronized TreeSet<indexContainer> indexContainerSet(final String startHash, final boolean ram, final boolean rot, int count) {
         // creates a set of indexContainers
         // this does not use the dhtInCache
-        kelondroOrder<indexContainer> containerOrder = new indexContainerOrder(indexOrder.clone());
+        final kelondroOrder<indexContainer> containerOrder = new indexContainerOrder(indexOrder.clone());
         containerOrder.rotate(emptyContainer(startHash, 0));
-        TreeSet<indexContainer> containers = new TreeSet<indexContainer>(containerOrder);
-        Iterator<indexContainer> i = wordContainers(startHash, ram, rot);
+        final TreeSet<indexContainer> containers = new TreeSet<indexContainer>(containerOrder);
+        final Iterator<indexContainer> i = wordContainers(startHash, ram, rot);
         if (ram) count = Math.min(dhtOutCache.size(), count);
         indexContainer container;
         // this loop does not terminate using the i.hasNex() predicate when rot == true
@@ -773,17 +773,17 @@ public final class plasmaWordIndex implements indexRI {
         return containers; // this may return less containers as demanded
     }
 
-    public indexURLReference storeDocument(IndexingStack.QueueEntry entry, plasmaParserDocument document, plasmaCondenser condenser) throws IOException {
-        long startTime = System.currentTimeMillis();
+    public indexURLReference storeDocument(final IndexingStack.QueueEntry entry, final plasmaParserDocument document, final plasmaCondenser condenser) throws IOException {
+        final long startTime = System.currentTimeMillis();
 
         // CREATE INDEX
-        String dc_title = document.dc_title();
-        yacyURL referrerURL = entry.referrerURL();
-        Date docDate = entry.getModificationDate();
+        final String dc_title = document.dc_title();
+        final yacyURL referrerURL = entry.referrerURL();
+        final Date docDate = entry.getModificationDate();
         
         // create a new loaded URL db entry
-        long ldate = System.currentTimeMillis();
-        indexURLReference newEntry = new indexURLReference(
+        final long ldate = System.currentTimeMillis();
+        final indexURLReference newEntry = new indexURLReference(
                 entry.url(),                               // URL
                 dc_title,                                  // document description
                 document.dc_creator(),                     // author
@@ -810,10 +810,10 @@ public final class plasmaWordIndex implements indexRI {
         // STORE URL TO LOADED-URL-DB
         putURL(newEntry);
         
-        long storageEndTime = System.currentTimeMillis();
+        final long storageEndTime = System.currentTimeMillis();
         
         // STORE PAGE INDEX INTO WORD INDEX DB
-        int words = addPageIndex(
+        final int words = addPageIndex(
                 entry.url(),                                  // document url
                 docDate,                                      // document mod date
                 (int) entry.size(),                           // document size
@@ -825,7 +825,7 @@ public final class plasmaWordIndex implements indexRI {
                 document.outboundLinks()                      // outbound links
         );
             
-        long indexingEndTime = System.currentTimeMillis();
+        final long indexingEndTime = System.currentTimeMillis();
         
         if (log.isInfo()) {
             // TODO: UTF-8 docDescription seems not to be displayed correctly because
@@ -845,8 +845,8 @@ public final class plasmaWordIndex implements indexRI {
         return newEntry;
     }
     
-    public synchronized kelondroCloneableIterator<indexContainer> wordContainers(String startHash, boolean ram, boolean rot) {
-        kelondroCloneableIterator<indexContainer> i = wordContainers(startHash, ram);
+    public synchronized kelondroCloneableIterator<indexContainer> wordContainers(final String startHash, final boolean ram, final boolean rot) {
+        final kelondroCloneableIterator<indexContainer> i = wordContainers(startHash, ram);
         if (rot) {
             return new kelondroRotateIterator<indexContainer>(i, new String(kelondroBase64Order.zero(startHash.length())), dhtOutCache.size() + ((ram) ? 0 : collections.size()));
         } else {
@@ -854,8 +854,8 @@ public final class plasmaWordIndex implements indexRI {
         }
     }
 
-    public synchronized kelondroCloneableIterator<indexContainer> wordContainers(String startWordHash, boolean ram) {
-        kelondroOrder<indexContainer> containerOrder = new indexContainerOrder(indexOrder.clone());
+    public synchronized kelondroCloneableIterator<indexContainer> wordContainers(final String startWordHash, final boolean ram) {
+        final kelondroOrder<indexContainer> containerOrder = new indexContainerOrder(indexOrder.clone());
         containerOrder.rotate(emptyContainer(startWordHash, 0));
         if (ram) {
             return dhtOutCache.wordContainers(startWordHash, false);
@@ -871,13 +871,13 @@ public final class plasmaWordIndex implements indexRI {
     
 
     //  The Cleaner class was provided as "UrldbCleaner" by Hydrox
-    public synchronized ReferenceCleaner getReferenceCleaner(String startHash) {
+    public synchronized ReferenceCleaner getReferenceCleaner(final String startHash) {
         return new ReferenceCleaner(startHash);
     }
     
     public class ReferenceCleaner extends Thread {
         
-        private String startHash;
+        private final String startHash;
         private boolean run = true;
         private boolean pause = false;
         public int rwiCountAtStart = 0;
@@ -885,7 +885,7 @@ public final class plasmaWordIndex implements indexRI {
         public String lastWordHash = "";
         public int lastDeletionCounter = 0;
         
-        public ReferenceCleaner(String startHash) {
+        public ReferenceCleaner(final String startHash) {
             this.startHash = startHash;
             this.rwiCountAtStart = size();
         }
@@ -895,19 +895,19 @@ public final class plasmaWordIndex implements indexRI {
             indexContainer container = null;
             indexRWIRowEntry entry = null;
             yacyURL url = null;
-            HashSet<String> urlHashs = new HashSet<String>();
+            final HashSet<String> urlHashs = new HashSet<String>();
             Iterator<indexContainer> indexContainerIterator = indexContainerSet(startHash, false, false, 100).iterator();
             while (indexContainerIterator.hasNext() && run) {
                 waiter();
                 container = indexContainerIterator.next();
-                Iterator<indexRWIRowEntry> containerIterator = container.entries();
+                final Iterator<indexRWIRowEntry> containerIterator = container.entries();
                 wordHashNow = container.getWordHash();
                 while (containerIterator.hasNext() && run) {
                     waiter();
                     entry = containerIterator.next();
                     // System.out.println("Wordhash: "+wordHash+" UrlHash:
                     // "+entry.getUrlHash());
-                    indexURLReference ue = referenceURL.load(entry.urlHash(), entry, 0);
+                    final indexURLReference ue = referenceURL.load(entry.urlHash(), entry, 0);
                     if (ue == null) {
                         urlHashs.add(entry.urlHash());
                     } else {
@@ -918,7 +918,7 @@ public final class plasmaWordIndex implements indexRI {
                     }
                 }
                 if (urlHashs.size() > 0) {
-                    int removed = removeEntries(container.getWordHash(), urlHashs);
+                    final int removed = removeEntries(container.getWordHash(), urlHashs);
                     serverLog.logFine("INDEXCLEANER", container.getWordHash() + ": " + removed + " of " + container.size() + " URL-entries deleted");
                     lastWordHash = container.getWordHash();
                     lastDeletionCounter = urlHashs.size();
@@ -926,7 +926,7 @@ public final class plasmaWordIndex implements indexRI {
                 }
                 if (!containerIterator.hasNext()) {
                     // We may not be finished yet, try to get the next chunk of wordHashes
-                    TreeSet<indexContainer> containers = indexContainerSet(container.getWordHash(), false, false, 100);
+                    final TreeSet<indexContainer> containers = indexContainerSet(container.getWordHash(), false, false, 100);
                     indexContainerIterator = containers.iterator();
                     // Make sure we don't get the same wordhash twice, but don't skip a word
                     if ((indexContainerIterator.hasNext()) && (!container.getWordHash().equals(indexContainerIterator.next().getWordHash()))) {
@@ -968,7 +968,7 @@ public final class plasmaWordIndex implements indexRI {
                 if (this.pause) {
                     try {
                         this.wait();
-                    } catch (InterruptedException e) {
+                    } catch (final InterruptedException e) {
                         this.run = false;
                         return;
                     }

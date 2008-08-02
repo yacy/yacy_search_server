@@ -294,16 +294,16 @@ public abstract class htmlFilterAbstractScraper implements htmlFilterScraper {
      * @param tags0
      * @param tags1
      */
-    public htmlFilterAbstractScraper(HashSet<String> tags0, HashSet<String> tags1) {
+    public htmlFilterAbstractScraper(final HashSet<String> tags0, final HashSet<String> tags1) {
         this.tags0  = tags0;
         this.tags1  = tags1;
     }
 
-    public boolean isTag0(String tag) {
+    public boolean isTag0(final String tag) {
         return (tags0 != null) && (tags0.contains(tag.toLowerCase()));
     }
 
-    public boolean isTag1(String tag) {
+    public boolean isTag1(final String tag) {
         return (tags1 != null) && (tags1.contains(tag.toLowerCase()));
     }
 
@@ -316,7 +316,7 @@ public abstract class htmlFilterAbstractScraper implements htmlFilterScraper {
     public abstract void scrapeTag1(String tagname, Properties tagopts, char[] text);
 
     // string conversions
-    private static String code_iso8859s(char c) {
+    private static String code_iso8859s(final char c) {
         switch (c) {
         
         // german umlaute and ligaturen
@@ -357,14 +357,14 @@ public abstract class htmlFilterAbstractScraper implements htmlFilterScraper {
         }
     }
 
-    public static serverCharBuffer convertUmlaute(serverCharBuffer bb) {
+    public static serverCharBuffer convertUmlaute(final serverCharBuffer bb) {
         if (bb.length() == 0) return bb;
 
-            serverCharBuffer t = new serverCharBuffer(bb.length() + 20);
+            final serverCharBuffer t = new serverCharBuffer(bb.length() + 20);
             char c;
             for  (int i = 0; i < bb.length(); i++) {
                 c = bb.charAt(i);
-                String z = code_iso8859s(c);
+                final String z = code_iso8859s(c);
                 if (z == null) t.append((int)c); 
                 else t.append(z);
             }
@@ -410,7 +410,7 @@ public abstract class htmlFilterAbstractScraper implements htmlFilterScraper {
 //        return t;
     }
 
-    private static char[] transscript(char[] code) {
+    private static char[] transscript(final char[] code) {
         if (code[1] == '#') {
             if (code[2] == 'x' || code[2] == 'X') {
                 return new char[] {(char) Integer.parseInt((new String(code)).substring(3, code.length - 1), 16)};
@@ -418,7 +418,7 @@ public abstract class htmlFilterAbstractScraper implements htmlFilterScraper {
                 return new char[] {(char) Integer.parseInt((new String(code)).substring(2, code.length - 1))};
             }
         } else {
-            String t = trans.get(new String(code)); 
+            final String t = trans.get(new String(code)); 
             if (t == null) return new char[0];
             return t.toCharArray();
         }
@@ -453,7 +453,7 @@ public abstract class htmlFilterAbstractScraper implements htmlFilterScraper {
         return bb.trim(); 
     }
 
-    public static serverCharBuffer stripAll(serverCharBuffer bb) {
+    public static serverCharBuffer stripAll(final serverCharBuffer bb) {
         //return stripAllTags(s);
         return convertUmlaute(transscriptAll(stripAllTags(bb)));
     }

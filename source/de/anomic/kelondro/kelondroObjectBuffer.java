@@ -62,11 +62,11 @@ public class kelondroObjectBuffer {
     // without an index-backend
     
     private int    readHit, readMiss, writeUnique, writeDouble;
-    private String name;
+    private final String name;
     private byte[] key;
     private Object value;
     
-    public kelondroObjectBuffer(String name) {
+    public kelondroObjectBuffer(final String name) {
         this.name = name;
         this.readHit = 0;
         this.readMiss = 0;
@@ -89,7 +89,7 @@ public class kelondroObjectBuffer {
                 };
     }
     
-    private static String[] combinedStatus(String[] a, String[] b) {
+    private static String[] combinedStatus(final String[] a, final String[] b) {
         return new String[]{
                 Integer.toString(Integer.parseInt(a[0]) + Integer.parseInt(b[0])),
                 Integer.toString(Integer.parseInt(a[1]) + Integer.parseInt(b[1])),
@@ -98,14 +98,14 @@ public class kelondroObjectBuffer {
         };
     }
     
-    public static String[] combinedStatus(String[][] a, int l) {
+    public static String[] combinedStatus(final String[][] a, final int l) {
         if ((a == null) || (a.length == 0) || (l == 0)) return null;
         if ((a.length >= 1) && (l == 1)) return a[0];
         if ((a.length >= 2) && (l == 2)) return combinedStatus(a[0], a[1]);
         return combinedStatus(combinedStatus(a, l - 1), a[l - 1]);
     }
     
-    public void put(byte[] key, Object value) {
+    public void put(final byte[] key, final Object value) {
         if ((key == null) || (value == null)) return;
         synchronized(this) {
             if (kelondroNaturalOrder.equal(this.key, key)){
@@ -118,7 +118,7 @@ public class kelondroObjectBuffer {
         }
     }
     
-    public void put(String key, Object value) {
+    public void put(final String key, final Object value) {
         if ((key == null) || (value == null)) return;
         synchronized(this) {
             if (kelondroNaturalOrder.equal(this.key, key.getBytes())){
@@ -131,7 +131,7 @@ public class kelondroObjectBuffer {
         }
     }
     
-    public Object get(byte[] key) {
+    public Object get(final byte[] key) {
         if (key == null) return null;
         synchronized(this) {
             if (kelondroNaturalOrder.equal(this.key, key)){
@@ -144,7 +144,7 @@ public class kelondroObjectBuffer {
         }
     }
     
-    public Object get(String key) {
+    public Object get(final String key) {
         if (key == null) return null;
         synchronized(this) {
             if (kelondroNaturalOrder.equal(this.key, key.getBytes())){
@@ -157,7 +157,7 @@ public class kelondroObjectBuffer {
         }
     }
     
-    public void remove(byte[] key) {
+    public void remove(final byte[] key) {
         if (key == null) return;
         synchronized(this) {
             if (kelondroNaturalOrder.equal(this.key, key)){
@@ -167,7 +167,7 @@ public class kelondroObjectBuffer {
         }
     }
     
-    public void remove(String key) {
+    public void remove(final String key) {
         if (key == null) return;
         synchronized(this) {
             if (kelondroNaturalOrder.equal(this.key, key.getBytes())){

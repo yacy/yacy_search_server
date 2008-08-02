@@ -45,7 +45,7 @@ import de.anomic.server.serverSystem;
 
 
 public class yacyTray implements ActionListener, ItemListener {
-	private boolean testing = false;
+	private final boolean testing = false;
 	
 	plasmaSwitchboard sb;
 	
@@ -57,13 +57,13 @@ public class yacyTray implements ActionListener, ItemListener {
     private static SystemTray tray;
     private static TrayIcon ti;
     
-	public yacyTray(plasmaSwitchboard sb, boolean showmenu) {
+	public yacyTray(final plasmaSwitchboard sb, final boolean showmenu) {
 		this.sb = sb;
 		tray = SystemTray.getDefaultSystemTray();
 		
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (Exception e) {
+        } catch (final Exception e) {
             e.printStackTrace();
         }
         if( Integer.parseInt(System.getProperty("java.version").substring(2,3)) >=5 )
@@ -84,7 +84,7 @@ public class yacyTray implements ActionListener, ItemListener {
 			// YaCy Search
 			menuItem = new JMenuItem("YaCy Search");
 			menuItem.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
+				public void actionPerformed(final ActionEvent e) {
 					openBrowser("");
 				}
 			});
@@ -95,7 +95,7 @@ public class yacyTray implements ActionListener, ItemListener {
 				menu.addSeparator();
 				menuItem = new JMenuItem("Quit");
 				menuItem.addActionListener(new ActionListener() {
-					public void actionPerformed(ActionEvent e) {
+					public void actionPerformed(final ActionEvent e) {
 						System.exit(0);
 					}
 				});
@@ -110,7 +110,7 @@ public class yacyTray implements ActionListener, ItemListener {
        
         ti.setIconAutoSize(true);
         ti.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
+            public void actionPerformed(final ActionEvent e) {
             	trayClickAction();
             }
         });        
@@ -129,7 +129,7 @@ public class yacyTray implements ActionListener, ItemListener {
 		} else { t1 = System.currentTimeMillis(); }
 	}
 	
-	private void openBrowser(String browserPopUpPage){
+	private void openBrowser(final String browserPopUpPage){
 		// no need for https, because we are on localhost
 		serverSystem.openBrowser("http://localhost:" + sb.getConfig("port", "8080") + "/" + browserPopUpPage);
 	}
@@ -139,12 +139,12 @@ public class yacyTray implements ActionListener, ItemListener {
 		isShown = false;
 	}
 	
-	public void displayBalloonMessage(String title, String message){
+	public void displayBalloonMessage(final String title, final String message){
 		ti.displayMessage(title, message, 0);
 	}
 
-    public void actionPerformed(ActionEvent e) { }
+    public void actionPerformed(final ActionEvent e) { }
 
-    public void itemStateChanged(ItemEvent e) {	}
+    public void itemStateChanged(final ItemEvent e) {	}
     
 }

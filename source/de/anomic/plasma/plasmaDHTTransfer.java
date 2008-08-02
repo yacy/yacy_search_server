@@ -54,21 +54,21 @@ public class plasmaDHTTransfer extends Thread {
     plasmaDHTChunk dhtChunk;
 
     // other fields
-    private yacySeedDB seedDB;
-    private yacyPeerActions peerActions;
-    private int maxRetry;
+    private final yacySeedDB seedDB;
+    private final yacyPeerActions peerActions;
+    private final int maxRetry;
     private int transferMode = TRANSFER_MODE_DISTRIBUTION;
     serverLog log;
 
     public plasmaDHTTransfer(
-            serverLog log,
-            yacySeedDB seedDB,
-            yacyPeerActions peerActions,
-            yacySeed destSeed, 
-            plasmaDHTChunk dhtChunk, 
-            boolean gzipBody, 
-            int timeout, 
-            int retries
+            final serverLog log,
+            final yacySeedDB seedDB,
+            final yacyPeerActions peerActions,
+            final yacySeed destSeed, 
+            final plasmaDHTChunk dhtChunk, 
+            final boolean gzipBody, 
+            final int timeout, 
+            final int retries
     ) {
         super(new ThreadGroup("TransferIndexThreadGroup"), "TransferIndexWorker_" + destSeed.getName());
         this.log = log;
@@ -81,14 +81,14 @@ public class plasmaDHTTransfer extends Thread {
         this.seed = destSeed;
     }
 
-    public void setTransferMode(int mode) {
+    public void setTransferMode(final int mode) {
         this.transferMode = mode;
     }
     
     public void run() {
         try {
             this.uploadIndex();
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
             e.printStackTrace();
         }
     }
@@ -133,15 +133,16 @@ public class plasmaDHTTransfer extends Thread {
          * - the retry counter limit was exceeded
          */
         this.transferStatus = plasmaDHTChunk.chunkStatus_RUNNING;
-        long retryCount = 0, start = System.currentTimeMillis();
+        long retryCount = 0;
+		final long start = System.currentTimeMillis();
         while (true) {
             // testing if we were aborted
             if (this.isAborted()) return;
 
             // transfering seleted words to remote peer
             this.transferStatusMessage = "Running: Transfering chunk to target " + this.seed.hash + "/" + this.seed.getName();
-            HashMap<String, Object> result = yacyClient.transferIndex(this.seedDB, this.seed, this.dhtChunk.containers(), this.dhtChunk.urlCacheMap(), this.gzipBody4Transfer, this.timeout4Transfer);
-            String error = (String) result.get("result");
+            final HashMap<String, Object> result = yacyClient.transferIndex(this.seedDB, this.seed, this.dhtChunk.containers(), this.dhtChunk.urlCacheMap(), this.gzipBody4Transfer, this.timeout4Transfer);
+            final String error = (String) result.get("result");
             if (error == null) {
                 // words successfully transfered
                 this.transferTime = System.currentTimeMillis() - start;                
@@ -159,7 +160,7 @@ public class plasmaDHTTransfer extends Thread {
                 // if the peer has set a pause time and we are in flush mode (index transfer)
                 // then we pause for a while now
                 if (this.transferMode == TRANSFER_MODE_FLUSH) {
-                    long pause = getBusyTime(result);
+                    final long pause = getBusyTime(result);
                     if (pause != -1) {
                         this.transferStatusMessage = "Finished: Transfer of chunk to target " + this.seed.hash + "/" + this.seed.getName() + ". Pausing " + pause + " ms.";
                         this.pause(pause);                        
@@ -224,7 +225,7 @@ public class plasmaDHTTransfer extends Thread {
                         return;
 
                     // doing a peer ping to the remote seed
-                    int added = yacyClient.publishMySeed(this.seedDB.mySeed(), this.peerActions, this.seed.getPublicAddress(), this.seed.hash);
+                    final int added = yacyClient.publishMySeed(this.seedDB.mySeed(), this.peerActions, this.seed.getPublicAddress(), this.seed.hash);
                     if (added < 0) {
                         // inc. retry counter
                         retryCount++;
@@ -243,23 +244,23 @@ public class plasmaDHTTransfer extends Thread {
     }
     
     @SuppressWarnings("unchecked")
-    private long getBusyTime(HashMap<String, Object> result) {
+    private long getBusyTime(final HashMap<String, Object> result) {
         int pause = -1;
-        Object transferRWIResult = result.get("resultTransferRWI");
+        final Object transferRWIResult = result.get("resultTransferRWI");
         assert transferRWIResult instanceof HashMap;
         if (transferRWIResult != null && ((HashMap<String, String>) transferRWIResult).containsKey("pause")) {
-            String pauseStr = ((HashMap<String, String>) transferRWIResult).get("pause");
-            try { pause = Integer.valueOf(pauseStr).intValue(); } catch (NumberFormatException numEx){}
+            final String pauseStr = ((HashMap<String, String>) transferRWIResult).get("pause");
+            try { pause = Integer.valueOf(pauseStr).intValue(); } catch (final NumberFormatException numEx){}
             if (pause < 0) pause = 5000;
             else if (pause > 30000) pause = 30000;
         }        
         return pause;     
     }
     
-    private void pause(long sleepTime) throws InterruptedException {        
+    private void pause(final long sleepTime) throws InterruptedException {        
         if (sleepTime == 0) return;
         long sleepCounter = sleepTime / 1000;
-        long sleepRest = sleepTime % 1000;
+        final long sleepRest = sleepTime % 1000;
         while (!this.isAborted() && sleepCounter > 0) {
             sleepCounter--;
             Thread.sleep(1000);            

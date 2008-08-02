@@ -61,7 +61,7 @@ public class kelondroProfile implements Cloneable {
         return System.currentTimeMillis();
     }
     
-    protected void stopRead(long handle) {
+    protected void stopRead(final long handle) {
         accRead += System.currentTimeMillis() - handle;
     }
     
@@ -69,7 +69,7 @@ public class kelondroProfile implements Cloneable {
         return System.currentTimeMillis();
     }
     
-    protected void stopWrite(long handle) {
+    protected void stopWrite(final long handle) {
         accWrite += System.currentTimeMillis() - handle;
     }
     
@@ -77,12 +77,12 @@ public class kelondroProfile implements Cloneable {
         return System.currentTimeMillis();
     }
     
-    protected void stopDelete(long handle) {
+    protected void stopDelete(final long handle) {
         accDelete += System.currentTimeMillis() - handle;
     }
     
     public kelondroProfile clone() {
-        kelondroProfile clone = new kelondroProfile();
+        final kelondroProfile clone = new kelondroProfile();
         clone.accRead = this.accRead;
         clone.accWrite = this.accWrite;
         clone.accDelete = this.accDelete;
@@ -93,20 +93,20 @@ public class kelondroProfile implements Cloneable {
         return "read=" + accRead + ", write=" + accWrite + ", delete=" + accDelete;
     }
     
-    public static kelondroProfile consolidate(kelondroProfile[] profiles) {
+    public static kelondroProfile consolidate(final kelondroProfile[] profiles) {
         for (int i = 1; i < profiles.length; i++) consolidate(profiles[0], profiles[i]);
         return profiles[0];
     }
     
-    public static kelondroProfile consolidate(kelondroProfile profile1, kelondroProfile profile2) {
+    public static kelondroProfile consolidate(final kelondroProfile profile1, final kelondroProfile profile2) {
         profile1.accRead += profile2.accRead;
         profile1.accWrite += profile2.accWrite;
         profile1.accDelete += profile2.accDelete;
         return profile1;
     }
     
-    public static kelondroProfile delta(kelondroProfile newer, kelondroProfile older) {
-        kelondroProfile result = new kelondroProfile();
+    public static kelondroProfile delta(final kelondroProfile newer, final kelondroProfile older) {
+        final kelondroProfile result = new kelondroProfile();
         result.accRead = newer.accRead - older.accRead;
         result.accWrite = newer.accWrite - older.accWrite;
         result.accDelete = newer.accDelete - older.accDelete;

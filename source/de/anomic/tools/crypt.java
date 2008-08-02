@@ -60,15 +60,15 @@ public class crypt {
     String cryptMethod; // one of ["TripleDES", "Blowfish", "DESede", "DES"]
     private static final String defaultMethod = "PBEWithMD5AndDES"; //"DES";
 
-    public crypt(String pbe) {
+    public crypt(final String pbe) {
     // this is possible, but not recommended
     this(pbe, (pbe + "XXXXXXXX").substring(0, 8));
     }
 
-    public crypt(String pbe, String salt) {
+    public crypt(final String pbe, final String salt) {
     this(pbe, salt, defaultMethod);
     }
-    private crypt(String pbe, String salt, String method) {
+    private crypt(final String pbe, String salt, final String method) {
     // a Password-Based Encryption. The SecretKey is created on the fly
         if (salt.length() > 8) salt = salt.substring(0,8);
         if (salt.length() < 8) salt = (salt + "XXXXXXXX").substring(0,8);
@@ -81,15 +81,15 @@ public class crypt {
     // Section: simple Codings
     // --------------------------------------------------------
 
-    public static String simpleEncode(String content) {
+    public static String simpleEncode(final String content) {
     return simpleEncode(content, null, 'b');
     }
 
-    public static String simpleEncode(String content, String key) {
+    public static String simpleEncode(final String content, final String key) {
     return simpleEncode(content, key, 'b');
     }
 
-    public static String simpleEncode(String content, String key, char method) {
+    public static String simpleEncode(final String content, String key, final char method) {
     if (key == null) { key = "NULL"; }
     switch (method) {
     case 'b' : return "b|" + kelondroBase64Order.enhancedCoder.encodeString(content);
@@ -99,7 +99,7 @@ public class crypt {
     }
     }
 
-    public static String simpleDecode(String encoded, String key) {
+    public static String simpleDecode(final String encoded, final String key) {
         if (encoded == null || encoded.length() < 3) {
             return null;
         }
@@ -113,7 +113,7 @@ public class crypt {
         case 'z':
             try {
                 return gzip.gunzipString(kelondroBase64Order.enhancedCoder.decode(encoded.substring(2), "de.anomic.tools.crypt.simpleDecode()"));
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 e.printStackTrace();
                 return null;
             }
@@ -126,8 +126,8 @@ public class crypt {
         }
     }
 
-    public static void main(String[] args) {
-        String teststring="1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    public static void main(final String[] args) {
+        final String teststring="1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
         System.out.println("Teststring   = " + teststring);
         System.out.println("enc-b result = " + simpleDecode(simpleEncode(teststring, null, 'b'), null));
         System.out.println("enc-z result = " + simpleDecode(simpleEncode(teststring, null, 'z'), null));

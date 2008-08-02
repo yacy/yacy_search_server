@@ -40,17 +40,17 @@ import de.anomic.yacy.yacySeed;
 
 public final class transfer {
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
-        plasmaSwitchboard sb = (plasmaSwitchboard) env;
-        serverObjects prop = new serverObjects();
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        final serverObjects prop = new serverObjects();
         if ((post == null) || (env == null)) return prop;
         if (!yacyNetwork.authentifyRequest(post, env)) return prop;
         
-        String process   = post.get("process", "");  // permission or store
+        final String process   = post.get("process", "");  // permission or store
         //String key       = post.get("key", "");      // a transmission key from the client
-        String otherpeer = post.get("iam", "");      // identification of the client (a peer-hash)
-        String purpose   = post.get("purpose", "");  // declares how the file shall be treated
-        String filename  = post.get("filename", ""); // a name of a file without path
+        final String otherpeer = post.get("iam", "");      // identification of the client (a peer-hash)
+        final String purpose   = post.get("purpose", "");  // declares how the file shall be treated
+        final String filename  = post.get("filename", ""); // a name of a file without path
         //long   filesize  = Long.parseLong((String) post.get("filesize", "")); // the size of the file
 
         prop.put("process", "0");
@@ -66,7 +66,7 @@ public final class transfer {
         	return prop;
         }
 
-        yacySeed otherseed = sb.webIndex.seedDB.get(otherpeer);
+        final yacySeed otherseed = sb.webIndex.seedDB.get(otherpeer);
         if ((otherseed == null) || (filename.indexOf("..") >= 0)) {
             // reject unknown peers: this does not appear fair, but anonymous senders are dangerous
             // reject paths that contain '..' because they are dangerous
@@ -75,7 +75,7 @@ public final class transfer {
             return prop;
         }
         
-        String otherpeerName = otherseed.hash + ":" + otherseed.getName();
+        final String otherpeerName = otherseed.hash + ":" + otherseed.getName();
         
         if (process.equals("permission")) {
             prop.put("process", "0");
@@ -83,7 +83,7 @@ public final class transfer {
                 // consolidation of cr files
                 //System.out.println("yacy/transfer:post=" + post.toString());
                 //String cansendprotocol = (String) post.get("can-send-protocol", "http");
-                String access = kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(otherpeer + ":" + filename)) + ":" + kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw("" + System.currentTimeMillis()));
+                final String access = kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(otherpeer + ":" + filename)) + ":" + kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw("" + System.currentTimeMillis()));
                 prop.put("response", "ok");
                 prop.put("process_access", access);
                 prop.put("process_address", sb.webIndex.seedDB.mySeed().getPublicAddress());
@@ -99,12 +99,12 @@ public final class transfer {
         if (process.equals("store")) {
             prop.put("process", "1");
             if (purpose.equals("crcon")) {
-                String fileString = post.get("filename$file");
-                String accesscode = post.get("access", "");   // one-time authentication
-                String md5 = post.get("md5", "");   // one-time authentication
+                final String fileString = post.get("filename$file");
+                final String accesscode = post.get("access", "");   // one-time authentication
+                final String md5 = post.get("md5", "");   // one-time authentication
                 //java.util.HashMap perm = sb.rankingPermissions;
                 //System.out.println("PERMISSIONDEBUG: accesscode=" + accesscode + ", permissions=" + perm.toString());
-                String grantedFile = sb.rankingPermissions.get(accesscode);
+                final String grantedFile = sb.rankingPermissions.get(accesscode);
                 prop.put("process_tt", "");
                 if ((grantedFile == null) || (!(grantedFile.equals(filename)))) {
                     // fraud-access of this interface
@@ -112,13 +112,13 @@ public final class transfer {
                     sb.getLog().logFine("RankingTransmission: denied " + otherpeerName + " to send CR file " + filename + ": wrong access code");
                 } else {
                     sb.rankingPermissions.remove(accesscode); // not needed any more
-                    File path = new File(sb.rankingPath, plasmaRankingDistribution.CR_OTHER);
+                    final File path = new File(sb.rankingPath, plasmaRankingDistribution.CR_OTHER);
                     path.mkdirs();
-                    File file = new File(path, filename);
+                    final File file = new File(path, filename);
                     try {
                         if (file.getCanonicalPath().toString().startsWith(path.getCanonicalPath().toString())){
                             serverFileUtils.copy(fileString.getBytes(), file);
-                            String md5t = serverCodings.encodeMD5Hex(file);
+                            final String md5t = serverCodings.encodeMD5Hex(file);
                             if (md5t.equals(md5)) {
                                 prop.put("response", "ok");
                                 sb.getLog().logFine("RankingTransmission: received from peer " + otherpeerName + " CR file " + filename);
@@ -131,7 +131,7 @@ public final class transfer {
                             prop.put("response", "io error");
                             return prop;
                         }
-                    } catch (IOException e) {
+                    } catch (final IOException e) {
                         prop.put("response", "io error");
                     }
                 }

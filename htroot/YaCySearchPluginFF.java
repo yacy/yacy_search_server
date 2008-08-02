@@ -37,15 +37,16 @@ public class YaCySearchPluginFF {
      * @param env the serverSwitch object holding all runtime-data
      * @return the rewrite-properties for the template
      */
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
-        plasmaSwitchboard sb = (plasmaSwitchboard) env;
-        serverObjects prop = new serverObjects();
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        final serverObjects prop = new serverObjects();
         
         // getting the http host header
-        String hostSocket = header.get(httpHeader.CONNECTION_PROP_HOST);
+        final String hostSocket = header.get(httpHeader.CONNECTION_PROP_HOST);
         
         String host = hostSocket;
-        int port = 80, pos = hostSocket.indexOf(":");        
+        int port = 80;
+		final int pos = hostSocket.indexOf(":");        
         if (pos != -1) {
             port = Integer.parseInt(hostSocket.substring(pos + 1));
             host = hostSocket.substring(0, pos);

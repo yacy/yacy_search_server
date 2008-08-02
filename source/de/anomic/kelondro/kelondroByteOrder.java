@@ -38,15 +38,15 @@ public interface kelondroByteOrder extends kelondroOrder<byte[]> {
     public static class StringOrder implements Comparator<String> {
 
     	public kelondroByteOrder baseOrder;
-    	public StringOrder(kelondroByteOrder base) {
+    	public StringOrder(final kelondroByteOrder base) {
     		this.baseOrder = base;
     	}
     	
-    	public StringOrder(kelondroOrder<byte[]> base) {
+    	public StringOrder(final kelondroOrder<byte[]> base) {
             this.baseOrder = (kelondroByteOrder) base;
         }
         
-        public int compare(String s1, String s2) {
+        public int compare(final String s1, final String s2) {
 			return baseOrder.compare(s1.getBytes(), s2.getBytes());
 		}
     	

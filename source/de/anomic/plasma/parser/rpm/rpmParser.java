@@ -75,26 +75,26 @@ public class rpmParser extends AbstractParser implements Parser {
         return SUPPORTED_MIME_TYPES;
     }
     
-    public plasmaParserDocument parse(yacyURL location, String mimeType, String charset,
-            InputStream source) throws ParserException {
+    public plasmaParserDocument parse(final yacyURL location, final String mimeType, final String charset,
+            final InputStream source) throws ParserException {
         File dstFile = null;
         try {
             dstFile = File.createTempFile("rpmParser",".tmp");
             serverFileUtils.copy(source,dstFile);
             return parse(location,mimeType,charset,dstFile);
-        } catch (Exception e) {            
+        } catch (final Exception e) {            
             return null;
         } finally {
             if (dstFile != null) {dstFile.delete();}            
         }        
     }    
     
-    public plasmaParserDocument parse(yacyURL location, String mimeType, String charset, File sourceFile) throws ParserException, InterruptedException {
+    public plasmaParserDocument parse(final yacyURL location, final String mimeType, final String charset, final File sourceFile) throws ParserException, InterruptedException {
         RPMFile rpmFile = null;        
         try {
             String summary = null, description = null, packager = null, name = sourceFile.getName();
-            HashMap<yacyURL, String> anchors = new HashMap<yacyURL, String>();
-            StringBuffer content = new StringBuffer();            
+            final HashMap<yacyURL, String> anchors = new HashMap<yacyURL, String>();
+            final StringBuffer content = new StringBuffer();            
             
             // opening the rpm file
             rpmFile = new RPMFile(sourceFile);
@@ -103,13 +103,13 @@ public class rpmParser extends AbstractParser implements Parser {
             rpmFile.parse();   
             
             // getting all header names
-            String[] headerNames = rpmFile.getTagNames();
+            final String[] headerNames = rpmFile.getTagNames();
             for (int i=0; i<headerNames.length; i++) {
                 // check for interruption
                 checkInterruption();
                 
                 // getting the next tag
-                DataTypeIf tag = rpmFile.getTag(headerNames[i]);
+                final DataTypeIf tag = rpmFile.getTag(headerNames[i]);
                 if (tag == null) continue;
                 
                 content.append(headerNames[i])
@@ -129,7 +129,7 @@ public class rpmParser extends AbstractParser implements Parser {
             rpmFile = null;
             if (summary == null) summary = name;
             
-            plasmaParserDocument theDoc = new plasmaParserDocument(
+            final plasmaParserDocument theDoc = new plasmaParserDocument(
                     location,
                     mimeType,
                     "UTF-8",
@@ -143,13 +143,13 @@ public class rpmParser extends AbstractParser implements Parser {
                     null); 
             
             return theDoc;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             if (e instanceof InterruptedException) throw (InterruptedException) e;
             if (e instanceof ParserException) throw (ParserException) e;
             
             throw new ParserException("Unexpected error while parsing rpm file. " + e.getMessage(),location); 
         } finally {
-            if (rpmFile != null) try { rpmFile.close(); } catch (Exception e) {/* ignore this */}
+            if (rpmFile != null) try { rpmFile.close(); } catch (final Exception e) {/* ignore this */}
         }
     }
     
@@ -158,17 +158,17 @@ public class rpmParser extends AbstractParser implements Parser {
         super.reset();
     }
     
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         try {
-            yacyURL contentUrl = new yacyURL(args[0], null);
+            final yacyURL contentUrl = new yacyURL(args[0], null);
             
-            rpmParser testParser = new rpmParser();
-            httpHeader reqHeader = new httpHeader();
+            final rpmParser testParser = new rpmParser();
+            final httpHeader reqHeader = new httpHeader();
             reqHeader.put(httpHeader.USER_AGENT, HTTPLoader.crawlerUserAgent);
-            byte[] content = HttpClient.wget(contentUrl.toString(), reqHeader, 10000);
-            ByteArrayInputStream input = new ByteArrayInputStream(content);
+            final byte[] content = HttpClient.wget(contentUrl.toString(), reqHeader, 10000);
+            final ByteArrayInputStream input = new ByteArrayInputStream(content);
             testParser.parse(contentUrl, "application/x-rpm", null, input);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             e.printStackTrace();
         }
     }

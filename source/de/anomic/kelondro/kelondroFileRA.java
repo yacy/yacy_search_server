@@ -32,11 +32,11 @@ public final class kelondroFileRA extends kelondroAbstractRA implements kelondro
 
     protected RandomAccessFile RAFile;
     
-    public kelondroFileRA(String file) throws IOException, FileNotFoundException {
+    public kelondroFileRA(final String file) throws IOException, FileNotFoundException {
         this(new File(file));
     }
 
-    public kelondroFileRA(File file) throws IOException, FileNotFoundException {
+    public kelondroFileRA(final File file) throws IOException, FileNotFoundException {
         this.name = file.getName();
         this.file = file;
         RAFile = new RandomAccessFile(file, "rw");
@@ -56,20 +56,20 @@ public final class kelondroFileRA extends kelondroAbstractRA implements kelondro
     }
 
     // pseudo-native method write
-    public void write(int b) throws IOException {
+    public void write(final int b) throws IOException {
         RAFile.write(b);
     }
 
-    public int read(byte[] b, int off, int len) throws IOException {
+    public int read(final byte[] b, final int off, final int len) throws IOException {
         return RAFile.read(b, off, len);
     }
 
-    public void write(byte[] b, int off, int len) throws IOException {
+    public void write(final byte[] b, final int off, final int len) throws IOException {
         // write to file
         RAFile.write(b, off, len);
     }
 
-    public void seek(long pos) throws IOException {
+    public void seek(final long pos) throws IOException {
         RAFile.seek(pos);
     }
 
@@ -86,8 +86,8 @@ public final class kelondroFileRA extends kelondroAbstractRA implements kelondro
     }
     
     // some static tools
-    public static void writeMap(File f, Map<String, String> map, String comment) throws IOException {
-        File fp = f.getParentFile();
+    public static void writeMap(final File f, final Map<String, String> map, final String comment) throws IOException {
+        final File fp = f.getParentFile();
         if (fp != null) fp.mkdirs();
         kelondroRA kra = null;
         try {
@@ -95,19 +95,19 @@ public final class kelondroFileRA extends kelondroAbstractRA implements kelondro
             kra.writeMap(map, comment);
             kra.close();
         } finally {
-            if (kra != null) try {kra.close();}catch(Exception e){}
+            if (kra != null) try {kra.close();}catch(final Exception e){}
         }
     }
 
-    public static Map<String, String> readMap(File f) throws IOException {
+    public static Map<String, String> readMap(final File f) throws IOException {
         kelondroRA kra = null;
         try {
             kra = new kelondroFileRA(f);
-            Map<String, String> map = kra.readMap();
+            final Map<String, String> map = kra.readMap();
             kra.close();
             return map;
         } finally {
-            if (kra != null) try {kra.close();}catch(Exception e){}
+            if (kra != null) try {kra.close();}catch(final Exception e){}
         }
     }
 

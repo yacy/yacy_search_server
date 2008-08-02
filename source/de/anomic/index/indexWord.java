@@ -47,7 +47,7 @@ public class indexWord {
     HashSet<Integer>         phrases;        // a set of handles to all phrases where this word appears
     public  kelondroBitfield flags;       // the flag bits for each word
 
-    public indexWord(int handle, int pip, int nop) {
+    public indexWord(final int handle, final int pip, final int nop) {
         this.count = 1;
         this.posInText = handle;
         this.posInPhrase = pip;
@@ -64,7 +64,7 @@ public class indexWord {
         return count;
     }
 
-    public void check(int i) {
+    public void check(final int i) {
         phrases.add(new Integer(i));
     }
 
@@ -76,25 +76,25 @@ public class indexWord {
     // static methods
 
     // create a word hash
-    public static final String word2hash(String word) {
+    public static final String word2hash(final String word) {
         return kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(word.toLowerCase())).substring(0, yacySeedDB.commonHashLength);
     }
     
-    public static final Set<String> words2hashSet(String[] words) {
-        TreeSet<String> hashes = new TreeSet<String>(kelondroBase64Order.enhancedComparator);
+    public static final Set<String> words2hashSet(final String[] words) {
+        final TreeSet<String> hashes = new TreeSet<String>(kelondroBase64Order.enhancedComparator);
         for (int i = 0; i < words.length; i++) hashes.add(word2hash(words[i]));
         return hashes;
     }
 
-    public static final String words2hashString(String[] words) {
-        StringBuffer sb = new StringBuffer();
+    public static final String words2hashString(final String[] words) {
+        final StringBuffer sb = new StringBuffer();
         for (int i = 0; i < words.length; i++) sb.append(word2hash(words[i]));
         return new String(sb);
     }
 
-    public static final TreeSet<String> words2hashes(Set<String> words) {
-        Iterator<String> i = words.iterator();
-        TreeSet<String> hashes = new TreeSet<String>(kelondroBase64Order.enhancedComparator);
+    public static final TreeSet<String> words2hashes(final Set<String> words) {
+        final Iterator<String> i = words.iterator();
+        final TreeSet<String> hashes = new TreeSet<String>(kelondroBase64Order.enhancedComparator);
         while (i.hasNext()) hashes.add(word2hash(i.next()));
         return hashes;
     }

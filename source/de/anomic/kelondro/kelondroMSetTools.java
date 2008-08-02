@@ -61,13 +61,13 @@ public class kelondroMSetTools {
     // - join by iterative tests (where we distinguish left-right and right-left tests)
 
     
-    public static <A, B> TreeMap<A, B> joinConstructive(Collection<TreeMap<A, B>> maps, boolean concatStrings) {
+    public static <A, B> TreeMap<A, B> joinConstructive(final Collection<TreeMap<A, B>> maps, final boolean concatStrings) {
         // this joins all TreeMap(s) contained in maps
         
         // first order entities by their size
-        TreeMap<Long, TreeMap<A, B>> orderMap = new TreeMap<Long, TreeMap<A, B>>();
+        final TreeMap<Long, TreeMap<A, B>> orderMap = new TreeMap<Long, TreeMap<A, B>>();
         TreeMap<A, B> singleMap;
-        Iterator<TreeMap<A, B>> i = maps.iterator();
+        final Iterator<TreeMap<A, B>> i = maps.iterator();
         int count = 0;
         while (i.hasNext()) {
             // get next entity:
@@ -103,17 +103,17 @@ public class kelondroMSetTools {
         return joinResult;
     }
     
-    public static <A, B> TreeMap<A, B> joinConstructive(TreeMap<A, B> map1, TreeMap<A, B> map2, boolean concatStrings) {
+    public static <A, B> TreeMap<A, B> joinConstructive(final TreeMap<A, B> map1, final TreeMap<A, B> map2, final boolean concatStrings) {
         // comparators must be equal
         if ((map1 == null) || (map2 == null)) return null;
         if (map1.comparator() != map2.comparator()) return null;
         if ((map1.size() == 0) || (map2.size() == 0)) return new TreeMap<A, B>(map1.comparator());
 
         // decide which method to use
-        int high = ((map1.size() > map2.size()) ? map1.size() : map2.size());
-        int low = ((map1.size() > map2.size()) ? map2.size() : map1.size());
-        int stepsEnum = 10 * (high + low - 1);
-        int stepsTest = 12 * log2a(high) * low;
+        final int high = ((map1.size() > map2.size()) ? map1.size() : map2.size());
+        final int low = ((map1.size() > map2.size()) ? map2.size() : map1.size());
+        final int stepsEnum = 10 * (high + low - 1);
+        final int stepsTest = 12 * log2a(high) * low;
 
         // start most efficient method
         if (stepsEnum > stepsTest) {
@@ -124,9 +124,9 @@ public class kelondroMSetTools {
     }
     
     @SuppressWarnings("unchecked")
-    private static <A, B> TreeMap<A, B> joinConstructiveByTest(TreeMap<A, B> small, TreeMap<A, B> large, boolean concatStrings) {
-        Iterator<Map.Entry<A, B>> mi = small.entrySet().iterator();
-        TreeMap<A, B> result = new TreeMap<A, B>(large.comparator());
+    private static <A, B> TreeMap<A, B> joinConstructiveByTest(final TreeMap<A, B> small, final TreeMap<A, B> large, final boolean concatStrings) {
+        final Iterator<Map.Entry<A, B>> mi = small.entrySet().iterator();
+        final TreeMap<A, B> result = new TreeMap<A, B>(large.comparator());
         Map.Entry<A, B> mentry1;
         B mobj2;
         while (mi.hasNext()) {
@@ -144,12 +144,12 @@ public class kelondroMSetTools {
     }
 
     @SuppressWarnings("unchecked")
-    private static <A, B> TreeMap<A, B> joinConstructiveByEnumeration(TreeMap<A, B> map1, TreeMap<A, B> map2, boolean concatStrings) {
+    private static <A, B> TreeMap<A, B> joinConstructiveByEnumeration(final TreeMap<A, B> map1, final TreeMap<A, B> map2, final boolean concatStrings) {
         // implement pairwise enumeration
-        Comparator<? super A> comp = map1.comparator();
-        Iterator<Map.Entry<A, B>> mi1 = map1.entrySet().iterator();
-        Iterator<Map.Entry<A, B>> mi2 = map2.entrySet().iterator();
-        TreeMap<A, B> result = new TreeMap<A, B>(map1.comparator());
+        final Comparator<? super A> comp = map1.comparator();
+        final Iterator<Map.Entry<A, B>> mi1 = map1.entrySet().iterator();
+        final Iterator<Map.Entry<A, B>> mi2 = map2.entrySet().iterator();
+        final TreeMap<A, B> result = new TreeMap<A, B>(map1.comparator());
         int c;
         if ((mi1.hasNext()) && (mi2.hasNext())) {
             Map.Entry<A, B> mentry1 = mi1.next();
@@ -175,17 +175,17 @@ public class kelondroMSetTools {
     }
     
     // now the same for set-set
-    public static <A> TreeSet<A> joinConstructive(TreeSet<A> set1, TreeSet<A> set2) {
+    public static <A> TreeSet<A> joinConstructive(final TreeSet<A> set1, final TreeSet<A> set2) {
     	// comparators must be equal
         if ((set1 == null) || (set2 == null)) return null;
         if (set1.comparator() != set2.comparator()) return null;
         if ((set1.size() == 0) || (set2.size() == 0)) return new TreeSet<A>(set1.comparator());
 
         // decide which method to use
-        int high = ((set1.size() > set2.size()) ? set1.size() : set2.size());
-        int low  = ((set1.size() > set2.size()) ? set2.size() : set1.size());
-        int stepsEnum = 10 * (high + low - 1);
-        int stepsTest = 12 * log2a(high) * low;
+        final int high = ((set1.size() > set2.size()) ? set1.size() : set2.size());
+        final int low  = ((set1.size() > set2.size()) ? set2.size() : set1.size());
+        final int stepsEnum = 10 * (high + low - 1);
+        final int stepsTest = 12 * log2a(high) * low;
 
         // start most efficient method
         if (stepsEnum > stepsTest) {
@@ -195,9 +195,9 @@ public class kelondroMSetTools {
         return joinConstructiveByEnumeration(set1, set2);
     }
 
-    private static <A> TreeSet<A> joinConstructiveByTest(TreeSet<A> small, TreeSet<A> large) {
-    	Iterator<A> mi = small.iterator();
-    	TreeSet<A> result = new TreeSet<A>(small.comparator());
+    private static <A> TreeSet<A> joinConstructiveByTest(final TreeSet<A> small, final TreeSet<A> large) {
+    	final Iterator<A> mi = small.iterator();
+    	final TreeSet<A> result = new TreeSet<A>(small.comparator());
     	A o;
     	while (mi.hasNext()) {
     		o = mi.next();
@@ -206,12 +206,12 @@ public class kelondroMSetTools {
     	return result;
     }
 
-    private static <A> TreeSet<A> joinConstructiveByEnumeration(TreeSet<A> set1, TreeSet<A> set2) {
+    private static <A> TreeSet<A> joinConstructiveByEnumeration(final TreeSet<A> set1, final TreeSet<A> set2) {
     	// implement pairvise enumeration
-    	Comparator<? super A> comp = set1.comparator();
-    	Iterator<A> mi = set1.iterator();
-    	Iterator<A> si = set2.iterator();
-    	TreeSet<A> result = new TreeSet<A>(set1.comparator());
+    	final Comparator<? super A> comp = set1.comparator();
+    	final Iterator<A> mi = set1.iterator();
+    	final Iterator<A> si = set2.iterator();
+    	final TreeSet<A> result = new TreeSet<A>(set1.comparator());
     	int c;
     	if ((mi.hasNext()) && (si.hasNext())) {
     		A mobj = mi.next();
@@ -233,17 +233,17 @@ public class kelondroMSetTools {
     }
     
     // now the same for set-set
-    public static <A> boolean anymatch(TreeSet<A> set1, TreeSet<A> set2) {
+    public static <A> boolean anymatch(final TreeSet<A> set1, final TreeSet<A> set2) {
 		// comparators must be equal
 		if ((set1 == null) || (set2 == null)) return false;
 		if (set1.comparator() != set2.comparator()) return false;
 		if ((set1.size() == 0) || (set2.size() == 0)) return false;
 
 		// decide which method to use
-		int high = ((set1.size() > set2.size()) ? set1.size() : set2.size());
-		int low = ((set1.size() > set2.size()) ? set2.size() : set1.size());
-		int stepsEnum = 10 * (high + low - 1);
-		int stepsTest = 12 * log2a(high) * low;
+		final int high = ((set1.size() > set2.size()) ? set1.size() : set2.size());
+		final int low = ((set1.size() > set2.size()) ? set2.size() : set1.size());
+		final int stepsEnum = 10 * (high + low - 1);
+		final int stepsTest = 12 * log2a(high) * low;
 
 		// start most efficient method
 		if (stepsEnum > stepsTest) {
@@ -253,8 +253,8 @@ public class kelondroMSetTools {
 		return anymatchByEnumeration(set1, set2);
 	}
 
-	private static <A> boolean anymatchByTest(TreeSet<A> small, TreeSet<A> large) {
-		Iterator<A> mi = small.iterator();
+	private static <A> boolean anymatchByTest(final TreeSet<A> small, final TreeSet<A> large) {
+		final Iterator<A> mi = small.iterator();
 		A o;
 		while (mi.hasNext()) {
 			o = mi.next();
@@ -263,11 +263,11 @@ public class kelondroMSetTools {
 		return false;
 	}
 
-    private static <A> boolean anymatchByEnumeration(TreeSet<A> set1, TreeSet<A> set2) {
+    private static <A> boolean anymatchByEnumeration(final TreeSet<A> set1, final TreeSet<A> set2) {
 		// implement pairvise enumeration
-		Comparator<? super A> comp = set1.comparator();
-		Iterator<A> mi = set1.iterator();
-		Iterator<A> si = set2.iterator();
+		final Comparator<? super A> comp = set1.comparator();
+		final Iterator<A> mi = set1.iterator();
+		final Iterator<A> si = set2.iterator();
 		int c;
 		if ((mi.hasNext()) && (si.hasNext())) {
 			A mobj = mi.next();
@@ -289,7 +289,7 @@ public class kelondroMSetTools {
     // ------------------------------------------------------------------------------------------------
     // exclude
 
-    public static <A, B> TreeMap<A, B> excludeConstructive(TreeMap<A, B> map, TreeSet<A> set) {
+    public static <A, B> TreeMap<A, B> excludeConstructive(final TreeMap<A, B> map, final TreeSet<A> set) {
         // comparators must be equal
         if (map == null) return null;
         if (set == null) return map;
@@ -299,9 +299,9 @@ public class kelondroMSetTools {
         // return excludeConstructiveByEnumeration(map, set);
     }
     
-    private static <A, B> TreeMap<A, B> excludeConstructiveByTestMapInSet(TreeMap<A, B> map, TreeSet<A> set) {
-        Iterator<A> mi = map.keySet().iterator();
-        TreeMap<A, B> result = new TreeMap<A, B>(map.comparator());
+    private static <A, B> TreeMap<A, B> excludeConstructiveByTestMapInSet(final TreeMap<A, B> map, final TreeSet<A> set) {
+        final Iterator<A> mi = map.keySet().iterator();
+        final TreeMap<A, B> result = new TreeMap<A, B>(map.comparator());
         A o;
         while (mi.hasNext()) {
             o = mi.next();
@@ -310,7 +310,7 @@ public class kelondroMSetTools {
         return result;
     }
     
-    public static <A, B> void excludeDestructive(TreeMap<A, B> map, TreeSet<A> set) {
+    public static <A, B> void excludeDestructive(final TreeMap<A, B> map, final TreeSet<A> set) {
         // comparators must be equal
         if (map == null) return;
         if (set == null) return;
@@ -323,18 +323,18 @@ public class kelondroMSetTools {
             excludeDestructiveByTestSetInMap(map, set);
     }
     
-    private static <A, B> void excludeDestructiveByTestMapInSet(TreeMap<A, B> map, TreeSet<A> set) {
-        Iterator<A> mi = map.keySet().iterator();
+    private static <A, B> void excludeDestructiveByTestMapInSet(final TreeMap<A, B> map, final TreeSet<A> set) {
+        final Iterator<A> mi = map.keySet().iterator();
         while (mi.hasNext()) if (set.contains(mi.next())) mi.remove();
     }
     
-    private static <A, B> void excludeDestructiveByTestSetInMap(TreeMap<A, B> map, TreeSet<A> set) {
-        Iterator<A> si = set.iterator();
+    private static <A, B> void excludeDestructiveByTestSetInMap(final TreeMap<A, B> map, final TreeSet<A> set) {
+        final Iterator<A> si = set.iterator();
         while (si.hasNext()) map.remove(si.next());
     }
     
     // and the same again with set-set
-    public static <A> void excludeDestructive(TreeSet<A> set1, TreeSet<A> set2) {
+    public static <A> void excludeDestructive(final TreeSet<A> set1, final TreeSet<A> set2) {
         // comparators must be equal
         if (set1 == null) return;
         if (set2 == null) return;
@@ -347,20 +347,20 @@ public class kelondroMSetTools {
             excludeDestructiveByTestLargeInSmall(set1, set2);
     }
     
-    private static <A> void excludeDestructiveByTestSmallInLarge(TreeSet<A> small, TreeSet<A> large) {
-        Iterator<A> mi = small.iterator();
+    private static <A> void excludeDestructiveByTestSmallInLarge(final TreeSet<A> small, final TreeSet<A> large) {
+        final Iterator<A> mi = small.iterator();
         while (mi.hasNext()) if (large.contains(mi.next())) mi.remove();
     }
     
-    private static <A> void excludeDestructiveByTestLargeInSmall(TreeSet<A> large, TreeSet<A> small) {
-        Iterator<A> si = small.iterator();
+    private static <A> void excludeDestructiveByTestLargeInSmall(final TreeSet<A> large, final TreeSet<A> small) {
+        final Iterator<A> si = small.iterator();
         while (si.hasNext()) large.remove(si.next());
     }
     
     // ------------------------------------------------------------------------------------------------
 
-    public static TreeMap<String, String> loadMap(String filename, String sep) {
-        TreeMap<String, String> map = new TreeMap<String, String>();
+    public static TreeMap<String, String> loadMap(final String filename, final String sep) {
+        final TreeMap<String, String> map = new TreeMap<String, String>();
         BufferedReader br = null;
         try {
             br = new BufferedReader(new InputStreamReader(new FileInputStream(filename)));
@@ -371,15 +371,15 @@ public class kelondroMSetTools {
                 if ((line.length() > 0) && (!(line.startsWith("#"))) && ((pos = line.indexOf(sep)) > 0))
                     map.put(line.substring(0, pos).trim().toLowerCase(), line.substring(pos + sep.length()).trim());
             }
-        } catch (IOException e) {            
+        } catch (final IOException e) {            
         } finally {
-            if (br != null) try { br.close(); } catch (Exception e) {}
+            if (br != null) try { br.close(); } catch (final Exception e) {}
         }
         return map;
     }
     
-    public static TreeMap<String, ArrayList<String>> loadMapMultiValsPerKey(String filename, String sep) {
-        TreeMap<String, ArrayList<String>> map = new TreeMap<String, ArrayList<String>>();
+    public static TreeMap<String, ArrayList<String>> loadMapMultiValsPerKey(final String filename, final String sep) {
+        final TreeMap<String, ArrayList<String>> map = new TreeMap<String, ArrayList<String>>();
         BufferedReader br = null;
         try {
             br = new BufferedReader(new InputStreamReader(new FileInputStream(filename)));
@@ -394,15 +394,15 @@ public class kelondroMSetTools {
                     map.get(key).add(value);
                 }
             }
-        } catch (IOException e) {            
+        } catch (final IOException e) {            
         } finally {
-            if (br != null) try { br.close(); } catch (Exception e) {}
+            if (br != null) try { br.close(); } catch (final Exception e) {}
         }
         return map;
     }
     
-    public static TreeSet<String> loadList(File file, Comparator<String> c) {
-        TreeSet<String> list = new TreeSet<String>(c);
+    public static TreeSet<String> loadList(final File file, final Comparator<String> c) {
+        final TreeSet<String> list = new TreeSet<String>(c);
         if (!(file.exists())) return list;
         
         BufferedReader br = null;
@@ -414,16 +414,16 @@ public class kelondroMSetTools {
                 if ((line.length() > 0) && (!(line.startsWith("#")))) list.add(line.trim().toLowerCase());
             }
             br.close();
-        } catch (IOException e) {            
+        } catch (final IOException e) {            
         } finally {
-            if (br != null) try{br.close();}catch(Exception e){}
+            if (br != null) try{br.close();}catch(final Exception e){}
         }
         return list;
     }
     
-    public static String setToString(Set<String> set, char separator) {
-        Iterator<String> i = set.iterator();
-        StringBuffer sb = new StringBuffer(set.size() * 7);
+    public static String setToString(final Set<String> set, final char separator) {
+        final Iterator<String> i = set.iterator();
+        final StringBuffer sb = new StringBuffer(set.size() * 7);
         if (i.hasNext()) sb.append(i.next());
         while (i.hasNext()) {
             sb.append(separator).append(i.next());
@@ -434,9 +434,9 @@ public class kelondroMSetTools {
     // ------------------------------------------------------------------------------------------------
 
     
-    public static void main(String[] args) {
-	TreeMap<String, String> m = new TreeMap<String, String>();
-	TreeMap<String, String> s = new TreeMap<String, String>();
+    public static void main(final String[] args) {
+	final TreeMap<String, String> m = new TreeMap<String, String>();
+	final TreeMap<String, String> s = new TreeMap<String, String>();
 	m.put("a", "a");
 	m.put("x", "x");
 	m.put("f", "f");

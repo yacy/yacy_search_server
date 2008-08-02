@@ -40,11 +40,11 @@ import de.anomic.yacy.yacyURL;
 
 public class urls {
     
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
-        plasmaSwitchboard sb = (plasmaSwitchboard) env;
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         
         // insert default values
-        serverObjects prop = new serverObjects();
+        final serverObjects prop = new serverObjects();
         prop.put("iam", sb.webIndex.seedDB.mySeed().hash);
         prop.put("response", "rejected - insufficient call parameters");
         prop.put("channel_title", "");
@@ -57,7 +57,7 @@ public class urls {
         
         if (post.get("call", "").equals("remotecrawl")) {
             // perform a remote crawl url handover
-            int stackType = NoticedURL.STACK_TYPE_LIMIT;
+            final int stackType = NoticedURL.STACK_TYPE_LIMIT;
             int count = Math.min(100, post.getInt("count", 0));
             int c = 0;
             CrawlEntry entry;
@@ -65,7 +65,7 @@ public class urls {
             while ((count > 0) && (sb.crawlQueues.noticeURL.stackSize(stackType) > 0)) {
                 try {
                     entry = sb.crawlQueues.noticeURL.pop(stackType, false);
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     break;
                 }
                 if (entry == null) break;
@@ -100,9 +100,9 @@ public class urls {
         
         if (post.get("call", "").equals("urlhashlist")) {
             // retrieve a list of urls from the LURL-db by a given list of url hashes
-            String urlhashes = post.get("hashes", "");
+            final String urlhashes = post.get("hashes", "");
             if (urlhashes.length() % 12 != 0) return prop;
-            int count = urlhashes.length() / 12;
+            final int count = urlhashes.length() / 12;
         	int c = 0;
         	indexURLReference entry;
         	indexURLReference.Components comp;

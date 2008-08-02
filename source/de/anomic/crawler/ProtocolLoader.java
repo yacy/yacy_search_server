@@ -42,13 +42,13 @@ public final class ProtocolLoader {
     private static final long minDelay = 250; // milliseconds; 4 accesses per second
     private static final ConcurrentHashMap<String, Long> accessTime = new ConcurrentHashMap<String, Long>(); // to protect targets from DDoS
     
-    private plasmaSwitchboard sb;
-    private serverLog log;
-    private HashSet<String> supportedProtocols;
-    private HTTPLoader httpLoader;
-    private FTPLoader ftpLoader;
+    private final plasmaSwitchboard sb;
+    private final serverLog log;
+    private final HashSet<String> supportedProtocols;
+    private final HTTPLoader httpLoader;
+    private final FTPLoader ftpLoader;
     
-    public ProtocolLoader(plasmaSwitchboard sb, serverLog log) {
+    public ProtocolLoader(final plasmaSwitchboard sb, final serverLog log) {
         this.sb = sb;
         this.log = log;
         this.supportedProtocols = new HashSet<String>(Arrays.asList(new String[]{"http","https","ftp"}));
@@ -58,7 +58,7 @@ public final class ProtocolLoader {
         ftpLoader = new FTPLoader(sb, log);
     }
     
-    public boolean isSupportedProtocol(String protocol) {
+    public boolean isSupportedProtocol(final String protocol) {
         if ((protocol == null) || (protocol.length() == 0)) return false;
         return this.supportedProtocols.contains(protocol.trim().toLowerCase());
     }
@@ -68,10 +68,10 @@ public final class ProtocolLoader {
         return (HashSet<String>) this.supportedProtocols.clone();
     }
     
-    public plasmaHTCache.Entry load(CrawlEntry entry, String parserMode) {
+    public plasmaHTCache.Entry load(final CrawlEntry entry, final String parserMode) {
         // getting the protocol of the next URL                
-        String protocol = entry.url().getProtocol();
-        String host = entry.url().getHost();
+        final String protocol = entry.url().getProtocol();
+        final String host = entry.url().getHost();
         
         // check if this loads a page from localhost, which must be prevented to protect the server
         // against attacks to the administration interface when localhost access is granted
@@ -79,13 +79,13 @@ public final class ProtocolLoader {
         
         // check access time
         if (!entry.url().isLocal()) {
-            Long lastAccess = accessTime.get(host);
+            final Long lastAccess = accessTime.get(host);
             long wait = 0;
             if (lastAccess != null) wait = Math.max(0, minDelay + lastAccess.longValue() - System.currentTimeMillis());
             if (wait > 0) {
                 // force a sleep here. Instead just sleep we clean up the accessTime map
-                long untilTime = System.currentTimeMillis() + wait;
-                Iterator<Map.Entry<String, Long>> i = accessTime.entrySet().iterator();
+                final long untilTime = System.currentTimeMillis() + wait;
+                final Iterator<Map.Entry<String, Long>> i = accessTime.entrySet().iterator();
                 Map.Entry<String, Long> e;
                 while (i.hasNext()) {
                     e = i.next();
@@ -93,7 +93,7 @@ public final class ProtocolLoader {
                     if (System.currentTimeMillis() - e.getValue().longValue() > minDelay) i.remove();
                 }
                 if (System.currentTimeMillis() < untilTime)
-                    try {Thread.sleep(untilTime - System.currentTimeMillis());} catch (InterruptedException ee) {}
+                    try {Thread.sleep(untilTime - System.currentTimeMillis());} catch (final InterruptedException ee) {}
             }
         }
         accessTime.put(host, System.currentTimeMillis());
@@ -106,7 +106,7 @@ public final class ProtocolLoader {
         return null;
     }
     
-    public String process(CrawlEntry entry, String parserMode) {
+    public String process(final CrawlEntry entry, final String parserMode) {
         // load a resource, store it to htcache and push queue entry to switchboard queue
         // returns null if everything went fine, a fail reason string if a problem occurred
         plasmaHTCache.Entry h;
@@ -114,10 +114,10 @@ public final class ProtocolLoader {
             h = load(entry, parserMode);
             entry.setStatus("loaded");
             if (h == null) return "load failed";
-            boolean stored = sb.htEntryStoreProcess(h);
+            final boolean stored = sb.htEntryStoreProcess(h);
             entry.setStatus("stored-" + ((stored) ? "ok" : "fail"));
             return (stored) ? null : "not stored";
-        } catch (Exception e) {
+        } catch (final Exception e) {
             log.logWarning("problem loading " + entry.url().toString(), e);
             return "load error - " + e.getMessage();
         }

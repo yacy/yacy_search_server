@@ -40,9 +40,9 @@ import de.anomic.yacy.yacySeed;
 
 public final class list {
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
         if (post == null || env == null) throw new NullPointerException("post: " + post + ", sb: " + env);
-        plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
@@ -54,7 +54,7 @@ public final class list {
         
         String otherPeerName = null;
         if (post.containsKey("iam")) {
-            yacySeed bla = sb.webIndex.seedDB.get(post.get("iam", ""));
+            final yacySeed bla = sb.webIndex.seedDB.get(post.get("iam", ""));
             if (bla != null) otherPeerName = bla.getName();
         }
         if (otherPeerName == null) otherPeerName = header.get(httpHeader.CONNECTION_PROP_CLIENTIP);
@@ -72,8 +72,8 @@ public final class list {
 
             if (filenamesarray.length > 0){
                 for (int i = 0;i < filenamesarray.length; i++) {
-                    String filename = filenamesarray[i];
-                    File fileObj = new File(listsPath,filename);
+                    final String filename = filenamesarray[i];
+                    final File fileObj = new File(listsPath,filename);
                     out.append(listManager.getListString(fileObj, false)).append(serverCore.CRLF_STRING);
                 }
             }

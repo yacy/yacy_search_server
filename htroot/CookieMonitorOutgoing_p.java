@@ -36,11 +36,11 @@ import de.anomic.server.serverSwitch;
 
 public class CookieMonitorOutgoing_p {
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> sb) {
-        plasmaSwitchboard switchboard = (plasmaSwitchboard) sb;
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> sb) {
+        final plasmaSwitchboard switchboard = (plasmaSwitchboard) sb;
 
         // return variable that accumulates replacements
-        serverObjects prop = new serverObjects();
+        final serverObjects prop = new serverObjects();
 
 	// handle on/off button
         if(post != null) {
@@ -55,11 +55,11 @@ public class CookieMonitorOutgoing_p {
         prop.put("monitorCookies.on", switchboard.getConfigBool("proxy.monitorCookies", false) ? "1":"0");
         prop.put("monitorCookies.off", !switchboard.getConfigBool("proxy.monitorCookies", false) ? "1":"0");
 
-        int maxCount = 100;
+        final int maxCount = 100;
         int entCount = 0;
         int tmpCount = 0;
         boolean dark = true;
-        Iterator<Map.Entry<String, Object[]>> i = switchboard.outgoingCookies.entrySet().iterator();
+        final Iterator<Map.Entry<String, Object[]>> i = switchboard.outgoingCookies.entrySet().iterator();
         Map.Entry<String, Object[]> entry;
         String host, client;
         Object[] cookies;

@@ -49,16 +49,16 @@ public class queues_p {
     public static final String STATE_PAUSED = "paused";
     
     private static SimpleDateFormat dayFormatter = new SimpleDateFormat("yyyy/MM/dd", Locale.US);
-    private static String daydate(Date date) {
+    private static String daydate(final Date date) {
         if (date == null) return "";
         return dayFormatter.format(date);
     }
     
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
         // return variable that accumulates replacements
-        plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         //wikiCode wikiTransformer = new wikiCode(switchboard);
-        serverObjects prop = new serverObjects();
+        final serverObjects prop = new serverObjects();
         if (post == null || !post.containsKey("html"))
             prop.setLocalized(false);
         prop.put("rejected", "0");
@@ -79,13 +79,13 @@ public class queues_p {
             int i=0; //counter
             
             // getting all entries that are currently in process
-            ArrayList<IndexingStack.QueueEntry> entryList = new ArrayList<IndexingStack.QueueEntry>();
+            final ArrayList<IndexingStack.QueueEntry> entryList = new ArrayList<IndexingStack.QueueEntry>();
             entryList.addAll(sb.webIndex.queuePreStack.getActiveQueueEntries());
-            int inProcessCount = entryList.size();
+            final int inProcessCount = entryList.size();
             
             // getting all enqueued entries
             if ((sb.webIndex.queuePreStack.size() > 0)) {
-                Iterator<IndexingStack.QueueEntry> i1 = sb.webIndex.queuePreStack.entryIterator(false);
+                final Iterator<IndexingStack.QueueEntry> i1 = sb.webIndex.queuePreStack.entryIterator(false);
                 while (i1.hasNext()) entryList.add(i1.next());
             }
             
@@ -94,10 +94,10 @@ public class queues_p {
             
             int ok = 0;
             for (i = 0; i < size; i++) {
-                boolean inProcess = i < inProcessCount;
+                final boolean inProcess = i < inProcessCount;
                 pcentry = entryList.get(i);
                 if ((pcentry != null) && (pcentry.url() != null)) {
-                    long entrySize = pcentry.size();
+                    final long entrySize = pcentry.size();
                     totalSize += entrySize;
                     initiator = sb.webIndex.seedDB.getConnected(pcentry.initiator());
                     prop.put("list-indexing_"+i+"_profile", (pcentry.profile() != null) ? pcentry.profile().name() : "deleted");
@@ -121,7 +121,7 @@ public class queues_p {
         if (sb.crawlQueues.size() == 0) {
             prop.put("list-loader", "0");
         } else {
-            CrawlEntry[] w = sb.crawlQueues.activeWorkerEntries();
+            final CrawlEntry[] w = sb.crawlQueues.activeWorkerEntries();
             int count = 0;
             for (int i = 0; i < w.length; i++)  {
                 if (w[i] == null) continue;
@@ -162,7 +162,7 @@ public class queues_p {
     }
     
     
-    public static final void addNTable(plasmaSwitchboard sb, serverObjects prop, String tableName, ArrayList<CrawlEntry> crawlerList) {
+    public static final void addNTable(final plasmaSwitchboard sb, final serverObjects prop, final String tableName, final ArrayList<CrawlEntry> crawlerList) {
 
         int showNum = 0;
         CrawlEntry urle;

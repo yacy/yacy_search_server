@@ -111,7 +111,7 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
         protected int            FREEC; // counter of free elements in list of free Nodes
         protected kelondroHandle FREEH; // pointer to first element in list of free Nodes, empty = NUL
 
-        protected usageControl(boolean init) throws IOException {
+        protected usageControl(final boolean init) throws IOException {
             if (init) {
                 this.USEDC = 0;
                 this.FREEC = 0;
@@ -120,8 +120,8 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
                 readfree();
                 readused();
                 try {
-                    int rest = (int) ((entryFile.length() - POS_NODES) % recordsize);// == 0 : "rest = " + ((entryFile.length()  - POS_NODES) % ((long) recordsize)) + ", USEDC = " + this.USEDC + ", FREEC = " + this.FREEC  + ", recordsize = " + recordsize + ", file = " + filename;
-                    int calculated_used = (int) ((entryFile.length() - POS_NODES) / recordsize);
+                    final int rest = (int) ((entryFile.length() - POS_NODES) % recordsize);// == 0 : "rest = " + ((entryFile.length()  - POS_NODES) % ((long) recordsize)) + ", USEDC = " + this.USEDC + ", FREEC = " + this.FREEC  + ", recordsize = " + recordsize + ", file = " + filename;
+                    final int calculated_used = (int) ((entryFile.length() - POS_NODES) / recordsize);
                     if ((rest != 0) || (calculated_used != this.USEDC + this.FREEC)) {
                         theLogger.log(Level.WARNING, "USEDC inconsistency at startup: calculated_used = " + calculated_used + ", USEDC = " + this.USEDC + ", FREEC = " + this.FREEC  + ", recordsize = " + recordsize + ", file = " + filename);
                         this.USEDC = calculated_used - this.FREEC;
@@ -131,13 +131,13 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
                         }
                         writeused(true);
                     }
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     assert false;
                 }
             }
         }
         
-        synchronized void writeused(boolean finalwrite) throws IOException {
+        synchronized void writeused(final boolean finalwrite) throws IOException {
             // we write only at close time, not in between. othervise, the read/write head
             // needs to run up and own all the way between the beginning and the end of the
             // file for each record. We check consistency beteen file size and
@@ -181,7 +181,7 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
             return this.USEDC;
         }
         
-        protected synchronized void dispose(kelondroHandle h) throws IOException {
+        protected synchronized void dispose(final kelondroHandle h) throws IOException {
             // delete element with handle h
             // this element is then connected to the deleted-chain and can be
             // re-used change counter
@@ -190,7 +190,7 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
             //synchronized (USAGE) {
                 synchronized (entryFile) {
                     assert (h.index < USEDC + FREEC) : "USEDC = " + USEDC + ", FREEC = " + FREEC + ", h.index = " + h.index;
-                    long sp = seekpos(h);
+                    final long sp = seekpos(h);
                     assert (sp <= entryFile.length() + ROW.objectsize) : h.index + "/" + sp + " exceeds file size " + entryFile.length();
                     USEDC--;
                     FREEC++;
@@ -216,7 +216,7 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
                 synchronized (entryFile) {
                     if (USAGE.FREEC == 0) {
                         // generate new entry
-                        int index = USAGE.allCount();
+                        final int index = USAGE.allCount();
                         entryFile.write(seekpos(index) + overhead, chunk, 0, ROW.objectsize); // occupy space, othervise the USAGE computaton does not work
                         USAGE.USEDC++;
                         writeused(false);
@@ -236,7 +236,7 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
                         } else {
                             //System.out.println("*DEBUG* ALLOCATED DELETED INDEX " + index);
                             // check for valid seek position
-                            long seekp = seekpos(USAGE.FREEH);
+                            final long seekp = seekpos(USAGE.FREEH);
                             if (seekp >= entryFile.length()) {
                                 // this is a severe inconsistency. try to heal..
                                 serverLog.logSevere("kelondroTray/" + filename, "new Handle: lost " + USAGE.FREEC + " marked nodes; seek position " + seekp + "/" + USAGE.FREEH.index + " out of file size " + entryFile.length() + "/" + ((entryFile.length() - POS_NODES) / recordsize));
@@ -259,7 +259,7 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
             //}
         }
         
-        protected synchronized void allocateRecord(int index, byte[] bulkchunk, int offset) throws IOException {
+        protected synchronized void allocateRecord(final int index, byte[] bulkchunk, int offset) throws IOException {
             // in case that the handle index was created outside this class,
             // this method ensures that the USAGE counters are consistent with the
             // new handle index
@@ -309,37 +309,37 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
         
         private synchronized void checkConsistency() {
             if ((debugmode) && (entryFile != null)) try { // in debug mode
-                long efl = entryFile.length();
+                final long efl = entryFile.length();
                 assert ((efl - POS_NODES) % (recordsize)) == 0 : "rest = " + ((entryFile.length()  - POS_NODES) % (recordsize)) + ", USEDC = " + this.USEDC + ", FREEC = " + this.FREEC  + ", recordsize = " + recordsize + ", file = " + filename;
-                long calculated_used = (efl - POS_NODES) / (recordsize);
+                final long calculated_used = (efl - POS_NODES) / (recordsize);
                 if (calculated_used != this.USEDC + this.FREEC) logFailure("INCONSISTENCY in USED computation: calculated_used = " + calculated_used + ", USEDC = " + this.USEDC + ", FREEC = " + this.FREEC  + ", recordsize = " + recordsize + ", file = " + filename);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 assert false;
             }
         }
     }
 
-    public static int staticsize(File file) {
+    public static int staticsize(final File file) {
         if (!(file.exists())) return 0;
         try {
-            kelondroRA ra = new kelondroFileRA(file.getCanonicalPath());
-            kelondroIOChunks entryFile = new kelondroRAIOChunks(ra, ra.name());
+            final kelondroRA ra = new kelondroFileRA(file.getCanonicalPath());
+            final kelondroIOChunks entryFile = new kelondroRAIOChunks(ra, ra.name());
 
-            int used = entryFile.readInt(POS_USEDC); // works only if consistency with file size is given
+            final int used = entryFile.readInt(POS_USEDC); // works only if consistency with file size is given
             entryFile.close();
             ra.close();
             return used;
-        } catch (FileNotFoundException e) {
+        } catch (final FileNotFoundException e) {
             return 0;
-        } catch (IOException e) {
+        } catch (final IOException e) {
             return 0;
         }
     }
 
     
-    public kelondroAbstractRecords(File file, boolean useNodeCache,
-                           short ohbytec, short ohhandlec,
-                           kelondroRow rowdef, int FHandles, int txtProps, int txtPropWidth) throws IOException {
+    public kelondroAbstractRecords(final File file, final boolean useNodeCache,
+                           final short ohbytec, final short ohhandlec,
+                           final kelondroRow rowdef, final int FHandles, final int txtProps, final int txtPropWidth) throws IOException {
         // opens an existing file or creates a new file
         // file: the file that shall be created
         // oha : overhead size array of four bytes: oha[0]=# of bytes, oha[1]=# of shorts, oha[2]=# of ints, oha[3]=# of longs, 
@@ -356,21 +356,21 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
         if (file.exists()) {
             // opens an existing tree
             this.filename = file.getCanonicalPath();
-            kelondroRA raf = new kelondroFileRA(this.filename);
+            final kelondroRA raf = new kelondroFileRA(this.filename);
             //kelondroRA raf = new kelondroBufferedRA(new kelondroFileRA(this.filename), 1024, 100);
             //kelondroRA raf = new kelondroCachedRA(new kelondroFileRA(this.filename), 5000000, 1000);
             //kelondroRA raf = new kelondroNIOFileRA(this.filename, (file.length() < 4000000), 10000);
             initExistingFile(raf, useNodeCache);
         } else {
             this.filename = file.getCanonicalPath();
-            kelondroRA raf = new kelondroFileRA(this.filename);
+            final kelondroRA raf = new kelondroFileRA(this.filename);
             // kelondroRA raf = new kelondroBufferedRA(new kelondroFileRA(this.filename), 1024, 100);
             // kelondroRA raf = new kelondroNIOFileRA(this.filename, false, 10000);
             initNewFile(raf, FHandles, txtProps);
         }
         assignRowdef(rowdef);
         if (fileExisted) {
-        	kelondroByteOrder oldOrder = readOrderType();
+        	final kelondroByteOrder oldOrder = readOrderType();
             if ((oldOrder != null) && (!(oldOrder.equals(rowdef.objectOrder)))) {
                 writeOrderType(); // write new order type
                 //throw new IOException("wrong object order upon initialization. new order is " + rowdef.objectOrder.toString() + ", old order was " + oldOrder.toString());
@@ -381,10 +381,10 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
         }
     }
 
-    public kelondroAbstractRecords(kelondroRA ra, String filename, boolean useCache,
-                           short ohbytec, short ohhandlec,
-                           kelondroRow rowdef, int FHandles, int txtProps, int txtPropWidth,
-                           boolean exitOnFail) {
+    public kelondroAbstractRecords(final kelondroRA ra, final String filename, final boolean useCache,
+                           final short ohbytec, final short ohhandlec,
+                           final kelondroRow rowdef, final int FHandles, final int txtProps, final int txtPropWidth,
+                           final boolean exitOnFail) {
         // this always creates a new file
         this.fileExisted = false;
         this.filename = filename;
@@ -395,7 +395,7 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
         
         try {
             initNewFile(ra, FHandles, txtProps);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             logFailure("cannot create / " + e.getMessage());
             if (exitOnFail) System.exit(-1);
         }
@@ -405,7 +405,7 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
 
     public void clear() throws IOException {
         kelondroRA ra = this.entryFile.getRA();
-        File f = ra.file();
+        final File f = ra.file();
         assert f != null;
         this.entryFile.close();
         f.delete();
@@ -413,7 +413,7 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
         initNewFile(ra, this.HANDLES.length, this.TXTPROPS.length);
     }
     
-    private void initNewFile(kelondroRA ra, int FHandles, int txtProps) throws IOException {
+    private void initNewFile(final kelondroRA ra, final int FHandles, final int txtProps) throws IOException {
 
         // create new Chunked IO
         this.entryFile = new kelondroRAIOChunks(ra, ra.name());
@@ -464,7 +464,7 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
             entryFile.writeInt(POS_HANDLES + 4 * i, kelondroHandle.NUL);
             HANDLES[i] = new kelondroHandle(kelondroHandle.NUL);
         }
-        byte[] ea = new byte[TXTPROPW];
+        final byte[] ea = new byte[TXTPROPW];
         for (int j = 0; j < TXTPROPW; j++) ea[j] = 0;
         for (int i = 0; i < this.TXTPROPS.length; i++) {
             entryFile.write(POS_TXTPROPS + TXTPROPW * i, ea);
@@ -474,12 +474,12 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
     }
 
     private static final byte[] fillSpaceChunk(int size) {
-        byte[] chunk = new byte[size];
+        final byte[] chunk = new byte[size];
         while (--size >= 0) chunk[size] = (byte) 0xff;
         return chunk;
     }
     
-    public void setDescription(byte[] description) throws IOException {
+    public void setDescription(final byte[] description) throws IOException {
         if (description.length > LEN_DESCR)
             entryFile.write(POS_DESCR, description, 0, LEN_DESCR);
         else
@@ -487,44 +487,44 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
     }
     
     public byte[] getDescription() throws IOException {
-        byte[] b = new byte[LEN_DESCR];
+        final byte[] b = new byte[LEN_DESCR];
         entryFile.readFully(POS_DESCR, b, 0, LEN_DESCR);
         return b;
     }
     
-    public void setLogger(Logger newLogger) {
+    public void setLogger(final Logger newLogger) {
         this.theLogger = newLogger;
     }
 
-    public void logWarning(String message) {
+    public void logWarning(final String message) {
         if (this.theLogger == null)
             System.err.println("KELONDRO WARNING " + this.filename + ": " + message);
         else
             this.theLogger.warning("KELONDRO WARNING " + this.filename + ": " + message);
     }
 
-    public void logFailure(String message) {
+    public void logFailure(final String message) {
         if (this.theLogger == null)
             System.err.println("KELONDRO FAILURE " + this.filename + ": " + message);
         else
             this.theLogger.severe("KELONDRO FAILURE " + this.filename + ": " + message);
     }
 
-    public void logFine(String message) {
+    public void logFine(final String message) {
         if (this.theLogger == null)
             System.out.println("KELONDRO DEBUG " + this.filename + ": " + message);
         else
             this.theLogger.fine("KELONDRO DEBUG " + this.filename + ": " + message);
     }
 
-    public kelondroAbstractRecords(kelondroRA ra, String filename, boolean useNodeCache) throws IOException{
+    public kelondroAbstractRecords(final kelondroRA ra, final String filename, final boolean useNodeCache) throws IOException{
         this.fileExisted = false;
         this.filename = filename;
         initExistingFile(ra, useNodeCache);
         readOrderType();
     }
 
-    private void initExistingFile(kelondroRA ra, boolean useBuffer) throws IOException {
+    private void initExistingFile(final kelondroRA ra, final boolean useBuffer) throws IOException {
         // read from Chunked IO
         if (useBuffer) {
             this.entryFile = new kelondroBufferedIOChunks(ra, ra.name(), 0, 30000 + random.nextLong() % 30000);
@@ -538,7 +538,7 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
         this.OHBYTEC = entryFile.readShort(POS_OHBYTEC);
         this.OHHANDLEC = entryFile.readShort(POS_OHHANDLEC);
 
-        kelondroColumn[] COLDEFS = new kelondroColumn[entryFile.readShort(POS_COLUMNS)];
+        final kelondroColumn[] COLDEFS = new kelondroColumn[entryFile.readShort(POS_COLUMNS)];
         this.HANDLES = new kelondroHandle[entryFile.readInt(POS_INTPROPC)];
         this.TXTPROPS = new byte[entryFile.readInt(POS_TXTPROPC)][];
         this.TXTPROPW = entryFile.readInt(POS_TXTPROPW);
@@ -578,15 +578,15 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
     private void writeOrderType() {
         try {
             setDescription((this.ROW.objectOrder == null) ? "__".getBytes() : this.ROW.objectOrder.signature().getBytes());
-        } catch (IOException e) {}
+        } catch (final IOException e) {}
     }
     
     private kelondroByteOrder readOrderType() {
         try {
-            byte[] d = getDescription();
-            String s = new String(d).substring(0, 2);
+            final byte[] d = getDescription();
+            final String s = new String(d).substring(0, 2);
             return kelondroNaturalOrder.orderBySignature(s);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             return null;
         }
     }
@@ -595,7 +595,7 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
         return filename;
     }
     
-    public synchronized final byte[] bulkRead(int start, int end) throws IOException {
+    public synchronized final byte[] bulkRead(final int start, final int end) throws IOException {
         // a bulk read simply reads a piece of memory from the record file
         // this makes only sense if there are no overhead bytes or pointer
         // the end value is OUTSIDE the record interval
@@ -603,17 +603,17 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
         assert OHHANDLEC == 0;
         assert start >= 0;
         assert end <= USAGE.allCount();
-        byte[] bulk = new byte[(end - start) * recordsize];
-        long bulkstart = POS_NODES + ((long) recordsize * (long) start);
+        final byte[] bulk = new byte[(end - start) * recordsize];
+        final long bulkstart = POS_NODES + ((long) recordsize * (long) start);
         entryFile.readFully(bulkstart, bulk, 0, bulk.length);
         return bulk;
     }
 
-    protected synchronized void deleteNode(kelondroHandle handle) throws IOException {
+    protected synchronized void deleteNode(final kelondroHandle handle) throws IOException {
         USAGE.dispose(handle);
     }
     
-    protected void printChunk(kelondroRow.Entry chunk) {
+    protected void printChunk(final kelondroRow.Entry chunk) {
         for (int j = 0; j < chunk.columns(); j++)
             System.out.print(new String(chunk.getColBytes(j)) + ", ");
     }
@@ -622,7 +622,7 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
         return this.ROW;
     }
     
-    private final void assignRowdef(kelondroRow rowdef) {
+    private final void assignRowdef(final kelondroRow rowdef) {
         // overwrites a given rowdef
         // the new rowdef must be compatible
         /*
@@ -643,12 +643,12 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
         this.ROW = rowdef;
     }
 
-    protected final long seekpos(kelondroHandle handle) {
+    protected final long seekpos(final kelondroHandle handle) {
         assert (handle.index >= 0): "handle index too low: " + handle.index;
         return POS_NODES + ((long) recordsize * (long) handle.index);
     }
     
-    protected final long seekpos(int index) {
+    protected final long seekpos(final int index) {
         assert (index >= 0): "handle index too low: " + index;
         return POS_NODES + ((long) recordsize * index);
     }
@@ -658,20 +658,20 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
         return this.HANDLES.length;
     }
 
-    protected final void setHandle(int pos, kelondroHandle handle) throws IOException {
+    protected final void setHandle(final int pos, kelondroHandle handle) throws IOException {
         if (pos >= HANDLES.length) throw new IllegalArgumentException("setHandle: handle array exceeded");
         if (handle == null) handle = new kelondroHandle(kelondroHandle.NUL);
         HANDLES[pos] = handle;
         entryFile.writeInt(POS_HANDLES + 4 * pos, handle.index);
     }
 
-    protected final kelondroHandle getHandle(int pos) {
+    protected final kelondroHandle getHandle(final int pos) {
         if (pos >= HANDLES.length) throw new IllegalArgumentException("getHandle: handle array exceeded");
         return (HANDLES[pos].index == kelondroHandle.NUL) ? null : HANDLES[pos];
     }
 
     // custom texts
-    public final void setText(int pos, byte[] text) throws IOException {
+    public final void setText(final int pos, byte[] text) throws IOException {
         if (pos >= TXTPROPS.length) throw new IllegalArgumentException("setText: text array exceeded");
         if (text.length > TXTPROPW) throw new IllegalArgumentException("setText: text lemgth exceeded");
         if (text == null) text = new byte[0];
@@ -679,7 +679,7 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
         entryFile.write(POS_TXTPROPS + TXTPROPW * pos, text);
     }
 
-    public final byte[] getText(int pos) {
+    public final byte[] getText(final int pos) {
         if (pos >= TXTPROPS.length) throw new IllegalArgumentException("getText: text array exceeded");
         return TXTPROPS[pos];
     }
@@ -698,12 +698,12 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
         return USAGE.FREEC;
     }
     
-    protected final Set<kelondroHandle> deletedHandles(long maxTime) throws kelondroException, IOException {
+    protected final Set<kelondroHandle> deletedHandles(final long maxTime) throws kelondroException, IOException {
         // initialize set with deleted nodes; the set contains Handle-Objects
         // this may last only the given maxInitTime
         // if the initTime is exceeded, the method throws an kelondroException
-        TreeSet<kelondroHandle> markedDeleted = new TreeSet<kelondroHandle>();
-        long timeLimit = (maxTime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxTime;
+        final TreeSet<kelondroHandle> markedDeleted = new TreeSet<kelondroHandle>();
+        final long timeLimit = (maxTime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxTime;
         long seekp;
         synchronized (USAGE) {
             if (USAGE.FREEC != 0) {
@@ -752,7 +752,7 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
             USAGE.writeused(true);
             this.entryFile.close();
             theLogger.fine("file '" + this.filename + "' closed.");
-        } catch (IOException e) {
+        } catch (final IOException e) {
             theLogger.severe("file '" + this.filename + "': failed to close.");
             e.printStackTrace();
         }
@@ -764,7 +764,7 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
         this.entryFile = null;
     }
 
-    protected final static String[] line2args(String line) {
+    protected final static String[] line2args(final String line) {
         // parse the command line
         if ((line == null) || (line.length() == 0)) return null;
         String args[];
@@ -778,7 +778,7 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
         return args;
     }
 
-    protected final static boolean equals(byte[] a, byte[] b) {
+    protected final static boolean equals(final byte[] a, final byte[] b) {
         if (a == b) return true;
         if ((a == null) || (b == null)) return false;
         if (a.length != b.length) return false;
@@ -786,21 +786,21 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
         return true;
     }
     
-    public final static void NUL2bytes(byte[] b, int offset) {
+    public final static void NUL2bytes(final byte[] b, final int offset) {
         b[offset    ] = (byte) (0XFF & (kelondroHandle.NUL >> 24));
         b[offset + 1] = (byte) (0XFF & (kelondroHandle.NUL >> 16));
         b[offset + 2] = (byte) (0XFF & (kelondroHandle.NUL >>  8));
         b[offset + 3] = (byte) (0XFF & kelondroHandle.NUL);
     }
     
-    public final static void int2bytes(long i, byte[] b, int offset) {
+    public final static void int2bytes(final long i, final byte[] b, final int offset) {
         b[offset    ] = (byte) (0XFF & (i >> 24));
         b[offset + 1] = (byte) (0XFF & (i >> 16));
         b[offset + 2] = (byte) (0XFF & (i >>  8));
         b[offset + 3] = (byte) (0XFF & i);
     }
     
-    public final static int bytes2int(byte[] b, int offset) {
+    public final static int bytes2int(final byte[] b, final int offset) {
         return (
             ((b[offset    ] & 0xff) << 24) |
             ((b[offset + 1] & 0xff) << 16) |
@@ -845,8 +845,8 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
         System.out.println("  Recordsize : " + this.recordsize + " bytes");
         System.out.println("--");
         System.out.println("DELETED HANDLES");
-        Set<kelondroHandle> dh =  deletedHandles(-1);
-        Iterator<kelondroHandle> dhi = dh.iterator();
+        final Set<kelondroHandle> dh =  deletedHandles(-1);
+        final Iterator<kelondroHandle> dhi = dh.iterator();
         kelondroHandle h;
         while (dhi.hasNext()) {
             h = dhi.next();
@@ -860,7 +860,7 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
     }
     
 
-    public final Iterator<EntryIndex> contentRows(long maxInitTime) throws kelondroException {
+    public final Iterator<EntryIndex> contentRows(final long maxInitTime) throws kelondroException {
         return new contentRowIterator(maxInitTime);
     }
 
@@ -868,10 +868,10 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
         // iterator that iterates all kelondroRow.Entry-objects in the file
         // all records that are marked as deleted are omitted
         
-        private Iterator<kelondroNode> nodeIterator;
+        private final Iterator<kelondroNode> nodeIterator;
         private EntryIndex nextEntry;
         
-        public contentRowIterator(long maxInitTime) {
+        public contentRowIterator(final long maxInitTime) {
             nodeIterator = contentNodes(maxInitTime);
             if (nodeIterator.hasNext()) nextEntry = next0(); else nextEntry = null;
         }
@@ -885,15 +885,15 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
                 return null;
             }
             try {
-                kelondroNode n = nodeIterator.next();
+                final kelondroNode n = nodeIterator.next();
                 return row().newEntryIndex(n.getValueRow(), n.handle().index);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw new kelondroException(filename, e.getMessage());
             }
         }
         
         public EntryIndex next() {
-            EntryIndex ni = nextEntry;
+            final EntryIndex ni = nextEntry;
             byte[] b;
             nextEntry = null;
             while (nodeIterator.hasNext()) {
@@ -911,11 +911,11 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
         
     }
     
-    protected final Iterator<kelondroNode> contentNodes(long maxInitTime) throws kelondroException {
+    protected final Iterator<kelondroNode> contentNodes(final long maxInitTime) throws kelondroException {
         // returns an iterator of Node-objects that are not marked as 'deleted'
         try {
             return new contentNodeIterator(maxInitTime);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             return new HashSet<kelondroNode>().iterator();
         }
     }
@@ -925,15 +925,15 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
         // all records that are marked as deleted are ommitted
         // this is probably also the fastest way to iterate all objects
         
-        private Set<kelondroHandle> markedDeleted;
-        private kelondroHandle pos;
-        private byte[] bulk;
-        private int bulksize;
+        private final Set<kelondroHandle> markedDeleted;
+        private final kelondroHandle pos;
+        private final byte[] bulk;
+        private final int bulksize;
         private int bulkstart;  // the offset of the bulk array to the node position
-        private boolean fullyMarked;
+        private final boolean fullyMarked;
         private kelondroNode next;
         
-        public contentNodeIterator(long maxInitTime) throws IOException, kelondroException {
+        public contentNodeIterator(final long maxInitTime) throws IOException, kelondroException {
             // initialize markedDeleted set of deleted Handles
             markedDeleted = deletedHandles(maxInitTime);
             fullyMarked = (maxInitTime < 0);
@@ -950,7 +950,7 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
         }
 
         public kelondroNode next() {
-            kelondroNode n = next;
+            final kelondroNode n = next;
             next = next0();
             return n;
         }
@@ -969,11 +969,11 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
                 kelondroNode nn;
                 try {
                     nn = next00();
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     serverLog.logSevere("kelondroCachedRecords", filename + " failed with " + e.getMessage(), e);
                     return null;
                 }
-                byte[] key = nn.getKey();
+                final byte[] key = nn.getKey();
                 if ((key == null) ||
                     ((key.length == 1) && (key[0] == (byte) 0x80)) || // the NUL pointer ('lost' chain terminator)
                     (key.length < 3) ||
@@ -982,7 +982,7 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
                     ((key.length  > 0) && (key[0] == 0))              // a 'lost' pointer within a deleted-chain
                    ) {
                     // this is a deleted node; probably not commited with dispose
-                    if (fullyMarked) try {USAGE.dispose(nn.handle());} catch (IOException e) {} // mark this now as deleted
+                    if (fullyMarked) try {USAGE.dispose(nn.handle());} catch (final IOException e) {} // mark this now as deleted
                     continue;
                 }
                 return nn;
@@ -994,7 +994,7 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
             // see if the next record is in the bulk, and if not re-fill the bulk
             if (pos.index >= (bulkstart + bulksize)) {
                 bulkstart = pos.index;
-                int maxlength = Math.min(USAGE.allCount() - bulkstart, bulksize);
+                final int maxlength = Math.min(USAGE.allCount() - bulkstart, bulksize);
                 if (((POS_NODES) + ((long) bulkstart) * ((long) recordsize)) < 0)
                     serverLog.logSevere("kelondroCachedRecords", "DEBUG: negative offset. POS_NODES = " + POS_NODES + ", bulkstart = " + bulkstart + ", recordsize = " + recordsize);
                 if ((maxlength * recordsize) < 0)
@@ -1005,7 +1005,7 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
                POS_NODES = 302, bulkstart = 820, recordsize = 2621466
                POS_NODES = 302, bulkstart = 13106, recordsize = 163866 */                
             // read node from bulk
-            kelondroNode n = newNode(new kelondroHandle(pos.index), bulk, (pos.index - bulkstart) * recordsize);
+            final kelondroNode n = newNode(new kelondroHandle(pos.index), bulk, (pos.index - bulkstart) * recordsize);
             pos.index++;
             while ((markedDeleted.contains(pos)) && (pos.index < USAGE.allCount())) pos.index++;
             return n;
@@ -1017,11 +1017,11 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
         
     }
     
-    public static byte[] trimCopy(byte[] a, int offset, int length) {
+    public static byte[] trimCopy(final byte[] a, final int offset, int length) {
         if (length > a.length - offset) length = a.length - offset;
         while ((length > 0) && (a[offset + length - 1] == 0)) length--;
         if (length == 0) return null;
-        byte[] b = new byte[length];
+        final byte[] b = new byte[length];
         System.arraycopy(a, offset, b, 0, length);
         return b;
     }

@@ -33,12 +33,11 @@ import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyTray;
 import de.anomic.yacy.yacyVersion;
 
 public class Steering {
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> ss) {
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> ss) {
         if (post == null || ss == null) { return new serverObjects(); }
 
         final plasmaSwitchboard sb = (plasmaSwitchboard) ss;
@@ -67,9 +66,9 @@ public class Steering {
         }
         
         if (post.containsKey("update")) {
-            boolean devenvironment = yacyVersion.combined2prettyVersion(sb.getConfig("version","0.1")).startsWith("dev");
-            String releaseFileName = post.get("releaseinstall", "");
-            File releaseFile = new File(sb.getRootPath(), "DATA/RELEASE/".replace("/", File.separator) + releaseFileName);
+            final boolean devenvironment = yacyVersion.combined2prettyVersion(sb.getConfig("version","0.1")).startsWith("dev");
+            final String releaseFileName = post.get("releaseinstall", "");
+            final File releaseFile = new File(sb.getRootPath(), "DATA/RELEASE/".replace("/", File.separator) + releaseFileName);
             if ((!devenvironment) && (releaseFile.length() > 0) && (releaseFile.exists())) {
                 yacyVersion.deployRelease(releaseFile);
             }

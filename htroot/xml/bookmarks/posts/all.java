@@ -38,11 +38,11 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 public class all {
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
         // return variable that accumulates replacements
-        plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
-        boolean isAdmin=switchboard.verifyAuthentication(header, true);
-        serverObjects prop = new serverObjects();
+        final plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
+        final boolean isAdmin=switchboard.verifyAuthentication(header, true);
+        final serverObjects prop = new serverObjects();
         
         Iterator<String> it;
         if(post != null && post.containsKey("tag")){
@@ -52,7 +52,7 @@ public class all {
         }
         
         // if an extended xml should be used
-        boolean extendedXML = (post != null && post.containsKey("extendedXML"));
+        final boolean extendedXML = (post != null && post.containsKey("extendedXML"));
         
         int count=0;
         bookmarksDB.Bookmark bookmark;

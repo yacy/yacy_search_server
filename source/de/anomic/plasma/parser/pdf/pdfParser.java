@@ -74,7 +74,7 @@ public class pdfParser extends AbstractParser implements Parser {
         return SUPPORTED_MIME_TYPES;
     }
     
-    public plasmaParserDocument parse(yacyURL location, String mimeType, String charset, InputStream source) throws ParserException, InterruptedException {
+    public plasmaParserDocument parse(final yacyURL location, final String mimeType, final String charset, final InputStream source) throws ParserException, InterruptedException {
         
         PDDocument theDocument = null;
         Writer writer = null;
@@ -93,14 +93,14 @@ public class pdfParser extends AbstractParser implements Parser {
             checkInterruption();
             
             // creating a pdf parser
-            PDFParser parser = new PDFParser(source);
+            final PDFParser parser = new PDFParser(source);
             parser.parse();
                         
             // check for interruption
             checkInterruption();
             
             // creating a text stripper
-            PDFTextStripper stripper = new PDFTextStripper();
+            final PDFTextStripper stripper = new PDFTextStripper();
             theDocument = parser.getPDDocument();
             
             if (theDocument.isEncrypted()) {
@@ -111,7 +111,7 @@ public class pdfParser extends AbstractParser implements Parser {
             }
             
             // extracting some metadata
-            PDDocumentInformation theDocInfo = theDocument.getDocumentInformation();            
+            final PDDocumentInformation theDocInfo = theDocument.getDocumentInformation();            
             if (theDocInfo != null) {
                 docTitle = theDocInfo.getTitle();
                 docSubject = theDocInfo.getSubject();
@@ -138,7 +138,7 @@ public class pdfParser extends AbstractParser implements Parser {
             plasmaParserDocument theDoc = null;
             
             if (writer instanceof serverCharBuffer) {
-                byte[] contentBytes = ((serverCharBuffer)writer).toString().getBytes("UTF-8");
+                final byte[] contentBytes = ((serverCharBuffer)writer).toString().getBytes("UTF-8");
                 theDoc = new plasmaParserDocument(
                         location,
                         mimeType,
@@ -168,21 +168,21 @@ public class pdfParser extends AbstractParser implements Parser {
             
             return theDoc;
         }
-        catch (Exception e) {       
+        catch (final Exception e) {       
             if (e instanceof InterruptedException) throw (InterruptedException) e;
             if (e instanceof ParserException) throw (ParserException) e;
             
             // close the writer
-            if (writer != null) try { writer.close(); } catch (Exception ex) {/* ignore this */}
+            if (writer != null) try { writer.close(); } catch (final Exception ex) {/* ignore this */}
             
             // delete the file
-            if (writerFile != null) try { writerFile.delete(); } catch (Exception ex)  {/* ignore this */}
+            if (writerFile != null) try { writerFile.delete(); } catch (final Exception ex)  {/* ignore this */}
             
             e.printStackTrace();
             throw new ParserException("Unexpected error while parsing pdf file. " + e.getMessage(),location); 
         } finally {
-            if (theDocument != null) try { theDocument.close(); } catch (Exception e) {/* ignore this */}
-            if (writer != null)      try { writer.close(); }      catch (Exception e) {/* ignore this */}
+            if (theDocument != null) try { theDocument.close(); } catch (final Exception e) {/* ignore this */}
+            if (writer != null)      try { writer.close(); }      catch (final Exception e) {/* ignore this */}
             Thread.currentThread().setPriority(Thread.NORM_PRIORITY);
         }
     }
@@ -196,7 +196,7 @@ public class pdfParser extends AbstractParser implements Parser {
      * test
      * @param args
      */
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         if(args.length > 0 && args[0].length() > 0) {
             // file
             final File pdfFile = new File(args[0]);
@@ -211,13 +211,13 @@ public class pdfParser extends AbstractParser implements Parser {
                 try {
                     document = parser.parse(null, "application/pdf", null, pdfFile);
                     
-                } catch (ParserException e) {
+                } catch (final ParserException e) {
                     System.err.println("Cannot parse file "+ pdfFile.getAbsolutePath());
                     e.printStackTrace();
-                } catch (InterruptedException e) {
+                } catch (final InterruptedException e) {
                     System.err.println("Interrupted while parsing!");
                     e.printStackTrace();
-                } catch (NoClassDefFoundError e) {
+                } catch (final NoClassDefFoundError e) {
                     System.err.println("class not found: " + e.getMessage());
                 }
                 
@@ -232,7 +232,7 @@ public class pdfParser extends AbstractParser implements Parser {
                     try {
                         // write file
                         serverFileUtils.copy(document.getText(), new File("parsedPdf.txt"));
-                    } catch (IOException e) {
+                    } catch (final IOException e) {
                         System.err.println("error saving parsed document");
                         e.printStackTrace();
                     }

@@ -61,14 +61,14 @@ public class kelondroSQLTable implements kelondroIndex {
     
     private Connection theDBConnection = null;
     private final kelondroByteOrder order = new kelondroNaturalOrder(true);
-    private kelondroRow rowdef;
+    private final kelondroRow rowdef;
     
-    public kelondroSQLTable(String dbType, kelondroRow rowdef) throws Exception {
+    public kelondroSQLTable(final String dbType, final kelondroRow rowdef) throws Exception {
         this.rowdef = rowdef;
         openDatabaseConnection(dbType);
     }
     
-    private void openDatabaseConnection(String dbType) throws Exception{
+    private void openDatabaseConnection(final String dbType) throws Exception{
 
         if (dbType == null) throw new IllegalArgumentException(); 
 
@@ -82,12 +82,12 @@ public class kelondroSQLTable implements kelondroIndex {
         }                
         try {            
             Class.forName(dbDriverStr).newInstance();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new Exception ("Unable to load the jdbc driver: " + e.getMessage(),e);
         }
         try {
             this.theDBConnection = DriverManager.getConnection (dbConnStr,this.db_usr_str,this.db_pwd_str);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new Exception ("Unable to establish a database connection: " + e.getMessage(),e);
         }
         
@@ -100,7 +100,7 @@ public class kelondroSQLTable implements kelondroIndex {
     public void close() {
         if (this.theDBConnection != null) try {
             this.theDBConnection.close();
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             e.printStackTrace();
         }
         this.theDBConnection = null;
@@ -109,13 +109,13 @@ public class kelondroSQLTable implements kelondroIndex {
     public int size() {
         int size = -1;
         try {
-            String sqlQuery = new String
+            final String sqlQuery = new String
             (
                 "SELECT count(value) from test"
             );
             
-            PreparedStatement sqlStatement = this.theDBConnection.prepareStatement(sqlQuery); 
-            ResultSet result = sqlStatement.executeQuery();
+            final PreparedStatement sqlStatement = this.theDBConnection.prepareStatement(sqlQuery); 
+            final ResultSet result = sqlStatement.executeQuery();
             
             while (result.next()) {
                 size = result.getInt(1);
@@ -125,7 +125,7 @@ public class kelondroSQLTable implements kelondroIndex {
             sqlStatement.close();
             
             return size;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             e.printStackTrace();
             return -1;
         }
@@ -135,10 +135,10 @@ public class kelondroSQLTable implements kelondroIndex {
         return this.rowdef;
     }
     
-    public boolean has(byte[] key) {
+    public boolean has(final byte[] key) {
         try {
             return (get(key) != null);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             return false;
         }
     }
@@ -147,18 +147,18 @@ public class kelondroSQLTable implements kelondroIndex {
         return new ArrayList<kelondroRowCollection>();
     }
     
-    public kelondroRow.Entry get(byte[] key) throws IOException {
+    public kelondroRow.Entry get(final byte[] key) throws IOException {
         try {
-            String sqlQuery = new String
+            final String sqlQuery = new String
             (
                 "SELECT value from test where hash = ?"
             );
             
-            PreparedStatement sqlStatement = this.theDBConnection.prepareStatement(sqlQuery); 
+            final PreparedStatement sqlStatement = this.theDBConnection.prepareStatement(sqlQuery); 
             sqlStatement.setString(1, new String(key));
             
             byte[] value = null;
-            ResultSet result = sqlStatement.executeQuery();
+            final ResultSet result = sqlStatement.executeQuery();
             while (result.next()) {
                 value = result.getBytes("value");
             }  
@@ -167,28 +167,28 @@ public class kelondroSQLTable implements kelondroIndex {
             sqlStatement.close();
             
             if (value == null) return null;
-            kelondroRow.Entry entry = this.rowdef.newEntry(value);
+            final kelondroRow.Entry entry = this.rowdef.newEntry(value);
             return entry;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new IOException(e.getMessage());
         }
     }
 
-    public synchronized void putMultiple(List<kelondroRow.Entry> rows) throws IOException {
-        Iterator<kelondroRow.Entry> i = rows.iterator();
+    public synchronized void putMultiple(final List<kelondroRow.Entry> rows) throws IOException {
+        final Iterator<kelondroRow.Entry> i = rows.iterator();
         while (i.hasNext()) put(i.next());
     }
     
-    public kelondroRow.Entry put(kelondroRow.Entry row, Date entryDate) throws IOException {
+    public kelondroRow.Entry put(final kelondroRow.Entry row, final Date entryDate) throws IOException {
         return put(row);
     }
     
-    public kelondroRow.Entry put(kelondroRow.Entry row) throws IOException {
+    public kelondroRow.Entry put(final kelondroRow.Entry row) throws IOException {
         try {
             
-            kelondroRow.Entry oldEntry = remove(row.getColBytes(0));            
+            final kelondroRow.Entry oldEntry = remove(row.getColBytes(0));            
             
-            String sqlQuery = new String
+            final String sqlQuery = new String
             (
                     "INSERT INTO test (" +
                     "hash, " +
@@ -197,7 +197,7 @@ public class kelondroSQLTable implements kelondroIndex {
             );                
             
             
-            PreparedStatement sqlStatement = this.theDBConnection.prepareStatement(sqlQuery);     
+            final PreparedStatement sqlStatement = this.theDBConnection.prepareStatement(sqlQuery);     
             
             sqlStatement.setString(1, new String(row.getColString(0, null)));
             sqlStatement.setBytes(2, row.bytes());
@@ -206,41 +206,41 @@ public class kelondroSQLTable implements kelondroIndex {
             sqlStatement.close();
             
             return oldEntry;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new IOException(e.getMessage());
         }
     }
 
-    public synchronized boolean addUnique(kelondroRow.Entry row) throws IOException {
+    public synchronized boolean addUnique(final kelondroRow.Entry row) throws IOException {
         throw new UnsupportedOperationException();
     }
     
-    public synchronized void addUnique(kelondroRow.Entry row, Date entryDate) {
+    public synchronized void addUnique(final kelondroRow.Entry row, final Date entryDate) {
         throw new UnsupportedOperationException();
     }
     
-    public synchronized int addUniqueMultiple(List<kelondroRow.Entry> rows) throws IOException {
+    public synchronized int addUniqueMultiple(final List<kelondroRow.Entry> rows) throws IOException {
         throw new UnsupportedOperationException();
     }
     
-    public kelondroRow.Entry remove(byte[] key) throws IOException {
+    public kelondroRow.Entry remove(final byte[] key) throws IOException {
         try {
             
-            kelondroRow.Entry entry =  this.get(key);
+            final kelondroRow.Entry entry =  this.get(key);
             if (entry == null) return entry;
             
-            String sqlQuery = new String
+            final String sqlQuery = new String
             (
                     "DELETE FROM test WHERE hash = ?"
             );                
             
             
-            PreparedStatement sqlStatement = this.theDBConnection.prepareStatement(sqlQuery);                 
+            final PreparedStatement sqlStatement = this.theDBConnection.prepareStatement(sqlQuery);                 
             sqlStatement.setString(1, new String(key));
             sqlStatement.execute();
             
             return entry;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new IOException(e.getMessage());
         }
     }
@@ -249,12 +249,12 @@ public class kelondroSQLTable implements kelondroIndex {
         return null;
     }
     
-    public kelondroCloneableIterator<kelondroRow.Entry> rows(boolean up, byte[] startKey) throws IOException {
+    public kelondroCloneableIterator<kelondroRow.Entry> rows(final boolean up, final byte[] startKey) throws IOException {
         // Objects are of type kelondroRow.Entry
         return null;
     }
 
-    public kelondroCloneableIterator<byte[]> keys(boolean up, byte[] startKey) {
+    public kelondroCloneableIterator<byte[]> keys(final boolean up, final byte[] startKey) {
         // Objects are of type byte[]
         return null;
     }
@@ -264,7 +264,7 @@ public class kelondroSQLTable implements kelondroIndex {
         return 0;
     }
 
-    public int columnSize(int column) {
+    public int columnSize(final int column) {
         // TODO Auto-generated method stub
         return 0;
     }

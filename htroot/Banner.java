@@ -42,8 +42,8 @@ import de.anomic.ymage.ymageMatrix;
 /** draw a banner with information about the peer */
 public class Banner {
 
-    public static ymageMatrix respond(httpHeader header, serverObjects post, serverSwitch<?> env) throws IOException {
-        plasmaSwitchboard sb = (plasmaSwitchboard) env;
+    public static ymageMatrix respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) throws IOException {
+        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final String IMAGE = "htroot/env/grafics/yacy.gif";
         int width = 468;
         int height = 60;
@@ -65,15 +65,15 @@ public class Banner {
         int    myppm   = 0;
         double myqph   = 0;
         String type    = "";
-        String network = env.getConfig("network.unit.name", "unspecified").toUpperCase();
-        int    peers   = sb.webIndex.seedDB.sizeConnected() + 1; // the '+ 1': the own peer is not included in sizeConnected()
+        final String network = env.getConfig("network.unit.name", "unspecified").toUpperCase();
+        final int    peers   = sb.webIndex.seedDB.sizeConnected() + 1; // the '+ 1': the own peer is not included in sizeConnected()
         long   nlinks  = sb.webIndex.seedDB.countActiveURL();
         long   nwords  = sb.webIndex.seedDB.countActiveRWI();
-        double nqpm    = sb.webIndex.seedDB.countActiveQPM();
+        final double nqpm    = sb.webIndex.seedDB.countActiveQPM();
         long   nppm    = sb.webIndex.seedDB.countActivePPM();
         double nqph    = 0;
 
-        yacySeed seed = sb.webIndex.seedDB.mySeed();
+        final yacySeed seed = sb.webIndex.seedDB.mySeed();
         if (seed != null){
             name    = seed.get(yacySeed.NAME, "-").toUpperCase();
             links   = Long.parseLong(seed.get(yacySeed.LCOUNT, "0"));
@@ -103,7 +103,7 @@ public class Banner {
         }
 
         if (!plasmaGrafics.logoIsLoaded()) {
-            BufferedImage logo = ImageIO.read(new File(IMAGE));
+            final BufferedImage logo = ImageIO.read(new File(IMAGE));
             return plasmaGrafics.getBannerPicture(1000, width, height, bgcolor, textcolor, bordercolor, name, links, words, type, myppm, network, peers, nlinks, nwords, nqph, nppm, logo);
         }
         

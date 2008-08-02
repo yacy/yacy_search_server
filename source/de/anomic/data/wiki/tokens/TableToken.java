@@ -43,9 +43,9 @@ public class TableToken extends AbstractToken {
 	private static final String[] blockElementNames = new String[] { "table", "tr", "td" };
 	
 	protected void parse() {
-		String[] t = text.split("\n");
+		final String[] t = text.split("\n");
 		String[] tds;
-		StringBuffer sb = new StringBuffer();
+		final StringBuffer sb = new StringBuffer();
 		sb.append("<table");
 		if (t[0].length() > 2) sb.append(parseTableProperties(t[0].substring(2)));
 		sb.append(">\n");
@@ -96,11 +96,11 @@ public class TableToken extends AbstractToken {
       * @return A string that only contains table properties.
       */
     private static StringBuffer parseTableProperties(final String properties) {
-        String[] values = properties.replaceAll("&quot;", "").split("[= ]");     //splitting the string at = and blanks
-        StringBuffer sb = new StringBuffer(properties.length());
+        final String[] values = properties.replaceAll("&quot;", "").split("[= ]");     //splitting the string at = and blanks
+        final StringBuffer sb = new StringBuffer(properties.length());
         String key, value;
         String[] posVals;
-        int numberofvalues = values.length;
+        final int numberofvalues = values.length;
         for (int i=0; i<numberofvalues; i++) {
         	key = values[i].trim();
             if (key.equals("nowrap")) {
@@ -121,14 +121,14 @@ public class TableToken extends AbstractToken {
         return sb;
     }
     
-    private static StringBuffer addPair(String key, String value, StringBuffer sb) {
+    private static StringBuffer addPair(final String key, final String value, final StringBuffer sb) {
     	return sb.append(" ").append(key).append("=\"").append(value).append("\"");
     }
 	
 	public Pattern[] getRegex() { return pattern; }
 	public String[] getBlockElementNames() { return blockElementNames; }
 	
-	public boolean setText(String text, int patternNr) {
+	public boolean setText(final String text, final int patternNr) {
 		this.text = text;
 		this.parsed = false;
 		this.markup = null;

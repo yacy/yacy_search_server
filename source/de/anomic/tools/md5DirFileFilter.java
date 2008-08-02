@@ -31,7 +31,7 @@ import java.io.FilenameFilter;
 
 public class md5DirFileFilter implements FilenameFilter {
 
-    public boolean accept(File dir, String name) {
+    public boolean accept(final File dir, final String name) {
         return !(name.startsWith("dir.") || name.endsWith(".md5"));
     }
 

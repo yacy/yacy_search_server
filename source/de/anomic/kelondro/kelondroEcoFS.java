@@ -53,7 +53,7 @@ import java.util.Iterator;
 public class kelondroEcoFS {
     
     private RandomAccessFile raf;
-    private File tablefile;
+    private final File tablefile;
     /**
      * number of bytes in one record
      */
@@ -63,7 +63,8 @@ public class kelondroEcoFS {
      * number of entries in buffer
      */
     private int cachecount, buffercount;
-    private byte[] cache, buffer, zero;
+    private byte[] cache, buffer;
+	final byte[]	zero;
     
     /**
      * stay below hard disc cache (is that necessary?)
@@ -72,7 +73,7 @@ public class kelondroEcoFS {
     private static final int maxWriteBuffer = 4 * 1024;
     
     
-    public kelondroEcoFS(File tablefile, int recordsize) throws IOException {
+    public kelondroEcoFS(final File tablefile, final int recordsize) throws IOException {
         this.tablefile = tablefile;
         this.recordsize = recordsize;
 
@@ -86,17 +87,17 @@ public class kelondroEcoFS {
             FileOutputStream fos = null;
             try {
                 fos = new FileOutputStream(tablefile);
-            } catch (FileNotFoundException e) {
+            } catch (final FileNotFoundException e) {
                 // should not happen
                 e.printStackTrace();
             }
-            try { if (fos != null) fos.close(); } catch (IOException e) {}
+            try { if (fos != null) fos.close(); } catch (final IOException e) {}
         }
         
         // open an existing table file
         try {
             raf = new RandomAccessFile(tablefile, "rw");
-        } catch (FileNotFoundException e) {
+        } catch (final FileNotFoundException e) {
             // should never happen
             e.printStackTrace();
         }
@@ -115,9 +116,9 @@ public class kelondroEcoFS {
      * @param recordsize
      * @return number of records in table
      */
-    public static long tableSize(File tablefile, long recordsize) {
+    public static long tableSize(final File tablefile, final long recordsize) {
         if (!tablefile.exists()) return 0;
-        long size = tablefile.length();
+        final long size = tablefile.length();
         assert size % recordsize == 0;
         return size / recordsize;
     }
@@ -148,7 +149,7 @@ public class kelondroEcoFS {
      * @param index
      * @return the index offset inside the cache or -1 if the index is not in the cache 
      */
-    private int inCache(long index) {
+    private int inCache(final long index) {
         if ((index >= this.cacheindex) && (index < this.cacheindex + this.cachecount)) {
             return (int) (index - this.cacheindex);
         }
@@ -162,8 +163,8 @@ public class kelondroEcoFS {
      * @return the index offset inside the buffer or -1 if the index is not in the buffer 
      * @throws IOException
      */
-    private int inBuffer(long index) throws IOException {
-        long fs = filesize();
+    private int inBuffer(final long index) throws IOException {
+        final long fs = filesize();
         if ((index >= fs) && (index < fs + this.buffercount)) {
             return (int) (index - fs);
         }
@@ -185,7 +186,7 @@ public class kelondroEcoFS {
         if (inCache(index) >= 0) return;
         
         // calculate new start position
-        long fs = this.filesize();
+        final long fs = this.filesize();
         if (index + this.cache.length / this.recordsize > fs) {
             index = fs - this.cache.length / this.recordsize;
         }
@@ -211,7 +212,7 @@ public class kelondroEcoFS {
         try {
             raf.seek(raf.length());
             raf.write(this.buffer, 0, this.recordsize * this.buffercount);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
@@ -224,7 +225,7 @@ public class kelondroEcoFS {
         // then close the file
         try {
             raf.close();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             e.printStackTrace();
         }
         raf = null;
@@ -238,12 +239,12 @@ public class kelondroEcoFS {
      * @param start offset in b to store data
      * @throws IOException
      */
-    public synchronized void get(long index, byte[] b, int start) throws IOException {
+    public synchronized void get(final long index, final byte[] b, final int start) throws IOException {
         assert b.length - start >= this.recordsize;
         if (index >= size()) throw new IndexOutOfBoundsException("kelondroEcoFS.get(" + index + ") outside bounds (" + this.size() + ")");
         // check if index is inside of cache
         int p = inCache(index);
-        int q = (p >= 0) ? -1 : inBuffer(index);
+        final int q = (p >= 0) ? -1 : inBuffer(index);
         if ((p < 0) && (q < 0)) {
             // the index is outside of cache and buffer index. shift cache window
             fillCache(index);
@@ -263,9 +264,9 @@ public class kelondroEcoFS {
         assert false;
     }
 
-    public synchronized void put(long index, byte[] b, int start) throws IOException {
+    public synchronized void put(final long index, final byte[] b, final int start) throws IOException {
         assert b.length - start >= this.recordsize;
-        long s = size();
+        final long s = size();
         if (index > s) throw new IndexOutOfBoundsException("kelondroEcoFS.put(" + index + ") outside bounds (" + this.size() + ")");
         
         // check if this is an empty entry
@@ -275,8 +276,8 @@ public class kelondroEcoFS {
         }
         
         // check if index is inside of cache
-        int p = inCache(index);
-        int q = (p >= 0) ? -1 : inBuffer(index);
+        final int p = inCache(index);
+        final int q = (p >= 0) ? -1 : inBuffer(index);
         if (p >= 0) {
             // write entry to the cache and to the file
             System.arraycopy(b, start, this.cache, p * this.recordsize, this.recordsize);
@@ -314,7 +315,7 @@ public class kelondroEcoFS {
         }
     }
 
-    public synchronized void add(byte[] b, int start) throws IOException {
+    public synchronized void add(final byte[] b, final int start) throws IOException {
         // index == size() == filesize() + (long) this.buffercount
         
         assert b.length - start >= this.recordsize;
@@ -343,18 +344,18 @@ public class kelondroEcoFS {
         assert this.buffercount <= this.buffer.length / this.recordsize;
     }
     
-    private boolean isClean(byte[] b, int offset, int length) {
+    private boolean isClean(final byte[] b, final int offset, final int length) {
         for (int i = 0; i < length; i++) {
             if (b[i + offset] != 0) return false;
         }
         return true;
     }
     
-    private boolean isClean(long index) throws IOException {
+    private boolean isClean(final long index) throws IOException {
          assert index < size();
          // check if index is inside of cache
          int p = inCache(index);
-         int q = (p >= 0) ? -1 : inBuffer(index);
+         final int q = (p >= 0) ? -1 : inBuffer(index);
          if ((p < 0) && (q < 0)) {
              // the index is outside of cache and buffer index. shift cache window
              fillCache(index);
@@ -389,9 +390,9 @@ public class kelondroEcoFS {
      * @param start offset in record to start reading
      * @throws IOException
      */
-    public synchronized void clean(long index, byte[] b, int start) throws IOException {
+    public synchronized void clean(final long index, final byte[] b, final int start) throws IOException {
         assert b.length - start >= this.recordsize;
-        long s = size();
+        final long s = size();
         if (index >= s) throw new IndexOutOfBoundsException("kelondroEcoFS.clean(" + index + ") outside bounds (" + s + ")");
         if (index == s - 1) {
             cleanLast(b, start);
@@ -400,7 +401,7 @@ public class kelondroEcoFS {
         
         // check if index is inside of cache
         int p = inCache(index);
-        int q = (p >= 0) ? -1 : inBuffer(index);
+        final int q = (p >= 0) ? -1 : inBuffer(index);
         if ((p < 0) && (q < 0)) {
             // the index is outside of cache and buffer index. shift cache window
             fillCache(index);
@@ -432,8 +433,8 @@ public class kelondroEcoFS {
      * @param index
      * @throws IOException
      */
-    public synchronized void clean(long index) throws IOException {
-        long s = size();
+    public synchronized void clean(final long index) throws IOException {
+        final long s = size();
         if (index >= s) throw new IndexOutOfBoundsException("kelondroEcoFS.clean(" + index + ") outside bounds (" + s + ")");
         if (index == s - 1) {
             cleanLast();
@@ -441,8 +442,8 @@ public class kelondroEcoFS {
         }
         
         // check if index is inside of cache
-        int p = inCache(index);
-        int q = (p >= 0) ? -1 : inBuffer(index);
+        final int p = inCache(index);
+        final int q = (p >= 0) ? -1 : inBuffer(index);
         if (p >= 0) {
             // write zero bytes to the cache and to the file
             System.arraycopy(zero, 0, this.cache, p * this.recordsize, this.recordsize);
@@ -466,7 +467,7 @@ public class kelondroEcoFS {
      * @param start
      * @throws IOException
      */
-    public synchronized void cleanLast(byte[] b, int start) throws IOException {
+    public synchronized void cleanLast(final byte[] b, final int start) throws IOException {
         cleanLast0(b, start);
         long i;
         while (((i = size()) > 0) && (isClean(i - 1))) {
@@ -485,12 +486,12 @@ public class kelondroEcoFS {
      * @param start
      * @throws IOException
      */
-    private synchronized void cleanLast0(byte[] b, int start) throws IOException {
+    private synchronized void cleanLast0(final byte[] b, final int start) throws IOException {
         assert b.length - start >= this.recordsize;
         // check if index is inside of cache
-        long s = this.size();
+        final long s = this.size();
         int p = inCache(s - 1);
-        int q = (p >= 0) ? -1 : inBuffer(s - 1);
+        final int q = (p >= 0) ? -1 : inBuffer(s - 1);
         if ((p < 0) && (q < 0)) {
             // the index is outside of cache and buffer index. shift cache window
             fillCache(this.size() - 1);
@@ -534,9 +535,9 @@ public class kelondroEcoFS {
     private synchronized void cleanLast0() throws IOException {
 
         // check if index is inside of cache
-        long s = this.size();
-        long p = inCache(s - 1);
-        long q = (p >= 0) ? -1 : inBuffer(s - 1);
+        final long s = this.size();
+        final long p = inCache(s - 1);
+        final long q = (p >= 0) ? -1 : inBuffer(s - 1);
         if (p >= 0) {
             // shrink cache and file
             assert this.buffercount == 0;
@@ -557,8 +558,8 @@ public class kelondroEcoFS {
     
     public static class ChunkIterator implements Iterator<byte[]> {
 
-        private int recordsize, chunksize;
-        private DataInputStream stream;
+        private final int recordsize, chunksize;
+        private final DataInputStream stream;
         private byte[] nextBytes;
         
         /**
@@ -570,7 +571,7 @@ public class kelondroEcoFS {
          * @param chunksize: the size of the chunks that are returned by next(). remaining bytes until the lenght of recordsize are skipped
          * @throws FileNotFoundException 
          */
-        public ChunkIterator(File file, int recordsize, int chunksize) throws FileNotFoundException {
+        public ChunkIterator(final File file, final int recordsize, final int chunksize) throws FileNotFoundException {
             assert (file.exists());
             assert file.length() % recordsize == 0;
             this.recordsize = recordsize;
@@ -584,7 +585,7 @@ public class kelondroEcoFS {
         }
 
         public byte[] next0() {
-            byte[] chunk = new byte[chunksize];
+            final byte[] chunk = new byte[chunksize];
             int r, s;
             try {
                 // read the chunk
@@ -597,13 +598,13 @@ public class kelondroEcoFS {
                     r += s;
                 }
                 return chunk;
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 return null;
             }
         }
 
         public byte[] next() {
-            byte[] n = this.nextBytes;
+            final byte[] n = this.nextBytes;
             this.nextBytes = next0();
             return n;
         }
@@ -618,13 +619,13 @@ public class kelondroEcoFS {
      * main - writes some data and checks the tables size (with time measureing)
      * @param args
      */
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         // open a file, add one entry and exit
-        File f = new File(args[0]);
+        final File f = new File(args[0]);
         if (f.exists()) f.delete();
         try {
-            kelondroEcoFS t = new kelondroEcoFS(f, 8);
-            byte[] b = new byte[8];
+            final kelondroEcoFS t = new kelondroEcoFS(f, 8);
+            final byte[] b = new byte[8];
             t.add("01234567".getBytes(), 0);
             t.add("ABCDEFGH".getBytes(), 0);
             t.add("abcdefgh".getBytes(), 0);
@@ -650,7 +651,7 @@ public class kelondroEcoFS {
             System.out.println("size = " + t.size());
             //t.clean(t.size() - 2);
             t.cleanLast();
-            long start = System.currentTimeMillis();
+            final long start = System.currentTimeMillis();
             long c = 0;
             for (int i = 0; i < 100000; i++) {
                 c = t.size();
@@ -659,7 +660,7 @@ public class kelondroEcoFS {
             System.out.println("size = " + c);
             
             t.close();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             e.printStackTrace();
         }
     }

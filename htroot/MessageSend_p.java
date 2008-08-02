@@ -40,21 +40,21 @@ import de.anomic.yacy.yacySeed;
 public class MessageSend_p {
 
     private static SimpleDateFormat SimpleFormatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-    public static String dateString(Date date) {
+    public static String dateString(final Date date) {
         return SimpleFormatter.format(date);
     }
 
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
-        plasmaSwitchboard sb = (plasmaSwitchboard) env;
-        serverObjects prop = new serverObjects();
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        final serverObjects prop = new serverObjects();
 
         if ((post == null) || (post.get("hash","").length() == 0)) {
             prop.put("mode", "2");
             return prop;
         }
 
-        String hash    = post.get("hash", "");
+        final String hash    = post.get("hash", "");
         String subject = post.get("subject", "");
         String message = post.get("message", "");
 
@@ -67,7 +67,7 @@ public class MessageSend_p {
 
             // open an editor page for the message
             // first ask if the other peer is online, and also what kind of document it accepts
-            HashMap<String, String> result = yacyClient.permissionMessage(sb.webIndex.seedDB, hash);
+            final HashMap<String, String> result = yacyClient.permissionMessage(sb.webIndex.seedDB, hash);
             //System.out.println("DEBUG: permission request result = " + result.toString());
             String peerName;
             yacySeed targetPeer = null;
@@ -82,7 +82,7 @@ public class MessageSend_p {
             }
 
             prop.putHTML("mode_permission_peerName", peerName, true);
-            String response = (result == null) ? null : (String) result.get("response");
+            final String response = (result == null) ? null : (String) result.get("response");
             if (response == null || result == null) {
                 // we don't have permission or other peer does not exist
                 prop.put("mode_permission", "0");
@@ -95,8 +95,8 @@ public class MessageSend_p {
 
                 // write input form
                 try {
-                    int messagesize = Integer.parseInt(result.get("messagesize"));
-                    int attachmentsize = Integer.parseInt(result.get("attachmentsize"));
+                    final int messagesize = Integer.parseInt(result.get("messagesize"));
+                    final int attachmentsize = Integer.parseInt(result.get("attachmentsize"));
 
                     prop.putHTML("mode_permission_response", response, true);
                     prop.put("mode_permission_messagesize", messagesize);
@@ -109,7 +109,7 @@ public class MessageSend_p {
 
                     }
 
-                } catch (NumberFormatException e) {
+                } catch (final NumberFormatException e) {
                     // "unresolved pattern", the remote peer is alive but had an exception
                     prop.put("mode_permission", "2");
                 }
@@ -128,15 +128,15 @@ public class MessageSend_p {
                 byte[] mb;
                 try {
                     mb = message.getBytes("UTF-8");
-                } catch (UnsupportedEncodingException e) {
+                } catch (final UnsupportedEncodingException e) {
                     mb = message.getBytes();
                 }
-                HashMap<String, String> result = yacyClient.postMessage(sb.webIndex.seedDB, hash, subject, mb);
+                final HashMap<String, String> result = yacyClient.postMessage(sb.webIndex.seedDB, hash, subject, mb);
 
                 //message has been sent
                 prop.put("mode_status_response", result.get("response"));
 
-            } catch (NumberFormatException e) {
+            } catch (final NumberFormatException e) {
                 prop.put("mode_status", "1");
 
                 // "unresolved pattern", the remote peer is alive but had an exception

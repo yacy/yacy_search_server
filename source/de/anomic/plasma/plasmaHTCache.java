@@ -115,8 +115,8 @@ public final class plasmaHTCache {
     public static final char LT_GLOBAL  = 'G';
 
     // doctype calculation
-    public static char docType(yacyURL url) {
-        String path = url.getPath().toLowerCase();
+    public static char docType(final yacyURL url) {
+        final String path = url.getPath().toLowerCase();
         // serverLog.logFinest("PLASMA", "docType URL=" + path);
         char doctype = DT_UNKNOWN;
         if (path.endsWith(".gif"))       { doctype = DT_IMAGE; }
@@ -141,7 +141,7 @@ public final class plasmaHTCache {
         return doctype;
     }
 
-    public static char docType(String mime) {
+    public static char docType(final String mime) {
         // serverLog.logFinest("PLASMA", "docType mime=" + mime);
         char doctype = DT_UNKNOWN;
         if (mime == null) doctype = DT_UNKNOWN;
@@ -185,7 +185,7 @@ public final class plasmaHTCache {
         return doctype;
     }
     
-    public static void init(File htCachePath, long CacheSizeMax) {
+    public static void init(final File htCachePath, final long CacheSizeMax) {
         
         cachePath = htCachePath;
         maxCacheSize = CacheSizeMax;
@@ -247,26 +247,26 @@ public final class plasmaHTCache {
         // this will collect information about the current cache size and elements
         try {
             cacheScanThread = serverInstantBusyThread.oneTimeJob(Class.forName("de.anomic.plasma.plasmaHTCache"), "cacheScan", log, 120000);
-        } catch (ClassNotFoundException e) {
+        } catch (final ClassNotFoundException e) {
             e.printStackTrace();
         }
     }
 
     static void resetResponseHeaderDB() {
         if (responseHeaderDB != null) responseHeaderDB.close();
-        File dbfile = new File(cachePath, DB_NAME);
+        final File dbfile = new File(cachePath, DB_NAME);
         if (dbfile.exists()) dbfile.delete();
         openResponseHeaderDB();
     }
     
     private static void openResponseHeaderDB() {
         // open the response header database
-        File dbfile = new File(cachePath, DB_NAME);
+        final File dbfile = new File(cachePath, DB_NAME);
         kelondroBLOB blob = null;
         if (DB_NAME.endsWith("heap")) {
             try {
                 blob = new kelondroBLOBHeap(dbfile, yacySeedDB.commonHashLength, kelondroBase64Order.enhancedCoder);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 e.printStackTrace();
             }
         } else {
@@ -275,8 +275,8 @@ public final class plasmaHTCache {
         responseHeaderDB = new kelondroMap(blob, 500);
     }
     
-    private static void deleteOldHTCache(File directory) {
-        String[] list = directory.list();
+    private static void deleteOldHTCache(final File directory) {
+        final String[] list = directory.list();
         if (list != null) {
             File object;
             for (int i = list.length - 1; i >= 0; i--) {
@@ -299,7 +299,7 @@ public final class plasmaHTCache {
         return responseHeaderDB.size();
     }
     
-    public static void push(Entry entry) {
+    public static void push(final Entry entry) {
         cacheStack.add(entry);
     }
 
@@ -311,7 +311,7 @@ public final class plasmaHTCache {
      * This method changes the HTCache size.<br>
      * @param the new cache size in bytes
      */
-    public static void setCacheSize(long newCacheSize) {
+    public static void setCacheSize(final long newCacheSize) {
         maxCacheSize = newCacheSize;
     }
 
@@ -323,20 +323,20 @@ public final class plasmaHTCache {
         return (curCacheSize >= maxCacheSize) ? 0 : maxCacheSize - curCacheSize;
     }
 
-    public static boolean writeResourceContent(yacyURL url, byte[] array) {
+    public static boolean writeResourceContent(final yacyURL url, final byte[] array) {
         if (array == null) return false;
-        File file = getCachePath(url);
+        final File file = getCachePath(url);
         try {
             deleteFile(file);
             file.getParentFile().mkdirs();
             serverFileUtils.copy(array, file);
-        } catch (FileNotFoundException e) {
+        } catch (final FileNotFoundException e) {
             // this is the case of a "(Not a directory)" error, which should be prohibited
             // by the shallStoreCache() property. However, sometimes the error still occurs
             // In this case do nothing.
             log.logSevere("File storage failed (not a directory): " + e.getMessage());
             return false;
-        } catch (IOException e) {
+        } catch (final IOException e) {
             log.logSevere("File storage failed (IO error): " + e.getMessage());
             return false;
         }
@@ -344,7 +344,7 @@ public final class plasmaHTCache {
         return true;
     }
 
-    public static void writeFileAnnouncement(File file) {
+    public static void writeFileAnnouncement(final File file) {
         if (file.exists()) {
             curCacheSize += file.length();
             if (System.currentTimeMillis() - lastcleanup > 300000) {
@@ -356,13 +356,13 @@ public final class plasmaHTCache {
         }
     }
     
-    public static boolean deleteURLfromCache(yacyURL url) {
+    public static boolean deleteURLfromCache(final yacyURL url) {
         if (deleteFileandDirs(getCachePath(url), "FROM")) {
             try {
                 // As the file is gone, the entry in responseHeader.db is not needed anymore
                 if (log.isFinest()) log.logFinest("Trying to remove responseHeader from URL: " + url.toNormalform(false, true));
                 responseHeaderDB.remove(url.hash());
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 resetResponseHeaderDB();
                 log.logInfo("IOExeption removing response header from DB: " + e.getMessage(), e);
             }
@@ -371,9 +371,9 @@ public final class plasmaHTCache {
         return false;
     }
 
-    private static boolean deleteFile(File obj) {
+    private static boolean deleteFile(final File obj) {
         if (obj.exists()) {
-            long size = obj.length();
+            final long size = obj.length();
             if (obj.delete()) {
                 curCacheSize -= size;
                 return true;
@@ -382,7 +382,7 @@ public final class plasmaHTCache {
        return false;
     }
 
-    private static boolean deleteFileandDirs(File path, String msg) {
+    private static boolean deleteFileandDirs(File path, final String msg) {
         if (deleteFile(path)) {
             log.logInfo("DELETED " + msg + " CACHE: " + path.toString());
             path = path.getParentFile(); // returns null if the path does not have a parent
@@ -397,21 +397,21 @@ public final class plasmaHTCache {
         return false;
     }
 
-    private static void cleanupDoIt(long newCacheSize) {
+    private static void cleanupDoIt(final long newCacheSize) {
         File file;
-        Iterator<Map.Entry<String, File>> iter = cacheAge.entrySet().iterator();
+        final Iterator<Map.Entry<String, File>> iter = cacheAge.entrySet().iterator();
         Map.Entry<String, File> entry;
         while (iter.hasNext() && curCacheSize >= newCacheSize) {
             if (Thread.currentThread().isInterrupted()) return;
             entry = iter.next();
-            String key = entry.getKey();
+            final String key = entry.getKey();
             file = entry.getValue();
-            long t = Long.parseLong(key.substring(0, 16), 16);
+            final long t = Long.parseLong(key.substring(0, 16), 16);
             if (System.currentTimeMillis() - t < 300000) break; // files must have been at least 5 minutes in the cache before they are deleted
             if (file != null) {
                 if (log.isFinest()) log.logFinest("Trying to delete [" + key + "] = old file: " + file.toString());
                 // This needs to be called *before* the file is deleted
-                String urlHash = getHash(file);
+                final String urlHash = getHash(file);
                 if (deleteFileandDirs(file, "OLD")) {
                     try {
                         // As the file is gone, the entry in responseHeader.db is not needed anymore
@@ -419,13 +419,13 @@ public final class plasmaHTCache {
                             if (log.isFinest()) log.logFinest("Trying to remove responseHeader for URLhash: " + urlHash);
                             responseHeaderDB.remove(urlHash);
                         } else {
-                            yacyURL url = getURL(file);
+                            final yacyURL url = getURL(file);
                             if (url != null) {
                                 if (log.isFinest()) log.logFinest("Trying to remove responseHeader for URL: " + url.toNormalform(false, true));
                                 responseHeaderDB.remove(url.hash());
                             }
                         }
-                    } catch (IOException e) {
+                    } catch (final IOException e) {
                         log.logInfo("IOExeption removing response header from DB: " + e.getMessage(), e);
                     }
                 }
@@ -453,8 +453,8 @@ public final class plasmaHTCache {
         responseHeaderDB.close();
     }
 
-    private static String ageString(long date, File f) {
-        StringBuffer sb = new StringBuffer(32);
+    private static String ageString(final long date, final File f) {
+        final StringBuffer sb = new StringBuffer(32);
         String s = Long.toHexString(date);
         for (int i = s.length(); i < 16; i++) sb.append('0');
             sb.append(s);
@@ -466,32 +466,32 @@ public final class plasmaHTCache {
 
     public static void cacheScan() {
         log.logConfig("STARTING HTCACHE SCANNING");
-        kelondroMScoreCluster<String> doms = new kelondroMScoreCluster<String>();
+        final kelondroMScoreCluster<String> doms = new kelondroMScoreCluster<String>();
         int fileCount = 0;
-        enumerateFiles fileEnum = new enumerateFiles(cachePath, true, false, true, true);
-        File dbfile = new File(cachePath, "responseHeader.db");
+        final enumerateFiles fileEnum = new enumerateFiles(cachePath, true, false, true, true);
+        final File dbfile = new File(cachePath, "responseHeader.db");
         while (fileEnum.hasMoreElements()) {
             if (Thread.currentThread().isInterrupted()) return;
             fileCount++;
-            File nextFile = fileEnum.nextElement();
-            long nextFileModDate = nextFile.lastModified();
+            final File nextFile = fileEnum.nextElement();
+            final long nextFileModDate = nextFile.lastModified();
             //System.out.println("Cache: " + dom(f));
             doms.incScore(dom(nextFile));
             curCacheSize += nextFile.length();
             if (!dbfile.equals(nextFile)) cacheAge.put(ageString(nextFileModDate, nextFile), nextFile);
             try {
                 Thread.sleep(10);
-            } catch (InterruptedException e) {
+            } catch (final InterruptedException e) {
                 return;
             }
         }
         //System.out.println("%" + (String) cacheAge.firstKey() + "=" + cacheAge.get(cacheAge.firstKey()));
         long ageHours = 0;
         if (!cacheAge.isEmpty()) {
-            Iterator<String> i = cacheAge.keySet().iterator();
+            final Iterator<String> i = cacheAge.keySet().iterator();
             if (i.hasNext()) try {
                 ageHours = (System.currentTimeMillis() - Long.parseLong(i.next().substring(0, 16), 16)) / 3600000;
-            } catch (NumberFormatException e) {
+            } catch (final NumberFormatException e) {
                 ageHours = 0;
             } else {
                 ageHours = 0;
@@ -505,13 +505,13 @@ public final class plasmaHTCache {
         log.logConfig("STARTING DNS PREFETCH");
         // start to prefetch IPs from DNS
         String dom;
-        long start = System.currentTimeMillis();
+        final long start = System.currentTimeMillis();
         String result = "";
         fileCount = 0;
         while ((doms.size() > 0) && (fileCount < 50) && ((System.currentTimeMillis() - start) < 60000)) {
             if (Thread.currentThread().isInterrupted()) return;
             dom = doms.getMaxObject();
-            InetAddress ip = serverDomains.dnsResolve(dom);
+            final InetAddress ip = serverDomains.dnsResolve(dom);
             if (ip == null) continue;
             result += ", " + dom + "=" + ip.getHostAddress();
             log.logConfig("PRE-FILLED " + dom + "=" + ip.getHostAddress());
@@ -520,7 +520,7 @@ public final class plasmaHTCache {
             // wait a short while to prevent that this looks like a DoS
             try {
                 Thread.sleep(100);
-            } catch (InterruptedException e) {
+            } catch (final InterruptedException e) {
                 return;
             }
         }
@@ -528,7 +528,7 @@ public final class plasmaHTCache {
                                                " ADDRESSES: " + result.substring(2));
     }
 
-    private static String dom(File f) {
+    private static String dom(final File f) {
         String s = f.toString().substring(cachePath.toString().length() + 1);
         int p = s.indexOf("/");
         if (p < 0) p = s.indexOf("\\");
@@ -545,7 +545,7 @@ public final class plasmaHTCache {
         p = s.indexOf("/");
         if (p < 0) p = s.indexOf("\\");
         if (p < 0) return null;
-        int e = s.indexOf("!");
+        final int e = s.indexOf("!");
         if ((e > 0) && (e < p)) p = e; // strip port
         return prefix + s.substring(0, p);
     }
@@ -559,19 +559,19 @@ public final class plasmaHTCache {
      * @throws <b>UnsupportedProtocolException</b> if the protocol is not supported and therefore the
      * info object couldn't be created
      */
-    public static IResourceInfo loadResourceInfo(yacyURL url) throws UnsupportedProtocolException, IllegalAccessException {    
+    public static IResourceInfo loadResourceInfo(final yacyURL url) throws UnsupportedProtocolException, IllegalAccessException {    
         
         // loading data from database
         Map<String, String> hdb;
         try {
             hdb = responseHeaderDB.get(url.hash());
-        } catch (IOException e) {
+        } catch (final IOException e) {
             return null;
         }
         if (hdb == null) return null;
         
         // generate the cached object
-        IResourceInfo cachedObj = objFactory.buildResourceInfoObj(url, hdb);
+        final IResourceInfo cachedObj = objFactory.buildResourceInfoObj(url, hdb);
         return cachedObj;
     }
     
@@ -587,12 +587,12 @@ public final class plasmaHTCache {
         return (cacheStack.size() == 0);
     }
 
-    public static boolean isPicture(String mimeType) {
+    public static boolean isPicture(final String mimeType) {
         if (mimeType == null) return false;
         return mimeType.toUpperCase().startsWith("IMAGE");
     }
 
-    public static boolean isText(String mimeType) {
+    public static boolean isText(final String mimeType) {
 //      Object ct = response.get(httpHeader.CONTENT_TYPE);
 //      if (ct == null) return false;
 //      String t = ((String)ct).toLowerCase();
@@ -600,7 +600,7 @@ public final class plasmaHTCache {
         return plasmaParser.supportedMimeTypesContains(mimeType);
     }
 
-    public static boolean noIndexingURL(yacyURL url) {
+    public static boolean noIndexingURL(final yacyURL url) {
         if (url == null) return false;
         String urlString = url.toString().toLowerCase();
         
@@ -619,7 +619,7 @@ public final class plasmaHTCache {
         return plasmaParser.mediaExtContains(urlString);
     }
 
-    private static String replaceRegex(String input, String regex, String replacement) {
+    private static String replaceRegex(String input, final String regex, final String replacement) {
         if (input == null) { return ""; }
         if (input.length() > 0) {
             final Pattern searchPattern = Pattern.compile(regex);
@@ -661,8 +661,8 @@ public final class plasmaHTCache {
         path = replaceRegex(path, "/\\.\\./", "/!!/");
         path = replaceRegex(path, "(\"|\\\\|\\*|\\?|:|<|>|\\|+)", "_"); // hier wird kein '/' gefiltert
         String extention = null;
-        int d = path.lastIndexOf(".");
-        int s = path.lastIndexOf("/");
+        final int d = path.lastIndexOf(".");
+        final int s = path.lastIndexOf("/");
         if ((d >= 0) && (d > s)) {
             extention = path.substring(d);
         } else if (path.endsWith("/ndx")) {
@@ -693,20 +693,20 @@ public final class plasmaHTCache {
         } else {
             host = "other/" + host;
         }
-        StringBuffer fileName = new StringBuffer();
+        final StringBuffer fileName = new StringBuffer();
         fileName.append(protocol).append('/').append(host);
         if (port >= 0) {
             fileName.append('!').append(port);
         }
 
         // generate cache path
-        File FileFlat = hashFile(fileName, "hash", extention, url.hash());
+        final File FileFlat = hashFile(fileName, "hash", extention, url.hash());
         return FileFlat;
     }
     
-    private static File hashFile(StringBuffer fileName, String prefix, String extention, String urlhash) {
-        String hexHash = yacySeed.b64Hash2hexHash(urlhash);
-        StringBuffer f = new StringBuffer(fileName.length() + 30);
+    private static File hashFile(final StringBuffer fileName, final String prefix, final String extention, final String urlhash) {
+        final String hexHash = yacySeed.b64Hash2hexHash(urlhash);
+        final StringBuffer f = new StringBuffer(fileName.length() + 30);
         f.append(fileName);
         if (prefix != null) f.append('/').append(prefix);
         f.append('/').append(hexHash.substring(0,2)).append('/').append(hexHash.substring(2,4)).append('/').append(hexHash);
@@ -719,15 +719,15 @@ public final class plasmaHTCache {
      */
     public static String getHash(final File f) {
         if ((!f.isFile()) || (f.getPath().indexOf("hash") < 0)) return null;
-        String name = f.getName();
+        final String name = f.getName();
         if (name.length() < 18) return null; // not a hash file name
-        String hexHash = name.substring(0,18);
+        final String hexHash = name.substring(0,18);
         if (hexHash.indexOf('.') >= 0) return null;
         try {
-            String hash = kelondroBase64Order.enhancedCoder.encode(serverCodings.decodeHex(hexHash));
+            final String hash = kelondroBase64Order.enhancedCoder.encode(serverCodings.decodeHex(hexHash));
             if (hash.length() == yacySeedDB.commonHashLength) return hash;
             return null;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             //log.logWarning("getHash: " + e.getMessage(), e);
             return null;
         }
@@ -745,7 +745,7 @@ public final class plasmaHTCache {
             // try the urlPool
             try {
                 url = plasmaSwitchboard.getSwitchboard().getURL(urlHash);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 log.logWarning("getURL(" + urlHash + "): " /*+ e.getMessage()*/, e);
                 url = null;
             }
@@ -754,15 +754,15 @@ public final class plasmaHTCache {
             Map<String, String> hdb;
             try {
                 hdb = responseHeaderDB.get(urlHash);
-            } catch (IOException e1) {
+            } catch (final IOException e1) {
                 hdb = null;
             }
             if (hdb != null) {
-                Object origRequestLine = hdb.get(httpHeader.X_YACY_ORIGINAL_REQUEST_LINE);
+                final Object origRequestLine = hdb.get(httpHeader.X_YACY_ORIGINAL_REQUEST_LINE);
                 if ((origRequestLine != null)&&(origRequestLine instanceof String)) {
                     int i = ((String)origRequestLine).indexOf(" ");
                     if (i >= 0) {
-                        String s = ((String)origRequestLine).substring(i).trim();
+                        final String s = ((String)origRequestLine).substring(i).trim();
                         i = s.indexOf(" ");
                         try {
                             url = new yacyURL((i<0) ? s : s.substring(0,i), urlHash);
@@ -775,7 +775,7 @@ public final class plasmaHTCache {
             if (url != null) return url;
         }
         // If we can't get the correct URL, it seems to be a treeed file
-        String c = cachePath.toString().replace('\\', '/');
+        final String c = cachePath.toString().replace('\\', '/');
         String path = f.toString().replace('\\', '/');
         int pos;
         if ((pos = path.indexOf("/tree")) >= 0) path = path.substring(0, pos) + path.substring(pos + 5);
@@ -867,21 +867,21 @@ public final class plasmaHTCache {
      * is available or the cached file is not readable, <code>null</code>
      * is returned.
      */
-    public static InputStream getResourceContentStream(yacyURL url) {
+    public static InputStream getResourceContentStream(final yacyURL url) {
         // load the url as resource from the cache
-        File f = getCachePath(url);
+        final File f = getCachePath(url);
         if (f.exists() && f.canRead()) try {
             return new BufferedInputStream(new FileInputStream(f));
-        } catch (IOException e) {
+        } catch (final IOException e) {
             log.logSevere("Unable to create a BufferedInputStream from file " + f,e);
             return null;
         }
         return null;        
     }
     
-    public static long getResourceContentLength(yacyURL url) {
+    public static long getResourceContentLength(final yacyURL url) {
         // load the url as resource from the cache
-        File f = getCachePath(url);
+        final File f = getCachePath(url);
         if (f.exists() && f.canRead()) {
             return f.length();
         } 
@@ -889,16 +889,16 @@ public final class plasmaHTCache {
     }
 
     public static Entry newEntry(
-            Date initDate, 
-            int depth, 
-            yacyURL url,
-            String name,
-            String responseStatus,
-            IResourceInfo docInfo,            
-            String initiator,
-            CrawlProfile.entry profile
+            final Date initDate, 
+            final int depth, 
+            final yacyURL url,
+            final String name,
+            final String responseStatus,
+            final IResourceInfo docInfo,            
+            final String initiator,
+            final CrawlProfile.entry profile
     ) {
-        Entry entry = new Entry(
+        final Entry entry = new Entry(
                 initDate, 
                 depth, 
                 url,
@@ -915,23 +915,23 @@ public final class plasmaHTCache {
     public final static class Entry {
 
     // the class objects
-    private Date                     initDate;       // the date when the request happened; will be used as a key
-    private int                      depth;          // the depth of prefetching
-    private String                   responseStatus;    
-    private File                     cacheFile;      // the cache file
+    private final Date                     initDate;       // the date when the request happened; will be used as a key
+    private final int                      depth;          // the depth of prefetching
+    private final String                   responseStatus;    
+    private final File                     cacheFile;      // the cache file
     private byte[]                   cacheArray;     // or the cache as byte-array
-    private yacyURL                  url;
-    private String                   name;           // the name of the link, read as anchor from an <a>-tag
-    private Date                     lastModified;
+    private final yacyURL                  url;
+    private final String                   name;           // the name of the link, read as anchor from an <a>-tag
+    private final Date                     lastModified;
     private char                     doctype;
-    private String                   language;
-    private CrawlProfile.entry profile;
-    private String                   initiator;
+    private final String                   language;
+    private final CrawlProfile.entry profile;
+    private final String                   initiator;
     
     /**
      * protocolspecific information about the resource 
      */
-    private IResourceInfo            resInfo;
+    private final IResourceInfo            resInfo;
 
     protected Entry clone() throws CloneNotSupportedException {
         return new Entry(
@@ -947,14 +947,14 @@ public final class plasmaHTCache {
     }
 
     @SuppressWarnings("null")
-    public Entry(Date initDate, 
-            int depth, 
-            yacyURL url,
-            String name,
-            String responseStatus,
-            IResourceInfo resourceInfo,            
-            String initiator,
-            CrawlProfile.entry profile
+    public Entry(final Date initDate, 
+            final int depth, 
+            final yacyURL url,
+            final String name,
+            final String responseStatus,
+            final IResourceInfo resourceInfo,            
+            final String initiator,
+            final CrawlProfile.entry profile
     ) {
         if (resourceInfo == null){
             System.out.println("Content information object is null. " + url);
@@ -1032,7 +1032,7 @@ public final class plasmaHTCache {
         return this.cacheFile;
     }
     
-    public void setCacheArray(byte[] data) {
+    public void setCacheArray(final byte[] data) {
         this.cacheArray = data;
     }
     
@@ -1047,13 +1047,13 @@ public final class plasmaHTCache {
     private boolean writeResourceInfo() {
         if (this.resInfo == null) return false;
         try {
-            HashMap<String, String> hm = new HashMap<String, String>();
+            final HashMap<String, String> hm = new HashMap<String, String>();
             hm.putAll(this.resInfo.getMap());
             hm.put("@@URL", this.url.toNormalform(false, false));
             hm.put("@@DEPTH", Integer.toString(this.depth));
             if (this.initiator != null) hm.put("@@INITIATOR", this.initiator);
             responseHeaderDB.put(this.url.hash(), hm);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             resetResponseHeaderDB();
             return false;
         }

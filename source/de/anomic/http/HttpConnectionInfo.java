@@ -158,14 +158,14 @@ public class HttpConnectionInfo {
         try {
             synchronized (allConnections) {
                 final int sizeBefore = allConnections.size();
-                for(HttpConnectionInfo con: allConnections) {
+                for(final HttpConnectionInfo con: allConnections) {
                     if(con.getLifetime() > staleAfterMillis) {
                         allConnections.remove(con);
                     }
                 }
                 serverLog.logFine("HTTPC", "cleanUp ConnectionInfo removed "+ (sizeBefore - allConnections.size()));
             }
-        } catch (java.util.ConcurrentModificationException e) {
+        } catch (final java.util.ConcurrentModificationException e) {
             serverLog.logWarning("HTTPC", "cleanUp ConnectionInfo interrupted by ConcurrentModificationException");
         }
     }
@@ -175,7 +175,7 @@ public class HttpConnectionInfo {
      */
     @Override
     public String toString() {
-        StringBuilder string = new StringBuilder(50);
+        final StringBuilder string = new StringBuilder(50);
         string.append("ID ");
         string.append(getID());
         string.append(", ");

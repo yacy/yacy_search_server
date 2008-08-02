@@ -35,8 +35,8 @@ import de.anomic.yacy.yacyURL;
 
 public class ResourceInfoFactory {
     public IResourceInfo buildResourceInfoObj(
-            yacyURL resourceURL,
-            Map<String, String> resourceMetadata
+            final yacyURL resourceURL,
+            final Map<String, String> resourceMetadata
     ) throws UnsupportedProtocolException, IllegalAccessException {
         
         String protocString = resourceURL.getProtocol();
@@ -65,7 +65,7 @@ public class ResourceInfoFactory {
             
             // return the newly created object
             return infoObject;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             if (e instanceof RuntimeException) {
                 throw (RuntimeException)e;
             } else if (e instanceof ClassNotFoundException) {

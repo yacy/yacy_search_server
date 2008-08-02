@@ -29,24 +29,24 @@ import javax.imageio.ImageIO;
 
 public class ymageCaptcha extends ymageMatrix {
 
-    public ymageCaptcha(int width, int height, byte displayMode, String code) {
+    public ymageCaptcha(final int width, final int height, final byte displayMode, final String code) {
         super(width, height, displayMode, "FFFFFF");
         this.create(code);
     }
 
-    private void create(String code){
+    private void create(final String code){
 
-        Random random = new Random();
+        final Random random = new Random();
 
-        int width = this.getWidth();
-        int height = this.getHeight();
-        int chars = code.length();
+        final int width = this.getWidth();
+        final int height = this.getHeight();
+        final int chars = code.length();
 
         int x;
         int y;
         int ub = 0;
-        int widthPerChar = width/chars;
-        int pixels = width * height;
+        final int widthPerChar = width/chars;
+        final int pixels = width * height;
 
 
         //printing code
@@ -78,14 +78,14 @@ public class ymageCaptcha extends ymageMatrix {
 
     }
 
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         // go into headless awt mode
         System.setProperty("java.awt.headless", "true");
 
-        ymageCaptcha m = new ymageCaptcha(200, 70, ymageMatrix.MODE_REPLACE, args[1]);
+        final ymageCaptcha m = new ymageCaptcha(200, 70, ymageMatrix.MODE_REPLACE, args[1]);
         try {
             ImageIO.write(m.getImage(), "png", new java.io.File(args[0]));
-        } catch (java.io.IOException e) {
+        } catch (final java.io.IOException e) {
             e.printStackTrace();
         }
 

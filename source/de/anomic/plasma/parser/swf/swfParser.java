@@ -70,18 +70,18 @@ public class swfParser extends AbstractParser implements Parser {
      * parses the source documents and returns a plasmaParserDocument containing
      * all extracted information about the parsed document
      */
-    public plasmaParserDocument parse(yacyURL location, String mimeType, String charset, InputStream source) throws ParserException, InterruptedException {
+    public plasmaParserDocument parse(final yacyURL location, final String mimeType, final String charset, final InputStream source) throws ParserException, InterruptedException {
 
         try {
-            SWF2HTML swf2html = new SWF2HTML();
+            final SWF2HTML swf2html = new SWF2HTML();
             String contents = swf2html.convertSWFToHTML(source);
             String url = null;
             String urlnr = null;
-            String linebreak = System.getProperty("line.separator");
-            String[] sections =  null;
-            String abstrct = null;
+            final String linebreak = System.getProperty("line.separator");
+            final String[] sections =  null;
+            final String abstrct = null;
             //TreeSet images = null;
-            HashMap<yacyURL, String> anchors = new HashMap<yacyURL, String>();
+            final HashMap<yacyURL, String> anchors = new HashMap<yacyURL, String>();
             int urls = 0;
             int urlStart = -1;
             int urlEnd = 0;
@@ -103,7 +103,7 @@ public class swfParser extends AbstractParser implements Parser {
             }
 
            // As the result of parsing this function must return a plasmaParserDocument object
-            plasmaParserDocument theDoc = new plasmaParserDocument(
+            final plasmaParserDocument theDoc = new plasmaParserDocument(
                     location,     // url of the source document
                     mimeType,     // the documents mime type
                     "UTF-8",      // charset of the document text
@@ -120,11 +120,11 @@ public class swfParser extends AbstractParser implements Parser {
                     anchors,      // a map of extracted anchors
                     null);      // a treeset of image URLs
             return theDoc;
-        } catch (Exception e) { 
+        } catch (final Exception e) { 
             if (e instanceof InterruptedException) throw (InterruptedException) e;
 
             // if an unexpected error occures just log the error and raise a new ParserException
-            String errorMsg = "Unable to parse the swf document '" + location + "':" + e.getMessage();
+            final String errorMsg = "Unable to parse the swf document '" + location + "':" + e.getMessage();
             this.theLogger.logSevere(errorMsg);
             throw new ParserException(errorMsg, location);
         }

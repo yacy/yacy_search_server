@@ -49,29 +49,29 @@ import de.anomic.yacy.yacySeed;
 public final class message {
 
     private static SimpleDateFormat SimpleFormatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-    public static String dateString(Date date) {
+    public static String dateString(final Date date) {
         return SimpleFormatter.format(date);
     }
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
         if (post == null || env == null) { return null; }
 
         // return variable that accumulates replacements
-        plasmaSwitchboard sb = (plasmaSwitchboard) env;
-        serverObjects prop = new serverObjects();
+        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        final serverObjects prop = new serverObjects();
         if ((post == null) || (env == null)) return prop;
         if (!yacyNetwork.authentifyRequest(post, env)) return prop;
 
-        String process = post.get("process", "permission");
-        String key =  post.get("key", "");
+        final String process = post.get("process", "permission");
+        final String key =  post.get("key", "");
 
-        int messagesize = 10240;
-        int attachmentsize = 0;
+        final int messagesize = 10240;
+        final int attachmentsize = 0;
 
         prop.put("messagesize", "0");
         prop.put("attachmentsize", "0");
 
-        String youare = post.get("youare", ""); // seed hash of the target peer, needed for network stability
+        final String youare = post.get("youare", ""); // seed hash of the target peer, needed for network stability
         // check if we are the right target and requester has correct information about this peer
         if ((sb.webIndex.seedDB.mySeed() == null) || (!(sb.webIndex.seedDB.mySeed().hash.equals(youare)))) {
             // this request has a wrong target
@@ -99,13 +99,13 @@ public final class message {
 
         if (process.equals("post")) {
             // post: post message to message board
-            String otherSeedString = post.get("myseed", "");
+            final String otherSeedString = post.get("myseed", "");
             if (otherSeedString.length() == 0) {
                 prop.put("response", "-1"); // request rejected
                 return prop;
             }
             //Date remoteTime = yacyCore.parseUniversalDate((String) post.get(yacySeed.MYTIME)); // read remote time
-            yacySeed otherSeed = yacySeed.genRemoteSeed(otherSeedString, key, false);
+            final yacySeed otherSeed = yacySeed.genRemoteSeed(otherSeedString, key, false);
 
             String subject = crypt.simpleDecode(post.get("subject", ""), key); // message's subject
             String message = crypt.simpleDecode(post.get("message", ""), key); // message body
@@ -127,7 +127,7 @@ public final class message {
             byte[] mb;
             try {
                 mb = message.getBytes("UTF-8");
-            } catch (UnsupportedEncodingException e) {
+            } catch (final UnsupportedEncodingException e) {
                 mb = message.getBytes();
             }
             sb.messageDB.write(msgEntry = sb.messageDB.newEntry(
@@ -139,11 +139,11 @@ public final class message {
             messageForwardingViaEmail(sb, msgEntry);
 
             // finally write notification
-            File notifierSource = new File(sb.getRootPath(), sb.getConfig("htRootPath","htroot") + "/env/grafics/message.gif");
-            File notifierDest   = new File(sb.getConfigPath("htDocsPath", "DATA/HTDOCS"), "notifier.gif");
+            final File notifierSource = new File(sb.getRootPath(), sb.getConfig("htRootPath","htroot") + "/env/grafics/message.gif");
+            final File notifierDest   = new File(sb.getConfigPath("htDocsPath", "DATA/HTDOCS"), "notifier.gif");
             try {
                 serverFileUtils.copy(notifierSource, notifierDest);
-            } catch (IOException e) {
+            } catch (final IOException e) {
             	serverLog.logSevere("MESSAGE", "NEW MESSAGE ARRIVED! (error: " + e.getMessage() + ")");
               
             }
@@ -162,19 +162,19 @@ public final class message {
 
      #[message]#
      */
-    private static void messageForwardingViaEmail(plasmaSwitchboard sb, messageBoard.entry msgEntry) {
+    private static void messageForwardingViaEmail(final plasmaSwitchboard sb, final messageBoard.entry msgEntry) {
         try {
             if (!Boolean.valueOf(sb.getConfig("msgForwardingEnabled","false")).booleanValue()) return;
 
             // getting the recipient address
-            String sendMailTo = sb.getConfig("msgForwardingTo","root@localhost").trim();
+            final String sendMailTo = sb.getConfig("msgForwardingTo","root@localhost").trim();
 			
             // getting the sendmail configuration
-            String sendMailStr = sb.getConfig("msgForwardingCmd","/usr/bin/sendmail")+" "+sendMailTo;
-            String[] sendMail = sendMailStr.trim().split(" ");
+            final String sendMailStr = sb.getConfig("msgForwardingCmd","/usr/bin/sendmail")+" "+sendMailTo;
+            final String[] sendMail = sendMailStr.trim().split(" ");
 
             // building the message text
-            StringBuffer emailTxt = new StringBuffer();
+            final StringBuffer emailTxt = new StringBuffer();
             emailTxt.append("To: ")
             .append(sendMailTo)
             .append("\nFrom: ")
@@ -198,11 +198,11 @@ public final class message {
             .append("\n===================================================================\n")
             .append(new String(msgEntry.message()));
 
-            Process process=Runtime.getRuntime().exec(sendMail);
-            PrintWriter email = new PrintWriter(process.getOutputStream());
+            final Process process=Runtime.getRuntime().exec(sendMail);
+            final PrintWriter email = new PrintWriter(process.getOutputStream());
             email.print(new String(emailTxt));
             email.close();                        
-        } catch (Exception e) {
+        } catch (final Exception e) {
             yacyCore.log.logWarning("message: message forwarding via email failed. ",e);
         }
 

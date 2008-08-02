@@ -41,9 +41,9 @@ import de.anomic.server.servletProperties;
 
 public class User{
     
-    public static servletProperties respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
-        servletProperties prop = new servletProperties();
-        plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
+    public static servletProperties respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+        final servletProperties prop = new servletProperties();
+        final plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
         userDB.Entry entry=null;
 
         //default values
@@ -73,8 +73,8 @@ public class User{
             prop.put("logged-in_username", entry.getUserName());
             if(entry.getTimeLimit() > 0){
                 prop.put("logged-in_limit", "1");
-                long limit=entry.getTimeLimit();
-                long used=entry.getTimeUsed();
+                final long limit=entry.getTimeLimit();
+                final long used=entry.getTimeUsed();
                 prop.put("logged-in_limit_timelimit", limit);
                 prop.put("logged-in_limit_timeused", used);
                 int percent=0;
@@ -90,11 +90,11 @@ public class User{
         //TODO: this does not work for a static admin, yet.
         }else if(post != null && post.containsKey("username") && post.containsKey("password")){
             //entry=sb.userDB.passwordAuth((String)post.get("username"), (String)post.get("password"), (String)header.get(httpHeader.CONNECTION_PROP_CLIENTIP, "xxxxxx"));
-            String username=post.get("username");
-            String password=post.get("password");
+            final String username=post.get("username");
+            final String password=post.get("password");
             
             entry=sb.userDB.passwordAuth(username, password);
-            boolean staticAdmin = sb.getConfig(httpd.ADMIN_ACCOUNT_B64MD5, "").equals(
+            final boolean staticAdmin = sb.getConfig(httpd.ADMIN_ACCOUNT_B64MD5, "").equals(
                     serverCodings.encodeMD5Hex(
                             kelondroBase64Order.standardCoder.encodeString(username + ":" + password)
                     )
@@ -107,7 +107,7 @@ public class User{
                 cookie=sb.userDB.getAdminCookie();
                 
             if(entry != null || staticAdmin){
-                httpHeader outgoingHeader=new httpHeader();
+                final httpHeader outgoingHeader=new httpHeader();
                 outgoingHeader.setCookie("login", cookie);
                 prop.setOutgoingHeader(outgoingHeader);
                 
@@ -129,7 +129,7 @@ public class User{
         				try {
 							entry.setProperty(userDB.Entry.MD5ENCODED_USERPWD_STRING, serverCodings.encodeMD5Hex(entry.getUserName()+":"+post.get("newpass", "")));
 							prop.put("status_password", "0"); //changes
-						} catch (IOException e) {}
+						} catch (final IOException e) {}
         			}else{
         				prop.put("status_password", "3"); //empty
         			}

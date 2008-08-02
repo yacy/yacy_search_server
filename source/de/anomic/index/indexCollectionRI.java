@@ -44,7 +44,7 @@ public class indexCollectionRI implements indexRI {
 
     kelondroCollectionIndex collectionIndex;
     
-    public indexCollectionRI(File path, String filenameStub, int maxpartition, kelondroRow payloadrow) {
+    public indexCollectionRI(final File path, final String filenameStub, final int maxpartition, final kelondroRow payloadrow) {
         try {
             collectionIndex = new kelondroCollectionIndex(
                     path,
@@ -54,7 +54,7 @@ public class indexCollectionRI implements indexRI {
                     4 /*loadfactor*/,
                     maxpartition,
                     payloadrow);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             serverLog.logSevere("PLASMA", "unable to open collection index at " + path.toString() + ":" + e.getMessage());
         }
     }
@@ -62,13 +62,13 @@ public class indexCollectionRI implements indexRI {
     public void clear() {
         try {
             collectionIndex.clear();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             e.printStackTrace();
         }
     }
     
-    public long getUpdateTime(String wordHash) {
-        indexContainer entries = getContainer(wordHash, null);
+    public long getUpdateTime(final String wordHash) {
+        final indexContainer entries = getContainer(wordHash, null);
         if (entries == null) return 0;
         return entries.updated();
     }
@@ -77,10 +77,10 @@ public class indexCollectionRI implements indexRI {
         return collectionIndex.size();
     }
     
-    public int indexSize(String wordHash) {
+    public int indexSize(final String wordHash) {
         try {
             return collectionIndex.indexSize(wordHash.getBytes());
-        } catch (IOException e) {
+        } catch (final IOException e) {
             return 0;
         }
     }
@@ -91,21 +91,21 @@ public class indexCollectionRI implements indexRI {
         return 100 * 1024 /* overhead here */ + collectionIndex.minMem();
     }
 
-    public synchronized kelondroCloneableIterator<indexContainer> wordContainers(String startWordHash, boolean rot) {
+    public synchronized kelondroCloneableIterator<indexContainer> wordContainers(final String startWordHash, final boolean rot) {
         return new wordContainersIterator(startWordHash, rot);
     }
 
     public class wordContainersIterator implements kelondroCloneableIterator<indexContainer> {
 
-        private Iterator<Object[]> wci;
-        private boolean rot;
+        private final Iterator<Object[]> wci;
+        private final boolean rot;
         
-        public wordContainersIterator(String startWordHash, boolean rot) {
+        public wordContainersIterator(final String startWordHash, final boolean rot) {
             this.rot = rot;
             this.wci = collectionIndex.keycollections(startWordHash.getBytes(), kelondroBase64Order.zero(startWordHash.length()), rot);
         }
         
-        public wordContainersIterator clone(Object secondWordHash) {
+        public wordContainersIterator clone(final Object secondWordHash) {
             return new wordContainersIterator((String) secondWordHash, rot);
         }
         
@@ -114,10 +114,10 @@ public class indexCollectionRI implements indexRI {
         }
 
         public indexContainer next() {
-            Object[] oo = wci.next();
+            final Object[] oo = wci.next();
             if (oo == null) return null;
-            byte[] key = (byte[]) oo[0];
-            kelondroRowSet collection = (kelondroRowSet) oo[1];
+            final byte[] key = (byte[]) oo[0];
+            final kelondroRowSet collection = (kelondroRowSet) oo[1];
             if (collection == null) return null;
             return new indexContainer(new String(key), collection);
         }
@@ -128,59 +128,59 @@ public class indexCollectionRI implements indexRI {
 
     }
 
-    public boolean hasContainer(String wordHash) {
+    public boolean hasContainer(final String wordHash) {
         try {
             return collectionIndex.has(wordHash.getBytes());
-        } catch (IOException e) {
+        } catch (final IOException e) {
             return false;
         }
     }
     
-    public indexContainer getContainer(String wordHash, Set<String> urlselection) {
+    public indexContainer getContainer(final String wordHash, final Set<String> urlselection) {
         try {
-            kelondroRowSet collection = collectionIndex.get(wordHash.getBytes());
+            final kelondroRowSet collection = collectionIndex.get(wordHash.getBytes());
             if (collection != null) collection.select(urlselection);
             if ((collection == null) || (collection.size() == 0)) return null;
             return new indexContainer(wordHash, collection);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             return null;
         }
     }
 
-    public indexContainer deleteContainer(String wordHash) {
+    public indexContainer deleteContainer(final String wordHash) {
         try {
-            kelondroRowSet collection = collectionIndex.delete(wordHash.getBytes());
+            final kelondroRowSet collection = collectionIndex.delete(wordHash.getBytes());
             if (collection == null) return null;
             return new indexContainer(wordHash, collection);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             return null;
         }
     }
 
-    public boolean removeEntry(String wordHash, String urlHash) {
-        HashSet<String> hs = new HashSet<String>();
+    public boolean removeEntry(final String wordHash, final String urlHash) {
+        final HashSet<String> hs = new HashSet<String>();
         hs.add(urlHash);
         return removeEntries(wordHash, hs) == 1;
     }
     
-    public int removeEntries(String wordHash, Set<String> urlHashes) {
+    public int removeEntries(final String wordHash, final Set<String> urlHashes) {
         try {
             return collectionIndex.remove(wordHash.getBytes(), urlHashes);
-        } catch (kelondroOutOfLimitsException e) {
+        } catch (final kelondroOutOfLimitsException e) {
             e.printStackTrace();
             return 0;
-        } catch (IOException e) {
+        } catch (final IOException e) {
             e.printStackTrace();
             return 0;
         }
     }
 
-    public void addEntries(indexContainer newEntries) {
+    public void addEntries(final indexContainer newEntries) {
         try {
             collectionIndex.merge(newEntries);
-        } catch (kelondroOutOfLimitsException e) {
+        } catch (final kelondroOutOfLimitsException e) {
             e.printStackTrace();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             e.printStackTrace();
         }
     }

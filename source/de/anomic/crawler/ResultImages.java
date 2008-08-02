@@ -49,17 +49,17 @@ public class ResultImages {
     // the same images may be linked from different pages
     private static final ConcurrentHashMap<String, Long> doubleCheck = new ConcurrentHashMap<String, Long>(); // (url-hash, time) when the url appeared first
     
-    public static void registerImages(plasmaParserDocument document, boolean privateEntry) {
+    public static void registerImages(final plasmaParserDocument document, final boolean privateEntry) {
         if (document == null) return;
         if (document.dc_source() == null) return;
         
-        HashMap<String, htmlFilterImageEntry> images = document.getImages();
-        for (htmlFilterImageEntry image: images.values()) {
+        final HashMap<String, htmlFilterImageEntry> images = document.getImages();
+        for (final htmlFilterImageEntry image: images.values()) {
             // do a double-check; attention: this can be time-consuming since this possibly needs a DNS-lookup
             if (doubleCheck.containsKey(image.url().hash())) continue;
             doubleCheck.put(image.url().hash(), System.currentTimeMillis());
             
-            String name = image.url().getFile();
+            final String name = image.url().getFile();
             boolean good = false;
             if (image.width() > 120 &&
                 image.height() > 100 &&
@@ -94,7 +94,7 @@ public class ResultImages {
         }
     }
     
-    public static OriginEntry next(boolean privateEntryOnly) {
+    public static OriginEntry next(final boolean privateEntryOnly) {
         OriginEntry e = null;
         if (privateEntryOnly) {
             e = privateImageQueueHigh.poll();
@@ -108,7 +108,7 @@ public class ResultImages {
         return e;
     }
     
-    public static int queueSize(boolean privateEntryOnly) {
+    public static int queueSize(final boolean privateEntryOnly) {
         if (privateEntryOnly) {
             return privateImageQueueHigh.size() + privateImageQueueLow.size();
         } else {
@@ -144,7 +144,7 @@ public class ResultImages {
     public static class OriginEntry {
         public htmlFilterImageEntry imageEntry;
         public yacyURL baseURL;
-        public OriginEntry(htmlFilterImageEntry imageEntry, yacyURL baseURL) {
+        public OriginEntry(final htmlFilterImageEntry imageEntry, final yacyURL baseURL) {
             this.imageEntry = imageEntry;
             this.baseURL = baseURL;
         }

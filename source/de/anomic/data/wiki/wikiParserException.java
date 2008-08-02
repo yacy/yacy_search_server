@@ -6,15 +6,15 @@ public class wikiParserException extends Exception {
     
     public wikiParserException() {  }
     
-    public wikiParserException(String message) {
+    public wikiParserException(final String message) {
         super(message);
     }
     
-    public wikiParserException(Throwable cause) {
+    public wikiParserException(final Throwable cause) {
         super(cause);
     }
     
-    public wikiParserException(String message, Throwable cause) {
+    public wikiParserException(final String message, final Throwable cause) {
         super(message, cause);
     }
 }

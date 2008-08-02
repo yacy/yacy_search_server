@@ -41,7 +41,7 @@ import de.anomic.yacy.yacyURL;
 
 public class CrawlResults {
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
+    public static serverObjects respond(final httpHeader header, serverObjects post, final serverSwitch<?> env) {
         // return variable that accumulates replacements
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final serverObjects prop = new serverObjects();
@@ -64,7 +64,7 @@ public class CrawlResults {
         int tabletype;
         try {
             tabletype = Integer.parseInt(post.get("process", "0"));
-        } catch (NumberFormatException e) {
+        } catch (final NumberFormatException e) {
             tabletype = 0;
         }
 
@@ -77,7 +77,7 @@ public class CrawlResults {
         if (((tabletype > 0) && (tabletype < 6)) ||
             (post != null && (post.containsKey("clearlist") ||
             post.containsKey("deleteentry")))) {
-            String authorization = ((String) header.get(httpHeader.AUTHORIZATION, "xxxxxx"));
+            final String authorization = ((String) header.get(httpHeader.AUTHORIZATION, "xxxxxx"));
             if (authorization.length() != 0) {
                 if (! sb.verifyAuthentication(header, true)){
                     // force log-in (again, because wrong password was given)
@@ -100,7 +100,7 @@ public class CrawlResults {
         // do the commands
         if (post.containsKey("clearlist")) sb.crawlResults.clearStack(tabletype);
         if (post.containsKey("deleteentry")) {
-                String hash = post.get("hash", null);
+                final String hash = post.get("hash", null);
                 if (hash != null) {
                     // delete from database
                     sb.webIndex.removeURL(hash);
@@ -255,7 +255,7 @@ public class CrawlResults {
 
                     dark = !dark;
                     cnt++;
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     serverLog.logSevere("PLASMA", "genTableProps", e);
                 }
             }
@@ -267,7 +267,7 @@ public class CrawlResults {
     }
 
     private static SimpleDateFormat dayFormatter = new SimpleDateFormat("yyyy/MM/dd", Locale.US);
-    private static String daydate(Date date) {
+    private static String daydate(final Date date) {
         if (date == null) {
             return "";
         } else {

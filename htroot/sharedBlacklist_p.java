@@ -57,10 +57,10 @@ public class sharedBlacklist_p {
     public static final int STATUS_URL_PROBLEM = 4;
     public static final int STATUS_WRONG_INVOCATION = 5;
     
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
-        plasmaSwitchboard sb = (plasmaSwitchboard) env;
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         // return variable that accumulates replacements
-        serverObjects prop = new serverObjects();
+        final serverObjects prop = new serverObjects();
 
         // getting the name of the destination blacklist
         String selectedBlacklistName = "";
@@ -82,16 +82,16 @@ public class sharedBlacklist_p {
                  * ====================================================== */
                 
                 // getting the source peer hash
-                String Hash = post.get("hash");
+                final String Hash = post.get("hash");
                 
                 // generate the download URL
                 String downloadURL = null;
                 if( sb.webIndex.seedDB != null ){ //no nullpointer error..
-                    yacySeed seed = sb.webIndex.seedDB.getConnected(Hash); 
+                    final yacySeed seed = sb.webIndex.seedDB.getConnected(Hash); 
                     if (seed != null) {
-                        String IP = seed.getIP(); 
-                        String Port = seed.get(yacySeed.PORT, "8080");
-                        String peerName = seed.get(yacySeed.NAME, "<" + IP + ":" + Port + ">");
+                        final String IP = seed.getIP(); 
+                        final String Port = seed.get(yacySeed.PORT, "8080");
+                        final String peerName = seed.get(yacySeed.NAME, "<" + IP + ":" + Port + ">");
                         prop.putHTML("page_source", peerName);
 
                         downloadURL = "http://" + IP + ":" + Port + "/yacy/list.html?col=black";
@@ -107,15 +107,15 @@ public class sharedBlacklist_p {
                 if (downloadURL != null) {
                     // download the blacklist
                     try {
-                        httpHeader reqHeader = new httpHeader();
+                        final httpHeader reqHeader = new httpHeader();
                         reqHeader.put(httpHeader.PRAGMA,"no-cache");
                         reqHeader.put(httpHeader.CACHE_CONTROL,"no-cache");
                         reqHeader.put(httpHeader.USER_AGENT, HTTPLoader.yacyUserAgent);
                         
                         // get List
-                        yacyURL u = new yacyURL(downloadURL, null);
+                        final yacyURL u = new yacyURL(downloadURL, null);
                         otherBlacklist = nxTools.strings(HttpClient.wget(u.toString(), reqHeader, 1000), "UTF-8"); 
-                    } catch (Exception e) {
+                    } catch (final Exception e) {
                         prop.put("status", STATUS_PEER_UNKNOWN);
                         prop.put("page", "1");
                     }
@@ -125,15 +125,15 @@ public class sharedBlacklist_p {
                  * Download the blacklist from URL
                  * ====================================================== */
                 
-                String downloadURL = post.get("url");
+                final String downloadURL = post.get("url");
                 prop.putHTML("page_source", downloadURL);
 
                 try {
-                    yacyURL u = new yacyURL(downloadURL, null);
-                    httpHeader reqHeader = new httpHeader();
+                    final yacyURL u = new yacyURL(downloadURL, null);
+                    final httpHeader reqHeader = new httpHeader();
                     reqHeader.put(httpHeader.USER_AGENT, HTTPLoader.yacyUserAgent);
                     otherBlacklist = nxTools.strings(HttpClient.wget(u.toString(), reqHeader, 10000), "UTF-8"); //get List
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     prop.put("status", STATUS_URL_PROBLEM);
                     prop.putHTML("status_address",downloadURL);
                     prop.put("page", "1");
@@ -142,10 +142,10 @@ public class sharedBlacklist_p {
                 /* ======================================================
                  * Import the blacklist from file
                  * ====================================================== */
-                String sourceFileName = post.get("file");
+                final String sourceFileName = post.get("file");
                 prop.put("page_source", sourceFileName);
                 
-                File sourceFile = new File(listManager.listsPath, sourceFileName);
+                final File sourceFile = new File(listManager.listsPath, sourceFileName);
                 if (!sourceFile.exists() || !sourceFile.canRead() || !sourceFile.isFile()) {
                     prop.put("status", STATUS_FILE_ERROR);
                     prop.put("page", "1");
@@ -168,7 +168,7 @@ public class sharedBlacklist_p {
                     pw = new PrintWriter(new FileWriter(new File(listManager.listsPath, selectedBlacklistName), true));
                     
                     // loop through the received entry list
-                    int num = Integer.parseInt( post.get("num") );
+                    final int num = Integer.parseInt( post.get("num") );
                     for(int i=0;i < num; i++){ 
                         if( post.containsKey("item" + i) ){
                             String newItem = post.get("item" + i);
@@ -191,8 +191,8 @@ public class sharedBlacklist_p {
 
                             count++;
                             if (plasmaSwitchboard.urlBlacklist != null) {
-                                String supportedBlacklistTypesStr = indexAbstractReferenceBlacklist.BLACKLIST_TYPES_STRING;
-                                String[] supportedBlacklistTypes = supportedBlacklistTypesStr.split(",");  
+                                final String supportedBlacklistTypesStr = indexAbstractReferenceBlacklist.BLACKLIST_TYPES_STRING;
+                                final String[] supportedBlacklistTypes = supportedBlacklistTypesStr.split(",");  
 
                                 for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
                                     if (listManager.listSetContains(supportedBlacklistTypes[blTypes] + ".BlackLists",selectedBlacklistName)) {
@@ -202,11 +202,11 @@ public class sharedBlacklist_p {
                             }
                         }
                     }
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     prop.put("status", "1");
                     prop.putHTML("status_error", e.getLocalizedMessage());
                 } finally {
-                    if (pw != null) try { pw.close(); } catch (Exception e){ /* */}
+                    if (pw != null) try { pw.close(); } catch (final Exception e){ /* */}
                 }
                 
                 prop.put("LOCATION","Blacklist_p.html?selectedListName=" + selectedBlacklistName + "&selectList=");
@@ -216,15 +216,15 @@ public class sharedBlacklist_p {
             // generate the html list
             if (otherBlacklist != null) {
                 // loading the current blacklist content
-                HashSet<String> Blacklist = new HashSet<String>(listManager.getListArray(new File(listManager.listsPath, selectedBlacklistName)));
+                final HashSet<String> Blacklist = new HashSet<String>(listManager.getListArray(new File(listManager.listsPath, selectedBlacklistName)));
                 
                 // sort the loaded blacklist
-                String[] sortedlist = otherBlacklist.toArray(new String[otherBlacklist.size()]);
+                final String[] sortedlist = otherBlacklist.toArray(new String[otherBlacklist.size()]);
                 Arrays.sort(sortedlist);
                 
                 int count = 0;
                 for(int i = 0; i < sortedlist.length; i++){
-                    String tmp = sortedlist[i];
+                    final String tmp = sortedlist[i];
                     if( !Blacklist.contains(tmp) && (!tmp.equals("")) ){
                         //newBlacklist.add(tmp);
                         prop.put("page_urllist_" + count + "_dark", count % 2 == 0 ? "0" : "1");

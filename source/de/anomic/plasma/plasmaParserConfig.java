@@ -28,6 +28,7 @@
 package de.anomic.plasma;
 
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -55,7 +56,7 @@ public class plasmaParserConfig {
      */
     public String parserMode = null;
     
-    public plasmaParserConfig(String theParserMode) {
+    public plasmaParserConfig(final String theParserMode) {
         if (!plasmaParser.PARSER_MODE.contains(theParserMode)) {
             throw new IllegalArgumentException("Unknown parser mode " + theParserMode);
         }
@@ -63,7 +64,7 @@ public class plasmaParserConfig {
         this.parserMode = theParserMode;            
     }
     
-    public boolean supportedContent(yacyURL url, String mimeType) {
+    public boolean supportedContent(final yacyURL url, String mimeType) {
         // TODO: we need some exceptions here to index URLs like this
         //       http://www.musicabona.com/respighi/12668/cd/index.html.fr
         mimeType = plasmaParser.normalizeMimeType(mimeType);
@@ -90,11 +91,11 @@ public class plasmaParserConfig {
     }        
     
     
-    public boolean supportedFileExt(yacyURL url) {
+    public boolean supportedFileExt(final yacyURL url) {
         if (url == null) throw new NullPointerException();
         
         // getting the file path
-        String name = plasmaParser.getFileExt(url);
+        final String name = plasmaParser.getFileExt(url);
         return supportedFileExtContains(name);
     }
     
@@ -111,12 +112,12 @@ public class plasmaParserConfig {
         }
     }        
     
-    public void initParseableMimeTypes(String enabledMimeTypes) {
+    public void initParseableMimeTypes(final String enabledMimeTypes) {
         HashSet<String> mimeTypes = null;
         if ((enabledMimeTypes == null) || (enabledMimeTypes.length() == 0)) {
             mimeTypes = new HashSet<String>();
         } else {            
-            String[] enabledMimeTypeList = enabledMimeTypes.split(",");
+            final String[] enabledMimeTypeList = enabledMimeTypes.split(",");
             mimeTypes = new HashSet<String>(enabledMimeTypeList.length);
             for (int i = 0; i < enabledMimeTypeList.length; i++) mimeTypes.add(enabledMimeTypeList[i].toLowerCase().trim());
         }
@@ -124,19 +125,19 @@ public class plasmaParserConfig {
     }
     
     public void enableAllParsers() {
-        Set<String> availableMimeTypes = plasmaParser.availableParserList.keySet();
+        final Set<String> availableMimeTypes = plasmaParser.availableParserList.keySet();
         setEnabledParserList(availableMimeTypes);
     }
     
-    public  String[] setEnabledParserList(Set<String> mimeTypeSet) {
+    public  String[] setEnabledParserList(final Set<String> mimeTypeSet) {
         
-        HashSet<String> newEnabledParsers = new HashSet<String>();
-        HashSet<String> newSupportedFileExt = new HashSet<String>();
+        final HashSet<String> newEnabledParsers = new HashSet<String>();
+        final HashSet<String> newSupportedFileExt = new HashSet<String>();
         
         if (mimeTypeSet != null) {
-            Iterator<String> mimeTypes = mimeTypeSet.iterator();
+            final Iterator<String> mimeTypes = mimeTypeSet.iterator();
             while (mimeTypes.hasNext()) {
-                String mimeType = mimeTypes.next();
+                final String mimeType = mimeTypes.next();
                 if (plasmaParser.availableParserList.containsKey(mimeType)) {
                     Parser theParser = null;
                     try {
@@ -144,19 +145,19 @@ public class plasmaParserConfig {
                         theParser = plasmaParser.makeParser((plasmaParser.availableParserList.get(mimeType)).parserClassName);
                         
                         // getting a list of mimeTypes that the parser supports
-                        Hashtable<String, String> parserSupportsMimeTypes = theParser.getSupportedMimeTypes();
+                        final Hashtable<String, String> parserSupportsMimeTypes = theParser.getSupportedMimeTypes();
                         if (parserSupportsMimeTypes != null) {
-                            Object supportedExtensions = parserSupportsMimeTypes.get(mimeType);
+                            final Object supportedExtensions = parserSupportsMimeTypes.get(mimeType);
                             if ((supportedExtensions != null) &&
                                     (supportedExtensions instanceof String) &&
                                     (((String)supportedExtensions).length() > 0)) {
-                                String[] extArray = ((String)supportedExtensions).split(",");
+                                final String[] extArray = ((String)supportedExtensions).split(",");
                                 newSupportedFileExt.addAll(Arrays.asList(extArray));
                             }
                         }
                         newEnabledParsers.add(mimeType);
                         
-                    } catch (Exception e) {
+                    } catch (final Exception e) {
                         serverLog.logSevere("PARSER", "error in setEnabledParserList", e);
                     } finally {
                         if (theParser != null)

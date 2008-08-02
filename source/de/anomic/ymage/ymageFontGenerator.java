@@ -523,7 +523,7 @@ public class ymageFontGenerator {
         };
 
     
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         String[] letter;
         long b;
         long v;

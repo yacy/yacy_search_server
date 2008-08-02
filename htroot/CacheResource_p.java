@@ -35,22 +35,22 @@ import de.anomic.server.serverSwitch;
 
 public class CacheResource_p {
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
-        plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
-        serverObjects prop = new serverObjects();
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+        final plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
+        final serverObjects prop = new serverObjects();
 
-        String path = ((post == null) ? "" : post.get("path", ""));
+        final String path = ((post == null) ? "" : post.get("path", ""));
 
         // we dont need check the path, because we have do that in plasmaSwitchboard.java - Borg-0300
-        File cache = switchboard.getConfigPath(plasmaSwitchboard.HTCACHE_PATH, plasmaSwitchboard.HTCACHE_PATH_DEFAULT);
+        final File cache = switchboard.getConfigPath(plasmaSwitchboard.HTCACHE_PATH, plasmaSwitchboard.HTCACHE_PATH_DEFAULT);
 
-        File f = new File(cache, path);
+        final File f = new File(cache, path);
         byte[] resource;
 
         try {
             resource = serverFileUtils.read(f);
             prop.put("resource", resource);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             prop.put("resource", new byte[0]);
         }
         return prop;

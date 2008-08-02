@@ -20,15 +20,15 @@ public class screenshot {
     } catch (AWTException e) {
     }
     */
-    public static void main(String[] args) throws Exception {
+    public static void main(final String[] args) throws Exception {
         
-        Toolkit toolkit = Toolkit.getDefaultToolkit();
-        Dimension screenSize = toolkit.getScreenSize();
-        Rectangle screenRect = new Rectangle(screenSize);
+        final Toolkit toolkit = Toolkit.getDefaultToolkit();
+        final Dimension screenSize = toolkit.getScreenSize();
+        final Rectangle screenRect = new Rectangle(screenSize);
         // create screen shot
-        Robot robot = new Robot();
-        BufferedImage image = robot.createScreenCapture(screenRect);
-        String outFileName = "test.png";
+        final Robot robot = new Robot();
+        final BufferedImage image = robot.createScreenCapture(screenRect);
+        final String outFileName = "test.png";
         // save captured image to PNG file
         ImageIO.write(image, "png", new File(outFileName));
         // give feedback

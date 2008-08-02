@@ -33,10 +33,10 @@ import de.anomic.yacy.yacySeed;
 
 public class IndexCreateLoaderQueue_p {
     
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
         // return variable that accumulates replacements
-        plasmaSwitchboard sb = (plasmaSwitchboard) env;
-        serverObjects prop = new serverObjects();
+        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        final serverObjects prop = new serverObjects();
         
 
         if (sb.crawlQueues.size() == 0) {
@@ -44,7 +44,7 @@ public class IndexCreateLoaderQueue_p {
         } else {
             prop.put("loader-set", "1");
             boolean dark = true;
-            CrawlEntry[] w = sb.crawlQueues.activeWorkerEntries();
+            final CrawlEntry[] w = sb.crawlQueues.activeWorkerEntries();
             yacySeed initiator;
             int count = 0;
             for (int i = 0; i < w.length; i++)  {

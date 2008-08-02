@@ -31,19 +31,19 @@ public class httpdBoundedSizeOutputStream extends httpdByteCountOutputStream {
 
     protected final long maxSize;
 
-    public httpdBoundedSizeOutputStream(OutputStream outputStream, long sizeLimit) {
+    public httpdBoundedSizeOutputStream(final OutputStream outputStream, final long sizeLimit) {
         this(outputStream,0,sizeLimit);
     }
     
-    public httpdBoundedSizeOutputStream(OutputStream outputStream, long initByteCount, long sizeLimit) {
+    public httpdBoundedSizeOutputStream(final OutputStream outputStream, final long initByteCount, final long sizeLimit) {
         super(outputStream,initByteCount,null);
         this.maxSize = sizeLimit;
     }    
 
-    public void write(byte[] b) throws IOException {
+    public void write(final byte[] b) throws IOException {
         if (this.byteCount + b.length > this.maxSize) {
             // write out the rest until we have reached the limit
-            long rest = this.maxSize-this.byteCount;
+            final long rest = this.maxSize-this.byteCount;
             if (rest > 0) this.write(b, 0, (int)rest);
             
             // throw an exception
@@ -52,10 +52,10 @@ public class httpdBoundedSizeOutputStream extends httpdByteCountOutputStream {
         super.write(b);
     }
 
-    public void write(byte[] b, int off, int len) throws IOException {     
+    public void write(final byte[] b, final int off, final int len) throws IOException {     
         if (this.byteCount + len > this.maxSize) {
             // write out the rest until we reach the limit
-            long rest = this.maxSize-this.byteCount;
+            final long rest = this.maxSize-this.byteCount;
             if (rest > 0) this.write(b, 0, (int)rest);
             
             // throw an exception
@@ -64,7 +64,7 @@ public class httpdBoundedSizeOutputStream extends httpdByteCountOutputStream {
         super.write(b, off, len);
     }
 
-    public void write(int b) throws IOException {
+    public void write(final int b) throws IOException {
         if (this.byteCount + 1 > this.maxSize) {
             // throw an exception
             throw new httpdLimitExceededException("Limit exceeded",this.maxSize);

@@ -57,7 +57,7 @@ public class NoticedURL {
     private long minimumLocalDelta;
     private long minimumGlobalDelta;
     
-    public NoticedURL(File cachePath) {
+    public NoticedURL(final File cachePath) {
         this.coreStack = new Balancer(cachePath, "urlNoticeCoreStack", false);
         this.limitStack = new Balancer(cachePath, "urlNoticeLimitStack", false);
         //overhangStack = new plasmaCrawlBalancer(overhangStackFile);
@@ -74,11 +74,11 @@ public class NoticedURL {
         return this.minimumGlobalDelta;
     }
     
-    public void setMinimumLocalDelta(long newDelta) {
+    public void setMinimumLocalDelta(final long newDelta) {
         this.minimumLocalDelta = Math.max(minimumLocalDeltaInit, newDelta);
     }
     
-    public void setMinimumGlobalDelta(long newDelta) {
+    public void setMinimumGlobalDelta(final long newDelta) {
         this.minimumGlobalDelta = Math.max(minimumGlobalDeltaInit, newDelta);
     }
     
@@ -120,7 +120,7 @@ public class NoticedURL {
         return ((coreStack == null) ? 0 : coreStack.size()) + ((limitStack == null) ? 0 : limitStack.size()) + ((remoteStack == null) ? 0 : remoteStack.size());
     }
 
-    public int stackSize(int stackType) {
+    public int stackSize(final int stackType) {
         switch (stackType) {
             case STACK_TYPE_CORE:     return (coreStack == null) ? 0 : coreStack.size();
             case STACK_TYPE_LIMIT:    return (limitStack == null) ? 0 : limitStack.size();
@@ -130,7 +130,7 @@ public class NoticedURL {
         }
     }
 
-    public boolean existsInStack(String urlhash) {
+    public boolean existsInStack(final String urlhash) {
         return
             coreStack.has(urlhash) ||
             limitStack.has(urlhash) ||
@@ -138,7 +138,7 @@ public class NoticedURL {
             remoteStack.has(urlhash);
     }
     
-    public void push(int stackType, CrawlEntry entry) {
+    public void push(final int stackType, final CrawlEntry entry) {
         try {
             switch (stackType) {
                 case STACK_TYPE_CORE:
@@ -152,14 +152,14 @@ public class NoticedURL {
                     break;
                 default: break;
             }
-        } catch (IOException er) {}
+        } catch (final IOException er) {}
     }
 
-    public CrawlEntry get(String urlhash) {
+    public CrawlEntry get(final String urlhash) {
         CrawlEntry entry = null;
-        try {if ((entry = coreStack.get(urlhash)) != null) return entry;} catch (IOException e) {}
-        try {if ((entry = limitStack.get(urlhash)) != null) return entry;} catch (IOException e) {}
-        try {if ((entry = remoteStack.get(urlhash)) != null) return entry;} catch (IOException e) {}
+        try {if ((entry = coreStack.get(urlhash)) != null) return entry;} catch (final IOException e) {}
+        try {if ((entry = limitStack.get(urlhash)) != null) return entry;} catch (final IOException e) {}
+        try {if ((entry = remoteStack.get(urlhash)) != null) return entry;} catch (final IOException e) {}
         return null;
     }
     
@@ -169,24 +169,24 @@ public class NoticedURL {
      * @param urlhash
      * @return true, if the entry was removed; false if not
      */
-    public boolean removeByURLHash(String urlhash) {
-        HashSet<String> urlHashes = new HashSet<String>();
+    public boolean removeByURLHash(final String urlhash) {
+        final HashSet<String> urlHashes = new HashSet<String>();
         urlHashes.add(urlhash);
-        try {return coreStack.remove(urlHashes) > 0;} catch (IOException e) {}
-        try {return limitStack.remove(urlHashes) > 0;} catch (IOException e) {}
-        try {return remoteStack.remove(urlHashes) > 0;} catch (IOException e) {}
+        try {return coreStack.remove(urlHashes) > 0;} catch (final IOException e) {}
+        try {return limitStack.remove(urlHashes) > 0;} catch (final IOException e) {}
+        try {return remoteStack.remove(urlHashes) > 0;} catch (final IOException e) {}
         return false;
     }
     
-    public int removeByProfileHandle(String handle, long timeout) {
+    public int removeByProfileHandle(final String handle, final long timeout) {
         int removed = 0;
-        try {removed += coreStack.removeAllByProfileHandle(handle, timeout);} catch (IOException e) {}
-        try {removed += limitStack.removeAllByProfileHandle(handle, timeout);} catch (IOException e) {}
-        try {removed += remoteStack.removeAllByProfileHandle(handle, timeout);} catch (IOException e) {}
+        try {removed += coreStack.removeAllByProfileHandle(handle, timeout);} catch (final IOException e) {}
+        try {removed += limitStack.removeAllByProfileHandle(handle, timeout);} catch (final IOException e) {}
+        try {removed += remoteStack.removeAllByProfileHandle(handle, timeout);} catch (final IOException e) {}
         return removed;
     }
     
-    public ArrayList<CrawlEntry> top(int stackType, int count) {
+    public ArrayList<CrawlEntry> top(final int stackType, final int count) {
         switch (stackType) {
             case STACK_TYPE_CORE:     return top(coreStack, count);
             case STACK_TYPE_LIMIT:    return top(limitStack, count);
@@ -195,7 +195,7 @@ public class NoticedURL {
         }
     }
     
-    public CrawlEntry pop(int stackType, boolean delay) throws IOException {
+    public CrawlEntry pop(final int stackType, final boolean delay) throws IOException {
         switch (stackType) {
             case STACK_TYPE_CORE:     return pop(coreStack, delay);
             case STACK_TYPE_LIMIT:    return pop(limitStack, delay);
@@ -204,16 +204,16 @@ public class NoticedURL {
         }
     }
 
-    public void shift(int fromStack, int toStack) {
+    public void shift(final int fromStack, final int toStack) {
         try {
-            CrawlEntry entry = pop(fromStack, false);
+            final CrawlEntry entry = pop(fromStack, false);
             if (entry != null) push(toStack, entry);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             return;
         }
     }
 
-    public void clear(int stackType) {
+    public void clear(final int stackType) {
         switch (stackType) {
                 case STACK_TYPE_CORE:     coreStack.clear(); break;
                 case STACK_TYPE_LIMIT:    limitStack.clear(); break;
@@ -222,7 +222,7 @@ public class NoticedURL {
             }
     }
     
-    private CrawlEntry pop(Balancer balancer, boolean delay) throws IOException {
+    private CrawlEntry pop(final Balancer balancer, final boolean delay) throws IOException {
         // this is a filo - pop
         int s;
         CrawlEntry entry;
@@ -231,7 +231,7 @@ public class NoticedURL {
             entry = balancer.pop((delay) ? minimumLocalDelta : 0, (delay) ? minimumGlobalDelta : 0, maximumDomAge);
             if (entry == null) {
                 if (s > balancer.size()) continue;
-                int aftersize = balancer.size();
+                final int aftersize = balancer.size();
                 balancer.clear(); // the balancer is broken and cannot shrink
                 throw new IOException("entry is null, balancer cannot shrink (bevore pop = " + s + ", after pop = " + aftersize + "); reset of balancer");
             }
@@ -241,26 +241,26 @@ public class NoticedURL {
         throw new IOException("balancer stack is empty");
     }
     
-    private ArrayList<CrawlEntry> top(Balancer balancer, int count) {
+    private ArrayList<CrawlEntry> top(final Balancer balancer, int count) {
         // this is a filo - top
         if (count > balancer.size()) count = balancer.size();
         ArrayList<CrawlEntry> list;
         try {
             list = balancer.top(count);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             list = new ArrayList<CrawlEntry>(0);
         }
         return list;
     }
     
-    public Iterator<CrawlEntry> iterator(int stackType) {
+    public Iterator<CrawlEntry> iterator(final int stackType) {
         // returns an iterator of plasmaCrawlBalancerEntry Objects
         try {switch (stackType) {
             case STACK_TYPE_CORE:     return coreStack.iterator();
             case STACK_TYPE_LIMIT:    return limitStack.iterator();
             case STACK_TYPE_REMOTE:   return remoteStack.iterator();
             default: return null;
-        }} catch (IOException e) {
+        }} catch (final IOException e) {
             return new HashSet<CrawlEntry>().iterator();
         }
     }

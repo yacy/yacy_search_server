@@ -42,11 +42,11 @@ import de.anomic.yacy.yacyURL;
 
 public class plasmaRankingRCIEvaluation {
     
-    public static int[] rcieval(kelondroAttrSeq rci) {
+    public static int[] rcieval(final kelondroAttrSeq rci) {
         // collect information about which entry has how many references
         // the output is a reference-count:occurrences relation
-        HashMap<Integer, Integer> counts = new HashMap<Integer, Integer>();
-        Iterator<String> i = rci.keys();
+        final HashMap<Integer, Integer> counts = new HashMap<Integer, Integer>();
+        final Iterator<String> i = rci.keys();
         String key;
         kelondroAttrSeq.Entry entry;
         Integer count_key, count_count;
@@ -65,7 +65,7 @@ public class plasmaRankingRCIEvaluation {
             }
             counts.put(count_key, count_count);
         }
-        int[] ctable = new int[maxcount + 1];
+        final int[] ctable = new int[maxcount + 1];
         for (int j = 0; j <= maxcount; j++) {
             count_count = counts.get(new Integer(j));
             if (count_count == null) {
@@ -77,15 +77,15 @@ public class plasmaRankingRCIEvaluation {
         return ctable;
     }
     
-    public static long sum(int[] c) {
+    public static long sum(final int[] c) {
         long s = 0;
         for (int i = 0; i < c.length; i++) s += c[i];
         return s;
     }
     
-    public static int[] interval(int[] counts, int parts) {
+    public static int[] interval(final int[] counts, final int parts) {
         long limit = sum(counts) / 2;
-        int[] partition = new int[parts];
+        final int[] partition = new int[parts];
         int s = 0, p = parts - 1;
         for (int i = 1; i < counts.length; i++) {
             s += counts[i];
@@ -100,7 +100,7 @@ public class plasmaRankingRCIEvaluation {
         return partition;
     }
     
-    public static void checkPartitionTable0(int[] counts, int[] partition) {
+    public static void checkPartitionTable0(final int[] counts, final int[] partition) {
         int sumsum = 0;
         int sum;
         int j = 0;
@@ -115,9 +115,9 @@ public class plasmaRankingRCIEvaluation {
         System.out.println("complete sum = " + sumsum);
     }
     
-    public static void checkPartitionTable1(int[] counts, int[] partition) {
+    public static void checkPartitionTable1(final int[] counts, final int[] partition) {
         int sumsum = 0;
-        int[] sum = new int[partition.length];
+        final int[] sum = new int[partition.length];
         for (int i = 0; i < partition.length; i++) sum[i] = 0;
         for (int i = 0; i < counts.length; i++) sum[orderIntoYBI(partition, i)] += counts[i];
         for (int i = partition.length - 1; i >= 0; i--) {
@@ -127,7 +127,7 @@ public class plasmaRankingRCIEvaluation {
         System.out.println("complete sum = " + sumsum);
     }
     
-    public static int orderIntoYBI(int[] partition, int count) {
+    public static int orderIntoYBI(final int[] partition, final int count) {
         for (int i = 0; i < partition.length - 1; i++) {
             if ((count >= (partition[i + 1] + 1)) && (count <= partition[i])) return i;
         }
@@ -135,10 +135,10 @@ public class plasmaRankingRCIEvaluation {
     }
     
     @SuppressWarnings("unchecked")
-    public static TreeSet<String>[] genRankingTable(kelondroAttrSeq rci, int[] partition) {
-        TreeSet<String>[] ranked = new TreeSet[partition.length];
+    public static TreeSet<String>[] genRankingTable(final kelondroAttrSeq rci, final int[] partition) {
+        final TreeSet<String>[] ranked = new TreeSet[partition.length];
         for (int i = 0; i < partition.length; i++) ranked[i] = new TreeSet<String>(kelondroBase64Order.enhancedComparator);
-        Iterator<String> i = rci.keys();
+        final Iterator<String> i = rci.keys();
         String key;
         kelondroAttrSeq.Entry entry;
         while (i.hasNext()) {
@@ -149,10 +149,10 @@ public class plasmaRankingRCIEvaluation {
         return ranked;
     }
 
-    public static HashMap<String, String> genReverseDomHash(File domlist) {
-        HashSet<String> domset = serverFileUtils.loadList(domlist);
-        HashMap<String, String> dommap = new HashMap<String, String>();
-        Iterator<String> i = domset.iterator();
+    public static HashMap<String, String> genReverseDomHash(final File domlist) {
+        final HashSet<String> domset = serverFileUtils.loadList(domlist);
+        final HashMap<String, String> dommap = new HashMap<String, String>();
+        final Iterator<String> i = domset.iterator();
         String dom;
         while (i.hasNext()) {
             dom = i.next();
@@ -160,12 +160,12 @@ public class plasmaRankingRCIEvaluation {
             try {
                 dommap.put((new yacyURL("http://" + dom, null)).hash().substring(6), dom);
                 dommap.put((new yacyURL("http://www." + dom, null)).hash().substring(6), "www." + dom);
-            } catch (MalformedURLException e) {}
+            } catch (final MalformedURLException e) {}
         }
         return dommap;
     }
 
-    public static void storeRankingTable(TreeSet<String>[] ranking, File tablePath) throws IOException {
+    public static void storeRankingTable(final TreeSet<String>[] ranking, final File tablePath) throws IOException {
         String filename;
         if (!(tablePath.exists())) tablePath.mkdirs();
         for (int i = 0; i < ranking.length - 1; i++) {
@@ -174,18 +174,18 @@ public class plasmaRankingRCIEvaluation {
         }
     }
     
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         try {
             if ((args.length == 2) && (args[0].equals("-genybr"))) {
-                File root_path = new File(args[1]);
-                File rci_file = new File(root_path, "DATA/RANKING/GLOBAL/030_rci0/RCI-0.rci.gz");
-                long start = System.currentTimeMillis();
+                final File root_path = new File(args[1]);
+                final File rci_file = new File(root_path, "DATA/RANKING/GLOBAL/030_rci0/RCI-0.rci.gz");
+                final long start = System.currentTimeMillis();
                 if (!(rci_file.exists())) return;
                 
                 // create partition table
                 final kelondroAttrSeq rci = new kelondroAttrSeq(rci_file, false);
-                int counts[] = rcieval(rci);
-                int[] partition = interval(counts, 16);
+                final int counts[] = rcieval(rci);
+                final int[] partition = interval(counts, 16);
                 
                 // check the table
                 System.out.println("partition position table:");
@@ -200,19 +200,19 @@ public class plasmaRankingRCIEvaluation {
                 System.out.println("sum of all references: " + sum);
                 
                 // create ranking
-                TreeSet<String>[] ranked = genRankingTable(rci, partition);
+                final TreeSet<String>[] ranked = genRankingTable(rci, partition);
                 storeRankingTable(ranked, new File(root_path, "ranking/YBR"));
-                long seconds = java.lang.Math.max(1, (System.currentTimeMillis() - start) / 1000);
+                final long seconds = java.lang.Math.max(1, (System.currentTimeMillis() - start) / 1000);
                 System.out.println("Finished YBR generation in " + seconds + " seconds.");
             }
             if ((args.length == 2) && (args[0].equals("-rcieval"))) {
-                File root_path = new File(args[1]);
+                final File root_path = new File(args[1]);
                 
                 // load a partition table
                 plasmaSearchRankingProcess.loadYBR(new File(root_path, "ranking/YBR"), 16);
                 
                 // load domain list and generate hash index for domains
-                HashMap<String, String> dommap = genReverseDomHash(new File(root_path, "domlist.txt"));
+                final HashMap<String, String> dommap = genReverseDomHash(new File(root_path, "domlist.txt"));
                 
                 // print out the table
                 String hash, dom;
@@ -227,7 +227,7 @@ public class plasmaRankingRCIEvaluation {
                 }
                 
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             e.printStackTrace();
         }
     }

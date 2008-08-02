@@ -65,7 +65,7 @@ public final class HTTPLoader {
     /**
      * The socket timeout that should be used
      */
-    private int socketTimeout;
+    private final int socketTimeout;
     
     /**
      * The maximum allowed file size
@@ -75,10 +75,10 @@ public final class HTTPLoader {
     //private String acceptEncoding;
     //private String acceptLanguage;
     //private String acceptCharset;
-    private plasmaSwitchboard sb;
-    private serverLog log;
+    private final plasmaSwitchboard sb;
+    private final serverLog log;
     
-    public HTTPLoader(plasmaSwitchboard sb, serverLog theLog) {
+    public HTTPLoader(final plasmaSwitchboard sb, final serverLog theLog) {
         this.sb = sb;
         this.log = theLog;
         
@@ -94,8 +94,8 @@ public final class HTTPLoader {
      * @param responseStatus Status-Code SPACE Reason-Phrase
      * @return
      */
-    protected plasmaHTCache.Entry createCacheEntry(CrawlEntry entry, Date requestDate, httpHeader requestHeader, httpHeader responseHeader, final String responseStatus) {
-        IResourceInfo resourceInfo = new ResourceInfo(entry.url(), requestHeader, responseHeader);
+    protected plasmaHTCache.Entry createCacheEntry(final CrawlEntry entry, final Date requestDate, final httpHeader requestHeader, final httpHeader responseHeader, final String responseStatus) {
+        final IResourceInfo resourceInfo = new ResourceInfo(entry.url(), requestHeader, responseHeader);
         return plasmaHTCache.newEntry(
                 requestDate, 
                 entry.depth(),
@@ -108,11 +108,11 @@ public final class HTTPLoader {
         );
     }    
    
-    public plasmaHTCache.Entry load(CrawlEntry entry, String parserMode) {
+    public plasmaHTCache.Entry load(final CrawlEntry entry, final String parserMode) {
         return load(entry, parserMode, DEFAULT_CRAWLING_RETRY_COUNT);
     }
     
-    private plasmaHTCache.Entry load(CrawlEntry entry, String parserMode, int retryCount) {
+    private plasmaHTCache.Entry load(final CrawlEntry entry, final String parserMode, final int retryCount) {
 
         if (retryCount < 0) {
             this.log.logInfo("Redirection counter exceeded for URL " + entry.url().toString() + ". Processing aborted.");
@@ -120,15 +120,15 @@ public final class HTTPLoader {
             return null;
         }
         
-        Date requestDate = new Date(); // remember the time...
-        String host = entry.url().getHost();
-        String path = entry.url().getFile();
+        final Date requestDate = new Date(); // remember the time...
+        final String host = entry.url().getHost();
+        final String path = entry.url().getFile();
         int port = entry.url().getPort();
-        boolean ssl = entry.url().getProtocol().equals("https");
+        final boolean ssl = entry.url().getProtocol().equals("https");
         if (port < 0) port = (ssl) ? 443 : 80;
         
         // check if url is in blacklist
-        String hostlow = host.toLowerCase();
+        final String hostlow = host.toLowerCase();
         if (plasmaSwitchboard.urlBlacklist.isListed(indexReferenceBlacklist.BLACKLIST_CRAWLER, hostlow, path)) {
             this.log.logInfo("CRAWLER Rejecting URL '" + entry.url().toString() + "'. URL is in blacklist.");
             sb.crawlQueues.errorURL.newEntry(entry, sb.webIndex.seedDB.mySeed().hash, new Date(), 1, ErrorURL.DENIED_URL_IN_BLACKLIST).store();
@@ -140,7 +140,7 @@ public final class HTTPLoader {
         final long maxFileSize = sb.getConfigLong("crawler.http.maxFileSize", DEFAULT_MAXFILESIZE);
         try {
             // create a request header
-            httpHeader requestHeader = new httpHeader();
+            final httpHeader requestHeader = new httpHeader();
             requestHeader.put(httpHeader.USER_AGENT, crawlerUserAgent);
             yacyURL refererURL = null;
             if (entry.referrerhash() != null) refererURL = sb.getURL(entry.referrerhash());
@@ -150,7 +150,7 @@ public final class HTTPLoader {
             requestHeader.put(httpHeader.ACCEPT_ENCODING, sb.getConfig("crawler.http.acceptEncoding", DEFAULT_ENCODING));
 
             // HTTP-Client
-            JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(socketTimeout, requestHeader, null);
+            final JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(socketTimeout, requestHeader, null);
             
             JakartaCommonsHttpResponse res = null;
             try {
@@ -181,7 +181,7 @@ public final class HTTPLoader {
                 }
 
                 // request has been placed and result has been returned. work off response
-                File cacheFile = plasmaHTCache.getCachePath(entry.url());
+                final File cacheFile = plasmaHTCache.getCachePath(entry.url());
                 try {
                     if (plasmaParser.supportedContent(parserMode, entry.url(), res.getResponseHeader().mime())) {
                         // delete old content
@@ -198,7 +198,7 @@ public final class HTTPLoader {
                             fos = new FileOutputStream(cacheFile); 
                             
                             // getting content length
-                            long contentLength = res.getResponseHeader().contentLength();
+                            final long contentLength = res.getResponseHeader().contentLength();
                             
                             // check the maximum allowed file size                     
                             if (contentLength == -1 || maxFileSize == -1) {
@@ -217,13 +217,13 @@ public final class HTTPLoader {
 
                             // we write the new cache entry to file system directly
                             (res).setAccountingName("CRAWLER");
-                            byte[] responseBody = res.getData();
+                            final byte[] responseBody = res.getData();
                             fos.write(responseBody);
                             htCache.setCacheArray(responseBody);
                             plasmaHTCache.writeFileAnnouncement(cacheFile);
                             //htCache.writeResourceInfo(); // write header to header BLOB-database
                         } finally {
-                            if (fos!=null)try{fos.close();}catch(Exception e){/* ignore this */}
+                            if (fos!=null)try{fos.close();}catch(final Exception e){/* ignore this */}
                         }
                         
                         return htCache;
@@ -233,7 +233,7 @@ public final class HTTPLoader {
                         sb.crawlQueues.errorURL.newEntry(entry, sb.webIndex.seedDB.mySeed().hash, new Date(), 1, ErrorURL.DENIED_WRONG_MIMETYPE_OR_EXT);
                         return null;
                     }
-                } catch (SocketException e) {
+                } catch (final SocketException e) {
                     // this may happen if the client suddenly closes its connection
                     // maybe the user has stopped loading
                     // in that case, we are not responsible and just forget it
@@ -257,7 +257,7 @@ public final class HTTPLoader {
                         }
                         
                         // normalizing URL
-                        yacyURL redirectionUrl = yacyURL.newURL(entry.url(), redirectionUrlString);
+                        final yacyURL redirectionUrl = yacyURL.newURL(entry.url(), redirectionUrlString);
 
                         // restart crawling with new url
                         this.log.logInfo("CRAWLER Redirection detected ('" + res.getStatusLine() + "') for URL " + entry.url().toString());
@@ -271,10 +271,10 @@ public final class HTTPLoader {
                         }
 
                         // generating url hash
-                        String urlhash = redirectionUrl.hash();
+                        final String urlhash = redirectionUrl.hash();
                         
                         // check if the url was already indexed
-                        String dbname = sb.urlExists(urlhash);
+                        final String dbname = sb.urlExists(urlhash);
                         if (dbname != null) {
                             this.log.logWarning("CRAWLER Redirection of URL=" + entry.url().toString() + " ignored. The url appears already in db " + dbname);
                             sb.crawlQueues.errorURL.newEntry(entry, sb.webIndex.seedDB.mySeed().hash, new Date(), 1, ErrorURL.DENIED_REDIRECTION_TO_DOUBLE_CONTENT);
@@ -301,8 +301,8 @@ public final class HTTPLoader {
                 }
             }
             return htCache;
-        } catch (Exception e) {
-            String errorMsg = e.getMessage();
+        } catch (final Exception e) {
+            final String errorMsg = e.getMessage();
             String failreason = null;
 
             if ((e instanceof IOException) && 
@@ -323,7 +323,7 @@ public final class HTTPLoader {
                 failreason = ErrorURL.DENIED_NO_ROUTE_TO_HOST;
             } else if ((e instanceof UnknownHostException) ||
                        ((errorMsg != null) && (errorMsg.indexOf("unknown host") >= 0))) {
-                yacyURL u = (entry.referrerhash() == null) ? null : sb.getURL(entry.referrerhash());
+                final yacyURL u = (entry.referrerhash() == null) ? null : sb.getURL(entry.referrerhash());
                 this.log.logWarning("CRAWLER Unknown host in URL '" + entry.url() + "'. " +
                         "Referer URL: " + ((u == null) ? "Unknown" : u.toNormalform(true, true)));
                 failreason = ErrorURL.DENIED_UNKNOWN_HOST;

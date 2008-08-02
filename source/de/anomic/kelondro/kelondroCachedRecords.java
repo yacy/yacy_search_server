@@ -61,32 +61,32 @@ public class kelondroCachedRecords extends kelondroAbstractRecords implements ke
     
     
     public kelondroCachedRecords(
-            File file, boolean useNodeCache, long preloadTime,
-            short ohbytec, short ohhandlec,
-            kelondroRow rowdef, int FHandles, int txtProps, int txtPropWidth) throws IOException {
+            final File file, final boolean useNodeCache, final long preloadTime,
+            final short ohbytec, final short ohhandlec,
+            final kelondroRow rowdef, final int FHandles, final int txtProps, final int txtPropWidth) throws IOException {
         super(file, useNodeCache, ohbytec, ohhandlec, rowdef, FHandles, txtProps, txtPropWidth);
         initCache(useNodeCache, preloadTime);
         if (useNodeCache) recordTracker.put(this.filename, this);
     }
     
     public kelondroCachedRecords(
-            kelondroRA ra, String filename, boolean useNodeCache, long preloadTime,
-            short ohbytec, short ohhandlec,
-            kelondroRow rowdef, int FHandles, int txtProps, int txtPropWidth,
-            boolean exitOnFail) {
+            final kelondroRA ra, final String filename, final boolean useNodeCache, final long preloadTime,
+            final short ohbytec, final short ohhandlec,
+            final kelondroRow rowdef, final int FHandles, final int txtProps, final int txtPropWidth,
+            final boolean exitOnFail) {
         super(ra, filename, useNodeCache, ohbytec, ohhandlec, rowdef, FHandles, txtProps, txtPropWidth, exitOnFail);
         initCache(useNodeCache, preloadTime);
         if (useNodeCache) recordTracker.put(this.filename, this);
     }
     
     public kelondroCachedRecords(
-            kelondroRA ra, String filename, boolean useNodeCache, long preloadTime) throws IOException{
+            final kelondroRA ra, final String filename, final boolean useNodeCache, final long preloadTime) throws IOException{
         super(ra, filename, useNodeCache);
         initCache(useNodeCache, preloadTime);
         if (useNodeCache) recordTracker.put(this.filename, this);
     }
     
-    private void initCache(boolean useNodeCache, long preloadTime) {
+    private void initCache(final boolean useNodeCache, final long preloadTime) {
         if (useNodeCache) {
             this.cacheHeaders = new kelondroIntBytesMap(this.headchunksize, 0);
         } else {
@@ -100,10 +100,10 @@ public class kelondroCachedRecords extends kelondroAbstractRecords implements ke
         this.cacheFlush = 0;
         // pre-load node cache
         if ((preloadTime > 0) && (useNodeCache)) {
-            long stop = System.currentTimeMillis() + preloadTime;
+            final long stop = System.currentTimeMillis() + preloadTime;
             int count = 0;
             try {
-                Iterator<kelondroNode> i = contentNodes(preloadTime);
+                final Iterator<kelondroNode> i = contentNodes(preloadTime);
                 CacheNode n;
                 while ((System.currentTimeMillis() < stop) && (cacheGrowStatus() == 2) && (i.hasNext())) {
                     n = (CacheNode) i.next();
@@ -112,7 +112,7 @@ public class kelondroCachedRecords extends kelondroAbstractRecords implements ke
                 }
                 cacheHeaders.flush();
                 logFine("preloaded " + count + " records into cache");
-            } catch (kelondroException e) {
+            } catch (final kelondroException e) {
                 // the contentNodes iterator had a time-out; we don't do a preload
                 logFine("could not preload records: " + e.getMessage());
             }
@@ -121,12 +121,12 @@ public class kelondroCachedRecords extends kelondroAbstractRecords implements ke
     }
 
     int cacheGrowStatus() {
-        long available = serverMemory.available();
+        final long available = serverMemory.available();
         if ((cacheHeaders != null) && (available < cacheHeaders.memoryNeededForGrow())) return 0;
         return cacheGrowStatus(available, memStopGrow, memStartShrink);
     }
     
-    public static final int cacheGrowStatus(long available, long stopGrow, long startShrink) {
+    public static final int cacheGrowStatus(final long available, final long stopGrow, final long startShrink) {
         // returns either 0, 1 or 2:
         // 0: cache is not allowed to grow, but shall shrink
         // 1: cache is allowed to grow, but need not to shrink
@@ -140,7 +140,7 @@ public class kelondroCachedRecords extends kelondroAbstractRecords implements ke
         return 0;
     }
     
-    public static void setCacheGrowStati(long memStopGrowNew, long memStartShrinkNew) {
+    public static void setCacheGrowStati(final long memStopGrowNew, final long memStartShrinkNew) {
         memStopGrow = memStopGrowNew;
         memStartShrink =  memStartShrinkNew;
     }
@@ -158,18 +158,18 @@ public class kelondroCachedRecords extends kelondroAbstractRecords implements ke
         return recordTracker.keySet().iterator();
     }
 
-    public static final Map<String, String> memoryStats(String filename) {
+    public static final Map<String, String> memoryStats(final String filename) {
         // returns a map for each file in the tracker;
         // the map represents properties for each record oobjects,
         // i.e. for cache memory allocation
-        kelondroCachedRecords theRecord = recordTracker.get(filename);
+        final kelondroCachedRecords theRecord = recordTracker.get(filename);
         return theRecord.memoryStats();
     }
     
     private final Map<String, String> memoryStats() {
         // returns statistical data about this object
         if (cacheHeaders == null) return null;
-        HashMap<String, String> map = new HashMap<String, String>();
+        final HashMap<String, String> map = new HashMap<String, String>();
         map.put("nodeChunkSize", Integer.toString(this.headchunksize + element_in_cache));
         map.put("nodeCacheCount", Integer.toString(cacheHeaders.size()));
         map.put("nodeCacheMem", Integer.toString(cacheHeaders.size() * (this.headchunksize + element_in_cache)));
@@ -182,7 +182,7 @@ public class kelondroCachedRecords extends kelondroAbstractRecords implements ke
         return map;
     }
     
-    protected synchronized void deleteNode(kelondroHandle handle) throws IOException {
+    protected synchronized void deleteNode(final kelondroHandle handle) throws IOException {
         if (cacheHeaders == null) {
             super.deleteNode(handle);
         } else synchronized (cacheHeaders) {
@@ -205,14 +205,14 @@ public class kelondroCachedRecords extends kelondroAbstractRecords implements ke
                 try {
                     for (int j = 0; j < headchunksize; j++) 
                         System.out.print(Integer.toHexString(0xff & entryFile.readByte(j + seekpos(new kelondroHandle(i)))) + " ");
-                } catch (IOException e) {}
+                } catch (final IOException e) {}
                 
                 System.out.println();
             }
         } else {
             System.out.println("### cache report: " + cacheHeaders.size() + " entries");
             
-                Iterator<kelondroRow.Entry> i = cacheHeaders.rows();
+                final Iterator<kelondroRow.Entry> i = cacheHeaders.rows();
                 kelondroRow.Entry entry;
                 while (i.hasNext()) {
                     entry = i.next();
@@ -270,7 +270,7 @@ public class kelondroCachedRecords extends kelondroAbstractRecords implements ke
         printCache();
         System.out.println("--");
         System.out.println("NODES");
-        Iterator<kelondroNode> i = new contentNodeIterator(-1);
+        final Iterator<kelondroNode> i = new contentNodeIterator(-1);
         kelondroNode n;
         while (i.hasNext()) {
             n = i.next();
@@ -278,7 +278,7 @@ public class kelondroCachedRecords extends kelondroAbstractRecords implements ke
         }
     }
     
-    public kelondroNode newNode(kelondroHandle handle, byte[] bulk, int offset) throws IOException {
+    public kelondroNode newNode(final kelondroHandle handle, final byte[] bulk, final int offset) throws IOException {
         return new CacheNode(handle, bulk, offset);
     }
     
@@ -315,7 +315,7 @@ public class kelondroCachedRecords extends kelondroAbstractRecords implements ke
         private boolean headChanged = false;
         private boolean tailChanged = false;
 
-        public CacheNode(byte[] rowinstance) throws IOException {
+        public CacheNode(final byte[] rowinstance) throws IOException {
             // this initializer is used to create nodes from bulk-read byte arrays
             assert ((rowinstance == null) || (rowinstance.length == ROW.objectsize)) : "bulkchunk.length = " + (rowinstance == null ? "null" : rowinstance.length) + ", ROW.width(0) = " + ROW.width(0);
             this.handle = new kelondroHandle(USAGE.allocatePayload(rowinstance));
@@ -345,7 +345,7 @@ public class kelondroCachedRecords extends kelondroAbstractRecords implements ke
             this.tailChanged = false; // we write the tail already during allocate
         }
         
-        public CacheNode(kelondroHandle handle, byte[] bulkchunk, int offset) throws IOException {
+        public CacheNode(final kelondroHandle handle, final byte[] bulkchunk, final int offset) throws IOException {
             // this initializer is used to create nodes from bulk-read byte arrays
             // if write is true, then the chunk in bulkchunk is written to the file
             // othervise it is considered equal to what is stored in the file
@@ -376,11 +376,11 @@ public class kelondroCachedRecords extends kelondroAbstractRecords implements ke
             this.tailChanged = changed;
         }
         
-        public CacheNode(kelondroHandle handle, boolean fillTail) throws IOException {
+        public CacheNode(final kelondroHandle handle, final boolean fillTail) throws IOException {
             this(handle, null, 0, fillTail);
         }
         
-        public CacheNode(kelondroHandle handle, CacheNode parentNode, int referenceInParent, boolean fillTail) throws IOException {
+        public CacheNode(final kelondroHandle handle, final CacheNode parentNode, final int referenceInParent, boolean fillTail) throws IOException {
             // this creates an entry with an pre-reserved entry position.
             // values can be written using the setValues() method,
             // but we expect that values are already there in the file.
@@ -396,7 +396,7 @@ public class kelondroCachedRecords extends kelondroAbstractRecords implements ke
                     parentNode.setOHHandle(referenceInParent, null);
                     parentNode.commit();
                     logWarning("INTERNAL ERROR, Node/init in " + filename + ": node handle index " + handle.index + " exceeds size. The bad node has been auto-fixed");
-                } catch (IOException ee) {
+                } catch (final IOException ee) {
                     throw new kelondroException(filename, "INTERNAL ERROR, Node/init: node handle index " + handle.index + " exceeds size. It was tried to fix the bad node, but failed with an IOException: " + ee.getMessage());
                 }
             }
@@ -457,7 +457,7 @@ public class kelondroCachedRecords extends kelondroAbstractRecords implements ke
             }
         }
         
-        private void setValue(byte[] value, int valueoffset, int valuewidth, byte[] targetarray, int targetoffset) {
+        private void setValue(final byte[] value, final int valueoffset, int valuewidth, final byte[] targetarray, int targetoffset) {
             if (value == null) {
                 while (valuewidth-- > 0) targetarray[targetoffset++] = 0;
             } else {
@@ -476,14 +476,14 @@ public class kelondroCachedRecords extends kelondroAbstractRecords implements ke
             return this.handle;
         }
 
-        public void setOHByte(int i, byte b) {
+        public void setOHByte(final int i, final byte b) {
             if (i >= OHBYTEC) throw new IllegalArgumentException("setOHByte: wrong index " + i);
             if (this.handle.index == kelondroHandle.NUL) throw new kelondroException(filename, "setOHByte: no handle assigned");
             this.headChunk[i] = b;
             this.headChanged = true;
         }
         
-        public void setOHHandle(int i, kelondroHandle otherhandle) {
+        public void setOHHandle(final int i, final kelondroHandle otherhandle) {
             assert (i < OHHANDLEC): "setOHHandle: wrong array size " + i;
             assert (this.handle.index != kelondroHandle.NUL): "setOHHandle: no handle assigned ind file" + filename;
             if (otherhandle == null) {
@@ -495,20 +495,20 @@ public class kelondroCachedRecords extends kelondroAbstractRecords implements ke
             this.headChanged = true;
         }
         
-        public byte getOHByte(int i) {
+        public byte getOHByte(final int i) {
             if (i >= OHBYTEC) throw new IllegalArgumentException("getOHByte: wrong index " + i);
             if (this.handle.index == kelondroHandle.NUL) throw new kelondroException(filename, "Cannot load OH values");
             return this.headChunk[i];
         }
 
-        public kelondroHandle getOHHandle(int i) {
+        public kelondroHandle getOHHandle(final int i) {
             if (this.handle.index == kelondroHandle.NUL) throw new kelondroException(filename, "Cannot load OH values");
             assert (i < OHHANDLEC): "handle index out of bounds: " + i + " in file " + filename;
-            int h = bytes2int(this.headChunk, OHBYTEC + 4 * i);
+            final int h = bytes2int(this.headChunk, OHBYTEC + 4 * i);
             return (h == kelondroHandle.NUL) ? null : new kelondroHandle(h);
         }
 
-        public synchronized void setValueRow(byte[] row) throws IOException {
+        public synchronized void setValueRow(final byte[] row) throws IOException {
             // if the index is defined, then write values directly to the file, else only to the object
             if ((row != null) && (row.length != ROW.objectsize)) throw new IOException("setValueRow with wrong (" + row.length + ") row length instead correct: " + ROW.objectsize);
             
@@ -542,7 +542,7 @@ public class kelondroCachedRecords extends kelondroAbstractRecords implements ke
             }
 
             // create return value
-            byte[] row = new byte[ROW.objectsize];
+            final byte[] row = new byte[ROW.objectsize];
 
             // read key
             System.arraycopy(headChunk, overhead, row, 0, ROW.width(0));
@@ -564,7 +564,7 @@ public class kelondroCachedRecords extends kelondroAbstractRecords implements ke
                 throw new kelondroException(filename, "no values to save (header missing)");
             }
 
-            boolean doCommit = this.headChanged || this.tailChanged;
+            final boolean doCommit = this.headChanged || this.tailChanged;
             
             // save head
             synchronized (entryFile) {
@@ -599,9 +599,9 @@ public class kelondroCachedRecords extends kelondroAbstractRecords implements ke
                     h = getOHHandle(i);
                     if (h == null) s = s + ":hNULL"; else s = s + ":h" + h.toString();
                 }
-                kelondroRow.Entry content = row().newEntry(getValueRow());
+                final kelondroRow.Entry content = row().newEntry(getValueRow());
                 for (int i = 0; i < row().columns(); i++) s = s + ":" + ((content.empty(i)) ? "NULL" : content.getColString(i, "UTF-8").trim());
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 s = s + ":***LOAD ERROR***:" + e.getMessage();
             }
             return s;

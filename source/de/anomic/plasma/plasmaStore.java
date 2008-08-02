@@ -43,23 +43,23 @@ public class plasmaStore {
 
 
     // some static helper methods
-    public static void saveGzip(File f, byte[] content) throws IOException {
+    public static void saveGzip(final File f, final byte[] content) throws IOException {
         java.util.zip.GZIPOutputStream gzipout = null;
         try {
             f.getParentFile().mkdirs();
             gzipout = new java.util.zip.GZIPOutputStream(new FileOutputStream(f));
             gzipout.write(content, 0, content.length);
         } finally {
-            if (gzipout!=null)try{gzipout.close();}catch(Exception e){}
+            if (gzipout!=null)try{gzipout.close();}catch(final Exception e){}
         }        
     }
 
-    public static byte[] loadGzip(File f) throws IOException {
+    public static byte[] loadGzip(final File f) throws IOException {
         java.util.zip.GZIPInputStream gzipin = null;
         try {
             gzipin = new java.util.zip.GZIPInputStream(new FileInputStream(f));
             byte[] result = new byte[1024];
-            byte[] buffer = new byte[512];
+            final byte[] buffer = new byte[512];
             byte[] b;
             int len = 0;
             int last;
@@ -82,7 +82,7 @@ public class plasmaStore {
             result = null;
             return b;
         } finally {
-            if (gzipin != null) try{gzipin.close();}catch(Exception e){}
+            if (gzipin != null) try{gzipin.close();}catch(final Exception e){}
         }
     }
 

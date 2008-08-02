@@ -42,8 +42,8 @@ import de.anomic.yacy.yacySeed;
 
 public class welcome {
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
-        plasmaSwitchboard sb = (plasmaSwitchboard) env;
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
@@ -57,7 +57,7 @@ public class welcome {
         prop.put("hostname", serverDomains.myPublicIP());
         try{
             prop.put("hostip", InetAddress.getByName(serverDomains.myPublicIP()).getHostAddress());
-        }catch(UnknownHostException e){
+        }catch(final UnknownHostException e){
             prop.put("hostip", "Unknown Host Exception");
         }       
         prop.put("port", serverCore.getPortNr(env.getConfig("port","8080")));
@@ -67,7 +67,7 @@ public class welcome {
         final boolean senior = (peertype.equals(yacySeed.PEERTYPE_SENIOR)) || (peertype.equals(yacySeed.PEERTYPE_PRINCIPAL));
         if (senior) { prop.put("couldcan", "can"); } else { prop.put("couldcan", "could"); }
         if (senior) { prop.put("seniorinfo", "This peer runs in senior mode which means that your peer can be accessed using the addresses shown above."); } else { prop.putHTML("seniorinfo", "<b>Nobody can access your peer from the outside of your intranet. You must open your firewall and/or set a 'virtual server' in the settings of your router to enable access to the addresses as shown below.</b>"); }
-        File wwwpath = env.getConfigPath("htDocsPath", "DATA/HTDOCS");
+        final File wwwpath = env.getConfigPath("htDocsPath", "DATA/HTDOCS");
         prop.putHTML("wwwpath", wwwpath.isAbsolute() ? wwwpath.getAbsolutePath() : "<application_root_path>/" + env.getConfig("htDocsPath", "DATA/HTDOCS"));
 
         // return rewrite properties

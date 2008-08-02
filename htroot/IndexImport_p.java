@@ -43,19 +43,19 @@ import de.anomic.server.serverSwitch;
 
 public final class IndexImport_p {
     
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
         // return variable that accumulates replacements
-        plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
-        serverObjects prop = new serverObjects();
+        final plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
+        final serverObjects prop = new serverObjects();
         
         int activeCount = 0;
         
         if (post != null) {
             if (post.containsKey("startIndexDbImport")) {
                 try {
-                    boolean startImport = true;                    
+                    final boolean startImport = true;                    
                     if (startImport) {
-                        Importer importerThread = new NoticeURLImporter(switchboard.plasmaPath, switchboard.crawlQueues, switchboard.webIndex.profilesActiveCrawls, switchboard.dbImportManager);
+                        final Importer importerThread = new NoticeURLImporter(switchboard.plasmaPath, switchboard.crawlQueues, switchboard.webIndex.profilesActiveCrawls, switchboard.dbImportManager);
 
                         if (importerThread != null) {
                             importerThread.setJobID(switchboard.dbImportManager.generateUniqueJobID());
@@ -64,9 +64,9 @@ public final class IndexImport_p {
                         prop.put("LOCATION","");
                         return prop;
                     } 
-                } catch (Exception e) { 
-                    serverByteBuffer errorMsg = new serverByteBuffer(100);
-                    PrintStream errorOut = new PrintStream(errorMsg);
+                } catch (final Exception e) { 
+                    final serverByteBuffer errorMsg = new serverByteBuffer(100);
+                    final PrintStream errorOut = new PrintStream(errorMsg);
                     e.printStackTrace(errorOut);
                     
                     prop.put("error", "3");
@@ -85,13 +85,13 @@ public final class IndexImport_p {
                     (post.containsKey("continueIndexDbImport"))
             ) {
                 // getting the job nr of the thread
-                String jobID = post.get("jobNr");
-                Importer importer = switchboard.dbImportManager.getImporterByID(Integer.valueOf(jobID).intValue());
+                final String jobID = post.get("jobNr");
+                final Importer importer = switchboard.dbImportManager.getImporterByID(Integer.valueOf(jobID).intValue());
                 if (importer != null) {
                     if (post.containsKey("stopIndexDbImport")) {
                         try {
                             importer.stopIt();
-                        } catch (InterruptedException e) {
+                        } catch (final InterruptedException e) {
                             // TODO Auto-generated catch block
                             e.printStackTrace();
                         }                        
@@ -112,18 +112,18 @@ public final class IndexImport_p {
         /*
          * Loop over all currently running jobs
          */
-        Importer[] importThreads = switchboard.dbImportManager.getRunningImporter();
+        final Importer[] importThreads = switchboard.dbImportManager.getRunningImporter();
         activeCount = importThreads.length;
         
         for (int i=0; i < activeCount; i++) {
-            Importer currThread = importThreads[i];
+            final Importer currThread = importThreads[i];
 
             // get import type
             prop.put("running.jobs_" + i + "_type", currThread.getJobType());
             
             // root path of the source db
-            String fullName = currThread.getJobName().toString();
-            String shortName = (fullName.length()>30)?fullName.substring(0,12) + "..." + fullName.substring(fullName.length()-22,fullName.length()):fullName;
+            final String fullName = currThread.getJobName().toString();
+            final String shortName = (fullName.length()>30)?fullName.substring(0,12) + "..." + fullName.substring(fullName.length()-22,fullName.length()):fullName;
             prop.put("running.jobs_" + i + "_fullName",fullName);
             prop.put("running.jobs_" + i + "_shortName",shortName);
             
@@ -150,12 +150,12 @@ public final class IndexImport_p {
         /*
          * Loop over all finished jobs 
          */
-        Importer[] finishedJobs = switchboard.dbImportManager.getFinishedImporter();
+        final Importer[] finishedJobs = switchboard.dbImportManager.getFinishedImporter();
         for (int i=0; i<finishedJobs.length; i++) {
-            Importer currThread = finishedJobs[i];
-            String error = currThread.getError();
-            String fullName = currThread.getJobName().toString();
-            String shortName = (fullName.length()>30)?fullName.substring(0,12) + "..." + fullName.substring(fullName.length()-22,fullName.length()):fullName;            
+            final Importer currThread = finishedJobs[i];
+            final String error = currThread.getError();
+            final String fullName = currThread.getJobName().toString();
+            final String shortName = (fullName.length()>30)?fullName.substring(0,12) + "..." + fullName.substring(fullName.length()-22,fullName.length()):fullName;            
             prop.put("finished.jobs_" + i + "_type", currThread.getJobType());
             prop.put("finished.jobs_" + i + "_fullName", fullName);
             prop.put("finished.jobs_" + i + "_shortName", shortName);

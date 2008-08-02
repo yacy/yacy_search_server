@@ -44,43 +44,43 @@ public class htmlFilterInputStream extends InputStream implements htmlFilterEven
     private static final int MODE_PRESCAN_FINISHED = 1;
     private int mode = 1;
     
-    private long preBufferSize = 2048;
+    private final long preBufferSize = 2048;
     private long preRead = 0;
-    private BufferedInputStream bufferedIn;
+    private final BufferedInputStream bufferedIn;
 
     private String detectedCharset;
     private boolean charsetChanged = false;
     private boolean endOfHead = false;
     
-    private Reader reader;
+    private final Reader reader;
     private Writer writer;
     
     public htmlFilterInputStream(
-            InputStream inStream,
-            String inputStreamCharset,
-            yacyURL rooturl,
-            htmlFilterTransformer transformer,
-            boolean passbyIfBinarySuspect
+            final InputStream inStream,
+            final String inputStreamCharset,
+            final yacyURL rooturl,
+            final htmlFilterTransformer transformer,
+            final boolean passbyIfBinarySuspect
     ) throws UnsupportedEncodingException {
         // create a input stream for buffereing
         this.bufferedIn = new BufferedInputStream(inStream,(int)this.preBufferSize);
         this.bufferedIn.mark((int)this.preBufferSize);
         
-        htmlFilterContentScraper scraper = new htmlFilterContentScraper(rooturl);
+        final htmlFilterContentScraper scraper = new htmlFilterContentScraper(rooturl);
         scraper.registerHtmlFilterEventListener(this);
         
         this.reader = new InputStreamReader(this,inputStreamCharset); 
         this.writer = new htmlFilterWriter(null,null,scraper,transformer,passbyIfBinarySuspect);
     }
 
-    public void scrapeTag0(String tagname, Properties tagopts) {
+    public void scrapeTag0(final String tagname, final Properties tagopts) {
         if (tagname == null || tagname.length() == 0) return;
         
         if (tagname.equalsIgnoreCase("meta")) {
             if (tagopts.containsKey("http-equiv")) {
-                String value = tagopts.getProperty("http-equiv");
+                final String value = tagopts.getProperty("http-equiv");
                 if (value.equalsIgnoreCase("Content-Type")) {
-                    String contentType = tagopts.getProperty("content","");
+                    final String contentType = tagopts.getProperty("content","");
                     this.detectedCharset = httpHeader.extractCharsetFromMimetypeHeader(contentType);
                     if (this.detectedCharset != null && this.detectedCharset.length() > 0) {
                         this.charsetChanged = true;
@@ -94,7 +94,7 @@ public class htmlFilterInputStream extends InputStream implements htmlFilterEven
         }
     }
 
-    public void scrapeTag1(String tagname, Properties tagopts, char[] text) {
+    public void scrapeTag1(final String tagname, final Properties tagopts, final char[] text) {
         if (tagname == null || tagname.length() == 0) return;
         
         if (tagname.equalsIgnoreCase("head")) {

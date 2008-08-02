@@ -38,23 +38,23 @@ public class ymageICOParser {
     
     public  static int ICONDIRENTRY_size = 16;
     
-    private int idCount;
+    private final int idCount;
     ymageBMPParser.INFOHEADER[] infoheaders;
     ymageBMPParser.IMAGEMAP[] imagemaps;
     
-    public static final boolean isICO(byte[] source) {
+    public static final boolean isICO(final byte[] source) {
         // check the file magic
         return (source != null) && (source.length >= 4) && (source[0] == 0) && (source[1] == 0) && (source[2] == 1) && (source[3] == 0);
     }
     
-    public ymageICOParser(byte[] source) {
+    public ymageICOParser(final byte[] source) {
         // read info-header
         idCount = ymageBMPParser.WORD(source, 4);
 
         // read the icon directory entry and the image entries
-        ICONDIRENTRY[] icondirentries = new ICONDIRENTRY[idCount];
+        final ICONDIRENTRY[] icondirentries = new ICONDIRENTRY[idCount];
         infoheaders = new ymageBMPParser.INFOHEADER[idCount];
-        ymageBMPParser.COLORTABLE[] colortables = new ymageBMPParser.COLORTABLE[idCount];
+        final ymageBMPParser.COLORTABLE[] colortables = new ymageBMPParser.COLORTABLE[idCount];
         imagemaps = new ymageBMPParser.IMAGEMAP[idCount];
         for (int i = 0; i < idCount; i++) {
             icondirentries[i] = new ICONDIRENTRY(source, 6 + i * ICONDIRENTRY_size);
@@ -69,7 +69,7 @@ public class ymageICOParser {
         
         public int bWidth, bHeight, bColorCount, bReserved, wPlanes, wBitCount, dwBytesInRes, dwImageOffset;
         
-        public ICONDIRENTRY(byte[] s, int offset) {
+        public ICONDIRENTRY(final byte[] s, final int offset) {
             // read info-header
             bWidth        = ymageBMPParser.BYTE(s, offset + 0);
             bHeight       = ymageBMPParser.BYTE(s, offset + 1);
@@ -87,32 +87,32 @@ public class ymageICOParser {
         return idCount;
     }
     
-    public BufferedImage getImage(int index) {
+    public BufferedImage getImage(final int index) {
         return imagemaps[index].image;
     }
     
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         // read a ICO and write it as png
         System.setProperty("java.awt.headless", "true");
-        File in = new File(args[0]);
-        File out = new File(args[1]);
+        final File in = new File(args[0]);
+        final File out = new File(args[1]);
         
-        byte[] file = new byte[(int) in.length()];
+        final byte[] file = new byte[(int) in.length()];
         FileInputStream fis = null;
         try {
             fis = new FileInputStream(in);
             fis.read(file);
-        } catch (FileNotFoundException e) {
+        } catch (final FileNotFoundException e) {
             e.printStackTrace();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             e.printStackTrace();
         }
         
-        ymageICOParser parser = new ymageICOParser(file);
+        final ymageICOParser parser = new ymageICOParser(file);
         
         try {
             ImageIO.write(parser.getImage(0), "PNG", out);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             e.printStackTrace();
         }
     }

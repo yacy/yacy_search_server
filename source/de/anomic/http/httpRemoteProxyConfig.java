@@ -110,10 +110,10 @@ public final class httpRemoteProxyConfig {
     }
     
     public static httpRemoteProxyConfig init(
-            String proxyHostName,
-            int proxyHostPort
+            final String proxyHostName,
+            final int proxyHostPort
     ) {
-        httpRemoteProxyConfig newConfig = new httpRemoteProxyConfig();
+        final httpRemoteProxyConfig newConfig = new httpRemoteProxyConfig();
         
         newConfig.remoteProxyUse  = true;
         newConfig.remoteProxyUse4SSL = true;
@@ -127,8 +127,8 @@ public final class httpRemoteProxyConfig {
         return newConfig;
     }
     
-    public static httpRemoteProxyConfig init(plasmaSwitchboard sb) {
-        httpRemoteProxyConfig newConfig = new httpRemoteProxyConfig();
+    public static httpRemoteProxyConfig init(final plasmaSwitchboard sb) {
+        final httpRemoteProxyConfig newConfig = new httpRemoteProxyConfig();
         
         // determining if remote proxy usage is enabled
         newConfig.remoteProxyUse = sb.getConfig("remoteProxyUse", "false").equalsIgnoreCase("true");
@@ -148,7 +148,7 @@ public final class httpRemoteProxyConfig {
         // reading the proxy host port
         try {
             newConfig.remoteProxyPort = Integer.parseInt(sb.getConfig("remoteProxyPort", "3128"));
-        } catch (NumberFormatException e) {
+        } catch (final NumberFormatException e) {
             newConfig.remoteProxyPort = 3128;
         }
         

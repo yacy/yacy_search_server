@@ -11,17 +11,17 @@ import de.anomic.plasma.plasmaWordIndex;
 public class NoticeURLImporter extends AbstractImporter implements Importer {
 
 	private File plasmaPath = null;
-    private HashSet<String> importProfileHandleCache = new HashSet<String>();
-    private CrawlProfile importProfileDB;
-    private NoticedURL importNurlDB;
-    private int importStartSize;
+    private final HashSet<String> importProfileHandleCache = new HashSet<String>();
+    private final CrawlProfile importProfileDB;
+    private final NoticedURL importNurlDB;
+    private final int importStartSize;
     private int urlCount = 0;
     private int profileCount = 0;
-    private CrawlQueues crawlQueues;
-    private CrawlProfile activeCrawls;
-    private ImporterManager dbImportManager;
+    private final CrawlQueues crawlQueues;
+    private final CrawlProfile activeCrawls;
+    private final ImporterManager dbImportManager;
     
-    public NoticeURLImporter(File crawlerPath, CrawlQueues crawlQueues, CrawlProfile activeCrawls, ImporterManager dbImportManager) {
+    public NoticeURLImporter(final File crawlerPath, final CrawlQueues crawlQueues, final CrawlProfile activeCrawls, final ImporterManager dbImportManager) {
         super("NURL");
         this.crawlQueues = crawlQueues;
         this.activeCrawls = activeCrawls;
@@ -29,8 +29,8 @@ public class NoticeURLImporter extends AbstractImporter implements Importer {
         
         // TODO: we need more error handling here
         this.plasmaPath = crawlerPath;
-        File noticeUrlDbFile = new File(plasmaPath,"urlNotice1.db");
-        File profileDbFile = new File(plasmaPath, plasmaWordIndex.DBFILE_ACTIVE_CRAWL_PROFILES);
+        final File noticeUrlDbFile = new File(plasmaPath,"urlNotice1.db");
+        final File profileDbFile = new File(plasmaPath, plasmaWordIndex.DBFILE_ACTIVE_CRAWL_PROFILES);
         
         String errorMsg = null;
         if (!plasmaPath.exists()) 
@@ -89,7 +89,7 @@ public class NoticeURLImporter extends AbstractImporter implements Importer {
     }
 
     public String getStatus() {
-        StringBuffer theStatus = new StringBuffer();
+        final StringBuffer theStatus = new StringBuffer();
         
         theStatus.append("#URLs=").append(this.urlCount).append("\n");
         theStatus.append("#Profiles=").append(this.profileCount);
@@ -104,7 +104,7 @@ public class NoticeURLImporter extends AbstractImporter implements Importer {
             //this.importNurlDB.waitOnInitThread();
             
             // the stack types we want to import
-            int[] stackTypes = new int[] {
+            final int[] stackTypes = new int[] {
                     NoticedURL.STACK_TYPE_CORE,
                     NoticedURL.STACK_TYPE_LIMIT,
                     NoticedURL.STACK_TYPE_REMOTE,
@@ -119,7 +119,7 @@ public class NoticeURLImporter extends AbstractImporter implements Importer {
                 }
                 
                 // getting an iterator and loop through the URL entries
-                Iterator<CrawlEntry> entryIter = (stackTypes[stackType] == -1) ? this.importNurlDB.iterator(stackType) : null;
+                final Iterator<CrawlEntry> entryIter = (stackTypes[stackType] == -1) ? this.importNurlDB.iterator(stackType) : null;
                 while (true) {
                     
                     String nextHash = null;
@@ -139,7 +139,7 @@ public class NoticeURLImporter extends AbstractImporter implements Importer {
                             nextEntry = entryIter.next();
                             nextHash = nextEntry.url().hash();
                         }
-                    } catch (IOException e) {
+                    } catch (final IOException e) {
                         this.log.logWarning("Unable to import entry: " + e.toString());
                         
                         if ((stackTypes[stackType] != -1) &&(this.importNurlDB.stackSize(stackTypes[stackType]) == 0)) break;
@@ -148,7 +148,7 @@ public class NoticeURLImporter extends AbstractImporter implements Importer {
                     
                     // getting a handler to the crawling profile the url belongs to
                     try {
-                        String profileHandle = nextEntry.profileHandle();
+                        final String profileHandle = nextEntry.profileHandle();
                         if (profileHandle == null) {
                             this.log.logWarning("Profile handle of url entry '" + nextHash + "' unknown.");
                             continue;
@@ -158,12 +158,12 @@ public class NoticeURLImporter extends AbstractImporter implements Importer {
                         if (!this.importProfileHandleCache.contains(profileHandle)) {
                             
                             // testing if the profile is already known
-                            CrawlProfile.entry profileEntry = this.activeCrawls.getEntry(profileHandle);
+                            final CrawlProfile.entry profileEntry = this.activeCrawls.getEntry(profileHandle);
                             
                             // if not we need to import it
                             if (profileEntry == null) {
                                 // copy and store the source profile entry into the destination db
-                                CrawlProfile.entry sourceEntry = this.importProfileDB.getEntry(profileHandle);
+                                final CrawlProfile.entry sourceEntry = this.importProfileDB.getEntry(profileHandle);
                                 if (sourceEntry != null) {
                                     this.profileCount++;
                                     this.importProfileHandleCache.add(profileHandle);
@@ -198,7 +198,7 @@ public class NoticeURLImporter extends AbstractImporter implements Importer {
             
             // TODO: what todo with nurlDB entries that do not exist in any stack?
             
-        } catch (Exception e) {
+        } catch (final Exception e) {
             this.error = e.toString();     
             this.log.logSevere("Import process had detected an error",e);
         } finally { 

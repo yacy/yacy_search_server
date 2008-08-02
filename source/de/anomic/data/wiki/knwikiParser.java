@@ -46,12 +46,12 @@ public class knwikiParser implements wikiParser {
 	private String[] BEs;
     private final plasmaSwitchboard sb;
     
-    public knwikiParser(plasmaSwitchboard sb) {
+    public knwikiParser(final plasmaSwitchboard sb) {
         this.sb = sb;
     }
 	
-	public static void main(String[] args) {
-		String text = "===T<pre>itle===\n" +
+	public static void main(final String[] args) {
+		final String text = "===T<pre>itle===\n" +
 				"==blubb== was ==ein '''shice'''==...och.bla\n" +
 				"* ein \n" +
 				"*==test=</pre>=\n" +
@@ -85,44 +85,44 @@ public class knwikiParser implements wikiParser {
 		// text = "[=\n=]* bla";
 		String t = "[=] ein fucking [= test =]-text[=,ne?!=] joa, [=alles=]wunderbar," +
 				"[=denk ich=] mal =]";
-		long l = System.currentTimeMillis();
+		final long l = System.currentTimeMillis();
 		t = new knwikiParser(null).parse((args.length > 0) ? args[0] : text, "localhost:8080");
         System.out.println("parsing time: " + (System.currentTimeMillis() - l) + " ms");
         System.out.println("--- --- ---");
         System.out.println(t);
 	}
     
-    public String transform(String content) {
+    public String transform(final String content) {
         return parse(content, null);
     }
     
-    public String transform(String content, plasmaSwitchboard sb) {
+    public String transform(final String content, final plasmaSwitchboard sb) {
         return parse(content, null);
     }
     
-    public String transform(byte[] content) throws UnsupportedEncodingException {
+    public String transform(final byte[] content) throws UnsupportedEncodingException {
         return parse(new String(content, "UTF-8"), null);
     }
     
     public String transform(
-            byte[] content, String encoding,
-            plasmaSwitchboard switchboard) throws UnsupportedEncodingException {
+            final byte[] content, final String encoding,
+            final plasmaSwitchboard switchboard) throws UnsupportedEncodingException {
         return parse(new String(content, encoding), null);
     }
     
-    public String transform(byte[] content, String encoding) throws UnsupportedEncodingException {
+    public String transform(final byte[] content, final String encoding) throws UnsupportedEncodingException {
         return parse(new String(content, encoding), null);
     }
     
-    public String transform(byte[] text, String encoding, String publicAddress) throws UnsupportedEncodingException {
+    public String transform(final byte[] text, final String encoding, final String publicAddress) throws UnsupportedEncodingException {
         return parse(new String(text, encoding), publicAddress);
     }
     
-    public String transform(String text, String publicAddress) {
+    public String transform(final String text, final String publicAddress) {
         return parse(text, publicAddress);
     }
 	
-	public String parse(String text, String publicAddress) {
+	public String parse(String text, final String publicAddress) {
         tokens = new Token[] {
                 new SimpleToken('=', '=', new String[][] { null, { "h2" }, { "h3" }, { "h4" } }, true),
                 new SimpleToken('\'', '\'', new String[][] { null, { "i" }, { "b" }, null, { "b", "i" } }, false),
@@ -134,7 +134,7 @@ public class knwikiParser implements wikiParser {
                 new DefinitionListToken(),
                 new TableToken()
         };
-        ArrayList<String> r = new ArrayList<String>();
+        final ArrayList<String> r = new ArrayList<String>();
         for (int i = 0, k, j; i < tokens.length; i++)
             if (tokens[i].getBlockElementNames() != null)
                 for (j = 0; j < tokens[i].getBlockElementNames().length; j++) {
@@ -178,7 +178,7 @@ public class knwikiParser implements wikiParser {
 					//	System.out.println("usable");
 					}
 					m.appendReplacement(sb, (st.getMarkup() == null) ? m.group() : st.getMarkup());
-				} catch (wikiParserException e) {
+				} catch (final wikiParserException e) {
                     m.appendReplacement(sb, st.getText());
                 }
 				text = new String(m.appendTail(sb));
@@ -187,9 +187,9 @@ public class knwikiParser implements wikiParser {
 		return text.replaceAll("----", "<hr />");
 	}
 	
-	private String replaceBRs(String text) {
-		StringBuffer sb = new StringBuffer(text.length());
-		String[] tt = text.split("\n");
+	private String replaceBRs(final String text) {
+		final StringBuffer sb = new StringBuffer(text.length());
+		final String[] tt = text.split("\n");
 		boolean replace;
 		for (int i=0, j; i<tt.length; i++) {
 			replace = true;
@@ -212,14 +212,14 @@ public class knwikiParser implements wikiParser {
 		private final boolean escaped;
 		private final boolean nl;
 		
-		public Text(String text, boolean escaped, boolean newLineBefore) {
+		public Text(final String text, final boolean escaped, final boolean newLineBefore) {
 			this.text = text;
 			this.escaped = escaped;
 			this.nl = newLineBefore;
         }
 		
-		public String setTextPlain(String text) { return this.text = text; }
-		public String setText(String text) {
+		public String setTextPlain(final String text) { return this.text = text; }
+		public String setText(final String text) {
 			if (this.nl)
 				this.text = text.substring(escapeNewLine.length());
 			else
@@ -239,13 +239,13 @@ public class knwikiParser implements wikiParser {
 		public boolean isEscaped() { return this.escaped; }
 		public boolean isNewLineBefore() { return this.nl; }
         
-		static Text[] split2Texts(String text, String escapeBegin, String escapeEnd) {
+		static Text[] split2Texts(final String text, final String escapeBegin, final String escapeEnd) {
 			if (text == null) return null;
 			if (text.length() < 2) return new Text[] { new Text(text, false, true) };
 			
-			int startLen = escapeBegin.length();
-            int endLen = escapeEnd.length();
-			ArrayList<Text> r = new ArrayList<Text>();
+			final int startLen = escapeBegin.length();
+            final int endLen = escapeEnd.length();
+			final ArrayList<Text> r = new ArrayList<Text>();
 			boolean escaped = text.startsWith(escapeBegin);
 			if (escaped) r.add(new Text("", false, true));
 			int i, j = 0;
@@ -258,7 +258,7 @@ public class knwikiParser implements wikiParser {
 			return r.toArray(new Text[r.size()]);
 		}
 		
-		private static Text resolve2Text(String text, boolean escaped, int from, int to, String escapeEnd) {
+		private static Text resolve2Text(final String text, final boolean escaped, final int from, int to, final String escapeEnd) {
 			if (to == -1) to = text.length();
 			return new Text(
 					text.substring(from, to),
@@ -266,8 +266,8 @@ public class knwikiParser implements wikiParser {
 					from < escapeEnd.length() + 2 || (!escaped && text.charAt(from - escapeEnd.length() - 1) == '\n'));
 		}
 		
-		static String mergeTexts(Text[] texts) {
-			StringBuffer sb = new StringBuffer();
+		static String mergeTexts(final Text[] texts) {
+			final StringBuffer sb = new StringBuffer();
 			for (int n=0; n < texts.length; n++)
 				sb.append(texts[n].getTextPlain());
 			return new String(sb);

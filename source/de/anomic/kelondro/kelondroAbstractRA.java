@@ -63,11 +63,11 @@ abstract class kelondroAbstractRA implements kelondroRA {
     abstract public void close() throws IOException;
 
     // derived methods:
-    public void readFully(byte[] b, int off, int len) throws IOException {
+    public void readFully(final byte[] b, int off, int len) throws IOException {
         if (len < 0) throw new IndexOutOfBoundsException("length is negative:" + len);
         if (b.length < off + len) throw new IndexOutOfBoundsException("bounds do not fit: b.length=" + b.length + ", off=" + off + ", len=" + len);
         while (len > 0) {
-            int r = read(b, off, len);
+            final int r = read(b, off, len);
             if (r < 0) throw new IOException("EOF"); // read exceeded EOF
             off += r;
             len -= r;
@@ -75,8 +75,8 @@ abstract class kelondroAbstractRA implements kelondroRA {
     }
     
     public byte[] readFully() throws IOException {
-        ByteArrayOutputStream dest = new ByteArrayOutputStream();
-        byte[] buffer = new byte[1024];
+        final ByteArrayOutputStream dest = new ByteArrayOutputStream();
+        final byte[] buffer = new byte[1024];
         
         int c, total = 0;
         while ((c = read(buffer, 0, 1024)) > 0) {
@@ -142,7 +142,7 @@ abstract class kelondroAbstractRA implements kelondroRA {
     private static final byte lf = 10;
     
     public void writeLine(final String line) throws IOException {
-        byte[] b = new byte[line.length() + 2];
+        final byte[] b = new byte[line.length() + 2];
         System.arraycopy(line.getBytes(), 0, b, 0, line.length());
         b[b.length - 2] = cr;
         b[b.length - 1] = lf;
@@ -150,7 +150,7 @@ abstract class kelondroAbstractRA implements kelondroRA {
     }
 
     public void writeLine(final byte[] line) throws IOException {
-        byte[] b = new byte[line.length + 2];
+        final byte[] b = new byte[line.length + 2];
         System.arraycopy(line, 0, b, 0, line.length);
         b[b.length - 2] = cr;
         b[b.length - 1] = lf;
@@ -201,8 +201,8 @@ abstract class kelondroAbstractRA implements kelondroRA {
 
     public HashMap<String, String> readMap() throws IOException {
         this.seek(0);
-        byte[] b = readFully();
-        BufferedReader br = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(b)));
+        final byte[] b = readFully();
+        final BufferedReader br = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(b)));
         final HashMap<String, String> map = new HashMap<String, String>();
         String line;
         int pos;

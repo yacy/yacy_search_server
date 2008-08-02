@@ -33,10 +33,10 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 public class rename_p {
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
         // return variable that accumulates replacements
-        plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
-        serverObjects prop = new serverObjects();
+        final plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
+        final serverObjects prop = new serverObjects();
         prop.put("result", "0");//error
         //rename tags
         if(post != null && post.containsKey("old") && post.containsKey("new")){

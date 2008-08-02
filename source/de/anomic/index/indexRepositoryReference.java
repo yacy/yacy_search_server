@@ -58,7 +58,7 @@ public final class indexRepositoryReference {
     private Export exportthread = null; // will habe a export thread assigned if exporter is running
     private File location = null;
     
-    public indexRepositoryReference(File indexSecondaryPath) {
+    public indexRepositoryReference(final File indexSecondaryPath) {
         super();
         this.location = new File(indexSecondaryPath, "TEXT");        
         urlIndexFile = new kelondroCache(new kelondroSplitTable(this.location, "urls", indexURLReference.rowdef, false));
@@ -90,16 +90,16 @@ public final class indexRepositoryReference {
         return 0;
     }
 
-    public synchronized indexURLReference load(String urlHash, indexRWIEntry searchedWord, long ranking) {
+    public synchronized indexURLReference load(final String urlHash, final indexRWIEntry searchedWord, final long ranking) {
         // generates an plasmaLURLEntry using the url hash
         // if the url cannot be found, this returns null
         if (urlHash == null) return null;
         assert urlIndexFile != null;
         try {
-            kelondroRow.Entry entry = urlIndexFile.get(urlHash.getBytes());
+            final kelondroRow.Entry entry = urlIndexFile.get(urlHash.getBytes());
             if (entry == null) return null;
             return new indexURLReference(entry, searchedWord, ranking);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             return null;
         }
     }
@@ -113,7 +113,7 @@ public final class indexRepositoryReference {
             } else {
                 oldEntry = null;
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             e.printStackTrace();
             oldEntry = null;
         }
@@ -128,10 +128,10 @@ public final class indexRepositoryReference {
         urlIndexFile.put(entry.toRowEntry(), new Date() /*entry.loaddate()*/);
     }
 
-    public synchronized indexURLReference newEntry(String propStr) {
+    public synchronized indexURLReference newEntry(final String propStr) {
         if (propStr != null && propStr.startsWith("{") && propStr.endsWith("}")) try {
             return new indexURLReference(serverCodings.s2p(propStr.substring(1, propStr.length() - 1)));
-        } catch (kelondroException e) {
+        } catch (final kelondroException e) {
             // wrong format
             return null;
         } else {
@@ -139,42 +139,42 @@ public final class indexRepositoryReference {
         }
     }
     
-    public synchronized boolean remove(String urlHash) {
+    public synchronized boolean remove(final String urlHash) {
         if (urlHash == null) return false;
         try {
-            kelondroRow.Entry r = urlIndexFile.remove(urlHash.getBytes());
+            final kelondroRow.Entry r = urlIndexFile.remove(urlHash.getBytes());
             return r != null;
-        } catch (IOException e) {
+        } catch (final IOException e) {
             return false;
         }
     }
 
-    public synchronized boolean exists(String urlHash) {
+    public synchronized boolean exists(final String urlHash) {
         if (urlIndexFile == null) return false; // case may happen during shutdown
         return urlIndexFile.has(urlHash.getBytes());
     }
 
-    public kelondroCloneableIterator<indexURLReference> entries(boolean up, String firstHash) throws IOException {
+    public kelondroCloneableIterator<indexURLReference> entries(final boolean up, final String firstHash) throws IOException {
         // enumerates entry elements
         return new kiter(up, firstHash);
     }
 
     public class kiter implements kelondroCloneableIterator<indexURLReference> {
         // enumerates entry elements
-        private Iterator<kelondroRow.Entry> iter;
-        private boolean error;
+        private final Iterator<kelondroRow.Entry> iter;
+        private final boolean error;
         boolean up;
 
-        public kiter(boolean up, String firstHash) throws IOException {
+        public kiter(final boolean up, final String firstHash) throws IOException {
             this.up = up;
             this.iter = urlIndexFile.rows(up, (firstHash == null) ? null : firstHash.getBytes());
             this.error = false;
         }
 
-        public kiter clone(Object secondHash) {
+        public kiter clone(final Object secondHash) {
             try {
                 return new kiter(up, (String) secondHash);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 return null;
             }
         }
@@ -205,27 +205,27 @@ public final class indexRepositoryReference {
      * 
      * @param proxyConfig 
      */
-    public void deadlinkCleaner(httpRemoteProxyConfig proxyConfig) {
-        serverLog log = new serverLog("URLDBCLEANUP");
-        HashSet<String> damagedURLS = new HashSet<String>();
+    public void deadlinkCleaner(final httpRemoteProxyConfig proxyConfig) {
+        final serverLog log = new serverLog("URLDBCLEANUP");
+        final HashSet<String> damagedURLS = new HashSet<String>();
         try {
-            Iterator<indexURLReference> eiter = entries(true, null);
+            final Iterator<indexURLReference> eiter = entries(true, null);
             int iteratorCount = 0;
             while (eiter.hasNext()) try {
                 eiter.next();
                 iteratorCount++;
-            } catch (RuntimeException e) {
+            } catch (final RuntimeException e) {
                 if(e.getMessage() != null) {
-                    String m = e.getMessage();
+                    final String m = e.getMessage();
                     damagedURLS.add(m.substring(m.length() - 12));
                 } else {
                     log.logSevere("RuntimeException:", e);
                 }
             }
-            try { Thread.sleep(1000); } catch (InterruptedException e) { }
+            try { Thread.sleep(1000); } catch (final InterruptedException e) { }
             log.logInfo("URLs vorher: " + urlIndexFile.size() + " Entries loaded during Iteratorloop: " + iteratorCount + " kaputte URLs: " + damagedURLS.size());
 
-            Iterator<String> eiter2 = damagedURLS.iterator();
+            final Iterator<String> eiter2 = damagedURLS.iterator();
             String urlHash;
             while (eiter2.hasNext()) {
                 urlHash = eiter2.next();
@@ -234,7 +234,7 @@ public final class indexRepositoryReference {
                 String oldUrlStr = null;
                 try {
                     // getting the url data as byte array
-                    kelondroRow.Entry entry = urlIndexFile.get(urlHash.getBytes());
+                    final kelondroRow.Entry entry = urlIndexFile.get(urlHash.getBytes());
 
                     // getting the wrong url string
                     oldUrlStr = entry.getColString(1, null).trim();
@@ -242,11 +242,11 @@ public final class indexRepositoryReference {
                     int pos = -1;
                     if ((pos = oldUrlStr.indexOf("://")) != -1) {
                         // trying to correct the url
-                        String newUrlStr = "http://" + oldUrlStr.substring(pos + 3);
-                        yacyURL newUrl = new yacyURL(newUrlStr, null);
+                        final String newUrlStr = "http://" + oldUrlStr.substring(pos + 3);
+                        final yacyURL newUrl = new yacyURL(newUrlStr, null);
 
                         // doing a http head request to test if the url is correct
-                        JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(10000, null, null);
+                        final JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(10000, null, null);
                         client.setProxy(proxyConfig);
                         JakartaCommonsHttpResponse res = null;
                         try {
@@ -267,19 +267,19 @@ public final class indexRepositoryReference {
                             log.logInfo("UrlDB-Entry with urlHash '" + urlHash + "' removed\n\tURL: " + oldUrlStr + "\n\tConnection Status: " + (res == null ? "null" : res.getStatusLine()));
                         }
                     }
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     remove(urlHash);
                     log.logInfo("UrlDB-Entry with urlHash '" + urlHash + "' removed\n\tURL: " + oldUrlStr + "\n\tExecption: " + e.getMessage());
                 }
             }
 
             log.logInfo("URLs nachher: " + size() + " kaputte URLs: " + damagedURLS.size());
-        } catch (IOException e) {
+        } catch (final IOException e) {
             log.logSevere("IOException", e);
         }
     }
 
-    public BlacklistCleaner getBlacklistCleaner(indexReferenceBlacklist blacklist) {
+    public BlacklistCleaner getBlacklistCleaner(final indexReferenceBlacklist blacklist) {
         return new BlacklistCleaner(blacklist);
     }
     
@@ -293,9 +293,9 @@ public final class indexRepositoryReference {
         public String lastBlacklistedHash = "";
         public String lastUrl = "";
         public String lastHash = "";
-        private indexReferenceBlacklist blacklist;
+        private final indexReferenceBlacklist blacklist;
 
-        public BlacklistCleaner(indexReferenceBlacklist blacklist) {
+        public BlacklistCleaner(final indexReferenceBlacklist blacklist) {
             this.blacklist = blacklist;
         }
 
@@ -308,7 +308,7 @@ public final class indexRepositoryReference {
                         if (this.pause) {
                             try {
                                 this.wait();
-                            } catch (InterruptedException e) {
+                            } catch (final InterruptedException e) {
                                 serverLog.logWarning("URLDBCLEANER", "InterruptedException", e);
                                 this.run = false;
                                 return;
@@ -340,7 +340,7 @@ public final class indexRepositoryReference {
                         lastHash = entry.hash();
                     }
                 }
-            } catch (RuntimeException e) {
+            } catch (final RuntimeException e) {
                 if (e.getMessage() != null && e.getMessage().indexOf("not found in LURL") != -1) {
                     serverLog.logWarning("URLDBCLEANER", "urlHash not found in LURL", e);
                 }
@@ -348,7 +348,7 @@ public final class indexRepositoryReference {
                     serverLog.logWarning("URLDBCLEANER", "RuntimeException", e);
                     run = false;
                 }
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 e.printStackTrace();
                 run = false;
             }
@@ -383,7 +383,7 @@ public final class indexRepositoryReference {
     }
     
     // export methods
-    public Export export(File f, String filter, int format, boolean dom) {
+    public Export export(final File f, final String filter, final int format, final boolean dom) {
         if ((exportthread != null) && (exportthread.isAlive())) {
             serverLog.logWarning("LURL-EXPORT", "cannot start another export thread, already one running");
             return exportthread;
@@ -398,15 +398,15 @@ public final class indexRepositoryReference {
     }
     
     public class Export extends Thread {
-        private File f;
-        private String filter;
+        private final File f;
+        private final String filter;
         private int count;
         private String failure;
-        private int format;
-        private boolean dom;
-        private kelondroRowSet doms;
+        private final int format;
+        private final boolean dom;
+        private final kelondroRowSet doms;
         
-        public Export(File f, String filter, int format, boolean dom) {
+        public Export(final File f, final String filter, final int format, boolean dom) {
             // format: 0=text, 1=html, 2=rss/xml
             this.f = f;
             this.filter = filter;
@@ -421,7 +421,7 @@ public final class indexRepositoryReference {
         public void run() {
             try {
                 f.getParentFile().mkdirs();
-                PrintWriter pw = new PrintWriter(new BufferedOutputStream(new FileOutputStream(f)));
+                final PrintWriter pw = new PrintWriter(new BufferedOutputStream(new FileOutputStream(f)));
                 if (format == 1) {
                     pw.println("<html><head></head><body>");
                 }
@@ -435,7 +435,7 @@ public final class indexRepositoryReference {
                     pw.println("<link>http://yacy.net</link>");
                 }
                 
-                Iterator<indexURLReference> i = entries(true, null); // iterates indexURLEntry objects
+                final Iterator<indexURLReference> i = entries(true, null); // iterates indexURLEntry objects
                 indexURLReference entry;
                 indexURLReference.Components comp;
                 String url;
@@ -482,7 +482,7 @@ public final class indexRepositoryReference {
                     pw.println("</rss>");
                 }
                 pw.close();
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 e.printStackTrace();
                 this.failure = e.getMessage();
             }

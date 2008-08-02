@@ -43,7 +43,7 @@ public class ymageOSM {
     
     // helper methods to load map images from openstreetmap.org
     
-    public static ymageMatrix getCombinedTiles(tileCoordinates t11) {
+    public static ymageMatrix getCombinedTiles(final tileCoordinates t11) {
         tileCoordinates t00, t10, t20, t01, t21, t02, t12, t22;
         t00 = new tileCoordinates(t11.xtile - 1, t11.ytile - 1, t11.zoom);
         t10 = new tileCoordinates(t11.xtile    , t11.ytile - 1, t11.zoom);
@@ -53,7 +53,7 @@ public class ymageOSM {
         t02 = new tileCoordinates(t11.xtile - 1, t11.ytile + 1, t11.zoom);
         t12 = new tileCoordinates(t11.xtile    , t11.ytile + 1, t11.zoom);
         t22 = new tileCoordinates(t11.xtile + 1, t11.ytile + 1, t11.zoom);
-        ymageMatrix m = new ymageMatrix(768, 768, ymageMatrix.MODE_REPLACE, "FFFFFF");
+        final ymageMatrix m = new ymageMatrix(768, 768, ymageMatrix.MODE_REPLACE, "FFFFFF");
         BufferedImage bi;
         bi = getSingleTile(t00); if (bi != null) m.insertBitmap(getSingleTile(t00),   0,   0);
         bi = getSingleTile(t10); if (bi != null) m.insertBitmap(getSingleTile(t10), 256,   0);
@@ -67,26 +67,26 @@ public class ymageOSM {
         return m;
     }
     
-    public static BufferedImage getSingleTile(tileCoordinates tile) {
+    public static BufferedImage getSingleTile(final tileCoordinates tile) {
         yacyURL tileURL;
         try {
             tileURL = new yacyURL(tile.url(), null);
-        } catch (MalformedURLException e) {
+        } catch (final MalformedURLException e) {
             return null;
         }
         System.out.println("*** DEBUG: fetching OSM tile: " + tileURL.toNormalform(true, true));
         InputStream tileStream = plasmaHTCache.getResourceContentStream(tileURL);
         if (tileStream == null) {
             // download resource using the crawler and keep resource in memory if possible
-            plasmaHTCache.Entry entry = plasmaSwitchboard.getSwitchboard().crawlQueues.loadResourceFromWeb(tileURL, 20000, true, false, false);
+            final plasmaHTCache.Entry entry = plasmaSwitchboard.getSwitchboard().crawlQueues.loadResourceFromWeb(tileURL, 20000, true, false, false);
             if ((entry == null) || (entry.cacheArray() == null)) return null;
             tileStream = new ByteArrayInputStream(entry.cacheArray());
         }
         try {
             return ImageIO.read(tileStream);
-        } catch (EOFException e) {
+        } catch (final EOFException e) {
             return null;
-        } catch (IOException e) {
+        } catch (final IOException e) {
             return null;
         }
     }
@@ -101,7 +101,7 @@ public class ymageOSM {
             this.ytile = (int) Math.floor((1 - Math.log(Math.tan(lat * Math.PI / 180) + 1 / Math.cos(lat * Math.PI / 180)) / Math.PI) / 2 * (1 << zoom));
         }
         
-        public tileCoordinates(int xtile, int ytile, int zoom) {
+        public tileCoordinates(final int xtile, final int ytile, final int zoom) {
             this.zoom = zoom;
             this.xtile = xtile;
             this.ytile = ytile;

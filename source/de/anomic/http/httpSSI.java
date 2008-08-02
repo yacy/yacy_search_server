@@ -35,14 +35,14 @@ import de.anomic.server.serverByteBuffer;
 
 public class httpSSI {
 
-    public static void writeSSI(serverByteBuffer in, OutputStream out, String authorization, String requesthost) throws IOException {
+    public static void writeSSI(final serverByteBuffer in, final OutputStream out, final String authorization, final String requesthost) throws IOException {
         writeSSI(in, 0, out, authorization, requesthost);
     }
     
-    public static void writeSSI(serverByteBuffer in, int off, OutputStream out, String authorization, String requesthost) throws IOException {
-        int p = in.indexOf("<!--#".getBytes(), off);
+    public static void writeSSI(final serverByteBuffer in, final int off, final OutputStream out, final String authorization, final String requesthost) throws IOException {
+        final int p = in.indexOf("<!--#".getBytes(), off);
         if (p >= 0) {
-            int q = in.indexOf("-->".getBytes(), p + 10);
+            final int q = in.indexOf("-->".getBytes(), p + 10);
             if (out instanceof httpChunkedOutputStream) {
                 ((httpChunkedOutputStream) out).write(in, off, p - off);
             } else {
@@ -59,28 +59,28 @@ public class httpSSI {
         }
     }
     
-    private static void parseSSI(serverByteBuffer in, int off, int len, OutputStream out, String authorization, String requesthost) {
+    private static void parseSSI(final serverByteBuffer in, final int off, final int len, final OutputStream out, final String authorization, final String requesthost) {
         if (in.startsWith("<!--#include virtual=\"".getBytes(), off)) {
-            int q = in.indexOf("\"".getBytes(), off + 22);
+            final int q = in.indexOf("\"".getBytes(), off + 22);
             if (q > 0) {
-                String path = in.toString(off + 22, q);
+                final String path = in.toString(off + 22, q);
                 writeContent(path, out, authorization, requesthost);
             }
         }
     }
     
-    private static void writeContent(String path, OutputStream out, String authorization, String requesthost) {
+    private static void writeContent(String path, final OutputStream out, final String authorization, final String requesthost) {
         // check if there are arguments in path string
         String args = "";
-        int argpos = path.indexOf('?');
+        final int argpos = path.indexOf('?');
         if (argpos > 0) {
             args = path.substring(argpos + 1);
             path = path.substring(0, argpos);
         }
         
         // set up virtual connection properties to call httpdFileHander.doGet()
-        Properties conProp = new Properties();
-        httpHeader header = new httpHeader(httpd.reverseMappingCache);
+        final Properties conProp = new Properties();
+        final httpHeader header = new httpHeader(httpd.reverseMappingCache);
         conProp.setProperty(httpHeader.CONNECTION_PROP_METHOD, httpHeader.METHOD_GET);
         conProp.setProperty(httpHeader.CONNECTION_PROP_PATH, path);
         conProp.setProperty(httpHeader.CONNECTION_PROP_ARGS, args);

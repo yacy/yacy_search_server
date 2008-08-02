@@ -57,16 +57,16 @@ public abstract class serverAbstractThread extends Thread implements serverThrea
         // shall only be used, if a thread blocks for an important reason
         // like a socket connect and must renew the timestamp to correct
         // statistics
-        long thisBlockTime = (System.currentTimeMillis() - this.threadBlockTimestamp);
+        final long thisBlockTime = (System.currentTimeMillis() - this.threadBlockTimestamp);
         this.blockPause += thisBlockTime;
         this.busytime -= thisBlockTime;
     }
     
-    protected final void announceMoreExecTime(long millis) {
+    protected final void announceMoreExecTime(final long millis) {
         this.busytime += millis;
     }
     
-    public final void setDescription(String shortText, String longText, String monitorURL) {
+    public final void setDescription(final String shortText, final String longText, final String monitorURL) {
         // sets a visible description string
         this.shortDescr = shortText;
         this.longDescr  = longText;
@@ -100,7 +100,7 @@ public abstract class serverAbstractThread extends Thread implements serverThrea
         return memuse;
     }
 
-    public final void setLog(serverLog log) {
+    public final void setLog(final serverLog log) {
         // defines a log where process states can be written to
         this.log = log;
     }
@@ -110,7 +110,7 @@ public abstract class serverAbstractThread extends Thread implements serverThrea
         return !this.running || Thread.currentThread().isInterrupted();
     }    
     
-    public void terminate(boolean waitFor) {
+    public void terminate(final boolean waitFor) {
         // after calling this method, the thread shall terminate
         this.running = false;
         
@@ -120,18 +120,18 @@ public abstract class serverAbstractThread extends Thread implements serverThrea
         // wait for termination
         if (waitFor) {
             // Busy waiting removed: while (this.isAlive()) try {this.sleep(100);} catch (InterruptedException e) {break;}
-            try { this.join(3000); } catch (InterruptedException e) {return;}
+            try { this.join(3000); } catch (final InterruptedException e) {return;}
         }
             
         // If we reach this point, the process is closed
     }
     
-    private final void logError(String text,Throwable thrown) {
+    private final void logError(final String text,final Throwable thrown) {
         if (log == null) serverLog.logSevere("THREAD-CONTROL", text, thrown);
         else log.logSevere(text,thrown);
     }
     
-    public void jobExceptionHandler(Exception e) {
+    public void jobExceptionHandler(final Exception e) {
         if (!(e instanceof ClosedByInterruptException)) {
             // default handler for job exceptions. shall be overridden for own handler
             logError("thread '" + this.getName() + "': " + e.toString(),e);

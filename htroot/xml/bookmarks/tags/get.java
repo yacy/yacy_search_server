@@ -42,11 +42,11 @@ public class get {
 	final static int SORT_SIZE = 2;
 	final static int SHOW_ALL = -1;
 	
-	public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
+	public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
         // return variable that accumulates replacements
-        plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
-        boolean isAdmin=switchboard.verifyAuthentication(header, true);
-        serverObjects prop = new serverObjects();
+        final plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
+        final boolean isAdmin=switchboard.verifyAuthentication(header, true);
+        final serverObjects prop = new serverObjects();
         Iterator<Tag> it = null;
         String tagName = "";
         int top = SHOW_ALL;
@@ -62,11 +62,11 @@ public class get {
     		} 
     	   			
         	if(post.containsKey("top")) {    				
-        		String s_top = post.get("top");
+        		final String s_top = post.get("top");
         		top = Integer.parseInt(s_top);    				
         	}
         	if(post.containsKey("sort")) {
-        		String sort = post.get("sort");
+        		final String sort = post.get("sort");
         		if (sort.equals("size"))
         			comp = SORT_SIZE;
         	}    				

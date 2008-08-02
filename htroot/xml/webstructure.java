@@ -38,11 +38,11 @@ import de.anomic.server.serverSwitch;
 
 public class webstructure {
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
-        serverObjects prop = new serverObjects();
-        plasmaSwitchboard sb = (plasmaSwitchboard) env;
-        boolean latest = ((post == null) ? false : post.containsKey("latest"));
-        Iterator<plasmaWebStructure.structureEntry> i = sb.webStructure.structureEntryIterator(latest);
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+        final serverObjects prop = new serverObjects();
+        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        final boolean latest = ((post == null) ? false : post.containsKey("latest"));
+        final Iterator<plasmaWebStructure.structureEntry> i = sb.webStructure.structureEntryIterator(latest);
         int c = 0, d;
         plasmaWebStructure.structureEntry sentry;
         Map.Entry<String, Integer> refentry;

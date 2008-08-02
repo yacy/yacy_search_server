@@ -45,12 +45,12 @@ public class CrawlProfile {
     static HashMap<String, Map<String, DomProfile>> domsCache = new HashMap<String, Map<String, DomProfile>>();
     
     kelondroMap profileTable;
-    private File profileTableFile;
+    private final File profileTableFile;
     
-    public CrawlProfile(File file) {
+    public CrawlProfile(final File file) {
         this.profileTableFile = file;
         profileTableFile.getParentFile().mkdirs();
-        kelondroBLOB dyn = new kelondroBLOBTree(profileTableFile, true, true, yacySeedDB.commonHashLength, 2000, '#', kelondroNaturalOrder.naturalOrder, false, false, true);
+        final kelondroBLOB dyn = new kelondroBLOBTree(profileTableFile, true, true, yacySeedDB.commonHashLength, 2000, '#', kelondroNaturalOrder.naturalOrder, false, false, true);
         profileTable = new kelondroMap(dyn, 500);
     }
     
@@ -59,7 +59,7 @@ public class CrawlProfile {
         if (profileTable != null) profileTable.close();
         if (!(profileTableFile.delete())) throw new RuntimeException("cannot delete crawl profile database");
         profileTableFile.getParentFile().mkdirs();
-        kelondroBLOB dyn = new kelondroBLOBTree(profileTableFile, true, true, yacySeedDB.commonHashLength, 2000, '#', kelondroNaturalOrder.naturalOrder, false, false, true);
+        final kelondroBLOB dyn = new kelondroBLOBTree(profileTableFile, true, true, yacySeedDB.commonHashLength, 2000, '#', kelondroNaturalOrder.naturalOrder, false, false, true);
         profileTable = new kelondroMap(dyn, 500);
     }
     
@@ -71,11 +71,11 @@ public class CrawlProfile {
         return profileTable.size();
     }
     
-    public Iterator<entry> profiles(boolean up) {
+    public Iterator<entry> profiles(final boolean up) {
         // enumerates profile entries
         try {
             return new profileIterator(up);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             return new HashSet<entry>().iterator();
         }
     }
@@ -84,14 +84,14 @@ public class CrawlProfile {
         // the iterator iterates all keys, which are byte[] objects
         kelondroCloneableIterator<byte[]> handleIterator;
         String lastkey;
-        public profileIterator(boolean up) throws IOException {
+        public profileIterator(final boolean up) throws IOException {
             handleIterator = profileTable.keys(up, false);
             lastkey = null;
         }
         public boolean hasNext() {
             try {
                 return handleIterator.hasNext();
-            } catch (kelondroException e) {
+            } catch (final kelondroException e) {
                 clear();
                 return false;
             }
@@ -100,7 +100,7 @@ public class CrawlProfile {
             try {
                 lastkey = new String(handleIterator.next());
                 return getEntry(lastkey);
-            } catch (kelondroException e) {
+            } catch (final kelondroException e) {
                 clear();
                 return null;
             }
@@ -108,35 +108,35 @@ public class CrawlProfile {
         public void remove() {
             if (lastkey != null) try {
                 removeEntry(lastkey);
-            } catch (kelondroException e) {
+            } catch (final kelondroException e) {
                 clear();
             }
         }
     }
    
-    public void removeEntry(String handle) {
+    public void removeEntry(final String handle) {
         try {
         profileTable.remove(handle);
-        } catch (IOException e) {}
+        } catch (final IOException e) {}
     }
     
-    public entry newEntry(HashMap<String, String> mem) {
-        entry ne = new entry(mem);
+    public entry newEntry(final HashMap<String, String> mem) {
+        final entry ne = new entry(mem);
         try {
             profileTable.put(ne.handle(), ne.map());
-        } catch (kelondroException e) {
+        } catch (final kelondroException e) {
             clear();
             try {
                 profileTable.put(ne.handle(), ne.map());
-            } catch (IOException ee) {
+            } catch (final IOException ee) {
                 e.printStackTrace();
                 System.exit(0);
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             clear();
             try {
                 profileTable.put(ne.handle(), ne.map());
-            } catch (IOException ee) {
+            } catch (final IOException ee) {
                 e.printStackTrace();
                 System.exit(0);
             }
@@ -144,16 +144,16 @@ public class CrawlProfile {
         return ne;        
     }
     
-    public entry newEntry(String name, yacyURL startURL, String generalFilter, String specificFilter,
-                           int generalDepth, int specificDepth,
-                           int recrawlIfOlder /*minutes*/, int domFilterDepth,  int domMaxPages,
-                           boolean crawlingQ,
-                           boolean indexText, boolean indexMedia,
-                           boolean storeHTCache, boolean storeTXCache,
-                           boolean remoteIndexing,
-                           boolean xsstopw, boolean xdstopw, boolean xpstopw) {
+    public entry newEntry(final String name, final yacyURL startURL, final String generalFilter, final String specificFilter,
+                           final int generalDepth, final int specificDepth,
+                           final int recrawlIfOlder /*minutes*/, final int domFilterDepth,  final int domMaxPages,
+                           final boolean crawlingQ,
+                           final boolean indexText, final boolean indexMedia,
+                           final boolean storeHTCache, final boolean storeTXCache,
+                           final boolean remoteIndexing,
+                           final boolean xsstopw, final boolean xdstopw, final boolean xpstopw) {
         
-        entry ne = new entry(name, startURL, generalFilter, specificFilter,
+        final entry ne = new entry(name, startURL, generalFilter, specificFilter,
                              generalDepth, specificDepth,
                              recrawlIfOlder, domFilterDepth, domMaxPages,
                              crawlingQ,
@@ -163,19 +163,19 @@ public class CrawlProfile {
                              xsstopw, xdstopw, xpstopw);
         try {
             profileTable.put(ne.handle(), ne.map());
-        } catch (kelondroException e) {
+        } catch (final kelondroException e) {
             clear();
             try {
                 profileTable.put(ne.handle(), ne.map());
-            } catch (IOException ee) {
+            } catch (final IOException ee) {
                 e.printStackTrace();
                 System.exit(0);
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             clear();
             try {
                 profileTable.put(ne.handle(), ne.map());
-            } catch (IOException ee) {
+            } catch (final IOException ee) {
                 e.printStackTrace();
                 System.exit(0);
             }
@@ -183,18 +183,18 @@ public class CrawlProfile {
         return ne;
     }
     
-    public entry getEntry(String handle) {
+    public entry getEntry(final String handle) {
         HashMap<String, String> m;
         try {
             m = profileTable.get(handle);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             return null;
         }
         if (m == null) return null;
         return new entry(m);
     }
 
-    public void changeEntry(entry e, String propName, String newValue) throws IOException {
+    public void changeEntry(final entry e, final String propName, final String newValue) throws IOException {
         e.mem.put(propName,  newValue);
         profileTable.put(e.handle(), e.mem);
     }
@@ -204,7 +204,7 @@ public class CrawlProfile {
         public String referrer;
         public int depth, count;
         
-        public DomProfile(String ref, int d) {
+        public DomProfile(final String ref, final int d) {
             this.referrer = ref;
             this.depth = d;
             this.count = 1;
@@ -242,16 +242,16 @@ public class CrawlProfile {
         HashMap<String, String> mem;
         private Map<String, DomProfile> doms;
         
-        public entry(String name, yacyURL startURL, String generalFilter, String specificFilter,
-                     int generalDepth, int specificDepth,
-                     int recrawlIfOlder /*minutes*/, int domFilterDepth, int domMaxPages,
-                     boolean crawlingQ,
-                     boolean indexText, boolean indexMedia,
-                     boolean storeHTCache, boolean storeTXCache,
-                     boolean remoteIndexing,
-                     boolean xsstopw, boolean xdstopw, boolean xpstopw) {
+        public entry(final String name, final yacyURL startURL, final String generalFilter, final String specificFilter,
+                     final int generalDepth, final int specificDepth,
+                     final int recrawlIfOlder /*minutes*/, final int domFilterDepth, final int domMaxPages,
+                     final boolean crawlingQ,
+                     final boolean indexText, final boolean indexMedia,
+                     final boolean storeHTCache, final boolean storeTXCache,
+                     final boolean remoteIndexing,
+                     final boolean xsstopw, final boolean xdstopw, final boolean xpstopw) {
             if (name == null || name.length() == 0) throw new NullPointerException("name must not be null");
-            String handle = (startURL == null) ? kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(Long.toString(System.currentTimeMillis()))).substring(0, yacySeedDB.commonHashLength) : startURL.hash();
+            final String handle = (startURL == null) ? kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(Long.toString(System.currentTimeMillis()))).substring(0, yacySeedDB.commonHashLength) : startURL.hash();
             mem = new HashMap<String, String>();
             mem.put(HANDLE,           handle);
             mem.put(NAME,             name);
@@ -277,7 +277,7 @@ public class CrawlProfile {
         }
         
         public String toString() {
-            StringBuffer str = new StringBuffer();
+            final StringBuffer str = new StringBuffer();
             
             if (this.mem != null) {     
                 str.append(this.mem.toString());
@@ -286,7 +286,7 @@ public class CrawlProfile {
             return str.toString();
         }        
         
-        public entry(HashMap<String, String> mem) {
+        public entry(final HashMap<String, String> mem) {
             this.mem = mem;
             this.doms = domsCache.get(this.mem.get(HANDLE));
             if (this.doms == null) this.doms = new HashMap<String, DomProfile>();
@@ -296,49 +296,49 @@ public class CrawlProfile {
             return mem;
         }
         public String handle() {
-            String r = mem.get(HANDLE);
+            final String r = mem.get(HANDLE);
             if (r == null) return null; else return r;
         }
         public String name() {
-            String r = mem.get(NAME);
+            final String r = mem.get(NAME);
             if (r == null) return ""; else return r;
         }
         public String startURL() {
-            String r = mem.get(START_URL);
+            final String r = mem.get(START_URL);
             if (r == null) return null; else return r;
         }
         public String generalFilter() {
-            String r = mem.get(GENERAL_FILTER);
+            final String r = mem.get(GENERAL_FILTER);
             if (r == null) return ".*"; else return r;
         }
         public String specificFilter() {
-            String r = mem.get(SPECIFIC_FILTER);
+            final String r = mem.get(SPECIFIC_FILTER);
             if (r == null) return ".*"; else return r;
         }
         public int generalDepth() {
-            String r = mem.get(GENERAL_DEPTH);
+            final String r = mem.get(GENERAL_DEPTH);
             if (r == null) return 0; else try {
                 return Integer.parseInt(r);
-            } catch (NumberFormatException e) {
+            } catch (final NumberFormatException e) {
                 return 0;
             }
         }
         public int specificDepth() {
-            String r = mem.get(SPECIFIC_DEPTH);
+            final String r = mem.get(SPECIFIC_DEPTH);
             if (r == null) return 0; else try {
                 return Integer.parseInt(r);
-            } catch (NumberFormatException e) {
+            } catch (final NumberFormatException e) {
                 return 0;
             }
         }
         public long recrawlIfOlder() {
             // returns a long (millis) that is the minimum age that
             // an antry must have to be re-crawled
-            String r = mem.get(RECRAWL_IF_OLDER);
+            final String r = mem.get(RECRAWL_IF_OLDER);
             if (r == null) return Long.MAX_VALUE; else try {
-                long l = Long.parseLong(r) * 60000L;
+                final long l = Long.parseLong(r) * 60000L;
                 return (l < 0) ? Long.MAX_VALUE : l;
-            } catch (NumberFormatException e) {
+            } catch (final NumberFormatException e) {
                 return Long.MAX_VALUE;
             }
         }
@@ -346,66 +346,66 @@ public class CrawlProfile {
             // if the depth is equal or less to this depth,
             // then the current url feeds with its domain the crawl filter
             // if this is -1, all domains are feeded
-            String r = mem.get(DOM_FILTER_DEPTH);
+            final String r = mem.get(DOM_FILTER_DEPTH);
             if (r == null) return Integer.MAX_VALUE; else try {
-                int i = Integer.parseInt(r);
+                final int i = Integer.parseInt(r);
                 if (i < 0) return Integer.MAX_VALUE;
                 return i;
-            } catch (NumberFormatException e) {
+            } catch (final NumberFormatException e) {
                 return Integer.MAX_VALUE;
             }
         }
         public int domMaxPages() {
             // this is the maximum number of pages that are crawled for a single domain
             // if -1, this means no limit
-            String r = mem.get(DOM_MAX_PAGES);
+            final String r = mem.get(DOM_MAX_PAGES);
             if (r == null) return Integer.MAX_VALUE; else try {
-                int i = Integer.parseInt(r);
+                final int i = Integer.parseInt(r);
                 if (i < 0) return Integer.MAX_VALUE;
                 return i;
-            } catch (NumberFormatException e) {
+            } catch (final NumberFormatException e) {
                 return Integer.MAX_VALUE;
             }
         }
         public boolean crawlingQ() {
-            String r = mem.get(CRAWLING_Q);
+            final String r = mem.get(CRAWLING_Q);
             if (r == null) return false; else return (r.equals(Boolean.TRUE.toString()));
         }
         public boolean indexText() {
-            String r = mem.get(INDEX_TEXT);
+            final String r = mem.get(INDEX_TEXT);
             if (r == null) return true; else return (r.equals(Boolean.TRUE.toString()));
         }
         public boolean indexMedia() {
-            String r = mem.get(INDEX_MEDIA);
+            final String r = mem.get(INDEX_MEDIA);
             if (r == null) return true; else return (r.equals(Boolean.TRUE.toString()));
         }
         public boolean storeHTCache() {
-            String r = mem.get(STORE_HTCACHE);
+            final String r = mem.get(STORE_HTCACHE);
             if (r == null) return false; else return (r.equals(Boolean.TRUE.toString()));
         }
         public boolean storeTXCache() {
-            String r = mem.get(STORE_TXCACHE);
+            final String r = mem.get(STORE_TXCACHE);
             if (r == null) return false; else return (r.equals(Boolean.TRUE.toString()));
         }
         public boolean remoteIndexing() {
-            String r = mem.get(REMOTE_INDEXING);
+            final String r = mem.get(REMOTE_INDEXING);
             if (r == null) return false; else return (r.equals(Boolean.TRUE.toString()));
         }
         public boolean excludeStaticStopwords() {
-            String r = mem.get(XSSTOPW);
+            final String r = mem.get(XSSTOPW);
             if (r == null) return false; else return (r.equals(Boolean.TRUE.toString()));
         }
         public boolean excludeDynamicStopwords() {
-            String r = mem.get(XDSTOPW);
+            final String r = mem.get(XDSTOPW);
             if (r == null) return false; else return (r.equals(Boolean.TRUE.toString()));
         }
         public boolean excludeParentStopwords() {
-            String r = mem.get(XPSTOPW);
+            final String r = mem.get(XPSTOPW);
             if (r == null) return false; else return (r.equals(Boolean.TRUE.toString()));
         }
-        public void domInc(String domain, String referrer, int depth) {
+        public void domInc(final String domain, final String referrer, final int depth) {
             synchronized (domain.intern()) {
-                DomProfile dp = doms.get(domain);
+                final DomProfile dp = doms.get(domain);
                 if (dp == null) {
                     // new domain
                     doms.put(domain, new DomProfile(referrer, depth));
@@ -417,11 +417,11 @@ public class CrawlProfile {
             }
             domsCache.put(this.mem.get(HANDLE), doms);
         }
-        public boolean grantedDomAppearance(String domain) {
-            int max = domFilterDepth();
+        public boolean grantedDomAppearance(final String domain) {
+            final int max = domFilterDepth();
             if (max == Integer.MAX_VALUE) return true;
             synchronized (domain.intern()) {
-                DomProfile dp = doms.get(domain);
+                final DomProfile dp = doms.get(domain);
                 if (dp == null) {
                     return 0 < max;
                 } else {
@@ -430,11 +430,11 @@ public class CrawlProfile {
             }
         }
 
-        public boolean grantedDomCount(String domain) {
-            int max = domMaxPages();
+        public boolean grantedDomCount(final String domain) {
+            final int max = domMaxPages();
             if (max == Integer.MAX_VALUE) return true;
             synchronized (domain.intern()) {
-                DomProfile dp = doms.get(domain);
+                final DomProfile dp = doms.get(domain);
                 if (dp == null) {
                     return 0 < max;
                 } else {
@@ -445,13 +445,13 @@ public class CrawlProfile {
         public int domSize() {
             return doms.size();
         }
-        public boolean domExists(String domain) {
+        public boolean domExists(final String domain) {
             if (domFilterDepth() == Integer.MAX_VALUE) return true;
             return doms.containsKey(domain);
         }
 
-        public String domName(boolean attr, int index){
-            Iterator<Map.Entry<String, DomProfile>> domnamesi = doms.entrySet().iterator();
+        public String domName(final boolean attr, final int index){
+            final Iterator<Map.Entry<String, DomProfile>> domnamesi = doms.entrySet().iterator();
             String domname="";
             Map.Entry<String, DomProfile> ey;
             DomProfile dp;

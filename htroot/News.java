@@ -40,11 +40,11 @@ import de.anomic.yacy.yacySeed;
 
 public class News {
     
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
-        plasmaSwitchboard sb = (plasmaSwitchboard) env;
-        serverObjects prop = new serverObjects();
-        boolean overview = (post == null) || (post.get("page", "0").equals("0"));
-        int tableID = (overview) ? -1 : (post == null ? 0 : Integer.parseInt(post.get("page", "0"))) - 1;
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        final serverObjects prop = new serverObjects();
+        final boolean overview = (post == null) || (post.get("page", "0").equals("0"));
+        final int tableID = (overview) ? -1 : (post == null ? 0 : Integer.parseInt(post.get("page", "0"))) - 1;
 
         // execute commands
         if (post != null) {
@@ -54,7 +54,7 @@ public class News {
                     prop.put("AUTHENTICATE", "admin log-in");
                     return prop; // this button needs authentication, force log-in
                 }
-                Iterator<String> e = post.keySet().iterator();
+                final Iterator<String> e = post.keySet().iterator();
                 String check;
                 String id;
                 while (e.hasNext()) {
@@ -63,7 +63,7 @@ public class News {
                         id = check.substring(4);
                         try {
                             sb.webIndex.newsPool.moveOff(tableID, id);
-                        } catch (IOException ee) {ee.printStackTrace();}
+                        } catch (final IOException ee) {ee.printStackTrace();}
                     }
                 }
             }
@@ -79,7 +79,7 @@ public class News {
                     } else {
                         sb.webIndex.newsPool.moveOffAll(tableID);
                     }
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     e.printStackTrace();
                 }
             }
@@ -101,8 +101,8 @@ public class News {
             prop.put("table_page", tableID + 1);
             
             if (sb.webIndex.seedDB != null) {
-                int maxCount = Math.min(1000, sb.webIndex.newsPool.size(tableID));
-                Iterator<yacyNewsRecord> recordIterator = sb.webIndex.newsPool.recordIterator(tableID, false);
+                final int maxCount = Math.min(1000, sb.webIndex.newsPool.size(tableID));
+                final Iterator<yacyNewsRecord> recordIterator = sb.webIndex.newsPool.recordIterator(tableID, false);
                 yacyNewsRecord record;
                 yacySeed seed;
                 int i = 0;
@@ -112,7 +112,7 @@ public class News {
                     
                     seed = sb.webIndex.seedDB.getConnected(record.originator());
                     if (seed == null) seed = sb.webIndex.seedDB.getDisconnected(record.originator());
-                    String category = record.category();
+                    final String category = record.category();
                     prop.put("table_list_" + i + "_id", record.id());
                     prop.putHTML("table_list_" + i + "_ori", (seed == null) ? record.originator() : seed.getName());
                     prop.put("table_list_" + i + "_cre", serverDate.formatShortSecond(record.created()));
@@ -121,14 +121,14 @@ public class News {
                     prop.put("table_list_" + i + "_rec", (record.received() == null) ? "-" : serverDate.formatShortSecond(record.received()));
                     prop.put("table_list_" + i + "_dis", record.distributed());
                     
-                    Map<String, String> attributeMap = record.attributes();
+                    final Map<String, String> attributeMap = record.attributes();
                     prop.putHTML("table_list_" + i + "_att", attributeMap.toString());
                     int j = 0;
                     if (attributeMap.size() > 0) {
-	                    Iterator<String> attributeKeys = attributeMap.keySet().iterator();
+	                    final Iterator<String> attributeKeys = attributeMap.keySet().iterator();
 	                    while (attributeKeys.hasNext()) {
-	                    	String key = attributeKeys.next();
-	                    	String value = attributeMap.get(key);
+	                    	final String key = attributeKeys.next();
+	                    	final String value = attributeMap.get(key);
 	                    	prop.put("table_list_" + i + "_attributes_" + j + "_name",key);
 	                    	prop.putHTML("table_list_" + i + "_attributes_" + j + "_value",value);
 	                    	j++;

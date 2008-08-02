@@ -68,7 +68,7 @@ public class Bookmarks {
 	final static boolean TAGS = false;
 	final static boolean FOLDERS = true;
 	
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
 
     	int max_count = 10;
     	int start=0;
@@ -118,7 +118,7 @@ public class Bookmarks {
     				prop.put("AUTHENTICATE","admin log-in");
     			}
     		}else if(post.containsKey("mode")){
-    			String mode=post.get("mode");            
+    			final String mode=post.get("mode");            
     			if(mode.equals("add")){
     				prop.put("mode", "2");
     			}else if(mode.equals("importxml")){
@@ -127,17 +127,17 @@ public class Bookmarks {
     				prop.put("mode", "4");
     			}
     		}else if(post.containsKey("add")){ //add an Entry
-    			String url=post.get("url");
-    			String title=post.get("title");
-    			String description=post.get("description");
+    			final String url=post.get("url");
+    			final String title=post.get("title");
+    			final String description=post.get("description");
     			String tagsString = post.get("tags");
-    			String pathString = post.get("path");
+    			final String pathString = post.get("path");
     			tagsString=tagsString+","+pathString;
     			if(tagsString.equals("")){
     				tagsString="unsorted"; //default tag
     			}
-    			Set<String> tags=listManager.string2set(bookmarksDB.cleanTagsString(tagsString)); 
-    			bookmarksDB.Bookmark bookmark = sb.bookmarksDB.createBookmark(url, username);
+    			final Set<String> tags=listManager.string2set(bookmarksDB.cleanTagsString(tagsString)); 
+    			final bookmarksDB.Bookmark bookmark = sb.bookmarksDB.createBookmark(url, username);
     			if(bookmark != null){
     				bookmark.setProperty(bookmarksDB.Bookmark.BOOKMARK_TITLE, title);
     				bookmark.setProperty(bookmarksDB.Bookmark.BOOKMARK_DESCRIPTION, description);
@@ -161,7 +161,7 @@ public class Bookmarks {
     	                    //ERROR
     			}
     		}else if(post.containsKey("edit")){
-    			String urlHash=post.get("edit");
+    			final String urlHash=post.get("edit");
     			prop.put("mode", "2");
     			if (urlHash.length() == 0) {
     				prop.put("mode_edit", "0"); // create mode
@@ -173,13 +173,13 @@ public class Bookmarks {
     				prop.put("mode_public", "0");
     				prop.put("mode_feed", "0");
     			} else {
-                    bookmarksDB.Bookmark bookmark = sb.bookmarksDB.getBookmark(urlHash);
+                    final bookmarksDB.Bookmark bookmark = sb.bookmarksDB.getBookmark(urlHash);
                     if (bookmark == null) {
                         // try to get the bookmark from the LURL database
-                        indexURLReference urlentry = sb.webIndex.getURL(urlHash, null, 0);
+                        final indexURLReference urlentry = sb.webIndex.getURL(urlHash, null, 0);
                         plasmaParserDocument document = null;
                         if (urlentry != null) {
-                            indexURLReference.Components comp = urlentry.comp();
+                            final indexURLReference.Components comp = urlentry.comp();
                             document = plasmaSnippetCache.retrieveDocument(comp.url(), true, 5000, true, false);
                             prop.put("mode_edit", "0"); // create mode
                             prop.put("mode_url", comp.url().toNormalform(false, true));
@@ -223,9 +223,9 @@ public class Bookmarks {
     			}
     			serverLog.logInfo("BOOKMARKS", "I try to import bookmarks from HTML-file");
     			try {
-    				File file=new File(post.get("htmlfile"));    			
+    				final File file=new File(post.get("htmlfile"));    			
     				sb.bookmarksDB.importFromBookmarks(new yacyURL(file) , post.get("htmlfile$file"), tags, isPublic);
-    			} catch (MalformedURLException e) {}
+    			} catch (final MalformedURLException e) {}
     			serverLog.logInfo("BOOKMARKS", "success!!");
     		}else if(post.containsKey("xmlfile")){
     			boolean isPublic=false;
@@ -234,7 +234,7 @@ public class Bookmarks {
     			}
     			sb.bookmarksDB.importFromXML(post.get("xmlfile$file"), isPublic);
     		}else if(post.containsKey("delete")){
-    			String urlHash=post.get("delete");
+    			final String urlHash=post.get("delete");
     			sb.bookmarksDB.removeBookmark(urlHash);
     		}
     		if(post.containsKey("tag")){
@@ -302,7 +302,7 @@ public class Bookmarks {
        			tagsIt=tags.iterator();
        			tagCount=0;
        			while (tagsIt.hasNext()) {            	
-       				String tname = tagsIt.next();
+       				final String tname = tagsIt.next();
        				if ((!tname.startsWith("/")) && (!tname.equals(""))) {
        					prop.put("bookmarks_"+count+"_tags_"+tagCount+"_tag", tname);
        					tagCount++;
@@ -346,7 +346,7 @@ public class Bookmarks {
        	return prop;    // return from serverObjects respond()
     }    
     
-    private static void printTagList(String id, String tagName, int comp, int max, boolean opt){    	
+    private static void printTagList(final String id, final String tagName, final int comp, final int max, final boolean opt){    	
     	int count=0;
         bookmarksDB.Tag tag;
     	Iterator<Tag> it = null;
@@ -378,7 +378,7 @@ public class Bookmarks {
        	prop.put(id, count);    	
     }
     
-    private static int recurseFolders(Iterator<String> it, String root, int count, boolean next, String prev){
+    private static int recurseFolders(final Iterator<String> it, String root, int count, final boolean next, final String prev){
     	String fn="";    	
     	bookmarksDB.Bookmark bookmark;
    	
@@ -398,7 +398,7 @@ public class Bookmarks {
     	if(fn.startsWith(root)){
     		prop.put("folderlist_"+count+"_folder", "<li>"+fn.replaceFirst(root+"/*","")+"<ul class=\"folder\">");
     		count++;    
-    		Iterator<String> bit=sb.bookmarksDB.getBookmarksIterator(fn, isAdmin);
+    		final Iterator<String> bit=sb.bookmarksDB.getBookmarksIterator(fn, isAdmin);
     		while(bit.hasNext()){
     			bookmark=sb.bookmarksDB.getBookmark(bit.next());
     			prop.put("folderlist_"+count+"_folder", "<li><a href=\""+bookmark.getUrl()+"\" title=\""+bookmark.getDescription()+"\">"+ bookmark.getTitle()+"</a></li>");
@@ -417,9 +417,9 @@ public class Bookmarks {
     	return count;
     }
 
-    private static void publishNews(String url, String title, String description, String tagsString) {
+    private static void publishNews(final String url, final String title, final String description, final String tagsString) {
     	// create a news message
-    	HashMap<String, String> map = new HashMap<String, String>();
+    	final HashMap<String, String> map = new HashMap<String, String>();
     	map.put("url", url.replace(',', '|'));
     	map.put("title", title.replace(',', ' '));
     	map.put("description", description.replace(',', ' '));

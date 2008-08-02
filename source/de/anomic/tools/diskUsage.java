@@ -93,7 +93,7 @@ public class diskUsage {
     //  public API  //
     //////////////////
 
-    public static void init(ArrayList<String> pathsToCheck) {
+    public static void init(final ArrayList<String> pathsToCheck) {
         if (usedOS >= 0) return; // prevent double initialization
         usedOS = getOS();
         if (usedOS == -1) {
@@ -152,7 +152,7 @@ public class diskUsage {
     ////////////
 
     private static HashMap<String, long[]> dfUnix() {
-        HashMap<String, long[]> diskUsages = new HashMap<String, long[]>();
+        final HashMap<String, long[]> diskUsages = new HashMap<String, long[]>();
         try {
             final List<String> lines = dfUnixExec();
             nextLine: for (final String line: lines){
@@ -171,7 +171,7 @@ public class diskUsage {
                 }
             }
             return diskUsages;
-        } catch (IOException e) {
+        } catch (final IOException e) {
             usageError = "dfUnix: " + e.getMessage();
             return diskUsages;
         }
@@ -195,7 +195,7 @@ public class diskUsage {
                 allMountPoints.add(allMountPoints.size(), tokens[5]);
                 allVolumes.add(allVolumes.size(), tokens[0]);
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             usageError = "error during dfUnixGetVolumes: " + e.getMessage();
         }
     }
@@ -302,7 +302,7 @@ public class diskUsage {
     }
 
     public static HashMap<String, long[]> dfWindows() {
-        HashMap<String, long[]> diskUsages = new HashMap<String, long[]>();
+        final HashMap<String, long[]> diskUsages = new HashMap<String, long[]>();
         for (int i = 0; i < yacyUsedVolumes.size(); i++){
             final List<String> processArgs = new ArrayList<String>();
             processArgs.add(windowsCommand);
@@ -323,12 +323,12 @@ public class diskUsage {
                     return diskUsages;
                 }
 
-                String[] tokens = line.trim().split(" ++");
-                long[] vals = new long[2];
+                final String[] tokens = line.trim().split(" ++");
+                final long[] vals = new long[2];
                 vals[0] = -1;
                 try { vals[1] = new Long(tokens[2].replaceAll("[.,]", "")); } catch (final NumberFormatException e) {continue;}
                 diskUsages.put (yacyUsedVolumes.get(i), vals);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 usageError = "dfWindows: " + e.getMessage();
                 return diskUsages;
             }
@@ -352,7 +352,7 @@ public class diskUsage {
         return -1;
     }
 
-    private static void checkMappedSubDirs (ArrayList<String> pathsToCheck) {
+    private static void checkMappedSubDirs (final ArrayList<String> pathsToCheck) {
         for (final String path : pathsToCheck) {
             if (usedOS <= UNIX_END)
                 checkPathUsageUnix (path);
@@ -372,10 +372,10 @@ public class diskUsage {
 
     private static void checkPathUsageWindows(final String path) {
         int index = -1;
-        String sub = path.substring(0, 1); // ?? nur ein character?
+        final String sub = path.substring(0, 1); // ?? nur ein character?
         try {
             index = yacyUsedVolumes.indexOf(sub);
-        } catch (IndexOutOfBoundsException e) {
+        } catch (final IndexOutOfBoundsException e) {
             usageError = "internal error while checking used windows volumes";
             return;
         }
@@ -407,9 +407,9 @@ public class diskUsage {
             log.logWarning("logpoint 1 " + ix.getMessage());
             throw new IOException(ix.getMessage());
         }
-        List<String> list = inputStream.getOutput();
+        final List<String> list = inputStream.getOutput();
         if (list.isEmpty()) {
-            String error = errorStream.getOutput().toString();
+            final String error = errorStream.getOutput().toString();
             log.logWarning("logpoint 2: "+ error);
             throw new IOException("empty list: " + error);
         } else

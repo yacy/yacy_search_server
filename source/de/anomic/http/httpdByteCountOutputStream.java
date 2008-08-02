@@ -43,11 +43,11 @@ public class httpdByteCountOutputStream extends BufferedOutputStream {
      * Constructor of this class
      * @param outputStream the {@link OutputStream} to write to
      */
-    public httpdByteCountOutputStream(OutputStream outputStream) {
+    public httpdByteCountOutputStream(final OutputStream outputStream) {
         this(outputStream,null);
     }
     
-    public httpdByteCountOutputStream(OutputStream outputStream, String accountName) {
+    public httpdByteCountOutputStream(final OutputStream outputStream, final String accountName) {
         this(outputStream,0,accountName);
     }    
     
@@ -56,26 +56,26 @@ public class httpdByteCountOutputStream extends BufferedOutputStream {
      * @param outputStream the {@link OutputStream} to write to
      * @param initByteCount to initialize the bytecount with a given value
      */
-    public httpdByteCountOutputStream(OutputStream outputStream, long initByteCount, String accountName) {
+    public httpdByteCountOutputStream(final OutputStream outputStream, final long initByteCount, final String accountName) {
         super(outputStream);
         this.byteCount = initByteCount;
         this.byteCountAccountName = accountName;
     }    
 
     /** @see java.io.OutputStream#write(byte[]) */
-    public void write(byte[] b) throws IOException {
+    public void write(final byte[] b) throws IOException {
         super.write(b);
         this.byteCount += b.length;
     }
 
     /** @see java.io.OutputStream#write(byte[], int, int) */
-    public synchronized void write(byte[] b, int off, int len) throws IOException {        
+    public synchronized void write(final byte[] b, final int off, final int len) throws IOException {        
         super.write(b, off, len);
         this.byteCount += len;
     }
 
     /** @see java.io.OutputStream#write(int) */
-    public synchronized void write(int b) throws IOException {
+    public synchronized void write(final int b) throws IOException {
         super.write(b);
         this.byteCount++;
     }
@@ -98,7 +98,7 @@ public class httpdByteCountOutputStream extends BufferedOutputStream {
         }
     }
     
-    public static long getAccountCount(String accountName) {
+    public static long getAccountCount(final String accountName) {
         synchronized (syncObject) {
             if (byteCountInfo.containsKey(accountName)) {
                 return (byteCountInfo.get(accountName)).longValue();

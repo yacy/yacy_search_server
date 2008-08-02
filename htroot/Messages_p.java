@@ -46,13 +46,13 @@ public class Messages_p {
     private static SimpleDateFormat SimpleFormatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
     private static final String PEERSKNOWN = "peersKnown_";
 
-    public static String dateString(Date date) {
+    public static String dateString(final Date date) {
         return SimpleFormatter.format(date);
     }
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
-        plasmaSwitchboard sb = (plasmaSwitchboard) env;
-        serverObjects prop = new serverObjects();
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        final serverObjects prop = new serverObjects();
 
         // set peer address / name
         final String peerAddress = sb.webIndex.seedDB.mySeed().getPublicAddress();
@@ -65,10 +65,10 @@ public class Messages_p {
             prop.put("peersKnown", "1");
             int peerCount = 0;
             try {
-                TreeMap<String, String> hostList = new TreeMap<String, String>();
+                final TreeMap<String, String> hostList = new TreeMap<String, String>();
                 final Iterator<yacySeed> e = sb.webIndex.seedDB.seedsConnected(true, false, null, (float) 0.0);
                 while (e.hasNext()) {
-                    yacySeed seed = e.next();
+                    final yacySeed seed = e.next();
                     if (seed != null) hostList.put(seed.get(yacySeed.NAME, "nameless"),seed.hash);
                 }
 
@@ -80,7 +80,7 @@ public class Messages_p {
                     hostList.remove(peername);
                     peerCount++;
                 }
-            } catch (Exception e) {/* */}
+            } catch (final Exception e) {/* */}
             prop.put(PEERSKNOWN + "peers", peerCount);
         } else {
             prop.put("peersKnown", "0");
@@ -93,15 +93,15 @@ public class Messages_p {
         messageBoard.entry message;
 
         // first reset notification
-        File notifierSource = new File(sb.getRootPath(), sb.getConfig("htRootPath", "htroot") + "/env/grafics/empty.gif");
-        File notifierDest = new File(sb.getConfigPath("htDocsPath", "DATA/HTDOCS"), "notifier.gif");
+        final File notifierSource = new File(sb.getRootPath(), sb.getConfig("htRootPath", "htroot") + "/env/grafics/empty.gif");
+        final File notifierDest = new File(sb.getConfigPath("htDocsPath", "DATA/HTDOCS"), "notifier.gif");
         try {
             serverFileUtils.copy(notifierSource, notifierDest);
-        } catch (IOException e) {
+        } catch (final IOException e) {
         }
 
         if (action.equals("delete")) {
-            String key = (post == null ? "" : post.get("object", ""));
+            final String key = (post == null ? "" : post.get("object", ""));
             sb.messageDB.remove(key);
             action = "list";
         }
@@ -109,7 +109,7 @@ public class Messages_p {
         if (action.equals("list")) {
             prop.put("mode", "0"); //list
             try {
-                Iterator<String> i = sb.messageDB.keys(null, true);
+                final Iterator<String> i = sb.messageDB.keys(null, true);
                 String key;
 
                 boolean dark = true;
@@ -136,7 +136,7 @@ public class Messages_p {
                     	// also write out the message body (needed for the RSS feed)
                         try {
                         	prop.putHTML("mode_messages_"+count+"_body",new String(message.message(), "UTF-8"), true);
-                        } catch (UnsupportedEncodingException e) {
+                        } catch (final UnsupportedEncodingException e) {
                             // can not happen, because UTF-8 must be supported by every JVM
                         }
                     }
@@ -145,7 +145,7 @@ public class Messages_p {
                     count++;
                 }
                 prop.put("mode_messages", count);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 prop.put("mode_error", "1");//I/O error reading message table
                 prop.putHTML("mode_error_message", e.getMessage());
             }
@@ -153,7 +153,7 @@ public class Messages_p {
 
         if (action.equals("view")) {
             prop.put("mode", "1"); //view
-            String key = (post == null ? "" : post.get("object", ""));
+            final String key = (post == null ? "" : post.get("object", ""));
             message = sb.messageDB.read(key);
             if (message == null) throw new NullPointerException("Message with ID " + key + " does not exist");
 
@@ -164,7 +164,7 @@ public class Messages_p {
             String theMessage = null;
             try {
                 theMessage = new String(message.message(), "UTF-8");
-            } catch (UnsupportedEncodingException e) {
+            } catch (final UnsupportedEncodingException e) {
                 // can not happen, because UTF-8 must be supported by every JVM
             }
             prop.putWiki("mode_message", theMessage);

@@ -36,7 +36,7 @@ public class DefinitionListToken extends ListToken {
 		super(';', null, null);
 	}
 	
-	protected StringBuffer parse(String[] t, int depth, StringBuffer sb) {
+	protected StringBuffer parse(final String[] t, final int depth, final StringBuffer sb) {
 		sb.append("<dl>\n");
 		while (super.aktline < t.length && getGrade(t[super.aktline]) >= depth) {
 			for (int j=0; j<depth + 1; j++) sb.append("\t");

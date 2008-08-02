@@ -47,28 +47,28 @@ public final class crawlReceipt {
      * this is used to respond on a remote crawling request
      */
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
         // return variable that accumulates replacements
-        plasmaSwitchboard sb = (plasmaSwitchboard) env;
-        serverObjects prop = new serverObjects();
+        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        final serverObjects prop = new serverObjects();
         if ((post == null) || (env == null)) return prop;
         if (!yacyNetwork.authentifyRequest(post, env)) return prop;
         
-        serverLog log = sb.getLog();
+        final serverLog log = sb.getLog();
 
         //int proxyPrefetchDepth = Integer.parseInt(env.getConfig("proxyPrefetchDepth", "0"));
         //int crawlingDepth = Integer.parseInt(env.getConfig("crawlingDepth", "0"));
 
         // request values
-        String iam        = post.get("iam", "");      // seed hash of requester
-        String youare     = post.get("youare", "");    // seed hash of the target peer, needed for network stability
+        final String iam        = post.get("iam", "");      // seed hash of requester
+        final String youare     = post.get("youare", "");    // seed hash of the target peer, needed for network stability
         //String process    = post.get("process", "");  // process type
-        String key        = post.get("key", "");      // transmission key
+        final String key        = post.get("key", "");      // transmission key
         //String receivedUrlhash    = post.get("urlhash", "");  // the url hash that has been crawled
-        String result     = post.get("result", "");   // the result; either "ok" or "fail"
-        String reason     = post.get("reason", "");   // the reason for that result
+        final String result     = post.get("result", "");   // the result; either "ok" or "fail"
+        final String reason     = post.get("reason", "");   // the reason for that result
         //String words      = post.get("wordh", "");    // priority word hashes
-        String propStr    = crypt.simpleDecode(post.get("lurlEntry", ""), key);
+        final String propStr    = crypt.simpleDecode(post.get("lurlEntry", ""), key);
         
         /*
          the result can have one of the following values:
@@ -112,14 +112,14 @@ public final class crawlReceipt {
     	}
         
         // generating a new loaded URL entry
-        indexURLReference entry = indexURLReference.importEntry(propStr);
+        final indexURLReference entry = indexURLReference.importEntry(propStr);
         if (entry == null) {
             log.logWarning("crawlReceipt: RECEIVED wrong RECEIPT (entry null) from peer " + iam + "\n\tURL properties: "+ propStr);
             prop.put("delay", "3600");
             return prop;
         }
         
-        indexURLReference.Components comp = entry.comp();
+        final indexURLReference.Components comp = entry.comp();
         if (comp.url() == null) {
             log.logWarning("crawlReceipt: RECEIVED wrong RECEIPT (url null) for hash " + entry.hash() + " from peer " + iam + "\n\tURL properties: "+ propStr);
             prop.put("delay", "3600");
@@ -127,7 +127,7 @@ public final class crawlReceipt {
         }
         
         // check if the entry is in our network domain
-        String urlRejectReason = sb.acceptURL(comp.url());
+        final String urlRejectReason = sb.acceptURL(comp.url());
         if (urlRejectReason != null) {
             log.logWarning("crawlReceipt: RECEIVED wrong RECEIPT (" + urlRejectReason + ") for hash " + entry.hash() + " from peer " + iam + "\n\tURL properties: "+ propStr);
             prop.put("delay", "9999");
@@ -144,14 +144,14 @@ public final class crawlReceipt {
             // ready for more
             prop.put("delay", "10");
             return prop;
-        } catch (IOException e) {
+        } catch (final IOException e) {
             e.printStackTrace();
             prop.put("delay", "3600");
             return prop;
         }
 
         sb.crawlQueues.delegatedURL.remove(entry.hash()); // the delegated work is transformed into an error case
-        ZURL.Entry ee = sb.crawlQueues.errorURL.newEntry(
+        final ZURL.Entry ee = sb.crawlQueues.errorURL.newEntry(
                 entry.toBalancerEntry(iam),
                 youare,
                 null,

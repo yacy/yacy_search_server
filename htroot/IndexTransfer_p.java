@@ -43,18 +43,18 @@ import de.anomic.yacy.yacySeed;
 
 public final class IndexTransfer_p {
     
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
         // return variable that accumulates replacements
-        plasmaSwitchboard sb = (plasmaSwitchboard) env;
-        serverObjects prop = new serverObjects();
+        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        final serverObjects prop = new serverObjects();
         
         if (post != null) {            
             if (post.containsKey("startIndexTransfer")) {                
-                yacySeed seed = sb.webIndex.seedDB.getConnected(post.get("hostHash", ""));                
+                final yacySeed seed = sb.webIndex.seedDB.getConnected(post.get("hostHash", ""));                
                 if (seed == null) {
                     prop.put("running_status","Disconnected peer");
                 } else {                    
-                    boolean deleteIndex = post.get("deleteIndex", "0").equals("1");
+                    final boolean deleteIndex = post.get("deleteIndex", "0").equals("1");
                     if(prop.containsKey("overwriteIP") && ! (prop.get("overwriteIP")).equals("")){
                         seed.setIP(prop.get("overwriteIP"));
                     }
@@ -79,9 +79,9 @@ public final class IndexTransfer_p {
         prop.putNum("ucount", sb.webIndex.countURL());
         prop.put("running",(sb.transferIdxThread==null) ? "0" : "1");
         if (sb.transferIdxThread != null) {
-            String[] status = sb.transferIdxThread.getStatus();
-            String[] range  = sb.transferIdxThread.getRange();
-            int[] chunk     = sb.transferIdxThread.getIndexCount();
+            final String[] status = sb.transferIdxThread.getStatus();
+            final String[] range  = sb.transferIdxThread.getRange();
+            final int[] chunk     = sb.transferIdxThread.getIndexCount();
             
             prop.put("running_selection.status",status[0]);
             prop.put("running_selection.twrange", range[0]);
@@ -111,8 +111,8 @@ public final class IndexTransfer_p {
         yacySeed seed;
         int hc = 0;
         if ((sb.webIndex.seedDB != null) && (sb.webIndex.seedDB.sizeConnected() > 0)) {
-            Iterator<yacySeed> e = sb.webIndex.peerActions.dhtAction.getAcceptRemoteIndexSeeds("------------");
-            TreeMap<String, String> hostList = new TreeMap<String, String>();
+            final Iterator<yacySeed> e = sb.webIndex.peerActions.dhtAction.getAcceptRemoteIndexSeeds("------------");
+            final TreeMap<String, String> hostList = new TreeMap<String, String>();
             while (e.hasNext()) {
                 seed = e.next();
                 if (seed != null) hostList.put(seed.get(yacySeed.NAME, "nameless"), seed.hash);
@@ -126,7 +126,7 @@ public final class IndexTransfer_p {
                     hc++;                
                     hostList.remove(hostName);
                 }
-            } catch (NoSuchElementException ex) {}
+            } catch (final NoSuchElementException ex) {}
             prop.put("running_hosts", hc);
         } else {
             prop.put("running_hosts", "0");

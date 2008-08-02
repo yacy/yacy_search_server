@@ -37,7 +37,7 @@ public class kelondroObjectSpace {
     private static TreeMap<Integer, Integer> aliveNow = new TreeMap<Integer, Integer>();
     //private static TreeMap aliveMax = new TreeMap();
     
-    private static void incAlive(int size) {
+    private static void incAlive(final int size) {
         final Integer s = new Integer(size);
         synchronized (aliveNow) {
             final Integer x = aliveNow.get(s);
@@ -45,7 +45,7 @@ public class kelondroObjectSpace {
         }
     }
     
-    private static void decAlive(int size) {
+    private static void decAlive(final int size) {
         final Integer s = new Integer(size);
         synchronized (aliveNow) {
             final Integer x = aliveNow.get(s);
@@ -53,11 +53,11 @@ public class kelondroObjectSpace {
         }
     }
     
-    public static byte[] alloc(int len) {
+    public static byte[] alloc(final int len) {
         if ((len < minSize) || (len > maxSize)) return new byte[len];
         incAlive(len);
         synchronized (objHeap) {
-            ArrayList<byte[]> buf = objHeap.get(new Integer(len));
+            final ArrayList<byte[]> buf = objHeap.get(new Integer(len));
             if ((buf == null) || (buf.size() == 0)) return new byte[len];
             return buf.remove(buf.size() - 1);
         }
@@ -91,9 +91,9 @@ public class kelondroObjectSpace {
         // creates a statistic output of this object space
         // the result is a mapping from Integer (chunk size) to Integer (number of counts)
         // and shows how many Objects are held in this space for usage
-        TreeMap<Integer, Integer> result = new TreeMap<Integer, Integer>();
+        final TreeMap<Integer, Integer> result = new TreeMap<Integer, Integer>();
         synchronized (objHeap) {
-            Iterator<Map.Entry<Integer, ArrayList<byte[]>>> i = objHeap.entrySet().iterator();
+            final Iterator<Map.Entry<Integer, ArrayList<byte[]>>> i = objHeap.entrySet().iterator();
             Map.Entry<Integer, ArrayList<byte[]>> entry;
             while (i.hasNext()) {
                 entry = i.next();

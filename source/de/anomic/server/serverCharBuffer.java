@@ -48,26 +48,26 @@ public final class serverCharBuffer extends Writer {
         offset = 0;
     }
     
-    public serverCharBuffer(int initLength) {
+    public serverCharBuffer(final int initLength) {
         this.buffer = new char[initLength];
         this.length = 0;
         this.offset = 0;
     }        
     
-    public serverCharBuffer(char[] bb) {
+    public serverCharBuffer(final char[] bb) {
         buffer = bb;
         length = bb.length;
         offset = 0;
     }
 
-    public serverCharBuffer(char[] bb, int initLength) {
+    public serverCharBuffer(final char[] bb, final int initLength) {
         this.buffer = new char[initLength];
         System.arraycopy(bb, 0, buffer, 0, bb.length);
         length = bb.length;
         offset = 0;
     }
     
-    public serverCharBuffer(char[] bb, int of, int le) {
+    public serverCharBuffer(final char[] bb, final int of, final int le) {
         if (of * 2 > bb.length) {
             buffer = new char[le];
             System.arraycopy(bb, of, buffer, 0, le);
@@ -80,13 +80,13 @@ public final class serverCharBuffer extends Writer {
         }
     }
 
-    public serverCharBuffer(serverCharBuffer bb) {
+    public serverCharBuffer(final serverCharBuffer bb) {
         buffer = bb.buffer;
         length = bb.length;
         offset = bb.offset;
     }
 
-    public serverCharBuffer(File f) throws IOException {
+    public serverCharBuffer(final File f) throws IOException {
         // initially fill the buffer with the content of a file
         if (f.length() > Integer.MAX_VALUE) throw new IOException("file is too large for buffering");
 
@@ -95,13 +95,13 @@ public final class serverCharBuffer extends Writer {
         offset = 0;
 
         try {
-            FileReader fr = new FileReader(f);
-            char[] temp = new char[256];
+            final FileReader fr = new FileReader(f);
+            final char[] temp = new char[256];
             int c;
             while ((c = fr.read(temp)) > 0) {
                 this.append(temp,0,c);
             }
-        } catch (FileNotFoundException e) {
+        } catch (final FileNotFoundException e) {
             throw new IOException("File not found: " + f.toString() + "; " + e.getMessage());
         }
     }
@@ -126,20 +126,20 @@ public final class serverCharBuffer extends Writer {
         offset = 0;
     }
 
-    public void write(int b) {
+    public void write(final int b) {
         write((char)b);
     }
     
-    public void write(char b) {
+    public void write(final char b) {
         if (offset + length + 1 > buffer.length) grow();
         buffer[offset + length++] = b;
     }
     
-    public void write(char[] bb) {
+    public void write(final char[] bb) {
         write(bb, 0, bb.length);
     }
     
-    public void write(char[] bb, int of, int le) {
+    public void write(final char[] bb, final int of, final int le) {
         while (offset + length + le > buffer.length) grow();
         System.arraycopy(bb, of, buffer, offset + length, le);
         length += le;
@@ -153,32 +153,32 @@ public final class serverCharBuffer extends Writer {
 //        return this;
 //    }
 
-    public serverCharBuffer append(int i) {
+    public serverCharBuffer append(final int i) {
         write((char) (i));
         return this;
     }
 
-    public serverCharBuffer append(char[] bb) {
+    public serverCharBuffer append(final char[] bb) {
         write(bb);
         return this;
     }
 
-    public serverCharBuffer append(char[] bb, int of, int le) {
+    public serverCharBuffer append(final char[] bb, final int of, final int le) {
         write(bb, of, le);
         return this;
     }
 
-    public serverCharBuffer append(String s) {
+    public serverCharBuffer append(final String s) {
         return append(s,0,s.length());
     }    
     
-    public serverCharBuffer append(String s, int off, int len) {
-        char[] temp = new char[len];
+    public serverCharBuffer append(final String s, final int off, final int len) {
+        final char[] temp = new char[len];
         s.getChars(off, (off + len), temp, 0);        
         return append(temp);
     }
     
-    public serverCharBuffer append(serverCharBuffer bb) {
+    public serverCharBuffer append(final serverCharBuffer bb) {
         return append(bb.buffer, bb.offset, bb.length);
     }
 
@@ -188,13 +188,13 @@ public final class serverCharBuffer extends Writer {
 //        return null;
 //    }
     
-    public char charAt(int pos) {
+    public char charAt(final int pos) {
         if (pos < 0) throw new IndexOutOfBoundsException();
         if (pos > length) throw new IndexOutOfBoundsException();
         return buffer[offset + pos];
     }
 
-    public void deleteCharAt(int pos) {
+    public void deleteCharAt(final int pos) {
         if (pos < 0) return;
         if (pos >= length) return;
         if (pos == length - 1) {
@@ -204,21 +204,21 @@ public final class serverCharBuffer extends Writer {
         }
     }
     
-    public int indexOf(char b) {
+    public int indexOf(final char b) {
         return indexOf(b, 0);
     }
 
-    public int indexOf(char[] bs) {
+    public int indexOf(final char[] bs) {
         return indexOf(bs, 0);
     }
 
-    public int indexOf(char b, int start) {
+    public int indexOf(final char b, final int start) {
         if (start >= length) return -1;
         for (int i = start; i < length; i++) if (buffer[offset + i] == b) return i;
         return -1;
     }
 
-    public int indexOf(char[] bs, int start) {
+    public int indexOf(final char[] bs, final int start) {
         if (start + bs.length > length) return -1;
         loop: for (int i = start; i <= length - bs.length; i++) {
             // first test only first char
@@ -235,12 +235,12 @@ public final class serverCharBuffer extends Writer {
         return -1;
     }
 
-    public int lastIndexOf(char b) {
+    public int lastIndexOf(final char b) {
         for (int i = length - 1; i >= 0; i--) if (buffer[offset + i] == b) return i;
         return -1;
     }
 
-    public boolean startsWith(char[] bs) {
+    public boolean startsWith(final char[] bs) {
         if (length < bs.length) return false;
         for (int i = 0; i < bs.length; i++) {
             if (buffer[offset + i] != bs[i]) return false;
@@ -252,20 +252,20 @@ public final class serverCharBuffer extends Writer {
         return getChars(0);
     }
 
-    public char[] getChars(int start) {
+    public char[] getChars(final int start) {
         return getChars(start, length);
     }
 
-    public char[] getChars(int start, int end) {
+    public char[] getChars(final int start, final int end) {
         // start is inclusive, end is exclusive
         if (end > length) throw new IndexOutOfBoundsException("getBytes: end > length");
         if (start > length) throw new IndexOutOfBoundsException("getBytes: start > length");
-        char[] tmp = new char[end - start];
+        final char[] tmp = new char[end - start];
         System.arraycopy(buffer, offset + start, tmp, 0, end - start);
         return tmp;
     }
 
-    public serverCharBuffer trim(int start) {
+    public serverCharBuffer trim(final int start) {
         // the end value is outside (+1) of the wanted target array
         if (start > length) throw new IndexOutOfBoundsException("trim: start > length");
         offset = offset + start;
@@ -273,7 +273,7 @@ public final class serverCharBuffer extends Writer {
         return this;
     }
 
-    public serverCharBuffer trim(int start, int end) {
+    public serverCharBuffer trim(final int start, final int end) {
         // the end value is outside (+1) of the wanted target array
         if (start > length) throw new IndexOutOfBoundsException("trim: start > length");
         if (end > length) throw new IndexOutOfBoundsException("trim: end > length");
@@ -292,7 +292,7 @@ public final class serverCharBuffer extends Writer {
         return trim(l, r);
     }
 
-    public boolean isWhitespace(boolean includeNonLetterBytes) {
+    public boolean isWhitespace(final boolean includeNonLetterBytes) {
         // returns true, if trim() would result in an empty serverByteBuffer
         if (includeNonLetterBytes) {
             char b;
@@ -306,7 +306,7 @@ public final class serverCharBuffer extends Writer {
         return true;
     }
     
-    public int whitespaceStart(boolean includeNonLetterBytes) {
+    public int whitespaceStart(final boolean includeNonLetterBytes) {
         // returns number of whitespace char at the beginning of text
         if (includeNonLetterBytes) {
             char b;
@@ -320,7 +320,7 @@ public final class serverCharBuffer extends Writer {
         return length;
     }
     
-    public int whitespaceEnd(boolean includeNonLetterBytes) {
+    public int whitespaceEnd(final boolean includeNonLetterBytes) {
         // returns position of whitespace at the end of text
         if (includeNonLetterBytes) {
             char b;
@@ -339,7 +339,7 @@ public final class serverCharBuffer extends Writer {
         return new String(buffer, offset, length);
     }
 
-    public String toString(int left, int rightbound) {
+    public String toString(final int left, final int rightbound) {
         return new String(buffer, offset + left, rightbound - left);
     }
 
@@ -348,7 +348,7 @@ public final class serverCharBuffer extends Writer {
         int pos = offset;
         int start;
         String key;
-        Properties p = new Properties();
+        final Properties p = new Properties();
         // eat up spaces at beginning
         while ((pos < length) && (buffer[pos] <= 32)) pos++;
         while (pos < length) {
@@ -395,11 +395,11 @@ public final class serverCharBuffer extends Writer {
         return p;
     }
     
-    public static boolean equals(char[] buffer, char[] pattern) {
+    public static boolean equals(final char[] buffer, final char[] pattern) {
         return equals(buffer, 0, pattern);
     }
     
-    public static boolean equals(char[] buffer, int offset, char[] pattern) {
+    public static boolean equals(final char[] buffer, final int offset, final char[] pattern) {
         // compares two char arrays: true, if pattern appears completely at offset position
         if (buffer.length < offset + pattern.length) return false;
         for (int i = 0; i < pattern.length; i++) if (buffer[offset + i] != pattern[i]) return false;
@@ -411,20 +411,20 @@ public final class serverCharBuffer extends Writer {
         this.offset = 0;
     }        
     
-    public void reset(int newSize) {  
+    public void reset(final int newSize) {  
         this.resize(newSize);
         this.reset();
     }         
      
-    public void resize(int newSize) {
+    public void resize(final int newSize) {
         if(newSize < 0) throw new IllegalArgumentException("Illegal array size: " + newSize);
-        char[] v = new char[newSize];
+        final char[] v = new char[newSize];
         System.arraycopy(this.buffer,0,v,0,newSize > this.buffer.length ? this.buffer.length : newSize);
         this.buffer = v;          
     }
     
     public char toCharArray()[] {
-        char[] newbuf = new char[this.length];
+        final char[] newbuf = new char[this.length];
         System.arraycopy(this.buffer, 0, newbuf, 0, this.length);
         return newbuf;
     }

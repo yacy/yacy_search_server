@@ -47,28 +47,28 @@ public class kelondroBLOBTree implements kelondroBLOB {
     private static final int EcoFSBufferSize = 20;
     
     protected int keylen;
-    private int reclen;
+    private final int reclen;
     //private int segmentCount;
-    private char fillChar;
-    private kelondroIndex index;
+    private final char fillChar;
+    private final kelondroIndex index;
     private kelondroObjectBuffer buffer;
-    private kelondroRow rowdef;
+    private final kelondroRow rowdef;
     
-    public kelondroBLOBTree(File file, boolean useNodeCache, boolean useObjectCache, int key,
-            int nodesize, char fillChar, kelondroByteOrder objectOrder, boolean usetree, boolean writebuffer, boolean resetOnFail) {
+    public kelondroBLOBTree(final File file, final boolean useNodeCache, final boolean useObjectCache, final int key,
+            final int nodesize, final char fillChar, final kelondroByteOrder objectOrder, final boolean usetree, final boolean writebuffer, final boolean resetOnFail) {
         // creates or opens a dynamic tree
         rowdef = new kelondroRow("byte[] key-" + (key + counterlen) + ", byte[] node-" + nodesize, objectOrder, 0);
         kelondroIndex fbi;
         if (usetree) {
 			try {
 				fbi = new kelondroTree(file, useNodeCache, 0, rowdef, 1, 8);
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				e.printStackTrace();
 				if (resetOnFail) {
 					file.delete();
 					try {
 						fbi = new kelondroTree(file, useNodeCache, -1, rowdef, 1, 8);
-					} catch (IOException e1) {
+					} catch (final IOException e1) {
 						e1.printStackTrace();
 						throw new kelondroException(e.getMessage());
 					}
@@ -97,7 +97,7 @@ public class kelondroBLOBTree implements kelondroBLOB {
         buffer = new kelondroObjectBuffer(file.toString());
     }
     
-    public static final void delete(File file) {
+    public static final void delete(final File file) {
         if (file.isFile()) {
             file.delete();
             if (file.exists()) file.deleteOnExit();
@@ -107,7 +107,7 @@ public class kelondroBLOBTree implements kelondroBLOB {
     }
     
     public void clear() throws IOException {
-    	String name = this.index.filename();
+    	final String name = this.index.filename();
     	this.index.clear();
     	this.buffer = new kelondroObjectBuffer(name);
     }
@@ -120,20 +120,20 @@ public class kelondroBLOBTree implements kelondroBLOB {
         return index.size();
     }
     
-    private static String counter(int c) {
+    private static String counter(final int c) {
         String s = Integer.toHexString(c);
         while (s.length() < counterlen) s = "0" + s;
         return s;
     }
 
-    private byte[] elementKey(String key, int record) {
+    private byte[] elementKey(String key, final int record) {
         if (key.length() > keylen) throw new RuntimeException("key len (" + key.length() + ") out of limit (" + keylen + "): '" + key + "'");
         while (key.length() < keylen) key = key + fillChar;
         key = key + counter(record);
         return key.getBytes();
     }
 
-    String origKey(byte[] rawKey) {
+    String origKey(final byte[] rawKey) {
         int n = keylen - 1;
         if (n >= rawKey.length) n = rawKey.length - 1;
         while ((n > 0) && (rawKey[n] == (byte) fillChar)) n--;
@@ -145,12 +145,12 @@ public class kelondroBLOBTree implements kelondroBLOB {
         kelondroCloneableIterator<kelondroRow.Entry> ri;
         String nextKey;
 
-        public keyIterator(kelondroCloneableIterator<kelondroRow.Entry> iter) {
+        public keyIterator(final kelondroCloneableIterator<kelondroRow.Entry> iter) {
             ri = iter;
             nextKey = n();
         }
 
-		public keyIterator clone(Object modifier) {
+		public keyIterator clone(final Object modifier) {
 			return new keyIterator(ri.clone(modifier));
 		}
 
@@ -159,7 +159,7 @@ public class kelondroBLOBTree implements kelondroBLOB {
         }
 
         public byte[] next() {
-            String result = nextKey;
+            final String result = nextKey;
             nextKey = n();
             return origKey(result.getBytes()).getBytes();
         }
@@ -183,7 +183,7 @@ public class kelondroBLOBTree implements kelondroBLOB {
                 v = new String(g, keylen, counterlen);
                 try {
                     c = Integer.parseInt(v, 16);
-                } catch (NumberFormatException e) {
+                } catch (final NumberFormatException e) {
                     c = -1;
                 }
                 if (c == 0) return k;
@@ -193,32 +193,32 @@ public class kelondroBLOBTree implements kelondroBLOB {
 
     }
 
-    public synchronized kelondroCloneableIterator<byte[]> keys(boolean up, boolean rotating) throws IOException {
+    public synchronized kelondroCloneableIterator<byte[]> keys(final boolean up, final boolean rotating) throws IOException {
         // iterates only the keys of the Nodes
         // enumerated objects are of type String
-        keyIterator i = new keyIterator(index.rows(up, null));
+        final keyIterator i = new keyIterator(index.rows(up, null));
         if (rotating) return new kelondroRotateIterator<byte[]>(i, null, index.size()); else return i;
     }
 
-    public synchronized kelondroCloneableIterator<byte[]> keys(boolean up, byte[] firstKey) throws IOException {
+    public synchronized kelondroCloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) throws IOException {
         return new keyIterator(index.rows(up, firstKey));
     }
     
-    private byte[] getValueCached(byte[] key) throws IOException {
+    private byte[] getValueCached(final byte[] key) throws IOException {
 
         // read from buffer
-        byte[] buffered = (byte[]) buffer.get(key);
+        final byte[] buffered = (byte[]) buffer.get(key);
         if (buffered != null) return buffered;
         
         // read from db
-        kelondroRow.Entry result = index.get(key);
+        final kelondroRow.Entry result = index.get(key);
         if (result == null) return null;
 
         // return result
         return result.getColBytes(1);
     }
 
-    private synchronized void setValueCached(byte[] key, byte[] value) throws IOException {
+    private synchronized void setValueCached(final byte[] key, final byte[] value) throws IOException {
         // update storage
         synchronized (this) {
             index.put(rowdef.newEntry(new byte[][]{key, value}));
@@ -226,25 +226,25 @@ public class kelondroBLOBTree implements kelondroBLOB {
         }
     }
 
-    private synchronized int get(String key, int pos) throws IOException {
-        int reccnt = pos / reclen;
+    private synchronized int get(final String key, final int pos) throws IOException {
+        final int reccnt = pos / reclen;
         // read within a single record
-        byte[] buf = getValueCached(elementKey(key, reccnt));
+        final byte[] buf = getValueCached(elementKey(key, reccnt));
         if (buf == null) return -1;
-        int recpos = pos % reclen;
+        final int recpos = pos % reclen;
         if (buf.length <= recpos) return -1;
         return buf[recpos] & 0xFF;
     }
     
-    public synchronized byte[] get(byte[] key) throws IOException {
-        kelondroRA ra = getRA(new String(key));
+    public synchronized byte[] get(final byte[] key) throws IOException {
+        final kelondroRA ra = getRA(new String(key));
         if (ra == null) return null;
         return ra.readFully();
     }
     
-    private synchronized byte[] get(String key, int pos, int len) throws IOException {
-        int recpos = pos % reclen;
-        int reccnt = pos / reclen;
+    private synchronized byte[] get(final String key, final int pos, final int len) throws IOException {
+        final int recpos = pos % reclen;
+        final int reccnt = pos / reclen;
         byte[] segment1;
         // read first within a single record
         if ((recpos == 0) && (reclen == len)) {
@@ -277,22 +277,22 @@ public class kelondroBLOBTree implements kelondroBLOB {
         // segment 1 in record <reccnt> : start = recpos, length = reclen - recpos
         // segment 2 in record <reccnt>+1: start = 0, length = len - reclen + recpos
         // recursively step further
-        byte[] segment2 = get(key, pos + segment1.length, len - segment1.length);
+        final byte[] segment2 = get(key, pos + segment1.length, len - segment1.length);
         if (segment2 == null) return segment1;
         // now combine the two segments into the result
-        byte[] result = new byte[segment1.length + segment2.length];
+        final byte[] result = new byte[segment1.length + segment2.length];
         System.arraycopy(segment1, 0, result, 0, segment1.length);
         System.arraycopy(segment2, 0, result, segment1.length, segment2.length);
         return result;
     }
 
-    public synchronized void put(byte[] key, byte[] b) throws IOException {
+    public synchronized void put(final byte[] key, final byte[] b) throws IOException {
         put(new String(key), 0, b, 0, b.length);
     }
     
-    private synchronized void put(String key, int pos, byte[] b, int off, int len) throws IOException {
-        int recpos = pos % reclen;
-        int reccnt = pos / reclen;
+    private synchronized void put(final String key, final int pos, final byte[] b, final int off, final int len) throws IOException {
+        final int recpos = pos % reclen;
+        final int reccnt = pos / reclen;
         byte[] buf;
         // first write current record
         if ((recpos == 0) && (reclen == len)) {
@@ -327,9 +327,9 @@ public class kelondroBLOBTree implements kelondroBLOB {
         }
     }
 
-    private synchronized void put(String key, int pos, int b) throws IOException {
-        int recpos = pos % reclen;
-        int reccnt = pos / reclen;
+    private synchronized void put(final String key, final int pos, final int b) throws IOException {
+        final int recpos = pos % reclen;
+        final int reccnt = pos / reclen;
         byte[] buf;
         // first write current record
         buf = getValueCached(elementKey(key, reccnt));
@@ -345,7 +345,7 @@ public class kelondroBLOBTree implements kelondroBLOB {
         setValueCached(elementKey(key, reccnt), buf);
     }
 
-    public synchronized void remove(byte[] key) throws IOException {
+    public synchronized void remove(final byte[] key) throws IOException {
         // remove value in cache and tree
         if (key == null) return;
         int recpos = 0;
@@ -358,11 +358,11 @@ public class kelondroBLOBTree implements kelondroBLOB {
         //segmentCount--; writeSegmentCount();
     }
 
-    public synchronized boolean has(byte[] key) throws IOException {
+    public synchronized boolean has(final byte[] key) throws IOException {
         return (key != null) && (getValueCached(elementKey(new String(key), 0)) != null);
     }
 
-    public synchronized kelondroRA getRA(String filekey) {
+    public synchronized kelondroRA getRA(final String filekey) {
         // this returns always a RARecord, even if no existed bevore
         //return new kelondroBufferedRA(new RARecord(filekey), 512, 0);
         return new RARecord(filekey);
@@ -374,7 +374,7 @@ public class kelondroBLOBTree implements kelondroBLOB {
 
         String filekey;
 
-        public RARecord(String filekey) {
+        public RARecord(final String filekey) {
             this.filekey = filekey;
         }
 
@@ -390,13 +390,13 @@ public class kelondroBLOBTree implements kelondroBLOB {
             return get(filekey, seekpos++);
         }
 
-        public void write(int i) throws IOException {
+        public void write(final int i) throws IOException {
             put(filekey, seekpos++, i);
         }
 
-        public int read(byte[] b, int off, int len) throws IOException {
+        public int read(final byte[] b, final int off, final int len) throws IOException {
             int l = Math.min(b.length - off, len);
-            byte[] buf = get(filekey, seekpos, l);
+            final byte[] buf = get(filekey, seekpos, l);
             if (buf == null) return -1;
             l = Math.min(buf.length, l);
             System.arraycopy(buf, 0, b, off, l);
@@ -404,12 +404,12 @@ public class kelondroBLOBTree implements kelondroBLOB {
             return l;
         }
 
-        public void write(byte[] b, int off, int len) throws IOException {
+        public void write(final byte[] b, final int off, final int len) throws IOException {
             put(filekey, seekpos, b, off, len);
             seekpos += len;
         }
 
-        public void seek(long pos) throws IOException {
+        public void seek(final long pos) throws IOException {
             seekpos = (int) pos;
         }
 
@@ -423,7 +423,7 @@ public class kelondroBLOBTree implements kelondroBLOB {
         index.close();
     }
 
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         // test app for DB functions
         // reads/writes files to a database table
         // arguments:
@@ -432,25 +432,25 @@ public class kelondroBLOBTree implements kelondroBLOB {
         if (args.length == 1) {
             // open a db and list keys
             try {
-                kelondroBLOB kd = new kelondroBLOBTree(new File(args[0]), true, true, 4 ,100, '_', kelondroNaturalOrder.naturalOrder, false, false, true);
+                final kelondroBLOB kd = new kelondroBLOBTree(new File(args[0]), true, true, 4 ,100, '_', kelondroNaturalOrder.naturalOrder, false, false, true);
                 System.out.println(kd.size() + " elements in DB");
-                Iterator<byte[]> i = kd.keys(true, false);
+                final Iterator<byte[]> i = kd.keys(true, false);
                 while (i.hasNext())
                     System.out.println(new String(i.next()));
                 kd.close();
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 e.printStackTrace();
             }
         }
     }
     
-    public static int countElements(kelondroBLOBTree t) {
+    public static int countElements(final kelondroBLOBTree t) {
         int count = 0;
         try {
-            Iterator<byte[]> iter = t.keys(true, false);
+            final Iterator<byte[]> iter = t.keys(true, false);
             while (iter.hasNext()) {count++; if (iter.next() == null) System.out.println("ERROR! null element found");}
             return count;
-        } catch (IOException e) {
+        } catch (final IOException e) {
             return -1;
         }
     }

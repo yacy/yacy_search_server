@@ -59,16 +59,16 @@ public class yacysearchitem {
     private static final int urllength = 120;
     private static final int MAX_TOPWORDS = 24;
     
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final serverObjects prop = new serverObjects();
         
-        String eventID = post.get("eventID", "");
-        boolean bottomline = post.get("bottomline", "false").equals("true");
-        boolean rss = post.get("rss", "false").equals("true");
-        boolean authenticated = sb.adminAuthenticated(header) >= 2;
-        int item = post.getInt("item", -1);
-        boolean auth = ((String) header.get(httpHeader.CONNECTION_PROP_CLIENTIP, "")).equals("localhost") || sb.verifyAuthentication(header, true);
+        final String eventID = post.get("eventID", "");
+        final boolean bottomline = post.get("bottomline", "false").equals("true");
+        final boolean rss = post.get("rss", "false").equals("true");
+        final boolean authenticated = sb.adminAuthenticated(header) >= 2;
+        final int item = post.getInt("item", -1);
+        final boolean auth = ((String) header.get(httpHeader.CONNECTION_PROP_CLIENTIP, "")).equals("localhost") || sb.verifyAuthentication(header, true);
         
         // default settings for blank item
         prop.put("content", "0");
@@ -78,16 +78,16 @@ public class yacysearchitem {
         prop.put("dynamic", "0");
         
         // find search event
-        plasmaSearchEvent theSearch = plasmaSearchEvent.getEvent(eventID);
+        final plasmaSearchEvent theSearch = plasmaSearchEvent.getEvent(eventID);
         if (theSearch == null) {
             // the event does not exist, show empty page
             return prop;
         }
-        plasmaSearchQuery theQuery = theSearch.getQuery();
+        final plasmaSearchQuery theQuery = theSearch.getQuery();
         
         // dynamically update count values
         if (!rss) {
-            int offset = theQuery.neededResults() - theQuery.displayResults() + 1;
+            final int offset = theQuery.neededResults() - theQuery.displayResults() + 1;
             prop.put("dynamic_offset", offset);
             prop.put("dynamic_itemscount", (item < 0) ? theQuery.neededResults() : item + 1);
             prop.put("dynamic_totalcount", yFormatter.number(theSearch.getRankingResult().getLocalResourceSize() + theSearch.getRankingResult().getRemoteResourceSize(), !rss));
@@ -105,7 +105,7 @@ public class yacysearchitem {
                 // get the topwords
                 final TreeSet<String> topwords = new TreeSet<String>(kelondroNaturalOrder.naturalComparator);
                 String tmp = "";
-                Iterator<String> i = references.iterator();
+                final Iterator<String> i = references.iterator();
                 while (i.hasNext()) {
                     tmp = i.next();
                     if (tmp.matches("[a-z]+")) {
@@ -175,14 +175,14 @@ public class yacysearchitem {
             // text search
 
             // generate result object
-            plasmaSearchEvent.ResultEntry result = theSearch.oneResult(item);
+            final plasmaSearchEvent.ResultEntry result = theSearch.oneResult(item);
             if (result == null) return prop; // no content
                 
             if (rss) {
                 // text search for rss output
                 prop.put("rss", "1"); // switch on specific content
                 prop.putHTML("rss_title", result.title(), true);
-                plasmaSnippetCache.TextSnippet snippet = result.textSnippet();
+                final plasmaSnippetCache.TextSnippet snippet = result.textSnippet();
                 prop.putHTML("rss_description", (snippet == null) ? "" : snippet.getLineRaw(), true);
                 prop.putHTML("rss_link", result.urlstring(), true);
                 prop.put("rss_urlhash", result.hash());
@@ -199,11 +199,11 @@ public class yacysearchitem {
             prop.putHTML("content_description", result.title());
             prop.put("content_url", result.urlstring());
         
-            int port=result.url().getPort();
+            final int port=result.url().getPort();
             yacyURL faviconURL;
             try {
                 faviconURL = new yacyURL(result.url().getProtocol() + "://" + result.url().getHost() + ((port != -1) ? (":" + String.valueOf(port)) : "") + "/favicon.ico", null);
-            } catch (MalformedURLException e1) {
+            } catch (final MalformedURLException e1) {
                 faviconURL = null;
             }
         
@@ -215,16 +215,16 @@ public class yacysearchitem {
             prop.put("content_ybr", plasmaSearchRankingProcess.ybr(result.hash()));
             prop.putNum("content_size", result.filesize());
         
-            TreeSet<String>[] query = theQuery.queryWords();
+            final TreeSet<String>[] query = theQuery.queryWords();
             yacyURL wordURL = null;
             try {
                 prop.putHTML("content_words", URLEncoder.encode(query[0].toString(),"UTF-8"));
-            } catch (UnsupportedEncodingException e) {}
+            } catch (final UnsupportedEncodingException e) {}
             prop.putHTML("content_former", theQuery.queryString);
             prop.put("content_rankingprops", result.word().toPropertyForm() + ", domLengthEstimated=" + yacyURL.domLengthEstimation(result.hash()) +
                     ((yacyURL.probablyRootURL(result.hash())) ? ", probablyRootURL" : "") + 
                     (((wordURL = yacyURL.probablyWordURL(result.hash(), query[0])) != null) ? ", probablyWordURL=" + wordURL.toNormalform(false, true) : ""));
-            plasmaSnippetCache.TextSnippet snippet = result.textSnippet();
+            final plasmaSnippetCache.TextSnippet snippet = result.textSnippet();
             prop.put("content_snippet", (snippet == null) ? "" : snippet.getLineMarked(theQuery.queryHashes));
             serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(theQuery.id(true), plasmaSearchEvent.FINALIZATION + "-" + item, 0, 0));
             
@@ -235,7 +235,7 @@ public class yacysearchitem {
             // image search; shows thumbnails
 
             prop.put("content", theQuery.contentdom + 1); // switch on specific content
-            plasmaSnippetCache.MediaSnippet ms = theSearch.oneImage(item);
+            final plasmaSnippetCache.MediaSnippet ms = theSearch.oneImage(item);
             if (ms == null) {
                 prop.put("content_items", "0");
             } else {
@@ -257,11 +257,11 @@ public class yacysearchitem {
             // any other media content
 
             // generate result object
-            plasmaSearchEvent.ResultEntry result = theSearch.oneResult(item);
+            final plasmaSearchEvent.ResultEntry result = theSearch.oneResult(item);
             if (result == null) return prop; // no content
             
             prop.put("content", theQuery.contentdom + 1); // switch on specific content
-            ArrayList<plasmaSnippetCache.MediaSnippet> media = result.mediaSnippets();
+            final ArrayList<plasmaSnippetCache.MediaSnippet> media = result.mediaSnippets();
             if (item == 0) col = true;
             if (media != null) {
                 plasmaSnippetCache.MediaSnippet ms;
@@ -285,9 +285,9 @@ public class yacysearchitem {
         return prop;
     }
     
-    private static String shorten(String s, int length) {
+    private static String shorten(final String s, final int length) {
         if (s.length() <= length) return s;
-        int p = s.lastIndexOf('.');
+        final int p = s.lastIndexOf('.');
         if (p < 0) return s.substring(0, length - 3) + "...";
         return s.substring(0, length - (s.length() - p) - 3) + "..." + s.substring(p);
     }

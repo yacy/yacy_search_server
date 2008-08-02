@@ -52,52 +52,52 @@ public final class ConsoleOutErrHandler extends Handler{
      * Get any configuration properties set
      */
     private void configure() {
-        LogManager manager = LogManager.getLogManager();
-        String className = getClass().getName();
+        final LogManager manager = LogManager.getLogManager();
+        final String className = getClass().getName();
         
-        String level = manager.getProperty(className + ".level");
+        final String level = manager.getProperty(className + ".level");
         setLevel((level == null) ? Level.INFO : Level.parse(level));
         
-        Level levelStdOut = parseLevel(manager.getProperty(className + ".levelStdOut"));
-        Level levelSplit = parseLevel(manager.getProperty(className + ".levelSplit"));
-        Level levelStdErr = parseLevel(manager.getProperty(className + ".levelStdErr"));
+        final Level levelStdOut = parseLevel(manager.getProperty(className + ".levelStdOut"));
+        final Level levelSplit = parseLevel(manager.getProperty(className + ".levelSplit"));
+        final Level levelStdErr = parseLevel(manager.getProperty(className + ".levelStdErr"));
         setLevels(levelStdOut,levelSplit,levelStdErr);
         
-        String filter = manager.getProperty(className + ".filter");
+        final String filter = manager.getProperty(className + ".filter");
         setFilter(makeFilter(filter));
         
-        String formatter = manager.getProperty(className + ".formatter");
+        final String formatter = manager.getProperty(className + ".formatter");
         setFormatter(makeFormatter(formatter));
         
-        String encoding = manager.getProperty(className + ".encoding");
+        final String encoding = manager.getProperty(className + ".encoding");
         try {
             this.stdOutHandler.setEncoding(encoding);
             this.stdErrHandler.setEncoding(encoding);
-        } catch (UnsupportedEncodingException e) {
+        } catch (final UnsupportedEncodingException e) {
             e.printStackTrace();
         }
         
-        String ignoreCtrlChrStr = manager.getProperty(className + ".ignoreCtrlChr");
+        final String ignoreCtrlChrStr = manager.getProperty(className + ".ignoreCtrlChr");
         this.ignoreCtrlChr = (ignoreCtrlChrStr==null)?false:ignoreCtrlChrStr.equalsIgnoreCase("true");
         
     }    
     
-    private Level parseLevel(String levelName) {
+    private Level parseLevel(final String levelName) {
         try {
             return (levelName == null) ? Level.INFO : Level.parse(levelName);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             return Level.ALL;
         }
     }
     
-    private Filter makeFilter(String name) {
+    private Filter makeFilter(final String name) {
         if (name == null) return null;
         
         Filter f = null;
         try {
-            Class<?> c = Class.forName(name);
+            final Class<?> c = Class.forName(name);
             f = (Filter)c.newInstance();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             if (name != null) {
                 System.err.println("Unable to load filter: " + name);
             }
@@ -105,21 +105,21 @@ public final class ConsoleOutErrHandler extends Handler{
         return f;
     }    
     
-    private Formatter makeFormatter(String name) {
+    private Formatter makeFormatter(final String name) {
         if (name == null) return null;
         
         Formatter f = null;
         try {
-            Class<?> c = Class.forName(name);
+            final Class<?> c = Class.forName(name);
             f = (Formatter)c.newInstance();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             f = new SimpleFormatter();
         }
         return f;
     }    
     
     
-    public void publish(LogRecord record) {
+    public void publish(final LogRecord record) {
         if (!isLoggable(record)) return;
         
         if (this.ignoreCtrlChr) {
@@ -147,34 +147,34 @@ public final class ConsoleOutErrHandler extends Handler{
         this.stdErrHandler.close();
     }
     
-    public synchronized void setLevel(Level newLevel) throws SecurityException {
+    public synchronized void setLevel(final Level newLevel) throws SecurityException {
         super.setLevel(newLevel);
     }
     
-    public void setLevels(Level stdOutLevel, Level splitLevel, Level stdErrLevel) throws SecurityException {
+    public void setLevels(final Level stdOutLevel, final Level splitLevel, final Level stdErrLevel) throws SecurityException {
         this.stdOutHandler.setLevel(stdOutLevel);
         this.splitLevel = splitLevel;
         this.stdErrHandler.setLevel(stdErrLevel);
     }
     
-    public void setFormatter(Formatter newFormatter) throws SecurityException {
+    public void setFormatter(final Formatter newFormatter) throws SecurityException {
         super.setFormatter(newFormatter);
         if (newFormatter == null) return;
         try {
             this.stdOutHandler.setFormatter(newFormatter.getClass().newInstance());
             this.stdErrHandler.setFormatter(newFormatter.getClass().newInstance());
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new SecurityException(e.getMessage());
         }
     }
 
-    public void setFilter(Filter newFilter) throws SecurityException {
+    public void setFilter(final Filter newFilter) throws SecurityException {
         super.setFilter(newFilter);
         if (newFilter == null) return;
         try {
             this.stdOutHandler.setFilter(newFilter.getClass().newInstance());
             this.stdErrHandler.setFilter(newFilter.getClass().newInstance());
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new SecurityException(e.getMessage());
         }
     }

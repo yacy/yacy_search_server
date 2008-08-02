@@ -42,10 +42,10 @@ import java.util.Enumeration;
 
 public class PKCS12Tool {
 
-    private KeyStore kspkcs12;
-    private String kspkcs12Pass;
+    private final KeyStore kspkcs12;
+    private final String kspkcs12Pass;
     
-    public PKCS12Tool(String pkcs12FileName, String pkcs12Pwd) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, FileNotFoundException, IOException {
+    public PKCS12Tool(final String pkcs12FileName, final String pkcs12Pwd) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, FileNotFoundException, IOException {
         if (pkcs12FileName == null) throw new NullPointerException();
         this.kspkcs12Pass = pkcs12Pwd;
     
@@ -53,7 +53,7 @@ public class PKCS12Tool {
         this.kspkcs12 = KeyStore.getInstance("PKCS12");
         
         // load pkcs12 file into keystore object
-        FileInputStream fileIn = new FileInputStream(pkcs12FileName);
+        final FileInputStream fileIn = new FileInputStream(pkcs12FileName);
         this.kspkcs12.load(fileIn,(pkcs12Pwd!=null)?pkcs12Pwd.toCharArray():null);
         
         // close stream
@@ -65,19 +65,19 @@ public class PKCS12Tool {
     }
     
     public void printAliases() throws KeyStoreException {
-        Enumeration<String> aliases = aliases();
+        final Enumeration<String> aliases = aliases();
         while (aliases.hasMoreElements()) {
             System.out.println(aliases.nextElement());
         }    
     }
     
-    public void importToJKS(String jksName, String jksPassword) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException, UnrecoverableKeyException {
+    public void importToJKS(final String jksName, final String jksPassword) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException, UnrecoverableKeyException {
         // creating java keystore
-        KeyStore jks=KeyStore.getInstance("JKS");
+        final KeyStore jks=KeyStore.getInstance("JKS");
         
         // loading keystore from file        
         FileInputStream jksFileIn = null;
-        File jksFile = new File(jksName);
+        final File jksFile = new File(jksName);
                 
         if (jksFile.exists()) {
             System.err.println("Loading java keystore from file '" + jksFile + "'");
@@ -88,17 +88,17 @@ public class PKCS12Tool {
         jks.load(jksFileIn,(jksPassword!=null)?jksPassword.toCharArray():null);
         if (jksFileIn != null) jksFileIn.close();
          
-        Enumeration<String> pkcs12Aliases = aliases();
+        final Enumeration<String> pkcs12Aliases = aliases();
         while (pkcs12Aliases.hasMoreElements()) {
-           String strAlias = pkcs12Aliases.nextElement();
+           final String strAlias = pkcs12Aliases.nextElement();
            System.err.println("Importing Alias '" + strAlias + "'");
 
            if (this.kspkcs12.isKeyEntry(strAlias)) {
               System.err.println("- Alias has key");
-              Key key = this.kspkcs12.getKey(strAlias, (this.kspkcs12Pass!=null)?this.kspkcs12Pass.toCharArray():null);
+              final Key key = this.kspkcs12.getKey(strAlias, (this.kspkcs12Pass!=null)?this.kspkcs12Pass.toCharArray():null);
               System.err.println("- Alias key imported");
 
-              Certificate[] chain = this.kspkcs12.getCertificateChain(strAlias);
+              final Certificate[] chain = this.kspkcs12.getCertificateChain(strAlias);
               System.err.println("- Alias certificate chain size: " + chain.length);
 
               jks.setKeyEntry(strAlias, key, (jksPassword!=null)?jksPassword.toCharArray():null, chain);
@@ -107,7 +107,7 @@ public class PKCS12Tool {
         
         // storing jdk into file
         System.err.print("Storing java keystore");
-        FileOutputStream jksFileOut = new FileOutputStream(jksName);
+        final FileOutputStream jksFileOut = new FileOutputStream(jksName);
         jks.store(jksFileOut,(jksPassword!=null)?jksPassword.toCharArray():null);
         jksFileOut.close();
         System.err.print("Import finished.");
@@ -116,8 +116,8 @@ public class PKCS12Tool {
     /**
      * @param args
      */
-    public static void main(String[] args) throws Exception {
-        PKCS12Tool pkcs12 = new PKCS12Tool("c:/temp/keystore.pkcs12","test");
+    public static void main(final String[] args) throws Exception {
+        final PKCS12Tool pkcs12 = new PKCS12Tool("c:/temp/keystore.pkcs12","test");
         //pkcs12.printAliases();
         pkcs12.importToJKS("c:/temp/jks.ks", "test");
    }

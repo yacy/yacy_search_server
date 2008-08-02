@@ -82,36 +82,36 @@ public class xlsParser extends AbstractParser implements Parser, HSSFListener {
      * parses the source documents and returns a plasmaParserDocument containing
      * all extracted information about the parsed document
      */ 
-    public plasmaParserDocument parse(yacyURL location, String mimeType,
-            String charset, InputStream source) throws ParserException,
+    public plasmaParserDocument parse(final yacyURL location, final String mimeType,
+            final String charset, final InputStream source) throws ParserException,
             InterruptedException {
         try {
             //generate new StringBuffer for parsing
             sbFoundStrings = new StringBuffer();
             
             //create a new org.apache.poi.poifs.filesystem.Filesystem
-            POIFSFileSystem poifs = new POIFSFileSystem(source);
+            final POIFSFileSystem poifs = new POIFSFileSystem(source);
             //get the Workbook (excel part) stream in a InputStream
-            InputStream din = poifs.createDocumentInputStream("Workbook");
+            final InputStream din = poifs.createDocumentInputStream("Workbook");
             //construct out HSSFRequest object
-            HSSFRequest req = new HSSFRequest();
+            final HSSFRequest req = new HSSFRequest();
             //lazy listen for ALL records with the listener shown above
             req.addListenerForAllRecords(this);
             //create our event factory
-            HSSFEventFactory factory = new HSSFEventFactory();
+            final HSSFEventFactory factory = new HSSFEventFactory();
             //process our events based on the document input stream
             factory.processEvents(req, din);
             //close our document input stream (don't want to leak these!)
             din.close();
             
             //now the parsed strings are in the StringBuffer, now convert them to a String
-            String contents = sbFoundStrings.toString();
+            final String contents = sbFoundStrings.toString();
             
             /*
              * create the plasmaParserDocument for the database
              * and set shortText and bodyText properly
              */
-            plasmaParserDocument theDoc = new plasmaParserDocument(
+            final plasmaParserDocument theDoc = new plasmaParserDocument(
                     location,
                     mimeType,
                     "UTF-8",
@@ -128,13 +128,13 @@ public class xlsParser extends AbstractParser implements Parser, HSSFListener {
                     null,
                     null);
             return theDoc;
-        } catch (Exception e) { 
+        } catch (final Exception e) { 
             if (e instanceof InterruptedException) throw (InterruptedException) e;
 
             /*
              * an unexpected error occurred, log it and throw a ParserException
              */            
-            String errorMsg = "Unable to parse the xls document '" + location + "':" + e.getMessage();
+            final String errorMsg = "Unable to parse the xls document '" + location + "':" + e.getMessage();
             this.theLogger.logSevere(errorMsg);            
             throw new ParserException(errorMsg, location);
         } finally {
@@ -151,10 +151,10 @@ public class xlsParser extends AbstractParser implements Parser, HSSFListener {
         super.reset();
     }
 
-    public void processRecord(Record record) {
+    public void processRecord(final Record record) {
         switch (record.getSid()){
             case NumberRecord.sid: {
-                NumberRecord numrec = (NumberRecord) record;
+                final NumberRecord numrec = (NumberRecord) record;
                 sbFoundStrings.append(numrec.getValue());
                 break;
             }
@@ -171,7 +171,7 @@ public class xlsParser extends AbstractParser implements Parser, HSSFListener {
             }
             
             case LabelSSTRecord.sid: {
-                LabelSSTRecord lsrec = (LabelSSTRecord)record;
+                final LabelSSTRecord lsrec = (LabelSSTRecord)record;
                 sbFoundStrings.append( sstrec.getString(lsrec.getSSTIndex()) );
                 break;
             }

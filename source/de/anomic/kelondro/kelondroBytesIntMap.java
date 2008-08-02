@@ -30,17 +30,17 @@ import java.util.Iterator;
 
 public class kelondroBytesIntMap {
     
-    private kelondroRow rowdef;
+    private final kelondroRow rowdef;
     private kelondroIndex index;
     
-    public kelondroBytesIntMap(kelondroIndex ki) {
+    public kelondroBytesIntMap(final kelondroIndex ki) {
         assert (ki.row().columns() == 2); // must be a key/index relation
         assert (ki.row().width(1) == 4);  // the value must be a b256-encoded int, 4 bytes long
         this.index = ki;
         this.rowdef = ki.row();
     }
     
-    public kelondroBytesIntMap(int keylength, kelondroByteOrder objectOrder, int space) {
+    public kelondroBytesIntMap(final int keylength, final kelondroByteOrder objectOrder, final int space) {
         this.rowdef = new kelondroRow(new kelondroColumn[]{new kelondroColumn("key", kelondroColumn.celltype_binary, kelondroColumn.encoder_bytes, keylength, "key"), new kelondroColumn("int c-4 {b256}")}, objectOrder, 0);
         this.index = new kelondroRAMIndex(rowdef, space);
     }
@@ -49,45 +49,45 @@ public class kelondroBytesIntMap {
         return index.row();
     }
     
-    public synchronized boolean has(byte[] key) {
+    public synchronized boolean has(final byte[] key) {
         assert (key != null);
         return index.has(key);
     }
     
-    public synchronized int geti(byte[] key) throws IOException {
+    public synchronized int geti(final byte[] key) throws IOException {
         assert (key != null);
-        kelondroRow.Entry indexentry = index.get(key);
+        final kelondroRow.Entry indexentry = index.get(key);
         if (indexentry == null) return -1;
         return (int) indexentry.getColLong(1);
     }
     
-    public synchronized int puti(byte[] key, int i) throws IOException {
+    public synchronized int puti(final byte[] key, final int i) throws IOException {
         assert i >= 0 : "i = " + i;
         assert (key != null);
-        kelondroRow.Entry newentry = index.row().newEntry();
+        final kelondroRow.Entry newentry = index.row().newEntry();
         newentry.setCol(0, key);
         newentry.setCol(1, i);
-        kelondroRow.Entry oldentry = index.put(newentry);
+        final kelondroRow.Entry oldentry = index.put(newentry);
         if (oldentry == null) return -1;
         return (int) oldentry.getColLong(1);
     }
     
-    public synchronized boolean addi(byte[] key, int i) throws IOException {
+    public synchronized boolean addi(final byte[] key, final int i) throws IOException {
         assert i >= 0 : "i = " + i;
         assert (key != null);
-        kelondroRow.Entry newentry = this.rowdef.newEntry();
+        final kelondroRow.Entry newentry = this.rowdef.newEntry();
         newentry.setCol(0, key);
         newentry.setCol(1, i);
         return index.addUnique(newentry);
     }
     
     public synchronized ArrayList<Integer[]> removeDoubles() throws IOException {
-        ArrayList<Integer[]> report = new ArrayList<Integer[]>();
+        final ArrayList<Integer[]> report = new ArrayList<Integer[]>();
         Integer[] is;
         Iterator<kelondroRow.Entry> ei;
         int c, i;
-        int initialSize = this.size();
-        for (kelondroRowCollection delset: index.removeDoubles()) {
+        final int initialSize = this.size();
+        for (final kelondroRowCollection delset: index.removeDoubles()) {
             is = new Integer[delset.size()];
             ei = delset.rows();
             c = 0;
@@ -101,15 +101,15 @@ public class kelondroBytesIntMap {
         return report;
     }
     
-    public synchronized int removei(byte[] key) throws IOException {
+    public synchronized int removei(final byte[] key) throws IOException {
         assert (key != null);
-        kelondroRow.Entry indexentry = index.remove(key);
+        final kelondroRow.Entry indexentry = index.remove(key);
         if (indexentry == null) return -1;
         return (int) indexentry.getColLong(1);
     }
 
     public synchronized int removeonei() throws IOException {
-        kelondroRow.Entry indexentry = index.removeOne();
+        final kelondroRow.Entry indexentry = index.removeOne();
         if (indexentry == null) return -1;
         return (int) indexentry.getColLong(1);
     }
@@ -118,11 +118,11 @@ public class kelondroBytesIntMap {
         return index.size();
     }
     
-    public synchronized kelondroCloneableIterator<byte[]> keys(boolean up, byte[] firstKey) throws IOException {
+    public synchronized kelondroCloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) throws IOException {
         return index.keys(up, firstKey);
     }
 
-    public synchronized kelondroCloneableIterator<kelondroRow.Entry> rows(boolean up, byte[] firstKey) throws IOException {
+    public synchronized kelondroCloneableIterator<kelondroRow.Entry> rows(final boolean up, final byte[] firstKey) throws IOException {
         return index.rows(up, firstKey);
     }
     

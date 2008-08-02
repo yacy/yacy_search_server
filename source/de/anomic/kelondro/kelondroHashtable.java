@@ -115,7 +115,7 @@ import java.io.IOException;
 
 public class kelondroHashtable {
     
-    private   kelondroFixedWidthArray hashArray;
+    private final   kelondroFixedWidthArray hashArray;
     protected int offset;
     protected int maxk;
     private   int maxrehash;
@@ -123,7 +123,7 @@ public class kelondroHashtable {
     
     private   static final byte[] dummyKey = kelondroBase64Order.enhancedCoder.encodeLong(0, 5).getBytes();
 
-    public kelondroHashtable(File file, kelondroRow rowdef, int offset, int maxsize, int maxrehash) throws IOException {
+    public kelondroHashtable(final File file, final kelondroRow rowdef, final int offset, final int maxsize, final int maxrehash) throws IOException {
         // this creates a new hashtable
         // the key element is not part of the columns array
         // this is unlike the kelondroTree, where the key is part of a row
@@ -133,7 +133,7 @@ public class kelondroHashtable {
         // this number is needed to omit grow of the table in case of re-hashing
         // the maxsize is re-computed to a virtual folding height and will result in a tablesize
         // less than the given maxsize. The actual maxsize can be retrieved by maxsize()
-        boolean fileExisted = file.exists();
+        final boolean fileExisted = file.exists();
         this.hashArray = new kelondroFixedWidthArray(file, extCol(rowdef), 6);
         if (fileExisted) {
             this.offset    = hashArray.geti(0);
@@ -153,8 +153,8 @@ public class kelondroHashtable {
         }
     }
     
-    private kelondroRow extCol(kelondroRow rowdef) {
-        kelondroColumn[] newCol = new kelondroColumn[rowdef.columns() + 1];
+    private kelondroRow extCol(final kelondroRow rowdef) {
+        final kelondroColumn[] newCol = new kelondroColumn[rowdef.columns() + 1];
         newCol[0] = new kelondroColumn("Cardinal key-4 {b256}");
         for (int i = 0; i < rowdef.columns(); i++) newCol[i + 1] = rowdef.column(i);
         return new kelondroRow(newCol, rowdef.objectOrder, rowdef.primaryKeyIndex);
@@ -166,22 +166,22 @@ public class kelondroHashtable {
 	return p;
     }
 
-    public synchronized byte[][] get(int key) throws IOException {
-        Object[] search = search(new Hash(key));
+    public synchronized byte[][] get(final int key) throws IOException {
+        final Object[] search = search(new Hash(key));
         if (search[1] == null) return null;
-        byte[][] row = (byte[][]) search[1];
-        byte[][] result = new byte[row.length - 1][];
+        final byte[][] row = (byte[][]) search[1];
+        final byte[][] result = new byte[row.length - 1][];
         System.arraycopy(row, 1, result, 0, row.length - 1);
         return result;
     }
 
-    public synchronized kelondroRow.Entry put(int key, kelondroRow.Entry rowentry) throws IOException {
-        Hash hash = new Hash(key);
+    public synchronized kelondroRow.Entry put(final int key, final kelondroRow.Entry rowentry) throws IOException {
+        final Hash hash = new Hash(key);
         
         // find row
-        Object[] search = search(hash);
+        final Object[] search = search(hash);
         kelondroRow.Entry oldhkrow;
-        int rowNumber = ((Integer) search[0]).intValue();
+        final int rowNumber = ((Integer) search[0]).intValue();
         if (search[1] == null) {
             oldhkrow = null;
         } else {
@@ -192,14 +192,14 @@ public class kelondroHashtable {
         while (rowNumber >= hashArray.size()) hashArray.set(hashArray.size(), dummyRow);
         
         // write row
-        kelondroRow.Entry newhkrow = hashArray.row().newEntry();
+        final kelondroRow.Entry newhkrow = hashArray.row().newEntry();
         newhkrow.setCol(0, hash.key());
         newhkrow.setCol(1, rowentry.bytes());
         hashArray.set(rowNumber, newhkrow);
         return (oldhkrow == null ? null : hashArray.row().newEntry(oldhkrow.getColBytes(1)));
     }
     
-    private Object[] search(Hash hash) throws IOException {
+    private Object[] search(final Hash hash) throws IOException {
         kelondroRow.Entry hkrow;
         int rowKey;
         int rowNumber;
@@ -219,7 +219,7 @@ public class kelondroHashtable {
         int key;
         int hash;
         int depth;
-        public Hash(int key) {
+        public Hash(final int key) {
             this.key = key;
             this.hash = key;
             this.depth = offset + 1;

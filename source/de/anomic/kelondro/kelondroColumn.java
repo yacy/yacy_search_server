@@ -44,7 +44,7 @@ public class kelondroColumn {
     public int celltype, cellwidth, encoder;
     public String nickname, description;
 
-    public kelondroColumn(String nickname, int celltype, int encoder, int cellwidth, String description) {
+    public kelondroColumn(final String nickname, final int celltype, final int encoder, final int cellwidth, final String description) {
         this.celltype = celltype;
         this.cellwidth = cellwidth;
         this.encoder = encoder;
@@ -112,7 +112,7 @@ public class kelondroColumn {
         if (p < 0) {
             // if the cell was defined with a type, we dont need to give an explicit with definition
             if (this.cellwidth < 0) throw new kelondroException("kelondroColumn - no cell width definition given");
-            int q = celldef.indexOf(' ');
+            final int q = celldef.indexOf(' ');
             if (q < 0) {
                 this.nickname = celldef;
                 celldef = "";
@@ -122,18 +122,18 @@ public class kelondroColumn {
             }
         } else {
             this.nickname = celldef.substring(0, p);
-            int q = celldef.indexOf(' ');
+            final int q = celldef.indexOf(' ');
             if (q < 0) {
                 try {
                     this.cellwidth = Integer.parseInt(celldef.substring(p + 1));
-                } catch (NumberFormatException e) {
+                } catch (final NumberFormatException e) {
                     throw new kelondroException("kelondroColumn - cellwidth description wrong:" + celldef.substring(p + 1));
                 }
                 celldef = "";
             } else {
                 try {
                     this.cellwidth = Integer.parseInt(celldef.substring(p + 1, q));
-                } catch (NumberFormatException e) {
+                } catch (final NumberFormatException e) {
                     throw new kelondroException("kelondroColumn - cellwidth description wrong:" + celldef.substring(p + 1, q));
                 }
                 celldef = celldef.substring(q + 1);
@@ -157,7 +157,7 @@ public class kelondroColumn {
         // parse/check encoder type
         if ((celldef.length() > 0) && (celldef.charAt(0) == '{')) {
             p = celldef.indexOf('}');
-            String expf = celldef.substring(1, p);
+            final String expf = celldef.substring(1, p);
             celldef = celldef.substring(p + 1).trim();
                  if (expf.equals("b64e")) this.encoder = encoder_b64e;
             else if (expf.equals("b256")) this.encoder = encoder_b256;
@@ -186,14 +186,14 @@ public class kelondroColumn {
         }
     }
 
-    public void setAttributes(String nickname, int celltype, int encoder) {
+    public void setAttributes(final String nickname, final int celltype, final int encoder) {
         this.celltype = celltype;
         this.encoder = encoder;
         this.nickname = nickname;
     }
     
     public String toString() {
-        StringBuffer s = new StringBuffer();
+        final StringBuffer s = new StringBuffer();
         switch (celltype) {
         case celltype_undefined:
             s.append(nickname);
@@ -241,7 +241,7 @@ public class kelondroColumn {
         return new String(s);
     }
 
-    public boolean equals(kelondroColumn otherCol) {
+    public boolean equals(final kelondroColumn otherCol) {
         return
           (this.celltype == otherCol.celltype) &&
           (this.cellwidth == otherCol.cellwidth) &&

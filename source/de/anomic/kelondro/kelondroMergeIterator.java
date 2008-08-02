@@ -37,7 +37,7 @@ public class kelondroMergeIterator<E> implements kelondroCloneableIterator<E> {
     private final Method merger;
     private final boolean up;
     
-    public kelondroMergeIterator(kelondroCloneableIterator<E> a, kelondroCloneableIterator<E> b, Comparator<E> c, Method m, boolean up) {
+    public kelondroMergeIterator(final kelondroCloneableIterator<E> a, final kelondroCloneableIterator<E> b, final Comparator<E> c, final Method m, final boolean up) {
         // this works currently only for String-type key iterations
         this.a = a;
         this.b = b;
@@ -48,7 +48,7 @@ public class kelondroMergeIterator<E> implements kelondroCloneableIterator<E> {
         nextb();
     }
     
-	public kelondroMergeIterator<E> clone(Object modifier) {
+	public kelondroMergeIterator<E> clone(final Object modifier) {
         return new kelondroMergeIterator<E>(a.clone(modifier), b.clone(modifier), comp, merger, up);
     }
     
@@ -64,14 +64,14 @@ public class kelondroMergeIterator<E> implements kelondroCloneableIterator<E> {
     private void nexta() {
         try {
             if ((a != null) && (a.hasNext())) na = a.next(); else na = null;
-        } catch (ConcurrentModificationException e) {
+        } catch (final ConcurrentModificationException e) {
             na = null;
         }
     }
     private void nextb() {
         try {
             if ((b != null) && (b.hasNext())) nb = b.next(); else nb = null;
-        } catch (ConcurrentModificationException e) {
+        } catch (final ConcurrentModificationException e) {
             nb = null;
         }
     }
@@ -94,19 +94,19 @@ public class kelondroMergeIterator<E> implements kelondroCloneableIterator<E> {
             return s;
         }
         // compare the Objects
-        int c = comp.compare(na, nb);
+        final int c = comp.compare(na, nb);
         if (c == 0) {
             try {
                 //System.out.print("MERGE OF " + na.toString() + " AND " + nb.toString() + ": ");
                 s = (E) this.merger.invoke(null, new Object[]{na, nb});
                 //System.out.println("RESULT IS " + s.toString());
-            } catch (IllegalArgumentException e) {
+            } catch (final IllegalArgumentException e) {
                 e.printStackTrace();
                 s = null;
-            } catch (IllegalAccessException e) {
+            } catch (final IllegalAccessException e) {
                 e.printStackTrace();
                 s = null;
-            } catch (InvocationTargetException e) {
+            } catch (final InvocationTargetException e) {
                 e.printStackTrace();
                 s = null;
             }
@@ -128,7 +128,7 @@ public class kelondroMergeIterator<E> implements kelondroCloneableIterator<E> {
         throw new java.lang.UnsupportedOperationException("merge does not support remove");
     }
     
-    public static <A> kelondroCloneableIterator<A> cascade(Set<kelondroCloneableIterator<A>> iterators, kelondroOrder<A> c, Method merger, boolean up) {
+    public static <A> kelondroCloneableIterator<A> cascade(final Set<kelondroCloneableIterator<A>> iterators, final kelondroOrder<A> c, final Method merger, final boolean up) {
         // this extends the ability to combine two iterators
         // to the ability of combining a set of iterators
         if (iterators == null) return null;
@@ -136,10 +136,10 @@ public class kelondroMergeIterator<E> implements kelondroCloneableIterator<E> {
         return cascade(iterators.iterator(), c, merger, up);
     }
     
-    private static <A> kelondroCloneableIterator<A> cascade(Iterator<kelondroCloneableIterator<A>> iiterators, kelondroOrder<A> c, Method merger, boolean up) {
+    private static <A> kelondroCloneableIterator<A> cascade(final Iterator<kelondroCloneableIterator<A>> iiterators, final kelondroOrder<A> c, final Method merger, final boolean up) {
         if (iiterators == null) return null;
         if (!(iiterators.hasNext())) return null;
-        kelondroCloneableIterator<A> one = iiterators.next();
+        final kelondroCloneableIterator<A> one = iiterators.next();
         if (!(iiterators.hasNext())) return one;
         return new kelondroMergeIterator<A>(one, cascade(iiterators, c, merger, up), c, merger, up);
     }
@@ -147,21 +147,21 @@ public class kelondroMergeIterator<E> implements kelondroCloneableIterator<E> {
     public static Method simpleMerge = null;
     static {
         try {
-            Class<?> c = Class.forName("de.anomic.kelondro.kelondroMergeIterator");
+            final Class<?> c = Class.forName("de.anomic.kelondro.kelondroMergeIterator");
             simpleMerge = c.getMethod("mergeEqualByReplace", new Class[]{Object.class, Object.class});
-        } catch (SecurityException e) {
+        } catch (final SecurityException e) {
             System.out.println("Error while initializing simpleMerge: " + e.getMessage());
             simpleMerge = null;
-        } catch (ClassNotFoundException e) {
+        } catch (final ClassNotFoundException e) {
             System.out.println("Error while initializing simpleMerge: " + e.getMessage());
             simpleMerge = null;
-        } catch (NoSuchMethodException e) {
+        } catch (final NoSuchMethodException e) {
             System.out.println("Error while initializing simpleMerge: " + e.getMessage());
             simpleMerge = null;
         }
     }
     
-    public static Object mergeEqualByReplace(Object a, Object b) {
+    public static Object mergeEqualByReplace(final Object a, final Object b) {
         return a;
     }
     

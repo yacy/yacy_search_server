@@ -38,11 +38,11 @@ import de.anomic.server.servletProperties;
 
 public class ConfigRobotsTxt_p {
     
-    public static servletProperties respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
-        plasmaSwitchboard sb = (plasmaSwitchboard) env;
+    public static servletProperties respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final servletProperties prop = new servletProperties();
         
-        httpdRobotsTxtConfig rbc = ((plasmaSwitchboard)env).robotstxtConfig;
+        final httpdRobotsTxtConfig rbc = ((plasmaSwitchboard)env).robotstxtConfig;
         prop.put("clientname", sb.webIndex.seedDB.mySeed().getPublicAddress());
         
         if (post != null) {

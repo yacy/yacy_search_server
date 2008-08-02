@@ -35,11 +35,11 @@ import de.anomic.server.serverSwitch;
 
 public class PerformanceSearch_p {
     
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> sb) {
+    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> sb) {
         // return variable that accumulates replacements
-        serverObjects prop = new serverObjects();
+        final serverObjects prop = new serverObjects();
         
-        Iterator<serverProfiling.Event> events = serverProfiling.history("SEARCH");
+        final Iterator<serverProfiling.Event> events = serverProfiling.history("SEARCH");
         int c = 0;
         serverProfiling.Event event;
         plasmaProfiling.searchEvent search;

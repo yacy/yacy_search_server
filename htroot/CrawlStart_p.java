@@ -31,16 +31,16 @@ import de.anomic.server.serverSwitch;
 
 public class CrawlStart_p {
     
-	public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
+	public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
         // return variable that accumulates replacements
-        serverObjects prop = new serverObjects();
+        final serverObjects prop = new serverObjects();
         
         // define visible variables
         prop.put("proxyPrefetchDepth", env.getConfig("proxyPrefetchDepth", "0"));
         prop.put("crawlingDepth", env.getConfig("crawlingDepth", "0"));
         prop.put("crawlingFilter", env.getConfig("crawlingFilter", "0"));
         
-        int crawlingIfOlder = (int) env.getConfigLong("crawlingIfOlder", -1);
+        final int crawlingIfOlder = (int) env.getConfigLong("crawlingIfOlder", -1);
         prop.put("crawlingIfOlderCheck", (crawlingIfOlder == -1) ? "0" : "1");
         prop.put("crawlingIfOlderUnitYearCheck", "0");
         prop.put("crawlingIfOlderUnitMonthCheck", "0");
@@ -62,10 +62,10 @@ public class CrawlStart_p {
             prop.put("crawlingIfOlderNumber", Math.max(1, Math.round(crawlingIfOlder / 60f)));
             prop.put("crawlingIfOlderUnitHourCheck", "1");
         }
-        int crawlingDomFilterDepth = (int) env.getConfigLong("crawlingDomFilterDepth", -1);
+        final int crawlingDomFilterDepth = (int) env.getConfigLong("crawlingDomFilterDepth", -1);
         prop.put("crawlingDomFilterCheck", (crawlingDomFilterDepth == -1) ? "0" : "1");
         prop.put("crawlingDomFilterDepth", (crawlingDomFilterDepth == -1) ? 1 : crawlingDomFilterDepth);
-        int crawlingDomMaxPages = (int) env.getConfigLong("crawlingDomMaxPages", -1);
+        final int crawlingDomMaxPages = (int) env.getConfigLong("crawlingDomMaxPages", -1);
         prop.put("crawlingDomMaxCheck", (crawlingDomMaxPages == -1) ? "0" : "1");
         prop.put("crawlingDomMaxPages", (crawlingDomMaxPages == -1) ? 10000 : crawlingDomMaxPages);
         prop.put("crawlingQChecked", env.getConfig("crawlingQ", "").equals("true") ? "1" : "0");
@@ -74,8 +74,8 @@ public class CrawlStart_p {
         prop.put("indexingMediaChecked", env.getConfig("indexMedia", "").equals("true") ? "1" : "0");
         prop.put("crawlOrderChecked", env.getConfig("crawlOrder", "").equals("true") ? "1" : "0");
         
-        long LCbusySleep = Integer.parseInt(env.getConfig(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL_BUSYSLEEP, "100"));
-        int LCppm = (LCbusySleep == 0) ? 1000 : (int) (60000L / LCbusySleep);
+        final long LCbusySleep = Integer.parseInt(env.getConfig(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL_BUSYSLEEP, "100"));
+        final int LCppm = (LCbusySleep == 0) ? 1000 : (int) (60000L / LCbusySleep);
         prop.put("crawlingSpeedMaxChecked", (LCppm >= 1000) ? "1" : "0");
         prop.put("crawlingSpeedCustChecked", ((LCppm > 10) && (LCppm < 1000)) ? "1" : "0");
         prop.put("crawlingSpeedMinChecked", (LCppm <= 10) ? "1" : "0");

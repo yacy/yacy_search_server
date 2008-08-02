@@ -37,24 +37,24 @@ public class kelondroFullRecords extends kelondroAbstractRecords {
     private static TreeMap<String, kelondroFullRecords> recordTracker = new TreeMap<String, kelondroFullRecords>();
     
     public kelondroFullRecords(
-            File file,
-            short ohbytec, short ohhandlec,
-            kelondroRow rowdef, int FHandles, int txtProps, int txtPropWidth) throws IOException {
+            final File file,
+            final short ohbytec, final short ohhandlec,
+            final kelondroRow rowdef, final int FHandles, final int txtProps, final int txtPropWidth) throws IOException {
         super(file, true, ohbytec, ohhandlec, rowdef, FHandles, txtProps, txtPropWidth);
         recordTracker.put(this.filename, this);
     }
     
     public kelondroFullRecords(
-            kelondroRA ra, String filename,
-            short ohbytec, short ohhandlec,
-            kelondroRow rowdef, int FHandles, int txtProps, int txtPropWidth,
-            boolean exitOnFail) {
+            final kelondroRA ra, final String filename,
+            final short ohbytec, final short ohhandlec,
+            final kelondroRow rowdef, final int FHandles, final int txtProps, final int txtPropWidth,
+            final boolean exitOnFail) {
         super(ra, filename, true, ohbytec, ohhandlec, rowdef, FHandles, txtProps, txtPropWidth, exitOnFail);
         recordTracker.put(this.filename, this);
     }
     
     public kelondroFullRecords(
-            kelondroRA ra, String filename) throws IOException{
+            final kelondroRA ra, final String filename) throws IOException{
         super(ra, filename, true);
         recordTracker.put(this.filename, this);
     }
@@ -64,7 +64,7 @@ public class kelondroFullRecords extends kelondroAbstractRecords {
         return recordTracker.keySet().iterator();
     }
 
-    protected synchronized void deleteNode(kelondroHandle handle) throws IOException {
+    protected synchronized void deleteNode(final kelondroHandle handle) throws IOException {
         super.deleteNode(handle);
     }
     
@@ -73,7 +73,7 @@ public class kelondroFullRecords extends kelondroAbstractRecords {
         super.close();
     }
     
-    public kelondroNode newNode(kelondroHandle handle, byte[] bulk, int offset) throws IOException {
+    public kelondroNode newNode(final kelondroHandle handle, final byte[] bulk, final int offset) throws IOException {
         return new EcoNode(handle, bulk, offset);
     }
 
@@ -84,7 +84,7 @@ public class kelondroFullRecords extends kelondroAbstractRecords {
         private boolean ohChanged = false;
         private boolean bodyChanged = false;
 
-        public EcoNode(byte[] rowinstance) throws IOException {
+        public EcoNode(final byte[] rowinstance) throws IOException {
             // this initializer is used to create nodes from bulk-read byte arrays
             assert ((rowinstance == null) || (rowinstance.length == ROW.objectsize)) : "bulkchunk.length = " + (rowinstance == null ? "null" : rowinstance.length) + ", ROW.width(0) = " + ROW.width(0);
             this.handle = new kelondroHandle(USAGE.allocatePayload(rowinstance));
@@ -104,7 +104,7 @@ public class kelondroFullRecords extends kelondroAbstractRecords {
             this.bodyChanged = false;
         }
         
-        public EcoNode(kelondroHandle handle, byte[] bulkchunk, int offset) throws IOException {
+        public EcoNode(final kelondroHandle handle, final byte[] bulkchunk, final int offset) throws IOException {
             // this initializer is used to create nodes from bulk-read byte arrays
             // if write is true, then the chunk in bulkchunk is written to the file
             // othervise it is considered equal to what is stored in the file
@@ -144,7 +144,7 @@ public class kelondroFullRecords extends kelondroAbstractRecords {
             this.bodyChanged = changed;
         }
         
-        public EcoNode(kelondroHandle handle) throws IOException {
+        public EcoNode(final kelondroHandle handle) throws IOException {
             // this creates an entry with an pre-reserved entry position.
             // values can be written using the setValues() method,
             // but we expect that values are already there in the file.
@@ -176,14 +176,14 @@ public class kelondroFullRecords extends kelondroAbstractRecords {
             return this.handle;
         }
 
-        public void setOHByte(int i, byte b) {
+        public void setOHByte(final int i, final byte b) {
             if (i >= OHBYTEC) throw new IllegalArgumentException("setOHByte: wrong index " + i);
             if (this.handle.index == kelondroHandle.NUL) throw new kelondroException(filename, "setOHByte: no handle assigned");
             this.ohChunk[i] = b;
             this.ohChanged = true;
         }
         
-        public void setOHHandle(int i, kelondroHandle otherhandle) {
+        public void setOHHandle(final int i, final kelondroHandle otherhandle) {
             assert (i < OHHANDLEC): "setOHHandle: wrong array size " + i;
             assert (this.handle.index != kelondroHandle.NUL): "setOHHandle: no handle assigned ind file" + filename;
             if (otherhandle == null) {
@@ -195,20 +195,20 @@ public class kelondroFullRecords extends kelondroAbstractRecords {
             this.ohChanged = true;
         }
         
-        public byte getOHByte(int i) {
+        public byte getOHByte(final int i) {
             if (i >= OHBYTEC) throw new IllegalArgumentException("getOHByte: wrong index " + i);
             if (this.handle.index == kelondroHandle.NUL) throw new kelondroException(filename, "Cannot load OH values");
             return this.ohChunk[i];
         }
 
-        public kelondroHandle getOHHandle(int i) {
+        public kelondroHandle getOHHandle(final int i) {
             if (this.handle.index == kelondroHandle.NUL) throw new kelondroException(filename, "Cannot load OH values");
             assert (i < OHHANDLEC): "handle index out of bounds: " + i + " in file " + filename;
-            int h = bytes2int(this.ohChunk, OHBYTEC + 4 * i);
+            final int h = bytes2int(this.ohChunk, OHBYTEC + 4 * i);
             return (h == kelondroHandle.NUL) ? null : new kelondroHandle(h);
         }
 
-        public synchronized void setValueRow(byte[] row) throws IOException {
+        public synchronized void setValueRow(final byte[] row) throws IOException {
             // if the index is defined, then write values directly to the file, else only to the object
             if ((row != null) && (row.length != ROW.objectsize)) throw new IOException("setValueRow with wrong (" + row.length + ") row length instead correct: " + ROW.objectsize);
             
@@ -247,7 +247,7 @@ public class kelondroFullRecords extends kelondroAbstractRecords {
 
             // place the data to the file
 
-            boolean doCommit = this.ohChanged || this.bodyChanged;
+            final boolean doCommit = this.ohChanged || this.bodyChanged;
             
             // save head
             synchronized (entryFile) {

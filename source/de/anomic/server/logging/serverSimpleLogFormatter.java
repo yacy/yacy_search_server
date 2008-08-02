@@ -36,7 +36,7 @@ import java.util.logging.SimpleFormatter;
 public class serverSimpleLogFormatter extends SimpleFormatter {
 
 
-      private Date date = new Date();      
+      private final Date date = new Date();      
       private final FieldPosition position = new FieldPosition(0);
 
       // e.g. 2005/05/25 11:22:53
@@ -49,13 +49,13 @@ public class serverSimpleLogFormatter extends SimpleFormatter {
           super();
       }        
       
-      public synchronized String format(LogRecord record) {
+      public synchronized String format(final LogRecord record) {
           
-          StringBuffer buffer = this.buffer;
+          final StringBuffer buffer = this.buffer;
           buffer.setLength(0);
           
           // adding the loglevel
-          int logLevel = record.getLevel().intValue();
+          final int logLevel = record.getLevel().intValue();
           if (logLevel == serverLog.LOGLEVEL_SEVERE) 
               this.buffer.append(serverLog.LOGTOKEN_SEVERE); 
           else if (logLevel == serverLog.LOGLEVEL_WARNING) 
@@ -93,13 +93,13 @@ public class serverSimpleLogFormatter extends SimpleFormatter {
               StringWriter writer = null;
               try {
                   writer = new StringWriter();
-                  PrintWriter printer = new PrintWriter(writer);
+                  final PrintWriter printer = new PrintWriter(writer);
                   record.getThrown().printStackTrace(printer);
                   buffer.append(writer.toString());
-              } catch (Exception e) {
+              } catch (final Exception e) {
                   buffer.append("Failed to get stack trace: " + e.getMessage());
               } finally {
-                  if (writer != null) try {writer.close();} catch (Exception ex) {}
+                  if (writer != null) try {writer.close();} catch (final Exception ex) {}
               }
           }
           return buffer.toString();

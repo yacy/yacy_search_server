@@ -57,11 +57,11 @@ import java.util.Vector;
 public class nxTools {
 
 
-    public static HashMap<String, String> table(Vector<String> list) {
-    	Enumeration<String> i = list.elements();
+    public static HashMap<String, String> table(final Vector<String> list) {
+    	final Enumeration<String> i = list.elements();
     	int pos;
     	String line;
-    	HashMap<String, String> props = new HashMap<String, String>(list.size());
+    	final HashMap<String, String> props = new HashMap<String, String>(list.size());
     	while (i.hasMoreElements()) {
     		line = (i.nextElement()).trim();
     		pos = line.indexOf("=");
@@ -70,7 +70,7 @@ public class nxTools {
     	return props;
 	}
     
-    public static HashMap<String, String> table(byte[] a, String encoding) {
+    public static HashMap<String, String> table(final byte[] a, final String encoding) {
         return table(strings(a, encoding));
     }
     
@@ -86,12 +86,12 @@ public class nxTools {
      * @param list
      * @return
      */
-    public static HashMap<String, String> table(ArrayList<String> list) {
+    public static HashMap<String, String> table(final ArrayList<String> list) {
         if (list == null) return new HashMap<String, String>();
-        Iterator<String> i = list.iterator();
+        final Iterator<String> i = list.iterator();
         int pos;
         String line;
-        HashMap<String, String> props = new HashMap<String, String>(list.size());
+        final HashMap<String, String> props = new HashMap<String, String>(list.size());
         while (i.hasNext()) {
             line = (i.next()).trim();
             if (line.startsWith("#")) continue; // exclude comments
@@ -102,11 +102,11 @@ public class nxTools {
         return props;
     }
 
-    public static Vector<String> grep(Vector<String> list, int afterContext, String pattern) {
-    	Enumeration<String> i = list.elements();
+    public static Vector<String> grep(final Vector<String> list, final int afterContext, final String pattern) {
+    	final Enumeration<String> i = list.elements();
     	int ac = 0;
 		String line;
-		Vector<String> result = new Vector<String>();
+		final Vector<String> result = new Vector<String>();
 		while (i.hasMoreElements()) {
 			line = i.nextElement();
 			if (line.indexOf(pattern) >= 0) {
@@ -120,11 +120,11 @@ public class nxTools {
 		return result;
 	}
     
-    public static ArrayList<String> grep(ArrayList<String> list, int afterContext, String pattern) {
-        Iterator<String> i = list.iterator();
+    public static ArrayList<String> grep(final ArrayList<String> list, final int afterContext, final String pattern) {
+        final Iterator<String> i = list.iterator();
         int ac = 0;
         String line;
-        ArrayList<String> result = new ArrayList<String>();
+        final ArrayList<String> result = new ArrayList<String>();
         while (i.hasNext()) {
             line = i.next();
             if (line.indexOf(pattern) >= 0) {
@@ -138,17 +138,17 @@ public class nxTools {
         return result;
         }    
 
-    public static String tail1(Vector<String> list) {
+    public static String tail1(final Vector<String> list) {
     	if ((list == null) || (list.size() == 0)) return "";
     	return list.lastElement();
     }
     
-    public static String tail1(ArrayList<String> list) {
+    public static String tail1(final ArrayList<String> list) {
         if ((list == null) || (list.size() == 0)) return "";
         return list.get(list.size()-1);
         }
 
-    public static String awk(String sentence, String separator, int count) {
+    public static String awk(String sentence, final String separator, int count) {
 	// returns the nth word of sentence, where count is the counter and the first word has the number 1
 	// the words are separated by the separator
 	if ((sentence == null) || (separator == null) || (count < 1)) return null;
@@ -166,15 +166,15 @@ public class nxTools {
         return null;
     }
 
-    public static ArrayList<String> strings(byte[] a) {
+    public static ArrayList<String> strings(final byte[] a) {
         return strings(a, null);
     }
     
-    public static ArrayList<String> strings(byte[] a, String encoding) {
+    public static ArrayList<String> strings(final byte[] a, final String encoding) {
         if (a == null) return new ArrayList<String>();
         int s = 0;
         int e;
-        ArrayList<String> v = new ArrayList<String>();
+        final ArrayList<String> v = new ArrayList<String>();
         byte b;
         while (s < a.length) {
             // find eol
@@ -190,7 +190,7 @@ public class nxTools {
                 v.add(new String(a, s, e - s));
             } else try {
                 v.add(new String(a, s, e - s, encoding));
-            } catch (UnsupportedEncodingException xcptn) {
+            } catch (final UnsupportedEncodingException xcptn) {
                 return v;
             }
             
@@ -205,14 +205,14 @@ public class nxTools {
         return v;
     }
     
-    public static String line(byte[] a, int lineNr) {
-        InputStreamReader r = new InputStreamReader(new ByteArrayInputStream(a));
-        LineNumberReader lnr = new LineNumberReader(r);
+    public static String line(final byte[] a, final int lineNr) {
+        final InputStreamReader r = new InputStreamReader(new ByteArrayInputStream(a));
+        final LineNumberReader lnr = new LineNumberReader(r);
         String theLine = null;
         while (lnr.getLineNumber() < lineNr) {
             try {
                 theLine = lnr.readLine();
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 return null;
             }
             if (theLine == null) return null;
@@ -230,7 +230,7 @@ public class nxTools {
      * @param len 
      * @return the shorten or the old String
      */
-    public static String shortenURLString(String url, int len) {
+    public static String shortenURLString(final String url, final int len) {
         // This is contributed by Thomas Quella (borg-0300)
         if (url == null) { return null; }
         int la = url.length();

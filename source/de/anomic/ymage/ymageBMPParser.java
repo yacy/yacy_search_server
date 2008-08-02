@@ -47,21 +47,21 @@ public class ymageBMPParser {
     //private static int BI_RLE4 = 2;
     //private static int BI_BITFIELDS = 3;
     
-    private IMAGEMAP imagemap;
+    private final IMAGEMAP imagemap;
     //boolean debugmode = false;
     
-    public static final boolean isBMP(byte[] source) {
+    public static final boolean isBMP(final byte[] source) {
         // check the file magic
         return (source != null) && (source.length >= 2) && (source[0] == 'B') && (source[1] == 'M');
     }
     
-    public ymageBMPParser(byte[] source) {
+    public ymageBMPParser(final byte[] source) {
 
         // read info-header
-        int bfOffBits  = DWORD(source, FILEHEADER_offset + 10);
+        final int bfOffBits  = DWORD(source, FILEHEADER_offset + 10);
         
-        INFOHEADER infoheader = new INFOHEADER(source, INFOHEADER_offset);
-        COLORTABLE colortable = new COLORTABLE(source, INFOHEADER_offset + INFOHEADER_size, infoheader);
+        final INFOHEADER infoheader = new INFOHEADER(source, INFOHEADER_offset);
+        final COLORTABLE colortable = new COLORTABLE(source, INFOHEADER_offset + INFOHEADER_size, infoheader);
         
         // check consistency with bfOffBits
         assert bfOffBits == INFOHEADER_offset + 40 + colortable.colorbytes : "bfOffBits = " + bfOffBits + ", colorbytes = " + colortable.colorbytes;
@@ -74,7 +74,7 @@ public class ymageBMPParser {
         return imagemap.image;
     }
 
-    public static final int DWORD(byte[] b, int offset) {
+    public static final int DWORD(final byte[] b, final int offset) {
         if (offset + 3 >= b.length) return 0;
         int ret = (b[offset + 3] & 0xff);
         ret = (ret << 8) | (b[offset + 2] & 0xff);
@@ -83,13 +83,13 @@ public class ymageBMPParser {
         return ret;
     }
 
-    public static final int WORD(byte[] b, int offset) {
-        int ret = ((b[offset + 1] & 0xff) << 8) | (b[offset] & 0xff);
+    public static final int WORD(final byte[] b, final int offset) {
+        final int ret = ((b[offset + 1] & 0xff) << 8) | (b[offset] & 0xff);
         return ret;
     }
     
-    public static final int BYTE(byte[] b, int offset) {
-        int ret = (b[offset] & 0xff);
+    public static final int BYTE(final byte[] b, final int offset) {
+        final int ret = (b[offset] & 0xff);
         return ret;
     }
     
@@ -98,7 +98,7 @@ public class ymageBMPParser {
         
         public int biWidth, biHeight, biBitCount, biCompression, biSizeImage, biClrUsed;
         
-        public INFOHEADER(byte[] s, int offset) {
+        public INFOHEADER(final byte[] s, final int offset) {
             // read info-header
             biWidth       = DWORD(s, offset + 4);
             biHeight      = DWORD(s, offset + 8);
@@ -114,7 +114,7 @@ public class ymageBMPParser {
         public int colorbytes;
         public int[] colorindex;
         
-        public COLORTABLE(byte[] s, int offset, INFOHEADER infoheader) {
+        public COLORTABLE(final byte[] s, final int offset, final INFOHEADER infoheader) {
             // read colortable
             colorbytes = 0; // for consistency check
             if (infoheader.biClrUsed == 0) {
@@ -148,7 +148,7 @@ public class ymageBMPParser {
         
         public BufferedImage image;
         
-        public IMAGEMAP(byte[] s, int offset, int width, int height, int compression, int bitcount, COLORTABLE colortable) {
+        public IMAGEMAP(final byte[] s, final int offset, final int width, final int height, final int compression, final int bitcount, final COLORTABLE colortable) {
             // parse picture content
             if ((width != 0) && (height != 0)) {
                 image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
@@ -167,7 +167,7 @@ public class ymageBMPParser {
         }
         
 
-        private void parseBMP1(byte[] s, int offset, int width, int height, COLORTABLE colortable) {
+        private void parseBMP1(final byte[] s, final int offset, final int width, final int height, final COLORTABLE colortable) {
             int n = 0;
             int b;
             for (int rows = 0; rows < height; rows++) {
@@ -188,7 +188,7 @@ public class ymageBMPParser {
             }
         }
         
-        private void parseBMP4(byte[] s, int offset, int width, int height, COLORTABLE colortable) {
+        private void parseBMP4(final byte[] s, final int offset, final int width, final int height, final COLORTABLE colortable) {
             int n = 0;
             int b;
             for (int rows = 0; rows < height; rows++) {
@@ -203,7 +203,7 @@ public class ymageBMPParser {
             }
         }
 
-        private void parseBMP8(byte[] s, int offset, int width, int height, COLORTABLE colortable) {
+        private void parseBMP8(final byte[] s, final int offset, final int width, final int height, final COLORTABLE colortable) {
             int n = 0;
             for (int rows = 0; rows < height; rows++) {
                 for (int columns = 0; columns < width; columns++) {
@@ -215,7 +215,7 @@ public class ymageBMPParser {
             }
         }
         
-        private void parseBMP24(byte[] s, int offset, int width, int height) {
+        private void parseBMP24(final byte[] s, final int offset, final int width, final int height) {
             int n = 0;
             for (int rows = 0; rows < height; rows++) {
                 for (int columns = 0; columns < width; columns++) {
@@ -227,7 +227,7 @@ public class ymageBMPParser {
             }
         }
         
-        private void parseBMP32(byte[] s, int offset, int width, int height) {
+        private void parseBMP32(final byte[] s, final int offset, final int width, final int height) {
             int n = 0;
             for (int rows = 0; rows < height; rows++) {
                 for (int columns = 0; columns < width; columns++) {
@@ -238,34 +238,34 @@ public class ymageBMPParser {
             }
         }
 
-        private final int fill4(int x) {
-            int r = x % 4;
+        private final int fill4(final int x) {
+            final int r = x % 4;
             if (r == 0) return 0; else return 4 - r;
         }
     }
     
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         // read a bmp and write it as png
         System.setProperty("java.awt.headless", "true");
-        File in = new File(args[0]);
-        File out = new File(args[1]);
+        final File in = new File(args[0]);
+        final File out = new File(args[1]);
         
-        byte[] file = new byte[(int) in.length()];
+        final byte[] file = new byte[(int) in.length()];
         FileInputStream fis = null;
         try {
             fis = new FileInputStream(in);
             fis.read(file);
-        } catch (FileNotFoundException e) {
+        } catch (final FileNotFoundException e) {
             e.printStackTrace();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             e.printStackTrace();
         }
         
-        ymageBMPParser parser = new ymageBMPParser(file);
+        final ymageBMPParser parser = new ymageBMPParser(file);
         
         try {
             ImageIO.write(parser.getImage(), "PNG", out);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             e.printStackTrace();
         }
     }

@@ -39,10 +39,10 @@ import java.util.TreeMap;
 public class kelondroBufferedEcoFS {
 
     private kelondroEcoFS efs;
-    private int maxEntries;
-    private TreeMap<Long, byte[]> buffer;
+    private final int maxEntries;
+    private final TreeMap<Long, byte[]> buffer;
     
-    public kelondroBufferedEcoFS(kelondroEcoFS efs, int maxEntries) {
+    public kelondroBufferedEcoFS(final kelondroEcoFS efs, final int maxEntries) {
         this.efs = efs;
         this.maxEntries = maxEntries;
         this.buffer = new TreeMap<Long, byte[]>();
@@ -50,7 +50,7 @@ public class kelondroBufferedEcoFS {
 
     private void flushBuffer() throws IOException {
         if (efs == null) return;
-        Iterator<Map.Entry<Long, byte[]>> i = buffer.entrySet().iterator();
+        final Iterator<Map.Entry<Long, byte[]>> i = buffer.entrySet().iterator();
         Map.Entry<Long, byte[]> entry;
         while (i.hasNext()) {
             entry = i.next();
@@ -70,7 +70,7 @@ public class kelondroBufferedEcoFS {
     public synchronized void close() {
         try {
             flushBuffer();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             e.printStackTrace();
         }
         if (efs != null) efs.close();
@@ -81,10 +81,10 @@ public class kelondroBufferedEcoFS {
         if (this.efs != null) this.close();
     }
     
-    public synchronized void get(long index, byte[] b, int start) throws IOException {
+    public synchronized void get(final long index, final byte[] b, final int start) throws IOException {
         assert b.length - start >= efs.recordsize;
         if (index >= size()) throw new IndexOutOfBoundsException("kelondroBufferedEcoFS.get(" + index + ") outside bounds (" + this.size() + ")");
-        byte[] bb = buffer.get(new Long(index));
+        final byte[] bb = buffer.get(new Long(index));
         if (bb == null) {
             efs.get(index, b, start);
         } else {
@@ -92,29 +92,29 @@ public class kelondroBufferedEcoFS {
         }
     }
 
-    public synchronized void put(long index, byte[] b, int start) throws IOException {
+    public synchronized void put(final long index, final byte[] b, final int start) throws IOException {
         assert b.length - start >= efs.recordsize;
-        long s = size();
+        final long s = size();
         if (index > s) throw new IndexOutOfBoundsException("kelondroBufferedEcoFS.put(" + index + ") outside bounds (" + this.size() + ")");
         if (index == s) {
             efs.add(b, start);
         } else {
-            byte[] bb = new byte[efs.recordsize];
+            final byte[] bb = new byte[efs.recordsize];
             System.arraycopy(b, start, bb, 0, efs.recordsize);
             buffer.put(new Long(index), bb);
             if (buffer.size() > this.maxEntries) flushBuffer();
        }
     }
     
-    public synchronized void add(byte[] b, int start) throws IOException {
+    public synchronized void add(final byte[] b, final int start) throws IOException {
         assert b.length - start >= efs.recordsize;
         // index == size() == efs.size();
         efs.add(b, start);
     }
 
-    public synchronized void cleanLast(byte[] b, int start) throws IOException {
+    public synchronized void cleanLast(final byte[] b, final int start) throws IOException {
         assert b.length - start >= efs.recordsize;
-        byte[] bb = buffer.remove(new Long(size() - 1));
+        final byte[] bb = buffer.remove(new Long(size() - 1));
         if (bb == null) {
             efs.cleanLast(b, start);
         } else {
