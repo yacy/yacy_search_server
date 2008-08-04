@@ -57,6 +57,25 @@
             Other already visited URLs are sorted out as "double", if they are not allowed using the re-crawl option.
           </td>
         </tr>
+        <tr valign="top" class="TableCellDark">
+          <td>Create Bookmark</td>
+          <td>
+	          <label for="createBookmark">Use</label>:
+	          <input type="checkbox" name="createBookmark" id="createBookmark" />&nbsp;&nbsp;&nbsp;
+			  <label for="bookmarkFolder"> Bookmark Folder</label>:
+			  <input name="bookmarkFolder" id="bookmarkFolder" type="text" size="20" maxlength="100" value="/crawlStart" /><br />
+          	  <br/><br/>This option works with "Starting Point: From URL" only!
+          </td>
+          <td>
+            This option lets you create a bookmark from your crawl start URL. For automatic re-crawling you can use the following default folders:<br/>
+            <ul>
+	            <li>/autoReCrawl/hourly</li>
+	            <li>/autoReCrawl/daily</li>
+	            <li>/autoReCrawl/weekly</li>
+	            <li>/autoReCrawl/monthly</li>
+            </ul>            
+          </td>
+        </tr>
         <tr valign="top" class="TableCellLight">
           <td><label for="crawlingDepth">Crawling Depth</label>:</td>
           <td><input name="crawlingDepth" id="crawlingDepth" type="text" size="2" maxlength="2" value="#[crawlingDepth]#" /></td>

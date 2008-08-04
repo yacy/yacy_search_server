@@ -23,8 +23,13 @@
 
 package de.anomic.data;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -54,6 +59,9 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import de.anomic.crawler.CrawlEntry;
+import de.anomic.crawler.CrawlProfile;
+import de.anomic.crawler.ZURL;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterWriter;
 import de.anomic.index.indexWord;
@@ -62,9 +70,14 @@ import de.anomic.kelondro.kelondroCloneableIterator;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMap;
 import de.anomic.kelondro.kelondroNaturalOrder;
+import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.server.serverBusyThread;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverFileUtils;
+import de.anomic.server.serverInstantBusyThread;
 import de.anomic.server.logging.serverLog;
+import de.anomic.yacy.yacyNewsPool;
+import de.anomic.yacy.yacyNewsRecord;
 import de.anomic.yacy.yacyURL;
 
 public class bookmarksDB {
@@ -75,6 +88,7 @@ public class bookmarksDB {
 	final static int SORT_ALPHA = 1;
 	final static int SORT_SIZE = 2;
 	final static int SHOW_ALL = -1;
+	final static String SLEEP_TIME = "3600000"; // default sleepTime: check for recrawls every hour
 	
 	// bookmarks
     kelondroMap bookmarksTable;		// kelondroMap bookmarksTable;
@@ -85,7 +99,9 @@ public class bookmarksDB {
     
     // dates
     kelondroMap datesTable;
-
+    
+    // autoReCrawl    
+    private serverBusyThread autoReCrawl;
     
 	// ------------------------------------
 	// bookmarksDB's class constructor
@@ -109,6 +125,14 @@ public class bookmarksDB {
         this.datesTable = new kelondroMap(new kelondroBLOBTree(datesFile, true, true, 20, 256, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 500);
         if (!datesExisted) rebuildDates();
 
+        // autoReCrawl
+        plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
+        this.autoReCrawl = new serverInstantBusyThread(this, "autoReCrawl", null, null);
+        long sleepTime = Long.parseLong(sb.getConfig("autoReCrawl_idlesleep" , SLEEP_TIME));
+        sb.deployThread("autoReCrawl", "autoReCrawl Scheduler", "simple scheduler for automatic re-crawls of bookmarked urls", null, autoReCrawl, -1,
+                sleepTime, sleepTime, Long.parseLong(sb.getConfig("autoReCrawl_memprereq" , "-1"))
+        );
+        serverLog.logInfo("BOOKMARKS", "autoReCrawl - thread initialized checking every "+(sleepTime/1000/60)+" minutes for recrawls");
     }
 
     // -----------------------------------------------------
@@ -121,6 +145,153 @@ public class bookmarksDB {
         tagsTable.close();
         datesTable.close();
     }
+    
+    // -----------------------------------------------------
+	// bookmarksDB's functions for autoReCrawl
+	// ----------------------------------------------------- 
+    
+    public boolean autoReCrawl() {
+    	
+    	// read crontab
+        File f = new File (plasmaSwitchboard.getSwitchboard().getRootPath(),"DATA/SETTINGS/autoReCrawl.conf");
+        String s;
+        try {                    	
+        	BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(f)));
+        	serverLog.logInfo("BOOKMARKS", "autoReCrawl - reading schedules from " + f);
+        	while( null != (s = in.readLine()) ) {
+        		if (!s.startsWith("#") && s.length()>0) {        			
+        			String parser[] = s.split("\t");
+        			if (parser.length == 13) {        				
+        				folderReCrawl(Long.parseLong(parser[0]), parser[1], parser[2], Integer.parseInt(parser[3]), Integer.parseInt(parser[4]), 
+           								Integer.parseInt(parser[5]), Integer.parseInt(parser[6]), Boolean.parseBoolean(parser[7]), 
+           								Boolean.parseBoolean(parser[8]), Boolean.parseBoolean(parser[9]), 
+           								Boolean.parseBoolean(parser[10]), Boolean.parseBoolean(parser[11]), 
+           								Boolean.parseBoolean(parser[12])
+           				);           			
+        			}
+        		}        		
+        	}
+        	in.close();
+        } catch( FileNotFoundException ex ) {        	
+        	try {
+        		serverLog.logInfo("BOOKMARKS", "autoReCrawl - creating new autoReCrawl.conf"); 
+        		File inputFile = new File(plasmaSwitchboard.getSwitchboard().getRootPath(),"defaults/autoReCrawl.conf");
+	            File outputFile = new File(plasmaSwitchboard.getSwitchboard().getRootPath(),"DATA/SETTINGS/autoReCrawl.conf");	
+	            FileReader i = new FileReader(inputFile);
+	            FileWriter o = new FileWriter(outputFile);
+	            int c;	
+	            while ((c = i.read()) != -1)
+	              o.write(c);	
+	            i.close();
+	            o.close();
+	            autoReCrawl();
+	        	return true;
+        	} catch( FileNotFoundException e ) {
+        		 serverLog.logSevere("BOOKMARKS", "autoReCrawl - file not found error: defaults/autoReCrawl.conf", e);
+        		 return false;
+        	} catch (IOException e) {
+        		serverLog.logSevere("BOOKMARKS", "autoReCrawl - IOException: defaults/autoReCrawl.conf", e);
+       		 	return false;
+        	}
+        } catch( Exception ex ) {
+        	serverLog.logSevere("BOOKMARKS", "autoReCrawl - error reading " + f, ex);
+        	return false;
+        }
+    	return true;
+    }    
+    
+    public void folderReCrawl (long schedule, String folder, String newcrawlingfilter, int newcrawlingdepth, int crawlingIfOlder, 
+    		int crawlingDomFilterDepth, int crawlingDomMaxPages, boolean crawlingQ, boolean indexText, boolean indexMedia, 
+    		boolean crawlOrder, boolean xsstopw, boolean storeHTCache) {
+
+	    plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
+	    Iterator<String> bit=getBookmarksIterator(folder, true);    		
+		serverLog.logInfo("BOOKMARKS", "autoReCrawl - processing: "+folder);
+		 
+		boolean xdstopw = xsstopw;
+		boolean xpstopw = xsstopw;
+				
+		while(bit.hasNext()) {
+			
+			Bookmark bm = getBookmark(bit.next());			
+			long sleepTime = Long.parseLong(sb.getConfig("autoReCrawl_idlesleep" , SLEEP_TIME));			
+			long interTime = (System.currentTimeMillis()-bm.getTimeStamp())%schedule;
+			
+			Date date=new Date(bm.getTimeStamp());
+			serverLog.logInfo("BOOKMARKS", "autoReCrawl - checking schedule for: "+"["+serverDate.formatISO8601(date)+"] "+bm.getUrl());
+			
+			if (interTime >= 0 && interTime < sleepTime) {			
+				try {	
+	    			// check if the crawl filter works correctly    			
+	    			Pattern.compile(newcrawlingfilter);
+	    			
+	    			// set crawlingStart to BookmarkUrl    			
+	    			String crawlingStart = bm.getUrl();	    			
+	    			
+                    // stack request
+                    // first delete old entry, if exists
+                    yacyURL crawlingStartURL = new yacyURL(crawlingStart, null);
+                    String urlhash = crawlingStartURL.hash();
+                    sb.webIndex.removeURL(urlhash);
+                    sb.crawlQueues.noticeURL.removeByURLHash(urlhash);
+                    sb.crawlQueues.errorURL.remove(urlhash);
+	               
+	                // stack url
+	                sb.webIndex.profilesPassiveCrawls.removeEntry(crawlingStartURL.hash()); // if there is an old entry, delete it
+	                CrawlProfile.entry pe = sb.webIndex.profilesActiveCrawls.newEntry(
+	                        "autoReCrawl", crawlingStartURL, newcrawlingfilter, newcrawlingfilter,
+	                        newcrawlingdepth, newcrawlingdepth,
+	                        crawlingIfOlder, crawlingDomFilterDepth, crawlingDomMaxPages,
+	                        crawlingQ,
+	                        indexText, indexMedia,
+	                        storeHTCache, true, crawlOrder, xsstopw, xdstopw, xpstopw);
+	                String reasonString = sb.crawlStacker.stackCrawl(crawlingStartURL, null, sb.webIndex.seedDB.mySeed().hash, "CRAWLING-ROOT", new Date(), 0, pe);
+	                
+	                if (reasonString == null) {
+	                	serverLog.logInfo("BOOKMARKS", "autoReCrawl - adding crawl profile for: " + crawlingStart);
+	                	// generate a YaCyNews if the global flag was set
+	                    if (crawlOrder) {
+	                        Map<String, String> m = new HashMap<String, String>(pe.map()); // must be cloned
+	                        m.remove("specificDepth");
+	                        m.remove("indexText");
+	                        m.remove("indexMedia");
+	                        m.remove("remoteIndexing");
+	                        m.remove("xsstopw");
+	                        m.remove("xpstopw");
+	                        m.remove("xdstopw");
+	                        m.remove("storeTXCache");
+	                        m.remove("storeHTCache");
+	                        m.remove("generalFilter");
+	                        m.remove("specificFilter");
+	                        m.put("intention", "Automatic ReCrawl!");
+	                        sb.webIndex.newsPool.publishMyNews(yacyNewsRecord.newRecord(sb.webIndex.seedDB.mySeed(), yacyNewsPool.CATEGORY_CRAWL_START, m));	                      
+	                    }                    
+	                } else {
+	                	serverLog.logInfo("BOOKMARKS", "autoReCrawl error adding crawl profile: " + crawlingStart + "- " + reasonString);                	
+	                	ZURL.Entry ee = sb.crawlQueues.errorURL.newEntry(
+	                            new CrawlEntry(
+	                                    sb.webIndex.seedDB.mySeed().hash, 
+	                                    crawlingStartURL, 
+	                                    "", 
+	                                    "", 
+	                                    new Date(),
+	                                    pe.handle(),
+	                                    0, 
+	                                    0, 
+	                                    0),
+	                            sb.webIndex.seedDB.mySeed().hash,
+	                            new Date(),
+	                            1,
+	                            reasonString);
+	                    
+	                    ee.store();
+	                    sb.crawlQueues.errorURL.push(ee);
+	                }              
+	    		} catch (MalformedURLException e1) {}
+			} // if
+		} // while(bit.hasNext())    	
+       	return;
+    } // } autoReCrawl() 
     
     // -------------------------------------
 	// bookmarksDB's public helper functions

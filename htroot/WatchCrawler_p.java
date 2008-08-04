@@ -32,6 +32,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -40,6 +41,8 @@ import de.anomic.crawler.CrawlEntry;
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.SitemapImporter;
 import de.anomic.crawler.ZURL;
+import de.anomic.data.bookmarksDB;
+import de.anomic.data.listManager;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterWriter;
 import de.anomic.http.httpHeader;
@@ -207,6 +210,19 @@ public class WatchCrawler_p {
                             final String reasonString = sb.crawlStacker.stackCrawl(url, null, sb.webIndex.seedDB.mySeed().hash, "CRAWLING-ROOT", new Date(), 0, pe);
                             
                             if (reasonString == null) {
+                            	// create a bookmark from crawl start url
+                            	Set<String> tags=listManager.string2set(bookmarksDB.cleanTagsString(post.get("bookmarkFolder","/crawlStart")));                                
+                                tags.add("crawlStart");
+                            	if (post.get("createBookmark","off").equals("on")) {
+                                	bookmarksDB.Bookmark bookmark = sb.bookmarksDB.createBookmark(crawlingStart, "admin");
+                        			if(bookmark != null){
+                        				bookmark.setProperty(bookmarksDB.Bookmark.BOOKMARK_TITLE, crawlingStart);                        				
+                        				bookmark.setOwner("admin");                        				
+                        				bookmark.setPublic(false);    
+                        				bookmark.setTags(tags, true);
+                        				sb.bookmarksDB.saveBookmark(bookmark);
+                        			}
+                                }
                                 // liftoff!
                                 prop.put("info", "8");//start msg
                                 prop.putHTML("info_crawlingURL", (post.get("crawlingURL")));
@@ -227,8 +243,7 @@ public class WatchCrawler_p {
                                     m.remove("specificFilter");
                                     m.put("intention", post.get("intention", "").replace(',', '/'));
                                     sb.webIndex.newsPool.publishMyNews(yacyNewsRecord.newRecord(sb.webIndex.seedDB.mySeed(), yacyNewsPool.CATEGORY_CRAWL_START, m));
-                                }
-                                
+                                }                                
                             } else {
                                 prop.put("info", "5"); //Crawling failed
                                 prop.putHTML("info_crawlingURL", (post.get("crawlingURL")));

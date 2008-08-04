@@ -134,7 +134,7 @@ public class Bookmarks {
     			final String pathString = post.get("path");
     			tagsString=tagsString+","+pathString;
     			if(tagsString.equals("")){
-    				tagsString="unsorted"; //default tag
+    				tagsString="/unsorted"; //default tag
     			}
     			final Set<String> tags=listManager.string2set(bookmarksDB.cleanTagsString(tagsString)); 
     			final bookmarksDB.Bookmark bookmark = sb.bookmarksDB.createBookmark(url, username);
