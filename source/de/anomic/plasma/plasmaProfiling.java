@@ -53,6 +53,7 @@ public class plasmaProfiling {
     public static ymageMatrix performanceGraph(final int width, final int height, final String subline) {        
         // find maximum values for automatic graph dimension adoption
         final int maxppm = (int) maxPayload("ppm", 25);
+        final int maxwords = (int) maxPayload("wordcache", 10000);
         final long maxbytes = maxPayload("memory", 110 * 1024 * 1024);
         
         // declare graph and set dimensions
@@ -60,41 +61,28 @@ public class plasmaProfiling {
         final int rightborder = 30;
         final int topborder = 20;
         final int bottomborder = 20;
-        final int leftscale = 50;
+        final int leftscale = 20000;
         final int rightscale = 100;
+        final int anotscale = 50;
         final int bottomscale = 60;
         final int vspace = height - topborder - bottomborder;
         final int hspace = width - leftborder - rightborder;
         final int maxtime = 600;
-        ymageChart chart = new ymageChart(width, height, "FFFFFF", "000000", "AAAAAA", leftborder, rightborder, topborder, bottomborder, "PEER PERFORMANCE GRAPH: PAGES/MINUTE and USED MEMORY", subline);
+        ymageChart chart = new ymageChart(width, height, "FFFFFF", "000000", "AAAAAA", leftborder, rightborder, topborder, bottomborder, "YACY PEER PERFORMANCE: MAIN MEMORY, WORD CACHE AND PAGES/MINUTE (PPM)", subline);
         chart.declareDimension(ymageChart.DIMENSION_BOTTOM, bottomscale, hspace / (maxtime / bottomscale), -maxtime, "000000", "CCCCCC", "TIME/SECONDS");
-        chart.declareDimension(ymageChart.DIMENSION_LEFT, leftscale, vspace * leftscale / maxppm, 0, "008800", null , "PPM [PAGES/MINUTE]");
+        chart.declareDimension(ymageChart.DIMENSION_LEFT, leftscale, vspace * leftscale / maxwords, 0, "008800", null , "WORDS IN CACHE");
         chart.declareDimension(ymageChart.DIMENSION_RIGHT, rightscale, vspace * rightscale / (int)(maxbytes / 1024 / 1024), 0, "0000FF", "CCCCCC", "MEMORY/MEGABYTE");
+        chart.declareDimension(ymageChart.DIMENSION_ANOT, anotscale, vspace * anotscale / maxppm, 0, "008800", null , "PPM [PAGES/MINUTE]");
         
-        // draw ppm
-        Iterator<Event> i = serverProfiling.history("ppm");
+        // draw chart
         long time;
         final long now = System.currentTimeMillis();
         long bytes;
-        int x0 = 1, x1, y0 = 0, y1, ppm;
+        int x0 = 1, x1, y0 = 0, y1, ppm, words;
         serverProfiling.Event event;
         try {
-            while (i.hasNext()) {
-                event = i.next();
-                time = event.time - now;
-                ppm = (int) ((Long) event.payload).longValue();
-                x1 = (int) (time/1000);
-                y1 = ppm;
-                chart.setColor("228822");
-                chart.chartDot(ymageChart.DIMENSION_BOTTOM, ymageChart.DIMENSION_LEFT, x1, y1, 2);
-                chart.setColor("008800");
-                if (x0 < 0) chart.chartLine(ymageChart.DIMENSION_BOTTOM, ymageChart.DIMENSION_LEFT, x0, y0, x1, y1);
-                x0 = x1; y0 = y1;
-            }
-
             // draw memory
-            i = serverProfiling.history("memory");
-            x0 = 1;
+            Iterator<Event> i = serverProfiling.history("memory");
             while (i.hasNext()) {
                 event = i.next();
                 time = event.time - now;
@@ -102,11 +90,44 @@ public class plasmaProfiling {
                 x1 = (int) (time/1000);
                 y1 = (int) (bytes / 1024 / 1024);
                 chart.setColor("AAAAFF");
-                chart.chartDot(ymageChart.DIMENSION_BOTTOM, ymageChart.DIMENSION_RIGHT, x1, y1, 2);
+                chart.chartDot(ymageChart.DIMENSION_BOTTOM, ymageChart.DIMENSION_RIGHT, x1, y1, 2, null);
                 chart.setColor("0000FF");
                 if (x0 < 0) chart.chartLine(ymageChart.DIMENSION_BOTTOM, ymageChart.DIMENSION_RIGHT, x0, y0, x1, y1);
                 x0 = x1; y0 = y1;
             }
+            
+            // draw wordcache
+            i = serverProfiling.history("wordcache");
+            x0 = 1; y0 = 0;
+            while (i.hasNext()) {
+                event = i.next();
+                time = event.time - now;
+                words = (int) ((Long) event.payload).longValue();
+                x1 = (int) (time/1000);
+                y1 = words;
+                chart.setColor("228822");
+                chart.chartDot(ymageChart.DIMENSION_BOTTOM, ymageChart.DIMENSION_LEFT, x1, y1, 2, null);
+                chart.setColor("008800");
+                if (x0 < 0) chart.chartLine(ymageChart.DIMENSION_BOTTOM, ymageChart.DIMENSION_LEFT, x0, y0, x1, y1);
+                x0 = x1; y0 = y1;
+            }
+            
+            // draw ppm
+            i = serverProfiling.history("ppm");
+            x0 = 1; y0 = 0;
+            while (i.hasNext()) {
+                event = i.next();
+                time = event.time - now;
+                ppm = (int) ((Long) event.payload).longValue();
+                x1 = (int) (time/1000);
+                y1 = ppm;
+                chart.setColor("AA8888");
+                if (x0 < 0) chart.chartLine(ymageChart.DIMENSION_BOTTOM, ymageChart.DIMENSION_ANOT, x0, y0, x1, y1);
+                chart.setColor("AA2222");
+                chart.chartDot(ymageChart.DIMENSION_BOTTOM, ymageChart.DIMENSION_ANOT, x1, y1, 2, ppm + " PPM");
+                x0 = x1; y0 = y1;
+            }
+            
             bufferChart = chart;
         } catch (final ConcurrentModificationException cme) {
             chart = bufferChart;

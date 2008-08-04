@@ -43,7 +43,7 @@ public class status_p {
         sb.updateMySeed();
         final int  cacheOutSize = sb.webIndex.dhtOutCacheSize();
         final long cacheMaxSize = sb.getConfigLong(plasmaSwitchboardConstants.WORDCACHE_MAX_COUNT, 10000);
-        prop.putNum("ppm", sb.webIndex.seedDB.mySeed().getPPM());
+        prop.putNum("ppm", sb.currentPPM());
         prop.putNum("qpm", sb.webIndex.seedDB.mySeed().getQPM());
         prop.putNum("wordCacheSize", sb.webIndex.dhtOutCacheSize() + sb.webIndex.dhtInCacheSize());
         prop.putNum("wordCacheWSize", cacheOutSize);

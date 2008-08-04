@@ -1683,7 +1683,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         if (System.currentTimeMillis() - lastPPMUpdate > 30000) {
             // we don't want to do this too often
             updateMySeed();
-            serverProfiling.update("ppm", new Long(webIndex.seedDB.mySeed().getPPM()));
+            serverProfiling.update("ppm", new Long(currentPPM()));
+            serverProfiling.update("wordcache", new Long(webIndex.cacheSize()));
             lastPPMUpdate = System.currentTimeMillis();
         }
         serverProfiling.update("indexed", queueEntry.url().toNormalform(true, false));
@@ -2090,6 +2091,14 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         ee.store();
         // push it onto the stack
         crawlQueues.errorURL.push(ee);
+    }
+    
+    public int currentPPM() {
+        final long uptime = (System.currentTimeMillis() - serverCore.startupTime) / 1000;
+        final long uptimediff = uptime - lastseedcheckuptime;
+        final long indexedcdiff = indexedPages - lastindexedPages;
+        totalPPM = (int) (indexedPages * 60 / Math.max(uptime, 1));
+        return Math.round(Math.max(indexedcdiff, 0f) * 60f / Math.max(uptimediff, 1f));
     }
     
     public void updateMySeed() {

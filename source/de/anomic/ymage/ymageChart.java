@@ -33,17 +33,18 @@ public class ymageChart extends ymageMatrix {
     public static final int DIMENSION_TOP    = 1;
     public static final int DIMENSION_LEFT   = 2;
     public static final int DIMENSION_BOTTOM = 3;
+    public static final int DIMENSION_ANOT   = 4;
     
     int leftborder;
     int rightborder;
     int topborder;
     int bottomborder;
-    int[] scales = new int[]{0,0,0,0};
-    int[] pixels = new int[]{0,0,0,0};
-    int[] offsets = new int[]{0,0,0,0};
-    String[] colnames = new String[]{"FFFFFF","FFFFFF","FFFFFF","FFFFFF"};
-    String[] colscale = new String[]{null,null,null,null};
-    String[] tablenames = new String[]{"","","",""};
+    int[] scales = new int[]{0,0,0,0,0};
+    int[] pixels = new int[]{0,0,0,0,0};
+    int[] offsets = new int[]{0,0,0,0,0};
+    String[] colnames = new String[]{"FFFFFF","FFFFFF","FFFFFF","FFFFFF","FFFFFF"};
+    String[] colscale = new String[]{null,null,null,null,null};
+    String[] tablenames = new String[]{"","","","",""};
     String name;
     String backgroundColor, foregroundColor;
     
@@ -83,11 +84,12 @@ public class ymageChart extends ymageMatrix {
         tablenames[dimensionType] = name;
     }
     
-    public void chartDot(final int dimension_x, final int dimension_y, final int coord_x, final int coord_y, final int dotsize) {
+    public void chartDot(final int dimension_x, final int dimension_y, final int coord_x, final int coord_y, final int dotsize, String anot) {
         final int x = (coord_x - offsets[dimension_x]) * pixels[dimension_x] / scales[dimension_x];
         final int y = (coord_y - offsets[dimension_y]) * pixels[dimension_y] / scales[dimension_y];
         if (dotsize == 1) plot(leftborder + x, height - bottomborder - y);
                       else dot(leftborder + x, height - bottomborder - y, dotsize, true);
+        if (anot != null) ymageToolPrint.print(this, leftborder + x + dotsize + 2, height - bottomborder - y, 0, anot, -1);
     }
     
     public void chartLine(final int dimension_x, final int dimension_y, final int coord_x1, final int coord_y1, final int coord_x2, final int coord_y2) {
@@ -131,7 +133,7 @@ public class ymageChart extends ymageMatrix {
             }
             setColor(colorNaming);
             line(x - 3, y, x + 3, y);
-            s1 = Integer.toString(s);
+            s1 = (s >= 1000000 && s % 10000 == 0) ? Integer.toString(s / 1000000) + "M" : (s >= 1000 && s % 1000 == 0) ? Integer.toString(s / 1000) + "K" : Integer.toString(s);
             if (s1.length() > s1max) s1max = s1.length();
             ymageToolPrint.print(this, (left) ? leftborder - 4 : width - rightborder + 4, y, 0, s1, (left) ? 1 : -1);
             y -= pixelperscale;
@@ -156,10 +158,10 @@ public class ymageChart extends ymageMatrix {
         ip.declareDimension(DIMENSION_LEFT, 50, 40, 0, green, scale , "PPM [PAGES/MINUTE]");
         ip.declareDimension(DIMENSION_RIGHT, 100, 20, 0, blue, scale, "MEMORY/MEGABYTE");
         ip.setColor(green);
-        ip.chartDot(DIMENSION_BOTTOM, DIMENSION_LEFT, -160, 100, 5);
+        ip.chartDot(DIMENSION_BOTTOM, DIMENSION_LEFT, -160, 100, 5, null);
         ip.chartLine(DIMENSION_BOTTOM, DIMENSION_LEFT, -160, 100, -130, 200);
         ip.setColor(blue);
-        ip.chartDot(DIMENSION_BOTTOM, DIMENSION_RIGHT, -50, 300, 2);
+        ip.chartDot(DIMENSION_BOTTOM, DIMENSION_RIGHT, -50, 300, 2, null);
         ip.chartLine(DIMENSION_BOTTOM, DIMENSION_RIGHT, -80, 100, -50, 300);
         //ip.print(100, 100, 0, "TEXT", true);
         //ip.print(100, 100, 0, "1234", false);
