@@ -129,10 +129,10 @@ public class bookmarksDB {
         plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
         this.autoReCrawl = new serverInstantBusyThread(this, "autoReCrawl", null, null);
         long sleepTime = Long.parseLong(sb.getConfig("autoReCrawl_idlesleep" , SLEEP_TIME));
-        sb.deployThread("autoReCrawl", "autoReCrawl Scheduler", "simple scheduler for automatic re-crawls of bookmarked urls", null, autoReCrawl, -1,
+        sb.deployThread("autoReCrawl", "autoReCrawl Scheduler", "simple scheduler for automatic re-crawls of bookmarked urls", null, autoReCrawl, 120000,
                 sleepTime, sleepTime, Long.parseLong(sb.getConfig("autoReCrawl_memprereq" , "-1"))
         );
-        serverLog.logInfo("BOOKMARKS", "autoReCrawl - thread initialized checking every "+(sleepTime/1000/60)+" minutes for recrawls");
+        serverLog.logInfo("BOOKMARKS", "autoReCrawl - serverBusyThread initialized checking every "+(sleepTime/1000/60)+" minutes for recrawls");
     }
 
     // -----------------------------------------------------
