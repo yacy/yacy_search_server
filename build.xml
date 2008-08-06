@@ -1039,11 +1039,11 @@
   <target name="winInstallerExe" depends="compileExtensions,copyMain4Dist,copyExt4Dist" description="Creates the windows installer.exe">
     <!-- http://nsisant.sourceforge.net/ -->
     <mkdir dir="${release_windows}" />
-    <copy file="yacy.nsi" tofile="${release_windows}/yacy.nsi" overwrite="true" filtering="true" />
+    <copy file="build.nsi" tofile="${release_windows}/build.nsi" overwrite="true" filtering="true" />
     <taskdef name="nsis" classname="net.sf.nsisant.Task">
       <classpath location="libbuild/nsisant-1.2.jar"/>
     </taskdef>
-    <nsis script="${release_windows}/yacy.nsi" nocd="yes" />
+    <nsis script="${release_windows}/build.nsi" nocd="yes" />
     <move file="${release_windows}/yacy_v${releaseVersion}_${DSTAMP}_${releaseNr}.exe"
           tofile="${release}/yacy_v${releaseVersion}_${DSTAMP}_${releaseNr}.exe" />
   	
