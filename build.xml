@@ -529,6 +529,11 @@
                includes="**/*"/>
                
     </copy>
+    <copy todir="${release_source}/libbuild">
+      <fileset dir="${libbuild}" 
+               includes="**/*"/>
+               
+    </copy>
 
     <!-- copy configuration files -->
     <copy todir="${release_source}">
@@ -1036,7 +1041,7 @@
     <mkdir dir="${release_windows}" />
     <copy file="yacy.nsi" tofile="${release_windows}/yacy.nsi" overwrite="true" filtering="true" />
     <taskdef name="nsis" classname="net.sf.nsisant.Task">
-      <classpath location="nsisant-1.2.jar"/>
+      <classpath location="libbuild/nsisant-1.2.jar"/>
     </taskdef>
     <nsis script="${release_windows}/yacy.nsi" nocd="yes" />
     <move file="${release_windows}/yacy_v${releaseVersion}_${DSTAMP}_${releaseNr}.exe"
