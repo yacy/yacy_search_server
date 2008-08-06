@@ -204,6 +204,8 @@ public final class httpChunkedInputStream extends InputStream {
             result = Integer.parseInt(baos.toString().trim(), 16);
         } catch (final NumberFormatException e) {
             throw new IOException ("Malformed chunk. Bad chunk size: " + baos.toString());
+        } finally {
+        	baos.close();
         }
         return result;
     }

@@ -166,7 +166,7 @@ public class indexRWIEntryOrder {
             this.start = start;
             this.end = end;
             this.doms = new HashMap<String, Integer>();
-            this.int1 = new Integer(1);
+            this.int1 = 1;
             this.decodedEntries = new ArrayList<indexRWIVarEntry>();
         }
         
@@ -190,7 +190,7 @@ public class indexRWIEntryOrder {
                 if (count == null) {
                 	doms.put(dom, int1);
                 } else {
-                	doms.put(dom, new Integer(count.intValue() + 1));
+                	doms.put(dom, Integer.valueOf(count.intValue() + 1));
                 }
             }
         }

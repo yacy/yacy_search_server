@@ -94,7 +94,7 @@ public class kelondroBytesIntMap {
             while (ei.hasNext()) {
                 i = (int) ei.next().getColLong(1);
                 assert i < initialSize : "i = " + i + ", initialSize = " + initialSize;
-                is[c++] = new Integer(i);
+                is[c++] = Integer.valueOf(i);
             }
             report.add(is);
         }

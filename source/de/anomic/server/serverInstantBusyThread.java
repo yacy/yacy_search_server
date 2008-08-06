@@ -66,7 +66,7 @@ public final class serverInstantBusyThread extends serverAbstractBusyThread impl
         }
         this.environment = (env instanceof Class) ? null : env;
         this.setName(theClass.getName() + "." + jobExec);
-        this.handle = new Long(System.currentTimeMillis() + this.getName().hashCode());
+        this.handle = Long.valueOf(System.currentTimeMillis() + this.getName().hashCode());
     }
     
     public int getJobCount() {

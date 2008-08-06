@@ -187,17 +187,16 @@ public class kelondroIntBytesMap {
                 index1 = new kelondroRowSet(rowdef, 0);
             }
             return index0.rows(true, null);
-        }
-        assert (index1 != null);
-    	if (index0 == null) {
+        } else {
+        	assert (index1 != null);
             return index1.rows(true, null);
         }
-        return new kelondroMergeIterator<kelondroRow.Entry>(
-    				index0.rows(true, null),
-    				index1.rows(true, null),
-    				entryOrder,
-    				kelondroMergeIterator.simpleMerge,
-                    true);
+//        return new kelondroMergeIterator<kelondroRow.Entry>(
+//    				index0.rows(true, null),
+//    				index1.rows(true, null),
+//    				entryOrder,
+//    				kelondroMergeIterator.simpleMerge,
+//                    true);
     }
     
     public void flush() {
@@ -233,9 +232,9 @@ public class kelondroIntBytesMap {
 		for (int i = 0; i < 1000000; i++) {
 			r = Math.abs(random.nextLong() % 10000);
 			//System.out.println("add " + r);
-			jcontrol.add(new Long(r));
+			jcontrol.add(Long.valueOf(r));
 			kcontrol.putb((int) r, "x".getBytes());
-			if (random.nextLong() % 5 == 0) ra.add(new Long(r));
+			if (random.nextLong() % 5 == 0) ra.add(Long.valueOf(r));
 			if ((ra.size() > 0) && (random.nextLong() % 7 == 0)) {
 				rc++;
 				p = Math.abs(random.nextInt() % ra.size());

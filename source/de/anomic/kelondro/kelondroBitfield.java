@@ -70,7 +70,6 @@ public class kelondroBitfield implements Cloneable {
             System.arraycopy(bb, 0, nb, 0, bb.length);
             for (int i = bb.length; i < nb.length; i++) nb[i] = 0;
             bb = nb;
-            nb = null;
         }
         if (value) {
             bb[slot] = (byte) (bb[slot] | (1 << (pos % 8)));
@@ -152,17 +151,17 @@ public class kelondroBitfield implements Cloneable {
         System.out.println("available: " + l);
         System.out.println("bevore:    " + test.toString());
         for (int i = 0; i < l/2; i++) {
-            System.out.println(new String(test.exportB64()));
+            System.out.println(test.exportB64());
             test.set(i, true);
             System.out.println(i + ":" + test.toString()); 
         }
         for (int i = l/2; i < l; i++) {
-            System.out.println(new String(test.exportB64()));
+            System.out.println(test.exportB64());
             test = new kelondroBitfield(4, test.exportB64());
             test.set(i, true);
             System.out.println(i + ":" + test.toString()); 
         }
-        System.out.println(new String(test.exportB64()));
+        System.out.println(test.exportB64());
         for (int i = l - 1; i >= 0; i--) {
             test.set(i, false);
             System.out.println(i + ":" + test.toString()); 

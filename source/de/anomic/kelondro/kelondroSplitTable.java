@@ -105,7 +105,7 @@ public class kelondroSplitTable implements kelondroIndex {
                     ram = kelondroEcoTable.staticRAMIndexNeed(f, rowdef);
                 }
                 if (ram > 0) {
-                    t.put(tablefile[i], new Long(ram));
+                    t.put(tablefile[i], Long.valueOf(ram));
                     sum += ram;
                 }
             }

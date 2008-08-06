@@ -75,7 +75,7 @@ public class AnimGifEncoder {
     private boolean         m_default_interlace = false;
 
     /** The default delay time, */
-    private final int             m_default_delay = 100;
+    private final static int             m_default_delay = 100;
 
     /** Set when looping the set is requested. */
     private boolean         m_loop  = true;

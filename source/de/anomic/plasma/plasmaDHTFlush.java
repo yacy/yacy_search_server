@@ -104,7 +104,7 @@ public class plasmaDHTFlush extends Thread {
             if (this.initialWordsDBSize == 0) return 100;
             else if (currentWordsDBSize >= this.initialWordsDBSize) return 0;
             //else return (float) ((initialWordsDBSize-currentWordsDBSize)/(initialWordsDBSize/100));
-            else return (this.transferedContainerCount*100/this.initialWordsDBSize);
+            else return (this.transferedContainerCount*100f/this.initialWordsDBSize);
         }
         
         public int getTransferedEntrySpeed() {

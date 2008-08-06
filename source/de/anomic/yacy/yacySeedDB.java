@@ -204,13 +204,13 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
             seedActiveDB.remove(mySeed.hash);
             seedPassiveDB.remove(mySeed.hash);
             seedPotentialDB.remove(mySeed.hash);
-        } catch (final IOException e) {}
+        } catch (final IOException e) { serverLog.logWarning("yacySeedDB", "could not remove hash ("+ e.getClass() +"): "+ e.getMessage()); }
     }
     
     public void saveMySeed() {
         try {
           this.mySeed().save(myOwnSeedFile);
-        } catch (final IOException e) {}
+        } catch (final IOException e) { serverLog.logWarning("yacySeedDB", "could not save mySeed '"+ myOwnSeedFile +"': "+ e.getMessage()); }
     }
     
     public boolean noDHTActivity() {
@@ -221,7 +221,11 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
     @SuppressWarnings("unchecked")
     private synchronized kelondroMapDataMining openSeedTable(final File seedDBFile) {
         final boolean usetree = false;
-        new File(seedDBFile.getParent()).mkdirs();
+        final File parentDir = new File(seedDBFile.getParent());  
+        if (!parentDir.exists()) {
+			if(!parentDir.mkdirs())
+				serverLog.logWarning("yacySeedDB", "could not create directories for "+ seedDBFile.getParent());
+		}
         Class[] args;
         try {
             args = new Class[]{"".getClass(), Class.forName("java.util.Map")};
@@ -253,7 +257,8 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
         // seed.db is detected
         yacyCore.log.logFine("seed-db " + seedDBFile.toString() + " reset (on-the-fly)");
         seedDB.close();
-        seedDBFile.delete();
+        if(!seedDBFile.delete())
+        	serverLog.logWarning("yacySeedDB", "could not delete file "+ seedDBFile);
         // create new seed database
         seedDB = openSeedTable(seedDBFile);
         return seedDB;
@@ -462,7 +467,7 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
             nameLookupCache.remove(seed.getName());
             seedActiveDB.remove(seed.hash);
             seedPotentialDB.remove(seed.hash);
-        } catch (final Exception e) {}
+        } catch (final Exception e) { serverLog.logWarning("yacySeedDB", "could not remove hash ("+ e.getClass() +"): "+ e.getMessage()); }
         //seed.put(yacySeed.LASTSEEN, yacyCore.shortFormatter.format(new Date(yacyCore.universalTime())));
         try {
             final HashMap<String, String> seedPropMap = seed.getMap();
@@ -487,7 +492,7 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
             nameLookupCache.remove(seed.getName());
             seedActiveDB.remove(seed.hash);
             seedPassiveDB.remove(seed.hash);
-        } catch (final Exception e) {}
+        } catch (final Exception e) { serverLog.logWarning("yacySeedDB", "could not remove hash ("+ e.getClass() +"): "+ e.getMessage()); }
     if (seed.isProper(false) != null) return;
     //seed.put(yacySeed.LASTSEEN, yacyCore.shortFormatter.format(new Date(yacyCore.universalTime())));
         try {
@@ -511,14 +516,14 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
     	if(peerHash == null) return;
     	try {
 			seedPassiveDB.remove(peerHash);
-		} catch (final IOException e) { }
+		} catch (final IOException e) { serverLog.logWarning("yacySeedDB", "could not remove hash ("+ e.getClass() +"): "+ e.getMessage()); }
     }
     
     public synchronized void removePotential(final String peerHash) {
     	if(peerHash == null) return;
     	try {
 			seedPotentialDB.remove(peerHash);
-		} catch (final IOException e) { }
+		} catch (final IOException e) { serverLog.logWarning("yacySeedDB", "could not remove hash ("+ e.getClass() +"): "+ e.getMessage()); }
     }
         
     public boolean hasConnected(final String hash) {
@@ -826,7 +831,12 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
                 throw new Exception("UPLOAD CHECK - Error: the result vector is different. " + errorMsg + serverCore.CRLF_STRING);
             }
         } finally {
-            if (seedFile != null) try { seedFile.delete(); } catch (final Exception e) {/* ignore this */}
+            if (seedFile != null)
+				try {
+					seedFile.delete();
+				} catch (final Exception e) {
+					/* ignore this */
+				}
         }
         
         return log;

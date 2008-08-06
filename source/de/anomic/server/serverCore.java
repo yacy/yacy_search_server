@@ -335,7 +335,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
             //System.out.println("server bfHosts=" + bfHost.toString());
             if (bfHost.get(cIP) != null) {
                 Integer attempts = bfHost.get(cIP);
-                if (attempts == null) attempts = new Integer(1); else attempts = new Integer(attempts.intValue() + 1);
+                if (attempts == null) attempts = Integer.valueOf(1); else attempts = Integer.valueOf(attempts.intValue() + 1);
                 bfHost.put(cIP, attempts);
                 this.log.logWarning("SLOWING DOWN ACCESS FOR BRUTE-FORCE PREVENTION FROM " + cIP + ", ATTEMPT " + attempts.intValue());
                 // add a delay to make brute-force harder
@@ -449,7 +449,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
 
     public final class Session extends Thread {
 
-        boolean destroyed = false;
+        //boolean destroyed = false;
         private boolean runningsession = false;
         private boolean stopped = false;
         
@@ -867,6 +867,12 @@ public final class serverCore extends serverAbstractBusyThread implements server
         } catch (final IOException e) {
             if (logerr) serverLog.logSevere("SERVER", "receive interrupted - exception 2 = " + e.getMessage());
             return null;
+        } finally {
+        	try {
+				readLineBuffer.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
         }
     }
 
@@ -892,10 +898,6 @@ public final class serverCore extends serverAbstractBusyThread implements server
     	os.flush();
     	if (bufferSize > 80) return "<LONG STREAM>";
     	return new String(buffer);
-    }
-    
-    protected void finalize() throws Throwable {
-        super.finalize();
     }
     
     public static final void checkInterruption() throws InterruptedException {
@@ -997,6 +999,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
             this.log.logFine("Loading keystore file " + keyStoreFileName);
             final FileInputStream stream = new FileInputStream(keyStoreFileName);            
             ks.load(stream, keyStorePwd.toCharArray());
+            stream.close();
             
             // creating a keystore factory
             this.log.logFine("Initializing key manager factory ...");

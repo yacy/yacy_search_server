@@ -36,7 +36,7 @@ public class ymageICOParser {
 
     // this is a implementation of http://msdn2.microsoft.com/en-us/library/ms997538(d=printer).aspx
     
-    public  static int ICONDIRENTRY_size = 16;
+    public static final int ICONDIRENTRY_size = 16;
     
     private final int idCount;
     ymageBMPParser.INFOHEADER[] infoheaders;
@@ -65,7 +65,7 @@ public class ymageICOParser {
     }
     
     
-    public class ICONDIRENTRY {
+    public static class ICONDIRENTRY {
         
         public int bWidth, bHeight, bColorCount, bReserved, wPlanes, wBitCount, dwBytesInRes, dwImageOffset;
         

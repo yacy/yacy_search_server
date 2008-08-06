@@ -58,7 +58,7 @@ public class kelondroHandle implements Comparable<kelondroHandle> {
 
     public boolean equals(final Object h) {
         assert (index != NUL);
-        assert (((kelondroHandle) h).index != NUL);
+        assert (h instanceof kelondroHandle && ((kelondroHandle) h).index != NUL);
         return (h instanceof kelondroHandle && this.index == ((kelondroHandle) h).index);
     }
 

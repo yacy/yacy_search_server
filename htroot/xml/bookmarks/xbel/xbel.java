@@ -53,7 +53,7 @@ public class xbel {
     private static int recurseFolders(final Iterator<String> it, String root, int count, final boolean next, final String prev){
     	String fn="";    	
     	   	
-    	if(next) fn = it.next().toString();    		
+    	if(next) fn = it.next();    		
     	else fn = prev;
 
     	if(fn.equals("\uffff")) {    		

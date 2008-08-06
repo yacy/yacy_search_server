@@ -148,7 +148,7 @@ public class plasmaWebStructure {
             crg = new StringBuffer(maxCRGDump);
         }
         
-        return new Integer[] {new Integer(LCount), new Integer(GCount)};
+        return new Integer[] {Integer.valueOf(LCount), Integer.valueOf(GCount)};
     }
     
     public void flushCitationReference(final String type) {
@@ -186,7 +186,7 @@ public class plasmaWebStructure {
         final int refsc = refstr2count(refs);
         for (int i = 0; i < refsc; i++) {
             c = refs.substring(8 + i * 10, 8 + (i + 1) * 10);
-            map.put(c.substring(0, 6), new Integer(Integer.parseInt(c.substring(6), 16)));
+            map.put(c.substring(0, 6), Integer.valueOf(c.substring(6), 16));
         }
         return map;
     }
@@ -306,7 +306,7 @@ public class plasmaWebStructure {
             if (refs.containsKey(dom)) {
                 c = (refs.get(dom)).intValue();
             }
-            refs.put(dom, new Integer(++c));
+            refs.put(dom, Integer.valueOf(++c));
         }
         
         // check if the maxref is exceeded
@@ -441,7 +441,7 @@ public class plasmaWebStructure {
         
     }
     
-    public class structureEntry {
+    public static class structureEntry {
         public String domhash, domain, date;
         public Map<String, Integer> references;
         public structureEntry(final String domhash, final String domain, final String date, final Map<String, Integer> references) {

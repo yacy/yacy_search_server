@@ -312,7 +312,6 @@ public class kelondroBLOBTree implements kelondroBLOB {
                 byte[] buff = new byte[reclen];
                 System.arraycopy(buf, 0, buff, 0, buf.length);
                 buf = buff;
-                buff = null;
             }
             // System.out.println("write:
             // b.length="+b.length+",off="+off+",len="+(reclen-recpos));
@@ -340,7 +339,6 @@ public class kelondroBLOBTree implements kelondroBLOB {
             byte[] buff = new byte[reclen];
             System.arraycopy(buf, 0, buff, 0, buf.length);
             buf = buff;
-            buff = null;
         }
         buf[recpos] = (byte) b;
         setValueCached(elementKey(key, reccnt), buf);

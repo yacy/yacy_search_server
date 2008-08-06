@@ -202,7 +202,8 @@ public class kelondroEcoFS {
         
         // copy records from file to cache
         raf.seek(this.recordsize * index);
-        raf.read(this.cache, 0, this.recordsize * this.cachecount);
+        final int bytesRead = raf.read(this.cache, 0, this.recordsize * this.cachecount);
+        assert bytesRead == this.recordsize * this.cachecount;
     }
 
     /**

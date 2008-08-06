@@ -91,7 +91,7 @@ public class kelondroBytesLongMap {
             ei = rowset.rows();
             c = 0;
             while (ei.hasNext()) {
-                is[c++] = new Long(ei.next().getColLong(1));
+                is[c++] = Long.valueOf(ei.next().getColLong(1));
             }
             report.add(is);
         }

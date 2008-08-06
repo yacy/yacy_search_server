@@ -159,7 +159,7 @@ public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
     public void cleanupAccessTracker(final long timeout) {
         final Iterator<Map.Entry<String, TreeMap<Long, String>>> i = accessTracker.entrySet().iterator();
         while (i.hasNext()) {
-            if (i.next().getValue().tailMap(new Long(System.currentTimeMillis() - timeout)).size() == 0) i.remove();
+            if (i.next().getValue().tailMap(Long.valueOf(System.currentTimeMillis() - timeout)).size() == 0) i.remove();
         }
     }
     
@@ -170,7 +170,7 @@ public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
         if (access == null) access = new TreeMap<Long, String>();
         
         synchronized (access) {
-            access.put(new Long(System.currentTimeMillis()), accessPath);
+            access.put(Long.valueOf(System.currentTimeMillis()), accessPath);
             // write back to tracker
             accessTracker.put(host, clearTooOldAccess(access));
         }
@@ -196,7 +196,7 @@ public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
     }
     
     private TreeMap<Long, String> clearTooOldAccess(final TreeMap<Long, String> access) {
-        return new TreeMap<Long, String>(access.tailMap(new Long(System.currentTimeMillis() - maxTrackingTime)));
+        return new TreeMap<Long, String>(access.tailMap(Long.valueOf(System.currentTimeMillis() - maxTrackingTime)));
     }
     
     public Iterator<String> accessHosts() {

@@ -123,7 +123,6 @@ public final class serverByteBuffer extends OutputStream {
         byte[] tmp = new byte[newsize];
         System.arraycopy(buffer, offset, tmp, 0, length);
         buffer = tmp;
-        tmp = null;
         offset = 0;
     }
 

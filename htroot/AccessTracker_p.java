@@ -75,10 +75,10 @@ public class AccessTracker_p {
                 host = i.next();
                 access = sb.accessTrack(host);
                 prop.putHTML("page_list_" + entCount + "_host", host);
-                prop.putNum("page_list_" + entCount + "_countSecond", access.tailMap(new Long(System.currentTimeMillis() - 1000)).size());
-                prop.putNum("page_list_" + entCount + "_countMinute", access.tailMap(new Long(System.currentTimeMillis() - 1000 * 60)).size());
-                prop.putNum("page_list_" + entCount + "_count10Minutes", access.tailMap(new Long(System.currentTimeMillis() - 1000 * 60 * 10)).size());
-                prop.putNum("page_list_" + entCount + "_countHour", access.tailMap(new Long(System.currentTimeMillis() - 1000 * 60 * 60)).size());
+                prop.putNum("page_list_" + entCount + "_countSecond", access.tailMap(Long.valueOf(System.currentTimeMillis() - 1000)).size());
+                prop.putNum("page_list_" + entCount + "_countMinute", access.tailMap(Long.valueOf(System.currentTimeMillis() - 1000 * 60)).size());
+                prop.putNum("page_list_" + entCount + "_count10Minutes", access.tailMap(Long.valueOf(System.currentTimeMillis() - 1000 * 60 * 10)).size());
+                prop.putNum("page_list_" + entCount + "_countHour", access.tailMap(Long.valueOf(System.currentTimeMillis() - 1000 * 60 * 60)).size());
                 entCount++;
             }
             } catch (final ConcurrentModificationException e) {} // we don't want to synchronize this
@@ -207,7 +207,7 @@ public class AccessTracker_p {
                 	dateCount++;
                 }
                 prop.put("page_list_" + entCount + "_dates", dateCount);
-                final int qph = handles.tailSet(new Long(System.currentTimeMillis() - 1000 * 60 * 60)).size();
+                final int qph = handles.tailSet(Long.valueOf(System.currentTimeMillis() - 1000 * 60 * 60)).size();
                 qphSum += qph;
                 prop.put("page_list_" + entCount + "_qph", qph);
                 

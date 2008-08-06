@@ -722,8 +722,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         // clean search events which have cached relations to the old index
         plasmaSearchEvent.cleanupEvents(true);
         // switch the networks
-        synchronized (this.webIndex) {
-            this.webIndex.close();
+    	synchronized (this.webIndex) {
+    		this.webIndex.close();
+    	}
+        synchronized (this) {
             setConfig("network.unit.definition", networkDefinition);
             overwriteNetworkDefinition(this);
             final File indexPrimaryPath = getConfigPath(plasmaSwitchboardConstants.INDEX_PRIMARY_PATH, plasmaSwitchboardConstants.INDEX_PATH_DEFAULT);
@@ -1683,8 +1685,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         if (System.currentTimeMillis() - lastPPMUpdate > 30000) {
             // we don't want to do this too often
             updateMySeed();
-            serverProfiling.update("ppm", new Long(currentPPM()));
-            serverProfiling.update("wordcache", new Long(webIndex.cacheSize()));
+            serverProfiling.update("ppm", Long.valueOf(currentPPM()));
+            serverProfiling.update("wordcache", Long.valueOf(webIndex.cacheSize()));
             lastPPMUpdate = System.currentTimeMillis();
         }
         serverProfiling.update("indexed", queueEntry.url().toNormalform(true, false));
@@ -1869,7 +1871,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     	final long timeInterval = 1000 * 60 * 60;
     	final TreeSet<Long> accessSet = tracker.get(host);
     	if (accessSet == null) return 0;
-    	return accessSet.tailSet(new Long(System.currentTimeMillis() - timeInterval)).size();
+    	return accessSet.tailSet(Long.valueOf(System.currentTimeMillis() - timeInterval)).size();
     }
     
     public void startTransferWholeIndex(final yacySeed seed, final boolean delete) {
@@ -2196,7 +2198,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
                         while (enu.hasNext()) {
                             ys = yacySeed.genRemoteSeed(enu.next(), null, false);
                             if ((ys != null) &&
-                                ((!webIndex.seedDB.mySeedIsDefined()) || (webIndex.seedDB.mySeed().hash != ys.hash))) {
+                                ((!webIndex.seedDB.mySeedIsDefined()) || (!webIndex.seedDB.mySeed().hash.equals(ys.hash)))) {
                                 if (webIndex.peerActions.connectPeer(ys, false)) lc++;
                                 //seedDB.writeMap(ys.hash, ys.getMap(), "init");
                                 //System.out.println("BOOTSTRAP: received peer " + ys.get(yacySeed.NAME, "anonymous") + "/" + ys.getAddress());

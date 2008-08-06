@@ -519,7 +519,7 @@ public class plasmaSnippetCache {
                 score = 0;
                 while (j.hasNext()) {if (hs.containsKey(j.next())) score++;}
                 if (score > 0) {
-                    os.put(new Integer(1000000 * score - sentence.length() * 10000 + uniqCounter--), sentence);
+                    os.put(Integer.valueOf(1000000 * score - sentence.length() * 10000 + uniqCounter--), sentence);
                 }
             }
             
@@ -723,7 +723,7 @@ public class plasmaSnippetCache {
             hash = j.next();
             pos = hs.get(hash);
             if (pos == null) {
-                remaininghashes.add(new String(hash));
+                remaininghashes.add(hash);
             }
         }
         return remaininghashes;
@@ -739,7 +739,7 @@ public class plasmaSnippetCache {
         while (words.hasMoreElements()) {
             word = words.nextElement();
             hash = indexWord.word2hash(new String(word));
-            if (!map.containsKey(hash)) map.put(hash, new Integer(pos)); // dont overwrite old values, that leads to too far word distances
+            if (!map.containsKey(hash)) map.put(hash, Integer.valueOf(pos)); // dont overwrite old values, that leads to too far word distances
             pos += word.length() + 1;
         }
         return map;
@@ -870,7 +870,7 @@ public class plasmaSnippetCache {
             } else {
                 return null;
             }
-            return new Object[]{resource,new Long(contentLength)};
+            return new Object[]{resource, Long.valueOf(contentLength)};
     }
     
     public static String failConsequences(final TextSnippet snippet, final String eventID) {

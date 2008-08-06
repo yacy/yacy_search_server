@@ -34,7 +34,7 @@ public class dbtest {
 
     public final static int keylength = 12;
     public final static int valuelength = 223; // sum of all data length as defined in plasmaURL
-    public static byte[] dummyvalue2 = new byte[valuelength];
+    private static final byte[] dummyvalue2 = new byte[valuelength];
     static {
         // fill the dummy value
         for (int i = 0; i < valuelength; i++) dummyvalue2[i] = '-';
@@ -449,10 +449,10 @@ public class dbtest {
                 final kelondroIntBytesMap kcontrol = new kelondroIntBytesMap(1, 0);
                 for (int i = 0; i < writeCount; i++) {
                     r = Math.abs(random.nextLong() % 1000);
-                    jcontrol.add(new Long(r));
+                    jcontrol.add(Long.valueOf(r));
                     kcontrol.putb((int) r, "x".getBytes());
                     serverInstantBusyThread.oneTimeJob(new WriteJob(table_test, table_reference, r), 0, 50);
-                    if (random.nextLong() % 5 == 0) ra.add(new Long(r));
+                    if (random.nextLong() % 5 == 0) ra.add(Long.valueOf(r));
                     for (int j = 0; j < readCount; j++) {
                         serverInstantBusyThread.oneTimeJob(new ReadJob(table_test, table_reference, random.nextLong() % writeCount), random.nextLong() % 1000, 20);
                     }
@@ -490,10 +490,10 @@ public class dbtest {
                 for (int i = 0; i < writeCount; i++) {
                     //if (i == 30) random = new Random(randomstart);
                     r = Math.abs(random.nextLong() % 1000);
-                    jcontrol.add(new Long(r));
+                    jcontrol.add(Long.valueOf(r));
                     kcontrol.putb((int) r, "x".getBytes());
                     new WriteJob(table_test, table_reference, r).run();
-                    if (random.nextLong() % 5 == 0) ra.add(new Long(r));
+                    if (random.nextLong() % 5 == 0) ra.add(Long.valueOf(r));
                     for (int j = 0; j < readCount; j++) {
                         new ReadJob(table_test, table_reference, random.nextLong() % writeCount).run();
                     }

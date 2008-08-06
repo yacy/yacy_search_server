@@ -69,7 +69,8 @@ public final class kelondroRow {
         //# Structure=<pivot-12>,'=',<UDate-3>,<VDate-3>,<LCount-2>,<GCount-2>,<ICount-2>,<DCount-2>,<TLength-3>,<WACount-3>,<WUCount-3>,<Flags-1>
 
         // parse pivot definition:
-        structure.replace('=', ',');
+        //does not work with 'String idx-26 "id = created + originator",String cat-8,String rec-14,short  dis-2 {b64e},String att-462'
+        //structure = structure.replace('=', ',');
         
         // parse property part definition:
         int p = structure.indexOf('|');
@@ -108,7 +109,7 @@ public final class kelondroRow {
     protected final void genNickRef() {
         if (nickref != null) return;
         nickref = new HashMap<String, Object[]>(row.length);
-        for (int i = 0; i < row.length; i++) nickref.put(row[i].nickname, new Object[]{row[i], new Integer(colstart[i])});
+        for (int i = 0; i < row.length; i++) nickref.put(row[i].nickname, new Object[]{row[i], Integer.valueOf(colstart[i])});
     }
     
     public final int columns() {
@@ -191,7 +192,7 @@ public final class kelondroRow {
         return new EntryIndex(rowinstance, index);
     }
     
-    public static class EntryComparator extends kelondroAbstractOrder<Entry> implements kelondroOrder<Entry>, Comparator<Entry> {
+    public static class EntryComparator extends kelondroAbstractOrder<Entry> implements kelondroOrder<Entry>, Comparator<Entry>, Cloneable {
 
         kelondroByteOrder base;
         public EntryComparator(final kelondroByteOrder baseOrder) {

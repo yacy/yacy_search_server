@@ -78,7 +78,7 @@ public final class serverDate {
      * RFC 2616 requires that HTTP clients are able to parse all 3 different
      * formats. All times MUST be in GMT/UTC, but ...
      */
-    public static SimpleDateFormat[] FORMATS_HTTP = new SimpleDateFormat[] {
+    private static final SimpleDateFormat[] FORMATS_HTTP = new SimpleDateFormat[] {
             // RFC 1123/822 (Standard) "Mon, 12 Nov 2007 10:11:12 GMT"
             FORMAT_RFC1123,
             // RFC 1036/850 (old)      "Monday, 12-Nov-07 10:11:12 GMT"
@@ -356,8 +356,8 @@ public final class serverDate {
             
             final StringBuffer uptime = new StringBuffer();
             
-            final int uptimeDays  = (int) (Math.floor(mins/1440));
-            final int uptimeHours = (int) (Math.floor(mins/60)%24);
+            final int uptimeDays  = (int) (Math.floor(mins/1440.0));
+            final int uptimeHours = (int) (Math.floor(mins/60.0)%24);
             final int uptimeMins  = (int) mins%60;
             
             uptime.append(uptimeDays)

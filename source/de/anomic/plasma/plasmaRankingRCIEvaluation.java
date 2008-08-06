@@ -56,18 +56,18 @@ public class plasmaRankingRCIEvaluation {
             entry = rci.getEntry(key);
             c = entry.getSeqSet().size();
             if (c > maxcount) maxcount = c;
-            count_key = new Integer(c);
+            count_key = Integer.valueOf(c);
             count_count = counts.get(count_key);
             if (count_count == null) {
-                count_count = new Integer(1);
+                count_count = 1;
             } else {
-                count_count = new Integer(count_count.intValue() + 1);
+                count_count = Integer.valueOf(count_count.intValue() + 1);
             }
             counts.put(count_key, count_count);
         }
         final int[] ctable = new int[maxcount + 1];
         for (int j = 0; j <= maxcount; j++) {
-            count_count = counts.get(new Integer(j));
+            count_count = counts.get(Integer.valueOf(j));
             if (count_count == null) {
                 ctable[j] = 0;
             } else {

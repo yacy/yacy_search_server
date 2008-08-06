@@ -234,7 +234,7 @@ public class kelondroAttrSeq {
         return null;
     }
    
-    public class Structure {
+    public static class Structure {
         
         protected String   pivot_name = null;
         protected int      pivot_len = -1;
@@ -351,7 +351,7 @@ public class kelondroAttrSeq {
             attrs = new HashMap<String, Long>();
             seq = (tree) ? (Set<String>) new TreeSet<String>() : (Set<String>) new HashSet<String>();
             for (int i = 0; i < structure.prop_names.length; i++) {
-                attrs.put(structure.prop_names[i], new Long(kelondroBase64Order.enhancedCoder.decodeLong(attrseq.substring(structure.prop_pos[i], structure.prop_pos[i] + structure.prop_len[i]))));
+                attrs.put(structure.prop_names[i], Long.valueOf(kelondroBase64Order.enhancedCoder.decodeLong(attrseq.substring(structure.prop_pos[i], structure.prop_pos[i] + structure.prop_len[i]))));
             }
             
             int p = attrseq.indexOf('|') + 1;
@@ -379,7 +379,7 @@ public class kelondroAttrSeq {
         }
         
         public void setAttr(final String key, final long attr) {
-            attrs.put(key, new Long(attr));
+            attrs.put(key, Long.valueOf(attr));
         }
         
         public Set<String> getSeqSet() {

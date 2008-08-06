@@ -101,7 +101,7 @@ public final class httpdProxyHandler {
     // static variables
     // can only be instantiated upon first instantiation of this class object
     private static plasmaSwitchboard switchboard = null;
-    public  static HashSet<String> yellowList = null;
+    private static final HashSet<String> yellowList;
     private static int timeout = 30000;
     private static boolean yacyTrigger = true;
     public static boolean isTransparentProxy = false;
@@ -203,6 +203,8 @@ public final class httpdProxyHandler {
                 System.out.println("redirector not Found");
             }
         }
+        } else {
+        	yellowList = null;
         }
     }
     
@@ -284,7 +286,7 @@ public final class httpdProxyHandler {
             final int reqID = requestHeader.hashCode();
             // remembering the starting time of the request
             final Date requestDate = new Date(); // remember the time...
-            conProp.put(httpHeader.CONNECTION_PROP_REQUEST_START,new Long(requestDate.getTime()));
+            conProp.put(httpHeader.CONNECTION_PROP_REQUEST_START, Long.valueOf(requestDate.getTime()));
             if (yacyTrigger) de.anomic.yacy.yacyCore.triggerOnlineAction();
             switchboard.proxyLastAccess = System.currentTimeMillis();
 
@@ -445,8 +447,8 @@ public final class httpdProxyHandler {
             try { if(countedRespond != null) countedRespond.flush(); else if(respond != null) respond.flush(); } catch (final Exception e) {}
             if (countedRespond != null) countedRespond.finish();
             
-            conProp.put(httpHeader.CONNECTION_PROP_REQUEST_END,new Long(System.currentTimeMillis()));
-            conProp.put(httpHeader.CONNECTION_PROP_PROXY_RESPOND_SIZE,(countedRespond != null) ? new Long(countedRespond.getCount()) : -1L);
+            conProp.put(httpHeader.CONNECTION_PROP_REQUEST_END, Long.valueOf(System.currentTimeMillis()));
+            conProp.put(httpHeader.CONNECTION_PROP_PROXY_RESPOND_SIZE,(countedRespond != null) ? Long.valueOf(countedRespond.getCount()) : -1L);
             logProxyAccess(conProp);
         }
     }
@@ -605,7 +607,7 @@ public final class httpdProxyHandler {
                     }
                     theLogger.logFine(reqID +" writeContent of " + url + " produced cacheArray = " + ((cacheArray == null) ? "null" : ("size=" + cacheArray.length)));
 
-                    if (hfos instanceof htmlFilterWriter) ((htmlFilterWriter) hfos).finalize();
+                    if (hfos instanceof htmlFilterWriter) ((htmlFilterWriter) hfos).close();
 
                     if (sizeBeforeDelete == -1) {
                         // totally fresh file
@@ -631,7 +633,7 @@ public final class httpdProxyHandler {
                     // write to file right here.
                     cacheFile.getParentFile().mkdirs();
                     writeContent(res, new BufferedWriter(hfos), new FileOutputStream(cacheFile));
-                    if (hfos instanceof htmlFilterWriter) ((htmlFilterWriter) hfos).finalize();
+                    if (hfos instanceof htmlFilterWriter) ((htmlFilterWriter) hfos).close();
                     theLogger.logFine(reqID +" for write-file of " + url + ": contentLength = " + contentLength + ", sizeBeforeDelete = " + sizeBeforeDelete);
                     plasmaHTCache.writeFileAnnouncement(cacheFile);
                     if (sizeBeforeDelete == -1) {
@@ -661,7 +663,7 @@ public final class httpdProxyHandler {
                         " SupportetContent=" + isSupportedContent);
 
                 writeContent(res, new BufferedWriter(hfos));
-                if (hfos instanceof htmlFilterWriter) ((htmlFilterWriter) hfos).finalize();
+                if (hfos instanceof htmlFilterWriter) ((htmlFilterWriter) hfos).close();
                 /*if (sizeBeforeDelete == -1) {
                     // no old file and no load. just data passing
                     //cacheEntry.status = plasmaHTCache.CACHE_PASSING;
@@ -775,7 +777,7 @@ public final class httpdProxyHandler {
                     serverFileUtils.copy(cacheFile,charSet,(Writer)hfos);
                 }
                 
-                if (hfos instanceof htmlFilterWriter) ((htmlFilterWriter) hfos).finalize();
+                if (hfos instanceof htmlFilterWriter) ((htmlFilterWriter) hfos).close();
                 if (gzippedOut != null) gzippedOut.finish();
                 if (chunkedOut != null) chunkedOut.finish();
             }
@@ -826,7 +828,7 @@ public final class httpdProxyHandler {
             final int reqID = requestHeader.hashCode();
             // remembering the starting time of the request
             final Date requestDate = new Date(); // remember the time...
-            conProp.put(httpHeader.CONNECTION_PROP_REQUEST_START,new Long(requestDate.getTime()));
+            conProp.put(httpHeader.CONNECTION_PROP_REQUEST_START, Long.valueOf(requestDate.getTime()));
             if (yacyTrigger) de.anomic.yacy.yacyCore.triggerOnlineAction();
             switchboard.proxyLastAccess = System.currentTimeMillis();
             
@@ -926,7 +928,7 @@ public final class httpdProxyHandler {
             final int reqID = requestHeader.hashCode();
             // remembering the starting time of the request
             final Date requestDate = new Date(); // remember the time...
-            conProp.put(httpHeader.CONNECTION_PROP_REQUEST_START,new Long(requestDate.getTime()));
+            conProp.put(httpHeader.CONNECTION_PROP_REQUEST_START, Long.valueOf(requestDate.getTime()));
             if (yacyTrigger) de.anomic.yacy.yacyCore.triggerOnlineAction();
             switchboard.proxyLastAccess = System.currentTimeMillis();
             
@@ -1052,8 +1054,8 @@ public final class httpdProxyHandler {
                 respond.flush();
             }
             
-            conProp.put(httpHeader.CONNECTION_PROP_REQUEST_END,new Long(System.currentTimeMillis()));
-            conProp.put(httpHeader.CONNECTION_PROP_PROXY_RESPOND_SIZE,(countedRespond != null) ? new Long(countedRespond.getCount()) : -1L);
+            conProp.put(httpHeader.CONNECTION_PROP_REQUEST_END, Long.valueOf(System.currentTimeMillis()));
+            conProp.put(httpHeader.CONNECTION_PROP_PROXY_RESPOND_SIZE,(countedRespond != null) ? Long.valueOf(countedRespond.getCount()) : -1L);
             logProxyAccess(conProp);
         }
     }

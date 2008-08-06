@@ -43,7 +43,7 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
     private final kelondroByteOrder    ordering; // the ordering on keys
     private RandomAccessFile     file;     // a random access to the file
 
-    public class gap {
+    public static class gap {
         public long seek;
         public int size;
         public gap(final long seek, final int size) {

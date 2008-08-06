@@ -61,10 +61,10 @@ public class diff {
         if (o == null || n == null) throw new NullPointerException("neither o nor n must be null");
         this.o = new Comparable[o.length()];
         for (int i=0; i<o.length(); i++)
-            this.o[i] = new Character(o.charAt(i));
+            this.o[i] = Character.valueOf(o.charAt(i));
         this.n = new Comparable[n.length()];
         for (int i=0; i<n.length(); i++)
-            this.n[i] = new Character(n.charAt(i));
+            this.n[i] = Character.valueOf(n.charAt(i));
         parse((minConsecutive > 0) ? minConsecutive : 1);
     }
     

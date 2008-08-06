@@ -367,7 +367,7 @@ public class serverDomains {
         int p;
         String tld;
         //String name;
-        final Integer ID = new Integer(id);
+        final Integer ID = Integer.valueOf(id);
         for (int i = 0; i < TLDList.length; i++) {
             p = TLDList[i].indexOf('=');
             if (p > 0) {

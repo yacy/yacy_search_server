@@ -565,31 +565,97 @@ public class yacyURL implements Serializable {
                this.getHost().toLowerCase() + ((defaultPort) ? ("") : (":" + this.port)) + path;
     }
     
-    public boolean equals(final Object other) {
-        if(other != null && other instanceof yacyURL) {
-            final yacyURL otherURL = (yacyURL) other;
-            return (((this.protocol == otherURL.protocol) || (this.protocol.equals(otherURL.protocol))) &&
-                    ((this.host     == otherURL.host    ) || (this.host.equals(otherURL.host))) &&
-                    ((this.userInfo == otherURL.userInfo) || (this.userInfo.equals(otherURL.userInfo))) &&
-                    ((this.path     == otherURL.path    ) || (this.path.equals(otherURL.path))) &&
-                    ((this.quest    == otherURL.quest   ) || (this.quest.equals(otherURL.quest))) &&
-                    ((this.ref      == otherURL.ref     ) || (this.ref.equals(otherURL.ref))) &&
-                    ((this.port     == otherURL.port    )));
-        }
-        return super.equals(other);
-    }
+//    public boolean equals(final Object other) {
+//        if(other != null && other instanceof yacyURL) {
+//            final yacyURL otherURL = (yacyURL) other;
+//            return (((this.protocol == otherURL.protocol) || (this.protocol.equals(otherURL.protocol))) &&
+//                    ((this.host     == otherURL.host    ) || (this.host.equals(otherURL.host))) &&
+//                    ((this.userInfo == otherURL.userInfo) || (this.userInfo.equals(otherURL.userInfo))) &&
+//                    ((this.path     == otherURL.path    ) || (this.path.equals(otherURL.path))) &&
+//                    ((this.quest    == otherURL.quest   ) || (this.quest.equals(otherURL.quest))) &&
+//                    ((this.ref      == otherURL.ref     ) || (this.ref.equals(otherURL.ref))) &&
+//                    ((this.port     == otherURL.port    )));
+//        }
+//        return super.equals(other);
+//    }
+//    
+//    /**
+//     * hash code computation for yacyURL: please don't mix this up with the YaCy-Hash
+//     * this hash here is only used by hashing data structures, like a HashMap
+//     * We do not use tha yacy hash here, because this needs the computation of a DNS
+//     * which is very time-intensive
+//     */
+//    public int hashCode() {
+//        return this.toNormalform(true, false).hashCode();
+//    }
     
-    /**
-     * hash code computation for yacyURL: please don't mix this up with the YaCy-Hash
-     * this hash here is only used by hashing data structures, like a HashMap
-     * We do not use tha yacy hash here, because this needs the computation of a DNS
-     * which is very time-intensive
-     */
-    public int hashCode() {
-        return this.toNormalform(true, false).hashCode();
-    }
-    
-    public int compareTo(final Object h) {
+    /* (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((host == null) ? 0 : host.hashCode());
+		result = prime * result + ((path == null) ? 0 : path.hashCode());
+		result = prime * result + port;
+		result = prime * result
+				+ ((protocol == null) ? 0 : protocol.hashCode());
+		result = prime * result + ((quest == null) ? 0 : quest.hashCode());
+		result = prime * result + ((ref == null) ? 0 : ref.hashCode());
+		result = prime * result
+				+ ((userInfo == null) ? 0 : userInfo.hashCode());
+		return result;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (!(obj instanceof yacyURL))
+			return false;
+		yacyURL other = (yacyURL) obj;
+		if (host == null) {
+			if (other.host != null)
+				return false;
+		} else if (!host.equals(other.host))
+			return false;
+		if (path == null) {
+			if (other.path != null)
+				return false;
+		} else if (!path.equals(other.path))
+			return false;
+		if (port != other.port)
+			return false;
+		if (protocol == null) {
+			if (other.protocol != null)
+				return false;
+		} else if (!protocol.equals(other.protocol))
+			return false;
+		if (quest == null) {
+			if (other.quest != null)
+				return false;
+		} else if (!quest.equals(other.quest))
+			return false;
+		if (ref == null) {
+			if (other.ref != null)
+				return false;
+		} else if (!ref.equals(other.ref))
+			return false;
+		if (userInfo == null) {
+			if (other.userInfo != null)
+				return false;
+		} else if (!userInfo.equals(other.userInfo))
+			return false;
+		return true;
+	}
+
+	public int compareTo(final Object h) {
         assert (h instanceof yacyURL);
         return this.toString().compareTo(((yacyURL) h).toString());
     }
@@ -647,15 +713,16 @@ public class yacyURL implements Serializable {
         }
         
         // find rootpath
-        String pathx = new String(this.path);
-        if (pathx.startsWith("/"))
-            pathx = pathx.substring(1);
-        if (pathx.endsWith("/"))
-            pathx = pathx.substring(0, pathx.length() - 1);
-        p = pathx.indexOf('/');
+        int rootpathStart = 0;
+        int rootpathEnd = this.path.length() - 1;
+        if (this.path.startsWith("/"))
+            rootpathStart = 1;
+        if (this.path.endsWith("/"))
+            rootpathEnd = this.path.length() - 2;
+        p = this.path.indexOf('/', rootpathStart);
         String rootpath = "";
-        if (p > 0) {
-            rootpath = pathx.substring(0, p);
+        if (p > 0 && p < rootpathEnd) {
+            rootpath = path.substring(rootpathStart, p);
         }
 
         // we collected enough information to compute the fragments that are

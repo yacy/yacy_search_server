@@ -165,7 +165,7 @@ public class loaderThreads {
         
     }
     
-    public class propLoader extends loaderCore implements loaderProcess {
+    public static class propLoader extends loaderCore implements loaderProcess {
         
         public propLoader() {
             this.status = STATUS_READY;

@@ -60,7 +60,7 @@ public class URLFetcherStack {
     public int getPushed() { return this.pushed; }
     public void clearStat() { this.popped = 0; this.pushed = 0; }
     
-    public void finalize() throws Throwable {
+    protected void finalize() throws Throwable {
         this.db.close();
     }
     

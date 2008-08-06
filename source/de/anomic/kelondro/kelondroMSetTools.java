@@ -77,7 +77,7 @@ public class kelondroMSetTools {
             if ((singleMap == null) || (singleMap.size() == 0)) return new TreeMap<A, B>();
             
             // store result in order of result size
-            orderMap.put(new Long(singleMap.size() * 1000 + count), singleMap);
+            orderMap.put(Long.valueOf(singleMap.size() * 1000 + count), singleMap);
             count++;
         }
         

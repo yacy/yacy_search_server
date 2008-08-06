@@ -52,7 +52,7 @@
     <td><label for="accounts">Accounts</label>:</td>
     <td>
       <input name="use_proxyaccounts" id="accounts" type="checkbox" size="16" maxlength="16" value="on"#(use_proxyAccounts)#:: checked="checked"#(/use_proxyAccounts)# />
-      Use <a href="User_p.html">Proxy Accounts</a>
+      Use <a href="ConfigAccounts_p.html">Proxy Accounts</a>
     </td>
   </tr>
   <tr valign="top">

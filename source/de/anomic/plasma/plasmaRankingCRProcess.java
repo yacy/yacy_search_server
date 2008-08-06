@@ -218,7 +218,6 @@ public class plasmaRankingCRProcess {
         return true;
     }
     
-    @SuppressWarnings("null")
     public static void accumulate(final File from_dir, final File tmp_dir, final File err_dir, final File bkp_dir, final File to_file, int max_files, final boolean newdb) throws IOException {
         if (!(from_dir.isDirectory())) {
             System.out.println("source path " + from_dir + " is not a directory.");

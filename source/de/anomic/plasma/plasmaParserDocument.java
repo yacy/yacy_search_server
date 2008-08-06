@@ -152,7 +152,7 @@ dc_rights
 
     public String dc_creator() {
         if (creator == null)
-            return new String();
+            return "";
         return creator.toString();
     }
     

@@ -79,7 +79,7 @@ public class yacyNewsDB {
         news = null;
     }
 
-    public void finalize() {
+    protected void finalize() {
         close();
     }
 

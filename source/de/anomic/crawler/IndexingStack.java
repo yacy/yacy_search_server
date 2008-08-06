@@ -291,7 +291,7 @@ public class IndexingStack {
             queueInProcess.remove(this.url.hash());
         }
         
-        public void finalize() {
+        protected void finalize() {
             this.close();
         }
         

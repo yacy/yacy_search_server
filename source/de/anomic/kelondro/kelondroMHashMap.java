@@ -164,7 +164,6 @@ public class kelondroMHashMap {
                     System.arraycopy(value, 0, newmem, mempos + keylen, valuelen);
                     // move newmem to mem
                     mem = newmem;
-                    newmem = null;
                 }
             } else {
                 // there is enough space

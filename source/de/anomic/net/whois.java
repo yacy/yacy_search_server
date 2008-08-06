@@ -45,6 +45,7 @@ public class whois {
                     result.setProperty(key, (oldValue == null) ? value : (oldValue + "; " + value));
                 }
             }
+            br.close();
             return result;
         } catch (final IOException e) {
             //e.printStackTrace();

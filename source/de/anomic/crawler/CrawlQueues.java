@@ -498,7 +498,7 @@ public class CrawlQueues {
         return workers.size();
     }
     
-    protected class crawlWorker extends Thread {
+    protected final class crawlWorker extends Thread {
         
         public CrawlEntry entry;
         private final Integer code;
@@ -506,7 +506,7 @@ public class CrawlQueues {
         public crawlWorker(final CrawlEntry entry) {
             this.entry = entry;
             this.entry.setStatus("worker-initialized");
-            this.code = new Integer(entry.hashCode());
+            this.code = Integer.valueOf(entry.hashCode());
             if (!workers.containsKey(code)) {
                 workers.put(code, this);
                 this.start();

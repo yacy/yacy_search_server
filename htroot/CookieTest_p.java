@@ -56,7 +56,7 @@ public class CookieTest_p {
         	while (it.hasNext()) {
         		e = it.next();
         		if (e.getKey().equals("Cookie")) {
-        			final String coockie[]=e.getValue().toString().split(";");
+        			final String coockie[]=e.getValue().split(";");
         			for(int i=0;i<coockie.length;i++)
         			{
         				final String nameValue[]=coockie[i].split("=");
@@ -75,8 +75,8 @@ public class CookieTest_p {
         }
         else if(post.containsKey("act")&&post.get("act").equals("set_cookie"))
        {
-        final String cookieName = post.get("cookie_name").toString().trim();
-        final String cookieValue = post.get("cookie_value").toString().trim();
+        final String cookieName = post.get("cookie_name").trim();
+        final String cookieValue = post.get("cookie_value").trim();
         final httpHeader outgoingHeader=new httpHeader();
         
         outgoingHeader.setCookie(cookieName,cookieValue);

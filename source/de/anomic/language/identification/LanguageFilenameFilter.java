@@ -29,7 +29,7 @@ import java.io.FilenameFilter;
 
 class LanguageFilenameFilter implements FilenameFilter {
     
-    private final String fileExtension = "lng";
+    private static final String fileExtension = "lng";
 
     public boolean accept(final File dir, final String name) {
         if (name.matches(".+\\."+fileExtension)) {

@@ -146,7 +146,7 @@ public class ViewProfile {
         while (i.hasNext()) {
             entry = (Map.Entry) i.next();
             final String key = ((String) entry.getKey());
-            String value = new String();
+            String value;
 
             // this prevents broken links ending in <br>
             value=((String) entry.getValue()).replaceAll("\r", "").replaceAll("\\\\n", "\n");

@@ -293,10 +293,10 @@ public class kelondroFlexWidthArray implements kelondroArray {
 			while (c < rowdef.columns()) {
 				e = col[c].row().newEntry(reb, rowdef.colstart[c], false);
 				// remember write to column, but do not write directly
-				colm[c].put(new Integer(index), e); // col[c].set(index,e);
+				colm[c].put(Integer.valueOf(index), e); // col[c].set(index,e);
 				c = c + col[c].row().columns();
 			}
-			indexref.put(new Integer(index), rowentry.getColBytes(0));
+			indexref.put(Integer.valueOf(index), rowentry.getColBytes(0));
 		}
         // write the other columns
         for (int j = 1; j < col.length; j++) {

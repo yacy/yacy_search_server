@@ -38,18 +38,18 @@ public class kelondroObjectSpace {
     //private static TreeMap aliveMax = new TreeMap();
     
     private static void incAlive(final int size) {
-        final Integer s = new Integer(size);
+        final Integer s = Integer.valueOf(size);
         synchronized (aliveNow) {
             final Integer x = aliveNow.get(s);
-            if (x == null) aliveNow.put(s, new Integer(1)); else aliveNow.put(s, new Integer(x.intValue() + 1));
+            if (x == null) aliveNow.put(s, Integer.valueOf(1)); else aliveNow.put(s, Integer.valueOf(x.intValue() + 1));
         }
     }
     
     private static void decAlive(final int size) {
-        final Integer s = new Integer(size);
+        final Integer s = Integer.valueOf(size);
         synchronized (aliveNow) {
             final Integer x = aliveNow.get(s);
-            if (x == null) aliveNow.put(s, new Integer(-1)); else aliveNow.put(s, new Integer(x.intValue() - 1));
+            if (x == null) aliveNow.put(s, Integer.valueOf(-1)); else aliveNow.put(s, Integer.valueOf(x.intValue() - 1));
         }
     }
     
@@ -57,7 +57,7 @@ public class kelondroObjectSpace {
         if ((len < minSize) || (len > maxSize)) return new byte[len];
         incAlive(len);
         synchronized (objHeap) {
-            final ArrayList<byte[]> buf = objHeap.get(new Integer(len));
+            final ArrayList<byte[]> buf = objHeap.get(Integer.valueOf(len));
             if ((buf == null) || (buf.size() == 0)) return new byte[len];
             return buf.remove(buf.size() - 1);
         }
@@ -69,7 +69,7 @@ public class kelondroObjectSpace {
         }
         decAlive(b.length);
         synchronized (objHeap) {
-            final Integer i = new Integer(b.length);
+            final Integer i = Integer.valueOf(b.length);
             ArrayList<byte[]> buf = objHeap.get(i);
             if (buf == null) {
                 buf = new ArrayList<byte[]>();
@@ -95,7 +95,7 @@ public class kelondroObjectSpace {
             Map.Entry<Integer, ArrayList<byte[]>> entry;
             while (i.hasNext()) {
                 entry = i.next();
-                result.put(entry.getKey(), new Integer(entry.getValue().size()));
+                result.put(entry.getKey(), Integer.valueOf(entry.getValue().size()));
             }
         }
         return result;

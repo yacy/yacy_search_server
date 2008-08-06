@@ -116,7 +116,7 @@ public final class transfer {
                     path.mkdirs();
                     final File file = new File(path, filename);
                     try {
-                        if (file.getCanonicalPath().toString().startsWith(path.getCanonicalPath().toString())){
+                        if (file.getCanonicalPath().startsWith(path.getCanonicalPath())){
                             serverFileUtils.copy(fileString.getBytes(), file);
                             final String md5t = serverCodings.encodeMD5Hex(file);
                             if (md5t.equals(md5)) {

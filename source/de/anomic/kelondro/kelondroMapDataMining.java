@@ -41,7 +41,7 @@ public class kelondroMapDataMining extends kelondroMap {
     private HashMap<String, Object> accMap; // to store accumulations of specific fields
     private int elementCount;
     
-	@SuppressWarnings({ "unchecked", "null" })
+	@SuppressWarnings("unchecked")
 	public kelondroMapDataMining(final kelondroBLOB dyn, final int cachesize, final String[] sortfields, final String[] longaccfields, final String[] doubleaccfields, final Method externalInitializer, final Object externalHandler) {
         super(dyn, cachesize);
         
@@ -68,13 +68,13 @@ public class kelondroMapDataMining extends kelondroMap {
             if (longaccfields != null) {
                 longaccumulator = new Long[longaccfields.length];
                 for (int i = 0; i < longaccfields.length; i++) {
-                    longaccumulator[i] = new Long(0);   
+                    longaccumulator[i] = Long.valueOf(0);   
                 }
             }
             if (doubleaccfields != null) {
                 doubleaccumulator = new Double[doubleaccfields.length];
                 for (int i = 0; i < doubleaccfields.length; i++) {
-                    doubleaccumulator[i] = new Double(0);   
+                    doubleaccumulator[i] = Double.valueOf(0);   
                 }
             }
         }
@@ -90,25 +90,25 @@ public class kelondroMapDataMining extends kelondroMap {
             this.elementCount = 0;
             while (it.hasNext()) {
                 mapname = new String(it.next());
-                map = super.get(new String(mapname));
+                map = super.get(mapname);
                 if (map == null) break;
                 
-                if (sortfields != null) for (int i = 0; i < sortfields.length; i++) {
+                if (sortfields != null && cluster != null) for (int i = 0; i < sortfields.length; i++) {
                     cell = map.get(sortfields[i]);
                     if (cell != null) cluster[i].setScore(mapname, kelondroMScoreCluster.object2score(cell));
                 }
 
-                if (longaccfields != null) for (int i = 0; i < longaccfields.length; i++) {
+                if (longaccfields != null && longaccumulator != null) for (int i = 0; i < longaccfields.length; i++) {
                     cell = map.get(longaccfields[i]);
                     valuel = 0;
                     if (cell != null) try {
                         if (cell instanceof Long)   valuel = ((Long) cell).longValue();
                         if (cell instanceof String) valuel = Long.parseLong((String) cell);
-                        longaccumulator[i] = new Long(longaccumulator[i].longValue() + valuel);
+                        longaccumulator[i] = Long.valueOf(longaccumulator[i].longValue() + valuel);
                     } catch (final NumberFormatException e) {}
                 }
                 
-                if (doubleaccfields != null) for (int i = 0; i < doubleaccfields.length; i++) {
+                if (doubleaccfields != null && doubleaccumulator != null) for (int i = 0; i < doubleaccfields.length; i++) {
                     cell = map.get(doubleaccfields[i]);
                     valued = 0d;
                     if (cell != null) try {
@@ -134,14 +134,14 @@ public class kelondroMapDataMining extends kelondroMap {
         } catch (final IOException e) {}
 
         // fill cluster
-        if (sortfields != null) for (int i = 0; i < sortfields.length; i++) sortClusterMap.put(sortfields[i], cluster[i]);
+        if (sortfields != null && cluster != null) for (int i = 0; i < sortfields.length; i++) sortClusterMap.put(sortfields[i], cluster[i]);
 
         // fill acc map
-        if (longaccfields != null) for (int i = 0; i < longaccfields.length; i++) accMap.put(longaccfields[i], longaccumulator[i]);
-        if (doubleaccfields != null) for (int i = 0; i < doubleaccfields.length; i++) accMap.put(doubleaccfields[i], doubleaccumulator[i]);
+        if (longaccfields != null && longaccumulator != null) for (int i = 0; i < longaccfields.length; i++) accMap.put(longaccfields[i], longaccumulator[i]);
+        if (doubleaccfields != null && doubleaccumulator != null) for (int i = 0; i < doubleaccfields.length; i++) accMap.put(doubleaccfields[i], doubleaccumulator[i]);
     }
 
-    public void clear() throws IOException {
+    public synchronized void clear() throws IOException {
     	super.clear();
         if (sortfields == null) sortClusterMap = null; else {
             sortClusterMap = new HashMap<String, kelondroMScoreCluster<String>>();
@@ -156,7 +156,7 @@ public class kelondroMapDataMining extends kelondroMap {
         	accMap = new HashMap<String, Object>();
         	if (longaccfields != null) {
                 for (int i = 0; i < longaccfields.length; i++) {
-            		accMap.put(longaccfields[i], new Long(0));
+            		accMap.put(longaccfields[i], Long.valueOf(0));
             	}
             }
         	if (doubleaccfields != null) {
@@ -207,9 +207,9 @@ public class kelondroMapDataMining extends kelondroMap {
                     valuel = Long.parseLong(value);
                     longaccumulator = (Long) accMap.get(longaccfields[i]);
                     if (add) {
-                        accMap.put(longaccfields[i], new Long(longaccumulator.longValue() + valuel));
+                        accMap.put(longaccfields[i], Long.valueOf(longaccumulator.longValue() + valuel));
                     } else {
-                        accMap.put(longaccfields[i], new Long(longaccumulator.longValue() - valuel));
+                        accMap.put(longaccfields[i], Long.valueOf(longaccumulator.longValue() - valuel));
                     }
                 } catch (final NumberFormatException e) {}
             }
@@ -282,7 +282,7 @@ public class kelondroMapDataMining extends kelondroMap {
         return new string2bytearrayIterator(cluster.scores(up));
     }
     
-    public class string2bytearrayIterator implements Iterator<byte[]> {
+    public static class string2bytearrayIterator implements Iterator<byte[]> {
 
         Iterator<String> s;
         

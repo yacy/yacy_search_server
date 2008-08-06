@@ -464,7 +464,7 @@ public class indexURLReference {
         //return "{" + core + "}";
     }
 
-    public class Components {
+    public static class Components {
         private yacyURL url;
         private final String dc_title, dc_creator, dc_subject, ETag;
         

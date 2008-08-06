@@ -44,7 +44,7 @@ public class htmlFilterInputStream extends InputStream implements htmlFilterEven
     private static final int MODE_PRESCAN_FINISHED = 1;
     private int mode = 1;
     
-    private final long preBufferSize = 2048;
+    private static final long preBufferSize = 2048;
     private long preRead = 0;
     private final BufferedInputStream bufferedIn;
 

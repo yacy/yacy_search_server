@@ -180,7 +180,7 @@ public class kelondroColumn {
         if ((celldef.length() > 0) && (celldef.charAt(0) == '"')) {
             p = celldef.indexOf('"', 1);
             this.description = celldef.substring(1, p);
-            celldef = celldef.substring(p + 1).trim();
+            //unused: celldef = celldef.substring(p + 1).trim();
         } else {
             this.description = this.nickname;
         }
@@ -241,12 +241,53 @@ public class kelondroColumn {
         return new String(s);
     }
 
-    public boolean equals(final kelondroColumn otherCol) {
-        return
-          (this.celltype == otherCol.celltype) &&
-          (this.cellwidth == otherCol.cellwidth) &&
-          (this.encoder == otherCol.encoder) &&
-          (this.nickname.equals(otherCol.nickname));
-    }
+	/* (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + celltype;
+		result = prime * result + cellwidth;
+		result = prime * result + encoder;
+		result = prime * result
+				+ ((nickname == null) ? 0 : nickname.hashCode());
+		return result;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (!(obj instanceof kelondroColumn))
+			return false;
+		kelondroColumn other = (kelondroColumn) obj;
+		if (celltype != other.celltype)
+			return false;
+		if (cellwidth != other.cellwidth)
+			return false;
+		if (encoder != other.encoder)
+			return false;
+		if (nickname == null) {
+			if (other.nickname != null)
+				return false;
+		} else if (!nickname.equals(other.nickname))
+			return false;
+		return true;
+	}
+
+//    public boolean equals(final kelondroColumn otherCol) {
+//        return
+//          (this.celltype == otherCol.celltype) &&
+//          (this.cellwidth == otherCol.cellwidth) &&
+//          (this.encoder == otherCol.encoder) &&
+//          (this.nickname.equals(otherCol.nickname));
+//    }
 
 }

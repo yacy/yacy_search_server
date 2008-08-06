@@ -126,7 +126,7 @@ public class httpdByteCountOutputStream extends BufferedOutputStream {
                     lastByteCount = (byteCountInfo.get(this.byteCountAccountName)).longValue();
                 }
                 lastByteCount += this.byteCount;
-                byteCountInfo.put(this.byteCountAccountName,new Long(lastByteCount));
+                byteCountInfo.put(this.byteCountAccountName, Long.valueOf(lastByteCount));
             }
             
         }            

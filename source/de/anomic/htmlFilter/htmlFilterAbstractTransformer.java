@@ -65,7 +65,7 @@ public abstract class htmlFilterAbstractTransformer implements htmlFilterTransfo
         tags1 = null;
     }
     
-    public void finalize() {
+    protected void finalize() {
         close();
     }
         

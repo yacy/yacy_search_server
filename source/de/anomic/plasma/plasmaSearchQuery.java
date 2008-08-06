@@ -108,7 +108,7 @@ public final class plasmaSearchQuery {
         this.onlineSnippetFetch = false;
         this.host = null;
         this.remotepeer = null;
-        this.handle = new Long(System.currentTimeMillis());
+        this.handle = Long.valueOf(System.currentTimeMillis());
         this.specialRights = false;
     }
     
@@ -142,7 +142,7 @@ public final class plasmaSearchQuery {
 		this.onlineSnippetFetch = onlineSnippetFetch;
 		this.host = host;
         this.remotepeer = null;
-		this.handle = new Long(System.currentTimeMillis());
+		this.handle = Long.valueOf(System.currentTimeMillis());
 		this.specialRights = specialRights;
     }
     

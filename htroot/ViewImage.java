@@ -109,7 +109,7 @@ public class ViewImage {
             }
 
             // read image
-            final Image image = ymageImageParser.parse(urlString.toString(), imgb);
+            final Image image = ymageImageParser.parse(urlString, imgb);
 
             if ((auth) && ((width == 0) || (height == 0)) && (maxwidth == 0) && (maxheight == 0)) return image;
 

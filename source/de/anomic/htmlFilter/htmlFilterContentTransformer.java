@@ -27,6 +27,7 @@ package de.anomic.htmlFilter;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Locale;
@@ -75,7 +76,7 @@ public class htmlFilterContentTransformer extends htmlFilterAbstractTransformer 
                         if (!s.startsWith("#") && s.length() > 0) bluelist.add(s.toLowerCase());
                     }
                     r.close();
-                } catch (final Exception e) {
+                } catch (final IOException e) {
                 }
                 // if (bluelist.size() == 0) System.out.println("BLUELIST is empty");
             }
@@ -94,7 +95,13 @@ public class htmlFilterContentTransformer extends htmlFilterAbstractTransformer 
                 bb.append((int)'X');
             }
             bb.append("</FONT> ");
-            return bb.getChars();
+            final char[] result = bb.getChars();
+            try {
+				bb.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+            return result;
     }
 
     private boolean bluelistHit(final char[] text) {

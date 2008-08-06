@@ -61,13 +61,13 @@ public class kelondroSortStack<E> {
         if (exists(element)) return;
         
         // manipulate weight in such a way that it has no conflicts
-        while (this.onstack.containsKey(weight)) weight = new Long(weight.longValue() + 1);
+        while (this.onstack.containsKey(weight)) weight = Long.valueOf(weight.longValue() + 1);
         
         // put the element on the stack
         this.onstack.put(weight, element);
         
         // register it for double-check
-        this.instack.add(new Integer(element.hashCode()));
+        this.instack.add(Integer.valueOf(element.hashCode()));
 
         // check maximum size of the stack an remove elements if the stack gets too large
         if (this.maxsize <= 0) return;
@@ -97,12 +97,12 @@ public class kelondroSortStack<E> {
     
     public boolean exists(final E element) {
         // uses the hashCode of the element to find out of the element had been on the list or the stack
-        return this.instack.contains(new Integer(element.hashCode()));
+        return this.instack.contains(Integer.valueOf(element.hashCode()));
     }
     
     public boolean exists(final int hashcode) {
         // uses the hashCode of the element to find out of the element had been on the list or the stack
-        return this.instack.contains(new Integer(hashcode));
+        return this.instack.contains(Integer.valueOf(hashcode));
     }
     
     public stackElement get(final int hashcode) {

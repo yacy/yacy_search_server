@@ -67,7 +67,7 @@ public class kelondroCachedRA extends kelondroAbstractRA implements kelondroRA {
     }
     
     private byte[] readCache(final int cacheNr) throws IOException {
-        final Integer cacheNrI = new Integer(cacheNr);
+        final Integer cacheNrI = Integer.valueOf(cacheNr);
         byte[] cache = cacheMemory.get(cacheNrI);
         if (cache == null) {
             if (cacheMemory.size() >= cacheMaxElements) {
@@ -82,7 +82,7 @@ public class kelondroCachedRA extends kelondroAbstractRA implements kelondroRA {
             // add new element
             cache = new byte[cacheElementSize];
             //System.out.println("buffernr=" + bufferNr + ", elSize=" + bufferElementSize);
-            ra.seek(cacheNr * cacheElementSize);
+            ra.seek(cacheNr * (long) cacheElementSize);
             ra.read(cache, 0, cacheElementSize);
             cacheMemory.put(cacheNrI, cache);
         }
@@ -92,8 +92,8 @@ public class kelondroCachedRA extends kelondroAbstractRA implements kelondroRA {
     
     private void writeCache(final byte[] cache, final int cacheNr) throws IOException {
         if (cache == null) return;
-        final Integer cacheNrI = new Integer(cacheNr);
-        ra.seek(cacheNr * cacheElementSize);
+        final Integer cacheNrI = Integer.valueOf(cacheNr);
+        ra.seek(cacheNr * (long) cacheElementSize);
         ra.write(cache, 0, cacheElementSize);
         cacheScore.setScore(cacheNrI, (int) (0xFFFFFFFFL & System.currentTimeMillis()));
     }
@@ -175,7 +175,7 @@ public class kelondroCachedRA extends kelondroAbstractRA implements kelondroRA {
         cacheMemory = null;
     }
 
-    public void finalize() {
+    protected void finalize() {
         try {
             close();
         } catch (final IOException e) {}

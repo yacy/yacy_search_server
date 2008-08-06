@@ -173,8 +173,10 @@ public final class yacy {
             }
             
             // ensure that there is a DATA directory, if not, create one and if that fails warn and die
-            File f = homePath; if (!(f.exists())) f.mkdirs();
-            f = new File(homePath, "DATA/"); if (!(f.exists())) f.mkdirs();
+            File f = homePath;
+            mkdirsIfNeseccary(f);
+            f = new File(homePath, "DATA/");
+            mkdirsIfNeseccary(f);
 			if (!(f.exists())) { 
 				System.err.println("Error creating DATA-directory in " + homePath.toString() + " . Please check your write-permission for this folder. YaCy will now terminate."); 
 				System.exit(-1); 
@@ -182,7 +184,7 @@ public final class yacy {
             
             // setting up logging
 			f = new File(homePath, "DATA/LOG/");
-			if (!f.exists()) f.mkdirs();
+            mkdirsIfNeseccary(f);
 			f = new File(homePath, "DATA/LOG/yacy.logging");
 			if (!f.exists()) try {
 			    serverFileUtils.copy(new File(homePath, "yacy.logging"), f);
@@ -204,9 +206,10 @@ public final class yacy {
             f = new File(homePath, "DATA/yacy.running");
             if (f.exists()) {                // another instance running? VM crash? User will have to care about this
                 serverLog.logSevere("STARTUP", "WARNING: the file " + f + " exists, this usually means that a YaCy instance is still running");
-                f.delete();
+                delete(f);
             }
-            f.createNewFile();
+            if(!f.createNewFile())
+                serverLog.logSevere("STARTUP", "WARNING: the file " + f + " can not be created!");
             f.deleteOnExit();
             
             pro = new File(homePath, "libx").exists();
@@ -214,7 +217,9 @@ public final class yacy {
             final String newconf = "DATA/SETTINGS/yacy.conf".replace("/", File.separator);
             final File oldconffile = new File(homePath, oldconf);
             if (oldconffile.exists()) {
-                oldconffile.renameTo(new File(homePath, newconf));
+            	final File newconfFile = new File(homePath, newconf);
+                if(!oldconffile.renameTo(newconfFile))
+                    serverLog.logSevere("STARTUP", "WARNING: the file " + oldconffile + " can not be renamed to "+ newconfFile +"!");
             }
             sb = new plasmaSwitchboard(homePath, "defaults/yacy.init".replace("/", File.separator), newconf, pro);
             sbSync.V(); // signal that the sb reference was set
@@ -270,7 +275,7 @@ public final class yacy {
             // create some directories
             final File htRootPath = new File(homePath, sb.getConfig("htRootPath", "htroot"));
             final File htDocsPath = sb.getConfigPath(plasmaSwitchboardConstants.HTDOCS_PATH, plasmaSwitchboardConstants.HTDOCS_PATH_DEFAULT);
-            if (!(htDocsPath.exists())) htDocsPath.mkdir();
+            mkdirIfNeseccary(htDocsPath);
             //final File htTemplatePath = new File(homePath, sb.getConfig("htTemplatePath","htdocs"));
 
             // create default notifier picture
@@ -298,11 +303,11 @@ public final class yacy {
                     }
 
             final File wwwDefaultPath = new File(htDocsPath, "www");
-            if (!(wwwDefaultPath.exists())) wwwDefaultPath.mkdir();
+            mkdirIfNeseccary(wwwDefaultPath);
 
 
             final File shareDefaultPath = new File(htDocsPath, "share");
-            if (!(shareDefaultPath.exists())) shareDefaultPath.mkdir();
+            mkdirIfNeseccary(shareDefaultPath);
 
             migration.migrate(sb, oldRev, newRev);
             
@@ -353,12 +358,12 @@ public final class yacy {
                     final File locale_source = sb.getConfigPath("locale.source", "locales");
                     try{
                         final File[] locale_source_files = locale_source.listFiles();
-                        locale_work.mkdirs();
+                        mkdirsIfNeseccary(locale_work);
                         File target;
                         for (int i=0; i < locale_source_files.length; i++){
                         	target = new File(locale_work, locale_source_files[i].getName());
                             if (locale_source_files[i].getName().endsWith(".lng")) {
-                            	if (target.exists()) target.delete();
+                            	if (target.exists()) delete(target);
                                 serverFileUtils.copy(locale_source_files[i], target);
                             }
                         }
@@ -458,7 +463,35 @@ public final class yacy {
         //} catch (Exception e) {} // was once stopped by de.anomic.net.ftpc$sm.checkExit(ftpc.java:1790)
     }
 
-    /**
+	/**
+	 * @param f
+	 */
+	private static void delete(File f) {
+		if(!f.delete())
+		    serverLog.logSevere("STARTUP", "WARNING: the file " + f + " can not be deleted!");
+	}
+
+	/**
+	 * @see File#mkdir()
+	 * @param path
+	 */
+	private static void mkdirIfNeseccary(final File path) {
+		if (!(path.exists()))
+			if(!path.mkdir())
+				serverLog.logWarning("STARTUP", "could not create directory "+ path.toString());
+	}
+
+	/**
+	 * @see File#mkdirs()
+	 * @param path
+	 */
+	private static void mkdirsIfNeseccary(final File path) {
+		if (!(path.exists()))
+			if(!path.mkdirs())
+				serverLog.logWarning("STARTUP", "could not create directories "+ path.toString());
+	}
+
+	/**
     * Loads the configuration from the data-folder.
     * FIXME: Why is this called over and over again from every method, instead
     * of setting the configurationdata once for this class in main?
@@ -479,14 +512,24 @@ public final class yacy {
         }
 
         final Properties config = new Properties();
-        try {
-            config.load(new FileInputStream(new File(homePath, "DATA/SETTINGS/yacy.conf")));
+        FileInputStream fis = null;
+		try {
+        	fis  = new FileInputStream(new File(homePath, "DATA/SETTINGS/yacy.conf"));
+            config.load(fis);
         } catch (final FileNotFoundException e) {
             serverLog.logSevere(mes, "could not find configuration file.");
             System.exit(-1);
         } catch (final IOException e) {
             serverLog.logSevere(mes, "could not read configuration file.");
             System.exit(-1);
+        } finally {
+        	if(fis != null) {
+        		try {
+					fis.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+        	}
         }
 
         return config;

@@ -62,7 +62,7 @@ public class serverProfiling extends Thread {
     
     public void run() {
     	while (running) {
-    		update("memory", new Long(serverMemory.used()));
+    		update("memory", Long.valueOf(serverMemory.used()));
     		try {
 				Thread.sleep(this.delaytime);
 			} catch (final InterruptedException e) {
@@ -80,7 +80,7 @@ public class serverProfiling extends Thread {
             // update entry
             history.add(new Event(counter, eventPayload));
             counter++;
-            eventCounter.put(eventName, new Integer(counter));
+            eventCounter.put(eventName, Integer.valueOf(counter));
             
             // clean up too old entries
             Event e;
@@ -96,7 +96,7 @@ public class serverProfiling extends Thread {
             // update entry
             history.add(new Event(counter, eventPayload));
             counter++;
-            eventCounter.put(eventName, new Integer(counter));
+            eventCounter.put(eventName, Integer.valueOf(counter));
             
             // store map
             historyMaps.put(eventName, history);

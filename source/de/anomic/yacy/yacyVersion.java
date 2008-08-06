@@ -153,7 +153,7 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
         // compare-operator for two yacyVersion objects
         // must be implemented to make it possible to put this object into
         // a ordered structure, like TreeSet or TreeMap
-        return (new Integer(v0.svn)).compareTo(new Integer(v1.svn));
+        return (Integer.valueOf(v0.svn)).compareTo(Integer.valueOf(v1.svn));
     }
     
     public boolean equals(final Object obj) {
@@ -359,7 +359,9 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
             if ((!download.exists()) || (download.length() == 0)) throw new IOException("wget of url " + release.url + " failed");
         } catch (final IOException e) {
             serverLog.logSevere("yacyVersion", "download of " + release.name + " failed: " + e.getMessage());
-            if (download != null && download.exists()) download.delete();
+            if (download != null && download.exists())
+            	if(!download.delete())
+            		serverLog.logWarning("yacyVersion", "could not delete file "+ download);
             download = null;
         } finally {
             if (res != null) {
@@ -614,7 +616,7 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
             
             // remove old files
             final long now = System.currentTimeMillis();
-            final long deleteAfterMillis = deleteAfterDays * 24 * 60 * 60000l;
+            final long deleteAfterMillis = deleteAfterDays * 24L * 60 * 60000;
             
             String lastMain = null;
             String filename;

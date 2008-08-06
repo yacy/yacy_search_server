@@ -223,7 +223,7 @@ public final class serverCodings {
         final Iterator<String> i = s.iterator();
         boolean hasNext = i.hasNext();
         while (hasNext) {
-            buf.append(i.next().toString());
+            buf.append(i.next());
             hasNext = i.hasNext();
             if (hasNext) buf.append(separator);
         }

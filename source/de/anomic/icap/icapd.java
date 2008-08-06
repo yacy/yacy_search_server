@@ -247,7 +247,8 @@ public class icapd implements serverHandler, Cloneable {
                     currLength = Integer.parseInt(encapsulated[i+1].split("=")[1]);
                     
                     final byte[] buffer = new byte[currLength-prevLength];
-                    in.read(buffer, 0, buffer.length);
+                    final int bytesRead = in.read(buffer, 0, buffer.length);
+                    assert bytesRead == buffer.length;
                     
                     reqHdrStream = new ByteArrayInputStream(buffer);
                     
@@ -257,7 +258,8 @@ public class icapd implements serverHandler, Cloneable {
                     currLength = Integer.parseInt(encapsulated[i+1].split("=")[1]);
                     
                     final byte[] buffer = new byte[currLength-prevLength];
-                    in.read(buffer, 0, buffer.length);
+                    final int bytesRead = in.read(buffer, 0, buffer.length);
+                    assert bytesRead == buffer.length;
                     
                     resHdrStream = new ByteArrayInputStream(buffer);
                     
@@ -341,7 +343,7 @@ public class icapd implements serverHandler, Cloneable {
             
             final Object[] httpRespStatus = httpHeader.parseResponseLine(httpRespStatusLine);
             
-            if (!(httpRespStatus[1].equals(new Integer(200)) || httpRespStatus[1].equals(new Integer(203)))) {
+            if (!(httpRespStatus[1].equals(Integer.valueOf(200)) || httpRespStatus[1].equals(Integer.valueOf(203)))) {
                 this.log.logInfo("Wrong status code for indexing:" +
                                  "\nStatus Code:   " + httpRespStatus[1] +
                                  "\nRequest Line:  " + httpRequestLine + 

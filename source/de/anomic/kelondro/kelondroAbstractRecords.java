@@ -426,8 +426,8 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
 
         // store dynamic run-time seek pointers
         POS_HANDLES = POS_COLWIDTHS + ROW.columns() * 4;
-        POS_TXTPROPS = POS_HANDLES + FHandles * 4;
-        POS_NODES = POS_TXTPROPS + txtProps * this.TXTPROPW;
+        POS_TXTPROPS = POS_HANDLES + FHandles * 4L;
+        POS_NODES = POS_TXTPROPS + txtProps * (long) this.TXTPROPW;
         //System.out.println("*** DEBUG: POS_NODES = " + POS_NODES + " for " + filename);
 
         // store dynamic back-up variables
@@ -661,7 +661,7 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
         if (pos >= HANDLES.length) throw new IllegalArgumentException("setHandle: handle array exceeded");
         if (handle == null) handle = new kelondroHandle(kelondroHandle.NUL);
         HANDLES[pos] = handle;
-        entryFile.writeInt(POS_HANDLES + 4 * pos, handle.index);
+        entryFile.writeInt(POS_HANDLES + 4L * pos, handle.index);
     }
 
     protected final kelondroHandle getHandle(final int pos) {
@@ -675,7 +675,7 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
         if (text == null) text = new byte[0];
         if (text.length > TXTPROPW) throw new IllegalArgumentException("setText: text lemgth exceeded");
         TXTPROPS[pos] = text;
-        entryFile.write(POS_TXTPROPS + TXTPROPW * pos, text);
+        entryFile.write(POS_TXTPROPS + TXTPROPW * (long) pos, text);
     }
 
     public final byte[] getText(final int pos) {
@@ -758,9 +758,8 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
         this.entryFile = null;
     }
 
-    public void finalize() {
+    protected void finalize() {
         if (entryFile != null) close();
-        this.entryFile = null;
     }
 
     protected final static String[] line2args(final String line) {

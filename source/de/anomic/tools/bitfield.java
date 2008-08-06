@@ -57,7 +57,6 @@ public class bitfield {
             System.arraycopy(bb, 0, nb, 0, bb.length);
             for (int i = bb.length; i < nb.length; i++) nb[i] = 0;
             bb = nb;
-            nb = null;
         }
         bb[slot] = (value) ? setAtom(bb[slot], pos % 6) : unsetAtom(bb[slot], pos % 6);
     }

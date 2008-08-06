@@ -90,13 +90,13 @@ public class ftpc {
     private Socket ControlSocket = null;
 
     // socket timeout
-    private final int ControlSocketTimeout = 300000;
+    private static final int ControlSocketTimeout = 300000;
 
     // data socket timeout
     private int DataSocketTimeout = 0; // in seconds (default infinite)
 
     // minimal data rate (to calculate timeout with max. filesize)
-    private final int DataSocketRate = 100;// Byte/s
+    private static final int DataSocketRate = 100;// Byte/s
 
     // socket for data transactions
     private ServerSocket DataSocketActive = null;
@@ -298,7 +298,7 @@ public class ftpc {
         return line1.split("\\|");
     }
 
-    class cl extends ClassLoader {
+    static class cl extends ClassLoader {
 
         public cl() {
             super();
@@ -372,7 +372,7 @@ public class ftpc {
 
             // invoke object.main()
             final Object result = m.invoke(null, argList);
-            parameterType = null;
+            //parameterType = null;
             m = null;
 
             // handle result
@@ -710,7 +710,7 @@ public class ftpc {
             }
             // return to last folder
             send("CWD " + currentFolder);
-            reply = receive();
+            /*reply =*/ receive();
             return true;
         } catch (final IOException e) {
             return false;
@@ -1143,7 +1143,9 @@ public class ftpc {
             Date date;
             final String dateString = tokens.group(3) + " " + tokens.group(4) + " " + year + " " + time;
             try {
-                date = lsDateFormat.parse(dateString);
+            	synchronized(lsDateFormat) {
+            		date = lsDateFormat.parse(dateString);
+            	}
             } catch (final ParseException e) {
                 errPrintln(logPrefix + "---- Error: not ls date-format '" + dateString + "': " + e.getMessage());
                 date = new Date();
@@ -1159,7 +1161,7 @@ public class ftpc {
      * @author danielr
      * @since 2008-03-13 r4558
      */
-    private class entryInfo {
+    private static class entryInfo {
         /**
          * is this a directory?
          */
@@ -1424,7 +1426,7 @@ public class ftpc {
         }
 
         // after stream is empty we should get control completion echo
-        reply = receive();
+        /*reply =*/ receive();
 
         // boolean success = !isNotPositiveCompletion(reply);
 
@@ -1485,7 +1487,8 @@ public class ftpc {
                 local = new File(currentLocalPath, remote);
                 if (local.exists()) {
                     errPrintln("Warning: local file " + local.toString() + " overwritten.");
-                    local.delete();
+                    if(!local.delete())
+                        errPrintln("Warning: local file " + local.toString() + " could not be deleted.");
                 }
                 retrieveFilesRecursively(remote, remove);
             }
@@ -2282,7 +2285,7 @@ public class ftpc {
                 }
     
                 // after stream is empty we should get control completion echo
-                reply = receive();
+                /*reply =*/ receive();
                 // boolean success = !isNotPositiveCompletion(reply);
             } finally {
                 // shutdown connection
@@ -2696,7 +2699,7 @@ public class ftpc {
             }
             c.exec("open " + host, false);
             c.exec("user " + account + " " + password, false);
-            c.exec("lcd " + localPath.getAbsolutePath().toString(), false);
+            c.exec("lcd " + localPath.getAbsolutePath(), false);
             c.exec("binary", false);
             c.exec("get " + remoteFile + " " + localPath.getAbsoluteFile().toString(), false);
             c.exec("close", false);

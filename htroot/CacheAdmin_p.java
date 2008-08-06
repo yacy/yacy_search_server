@@ -216,7 +216,7 @@ public class CacheAdmin_p {
                 prop.put("info_treeFolders", dList.size());
                 while (iter.hasNext()) {
                     prop.put("info_treeFolders_" + i + "_path", pathString);
-                    prop.put("info_treeFolders_" + i + "_name", iter.next().toString());
+                    prop.put("info_treeFolders_" + i + "_name", iter.next());
                     i++;
                 } 
                 
@@ -225,7 +225,7 @@ public class CacheAdmin_p {
                 prop.put("info_treeFiles", fList.size());
                 while (iter.hasNext()) {
                     prop.put("info_treeFiles_" + i + "_path", pathString);
-                    prop.put("info_treeFiles_" + i + "_name", iter.next().toString());
+                    prop.put("info_treeFiles_" + i + "_name", iter.next());
                     i++;
                 }
             }
@@ -291,7 +291,7 @@ public class CacheAdmin_p {
             prop.put("info_type_use." + extension + "_" + extension + "_" + i + "_name",
                     de.anomic.data.htmlTools.encodeUnicode2html(descr.replaceAll("\n", "").trim(), true));
             prop.put("info_type_use." + extension + "_" + extension + "_" + i + "_link",
-                    de.anomic.data.htmlTools.encodeUnicode2html(entry.getKey().toString(), true));
+                    de.anomic.data.htmlTools.encodeUnicode2html(entry.getKey(), true));
             i++;
         }
         prop.put("info_type_use." + extension, (i == 0) ? 0 : 1);

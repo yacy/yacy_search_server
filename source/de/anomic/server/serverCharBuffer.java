@@ -94,8 +94,9 @@ public final class serverCharBuffer extends Writer {
         buffer = new char[length*2];
         offset = 0;
 
+        FileReader fr = null;
         try {
-            final FileReader fr = new FileReader(f);
+			fr = new FileReader(f);
             final char[] temp = new char[256];
             int c;
             while ((c = fr.read(temp)) > 0) {
@@ -103,6 +104,9 @@ public final class serverCharBuffer extends Writer {
             }
         } catch (final FileNotFoundException e) {
             throw new IOException("File not found: " + f.toString() + "; " + e.getMessage());
+        } finally {
+        	if(fr != null)
+        		fr.close();
         }
     }
 
@@ -122,7 +126,6 @@ public final class serverCharBuffer extends Writer {
         char[] tmp = new char[newsize];
         System.arraycopy(buffer, offset, tmp, 0, length);
         buffer = tmp;
-        tmp = null;
         offset = 0;
     }
 

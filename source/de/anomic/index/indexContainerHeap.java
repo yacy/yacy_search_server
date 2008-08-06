@@ -271,7 +271,7 @@ public final class indexContainerHeap {
             is = null;
         }
         
-        public void finalize() {
+        protected void finalize() {
             this.close();
         }
     }
@@ -377,7 +377,8 @@ public final class indexContainerHeap {
             final byte[] word = new byte[index.row().primaryKeyLength];
             
             raf.seek(pos);
-            raf.read(word);
+            final int bytesRead = raf.read(word);
+            assert bytesRead == word.length;
             assert key.equals(new String(word));
             
             // read collection

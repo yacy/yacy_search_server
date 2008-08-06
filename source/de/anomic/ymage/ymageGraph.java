@@ -92,7 +92,7 @@ public class ymageGraph {
         borders.add(fromPoint + "$" + toPoint);
     }
 
-    public class coordinate {
+    public static class coordinate {
         public double x, y;
         public int layer;
         public coordinate(final double x, final double y, final int layer) {

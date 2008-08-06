@@ -105,7 +105,6 @@ public final class kelondroMScoreCluster<E> {
                 c += plainByteArray[(byte) s.charAt(i)];
             }
             for (int i = len; i < 5; i++) c <<= 6;
-            if (c > Integer.MAX_VALUE) return Integer.MAX_VALUE;
             if (c < 0) {
                 System.out.println("string2score: negative score for input " + s);
                 return 0;
@@ -158,7 +157,7 @@ public final class kelondroMScoreCluster<E> {
         
         if (usk == null) {
             // set new value
-            usk = new Long(scoreKey(encnt++, newScore));
+            usk = Long.valueOf(scoreKey(encnt++, newScore));
             
             // put new value into cluster
             refkeyDB.put(obj, usk);
@@ -175,7 +174,7 @@ public final class kelondroMScoreCluster<E> {
             gcount -= oldScore;
             
             // set new value
-            usk = new Long(scoreKey(oldHandle, newScore)); // generates an unique key for a specific score
+            usk = Long.valueOf(scoreKey(oldHandle, newScore)); // generates an unique key for a specific score
             refkeyDB.put(obj, usk);
             keyrefDB.put(usk, obj);
         }
@@ -192,7 +191,7 @@ public final class kelondroMScoreCluster<E> {
         if (usk == null) {
             // set new value
             if (incrementScore < 0) throw new kelondroOutOfLimitsException(incrementScore);
-            usk = new Long(scoreKey(encnt++, incrementScore));
+            usk = Long.valueOf(scoreKey(encnt++, incrementScore));
             
             // put new value into cluster
             refkeyDB.put(obj, usk);
@@ -210,7 +209,7 @@ public final class kelondroMScoreCluster<E> {
             // set new value
             final int newValue = oldScore + incrementScore;
             if (newValue < 0) throw new kelondroOutOfLimitsException(newValue);
-            usk = new Long(scoreKey(oldHandle, newValue)); // generates an unique key for a specific score
+            usk = Long.valueOf(scoreKey(oldHandle, newValue)); // generates an unique key for a specific score
             refkeyDB.put(obj, usk);
             keyrefDB.put(usk, obj);
             
@@ -288,7 +287,6 @@ public final class kelondroMScoreCluster<E> {
             E[] sc = (E[]) new Object[i];
             System.arraycopy(s, 0, sc, 0, i);
             s = sc;
-            sc = null;
         }
         return s;
     }

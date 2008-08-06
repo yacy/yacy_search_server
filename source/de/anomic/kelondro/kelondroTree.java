@@ -880,7 +880,7 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
             while ((c = row().objectOrder.compare(startKey, searchNode.getKey())) != 0) {
                 // the current 'thisNode' is not the start node, put it on the stack
                 ct = (c < 0) ? leftchild : rightchild;
-                nodeStack.addLast(new Object[]{searchNode, new Integer(ct)});
+                nodeStack.addLast(new Object[]{searchNode, Integer.valueOf(ct)});
                 
                 // go to next node
                 searchHandle = searchNode.getOHHandle(ct);
@@ -914,7 +914,7 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
                     //System.out.println("go to other leg, stack size=" + nodeStack.size());
                     // we have walked one leg of the tree; now go to the other one: step down to next child
                     final HashSet<kelondroHandle> visitedNodeHandles = new HashSet<kelondroHandle>(); // to detect loops
-                    nodeStack.addLast(new Object[]{nextNode, new Integer(childtype)});
+                    nodeStack.addLast(new Object[]{nextNode, Integer.valueOf(childtype)});
                     nextNode = new CacheNode(childHandle, nextNode, childtype, false);
                     childtype = (up) ? leftchild : rightchild;
                     while ((childHandle = nextNode.getOHHandle(childtype)) != null) {
@@ -927,7 +927,7 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
                         }
                         visitedNodeHandles.add(childHandle);
                         try {
-                            nodeStack.addLast(new Object[]{nextNode, new Integer(childtype)});
+                            nodeStack.addLast(new Object[]{nextNode, Integer.valueOf(childtype)});
                             nextNode = new CacheNode(childHandle, nextNode, childtype, false);
                         } catch (final IllegalArgumentException e) {
                             // return what we have

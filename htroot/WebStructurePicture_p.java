@@ -117,7 +117,7 @@ public class WebStructurePicture_p {
         ymageGraph.coordinate center = graph.getPoint(centerhost);
         int mynodes = 0;
         if (center == null) {
-        	center = graph.addPoint(centerhost, x, y, nextlayer);
+        	/*center =*/ graph.addPoint(centerhost, x, y, nextlayer);
         	maxnodes--;
         	mynodes++;
         }
@@ -147,8 +147,8 @@ public class WebStructurePicture_p {
             // set a new point. It is placed on a circle around the host point
             final double angle = kelondroBase64Order.enhancedCoder.cardinal((targethash + "____").getBytes()) / maxlongd * 2 * Math.PI;
             //System.out.println("ANGLE = " + angle);
-            rr = radius * 0.25 * (1 - targetrefs / maxtargetrefs);
-            re = radius * 0.5 * (thisrefs / maxthisrefs);
+            rr = radius * 0.25 * (1 - targetrefs / (double) maxtargetrefs);
+            re = radius * 0.5 * (thisrefs / (double) maxthisrefs);
             graph.addPoint(targethost, x + (radius - rr - re) * Math.cos(angle), y + (radius - rr - re) * Math.sin(angle), nextlayer);
             maxnodes--;
             mynodes++;

@@ -29,7 +29,7 @@ package de.anomic.tools;
   
 public class bbCode {
 	
-	String text;
+	//String text;
 	/**init - no Code yet*/
 	public bbCode()
 	{

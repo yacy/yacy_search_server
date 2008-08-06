@@ -342,7 +342,7 @@ public final class httpTemplate {
                     //TODO: better Error Handling
                     transferUntil(pis, keyStream,appendBytes("%%".getBytes("UTF-8"),patternName,null,null));
                     if(pis.available()==0){
-                        serverLog.logSevere("TEMPLATE", "No such Template: %%"+patternName);
+                        serverLog.logSevere("TEMPLATE", "No such Template: %%"+new String(patternName));
                         return structure.getBytes();
                     }
                     keyStream=new ByteArrayOutputStream();
@@ -542,7 +542,13 @@ public final class httpTemplate {
         newPrefix.append(oldPrefix)
         .append(key)
         .append("_".getBytes());
-        return newPrefix.getBytes();
+        byte[] result = newPrefix.getBytes();
+        try {
+			newPrefix.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+        return result;
     }
 
     public static byte[] newPrefix(final byte[] oldPrefix, final byte[] multi_key, final int i) {
@@ -555,6 +561,13 @@ public final class httpTemplate {
             .append("_".getBytes());
 
         } catch (final UnsupportedEncodingException e) {}
+        finally {
+        	try {
+				newPrefix.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+        }
         return newPrefix.getBytes();
     }
 
@@ -566,6 +579,12 @@ public final class httpTemplate {
             return new String(patternKey.getBytes(),"UTF-8");
         } catch (final UnsupportedEncodingException e) {
             return null;
+        } finally {
+        	try {
+				patternKey.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
         }
     }
     
@@ -575,7 +594,13 @@ public final class httpTemplate {
                  .append(b2);
         if (b3 != null) byteArray.append(b3);
         if (b4 != null) byteArray.append(b4);
-        return byteArray.getBytes();
+        final byte[] result = byteArray.getBytes();
+        try {
+			byteArray.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+        return result;
     }
     
 }

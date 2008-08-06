@@ -200,7 +200,7 @@ public class BlacklistCleaner_p {
                 
                 // check for double-occurance
                 if (ok.contains(s)) {
-                    r.put(s, new Integer(ERR_DOUBLE_OCCURANCE));
+                    r.put(s, Integer.valueOf(ERR_DOUBLE_OCCURANCE));
                     continue;
                 }
                 ok.add(s);
@@ -218,29 +218,29 @@ public class BlacklistCleaner_p {
                 // check whether host begins illegally
                 if (!host.matches("([A-Za-z0-9_-]+|\\*)(\\.([A-Za-z0-9_-]+|\\*))*")) {
                     if (i == 0 && host.length() > 1 && host.charAt(1) != '.') {
-                        r.put(s, new Integer(ERR_SUBDOMAIN_XOR_WILDCARD));
+                        r.put(s, Integer.valueOf(ERR_SUBDOMAIN_XOR_WILDCARD));
                         continue;
                     }
-                    r.put(s, new Integer(ERR_HOST_WRONG_CHARS));
+                    r.put(s, Integer.valueOf(ERR_HOST_WRONG_CHARS));
                     continue;
                 }
                 
                 // in host-part only full sub-domains may be wildcards
                 if (host.length() > 0 && i > -1) {
                     if (!(i == 0 || i == host.length() - 1)) {
-                        r.put(s, new Integer(ERR_WILDCARD_BEGIN_OR_END));
+                        r.put(s, Integer.valueOf(ERR_WILDCARD_BEGIN_OR_END));
                         continue;
                     }
                     
                     if (i == host.length() - 1 && host.length() > 1 && host.charAt(i - 1) != '.') {
-                        r.put(s, new Integer(ERR_SUBDOMAIN_XOR_WILDCARD));
+                        r.put(s, Integer.valueOf(ERR_SUBDOMAIN_XOR_WILDCARD));
                         continue;
                     }
                 }
                 
                 // check for double-occurences of "*" in host
                 if (host.indexOf("*", i + 1) > -1) {
-                    r.put(s, new Integer(ERR_TWO_WILDCARDS_IN_HOST));
+                    r.put(s, Integer.valueOf(ERR_TWO_WILDCARDS_IN_HOST));
                     continue;
                 }
                 
@@ -248,7 +248,7 @@ public class BlacklistCleaner_p {
                 try {
                     Pattern.compile(path);
                 } catch (final PatternSyntaxException e) {
-                    r.put(s, new Integer(ERR_PATH_REGEX));
+                    r.put(s, Integer.valueOf(ERR_PATH_REGEX));
                     continue;
                 }
             }

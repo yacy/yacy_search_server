@@ -30,7 +30,7 @@ import SevenZip.IInStream;
 
 public class ByteArrayIInStream extends IInStream {
     
-    private class SeekableByteArrayInputStream extends ByteArrayInputStream {
+    private static class SeekableByteArrayInputStream extends ByteArrayInputStream {
         public SeekableByteArrayInputStream(final byte[] buf) { super(buf); }
         public SeekableByteArrayInputStream(final byte[] buf, final int off, final int len) { super(buf, off, len); }
         

@@ -59,29 +59,29 @@ public class migration {
     public static void migrateDefaultFiles(final plasmaSwitchboard sb){
         File file=new File(sb.htDocsPath, "share/dir.html");
         if(file.exists())
-            file.delete();
+            delete(file);
         file=new File(sb.htDocsPath, "share/dir.class");
         if(file.exists())
-            file.delete();
+            delete(file);
         file=new File(sb.htDocsPath, "share/dir.java");
         if(file.exists())
-            file.delete();
+            delete(file);
         file=new File(sb.htDocsPath, "www/welcome.html");
         if(file.exists())
-            file.delete();
+            delete(file);
         file=new File(sb.htDocsPath, "www/welcome.java");
         if(file.exists())
-            file.delete();
+            delete(file);
         file=new File(sb.htDocsPath, "www/welcome.class");
         if(file.exists())
-            file.delete();
+            delete(file);
     }
     public static void installSkins(final plasmaSwitchboard sb){
         final File skinsPath = sb.getConfigPath("skinPath", "DATA/SKINS");
         final File defaultSkinsPath = new File(sb.getRootPath(), "skins");
         if(defaultSkinsPath.exists()){
             final String[] skinFiles = listManager.getDirListing(defaultSkinsPath.getAbsolutePath());
-            skinsPath.mkdirs();
+            mkdirs(skinsPath);
             for(int i=0;i<skinFiles.length;i++){
                 if(skinFiles[i].endsWith(".css")){
                     try{
@@ -106,7 +106,7 @@ public class migration {
             }
         }else{
             try {
-                styleFile.getParentFile().mkdirs();
+                mkdirs(styleFile.getParentFile());
                 serverFileUtils.copy(skinFile, styleFile);
                 serverLog.logInfo("MIGRATION", "copied new Skinfile");
             } catch (final IOException e) {
@@ -114,15 +114,33 @@ public class migration {
             }
         }
     }
+
+	/**
+	 * @param path
+	 */
+	private static void mkdirs(final File path) {
+		if (!path.exists()) {
+			if(!path.mkdirs())
+				serverLog.logWarning("MIGRATION", "could not create directories for "+ path);
+		}
+	}
     public static void migrateBookmarkTagsDB(final plasmaSwitchboard sb){
         sb.bookmarksDB.close();
         final File tagsDBFile=new File(sb.workPath, "bookmarkTags.db");
         if(tagsDBFile.exists()){
-            tagsDBFile.delete();
+            delete(tagsDBFile);
             serverLog.logInfo("MIGRATION", "Migrating bookmarkTags.db to use wordhashs as keys.");
         }
         sb.initBookmarks();
     }
+
+	/**
+	 * @param filename
+	 */
+	private static void delete(final File filename) {
+		if(!filename.delete())
+			serverLog.logWarning("MIGRATION", "could not delete "+ filename);
+	}
     public static void migrateWorkFiles(final plasmaSwitchboard sb){
         File file=new File(sb.getRootPath(), "DATA/SETTINGS/wiki.db");
         File file2;

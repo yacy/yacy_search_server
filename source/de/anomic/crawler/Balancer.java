@@ -127,7 +127,7 @@ public class Balancer {
         }
     }
     
-    public void finalize() {
+    protected void finalize() {
         if (urlFileStack != null) {
             serverLog.logWarning("Balancer", "crawl stack " + stackname + " closed by finalizer");
             close();
@@ -315,7 +315,7 @@ public class Balancer {
             urlFileStack.push(urlFileStack.row().newEntry(new byte[][]{(urlRAMStack.get(i)).getBytes()}));
             urlFileStack.push(urlFileStack.row().newEntry(new byte[][]{(urlRAMStack.get(urlRAMStack.size() - i - 1)).getBytes()}));
         }
-        if (urlRAMStack.size() % 2 == 1) 
+        if (urlRAMStack.size() % 2 != 0) 
             urlFileStack.push(urlFileStack.row().newEntry(new byte[][]{(urlRAMStack.get(urlRAMStack.size() / 2)).getBytes()}));
     }
     
@@ -417,7 +417,7 @@ public class Balancer {
                 entry = i.next();
                 domhash = entry.getKey();
                 domlist = entry.getValue();
-                hitlist.put(new Integer(domlist.size() * 100 + count++), domhash);
+                hitlist.put(Integer.valueOf(domlist.size() * 100 + count++), domhash);
             }
             
             // now iterate in descending order and fetch that one,

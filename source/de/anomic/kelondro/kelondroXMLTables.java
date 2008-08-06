@@ -160,13 +160,13 @@ public class kelondroXMLTables {
     }
 
     public void close() throws IOException {
-        finalize();
+        commit(true);
     }
 
     // we finalize the operation by saving everything throug the scheduler
     // this method is called by the java GC bevore it destroys the object
     protected void finalize() throws IOException {
-        commit(true);
+    	close();
     }
 
 }

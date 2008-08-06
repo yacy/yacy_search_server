@@ -208,7 +208,7 @@ public class blogBoardComments {
         return database.keys(up, false);
     }
 
-    public class CommentEntry {
+    public static class CommentEntry {
         
         String key;
         HashMap<String, String> record;

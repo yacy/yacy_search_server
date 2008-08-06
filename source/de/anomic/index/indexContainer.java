@@ -245,7 +245,7 @@ public class indexContainer extends kelondroRowSet {
             if ((singleContainer == null) || (singleContainer.size() == 0)) return null; // as this is a cunjunction of searches, we have no result if any word is not known
             
             // store result in order of result size
-            map.put(new Long(singleContainer.size() * 1000 + count), singleContainer);
+            map.put(Long.valueOf(singleContainer.size() * 1000 + count), singleContainer);
             count++;
         }
         

@@ -130,9 +130,9 @@ public class ymageMatrix {
     		final int r = (int) (c >> 16);
             final int g = (int) ((c >> 8) & 0xff);
             final int b = (int) (c & 0xff);
-            defaultCol[0] = (g + b) / 2;
-            defaultCol[1] = (r + b) / 2;
-            defaultCol[2] = (r + g) / 2;
+            defaultCol[0] = (g + b) >>> 1; // / 2;
+            defaultCol[1] = (r + b) >>> 1; // / 2;
+            defaultCol[2] = (r + g) >>> 1; // / 2;
     	} else {
     		defaultCol[0] = (int) (c >> 16);
             defaultCol[1] = (int) ((c >> 8) & 0xff);

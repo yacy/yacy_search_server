@@ -162,8 +162,8 @@ public class LogParserPLASMA implements LogParser{
     public static final String TOTAL_PARSER_RUNS        = "totalParserRuns";
     
     
-    private final double parserVersion = 0.1;
-    private final String parserType = "PLASMA";
+    private static final double parserVersion = 0.1;
+    private static final String parserType = "PLASMA";
 
     //RegExp for LogLevel I
     private static final Pattern i1 = Pattern.compile("Received (\\d*) URLs from peer [\\w-_]{12}:[\\w-_]*/[\\w.-]* in (\\d*) ms, blocked (\\d*) URLs");
@@ -434,49 +434,49 @@ public class LogParserPLASMA implements LogParser{
 
     public Hashtable<String, Object> getResults() {
         final Hashtable<String, Object> results = new Hashtable<String, Object>();
-        results.put(PARSER_VERSION          , new Double(parserVersion));
-        results.put(URLS_RECEIVED           , new Integer(urlSum));
-        results.put(URLS_REQUESTED          , new Integer(urlReqSum));
-        results.put(URLS_BLOCKED            , new Integer(blockedURLSum));
-        results.put(WORDS_RECEIVED          , new Integer(wordsSum));
-        results.put(RWIS_RECEIVED           , new Integer(rwiSum));
-        results.put(RWIS_BLOCKED            , new Integer(blockedRWISum));
-        results.put(URLS_RECEIVED_TIME      , new Long(urlTimeSum));
-        results.put(RWIS_RECEIVED_TIME      , new Long(rwiTimeSum));
-        results.put(DHT_TRAFFIC_SENT        , new Long(DHTSendTraffic));
-        results.put(DHT_URLS_SENT           , new Integer(DHTSendURLs));
-        results.put(DHT_REJECTED            , new Integer(RWIRejectCount));
+        results.put(PARSER_VERSION          , Double.valueOf(parserVersion));
+        results.put(URLS_RECEIVED           , Integer.valueOf(urlSum));
+        results.put(URLS_REQUESTED          , Integer.valueOf(urlReqSum));
+        results.put(URLS_BLOCKED            , Integer.valueOf(blockedURLSum));
+        results.put(WORDS_RECEIVED          , Integer.valueOf(wordsSum));
+        results.put(RWIS_RECEIVED           , Integer.valueOf(rwiSum));
+        results.put(RWIS_BLOCKED            , Integer.valueOf(blockedRWISum));
+        results.put(URLS_RECEIVED_TIME      , Long.valueOf(urlTimeSum));
+        results.put(RWIS_RECEIVED_TIME      , Long.valueOf(rwiTimeSum));
+        results.put(DHT_TRAFFIC_SENT        , Long.valueOf(DHTSendTraffic));
+        results.put(DHT_URLS_SENT           , Integer.valueOf(DHTSendURLs));
+        results.put(DHT_REJECTED            , Integer.valueOf(RWIRejectCount));
         results.put(DHT_REJECTED_PEERS_NAME , RWIRejectPeerNames);
         results.put(DHT_REJECTED_PEERS_HASH , RWIRejectPeerHashs);
         results.put(DHT_SENT_PEERS_NAME     , DHTPeerNames);
         results.put(DHT_SENT_PEERS_HASH     , DHTPeerHashs);
-        results.put(DHT_SELECTED            , new Integer(DHTSelectionTargetCount));
-        results.put(DHT_WORDS_SELECTED      , new Integer(DHTSelectionWordsCount));
-        results.put(DHT_WORDS_SELECTED_TIME , new Integer(DHTSelectionWordsTimeCount));
-        results.put(DHT_DISTANCE_MIN        , new Double(minDHTDist));
-        results.put(DHT_DISTANCE_MAX        , new Double(maxDHTDist));
-        results.put(DHT_DISTANCE_AVERAGE    , new Double(avgDHTDist / DHTSelectionTargetCount));
-        results.put(PEERS_BUSY              , new Integer(busyPeerCount));
-        results.put(PEERS_TOO_LESS          , new Integer(notEnoughDHTPeers));
-        results.put(DHT_SENT_FAILED         , new Integer(failedIndexDistributionCount));
-        results.put(ERROR_CHILD_TWICE_LEFT  , new Integer(leftChildTwiceCount));
-        results.put(ERROR_CHILD_TWICE_RIGHT , new Integer(rightChildTwiceCount));
-        results.put(RANKING_DIST            , new Integer(rankingDistributionCount));
-        results.put(RANKING_DIST_TIME       , new Integer(rankingDistributionTime));
-        results.put(RANKING_DIST_FAILED     , new Integer(rankingDistributionFailCount));
-        results.put(ERROR_MALFORMED_URL     , new Integer(malformedURLCount));
-        results.put(INDEXED_SITES           , new Integer(indexedSites));
-        results.put(INDEXED_WORDS           , new Integer(indexedWordSum));
-        results.put(INDEXED_SITES_SIZE      , new Integer(indexedSiteSizeSum));
-        results.put(INDEXED_ANCHORS         , new Integer(indexedAnchorsCount));
+        results.put(DHT_SELECTED            , Integer.valueOf(DHTSelectionTargetCount));
+        results.put(DHT_WORDS_SELECTED      , Integer.valueOf(DHTSelectionWordsCount));
+        results.put(DHT_WORDS_SELECTED_TIME , Integer.valueOf(DHTSelectionWordsTimeCount));
+        results.put(DHT_DISTANCE_MIN        , Double.valueOf(minDHTDist));
+        results.put(DHT_DISTANCE_MAX        , Double.valueOf(maxDHTDist));
+        results.put(DHT_DISTANCE_AVERAGE    , Double.valueOf(avgDHTDist / DHTSelectionTargetCount));
+        results.put(PEERS_BUSY              , Integer.valueOf(busyPeerCount));
+        results.put(PEERS_TOO_LESS          , Integer.valueOf(notEnoughDHTPeers));
+        results.put(DHT_SENT_FAILED         , Integer.valueOf(failedIndexDistributionCount));
+        results.put(ERROR_CHILD_TWICE_LEFT  , Integer.valueOf(leftChildTwiceCount));
+        results.put(ERROR_CHILD_TWICE_RIGHT , Integer.valueOf(rightChildTwiceCount));
+        results.put(RANKING_DIST            , Integer.valueOf(rankingDistributionCount));
+        results.put(RANKING_DIST_TIME       , Integer.valueOf(rankingDistributionTime));
+        results.put(RANKING_DIST_FAILED     , Integer.valueOf(rankingDistributionFailCount));
+        results.put(ERROR_MALFORMED_URL     , Integer.valueOf(malformedURLCount));
+        results.put(INDEXED_SITES           , Integer.valueOf(indexedSites));
+        results.put(INDEXED_WORDS           , Integer.valueOf(indexedWordSum));
+        results.put(INDEXED_SITES_SIZE      , Integer.valueOf(indexedSiteSizeSum));
+        results.put(INDEXED_ANCHORS         , Integer.valueOf(indexedAnchorsCount));
 //        results.put(INDEXED_STACK_TIME      , new Integer(indexedStackingTime));
 //        results.put(INDEXED_PARSE_TIME      , new Integer(indexedParsingTime));
 //        results.put(INDEXED_INDEX_TIME      , new Integer(indexedIndexingTime));
 //        results.put(INDEXED_STORE_TIME      , new Integer(indexedStorageTime));
-        results.put(INDEXED_LINKSTORE_TIME , new Integer(indexedLinkStorageTime));
-        results.put(INDEXED_INDEXSTORE_TIME, new Integer(indexedIndexStorageTime));
-        results.put(TOTAL_PARSER_TIME      , new Long(totalParserTime));
-        results.put(TOTAL_PARSER_RUNS      , new Integer(totalParserRuns));
+        results.put(INDEXED_LINKSTORE_TIME , Integer.valueOf(indexedLinkStorageTime));
+        results.put(INDEXED_INDEXSTORE_TIME, Integer.valueOf(indexedIndexStorageTime));
+        results.put(TOTAL_PARSER_TIME      , Long.valueOf(totalParserTime));
+        results.put(TOTAL_PARSER_RUNS      , Integer.valueOf(totalParserRuns));
         return results;
     }
     
@@ -510,7 +510,7 @@ public class LogParserPLASMA implements LogParser{
         System.out.println("DHT: Blocked " + blockedRWISum + " RWIs before requesting URLs, because URL-Hash was blacklisted.");
         System.out.println("DHT: " + rwiTimeSum / rwiSum + " milliseconds per RWI.");            
         System.out.println("DHT: Rejected " + RWIRejectCount + " Indextransfers from " + RWIRejectPeerNames.size() + " PeerNames with " + RWIRejectPeerHashs.size() + " PeerHashs.");
-        System.out.println("DHT: " + ((double)Math.round(DHTSendTraffic*100/(1024*1024)))/100 + " MegaBytes (" + DHTSendTraffic + " Bytes) of DHT-Transfertraffic.");
+        System.out.println("DHT: " + DHTSendTraffic/(1024*1024l) + " MegaBytes (" + DHTSendTraffic + " Bytes) of DHT-Transfertraffic.");
         System.out.println("DHT: Sended " + DHTSendURLs + " URLs via DHT.");
         System.out.println("DHT: DHT Transfers send to " + DHTPeerNames.size() + " Peernames with " + DHTPeerHashs.size() + " Peerhashs.");
         System.out.println("DHT: Totally selected " + DHTSelectionWordsCount + " words in " + DHTSelectionWordsTimeCount + " seconds (" + (float)DHTSelectionWordsCount/DHTSelectionWordsTimeCount + " words/s)");

@@ -38,7 +38,7 @@ public class ymageFontGenerator {
 0x78:xyz{|}~
 */
 
-    public static final String[][] font =
+    private static final String[][] font =
         {
             {".....", //0x20
              ".....",

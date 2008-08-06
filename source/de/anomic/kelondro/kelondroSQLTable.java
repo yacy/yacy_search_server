@@ -50,14 +50,14 @@ import java.util.List;
 
 public class kelondroSQLTable implements kelondroIndex {
 
-    private final String db_driver_str_mysql = "org.gjt.mm.mysql.Driver";
-    private final String db_driver_str_pgsql = "org.postgresql.Driver";
+    private static final String db_driver_str_mysql = "org.gjt.mm.mysql.Driver";
+    private static final String db_driver_str_pgsql = "org.postgresql.Driver";
     
-    private final String db_conn_str_mysql    = "jdbc:mysql://192.168.0.2:3306/yacy";
-    private final String db_conn_str_pgsql   = "jdbc:postgresql://192.168.0.2:5432";
+    private static final String db_conn_str_mysql    = "jdbc:mysql://192.168.0.2:3306/yacy";
+    private static final String db_conn_str_pgsql   = "jdbc:postgresql://192.168.0.2:5432";
     
-    private final String db_usr_str    = "yacy";
-    private final String db_pwd_str    = "yacy";
+    private static final String db_usr_str    = "yacy";
+    private static final String db_pwd_str    = "yacy";
     
     private Connection theDBConnection = null;
     private final kelondroByteOrder order = new kelondroNaturalOrder(true);
@@ -109,10 +109,7 @@ public class kelondroSQLTable implements kelondroIndex {
     public int size() {
         int size = -1;
         try {
-            final String sqlQuery = new String
-            (
-                "SELECT count(value) from test"
-            );
+            final String sqlQuery = "SELECT count(value) from test";
             
             final PreparedStatement sqlStatement = this.theDBConnection.prepareStatement(sqlQuery); 
             final ResultSet result = sqlStatement.executeQuery();
@@ -149,10 +146,7 @@ public class kelondroSQLTable implements kelondroIndex {
     
     public kelondroRow.Entry get(final byte[] key) throws IOException {
         try {
-            final String sqlQuery = new String
-            (
-                "SELECT value from test where hash = ?"
-            );
+            final String sqlQuery = "SELECT value from test where hash = ?";
             
             final PreparedStatement sqlStatement = this.theDBConnection.prepareStatement(sqlQuery); 
             sqlStatement.setString(1, new String(key));
@@ -188,18 +182,15 @@ public class kelondroSQLTable implements kelondroIndex {
             
             final kelondroRow.Entry oldEntry = remove(row.getColBytes(0));            
             
-            final String sqlQuery = new String
-            (
-                    "INSERT INTO test (" +
+            final String sqlQuery = "INSERT INTO test (" +
                     "hash, " +
                     "value) " +
-                    "VALUES (?,?)"
-            );                
+                    "VALUES (?,?)";                
             
             
             final PreparedStatement sqlStatement = this.theDBConnection.prepareStatement(sqlQuery);     
             
-            sqlStatement.setString(1, new String(row.getColString(0, null)));
+            sqlStatement.setString(1, row.getColString(0, null));
             sqlStatement.setBytes(2, row.bytes());
             sqlStatement.execute();
             
@@ -224,24 +215,30 @@ public class kelondroSQLTable implements kelondroIndex {
     }
     
     public kelondroRow.Entry remove(final byte[] key) throws IOException {
+        PreparedStatement sqlStatement = null;
         try {
             
             final kelondroRow.Entry entry =  this.get(key);
-            if (entry == null) return entry;
+            if (entry == null) return null;
             
-            final String sqlQuery = new String
-            (
-                    "DELETE FROM test WHERE hash = ?"
-            );                
+            final String sqlQuery = "DELETE FROM test WHERE hash = ?";                
             
             
-            final PreparedStatement sqlStatement = this.theDBConnection.prepareStatement(sqlQuery);                 
+			sqlStatement = this.theDBConnection.prepareStatement(sqlQuery);                 
             sqlStatement.setString(1, new String(key));
             sqlStatement.execute();
             
             return entry;
         } catch (final Exception e) {
             throw new IOException(e.getMessage());
+        } finally {
+        	if(sqlStatement != null) {
+        		try {
+					sqlStatement.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+        	}
         }
     }
     

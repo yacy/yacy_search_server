@@ -65,7 +65,7 @@ public class indexWord {
     }
 
     public void check(final int i) {
-        phrases.add(new Integer(i));
+        phrases.add(Integer.valueOf(i));
     }
 
     public Iterator<Integer> phrases() {

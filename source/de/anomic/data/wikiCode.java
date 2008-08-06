@@ -636,11 +636,11 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
         String anchorext = "";
         if((s=dirElements.size())>2){
             for(int i=0;i<s;i++){
-                element = dirElements.get(i).toString();
+                element = dirElements.get(i);
                 //counting double headlines
                 doubles = 0;
                 for(int j=0;j<i;j++){
-                    if(dirElements.get(j).toString().substring(1).replaceAll(" ","_").replaceAll("[^a-zA-Z0-9_]","").equals(element.substring(1).replaceAll(" ","_").replaceAll("[^a-zA-Z0-9_]",""))){
+                    if(dirElements.get(j).substring(1).replaceAll(" ","_").replaceAll("[^a-zA-Z0-9_]","").equals(element.substring(1).replaceAll(" ","_").replaceAll("[^a-zA-Z0-9_]",""))){
                         doubles++;
                     }
                 }
@@ -719,7 +719,7 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
                 //counting double headlines
                 int doubles = 0;
                 for(int i=0;i<headlines;i++){
-                    if(dirElements.get(i).toString().substring(1).equals(direlem)){
+                    if(dirElements.get(i).substring(1).equals(direlem)){
                         doubles++;
                     }
                 }
@@ -738,7 +738,7 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
             }
             else{
                 input = input.substring(0, p0) +  repl1 +
-                (direlem = input.substring(p0 + l, p1)) + repl2 +
+                (/*direlem =*/ input.substring(p0 + l, p1)) + repl2 +
                 input.substring(p1 + l);
             }
         }

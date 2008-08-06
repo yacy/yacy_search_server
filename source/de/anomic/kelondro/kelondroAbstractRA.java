@@ -197,6 +197,7 @@ abstract class kelondroAbstractRA implements kelondroRA {
         }
         bb.append("# EOF\r\n");
         write(bb.getBytes());
+        bb.close();
     }
 
     public HashMap<String, String> readMap() throws IOException {

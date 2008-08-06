@@ -182,13 +182,13 @@ public class Supporter {
                 final int factor = ((dbtype == yacyNewsPool.OUTGOING_DB) || (dbtype == yacyNewsPool.PUBLISHED_DB)) ? 2 : 1;
                 if (vote.equals("negative")) {
                     final Integer i = negativeHashes.get(urlhash);
-                    if (i == null) negativeHashes.put(urlhash, new Integer(factor));
-                    else negativeHashes.put(urlhash, new Integer(i.intValue() + factor));
+                    if (i == null) negativeHashes.put(urlhash, Integer.valueOf(factor));
+                    else negativeHashes.put(urlhash, Integer.valueOf(i.intValue() + factor));
                 }
                 if (vote.equals("positive")) {
                     final Integer i = positiveHashes.get(urlhash);
-                    if (i == null) positiveHashes.put(urlhash, new Integer(factor));
-                    else positiveHashes.put(urlhash, new Integer(i.intValue() + factor));
+                    if (i == null) positiveHashes.put(urlhash, Integer.valueOf(factor));
+                    else positiveHashes.put(urlhash, Integer.valueOf(i.intValue() + factor));
                 }
             }
         }

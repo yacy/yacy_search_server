@@ -287,16 +287,16 @@ public class cryptbig {
 	    fin  = new BufferedInputStream(new FileInputStream(inFileName), 4096);
 
 	    // read the file properties
-	    final byte[] thisMagic = new byte[magicString.length()]; fin.read(thisMagic);
+	    final byte[] thisMagic = new byte[magicString.length()]; int bytesRead = fin.read(thisMagic);
 
 	    if (!((new String(thisMagic)).equals(magicString))) {
 		// this is not an crypt file, so dont do anything
 		fin.close();
 		return;
 	    }
-	    final byte[] C = new byte[1]; fin.read(C); // the length of the following String, encoded as b64
-	    final byte[] B = new byte[(int) kelondroBase64Order.standardCoder.decodeLong(new String(C))]; fin.read(B); // this is again the length of the following string, as encrypted b64-ed integer
-	    final byte[] A = new byte[(int) kelondroBase64Order.standardCoder.decodeLong(new String(dcipher.doFinal(B), "UTF8"))]; fin.read(A);
+	    final byte[] C = new byte[1]; bytesRead = fin.read(C); // the length of the following String, encoded as b64
+	    final byte[] B = new byte[(int) kelondroBase64Order.standardCoder.decodeLong(new String(C))]; bytesRead = fin.read(B); // this is again the length of the following string, as encrypted b64-ed integer
+	    final byte[] A = new byte[(int) kelondroBase64Order.standardCoder.decodeLong(new String(dcipher.doFinal(B), "UTF8"))]; bytesRead = fin.read(A);
 	    final String X = new String(dcipher.doFinal(A), "UTF8");
 
 	    System.out.println("TEST: detecting X-String      : " + X);
@@ -443,7 +443,7 @@ public class cryptbig {
 	final cryptbig crypter = new cryptbig(key);
 	String e = crypter.encryptString(key);
 	if (e.length() == 0) e = "0XXXX";
-	if (e.length() % 2 == 1) e += "X";
+	if (e.length() % 2 != 0) e += "X";
 	while (e.length() < 32) e = e + e;
 	final char[] r = new char[16];
 	for (int i = 0; i < 16; i++) r[i] = e.charAt(2 * i + 1);

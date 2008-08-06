@@ -86,6 +86,7 @@ public class psParser extends AbstractParser implements Parser {
             while ((procOutputLine = stdOut.readLine()) != null) {
                 procOutput.append(procOutputLine).append(", ");
             }
+            stdOut.close();
             final int returnCode = ps2asciiProc.waitFor();
             return (returnCode == 0);
         } catch (final Exception e) {
@@ -145,7 +146,7 @@ public class psParser extends AbstractParser implements Parser {
             writer = new BufferedWriter(new FileWriter(outputFile));
             
             final String versionInfoLine = reader.readLine();
-            final String version = versionInfoLine.substring(versionInfoLine.length()-3);
+            final String version = (versionInfoLine == null) ? "" : versionInfoLine.substring(versionInfoLine.length()-3);
 
             int ichar = 0;
             boolean isComment = false;
@@ -244,9 +245,11 @@ public class psParser extends AbstractParser implements Parser {
     		while ((procOutputLine = stdOut.readLine()) != null) {
     			procOut.append(procOutputLine);
     		}
+    		stdOut.close();
     		while ((procOutputLine = stdErr.readLine()) != null) {
     			procErr.append(procOutputLine);
     		}
+    		stdErr.close();
     		execCode = ps2asciiProc.waitFor();
     	} catch (final Exception e) {
     		final String errorMsg = "Unable to convert ps to ascii. " + e.getMessage();

@@ -250,7 +250,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
             if (pos < 0) {
                 new_rows_sequential.add(row);
             } else {
-                old_rows_ordered.put(new Integer(pos), row);
+                old_rows_ordered.put(Integer.valueOf(pos), row);
             }
         }
         // overwrite existing entries in index

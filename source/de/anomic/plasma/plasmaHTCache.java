@@ -538,8 +538,8 @@ public final class plasmaHTCache {
         p = s.indexOf("/");
         if (p < 0) p = s.indexOf("\\");
         if (p < 0) return null;
-        String prefix = new String("");
-        if (s.startsWith("www")) prefix = new String("www.");
+        String prefix = "";
+        if (s.startsWith("www")) prefix = "www.";
         // remove the www|other|ip directory
         s = s.substring(p + 1);
         p = s.indexOf("/");
@@ -666,7 +666,7 @@ public final class plasmaHTCache {
         if ((d >= 0) && (d > s)) {
             extention = path.substring(d);
         } else if (path.endsWith("/ndx")) {
-            extention = new String (".html"); // Just a wild guess
+            extention = ".html"; // Just a wild guess
         }
         path = path.concat(replaceRegex(query, "(\"|\\\\|\\*|\\?|/|:|<|>|\\|+)", "_"));
 
@@ -953,7 +953,6 @@ public final class plasmaHTCache {
         );
     }
 
-    @SuppressWarnings("null")
     public Entry(final Date initDate, 
             final int depth, 
             final yacyURL url,
@@ -965,7 +964,7 @@ public final class plasmaHTCache {
     ) {
         if (resourceInfo == null){
             System.out.println("Content information object is null. " + url);
-            System.exit(0);            
+            System.exit(0);
         }
         this.resInfo = resourceInfo;
         this.url              = url;

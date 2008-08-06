@@ -42,133 +42,143 @@ import de.anomic.server.serverFileUtils;
  * @since 21.03.2008
  */
 public class JakartaCommonsHttpResponse {
-    private final HttpMethod method;
-    private String incomingAccountingName = null;
+	private final HttpMethod method;
+	private String incomingAccountingName = null;
 
-    /**
-     * cache of body-data
-     */
-    private byte[] responseBody;
+	/**
+	 * cache of body-data
+	 */
+	private byte[] responseBody;
 
-    /**
-     * constructor
-     * 
-     * @param method
-     * @throws IOException
-     */
-    public JakartaCommonsHttpResponse(final HttpMethod method) {
-        super();
+	/**
+	 * constructor
+	 * 
+	 * @param method
+	 * @throws IOException
+	 */
+	public JakartaCommonsHttpResponse(final HttpMethod method) {
+		super();
 
-        this.method = method;
-    }
+		this.method = method;
+	}
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see de.anomic.http.HttpResponse#getResponseHeader()
-     */
-    public httpHeader getResponseHeader() {
-        final httpHeader responseHeader = new httpHeader();
-        for (final Header header : getHeaders()) {
-            responseHeader.add(header.getName(), header.getValue());
-        }
-        return responseHeader;
-    }
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see de.anomic.http.HttpResponse#getResponseHeader()
+	 */
+	public httpHeader getResponseHeader() {
+		final httpHeader responseHeader = new httpHeader();
+		for (final Header header : getHeaders()) {
+			responseHeader.add(header.getName(), header.getValue());
+		}
+		return responseHeader;
+	}
 
-    /**
-     * @see org.apache.commons.httpclient.HttpMethod#getResponseHeaders()
-     * @return the headers
-     */
-    private Header[] getHeaders() {
-        return method.getResponseHeaders();
-    }
+	/**
+	 * @see org.apache.commons.httpclient.HttpMethod#getResponseHeaders()
+	 * @return the headers
+	 */
+	private Header[] getHeaders() {
+		return method.getResponseHeaders();
+	}
 
-    /**
-     * @see org.apache.commons.httpclient.HttpMethod#getResponseBody()
-     * @return
-     * @throws IOException
-     */
-    public byte[] getData() throws IOException {
-        if (responseBody == null) {
-            InputStream instream = null;
-            try {
-                instream = getDataAsStream();
-                if (instream != null) {
-                    responseBody = serverFileUtils.read(instream);
-                }
-            } finally {
-                if (instream != null) {
-                    closeStream();
-                }
-            }
-        }
-        return responseBody;
-    }
+	/**
+	 * @see org.apache.commons.httpclient.HttpMethod#getResponseBody()
+	 * @return
+	 * @throws IOException
+	 */
+	public byte[] getData() throws IOException {
+		if (responseBody == null) {
+			InputStream instream = null;
+			try {
+				instream = getDataAsStream();
+				if (instream != null) {
+					responseBody = serverFileUtils.read(instream);
+				}
+			} finally {
+				if (instream != null) {
+					closeStream();
+				}
+			}
+		}
+		return responseBody;
+	}
 
-    /**
-     * @see org.apache.commons.httpclient.HttpMethod#getResponseBodyAsStream()
-     * @return
-     * @throws IOException
-     */
-    public InputStream getDataAsStream() throws IOException {
-        InputStream inStream = method.getResponseBodyAsStream();
-        if(inStream == null) {
-            return null;
-        }
-        
-        if (getResponseHeader().gzip()) {
-            inStream = new GZIPInputStream(inStream);
-        }
-        // count bytes for overall http-statistics
-        return new httpdByteCountInputStream(inStream, incomingAccountingName);
-    }
+	/**
+	 * @see org.apache.commons.httpclient.HttpMethod#getResponseBodyAsStream()
+	 * @return
+	 * @throws IOException
+	 */
+	public InputStream getDataAsStream() throws IOException {
+		InputStream inStream = method.getResponseBodyAsStream();
+		if (inStream == null) {
+			return null;
+		}
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see de.anomic.http.HttpResponse#closeStream()
-     */
-    public void closeStream() {
-        method.releaseConnection();
-        // statistics
-        HttpConnectionInfo.removeConnection(method.hashCode());
-    }
+		if (getResponseHeader().gzip()) {
+			inStream = new GZIPInputStream(inStream);
+		}
+		// count bytes for overall http-statistics
+		return new httpdByteCountInputStream(inStream, incomingAccountingName);
+	}
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see de.anomic.http.HttpResponse#getStatusLine()
-     */
-    public String getStatusLine() {
-        return getStatusCode() + " " + method.getStatusText();
-    }
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see de.anomic.http.HttpResponse#closeStream()
+	 */
+	public void closeStream() {
+		method.releaseConnection();
+		// statistics
+		HttpConnectionInfo.removeConnection(method.hashCode());
+	}
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see de.anomic.http.HttpResponse#getStatusCode()
-     */
-    public int getStatusCode() {
-        final int code = method.getStatusCode();
-        assert code >= 100 && code <= 999 : "postcondition violated: StatusCode (" + code + ") has not 3 digits!";
-        return code;
-    }
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see de.anomic.http.HttpResponse#getStatusLine()
+	 */
+	public String getStatusLine() {
+		return getStatusCode() + " " + method.getStatusText();
+	}
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see de.anomic.http.HttpResponse#getHttpVer()
-     */
-    public String getHttpVer() {
-        return method.getStatusLine().getHttpVersion();
-    }
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see de.anomic.http.HttpResponse#getStatusCode()
+	 */
+	public int getStatusCode() {
+		final int code = method.getStatusCode();
+		assert code >= 100 && code <= 999 : "postcondition violated: StatusCode ("
+				+ code + ") has not 3 digits!";
+		return code;
+	}
 
-    /**
-     * sets the name for accounting incoming (loaded) bytes
-     * 
-     * @param accName
-     */
-    public void setAccountingName(final String accName) {
-        incomingAccountingName = accName;
-    }
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see de.anomic.http.HttpResponse#getHttpVer()
+	 */
+	public String getHttpVer() {
+		return method.getStatusLine().getHttpVersion();
+	}
+
+	/**
+	 * sets the name for accounting incoming (loaded) bytes
+	 * 
+	 * @param accName
+	 */
+	public void setAccountingName(final String accName) {
+		incomingAccountingName = accName;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#finalize()
+	 */
+	protected void finalize() {
+		closeStream();
+	}
 }

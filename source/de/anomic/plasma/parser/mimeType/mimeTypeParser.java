@@ -119,10 +119,10 @@ public class mimeTypeParser extends AbstractParser implements Parser {
             if (threadLoopDetection.containsKey(Thread.currentThread())) {
                 loopDepth = threadLoopDetection.get(Thread.currentThread());                
             } else {
-                loopDepth = new Integer(0);
+                loopDepth = 0;
             }
             if (loopDepth.intValue() > 5) return null;
-            threadLoopDetection.put(Thread.currentThread(),new Integer(loopDepth.intValue()+1));
+            threadLoopDetection.put(Thread.currentThread(),Integer.valueOf(loopDepth.intValue()+1));
             
             // deactivating the logging for jMimeMagic
             final Logger jmimeMagicLogger = Logger.getLogger("net.sf.jmimemagic");
@@ -164,7 +164,7 @@ public class mimeTypeParser extends AbstractParser implements Parser {
             if (loopDepth.intValue() <= 1) {
                 threadLoopDetection.remove(Thread.currentThread());
             } else {
-                threadLoopDetection.put(Thread.currentThread(), new Integer(loopDepth.intValue()-1));
+                threadLoopDetection.put(Thread.currentThread(), Integer.valueOf(loopDepth.intValue()-1));
             }
         }
     }

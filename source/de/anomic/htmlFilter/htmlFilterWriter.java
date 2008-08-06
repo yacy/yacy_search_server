@@ -110,7 +110,13 @@ public final class htmlFilterWriter extends Writer {
 //              else bb.append((byte) 32).append(tagopts);
             }
             bb.append((int)'>');
-            return bb.getChars();
+            final char[] result = bb.getChars();
+            try {
+				bb.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+            return result;
     }
 
     public static char[] genTag1raw(final String tagname, final char[] tagopts, final char[] text) {
@@ -124,7 +130,13 @@ public final class htmlFilterWriter extends Writer {
             bb.append((int)'>');
             bb.append(text);
             bb.append((int)'<').append((int)'/').append(tagname).append((int)'>');
-            return bb.getChars();
+            final char[] result = bb.getChars();
+            try {
+				bb.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+            return result;
     }
 
     public static char[] genTag0(final String tagname, final Properties tagopts, final char quotechar) {   
@@ -136,14 +148,26 @@ public final class htmlFilterWriter extends Writer {
                 bb.append(tagoptsx);
             }
             bb.append((int)'>');
-            return bb.getChars();          
+            final char[] result = bb.getChars();
+            try {
+				bb.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+            return result;
     }
 
     public static char[] genTag1(final String tagname, final Properties tagopts, final char[] text, final char quotechar) {  
             final char[] gt0 = genTag0(tagname, tagopts, quotechar);
             final serverCharBuffer cb = new serverCharBuffer(gt0, gt0.length + text.length + tagname.length() + 3);
             cb.append(text).append((int)'<').append((int)'/').append(tagname).append((int)'>');
-            return cb.getChars();        
+            final char[] result = cb.getChars();
+            try {
+				cb.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+            return result;
     }
 
     // a helper method for pretty-printing of properties for html tags
@@ -157,8 +181,17 @@ public final class htmlFilterWriter extends Writer {
                 bb.append(prop.getProperty(key));
                 bb.append((int)quotechar); 
             }
-            if (bb.length() > 0) return bb.getChars(1);
-            return bb.getChars(); 
+            final char[] result;
+            if (bb.length() > 0)
+            	result = bb.getChars(1);
+            else
+            	result = bb.getChars();
+            try {
+				bb.close();
+			} catch (IOException ex) {
+				ex.printStackTrace();
+			}
+            return result;
     }
 
     private char[] filterTag(final String tag, final boolean opening, final char[] content, final char quotechar) {
@@ -176,16 +209,38 @@ public final class htmlFilterWriter extends Writer {
             if (opening) {
                 if ((scraper != null) && (scraper.isTag0(tag))) {
                     // this single tag is collected at once here
-                    scraper.scrapeTag0(tag, new serverCharBuffer(content).propParser());
+                	final serverCharBuffer charBuffer = new serverCharBuffer(content);
+                    scraper.scrapeTag0(tag, charBuffer.propParser());
+                    try {
+						charBuffer.close();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
                 }
                 if ((transformer != null) && (transformer.isTag0(tag))) {
                     // this single tag is collected at once here
-                    return transformer.transformTag0(tag, new serverCharBuffer(content).propParser(), quotechar);
+                	final serverCharBuffer scb = new serverCharBuffer(content);
+                	try {
+                		return transformer.transformTag0(tag, scb.propParser(), quotechar);
+                	} finally {
+                		try {
+							scb.close();
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+                	}
                 } else if (((scraper != null) && (scraper.isTag1(tag))) ||
                            ((transformer != null) && (transformer.isTag1(tag)))) {
                     // ok, start collecting
                     filterTag = tag;
-                    filterOpts = new serverCharBuffer(content).propParser();
+                    final serverCharBuffer scb = new serverCharBuffer(content);
+                    filterOpts = scb.propParser();
+                    try {
+						scb.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
                     filterCont = new serverCharBuffer();
                     return new char[0];
                 } else {
@@ -298,7 +353,7 @@ public final class htmlFilterWriter extends Writer {
 //      System.out.println((char) c);
         if ((binaryUnsuspect) && (binaryHint((char)c))) {
             binaryUnsuspect = false;
-            if (passbyIfBinarySuspect) finalize();
+            if (passbyIfBinarySuspect) close();
         }
 
         if (binaryUnsuspect || !passbyIfBinarySuspect) {
@@ -442,7 +497,7 @@ public final class htmlFilterWriter extends Writer {
         // if you want to flush all, call close() at end of writing;
     }
 
-    public void finalize() throws IOException {
+    protected void finalize() throws IOException {
         // if we are forced to close, we of course flush the buffer first,
         // then close the connection
         close();

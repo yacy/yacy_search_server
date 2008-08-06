@@ -419,7 +419,6 @@ public class kelondroCachedRecords extends kelondroAbstractRecords implements ke
                     this.tailChunk = new byte[tailchunksize];
                     System.arraycopy(chunkbuffer, 0, this.headChunk, 0, headchunksize);
                     System.arraycopy(chunkbuffer, headchunksize, this.tailChunk, 0, tailchunksize);
-                    chunkbuffer = null;
                 } else {
                     // read overhead and key
                     this.headChunk = new byte[headchunksize];
@@ -440,7 +439,6 @@ public class kelondroCachedRecords extends kelondroAbstractRecords implements ke
                         this.tailChunk = new byte[tailchunksize];
                         System.arraycopy(chunkbuffer, 0, this.headChunk, 0, headchunksize);
                         System.arraycopy(chunkbuffer, headchunksize, this.tailChunk, 0, tailchunksize);
-                        chunkbuffer = null;
                     } else {
                         // read overhead and key
                         this.headChunk = new byte[headchunksize];

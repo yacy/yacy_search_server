@@ -268,10 +268,10 @@ public class blogBoard {
      */
     public class BlogIterator implements Iterator<BlogEntry> {
         Iterator<byte[]> blogIter;
-        blogBoard.BlogEntry nextEntry;
+        //blogBoard.BlogEntry nextEntry;
         public BlogIterator(final boolean up) throws IOException {
             this.blogIter = blogBoard.this.database.keys(up, false);
-            this.nextEntry = null;
+            //this.nextEntry = null;
         }
         
         public boolean hasNext() {
@@ -293,14 +293,14 @@ public class blogBoard {
         }
         
         public void remove() {
-            if (this.nextEntry != null) {
-                try {
-                    final Object blogKey = this.nextEntry.getKey();
-                    if (blogKey != null) deleteBlogEntry((String) blogKey);
-                } catch (final kelondroException e) {
-                    //resetDatabase();
-                }
-            }
+//            if (this.nextEntry != null) {
+//                try {
+//                    final Object blogKey = this.nextEntry.getKey();
+//                    if (blogKey != null) deleteBlogEntry((String) blogKey);
+//                } catch (final kelondroException e) {
+//                    //resetDatabase();
+//                }
+//            }
         }
     }
  

@@ -126,7 +126,7 @@ public class plasmaSearchRankingProfile {
                 if ((s == 0) || (e.startsWith(prefix))) {
                     p = e.indexOf("=");
                     if (p < 0) System.out.println("DEBUG: bug in plasmaSearchRankingProfile: e = " + e);
-                    if ((p > 0) && (e.length() > p + 1)) coeff.put(e.substring(s, p), new Integer(Integer.parseInt(e.substring(p + 1))));
+                    if ((p > 0) && (e.length() > p + 1)) coeff.put(e.substring(s, p), Integer.valueOf(Integer.parseInt(e.substring(p + 1))));
                 }
             }
             coeff_domlength          = parseMap(coeff, DOMLENGTH, coeff_domlength);

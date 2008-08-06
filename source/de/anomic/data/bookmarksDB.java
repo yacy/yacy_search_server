@@ -33,6 +33,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.MalformedURLException;
@@ -718,7 +719,7 @@ public class bookmarksDB {
     		removeTag(oldHash);
     		final Iterator<String> it = urlHashes.iterator();
             Bookmark bookmark;                
-            Set<String> tags = new HashSet<String>(); 
+            Set<String> tags; 
             String tagsString;            
             while (it.hasNext()) {							// looping through all bookmarks which were tagged with oldName
                 bookmark = getBookmark(it.next());
@@ -770,7 +771,7 @@ public class bookmarksDB {
     		serverFileUtils.copy(input,writer);
     		writer.close();
     		links = scraper.getAnchors();    		
-    	} catch (final IOException e) {}
+    	} catch (final IOException e) { serverLog.logWarning("BOOKMARKS", "error during load of links: "+ e.getClass() +" "+ e.getMessage());}
     	final Iterator<yacyURL> it = links.keySet().iterator();
     	while (it.hasNext()) {
     		url= it.next();
@@ -1269,12 +1270,12 @@ public class bookmarksDB {
      */
     public class tagIterator implements Iterator<Tag> {
         kelondroCloneableIterator<byte[]> tagIter;
-        bookmarksDB.Tag nextEntry;
+        //bookmarksDB.Tag nextEntry;
         
         public tagIterator(final boolean up) throws IOException {
             flushTagCache(); //XXX: This costs performace :-((
             this.tagIter = bookmarksDB.this.tagsTable.keys(up, false);
-            this.nextEntry = null;
+            //this.nextEntry = null;
         }
         
         public boolean hasNext() {
@@ -1296,14 +1297,14 @@ public class bookmarksDB {
         }
         
         public void remove() {
-            if (this.nextEntry != null) {
-                try {
-                    final String tagHash = this.nextEntry.getTagHash();
-                    if (tagHash != null) removeTag(tagHash);
-                } catch (final kelondroException e) {
-                    //resetDatabase();
-                }
-            }
+//            if (this.nextEntry != null) {
+//                try {
+//                    final String tagHash = this.nextEntry.getTagHash();
+//                    if (tagHash != null) removeTag(tagHash);
+//                } catch (final kelondroException e) {
+//                    //resetDatabase();
+//                }
+//            }
         }
     }
     
@@ -1312,11 +1313,11 @@ public class bookmarksDB {
      */
     public class bookmarkIterator implements Iterator<Bookmark> {
         Iterator<byte[]> bookmarkIter;
-        bookmarksDB.Bookmark nextEntry;
+        //bookmarksDB.Bookmark nextEntry;
         public bookmarkIterator(final boolean up) throws IOException {
             //flushBookmarkCache(); //XXX: this will cost performance
             this.bookmarkIter = bookmarksDB.this.bookmarksTable.keys(up, false);
-            this.nextEntry = null;
+            //this.nextEntry = null;
         }
         
         public boolean hasNext() {
@@ -1338,14 +1339,14 @@ public class bookmarksDB {
         }
         
         public void remove() {
-            if (this.nextEntry != null) {
-                try {
-                    final Object bookmarkName = this.nextEntry.getUrlHash();
-                    if (bookmarkName != null) removeBookmark((String) bookmarkName);
-                } catch (final kelondroException e) {
-                    //resetDatabase();
-                }
-            }
+//            if (this.nextEntry != null) {
+//                try {
+//                    final Object bookmarkName = this.nextEntry.getUrlHash();
+//                    if (bookmarkName != null) removeBookmark((String) bookmarkName);
+//                } catch (final kelondroException e) {
+//                    //resetDatabase();
+//                }
+//            }
         }
     }
     
@@ -1380,17 +1381,27 @@ public class bookmarksDB {
     /**
      * Comparator to sort objects of type Tag according to their names
      */
-    public class tagComparator implements Comparator<Tag> {
+    public static class tagComparator implements Comparator<Tag>, Serializable {
         
-    	public int compare(final Tag obj1, final Tag obj2){
+    	/**
+		 * generated serial
+		 */
+		private static final long serialVersionUID = 3105057490088903930L;
+
+		public int compare(final Tag obj1, final Tag obj2){
     		return obj1.getTagName().compareTo(obj2.getTagName());
     	}
     	
     }
     
-    public class tagSizeComparator implements Comparator<Tag> {
+    public static class tagSizeComparator implements Comparator<Tag>, Serializable {
         
-    	public int compare(final Tag obj1, final Tag obj2) {
+    	/**
+		 * generated serial
+		 */
+		private static final long serialVersionUID = 4149185397646373251L;
+
+		public int compare(final Tag obj1, final Tag obj2) {
     		if (obj1.size() < obj2.size()) return 1;
     		else if (obj1.getTagName().equals(obj2.getTagName())) return 0;
     		else return -1;

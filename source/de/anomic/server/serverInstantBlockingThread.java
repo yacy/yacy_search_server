@@ -52,7 +52,7 @@ public class serverInstantBlockingThread<J extends serverProcessorJob> extends s
         this.jobExecMethod = execMethod(env, jobExec);
         this.environment = (env instanceof Class) ? null : env;
         this.setName(jobExecMethod.getClass().getName() + "." + jobExecMethod.getName() + "." + handleCounter++);
-        this.handle = new Long(System.currentTimeMillis() + this.getName().hashCode());
+        this.handle = Long.valueOf(System.currentTimeMillis() + this.getName().hashCode());
     }
     
     protected static Method execMethod(final Object env, final String jobExec) {

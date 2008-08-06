@@ -36,6 +36,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Reader;
+import java.io.Serializable;
 import java.io.Writer;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -51,6 +52,7 @@ import java.util.zip.ZipOutputStream;
 
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroRowSet;
+import de.anomic.server.logging.serverLog;
 import de.anomic.tools.nxTools;
 
 public final class serverFileUtils {
@@ -309,8 +311,16 @@ public final class serverFileUtils {
     public static byte[] uncompressGZipArray(byte[] source) throws IOException {
     	if (source == null) return null;
     	
-        // support of gzipped data (requested by roland)      
-        if ((source.length > 1) && (((source[1] << 8) | source[0]) == GZIPInputStream.GZIP_MAGIC)) {
+        // support of gzipped data (requested by roland)
+		/* "Bitwise OR of signed byte value
+		 * 
+		 * [...] Values loaded from a byte array are sign extended to 32 bits before
+		 * any any bitwise operations are performed on the value. Thus, if b[0]
+		 * contains the value 0xff, and x is initially 0, then the code ((x <<
+		 * 8) | b[0]) will sign extend 0xff to get 0xffffffff, and thus give the
+		 * value 0xffffffff as the result. [...]" findbugs description of BIT_IOR_OF_SIGNED_BYTE
+		 */
+        if ((source.length > 1) && (((source[1] << 8) | (source[0] & 0xff)) == GZIPInputStream.GZIP_MAGIC)) {
             System.out.println("DEBUG: uncompressGZipArray - uncompressing source");
             try {
                 final ByteArrayInputStream byteInput = new ByteArrayInputStream(source);
@@ -422,7 +432,7 @@ public final class serverFileUtils {
         }
         if(os != null) {
             for (final Iterator<String> i = set.iterator(); i.hasNext(); ) {
-                os.write((i.next().toString()).getBytes());
+                os.write((i.next()).getBytes());
                 if (sep != null) os.write(sep.getBytes());
             }
             os.close();
@@ -472,13 +482,21 @@ public final class serverFileUtils {
         if (!(from_dir.isDirectory())) return;
         if (!(to_dir.isDirectory())) return;
         final String[] list = from_dir.list();
-        for (int i = 0; i < list.length; i++) (new File(from_dir, list[i])).renameTo(new File(to_dir, list[i]));
+        for (int i = 0; i < list.length; i++) {
+        	if(!new File(from_dir, list[i]).renameTo(new File(to_dir, list[i])))
+        		serverLog.logWarning("serverFileUtils", "moveAll(): could not move from "+ from_dir + list[i] +" to "+ to_dir + list[i]);
+        }
     }
     
 
-    public static class dirlistComparator implements Comparator<File> {
+    public static class dirlistComparator implements Comparator<File>, Serializable {
         
-        public int compare(final File file1, final File file2) {
+        /**
+		 * generated serial
+		 */
+		private static final long serialVersionUID = -5196490300039230135L;
+
+		public int compare(final File file1, final File file2) {
             if (file1.isDirectory() && !file2.isDirectory()) {
                 return -1;
             } else if (!file1.isDirectory() && file2.isDirectory()) {

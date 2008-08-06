@@ -39,9 +39,9 @@ public final class ResourceObserver {
     //private final static long MIN_FREE_MEMORY = 0;
     // We are called with the cleanup job every five minutes;
     // the disk usage should be checked with every run
-    private final int CHECK_DISK_USAGE_FREQ = 1;
+    private static final int CHECK_DISK_USAGE_FREQ = 1;
     // The memory usage should be checked on every run
-    private final int CHECK_MEMORY_USAGE_FREQ = 1;
+    private static final int CHECK_MEMORY_USAGE_FREQ = 1;
     
     private final serverLog log = new serverLog("RESOURCE OBSERVER");
     private final plasmaSwitchboard sb;
@@ -67,7 +67,7 @@ public final class ResourceObserver {
         String path;
         for (final String element : pathes) {
             try {
-                path = sb.getConfigPath(element, "").getCanonicalPath().toString();
+                path = sb.getConfigPath(element, "").getCanonicalPath();
                 if (path.length() > 0) pathsToCheck.add(path);
             } catch (final IOException e) {}
         }

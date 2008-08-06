@@ -582,11 +582,11 @@ public final class userDB {
     public class userIterator implements Iterator<Entry> {
         // the iterator iterates all userNames
         kelondroCloneableIterator<byte[]> userIter;
-        userDB.Entry nextEntry;
+        //userDB.Entry nextEntry;
         
         public userIterator(final boolean up) throws IOException {
             this.userIter = userDB.this.userTable.keys(up, false);
-            this.nextEntry = null;
+            //this.nextEntry = null;
         }
         public boolean hasNext() {
             try {
@@ -605,14 +605,14 @@ public final class userDB {
             }
         }
         public void remove() {
-            if (this.nextEntry != null) {
-                try {
-                    final Object userName = this.nextEntry.getUserName();
-                    if (userName != null) removeEntry((String) userName);
-                } catch (final kelondroException e) {
-                    resetDatabase();
-                }
-            }
+//            if (this.nextEntry != null) {
+//                try {
+//                    final Object userName = this.nextEntry.getUserName();
+//                    if (userName != null) removeEntry((String) userName);
+//                } catch (final kelondroException e) {
+//                    resetDatabase();
+//                }
+//            }
         }
     }    
     

@@ -72,7 +72,7 @@ public final class kelondroBufferedIOChunks extends kelondroAbstractIOChunks imp
 
         // do the read
         synchronized (this.buffer) {
-            final byte[] bb = buffer.get(new Long(pos));
+            final byte[] bb = buffer.get(Long.valueOf(pos));
             if (bb == null) {
                 // entry not known, read directly from IO
                 synchronized (this.ra) {
@@ -101,7 +101,7 @@ public final class kelondroBufferedIOChunks extends kelondroAbstractIOChunks imp
         final byte[] bb = kelondroObjectSpace.alloc(len);
         System.arraycopy(b, off, bb, 0, len);
         synchronized (buffer) {
-            buffer.put(new Long(pos + off), bb);
+            buffer.put(Long.valueOf(pos + off), bb);
             bufferCurrSize += overhead + len;
         }
         

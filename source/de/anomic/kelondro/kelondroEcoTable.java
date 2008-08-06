@@ -332,7 +332,7 @@ public class kelondroEcoTable implements kelondroIndex {
         file = null;
     }
     
-    public void finalize() {
+    protected void finalize() {
         if (this.file != null) this.close();
     }
 

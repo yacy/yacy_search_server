@@ -104,7 +104,7 @@ public class NoticedURL {
         }
     }
     
-    public void finalize() {
+    protected void finalize() {
         if ((coreStack != null) || (limitStack != null) || (remoteStack != null)) {
             serverLog.logWarning("plasmaCrawlNURL", "NURL stack closed by finalizer");
             close();

@@ -205,13 +205,13 @@ public class kelondroHashtable {
         int rowNumber;
         do {
             rowNumber = hash.node();
-            if (rowNumber >= hashArray.size()) return new Object[]{new Integer(rowNumber), null};
+            if (rowNumber >= hashArray.size()) return new Object[]{Integer.valueOf(rowNumber), null};
             hkrow = hashArray.get(rowNumber);
             rowKey = (int) hkrow.getColLong(0);
-            if (rowKey == 0) return new Object[]{new Integer(rowNumber), null};
+            if (rowKey == 0) return new Object[]{Integer.valueOf(rowNumber), null};
             hash.rehash();
         } while (rowKey != hash.key());
-        return new Object[]{new Integer(rowNumber), hkrow};
+        return new Object[]{Integer.valueOf(rowNumber), hkrow};
     }
     
     

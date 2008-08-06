@@ -70,7 +70,6 @@ public class kelondroByteArray {
         System.arraycopy(buffer, offset, newbuffer, 0, length);
         buffer = newbuffer;
         offset = 0;
-        newbuffer = null;
     }
     
     public void trim(final int needed) {
@@ -80,7 +79,6 @@ public class kelondroByteArray {
         System.arraycopy(buffer, offset, newbuffer, 0, length);
         buffer = newbuffer;
         offset = 0;
-        newbuffer = null;
     }
     
     public final void removeShift(final int pos, final int dist, final int upBound) {

@@ -382,7 +382,7 @@ public class Bookmarks {
     	String fn="";    	
     	bookmarksDB.Bookmark bookmark;
    	
-    	if (next) fn = it.next().toString();    		
+    	if (next) fn = it.next();    		
     	else fn = prev;
 
     	if(fn.equals("\uffff")) {    		

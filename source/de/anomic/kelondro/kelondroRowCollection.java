@@ -49,7 +49,7 @@ public class kelondroRowCollection {
 
     public  static final double growfactor = 1.4;
     private static final int isortlimit = 20;
-    static final Integer dummy = new Integer(0);
+    static final Integer dummy = 0;
     
     public static final ExecutorService sortingthreadexecutor = (serverProcessor.useCPU > 1) ? Executors.newCachedThreadPool(new NamePrefixThreadFactory("sorting")) : null;
     public static final ExecutorService partitionthreadexecutor = (serverProcessor.useCPU > 1) ? Executors.newCachedThreadPool(new NamePrefixThreadFactory("partition")) : null;
@@ -185,16 +185,23 @@ public class kelondroRowCollection {
     public static kelondroRowCollection importCollection(final InputStream is, final kelondroRow rowdef) throws IOException {
         final byte[] byte2 = new byte[2];
         final byte[] byte4 = new byte[4];
-        is.read(byte4); final int size = (int) kelondroNaturalOrder.decodeLong(byte4);
-        is.read(byte2); //short lastread = (short) kelondroNaturalOrder.decodeLong(byte2);
-        is.read(byte2); //short lastwrote = (short) kelondroNaturalOrder.decodeLong(byte2);
-        is.read(byte2); //String orderkey = new String(byte2);
-        is.read(byte2); final short ordercol = (short) kelondroNaturalOrder.decodeLong(byte2);
-        is.read(byte2); final short orderbound = (short) kelondroNaturalOrder.decodeLong(byte2);
+        int bytesRead;
+        bytesRead = is.read(byte4); final int size = (int) kelondroNaturalOrder.decodeLong(byte4);
+        assert bytesRead == byte4.length;
+        bytesRead = is.read(byte2); //short lastread = (short) kelondroNaturalOrder.decodeLong(byte2);
+        assert bytesRead == byte2.length;
+        bytesRead = is.read(byte2); //short lastwrote = (short) kelondroNaturalOrder.decodeLong(byte2);
+        assert bytesRead == byte2.length;
+        bytesRead = is.read(byte2); //String orderkey = new String(byte2);
+        assert bytesRead == byte2.length;
+        bytesRead = is.read(byte2); final short ordercol = (short) kelondroNaturalOrder.decodeLong(byte2);
+        assert bytesRead == byte2.length;
+        bytesRead = is.read(byte2); final short orderbound = (short) kelondroNaturalOrder.decodeLong(byte2);
+        assert bytesRead == byte2.length;
         assert rowdef.primaryKeyIndex == ordercol;
         final byte[] chunkcache = new byte[size * rowdef.objectsize];
-        final int c = is.read(chunkcache);
-        assert c == chunkcache.length;
+        bytesRead =  is.read(chunkcache);
+        assert bytesRead == chunkcache.length;
         return new kelondroRowCollection(rowdef, size, chunkcache, orderbound);
     }
     
@@ -212,7 +219,6 @@ public class kelondroRowCollection {
         byte[] newChunkcache = new byte[(int) (needed * growfactor)]; // increase space
         System.arraycopy(chunkcache, 0, newChunkcache, 0, chunkcache.length);
         chunkcache = newChunkcache;
-        newChunkcache = null;
     }
     
     public final long memoryNeededForGrow() {
@@ -234,7 +240,6 @@ public class kelondroRowCollection {
         System.arraycopy(chunkcache, 0, newChunkcache, 0, Math.min(
                 chunkcache.length, newChunkcache.length));
         chunkcache = newChunkcache;
-        newChunkcache = null;
     }
 
     public final long lastRead() {
@@ -317,7 +322,7 @@ public class kelondroRowCollection {
     
     private final boolean addUnique(final byte[] a, final int astart, final int alength) {
         assert (a != null);
-        assert (astart >= 0) && (astart < a.length) : " astart = " + a;
+        assert (astart >= 0) && (astart < a.length) : " astart = " + astart;
         assert (!(serverLog.allZero(a, astart, alength))) : "a = " + serverLog.arrayList(a, astart, alength);
         assert (alength > 0);
         assert (astart + alength <= a.length);
@@ -601,7 +606,7 @@ public class kelondroRowCollection {
         }
         
         public Integer call() throws Exception {
-            return new Integer(rc.partition(L, R, S, new byte[rc.rowdef.objectsize]));
+            return Integer.valueOf(rc.partition(L, R, S, new byte[rc.rowdef.objectsize]));
         }
     }
     
@@ -701,7 +706,7 @@ public class kelondroRowCollection {
     }
 
     private final int picMiddle(final int[] list, int len) {
-        assert len % 2 == 1;
+        assert len % 2 != 0;
         assert len <= list.length;
         final int cut = list.length / 2;
         for (int i = 0; i < cut; i++) {remove(list, len, min(list, len)); len--;}

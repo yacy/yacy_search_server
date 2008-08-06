@@ -90,7 +90,7 @@ public class yacyNewsQueue {
         queueStack = null;
     }
 
-    public void finalize() {
+    protected void finalize() {
         close();
     }
 

@@ -184,7 +184,7 @@ public class RobotsTxt {
                                 new Date(),
                                 null,
                                 null,
-                                new Integer(0));
+                                Integer.valueOf(0));
                     } else {
                         robotsTxt4Host.setLoadedDate(new Date());
                     }
@@ -249,7 +249,7 @@ public class RobotsTxt {
         }
     }    
     
-    public class Entry {
+    public static class Entry {
         public static final String ALLOW_PATH_LIST    = "allow";
         public static final String DISALLOW_PATH_LIST = "disallow";
         public static final String LOADED_DATE        = "date";
@@ -587,6 +587,6 @@ public class RobotsTxt {
                 res.closeStream();
             }
         }
-        return new Object[]{new Boolean(accessCompletelyRestricted),robotsTxt,eTag,lastMod};
+        return new Object[]{Boolean.valueOf(accessCompletelyRestricted),robotsTxt,eTag,lastMod};
     }
 }

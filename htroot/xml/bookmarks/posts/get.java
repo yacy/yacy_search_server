@@ -68,7 +68,7 @@ public class get {
         bookmarksDB.Bookmark bookmark=null;
         while(it.hasNext()){
             bookmark=switchboard.bookmarksDB.getBookmark(it.next());
-            if(serverDate.formatISO8601(new Date(bookmark.getTimeStamp())) == date &&
+            if(serverDate.formatISO8601(new Date(bookmark.getTimeStamp())).equals(date) &&
                     tag==null || bookmark.getTags().contains(tag) &&
                     isAdmin || bookmark.getPublic()){
                 prop.put("posts_"+count+"_url", bookmark.getUrl());

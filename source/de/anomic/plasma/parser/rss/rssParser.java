@@ -25,6 +25,7 @@
 package de.anomic.plasma.parser.rss;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
 import java.util.HashMap;
@@ -114,7 +115,9 @@ public class rssParser extends AbstractParser implements Parser {
                     anchors.put(itemURL, itemTitle);
                     
                 	if ((text.length() != 0) && (text.byteAt(text.length() - 1) != 32)) text.append((byte) 32);
-                	text.append(new serverCharBuffer(htmlFilterAbstractScraper.stripAll(new serverCharBuffer(itemDescr.toCharArray()))).trim().toString()).append(' ');
+                	serverCharBuffer scb = new serverCharBuffer(htmlFilterAbstractScraper.stripAll(new serverCharBuffer(itemDescr.toCharArray())));
+                	text.append(scb.trim().toString()).append(' ');
+                	scb.close();
                     
                     final String itemContent = item.getDescription();
                     if ((itemContent != null) && (itemContent.length() > 0)) {
@@ -159,13 +162,16 @@ public class rssParser extends AbstractParser implements Parser {
                     text.getBytes(),
                     anchors,
                     images);            
+            // close streams
+            text.close();
+            authors.close();
+            
             
             return theDoc;
             
-        } catch (final Exception e) {
-            if (e instanceof InterruptedException) throw (InterruptedException) e;
-            if (e instanceof ParserException) throw (ParserException) e;
-            
+        } catch (final InterruptedException e) {
+        	throw e;
+        } catch (final IOException e) {
             throw new ParserException("Unexpected error while parsing rss file." + e.getMessage(),location); 
         }
 	}

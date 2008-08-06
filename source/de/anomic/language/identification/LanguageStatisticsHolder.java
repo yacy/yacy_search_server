@@ -37,7 +37,7 @@ public class LanguageStatisticsHolder extends Vector<LanguageStatistics> {
 
     private static final long serialVersionUID = -887517724227204705L;
 
-    private final String languageDir = "langstats";  // directory that contains language files    
+    private static final String languageDir = "langstats";  // directory that contains language files    
     
     private static LanguageStatisticsHolder instance;
     

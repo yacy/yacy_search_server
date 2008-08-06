@@ -108,11 +108,16 @@ public class LanguageStatistics {
         boolean ret = true;
         BufferedReader reader = null;
         String line;
-        String splitLine[] = new String[2];
+        String splitLine[];
         try {
             reader = new BufferedReader(new FileReader(file));
             while(reader.ready()) {
-                line = reader.readLine().trim();
+                line = reader.readLine();
+                if(line == null) {
+                	// end of file
+                	break;
+                }
+                line = line.trim();
                 if (line.matches("^\\p{L}\\p{Z}+\\p{N}*\\p{P}{0,1}\\p{N}+$")) {
                     splitLine = line.split("\\p{Z}+");
                     this.put(splitLine[0].charAt(0), Float.parseFloat(splitLine[1]));

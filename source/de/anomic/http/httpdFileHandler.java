@@ -112,7 +112,7 @@ public final class httpdFileHandler {
     private static final HashMap<File, SoftReference<byte[]>> templateCache;    
     private static final HashMap<File, SoftReference<Method>> templateMethodCache;
     
-    public static boolean useTemplateCache = false;
+    public static final boolean useTemplateCache;
     
     //private Properties connectionProperties = null;
     // creating a logger
@@ -148,8 +148,8 @@ public final class httpdFileHandler {
             
             // create a htRootPath: system pages
             if (htRootPath == null) {
-                htRootPath = new File(theSwitchboard.getRootPath(), theSwitchboard.getConfig("htRootPath","htroot"));
-                if (!(htRootPath.exists())) htRootPath.mkdir();
+	                htRootPath = new File(theSwitchboard.getRootPath(), theSwitchboard.getConfig(plasmaSwitchboardConstants.HTROOT_PATH, plasmaSwitchboardConstants.HTROOT_PATH_DEFAULT));
+	                if (!(htRootPath.exists())) htRootPath.mkdir();
             }
             
             // create a htDocsPath: user defined pages
@@ -318,9 +318,9 @@ public final class httpdFileHandler {
                     serverLog.logInfo("HTTPD", "Wrong log-in for account 'admin' in http file handler for path '" + path + "' from host '" + clientIP + "'");
                     final Integer attempts = serverCore.bfHost.get(clientIP);
                     if (attempts == null)
-                        serverCore.bfHost.put(clientIP, new Integer(1));
+                        serverCore.bfHost.put(clientIP, Integer.valueOf(1));
                     else
-                        serverCore.bfHost.put(clientIP, new Integer(attempts.intValue() + 1));
+                        serverCore.bfHost.put(clientIP, Integer.valueOf(attempts.intValue() + 1));
     
                     final httpHeader headers = getDefaultHeaders(path);
                     headers.put(httpHeader.WWW_AUTHENTICATE,"Basic realm=\"admin log-in\"");
@@ -628,9 +628,9 @@ public final class httpdFileHandler {
                                     serverLog.logInfo("HTTPD", "dynamic log-in for account 'admin' in http file handler for path '" + path + "' from host '" + clientIP + "'");
                                     final Integer attempts = serverCore.bfHost.get(clientIP);
                                     if (attempts == null)
-                                        serverCore.bfHost.put(clientIP, new Integer(1));
+                                        serverCore.bfHost.put(clientIP, Integer.valueOf(1));
                                     else
-                                        serverCore.bfHost.put(clientIP, new Integer(attempts.intValue() + 1));
+                                        serverCore.bfHost.put(clientIP, Integer.valueOf(attempts.intValue() + 1));
                                 }
                                 // send authentication request to browser
                                 final httpHeader headers = getDefaultHeaders(path);

@@ -190,7 +190,7 @@ public final class plasmaSearchEvent {
                         mindhtdistance = d;
                         IAneardhthash = wordhash;
                     }
-                    IACount.put(wordhash, new Integer(container.size()));
+                    IACount.put(wordhash, Integer.valueOf(container.size()));
                     IAResults.put(wordhash, indexContainer.compressIndex(container, null, 1000).toString());
                 }
                 serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), "abstract generation", this.rankedCache.searchContainerMaps()[0].size(), System.currentTimeMillis() - timer));
@@ -224,7 +224,7 @@ public final class plasmaSearchEvent {
                     snippetComputationAllTime += resultEntry.snippetComputationTime;
                 
                     // place the result to the result vector
-                    result.push(resultEntry, new Long(rankedCache.getOrder().cardinal(resultEntry.word())));
+                    result.push(resultEntry, Long.valueOf(rankedCache.getOrder().cardinal(resultEntry.word())));
 
                     // add references
                     synchronized (rankedCache) {
@@ -545,7 +545,7 @@ public final class plasmaSearchEvent {
                 
                 // place the result to the result vector
                 if (!result.exists(resultEntry)) {
-                    result.push(resultEntry, new Long(rankedCache.getOrder().cardinal(resultEntry.word())));
+                    result.push(resultEntry, Long.valueOf(rankedCache.getOrder().cardinal(resultEntry.word())));
                     rankedCache.addReferences(resultEntry);
                 }
                 //System.out.println("DEBUG SNIPPET_LOADING: thread " + id + " got " + resultEntry.url());
@@ -585,7 +585,7 @@ public final class plasmaSearchEvent {
             if ((localSearchThread != null) && (localSearchThread.isAlive())) {
                 // in case that the local search takes longer than some other remote search requests, 
                 // do some sleeps to give the local process a chance to contribute
-                try {Thread.sleep(item * 100);} catch (final InterruptedException e) {}
+                try {Thread.sleep(item * 100L);} catch (final InterruptedException e) {}
             }
             // now wait until as many remote worker threads have finished, as we want to display results
             while ((this.primarySearchThreads != null) && (this.primarySearchThreads.length > item) && (anyWorkerAlive()) && 
@@ -630,7 +630,7 @@ public final class plasmaSearchEvent {
                 if (imagemedia != null) {
                     for (int j = 0; j < imagemedia.size(); j++) {
                         ms = imagemedia.get(j);
-                        images.push(ms, new Long(ms.ranking));
+                        images.push(ms, Long.valueOf(ms.ranking));
                     }
                 }
             }

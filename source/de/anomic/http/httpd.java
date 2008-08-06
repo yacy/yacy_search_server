@@ -354,11 +354,11 @@ public final class httpd implements serverHandler, Cloneable {
         final String requester = this.prop.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP);
         if (requester == null) return false;
         if (lastAccessDelta(YaCyHopAccessRequester, requester) < 10000) return false;
-        YaCyHopAccessRequester.put(requester, new Long(System.currentTimeMillis()));
+        YaCyHopAccessRequester.put(requester, Long.valueOf(System.currentTimeMillis()));
         
         // check access target frequecy: protection against DoS from a single peer by several different requesters
         if (lastAccessDelta(YaCyHopAccessTargets, host) < 3000) return false;
-        YaCyHopAccessTargets.put(host, new Long(System.currentTimeMillis()));
+        YaCyHopAccessTargets.put(host, Long.valueOf(System.currentTimeMillis()));
         
         // passed all tests
         return true;
@@ -376,7 +376,7 @@ public final class httpd implements serverHandler, Cloneable {
         
         // reading the authentication settings from switchboard
         if (!this.proxyAccounts_init) {
-            this.use_proxyAccounts = (switchboard.getConfig("use_proxyAccounts", "false").equals("true") ? true : false);
+            this.use_proxyAccounts = switchboard.getConfigBool("use_proxyAccounts", false);
 			this.proxyAccounts_init = true; // is initialised
 		}
         
@@ -730,7 +730,8 @@ public final class httpd implements serverHandler, Cloneable {
         // parsing post request bodies with a given length
         if (length != -1) {
             buffer = new byte[length];
-            in.read(buffer);
+            int bytesRead = in.read(buffer);
+            assert bytesRead == buffer.length;
         // parsing post request bodies which are gzip content-encoded
         } else {
             ByteArrayOutputStream bout = new ByteArrayOutputStream();
@@ -906,8 +907,8 @@ public final class httpd implements serverHandler, Cloneable {
             throw new IOException("boundary not recognized: " + ((line == null) ? "NULL" : new String(line, "UTF-8")) + ", boundary = " + new String(boundary));
         
         // we need some constants
-        final byte[] namec = (new String("name=")).getBytes();
-        final byte[] filenamec = (new String("filename=")).getBytes();
+        final byte[] namec = "name=".getBytes();
+        final byte[] filenamec = "filename=".getBytes();
         //byte[] semicolonc = (new String(";")).getBytes();
         final byte[] quotec = new byte[] {(byte) '"'};
         
@@ -1535,7 +1536,7 @@ public final class httpd implements serverHandler, Cloneable {
         try {                            
             final int idx = hostName.indexOf(":");
             final String dstHost = (idx != -1) ? hostName.substring(0,idx).trim() : hostName.trim();     
-            final Integer dstPort = (idx != -1) ? Integer.valueOf(hostName.substring(idx+1).trim()) : new Integer(80);
+            final Integer dstPort = (idx != -1) ? Integer.valueOf(hostName.substring(idx+1).trim()) : Integer.valueOf(80);
             
             // if the hostname endswith thisPeerName.yacy ...
             final String alternativeAddress = (alternativeResolver == null) ? null : alternativeResolver.myAlternativeAddress();
@@ -1547,7 +1548,7 @@ public final class httpd implements serverHandler, Cloneable {
              */
             } else if (
                     // check if the destination port is equal to the port yacy is listening to
-                    dstPort.equals(new Integer(serverCore.getPortNr(switchboard.getConfig("port", "8080")))) &&
+                    dstPort.equals(Integer.valueOf(serverCore.getPortNr(switchboard.getConfig("port", "8080")))) &&
                     (
                             // check if the destination host is our local IP address
                             isThisHostIP(dstHost) ||

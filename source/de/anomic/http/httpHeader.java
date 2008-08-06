@@ -477,12 +477,12 @@ public final class httpHeader extends TreeMap<String, String> implements Map<Str
     public static Object[] parseResponseLine(final String respLine) {
         
         if ((respLine == null) || (respLine.length() == 0)) {
-            return new Object[]{"HTTP/1.0",new Integer(500),"status line parse error"};
+            return new Object[]{"HTTP/1.0",Integer.valueOf(500),"status line parse error"};
         }
         
         int p = respLine.indexOf(" ");
         if (p < 0) {
-            return new Object[]{"HTTP/1.0",new Integer(500),"status line parse error"};
+            return new Object[]{"HTTP/1.0",Integer.valueOf(500),"status line parse error"};
         }
         
         String httpVer, status, statusText;
@@ -500,7 +500,7 @@ public final class httpHeader extends TreeMap<String, String> implements Map<Str
             statusCode = Integer.valueOf((p < 0) ? status.trim() : status.substring(0,p).trim());
             statusText = (p < 0) ? "" : status.substring(p+1).trim();
         } catch (final Exception e) {
-            statusCode = new Integer(500);
+            statusCode = Integer.valueOf(500);
             statusText = status;
         }
         
@@ -798,7 +798,7 @@ public final class httpHeader extends TreeMap<String, String> implements Map<Str
     /**
      * Implementation of Map.Entry. Structure that hold two values - exactly what we need!
      */
-    class Entry implements Map.Entry<String, String> {
+    static class Entry implements Map.Entry<String, String> {
         private final String k;
         private String v;
         Entry(final String k, final String v) {
@@ -909,7 +909,7 @@ public final class httpHeader extends TreeMap<String, String> implements Map<Str
             //System.out.println(""+e.getKey()+" : "+e.getValue());
             if(e.getKey().equals("Cookie"))
             {
-                return e.getValue().toString();
+                return e.getValue();
             }
         }
         return "";

@@ -79,7 +79,6 @@ public class plasmaStore {
             // finished with reading. now cut the result to the right size
             b = new byte[len];
             System.arraycopy(result, 0, b, 0, len); 
-            result = null;
             return b;
         } finally {
             if (gzipin != null) try{gzipin.close();}catch(final Exception e){}

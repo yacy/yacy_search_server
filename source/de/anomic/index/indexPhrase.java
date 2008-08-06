@@ -54,7 +54,7 @@ public class indexPhrase {
     }
 
     public void check(final int i) {
-        hash.add(new Integer(i));
+        hash.add(Integer.valueOf(i));
     }
 
     

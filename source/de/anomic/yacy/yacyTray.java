@@ -45,7 +45,7 @@ import de.anomic.server.serverSystem;
 
 
 public class yacyTray implements ActionListener, ItemListener {
-	private final boolean testing = false;
+	private static final boolean testing = false;
 	
 	plasmaSwitchboard sb;
 	

@@ -927,7 +927,7 @@ public final class yacyClient {
             
             return resultObj;
         } finally {
-            resultObj.put("payloadSize", new Integer(payloadSize));
+            resultObj.put("payloadSize", Integer.valueOf(payloadSize));
         }
     }
 

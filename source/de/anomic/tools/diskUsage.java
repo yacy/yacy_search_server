@@ -291,7 +291,7 @@ public class diskUsage {
         final File file = new File("DATA");
 
         String path = null;
-        try { path = file.getCanonicalPath().toString(); } catch (final IOException e) {
+        try { path = file.getCanonicalPath(); } catch (final IOException e) {
             usageError = "Cant get DATA directory";
             return;
         }

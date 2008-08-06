@@ -77,14 +77,14 @@ public class kelondroBufferedEcoFS {
         efs = null;
     }
 
-    public synchronized void finalize() {
+    protected synchronized void finalize() {
         if (this.efs != null) this.close();
     }
     
     public synchronized void get(final long index, final byte[] b, final int start) throws IOException {
         assert b.length - start >= efs.recordsize;
         if (index >= size()) throw new IndexOutOfBoundsException("kelondroBufferedEcoFS.get(" + index + ") outside bounds (" + this.size() + ")");
-        final byte[] bb = buffer.get(new Long(index));
+        final byte[] bb = buffer.get(Long.valueOf(index));
         if (bb == null) {
             efs.get(index, b, start);
         } else {
@@ -101,7 +101,7 @@ public class kelondroBufferedEcoFS {
         } else {
             final byte[] bb = new byte[efs.recordsize];
             System.arraycopy(b, start, bb, 0, efs.recordsize);
-            buffer.put(new Long(index), bb);
+            buffer.put(Long.valueOf(index), bb);
             if (buffer.size() > this.maxEntries) flushBuffer();
        }
     }
@@ -114,7 +114,7 @@ public class kelondroBufferedEcoFS {
 
     public synchronized void cleanLast(final byte[] b, final int start) throws IOException {
         assert b.length - start >= efs.recordsize;
-        final byte[] bb = buffer.remove(new Long(size() - 1));
+        final byte[] bb = buffer.remove(Long.valueOf(size() - 1));
         if (bb == null) {
             efs.cleanLast(b, start);
         } else {
@@ -124,7 +124,7 @@ public class kelondroBufferedEcoFS {
     }
     
     public synchronized void cleanLast() throws IOException {
-        buffer.remove(new Long(size() - 1));
+        buffer.remove(Long.valueOf(size() - 1));
         efs.cleanLast();
     }
     

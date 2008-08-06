@@ -97,7 +97,7 @@ public class swfParser extends AbstractParser implements Parser {
             while ((urlStart = contents.indexOf("http://",urlEnd)) >= 0){
                 urlEnd = contents.indexOf(linebreak,urlStart);
                 url = contents.substring(urlStart,urlEnd);
-                urlnr = (new Integer(++urls)).toString();
+                urlnr = (Integer.valueOf(++urls)).toString();
                 anchors.put(new yacyURL(url, null), urlnr);
                 contents = contents.substring(0,urlStart)+contents.substring(urlEnd);
             }

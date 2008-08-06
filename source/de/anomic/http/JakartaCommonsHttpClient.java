@@ -604,7 +604,7 @@ public class JakartaCommonsHttpClient {
                 final JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(1000, null, null);
                 resp = client.POST(url, files);
                 System.out.println("----- Header: -----");
-                System.out.println(new String(resp.getResponseHeader().toString()));
+                System.out.println(resp.getResponseHeader().toString());
                 System.out.println("----- Body:   -----");
                 System.out.println(new String(resp.getData()));
             } else if (args.length > 1 && "head".equals(args[1])) {

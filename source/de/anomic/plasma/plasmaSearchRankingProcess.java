@@ -122,9 +122,7 @@ public final class plasmaSearchRankingProcess {
                       this.localSearchContainerMaps[1].values(),
                       query.maxDistance);
         serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), plasmaSearchEvent.JOIN, index.size(), System.currentTimeMillis() - timer));
-        final int joincount = index.size();
-        
-        if ((index == null) || (joincount == 0)) {
+        if ((index == null) || (index.size() == 0)) {
             return;
         }
         
@@ -166,7 +164,7 @@ public final class plasmaSearchRankingProcess {
             }
             
             // kick out entries that are too bad according to current findings
-            r = new Long(order.cardinal(iEntry));
+            r = Long.valueOf(order.cardinal(iEntry));
             if ((maxentries >= 0) && (stack.size() >= maxentries) && (stack.bottom(r.longValue()))) continue;
             
             // check constraints

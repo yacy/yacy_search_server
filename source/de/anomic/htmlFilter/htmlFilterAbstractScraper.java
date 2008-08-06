@@ -434,7 +434,6 @@ public abstract class htmlFilterAbstractScraper implements htmlFilterScraper {
                 bb = new serverCharBuffer(bb.getChars(0, p0), bb.length()).append(bb.getChars(p0 + 1));
             }
         }
-        t = null;
         return bb;
     }
 
@@ -462,7 +461,7 @@ public abstract class htmlFilterAbstractScraper implements htmlFilterScraper {
         tags1 = null;
     }
     
-    public void finalize() {
+    protected void finalize() {
         close();
     }
     
