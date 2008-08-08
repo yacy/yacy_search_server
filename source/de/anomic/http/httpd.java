@@ -24,6 +24,7 @@
 
 package de.anomic.http;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.CharArrayWriter;
 import java.io.File;
@@ -35,15 +36,24 @@ import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.FileItemFactory;
+import org.apache.commons.fileupload.FileUpload;
+import org.apache.commons.fileupload.FileUploadBase;
+import org.apache.commons.fileupload.FileUploadException;
+import org.apache.commons.fileupload.RequestContext;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.httpclient.ChunkedInputStream;
 
 import de.anomic.data.htmlTools;
@@ -126,7 +136,7 @@ public final class httpd implements serverHandler, Cloneable {
     private int keepAliveRequestCount = 0;
     
     // needed for logging
-    private final serverLog log = new serverLog("HTTPD");
+    private final static serverLog log = new serverLog("HTTPD");
 
     // class methods
     public httpd(final serverSwitch<?> s) {
@@ -304,7 +314,7 @@ public final class httpd implements serverHandler, Cloneable {
                 return false;
             } else if (!this.serverAccountBase64MD5.equals(serverCodings.encodeMD5Hex(auth.trim().substring(6)))) {
                 // wrong password given: ask for authenticate again
-                serverLog.logInfo("HTTPD", "Wrong log-in for account 'server' in HTTPD.GET " + this.prop.getProperty("PATH") + " from IP " + this.clientIP);
+                log.logInfo("Wrong log-in for account 'server' in HTTPD.GET " + this.prop.getProperty("PATH") + " from IP " + this.clientIP);
                 this.session.out.write((httpVersion + " 401 log-in required" + serverCore.CRLF_STRING +
                         httpHeader.WWW_AUTHENTICATE + ": Basic realm=\"log-in\"" + 
                         serverCore.CRLF_STRING).getBytes());
@@ -848,7 +858,7 @@ public final class httpd implements serverHandler, Cloneable {
                     b.write(Integer.parseInt(s.substring(i + 2, end)));
                     i += end - i;
                 } else {                                                // 'named' smybols
-                    serverLog.logFine("HTTPD", "discovered yet unimplemented HTML entity '" + s.substring(i, end + 1) + "'");
+                    log.logFine("discovered yet unimplemented HTML entity '" + s.substring(i, end + 1) + "'");
                     b.write(s.charAt(i));
                 }
             } else {
@@ -858,134 +868,197 @@ public final class httpd implements serverHandler, Cloneable {
         return b.toString();
     }
     
-    public static HashMap<String, byte[]> parseMultipart(final httpHeader header, final serverObjects args, final InputStream in, final int length) throws IOException {
-        // this is a quick hack using a previously coded parseMultipart based on a buffer
-        // should be replaced sometime by a 'right' implementation
-
-        byte[] buffer = null;
-        
-        // parsing post request bodies with a given length
-        if (length != -1) { 
-            buffer = new byte[length];
-            int c, a = 0;
-            while (a < length) {
-                c = in.read(buffer, a, length - a);
-                if (c <= 0) break;
-                a += c;
-            }
-        // parsing post request bodies which are gzip content-encoded
-        } else {
-            serverByteBuffer bout = new serverByteBuffer();
-            serverFileUtils.copy(in,bout);
-            buffer = bout.getBytes();
-            bout.close(); bout = null;
-        }
-        
-        //System.out.println("MULTIPART-BUFFER=" + new String(buffer));
-        final HashMap<String, byte[]> files = parseMultipart(header, args, buffer);
-        buffer = null;
-        return files;
+    /**
+     * parses the message accordingly to RFC 1867 using "Commons FileUpload" (http://commons.apache.org/fileupload/)
+     * 
+     * @author danielr
+     * @since 07.08.2008
+     * @param header hier muss ARGC gesetzt werden!
+     * @param args
+     * @param in
+     * @param length
+     * @return
+     * @throws IOException
+     */
+    @SuppressWarnings("unchecked")
+	public static HashMap<String, byte[]> parseMultipart(final httpHeader header, final serverObjects args, final InputStream in, final int length) throws IOException {
+		RequestContext request = new yacyContextRequest(header, in);
+    	
+    	if(!FileUploadBase.isMultipartContent(request)) {
+    		throw new IOException("the request is not a multipart-message!");
+    	}
+    	
+    	FileItemFactory factory = new DiskFileItemFactory();
+    	FileUpload upload = new FileUpload(factory);
+		List<FileItem> items;
+		try {
+			items = upload.parseRequest(request);
+		} catch (FileUploadException e) {
+			throw new IOException("FileUploadException "+e.getMessage());
+		}
+		
+		final HashMap<String, byte[]> files = new HashMap<String, byte[]>();
+		int formFieldCount = 0;
+    	for(FileItem item: items) {
+    		if(item.isFormField()) {
+    			// simple text
+    			if(item.getContentType() == null || !item.getContentType().contains("charset")) {
+    				// old yacy clients use their local default charset, on most systems UTF-8 (I hope ;)
+    				args.put(item.getFieldName(), item.getString("UTF-8"));
+    			} else {
+    				// use default encoding (given as header or ISO-8859-1)
+    				args.put(item.getFieldName(), item.getString());
+    			}
+    			formFieldCount++;
+    		} else {
+    			// file
+    			args.put(item.getFieldName(), item.getName());
+    			final byte[] fileContent = serverFileUtils.read(item.getInputStream());
+    			item.getInputStream().close();
+    			files.put(item.getFieldName(), fileContent);
+    		}
+    	}
+    	header.put("ARGC", String.valueOf(items.size())); // store argument count
+    	
+    	return files;
     }
-    
-    public static HashMap<String, byte[]> parseMultipart(final httpHeader header, final serverObjects args, final byte[] buffer) throws IOException {
-        // we parse a multipart message and put results into the properties
-        // find/identify boundary marker
-        //System.out.println("DEBUG parseMultipart = <<" + new String(buffer) + ">>");
-        final String s = header.get(httpHeader.CONTENT_TYPE);
-        if (s == null) return null;
-        int q;
-        int p = s.toLowerCase().indexOf("boundary=");
-        if (p < 0) throw new IOException("boundary marker in multipart not found");
-        // boundaries start with additional leading "--", see RFC1867
-        final byte[] boundary = ("--" + s.substring(p + 9)).getBytes();
-        
-        // eat up first boundary
-        // the buffer must start with a boundary
-        byte[] line = readLine(0, buffer);
-        int pos = nextPos;
-        if ((line == null) || (!(equals(line, 0, boundary, 0, boundary.length))))
-            throw new IOException("boundary not recognized: " + ((line == null) ? "NULL" : new String(line, "UTF-8")) + ", boundary = " + new String(boundary));
-        
-        // we need some constants
-        final byte[] namec = "name=".getBytes();
-        final byte[] filenamec = "filename=".getBytes();
-        //byte[] semicolonc = (new String(";")).getBytes();
-        final byte[] quotec = new byte[] {(byte) '"'};
-        
-        // now loop over boundaries
-        byte [] name;
-        byte [] filename;
-        final HashMap<String, byte[]> files = new HashMap<String, byte[]>();
-        int argc = 0;
-        //System.out.println("DEBUG: parsing multipart body:" + new String(buffer));
-        while (pos < buffer.length) { // boundary enumerator
-            // here the 'pos' marker points to the first line in a section after a boundary line
-            line = readLine(pos, buffer); pos = nextPos;
-            // termination if line is empty
-            if (line.length == 0) break;
-            // find name tag in line
-            p = indexOf(0, line, namec);
-            if (p < 0) throw new IOException("tag name in marker section not found: '" + new String(line, "UTF-8") + "'"); // a name tag must always occur
-            p += namec.length + 1; // first position of name value
-            q = indexOf(p, line, quotec);
-            if (q < 0) throw new IOException("missing quote in name tag: '" + new String(line, "UTF-8") + "'");
-            name = new byte[q - p];
-            java.lang.System.arraycopy(line, p, name, 0, q - p);
-            // if this line has also a filename attribute, read it
-            p = indexOf(q, line, filenamec);
-            if (p > 0) {
-                p += filenamec.length + 1; // first position of name value
-                q = indexOf(p, line, quotec);
-                if (q < 0) throw new IOException("missing quote in filename tag: '" + new String(line) + "'");
-                filename = new byte[q - p];
-                java.lang.System.arraycopy(line, p, filename, 0, q - p);
-            } else filename = null;
-            // we have what we need. more information lines may follow, but we omit parsing them
-            // we just skip until an empty line is reached
-            while (pos < buffer.length) { // line skiping
-                line = readLine(pos, buffer); pos = nextPos;
-                if ((line == null) || (line.length == 0)) break;
-            }
-            // depending on the filename tag exsistence, read now either a value for the name
-            // or a complete uploaded file
-            // to know the exact length of the value, we must identify the next boundary
-            p = indexOf(pos, buffer, boundary);
-            
-            // if we can't find another boundary, then this is an error in the input
-            if (p < 0) {
-                serverLog.logSevere("HTTPD", "ERROR in PUT body: no ending boundary. probably missing values");
-                break;
-            }
-            
-            // we don't know if the value is terminated by LF, CR or CRLF
-            // (it's suppose to be CRLF, but we want to be lazy about wrong terminations)
-            if (buffer[p - 2] == serverCore.CR) // ERROR: IndexOutOfBounds: -2
-                /* CRLF */ q = p - 2;
-            else
-                /* CR or LF only */ q = p - 1;
-            // the above line is wrong if we uploaded a file that has a CR as it's last byte
-            // and the client's line termination symbol is only a CR or LF (which would be incorrect)
-            // the value is between 'pos' and 'q', while the next marker is 'p'
-            line = new byte[q - pos];
-            java.lang.System.arraycopy(buffer, pos, line, 0, q - pos);
-            // in the 'line' variable we have now either a normal value or an uploadef file
-            if (filename == null) {
-                args.put(new String(name, "UTF-8"), new String(line, "UTF-8"));
-            } else {
-                // we store the file in a hashtable.
-                // we use the same key to address the file in the hashtable as we
-                // use to address the filename in the properties, but without leading '&'
-                args.put(new String(name, "UTF-8"), new String(filename, "UTF-8"));
-                files.put(new String(name, "UTF-8"), line);
-            }
-            argc++;
-            // finally, read the next boundary line
-            line = readLine(p, buffer);
-            pos = nextPos;
-        }
-        header.put("ARGC", Integer.toString(argc)); // store argument count
-        return files;
-    }
+//        // FIXME this is a quick hack using a previously coded parseMultipart based on a buffer
+//        // should be replaced sometime by a 'right' implementation
+//
+//        byte[] buffer = null;
+//        
+//        // parsing post request bodies with a given length
+//        if (length != -1) { 
+//            buffer = new byte[length];
+//            int c, a = 0;
+//            while (a < length) {
+//                c = in.read(buffer, a, length - a);
+//                if (c <= 0) break;
+//                a += c;
+//            }
+//        // parsing post request bodies which are gzip content-encoded
+//        } else {
+//            serverByteBuffer bout = new serverByteBuffer();
+//            serverFileUtils.copy(in,bout);
+//            buffer = bout.getBytes();
+//            bout.close(); bout = null;
+//        }
+//        
+//        //System.out.println("MULTIPART-BUFFER=" + new String(buffer));
+//        final HashMap<String, byte[]> files = parseMultipart(header, args, buffer);
+//        buffer = null;
+//        return files;
+//    }
+//    
+//    public static HashMap<String, byte[]> parseMultipart(final httpHeader header, final serverObjects args, final byte[] buffer) throws IOException {
+//        // we parse a multipart message and put results into the properties
+//        // find/identify boundary marker
+//        //System.out.println("DEBUG parseMultipart = <<" + new String(buffer) + ">>");
+//        final String s = header.get(httpHeader.CONTENT_TYPE);
+//        if (s == null) return null;
+//        int q;
+//        int p = s.toLowerCase().indexOf("boundary=");
+//        if (p < 0) throw new IOException("boundary marker in multipart not found");
+//        // boundaries start with additional leading "--", see RFC1867
+//        final byte[] boundary = ("--" + s.substring(p + 9)).getBytes();
+//        
+//        // eat up first boundary
+//        // the buffer must start with a boundary
+//        byte[] line = readLine(0, buffer);
+//        int pos = nextPos;
+//        if ((line == null) || (!(equals(line, 0, boundary, 0, boundary.length))))
+//            throw new IOException("boundary not recognized: " + ((line == null) ? "NULL" : new String(line, "UTF-8")) + ", boundary = " + new String(boundary));
+//        
+//        // we need some constants
+//        final byte[] namec = "name=".getBytes();
+//        final byte[] filenamec = "filename=".getBytes();
+//        //byte[] semicolonc = (new String(";")).getBytes();
+//        final byte[] quotec = new byte[] {(byte) '"'};
+//        
+//        // now loop over boundaries
+//        byte [] name;
+//        byte [] filename;
+//        final HashMap<String, byte[]> files = new HashMap<String, byte[]>();
+//        int argc = 0;
+//        //System.out.println("DEBUG: parsing multipart body:" + new String(buffer));
+//        while (pos < buffer.length) { // boundary enumerator
+//            // here the 'pos' marker points to the first line in a section after a boundary line
+//            line = readLine(pos, buffer); pos = nextPos;
+//            // termination if line is empty
+//            if (line.length == 0) break;
+//            // find name tag in line
+//            p = indexOf(0, line, namec);
+//            if (p < 0) throw new IOException("tag name in marker section not found: '" + new String(line, "UTF-8") + "'"); // a name tag must always occur
+//            p += namec.length + 1; // first position of name value
+//            q = indexOf(p, line, quotec);
+//            if (q < 0) throw new IOException("missing quote in name tag: '" + new String(line, "UTF-8") + "'");
+//            name = new byte[q - p];
+//            java.lang.System.arraycopy(line, p, name, 0, q - p);
+//            // if this line has also a filename attribute, read it
+//            p = indexOf(q, line, filenamec);
+//            if (p > 0) {
+//                p += filenamec.length + 1; // first position of name value
+//                q = indexOf(p, line, quotec);
+//                if (q < 0) {
+//                	log.logWarning("quote of filename tag not found, searching in next line");
+//                	// append next line to this
+//                	final byte[] nextline = readLine(pos, buffer); pos = nextPos;
+//                	final byte[] holeLine = new byte[line.length + nextline.length];
+//                	System.arraycopy(line, 0, holeLine, 0, line.length);
+//                	System.arraycopy(nextline, 0, holeLine, line.length, nextline.length);
+//                	p = indexOf(q, holeLine, quotec);
+//                	if(p > 0)
+//                		throw new IOException("missing quote in filename tag: '" + new String(line) + "'");
+//                }
+//                filename = new byte[q - p];
+//                java.lang.System.arraycopy(line, p, filename, 0, q - p);
+//            } else filename = null;
+//            // we have what we need. more information lines may follow, but we omit parsing them
+//            // we just skip until an empty line is reached
+//            while (pos < buffer.length) { // line skiping
+//                line = readLine(pos, buffer); pos = nextPos;
+//                if ((line == null) || (line.length == 0)) break;
+//            }
+//            // depending on the filename tag exsistence, read now either a value for the name
+//            // or a complete uploaded file
+//            // to know the exact length of the value, we must identify the next boundary
+//            p = indexOf(pos, buffer, boundary);
+//            
+//            // if we can't find another boundary, then this is an error in the input
+//            if (p < 0) {
+//                log.logSevere("ERROR in PUT body: no ending boundary. probably missing values");
+//                break;
+//            }
+//            
+//            // we don't know if the value is terminated by LF, CR or CRLF
+//            // (it's suppose to be CRLF, but we want to be lazy about wrong terminations)
+//            if (buffer[p - 2] == serverCore.CR) // ERROR: IndexOutOfBounds: -2
+//                /* CRLF */ q = p - 2;
+//            else
+//                /* CR or LF only */ q = p - 1;
+//            // the above line is wrong if we uploaded a file that has a CR as it's last byte
+//            // and the client's line termination symbol is only a CR or LF (which would be incorrect)
+//            // the value is between 'pos' and 'q', while the next marker is 'p'
+//            line = new byte[q - pos];
+//            java.lang.System.arraycopy(buffer, pos, line, 0, q - pos);
+//            // in the 'line' variable we have now either a normal value or an uploadef file
+//            if (filename == null) {
+//                args.put(new String(name, "UTF-8"), new String(line, "UTF-8"));
+//            } else {
+//                // we store the file in a hashtable.
+//                // we use the same key to address the file in the hashtable as we
+//                // use to address the filename in the properties, but without leading '&'
+//                args.put(new String(name, "UTF-8"), new String(filename, "UTF-8"));
+//                files.put(new String(name, "UTF-8"), line);
+//            }
+//            argc++;
+//            // finally, read the next boundary line
+//            line = readLine(p, buffer);
+//            pos = nextPos;
+//        }
+//        header.put("ARGC", Integer.toString(argc)); // store argument count
+//        return files;
+//    }
     
     /*
      ------------1090358578442
@@ -1008,7 +1081,71 @@ public final class httpd implements serverHandler, Cloneable {
      
      */
     
-    static int nextPos = -1;        
+    /**
+     * wraps the request into a org.apache.commons.fileupload.RequestContext
+     * 
+	 * @author danielr
+	 * @since 07.08.2008
+	 */
+	private static class yacyContextRequest implements RequestContext {
+		private final httpHeader header;
+		private final InputStream inStream;
+	
+		/**
+		 * creates a new yacyContextRequest
+		 * 
+		 * @param header
+		 * @param in
+		 */
+		public yacyContextRequest(httpHeader header, InputStream in) {
+			this.header = header;
+			this.inStream = in;
+		}
+	
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see
+		 * org.apache.commons.fileupload.RequestContext#getCharacterEncoding()
+		 */
+		@Override
+		public String getCharacterEncoding() {
+			return header.getCharacterEncoding();
+		}
+	
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see org.apache.commons.fileupload.RequestContext#getContentLength()
+		 */
+		@Override
+		public int getContentLength() {
+			return (int) header.contentLength();
+		}
+	
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see org.apache.commons.fileupload.RequestContext#getContentType()
+		 */
+		@Override
+		public String getContentType() {
+			return header.get(httpHeader.CONTENT_TYPE);
+		}
+	
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see org.apache.commons.fileupload.RequestContext#getInputStream()
+		 */
+		@Override
+		public InputStream getInputStream() throws IOException {
+			return inStream;
+		}
+	
+	}
+
+	static int nextPos = -1;        
     private static byte[] readLine(final int start, final byte[] array) {
         // read a string from an array; line ending is always CRLF
         // but we are also fuzzy with that: may also be only CR or LF
