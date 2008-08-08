@@ -535,10 +535,10 @@ public class yacySeed implements Cloneable {
             // of the local UTC offset is wrong. We correct this here by adding the local UTC
             // offset again.
             return t + serverDate.UTCDiff();
-        } catch (final java.text.ParseException e) {
-            return System.currentTimeMillis();
+        } catch (final java.text.ParseException e) { // in case of an error make seed look old!!!
+            return System.currentTimeMillis() - serverDate.dayMillis;
         } catch (final java.lang.NumberFormatException e) {
-            return System.currentTimeMillis();
+            return System.currentTimeMillis() - serverDate.dayMillis;
         }
     }
     
@@ -835,7 +835,14 @@ public class yacySeed implements Cloneable {
         final String peerName = this.dna.get(yacySeed.NAME);
         if (peerName == null) return "no peer name given";
         dna.put(yacySeed.NAME, checkPeerName(peerName));
-        
+
+        // type
+        final String peerType = this.getPeerType();
+        if ((peerType == null) || 
+            !(peerType.equals(yacySeed.PEERTYPE_VIRGIN) || peerType.equals(yacySeed.PEERTYPE_JUNIOR)
+              || peerType.equals(yacySeed.PEERTYPE_SENIOR) || peerType.equals(yacySeed.PEERTYPE_PRINCIPAL)))
+            return "invalid peerType '" + peerType + "'";
+
         // check IP
         if (!checkOwnIP) {
             // checking of IP is omitted if we read the own seed file        

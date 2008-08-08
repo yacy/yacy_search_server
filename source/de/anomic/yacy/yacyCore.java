@@ -273,6 +273,12 @@ public class yacyCore {
                     // check if seed's lastSeen has been updated
                     final yacySeed newSeed = sb.webIndex.seedDB.getConnected(this.seed.hash);
                     if (newSeed != null) {
+                        if (!newSeed.isOnline()) {
+                            log.logFine("publish: recently handshaked " + this.seed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR) +
+                                " peer '" + this.seed.getName() + "' at " + this.seed.getPublicAddress() + " is not online." +
+                                " Removing Peer from connected");
+                            sb.webIndex.peerActions.peerDeparture(newSeed, "peer not online");
+                        } else
                         if (newSeed.getLastSeenUTC() < (System.currentTimeMillis() - 10000)) {
                             // update last seed date
                             if (newSeed.getLastSeenUTC() >= this.seed.getLastSeenUTC()) {
