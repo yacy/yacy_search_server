@@ -41,11 +41,12 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -82,7 +83,7 @@ public final class plasmaHTCache {
 
     private static kelondroMap responseHeaderDB = null;
     private static final ConcurrentLinkedQueue<Entry> cacheStack = new ConcurrentLinkedQueue<Entry>();
-    private static final ConcurrentHashMap<String, File> cacheAge = new ConcurrentHashMap<String, File>(); // a <date+hash, cache-path> - relation
+    private static final SortedMap<String, File> cacheAge = Collections.synchronizedSortedMap(new TreeMap<String, File>()); // a <date+hash, cache-path> - relation
     public static long curCacheSize = 0;
     public static long maxCacheSize = 0l;
     public static File cachePath = null;
@@ -399,15 +400,13 @@ public final class plasmaHTCache {
 
     private static void cleanupDoIt(final long newCacheSize) {
         File file;
-        final Iterator<Map.Entry<String, File>> iter = cacheAge.entrySet().iterator();
-        Map.Entry<String, File> entry;
-        while (iter.hasNext() && curCacheSize >= newCacheSize) {
+        String key;
+        while (!cacheAge.isEmpty() && curCacheSize >= newCacheSize) {
             if (Thread.currentThread().isInterrupted()) return;
-            entry = iter.next();
-            final String key = entry.getKey();
-            file = entry.getValue();
+            key = cacheAge.firstKey();
+            file = cacheAge.get(key);
             final long t = Long.parseLong(key.substring(0, 16), 16);
-            if (System.currentTimeMillis() - t < 300000) break; // files must have been at least 5 minutes in the cache before they are deleted
+            if (System.currentTimeMillis() - t < 300000) return; // files must have been at least 5 minutes in the cache before they are deleted
             if (file != null) {
                 if (log.isFinest()) log.logFinest("Trying to delete [" + key + "] = old file: " + file.toString());
                 // This needs to be called *before* the file is deleted
@@ -430,7 +429,7 @@ public final class plasmaHTCache {
                     }
                 }
             }
-            iter.remove();
+            cacheAge.remove(key);
         }
     }
 
@@ -469,7 +468,7 @@ public final class plasmaHTCache {
         final kelondroMScoreCluster<String> doms = new kelondroMScoreCluster<String>();
         int fileCount = 0;
         final enumerateFiles fileEnum = new enumerateFiles(cachePath, true, false, true, true);
-        final File dbfile = new File(cachePath, "responseHeader.db");
+        final File dbfile = new File(cachePath, DB_NAME);
         while (fileEnum.hasMoreElements()) {
             if (Thread.currentThread().isInterrupted()) return;
             fileCount++;
@@ -488,12 +487,9 @@ public final class plasmaHTCache {
         //System.out.println("%" + (String) cacheAge.firstKey() + "=" + cacheAge.get(cacheAge.firstKey()));
         long ageHours = 0;
         if (!cacheAge.isEmpty()) {
-            final Iterator<String> i = cacheAge.keySet().iterator();
-            if (i.hasNext()) try {
-                ageHours = (System.currentTimeMillis() - Long.parseLong(i.next().substring(0, 16), 16)) / 3600000;
+            try {
+                ageHours = (System.currentTimeMillis() - Long.parseLong(cacheAge.firstKey().substring(0, 16), 16)) / 3600000;
             } catch (final NumberFormatException e) {
-                ageHours = 0;
-            } else {
                 ageHours = 0;
             }
         }
