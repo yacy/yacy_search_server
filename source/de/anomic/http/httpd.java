@@ -873,7 +873,8 @@ public final class httpd implements serverHandler, Cloneable {
      * 
      * @author danielr
      * @since 07.08.2008
-     * @param header hier muss ARGC gesetzt werden!
+     * @param header
+     *            hier muss ARGC gesetzt werden!
      * @param args
      * @param in
      * @param length
@@ -881,46 +882,52 @@ public final class httpd implements serverHandler, Cloneable {
      * @throws IOException
      */
     @SuppressWarnings("unchecked")
-	public static HashMap<String, byte[]> parseMultipart(final httpHeader header, final serverObjects args, final InputStream in, final int length) throws IOException {
-		RequestContext request = new yacyContextRequest(header, in);
-    	
-    	if(!FileUploadBase.isMultipartContent(request)) {
-    		throw new IOException("the request is not a multipart-message!");
-    	}
-    	
-    	FileItemFactory factory = new DiskFileItemFactory();
-    	FileUpload upload = new FileUpload(factory);
-		List<FileItem> items;
-		try {
-			items = upload.parseRequest(request);
-		} catch (FileUploadException e) {
-			throw new IOException("FileUploadException "+e.getMessage());
-		}
-		
-		final HashMap<String, byte[]> files = new HashMap<String, byte[]>();
-		int formFieldCount = 0;
-    	for(FileItem item: items) {
-    		if(item.isFormField()) {
-    			// simple text
-    			if(item.getContentType() == null || !item.getContentType().contains("charset")) {
-    				// old yacy clients use their local default charset, on most systems UTF-8 (I hope ;)
-    				args.put(item.getFieldName(), item.getString("UTF-8"));
-    			} else {
-    				// use default encoding (given as header or ISO-8859-1)
-    				args.put(item.getFieldName(), item.getString());
-    			}
-    			formFieldCount++;
-    		} else {
-    			// file
-    			args.put(item.getFieldName(), item.getName());
-    			final byte[] fileContent = serverFileUtils.read(item.getInputStream());
-    			item.getInputStream().close();
-    			files.put(item.getFieldName(), fileContent);
-    		}
-    	}
-    	header.put("ARGC", String.valueOf(items.size())); // store argument count
-    	
-    	return files;
+    public static HashMap<String, byte[]> parseMultipart(final httpHeader header, final serverObjects args, final InputStream in, final int length)
+            throws IOException {
+        // read all data from network in memory
+        byte[] buffer = serverFileUtils.read(in);
+        // parse data in memory
+        RequestContext request = new yacyContextRequest(header, new ByteArrayInputStream(buffer));
+
+        // check information
+        if (!FileUploadBase.isMultipartContent(request)) {
+            throw new IOException("the request is not a multipart-message!");
+        }
+
+        // format information for further usage
+        FileItemFactory factory = new DiskFileItemFactory();
+        FileUpload upload = new FileUpload(factory);
+        List<FileItem> items;
+        try {
+            items = upload.parseRequest(request);
+        } catch (FileUploadException e) {
+            throw new IOException("FileUploadException " + e.getMessage());
+        }
+
+        final HashMap<String, byte[]> files = new HashMap<String, byte[]>();
+        int formFieldCount = 0;
+        for (FileItem item : items) {
+            if (item.isFormField()) {
+                // simple text
+                if (item.getContentType() == null || !item.getContentType().contains("charset")) {
+                    // old yacy clients use their local default charset, on most systems UTF-8 (I hope ;)
+                    args.put(item.getFieldName(), item.getString("UTF-8"));
+                } else {
+                    // use default encoding (given as header or ISO-8859-1)
+                    args.put(item.getFieldName(), item.getString());
+                }
+                formFieldCount++;
+            } else {
+                // file
+                args.put(item.getFieldName(), item.getName());
+                final byte[] fileContent = serverFileUtils.read(item.getInputStream());
+                item.getInputStream().close();
+                files.put(item.getFieldName(), fileContent);
+            }
+        }
+        header.put("ARGC", String.valueOf(items.size())); // store argument count
+
+        return files;
     }
 //        // FIXME this is a quick hack using a previously coded parseMultipart based on a buffer
 //        // should be replaced sometime by a 'right' implementation
