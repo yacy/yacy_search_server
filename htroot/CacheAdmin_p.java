@@ -35,6 +35,7 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.Writer;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -139,7 +140,7 @@ public class CacheAdmin_p {
                         String sourceCharset = resInfo.getCharacterEncoding();
                         if (sourceCharset == null) sourceCharset = "UTF-8";
                         final String mimeType = resInfo.getMimeType();                    
-                        serverFileUtils.copy(file, sourceCharset, writer);
+                        serverFileUtils.copy(file, Charset.forName(sourceCharset), writer);
                         writer.close();
                         
                         final plasmaParserDocument document = switchboard.parser.transformScraper(url, mimeType, sourceCharset, scraper);

@@ -28,6 +28,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.LinkedList;
@@ -124,7 +125,7 @@ public class rssParser extends AbstractParser implements Parser {
                         
                         final htmlFilterContentScraper scraper = new htmlFilterContentScraper(itemURL);
                         final Writer writer = new htmlFilterWriter(null, null, scraper, null, false);
-                        serverFileUtils.copy(new ByteArrayInputStream(itemContent.getBytes("UTF-8")), writer, "UTF-8");
+                        serverFileUtils.copy(new ByteArrayInputStream(itemContent.getBytes("UTF-8")), writer, Charset.forName("UTF-8"));
                         
                         final String itemHeadline = scraper.getTitle();     
                         if ((itemHeadline != null) && (itemHeadline.length() > 0)) {

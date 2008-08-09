@@ -42,6 +42,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.text.Collator;
 import java.util.Date;
 import java.util.HashMap;
@@ -54,6 +55,7 @@ import java.util.Vector;
 
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDate;
+import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyURL;
 
 
@@ -946,13 +948,20 @@ public final class httpHeader extends TreeMap<String, String> implements Map<Str
 
     /**
      * @param header
-     * @return
+     * @return a supported Charset, so data can be encoded (may not be correct)
      */
-    static String getCharSet(final httpHeader header) {
-        String charSet = header.getCharacterEncoding();
-        if (charSet == null) {
-            charSet = DEFAULT_CHARSET;
+    static Charset getCharSet(final httpHeader header) {
+        String charSetName = header.getCharacterEncoding();
+        if (charSetName == null) {
+        	// no character encoding is sent by the server
+            charSetName = DEFAULT_CHARSET;
         }
-        return charSet;
+        // maybe the charset is valid but not installed on this computer
+        if(!Charset.isSupported(charSetName)) {
+        	serverLog.logWarning("httpHeader", "charset '"+ charSetName +"' is not supported on this machine, using default ("+ Charset.defaultCharset().name() +")");
+        	// use system default
+        	return Charset.defaultCharset();
+        }
+        return Charset.forName(charSetName);
     } 
 }

@@ -30,6 +30,7 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.nio.charset.Charset;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.zip.ZipEntry;
@@ -117,7 +118,7 @@ public class odtParser extends AbstractParser implements Parser {
                     // extract data
                     final InputStream zipFileEntryStream = zipFile.getInputStream(zipEntry);
                     final OpenDocumentTextInputStream odStream = new OpenDocumentTextInputStream(zipFileEntryStream);
-                    serverFileUtils.copy(odStream, writer, "UTF-8");
+                    serverFileUtils.copy(odStream, writer, Charset.forName("UTF-8"));
                 
                     // close readers and writers
                     odStream.close();

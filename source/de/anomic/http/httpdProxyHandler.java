@@ -65,6 +65,7 @@ import java.net.NoRouteToHostException;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
@@ -549,12 +550,12 @@ public final class httpdProxyHandler {
                 // make a transformer
                 theLogger.logFine(reqID +" create transformer for URL " + url);
                 //hfos = new htmlFilterOutputStream((gzippedOut != null) ? gzippedOut : ((chunkedOut != null)? chunkedOut : respond), null, transformer, (ext.length() == 0));
-                final String charSet = httpHeader.getCharSet(responseHeader);
+                final Charset charSet = httpHeader.getCharSet(responseHeader);
                 hfos = new htmlFilterWriter(outStream,charSet, null, transformer, (ext.length() == 0));
             } else {
                 // simply pass through without parsing
                 theLogger.logFine(reqID +" create passthrough for URL " + url + ", extension '" + ext + "', mime-type '" + responseHeader.mime() + "'");
-                hfos = new OutputStreamWriter(outStream, httpHeader.getCharSet(res.getResponseHeader()));
+                hfos = new OutputStreamWriter(outStream, httpHeader.getCharSet(responseHeader));
             }
             
             // handle incoming cookies
@@ -757,7 +758,7 @@ public final class httpdProxyHandler {
                 //respondHeader(respond, "203 OK", cachedResponseHeader); // respond with 'non-authoritative'
                 
                 // determine the content charset
-                final String charSet = httpHeader.getCharSet(cachedResponseHeader);
+                final Charset charSet = httpHeader.getCharSet(cachedResponseHeader);
                 
                 // make a transformer
                 final OutputStream outStream = (gzippedOut != null) ? gzippedOut : ((chunkedOut != null)? chunkedOut : respond);
@@ -801,7 +802,7 @@ public final class httpdProxyHandler {
         try {
             final InputStream data = res.getDataAsStream();
             if (data == null) return;
-            final String charSet = httpHeader.getCharSet(res.getResponseHeader());
+            final Charset charSet = httpHeader.getCharSet(res.getResponseHeader());
             serverFileUtils.copyToWriter(new BufferedInputStream(data), hfos, charSet);
         } finally {
             res.closeStream();
@@ -813,7 +814,7 @@ public final class httpdProxyHandler {
         try {
             final InputStream data = res.getDataAsStream();
             if (data == null) return;
-            final String charSet = httpHeader.getCharSet(res.getResponseHeader());
+            final Charset charSet = httpHeader.getCharSet(res.getResponseHeader());
             serverFileUtils.copyToWriters(new BufferedInputStream(data), hfos, new BufferedWriter(new OutputStreamWriter(byteStream, charSet)) , charSet);
         } finally {
             res.closeStream();

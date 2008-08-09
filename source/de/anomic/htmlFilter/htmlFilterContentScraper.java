@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.MalformedURLException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -485,7 +486,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         // scrape content
         final htmlFilterContentScraper scraper = new htmlFilterContentScraper(new yacyURL("http://localhost", null));
         final Writer writer = new htmlFilterWriter(null, null, scraper, null, false);
-        serverFileUtils.copy(new ByteArrayInputStream(page), writer, "UTF-8");
+        serverFileUtils.copy(new ByteArrayInputStream(page), writer, Charset.forName("UTF-8"));
         
         return scraper;
     }
@@ -500,7 +501,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         // scrape content
         final htmlFilterContentScraper scraper = new htmlFilterContentScraper(location);
         final Writer writer = new htmlFilterWriter(null, null, scraper, null, false);
-        serverFileUtils.copy(new ByteArrayInputStream(page), writer, "UTF-8");
+        serverFileUtils.copy(new ByteArrayInputStream(page), writer, Charset.forName("UTF-8"));
         
         return scraper;
     }

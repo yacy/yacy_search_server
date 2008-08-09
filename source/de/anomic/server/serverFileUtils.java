@@ -38,6 +38,7 @@ import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.Serializable;
 import java.io.Writer;
+import java.nio.charset.Charset;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -98,7 +99,7 @@ public final class serverFileUtils {
         return total;
     }
     
-    public static int copy(final File source, final String inputCharset, final Writer dest) throws IOException {
+    public static int copy(final File source, final Charset inputCharset, final Writer dest) throws IOException {
         InputStream fis = null;
         try {
             fis = new FileInputStream(source);
@@ -108,7 +109,7 @@ public final class serverFileUtils {
         }
     }    
     
-    public static int copy(final InputStream source, final Writer dest, final String inputCharset) throws IOException {
+    public static int copy(final InputStream source, final Writer dest, final Charset inputCharset) throws IOException {
         final InputStreamReader reader = new InputStreamReader(source,inputCharset);
         return copy(reader,dest);
     }
@@ -158,7 +159,7 @@ public final class serverFileUtils {
             fos = new FileOutputStream(dest);
             copy(source, fos, count);
         } finally {
-            if (fos != null) try {fos.close();} catch (final Exception e) {}
+            if (fos != null) try {fos.close();} catch (final Exception e) { serverLog.logWarning("FileUtils", "cannot close FileOutputStream for "+ dest +"! "+ e.getMessage()); }
         }
     }
 
@@ -393,8 +394,7 @@ public final class serverFileUtils {
         }
         pw.println("# EOF");
         pw.close();
-        file.delete();
-        tf.renameTo(file);
+        forceMove(tf, file);
     }
 
     public static Set<String> loadSet(final File file, final int chunksize, final boolean tree) throws IOException {
@@ -437,8 +437,7 @@ public final class serverFileUtils {
             }
             os.close();
         }
-        file.delete();
-        tf.renameTo(file);
+        forceMove(tf, file);
     }
 
     public static void saveSet(final File file, final String format, final kelondroRowSet set, final String sep) throws IOException {
@@ -469,8 +468,21 @@ public final class serverFileUtils {
             }
             os.close();
         }
-        file.delete();
-        tf.renameTo(file);
+        forceMove(tf, file);
+    }
+
+    /**
+     * @param from
+     * @param to
+     * @throws IOException
+     */
+    private static void forceMove(final File from, final File to) throws IOException {
+        if(!(to.delete() && from.renameTo(to))) {
+            // do it manually
+            copy(from, to);
+            if(!from.delete())
+                from.deleteOnExit();
+        }
     }
     
     /**
@@ -567,7 +579,7 @@ public final class serverFileUtils {
      * @return
      * @throws IOException
      */
-    public static int copyToWriter(final BufferedInputStream data, final BufferedWriter writer, final String charSet) throws IOException {
+    public static int copyToWriter(final BufferedInputStream data, final BufferedWriter writer, final Charset charSet) throws IOException {
         // the docs say: "For top efficiency, consider wrapping an InputStreamReader within a BufferedReader."
         final Reader sourceReader = new InputStreamReader(data, charSet);
         
@@ -581,7 +593,8 @@ public final class serverFileUtils {
         writer.flush();
         return count;
     }
-    public static int copyToWriters(final BufferedInputStream data, final BufferedWriter writer0, final BufferedWriter writer1, final String charSet) throws IOException {
+    
+    public static int copyToWriters(final BufferedInputStream data, final BufferedWriter writer0, final BufferedWriter writer1, final Charset charSet) throws IOException {
         // the docs say: "For top efficiency, consider wrapping an InputStreamReader within a BufferedReader."
         assert writer0 != null;
         assert writer1 != null;

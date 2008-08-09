@@ -46,6 +46,7 @@ import de.anomic.index.indexReferenceBlacklist;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyURL;
 
@@ -79,7 +80,7 @@ prop.putHTML("asd", "0");
                 yacyURL testurl = null;
 				try {
 					testurl = new yacyURL(urlstring, null);
-				} catch (final MalformedURLException e) { }
+				} catch (final MalformedURLException e) { testurl = null; }
 				if(testurl != null) {
 					prop.putHTML("testlist_url",testurl.toString());
 					if(plasmaSwitchboard.urlBlacklist.isListed(indexReferenceBlacklist.BLACKLIST_CRAWLER, testurl))
@@ -139,7 +140,9 @@ prop.putHTML("asd", "0");
                 }                   
                 
                 final File BlackListFile = new File(listManager.listsPath, blacklistToUse);
-                BlackListFile.delete();
+                if(!BlackListFile.delete()) {
+                    serverLog.logWarning("Blacklist", "file "+ BlackListFile +" could not be deleted!");
+                }
 
                 for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
                     listManager.removeFromListSet(supportedBlacklistTypes[blTypes] + ".BlackLists",blacklistToUse);
@@ -407,7 +410,7 @@ prop.putHTML("asd", "0");
         } catch (final IOException e) {
             e.printStackTrace();
         } finally {
-            if (pw != null) try { pw.close(); } catch (final Exception e){ /* */}
+            if (pw != null) try { pw.close(); } catch (final Exception e){ serverLog.logWarning("Blacklist", "could not close stream to "+ blacklistToUse +"! "+ e.getMessage());}
         }
 
         // add to blacklist

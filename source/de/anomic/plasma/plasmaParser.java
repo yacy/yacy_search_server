@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -704,7 +705,7 @@ public final class plasmaParser {
         // parsing the content
         final htmlFilterContentScraper scraper = new htmlFilterContentScraper(location);        
         final htmlFilterWriter writer = new htmlFilterWriter(null,null,scraper,null,false);
-        serverFileUtils.copy(htmlFilter, writer, charset);
+        serverFileUtils.copy(htmlFilter, writer, Charset.forName(charset));
         writer.close();
         //OutputStream hfos = new htmlFilterOutputStream(null, scraper, null, false);            
         //serverFileUtils.copy(sourceFile, hfos);

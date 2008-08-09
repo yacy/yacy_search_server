@@ -41,6 +41,7 @@ import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.MalformedURLException;
+import java.nio.charset.Charset;
 import java.util.Enumeration;
 import java.util.Properties;
 
@@ -73,11 +74,11 @@ public final class htmlFilterWriter extends Writer {
 
     public htmlFilterWriter(
             final OutputStream outStream,
-            final String outputStreamCharset,
+            final Charset charSet,
             final htmlFilterScraper scraper,
             final htmlFilterTransformer transformer,
             final boolean passbyIfBinarySuspect
-    ) throws UnsupportedEncodingException {
+    ) {
         this.outStream     = outStream;
         this.scraper       = scraper;
         this.transformer   = transformer;
@@ -93,7 +94,7 @@ public final class htmlFilterWriter extends Writer {
         this.passbyIfBinarySuspect = passbyIfBinarySuspect;
         
         if (this.outStream != null) {
-            this.out = new OutputStreamWriter(this.outStream,(outputStreamCharset == null)?"UTF-8":outputStreamCharset);
+            this.out = new OutputStreamWriter(this.outStream,(charSet == null)?Charset.defaultCharset():charSet);
         }        
     }
 
@@ -558,7 +559,7 @@ public final class htmlFilterWriter extends Writer {
             final htmlFilterTransformer transformer = new htmlFilterContentTransformer();            
             final Reader is = new FileReader(args[0]);
             final FileOutputStream fos = new FileOutputStream(new File(args[0] + ".out"));
-            final Writer os = new htmlFilterWriter(fos, "UTF-8",scraper, transformer, false);
+            final Writer os = new htmlFilterWriter(fos, Charset.forName("UTF-8"),scraper, transformer, false);
             int i;
             while ((i = is.read(buffer)) > 0) os.write(buffer, 0, i);
             os.close();
