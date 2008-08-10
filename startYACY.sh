@@ -91,10 +91,10 @@ then
     if [ -n "$HUGEPAGESTOTAL" ] && [ $HUGEPAGESTOTAL -ne 0 ]
     then 
         ENABLEHUGEPAGES=1
-    elif [ $OS = "SunOS" ]
-    then
-        ENABLEHUGEPAGES=1
     fi
+elif [ $OS = "SunOS" ]
+then
+    ENABLEHUGEPAGES=1
 fi 
 
 
