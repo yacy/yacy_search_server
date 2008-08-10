@@ -38,6 +38,7 @@ import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -884,17 +885,14 @@ public final class httpd implements serverHandler, Cloneable {
     @SuppressWarnings("unchecked")
     public static HashMap<String, byte[]> parseMultipart(final httpHeader header, final serverObjects args, final InputStream in, final int length)
             throws IOException {
-        // read all data from network in memory
-        byte[] buffer = serverFileUtils.read(in);
-        // parse data in memory
-        RequestContext request = new yacyContextRequest(header, new ByteArrayInputStream(buffer));
+        RequestContext request = new yacyContextRequest(header, in);
 
         // check information
         if (!FileUploadBase.isMultipartContent(request)) {
             throw new IOException("the request is not a multipart-message!");
         }
 
-        // format information for further usage
+        // parse data in memory
         FileItemFactory factory = new DiskFileItemFactory();
         FileUpload upload = new FileUpload(factory);
         List<FileItem> items;
@@ -904,6 +902,7 @@ public final class httpd implements serverHandler, Cloneable {
             throw new IOException("FileUploadException " + e.getMessage());
         }
 
+        // format information for further usage
         final HashMap<String, byte[]> files = new HashMap<String, byte[]>();
         int formFieldCount = 0;
         for (FileItem item : items) {
