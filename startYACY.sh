@@ -79,7 +79,32 @@ done
 
 #get javastart args
 #JAVA_ARGS="";
-JAVA_ARGS="-server -XX:+UseConcMarkSweepGC -XX:+CMSIncrementalMode -XX:+UseAdaptiveSizePolicy -XX:+UseLargePages";
+
+#check if Linux system supports large memory pages or if OS is Solaris which 
+#supports large memory pages since version 9 
+#(according to http://java.sun.com/javase/technologies/hotspot/largememory.jsp)
+ENABLEHUGEPAGES=0;
+
+if [ $OS = "Linux" ]
+then
+    HUGEPAGESTOTAL="`cat /proc/meminfo | grep HugePages_Total | sed s/[^0-9]//g`"
+    if [ -n "$HUGEPAGESTOTAL" ] && [ $HUGEPAGESTOTAL -ne 0 ]
+    then 
+        ENABLEHUGEPAGES=1
+    elif [ $OS = "SunOS" ]
+    then
+        ENABLEHUGEPAGES=1
+    fi
+fi 
+
+
+JAVA_ARGS="-server -XX:+UseConcMarkSweepGC -XX:+CMSIncrementalMode -XX:+UseAdaptiveSizePolicy";
+#turn on support for large memory pages if supported by OS
+if [ $ENABLEHUGEPAGES -eq 1 ]
+then
+    JAVA_ARGS="$JAVA_ARGS -XX:+UseLargePages"
+fi
+
 #JAVA_ARGS="-verbose:gc -XX:+PrintGCTimeStamps -XX:+PrintGCDetails $JAVA_ARGS";
     
 if [ ! -f $CONFIGFILE -a -f DATA/SETTINGS/httpProxy.conf ]
