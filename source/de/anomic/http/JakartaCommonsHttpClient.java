@@ -444,12 +444,14 @@ public class JakartaCommonsHttpClient {
             throw e;
         }
         final httpRemoteProxyConfig hostProxyConfig = getProxyConfig(host);
-        final String scheme = method.getURI().getScheme();
-        if(scheme != null && scheme.toLowerCase().startsWith("https") && !hostProxyConfig.useProxy4SSL()) {
-            // do not use proxy for HTTPS
-            return null;
+        if(hostProxyConfig != null) {
+            final String scheme = method.getURI().getScheme();
+            if(scheme != null && scheme.toLowerCase().startsWith("https") && !hostProxyConfig.useProxy4SSL()) {
+                // do not use proxy for HTTPS
+                return null;
+            }
+            addProxyAuth(method, hostProxyConfig);
         }
-        addProxyAuth(method, hostProxyConfig);
         return hostProxyConfig;
     }
 
