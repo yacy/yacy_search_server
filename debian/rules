@@ -1,0 +1,54 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+# Sample debian/rules that uses debhelper.
+# This file was originally written by Joey Hess and Craig Small.
+# As a special exception, when this file is copied by dh-make into a
+# dh-make output file, you may use that output file without restriction.
+# This special exception was added by Craig Small in version 0.37 of dh-make.
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+
+configure: configure-stamp
+configure-stamp:
+	# Add here commands to configure the package.
+
+
+build: build-stamp
+
+build-stamp: configure-stamp 
+	ant all
+	m4 -DDebian addon/yacyInit.m4 >debian/yacy.init
+
+clean:
+	ant clean
+	rm -f debian/yacy.init
+	dh_clean 
+
+install: build
+	# Add here commands to install the package into debian/yacy.
+	ant installonlinux -DDESTDIR=$(CURDIR)/debian/yacy
+	mkdir -p $(CURDIR)/debian/yacy/usr/share/java/yacy/
+	cp lib/*.jar $(CURDIR)/debian/yacy/usr/share/java/yacy/
+	cp libx/*.jar $(CURDIR)/debian/yacy/usr/share/java/yacy/
+	#cp -r classes $(CURDIR)/debian/yacy/usr/share/java/yacy/
+
+
+# Build architecture-independent files here.
+binary-indep: build install
+# We have nothing to do by default.
+
+# Build architecture-dependent files here.
+binary-arch: build install
+	dh_installchangelogs 
+	dh_installdocs
+	dh_installinit
+#	dh_installman
+	dh_installdeb
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary install configure

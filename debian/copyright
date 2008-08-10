@@ -1,0 +1,30 @@
+This package was debianized by Florian Richter <Florian_Richter@gmx.de> on
+Wed, 28 May 2008 19:15:45 +0200.
+
+It was downloaded from <http://yacy.net>
+
+Upstream Author: Michael Peter Christen <mc@anomic.de>
+
+Copyright: (C) by Michael Peter Christen; mc@anomic.de
+
+License:
+All parts of the software known as YaCy are covered under the 
+terms of the GNU General Public License as published by the 
+Free Software Foundation; either version 2 of the License, or 
+(at your option) any later version unless stated otherwise.
+
+You should have received a copy of the GNU General Public License
+along with this software; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+People who have contributed to this software in addition to those
+mentioned in the source code or other files belonging to YaCy:
+
+Jakub Steiner (bookmarkpriv.png, bookmarkpub.png)
+
+
+The Debian packaging is (C) 2008, Florian Richter <Florian_Richter@gmx.de> and
+is licensed under the GPL, see `/usr/share/common-licenses/GPL'.
+
+
+Some libraries of yacy have different licenses. Please have a look at lib/ and libx/

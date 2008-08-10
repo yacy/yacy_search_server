@@ -769,6 +769,7 @@
         <include name="yacy.stopwords"/>
         <include name="yacy.parser"/>
         <include name="httpd.mime"/>
+        <include name="build.properties"/>
       </fileset>
     </copy>
 
@@ -1055,4 +1056,19 @@
     <delete dir="${release_windows}" failonerror="false" />
   </target>
 
+  <target name="deb" depends="init" description="Creates a debian package">
+    <!-- replacing the old with the new revision number -->
+    <replaceregexp file="debian/changelog"
+                  match="yacy \(.*\) unstable; urgency=low"
+                  replace="yacy (${releaseVersion}svn${baseRevisionNr}) unstable; urgency=low" />
+
+    <!-- build debian package -->
+    <exec executable="dpkg-buildpackage">
+      <arg value="-b"/>
+      <arg value="-rfakeroot"/>
+    </exec>
+    <replaceregexp file="debian/changelog"
+                  match="yacy \(.*\) unstable; urgency=low"
+                  replace="yacy (*auto-svn-version*) unstable; urgency=low" />
+  </target>
 </project>

@@ -1,0 +1,21 @@
+Source: yacy
+Section: network
+Priority: extra
+Maintainer: root <root@debian>
+Build-Depends: ant, sun-java6-jdk, debhelper (>= 5)
+Standards-Version: 3.7.2
+
+Package: yacy
+Architecture: any
+Depends: sun-java6-jre, sudo
+Description: P2P Web Search Engine
+ YaCy is a Java-based peer-2-peer search engine.
+ It provoids a personal websearch engine, which is
+ free and decentral. The search index is distributed
+ over a peer2peer network. It contains a crawler, an indexer
+ and an own database engine. In the robinson-modus, yacy
+ can be used for a topic-oriented search protal or to index an
+ intranet.
+ Also included in YaCy is a Wiki, a P2P-message-system, a
+ Blog and a bookmark management system. 
+Homepage: http://yacy.net/
