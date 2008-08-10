@@ -59,8 +59,8 @@ public class ResourceInfo implements IResourceInfo {
     }
 
     public ResourceInfo(final yacyURL objectURL, final httpHeader requestHeaders, final httpHeader responseHeaders) {
-        if (objectURL == null) throw new NullPointerException();
-        if (responseHeaders == null) throw new NullPointerException();  
+        if (objectURL == null) throw new NullPointerException("objectURL == null");
+        if (responseHeaders == null) throw new NullPointerException("responseHeader == null");
         
         // generating the url hash
         this.url = objectURL;

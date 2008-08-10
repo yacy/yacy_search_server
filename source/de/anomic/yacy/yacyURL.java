@@ -732,7 +732,7 @@ public class yacyURL implements Serializable {
         final byte flagbyte = (byte) (((isHTTP) ? 0 : 32) | (id << 2) | domlengthKey);
 
         // combine the attributes
-        final StringBuffer hash = new StringBuffer(12);
+        final StringBuilder hash = new StringBuilder(12);
         // form the 'local' part of the hash
         hash.append(kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(toNormalform(true, true))).substring(0, 5)); // 5 chars
         hash.append(subdomPortPath(subdom, port, rootpath)); // 1 char
@@ -741,7 +741,7 @@ public class yacyURL implements Serializable {
         hash.append(kelondroBase64Order.enhancedCoder.encodeByte(flagbyte)); // 1 char
 
         // return result hash
-        return new String(hash);
+        return hash.toString();
     }
 
     private static char subdomPortPath(final String subdom, final int port, final String rootpath) {

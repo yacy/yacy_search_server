@@ -977,6 +977,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
          * Testing if the content type is supported by the available parsers
          * ========================================================================= */
         final boolean isSupportedContent = plasmaParser.supportedContent(entry.url(),entry.getMimeType());
+        log.logFinest(entry.url() +" content of type "+ entry.getMimeType() +" is supported: "+ isSupportedContent);
         
         /* =========================================================================
          * INDEX CONTROL HEADER

@@ -187,7 +187,8 @@ public final class HTTPLoader {
                     if (plasmaParser.supportedContent(parserMode, entry.url(), res.getResponseHeader().mime())) {
                         // delete old content
                         if (cacheFile.isFile()) {
-                            plasmaHTCache.deleteURLfromCache(entry.url());
+                            // TODO why is content and metadata so separated? htcache holds metadata, but deleteURLfromCache deletes it???
+                            plasmaHTCache.deleteURLfromCache(entry.url(), true);
                         }
                         
                         // create parent directories
@@ -217,7 +218,7 @@ public final class HTTPLoader {
                             }
 
                             // we write the new cache entry to file system directly
-                            (res).setAccountingName("CRAWLER");
+                            res.setAccountingName("CRAWLER");
                             final byte[] responseBody = res.getData();
                             fos.write(responseBody);
                             htCache.setCacheArray(responseBody);

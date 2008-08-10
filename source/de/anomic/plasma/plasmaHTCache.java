@@ -254,6 +254,7 @@ public final class plasmaHTCache {
     }
 
     static void resetResponseHeaderDB() {
+        log.logFine("reset responseHeader DB with "+ responseHeaderDB.size() +" entries");
         if (responseHeaderDB != null) responseHeaderDB.close();
         final File dbfile = new File(cachePath, DB_NAME);
         if (dbfile.exists()) dbfile.delete();
@@ -358,14 +359,18 @@ public final class plasmaHTCache {
     }
     
     public static boolean deleteURLfromCache(final yacyURL url) {
-        if (deleteFileandDirs(getCachePath(url), "FROM")) {
+        return deleteURLfromCache(url, false);
+    }
+    
+    public static boolean deleteURLfromCache(final yacyURL url, final boolean keepHeader) {
+        if (deleteFileandDirs(getCachePath(url), "FROM") && !keepHeader) {
             try {
                 // As the file is gone, the entry in responseHeader.db is not needed anymore
                 if (log.isFinest()) log.logFinest("Trying to remove responseHeader from URL: " + url.toNormalform(false, true));
                 responseHeaderDB.remove(url.hash());
             } catch (final IOException e) {
                 resetResponseHeaderDB();
-                log.logInfo("IOExeption removing response header from DB: " + e.getMessage(), e);
+                log.logWarning("IOExeption removing response header from DB: " + e.getMessage(), e);
             }
            return true;
        }
@@ -904,7 +909,6 @@ public final class plasmaHTCache {
                 initiator, 
                 profile
         );
-        entry.writeResourceInfo();
         return entry;
     }
 
@@ -936,7 +940,7 @@ public final class plasmaHTCache {
      */
     private final IResourceInfo            resInfo;
 
-    protected Entry clone() throws CloneNotSupportedException {
+    protected Entry clone() {
         return new Entry(
                 this.initDate,
                 this.depth,
@@ -984,6 +988,8 @@ public final class plasmaHTCache {
 
         // to be defined later:
         this.cacheArray     = null;
+        
+        writeResourceInfo();
     }
 
     public String name() {
@@ -1046,7 +1052,7 @@ public final class plasmaHTCache {
         return this.resInfo;
     }
     
-    boolean writeResourceInfo() {
+    private boolean writeResourceInfo() {
         if (this.resInfo == null) return false;
         try {
             final HashMap<String, String> hm = new HashMap<String, String>();
@@ -1054,9 +1060,10 @@ public final class plasmaHTCache {
             hm.put("@@URL", this.url.toNormalform(false, false));
             hm.put("@@DEPTH", Integer.toString(this.depth));
             if (this.initiator != null) hm.put("@@INITIATOR", this.initiator);
-            getResponseHeaderDB().put(this.url.hash(), hm);
+            plasmaHTCache.getResponseHeaderDB().put(this.url.hash(), hm);
         } catch (final Exception e) {
-            resetResponseHeaderDB();
+            log.logWarning("could not write ResourceInfo: "+ e.getClass() +": "+ e.getMessage());
+            plasmaHTCache.resetResponseHeaderDB();
             return false;
         }
         return true;
