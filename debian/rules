@@ -18,7 +18,8 @@ configure-stamp:
 build: build-stamp
 
 build-stamp: configure-stamp 
-	ant all
+	# build yacy
+	ant build-jar
 	m4 -DDebian addon/yacyInit.m4 >debian/yacy.init
 
 clean:
@@ -26,7 +27,7 @@ clean:
 	rm -f debian/yacy.init
 	dh_clean 
 
-install: build
+install:
 	# Add here commands to install the package into debian/yacy.
 	ant installonlinux -DDESTDIR=$(CURDIR)/debian/yacy
 	mkdir -p $(CURDIR)/debian/yacy/usr/share/java/yacy/
@@ -36,11 +37,11 @@ install: build
 
 
 # Build architecture-independent files here.
-binary-indep: build install
+binary-indep: install
 # We have nothing to do by default.
 
 # Build architecture-dependent files here.
-binary-arch: build install
+binary-arch: install
 	dh_installchangelogs 
 	dh_installdocs
 	dh_installinit

@@ -752,7 +752,10 @@
     </delete>
   </target>
 
-  <target name="installonlinux" depends="compileMain,build-jar">
+  <target name="installonlinux">
+    <!-- check for jar-file -->
+    <available file="yacy.jar" property="built"/>
+    <fail message="Please build yacy with 'ant clean all'" unless="built"/>
     <!-- copy main class files -->
     <copy todir="${DESTDIR}/usr/share/java/">
       <fileset dir=".">
@@ -980,8 +983,7 @@
     <ant2svg destfile="doc/build_dependencies.svg"/>
   </target>
 
-  <target name="build-jar" depends="compileMain">
-    <delete file="yacy.jar" />
+  <target name="build-jar" depends="compileMain,compileExtensions">
     <jar destfile="yacy.jar" basedir="${build}/">
       <manifest>
         <attribute name="Main-Class" value="yacy"/>
@@ -989,7 +991,7 @@
     </jar>
   </target>
 
-  <target name="makeWinStartExe" depends="build-jar,compileExtensions">
+  <target name="makeWinStartExe" depends="build-jar">
     <!-- Creates a Windows Executable using JSmooth (http://jsmooth.sf.net) -->
     <taskdef name="jsmoothgen"
              classname="net.charabia.jsmoothgen.ant.JSmoothGen"
@@ -1066,6 +1068,7 @@
     <exec executable="dpkg-buildpackage">
       <arg value="-b"/>
       <arg value="-rfakeroot"/>
+      <arg value="-uc"/>
     </exec>
     <replaceregexp file="debian/changelog"
                   match="yacy \(.*\) unstable; urgency=low"

@@ -46,6 +46,8 @@ SHUTDOWN_TIMEOUT=50
 # Default niceness if not set in config file
 NICE_VAL=0
 
+JAVA_ARGS="-server -XX:+UseConcMarkSweepGC -XX:+CMSIncrementalMode -XX:+UseAdaptiveSizePolicy"
+
 ifdef(`openSUSE', `dnl
 . /etc/rc.status
 rc_reset
@@ -80,7 +82,7 @@ fi
 
 cd $YACY_HOME
 
-JAVA_ARGS="-Djava.awt.headless=true"
+JAVA_ARGS="$JAVA_ARGS -Djava.awt.headless=true"
 #get javastart args
 if [ -f DATA/SETTINGS/yacy.conf ]
 then
@@ -97,6 +99,8 @@ then
 		if [ -n $j ]; then NICE_VAL=$j; fi;
 	fi
 	
+else
+	JAVA_ARGS="-Xmx=120m -Xms120m $JAVA_ARGS"
 fi
 
 # generating the proper classpath
