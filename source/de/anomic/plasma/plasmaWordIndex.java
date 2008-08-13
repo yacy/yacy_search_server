@@ -61,6 +61,7 @@ import de.anomic.kelondro.kelondroOrder;
 import de.anomic.kelondro.kelondroRotateIterator;
 import de.anomic.kelondro.kelondroRowCollection;
 import de.anomic.server.serverMemory;
+import de.anomic.server.serverProfiling;
 import de.anomic.server.logging.serverLog;
 import de.anomic.xml.RSSFeed;
 import de.anomic.xml.RSSMessage;
@@ -417,17 +418,23 @@ public final class plasmaWordIndex implements indexRI {
 
     public void dhtFlushControl(final indexRAMRI theCache) {
         // check for forced flush
-        int l = 0;
-        // flush elements that are too big. This flushing depends on the fact that the flush rule
-        // selects the biggest elements first for flushing. If it does not for any reason, the following
-        // loop would not terminate. To ensure termination an additional counter is used
-        while ((l++ < 100) && (theCache.maxURLinCache() > wCacheMaxChunk)) {
-            flushCache(theCache, Math.min(10, theCache.size()));
-        }
-        // next flush more entries if the size exceeds the maximum size of the cache
-        if ((theCache.size() > theCache.getMaxWordCount()) ||
-            (serverMemory.available() < collections.minMem())) {
-            flushCache(theCache, Math.min(theCache.size() - theCache.getMaxWordCount() + 1, theCache.size()));
+        int cs = cacheSize();
+        if (cs > 0) {
+            // flush elements that are too big. This flushing depends on the fact that the flush rule
+            // selects the biggest elements first for flushing. If it does not for any reason, the following
+            // loop would not terminate.
+            serverProfiling.update("wordcache", new Long(cs));
+            // To ensure termination an additional counter is used
+            int l = 0;
+            while ((l++ < 100) && (theCache.maxURLinCache() > wCacheMaxChunk)) {
+                flushCache(theCache, Math.min(10, theCache.size()));
+            }
+            // next flush more entries if the size exceeds the maximum size of the cache
+            if ((theCache.size() > theCache.getMaxWordCount()) ||
+                    (serverMemory.available() < collections.minMem())) {
+                flushCache(theCache, Math.min(theCache.size() - theCache.getMaxWordCount() + 1, theCache.size()));
+            }
+            if (cacheSize() != cs) serverProfiling.update("wordcache", new Long(cacheSize()));
         }
     }
     

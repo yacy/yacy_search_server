@@ -86,7 +86,7 @@ public class kelondroSQLTable implements kelondroIndex {
             throw new Exception ("Unable to load the jdbc driver: " + e.getMessage(),e);
         }
         try {
-            this.theDBConnection = DriverManager.getConnection (dbConnStr,this.db_usr_str,this.db_pwd_str);
+            this.theDBConnection = DriverManager.getConnection (dbConnStr, db_usr_str, db_pwd_str);
         } catch (final Exception e) {
             throw new Exception ("Unable to establish a database connection: " + e.getMessage(),e);
         }

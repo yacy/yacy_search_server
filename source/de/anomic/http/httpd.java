@@ -198,7 +198,7 @@ public final class httpd implements serverHandler, Cloneable {
         // check if we want to allow this socket to connect us
         if (!(this.allowProxy || this.allowServer || this.allowYaCyHop)) {
             final String errorMsg = "CONNECTION FROM " + this.userAddress.getHostName() + " [" + this.clientIP + "] FORBIDDEN";
-            this.log.logWarning(errorMsg);
+            log.logWarning(errorMsg);
             throw new IOException(errorMsg);
         }
 
@@ -238,7 +238,7 @@ public final class httpd implements serverHandler, Cloneable {
     public String error(final Throwable e) { // OBLIGATORIC FUNCTION
         // return string in case of any error that occurs during communication
         // is always (but not only) called if an IO-dependent exception occurrs.
-        this.log.logSevere("Unexpected Error. " + e.getClass().getName(),e);
+        log.logSevere("Unexpected Error. " + e.getClass().getName(),e);
         final String message = e.getMessage();
         if (message.indexOf("heap space") > 0) e.printStackTrace();
         return "501 Exception occurred: " + message;
@@ -509,22 +509,22 @@ public final class httpd implements serverHandler, Cloneable {
     
     private void logUnexpectedError(final Exception e) {
         if (e instanceof InterruptedException) {
-            this.log.logInfo("Interruption detected");
+            log.logInfo("Interruption detected");
         } else {
             final String errorMsg = e.getMessage();
             if (errorMsg != null) {
                 if (errorMsg.startsWith("Socket closed")) {
-                    this.log.logInfo("httpd shutdown detected ...");
+                    log.logInfo("httpd shutdown detected ...");
                 } else if ((errorMsg.startsWith("Broken pipe") || errorMsg.startsWith("Connection reset"))) {
                     // client closed the connection, so we just end silently
-                    this.log.logInfo("Client unexpectedly closed connection");
+                    log.logInfo("Client unexpectedly closed connection");
                 } else if (errorMsg.equals("400 Bad request")) {
-                	this.log.logInfo("Bad client request.");
+                	log.logInfo("Bad client request.");
                 } else {
-                    this.log.logSevere("Unexpected Error. " + e.getClass().getName() + ": " + e.getMessage(),e);
+                    log.logSevere("Unexpected Error. " + e.getClass().getName() + ": " + e.getMessage(),e);
                 }
             } else {
-                this.log.logSevere("Unexpected Error. " + e.getClass().getName(),e);
+                log.logSevere("Unexpected Error. " + e.getClass().getName(),e);
             }
         }        
     }
@@ -594,7 +594,7 @@ public final class httpd implements serverHandler, Cloneable {
             final String transferEncoding = header.get(httpHeader.TRANSFER_ENCODING);
             if (transferEncoding != null) {
                 if (!httpHeader.HTTP_VERSION_1_1.equals(httpVersion)) {
-                    this.log.logWarning("client "+ session.getName() +" uses transfer-coding with HTTP version "+ httpVersion +"!");
+                    log.logWarning("client "+ session.getName() +" uses transfer-coding with HTTP version "+ httpVersion +"!");
                 }
                 if("chunked".equalsIgnoreCase(header.get(httpHeader.TRANSFER_ENCODING))) {
                     sessionIn = new ChunkedInputStream(this.session.in);
@@ -1112,6 +1112,7 @@ public final class httpd implements serverHandler, Cloneable {
 		 * @see
 		 * org.apache.commons.fileupload.RequestContext#getCharacterEncoding()
 		 */
+		//@Override
 		public String getCharacterEncoding() {
 			return header.getCharacterEncoding();
 		}
@@ -1121,6 +1122,7 @@ public final class httpd implements serverHandler, Cloneable {
 		 * 
 		 * @see org.apache.commons.fileupload.RequestContext#getContentLength()
 		 */
+		//@Override
 		public int getContentLength() {
 			return (int) header.contentLength();
 		}
@@ -1130,6 +1132,7 @@ public final class httpd implements serverHandler, Cloneable {
 		 * 
 		 * @see org.apache.commons.fileupload.RequestContext#getContentType()
 		 */
+		//@Override
 		public String getContentType() {
 			return header.get(httpHeader.CONTENT_TYPE);
 		}
@@ -1139,12 +1142,14 @@ public final class httpd implements serverHandler, Cloneable {
 		 * 
 		 * @see org.apache.commons.fileupload.RequestContext#getInputStream()
 		 */
+		//@Override
 		public InputStream getInputStream() throws IOException {
 			return inStream;
 		}
 	
 	}
 
+	/*
 	static int nextPos = -1;        
     private static byte[] readLine(final int start, final byte[] array) {
         // read a string from an array; line ending is always CRLF
@@ -1159,7 +1164,8 @@ public final class httpd implements serverHandler, Cloneable {
         java.lang.System.arraycopy(array, start, result, 0, pos - start);
         return result;
     }
-    
+    */
+	
     public static int indexOf(final int start, final byte[] array, final byte[] pattern) {
         // return a position of a pattern in an array
         if (start > array.length - pattern.length) return -1;

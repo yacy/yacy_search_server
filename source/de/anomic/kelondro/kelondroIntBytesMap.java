@@ -41,13 +41,13 @@ public class kelondroIntBytesMap {
     private final kelondroRow rowdef;
     private final kelondroRowSet index0;
     private kelondroRowSet index1;
-    private final kelondroOrder<kelondroRow.Entry> entryOrder;
+    //private final kelondroOrder<kelondroRow.Entry> entryOrder;
     
     public kelondroIntBytesMap(final int payloadSize, final int initSize) {
     	this.rowdef = new kelondroRow("Cardinal key-4 {b256}, byte[] payload-" + payloadSize, kelondroNaturalOrder.naturalOrder, 0);
     	this.index0 = new kelondroRowSet(rowdef, initSize);
     	this.index1 = null;
-        this.entryOrder = new kelondroRow.EntryComparator(rowdef.objectOrder);
+        //this.entryOrder = new kelondroRow.EntryComparator(rowdef.objectOrder);
     }
     
     public long memoryNeededForGrow() {

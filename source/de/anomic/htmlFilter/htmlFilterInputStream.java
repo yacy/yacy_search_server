@@ -63,8 +63,8 @@ public class htmlFilterInputStream extends InputStream implements htmlFilterEven
             final boolean passbyIfBinarySuspect
     ) throws UnsupportedEncodingException {
         // create a input stream for buffereing
-        this.bufferedIn = new BufferedInputStream(inStream,(int)this.preBufferSize);
-        this.bufferedIn.mark((int)this.preBufferSize);
+        this.bufferedIn = new BufferedInputStream(inStream,(int) preBufferSize);
+        this.bufferedIn.mark((int) preBufferSize);
         
         final htmlFilterContentScraper scraper = new htmlFilterContentScraper(rooturl);
         scraper.registerHtmlFilterEventListener(this);
@@ -128,7 +128,7 @@ public class htmlFilterInputStream extends InputStream implements htmlFilterEven
     public int read() throws IOException {
         // mode 0 is called from within the detectCharset function
         if (this.mode == MODE_PRESCAN) {      
-            if (this.endOfHead || this.charsetChanged || this.preRead >= this.preBufferSize-1) {
+            if (this.endOfHead || this.charsetChanged || this.preRead >= preBufferSize - 1) {
                 return -1;            
             }
             this.preRead++;            
