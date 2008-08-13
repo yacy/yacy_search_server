@@ -24,7 +24,6 @@
 
 package de.anomic.http;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.CharArrayWriter;
 import java.io.File;
@@ -38,7 +37,6 @@ import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -1114,7 +1112,6 @@ public final class httpd implements serverHandler, Cloneable {
 		 * @see
 		 * org.apache.commons.fileupload.RequestContext#getCharacterEncoding()
 		 */
-		@Override
 		public String getCharacterEncoding() {
 			return header.getCharacterEncoding();
 		}
@@ -1124,7 +1121,6 @@ public final class httpd implements serverHandler, Cloneable {
 		 * 
 		 * @see org.apache.commons.fileupload.RequestContext#getContentLength()
 		 */
-		@Override
 		public int getContentLength() {
 			return (int) header.contentLength();
 		}
@@ -1134,7 +1130,6 @@ public final class httpd implements serverHandler, Cloneable {
 		 * 
 		 * @see org.apache.commons.fileupload.RequestContext#getContentType()
 		 */
-		@Override
 		public String getContentType() {
 			return header.get(httpHeader.CONTENT_TYPE);
 		}
@@ -1144,7 +1139,6 @@ public final class httpd implements serverHandler, Cloneable {
 		 * 
 		 * @see org.apache.commons.fileupload.RequestContext#getInputStream()
 		 */
-		@Override
 		public InputStream getInputStream() throws IOException {
 			return inStream;
 		}
