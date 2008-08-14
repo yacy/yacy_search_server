@@ -21,7 +21,9 @@
           <pathelement location="${libx}/log4j-1.2.9.jar" /> 
           <pathelement location="${libx}/xerces.jar"/>     
   	  	</classpath>
-  	  </javac>    	
+  	  </javac> 
+	  <!-- copy log4j.properties, to disable logging -->
+	  <copy file="${src}/de/anomic/plasma/parser/${parserShortName}/log4j.properties" todir="${build}"/>
     </target>
 	
 

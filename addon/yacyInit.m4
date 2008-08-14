@@ -47,6 +47,12 @@ SHUTDOWN_TIMEOUT=50
 NICE_VAL=0
 
 JAVA_ARGS="-server -XX:+UseConcMarkSweepGC -XX:+CMSIncrementalMode -XX:+UseAdaptiveSizePolicy"
+#check if system supports large memory pages and enable it if possible
+HUGEPAGESTOTAL="`cat /proc/meminfo | grep HugePages_Total | sed s/[^0-9]//g`"
+if [ -n "$HUGEPAGESTOTAL" ] && [ $HUGEPAGESTOTAL -ne 0 ]
+then 
+  JAVA_ARGS="$JAVA_ARGS -XX:+UseLargePages"
+fi
 
 ifdef(`openSUSE', `dnl
 . /etc/rc.status
