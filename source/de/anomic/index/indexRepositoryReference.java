@@ -248,7 +248,7 @@ public final class indexRepositoryReference {
                         final yacyURL newUrl = new yacyURL(newUrlStr, null);
 
                         // doing a http head request to test if the url is correct
-                        final JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(10000, null, null);
+                        final JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(10000);
                         client.setProxy(proxyConfig);
                         JakartaCommonsHttpResponse res = null;
                         try {

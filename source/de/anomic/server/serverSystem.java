@@ -46,11 +46,11 @@ public final class serverSystem {
 	public static final String blankTypeString = "____";
 
 	// system-identification statics
-	public static int     systemOS = systemUnknown;
-	public static boolean isMacArchitecture = false;
-	public static boolean isUnixFS = false;
-	public static boolean canExecUnix = false;
-	public static boolean isWindows = false;
+	public static final int     systemOS;
+	public static final boolean isMacArchitecture;
+	public static final boolean isUnixFS;
+	public static final boolean canExecUnix;
+	public static final boolean isWindows;
 
 	// calculated system constants
 	public static int maxPathLength = 65535;
@@ -317,6 +317,7 @@ public final class serverSystem {
 				}
 			}
 		} catch (final Exception e) {
+		    System.err.println("ERROR "+ e.getClass() +" in openBrowser(): "+ e.getMessage());
 			System.out.println("please start your browser and open the following location: " + url);
 		}
 	}

@@ -888,7 +888,7 @@ public final class plasmaParser {
                 contentURL = new yacyURL(args[1], null);
                 
                 // downloading the document content
-                final JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(5000, null, null);
+                final JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(5000);
                 
                 res = client.GET(args[1]);
                 if (res.getStatusCode() != 200) {

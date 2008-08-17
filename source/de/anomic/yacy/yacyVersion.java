@@ -340,7 +340,7 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
         File download = null;
         final httpHeader header = new httpHeader();
         header.put(httpHeader.USER_AGENT, HTTPLoader.yacyUserAgent);
-        final JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(120000, header, null);
+        final JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(120000, header);
         JakartaCommonsHttpResponse res = null;
         final String name = release.url.getFileName();
         try {

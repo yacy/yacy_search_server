@@ -45,6 +45,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.StringTokenizer;
+import java.util.Map.Entry;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
@@ -89,7 +90,7 @@ public final class httpd implements serverHandler, Cloneable {
     
     public static final int ERRORCASE_MESSAGE = 4;
     public static final int ERRORCASE_FILE = 5;
-    public static httpdAlternativeDomainNames alternativeResolver = null;
+    private static httpdAlternativeDomainNames alternativeResolver = null;
     
     /**
      * A hashset containing extensions that indicate content that should not be transported
@@ -349,8 +350,8 @@ public final class httpd implements serverHandler, Cloneable {
         // user = addressed peer name
         // pw = addressed peer hash (b64-hash)
         final String auth = (String) header.get(httpHeader.PROXY_AUTHORIZATION,"xxxxxx");
-        if (alternativeResolver != null) {
-            final String test = kelondroBase64Order.standardCoder.encodeString(alternativeResolver.myName() + ":" + alternativeResolver.myID());
+        if (getAlternativeResolver() != null) {
+            final String test = kelondroBase64Order.standardCoder.encodeString(getAlternativeResolver().myName() + ":" + getAlternativeResolver().myID());
             if (!test.equals(auth.trim().substring(6))) return false;
         }
         
@@ -1311,15 +1312,15 @@ public final class httpd implements serverHandler, Cloneable {
             }
 
             // if peer has public address it will be used
-            if (alternativeResolver != null) {
-                tp.put("extAddress", alternativeResolver.myIP() + ":" + alternativeResolver.myPort());
+            if (getAlternativeResolver() != null) {
+                tp.put("extAddress", getAlternativeResolver().myIP() + ":" + getAlternativeResolver().myPort());
             }
             // otherwise the local ip address will be used
             else {
                 tp.put("extAddress", tp.get("host", "127.0.0.1") + ":" + tp.get("port", "8080"));
             }
 
-            tp.put("peerName", (alternativeResolver == null) ? "" : alternativeResolver.myName());
+            tp.put("peerName", (getAlternativeResolver() == null) ? "" : getAlternativeResolver().myName());
             tp.put("errorMessageType", errorcase);
             tp.put("httpStatus",       Integer.toString(httpStatusCode) + " " + httpStatusText);
             tp.put("requestMethod",    conProp.getProperty(httpHeader.CONNECTION_PROP_METHOD));
@@ -1330,10 +1331,8 @@ public final class httpd implements serverHandler, Cloneable {
                     tp.put("errorMessageType_file", (detailedErrorMsgFile == null) ? "" : detailedErrorMsgFile.toString());
                     if ((detailedErrorMsgValues != null) && (detailedErrorMsgValues.size() > 0)) {
                         // rewriting the value-names and add the proper name prefix:
-                        final Iterator<String> nameIter = detailedErrorMsgValues.keySet().iterator();
-                        while (nameIter.hasNext()) {
-                            final String name = nameIter.next();
-                            tp.put("errorMessageType_" + name, detailedErrorMsgValues.get(name));
+                        for(Entry<String, String> entry: detailedErrorMsgValues.entrySet()) {
+                            tp.put("errorMessageType_" + entry.getKey(), entry.getValue());
                         }                        
                     }                    
                     break;
@@ -1385,11 +1384,9 @@ public final class httpd implements serverHandler, Cloneable {
                 serverFileUtils.copy(result, respond);
             }
             respond.flush();
-        } catch (final Exception e) { 
-            throw new IOException(e.getMessage());
         } finally {
-            if (fis != null) try { fis.close(); } catch (final Exception e) {}
-            if (o != null)   try { o.close();   } catch (final Exception e) {}
+            if (fis != null) try { fis.close(); } catch (final Exception e) { e.printStackTrace(); }
+            if (o != null)   try { o.close();   } catch (final Exception e) { e.printStackTrace(); }
         }     
     }
     
@@ -1622,10 +1619,10 @@ public final class httpd implements serverHandler, Cloneable {
         if ((hostName == null) || (hostName.length() == 0)) return false;
         
         // getting ip address and port of this seed
-        if (alternativeResolver == null) return false;
+        if (getAlternativeResolver() == null) return false;
         
         // resolve ip addresses
-        final InetAddress seedInetAddress = serverDomains.dnsResolve(alternativeResolver.myIP());
+        final InetAddress seedInetAddress = serverDomains.dnsResolve(getAlternativeResolver().myIP());
         final InetAddress hostInetAddress = serverDomains.dnsResolve(hostName);
         if (seedInetAddress == null || hostInetAddress == null) return false;
         
@@ -1682,7 +1679,7 @@ public final class httpd implements serverHandler, Cloneable {
             final Integer dstPort = (idx != -1) ? Integer.valueOf(hostName.substring(idx+1).trim()) : Integer.valueOf(80);
             
             // if the hostname endswith thisPeerName.yacy ...
-            final String alternativeAddress = (alternativeResolver == null) ? null : alternativeResolver.myAlternativeAddress();
+            final String alternativeAddress = (getAlternativeResolver() == null) ? null : getAlternativeResolver().myAlternativeAddress();
             if ((alternativeAddress != null) && (dstHost.endsWith(alternativeAddress))) {
                 return true;
             /* 
@@ -1703,5 +1700,19 @@ public final class httpd implements serverHandler, Cloneable {
             }
         } catch (final Exception e) {}    
         return false;
+    }
+
+    /**
+     * @param alternativeResolver the alternativeResolver to set
+     */
+    public static void setAlternativeResolver(httpdAlternativeDomainNames alternativeResolver) {
+        httpd.alternativeResolver = alternativeResolver;
+    }
+
+    /**
+     * @return the alternativeResolver
+     */
+    static httpdAlternativeDomainNames getAlternativeResolver() {
+        return alternativeResolver;
     }       
 }

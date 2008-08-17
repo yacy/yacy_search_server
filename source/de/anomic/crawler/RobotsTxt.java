@@ -514,7 +514,7 @@ public class RobotsTxt {
         
         // setup http-client
         //TODO: adding Traffic statistic for robots download?
-        final JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(10000, reqHeaders, null);
+        final JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(10000, reqHeaders);
         JakartaCommonsHttpResponse res = null;
         try {
             // sending the get request

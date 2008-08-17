@@ -270,7 +270,7 @@ public final class yacyClient {
         final httpHeader header = new httpHeader();
         header.put(httpHeader.USER_AGENT, HTTPLoader.yacyUserAgent);
         header.put(httpHeader.HOST, vhost);
-        final JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(timeout, header, null);
+        final JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(timeout, header);
         client.setProxy(proxyConfig());
         
         JakartaCommonsHttpResponse res = null;

@@ -1068,7 +1068,7 @@ public final class httpdProxyHandler {
      * @return
      */
     private static String resolveYacyDomains(final String host) {
-        return (httpd.alternativeResolver == null) ? null : httpd.alternativeResolver.resolve(host);
+        return (httpd.getAlternativeResolver() == null) ? null : httpd.getAlternativeResolver().resolve(host);
     }
 
     /**
@@ -1121,7 +1121,7 @@ public final class httpdProxyHandler {
      */
     private static JakartaCommonsHttpClient setupHttpClient(final httpHeader requestHeader, final String connectHost) {
         // setup HTTP-client
-        final JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(timeout, requestHeader, null);
+        final JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(timeout, requestHeader);
         client.setFollowRedirects(false);
         // cookies are handled by the user's browser
         client.setIgnoreCookies(true);
@@ -1244,7 +1244,7 @@ public final class httpdProxyHandler {
 
     private static void setViaHeader(final httpHeader header, final String httpVer) {
         if (!switchboard.getConfigBool("proxy.sendViaHeader", true)) return;
-        final String myAddress = (httpd.alternativeResolver == null) ? null : httpd.alternativeResolver.myAlternativeAddress();
+        final String myAddress = (httpd.getAlternativeResolver() == null) ? null : httpd.getAlternativeResolver().myAlternativeAddress();
         if (myAddress != null) {
     
             // getting header set by other proxies in the chain

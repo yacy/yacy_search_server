@@ -70,7 +70,7 @@ public final class httpRemoteProxyConfig {
     /**
      * @return the remoteProxyConfig
      */
-    public static httpRemoteProxyConfig getRemoteProxyConfig() {
+    public static synchronized httpRemoteProxyConfig getRemoteProxyConfig() {
         return remoteProxyConfig;
     }
 

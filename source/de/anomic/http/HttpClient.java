@@ -94,7 +94,7 @@ public abstract class HttpClient {
     public static byte[] wget(final String uri, final httpHeader header, final int timeout, final String vhost) {
         assert uri != null : "precondition violated: uri != null";
         addHostHeader(header, vhost);
-        final JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(timeout, header, null);
+        final JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(timeout, header);
 
         // do the request
         try {
@@ -141,7 +141,7 @@ public abstract class HttpClient {
      * @return null on error
      */
     public static httpHeader whead(final String uri, final httpHeader header) {
-        final JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(10000, header, null);
+        final JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(10000, header);
         JakartaCommonsHttpResponse response = null;
         try {
             response = client.HEAD(uri);

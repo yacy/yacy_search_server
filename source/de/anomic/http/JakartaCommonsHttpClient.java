@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.httpclient.ConnectMethod;
@@ -139,14 +140,39 @@ public class JakartaCommonsHttpClient {
 
     private Header[] headers = new Header[0];
     private httpRemoteProxyConfig proxyConfig = null;
+    private boolean useGlobalProxyConfig = true;
     private boolean followRedirects = true;
     private boolean ignoreCookies = false;
 
+
     /**
-     * constructs a new Client with given parameters
+     * creates a new JakartaCommonsHttpClient with given timeout using global remoteProxyConfig
+     *
+     * @param timeout in milliseconds
+     */
+    public JakartaCommonsHttpClient(final int timeout) {
+        this(timeout, null);
+    }
+
+    /**
+     * creates a new JakartaCommonsHttpClient with given timeout and requestHeader using global remoteProxyConfig
+     *
+     * @param timeout in milliseconds
+     * @param header header options to send
+     */
+    public JakartaCommonsHttpClient(final int timeout, final httpHeader header) {
+        super();
+        setTimeout(timeout);
+        setHeader(header);
+    }
+
+    /**
+     * creates a new JakartaCommonsHttpClient with given timeout and requestHeader using given remoteProxyConfig
+     * 
+     * if proxyConfig is null, then no proxy is used
      * 
      * @param timeout in milliseconds
-     * @param header
+     * @param header header options to send
      * @param proxyConfig
      */
     public JakartaCommonsHttpClient(final int timeout, final httpHeader header, final httpRemoteProxyConfig proxyConfig) {
@@ -161,9 +187,8 @@ public class JakartaCommonsHttpClient {
      * @see de.anomic.http.HttpClient#setProxy(de.anomic.http.httpRemoteProxyConfig)
      */
     public void setProxy(final httpRemoteProxyConfig proxyConfig) {
-        if (proxyConfig != null && proxyConfig.useProxy()) {
-            this.proxyConfig = proxyConfig;
-        }
+        this.useGlobalProxyConfig = false;
+        this.proxyConfig = proxyConfig;
     }
 
     /*
@@ -381,8 +406,8 @@ public class JakartaCommonsHttpClient {
         } else {
             headers = new Header[requestHeader.size()];
             int i = 0;
-            for (final String name : requestHeader.keySet()) {
-                headers[i] = new Header(name, requestHeader.get(name));
+            for (final Entry<String, String> header : requestHeader.entrySet()) {
+                headers[i] = new Header(header.getKey(), header.getValue());
                 i++;
             }
         }
@@ -520,13 +545,17 @@ public class JakartaCommonsHttpClient {
     /**
      * 
      * @param hostname
-     * @return
+     * @return null if no proxy should be used
      */
     private httpRemoteProxyConfig getProxyConfig(final String hostname) {
         final httpRemoteProxyConfig hostProxyConfig;
-        if (proxyConfig != null) {
+        if (!useGlobalProxyConfig) {
             // client specific
-            hostProxyConfig = proxyConfig.useForHost(hostname) ? proxyConfig : null;
+            if(proxyConfig == null) {
+                hostProxyConfig = null;
+            } else {
+                hostProxyConfig = proxyConfig.useForHost(hostname) ? proxyConfig : null;
+            }
         } else {
             // default settings
             hostProxyConfig = httpRemoteProxyConfig.getProxyConfigForHost(hostname);
@@ -603,7 +632,7 @@ public class JakartaCommonsHttpClient {
                 files.add(new FilePart("anotherfile.raw", new ByteArrayPartSource("anotherfile.raw",
                         "this is not a binary file ;)".getBytes())));
                 System.out.println("POST " + files.size() + " elements to " + url);
-                final JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(1000, null, null);
+                final JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(1000);
                 resp = client.POST(url, files);
                 System.out.println("----- Header: -----");
                 System.out.println(resp.getResponseHeader().toString());

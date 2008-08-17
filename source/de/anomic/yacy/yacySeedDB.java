@@ -127,7 +127,7 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
         lastSeedUpload_seedDBSize = sizeConnected();
 
         // tell the httpdProxy how to find this table as address resolver
-        httpd.alternativeResolver = this;
+        httpd.setAlternativeResolver(this);
     }
     
     private synchronized void initMySeed() {
@@ -850,7 +850,7 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
         reqHeader.put(httpHeader.USER_AGENT, HTTPLoader.yacyUserAgent);
         
         // init http-client
-        final JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(10000, reqHeader, null);
+        final JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(10000, reqHeader);
         byte[] content = null;
         JakartaCommonsHttpResponse res = null;
         try {

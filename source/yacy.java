@@ -568,7 +568,7 @@ public final class yacy {
         // send 'wget' to web interface
         final httpHeader requestHeader = new httpHeader();
         requestHeader.put(httpHeader.AUTHORIZATION, "realm=" + encodedPassword); // for http-authentify
-        final JakartaCommonsHttpClient con = new JakartaCommonsHttpClient(10000, requestHeader, null);
+        final JakartaCommonsHttpClient con = new JakartaCommonsHttpClient(10000, requestHeader);
         JakartaCommonsHttpResponse res = null;
         try {
             res = con.GET("http://localhost:"+ port +"/Steering.html?shutdown=");

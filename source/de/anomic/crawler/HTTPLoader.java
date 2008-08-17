@@ -151,7 +151,7 @@ public final class HTTPLoader {
             requestHeader.put(httpHeader.ACCEPT_ENCODING, sb.getConfig("crawler.http.acceptEncoding", DEFAULT_ENCODING));
 
             // HTTP-Client
-            final JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(socketTimeout, requestHeader, null);
+            final JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(socketTimeout, requestHeader);
             
             JakartaCommonsHttpResponse res = null;
             try {

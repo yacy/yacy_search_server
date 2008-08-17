@@ -154,7 +154,7 @@ public class SitemapParser extends DefaultHandler {
         // download document
         final httpHeader header = new httpHeader();
         header.put(httpHeader.USER_AGENT, HTTPLoader.crawlerUserAgent);
-        final JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(5000, header, null);
+        final JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(5000, header);
         JakartaCommonsHttpResponse res = null;
         try {
             res = client.GET(siteMapURL.toString());
