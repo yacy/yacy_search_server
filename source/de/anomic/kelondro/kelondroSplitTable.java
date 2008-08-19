@@ -32,7 +32,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -380,21 +379,21 @@ public class kelondroSplitTable implements kelondroIndex {
     }
     
     public synchronized kelondroCloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) throws IOException {
-        final HashSet<kelondroCloneableIterator<byte[]>> set = new HashSet<kelondroCloneableIterator<byte[]>>();
+        final List<kelondroCloneableIterator<byte[]>> c = new ArrayList<kelondroCloneableIterator<byte[]>>(tables.size());
         final Iterator<kelondroIndex> i = tables.values().iterator();
         while (i.hasNext()) {
-            set.add(i.next().keys(up, firstKey));
+            c.add(i.next().keys(up, firstKey));
         }
-        return kelondroMergeIterator.cascade(set, rowdef.objectOrder, kelondroMergeIterator.simpleMerge, up);
+        return kelondroMergeIterator.cascade(c, rowdef.objectOrder, kelondroMergeIterator.simpleMerge, up);
     }
     
     public synchronized kelondroCloneableIterator<kelondroRow.Entry> rows(final boolean up, final byte[] firstKey) throws IOException {
-        final HashSet<kelondroCloneableIterator<kelondroRow.Entry>> set = new HashSet<kelondroCloneableIterator<kelondroRow.Entry>>();
+        final List<kelondroCloneableIterator<kelondroRow.Entry>> c = new ArrayList<kelondroCloneableIterator<kelondroRow.Entry>>(tables.size());
         final Iterator<kelondroIndex> i = tables.values().iterator();
         while (i.hasNext()) {
-            set.add(i.next().rows(up, firstKey));
+            c.add(i.next().rows(up, firstKey));
         }
-        return kelondroMergeIterator.cascade(set, entryOrder, kelondroMergeIterator.simpleMerge, up);
+        return kelondroMergeIterator.cascade(c, entryOrder, kelondroMergeIterator.simpleMerge, up);
     }
 
     public final int cacheObjectChunkSize() {

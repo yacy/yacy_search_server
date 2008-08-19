@@ -36,8 +36,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import de.anomic.http.httpdProxyCacheEntry;
 import de.anomic.kelondro.kelondroFlexWidthArray;
-import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
@@ -465,7 +465,7 @@ public class CrawlQueues {
         return;
     }
     
-    public plasmaHTCache.Entry loadResourceFromWeb(
+    public httpdProxyCacheEntry loadResourceFromWeb(
             final yacyURL url, 
             final int socketTimeout,
             final boolean keepInMemory,

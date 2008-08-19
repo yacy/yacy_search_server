@@ -40,6 +40,7 @@ import java.util.TreeSet;
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.IndexingStack;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
+import de.anomic.http.httpdProxyCacheEntry;
 import de.anomic.index.indexCollectionRI;
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexContainerOrder;
@@ -819,7 +820,7 @@ public final class plasmaWordIndex implements indexRI {
                 new byte[0],                               // md5
                 (int) entry.size(),                        // size
                 condenser.RESULT_NUMB_WORDS,               // word count
-                plasmaHTCache.docType(document.dc_format()), // doctype
+                httpdProxyCacheEntry.docType(document.dc_format()), // doctype
                 condenser.RESULT_FLAGS,                    // flags
                 yacyURL.language(entry.url()),             // language
                 document.inboundLinks(),                   // inbound links
@@ -842,7 +843,7 @@ public final class plasmaWordIndex implements indexRI {
                 document,                                     // document content
                 condenser,                                    // document condenser
                 yacyURL.language(entry.url()),                // document language
-                plasmaHTCache.docType(document.dc_format()),  // document type
+                httpdProxyCacheEntry.docType(document.dc_format()),  // document type
                 document.inboundLinks(),                      // inbound links
                 document.outboundLinks()                      // outbound links
         );

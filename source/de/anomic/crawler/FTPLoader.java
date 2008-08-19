@@ -34,6 +34,7 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.util.Date;
 
+import de.anomic.http.httpdProxyCacheEntry;
 import de.anomic.net.ftpc;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaParser;
@@ -54,9 +55,9 @@ public class FTPLoader {
         maxFileSize = (int) sb.getConfigLong("crawler.ftp.maxFileSize", -1l);
     }
 
-    protected plasmaHTCache.Entry createCacheEntry(final CrawlEntry entry, final String mimeType,
+    protected httpdProxyCacheEntry createCacheEntry(final CrawlEntry entry, final String mimeType,
             final Date fileDate) {
-        return plasmaHTCache.newEntry(new Date(), entry.depth(), entry.url(), entry.name(), "OK", new ResourceInfo(
+        return plasmaHTCache.newEntry(entry.depth(), entry.url(), entry.name(), "OK", new ResourceInfo(
                 entry.url(), sb.getURL(entry.referrerhash()), mimeType, fileDate), entry.initiator(),
                 sb.webIndex.profilesActiveCrawls.getEntry(entry.profileHandle()));
     }
@@ -67,13 +68,13 @@ public class FTPLoader {
      * @param entry
      * @return
      */
-    public plasmaHTCache.Entry load(final CrawlEntry entry) {
+    public httpdProxyCacheEntry load(final CrawlEntry entry) {
         final yacyURL entryUrl = entry.url();
         final String fullPath = getPath(entryUrl);
         final File cacheFile = createCachefile(entryUrl);
 
         // the return value
-        plasmaHTCache.Entry htCache = null;
+        httpdProxyCacheEntry htCache = null;
 
         // determine filename and path
         String file, path;
@@ -232,7 +233,7 @@ public class FTPLoader {
      * @return
      * @throws Exception
      */
-    private plasmaHTCache.Entry getFile(final ftpc ftpClient, final CrawlEntry entry, final File cacheFile)
+    private httpdProxyCacheEntry getFile(final ftpc ftpClient, final CrawlEntry entry, final File cacheFile)
             throws Exception {
         // determine the mimetype of the resource
         final yacyURL entryUrl = entry.url();
@@ -242,7 +243,7 @@ public class FTPLoader {
 
         // if the mimetype and file extension is supported we start to download
         // the file
-        plasmaHTCache.Entry htCache = null;
+        httpdProxyCacheEntry htCache = null;
         if (plasmaParser.supportedContent(plasmaParser.PARSER_MODE_CRAWLER, entryUrl, mimeType)) {
             // aborting download if content is too long
             final int size = ftpClient.fileSize(path);

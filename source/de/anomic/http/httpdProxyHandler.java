@@ -400,9 +400,8 @@ public final class httpdProxyHandler {
             // 4. cache stale - refill - superfluous
             // in two of these cases we trigger a scheduler to handle newly arrived files:
             // case 1 and case 3
-            final plasmaHTCache.Entry cacheEntry = (cachedResponseHeader == null) ? null :
+            final httpdProxyCacheEntry cacheEntry = (cachedResponseHeader == null) ? null :
                 plasmaHTCache.newEntry(
-                    requestDate,                     // init date 
                     0,                               // crawling depth
                     url,                             // url
                     "",                              // name of the url is unknown
@@ -526,10 +525,8 @@ public final class httpdProxyHandler {
             }            
 
             // reserver cache entry
-            final Date requestDate = new Date(((Long)conProp.get(httpHeader.CONNECTION_PROP_REQUEST_START)).longValue());
             final IResourceInfo resInfo = new ResourceInfo(url,requestHeader,responseHeader);
-            final plasmaHTCache.Entry cacheEntry = plasmaHTCache.newEntry(
-                    requestDate, 
+            final httpdProxyCacheEntry cacheEntry = plasmaHTCache.newEntry(
                     0, 
                     url,
                     "",

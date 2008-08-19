@@ -42,6 +42,7 @@ import de.anomic.http.httpHeader;
 import de.anomic.http.httpdBoundedSizeOutputStream;
 import de.anomic.http.httpdByteCountOutputStream;
 import de.anomic.http.httpdLimitExceededException;
+import de.anomic.http.httpdProxyCacheEntry;
 import de.anomic.index.indexReferenceBlacklist;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaParser;
@@ -95,10 +96,9 @@ public final class HTTPLoader {
      * @param responseStatus Status-Code SPACE Reason-Phrase
      * @return
      */
-    protected plasmaHTCache.Entry createCacheEntry(final CrawlEntry entry, final Date requestDate, final httpHeader requestHeader, final httpHeader responseHeader, final String responseStatus) {
+    protected httpdProxyCacheEntry createCacheEntry(final CrawlEntry entry, final Date requestDate, final httpHeader requestHeader, final httpHeader responseHeader, final String responseStatus) {
         final IResourceInfo resourceInfo = new ResourceInfo(entry.url(), requestHeader, responseHeader);
         return plasmaHTCache.newEntry(
-                requestDate, 
                 entry.depth(),
                 entry.url(),
                 entry.name(),
@@ -109,11 +109,11 @@ public final class HTTPLoader {
         );
     }    
    
-    public plasmaHTCache.Entry load(final CrawlEntry entry, final String parserMode) {
+    public httpdProxyCacheEntry load(final CrawlEntry entry, final String parserMode) {
         return load(entry, parserMode, DEFAULT_CRAWLING_RETRY_COUNT);
     }
     
-    private plasmaHTCache.Entry load(final CrawlEntry entry, final String parserMode, final int retryCount) {
+    private httpdProxyCacheEntry load(final CrawlEntry entry, final String parserMode, final int retryCount) {
 
         if (retryCount < 0) {
             this.log.logInfo("Redirection counter exceeded for URL " + entry.url().toString() + ". Processing aborted.");
@@ -137,7 +137,7 @@ public final class HTTPLoader {
         }
         
         // take a file from the net
-        plasmaHTCache.Entry htCache = null;
+        httpdProxyCacheEntry htCache = null;
         final long maxFileSize = sb.getConfigLong("crawler.http.maxFileSize", DEFAULT_MAXFILESIZE);
         try {
             // create a request header

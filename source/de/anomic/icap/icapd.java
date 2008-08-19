@@ -40,6 +40,7 @@ import java.util.Properties;
 import de.anomic.http.HttpClient;
 import de.anomic.http.httpChunkedInputStream;
 import de.anomic.http.httpHeader;
+import de.anomic.http.httpdProxyCacheEntry;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -376,8 +377,7 @@ public class icapd implements serverHandler, Cloneable {
             
             // generating a htcache entry object
             final IResourceInfo resInfo = new ResourceInfo(httpRequestURL,httpReqHeader,httpResHeader);
-            final plasmaHTCache.Entry cacheEntry = plasmaHTCache.newEntry(
-                    new Date(),  
+            final httpdProxyCacheEntry cacheEntry = plasmaHTCache.newEntry(
                     0, 
                     httpRequestURL,
                     "",

@@ -39,6 +39,7 @@ import java.util.TreeSet;
 import de.anomic.htmlFilter.htmlFilterImageEntry;
 import de.anomic.http.HttpClient;
 import de.anomic.http.httpHeader;
+import de.anomic.http.httpdProxyCacheEntry;
 import de.anomic.index.indexURLReference;
 import de.anomic.index.indexWord;
 import de.anomic.kelondro.kelondroMScoreCluster;
@@ -284,7 +285,7 @@ public class plasmaSnippetCache {
                 // if not found try to download it
                 
                 // download resource using the crawler and keep resource in memory if possible
-                final plasmaHTCache.Entry entry = plasmaSwitchboard.getSwitchboard().crawlQueues.loadResourceFromWeb(url, timeout, true, true, reindexing);
+                final httpdProxyCacheEntry entry = plasmaSwitchboard.getSwitchboard().crawlQueues.loadResourceFromWeb(url, timeout, true, true, reindexing);
                 
                 // getting resource metadata (e.g. the http headers for http resources)
                 if (entry != null) {
@@ -395,7 +396,7 @@ public class plasmaSnippetCache {
                 // if not found try to download it
                 
                 // download resource using the crawler and keep resource in memory if possible
-                final plasmaHTCache.Entry entry = plasmaSwitchboard.getSwitchboard().crawlQueues.loadResourceFromWeb(url, timeout, true, forText, global);
+                final httpdProxyCacheEntry entry = plasmaSwitchboard.getSwitchboard().crawlQueues.loadResourceFromWeb(url, timeout, true, forText, global);
                 
                 // getting resource metadata (e.g. the http headers for http resources)
                 if (entry != null) {
@@ -853,7 +854,7 @@ public class plasmaSnippetCache {
                 // if the content is not available in cache try to download it from web
                 
                 // try to download the resource using a crawler
-                final plasmaHTCache.Entry entry = plasmaSwitchboard.getSwitchboard().crawlQueues.loadResourceFromWeb(url, (socketTimeout < 0) ? -1 : socketTimeout, true, forText, reindexing);
+                final httpdProxyCacheEntry entry = plasmaSwitchboard.getSwitchboard().crawlQueues.loadResourceFromWeb(url, (socketTimeout < 0) ? -1 : socketTimeout, true, forText, reindexing);
                 if (entry == null) return null; // not found in web
                 
                 // read resource body (if it is there)

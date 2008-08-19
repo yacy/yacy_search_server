@@ -136,6 +136,7 @@ import de.anomic.http.JakartaCommonsHttpClient;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpRemoteProxyConfig;
 import de.anomic.http.httpd;
+import de.anomic.http.httpdProxyCacheEntry;
 import de.anomic.http.httpdRobotsTxtConfig;
 import de.anomic.index.indexReferenceBlacklist;
 import de.anomic.index.indexURLReference;
@@ -965,7 +966,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         return this.webIndex.cleanProfiles();
     }
     
-    public boolean htEntryStoreProcess(final plasmaHTCache.Entry entry) {
+    public boolean htEntryStoreProcess(final httpdProxyCacheEntry entry) {
         
         if (entry == null) return false;
 

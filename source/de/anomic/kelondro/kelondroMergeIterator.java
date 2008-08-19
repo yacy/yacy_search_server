@@ -24,10 +24,10 @@ package de.anomic.kelondro;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
-import java.util.Set;
 
 public class kelondroMergeIterator<E> implements kelondroCloneableIterator<E> {
     
@@ -119,7 +119,7 @@ public class kelondroMergeIterator<E> implements kelondroCloneableIterator<E> {
         throw new java.lang.UnsupportedOperationException("merge does not support remove");
     }
     
-    public static <A> kelondroCloneableIterator<A> cascade(final Set<kelondroCloneableIterator<A>> iterators, final kelondroOrder<A> c, final Method merger, final boolean up) {
+    public static <A> kelondroCloneableIterator<A> cascade(final Collection<kelondroCloneableIterator<A>> iterators, final kelondroOrder<A> c, final Method merger, final boolean up) {
         // this extends the ability to combine two iterators
         // to the ability of combining a set of iterators
         if (iterators == null) return null;

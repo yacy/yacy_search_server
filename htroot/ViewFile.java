@@ -37,6 +37,7 @@ import de.anomic.data.htmlTools;
 import de.anomic.htmlFilter.htmlFilterImageEntry;
 import de.anomic.http.HttpClient;
 import de.anomic.http.httpHeader;
+import de.anomic.http.httpdProxyCacheEntry;
 import de.anomic.index.indexURLReference;
 import de.anomic.plasma.plasmaCondenser;
 import de.anomic.plasma.plasmaHTCache;
@@ -145,7 +146,7 @@ public class ViewFile {
 
         // if the resource body was not cached we try to load it from web
         if (resource == null) {
-            plasmaHTCache.Entry entry = null;
+            httpdProxyCacheEntry entry = null;
             try {
                 entry = sb.crawlQueues.loadResourceFromWeb(url, 5000, false, true, false);
             } catch (final Exception e) {
