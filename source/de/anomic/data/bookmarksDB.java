@@ -690,12 +690,12 @@ public class bookmarksDB {
     public void rebuildDates(){
         serverLog.logInfo("BOOKMARKS", "rebuilding dates.db from bookmarks.db...");
         final Iterator<Bookmark> it=bookmarkIterator(true);
-        Bookmark bookmark;
+        Bookmark bookmark;        
         String date;
         bookmarksDate bmDate;
         while(it.hasNext()){
             bookmark=it.next();
-            date = (new SimpleDateFormat("yyyy-MM-dd")).format(new Date(bookmark.getTimeStamp()));
+            date = String.valueOf(bookmark.getTimeStamp());
             bmDate=getDate(date);
             if(bmDate==null){
                 bmDate=new bookmarksDate(date);
