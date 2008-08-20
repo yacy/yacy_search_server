@@ -424,8 +424,7 @@ public class SettingsAck_p {
                     for (int i=0; i<configOptions.length; i++) {
                         final String newSettings = post.get(configOptions[i],"");
                         final String oldSettings = env.getConfig(configOptions[i],"");
-                        // FIXME should this be: nC = nC && newSettings.equals()
-                        //         or (current): nC = nC & newSettings.equals()
+                        // bitwise AND with boolean is same as logic AND
                         nothingChanged &= newSettings.equals(oldSettings); 
                         if (!nothingChanged) {
                             env.setConfig(configOptions[i],newSettings);

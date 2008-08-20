@@ -150,16 +150,17 @@ public final class userDB {
         return entry;
     }
     /**
-     * determinate, if a user has Adminrights from a authorisation http-headerfield
-     * it tests both userDB and oldstyle adminpw.
-     * @param auth the http-headerline for authorisation
+     * determinate, if a user has Adminrights from a authorisation http-headerfield it tests both userDB and oldstyle adminpw.
+     * 
+     * @param auth
+     *            the http-headerline for authorisation
      */
-    public boolean hasAdminRight(final String auth, final String ip, final String cookies){
-        final Entry entry=getUser(auth, ip, cookies);
-        if(entry != null)
+    public boolean hasAdminRight(final String auth, final String ip, final String cookies) {
+        final Entry entry = getUser(auth, ip, cookies);
+        if (entry != null)
             return entry.hasAdminRight();
-        else if(entry != null && cookieAdminAuth(cookies))
-            return entry.hasAdminRight();
+        // else if(entry != null && cookieAdminAuth(cookies))
+        //     return entry.hasAdminRight();
         else
             return false;
     }

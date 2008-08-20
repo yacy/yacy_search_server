@@ -115,14 +115,12 @@ public final class plasmaSearchRankingProcess {
         // join and exclude the local result
         timer = System.currentTimeMillis();
         final indexContainer index =
-            (this.localSearchContainerMaps == null) ?
-              plasmaWordIndex.emptyContainer(null, 0) :
-                  indexContainer.joinExcludeContainers(
-                      this.localSearchContainerMaps[0].values(),
-                      this.localSearchContainerMaps[1].values(),
-                      query.maxDistance);
+            indexContainer.joinExcludeContainers(
+                this.localSearchContainerMaps[0].values(),
+                this.localSearchContainerMaps[1].values(),
+                query.maxDistance);
         serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), plasmaSearchEvent.JOIN, index.size(), System.currentTimeMillis() - timer));
-        if ((index == null) || (index.size() == 0)) {
+        if (index.size() == 0) {
             return;
         }
         

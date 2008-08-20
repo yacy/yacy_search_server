@@ -73,9 +73,9 @@ public class kelondroBLOBArray implements kelondroBLOB {
 
         // check existence of the heap directory
         if (heapLocation.exists()) {
-            if (!heapLocation.isDirectory()) throw new IOException("the BLOBArray directory " + heapLocation.toString() + " does not exist (is blocked by a file with same name");
+            if (!heapLocation.isDirectory()) throw new IOException("the BLOBArray directory " + heapLocation.toString() + " does not exist (is blocked by a file with same name)");
         } else {
-            heapLocation.mkdirs();
+            if(!heapLocation.mkdirs()) throw new IOException("the BLOBArray directory " + heapLocation.toString() + " does not exist (can not be created)");
         }
 
         // register all blob files inside this directory
@@ -91,7 +91,7 @@ public class kelondroBLOBArray implements kelondroBLOB {
                } catch (ParseException e) {continue;}
                f = new File(heapLocation, files[i]);
                oneBlob = new kelondroBLOBHeap(f, keylength, ordering);
-               sortedItems.put(new Long(d.getTime()), new blobItem(d, f, oneBlob));
+               sortedItems.put(Long.valueOf(d.getTime()), new blobItem(d, f, oneBlob));
             }
         }
         

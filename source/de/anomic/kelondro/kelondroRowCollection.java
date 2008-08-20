@@ -263,10 +263,10 @@ public class kelondroRowCollection {
         return b;
     }
     
-    public final kelondroRow.Entry get(final int index, final boolean clone) {
+    public synchronized final kelondroRow.Entry get(final int index, final boolean clone) {
         assert (index >= 0) : "get: access with index " + index + " is below zero";
         assert (index < chunkcount) : "get: access with index " + index + " is above chunkcount " + chunkcount + "; sortBound = " + sortBound;
-        assert (index * rowdef.objectsize < chunkcache.length);
+        assert (chunkcache != null && index * rowdef.objectsize < chunkcache.length);
         assert sortBound <= chunkcount : "sortBound = " + sortBound + ", chunkcount = " + chunkcount;
         if ((chunkcache == null) || (rowdef == null)) return null; // case may appear during shutdown
         kelondroRow.Entry entry;
