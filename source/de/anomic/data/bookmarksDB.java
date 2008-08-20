@@ -48,6 +48,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -772,10 +773,9 @@ public class bookmarksDB {
     		writer.close();
     		links = scraper.getAnchors();    		
     	} catch (final IOException e) { serverLog.logWarning("BOOKMARKS", "error during load of links: "+ e.getClass() +" "+ e.getMessage());}
-    	final Iterator<yacyURL> it = links.keySet().iterator();
-    	while (it.hasNext()) {
-    		url= it.next();
-    		title=links.get(url);
+    	for (Entry<yacyURL, String> link: links.entrySet()) {
+    		url= link.getKey();
+    		title=link.getValue();
     		serverLog.logInfo("BOOKMARKS", "links.get(url)");
     		if(title.equals("")){//cannot be displayed
     			title=url.toString();

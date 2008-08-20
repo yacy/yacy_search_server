@@ -131,7 +131,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
     HashMap<String, String> denyHost;
     int commandMaxLength;
     private int maxBusySessions;
-    ConcurrentHashMap<Session, Object> busySessions;
+    final ConcurrentHashMap<Session, Object> busySessions;
     
     /*
     private static ServerSocketFactory getServerSocketFactory(boolean dflt, File keyfile, String passphrase) {
@@ -400,7 +400,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
         Thread.interrupted();
         
         // shut down all busySessions
-        if (this.busySessions != null) for (final Session session: this.busySessions.keySet()) {
+        for (final Session session: this.busySessions.keySet()) {
             try {
                 session.interrupt();
             } catch (final SecurityException e ) {
@@ -420,7 +420,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
 
         // close all sessions
         this.log.logInfo("Closing server sessions ...");
-        if (this.busySessions != null) for (final Session s: this.busySessions.keySet()) {
+        for (final Session s: this.busySessions.keySet()) {
             s.interrupt();
             s.close();
         }

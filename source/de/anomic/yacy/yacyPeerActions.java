@@ -54,7 +54,6 @@ public class yacyPeerActions {
         if (userAgents != null) userAgents.clear();
         userAgents = null;
         if (dhtAction != null) dhtAction.close();
-        dhtAction.close();
     }
     
     public synchronized boolean connectPeer(final yacySeed seed, final boolean direct) {

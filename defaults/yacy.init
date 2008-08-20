@@ -452,7 +452,7 @@ staticIP=
 # the browser type is optional and works only under certain conditions
 browserPopUpTrigger=true
 browserPopUpPage=ConfigBasic.html
-browserPopUpApplication=netscape
+browserPopUpApplication=firefox
 
 # defines if the YaCy icon appears in the system tray on supported platforms
 trayIcon=true

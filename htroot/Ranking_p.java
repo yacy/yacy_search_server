@@ -26,8 +26,8 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSearchEvent;
@@ -104,11 +104,10 @@ public class Ranking_p {
     
     private static void putRanking(final serverObjects prop, final Map<String, String> map, final String prefix, final String attrExtension) {
     	prop.put("attr" + attrExtension, map.size());
-    	final Iterator<String> it = map.keySet().iterator();
     	String key;
     	int i, j = 0;
-    	while (it.hasNext()) {
-    		key = it.next();
+    	for (final Entry<String, String> entry: map.entrySet()) {
+    		key = entry.getKey();
     		prop.put("attr" + attrExtension + "_" + j + "_name", rankingParameters.get(key.substring(prefix.length())));
     		prop.put("attr" + attrExtension + "_" + j + "_nameorg", key);
     		prop.put("attr" + attrExtension + "_" + j + "_select", maxRankingRange);
@@ -117,7 +116,7 @@ public class Ranking_p {
     			prop.put("attr" + attrExtension + "_" + j + "_select_" + i + "_value", i);
     			try {
 					prop.put("attr" + attrExtension + "_" + j + "_select_" + i + "_checked",
-							(i == Integer.valueOf(map.get(key)).intValue()) ? "1" : "0");
+							(i == Integer.valueOf(entry.getValue()).intValue()) ? "1" : "0");
 				} catch (final NumberFormatException e) {
 					prop.put("attr" + attrExtension + "_" + j + "_select_" + i + "_checked", "0");
 				}
@@ -135,10 +134,12 @@ public class Ranking_p {
         plasmaSearchEvent.cleanupEvents(true);
         
         // case if no values are requested
-        if ((post == null) || (env == null)) {
+        if ((post == null) || (sb == null)) {
             // we create empty entries for template strings
             final serverObjects prop = defaultValues();
-            final plasmaSearchRankingProfile ranking = sb.getRanking();
+            final plasmaSearchRankingProfile ranking;
+            if(sb == null) ranking = new plasmaSearchRankingProfile(plasmaSearchQuery.CONTENTDOM_TEXT);
+            else ranking = sb.getRanking();
             putRanking(prop, ranking, "local");
             return prop;
         }

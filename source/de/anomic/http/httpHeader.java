@@ -343,12 +343,8 @@ public final class httpHeader extends TreeMap<String, String> implements Map<Str
         FileOutputStream fos = null;
         try {
             fos = new FileOutputStream(f);
-            final Iterator<String> i = keySet().iterator();
-            String key, value;
-            while (i.hasNext()) {
-                key = i.next();
-                value = get(key);
-                fos.write((key + "=" + value + "\r\n").getBytes());
+            for (java.util.Map.Entry<String, String> entry: entrySet()) {
+                fos.write((entry.getKey() + "=" + entry.getValue() + "\r\n").getBytes());
             }
             fos.flush();
         } finally {

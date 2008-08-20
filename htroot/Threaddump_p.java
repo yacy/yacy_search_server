@@ -33,6 +33,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import de.anomic.data.htmlTools;
 import de.anomic.http.httpHeader;
@@ -95,8 +96,10 @@ public class Threaddump_p {
         
         final File classPath = new File(rootPath, "source");
   
-        for (final Thread thread: stackTraces.keySet()) {
-            final StackTraceElement[] stackTraceElements = stackTraces.get(thread);
+        Thread thread;
+        for (final Entry<Thread, StackTraceElement[]> entry: stackTraces.entrySet()) {
+            thread = entry.getKey();
+            final StackTraceElement[] stackTraceElements = entry.getValue();
             StackTraceElement ste;
             String line;
             String tracename = "";

@@ -432,13 +432,12 @@ public final class userDB {
             if (timeStamp < 0) throw new IllegalArgumentException();
             
             final Long lastAccess = this.getLastAccess();                                            
-            long oldTimeUsed = getTimeUsed();
-            long newTimeUsed = oldTimeUsed;            
+            long newTimeUsed = getTimeUsed();            
             
             if (incrementTimeUsed) {
                 if ((lastAccess == null)||((lastAccess != null)&&(timeStamp-lastAccess.longValue()>=1000*60))) { //1 minute
                     //this.mem.put(TIME_USED,Long.toString(newTimeUsed = ++oldTimeUsed));  
-                    newTimeUsed = ++oldTimeUsed;  
+                    newTimeUsed++;  
 					if(lastAccess != null){
     					this.oldDate.setTime(new Date(lastAccess.longValue()));
 	    				this.newDate.setTime(new Date(System.currentTimeMillis()));

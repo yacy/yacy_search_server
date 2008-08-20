@@ -96,7 +96,7 @@ public final class plasmaWordIndex implements indexRI {
     private final indexCollectionRI        collections;          // new database structure to replace AssortmentCluster and FileCluster
     private final       serverLog                log;
     indexRepositoryReference               referenceURL;
-    public        yacySeedDB               seedDB;
+    public  final yacySeedDB               seedDB;
     public        yacyNewsPool             newsPool;
     private final       File                     primaryRoot, secondaryRoot;
     public        IndexingStack            queuePreStack;

@@ -318,7 +318,8 @@ public final class serverSystem {
 			}
 		} catch (final Exception e) {
 		    System.err.println("ERROR "+ e.getClass() +" in openBrowser(): "+ e.getMessage());
-			System.out.println("please start your browser and open the following location: " + url);
+		    // browser could not be started automatically, tell user to do it
+		    System.out.println("please start your browser and open the following location: " + url);
 		}
 	}
 

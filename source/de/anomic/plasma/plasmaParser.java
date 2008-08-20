@@ -48,6 +48,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -946,10 +947,9 @@ public final class plasmaParser {
                 // found links
                 int anchorNr = 0;
                 final Map<yacyURL, String> anchors = document.getAnchors();
-                final Iterator<yacyURL> anchorIter = anchors.keySet().iterator();
-                while (anchorIter.hasNext()) {
-                    final yacyURL key = anchorIter.next();
-                    System.out.println("URL " + anchorNr + ":\t" + key.toString() + " | " + anchors.get(key));
+                for (Entry<yacyURL, String> anchor: anchors.entrySet()) {
+                    final yacyURL key = anchor.getKey();
+                    System.out.println("URL " + anchorNr + ":\t" + key.toString() + " | " + anchor.getValue());
                     anchorNr++;
                 }
                 document.close();

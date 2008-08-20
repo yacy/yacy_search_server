@@ -39,9 +39,18 @@ public class IndexShare_p {
     public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
     	// return variable that accumulates replacements
         final plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
-		final serverObjects prop = new serverObjects();
+        final serverObjects prop = new serverObjects();
 
-        if ((post == null) || (env == null)) {
+        if(switchboard == null) {
+            prop.put("linkfreq", "30");
+            prop.put("wordfreq", "10");
+            prop.put("dtable", "");
+            prop.put("rtable", "");
+            prop.putNum("wcount", 0);
+            prop.putNum("ucount", 0);
+            return prop; // be save
+        }
+        if (post == null) {
             prop.put("linkfreq", switchboard.getConfig("defaultLinkReceiveFrequency","30"));
             prop.put("wordfreq", switchboard.getConfig("defaultWordReceiveFrequency","10"));
             prop.put("dtable", "");

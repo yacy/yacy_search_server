@@ -39,6 +39,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -114,12 +115,11 @@ public class BlacklistCleaner_p {
             prop.put(RESULTS + "disabled", (ies.size() == 0) ? "1" : "0");
             if (ies.size() > 0) {
                 prop.put(RESULTS + DISABLED + "entries", ies.size());
-                final Iterator<String> it = ies.keySet().iterator();
                 int i = 0;
                 String s;
-                while (it.hasNext()) {
-                    s = it.next();
-                    prop.put(RESULTS + DISABLED + ENTRIES + i + "_error", ies.get(s).longValue());
+                for (Entry<String, Integer> entry: ies.entrySet()) {
+                    s = entry.getKey();
+                    prop.put(RESULTS + DISABLED + ENTRIES + i + "_error", entry.getValue().longValue());
                     prop.putHTML(RESULTS + DISABLED + ENTRIES + i + "_entry", s);
                     i++;
                 }

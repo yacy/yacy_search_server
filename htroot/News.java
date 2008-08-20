@@ -27,6 +27,7 @@
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import de.anomic.http.HttpClient;
 import de.anomic.http.httpHeader;
@@ -125,12 +126,9 @@ public class News {
                     prop.putHTML("table_list_" + i + "_att", attributeMap.toString());
                     int j = 0;
                     if (attributeMap.size() > 0) {
-	                    final Iterator<String> attributeKeys = attributeMap.keySet().iterator();
-	                    while (attributeKeys.hasNext()) {
-	                    	final String key = attributeKeys.next();
-	                    	final String value = attributeMap.get(key);
-	                    	prop.put("table_list_" + i + "_attributes_" + j + "_name",key);
-	                    	prop.putHTML("table_list_" + i + "_attributes_" + j + "_value",value);
+	                    for (Entry<String, String> attribute: attributeMap.entrySet()) {
+	                    	prop.put("table_list_" + i + "_attributes_" + j + "_name", attribute.getKey());
+	                    	prop.putHTML("table_list_" + i + "_attributes_" + j + "_value", attribute.getValue());
 	                    	j++;
 	                    }
                     }

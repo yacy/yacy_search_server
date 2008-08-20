@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.Map.Entry;
 
 public class kelondroMSetTools {
 
@@ -300,12 +301,11 @@ public class kelondroMSetTools {
     }
     
     private static <A, B> TreeMap<A, B> excludeConstructiveByTestMapInSet(final TreeMap<A, B> map, final TreeSet<A> set) {
-        final Iterator<A> mi = map.keySet().iterator();
         final TreeMap<A, B> result = new TreeMap<A, B>(map.comparator());
         A o;
-        while (mi.hasNext()) {
-            o = mi.next();
-            if (!(set.contains(o))) result.put(o, map.get(o));
+        for (Entry<A, B> entry: map.entrySet()) {
+            o = entry.getKey();
+            if (!(set.contains(o))) result.put(o, entry.getValue());
         }
         return result;
     }

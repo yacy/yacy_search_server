@@ -29,6 +29,7 @@ package de.anomic.index;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map.Entry;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -99,11 +100,12 @@ public class indexDefaultReferenceBlacklist extends indexAbstractReferenceBlackl
         // loop over all Regexentrys
         if(!matched) {
             final HashMap<String, ArrayList<String>> blacklistMapNotMatched = super.getBlacklistMap(blacklistType,false);
-            for(final String key: blacklistMapNotMatched.keySet()) {
+            String key;
+            for(final Entry<String, ArrayList<String>> entry: blacklistMapNotMatched.entrySet()) {
+                key = entry.getKey();
                 try {
-                
                     if(Pattern.matches(key, hostlow)) {
-                        app = blacklistMapNotMatched.get(key);
+                        app = entry.getValue();
                         for (int i=0; i<app.size(); i++) {
                             if(Pattern.matches(app.get(i), path)) 
                                 return true;

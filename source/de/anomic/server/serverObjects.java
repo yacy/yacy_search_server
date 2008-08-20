@@ -50,7 +50,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import de.anomic.data.htmlTools;
@@ -271,11 +270,10 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
         // the keyMapper may contain regular expressions as defined in String.matches
         // this method is particulary useful when parsing the result of checkbox forms
         final ArrayList<String> v = new ArrayList<String>();
-        final Iterator<String> e = keySet().iterator();
         String key;
-        while (e.hasNext()) {
-            key = e.next();
-            if (key.matches(keyMapper)) v.add(get(key));
+        for (Map.Entry<String, String> entry: entrySet()) {
+            key = entry.getKey();
+            if (key.matches(keyMapper)) v.add(entry.getValue());
         }
         // make a String[]
         final String[] result = new String[v.size()];
@@ -285,11 +283,8 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
 
     // put all elements of another hashtable into the own table
     public void putAll(final serverObjects add) {
-        final Iterator<String> e = add.keySet().iterator();
-        String k;
-        while (e.hasNext()) {
-            k = e.next();
-            put(k, add.get(k));
+        for (Map.Entry<String, String> entry: add.entrySet()) {
+            put(entry.getKey(), entry.getValue());
         }
     }
 
@@ -298,11 +293,10 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
         BufferedOutputStream fos = null;
         try {
             fos = new BufferedOutputStream(new FileOutputStream(f));
-            final Iterator<String> e = keySet().iterator();
             String key, value;
-            while (e.hasNext()) {
-                key = e.next();
-                value = get(key).replaceAll("\n", "\\\\n");  
+            for (Map.Entry<String, String> entry: entrySet()) {
+                key = entry.getKey();
+                value = entry.getValue().replaceAll("\n", "\\\\n");  
                 fos.write((key + "=" + value + "\r\n").getBytes());
             }
         } finally {
