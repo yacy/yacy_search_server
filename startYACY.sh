@@ -147,14 +147,14 @@ for N in lib/*.jar; do CLASSPATH="$CLASSPATH$N:"; done
 for N in libx/*.jar; do CLASSPATH="$CLASSPATH$N:"; done
 CLASSPATH="classes:.:htroot:$CLASSPATH"
 
-cmdline="";
+cmdline="$JAVA $JAVA_ARGS -Djava.awt.headless=true -classpath $CLASSPATH yacy";
 if [ $DEBUG -eq 1 ] #debug
 then
-	cmdline="$JAVA $JAVA_ARGS -Djava.awt.headless=true -classpath $CLASSPATH yacy"
+	cmdline=$cmdline
 elif [ $LOGGING -eq 1 ];then #logging
-	cmdline="$JAVA $JAVA_ARGS -Djava.awt.headless=true -classpath $CLASSPATH yacy >> yacy.log & echo \$! > $PIDFILE"
+	cmdline="$cmdline >> yacy.log & echo \$! > $PIDFILE"
 else
-	cmdline="$JAVA $JAVA_ARGS -Djava.awt.headless=true -classpath $CLASSPATH yacy >> /dev/null & echo \$! > $PIDFILE"
+	cmdline="$cmdline >> /dev/null & echo \$! > $PIDFILE"
 fi
 if [ $PRINTONLY -eq 1 ];then
 	echo $cmdline
