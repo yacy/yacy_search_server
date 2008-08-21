@@ -16,7 +16,7 @@
     You can define URLs as start points for Web page crawling and start crawling here. "Crawling" means that YaCy will download the given website, extract all links in it and then download the content behind these links. This is repeated as long as specified under "Crawling Depth".
     </p>
     
-    <form action="WatchCrawler_p.html" method="post" enctype="multipart/form-data">
+    <form name="WatchCrawler" id="WatchCrawler" action="WatchCrawler_p.html" method="post" enctype="multipart/form-data">
       <table border="0" cellpadding="5" cellspacing="1">
         <tr class="TableHeader">
           <td><strong>Attribut</strong></td>
@@ -31,8 +31,7 @@
                 <td><label for="url"><nobr>From URL</nobr></label>:</td>
                 <td><input type="radio" name="crawlingMode" id="url" value="url" checked="checked" /></td>
                 <td>
-                  <input name="crawlingURL" type="text" size="41" maxlength="256" value="http://" onkeypress="changed()" />
-                  <span id="robotsOK"></span>                  
+                  <input name="crawlingURL" type="text" size="41" maxlength="256" value="http://" onkeypress="changed()" />                                    
                 </td>
               </tr>
               <tr>
@@ -48,7 +47,11 @@
                 <td><input type="file" name="crawlingFile" size="28" /></td>
               </tr>
               <tr>
-              	<td colspan="3" class="commit"><span id="title"><br/></span><img src="/env/grafics/empty.gif" name="ajax" alt="empty" /></td>
+              	<td colspan="3" class="commit">
+	              	<span id="robotsOK"></span>
+	              	<span id="title"><br/></span>
+	              	<img src="/env/grafics/empty.gif" name="ajax" alt="empty" />
+              	</td>
               </tr>
             </table>
           </td>
@@ -61,10 +64,14 @@
           <td>Create Bookmark</td>
           <td>
 	          <label for="createBookmark">Use</label>:
-	          <input type="checkbox" name="createBookmark" id="createBookmark" />&nbsp;&nbsp;&nbsp;
-			  <label for="bookmarkFolder"> Bookmark Folder</label>:
-			  <input name="bookmarkFolder" id="bookmarkFolder" type="text" size="20" maxlength="100" value="/crawlStart" /><br />
-          	  <br/><br/>This option works with "Starting Point: From URL" only!
+	          <input type="checkbox" name="createBookmark" id="createBookmark" />
+	          &nbsp;&nbsp;&nbsp;(works with "Starting Point: From URL" only)
+	          <br /><br />
+			  <label for="bookmarkTitle"> Title</label>:&nbsp;&nbsp;&nbsp; 
+			  <input name="bookmarkTitle" id="bookmarkTitle" type="text" size="50" maxlength="100" /><br /><br />
+			  <label for="bookmarkFolder"> Folder</label>:
+			  <input name="bookmarkFolder" id="bookmarkFolder" type="text" size="50" maxlength="100" value="/crawlStart" />
+			  <br />&nbsp;          	  
           </td>
           <td>
             This option lets you create a bookmark from your crawl start URL. For automatic re-crawling you can use the following default folders:<br/>

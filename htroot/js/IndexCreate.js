@@ -11,7 +11,8 @@ function handleResponse(){
         if(response.getElementsByTagName("title")[0].firstChild!=null){
 	        title=response.getElementsByTagName("title")[0].firstChild.nodeValue;
 	    }
-		document.getElementById("title").innerHTML=title;
+		// document.getElementById("title").innerHTML=title;
+		document.WatchCrawler.bookmarkTitle.value=title
 		
 		// deterime if crawling is allowed by the robots.txt
         robotsOK="";		

@@ -216,7 +216,7 @@ public class WatchCrawler_p {
                             	if (post.get("createBookmark","off").equals("on")) {
                                 	bookmarksDB.Bookmark bookmark = sb.bookmarksDB.createBookmark(crawlingStart, "admin");
                         			if(bookmark != null){
-                        				bookmark.setProperty(bookmarksDB.Bookmark.BOOKMARK_TITLE, crawlingStart);                        				
+                        				bookmark.setProperty(bookmarksDB.Bookmark.BOOKMARK_TITLE, post.get("bookmarkTitle", crawlingStart));                        				
                         				bookmark.setOwner("admin");                        				
                         				bookmark.setPublic(false);    
                         				bookmark.setTags(tags, true);
