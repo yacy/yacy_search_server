@@ -880,3 +880,13 @@ routing.deleteOldSeeds.permission__pro = true
 routing.deleteOldSeeds.time = 7
 routing.deleteOldSeeds.time__pro = 30
 
+# autoReCrawl Options
+autoReCrawl_idlesleep = 3600000
+autoReCrawl_busysleep = 3600000
+autoReCrawl_memprereq = -1
+
+
+
+
+
+

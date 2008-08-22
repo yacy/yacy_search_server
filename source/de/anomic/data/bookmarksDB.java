@@ -222,16 +222,27 @@ public class bookmarksDB {
 			serverLog.logInfo("BOOKMARKS", "autoReCrawl - checking schedule for: "+"["+serverDate.formatISO8601(date)+"] "+bm.getUrl());
 			
 			if (interTime >= 0 && interTime < sleepTime) {			
-				try {	
-	    			// check if the crawl filter works correctly    			
-	    			Pattern.compile(newcrawlingfilter);
-	    			
-	    			// set crawlingStart to BookmarkUrl    			
-	    			String crawlingStart = bm.getUrl();	    			
-	    			
-                    // stack request
-                    // first delete old entry, if exists
+				try {
+	    			int pos = 0;					
+					// set crawlingStart to BookmarkUrl    			
+	    			String crawlingStart = bm.getUrl();
+                    
                     yacyURL crawlingStartURL = new yacyURL(crawlingStart, null);
+                    
+                    // set the crawling filter                    
+                    if (newcrawlingfilter.length() < 2) newcrawlingfilter = ".*"; // avoid that all urls are filtered out if bad value was submitted
+                    
+                    if (crawlingStartURL!= null && newcrawlingfilter.equals("dom")) {
+                        newcrawlingfilter = ".*" + crawlingStartURL.getHost() + ".*";
+                    }
+                    if (crawlingStart!= null && newcrawlingfilter.equals("sub") && (pos = crawlingStart.lastIndexOf("/")) > 0) {
+                        newcrawlingfilter = crawlingStart.substring(0, pos + 1) + ".*";
+                    }
+                    sb.setConfig("crawlingFilter", newcrawlingfilter);					
+					
+					// check if the crawl filter works correctly    			
+	    			Pattern.compile(newcrawlingfilter);	    			
+                    
                     String urlhash = crawlingStartURL.hash();
                     sb.webIndex.removeURL(urlhash);
                     sb.crawlQueues.noticeURL.removeByURLHash(urlhash);
@@ -250,6 +261,7 @@ public class bookmarksDB {
 	                
 	                if (reasonString == null) {
 	                	serverLog.logInfo("BOOKMARKS", "autoReCrawl - adding crawl profile for: " + crawlingStart);
+	                	serverLog.logInfo("BOOKMARKS", "autoReCrawl - crawl filter is set to: " + newcrawlingfilter);
 	                	// generate a YaCyNews if the global flag was set
 	                    if (crawlOrder) {
 	                        Map<String, String> m = new HashMap<String, String>(pe.map()); // must be cloned
