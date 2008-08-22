@@ -69,7 +69,7 @@ public final class serverFileUtils {
      * 
      * @param source InputStream
      * @param dest OutputStream
-     * @param count the total amount of bytes to copy (-1 for all)
+     * @param count the total amount of bytes to copy (-1 for all, else must be greater than zero)
      * @return Total number of bytes copied.
      * @throws IOException 
      * 
@@ -79,6 +79,12 @@ public final class serverFileUtils {
      * @see #copy(File source, File dest)
      */
     public static long copy(final InputStream source, final OutputStream dest, final long count) throws IOException {
+        assert count == -1 || count > 0 : "precondition violated: count == -1 || count > 0 (nothing to copy)";
+        if(count == 0) {
+            // no bytes to copy
+            return 0;
+        }
+        
         final byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];                
         int chunkSize = (int) ((count > 0) ? Math.min(count, DEFAULT_BUFFER_SIZE) : DEFAULT_BUFFER_SIZE);
         

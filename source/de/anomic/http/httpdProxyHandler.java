@@ -986,9 +986,17 @@ public final class httpdProxyHandler {
             // input so we have to end it to do the request
             final long requestLength = requestHeader.contentLength();
             if(requestLength > -1) {
-                final ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-                serverFileUtils.copy(body, buffer, requestLength);
-                body = new ByteArrayInputStream(buffer.toByteArray());
+                final byte[] bodyData;
+                if(requestLength == 0) {
+                    // no body
+                    bodyData = new byte[0];
+                } else {
+                    // read content-length bytes into memory
+                    final ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+                    serverFileUtils.copy(body, buffer, requestLength);
+                    bodyData = buffer.toByteArray();
+                }
+                body = new ByteArrayInputStream(bodyData);
             }
             JakartaCommonsHttpResponse res = null;
             try {
