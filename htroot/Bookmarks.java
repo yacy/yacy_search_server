@@ -131,11 +131,11 @@ public class Bookmarks {
     			final String title=post.get("title");
     			final String description=post.get("description");
     			String tagsString = post.get("tags");
-    			final String pathString = post.get("path");
-    			tagsString=tagsString+","+pathString;
-    			if(tagsString.equals("")){
-    				tagsString="/unsorted"; //default tag
+    			String pathString = post.get("path");    			
+    			if(pathString.equals("")){
+    				pathString="/unsorted"; //default folder
     			}
+    			tagsString=tagsString+","+pathString;
     			final Set<String> tags=listManager.string2set(bookmarksDB.cleanTagsString(tagsString)); 
     			final bookmarksDB.Bookmark bookmark = sb.bookmarksDB.createBookmark(url, username);
     			if(bookmark != null){

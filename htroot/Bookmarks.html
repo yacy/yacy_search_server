@@ -7,7 +7,10 @@
 		<script src="/js/Bookmarks.js" type="text/javascript"></script>
 		<link rel="alternate" type="application/rss+xml" title="RSS" href="Bookmarks.rss" />
 	</head>
-	<body id="Bookmarks" onload="treeMenu_init(document.getElementById('folder'), '')">
+	<body id="Bookmarks" 
+		onload="treeMenu_init(document.getElementById('folder'), window.name)"
+		onunload="window.name = treeMenu_store(document.getElementById('folder'))"
+	>
 		#%env/templates/header.template%#
 		#(mode)#
 		<!-- SubMenu (mode=0) -->
@@ -17,7 +20,9 @@
 				<li><a href="Bookmarks.html?login=true" class="MenuItemLink">Login</a></li>
 				<li><a href="Bookmarks.html?login=true&mode=add" class="MenuItemLink lock">Add Bookmark</a></li>
 				<li><a href="Bookmarks.html?login=true&mode=importxml" class="MenuItemLink lock">Import Bookmarks</a></li>
-				<li><a href="xml/bookmarks/xbel/xbel.xml" class="MenuItemLink lock">Export Bookmarks</a></li>
+				<li><a href="xml/bookmarks/xbel/xbel.xml" class="MenuItemLink lock">Bookmarks (XBEL)</a></li>
+				<li><a href="xml/bookmarks/posts/all.xml" class="MenuItemLink lock">Bookmarks (XML)</a></li>
+				<li><a href="Bookmarks.rss" class="MenuItemLink lock">Bookmarks (RSS)</a></li>
 			</ul>
 			<p/>
 		</div>
@@ -27,7 +32,9 @@
 			<ul class="SubMenu">
 				<li><a href="Bookmarks.html?mode=add" class="MenuItemLink lock">Add Bookmark</a></li>
 				<li><a href="Bookmarks.html?mode=importxml" class="MenuItemLink lock">Import Bookmarks</a></li>
-				<li><a href="xml/bookmarks/xbel/xbel.xml" class="MenuItemLink lock">Export Bookmarks</a></li>
+				<li><a href="xml/bookmarks/xbel/xbel.xml" class="MenuItemLink lock">Bookmarks (XBEL)</a></li>
+				<li><a href="xml/bookmarks/posts/all.xml" class="MenuItemLink lock">Bookmarks (XML)</a></li>
+				<li><a href="Bookmarks.rss" class="MenuItemLink lock">Bookmarks (RSS)</a></li>
 			</ul>
 			<p/>
 		</div>
