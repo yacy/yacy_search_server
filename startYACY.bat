@@ -22,6 +22,7 @@ if exist DATA\SETTINGS\httpProxy.conf GoTo :RENAMEINDEX
 if exist DATA\SETTINGS\yacy.conf GoTo :GETSTARTOPTS
 
 :STARTJAVA
+set javacmd=%javacmd% -Djava.net.preferIPv4Stack=true
 Rem Starting YaCy
 Echo Generated classpath:%CLASSPATH%
 Echo JRE Parameters:%javacmd%
