@@ -13,7 +13,7 @@
   <link media="screen" type="text/css" href="css/jquery.accordion.css" rel="stylesheet" />	
 	
   <script src="js/jquery-1.2.6.min.js" type="text/javascript"></script>    
-  <script src="js/jquery-ui.min.js" type="text/javascript"></script>
+  <script src="js/jquery.ui.all.min.js" type="text/javascript"></script>
   
   <script src="js/jquery.tablesorter.min.js" type="text/javascript"></script>  
   <script src="js/jquery.tablesorter.pager.js" type="text/javascript"></script>
@@ -36,7 +36,7 @@
 		qtag = "";
 		/* Initialize Tabs and set up close function */
 		var $tabs = $('#container ul').tabs({
-        	add: function(ui) {
+        	add: function(e, ui) {
             	var li = $(ui.tab).parents('li:eq(0)')[0];
                 $('<img class="close" alt="close" src="/yacy/ui/img/cancel.png" border="0"/>')
 					.appendTo(li)
@@ -62,9 +62,9 @@
 	        	$('#' + ui.panel.id).attr('prefermaskfilter', prefermaskfilter);
 				$('#' + ui.panel.id).attr('urlmaskfilter', urlmaskfilter);
             },
-			select: function(ui) {             	
+			select: function(e, ui) {             	
 				/* set global variable tabid */
-				tabid = '#' + ui.panel.id;				
+				tabid = '#' + ui.panel.id;						
 				if (tabid == "#Bookmarks") {
 					$("select[@name='resource']").setValue('ymarks');
 					$("input[@name='search']").setValue(qtag);									
