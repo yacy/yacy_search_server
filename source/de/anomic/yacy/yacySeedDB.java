@@ -439,20 +439,20 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
     public long countPotentialRWI() { return seedPotentialDB.getLongAcc(yacySeed.ICOUNT); }
 
     public synchronized void addConnected(final yacySeed seed) {
-        if ((seed == null) || (seed.isProper(false) != null)) return;
+        if (seed.isProper(false) != null) return;
         //seed.put(yacySeed.LASTSEEN, yacyCore.shortFormatter.format(new Date(yacyCore.universalTime())));
         try {
             nameLookupCache.put(seed.getName(), seed);
             final HashMap<String, String> seedPropMap = seed.getMap();
-            synchronized(seedPropMap) {
+            synchronized (seedPropMap) {
                 seedActiveDB.put(seed.hash, seedPropMap);
             }
             seedPassiveDB.remove(seed.hash);
             seedPotentialDB.remove(seed.hash);
-        } catch (final IOException e){
+        } catch (final IOException e) {
             yacyCore.log.logSevere("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
-            resetActiveTable();            
-        } catch (final kelondroException e){
+            resetActiveTable();
+        } catch (final kelondroException e) {
             yacyCore.log.logSevere("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
             resetActiveTable();
         } catch (final IllegalArgumentException e) {
@@ -460,9 +460,9 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
             resetActiveTable();
         }
     }
-    
+
     public synchronized void addDisconnected(final yacySeed seed) {
-        if (seed == null) return;
+        if (seed.isProper(false) != null) return;
         try {
             nameLookupCache.remove(seed.getName());
             seedActiveDB.remove(seed.hash);
@@ -471,7 +471,7 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
         //seed.put(yacySeed.LASTSEEN, yacyCore.shortFormatter.format(new Date(yacyCore.universalTime())));
         try {
             final HashMap<String, String> seedPropMap = seed.getMap();
-            synchronized(seedPropMap) {
+            synchronized (seedPropMap) {
                 seedPassiveDB.put(seed.hash, seedPropMap);
             }
         } catch (final IOException e) {
@@ -485,33 +485,32 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
             resetPassiveTable();
         }
     }
-    
+
     public synchronized void addPotential(final yacySeed seed) {
-        if (seed == null) return;
+        if (seed.isProper(false) != null) return;
         try {
             nameLookupCache.remove(seed.getName());
             seedActiveDB.remove(seed.hash);
             seedPassiveDB.remove(seed.hash);
         } catch (final Exception e) { serverLog.logWarning("yacySeedDB", "could not remove hash ("+ e.getClass() +"): "+ e.getMessage()); }
-    if (seed.isProper(false) != null) return;
-    //seed.put(yacySeed.LASTSEEN, yacyCore.shortFormatter.format(new Date(yacyCore.universalTime())));
+        //seed.put(yacySeed.LASTSEEN, yacyCore.shortFormatter.format(new Date(yacyCore.universalTime())));
         try {
             final HashMap<String, String> seedPropMap = seed.getMap();
-            synchronized(seedPropMap) {
+            synchronized (seedPropMap) {
                 seedPotentialDB.put(seed.hash, seedPropMap);
             }
-    } catch (final IOException e) {
-        yacyCore.log.logSevere("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
-        resetPotentialTable();
-    } catch (final kelondroException e) {
-        yacyCore.log.logSevere("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
-        resetPotentialTable();
-    } catch (final IllegalArgumentException e) {
-        yacyCore.log.logSevere("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
-        resetPotentialTable();
+        } catch (final IOException e) {
+            yacyCore.log.logSevere("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
+            resetPotentialTable();
+        } catch (final kelondroException e) {
+            yacyCore.log.logSevere("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
+            resetPotentialTable();
+        } catch (final IllegalArgumentException e) {
+            yacyCore.log.logSevere("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
+            resetPotentialTable();
+        }
     }
-    }
-    
+
     public synchronized void removeDisconnected(final String peerHash) {
     	if(peerHash == null) return;
     	try {
