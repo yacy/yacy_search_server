@@ -146,7 +146,7 @@ public class CrawlProfile {
     
     public entry newEntry(final String name, final yacyURL startURL, final String generalFilter, final String specificFilter,
                            final int generalDepth, final int specificDepth,
-                           final int recrawlIfOlder /*minutes*/, final int domFilterDepth,  final int domMaxPages,
+                           final long recrawlIfOlder /*date*/, final int domFilterDepth,  final int domMaxPages,
                            final boolean crawlingQ,
                            final boolean indexText, final boolean indexMedia,
                            final boolean storeHTCache, final boolean storeTXCache,
@@ -244,7 +244,7 @@ public class CrawlProfile {
         
         public entry(final String name, final yacyURL startURL, final String generalFilter, final String specificFilter,
                      final int generalDepth, final int specificDepth,
-                     final int recrawlIfOlder /*minutes*/, final int domFilterDepth, final int domMaxPages,
+                     final long recrawlIfOlder /*date*/, final int domFilterDepth, final int domMaxPages,
                      final boolean crawlingQ,
                      final boolean indexText, final boolean indexMedia,
                      final boolean storeHTCache, final boolean storeTXCache,
@@ -260,7 +260,7 @@ public class CrawlProfile {
             mem.put(SPECIFIC_FILTER,  (specificFilter == null) ? ".*" : specificFilter);
             mem.put(GENERAL_DEPTH,    Integer.toString(generalDepth));
             mem.put(SPECIFIC_DEPTH,   Integer.toString(specificDepth));
-            mem.put(RECRAWL_IF_OLDER, Integer.toString(recrawlIfOlder));
+            mem.put(RECRAWL_IF_OLDER, Long.toString(recrawlIfOlder));
             mem.put(DOM_FILTER_DEPTH, Integer.toString(domFilterDepth));
             mem.put(DOM_MAX_PAGES,    Integer.toString(domMaxPages));
             mem.put(CRAWLING_Q,       Boolean.toString(crawlingQ)); // crawling of urls with '?'
@@ -339,14 +339,14 @@ public class CrawlProfile {
         }
         public long recrawlIfOlder() {
             // returns a long (millis) that is the minimum age that
-            // an antry must have to be re-crawled
+            // an entry must have to be re-crawled
             final String r = mem.get(RECRAWL_IF_OLDER);
-            if (r == null) return Long.MAX_VALUE;
+            if (r == null) return 0L;
             try {
-                final long l = Long.parseLong(r) * 60000L;
-                return (l < 0) ? Long.MAX_VALUE : l;
+                final long l = Long.parseLong(r);
+                return (l < 0) ? 0L : l;
             } catch (final NumberFormatException e) {
-                return Long.MAX_VALUE;
+                return 0L;
             }
         }
         public int domFilterDepth() {

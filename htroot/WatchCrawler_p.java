@@ -144,7 +144,7 @@ public class WatchCrawler_p {
                     final boolean crawlingIfOlderCheck = post.get("crawlingIfOlderCheck", "off").equals("on");
                     final int crawlingIfOlderNumber = Integer.parseInt(post.get("crawlingIfOlderNumber", "-1"));
                     final String crawlingIfOlderUnit = post.get("crawlingIfOlderUnit","year");
-                    final int crawlingIfOlder = recrawlIfOlderC(crawlingIfOlderCheck, crawlingIfOlderNumber, crawlingIfOlderUnit);                    
+                    final long crawlingIfOlder = recrawlIfOlderC(crawlingIfOlderCheck, crawlingIfOlderNumber, crawlingIfOlderUnit);                    
                     env.setConfig("crawlingIfOlder", crawlingIfOlder);
                     
                     final boolean crawlingDomFilterCheck = post.get("crawlingDomFilterCheck", "off").equals("on");
@@ -394,13 +394,13 @@ public class WatchCrawler_p {
         return prop;
     }
 
-    private static int recrawlIfOlderC(final boolean recrawlIfOlderCheck, final int recrawlIfOlderNumber, final String crawlingIfOlderUnit) {
-        if (!recrawlIfOlderCheck) return -1;
-        if (crawlingIfOlderUnit.equals("year")) return recrawlIfOlderNumber * 60 * 24 * 365;
-        if (crawlingIfOlderUnit.equals("month")) return recrawlIfOlderNumber * 60 * 24 * 30;
-        if (crawlingIfOlderUnit.equals("day")) return recrawlIfOlderNumber * 60 * 24;
-        if (crawlingIfOlderUnit.equals("hour")) return recrawlIfOlderNumber * 60;
-        return recrawlIfOlderNumber;
+    private static long recrawlIfOlderC(final boolean recrawlIfOlderCheck, final int recrawlIfOlderNumber, final String crawlingIfOlderUnit) {
+        if (!recrawlIfOlderCheck) return 0L;
+        if (crawlingIfOlderUnit.equals("year")) return System.currentTimeMillis() - (long) recrawlIfOlderNumber * 1000L * 60L * 60L * 24L * 365L;
+        if (crawlingIfOlderUnit.equals("month")) return System.currentTimeMillis() - (long) recrawlIfOlderNumber * 1000L * 60L * 60L * 24L * 30L;
+        if (crawlingIfOlderUnit.equals("day")) return System.currentTimeMillis() - (long) recrawlIfOlderNumber * 1000L * 60L * 60L * 24L;
+        if (crawlingIfOlderUnit.equals("hour")) return System.currentTimeMillis() - (long) recrawlIfOlderNumber * 1000L * 60L * 60L;
+        return System.currentTimeMillis() - (long) recrawlIfOlderNumber;
     }
     
     private static void setPerformance(final plasmaSwitchboard sb, final serverObjects post) {

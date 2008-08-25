@@ -452,7 +452,7 @@ public final class CrawlStacker extends Thread {
         // check if the url is double registered
         final String dbocc = sb.crawlQueues.urlExists(entry.url().hash());
         final indexURLReference oldEntry = this.sb.webIndex.getURL(entry.url().hash(), null, 0);
-        final boolean recrawl = (oldEntry != null) && ((System.currentTimeMillis() - oldEntry.loaddate().getTime()) > profile.recrawlIfOlder());
+        final boolean recrawl = (oldEntry != null) && (profile.recrawlIfOlder() > oldEntry.loaddate().getTime());
         // do double-check
         if ((dbocc != null) && (!recrawl)) {
             reason = ErrorURL.DOUBLE_REGISTERED + dbocc + ")";
