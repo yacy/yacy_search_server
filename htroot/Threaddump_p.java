@@ -36,7 +36,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import de.anomic.data.htmlTools;
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
@@ -49,7 +49,7 @@ public class Threaddump_p {
 	private static final serverObjects prop = new serverObjects();
 	private static plasmaSwitchboard sb = null;
 
-    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
 
     	prop.clear();
     	sb = (plasmaSwitchboard) env;

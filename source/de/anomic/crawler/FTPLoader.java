@@ -34,12 +34,15 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.util.Date;
 
+import de.anomic.http.JakartaCommonsHttpClient;
+import de.anomic.http.httpRequestHeader;
+import de.anomic.http.httpResponseHeader;
 import de.anomic.http.httpdProxyCacheEntry;
+import de.anomic.index.indexDocumentMetadata;
 import de.anomic.net.ftpc;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.cache.ftp.ResourceInfo;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyURL;
 
@@ -55,11 +58,17 @@ public class FTPLoader {
         maxFileSize = (int) sb.getConfigLong("crawler.ftp.maxFileSize", -1l);
     }
 
-    protected httpdProxyCacheEntry createCacheEntry(final CrawlEntry entry, final String mimeType,
-            final Date fileDate) {
-        return plasmaHTCache.newEntry(entry.depth(), entry.url(), entry.name(), "OK", new ResourceInfo(
-                entry.url(), sb.getURL(entry.referrerhash()), mimeType, fileDate), entry.initiator(),
-                sb.webIndex.profilesActiveCrawls.getEntry(entry.profileHandle()));
+    protected indexDocumentMetadata createCacheEntry(final CrawlEntry entry, final String mimeType, final Date fileDate) {
+        httpRequestHeader requestHeader = new httpRequestHeader();
+        requestHeader.put(httpRequestHeader.REFERER, sb.getURL(entry.referrerhash()).toNormalform(true, false));
+        httpResponseHeader responseHeader = new httpResponseHeader();
+        responseHeader.put(httpResponseHeader.LAST_MODIFIED, JakartaCommonsHttpClient.date2String(fileDate));
+        responseHeader.put(httpResponseHeader.CONTENT_TYPE, mimeType);
+        indexDocumentMetadata metadata = new httpdProxyCacheEntry(entry.depth(), entry.url(), entry.name(), "OK",
+                requestHeader, responseHeader,
+                entry.initiator(), sb.webIndex.profilesActiveCrawls.getEntry(entry.profileHandle()));
+        plasmaHTCache.storeMetadata(responseHeader, metadata);
+        return metadata;
     }
 
     /**
@@ -68,13 +77,13 @@ public class FTPLoader {
      * @param entry
      * @return
      */
-    public httpdProxyCacheEntry load(final CrawlEntry entry) {
+    public indexDocumentMetadata load(final CrawlEntry entry) {
         final yacyURL entryUrl = entry.url();
         final String fullPath = getPath(entryUrl);
         final File cacheFile = createCachefile(entryUrl);
 
         // the return value
-        httpdProxyCacheEntry htCache = null;
+        indexDocumentMetadata htCache = null;
 
         // determine filename and path
         String file, path;
@@ -163,7 +172,7 @@ public class FTPLoader {
         // testing if the file already exists
         if (cacheFile.isFile()) {
             // delete the file if it already exists
-            plasmaHTCache.deleteURLfromCache(entryUrl);
+            plasmaHTCache.deleteURLfromCache(entryUrl, false);
         } else {
             // create parent directories
             cacheFile.getParentFile().mkdirs();
@@ -233,7 +242,7 @@ public class FTPLoader {
      * @return
      * @throws Exception
      */
-    private httpdProxyCacheEntry getFile(final ftpc ftpClient, final CrawlEntry entry, final File cacheFile)
+    private indexDocumentMetadata getFile(final ftpc ftpClient, final CrawlEntry entry, final File cacheFile)
             throws Exception {
         // determine the mimetype of the resource
         final yacyURL entryUrl = entry.url();
@@ -243,7 +252,7 @@ public class FTPLoader {
 
         // if the mimetype and file extension is supported we start to download
         // the file
-        httpdProxyCacheEntry htCache = null;
+        indexDocumentMetadata htCache = null;
         if (plasmaParser.supportedContent(plasmaParser.PARSER_MODE_CRAWLER, entryUrl, mimeType)) {
             // aborting download if content is too long
             final int size = ftpClient.fileSize(path);

@@ -1,6 +1,6 @@
 
 
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.ymage.ymageMatrix;
@@ -8,7 +8,7 @@ import de.anomic.ymage.ymageOSM;
 
 public class osm {
 
-    public static ymageMatrix respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static ymageMatrix respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
 
         int zoom = 10;
         double lat = 47.968056d;

@@ -35,7 +35,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 import de.anomic.data.listManager;
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.index.indexAbstractReferenceBlacklist;
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntry;
@@ -55,7 +55,7 @@ import de.anomic.yacy.yacyURL;
 
 public class IndexControlRWIs_p {
     
-    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
         // return variable that accumulates replacements
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final serverObjects prop = new serverObjects();

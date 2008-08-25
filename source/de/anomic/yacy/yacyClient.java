@@ -65,8 +65,8 @@ import de.anomic.http.DefaultCharsetStringPart;
 import de.anomic.http.HttpClient;
 import de.anomic.http.JakartaCommonsHttpClient;
 import de.anomic.http.JakartaCommonsHttpResponse;
-import de.anomic.http.httpHeader;
 import de.anomic.http.httpRemoteProxyConfig;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexRWIRowEntry;
@@ -267,9 +267,9 @@ public final class yacyClient {
      * @throws IOException
      */
     private static byte[] wput(final String url, final String vhost, final List<Part> post, final int timeout, final boolean gzipBody) throws IOException {
-        final httpHeader header = new httpHeader();
-        header.put(httpHeader.USER_AGENT, HTTPLoader.yacyUserAgent);
-        header.put(httpHeader.HOST, vhost);
+        final httpRequestHeader header = new httpRequestHeader();
+        header.put(httpRequestHeader.USER_AGENT, HTTPLoader.yacyUserAgent);
+        header.put(httpRequestHeader.HOST, vhost);
         final JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(timeout, header);
         client.setProxy(proxyConfig());
         
@@ -1071,8 +1071,8 @@ public final class yacyClient {
             final String wordhashe = indexWord.word2hash("test");
             //System.out.println("permission=" + permissionMessage(args[1]));
             
-            final httpHeader reqHeader = new httpHeader();
-            reqHeader.put(httpHeader.USER_AGENT, HTTPLoader.crawlerUserAgent);
+            final httpRequestHeader reqHeader = new httpRequestHeader();
+            reqHeader.put(httpRequestHeader.USER_AGENT, HTTPLoader.crawlerUserAgent);
             final byte[] content = HttpClient.wget(
                                               "http://" + target.getPublicAddress() + "/yacy/search.html" +
                                                       "?myseed=" + sb.webIndex.seedDB.mySeed().genSeedStr(null) +

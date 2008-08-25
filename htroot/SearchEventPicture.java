@@ -25,7 +25,7 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.plasma.plasmaGrafics;
 import de.anomic.plasma.plasmaSearchEvent;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -37,7 +37,7 @@ import de.anomic.ymage.ymageMatrix;
 
 public class SearchEventPicture {
     
-    public static ymageMatrix respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static ymageMatrix respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final String eventID = (String) header.get("event", plasmaSearchEvent.lastEventID);
         if (eventID == null) return null;

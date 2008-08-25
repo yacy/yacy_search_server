@@ -31,7 +31,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.index.indexRWIRowEntry;
 import de.anomic.index.indexReferenceBlacklist;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -48,7 +48,7 @@ import de.anomic.yacy.yacySeed;
 
 public final class transferRWI {
 
-    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) throws InterruptedException {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) throws InterruptedException {
         
         // return variable that accumulates replacements
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;

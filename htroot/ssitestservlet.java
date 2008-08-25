@@ -25,13 +25,13 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 public class ssitestservlet {
 
-    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
         
         //plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final serverObjects prop = new serverObjects();

@@ -29,7 +29,7 @@ import java.io.File;
 import java.util.Iterator;
 import java.util.Map;
 
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.kelondroCache;
 import de.anomic.kelondro.kelondroCachedRecords;
 import de.anomic.kelondro.kelondroEcoTable;
@@ -47,7 +47,7 @@ public class PerformanceMemory_p {
     private static final long MB = 1024 * KB;
     private static Map<String, String> defaultSettings = null;
         
-    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
         if (defaultSettings == null) {

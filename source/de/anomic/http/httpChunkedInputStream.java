@@ -49,7 +49,7 @@ public final class httpChunkedInputStream extends InputStream {
     private final InputStream inputStream;
     private int currPos;
     private int currChunkSize;
-    private httpHeader httpTrailer;
+    private httpRequestHeader httpTrailer;
     
     private boolean beginningOfStream = true;
     private boolean isEOF = false;
@@ -108,7 +108,6 @@ public final class httpChunkedInputStream extends InputStream {
         }
     }
     
-    
     private void readNextChunk() throws IOException {
         if (!this.beginningOfStream) readCRLF();
         
@@ -120,7 +119,6 @@ public final class httpChunkedInputStream extends InputStream {
             readTrailer();
         }
     }
-    
     
     private void readTrailer() throws IOException {
         BufferedReader reader = null;
@@ -140,19 +138,15 @@ public final class httpChunkedInputStream extends InputStream {
             
             final ByteArrayInputStream bin = new ByteArrayInputStream(bout.getBytes());
             reader = new BufferedReader(new InputStreamReader(bin));
-            this.httpTrailer = httpHeader.readHttpHeader(reader);
+            this.httpTrailer = new httpRequestHeader();
+            this.httpTrailer.readHttpHeader(reader);
         } finally {
             if (reader != null) try {reader.close();}catch(final Exception e){}
             if (bout != null) try {bout.close();}catch(final Exception e){}
         }
     }
     
-    public httpHeader getTrailer() {
-        return this.httpTrailer;
-    }
-    
-    private static int readChunkFromStream(final InputStream in) 
-    throws IOException {           
+    private static int readChunkFromStream(final InputStream in) throws IOException {           
         
         final serverByteBuffer baos = new serverByteBuffer();
         int state = READ_CHUNK_STATE_NORMAL; 

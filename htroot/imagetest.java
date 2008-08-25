@@ -24,7 +24,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.ymage.ymageMatrix;
@@ -32,7 +32,7 @@ import de.anomic.ymage.ymageToolPrint;
 
 public class imagetest {
     
-    public static ymageMatrix respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static ymageMatrix respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
         /*
         BufferedImage bi = new BufferedImage(640, 400, BufferedImage.TYPE_INT_RGB); 
         Graphics2D g = bi.createGraphics();

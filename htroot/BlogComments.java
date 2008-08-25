@@ -40,7 +40,7 @@ import de.anomic.data.blogBoardComments;
 import de.anomic.data.messageBoard;
 import de.anomic.data.userDB;
 import de.anomic.data.blogBoard.BlogEntry;
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
@@ -57,7 +57,7 @@ public class BlogComments {
         return SimpleFormatter.format(date);
     }
 
-    public static serverObjects respond(final httpHeader header, serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, serverObjects post, final serverSwitch<?> env) {
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final serverObjects prop = new serverObjects();
         blogBoard.BlogEntry page = null;
@@ -72,7 +72,7 @@ public class BlogComments {
         }
 
         if(!hasRights){
-            final userDB.Entry userentry = sb.userDB.proxyAuth((String)header.get(httpHeader.AUTHORIZATION, "xxxxxx"));
+            final userDB.Entry userentry = sb.userDB.proxyAuth((String)header.get(httpRequestHeader.AUTHORIZATION, "xxxxxx"));
             if(userentry != null && userentry.hasRight(userDB.Entry.BLOG_RIGHT)){
                 hasRights=true;
             }
@@ -83,7 +83,7 @@ public class BlogComments {
         }
 
         final String pagename = post.get("page", "blog_default");
-        final String ip = post.get(httpHeader.CONNECTION_PROP_CLIENTIP, "127.0.0.1");
+        final String ip = post.get(httpRequestHeader.CONNECTION_PROP_CLIENTIP, "127.0.0.1");
 
         String StrAuthor = post.get("author", "anonymous");
 

@@ -30,7 +30,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Iterator;
 
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.index.indexRepositoryReference;
 import de.anomic.index.indexURLReference;
 import de.anomic.kelondro.kelondroBase64Order;
@@ -44,7 +44,7 @@ import de.anomic.yacy.yacyURL;
 
 public class IndexControlURLs_p {
     
-    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
         // return variable that accumulates replacements
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         

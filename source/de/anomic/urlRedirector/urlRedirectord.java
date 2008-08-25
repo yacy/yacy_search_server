@@ -10,7 +10,7 @@ import java.util.Date;
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.data.userDB;
 import de.anomic.http.HttpClient;
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpResponseHeader;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
@@ -181,7 +181,7 @@ public class urlRedirectord implements serverHandler, Cloneable {
                         final yacyURL reqURL = new yacyURL(this.nextURL, null);
                         
                         // getting URL mimeType
-                        final httpHeader header = HttpClient.whead(reqURL.toString()); 
+                        final httpResponseHeader header = HttpClient.whead(reqURL.toString()); 
                         
                         if (plasmaParser.supportedContent(
                                 plasmaParser.PARSER_MODE_URLREDIRECTOR,

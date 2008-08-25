@@ -36,7 +36,7 @@ import java.util.LinkedList;
 
 import de.anomic.crawler.HTTPLoader;
 import de.anomic.http.HttpClient;
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.parser.AbstractParser;
@@ -274,8 +274,8 @@ public class vcfParser extends AbstractParser implements Parser {
             final yacyURL contentUrl = new yacyURL(args[0], null);
             
             final vcfParser testParser = new vcfParser();
-            final httpHeader reqHeader = new httpHeader();
-            reqHeader.put(httpHeader.USER_AGENT, HTTPLoader.crawlerUserAgent);
+            final httpRequestHeader reqHeader = new httpRequestHeader();
+            reqHeader.put(httpRequestHeader.USER_AGENT, HTTPLoader.crawlerUserAgent);
             final byte[] content = HttpClient.wget(contentUrl.toString(), reqHeader, 10000);
             final ByteArrayInputStream input = new ByteArrayInputStream(content);
             testParser.parse(contentUrl, "text/x-vcard", "UTF-8",input);

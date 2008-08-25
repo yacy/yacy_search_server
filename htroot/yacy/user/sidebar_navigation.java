@@ -28,7 +28,7 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.kelondroMSetTools;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.plasma.plasmaSearchEvent;
@@ -42,7 +42,7 @@ public class sidebar_navigation {
 
     private static final int MAX_TOPWORDS = 24;
     
-    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
         final serverObjects prop = new serverObjects();
         
         final String eventID = post.get("eventID", "");

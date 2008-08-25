@@ -38,7 +38,7 @@ import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpRemoteProxyConfig;
 import de.anomic.http.httpd;
 import de.anomic.http.httpdProxyHandler;
@@ -59,13 +59,13 @@ public class SettingsAck_p {
     
     private static boolean nothingChanged = false;
     
-    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         
         // get referer for backlink
-        final String referer = header.get(httpHeader.REFERER);
+        final String referer = header.get(httpRequestHeader.REFERER);
         prop.put("referer", (referer == null) ? "Settings_p.html" : referer); 
         
         //if (post == null) System.out.println("POST: NULL"); else System.out.println("POST: " + post.toString());

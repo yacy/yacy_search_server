@@ -35,7 +35,6 @@ import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.util.Properties;
 
-import de.anomic.http.httpHeader;
 import de.anomic.yacy.yacyURL;
 
 public class htmlFilterInputStream extends InputStream implements htmlFilterEventListener {
@@ -73,6 +72,25 @@ public class htmlFilterInputStream extends InputStream implements htmlFilterEven
         this.writer = new htmlFilterWriter(null,null,scraper,transformer,passbyIfBinarySuspect);
     }
 
+    private static String extractCharsetFromMimetypeHeader(final String mimeType) {
+        if (mimeType == null) return null;
+        
+        final String[] parts = mimeType.split(";");
+        if (parts == null || parts.length <= 1) return null;
+        
+        for (int i=1; i < parts.length; i++) {    
+            final String param = parts[i].trim();
+            if (param.startsWith("charset=")) {
+                String charset = param.substring("charset=".length()).trim();
+                if (charset.startsWith("\"") || charset.startsWith("'")) charset = charset.substring(1);
+                if (charset.endsWith("\"") || charset.endsWith("'")) charset = charset.substring(0,charset.length()-1);
+                return charset.trim();
+            }
+        }
+        
+        return null;            
+    }
+
     public void scrapeTag0(final String tagname, final Properties tagopts) {
         if (tagname == null || tagname.length() == 0) return;
         
@@ -80,8 +98,9 @@ public class htmlFilterInputStream extends InputStream implements htmlFilterEven
             if (tagopts.containsKey("http-equiv")) {
                 final String value = tagopts.getProperty("http-equiv");
                 if (value.equalsIgnoreCase("Content-Type")) {
+                    // parse lines like <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
                     final String contentType = tagopts.getProperty("content","");
-                    this.detectedCharset = httpHeader.extractCharsetFromMimetypeHeader(contentType);
+                    this.detectedCharset = extractCharsetFromMimetypeHeader(contentType);
                     if (this.detectedCharset != null && this.detectedCharset.length() > 0) {
                         this.charsetChanged = true;
                     } else if (tagopts.containsKey("charset")) { 

@@ -74,7 +74,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Level;
-import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
@@ -222,8 +221,8 @@ public final class httpdFileHandler {
 //        out.flush();
 //    }
     
-    private static final httpHeader getDefaultHeaders(final String path) {
-        final httpHeader headers = new httpHeader();
+    private static final httpResponseHeader getDefaultHeaders(final String path) {
+        final httpResponseHeader headers = new httpResponseHeader();
 		String ext;
 		int pos;
     	if ((pos = path.lastIndexOf('.')) < 0) {
@@ -231,27 +230,27 @@ public final class httpdFileHandler {
         } else {
             ext = path.substring(pos + 1).toLowerCase();
         }
-        headers.put(httpHeader.SERVER, "AnomicHTTPD (www.anomic.de)");
-        headers.put(httpHeader.DATE, HttpClient.dateString(new Date()));
+        headers.put(httpResponseHeader.SERVER, "AnomicHTTPD (www.anomic.de)");
+        headers.put(httpResponseHeader.DATE, HttpClient.dateString(new Date()));
         if(!(plasmaParser.mediaExtContains(ext))){
-            headers.put(httpHeader.PRAGMA, "no-cache");         
+            headers.put(httpResponseHeader.PRAGMA, "no-cache");         
         }
         return headers;
     }
     
-    public static void doGet(final Properties conProp, final httpHeader requestHeader, final OutputStream response) {
+    public static void doGet(final Properties conProp, final httpRequestHeader requestHeader, final OutputStream response) {
         doResponse(conProp, requestHeader, response, null);
     }
     
-    public static void doHead(final Properties conProp, final httpHeader requestHeader, final OutputStream response) {
+    public static void doHead(final Properties conProp, final httpRequestHeader requestHeader, final OutputStream response) {
         doResponse(conProp, requestHeader, response, null);
     }
     
-    public static void doPost(final Properties conProp, final httpHeader requestHeader, final OutputStream response, final InputStream body) {
+    public static void doPost(final Properties conProp, final httpRequestHeader requestHeader, final OutputStream response, final InputStream body) {
         doResponse(conProp, requestHeader, response, body);
     }
     
-    public static void doResponse(final Properties conProp, final httpHeader requestHeader, final OutputStream out, final InputStream body) {
+    public static void doResponse(final Properties conProp, final httpRequestHeader requestHeader, final OutputStream out, final InputStream body) {
         
         String path = null;
         try {
@@ -283,7 +282,7 @@ public final class httpdFileHandler {
             }
             
             // check permission/granted access
-            String authorization = requestHeader.get(httpHeader.AUTHORIZATION);
+            String authorization = requestHeader.get(httpRequestHeader.AUTHORIZATION);
             if (authorization != null && authorization.length() == 0) authorization = null;
             final String adminAccountBase64MD5 = switchboard.getConfig(httpd.ADMIN_ACCOUNT_B64MD5, "");
             
@@ -300,13 +299,13 @@ public final class httpdFileHandler {
                 // authentication required
                 if (authorization == null) {
                     // no authorization given in response. Ask for that
-                    final httpHeader headers = getDefaultHeaders(path);
-                    headers.put(httpHeader.WWW_AUTHENTICATE,"Basic realm=\"admin log-in\"");
+                    final httpResponseHeader responseHeader = getDefaultHeaders(path);
+                    responseHeader.put(httpRequestHeader.WWW_AUTHENTICATE,"Basic realm=\"admin log-in\"");
                     //httpd.sendRespondHeader(conProp,out,httpVersion,401,headers);
                     final servletProperties tp=new servletProperties();
                     tp.put("returnto", path);
-                    //TODO: separate errorpage Wrong Login / No Login
-                    httpd.sendRespondError(conProp, out, 5, 401, "Wrong Authentication", "", new File("proxymsg/authfail.inc"), tp, null, headers);
+                    //TODO: separate error page Wrong Login / No Login
+                    httpd.sendRespondError(conProp, out, 5, 401, "Wrong Authentication", "", new File("proxymsg/authfail.inc"), tp, null, responseHeader);
                     return;
                 } else if (
                     (httpd.staticAdminAuthenticated(authorization.trim().substring(6), switchboard) == 4) ||
@@ -322,8 +321,8 @@ public final class httpdFileHandler {
                     else
                         serverCore.bfHost.put(clientIP, Integer.valueOf(attempts.intValue() + 1));
     
-                    final httpHeader headers = getDefaultHeaders(path);
-                    headers.put(httpHeader.WWW_AUTHENTICATE,"Basic realm=\"admin log-in\"");
+                    final httpResponseHeader headers = getDefaultHeaders(path);
+                    headers.put(httpRequestHeader.WWW_AUTHENTICATE,"Basic realm=\"admin log-in\"");
                     httpd.sendRespondHeader(conProp,out,httpVersion,401,headers);
                     return;
                 }
@@ -337,27 +336,12 @@ public final class httpdFileHandler {
                 int length = 0;
                 //System.out.println("HEADER: " + requestHeader.toString()); // DEBUG
                 if (method.equals(httpHeader.METHOD_POST)) {
-    
-                    GZIPInputStream gzipBody = null;
-                    /* "If the message does include a non-identity transfer-coding, the Content-Length MUST be ignored."
-                     * [RFC 2616 HTTP/1.1, section 4.4] TODO: full RFC compliance
-                     */
-                    if (requestHeader.gzip()) {
-                        length = -1;
-                        gzipBody = new GZIPInputStream(body);
-                    } else if (requestHeader.containsKey(httpHeader.CONTENT_LENGTH)) {
-                        length = Integer.parseInt(requestHeader.get(httpHeader.CONTENT_LENGTH));
-                    }
-    //                } else {
-    //                    httpd.sendRespondError(conProp,out,4,403,null,"bad post values",null); 
-    //                    return;
-    //                }
-                    
+
                     // if its a POST, it can be either multipart or as args in the body
                     if ((requestHeader.containsKey(httpHeader.CONTENT_TYPE)) &&
                             (requestHeader.get(httpHeader.CONTENT_TYPE).toLowerCase().startsWith("multipart"))) {
                         // parse multipart
-                        final HashMap<String, byte[]> files = httpd.parseMultipart(requestHeader, args, (gzipBody!=null)?gzipBody:body, length);
+                        final HashMap<String, byte[]> files = httpd.parseMultipart(requestHeader, args, body, length);
                         // integrate these files into the args
                         if (files != null) {
                             final Iterator<Map.Entry<String, byte[]>> fit = files.entrySet().iterator();
@@ -370,7 +354,7 @@ public final class httpdFileHandler {
                         argc = Integer.parseInt(requestHeader.get("ARGC"));
                     } else {
                         // parse args in body
-                        argc = httpd.parseArgs(args, (gzipBody!=null)?gzipBody:body, length);
+                        argc = httpd.parseArgs(args, body, length);
                     }
                 } else {
                     // no args
@@ -488,7 +472,7 @@ public final class httpdFileHandler {
                     aBuffer.append("  </ul>\n</body>\n</html>\n");
 
                     // write the list to the client
-                    httpd.sendRespondHeader(conProp, out, httpVersion, 200, null, "text/html", aBuffer.length(), new Date(dir.lastModified()), null, new httpHeader(), null, null, true);
+                    httpd.sendRespondHeader(conProp, out, httpVersion, 200, null, "text/html", aBuffer.length(), new Date(dir.lastModified()), null, new httpResponseHeader(), null, null, true);
                     if (!method.equals(httpHeader.METHOD_HEAD)) {
                         out.write(aBuffer.toString().getBytes());
                     }
@@ -633,15 +617,15 @@ public final class httpdFileHandler {
                                         serverCore.bfHost.put(clientIP, Integer.valueOf(attempts.intValue() + 1));
                                 }
                                 // send authentication request to browser
-                                final httpHeader headers = getDefaultHeaders(path);
-                                headers.put(httpHeader.WWW_AUTHENTICATE,"Basic realm=\"" + tp.get(servletProperties.ACTION_AUTHENTICATE, "") + "\"");
+                                final httpResponseHeader headers = getDefaultHeaders(path);
+                                headers.put(httpRequestHeader.WWW_AUTHENTICATE,"Basic realm=\"" + tp.get(servletProperties.ACTION_AUTHENTICATE, "") + "\"");
                                 httpd.sendRespondHeader(conProp,out,httpVersion,401,headers);
                                 return;
                             } else if (tp.containsKey(servletProperties.ACTION_LOCATION)) {
                                 String location = tp.get(servletProperties.ACTION_LOCATION, "");
                                 if (location.length() == 0) location = path;
                                 
-                                final httpHeader headers = getDefaultHeaders(path);
+                                final httpResponseHeader headers = getDefaultHeaders(path);
                                 headers.setCookieVector(tp.getOutgoingHeader().getCookieVector()); //put the cookies into the new header TODO: can we put all headerlines, without trouble?
                                 headers.put(httpHeader.LOCATION,location);
                                 httpd.sendRespondHeader(conProp,out,httpVersion,302,headers);
@@ -767,7 +751,7 @@ public final class httpdFileHandler {
                     
                     int statusCode = 200;
                     int rangeStartOffset = 0;
-                    httpHeader header = new httpHeader();
+                    httpResponseHeader header = new httpResponseHeader();
                     
                     // adding the accept ranges header
                     header.put(httpHeader.ACCEPT_RANGES, "bytes");
@@ -804,7 +788,7 @@ public final class httpdFileHandler {
                                 if ((ranges.length == 1)&&(ranges[0].endsWith("-"))) {
                                     rangeStartOffset = Integer.valueOf(ranges[0].substring(0,ranges[0].length()-1)).intValue();
                                     statusCode = 206;
-                                    if (header == null) header = new httpHeader();
+                                    if (header == null) header = new httpResponseHeader();
                                     header.put(httpHeader.CONTENT_RANGE, "bytes " + rangeStartOffset + "-" + (targetFile.length()-1) + "/" + targetFile.length());
                                 }
                             }
@@ -848,7 +832,7 @@ public final class httpdFileHandler {
                         try {newOut.flush();}catch (final Exception e) {}
                         
                         // wait a little time until everything closes so that clients can read from the streams/sockets
-                        if ((contentLength >= 0) && ((String)requestHeader.get(httpHeader.CONNECTION, "close")).indexOf("keep-alive") == -1) {
+                        if ((contentLength >= 0) && ((String)requestHeader.get(httpRequestHeader.CONNECTION, "close")).indexOf("keep-alive") == -1) {
                             // in case that the client knows the size in advance (contentLength present) the waiting will have no effect on the interface performance
                             // but if the client waits on a connection interruption this will slow down.
                             try {Thread.sleep(2000);} catch (final InterruptedException e) {} // FIXME: is this necessary?
@@ -985,7 +969,7 @@ public final class httpdFileHandler {
             
             final Class<?> c = provider.loadClass(classFile);
             final Class<?>[] params = new Class[] {
-                    httpHeader.class,
+                    httpRequestHeader.class,
                     serverObjects.class,
                     serverSwitch.class };
             m = c.getMethod("respond", params);
@@ -1005,7 +989,7 @@ public final class httpdFileHandler {
         return m;
     }
     
-    public static final Object invokeServlet(final File targetClass, final httpHeader request, final serverObjects args) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+    public static final Object invokeServlet(final File targetClass, final httpRequestHeader request, final serverObjects args) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
         Object result;
         if (safeServletsMode) synchronized (switchboard) {
             result = rewriteMethod(targetClass).invoke(null, new Object[] {request, args, switchboard});

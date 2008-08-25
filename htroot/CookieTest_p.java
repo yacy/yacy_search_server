@@ -30,14 +30,14 @@
 import java.util.Iterator;
 import java.util.Map;
 
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpResponseHeader;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.servletProperties;
 
 public class CookieTest_p {
 
-    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpResponseHeader header, final serverObjects post, final serverSwitch<?> env) {
       
 
         // case if no values are requested
@@ -50,7 +50,7 @@ public class CookieTest_p {
         
         final servletProperties prop = new servletProperties();
         if(post.containsKey("act")&&post.get("act").equals("clear_cookie")) {
-            final httpHeader outgoingHeader = new httpHeader();
+            final httpResponseHeader outgoingHeader = new httpResponseHeader();
         	final Iterator<Map.Entry<String, String>> it = header.entrySet().iterator();
         	Map.Entry<String, String> e;
         	while (it.hasNext()) {
@@ -77,7 +77,7 @@ public class CookieTest_p {
        {
         final String cookieName = post.get("cookie_name").trim();
         final String cookieValue = post.get("cookie_value").trim();
-        final httpHeader outgoingHeader=new httpHeader();
+        final httpResponseHeader outgoingHeader=new httpResponseHeader();
         
         outgoingHeader.setCookie(cookieName,cookieValue);
         prop.setOutgoingHeader(outgoingHeader);

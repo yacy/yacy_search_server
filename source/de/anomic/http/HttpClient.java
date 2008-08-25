@@ -88,10 +88,10 @@ public abstract class HttpClient {
      * @param timeout in milliseconds
      * @return
      */
-    public static byte[] wget(final String uri, final httpHeader header, final int timeout) {
+    public static byte[] wget(final String uri, final httpRequestHeader header, final int timeout) {
         return wget(uri, header, timeout, null);
     }
-    public static byte[] wget(final String uri, final httpHeader header, final int timeout, final String vhost) {
+    public static byte[] wget(final String uri, final httpRequestHeader header, final int timeout, final String vhost) {
         assert uri != null : "precondition violated: uri != null";
         addHostHeader(header, vhost);
         final JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(timeout, header);
@@ -113,13 +113,13 @@ public abstract class HttpClient {
      * @param vhost
      * @return
      */
-    private static void addHostHeader(httpHeader header, final String vhost) {
+    private static void addHostHeader(httpRequestHeader header, final String vhost) {
         if (vhost != null) {
             if (header != null) {
-                header = new httpHeader();
+                header = new httpRequestHeader();
             }
             // set host-header
-            header.add(httpHeader.HOST, vhost);
+            header.add(httpRequestHeader.HOST, vhost);
         }
     }
 
@@ -129,7 +129,7 @@ public abstract class HttpClient {
      * @param uri
      * @return
      */
-    public static httpHeader whead(final String uri) {
+    public static httpResponseHeader whead(final String uri) {
         return whead(uri, null);
     }
 
@@ -140,7 +140,7 @@ public abstract class HttpClient {
      * @param header request header
      * @return null on error
      */
-    public static httpHeader whead(final String uri, final httpHeader header) {
+    public static httpResponseHeader whead(final String uri, final httpRequestHeader header) {
         final JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(10000, header);
         JakartaCommonsHttpResponse response = null;
         try {

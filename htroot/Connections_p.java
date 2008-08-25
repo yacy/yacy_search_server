@@ -35,7 +35,7 @@ import java.util.Set;
 
 import de.anomic.http.HttpConnectionInfo;
 import de.anomic.http.JakartaCommonsHttpClient;
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpd;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
@@ -50,7 +50,7 @@ import de.anomic.yacy.yacySeed;
 
 public final class Connections_p {    
     
-    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
         // return variable that accumulates replacements
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final serverObjects prop = new serverObjects();
@@ -148,7 +148,7 @@ public final class Connections_p {
                     final Properties conProp = (Properties) currentHttpd.getConProp().clone();
                     
                     // getting the destination host
-                    dest = conProp.getProperty(httpHeader.CONNECTION_PROP_HOST);
+                    dest = conProp.getProperty(httpRequestHeader.CONNECTION_PROP_HOST);
                     if (dest==null)continue;
                 } else if (cmdObj instanceof urlRedirectord) {
                     prot = "urlRedirector";

@@ -36,7 +36,7 @@ import java.util.Iterator;
 import de.anomic.crawler.HTTPLoader;
 import de.anomic.data.listManager;
 import de.anomic.http.HttpClient;
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
@@ -46,7 +46,7 @@ import de.anomic.yacy.yacyURL;
 
 public class ConfigAppearance_p {
 
-	public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+	public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
         final serverObjects prop = new serverObjects();
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final String skinPath = new File(env.getRootPath(), env.getConfig("skinPath", "DATA/SKINS")).toString();
@@ -89,8 +89,8 @@ public class ConfigAppearance_p {
                 ArrayList<String> skinVector;
                 try {
                     final yacyURL u = new yacyURL(url, null);
-                    final httpHeader reqHeader = new httpHeader();
-                    reqHeader.put(httpHeader.USER_AGENT, HTTPLoader.yacyUserAgent);
+                    final httpRequestHeader reqHeader = new httpRequestHeader();
+                    reqHeader.put(httpRequestHeader.USER_AGENT, HTTPLoader.yacyUserAgent);
                     skinVector = nxTools.strings(HttpClient.wget(u.toString(), reqHeader, 10000), "UTF-8");
                 } catch (final IOException e) {
                     prop.put("status", "1");// unable to get URL

@@ -25,14 +25,14 @@
 package xml.bookmarks.posts;
 import java.net.MalformedURLException;
 
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyURL;
 
 public class delete_p {
-    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
         // return variable that accumulates replacements
         final plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
         final serverObjects prop = new serverObjects();

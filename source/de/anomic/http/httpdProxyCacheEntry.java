@@ -30,12 +30,13 @@ import java.io.File;
 import java.util.Date;
 
 import de.anomic.crawler.CrawlProfile;
+import de.anomic.index.indexDocumentMetadata;
 import de.anomic.plasma.plasmaHTCache;
-import de.anomic.plasma.cache.IResourceInfo;
+import de.anomic.server.serverDate;
 import de.anomic.server.serverSystem;
 import de.anomic.yacy.yacyURL;
 
-public class httpdProxyCacheEntry {
+public class httpdProxyCacheEntry implements indexDocumentMetadata {
     
     // doctypes:
     public static final char DT_PDFPS   = 'p';
@@ -57,16 +58,11 @@ public class httpdProxyCacheEntry {
     private        byte[]             cacheArray;      // or the cache as byte-array
     private final  yacyURL            url;
     private final  String             name;            // the name of the link, read as anchor from an <a>-tag
-    private final  Date               lastModified;
-    private        char               doctype;
     private final  String             language;
     private final  CrawlProfile.entry profile;
     private final  String             initiator;
-
-    /**
-     * protocol specific information about the resource
-     */
-    private final IResourceInfo resInfo;
+    private        httpRequestHeader  requestHeader;
+    private        httpResponseHeader responseHeader;
 
     // doctype calculation
     public static char docType(final yacyURL url) {
@@ -139,15 +135,21 @@ public class httpdProxyCacheEntry {
         return doctype;
     }
     
-    public httpdProxyCacheEntry(final int depth,
-            final yacyURL url, final String name, final String responseStatus,
-            final IResourceInfo resourceInfo, final String initiator,
+    public httpdProxyCacheEntry(
+            final int depth,
+            final yacyURL url,
+            final String name,
+            final String responseStatus,
+            final httpRequestHeader requestHeader,
+            final httpResponseHeader responseHeader,
+            final String initiator,
             final CrawlProfile.entry profile) {
-        if (resourceInfo == null) {
-            System.out.println("Content information object is null. " + url);
+        if (responseHeader == null) {
+            System.out.println("Response header information is null. " + url);
             System.exit(0);
         }
-        this.resInfo = resourceInfo;
+        this.requestHeader = requestHeader;
+        this.responseHeader = responseHeader;
         this.url = url;
         this.name = name;
         this.cacheFile = plasmaHTCache.getCachePath(this.url);
@@ -157,14 +159,6 @@ public class httpdProxyCacheEntry {
         this.responseStatus = responseStatus;
         this.profile = profile;
         this.initiator = (initiator == null) ? null : ((initiator.length() == 0) ? null : initiator);
-
-        // getting the last modified date
-        this.lastModified = resourceInfo.getModificationDate();
-
-        // getting the doctype
-        this.doctype = docType(resourceInfo.getMimeType());
-        if (this.doctype == DT_UNKNOWN)
-            this.doctype = docType(url);
         this.language = yacyURL.language(url);
 
         // to be defined later:
@@ -180,15 +174,29 @@ public class httpdProxyCacheEntry {
     public yacyURL url() {
         return this.url;
     }
+    
+    public char docType() {
+        char doctype = docType(getMimeType());
+        if (doctype == DT_UNKNOWN) doctype = docType(url);
+        return doctype;
+    }
 
     public String urlHash() {
         return this.url.hash();
     }
 
     public Date lastModified() {
-        return this.lastModified;
+        Date docDate = null;
+        
+        if (responseHeader != null) {
+            docDate = responseHeader.lastModified();
+            if (docDate == null) docDate = responseHeader.date();
+        }
+        if (docDate == null) docDate = new Date(serverDate.correctedUTCTime());   
+        
+        return docDate;
     }
-
+    
     public String language() {
         return this.language;
     }
@@ -215,10 +223,6 @@ public class httpdProxyCacheEntry {
         return this.depth;
     }
 
-    public yacyURL referrerURL() {
-        return (this.resInfo == null) ? null : this.resInfo.getRefererUrl();
-    }
-
     public File cacheFile() {
         return this.cacheFile;
     }
@@ -230,27 +234,6 @@ public class httpdProxyCacheEntry {
     public byte[] cacheArray() {
         return this.cacheArray;
     }
-
-    public IResourceInfo getDocumentInfo() {
-        return this.resInfo;
-    }
-
-    public String getMimeType() {
-        return (this.resInfo == null) ? null : this.resInfo.getMimeType();
-    }
-
-    public Date ifModifiedSince() {
-        return (this.resInfo == null) ? null : this.resInfo.ifModifiedSince();
-    }
-
-    public boolean requestWithCookie() {
-        return (this.resInfo == null) ? false : this.resInfo.requestWithCookie();
-    }
-
-    public boolean requestProhibitsIndexing() {
-        return (this.resInfo == null) ? false : this.resInfo.requestProhibitsIndexing();
-    }
-
 
     // the following three methods for cache read/write granting shall be as loose
     // as possible but also as strict as necessary to enable caching of most items
@@ -269,8 +252,7 @@ public class httpdProxyCacheEntry {
         // if the storage was requested by prefetching, the request map is null
 
         // check status code
-        if ((this.resInfo != null)
-                && (!this.resInfo.validResponseStatus(this.responseStatus))) {
+        if (!validResponseStatus()) {
             return "bad_status_" + this.responseStatus.substring(0, 3);
         }
 
@@ -299,14 +281,70 @@ public class httpdProxyCacheEntry {
         if (this.url.isCGI()) {
             return "dynamic_cgi";
         }
-
-        if (this.resInfo != null) {
-            return this.resInfo.shallStoreCacheForProxy();
+        
+        if (requestHeader != null) {
+            // -authorization cases in request
+            // authorization makes pages very individual, and therefore we cannot use the
+            // content in the cache
+            if (requestHeader.containsKey(httpRequestHeader.AUTHORIZATION)) { return "personalized"; }
+            // -ranges in request and response
+            // we do not cache partial content
+            if (requestHeader.containsKey(httpHeader.RANGE)) { return "partial"; }
         }
+        
+        if (responseHeader != null) {
+            // -ranges in request and response
+            // we do not cache partial content            
+            if (responseHeader.containsKey(httpHeader.CONTENT_RANGE)) { return "partial"; }
 
+            // -if-modified-since in request
+            // we do not care about if-modified-since, because this case only occurres if the
+            // cache file does not exist, and we need as much info as possible for the indexing
+
+            // -cookies in request
+            // we do not care about cookies, because that would prevent loading more pages
+            // from one domain once a request resulted in a client-side stored cookie
+
+            // -set-cookie in response
+            // we do not care about cookies in responses, because that info comes along
+            // any/many pages from a server and does not express the validity of the page
+            // in modes of life-time/expiration or individuality
+
+            // -pragma in response
+            // if we have a pragma non-cache, we don't cache. usually if this is wanted from
+            // the server, it makes sense
+            String cacheControl = responseHeader.get(httpResponseHeader.PRAGMA);
+            if (cacheControl != null && cacheControl.trim().toUpperCase().equals("NO-CACHE")) { return "controlled_no_cache"; }
+
+            // -expires in response
+            // we do not care about expires, because at the time this is called the data is
+            // obvious valid and that header info is used in the indexing later on
+
+            // -cache-control in response
+            // the cache-control has many value options.
+            cacheControl = responseHeader.get(httpResponseHeader.CACHE_CONTROL);
+            if (cacheControl != null) {
+                cacheControl = cacheControl.trim().toUpperCase();
+                if (cacheControl.startsWith("MAX-AGE=")) {
+                    // we need also the load date
+                    final Date date = responseHeader.date();
+                    if (date == null) return "stale_no_date_given_in_response";
+                    try {
+                        final long ttl = 1000 * Long.parseLong(cacheControl.substring(8)); // milliseconds to live
+                        if (serverDate.correctedUTCTime() - date.getTime() > ttl) {
+                            //System.out.println("***not indexed because cache-control");
+                            return "stale_expired";
+                        }
+                    } catch (final Exception e) {
+                        return "stale_error_" + e.getMessage() + ")";
+                    }
+                }
+            }
+        }
         return null;
     }
 
+    
     /**
      * decide upon header information if a specific file should be taken from
      * the cache or not
@@ -325,11 +363,170 @@ public class httpdProxyCacheEntry {
             return false;
         }
 
-        if (this.resInfo != null) {
-            return this.resInfo.shallUseCacheForProxy();
+        String cacheControl;
+        if (requestHeader != null) {
+            // -authorization cases in request
+            if (requestHeader.containsKey(httpRequestHeader.AUTHORIZATION)) { return false; }
+
+            // -ranges in request
+            // we do not cache partial content
+            if (requestHeader.containsKey(httpHeader.RANGE)) { return false; }
+
+            // if the client requests a un-cached copy of the resource ...
+            cacheControl = requestHeader.get(httpResponseHeader.PRAGMA);
+            if (cacheControl != null && cacheControl.trim().toUpperCase().equals("NO-CACHE")) { return false; }
+
+            cacheControl = requestHeader.get(httpResponseHeader.CACHE_CONTROL);
+            if (cacheControl != null) {
+                cacheControl = cacheControl.trim().toUpperCase();
+                if (cacheControl.startsWith("NO-CACHE") || cacheControl.startsWith("MAX-AGE=0")) { return false; }
+            }
+
+            // -if-modified-since in request
+            // The entity has to be transferred only if it has
+            // been modified since the date given by the If-Modified-Since header.
+            if (requestHeader.containsKey(httpRequestHeader.IF_MODIFIED_SINCE)) {
+                // checking this makes only sense if the cached response contains
+                // a Last-Modified field. If the field does not exist, we go the safe way
+                if (!responseHeader.containsKey(httpResponseHeader.LAST_MODIFIED)) { return false; }
+                // parse date
+                Date d1, d2;
+                d2 = responseHeader.lastModified(); if (d2 == null) { d2 = new Date(serverDate.correctedUTCTime()); }
+                d1 = requestHeader.ifModifiedSince(); if (d1 == null) { d1 = new Date(serverDate.correctedUTCTime()); }
+                // finally, we shall treat the cache as stale if the modification time is after the if-.. time
+                if (d2.after(d1)) { return false; }
+            }
+
+            final String mimeType = getMimeType();
+            if (!plasmaHTCache.isPicture(mimeType)) {
+                // -cookies in request
+                // unfortunately, we should reload in case of a cookie
+                // but we think that pictures can still be considered as fresh
+                // -set-cookie in cached response
+                // this is a similar case as for COOKIE.
+                if (requestHeader.containsKey(httpRequestHeader.COOKIE) ||
+                    responseHeader.containsKey(httpResponseHeader.SET_COOKIE) ||
+                    responseHeader.containsKey(httpResponseHeader.SET_COOKIE2)) {
+                    return false; // too strong
+                }
+            }
         }
 
+        if (responseHeader != null) {
+            // -pragma in cached response
+            // logically, we would not need to care about no-cache pragmas in cached response headers,
+            // because they cannot exist since they are not written to the cache.
+            // So this IF should always fail..
+            cacheControl = responseHeader.get(httpResponseHeader.PRAGMA); 
+            if (cacheControl != null && cacheControl.trim().toUpperCase().equals("NO-CACHE")) { return false; }
+    
+            // see for documentation also:
+            // http://www.web-caching.com/cacheability.html
+            // http://vancouver-webpages.com/CacheNow/
+    
+            // look for freshnes information
+            // if we don't have any freshnes indication, we treat the file as stale.
+            // no handle for freshness control:
+    
+            // -expires in cached response
+            // the expires value gives us a very easy hint when the cache is stale
+            final Date expires = responseHeader.expires();
+            if (expires != null) {
+    //          System.out.println("EXPIRES-TEST: expires=" + expires + ", NOW=" + serverDate.correctedGMTDate() + ", url=" + url);
+                if (expires.before(new Date(serverDate.correctedUTCTime()))) { return false; }
+            }
+            final Date lastModified = responseHeader.lastModified();
+            cacheControl = responseHeader.get(httpResponseHeader.CACHE_CONTROL);
+            if (cacheControl == null && lastModified == null && expires == null) { return false; }
+    
+            // -lastModified in cached response
+            // we can apply a TTL (Time To Live)  heuristic here. We call the time delta between the last read
+            // of the file and the last modified date as the age of the file. If we consider the file as
+            // middel-aged then, the maximum TTL would be cache-creation plus age.
+            // This would be a TTL factor of 100% we want no more than 10% TTL, so that a 10 month old cache
+            // file may only be treated as fresh for one more month, not more.
+            Date date = responseHeader.date();
+            if (lastModified != null) {
+                if (date == null) { date = new Date(serverDate.correctedUTCTime()); }
+                final long age = date.getTime() - lastModified.getTime();
+                if (age < 0) { return false; }
+                // TTL (Time-To-Live) is age/10 = (d2.getTime() - d1.getTime()) / 10
+                // the actual living-time is serverDate.correctedGMTDate().getTime() - d2.getTime()
+                // therefore the cache is stale, if serverDate.correctedGMTDate().getTime() - d2.getTime() > age/10
+                if (serverDate.correctedUTCTime() - date.getTime() > age / 10) { return false; }
+            }
+    
+            // -cache-control in cached response
+            // the cache-control has many value options.
+            if (cacheControl != null) {
+                cacheControl = cacheControl.trim().toUpperCase();
+                if (cacheControl.startsWith("PRIVATE") ||
+                    cacheControl.startsWith("NO-CACHE") ||
+                    cacheControl.startsWith("NO-STORE")) {
+                    // easy case
+                    return false;
+    //          } else if (cacheControl.startsWith("PUBLIC")) {
+    //              // ok, do nothing
+                } else if (cacheControl.startsWith("MAX-AGE=")) {
+                    // we need also the load date
+                    if (date == null) { return false; }
+                    try {
+                        final long ttl = 1000 * Long.parseLong(cacheControl.substring(8)); // milliseconds to live
+                        if (serverDate.correctedUTCTime() - date.getTime() > ttl) {
+                            return false;
+                        }
+                    } catch (final Exception e) {
+                        return false;
+                    }
+                }
+            }
+        }
+        
         return true;
     }
+    
+    public String getMimeType() {
+        if (responseHeader == null) return null;
+        
+        String mimeType = responseHeader.mime();
+        mimeType = mimeType.trim().toLowerCase();
+        
+        final int pos = mimeType.indexOf(';');
+        return ((pos < 0) ? mimeType : mimeType.substring(0, pos));          
+    }
+    
+    public String getCharacterEncoding() {
+        if (responseHeader == null) return null;
+        return responseHeader.getCharacterEncoding();      
+    }
+    
+    public yacyURL referrerURL() {
+        if (requestHeader == null) return null;
+        try {
+            return new yacyURL((String) requestHeader.get(httpRequestHeader.REFERER, ""), null);
+        } catch (final Exception e) {
+            return null;
+        }        
+    }
+    
+    public boolean validResponseStatus() {
+        return (responseStatus == null) ? false : responseStatus.startsWith("200") || responseStatus.startsWith("203");
+    }
+
+    public Date ifModifiedSince() {
+        return (requestHeader == null) ? null : requestHeader.ifModifiedSince();
+    }
+
+    public boolean requestWithCookie() {
+        return (requestHeader == null) ? false : requestHeader.containsKey(httpRequestHeader.COOKIE);
+    }
+
+    public boolean requestProhibitsIndexing() {
+        return (requestHeader == null) 
+        ? false 
+        : requestHeader.containsKey(httpHeader.X_YACY_INDEX_CONTROL) &&
+          (requestHeader.get(httpHeader.X_YACY_INDEX_CONTROL)).toUpperCase().equals("NO-INDEX");
+    }
+    
 
 }

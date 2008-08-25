@@ -30,7 +30,7 @@
 import java.util.HashMap;
 import java.util.TreeSet;
 
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.index.indexURLReference;
 import de.anomic.index.indexWord;
 import de.anomic.kelondro.kelondroBitfield;
@@ -59,7 +59,7 @@ import de.anomic.yacy.yacyURL;
 
 public class yacysearch {
 
-    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         sb.localSearchLastAccess = System.currentTimeMillis();
         
@@ -72,7 +72,7 @@ public class yacysearch {
         String promoteSearchPageGreeting = env.getConfig("promoteSearchPageGreeting", "");
         if (env.getConfigBool("promoteSearchPageGreeting.useNetworkName", false)) promoteSearchPageGreeting = env.getConfig("network.unit.description", "");
         if (promoteSearchPageGreeting.length() == 0) promoteSearchPageGreeting = "P2P Web Search";
-        final String client = header.get(httpHeader.CONNECTION_PROP_CLIENTIP); // the search client who initiated the search
+        final String client = header.get(httpRequestHeader.CONNECTION_PROP_CLIENTIP); // the search client who initiated the search
         
         // get query
         String querystring = (post == null) ? "" : post.get("query", post.get("search", "")).trim(); // SRU compliance

@@ -29,7 +29,7 @@ import java.util.Date;
 
 import de.anomic.crawler.CrawlEntry;
 import de.anomic.crawler.NoticedURL;
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.index.indexURLReference;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverDate;
@@ -40,7 +40,7 @@ import de.anomic.yacy.yacyURL;
 
 public class urls {
     
-    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         
         // insert default values

@@ -32,7 +32,7 @@ import java.io.File;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDomains;
@@ -42,7 +42,7 @@ import de.anomic.yacy.yacySeed;
 
 public class welcome {
 
-    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         
         // return variable that accumulates replacements
@@ -61,7 +61,7 @@ public class welcome {
             prop.put("hostip", "Unknown Host Exception");
         }       
         prop.put("port", serverCore.getPortNr(env.getConfig("port","8080")));
-        prop.put("clientip", (String) header.get(httpHeader.CONNECTION_PROP_CLIENTIP, ""));
+        prop.put("clientip", (String) header.get(httpRequestHeader.CONNECTION_PROP_CLIENTIP, ""));
 
         final String peertype = (sb.webIndex.seedDB.mySeed() == null) ? yacySeed.PEERTYPE_JUNIOR : sb.webIndex.seedDB.mySeed().get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN);
         final boolean senior = (peertype.equals(yacySeed.PEERTYPE_SENIOR)) || (peertype.equals(yacySeed.PEERTYPE_PRINCIPAL));

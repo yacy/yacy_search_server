@@ -36,7 +36,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
@@ -50,7 +50,7 @@ import de.anomic.yacy.yacySeed;
 public class ViewProfile {
 
     @SuppressWarnings("unchecked")
-    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
         final serverObjects prop = new serverObjects();
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final boolean authenticated = sb.adminAuthenticated(header) >= 2;

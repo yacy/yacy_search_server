@@ -34,7 +34,7 @@ import de.anomic.crawler.HTTPLoader;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterWriter;
 import de.anomic.http.HttpClient;
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
@@ -43,7 +43,7 @@ import de.anomic.yacy.yacyURL;
 
 public class getpageinfo_p {
     
-    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final serverObjects prop = new serverObjects();
         prop.put("sitemap", "");
@@ -65,8 +65,8 @@ public class getpageinfo_p {
             if (actions.indexOf("title")>=0) {
                 try {
                     final yacyURL u = new yacyURL(url, null);
-                    final httpHeader reqHeader = new httpHeader();
-                    reqHeader.put(httpHeader.USER_AGENT, HTTPLoader.yacyUserAgent); // do not set the crawler user agent, because this page was loaded by manual entering of the url
+                    final httpRequestHeader reqHeader = new httpRequestHeader();
+                    reqHeader.put(httpRequestHeader.USER_AGENT, HTTPLoader.yacyUserAgent); // do not set the crawler user agent, because this page was loaded by manual entering of the url
                     final byte[] r = HttpClient.wget(u.toString(), reqHeader, 5000);
                     if (r == null) return prop;
                     final String contentString=new String(r);

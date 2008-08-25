@@ -29,7 +29,7 @@
 import java.io.IOException;
 import java.text.ParseException;
 
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.index.indexReferenceBlacklist;
 import de.anomic.index.indexURLReference;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -46,7 +46,7 @@ import de.anomic.yacy.yacySeed;
 public final class transferURL {
 
     
-    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) throws InterruptedException {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) throws InterruptedException {
         final long start = System.currentTimeMillis();
         long freshdate = 0;
         try {freshdate = serverDate.parseShortDay("20061101").getTime();} catch (final ParseException e1) {}

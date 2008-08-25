@@ -34,7 +34,7 @@ import java.util.TreeMap;
 
 import de.anomic.data.messageBoard;
 import de.anomic.http.HttpClient;
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
@@ -50,7 +50,7 @@ public class Messages_p {
         return SimpleFormatter.format(date);
     }
 
-    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final serverObjects prop = new serverObjects();
 
@@ -126,7 +126,7 @@ public class Messages_p {
                     prop.putHTML("mode_messages_"+count+"_key", key, true);
                     prop.put("mode_messages_"+count+"_hash", message.authorHash());
 
-                    if ((header.get(httpHeader.CONNECTION_PROP_PATH)).endsWith(".rss")) {
+                    if ((header.get(httpRequestHeader.CONNECTION_PROP_PATH)).endsWith(".rss")) {
                     	// set the peer address
                     	prop.put("mode_messages_"+count+"_peerAddress", peerAddress);
 

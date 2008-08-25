@@ -34,7 +34,7 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.TreeMap;
 
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverMemory;
 import de.anomic.server.serverObjects;
@@ -43,7 +43,7 @@ import de.anomic.yacy.yacySeed;
 
 public final class IndexTransfer_p {
     
-    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
         // return variable that accumulates replacements
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final serverObjects prop = new serverObjects();

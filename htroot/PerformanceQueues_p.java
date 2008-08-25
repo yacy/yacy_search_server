@@ -29,7 +29,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.server.serverBusyThread;
@@ -51,7 +51,7 @@ public class PerformanceQueues_p {
         performanceProfiles.put("defaults/performance_dht.profile", "prefer DHT");
     }
     
-    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> sb) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> sb) {
         // return variable that accumulates replacements
         final plasmaSwitchboard switchboard = (plasmaSwitchboard) sb;
         final serverObjects prop = new serverObjects();

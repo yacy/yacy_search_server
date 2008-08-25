@@ -3,7 +3,7 @@ import java.awt.Image;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.plasma.plasmaGrafics;
 import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.plasma.plasmaGrafics.CircleThreadPiece;
@@ -13,7 +13,7 @@ import de.anomic.server.serverSwitch;
 
 public class PeerLoadPicture {
     
-    public static Image respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static Image respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
 
         int width = 800;
         int height = 600;

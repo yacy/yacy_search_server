@@ -29,7 +29,7 @@ import java.util.Iterator;
 
 import de.anomic.crawler.IndexingStack;
 import de.anomic.crawler.ZURL;
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverMemory;
@@ -40,7 +40,7 @@ import de.anomic.yacy.yacyURL;
 
 public class IndexCreateIndexingQueue_p {
     
-    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
         // return variable that accumulates replacements
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final serverObjects prop = new serverObjects();
@@ -67,7 +67,7 @@ public class IndexCreateIndexingQueue_p {
                         IndexingStack.QueueEntry entry = null;
                         while ((entry = sb.webIndex.queuePreStack.pop()) != null) {
                             if ((entry != null) && (entry.profile() != null) && (!(entry.profile().storeHTCache()))) {
-                                plasmaHTCache.deleteURLfromCache(entry.url());
+                                plasmaHTCache.deleteURLfromCache(entry.url(), false);
                             }                            
                         }
                         sb.webIndex.queuePreStack.clear(); // reset file to clean up content completely

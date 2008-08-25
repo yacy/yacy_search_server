@@ -44,7 +44,7 @@ import de.anomic.crawler.HTTPLoader;
 import de.anomic.crawler.ZURL;
 import de.anomic.http.JakartaCommonsHttpClient;
 import de.anomic.http.JakartaCommonsHttpResponse;
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpdByteCountInputStream;
 import de.anomic.index.indexURLReference;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -152,9 +152,9 @@ public class SitemapParser extends DefaultHandler {
      */
     public void parse() {
         // download document
-        final httpHeader header = new httpHeader();
-        header.put(httpHeader.USER_AGENT, HTTPLoader.crawlerUserAgent);
-        final JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(5000, header);
+        final httpRequestHeader requestHeader = new httpRequestHeader();
+        requestHeader.put(httpRequestHeader.USER_AGENT, HTTPLoader.crawlerUserAgent);
+        final JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(5000, requestHeader);
         JakartaCommonsHttpResponse res = null;
         try {
             res = client.GET(siteMapURL.toString());
@@ -166,7 +166,7 @@ public class SitemapParser extends DefaultHandler {
 
             // getting some metadata
             final String contentMimeType = res.getResponseHeader().mime();
-            this.contentLength = res.getResponseHeader().contentLength();
+            this.contentLength = res.getResponseHeader().getContentLength();
 
             try {
                 InputStream contentStream = res.getDataAsStream();

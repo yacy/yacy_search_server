@@ -29,7 +29,7 @@
 // javac -classpath .:../classes ConfigRobotsTxt_p.java
 // if the shell's current path is HTROOT
 
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpdRobotsTxtConfig;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
@@ -39,7 +39,7 @@ import de.anomic.server.servletProperties;
 
 public class ConfigRobotsTxt_p {
     
-    public static servletProperties respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static servletProperties respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final servletProperties prop = new servletProperties();
         

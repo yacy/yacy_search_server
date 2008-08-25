@@ -41,7 +41,7 @@ import de.anomic.data.listManager;
 import de.anomic.data.userDB;
 import de.anomic.data.bookmarksDB.Tag;
 import de.anomic.http.HttpClient;
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.index.indexURLReference;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.plasmaSnippetCache;
@@ -68,7 +68,7 @@ public class Bookmarks {
 	final static boolean TAGS = false;
 	final static boolean FOLDERS = true;
 	
-    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
 
     	int max_count = 10;
     	int start=0;

@@ -30,7 +30,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.TreeSet;
 
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -40,7 +40,7 @@ import de.anomic.yacy.yacyVersion;
 
 public class ConfigUpdate_p {
 
-    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;

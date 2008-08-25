@@ -27,7 +27,7 @@
 import java.util.Date;
 import java.util.Iterator;
 
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.plasma.plasmaProfiling;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverProfiling;
@@ -35,7 +35,7 @@ import de.anomic.server.serverSwitch;
 
 public class PerformanceSearch_p {
     
-    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> sb) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> sb) {
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
         

@@ -35,7 +35,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
 
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.kelondroBLOBTree;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroCloneableIterator;
@@ -138,8 +138,8 @@ public final class userDB {
 		}
 		return null;
 	}
-        public Entry getUser(final httpHeader header){
-            return getUser(header.get(httpHeader.AUTHORIZATION), header.get(httpHeader.CONNECTION_PROP_CLIENTIP), header.getHeaderCookies());
+        public Entry getUser(final httpRequestHeader header){
+            return getUser(header.get(httpRequestHeader.AUTHORIZATION), header.get(httpRequestHeader.CONNECTION_PROP_CLIENTIP), header.getHeaderCookies());
         }
         public Entry getUser(final String auth, final String ip, final String cookies){
         Entry entry=null;

@@ -81,13 +81,12 @@ import de.anomic.crawler.HTTPLoader;
 import de.anomic.htmlFilter.htmlFilterContentTransformer;
 import de.anomic.htmlFilter.htmlFilterTransformer;
 import de.anomic.htmlFilter.htmlFilterWriter;
+import de.anomic.index.indexDocumentMetadata;
 import de.anomic.index.indexReferenceBlacklist;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
-import de.anomic.plasma.cache.IResourceInfo;
-import de.anomic.plasma.cache.http.ResourceInfo;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDomains;
 import de.anomic.server.serverFileUtils;
@@ -226,7 +225,7 @@ public final class httpdProxyHandler {
     private static final StringBuffer userAgentStr = new StringBuffer();
     
     
-    public static void handleOutgoingCookies(final httpHeader requestHeader, final String targethost, final String clienthost) {
+    public static void handleOutgoingCookies(final httpRequestHeader requestHeader, final String targethost, final String clienthost) {
         /*
          The syntax for the header is:
          
@@ -240,8 +239,8 @@ public final class httpdProxyHandler {
          domain          =       "$Domain" "=" value
          */
         if (switchboard.getConfigBool("proxy.monitorCookies", false)) {
-            if (requestHeader.containsKey(httpHeader.COOKIE)) {
-                final Object[] entry = new Object[]{new Date(), clienthost, requestHeader.getMultiple(httpHeader.COOKIE)};
+            if (requestHeader.containsKey(httpRequestHeader.COOKIE)) {
+                final Object[] entry = new Object[]{new Date(), clienthost, requestHeader.getMultiple(httpRequestHeader.COOKIE)};
                 synchronized(switchboard.outgoingCookies) {
                     switchboard.outgoingCookies.put(targethost, entry);
                 }
@@ -249,7 +248,7 @@ public final class httpdProxyHandler {
         }
     }
     
-    public static void handleIncomingCookies(final httpHeader respondHeader, final String serverhost, final String targetclient) {
+    public static void handleIncomingCookies(final httpResponseHeader respondHeader, final String serverhost, final String targetclient) {
         /*
          The syntax for the Set-Cookie response header is 
          
@@ -266,8 +265,8 @@ public final class httpdProxyHandler {
          |       "Version" "=" 1*DIGIT
          */
         if (switchboard.getConfigBool("proxy.monitorCookies", false)) {
-            if (respondHeader.containsKey(httpHeader.SET_COOKIE)) {
-                final Object[] entry = new Object[]{new Date(), targetclient, respondHeader.getMultiple(httpHeader.SET_COOKIE)};
+            if (respondHeader.containsKey(httpResponseHeader.SET_COOKIE)) {
+                final Object[] entry = new Object[]{new Date(), targetclient, respondHeader.getMultiple(httpResponseHeader.SET_COOKIE)};
                 synchronized(switchboard.incomingCookies) {
                     switchboard.incomingCookies.put(serverhost, entry);
                 }
@@ -281,7 +280,7 @@ public final class httpdProxyHandler {
      * @param respond the OutputStream to the client
      * @see de.anomic.http.httpdHandler#doGet(java.util.Properties, de.anomic.http.httpHeader, java.io.OutputStream)
      */
-    public static void doGet(final Properties conProp, final httpHeader requestHeader, final OutputStream respond) {
+    public static void doGet(final Properties conProp, final httpRequestHeader requestHeader, final OutputStream respond) {
         httpdByteCountOutputStream countedRespond = null;
         try {
             final int reqID = requestHeader.hashCode();
@@ -367,15 +366,7 @@ public final class httpdProxyHandler {
             // decide whether to use a cache entry or connect to the network
             final File cacheFile = plasmaHTCache.getCachePath(url);
             
-            httpHeader cachedResponseHeader = null;
-            final ResourceInfo cachedResInfo = (ResourceInfo) plasmaHTCache.loadResourceInfo(url);
-            if (cachedResInfo != null) {
-                // set the new request header (needed by function shallUseCacheForProxy)
-                cachedResInfo.setRequestHeader(requestHeader);
-                
-                // get the cached response header
-                cachedResponseHeader = cachedResInfo.getResponseHeader();
-            }
+            httpResponseHeader cachedResponseHeader = plasmaHTCache.loadResponseHeader(url);
             final boolean cacheExists = cacheFile.isFile() && (cachedResponseHeader != null);
             
             // why are files unzipped upon arrival? why not zip all files in cache?
@@ -400,18 +391,20 @@ public final class httpdProxyHandler {
             // 4. cache stale - refill - superfluous
             // in two of these cases we trigger a scheduler to handle newly arrived files:
             // case 1 and case 3
-            final httpdProxyCacheEntry cacheEntry = (cachedResponseHeader == null) ? null :
-                plasmaHTCache.newEntry(
+            final indexDocumentMetadata cacheEntry = (cachedResponseHeader == null) ? null :
+                new httpdProxyCacheEntry(
                     0,                               // crawling depth
                     url,                             // url
                     "",                              // name of the url is unknown
                     //requestHeader,                 // request headers
                     "200 OK",                        // request status
-                    //cachedResponseHeader,          // response headers
-                    cachedResInfo,
+                    requestHeader,
+                    cachedResponseHeader,
                     null,                            // initiator
                     switchboard.webIndex.defaultProxyProfile  // profile
             );
+            if (cacheEntry != null) plasmaHTCache.storeMetadata(cachedResponseHeader, cacheEntry);
+            
             if (yacyCore.getOnlineMode() == 0) {
             	if (cacheExists) {
             	    theLogger.logFinest(reqID +"    fulfill request from cache");
@@ -453,7 +446,7 @@ public final class httpdProxyHandler {
         }
     }
     
-    private static void fulfillRequestFromWeb(final Properties conProp, final yacyURL url,final String ext, final httpHeader requestHeader, final httpHeader cachedResponseHeader, final File cacheFile, final OutputStream respond) {
+    private static void fulfillRequestFromWeb(final Properties conProp, final yacyURL url,final String ext, final httpRequestHeader requestHeader, final httpResponseHeader cachedResponseHeader, final File cacheFile, final OutputStream respond) {
         
         final GZIPOutputStream gzippedOut = null; 
         Writer hfos = null;
@@ -499,9 +492,9 @@ public final class httpdProxyHandler {
             try {
             res = client.GET(getUrl);
             theLogger.logFinest(reqID +"    response status: "+ res.getStatusLine());
-            conProp.put(httpHeader.CONNECTION_PROP_CLIENT_REQUEST_HEADER,requestHeader);
+            conProp.put(httpHeader.CONNECTION_PROP_CLIENT_REQUEST_HEADER, requestHeader);
             
-            final httpHeader responseHeader = res.getResponseHeader();
+            final httpResponseHeader responseHeader = res.getResponseHeader();
             // determine if it's an internal error of the httpc
             if (responseHeader.size() == 0) {
                 throw new Exception(res.getStatusLine());
@@ -520,23 +513,22 @@ public final class httpdProxyHandler {
             if ((cacheFile.isFile()) && (cachedResponseHeader != null)) {
                 // delete the cache
                 sizeBeforeDelete = cacheFile.length();
-                plasmaHTCache.deleteURLfromCache(url);
+                plasmaHTCache.deleteURLfromCache(url, false);
                 conProp.setProperty(httpHeader.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_REFRESH_MISS");
             }            
 
             // reserver cache entry
-            final IResourceInfo resInfo = new ResourceInfo(url,requestHeader,responseHeader);
-            final httpdProxyCacheEntry cacheEntry = plasmaHTCache.newEntry(
+            final indexDocumentMetadata cacheEntry = new httpdProxyCacheEntry(
                     0, 
                     url,
                     "",
-                    //requestHeader, 
-                    res.getStatusLine(), 
-                    //res.responseHeader,
-                    resInfo,
+                    res.getStatusLine(),
+                    requestHeader,
+                    responseHeader,
                     null, 
                     switchboard.webIndex.defaultProxyProfile
             );
+            plasmaHTCache.storeMetadata(responseHeader, cacheEntry);
 
             // handle file types and make (possibly transforming) output stream
             final OutputStream outStream = (gzippedOut != null) ? gzippedOut : ((chunkedOut != null)? chunkedOut : respond);
@@ -547,12 +539,12 @@ public final class httpdProxyHandler {
                 // make a transformer
                 theLogger.logFine(reqID +" create transformer for URL " + url);
                 //hfos = new htmlFilterOutputStream((gzippedOut != null) ? gzippedOut : ((chunkedOut != null)? chunkedOut : respond), null, transformer, (ext.length() == 0));
-                final Charset charSet = httpHeader.getCharSet(responseHeader);
+                final Charset charSet = responseHeader.getCharSet();
                 hfos = new htmlFilterWriter(outStream,charSet, null, transformer, (ext.length() == 0));
             } else {
                 // simply pass through without parsing
                 theLogger.logFine(reqID +" create passthrough for URL " + url + ", extension '" + ext + "', mime-type '" + responseHeader.mime() + "'");
-                hfos = new OutputStreamWriter(outStream, httpHeader.getCharSet(responseHeader));
+                hfos = new OutputStreamWriter(outStream, responseHeader.getCharSet());
             }
             
             // handle incoming cookies
@@ -562,7 +554,7 @@ public final class httpdProxyHandler {
             
             // sending the respond header back to the client
             if (chunkedOut != null) {
-                responseHeader.put(httpHeader.TRANSFER_ENCODING, "chunked");
+                responseHeader.put(httpResponseHeader.TRANSFER_ENCODING, "chunked");
             }
             
             theLogger.logFinest(reqID +"    sending response header: "+ responseHeader);
@@ -589,7 +581,7 @@ public final class httpdProxyHandler {
                      */
                     ((storeHTCache) || (isSupportedContent))
             ) {
-                final long contentLength = responseHeader.contentLength();
+                final long contentLength = responseHeader.getContentLength();
                 // we write a new cache entry
                 if ((contentLength > 0) && (contentLength < 1048576)) // if the length is known and < 1 MB
                 {
@@ -699,8 +691,8 @@ public final class httpdProxyHandler {
             final Properties conProp, 
             final yacyURL url,
             final String ext,
-            final httpHeader requestHeader, 
-            final httpHeader cachedResponseHeader,
+            final httpRequestHeader requestHeader, 
+            final httpResponseHeader cachedResponseHeader,
             final File cacheFile,
             final OutputStream respond
     ) throws IOException {
@@ -730,14 +722,14 @@ public final class httpdProxyHandler {
 //          }
             
             // check if we can send a 304 instead the complete content
-            if (requestHeader.containsKey(httpHeader.IF_MODIFIED_SINCE)) {
+            if (requestHeader.containsKey(httpRequestHeader.IF_MODIFIED_SINCE)) {
                 // conditional request: freshness of cache for that condition was already
                 // checked within shallUseCache(). Now send only a 304 response
                 theLogger.logInfo("CACHE HIT/304 " + cacheFile.toString());
                 conProp.setProperty(httpHeader.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_REFRESH_HIT");
                 
                 // setting the content length header to 0
-                cachedResponseHeader.put(httpHeader.CONTENT_LENGTH, Integer.toString(0));
+                cachedResponseHeader.put(httpResponseHeader.CONTENT_LENGTH, Integer.toString(0));
                 
                 // send cached header with replaced date and added length
                 httpd.sendRespondHeader(conProp,respond,httpVer,304,cachedResponseHeader);
@@ -748,14 +740,14 @@ public final class httpdProxyHandler {
                 conProp.setProperty(httpHeader.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_HIT");
                 
                 // setting the content header to the proper length
-                cachedResponseHeader.put(httpHeader.CONTENT_LENGTH, Long.toString(cacheFile.length()));
+                cachedResponseHeader.put(httpResponseHeader.CONTENT_LENGTH, Long.toString(cacheFile.length()));
                 
                 // send cached header with replaced date and added length 
                 httpd.sendRespondHeader(conProp,respond,httpVer,203,cachedResponseHeader);
                 //respondHeader(respond, "203 OK", cachedResponseHeader); // respond with 'non-authoritative'
                 
                 // determine the content charset
-                final Charset charSet = httpHeader.getCharSet(cachedResponseHeader);
+                final Charset charSet = cachedResponseHeader.getCharSet();
                 
                 // make a transformer
                 final OutputStream outStream = (gzippedOut != null) ? gzippedOut : ((chunkedOut != null)? chunkedOut : respond);
@@ -799,7 +791,7 @@ public final class httpdProxyHandler {
         try {
             final InputStream data = res.getDataAsStream();
             if (data == null) return;
-            final Charset charSet = httpHeader.getCharSet(res.getResponseHeader());
+            final Charset charSet = res.getResponseHeader().getCharSet();
             serverFileUtils.copyToWriter(new BufferedInputStream(data), hfos, charSet);
         } finally {
             res.closeStream();
@@ -811,14 +803,14 @@ public final class httpdProxyHandler {
         try {
             final InputStream data = res.getDataAsStream();
             if (data == null) return;
-            final Charset charSet = httpHeader.getCharSet(res.getResponseHeader());
+            final Charset charSet = res.getResponseHeader().getCharSet();
             serverFileUtils.copyToWriters(new BufferedInputStream(data), hfos, new BufferedWriter(new OutputStreamWriter(byteStream, charSet)) , charSet);
         } finally {
             res.closeStream();
         }
     }
 
-    public static void doHead(final Properties conProp, final httpHeader requestHeader, OutputStream respond) {
+    public static void doHead(final Properties conProp, final httpRequestHeader requestHeader, OutputStream respond) {
         
         JakartaCommonsHttpResponse res = null;
         yacyURL url = null;
@@ -894,7 +886,7 @@ public final class httpdProxyHandler {
             theLogger.logFinest(reqID +"    response status: "+ res.getStatusLine());
             
             // determine if it's an internal error of the httpc
-            final httpHeader responseHeader = res.getResponseHeader();
+            final httpResponseHeader responseHeader = res.getResponseHeader();
             if (responseHeader.size() == 0) {
                 throw new Exception(res.getStatusLine());
             }            
@@ -916,7 +908,7 @@ public final class httpdProxyHandler {
         }
     }
 
-    public static void doPost(final Properties conProp, final httpHeader requestHeader, final OutputStream respond, InputStream body) throws IOException {
+    public static void doPost(final Properties conProp, final httpRequestHeader requestHeader, final OutputStream respond, InputStream body) throws IOException {
         assert conProp != null : "precondition violated: conProp != null";
         assert requestHeader != null : "precondition violated: requestHeader != null";
         assert body != null : "precondition violated: body != null";
@@ -984,7 +976,7 @@ public final class httpdProxyHandler {
             // "if there is a body to the call, we would have a CONTENT-LENGTH tag in the requestHeader"
             // it seems that it is a HTTP/1.1 connection which stays open (the inputStream) and endlessly waits for
             // input so we have to end it to do the request
-            final long requestLength = requestHeader.contentLength();
+            final long requestLength = requestHeader.getContentLength();
             if(requestLength > -1) {
                 final byte[] bodyData;
                 if(requestLength == 0) {
@@ -1004,7 +996,7 @@ public final class httpdProxyHandler {
             res = client.POST(getUrl, body);
             theLogger.logFinest(reqID +"    response status: "+ res.getStatusLine());
             
-            final httpHeader responseHeader = res.getResponseHeader();
+            final httpResponseHeader responseHeader = res.getResponseHeader();
             // determine if it's an internal error of the httpc
             if (responseHeader.size() == 0) {
                 throw new Exception(res.getStatusLine());
@@ -1016,7 +1008,7 @@ public final class httpdProxyHandler {
             
             // sending the respond header back to the client
             if (chunked != null) {
-                responseHeader.put(httpHeader.TRANSFER_ENCODING, "chunked");
+                responseHeader.put(httpResponseHeader.TRANSFER_ENCODING, "chunked");
             }
             
             // sending response headers
@@ -1092,7 +1084,7 @@ public final class httpdProxyHandler {
      * @param requestHeader
      * @param hostlow
      */
-    private static void prepareRequestHeader(final Properties conProp, final httpHeader requestHeader, final String hostlow) {
+    private static void prepareRequestHeader(final Properties conProp, final httpRequestHeader requestHeader, final String hostlow) {
         // set another userAgent, if not yellow-listed
         if ((yellowList != null) && (!(yellowList.contains(domain(hostlow))))) {
             // change the User-Agent
@@ -1124,7 +1116,7 @@ public final class httpdProxyHandler {
      * @param connectHost may be 'host:port' or 'host:port/path'
      * @return
      */
-    private static JakartaCommonsHttpClient setupHttpClient(final httpHeader requestHeader, final String connectHost) {
+    private static JakartaCommonsHttpClient setupHttpClient(final httpRequestHeader requestHeader, final String connectHost) {
         // setup HTTP-client
         final JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(timeout, requestHeader);
         client.setFollowRedirects(false);
@@ -1154,12 +1146,13 @@ public final class httpdProxyHandler {
      * @param respond
      * @return
      */
-    private static httpChunkedOutputStream setTransferEncoding(final Properties conProp, final httpHeader responseHeader,
+    private static httpChunkedOutputStream setTransferEncoding(
+            final Properties conProp, final httpResponseHeader responseHeader,
             final int statusCode, final OutputStream respond) {
         final String httpVer = conProp.getProperty(httpHeader.CONNECTION_PROP_HTTP_VER);
         httpChunkedOutputStream chunkedOut = null;
         // gzipped response is ungzipped an therefor the length is unknown
-        if (responseHeader.gzip() || responseHeader.contentLength() < 0) {
+        if (responseHeader.gzip() || responseHeader.getContentLength() < 0) {
             // according to http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
             // a 204,304 message must not contain a message body.
             // Therefore we need to set the content-length to 0.
@@ -1181,7 +1174,7 @@ public final class httpdProxyHandler {
      * @param res
      * @param responseHeader
      */
-    private static void prepareResponseHeader(final httpHeader responseHeader, final String httpVer) {
+    private static void prepareResponseHeader(final httpResponseHeader responseHeader, final String httpVer) {
         modifyProxyHeaders(responseHeader, httpVer);
         
         correctContentEncoding(responseHeader);
@@ -1190,10 +1183,10 @@ public final class httpdProxyHandler {
     /**
      * @param responseHeader
      */
-    private static void correctContentEncoding(final httpHeader responseHeader) {
+    private static void correctContentEncoding(final httpResponseHeader responseHeader) {
         // TODO gzip again? set "correct" encoding?
         if(responseHeader.gzip()) {
-            responseHeader.remove(httpHeader.CONTENT_ENCODING);
+            responseHeader.remove(httpResponseHeader.CONTENT_ENCODING);
             responseHeader.remove(httpHeader.CONTENT_LENGTH); // remove gziped length
         }
     }
@@ -1204,7 +1197,7 @@ public final class httpdProxyHandler {
      * @param conProp
      * @param requestHeader
      */
-    private static void addXForwardedForHeader(final Properties conProp, final httpHeader requestHeader) {
+    private static void addXForwardedForHeader(final Properties conProp, final httpRequestHeader requestHeader) {
         // setting the X-Forwarded-For Header
         if (switchboard.getConfigBool("proxy.sendXForwardedForHeader", true)) {
             requestHeader.put(httpHeader.X_FORWARDED_FOR, conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP));
@@ -1227,24 +1220,24 @@ public final class httpdProxyHandler {
          - Trailers
          */
         
-        headers.remove(httpHeader.CONNECTION);
-        headers.remove(httpHeader.KEEP_ALIVE);
-        headers.remove(httpHeader.UPGRADE);
-        headers.remove(httpHeader.TE);
-        headers.remove(httpHeader.PROXY_CONNECTION);
-        headers.remove(httpHeader.PROXY_AUTHENTICATE);
-        headers.remove(httpHeader.PROXY_AUTHORIZATION);
+        headers.remove(httpRequestHeader.CONNECTION);
+        headers.remove(httpRequestHeader.KEEP_ALIVE);
+        headers.remove(httpRequestHeader.UPGRADE);
+        headers.remove(httpRequestHeader.TE);
+        headers.remove(httpRequestHeader.PROXY_CONNECTION);
+        headers.remove(httpRequestHeader.PROXY_AUTHENTICATE);
+        headers.remove(httpRequestHeader.PROXY_AUTHORIZATION);
         
         // special headers inserted by squid
-        headers.remove(httpHeader.X_CACHE);
-        headers.remove(httpHeader.X_CACHE_LOOKUP);     
+        headers.remove(httpRequestHeader.X_CACHE);
+        headers.remove(httpRequestHeader.X_CACHE_LOOKUP);     
         
         // remove transfer encoding header
-        headers.remove(httpHeader.TRANSFER_ENCODING);
+        headers.remove(httpResponseHeader.TRANSFER_ENCODING);
         
         //removing yacy status headers
-        headers.remove(httpHeader.X_YACY_KEEP_ALIVE_REQUEST_COUNT);
-        headers.remove(httpHeader.X_YACY_ORIGINAL_REQUEST_LINE);
+        headers.remove(httpResponseHeader.X_YACY_KEEP_ALIVE_REQUEST_COUNT);
+        headers.remove(httpResponseHeader.X_YACY_ORIGINAL_REQUEST_LINE);
     }
 
     private static void setViaHeader(final httpHeader header, final String httpVer) {
@@ -1268,7 +1261,7 @@ public final class httpdProxyHandler {
         }
     }
 
-    public static void doConnect(final Properties conProp, final de.anomic.http.httpHeader requestHeader, final InputStream clientIn, final OutputStream clientOut) throws IOException {
+    public static void doConnect(final Properties conProp, final httpRequestHeader requestHeader, final InputStream clientIn, final OutputStream clientOut) throws IOException {
         
         switchboard.proxyLastAccess = System.currentTimeMillis();
     

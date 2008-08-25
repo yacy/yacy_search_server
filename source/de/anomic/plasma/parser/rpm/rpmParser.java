@@ -35,7 +35,7 @@ import com.jguild.jrpm.io.datatype.DataTypeIf;
 
 import de.anomic.crawler.HTTPLoader;
 import de.anomic.http.HttpClient;
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.parser.AbstractParser;
 import de.anomic.plasma.parser.Parser;
@@ -163,8 +163,8 @@ public class rpmParser extends AbstractParser implements Parser {
             final yacyURL contentUrl = new yacyURL(args[0], null);
             
             final rpmParser testParser = new rpmParser();
-            final httpHeader reqHeader = new httpHeader();
-            reqHeader.put(httpHeader.USER_AGENT, HTTPLoader.crawlerUserAgent);
+            final httpRequestHeader reqHeader = new httpRequestHeader();
+            reqHeader.put(httpRequestHeader.USER_AGENT, HTTPLoader.crawlerUserAgent);
             final byte[] content = HttpClient.wget(contentUrl.toString(), reqHeader, 10000);
             final ByteArrayInputStream input = new ByteArrayInputStream(content);
             testParser.parse(contentUrl, "application/x-rpm", null, input);

@@ -2,7 +2,7 @@
 import java.util.Iterator;
 
 import de.anomic.crawler.CrawlProfile.entry;
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.server.serverObjects;
@@ -10,7 +10,7 @@ import de.anomic.server.serverSwitch;
 
 
 public class WatchWebStructure_p {
-    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final serverObjects prop = new serverObjects();
         

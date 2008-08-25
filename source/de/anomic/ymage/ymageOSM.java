@@ -35,7 +35,7 @@ import java.net.MalformedURLException;
 
 import javax.imageio.ImageIO;
 
-import de.anomic.http.httpdProxyCacheEntry;
+import de.anomic.index.indexDocumentMetadata;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.yacy.yacyURL;
@@ -79,7 +79,7 @@ public class ymageOSM {
         InputStream tileStream = plasmaHTCache.getResourceContentStream(tileURL);
         if (tileStream == null) {
             // download resource using the crawler and keep resource in memory if possible
-            final httpdProxyCacheEntry entry = plasmaSwitchboard.getSwitchboard().crawlQueues.loadResourceFromWeb(tileURL, 20000, true, false, false);
+            final indexDocumentMetadata entry = plasmaSwitchboard.getSwitchboard().crawlQueues.loadResourceFromWeb(tileURL, 20000, true, false, false);
             if ((entry == null) || (entry.cacheArray() == null)) return null;
             tileStream = new ByteArrayInputStream(entry.cacheArray());
         }

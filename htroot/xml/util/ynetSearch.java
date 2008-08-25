@@ -30,14 +30,14 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Scanner;
 
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 public class ynetSearch {
 	
-	public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {        
+	public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {        
         final plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
         final boolean isAdmin=switchboard.verifyAuthentication(header, true);
         final serverObjects prop = new serverObjects();              

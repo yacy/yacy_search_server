@@ -67,8 +67,8 @@ public class JakartaCommonsHttpResponse {
 	 * 
 	 * @see de.anomic.http.HttpResponse#getResponseHeader()
 	 */
-	public httpHeader getResponseHeader() {
-		final httpHeader responseHeader = new httpHeader();
+	public httpResponseHeader getResponseHeader() {
+		final httpResponseHeader responseHeader = new httpResponseHeader();
 		for (final Header header : getHeaders()) {
 			responseHeader.add(header.getName(), header.getValue());
 		}

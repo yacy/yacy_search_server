@@ -39,7 +39,7 @@ import java.util.HashSet;
 import de.anomic.crawler.HTTPLoader;
 import de.anomic.data.listManager;
 import de.anomic.http.HttpClient;
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.index.indexAbstractReferenceBlacklist;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
@@ -57,7 +57,7 @@ public class sharedBlacklist_p {
     public static final int STATUS_URL_PROBLEM = 4;
     public static final int STATUS_WRONG_INVOCATION = 5;
     
-    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
@@ -107,10 +107,10 @@ public class sharedBlacklist_p {
                 if (downloadURL != null) {
                     // download the blacklist
                     try {
-                        final httpHeader reqHeader = new httpHeader();
-                        reqHeader.put(httpHeader.PRAGMA,"no-cache");
-                        reqHeader.put(httpHeader.CACHE_CONTROL,"no-cache");
-                        reqHeader.put(httpHeader.USER_AGENT, HTTPLoader.yacyUserAgent);
+                        final httpRequestHeader reqHeader = new httpRequestHeader();
+                        reqHeader.put(httpRequestHeader.PRAGMA,"no-cache");
+                        reqHeader.put(httpRequestHeader.CACHE_CONTROL,"no-cache");
+                        reqHeader.put(httpRequestHeader.USER_AGENT, HTTPLoader.yacyUserAgent);
                         
                         // get List
                         final yacyURL u = new yacyURL(downloadURL, null);
@@ -130,8 +130,8 @@ public class sharedBlacklist_p {
 
                 try {
                     final yacyURL u = new yacyURL(downloadURL, null);
-                    final httpHeader reqHeader = new httpHeader();
-                    reqHeader.put(httpHeader.USER_AGENT, HTTPLoader.yacyUserAgent);
+                    final httpRequestHeader reqHeader = new httpRequestHeader();
+                    reqHeader.put(httpRequestHeader.USER_AGENT, HTTPLoader.yacyUserAgent);
                     otherBlacklist = nxTools.strings(HttpClient.wget(u.toString(), reqHeader, 10000), "UTF-8"); //get List
                 } catch (final Exception e) {
                     prop.put("status", STATUS_URL_PROBLEM);

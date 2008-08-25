@@ -39,13 +39,13 @@ import java.util.Properties;
 
 import de.anomic.http.HttpClient;
 import de.anomic.http.httpChunkedInputStream;
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
+import de.anomic.http.httpResponseHeader;
 import de.anomic.http.httpdProxyCacheEntry;
+import de.anomic.index.indexDocumentMetadata;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.cache.IResourceInfo;
-import de.anomic.plasma.cache.http.ResourceInfo;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverHandler;
@@ -309,11 +309,11 @@ public class icapd implements serverHandler, Cloneable {
             
             // parsing the requestline
             final Properties httpReqProps = new Properties();
-            httpHeader.parseRequestLine(httpRequestLine,httpReqProps,virtualHost);
+            httpRequestHeader.parseRequestLine(httpRequestLine,httpReqProps,virtualHost);
             
-            if (!httpReqProps.getProperty(httpHeader.CONNECTION_PROP_METHOD).equals(httpHeader.METHOD_GET)) {
+            if (!httpReqProps.getProperty(httpRequestHeader.CONNECTION_PROP_METHOD).equals(httpRequestHeader.METHOD_GET)) {
                 this.log.logInfo("Wrong http request method for indexing:" +
-                        "\nRequest Method: " + httpReqProps.getProperty(httpHeader.CONNECTION_PROP_METHOD) + 
+                        "\nRequest Method: " + httpReqProps.getProperty(httpRequestHeader.CONNECTION_PROP_METHOD) + 
                         "\nRequest Line:   " + httpRequestLine);
                 reader.close();
                 if(reqHdrStream != null) {
@@ -323,17 +323,18 @@ public class icapd implements serverHandler, Cloneable {
             }
             
             // reading all request headers
-            final httpHeader httpReqHeader = httpHeader.readHttpHeader(reader); 
+            final httpRequestHeader httpReqHeader = new httpRequestHeader();
+            httpReqHeader.readHttpHeader(reader); 
             reader.close();
             if(reqHdrStream != null) {
                 reqHdrStream.close();
             }
             
             // handle transparent proxy support: this function call is needed to set the host property properly
-            httpHeader.handleTransparentProxySupport(httpReqHeader,httpReqProps,virtualHost,true);
+            httpRequestHeader.handleTransparentProxySupport(httpReqHeader,httpReqProps,virtualHost,true);
             
             // getting the request URL
-            final yacyURL httpRequestURL = httpHeader.getRequestURL(httpReqProps);            
+            final yacyURL httpRequestURL = httpRequestHeader.getRequestURL(httpReqProps);            
             
             /* =========================================================================
              * Parsing response data
@@ -342,7 +343,7 @@ public class icapd implements serverHandler, Cloneable {
             reader = new BufferedReader(new InputStreamReader(resHdrStream));
             final String httpRespStatusLine = reader.readLine();
             
-            final Object[] httpRespStatus = httpHeader.parseResponseLine(httpRespStatusLine);
+            final Object[] httpRespStatus = httpResponseHeader.parseResponseLine(httpRespStatusLine);
             
             if (!(httpRespStatus[1].equals(Integer.valueOf(200)) || httpRespStatus[1].equals(Integer.valueOf(203)))) {
                 this.log.logInfo("Wrong status code for indexing:" +
@@ -357,7 +358,8 @@ public class icapd implements serverHandler, Cloneable {
             }
             
             // reading all response headers
-            final httpHeader httpResHeader = httpHeader.readHttpHeader(reader);
+            final httpResponseHeader httpResHeader = new httpResponseHeader();
+            httpResHeader.readHttpHeader(reader);
             reader.close();
             if(resHdrStream != null) {
                 resHdrStream.close();
@@ -376,23 +378,23 @@ public class icapd implements serverHandler, Cloneable {
              * ========================================================================= */
             
             // generating a htcache entry object
-            final IResourceInfo resInfo = new ResourceInfo(httpRequestURL,httpReqHeader,httpResHeader);
-            final httpdProxyCacheEntry cacheEntry = plasmaHTCache.newEntry(
+            final indexDocumentMetadata cacheEntry = new httpdProxyCacheEntry(
                     0, 
                     httpRequestURL,
                     "",
                     httpRespStatusLine,
-                    resInfo,
+                    httpReqHeader, httpResHeader,
                     null, 
                     switchboard.webIndex.defaultProxyProfile
             );
+            plasmaHTCache.storeMetadata(httpResHeader, cacheEntry);
             
             // getting the filename/path to store the response body
             final File cacheFile = plasmaHTCache.getCachePath(httpRequestURL);
             
             // if the file already exits we delete it
             if (cacheFile.isFile()) {
-                plasmaHTCache.deleteURLfromCache(httpRequestURL);
+                plasmaHTCache.deleteURLfromCache(httpRequestURL, false);
             }                        
             // we write the new cache entry to file system directly
             cacheFile.getParentFile().mkdirs();            

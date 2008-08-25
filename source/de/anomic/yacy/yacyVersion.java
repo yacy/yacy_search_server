@@ -46,7 +46,8 @@ import de.anomic.crawler.HTTPLoader;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.http.JakartaCommonsHttpClient;
 import de.anomic.http.JakartaCommonsHttpResponse;
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpResponseHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverFileUtils;
@@ -338,8 +339,8 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
         final File storagePath = plasmaSwitchboard.getSwitchboard().releasePath;
         // load file
         File download = null;
-        final httpHeader header = new httpHeader();
-        header.put(httpHeader.USER_AGENT, HTTPLoader.yacyUserAgent);
+        final httpRequestHeader header = new httpRequestHeader();
+        header.put(httpResponseHeader.USER_AGENT, HTTPLoader.yacyUserAgent);
         final JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(120000, header);
         JakartaCommonsHttpResponse res = null;
         final String name = release.url.getFileName();

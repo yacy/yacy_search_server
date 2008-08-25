@@ -133,11 +133,12 @@ import de.anomic.data.wikiBoard;
 import de.anomic.data.wiki.wikiParser;
 import de.anomic.http.HttpClient;
 import de.anomic.http.JakartaCommonsHttpClient;
-import de.anomic.http.httpHeader;
 import de.anomic.http.httpRemoteProxyConfig;
+import de.anomic.http.httpRequestHeader;
+import de.anomic.http.httpResponseHeader;
 import de.anomic.http.httpd;
-import de.anomic.http.httpdProxyCacheEntry;
 import de.anomic.http.httpdRobotsTxtConfig;
+import de.anomic.index.indexDocumentMetadata;
 import de.anomic.index.indexReferenceBlacklist;
 import de.anomic.index.indexURLReference;
 import de.anomic.kelondro.kelondroCache;
@@ -968,7 +969,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         return this.webIndex.cleanProfiles();
     }
     
-    public boolean htEntryStoreProcess(final httpdProxyCacheEntry entry) {
+    public boolean htEntryStoreProcess(final indexDocumentMetadata entry) {
         
         if (entry == null) return false;
 
@@ -1052,7 +1053,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             ));
         } else {
             if (!entry.profile().storeHTCache() && entry.cacheFile().exists()) {
-                plasmaHTCache.deleteURLfromCache(entry.url());                
+                plasmaHTCache.deleteURLfromCache(entry.url(), false);                
             }
         }
         }
@@ -1787,16 +1788,16 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         }
     }
 
-    public int adminAuthenticated(final httpHeader header) {
+    public int adminAuthenticated(final httpRequestHeader requestHeader) {
         
         // authorization for localhost, only if flag is set to grant localhost access as admin
-        final String clientIP = (String) header.get(httpHeader.CONNECTION_PROP_CLIENTIP, "");
-        final String refererHost = header.refererHost();
+        final String clientIP = (String) requestHeader.get(httpRequestHeader.CONNECTION_PROP_CLIENTIP, "");
+        final String refererHost = requestHeader.refererHost();
         final boolean accessFromLocalhost = serverCore.isLocalhost(clientIP) && (refererHost.length() == 0 || serverCore.isLocalhost(refererHost));
         if (getConfigBool("adminAccountForLocalhost", false) && accessFromLocalhost) return 3; // soft-authenticated for localhost
         
         // get the authorization string from the header
-        final String authorization = ((String) header.get(httpHeader.AUTHORIZATION, "xxxxxx")).trim().substring(6);
+        final String authorization = ((String) requestHeader.get(httpRequestHeader.AUTHORIZATION, "xxxxxx")).trim().substring(6);
         
         // security check against too long authorization strings
         if (authorization.length() > 256) return 0; 
@@ -1806,13 +1807,13 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         if (accessFromLocalhost && (adminAccountBase64MD5.equals(authorization))) return 3; // soft-authenticated for localhost
 
         // authorization by hit in userDB
-        if (userDB.hasAdminRight((String) header.get(httpHeader.AUTHORIZATION, "xxxxxx"), ((String) header.get(httpHeader.CONNECTION_PROP_CLIENTIP, "")), header.getHeaderCookies())) return 4; //return, because 4=max
+        if (userDB.hasAdminRight((String) requestHeader.get(httpRequestHeader.AUTHORIZATION, "xxxxxx"), ((String) requestHeader.get(httpRequestHeader.CONNECTION_PROP_CLIENTIP, "")), requestHeader.getHeaderCookies())) return 4; //return, because 4=max
 
         // authorization with admin keyword in configuration
         return httpd.staticAdminAuthenticated(authorization, this);
     }
     
-    public boolean verifyAuthentication(final httpHeader header, final boolean strict) {
+    public boolean verifyAuthentication(final httpRequestHeader header, final boolean strict) {
         // handle access rights
         switch (adminAuthenticated(header)) {
         case 0: // wrong password given
@@ -2147,14 +2148,14 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     public void loadSeedLists() {
         // uses the superseed to initialize the database with known seeds
         
-        yacySeed          ys;
-        String            seedListFileURL;
-        yacyURL           url;
-        ArrayList<String> seedList;
-        Iterator<String>  enu;
-        int               lc;
-        final int               sc = webIndex.seedDB.sizeConnected();
-        httpHeader        header;
+        yacySeed           ys;
+        String             seedListFileURL;
+        yacyURL            url;
+        ArrayList<String>  seedList;
+        Iterator<String>   enu;
+        int                lc;
+        final int          sc = webIndex.seedDB.sizeConnected();
+        httpResponseHeader header;
         
         yacyCore.log.logInfo("BOOTSTRAP: " + sc + " seeds known from previous run");
         
@@ -2171,10 +2172,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             ) {
                 // load the seed list
                 try {
-                    final httpHeader reqHeader = new httpHeader();
-                    reqHeader.put(httpHeader.PRAGMA, "no-cache");
-                    reqHeader.put(httpHeader.CACHE_CONTROL, "no-cache");
-                    reqHeader.put(httpHeader.USER_AGENT, HTTPLoader.yacyUserAgent);
+                    final httpRequestHeader reqHeader = new httpRequestHeader();
+                    reqHeader.put(httpRequestHeader.PRAGMA, "no-cache");
+                    reqHeader.put(httpRequestHeader.CACHE_CONTROL, "no-cache");
+                    reqHeader.put(httpRequestHeader.USER_AGENT, HTTPLoader.yacyUserAgent);
                     
                     url = new yacyURL(seedListFileURL, null);
                     final long start = System.currentTimeMillis();
@@ -2257,8 +2258,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     public static Map<String, String> loadHashMap(final yacyURL url) {
         try {
             // sending request
-            final httpHeader reqHeader = new httpHeader();
-            reqHeader.put(httpHeader.USER_AGENT, HTTPLoader.yacyUserAgent);
+            final httpRequestHeader reqHeader = new httpRequestHeader();
+            reqHeader.put(httpRequestHeader.USER_AGENT, HTTPLoader.yacyUserAgent);
             final HashMap<String, String> result = nxTools.table(HttpClient.wget(url.toString(), reqHeader, 10000), "UTF-8");
             if (result == null) return new HashMap<String, String>();
             return result;

@@ -37,7 +37,7 @@ import java.util.Iterator;
 import de.anomic.data.blogBoard;
 import de.anomic.data.userDB;
 import de.anomic.http.HttpClient;
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -55,7 +55,7 @@ public class Blog {
         return SimpleFormatter.format(date);
     }
 
-    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final serverObjects prop = new serverObjects();
         blogBoard.BlogEntry page = null;
@@ -67,7 +67,7 @@ public class Blog {
         prop.put("display", 1); // Fixed to 1
 
         
-        final boolean xml = (header.get(httpHeader.CONNECTION_PROP_PATH)).endsWith(".xml");
+        final boolean xml = (header.get(httpRequestHeader.CONNECTION_PROP_PATH)).endsWith(".xml");
         final String address = sb.webIndex.seedDB.mySeed().getPublicAddress();
 
         if(hasRights) {
@@ -86,7 +86,7 @@ public class Blog {
         final int num   = post.getInt("num",10);  //indicates how many entries should be shown
 
         if(!hasRights){
-            final userDB.Entry userentry = sb.userDB.proxyAuth((String)header.get(httpHeader.AUTHORIZATION, "xxxxxx"));
+            final userDB.Entry userentry = sb.userDB.proxyAuth((String)header.get(httpRequestHeader.AUTHORIZATION, "xxxxxx"));
             if(userentry != null && userentry.hasRight(userDB.Entry.BLOG_RIGHT)){
                 hasRights=true;
             } else if(post.containsKey("login")) {
@@ -96,7 +96,7 @@ public class Blog {
         }
 
         String pagename = post.get("page", DEFAULT_PAGE);
-        final String ip = (String)header.get(httpHeader.CONNECTION_PROP_CLIENTIP, "127.0.0.1");
+        final String ip = (String)header.get(httpRequestHeader.CONNECTION_PROP_CLIENTIP, "127.0.0.1");
 
         String StrAuthor = post.get("author", "");
 

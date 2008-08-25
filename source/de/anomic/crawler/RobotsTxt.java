@@ -42,7 +42,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import de.anomic.http.HttpClient;
 import de.anomic.http.JakartaCommonsHttpClient;
 import de.anomic.http.JakartaCommonsHttpResponse;
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.kelondroBLOB;
 import de.anomic.kelondro.kelondroBLOBHeap;
 import de.anomic.kelondro.kelondroBLOBTree;
@@ -496,19 +496,19 @@ public class RobotsTxt {
         downloadStart = System.currentTimeMillis();
         
         // if we previously have downloaded this robots.txt then we can set the if-modified-since header
-        httpHeader reqHeaders = new httpHeader();
+        httpRequestHeader reqHeaders = new httpRequestHeader();
         
         // add yacybot user agent
-        reqHeaders.put(httpHeader.USER_AGENT, HTTPLoader.crawlerUserAgent);
+        reqHeaders.put(httpRequestHeader.USER_AGENT, HTTPLoader.crawlerUserAgent);
         
         // adding referer
-        reqHeaders.put(httpHeader.REFERER, (yacyURL.newURL(robotsURL,"/")).toNormalform(true, true));
+        reqHeaders.put(httpRequestHeader.REFERER, (yacyURL.newURL(robotsURL,"/")).toNormalform(true, true));
         
         if (entry != null) {
             oldEtag = entry.getETag();
-            reqHeaders = new httpHeader();
+            reqHeaders = new httpRequestHeader();
             final Date modDate = entry.getModDate();
-            if (modDate != null) reqHeaders.put(httpHeader.IF_MODIFIED_SINCE,HttpClient.dateString(entry.getModDate()));
+            if (modDate != null) reqHeaders.put(httpRequestHeader.IF_MODIFIED_SINCE,HttpClient.dateString(entry.getModDate()));
             
         }
         
@@ -531,7 +531,7 @@ public class RobotsTxt {
                 } else {
 
                     // getting some metadata
-                    eTag = res.getResponseHeader().containsKey(httpHeader.ETAG)?(res.getResponseHeader().get(httpHeader.ETAG)).trim():null;
+                    eTag = res.getResponseHeader().containsKey(httpRequestHeader.ETAG)?(res.getResponseHeader().get(httpRequestHeader.ETAG)).trim():null;
                     lastMod = res.getResponseHeader().lastModified();                    
                     
                     // if the robots.txt file was not changed we break here
@@ -556,7 +556,7 @@ public class RobotsTxt {
                 return null;
             } else if (res.getStatusLine().startsWith("3")) {
                 // getting redirection URL
-                String redirectionUrlString = res.getResponseHeader().get(httpHeader.LOCATION);
+                String redirectionUrlString = res.getResponseHeader().get(httpRequestHeader.LOCATION);
                 if (redirectionUrlString==null) {
                     serverLog.logFinest("ROBOTS","robots.txt could not be downloaded from URL '" + robotsURL + "' because of missing redirecton header. [" + res.getStatusLine() + "].");
                     robotsTxt = null;                    

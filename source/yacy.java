@@ -51,7 +51,7 @@ import de.anomic.data.translator;
 import de.anomic.http.HttpClient;
 import de.anomic.http.JakartaCommonsHttpClient;
 import de.anomic.http.JakartaCommonsHttpResponse;
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpd;
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntry;
@@ -566,8 +566,8 @@ public final class yacy {
         if (encodedPassword == null) encodedPassword = ""; // not defined
 
         // send 'wget' to web interface
-        final httpHeader requestHeader = new httpHeader();
-        requestHeader.put(httpHeader.AUTHORIZATION, "realm=" + encodedPassword); // for http-authentify
+        final httpRequestHeader requestHeader = new httpRequestHeader();
+        requestHeader.put(httpRequestHeader.AUTHORIZATION, "realm=" + encodedPassword); // for http-authentify
         final JakartaCommonsHttpClient con = new JakartaCommonsHttpClient(10000, requestHeader);
         JakartaCommonsHttpResponse res = null;
         try {

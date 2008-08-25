@@ -28,7 +28,7 @@
 //import java.net.*;
 //import java.io.*;
 //import de.anomic.tools.*;
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.server.serverObjects;
@@ -36,7 +36,7 @@ import de.anomic.server.serverSwitch;
 
 public class IndexShare_p {
 
-    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
     	// return variable that accumulates replacements
         final plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
         final serverObjects prop = new serverObjects();

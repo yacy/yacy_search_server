@@ -72,7 +72,9 @@ public final class serverDate {
     private static final SimpleDateFormat FORMAT_ISO8601      = new SimpleDateFormat(PATTERN_ISO8601);
     
     /** Date formatter/parser for standard compliant HTTP header dates (RFC 1123) */
-    private static final SimpleDateFormat FORMAT_RFC1123      = new SimpleDateFormat(PATTERN_RFC1123, Locale.US); 
+    private static final SimpleDateFormat FORMAT_RFC1123      = new SimpleDateFormat(PATTERN_RFC1123, Locale.US);
+    
+    private static final SimpleDateFormat FORMAT_RFC1036      = new SimpleDateFormat(PATTERN_RFC1036, Locale.US); 
 
     /**
      * RFC 2616 requires that HTTP clients are able to parse all 3 different
@@ -82,7 +84,7 @@ public final class serverDate {
             // RFC 1123/822 (Standard) "Mon, 12 Nov 2007 10:11:12 GMT"
             FORMAT_RFC1123,
             // RFC 1036/850 (old)      "Monday, 12-Nov-07 10:11:12 GMT"
-            new SimpleDateFormat(PATTERN_RFC1036, Locale.US),
+            FORMAT_RFC1036,
             // ANSI C asctime()        "Mon Nov 12 10:11:12 2007"
             new SimpleDateFormat(PATTERN_ANSIC, Locale.US),
     };

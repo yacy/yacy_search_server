@@ -38,18 +38,18 @@ import java.util.Date;
 import de.anomic.http.HttpClient;
 import de.anomic.http.JakartaCommonsHttpClient;
 import de.anomic.http.JakartaCommonsHttpResponse;
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
+import de.anomic.http.httpResponseHeader;
 import de.anomic.http.httpdBoundedSizeOutputStream;
 import de.anomic.http.httpdByteCountOutputStream;
 import de.anomic.http.httpdLimitExceededException;
 import de.anomic.http.httpdProxyCacheEntry;
+import de.anomic.index.indexDocumentMetadata;
 import de.anomic.index.indexReferenceBlacklist;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
-import de.anomic.plasma.cache.IResourceInfo;
-import de.anomic.plasma.cache.http.ResourceInfo;
 import de.anomic.server.serverSystem;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyURL;
@@ -96,24 +96,26 @@ public final class HTTPLoader {
      * @param responseStatus Status-Code SPACE Reason-Phrase
      * @return
      */
-    protected httpdProxyCacheEntry createCacheEntry(final CrawlEntry entry, final Date requestDate, final httpHeader requestHeader, final httpHeader responseHeader, final String responseStatus) {
-        final IResourceInfo resourceInfo = new ResourceInfo(entry.url(), requestHeader, responseHeader);
-        return plasmaHTCache.newEntry(
+    protected indexDocumentMetadata createCacheEntry(final CrawlEntry entry, final Date requestDate, final httpRequestHeader requestHeader, final httpResponseHeader responseHeader, final String responseStatus) {
+        indexDocumentMetadata metadata = new httpdProxyCacheEntry(
                 entry.depth(),
                 entry.url(),
                 entry.name(),
                 responseStatus,
-                resourceInfo, 
+                requestHeader,
+                responseHeader, 
                 entry.initiator(),
                 sb.webIndex.profilesActiveCrawls.getEntry(entry.profileHandle())
         );
+        plasmaHTCache.storeMetadata(responseHeader, metadata);
+        return metadata;
     }    
    
-    public httpdProxyCacheEntry load(final CrawlEntry entry, final String parserMode) {
+    public indexDocumentMetadata load(final CrawlEntry entry, final String parserMode) {
         return load(entry, parserMode, DEFAULT_CRAWLING_RETRY_COUNT);
     }
     
-    private httpdProxyCacheEntry load(final CrawlEntry entry, final String parserMode, final int retryCount) {
+    private indexDocumentMetadata load(final CrawlEntry entry, final String parserMode, final int retryCount) {
 
         if (retryCount < 0) {
             this.log.logInfo("Redirection counter exceeded for URL " + entry.url().toString() + ". Processing aborted.");
@@ -137,18 +139,18 @@ public final class HTTPLoader {
         }
         
         // take a file from the net
-        httpdProxyCacheEntry htCache = null;
+        indexDocumentMetadata htCache = null;
         final long maxFileSize = sb.getConfigLong("crawler.http.maxFileSize", DEFAULT_MAXFILESIZE);
         try {
             // create a request header
-            final httpHeader requestHeader = new httpHeader();
-            requestHeader.put(httpHeader.USER_AGENT, crawlerUserAgent);
+            final httpRequestHeader requestHeader = new httpRequestHeader();
+            requestHeader.put(httpRequestHeader.USER_AGENT, crawlerUserAgent);
             yacyURL refererURL = null;
             if (entry.referrerhash() != null) refererURL = sb.getURL(entry.referrerhash());
-            if (refererURL != null) requestHeader.put(httpHeader.REFERER, refererURL.toNormalform(true, true));
-            requestHeader.put(httpHeader.ACCEPT_LANGUAGE, sb.getConfig("crawler.http.acceptLanguage", DEFAULT_LANGUAGE));
-            requestHeader.put(httpHeader.ACCEPT_CHARSET, sb.getConfig("crawler.http.acceptCharset", DEFAULT_CHARSET));
-            requestHeader.put(httpHeader.ACCEPT_ENCODING, sb.getConfig("crawler.http.acceptEncoding", DEFAULT_ENCODING));
+            if (refererURL != null) requestHeader.put(httpRequestHeader.REFERER, refererURL.toNormalform(true, true));
+            requestHeader.put(httpRequestHeader.ACCEPT_LANGUAGE, sb.getConfig("crawler.http.acceptLanguage", DEFAULT_LANGUAGE));
+            requestHeader.put(httpRequestHeader.ACCEPT_CHARSET, sb.getConfig("crawler.http.acceptCharset", DEFAULT_CHARSET));
+            requestHeader.put(httpRequestHeader.ACCEPT_ENCODING, sb.getConfig("crawler.http.acceptEncoding", DEFAULT_ENCODING));
 
             // HTTP-Client
             final JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(socketTimeout, requestHeader);
@@ -200,7 +202,7 @@ public final class HTTPLoader {
                             fos = new FileOutputStream(cacheFile); 
                             
                             // getting content length
-                            final long contentLength = res.getResponseHeader().contentLength();
+                            final long contentLength = res.getResponseHeader().getContentLength();
                             
                             // check the maximum allowed file size                     
                             if (contentLength == -1 || maxFileSize == -1) {
@@ -247,9 +249,9 @@ public final class HTTPLoader {
                     htCache = null;
                 }
             } else if (res.getStatusLine().startsWith("30")) {
-                    if (res.getResponseHeader().containsKey(httpHeader.LOCATION)) {
+                    if (res.getResponseHeader().containsKey(httpRequestHeader.LOCATION)) {
                         // getting redirection URL
-                        String redirectionUrlString = res.getResponseHeader().get(httpHeader.LOCATION);
+                        String redirectionUrlString = res.getResponseHeader().get(httpRequestHeader.LOCATION);
                         redirectionUrlString = redirectionUrlString.trim();
 
                         if (redirectionUrlString.length() == 0) {

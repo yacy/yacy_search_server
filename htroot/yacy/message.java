@@ -35,7 +35,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import de.anomic.data.messageBoard;
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
@@ -53,7 +53,7 @@ public final class message {
         return SimpleFormatter.format(date);
     }
 
-    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
         if (post == null || env == null) { return null; }
 
         // return variable that accumulates replacements
@@ -81,7 +81,7 @@ public final class message {
 
         if ((sb.isRobinsonMode()) &&
         	 (!((sb.isPublicRobinson()) ||
-        	    (sb.isInMyCluster(header.get(httpHeader.CONNECTION_PROP_CLIENTIP)))))) {
+        	    (sb.isInMyCluster(header.get(httpRequestHeader.CONNECTION_PROP_CLIENTIP)))))) {
             // if we are a robinson cluster, answer only if this client is known by our network definition
         	prop.put("response", "-1"); // request rejected
             return prop;

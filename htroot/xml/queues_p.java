@@ -37,7 +37,7 @@ import java.util.Locale;
 import de.anomic.crawler.CrawlEntry;
 import de.anomic.crawler.IndexingStack;
 import de.anomic.crawler.NoticedURL;
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.server.serverObjects;
@@ -55,7 +55,7 @@ public class queues_p {
         return dayFormatter.format(date);
     }
     
-    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
         // return variable that accumulates replacements
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         //wikiCode wikiTransformer = new wikiCode(switchboard);

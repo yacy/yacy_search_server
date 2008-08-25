@@ -45,7 +45,7 @@ import de.anomic.data.bookmarksDB;
 import de.anomic.data.listManager;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterWriter;
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.server.serverFileUtils;
@@ -64,7 +64,7 @@ public class WatchCrawler_p {
     // this servlet does NOT create the WatchCrawler page content!
     // this servlet starts a web crawl. The interface for entering the web crawl parameters is in IndexCreate_p.html
     
-    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
         // return variable that accumulates replacements
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         // inital values for AJAX Elements (without JavaScript) 

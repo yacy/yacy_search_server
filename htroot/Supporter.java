@@ -31,7 +31,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.index.indexReferenceBlacklist;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroNaturalOrder;
@@ -50,7 +50,7 @@ import de.anomic.yacy.yacyURL;
 
 public class Supporter {
 
-    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final serverObjects prop = new serverObjects();
         

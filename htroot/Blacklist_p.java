@@ -40,7 +40,7 @@ import java.util.Iterator;
 import java.util.TreeMap;
 
 import de.anomic.data.listManager;
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.index.indexAbstractReferenceBlacklist;
 import de.anomic.index.indexReferenceBlacklist;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -55,7 +55,7 @@ public class Blacklist_p {
     private final static String BLACKLIST        = "blackLists_";
     private final static String BLACKLIST_SHARED = "BlackLists.Shared";
 
-    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         
         // initialize the list manager
@@ -378,7 +378,7 @@ prop.putHTML("asd", "0");
      * @return null if no error occured, else a String to put into LOCATION
      */
     private static String addBlacklistEntry(final String blacklistToUse, String newEntry, 
-            final httpHeader header, final String[] supportedBlacklistTypes) {
+            final httpRequestHeader header, final String[] supportedBlacklistTypes) {
 
         if (blacklistToUse == null || blacklistToUse.trim().length() == 0) {
             return "";
@@ -430,7 +430,7 @@ prop.putHTML("asd", "0");
      * @return null if no error occured, else a String to put into LOCATION
      */
     private static String deleteBlacklistEntry(final String blacklistToUse, String oldEntry, 
-            final httpHeader header, final String[] supportedBlacklistTypes) {
+            final httpRequestHeader header, final String[] supportedBlacklistTypes) {
 
         if (blacklistToUse == null || blacklistToUse.trim().length() == 0) {
             return "";

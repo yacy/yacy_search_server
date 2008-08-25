@@ -160,7 +160,7 @@ public class JakartaCommonsHttpClient {
      * @param timeout in milliseconds
      * @param header header options to send
      */
-    public JakartaCommonsHttpClient(final int timeout, final httpHeader header) {
+    public JakartaCommonsHttpClient(final int timeout, final httpRequestHeader header) {
         super();
         setTimeout(timeout);
         setHeader(header);
@@ -175,7 +175,7 @@ public class JakartaCommonsHttpClient {
      * @param header header options to send
      * @param proxyConfig
      */
-    public JakartaCommonsHttpClient(final int timeout, final httpHeader header, final httpRemoteProxyConfig proxyConfig) {
+    public JakartaCommonsHttpClient(final int timeout, final httpRequestHeader header, final httpRemoteProxyConfig proxyConfig) {
         super();
         setTimeout(timeout);
         setHeader(header);
@@ -195,7 +195,7 @@ public class JakartaCommonsHttpClient {
      * (non-Javadoc)
      * @see de.anomic.http.HttpClient#setHeader(de.anomic.http.httpHeader)
      */
-    public void setHeader(final httpHeader header) {
+    public void setHeader(final httpRequestHeader header) {
         headers = convertHeaders(header);
     }
 
@@ -322,7 +322,7 @@ public class JakartaCommonsHttpClient {
         if (gzipBody) {
             data = zipRequest(data);
 
-            post.setRequestHeader(httpHeader.CONTENT_ENCODING, httpHeader.CONTENT_ENCODING_GZIP);
+            post.setRequestHeader(httpResponseHeader.CONTENT_ENCODING, httpHeader.CONTENT_ENCODING_GZIP);
         }
         post.setRequestEntity(data);
         // redirects in POST cause a "Entity enclosing requests cannot be redirected without user intervention" -
@@ -369,7 +369,7 @@ public class JakartaCommonsHttpClient {
      * @param requestHeader
      * @param method
      */
-    public void addHeader(final httpHeader requestHeader, final HttpMethod method) {
+    public void addHeader(final httpRequestHeader requestHeader, final HttpMethod method) {
         assert method != null : "precondition violated: method != null";
         if (requestHeader != null) {
             addHeaders(convertHeaders(requestHeader), method);
@@ -399,7 +399,7 @@ public class JakartaCommonsHttpClient {
      * @param requestHeader
      * @return
      */
-    private static Header[] convertHeaders(final httpHeader requestHeader) {
+    private static Header[] convertHeaders(final httpRequestHeader requestHeader) {
         final Header[] headers;
         if (requestHeader == null) {
             headers = new Header[0];
@@ -537,7 +537,7 @@ public class JakartaCommonsHttpClient {
                 final String credentials = kelondroBase64Order.standardCoder.encodeString(remoteProxyUser.replace(":",
                                                                                                                   "") +
                         ":" + remoteProxyPwd);
-                method.setRequestHeader(httpHeader.PROXY_AUTHORIZATION, "Basic " + credentials);
+                method.setRequestHeader(httpRequestHeader.PROXY_AUTHORIZATION, "Basic " + credentials);
             }
         }
     }
@@ -587,7 +587,7 @@ public class JakartaCommonsHttpClient {
      * @param date The Date-Object to be converted.
      * @return String with the date.
      */
-    public static String date2String(final Date date) {
+    public static String date2String(final Date date) { // TODO: merge this method with serverDate
         if (date == null) {
             return "";
         }

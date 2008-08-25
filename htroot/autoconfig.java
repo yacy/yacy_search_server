@@ -24,7 +24,7 @@
 //javac -classpath .:../Classes Status.java
 //if the shell's current path is HTROOT
 
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -38,12 +38,12 @@ public class autoconfig {
      * @param env the serverSwitch object holding all runtime-data
      * @return the rewrite-properties for the template
      */
-    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
         
         final serverObjects prop = new serverObjects();
         
         // getting the http host header
-        final String hostSocket = header.get(httpHeader.CONNECTION_PROP_HOST);
+        final String hostSocket = header.get(httpRequestHeader.CONNECTION_PROP_HOST);
         
         String host = hostSocket;
         int port = 80;

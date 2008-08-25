@@ -31,7 +31,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 import de.anomic.data.userDB;
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpd;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -41,7 +41,7 @@ import de.anomic.server.serverSwitch;
 
 public class ConfigAccounts_p {
     
-    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
         final serverObjects prop = new serverObjects();
         final plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
         userDB.Entry entry=null;

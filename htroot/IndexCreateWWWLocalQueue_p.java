@@ -36,7 +36,7 @@ import java.util.regex.PatternSyntaxException;
 import de.anomic.crawler.CrawlEntry;
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.NoticedURL;
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.server.serverObjects;
@@ -59,7 +59,7 @@ public class IndexCreateWWWLocalQueue_p {
     private static final int INITIATOR  = 5;
     private static final int MODIFIED   = 6;
     
-    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
         // return variable that accumulates replacements
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final serverObjects prop = new serverObjects();

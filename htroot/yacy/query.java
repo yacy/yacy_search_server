@@ -27,7 +27,7 @@
 // javac -classpath .:../../classes query.java
 // if the shell's current path is HTROOT
 
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
@@ -39,7 +39,7 @@ public final class query {
     // example:
     // http://localhost:8080/yacy/query.html?youare=sCJ6Tq8T0N9x&object=lurlcount
     
-    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> ss) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> ss) {
         if (post == null || ss == null) { return null; }
 
         // return variable that accumulates replacements
@@ -52,7 +52,7 @@ public final class query {
         
         if ((sb.isRobinsonMode()) &&
             (!sb.isPublicRobinson()) &&
-            (!sb.isInMyCluster(header.get(httpHeader.CONNECTION_PROP_CLIENTIP)))) {
+            (!sb.isInMyCluster(header.get(httpRequestHeader.CONNECTION_PROP_CLIENTIP)))) {
         	// if we are a robinson cluster, answer only if we are public robinson peers,
         	// or we are a private cluster and the requester is in our cluster.
           	// if we don't answer, the remote peer will recognize us as junior peer,

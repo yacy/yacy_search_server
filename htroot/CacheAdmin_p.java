@@ -44,13 +44,12 @@ import java.util.TreeSet;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterImageEntry;
 import de.anomic.htmlFilter.htmlFilterWriter;
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
+import de.anomic.http.httpResponseHeader;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
-import de.anomic.plasma.cache.IResourceInfo;
-import de.anomic.plasma.cache.UnsupportedProtocolException;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -66,7 +65,6 @@ public class CacheAdmin_p {
 	private static final int HtmlFile = 0;
 	private static final int NotCached = 1;
 	private static final int Image = 2;
-    private static final int ProtocolError = 3;
     private static final int SecurityError = 4;
     
     public static final class Filter implements FilenameFilter {
@@ -78,7 +76,7 @@ public class CacheAdmin_p {
         }
     }
 
-    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
         final plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
         final serverObjects prop = new serverObjects();
 
@@ -116,11 +114,11 @@ public class CacheAdmin_p {
 
             info.ensureCapacity(10000);
             try {
-                final IResourceInfo resInfo = plasmaHTCache.loadResourceInfo(url);
-                if (resInfo == null) {
+                final httpResponseHeader responseHeader = plasmaHTCache.loadResponseHeader(url);
+                if (responseHeader == null) {
                     prop.put("info_type", NotCached);
                 } else {
-                    formatHeader(prop, resInfo.getMap());
+                    formatHeader(prop, responseHeader);
                     
                     final String ff = file.toString();
                     final int dotpos = ff.lastIndexOf('.');
@@ -137,9 +135,9 @@ public class CacheAdmin_p {
                         final htmlFilterContentScraper scraper = new htmlFilterContentScraper(url);
                         //final OutputStream os = new htmlFilterOutputStream(null, scraper, null, false);
                         final Writer writer = new htmlFilterWriter(null,null,scraper,null,false);                    
-                        String sourceCharset = resInfo.getCharacterEncoding();
+                        String sourceCharset = responseHeader.getCharacterEncoding();
                         if (sourceCharset == null) sourceCharset = "UTF-8";
-                        final String mimeType = resInfo.getMimeType();                    
+                        final String mimeType = responseHeader.mime();                    
                         serverFileUtils.copy(file, Charset.forName(sourceCharset), writer);
                         writer.close();
                         
@@ -177,8 +175,6 @@ public class CacheAdmin_p {
                 }
             } catch (final IOException e) {
             	prop.put("info_type", NotCached);
-            } catch (final UnsupportedProtocolException e) {
-                prop.put("info_type", ProtocolError);
             } catch (final IllegalAccessException e) {
                 prop.put("info_type", SecurityError);
             }

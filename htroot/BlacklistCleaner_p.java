@@ -44,7 +44,7 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import de.anomic.data.listManager;
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.index.indexAbstractReferenceBlacklist;
 import de.anomic.index.indexDefaultReferenceBlacklist;
 import de.anomic.index.indexReferenceBlacklist;
@@ -71,7 +71,7 @@ public class BlacklistCleaner_p {
         indexDefaultReferenceBlacklist.class
     };
     
-    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
         final serverObjects prop = new serverObjects();
         
         // initialize the list manager

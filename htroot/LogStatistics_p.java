@@ -31,7 +31,7 @@ import java.util.Hashtable;
 import java.util.logging.Handler;
 import java.util.logging.Logger;
 
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.logging.LogalizerHandler;
@@ -42,7 +42,7 @@ public class LogStatistics_p {
     private static final String RESULTS = "results_";
     
     @SuppressWarnings({ "unchecked", "boxing" })
-    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
         
         final serverObjects prop = new serverObjects();
         final Logger logger = Logger.getLogger("");

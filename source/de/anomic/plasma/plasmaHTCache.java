@@ -50,18 +50,14 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import de.anomic.crawler.CrawlProfile;
-import de.anomic.http.httpHeader;
-import de.anomic.http.httpdProxyCacheEntry;
+import de.anomic.http.httpResponseHeader;
+import de.anomic.index.indexDocumentMetadata;
 import de.anomic.kelondro.kelondroBLOB;
 import de.anomic.kelondro.kelondroBLOBHeap;
 import de.anomic.kelondro.kelondroBLOBTree;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroMap;
-import de.anomic.plasma.cache.IResourceInfo;
-import de.anomic.plasma.cache.ResourceInfoFactory;
-import de.anomic.plasma.cache.UnsupportedProtocolException;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverDomains;
 import de.anomic.server.serverFileUtils;
@@ -81,7 +77,7 @@ public final class plasmaHTCache {
     public  static final long oneday = 1000 * 60 * 60 * 24; // milliseconds of a day
 
     private static kelondroMap responseHeaderDB = null;
-    private static final ConcurrentLinkedQueue<httpdProxyCacheEntry> cacheStack = new ConcurrentLinkedQueue<httpdProxyCacheEntry>();
+    private static final ConcurrentLinkedQueue<indexDocumentMetadata> cacheStack = new ConcurrentLinkedQueue<indexDocumentMetadata>();
     private static final SortedMap<String, File> cacheAge = Collections.synchronizedSortedMap(new TreeMap<String, File>()); // a <date+hash, cache-path> - relation
     public static long curCacheSize = 0;
     public static long maxCacheSize = 0l;
@@ -89,7 +85,6 @@ public final class plasmaHTCache {
     public static final serverLog log = new serverLog("HTCACHE");
     private static long lastcleanup = System.currentTimeMillis();
     
-    private static ResourceInfoFactory objFactory = new ResourceInfoFactory();
     private static serverThread cacheScanThread = null;
 
     // URL attributes
@@ -217,11 +212,11 @@ public final class plasmaHTCache {
         return responseHeaderDB.size();
     }
     
-    public static void push(final httpdProxyCacheEntry entry) {
+    public static void push(final indexDocumentMetadata entry) {
         cacheStack.add(entry);
     }
 
-    public static httpdProxyCacheEntry pop() {
+    public static indexDocumentMetadata pop() {
         return cacheStack.poll();
     }
 
@@ -239,58 +234,6 @@ public final class plasmaHTCache {
      */
     public static long getFreeSize() {
         return (curCacheSize >= maxCacheSize) ? 0 : maxCacheSize - curCacheSize;
-    }
-
-    public static boolean writeResourceContent(final yacyURL url, final byte[] array) {
-        if (array == null) return false;
-        final File file = getCachePath(url);
-        try {
-            deleteFile(file);
-            file.getParentFile().mkdirs();
-            serverFileUtils.copy(array, file);
-        } catch (final FileNotFoundException e) {
-            // this is the case of a "(Not a directory)" error, which should be prohibited
-            // by the shallStoreCache() property. However, sometimes the error still occurs
-            // In this case do nothing.
-            log.logSevere("File storage failed (not a directory): " + e.getMessage());
-            return false;
-        } catch (final IOException e) {
-            log.logSevere("File storage failed (IO error): " + e.getMessage());
-            return false;
-        }
-        writeFileAnnouncement(file);
-        return true;
-    }
-
-    public static void writeFileAnnouncement(final File file) {
-        if (file.exists()) {
-            curCacheSize += file.length();
-            if (System.currentTimeMillis() - lastcleanup > 300000) {
-                // call the cleanup job only every 5 minutes
-                cleanup();
-                lastcleanup = System.currentTimeMillis();
-            }
-            cacheAge.put(ageString(file.lastModified(), file), file);
-        }
-    }
-    
-    public static boolean deleteURLfromCache(final yacyURL url) {
-        return deleteURLfromCache(url, false);
-    }
-    
-    public static boolean deleteURLfromCache(final yacyURL url, final boolean keepHeader) {
-        if (deleteFileandDirs(getCachePath(url), "FROM") && !keepHeader) {
-            try {
-                // As the file is gone, the entry in responseHeader.db is not needed anymore
-                if (log.isFinest()) log.logFinest("Trying to remove responseHeader from URL: " + url.toNormalform(false, true));
-                responseHeaderDB.remove(url.hash());
-            } catch (final IOException e) {
-                resetResponseHeaderDB();
-                log.logWarning("IOExeption removing response header from DB: " + e.getMessage(), e);
-            }
-           return true;
-       }
-        return false;
     }
 
     private static boolean deleteFile(final File obj) {
@@ -467,35 +410,6 @@ public final class plasmaHTCache {
         return prefix + s.substring(0, p);
     }
 
-    /**
-     * Returns an object containing metadata about a cached resource
-     * @param url the {@link URL} of the resource
-     * @return an {@link IResourceInfo info object}
-     * @throws <b>IllegalAccessException</b> if the {@link SecurityManager} doesn't allow instantiation
-     * of the info object with the given protocol
-     * @throws <b>UnsupportedProtocolException</b> if the protocol is not supported and therefore the
-     * info object couldn't be created
-     */
-    public static IResourceInfo loadResourceInfo(final yacyURL url) throws UnsupportedProtocolException, IllegalAccessException {    
-        
-        // loading data from database
-        Map<String, String> hdb;
-        try {
-            hdb = responseHeaderDB.get(url.hash());
-        } catch (final IOException e) {
-            return null;
-        }
-        if (hdb == null) return null;
-        
-        // generate the cached object
-        final IResourceInfo cachedObj = objFactory.buildResourceInfoObj(url, hdb);
-        return cachedObj;
-    }
-    
-    public static ResourceInfoFactory getResourceInfoFactory() {
-        return objFactory;
-    }
-
     public static boolean full() {
         return (cacheStack.size() > stackLimit);
     }
@@ -510,10 +424,6 @@ public final class plasmaHTCache {
     }
 
     public static boolean isText(final String mimeType) {
-//      Object ct = response.get(httpHeader.CONTENT_TYPE);
-//      if (ct == null) return false;
-//      String t = ((String)ct).toLowerCase();
-//      return ((t.startsWith("text")) || (t.equals("application/xhtml+xml")));
         return plasmaParser.supportedMimeTypesContains(mimeType);
     }
 
@@ -675,7 +585,7 @@ public final class plasmaHTCache {
                 hdb = null;
             }
             if (hdb != null) {
-                final Object origRequestLine = hdb.get(httpHeader.X_YACY_ORIGINAL_REQUEST_LINE);
+                final Object origRequestLine = hdb.get(httpResponseHeader.X_YACY_ORIGINAL_REQUEST_LINE);
                 if ((origRequestLine != null)&&(origRequestLine instanceof String)) {
                     int i = ((String)origRequestLine).indexOf(" ");
                     if (i >= 0) {
@@ -778,6 +688,116 @@ public final class plasmaHTCache {
     }
     
     /**
+     * @return the responseHeaderDB
+     */
+    static kelondroMap getResponseHeaderDB() {
+        return responseHeaderDB;
+    }
+
+    
+    /*
+     * ACCESS METHODS
+     */
+    
+    
+    // Store to Cache
+    
+    public static void storeMetadata(
+            final httpResponseHeader responseHeader,
+            indexDocumentMetadata metadata
+    ) {
+        if (responseHeader != null) try {
+            // store the response header into the header database
+            final HashMap<String, String> hm = new HashMap<String, String>();
+            hm.putAll(responseHeader);
+            hm.put("@@URL", metadata.url().toNormalform(false, false));
+            hm.put("@@DEPTH", Integer.toString(metadata.depth()));
+            if (metadata.initiator() != null) hm.put("@@INITIATOR", metadata.initiator());
+            responseHeaderDB.put(metadata.urlHash(), hm);
+        } catch (final Exception e) {
+            log.logWarning("could not write ResourceInfo: "
+                    + e.getClass() + ": " + e.getMessage());
+            resetResponseHeaderDB();
+        }
+    }
+
+    public static boolean writeResourceContent(final yacyURL url, final byte[] array) {
+        if (array == null) return false;
+        final File file = getCachePath(url);
+        try {
+            deleteFile(file);
+            file.getParentFile().mkdirs();
+            serverFileUtils.copy(array, file);
+        } catch (final FileNotFoundException e) {
+            // this is the case of a "(Not a directory)" error, which should be prohibited
+            // by the shallStoreCache() property. However, sometimes the error still occurs
+            // In this case do nothing.
+            log.logSevere("File storage failed (not a directory): " + e.getMessage());
+            return false;
+        } catch (final IOException e) {
+            log.logSevere("File storage failed (IO error): " + e.getMessage());
+            return false;
+        }
+        writeFileAnnouncement(file);
+        return true;
+    }
+
+    public static void writeFileAnnouncement(final File file) {
+        if (file.exists()) {
+            curCacheSize += file.length();
+            if (System.currentTimeMillis() - lastcleanup > 300000) {
+                // call the cleanup job only every 5 minutes
+                cleanup();
+                lastcleanup = System.currentTimeMillis();
+            }
+            cacheAge.put(ageString(file.lastModified(), file), file);
+        }
+    }
+
+    // Delete from Cache
+    
+    public static boolean deleteURLfromCache(final yacyURL url, final boolean keepHeader) {
+        if (deleteFileandDirs(getCachePath(url), "FROM") && !keepHeader) {
+            try {
+                // As the file is gone, the entry in responseHeader.db is not needed anymore
+                if (log.isFinest()) log.logFinest("Trying to remove responseHeader from URL: " + url.toNormalform(false, true));
+                responseHeaderDB.remove(url.hash());
+            } catch (final IOException e) {
+                resetResponseHeaderDB();
+                log.logWarning("IOExeption removing response header from DB: " + e.getMessage(), e);
+            }
+           return true;
+       }
+        return false;
+    }
+    
+    
+    // Read from Cache
+    
+    /**
+     * Returns an object containing metadata about a cached resource
+     * @param url the {@link URL} of the resource
+     * @return an {@link IResourceInfo info object}
+     * @throws <b>IllegalAccessException</b> if the {@link SecurityManager} doesn't allow instantiation
+     * of the info object with the given protocol
+     * @throws <b>UnsupportedProtocolException</b> if the protocol is not supported and therefore the
+     * info object couldn't be created
+     */
+    public static httpResponseHeader loadResponseHeader(final yacyURL url) throws IllegalAccessException {    
+        
+        // loading data from database
+        Map<String, String> hdb;
+        try {
+            hdb = responseHeaderDB.get(url.hash());
+        } catch (final IOException e) {
+            return null;
+        }
+        if (hdb == null) return null;
+        
+        return new httpResponseHeader(null, hdb);
+    }
+    
+    /**
      * Returns the content of a cached resource as {@link InputStream}
      * @param url the requested resource
      * @return the resource content as {@link InputStream}. In no data
@@ -805,46 +825,5 @@ public final class plasmaHTCache {
         return 0;           
     }
 
-    public static httpdProxyCacheEntry newEntry(
-            final int depth, 
-            final yacyURL url,
-            final String name,
-            final String responseStatus,
-            final IResourceInfo docInfo,            
-            final String initiator,
-            final CrawlProfile.entry profile
-    ) {
-        final httpdProxyCacheEntry entry = new httpdProxyCacheEntry(
-                depth, 
-                url,
-                name,
-                responseStatus,
-                docInfo,
-                initiator, 
-                profile
-        );
-        if (docInfo != null) try {
-            final HashMap<String, String> hm = new HashMap<String, String>();
-            hm.putAll(docInfo.getMap());
-            hm.put("@@URL", url.toNormalform(false, false));
-            hm.put("@@DEPTH", Integer.toString(depth));
-            if (initiator != null)
-                hm.put("@@INITIATOR", initiator);
-            plasmaHTCache.getResponseHeaderDB().put(url.hash(), hm);
-        } catch (final Exception e) {
-            plasmaHTCache.log.logWarning("could not write ResourceInfo: "
-                    + e.getClass() + ": " + e.getMessage());
-            plasmaHTCache.resetResponseHeaderDB();
-        }
-
-        return entry;
-    }
-
-    /**
-     * @return the responseHeaderDB
-     */
-    static kelondroMap getResponseHeaderDB() {
-        return responseHeaderDB;
-    }
-
+    
 }

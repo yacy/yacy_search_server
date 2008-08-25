@@ -35,7 +35,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.Properties;
 
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -43,7 +43,7 @@ import de.anomic.yacy.yacyNetwork;
 
 public final class profile {
 
-    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
@@ -52,7 +52,7 @@ public final class profile {
 
         if ((sb.isRobinsonMode()) &&
            	(!sb.isPublicRobinson()) &&
-           	(!sb.isInMyCluster(header.get(httpHeader.CONNECTION_PROP_CLIENTIP)))) {
+           	(!sb.isInMyCluster(header.get(httpRequestHeader.CONNECTION_PROP_CLIENTIP)))) {
                // if we are a robinson cluster, answer only if this client is known by our network definition
         	prop.put("list", "0");
             return prop;

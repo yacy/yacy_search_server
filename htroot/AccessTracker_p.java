@@ -33,7 +33,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.Map.Entry;
 
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.net.natLib;
 import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -53,7 +53,7 @@ public class AccessTracker_p {
 		return accessClone;
 	}
 	
-    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
      
         // return variable that accumulates replacements

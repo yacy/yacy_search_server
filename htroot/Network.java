@@ -37,7 +37,7 @@ import java.util.regex.PatternSyntaxException;
 
 import de.anomic.crawler.HTTPLoader;
 import de.anomic.http.HttpClient;
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverDate;
@@ -53,13 +53,13 @@ public class Network {
 
     private static final String STR_TABLE_LIST = "table_list_";
 
-    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> switchboard) {
+    public static serverObjects respond(final httpRequestHeader requestHeader, final serverObjects post, final serverSwitch<?> switchboard) {
         final plasmaSwitchboard sb = (plasmaSwitchboard) switchboard;
         final long start = System.currentTimeMillis();
         
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
-        prop.setLocalized(!(header.get("PATH")).endsWith(".xml"));
+        prop.setLocalized(!(requestHeader.get("PATH")).endsWith(".xml"));
         prop.putHTML("page_networkTitle", sb.getConfig("network.unit.description", "unspecified"));
         prop.putHTML("page_networkName", sb.getConfig("network.unit.name", "unspecified"));
         final boolean overview = (post == null) || (post.get("page", "0").equals("0"));
@@ -183,7 +183,7 @@ public class Network {
             if (post.containsKey("addPeer")) {
 
                 // AUTHENTICATE
-                if (!header.containsKey(httpHeader.AUTHORIZATION)) {
+                if (!requestHeader.containsKey(httpRequestHeader.AUTHORIZATION)) {
                     prop.putHTML("AUTHENTICATE","log-in");
                     return prop;
                 }

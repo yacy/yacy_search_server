@@ -32,7 +32,7 @@ import java.util.Iterator;
 
 import de.anomic.data.bookmarksDB;
 import de.anomic.data.bookmarksDB.Tag;
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -42,7 +42,7 @@ public class get {
 	final static int SORT_SIZE = 2;
 	final static int SHOW_ALL = -1;
 	
-	public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+	public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
         // return variable that accumulates replacements
         final plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
         final boolean isAdmin=switchboard.verifyAuthentication(header, true);

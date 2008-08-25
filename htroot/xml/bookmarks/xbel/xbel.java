@@ -5,7 +5,7 @@ import java.util.Iterator;
 
 import de.anomic.data.bookmarksDB;
 import de.anomic.data.htmlTools;
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
@@ -17,7 +17,7 @@ public class xbel {
 	private static plasmaSwitchboard switchboard = null;
 	private static boolean isAdmin = false;	
 	
-    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
  
     	int count = 0;;
 

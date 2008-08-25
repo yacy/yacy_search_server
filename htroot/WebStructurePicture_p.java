@@ -30,7 +30,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
 
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaWebStructure;
@@ -45,7 +45,7 @@ public class WebStructurePicture_p {
     
     private static final double maxlongd = Long.MAX_VALUE;
     
-    public static ymageMatrix respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static ymageMatrix respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         
         int width = 768;

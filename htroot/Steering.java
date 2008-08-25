@@ -29,7 +29,7 @@
 
 import java.io.File;
 
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -37,7 +37,7 @@ import de.anomic.yacy.yacyVersion;
 
 public class Steering {
 
-    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> ss) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> ss) {
         if (post == null || ss == null) { return new serverObjects(); }
 
         final plasmaSwitchboard sb = (plasmaSwitchboard) ss;

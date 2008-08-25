@@ -30,7 +30,8 @@
 import java.io.IOException;
 
 import de.anomic.data.userDB;
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
+import de.anomic.http.httpResponseHeader;
 import de.anomic.http.httpd;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -41,7 +42,7 @@ import de.anomic.server.servletProperties;
 
 public class User{
     
-    public static servletProperties respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static servletProperties respond(final httpRequestHeader requestHeader, final serverObjects post, final serverSwitch<?> env) {
         final servletProperties prop = new servletProperties();
         final plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
         userDB.Entry entry=null;
@@ -51,16 +52,16 @@ public class User{
         prop.put("logged-in_limit", "0");
         prop.put("status", "0");
         //identified via HTTPPassword
-        entry=sb.userDB.proxyAuth(((String) header.get(httpHeader.AUTHORIZATION, "xxxxxx")));
+        entry=sb.userDB.proxyAuth(((String) requestHeader.get(httpRequestHeader.AUTHORIZATION, "xxxxxx")));
         if(entry != null){
         	prop.put("logged-in_identified-by", "1");
         //try via cookie
         }else{
-            entry=sb.userDB.cookieAuth(header.getHeaderCookies());
+            entry=sb.userDB.cookieAuth(requestHeader.getHeaderCookies());
             prop.put("logged-in_identified-by", "2");
             //try via ip
             if(entry == null){
-                entry=sb.userDB.ipAuth(((String)header.get(httpHeader.CONNECTION_PROP_CLIENTIP, "xxxxxx")));
+                entry=sb.userDB.ipAuth(((String)requestHeader.get(httpRequestHeader.CONNECTION_PROP_CLIENTIP, "xxxxxx")));
                 if(entry != null){
                     prop.put("logged-in_identified-by", "0");
                 }
@@ -84,12 +85,11 @@ public class User{
                 prop.put("logged-in_limit_percent2", (100-percent)/3);
             }
         //logged in via static Password
-        }else if(sb.verifyAuthentication(header, true)){
+        }else if(sb.verifyAuthentication(requestHeader, true)){
             prop.put("logged-in", "2");
         //identified via form-login
         //TODO: this does not work for a static admin, yet.
         }else if(post != null && post.containsKey("username") && post.containsKey("password")){
-            //entry=sb.userDB.passwordAuth((String)post.get("username"), (String)post.get("password"), (String)header.get(httpHeader.CONNECTION_PROP_CLIENTIP, "xxxxxx"));
             final String username=post.get("username");
             final String password=post.get("password");
             
@@ -107,7 +107,7 @@ public class User{
                 cookie=sb.userDB.getAdminCookie();
                 
             if(entry != null || staticAdmin){
-                final httpHeader outgoingHeader=new httpHeader();
+                final httpResponseHeader outgoingHeader=new httpResponseHeader();
                 outgoingHeader.setCookie("login", cookie);
                 prop.setOutgoingHeader(outgoingHeader);
                 
@@ -144,12 +144,12 @@ public class User{
         if(post!=null && post.containsKey("logout")){
             prop.put("logged-in", "0");
             if(entry != null){
-                entry.logout(((String)header.get(httpHeader.CONNECTION_PROP_CLIENTIP, "xxxxxx")), userDB.getLoginToken(header.getHeaderCookies())); //todo: logout cookie
+                entry.logout(((String)requestHeader.get(httpRequestHeader.CONNECTION_PROP_CLIENTIP, "xxxxxx")), userDB.getLoginToken(requestHeader.getHeaderCookies())); //todo: logout cookie
             }else{
-                sb.userDB.adminLogout(userDB.getLoginToken(header.getHeaderCookies()));
+                sb.userDB.adminLogout(userDB.getLoginToken(requestHeader.getHeaderCookies()));
             }
             //XXX: This should not be needed anymore, because of isLoggedout
-            if(! ((String) header.get(httpHeader.AUTHORIZATION, "xxxxxx")).equals("xxxxxx")){
+            if(! ((String) requestHeader.get(httpRequestHeader.AUTHORIZATION, "xxxxxx")).equals("xxxxxx")){
                 prop.put("AUTHENTICATE","admin log-in");
             }
         }

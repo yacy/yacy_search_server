@@ -21,7 +21,7 @@
 import java.util.Random;
 
 import de.anomic.crawler.ResultImages;
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
@@ -43,7 +43,7 @@ public class Collage {
     private static           long      imgZIndex[]   = new long[fifoMax];
     private static final     Random rand = new Random();
     
-    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
         final serverObjects prop = new serverObjects();
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final boolean authenticated = sb.verifyAuthentication(header, false);

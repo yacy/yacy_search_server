@@ -31,7 +31,7 @@
 import java.util.regex.Pattern;
 
 import de.anomic.data.translator;
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpd;
 import de.anomic.http.httpdFileHandler;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -51,7 +51,7 @@ public class ConfigBasic {
     private static final int NEXTSTEP_PEERPORT  = 3;
     private static final int NEXTSTEP_RECONNECT = 4;
     
-    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
         
         // return variable that accumulates replacements
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
@@ -107,8 +107,8 @@ public class ConfigBasic {
             reconnect = true;
             
             String host = null;
-            if (header.containsKey(httpHeader.HOST)) {
-                host = header.get(httpHeader.HOST);
+            if (header.containsKey(httpRequestHeader.HOST)) {
+                host = header.get(httpRequestHeader.HOST);
                 final int idx = host.indexOf(":");
                 if (idx != -1) host = host.substring(0,idx);
             } else {

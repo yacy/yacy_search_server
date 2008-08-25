@@ -38,13 +38,12 @@ import java.util.TreeSet;
 
 import de.anomic.htmlFilter.htmlFilterImageEntry;
 import de.anomic.http.HttpClient;
-import de.anomic.http.httpHeader;
-import de.anomic.http.httpdProxyCacheEntry;
+import de.anomic.http.httpResponseHeader;
+import de.anomic.index.indexDocumentMetadata;
 import de.anomic.index.indexURLReference;
 import de.anomic.index.indexWord;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroMSetTools;
-import de.anomic.plasma.cache.IResourceInfo;
 import de.anomic.plasma.parser.ParserException;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySearch;
@@ -258,10 +257,11 @@ public class plasmaSnippetCache {
         // if the snippet is not in the cache, we can try to get it from the htcache
         long resContentLength = 0;
         InputStream resContent = null;
-        IResourceInfo resInfo = null;
+        httpResponseHeader responseHeader = null;
         try {
             // trying to load the resource from the cache
             resContent = plasmaHTCache.getResourceContentStream(url);
+            responseHeader = plasmaHTCache.loadResponseHeader(url);
             if (resContent != null) {
                 // if the content was found
                 resContentLength = plasmaHTCache.getResourceContentLength(url);
@@ -285,13 +285,12 @@ public class plasmaSnippetCache {
                 // if not found try to download it
                 
                 // download resource using the crawler and keep resource in memory if possible
-                final httpdProxyCacheEntry entry = plasmaSwitchboard.getSwitchboard().crawlQueues.loadResourceFromWeb(url, timeout, true, true, reindexing);
+                final indexDocumentMetadata entry = plasmaSwitchboard.getSwitchboard().crawlQueues.loadResourceFromWeb(url, timeout, true, true, reindexing);
                 
                 // getting resource metadata (e.g. the http headers for http resources)
                 if (entry != null) {
                     // place entry on crawl queue
                     plasmaHTCache.push(entry);
-                    resInfo = entry.getDocumentInfo();
                     
                     // read resource body (if it is there)
                     final byte []resourceArray = entry.cacheArray();
@@ -321,7 +320,7 @@ public class plasmaSnippetCache {
          * =========================================================================== */
         plasmaParserDocument document = null;
         try {
-             document = parseDocument(url, resContentLength, resContent, resInfo);
+             document = parseDocument(url, resContentLength, resContent, responseHeader);
         } catch (final ParserException e) {
             return new TextSnippet(url, null, ERROR_PARSER_FAILED, queryhashes, e.getMessage()); // cannot be parsed
         } finally {
@@ -385,10 +384,11 @@ public class plasmaSnippetCache {
         // load resource
         long resContentLength = 0;
         InputStream resContent = null;
-        IResourceInfo resInfo = null;
+        httpResponseHeader responseHeader = null;
         try {
             // trying to load the resource from the cache
             resContent = plasmaHTCache.getResourceContentStream(url);
+            responseHeader = plasmaHTCache.loadResponseHeader(url);
             if (resContent != null) {
                 // if the content was found
                 resContentLength = plasmaHTCache.getResourceContentLength(url);
@@ -396,11 +396,10 @@ public class plasmaSnippetCache {
                 // if not found try to download it
                 
                 // download resource using the crawler and keep resource in memory if possible
-                final httpdProxyCacheEntry entry = plasmaSwitchboard.getSwitchboard().crawlQueues.loadResourceFromWeb(url, timeout, true, forText, global);
+                final indexDocumentMetadata entry = plasmaSwitchboard.getSwitchboard().crawlQueues.loadResourceFromWeb(url, timeout, true, forText, global);
                 
                 // getting resource metadata (e.g. the http headers for http resources)
                 if (entry != null) {
-                    resInfo = entry.getDocumentInfo();
 
                     // read resource body (if it is there)
                     final byte[] resourceArray = entry.cacheArray();
@@ -430,7 +429,7 @@ public class plasmaSnippetCache {
         // parse resource
         plasmaParserDocument document = null;
         try {
-            document = parseDocument(url, resContentLength, resContent, resInfo);            
+            document = parseDocument(url, resContentLength, resContent, responseHeader);            
         } catch (final ParserException e) {
             serverLog.logFine("snippet fetch", "parser error " + e.getMessage() + " for url " + url);
             return null;
@@ -768,36 +767,35 @@ public class plasmaSnippetCache {
      * @return the extracted data
      * @throws ParserException
      */
-    public static plasmaParserDocument parseDocument(final yacyURL url, final long contentLength, final InputStream resourceStream, IResourceInfo docInfo) throws ParserException {
+    public static plasmaParserDocument parseDocument(final yacyURL url, final long contentLength, final InputStream resourceStream, httpResponseHeader responseHeader) throws ParserException {
         try {
             if (resourceStream == null) return null;
 
             // STEP 1: if no resource metadata is available, try to load it from cache 
-            if (docInfo == null) {
+            if (responseHeader == null) {
                 // try to get the header from the htcache directory
                 try {                    
-                    docInfo = plasmaHTCache.loadResourceInfo(url);
+                    responseHeader = plasmaHTCache.loadResponseHeader(url);
                 } catch (final Exception e) {
                     // ignore this. resource info loading failed
                 }   
             }
             
             // STEP 2: if the metadata is still null try to download it from web
-            if ((docInfo == null) && (url.getProtocol().startsWith("http"))) {
+            if ((responseHeader == null) && (url.getProtocol().startsWith("http"))) {
                 // TODO: we need a better solution here
                 // e.g. encapsulate this in the crawlLoader class
                 
                 // getting URL mimeType
                 try {
-                    final httpHeader header = HttpClient.whead(url.toString());
-                    docInfo = plasmaHTCache.getResourceInfoFactory().buildResourceInfoObj(url, header);
+                    responseHeader = HttpClient.whead(url.toString());
                 } catch (final Exception e) {
                     // ingore this. http header download failed
                 } 
             }
 
             // STEP 3: if the metadata is still null try to guess the mimeType of the resource
-            if (docInfo == null) {
+            if (responseHeader == null) {
                 final String filename = plasmaHTCache.getCachePath(url).getName();
                 final int p = filename.lastIndexOf('.');
                 if (    // if no extension is available
@@ -820,8 +818,8 @@ public class plasmaSnippetCache {
                 }
                 return null;
             }            
-            if (plasmaParser.supportedMimeTypesContains(docInfo.getMimeType())) {
-                return parser.parseSource(url, docInfo.getMimeType(), docInfo.getCharacterEncoding(), contentLength, resourceStream);
+            if (plasmaParser.supportedMimeTypesContains(responseHeader.mime())) {
+                return parser.parseSource(url, responseHeader.mime(), responseHeader.getCharacterEncoding(), contentLength, resourceStream);
             }
             return null;
         } catch (final InterruptedException e) {
@@ -854,7 +852,7 @@ public class plasmaSnippetCache {
                 // if the content is not available in cache try to download it from web
                 
                 // try to download the resource using a crawler
-                final httpdProxyCacheEntry entry = plasmaSwitchboard.getSwitchboard().crawlQueues.loadResourceFromWeb(url, (socketTimeout < 0) ? -1 : socketTimeout, true, forText, reindexing);
+                final indexDocumentMetadata entry = plasmaSwitchboard.getSwitchboard().crawlQueues.loadResourceFromWeb(url, (socketTimeout < 0) ? -1 : socketTimeout, true, forText, reindexing);
                 if (entry == null) return null; // not found in web
                 
                 // read resource body (if it is there)

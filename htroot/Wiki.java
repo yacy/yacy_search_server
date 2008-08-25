@@ -36,7 +36,7 @@ import java.util.Iterator;
 
 import de.anomic.data.diff;
 import de.anomic.data.wikiBoard;
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -54,7 +54,7 @@ public class Wiki {
     }
 
 
-    public static serverObjects respond(final httpHeader header, serverObjects post, final serverSwitch<?> env) throws IOException {
+    public static serverObjects respond(final httpRequestHeader header, serverObjects post, final serverSwitch<?> env) throws IOException {
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final serverObjects prop = new serverObjects();
         if (post == null) {
@@ -68,7 +68,7 @@ public class Wiki {
         
         String access = sb.getConfig("WikiAccess", "admin");
         final String pagename = get(post, "page", "start");
-        final String ip = get(post, httpHeader.CONNECTION_PROP_CLIENTIP, "127.0.0.1");
+        final String ip = get(post, httpRequestHeader.CONNECTION_PROP_CLIENTIP, "127.0.0.1");
         String author = get(post, "author", "anonymous");
         if (author.equals("anonymous")) {
             author = wikiBoard.guessAuthor(ip);

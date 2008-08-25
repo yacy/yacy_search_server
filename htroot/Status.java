@@ -29,7 +29,7 @@
 
 import java.util.Date;
 
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpd;
 import de.anomic.http.httpdByteCountInputStream;
 import de.anomic.http.httpdByteCountOutputStream;
@@ -51,7 +51,7 @@ public class Status {
     private static final String SEEDSERVER = "seedServer";
     private static final String PEERSTATUS = "peerStatus";
 
-    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;

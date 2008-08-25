@@ -26,8 +26,8 @@ import java.util.Hashtable;
 
 import de.anomic.crawler.HTTPLoader;
 import de.anomic.http.HttpClient;
-import de.anomic.http.httpHeader;
 import de.anomic.http.httpRemoteProxyConfig;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.yacy.yacyURL;
 
 public class loaderThreads {
@@ -122,8 +122,8 @@ public class loaderThreads {
 
         public void run() {
             try {
-                final httpHeader reqHeader = new httpHeader();
-                reqHeader.put(httpHeader.USER_AGENT, HTTPLoader.crawlerUserAgent);
+                final httpRequestHeader reqHeader = new httpRequestHeader();
+                reqHeader.put(httpRequestHeader.USER_AGENT, HTTPLoader.crawlerUserAgent);
                 page = HttpClient.wget(url.toString(), reqHeader, timeout);
                 loaded = true;
                 process.feed(page);

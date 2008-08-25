@@ -34,7 +34,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.index.indexContainer;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroBitfield;
@@ -60,7 +60,7 @@ import de.anomic.yacy.yacyURL;
 
 public final class search {
 
-    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
         // return variable that accumulates replacements
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         sb.remoteSearchLastAccess = System.currentTimeMillis();
@@ -68,7 +68,7 @@ public final class search {
         final serverObjects prop = new serverObjects();
         if ((post == null) || (env == null)) return prop;
         if (!yacyNetwork.authentifyRequest(post, env)) return prop;
-        final String client = header.get(httpHeader.CONNECTION_PROP_CLIENTIP);
+        final String client = header.get(httpRequestHeader.CONNECTION_PROP_CLIENTIP);
 
         //System.out.println("yacy: search received request = " + post.toString());
 
@@ -113,7 +113,7 @@ public final class search {
 
         if ((sb.isRobinsonMode()) &&
              	 (!((sb.isPublicRobinson()) ||
-             	    (sb.isInMyCluster(header.get(httpHeader.CONNECTION_PROP_CLIENTIP)))))) {
+             	    (sb.isInMyCluster(header.get(httpRequestHeader.CONNECTION_PROP_CLIENTIP)))))) {
                  // if we are a robinson cluster, answer only if this client is known by our network definition
         	prop.put("links", "");
             prop.put("linkcount", "0");

@@ -36,15 +36,15 @@ import java.util.Map;
 import de.anomic.data.htmlTools;
 import de.anomic.htmlFilter.htmlFilterImageEntry;
 import de.anomic.http.HttpClient;
-import de.anomic.http.httpHeader;
-import de.anomic.http.httpdProxyCacheEntry;
+import de.anomic.http.httpRequestHeader;
+import de.anomic.http.httpResponseHeader;
+import de.anomic.index.indexDocumentMetadata;
 import de.anomic.index.indexURLReference;
 import de.anomic.plasma.plasmaCondenser;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.cache.IResourceInfo;
 import de.anomic.plasma.parser.ParserException;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
@@ -63,7 +63,7 @@ public class ViewFile {
     private static final String HIGHLIGHT_CSS = "searchHighlight";
     private static final int MAX_HIGHLIGHTS = 6;
 
-    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
 
         final serverObjects prop = new serverObjects();
         final plasmaSwitchboard sb = (plasmaSwitchboard)env;     
@@ -138,15 +138,21 @@ public class ViewFile {
         // loading the resource content as byte array
         InputStream resource = null;
         long resourceLength = -1;
-        IResourceInfo resInfo = null;
+        httpResponseHeader responseHeader = null;
         String resMime = null;
         // trying to load the resource body
         resource = plasmaHTCache.getResourceContentStream(url);
         resourceLength = plasmaHTCache.getResourceContentLength(url);
+        try {
+            responseHeader = plasmaHTCache.loadResponseHeader(url);
+        } catch (IllegalAccessException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
 
         // if the resource body was not cached we try to load it from web
         if (resource == null) {
-            httpdProxyCacheEntry entry = null;
+            indexDocumentMetadata entry = null;
             try {
                 entry = sb.crawlQueues.loadResourceFromWeb(url, 5000, false, true, false);
             } catch (final Exception e) {
@@ -157,7 +163,6 @@ public class ViewFile {
             }
 
             if (entry != null) {
-                resInfo = entry.getDocumentInfo();
                 resource = plasmaHTCache.getResourceContentStream(url);
                 resourceLength = plasmaHTCache.getResourceContentLength(url);
             }
@@ -171,17 +176,17 @@ public class ViewFile {
         }
 
         // try to load resource metadata
-        if (resInfo == null) {
+        if (responseHeader == null) {
 
             // try to load the metadata from cache
             try {
-                resInfo = plasmaHTCache.loadResourceInfo(url);
+                responseHeader = plasmaHTCache.loadResponseHeader(url);
             } catch (final Exception e) {
                 /* ignore this */
             }
 
             // if the metadata was not cached try to load it from web
-            if (resInfo == null) {
+            if (responseHeader == null) {
                 final String protocol = url.getProtocol();
                 if (!((protocol.equals("http") || protocol.equals("https")))) {
                     prop.put("error", "6");
@@ -189,25 +194,17 @@ public class ViewFile {
                     return prop;
                 }
 
-                final httpHeader responseHeader = HttpClient.whead(url.toString());
+                responseHeader = HttpClient.whead(url.toString());
                 if (responseHeader == null) {
                     prop.put("error", "4");
                     prop.put("error_errorText", "Unable to load resource metadata.");
                     prop.put("viewMode", VIEW_MODE_NO_TEXT);
                     return prop;
                 }
-                try {
-                    resInfo = plasmaHTCache.getResourceInfoFactory().buildResourceInfoObj(url, responseHeader);
-                } catch (final Exception e) {
-                    prop.put("error", "4");
-                    prop.putHTML("error_errorText", e.getMessage());
-                    prop.put("viewMode", VIEW_MODE_NO_TEXT);
-                    return prop;
-                }
                 resMime = responseHeader.mime();
             }
         } else {
-            resMime = resInfo.getMimeType();
+            resMime = responseHeader.mime();
         }
         
         final String[] wordArray = wordArray(post.get("words", null));
@@ -244,7 +241,7 @@ public class ViewFile {
             // parsing the resource content
             plasmaParserDocument document = null;
             try {
-                document = plasmaSnippetCache.parseDocument(url, resourceLength, resource, resInfo);
+                document = plasmaSnippetCache.parseDocument(url, resourceLength, resource);
                 if (document == null) {
                     prop.put("error", "5");
                     prop.put("error_errorText", "Unknown error");

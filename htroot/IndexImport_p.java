@@ -34,7 +34,7 @@ import java.util.Date;
 
 import de.anomic.crawler.Importer;
 import de.anomic.crawler.NoticeURLImporter;
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverByteBuffer;
 import de.anomic.server.serverDate;
@@ -43,7 +43,7 @@ import de.anomic.server.serverSwitch;
 
 public final class IndexImport_p {
     
-    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
         // return variable that accumulates replacements
         final plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
         final serverObjects prop = new serverObjects();

@@ -27,7 +27,7 @@
 import java.util.HashSet;
 import java.util.Iterator;
 
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
@@ -35,13 +35,13 @@ import de.anomic.server.serverSwitch;
 
 public class sidebar_history {
 
-    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final serverObjects prop = new serverObjects();
     
         // list search history
         final Iterator<plasmaSearchQuery> i = sb.localSearches.iterator();
-        final String client = header.get(httpHeader.CONNECTION_PROP_CLIENTIP);
+        final String client = header.get(httpRequestHeader.CONNECTION_PROP_CLIENTIP);
         plasmaSearchQuery query;
         int c = 0;
         final HashSet<String> visibleQueries = new HashSet<String>();

@@ -29,7 +29,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaParserConfig;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -42,7 +42,7 @@ import de.anomic.yacy.yacySeedUploader;
 
 public final class Settings_p {
     
-    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
@@ -162,7 +162,7 @@ public final class Settings_p {
         }
         
         // clientIP
-        prop.putHTML("clientIP", (String) header.get(httpHeader.CONNECTION_PROP_CLIENTIP, "<unknown>"), true); // read an artificial header addendum
+        prop.putHTML("clientIP", (String) header.get(httpRequestHeader.CONNECTION_PROP_CLIENTIP, "<unknown>"), true); // read an artificial header addendum
         
         /* 
          * seed upload settings

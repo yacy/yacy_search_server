@@ -28,7 +28,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.index.indexURLReference;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -41,7 +41,7 @@ import de.anomic.yacy.yacyURL;
 
 public class CrawlResults {
 
-    public static serverObjects respond(final httpHeader header, serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, serverObjects post, final serverSwitch<?> env) {
         // return variable that accumulates replacements
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final serverObjects prop = new serverObjects();
@@ -77,7 +77,7 @@ public class CrawlResults {
         if (((tabletype > 0) && (tabletype < 6)) ||
             (post != null && (post.containsKey("clearlist") ||
             post.containsKey("deleteentry")))) {
-            final String authorization = ((String) header.get(httpHeader.AUTHORIZATION, "xxxxxx"));
+            final String authorization = ((String) header.get(httpRequestHeader.AUTHORIZATION, "xxxxxx"));
             if (authorization.length() != 0) {
                 if (! sb.verifyAuthentication(header, true)){
                     // force log-in (again, because wrong password was given)

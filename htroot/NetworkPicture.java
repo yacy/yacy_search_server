@@ -24,7 +24,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.plasma.plasmaGrafics;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
@@ -34,7 +34,7 @@ import de.anomic.ymage.ymageMatrix;
 /** draw a picture of the yacy network */
 public class NetworkPicture {
     
-    public static ymageMatrix respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static ymageMatrix respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         
         int width = 768;

@@ -32,7 +32,7 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.kelondroMSetTools;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.plasma.plasmaProfiling;
@@ -59,7 +59,7 @@ public class yacysearchitem {
     private static final int urllength = 120;
     private static final int MAX_TOPWORDS = 24;
     
-    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final serverObjects prop = new serverObjects();
         
@@ -68,7 +68,7 @@ public class yacysearchitem {
         final boolean rss = post.get("rss", "false").equals("true");
         final boolean authenticated = sb.adminAuthenticated(header) >= 2;
         final int item = post.getInt("item", -1);
-        final boolean auth = ((String) header.get(httpHeader.CONNECTION_PROP_CLIENTIP, "")).equals("localhost") || sb.verifyAuthentication(header, true);
+        final boolean auth = ((String) header.get(httpRequestHeader.CONNECTION_PROP_CLIENTIP, "")).equals("localhost") || sb.verifyAuthentication(header, true);
         
         // default settings for blank item
         prop.put("content", "0");

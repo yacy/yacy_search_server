@@ -21,7 +21,7 @@
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  US
 package de.anomic.server;
 
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpResponseHeader;
 
 public class servletProperties extends serverObjects {
 
@@ -37,7 +37,7 @@ public class servletProperties extends serverObjects {
 
     private String prefix="";
     
-    private  httpHeader outgoingHeader;
+    private  httpResponseHeader outgoingHeader;
     
     public servletProperties(){
         super();
@@ -47,13 +47,13 @@ public class servletProperties extends serverObjects {
         super(so);
     }
     
-    public void setOutgoingHeader(final httpHeader outgoingHeader) {
+    public void setOutgoingHeader(final httpResponseHeader outgoingHeader) {
         this.outgoingHeader = outgoingHeader;
     }
     
-    public httpHeader getOutgoingHeader() {
+    public httpResponseHeader getOutgoingHeader() {
         if(outgoingHeader == null)
-            return new httpHeader();
+            return new httpResponseHeader();
         return outgoingHeader;
     }
     

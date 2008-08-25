@@ -30,7 +30,7 @@ import java.util.Iterator;
 
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.CrawlProfile.entry;
-import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.server.serverObjects;
@@ -79,7 +79,7 @@ public class CrawlProfileEditor_p {
         labels.add(new eentry(entry.XPSTOPW,          "Parent stop-words",    false, eentry.BOOLEAN));
     }
     
-    public static serverObjects respond(final httpHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
         final servletProperties prop = new servletProperties();
         final plasmaSwitchboard sb = (plasmaSwitchboard)env;
         
