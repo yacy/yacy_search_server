@@ -31,10 +31,22 @@ then
 	exit 1
 fi
 
+usage() {
+	cat - <<USAGE
+startscript for YaCy on UNIX-like systems
+Options
+  -h, --help		show this help
+  -t, --tail-log	show the output of "tail -f DATA/LOG/yacy00.log" after starting YaCy
+  -l, --logging		save the output of YaCy to yacy.log
+  -d, --debug		show the output of YaCy on the console
+  -p, --print-out	only print the command, which would be executed to start YaCy
+USAGE
+}
+
 #startup YaCy
 cd "`dirname $0`"
 
-options="`getopt -n YaCy -o d,l,p,t -- $@`"
+options="`getopt -n YaCy -o h,d,l,p,t -l help,debug,logging,print-out,tail-log -- $@`"
 if [ $? -ne 0 ];then
 	exit 1;
 fi
@@ -48,23 +60,32 @@ PRINTONLY=0
 TAILLOG=0
 for option in $options;do
 	if [ $isparameter -ne 1 ];then #option
-		if [ "$option" = "-l" ];then
-			LOGGING=1
-			if [ $DEBUG -eq 1 ];then
-				echo "can not combine -l and -d"
-				exit 1;
-			fi
-		elif [ "$option" = "-d" ];then
-			DEBUG=1
-			if [ $LOGGING -eq 1 ];then
-				echo "can not combine -l and -d"
-				exit 1;
-			fi
-		elif [ "$option" = "-p" ];then
-			PRINTONLY=1
-		elif [ "$option" = "-t" ];then
-			TAILLOG=1
-		fi #which option 
+		case $option in
+			-h|--help) 
+				usage
+				exit 3
+				;;
+			-l|--logging) 
+				LOGGING=1
+				if [ $DEBUG -eq 1 ];then
+					echo "can not combine -l and -d"
+					exit 1;
+				fi
+				;;
+			-d|--debug)
+				DEBUG=1
+				if [ $LOGGING -eq 1 ];then
+					echo "can not combine -l and -d"
+					exit 1;
+				fi
+				;;
+			-p|--print-out)
+				PRINTONLY=1
+				;;
+			-t|--tail-log)
+				TAILLOG=1
+				;;
+		esac #case option 
 	else #parameter
 		if [ x$option = "--" ];then #option / parameter seperator
 			isparameter=1;
@@ -154,7 +175,7 @@ then
 elif [ $LOGGING -eq 1 ];then #logging
 	cmdline="$cmdline >> yacy.log & echo \$! > $PIDFILE"
 else
-	cmdline="$cmdline >> /dev/null & echo \$! > $PIDFILE"
+	cmdline="$cmdline &> /dev/null & echo \$! > $PIDFILE"
 fi
 if [ $PRINTONLY -eq 1 ];then
 	echo $cmdline
@@ -169,6 +190,7 @@ else
 	echo " >> YaCy started as daemon process. Administration at http://localhost:$PORT << "
 	eval $cmdline
 	if [ "$TAILLOG" -eq "1" -a ! "$DEBUG" -eq "1" ];then
+		sleep 1
 		tail -f DATA/LOG/yacy00.log
 	fi
 fi
