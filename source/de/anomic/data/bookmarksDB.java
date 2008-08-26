@@ -201,7 +201,7 @@ public class bookmarksDB {
     	return true;
     }    
     
-    public void folderReCrawl (long schedule, String folder, String newcrawlingfilter, int newcrawlingdepth, long crawlingIfOlder, 
+    public void folderReCrawl (long schedule, String folder, String crawlingfilter, int newcrawlingdepth, long crawlingIfOlder, 
     		int crawlingDomFilterDepth, int crawlingDomMaxPages, boolean crawlingQ, boolean indexText, boolean indexMedia, 
     		boolean crawlOrder, boolean xsstopw, boolean storeHTCache) {
 
@@ -225,8 +225,9 @@ public class bookmarksDB {
 				try {
 	    			int pos = 0;					
 					// set crawlingStart to BookmarkUrl    			
-	    			String crawlingStart = bm.getUrl();
-                    
+	    			String crawlingStart = bm.getUrl();                    
+	    			String newcrawlingfilter = crawlingfilter;
+	    			
                     yacyURL crawlingStartURL = new yacyURL(crawlingStart, null);
                     
                     // set the crawling filter                    
@@ -237,8 +238,7 @@ public class bookmarksDB {
                     }
                     if (crawlingStart!= null && newcrawlingfilter.equals("sub") && (pos = crawlingStart.lastIndexOf("/")) > 0) {
                         newcrawlingfilter = crawlingStart.substring(0, pos + 1) + ".*";
-                    }
-                    sb.setConfig("crawlingFilter", newcrawlingfilter);					
+                    }                    				
 					
 					// check if the crawl filter works correctly    			
 	    			Pattern.compile(newcrawlingfilter);	    			
@@ -280,7 +280,7 @@ public class bookmarksDB {
 	                        sb.webIndex.newsPool.publishMyNews(yacyNewsRecord.newRecord(sb.webIndex.seedDB.mySeed(), yacyNewsPool.CATEGORY_CRAWL_START, m));	                      
 	                    }                    
 	                } else {
-	                	serverLog.logInfo("BOOKMARKS", "autoReCrawl error adding crawl profile: " + crawlingStart + "- " + reasonString);                	
+	                	serverLog.logInfo("BOOKMARKS", "autoReCrawl - error adding crawl profile: " + crawlingStart + "- " + reasonString);                	
 	                	ZURL.Entry ee = sb.crawlQueues.errorURL.newEntry(
 	                            new CrawlEntry(
 	                                    sb.webIndex.seedDB.mySeed().hash, 
