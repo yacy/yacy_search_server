@@ -163,7 +163,7 @@ public class bookmarksDB {
         		if (!s.startsWith("#") && s.length()>0) {        			
         			String parser[] = s.split("\t");
         			if (parser.length == 13) {        				
-        				folderReCrawl(Long.parseLong(parser[0]), parser[1], parser[2], Integer.parseInt(parser[3]), Integer.parseInt(parser[4]), 
+        				folderReCrawl(Long.parseLong(parser[0]), parser[1], parser[2], Integer.parseInt(parser[3]), Long.parseLong(parser[4]), 
            								Integer.parseInt(parser[5]), Integer.parseInt(parser[6]), Boolean.parseBoolean(parser[7]), 
            								Boolean.parseBoolean(parser[8]), Boolean.parseBoolean(parser[9]), 
            								Boolean.parseBoolean(parser[10]), Boolean.parseBoolean(parser[11]), 
@@ -201,7 +201,7 @@ public class bookmarksDB {
     	return true;
     }    
     
-    public void folderReCrawl (long schedule, String folder, String newcrawlingfilter, int newcrawlingdepth, int crawlingIfOlder, 
+    public void folderReCrawl (long schedule, String folder, String newcrawlingfilter, int newcrawlingdepth, long crawlingIfOlder, 
     		int crawlingDomFilterDepth, int crawlingDomMaxPages, boolean crawlingQ, boolean indexText, boolean indexMedia, 
     		boolean crawlOrder, boolean xsstopw, boolean storeHTCache) {
 
@@ -253,7 +253,7 @@ public class bookmarksDB {
 	                CrawlProfile.entry pe = sb.webIndex.profilesActiveCrawls.newEntry(
 	                        "autoReCrawl", crawlingStartURL, newcrawlingfilter, newcrawlingfilter,
 	                        newcrawlingdepth, newcrawlingdepth,
-	                        crawlingIfOlder, crawlingDomFilterDepth, crawlingDomMaxPages,
+	                        sb.webIndex.profilesActiveCrawls.getRecrawlDate(crawlingIfOlder), crawlingDomFilterDepth, crawlingDomMaxPages,
 	                        crawlingQ,
 	                        indexText, indexMedia,
 	                        storeHTCache, true, crawlOrder, xsstopw, xdstopw, xpstopw);
