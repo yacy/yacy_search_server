@@ -251,7 +251,7 @@ public class bookmarksDB {
 	                // stack url
 	                sb.webIndex.profilesPassiveCrawls.removeEntry(crawlingStartURL.hash()); // if there is an old entry, delete it
 	                CrawlProfile.entry pe = sb.webIndex.profilesActiveCrawls.newEntry(
-	                        "autoReCrawl", crawlingStartURL, newcrawlingfilter, newcrawlingfilter,
+	                        folder, crawlingStartURL, newcrawlingfilter, newcrawlingfilter,
 	                        newcrawlingdepth, newcrawlingdepth,
 	                        sb.webIndex.profilesActiveCrawls.getRecrawlDate(crawlingIfOlder), crawlingDomFilterDepth, crawlingDomMaxPages,
 	                        crawlingQ,
@@ -261,7 +261,7 @@ public class bookmarksDB {
 	                
 	                if (reasonString == null) {
 	                	serverLog.logInfo("BOOKMARKS", "autoReCrawl - adding crawl profile for: " + crawlingStart);
-	                	serverLog.logInfo("BOOKMARKS", "autoReCrawl - crawl filter is set to: " + newcrawlingfilter);
+	                	// serverLog.logInfo("BOOKMARKS", "autoReCrawl - crawl filter is set to: " + newcrawlingfilter);
 	                	// generate a YaCyNews if the global flag was set
 	                    if (crawlOrder) {
 	                        Map<String, String> m = new HashMap<String, String>(pe.map()); // must be cloned
