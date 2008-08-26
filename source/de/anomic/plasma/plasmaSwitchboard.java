@@ -980,7 +980,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
          * Testing if the content type is supported by the available parsers
          * ========================================================================= */
         final boolean isSupportedContent = plasmaParser.supportedContent(entry.url(),entry.getMimeType());
-        log.logFinest(entry.url() +" content of type "+ entry.getMimeType() +" is supported: "+ isSupportedContent);
+        log.logFinest("STORE "+ entry.url() +" content of type "+ entry.getMimeType() +" is supported: "+ isSupportedContent);
         
         /* =========================================================================
          * INDEX CONTROL HEADER
@@ -1516,6 +1516,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     
     public indexingQueueEntry parseDocument(final indexingQueueEntry in) {
         in.queueEntry.updateStatus(IndexingStack.QUEUE_STATE_PARSING);
+        
+        // debug
+        log.logFinest("PARSE "+ in.queueEntry.toString());
+        
         plasmaParserDocument document = null;
         try {
             document = parseDocument(in.queueEntry);
@@ -1595,6 +1599,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     
     public indexingQueueEntry condenseDocument(final indexingQueueEntry in) {
         in.queueEntry.updateStatus(IndexingStack.QUEUE_STATE_CONDENSING);
+        
+        // debug
+        log.logFinest("CONDENSE "+ in.queueEntry.toString());
+        
         plasmaCondenser condenser = null;
         try {
             condenser = condenseDocument(in.queueEntry, in.document);

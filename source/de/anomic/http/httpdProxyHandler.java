@@ -55,7 +55,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.BindException;
 import java.net.ConnectException;
@@ -71,6 +70,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Properties;
+import java.util.Set;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
@@ -177,7 +177,10 @@ public final class httpdProxyHandler {
             
         // create a htRootPath: system pages
         htRootPath = new File(switchboard.getRootPath(), switchboard.getConfig("htRootPath","htroot"));
-        if (!(htRootPath.exists())) htRootPath.mkdir();
+        if (!(htRootPath.exists())) {
+            if(!htRootPath.mkdir())
+                serverLog.logSevere("PROXY", "could not create htRoot "+ htRootPath);
+        }
             
         // load a transformer
         transformer = new htmlFilterContentTransformer();
@@ -224,6 +227,27 @@ public final class httpdProxyHandler {
      */
     private static final StringBuffer userAgentStr = new StringBuffer();
     
+    /**
+     * A Set of media types which are known to only contain binary data (no readable text)
+     * Each is only the first part of the content-type field (no subtypes)
+     */
+    private static final Set<String> binaryTypes = new HashSet<String>();
+    
+    /**
+     * A Set of content-types which are known to only contain binary data (no readable text)
+     * Each is a complete content-type header field (without parameters)
+     */
+    private static final Set<String> binaryContent = new HashSet<String>();
+    static {
+        // all Strings must be lower case!!
+        // RFC 2045: "Matching of media type and subtype is ALWAYS case-insensitive."
+        // discrete types
+        binaryTypes.add("image");
+        binaryTypes.add("audio");
+        binaryTypes.add("video");
+        
+        binaryContent.add("application/octet-stream");
+    }
     
     public static void handleOutgoingCookies(final httpRequestHeader requestHeader, final String targethost, final String clienthost) {
         /*
@@ -449,7 +473,7 @@ public final class httpdProxyHandler {
     private static void fulfillRequestFromWeb(final Properties conProp, final yacyURL url,final String ext, final httpRequestHeader requestHeader, final httpResponseHeader cachedResponseHeader, final File cacheFile, final OutputStream respond) {
         
         final GZIPOutputStream gzippedOut = null; 
-        Writer hfos = null;
+        Writer textOutput = null;
         
         JakartaCommonsHttpResponse res = null;                
         try {
@@ -532,19 +556,25 @@ public final class httpdProxyHandler {
 
             // handle file types and make (possibly transforming) output stream
             final OutputStream outStream = (gzippedOut != null) ? gzippedOut : ((chunkedOut != null)? chunkedOut : respond);
-            if (
-                    (!transformer.isIdentityTransformer()) &&
-                    (plasmaParser.supportedHTMLContent(url,responseHeader.mime()))
-                ) {
-                // make a transformer
-                theLogger.logFine(reqID +" create transformer for URL " + url);
-                //hfos = new htmlFilterOutputStream((gzippedOut != null) ? gzippedOut : ((chunkedOut != null)? chunkedOut : respond), null, transformer, (ext.length() == 0));
-                final Charset charSet = responseHeader.getCharSet();
-                hfos = new htmlFilterWriter(outStream,charSet, null, transformer, (ext.length() == 0));
+            final boolean isBinary = isBinary(responseHeader);
+            if(isBinary) {
+                theLogger.logFine(reqID +" create direct passthrough for URL " + url + ", extension '" + ext + "', mime-type '" + responseHeader.mime() + "'");
             } else {
-                // simply pass through without parsing
-                theLogger.logFine(reqID +" create passthrough for URL " + url + ", extension '" + ext + "', mime-type '" + responseHeader.mime() + "'");
-                hfos = new OutputStreamWriter(outStream, responseHeader.getCharSet());
+                // handle text stuff (encoding and so on)
+                if (
+                        (!transformer.isIdentityTransformer()) &&
+                        (plasmaParser.supportedHTMLContent(url,responseHeader.mime()))
+                    ) {
+                    // make a transformer
+                    theLogger.logFine(reqID +" create transformer for URL " + url);
+                    //hfos = new htmlFilterOutputStream((gzippedOut != null) ? gzippedOut : ((chunkedOut != null)? chunkedOut : respond), null, transformer, (ext.length() == 0));
+                    final Charset charSet = responseHeader.getCharSet();
+                    textOutput = new htmlFilterWriter(outStream,charSet, null, transformer, (ext.length() == 0));
+                } else {
+                    // simply pass through without parsing
+                    theLogger.logFine(reqID +" create text passthrough for URL " + url + ", extension '" + ext + "', mime-type '" + responseHeader.mime() + "'");
+                    textOutput = new OutputStreamWriter(outStream, responseHeader.getCharSet());
+                }
             }
             
             // handle incoming cookies
@@ -587,7 +617,12 @@ public final class httpdProxyHandler {
                 {
                     // ok, we don't write actually into a file, only to RAM, and schedule writing the file.
                     final ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
-                    writeContent(res, new BufferedWriter(hfos), byteStream);
+                    if(isBinary) {
+                        final OutputStream toClientAndMemory = new MultiOutputStream(new OutputStream[] {outStream, byteStream});
+                        serverFileUtils.copy(res.getDataAsStream(), toClientAndMemory);
+                    } else {
+                        writeTextContent(res, new BufferedWriter(textOutput), byteStream);
+                    }
                     // cached bytes
                     byte[] cacheArray;
                     if(byteStream.size() > 0) {
@@ -597,7 +632,7 @@ public final class httpdProxyHandler {
                     }
                     theLogger.logFine(reqID +" writeContent of " + url + " produced cacheArray = " + ((cacheArray == null) ? "null" : ("size=" + cacheArray.length)));
 
-                    if (hfos instanceof htmlFilterWriter) ((htmlFilterWriter) hfos).close();
+                    if (textOutput instanceof htmlFilterWriter) ((htmlFilterWriter) textOutput).close();
 
                     if (sizeBeforeDelete == -1) {
                         // totally fresh file
@@ -622,8 +657,14 @@ public final class httpdProxyHandler {
                     // the file is too big to cache it in the ram, or the size is unknown
                     // write to file right here.
                     cacheFile.getParentFile().mkdirs();
-                    writeContent(res, new BufferedWriter(hfos), new FileOutputStream(cacheFile));
-                    if (hfos instanceof htmlFilterWriter) ((htmlFilterWriter) hfos).close();
+                    final OutputStream fileStream = new FileOutputStream(cacheFile);
+                    if(isBinary) {
+                        OutputStream toClientAndFile = new MultiOutputStream(new OutputStream[] {outStream, fileStream});
+                        serverFileUtils.copy(res.getDataAsStream(), toClientAndFile);
+                    } else {
+                        writeTextContent(res, new BufferedWriter(textOutput), fileStream);
+                    }
+                    if (textOutput instanceof htmlFilterWriter) ((htmlFilterWriter) textOutput).close();
                     theLogger.logFine(reqID +" for write-file of " + url + ": contentLength = " + contentLength + ", sizeBeforeDelete = " + sizeBeforeDelete);
                     plasmaHTCache.writeFileAnnouncement(cacheFile);
                     if (sizeBeforeDelete == -1) {
@@ -652,8 +693,14 @@ public final class httpdProxyHandler {
                         " StoreHTCache=" + storeHTCache + 
                         " SupportetContent=" + isSupportedContent);
 
-                writeContent(res, new BufferedWriter(hfos));
-                if (hfos instanceof htmlFilterWriter) ((htmlFilterWriter) hfos).close();
+                if(isBinary) {
+                    // directly pass bytes to client
+                    serverFileUtils.copy(res.getDataAsStream(), outStream);
+                } else {
+                    // read data with specified encoding and send it as character stream
+                    writeTextContent(res, new BufferedWriter(textOutput));
+                }
+                if (textOutput instanceof htmlFilterWriter) ((htmlFilterWriter) textOutput).close();
                 /*if (sizeBeforeDelete == -1) {
                     // no old file and no load. just data passing
                     //cacheEntry.status = plasmaHTCache.CACHE_PASSING;
@@ -701,7 +748,7 @@ public final class httpdProxyHandler {
         
         final httpChunkedOutputStream chunkedOut = null;
         final GZIPOutputStream gzippedOut = null;
-        Object hfos = null;
+        Writer textOutput = null;
         
         // we respond on the request by using the cache, the cache is fresh        
         try {
@@ -754,20 +801,19 @@ public final class httpdProxyHandler {
                 if (( !transformer.isIdentityTransformer()) &&
                         (ext == null || !plasmaParser.supportedHTMLFileExtContains(url)) &&
                         (plasmaParser.HTMLParsableMimeTypesContains(cachedResponseHeader.mime()))) {
-                    hfos = new htmlFilterWriter(outStream, charSet, null, transformer, (ext == null || ext.length() == 0));
-                } else {
-                    hfos = outStream;
+                    textOutput = new htmlFilterWriter(outStream, charSet, null, transformer, (ext == null || ext.length() == 0));
                 }
                 
                 // send also the complete body now from the cache
                 // simply read the file and transfer to out socket
-                if (hfos instanceof OutputStream) {
-                    serverFileUtils.copy(cacheFile,(OutputStream)hfos);
-                } else if (hfos instanceof Writer) {
-                    serverFileUtils.copy(cacheFile,charSet,(Writer)hfos);
+                if(textOutput != null && !isBinary(cachedResponseHeader)) {
+                    // send as encoded text
+                    serverFileUtils.copy(cacheFile, charSet, textOutput);
+                } else {
+                    serverFileUtils.copy(cacheFile, outStream);
                 }
                 
-                if (hfos instanceof htmlFilterWriter) ((htmlFilterWriter) hfos).close();
+                if (textOutput != null) textOutput.close();
                 if (gzippedOut != null) gzippedOut.finish();
                 if (chunkedOut != null) chunkedOut.finish();
             }
@@ -787,24 +833,63 @@ public final class httpdProxyHandler {
         return;
     }
 
-    public static void writeContent(final JakartaCommonsHttpResponse res, final BufferedWriter hfos) throws IOException, UnsupportedEncodingException {
+    /**
+     * determines if the body is text or not
+     * 
+     * @param responseHeader
+     * @return
+     */
+    private static boolean isBinary(httpResponseHeader responseHeader) {
+        String mime = responseHeader.mime().toLowerCase();
+        if(mime.contains(";")) {
+            // cut of parameters
+            mime = mime.substring(0, mime.indexOf(';'));
+        }
+        // mime and the contents of the Set must be lower case!
+        if(binaryContent.contains(mime)) {
+            return true;
+        }
+        final int endType = mime.contains("/") ? mime.indexOf('/') : mime.length();  
+        final String type = mime.substring(0, endType);
+        if(binaryTypes.contains(type)) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * ready the body of res with charSet and write it to output
+     * 
+     * @param res
+     * @param output
+     * @throws IOException
+     */
+    public static void writeTextContent(final JakartaCommonsHttpResponse res, final BufferedWriter output) throws IOException {
         try {
             final InputStream data = res.getDataAsStream();
             if (data == null) return;
             final Charset charSet = res.getResponseHeader().getCharSet();
-            serverFileUtils.copyToWriter(new BufferedInputStream(data), hfos, charSet);
+            serverFileUtils.copyToWriter(new BufferedInputStream(data), output, charSet);
         } finally {
             res.closeStream();
         }
     }
     
-    public static void writeContent(final JakartaCommonsHttpResponse res, final BufferedWriter hfos, final OutputStream byteStream) throws IOException, UnsupportedEncodingException {
+    /**
+     * ready the body of res with charSet and write it to output and parallel encoded with charSet to byteStream
+     * 
+     * @param res
+     * @param output
+     * @param byteStream
+     * @throws IOException
+     */
+    public static void writeTextContent(final JakartaCommonsHttpResponse res, final BufferedWriter output, final OutputStream byteStream) throws IOException {
         assert byteStream != null;
         try {
             final InputStream data = res.getDataAsStream();
             if (data == null) return;
             final Charset charSet = res.getResponseHeader().getCharSet();
-            serverFileUtils.copyToWriters(new BufferedInputStream(data), hfos, new BufferedWriter(new OutputStreamWriter(byteStream, charSet)) , charSet);
+            serverFileUtils.copyToWriters(new BufferedInputStream(data), output, new BufferedWriter(new OutputStreamWriter(byteStream, charSet)) , charSet);
         } finally {
             res.closeStream();
         }
@@ -1031,7 +1116,7 @@ public final class httpdProxyHandler {
             }
             if (chunked != null)  chunked.finish();
             */
-            writeContent(res, new BufferedWriter(new OutputStreamWriter((chunked != null) ? chunked : countedRespond)));
+            writeTextContent(res, new BufferedWriter(new OutputStreamWriter((chunked != null) ? chunked : countedRespond)));
             
             countedRespond.flush();
             } finally {

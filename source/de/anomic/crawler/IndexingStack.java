@@ -625,5 +625,14 @@ public class IndexingStack {
 
             return null;
         }
+        
+        /*
+         * (non-Javadoc)
+         * 
+         * @see java.lang.Object#toString()
+         */
+        public String toString() {
+            return "QueueEntry of "+ url.toString() + ", ref="+referrerHash +", initiator="+initiator +", flags="+ flags +", anchor="+ anchorName;
+        }
     } // class Entry
 }
