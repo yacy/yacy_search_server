@@ -90,6 +90,12 @@ public final class plasmaWordIndex implements indexRI {
     public static final String DBFILE_ACTIVE_CRAWL_PROFILES        = "crawlProfilesActive.db";
     public static final String DBFILE_PASSIVE_CRAWL_PROFILES       = "crawlProfilesPassive.db";
     
+    public static final long CRAWL_PROFILE_PROXY_RECRAWL_CYCLE = 60L * 24L;
+    public static final long CRAWL_PROFILE_SNIPPET_LOCAL_TEXT_RECRAWL_CYCLE = 60L * 24L * 30L;
+    public static final long CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT_RECRAWL_CYCLE = 60L * 24L * 30L;
+    public static final long CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA_RECRAWL_CYCLE = 60L * 24L * 30L;
+    public static final long CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA_RECRAWL_CYCLE = 60L * 24L * 30L;
+    
     
     private final kelondroByteOrder        indexOrder = kelondroBase64Order.enhancedCoder;
     private final indexRAMRI               dhtOutCache, dhtInCache;
@@ -249,7 +255,7 @@ public final class plasmaWordIndex implements indexRI {
             this.defaultProxyProfile = this.profilesActiveCrawls.newEntry("proxy", null, ".*", ".*",
                     0 /*Integer.parseInt(getConfig(PROXY_PREFETCH_DEPTH, "0"))*/,
                     0 /*Integer.parseInt(getConfig(PROXY_PREFETCH_DEPTH, "0"))*/,
-                    60 * 24, -1, -1, false,
+                    this.profilesActiveCrawls.getRecrawlDate(CRAWL_PROFILE_PROXY_RECRAWL_CYCLE), -1, -1, false,
                     true /*getConfigBool(PROXY_INDEXING_LOCAL_TEXT, true)*/,
                     true /*getConfigBool(PROXY_INDEXING_LOCAL_MEDIA, true)*/,
                     true, true,
@@ -263,22 +269,22 @@ public final class plasmaWordIndex implements indexRI {
         if (this.defaultTextSnippetLocalProfile == null) {
             // generate new default entry for snippet fetch and optional crawling
             defaultTextSnippetLocalProfile = this.profilesActiveCrawls.newEntry(CRAWL_PROFILE_SNIPPET_LOCAL_TEXT, null, ".*", ".*", 0, 0,
-                    60 * 24 * 30, -1, -1, true, false, false, false, false, false, true, true, false);
+            		this.profilesActiveCrawls.getRecrawlDate(CRAWL_PROFILE_SNIPPET_LOCAL_TEXT_RECRAWL_CYCLE), -1, -1, true, false, false, false, false, false, true, true, false);
         }
         if (this.defaultTextSnippetGlobalProfile == null) {
             // generate new default entry for snippet fetch and optional crawling
             defaultTextSnippetGlobalProfile = this.profilesActiveCrawls.newEntry(CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT, null, ".*", ".*", 0, 0,
-                    60 * 24 * 30, -1, -1, true, true, true, true, true, false, true, true, false);
+            		this.profilesActiveCrawls.getRecrawlDate(CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT_RECRAWL_CYCLE), -1, -1, true, true, true, true, true, false, true, true, false);
         }
         if (this.defaultMediaSnippetLocalProfile == null) {
             // generate new default entry for snippet fetch and optional crawling
             defaultMediaSnippetLocalProfile = this.profilesActiveCrawls.newEntry(CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA, null, ".*", ".*", 0, 0,
-                    60 * 24 * 30, -1, -1, true, false, false, false, false, false, true, true, false);
+            		this.profilesActiveCrawls.getRecrawlDate(CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA_RECRAWL_CYCLE), -1, -1, true, false, false, false, false, false, true, true, false);
         }
         if (this.defaultMediaSnippetGlobalProfile == null) {
             // generate new default entry for snippet fetch and optional crawling
             defaultMediaSnippetGlobalProfile = this.profilesActiveCrawls.newEntry(CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA, null, ".*", ".*", 0, 0,
-                    60 * 24 * 30, -1, -1, true, false, true, true, true, false, true, true, false);
+            		this.profilesActiveCrawls.getRecrawlDate(CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA_RECRAWL_CYCLE), -1, -1, true, false, true, true, true, false, true, true, false);
         }
     }
     

@@ -1,4 +1,4 @@
-// plasmaCrawlProfile.java 
+// CrawlProfile.java 
 // ------------------------
 // part of YaCy
 // (C) by Michael Peter Christen; mc@yacy.net
@@ -197,6 +197,10 @@ public class CrawlProfile {
     public void changeEntry(final entry e, final String propName, final String newValue) throws IOException {
         e.mem.put(propName,  newValue);
         profileTable.put(e.handle(), e.mem);
+    }
+    
+    public long getRecrawlDate(final long oldTimeMinutes) {
+    	return System.currentTimeMillis() - (60000L * oldTimeMinutes);
     }
     
     public static class DomProfile {

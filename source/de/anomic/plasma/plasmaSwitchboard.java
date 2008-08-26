@@ -122,6 +122,7 @@ import de.anomic.crawler.ResultImages;
 import de.anomic.crawler.ResultURLs;
 import de.anomic.crawler.RobotsTxt;
 import de.anomic.crawler.ZURL;
+import de.anomic.crawler.CrawlProfile.entry;
 import de.anomic.data.URLLicense;
 import de.anomic.data.blogBoard;
 import de.anomic.data.blogBoardComments;
@@ -1294,6 +1295,31 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
                 setConfig(httpd.ADMIN_ACCOUNT_B64MD5, "0000" + serverCodings.encodeMD5Hex(System.getProperties().toString() + System.currentTimeMillis()));
                 setConfig("adminAccount", "");
             }
+            
+            // refresh recrawl dates
+            try{
+            	Iterator<CrawlProfile.entry> it = webIndex.profilesActiveCrawls.profiles(true);
+                entry selentry;
+                while (it.hasNext()) {
+                    selentry = it.next();
+                    if (selentry.name().equals(plasmaWordIndex.CRAWL_PROFILE_PROXY))
+                    	webIndex.profilesActiveCrawls.changeEntry(selentry, CrawlProfile.entry.RECRAWL_IF_OLDER,
+                    			Long.toString(webIndex.profilesActiveCrawls.getRecrawlDate(plasmaWordIndex.CRAWL_PROFILE_PROXY_RECRAWL_CYCLE)));
+                    // if (selentry.name().equals(plasmaWordIndex.CRAWL_PROFILE_REMOTE));
+                    if (selentry.name().equals(plasmaWordIndex.CRAWL_PROFILE_SNIPPET_LOCAL_TEXT))
+                    	webIndex.profilesActiveCrawls.changeEntry(selentry, CrawlProfile.entry.RECRAWL_IF_OLDER,
+                    			Long.toString(webIndex.profilesActiveCrawls.getRecrawlDate(plasmaWordIndex.CRAWL_PROFILE_SNIPPET_LOCAL_TEXT_RECRAWL_CYCLE)));
+                    if (selentry.name().equals(plasmaWordIndex.CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT))
+                    	webIndex.profilesActiveCrawls.changeEntry(selentry, CrawlProfile.entry.RECRAWL_IF_OLDER,
+                    			Long.toString(webIndex.profilesActiveCrawls.getRecrawlDate(plasmaWordIndex.CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT_RECRAWL_CYCLE)));
+                    if (selentry.name().equals(plasmaWordIndex.CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA))
+                    	webIndex.profilesActiveCrawls.changeEntry(selentry, CrawlProfile.entry.RECRAWL_IF_OLDER,
+                    			Long.toString(webIndex.profilesActiveCrawls.getRecrawlDate(plasmaWordIndex.CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA_RECRAWL_CYCLE)));
+                    if (selentry.name().equals(plasmaWordIndex.CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA))
+                    	webIndex.profilesActiveCrawls.changeEntry(selentry, CrawlProfile.entry.RECRAWL_IF_OLDER,
+                    			Long.toString(webIndex.profilesActiveCrawls.getRecrawlDate(plasmaWordIndex.CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA_RECRAWL_CYCLE)));
+                }
+            } catch (final IOException e) {};
             
             // close unused connections
             JakartaCommonsHttpClient.cleanup();
