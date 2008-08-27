@@ -1123,7 +1123,10 @@ public final class httpdProxyHandler {
                 writeTextContent(res, new BufferedWriter(new OutputStreamWriter(outStream)));
             }
             
-            countedRespond.flush();
+            if (chunked != null) {
+                chunked.finish();
+            }
+            outStream.flush();
             } finally {
                 // if opened ...
                 if(res != null) {
