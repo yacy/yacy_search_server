@@ -1116,7 +1116,12 @@ public final class httpdProxyHandler {
             }
             if (chunked != null)  chunked.finish();
             */
-            writeTextContent(res, new BufferedWriter(new OutputStreamWriter((chunked != null) ? chunked : countedRespond)));
+            final OutputStream outStream = (chunked != null) ? chunked : countedRespond;
+            if(isBinary(responseHeader)) {
+                serverFileUtils.copy(res.getDataAsStream(), outStream);
+            } else {
+                writeTextContent(res, new BufferedWriter(new OutputStreamWriter(outStream)));
+            }
             
             countedRespond.flush();
             } finally {
