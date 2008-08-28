@@ -203,7 +203,7 @@ public final class plasmaSearchQuery {
     }
 
     public static String anonymizedQueryHashes(final Set<String> hashes) {
-        // create a more anonymized representation of euqery hashes for logging
+        // create a more anonymized representation of a query hashes for logging
         final Iterator<String> i = hashes.iterator();
         final StringBuffer sb = new StringBuffer(hashes.size() * (yacySeedDB.commonHashLength + 2) + 2);
         sb.append("[");
@@ -281,10 +281,18 @@ public final class plasmaSearchQuery {
 
     public String id(final boolean anonymized) {
         // generate a string that identifies a search so results can be re-used in a cache
-        if (anonymized) {
-            return anonymizedQueryHashes(this.queryHashes) + "-" + anonymizedQueryHashes(this.excludeHashes) + "*" + this.contentdom + "*" + this.zonecode + "*" + indexWord.word2hash(this.ranking.toExternalString());
-        }
-        return hashSet2hashString(this.queryHashes) + "-" + hashSet2hashString(this.excludeHashes) + "*" + this.contentdom + "*" + this.zonecode + "*" + indexWord.word2hash(this.ranking.toExternalString());
+        String context =
+            "*" + this.domType + 
+            "*" + this.contentdom +
+            "*" + this.zonecode +
+            "*" + indexWord.word2hash(this.ranking.toExternalString()) +
+            "*" + this.prefer +
+            "*" + this.urlMask +
+            "*" + this.constraint;
+        if (anonymized) 
+            return anonymizedQueryHashes(this.queryHashes) + "-" + anonymizedQueryHashes(this.excludeHashes) + context;
+        else
+            return hashSet2hashString(this.queryHashes) + "-" + hashSet2hashString(this.excludeHashes) + context;
     }
     
 }
