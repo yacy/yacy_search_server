@@ -341,7 +341,7 @@ public final class httpdFileHandler {
                     if ((requestHeader.containsKey(httpHeader.CONTENT_TYPE)) &&
                             (requestHeader.get(httpHeader.CONTENT_TYPE).toLowerCase().startsWith("multipart"))) {
                         // parse multipart
-                        final HashMap<String, byte[]> files = httpd.parseMultipart(requestHeader, args, body, length);
+                        final HashMap<String, byte[]> files = httpd.parseMultipart(requestHeader, args, body);
                         // integrate these files into the args
                         if (files != null) {
                             final Iterator<Map.Entry<String, byte[]>> fit = files.entrySet().iterator();

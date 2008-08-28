@@ -616,7 +616,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
                 
                 // listen for commands
                 listen();
-            } catch (final Exception e) {
+            } catch (final IOException e) {
                 System.err.println("ERROR: (internal) " + e);        
             } finally {
                 try {

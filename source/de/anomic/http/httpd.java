@@ -56,6 +56,7 @@ import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.RequestContext;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.httpclient.ChunkedInputStream;
+import org.apache.commons.httpclient.ContentLengthInputStream;
 
 import de.anomic.data.htmlTools;
 import de.anomic.data.userDB;
@@ -877,14 +878,17 @@ public final class httpd implements serverHandler, Cloneable {
      *            hier muss ARGC gesetzt werden!
      * @param args
      * @param in
-     * @param length
      * @return
      * @throws IOException
      */
     @SuppressWarnings("unchecked")
-    public static HashMap<String, byte[]> parseMultipart(final httpRequestHeader header, final serverObjects args, final InputStream in, final int length)
+    public static HashMap<String, byte[]> parseMultipart(final httpRequestHeader header, final serverObjects args, final InputStream in)
             throws IOException {
-        RequestContext request = new yacyContextRequest(header, in);
+        
+        final long clength = header.getContentLength();
+        final InputStream body = (clength > 0) ? new ContentLengthInputStream(in, clength) : in;
+        
+        RequestContext request = new yacyContextRequest(header, body);
 
         // check information
         if (!FileUploadBase.isMultipartContent(request)) {
@@ -898,6 +902,7 @@ public final class httpd implements serverHandler, Cloneable {
         try {
             items = upload.parseRequest(request);
         } catch (FileUploadException e) {
+            e.printStackTrace();
             throw new IOException("FileUploadException " + e.getMessage());
         }
 
