@@ -441,7 +441,7 @@ public final class httpd implements serverHandler, Cloneable {
         
         parseRequestLine(unknownCommand, args);
         
-        sendRespondError(this.prop,this.session.out,0,501,null,unknownCommand + " method not implemented",null);
+        sendRespondError(this.prop,this.session.out,4,501,null,unknownCommand + " method not implemented",null);
         return serverCore.TERMINATE_CONNECTION;
     }
     
@@ -451,12 +451,12 @@ public final class httpd implements serverHandler, Cloneable {
     }
     
     public Boolean TRACE() throws IOException {
-        sendRespondError(this.prop,this.session.out,0,501,null,"TRACE method not implemented",null);
+        sendRespondError(this.prop,this.session.out,4,501,null,"TRACE method not implemented",null);
         return serverCore.TERMINATE_CONNECTION;
     }
     
     public Boolean OPTIONS() throws IOException {
-        sendRespondError(this.prop,this.session.out,0,501,null,"OPTIONS method not implemented",null);
+        sendRespondError(this.prop,this.session.out,4,501,null,"OPTIONS method not implemented",null);
         return serverCore.TERMINATE_CONNECTION;
     }    
     
@@ -641,6 +641,7 @@ public final class httpd implements serverHandler, Cloneable {
                     return serverCore.TERMINATE_CONNECTION;
                 }
             }
+            if(sessionIn instanceof ChunkedInputStream) sessionIn.close(); // read to end, but do not close the stream (maybe HTTP/1.1 persistent)
             //return serverCore.RESUME_CONNECTION;
             return this.prop.getProperty(httpRequestHeader.CONNECTION_PROP_PERSISTENT).equals("keep-alive") ? serverCore.RESUME_CONNECTION : serverCore.TERMINATE_CONNECTION;
         } catch (final Exception e) {
@@ -944,7 +945,6 @@ public final class httpd implements serverHandler, Cloneable {
         // data may be compressed
         final String bodyEncoding = header.get(httpHeader.CONTENT_ENCODING);
         if(httpHeader.CONTENT_ENCODING_GZIP.equalsIgnoreCase(bodyEncoding) && !(body instanceof GZIPInputStream)) {
-            System.out.println("+-+ DEBUG "+ header.getContentType() +" is GZIP");
             body = new GZIPInputStream(body);
             // length of uncompressed data is unknown
             header.remove(httpHeader.CONTENT_LENGTH);
@@ -952,10 +952,7 @@ public final class httpd implements serverHandler, Cloneable {
             // ensure the end of data (if client keeps alive the connection)
             final long clength = header.getContentLength();
             if (clength > 0) {
-                System.out.println("+-+ DEBUG "+ header.getContentType() +" has length "+ clength);
                 body = new ContentLengthInputStream(body, clength);
-            } else {
-                System.out.println("+-+ DEBUG "+ header.getContentType() +" no length "+ clength);
             }
         }
         return body;
