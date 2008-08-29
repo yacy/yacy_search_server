@@ -75,6 +75,12 @@ public final class indexRAMRI implements indexRI, indexRIReader {
                 }
             } catch (final IOException e){
                 log.logSevere("unable to restore cache dump: " + e.getMessage(), e);
+                indexHeapFile.delete();
+                heap.initWriteMode();
+            } catch (final NegativeArraySizeException e){
+            	log.logSevere("unable to restore cache dump: " + e.getMessage(), e);
+                indexHeapFile.delete();
+                heap.initWriteMode();
             }
         } else {
             heap.initWriteMode();
