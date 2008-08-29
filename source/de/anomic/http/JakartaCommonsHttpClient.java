@@ -323,6 +323,7 @@ public class JakartaCommonsHttpClient {
             data = zipRequest(data);
 
             post.setRequestHeader(httpResponseHeader.CONTENT_ENCODING, httpHeader.CONTENT_ENCODING_GZIP);
+            post.setContentChunked(true);
         }
         post.setRequestEntity(data);
         // redirects in POST cause a "Entity enclosing requests cannot be redirected without user intervention" -

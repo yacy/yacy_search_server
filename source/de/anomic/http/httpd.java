@@ -47,6 +47,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.Map.Entry;
+import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
@@ -877,16 +878,14 @@ public final class httpd implements serverHandler, Cloneable {
      * @param header
      *            hier muss ARGC gesetzt werden!
      * @param args
-     * @param in
+     * @param in the raw body
      * @return
      * @throws IOException
      */
     @SuppressWarnings("unchecked")
     public static HashMap<String, byte[]> parseMultipart(final httpRequestHeader header, final serverObjects args, final InputStream in)
             throws IOException {
-        
-        final long clength = header.getContentLength();
-        final InputStream body = (clength > 0) ? new ContentLengthInputStream(in, clength) : in;
+        final InputStream body = prepareBody(header, in);
         
         RequestContext request = new yacyContextRequest(header, body);
 
@@ -908,7 +907,6 @@ public final class httpd implements serverHandler, Cloneable {
 
         // format information for further usage
         final HashMap<String, byte[]> files = new HashMap<String, byte[]>();
-        int formFieldCount = 0;
         for (FileItem item : items) {
             if (item.isFormField()) {
                 // simple text
@@ -919,7 +917,6 @@ public final class httpd implements serverHandler, Cloneable {
                     // use default encoding (given as header or ISO-8859-1)
                     args.put(item.getFieldName(), item.getString());
                 }
-                formFieldCount++;
             } else {
                 // file
                 args.put(item.getFieldName(), item.getName());
@@ -932,41 +929,72 @@ public final class httpd implements serverHandler, Cloneable {
 
         return files;
     }
+
+    /**
+     * prepares the body so that it can be read as whole plain text
+     * (uncompress if necessary and ensure correct ending)
+     * 
+     * @param header
+     * @param in
+     * @return
+     * @throws IOException
+     */
+    private static InputStream prepareBody(final httpRequestHeader header, final InputStream in) throws IOException {
+        InputStream body = in;
+        // data may be compressed
+        final String bodyEncoding = header.get(httpHeader.CONTENT_ENCODING);
+        if(httpHeader.CONTENT_ENCODING_GZIP.equalsIgnoreCase(bodyEncoding) && !(body instanceof GZIPInputStream)) {
+            System.out.println("+-+ DEBUG "+ header.getContentType() +" is GZIP");
+            body = new GZIPInputStream(body);
+            // length of uncompressed data is unknown
+            header.remove(httpHeader.CONTENT_LENGTH);
+        } else {
+            // ensure the end of data (if client keeps alive the connection)
+            final long clength = header.getContentLength();
+            if (clength > 0) {
+                System.out.println("+-+ DEBUG "+ header.getContentType() +" has length "+ clength);
+                body = new ContentLengthInputStream(body, clength);
+            } else {
+                System.out.println("+-+ DEBUG "+ header.getContentType() +" no length "+ clength);
+            }
+        }
+        return body;
+    }
     
     /**
      * wraps the request into a org.apache.commons.fileupload.RequestContext
      * 
-	 * @author danielr
-	 * @since 07.08.2008
-	 */
-	private static class yacyContextRequest extends httpRequestHeader implements RequestContext {
-		
-	    private static final long serialVersionUID = -8936741958551376593L;
-        
+     * @author danielr
+     * @since 07.08.2008
+     */
+    private static class yacyContextRequest extends httpRequestHeader implements RequestContext {
+
+        private static final long serialVersionUID = -8936741958551376593L;
+
         private final InputStream inStream;
-	
-		/**
-		 * creates a new yacyContextRequest
-		 * 
-		 * @param header
-		 * @param in
-		 */
-		public yacyContextRequest(Map<String, String> requestHeader, InputStream in) {
-		    super(null, requestHeader);
-			this.inStream = in;
-		}
-	
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see org.apache.commons.fileupload.RequestContext#getInputStream()
-		 */
-		//@Override
-		public InputStream getInputStream() throws IOException {
-			return inStream;
-		}
-	
-	}
+
+        /**
+         * creates a new yacyContextRequest
+         * 
+         * @param header
+         * @param in
+         */
+        public yacyContextRequest(Map<String, String> requestHeader, InputStream in) {
+            super(null, requestHeader);
+            this.inStream = in;
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see org.apache.commons.fileupload.RequestContext#getInputStream()
+         */
+        // @Override
+        public InputStream getInputStream() throws IOException {
+            return inStream;
+        }
+
+    }
 
 	/*
 	static int nextPos = -1;        

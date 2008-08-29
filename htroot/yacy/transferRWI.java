@@ -38,6 +38,7 @@ import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.server.logging.serverLog;
 import de.anomic.tools.nxTools;
 import de.anomic.xml.RSSFeed;
 import de.anomic.xml.RSSMessage;
@@ -53,10 +54,23 @@ public final class transferRWI {
         // return variable that accumulates replacements
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final serverObjects prop = new serverObjects();
-        if ((post == null) || (env == null)) return prop;
-        if (!yacyNetwork.authentifyRequest(post, env)) return prop;
-        if (!post.containsKey("wordc")) return prop;
-        if (!post.containsKey("entryc")) return prop;
+        final String contentType = header.getContentType();
+        if ((post == null) || (env == null)) {
+            logWarning(contentType, "post or env is null!");
+            return prop;
+        }
+        if (!yacyNetwork.authentifyRequest(post, env)) {
+            logWarning(contentType, "not authentified");
+            return prop;
+        }
+        if (!post.containsKey("wordc")) {
+            logWarning(contentType, "missing wordc");
+            return prop;
+        }
+        if (!post.containsKey("entryc")) {
+            logWarning(contentType, "missing entryc");
+            return prop;
+        }
         
         // request values
         final String iam      = post.get("iam", "");                      // seed hash of requester
@@ -196,5 +210,13 @@ public final class transferRWI {
 
         // return rewrite properties
         return prop;
+    }
+
+    /**
+     * @param requestIdentifier
+     * @param msg
+     */
+    private static void logWarning(final String requestIdentifier, final String msg) {
+        serverLog.logWarning("transferRWI", requestIdentifier +" "+ msg);
     }
 }
