@@ -6,7 +6,7 @@ Build-Depends: ant, sun-java5-jdk, debhelper (>= 5), m4
 Standards-Version: 3.7.2
 
 Package: yacy
-Architecture: any
+Architecture: all
 Depends: java-virtual-machine, java2-runtime, sudo
 Description: P2P Web Search Engine
  YaCy is a Java-based peer-2-peer search engine.
