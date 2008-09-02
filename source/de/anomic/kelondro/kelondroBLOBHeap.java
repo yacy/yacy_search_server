@@ -145,7 +145,7 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
             lastFree = i.next();
             while (i.hasNext()) {
                 nextFree = i.next();
-                System.out.println("*** DEBUG BLOB: free-seek = " + nextFree.seek + ", size = " + nextFree.size);
+                //System.out.println("*** DEBUG BLOB: free-seek = " + nextFree.seek + ", size = " + nextFree.size);
                 // check if they follow directly
                 if (lastFree.seek + lastFree.size + 4 == nextFree.seek) {
                     // merge those records

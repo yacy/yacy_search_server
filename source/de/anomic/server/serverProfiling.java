@@ -33,14 +33,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class serverProfiling extends Thread {
     
-    /**
-     * key=name of history, value=TreeMap of Long/Event
-     */
-    private static final Map<String, ConcurrentLinkedQueue<Event>> historyMaps = new ConcurrentHashMap<String, ConcurrentLinkedQueue<Event>>();;
-    /**
-     * key=name of history, value=Integer of event counter
-     */
-    private static final Map<String, Integer> eventCounter = new ConcurrentHashMap<String, Integer>();
+    private static final Map<String, ConcurrentLinkedQueue<Event>> historyMaps = new ConcurrentHashMap<String, ConcurrentLinkedQueue<Event>>(); // value=TreeMap of Long/Event
+    private static final Map<String, Long> eventAccess = new ConcurrentHashMap<String, Long>(); // value: last time when this was accessed
     private static serverProfiling systemProfiler = null;
     
     public static void startSystemProfiling() {
@@ -73,14 +67,21 @@ public class serverProfiling extends Thread {
     
     public static void update(final String eventName, final Object eventPayload) {
     	// get event history container
-    	int counter = eventCounter.containsKey(eventName) ? (eventCounter.get(eventName)).intValue() : 0;
-    	if (historyMaps.containsKey(eventName)) {
-    	    final ConcurrentLinkedQueue<Event> history = historyMaps.get(eventName);
+        Long lastAcc = eventAccess.get(eventName);
+        if (lastAcc == null) {
+            eventAccess.put(eventName, new Long(System.currentTimeMillis()));
+        } else {
+            if (System.currentTimeMillis() - lastAcc.longValue() > 1000) {
+                eventAccess.put(eventName, new Long(System.currentTimeMillis()));
+            } else {
+                return; // protect against too heavy load
+            }
+        }
+    	ConcurrentLinkedQueue<Event> history = historyMaps.get(eventName);
+    	if (history != null) {
 
             // update entry
-            history.add(new Event(counter, eventPayload));
-            counter++;
-            eventCounter.put(eventName, Integer.valueOf(counter));
+            history.add(new Event(eventPayload));
             
             // clean up too old entries
             Event e;
@@ -91,12 +92,10 @@ public class serverProfiling extends Thread {
                 history.poll();
             }
     	} else {
-    	    final ConcurrentLinkedQueue<Event> history = new ConcurrentLinkedQueue<Event>();
+    	    history = new ConcurrentLinkedQueue<Event>();
 
             // update entry
-            history.add(new Event(counter, eventPayload));
-            counter++;
-            eventCounter.put(eventName, Integer.valueOf(counter));
+            history.add(new Event(eventPayload));
             
             // store map
             historyMaps.put(eventName, history);
@@ -108,12 +107,10 @@ public class serverProfiling extends Thread {
     }
 
     public static class Event {
-        public int count;
         public Object payload;
         public long time;
 
-        public Event(final int count, final Object payload) {
-            this.count = count;
+        public Event(final Object payload) {
             this.payload = payload;
             this.time = System.currentTimeMillis();
         }

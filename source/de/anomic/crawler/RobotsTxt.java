@@ -208,7 +208,7 @@ public class RobotsTxt {
                             (Date) result[DOWNLOAD_MODDATE],
                             (String) result[DOWNLOAD_ETAG],
                             parserResult.sitemap(),
-                            parserResult.crawlDelay());
+                            parserResult.crawlDelayMillis());
                 }
             }
         }
@@ -216,10 +216,10 @@ public class RobotsTxt {
         return robotsTxt4Host;
     }
     
-    public int crawlDelay(final yacyURL theURL) {
+    public long crawlDelayMillis(final yacyURL theURL) {
         final String urlHostPort = getHostPort(theURL);
         final RobotsTxt.Entry robotsEntry = getEntry(urlHostPort, true);
-        return robotsEntry.getCrawlDelay();
+        return robotsEntry.getCrawlDelayMillis();
     }
     
     private Entry addEntry(
@@ -230,11 +230,11 @@ public class RobotsTxt {
     		final Date modDate, 
     		final String eTag, 
     		final String sitemap,
-    		final int crawlDelay
+    		final long crawlDelayMillis
     ) {
         final Entry entry = new Entry(
                 hostName, allowPathList, denyPathList, loadedDate, modDate,
-                eTag, sitemap, crawlDelay);
+                eTag, sitemap, crawlDelayMillis);
         addEntry(entry);
         return entry;
     }
@@ -257,6 +257,7 @@ public class RobotsTxt {
         public static final String ETAG               = "etag";
         public static final String SITEMAP            = "sitemap";
         public static final String CRAWL_DELAY        = "crawlDelay";
+        public static final String CRAWL_DELAY_MILLIS = "crawlDelayMillis";
         
         // this is a simple record structure that holds all properties of a single crawl start
         HashMap<String, String> mem;
@@ -301,7 +302,7 @@ public class RobotsTxt {
                 final Date modDate,
                 final String eTag,
                 final String sitemap,
-                final int crawlDelay
+                final long crawlDelayMillis
         ) {
             if ((hostName == null) || (hostName.length() == 0)) throw new IllegalArgumentException("The hostname is missing");
             
@@ -314,7 +315,7 @@ public class RobotsTxt {
             if (modDate != null) this.mem.put(MOD_DATE,Long.toString(modDate.getTime()));
             if (eTag != null) this.mem.put(ETAG,eTag);
             if (sitemap != null) this.mem.put(SITEMAP,sitemap);
-            if (crawlDelay != 0) this.mem.put(CRAWL_DELAY, Integer.toString(crawlDelay));
+            if (crawlDelayMillis > 0) this.mem.put(CRAWL_DELAY_MILLIS, Long.toString(crawlDelayMillis));
             
             if ((allowPathList != null)&&(allowPathList.size()>0)) {
                 this.allowPathList.addAll(allowPathList);
@@ -382,9 +383,14 @@ public class RobotsTxt {
             return null;
         }          
         
-        public int getCrawlDelay() {
+        public long getCrawlDelayMillis() {
+            if (this.mem.containsKey(CRAWL_DELAY_MILLIS)) try {
+                return Long.parseLong(this.mem.get(CRAWL_DELAY_MILLIS));
+            } catch (final NumberFormatException e) {
+                return 0;
+            }
             if (this.mem.containsKey(CRAWL_DELAY)) try {
-                return Integer.parseInt(this.mem.get(CRAWL_DELAY));
+                return 1000 * Integer.parseInt(this.mem.get(CRAWL_DELAY));
             } catch (final NumberFormatException e) {
                 return 0;
             }
@@ -458,19 +464,19 @@ public class RobotsTxt {
         return sitemapURL;
     }
     
-    public Integer getCrawlDelay(final yacyURL theURL) {
+    public Long getCrawlDelayMillis(final yacyURL theURL) {
         if (theURL == null) throw new IllegalArgumentException(); 
-        Integer crawlDelay = null;
+        Long crawlDelay = null;
         
         // generating the hostname:poart string needed to do a DB lookup
         final String urlHostPort = getHostPort(theURL);
         final RobotsTxt.Entry robotsTxt4Host = getEntry(urlHostPort, true);
                        
         try {
-            crawlDelay = robotsTxt4Host.getCrawlDelay();
+            crawlDelay = robotsTxt4Host.getCrawlDelayMillis();
         } catch (final NumberFormatException e) {/* ignore this */}
         
-        return crawlDelay;      
+        return crawlDelay;
     }
     
     public boolean isDisallowed(final yacyURL nexturl) {

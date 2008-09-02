@@ -310,7 +310,7 @@ public class indexRWIVarEntry implements indexRWIEntry, Cloneable {
         // joins two entries into one entry
         
         // combine the distance
-        this.worddistance = this.worddistance + ((oe instanceof indexRWIVarEntry) ? ((indexRWIVarEntry) oe).worddistance : 0) + Math.abs(this.posintext() - oe.posintext());
+        this.worddistance = Math.abs(this.posintext() - oe.posintext());
         this.posintext = Math.min(this.posintext, oe.posintext());
         this.posinphrase = (this.posofphrase == oe.posofphrase()) ? Math.min(this.posinphrase, oe.posinphrase()) : 0;
         this.posofphrase = Math.min(this.posofphrase, oe.posofphrase());

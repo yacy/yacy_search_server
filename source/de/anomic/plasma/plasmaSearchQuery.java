@@ -227,17 +227,15 @@ public final class plasmaSearchQuery {
     	return kelondroMSetTools.anymatch(wordhashes, keyhashes);
     }
     
+    private static String seps = "'.,:/&"; static {seps += '"';}
+    
     @SuppressWarnings("unchecked")
     public static TreeSet<String>[] cleanQuery(String querystring) {
     	// returns two sets: a query set and a exclude set
     	if ((querystring == null) || (querystring.length() == 0)) return new TreeSet[]{new TreeSet<String>(kelondroNaturalOrder.naturalComparator), new TreeSet<String>(kelondroNaturalOrder.naturalComparator)};
         
         // convert Umlaute
-        querystring = htmlFilterAbstractScraper.convertUmlaute(new serverCharBuffer(querystring.toCharArray())).toString();
-        
-        // remove funny symbols
-        final String seps = "'.,:/&";
-        querystring = querystring.toLowerCase().trim();
+        querystring = htmlFilterAbstractScraper.convertUmlaute(new serverCharBuffer(querystring.toCharArray())).toString().toLowerCase().trim();
         int c;
         for (int i = 0; i < seps.length(); i++) {
             while ((c = querystring.indexOf(seps.charAt(i))) >= 0) { querystring = querystring.substring(0, c) + (((c + 1) < querystring.length()) ? (" " + querystring.substring(c + 1)) : ""); }
@@ -288,7 +286,8 @@ public final class plasmaSearchQuery {
             "*" + indexWord.word2hash(this.ranking.toExternalString()) +
             "*" + this.prefer +
             "*" + this.urlMask +
-            "*" + this.constraint;
+            "*" + this.constraint +
+            "*" + this.maxDistance;
         if (anonymized) 
             return anonymizedQueryHashes(this.queryHashes) + "-" + anonymizedQueryHashes(this.excludeHashes) + context;
         else

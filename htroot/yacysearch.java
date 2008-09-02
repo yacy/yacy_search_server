@@ -117,13 +117,6 @@ public class yacysearch {
         }
 
         // collect search attributes
-        int maxDistance = Integer.MAX_VALUE;
-        
-        if ((querystring.length() > 2) && (querystring.charAt(0) == '"') && (querystring.charAt(querystring.length() - 1) == '"')) {
-            querystring = querystring.substring(1, querystring.length() - 1).trim();
-            maxDistance = 1;
-        }
-
         int itemsPerPage = Math.min((authenticated) ? 1000 : 10, post.getInt("maximumRecords", post.getInt("count", 10))); // SRU syntax with old property as alternative
         int offset = (post.hasValue("query") && post.hasValue("former") && !post.get("query","").equalsIgnoreCase(post.get("former",""))) ? 0 : post.getInt("startRecord", post.getInt("offset", 0));
         
@@ -181,6 +174,7 @@ public class yacysearch {
         }
         
         if ((!block) && (post == null || post.get("cat", "href").equals("href"))) {
+            
             // check available memory and clean up if necessary
             if (!serverMemory.request(8000000L, false)) {
                 sb.webIndex.clearCache();
@@ -197,7 +191,9 @@ public class yacysearch {
                 query[0].remove("recent");
                 ranking.coeff_date = plasmaSearchRankingProfile.COEFF_MAX;
             }
-            	
+           
+            int maxDistance = (querystring.indexOf('"') >= 0) ? maxDistance = query.length - 1 : Integer.MAX_VALUE;
+
             // filter out stopwords
             final TreeSet<String> filtered = kelondroMSetTools.joinConstructive(query[0], plasmaSwitchboard.stopwords);
             if (filtered.size() > 0) {

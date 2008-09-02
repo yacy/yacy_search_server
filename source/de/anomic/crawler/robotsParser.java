@@ -65,14 +65,14 @@ public final class robotsParser {
     private ArrayList<String> allowList;
     private ArrayList<String> denyList;
     private String sitemap;
-    private int crawlDelay;
+    private long crawlDelayMillis;
     
     public robotsParser(final byte[] robotsTxt) {
         if ((robotsTxt == null)||(robotsTxt.length == 0)) {
             allowList = new ArrayList<String>(0);
             denyList = new ArrayList<String>(0);
             sitemap = "";
-            crawlDelay = 0;
+            crawlDelayMillis = 0;
         } else {
             final ByteArrayInputStream bin = new ByteArrayInputStream(robotsTxt);
             final BufferedReader reader = new BufferedReader(new InputStreamReader(bin));
@@ -85,7 +85,7 @@ public final class robotsParser {
             allowList = new ArrayList<String>(0);
             denyList = new ArrayList<String>(0);
             sitemap = "";
-            crawlDelay = 0;
+            crawlDelayMillis = 0;
         } else {
             parse(reader);
         }
@@ -100,7 +100,7 @@ public final class robotsParser {
         int pos;
         String line = null, lineUpper = null;
         sitemap = null;
-        crawlDelay = 0;
+        crawlDelayMillis = 0;
         boolean isRule4AllAgents = false,
                 isRule4YaCyAgent = false,
                 rule4YaCyFound = false,
@@ -130,7 +130,7 @@ public final class robotsParser {
                         inBlock = false;
                         isRule4AllAgents = false;
                         isRule4YaCyAgent = false;
-                        crawlDelay = 0; // each block has a separate delay
+                        crawlDelayMillis = 0; // each block has a separate delay
                     }
                     
                     // cutting off comments at the line end
@@ -138,7 +138,7 @@ public final class robotsParser {
                     if (pos != -1) line = line.substring(0,pos).trim();
                     
                     // replacing all tabs with spaces
-                    line = line.replaceAll("\t"," ");
+                    line = line.replaceAll("\t"," ").replaceAll(":"," ");
                     
                     // getting out the robots name
                     pos = line.indexOf(" ");
@@ -149,10 +149,14 @@ public final class robotsParser {
                         if (isRule4YaCyAgent) rule4YaCyFound = true;
                     }
                 } else if (lineUpper.startsWith(ROBOTS_CRAWL_DELAY)) {
+                    // replacing all tabs with spaces
+                    line = line.replaceAll("\t"," ").replaceAll(":"," ");
+                    
                     pos = line.indexOf(" ");
                     if (pos != -1) {
                     	try {
-                    		crawlDelay = Integer.parseInt(line.substring(pos).trim());
+                    	    // the crawl delay can be a float number and means number of seconds
+                    	    crawlDelayMillis = (long) (1000.0 * Float.parseFloat(line.substring(pos).trim()));
                     	} catch (final NumberFormatException e) {
                     		// invalid crawling delay
                     	}
@@ -171,7 +175,7 @@ public final class robotsParser {
                         if (line.endsWith("*")) line = line.substring(0,line.length()-1);
                         
                         // replacing all tabs with spaces
-                        line = line.replaceAll("\t"," ");
+                        line = line.replaceAll("\t"," ").replaceAll(":"," ");
                         
                         // getting the path
                         pos = line.indexOf(" ");
@@ -210,8 +214,8 @@ public final class robotsParser {
         denyList = (rule4YaCyFound) ? deny4YaCyAgent : deny4AllAgents;
     }
     
-    public int crawlDelay() {
-        return this.crawlDelay;
+    public long crawlDelayMillis() {
+        return this.crawlDelayMillis;
     }
     
     public String sitemap() {

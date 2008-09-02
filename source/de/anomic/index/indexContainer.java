@@ -314,7 +314,7 @@ public class indexContainer extends kelondroRowSet {
     }
     
     private static indexContainer joinConstructiveByTest(final indexContainer small, final indexContainer large, final int maxDistance) {
-        System.out.println("DEBUG: JOIN METHOD BY TEST");
+        System.out.println("DEBUG: JOIN METHOD BY TEST, maxdistance = " + maxDistance);
         assert small.rowdef.equals(large.rowdef) : "small = " + small.rowdef.toString() + "; large = " + large.rowdef.toString();
         final int keylength = small.rowdef.width(0);
         assert (keylength == large.rowdef.width(0));
@@ -337,7 +337,7 @@ public class indexContainer extends kelondroRowSet {
     }
     
     private static indexContainer joinConstructiveByEnumeration(final indexContainer i1, final indexContainer i2, final int maxDistance) {
-        System.out.println("DEBUG: JOIN METHOD BY ENUMERATION");
+        System.out.println("DEBUG: JOIN METHOD BY ENUMERATION, maxdistance = " + maxDistance);
         assert i1.rowdef.equals(i2.rowdef) : "i1 = " + i1.rowdef.toString() + "; i2 = " + i2.rowdef.toString();
         final int keylength = i1.rowdef.width(0);
         assert (keylength == i2.rowdef.width(0));

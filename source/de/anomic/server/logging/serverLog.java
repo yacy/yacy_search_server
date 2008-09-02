@@ -103,8 +103,8 @@ public final class serverLog {
     public static void logSevere(final String appName, final String message, final Throwable thrown) {
         Logger.getLogger(appName).log(Level.SEVERE,message,thrown);
     }
-    public static void isSevere(final String appName) {
-        Logger.getLogger(appName).isLoggable(Level.SEVERE);
+    public static boolean isSevere(final String appName) {
+        return Logger.getLogger(appName).isLoggable(Level.SEVERE);
     }    
     
     public static void logWarning(final String appName, final String message) {
@@ -113,8 +113,8 @@ public final class serverLog {
     public static void logWarning(final String appName, final String message, final Throwable thrown) {
         Logger.getLogger(appName).log(Level.WARNING,message,thrown);
     }
-    public static void isWarning(final String appName) {
-        Logger.getLogger(appName).isLoggable(Level.WARNING);
+    public static boolean isWarning(final String appName) {
+        return Logger.getLogger(appName).isLoggable(Level.WARNING);
     }      
     
     public static void logConfig(final String appName, final String message) {
@@ -123,8 +123,8 @@ public final class serverLog {
     public static void logConfig(final String appName, final String message, final Throwable thrown) {
         Logger.getLogger(appName).log(Level.CONFIG,message,thrown);
     }    
-    public static void isConfig(final String appName) {
-        Logger.getLogger(appName).isLoggable(Level.CONFIG);
+    public static boolean isConfig(final String appName) {
+        return Logger.getLogger(appName).isLoggable(Level.CONFIG);
     }     
     
     public static void logInfo(final String appName, final String message) {
@@ -133,8 +133,8 @@ public final class serverLog {
     public static void logInfo(final String appName, final String message, final Throwable thrown) {
         Logger.getLogger(appName).log(Level.INFO,message,thrown);
     }
-    public static void isInfo(final String appName) {
-        Logger.getLogger(appName).isLoggable(Level.INFO);
+    public static boolean isInfo(final String appName) {
+        return Logger.getLogger(appName).isLoggable(Level.INFO);
     }     
     
     public static void logFine(final String appName, final String message) {
@@ -143,8 +143,8 @@ public final class serverLog {
     public static void logFine(final String appName, final String message, final Throwable thrown) {
         Logger.getLogger(appName).log(Level.FINE,message,thrown);
     }
-    public static void isFine(final String appName) {
-        Logger.getLogger(appName).isLoggable(Level.FINE);
+    public static boolean isFine(final String appName) {
+        return Logger.getLogger(appName).isLoggable(Level.FINE);
     } 
     
     public static void logFiner(final String appName, final String message) {
@@ -153,8 +153,8 @@ public final class serverLog {
     public static void logFiner(final String appName, final String message, final Throwable thrown) {
         Logger.getLogger(appName).log(Level.FINER,message,thrown);
     }
-    public static void isFiner(final String appName) {
-        Logger.getLogger(appName).isLoggable(Level.FINER);
+    public static boolean isFiner(final String appName) {
+        return Logger.getLogger(appName).isLoggable(Level.FINER);
     } 
     
     public static void logFinest(final String appName, final String message) {
@@ -163,8 +163,8 @@ public final class serverLog {
     public static void logFinest(final String appName, final String message, final Throwable thrown) {
         Logger.getLogger(appName).log(Level.FINEST,message,thrown);
     }    
-    public static void isFinest(final String appName) {
-        Logger.getLogger(appName).isLoggable(Level.FINEST);
+    public static boolean isFinest(final String appName) {
+        return Logger.getLogger(appName).isLoggable(Level.FINEST);
     } 
     
     public static final void configureLogging(final File homePath, final File loggingConfigFile) throws SecurityException, FileNotFoundException, IOException {

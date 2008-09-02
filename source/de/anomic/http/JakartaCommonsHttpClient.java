@@ -144,7 +144,6 @@ public class JakartaCommonsHttpClient {
     private boolean followRedirects = true;
     private boolean ignoreCookies = false;
 
-
     /**
      * creates a new JakartaCommonsHttpClient with given timeout using global remoteProxyConfig
      *
@@ -434,8 +433,8 @@ public class JakartaCommonsHttpClient {
         HttpConnectionInfo.addConnection(generateConInfo(method));
 
         // execute (send request)
-        serverLog.logFine("HTTPC", "executing " + method.hashCode() + " " + method.getName() + " " + method.getURI());
-        serverLog.logFinest("HTTPC", "->" + method.hashCode() + " request headers " +
+        if (serverLog.isFine("HTTPC")) serverLog.logFine("HTTPC", "executing " + method.hashCode() + " " + method.getName() + " " + method.getURI());
+        if (serverLog.isFinest("HTTPC")) serverLog.logFinest("HTTPC", "->" + method.hashCode() + " request headers " +
                 Arrays.toString(method.getRequestHeaders()));
         try {
             if (hostConfig == null) {
@@ -448,7 +447,7 @@ public class JakartaCommonsHttpClient {
             HttpConnectionInfo.removeConnection(generateConInfo(method));
             throw e;
         }
-        serverLog.logFinest("HTTPC", "<-" + method.hashCode() + " response headers " +
+        if (serverLog.isFinest("HTTPC")) serverLog.logFinest("HTTPC", "<-" + method.hashCode() + " response headers " +
                 Arrays.toString(method.getResponseHeaders()));
 
         // return response

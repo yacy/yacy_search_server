@@ -493,7 +493,7 @@ public class Balancer {
                               15000,
                               Math.max(
                                 (crawlEntry.url().isLocal()) ? minimumLocalDelta : minimumGlobalDelta,
-                                plasmaSwitchboard.getSwitchboard().robots.crawlDelay(crawlEntry.url()) * 1000)
+                                plasmaSwitchboard.getSwitchboard().robots.crawlDelayMillis(crawlEntry.url()))
                             ); // prevent that that robots file can stop our indexer completely
         if (delta < genericDelta) {
             // force a busy waiting here

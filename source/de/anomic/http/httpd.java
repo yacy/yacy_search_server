@@ -902,7 +902,7 @@ public final class httpd implements serverHandler, Cloneable {
         try {
             items = upload.parseRequest(request);
         } catch (FileUploadException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
             throw new IOException("FileUploadException " + e.getMessage());
         }
 
