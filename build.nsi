@@ -72,10 +72,12 @@ Section "YaCy on the Desktop"
 	CreateShortCut "$DESKTOP\YaCy.lnk" "$INSTDIR\startYACY.bat" "" "$INSTDIR\addon\YaCy.ico" "" SW_SHOWMINIMIZED
 SectionEnd
 
+/*
 Section "YaCy in Startup"
 	SetShellVarContext current
 	CreateShortCut "$SMSTARTUP\YaCy.lnk" "$INSTDIR\startYACY.bat" "" "$INSTDIR\addon\YaCy.ico" "" SW_SHOWMINIMIZED
 SectionEnd
+*/
 
 Section "Uninstall"
 	IfFileExists "$INSTDIR\DATA\yacy.running" 0 +3

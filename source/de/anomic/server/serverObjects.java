@@ -264,6 +264,13 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
             return dflt;
         }
     }
+    
+    public boolean hasValue(final String key) {
+        final String s = super.get(key);
+        if (s == null) return false;
+        if (s == "") return false;
+        return true;
+    }
 
     // returns a set of all values where their key mappes the keyMapper
     public String[] getAll(final String keyMapper) {

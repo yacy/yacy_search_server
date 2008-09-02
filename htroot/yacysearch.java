@@ -125,7 +125,7 @@ public class yacysearch {
         }
 
         int itemsPerPage = Math.min((authenticated) ? 1000 : 10, post.getInt("maximumRecords", post.getInt("count", 10))); // SRU syntax with old property as alternative
-        int offset = post.getInt("startRecord", post.getInt("offset", 0));
+        int offset = (post.hasValue("query") && post.hasValue("former") && !post.get("query","").equalsIgnoreCase(post.get("former",""))) ? 0 : post.getInt("startRecord", post.getInt("offset", 0));
         
         boolean global = (post == null) ? true : post.get("resource", "global").equals("global");
         final boolean indexof = (post != null && post.get("indexof","").equals("on")); 
@@ -423,6 +423,9 @@ public class yacysearch {
         return prop;
     }
 
+    /**
+     * generates the page navigation bar
+     */
     private static String navurla(final int page, final int display, final plasmaSearchQuery theQuery) {
         return
         "<a href=\"yacysearch.html?display=" + display +
