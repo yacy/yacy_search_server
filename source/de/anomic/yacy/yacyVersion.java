@@ -389,13 +389,16 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
         		final String script =
 	            	"@echo off" + serverCore.LF_STRING +
 	            	"title YaCy restarter" + serverCore.LF_STRING +
-	            	"echo YACY RESTARTER" + serverCore.LF_STRING +
-	            	"echo working..." + serverCore.LF_STRING +
-	            	"cd " + apphome + "/DATA/RELEASE/".replace("/", File.separator) + serverCore.LF_STRING +
+	            	"set loading=YACY RESTARTER" + serverCore.LF_STRING +
+	            	"echo %loading%" + serverCore.LF_STRING +
+	            	"cd \"" + apphome + "/DATA/RELEASE/".replace("/", File.separator) + "\"" + serverCore.LF_STRING +
 	            	":WAIT" + serverCore.LF_STRING +
+	            	"set loading=%loading%." + serverCore.LF_STRING +
+	            	"cls" + serverCore.LF_STRING +
+	            	"echo %loading%" + serverCore.LF_STRING +
 	            	"ping -n 2 127.0.0.1 >nul" + serverCore.LF_STRING +
 	            	"IF exist ..\\yacy.running goto WAIT" + serverCore.LF_STRING +
-	            	"cd " + apphome + serverCore.LF_STRING +
+	            	"cd \"" + apphome + "\"" + serverCore.LF_STRING +
 	            	"start /MIN CMD /C " + starterFile + serverCore.LF_STRING;
 	            final File scriptFile = new File(sb.getRootPath(), "DATA/RELEASE/restart.bat".replace("/", File.separator));
 	            serverSystem.deployScript(scriptFile, script);
@@ -464,17 +467,20 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
             	script = 
 	            	"@echo off" + serverCore.LF_STRING +
 	            	"title YaCy updater" + serverCore.LF_STRING +
-	            	"echo YACY UPDATER" + serverCore.LF_STRING +
-	            	"echo working..." + serverCore.LF_STRING +
-	            	"cd " + apphome + "/DATA/RELEASE/".replace("/", File.separator) + serverCore.LF_STRING +
+	            	"set loading=YACY UPDATER" + serverCore.LF_STRING +
+	            	"echo %loading%" + serverCore.LF_STRING +
+	            	"cd \"" + apphome + "/DATA/RELEASE/".replace("/", File.separator) + "\"" + serverCore.LF_STRING +
 	
 	            	":WAIT" + serverCore.LF_STRING +
+	            	"set loading=%loading%." + serverCore.LF_STRING +
+	            	"cls" + serverCore.LF_STRING +
+	            	"echo %loading%" + serverCore.LF_STRING +
 	            	"ping -n 2 127.0.0.1 >nul" + serverCore.LF_STRING +
 	            	"IF exist ..\\yacy.running goto WAIT" + serverCore.LF_STRING +
 	            	"IF not exist yacy goto NODATA" + serverCore.LF_STRING +
 
 	            	"cd yacy" + serverCore.LF_STRING +
-	            	"xcopy *.* " + apphome + " /E /Y >nul" + serverCore.LF_STRING +
+	            	"xcopy *.* \"" + apphome + "\" /E /Y >nul" + serverCore.LF_STRING +
 	            	// /E - all subdirectories
 	            	// /Y - don't ask
 	            	"cd .." + serverCore.LF_STRING +
@@ -488,7 +494,7 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
 	            	"pause" + serverCore.LF_STRING +
 	
 	            	":END" + serverCore.LF_STRING +
-	            	"cd " + apphome + serverCore.LF_STRING +
+	            	"cd \"" + apphome + "\"" + serverCore.LF_STRING +
 	            	"start /MIN CMD /C " + starterFile + serverCore.LF_STRING;
             	scriptFileName = "update.bat";
             } else { // unix/linux
