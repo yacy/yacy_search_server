@@ -202,36 +202,15 @@ public final class plasmaSearchEvent {
             // start worker threads to fetch urls and snippets
             this.workerThreads = new resultWorker[workerThreadCount];
             for (int i = 0; i < workerThreadCount; i++) {
-                this.workerThreads[i] = new resultWorker(i, 10000);
+                this.workerThreads[i] = new resultWorker(i, 6000, 2);
                 this.workerThreads[i].start();
             }
             serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), "online snippet fetch threads started", 0, 0));
         } else {
-            // prepare result vector directly without worker threads
             final long timer = System.currentTimeMillis();
-            indexURLReference uentry;
-            ResultEntry resultEntry;
-            yacyURL url;
-            synchronized (rankedCache) {
-                while ((rankedCache.size() > 0) && ((uentry = rankedCache.bestURL(true)) != null) && (result.size() < (query.neededResults()))) {
-                    url = uentry.comp().url();
-                    if (url == null) continue;
-                    //System.out.println("***DEBUG*** SEARCH RESULT URL=" + url.toNormalform(false, false));
-                
-                    resultEntry = obtainResultEntry(uentry, 0 /*(snippetComputationAllTime < 100) ? 1 : 0*/);
-                    if (resultEntry == null) continue; // the entry had some problems, cannot be used
-                    urlRetrievalAllTime += resultEntry.dbRetrievalTime;
-                    snippetComputationAllTime += resultEntry.snippetComputationTime;
-                
-                    // place the result to the result vector
-                    result.push(resultEntry, Long.valueOf(rankedCache.getOrder().cardinal(resultEntry.word())));
-
-                    // add references
-                    synchronized (rankedCache) {
-                        rankedCache.addReferences(resultEntry);
-                    }
-                }
-            }
+            // use only a single worker thread, thats enough
+            resultWorker worker = new resultWorker(0, 3000, 0);
+            worker.start();
             serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), "offline snippet fetch", result.size(), System.currentTimeMillis() - timer));
         }
         
@@ -494,7 +473,7 @@ public final class plasmaSearchEvent {
             event.workerThreads = new resultWorker[workerThreadCount];
             resultWorker worker;
             for (int i = 0; i < workerThreadCount; i++) {
-                worker = event.new resultWorker(i, 10000);
+                worker = event.new resultWorker(i, 6000, 2);
                 worker.start();
                 event.workerThreads[i] = worker;
             }
@@ -508,12 +487,13 @@ public final class plasmaSearchEvent {
         private final long timeout; // the date until this thread should try to work
         private long lastLifeSign; // when the last time the run()-loop was executed
         private final int id;
+        private int snippetMode;
         
-        public resultWorker(final int id, final long maxlifetime) {
+        public resultWorker(final int id, final long maxlifetime, int snippetMode) {
             this.id = id;
+            this.snippetMode = snippetMode;
             this.lastLifeSign = System.currentTimeMillis();
             this.timeout = System.currentTimeMillis() + Math.max(1000, maxlifetime);
-            //this.sleeptime = Math.min(300, maxlifetime / 10 * id);
         }
 
         public void run() {
@@ -524,8 +504,8 @@ public final class plasmaSearchEvent {
                 this.lastLifeSign = System.currentTimeMillis();
 
                 // check if we have enough
-                if ((query.contentdom == plasmaSearchQuery.CONTENTDOM_IMAGE) && (images.size() >= query.neededResults() + 30)) break;
-                if ((query.contentdom != plasmaSearchQuery.CONTENTDOM_IMAGE) && (result.size() >= query.neededResults() + 10 /*+ query.displayResults()*/)) break;
+                if ((query.contentdom == plasmaSearchQuery.CONTENTDOM_IMAGE) && (images.size() >= query.neededResults())) break;
+                if ((query.contentdom != plasmaSearchQuery.CONTENTDOM_IMAGE) && (result.size() >= query.neededResults())) break;
 
                 // get next entry
                 page = rankedCache.bestURL(true);
@@ -535,13 +515,13 @@ public final class plasmaSearchEvent {
                     try {Thread.sleep(100);} catch (final InterruptedException e1) {}
                     continue;
                 }
-                if (anyResultWith(page.hash())) continue;
-                if (anyFailureWith(page.hash())) continue;
+                if (result.exists(page.hash().hashCode())) continue;
+                if (failedURLs.get(page.hash()) != null) continue;
                 
                 // try secondary search
                 prepareSecondarySearch(); // will be executed only once
                 
-                final ResultEntry resultEntry = obtainResultEntry(page, 2);
+                final ResultEntry resultEntry = obtainResultEntry(page, snippetMode);
                 if (resultEntry == null) continue; // the entry had some problems, cannot be used
                 urlRetrievalAllTime += resultEntry.dbRetrievalTime;
                 snippetComputationAllTime += resultEntry.snippetComputationTime;
@@ -555,14 +535,6 @@ public final class plasmaSearchEvent {
                 //System.out.println("DEBUG SNIPPET_LOADING: thread " + id + " got " + resultEntry.url());
             }
             serverLog.logInfo("SEARCH", "resultWorker thread " + id + " terminated");
-        }
-        
-        private boolean anyResultWith(final String urlhash) {
-            return result.exists(urlhash.hashCode());
-        }
-        
-        private boolean anyFailureWith(final String urlhash) {
-            return (failedURLs.get(urlhash) != null);
         }
         
         public long busytime() {
