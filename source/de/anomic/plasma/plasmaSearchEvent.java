@@ -195,7 +195,6 @@ public final class plasmaSearchEvent {
                 }
                 serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), "abstract generation", this.rankedCache.searchContainerMaps()[0].size(), System.currentTimeMillis() - timer));
             }
-            
         }
         
         if (query.onlineSnippetFetch) {
@@ -462,8 +461,7 @@ public final class plasmaSearchEvent {
         }
 
         // if worker threads had been alive, but did not succeed, start them again to fetch missing links
-        if ((query.onlineSnippetFetch) &&
-            (!event.anyWorkerAlive()) &&
+        if ((!event.anyWorkerAlive()) &&
             (((query.contentdom == plasmaSearchQuery.CONTENTDOM_IMAGE) && (event.images.size() + 30 < query.neededResults())) ||
              (event.result.size() < query.neededResults() + 10)) &&
             (event.getRankingResult().getLocalResourceSize() + event.getRankingResult().getRemoteResourceSize() > event.result.size())) {
@@ -473,7 +471,7 @@ public final class plasmaSearchEvent {
             event.workerThreads = new resultWorker[workerThreadCount];
             resultWorker worker;
             for (int i = 0; i < workerThreadCount; i++) {
-                worker = event.new resultWorker(i, 6000, 2);
+                worker = event.new resultWorker(i, 6000, (query.onlineSnippetFetch) ? 2 : 0);
                 worker.start();
                 event.workerThreads[i] = worker;
             }
@@ -500,12 +498,13 @@ public final class plasmaSearchEvent {
 
             // start fetching urls and snippets
             indexURLReference page;
+            final int fetchAhead = snippetMode == 0 ? 0 : 10;
             while (System.currentTimeMillis() < this.timeout) {
                 this.lastLifeSign = System.currentTimeMillis();
 
                 // check if we have enough
-                if ((query.contentdom == plasmaSearchQuery.CONTENTDOM_IMAGE) && (images.size() >= query.neededResults())) break;
-                if ((query.contentdom != plasmaSearchQuery.CONTENTDOM_IMAGE) && (result.size() >= query.neededResults())) break;
+                if ((query.contentdom == plasmaSearchQuery.CONTENTDOM_IMAGE) && (images.size() >= query.neededResults() + fetchAhead)) break;
+                if ((query.contentdom != plasmaSearchQuery.CONTENTDOM_IMAGE) && (result.size() >= query.neededResults() + fetchAhead)) break;
 
                 // get next entry
                 page = rankedCache.bestURL(true);

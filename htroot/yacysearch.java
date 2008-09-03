@@ -76,7 +76,7 @@ public class yacysearch {
         
         // get query
         String querystring = (post == null) ? "" : post.get("query", post.get("search", "")).trim(); // SRU compliance
-        final boolean fetchSnippets = (post != null && post.get("verify", "true").equals("true"));
+        final boolean fetchSnippets = (post != null && post.get("verify", "false").equals("true"));
         final serverObjects prop = new serverObjects();
         
         final boolean rss = (post == null) ? false : post.get("rss", "false").equals("true");
@@ -435,6 +435,7 @@ public class yacysearch {
         "&amp;maximumRecords="+ theQuery.displayResults() +
         "&amp;startRecord=" + (page * theQuery.displayResults()) +
         "&amp;resource=" + ((theQuery.isLocal()) ? "local" : "global") +
+        "&amp;verify=" + ((theQuery.onlineSnippetFetch) ? "true" : "false") +
         "&amp;urlmaskfilter=" + theQuery.urlMask +
         "&amp;prefermaskfilter=" + theQuery.prefer +
         "&amp;cat=href&amp;constraint=" + ((theQuery.constraint == null) ? "" : theQuery.constraint.exportB64()) +

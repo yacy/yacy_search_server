@@ -333,20 +333,4 @@ public class ysearch {
         // return rewrite properties
         return prop;
     }
-/*
-    private static String navhidden(int page, int display, plasmaSearchQuery theQuery) {
-        return
-        "<input type=\"hidden\" name=\"display\" value=\"" + display + "\" />" +
-        "<input type=\"hidden\" name=\"search\" value=\"" + theQuery.queryString() + "\" />" +
-        "<input type=\"hidden\" name=\"count\" value=\"" + theQuery.displayResults() + "\" />" +
-        "<input type=\"hidden\" name=\"offset\" value=\"" + (page * theQuery.displayResults()) + "\" />" +
-        "<input type=\"hidden\" name=\"resource\" value=\"" + theQuery.searchdom() + "\" />" +
-        "<input type=\"hidden\" name=\"urlmaskfilter\" value=\"" + theQuery.urlMask + "\" />" +
-        "<input type=\"hidden\" name=\"prefermaskfilter\" value=\"" + theQuery.prefer + "\" />" +
-        "<input type=\"hidden\" name=\"cat\" value=\"href\" />" +
-        "<input type=\"hidden\" name=\"constraint\" value=\"" + ((theQuery.constraint == null) ? "" : theQuery.constraint.exportB64()) + "\" />" +
-        "<input type=\"hidden\" name=\"contentdom\" value=\"" + theQuery.contentdom() + "\" />" +
-        "<input type=\"hidden\" name=\"former\" value=\"" + theQuery.queryString() + "\" />";
-    }
-    */
 }
