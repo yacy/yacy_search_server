@@ -296,6 +296,7 @@ public class yacySearch extends Thread {
         if (targets == 0) return new yacySearch[0];
         final yacySearch[] searchThreads = new yacySearch[targets];
         for (int i = 0; i < targets; i++) {
+            if (targetPeers[i] == null || targetPeers[i].hash == null) continue;
             searchThreads[i] = new yacySearch(wordhashes, excludehashes, urlhashes, prefer, filter, count, maxDist, true, targets, targetPeers[i],
                     wordIndex, crawlResults, containerCache, abstractCache, blacklist, rankingProfile, constraint);
             searchThreads[i].start();
@@ -316,7 +317,7 @@ public class yacySearch extends Thread {
 
         // prepare seed targets and threads
         final yacySeed targetPeer = wordIndex.seedDB.getConnected(targethash);
-        if (targetPeer == null) return null;
+        if (targetPeer == null || targetPeer.hash == null) return null;
         if (clusterselection != null) targetPeer.setAlternativeAddress(clusterselection.get(targetPeer.hash));
         final yacySearch searchThread = new yacySearch(wordhashes, excludehashes, urlhashes, "", "", 0, 9999, true, 0, targetPeer,
                                              wordIndex, crawlResults, containerCache, new TreeMap<String, TreeMap<String, String>>(), blacklist, rankingProfile, constraint);

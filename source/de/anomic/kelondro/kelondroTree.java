@@ -151,6 +151,9 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
         n.commit();
     }
 
+    // the has-property in kelondroTree should not be used, because it has the effect of doubling the IO activity in case that
+    // the result is 'true'. Whenever possible, please use the get method, store the result in a dummy value and test the result
+    // by comparing it with null.
     public boolean has(final byte[] key) {
         boolean result;
         synchronized (writeSearchObj) {

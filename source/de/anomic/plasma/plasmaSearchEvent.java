@@ -68,7 +68,7 @@ public final class plasmaSearchEvent {
     public static String lastEventID = "";
     private static ConcurrentHashMap<String, plasmaSearchEvent> lastEvents = new ConcurrentHashMap<String, plasmaSearchEvent>(); // a cache for objects from this class: re-use old search requests
     public static final long eventLifetime = 600000; // the time an event will stay in the cache, 10 Minutes
-    private static final int max_results_preparation = 200;
+    private static final int max_results_preparation = 300;
     
     private long eventTime;
     plasmaSearchQuery query;
@@ -240,8 +240,8 @@ public final class plasmaSearchEvent {
         serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), "event-cleanup", 0, 0));
         
         // store this search to a cache so it can be re-used
-        lastEvents.put(query.id(false), this);
         lastEventID = query.id(false);
+        lastEvents.put(lastEventID, this);
     }
 
     private class localSearchProcess extends Thread {
@@ -460,24 +460,28 @@ public final class plasmaSearchEvent {
             final ResultURLs crawlResults,
             final TreeMap<String, String> preselectedPeerHashes,
             final boolean generateAbstracts) {
-        plasmaSearchEvent event = lastEvents.get(query.id(false));
-        if (event == null) {
-            event = new plasmaSearchEvent(query, wordIndex, crawlResults, preselectedPeerHashes, generateAbstracts);
+        
+        String id = query.id(false);
+        plasmaSearchEvent event = lastEvents.get(id);
+        if (plasmaSwitchboard.getSwitchboard().crawlQueues.noticeURL.size() > 0 && event != null && System.currentTimeMillis() - event.eventTime > 60000) {
+            // if a local crawl is ongoing, don't use the result from the cache to use possibly more results that come from the current crawl
+            // to prevent that this happens during a person switches between the different result pages, a re-search happens no more than
+            // once a minute
+            lastEvents.remove(id);
+            event = null;
         } else {
-            //re-new the event time for this event, so it is not deleted next time too early
-            event.eventTime = System.currentTimeMillis();
-            // replace the query, because this contains the current result offset
-            event.query = query;
-        }
-    
-        // if a local crawl is ongoing, do another local search to enrich the current results with more
-        // entries that can possibly come out of the running crawl
-        if (plasmaSwitchboard.getSwitchboard().crawlQueues.noticeURL.size() > 0) {
-            synchronized (event.rankedCache) {
-                event.rankedCache.execQuery();
+            if (event != null) {
+                //re-new the event time for this event, so it is not deleted next time too early
+                event.eventTime = System.currentTimeMillis();
+                // replace the query, because this contains the current result offset
+                event.query = query;
             }
         }
-        
+        if (event == null) {
+            // generate a new event
+            event = new plasmaSearchEvent(query, wordIndex, crawlResults, preselectedPeerHashes, generateAbstracts);
+        }
+
         // if worker threads had been alive, but did not succeed, start them again to fetch missing links
         if ((query.onlineSnippetFetch) &&
             (!event.anyWorkerAlive()) &&
