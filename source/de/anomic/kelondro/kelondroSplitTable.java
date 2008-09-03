@@ -137,7 +137,7 @@ public class kelondroSplitTable implements kelondroIndex {
                 f = new File(path, maxf);
                 if (f.isDirectory()) {
                     // this is a kelonodroFlex table
-                    serverLog.logInfo("kelondroSplitTable", "opening partial flex table " + path);
+                    serverLog.logInfo("kelondroSplitTable", "opening partial flex table " + f);
                     table = new kelondroFlexTable(path, maxf, rowdef, 0, resetOnFail);
                 } else {
                     serverLog.logInfo("kelondroSplitTable", "opening partial eco table " + f);
