@@ -152,7 +152,16 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
     }
 
     public boolean has(final byte[] key) {
-        throw new UnsupportedOperationException("has should not be used with kelondroTree.");
+        boolean result;
+        synchronized (writeSearchObj) {
+            try {
+                writeSearchObj.process(key);
+                result = writeSearchObj.found();
+            } catch (final IOException e) {
+                result = false;
+            }
+        }
+        return result;
     }
     
     // Returns the value to which this map maps the specified key.
