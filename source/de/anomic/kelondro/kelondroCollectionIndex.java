@@ -279,7 +279,7 @@ public class kelondroCollectionIndex {
             if (propfile.exists()) {
                 props = serverFileUtils.loadHashMap(propfile);
                 final String stored_rowdef = props.get("rowdef");
-                if ((stored_rowdef == null) || (!(rowdef.subsumes(new kelondroRow(stored_rowdef, rowdef.objectOrder, 0))))) {
+                if ((rowdef != null) && (!(rowdef.subsumes(new kelondroRow(stored_rowdef, rowdef.objectOrder, 0))))) {
                     System.out.println("FATAL ERROR: stored rowdef '" + stored_rowdef + "' does not match with new rowdef '" + 
                             rowdef + "' for array cluster '" + path + "/" + filenameStub + "'");
                     System.exit(-1);

@@ -105,7 +105,7 @@ public class kelondroFlexWidthArray implements kelondroArray {
         if (propfile.exists()) {
             props = serverFileUtils.loadHashMap(propfile);
             final String stored_rowdef = props.get("rowdef");
-            if ((stored_rowdef == null) || (!(rowdef.subsumes(new kelondroRow(stored_rowdef, rowdef.objectOrder, 0))))) {
+            if ((stored_rowdef != null) && (!(rowdef.subsumes(new kelondroRow(stored_rowdef, rowdef.objectOrder, 0))))) {
                 System.out.println("FATAL ERROR: stored rowdef '" + stored_rowdef + "' does not match with new rowdef '" + 
                         rowdef + "' for flex table '" + path + "', table " + tablename);
                 System.exit(-1);
