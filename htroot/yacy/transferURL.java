@@ -91,7 +91,7 @@ public final class transferURL {
                 // read new lurl-entry
                 urls = post.get("url" + i);
                 if (urls == null) {
-                    yacyCore.log.logFine("transferURL: got null URL-string from peer " + otherPeerName);
+                    if (yacyCore.log.isFine()) yacyCore.log.logFine("transferURL: got null URL-string from peer " + otherPeerName);
                     blocked++;
                     continue;
                 }
@@ -114,14 +114,14 @@ public final class transferURL {
                 
                 // check whether entry is too old
                 if (lEntry.freshdate().getTime() <= freshdate) {
-                    yacyCore.log.logFine("transerURL: received too old URL from peer " + otherPeerName + ": " + lEntry.freshdate());
+                    if (yacyCore.log.isFine()) yacyCore.log.logFine("transerURL: received too old URL from peer " + otherPeerName + ": " + lEntry.freshdate());
                     blocked++;
                     continue;
                 }
                 
                 // check if the entry is blacklisted
                 if ((blockBlacklist) && (plasmaSwitchboard.urlBlacklist.isListed(indexReferenceBlacklist.BLACKLIST_DHT, comp.url()))) {
-                    yacyCore.log.logFine("transferURL: blocked blacklisted URL '" + comp.url().toNormalform(false, true) + "' from peer " + otherPeerName);
+                    if (yacyCore.log.isFine()) yacyCore.log.logFine("transferURL: blocked blacklisted URL '" + comp.url().toNormalform(false, true) + "' from peer " + otherPeerName);
                     lEntry = null;
                     blocked++;
                     continue;
@@ -130,7 +130,7 @@ public final class transferURL {
                 // check if the entry is in our network domain
                 final String urlRejectReason = sb.acceptURL(comp.url());
                 if (urlRejectReason != null) {
-                    yacyCore.log.logFine("transferURL: blocked URL '" + comp.url() + "' (" + urlRejectReason + ") from peer " + otherPeerName);
+                    if (yacyCore.log.isFine()) yacyCore.log.logFine("transferURL: blocked URL '" + comp.url() + "' (" + urlRejectReason + ") from peer " + otherPeerName);
                     lEntry = null;
                     blocked++;
                     continue;
@@ -140,7 +140,7 @@ public final class transferURL {
                 try {
                     sb.webIndex.putURL(lEntry);
                     sb.crawlResults.stack(lEntry, iam, iam, 3);
-                    yacyCore.log.logFine("transferURL: received URL '" + comp.url().toNormalform(false, true) + "' from peer " + otherPeerName);
+                    if (yacyCore.log.isFine()) yacyCore.log.logFine("transferURL: received URL '" + comp.url().toNormalform(false, true) + "' from peer " + otherPeerName);
                     received++;
                 } catch (final IOException e) {
                     e.printStackTrace();

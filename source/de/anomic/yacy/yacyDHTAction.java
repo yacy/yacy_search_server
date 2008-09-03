@@ -358,9 +358,9 @@ public class yacyDHTAction {
         	firstdist = yacyDHTAction.dhtDistance(seed.hash, firstKey);
         	lastdist = yacyDHTAction.dhtDistance(seed.hash, lastKey);
             if (lastdist > maxDist) {
-                if (log != null) log.logFine("Discarded too distant DHT target peer " + seed.getName() + ":" + seed.hash + ", distance2first = " + firstdist + ", distance2last = " + lastdist);
+                if (log != null && yacyCore.log.isFine()) log.logFine("Discarded too distant DHT target peer " + seed.getName() + ":" + seed.hash + ", distance2first = " + firstdist + ", distance2last = " + lastdist);
             } else if (doublecheck.contains(seed.hash)) {
-                if (log != null) log.logFine("Discarded double DHT target peer " + seed.getName() + ":" + seed.hash + ", distance2first = " + firstdist + ", distance2last = " + lastdist);
+                if (log != null && yacyCore.log.isFine()) log.logFine("Discarded double DHT target peer " + seed.getName() + ":" + seed.hash + ", distance2first = " + firstdist + ", distance2last = " + lastdist);
             } else {
                 if (log != null) log.logInfo("Selected  " + ((seeds.size() < primaryPeerCount) ? "primary" : "reserve") + "  DHT target peer " + seed.getName() + ":" + seed.hash + ", distance2first = " + firstdist + ", distance2last = " + lastdist);
                 seeds.add(seed);

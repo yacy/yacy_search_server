@@ -816,7 +816,7 @@ public class yacySeed implements Cloneable {
         // check semantics of content
         final String testResult = resultSeed.isProper(ownSeed);
         if (testResult != null) {
-            yacyCore.log.logFinest("seed is not proper (" + testResult + "): " + resultSeed);
+            if (yacyCore.log.isFinest()) yacyCore.log.logFinest("seed is not proper (" + testResult + "): " + resultSeed);
             return null;
         }
         

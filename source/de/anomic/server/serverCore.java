@@ -271,7 +271,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
             if (bindIP.startsWith("#")) {
                 final String interfaceName = bindIP.substring(1);
                 String hostName = null;
-                this.log.logFine("Trying to determine IP address of interface '" + interfaceName + "'.");                    
+                if (this.log.isFine()) this.log.logFine("Trying to determine IP address of interface '" + interfaceName + "'.");                    
 
                 final Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
                 if (interfaces != null) {
@@ -322,7 +322,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
             // prepare for new connection
             // idleThreadCheck();
             this.switchboard.handleBusyState(this.busySessions.size());
-            this.log.logFinest("* waiting for connections, " + this.busySessions.size() + " sessions running");
+            if (log.isFinest()) this.log.logFinest("* waiting for connections, " + this.busySessions.size() + " sessions running");
                         
             announceThreadBlockApply();
             
@@ -549,7 +549,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
     	*/
     
     	public void log(final boolean outgoing, final String request) {
-    	    serverCore.this.log.logFine(this.userAddress.getHostAddress() + "/" + this.identity + " " +
+    	    if (serverCore.this.log.isFine()) serverCore.this.log.logFine(this.userAddress.getHostAddress() + "/" + this.identity + " " +
     		     "[" + ((busySessions == null)? -1 : busySessions.size()) + ", " + this.commandCounter +
     		     ((outgoing) ? "] > " : "] < ") +
     		     request);
@@ -992,22 +992,22 @@ public final class serverCore extends serverAbstractBusyThread implements server
             this.log.logInfo("Initializing SSL support ...");
             
             // creating a new keystore instance of type (java key store)
-            this.log.logFine("Initializing keystore ...");
+            if (this.log.isFine()) this.log.logFine("Initializing keystore ...");
             final KeyStore ks = KeyStore.getInstance("JKS");
             
             // loading keystore data from file
-            this.log.logFine("Loading keystore file " + keyStoreFileName);
+            if (this.log.isFine()) this.log.logFine("Loading keystore file " + keyStoreFileName);
             final FileInputStream stream = new FileInputStream(keyStoreFileName);            
             ks.load(stream, keyStorePwd.toCharArray());
             stream.close();
             
             // creating a keystore factory
-            this.log.logFine("Initializing key manager factory ...");
+            if (this.log.isFine()) this.log.logFine("Initializing key manager factory ...");
             final KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
             kmf.init(ks,keyStorePwd.toCharArray());
             
             // initializing the ssl context
-            this.log.logFine("Initializing SSL context ...");
+            if (this.log.isFine()) this.log.logFine("Initializing SSL context ...");
             final SSLContext sslcontext = SSLContext.getInstance("TLS");
             sslcontext.init(kmf.getKeyManagers(), null, null);
             

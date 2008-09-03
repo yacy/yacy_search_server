@@ -262,7 +262,7 @@ public class blogBoardComments {
             try {
                 final String date = record.get("date");
                 if (date == null) {
-                    serverLog.logFinest("Blog", "ERROR: date field missing in blogBoard");
+                    if (serverLog.isFinest("Blog")) serverLog.logFinest("Blog", "ERROR: date field missing in blogBoard");
                     return new Date();
                 }
                 synchronized (SimpleFormatter) {
@@ -276,7 +276,7 @@ public class blogBoardComments {
         public String getTimestamp() {
             final String timestamp = record.get("date");
             if (timestamp == null) {
-                serverLog.logFinest("Blog", "ERROR: date field missing in blogBoard");
+                if (serverLog.isFinest("Blog")) serverLog.logFinest("Blog", "ERROR: date field missing in blogBoard");
                 return dateString(new Date());
             }
             return timestamp;

@@ -163,7 +163,7 @@ public class HttpConnectionInfo {
                         allConnections.remove(con);
                     }
                 }
-                serverLog.logFine("HTTPC", "cleanUp ConnectionInfo removed "+ (sizeBefore - allConnections.size()));
+                if (serverLog.isFine("HTTPC")) serverLog.logFine("HTTPC", "cleanUp ConnectionInfo removed "+ (sizeBefore - allConnections.size()));
             }
         } catch (final java.util.ConcurrentModificationException e) {
             serverLog.logWarning("HTTPC", "cleanUp ConnectionInfo interrupted by ConcurrentModificationException");

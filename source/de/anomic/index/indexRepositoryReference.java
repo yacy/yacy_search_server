@@ -319,20 +319,20 @@ public final class indexRepositoryReference {
                     }
                     final indexURLReference entry = eiter.next();
                     if (entry == null) {
-                        serverLog.logFine("URLDBCLEANER", "entry == null");
+                        if (serverLog.isFine("URLDBCLEANER")) serverLog.logFine("URLDBCLEANER", "entry == null");
                     } else if (entry.hash() == null) {
-                        serverLog.logFine("URLDBCLEANER", ++blacklistedUrls + " blacklisted (" + ((double) blacklistedUrls / totalSearchedUrls) * 100 + "%): " + "hash == null");
+                        if (serverLog.isFine("URLDBCLEANER")) serverLog.logFine("URLDBCLEANER", ++blacklistedUrls + " blacklisted (" + ((double) blacklistedUrls / totalSearchedUrls) * 100 + "%): " + "hash == null");
                     } else {
                         final indexURLReference.Components comp = entry.comp();
                         totalSearchedUrls++;
                         if (comp.url() == null) {
-                            serverLog.logFine("URLDBCLEANER", ++blacklistedUrls + " blacklisted (" + ((double) blacklistedUrls / totalSearchedUrls) * 100 + "%): " + entry.hash() + "URL == null");
+                            if (serverLog.isFine("URLDBCLEANER")) serverLog.logFine("URLDBCLEANER", ++blacklistedUrls + " blacklisted (" + ((double) blacklistedUrls / totalSearchedUrls) * 100 + "%): " + entry.hash() + "URL == null");
                             remove(entry.hash());
                         } else if (blacklist.isListed(indexReferenceBlacklist.BLACKLIST_CRAWLER, comp.url()) ||
                                 blacklist.isListed(indexReferenceBlacklist.BLACKLIST_DHT, comp.url())) {
                             lastBlacklistedUrl = comp.url().toNormalform(true, true);
                             lastBlacklistedHash = entry.hash();
-                            serverLog.logFine("URLDBCLEANER", ++blacklistedUrls + " blacklisted (" + ((double) blacklistedUrls / totalSearchedUrls) * 100 + "%): " + entry.hash() + " " + comp.url().toNormalform(false, true));
+                            if (serverLog.isFine("URLDBCLEANER")) serverLog.logFine("URLDBCLEANER", ++blacklistedUrls + " blacklisted (" + ((double) blacklistedUrls / totalSearchedUrls) * 100 + "%): " + entry.hash() + " " + comp.url().toNormalform(false, true));
                             remove(entry.hash());
                             if (blacklistedUrls % 100 == 0) {
                                 serverLog.logInfo("URLDBCLEANER", "Deleted " + blacklistedUrls + " URLs until now. Last deleted URL-Hash: " + lastBlacklistedUrl);

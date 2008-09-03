@@ -71,7 +71,7 @@ public class translator {
 			} else {
 				//Filename not available, but it will be printed in Log 
 				//after all untranslated Strings as "Translated file: "
-				serverLog.logFine("TRANSLATOR", "Unused String: "+key); 
+				if (serverLog.isFine("TRANSLATOR")) serverLog.logFine("TRANSLATOR", "Unused String: "+key); 
 			}
 		}
 		return result;

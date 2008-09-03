@@ -327,8 +327,8 @@ public final class httpdProxyHandler {
             yacyURL url = null;
             try {
                 url = httpHeader.getRequestURL(conProp);
-                theLogger.logFine(reqID +" GET "+ url);
-                theLogger.logFinest(reqID +"    header: "+ requestHeader);
+                if (theLogger.isFine()) theLogger.logFine(reqID +" GET "+ url);
+                if (theLogger.isFinest()) theLogger.logFinest(reqID +"    header: "+ requestHeader);
 
                 //redirector
                 if (redirectorEnabled){
@@ -342,7 +342,7 @@ public final class httpdProxyHandler {
                             url = new yacyURL(newUrl, null);
                         } catch(final MalformedURLException e){}//just keep the old one
                     }
-                    theLogger.logFinest(reqID +"    using redirector to "+ url);
+                    if (theLogger.isFinest()) theLogger.logFinest(reqID +"    using redirector to "+ url);
                     conProp.setProperty(httpHeader.CONNECTION_PROP_HOST, url.getHost()+":"+url.getPort());
                     conProp.setProperty(httpHeader.CONNECTION_PROP_PATH, url.getPath());
                     requestHeader.put(httpHeader.HOST, url.getHost()+":"+url.getPort());
@@ -431,17 +431,17 @@ public final class httpdProxyHandler {
             
             if (yacyCore.getOnlineMode() == 0) {
             	if (cacheExists) {
-            	    theLogger.logFinest(reqID +"    fulfill request from cache");
+            	    if (theLogger.isFinest()) theLogger.logFinest(reqID +"    fulfill request from cache");
             	    fulfillRequestFromCache(conProp,url,ext,requestHeader,cachedResponseHeader,cacheFile,countedRespond);
             	} else {
                     theLogger.logInfo("URL not availabe in Cache"+" and not in online-mode!");
                     httpd.sendRespondError(conProp,countedRespond,4,404,null,"URL not availabe in Cache",null);
             	}
             } else if (cacheExists && cacheEntry.shallUseCacheForProxy()) {
-                theLogger.logFinest(reqID +"    fulfill request from cache");
+                if (theLogger.isFinest()) theLogger.logFinest(reqID +"    fulfill request from cache");
                 fulfillRequestFromCache(conProp,url,ext,requestHeader,cachedResponseHeader,cacheFile,countedRespond);
             } else {            
-                theLogger.logFinest(reqID +"    fulfill request from web");
+                if (theLogger.isFinest()) theLogger.logFinest(reqID +"    fulfill request from web");
                 fulfillRequestFromWeb(conProp,url,ext,requestHeader,cachedResponseHeader,cacheFile,countedRespond);
             }
            
@@ -515,7 +515,7 @@ public final class httpdProxyHandler {
             // send request
             try {
             res = client.GET(getUrl);
-            theLogger.logFinest(reqID +"    response status: "+ res.getStatusLine());
+            if (theLogger.isFinest()) theLogger.logFinest(reqID +"    response status: "+ res.getStatusLine());
             conProp.put(httpHeader.CONNECTION_PROP_CLIENT_REQUEST_HEADER, requestHeader);
             
             final httpResponseHeader responseHeader = res.getResponseHeader();
@@ -557,8 +557,8 @@ public final class httpdProxyHandler {
             // handle file types and make (possibly transforming) output stream
             final OutputStream outStream = (gzippedOut != null) ? gzippedOut : ((chunkedOut != null)? chunkedOut : respond);
             final boolean isBinary = isBinary(responseHeader);
-            if(isBinary) {
-                theLogger.logFine(reqID +" create direct passthrough for URL " + url + ", extension '" + ext + "', mime-type '" + responseHeader.mime() + "'");
+            if (isBinary) {
+                if (theLogger.isFine()) theLogger.logFine(reqID +" create direct passthrough for URL " + url + ", extension '" + ext + "', mime-type '" + responseHeader.mime() + "'");
             } else {
                 // handle text stuff (encoding and so on)
                 if (
@@ -566,13 +566,13 @@ public final class httpdProxyHandler {
                         (plasmaParser.supportedHTMLContent(url,responseHeader.mime()))
                     ) {
                     // make a transformer
-                    theLogger.logFine(reqID +" create transformer for URL " + url);
+                    if (theLogger.isFine()) theLogger.logFine(reqID +" create transformer for URL " + url);
                     //hfos = new htmlFilterOutputStream((gzippedOut != null) ? gzippedOut : ((chunkedOut != null)? chunkedOut : respond), null, transformer, (ext.length() == 0));
                     final Charset charSet = responseHeader.getCharSet();
                     textOutput = new htmlFilterWriter(outStream,charSet, null, transformer, (ext.length() == 0));
                 } else {
                     // simply pass through without parsing
-                    theLogger.logFine(reqID +" create text passthrough for URL " + url + ", extension '" + ext + "', mime-type '" + responseHeader.mime() + "'");
+                    if (theLogger.isFine()) theLogger.logFine(reqID +" create text passthrough for URL " + url + ", extension '" + ext + "', mime-type '" + responseHeader.mime() + "'");
                     textOutput = new OutputStreamWriter(outStream, responseHeader.getCharSet());
                 }
             }
@@ -587,7 +587,7 @@ public final class httpdProxyHandler {
                 responseHeader.put(httpResponseHeader.TRANSFER_ENCODING, "chunked");
             }
             
-            theLogger.logFinest(reqID +"    sending response header: "+ responseHeader);
+            if (theLogger.isFinest()) theLogger.logFinest(reqID +"    sending response header: "+ responseHeader);
             httpd.sendRespondHeader(
                     conProp,
                     respond,
@@ -630,7 +630,7 @@ public final class httpdProxyHandler {
                     } else {
                         cacheArray = null;
                     }
-                    theLogger.logFine(reqID +" writeContent of " + url + " produced cacheArray = " + ((cacheArray == null) ? "null" : ("size=" + cacheArray.length)));
+                    if (theLogger.isFine()) theLogger.logFine(reqID +" writeContent of " + url + " produced cacheArray = " + ((cacheArray == null) ? "null" : ("size=" + cacheArray.length)));
 
                     if (textOutput instanceof htmlFilterWriter) ((htmlFilterWriter) textOutput).close();
 
@@ -665,7 +665,7 @@ public final class httpdProxyHandler {
                         writeTextContent(res, new BufferedWriter(textOutput), fileStream);
                     }
                     if (textOutput instanceof htmlFilterWriter) ((htmlFilterWriter) textOutput).close();
-                    theLogger.logFine(reqID +" for write-file of " + url + ": contentLength = " + contentLength + ", sizeBeforeDelete = " + sizeBeforeDelete);
+                    if (theLogger.isFine()) theLogger.logFine(reqID +" for write-file of " + url + ": contentLength = " + contentLength + ", sizeBeforeDelete = " + sizeBeforeDelete);
                     plasmaHTCache.writeFileAnnouncement(cacheFile);
                     if (sizeBeforeDelete == -1) {
                         // totally fresh file
@@ -688,7 +688,7 @@ public final class httpdProxyHandler {
                 }
             } else {
                 // no caching
-                theLogger.logFine(reqID +" "+ cacheFile.toString() + " not cached." +
+                if (theLogger.isFine()) theLogger.logFine(reqID +" "+ cacheFile.toString() + " not cached." +
                         " StoreError=" + ((storeError==null)?"None":storeError) + 
                         " StoreHTCache=" + storeHTCache + 
                         " SupportetContent=" + isSupportedContent);
@@ -932,8 +932,8 @@ public final class httpdProxyHandler {
                 httpd.sendRespondError(conProp,respond,4,501,null,errorMsg,e);
                 return;
             } 
-            theLogger.logFine(reqID +" HEAD "+ url);
-            theLogger.logFinest(reqID +"    header: "+ requestHeader);
+            if (theLogger.isFine()) theLogger.logFine(reqID +" HEAD "+ url);
+            if (theLogger.isFinest()) theLogger.logFinest(reqID +"    header: "+ requestHeader);
             
             // check the blacklist, inspired by [AS]: respond a 404 for all AGIS (all you get is shit) servers
             final String hostlow = host.toLowerCase();
@@ -961,14 +961,14 @@ public final class httpdProxyHandler {
             // generate request-url
             final String connectHost = hostPart(host, port, yAddress);
             final String getUrl = "http://"+ connectHost + remotePath;
-            theLogger.logFinest(reqID +"    using url: "+ getUrl);
+            if (theLogger.isFinest()) theLogger.logFinest(reqID +"    using url: "+ getUrl);
             
             final JakartaCommonsHttpClient client = setupHttpClient(requestHeader, connectHost);
             
             // send request
             try {
             res = client.HEAD(getUrl);
-            theLogger.logFinest(reqID +"    response status: "+ res.getStatusLine());
+            if (theLogger.isFinest()) theLogger.logFinest(reqID +"    response status: "+ res.getStatusLine());
             
             // determine if it's an internal error of the httpc
             final httpResponseHeader responseHeader = res.getResponseHeader();
@@ -979,7 +979,7 @@ public final class httpdProxyHandler {
             prepareResponseHeader(responseHeader, res.getHttpVer());
 
             // sending the server respond back to the client
-            theLogger.logFinest(reqID +"    sending response header: "+ responseHeader);
+            if (theLogger.isFinest()) theLogger.logFinest(reqID +"    sending response header: "+ responseHeader);
             httpd.sendRespondHeader(conProp,respond,httpVer,res.getStatusCode(),res.getStatusLine().substring(4),responseHeader);
             respond.flush();
             } finally {
@@ -1032,8 +1032,8 @@ public final class httpdProxyHandler {
                 httpd.sendRespondError(conProp,countedRespond,4,501,null,errorMsg,e);
                 return;
             }                             
-            theLogger.logFine(reqID +" POST "+ url);
-            theLogger.logFinest(reqID +"    header: "+ requestHeader);
+            if (theLogger.isFine()) theLogger.logFine(reqID +" POST "+ url);
+            if (theLogger.isFinest()) theLogger.logFinest(reqID +"    header: "+ requestHeader);
             
             prepareRequestHeader(conProp, requestHeader, host.toLowerCase());
             
@@ -1049,7 +1049,7 @@ public final class httpdProxyHandler {
             
             final String connectHost = hostPart(host, port, yAddress);
             final String getUrl = "http://"+ connectHost + remotePath;
-            theLogger.logFinest(reqID +"    using url: "+ getUrl);
+            if (theLogger.isFinest()) theLogger.logFinest(reqID +"    using url: "+ getUrl);
             
             final JakartaCommonsHttpClient client = setupHttpClient(requestHeader, connectHost);
             
@@ -1079,7 +1079,7 @@ public final class httpdProxyHandler {
             try {
             // sending the request
             res = client.POST(getUrl, body);
-            theLogger.logFinest(reqID +"    response status: "+ res.getStatusLine());
+            if (theLogger.isFinest()) theLogger.logFinest(reqID +"    response status: "+ res.getStatusLine());
             
             final httpResponseHeader responseHeader = res.getResponseHeader();
             // determine if it's an internal error of the httpc
@@ -1097,7 +1097,7 @@ public final class httpdProxyHandler {
             }
             
             // sending response headers
-            theLogger.logFinest(reqID +"    sending response header: "+ responseHeader);
+            if (theLogger.isFinest()) theLogger.logFinest(reqID +"    sending response header: "+ responseHeader);
             httpd.sendRespondHeader(conProp,
                                     countedRespond,
                                     httpVer,
@@ -1539,7 +1539,7 @@ public final class httpdProxyHandler {
                 final String exceptionMsg = e.getMessage();
                 if ((exceptionMsg != null) && (exceptionMsg.indexOf("Corrupt GZIP trailer") >= 0)) {
                     // just do nothing, we leave it this way
-                    theLogger.logFine("ignoring bad gzip trail for URL " + url + " (" + e.getMessage() + ")");
+                    if (theLogger.isFine()) theLogger.logFine("ignoring bad gzip trail for URL " + url + " (" + e.getMessage() + ")");
                     forceConnectionClose(conProp);
                 } else if ((exceptionMsg != null) && (exceptionMsg.indexOf("Connection reset")>= 0)) {
                     errorMessage = "Connection reset";
@@ -1801,7 +1801,7 @@ public final class httpdProxyHandler {
         logMessage.append(mime);        
         
         // sending the logging message to the logger
-        proxyLog.logFine(logMessage.toString());
+        if (proxyLog.isFine()) proxyLog.logFine(logMessage.toString());
     }
     
 }

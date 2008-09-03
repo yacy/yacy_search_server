@@ -76,8 +76,7 @@ public class kelondroCachedRA extends kelondroAbstractRA implements kelondroRA {
                 final Integer element = it.next();
                 writeCache(cacheMemory.get(element), element.intValue());
                 cacheMemory.remove(element);
-                final int age = cacheScore.deleteScore(element);
-                de.anomic.server.logging.serverLog.logFine("CACHE: " + name, "GC; age=" + ((((int) (0xFFFFFFFFL & System.currentTimeMillis())) - age) / 1000));
+                cacheScore.deleteScore(element);
             }
             // add new element
             cache = new byte[cacheElementSize];

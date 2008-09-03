@@ -861,7 +861,7 @@ public final class httpd implements serverHandler, Cloneable {
                     b.write(Integer.parseInt(s.substring(i + 2, end)));
                     i += end - i;
                 } else {                                                // 'named' smybols
-                    log.logFine("discovered yet unimplemented HTML entity '" + s.substring(i, end + 1) + "'");
+                    if (log.isFine()) log.logFine("discovered yet unimplemented HTML entity '" + s.substring(i, end + 1) + "'");
                     b.write(s.charAt(i));
                 }
             } else {

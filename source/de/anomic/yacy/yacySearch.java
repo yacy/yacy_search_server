@@ -195,7 +195,7 @@ public class yacySearch extends Thread {
                 distance = yacyDHTAction.dhtDistance(seed.hash, wordhash);
                 if (distance > 0.2) continue; // catch bug in peer selection
                 if (!seed.getFlagAcceptRemoteIndex()) continue; // probably a robinson peer
-                serverLog.logFine("PLASMA", "selectPeers/DHTorder: " + seed.hash + ":" + seed.getName() + "/" + distance + " for wordhash " + wordhash + ", score " + c);
+                if (serverLog.isFine("PLASMA")) serverLog.logFine("PLASMA", "selectPeers/DHTorder: " + seed.hash + ":" + seed.getName() + "/" + distance + " for wordhash " + wordhash + ", score " + c);
                 ranking.addScore(seed.hash, c--);
                 regularSeeds.put(seed.hash, seed);
             }
@@ -210,7 +210,7 @@ public class yacySearch extends Thread {
             if (seed == null) continue;
             if (!seed.getFlagAcceptRemoteIndex()) continue; // probably a robinson peer
             score = (int) Math.round(Math.random() * ((c / 3) + 3));
-            serverLog.logFine("PLASMA", "selectPeers/RWIcount: " + seed.hash + ":" + seed.getName() + ", RWIcount=" + seed.get(yacySeed.ICOUNT,"") + ", score " + score);
+            if (serverLog.isFine("PLASMA")) serverLog.logFine("PLASMA", "selectPeers/RWIcount: " + seed.hash + ":" + seed.getName() + ", RWIcount=" + seed.get(yacySeed.ICOUNT,"") + ", score " + score);
             ranking.addScore(seed.hash, score);
             regularSeeds.put(seed.hash, seed);
             c--;

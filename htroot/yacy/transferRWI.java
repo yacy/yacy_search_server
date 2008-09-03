@@ -115,7 +115,7 @@ public final class transferRWI {
         } */ else {
             // we want and can receive indexes
             // log value status (currently added to find outOfMemory error
-            sb.getLog().logFine("Processing " + indexes.length + " bytes / " + wordc + " words / " + entryc + " entries from " + otherPeerName);
+            if (sb.getLog().isFine()) sb.getLog().logFine("Processing " + indexes.length + " bytes / " + wordc + " words / " + entryc + " entries from " + otherPeerName);
             final long startProcess = System.currentTimeMillis();
 
             // decode request
@@ -157,7 +157,7 @@ public final class transferRWI {
                 
                 // block blacklisted entries
                 if ((blockBlacklist) && (plasmaSwitchboard.urlBlacklist.hashInBlacklistedCache(indexReferenceBlacklist.BLACKLIST_DHT, urlHash))) {
-                    yacyCore.log.logFine("transferRWI: blocked blacklisted URLHash '" + urlHash + "' from peer " + otherPeerName);
+                    if (yacyCore.log.isFine()) yacyCore.log.logFine("transferRWI: blocked blacklisted URLHash '" + urlHash + "' from peer " + otherPeerName);
                     blocked++;
                     continue;
                 }

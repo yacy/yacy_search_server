@@ -186,7 +186,7 @@ public class NoticeURLImporter extends AbstractImporter implements Importer {
                     }
                     
                     if (this.urlCount % 100 == 0) {
-                        this.log.logFine(this.urlCount + " URLs and '" + this.profileCount + "' profile entries processed so far.");
+                        if (this.log.isFine()) this.log.logFine(this.urlCount + " URLs and '" + this.profileCount + "' profile entries processed so far.");
                     }                 
                     if (this.isAborted()) break; 
                 }

@@ -344,7 +344,7 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
                     // add the entry to the index
                     this.index.putl(key, entry.seek);
                     
-                    System.out.println("*** DEBUG BLOB: replaced-fit record at " + entry.seek + ", reclen=" + reclen + ", key=" + new String(key));
+                    //System.out.println("*** DEBUG BLOB: replaced-fit record at " + entry.seek + ", reclen=" + reclen + ", key=" + new String(key));
                     
                     // finished!
                     return;
@@ -391,7 +391,7 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
                 // add a new free entry
                 free.add(new gap(lseek + 4 + reclen, newfreereclen));
                 
-                System.out.println("*** DEBUG BLOB: replaced-split record at " + lseek + ", reclen=" + reclen + ", new reclen=" + newfreereclen + ", key=" + new String(key));
+                //System.out.println("*** DEBUG BLOB: replaced-split record at " + lseek + ", reclen=" + reclen + ", new reclen=" + newfreereclen + ", key=" + new String(key));
                 
                 // finished!
                 return;

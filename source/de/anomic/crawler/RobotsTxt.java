@@ -57,6 +57,7 @@ import de.anomic.yacy.yacyURL;
 public class RobotsTxt {
     
     public static final String ROBOTS_DB_PATH_SEPARATOR = ";";    
+    private static final serverLog log = new serverLog("ROBOTS");
     
     kelondroMap robotsTable;
     private final File robotsTableFile;
@@ -151,13 +152,13 @@ public class RobotsTxt {
                 try {                 
                     robotsURL = new yacyURL("http://" + urlHostPort + "/robots.txt", null);
                 } catch (final MalformedURLException e) {
-                    serverLog.logSevere("ROBOTS","Unable to generate robots.txt URL for host:port '" + urlHostPort + "'.");
+                    log.logSevere("Unable to generate robots.txt URL for host:port '" + urlHostPort + "'.");
                     robotsURL = null;
                 }
                 
                 Object[] result = null;
                 if (robotsURL != null) {
-                    serverLog.logFine("ROBOTS","Trying to download the robots.txt file from URL '" + robotsURL + "'.");
+                    if (log.isFine()) log.logFine("Trying to download the robots.txt file from URL '" + robotsURL + "'.");
                     try {
                         result = downloadRobotsTxt(robotsURL, 5, robotsTxt4Host);
                     } catch (final Exception e) {
@@ -533,7 +534,7 @@ public class RobotsTxt {
             if (res.getStatusLine().startsWith("2")) {
                 if (!res.getResponseHeader().mime().startsWith("text/plain")) {
                     robotsTxt = null;
-                    serverLog.logFinest("ROBOTS","Robots.txt from URL '" + robotsURL + "' has wrong mimetype '" + res.getResponseHeader().mime() + "'.");                    
+                    if (log.isFinest()) log.logFinest("Robots.txt from URL '" + robotsURL + "' has wrong mimetype '" + res.getResponseHeader().mime() + "'.");                    
                 } else {
 
                     // getting some metadata
@@ -542,7 +543,7 @@ public class RobotsTxt {
                     
                     // if the robots.txt file was not changed we break here
                     if ((eTag != null) && (oldEtag != null) && (eTag.equals(oldEtag))) {
-                        serverLog.logFinest("ROBOTS","Robots.txt from URL '" + robotsURL + "' was not modified. Abort downloading of new version.");
+                        if (log.isFinest()) log.logFinest("Robots.txt from URL '" + robotsURL + "' was not modified. Abort downloading of new version.");
                         return null;
                     }
                     
@@ -556,7 +557,7 @@ public class RobotsTxt {
                     robotsTxt = sbb.getBytes();
                     
                     downloadEnd = System.currentTimeMillis();                    
-                    serverLog.logFinest("ROBOTS","Robots.txt successfully loaded from URL '" + robotsURL + "' in " + (downloadEnd-downloadStart) + " ms.");
+                    if (log.isFinest()) log.logFinest("Robots.txt successfully loaded from URL '" + robotsURL + "' in " + (downloadEnd-downloadStart) + " ms.");
                 }
             } else if (res.getStatusCode() == 304) {
                 return null;
@@ -564,7 +565,7 @@ public class RobotsTxt {
                 // getting redirection URL
                 String redirectionUrlString = res.getResponseHeader().get(httpRequestHeader.LOCATION);
                 if (redirectionUrlString==null) {
-                    serverLog.logFinest("ROBOTS","robots.txt could not be downloaded from URL '" + robotsURL + "' because of missing redirecton header. [" + res.getStatusLine() + "].");
+                    if (log.isFinest()) log.logFinest("robots.txt could not be downloaded from URL '" + robotsURL + "' because of missing redirecton header. [" + res.getStatusLine() + "].");
                     robotsTxt = null;                    
                 } else {
                 
@@ -574,15 +575,15 @@ public class RobotsTxt {
                     final yacyURL redirectionUrl = yacyURL.newURL(robotsURL, redirectionUrlString);      
                     
                     // following the redirection
-                    serverLog.logFinest("ROBOTS","Redirection detected for robots.txt with URL '" + robotsURL + "'." + 
+                    if (log.isFinest()) log.logFinest("Redirection detected for robots.txt with URL '" + robotsURL + "'." + 
                             "\nRedirecting request to: " + redirectionUrl);
                     return downloadRobotsTxt(redirectionUrl,redirectionCount,entry);
                 }
             } else if (res.getStatusCode() == 401 || res.getStatusCode() == 403) {
                 accessCompletelyRestricted = true;
-                serverLog.logFinest("ROBOTS","Access to Robots.txt not allowed on URL '" + robotsURL + "'.");
+                if (log.isFinest()) log.logFinest("Access to Robots.txt not allowed on URL '" + robotsURL + "'.");
             } else {
-                serverLog.logFinest("ROBOTS","robots.txt could not be downloaded from URL '" + robotsURL + "'. [" + res.getStatusLine() + "].");
+                if (log.isFinest()) log.logFinest("robots.txt could not be downloaded from URL '" + robotsURL + "'. [" + res.getStatusLine() + "].");
                 robotsTxt = null;
             }        
         } catch (final Exception e) {

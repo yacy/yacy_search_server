@@ -116,7 +116,7 @@ public class SZParserExtractCallback extends ArchiveExtractCallback {
                     u = entry.getKey().toNormalform(true, true);
                     if (u.startsWith(base + "/")) {
                         final String ref = "#" + u.substring(base.length() + 1);
-                        this.log.logFinest("changing " + entry.getKey() + " to use reference " + ref);
+                        if (this.log.isFinest()) this.log.logFinest("changing " + entry.getKey() + " to use reference " + ref);
                         nanchors.put(new yacyURL(base + ref, null), entry.getValue());
                     } else {
                         nanchors.put(entry.getKey(), entry.getValue());

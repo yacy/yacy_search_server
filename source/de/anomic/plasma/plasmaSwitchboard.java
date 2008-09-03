@@ -980,7 +980,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
          * Testing if the content type is supported by the available parsers
          * ========================================================================= */
         final boolean isSupportedContent = plasmaParser.supportedContent(entry.url(),entry.getMimeType());
-        log.logFinest("STORE "+ entry.url() +" content of type "+ entry.getMimeType() +" is supported: "+ isSupportedContent);
+        if (log.isFinest()) log.logFinest("STORE "+ entry.url() +" content of type "+ entry.getMimeType() +" is supported: "+ isSupportedContent);
         
         /* =========================================================================
          * INDEX CONTROL HEADER
@@ -991,8 +991,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         boolean doIndexing = true;        
         if (entry.requestProhibitsIndexing()) {        
             doIndexing = false;
-            if (this.log.isFine())
-                this.log.logFine("Crawling of " + entry.url() + " prohibited by request.");
+            if (this.log.isFine()) this.log.logFine("Crawling of " + entry.url() + " prohibited by request.");
         }        
         
         /* =========================================================================
@@ -1518,7 +1517,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         in.queueEntry.updateStatus(IndexingStack.QUEUE_STATE_PARSING);
         
         // debug
-        log.logFinest("PARSE "+ in.queueEntry.toString());
+        if (log.isFinest()) log.logFinest("PARSE "+ in.queueEntry.toString());
         
         plasmaParserDocument document = null;
         try {
@@ -1601,7 +1600,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         in.queueEntry.updateStatus(IndexingStack.QUEUE_STATE_CONDENSING);
         
         // debug
-        log.logFinest("CONDENSE "+ in.queueEntry.toString());
+        if (log.isFinest()) log.logFinest("CONDENSE "+ in.queueEntry.toString());
         
         plasmaCondenser condenser = null;
         try {

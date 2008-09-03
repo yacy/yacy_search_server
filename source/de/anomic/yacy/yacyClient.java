@@ -139,7 +139,7 @@ public final class yacyClient {
         }
         
         if (result == null || result.size() < 3) {
-            yacyCore.log.logFine("yacyClient.publishMySeed result error: " +
+            if (yacyCore.log.isFine()) yacyCore.log.logFine("yacyClient.publishMySeed result error: " +
             ((result == null) ? "result null" : ("result=" + result.toString())));
             return -1;
         }
@@ -155,7 +155,7 @@ public final class yacyClient {
             } else {
             	otherPeer = yacySeed.genRemoteSeed(seed, salt, false);
             	if (otherPeer == null || !otherPeer.hash.equals(otherHash)) {
-            		yacyCore.log.logFine("yacyClient.publishMySeed: consistency error: other peer '" + ((otherPeer==null)?"unknown":otherPeer.getName()) + "' wrong");
+            	    if (yacyCore.log.isFine()) yacyCore.log.logFine("yacyClient.publishMySeed: consistency error: other peer '" + ((otherPeer==null)?"unknown":otherPeer.getName()) + "' wrong");
             		return -1; // no success
             	}
             }
@@ -194,10 +194,10 @@ public final class yacyClient {
             yacyCore.log.logInfo("yacyClient.publishMySeed: Peer '" + ((otherPeer==null)?"unknown":otherPeer.getName()) + "' reported us as junior.");
         } else if ((mytype.equalsIgnoreCase(yacySeed.PEERTYPE_SENIOR)) ||
                    (mytype.equalsIgnoreCase(yacySeed.PEERTYPE_PRINCIPAL))) {
-            yacyCore.log.logFine("yacyClient.publishMySeed: Peer '" + ((otherPeer==null)?"unknown":otherPeer.getName()) + "' reported us as " + mytype + ", accepted other peer.");
+            if (yacyCore.log.isFine()) yacyCore.log.logFine("yacyClient.publishMySeed: Peer '" + ((otherPeer==null)?"unknown":otherPeer.getName()) + "' reported us as " + mytype + ", accepted other peer.");
         } else {
             // wrong type report
-            yacyCore.log.logFine("yacyClient.publishMySeed: Peer '" + ((otherPeer==null)?"unknown":otherPeer.getName()) + "' reported us as " + mytype + ", rejecting other peer.");
+            if (yacyCore.log.isFine()) yacyCore.log.logFine("yacyClient.publishMySeed: Peer '" + ((otherPeer==null)?"unknown":otherPeer.getName()) + "' reported us as " + mytype + ", rejecting other peer.");
             return -1;
         }
         if (mySeed.orVirgin().equals(yacySeed.PEERTYPE_VIRGIN))
@@ -482,7 +482,7 @@ public final class yacyClient {
         }
 
         if ((result == null) || (result.size() == 0)) {
-			yacyCore.log.logFine("SEARCH failed FROM "
+            if (yacyCore.log.isFine()) yacyCore.log.logFine("SEARCH failed FROM "
 					+ target.hash
 					+ ":"
 					+ target.getName()
@@ -641,7 +641,7 @@ public final class yacyClient {
 		} catch (final NumberFormatException e) {
 			searchtime = totalrequesttime;
 		}
-		yacyCore.log.logFine("SEARCH "
+		if (yacyCore.log.isFine()) yacyCore.log.logFine("SEARCH "
 				+ results
 				+ " URLS FROM "
 				+ target.hash
@@ -855,7 +855,7 @@ public final class yacyClient {
                 while (eenum.hasNext()) {
                     entry = eenum.next();
                     if (urlCache.get(entry.urlHash()) == null) {
-                        yacyCore.log.logFine("DEBUG transferIndex: to-send url hash '" + entry.urlHash() + "' is not contained in urlCache");
+                        if (yacyCore.log.isFine()) yacyCore.log.logFine("DEBUG transferIndex: to-send url hash '" + entry.urlHash() + "' is not contained in urlCache");
                     }
                 }
             }        
@@ -898,7 +898,7 @@ public final class yacyClient {
             for (int i = 0; i < uhs.length; i++) {
                 urls[i] = urlCache.get(uhs[i]);
                 if (urls[i] == null) {
-                    yacyCore.log.logFine("DEBUG transferIndex: requested url hash '" + uhs[i] + "', unknownURL='" + uhss + "'");
+                    if (yacyCore.log.isFine()) yacyCore.log.logFine("DEBUG transferIndex: requested url hash '" + uhs[i] + "', unknownURL='" + uhss + "'");
                 }
             }
             

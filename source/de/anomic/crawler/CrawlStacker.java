@@ -221,7 +221,7 @@ public final class CrawlStacker extends Thread {
         if (profile == null) return;
         
         // DEBUG
-        log.logFinest("ENQUEUE "+ nexturl +", referer="+referrerhash +", initiator="+initiatorHash +", name="+name +", load="+loadDate +", depth="+currentdepth);
+        if (log.isFinest()) log.logFinest("ENQUEUE "+ nexturl +", referer="+referrerhash +", initiator="+initiatorHash +", name="+name +", load="+loadDate +", depth="+currentdepth);
         
         // check first before we create a big object
         if (this.urlEntryCache.has(nexturl.hash().getBytes())) return;

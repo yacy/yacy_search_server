@@ -74,7 +74,7 @@ public class rct_p {
                         final String urlRejectReason = sb.acceptURL(url);
                         if (urlRejectReason == null) {
                             // stack url
-                            sb.getLog().logFinest("crawlOrder: stack: url='" + url + "'");
+                            if (sb.getLog().isFinest()) sb.getLog().logFinest("crawlOrder: stack: url='" + url + "'");
                             final String reasonString = sb.crawlStacker.stackCrawl(url, referrer, peerhash, "REMOTE-CRAWLING", loaddate, 0, sb.webIndex.defaultRemoteProfile);
 
                             if (reasonString == null) {

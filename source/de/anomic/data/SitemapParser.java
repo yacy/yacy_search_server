@@ -172,7 +172,7 @@ public class SitemapParser extends DefaultHandler {
                 InputStream contentStream = res.getDataAsStream();
                 if ((contentMimeType != null) &&
                         (contentMimeType.equals("application/x-gzip") || contentMimeType.equals("application/gzip"))) {
-                    this.logger.logFine("Sitemap file has mimetype " + contentMimeType);
+                    if (this.logger.isFine()) this.logger.logFine("Sitemap file has mimetype " + contentMimeType);
                     contentStream = new GZIPInputStream(contentStream);
                 }
 

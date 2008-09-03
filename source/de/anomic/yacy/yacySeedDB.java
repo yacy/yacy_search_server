@@ -255,7 +255,7 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
     protected synchronized kelondroMapDataMining resetSeedTable(kelondroMapDataMining seedDB, final File seedDBFile) {
         // this is an emergency function that should only be used if any problem with the
         // seed.db is detected
-        yacyCore.log.logFine("seed-db " + seedDBFile.toString() + " reset (on-the-fly)");
+        yacyCore.log.logWarning("seed-db " + seedDBFile.toString() + " reset (on-the-fly)");
         seedDB.close();
         if(!seedDBFile.delete())
         	serverLog.logWarning("yacySeedDB", "could not delete file "+ seedDBFile);
@@ -397,7 +397,7 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
             return result;
         } catch (final kelondroException e) {
             seedActiveDB = resetSeedTable(seedActiveDB, seedActiveDBFile);
-            yacyCore.log.logFine("Internal Error at yacySeedDB.seedsByAge: " + e.getMessage(), e);
+            if (yacyCore.log.isFine()) yacyCore.log.logFine("Internal Error at yacySeedDB.seedsByAge: " + e.getMessage(), e);
             return null;
         }
     }
@@ -811,15 +811,15 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
             // create a seed file which for uploading ...    
             seedFile = File.createTempFile("seedFile",".txt", plasmaHTCache.cachePath);
             seedFile.deleteOnExit();
-            serverLog.logFine("YACY","SaveSeedList: Storing seedlist into tempfile " + seedFile.toString());
+            if (serverLog.isFine("YACY")) serverLog.logFine("YACY", "SaveSeedList: Storing seedlist into tempfile " + seedFile.toString());
             final ArrayList<String> uv = storeCache(seedFile, true);            
             
             // uploading the seed file
-            serverLog.logFine("YACY","SaveSeedList: Trying to upload seed-file, " + seedFile.length() + " bytes, " + uv.size() + " entries.");
+            if (serverLog.isFine("YACY")) serverLog.logFine("YACY", "SaveSeedList: Trying to upload seed-file, " + seedFile.length() + " bytes, " + uv.size() + " entries.");
             log = uploader.uploadSeedFile(sb,seedDB,seedFile);
             
             // test download
-            serverLog.logFine("YACY","SaveSeedList: Trying to download seed-file '" + seedURL + "'.");
+            if (serverLog.isFine("YACY")) serverLog.logFine("YACY", "SaveSeedList: Trying to download seed-file '" + seedURL + "'.");
             final ArrayList<String> check = downloadSeedFile(seedURL);
             
             // Comparing if local copy and uploaded copy are equal
@@ -882,14 +882,14 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
 
     private String checkCache(final ArrayList<String> uv, final ArrayList<String> check) {                
         if ((check == null) || (uv == null) || (uv.size() != check.size())) {
-            serverLog.logFine("YACY","SaveSeedList: Local and uploades seed-list " +
+            if (serverLog.isFine("YACY")) serverLog.logFine("YACY", "SaveSeedList: Local and uploades seed-list " +
                                "contains varying numbers of entries." +
                                "\n\tLocal seed-list:  " + ((uv == null) ? "null" : Integer.toString(uv.size())) + " entries" + 
                                "\n\tRemote seed-list: " + ((check == null) ? "null" : Integer.toString(check.size())) + " enties");
             return "Entry count is different: uv.size() = " + ((uv == null) ? "null" : Integer.toString(uv.size())) + ", check = " + ((check == null) ? "null" : Integer.toString(check.size()));
         } 
         	
-        serverLog.logFine("YACY","SaveSeedList: Comparing local and uploades seed-list entries ...");
+        if (serverLog.isFine("YACY")) serverLog.logFine("YACY", "SaveSeedList: Comparing local and uploades seed-list entries ...");
         int i;
         for (i = 0; i < uv.size(); i++) {
         	if (!((uv.get(i)).equals(check.get(i)))) return "Element at position " + i + " is different.";

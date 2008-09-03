@@ -349,7 +349,7 @@ public class CrawlQueues {
             final String urlRejectReason = sb.acceptURL(url);
             if (urlRejectReason == null) {
                 // stack url
-                sb.getLog().logFinest("crawlOrder: stack: url='" + url + "'");
+                if (sb.getLog().isFinest()) sb.getLog().logFinest("crawlOrder: stack: url='" + url + "'");
                 final String reasonString = sb.crawlStacker.stackCrawl(url, referrer, hash, item.getDescription(), loaddate, 0, sb.webIndex.defaultRemoteProfile);
 
                 if (reasonString == null) {

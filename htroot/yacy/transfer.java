@@ -70,8 +70,10 @@ public final class transfer {
         if ((otherseed == null) || (filename.indexOf("..") >= 0)) {
             // reject unknown peers: this does not appear fair, but anonymous senders are dangerous
             // reject paths that contain '..' because they are dangerous
-            if (otherseed == null) sb.getLog().logFine("RankingTransmission: rejected unknown peer '" + otherpeer + "', current IP " + header.get(httpRequestHeader.CONNECTION_PROP_CLIENTIP, "unknown"));
-            if (filename.indexOf("..") >= 0) sb.getLog().logFine("RankingTransmission: rejected wrong path '" + filename + "' from peer " + (otherseed == null ? "null" : otherseed.getName() + "/" + otherseed.getPublicAddress()) + ", current IP " + header.get(httpRequestHeader.CONNECTION_PROP_CLIENTIP, "unknown"));
+            if (sb.getLog().isFine()) {
+                if (otherseed == null) sb.getLog().logFine("RankingTransmission: rejected unknown peer '" + otherpeer + "', current IP " + header.get(httpRequestHeader.CONNECTION_PROP_CLIENTIP, "unknown"));
+                if (filename.indexOf("..") >= 0) sb.getLog().logFine("RankingTransmission: rejected wrong path '" + filename + "' from peer " + (otherseed == null ? "null" : otherseed.getName() + "/" + otherseed.getPublicAddress()) + ", current IP " + header.get(httpRequestHeader.CONNECTION_PROP_CLIENTIP, "unknown"));
+            }
             return prop;
         }
         
@@ -91,7 +93,7 @@ public final class transfer {
                 prop.put("process_path", "");  // currently empty; the store process will find a path
                 prop.put("process_maxsize", "-1"); // if response is too big we return the size of the file
                 sb.rankingPermissions.put(serverCodings.encodeMD5Hex(kelondroBase64Order.standardCoder.encodeString(access)), filename);
-                sb.getLog().logFine("RankingTransmission: granted peer " + otherpeerName + " to send CR file " + filename);
+                if (sb.getLog().isFine()) sb.getLog().logFine("RankingTransmission: granted peer " + otherpeerName + " to send CR file " + filename);
             }
             return prop;
         }
@@ -109,7 +111,7 @@ public final class transfer {
                 if ((grantedFile == null) || (!(grantedFile.equals(filename)))) {
                     // fraud-access of this interface
                     prop.put("response", "denied");
-                    sb.getLog().logFine("RankingTransmission: denied " + otherpeerName + " to send CR file " + filename + ": wrong access code");
+                    if (sb.getLog().isFine()) sb.getLog().logFine("RankingTransmission: denied " + otherpeerName + " to send CR file " + filename + ": wrong access code");
                 } else {
                     sb.rankingPermissions.remove(accesscode); // not needed any more
                     final File path = new File(sb.rankingPath, plasmaRankingDistribution.CR_OTHER);
@@ -121,10 +123,10 @@ public final class transfer {
                             final String md5t = serverCodings.encodeMD5Hex(file);
                             if (md5t.equals(md5)) {
                                 prop.put("response", "ok");
-                                sb.getLog().logFine("RankingTransmission: received from peer " + otherpeerName + " CR file " + filename);
+                                if (sb.getLog().isFine()) sb.getLog().logFine("RankingTransmission: received from peer " + otherpeerName + " CR file " + filename);
                             } else {
                                 prop.put("response", "transfer failure");
-                                sb.getLog().logFine("RankingTransmission: transfer failure from peer " + otherpeerName + " for CR file " + filename);
+                                if (sb.getLog().isFine()) sb.getLog().logFine("RankingTransmission: transfer failure from peer " + otherpeerName + " for CR file " + filename);
                             }
                         }else{
                             //exploit?
@@ -140,7 +142,7 @@ public final class transfer {
         }
 
         // wrong access
-        sb.getLog().logFine("RankingTransmission: rejected unknown process " + process + ":" + purpose + " from peer " + otherpeerName);
+        if (sb.getLog().isFine()) sb.getLog().logFine("RankingTransmission: rejected unknown process " + process + ":" + purpose + " from peer " + otherpeerName);
         return prop;
     }
 

@@ -73,7 +73,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
-import java.util.logging.Level;
 import java.util.zip.GZIPOutputStream;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
@@ -677,11 +676,9 @@ public final class httpdFileHandler {
                                 // storing the content into the cache
                                 ref = new SoftReference<byte[]>(templateContent);
                                 templateCache.put(targetFile, ref);
-                                if (theLogger.isLoggable(Level.FINEST))
-                                    theLogger.logFinest("Cache MISS for file " + targetFile);
+                                if (theLogger.isFinest()) theLogger.logFinest("Cache MISS for file " + targetFile);
                             } else {
-                                if (theLogger.isLoggable(Level.FINEST))
-                                    theLogger.logFinest("Cache HIT for file " + targetFile);
+                                if (theLogger.isFinest()) theLogger.logFinest("Cache HIT for file " + targetFile);
                             }
 
                             // creating an inputstream needed by the template

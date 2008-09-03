@@ -152,7 +152,7 @@ public class yacyCore {
     }
     
     public final void publishSeedList() {
-        log.logFine("yacyCore.publishSeedList: Triggered Seed Publish");
+        if (log.isFine()) log.logFine("yacyCore.publishSeedList: Triggered Seed Publish");
 
         /*
         if (oldIPStamp.equals((String) seedDB.mySeed.get(yacySeed.IP, "127.0.0.1")))
@@ -169,7 +169,7 @@ public class yacyCore {
             (System.currentTimeMillis() - sb.webIndex.seedDB.lastSeedUpload_timeStamp < 1000 * 60 * 60 * 24) &&
             (sb.webIndex.seedDB.mySeed().isPrincipal())
         ) {
-            log.logFine("yacyCore.publishSeedList: not necessary to publish: oldIP is equal, sizeConnected is equal and I can reach myself under the old IP.");
+            if (log.isFine()) log.logFine("yacyCore.publishSeedList: not necessary to publish: oldIP is equal, sizeConnected is equal and I can reach myself under the old IP.");
             return;
         }
 
@@ -195,7 +195,7 @@ public class yacyCore {
             if (seedUploadMethod.equals("")) {
                 this.sb.setConfig("seedUploadMethod", "none");
             }
-            log.logFine("yacyCore.publishSeedList: No uploading method configured");
+            if (log.isFine()) log.logFine("yacyCore.publishSeedList: No uploading method configured");
             return;
         }
     }
@@ -274,7 +274,7 @@ public class yacyCore {
                     final yacySeed newSeed = sb.webIndex.seedDB.getConnected(this.seed.hash);
                     if (newSeed != null) {
                         if (!newSeed.isOnline()) {
-                            log.logFine("publish: recently handshaked " + this.seed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR) +
+                            if (log.isFine()) log.logFine("publish: recently handshaked " + this.seed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR) +
                                 " peer '" + this.seed.getName() + "' at " + this.seed.getPublicAddress() + " is not online." +
                                 " Removing Peer from connected");
                             sb.webIndex.peerActions.peerDeparture(newSeed, "peer not online");
@@ -282,13 +282,13 @@ public class yacyCore {
                         if (newSeed.getLastSeenUTC() < (System.currentTimeMillis() - 10000)) {
                             // update last seed date
                             if (newSeed.getLastSeenUTC() >= this.seed.getLastSeenUTC()) {
-                                log.logFine("publish: recently handshaked " + this.seed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR) +
+                                if (log.isFine()) log.logFine("publish: recently handshaked " + this.seed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR) +
                                     " peer '" + this.seed.getName() + "' at " + this.seed.getPublicAddress() + " with old LastSeen: '" +
                                     serverDate.formatShortSecond(new Date(newSeed.getLastSeenUTC())) + "'");
                                 newSeed.setLastSeenUTC();
                                 sb.webIndex.peerActions.peerArrival(newSeed, true);
                             } else {
-                                log.logFine("publish: recently handshaked " + this.seed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR) +
+                                if (log.isFine()) log.logFine("publish: recently handshaked " + this.seed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR) +
                                     " peer '" + this.seed.getName() + "' at " + this.seed.getPublicAddress() + " with old LastSeen: '" +
                                     serverDate.formatShortSecond(new Date(newSeed.getLastSeenUTC())) + "', this is more recent: '" +
                                     serverDate.formatShortSecond(new Date(this.seed.getLastSeenUTC())) + "'");
@@ -297,7 +297,7 @@ public class yacyCore {
                             }
                         }
                     } else {
-                        log.logFine("publish: recently handshaked " + this.seed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR) + " peer '" + this.seed.getName() + "' at " + this.seed.getPublicAddress() + " not in connectedDB");
+                        if (log.isFine()) log.logFine("publish: recently handshaked " + this.seed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR) + " peer '" + this.seed.getName() + "' at " + this.seed.getPublicAddress() + " not in connectedDB");
                     }
                 }
             } catch (final Exception e) {
@@ -407,7 +407,7 @@ public class yacyCore {
                 i++;
 
                 final String address = seed.getClusterAddress();
-                log.logFine("HELLO #" + i + " to peer '" + seed.get(yacySeed.NAME, "") + "' at " + address); // debug
+                if (log.isFine()) log.logFine("HELLO #" + i + " to peer '" + seed.get(yacySeed.NAME, "") + "' at " + address); // debug
                 final String seederror = seed.isProper(false);
                 if ((address == null) || (seederror != null)) {
                     // we don't like that address, delete it
@@ -465,7 +465,7 @@ public class yacyCore {
                         }
                     }
                 }
-                log.logFine("DBSize before -> after Cleanup: " + dbSize + " -> " + amIAccessibleDB.size());
+                if (log.isFine()) log.logFine("DBSize before -> after Cleanup: " + dbSize + " -> " + amIAccessibleDB.size());
             }
             log.logInfo("PeerPing: I am accessible for " + accessible +
                 " peer(s), not accessible for " + notaccessible + " peer(s).");
@@ -538,12 +538,12 @@ public class yacyCore {
                 threadCount = yacyCore.publishThreadGroup.enumerate(threadList);
 
                 // we need to use a timeout here because of missing interruptable session threads ...
-                log.logFine("publish: Waiting for " + yacyCore.publishThreadGroup.activeCount() +  " remaining publishing threads to finish shutdown ...");
+                if (log.isFine()) log.logFine("publish: Waiting for " + yacyCore.publishThreadGroup.activeCount() +  " remaining publishing threads to finish shutdown ...");
                 for (int currentThreadIdx = 0; currentThreadIdx < threadCount; currentThreadIdx++) {
                     final Thread currentThread = threadList[currentThreadIdx];
 
                     if (currentThread.isAlive()) {
-                        log.logFine("publish: Waiting for remaining publishing thread '" + currentThread.getName() + "' to finish shutdown");
+                        if (log.isFine()) log.logFine("publish: Waiting for remaining publishing thread '" + currentThread.getName() + "' to finish shutdown");
                         try { currentThread.join(500); } catch (final InterruptedException ex) {}
                     }
                 }
@@ -710,7 +710,7 @@ public class yacyCore {
             try {
                 sb.webIndex.seedDB.mySeed().put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_PRINCIPAL); // this information shall also be uploaded
 
-                log.logFine("SaveSeedList: Using seed uploading method '" + seedUploadMethod + "' for seed-list uploading." +
+                if (log.isFine()) log.logFine("SaveSeedList: Using seed uploading method '" + seedUploadMethod + "' for seed-list uploading." +
                             "\n\tPrevious peerType is '" + sb.webIndex.seedDB.mySeed().get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_JUNIOR) + "'.");
 
 //              logt = seedDB.uploadCache(seedFTPServer, seedFTPAccount, seedFTPPassword, seedFTPPath, seedURL);
