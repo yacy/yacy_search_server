@@ -397,6 +397,7 @@ public final class htmlFilterWriter extends Writer {
                 buffer.append(c);
                 final int bufferLength = buffer.length();
                 if ((c == rb) && (bufferLength > 14) &&
+                    (buffer.charAt(bufferLength - 9) == lb) &&
                     (buffer.charAt(bufferLength - 8) == '/') &&
                     (buffer.charAt(bufferLength - 7) == 's') &&
                     (buffer.charAt(bufferLength - 6) == 'c') &&
@@ -422,12 +423,12 @@ public final class htmlFilterWriter extends Writer {
                     if (c == singlequote) inSingleQuote = true;
                     if (c == doublequote) inDoubleQuote = true;
                     // fill in tag text
-                    if ((buffer.length() == 3) && (buffer.charAt(1) == excl) &&
+                    if ((buffer.length() >= 3) && (buffer.charAt(1) == excl) &&
                         (buffer.charAt(2) == dash) && (c == dash)) {
                         // this is the start of a comment
                         inComment = true;
                         buffer.append(c);
-                    } else if ((buffer.length() == 6) &&
+                    } else if ((buffer.length() >= 6) &&
                                (buffer.charAt(1) == 's') &&
                                (buffer.charAt(2) == 'c') &&
                                (buffer.charAt(3) == 'r') &&
