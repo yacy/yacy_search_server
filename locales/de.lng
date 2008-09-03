@@ -650,22 +650,26 @@ Title==Titel
 
 #File: CrawlStart_p.html
 #---------------------------
-Crawl Start \(expert\)==Crawl Start (Experte)
-Expert Crawl Start==Experten Crawl Start
+Crawl Start==Crawl Start
 Start Crawling Job:==Starte Crawling Aufgabe:
 You can define URLs as start points for Web page crawling and start crawling here. \"Crawling\" means that YaCy will download the given website, extract all links in it and then download the content behind these links. This is repeated as long as specified under \"Crawling Depth\".==Sie k&ouml;nnen hier URLs angeben, die gecrawlt werden sollen und dann das Crawling starten. "Crawling" bedeutet, dass YaCy die angegebene Webseite runterl&auml;dt, alle Links extrahiert und dann den Inhalt hinter diesen Links runterl&auml;dt. Dies wird solange wiederholt wie unter "Crawling Tiefe" angegeben.
 #Attribut==Attribut
 Value==Wert
 Description</strong>==Beschreibung</strong>
-Starting Point:==Startpunkt:
-From URL==Von URL
+>Starting Point:==>Startpunkt:
+>From URL==>Von URL
 From Sitemap==Von Sitemap
 From File==Von Datei
+Create Bookmark==Lesezeichen erstellen
+\(works with "Starting Point: From URL" only\)==(funktioniert nur mit "Startpunkt von URL")
+Title<==Titel<
+Folder<==Ordner<
+This option lets you create a bookmark from your crawl start URL. For automatic re-crawling you can use the following default folders:==Diese Option gibt Ihnen die M&ouml;glichkeit ein Lesezeichen aus Ihrer Crawl Start URL zu erstellen. Um diese automatisch wieder zu crawlen, k&ouml;nnen Sie diese folgenden standard Ordner benutzen:
 Crawling Depth</label>==Crawling-Tiefe</label>
 This defines how often the Crawler will follow links embedded in websites.==Dies definiert, wie oft der Crawler eingebetteten Links in Webseiten folgen wird.
 A minimum of 0 is recommended and means that the page you enter under \"Starting Point\" will be added==Ein Minimum von 0 wird empfohlen und bedeutet, dass die Seite, die Sie unter "Startpunkt" angegeben haben, 
 to the index, but no linked content is indexed. 2-4 is good for normal indexing.==dem Index zugef&uuml;gt wird, verlinkter Inhalt allerdings nicht. 2-4 ist gut f&uuml;r normales Indexieren.
-Be careful with the depth. Consider a branching factor of average 20;==Seien Sie vorsichtig mit der Crawl-Tiefe. Erw&auml;gen Sie einen durschnittlichen Verzweigungsfaktor von 20;
+Be careful with the depth. Consider a branching factor of average 20;==Seien Sie vorsichtig mit der Crawl-Tiefe. Erw&auml;gen Sie einen durchschnittlichen Verzweigungsfaktor von 20;
 A prefetch-depth of 8 would index 25.600.000.000 pages, maybe this is the whole WWW.==eine Crawl-Tiefe 8 wird 25.600.000.000 Seiten indexieren, vielleicht sogar das ganze WWW.
 Crawling Filter==Crawling Filter
 Use filter==Filter nutzen
@@ -1179,24 +1183,24 @@ To enable Log Statistics open DATA/LOG/yacy.logging and set "de.anomic.server.lo
 URLs Received:==Empfangene URLs:
 URLs Requested:==Angeforderte URLs:
 URLs Blocked:==Blockierte URLs:
-Total time:==Gesamte Zeit:
+Total receive time:==Gesamte Empfangszeit:
 URLs Sent:==Versandte URLs:
 RWIs / Words==RWIs / W&ouml;rter
 Words received:==Empfangene W&ouml;rter:
-RWIs reveived:==Empfangene RWIs:
+RWIs received:==Empfangene RWIs:
 RWIs blocked:==Blockierte RWIs:
 RWIs selected:==Ausgew&auml;hlte RWIs:
 Selection time:==Auswahlzeit:
 Chunks / Protocol==Chunks / Protokoll
 Sent traffic:==Ausgehender Traffic:
 Total peers selected:==Insgesamt gew&auml;hlte Peers:
-DHT Distance: Min/Average/Max:==DHT Distanz: Min/Durschnitt/Max:
+DHT Distance: Min/Average/Max:==DHT Distanz: Min/Durchschnitt/Max:
 Not enough peers found for distribution:==Nicht genug Peers gefunden zur Verteilung:
 Peers busy:==Besch&auml;ftigte Peers:
 Distribution failed:==Fehlgeschlagene Verteilung: 
 Rejected index receives:==Abgelehnte Index Empf&auml;nge:
 Rejected index receives from:==Abgelehnte Index Empf&auml;nge von:
-Sent indexes:==Versandte Indexe:
+Sent indexes to:==Versandte Indexe an:
 Ranking Distribution==Ranking Verteilung
 Submitted ranking files:==Verschickte Ranking Dateien:
 Total time submitting ranking files:==Insgesamte Versandzeit der Ranking Dateien: 
@@ -1206,10 +1210,8 @@ Indexed sites:==Indexierte Seiten:
 Size of indexed sites:==Gr&ouml;sse der indexierten Seiten:
 Indexed words:==Indexierte W&ouml;rter:
 Indexed anchors:==Indexierte Verweise:
-Total stacking time:==Insgesamte Sammelzeit:
-Total parsing time:==Insgesamte Parsing Zeit:
-Total indexing time:==Insgesamte Indexierungs Zeit:
-Total storage time:==Insgesamte Speicher Zeit:
+Total link storage time:==Gesamte Link Speicherzeit:
+Total index storage time:==Gesamte Index Speicherzeit:
 Errors==Fehler
 Tried to create left child node twice==Doppelte Erzeugung des linken Tochterknoten wurde versucht
 Tried to create right child node twice==Doppelte Erzeugung des rechten Tochterknoten wurde versucht
