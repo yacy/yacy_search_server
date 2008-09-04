@@ -16,8 +16,8 @@
 </div>
 <div class="SubMenu">
   <ul class="SubMenu">
-    <li><a href="/PerformanceQueues_p.html" class="MenuItemLink lock">Queue Performance</a></li>
-    <li><a href="/PerformanceMemory_p.html" class="MenuItemLink lock">Memory for Database Caches</a></li>
-    <li><a href="/PerformanceSearch_p.html" class="MenuItemLink lock">Timing for Search Sequence</a></li>
+    <li><a href="/PerformanceQueues_p.html" class="MenuItemLink lock">Performance</a></li>
+    <li><a href="/PerformanceMemory_p.html" class="MenuItemLink lock">Memory</a></li>
+    <li><a href="/PerformanceSearch_p.html" class="MenuItemLink lock">Search Sequence</a></li>
   </ul>
 </div>

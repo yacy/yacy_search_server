@@ -23,6 +23,7 @@
 
 #File: AccessTracker_p.html
 #---------------------------
+Access Tracker==Zugriffe
 Server Access Overview==Server Zugriff &Uuml;berblick
 This is a list of \#\[num\]\# requests to the local http server within the last hour.==Dies ist eine Liste von #[num]# Anfragen, die an den lokalen http Server innerhalb der letzten Stunde gestellt wurden.
 Showing \#\[num\]\# requests.==Gezeigt werden #[num]# Anfragen.
@@ -2116,7 +2117,7 @@ div id="location">
 Search Form==Suchformular
 Crawl Start==Crawl starten
 Status Page==Status Seite
-Confirm Shutdown==Herunterfahren best&auml;tigen
+Confirm Shutdown==Best&auml;tige Herunterfahren
 >&lt;Shutdown==>&lt;Herunterfahren
 Event Terminal==Ereignis Terminal
 Image Terminal==Bilder Terminal
@@ -2392,6 +2393,8 @@ Topwords</strong>:==Topw&ouml;rter</strong>:
 #File: env/templates/simpleheader.template
 #---------------------------
 #Peer Administration==Peer Administration
+Confirm Shutdown==Best&auml;tige Herunterfahren
+>Shutdown==>Herunterfahren
 Web Search==Web Suche
 Peer Owner Profile==Impressum dieses Peers
 Help / Wiki==Hilfe / Wiki
@@ -2420,7 +2423,7 @@ Indexing with Proxy==Indexierung per Proxy
 Monitoring==Kontrolle
 YaCy Network==YaCy Netzwerk
 Web Visualization==Internet Visualisierung
-Access Tracker==Zugriffs Tracker
+Access Tracker==Zugriffe
 #Server Log==Server Log
 News Monitor==News Anzeige
 Cookies in Proxy==Cookies per Proxy
@@ -2443,8 +2446,8 @@ YaCy Statistics==YaCy Statistiken
 
 #File: env/templates/submenuAccessTracker.template
 #---------------------------
-Access Tracker==Zugriffs Tracker
-Server Access==Server Zugriff
+Access Tracker==Zugriffe
+Server Access==Server-Zugriff
 Overview==&Uuml;berblick
 #Details==Details
 Connections</a>==Verbindungen</a>
@@ -2472,9 +2475,9 @@ System Update==System Aktualisierung
 Network Configuration==Netzwerk Konfiguration
 Advanced Settings==Erweiterte Einstellungen
 Advanced Properties==Erweitertes Verhalten
-Queue Performance==Performanceeinstellungen f&uuml;r Puffer
-Memory for Database Caches==Performanceeinstellungen f&uuml;r Speicher
-Timing for Search Sequence==Timing-Einstellungen des Suchablaufs
+>Performance==>Leistung
+>Memory==>Speicher
+Search Sequence==Suchablauf
 #-----------------------------
 
 #File: env/templates/submenuCookie.template
@@ -2505,6 +2508,7 @@ Index Cleaner==Index Aufr&auml;umer
 
 #File: env/templates/submenuIndexCreate.template
 #---------------------------
+Web Crawler Control==Web Crawler Steuerung
 Start a Web Crawl==Starte einen Web Crawl
 Crawl Start==Crawl starten
 Crawl Profile Editor==Crawl Profil Editor
@@ -2512,7 +2516,8 @@ Crawler Queues==Crawler Puffer
 Control Queues==Kontrolle des Puffers
 Indexing<==Indexierung<
 Loader<==Lader<
-WWW Crawl Queues==WWW Crawl-Puffer
+URLs to be processed==zu verarbeitende URLs
+Processing Queues==Warteschlangen
 Local<==Lokal<
 #Global<==Global<
 #Remote<==Remote<
