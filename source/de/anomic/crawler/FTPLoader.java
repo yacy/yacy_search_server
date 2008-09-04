@@ -193,7 +193,7 @@ public class FTPLoader {
      * establish a connection to the ftp server (open, login, set transfer mode)
      * 
      * @param ftpClient
-     * @param host
+     * @param hostname
      * @param port
      * @return success
      */

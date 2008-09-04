@@ -26,19 +26,44 @@
     </fieldset>
     </form>
     
-	#(urlhashsimilar)#::Sequential List of URL-Hashes:<br />
-    #{rows}# 
-    #{cols}#<a href="/IndexControlURLs_p.html?urlhash=#[urlHash]#&amp;urlhashsearch=1" class="tt">#[urlHash]#</a> #{/cols}#<br />
-    #{/rows}# 
-    #(/urlhashsimilar)#
+    #(statistics)#::
+    <form action="IndexControlURLs_p.html" method="post" enctype="multipart/form-data">
+    <fieldset><legend>Statistics about top-domains in URL Database</legend>
+      <dl>
+        <dt class="TableCellLight"></dt>
+        <dd>Show top <input type="text" name="lines" value="#[lines]#" size="6" maxlength="6" /> domains from all URLs.
+            <input type="submit" name="statistics" value="Generate Statistics" />
+        </dd>
+      </dl>
+    </fieldset>
+    </form>
+    #(/statistics)#
     
-    #(lurlexportfinished)#::
-    <div class="commit">Finished export of #[urlcount]# URLs to file #[exportfile]#</div>::
-    #(/lurlexportfinished)#
-    
-    #(lurlexporterror)#::
-    <div class="error">Export to file #[exportfile]# failed: #[exportfailmsg]#</div>::
-    #(/lurlexporterror)#
+    #(statisticslines)#::
+    <p><em>Statistics about the top-#[domains]# domains in the database:</em>
+    <table cellpadding="2" cellspacing="1" >
+      <tr class="TableHeader">
+   		<td align="center"></td>
+        <td><strong>Domain</strong></td>
+        <td><strong>URLs</strong></td>
+      </tr>
+      #{domains}#
+      <tr class="TableCell#(dark)#Light::Dark#(/dark)#">
+        <td>
+          <form action="IndexControlURLs_p.html" method="post" enctype="multipart/form-data">
+            <div>
+              <input type="hidden" name="hashpart" value="#[hashpart]#" />
+              <input type="hidden" name="lines" value="#[lines]#" />
+              <input type="submit" name="deletedomain" value="delete all" />
+            </div>
+          </form>
+        </td>
+        <td><a href="http://#[domain]#/" target="_">#[domain]#</a></td>
+        <td>#[count]#</td>
+      </tr>
+      #{/domains}#
+    </table></p>
+    #(/statisticslines)#
     
     #(lurlexport)#::
     <form action="IndexControlURLs_p.html" method="post" enctype="multipart/form-data">
@@ -69,6 +94,21 @@
     <div class="commit" style="text-decoration:blink">Export to file #[exportfile]# is running ..  #[urlcount]# URLs so far</div>::
     #(/lurlexport)#
     
+	#(lurlexportfinished)#::
+    <div class="commit">Finished export of #[urlcount]# URLs to file #[exportfile]#</div>::
+    #(/lurlexportfinished)#
+    
+    #(lurlexporterror)#::
+    <div class="error">Export to file #[exportfile]# failed: #[exportfailmsg]#</div>::
+    #(/lurlexporterror)#
+    
+    #(urlhashsimilar)#::<p>Sequential List of URL-Hashes:<br />
+    #{rows}# 
+    #{cols}#<a href="/IndexControlURLs_p.html?urlhash=#[urlHash]#&amp;urlhashsearch=1" class="tt">#[urlHash]#</a> #{/cols}#<br />
+    #{/rows}#
+    </p>
+    #(/urlhashsimilar)#
+    
     #(genUrlProfile)#
     ::No entry found for URL-hash #[urlhash]#
     ::<table>
@@ -98,6 +138,7 @@
 		<span class="small">&nbsp;delete the reference to this url at every other word where the reference exists (very extensive, but prevents unresolved references)</span><br />
 	</form>
     #(/genUrlProfile)#
+    
     #[result]#
     
     #%env/templates/footer.template%#

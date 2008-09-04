@@ -24,6 +24,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
@@ -99,16 +100,33 @@ public class CrawlResults {
 
         // do the commands
         if (post.containsKey("clearlist")) sb.crawlResults.clearStack(tabletype);
+        
         if (post.containsKey("deleteentry")) {
-                final String hash = post.get("hash", null);
-                if (hash != null) {
-                    // delete from database
-                    sb.webIndex.removeURL(hash);
+            final String hash = post.get("hash", null);
+            if (hash != null) {
+                // delete from database
+                sb.webIndex.removeURL(hash);
+            }
+        }
+        
+        if (post.containsKey("deletedomain")) {
+            final String hashpart = post.get("hashpart", null);
+            final String domain = post.get("domain", null);
+            if (hashpart != null) {
+                // delete all urls for this domain from database
+                try {
+                    sb.webIndex.deleteDomain(hashpart);
+                    sb.crawlResults.deleteDomain(tabletype, domain, hashpart);
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
             }
+        }
+        
         if (post.containsKey("moreIndexed")) {
             lines = Integer.parseInt(post.get("showIndexed", "500"));
         }
+        
         if (post.get("si") != null)
             if (post.get("si").equals("0")) showInit = false; else showInit = true;
         if (post.get("se") != null)
@@ -126,7 +144,7 @@ public class CrawlResults {
         // create table
         if (tabletype == 0) {
             prop.put("table", "2");
-        } else if (sb.crawlResults.getStackSize(tabletype) == 0) {
+        } else if (sb.crawlResults.getStackSize(tabletype) == 0 && sb.crawlResults.getDomainListSize(tabletype) == 0) {
             prop.put("table", "0");
         } else {
             prop.put("table", "1");
@@ -256,7 +274,10 @@ public class CrawlResults {
                 domain = j.next();
                 if (domain == null) break;
                 prop.put("table_domains_" + cnt + "_dark", (dark) ? "1" : "0");
+                prop.put("table_domains_" + cnt + "_feedbackpage", "CrawlResults.html");
+                prop.put("table_domains_" + cnt + "_tabletype", tabletype);
                 prop.put("table_domains_" + cnt + "_domain", domain);
+                prop.put("table_domains_" + cnt + "_hashpart", yacyURL.hosthash(domain));
                 prop.put("table_domains_" + cnt + "_count", sb.crawlResults.domainCount(tabletype, domain));
                 dark = !dark;
                 cnt++;

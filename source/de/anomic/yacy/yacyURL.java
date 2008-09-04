@@ -737,13 +737,13 @@ public class yacyURL implements Serializable {
         hash.append(kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(toNormalform(true, true))).substring(0, 5)); // 5 chars
         hash.append(subdomPortPath(subdom, port, rootpath)); // 1 char
         // form the 'global' part of the hash
-        hash.append(protocolHostPort(this.protocol, host, port)); // 5 chars
+        hash.append(hosthash(this.protocol, host, port)); // 5 chars
         hash.append(kelondroBase64Order.enhancedCoder.encodeByte(flagbyte)); // 1 char
 
         // return result hash
         return hash.toString();
     }
-
+    
     private static char subdomPortPath(final String subdom, final int port, final String rootpath) {
         return kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(subdom + ":" + port + ":" + rootpath)).charAt(0);
     }
@@ -755,8 +755,23 @@ public class yacyURL implements Serializable {
         return (urlHash.charAt(5) == rootURLFlag0) || (urlHash.charAt(5) == rootURLFlag1);
     }
 
-    private static String protocolHostPort(final String protocol, final String host, final int port) {
+    /**
+     * compute a 5-byte hash fragment that can be used to identify the domain of the url
+     * @param protocol
+     * @param host
+     * @param port
+     * @return 5 bytes base64 encoded String representing the domain of the url
+     */
+    public static final String hosthash(final String protocol, final String host, final int port) {
         return kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(protocol + ":" + host + ":" + port)).substring(0, 5);
+    }
+
+    public static final String hosthash(final String host) {
+        return hosthash("http", host, 80);
+    }
+    
+    public final String hosthash() {
+        return this.hash().substring(6, 11);
     }
 
     private static String[] testTLDs = new String[] { "com", "net", "org", "uk", "fr", "de", "es", "it" };
@@ -769,7 +784,7 @@ public class yacyURL implements Serializable {
             if ((word == null) || (word.length() == 0)) continue;
             final String pattern = urlHash.substring(6, 11);
             for (int i = 0; i < testTLDs.length; i++) {
-                if (pattern.equals(protocolHostPort("http", "www." + word.toLowerCase() + "." + testTLDs[i], 80)))
+                if (pattern.equals(hosthash("http", "www." + word.toLowerCase() + "." + testTLDs[i], 80)))
                     try {
                         return new yacyURL("http://www." + word.toLowerCase() + "." + testTLDs[i], null);
                     } catch (final MalformedURLException e) {

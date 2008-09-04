@@ -79,20 +79,22 @@
     <p><em>Statistics about #[domains]# domains in this stack:</em>
     <table cellpadding="2" cellspacing="1" >
       <tr class="TableHeader">
-   		<td align="center">
-          <form action="#[feedbackpage]#" method="post" enctype="multipart/form-data">
-            <div>
-              <input type="hidden" name="process" value="#[tabletype]#" />
-              <input type="submit" name="clearlist" value="clear list" />
-            </div>
-          </form>
-        </td>
+   		<td align="center"></td>
         <td><strong>Domain</strong></td>
         <td><strong>URLs</strong></td>
       </tr>
       #{domains}#
       <tr class="TableCell#(dark)#Light::Dark#(/dark)#">
-        <td></td>
+        <td align="center">
+          <form action="#[feedbackpage]#" method="post" enctype="multipart/form-data">
+            <div>
+              <input type="hidden" name="process" value="#[tabletype]#" />
+              <input type="hidden" name="hashpart" value="#[hashpart]#" />
+              <input type="hidden" name="domain" value="#[domain]#" />
+              <input type="submit" name="deletedomain" value="delete all" />
+            </div>
+          </form>
+        </td>
         <td><a href="http://#[domain]#/" target="_">#[domain]#</a></td>
         <td>#[count]#</td>
       </tr>

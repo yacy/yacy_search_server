@@ -31,9 +31,12 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 
 import de.anomic.data.htmlTools;
 import de.anomic.http.JakartaCommonsHttpClient;
@@ -42,12 +45,11 @@ import de.anomic.http.httpRemoteProxyConfig;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroCache;
 import de.anomic.kelondro.kelondroCloneableIterator;
-import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroIndex;
+import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroRowSet;
 import de.anomic.kelondro.kelondroSplitTable;
-import de.anomic.server.serverCodings;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyURL;
 
@@ -55,8 +57,9 @@ public final class indexRepositoryReference {
 
     // class objects
     kelondroIndex urlIndexFile;
-    private Export exportthread = null; // will habe a export thread assigned if exporter is running
-    private File location = null;
+    private Export      exportthread    = null; // will have a export thread assigned if exporter is running
+    private File        location        = null;
+    ArrayList<hostStat> statsDump       = null;
     
     public indexRepositoryReference(final File indexSecondaryPath) {
         super();
@@ -66,11 +69,13 @@ public final class indexRepositoryReference {
 
     public void clearCache() {
         if (urlIndexFile instanceof kelondroCache) ((kelondroCache) urlIndexFile).clearCache();
+        statsDump = null;
     }
     
     public void clear() throws IOException {
         if (exportthread != null) exportthread.interrupt();
         urlIndexFile.clear();
+        statsDump = null;
     }
     
     public int size() {
@@ -78,8 +83,9 @@ public final class indexRepositoryReference {
     }
 
     public void close() {
+        statsDump = null;
         if (urlIndexFile != null) {
-                urlIndexFile.close();
+            urlIndexFile.close();
             urlIndexFile = null;
         }
     }
@@ -127,24 +133,14 @@ public final class indexRepositoryReference {
         }
 
         urlIndexFile.put(entry.toRowEntry(), new Date() /*entry.loaddate()*/);
-    }
-
-    public synchronized indexURLReference newEntry(final String propStr) {
-        if (propStr == null || !propStr.startsWith("{") || !propStr.endsWith("}")) {
-            return null;
-        }
-        try {
-            return new indexURLReference(serverCodings.s2p(propStr.substring(1, propStr.length() - 1)));
-        } catch (final kelondroException e) {
-            // wrong format
-            return null;
-        }
+        statsDump = null;
     }
     
     public synchronized boolean remove(final String urlHash) {
         if (urlHash == null) return false;
         try {
             final kelondroRow.Entry r = urlIndexFile.remove(urlHash.getBytes());
+            if (r != null) statsDump = null;
             return r != null;
         } catch (final IOException e) {
             return false;
@@ -503,5 +499,111 @@ public final class indexRepositoryReference {
             return this.count;
         }
         
+    }
+    
+    public Iterator<hostStat> statistics(int count) throws IOException {
+        // prevent too heavy IO.
+        if (statsDump != null && count <= statsDump.size()) return statsDump.iterator();
+        
+        HashMap<String, hashStat> map = new HashMap<String, hashStat>();
+        // first collect all domains and calculate statistics about it
+        kelondroCloneableIterator<byte[]> i = this.urlIndexFile.keys(true, null);
+        String urlhash, hosthash;
+        hashStat ds;
+        if (i != null) while (i.hasNext()) {
+            urlhash = new String(i.next());
+            hosthash = urlhash.substring(6,11);
+            ds = map.get(hosthash);
+            if (ds == null) {
+                ds = new hashStat(urlhash);
+                map.put(hosthash, ds);
+            } else {
+                ds.count++;
+            }
+        }
+        
+        // order elements by size
+        kelondroMScoreCluster<String> s = new kelondroMScoreCluster<String>();
+        for (Map.Entry<String, hashStat> e: map.entrySet()) {
+            s.addScore(e.getValue().urlhash, e.getValue().count);
+        }
+    
+        // fetch urls from the database to determine the host in clear text
+        Iterator<String> j = s.scores(false); // iterate urlhash-examples in reverse order (biggest first)
+        indexURLReference urlref;
+        count += 10; // make some more to prevent that we have to do this again after deletions too soon.
+        if (count < 0 || count > s.size()) count = s.size();
+        statsDump = new ArrayList<hostStat>();
+        while (j.hasNext() && count > 0) {
+            urlhash = j.next();
+            if (urlhash == null) continue;
+            urlref = this.load(urlhash, null, 0);
+            if (urlref == null || urlref.comp() == null || urlref.comp().url() == null || urlref.comp().url().getHost() == null) continue;
+            if (statsDump == null) return new ArrayList<hostStat>().iterator(); // some other operation has destroyed the object
+            statsDump.add(new hostStat(urlref.comp().url().getHost(), urlhash.substring(6, 11), s.getScore(urlhash)));
+            count--;
+        }
+        // finally return an iterator for the result array
+        return (statsDump == null) ? new ArrayList<hostStat>().iterator() : statsDump.iterator();
+    }
+    
+    public class hashStat {
+        public String urlhash;
+        public int count;
+        public hashStat(String urlhash) {
+            this.urlhash = urlhash;
+            this.count = 1;
+        }
+    }
+    
+    public class hostStat {
+        public String hostname, hosthash;
+        public int count;
+        public hostStat(String host, String urlhashfragment, int count) {
+            assert urlhashfragment.length() == 5;
+            this.hostname = host;
+            this.hosthash = urlhashfragment;
+            this.count = count;
+        }
+    }
+    
+    /**
+     * using a fragment of the url hash (5 bytes: bytes 6 to 10) it is possible to address all urls from a specific domain
+     * here such a fragment can be used to delete all these domains at once
+     * @param hosthash
+     * @return number of deleted domains
+     * @throws IOException
+     */
+    public int deleteDomain(String hosthash) throws IOException {
+        // first collect all url hashes that belong to the domain
+        assert hosthash.length() == 5;
+        ArrayList<String> l = new ArrayList<String>();
+        kelondroCloneableIterator<byte[]> i = this.urlIndexFile.keys(true, null);
+        String hash;
+        while (i.hasNext()) {
+            hash = new String(i.next());
+            if (hosthash.equals(hash.substring(6, 11))) l.add(hash);
+        }
+        
+        // then delete the urls using this list
+        int cnt = 0;
+        for (String h: l) {
+            if (urlIndexFile.remove(h.getBytes()) != null) cnt++;
+        }
+        
+        // finally remove the line with statistics
+        if (statsDump != null) {
+            Iterator<hostStat> hsi = statsDump.iterator();
+            hostStat hs;
+            while (hsi.hasNext()) {
+                hs = hsi.next();
+                if (hs.hosthash.equals(hosthash)) {
+                    hsi.remove();
+                    break;
+                }
+            }
+        }
+        
+        return cnt;
     }
 }

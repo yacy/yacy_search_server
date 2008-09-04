@@ -100,18 +100,18 @@ public final class plasmaWordIndex implements indexRI {
     private final kelondroByteOrder        indexOrder = kelondroBase64Order.enhancedCoder;
     private final indexRAMRI               dhtOutCache, dhtInCache;
     private final indexCollectionRI        collections;          // new database structure to replace AssortmentCluster and FileCluster
-    private final       serverLog                log;
-    indexRepositoryReference               referenceURL;
+    private final serverLog                log;
+    private indexRepositoryReference       referenceURL;
     public  final yacySeedDB               seedDB;
     public        yacyNewsPool             newsPool;
-    private final       File                     primaryRoot, secondaryRoot;
+    private final File                     primaryRoot, secondaryRoot;
     public        IndexingStack            queuePreStack;
     public        CrawlProfile             profilesActiveCrawls, profilesPassiveCrawls;
     public  CrawlProfile.entry             defaultProxyProfile;
     public  CrawlProfile.entry             defaultRemoteProfile;
     public  CrawlProfile.entry             defaultTextSnippetLocalProfile, defaultTextSnippetGlobalProfile;
     public  CrawlProfile.entry             defaultMediaSnippetLocalProfile, defaultMediaSnippetGlobalProfile;
-    private final File                           queuesRoot;
+    private final File                     queuesRoot;
     public  yacyPeerActions                peerActions;
 
     public plasmaWordIndex(final String networkName, final serverLog log, final File indexPrimaryRoot, final File indexSecondaryRoot, final int entityCacheMaxSize) {
@@ -360,6 +360,14 @@ public final class plasmaWordIndex implements indexRI {
     
     public kelondroCloneableIterator<indexURLReference> entriesURL(final boolean up, final String firstHash) throws IOException {
         return this.referenceURL.entries(up, firstHash);
+    }
+    
+    public Iterator<indexRepositoryReference.hostStat> statistics(int count) throws IOException {
+        return this.referenceURL.statistics(count);
+    }
+    
+    public int deleteDomain(String urlfragment) throws IOException {
+        return this.referenceURL.deleteDomain(urlfragment);
     }
     
     public indexRepositoryReference.BlacklistCleaner getURLCleaner(final indexReferenceBlacklist blacklist) {

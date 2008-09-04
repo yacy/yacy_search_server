@@ -108,10 +108,14 @@ public final class ResultURLs {
     
     public synchronized int getStackSize(final int stack) {
         final List<String> resultStack = getStack(stack);
-        if(resultStack == null) {
-            return -1;
-        }
+        if (resultStack == null) return 0;
         return resultStack.size();
+    }
+    
+    public synchronized int getDomainListSize(final int stack) {
+        final kelondroMScoreCluster<String> domains = getDomains(stack);
+        if (domains == null) return 0;
+        return domains.size();
     }
 
     public synchronized String getUrlHash(final int stack, final int pos) {
@@ -191,7 +195,19 @@ public final class ResultURLs {
      * @return iterator of domains in reverse order (downwards)
      */
     public Iterator<String> domains(final int stack) {
+        assert getDomains(stack) != null : "getDomains(" + stack + ") = null";
         return getDomains(stack).scores(false);
+    }
+    
+    public int deleteDomain(final int stack, String host, String hosthash) {
+        assert hosthash.length() == 5;
+        int i = 0;
+        while (i < getStackSize(stack)) {
+            if (getUrlHash(stack, i).substring(6, 11).equals(hosthash)) getStack(stack).remove(i); else i++;
+        }
+        assert host != null : "host = null";
+        assert getDomains(stack) != null : "getDomains(" + stack + ") = null";
+        return getDomains(stack).deleteScore(host);
     }
     
     /**
@@ -201,6 +217,8 @@ public final class ResultURLs {
      * @return the number of occurrences of the domain in the stack statistics
      */
     public int domainCount(final int stack, String domain) {
+        assert domain != null : "domain = null";
+        assert getDomains(stack) != null : "getDomains(" + stack + ") = null";
         return getDomains(stack).getScore(domain);
     }
     
@@ -247,7 +265,7 @@ public final class ResultURLs {
 
     public synchronized boolean removeStack(final int stack, final int pos) {
         final List<String> resultStack = getStack(stack);
-        if(resultStack == null) {
+        if (resultStack == null) {
             return false;
         }
         return resultStack.remove(pos) != null;
@@ -257,8 +275,11 @@ public final class ResultURLs {
         final List<String> resultStack = getStack(stack);
         if (resultStack != null) resultStack.clear();
         final kelondroMScoreCluster<String> resultDomains = getDomains(stack);
-        if (resultDomains != null) resultDomains.clear();
-        
+        if (resultDomains != null) {
+            // we do not clear this completely, just remove most of the less important entries
+            resultDomains.shrinkToMaxSize(100);
+            resultDomains.shrinkToMinScore(2);
+        }
     }
 
     public synchronized boolean remove(final String urlHash) {

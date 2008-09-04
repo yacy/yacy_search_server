@@ -50,6 +50,34 @@ public final class kelondroMScoreCluster<E> {
         encnt = 0;
     }
     
+    /**
+     * shrink the cluster to a demanded size
+     * @param maxsize
+     */
+    public void shrinkToMaxSize(int maxsize) {
+        if (maxsize < 0) return;
+        while (refkeyDB.size() > maxsize) {
+            // find and remove smallest objects until cluster has demanded size
+            refkeyDB.remove(keyrefDB.remove(keyrefDB.firstKey()));
+        }
+    }
+    
+    /**
+     * shrink the cluster in such a way that the smallest score is equal or greater than a given minScore
+     * @param minScore
+     */
+    public void shrinkToMinScore(int minScore) {
+        int score;
+        Long key;
+        while (true) {
+            // find and remove objects where their score is smaller than the demanded minimum score
+            key = keyrefDB.firstKey();
+            score = (int) ((key.longValue() & 0xFFFFFFFF00000000L) >> 32);
+            if (score >= minScore) break;
+            refkeyDB.remove(keyrefDB.remove(key));
+        }
+    }
+    
     public static final String shortDateFormatString = "yyyyMMddHHmmss";
     public static final SimpleDateFormat shortFormatter = new SimpleDateFormat(shortDateFormatString);
     public static final long minutemillis = 60000;
@@ -261,13 +289,11 @@ public final class kelondroMScoreCluster<E> {
 
     public synchronized E getMaxObject() {
         if (refkeyDB.size() == 0) return null;
-        //return getScores(1, false)[0];
         return keyrefDB.get(keyrefDB.lastKey());
     }
     
     public synchronized E getMinObject() {
         if (refkeyDB.size() == 0) return null;
-        //return getScores(1, true)[0];
         return keyrefDB.get(keyrefDB.firstKey());
     }
     

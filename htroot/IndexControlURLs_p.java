@@ -54,41 +54,50 @@ public class IndexControlURLs_p {
         prop.put("result", "");
         prop.put("ucount", Integer.toString(sb.webIndex.countURL()));
         prop.put("otherHosts", "");
+        prop.put("genUrlProfile", 0);
+        prop.put("statistics", 1);
+        prop.put("statistics_lines", 100);
+        prop.put("statisticslines", 0);
         
+        // show export messages
         final indexRepositoryReference.Export export = sb.webIndex.exportURL();
         if ((export != null) && (export.isAlive())) {
         	// there is currently a running export
-        	prop.put("lurlexportfinished", 0);
+            prop.put("lurlexport", 2);
+            prop.put("lurlexportfinished", 0);
     		prop.put("lurlexporterror", 0);
-    		prop.put("lurlexport", 2);
-            prop.put("lurlexport_exportfile", export.file().toString());
+    		prop.put("lurlexport_exportfile", export.file().toString());
             prop.put("lurlexport_urlcount", export.count());
         } else {
-        	prop.put("lurlexport", 1);
-    		prop.put("lurlexport_exportfile", sb.getRootPath() + "/DATA/EXPORT/" + serverDate.formatShortSecond());
-
-    		prop.put("lurlexportfinished", 0);
-    		prop.put("lurlexporterror", 0);
-    		if (export == null) {
-        		// the export is finished, or there has not been a export
-        		prop.put("lurlexportfinished", 1);
-        		prop.put("lurlexportfinished_exportfile", "");
-            	prop.put("lurlexportfinished_urlcount", 0);
-        	} else {
-        		// the export had errors
-        		prop.put("lurlexporterror", 1);
-        		prop.put("lurlexporterror_exportfile", export.file().toString());
-        		prop.put("lurlexporterror_exportfailmsg", export.failed());
-        	}
-        }        
+            prop.put("lurlexport", 1);
+            prop.put("lurlexport_exportfile", sb.getRootPath() + "/DATA/EXPORT/" + serverDate.formatShortSecond());
+            if (export == null) {
+                // there has never been an export
+                prop.put("lurlexportfinished", 0);
+                prop.put("lurlexporterror", 0);
+            } else {
+                // an export was running but has finished
+                prop.put("lurlexportfinished", 1);
+                prop.put("lurlexportfinished_exportfile", export.file().toString());
+                prop.put("lurlexportfinished_urlcount", export.count());
+                if (export.failed() == null) {
+                    prop.put("lurlexporterror", 0);
+                } else {
+                    prop.put("lurlexporterror", 1);
+                    prop.put("lurlexporterror_exportfile", export.file().toString());
+                    prop.put("lurlexporterror_exportfailmsg", export.failed());
+                }
+            }
+        }
+        
         if (post == null || env == null) {
             return prop; // nothing to do
         }
         
-        // default values
+        // post values that are set on numerous input fields with same name
         String urlstring = post.get("urlstring", "").trim();
         String urlhash = post.get("urlhash", "").trim();
-
+        
         if (!urlstring.startsWith("http://") &&
             !urlstring.startsWith("https://")) { urlstring = "http://" + urlstring; }
 
@@ -141,6 +150,7 @@ public class IndexControlURLs_p {
                     prop.put("urlhash", "");
                 } else {
                     prop.putAll(genUrlProfile(sb, entry, urlhash));
+                    prop.put("statistics", 0);
                 }
             } catch (final MalformedURLException e) {
                 prop.putHTML("urlstring", "bad url: " + urlstring);
@@ -156,6 +166,7 @@ public class IndexControlURLs_p {
             } else {
                 prop.putHTML("urlstring", entry.comp().url().toNormalform(false, true));
                 prop.putAll(genUrlProfile(sb, entry, urlhash));
+                prop.put("statistics", 0);
             }
             prop.put("lurlexport", 0);
         }
@@ -181,6 +192,7 @@ public class IndexControlURLs_p {
                     }
                     i++;
                 }
+                prop.put("statistics", 0);
                 prop.put("urlhashsimilar_rows", rows);
                 prop.put("result", result.toString());
             } catch (final IOException e) {
@@ -215,6 +227,45 @@ public class IndexControlURLs_p {
 			if ((running != null) && (running.failed() == null)) {
 				prop.put("lurlexport", 2);			    
 			}
+        }
+        
+        if (post.containsKey("deletedomain")) {
+            String hp = post.get("hashpart");
+            try {
+                sb.webIndex.deleteDomain(hp);
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            // trigger the loading of the table
+            post.put("statistics", "");
+        }
+        
+        if (post.containsKey("statistics")) {
+            int count = post.getInt("lines", 100);
+            Iterator<indexRepositoryReference.hostStat> statsiter;
+            prop.put("statistics_lines", count);
+            int cnt = 0;
+            try {
+                statsiter = sb.webIndex.statistics(count);
+                boolean dark = true;
+                indexRepositoryReference.hostStat hs;
+                while (statsiter.hasNext() && cnt < count) {
+                    hs = statsiter.next();
+                    prop.put("statisticslines_domains_" + cnt + "_dark", (dark) ? "1" : "0");
+                    prop.put("statisticslines_domains_" + cnt + "_domain", hs.hostname);
+                    prop.put("statisticslines_domains_" + cnt + "lines", count);
+                    prop.put("statisticslines_domains_" + cnt + "_hashpart", hs.hosthash);
+                    prop.put("statisticslines_domains_" + cnt + "_count", hs.count);
+                    dark = !dark;
+                    cnt++;
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            prop.put("statisticslines_domains", cnt);
+            prop.put("statisticslines", 1);
+            prop.put("lurlexport", 0);
         }
         
         // insert constants
