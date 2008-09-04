@@ -37,18 +37,17 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.TreeSet;
 
 import de.anomic.data.htmlTools;
 import de.anomic.http.JakartaCommonsHttpClient;
 import de.anomic.http.JakartaCommonsHttpResponse;
 import de.anomic.http.httpRemoteProxyConfig;
-import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroCache;
 import de.anomic.kelondro.kelondroCloneableIterator;
 import de.anomic.kelondro.kelondroIndex;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroRow;
-import de.anomic.kelondro.kelondroRowSet;
 import de.anomic.kelondro.kelondroSplitTable;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyURL;
@@ -402,7 +401,6 @@ public final class indexRepositoryReference {
         private String failure;
         private final int format;
         private final boolean dom;
-        private final kelondroRowSet doms;
         
         public Export(final File f, final String filter, final int format, boolean dom) {
             // format: 0=text, 1=html, 2=rss/xml
@@ -413,7 +411,6 @@ public final class indexRepositoryReference {
             this.format = format;
             this.dom = dom;
             if ((dom) && (format == 2)) dom = false;
-            this.doms = new kelondroRowSet(new kelondroRow("String hash-6", kelondroBase64Order.enhancedCoder, 0), 0);
         }
         
         public void run() {
@@ -433,26 +430,24 @@ public final class indexRepositoryReference {
                     pw.println("<link>http://yacy.net</link>");
                 }
                 
-                final Iterator<indexURLReference> i = entries(true, null); // iterates indexURLEntry objects
-                indexURLReference entry;
-                indexURLReference.Components comp;
-                String url;
-                loop: while (i.hasNext()) {
-                    entry = i.next();
-                    comp = entry.comp();
-                    url = comp.url().toNormalform(true, false);
-                    if (!url.matches(filter)) continue;
-                    if (dom) {
-                        if (doms.has(entry.hash().substring(6).getBytes())) continue loop;
-                        doms.add(entry.hash().substring(6).getBytes());
-                        url = comp.url().getHost();
-                        if (format == 0) {
-                            pw.println(url);
-                        }
-                        if (format == 1) {
-                            pw.println("<a href=\"http://" + url + "\">" + url + "</a><br>");
-                        }
-                    } else {
+                if (dom) {
+                    TreeSet<String> set = domainNameCollector(-1);
+                    for (String host: set) {
+                        if (!host.matches(filter)) continue;
+                        if (format == 0) pw.println(host);
+                        if (format == 1) pw.println("<a href=\"http://" + host + "\">" + host + "</a><br>");
+                        count++;
+                    }
+                } else {
+                    final Iterator<indexURLReference> i = entries(true, null); // iterates indexURLEntry objects
+                    indexURLReference entry;
+                    indexURLReference.Components comp;
+                    String url;
+                    while (i.hasNext()) {
+                        entry = i.next();
+                        comp = entry.comp();
+                        url = comp.url().toNormalform(true, false);
+                        if (!url.matches(filter)) continue;
                         if (format == 0) {
                             pw.println(url);
                         }
@@ -469,8 +464,8 @@ public final class indexRepositoryReference {
                             pw.println("<guid isPermaLink=\"false\">" + entry.hash() + "</guid>");
                             pw.println("</item>");
                         }
+                        count++;
                     }
-                    count++;
                 }
                 if (format == 1) {
                     pw.println("</body></html>");
@@ -501,10 +496,7 @@ public final class indexRepositoryReference {
         
     }
     
-    public Iterator<hostStat> statistics(int count) throws IOException {
-        // prevent too heavy IO.
-        if (statsDump != null && count <= statsDump.size()) return statsDump.iterator();
-        
+    private HashMap<String, hashStat> domainSampleCollector() throws IOException {
         HashMap<String, hashStat> map = new HashMap<String, hashStat>();
         // first collect all domains and calculate statistics about it
         kelondroCloneableIterator<byte[]> i = this.urlIndexFile.keys(true, null);
@@ -512,7 +504,7 @@ public final class indexRepositoryReference {
         hashStat ds;
         if (i != null) while (i.hasNext()) {
             urlhash = new String(i.next());
-            hosthash = urlhash.substring(6,11);
+            hosthash = urlhash.substring(6, 11);
             ds = map.get(hosthash);
             if (ds == null) {
                 ds = new hashStat(urlhash);
@@ -521,6 +513,35 @@ public final class indexRepositoryReference {
                 ds.count++;
             }
         }
+        return map;
+    }
+    
+    public TreeSet<String> domainNameCollector(int count) throws IOException {
+        // collect hashes from all domains
+        HashMap<String, hashStat> map = domainSampleCollector();
+        
+        // fetch urls from the database to determine the host in clear text
+        indexURLReference urlref;
+        if (count < 0 || count > map.size()) count = map.size();
+        statsDump = new ArrayList<hostStat>();
+        TreeSet<String> set = new TreeSet<String>();
+        for (hashStat hs: map.values()) {
+            if (hs == null) continue;
+            urlref = this.load(hs.urlhash, null, 0);
+            if (urlref == null || urlref.comp() == null || urlref.comp().url() == null || urlref.comp().url().getHost() == null) continue;
+            set.add(urlref.comp().url().getHost());
+            count--;
+            if (count == 0) break;
+        }
+        return set;
+    }
+    
+    public Iterator<hostStat> statistics(int count) throws IOException {
+        // prevent too heavy IO.
+        if (statsDump != null && count <= statsDump.size()) return statsDump.iterator();
+        
+        // collect hashes from all domains
+        HashMap<String, hashStat> map = domainSampleCollector();
         
         // order elements by size
         kelondroMScoreCluster<String> s = new kelondroMScoreCluster<String>();
@@ -531,10 +552,11 @@ public final class indexRepositoryReference {
         // fetch urls from the database to determine the host in clear text
         Iterator<String> j = s.scores(false); // iterate urlhash-examples in reverse order (biggest first)
         indexURLReference urlref;
+        String urlhash;
         count += 10; // make some more to prevent that we have to do this again after deletions too soon.
         if (count < 0 || count > s.size()) count = s.size();
         statsDump = new ArrayList<hostStat>();
-        while (j.hasNext() && count > 0) {
+        while (j.hasNext()) {
             urlhash = j.next();
             if (urlhash == null) continue;
             urlref = this.load(urlhash, null, 0);
@@ -542,6 +564,7 @@ public final class indexRepositoryReference {
             if (statsDump == null) return new ArrayList<hostStat>().iterator(); // some other operation has destroyed the object
             statsDump.add(new hostStat(urlref.comp().url().getHost(), urlhash.substring(6, 11), s.getScore(urlhash)));
             count--;
+            if (count == 0) break;
         }
         // finally return an iterator for the result array
         return (statsDump == null) ? new ArrayList<hostStat>().iterator() : statsDump.iterator();

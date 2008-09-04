@@ -58,6 +58,7 @@ public class IndexControlURLs_p {
         prop.put("statistics", 1);
         prop.put("statistics_lines", 100);
         prop.put("statisticslines", 0);
+        prop.put("reload", 0);
         
         // show export messages
         final indexRepositoryReference.Export export = sb.webIndex.exportURL();
@@ -68,6 +69,7 @@ public class IndexControlURLs_p {
     		prop.put("lurlexporterror", 0);
     		prop.put("lurlexport_exportfile", export.file().toString());
             prop.put("lurlexport_urlcount", export.count());
+            prop.put("reload", 1);
         } else {
             prop.put("lurlexport", 1);
             prop.put("lurlexport_exportfile", sb.getRootPath() + "/DATA/EXPORT/" + serverDate.formatShortSecond());
@@ -109,6 +111,7 @@ public class IndexControlURLs_p {
             final int i = sb.removeAllUrlReferences(urlhash, true);
             prop.put("result", "Deleted URL and " + i + " references from " + i + " word indexes.");
             prop.put("lurlexport", 0);
+            prop.put("reload", 0);
         }
 
         if (post.containsKey("urlhashdelete")) {
@@ -122,6 +125,7 @@ public class IndexControlURLs_p {
                 prop.putHTML("result", "Removed URL " + urlstring);
             }
             prop.put("lurlexport", 0);
+            prop.put("reload", 0);
         }
 
         if (post.containsKey("urldelete")) {
@@ -137,6 +141,7 @@ public class IndexControlURLs_p {
                 prop.putHTML("result", "Removed URL " + urlstring);
             }
             prop.put("lurlexport", 0);
+            prop.put("reload", 0);
         }
 
         if (post.containsKey("urlstringsearch")) {
@@ -157,6 +162,7 @@ public class IndexControlURLs_p {
                 prop.put("urlhash", "");
             }
             prop.put("lurlexport", 0);
+            prop.put("reload", 0);
         }
 
         if (post.containsKey("urlhashsearch")) {
@@ -169,6 +175,7 @@ public class IndexControlURLs_p {
                 prop.put("statistics", 0);
             }
             prop.put("lurlexport", 0);
+            prop.put("reload", 0);
         }
 
         // generate list
@@ -199,6 +206,7 @@ public class IndexControlURLs_p {
                 prop.put("result", "No Entries for URL hash " + urlhash);
             }
             prop.put("lurlexport", 0);
+            prop.put("reload", 0);
         }
         
         if (post.containsKey("lurlexport")) {
@@ -227,6 +235,7 @@ public class IndexControlURLs_p {
 			if ((running != null) && (running.failed() == null)) {
 				prop.put("lurlexport", 2);			    
 			}
+			prop.put("reload", 1);
         }
         
         if (post.containsKey("deletedomain")) {
@@ -239,6 +248,7 @@ public class IndexControlURLs_p {
             }
             // trigger the loading of the table
             post.put("statistics", "");
+            prop.put("reload", 0);
         }
         
         if (post.containsKey("statistics")) {
@@ -266,6 +276,7 @@ public class IndexControlURLs_p {
             prop.put("statisticslines_domains", cnt);
             prop.put("statisticslines", 1);
             prop.put("lurlexport", 0);
+            prop.put("reload", 0);
         }
         
         // insert constants

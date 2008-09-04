@@ -1,5 +1,6 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
+#(reload)#::<meta http-equiv="REFRESH" content="5; url=/IndexControlURLs_p.html">#(/reload)#
   <head>
     <title>YaCy '#[clientname]#': Index Control</title>
     #%env/templates/metas.template%#
@@ -76,13 +77,13 @@
         <dd><input type="text" name="exportfilter" value=".*.*" size="20" maxlength="250" />
         </dd>
         <dt class="TableCellDark">Export Format</dt>
-        <dd>Only Domain:
+        <dd>Only Domain <i>(superfast)</i>:
             <input type="radio" name="format" value="dom-text" />Plain Text List (domains only)&nbsp;&nbsp;
-            <input type="radio" name="format" value="dom-html" />HTML (domains as URLs, no title)<br />
-            Full URL List:
+            <input type="radio" name="format" value="dom-html" checked="checked" />HTML (domains as URLs, no title)<br />
+            Full URL List <i>(high IO)&nbsp;&nbsp;&nbsp;&nbsp;</i>:
             <input type="radio" name="format" value="url-text" />Plain Text List (URLs only)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             <input type="radio" name="format" value="url-html" />HTML (URLs with title)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            <input type="radio" name="format" value="url-rss" checked="checked" />XML (RSS)
+            <input type="radio" name="format" value="url-rss" />XML (RSS)
             <br />
         </dd>
         <dt class="TableCellLight"></dt>
@@ -95,7 +96,7 @@
     #(/lurlexport)#
     
 	#(lurlexportfinished)#::
-    <div class="commit">Finished export of #[urlcount]# URLs to file #[exportfile]#</div>::
+    <div class="commit">Finished export of #[urlcount]# URLs to file <a href="file://#[exportfile]#" target="_">#[exportfile]#</a></div>::
     #(/lurlexportfinished)#
     
     #(lurlexporterror)#::
