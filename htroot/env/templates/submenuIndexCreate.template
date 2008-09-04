@@ -1,37 +1,43 @@
 <div class="SubMenu">
-  <h3>Start a Web Crawl</h3>
+  <h3>Web Crawler Control</h3>
+</div>
+<div class="SubMenu">
+
+  <div class="SubMenugroup">
+    <h3>Start a Web Crawl</h3>
     <ul class="SubMenu">
       <li><a href="/CrawlStart_p.html" class="MenuItemLink lock">Crawl Start</a></li>
       <li><a href="/CrawlProfileEditor_p.html" class="MenuItemLink lock">Crawl Profile Editor</a></li>
       <li><a href="/WatchCrawler_p.html" class="MenuItemLink lock">Crawler Queues</a></li>
     </ul>
-    <ul class="SubMenu">
-      <li>&nbsp;</li>
-    </ul>
-</div>
-<div class="SubMenu">
-  <div class="SubMenugroup">
-    <h3>Control Queues</h3>
-    <ul class="SubMenu">
-      <li><a href="/IndexCreateIndexingQueue_p.html" class="MenuItemLink lock">Indexing</a></li>
-      <li><a href="/IndexCreateLoaderQueue_p.html" class="MenuItemLink lock">Loader</a></li>
-    </ul>
   </div>
+  
   <div class="SubMenugroup">
-    <h3>WWW Crawl Queues</h3>
+    <h3>URLs to be processed</h3>
     <ul class="SubMenu">
       <li><a href="/IndexCreateWWWLocalQueue_p.html" class="MenuItemLink lock">Local</a></li>
       <li><a href="/IndexCreateWWWGlobalQueue_p.html" class="MenuItemLink lock">Global</a></li>
       <li><a href="/IndexCreateWWWRemoteQueue_p.html" class="MenuItemLink lock">Remote</a></li>
-      <li><!--<a href="/IndexCreateWWWOverhangQueue_p.html" class="MenuItemLink">--><em class="lock">Overhang</em><!--</a>--></li>
+      <!--<li><a href="/IndexCreateWWWOverhangQueue_p.html" class="MenuItemLink"><em class="lock">Overhang</em></a></li>-->
     </ul>
   </div>
+  
+  <div class="SubMenugroup">
+    <h3>Processing Queues</h3>
+    <ul class="SubMenu">
+      <li><a href="/IndexCreateLoaderQueue_p.html" class="MenuItemLink lock">Loader</a></li>
+      <li><a href="/IndexCreateIndexingQueue_p.html" class="MenuItemLink lock">Indexing</a></li>
+    </ul>
+  </div>
+  
+  <!---
   <div class="SubMenugroup">
     <h3>Media Crawl Queues</h3>
     <ul class="SubMenu">
-      <li><!--<a href="/IndexCreateImageQueue_p.html" class="MenuItemLink">--><em class="lock">Images</em><!--</a>--></li>
-      <li><!--<a href="/IndexCreateMovieQueue_p.html" class="MenuItemLink">--><em class="lock">Movies</em><!--</a>--></li>
-      <li><!--<a href="/IndexCreateMusicQueue_p.html" class="MenuItemLink">--><em class="lock">Music</em><!--</a>--></li>
+      <li><a href="/IndexCreateImageQueue_p.html" class="MenuItemLink"><em class="lock">Images</em></a></li>
+      <li><a href="/IndexCreateMovieQueue_p.html" class="MenuItemLink"><em class="lock">Movies</em></a></li>
+      <li><a href="/IndexCreateMusicQueue_p.html" class="MenuItemLink"><em class="lock">Music</em></a></li>
     </ul>
   </div>
+  -->
 </div>
