@@ -76,6 +76,29 @@
     #(table)#
     <p><em>The stack is empty.</em></p>
     ::
+    <p><em>Statistics about #[domains]# domains in this stack:</em>
+    <table cellpadding="2" cellspacing="1" >
+      <tr class="TableHeader">
+   		<td align="center">
+          <form action="#[feedbackpage]#" method="post" enctype="multipart/form-data">
+            <div>
+              <input type="hidden" name="process" value="#[tabletype]#" />
+              <input type="submit" name="clearlist" value="clear list" />
+            </div>
+          </form>
+        </td>
+        <td><strong>Domain</strong></td>
+        <td><strong>URLs</strong></td>
+      </tr>
+      #{domains}#
+      <tr class="TableCell#(dark)#Light::Dark#(/dark)#">
+        <td></td>
+        <td><a href="http://#[domain]#/" target="_">#[domain]#</a></td>
+        <td>#[count]#</td>
+      </tr>
+      #{/domains}#
+    </table><br>
+    
     <p><em>
     #(size)#
     Showing all #[all]# entries in this stack.
@@ -85,7 +108,6 @@
     </em></p>
     <table cellpadding="2" cellspacing="1" >
       <tr class="TableHeader">
-        #(showControl)#::
         <td align="center">
           <form action="#[feedbackpage]#" method="post" enctype="multipart/form-data">
             <div>
@@ -94,7 +116,6 @@
             </div>
           </form>
         </td>
-        #(/showControl)#
         #(showInit)#::<td><strong>Initiator</strong></td>#(/showInit)#
         #(showExec)#::<td><strong>Executor</strong></td>#(/showExec)#
         #(showDate)#::<td><strong>Modified</strong></td>#(/showDate)#

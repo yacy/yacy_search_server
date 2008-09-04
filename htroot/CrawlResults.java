@@ -26,6 +26,7 @@
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.Locale;
 
 import de.anomic.http.httpRequestHeader;
@@ -47,7 +48,6 @@ public class CrawlResults {
         final serverObjects prop = new serverObjects();
 
         int lines = 500;
-        boolean showControl = env.getConfigBool("IndexMonitorControl", true);
         boolean showInit = env.getConfigBool("IndexMonitorInit", false);
         boolean showExec = env.getConfigBool("IndexMonitorExec", false);
         boolean showDate = env.getConfigBool("IndexMonitorDate", true);
@@ -109,8 +109,6 @@ public class CrawlResults {
         if (post.containsKey("moreIndexed")) {
             lines = Integer.parseInt(post.get("showIndexed", "500"));
         }
-        if (post.get("sc") != null)
-            if (post.get("sc").equals("0")) showControl = false; else showControl = true;
         if (post.get("si") != null)
             if (post.get("si").equals("0")) showInit = false; else showInit = true;
         if (post.get("se") != null)
@@ -141,12 +139,8 @@ public class CrawlResults {
             }
             prop.put("table_size_all", sb.crawlResults.getStackSize(tabletype));
             
-            if (showControl) {
-                prop.put("table_showControl", "1");
-                prop.putHTML("table_showControl_feedbackpage", "CrawlResults.html");
-                prop.put("table_showControl_tabletype", tabletype);
-            } else
-                prop.put("table_showControl", "0");
+            prop.putHTML("table_feedbackpage", "CrawlResults.html");
+            prop.put("table_tabletype", tabletype);
             prop.put("table_showInit", (showInit) ? "1" : "0");
             prop.put("table_showExec", (showExec) ? "1" : "0");
             prop.put("table_showDate", (showDate) ? "1" : "0");
@@ -165,9 +159,7 @@ public class CrawlResults {
             for (i = sb.crawlResults.getStackSize(tabletype) - 1; i >= (sb.crawlResults.getStackSize(tabletype) - lines); i--) {
                 initiatorHash = sb.crawlResults.getInitiatorHash(tabletype, i);
                 executorHash = sb.crawlResults.getExecutorHash(tabletype, i);
-//              serverLog.logFinest("PLASMA", "plasmaCrawlLURL/genTableProps initiatorHash=" + initiatorHash + " executorHash=" + executorHash);
                 urlHash = sb.crawlResults.getUrlHash(tabletype, i);
-//              serverLog.logFinest("PLASMA", "plasmaCrawlLURL/genTableProps urlHash=" + urlHash);
                 try {
                     urle = sb.webIndex.getURL(urlHash, null, 0);
                     if(urle == null) {
@@ -182,18 +174,13 @@ public class CrawlResults {
                         urltxt = nxTools.shortenURLString(urlstr, 72); // shorten the string text like a URL
                         cachepath = plasmaHTCache.getCachePath(new yacyURL(urlstr, null)).toString().replace('\\', '/').substring(plasmaHTCache.cachePath.toString().length() + 1);
                     }
-//                  serverLog.logFinest("PLASMA", "plasmaCrawlLURL/genTableProps urle=" + urle.toString());
                     initiatorSeed = sb.webIndex.seedDB.getConnected(initiatorHash);
                     executorSeed = sb.webIndex.seedDB.getConnected(executorHash);
 
                     prop.put("table_indexed_" + cnt + "_dark", (dark) ? "1" : "0");
-                    if (showControl) {
-                        prop.put("table_indexed_" + cnt + "_showControl", "1");
-                        prop.put("table_indexed_" + cnt + "_showControl_feedbackpage", "CrawlResults.html");
-                        prop.put("table_indexed_" + cnt + "_showControl_tabletype", tabletype);
-                        prop.put("table_indexed_" + cnt + "_showControl_urlhash", urlHash);
-                    } else
-                        prop.put("table_indexed_" + cnt + "_showControl", "0");
+                    prop.put("table_indexed_" + cnt + "_feedbackpage", "CrawlResults.html");
+                    prop.put("table_indexed_" + cnt + "_tabletype", tabletype);
+                    prop.put("table_indexed_" + cnt + "_urlhash", urlHash);
 
                     if (showInit) {
                         prop.put("table_indexed_" + cnt + "_showInit", "1");
@@ -260,6 +247,21 @@ public class CrawlResults {
                 }
             }
             prop.put("table_indexed", cnt);
+            
+            cnt = 0;
+            dark = true;
+            Iterator<String> j = sb.crawlResults.domains(tabletype);
+            String domain;
+            while (j.hasNext() && cnt < 100) {
+                domain = j.next();
+                if (domain == null) break;
+                prop.put("table_domains_" + cnt + "_dark", (dark) ? "1" : "0");
+                prop.put("table_domains_" + cnt + "_domain", domain);
+                prop.put("table_domains_" + cnt + "_count", sb.crawlResults.domainCount(tabletype, domain));
+                dark = !dark;
+                cnt++;
+            }
+            prop.put("table_domains", cnt);
         }
         prop.put("process", tabletype);
         // return rewrite properties

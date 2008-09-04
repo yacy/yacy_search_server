@@ -35,11 +35,13 @@ package de.anomic.crawler;
 
 import java.net.MalformedURLException;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
 import de.anomic.index.indexURLReference;
 import de.anomic.kelondro.kelondroBitfield;
+import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyURL;
@@ -56,6 +58,13 @@ public final class ResultURLs {
     private final LinkedList<String> lcrawlResultStack; // 5 - local index: result of local crawling
     private final LinkedList<String> gcrawlResultStack; // 6 - local index: triggered external
 
+    private final kelondroMScoreCluster<String> externResultDomains;
+    private final kelondroMScoreCluster<String> searchResultDomains;
+    private final kelondroMScoreCluster<String> transfResultDomains;
+    private final kelondroMScoreCluster<String> proxyResultDomains;
+    private final kelondroMScoreCluster<String> lcrawlResultDomains;
+    private final kelondroMScoreCluster<String> gcrawlResultDomains;
+
     public ResultURLs() {
         // init result stacks
         externResultStack = new LinkedList<String>();
@@ -64,6 +73,13 @@ public final class ResultURLs {
         proxyResultStack  = new LinkedList<String>();
         lcrawlResultStack = new LinkedList<String>();
         gcrawlResultStack = new LinkedList<String>();
+        // init result domain statistics
+        externResultDomains = new kelondroMScoreCluster<String>();
+        searchResultDomains = new kelondroMScoreCluster<String>();
+        transfResultDomains = new kelondroMScoreCluster<String>();
+        proxyResultDomains = new kelondroMScoreCluster<String>();
+        lcrawlResultDomains = new kelondroMScoreCluster<String>();
+        gcrawlResultDomains = new kelondroMScoreCluster<String>();
     }
 
     public synchronized void stack(final indexURLReference e, final String initiatorHash, final String executorHash, final int stackType) {
@@ -72,18 +88,22 @@ public final class ResultURLs {
         if (e == null) { return; }
         try {
             final List<String> resultStack = getStack(stackType);
-            if(resultStack != null) {
+            if (resultStack != null) {
                 resultStack.add(e.hash() + initiatorHash + executorHash);
             }
-            return;
         } catch (final Exception ex) {
             System.out.println("INTERNAL ERROR in newEntry/2: " + ex.toString());
             return;
         }
-    }
-
-    public synchronized void notifyGCrawl(final String urlHash, final String initiatorHash, final String executorHash) {
-        gcrawlResultStack.add(urlHash + initiatorHash + executorHash);
+        try {
+            final kelondroMScoreCluster<String> domains = getDomains(stackType);
+            if (domains != null) {
+                domains.incScore(e.comp().url().getHost());
+            }
+        } catch (final Exception ex) {
+            System.out.println("INTERNAL ERROR in newEntry/3: " + ex.toString());
+            return;
+        }
     }
     
     public synchronized int getStackSize(final int stack) {
@@ -167,6 +187,24 @@ public final class ResultURLs {
     }
 
     /**
+     * iterate all domains in the result domain statistic
+     * @return iterator of domains in reverse order (downwards)
+     */
+    public Iterator<String> domains(final int stack) {
+        return getDomains(stack).scores(false);
+    }
+    
+    /**
+     * return the count of the domain
+     * @param stack type
+     * @param domain name
+     * @return the number of occurrences of the domain in the stack statistics
+     */
+    public int domainCount(final int stack, String domain) {
+        return getDomains(stack).getScore(domain);
+    }
+    
+    /**
      * returns the stack indentified by the id <em>stack</em>
      * 
      * @param stack id of resultStack
@@ -184,6 +222,18 @@ public final class ResultURLs {
                 return null;
         }
     }
+    private kelondroMScoreCluster<String> getDomains(final int stack) {
+        switch (stack) {
+            case 1: return externResultDomains;
+            case 2: return searchResultDomains;
+            case 3: return transfResultDomains;
+            case 4: return proxyResultDomains;
+            case 5: return lcrawlResultDomains;
+            case 6: return gcrawlResultDomains;
+            default:
+                return null;
+        }
+    }
     
     /**
      * tests if a stack with id <em>stack</em> exists
@@ -196,16 +246,6 @@ public final class ResultURLs {
     }
 
     public synchronized boolean removeStack(final int stack, final int pos) {
-//        Object prevElement = null;
-//        switch (stack) {
-//            case 1: prevElement = externResultStack.remove(pos); break;
-//            case 2: prevElement = searchResultStack.remove(pos); break;
-//            case 3: prevElement = transfResultStack.remove(pos); break;
-//            case 4: prevElement = proxyResultStack.remove(pos); break;
-//            case 5: prevElement = lcrawlResultStack.remove(pos); break;
-//            case 6: prevElement = gcrawlResultStack.remove(pos); break;
-//        }
-//        return prevElement != null;
         final List<String> resultStack = getStack(stack);
         if(resultStack == null) {
             return false;
@@ -215,17 +255,10 @@ public final class ResultURLs {
 
     public synchronized void clearStack(final int stack) {
         final List<String> resultStack = getStack(stack);
-        if(resultStack != null) {
-            resultStack.clear();
-        }
-//        switch (stack) {
-//            case 1: externResultStack.clear(); break;
-//            case 2: searchResultStack.clear(); break;
-//            case 3: transfResultStack.clear(); break;
-//            case 4: proxyResultStack.clear(); break;
-//            case 5: lcrawlResultStack.clear(); break;
-//            case 6: gcrawlResultStack.clear(); break;
-//        }
+        if (resultStack != null) resultStack.clear();
+        final kelondroMScoreCluster<String> resultDomains = getDomains(stack);
+        if (resultDomains != null) resultDomains.clear();
+        
     }
 
     public synchronized boolean remove(final String urlHash) {
