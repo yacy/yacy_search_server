@@ -543,6 +543,7 @@ filterOutStopwordsFromTopwords=true
 # be available/free in the heap; othervise the loop is not executed
 # and another idlesleep is performed
 performanceProfile=defaults/yacy.init
+performanceSpeed=100
 20_dhtdistribution_idlesleep=30000
 20_dhtdistribution_busysleep=10000
 20_dhtdistribution_memprereq=6291456
@@ -602,7 +603,6 @@ javastart_Xms=Xms120m
 # UNIX: corresponds to the nice-level
 # WIN: -20=realtime;-15=high;-10=above;0=normal;10=below;20=low
 javastart_priority=10
-javastart_priority__pro=0
 
 # performance properties for the word index cache
 # wordCacheMaxLow/High is the number of word indexes that shall be held in the

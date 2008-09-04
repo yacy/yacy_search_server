@@ -93,11 +93,14 @@ public class PerformanceQueues_p {
         int c = 0;
         long idleCycles, busyCycles, memshortageCycles;
         // set profile?
-        final double multiplier = (post != null) && post.containsKey("multiplier") ? post.getDouble("multiplier", 1) : 1;
+        final double multiplier = (post != null) && post.containsKey("profileSpeed") ? 100.0 / post.getDouble("profileSpeed", 100.0) : 1.0;
         final boolean setProfile = (post != null && post.containsKey("submitdefault"));
         final boolean setDelay = (post != null) && (post.containsKey("submitdelay"));
         // save used settings file to config
-        if (setProfile && post != null) switchboard.setConfig("performanceProfile", post.get("defaultFile", "defaults/yacy.init"));
+        if (setProfile && post != null){
+        	switchboard.setConfig("performanceProfile", post.get("defaultFile", "defaults/yacy.init"));
+        	switchboard.setConfig("performanceSpeed", post.getInt("profileSpeed", 100));
+        }
         
         while (threads.hasNext()) {
             threadName = threads.next();
@@ -190,6 +193,17 @@ public class PerformanceQueues_p {
             c++;
         }
         prop.put("profile", c);
+        
+        c = 0;
+        final int[] speedValues = {200,150,100,50,25,10};
+        final int usedspeed = Integer.parseInt(switchboard.getConfig("performanceSpeed", "100"));
+        for(final int speed: speedValues){
+        	prop.put("speed_" + c + "_value", speed);
+        	prop.put("speed_" + c + "_label", speed + " %");
+        	prop.put("speed_" + c + "_used", (speed == usedspeed) ? "1" : "0");
+        	c++;
+        }
+        prop.put("speed", c);
         
         if ((post != null) && (post.containsKey("cacheSizeSubmit"))) {
             final int wordCacheMaxCount = post.getInt("wordCacheMaxCount", 20000);

@@ -17,7 +17,14 @@
 			#{profile}#
 			<option value="#[filename]#"#(used)#:: selected="selected"#(/used)#>#[description]#</option>
 			#{/profile}#
-			</select> and use <select name="multiplier"><option value="0.5">200 %</option><option value="0.75">150 %</option><option value="1" selected="selected">100 %</option><option value="2">50 %</option><option value="3">33 %</option><option value="10">10 %</option></select> of the defiend performance.
+			</select>
+			and use
+			<select name="profileSpeed">
+			#{speed}#
+			<option value="#[value]#"#(used)#:: selected="selected"#(/used)#>#[label]#</option>
+			#{/speed}#
+			</select>
+			of the defiend performance.
 		</p>
 		<p><input type="submit" name="submitdefault" value="Save" /> Changes take effect immediately</p>
 	</fieldset>
