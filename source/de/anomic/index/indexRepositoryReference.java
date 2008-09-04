@@ -504,7 +504,7 @@ public final class indexRepositoryReference {
         hashStat ds;
         if (i != null) while (i.hasNext()) {
             urlhash = new String(i.next());
-            hosthash = urlhash.substring(6, 11);
+            hosthash = urlhash.substring(6);
             ds = map.get(hosthash);
             if (ds == null) {
                 ds = new hashStat(urlhash);
@@ -562,7 +562,7 @@ public final class indexRepositoryReference {
             urlref = this.load(urlhash, null, 0);
             if (urlref == null || urlref.comp() == null || urlref.comp().url() == null || urlref.comp().url().getHost() == null) continue;
             if (statsDump == null) return new ArrayList<hostStat>().iterator(); // some other operation has destroyed the object
-            statsDump.add(new hostStat(urlref.comp().url().getHost(), urlhash.substring(6, 11), s.getScore(urlhash)));
+            statsDump.add(new hostStat(urlref.comp().url().getHost(), urlhash.substring(6), s.getScore(urlhash)));
             count--;
             if (count == 0) break;
         }
@@ -583,7 +583,7 @@ public final class indexRepositoryReference {
         public String hostname, hosthash;
         public int count;
         public hostStat(String host, String urlhashfragment, int count) {
-            assert urlhashfragment.length() == 5;
+            assert urlhashfragment.length() == 6;
             this.hostname = host;
             this.hosthash = urlhashfragment;
             this.count = count;
@@ -599,13 +599,13 @@ public final class indexRepositoryReference {
      */
     public int deleteDomain(String hosthash) throws IOException {
         // first collect all url hashes that belong to the domain
-        assert hosthash.length() == 5;
+        assert hosthash.length() == 6;
         ArrayList<String> l = new ArrayList<String>();
         kelondroCloneableIterator<byte[]> i = this.urlIndexFile.keys(true, null);
         String hash;
         while (i.hasNext()) {
             hash = new String(i.next());
-            if (hosthash.equals(hash.substring(6, 11))) l.add(hash);
+            if (hosthash.equals(hash.substring(6))) l.add(hash);
         }
         
         // then delete the urls using this list

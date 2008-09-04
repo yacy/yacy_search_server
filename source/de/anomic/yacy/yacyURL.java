@@ -565,30 +565,6 @@ public class yacyURL implements Serializable {
                this.getHost().toLowerCase() + ((defaultPort) ? ("") : (":" + this.port)) + path;
     }
     
-//    public boolean equals(final Object other) {
-//        if(other != null && other instanceof yacyURL) {
-//            final yacyURL otherURL = (yacyURL) other;
-//            return (((this.protocol == otherURL.protocol) || (this.protocol.equals(otherURL.protocol))) &&
-//                    ((this.host     == otherURL.host    ) || (this.host.equals(otherURL.host))) &&
-//                    ((this.userInfo == otherURL.userInfo) || (this.userInfo.equals(otherURL.userInfo))) &&
-//                    ((this.path     == otherURL.path    ) || (this.path.equals(otherURL.path))) &&
-//                    ((this.quest    == otherURL.quest   ) || (this.quest.equals(otherURL.quest))) &&
-//                    ((this.ref      == otherURL.ref     ) || (this.ref.equals(otherURL.ref))) &&
-//                    ((this.port     == otherURL.port    )));
-//        }
-//        return super.equals(other);
-//    }
-//    
-//    /**
-//     * hash code computation for yacyURL: please don't mix this up with the YaCy-Hash
-//     * this hash here is only used by hashing data structures, like a HashMap
-//     * We do not use tha yacy hash here, because this needs the computation of a DNS
-//     * which is very time-intensive
-//     */
-//    public int hashCode() {
-//        return this.toNormalform(true, false).hashCode();
-//    }
-    
     /* (non-Javadoc)
 	 * @see java.lang.Object#hashCode()
 	 */
@@ -737,7 +713,7 @@ public class yacyURL implements Serializable {
         hash.append(kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(toNormalform(true, true))).substring(0, 5)); // 5 chars
         hash.append(subdomPortPath(subdom, port, rootpath)); // 1 char
         // form the 'global' part of the hash
-        hash.append(hosthash(this.protocol, host, port)); // 5 chars
+        hash.append(hosthash5(this.protocol, host, port)); // 5 chars
         hash.append(kelondroBase64Order.enhancedCoder.encodeByte(flagbyte)); // 1 char
 
         // return result hash
@@ -755,25 +731,38 @@ public class yacyURL implements Serializable {
         return (urlHash.charAt(5) == rootURLFlag0) || (urlHash.charAt(5) == rootURLFlag1);
     }
 
+    private static final String hosthash5(final String protocol, final String host, final int port) {
+        return kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(protocol + ":" + host + ":" + port)).substring(0, 5);
+    }
+    
     /**
-     * compute a 5-byte hash fragment that can be used to identify the domain of the url
+     * compute a 6-byte hash fragment that can be used to identify the domain of the url
      * @param protocol
      * @param host
      * @param port
-     * @return 5 bytes base64 encoded String representing the domain of the url
+     * @return 6 bytes base64 encoded String representing the domain of the url
      */
-    public static final String hosthash(final String protocol, final String host, final int port) {
-        return kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(protocol + ":" + host + ":" + port)).substring(0, 5);
+    public static final String hosthash6(final String protocol, final String host, final int port) {
+        final StringBuilder hash = new StringBuilder(12);
+        final int id = serverDomains.getDomainID(host); // id=7: tld is local
+        int p = host.lastIndexOf('.');
+        String dom = (p > 0) ? dom = host.substring(0, p) : "";
+        p = dom.lastIndexOf('.');
+        if (p > 0) dom = dom.substring(p + 1);
+        final int l = dom.length();
+        final int domlengthKey = (l <= 8) ? 0 : (l <= 12) ? 1 : (l <= 16) ? 2 : 3;
+        final byte flagbyte = (byte) (((protocol.equals("http")) ? 0 : 32) | (id << 2) | domlengthKey);
+        hash.append(hosthash5(protocol, host, port)); // 5 chars
+        hash.append(kelondroBase64Order.enhancedCoder.encodeByte(flagbyte)); // 1 char
+
+        // return result hash
+        return hash.toString();
     }
 
-    public static final String hosthash(final String host) {
-        return hosthash("http", host, 80);
+    public static final String hosthash6(final String host) {
+        return hosthash6("http", host, 80);
     }
     
-    public final String hosthash() {
-        return this.hash().substring(6, 11);
-    }
-
     private static String[] testTLDs = new String[] { "com", "net", "org", "uk", "fr", "de", "es", "it" };
 
     public static final yacyURL probablyWordURL(final String urlHash, final TreeSet<String> words) {
@@ -784,7 +773,7 @@ public class yacyURL implements Serializable {
             if ((word == null) || (word.length() == 0)) continue;
             final String pattern = urlHash.substring(6, 11);
             for (int i = 0; i < testTLDs.length; i++) {
-                if (pattern.equals(hosthash("http", "www." + word.toLowerCase() + "." + testTLDs[i], 80)))
+                if (pattern.equals(hosthash5("http", "www." + word.toLowerCase() + "." + testTLDs[i], 80)))
                     try {
                         return new yacyURL("http://www." + word.toLowerCase() + "." + testTLDs[i], null);
                     } catch (final MalformedURLException e) {

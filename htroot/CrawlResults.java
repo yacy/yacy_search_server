@@ -277,7 +277,7 @@ public class CrawlResults {
                 prop.put("table_domains_" + cnt + "_feedbackpage", "CrawlResults.html");
                 prop.put("table_domains_" + cnt + "_tabletype", tabletype);
                 prop.put("table_domains_" + cnt + "_domain", domain);
-                prop.put("table_domains_" + cnt + "_hashpart", yacyURL.hosthash(domain));
+                prop.put("table_domains_" + cnt + "_hashpart", yacyURL.hosthash6(domain));
                 prop.put("table_domains_" + cnt + "_count", sb.crawlResults.domainCount(tabletype, domain));
                 dark = !dark;
                 cnt++;

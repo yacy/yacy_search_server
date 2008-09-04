@@ -200,10 +200,10 @@ public final class ResultURLs {
     }
     
     public int deleteDomain(final int stack, String host, String hosthash) {
-        assert hosthash.length() == 5;
+        assert hosthash.length() == 6;
         int i = 0;
         while (i < getStackSize(stack)) {
-            if (getUrlHash(stack, i).substring(6, 11).equals(hosthash)) getStack(stack).remove(i); else i++;
+            if (getUrlHash(stack, i).substring(6).equals(hosthash)) getStack(stack).remove(i); else i++;
         }
         assert host != null : "host = null";
         assert getDomains(stack) != null : "getDomains(" + stack + ") = null";
