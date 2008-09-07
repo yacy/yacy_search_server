@@ -1120,7 +1120,7 @@ public final class httpdProxyHandler {
             if(isBinary(responseHeader)) {
                 serverFileUtils.copy(res.getDataAsStream(), outStream);
             } else {
-                writeTextContent(res, new BufferedWriter(new OutputStreamWriter(outStream)));
+                writeTextContent(res, new BufferedWriter(new OutputStreamWriter(outStream, responseHeader.getCharSet())));
             }
             
             if (chunked != null) {
