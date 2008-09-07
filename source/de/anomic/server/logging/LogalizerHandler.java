@@ -69,7 +69,7 @@ public class LogalizerHandler extends Handler {
                 System.out.println("Can't find any parsers in "+parserDir.toString());
             }
 	    for(final String filename: parserDirFiles) {
-		final Pattern patternGetClassName = Pattern.compile(".*"+ File.separator +"([^"+ File.separator +"]+)\\.class");
+		final Pattern patternGetClassName = Pattern.compile(".*\\"+ File.separator +"([^\\"+ File.separator +"]+)\\.class");
 		final Matcher matcherClassName = patternGetClassName.matcher(filename);
 		matcherClassName.find();
                 final String className = matcherClassName.group(1);
