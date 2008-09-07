@@ -25,6 +25,7 @@
 
 package de.anomic.server.logging;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -68,7 +69,7 @@ public class LogalizerHandler extends Handler {
                 System.out.println("Can't find any parsers in "+parserDir.toString());
             }
 	    for(final String filename: parserDirFiles) {
-		final Pattern patternGetClassName = Pattern.compile(".*/([^/]+)\\.class");
+		final Pattern patternGetClassName = Pattern.compile(".*"+ File.separator +"([^"+ File.separator +"]+)\\.class");
 		final Matcher matcherClassName = patternGetClassName.matcher(filename);
 		matcherClassName.find();
                 final String className = matcherClassName.group(1);
