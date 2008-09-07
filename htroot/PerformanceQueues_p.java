@@ -169,6 +169,7 @@ public class PerformanceQueues_p {
                 if ((threadName.equals("50_localcrawl")) && (busysleep < 100)) busysleep = 100;
                 if ((threadName.equals("61_globalcrawltrigger")) && (busysleep < 100)) busysleep = 100;
                 if ((threadName.equals("62_remotetriggeredcrawl")) && (busysleep < 100)) busysleep = 100;
+                if (threadName.equals("autoReCrawl")) { idlesleep = 3600000; busysleep = 3600000; memprereq = -1; }
 
                 onTheFlyReconfiguration(switchboard, threadName, idlesleep, busysleep, memprereq);
             }
