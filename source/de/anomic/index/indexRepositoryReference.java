@@ -556,13 +556,17 @@ public final class indexRepositoryReference {
         count += 10; // make some more to prevent that we have to do this again after deletions too soon.
         if (count < 0 || count > s.size()) count = s.size();
         statsDump = new ArrayList<hostStat>();
+        indexURLReference.Components comps;
+        yacyURL url;
         while (j.hasNext()) {
             urlhash = j.next();
             if (urlhash == null) continue;
             urlref = this.load(urlhash, null, 0);
             if (urlref == null || urlref.comp() == null || urlref.comp().url() == null || urlref.comp().url().getHost() == null) continue;
             if (statsDump == null) return new ArrayList<hostStat>().iterator(); // some other operation has destroyed the object
-            statsDump.add(new hostStat(urlref.comp().url().getHost(), urlhash.substring(6), s.getScore(urlhash)));
+            comps = urlref.comp();
+            url = comps.url();
+            statsDump.add(new hostStat(url.getHost(), url.getPort(), urlhash.substring(6), s.getScore(urlhash)));
             count--;
             if (count == 0) break;
         }
@@ -581,10 +585,12 @@ public final class indexRepositoryReference {
     
     public class hostStat {
         public String hostname, hosthash;
+        public int port;
         public int count;
-        public hostStat(String host, String urlhashfragment, int count) {
+        public hostStat(String host, int port, String urlhashfragment, int count) {
             assert urlhashfragment.length() == 6;
             this.hostname = host;
+            this.port = port;
             this.hosthash = urlhashfragment;
             this.count = count;
         }

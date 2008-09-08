@@ -300,11 +300,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         
         // set network-specific performance attributes
         if (this.firstInit) {
-            int remotecrawl_ppm = Math.max(1, (int) getConfigLong("network.unit.remotecrawl.speed", 60));
-            setConfig(plasmaSwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_BUSYSLEEP, 60000 / remotecrawl_ppm);
-            setConfig(plasmaSwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_IDLESLEEP, Math.max(10000, 180000 / remotecrawl_ppm));
-            setConfig(plasmaSwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_BUSYSLEEP, Math.max(15000, 1800000 / remotecrawl_ppm));
-            setConfig(plasmaSwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_IDLESLEEP, Math.max(30000, 3600000 / remotecrawl_ppm));
+            setRemotecrawlPPM(Math.max(1, (int) getConfigLong("network.unit.remotecrawl.speed", 60)));
         }
         
         // start indexing management
@@ -763,6 +759,15 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
                 log.logInfo("RANDOM PASSWORD REMOVED! User must set a new password");
             }
         }
+        // set the network-specific remote crawl ppm
+        setRemotecrawlPPM(Math.max(1, (int) getConfigLong("network.unit.remotecrawl.speed", 60)));
+    }
+    
+    private void setRemotecrawlPPM(int ppm) {
+        setConfig(plasmaSwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_BUSYSLEEP, 60000 / ppm);
+        setConfig(plasmaSwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_IDLESLEEP, Math.max(10000, 180000 / ppm));
+        setConfig(plasmaSwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_BUSYSLEEP, Math.max(15000, 1800000 / ppm));
+        setConfig(plasmaSwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_IDLESLEEP, Math.max(30000, 3600000 / ppm));
     }
     
     public void initMessages() {

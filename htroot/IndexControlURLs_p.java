@@ -263,7 +263,7 @@ public class IndexControlURLs_p {
                 while (statsiter.hasNext() && cnt < count) {
                     hs = statsiter.next();
                     prop.put("statisticslines_domains_" + cnt + "_dark", (dark) ? "1" : "0");
-                    prop.put("statisticslines_domains_" + cnt + "_domain", hs.hostname);
+                    prop.put("statisticslines_domains_" + cnt + "_domain", hs.hostname + ((hs.port == 80) ? "" : ":" + hs.port));
                     prop.put("statisticslines_domains_" + cnt + "lines", count);
                     prop.put("statisticslines_domains_" + cnt + "_hashpart", hs.hosthash);
                     prop.put("statisticslines_domains_" + cnt + "_count", hs.count);
