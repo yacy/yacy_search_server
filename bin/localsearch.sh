@@ -7,4 +7,4 @@ else
   echo "Neither curl nor wget installed!"
   exit 1
 fi
-eval $httpfetcher "http://localhost:$port/yacysearch.rss?query=$1&resource=local&verify=false" | grep link | grep -v opensearchdescription | grep -v yacysearch | grep -v 'yacy:item' | sed 's/<link>//' | sed 's/<\/link>//'
+eval $httpfetcher "http://localhost:$port/yacysearch.rss?query=$1&resource=local&verify=false" | awk '/^<link>/{ gsub("<link>","" );gsub("<\/link>","" ); print $0 }'
