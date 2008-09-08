@@ -25,13 +25,12 @@ package de.anomic.crawler;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroEcoTable;
@@ -41,6 +40,7 @@ import de.anomic.kelondro.kelondroStack;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySeedDB;
+import de.anomic.yacy.yacyURL;
 
 public class Balancer {
     
@@ -48,26 +48,29 @@ public class Balancer {
     private static final String indexSuffix = "9.db";
     private static final int EcoFSBufferSize = 200;
 
-    // a shared domainAccess map for all balancers
-    private static final Map<String, domaccess> domainAccess = Collections.synchronizedMap(new HashMap<String, domaccess>());
+    // a shared domainAccess map for all balancers. the key is a domain-hash (6 bytes)
+    public static final ConcurrentHashMap<String, domaccess> domainAccess = new ConcurrentHashMap<String, domaccess>();
     
     // definition of payload for fileStack
     private static final kelondroRow stackrow = new kelondroRow("byte[] urlhash-" + yacySeedDB.commonHashLength, kelondroBase64Order.enhancedCoder, 0);
     
     // class variables
-    private final ArrayList<String>                   urlRAMStack;     // a list that is flushed first
-    private kelondroStack                       urlFileStack;    // a file with url hashes
-    kelondroIndex                               urlFileIndex;
-    private final HashMap<String, LinkedList<String>> domainStacks;    // a map from domain name part to Lists with url hashs
-    private final File                                cacheStacksPath;
-    private final String                              stackname;
-    private boolean                             top;             // to alternate between top and bottom of the file stack
-    private final boolean                             fullram;
+    private final ConcurrentHashMap<String, LinkedList<String>>
+                                     domainStacks;    // a map from domain name part to Lists with url hashs
+    private final ArrayList<String>  urlRAMStack;     // a list that is flushed first
+    private kelondroStack            urlFileStack;    // a file with url hashes
+    private kelondroIndex            urlFileIndex;
+    private final File               cacheStacksPath;
+    private final String             stackname;
+    private boolean                  top;             // to alternate between top and bottom of the file stack
+    private final boolean            fullram;
 
     public static class domaccess {
-    	long time;
-    	int count;
-    	public domaccess() {
+    	public long time;
+    	public int count;
+    	public String host;
+    	public domaccess(String host) {
+    	    this.host = host;
     		this.time = System.currentTimeMillis();
     		this.count = 0;
     	}
@@ -75,11 +78,8 @@ public class Balancer {
     		this.time = System.currentTimeMillis();
     		this.count++;
     	}
-    	public long time() {
-    		return this.time;
-    	}
-    	public int count() {
-    		return this.count;
+    	public long flux(long range) {
+    	    return count >= 1000 ? range * Math.min(5000, count) / 1000 : range / (1000 - count);
     	}
     }
     
@@ -88,7 +88,7 @@ public class Balancer {
         this.stackname = stackname;
         final File stackFile = new File(cachePath, stackname + stackSuffix);
         this.urlFileStack   = kelondroStack.open(stackFile, stackrow);
-        this.domainStacks   = new HashMap<String, LinkedList<String>>();
+        this.domainStacks   = new ConcurrentHashMap<String, LinkedList<String>>();
         this.urlRAMStack    = new ArrayList<String>();
         this.top            = true;
         this.fullram        = fullram;
@@ -428,7 +428,7 @@ public class Balancer {
                 domhash = hitlist.remove(hitlist.lastKey());
                 if (maxhash == null) maxhash = domhash; // remember first entry
                 delta = lastAccessDelta(domhash);
-                if (delta > minimumGlobalDelta) {
+                if (delta > ((yacyURL.isLocal(domhash)) ? minimumLocalDelta : minimumGlobalDelta)) {
                     domlist = domainStacks.get(domhash);
                     result = domlist.removeFirst();
                     if (domlist.size() == 0) domainStacks.remove(domhash);
@@ -458,7 +458,7 @@ public class Balancer {
                 // check if the time after retrieval of last hash from same
                 // domain is not shorter than the minimumDelta
                 long delta = lastAccessDelta(nexthash);
-                if (delta > minimumGlobalDelta) {
+                if (delta > ((yacyURL.isLocal(nexthash)) ? minimumLocalDelta : minimumGlobalDelta)) {
                     // the entry is fine
                     result = new String((top) ? urlFileStack.pop().getColBytes(0) : urlFileStack.pot().getColBytes(0));
                 } else {
@@ -487,18 +487,12 @@ public class Balancer {
             return null;
         }
         assert urlFileIndex.size() + 1 == s : "urlFileIndex.size() = " + urlFileIndex.size() + ", s = " + s + ", result = " + result;
-        
         final CrawlEntry crawlEntry = new CrawlEntry(rowEntry);
-        final long genericDelta = Math.min(
-                              15000,
-                              Math.max(
-                                (crawlEntry.url().isLocal()) ? minimumLocalDelta : minimumGlobalDelta,
-                                plasmaSwitchboard.getSwitchboard().robots.crawlDelayMillis(crawlEntry.url()))
-                            ); // prevent that that robots file can stop our indexer completely
+        final long genericDelta = ensureDelta(result.substring(6), crawlEntry, minimumLocalDelta, minimumGlobalDelta);
         if (delta < genericDelta) {
             // force a busy waiting here
             // in best case, this should never happen if the balancer works propertly
-            // this is only to protect against the worst case, where the crawler could
+            // this is only to protection against the worst case, where the crawler could
             // behave in a DoS-manner
             final long sleeptime = genericDelta - delta;
             try {synchronized(this) { this.wait(sleeptime); }} catch (final InterruptedException e) {}
@@ -506,17 +500,33 @@ public class Balancer {
         
         // update statistical data
         domaccess lastAccess = domainAccess.get(result.substring(6));
-        if (lastAccess == null) lastAccess = new domaccess(); else lastAccess.update();
-        domainAccess.put(result.substring(6), lastAccess);
+        if (lastAccess == null) {
+            lastAccess = new domaccess(crawlEntry.url().getHost());
+            domainAccess.put(result.substring(6), lastAccess);
+        } else {
+            lastAccess.update();
+        }
         
         return crawlEntry;
+    }
+    
+    private long ensureDelta(String hosthash, CrawlEntry crawlEntry, final long minimumLocalDelta, final long minimumGlobalDelta) {
+        long deltaBase = (yacyURL.isLocal(hosthash)) ? minimumLocalDelta : minimumGlobalDelta;
+        if (crawlEntry.url().isCGI()) deltaBase = deltaBase * 2; // mostly there is a database access in the background which creates a lot of unwanted IO on target site
+        domaccess lastAccess = domainAccess.get(hosthash);
+        return Math.min(
+                    60000,
+                    Math.max(
+                      deltaBase + ((lastAccess == null) ? 0 : lastAccess.flux(deltaBase)),
+                      plasmaSwitchboard.getSwitchboard().robots.crawlDelayMillis(crawlEntry.url()))
+                  ); // prevent that that robots file can stop our indexer completely
     }
     
     private long lastAccessDelta(final String hash) {
         assert hash != null;
         final domaccess lastAccess = domainAccess.get((hash.length() > 6) ? hash.substring(6) : hash);
         if (lastAccess == null) return Long.MAX_VALUE; // never accessed
-        return System.currentTimeMillis() - lastAccess.time();
+        return System.currentTimeMillis() - lastAccess.time;
     }
 
     public synchronized ArrayList<CrawlEntry> top(int count) throws IOException {

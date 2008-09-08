@@ -818,8 +818,8 @@ public class yacyURL implements Serializable {
     public static final int domDomain(final String urlHash) {
         // returns the ID of the domain of the domain
         assert (urlHash != null);
-        assert (urlHash.length() == 12) : "urlhash = " + urlHash;
-        return (kelondroBase64Order.enhancedCoder.decodeByte(urlHash.charAt(11)) & 28) >> 2;
+        assert (urlHash.length() == 12 || urlHash.length() == 6) : "urlhash = " + urlHash;
+        return (kelondroBase64Order.enhancedCoder.decodeByte(urlHash.charAt((urlHash.length() == 12) ? 11 : 5)) & 28) >> 2;
     }
 
     public static boolean isDomDomain(final String urlHash, final int id) {
@@ -840,6 +840,10 @@ public class yacyURL implements Serializable {
             }
         }
         return domDomain(this.hash) == 7;
+    }
+    
+    public static final boolean isLocal(String urlhash) {
+        return domDomain(urlhash) == 7;
     }
     
     // language calculation
