@@ -104,7 +104,6 @@ public class CrawlEntry {
         assert appdate != null;
         assert url != null;
         assert initiator != null;
-        assert initiator.length() > 0 : "initiator of '"+ url +"' is empty";
         assert referrerhash != null;
         this.initiator     = initiator;
         this.url           = url;

@@ -318,7 +318,7 @@ public class IndexingStack {
         }
 
         public String initiator() {
-            return (initiator == null) ? "" : initiator;
+            return (initiator == null) ? "------------" : initiator;
         }
         
         public yacySeed initiatorPeer() {
