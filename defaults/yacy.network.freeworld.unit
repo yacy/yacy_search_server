@@ -14,6 +14,7 @@ network.unit.search.time = 4
 network.unit.dht = true
 network.unit.dhtredundancy.junior = 1
 network.unit.dhtredundancy.senior = 3
+network.unit.remotecrawl.speed = 10
 network.unit.bootstrap.seedlist0 = http://www.yacy.net/seed.txt
 network.unit.bootstrap.seedlist1 = http://home.arcor.de/hermens/yacy/seed.txt
 network.unit.bootstrap.seedlist2 = http://low.audioattack.de/yacy/seed.txt
@@ -26,5 +27,5 @@ network.unit.update.location1 = http://latest.yacy.de
 network.unit.update.location2 = http://www.findenstattsuchen.info/YaCy/latest/index.php
 network.unit.update.location3 = http://www.yacystats.de/yacybuild/
 
-# properties for in-protocol response authentification:
+# properties for in-protocol response authentication:
 network.unit.protocol.control = uncontrolled

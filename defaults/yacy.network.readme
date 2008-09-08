@@ -34,11 +34,11 @@
 #     network.unit.dhtredundancy = <integer number, 0 means no DHT enabled>
 #     network.unit.bootstrap.seedlist<n> = <an url to a seedlists-file, which is stored by a principal peer>
 #     network.unit.protocol.control = 'uncontrolled'|'moderated'|'controlled'
-#     network.unit.protocol.request.authentification.method = 'salted-magic'
-#     network.unit.protocol.request.authentification.essentials = <any string, a secret password>
-#     network.unit.protocol.response.authentification.method = 'challenge-pwresponse'
-#     network.unit.protocol.response.authentification.essentials = <a challenge string>':'<a secret response-string>
+#     network.unit.protocol.request.authentication.method = 'salted-magic'
+#     network.unit.protocol.request.authentication.essentials = <any string, a secret password>
+#     network.unit.protocol.response.authentication.method = 'challenge-pwresponse'
+#     network.unit.protocol.response.authentication.essentials = <a challenge string>':'<a secret response-string>
 #     network.unit.administration.control = 'uncontrolled'|'moderated'|'controlled'
 #     network.unit.administration.manager = <a .yacy or .yacyh - domain, naming the manager peer>
-#     network.unit.administration.request.authentification.method = 'salted-magic'
-#     network.unit.administration.request.authentification.essentials = <any string, a secret password>
+#     network.unit.administration.request.authentication.method = 'salted-magic'
+#     network.unit.administration.request.authentication.essentials = <any string, a secret password>

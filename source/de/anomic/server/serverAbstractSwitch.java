@@ -41,6 +41,7 @@ public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
     private final   File      configFile;
     private final   String    configComment;
     private final   File      rootPath;
+    protected boolean firstInit;
     protected serverLog log;
     protected int       serverJobs;
     protected long      maxTrackingTime;
@@ -64,6 +65,7 @@ public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
     	this.configComment = "This is an automatically generated file, updated by serverAbstractSwitch and initialized by " + initPath;
         final File initFile = new File(rootPath, initPath);
         this.configFile = new File(rootPath, configPath); // propertiesFile(config);
+        firstInit = !configFile.exists(); // this is true if the application was started for the first time
         new File(configFile.getParent()).mkdir();
 
         // predefine init's

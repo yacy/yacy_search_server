@@ -298,6 +298,15 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
                                          (int) getConfigLong(plasmaSwitchboardConstants.WORDCACHE_MAX_COUNT, 20000));
         setConfig(plasmaSwitchboardConstants.WORDCACHE_MAX_COUNT, Integer.toString(wordCacheMaxCount));
         
+        // set network-specific performance attributes
+        if (this.firstInit) {
+            int remotecrawl_ppm = Math.max(1, (int) getConfigLong("network.unit.remotecrawl.speed", 60));
+            setConfig(plasmaSwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_BUSYSLEEP, 60000 / remotecrawl_ppm);
+            setConfig(plasmaSwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_IDLESLEEP, Math.max(10000, 180000 / remotecrawl_ppm));
+            setConfig(plasmaSwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_BUSYSLEEP, Math.max(15000, 1800000 / remotecrawl_ppm));
+            setConfig(plasmaSwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_IDLESLEEP, Math.max(30000, 3600000 / remotecrawl_ppm));
+        }
+        
         // start indexing management
         log.logConfig("Starting Indexing Management");
         final String networkName = getConfig("network.unit.name", "");

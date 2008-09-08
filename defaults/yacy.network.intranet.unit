@@ -13,6 +13,7 @@ network.unit.domain = local
 network.unit.dht = false
 network.unit.dhtredundancy.junior = 1
 network.unit.dhtredundancy.senior = 1
+network.unit.remotecrawl.speed = 600
 
 # each network may use different yacy distributions.
 # the auto-updater can access network-specific update locations
@@ -21,5 +22,5 @@ network.unit.update.location1 = http://latest.yacy.de
 network.unit.update.location2 = http://www.findenstattsuchen.info/YaCy/latest/index.php
 network.unit.update.location3 = http://www.yacystats.de/yacybuild/
 
-# properties for in-protocol response authentification:
+# properties for in-protocol response authentication:
 network.unit.protocol.control = uncontrolled

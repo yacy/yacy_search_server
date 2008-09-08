@@ -13,17 +13,17 @@
 #     network.group.description = <any string, just informal; appears in network graphic>
 #     network.group.administration.control = 'uncontrolled'|'moderated'|'controlled'
 #     network.group.administration.manager = <a .yacy or .yacyh - domain, naming the manager peer>
-#     network.group.administration.request.authentification.method = 'salted-magic'
-#     network.group.administration.request.authentification.essentials = <any string, a secret password>
+#     network.group.administration.request.authentication.method = 'salted-magic'
+#     network.group.administration.request.authentication.essentials = <any string, a secret password>
 
 # -----------------------------------------------------------------#
 # this is a work in progress. disabled properties are not yet used #
 # -----------------------------------------------------------------#
 
-# properties for group access administrator-authentification:
+# properties for group access administrator-authentication:
 #network.group.name = everybody
 #network.group.description = Our Peer-Group
 #network.group.administration.control = uncontrolled
 #network.group.administration.manager = 
-#network.group.administration.request.authentification.method = salted-magic
-#network.group.administration.request.authentification.essentials =
+#network.group.administration.request.authentication.method = salted-magic
+#network.group.administration.request.authentication.essentials =
