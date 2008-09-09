@@ -209,7 +209,7 @@ public final class plasmaSearchEvent {
             final long timer = System.currentTimeMillis();
             // use only a single worker thread, thats enough
             resultWorker worker = new resultWorker(0, 3000, 0);
-            worker.start();
+            worker.run();
             serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), "offline snippet fetch", result.size(), System.currentTimeMillis() - timer));
         }
         
@@ -458,22 +458,23 @@ public final class plasmaSearchEvent {
         if (event == null) {
             // generate a new event
             event = new plasmaSearchEvent(query, wordIndex, crawlResults, preselectedPeerHashes, generateAbstracts);
-        }
-
-        // if worker threads had been alive, but did not succeed, start them again to fetch missing links
-        if ((!event.anyWorkerAlive()) &&
-            (((query.contentdom == plasmaSearchQuery.CONTENTDOM_IMAGE) && (event.images.size() + 30 < query.neededResults())) ||
-             (event.result.size() < query.neededResults() + 10)) &&
-            (event.getRankingResult().getLocalResourceSize() + event.getRankingResult().getRemoteResourceSize() > event.result.size())) {
-            // set new timeout
-            event.eventTime = System.currentTimeMillis();
-            // start worker threads to fetch urls and snippets
-            event.workerThreads = new resultWorker[workerThreadCount];
-            resultWorker worker;
-            for (int i = 0; i < workerThreadCount; i++) {
-                worker = event.new resultWorker(i, 6000, (query.onlineSnippetFetch) ? 2 : 0);
-                worker.start();
-                event.workerThreads[i] = worker;
+        } else {
+            // if worker threads had been alive, but did not succeed, start them again to fetch missing links
+            if ((!event.anyWorkerAlive()) &&
+                (((query.contentdom == plasmaSearchQuery.CONTENTDOM_IMAGE) && (event.images.size() + 30 < query.neededResults())) ||
+                 (event.result.size() < query.neededResults() + 10)) &&
+                 (event.query.onlineSnippetFetch) &&
+                (event.getRankingResult().getLocalResourceSize() + event.getRankingResult().getRemoteResourceSize() > event.result.size())) {
+                // set new timeout
+                event.eventTime = System.currentTimeMillis();
+                // start worker threads to fetch urls and snippets
+                event.workerThreads = new resultWorker[workerThreadCount];
+                resultWorker worker;
+                for (int i = 0; i < workerThreadCount; i++) {
+                    worker = event.new resultWorker(i, 6000, (query.onlineSnippetFetch) ? 2 : 0);
+                    worker.start();
+                    event.workerThreads[i] = worker;
+                }
             }
         }
     

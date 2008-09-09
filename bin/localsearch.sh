@@ -1,10 +1,10 @@
 port=$(grep ^port= ../DATA/SETTINGS/yacy.conf |cut -d= -f2)
 if which curl &>/dev/null; then
-  httpfetcher="curl -s"
+  curl -s "http://localhost:$port/yacysearch.rss?resource=local&verify=false&query=$1" | awk '/^<link>/{ gsub("<link>","" );gsub("<\/link>","" ); print $0 }'
 elif which wget &>/dev/null; then
-  httpfetcher="wget -q -O - "
+  wget -q -O - "http://localhost:$port/yacysearch.rss?resource=local&verify=false&query=$1" | awk '/^<link>/{ gsub("<link>","" );gsub("<\/link>","" ); print $0 }'
 else
   echo "Neither curl nor wget installed!"
   exit 1
 fi
-eval $httpfetcher "http://localhost:$port/yacysearch.rss?query=$1&resource=local&verify=false" | awk '/^<link>/{ gsub("<link>","" );gsub("<\/link>","" ); print $0 }'
+
