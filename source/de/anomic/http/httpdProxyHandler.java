@@ -1183,6 +1183,13 @@ public final class httpdProxyHandler {
             // change the User-Agent
             requestHeader.put(httpHeader.USER_AGENT, generateUserAgent(requestHeader));
         }
+
+	// only gzip-encoding is supported, remove other encodings (e. g. deflate)
+        if (((String)requestHeader.get(httpRequestHeader.ACCEPT_ENCODING,"")).indexOf("gzip") != -1) {
+            requestHeader.put(httpRequestHeader.ACCEPT_ENCODING, "gzip");
+	} else {
+            requestHeader.put(httpRequestHeader.ACCEPT_ENCODING, "");
+	}
         
         addXForwardedForHeader(conProp, requestHeader);
     }
