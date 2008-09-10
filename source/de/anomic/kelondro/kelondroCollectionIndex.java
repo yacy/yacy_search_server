@@ -177,6 +177,11 @@ public class kelondroCollectionIndex {
         }
     }
     
+    public void deleteIndexOnExit() {
+    	// will be rebuilt on next start
+    	new File(this.path, this.filenameStub + ".index").deleteOnExit();
+    }
+    
     private void openAllArrayFiles(final boolean indexGeneration, final kelondroByteOrder indexOrder) throws IOException {
         
         final String[] list = this.path.list();

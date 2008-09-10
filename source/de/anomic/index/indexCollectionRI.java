@@ -67,6 +67,10 @@ public class indexCollectionRI implements indexRI {
         }
     }
     
+    public void deleteIndexOnExit() {
+    	collectionIndex.deleteIndexOnExit();
+    }
+    
     public long getUpdateTime(final String wordHash) {
         final indexContainer entries = getContainer(wordHash, null);
         if (entries == null) return 0;

@@ -219,6 +219,10 @@ public final class plasmaWordIndex implements indexRI {
         queuePreStack.clear();
     }
     
+    public void deleteIndexOnExit() {
+    	collections.deleteIndexOnExit();
+    }
+    
     private void initActiveCrawlProfiles() {
         this.defaultProxyProfile = null;
         this.defaultRemoteProfile = null;
