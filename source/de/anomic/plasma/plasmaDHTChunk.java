@@ -66,6 +66,7 @@ public class plasmaDHTChunk {
     private long selectionEndTime = 0;
     
     private int transferFailedCounter = 0;
+    private int kelondroExceptionCounter = 0;
     
     public indexContainer firstContainer() {
         return indexContainers[0];
@@ -270,7 +271,8 @@ public class plasmaDHTChunk {
             indexContainers = new indexContainer[0];
             urlCache = new HashMap<String, indexURLReference>();
             this.status = chunkStatus_FAILED;
-            wordIndex.deleteIndexOnExit(); // delete index on exit for rebuild
+            kelondroExceptionCounter++;
+            if (kelondroExceptionCounter > 50) wordIndex.deleteIndexOnExit(); // delete index on exit for rebuild
             return 0;
         }
     }
