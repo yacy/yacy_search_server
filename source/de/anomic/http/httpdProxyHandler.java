@@ -561,6 +561,7 @@ public final class httpdProxyHandler {
                 if (theLogger.isFine()) theLogger.logFine(reqID +" create direct passthrough for URL " + url + ", extension '" + ext + "', mime-type '" + responseHeader.mime() + "'");
             } else {
                 // handle text stuff (encoding and so on)
+                final Charset charSet = responseHeader.getCharSet();
                 if (
                         (!transformer.isIdentityTransformer()) &&
                         (plasmaParser.supportedHTMLContent(url,responseHeader.mime()))
@@ -568,12 +569,11 @@ public final class httpdProxyHandler {
                     // make a transformer
                     if (theLogger.isFine()) theLogger.logFine(reqID +" create transformer for URL " + url);
                     //hfos = new htmlFilterOutputStream((gzippedOut != null) ? gzippedOut : ((chunkedOut != null)? chunkedOut : respond), null, transformer, (ext.length() == 0));
-                    final Charset charSet = responseHeader.getCharSet();
                     textOutput = new htmlFilterWriter(outStream,charSet, null, transformer, (ext.length() == 0));
                 } else {
                     // simply pass through without parsing
                     if (theLogger.isFine()) theLogger.logFine(reqID +" create text passthrough for URL " + url + ", extension '" + ext + "', mime-type '" + responseHeader.mime() + "'");
-                    textOutput = new OutputStreamWriter(outStream, responseHeader.getCharSet());
+                    textOutput = new OutputStreamWriter(outStream, charSet);
                 }
             }
             
@@ -595,6 +595,8 @@ public final class httpdProxyHandler {
                     res.getStatusCode(),
                     res.getStatusLine().substring(4), // status text 
                     responseHeader);
+            
+            if(hasBody(res.getStatusCode())) {
             
             final String storeError = cacheEntry.shallStoreCacheForProxy();
             final boolean storeHTCache = cacheEntry.profile().storeHTCache();
@@ -720,6 +722,7 @@ public final class httpdProxyHandler {
                 chunkedOut.finish();
                 chunkedOut.flush();
             }
+            } // end hasBody
             } finally {
                 // if opened ...
                 if(res != null) {
@@ -732,6 +735,23 @@ public final class httpdProxyHandler {
             if (cacheFile.exists()) cacheFile.delete();
             handleProxyException(e,conProp,respond,url);
         }
+    }
+
+    /**
+     * determines if the response should have a body
+     * 
+     * @param statusCode
+     * @param responseHeader
+     * @return
+     */
+    private static boolean hasBody(final int statusCode) {
+        // "All 1xx (informational), 204 (no content), and 304 (not modified) responses MUST NOT
+        //  include a message-body."
+        // [RFC 2616 HTTP/1.1, Sect. 4.3] and like [RFC 1945 HTTP/1.0, Sect. 7.2]
+        if((statusCode >= 100 && statusCode < 200) || statusCode == 204 || statusCode == 304) {
+            return false; 
+        }
+        return true;
     }
 
     private static void fulfillRequestFromCache(
