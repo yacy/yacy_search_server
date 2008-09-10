@@ -15,13 +15,10 @@
 20_dhtdistribution_memprereq=6291456
 50_localcrawl_idlesleep=4000
 50_localcrawl_busysleep=500
-50_localcrawl_busysleep__pro=100
 50_localcrawl_memprereq=4194304
 50_localcrawl_isPaused=false
 60_remotecrawlloader_idlesleep=60000
-60_remotecrawlloader_idlesleep__pro=10000
 60_remotecrawlloader_busysleep=40000
-60_remotecrawlloader_busysleep__pro=2000
 60_remotecrawlloader_memprereq=2097152
 60_remotecrawlloader_isPaused=false
 62_remotetriggeredcrawl_idlesleep=10000
@@ -33,7 +30,6 @@
 70_cachemanager_memprereq=1048576
 80_indexing_idlesleep=1000
 80_indexing_busysleep=100
-80_indexing_busysleep__pro=10
 80_indexing_memprereq=6291456
 82_crawlstack_idlesleep=5000
 82_crawlstack_busysleep=1

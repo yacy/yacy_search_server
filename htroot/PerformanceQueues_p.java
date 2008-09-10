@@ -166,12 +166,15 @@ public class PerformanceQueues_p {
                 // check values to prevent short-cut loops
                 if (idlesleep < 1000) idlesleep = 1000;
                 if (threadName.equals("10_httpd")) { idlesleep = 0; busysleep = 0; memprereq = 0; }
-                if ((threadName.equals("50_localcrawl")) && (busysleep < 100)) busysleep = 100;
-                if ((threadName.equals("61_globalcrawltrigger")) && (busysleep < 100)) busysleep = 100;
-                if ((threadName.equals("62_remotetriggeredcrawl")) && (busysleep < 100)) busysleep = 100;
+                if (threadName.equals(plasmaSwitchboardConstants.CRAWLJOB_LOCAL_CRAWL) && (busysleep < 50)) busysleep = 50;
                 if (threadName.equals("autoReCrawl")) { idlesleep = 3600000; busysleep = 3600000; memprereq = -1; }
-
-                onTheFlyReconfiguration(switchboard, threadName, idlesleep, busysleep, memprereq);
+                
+                if (threadName.equals(plasmaSwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER)
+                		|| threadName.equals(plasmaSwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL)) {
+                	switchboard.setRemotecrawlPPM(Math.max(1, (int) (switchboard.getConfigLong("network.unit.remotecrawl.speed", 60) / multiplier)));
+                } else {
+                	onTheFlyReconfiguration(switchboard, threadName, idlesleep, busysleep, memprereq);
+                }
             }
             prop.put("table_" + c + "_idlesleep", idlesleep);
             prop.put("table_" + c + "_busysleep", busysleep);

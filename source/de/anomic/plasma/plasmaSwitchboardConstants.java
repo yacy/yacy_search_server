@@ -86,7 +86,7 @@ public final class plasmaSwitchboardConstants {
     public static final String CRAWLJOB_LOCAL_CRAWL_METHOD_FREEMEM              = null;
     public static final String CRAWLJOB_LOCAL_CRAWL_IDLESLEEP                   = "50_localcrawl_idlesleep";
     public static final String CRAWLJOB_LOCAL_CRAWL_BUSYSLEEP                   = "50_localcrawl_busysleep";
-    // 61_globalcawltrigger
+    // 60_remotecrawlloader
     /**
      * <p><code>public static final String <strong>CRAWLJOB_REMOTE_CRAWL_LOADER</strong> = "60_remotecrawlloader"</code></p>
      * <p>Name of the remote crawl list loading thread</p>

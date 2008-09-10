@@ -763,7 +763,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         setRemotecrawlPPM(Math.max(1, (int) getConfigLong("network.unit.remotecrawl.speed", 60)));
     }
     
-    private void setRemotecrawlPPM(int ppm) {
+    public void setRemotecrawlPPM(int ppm) {
         setConfig(plasmaSwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_BUSYSLEEP, 60000 / ppm);
         setConfig(plasmaSwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_IDLESLEEP, Math.max(10000, 180000 / ppm));
         setConfig(plasmaSwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_BUSYSLEEP, Math.max(15000, 1800000 / ppm));
