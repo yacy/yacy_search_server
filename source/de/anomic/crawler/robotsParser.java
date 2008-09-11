@@ -108,7 +108,8 @@ public final class robotsParser {
         
         try {
             while ((line = reader.readLine()) != null) {
-                line = line.trim();
+                // replacing all tabs with spaces
+                line = line.replaceAll("\t"," ").replaceAll(":"," ").trim();
                 lineUpper = line.toUpperCase();
                 
                 if (line.length() == 0) {
@@ -137,9 +138,6 @@ public final class robotsParser {
                     pos = line.indexOf(ROBOTS_COMMENT);
                     if (pos != -1) line = line.substring(0,pos).trim();
                     
-                    // replacing all tabs with spaces
-                    line = line.replaceAll("\t"," ").replaceAll(":"," ");
-                    
                     // getting out the robots name
                     pos = line.indexOf(" ");
                     if (pos != -1) {
@@ -149,9 +147,6 @@ public final class robotsParser {
                         if (isRule4YaCyAgent) rule4YaCyFound = true;
                     }
                 } else if (lineUpper.startsWith(ROBOTS_CRAWL_DELAY)) {
-                    // replacing all tabs with spaces
-                    line = line.replaceAll("\t"," ").replaceAll(":"," ");
-                    
                     pos = line.indexOf(" ");
                     if (pos != -1) {
                     	try {
@@ -173,9 +168,6 @@ public final class robotsParser {
                                            
                         // cutting of tailing *
                         if (line.endsWith("*")) line = line.substring(0,line.length()-1);
-                        
-                        // replacing all tabs with spaces
-                        line = line.replaceAll("\t"," ").replaceAll(":"," ");
                         
                         // getting the path
                         pos = line.indexOf(" ");
