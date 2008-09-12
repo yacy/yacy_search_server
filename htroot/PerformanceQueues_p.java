@@ -158,21 +158,26 @@ public class PerformanceQueues_p {
                 
                 onTheFlyReconfiguration(switchboard, threadName, idlesleep, busysleep, memprereq);
             } if (setProfile) {
-                // load with new values
-                idlesleep = (long) (Long.parseLong(d(defaultSettings.get(threadName + "_idlesleep"), String.valueOf(idlesleep))) * multiplier);
-                busysleep = (long) (Long.parseLong(d(defaultSettings.get(threadName + "_busysleep"), String.valueOf(busysleep))) * multiplier);
-                memprereq = (long) (Long.parseLong(d(defaultSettings.get(threadName + "_memprereq"), String.valueOf(memprereq))) * multiplier);
-
-                // check values to prevent short-cut loops
-                if (idlesleep < 1000) idlesleep = 1000;
-                if (threadName.equals("10_httpd")) { idlesleep = 0; busysleep = 0; memprereq = 0; }
-                if (threadName.equals(plasmaSwitchboardConstants.CRAWLJOB_LOCAL_CRAWL) && (busysleep < 50)) busysleep = 50;
-                if (threadName.equals("autoReCrawl")) { idlesleep = 3600000; busysleep = 3600000; memprereq = -1; }
-                
-                if (threadName.equals(plasmaSwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER)
+                if (threadName.equals(plasmaSwitchboardConstants.PEER_PING)
+                		|| threadName.equals(plasmaSwitchboardConstants.SEED_UPLOAD)
+                		|| threadName.equals(plasmaSwitchboardConstants.CLEANUP)
+                		|| threadName.equals("autoReCrawl")
+                		) { /* do not change any values */ }
+                else if (threadName.equals(plasmaSwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER)
                 		|| threadName.equals(plasmaSwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL)) {
                 	switchboard.setRemotecrawlPPM(Math.max(1, (int) (switchboard.getConfigLong("network.unit.remotecrawl.speed", 60) / multiplier)));
-                } else {
+                }
+                else {
+                    // load with new values
+                    idlesleep = (long) (Long.parseLong(d(defaultSettings.get(threadName + "_idlesleep"), String.valueOf(idlesleep))) * multiplier);
+                    busysleep = (long) (Long.parseLong(d(defaultSettings.get(threadName + "_busysleep"), String.valueOf(busysleep))) * multiplier);
+                    //memprereq = (long) (Long.parseLong(d(defaultSettings.get(threadName + "_memprereq"), String.valueOf(memprereq))) * multiplier);
+
+                    // check values to prevent short-cut loops
+                    if (idlesleep < 1000) idlesleep = 1000;
+                    if (threadName.equals("10_httpd")) { idlesleep = 0; busysleep = 0; memprereq = 0; }
+                    if (threadName.equals(plasmaSwitchboardConstants.CRAWLJOB_LOCAL_CRAWL) && (busysleep < 50)) busysleep = 50;
+                    
                 	onTheFlyReconfiguration(switchboard, threadName, idlesleep, busysleep, memprereq);
                 }
             }
