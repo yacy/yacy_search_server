@@ -169,4 +169,7 @@ public final class kelondroBufferedIOChunks extends kelondroAbstractIOChunks imp
         super.finalize();
     }
     
+    public void deleteOnExit() {
+        this.ra.deleteOnExit();
+    }
 }

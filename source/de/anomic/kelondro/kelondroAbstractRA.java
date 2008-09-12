@@ -237,5 +237,9 @@ abstract class kelondroAbstractRA implements kelondroRA {
         read(b, 0, l);
         return b;
     }
+    
+    public void deleteOnExit() {
+        if (this.file != null) this.file.deleteOnExit();
+    }
 
 }

@@ -460,4 +460,8 @@ public class kelondroCache implements kelondroIndex {
 		init();
 	}
 
+    public void deleteOnExit() {
+        this.index.deleteOnExit();
+    }
+
 }

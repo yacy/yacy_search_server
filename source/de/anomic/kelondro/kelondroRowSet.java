@@ -551,4 +551,7 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         return null;
     }
 
+    public void deleteOnExit() {
+        // do nothing, there is no file
+    }
 }

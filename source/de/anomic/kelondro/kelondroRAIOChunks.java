@@ -74,4 +74,7 @@ public final class kelondroRAIOChunks extends kelondroAbstractIOChunks implement
         super.finalize();
     }
 
+    public void deleteOnExit() {
+        this.ra.deleteOnExit();
+    }
 }

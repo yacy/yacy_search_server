@@ -128,4 +128,8 @@ public class kelondroBufferedEcoFS {
         efs.cleanLast();
     }
     
+    public void deleteOnExit() {
+        efs.deleteOnExit();
+    }
+    
 }

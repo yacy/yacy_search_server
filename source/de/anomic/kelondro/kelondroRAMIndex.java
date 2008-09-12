@@ -231,5 +231,9 @@ public class kelondroRAMIndex implements kelondroIndex {
 	public String filename() {
 		return null; // this does not have a file name
 	}
+	
+	public void deleteOnExit() {
+        // do nothing, there is no file
+    }
 
 }

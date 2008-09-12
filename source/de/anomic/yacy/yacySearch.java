@@ -191,7 +191,7 @@ public class yacySearch extends Thread {
             c = seedcount;
             while (dhtEnum.hasNext() && c > 0) {
                 seed = dhtEnum.next();
-                if (seed == null) continue;
+                if (seed == null || seed.hash == null) continue;
                 distance = yacyDHTAction.dhtDistance(seed.hash, wordhash);
                 if (distance > 0.2) continue; // catch bug in peer selection
                 if (!seed.getFlagAcceptRemoteIndex()) continue; // probably a robinson peer

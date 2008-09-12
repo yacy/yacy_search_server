@@ -1024,6 +1024,10 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
         return b;
     }
     
+    public void deleteOnExit() {
+        this.entryFile.deleteOnExit();
+    }
+    
     public abstract kelondroNode newNode(kelondroHandle handle, byte[] bulk, int offset) throws IOException;
     
 }

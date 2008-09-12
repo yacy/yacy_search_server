@@ -665,5 +665,9 @@ public class kelondroEcoFS {
             e.printStackTrace();
         }
     }
+    
+    public void deleteOnExit() {
+        this.tablefile.deleteOnExit();
+    }
 
 }

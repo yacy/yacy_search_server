@@ -54,6 +54,7 @@ public interface kelondroIndex {
     public kelondroRow.Entry removeOne() throws IOException;
     public kelondroCloneableIterator<byte[]> keys(boolean up, byte[] firstKey) throws IOException; // iterates only the key
     public kelondroCloneableIterator<kelondroRow.Entry> rows(boolean up, byte[] firstKey) throws IOException; // iterates the whole row
+    public void deleteOnExit();
     public void clear() throws IOException;
     public void close();
 }

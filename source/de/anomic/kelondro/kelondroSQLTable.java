@@ -297,7 +297,10 @@ public class kelondroSQLTable implements kelondroIndex {
     }
 
     public void clear() {
-        // TODO Auto-generated method stub
-        
+        // do nothing
+    }
+
+    public void deleteOnExit() {
+        // do nothing
     }
 }

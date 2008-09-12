@@ -417,4 +417,8 @@ public class kelondroFlexWidthArray implements kelondroArray {
             e.printStackTrace();
         }
     }
+    
+    public void deleteOnExit() {
+        for (int i = 0; i < this.col.length; i++) this.col[i].deleteOnExit();
+    }
 }

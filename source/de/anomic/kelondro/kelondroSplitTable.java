@@ -434,5 +434,9 @@ public class kelondroSplitTable implements kelondroIndex {
     public static void main(final String[] args) {
         System.out.println(dateSuffix(new Date()));
     }
+
+    public void deleteOnExit() {
+        for (kelondroIndex i: this.tables.values()) i.deleteOnExit();
+    }
     
 }

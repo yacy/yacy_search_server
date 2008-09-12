@@ -715,4 +715,8 @@ public class kelondroEcoTable implements kelondroIndex {
         */
     }
 
+    public void deleteOnExit() {
+        this.file.deleteOnExit();
+    }
+
 }

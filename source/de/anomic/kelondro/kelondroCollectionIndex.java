@@ -53,8 +53,9 @@ public class kelondroCollectionIndex {
     private static final int serialNumber = 0;
     private static final long minimumRAM4Eco = 20 * 1024 * 1024;
     private static final int EcoFSBufferSize = 1000;
+    private static final int errorLimit = 500; // if the index exceeds this number of errors, it is re-built next time the application starts
     
-    kelondroIndex index;
+    private kelondroIndex index;
     private final int           keylength;
     private final File          path;
     private final String        filenameStub;
@@ -63,6 +64,7 @@ public class kelondroCollectionIndex {
     private Map<String, kelondroFixedWidthArray> arrays; // Map of (partitionNumber"-"chunksize)/kelondroFixedWidthArray - Objects
     private final kelondroRow   payloadrow; // definition of the payload (chunks inside the collections)
     private final int           maxPartitions;  // this is the maxmimum number of array files
+    private int                 indexErrors; // counter for exceptions when index returned wrong value
     
     private static final int idx_col_key        = 0;  // the index
     private static final int idx_col_chunksize  = 1;  // chunksize (number of bytes in a single chunk, needed for migration option)
@@ -113,6 +115,7 @@ public class kelondroCollectionIndex {
     public kelondroCollectionIndex(final File path, final String filenameStub, final int keyLength, final kelondroByteOrder indexOrder,
                                    final int loadfactor, final int maxpartitions, final kelondroRow rowdef) throws IOException {
         // the buffersize is number of bytes that are only used if the kelondroFlexTable is backed up with a kelondroTree
+        indexErrors = 0;
         this.path = path;
         this.filenameStub = filenameStub;
         this.keylength = keyLength;
@@ -179,7 +182,7 @@ public class kelondroCollectionIndex {
     
     public void deleteIndexOnExit() {
     	// will be rebuilt on next start
-    	new File(this.path, this.filenameStub + ".index").deleteOnExit();
+    	this.index.deleteOnExit();
     }
     
     private void openAllArrayFiles(final boolean indexGeneration, final kelondroByteOrder indexOrder) throws IOException {
@@ -501,9 +504,11 @@ public class kelondroCollectionIndex {
                     newPartitionNumber, serialNumber, this.payloadrow.objectsize); // modifies indexrow
         }
         
-        if ((int) indexrow.getColLong(idx_col_chunkcount) != collection.size())
-        	serverLog.logSevere("kelondroCollectionIndex", "UPDATE (put) ERROR: array has different chunkcount than index after merge: index = " + (int) indexrow.getColLong(idx_col_chunkcount) + ", collection.size() = " + collection.size());
-        
+        if ((int) indexrow.getColLong(idx_col_chunkcount) != collection.size()) {
+            this.indexErrors++;
+            if (this.indexErrors == errorLimit) deleteIndexOnExit(); // delete index on exit for rebuild
+        	serverLog.logSevere("kelondroCollectionIndex", "UPDATE (put) ERROR: array has different chunkcount than index after merge: index = " + (int) indexrow.getColLong(idx_col_chunkcount) + ", collection.size() = " + collection.size() + " (error #" + indexErrors + ")");
+        }
         index.put(indexrow); // write modified indexrow
     }
     
@@ -562,9 +567,11 @@ public class kelondroCollectionIndex {
             
             final int collectionsize = collection.size(); // extra variable for easier debugging
             final int indexrowcount = (int) indexrow.getColLong(idx_col_chunkcount);
-            if (indexrowcount != collectionsize)
-            	serverLog.logSevere("kelondroCollectionIndex", "UPDATE (merge) ERROR: array has different chunkcount than index after merge: index = " + indexrowcount + ", collection.size() = " + collectionsize);
-            
+            if (indexrowcount != collectionsize) {
+                this.indexErrors++;
+                if (this.indexErrors == errorLimit) deleteIndexOnExit(); // delete index on exit for rebuild
+            	serverLog.logSevere("kelondroCollectionIndex", "UPDATE (merge) ERROR: array has different chunkcount than index after merge: index = " + indexrowcount + ", collection.size() = " + collectionsize + " (error #" + indexErrors + ")");
+            }
             index.put(indexrow); // write modified indexrow
         }
     }
@@ -750,7 +757,12 @@ public class kelondroCollectionIndex {
         // open array entry
         final kelondroFixedWidthArray array = getArray(clusteridx, serialnumber, index.row().objectOrder, chunksize);
         final kelondroRow.Entry arrayrow = array.get(rownumber);
-        if (arrayrow == null) throw new kelondroException(arrayFile(this.path, this.filenameStub, this.loadfactor, chunksize, clusteridx, serialnumber).toString(), "array does not contain expected row");
+        if (arrayrow == null) {
+            // the index appears to be corrupted
+            this.indexErrors++;
+            if (this.indexErrors == errorLimit) deleteIndexOnExit(); // delete index on exit for rebuild
+            throw new kelondroException(arrayFile(this.path, this.filenameStub, this.loadfactor, chunksize, clusteridx, serialnumber).toString(), "array does not contain expected row (error #" + indexErrors + ")");
+        }
 
         // read the row and define a collection
         final byte[] indexkey = indexrow.getColBytes(idx_col_key);
@@ -759,7 +771,9 @@ public class kelondroCollectionIndex {
             // cleanup for a bad bug that corrupted the database
             index.remove(indexkey); // the RowCollection must be considered lost
             array.remove(rownumber); // loose the RowCollection (we don't know how much is lost)
-            serverLog.logSevere("kelondroCollectionIndex." + array.filename, "lost a RowCollection because of a bad arraykey");
+            this.indexErrors++;
+            if (this.indexErrors == errorLimit) deleteIndexOnExit(); // delete index on exit for rebuild
+            serverLog.logSevere("kelondroCollectionIndex." + array.filename, "lost a RowCollection because of a bad arraykey (error #" + indexErrors + ")");
             return new kelondroRowSet(this.payloadrow, 0);
         }
         final kelondroRowSet collection = new kelondroRowSet(this.payloadrow, arrayrow, 1); // FIXME: this does not yet work with different rowdef in case of several rowdef.objectsize()
@@ -777,14 +791,18 @@ public class kelondroCollectionIndex {
             indexEntry.setCol(idx_col_lastread, kelondroRowCollection.daysSince2000(System.currentTimeMillis()));
             indexEntry.setCol(idx_col_lastwrote, kelondroRowCollection.daysSince2000(System.currentTimeMillis()));
             index.put(indexEntry);
-            serverLog.logSevere("kelondroCollectionIndex." + array.filename, "array contains wrong row '" + new String(arrayrow.getColBytes(0)) + "', expected is '" + new String(indexrow.getColBytes(idx_col_key)) + "', the row has been fixed");
+            this.indexErrors++;
+            if (this.indexErrors == errorLimit) deleteIndexOnExit(); // delete index on exit for rebuild
+            serverLog.logSevere("kelondroCollectionIndex." + array.filename, "array contains wrong row '" + new String(arrayrow.getColBytes(0)) + "', expected is '" + new String(indexrow.getColBytes(idx_col_key)) + "', the row has been fixed (error #" + indexErrors + ")");
         }
         final int chunkcountInArray = collection.size();
         if (chunkcountInArray != chunkcount) {
             // fix the entry in index
             indexrow.setCol(idx_col_chunkcount, chunkcountInArray);
             index.put(indexrow);
-            array.logFailure("INCONSISTENCY (get) in " + arrayFile(this.path, this.filenameStub, this.loadfactor, chunksize, clusteridx, serialnumber).toString() + ": array has different chunkcount than index: index = " + chunkcount + ", array = " + chunkcountInArray + "; the index has been auto-fixed");
+            this.indexErrors++;
+            if (this.indexErrors == errorLimit) deleteIndexOnExit(); // delete index on exit for rebuild
+            array.logFailure("INCONSISTENCY (get) in " + arrayFile(this.path, this.filenameStub, this.loadfactor, chunksize, clusteridx, serialnumber).toString() + ": array has different chunkcount than index: index = " + chunkcount + ", array = " + chunkcountInArray + "; the index has been auto-fixed (error #" + indexErrors + ")");
         }
         if (remove) array.remove(rownumber); // index is removed in calling method
         return collection;

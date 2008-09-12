@@ -79,4 +79,6 @@ public interface kelondroRA {
 
     public void writeArray(byte[] b) throws IOException;
     public byte[] readArray() throws IOException;
+    
+    public void deleteOnExit();
 }
