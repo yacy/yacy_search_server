@@ -332,7 +332,7 @@ public final class httpdFileHandler {
             int argc = 0;
             if (argsString == null) {
                 // no args here, maybe a POST with multipart extension
-                int length = 0;
+                int length = requestHeader.getContentLength();
                 //System.out.println("HEADER: " + requestHeader.toString()); // DEBUG
                 if (method.equals(httpHeader.METHOD_POST)) {
 
