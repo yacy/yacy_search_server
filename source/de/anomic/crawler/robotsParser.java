@@ -109,7 +109,7 @@ public final class robotsParser {
         try {
             while ((line = reader.readLine()) != null) {
                 // replacing all tabs with spaces
-                line = line.replaceAll("\t"," ").replaceAll(":"," ").trim();
+                line = line.replaceAll("\t"," ").trim();
                 lineUpper = line.toUpperCase();
                 
                 if (line.length() == 0) {
