@@ -1,0 +1,50 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Websearch Comparison</title>
+    #%env/templates/metas.template%#
+  </head>
+<body>
+    #%env/templates/header.template%#
+    <h2>Websearch Comparison</h2>
+    <p>This page lets you compare two search engines. Please select search engines 
+    and enter your searchword(s) below.</p>
+    <fieldset>
+        <legend>Parameters</legend>
+        <form action="" method="get">
+            <dl>
+                <dt>Left Search Engine</dt>
+                <dd>
+                   <select name="left">
+                   #{searchengines}#
+                   <option>#[searchengine]#</option>
+                   #{/searchengines}#
+                   </select>
+                </dd>
+               <dt>Right Search Engine</dt>
+               <dd>
+                   <select name="right">
+                   #{searchengines}#
+                   <option>#[searchengine]#</option>
+                   #{/searchengines}#
+                   </select>
+               </dd>
+               <dt>Query</dt>
+               <dd>
+                    <input type="text" name="query" size="60">
+                </dd>        
+           </dl>   
+           <input type="submit" />
+        </form>
+    </fieldset>
+    #(search)#
+    ::
+    <fieldset>
+        <legend>Search Result</legend>
+        <iframe src="#[left]##[query]#" width="49%" height="300"></iframe> 
+        <iframe src="#[right]##[query]#" width="49%" height="300"></iframe>
+    </fieldset>
+    #(/search)#
+    #%env/templates/footer.template%#
+  </body>
+</html>
