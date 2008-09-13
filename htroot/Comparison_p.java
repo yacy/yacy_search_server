@@ -42,7 +42,7 @@ public class Comparison_p{
 
         Map<String, String> searchengines = new Hashtable<String, String>();
         searchengines.put("YaCy", "yacysearch.html?display=0&amp;query=");
-        searchengines.put("google.de", "http://www.google.de/?q=");
+        searchengines.put("google.de", "http://www.google.de/search?q=");
         searchengines.put("metager.de", "http://www.metager.de/meta/cgi-bin/meta.ger1?eingabe=");
         
         if (post != null) {
