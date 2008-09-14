@@ -99,7 +99,8 @@ done
 #echo $options;exit 0 #DEBUG for getopts
 
 #get javastart args
-#JAVA_ARGS="";
+JAVA_ARGS="-server -XX:+UseAdaptiveSizePolicy";
+#JAVA_ARGS="-verbose:gc -XX:+PrintGCTimeStamps -XX:+PrintGCDetails $JAVA_ARGS";
 
 #check if Linux system supports large memory pages or if OS is Solaris which 
 #supports large memory pages since version 9 
@@ -115,19 +116,18 @@ then
     fi
 elif [ $OS = "SunOS" ]
 then
+	# the UseConcMarkSweepGC option caused a full CPU usage - bug on Darwin.
+	# It was reported that the same option causes good performance on solaris.
+    JAVA_ARGS="$JAVA_ARGS -XX:+UseConcMarkSweepGC -XX:+CMSIncrementalMode"
     ENABLEHUGEPAGES=1
 fi 
 
-
-JAVA_ARGS="-server -XX:+UseConcMarkSweepGC -XX:+CMSIncrementalMode -XX:+UseAdaptiveSizePolicy";
 #turn on support for large memory pages if supported by OS
 if [ $ENABLEHUGEPAGES -eq 1 ]
 then
     JAVA_ARGS="$JAVA_ARGS -XX:+UseLargePages"
 fi
 
-#JAVA_ARGS="-verbose:gc -XX:+PrintGCTimeStamps -XX:+PrintGCDetails $JAVA_ARGS";
-    
 if [ ! -f $CONFIGFILE -a -f DATA/SETTINGS/httpProxy.conf ]
 then
 	# old config if new does not exist
