@@ -637,14 +637,18 @@ These pages had been indexed by your peer, but the crawl was initiated by a remo
 This is the 'mirror'-case of process \(1\).==Dies ist der 'Gegensatz' Prozess zu (1).
 <em>Use Case:</em> This list may fill if you check the 'Accept remote crawling requests'-flag on the 'Index Crate' page==<em>Anwendung:</em> Diese Liste f&uuml;llt sich, wenn Sie 'Akzeptiere remote Crawling Anfragen' auf der 'Index erzeugen' Seite aktiviert haben.
 The stack is empty.==Die Liste ist leer.
+Statistics about \#\[domains\]\# domains in this stack:==Statistiken &uuml;ber #[domains]# Domains in diesem Bereich: 
+#Domain==Domain
+#URLs=URLs
+"delete all"=="alle l&ouml;schen"
 Showing all \#\[all\]\# entries in this stack.==Zeigt alle #[all]# Eintr&auml;ge in diesem Bereich.
 Showing latest \#\[count\]\# lines from a stack of \#\[all\]\# entries.==Zeigt die letzten #[count]# Eintr&auml;ge aus diesem Bereich von insgesamt #[all]# Eintr&auml;gen.
 "clear list"=="Liste leeren"
 #Initiator==Initiator
-Executor==Ausf&uuml;hrender
-Modified==&Auml;nderungsdatum
-Words==W&ouml;rter
-Title==Titel
+>Executor==>Ausf&uuml;hrender
+>Modified==>&Auml;nderungsdatum
+>Words==>W&ouml;rter
+>Title==>Titel
 #URL==URL
 "delete"=="L&ouml;schen"
 #-----------------------------
@@ -951,6 +955,13 @@ Retrieve by URL:<==Abfrage nach URL:<
 Retrieve by URL-Hash==Abfrage nach URL-Hash
 "Show Details for URL-Hash"=="Details f&uuml;r URL-Hash zeigen"
 "Generate List"=="Liste erstellen"
+Statistics about top-domains in URL Database==Statistik &uuml;ber die Top-Domains in der URL Datenbank
+Show top==Zeige die
+domains from all URLs.==Top-Domains aus allen URLs.
+"Generate Statistics"=="Statistik erstellen"
+Statistics about the top-\#\[domains\]\# domains in the database:==Statistik &uumlber die Top-#[domains]# Domains in der Datenbank:
+#Domain==Domain
+#URLs==URLs
 Sequential List of URL-Hashes==aufeinanderfolgende Liste der URL-Hashes
 Finished export of \#\[urlcount\]\# URLs to file \#\[exportfile\]\#==Export von #[urlcount]# nach Datei #[exportfile]# wurde beendet
 Export to file \#\[exportfile\]\# failed==Export nach Date #[exportfile]# fehlgeschlagen
@@ -958,10 +969,10 @@ Loaded URL Export==Export geladener URLs
 Export File==Export-Datei
 #URL Filter==URL Filter
 #Export Format==Export Format
-Only Domain==Nur Domains
+Only Domain <i>\(superfast\)==Nur Domains <i>(sehr schnell)
 Plain Text List \(domains only\)==Einfache Text Liste (nur Domains)
 HTML \(domains as URLs, no title\)==HTML (Domains als URLs, kein Titel)
-Full URL List==Vollst&auml;ndige URL Liste
+Full URL List <i>\(high IO\)==Vollst&auml;ndige URL Liste <i>(hoher IO)
 Plain Text List \(URLs only\)==Einfache Text Liste (nur URLs)
 HTML \(URLs with title\)==HTML (URLs mit Titel)
 #XML (RSS)==XML (RSS)
@@ -1397,7 +1408,6 @@ Use Default Profile:==Standard Profil benutzen:
 Save==Speichern
 and use==und nutze
 of the defined performance.==der vorgegebenen Geschwindigkeit.
-show expert settings==Zeige Experten-Einstellungen
 Changes take effect immediately==&Auml;nderungen werden sofort wirksam
 Cache Settings:==Cache Einstellungen:
 Cache Type==Cache Typ
