@@ -967,7 +967,7 @@ public class bookmarksDB {
             return urlHashes;
         }
         public boolean hasPublicItems(){
-        	final Iterator<String> it=getBookmarksIterator(this.getTagHash(), false);
+        	final Iterator<String> it=getBookmarksIterator(this.getTagName(), false);
         	if(it.hasNext()){
         		return true;
         	}
