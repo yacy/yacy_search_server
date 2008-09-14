@@ -294,9 +294,12 @@ public class plasmaDHTChunk {
                 urlHashes.add(iEntry.urlHash());
             }
             final String wordHash = indexContainers[i].getWordHash();
-            count = wordIndex.removeEntriesExpl(this.indexContainers[i].getWordHash(), urlHashes);
-            if (log.isFine()) 
-                if (this.log.isFine()) log.logFine("Deleted partial index (" + c + " URLs) for word " + wordHash + "; " + this.wordIndex.indexSize(wordHash) + " entries left");
+            try {
+                count = wordIndex.removeEntriesExpl(this.indexContainers[i].getWordHash(), urlHashes);
+            } catch (kelondroException e) {
+                e.printStackTrace();
+            }
+            if (this.log.isFine()) log.logFine("Deleted partial index (" + c + " URLs) for word " + wordHash + "; " + this.wordIndex.indexSize(wordHash) + " entries left");
             this.indexContainers[i] = null;
         }
         return count;
