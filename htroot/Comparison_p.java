@@ -41,7 +41,7 @@ public class Comparison_p{
         final servletProperties prop = new servletProperties();
 
         Map<String, String> searchengines = new Hashtable<String, String>();
-        searchengines.put("YaCy", "yacysearch.html?display=0&amp;query=");
+        searchengines.put("YaCy", "yacysearch.html?display=2&amp;query=");
         searchengines.put("google.de", "http://www.google.de/search?q=");
         searchengines.put("metager.de", "http://www.metager.de/meta/cgi-bin/meta.ger1?eingabe=");
         
