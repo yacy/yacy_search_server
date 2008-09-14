@@ -53,6 +53,7 @@ public class Comparison_p{
         } else {
             
             prop.put("search", 0);
+            prop.put("search_query", "");
            
         }
         
@@ -60,6 +61,16 @@ public class Comparison_p{
         int i = 0;
         for(String name : searchengines.keySet()){
             prop.put("searchengines_" + i + "_searchengine", name);
+	    if(post != null && post.get("left").equals(name)) {
+		    prop.put("searchengines_" + i + "_leftengine", 1);
+	    } else {
+		    prop.put("searchengines_" + i + "_leftengine", 0);
+	    }
+	    if(post != null && post.get("right").equals(name)) {
+		    prop.put("searchengines_" + i + "_rightengine", 1);
+	    } else {
+		    prop.put("searchengines_" + i + "_rightengine", 0);
+	    }
             i++;
         }
 

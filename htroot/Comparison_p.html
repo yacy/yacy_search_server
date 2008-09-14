@@ -17,7 +17,7 @@
                 <dd>
                    <select name="left">
                    #{searchengines}#
-                   <option>#[searchengine]#</option>
+                   <option #(leftengine)#::selected="selected"#(/leftengine)#>#[searchengine]#</option>
                    #{/searchengines}#
                    </select>
                 </dd>
@@ -25,13 +25,13 @@
                <dd>
                    <select name="right">
                    #{searchengines}#
-                   <option>#[searchengine]#</option>
+                   <option #(rightengine)#::selected="selected"#(/rightengine)#>#[searchengine]#</option>
                    #{/searchengines}#
                    </select>
                </dd>
                <dt>Query</dt>
                <dd>
-                    <input type="text" name="query" size="60">
+                    <input type="text" name="query" value="#[search_query]#" size="60">
                 </dd>        
            </dl>   
            <input type="submit" />
