@@ -284,9 +284,11 @@ public final class ResultURLs {
 
     public synchronized boolean remove(final String urlHash) {
         if (urlHash == null) return false;
+        String hash;
         for (int stack = 1; stack <= 6; stack++) {
             for (int i = getStackSize(stack) - 1; i >= 0; i--) {
-                if (getUrlHash(stack, i).equals(urlHash)) {
+                hash = getUrlHash(stack, i);
+                if (hash != null && hash.equals(urlHash)) {
                     removeStack(stack, i);
                     return true;
                 }
