@@ -8,7 +8,7 @@
       <li><a href="/index.html?display=1" accesskey="s" class="MenuItemLink">Search Page (standard)</a></li>
       <li><a href="/yacy/user/ysearch.html?display=1" accesskey="s" class="MenuItemLink">Search Page (alternative)</a></li>
       <li><a href="/yacy/ui/" accesskey="s" class="MenuItemLink">Search Page (Rich Client)</a></li>
-      <li><a href="/Comparison_p.html" class="MenuItemLink lock">Compare Search</a></li>
+      <li><a href="/compare_yacy.html?display=1" class="MenuItemLink">Compare Search</a></li>
       <li><a href="/Ranking_p.html" class="MenuItemLink lock">Ranking Config</a></li>
       <li><a href="/Surftips.html?display=1" class="MenuItemLink">Surftips</a></li>
       <li><a href="/Wiki.html?display=1" class="MenuItemLink">Publication</a></li>

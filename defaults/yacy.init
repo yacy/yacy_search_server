@@ -881,8 +881,7 @@ autoReCrawl_idlesleep = 3600000
 autoReCrawl_busysleep = 3600000
 autoReCrawl_memprereq = -1
 
-
-
-
-
+# options to remember the default search engines when using the search compare features
+compare_yacy.left = YaCy
+compare_yacy.right = YaCy
 
