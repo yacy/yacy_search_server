@@ -2418,9 +2418,10 @@ Project Home==Projektseite
 #---------------------------
 YaCy - Distributed Search Engine==YaCy - Verteilte Suchmaschine
 Search&nbsp;&amp;&nbsp;Browse==Suchen&nbsp;&amp;&nbsp;Surfen
-Search Page \(standard\)==Suchseite (standard)
+Search Page==Suchseite
 Search Page \(alternative\)==(alternative) Suchseite
-Search Page \(Rich Client\)==Suchseite (Rich Client)
+Rich Client Search==Rich Client Suche
+Compare Search==Vergleichs-Suche
 Ranking Config==Ranking Einstellungen
 >Surftips==>Surftipps
 Publication==Ver&ouml;ffentlichung
