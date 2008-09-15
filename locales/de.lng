@@ -2657,7 +2657,21 @@ PLEASE REPLACE THIS PAGE BY PUTTING A FILE index.html INTO THE PATH==BITTE ERSET
 
 #File: yacy/ui/index.html
 #-----------------------------
-YaCy Search==YaCy Suche
+"Welcome"=="Willkommen"
+>Welcome==>Willkommen
+"Classic Search"=="Klassische Suche"
+>Classic Search==>Klassische Suche
+"Admin Console"=="Admin Konsole"
+>Admin Console==>Admin Konsole
+"Bookmarks"=="Lesezeichen"
+>Bookmarks==>Lesezeichen				
+#-----------------------------
+
+#File: yacy/ui/sidebar/sidebar_1.html
+#-----------------------------
+YaCy P2P Websearch==YaCy P2P Websuche
+YaCy Project==YaCy Projekt
+YaCy Peer Admin==YaCy Peer Administration
 "Search"=="Suchen"
 >text==>Text
 >image==>Bilder
@@ -2668,15 +2682,18 @@ freeworld==freeworld
 local peer==lokaler Peer
 bookmarks==Lesezeichen
 sciencenet==ScienceNet
-"Welcome"=="Willkommen"
->Welcome==>Willkommen
-#"Ranking"=="Ranking"
-#>Ranking==>Ranking
-"Bookmarks"=="Lesezeichen"
->Bookmarks==>Lesezeichen				
+>Admin Console==>Admin Konsole
+>Re-Start==>Neustart
+>Shutdown==>Herunterfahren
 #-----------------------------
 
-#File: yacy/ui/ymarks.html
+#File: yacy/ui/sidebar/sidebar_2.html
+#-----------------------------
+Search Options==Suchoptionen
+Bookmark TagCloud==Lesezeichen TagWolke
+#-----------------------------
+
+#File: yacy/ui/yacyui-bookmarks.html
 #-----------------------------
 "public bookmark"=="&ouml;ffentliches Lesezeichen"
 "private bookmark"=="privates Lesezeichen"
