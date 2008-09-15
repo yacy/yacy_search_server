@@ -1797,6 +1797,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         // find all the words in a specific resource and remove the url reference from every word index
         // finally, delete the url entry
         
+        if (urlhash == null) return 0;
         // determine the url string
         final indexURLReference entry = webIndex.getURL(urlhash, null, 0);
         if (entry == null) return 0;
@@ -1807,27 +1808,33 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         try {
             // get the resource content
             final Object[] resource = plasmaSnippetCache.getResource(comp.url(), fetchOnline, 10000, true, false);
-            resourceContent = (InputStream) resource[0];
-            final Long resourceContentLength = (Long) resource[1];
-            
-            // parse the resource
-            final plasmaParserDocument document = plasmaSnippetCache.parseDocument(comp.url(), resourceContentLength.longValue(), resourceContent);
-            
-            // get the word set
-            Set<String> words = null;
-            try {
-                words = new plasmaCondenser(document, true, true).words().keySet();
-            } catch (final UnsupportedEncodingException e) {
-                e.printStackTrace();
+            if (resource == null) {
+                // delete just the url entry
+                webIndex.removeURL(urlhash);
+                return 0;
+            } else {
+                resourceContent = (InputStream) resource[0];
+                final Long resourceContentLength = (Long) resource[1];
+                
+                // parse the resource
+                final plasmaParserDocument document = plasmaSnippetCache.parseDocument(comp.url(), resourceContentLength.longValue(), resourceContent);
+                
+                // get the word set
+                Set<String> words = null;
+                try {
+                    words = new plasmaCondenser(document, true, true).words().keySet();
+                } catch (final UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+                
+                // delete all word references
+                int count = 0;
+                if (words != null) count = webIndex.removeWordReferences(words, urlhash);
+                
+                // finally delete the url entry itself
+                webIndex.removeURL(urlhash);
+                return count;
             }
-            
-            // delete all word references
-            int count = 0;
-            if (words != null) count = webIndex.removeWordReferences(words, urlhash);
-            
-            // finally delete the url entry itself
-            webIndex.removeURL(urlhash);
-            return count;
         } catch (final ParserException e) {
             return 0;
         } finally {
