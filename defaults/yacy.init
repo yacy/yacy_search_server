@@ -494,7 +494,7 @@ proxyIndexingLocalMedia=true
 # Be careful with this number. Consider a branching factor of average 20;
 # A prefetch-depth of 8 would index 25.600.000.000 pages, maybe the whole WWW.
 crawlingDepth=3
-crawlingIfOlder=525600
+crawlingIfOlder=-1
 crawlingDomFilterDepth=-1
 crawlingDomMaxPages=-1
 indexText=true

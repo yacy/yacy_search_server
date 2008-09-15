@@ -54,11 +54,14 @@ public final class kelondroMScoreCluster<E> {
      * shrink the cluster to a demanded size
      * @param maxsize
      */
-    public void shrinkToMaxSize(int maxsize) {
+    public synchronized void shrinkToMaxSize(int maxsize) {
         if (maxsize < 0) return;
+        Long key;
         while (refkeyDB.size() > maxsize) {
             // find and remove smallest objects until cluster has demanded size
-            refkeyDB.remove(keyrefDB.remove(keyrefDB.firstKey()));
+            key = keyrefDB.firstKey();
+            if (key == null) break;
+            refkeyDB.remove(keyrefDB.remove(key));
         }
     }
     
@@ -66,12 +69,13 @@ public final class kelondroMScoreCluster<E> {
      * shrink the cluster in such a way that the smallest score is equal or greater than a given minScore
      * @param minScore
      */
-    public void shrinkToMinScore(int minScore) {
+    public synchronized void shrinkToMinScore(int minScore) {
         int score;
         Long key;
         while (true) {
             // find and remove objects where their score is smaller than the demanded minimum score
             key = keyrefDB.firstKey();
+            if (key == null) break;
             score = (int) ((key.longValue() & 0xFFFFFFFF00000000L) >> 32);
             if (score >= minScore) break;
             refkeyDB.remove(keyrefDB.remove(key));
