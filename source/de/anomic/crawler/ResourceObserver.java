@@ -32,9 +32,6 @@ import de.anomic.server.logging.serverLog;
 import de.anomic.tools.diskUsage;
 
 public final class ResourceObserver {
-    // The minimal free space on every used volume, for now set to 1000 MB.
-    // TODO make it configurable
-    private final static long MIN_FREE_DISK_SPACE = 1000L /* MiB */ * 1024L * 1024L;
     // Unknown for now
     //private final static long MIN_FREE_MEMORY = 0;
     // We are called with the cleanup job every five minutes;
@@ -126,10 +123,10 @@ public final class ResourceObserver {
     }
     
     /**
-     * @return amount of space that should be kept free
+     * @return amount of space (MiB) that should be kept free
      */
     public long getMinFreeDiskSpace () {
-        return MIN_FREE_DISK_SPACE;
+        return sb.getConfigLong("disk.free", 3000) /* MiB */ * 1024L * 1024L;
     }
     
     /**
@@ -146,8 +143,8 @@ public final class ResourceObserver {
         for (final Map.Entry<String, long[]> entry: usage.entrySet()) {
             val = entry.getValue();
             this.log.logInfo("df of Volume " + entry.getKey() + ": " + (val[1] / 1024 / 1024) + " MB");
-            if (val[1] < MIN_FREE_DISK_SPACE) {
-                this.log.logWarning("Volume " + entry.getKey() + ": free space (" + (val[1] / 1024 / 1024) + " MB) is too low (< " + (MIN_FREE_DISK_SPACE / 1024 / 1024) + " MB)");
+            if (val[1] < getMinFreeDiskSpace()) {
+                this.log.logWarning("Volume " + entry.getKey() + ": free space (" + (val[1] / 1024 / 1024) + " MB) is too low (< " + (getMinFreeDiskSpace() / 1024 / 1024) + " MB)");
                 below = true;
             }
         }

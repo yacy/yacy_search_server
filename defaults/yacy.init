@@ -885,3 +885,5 @@ autoReCrawl_memprereq = -1
 compare_yacy.left = YaCy
 compare_yacy.right = YaCy
 
+# minimum free disk space for crawling (MiB)
+disk.free = 3000
