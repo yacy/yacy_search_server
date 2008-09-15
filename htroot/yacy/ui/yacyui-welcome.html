@@ -1,15 +1,14 @@
 <h3>Overview</h3>
 <p>
-	YaCy-UI is going to be a rich client for YaCy attempting to provide a new, more functional and easier search interface.
-	Unlike the current server based interface YaCy-UI makes heavy use of jQuery, JavaScript, Ajax, XML and XSLT. This
-	approach offers some neat advantages, one example could be the integration of sciencenet via opensearch. The overall
-	idea is to integrate functionallity on a modular basis (e.g. a webshot function could be integrated by linking to
-	another, even local web service without the need to further extend YaCy's functionallity). Currently YaCy-UI is at most
-	alpha status, so I would be very greatful for feedback and bug reports!
+	YaCy-UI is going to be a rich client for YaCy based on the existing YaCY-API. 
+	YaCy-UI makes heavy use of jQuery, JavaScript, Ajax, XML and XSLT. 
+	Currently YaCy-UI is at most alpha status, so I would be very greatful for feedback and bug reports!
 </p>
 apfelmaennchen
 <h3>Change Log</h3>
 	<ul>		
+		<li>14-09-2008: Added yacysearch.htm via iframe as 'Classic Search'</li>		
+		<li>14-09-2008: Major rework and redesign of YaCy-UI</li>
 		<li>24-08-2008: Updated to jQuery-ui 1.6b</li>
 		<li>28-05-2008: Updated to jQuery 1.2.6 and jQuery-ui 1.5b4</li>
 		<li>18-05-2008: YaCy-UI has basic support for searching Bookmark tags !!</li>
@@ -24,6 +23,7 @@ apfelmaennchen
 <h3>Bug Tracker</h3>
 	<ul>		
 		<li>Please report bugs in the official <a href="http://forum.yacy-websuche.de/">YaCy-Forum</a> - thanks!</li> 
+		<li>15-09-2008: there seems to be a bug with the German translation: the link yacyui-bookmarks.html gets translated into yacyui-Lesezeichen.html :-( 
 		<li>12-05-2008: if you click a tag in the tagcloud, the bookmarks table doesn't update properly and JavaScript returns a 'tabs is undefined' error...</li>
 		<li>10-05-2008: <strike>there is an issue with Firefox 3.0b5 and the jQuery XML parsing of the search result (one symptom is the broken pagination)</strike></li>
 		<li>19-04-2008: <strike>if you open more than one search tab in Firefox 2.x or Safari, only the first result item is shown. I would be greatful for any hint...</strike></li>

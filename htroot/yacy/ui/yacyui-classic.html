@@ -1,0 +1,22 @@
+<script language="JavaScript">
+	//<![CDATA[	
+		function resize_iframe() {		
+			var height=document.documentElement.clientHeight;
+			document.getElementById("yclassic").style.height=parseInt(height-document.getElementById("yclassic").offsetTop-15)+"px";
+		}
+		window.onresize=resize_iframe; 
+   //]]>
+</script>
+
+<iframe 
+	id="yclassic"
+	name="yclassic"
+	src="../../yacysearch.html?display=2"    
+    onload="resize_iframe()"
+    width="100%" 
+    scrolling="auto" 
+    name="YaCy Classic Search"
+    marginheight="0"
+    marginwidth="0"
+    frameborder="0">
+</iframe>

@@ -1,0 +1,22 @@
+<script language="JavaScript">
+	//<![CDATA[
+		function resize_iframe() {		
+			var height=document.documentElement.clientHeight;
+			document.getElementById("yranking").style.height=parseInt(height-document.getElementById("yranking").offsetTop-15)+"px";
+		}
+		window.onresize=resize_iframe; 
+   //]]>
+</script>
+
+<iframe 
+	id="yranking"
+	src="../../Ranking_p.html"
+    onload="resize_iframe()"
+    width="100%" 
+    scrolling="auto" 
+    name="YaCy Classic Search"
+    marginheight="0"
+    marginwidth="0"
+    frameborder="0">
+</iframe>	
+	

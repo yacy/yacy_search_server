@@ -2,13 +2,11 @@
 
 div.main { 
   float:left;
-  width:100%; 
-}
-div.top { 
-  float:left;
+  margin-top:1.5em;
   width:75%;
-  margin-top: -1.0em;  
+  height:100%; 
 }
+
 
 /* Searchbox */
 .searchbox {
@@ -29,16 +27,8 @@ div.top {
   border-bottom: 1px solid #999;
   background: url(../img/box800.png) no-repeat;  
 }
-#searchtext {
-  width: 280px;
-  margin-top: 1em;
-  margin-bottom: .5em;
-  padding: 2px 5px;
-  border: 1px solid #CCCCCC;
-  font: normal small Arial, Helvetica, sans-serif;
-  color: #999999;
-}
-#searchbutton, .selectbox {
+
+#searchbutton {
   width: 100px;
   margin-top: 1em;
   margin-bottom: .5em;
@@ -48,7 +38,7 @@ div.top {
   color: #999999;
 }
 .filter {
-  width: 180px;  
+  width: 190px;  
   margin-bottom: .5em;
   padding: 2px 5px;
   border: 1px solid #CCCCCC;
@@ -56,7 +46,7 @@ div.top {
   color: #999999;
 }
 .selector {
-  width: 100px;  
+  width: 120px;  
   margin-bottom: .5em;
   padding: 2px 5px;
   border: 1px solid #CCCCCC;
@@ -73,31 +63,37 @@ div.top {
 
 /* Sidebar */
 
-div.sidebar {   
-  margin-left: 1em;
+div.sidebar {     
   margin-right: 1em;
-  float:right;
+  float:left;
   width:250px;
 }
 .menu img {
   width: 32px; 
   height: 32px;
+  padding: 2px 15px 2px 2px;
+  vertical-align: middle;
+}
+.menu img.logo {
+  width: 256px; 
+  height: 128px;  
   padding: 2px 16px 2px 8px;
   vertical-align: middle;
 }
+
 img {
   vertical-align: top;
 }
 
 .sidebar .boxed h3 {
-  font-family: Helvetica,Arial,sans-serif;
+  -family: Helvetica,Arial,sans-serif;
   display:block;
   padding:5px 15px;
   margin-top: 0;
   margin-bottom: 0px;
   text-decoration: none;
-  font-weight: bold;
-  font-size: 14px;
+  weight: bold;
+  size: 14px;
   color: black;
   background: url(../img/box250.png) no-repeat;
   border-top: 1px solid #FFFFFF;
@@ -116,67 +112,14 @@ img {
   padding: 5px 0 0 10px;  
 }
 
-/* YaCy Tables ---------------------------*/
+/* YaCy Flexigrid ---------------------------*/
+.flexigrid div.fbutton .add {
+	background: url(../img/add.png) no-repeat center left;
+}
+.flexigrid div.fbutton .delete {
+	background: url(../img/close.png) no-repeat center left;
+}	
 
-table.ytable {
-	font: normal small Arial, Helvetica, sans-serif;	
-	background-color: #fff;
-	margin:10px 0pt 15px;	
-	width: 100%;
-	text-align: left;
-	table-layout:fixed;
-}
-table.ytable thead tr th, table.ytable tfoot tr th {
-	background-color: #e6EEEE;
-	border: 1px solid #FFF;
-	font: bold small Arial, Helvetica, sans-serif;
-	padding: 4px;
-}
-table.ytable thead tr .header {
-	background-image: url(../img/bg.gif);
-	background-repeat: no-repeat;
-	background-position: center right;
-	cursor: pointer;
-}
-table.ytable tbody td {
-	color: #3D3D3D;
-	padding: 4px;
-	background-color: #FFF;
-	vertical-align: top;
-	/* white-space: nowrap; */
-	text-overflow:ellipsis;
-	overflow:hidden;
-}
-table.ytable tbody tr.odd td {
-	background-color:#F0F0F6;
-}
-table.ytable thead tr .headerSortUp {
-	background-image: url(../img/asc.gif);
-}
-table.ytable thead tr .headerSortDown {
-	background-image: url(../img/desc.gif);
-}
-table.ytable thead tr .headerSortDown, table.ytable thead tr .headerSortUp {
-	background-color: #8dbdd8;
-}
-table.ytable img {
-	border:0;
-	padding-top:6px;
-}
-
-table.ystat {
-	text-align: left; 
-	height: 75px; 
-	margin-left: 10px; 
-	width: 200px;
-	padding-bottom: 5px;	
-}
-table.ystat td {
-	vertical-align: middle; 
-	width: 100px; 
-	font-family: Courier New,Courier,monospace;
-	font-size: 10px;
-}
 
 /* YaCy Bookmarks ---------------------------*/
 .url {
@@ -283,10 +226,10 @@ dl.pairs dt {
 	margin-bottom : 10px;
 	border: none;	
 	margin: 0px;
-	padding: 10px;
+	padding: 5px 10px 5px 10px;
 	border: 1px solid black;
 	text-decoration: none;	
-	font-size: 12px;
+	font-size: 14px;
 }
 
 .basic p {
@@ -295,12 +238,12 @@ dl.pairs dt {
 .basic h3 {
 	cursor:pointer;
 	display:block;
-	padding:5px 15px;
+	padding:4px 12px;
 	margin-top: 0;
 	margin-bottom: 0px;
 	text-decoration: none;
-	font-weight: bold;
-	font-size: 14px;
+	/* font-weight: bold; */
+	font-size: 12px;
 	color: black;
 	background: url(../img/box250.png) no-repeat;
 	border-top: 1px solid #FFFFFF;
@@ -312,6 +255,11 @@ dl.pairs dt {
 .basic h3.selected {
 	
 }
+#tagcloud {
+	text-align: justify;
+	line-height: 120%;
+}
+
 #tagcloud a {
 	cursor:pointer;		
 }
@@ -319,64 +267,6 @@ dl.pairs dt {
 	background-color:#e6EEEE;		
 }
 
-
-/* jqmDialog ---------------------------*/
-
-div.whiteOverlay { background: white; }
-div.jqDrag {cursor: move;}
-
-div.jqmDialog {
-  display: none;
-  position: fixed;
-  top: 17%;
-  left: 50%;
-  margin-left: -200px;
-  width: 600px;
-  overflow: hidden;
-  font-family:verdana,tahoma,helvetica;
-}
-
-/* Fixed posistioning emulation for IE6
-     Star selector used to hide definition from browsers other than IE6
-     For valid CSS, use a conditional include instead */
-* html div.jqmDialog {
-     position: absolute;
-     top: expression((document.documentElement.scrollTop || document.body.scrollTop) + Math.round(17 * (document.documentElement.offsetHeight || document.body.clientHeight) / 100) + 'px');
-}
-
-/* [[[ Title / Top Classes ]]] */
-div.jqmdTC { 
-  background: url(../img/box600.png) no-repeat;  
-  color: black;
-  padding: 7px 22px 5px 5px;
-  font-family:"sans serif",verdana,tahoma,helvetica;
-  font-weight: bold;
-  * zoom: 1;
-}
-
-
-/* [[[ Body / Message Classes ]]] */
-div.jqmdBC {
-  background: white;
-  margin: 0px;
-  border: 1px solid black;
-  height: 250px;
-  overflow: auto;
-}
-
-
-div.jqmdMSG { color: black; }
-
-
-/* [[[ Button classes ]]] */
-input.jqmdX {
-  position: absolute;
-  right: 7px;
-  top: 4px;
-  padding: 0 0 0 19px;
-  height: 19px;
-  width: 0px;
-  background: url(../img-2/cancel.png) no-repeat center;
-  overflow: hidden;
-  cursor: pointer;
+.hidden {
+	display:hidden;
 }

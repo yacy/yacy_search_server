@@ -1,14 +1,20 @@
 <script type="text/javascript"> 
    //<![CDATA[
 	$(document).ready(function() {   		
-  		$("#side3").accordion({
+  		
+  		/* Init Sidebar_2 */
+  		$("#side2").accordion({
 			autoHeight: false,
 			header: "h3"
 		});
+		$("#side2").accordion("activate", 1);
+		
+		/* Load TagCloud */
 		$.ajax({
 			type: "GET",
-			url: "/xml/bookmarks/tags/get.xml?login=true&top=25&sort=alpha",			
+			url: "/xml/bookmarks/tags/get.xml?top=25&sort=alpha",			
 			dataType: "xml",
+			cache: false,					
 			success: function(xml) {				
 				$(xml).find('tag').each(function(){					
 					var count = $(this).attr('count');
@@ -23,9 +29,9 @@
 							$("select[@name='resource']").setValue('ymarks');
 							$("input[@name='search']").setValue(qtag);
 							if (tabid == "#Bookmarks") {
-								$('#container ul').tabs("load", 2);
+								$tabs.tabs("load", 3);
 							} else {
-								$('#container ul').tabs('select',2);
+								$tabs.tabs('select',3);
 							}							
 						});																										
 				}); //close each(
@@ -42,8 +48,8 @@
 			<label for="itemsPerPage">Items per page: </label>			
 			<br />
 			<select class="selector" name="itemsPerPage">
-				<option selected="selected" value="5">5</option>
-				<option value="10">10</option>
+				<option selected="selected" value="10">10</option>
+				<option value="15">15</option>
 				<option value="25">25</option>
 				<option value="50">50</option>
 			</select>
@@ -67,7 +73,7 @@
 			<br />								
 			<label for="resource">Language:</label>
 			<br />
-			<select class="filter" id="language" name="language">
+			<select class="selector" id="language" name="language">
 				<option value="any" selected="selected">any language</option>
 				<option value="ger" >German</option>
 				<option value="eng" >English</option>										
@@ -76,28 +82,8 @@
 		</form>			
 </div>
 
-<h3>Ranking</h3> <!-- 1 -->
-<div>
-		Some easy to use ranking controlls....
-</div>
-
-<h3>Bookmark Navigation</h3> <!-- 2 -->
-<div id="pager" class="tablesorterPager">	
-	<form action="">
-		 <p>
-			<img src="img/first.png" class="first" alt="first" />
-			<img src="img/prev.png" class="prev" alt="prev" />
-			<input type="text" class="pagedisplay" alt="pagedisplay" name="pagedisplay" />
-			<img src="img/next.png" class="next" alt="next" />
-			<img src="img/last.png" class="last" alt="last" />
-			<select class="pagesize" name="pagesize">
-				<option selected="selected" value="5">5</option>
-				<option value="10">10</option>
-				<option value="25">25</option>
-				<option value="50">50</option>
-			</select>
-		 </p>
-	</form>
+<h3>Bookmark TagCloud</h3> <!-- 1 -->
+<div class="menu">	
 	<p id="tagcloud"></p>	
 </div>	
 

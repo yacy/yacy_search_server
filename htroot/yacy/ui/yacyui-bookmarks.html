@@ -1,0 +1,87 @@
+<script type="text/javascript">
+   //<![CDATA[
+	$(document).ready(function() {
+		
+		$("#side1").accordion("activate", 0);
+		$("#side2").accordion("activate", 1);
+		// $('#yoptions').resetForm();
+	
+		counter = 0;
+		$.ajax({
+			type: "GET",
+			url: "/xml/bookmarks/xbel/xbel.xml?tag="+qtag,			
+			dataType: "xml",
+			success: function(xml) {
+				$(xml).find('bookmark').each(function(){
+					var link = $(this).attr('href');
+					var hash = $(this).attr('id');
+					var title = $(this).find('title').text();
+					var date = $(this).attr('added');;
+					var desc = $(this).find('desc').text();
+					var pub = $(this).find('metadata[owner=YaCy][public]').attr('public');										
+					var tags = $(this).find('metadata[owner=Mozilla][ShortcutURL]').attr('ShortcutURL');
+					if (tags != undefined) {
+						tags = tags.replace(",",", ","g");
+					} else {
+						tags ="";
+					}					
+					if (pub == "true") {
+						icon = '<img src="img-2/world2.png" alt="public bookmark" title="public bookmark"/>'
+					} else {
+						 var icon = '<img src="img-2/lock.png" alt="private bookmark" title="private bookmark"/>'
+					}				
+					$('<tr></tr')
+						.html('<td><input type="checkbox" value="true" /></td><td>' +icon+ '</td><td><h3 class="linktitle">' +title+ '</h3><p class="desc">' +desc+ '</p><p class="url"><a href="' +link+ '">' +link+ '</a></p><td>' +tags+ ' </td><td>' +date+ '</td>')						
+						.appendTo('#ymarks tbody');																						
+					counter++;
+				}); //close each(				
+    			var height=document.documentElement.clientHeight - 205;    			
+    			$('#ymarks').flexigrid({
+    				colModel: [
+						{display: '', name : 'select', width : 25, sortable : false, align: 'center'},
+						{display: '', name : 'public', width : 25, sortable : true, align: 'center'},
+						{display: 'Title', name : 'title', width : 450, sortable : true, align: 'left'},
+						{display: 'Tags', name : 'tags', width : 220, sortable : false, align: 'left'},
+						{display: 'Date', name : 'date', width : 135, sortable : true, align: 'left'}
+					],
+					buttons: [
+						{name: 'Add', bclass: 'add', onpress: test},
+						{name: 'Delete', bclass: 'delete', onpress: test},
+						{separator: true}
+					],										
+					striped: true,
+					nowrap: false,			 									    				
+    				height: height,
+    				title: 'YaCy Bookmarks: '+qtag										    				
+    			});    							
+			}
+		}); //close $.ajax(							
+		function test(com,grid) {
+			if (com=='Delete') {
+				confirm('Delete ' + $('.trSelected',grid).length + ' items?')
+			}
+			else if (com=='Add') {
+				alert('Add New Item');
+			}			
+		}	
+	});
+  //]]>
+</script>
+
+<!-- Display Bookmarks Table -->		
+<table id="ymarks" summary="YaCy Bookmarks">
+	<colgroup>
+		<col width="25"/>
+		<col width="25"/>
+		<col width="450"/>
+		<col width="220"/>
+		<col width="135"/>								
+	</colgroup>			
+	<tbody>			
+	</tbody>
+</table>
+
+
+
+
+

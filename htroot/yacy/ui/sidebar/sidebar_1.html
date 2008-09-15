@@ -1,0 +1,111 @@
+<script type="text/javascript">
+   //<![CDATA[
+	$(document).ready(function() { 
+  		
+  		/* Init Sidebar_1 */
+  		$("#side1").accordion({
+			autoHeight: false,
+			header: "h3"
+		});
+		$("#side1").accordion("activate", 2);		
+		
+		/* Menu .click(function() */
+		$("#login").click(function() {
+			$.ajax({
+    			url: "/xml/bookmarks/xbel/xbel.xml?login=true",
+    			method : "GET",
+    			dataType: "xml",    			
+    			success: function(xml) {
+    				// ToDo: /xml/util/login.xml
+    				// alert("Login");
+    			}    			
+			});          
+		});		
+		
+		$("#admin").click(function() { $tabs.tabs('select',1); });
+		
+		$("#searchtext").click(function () { 
+			$("#side2").accordion("activate", 0); 
+		});
+		
+		/* Load Search Result into new Tab */
+		$('#searchbox').submit(function() {			
+			if ($("select[@name='resource']").getValue() == "ymarks") {								
+				qtag = $("input[@name='search']").getValue();				
+				if (tabid == "#Bookmarks") {
+					$tabs.tabs("load", 3);
+				} else {
+					$tabs.tabs('select',3);
+				}						
+			} else {			
+				var tabnr = $tabs.tabs('length');			
+				var tabname = $("input[@name='search']").getValue();			
+				$tabs.tabs('add', "yacyui-search.html", '*' + tabname);
+				$tabs.tabs('select',tabnr);
+			}
+			return false;
+		});		
+	});	
+  //]]>
+</script>
+
+<h3>YaCy P2P Websearch</h3><!-- 0 -->
+<div class="menu">		
+	<form id="searchbox" class="small" method="get" accept-charset="UTF-8" action="">								
+		<p>
+		<label for="search">Search term:</label>
+		<br />
+		<input id="searchtext" name="search" class="filter" type="text" size="20" maxlength="80" value=""/>
+		<br />		
+		<label for="ontentdom">Content domain:</label>
+		<br />
+		<select name="contentdom" class="selector">
+			<option selected="selected" value="text">text</option>
+			<option value="image">image</option>
+			<option value="audio">audio</option>
+			<option value="video">video</option>
+			<option value="app">application</option>
+		</select>
+		<br />
+		<label for="resource">Resource/Network:</label>
+		<br />		
+		<select name="resource" class="selector">
+			<option value="/yacysearch.rss?resource=global" selected="selected">freeworld</option>
+			<option value="/yacysearch.rss?resource=local" >local peer</option>
+			<option value="ymarks" >bookmarks</option>
+			<option value="/xml/util/ynetSearch.xml?login=&url=http://sciencenet.fzk.de:8080/yacysearch.rss?resource=global" >sciencenet</option>
+		</select>
+		<br />
+		<input  id="searchbutton" type="submit" name="Enter" value="Search" />																	
+		</p>
+	</form>
+</div>
+<h3>YaCy Project</h3><!-- 1 -->
+<div class="menu">
+		<img alt="YaCy Project Home" title="YaCy Project Home" src="img-1/home.png" />
+			<a href="http://www.yacy.net" >YaCy Home</a><br />
+		<img alt="YaCy Statistics" title="YaCy Statistics" src="img-2/bar_graph.png" />
+			<a href="http://www.yacystats.de" >YaCy Statistics</a><br />
+		<img alt="YaCy Forum" title="YaCy Forum" src="img-1/Discussion.png" />
+			<a href="http://forum.yacy-websuche.de/" >YaCy Forum</a><br />
+		<img alt="Help" title="YaCy Wiki" src="img-1/Help%20Blue%20Button.png" />
+			<a href="http://yacy-websuche.de/wiki/index.php/Hauptseite" >YaCy Wiki</a><br />
+</div>
+<h3>YaCy Peer Admin</h3><!-- 2 -->
+<div class="menu">
+		<img alt="Login" title="Login" src="img-1/User.png" />
+			<a id="login" href="#Login">Login</a><br />
+		<img alt="Admin Console" title="Admin Console" src="img-1/Gear.png" />
+			<a id="admin" href="#AdminConsole">Admin Console</a><br />
+		<img alt="Re-Start" title="Re-Start" src="img-1/Backup%20Green%20Button.png" />
+			<a href="../../Steering.html?restart=">Re-Start</a><br />
+		<img alt="Shutdown" title="Shutdown" src="img-1/Stop%20Red%20Button.png" />
+			<a href="../../Steering.html?shutdown=">Shutdown</a><br />		
+</div>
+
+
+
+
+
+
+	
