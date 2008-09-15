@@ -5,9 +5,9 @@
   <li class="menugroup" id="menugroupGlobalIndex">
     <h3>Search&nbsp;&amp;&nbsp;Browse</h3>
     <ul class="menu">
-      <li><a href="/index.html?display=1" accesskey="s" class="MenuItemLink">Search Page (standard)</a></li>
-      <li><a href="/yacy/user/ysearch.html?display=1" accesskey="s" class="MenuItemLink">Search Page (alternative)</a></li>
-      <li><a href="/yacy/ui/" accesskey="s" class="MenuItemLink">Search Page (Rich Client)</a></li>
+      <li><a href="/index.html?display=1" accesskey="s" class="MenuItemLink">Search Page</a></li>
+      <li><a href="/yacy/ui/" accesskey="s" class="MenuItemLink">Rich Client Search</a></li>
+      <!--<li><a href="/yacy/user/ysearch.html?display=1" accesskey="s" class="MenuItemLink">Search Page (alternative)</a></li>-->
       <li><a href="/compare_yacy.html?display=1" class="MenuItemLink">Compare Search</a></li>
       <li><a href="/Ranking_p.html" class="MenuItemLink lock">Ranking Config</a></li>
       <li><a href="/Surftips.html?display=1" class="MenuItemLink">Surftips</a></li>
