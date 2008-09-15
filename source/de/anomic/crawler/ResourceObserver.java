@@ -32,9 +32,9 @@ import de.anomic.server.logging.serverLog;
 import de.anomic.tools.diskUsage;
 
 public final class ResourceObserver {
-    // The minimal free space on every used volume, for now set to 100 MB.
+    // The minimal free space on every used volume, for now set to 1000 MB.
     // TODO make it configurable
-    private final static long MIN_FREE_DISK_SPACE = 100L /* MiB */ * 1024L * 1024L;
+    private final static long MIN_FREE_DISK_SPACE = 1000L /* MiB */ * 1024L * 1024L;
     // Unknown for now
     //private final static long MIN_FREE_MEMORY = 0;
     // We are called with the cleanup job every five minutes;
