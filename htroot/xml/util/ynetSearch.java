@@ -50,8 +50,13 @@ public class ynetSearch {
     			}
     		} else {
     			InputStream is = null;    			 
-    			try { 	
-    				final String s = post.get("url")+"&search="+post.get("search")+"&count="+post.get("count")+"&offset="+post.get("offset");    				   				
+    			try {
+    			    String searchaddress = post.get("url");
+    			    if (!searchaddress.startsWith("http://")) {
+    			        // a relative path .. this addresses the local peer
+    			        searchaddress = "http://" + switchboard.webIndex.seedDB.mySeed().getPublicAddress() + (searchaddress.startsWith("/") ? "" : "/") + searchaddress;
+    			    }
+    				final String s = searchaddress+"&search="+post.get("search")+"&count="+post.get("count")+"&offset="+post.get("offset");    				   				
     				final URL url = new URL(s);     				
     				is = url.openStream(); 
     				final String httpout = new Scanner(is).useDelimiter( "\\Z" ).next();
