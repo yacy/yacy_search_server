@@ -63,35 +63,37 @@ public class compare_yacy {
         String default_right = sb.getConfig("compare_yacy.right", defaultsearch);
         
         if (post != null) {
-            prop.put("search", 1);
-            prop.putHTML("search_query", post.get("query", ""));
-            prop.putHTML("search_left", searchengines.get(post.get("left", default_left)));
-            prop.putHTML("search_right", searchengines.get(post.get("right", default_right)));
-        } else {
-            prop.put("search", 0);
-            prop.put("search_query", "");
+            if (searchengines.get(post.get("left", default_left)) != null) {
+                default_left = post.get("left", default_left);
+                sb.setConfig("compare_yacy.left", default_left);
+            }
+            if (searchengines.get(post.get("right", default_right)) != null) {
+                default_right = post.get("right", default_right);
+                sb.setConfig("compare_yacy.right", default_right);
+            }
         }
-        
         
         prop.put("searchengines", order.length);
         String name;
         for (int i = 0; i < order.length; i++) {
             name = order[i];
             prop.putHTML("searchengines_" + i + "_searchengine", name);
-            if (post != null && post.get("left", default_left).equals(name)) {
-                prop.put("searchengines_" + i + "_leftengine", 1);
-                sb.setConfig("compare_yacy.left", name);
-            } else {
-                prop.put("searchengines_" + i + "_leftengine", 0);
-            }
-            if (post != null && post.get("right", default_right).equals(name)) {
-                prop.put("searchengines_" + i + "_rightengine", 1);
-                sb.setConfig("compare_yacy.right", name);
-            } else {
-                prop.put("searchengines_" + i + "_rightengine", 0);
-            }
+            prop.put("searchengines_" + i + "_leftengine", name.equals(default_left) ? 1 : 0);
+            prop.put("searchengines_" + i + "_rightengine", name.equals(default_right) ? 1 : 0);
         }
 
+        prop.putHTML("search_left", searchengines.get(default_left));
+        prop.putHTML("search_right", searchengines.get(default_right));
+        
+        if (post == null || post.get("query", "").length() == 0) {
+            prop.put("search", 0);
+            prop.put("search_query", "");
+            return prop;
+        }
+        
+        prop.put("search", 1);
+        prop.putHTML("search_query", post.get("query", ""));
+        
         // return rewrite properties
         return prop;
     }
