@@ -5,6 +5,7 @@
 		$.ajax({
 			type: "GET",
 			url: query,
+			async: false,
 			dataType: "xml",
 			success: function(xml) {				
 				if ($.browser.mozilla && ($.browser.version > 1.8)) {

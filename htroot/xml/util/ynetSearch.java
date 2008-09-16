@@ -48,6 +48,7 @@ public class ynetSearch {
     			if(post.containsKey("login")){
     				prop.put("AUTHENTICATE","admin log-in");
     			}
+    			return prop;
     		} else {
     			InputStream is = null;    			 
     			try {
