@@ -36,7 +36,15 @@ public class delete_p {
         // return variable that accumulates replacements
         final plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
         final serverObjects prop = new serverObjects();
+        final boolean isAdmin=switchboard.verifyAuthentication(header, true);        
         if(post!= null){
+    		if(!isAdmin){
+    			// force authentication if desired
+        			if(post.containsKey("login")){
+        				prop.put("AUTHENTICATE","admin log-in");
+        			}
+        			return prop;
+    		} 
         	try {
                 if( post.containsKey("url") && switchboard.bookmarksDB.removeBookmark((new yacyURL(post.get("url", "nourl"), null)).hash())) {
                 	prop.put("result", "1");
@@ -50,11 +58,10 @@ public class delete_p {
             }
         }else{
         	prop.put("result", "0");
-        }
+        }        
         // return rewrite properties
         return prop;
-    }
-    
+    }    
 }
 
 

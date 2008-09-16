@@ -1,11 +1,57 @@
 <script type="text/javascript">
    //<![CDATA[
 	$(document).ready(function() {
-		
 		$("#side1").accordion("activate", 0);
 		$("#side2").accordion("activate", 1);
 		// $('#yoptions').resetForm();
-	
+		$("#bmadd").dialog({
+			autoOpen: false,
+			height: 350,
+			width: 250,
+			resizable: false,
+			buttons: { 
+        		"Add": function() { 
+            		var url = $("input[@name='bm_url']").getValue();
+            		var title = $("input[@name='bm_title']").getValue();
+            		var desc = $("input[@name='bm_desc']").getValue();            		
+            		var tags = $("input[@name='bm_tags']").getValue()
+            		var path = $("input[@name='bm_path']").getValue();
+            		var pub = $("select[@name='bm_public']").getValue();            		
+            		var query = "&url="+url+"&title="+title+"&description="+desc+"&tags="+tags+"&path="+path+"&public="+pub+"&add=create";            		
+            		$.ajax({
+						type: "POST",
+						url: "/xml/bookmarks/posts/add_p.xml?login="+query,			
+						dataType: "xml",
+						success: function(xml) {
+            				$("#bmadd").dialog("close");            
+            				$tabs.tabs("load", 3);            					
+            			}
+            		});	 
+        		}, 
+        		"Cancel": function() { 
+            		$(this).dialog("close"); 
+        		} 
+    		} 
+		});
+		function bm_action(com,grid) {
+			if (com=='Delete') {
+				confirm('Delete ' + $('.trSelected',grid).length + ' bookmark(s)?')				
+				$('.trSelected',grid).each(function(){
+					var url = "/xml/bookmarks/posts/delete_p.xml?login=&urlhash="+$(this).find('td :first').text();					
+					$.ajax({
+						type: 'POST',
+						url: url,			
+						dataType: 'xml',
+						success: function(xml) {
+							$tabs.tabs("load", 3);
+						}
+					}); // close $.ajax(					
+				}); //close each(
+			}
+			else if (com=='Add') {
+				$("#bmadd").dialog('open');
+			}			
+		}	
 		counter = 0;
 		$.ajax({
 			type: "GET",
@@ -16,7 +62,7 @@
 					var link = $(this).attr('href');
 					var hash = $(this).attr('id');
 					var title = $(this).find('title').text();
-					var date = $(this).attr('added');;
+					var date = $(this).attr('added');
 					var desc = $(this).find('desc').text();
 					var pub = $(this).find('metadata[owner=YaCy][public]').attr('public');										
 					var tags = $(this).find('metadata[owner=Mozilla][ShortcutURL]').attr('ShortcutURL');
@@ -31,22 +77,22 @@
 						 var icon = '<img src="img-2/lock.png" alt="private bookmark" title="private bookmark"/>'
 					}				
 					$('<tr></tr')
-						.html('<td><input type="checkbox" value="true" /></td><td>' +icon+ '</td><td><h3 class="linktitle">' +title+ '</h3><p class="desc">' +desc+ '</p><p class="url"><a href="' +link+ '">' +link+ '</a></p><td>' +tags+ ' </td><td>' +date+ '</td>')						
+						.html('<td>' +hash+ '</td><td>' +icon+ '</td><td><h3 class="linktitle">' +title+ '</h3><p class="desc">' +desc+ '</p><p class="url"><a href="' +link+ '">' +link+ '</a></p><td>' +tags+ ' </td><td>' +date+ '</td>')						
 						.appendTo('#ymarks tbody');																						
 					counter++;
 				}); //close each(				
     			var height=document.documentElement.clientHeight - 205;    			
     			$('#ymarks').flexigrid({
     				colModel: [
-						{display: '', name : 'select', width : 25, sortable : false, align: 'center'},
+						{display: 'Hash', name : 'hash', width : 50, sortable : false, align: 'center', hide: true},
 						{display: '', name : 'public', width : 25, sortable : true, align: 'center'},
 						{display: 'Title', name : 'title', width : 450, sortable : true, align: 'left'},
-						{display: 'Tags', name : 'tags', width : 215, sortable : false, align: 'left'},
+						{display: 'Tags', name : 'tags', width : 240, sortable : false, align: 'left'},
 						{display: 'Date', name : 'date', width : 130, sortable : true, align: 'left'}
 					],
 					buttons: [
-						{name: 'Add', bclass: 'add', onpress: test},
-						{name: 'Delete', bclass: 'delete', onpress: test},
+						{name: 'Add', bclass: 'add', onpress: bm_action},
+						{name: 'Delete', bclass: 'delete', onpress: bm_action},
 						{separator: true}
 					],										
 					striped: true,
@@ -55,31 +101,47 @@
     				title: 'YaCy Bookmarks: '+qtag										    				
     			});    							
 			}
-		}); //close $.ajax(							
-		function test(com,grid) {
-			if (com=='Delete') {
-				confirm('Delete ' + $('.trSelected',grid).length + ' items?')
-			}
-			else if (com=='Add') {
-				alert('Add New Item');
-			}			
-		}	
+		}); //close $.ajax(
 	});
   //]]>
 </script>
 
 <!-- Display Bookmarks Table -->		
 <table id="ymarks" summary="YaCy Bookmarks">
-	<colgroup>
-		<col width="25"/>
-		<col width="25"/>
-		<col width="450"/>
-		<col width="215"/>
-		<col width="130"/>								
-	</colgroup>			
 	<tbody>			
 	</tbody>
 </table>
+<!-- Display Bookmarks Edit Dialog -->	
+<div id="bmadd" class="bmdialog" title="Add bookmark">
+	<form id="bmaddform" class="small" method="get" accept-charset="UTF-8" action="">
+		<label for="url">URL:</label>
+		<br />					
+		<input type="text" name="bm_url" id="bm_url" class="filter" onblur="loadTitle()" size="80" />
+		<br />
+		<label for="bm_title">Title:</label>
+		<br />
+		<input type="text" name="bm_title" id="bm_title" class="filter" size="80" />
+		<br />
+		<label for="bm_desc">Description:</label>
+		<br />
+		<input type="text" name="bm_desc" id="bm_desc" class="filter" size="80" />
+		<br />
+		<label for="bm_path">Folder (/folder/subfolder):</label>
+		<br />
+		<input type="text" name="bm_path" id="bm_path" class="filter" size="80" />
+		<br />
+		<label for="bm_tags">Tags (comma separated):</label>
+		<br />
+		<input type="text" name="bm_tags" id="bm_tags" class="filter" size="80" />
+		<br />
+		<label for="bm_public">Public:</label>
+		<br />
+		<select name="bm_public" id="bm_public" class="selector">
+			<option value="public" selected="selected">yes</option>
+			<option value="private">no</option>
+		</select>
+	</form>
+</div>
 
 
 

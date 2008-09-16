@@ -1,0 +1,97 @@
+/* This file skins dialog */
+
+.bmdialog .ui-dialog,
+.bmdialog.ui-dialog {
+	background-color: white;
+	font-family: "Trebuchet MS", Trebuchet, Verdana, Helvetica, Arial, sans-serif;
+    font-size: 12px;
+}
+
+.bmdialog .ui-dialog .ui-dialog-titlebar,
+.bmdialog.ui-dialog .ui-dialog-titlebar {
+	background: url(../img/tab.png) no-repeat;	
+	padding: 2px;
+	height: 28px;
+	_height: 29px;
+}
+
+.bmdialog .ui-dialog.ui-draggable .ui-dialog-titlebar,
+.bmdialog.ui-dialog.ui-draggable .ui-dialog-titlebar {
+	cursor: move;
+}
+
+.bmdialog .ui-dialog .ui-dialog-titlebar-close,
+.bmdialog.ui-dialog .ui-dialog-titlebar-close {
+	width: 16px;
+	height: 16px;
+	background: url(../img-2/cancel.png) no-repeat;
+	position:absolute;
+	top: 6px;
+	right: 7px;
+	cursor: default;
+}
+
+.bmdialog .ui-dialog .ui-dialog-titlebar-close span,
+.bmdialog.ui-dialog .ui-dialog-titlebar-close span {
+	display: none;
+}
+
+.bmdialog .ui-dialog .ui-dialog-titlebar-close-hover,
+.bmdialog.ui-dialog .ui-dialog-titlebar-close-hover {
+	background: url(../img-2/cancel.png) no-repeat;
+}
+
+.bmdialog .ui-dialog .ui-dialog-title,
+.bmdialog.ui-dialog .ui-dialog-title {
+	margin-left: 5px;
+    color: #27537a;
+    font-weight: bold;
+    line-height: 1.2;
+	position: relative;
+	top: 7px;
+	left: 4px;
+}
+
+.bmdialog .ui-dialog .ui-dialog-content,
+.bmdialog.ui-dialog .ui-dialog-content {
+	margin: 1.2em;
+}
+
+.bmdialog .ui-dialog .ui-dialog-buttonpane,
+.bmdialog.ui-dialog .ui-dialog-buttonpane {
+	position: absolute;
+	bottom: 8px;
+	right: 12px;
+	width: 100%;
+	text-align: right;
+}
+
+.bmdialog .ui-dialog .ui-dialog-buttonpane button,
+.bmdialog.ui-dialog .ui-dialog-buttonpane button {
+	margin: 6px;
+}
+
+/* Dialog handle styles */
+.bmdialog .ui-dialog .ui-resizable-n,
+.bmdialog.ui-dialog .ui-resizable-n { cursor: n-resize; height: 6px; width: 100%; top: 0px; left: 0px; background: transparent url(i/dialog-n.gif) repeat scroll center top; }
+
+.bmdialog .ui-dialog .ui-resizable-s,
+.bmdialog.ui-dialog .ui-resizable-s { cursor: s-resize; height: 8px; width: 100%; bottom: 0px; left: 0px; background: transparent url(i/dialog-s.gif) repeat scroll center top; }
+
+.bmdialog .ui-dialog .ui-resizable-e,
+.bmdialog.ui-dialog .ui-resizable-e { cursor: e-resize; width: 7px; right: 0px; top: 0px; height: 100%; background: transparent url(i/dialog-e.gif) repeat scroll right center; }
+
+.bmdialog .ui-dialog .ui-resizable-w,
+.bmdialog.ui-dialog .ui-resizable-w { cursor: w-resize; width: 7px; left: 0px; top: 0px; height: 100%; background: transparent url(i/dialog-w.gif) repeat scroll right center; }
+
+.bmdialog .ui-dialog .ui-resizable-se,
+.bmdialog.ui-dialog .ui-resizable-se { cursor: se-resize; width: 9px; height: 9px; right: 0px; bottom: 0px; background: transparent url(i/dialog-se.gif); }
+
+.bmdialog .ui-dialog .ui-resizable-sw,
+.bmdialog.ui-dialog .ui-resizable-sw { cursor: sw-resize; width: 9px; height: 9px; left: 0px; bottom: 0px; background: transparent url(i/dialog-sw.gif); }
+
+.bmdialog .ui-dialog .ui-resizable-nw,
+.bmdialog.ui-dialog .ui-resizable-nw { cursor: nw-resize; width: 9px; height: 29px; left: 0px; top: 0px; background: transparent url(i/dialog-nw.gif); }
+
+.bmdialog .ui-dialog .ui-resizable-ne,
+.bmdialog.ui-dialog .ui-resizable-ne { cursor: ne-resize; width: 9px; height: 29px; right: 0px; top: 0px; background: transparent url(i/dialog-ne.gif); }
