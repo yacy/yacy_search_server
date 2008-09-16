@@ -218,7 +218,7 @@ dl.pairs dt {
 }
 /* jQuery Accordion */
 .basic  {
-	font-family: Helvetica,Arial,sans-serif;
+	font-family: "Trebuchet MS", Trebuchet, Verdana, Helvetica, Arial, sans-serif;    
 	width: 250px;	
 }
 .basic div {
@@ -244,7 +244,7 @@ dl.pairs dt {
 	text-decoration: none;
 	/* font-weight: bold; */
 	font-size: 12px;
-	color: black;
+	color: #27537a;
 	background: url(../img/box250.png) no-repeat;
 	border-top: 1px solid #FFFFFF;
 	border-bottom: 1px solid #999;	
