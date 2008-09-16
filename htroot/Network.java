@@ -164,16 +164,6 @@ public class Network {
 
             prop.putNum("table_gppm", otherppm + ((iAmActive) ? myppm : 0));
             prop.putNum("table_gqph", Math.round(6000d * otherqpm + 100d * ((iAmActive) ? myqph : 0d)) / 100d);
-
-//          String comment = "";
-            prop.put("table_comment", 0);
-            if (conCount == 0) {
-                if (Integer.parseInt(sb.getConfig("onlineMode", "1")) == 2) {
-                    prop.put("table_comment", 1);//in onlinemode, but not online
-                } else {
-                    prop.put("table_comment", 2);//not in online mode, and not online
-                }
-            }
             prop.put("table", 2); // triggers overview
             prop.put("page", 0);
         } else if (post != null && Integer.parseInt(post.get("page", "1")) == 4) {

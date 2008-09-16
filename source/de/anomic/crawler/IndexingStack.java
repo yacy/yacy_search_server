@@ -318,7 +318,7 @@ public class IndexingStack {
         }
 
         public String initiator() {
-            return (initiator == null) ? "------------" : initiator;
+            return (initiator == null) ? "------------" : initiator; // TODO: this may cause problems for methods that check if the initiator is the proxy
         }
         
         public yacySeed initiatorPeer() {
@@ -396,10 +396,10 @@ public class IndexingStack {
             // 6) local fetching for global crawling (other known or unknwon initiator)
             int processCase = plasmaSwitchboardConstants.PROCESSCASE_0_UNKNOWN;
             // FIXME the equals seems to be incorrect: String.equals(boolean)
-            if ((initiator == null) || (initiator.equals(initiator.length() == 0))) {
+            if ((initiator == null) || initiator.length() == 0 || initiator.equals("------------")) {
                 // proxy-load
                 processCase = plasmaSwitchboardConstants.PROCESSCASE_4_PROXY_LOAD;
-            } else if ((initiator != null) && (initiator.equals(wordIndex.seedDB.mySeed().hash))) {
+            } else if (initiator.equals(wordIndex.seedDB.mySeed().hash)) {
                 // normal crawling
                 processCase = plasmaSwitchboardConstants.PROCESSCASE_5_LOCAL_CRAWLING;
             } else {

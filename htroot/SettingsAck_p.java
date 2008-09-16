@@ -288,28 +288,6 @@ public class SettingsAck_p {
             prop.putHTML("info_filter", filter);
             return prop;
         }
-
-        if (post.containsKey("pmode")) {
-            env.setConfig("onlineMode", "2");
-            prop.put("info", "11");//permanent online mode
-            yacyCore.setOnlineMode(2);
-            yacyCore.triggerOnlineAction();
-            return prop;
-        }
-        
-        if (post.containsKey("emode")) {
-            env.setConfig("onlineMode", "1");
-            prop.put("info", "24");//event-based online mode
-            yacyCore.setOnlineMode(1);
-            return prop;
-        }
-        
-        if (post.containsKey("cmode")) {
-            env.setConfig("onlineMode", "0");
-            prop.put("info", "25");//cache mode
-            yacyCore.setOnlineMode(0);
-            return prop;
-        }
         
         if (post.containsKey("proxysettings")) {
             

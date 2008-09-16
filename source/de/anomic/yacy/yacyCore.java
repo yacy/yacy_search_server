@@ -81,7 +81,6 @@ public class yacyCore {
     // public static boolean terminate = false;
 
     // class variables
-    private static int onlineMode = 1;
     plasmaSwitchboard sb;
 
     public static int yacyTime() {
@@ -115,40 +114,11 @@ public class yacyCore {
         // ATTENTION, VERY IMPORTANT: before starting the thread, the httpd yacy server must be running!
 
         speedKey = System.currentTimeMillis() - time;
-
-        // start with a seedList update to propagate out peer, if possible
-        onlineMode = Integer.parseInt(sb.getConfig("onlineMode", "1"));
-        //lastSeedUpdate = universalTime();
         lastOnlineTime = 0;
-
-        // cycle
-        // within cycle: update seed file, strengthen network, pass news (new, old seed's)
-        if (online()) {
-            log.logConfig("you are in online mode");
-        } else {
-            log.logConfig("YOU ARE OFFLINE! ---");
-            log.logConfig("--- TO START BOOTSTRAPING, YOU MUST USE THE PROXY,");
-            log.logConfig("--- OR HIT THE BUTTON 'go online'");
-            log.logConfig("--- ON THE STATUS PAGE http://localhost:" + serverCore.getPortNr(sb.getConfig("port", "8080")) + "/Status.html");
-        }
     }
 
     synchronized static public void triggerOnlineAction() {
         lastOnlineTime = System.currentTimeMillis();
-    }
-
-    public final boolean online() {
-        onlineMode = Integer.parseInt(sb.getConfig("onlineMode", "1"));
-        return ((onlineMode == 2) || ((System.currentTimeMillis() - lastOnlineTime) < 10000));
-    }
-
-    public static int getOnlineMode() {
-        return onlineMode;
-    }
-
-    public static void setOnlineMode(final int newOnlineMode) {
-        onlineMode = newOnlineMode;
-        return;
     }
     
     public final void publishSeedList() {
@@ -201,7 +171,6 @@ public class yacyCore {
     }
 
     public final void peerPing() {
-        if (!online()) { return; }
         if ((sb.isRobinsonMode()) && (sb.getConfig("cluster.mode", "").equals("privatepeer"))) {
             // in case this peer is a privat peer we omit the peer ping
             // all other robinson peer types do a peer ping:

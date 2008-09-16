@@ -446,6 +446,10 @@ public class JakartaCommonsHttpClient {
             // cleanUp statistics
             HttpConnectionInfo.removeConnection(generateConInfo(method));
             throw e;
+        } catch (final IllegalStateException e) {
+            // cleanUp statistics
+            HttpConnectionInfo.removeConnection(generateConInfo(method));
+            throw new IOException(e.getMessage());
         }
         if (serverLog.isFinest("HTTPC")) serverLog.logFinest("HTTPC", "<-" + method.hashCode() + " response headers " +
                 Arrays.toString(method.getResponseHeaders()));

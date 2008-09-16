@@ -699,7 +699,6 @@ public final class plasmaHTCache {
      * ACCESS METHODS
      */
     
-    
     // Store to Cache
     
     public static void storeMetadata(
@@ -712,7 +711,6 @@ public final class plasmaHTCache {
             hm.putAll(responseHeader);
             hm.put("@@URL", metadata.url().toNormalform(false, false));
             hm.put("@@DEPTH", Integer.toString(metadata.depth()));
-            if (metadata.initiator() != null) hm.put("@@INITIATOR", metadata.initiator());
             responseHeaderDB.put(metadata.urlHash(), hm);
         } catch (final Exception e) {
             log.logWarning("could not write ResourceInfo: "

@@ -270,14 +270,6 @@ public class Status {
             prop.put("tray", "1");
         }
 
-        if (sb.getConfig("onlineMode", "1").equals("0")) {
-            prop.put("omode", "0");
-        } else if (sb.getConfig("onlineMode", "1").equals("1")) {
-                prop.put("omode", "1");
-            } else {
-            prop.put("omode", "2");
-        }
-
         // memory usage and system attributes
         prop.put("freeMemory", serverMemory.bytesToString(serverMemory.free()));
         prop.put("totalMemory", serverMemory.bytesToString(serverMemory.total()));

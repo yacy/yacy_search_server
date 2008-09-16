@@ -158,6 +158,13 @@ public class httpdProxyCacheEntry implements indexDocumentMetadata {
         this.depth = depth;
         this.responseStatus = responseStatus;
         this.profile = profile;
+        
+        // the initiator is the hash of the peer that caused the hash entry
+        // it is stored here only to track processed in the peer and this
+        // information is not permanently stored in the web index after the queue has
+        // been processed
+        // in case of proxy usage, the initiator hash is null,
+        // which distinguishes local crawling from proxy indexing
         this.initiator = (initiator == null) ? null : ((initiator.length() == 0) ? null : initiator);
         this.language = yacyURL.language(url);
 

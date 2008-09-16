@@ -85,6 +85,8 @@ public class rssParser extends AbstractParser implements Parser {
             final serverCharBuffer authors = new serverCharBuffer();
             
             final RSSFeed feed = new RSSReader(source).getFeed();
+            if (feed == null) throw new ParserException("no feed in document",location);
+            if (feed.getChannel() == null) throw new ParserException("no channel in document",location);
             
             // getting the rss feed title and description
             final String feedTitle = feed.getChannel().getTitle();

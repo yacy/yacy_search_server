@@ -93,7 +93,6 @@ import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.logging.serverLog;
 import de.anomic.server.logging.serverMiniLogFormatter;
-import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyURL;
 
 public final class httpdProxyHandler {
@@ -415,35 +414,32 @@ public final class httpdProxyHandler {
             // 4. cache stale - refill - superfluous
             // in two of these cases we trigger a scheduler to handle newly arrived files:
             // case 1 and case 3
-            final indexDocumentMetadata cacheEntry = (cachedResponseHeader == null) ? null :
-                new httpdProxyCacheEntry(
-                    0,                               // crawling depth
-                    url,                             // url
-                    "",                              // name of the url is unknown
-                    //requestHeader,                 // request headers
-                    "200 OK",                        // request status
-                    requestHeader,
-                    cachedResponseHeader,
-                    null,                            // initiator
-                    switchboard.webIndex.defaultProxyProfile  // profile
-            );
-            if (cacheEntry != null) plasmaHTCache.storeMetadata(cachedResponseHeader, cacheEntry);
-            
-            if (yacyCore.getOnlineMode() == 0) {
-            	if (cacheExists) {
-            	    if (theLogger.isFinest()) theLogger.logFinest(reqID +"    fulfill request from cache");
-            	    fulfillRequestFromCache(conProp,url,ext,requestHeader,cachedResponseHeader,cacheFile,countedRespond);
-            	} else {
-                    theLogger.logInfo("URL not availabe in Cache"+" and not in online-mode!");
-                    httpd.sendRespondError(conProp,countedRespond,4,404,null,"URL not availabe in Cache",null);
-            	}
-            } else if (cacheExists && cacheEntry.shallUseCacheForProxy()) {
-                if (theLogger.isFinest()) theLogger.logFinest(reqID +"    fulfill request from cache");
-                fulfillRequestFromCache(conProp,url,ext,requestHeader,cachedResponseHeader,cacheFile,countedRespond);
-            } else {            
-                if (theLogger.isFinest()) theLogger.logFinest(reqID +"    fulfill request from web");
-                fulfillRequestFromWeb(conProp,url,ext,requestHeader,cachedResponseHeader,cacheFile,countedRespond);
+            if (cachedResponseHeader == null) {
+                if (theLogger.isFinest()) theLogger.logFinest(reqID + " page not in cache: fulfill request from web");
+                    fulfillRequestFromWeb(conProp,url,ext,requestHeader,cachedResponseHeader,cacheFile,countedRespond);
+            } else {
+                final indexDocumentMetadata cacheEntry = new httpdProxyCacheEntry(
+                        0,                               // crawling depth
+                        url,                             // url
+                        "",                              // name of the url is unknown
+                        //requestHeader,                 // request headers
+                        "200 OK",                        // request status
+                        requestHeader,
+                        cachedResponseHeader,
+                        null,                            // initiator
+                        switchboard.webIndex.defaultProxyProfile  // profile
+                );
+                plasmaHTCache.storeMetadata(cachedResponseHeader, cacheEntry); // TODO: check if this storeMetadata is necessary
+                
+                if (cacheExists && cacheEntry.shallUseCacheForProxy()) {
+                    if (theLogger.isFinest()) theLogger.logFinest(reqID + " fulfill request from cache");
+                    fulfillRequestFromCache(conProp,url,ext,requestHeader,cachedResponseHeader,cacheFile,countedRespond);
+                } else {            
+                    if (theLogger.isFinest()) theLogger.logFinest(reqID + " fulfill request from web");
+                    fulfillRequestFromWeb(conProp,url,ext,requestHeader,cachedResponseHeader,cacheFile,countedRespond);
+                }
             }
+            
            
         } catch (final Exception e) {
             try {
