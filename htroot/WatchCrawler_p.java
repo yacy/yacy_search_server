@@ -383,12 +383,12 @@ public class WatchCrawler_p {
         }
         
         // performance settings
-        final long LCbusySleep = Integer.parseInt(env.getConfig(plasmaSwitchboardConstants.CRAWLJOB_LOCAL_CRAWL_BUSYSLEEP, "100"));
+        final long LCbusySleep = Integer.parseInt(env.getConfig(plasmaSwitchboardConstants.CRAWLJOB_LOCAL_CRAWL_BUSYSLEEP, "1000"));
         final int LCppm = (int) (60000L / Math.max(1,LCbusySleep));
-        prop.put("crawlingSpeedMaxChecked", (LCppm >= 1000) ? "1" : "0");
-        prop.put("crawlingSpeedCustChecked", ((LCppm > 10) && (LCppm < 1000)) ? "1" : "0");
+        prop.put("crawlingSpeedMaxChecked", (LCppm >= 6000) ? "1" : "0");
+        prop.put("crawlingSpeedCustChecked", ((LCppm > 10) && (LCppm < 6000)) ? "1" : "0");
         prop.put("crawlingSpeedMinChecked", (LCppm <= 10) ? "1" : "0");
-        prop.put("customPPMdefault", ((LCppm > 10) && (LCppm < 1000)) ? Integer.toString(LCppm) : "");
+        prop.put("customPPMdefault", Integer.toString(LCppm));
         
         // return rewrite properties
         return prop;
@@ -404,14 +404,14 @@ public class WatchCrawler_p {
     }
     
     private static void setPerformance(final plasmaSwitchboard sb, final serverObjects post) {
-        final String crawlingPerformance = post.get("crawlingPerformance","custom");
-        final long LCbusySleep = Integer.parseInt(sb.getConfig(plasmaSwitchboardConstants.CRAWLJOB_LOCAL_CRAWL_BUSYSLEEP, "100"));
+        final String crawlingPerformance = post.get("crawlingPerformance", "custom");
+        final long LCbusySleep = Integer.parseInt(sb.getConfig(plasmaSwitchboardConstants.CRAWLJOB_LOCAL_CRAWL_BUSYSLEEP, "1000"));
         int wantedPPM = (LCbusySleep == 0) ? 6000 : (int) (60000L / LCbusySleep);
         try {
             wantedPPM = Integer.parseInt(post.get("customPPM", Integer.toString(wantedPPM)));
         } catch (final NumberFormatException e) {}
-        if (crawlingPerformance.equals("minimum")) wantedPPM = 10;
-        if (crawlingPerformance.equals("maximum")) wantedPPM = 6000;
+        if (crawlingPerformance.toLowerCase().equals("minimum")) wantedPPM = 10;
+        if (crawlingPerformance.toLowerCase().equals("maximum")) wantedPPM = 6000;
         sb.setPerformance(wantedPPM);
     }
     

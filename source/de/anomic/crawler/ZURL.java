@@ -44,6 +44,7 @@ import de.anomic.yacy.yacyURL;
 public class ZURL {
     
     private static final int EcoFSBufferSize = 200;
+    private static final int maxStackSize    = 300;
     
     public final static kelondroRow rowdef = new kelondroRow(
             "String urlhash-"   + yacySeedDB.commonHashLength + ", " + // the url's hash
@@ -117,6 +118,7 @@ public class ZURL {
     
     public synchronized void push(final Entry e) {
         stack.add(e.hash());
+        while (stack.size() > maxStackSize) stack.removeFirst();
     }
     
     public Entry top(final int pos) {

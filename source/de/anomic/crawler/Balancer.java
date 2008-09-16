@@ -239,7 +239,7 @@ public class Balancer {
        return removedCounter;
     }
     
-    public synchronized boolean has(final String urlhash) {
+    public boolean has(final String urlhash) {
         return urlFileIndex.has(urlhash.getBytes());
     }
     
