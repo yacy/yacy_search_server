@@ -461,8 +461,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         // start a loader
         log.logConfig("Starting Crawl Loader");
         this.crawlQueues = new CrawlQueues(this, plasmaPath);
-        this.crawlQueues.noticeURL.setMinimumLocalDelta(this.getConfigLong("minimumLocalDelta", this.crawlQueues.noticeURL.getMinimumLocalDelta()));
-        this.crawlQueues.noticeURL.setMinimumGlobalDelta(this.getConfigLong("minimumGlobalDelta", this.crawlQueues.noticeURL.getMinimumGlobalDelta()));
+        this.crawlQueues.noticeURL.setMinimumDelta(
+                this.getConfigLong("minimumLocalDelta", this.crawlQueues.noticeURL.getMinimumLocalDelta()),
+                this.getConfigLong("minimumGlobalDelta", this.crawlQueues.noticeURL.getMinimumGlobalDelta()));
                 
         /*
          * Creating sync objects and loading status for the crawl jobs

@@ -45,41 +45,30 @@ public class NoticedURL {
 
     private static final long minimumLocalDeltaInit  =   0; // the minimum time difference between access of the same local domain
     private static final long minimumGlobalDeltaInit = 500; // the minimum time difference between access of the same global domain
-    private static final long maximumDomAge       =  60000; // the maximum age of a domain until it is used for another crawl attempt
     
     private Balancer coreStack;      // links found by crawling to depth-1
     private Balancer limitStack;     // links found by crawling at target depth
     private Balancer remoteStack;    // links from remote crawl orders
-    //private final plasmaCrawlBalancer overhangStack;  // links found by crawling at depth+1
-    //private kelondroStack imageStack;     // links pointing to image resources
-    //private kelondroStack movieStack;     // links pointing to movie resources
-    //private kelondroStack musicStack;     // links pointing to music resources
-    private long minimumLocalDelta;
-    private long minimumGlobalDelta;
     
     public NoticedURL(final File cachePath) {
-        this.coreStack = new Balancer(cachePath, "urlNoticeCoreStack", false);
-        this.limitStack = new Balancer(cachePath, "urlNoticeLimitStack", false);
+        this.coreStack = new Balancer(cachePath, "urlNoticeCoreStack", false, minimumLocalDeltaInit, minimumGlobalDeltaInit);
+        this.limitStack = new Balancer(cachePath, "urlNoticeLimitStack", false, minimumLocalDeltaInit, minimumGlobalDeltaInit);
         //overhangStack = new plasmaCrawlBalancer(overhangStackFile);
-        this.remoteStack = new Balancer(cachePath, "urlNoticeRemoteStack", false);
-        this.minimumLocalDelta = minimumLocalDeltaInit;
-        this.minimumGlobalDelta = minimumGlobalDeltaInit;
+        this.remoteStack = new Balancer(cachePath, "urlNoticeRemoteStack", false, minimumLocalDeltaInit, minimumGlobalDeltaInit);
     }
 
     public long getMinimumLocalDelta() {
-        return this.minimumLocalDelta;
+        return this.coreStack.getMinimumLocalDelta();
     }
     
     public long getMinimumGlobalDelta() {
-        return this.minimumGlobalDelta;
+        return this.coreStack.getMinimumGlobalDelta();
     }
     
-    public void setMinimumLocalDelta(final long newDelta) {
-        this.minimumLocalDelta = Math.max(minimumLocalDeltaInit, newDelta);
-    }
-    
-    public void setMinimumGlobalDelta(final long newDelta) {
-        this.minimumGlobalDelta = Math.max(minimumGlobalDeltaInit, newDelta);
+    public void setMinimumDelta(final long minimumLocalDelta, final long minimumGlobalDelta) {
+        this.coreStack.setMinimumDelta(minimumLocalDelta, minimumGlobalDelta);
+        this.limitStack.setMinimumDelta(minimumLocalDelta, minimumGlobalDelta);
+        this.remoteStack.setMinimumDelta(minimumLocalDelta, minimumGlobalDelta);
     }
     
     public void clear() {
@@ -228,7 +217,7 @@ public class NoticedURL {
         CrawlEntry entry;
         synchronized (balancer) {
         while ((s = balancer.size()) > 0) {
-            entry = balancer.pop((delay) ? minimumLocalDelta : 0, (delay) ? minimumGlobalDelta : 0, maximumDomAge);
+            entry = balancer.pop(delay);
             if (entry == null) {
                 if (s > balancer.size()) continue;
                 final int aftersize = balancer.size();

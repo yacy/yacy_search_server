@@ -267,8 +267,7 @@ public class PerformanceQueues_p {
             final long minimumGlobalDelta = post.getLong("minimumGlobalDelta", switchboard.crawlQueues.noticeURL.getMinimumGlobalDelta());
             switchboard.setConfig("minimumLocalDelta", minimumLocalDelta);
             switchboard.setConfig("minimumGlobalDelta", minimumGlobalDelta);
-            switchboard.crawlQueues.noticeURL.setMinimumLocalDelta(minimumLocalDelta);
-            switchboard.crawlQueues.noticeURL.setMinimumGlobalDelta(minimumGlobalDelta);
+            switchboard.crawlQueues.noticeURL.setMinimumDelta(minimumLocalDelta, minimumGlobalDelta);
         }
         
         // delta settings
