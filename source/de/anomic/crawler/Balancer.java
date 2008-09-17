@@ -446,6 +446,43 @@ public class Balancer {
         // so just fill them up with some stuff
         if (result == null) shiftFileToDomStacks(1000);
         
+        // 2nd-b: check domainStacks for best match between stack size and retrieval time
+        String maxhash = null;
+        if ((result == null) && (domainStacks.size() > 0)) synchronized (domainStacks) {
+            // we order all domains by the number of entries per domain
+            // then we iterate through these domains in descending entry order
+            // and take that one, that has a zero waiting time
+            final Iterator<Map.Entry<String, LinkedList<String>>> i = domainStacks.entrySet().iterator();
+            Map.Entry<String, LinkedList<String>> entry;
+            String domhash;
+            LinkedList<String> domlist;
+            final TreeMap<Integer, String> hitlist = new TreeMap<Integer, String>();
+            int count = 0;
+            // first collect information about sizes of the domain lists
+            while (i.hasNext()) {
+                entry = i.next();
+                domhash = entry.getKey();
+                domlist = entry.getValue();
+                hitlist.put(Integer.valueOf(domlist.size() * 100 + count++), domhash);
+            }
+            
+            // now iterate in descending order and fetch that one,
+            // that is acceptable by the minimumDelta constraint
+            long waitingtime;
+            while (hitlist.size() > 0) {
+                domhash = hitlist.remove(hitlist.lastKey());
+                if (maxhash == null) maxhash = domhash; // remember first entry
+                waitingtime = CrawlEntry.waitingRemainingGuessed(domhash, minimumLocalDelta, minimumGlobalDelta);
+                if (waitingtime < 100) {
+                    domlist = domainStacks.get(domhash);
+                    result = domlist.removeFirst();
+                    if (domlist.size() == 0) domainStacks.remove(domhash);
+                    break;
+                }
+            }
+            
+        }
+        
         // 2nd-a: check domainStacks for latest arrivals
         if ((result == null) && (domainStacks.size() > 0)) synchronized (domainStacks) {
             // we select specific domains that have not been used for a long time
@@ -481,44 +518,10 @@ public class Balancer {
             }
         }
         
-        // 2nd-b: check domainStacks for best match between stack size and retrieval time
-        if ((result == null) && (domainStacks.size() > 0)) synchronized (domainStacks) {
-            // we order all domains by the number of entries per domain
-            // then we iterate through these domains in descending entry order
-            // and take that one, that has a zero waiting time
-            final Iterator<Map.Entry<String, LinkedList<String>>> i = domainStacks.entrySet().iterator();
-            Map.Entry<String, LinkedList<String>> entry;
-            String domhash;
-            LinkedList<String> domlist;
-            final TreeMap<Integer, String> hitlist = new TreeMap<Integer, String>();
-            int count = 0;
-            // first collect information about sizes of the domain lists
-            while (i.hasNext()) {
-                entry = i.next();
-                domhash = entry.getKey();
-                domlist = entry.getValue();
-                hitlist.put(Integer.valueOf(domlist.size() * 100 + count++), domhash);
-            }
-            
-            // now iterate in descending order and fetch that one,
-            // that is acceptable by the minimumDelta constraint
-            long waitingtime;
-            String maxhash = null;
-            while (hitlist.size() > 0) {
-                domhash = hitlist.remove(hitlist.lastKey());
-                if (maxhash == null) maxhash = domhash; // remember first entry
-                waitingtime = CrawlEntry.waitingRemainingGuessed(domhash, minimumLocalDelta, minimumGlobalDelta);
-                if (waitingtime == 0) {
-                    domlist = domainStacks.get(domhash);
-                    result = domlist.removeFirst();
-                    if (domlist.size() == 0) domainStacks.remove(domhash);
-                    break;
-                }
-            }
-            
-            // if we did yet not choose any entry, we simply take that one with the most entries
-            if ((result == null) && (maxhash != null)) {
-                domlist = domainStacks.get(maxhash);
+        // 2nd-c: if we did yet not choose any entry, we simply take that one with the most entries
+        if ((result == null) && (maxhash != null)) {
+            LinkedList<String> domlist = domainStacks.get(maxhash);
+            if (domlist != null) {
                 result = domlist.removeFirst();
                 if (domlist.size() == 0) domainStacks.remove(maxhash);
             }
