@@ -824,6 +824,7 @@ public final class plasmaWordIndex implements indexRI {
             language = entry.url().language();
         } else {
             System.out.println("*** DEBUG LANGUAGE: identification of " + entry.url() + " SUCCESS: " + language);
+            if (language.equals("pl")) language = entry.url().language(); // patch a bug TODO: remove this if bug is fixed
         }
         
         // create a new loaded URL db entry

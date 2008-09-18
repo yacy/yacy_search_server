@@ -365,7 +365,7 @@ public class Balancer {
     public synchronized void push(final CrawlEntry entry) throws IOException {
         assert entry != null;
         if (urlFileIndex.has(entry.url().hash().getBytes())) {
-            serverLog.logWarning("PLASMA BALANCER", "double-check has failed for urlhash " + entry.url().hash()  + " in " + stackname + " - fixed");
+            serverLog.logWarning("BALANCER", "double-check has failed for urlhash " + entry.url().hash()  + " in " + stackname + " - fixed");
             return;
         }
         
@@ -534,7 +534,7 @@ public class Balancer {
                 // emergency case: this means that something with the stack organization is wrong
                 // the file appears to be broken. We kill the file.
                 kelondroStack.reset(urlFileStack);
-                serverLog.logSevere("PLASMA BALANCER", "get() failed to fetch entry from file stack. reset stack file.");
+                serverLog.logSevere("BALANCER", "get() failed to fetch entry from file stack. reset stack file.");
             } else {
                 final String nexthash = new String(nextentry.getColBytes(0));
 
@@ -554,7 +554,7 @@ public class Balancer {
         
         // check case where we did not found anything
         if (result == null) {
-            serverLog.logSevere("PLASMA BALANCER", "get() was not able to find a valid urlhash - total size = " + size() + ", fileStack.size() = " + urlFileStack.size() + ", ramStack.size() = " + urlRAMStack.size() + ", domainStacks.size() = " + domainStacks.size());
+            serverLog.logSevere("BALANCER", "get() was not able to find a valid urlhash - total size = " + size() + ", fileStack.size() = " + urlFileStack.size() + ", ramStack.size() = " + urlRAMStack.size() + ", domainStacks.size() = " + domainStacks.size());
             return null;
         }
         
@@ -573,7 +573,7 @@ public class Balancer {
             // in best case, this should never happen if the balancer works propertly
             // this is only to protection against the worst case, where the crawler could
             // behave in a DoS-manner
-            serverLog.logInfo("PLASMA BALANCER", "forcing fetch delay of " + sleeptime + " millisecond for " + crawlEntry.url().getHost());
+            serverLog.logInfo("BALANCER", "forcing fetch delay of " + sleeptime + " millisecond for " + crawlEntry.url().getHost());
             try {synchronized(this) { this.wait(sleeptime); }} catch (final InterruptedException e) {}
         }
         

@@ -39,6 +39,7 @@ import java.util.TreeSet;
 
 import de.anomic.kelondro.kelondroRow.Entry;
 import de.anomic.server.serverMemory;
+import de.anomic.server.logging.serverLog;
 
 /*
  * The EcoIndex builds upon the EcoFS and tries to reduce the number of IO requests that the
@@ -106,21 +107,21 @@ public class kelondroEcoTable implements kelondroIndex {
                      ((useTailCache == tailCacheForceUsage) ||
                       ((useTailCache == tailCacheUsageAuto) && (serverMemory.free() > neededRAM4table + 200 * 1024 * 1024)))) ?
                     new kelondroRowSet(taildef, records) : null;
-            System.out.println("*** DEBUG " + tablefile + ": available RAM: " + (serverMemory.available() / 1024 / 1024) + "MB, allocating space for " + records + " entries");
+            serverLog.logInfo("ECOTABLE", "initialization of " + tablefile + ": available RAM: " + (serverMemory.available() / 1024 / 1024) + "MB, allocating space for " + records + " entries");
             final long neededRAM4index = 2 * 1024 * 1024 + records * (rowdef.primaryKeyLength + 4) * 3 / 2;
             if (!serverMemory.request(neededRAM4index, false)) {
                 // despite calculations seemed to show that there is enough memory for the table AND the index
                 // there is now not enough memory left for the index. So delete the table again to free the memory
                 // for the index
-                System.out.println("*** DEBUG " + tablefile + ": not enough RAM (" + (serverMemory.available() / 1024 / 1024) + "MB) left for index, deleting allocated table space to enable index space allocation (needed: " + (neededRAM4index / 1024 / 1024) + "MB)");
+                serverLog.logSevere("ECOTABLE", tablefile + ": not enough RAM (" + (serverMemory.available() / 1024 / 1024) + "MB) left for index, deleting allocated table space to enable index space allocation (needed: " + (neededRAM4index / 1024 / 1024) + "MB)");
                 table = null; System.gc();
-                System.out.println("*** DEBUG " + tablefile + ": RAM after releasing the table: " + (serverMemory.available() / 1024 / 1024) + "MB");
+                serverLog.logSevere("ECOTABLE", tablefile + ": RAM after releasing the table: " + (serverMemory.available() / 1024 / 1024) + "MB");
             }
             index = new kelondroBytesIntMap(rowdef.primaryKeyLength, rowdef.objectOrder, records);
-            System.out.println("*** DEBUG " + tablefile + ": EcoTable " + tablefile.toString() + " has table copy " + ((table == null) ? "DISABLED" : "ENABLED"));
+            serverLog.logInfo("ECOTABLE", tablefile + ": EcoTable " + tablefile.toString() + " has table copy " + ((table == null) ? "DISABLED" : "ENABLED"));
 
             // read all elements from the file into the copy table
-            System.out.print("*** initializing RAM index for EcoTable " + tablefile.getName() + ":");
+            serverLog.logInfo("ECOTABLE", "initializing RAM index for EcoTable " + tablefile.getName() + ", please wait.");
             int i = 0;
             byte[] key;
             if (table == null) {
@@ -133,11 +134,12 @@ public class kelondroEcoTable implements kelondroIndex {
                     if (key == null) {i++; continue;}
                     if (!index.addi(key, i++)) fail++;
                     assert index.size() + fail == i : "index.size() = " + index.size() + ", i = " + i + ", fail = " + fail + ", key = '" + new String(key) + "'";
-                    
+                    /*
                     if ((i % 10000) == 0) {
                         System.out.print('.');
                         System.out.flush();
                     }
+                    */
                 }
             } else {
                 byte[] record;
@@ -154,23 +156,24 @@ public class kelondroEcoTable implements kelondroIndex {
                     
                     // write the tail into the table
                     table.addUnique(taildef.newEntry(record, rowdef.primaryKeyLength, true));
-                
+                    /*
                     if ((i % 10000) == 0) {
                         System.out.print('.');
                         System.out.flush();
                     }
+                    */
                 }
             }
             
             // check consistency
-            System.out.print(" -ordering- ..");
-            System.out.flush();
+            //System.out.print(" -ordering- ..");
+            //System.out.flush();
             this.file = new kelondroBufferedEcoFS(new kelondroEcoFS(tablefile, rowdef.objectsize), this.buffersize);
             final ArrayList<Integer[]> doubles = index.removeDoubles();
             //assert index.size() + doubles.size() + fail == i;
-            System.out.println(" -removed " + doubles.size() + " doubles- done.");
+            //System.out.println(" -removed " + doubles.size() + " doubles- done.");
             if (doubles.size() > 0) {
-                System.out.println("DEBUG " + tablefile + ": WARNING - EcoTable " + tablefile + " has " + doubles.size() + " doubles");
+                serverLog.logInfo("ECOTABLE", tablefile + ": WARNING - EcoTable " + tablefile + " has " + doubles.size() + " doubles");
                 // from all the doubles take one, put it back to the index and remove the others from the file
                 // first put back one element each
                 final byte[] record = new byte[rowdef.objectsize];

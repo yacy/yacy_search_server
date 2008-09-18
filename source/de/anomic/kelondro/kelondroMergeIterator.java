@@ -142,16 +142,21 @@ public class kelondroMergeIterator<E> implements kelondroCloneableIterator<E> {
             final Class<?> c = Class.forName("de.anomic.kelondro.kelondroMergeIterator");
             meth = c.getMethod("mergeEqualByReplace", new Class[]{Object.class, Object.class});
         } catch (final SecurityException e) {
-            System.out.println("Error while initializing simpleMerge: " + e.getMessage());
+            System.out.println("Error while initializing simpleMerge (1): " + e.getMessage());
             meth = null;
         } catch (final ClassNotFoundException e) {
-            System.out.println("Error while initializing simpleMerge: " + e.getMessage());
+            System.out.println("Error while initializing simpleMerge (2): " + e.getMessage());
             meth = null;
         } catch (final NoSuchMethodException e) {
-            System.out.println("Error while initializing simpleMerge: " + e.getMessage());
+            System.out.println("Error while initializing simpleMerge (3): " + e.getMessage());
             meth = null;
         }
         simpleMerge = meth; 
     }
     
+    // do not remove the following method, it is not reference anywhere directly but indirectly using reflection
+    // please see initialization of simpleMerge above
+    public static Object mergeEqualByReplace(final Object a, final Object b) {
+        return a;
+    }
 }
