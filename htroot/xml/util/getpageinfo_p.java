@@ -88,16 +88,16 @@ public class getpageinfo_p {
                     int count = 0;
                     for(int i=0;i<list.length;i++){
                     	String tag = list[i];
-                    	if (!tag.equals("")) {
-                    		while (i<(list.length-1) && !list[i+1].equals("")) {
-                    			i++;
-                    			tag += " "+list[i];                    			
-                    		}                    	                 	
+                    	if (!tag.equals("")) {                   	                 	
                     		prop.putHTML("tags_"+count+"_tag", tag, true);
                     		count++;
                     	}
                     }
                     prop.put("tags", count);
+                    // put description                    
+                    prop.putHTML("desc", scraper.getDescription(), true);
+                    // put language 
+                    prop.putHTML("lang", scraper.getContentLanguages()[0], true);
 
                 } catch (final MalformedURLException e) { /* ignore this */
                 } catch (final IOException e) { /* ignore this */
@@ -106,7 +106,7 @@ public class getpageinfo_p {
             if(actions.indexOf("robots")>=0){
                 try {
                     final yacyURL theURL = new yacyURL(url, null);
-                	
+                    
                 	// determine if crawling of the current URL is allowed
                 	prop.put("robots-allowed", sb.robots.isDisallowed(theURL) ? "0" : "1");
                     

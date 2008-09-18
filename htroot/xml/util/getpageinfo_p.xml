@@ -1,6 +1,8 @@
 <?xml version='1.0' standalone='yes'?>
 <pageinfo>
   <title>#[title]#</title>
+  <desc>#[desc]#</desc>
+  <lang>#[lang]#</lang>
   <robots>#(robots-allowed)#0::1::#(/robots-allowed)#</robots>
   <sitemap>#[sitemap]#</sitemap>
   <favicon>#[favicon]#</favicon>
