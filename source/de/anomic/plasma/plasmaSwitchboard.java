@@ -1237,6 +1237,27 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
                 queueEntry.close();
                 return true;
             }
+            
+            // check if the document should be indexed
+            String noIndexReason = ErrorURL.DENIED_UNSPECIFIED_INDEXING_ERROR;
+            if (queueEntry.processCase() == plasmaSwitchboardConstants.PROCESSCASE_4_PROXY_LOAD) {
+                // proxy-load
+                noIndexReason = queueEntry.shallIndexCacheForProxy();
+            } else {
+                // normal crawling
+                noIndexReason = queueEntry.shallIndexCacheForCrawler();
+            }
+            
+            if (noIndexReason != null) {
+                // this document should not be indexed. log cause and close queue
+                final yacyURL referrerURL = queueEntry.referrerURL();
+                log.logFine("Not indexed any word in URL " + queueEntry.url() + "; cause: " + noIndexReason);
+                addURLtoErrorDB(queueEntry.url(), (referrerURL == null) ? "" : referrerURL.hash(), queueEntry.initiator(), queueEntry.anchorName(), noIndexReason);
+                // finish this entry
+                return true;
+            }
+            
+            // put document into the concurrent processing queue            
             webIndex.queuePreStack.enQueueToActive(queueEntry);
             
             // check for interruption
@@ -1468,14 +1489,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
                     this.webIndex.newsPool.publishMyNews(yacyNewsRecord.newRecord(webIndex.seedDB.mySeed(), yacyNewsPool.CATEGORY_PROFILE_BROADCAST, news));
                 }
             }
-/*
-            // set a maximum amount of memory for the caches
-            // long memprereq = Math.max(getConfigLong(INDEXER_MEMPREREQ, 0), wordIndex.minMem());
-            // setConfig(INDEXER_MEMPREREQ, memprereq);
-            // setThreadPerformance(INDEXER, getConfigLong(INDEXER_IDLESLEEP, 0), getConfigLong(INDEXER_BUSYSLEEP, 0), memprereq);
-            kelondroCachedRecords.setCacheGrowStati(40 * 1024 * 1024, 20 * 1024 * 1024);
-            kelondroCache.setCacheGrowStati(40 * 1024 * 1024, 20 * 1024 * 1024);
-*/
+            
             // update the cluster set
             this.clusterhashes = this.webIndex.seedDB.clusterHashes(getConfig("cluster.peers.yacydomain", ""));
             
@@ -1617,68 +1631,22 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         // debug
         if (log.isFinest()) log.logFinest("CONDENSE "+ in.queueEntry.toString());
         
-        plasmaCondenser condenser = null;
+        // strip out words and generate statistics
+        if (this.log.isFine()) log.logFine("Condensing for '" + in.queueEntry.url().toNormalform(false, true) + "'");
         try {
-            condenser = condenseDocument(in.queueEntry, in.document);
-        } catch (final InterruptedException e) {
-            condenser = null;
-        }
-        if (condenser == null) {
+            plasmaCondenser condenser = new plasmaCondenser(in.document, in.queueEntry.profile().indexText(), in.queueEntry.profile().indexMedia());
+
+            // update image result list statistics
+            // its good to do this concurrently here, because it needs a DNS lookup
+            // to compute a URL hash which is necessary for a double-check
+            final CrawlProfile.entry profile = in.queueEntry.profile();
+            ResultImages.registerImages(in.document, (profile == null) ? true : !profile.remoteIndexing());
+            
+            return new indexingQueueEntry(in.queueEntry, in.document, condenser);
+        } catch (final UnsupportedEncodingException e) {
             in.queueEntry.close();
             return null;
         }
-
-        // update image result list statistics
-        // its good to do this concurrently here, because it needs a DNS lookup
-        // to compute a URL hash which is necessary for a double-check
-        final CrawlProfile.entry profile = in.queueEntry.profile();
-        ResultImages.registerImages(in.document, (profile == null) ? true : !profile.remoteIndexing());
-        
-        return new indexingQueueEntry(in.queueEntry, in.document, condenser);
-    }
-    
-    private plasmaCondenser condenseDocument(final IndexingStack.QueueEntry entry, plasmaParserDocument document) throws InterruptedException {
-        // CREATE INDEX
-        final String dc_title = document.dc_title();
-        final yacyURL referrerURL = entry.referrerURL();
-        final int processCase = entry.processCase();
-        
-        String noIndexReason = ErrorURL.DENIED_UNSPECIFIED_INDEXING_ERROR;
-        if (processCase == plasmaSwitchboardConstants.PROCESSCASE_4_PROXY_LOAD) {
-            // proxy-load
-            noIndexReason = entry.shallIndexCacheForProxy();
-        } else {
-            // normal crawling
-            noIndexReason = entry.shallIndexCacheForCrawler();
-        }
-        
-        if (noIndexReason != null) {
-            // check for interruption
-            checkInterruption();
-            
-            log.logFine("Not indexed any word in URL " + entry.url() + "; cause: " + noIndexReason);
-            addURLtoErrorDB(entry.url(), (referrerURL == null) ? "" : referrerURL.hash(), entry.initiator(), dc_title, noIndexReason);
-            /*
-            if ((processCase == PROCESSCASE_6_GLOBAL_CRAWLING) && (initiatorPeer != null)) {
-                if (clusterhashes != null) initiatorPeer.setAlternativeAddress((String) clusterhashes.get(initiatorPeer.hash));
-                yacyClient.crawlReceipt(initiatorPeer, "crawl", "rejected", noIndexReason, null, "");
-            }
-            */
-            document.close();
-            document = null;
-            return null;
-        }
-    
-        // strip out words
-        checkInterruption();
-        if (this.log.isFine()) log.logFine("Condensing for '" + entry.url().toNormalform(false, true) + "'");
-        plasmaCondenser condenser;
-        try {
-            condenser = new plasmaCondenser(document, entry.profile().indexText(), entry.profile().indexMedia());
-        } catch (final UnsupportedEncodingException e) {
-            return null;
-        }
-        return condenser;
     }
     
     public indexingQueueEntry webStructureAnalysis(final indexingQueueEntry in) {
