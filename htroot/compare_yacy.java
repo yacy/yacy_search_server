@@ -36,7 +36,7 @@ import java.util.Map;
 public class compare_yacy {
     
     private static final String defaultsearch = "YaCy";
-    private static final String[] order = {defaultsearch, "YaCy (local)", "google.de", "google.com", "metager.de", "yahoo.com", "romso.de", "search.live.com", "Wikipedia English", "Wikipedia Deutsch"};
+    private static final String[] order = {defaultsearch, "YaCy (local)", "google.de", "google.com", "metager.de", "yahoo.com", "romso.de", "search.live.com", "Wikipedia English", "Wikipedia Deutsch", "Sciencenet"};
     private static final Map<String, String> searchengines = new HashMap<String, String>();
     static {
         searchengines.put(defaultsearch, "yacysearch.html?display=2&verify=true&resource=global&query=");
@@ -49,6 +49,7 @@ public class compare_yacy {
         searchengines.put("search.live.com", "http://search.live.com/results.aspx?q=");
         searchengines.put("Wikipedia English", "http://en.wikipedia.org/wiki/");
         searchengines.put("Wikipedia Deutsch", "http://de.wikipedia.org/wiki/");
+        searchengines.put("Sciencenet", "http://sciencenet.fzk.de:8080/yacysearch.html?display=2&verify=true&resource=global&query=");
     }
     
     public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
