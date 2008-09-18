@@ -818,6 +818,13 @@ public final class plasmaWordIndex implements indexRI {
         final String dc_title = document.dc_title();
         final yacyURL referrerURL = entry.referrerURL();
         final Date docDate = entry.getModificationDate();
+        String language = condenser.language();
+        if (language == null) {
+            System.out.println("*** DEBUG LANGUAGE: identification of " + entry.url() + " FAILED, taking TLD");
+            language = entry.url().language();
+        } else {
+            System.out.println("*** DEBUG LANGUAGE: identification of " + entry.url() + " SUCCESS: " + language);
+        }
         
         // create a new loaded URL db entry
         final long ldate = System.currentTimeMillis();
@@ -836,7 +843,7 @@ public final class plasmaWordIndex implements indexRI {
                 condenser.RESULT_NUMB_WORDS,               // word count
                 httpdProxyCacheEntry.docType(document.dc_format()), // doctype
                 condenser.RESULT_FLAGS,                    // flags
-                yacyURL.language(entry.url()),             // language
+                language,                                  // language
                 document.inboundLinks(),                   // inbound links
                 document.outboundLinks(),                  // outbound links
                 document.getAudiolinks().size(),           // laudio
@@ -856,7 +863,7 @@ public final class plasmaWordIndex implements indexRI {
                 docDate,                                      // document mod date
                 document,                                     // document content
                 condenser,                                    // document condenser
-                yacyURL.language(entry.url()),                // document language
+                language,                                     // document language
                 httpdProxyCacheEntry.docType(document.dc_format()),  // document type
                 document.inboundLinks(),                      // inbound links
                 document.outboundLinks()                      // outbound links

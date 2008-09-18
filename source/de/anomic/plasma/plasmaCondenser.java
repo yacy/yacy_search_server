@@ -52,6 +52,7 @@ import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexWord;
 import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroMSetTools;
+import de.anomic.language.identification.Identificator;
 import de.anomic.yacy.yacyURL;
 
 public final class plasmaCondenser {
@@ -110,6 +111,7 @@ public final class plasmaCondenser {
     public int RESULT_NUMB_SENTENCES = -1;
     public int RESULT_DIFF_SENTENCES = -1;
     public kelondroBitfield RESULT_FLAGS = new kelondroBitfield(4);
+    Identificator languageIdentificator;
     
     public plasmaCondenser(final plasmaParserDocument document, final boolean indexText, final boolean indexMedia) throws UnsupportedEncodingException {
         // if addMedia == true, then all the media links are also parsed and added to the words
@@ -118,6 +120,8 @@ public final class plasmaCondenser {
         this.wordcut = 2;
         this.words = new TreeMap<String, indexWord>();
         this.RESULT_FLAGS = new kelondroBitfield(4);
+        
+        this.languageIdentificator = new Identificator();
         
         //System.out.println("DEBUG: condensing " + document.getMainLongTitle() + ", indexText=" + Boolean.toString(indexText) + ", indexMedia=" + Boolean.toString(indexMedia));
 
@@ -229,6 +233,7 @@ public final class plasmaCondenser {
         int pip = 0;
         while (wordenum.hasMoreElements()) {
             word = (new String(wordenum.nextElement())).toLowerCase();
+            languageIdentificator.add(word);
             wprop = words.get(word);
             if (wprop == null) wprop = new indexWord(0, pip, phrase);
             if (wprop.flags == null) wprop.flags = flagstemplate.clone();
@@ -263,6 +268,10 @@ public final class plasmaCondenser {
     public Map<String, indexWord> words() {
         // returns the words as word/indexWord relation map
         return words;
+    }
+    
+    public String language() {
+        return this.languageIdentificator.getLanguage();
     }
 
     public String intString(final int number, final int length) {

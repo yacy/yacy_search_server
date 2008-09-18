@@ -28,6 +28,8 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.util.Vector;
 
+import de.anomic.server.logging.serverLog;
+
 /**
  * This class loads and provides several language statistics to the system.
  * It has been implemented as a Singleton since it has to access several
@@ -64,6 +66,10 @@ public class LanguageStatisticsHolder extends Vector<LanguageStatistics> {
     private void addAllLanguagesInDirectory(final String directory) {
         
         final File folder = new File(directory);
+        if (!folder.exists()) {
+            serverLog.logSevere("LanguageStatistics", "the language statistics folder " + directory + " cannot be found");
+            return;
+        }
         final FilenameFilter filter = new LanguageFilenameFilter();
         final File[] allLanguageFiles = folder.listFiles(filter);
         

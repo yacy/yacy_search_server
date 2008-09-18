@@ -58,7 +58,6 @@ public class httpdProxyCacheEntry implements indexDocumentMetadata {
     private        byte[]             cacheArray;      // or the cache as byte-array
     private final  yacyURL            url;
     private final  String             name;            // the name of the link, read as anchor from an <a>-tag
-    private final  String             language;
     private final  CrawlProfile.entry profile;
     private final  String             initiator;
     private        httpRequestHeader  requestHeader;
@@ -166,7 +165,6 @@ public class httpdProxyCacheEntry implements indexDocumentMetadata {
         // in case of proxy usage, the initiator hash is null,
         // which distinguishes local crawling from proxy indexing
         this.initiator = (initiator == null) ? null : ((initiator.length() == 0) ? null : initiator);
-        this.language = yacyURL.language(url);
 
         // to be defined later:
         this.cacheArray = null;
@@ -205,7 +203,9 @@ public class httpdProxyCacheEntry implements indexDocumentMetadata {
     }
     
     public String language() {
-        return this.language;
+        // please avoid this method if a condenser document is available, because the condenser has a built-in language detection
+        // this here is only a guess using the TLD
+        return this.url().language();
     }
 
     public CrawlProfile.entry profile() {

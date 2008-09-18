@@ -89,8 +89,9 @@ public class LanguageStatistics {
      * @return the percentage
      */
     public final float get(final char letter) {
-        if (stats.containsKey(letter)) {
-            return stats.get(letter);
+        Float f = stats.get(letter);
+        if (f != null) {
+            return f.floatValue();
         }
         return 0;
     }
