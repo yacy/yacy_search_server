@@ -46,11 +46,18 @@ public class getpageinfo_p {
     public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final serverObjects prop = new serverObjects();
-        prop.put("sitemap", "");
-        prop.put("title", "");
-        prop.put("favicon","");
+        
+        // avoid UNRESOLVED PATTERN        
+        prop.put("title", "");        
+        prop.put("desc", "");
+        prop.put("lang", "");
         prop.put("robots-allowed", "3"); //unknown
-        String actions="title";
+        prop.put("sitemap", "");
+        prop.put("favicon","");        
+        
+        // default actions
+        String actions="title,robots";
+        
         if(post!=null && post.containsKey("url")){
             if(post.containsKey("actions"))
                 actions=post.get("actions");

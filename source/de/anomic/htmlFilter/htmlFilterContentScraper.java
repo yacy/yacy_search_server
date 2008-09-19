@@ -395,7 +395,8 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         if (s.length() == 0) {
             return getTitle().toLowerCase().split(splitrex);
         }
-        if (s.contains(",")) return s.split(",");
+        if (s.contains(",")) return s.split(" |,");
+        if (s.contains(";")) return s.split(" |;");
         return s.split("\\s");
     }
     
