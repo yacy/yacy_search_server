@@ -179,7 +179,7 @@ public class ViewProfile {
                 //This will display unknown items(of newer versions) as plaintext
             } else {
                 //unknown
-                prop.put("success_other_" + numUnknown + "_key", key);
+                prop.putHTML("success_other_" + numUnknown + "_key", key);
                 prop.putHTML("success_other_" + numUnknown + "_value", value);
                 numUnknown++;
             }

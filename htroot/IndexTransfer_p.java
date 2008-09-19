@@ -99,7 +99,7 @@ public final class IndexTransfer_p {
             prop.putNum("running_twEntrySpeed", sb.transferIdxThread.getTransferedEntrySpeed());
             
             prop.put("running_deleteIndex", sb.transferIdxThread.deleteIndex() ? "1" : "0");
-            prop.put("running_peerName",sb.transferIdxThread.getSeed().getName());
+            prop.putHTML("running_peerName",sb.transferIdxThread.getSeed().getName());
             prop.put("running_stopped",(sb.transferIdxThread.isFinished()) || (!sb.transferIdxThread.isAlive()) ? "1" : "0");
         } else {
             if (!prop.containsKey("running_status")) prop.put("running_status","Not running");

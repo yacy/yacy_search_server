@@ -146,8 +146,8 @@ public class LogStatistics_p {
         String[] hashes = ((HashSet<String>) r.get(LogParserPLASMA.DHT_REJECTED_PEERS_HASH)).toArray(new String[1]);
         int i;
         for (i = 0; i<names.length && i<hashes.length; i++) {
-            prop.put(RESULTS + "useDHTRejectPeers_DHTRejectPeers_" + i + "_name", names[i]);
-            prop.put(RESULTS + "useDHTRejectPeers_DHTRejectPeers_" + i + "_hash", hashes[i]);
+            prop.putHTML(RESULTS + "useDHTRejectPeers_DHTRejectPeers_" + i + "_name", names[i]);
+            prop.putHTML(RESULTS + "useDHTRejectPeers_DHTRejectPeers_" + i + "_hash", hashes[i]);
         }
         prop.put(RESULTS + "DHTRejectPeers", i);
         prop.put(RESULTS + "useDHTRejectPeers", (i > 0) ? "1" : "0");
@@ -156,8 +156,8 @@ public class LogStatistics_p {
         names = ((HashSet<String>)r.get(LogParserPLASMA.DHT_SENT_PEERS_NAME)).toArray(new String[1]);
         hashes = ((HashSet<String>)r.get(LogParserPLASMA.DHT_SENT_PEERS_HASH)).toArray(new String[1]);
         for (i = 0; i<names.length && i<hashes.length; i++) {
-            prop.put(RESULTS + "useDHTPeers_DHTPeers_" + i + "_name", names[i]);
-            prop.put(RESULTS + "useDHTPeers_DHTPeers_" + i + "_hash", hashes[i]);
+            prop.putHTML(RESULTS + "useDHTPeers_DHTPeers_" + i + "_name", names[i]);
+            prop.putHTML(RESULTS + "useDHTPeers_DHTPeers_" + i + "_hash", hashes[i]);
         }
         prop.put(RESULTS + "DHTPeers", i);
         prop.put(RESULTS + "useDHTPeers", (i > 0) ? "1" : "0");

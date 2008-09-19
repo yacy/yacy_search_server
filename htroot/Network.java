@@ -193,7 +193,7 @@ public class Network {
                     peer = sb.webIndex.seedDB.getConnected(peer.hash);
                     if (peer == null) {
                         prop.put("table_comment",1);
-                        prop.put("table_comment_status","publish: disconnected peer 'UNKNOWN/" + post.get("peerHash") + "' from UNKNOWN");
+                        prop.putHTML("table_comment_status","publish: disconnected peer 'UNKNOWN/" + post.get("peerHash") + "' from UNKNOWN");
                     } else {
                         prop.put("table_comment",2);
                         prop.putHTML("table_comment_status","publish: handshaked " + peer.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR) + " peer '" + peer.getName() + "' at " + peer.getPublicAddress());
@@ -201,9 +201,9 @@ public class Network {
                     }
                 }
 
-                prop.put("table_peerHash",post.get("peerHash"));
-                prop.put("table_peerIP",post.get("peerIP"));
-                prop.put("table_peerPort",post.get("peerPort"));                
+                prop.putHTML("table_peerHash",post.get("peerHash"));
+                prop.putHTML("table_peerIP",post.get("peerIP"));
+                prop.putHTML("table_peerPort",post.get("peerPort"));                
             } else {
                 prop.put("table_peerHash","");
                 prop.put("table_peerIP","");

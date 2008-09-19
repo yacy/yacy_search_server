@@ -115,10 +115,10 @@ public class ProxyIndexingMonitor_p {
                         // proxyCache - only display on change
                         if (oldProxyCachePath.equals(newProxyCachePath)) {
                             prop.put("info_path", "0");
-                            prop.put("info_path_return", oldProxyCachePath);
+                            prop.putHTML("info_path_return", oldProxyCachePath);
                         } else {
                             prop.put("info_path", "1");
-                            prop.put("info_path_return", newProxyCachePath);
+                            prop.putHTML("info_path_return", newProxyCachePath);
                         }
                         // proxyCacheSize - only display on change
                         if (oldProxyCacheSize.equals(newProxyCacheSize)) {
@@ -146,13 +146,13 @@ public class ProxyIndexingMonitor_p {
             }
         }
 
-        prop.put("proxyPrefetchDepth", env.getConfig("proxyPrefetchDepth", "0"));
+        prop.put("proxyPrefetchDepth", env.getConfigLong("proxyPrefetchDepth", 0));
         prop.put("proxyStoreHTCacheChecked", env.getConfig("proxyStoreHTCache", "").equals("true") ? "1" : "0");
         prop.put("proxyIndexingRemote", env.getConfig("proxyIndexingRemote", "").equals("true") ? "1" : "0");
         prop.put("proxyIndexingLocalText", env.getConfig("proxyIndexingLocalText", "").equals("true") ? "1" : "0");
         prop.put("proxyIndexingLocalMedia", env.getConfig("proxyIndexingLocalMedia", "").equals("true") ? "1" : "0");
         prop.put("proxyCache", env.getConfig(plasmaSwitchboardConstants.HTCACHE_PATH, plasmaSwitchboardConstants.HTCACHE_PATH_DEFAULT));
-        prop.put("proxyCacheSize", env.getConfig("proxyCacheSize", "64"));
+        prop.put("proxyCacheSize", env.getConfigLong("proxyCacheSize", 64));
         // return rewrite properties
         return prop;
     }

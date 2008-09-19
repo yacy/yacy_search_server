@@ -51,7 +51,7 @@ public class ConfigUpdate_p {
         if (post != null) {
             if (post.containsKey("update")) {
                 prop.put("forwardToSteering", "1");
-                prop.put("forwardToSteering_release",post.get("releaseinstall", ""));
+                prop.putHTML("forwardToSteering_release",post.get("releaseinstall", ""));
                 prop.put("deploys", "1");
                 prop.put("candeploy", "2"); // display nothing else
                 return prop;
@@ -92,7 +92,7 @@ public class ConfigUpdate_p {
                     // there is a version that is more recent. Load it and re-start with it
                     sb.getLog().logInfo("AUTO-UPDATE: downloading more recent release " + updateVersion.url);
                     final File downloaded = yacyVersion.downloadRelease(updateVersion);
-                    prop.put("candeploy_autoUpdate_downloadedRelease", updateVersion.name);
+                    prop.putHTML("candeploy_autoUpdate_downloadedRelease", updateVersion.name);
                     final boolean devenvironment = yacyVersion.combined2prettyVersion(sb.getConfig("version","0.1")).startsWith("dev");
                     if (devenvironment) {
                         sb.getLog().logInfo("AUTO-UPDATE: omiting update because this is a development environment");
@@ -129,7 +129,7 @@ public class ConfigUpdate_p {
         
         // version information
         final String versionstring = yacyVersion.combined2prettyVersion(sb.getConfig("version","0.1"));
-        prop.put("candeploy_versionpp", versionstring);
+        prop.putHTML("candeploy_versionpp", versionstring);
         final boolean devenvironment = versionstring.startsWith("dev");
         double thisVersion = Double.parseDouble(sb.getConfig("version","0.1"));
         // cut off the SVN Rev in the Version
@@ -161,7 +161,7 @@ public class ConfigUpdate_p {
         while (i.hasNext()) {
             release = i.next();
             prop.put("candeploy_downloadedreleases_" + relcount + "_name", ((release.mainRelease) ? "main" : "dev") + " " + release.releaseNr + "/" + release.svn);
-            prop.put("candeploy_downloadedreleases_" + relcount + "_file", release.name);
+            prop.putHTML("candeploy_downloadedreleases_" + relcount + "_file", release.name);
             prop.put("candeploy_downloadedreleases_" + relcount + "_selected", (release == dflt) ? "1" : "0");
             relcount++;
         }
@@ -201,7 +201,7 @@ public class ConfigUpdate_p {
         prop.put("candeploy_manualUpdateChecked", (sb.getConfig("update.process", "manual").equals("manual")) ? "1" : "0");
         prop.put("candeploy_autoUpdateChecked", (sb.getConfig("update.process", "manual").equals("auto")) ? "1" : "0");
         prop.put("candeploy_cycle", sb.getConfigLong("update.cycle", 168));
-        prop.put("candeploy_blacklist", sb.getConfig("update.blacklist", ""));
+        prop.putHTML("candeploy_blacklist", sb.getConfig("update.blacklist", ""));
         prop.put("candeploy_releaseTypeMainChecked", (sb.getConfig("update.concept", "any").equals("any")) ? "0" : "1");
         prop.put("candeploy_releaseTypeAnyChecked", (sb.getConfig("update.concept", "any").equals("any")) ? "1" : "0");
         prop.put("candeploy_lastlookup", (sb.getConfigLong("update.time.lookup", 0) == 0) ? "0" : "1");

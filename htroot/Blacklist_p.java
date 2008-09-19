@@ -264,8 +264,8 @@ prop.putHTML("asd", "0");
                     final String selectedEntry = post.get("selectedEntry");
                     final String currentBlacklist = post.get("currentBlacklist");
                     if (selectedEntry != null && currentBlacklist != null) {
-                        prop.put(DISABLED + "edit_item", selectedEntry);
-                        prop.put(DISABLED + "edit_currentBlacklist", currentBlacklist);
+                        prop.putHTML(DISABLED + "edit_item", selectedEntry);
+                        prop.putHTML(DISABLED + "edit_currentBlacklist", currentBlacklist);
                         prop.put(DISABLED + "edit", "1");
                     }
                 }
@@ -298,7 +298,7 @@ prop.putHTML("asd", "0");
                 if (nextEntry.length() == 0) continue;
                 if (nextEntry.startsWith("#")) continue;
     
-                prop.put(DISABLED + "Itemlist_" + entryCount + "_item", nextEntry);
+                prop.putHTML(DISABLED + "Itemlist_" + entryCount + "_item", nextEntry);
                 entryCount++;
             }
         	prop.put(DISABLED + "Itemlist", entryCount);
@@ -318,7 +318,7 @@ prop.putHTML("asd", "0");
 	                String peername;
 	                while ((peername = hostList.firstKey()) != null) {
 	                    final String Hash = hostList.get(peername);
-	                    prop.put(DISABLED + "otherHosts_" + peerCount + "_hash", Hash);
+	                    prop.putHTML(DISABLED + "otherHosts_" + peerCount + "_hash", Hash);
 	                    prop.putHTML(DISABLED + "otherHosts_" + peerCount + "_name", peername, true);
 	                    hostList.remove(peername);
 	                    peerCount++;

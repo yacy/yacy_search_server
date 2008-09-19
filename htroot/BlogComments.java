@@ -143,7 +143,7 @@ public class BlogComments {
                 blogEntry.addComment(commentID);
                 sb.blogDB.writeBlogEntry(blogEntry);
                 sb.blogCommentDB.write(sb.blogCommentDB.newEntry(commentID, subject, author, ip, date, content));
-                prop.put("LOCATION","BlogComments.html?page=" + pagename);
+                prop.putHTML("LOCATION","BlogComments.html?page=" + pagename);
 
                 messageBoard.entry msgEntry = null;
                 try {
@@ -191,8 +191,8 @@ public class BlogComments {
         if(post.containsKey("preview") && page.getCommentMode() != 0) {
             //preview the page
             prop.put("mode", "1");//preview
-            prop.put("mode_pageid", pagename);
-            prop.put("mode_allow_pageid", pagename);
+            prop.putHTML("mode_pageid", pagename);
+            prop.putHTML("mode_allow_pageid", pagename);
             try {
                 prop.putHTML("mode_author", new String(author, "UTF-8"));
                 prop.putHTML("mode_allow_author", new String(author, "UTF-8"));
@@ -212,7 +212,7 @@ public class BlogComments {
             } else {
                 //show 1 blog entry
                 prop.put("mode_pageid", page.getKey());
-                prop.put("mode_allow_pageid", pagename);
+                prop.putHTML("mode_allow_pageid", pagename);
                 try {
                     prop.putHTML("mode_subject", new String(page.getSubject(),"UTF-8"));
                 } catch (final UnsupportedEncodingException e) {

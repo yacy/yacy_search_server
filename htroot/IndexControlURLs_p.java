@@ -104,7 +104,7 @@ public class IndexControlURLs_p {
             !urlstring.startsWith("https://")) { urlstring = "http://" + urlstring; }
 
         prop.putHTML("urlstring", urlstring);
-        prop.put("urlhash", urlhash);
+        prop.putHTML("urlhash", urlhash);
         prop.put("result", " ");
 
         if (post.containsKey("urlhashdeleteall")) {
@@ -117,7 +117,7 @@ public class IndexControlURLs_p {
         if (post.containsKey("urlhashdelete")) {
             final indexURLReference entry = sb.webIndex.getURL(urlhash, null, 0);
             if (entry == null) {
-                prop.put("result", "No Entry for URL hash " + urlhash + "; nothing deleted.");
+                prop.putHTML("result", "No Entry for URL hash " + urlhash + "; nothing deleted.");
             } else {
                 urlstring = entry.comp().url().toNormalform(false, true);
                 prop.put("urlstring", "");
@@ -168,7 +168,7 @@ public class IndexControlURLs_p {
         if (post.containsKey("urlhashsearch")) {
             final indexURLReference entry = sb.webIndex.getURL(urlhash, null, 0);
             if (entry == null) {
-                prop.put("result", "No Entry for URL hash " + urlhash);
+                prop.putHTML("result", "No Entry for URL hash " + urlhash);
             } else {
                 prop.putHTML("urlstring", entry.comp().url().toNormalform(false, true));
                 prop.putAll(genUrlProfile(sb, entry, urlhash));
@@ -203,7 +203,7 @@ public class IndexControlURLs_p {
                 prop.put("urlhashsimilar_rows", rows);
                 prop.put("result", result.toString());
             } catch (final IOException e) {
-                prop.put("result", "No Entries for URL hash " + urlhash);
+                prop.putHTML("result", "No Entries for URL hash " + urlhash);
             }
             prop.put("lurlexport", 0);
             prop.put("reload", 0);

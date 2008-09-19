@@ -213,7 +213,7 @@ public class Blog {
         else if(post.get("delete", "").equals("try")) {
             if(hasRights) {
                 prop.put("mode", "4");
-                prop.put("mode_pageid", pagename);
+                prop.putHTML("mode_pageid", pagename, xml);
                 try {
                     prop.putHTML("mode_author",new String(page.getAuthor(), "UTF-8"), xml);
                 } catch (final UnsupportedEncodingException e) {

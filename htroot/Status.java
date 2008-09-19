@@ -159,7 +159,7 @@ public class Status {
         prop.put("port",serverCore.getPortNr(extendedPortString));
         if (pos!=-1) {
             prop.put("extPortFormat", "1");
-            prop.put("extPortFormat_extPort",extendedPortString);
+            prop.putHTML("extPortFormat_extPort",extendedPortString);
         } else {
             prop.put("extPortFormat", "0");
         }
@@ -237,13 +237,13 @@ public class Status {
 
             if (seedUploadMethod.equalsIgnoreCase("ftp")) {
                 prop.put(SEEDSERVER, "1"); // enabled
-                prop.put("seedServer_seedServer", sb.getConfig("seedFTPServer", ""));
+                prop.putHTML("seedServer_seedServer", sb.getConfig("seedFTPServer", ""));
             } else if (seedUploadMethod.equalsIgnoreCase("scp")) {
                 prop.put(SEEDSERVER, "1"); // enabled
-                prop.put("seedServer_seedServer", sb.getConfig("seedScpServer", ""));
+                prop.putHTML("seedServer_seedServer", sb.getConfig("seedScpServer", ""));
             } else if (seedUploadMethod.equalsIgnoreCase("file")) {
                 prop.put(SEEDSERVER, "2"); // enabled
-                prop.put("seedServer_seedFile", sb.getConfig("seedFilePath", ""));
+                prop.putHTML("seedServer_seedFile", sb.getConfig("seedFilePath", ""));
             }
             prop.put("seedServer_lastUpload",
                     serverDate.formatInterval(System.currentTimeMillis() - sb.webIndex.seedDB.lastSeedUpload_timeStamp));

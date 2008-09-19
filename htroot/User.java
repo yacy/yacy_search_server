@@ -113,7 +113,7 @@ public class User{
                 
                 prop.put("logged-in", "1");
                 prop.put("logged-in_identified-by", "1");
-                prop.put("logged-in_username", username);
+                prop.putHTML("logged-in_username", username);
                 if(post.containsKey("returnto")){
                     prop.put("LOCATION", post.get("returnto"));
                 }

@@ -82,7 +82,7 @@ public class CookieTest_p {
         outgoingHeader.setCookie(cookieName,cookieValue);
         prop.setOutgoingHeader(outgoingHeader);
         prop.put("cookiesin", "1");
-        prop.put("cookiesin_0_name", cookieName);
+        prop.putHTML("cookiesin_0_name", cookieName);
         prop.putHTML("cookiesin_0_value", cookieValue);
         //header.
         

@@ -70,8 +70,8 @@ public class sharedBlacklist_p {
             selectedBlacklistName = "shared.black";
         }
         
-        prop.put("currentBlacklist", selectedBlacklistName);
-        prop.put("page_target", selectedBlacklistName);
+        prop.putHTML("currentBlacklist", selectedBlacklistName);
+        prop.putHTML("page_target", selectedBlacklistName);
         
         if (post != null) {
             ArrayList<String> otherBlacklist = null;
@@ -143,7 +143,7 @@ public class sharedBlacklist_p {
                  * Import the blacklist from file
                  * ====================================================== */
                 final String sourceFileName = post.get("file");
-                prop.put("page_source", sourceFileName);
+                prop.putHTML("page_source", sourceFileName);
                 
                 final File sourceFile = new File(listManager.listsPath, sourceFileName);
                 if (!sourceFile.exists() || !sourceFile.canRead() || !sourceFile.isFile()) {
@@ -209,7 +209,7 @@ public class sharedBlacklist_p {
                     if (pw != null) try { pw.close(); } catch (final Exception e){ /* */}
                 }
                 
-                prop.put("LOCATION","Blacklist_p.html?selectedListName=" + selectedBlacklistName + "&selectList=");
+                prop.putHTML("LOCATION","Blacklist_p.html?selectedListName=" + selectedBlacklistName + "&selectList=");
                 return prop;
             }
             

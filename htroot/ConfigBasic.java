@@ -83,9 +83,9 @@ public class ConfigBasic {
         final String peerName = (post == null) ? env.getConfig("peerName","") : (String) post.get("peername", "");
         
         // port settings
-        String port = env.getConfig("port", "8080"); //this allows a low port, but it will only get one, if the user edits the config himself.
+        long port = env.getConfigLong("port", 8080); //this allows a low port, but it will only get one, if the user edits the config himself.
 		if (post != null && Integer.parseInt(post.get("port")) > 1023) {
-			port = post.get("port", "8080");
+			port = post.getLong("port", 8080);
 		}
 
         // check if peer name already exists
@@ -98,7 +98,7 @@ public class ConfigBasic {
  
         // check port
         boolean reconnect = false;
-        if (!env.getConfig("port", port).equals(port)) {
+        if (!(env.getConfigLong("port", port) == port)) {
             // validate port
             final serverCore theServerCore = (serverCore) env.getThread("10_httpd");
             env.setConfig("port", port);
@@ -201,8 +201,8 @@ public class ConfigBasic {
         
         
         // set default values       
-        prop.put("defaultName", env.getConfig("peerName", ""));
-        prop.put("defaultPort", env.getConfig("port", "8080"));
+        prop.putHTML("defaultName", env.getConfig("peerName", ""));
+        prop.putHTML("defaultPort", env.getConfig("port", "8080"));
         lang = env.getConfig("locale.language", "default"); // re-assign lang, may have changed
         if (lang.equals("default")) {
             prop.put("langDeutsch", "0");

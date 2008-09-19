@@ -103,7 +103,7 @@ public class MessageSend_p {
                     prop.put("mode_permission_attachmentsize", attachmentsize);
                     prop.putHTML("mode_permission_subject", subject, true);
                     prop.putHTML("mode_permission_message", message, true);
-                    prop.put("mode_permission_hash", hash);
+                    prop.putHTML("mode_permission_hash", hash);
                     if (post.containsKey("preview")) {
                         prop.putWiki("mode_permission_previewmessage", message);
 

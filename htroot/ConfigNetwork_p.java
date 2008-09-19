@@ -192,8 +192,8 @@ public class ConfigNetwork_p {
         // set p2p/robinson mode flags and values
         prop.put("p2p.checked", (indexDistribute || indexReceive) ? "1" : "0");
         prop.put("robinson.checked", (indexDistribute || indexReceive) ? "0" : "1");
-        prop.put("cluster.peers.ipport", sb.getConfig("cluster.peers.ipport", ""));
-        prop.put("cluster.peers.yacydomain", sb.getConfig("cluster.peers.yacydomain", ""));
+        prop.putHTML("cluster.peers.ipport", sb.getConfig("cluster.peers.ipport", ""));
+        prop.putHTML("cluster.peers.yacydomain", sb.getConfig("cluster.peers.yacydomain", ""));
         prop.put("cluster.peers.yacydomain.hashes", (sb.clusterhashes.size() == 0) ? "" : sb.clusterhashes.toString());
         
         // set p2p mode flags
@@ -203,11 +203,11 @@ public class ConfigNetwork_p {
         prop.put("publicpeerChecked", (sb.getConfig("cluster.mode", "").equals("publicpeer")) ? "1" : "0");
         
         // set network configuration
-        prop.put("network.unit.definition", sb.getConfig("network.unit.definition", ""));
-        prop.put("network.unit.name", sb.getConfig("network.unit.name", ""));
-        prop.put("network.unit.description", sb.getConfig("network.unit.description", ""));
-        prop.put("network.unit.domain", sb.getConfig("network.unit.domain", ""));
-        prop.put("network.unit.dht", sb.getConfig("network.unit.dht", ""));
+        prop.putHTML("network.unit.definition", sb.getConfig("network.unit.definition", ""));
+        prop.putHTML("network.unit.name", sb.getConfig("network.unit.name", ""));
+        prop.putHTML("network.unit.description", sb.getConfig("network.unit.description", ""));
+        prop.putHTML("network.unit.domain", sb.getConfig("network.unit.domain", ""));
+        prop.putHTML("network.unit.dht", sb.getConfig("network.unit.dht", ""));
         networkBootstrapLocations.remove(sb.getConfig("network.unit.definition", ""));
         int c = 0;
         for (final String s: networkBootstrapLocations) prop.put("networks_" + c++ + "_network", s);

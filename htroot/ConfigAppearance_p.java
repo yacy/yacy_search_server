@@ -140,12 +140,12 @@ public class ConfigAppearance_p {
         }
         prop.put("skinlist", i);
 
-        prop.put("currentskin", env.getConfig("currentSkin", "default"));
+        prop.putHTML("currentskin", env.getConfig("currentSkin", "default"));
         
-        prop.put("promoteSearchPageGreeting", sb.getConfig("promoteSearchPageGreeting", ""));
-        prop.put("promoteSearchPageGreeting.homepage", sb.getConfig("promoteSearchPageGreeting.homepage", ""));
-        prop.put("promoteSearchPageGreeting.largeImage", sb.getConfig("promoteSearchPageGreeting.largeImage", ""));
-        prop.put("promoteSearchPageGreeting.smallImage", sb.getConfig("promoteSearchPageGreeting.smallImage", ""));
+        prop.putHTML("promoteSearchPageGreeting", sb.getConfig("promoteSearchPageGreeting", ""));
+        prop.putHTML("promoteSearchPageGreeting.homepage", sb.getConfig("promoteSearchPageGreeting.homepage", ""));
+        prop.putHTML("promoteSearchPageGreeting.largeImage", sb.getConfig("promoteSearchPageGreeting.largeImage", ""));
+        prop.putHTML("promoteSearchPageGreeting.smallImage", sb.getConfig("promoteSearchPageGreeting.smallImage", ""));
         String myaddress = sb.webIndex.seedDB.mySeed().getPublicAddress();
         if (myaddress == null) myaddress = "localhost:" + sb.getConfig("port", "8080");
         prop.put("myaddress", myaddress);

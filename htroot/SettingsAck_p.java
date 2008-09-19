@@ -447,7 +447,7 @@ public class SettingsAck_p {
             
             prop.put("info", "21");
             prop.put("info_msgForwardingEnabled", post.containsKey("msgForwardingEnabled") ? "on" : "off");
-            prop.put("info_msgForwardingCmd", post.get("msgForwardingCmd"));
+            prop.putHTML("info_msgForwardingCmd", post.get("msgForwardingCmd"));
             prop.putHTML("info_msgForwardingTo", post.get("msgForwardingTo"));
             
             return prop;
@@ -522,7 +522,7 @@ public class SettingsAck_p {
                 env.setConfig("crawler.clientTimeout", Integer.toString(crawlerTimeout));
             } catch (final NumberFormatException e) {
                 prop.put("info", "29");
-                prop.put("info_crawler.clientTimeout",post.get("crawler.clientTimeout"));
+                prop.putHTML("info_crawler.clientTimeout",post.get("crawler.clientTimeout"));
                 return prop;
             }
             
@@ -539,7 +539,7 @@ public class SettingsAck_p {
                 env.setConfig("crawler.http.maxFileSize", Long.toString(maxHttpSize));
             } catch (final NumberFormatException e) {
                 prop.put("info", "30");
-                prop.put("info_crawler.http.maxFileSize",post.get("crawler.http.maxFileSize"));
+                prop.putHTML("info_crawler.http.maxFileSize",post.get("crawler.http.maxFileSize"));
                 return prop;
             }
             
@@ -553,7 +553,7 @@ public class SettingsAck_p {
                 env.setConfig("crawler.ftp.maxFileSize", Long.toString(maxFtpSize));
             } catch (final NumberFormatException e) {
                 prop.put("info", "31");
-                prop.put("info_crawler.ftp.maxFileSize",post.get("crawler.ftp.maxFileSize"));
+                prop.putHTML("info_crawler.ftp.maxFileSize",post.get("crawler.ftp.maxFileSize"));
                 return prop;
             }                        
             

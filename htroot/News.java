@@ -118,7 +118,7 @@ public class News {
                     prop.putHTML("table_list_" + i + "_ori", (seed == null) ? record.originator() : seed.getName());
                     prop.put("table_list_" + i + "_cre", serverDate.formatShortSecond(record.created()));
                     prop.put("table_list_" + i + "_crerfcdate", HttpClient.dateString(record.created()));
-                    prop.put("table_list_" + i + "_cat", category);
+                    prop.putHTML("table_list_" + i + "_cat", category);
                     prop.put("table_list_" + i + "_rec", (record.received() == null) ? "-" : serverDate.formatShortSecond(record.received()));
                     prop.put("table_list_" + i + "_dis", record.distributed());
                     
@@ -169,7 +169,7 @@ public class News {
                     	title = ""; 
                     	description = "";
                     }
-                    prop.put("table_list_" + i + "_link", link);
+                    prop.putHTML("table_list_" + i + "_link", link);
                     prop.putHTML("table_list_" + i + "_title", title);
                     prop.putHTML("table_list_" + i + "_description", description);
                     

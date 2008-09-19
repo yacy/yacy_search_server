@@ -84,10 +84,10 @@ public final class Settings_p {
         prop.put("port", env.getConfig("port", "8080"));               
         
         prop.putHTML("peerName", env.getConfig("peerName", "nameless"));
-        prop.put("staticIP", env.getConfig("staticIP", ""));
+        prop.putHTML("staticIP", env.getConfig("staticIP", ""));
         String peerLang = env.getConfig("locale.language", "default");
         if (peerLang.equals("default")) peerLang = "en";
-        prop.put("peerLang", peerLang);
+        prop.putHTML("peerLang", peerLang);
         
         // http networking settings
         prop.put("isTransparentProxy", env.getConfig("isTransparentProxy", "false").equals("true") ? "1" : "0"); 
@@ -118,13 +118,13 @@ public final class Settings_p {
         prop.put("remoteProxyUse4Yacy", env.getConfig("remoteProxyUse4Yacy", "true").equals("true") ? 1 : 0);
         prop.put("remoteProxyUse4SSL", env.getConfig("remoteProxyUse4SSL", "true").equals("true") ? 1 : 0);
         
-        prop.put("remoteProxyHost", env.getConfig("remoteProxyHost", ""));
-        prop.put("remoteProxyPort", env.getConfig("remoteProxyPort", ""));
+        prop.putHTML("remoteProxyHost", env.getConfig("remoteProxyHost", ""));
+        prop.putHTML("remoteProxyPort", env.getConfig("remoteProxyPort", ""));
         
-        prop.put("remoteProxyUser", env.getConfig("remoteProxyUser", ""));
-        prop.put("remoteProxyPwd", env.getConfig("remoteProxyPwd", ""));
+        prop.putHTML("remoteProxyUser", env.getConfig("remoteProxyUser", ""));
+        prop.putHTML("remoteProxyPwd", env.getConfig("remoteProxyPwd", ""));
         
-        prop.put("remoteProxyNoProxy", env.getConfig("remoteProxyNoProxy", ""));
+        prop.putHTML("remoteProxyNoProxy", env.getConfig("remoteProxyNoProxy", ""));
         
         // proxy access filter
         prop.putHTML("proxyfilter", env.getConfig("proxyClient", "*"));
@@ -211,8 +211,8 @@ public final class Settings_p {
          * Message forwarding configuration
          */
         prop.put("msgForwardingEnabled",env.getConfig("msgForwardingEnabled","false").equals("true") ? "1" : "0");
-        prop.put("msgForwardingCmd",env.getConfig("msgForwardingCmd", ""));
-        prop.put("msgForwardingTo",env.getConfig("msgForwardingTo", ""));
+        prop.putHTML("msgForwardingCmd",env.getConfig("msgForwardingCmd", ""));
+        prop.putHTML("msgForwardingTo",env.getConfig("msgForwardingTo", ""));
         
         /*
          * Parser Configuration
@@ -274,9 +274,9 @@ public final class Settings_p {
         prop.put("parser.colspan", configArray.length+2);
         
         // Crawler settings
-        prop.put("crawler.clientTimeout",sb.getConfig("crawler.clientTimeout", "10000"));
-        prop.put("crawler.http.maxFileSize",sb.getConfig("crawler.http.maxFileSize", "-1"));
-        prop.put("crawler.ftp.maxFileSize",sb.getConfig("crawler.ftp.maxFileSize", "-1"));
+        prop.putHTML("crawler.clientTimeout",sb.getConfig("crawler.clientTimeout", "10000"));
+        prop.putHTML("crawler.http.maxFileSize",sb.getConfig("crawler.http.maxFileSize", "-1"));
+        prop.putHTML("crawler.ftp.maxFileSize",sb.getConfig("crawler.ftp.maxFileSize", "-1"));
         
         // return rewrite properties
         return prop;

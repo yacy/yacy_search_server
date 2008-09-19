@@ -74,14 +74,14 @@ public class ConfigProfile_p {
 
             prop.putHTML("name", profile.getProperty("name", ""));
             prop.putHTML("nickname", profile.getProperty("nickname", ""));
-            prop.put("homepage", profile.getProperty("homepage", ""));
-            prop.put("email", profile.getProperty("email", ""));
+            prop.putHTML("homepage", profile.getProperty("homepage", ""));
+            prop.putHTML("email", profile.getProperty("email", ""));
 
-            prop.put("icq", profile.getProperty("icq", ""));
-            prop.put("jabber", profile.getProperty("jabber", ""));
-            prop.put("yahoo", profile.getProperty("yahoo", ""));
-            prop.put("msn", profile.getProperty("msn", ""));
-            prop.put("skype", profile.getProperty("skype", ""));
+            prop.putHTML("icq", profile.getProperty("icq", ""));
+            prop.putHTML("jabber", profile.getProperty("jabber", ""));
+            prop.putHTML("yahoo", profile.getProperty("yahoo", ""));
+            prop.putHTML("msn", profile.getProperty("msn", ""));
+            prop.putHTML("skype", profile.getProperty("skype", ""));
 
             prop.putHTML("comment", profile.getProperty("comment", ""));
 
@@ -105,14 +105,14 @@ public class ConfigProfile_p {
         else{
             prop.putHTML("name", profile.getProperty("name", ""));
             prop.putHTML("nickname", profile.getProperty("nickname", ""));
-            prop.put("homepage", profile.getProperty("homepage", ""));
-            prop.put("email", profile.getProperty("email", ""));
+            prop.putHTML("homepage", profile.getProperty("homepage", ""));
+            prop.putHTML("email", profile.getProperty("email", ""));
 
-            prop.put("icq", profile.getProperty("icq", ""));
-            prop.put("jabber", profile.getProperty("jabber", ""));
-            prop.put("yahoo", profile.getProperty("yahoo", ""));
-            prop.put("msn", profile.getProperty("msn", ""));
-            prop.put("skype", profile.getProperty("skype", ""));
+            prop.putHTML("icq", profile.getProperty("icq", ""));
+            prop.putHTML("jabber", profile.getProperty("jabber", ""));
+            prop.putHTML("yahoo", profile.getProperty("yahoo", ""));
+            prop.putHTML("msn", profile.getProperty("msn", ""));
+            prop.putHTML("skype", profile.getProperty("skype", ""));
 
             prop.putHTML("comment", profile.getProperty("comment", ""));
         }

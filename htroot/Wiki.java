@@ -118,7 +118,7 @@ public class Wiki {
             if (post.get("content", "").trim().length() > 0 && !page.page().equals(content))
                 sb.webIndex.newsPool.publishMyNews(yacyNewsRecord.newRecord(sb.webIndex.seedDB.mySeed(), yacyNewsPool.CATEGORY_WIKI_UPDATE, map));
             page = newEntry;
-            prop.put("LOCATION", "/Wiki.html?page=" + pagename);
+            prop.putHTML("LOCATION", "/Wiki.html?page=" + pagename);
         }
 
         if (post != null && post.containsKey("edit")) {

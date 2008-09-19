@@ -83,7 +83,7 @@ public class Bookmarks {
     	// set user name
     	if(user != null) username=user.getUserName();
     	else if(isAdmin) username="admin";
-    	prop.put("user", username);
+    	prop.putHTML("user", username);
     	
     	//redirect to userpage
     	/*
@@ -167,7 +167,7 @@ public class Bookmarks {
     				prop.put("mode_edit", "0"); // create mode
     				prop.putHTML("mode_title", post.get("title"));
     				prop.putHTML("mode_description", post.get("description"));
-    				prop.put("mode_url", post.get("url"));
+    				prop.putHTML("mode_url", post.get("url"));
     				prop.putHTML("mode_tags", post.get("tags"));
     				prop.putHTML("mode_path", post.get("path"));
     				prop.put("mode_public", "0");
@@ -197,7 +197,7 @@ public class Bookmarks {
                         prop.put("mode_edit", "1"); // edit mode
                         prop.putHTML("mode_title", bookmark.getTitle());
                         prop.putHTML("mode_description", bookmark.getDescription());
-                        prop.put("mode_url", bookmark.getUrl());
+                        prop.put("mode_url", bookmark.getUrl()); //TODO: XSS protection - how is this stored?
                         prop.putHTML("mode_tags", bookmark.getTagsString());
                         prop.putHTML("mode_path",bookmark.getFoldersString());
                         if (bookmark.getPublic()) {
@@ -304,7 +304,7 @@ public class Bookmarks {
        			while (tagsIt.hasNext()) {            	
        				final String tname = tagsIt.next();
        				if ((!tname.startsWith("/")) && (!tname.equals(""))) {
-       					prop.put("bookmarks_"+count+"_tags_"+tagCount+"_tag", tname);
+       					prop.putHTML("bookmarks_"+count+"_tags_"+tagCount+"_tag", tname);
        					tagCount++;
        				}
        			}

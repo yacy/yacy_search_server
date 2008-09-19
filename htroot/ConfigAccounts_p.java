@@ -132,8 +132,8 @@ public class ConfigAccounts_p {
                 // link: "If you want to manage more Users, return to the user page." (parameter "user" is empty)
                 if (entry != null) {
                     //TODO: set username read-only in html
-                    prop.put("current_user", post.get("user"));
-                    prop.put("username", post.get("user"));
+                    prop.putHTML("current_user", post.get("user"));
+                    prop.putHTML("username", post.get("user"));
                     prop.putHTML("firstname", entry.getFirstName());
                     prop.putHTML("lastname", entry.getLastName());
                     prop.putHTML("address", entry.getAddress());

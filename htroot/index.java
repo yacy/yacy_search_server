@@ -106,11 +106,11 @@ public class index {
         prop.put("searchoptions_indexofChecked", "");
         prop.put("searchoptions_publicSearchpage", (publicPage == true) ? "0" : "1");
         prop.put("results", "");
-        prop.put("cat", cat);
+        prop.putHTML("cat", cat);
         prop.put("type", type);
         prop.put("depth", "0");
         prop.put("display", display);
-        prop.put("constraint", constraint);
+        prop.putHTML("constraint", constraint);
         prop.put("searchoptions_display", display);
         prop.put("contentdomCheckText", (contentdom == plasmaSearchQuery.CONTENTDOM_TEXT) ? "1" : "0");
         prop.put("contentdomCheckAudio", (contentdom == plasmaSearchQuery.CONTENTDOM_AUDIO) ? "1" : "0");

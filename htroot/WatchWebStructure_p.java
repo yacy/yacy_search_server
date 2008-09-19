@@ -48,7 +48,7 @@ public class WatchWebStructure_p {
             }
         }
         
-        prop.put("host", host);
+        prop.putHTML("host", host);
         prop.put("depth", depth);
         prop.put("depthi", Math.min(8, depth + 1));
         prop.put("depthd", Math.max(0, depth - 1));

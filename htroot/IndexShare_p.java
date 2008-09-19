@@ -51,8 +51,8 @@ public class IndexShare_p {
             return prop; // be save
         }
         if (post == null) {
-            prop.put("linkfreq", switchboard.getConfig("defaultLinkReceiveFrequency","30"));
-            prop.put("wordfreq", switchboard.getConfig("defaultWordReceiveFrequency","10"));
+            prop.put("linkfreq", switchboard.getConfigLong("defaultLinkReceiveFrequency",30));
+            prop.put("wordfreq", switchboard.getConfigLong("defaultWordReceiveFrequency",10));
             prop.put("dtable", "");
             prop.put("rtable", "");
             prop.putNum("wcount", switchboard.webIndex.size());

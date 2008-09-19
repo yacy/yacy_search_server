@@ -78,7 +78,7 @@ public class ViewLog_p {
         prop.put("reverseChecked", reversed ? "1" : "0");
         prop.put("lines", lines);
         prop.put("maxlines",maxlines);
-        prop.put("filter", filter);
+        prop.putHTML("filter", filter);
         
         // trying to compile the regular expression filter expression
         Matcher filterMatcher = null;

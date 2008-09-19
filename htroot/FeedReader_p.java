@@ -67,9 +67,9 @@ public class FeedReader_p {
             for (final RSSMessage item: feed) {
                 prop.putHTML("page_items_" + i + "_author", item.getAuthor());
                 prop.putHTML("page_items_" + i + "_title", item.getTitle());
-                prop.put("page_items_" + i + "_link", item.getLink());
-                prop.put("page_items_" + i + "_description", item.getDescription());
-                prop.put("page_items_" + i + "_date", item.getPubDate());
+                prop.putHTML("page_items_" + i + "_link", item.getLink());
+                prop.putHTML("page_items_" + i + "_description", item.getDescription());
+                prop.putHTML("page_items_" + i + "_date", item.getPubDate());
                 i++;
             }
             prop.put("page_items", feed.size());

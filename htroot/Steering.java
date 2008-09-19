@@ -73,7 +73,7 @@ public class Steering {
                 yacyVersion.deployRelease(releaseFile);
             }
             prop.put("info", "5");
-            prop.put("info_release", releaseFileName);
+            prop.putHTML("info_release", releaseFileName);
             
             return prop;
         }
