@@ -36,6 +36,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeSet;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
@@ -67,8 +68,9 @@ public class plasmaParserDocument {
     private boolean resorted;
     private InputStream textStream;
     private int inboundLinks, outboundLinks; // counters for inbound and outbound links, are counted after calling notifyWebStructure
+    private Set<String> languages;
     
-    protected plasmaParserDocument(final yacyURL location, final String mimeType, final String charset,
+    protected plasmaParserDocument(final yacyURL location, final String mimeType, final String charset, final Set<String> languages,
                     final String[] keywords, final String title, final String author,
                     final String[] sections, final String abstrct,
                     final Object text, final Map<yacyURL, String> anchors, final HashMap<String, htmlFilterImageEntry> images) {
@@ -90,6 +92,7 @@ public class plasmaParserDocument {
         this.resorted = false;
         this.inboundLinks = -1;
         this.outboundLinks = -1;
+        this.languages = languages;
         
         if (text == null) try {
             this.text = new serverCachedFileOutputStream(Parser.MAX_KEEP_IN_MEMORY_SIZE);
@@ -101,31 +104,48 @@ public class plasmaParserDocument {
         }
     }
     
-    public plasmaParserDocument(final yacyURL location, final String mimeType, final String charset) {
-        this(location, mimeType, charset, null, null, null, null, null, (Object)null, null, null);
+    public plasmaParserDocument(final yacyURL location, final String mimeType, final String charset, final Set<String> languages) {
+        this(location, mimeType, charset, languages, null, null, null, null, null, (Object)null, null, null);
     }
     
-    public plasmaParserDocument(final yacyURL location, final String mimeType, final String charset,
+    public plasmaParserDocument(final yacyURL location, final String mimeType, final String charset, final Set<String> languages,
                     final String[] keywords, final String title, final String author,
                     final String[] sections, final String abstrct,
                     final byte[] text, final Map<yacyURL, String> anchors, final HashMap<String, htmlFilterImageEntry> images) {
-        this(location, mimeType, charset, keywords, title, author, sections, abstrct, (Object)text, anchors, images);
+        this(location, mimeType, charset, languages, keywords, title, author, sections, abstrct, (Object)text, anchors, images);
     }
     
-    public plasmaParserDocument(final yacyURL location, final String mimeType, final String charset,
+    public plasmaParserDocument(final yacyURL location, final String mimeType, final String charset, final Set<String> languages,
             final String[] keywords, final String title, final String author,
             final String[] sections, final String abstrct,
             final File text, final Map<yacyURL, String> anchors, final HashMap<String, htmlFilterImageEntry> images) {
-        this(location, mimeType, charset, keywords, title, author, sections, abstrct, (Object)text, anchors, images);
+        this(location, mimeType, charset, languages, keywords, title, author, sections, abstrct, (Object)text, anchors, images);
     }
     
-    public plasmaParserDocument(final yacyURL location, final String mimeType, final String charset,
+    public plasmaParserDocument(final yacyURL location, final String mimeType, final String charset, final Set<String> languages,
             final String[] keywords, final String title, final String author,
             final String[] sections, final String abstrct,
             final serverCachedFileOutputStream text, final Map<yacyURL, String> anchors, final HashMap<String, htmlFilterImageEntry> images) {
-        this(location, mimeType, charset, keywords, title, author, sections, abstrct, (Object)text, anchors, images);
+        this(location, mimeType, charset, languages, keywords, title, author, sections, abstrct, (Object)text, anchors, images);
     }
 
+    /**
+     * compute a set of languages that this document contains
+     * the language is not computed using a statistical analysis of the content, only from given metadata that came with the document
+     * if there are several languages defined in the document, the TLD is taken to check which one should be picked
+     * If there is no metadata at all, null is returned
+     * @return a string with a language name using the alpha-2 code of ISO 639
+     */
+    public String languageByMetadata() {
+        if (this.languages == null) return null;
+        if (this.languages.size() == 0) return null;
+        if (this.languages.size() == 1) return languages.iterator().next();
+        if (this.languages.contains(this.source.language())) return this.source.language();
+        // now we are confused: the declared languages differ all from the TLD
+        // just pick one of the languages that we have
+        return languages.iterator().next();
+    }
+    
     /*
 DC according to rfc 5013
 

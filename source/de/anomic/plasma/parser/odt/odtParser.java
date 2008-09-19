@@ -32,7 +32,9 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -89,6 +91,7 @@ public class odtParser extends AbstractParser implements Parser {
             String docShortTitle  = null;
             String docLongTitle   = null;
             String docAuthor      = null;
+            String docLanguage    = null;
             
             // opening the file as zip file
             final ZipFile zipFile= new ZipFile(dest);
@@ -134,8 +137,13 @@ public class odtParser extends AbstractParser implements Parser {
                     docShortTitle  = metaData.getTitle();
                     docLongTitle   = metaData.getSubject();
                     docAuthor      = metaData.getCreator();
+                    docLanguage    = metaData.getLanguage();
                 }
             }
+            
+            // make the languages set
+            Set<String> languages = new HashSet<String>(1);
+            if (docLanguage != null) languages.add(docLanguage);
             
             // if there is no title availabe we generate one
             if (docLongTitle == null) {
@@ -156,6 +164,7 @@ public class odtParser extends AbstractParser implements Parser {
                         location,
                         mimeType,
                         "UTF-8",
+                        languages,
                         docKeywords,
                         docLongTitle,
                         docAuthor,
@@ -169,6 +178,7 @@ public class odtParser extends AbstractParser implements Parser {
                         location,
                         mimeType,
                         "UTF-8",
+                        languages,
                         docKeywords,
                         docLongTitle,
                         docAuthor,

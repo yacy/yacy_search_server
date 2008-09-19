@@ -63,7 +63,7 @@ public class sevenzipParser extends AbstractParser implements Parser {
     
     public plasmaParserDocument parse(final yacyURL location, final String mimeType, final String charset,
             final IInStream source, final long maxRamSize) throws ParserException, InterruptedException {
-        final plasmaParserDocument doc = new plasmaParserDocument(location, mimeType, charset);
+        final plasmaParserDocument doc = new plasmaParserDocument(location, mimeType, charset, null);
         Handler archive;
         super.theLogger.logFine("opening 7zip archive...");
         try {

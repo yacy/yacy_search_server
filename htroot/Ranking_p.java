@@ -75,6 +75,7 @@ public class Ranking_p {
 		rankingParameters.put(plasmaSearchRankingProfile.WORDSINTEXT, "Words In Text");
 		rankingParameters.put(plasmaSearchRankingProfile.WORDSINTITLE, "Words In Title");
 		rankingParameters.put(plasmaSearchRankingProfile.YBR, "YaCy Block Rank");
+		rankingParameters.put(plasmaSearchRankingProfile.LANGUAGE, "Preferred Language");
 	}
 
     private static serverObjects defaultValues() {

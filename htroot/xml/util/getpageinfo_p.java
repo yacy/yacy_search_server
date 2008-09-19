@@ -29,6 +29,7 @@ package xml.util;
 import java.io.IOException;
 import java.io.Writer;
 import java.net.MalformedURLException;
+import java.util.Set;
 
 import de.anomic.crawler.HTTPLoader;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
@@ -103,8 +104,9 @@ public class getpageinfo_p {
                     prop.put("tags", count);
                     // put description                    
                     prop.putHTML("desc", scraper.getDescription(), true);
-                    // put language 
-                    prop.putHTML("lang", scraper.getContentLanguages()[0], true);
+                    // put language
+                    Set<String> languages = scraper.getContentLanguages();
+                    prop.putHTML("lang", (languages == null) ? "unknown" : languages.iterator().next(), true);
 
                 } catch (final MalformedURLException e) { /* ignore this */
                 } catch (final IOException e) { /* ignore this */

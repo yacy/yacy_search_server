@@ -134,6 +134,7 @@ public class rpmParser extends AbstractParser implements Parser {
                     mimeType,
                     "UTF-8",
                     null,
+                    null,
                     summary,
                     packager,
                     null,

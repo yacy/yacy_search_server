@@ -116,6 +116,7 @@ public class xlsParser extends AbstractParser implements Parser, HSSFListener {
                     mimeType,
                     "UTF-8",
                     null,
+                    null,
                     ((contents.length() > 80) ? contents.substring(0, 80) : contents.trim()).
                     replaceAll("\r\n"," ").
                     replaceAll("\n"," ").

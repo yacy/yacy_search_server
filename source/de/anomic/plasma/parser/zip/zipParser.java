@@ -172,6 +172,7 @@ public class zipParser extends AbstractParser implements Parser {
                     location,
                     mimeType,
                     null,
+                    null,
                     docKeywords.toString().split(" |,"),
                     docLongTitle.toString(),
                     "", // TODO: AUTHOR
@@ -184,6 +185,7 @@ public class zipParser extends AbstractParser implements Parser {
                 result = new plasmaParserDocument(
                         location,
                         mimeType,
+                        null,
                         null,
                         docKeywords.toString().split(" |,"),
                         docLongTitle.toString(),

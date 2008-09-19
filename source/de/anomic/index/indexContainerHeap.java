@@ -118,6 +118,7 @@ public final class indexContainerHeap {
         int urlCount = 0;
         synchronized (cache) {
             for (final indexContainer container : new heapFileEntries(heapFile, this.payloadrow)) {
+                // TODO: in this loop a lot of memory may be allocated. A check if the memory gets low is necessary. But what do when the memory is low?
                 if (container == null) break;
                 cache.put(container.getWordHash(), container);
                 urlCount += container.size();
@@ -252,6 +253,10 @@ public final class indexContainerHeap {
             }
         }
         
+        /**
+         * return an index container
+         * because they may get very large, it is wise to deallocate some memory before calling next()
+         */
         public indexContainer next() {
             final indexContainer n = this.nextContainer;
             this.nextContainer = next0();

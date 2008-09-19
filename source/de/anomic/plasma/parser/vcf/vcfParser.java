@@ -78,7 +78,7 @@ public class vcfParser extends AbstractParser implements Parser {
         return SUPPORTED_MIME_TYPES;
     }
     
-    public plasmaParserDocument parse(final yacyURL location, final String mimeType, final String charset, final InputStream source) throws ParserException, InterruptedException {
+    public plasmaParserDocument parse(final yacyURL url, final String mimeType, final String charset, final InputStream source) throws ParserException, InterruptedException {
         
         try {
             final StringBuffer parsedTitle = new StringBuffer();
@@ -213,7 +213,7 @@ public class vcfParser extends AbstractParser implements Parser {
                     
                 } else {
                     if (theLogger.isFinest()) this.theLogger.logFinest("Invalid data in vcf file" +
-                                             "\n\tURL: " + location +
+                                             "\n\tURL: " + url +
                                              "\n\tLine: " + line + 
                                              "\n\tLine-Nr: " + lineNr);
                 }
@@ -222,10 +222,11 @@ public class vcfParser extends AbstractParser implements Parser {
             final String[] sections = parsedNames.toArray(new String[parsedNames.size()]);
             final byte[] text = parsedDataText.toString().getBytes();
             final plasmaParserDocument theDoc = new plasmaParserDocument(
-                    location,                   // url of the source document
+                    url,                   // url of the source document
                     mimeType,                   // the documents mime type
                     null,
                     null,                       // a list of extracted keywords
+                    null,                       // the language
                     parsedTitle.toString(),     // a long document title
                     "",                         // TODO: AUTHOR
                     sections,                   // an array of section headlines
@@ -238,7 +239,7 @@ public class vcfParser extends AbstractParser implements Parser {
             if (e instanceof InterruptedException) throw (InterruptedException) e;
             if (e instanceof ParserException) throw (ParserException) e;
             
-            throw new ParserException("Unexpected error while parsing vcf resource. " + e.getMessage(),location);
+            throw new ParserException("Unexpected error while parsing vcf resource. " + e.getMessage(),url);
         } 
     }
     

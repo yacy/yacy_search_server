@@ -57,6 +57,7 @@ public class plasmaSearchRankingProfile {
     public static final String CATHASVIDEO        = "cathasvideo";
     public static final String CATHASAPP          = "cathasapp";
     public static final String TERMFREQUENCY      = "tf";
+    public static final String LANGUAGE           = "language";   // ranking of preferred language
 
     // post-sort predicates
     public static final String URLCOMPINTOPLIST   = "urlcompintoplist";
@@ -74,7 +75,7 @@ public class plasmaSearchRankingProfile {
         coeff_appurl, coeff_app_dc_title, coeff_app_dc_creator, coeff_app_dc_subject, coeff_app_dc_description, coeff_appemph,
         coeff_catindexof, coeff_cathasimage, coeff_cathasaudio, coeff_cathasvideo, coeff_cathasapp,
         coeff_urlcompintoplist, coeff_descrcompintoplist, coeff_prefer,
-        coeff_termfrequency;
+        coeff_termfrequency, coeff_language;
     
     public plasmaSearchRankingProfile(final int mediatype) {
         // set default-values
@@ -109,6 +110,7 @@ public class plasmaSearchRankingProfile {
         coeff_urlcompintoplist   = 3;
         coeff_descrcompintoplist = 2;
         coeff_prefer             = 14;
+        coeff_language           = 13;
     }
     
     public plasmaSearchRankingProfile(final String prefix, final String profile) {
@@ -160,6 +162,7 @@ public class plasmaSearchRankingProfile {
             coeff_urlcompintoplist   = parseMap(coeff, URLCOMPINTOPLIST, coeff_urlcompintoplist);
             coeff_descrcompintoplist = parseMap(coeff, DESCRCOMPINTOPLIST, coeff_descrcompintoplist);
             coeff_prefer             = parseMap(coeff, PREFER, coeff_prefer);
+            coeff_language           = parseMap(coeff, LANGUAGE, coeff_language);
         }
     }
     
@@ -209,6 +212,7 @@ public class plasmaSearchRankingProfile {
         ext.put(prefix + CATHASVIDEO, Integer.toString(coeff_cathasvideo));
         ext.put(prefix + CATHASAPP, Integer.toString(coeff_cathasapp));
         ext.put(prefix + TERMFREQUENCY, Integer.toString(coeff_termfrequency));
+        ext.put(prefix + LANGUAGE, Integer.toString(coeff_language));
         return ext;
     }
     

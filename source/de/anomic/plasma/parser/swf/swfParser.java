@@ -107,6 +107,7 @@ public class swfParser extends AbstractParser implements Parser {
                     location,     // url of the source document
                     mimeType,     // the documents mime type
                     "UTF-8",      // charset of the document text
+                    null,
                     null,          //keywords
                       ((contents.length() > 80)? contents.substring(0, 80):contents.trim()).
                           replaceAll("\r\n"," ").

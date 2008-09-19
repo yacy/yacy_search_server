@@ -819,12 +819,29 @@ public final class plasmaWordIndex implements indexRI {
         final yacyURL referrerURL = entry.referrerURL();
         final Date docDate = entry.getModificationDate();
         String language = condenser.language();
+        String bymetadata = document.languageByMetadata(); // the languageByMetadata may return null if there was no declaration
         if (language == null) {
-            System.out.println("*** DEBUG LANGUAGE: identification of " + entry.url() + " FAILED, taking TLD");
-            language = entry.url().language();
+            language = (bymetadata == null) ? entry.url().language() : bymetadata;
+            System.out.println("*** DEBUG LANGUAGE-BY-STATISTICS: " + entry.url() + " FAILED, taking " + ((bymetadata == null) ? "TLD" : "metadata") + ": " + language);
         } else {
-            System.out.println("*** DEBUG LANGUAGE: identification of " + entry.url() + " SUCCESS: " + language);
-            if (language.equals("pl")) language = entry.url().language(); // patch a bug TODO: remove this if bug is fixed
+            if (language.equals("pl")) {
+                System.out.println("*** DEBUG LANGUAGE-BY-STATISTICS: " + entry.url() + " HAS BUG: " + language);
+                language = (bymetadata == null) ? entry.url().language() : bymetadata; // extra handling of this case: overwrite with bymetadata
+            } else {
+                if (bymetadata == null) {
+                    if (language.equals(entry.url().language()))
+                        System.out.println("*** DEBUG LANGUAGE-BY-STATISTICS: " + entry.url() + " CONFIRMED - TLD IDENTICAL: " + language);
+                    else {
+                        System.out.println("*** DEBUG LANGUAGE-BY-STATISTICS: " + entry.url() + " CONFLICTING: " + language + " (the language given by the TLD is " + entry.url().language() + ")");
+                        language = entry.url().language();
+                    }
+                } else {
+                    if (language.equals(bymetadata))
+                        System.out.println("*** DEBUG LANGUAGE-BY-STATISTICS: " + entry.url() + " CONFIRMED - METADATA IDENTICAL: " + language);
+                    else
+                        System.out.println("*** DEBUG LANGUAGE-BY-STATISTICS: " + entry.url() + " CONFLICTING: " + language + " (the language given by metadata is " + bymetadata + ")");
+                }
+            }
         }
         
         // create a new loaded URL db entry

@@ -88,6 +88,7 @@ public class pptParser extends AbstractParser implements Parser {
                     mimeType,
                     "UTF-8",
                     null,
+                    null,
                     ((contents.length() > 80) ? contents.substring(0, 80) : contents.trim()).
                     replaceAll("\r\n"," ").
                     replaceAll("\n"," ").

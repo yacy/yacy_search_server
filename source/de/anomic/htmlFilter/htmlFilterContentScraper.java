@@ -50,6 +50,7 @@ import de.anomic.http.httpRequestHeader;
 import de.anomic.server.serverCharBuffer;
 import de.anomic.server.serverFileUtils;
 import de.anomic.yacy.yacyURL;
+import de.anomic.tools.iso639;
 
 public class htmlFilterContentScraper extends htmlFilterAbstractScraper implements htmlFilterScraper {
 
@@ -381,11 +382,21 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         return s;
     }
     
-    public String[] getContentLanguages() {
+    public HashSet<String> getContentLanguages() {
         String s = metas.get("content-language");
         if (s == null) s = metas.get("dc.language");
-        if (s == null) s = "";
-        return s.split(" |,");
+        if (s == null) return null;
+        HashSet<String> hs = new HashSet<String>();
+        String[] cl = s.split(" |,");
+        int p;
+        for (int i = 0; i < cl.length; i++) {
+            cl[i] = cl[i].toLowerCase();
+            p = cl[i].indexOf('-');
+            if (p > 0) cl[i] = cl[i].substring(0, p);
+            if (iso639.exists(cl[i])) hs.add(cl[i]);
+        }
+        if (hs.size() == 0) return null;
+        return hs;
     }
     
     public String[] getKeywords() {

@@ -727,6 +727,7 @@ public final class plasmaParser {
                 location,
                 mimeType,
                 charSet,
+                scraper.getContentLanguages(),
                 scraper.getKeywords(),
                 scraper.getTitle(),
                 scraper.getAuthor(),

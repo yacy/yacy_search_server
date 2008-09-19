@@ -848,7 +848,7 @@ public class yacyURL implements Serializable {
     
     // language calculation
     public String language() {
-        String language = "uk";
+        String language = "en";
         final int pos = host.lastIndexOf(".");
         if ((pos > 0) && (host.length() - pos == 3)) language = host.substring(pos + 1).toLowerCase();
         return language;
