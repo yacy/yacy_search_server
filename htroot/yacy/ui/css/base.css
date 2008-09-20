@@ -122,8 +122,25 @@ img {
 }
 .flexigrid div.fbutton .delete {
 	background: url(../img/close.png) no-repeat center left;
-}	
-
+}
+.flexigrid div.fbutton .bookmark {
+	background: url(../img/bookmark.png) no-repeat center left;
+}
+.flexigrid div.fbutton .blacklist {
+	background: url(../img/blacklist.png) no-repeat center left;
+}
+.flexigrid div.fbutton .crawl {
+	background: url(../img/crawl.png) no-repeat center left;
+}
+.flexigrid div.fbutton .next {
+	background: url(../img/next.png) no-repeat center left;
+}
+.flexigrid div.fbutton .prev {
+	background: url(../img/prev.png) no-repeat center left;
+}
+.flexigrid div.fbutton .load {
+	background: url(../img/flexigrid/load.png) no-repeat center left;
+}
 
 /* YaCy Bookmarks ---------------------------*/
 .url {

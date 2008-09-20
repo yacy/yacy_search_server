@@ -7,77 +7,91 @@
 			url: query,
 			async: false,
 			dataType: "xml",
-			success: function(xml) {				
-				if ($.browser.mozilla && ($.browser.version > 1.8)) {
-					var totalResults = parseInt($(xml).find('opensearch\\:totalResults').text().replace(".","","g"));
-					var startIndex = parseInt($(xml).find('opensearch\\:startIndex').text());				
-					var itemsPerPage = parseInt($(xml).find('opensearch\\:itemsPerPage').text());
-				} else {
-					var totalResults = parseInt($(xml).find('totalResults').text().replace(".","","g"));
-					var startIndex = parseInt($(xml).find('startIndex').text());				
-					var itemsPerPage = parseInt($(xml).find('itemsPerPage').text());
-				}
-				var query = $(xml).find('Query').attr('searchTerms');				
-				var endIndex = startIndex+itemsPerPage;				
-				if (endIndex > totalResults) {
-					endIndex = totalResults;
-				}
-				
-				var totalPages = (totalResults/itemsPerPage)|0;
-				if (startIndex != 0) {
-    				var currentPage = ((startIndex-1)/itemsPerPage);
-  				} else {
-    				var currentPage = 0;
-  				}	
-												
+			success: function(xml) {
+				var totalResults = parseInt($(xml).find('opensearch\\:totalResults').text().replace(",","","g"));
+				var startIndex = parseInt($(xml).find('opensearch\\:startIndex').text());				
+				var itemsPerPage = parseInt($(xml).find('opensearch\\:itemsPerPage').text());				
+				var query = $(xml).find('opensearch\\:Query').attr('searchTerms');								
 				$(xml).find('item').each(function(){					
 					var title = $(this).find('title').text();
 					var link = $(this).find('link').text();
 					var desc = $(this).find('description').text();
-					var guid = $(this).find('guid').text();
-					$('<div class="searchresults"></div>')
-						.html('<h3 class="linktitle"><a href="' +link+ '">' +title+ '</a></h3><p class="snippet">' +desc+ '</p><p class="url"><a href="' +link+ '" id="' +guid+ '" >' +link+ '</a></p>')						
-						.appendTo(tabid);										
+					var hash = $(this).find('guid').text();
+					var date = $(this).find('pubDate').text();
+					var tags = "";
+					$('<tr></tr')
+						.html('<td>' +hash+ '</td><td>' +''+ '</td><td><h3 class="linktitle">' +HTMLenc(title)+ '</h3><p class="desc">' +HTMLenc(desc)+ '</p><p class="url"><a href="' +link+ '">' +link+ '</a></p><td>' +HTMLenc(tags)+ ' </td><td>' +date+ '</td>')						
+						.appendTo(tabid+" .yresult tbody");										
 				}); //close each(
-				
-				var pagination = tabid + " .pagination";		
-				$('<div class="pagination"></div>').html('[loading...]').appendTo(tabid);	
-				$(pagination).pagination(totalResults, {
-					current_page:currentPage,
-					items_per_page:itemsPerPage,
-					num_edge_entries:1,
-					num_display_entries:10,
-					callback: loadContents
-				});
-
-				$(".linktitle a").faviconize({
-					position: "before",
-					defaultImage: "img-2/article.png",
-					className: "favicon"
-				});	
+				var height=document.documentElement.clientHeight - 205;    			
+    			var page = "&nbsp;" + (startIndex+1) + "-" + (startIndex+itemsPerPage) + " of " + totalResults
+				$(tabid+" .yresult").flexigrid({
+    				colModel: [
+						{display: 'Hash', name : 'hash', width : 50, sortable : false, align: 'center', hide: true},
+						{display: '', name : 'public', width : 25, sortable : true, align: 'center'},
+						{display: 'Title', name : 'title', width : 450, sortable : true, align: 'left'},
+						{display: 'Tags', name : 'tags', width : 240, sortable : false, align: 'left'},
+						{display: 'Date', name : 'date', width : 130, sortable : true, align: 'left'}
+					],
+					buttons: [
+						{name: 'Bookmark', bclass: 'bookmark', onpress: test},
+						{name: 'Crawl', bclass: 'crawl', onpress: test},
+						{name: 'Blacklist', bclass: 'blacklist', onpress: test},
+						{name: 'Refresh', bclass: 'load', onpress: load},
+						{separator: true},						
+						{name: page, bclass: 'prev', onpress: load},						
+						{name: '&nbsp;', bclass: 'next', onpress: load},
+						{separator: true}						
+					],										
+					striped: true,
+					nowrap: false,			 									    				
+    				height: height,					
+    				title: 'YaCy P2P Web Search: '+query										    				
+    			});	
 			}
 		}); //close $.ajax(
-		function loadContents(page_id, jq) {
-			var $tabs = $('#container ul');
-			var count = $(tabid).attr('count');		
-			var offset = ((page_id*count)+1);
-			$(tabid).attr('offset', offset);
 		
+		/*
+		$(".linktitle a").faviconize({
+			position: "before",
+			defaultImage: "img-2/article.png",
+			className: "favicon"
+		});
+		*/
+		
+		function test() { alert("Test!"); }
+
+		function load(com, grid) {
+			var $tabs = $('#container ul');
+			var count = parseInt($(tabid).attr('count'));
+			var offset = parseInt($(tabid).attr('offset'));			
+			if (com == '&nbsp;') { 
+				offset = offset+count;
+			}
+			else if (com == 'Refresh') {
+				offset = 0;
+			}
+			else if (offset > count) {
+				offset = offset-count;
+			}
+			$(tabid).attr('offset', offset);
 			query = $(tabid).attr('resource')
 				+"&search="+$(tabid).attr('search')
 				+"&contentdom="+$(tabid).attr('contentdom')
-				+"&count="+$(tabid).attr('count')
+				+"&count="+$(tabid).attr('count')			
 				+"&offset="+$(tabid).attr('offset')
 				+"&constraint="+$(tabid).attr('constraint')
 				+"&prefermaskfilter="+$(tabid).attr('prefermaskfilter')
 				+"&urlmaskfilter="+$(tabid).attr('urlmaskfilter');
-			
+					
 			var selected = $tabs.data('selected.tabs');
-			$tabs.tabs("load", selected);			
-			$('#pagination').trigger("update");
+			$tabs.tabs("load", selected);
 			return false;
 		}					
 	 }); //close $(
   //]]>
 </script>
+<table class="yresult">
+	<tbody></tbody>
+</table>
 

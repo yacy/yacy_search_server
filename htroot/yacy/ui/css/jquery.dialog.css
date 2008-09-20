@@ -5,6 +5,7 @@
 	background-color: white;
 	font-family: "Trebuchet MS", Trebuchet, Verdana, Helvetica, Arial, sans-serif;
     font-size: 12px;
+    border: black;
 }
 
 .bmdialog .ui-dialog .ui-dialog-titlebar,
