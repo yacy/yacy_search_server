@@ -71,9 +71,9 @@ public class get {
             if(serverDate.formatISO8601(new Date(bookmark.getTimeStamp())).equals(date) &&
                     tag==null || bookmark.getTags().contains(tag) &&
                     isAdmin || bookmark.getPublic()){
-                prop.put("posts_"+count+"_url", bookmark.getUrl());
-                prop.put("posts_"+count+"_title", bookmark.getTitle());
-                prop.put("posts_"+count+"_description", bookmark.getDescription());
+                prop.putHTML("posts_"+count+"_url", bookmark.getUrl());
+                prop.putHTML("posts_"+count+"_title", bookmark.getTitle());
+                prop.putHTML("posts_"+count+"_description", bookmark.getDescription());
                 prop.put("posts_"+count+"_md5", serverCodings.encodeMD5Hex(bookmark.getUrl()));
                 prop.put("posts_"+count+"_time", date);
                 prop.putHTML("posts_"+count+"_tags", bookmark.getTagsString().replaceAll(","," "));

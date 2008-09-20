@@ -102,7 +102,7 @@ public class queues_p {
                     totalSize += entrySize;
                     initiator = sb.webIndex.seedDB.getConnected(pcentry.initiator());
                     prop.put("list-indexing_"+i+"_profile", (pcentry.profile() != null) ? pcentry.profile().name() : "deleted");
-                    prop.put("list-indexing_"+i+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()));
+                    prop.putHTML("list-indexing_"+i+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()));
                     prop.put("list-indexing_"+i+"_depth", pcentry.depth());
                     prop.put("list-indexing_"+i+"_modified", pcentry.getModificationDate());
                     prop.putHTML("list-indexing_"+i+"_anchor", (pcentry.anchorName()==null) ? "" : pcentry.anchorName(), true);
@@ -118,7 +118,7 @@ public class queues_p {
         
         //loader queue
         prop.put("loaderSize", Integer.toString(sb.crawlQueues.size()));        
-        prop.put("loaderMax", sb.getConfig(plasmaSwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX, "10"));
+        prop.put("loaderMax", sb.getConfigLong(plasmaSwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX, 10));
         if (sb.crawlQueues.size() == 0) {
             prop.put("list-loader", "0");
         } else {
@@ -128,7 +128,7 @@ public class queues_p {
                 if (w[i] == null) continue;
                 prop.put("list-loader_"+count+"_profile", w[i].profileHandle());
                 initiator = sb.webIndex.seedDB.getConnected(w[i].initiator());
-                prop.put("list-loader_"+count+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()));
+                prop.putHTML("list-loader_"+count+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()));
                 prop.put("list-loader_"+count+"_depth", w[i].depth());
                 prop.putHTML("list-loader_"+count+"_url", w[i].url().toString(), true);
                 count++;

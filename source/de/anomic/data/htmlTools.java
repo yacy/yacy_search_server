@@ -273,5 +273,9 @@ public class htmlTools {
         System.out.println(txet);
         System.out.println(decodeHtml2Unicode(txet));
         if (decodeHtml2Unicode(txet).equals(text)) System.out.println("correct");
+        
+        final String text2 = "encodeUnicode2xml: & \" < > ä ö ü";
+        System.out.println(text2);
+        System.out.println(encodeUnicode2xml(text2));
     }
 }

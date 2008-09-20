@@ -33,7 +33,7 @@ public class xbel {
     		}
         	if(post.containsKey("tag")) {
     			final String tagName=post.get("tag");    			
-    			prop.put("folder", tagName);
+    			prop.putHTML("folder", tagName);
     			if (!tagName.equals("")) {
     				final Iterator<String> bit=switchboard.bookmarksDB.getBookmarksIterator(tagName, isAdmin);
     				count = print_XBEL(bit, count);
