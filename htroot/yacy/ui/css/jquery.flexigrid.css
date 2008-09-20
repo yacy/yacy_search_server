@@ -3,8 +3,9 @@
 
 .flexigrid
 	{
-	font-family: Arial, Helvetica, sans-serif;
+	font-family: "Trebuchet MS", Trebuchet, Verdana, Helvetica, Arial, sans-serif;
 	font-size: 11px;
+	color: #27537a;
 	position: relative;
 	border: 0px solid #eee;
 	overflow: hidden;

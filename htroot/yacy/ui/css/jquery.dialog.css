@@ -12,7 +12,7 @@
 	background: url(../img/tab.png) no-repeat;	
 	padding: 2px;
 	height: 28px;
-	_height: 29px;
+	/*_height: 29px;*/
 }
 
 .bmdialog .ui-dialog.ui-draggable .ui-dialog-titlebar,
@@ -20,13 +20,13 @@
 	cursor: move;
 }
 
-.bmdialog .ui-dialog .ui-dialog-titlebar-close,
-.bmdialog.ui-dialog .ui-dialog-titlebar-close {
+.bmdialog .ui-dialog .ui-dialog-titlebar-ajax,
+.bmdialog.ui-dialog .ui-dialog-titlebar-ajax {
 	width: 16px;
 	height: 16px;
-	background: url(../img-2/cancel.png) no-repeat;
+	background: url(../loading.gif) no-repeat;
 	position:absolute;
-	top: 6px;
+	top: 8px;
 	right: 7px;
 	cursor: default;
 }
@@ -71,9 +71,16 @@
 	margin: 6px;
 }
 
-/* Dialog handle styles */
+/* Dialog handle styles
 .bmdialog .ui-dialog .ui-resizable-n,
-.bmdialog.ui-dialog .ui-resizable-n { cursor: n-resize; height: 6px; width: 100%; top: 0px; left: 0px; background: transparent url(i/dialog-n.gif) repeat scroll center top; }
+.bmdialog.ui-dialog .ui-resizable-n { 
+	cursor: n-resize; 
+	height: 6px; 
+	width: 100%; 
+	top: 0px; 
+	left: 0px; 
+	background: transparent url(i/dialog-n.gif) repeat scroll center top;
+}
 
 .bmdialog .ui-dialog .ui-resizable-s,
 .bmdialog.ui-dialog .ui-resizable-s { cursor: s-resize; height: 8px; width: 100%; bottom: 0px; left: 0px; background: transparent url(i/dialog-s.gif) repeat scroll center top; }
@@ -95,3 +102,4 @@
 
 .bmdialog .ui-dialog .ui-resizable-ne,
 .bmdialog.ui-dialog .ui-resizable-ne { cursor: ne-resize; width: 9px; height: 29px; right: 0px; top: 0px; background: transparent url(i/dialog-ne.gif); }
+ */

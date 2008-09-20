@@ -32,6 +32,9 @@
   
   <script type="text/javascript">
    //<![CDATA[
+	HTMLenc = function(s) {
+		return $('<div/>').text(s).html();			
+	}	
 	$(function() {		
 		qtag = "";
 		tabid = "Welcome";

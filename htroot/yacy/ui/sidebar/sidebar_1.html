@@ -40,7 +40,7 @@
 			} else {			
 				var tabnr = $tabs.tabs('length');			
 				var tabname = $("input[@name='search']").getValue();			
-				$tabs.tabs('add', "yacyui-search.html", '*' + tabname);
+				$tabs.tabs('add', "yacyui-search.html", '*' + HTMLenc(tabname));
 				$tabs.tabs('select',tabnr);
 			}
 			return false;

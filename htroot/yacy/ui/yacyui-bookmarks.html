@@ -6,14 +6,14 @@
 		// $('#yoptions').resetForm();
 		$("#bmadd").dialog({
 			autoOpen: false,
-			height: 350,
+			height: 375,
 			width: 250,
 			resizable: false,
 			buttons: { 
         		"Add": function() { 
             		var url = $("input[@name='bm_url']").getValue();
-            		var title = $("input[@name='bm_title']").getValue();
-            		var desc = $("input[@name='bm_desc']").getValue();            		
+            		var title = $("textarea[@name='bm_title']").getValue();
+            		var desc = $("textarea[@name='bm_desc']").getValue();            		
             		var tags = $("input[@name='bm_tags']").getValue()
             		var path = $("input[@name='bm_path']").getValue();
             		var pub = $("select[@name='bm_public']").getValue();            		
@@ -27,10 +27,7 @@
             				$tabs.tabs("load", 3);            					
             			}
             		});	 
-        		}, 
-        		"Cancel": function() { 
-            		$(this).dialog("close"); 
-        		} 
+        		}
     		} 
 		});
 		function bm_action(com,grid) {
@@ -51,7 +48,26 @@
 			else if (com=='Add') {
 				$("#bmadd").dialog('open');
 			}			
-		}	
+		}
+		$("#bm_url").blur(function() { 
+			var url = $("input[@name='bm_url']").getValue();
+			$.ajax({
+				type: "GET",
+				url: "/xml/util/getpageinfo_p.xml?url="+url,			
+				dataType: "xml",
+				success: function(xml) {
+					var title = $(xml).find('title').text();
+					$("textarea[@name='bm_title']").setValue(title);
+					var desc = $(xml).find('desc').text();					
+					$("textarea[@name='bm_desc']").setValue(desc);					
+					tags = "";
+					$(xml).find('tag').each(function(){
+						tags = tags + "," + $(this).attr('name');
+					});
+					$("input[@name='bm_tags']").setValue(tags);									
+				}					
+			});
+		});	
 		counter = 0;
 		$.ajax({
 			type: "GET",
@@ -77,11 +93,11 @@
 						 var icon = '<img src="img-2/lock.png" alt="private bookmark" title="private bookmark"/>'
 					}				
 					$('<tr></tr')
-						.html('<td>' +hash+ '</td><td>' +icon+ '</td><td><h3 class="linktitle">' +title+ '</h3><p class="desc">' +desc+ '</p><p class="url"><a href="' +link+ '">' +link+ '</a></p><td>' +tags+ ' </td><td>' +date+ '</td>')						
-						.appendTo('#ymarks tbody');																						
+						.html('<td>' +hash+ '</td><td>' +icon+ '</td><td><h3 class="linktitle">' +HTMLenc(title)+ '</h3><p class="desc">' +HTMLenc(desc)+ '</p><p class="url"><a href="' +link+ '">' +link+ '</a></p><td>' +HTMLenc(tags)+ ' </td><td>' +date+ '</td>')						
+						.appendTo('#ymarks tbody');
 					counter++;
-				}); //close each(				
-    			var height=document.documentElement.clientHeight - 205;    			
+				}); //close each(
+				var height=document.documentElement.clientHeight - 205;    			
     			$('#ymarks').flexigrid({
     				colModel: [
 						{display: 'Hash', name : 'hash', width : 50, sortable : false, align: 'center', hide: true},
@@ -98,8 +114,8 @@
 					striped: true,
 					nowrap: false,			 									    				
     				height: height,
-    				title: 'YaCy Bookmarks: '+qtag										    				
-    			});    							
+    				title: 'YaCy Bookmarks: ' + HTMLenc(qtag)										    				
+    			});    			
 			}
 		}); //close $.ajax(
 	});
@@ -108,7 +124,7 @@
 
 <!-- Display Bookmarks Table -->		
 <table id="ymarks" summary="YaCy Bookmarks">
-	<tbody>			
+	<tbody>		
 	</tbody>
 </table>
 <!-- Display Bookmarks Edit Dialog -->	
@@ -116,15 +132,17 @@
 	<form id="bmaddform" class="small" method="get" accept-charset="UTF-8" action="">
 		<label for="url">URL:</label>
 		<br />					
-		<input type="text" name="bm_url" id="bm_url" class="filter" onblur="loadTitle()" size="80" />
+		<input type="text" name="bm_url" id="bm_url" class="filter" size="80" />
 		<br />
 		<label for="bm_title">Title:</label>
 		<br />
-		<input type="text" name="bm_title" id="bm_title" class="filter" size="80" />
+		<textarea name="bm_title" id="bm_title" class="filter" rows="1" cols="20">
+		</textarea>
 		<br />
 		<label for="bm_desc">Description:</label>
 		<br />
-		<input type="text" name="bm_desc" id="bm_desc" class="filter" size="80" />
+		<textarea name="bm_desc" id="bm_desc" class="filter" rows="3" cols="20">
+		</textarea>		
 		<br />
 		<label for="bm_path">Folder (/folder/subfolder):</label>
 		<br />
