@@ -732,7 +732,7 @@ public class plasmaSnippetCache {
     private static HashMap<String, Integer> hashSentence(final String sentence) {
         // generates a word-wordPos mapping
         final HashMap<String, Integer> map = new HashMap<String, Integer>();
-        final Enumeration<StringBuffer> words = plasmaCondenser.wordTokenizer(sentence, "UTF-8", 0);
+        final Enumeration<StringBuffer> words = plasmaCondenser.wordTokenizer(sentence, "UTF-8");
         int pos = 0;
         StringBuffer word;
         String hash;

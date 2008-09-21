@@ -125,7 +125,8 @@ public final class plasmaCondenser {
         
         //System.out.println("DEBUG: condensing " + document.getMainLongTitle() + ", indexText=" + Boolean.toString(indexText) + ", indexMedia=" + Boolean.toString(indexMedia));
 
-        insertTextToWords(document.dc_source().toNormalform(false, true), 0, indexRWIEntry.flag_app_dc_identifier, RESULT_FLAGS);
+        // add the URL components to the word list
+        insertTextToWords(document.dc_source().toNormalform(false, true), 0, indexRWIEntry.flag_app_dc_identifier, RESULT_FLAGS, false);
         
         Map.Entry<yacyURL, String> entry;
         if (indexText) {
@@ -142,22 +143,21 @@ public final class plasmaCondenser {
             // phrase  99 is taken from the media Link url and anchor description
             // phrase 100 and above are lines from the text
       
-            insertTextToWords(document.dc_title(),    1, indexRWIEntry.flag_app_dc_title, RESULT_FLAGS);
-            insertTextToWords(document.dc_description(), 3, indexRWIEntry.flag_app_dc_description, RESULT_FLAGS);
-            insertTextToWords(document.dc_creator(),   4, indexRWIEntry.flag_app_dc_creator, RESULT_FLAGS);
+            insertTextToWords(document.dc_title(),    1, indexRWIEntry.flag_app_dc_title, RESULT_FLAGS, true);
+            insertTextToWords(document.dc_description(), 3, indexRWIEntry.flag_app_dc_description, RESULT_FLAGS, true);
+            insertTextToWords(document.dc_creator(),   4, indexRWIEntry.flag_app_dc_creator, RESULT_FLAGS, true);
             // missing: tags!
             final String[] titles = document.getSectionTitles();
             for (int i = 0; i < titles.length; i++) {
-                insertTextToWords(titles[i], i + 10, indexRWIEntry.flag_app_emphasized, RESULT_FLAGS);
+                insertTextToWords(titles[i], i + 10, indexRWIEntry.flag_app_emphasized, RESULT_FLAGS, true);
             }
             
-            // anchors
+            // anchors: for text indexing we add only the anchor description
             final Iterator<Map.Entry<yacyURL, String>> i = document.getAnchors().entrySet().iterator();
             while (i.hasNext()) {
                 entry = i.next();
                 if ((entry == null) || (entry.getKey() == null)) continue;
-                insertTextToWords(entry.getKey().toNormalform(false, false), 98, indexRWIEntry.flag_app_dc_identifier, RESULT_FLAGS);
-                insertTextToWords(entry.getValue(), 98, indexRWIEntry.flag_app_dc_description, RESULT_FLAGS);
+                insertTextToWords(entry.getValue(), 98, indexRWIEntry.flag_app_dc_description, RESULT_FLAGS, true);
             }
         } else {
             this.RESULT_NUMB_WORDS = 0;
@@ -167,28 +167,29 @@ public final class plasmaCondenser {
         }
         
         if (indexMedia) {
+            // add anchor descriptions: here, we also add the url components
             // audio
             Iterator<Map.Entry<yacyURL, String>> i = document.getAudiolinks().entrySet().iterator();
             while (i.hasNext()) {
                 entry = i.next();
-                insertTextToWords(entry.getKey().toNormalform(false, false), 99, flag_cat_hasaudio, RESULT_FLAGS);
-                insertTextToWords(entry.getValue(), 99, flag_cat_hasaudio, RESULT_FLAGS);
+                insertTextToWords(entry.getKey().toNormalform(false, false), 99, flag_cat_hasaudio, RESULT_FLAGS, false);
+                insertTextToWords(entry.getValue(), 99, flag_cat_hasaudio, RESULT_FLAGS, true);
             }
 
             // video
             i = document.getVideolinks().entrySet().iterator();
             while (i.hasNext()) {
                 entry = i.next();
-                insertTextToWords(entry.getKey().toNormalform(false, false), 99, flag_cat_hasvideo, RESULT_FLAGS);
-                insertTextToWords(entry.getValue(), 99, flag_cat_hasvideo, RESULT_FLAGS);
+                insertTextToWords(entry.getKey().toNormalform(false, false), 99, flag_cat_hasvideo, RESULT_FLAGS, false);
+                insertTextToWords(entry.getValue(), 99, flag_cat_hasvideo, RESULT_FLAGS, true);
             }
 
             // applications
             i = document.getApplinks().entrySet().iterator();
             while (i.hasNext()) {
                 entry = i.next();
-                insertTextToWords(entry.getKey().toNormalform(false, false), 99, flag_cat_hasapp, RESULT_FLAGS);
-                insertTextToWords(entry.getValue(), 99, flag_cat_hasapp, RESULT_FLAGS);
+                insertTextToWords(entry.getKey().toNormalform(false, false), 99, flag_cat_hasapp, RESULT_FLAGS, false);
+                insertTextToWords(entry.getValue(), 99, flag_cat_hasapp, RESULT_FLAGS, true);
             }
 
             // images
@@ -196,8 +197,8 @@ public final class plasmaCondenser {
             htmlFilterImageEntry ientry;
             while (j.hasNext()) {
                 ientry = j.next();
-                insertTextToWords(ientry.url().toNormalform(false, false), 99, flag_cat_hasimage, RESULT_FLAGS);
-                insertTextToWords(ientry.alt(), 99, flag_cat_hasimage, RESULT_FLAGS);
+                insertTextToWords(ientry.url().toNormalform(false, false), 99, flag_cat_hasimage, RESULT_FLAGS, false);
+                insertTextToWords(ientry.alt(), 99, flag_cat_hasimage, RESULT_FLAGS, true);
             }
         
             // finally check all words for missing flag entry
@@ -221,19 +222,20 @@ public final class plasmaCondenser {
         if (document.getApplinks().size()   > 0) RESULT_FLAGS.set(flag_cat_hasapp,   true);
     }
     
-    private void insertTextToWords(final String text, final int phrase, final int flagpos, final kelondroBitfield flagstemplate) {
+    private void insertTextToWords(final String text, final int phrase, final int flagpos, final kelondroBitfield flagstemplate, boolean useForLanguageIdentification) {
         String word;
         indexWord wprop;
         sievedWordsEnum wordenum;
         try {
-            wordenum = new sievedWordsEnum(new ByteArrayInputStream(text.getBytes()), "UTF-8", 3);
+            wordenum = new sievedWordsEnum(new ByteArrayInputStream(text.getBytes()), "UTF-8");
         } catch (final UnsupportedEncodingException e) {
             return;
         }
         int pip = 0;
         while (wordenum.hasMoreElements()) {
             word = (new String(wordenum.nextElement())).toLowerCase();
-            languageIdentificator.add(word);
+            if (useForLanguageIdentification) languageIdentificator.add(word);
+            if (word.length() < 3) continue;
             wprop = words.get(word);
             if (wprop == null) wprop = new indexWord(0, pip, phrase);
             if (wprop.flags == null) wprop.flags = flagstemplate.clone();
@@ -309,9 +311,11 @@ public final class plasmaCondenser {
         }
         
         // read source
-        final sievedWordsEnum wordenum = new sievedWordsEnum(is, charset, wordminsize);
+        final sievedWordsEnum wordenum = new sievedWordsEnum(is, charset);
         while (wordenum.hasMoreElements()) {
             word = (new String(wordenum.nextElement())).toLowerCase(); // TODO: does toLowerCase work for non ISO-8859-1 chars?
+            languageIdentificator.add(word);
+            if (word.length() < wordminsize) continue;
             //System.out.println("PARSED-WORD " + word);
             
             //This is useful for testing what YaCy "sees" of a website.
@@ -483,9 +487,9 @@ public final class plasmaCondenser {
         return invisibleChar[c - ' '];
     }
 
-    public static Enumeration<StringBuffer> wordTokenizer(final String s, final String charset, final int minLength) {
+    public static Enumeration<StringBuffer> wordTokenizer(final String s, final String charset) {
         try {
-            return new sievedWordsEnum(new ByteArrayInputStream(s.getBytes()), charset, minLength);
+            return new sievedWordsEnum(new ByteArrayInputStream(s.getBytes()), charset);
         } catch (final Exception e) {
             return null;
         }
@@ -496,12 +500,10 @@ public final class plasmaCondenser {
         
         StringBuffer buffer = null;
         unsievedWordsEnum e;
-        int ml;
 
-        public sievedWordsEnum(final InputStream is, final String charset, final int minLength) throws UnsupportedEncodingException {
+        public sievedWordsEnum(final InputStream is, final String charset) throws UnsupportedEncodingException {
             e = new unsievedWordsEnum(is, charset);
             buffer = nextElement0();
-            ml = minLength;
         }
 
         public void pre(final boolean x) {
@@ -514,7 +516,6 @@ public final class plasmaCondenser {
             loop: while (e.hasMoreElements()) {
                 s = e.nextElement();
                 if ((s.length() == 1) && (htmlFilterContentScraper.punctuation(s.charAt(0)))) return s;
-                if ((s.length() < ml) && (!(s.toString().equals("of")))) continue loop;
                 for (int i = 0; i < s.length(); i++) {
                     c = s.charAt(i);
                     // TODO: Bugfix needed for UTF-8
