@@ -81,7 +81,7 @@ public final class plasmaSearchRankingProcess {
         this.stack = new kelondroSortStack<indexRWIVarEntry>(maxentries);
         this.doubleDomCache = new HashMap<String, kelondroSortStack<indexRWIVarEntry>>();
         this.handover = new HashMap<String, String>();
-        this.order = (query == null) ? null : new indexRWIEntryOrder(query.ranking);
+        this.order = (query == null) ? null : new indexRWIEntryOrder(query.ranking, query.targetlang);
         this.query = query;
         this.maxentries = maxentries;
         this.remote_peerCount = 0;

@@ -194,4 +194,28 @@ public class iso639 {
         return mapping.containsKey(code.toLowerCase());
     }
     
+    /**
+     * analyse a user-agent string and return language as given in the agent string
+     * @param userAgent string
+     * @return the language code if it is possible to parse the string and find a language code or null if not
+     */
+    public static final String userAgentLanguageDetection(String userAgent) {
+        if (userAgent == null || userAgent.length() < 2) return null;
+        userAgent = userAgent.toLowerCase();
+        if (userAgent.length() == 2 && mapping.containsKey(userAgent)) return userAgent;
+        if (userAgent.length() == 5 && mapping.containsKey(userAgent.substring(0, 2))) return userAgent.substring(0, 2);
+        int p = 2;
+        // search for entries like ' en-'
+        while (p < userAgent.length() - 1 && (p = userAgent.indexOf('-', p)) > 2) {
+            if (userAgent.charAt(p - 3) == ' ' && mapping.containsKey(userAgent.substring(p - 2, p))) return userAgent.substring(p - 2, p);
+            p++;
+        }
+        // search for entries like ' en;'
+        p = 1;
+        while (p < userAgent.length() - 1 && (p = userAgent.indexOf(';', p)) > 2) {
+            if (userAgent.charAt(p - 3) == ' ' && mapping.containsKey(userAgent.substring(p - 2, p))) return userAgent.substring(p - 2, p);
+            p++;
+        }
+        return null;
+    }
 }

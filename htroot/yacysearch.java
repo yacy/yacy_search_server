@@ -50,6 +50,7 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverProfiling;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.logging.serverLog;
+import de.anomic.tools.iso639;
 import de.anomic.tools.yFormatter;
 import de.anomic.xml.RSSFeed;
 import de.anomic.xml.RSSMessage;
@@ -76,7 +77,7 @@ public class yacysearch {
         
         // get query
         String querystring = (post == null) ? "" : post.get("query", post.get("search", "")).trim(); // SRU compliance
-        final boolean fetchSnippets = (post != null && post.get("verify", "false").equals("true"));
+        boolean fetchSnippets = (post != null && post.get("verify", "false").equals("true"));
         final serverObjects prop = new serverObjects();
         
         final boolean rss = (post == null) ? false : post.get("rss", "false").equals("true");
@@ -137,6 +138,11 @@ public class yacysearch {
             constraint.set(plasmaCondenser.flag_cat_indexof, true);
         }
         
+        // find out language of the user by reading of the user-agent string
+        String agent = header.get("User-Agent");
+        if (agent == null) agent = System.getProperty("user.language");
+        String language = (agent == null) ? "en" : iso639.userAgentLanguageDetection(agent);
+        
         // SEARCH
         //final boolean indexDistributeGranted = sb.getConfig(plasmaSwitchboard.INDEX_DIST_ALLOW, "true").equals("true");
         //final boolean indexReceiveGranted = sb.getConfig("allowReceiveIndex", "true").equals("true");
@@ -159,23 +165,23 @@ public class yacysearch {
         boolean block = false;
         if (global || fetchSnippets) {
             // in case that we do a global search or we want to fetch snippets, we check for DoS cases
-            if (trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() - 3000)).size() > 1) try {
-                Thread.sleep(3000);
-                block = true;
-            } catch (final InterruptedException e) {
-                e.printStackTrace();
+            if (trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() - 1000)).size() > 2) {
+                global = false;
+                fetchSnippets = false;
             }
-            if (trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() - 60000)).size() > 12) try {
-                Thread.sleep(10000);
-                block = true;
-            } catch (final InterruptedException e) {
-                e.printStackTrace();
+            if (trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() - 3000)).size() > 1) {
+                global = false;
+                fetchSnippets = false;
             }
-            if (trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() - 600000)).size() > 36) try {
-                Thread.sleep(30000);
+            if (trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() - 60000)).size() > 200) {
+                global = false;
+                fetchSnippets = false;
                 block = true;
-            } catch (final InterruptedException e) {
-                e.printStackTrace();
+            }
+            if (trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() - 600000)).size() > 600) {
+                global = false;
+                fetchSnippets = false;
+                block = true;
             }
         }
         
@@ -265,6 +271,7 @@ public class yacysearch {
                     maxDistance,
                     prefermask,
                     contentdomCode,
+                    language,
                     fetchSnippets,
                     itemsPerPage,
                     offset,

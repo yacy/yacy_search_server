@@ -64,6 +64,7 @@ import de.anomic.kelondro.kelondroRowCollection;
 import de.anomic.server.serverMemory;
 import de.anomic.server.serverProfiling;
 import de.anomic.server.logging.serverLog;
+import de.anomic.tools.iso639;
 import de.anomic.xml.RSSFeed;
 import de.anomic.xml.RSSMessage;
 import de.anomic.yacy.yacyDHTAction;
@@ -815,31 +816,49 @@ public final class plasmaWordIndex implements indexRI {
         final long startTime = System.currentTimeMillis();
 
         // CREATE INDEX
+        
+        // load some document metadata
         final String dc_title = document.dc_title();
         final yacyURL referrerURL = entry.referrerURL();
         final Date docDate = entry.getModificationDate();
-        String language = condenser.language();
+        
+        // do a identification of the language
+        String language = condenser.language(); // this is a statistical analysation of the content: will be compared with other attributes
         String bymetadata = document.languageByMetadata(); // the languageByMetadata may return null if there was no declaration
         if (language == null) {
+            // no statistics available, we take either the metadata (if given) or the TLD
             language = (bymetadata == null) ? entry.url().language() : bymetadata;
             System.out.println("*** DEBUG LANGUAGE-BY-STATISTICS: " + entry.url() + " FAILED, taking " + ((bymetadata == null) ? "TLD" : "metadata") + ": " + language);
         } else {
-            if (language.equals("pl")) {
-                System.out.println("*** DEBUG LANGUAGE-BY-STATISTICS: " + entry.url() + " HAS BUG: " + language);
-                language = (bymetadata == null) ? entry.url().language() : bymetadata; // extra handling of this case: overwrite with bymetadata
-            } else {
-                if (bymetadata == null) {
-                    if (language.equals(entry.url().language()))
-                        System.out.println("*** DEBUG LANGUAGE-BY-STATISTICS: " + entry.url() + " CONFIRMED - TLD IDENTICAL: " + language);
-                    else {
-                        System.out.println("*** DEBUG LANGUAGE-BY-STATISTICS: " + entry.url() + " CONFLICTING: " + language + " (the language given by the TLD is " + entry.url().language() + ")");
+            if (bymetadata == null) {
+                // two possible results: compare and report conflicts
+                if (language.equals(entry.url().language()))
+                    System.out.println("*** DEBUG LANGUAGE-BY-STATISTICS: " + entry.url() + " CONFIRMED - TLD IDENTICAL: " + language);
+                else {
+                    String error = "*** DEBUG LANGUAGE-BY-STATISTICS: " + entry.url() + " CONFLICTING: " + language + " (the language given by the TLD is " + entry.url().language() + ")";
+                    // see if we have a hint in the url that the statistic was right
+                    String u = entry.url().toNormalform(true, false).toLowerCase();
+                    if (!u.contains("/" + language + "/") && !u.contains("/" + iso639.country(language).toLowerCase() + "/")) {
+                        // no confirmation using the url, use the TLD
                         language = entry.url().language();
+                        System.out.println(error + ", corrected using the TLD");
+                    } else {
+                        // this is a strong hint that the statistics was in fact correct
+                        System.out.println(error + ", but the url proves that the statistic is correct");
                     }
+                }
+            } else {
+                // here we have three results: we can do a voting
+                if (language.equals(bymetadata)) {
+                    System.out.println("*** DEBUG LANGUAGE-BY-STATISTICS: " + entry.url() + " CONFIRMED - METADATA IDENTICAL: " + language);
+                } else if (language.equals(entry.url().language())) {
+                    System.out.println("*** DEBUG LANGUAGE-BY-STATISTICS: " + entry.url() + " CONFIRMED - TLD IS IDENTICAL: " + language);
+                } else if (bymetadata.equals(entry.url().language())) {
+                    System.out.println("*** DEBUG LANGUAGE-BY-STATISTICS: " + entry.url() + " CONFLICTING: " + language + " BUT METADATA AND TLD ARE IDENTICAL: " + bymetadata + ")");
+                    language = bymetadata;
                 } else {
-                    if (language.equals(bymetadata))
-                        System.out.println("*** DEBUG LANGUAGE-BY-STATISTICS: " + entry.url() + " CONFIRMED - METADATA IDENTICAL: " + language);
-                    else
-                        System.out.println("*** DEBUG LANGUAGE-BY-STATISTICS: " + entry.url() + " CONFLICTING: " + language + " (the language given by metadata is " + bymetadata + ")");
+                    System.out.println("*** DEBUG LANGUAGE-BY-STATISTICS: " + entry.url() + " CONFLICTING: ALL DIFFERENT! statistic: " + language + ", metadata: " + bymetadata + ", TLD: + " + entry.url().language() + ". taking metadata.");
+                    language = bymetadata;
                 }
             }
         }

@@ -40,6 +40,7 @@ import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.logging.serverLog;
+import de.anomic.tools.iso639;
 import de.anomic.tools.yFormatter;
 import de.anomic.xml.RSSFeed;
 import de.anomic.xml.RSSMessage;
@@ -66,6 +67,7 @@ public class ysearch {
         
         // get query
         String querystring = (post == null) ? "" : post.get("search", "").trim();
+        boolean fetchSnippets = (post != null && post.get("verify", "false").equals("true"));
         final serverObjects prop = new serverObjects();
         
         final boolean rss = (post == null) ? false : post.get("rss", "false").equals("true");
@@ -132,6 +134,11 @@ public class ysearch {
         
         final int domainzone = (post == null ? yacyURL.TLD_any_zone_filter : post.getInt("zone", yacyURL.TLD_any_zone_filter));
         
+        // find out language of the user by reading of the user-agent string
+        String agent = header.get("User-Agent");
+        if (agent == null) agent = System.getProperty("user.language");
+        String language = (agent == null) ? "en" : iso639.userAgentLanguageDetection(agent);
+        
         // SEARCH
         //final boolean indexDistributeGranted = sb.getConfig(plasmaSwitchboard.INDEX_DIST_ALLOW, "true").equals("true");
         //final boolean indexReceiveGranted = sb.getConfig("allowReceiveIndex", "true").equals("true");
@@ -152,18 +159,23 @@ public class ysearch {
         TreeSet<Long> trackerHandles = sb.localSearchTracker.get(client);
         if (trackerHandles == null) trackerHandles = new TreeSet<Long>();
         boolean block = false;
-        if (trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() -   3000)).size() >  1) try {
-            Thread.sleep(3000);
-            block = true;
-        } catch (final InterruptedException e) { e.printStackTrace(); }
-        if (trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() -  60000)).size() > 12) try {
-            Thread.sleep(10000);
-            block = true;
-        } catch (final InterruptedException e) { e.printStackTrace(); }
-        if (trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() - 600000)).size() > 36) try {
-            Thread.sleep(30000);
-            block = true;
-        } catch (final InterruptedException e) { e.printStackTrace(); }
+        if (global || fetchSnippets) {
+            // in case that we do a global search or we want to fetch snippets, we check for DoS cases
+            if (trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() - 3000)).size() > 1) {
+                global = false;
+                fetchSnippets = false;
+            }
+            if (trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() - 60000)).size() > 30) {
+                global = false;
+                fetchSnippets = false;
+                block = true;
+            }
+            if (trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() - 600000)).size() > 100) {
+                global = false;
+                fetchSnippets = false;
+                block = true;
+            }
+        }
         
         if ((!block) && (post == null || post.get("cat", "href").equals("href"))) {
 
@@ -198,6 +210,7 @@ public class ysearch {
                     maxDistance,
                     prefermask,
                     contentdomCode,
+                    language,
                     true,
                     itemsPerPage,
                     offset,

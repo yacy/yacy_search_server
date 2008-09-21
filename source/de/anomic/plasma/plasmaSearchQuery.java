@@ -62,6 +62,7 @@ public final class plasmaSearchQuery {
     public String prefer;
     public int contentdom;
     public String urlMask;
+    public String targetlang;
     public int domType;
     public int zonecode;
     public int domMaxTargets;
@@ -100,6 +101,7 @@ public final class plasmaSearchQuery {
         this.linesPerPage = lines;
         this.offset = 0;
         this.urlMask = ".*";
+        this.targetlang = "en";
         this.domType = SEARCHDOM_LOCAL;
         this.zonecode = yacyURL.TLD_any_zone_filter;
         this.domMaxTargets = 0;
@@ -117,6 +119,7 @@ public final class plasmaSearchQuery {
 		final TreeSet<String> excludeHashes, 
         final plasmaSearchRankingProfile ranking,
         final int maxDistance, final String prefer, final int contentdom,
+        final String language,
         final boolean onlineSnippetFetch,
         final int lines, final int offset, final String urlMask,
         final int domType, final String domGroupName, final int domMaxTargets,
@@ -134,7 +137,8 @@ public final class plasmaSearchQuery {
 		this.linesPerPage = Math.min((specialRights) ? 1000 : 10, lines);
 		this.offset = Math.min((specialRights) ? 10000 : 100, offset);
 		this.urlMask = urlMask;
-		this.domType = domType;
+        this.targetlang = language;
+        this.domType = domType;
         this.zonecode = domainzone;
 		this.domMaxTargets = domMaxTargets;
 		this.constraint = constraint;
@@ -286,6 +290,7 @@ public final class plasmaSearchQuery {
             "*" + indexWord.word2hash(this.ranking.toExternalString()) +
             "*" + this.prefer +
             "*" + this.urlMask +
+            "*" + this.targetlang +
             "*" + this.constraint +
             "*" + this.maxDistance;
         if (anonymized) 

@@ -44,13 +44,15 @@ public class indexRWIEntryOrder {
     private final plasmaSearchRankingProfile ranking;
     private final kelondroMScoreCluster<String> doms; // collected for "authority" heuristic 
     private int maxdomcount;
+    private String language;
     
-    public indexRWIEntryOrder(final plasmaSearchRankingProfile profile) {
+    public indexRWIEntryOrder(final plasmaSearchRankingProfile profile, String language) {
         this.min = null;
         this.max = null;
         this.ranking = profile;
         this.doms = new kelondroMScoreCluster<String>();
         this.maxdomcount = 0;
+        this.language = language;
     }
     
     public ArrayList<indexRWIVarEntry> normalizeWith(final indexContainer container) {
@@ -134,23 +136,29 @@ public class indexRWIEntryOrder {
            + ((max.hitcount()      == min.hitcount())      ? 0 : (((t.hitcount()     - min.hitcount()      ) << 8) / (max.hitcount()     - min.hitcount())      ) << ranking.coeff_hitcount)
            + tf
            + ((ranking.coeff_authority > 12) ? (authority(t.urlHash()) << ranking.coeff_authority) : 0)
-           + (((flags.get(indexRWIEntry.flag_app_dc_identifier))  ? 255 << ranking.coeff_appurl             : 0))
-           + (((flags.get(indexRWIEntry.flag_app_dc_title))       ? 255 << ranking.coeff_app_dc_title       : 0))
-           + (((flags.get(indexRWIEntry.flag_app_dc_creator))     ? 255 << ranking.coeff_app_dc_creator     : 0))
-           + (((flags.get(indexRWIEntry.flag_app_dc_subject))     ? 255 << ranking.coeff_app_dc_subject     : 0))
-           + (((flags.get(indexRWIEntry.flag_app_dc_description)) ? 255 << ranking.coeff_app_dc_description : 0))
-           + (((flags.get(indexRWIEntry.flag_app_emphasized))     ? 255 << ranking.coeff_appemph            : 0))
-           + (((flags.get(plasmaCondenser.flag_cat_indexof))      ? 255 << ranking.coeff_catindexof         : 0))
-           + (((flags.get(plasmaCondenser.flag_cat_hasimage))     ? 255 << ranking.coeff_cathasimage        : 0))
-           + (((flags.get(plasmaCondenser.flag_cat_hasaudio))     ? 255 << ranking.coeff_cathasaudio        : 0))
-           + (((flags.get(plasmaCondenser.flag_cat_hasvideo))     ? 255 << ranking.coeff_cathasvideo        : 0))
-           + (((flags.get(plasmaCondenser.flag_cat_hasapp))       ? 255 << ranking.coeff_cathasapp          : 0))
-           + (((yacyURL.probablyRootURL(t.urlHash()))             ?  15 << ranking.coeff_urllength          : 0));
+           + ((flags.get(indexRWIEntry.flag_app_dc_identifier))  ? 255 << ranking.coeff_appurl             : 0)
+           + ((flags.get(indexRWIEntry.flag_app_dc_title))       ? 255 << ranking.coeff_app_dc_title       : 0)
+           + ((flags.get(indexRWIEntry.flag_app_dc_creator))     ? 255 << ranking.coeff_app_dc_creator     : 0)
+           + ((flags.get(indexRWIEntry.flag_app_dc_subject))     ? 255 << ranking.coeff_app_dc_subject     : 0)
+           + ((flags.get(indexRWIEntry.flag_app_dc_description)) ? 255 << ranking.coeff_app_dc_description : 0)
+           + ((flags.get(indexRWIEntry.flag_app_emphasized))     ? 255 << ranking.coeff_appemph            : 0)
+           + ((flags.get(plasmaCondenser.flag_cat_indexof))      ? 255 << ranking.coeff_catindexof         : 0)
+           + ((flags.get(plasmaCondenser.flag_cat_hasimage))     ? 255 << ranking.coeff_cathasimage        : 0)
+           + ((flags.get(plasmaCondenser.flag_cat_hasaudio))     ? 255 << ranking.coeff_cathasaudio        : 0)
+           + ((flags.get(plasmaCondenser.flag_cat_hasvideo))     ? 255 << ranking.coeff_cathasvideo        : 0)
+           + ((flags.get(plasmaCondenser.flag_cat_hasapp))       ? 255 << ranking.coeff_cathasapp          : 0)
+           + ((patchUK(t.language).equals(this.language))        ? 255 << ranking.coeff_language           : 0)
+           + ((yacyURL.probablyRootURL(t.urlHash()))             ?  15 << ranking.coeff_urllength          : 0);
         //if (searchWords != null) r += (yacyURL.probablyWordURL(t.urlHash(), searchWords) != null) ? 256 << ranking.coeff_appurl : 0;
 
         return Long.MAX_VALUE - r; // returns a reversed number: the lower the number the better the ranking. This is used for simple sorting with a TreeMap
     }
 
+    private static final String patchUK(String l) {
+        // this is to patch a bad language name setting that was used in 0.60 and before
+        if (l.equals("uk")) return "en"; else return l;
+    }
+    
     public static class minmaxfinder extends Thread {
 
         indexRWIVarEntry entryMin;

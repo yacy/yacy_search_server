@@ -142,6 +142,7 @@ public final class plasmaSearchEvent {
                     "",
                     query.prefer,
                     query.urlMask,
+                    query.targetlang,
                     query.displayResults(),
                     query.maxDistance,
                     wordIndex,

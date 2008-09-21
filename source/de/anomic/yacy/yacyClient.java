@@ -422,6 +422,7 @@ public final class yacyClient {
             final String urlhashes,
             final String prefer,
             final String filter,
+            final String language,
             final int count,
             final int maxDistance,
             final boolean global, 
@@ -464,6 +465,7 @@ public final class yacyClient {
         post.add(new DefaultCharsetStringPart("urls", urlhashes));
         post.add(new DefaultCharsetStringPart("prefer", prefer));
         post.add(new DefaultCharsetStringPart("filter", filter));
+        post.add(new DefaultCharsetStringPart("language", language));
         post.add(new DefaultCharsetStringPart("ttl", "0"));
         post.add(new DefaultCharsetStringPart("maxdist", Integer.toString(maxDistance)));
         post.add(new DefaultCharsetStringPart("profile", crypt.simpleEncode(rankingProfile.toExternalString())));
