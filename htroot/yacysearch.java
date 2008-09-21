@@ -138,11 +138,6 @@ public class yacysearch {
             constraint.set(plasmaCondenser.flag_cat_indexof, true);
         }
         
-        // find out language of the user by reading of the user-agent string
-        String agent = header.get("User-Agent");
-        if (agent == null) agent = System.getProperty("user.language");
-        String language = (agent == null) ? "en" : iso639.userAgentLanguageDetection(agent);
-        
         // SEARCH
         //final boolean indexDistributeGranted = sb.getConfig(plasmaSwitchboard.INDEX_DIST_ALLOW, "true").equals("true");
         //final boolean indexReceiveGranted = sb.getConfig("allowReceiveIndex", "true").equals("true");
@@ -203,7 +198,24 @@ public class yacysearch {
                 query[0].remove("recent");
                 ranking.coeff_date = plasmaSearchRankingProfile.COEFF_MAX;
             }
+            int lrp = querystring.indexOf("LANGUAGE:");
+            String lr = "";
+            if (lrp >= 0) {
+                lr = querystring.substring(lrp + 9, lrp + 11).toLowerCase();
+                query[0].remove("language:" + lr);
+            }
            
+            // read the language from the language-restrict option 'lr'
+            // if no one is given, use the user agent or the system language as default
+            String language = (post == null) ? lr : post.get("lr", lr);
+            if (language.startsWith("lang_")) language = language.substring(5);
+            if (!iso639.exists(language)) {
+                // find out language of the user by reading of the user-agent string
+                String agent = header.get("User-Agent");
+                if (agent == null) agent = System.getProperty("user.language");
+                language = (agent == null) ? "en" : iso639.userAgentLanguageDetection(agent);
+            }
+            
             int maxDistance = (querystring.indexOf('"') >= 0) ? maxDistance = query.length - 1 : Integer.MAX_VALUE;
 
             // filter out stopwords
