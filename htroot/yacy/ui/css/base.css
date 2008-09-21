@@ -14,7 +14,7 @@ table.contentdom {
 	text-align:center;
 	margin:8px 0px 6px 0px;
 	border:1px solid #CCCCCC;
-
+	display:inline-block;
 }
 div.ys {
 	clear: inherit;
@@ -22,7 +22,7 @@ div.ys {
 }
 #searchbutton {
   width: 95px;
-  padding: 12px 0px 12px 0px; /* top right bottom left */
+  height: 48px;  
   margin: 20px 0px 0px 8px;
   /* border: 1px solid #CCCCCC; */
   font: "Trebuchet MS", Trebuchet, Verdana, Helvetica, Arial, sans-serif;

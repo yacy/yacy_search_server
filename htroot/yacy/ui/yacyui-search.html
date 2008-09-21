@@ -7,11 +7,18 @@
 			url: query,
 			async: false,
 			dataType: "xml",
-			success: function(xml) {
-				var totalResults = parseInt($(xml).find('opensearch\\:totalResults').text().replace(",","","g"));
-				var startIndex = parseInt($(xml).find('opensearch\\:startIndex').text());				
-				var itemsPerPage = parseInt($(xml).find('opensearch\\:itemsPerPage').text());				
-				var query = $(xml).find('opensearch\\:Query').attr('searchTerms');								
+			success: function(xml) {				
+				if ($.browser.mozilla && ($.browser.version.replace(".","","g") > 1800)) {
+					var totalResults = parseInt($(xml).find('opensearch\\:totalResults').text().replace(",","","g"));
+					var startIndex = parseInt($(xml).find('opensearch\\:startIndex').text());				
+					var itemsPerPage = parseInt($(xml).find('opensearch\\:itemsPerPage').text());				
+					var query = $(xml).find('opensearch\\:Query').attr('searchTerms');													
+				} else {					
+					var totalResults = parseInt($(xml).find('totalResults').text().replace(",","","g"));
+					var startIndex = parseInt($(xml).find('startIndex').text());				
+					var itemsPerPage = parseInt($(xml).find('itemsPerPage').text());
+					var query = $(xml).find('Query').attr('searchTerms');
+				}
 				$(xml).find('item').each(function(){					
 					var title = $(this).find('title').text();
 					var link = $(this).find('link').text();
@@ -24,7 +31,7 @@
 						.appendTo(tabid+" .yresult tbody");										
 				}); //close each(
 				var height=document.documentElement.clientHeight - 205;    			
-    			var page = "&nbsp;" + (startIndex+1) + "-" + (startIndex+itemsPerPage) + " of " + totalResults
+    			var page = "&nbsp;" + (startIndex+1) + "-" + (startIndex+itemsPerPage) + " of " + totalResults;	
 				$(tabid+" .yresult").flexigrid({
     				colModel: [
 						{display: 'Hash', name : 'hash', width : 50, sortable : false, align: 'center', hide: true},
@@ -82,8 +89,7 @@
 			} else {
 				alert("Test!");
 			}
-		}		
-
+		}
 		function load(com, grid) {
 			var $tabs = $('#container ul');
 			var count = parseInt($(tabid).attr('count'));
