@@ -1,6 +1,6 @@
 <script type="application/javascript">
   //<![CDATA[
-	$(function() {				
+	$(document).ready(function() {				
 		$("#side3").accordion("activate", 0);
 		$.ajax({
 			type: "GET",
@@ -59,7 +59,30 @@
 		});
 		*/
 		
-		function test() { alert("Test!"); }
+		function test(com, grid) { 
+			if (com == 'Bookmark') { 
+				confirm('Add' + $('.trSelected',grid).length + ' bookmark(s)?')				
+				$('.trSelected',grid).each(function(){
+					var url = $(this).find('.url').text();
+            		var title = $(this).find('.linktitle').text();
+            		var desc = $(this).find('.desc').text();            		
+            		var tags = $(tabid).attr('search');
+            		var path = "/searchResults";
+            		var pub = "private";            		
+            		var query = "&url="+url+"&title="+title+"&description="+desc+"&tags="+tags+"&path="+path+"&public="+pub+"&add=create";            		
+            		$.ajax({
+						type: "POST",
+						url: "/xml/bookmarks/posts/add_p.xml?login="+query,			
+						dataType: "xml",
+						success: function(xml) {
+            				alert("Posted bookmark for: "+url);            					
+            			}
+					});
+            	});	
+			} else {
+				alert("Test!");
+			}
+		}		
 
 		function load(com, grid) {
 			var $tabs = $('#container ul');

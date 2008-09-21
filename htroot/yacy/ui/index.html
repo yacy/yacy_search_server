@@ -49,7 +49,7 @@
 					});
 				/* save search options from form to tab attributes*/			
 				var search = $("input[@name='search']").getValue();
-				var contentdom = $("select[@name='contentdom']").getValue();
+				var contentdom = $("input[@name='contentdom']").getValue();
 				var count = $("select[@name='itemsPerPage']").getValue();
 				var offset = 0;
 				var resource = $("select[@name='resource']").getValue();
@@ -71,6 +71,7 @@
 				tabid = '#' + ui.panel.id;						
 				if (tabid == "#Bookmarks") {
 					$("select[@name='resource']").setValue('ymarks');
+					$("input[@name='contentdom']").setValue('text');
 					$("input[@name='search']").setValue(qtag);									
 				} else {				
 					/* set query string */				
@@ -93,7 +94,7 @@
 						+"&urlmaskfilter="+urlmaskfilter;
 					$("input[@name='search']").setValue(search);
 					$("select[@name='itemsPerPage']").setValue(count);
-					$("select[@name='contentdom']").setValue(contentdom);
+					$("input[@name='contentdom']").setValue(contentdom);
 					$("select[@name='constraint']").setValue(constraint);
 					$("input[@name='prefermaskfilter']").setValue(prefermaskfilter);
 					$("input[@name='urlmaskfilter']").setValue(urlmaskfilter);
@@ -123,7 +124,7 @@
 			<!-- initial tabs only, dynamic tabs are loaded via jQuery -->
 			<li><a href="yacyui-welcome.html" title="Welcome"><span>Welcome</span></a></li>
 			<li><a href="yacyui-admin.html" title="Admin Console"><span>Admin Console</span></a></li>
-			<li><a href="yacyui-classic.html" title="Classic Search"><span>Classic Search</span></a></li>			
+			<li><a href="yacyui-compare.html" title="Compare Search"><span>Compare Search</span></a></li>			
 			<li><a href="yacyui-bookmarks.html" title="Bookmarks"><span>Bookmarks</span></a></li>			
 		</ul>		
 	</div>		

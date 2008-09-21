@@ -50,14 +50,52 @@
 </script>
 
 <h3>YaCy P2P Websearch</h3><!-- 0 -->
-<div class="menu">		
+<div class="yform">		
 	<form id="searchbox" class="small" method="get" accept-charset="UTF-8" action="">								
 		<p>
 		<label for="search">Search term:</label>
 		<br />
-		<input id="searchtext" name="search" class="filter" type="text" size="20" maxlength="80" value=""/>
+		<input id="searchtext" name="search" class="filter" type="text" size="20" maxlength="80" value=""/>		
+		<img src="img-2/question_blue.png" class="help" alt="help" title="help" />
+		<br />
+		<div class="ys">
+			<label for="resource">Resource/Network:</label>
+			<br />		
+			<select name="resource" class="selector">		
+				<option value="/yacysearch.rss?resource=global&verify=true" selected="selected">freeworld</option>
+				<option value="/yacysearch.rss?resource=local&verify=true" >local peer</option>
+				<option value="ymarks" >bookmarks</option>
+				<option value="/xml/util/ynetSearch.xml?login=&url=http://sciencenet.fzk.de:8080/yacysearch.rss?resource=global&verify=true" >sciencenet</option>
+			</select>
+			<br />								
+			<label for="resource">Language:</label>	
+			<br />
+			<select disabled class="selector" id="language" name="language">
+				<option value="any" selected="selected">any language</option>
+				<option value="ger" >German</option>
+				<option value="eng" >English</option>										
+			</select>
+		</div>
+		<input  id="searchbutton" type="submit" name="Enter" value="Search" />
+		<table class="contentdom">
+			<tr>
+				<td width="20%"><input type="radio" id="text" name="contentdom" value="text" checked="checked" /></td>
+				<td width="20%"><input disabled type="radio" id="images" name="contentdom" value="image" /></td>
+				<td width="20%"><input disabled type="radio" id="audio" name="contentdom" value="audio" /></td>
+				<td width="20%"><input disabled type="radio" id="video" name="contentdom" value="video" /></td>
+				<td width="20%"><input disabled type="radio" id="appl" name="contentdom" value="app" /></td>
+			</tr>
+			<tr>
+				<td><label for="text">Text</label></td>
+				<td><label for="images">Images</label></td>
+				<td><label for="audio">Audio</label></td>
+				<td><label for="video">Video</label></td>
+				<td><label for="appl">Applications</label></td>
+			</tr>
+		</table>
+		<!-- 
 		<br />		
-		<label for="ontentdom">Content domain:</label>
+		<label for="contentdom">Content domain:</label>
 		<br />
 		<select name="contentdom" class="selector">
 			<option selected="selected" value="text">text</option>
@@ -66,17 +104,7 @@
 			<option value="video">video</option>
 			<option value="app">application</option>
 		</select>
-		<br />
-		<label for="resource">Resource/Network:</label>
-		<br />		
-		<select name="resource" class="selector">		
-			<option value="/yacysearch.rss?resource=global&verify=true" selected="selected">freeworld</option>
-			<option value="/yacysearch.rss?resource=local&verify=true" >local peer</option>
-			<option value="ymarks" >bookmarks</option>
-			<option value="/xml/util/ynetSearch.xml?login=&url=http://sciencenet.fzk.de:8080/yacysearch.rss?resource=global&verify=true" >sciencenet</option>
-		</select>
-		<br />
-		<input  id="searchbutton" type="submit" name="Enter" value="Search" />																	
+		-->																	
 		</p>
 	</form>
 </div>

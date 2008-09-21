@@ -4,57 +4,48 @@ div.main {
   float:left;
   margin-top:1.5em;
   width:75%;
-  height:100%; 
+  height:100%;
 }
 
 
 /* Searchbox */
-.searchbox {
-  float:left; 
-  width:800px;
-}
-.searchbox .boxed h3 {
-  font-family: Helvetica,Arial,sans-serif;
-  display:block;
-  padding:5px 15px;
-  margin-top: 0;
-  margin-bottom: 0px;
-  text-decoration: none;
-  font-weight: bold;
-  font-size: 14px;
-  color: black;  
-  border-top: 1px solid #FFFFFF;
-  border-bottom: 1px solid #999;
-  background: url(../img/box800.png) no-repeat;  
-}
+table.contentdom {
+	width:100%;
+	text-align:center;
+	margin:8px 0px 6px 0px;
+	border:1px solid #CCCCCC;
 
+}
+div.ys {
+	clear: inherit;
+	float:left;
+}
 #searchbutton {
-  width: 100px;
-  margin-top: 1em;
-  margin-bottom: .5em;
-  padding: 2px 5px;
-  border: 1px solid #CCCCCC;
+  width: 95px;
+  padding: 12px 0px 12px 0px; /* top right bottom left */
+  margin: 20px 0px 0px 8px;
+  /* border: 1px solid #CCCCCC; */
   font: "Trebuchet MS", Trebuchet, Verdana, Helvetica, Arial, sans-serif;
   font-size: 12px; 
-  color: #999999;
+  /* color: #999999; */
 }
 .filter {
   width: 190px;  
   margin-bottom: .5em;
-  padding: 2px 5px;
+  padding: 2px 0px 2px 0px /* top right bottom left */
   border: 1px solid #CCCCCC;
   font-family: "Trebuchet MS", Trebuchet, Verdana, Helvetica, Arial, sans-serif;
   font-size: 12px;
-  color: #999999;
+  /* color: #999999; */
 }
 .selector {
   width: 120px;  
   margin-bottom: .5em;
-  padding: 2px 5px;
+  padding: 2px 0px 2px 0px; /* top right bottom left */
   border: 1px solid #CCCCCC;
   font-family: "Trebuchet MS", Trebuchet, Verdana, Helvetica, Arial, sans-serif;
   font-size: 12px;
-  color: #999999;
+  /* color: #999999; */
 }
 .small {
   font-family: "Trebuchet MS", Trebuchet, Verdana, Helvetica, Arial, sans-serif;
@@ -84,36 +75,13 @@ div.sidebar {
   padding: 2px 16px 2px 8px;
   vertical-align: middle;
 }
-
 img {
   vertical-align: top;
 }
-
-.sidebar .boxed h3 {
-  -family: Helvetica,Arial,sans-serif;
-  display:block;
-  padding:5px 15px;
-  margin-top: 0;
-  margin-bottom: 0px;
-  text-decoration: none;
-  weight: bold;
-  size: 14px;
-  color: black;
-  background: url(../img/box250.png) no-repeat;
-  border-top: 1px solid #FFFFFF;
-  border-bottom: 1px solid #999;    
-}
-
-/* Boxed Style */
-
-.boxed{  
-  margin-top: 1em;
-  margin-bottom: 1em;
-}
-.boxed .content {
-  font-family: Helvetica,Arial,sans-serif;
-  border: 1px solid #000000;
-  padding: 5px 0 0 10px;  
+img.help {
+  vertical-align: middle;
+  padding-bottom:5px;
+  padding-left: 6px;
 }
 
 /* YaCy Flexigrid ---------------------------*/
@@ -168,7 +136,7 @@ h3.linktitle {
   	margin-bottom:-1em; 	
 }
 
-/* YaCy Search ---------------------------*/
+/* YaCy Search Results ---------------------------*/
 
 div.searchresults {
   	width:100%;
@@ -242,7 +210,7 @@ dl.pairs dt {
 	font-family: "Trebuchet MS", Trebuchet, Verdana, Helvetica, Arial, sans-serif;    
 	width: 250px;	
 }
-.basic div {
+.basic div.yform, .basic div.menu  {
 	background-color: white;
 	margin-bottom : 10px;
 	border: none;	
