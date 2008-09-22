@@ -254,6 +254,7 @@ public final class plasmaCondenser {
     public plasmaCondenser(final InputStream text, final String charset, final int wordminsize, final int wordcut) throws UnsupportedEncodingException {
         this.wordminsize = wordminsize;
         this.wordcut = wordcut;
+        this.languageIdentificator = null; // we don't need that here
         // analysis = new Properties();
         words = new TreeMap<String, indexWord>();
         createCondensement(text, charset);
@@ -314,7 +315,7 @@ public final class plasmaCondenser {
         final sievedWordsEnum wordenum = new sievedWordsEnum(is, charset);
         while (wordenum.hasMoreElements()) {
             word = (new String(wordenum.nextElement())).toLowerCase(); // TODO: does toLowerCase work for non ISO-8859-1 chars?
-            languageIdentificator.add(word);
+            if (languageIdentificator != null) languageIdentificator.add(word);
             if (word.length() < wordminsize) continue;
             //System.out.println("PARSED-WORD " + word);
             
