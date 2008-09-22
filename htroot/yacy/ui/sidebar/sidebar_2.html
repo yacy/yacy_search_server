@@ -22,7 +22,7 @@
 					var size = ((count/20)+0.3);
 					if (size < 1) {size = 1;}					
 					$('<a style="font-size:'+size+'em"></a>')
-						.html(tag+' ')						
+						.html(HTMLenc(tag)+' ')						
 						.appendTo('#tagcloud')
 						.bind('click', function() {
 							qtag = $(this).text();
