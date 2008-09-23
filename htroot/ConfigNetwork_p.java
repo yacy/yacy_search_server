@@ -204,7 +204,7 @@ public class ConfigNetwork_p {
         
         // set network configuration
         prop.putHTML("network.unit.definition", sb.getConfig("network.unit.definition", ""));
-        prop.putHTML("network.unit.name", sb.getConfig("network.unit.name", ""));
+        prop.putHTML("network.unit.name", sb.getConfig(plasmaSwitchboardConstants.NETWORK_NAME, ""));
         prop.putHTML("network.unit.description", sb.getConfig("network.unit.description", ""));
         prop.putHTML("network.unit.domain", sb.getConfig("network.unit.domain", ""));
         prop.putHTML("network.unit.dht", sb.getConfig("network.unit.dht", ""));

@@ -35,6 +35,7 @@ import org.apache.commons.httpclient.methods.multipart.Part;
 
 import de.anomic.http.DefaultCharsetStringPart;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
@@ -46,8 +47,8 @@ public class yacyNetwork {
 		if ((post == null) || (env == null)) return false;
 		
 		// identify network
-		final String unitName = post.get("network.unit.name", yacySeed.DFLT_NETWORK_UNIT); // the network unit  
-		if (!unitName.equals(env.getConfig("network.unit.name", yacySeed.DFLT_NETWORK_UNIT))) {
+		final String unitName = post.get(plasmaSwitchboardConstants.NETWORK_NAME, yacySeed.DFLT_NETWORK_UNIT); // the network unit  
+		if (!unitName.equals(env.getConfig(plasmaSwitchboardConstants.NETWORK_NAME, yacySeed.DFLT_NETWORK_UNIT))) {
 			return false;
 		}
         
@@ -86,7 +87,7 @@ public class yacyNetwork {
 		post.add(new DefaultCharsetStringPart("myUTC", Long.toString(System.currentTimeMillis())));
 
         // network identification
-        post.add(new DefaultCharsetStringPart("network.unit.name", plasmaSwitchboard.getSwitchboard().getConfig("network.unit.name", yacySeed.DFLT_NETWORK_UNIT)));
+        post.add(new DefaultCharsetStringPart(plasmaSwitchboardConstants.NETWORK_NAME, plasmaSwitchboard.getSwitchboard().getConfig(plasmaSwitchboardConstants.NETWORK_NAME, yacySeed.DFLT_NETWORK_UNIT)));
 
         // authentification essentials
         final String authentificationControl = sb.getConfig("network.unit.protocol.control", "uncontrolled");

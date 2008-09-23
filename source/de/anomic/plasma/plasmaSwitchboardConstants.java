@@ -531,4 +531,9 @@ public final class plasmaSwitchboardConstants {
      */
     public static final String STR_REMOTECRAWLTRIGGER = "REMOTECRAWLTRIGGER: REMOTE CRAWL TO PEER ";
 
+    /**
+     * network properties
+     * 
+     */
+    public static final String NETWORK_NAME = "network.unit.name";
 }

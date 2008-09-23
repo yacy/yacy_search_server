@@ -134,7 +134,7 @@ public class ConfigBasic {
         }
 
         // set a use case
-        String networkName = sb.getConfig("network.unit.name", "");
+        String networkName = sb.getConfig(plasmaSwitchboardConstants.NETWORK_NAME, "");
         if (post != null && post.containsKey("usecase")) {
             if (post.get("usecase", "").equals("freeworld") && !networkName.equals("freeworld")) {
                 // switch to freeworld network
@@ -159,7 +159,7 @@ public class ConfigBasic {
             }
         }
         
-        networkName = sb.getConfig("network.unit.name", "");
+        networkName = sb.getConfig(plasmaSwitchboardConstants.NETWORK_NAME, "");
         if (networkName.equals("freeworld")) {
             prop.put("setUseCase", 1);
             prop.put("setUseCase_freeworldChecked", 1);

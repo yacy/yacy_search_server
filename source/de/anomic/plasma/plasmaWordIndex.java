@@ -116,6 +116,10 @@ public final class plasmaWordIndex implements indexRI {
     public  yacyPeerActions                peerActions;
 
     public plasmaWordIndex(final String networkName, final serverLog log, final File indexPrimaryRoot, final File indexSecondaryRoot, final int entityCacheMaxSize) {
+        if (networkName == null || networkName.length() == 0) {
+            log.logSevere("no network name given - shutting down");
+            System.exit(0);
+        }
         this.log = log;
         this.primaryRoot = new File(indexPrimaryRoot, networkName);
         this.secondaryRoot = new File(indexSecondaryRoot, networkName);

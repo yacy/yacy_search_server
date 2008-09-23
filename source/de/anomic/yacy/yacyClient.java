@@ -79,6 +79,7 @@ import de.anomic.plasma.plasmaSearchRankingProcess;
 import de.anomic.plasma.plasmaSearchRankingProfile;
 import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.server.serverByteBuffer;
 import de.anomic.server.serverCodings;
@@ -1083,7 +1084,7 @@ public final class yacyClient {
                                                       "&count=10" +
                                                       "&resource=global" +
                                                       "&query=" + wordhashe +
-                                                      "&network.unit.name=" + plasmaSwitchboard.getSwitchboard().getConfig("network.unit.name", yacySeed.DFLT_NETWORK_UNIT),
+                                                      "&network.unit.name=" + plasmaSwitchboard.getSwitchboard().getConfig(plasmaSwitchboardConstants.NETWORK_NAME, yacySeed.DFLT_NETWORK_UNIT),
                                                       reqHeader, 10000, target.getHexHash() + ".yacyh");            
             final HashMap<String, String> result = nxTools.table(content, "UTF-8");
             System.out.println("Result=" + result.toString());

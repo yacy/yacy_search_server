@@ -139,9 +139,10 @@ public class yacysearch {
         }
         
         // SEARCH
-        //final boolean indexDistributeGranted = sb.getConfig(plasmaSwitchboard.INDEX_DIST_ALLOW, "true").equals("true");
-        //final boolean indexReceiveGranted = sb.getConfig("allowReceiveIndex", "true").equals("true");
+        final boolean indexReceiveGranted = sb.getConfigBool(plasmaSwitchboardConstants.INDEX_RECEIVE_ALLOW, true);
+        global = global && indexReceiveGranted; // if the user does not want indexes from remote peers, it cannot be a global search
         //final boolean offline = yacyCore.seedDB.mySeed().isVirgin();
+        
         final boolean clustersearch = sb.isRobinsonMode() &&
     									(sb.getConfig("cluster.mode", "").equals("privatecluster") ||
     									 sb.getConfig("cluster.mode", "").equals("publiccluster"));

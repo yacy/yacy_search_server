@@ -39,7 +39,7 @@ public class CrawlStart_p {
         
         // define visible variables
         String a = sb.webIndex.seedDB.mySeed().getPublicAddress();
-        prop.put("starturl", (sb.getConfig("network.unit.name", "").equals("intranet")) ? "http://" + ((a == null) ? "localhost:" + sb.getConfig("port", "8080") : a) + "/repository/" : "http://");
+        prop.put("starturl", (sb.getConfig(plasmaSwitchboardConstants.NETWORK_NAME, "").equals("intranet")) ? "http://" + ((a == null) ? "localhost:" + sb.getConfig("port", "8080") : a) + "/repository/" : "http://");
         prop.put("proxyPrefetchDepth", env.getConfig("proxyPrefetchDepth", "0"));
         prop.put("crawlingDepth", env.getConfig("crawlingDepth", "0"));
         prop.put("crawlingFilter", env.getConfig("crawlingFilter", "0"));

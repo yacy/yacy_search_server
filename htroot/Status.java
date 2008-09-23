@@ -205,10 +205,10 @@ public class Status {
             }
         }
         final String peerStatus = ((sb.webIndex.seedDB.mySeed() == null) ? yacySeed.PEERTYPE_VIRGIN : sb.webIndex.seedDB.mySeed().get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN));
-        if (peerStatus.equals(yacySeed.PEERTYPE_VIRGIN) && sb.getConfig("network.unit.name", "").equals("freeworld")) {
+        if (peerStatus.equals(yacySeed.PEERTYPE_VIRGIN) && sb.getConfig(plasmaSwitchboardConstants.NETWORK_NAME, "").equals("freeworld")) {
             prop.put(PEERSTATUS, "0");
             prop.put("urgentStatusVirgin", "1");
-        } else if (peerStatus.equals(yacySeed.PEERTYPE_JUNIOR) && sb.getConfig("network.unit.name", "").equals("freeworld")) {
+        } else if (peerStatus.equals(yacySeed.PEERTYPE_JUNIOR) && sb.getConfig(plasmaSwitchboardConstants.NETWORK_NAME, "").equals("freeworld")) {
             prop.put(PEERSTATUS, "1");
             prop.put("warningStatusJunior", "1");
         } else if (peerStatus.equals(yacySeed.PEERTYPE_SENIOR)) {

@@ -34,6 +34,7 @@ import javax.imageio.ImageIO;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.plasma.plasmaGrafics;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacySeed;
@@ -65,7 +66,7 @@ public class Banner {
         int    myppm   = 0;
         double myqph   = 0;
         String type    = "";
-        final String network = env.getConfig("network.unit.name", "unspecified").toUpperCase();
+        final String network = env.getConfig(plasmaSwitchboardConstants.NETWORK_NAME, "unspecified").toUpperCase();
         final int    peers   = sb.webIndex.seedDB.sizeConnected() + 1; // the '+ 1': the own peer is not included in sizeConnected()
         long   nlinks  = sb.webIndex.seedDB.countActiveURL();
         long   nwords  = sb.webIndex.seedDB.countActiveRWI();

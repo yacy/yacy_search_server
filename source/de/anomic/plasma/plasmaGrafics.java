@@ -114,7 +114,7 @@ public class plasmaGrafics {
         if (primarySearches == null) return null; // this was a local search and there are no threads
 
         // get a copy of a recent network picture
-        final ymageMatrix eventPicture = getNetworkPicture(seedDB, 120000, plasmaSwitchboard.getSwitchboard().getConfig("network.unit.name", "unspecified"), plasmaSwitchboard.getSwitchboard().getConfig("network.unit.description", "unspecified"), COL_BACKGROUND);
+        final ymageMatrix eventPicture = getNetworkPicture(seedDB, 120000, plasmaSwitchboard.getSwitchboard().getConfig(plasmaSwitchboardConstants.NETWORK_NAME, "unspecified"), plasmaSwitchboard.getSwitchboard().getConfig("network.unit.description", "unspecified"), COL_BACKGROUND);
         //if (eventPicture instanceof ymageMatrix) eventPicture = (ymageMatrix) eventPicture; //new ymageMatrix((ymageMatrix) eventPicture);
         // TODO: fix cloning of ymageMatrix pictures
         

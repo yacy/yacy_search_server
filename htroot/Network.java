@@ -39,6 +39,7 @@ import de.anomic.crawler.HTTPLoader;
 import de.anomic.http.HttpClient;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
@@ -61,7 +62,7 @@ public class Network {
         final serverObjects prop = new serverObjects();
         prop.setLocalized(!(requestHeader.get("PATH")).endsWith(".xml"));
         prop.putHTML("page_networkTitle", sb.getConfig("network.unit.description", "unspecified"));
-        prop.putHTML("page_networkName", sb.getConfig("network.unit.name", "unspecified"));
+        prop.putHTML("page_networkName", sb.getConfig(plasmaSwitchboardConstants.NETWORK_NAME, "unspecified"));
         final boolean overview = (post == null) || (post.get("page", "0").equals("0"));
 
         final String mySeedType = sb.webIndex.seedDB.mySeed().get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN);

@@ -300,9 +300,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             setRemotecrawlPPM(Math.max(1, (int) getConfigLong("network.unit.remotecrawl.speed", 60)));
         }
         
+        // load the network definition
+        overwriteNetworkDefinition();
+
         // start indexing management
         log.logConfig("Starting Indexing Management");
-        final String networkName = getConfig("network.unit.name", "");
+        final String networkName = getConfig(plasmaSwitchboardConstants.NETWORK_NAME, "");
         webIndex = new plasmaWordIndex(networkName, log, indexPrimaryPath, indexSecondaryPath, wordCacheMaxCount);
         crawlResults = new ResultURLs();
         
@@ -312,9 +315,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         serverInstantBusyThread.oneTimeJob(this, "loadSeedLists", yacyCore.log, 0);
         final long startedSeedListAquisition = System.currentTimeMillis();
         
-        // load the network definition
-        overwriteNetworkDefinition();
-
         // set up local robots.txt
         this.robotstxtConfig = httpdRobotsTxtConfig.init(this);
         
@@ -728,7 +728,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             setConfig("crawlResponse", "false");
             setConfig(plasmaSwitchboardConstants.INDEX_DIST_ALLOW, false);
             setConfig(plasmaSwitchboardConstants.INDEX_RECEIVE_ALLOW, false);
-            webIndex.seedDB.mySeed().setFlagAcceptRemoteIndex(false);
         }
         
         // in freeworld network set full p2p mode
@@ -737,7 +736,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             setConfig("crawlResponse", "true");
             setConfig(plasmaSwitchboardConstants.INDEX_DIST_ALLOW, true);
             setConfig(plasmaSwitchboardConstants.INDEX_RECEIVE_ALLOW, true);
-            webIndex.seedDB.mySeed().setFlagAcceptRemoteIndex(true);
         }
         
     }
@@ -762,7 +760,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             final File indexPrimaryPath = getConfigPath(plasmaSwitchboardConstants.INDEX_PRIMARY_PATH, plasmaSwitchboardConstants.INDEX_PATH_DEFAULT);
             final File indexSecondaryPath = (getConfig(plasmaSwitchboardConstants.INDEX_SECONDARY_PATH, "").length() == 0) ? indexPrimaryPath : new File(getConfig(plasmaSwitchboardConstants.INDEX_SECONDARY_PATH, ""));
             final int wordCacheMaxCount = (int) getConfigLong(plasmaSwitchboardConstants.WORDCACHE_MAX_COUNT, 20000);
-            this.webIndex = new plasmaWordIndex(getConfig("network.unit.name", ""), getLog(), indexPrimaryPath, indexSecondaryPath, wordCacheMaxCount);
+            this.webIndex = new plasmaWordIndex(getConfig(plasmaSwitchboardConstants.NETWORK_NAME, ""), getLog(), indexPrimaryPath, indexSecondaryPath, wordCacheMaxCount);
         }
         // start up crawl jobs
         continueCrawlJob(plasmaSwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
