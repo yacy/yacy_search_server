@@ -154,8 +154,8 @@ public class ConfigBasic {
                 // switch to intranet network
                 sb.switchNetwork("defaults/yacy.network.intranet.unit");
                 // switch to p2p mode: enable ad-hoc networks between intranet users
-                sb.setConfig(plasmaSwitchboardConstants.INDEX_DIST_ALLOW, true);
-                sb.setConfig(plasmaSwitchboardConstants.INDEX_RECEIVE_ALLOW, true);
+                sb.setConfig(plasmaSwitchboardConstants.INDEX_DIST_ALLOW, false);
+                sb.setConfig(plasmaSwitchboardConstants.INDEX_RECEIVE_ALLOW, false);
             }
         }
         

@@ -273,9 +273,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         // remote proxy configuration
         httpRemoteProxyConfig.init(this);
         
-        // load the network definition
-        overwriteNetworkDefinition(this);
-
         // load values from configs        
         this.plasmaPath   = getConfigPath(plasmaSwitchboardConstants.PLASMA_PATH, plasmaSwitchboardConstants.PLASMA_PATH_DEFAULT);
         this.log.logConfig("Plasma DB Path: " + this.plasmaPath.toString());
@@ -315,6 +312,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         serverInstantBusyThread.oneTimeJob(this, "loadSeedLists", yacyCore.log, 0);
         final long startedSeedListAquisition = System.currentTimeMillis();
         
+        // load the network definition
+        overwriteNetworkDefinition();
+
         // set up local robots.txt
         this.robotstxtConfig = httpdRobotsTxtConfig.init(this);
         
@@ -648,27 +648,28 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     }
     
 
-    public static void overwriteNetworkDefinition(final plasmaSwitchboard sb) {
+    public void overwriteNetworkDefinition() {
 
         // load network configuration into settings
-        String networkUnitDefinition = sb.getConfig("network.unit.definition", "defaults/yacy.network.freeworld.unit");
-        final String networkGroupDefinition = sb.getConfig("network.group.definition", "yacy.network.group");
+        String networkUnitDefinition = getConfig("network.unit.definition", "defaults/yacy.network.freeworld.unit");
+        final String networkGroupDefinition = getConfig("network.group.definition", "yacy.network.group");
 
         // patch old values
         if (networkUnitDefinition.equals("yacy.network.unit")) {
             networkUnitDefinition = "defaults/yacy.network.freeworld.unit";
-            sb.setConfig("network.unit.definition", networkUnitDefinition);
+            setConfig("network.unit.definition", networkUnitDefinition);
         }
         
-        // remove old release locations
-        int i = 0;
-        String location;
-        while (true) {
-            location = sb.getConfig("network.unit.update.location" + i, "");
-            if (location.length() == 0) break;
-            sb.removeConfig("network.unit.update.location" + i);
-            i++;
+        // remove old release and bootstrap locations
+        Iterator<String> ki = configKeys();
+        ArrayList<String> d = new ArrayList<String>();
+        String k;
+        while (ki.hasNext()) {
+            k = ki.next();
+            if (k.startsWith("network.unit.update.location")) d.add(k);
+            if (k.startsWith("network.unit.bootstrap")) d.add(k);
         }
+        for (String s:d) this.removeConfig(s); // must be removed afterwards othervise a ki.remove() would not remove the property on file
         
         // include additional network definition properties into our settings
         // note that these properties cannot be set in the application because they are
@@ -678,30 +679,32 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         Map<String, String> initProps;
         if (networkUnitDefinition.startsWith("http://")) {
             try {
-            	sb.setConfig(plasmaSwitchboard.loadHashMap(new yacyURL(networkUnitDefinition, null)));
+            	setConfig(plasmaSwitchboard.loadHashMap(new yacyURL(networkUnitDefinition, null)));
             } catch (final MalformedURLException e) { }
         } else {
-            final File networkUnitDefinitionFile = (networkUnitDefinition.startsWith("/")) ? new File(networkUnitDefinition) : new File(sb.getRootPath(), networkUnitDefinition);
+            final File networkUnitDefinitionFile = (networkUnitDefinition.startsWith("/")) ? new File(networkUnitDefinition) : new File(getRootPath(), networkUnitDefinition);
             if (networkUnitDefinitionFile.exists()) {
                 initProps = serverFileUtils.loadHashMap(networkUnitDefinitionFile);
-                sb.setConfig(initProps);
+                setConfig(initProps);
             }
         }
         if (networkGroupDefinition.startsWith("http://")) {
             try {
-            	sb.setConfig(plasmaSwitchboard.loadHashMap(new yacyURL(networkGroupDefinition, null)));
+            	setConfig(plasmaSwitchboard.loadHashMap(new yacyURL(networkGroupDefinition, null)));
             } catch (final MalformedURLException e) { }
         } else {
-            final File networkGroupDefinitionFile = new File(sb.getRootPath(), networkGroupDefinition);
+            final File networkGroupDefinitionFile = new File(getRootPath(), networkGroupDefinition);
             if (networkGroupDefinitionFile.exists()) {
                 initProps = serverFileUtils.loadHashMap(networkGroupDefinitionFile);
-                sb.setConfig(initProps);
+                setConfig(initProps);
             }
         }
 
         // set release locations
+        int i = 0;
+        String location;
         while (true) {
-            location = sb.getConfig("network.unit.update.location" + i, "");
+            location = getConfig("network.unit.update.location" + i, "");
             if (location.length() == 0) break;
             try {
                 yacyVersion.latestReleaseLocations.add(new yacyURL(location, null));
@@ -712,11 +715,30 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         }
         
         // initiate url license object
-        sb.licensedURLs = new URLLicense(8);
+        licensedURLs = new URLLicense(8);
         
         // set URL domain acceptance
-        sb.acceptGlobalURLs = "global.any".indexOf(sb.getConfig("network.unit.domain", "global")) >= 0;
-        sb.acceptLocalURLs = "local.any".indexOf(sb.getConfig("network.unit.domain", "global")) >= 0;
+        acceptGlobalURLs = "global.any".indexOf(getConfig("network.unit.domain", "global")) >= 0;
+        acceptLocalURLs = "local.any".indexOf(getConfig("network.unit.domain", "global")) >= 0;
+        
+        // in intranet and portal network set robinson mode
+        if (networkUnitDefinition.equals("defaults/yacy.network.webportal.unit") ||
+            networkUnitDefinition.equals("defaults/yacy.network.intranet.unit")) {
+            // switch to robinson mode
+            setConfig("crawlResponse", "false");
+            setConfig(plasmaSwitchboardConstants.INDEX_DIST_ALLOW, false);
+            setConfig(plasmaSwitchboardConstants.INDEX_RECEIVE_ALLOW, false);
+            webIndex.seedDB.mySeed().setFlagAcceptRemoteIndex(false);
+        }
+        
+        // in freeworld network set full p2p mode
+        if (networkUnitDefinition.equals("defaults/yacy.network.freeworld.unit")) {
+            // switch to robinson mode
+            setConfig("crawlResponse", "true");
+            setConfig(plasmaSwitchboardConstants.INDEX_DIST_ALLOW, true);
+            setConfig(plasmaSwitchboardConstants.INDEX_RECEIVE_ALLOW, true);
+            webIndex.seedDB.mySeed().setFlagAcceptRemoteIndex(true);
+        }
         
     }
     
@@ -736,7 +758,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
                 this.webIndex.close();
             }
             setConfig("network.unit.definition", networkDefinition);
-            overwriteNetworkDefinition(this);
+            overwriteNetworkDefinition();
             final File indexPrimaryPath = getConfigPath(plasmaSwitchboardConstants.INDEX_PRIMARY_PATH, plasmaSwitchboardConstants.INDEX_PATH_DEFAULT);
             final File indexSecondaryPath = (getConfig(plasmaSwitchboardConstants.INDEX_SECONDARY_PATH, "").length() == 0) ? indexPrimaryPath : new File(getConfig(plasmaSwitchboardConstants.INDEX_SECONDARY_PATH, ""));
             final int wordCacheMaxCount = (int) getConfigLong(plasmaSwitchboardConstants.WORDCACHE_MAX_COUNT, 20000);

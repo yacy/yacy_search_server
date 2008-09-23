@@ -157,7 +157,7 @@ public final class indexRAMRI implements indexRI, indexRIReader {
 
 
     public synchronized String maxScoreWordHash() {
-        if (heap.size() == 0) return null;
+        if (heap == null || heap.size() == 0) return null;
         try {
             return hashScore.getMaxObject();
         } catch (final Exception e) {

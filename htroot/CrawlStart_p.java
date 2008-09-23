@@ -25,6 +25,7 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import de.anomic.http.httpRequestHeader;
+import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -33,9 +34,12 @@ public class CrawlStart_p {
     
 	public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
         // return variable that accumulates replacements
+	    final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final serverObjects prop = new serverObjects();
         
         // define visible variables
+        String a = sb.webIndex.seedDB.mySeed().getPublicAddress();
+        prop.put("starturl", (sb.getConfig("network.unit.name", "").equals("intranet")) ? "http://" + ((a == null) ? "localhost:" + sb.getConfig("port", "8080") : a) + "/repository/" : "http://");
         prop.put("proxyPrefetchDepth", env.getConfig("proxyPrefetchDepth", "0"));
         prop.put("crawlingDepth", env.getConfig("crawlingDepth", "0"));
         prop.put("crawlingFilter", env.getConfig("crawlingFilter", "0"));
