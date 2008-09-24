@@ -15,12 +15,15 @@ public class xbel {
 
 	private static final serverObjects prop = new serverObjects();
 	private static plasmaSwitchboard switchboard = null;
-	private static boolean isAdmin = false;	
+	private static boolean isAdmin = false;
+	private static int R = 1; // TODO: solve the recursion problem an remove global variable
 	
     public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
  
     	int count = 0;;
-
+    	String root = "/";
+    	String style = "";
+    	
     	prop.clear();
     	switchboard = (plasmaSwitchboard) env;    	
     	isAdmin=switchboard.verifyAuthentication(header, true);   
@@ -41,23 +44,30 @@ public class xbel {
     				return prop;
     			}
         	}
+        	if(post.containsKey("folder")) {
+        		final String folderName=post.get("folder");
+        		if (folderName.startsWith("/")) { root = folderName; } 
+        			else { root = "/" + folderName; }
+        	}
+        	if(post.containsKey("style") && !post.get("style").equals("")) {
+        		style = "<?xml-stylesheet type=\"text/xsl\" href=\""+htmlTools.encodeUnicode2xml(post.get("style"))+"\" ?>";
+        	} 
     	}
-    	// print bookmark folders as XBEL default
-    	prop.put("folder", "YaCy Bookmark Folder");
-    	count = recurseFolders(switchboard.bookmarksDB.getFolderList(isAdmin),"/",0,true,"");
+    	prop.put("style", style);
+    	R = root.replaceAll("[^/]","").length() - 1;
+    	count = recurseFolders(switchboard.bookmarksDB.getFolderList(root, isAdmin),root,0,true,"");
         prop.put("xbel", count);
-    	return prop;    // return from serverObjects respond()
-    
+    	return prop;    // return from serverObjects respond()    
     }
 
     private static int recurseFolders(final Iterator<String> it, String root, int count, final boolean next, final String prev){
     	String fn="";    	
-    	   	
+    	
     	if(next) fn = it.next();    		
     	else fn = prev;
 
-    	if(fn.equals("\uffff")) {    		
-    		int i = prev.replaceAll("[^/]","").length();
+    	if(fn.equals("\uffff")) {
+    		int i = prev.replaceAll("[^/]","").length() - R; 
     		while(i>0){
     			prop.put("xbel_"+count+"_elements", "</folder>");
     			count++;
@@ -69,7 +79,8 @@ public class xbel {
     	if(fn.startsWith(root)){
     		prop.put("xbel_"+count+"_elements", "<folder id=\""+bookmarksDB.tagHash(fn)+"\">");
     		count++;
-    		prop.put("xbel_"+count+"_elements", "<title>" + htmlTools.encodeUnicode2xml(fn.replaceFirst(root+"/*","")) + "</title>");   		
+    		  		
+    		prop.put("xbel_"+count+"_elements", "<title>" + htmlTools.encodeUnicode2xml(fn.replaceAll("(/.[^/]*)*/", "")) + "</title>");   		
     		count++;    
     		final Iterator<String> bit=switchboard.bookmarksDB.getBookmarksIterator(fn, isAdmin);
     		count = print_XBEL(bit, count);
@@ -121,7 +132,7 @@ public class xbel {
     		count++;     		
 		}
     	return count;
-    }
+    }    
 }
 
 
