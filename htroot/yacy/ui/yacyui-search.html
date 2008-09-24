@@ -7,8 +7,8 @@
 			url: query,
 			async: false,
 			dataType: "xml",
-			success: function(xml) {				
-				if ($.browser.mozilla && ($.browser.version.replace(".","","g") > 1800)) {
+			success: function(xml) {
+				if (($.browser.mozilla && (parseInt($.browser.version.replace(".","","g")) > 1800))) {					
 					var totalResults = parseInt($(xml).find('opensearch\\:totalResults').text().replace(",","","g"));
 					var startIndex = parseInt($(xml).find('opensearch\\:startIndex').text());				
 					var itemsPerPage = parseInt($(xml).find('opensearch\\:itemsPerPage').text());				
@@ -41,13 +41,13 @@
 						{display: 'Date', name : 'date', width : 130, sortable : true, align: 'left'}
 					],
 					buttons: [
-						{name: 'Bookmark', bclass: 'bookmark', onpress: test},
-						{name: 'Crawl', bclass: 'crawl', onpress: test},
-						{name: 'Blacklist', bclass: 'blacklist', onpress: test},
-						{name: 'Refresh', bclass: 'load', onpress: load},
+						{name: 'Bookmark', bclass: 'bookmark', onpress: yaction},
+						{name: 'Crawl', bclass: 'crawl', onpress: yaction},
+						{name: 'Blacklist', bclass: 'blacklist', onpress: yaction},
+						{name: 'Refresh', bclass: 'load', onpress: yload},
 						{separator: true},						
-						{name: page, bclass: 'prev', onpress: load},						
-						{name: '&nbsp;', bclass: 'next', onpress: load},
+						{name: page, bclass: 'prev', onpress: yload},						
+						{name: '&nbsp;', bclass: 'next', onpress: yload},
 						{separator: true}						
 					],										
 					striped: true,
@@ -66,9 +66,9 @@
 		});
 		*/
 		
-		function test(com, grid) { 
+		function yaction(com, grid) { 
 			if (com == 'Bookmark') { 
-				confirm('Add' + $('.trSelected',grid).length + ' bookmark(s)?')				
+				confirm('Add ' + $('.trSelected',grid).length + ' search results to bookmark(s)?')				
 				$('.trSelected',grid).each(function(){
 					var url = $(this).find('.url').text();
             		var title = $(this).find('.linktitle').text();
@@ -82,7 +82,7 @@
 						url: "/xml/bookmarks/posts/add_p.xml?login="+query,			
 						dataType: "xml",
 						success: function(xml) {
-            				alert("Posted bookmark for: "+url);            					
+            				alert("Debug: posted bookmark for: "+url);            					
             			}
 					});
             	});	
@@ -90,7 +90,7 @@
 				alert("Test!");
 			}
 		}
-		function load(com, grid) {
+		function yload(com, grid) {
 			var $tabs = $('#container ul');
 			var count = parseInt($(tabid).attr('count'));
 			var offset = parseInt($(tabid).attr('offset'));			

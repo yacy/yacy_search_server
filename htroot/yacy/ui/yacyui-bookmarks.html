@@ -23,8 +23,11 @@
 						url: "/xml/bookmarks/posts/add_p.xml?login="+query,			
 						dataType: "xml",
 						success: function(xml) {
+            				$('#bmaddform').resetForm();
             				$("#bmadd").dialog("close");            
-            				$tabs.tabs("load", 3);            					
+            				$tabs.tabs("load", 3);
+            				$("#side2 *").remove();
+            				$("#side2").load("sidebar/sidebar_2.html");            					
             			}
             		});	 
         		}

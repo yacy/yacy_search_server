@@ -5,6 +5,7 @@
   		/* Init Sidebar_2 */
   		$("#side2").accordion({
 			autoHeight: false,
+			fillSpace: true,			
 			header: "h3"
 		});
 		$("#side2").accordion("activate", 1);
@@ -36,7 +37,13 @@
 						});																										
 				}); //close each(
 			}
-		}); //close $.ajax(			
+		}); //close $.ajax(	
+		/* Load Folders */		
+		$("#yfolder").getTransform('xsl/xbel2folder-ul.xsl','/xml/bookmarks/xbel/xbel.xml');
+		$("#yfolder").treeview({
+			collapsed: true,
+			unique: true			
+		});					
 	});	
   //]]>
 </script>
@@ -78,7 +85,10 @@
 <div class="menu">	
 	<p id="tagcloud"></p>	
 </div>	
-
+<h3>Bookmark Folders</h3> <!-- 2 -->
+<div class="menu">
+		<ul class="filetree" id="yfolder"></ul>
+</div>
 
 
 
