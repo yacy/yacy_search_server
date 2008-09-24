@@ -322,8 +322,12 @@ public class bookmarksDB {
         return indexWord.word2hash(user+":"+tagName.toLowerCase());
     }
     
-    public Iterator<String> getFolderList(final boolean priv){
+    public Iterator<String> getFolderList(final boolean priv){    
+    	return getFolderList("/", priv);    	
+    }
     
+    public Iterator<String> getFolderList(final String root, final boolean priv){
+        
     	final Set<String> folders = new TreeSet<String>();
     	String path = "";   	
     	final Iterator<Tag> it = this.getTagIterator(priv);
@@ -331,15 +335,16 @@ public class bookmarksDB {
     	
     	while(it.hasNext()){
     		tag=it.next();
-    		if (tag.getFriendlyName().startsWith("/")) {
+    		if (tag.getFriendlyName().startsWith(root)) {
     			path = tag.getFriendlyName();
     			path = cleanTagsString(path);                  
-    			while(path.length() > 0){
-    				folders.add(path);
+    			while(path.length() > 0 && !path.equals(root)){
+    				folders.add(path);    				
     				path = path.replaceAll("(/.[^/]*$)", "");	// create missing folders in path
     			}       			
     		}
     	}
+    	if (!root.equals("/")) { folders.add(root); }
     	folders.add("\uffff");
     	return folders.iterator();    	
     }
