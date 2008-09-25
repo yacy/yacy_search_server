@@ -192,8 +192,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     
     public static wikiParser wikiParser = null;
     
-    public yacyTray yacytray;
-    
     // storage management
     public  File                           htCachePath;
     public  File                           plasmaPath;
@@ -268,7 +266,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         setLog(new serverLog("PLASMA"));
         if (applyPro) this.log.logInfo("This is the pro-version of YaCy");
         
-        initSystemTray();
+	// init TrayIcon if possible
+	yacyTray.init(this);
         
         // remote proxy configuration
         httpRemoteProxyConfig.init(this);
@@ -299,7 +298,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         if (this.firstInit) {
             setRemotecrawlPPM(Math.max(1, (int) getConfigLong("network.unit.remotecrawl.speed", 60)));
         }
-        
+
         // load the network definition
         overwriteNetworkDefinition();
 
@@ -629,24 +628,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         log.logConfig("Finished Switchboard Initialization");
     }
 
-
-    /**
-     * 
-     */
-    private void initSystemTray() {
-        // make system tray
-        // TODO: make tray on linux
-        try {
-            final boolean trayIcon = getConfig("trayIcon", "false").equals("true");
-            if (trayIcon && serverSystem.isWindows) {
-                System.setProperty("java.awt.headless", "false");
-                yacytray = new yacyTray(this, false);
-            }
-        } catch (final Exception e) {
-            System.setProperty("java.awt.headless", "true");
-        }
-    }
-    
 
     public void overwriteNetworkDefinition() {
 
@@ -1134,7 +1115,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         crawlQueues.close();
         log.logConfig("SWITCHBOARD SHUTDOWN STEP 3: sending termination signal to database manager (stand by...)");
         webIndex.close();
-        if(yacyTray.isShown) yacytray.removeTray();
+        yacyTray.removeTray();
         log.logConfig("SWITCHBOARD SHUTDOWN TERMINATED");
     }
     
