@@ -22,7 +22,7 @@ public class xbel {
  
     	int count = 0;;
     	String root = "/";
-    	String style = "";
+    	int style = 0;
     	
     	prop.clear();
     	switchboard = (plasmaSwitchboard) env;    	
@@ -50,7 +50,9 @@ public class xbel {
         			else { root = "/" + folderName; }
         	}
         	if(post.containsKey("style") && !post.get("style").equals("")) {
-        		style = "<?xml-stylesheet type=\"text/xsl\" href=\""+htmlTools.encodeUnicode2xml(post.get("style"))+"\" ?>";
+        		style = 1;        		
+        		prop.putHTML("style_href", post.get("style"));        		  
+        		prop.putHTML("style_type", post.get("style").replaceAll("^.*\\.", ""));	
         	} 
     	}
     	prop.put("style", style);
@@ -80,7 +82,8 @@ public class xbel {
     		prop.put("xbel_"+count+"_elements", "<folder id=\""+bookmarksDB.tagHash(fn)+"\">");
     		count++;
     		  		
-    		prop.put("xbel_"+count+"_elements", "<title>" + htmlTools.encodeUnicode2xml(fn.replaceAll("(/.[^/]*)*/", "")) + "</title>");   		
+    		final String title = fn; // just to make sure fn stays untouched    		
+    		prop.put("xbel_"+count+"_elements", "<title>" + htmlTools.encodeUnicode2xml(title.replaceAll("(/.[^/]*)*/", "")) + "</title>");   		
     		count++;    
     		final Iterator<String> bit=switchboard.bookmarksDB.getBookmarksIterator(fn, isAdmin);
     		count = print_XBEL(bit, count);
