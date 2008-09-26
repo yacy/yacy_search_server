@@ -44,11 +44,13 @@ import de.anomic.server.serverSystem;
 public final class yacyTray {
 	private static plasmaSwitchboard sb;
 	
-	private static boolean isShown = false;
-	public static boolean lockBrowserPopup = true;
-
 	private static nativeTrayIcon ti;
-
+	private static boolean isShown = false;
+	final private static boolean deutsch = System.getProperty("user.language","").equals("de");
+	
+	public static boolean lockBrowserPopup = true;
+	
+	
 	public static void init(final plasmaSwitchboard par_sb) {
 		sb = par_sb;
 		try {
@@ -77,12 +79,15 @@ public final class yacyTray {
 	}
 
 	public static PopupMenu setupPopupMenu() {
+		String label;
 		// this is the popup menu
 		PopupMenu menu = new PopupMenu("YaCy");
 		MenuItem menuItem;
 		
 		// YaCy Search
-		menuItem = new MenuItem("YaCy Search");
+		if(deutsch) label = "YaCy Suche";
+		else label = "YaCy Search";
+		menuItem = new MenuItem(label);
 		menuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(final ActionEvent e) {
 				openBrowser("");
@@ -92,7 +97,9 @@ public final class yacyTray {
 		
 		// Quit
 		menu.addSeparator();
-		menuItem = new MenuItem("Shutdown");
+		if(deutsch) label = "Beenden";
+		else label = "Shutdown";
+		menuItem = new MenuItem(label);
 		menuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(final ActionEvent e) {
 				sb.terminate();
@@ -105,7 +112,10 @@ public final class yacyTray {
 	
 	private static void trayClickAction(){	//doubleclick
 		if (lockBrowserPopup) {
-			ti.displayBalloonMessage("YaCy","Please wait until YaCy is started.");
+			String label;
+			if(deutsch) label = "Bitte warten bis YaCy gestartet ist.";
+			else label = "Please wait until YaCy is started.";
+			ti.displayBalloonMessage("YaCy",label);
 		} else {
 			openBrowser("");
 		}
