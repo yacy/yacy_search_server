@@ -44,10 +44,8 @@ import de.anomic.server.serverSystem;
 public final class yacyTray {
 	private static plasmaSwitchboard sb;
 	
-	public static boolean isShown = false;
+	private static boolean isShown = false;
 	public static boolean lockBrowserPopup = true;
-	
-	private static long t1;
 
 	private static nativeTrayIcon ti;
 
@@ -94,7 +92,7 @@ public final class yacyTray {
 		
 		// Quit
 		menu.addSeparator();
-		menuItem = new MenuItem("Quit");
+		menuItem = new MenuItem("Shutdown");
 		menuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(final ActionEvent e) {
 				sb.terminate();
@@ -105,15 +103,12 @@ public final class yacyTray {
 	}
     
 	
-	private static void trayClickAction(){	//detect doubleclick
-		if(System.currentTimeMillis() - t1 < 500){
-			if (lockBrowserPopup) {
-				ti.displayBalloonMessage("YaCy","Please wait until YaCy is started.");
-			} else {
-				openBrowser("");
-			}
-			t1 = 0; //protecting against tripleclick
-		} else { t1 = System.currentTimeMillis(); }
+	private static void trayClickAction(){	//doubleclick
+		if (lockBrowserPopup) {
+			ti.displayBalloonMessage("YaCy","Please wait until YaCy is started.");
+		} else {
+			openBrowser("");
+		}
 	}
 	
 	private static void openBrowser(final String browserPopUpPage){
