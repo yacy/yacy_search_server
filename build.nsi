@@ -4,7 +4,6 @@
 ;(C) 2008 by David Wieditz
 
 !define JRE_VERSION6 "1.6"
-!define JRE_VERSION5 "1.5"
 !define JRE_URL "http://javadl.sun.com/webapps/download/AutoDL?BundleId=23112" ;jre-6u7-windows-i586-p.exe
 
 Name "YaCy"
@@ -145,7 +144,6 @@ FunctionEnd
 Function DetectJRE
 	ReadRegStr $2 HKLM "SOFTWARE\JavaSoft\Java Runtime Environment" "CurrentVersion"
 	StrCmp $2 ${JRE_VERSION6} doneDetectJRE
-	StrCmp $2 ${JRE_VERSION5} doneDetectJRE
 	Call GetJRE
 	doneDetectJRE:
 FunctionEnd

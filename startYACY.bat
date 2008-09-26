@@ -11,7 +11,6 @@ Rem Generating the proper classpath unsing loops and labels
 Set CLASSPATH=classes;htroot
 For %%X in (lib/*.jar) Do Call %0 CPGEN lib\%%X
 For %%X in (libx/*.jar) Do Call %0 CPGEN libx\%%X
-For %%X in (libx/windows/*.jar) Do Call %0 CPGEN libx\windows\%%X
 
 REM Please change the "javastart" settings in the web-interface "Basic Configuration" -> "Advanced" 
 set jmx=

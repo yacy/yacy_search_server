@@ -33,24 +33,15 @@ import java.awt.PopupMenu;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.io.File;
-import java.lang.reflect.Method;
 import java.lang.reflect.Constructor;
-
-import javax.swing.UIManager;
-
-//import org.jdesktop.jdic.tray.SystemTray;
-//import org.jdesktop.jdic.tray.TrayIcon;
+import java.lang.reflect.Method;
 
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverSystem;
 
 
 public final class yacyTray {
-	private static final boolean testing = true;
-	
 	private static plasmaSwitchboard sb;
 	
 	public static boolean isShown = false;
@@ -58,7 +49,7 @@ public final class yacyTray {
 	
 	private static long t1;
 
-	private static nativTrayIcon ti;
+	private static nativeTrayIcon ti;
 
 	public static void init(final plasmaSwitchboard par_sb) {
 		sb = par_sb;
@@ -67,14 +58,14 @@ public final class yacyTray {
 			if (trayIcon) {
 				System.setProperty("java.awt.headless", "false");
 
-				if(nativTrayIcon.isSupported()) {
+				if(nativeTrayIcon.isSupported()) {
 					final String iconpath = sb.getRootPath().toString() + "/addon/YaCy_TrayIcon.gif".replace("/", File.separator);
 					ActionListener al = new ActionListener() {
 						public void actionPerformed(final ActionEvent e) {
 							trayClickAction();
 						}
 					};
-					ti = new nativTrayIcon(sb, iconpath, al, setupPopupMenu());
+					ti = new nativeTrayIcon(sb, iconpath, al, setupPopupMenu());
 
 					ti.addToSystemTray();
 					isShown = true;
@@ -131,13 +122,15 @@ public final class yacyTray {
 	}
 	
 	public static void removeTray(){
+		if (isShown){
 		ti.removeFromSystemTray();
 		isShown = false;
+		}
 	}
 	
 }
 
-class nativTrayIcon {
+class nativeTrayIcon {
 	private plasmaSwitchboard sb;
 	private Object SystemTray;
 	private Object TrayIcon;
@@ -157,8 +150,8 @@ class nativTrayIcon {
 
 	}
 
-	public nativTrayIcon(final plasmaSwitchboard sb, String IconPath, ActionListener al, PopupMenu menu) {
-		if(!this.isSupported())
+	public nativeTrayIcon(final plasmaSwitchboard sb, String IconPath, ActionListener al, PopupMenu menu) {
+		if(!isSupported())
 			return;
 		this.sb = sb;
 
