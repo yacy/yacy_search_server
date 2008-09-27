@@ -20,9 +20,16 @@
     				// alert("Login");
     			}    			
 			});          
-		});		
+		});
 		
-		$("#admin").click(function() { $tabs.tabs('select',1); });
+		$("#shutdown").click(function() {
+			confirm("Shutdown YaCy-Peer?");
+			$("body").load("../../Steering.html?shutdown=");		
+		});
+		
+		$("#admin").click(function() { 
+			$tabs.tabs('select',1); 
+		});
 		
 		$("#searchtext").click(function () { 
 			$("#side2").accordion("activate", 0); 
@@ -226,19 +233,7 @@
 				<td><label for="video">Video</label></td>
 				<td><label for="appl">Applications</label></td>
 			</tr>
-		</table>
-		<!-- 
-		<br />		
-		<label for="contentdom">Content domain:</label>
-		<br />
-		<select name="contentdom" class="selector">
-			<option selected="selected" value="text">text</option>
-			<option value="image">image</option>
-			<option value="audio">audio</option>
-			<option value="video">video</option>
-			<option value="app">application</option>
-		</select>
-		-->																	
+		</table>															
 		</p>
 	</form>
 </div>
@@ -262,7 +257,7 @@
 		<img alt="Re-Start" title="Re-Start" src="img-1/Backup%20Green%20Button.png" />
 			<a href="../../Steering.html?restart=">Re-Start</a><br />
 		<img alt="Shutdown" title="Shutdown" src="img-1/Stop%20Red%20Button.png" />
-			<a href="../../Steering.html?shutdown=">Shutdown</a><br />		
+			<a id="shutdown" href="#Shutdown">Shutdown</a><br />		
 </div>
 
 

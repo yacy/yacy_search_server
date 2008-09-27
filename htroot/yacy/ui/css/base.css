@@ -58,6 +58,8 @@ div.ys {
 
 /* Sidebar */
 
+
+
 div.sidebar {     
   margin-right: 1em;
   float:left;
@@ -120,8 +122,8 @@ img.help {
 h3.linktitle {
 	margin-top:2px;	
 	margin-bottom: -0.5em;
-        font-size: 1.0em;
-        line-height: 1.2em;
+    font-size: 1.0em;
+    line-height: 1.2em;
 	color:#239AFF;
 }
 .url a {
@@ -158,8 +160,8 @@ div.searchresults.hidden {
 	margin:2px;
 	padding-left: 20px;
 	margin-bottom: -0.5em;
-        font-size: 1.0em;
-        line-height: 1.2em
+    font-size: 1.0em;
+    line-height: 1.2em
 }
 .snippet {
   	font-style:italic;
@@ -215,10 +217,13 @@ dl.pairs dt {
 	margin-bottom : 10px;
 	border: none;	
 	margin: 0px;
-	padding: 5px 10px 5px 10px;
+	padding: 5px 10px 5px 10px; /* top right bottom left */
 	border: 1px solid black;
 	text-decoration: none;	
 	font-size: 14px;
+	max-height: 220px;
+	overflow-x: hidden;
+	overflow-y: auto;
 }
 
 .basic p {
@@ -244,6 +249,18 @@ dl.pairs dt {
 .basic h3.selected {
 	
 }
+.basic h3 span.loading {
+	padding: 0px 15px 0px 10px;
+    margin-left: 5px;
+    background: url(../img/loading.gif) no-repeat 0 50%;
+}
+
+#yfolder {	
+	font-family: "Trebuchet MS", Trebuchet, Verdana, Helvetica, Arial, sans-serif;
+	font-size: 12px;
+	color: black;
+}
+
 #tagcloud {
 	text-align: justify;
 	line-height: 120%;

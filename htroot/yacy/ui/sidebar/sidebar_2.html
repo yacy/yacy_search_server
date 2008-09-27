@@ -1,21 +1,43 @@
 <script type="text/javascript"> 
    //<![CDATA[
-	$(document).ready(function() {   		
-  		
+	$(document).ready(function() {
   		/* Init Sidebar_2 */
   		$("#side2").accordion({
 			autoHeight: false,
-			fillSpace: true,			
+			clearStyle: true,					
 			header: "h3"
 		});
-		$("#side2").accordion("activate", 1);
-		
+		$("#side2").accordion("activate", 1);		
+		/* Load Folders */	
+		loadFolders();
+		/* experiemntal: only works with first folder level */
+		$("span.folder").click(function() {
+			qtag = "/"+$(this).text();				
+			if (tabid == "#Bookmarks") {
+				$tabs.tabs("load", 3);
+			} else {
+				$tabs.tabs('select',3);
+			}			
+		});						
 		/* Load TagCloud */
+		loadTagCloud();
+	});
+	function loadFolders() {
+		$("#yfolder *").remove();		
+		$("#yfolder").getTransform('xsl/xbel2folder-ul.xsl','/xml/bookmarks/xbel/xbel.xml');		
+		$("#yfolder").treeview({
+			collapsed: true,
+			unique: true			
+		});			
+	}
+	function loadTagCloud() {		
+		$("#tagcloud *").remove();
+		$("#sidebar-2-1").toggleClass("loading");
 		$.ajax({
-			type: "GET",
+			type: "POST",
 			url: "/xml/bookmarks/tags/get.xml?top=25&sort=alpha",			
 			dataType: "xml",
-			cache: false,					
+			cache: false,
 			success: function(xml) {				
 				$(xml).find('tag').each(function(){					
 					var count = $(this).attr('count');
@@ -36,19 +58,15 @@
 							}							
 						});																										
 				}); //close each(
+				$("#sidebar-2-1").toggleClass("loading");
 			}
 		}); //close $.ajax(	
-		/* Load Folders */		
-		$("#yfolder").getTransform('xsl/xbel2folder-ul.xsl','/xml/bookmarks/xbel/xbel.xml');
-		$("#yfolder").treeview({
-			collapsed: true,
-			unique: true			
-		});					
-	});	
-  //]]>
+	}	
+  //]]>  
 </script>
 
-<h3>Search Options</h3> <!-- 0 -->
+<!-- 0 -->
+<h3>Search Options</h3> 
 <div class="yform">	
 		<form id="yoptions" class="small" method="get" action="" accept-charset="UTF-8">			
 			<p>
@@ -81,13 +99,20 @@
 		</form>			
 </div>
 
-<h3>Bookmark TagCloud</h3> <!-- 1 -->
+<!-- 1 -->
+<h3 id="tagcloud-h3">Bookmark TagCloud
+	<span id="sidebar-2-1"></span>
+</h3> 
 <div class="menu">	
 	<p id="tagcloud"></p>	
-</div>	
-<h3>Bookmark Folders</h3> <!-- 2 -->
+</div>
+
+<!-- 2 -->	
+<h3>Bookmark Folders
+	<span id="sidebar-2-2"></span>
+</h3> 
 <div class="menu">
-		<ul class="filetree" id="yfolder"></ul>
+	<ul class="filetree" id="yfolder"></ul>
 </div>
 
 

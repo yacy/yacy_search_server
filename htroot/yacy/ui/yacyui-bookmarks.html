@@ -2,7 +2,7 @@
    //<![CDATA[
 	$(document).ready(function() {
 		$("#side1").accordion("activate", 0);
-		$("#side2").accordion("activate", 1);
+		// $("#side2").accordion("activate", 1);
 		// $('#yoptions').resetForm();
 		$("#bmadd").dialog({
 			autoOpen: false,
@@ -24,34 +24,15 @@
 						dataType: "xml",
 						success: function(xml) {
             				$('#bmaddform').resetForm();
-            				$("#bmadd").dialog("close");            
-            				$tabs.tabs("load", 3);
-            				$("#side2 *").remove();
-            				$("#side2").load("sidebar/sidebar_2.html");            					
+            				$("#bmadd").dialog("close");            				
+							loadFolders();
+							loadTagCloud();
+							$tabs.tabs("select", 3);
             			}
             		});	 
         		}
     		} 
 		});
-		function bm_action(com,grid) {
-			if (com=='Delete') {
-				confirm('Delete ' + $('.trSelected',grid).length + ' bookmark(s)?')				
-				$('.trSelected',grid).each(function(){
-					var url = "/xml/bookmarks/posts/delete_p.xml?login=&urlhash="+$(this).find('td :first').text();					
-					$.ajax({
-						type: 'POST',
-						url: url,			
-						dataType: 'xml',
-						success: function(xml) {
-							$tabs.tabs("load", 3);
-						}
-					}); // close $.ajax(					
-				}); //close each(
-			}
-			else if (com=='Add') {
-				$("#bmadd").dialog('open');
-			}			
-		}
 		$("#bm_url").blur(function() { 
 			var url = $("input[@name='bm_url']").getValue();
 			$.ajax({
@@ -70,10 +51,29 @@
 					$("input[@name='bm_tags']").setValue(tags);									
 				}					
 			});
-		});	
-		counter = 0;
+		});
+		function bm_action(com,grid) {
+			if (com=='Delete') {
+				confirm('Delete ' + $('.trSelected',grid).length + ' bookmark(s)?')				
+				$('.trSelected',grid).each(function(){
+					var url = "/xml/bookmarks/posts/delete_p.xml?login=&urlhash="+$(this).find('td :first').text();					
+					$.ajax({
+						type: 'POST',
+						url: url,			
+						dataType: 'xml'						
+					}); // close $.ajax(					
+				}); //close each(				
+				loadFolders();
+				loadTagCloud();
+				$tabs.tabs("load", 3);
+			}
+			else if (com=='Add') {
+				$("#bmadd").dialog('open');
+			}			
+		}
 		$.ajax({
-			type: "GET",
+			type: "POST",
+			async: true,
 			url: "/xml/bookmarks/xbel/xbel.xml?tag="+qtag,			
 			dataType: "xml",
 			success: function(xml) {
@@ -97,8 +97,7 @@
 					}				
 					$('<tr></tr')
 						.html('<td>' +hash+ '</td><td>' +icon+ '</td><td><h3 class="linktitle">' +HTMLenc(title)+ '</h3><p class="desc">' +HTMLenc(desc)+ '</p><p class="url"><a href="' +link+ '">' +link+ '</a></p><td>' +HTMLenc(tags)+ ' </td><td>' +date+ '</td>')						
-						.appendTo('#ymarks tbody');
-					counter++;
+						.appendTo('#ymarks tbody');					
 				}); //close each(
 				var height=document.documentElement.clientHeight - 205;    			
     			$('#ymarks').flexigrid({
