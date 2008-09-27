@@ -81,7 +81,7 @@ public final class yacyTray {
 	public static PopupMenu setupPopupMenu() {
 		String label;
 		// this is the popup menu
-		PopupMenu menu = new PopupMenu("YaCy");
+		PopupMenu menu = new PopupMenu();
 		MenuItem menuItem;
 		
 		// YaCy Search
@@ -95,8 +95,32 @@ public final class yacyTray {
 		});
 		menu.add(menuItem);
 		
-		// Quit
+		// Compare YaCy
+		if(deutsch) label = "Vergleichs-Suche";
+		else label = "Compare YaCy";
+		menuItem = new MenuItem(label);
+		menuItem.addActionListener(new ActionListener() {
+			public void actionPerformed(final ActionEvent e) {
+				openBrowser("compare_yacy.html");
+			}
+		});
+		menu.add(menuItem);
+		
+		// Peer Administration
+		if(deutsch) label = "Peer Administration";
+		else label = "Peer Administration";
+		menuItem = new MenuItem(label);
+		menuItem.addActionListener(new ActionListener() {
+			public void actionPerformed(final ActionEvent e) {
+				openBrowser("Status.html");
+			}
+		});
+		menu.add(menuItem);
+		
+		// Separator
 		menu.addSeparator();
+
+		// Quit
 		if(deutsch) label = "Beenden";
 		else label = "Shutdown";
 		menuItem = new MenuItem(label);
