@@ -112,13 +112,45 @@
 					$('#yoptions').trigger('update');
 				}
 			}
-		});		
-			 
+		});
+		/* Initialize Bookmark Dialog */		
+		$("#bmadd").dialog({			
+			autoOpen: false,
+			height: 400,
+			width: 250,
+			resizable: false,
+			buttons: { 
+        		OK: bookmark,
+        		Cancel: function() { $("#bmadd").dialog("close"); }
+    		} 
+		}); 
 		/* Load Sidebar */
 		$("#side1").load("sidebar/sidebar_1.html");
 		$("#side2").load("sidebar/sidebar_2.html");
 	});	
-   //]]>	
+   //]]>
+   	function bookmark() {
+		var url = $("input[@name='bm_url']").getValue();
+        var title = $("textarea[@name='bm_title']").getValue();
+        var desc = $("textarea[@name='bm_desc']").getValue();            		
+        var tags = $("input[@name='bm_tags']").getValue()
+        var path = $("input[@name='bm_path']").getValue();
+        var pub = $("select[@name='bm_public']").getValue();            		
+        var query = "&url="+url+"&title="+title+"&description="+desc+"&tags="+tags+"&path="+path+"&public="+pub+"&add=create";            		
+        $.ajax({
+			type: "POST",
+			url: "/xml/bookmarks/posts/add_p.xml?login="+query,			
+			dataType: "xml",
+			success: function(xml) {
+         		$('#bmaddform').resetForm();
+         		$("#bm_url").unbind('blur');
+         		$("#bmadd").dialog("close");		
+				loadFolders();
+				loadTagCloud();
+				$tabs.tabs("load", 3);
+   			}
+   		});	 
+	}	
   </script>  
 </head>
 
@@ -138,6 +170,39 @@
 			<li><a href="yacyui-compare.html" title="Compare Search"><span>Compare Search</span></a></li>			
 			<li><a href="yacyui-bookmarks.html" title="Bookmarks"><span>Bookmarks</span></a></li>			
 		</ul>		
+	</div>
+	<!-- Bookmarks Edit Dialog -->	
+	<div id="bmadd" class="bmdialog" title="YaCy Bookmarks">
+		<form id="bmaddform" class="small" method="get" accept-charset="UTF-8" action="">
+			<label for="url">URL:</label>
+			<br />					
+			<input type="text" name="bm_url" id="bm_url" class="filter" size="80" />
+			<br />
+			<label for="bm_title">Title:</label>
+			<br />
+			<textarea name="bm_title" id="bm_title" class="filter" rows="1" cols="20">
+			</textarea>
+			<br />
+			<label for="bm_desc">Description:</label>
+			<br />
+			<textarea name="bm_desc" id="bm_desc" class="filter" rows="3" cols="20">
+			</textarea>		
+			<br />
+			<label for="bm_path">Folder (/folder/subfolder):</label>
+			<br />
+			<input type="text" name="bm_path" id="bm_path" class="filter" size="80" />
+			<br />
+			<label for="bm_tags">Tags (comma separated):</label>
+			<br />
+			<input type="text" name="bm_tags" id="bm_tags" class="filter" size="80" />
+			<br />
+			<label for="bm_public">Public:</label>
+			<br />
+			<select name="bm_public" id="bm_public" class="selector">
+				<option value="public">yes</option>
+				<option value="private">no</option>
+			</select>
+		</form>
 	</div>		
 </body>
 </html>

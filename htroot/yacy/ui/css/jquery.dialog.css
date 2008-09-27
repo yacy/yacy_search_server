@@ -25,7 +25,7 @@
 .bmdialog.ui-dialog .ui-dialog-titlebar-close {
 	width: 16px;
 	height: 16px;
-	background: url(../img-2/cancel.png) no-repeat;
+	background: url(../img/cancel.png) no-repeat;
 	position:absolute;
 	top: 8px;
 	right: 7px;

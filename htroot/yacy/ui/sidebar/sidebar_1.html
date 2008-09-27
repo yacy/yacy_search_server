@@ -23,8 +23,9 @@
 		});
 		
 		$("#shutdown").click(function() {
-			confirm("Shutdown YaCy-Peer?");
-			$("body").load("../../Steering.html?shutdown=");		
+			if ( confirm("Shutdown YaCy-Peer?") ) {
+				$("body").load("../../Steering.html?shutdown=");
+			}		
 		});
 		
 		$("#admin").click(function() { 

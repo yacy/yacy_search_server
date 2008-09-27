@@ -87,11 +87,23 @@ img.help {
 }
 
 /* YaCy Flexigrid ---------------------------*/
-.flexigrid div.fbutton .add {
-	background: url(../img/add.png) no-repeat center left;
+.flexigrid div.fbutton .help {
+	background: url(../img-2/question_blue.png) no-repeat center left;
 }
 .flexigrid div.fbutton .delete {
-	background: url(../img/close.png) no-repeat center left;
+	background: url(../img-2/cancel.png) no-repeat center left;
+}
+.flexigrid div.fbutton .edit {
+	background: url(../img-2/pencil.png) no-repeat center left;
+}
+.flexigrid div.fbutton .import {
+	background: url(../img-2/download.png) no-repeat center left;
+}
+.flexigrid div.fbutton .rss {
+	background: url(../img-2/rss_round.png) no-repeat center left;
+}
+.flexigrid div.fbutton .xml {
+	background: url(../img-2/code.png) no-repeat center left;
 }
 .flexigrid div.fbutton .bookmark {
 	background: url(../img/bookmark.png) no-repeat center left;

@@ -41,14 +41,19 @@
 						{display: 'Date', name : 'date', width : 130, sortable : true, align: 'left'}
 					],
 					buttons: [
-						{name: 'Bookmark', bclass: 'bookmark', onpress: yaction},
 						{name: 'Crawl', bclass: 'crawl', onpress: yaction},
+						{separator: true},
+						{name: 'Bookmark', bclass: 'bookmark', onpress: yaction},
+						{separator: true},						
 						{name: 'Blacklist', bclass: 'blacklist', onpress: yaction},
+						{separator: true},
 						{name: 'Refresh', bclass: 'load', onpress: yload},
+						{name: 'RSS', bclass: 'rss', onpress: yaction},
 						{separator: true},						
 						{name: page, bclass: 'prev', onpress: yload},						
 						{name: '&nbsp;', bclass: 'next', onpress: yload},
-						{separator: true}						
+						{separator: true},
+						{name: 'Help', bclass: 'help', onpress:yaction},						
 					],										
 					striped: true,
 					nowrap: false,			 									    				

@@ -4,73 +4,7 @@
 		$("#side1").accordion("activate", 0);
 		// $("#side2").accordion("activate", 1);
 		// $('#yoptions').resetForm();
-		$("#bmadd").dialog({
-			autoOpen: false,
-			height: 375,
-			width: 250,
-			resizable: false,
-			buttons: { 
-        		"Add": function() { 
-            		var url = $("input[@name='bm_url']").getValue();
-            		var title = $("textarea[@name='bm_title']").getValue();
-            		var desc = $("textarea[@name='bm_desc']").getValue();            		
-            		var tags = $("input[@name='bm_tags']").getValue()
-            		var path = $("input[@name='bm_path']").getValue();
-            		var pub = $("select[@name='bm_public']").getValue();            		
-            		var query = "&url="+url+"&title="+title+"&description="+desc+"&tags="+tags+"&path="+path+"&public="+pub+"&add=create";            		
-            		$.ajax({
-						type: "POST",
-						url: "/xml/bookmarks/posts/add_p.xml?login="+query,			
-						dataType: "xml",
-						success: function(xml) {
-            				$('#bmaddform').resetForm();
-            				$("#bmadd").dialog("close");            				
-							loadFolders();
-							loadTagCloud();
-							$tabs.tabs("select", 3);
-            			}
-            		});	 
-        		}
-    		} 
-		});
-		$("#bm_url").blur(function() { 
-			var url = $("input[@name='bm_url']").getValue();
-			$.ajax({
-				type: "GET",
-				url: "/xml/util/getpageinfo_p.xml?url="+url,			
-				dataType: "xml",
-				success: function(xml) {
-					var title = $(xml).find('title').text();
-					$("textarea[@name='bm_title']").setValue(title);
-					var desc = $(xml).find('desc').text();					
-					$("textarea[@name='bm_desc']").setValue(desc);					
-					tags = "";
-					$(xml).find('tag').each(function(){
-						tags = tags + "," + $(this).attr('name');
-					});
-					$("input[@name='bm_tags']").setValue(tags);									
-				}					
-			});
-		});
-		function bm_action(com,grid) {
-			if (com=='Delete') {
-				confirm('Delete ' + $('.trSelected',grid).length + ' bookmark(s)?')				
-				$('.trSelected',grid).each(function(){
-					var url = "/xml/bookmarks/posts/delete_p.xml?login=&urlhash="+$(this).find('td :first').text();					
-					$.ajax({
-						type: 'POST',
-						url: url,			
-						dataType: 'xml'						
-					}); // close $.ajax(					
-				}); //close each(				
-				loadFolders();
-				loadTagCloud();
-				$tabs.tabs("load", 3);
-			}
-			else if (com=='Add') {
-				$("#bmadd").dialog('open');
-			}			
-		}
+		
 		$.ajax({
 			type: "POST",
 			async: true,
@@ -91,12 +25,12 @@
 						tags ="";
 					}					
 					if (pub == "true") {
-						icon = '<img src="img-2/world2.png" alt="public bookmark" title="public bookmark"/>'
+						icon = '<img src="img-2/world2.png" alt="public" title="public bookmark"/>'
 					} else {
-						 var icon = '<img src="img-2/lock.png" alt="private bookmark" title="private bookmark"/>'
+						 var icon = '<img src="img-2/lock.png" alt="private" title="private bookmark"/>'
 					}				
 					$('<tr></tr')
-						.html('<td>' +hash+ '</td><td>' +icon+ '</td><td><h3 class="linktitle">' +HTMLenc(title)+ '</h3><p class="desc">' +HTMLenc(desc)+ '</p><p class="url"><a href="' +link+ '">' +link+ '</a></p><td>' +HTMLenc(tags)+ ' </td><td>' +date+ '</td>')						
+						.html('<td>' +hash+ '</td><td>' +icon+ '</td><td><h3 class="linktitle">' +HTMLenc(title)+ '</h3><p class="desc">' +HTMLenc(desc)+ '</p><p class="url"><a href="' +link+ '">' +link+ '</a></p><td class="tags">' +HTMLenc(tags)+ ' </td><td class="date">' +date+ '</td>')						
 						.appendTo('#ymarks tbody');					
 				}); //close each(
 				var height=document.documentElement.clientHeight - 205;    			
@@ -109,9 +43,20 @@
 						{display: 'Date', name : 'date', width : 130, sortable : true, align: 'left'}
 					],
 					buttons: [
-						{name: 'Add', bclass: 'add', onpress: bm_action},
+						{name: 'Crawl', bclass: 'crawl', onpress: bm_action},
+						{separator: true},
+						{name: 'Bookmark', bclass: 'bookmark', onpress: bm_action},
+						{separator: true},
+						{name: 'Edit', bclass: 'edit', onpress: bm_action},
 						{name: 'Delete', bclass: 'delete', onpress: bm_action},
-						{separator: true}
+						{separator: true},
+						{name: 'RSS', bclass: 'rss', onpress: bm_action},
+						{name: 'XBEL', bclass: 'xml', onpress: bm_action},
+						{name: 'XML', bclass: 'xml', onpress: bm_action},
+						{separator: true},
+						{name: 'Import', bclass: 'import', onpress: bm_action},
+						{separator: true},
+						{name: 'Help', bclass: 'help', onpress: bm_action},
 					],										
 					striped: true,
 					nowrap: false,			 									    				
@@ -121,6 +66,67 @@
 			}
 		}); //close $.ajax(
 	});
+	function bm_action(com,grid) {
+		if (com=='XBEL') {
+			window.document.location.href = '/xml/bookmarks/xbel/xbel.xml';
+		}
+		else if (com=='RSS') {
+			window.document.location.href = '/Bookmarks.rss';
+		}
+		else if (com=='XML') {
+			window.document.location.href = '/xml/bookmarks/posts/all.xml';
+		}
+		else if (com=='Delete') {
+			confirm('Delete ' + $('.trSelected',grid).length + ' bookmark(s)?')				
+			$('.trSelected',grid).each(function(){
+				var url = "/xml/bookmarks/posts/delete_p.xml?login=&urlhash="+$(this).find('td :first').text();					
+				$.ajax({
+					type: 'POST',
+					url: url,			
+					dataType: 'xml'						
+				}); // close $.ajax(					
+			}); //close each(
+			loadFolders();
+			loadTagCloud();
+			$tabs.tabs("load", 3);	
+		}
+		else if (com=='Bookmark') {			
+			$('#bmaddform').resetForm();
+			$("#bm_url").blur(function() { 
+				var url = $("input[@name='bm_url']").getValue();
+				$.ajax({
+					type: "GET",
+					url: "/xml/util/getpageinfo_p.xml?url="+url,			
+					dataType: "xml",
+					success: function(xml) {
+						var title = $(xml).find('title').text();
+						$("textarea[@name='bm_title']").setValue(title);
+						var desc = $(xml).find('desc').text();					
+						$("textarea[@name='bm_desc']").setValue(desc);					
+						tags = "";
+						$(xml).find('tag').each(function(){
+							tags = tags + "," + $(this).attr('name');
+						});
+						$("input[@name='bm_tags']").setValue(tags);									
+					}					
+				});
+			});						
+			$("#bmadd").dialog('open');
+		} 
+		else if (com=='Edit') {
+			if ($('.trSelected',grid).length > 1) {
+				alert("Edit of more than one selected bookmark is currently not supportet!");
+				return false;
+			}
+			$("input[@name='bm_url']").setValue($('.trSelected',grid).find('.url').text());
+            $("textarea[@name='bm_title']").setValue($('.trSelected',grid).find('h3.linktitle').text().replace(/^\s+/g,""));
+            $("textarea[@name='bm_desc']").setValue($('.trSelected',grid).find('p.desc').text().replace(/^\s+/g,""));            		
+            $("input[@name='bm_tags']").setValue($('.trSelected',grid).find('td.tags').text());            
+            // $("input[@name='bm_path']").setValue($('.trSelected',grid).find('.path').text());
+            $("select[@name='bm_public']").setValue($('.trSelected',grid).find('img').attr('alt'));
+            $("#bmadd").dialog('open'); 
+		}		
+	}
   //]]>
 </script>
 
@@ -129,39 +135,7 @@
 	<tbody>		
 	</tbody>
 </table>
-<!-- Display Bookmarks Edit Dialog -->	
-<div id="bmadd" class="bmdialog" title="Add bookmark">
-	<form id="bmaddform" class="small" method="get" accept-charset="UTF-8" action="">
-		<label for="url">URL:</label>
-		<br />					
-		<input type="text" name="bm_url" id="bm_url" class="filter" size="80" />
-		<br />
-		<label for="bm_title">Title:</label>
-		<br />
-		<textarea name="bm_title" id="bm_title" class="filter" rows="1" cols="20">
-		</textarea>
-		<br />
-		<label for="bm_desc">Description:</label>
-		<br />
-		<textarea name="bm_desc" id="bm_desc" class="filter" rows="3" cols="20">
-		</textarea>		
-		<br />
-		<label for="bm_path">Folder (/folder/subfolder):</label>
-		<br />
-		<input type="text" name="bm_path" id="bm_path" class="filter" size="80" />
-		<br />
-		<label for="bm_tags">Tags (comma separated):</label>
-		<br />
-		<input type="text" name="bm_tags" id="bm_tags" class="filter" size="80" />
-		<br />
-		<label for="bm_public">Public:</label>
-		<br />
-		<select name="bm_public" id="bm_public" class="selector">
-			<option value="public" selected="selected">yes</option>
-			<option value="private">no</option>
-		</select>
-	</form>
-</div>
+
 
 
 
