@@ -1554,6 +1554,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             document = parseDocument(in.queueEntry);
         } catch (final InterruptedException e) {
             document = null;
+        } catch (final Exception e) {
+            document = null;
         }
         if (document == null) {
             in.queueEntry.close();

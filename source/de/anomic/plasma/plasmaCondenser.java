@@ -139,7 +139,7 @@ public final class plasmaCondenser {
             // phrase   4 is the Document Author
             // phrase   5 are the tags specified in document
             // phrase  10 and above are the section headlines/titles (88 possible)
-            // phrase  98 is taken from the embedded anchor/hyperlinks description
+            // phrase  98 is taken from the embedded anchor/hyperlinks description (REMOVED!)
             // phrase  99 is taken from the media Link url and anchor description
             // phrase 100 and above are lines from the text
       
@@ -153,12 +153,19 @@ public final class plasmaCondenser {
             }
             
             // anchors: for text indexing we add only the anchor description
+            // REMOVED! Reason:
+            // words from the anchor description should appear as normal text in the output from the parser
+            // to flag these words as appearance in dc_description would confuse, since the user expects such word as titles of
+            // pages that are shown in the search result. The words from the URLS should also not appear as part of the index, because they
+            // are not visible in the text and could be used to crate fake-content
+            /*
             final Iterator<Map.Entry<yacyURL, String>> i = document.getAnchors().entrySet().iterator();
             while (i.hasNext()) {
                 entry = i.next();
                 if ((entry == null) || (entry.getKey() == null)) continue;
                 insertTextToWords(entry.getValue(), 98, indexRWIEntry.flag_app_dc_description, RESULT_FLAGS, true);
             }
+            */
         } else {
             this.RESULT_NUMB_WORDS = 0;
             this.RESULT_DIFF_WORDS = 0;
