@@ -162,7 +162,6 @@ import de.anomic.server.serverProcessorJob;
 import de.anomic.server.serverProfiling;
 import de.anomic.server.serverSemaphore;
 import de.anomic.server.serverSwitch;
-import de.anomic.server.serverSystem;
 import de.anomic.server.serverThread;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.crypt;
@@ -184,7 +183,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     private int       dhtTransferIndexCount = 100;    
     public static long lastPPMUpdate = System.currentTimeMillis()- 30000;
 
-    // couloured list management
+    // colored list management
     public static TreeSet<String> badwords = null;
     public static TreeSet<String> blueList = null;
     public static TreeSet<String> stopwords = null;    
@@ -702,6 +701,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         acceptGlobalURLs = "global.any".indexOf(getConfig("network.unit.domain", "global")) >= 0;
         acceptLocalURLs = "local.any".indexOf(getConfig("network.unit.domain", "global")) >= 0;
         
+        /*
         // in intranet and portal network set robinson mode
         if (networkUnitDefinition.equals("defaults/yacy.network.webportal.unit") ||
             networkUnitDefinition.equals("defaults/yacy.network.intranet.unit")) {
@@ -718,7 +718,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             setConfig(plasmaSwitchboardConstants.INDEX_DIST_ALLOW, true);
             setConfig(plasmaSwitchboardConstants.INDEX_RECEIVE_ALLOW, true);
         }
-        
+        */
     }
     
     public void switchNetwork(final String networkDefinition) {

@@ -253,7 +253,7 @@ public class plasmaGrafics {
         //System.out.println("Seed " + seed.hash + " has distance " + seed.dhtDistance() + ", angle = " + angle);
         int linelength = 20 + outerradius * (20 * (name.length() - shortestName) / (longestName - shortestName) + Math.abs(seed.hash.hashCode() % 20)) / 60;
         if (linelength > outerradius) linelength = outerradius;
-        int dotsize = 6 + 2 * (int) (seed.getLinkCount() / 500000L);
+        int dotsize = 5 + (int) (seed.getLinkCount() / 1000000L);
         if (dotsize > 18) dotsize = 18;
         // draw dot
         img.setColor(colorDot);
@@ -266,16 +266,16 @@ public class plasmaGrafics {
         ymageToolPrint.arcPrint(img, x, y, innerradius + linelength, angle, name);
 
         // draw corona around dot for crawling activity
-        int ppm10 = seed.getPPM() / 10;
-        if ((corona) && (ppm10 > 0)) {
-            if (ppm10 > 3) ppm10 = 3;
+        int ppm20 = seed.getPPM() / 20;
+        if ((corona) && (ppm20 > 0)) {
+            if (ppm20 > 3) ppm20 = 3;
             // draw a wave around crawling peers
             long strength;
             img.setColor("303030");
             img.arcArc(x, y, innerradius, angle, dotsize + 1, dotsize + 1, 0, 360);
             final int waveradius = innerradius / 2;
             for (int r = 0; r < waveradius; r++) {
-                strength = (waveradius - r) * (long) (0x08 * ppm10 * (1.0 + Math.sin(Math.PI * 16 * r / waveradius))) / waveradius;
+                strength = (waveradius - r) * (long) (0x08 * ppm20 * (1.0 + Math.sin(Math.PI * 16 * r / waveradius))) / waveradius;
                 //System.out.println("r = " + r + ", Strength = " + strength);
                 img.setColor((strength << 16) | (strength << 8) | strength);
                 img.arcArc(x, y, innerradius, angle, dotsize + r, dotsize + r, 0, 360);

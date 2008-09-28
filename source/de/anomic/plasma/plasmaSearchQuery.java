@@ -231,7 +231,7 @@ public final class plasmaSearchQuery {
     	return kelondroMSetTools.anymatch(wordhashes, keyhashes);
     }
     
-    private static String seps = "'.,/&-_"; static {seps += '"';}
+    private static String seps = "'.,/&_"; static {seps += '"';}
     
     @SuppressWarnings("unchecked")
     public static TreeSet<String>[] cleanQuery(String querystring) {

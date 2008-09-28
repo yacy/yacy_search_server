@@ -277,7 +277,7 @@ public class FTPLoader {
         } else {
             // if the response has not the right file type then reject file
             log.logInfo("REJECTED WRONG MIME/EXT TYPE " + mimeType + " for URL " + entry.url().toString());
-            sb.crawlQueues.errorURL.newEntry(entry, null, new Date(), 1, ErrorURL.DENIED_WRONG_MIMETYPE_OR_EXT);
+            sb.crawlQueues.errorURL.newEntry(entry, this.sb.webIndex.seedDB.mySeed().hash, new Date(), 1, ErrorURL.DENIED_WRONG_MIMETYPE_OR_EXT);
             throw new Exception("response has not the right file type -> rejected");
         }
         return htCache;
