@@ -290,7 +290,7 @@ div.bookmark {
 
 div.searchresults {
   padding-top:1em;
-  margin-bottom:1em;
+  width:85%;
 }
 
 div.searchresults.hidden {
@@ -362,7 +362,6 @@ div.searchresults p{
 
 form.search.small p.yacylogo { /* The logo in yacysearch.html */
   display:block;
-  float:left;
   padding:0;
   margin: 0 5px 5px;
 }
@@ -409,7 +408,10 @@ div.sidebar { /* sidebars on the right side */
 
 form.search.small h2 {
   clear:none;
-  margin-left:85px;
+  font-size: 1.2em;
+  margin-left:0px;
+  margin-top:0px;
+  /*border-bottom:1px solid;*/
 }
 
 li.menugroup h3{
@@ -635,8 +637,8 @@ form.PeerControl fieldset { /* on Status.html */
 }
 
 form.search.small fieldset {
-    clear:left;
     margin-left:100px;
+    width:80%;
 }
 
 form.search.small fieldset * {

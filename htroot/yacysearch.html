@@ -45,12 +45,12 @@
     </form>
     ::
     <form class="search small" action="yacysearch.html" method="get" accept-charset="UTF-8">
-      <p class="yacylogo"><a href="#[promoteSearchPageGreeting.homepage]#" class="yacylogo"><img src="#[promoteSearchPageGreeting.smallImage]#" alt="yacy" /></a></p>
       <h2>#[promoteSearchPageGreeting]#</h2>
+      <div class="yacylogo"><a href="#[promoteSearchPageGreeting.homepage]#" class="yacylogo"><img src="#[promoteSearchPageGreeting.smallImage]#" alt="yacy" align="left"/></a></div>
       <fieldset class="yacys">
               <input id="search" name="query" type="text" size="50" maxlength="80" value="#[former]#" onclick="document.getElementById('Enter').value = 'Search'" />
-              <input id="Enter" type="submit" name="Enter" value="Search" /> &nbsp;
-              <a href="index.html?display=#[display]#&amp;input=#[input]#&amp;searchoptions=1&amp;count=#[count]#&amp;resource=#[resource]#&amp;time=#[time]#&amp;urlmaskfilter=#[urlmaskfilter]#&amp;prefermaskfilter=#[prefermaskfilter]#&amp;cat=#[cat]#&amp;constraint=#[constraint]#&amp;contentdom=#[contentdom]#&amp;former=#[former]#">more options</a>
+              <input id="Enter" type="submit" name="Enter" value="Search" />
+              
           <div class="yacysearch">
               <input type="radio" id="text" name="contentdom" value="text"#(contentdomCheckText)#:: checked="checked"#(/contentdomCheckText)# />
               <label for="text">Text</label>&nbsp;&nbsp;
@@ -62,6 +62,8 @@
               <label for="video">Video</label>&nbsp;&nbsp;
               <input type="radio" id="appl" name="contentdom" value="app"#(contentdomCheckApp)#:: checked="checked"#(/contentdomCheckApp)# />
               <label for="appl">Applications</label>
+               &nbsp;
+              <a href="index.html?display=#[display]#&amp;input=#[input]#&amp;searchoptions=1&amp;count=#[count]#&amp;resource=#[resource]#&amp;time=#[time]#&amp;urlmaskfilter=#[urlmaskfilter]#&amp;prefermaskfilter=#[prefermaskfilter]#&amp;cat=#[cat]#&amp;constraint=#[constraint]#&amp;contentdom=#[contentdom]#&amp;former=#[former]#">more options</a>
            </div>
         <input type="hidden" name="former" value="#[former]#" />
         <input type="hidden" name="maximumRecords" value="#[count]#" />
@@ -82,7 +84,7 @@
 #(searchagain)#
 ::
 <script type="text/javascript">
-document.getElementById("Enter").value = "search again - catch up more links";
+document.getElementById("Enter").value = "search again";
 </script>
 #(/searchagain)#
 
