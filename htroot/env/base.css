@@ -363,10 +363,14 @@ div.searchresults p{
   padding-left: 20px;
 }
 
-form.search.small p.yacylogo { /* The logo in yacysearch.html */
+form.search.small div.yacylogo { /* The logo in yacysearch.html */
   display:block;
   padding:0;
   margin: 0 5px 5px;
+}
+
+div.yacylogo {
+	float:left;
 }
 
 
@@ -605,6 +609,7 @@ form.search {
 }
 form.search.small {
   text-align:left;
+  margin-bottom:5px;
 }
 
 /*----------
@@ -639,10 +644,8 @@ form.PeerControl fieldset { /* on Status.html */
 }
 
 form.search.small fieldset {
-	float: left;
 	margin:0px;
-	margin-left:12px;
-	margin-bottom:5px;
+	white-space:nowrap;
 }
 
 form.search.small fieldset * {
