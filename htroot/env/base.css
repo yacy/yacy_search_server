@@ -394,16 +394,15 @@ h2.yacy { /* The heading in index.html */
 div.welcome { /* The heading in Status.html */
   clear:left;
   float:left;
-  margin:10px 0;
-  padding-top:130px;
+  margin:-10px 0;
+  padding-top:0px;
   text-align:left;
-  width:65%;
-  background:url(/env/grafics/kaskelix.png) top center no-repeat;
+  width:680px;
 }
 
 div.sidebar { /* sidebars on the right side */
   float:left;
-  width:35%;
+  width:120px;
   margin:10px 0;
   padding-top:10px;
   text-align:left;

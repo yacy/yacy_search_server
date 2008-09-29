@@ -12,13 +12,18 @@
           }
         }
       }
+      function reloadGraph() {
+	    document.images["graph"].src="PerformanceGraph.png?time="+(new Date()).getTime();
+	    window.status="";
+	  }
       function init() {
         loaderBanner = window.setInterval("loadBanner()", 20000);
+        window.setInterval("reloadGraph()", 5000);
       }
     </script>
   </head>
   <body onload="init();">
-    #%env/templates/header.template%#
+	#%env/templates/header.template%#
     #%env/templates/submenuConfig.template%#
     
     #(showPrivateTable)#
@@ -36,10 +41,11 @@
     
     <div class="welcome">
     <center>
-      <h2>Welcome to YaCy!</h2>
-      <iframe src="rssTerminal.html?set=PEERNEWS,REMOTESEARCH,LOCALSEARCH,REMOTEINDEXING,LOCALINDEXING,INDEXRECEIVE&width=468px&height=200px&maxlines=17&maxwidth=95"
-              width="468" height="200" scrolling="no" name="newsframe"
-              marginheight="0" marginwidth="0" frameborder="0"></iframe><br />
+      <h2><img src="/env/grafics/kaskelix.png" align="bottom">Welcome to YaCy!</h2>
+      <iframe src="rssTerminal.html?set=PEERNEWS,REMOTESEARCH,LOCALSEARCH,REMOTEINDEXING,LOCALINDEXING,INDEXRECEIVE&width=600px&height=180px&maxlines=16&maxwidth=120"
+              width="600" height="180" scrolling="no" name="newsframe"
+              marginheight="0" marginwidth="0" frameborder="1"></iframe><br />
+      <img src="PerformanceGraph.png" name="graph" alt="PerformanceGraph"/><br />
       <img src="Banner.png?textcolor=000000&amp;bgcolor=ddeeee&amp;bordercolor=aaaaaa" alt="banner" />
     </center>
 
