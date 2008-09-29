@@ -55,7 +55,7 @@ public final class yacyTray {
 		sb = par_sb;
 		try {
 			final boolean trayIcon = sb.getConfigBool("trayIcon", false);
-			if (trayIcon) {
+			if (trayIcon && serverSystem.isWindows) {
 				System.setProperty("java.awt.headless", "false");
 
 				if(nativeTrayIcon.isSupported()) {

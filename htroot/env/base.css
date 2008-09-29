@@ -249,6 +249,10 @@ div.ProgressBarFill {
 	height:100%; /*not valid value for Netscape 8*/
 }
 
+#results {
+clear:both;
+}
+
 #resCounter {
 	/* left part of the progress bar */
 	position: absolute;
@@ -257,7 +261,7 @@ div.ProgressBarFill {
 
 #resProgBar {
 	height: 1.5em;
-	margin: 1em auto;
+	/* margin: 1em auto; */
 	position: relative; /* for "relative" absolute pos of children */
 	text-align: left;
 	width: 100%;
@@ -359,12 +363,12 @@ div.searchresults p{
   padding-left: 20px;
 }
 
-
 form.search.small p.yacylogo { /* The logo in yacysearch.html */
   display:block;
   padding:0;
   margin: 0 5px 5px;
 }
+
 
 /*----------
 <h1>, <h2>, <h3>, <h4>, <h5>
@@ -378,7 +382,6 @@ div.head h1 {
   text-align: center;
   margin:0;
 }
-
 
 h2.yacy { /* The heading in index.html */
   margin:10px auto;
@@ -408,10 +411,10 @@ div.sidebar { /* sidebars on the right side */
 
 form.search.small h2 {
   clear:none;
-  font-size: 1.2em;
-  margin-left:0px;
-  margin-top:0px;
-  /*border-bottom:1px solid;*/
+  /*font-size: 1.2em;*/
+  margin:0px;
+  margin-bottom:5px;
+  border-bottom:1px solid #CAD5E3;
 }
 
 li.menugroup h3{
@@ -637,8 +640,10 @@ form.PeerControl fieldset { /* on Status.html */
 }
 
 form.search.small fieldset {
-    margin-left:100px;
-    width:80%;
+	float: left;
+	margin:0px;
+	margin-left:12px;
+	margin-bottom:5px;
 }
 
 form.search.small fieldset * {
