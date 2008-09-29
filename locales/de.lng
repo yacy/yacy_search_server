@@ -236,6 +236,19 @@ Private Queue==Privater Puffer
 Public Queue==&Ouml;ffentlicher Puffer
 #-----------------------------
 
+
+#File: compare_yacy.html
+#---------------------------
+Websearch Comparison==Vergleichs-Suche
+Left Search Engine==linke Suchmaschine
+Right Search Engine==rechte Suchmaschine
+Query==Suchwort
+"Compare"=="Vergleiche"
+Search Result==Suchergebnis
+#---------------------------
+
+
+
 #File: ConfigAppearance_p.html
 #---------------------------
 Appearance and Integration==Erscheinungsbild und Integration
@@ -2375,7 +2388,7 @@ alt text==alt Beschreibung
 Search Page==Suchseite
 "Search"=="Suchen"
 'Search'=='Suchen'
-"search again - catch up more links"=="Erneut suchen - mehr Links sammeln" 
+"search again"=="Erneut suchen" 
 more options==Mehr Optionen
 #Text==Text
 Images==Bilder
@@ -2662,6 +2675,7 @@ PLEASE REPLACE THIS PAGE BY PUTTING A FILE index.html INTO THE PATH==BITTE ERSET
 "Classic Search"=="Klassische Suche"
 >Classic Search==>Klassische Suche
 "Admin Console"=="Admin Konsole"
+Compare Search==Vergleichs-Suche
 >Admin Console==>Admin Konsole
 "Bookmarks"=="Lesezeichen"
 >Bookmarks==>Lesezeichen				
@@ -2673,15 +2687,19 @@ YaCy P2P Websearch==YaCy P2P Websuche
 YaCy Project==YaCy Projekt
 YaCy Peer Admin==YaCy Peer Administration
 "Search"=="Suchen"
->text==>Text
->image==>Bilder
->audio==>Audio
->video==>Video
->application==>Anwendungen
+>Text==>Text
+>Images==>Bilder
+>Audio==>Audio
+>Video==>Video
+>Application==>Anwendungen
+Search term:==Suchbegriff:
+"help"=="Hilfe"
+Resource/Network:==Ressource/Netzwerk:
 freeworld==freeworld
 local peer==lokaler Peer
 bookmarks==Lesezeichen
 sciencenet==ScienceNet
+>Language:==>Sprache:
 >Admin Console==>Admin Konsole
 >Re-Start==>Neustart
 >Shutdown==>Herunterfahren
@@ -2690,7 +2708,16 @@ sciencenet==ScienceNet
 #File: yacy/ui/sidebar/sidebar_2.html
 #-----------------------------
 Search Options==Suchoptionen
+Items per page:==Ergebnisse pro Seite:
+Constraint:==Einschr&auml;nkungen:
+all pages==alle Seiten
+index pages==Index Seiten
+URL mask:==URL Filter:
+Prefer mask:==Vorzugsmaske:
 Bookmark TagCloud==Lesezeichen TagWolke
+Bookmark Folders==Lesezeichen Ordner
+alt="help"==alt="Hilfe"
+title="help"==title=="Hilfe"
 #-----------------------------
 
 #File: yacy/ui/yacyui-bookmarks.html
@@ -2703,5 +2730,4 @@ Bookmark TagCloud==Lesezeichen TagWolke
 >Title==>Titel
 >Tags==>Tags
 >Date==>Datum
-Edit Bookmark==Lesezeichen bearbeiten
 #-----------------------------
