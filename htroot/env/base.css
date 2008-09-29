@@ -394,7 +394,7 @@ h2.yacy { /* The heading in index.html */
 div.welcome { /* The heading in Status.html */
   clear:left;
   float:left;
-  margin:-10px 0;
+  margin: 0;
   padding-top:0px;
   text-align:left;
   width:680px;
