@@ -134,10 +134,10 @@ Function GetJRE
 		StrCmp $R0 "success" +3
 		MessageBox MB_OK "Download failed: $R0"
 		Return
-	StrCmp $0 "Admin" +4
+	StrCmp $0 "Admin" +3
 		CreateShortCut "$DESKTOP\Install Java for YaCy.lnk" "$2"
 		Return ; don't delete if not admin
-	ExecWait $2
+	ExecWait "$2 /s"
 	Delete $2
 FunctionEnd
 
