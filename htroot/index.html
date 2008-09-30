@@ -28,12 +28,13 @@
         <input type="submit" name="Enter" value="Search" />
         <input type="hidden" name="former" value="#[former]#" />
         <input type="hidden" name="verify" value="true" />
-        <br />
-        <input type="radio" id="text" name="contentdom" value="text" #(contentdomCheckText)#::checked="checked"#(/contentdomCheckText)# /><label for="text">Text</label>&nbsp;&nbsp;
-        <input type="radio" id="image" name="contentdom" value="image" #(contentdomCheckImage)#::checked="checked"#(/contentdomCheckImage)# /><label for="image">Images</label>&nbsp;&nbsp;
-        <input type="radio" id="audio" name="contentdom" value="audio" #(contentdomCheckAudio)#::checked="checked"#(/contentdomCheckAudio)# /><label for="audio">Audio</label>&nbsp;&nbsp;
-        <input type="radio" id="video" name="contentdom" value="video" #(contentdomCheckVideo)#::checked="checked"#(/contentdomCheckVideo)# /><label for="video">Video</label>&nbsp;&nbsp;
-        <input type="radio" id="app" name="contentdom" value="app" #(contentdomCheckApp)#::checked="checked"#(/contentdomCheckApp)# /><label for="app">Applications</label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <div class="yacysearch">
+	        <input type="radio" id="text" name="contentdom" value="text" #(contentdomCheckText)#::checked="checked"#(/contentdomCheckText)# /><label for="text">Text</label>&nbsp;&nbsp;
+	        <input type="radio" id="image" name="contentdom" value="image" #(contentdomCheckImage)#::checked="checked"#(/contentdomCheckImage)# /><label for="image">Images</label>&nbsp;&nbsp;
+	        <input type="radio" id="audio" name="contentdom" value="audio" #(contentdomCheckAudio)#::checked="checked"#(/contentdomCheckAudio)# /><label for="audio">Audio</label>&nbsp;&nbsp;
+	        <input type="radio" id="video" name="contentdom" value="video" #(contentdomCheckVideo)#::checked="checked"#(/contentdomCheckVideo)# /><label for="video">Video</label>&nbsp;&nbsp;
+	        <input type="radio" id="app" name="contentdom" value="app" #(contentdomCheckApp)#::checked="checked"#(/contentdomCheckApp)# /><label for="app">Applications</label>
+        </div>
       #(searchoptions)#
         <input type="hidden" name="maximumRecords" value="10" />
         <input type="hidden" name="startRecord" value="0" />

@@ -316,8 +316,6 @@ div.content {
 div.yacysearch {
   margin-top: .8em;
   display:block;
-  position:relative;
-  /*left:-60px;*/
 }
 
 div.urlactions {
