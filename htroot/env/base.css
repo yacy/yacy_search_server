@@ -255,8 +255,7 @@ clear:both;
 
 #resCounter {
 	/* left part of the progress bar */
-	position: absolute;
-	left: 1em;
+	float:left;
 }
 
 #resProgBar {
@@ -270,8 +269,7 @@ clear:both;
 
 #resNav {
 	/* right part of the progress bar */
-	position: absolute;
-	right: 1em;
+	float:right;
 }
 
 #resProgFill {
@@ -364,9 +362,9 @@ div.searchresults p{
 }
 
 form.search.small div.yacylogo { /* The logo in yacysearch.html */
-  display:block;
+  display:inline;
   padding:0;
-  margin: 0 5px 5px;
+  margin: 5px;
 }
 
 div.yacylogo {
@@ -610,6 +608,7 @@ form.search {
 form.search.small {
   text-align:left;
   margin-bottom:5px;
+  white-space:nowrap;
 }
 
 /*----------
@@ -644,6 +643,7 @@ form.PeerControl fieldset { /* on Status.html */
 }
 
 form.search.small fieldset {
+	display:inline;
 	margin:0px;
 	white-space:nowrap;
 }
