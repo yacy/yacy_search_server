@@ -642,15 +642,19 @@ form.PeerControl fieldset { /* on Status.html */
 	text-align:right;
 }
 
-form.search.small fieldset {
+form.search fieldset {
 	display:inline;
-	margin:0px;
 	white-space:nowrap;
+}
+
+form.search.small fieldset {
+	margin:0px;
 }
 
 form.search.small fieldset * {
   margin-left:0;
 }
+
 /*----------
 <img>
 */
