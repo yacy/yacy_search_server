@@ -215,6 +215,7 @@ public class yacysearch {
                 String agent = header.get("User-Agent");
                 if (agent == null) agent = System.getProperty("user.language");
                 language = (agent == null) ? "en" : iso639.userAgentLanguageDetection(agent);
+                if (language == null) language = "en";
             }
             
             int maxDistance = (querystring.indexOf('"') >= 0) ? maxDistance = query.length - 1 : Integer.MAX_VALUE;
