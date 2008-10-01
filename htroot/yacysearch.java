@@ -212,7 +212,7 @@ public class yacysearch {
             if (language.startsWith("lang_")) language = language.substring(5);
             if (!iso639.exists(language)) {
                 // find out language of the user by reading of the user-agent string
-                String agent = header.get("User-Agent");
+                String agent = header.get(httpRequestHeader.ACCEPT_LANGUAGE);
                 if (agent == null) agent = System.getProperty("user.language");
                 language = (agent == null) ? "en" : iso639.userAgentLanguageDetection(agent);
                 if (language == null) language = "en";

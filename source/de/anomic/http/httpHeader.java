@@ -76,6 +76,12 @@ public class httpHeader extends TreeMap<String, String> implements Map<String, S
     // TODO: sort these header properties into request and response properties (some are both)
     public static final String HOST = "Host";
     public static final String USER_AGENT = "User-Agent";
+    
+    public static final String ACCEPT = "Accept";
+    public static final String ACCEPT_LANGUAGE = "Accept-Language";
+    public static final String ACCEPT_ENCODING = "Accept-Encoding";
+    public static final String ACCEPT_CHARSET = "Accept-Charset";
+    
 
     public static final String CONTENT_LENGTH = "Content-Length";
     public static final String CONTENT_TYPE = "Content-Type";

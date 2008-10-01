@@ -202,6 +202,7 @@ public class iso639 {
     public static final String userAgentLanguageDetection(String userAgent) {
         if (userAgent == null || userAgent.length() < 2) return null;
         userAgent = userAgent.toLowerCase();
+        if (mapping.containsKey(userAgent.substring(0, 2))) return userAgent.substring(0, 2);
         if (userAgent.length() == 2 && mapping.containsKey(userAgent)) return userAgent;
         if (userAgent.length() == 5 && mapping.containsKey(userAgent.substring(0, 2))) return userAgent.substring(0, 2);
         int p = 2;
