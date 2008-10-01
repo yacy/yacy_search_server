@@ -137,6 +137,7 @@ public final class plasmaSearchQuery {
 		this.linesPerPage = Math.min((specialRights) ? 1000 : 10, lines);
 		this.offset = Math.min((specialRights) ? 10000 : 100, offset);
 		this.urlMask = urlMask;
+		assert language != null;
         this.targetlang = language;
         this.domType = domType;
         this.zonecode = domainzone;

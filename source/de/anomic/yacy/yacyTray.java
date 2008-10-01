@@ -65,7 +65,7 @@ public final class yacyTray {
 							trayClickAction();
 						}
 					};
-					ti = new nativeTrayIcon(sb, iconpath, al, setupPopupMenu());
+					ti = new nativeTrayIcon(iconpath, al, setupPopupMenu());
 
 					ti.addToSystemTray();
 					isShown = true;
@@ -160,7 +160,6 @@ public final class yacyTray {
 }
 
 class nativeTrayIcon {
-	private plasmaSwitchboard sb;
 	private Object SystemTray;
 	private Object TrayIcon;
 	private Class<?> SystemTrayClass;
@@ -179,10 +178,9 @@ class nativeTrayIcon {
 
 	}
 
-	public nativeTrayIcon(final plasmaSwitchboard sb, String IconPath, ActionListener al, PopupMenu menu) {
-		if(!isSupported())
-			return;
-		this.sb = sb;
+	@SuppressWarnings("unchecked")
+    public nativeTrayIcon(String IconPath, ActionListener al, PopupMenu menu) {
+		if(!isSupported()) return;
 
 		final Image i = Toolkit.getDefaultToolkit().getImage(IconPath);
 		
@@ -232,7 +230,8 @@ class nativeTrayIcon {
 		}
 	}
 
-	public void addToSystemTray() {
+	@SuppressWarnings("unchecked")
+    public void addToSystemTray() {
 		try {
 			// with reflections: this.SystemTray.add(this.TrayIcon)
 			Class partypes1[] = new Class[1];
@@ -247,7 +246,8 @@ class nativeTrayIcon {
 		}
 	}
 
-	public void removeFromSystemTray() {
+	@SuppressWarnings("unchecked")
+    public void removeFromSystemTray() {
 		try {
 			// with reflections: this.SystemTray.remove(this.TrayIcon)
 			Class partypes1[] = new Class[1];
@@ -262,7 +262,8 @@ class nativeTrayIcon {
 		}
 	}
 
-	public void displayBalloonMessage(final String title, final String message) {
+	@SuppressWarnings("unchecked")
+    public void displayBalloonMessage(final String title, final String message) {
 		try {
 			// with reflections: this.TrayIcon.displayBalloonMessage(title, message, TrayIcon.MessageType.NONE)
 			Class partypes1[] = new Class[3];

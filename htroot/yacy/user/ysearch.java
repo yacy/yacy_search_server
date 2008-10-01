@@ -138,6 +138,7 @@ public class ysearch {
         String agent = header.get("User-Agent");
         if (agent == null) agent = System.getProperty("user.language");
         String language = (agent == null) ? "en" : iso639.userAgentLanguageDetection(agent);
+        if (language == null) language = "en";
         
         // SEARCH
         //final boolean indexDistributeGranted = sb.getConfig(plasmaSwitchboard.INDEX_DIST_ALLOW, "true").equals("true");

@@ -295,6 +295,7 @@ public class yacySearch extends Thread {
         //if (wordIndex.seedDB.mySeed() == null || wordIndex.seedDB.mySeed().getPublicAddress() == null) { return null; }
 
         // prepare seed targets and threads
+        assert language != null;
         final yacySeed[] targetPeers = (clusterselection == null) ? selectSearchTargets(wordIndex.seedDB, wordIndex.peerActions, plasmaSearchQuery.hashes2Set(wordhashes), targets) : selectClusterPeers(wordIndex.seedDB, clusterselection);
         if (targetPeers == null) return new yacySearch[0];
         targets = targetPeers.length;

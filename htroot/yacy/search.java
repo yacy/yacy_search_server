@@ -93,6 +93,7 @@ public final class search {
             String agent = header.get("User-Agent");
             if (agent == null) agent = System.getProperty("user.language");
             language = (agent == null) ? "en" : iso639.userAgentLanguageDetection(agent);
+            if (language == null) language = "en";
         }
         final int     partitions = post.getInt("partitions", 30);
         String  profile = post.get("profile", ""); // remote profile hand-over
