@@ -812,7 +812,7 @@ externalRedirector=
 
 svnRevision=0
 
-currentSkin=
+currentSkin=default
 
 # temporary flag for new database structure. set only true for testing
 # ALL DATA THAT IS CREATED WITH THIS FLAG ON WILL BE VOID IN A FINAL VERSION

@@ -155,6 +155,10 @@ div.ProgressBarFill {
 
 /* Searchresults */
 
+form.search.small h2 {
+  border-bottom:1px solid #CAD5E3;
+}
+
 .searchresults {
   /*border-top:1px #000 dashed;*/
 }
@@ -229,10 +233,10 @@ fieldset {
   border:1px solid #aaa;
 }
 
-input, select, textarea, button {
+/* input, select, textarea, button {
   color: black;
   background-color: white;
-}
+} */
 
 legend {
   background-color:#88aaaa;
