@@ -464,6 +464,11 @@ a.MenuItemLink{
   margin-bottom:1px;
   padding:1px 10px 1px 15px;
   font-size:0.9em;
+  white-space:nowrap;
+}
+
+li.menugroup a {
+	white-space:normal;
 }
 
 a.MenuItemLink.lock{
