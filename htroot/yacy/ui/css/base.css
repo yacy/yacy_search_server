@@ -87,6 +87,9 @@ img.help {
 }
 
 /* YaCy Flexigrid ---------------------------*/
+.flexigrid div.fbutton .pictures {
+	background: url(../img-2/pictures.png) no-repeat center left;
+}
 .flexigrid div.fbutton .help {
 	background: url(../img-2/question_blue.png) no-repeat center left;
 }

@@ -42,6 +42,7 @@
 					],
 					buttons: [
 						{name: 'Crawl', bclass: 'crawl', onpress: yaction},
+						{name: 'Open', bclass: 'pictures', onpress: yaction},
 						{separator: true},
 						{name: 'Bookmark', bclass: 'bookmark', onpress: yaction},
 						{separator: true},						
@@ -91,6 +92,11 @@
             			}
 					});
             	});	
+			} else if (com =='Open') {
+				$('.trSelected',grid).each(function(){
+					var url = $(this).find('.url').text();
+					window.open(url);
+				});
 			} else {
 				alert("Test!");
 			}
