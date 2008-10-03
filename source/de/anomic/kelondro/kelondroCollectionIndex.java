@@ -535,7 +535,12 @@ public class kelondroCollectionIndex {
             final int oldSerialNumber = 0;
 
             // load the old collection and join it
-            collection.addAllUnique(getwithparams(indexrow, oldchunksize, oldchunkcount, oldPartitionNumber, oldrownumber, oldSerialNumber, false));
+            try {
+                collection.addAllUnique(getwithparams(indexrow, oldchunksize, oldchunkcount, oldPartitionNumber, oldrownumber, oldSerialNumber, false));
+            } catch (kelondroException e) {
+                // an error like "array does not contain expected row" may appear here. Just go on like if the collection does not exist
+                e.printStackTrace();
+            }
             collection.sort();
             collection.uniq(); // FIXME: not clear if it would be better to insert the collection with put to avoid double-entries
             collection.trim(false);
@@ -672,17 +677,27 @@ public class kelondroCollectionIndex {
         int removed = 0;
         assert (removekeys != null);
         // load the old collection and remove keys
-        final kelondroRowSet oldcollection = getwithparams(indexrow, oldchunksize, oldchunkcount, oldPartitionNumber, oldrownumber, serialNumber, false);
-
-        // remove the keys from the set
-        final Iterator<String> i = removekeys.iterator();
-        while (i.hasNext()) {
-            if (oldcollection.remove(i.next().getBytes()) != null) removed++;
+        kelondroRowSet oldcollection = null;
+        try {
+            oldcollection = getwithparams(indexrow, oldchunksize, oldchunkcount, oldPartitionNumber, oldrownumber, serialNumber, false);
+        } catch (kelondroException e) {
+            // some internal problems occurred. however, go on like there was no old collection
+            e.printStackTrace();
         }
-        oldcollection.sort();
-        oldcollection.trim(false);
-
-        if (oldcollection.size() == 0) {
+        // the oldcollection may be null here!
+        
+        if (oldcollection != null && oldcollection.size() > 0) {
+            // remove the keys from the set
+            final Iterator<String> i = removekeys.iterator();
+            while (i.hasNext()) {
+                if (oldcollection.remove(i.next().getBytes()) != null) removed++;
+            }
+            oldcollection.sort();
+            oldcollection.trim(false);
+        }
+        
+        // in case of an error or an empty collection, remove the collection:
+        if (oldcollection == null || oldcollection.size() == 0) {
             // delete the index entry and the array
             array_remove(
                     oldPartitionNumber, serialNumber, this.payloadrow.objectsize,
@@ -691,6 +706,7 @@ public class kelondroCollectionIndex {
             return removed;
         }
         
+        // now write to a new partition (which may be the same partition as the old one)
         final int newPartitionNumber = arrayIndex(oldcollection.size());
 
         // see if we need new space or if we can overwrite the old space
@@ -761,7 +777,8 @@ public class kelondroCollectionIndex {
             // the index appears to be corrupted
             this.indexErrors++;
             if (this.indexErrors == errorLimit) deleteIndexOnExit(); // delete index on exit for rebuild
-            throw new kelondroException(arrayFile(this.path, this.filenameStub, this.loadfactor, chunksize, clusteridx, serialnumber).toString(), "array does not contain expected row (error #" + indexErrors + ")");
+            serverLog.logWarning("kelondroCollectionIndex", "array " + arrayFile(this.path, this.filenameStub, this.loadfactor, chunksize, clusteridx, serialnumber).toString() + " does not contain expected row (error #" + indexErrors + ")");
+            return new kelondroRowSet(this.payloadrow, 0);
         }
 
         // read the row and define a collection
@@ -838,7 +855,7 @@ public class kelondroCollectionIndex {
             if (indexrow == null) return null;
             try {
                 return new Object[]{indexrow.getColBytes(0), getdelete(indexrow, false)};
-            } catch (final IOException e) {
+            } catch (final Exception e) {
                 e.printStackTrace();
                 return null;
             }

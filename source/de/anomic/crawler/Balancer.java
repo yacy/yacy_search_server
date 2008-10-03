@@ -365,7 +365,7 @@ public class Balancer {
     public synchronized void push(final CrawlEntry entry) throws IOException {
         assert entry != null;
         if (urlFileIndex.has(entry.url().hash().getBytes())) {
-            serverLog.logWarning("BALANCER", "double-check has failed for urlhash " + entry.url().hash()  + " in " + stackname + " - fixed");
+            //serverLog.logWarning("BALANCER", "double-check has failed for urlhash " + entry.url().hash()  + " in " + stackname + " - fixed");
             return;
         }
         

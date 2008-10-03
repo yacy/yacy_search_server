@@ -29,6 +29,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -74,7 +75,7 @@ public class kelondroEcoTable implements kelondroIndex {
     public kelondroEcoTable(final File tablefile, final kelondroRow rowdef, final int useTailCache, final int buffersize, final int initialSpace) {
         this.rowdef = rowdef;
         this.buffersize = buffersize;
-        this.fail = 0;
+        //this.fail = 0;
         assert rowdef.primaryKeyIndex == 0;
         // define the taildef, a row like the rowdef but without the first column
         final kelondroColumn[] cols = new kelondroColumn[rowdef.columns() - 1];
@@ -270,7 +271,10 @@ public class kelondroEcoTable implements kelondroIndex {
         assert ((table == null) || (table.size() == index.size()));
         final int i = (int) file.size();
         final boolean added = index.addi(row.getPrimaryKeyBytes(), i);
-        if (!added) return false;
+        if (!added) {
+            fail++;
+            return false;
+        }
         if (table != null) {
             assert table.size() == i;
             table.addUnique(taildef.newEntry(row.bytes(), rowdef.primaryKeyLength, true));
@@ -620,8 +624,7 @@ public class kelondroEcoTable implements kelondroIndex {
                 e.printStackTrace();
                 return null;
             }
-            assert this.c >= 0;
-            if (this.c < 0) return null;
+            if (this.c < 0) throw new ConcurrentModificationException(); // this should only happen if the table was modified during the iteration
             final byte[] b = new byte[rowdef.objectsize];
             if (table == null) {
                 // read from file

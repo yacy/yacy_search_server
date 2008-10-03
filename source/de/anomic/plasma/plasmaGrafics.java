@@ -62,9 +62,9 @@ public class plasmaGrafics {
     private static final String COL_WE_LINE        = "FFAAAA";
     private static final String COL_WE_TEXT        = "FFCCCC";
     
-    private static final Color  COL_BORDER      = new Color(  0,   0,   0);
-    private static final Color  COL_NORMAL_TEXT = new Color(  0,   0,   0);
-    private static final Color  COL_LOAD_BG     = new Color(247, 247, 247);
+    private static final String COL_BORDER         = "000000";
+    private static final String COL_NORMAL_TEXT    = "000000";
+    private static final String COL_LOAD_BG        = "F7F7F7";
     
     public static class CircleThreadPiece {
         private final String pieceName;
@@ -294,7 +294,7 @@ public class plasmaGrafics {
     	//prepare image
     	peerloadPicture = new BufferedImage(width,height,BufferedImage.TYPE_INT_RGB);
         final Graphics2D g = peerloadPicture.createGraphics();
-        g.setBackground(COL_LOAD_BG);
+        g.setBackground(Color.decode("0x"+COL_LOAD_BG));
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g.clearRect(0,0,width,height);
         
@@ -321,7 +321,7 @@ public class plasmaGrafics {
         drawLegendLine(g, 5, height - 5 - 15 * i, fillRest.getPieceName()+" ("+fillRest.getFractionPercent()+" %)", fillRest.getColor());
         
         //draw border around the circle
-        g.setColor(COL_BORDER);
+        g.setColor(Color.decode("0x"+COL_BORDER));
         g.drawArc(circ_x, circ_y, circ_w, circ_w, 0, 360);
         
         peerloadPictureDate = System.currentTimeMillis();
@@ -330,10 +330,10 @@ public class plasmaGrafics {
     private static void drawLegendLine(final Graphics2D g, final int x, final int y, final String caption, final Color item_color) {
     	g.setColor(item_color);
     	g.fillRect(x, y-LEGEND_BOX_SIZE, LEGEND_BOX_SIZE, LEGEND_BOX_SIZE);
-    	g.setColor(COL_BORDER);
+    	g.setColor(Color.decode("0x"+COL_BORDER));
     	g.drawRect(x, y-LEGEND_BOX_SIZE, LEGEND_BOX_SIZE, LEGEND_BOX_SIZE);
     	
-    	g.setColor(COL_NORMAL_TEXT);
+    	g.setColor(Color.decode("0x"+COL_NORMAL_TEXT));
     	g.drawChars(caption.toCharArray(), 0, caption.length(), x+LEGEND_BOX_SIZE+5,y);
     }
 

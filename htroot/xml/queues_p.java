@@ -38,6 +38,7 @@ import de.anomic.crawler.CrawlEntry;
 import de.anomic.crawler.IndexingStack;
 import de.anomic.crawler.NoticedURL;
 import de.anomic.http.httpRequestHeader;
+import de.anomic.kelondro.kelondroException;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.server.serverObjects;
@@ -87,7 +88,11 @@ public class queues_p {
             // getting all enqueued entries
             if ((sb.webIndex.queuePreStack.size() > 0)) {
                 final Iterator<IndexingStack.QueueEntry> i1 = sb.webIndex.queuePreStack.entryIterator(false);
-                while (i1.hasNext()) entryList.add(i1.next());
+                while (i1.hasNext()) try {
+                    entryList.add(i1.next());
+                } catch (kelondroException e) {
+                    e.printStackTrace();
+                }
             }
             
             int size = (post == null) ? entryList.size() : post.getInt("num", entryList.size());

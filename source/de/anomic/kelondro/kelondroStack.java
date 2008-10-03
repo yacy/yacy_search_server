@@ -113,7 +113,8 @@ public final class kelondroStack extends kelondroFullRecords {
                 nextHandle = new EcoNode(nextHandle).getOHHandle((up) ? right : left);
                 return row().newEntry(new EcoNode(lastHandle).getValueRow());
             } catch (final IOException e) {
-                throw new kelondroException(filename, "IO error at Counter:next()");
+                e.printStackTrace();
+                throw new kelondroException(filename, "IO error at stackIterator.next(): " + e.getMessage());
             }
         }
 
