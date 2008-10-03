@@ -202,7 +202,8 @@ public class yacysearch {
             int lrp = querystring.indexOf("LANGUAGE:");
             String lr = "";
             if (lrp >= 0) {
-                lr = querystring.substring(lrp + 9, lrp + 11).toLowerCase();
+                if (querystring.length() >= (lrp + 11))
+                	lr = querystring.substring(lrp + 9, lrp + 11).toLowerCase();
                 query[0].remove("language:" + lr);
             }
            
