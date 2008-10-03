@@ -127,8 +127,8 @@
 		/* Load Sidebar */
 		$("#side1").load("sidebar/sidebar_1.html");
 		$("#side2").load("sidebar/sidebar_2.html");
+		$tabs.tabs('select',1);
 	});	
-   //]]>
    	function bookmark() {
 		var url = $("input[@name='bm_url']").getValue();
         var title = $("textarea[@name='bm_title']").getValue();
@@ -136,10 +136,11 @@
         var tags = $("input[@name='bm_tags']").getValue()
         var path = $("input[@name='bm_path']").getValue();
         var pub = $("select[@name='bm_public']").getValue();            		
-        var query = "&url="+url+"&title="+title+"&description="+desc+"&tags="+tags+"&path="+path+"&public="+pub+"&add=create";            		
+        // var query = "&url="+url+"&title="+title+"&description="+desc+"&tags="+tags+"&path="+path+"&public="+pub+"&add=create";            		
         $.ajax({
 			type: "POST",
-			url: "/xml/bookmarks/posts/add_p.xml?login="+query,			
+			url: "/xml/bookmarks/posts/add_p.xml",
+			data: "login=&url="+url+"&title="+title+"&description="+desc+"&tags="+tags+"&path="+path+"&public="+pub+"&add=create",						
 			dataType: "xml",
 			success: function(xml) {
          		$('#bmaddform').resetForm();
@@ -150,7 +151,8 @@
 				$tabs.tabs("load", 3);
    			}
    		});	 
-	}	
+	}
+	//]]>	
   </script>  
 </head>
 
@@ -165,7 +167,7 @@
 	<div id="container" class="main">
 		<ul>
 			<!-- initial tabs only, dynamic tabs are loaded via jQuery -->
-			<li><a href="yacyui-welcome.html" title="Welcome"><span>Welcome</span></a></li>
+			<li><a href="yacyui-welcome.html" title="About YaCy-UI"><span>About YaCy-UI</span></a></li>
 			<li><a href="yacyui-admin.html" title="Admin Console"><span>Admin Console</span></a></li>
 			<li><a href="yacyui-compare.html" title="Compare Search"><span>Compare Search</span></a></li>			
 			<li><a href="yacyui-bookmarks.html" title="Bookmarks"><span>Bookmarks</span></a></li>			
@@ -173,7 +175,7 @@
 	</div>
 	<!-- Bookmarks Edit Dialog -->	
 	<div id="bmadd" class="bmdialog" title="YaCy Bookmarks">
-		<form id="bmaddform" class="small" method="get" accept-charset="UTF-8" action="">
+		<form id="bmaddform" class="small" method="post" accept-charset="UTF-8" action="jQuery">
 			<label for="url">URL:</label>
 			<br />					
 			<input type="text" name="bm_url" id="bm_url" class="filter" size="80" />

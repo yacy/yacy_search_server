@@ -1,1 +1,35 @@
-<h3>Admin Console...</h3>
+<script type="text/javascript">
+//<![CDATA[
+$(function() {
+	loaderBanner = window.setInterval("loadBanner()", 15000);
+	window.setInterval("reloadGraph()", 6000);
+}); 
+function loadBanner() {
+	for (var i = 0; i < document.images.length; i++) {
+		if (document.images[i].src.indexOf("Banner.png") > 0) {
+			document.images[i].src = "/Banner.png?textcolor=000000&bgcolor=ffffff&bordercolor=aaaaaa&time=" + (new Date()).getTime();
+			break;
+		}
+	}
+}
+function reloadGraph() {
+	document.images["graph"].src="/PerformanceGraph.png?time="+(new Date()).getTime();
+	window.status="";
+}
+//]]>
+</script>
+<p>
+	<img src="/Banner.png?textcolor=000000&bgcolor=ffffff&bordercolor=aaaaaa" alt="banner" />
+</p>
+<div style="display: block, float: left; width:670px; border:1px solid #CCCCCC;">
+	<iframe 
+		src="/rssTerminal.html?set=PEERNEWS,REMOTESEARCH,LOCALSEARCH,REMOTEINDEXING,LOCALINDEXING,INDEXRECEIVE&amp;width=670px&amp;height=180px&amp;maxlines=20&amp;maxwidth=120" 
+		name="newsframe" marginheight="5" marginwidth="5" scrolling="no" frameborder="0" height="180" width="670">
+	</iframe>
+</div>
+<br />
+<div style="display: block, float: left; width:670px; border:1px solid #CCCCCC;">
+	<img src="/PerformanceGraph.png?time=" id="graph" alt="PerformanceGraph">
+</div>
+
+
