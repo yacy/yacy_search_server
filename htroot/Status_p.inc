@@ -1,5 +1,5 @@
 <div class="sidebar">
-<fieldset>
+<fieldset style="width: 230px;">
   <legend>System Status</legend>
   <dl>
 
