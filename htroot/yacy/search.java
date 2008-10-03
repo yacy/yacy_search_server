@@ -134,18 +134,15 @@ public final class search {
         TreeSet<Long> trackerHandles = sb.remoteSearchTracker.get(client);
         if (trackerHandles == null) trackerHandles = new TreeSet<Long>();
         boolean block = false;
-        if (trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() -   6000)).size() >  1) try {
-            Thread.sleep(3000);
+        if (trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() -   3000)).size() >  1) {
             block = true;
-        } catch (final InterruptedException e) { e.printStackTrace(); }
-        if (trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() -  60000)).size() > 12) try {
-            Thread.sleep(10000);
+        }
+        if (trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() -  60000)).size() > 12) {
             block = true;
-        } catch (final InterruptedException e) { e.printStackTrace(); }
-        if (trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() - 600000)).size() > 36) try {
-            Thread.sleep(30000);
+        }
+        if (trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() - 600000)).size() > 36) {
             block = true;
-        } catch (final InterruptedException e) { e.printStackTrace(); }
+        }
         if (block) {
             prop.put("links", "");
             prop.put("linkcount", "0");
