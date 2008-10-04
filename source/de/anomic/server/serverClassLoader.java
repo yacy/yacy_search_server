@@ -31,7 +31,7 @@ public final class serverClassLoader extends ClassLoader {
     /**
      * directory of class files
      */
-    private static final String HTROOT = "htroot/";
+    private static final String HTROOT = "htroot" + File.separator;
     private final static String baseDir = System.getProperty("user.dir");
     private final HashMap<File, Class<?>> classes;
 
