@@ -452,11 +452,11 @@ public final class plasmaParser {
              * find an additional parser class
              */
 	    final ListDirs parserDir = new ListDirs(packageURI);
-            final ArrayList<String> parserClasses = parserDir.listFiles(".*/parser/[^/]+/[^/]+Parser\\.class");
+            final ArrayList<String> parserClasses = parserDir.listFiles(".*\\"+ File.separator +"parser\\"+ File.separator +"[^\\"+ File.separator +"]+\\"+ File.separator +"[^\\"+ File.separator +"]+Parser\\.class");
 	    if (parserClasses == null) return;
 
-	    final Pattern patternGetClassName = Pattern.compile(".*/([^/]+)\\.class");
-	    final Pattern patternGetFullClassName = Pattern.compile(".*(/[^/]+/[^/]+)\\.class");
+	    final Pattern patternGetClassName = Pattern.compile(".*\\"+ File.separator +"([^\\"+ File.separator +"]+)\\.class");
+	    final Pattern patternGetFullClassName = Pattern.compile(".*(\\"+ File.separator +"[^\\"+ File.separator +"]+\\"+ File.separator +"[^\\"+ File.separator +"]+)\\.class");
                 
             for (final String parserClassFile: parserClasses) {
 		serverLog.logFine("PARSER", "Testing parser class " + parserClassFile);
@@ -465,7 +465,7 @@ public final class plasmaParser {
 		final String className = matcherClassName.group(1);
 		final Matcher matcherFullClassName = patternGetFullClassName.matcher(parserClassFile);
 		matcherFullClassName.find();
-		final String fullClassName = plasmaParserPkgName + matcherFullClassName.group(1).replace("/", ".");
+		final String fullClassName = plasmaParserPkgName + matcherFullClassName.group(1).replace(File.separator , ".");
 		try {
 		    // trying to load the parser class by its name
 		    final Class<?> parserClass = Class.forName(fullClassName);
