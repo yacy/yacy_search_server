@@ -754,7 +754,7 @@
   <target name="installonlinux">
     <!-- check for jar-file -->
     <available file="yacy.jar" property="built"/>
-    <fail message="Please build yacy with 'ant clean all'" unless="built"/>
+    <fail message="Please build yacy with 'ant clean build-jar'" unless="built"/>
     <!-- copy main class files -->
     <copy todir="${DESTDIR}/usr/share/java/">
       <fileset dir=".">
