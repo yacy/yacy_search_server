@@ -2717,7 +2717,7 @@ Prefer mask:==Vorzugsmaske:
 Bookmark TagCloud==Lesezeichen TagWolke
 Bookmark Folders==Lesezeichen Ordner
 alt="help"==alt="Hilfe"
-title="help"==title=="Hilfe"
+title="help"==title="Hilfe"
 #-----------------------------
 
 #File: yacy/ui/yacyui-bookmarks.html
