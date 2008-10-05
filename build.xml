@@ -781,20 +781,6 @@
   	               includes="**/*"/>
   	    </copy>
 
-  	<!-- copy Unix wrappers -->
-    <copy todir="${DESTDIR}/usr/share/yacy">
-      <fileset dir=".">
-        <include name="startYACY.sh"/>
-        <include name="stopYACY.sh"/>
-        <include name="killYACY.sh"/>
-        <include name="restart.sh"/>
-      </fileset>
-    </copy>
-      <chmod file="${DESTDIR}/usr/share/yacy/startYACY.sh" perm="ugo+rx"/>
-      <chmod file="${DESTDIR}/usr/share/yacy/stopYACY.sh" perm="ugo+rx"/>
-      <chmod file="${DESTDIR}/usr/share/yacy/killYACY.sh" perm="ugo+rx"/>
-      <chmod file="${DESTDIR}/usr/share/yacy/restart.sh" perm="ugo+rx"/>
-
     <!-- copy locales  -->
     <copy todir="${DESTDIR}/usr/share/yacy/locales">
       <fileset dir="${locales}">
