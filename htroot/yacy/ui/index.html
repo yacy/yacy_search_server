@@ -98,10 +98,11 @@
 						+"&contentdom="+contentdom
 						+"&count="+count
 						+"&offset="+offset
-						+"&constraint="+constraint
-						+"&prefermaskfilter="+prefermaskfilter
-						+"&urlmaskfilter="+urlmaskfilter
-						+"&lr=lang_"+language;
+						+"&urlmaskfilter="+urlmaskfilter;
+					if (constraint!="") { query = query+"&constraint="+constraint; };
+					if (prefermaskfilter!="") { query = query+"&prefermaskfilter="+prefermaskfilter; };					
+					if (language!="") { query = query+"&lr=lang_"+language; };
+					
 					$("input[@name='search']").setValue(search);
 					$("select[@name='itemsPerPage']").setValue(count);
 					$("input[@name='contentdom']").setValue(contentdom);
