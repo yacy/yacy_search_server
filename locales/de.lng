@@ -2095,7 +2095,7 @@ You can now go back to the <a href="Settings_p.html">Settings</a> page if you wa
 Shutting down.==YaCy wird nun heruntergefahren
 Application will terminate after working off all scheduled tasks.==Der YaCy Proxy f&auml;hrt sich runter, nachdem alle ausstehenden Aufgaben abgearbeitet wurden.
 Restart YaCy.==YaCy wird nun neu gestartet.
-If you can't reach YaCy's interface after 5 minutes restart failed.==Wenn Sie nach 5 Minuten nicht auf das YaCy Interface zurgreifen k&ouml;nnen, dann ist der Neustart fehlgeschlagen.
+If you can't reach YaCy's interface after 5 minutes restart failed.==Wenn Sie nach 5 Minuten nicht auf das YaCy Interface zugreifen k&ouml;nnen, dann ist der Neustart fehlgeschlagen.
 Installing release==Installiere Release
 YaCy will be restarted after installation==YaCy wird nach der Installation neugestartet
 #-----------------------------
