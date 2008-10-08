@@ -184,18 +184,18 @@ public class NoticedURL {
         }
     }
     
-    public CrawlEntry pop(final int stackType, final boolean delay) throws IOException {
+    public CrawlEntry pop(final int stackType, final boolean delay, CrawlProfile profile) throws IOException {
         switch (stackType) {
-            case STACK_TYPE_CORE:     return pop(coreStack, delay);
-            case STACK_TYPE_LIMIT:    return pop(limitStack, delay);
-            case STACK_TYPE_REMOTE:   return pop(remoteStack, delay);
+            case STACK_TYPE_CORE:     return pop(coreStack, delay, profile);
+            case STACK_TYPE_LIMIT:    return pop(limitStack, delay, profile);
+            case STACK_TYPE_REMOTE:   return pop(remoteStack, delay, profile);
             default: return null;
         }
     }
 
-    public void shift(final int fromStack, final int toStack) {
+    public void shift(final int fromStack, final int toStack, CrawlProfile profile) {
         try {
-            final CrawlEntry entry = pop(fromStack, false);
+            final CrawlEntry entry = pop(fromStack, false, profile);
             if (entry != null) push(toStack, entry);
         } catch (final IOException e) {
             return;
@@ -211,13 +211,13 @@ public class NoticedURL {
             }
     }
     
-    private CrawlEntry pop(final Balancer balancer, final boolean delay) throws IOException {
+    private CrawlEntry pop(final Balancer balancer, final boolean delay, CrawlProfile profile) throws IOException {
         // this is a filo - pop
         int s;
         CrawlEntry entry;
         synchronized (balancer) {
         while ((s = balancer.size()) > 0) {
-            entry = balancer.pop(delay);
+            entry = balancer.pop(delay, profile);
             if (entry == null) {
                 if (s > balancer.size()) continue;
                 final int aftersize = balancer.size();

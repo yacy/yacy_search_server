@@ -30,6 +30,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import de.anomic.kelondro.kelondroBLOB;
+import de.anomic.kelondro.kelondroBLOBHeap;
 import de.anomic.kelondro.kelondroBLOBTree;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroCloneableIterator;
@@ -47,10 +48,10 @@ public class CrawlProfile {
     kelondroMap profileTable;
     private final File profileTableFile;
     
-    public CrawlProfile(final File file) {
+    public CrawlProfile(final File file) throws IOException {
         this.profileTableFile = file;
         profileTableFile.getParentFile().mkdirs();
-        final kelondroBLOB dyn = new kelondroBLOBTree(profileTableFile, true, true, yacySeedDB.commonHashLength, 2000, '#', kelondroNaturalOrder.naturalOrder, false, false, true);
+        final kelondroBLOB dyn = new kelondroBLOBHeap(profileTableFile, yacySeedDB.commonHashLength, kelondroNaturalOrder.naturalOrder);
         profileTable = new kelondroMap(dyn, 500);
     }
     
@@ -183,6 +184,14 @@ public class CrawlProfile {
         return ne;
     }
     
+    public boolean hasEntry(final String handle) {
+        try {
+            return profileTable.has(handle);
+        } catch (final IOException e) {
+            return false;
+        }
+    }
+
     public entry getEntry(final String handle) {
         HashMap<String, String> m;
         try {

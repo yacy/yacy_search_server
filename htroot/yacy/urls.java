@@ -64,7 +64,7 @@ public class urls {
             yacyURL referrer;
             while ((count > 0) && (sb.crawlQueues.noticeURL.stackSize(stackType) > 0)) {
                 try {
-                    entry = sb.crawlQueues.noticeURL.pop(stackType, false);
+                    entry = sb.crawlQueues.noticeURL.pop(stackType, false, sb.webIndex.profilesActiveCrawls);
                 } catch (final IOException e) {
                     break;
                 }

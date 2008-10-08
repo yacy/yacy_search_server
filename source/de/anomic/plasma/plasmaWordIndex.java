@@ -88,8 +88,8 @@ public final class plasmaWordIndex implements indexRI {
     public static final String CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT   = "snippetGlobalText";
     public static final String CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA   = "snippetLocalMedia";
     public static final String CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA  = "snippetGlobalMedia";
-    public static final String DBFILE_ACTIVE_CRAWL_PROFILES        = "crawlProfilesActive.db";
-    public static final String DBFILE_PASSIVE_CRAWL_PROFILES       = "crawlProfilesPassive.db";
+    public static final String DBFILE_ACTIVE_CRAWL_PROFILES        = "crawlProfilesActive.heap";
+    public static final String DBFILE_PASSIVE_CRAWL_PROFILES       = "crawlProfilesPassive.heap";
     
     public static final long CRAWL_PROFILE_PROXY_RECRAWL_CYCLE = 60L * 24L;
     public static final long CRAWL_PROFILE_SNIPPET_LOCAL_TEXT_RECRAWL_CYCLE = 60L * 24L * 30L;
@@ -163,7 +163,17 @@ public final class plasmaWordIndex implements indexRI {
             final File oldFile = new File(new File(queuesRoot.getParentFile().getParentFile().getParentFile(), "PLASMADB"), "crawlProfilesActive1.db");
             if (oldFile.exists()) oldFile.renameTo(profilesActiveFile);
         }
-        this.profilesActiveCrawls = new CrawlProfile(profilesActiveFile);
+        try {
+            this.profilesActiveCrawls = new CrawlProfile(profilesActiveFile);
+        } catch (IOException e) {
+            profilesActiveFile.delete();
+            try {
+                this.profilesActiveCrawls = new CrawlProfile(profilesActiveFile);
+            } catch (IOException e1) {
+                e1.printStackTrace();
+                this.profilesActiveCrawls = null;
+            }
+        }
         initActiveCrawlProfiles();
         log.logConfig("Loaded active crawl profiles from file " + profilesActiveFile.getName() +
                 ", " + this.profilesActiveCrawls.size() + " entries" +
@@ -174,7 +184,17 @@ public final class plasmaWordIndex implements indexRI {
             final File oldFile = new File(new File(queuesRoot.getParentFile().getParentFile().getParentFile(), "PLASMADB"), "crawlProfilesPassive1.db");
             if (oldFile.exists()) oldFile.renameTo(profilesPassiveFile);
         }
-        this.profilesPassiveCrawls = new CrawlProfile(profilesPassiveFile);
+        try {
+            this.profilesPassiveCrawls = new CrawlProfile(profilesPassiveFile);
+        } catch (IOException e) {
+            profilesPassiveFile.delete();
+            try {
+                this.profilesPassiveCrawls = new CrawlProfile(profilesPassiveFile);
+            } catch (IOException e1) {
+                e1.printStackTrace();
+                this.profilesPassiveCrawls = null;
+            }
+        }
         log.logConfig("Loaded passive crawl profiles from file " + profilesPassiveFile.getName() +
                 ", " + this.profilesPassiveCrawls.size() + " entries" +
                 ", " + profilesPassiveFile.length()/1024);
@@ -296,7 +316,11 @@ public final class plasmaWordIndex implements indexRI {
     private void resetProfiles() {
         final File pdb = new File(this.queuesRoot, DBFILE_ACTIVE_CRAWL_PROFILES);
         if (pdb.exists()) pdb.delete();
-        profilesActiveCrawls = new CrawlProfile(pdb);
+        try {
+            profilesActiveCrawls = new CrawlProfile(pdb);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         initActiveCrawlProfiles();
     }
     

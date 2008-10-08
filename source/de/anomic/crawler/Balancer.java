@@ -398,7 +398,18 @@ public class Balancer {
         }
     }
     
-    public synchronized CrawlEntry pop(boolean delay) throws IOException {
+    /**
+     * get the next entry in this crawl queue in such a way that the domain access time delta is maximized
+     * and always above the given minimum delay time. An additional delay time is computed using the robots.txt
+     * crawl-delay time which is always respected. In case the minimum time cannot ensured, this method pauses
+     * the necessary time until the url is released and returned as CrawlEntry object. In case that a profile
+     * for the computed Entry does not exist, null is returned
+     * @param delay
+     * @param profile
+     * @return a url in a CrawlEntry object
+     * @throws IOException
+     */
+    public synchronized CrawlEntry pop(boolean delay, CrawlProfile profile) throws IOException {
         // returns a crawl entry from the stack and ensures minimum delta times
         // we have 3 sources to choose from: the ramStack, the domainStacks and the fileStack
         
@@ -565,8 +576,11 @@ public class Balancer {
             throw new IOException("get() found a valid urlhash, but failed to fetch the corresponding url entry - total size = " + size() + ", fileStack.size() = " + urlFileStack.size() + ", ramStack.size() = " + urlRAMStack.size() + ", domainStacks.size() = " + domainStacks.size());
         }
         assert urlFileIndex.size() + 1 == s : "urlFileIndex.size() = " + urlFileIndex.size() + ", s = " + s + ", result = " + result;
-        final CrawlEntry crawlEntry = new CrawlEntry(rowEntry);        
-        long sleeptime = crawlEntry.waitingRemaining(minimumLocalDelta, minimumGlobalDelta);
+        final CrawlEntry crawlEntry = new CrawlEntry(rowEntry);
+        // at this point we must check if the crawlEntry has relevancy because the crawl profile still exists
+        // if not: return null. A calling method must handle the null value and try again
+        if (profile != null && !profile.hasEntry(crawlEntry.profileHandle())) return null;
+        long sleeptime = crawlEntry.waitingRemaining(minimumLocalDelta, minimumGlobalDelta); // this uses the robots.txt database and may cause a loading of robots.txt from the server
         
         if (delay && sleeptime > 0) {
             // force a busy waiting here

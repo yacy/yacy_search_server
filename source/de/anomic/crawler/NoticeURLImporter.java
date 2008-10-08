@@ -12,7 +12,7 @@ public class NoticeURLImporter extends AbstractImporter implements Importer {
 
 	private File plasmaPath = null;
     private final HashSet<String> importProfileHandleCache = new HashSet<String>();
-    private final CrawlProfile importProfileDB;
+    private CrawlProfile importProfileDB;
     private final NoticedURL importNurlDB;
     private final int importStartSize;
     private int urlCount = 0;
@@ -73,7 +73,17 @@ public class NoticeURLImporter extends AbstractImporter implements Importer {
         
         // init profile DB
         this.log.logInfo("Initializing the source profileDB");
-        this.importProfileDB = new CrawlProfile(profileDbFile);
+        try {
+            this.importProfileDB = new CrawlProfile(profileDbFile);
+        } catch (IOException e) {
+            profileDbFile.delete();
+            try {
+                this.importProfileDB = new CrawlProfile(profileDbFile);
+            } catch (IOException e1) {
+                e1.printStackTrace();
+                this.importProfileDB = null;
+            }
+        }
     }
 
     public long getEstimatedTime() {
@@ -130,7 +140,7 @@ public class NoticeURLImporter extends AbstractImporter implements Importer {
                             if (this.importNurlDB.stackSize(stackTypes[stackType]) == 0) break;
                             
                             this.urlCount++;
-                            nextEntry = this.importNurlDB.pop(stackTypes[stackType], false);
+                            nextEntry = this.importNurlDB.pop(stackTypes[stackType], false, null);
                             nextHash = nextEntry.url().hash();
                         } else {
                             if (!entryIter.hasNext()) break;
