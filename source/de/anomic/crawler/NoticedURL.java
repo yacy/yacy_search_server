@@ -216,18 +216,18 @@ public class NoticedURL {
         int s;
         CrawlEntry entry;
         synchronized (balancer) {
-        while ((s = balancer.size()) > 0) {
-            entry = balancer.pop(delay, profile);
-            if (entry == null) {
-                if (s > balancer.size()) continue;
-                final int aftersize = balancer.size();
-                balancer.clear(); // the balancer is broken and cannot shrink
-                throw new IOException("entry is null, balancer cannot shrink (bevore pop = " + s + ", after pop = " + aftersize + "); reset of balancer");
+            while ((s = balancer.size()) > 0) {
+                entry = balancer.pop(delay, profile);
+                if (entry == null) {
+                    if (s > balancer.size()) continue;
+                    final int aftersize = balancer.size();
+                    balancer.clear(); // the balancer is broken and cannot shrink
+                    throw new IOException("entry is null, balancer cannot shrink (bevore pop = " + s + ", after pop = " + aftersize + "); reset of balancer");
+                }
+                return entry;
             }
-            return entry;
         }
-        }
-        throw new IOException("balancer stack is empty");
+        return null;
     }
     
     private ArrayList<CrawlEntry> top(final Balancer balancer, int count) {

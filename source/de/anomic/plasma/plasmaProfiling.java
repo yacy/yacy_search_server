@@ -72,17 +72,35 @@ public class plasmaProfiling {
         chart.declareDimension(ymageChart.DIMENSION_BOTTOM, bottomscale, hspace / (maxtime / bottomscale), -maxtime, "000000", "CCCCCC", "TIME/SECONDS");
         chart.declareDimension(ymageChart.DIMENSION_LEFT, leftscale, vspace * leftscale / maxwords, 0, "008800", null , "INDEXING, WORDS IN CACHE");
         chart.declareDimension(ymageChart.DIMENSION_RIGHT, rightscale, vspace * rightscale / (int)(maxbytes / 1024 / 1024), 0, "0000FF", "CCCCCC", "MEMORY/MEGABYTE");
-        chart.declareDimension(ymageChart.DIMENSION_ANOT, anotscale, vspace * anotscale / maxppm, 0, "008800", null , "PPM [PAGES/MINUTE]");
+        chart.declareDimension(ymageChart.DIMENSION_ANOT0, anotscale, vspace * anotscale / maxppm, 0, "008800", null , "PPM [PAGES/MINUTE]");
+        chart.declareDimension(ymageChart.DIMENSION_ANOT1, vspace / 6, vspace / 6, 0, "888800", null , "URL");
         
         // draw chart
         long time;
         final long now = System.currentTimeMillis();
         long bytes;
-        int x0 = 1, x1, y0 = 0, y1, ppm, words;
+        int x0, x1, y0, y1, ppm, words;
         serverProfiling.Event event;
         try {
+            // draw urls
+            /*
+            Iterator<Event> i = serverProfiling.history("indexed");
+            x0 = 1; y0 = 0;
+            while (i.hasNext()) {
+                event = i.next();
+                time = event.time - now;
+                x1 = (int) (time/1000);
+                y1 = ppm;
+                chart.setColor("AA8888");
+                if (x0 < 0) chart.chartLine(ymageChart.DIMENSION_BOTTOM, ymageChart.DIMENSION_ANOT0, x0, y0, x1, y1);
+                chart.setColor("AA2222");
+                chart.chartDot(ymageChart.DIMENSION_BOTTOM, ymageChart.DIMENSION_ANOT0, x1, y1, 2, ((String) event.payload), 315);
+                x0 = x1; y0 = y1;
+            }
+            */
             // draw memory
             Iterator<Event> i = serverProfiling.history("memory");
+            x0 = 1; y0 = 0;
             while (i.hasNext()) {
                 event = i.next();
                 time = event.time - now;
@@ -90,7 +108,7 @@ public class plasmaProfiling {
                 x1 = (int) (time/1000);
                 y1 = (int) (bytes / 1024 / 1024);
                 chart.setColor("AAAAFF");
-                chart.chartDot(ymageChart.DIMENSION_BOTTOM, ymageChart.DIMENSION_RIGHT, x1, y1, 2, null);
+                chart.chartDot(ymageChart.DIMENSION_BOTTOM, ymageChart.DIMENSION_RIGHT, x1, y1, 2, null, 0);
                 chart.setColor("0000FF");
                 if (x0 < 0) chart.chartLine(ymageChart.DIMENSION_BOTTOM, ymageChart.DIMENSION_RIGHT, x0, y0, x1, y1);
                 x0 = x1; y0 = y1;
@@ -106,7 +124,7 @@ public class plasmaProfiling {
                 x1 = (int) (time/1000);
                 y1 = words;
                 chart.setColor("228822");
-                chart.chartDot(ymageChart.DIMENSION_BOTTOM, ymageChart.DIMENSION_LEFT, x1, y1, 2, null);
+                chart.chartDot(ymageChart.DIMENSION_BOTTOM, ymageChart.DIMENSION_LEFT, x1, y1, 2, null, 315);
                 chart.setColor("008800");
                 if (x0 < 0) chart.chartLine(ymageChart.DIMENSION_BOTTOM, ymageChart.DIMENSION_LEFT, x0, y0, x1, y1);
                 x0 = x1; y0 = y1;
@@ -122,9 +140,9 @@ public class plasmaProfiling {
                 x1 = (int) (time/1000);
                 y1 = ppm;
                 chart.setColor("AA8888");
-                if (x0 < 0) chart.chartLine(ymageChart.DIMENSION_BOTTOM, ymageChart.DIMENSION_ANOT, x0, y0, x1, y1);
+                if (x0 < 0) chart.chartLine(ymageChart.DIMENSION_BOTTOM, ymageChart.DIMENSION_ANOT0, x0, y0, x1, y1);
                 chart.setColor("AA2222");
-                chart.chartDot(ymageChart.DIMENSION_BOTTOM, ymageChart.DIMENSION_ANOT, x1, y1, 2, ppm + " PPM");
+                chart.chartDot(ymageChart.DIMENSION_BOTTOM, ymageChart.DIMENSION_ANOT0, x1, y1, 2, ppm + " PPM", 0);
                 x0 = x1; y0 = y1;
             }
             

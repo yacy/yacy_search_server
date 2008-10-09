@@ -57,7 +57,7 @@ public class ymageToolPrint {
                 for (int j = 0; j < 5; j++) {
                 	c = row & 3L;
                     if (c == 3) matrix.plot(x + 5 - j, y, 100);
-                    if (c == 2) matrix.plot(x + 5 - j, y, 35);
+                    if (c == 2) matrix.plot(x + 5 - j, y, 36);
                     row = row >> 2;
                 }
                 y--;
@@ -66,10 +66,20 @@ public class ymageToolPrint {
                 for (int j = 0; j < 5; j++) {
                 	c = row & 3L;
                     if (c == 3) matrix.plot(x, y - 5 + j, 100);
-                    if (c == 2) matrix.plot(x, y - 5 + j, 35);
+                    if (c == 2) matrix.plot(x, y - 5 + j, 36);
                     row = row >> 2;
                 }
                 x--;
+            }
+            if (angle == 315) {
+                for (int j = 0; j < 5; j++) {
+                    c = row & 3L;
+                    if (c == 3) { matrix.plot(x + 5 - j, y + 5 - j, 100); matrix.plot(x + 6 - j, y + 5 - j, 50); matrix.plot(x + 5 - j, y + 6 - j, 50); }
+                    if (c == 2) { matrix.plot(x + 5 - j, y + 5 - j, 36);  matrix.plot(x + 6 - j, y + 5 - j, 18); matrix.plot(x + 5 - j, y + 6 - j, 18); }
+                    row = row >> 2;
+                }
+                x++;
+                y--;
             }
         }
     }
@@ -85,11 +95,15 @@ public class ymageToolPrint {
         } else if (angle == 90) {
             xx = x;
             yy = (align == -1) ? y : (align == 1) ? y + 6 * message.length() : y + 3 * message.length();
+        } else if (angle == 315) {
+            xx = (align == -1) ? x : (align == 1) ? x - 6 * message.length() : x - 3 * message.length();
+            yy = (align == -1) ? y : (align == 1) ? y - 6 * message.length() : y - 3 * message.length();
         }
         for (int i = 0; i < message.length(); i++) {
             print(matrix, xx, yy, angle, message.charAt(i));
             if (angle == 0) xx += 6;
             else if (angle == 90) yy -= 6;
+            else if (angle == 315) {xx += 6; yy += 6;}
         }
     }
     
