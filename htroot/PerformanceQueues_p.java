@@ -72,6 +72,8 @@ public class PerformanceQueues_p {
         final boolean xml = (header.get("PATH")).endsWith(".xml");
         prop.setLocalized(!xml);
         
+        prop.put("enableSimpleConfig", sb.getConfigBool("enableSimpleConfig", true) ? "1" : "0");
+        
         // calculate totals
         long blocktime_total = 0, sleeptime_total = 0, exectime_total = 0;
         while (threads.hasNext()) {

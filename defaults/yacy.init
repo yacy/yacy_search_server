@@ -814,6 +814,8 @@ svnRevision=0
 
 currentSkin=default
 
+enableSimpleConfig=true
+
 # temporary flag for new database structure. set only true for testing
 # ALL DATA THAT IS CREATED WITH THIS FLAG ON WILL BE VOID IN A FINAL VERSION
 # table-types: RAM = 0, TREE = 1, FLEX = 2;

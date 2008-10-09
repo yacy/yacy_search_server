@@ -5,7 +5,7 @@
     #%env/templates/metas.template%#
     <script type="text/javascript" src="js/html.js"></script>
   </head>
-  <body id="PerformanceMemory" onload="hide('memory_tables')">
+  <body id="PerformanceMemory" #(enableSimpleConfig)#::onload="hide('memory_tables')"#(/enableSimpleConfig)#>
     <script type="text/javascript"><!--
 	function reloadGraph() {
 	  if(document.forms["optionreloadGraph"].option.checked)

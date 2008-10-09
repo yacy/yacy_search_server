@@ -5,7 +5,7 @@
   #%env/templates/metas.template%#
   <script type="text/javascript" src="js/html.js"></script>
   </head>
-  <body id="PerformanceQueues" onload="hide('expert_settings')">
+  <body id="PerformanceQueues" #(enableSimpleConfig)#::onload="hide('expert_settings')"#(/enableSimpleConfig)#>
   #%env/templates/header.template%#
   #%env/templates/submenuConfig.template%#
   <h2>Performance Settings of Queues and Processes</h2>
