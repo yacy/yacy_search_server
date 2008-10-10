@@ -39,7 +39,6 @@ public class kelondroMapDataMining extends kelondroMap {
     private final String[] sortfields, longaccfields, doubleaccfields;
     private HashMap<String, kelondroMScoreCluster<String>> sortClusterMap; // a String-kelondroMScoreCluster - relation
     private HashMap<String, Object> accMap; // to store accumulations of specific fields
-    private int elementCount;
     
 	@SuppressWarnings("unchecked")
 	public kelondroMapDataMining(final kelondroBLOB dyn, final int cachesize, final String[] sortfields, final String[] longaccfields, final String[] doubleaccfields, final Method externalInitializer, final Object externalHandler) {
@@ -87,7 +86,6 @@ public class kelondroMapDataMining extends kelondroMap {
             long valuel;
             double valued;
             Map<String, String> map;
-            this.elementCount = 0;
             while (it.hasNext()) {
                 mapname = new String(it.next());
                 map = super.get(mapname);
@@ -129,7 +127,6 @@ public class kelondroMapDataMining extends kelondroMap {
                         e.printStackTrace();
                     }
                 }
-                elementCount++;
             }
         } catch (final IOException e) {}
 
@@ -165,7 +162,6 @@ public class kelondroMapDataMining extends kelondroMap {
             	}
             }
         }
-        this.elementCount = 0;
     }
     
     public synchronized void put(final String key, final HashMap<String, String> newMap) throws IOException {
@@ -176,10 +172,7 @@ public class kelondroMapDataMining extends kelondroMap {
         // update elementCount
         if ((longaccfields != null) || (doubleaccfields != null)) {
             final Map<String, String> oldMap = super.get(key, false);
-            if (oldMap == null) {
-                // new element
-                elementCount++;
-            } else {
+            if (oldMap != null) {
                 // element exists, update acc
                 if ((longaccfields != null) || (doubleaccfields != null)) updateAcc(oldMap, false);
             }
@@ -250,8 +243,6 @@ public class kelondroMapDataMining extends kelondroMap {
         if ((sortfields != null) || (longaccfields != null) || (doubleaccfields != null)) {
             final Map<String, String> map = super.get(key);
             if (map != null) {
-                // update count
-                elementCount--;
 
                 // update accumulators (subtract)
                 if ((longaccfields != null) || (doubleaccfields != null)) updateAcc(map, false);
@@ -331,7 +322,6 @@ public class kelondroMapDataMining extends kelondroMap {
     }
     
     public synchronized int size() {
-        if ((sortfields != null) || (longaccfields != null) || (doubleaccfields != null)) return elementCount;
         return super.size();
     }
     

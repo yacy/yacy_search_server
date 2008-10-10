@@ -47,7 +47,7 @@ import de.anomic.http.JakartaCommonsHttpResponse;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpd;
 import de.anomic.http.httpdAlternativeDomainNames;
-import de.anomic.kelondro.kelondroBLOBTree;
+import de.anomic.kelondro.kelondroBLOBHeap;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMScoreCluster;
@@ -220,7 +220,6 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
     
     @SuppressWarnings("unchecked")
     private synchronized kelondroMapDataMining openSeedTable(final File seedDBFile) {
-        final boolean usetree = false;
         final File parentDir = new File(seedDBFile.getParent());  
         if (!parentDir.exists()) {
 			if(!parentDir.mkdirs())
@@ -244,11 +243,17 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
             initializeHandlerMethod = null;
         }
         try {
-            return new kelondroMapDataMining(new kelondroBLOBTree(seedDBFile, true, true, commonHashLength, 480, '#', kelondroBase64Order.enhancedCoder, usetree, false, true), 500, sortFields, longaccFields, doubleaccFields, initializeHandlerMethod, this);
+            return new kelondroMapDataMining(new kelondroBLOBHeap(seedDBFile, commonHashLength, kelondroBase64Order.enhancedCoder), 500, sortFields, longaccFields, doubleaccFields, initializeHandlerMethod, this);
         } catch (final Exception e) {
             // try again
-            kelondroBLOBTree.delete(seedDBFile);
-            return new kelondroMapDataMining(new kelondroBLOBTree(seedDBFile, true, true, commonHashLength, 480, '#', kelondroBase64Order.enhancedCoder, usetree, false, true), 500, sortFields, longaccFields, doubleaccFields, initializeHandlerMethod, this);
+            seedDBFile.delete();
+            try {
+                return new kelondroMapDataMining(new kelondroBLOBHeap(seedDBFile, commonHashLength, kelondroBase64Order.enhancedCoder), 500, sortFields, longaccFields, doubleaccFields, initializeHandlerMethod, this);
+            } catch (IOException e1) {
+                e1.printStackTrace();
+                System.exit(-1);
+                return null;
+            }
         }
     }
     
@@ -403,30 +408,15 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
     }
 
     public int sizeConnected() {
-    return seedActiveDB.size();
-        /*
-        Enumeration e = seedsConnected(true, false, null);
-        int c = 0; while (e.hasMoreElements()) {c++; e.nextElement();}
-        return c;
-        */
+        return seedActiveDB.size();
     }
     
     public int sizeDisconnected() {
-    return seedPassiveDB.size();
-        /*
-        Enumeration e = seedsDisconnected(true, false, null);
-        int c = 0; while (e.hasMoreElements()) {c++; e.nextElement();}
-        return c;
-        */
+        return seedPassiveDB.size();
     }
     
     public int sizePotential() {
-    return seedPotentialDB.size();
-        /*
-        Enumeration e = seedsPotential(true, false, null);
-        int c = 0; while (e.hasMoreElements()) {c++; e.nextElement();}
-        return c;
-        */
+        return seedPotentialDB.size();
     }
     
     public long countActiveURL() { return seedActiveDB.getLongAcc(yacySeed.LCOUNT); }

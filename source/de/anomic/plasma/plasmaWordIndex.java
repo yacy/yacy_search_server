@@ -215,9 +215,9 @@ public final class plasmaWordIndex implements indexRI {
         final File oldSeedFile = new File(new File(indexPrimaryRoot.getParentFile(), "YACYDB"), "mySeed.txt");
         if (oldSeedFile.exists()) oldSeedFile.renameTo(mySeedFile);
         seedDB = new yacySeedDB(
-                new File(networkRoot, "seed.new.db"),
-                new File(networkRoot, "seed.old.db"),
-                new File(networkRoot, "seed.pot.db"),
+                new File(networkRoot, "seed.new.heap"),
+                new File(networkRoot, "seed.old.heap"),
+                new File(networkRoot, "seed.pot.heap"),
                 mySeedFile
                 );
         
