@@ -37,6 +37,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import de.anomic.http.HttpClient;
@@ -105,7 +106,7 @@ public class RobotsTxt {
         // this method will always return a non-null value
         Entry robotsTxt4Host = null;
         try {
-            final HashMap<String, String> record = this.robotsTable.get(urlHostPort);
+            final Map<String, String> record = this.robotsTable.get(urlHostPort);
             if (record != null) robotsTxt4Host = new Entry(urlHostPort, record);
         } catch (final kelondroException e) {
         	resetDatabase();
@@ -134,7 +135,7 @@ public class RobotsTxt {
                 // check the robots table again for all threads that come here because they waited for another one
                 // to complete a download
                 try {
-                    final HashMap<String, String> record = this.robotsTable.get(urlHostPort);
+                    final Map<String, String> record = this.robotsTable.get(urlHostPort);
                     if (record != null) robotsTxt4Host = new Entry(urlHostPort, record);
                 } catch (final kelondroException e) {
                     resetDatabase();
@@ -261,11 +262,11 @@ public class RobotsTxt {
         public static final String CRAWL_DELAY_MILLIS = "crawlDelayMillis";
         
         // this is a simple record structure that holds all properties of a single crawl start
-        HashMap<String, String> mem;
+        Map<String, String> mem;
         private LinkedList<String> allowPathList, denyPathList;
         String hostName;
         
-        public Entry(final String hostName, final HashMap<String, String> mem) {
+        public Entry(final String hostName, final Map<String, String> mem) {
             this.hostName = hostName.toLowerCase();
             this.mem = mem; 
             

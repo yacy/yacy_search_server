@@ -50,6 +50,7 @@ import java.net.URL;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
@@ -161,12 +162,12 @@ public class yacySeed implements Cloneable {
     /** the peer-hash */
     public String hash;
     /** a set of identity founding values, eg. IP, name of the peer, YaCy-version, ...*/
-    private final HashMap<String, String> dna;
+    private final Map<String, String> dna;
     public int available;
     public int selectscore = -1; // only for debugging
     public String alternativeIP = null;
 
-    public yacySeed(final String theHash, final HashMap<String, String> theDna) {
+    public yacySeed(final String theHash, final Map<String, String> theDna) {
         // create a seed with a pre-defined hash map
         this.hash = theHash;
         this.dna = theDna;
@@ -351,7 +352,7 @@ public class yacySeed implements Cloneable {
     }
 
     /** @return the DNA-map of this peer */
-    public final HashMap<String, String> getMap() {
+    public final Map<String, String> getMap() {
         return this.dna;
     }
 

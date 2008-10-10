@@ -35,6 +35,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.TreeSet;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -121,7 +122,7 @@ public class blogBoard {
     private BlogEntry readBlogEntry(String key, final kelondroMap base) {
     	key = normalize(key);
         if (key.length() > keyLength) key = key.substring(0, keyLength);
-        HashMap<String, String> record;
+        Map<String, String> record;
         try {
             record = base.get(key);
         } catch (final IOException e) {
@@ -307,7 +308,7 @@ public class blogBoard {
     public class BlogEntry {
         
         String key;
-        HashMap<String, String> record;
+        Map<String, String> record;
     
         public BlogEntry(final String nkey, final byte[] subject, final byte[] author, final String ip, final Date date, final byte[] page, final ArrayList<String> comments, final String commentMode) {
             record = new HashMap<String, String>();
@@ -325,7 +326,7 @@ public class blogBoard {
             
             wikiBoard.setAuthor(ip, new String(author));
         }
-        BlogEntry(final String key, final HashMap<String, String> record) {
+        BlogEntry(final String key, final Map<String, String> record) {
             this.key = key;
             this.record = record;
             if (this.record.get("comments")==null) this.record.put("comments", listManager.collection2string(new ArrayList<String>()));

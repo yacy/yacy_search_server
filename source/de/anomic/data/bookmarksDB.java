@@ -410,7 +410,7 @@ public class bookmarksDB {
     
     public Bookmark getBookmark(final String urlHash){
         try {
-            final HashMap<String, String> map = bookmarksTable.get(urlHash);
+            final Map<String, String> map = bookmarksTable.get(urlHash);
             if (map == null) return null;
             return new Bookmark(map);
         } catch (final IOException e) {
@@ -505,7 +505,7 @@ public class bookmarksDB {
      * @param hash an object of type String, containing a tagHash
      */
     private Tag loadTag(final String hash){
-        HashMap<String, String> map;
+        Map<String, String> map;
         Tag ret=null;
         try {
             map = tagsTable.get(hash);
@@ -693,9 +693,9 @@ public class bookmarksDB {
 	// ---------------------------------------
     
     public bookmarksDate getDate(final String date){
-    	HashMap<String, String> map;
+    	Map<String, String> map;
         try {
-            map=datesTable.get(date);
+            map = datesTable.get(date);
         } catch (final IOException e) {
             map = null;
         }
@@ -913,10 +913,10 @@ public class bookmarksDB {
         public static final String URL_HASHES="urlHashes";
         public static final String TAG_NAME="tagName";
         private final String tagHash;
-        private final HashMap<String, String> mem;
+        private final Map<String, String> mem;
         private Set<String> urlHashes;
 
-        public Tag(final String hash, final HashMap<String, String> map){
+        public Tag(final String hash, final Map<String, String> map){
         	tagHash=hash;
             mem=map;
             if(mem.containsKey(URL_HASHES))
@@ -938,7 +938,7 @@ public class bookmarksDB {
             urlHashes=new HashSet<String>();
             mem.put(TAG_NAME, name);
         }
-        public HashMap<String, String> getMap(){
+        public Map<String, String> getMap(){
             mem.put(URL_HASHES, listManager.collection2string(this.urlHashes));
             return mem;
         }
@@ -993,7 +993,7 @@ public class bookmarksDB {
      */    
     public class bookmarksDate{
         public static final String URL_HASHES="urlHashes";
-        private final HashMap<String, String> mem;
+        private final Map<String, String> mem;
         String date;
 
         public bookmarksDate(final String mydate){
@@ -1003,7 +1003,7 @@ public class bookmarksDB {
             mem.put(URL_HASHES, "");
         }
 
-        public bookmarksDate(final String mydate, final HashMap<String, String> map){
+        public bookmarksDate(final String mydate, final Map<String, String> map){
             //round to seconds, but store as milliseconds (java timestamp)
             date=String.valueOf((Long.parseLong(mydate)/1000)*1000);
             mem=map;
@@ -1075,9 +1075,9 @@ public class bookmarksDB {
         private String urlHash;
         private Set<String> tags;
         private long timestamp;
-        HashMap<String, String> entry;
+        Map<String, String> entry;
         
-        public Bookmark(final String urlHash, final HashMap<String, String> map) {
+        public Bookmark(final String urlHash, final Map<String, String> map) {
             this.entry = map;
             this.urlHash=urlHash;
             if(map.containsKey(BOOKMARK_TAGS))
@@ -1129,7 +1129,7 @@ public class bookmarksDB {
             timestamp=System.currentTimeMillis();
         }
 
-        public Bookmark(final HashMap<String, String> map) throws MalformedURLException {
+        public Bookmark(final Map<String, String> map) throws MalformedURLException {
             this((new yacyURL(map.get(BOOKMARK_URL), null)).hash(), map);
         }
         

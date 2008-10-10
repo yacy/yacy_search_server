@@ -28,6 +28,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.TimeZone;
 
 import de.anomic.kelondro.kelondroBLOBTree;
@@ -116,7 +117,7 @@ public class wikiBoard {
     public class entry {
 
         String key;
-        HashMap<String, String> record;
+        Map<String, String> record;
 
         public entry(final String subject, String author, String ip, String reason, final byte[] page) throws IOException {
             record = new HashMap<String, String>();
@@ -137,7 +138,7 @@ public class wikiBoard {
             //System.out.println("DEBUG: setting author " + author + " for ip = " + ip + ", authors = " + authors.toString());
         }
 
-        entry(final String key, final HashMap<String, String> record) {
+        entry(final String key, final Map<String, String> record) {
             this.key = key;
             this.record = record;
         }
@@ -275,7 +276,7 @@ public class wikiBoard {
         try {
             key = normalize(key);
             if (key.length() > keyLength) key = key.substring(0, keyLength);
-            final HashMap<String, String> record = base.get(key);
+            final Map<String, String> record = base.get(key);
             if (record == null) return newEntry(key, "anonymous", "127.0.0.1", "New Page", "".getBytes());
             return new entry(key, record);
         } catch (final IOException e) {

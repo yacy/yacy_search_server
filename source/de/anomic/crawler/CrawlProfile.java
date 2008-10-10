@@ -121,7 +121,7 @@ public class CrawlProfile {
         } catch (final IOException e) {}
     }
     
-    public entry newEntry(final HashMap<String, String> mem) {
+    public entry newEntry(final Map<String, String> mem) {
         final entry ne = new entry(mem);
         try {
             profileTable.put(ne.handle(), ne.map());
@@ -193,7 +193,7 @@ public class CrawlProfile {
     }
 
     public entry getEntry(final String handle) {
-        HashMap<String, String> m;
+        Map<String, String> m;
         try {
             m = profileTable.get(handle);
         } catch (final IOException e) {
@@ -252,7 +252,7 @@ public class CrawlProfile {
         public static final String XDSTOPW          = "xdstopw";
         public static final String XPSTOPW          = "xpstopw";
         
-        HashMap<String, String> mem;
+        Map<String, String> mem;
         private Map<String, DomProfile> doms;
         
         public entry(final String name, final yacyURL startURL, final String generalFilter, final String specificFilter,
@@ -299,13 +299,13 @@ public class CrawlProfile {
             return str.toString();
         }        
         
-        public entry(final HashMap<String, String> mem) {
+        public entry(final Map<String, String> mem) {
             this.mem = mem;
             this.doms = domsCache.get(this.mem.get(HANDLE));
             if (this.doms == null) this.doms = new HashMap<String, DomProfile>();
         }
         
-        public HashMap<String, String> map() {
+        public Map<String, String> map() {
             return mem;
         }
         public String handle() {

@@ -443,7 +443,7 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
         //seed.put(yacySeed.LASTSEEN, yacyCore.shortFormatter.format(new Date(yacyCore.universalTime())));
         try {
             nameLookupCache.put(seed.getName(), seed);
-            final HashMap<String, String> seedPropMap = seed.getMap();
+            final Map<String, String> seedPropMap = seed.getMap();
             synchronized (seedPropMap) {
                 seedActiveDB.put(seed.hash, seedPropMap);
             }
@@ -470,7 +470,7 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
         } catch (final Exception e) { serverLog.logWarning("yacySeedDB", "could not remove hash ("+ e.getClass() +"): "+ e.getMessage()); }
         //seed.put(yacySeed.LASTSEEN, yacyCore.shortFormatter.format(new Date(yacyCore.universalTime())));
         try {
-            final HashMap<String, String> seedPropMap = seed.getMap();
+            final Map<String, String> seedPropMap = seed.getMap();
             synchronized (seedPropMap) {
                 seedPassiveDB.put(seed.hash, seedPropMap);
             }
@@ -495,7 +495,7 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
         } catch (final Exception e) { serverLog.logWarning("yacySeedDB", "could not remove hash ("+ e.getClass() +"): "+ e.getMessage()); }
         //seed.put(yacySeed.LASTSEEN, yacyCore.shortFormatter.format(new Date(yacyCore.universalTime())));
         try {
-            final HashMap<String, String> seedPropMap = seed.getMap();
+            final Map<String, String> seedPropMap = seed.getMap();
             synchronized (seedPropMap) {
                 seedPotentialDB.put(seed.hash, seedPropMap);
             }
@@ -552,7 +552,7 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
     private yacySeed get(final String hash, final kelondroMapDataMining database) {
         if (hash == null) return null;
         if ((this.mySeed != null) && (hash.equals(mySeed.hash))) return mySeed;
-        HashMap<String, String> entry;
+        Map<String, String> entry;
         try {
             entry = database.get(hash);
         } catch (final IOException e) {
@@ -1006,7 +1006,7 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
         public yacySeed internalNext() {
             if ((it == null) || (!(it.hasNext()))) return null;
             try {
-                final HashMap<String, String> dna = it.next();
+                final Map<String, String> dna = it.next();
                 if (dna == null) return null;
                 final String hash = dna.remove("key");
                 //while (hash.length() < commonHashLength) { hash = hash + "_"; }

@@ -37,11 +37,11 @@ import de.anomic.server.logging.serverLog;
 
 public final class kelondroBLOBHeap implements kelondroBLOB {
 
-    private kelondroBytesLongMap index;    // key/seek relation for used records
-    private ArrayList<gap>    free;     // list of {size, seek} pairs denoting space and position of free records
-    private final File                 heapFile; // the file of the heap
-    private final kelondroByteOrder    ordering; // the ordering on keys
-    private RandomAccessFile     file;     // a random access to the file
+    private kelondroBytesLongMap    index;    // key/seek relation for used records
+    private ArrayList<gap>          free;     // list of {size, seek} pairs denoting space and position of free records
+    private final File              heapFile; // the file of the heap
+    private final kelondroByteOrder ordering; // the ordering on keys
+    private RandomAccessFile        file;     // a random access to the file
 
     public static class gap {
         public long seek;
@@ -436,7 +436,7 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
      * @throws IOException
      */
     public synchronized kelondroCloneableIterator<byte[]> keys(final boolean up, final boolean rotating) throws IOException {
-        return new kelondroRotateIterator<byte[]>(this.index.keys(up, null), null, 1);
+        return new kelondroRotateIterator<byte[]>(this.index.keys(up, null), null, this.index.size());
     }
 
     /**
@@ -459,6 +459,15 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
             heap.put("aaaaaaaaaaab".getBytes(), "vier fuenf sechs".getBytes());
             heap.put("aaaaaaaaaaac".getBytes(), "sieben acht neun".getBytes());
             heap.put("aaaaaaaaaaad".getBytes(), "zehn elf zwoelf".getBytes());
+            // iterate over keys
+            Iterator<byte[]> i = heap.index.keys(true, null);
+            while (i.hasNext()) {
+                System.out.println("key_a: " + new String(i.next()));
+            }
+            i = heap.keys(true, false);
+            while (i.hasNext()) {
+                System.out.println("key_b: " + new String(i.next()));
+            }
             heap.remove("aaaaaaaaaaab".getBytes());
             heap.remove("aaaaaaaaaaac".getBytes());
             heap.close();
@@ -466,5 +475,5 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
             e.printStackTrace();
         }
     }
-    
+
 }

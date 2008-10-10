@@ -28,6 +28,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.TimeZone;
 
 import de.anomic.kelondro.kelondroBLOBTree;
@@ -90,7 +91,7 @@ public class messageBoard {
     public class entry {
 	
 	String key; // composed by category and date
-    HashMap<String, String> record; // contains author, target hash, subject and message
+    Map<String, String> record; // contains author, target hash, subject and message
 
 	public entry(final String category,
                      String authorName, String authorHash,
@@ -118,7 +119,7 @@ public class messageBoard {
             record.put("read", "false");
 	}
 
-	entry(final String key, final HashMap<String, String> record) {
+	entry(final String key, final Map<String, String> record) {
 	    this.key = key;
 	    this.record = record;
 	}
@@ -197,7 +198,7 @@ public class messageBoard {
     }
     
     public entry read(final String key) {
-        HashMap<String, String> record;
+        Map<String, String> record;
         try {
             record = database.get(key);
         } catch (final IOException e) {

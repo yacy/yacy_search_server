@@ -345,13 +345,13 @@ public class kelondroMapDataMining extends kelondroMap {
         super.close();
     }
     
-    public class mapIterator implements Iterator<HashMap<String, String>> {
+    public class mapIterator implements Iterator<Map<String, String>> {
         // enumerates Map-Type elements
         // the key is also included in every map that is returned; it's key is 'key'
 
         Iterator<byte[]> keyIterator;
         boolean finish;
-        HashMap<String, String> n;
+        Map<String, String> n;
 
         public mapIterator(final Iterator<byte[]> keyIterator) {
             this.keyIterator = keyIterator;
@@ -363,17 +363,17 @@ public class kelondroMapDataMining extends kelondroMap {
             return this.n != null;
         }
 
-        public HashMap<String, String> next() {
-            final HashMap<String, String> n1 = n;
+        public Map<String, String> next() {
+            final Map<String, String> n1 = n;
             n = next0();
             return n1;
         }
         
-        private HashMap<String, String> next0() {
+        private Map<String, String> next0() {
             if (finish) return null;
             if (keyIterator == null) return null;
             String nextKey;
-            HashMap<String, String> map;
+            Map<String, String> map;
             while (keyIterator.hasNext()) {
                 nextKey = new String(keyIterator.next());
                 if (nextKey == null) {

@@ -29,6 +29,7 @@ package de.anomic.kelondro;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashMap;
@@ -41,13 +42,13 @@ public class kelondroMap {
 
     private final kelondroBLOB blob;
     private kelondroMScoreCluster<String> cacheScore;
-    private HashMap<String, HashMap<String, String>> cache;
+    private HashMap<String, Map<String, String>> cache;
     private final long startup;
     private final int cachesize;
 
     public kelondroMap(final kelondroBLOB blob, final int cachesize) {
         this.blob = blob;
-        this.cache = new HashMap<String, HashMap<String, String>>();
+        this.cache = new HashMap<String, Map<String, String>>();
         this.cacheScore = new kelondroMScoreCluster<String>();
         this.startup = System.currentTimeMillis();
         this.cachesize = cachesize;
@@ -67,7 +68,7 @@ public class kelondroMap {
      */
     public void clear() throws IOException {
     	this.blob.clear();
-        this.cache = new HashMap<String, HashMap<String, String>>();
+        this.cache = new HashMap<String, Map<String, String>>();
         this.cacheScore = new kelondroMScoreCluster<String>();
     }
 
@@ -108,7 +109,7 @@ public class kelondroMap {
      * @param newMap
      * @throws IOException
      */
-    public synchronized void put(String key, final HashMap<String, String> newMap) throws IOException {
+    public synchronized void put(String key, final Map<String, String> newMap) throws IOException {
         assert (key != null);
         assert (key.length() > 0);
         assert (newMap != null);
@@ -163,18 +164,18 @@ public class kelondroMap {
      * @return
      * @throws IOException
      */
-    public synchronized HashMap<String, String> get(final String key) throws IOException {
+    public synchronized Map<String, String> get(final String key) throws IOException {
         if (key == null) return null;
         return get(key, true);
     }
 
-    protected synchronized HashMap<String, String> get(String key, final boolean storeCache) throws IOException {
+    protected synchronized Map<String, String> get(String key, final boolean storeCache) throws IOException {
         // load map from cache
         assert key != null;
         if (cache == null) return null; // case may appear during shutdown
         while (key.length() < blob.keylength()) key += "_";
         
-        HashMap<String, String> map = cache.get(key);
+        Map<String, String> map = cache.get(key);
         if (map != null) return map;
 
         // load map from kra
@@ -269,7 +270,7 @@ public class kelondroMap {
         blob.close();
     }
 
-    public class objectIterator implements Iterator<HashMap<String, String>> {
+    public class objectIterator implements Iterator<Map<String, String>> {
         // enumerates Map-Type elements
         // the key is also included in every map that is returned; it's key is 'key'
 
@@ -285,14 +286,14 @@ public class kelondroMap {
             return (!(finish)) && (keyIterator.hasNext());
         }
 
-        public HashMap<String, String> next() {
+        public Map<String, String> next() {
             final byte[] nextKey = keyIterator.next();
             if (nextKey == null) {
                 finish = true;
                 return null;
             }
             try {
-                final HashMap<String, String> obj = get(new String(nextKey));
+                final Map<String, String> obj = get(new String(nextKey));
                 if (obj == null) throw new kelondroException("no more elements available");
                 return obj;
             } catch (final IOException e) {
@@ -305,5 +306,31 @@ public class kelondroMap {
             throw new UnsupportedOperationException();
         }
     } // class mapIterator
+    
+    public static void main(String[] args) {
+        // test the class
+        File f = new File("maptest");
+        if (f.exists()) f.delete();
+        try {
+            // make a blob
+            kelondroBLOB blob = new kelondroBLOBHeap(f, 12, kelondroNaturalOrder.naturalOrder);
+            // make map
+            kelondroMap map = new kelondroMap(blob, 1024);
+            // put some values into the map
+            HashMap<String, String> m = new HashMap<String, String>();
+            m.put("k", "000"); map.put("123", m);
+            m.put("k", "111"); map.put("456", m);
+            m.put("k", "222"); map.put("789", m);
+            // iterate over keys
+            Iterator<byte[]> i = map.keys(true, false);
+            while (i.hasNext()) {
+                System.out.println("key: " + new String(i.next()));
+            }
+            // clean up
+            map.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
     
 }

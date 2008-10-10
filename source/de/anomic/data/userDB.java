@@ -86,7 +86,7 @@ public final class userDB {
         if(userName.length()>128){
             userName=userName.substring(0, 127);
         }
-        HashMap<String, String> record;
+        Map<String, String> record;
         try {
             record = userTable.get(userName);
         } catch (final IOException e) {
@@ -312,11 +312,11 @@ public final class userDB {
         public static final int PROXY_TIMELIMIT_REACHED = 3;
         
         // this is a simple record structure that hold all properties of a user
-        HashMap<String, String> mem;
+        Map<String, String> mem;
         String userName;
 		private final Calendar oldDate, newDate;
         
-        public Entry(final String userName, final HashMap<String, String> mem) throws IllegalArgumentException {
+        public Entry(final String userName, final Map<String, String> mem) throws IllegalArgumentException {
             if ((userName == null) || (userName.length() == 0)) 
                 throw new IllegalArgumentException("Username needed.");
             if(userName.length()>128){
