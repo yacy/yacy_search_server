@@ -475,13 +475,13 @@ public class Network {
         final int lastSemicolon = userAgent.lastIndexOf(';');
         final int firstClosedParenthesis = userAgent.indexOf(')');
 
-        if (lastSemicolon > 0) {
+        if (lastSemicolon < firstClosedParenthesis) {
             // ; Location )
             location = (firstClosedParenthesis > 0) ? userAgent.substring(lastSemicolon + 1, firstClosedParenthesis)
                     .trim() : userAgent.substring(lastSemicolon + 1).trim();
         } else {
-            if (firstOpenParenthesis > 0) {
-                if (firstClosedParenthesis > 0) {
+            if (firstOpenParenthesis < userAgent.length()) {
+                if (firstClosedParenthesis > firstOpenParenthesis) {
                     // ( Location )
                     location = userAgent.substring(firstOpenParenthesis + 1, firstClosedParenthesis).trim();
                 } else {
