@@ -1,4 +1,4 @@
-// kelondroMapObjects.java
+// kelondroMapDataMining.java
 // -----------------------
 // (C) 29.01.2007 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 2004 as part of kelondroMap on http://www.anomic.de
@@ -164,7 +164,7 @@ public class kelondroMapDataMining extends kelondroMap {
         }
     }
     
-    public synchronized void put(final String key, final HashMap<String, String> newMap) throws IOException {
+    public synchronized void put(final String key, final Map<String, String> newMap) throws IOException {
         assert (key != null);
         assert (key.length() > 0);
         assert (newMap != null);

@@ -184,7 +184,7 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
      * the number of BLOBs in the heap
      * @return the number of BLOBs in the heap
      */
-    public int size() {
+    public synchronized int size() {
         return this.index.size();
     }
 
@@ -193,7 +193,7 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
      * @param key
      * @return true if the key exists, false othervise
      */
-    public boolean has(final byte[] key) {
+    public synchronized boolean has(final byte[] key) {
         assert index != null;
         assert index.row().primaryKeyLength == key.length;
         
@@ -470,6 +470,7 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
             }
             heap.remove("aaaaaaaaaaab".getBytes());
             heap.remove("aaaaaaaaaaac".getBytes());
+            heap.put("aaaaaaaaaaaX".getBytes(), "WXYZ".getBytes());
             heap.close();
         } catch (final IOException e) {
             e.printStackTrace();

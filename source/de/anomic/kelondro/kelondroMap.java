@@ -1,4 +1,4 @@
-// kelondroObjects.java
+// kelondroMap.java
 // -----------------------
 // (C) 29.01.2007 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 2004 as kelondroMap on http://www.anomic.de
@@ -87,9 +87,9 @@ public class kelondroMap {
         return bb.toString();
     }
 
-    private static HashMap<String, String> string2map(final String s) throws IOException {
+    private static Map<String, String> string2map(final String s) throws IOException {
         final BufferedReader br = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(s.getBytes())));
-        final HashMap<String, String> map = new HashMap<String, String>();
+        final Map<String, String> map = new HashMap<String, String>();
         String line;
         int pos;
         while ((line = br.readLine()) != null) { // very slow readLine????
@@ -317,7 +317,7 @@ public class kelondroMap {
             // make map
             kelondroMap map = new kelondroMap(blob, 1024);
             // put some values into the map
-            HashMap<String, String> m = new HashMap<String, String>();
+            Map<String, String> m = new HashMap<String, String>();
             m.put("k", "000"); map.put("123", m);
             m.put("k", "111"); map.put("456", m);
             m.put("k", "222"); map.put("789", m);

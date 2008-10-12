@@ -308,7 +308,7 @@ public class Network {
                             prop.put(STR_TABLE_LIST + conCount + "_updatedBlog", 0);
                             prop.put(STR_TABLE_LIST + conCount + "_isCrawling", 0);
                             if (conCount >= maxCount) { break; }
-                            if (sb.webIndex.seedDB.mySeed() != null && seed.hash.equals(sb.webIndex.seedDB.mySeed().hash)) {
+                            if (sb.webIndex.seedDB != null && sb.webIndex.seedDB.mySeed() != null && seed.hash.equals(sb.webIndex.seedDB.mySeed().hash)) {
                                 prop.put(STR_TABLE_LIST + conCount + "_dark", 2);
                             } else {
                                 prop.put(STR_TABLE_LIST + conCount + "_dark", ((dark) ? 1 : 0) ); dark=!dark;
