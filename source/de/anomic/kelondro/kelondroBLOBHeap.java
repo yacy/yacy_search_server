@@ -316,6 +316,9 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
     public synchronized void put(final byte[] key, final byte[] b) throws IOException {
         assert key.length == index.row().primaryKeyLength;
         
+        // we do not write records of length 0 into the BLOB
+        if (b.length == 0) return;
+        
         // first remove the old entry
         this.remove(key);
         
@@ -415,19 +418,82 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
         if (pos < 0) return;
         
         // access the file and read the container
-        file.seek(pos);
+        this.file.seek(pos);
         int len = file.readInt();
         
         // add entry to free array
-        this.free.add(new gap(pos, len));
+        gap thisGap = new gap(pos, len);
+        this.free.add(thisGap);
         
         // fill zeros to the content
-        while (len-- > 0) file.write(0);
+        while (len-- > 0) this.file.write(0);
         
         // remove entry from index
         this.index.removel(key);
+        
+        // recursively merge gaps
+        tryMergeGaps(thisGap);
     }
 
+    private void tryMergeGaps(final gap thisGap) throws IOException {
+        // try to merge two gaps if one gap has been processed already and the position of the next record is known
+        // if the next record is also a gap, merge these gaps and go on recursively
+        
+        // first check if next gap position is outside of file size
+        long nextRecord = thisGap.seek + thisGap.size + 4;
+        if (nextRecord >= this.file.length()) return; // end of recursion
+        
+        // move to next position and read record size
+        this.file.seek(nextRecord);
+        int len = file.readInt();
+        
+        // check if the record is a gap-record
+        assert len > 0;
+        if (len == 0) {
+            // a strange gap record: we can extend the thisGap with four bytes
+        } else {
+            int t = this.file.read();
+            if (t == 0) {
+                System.out.println("*** DEBUG-BLOBHeap " + heapFile.getName() + ": merging gap from pos " + thisGap.seek + ", len " + thisGap.size + " with next record of size " + len + " (+ 4)");
+                // the nextRecord is a gap record; we remove that from the free list because it will be joined with the current gap
+                gap g = removeFromFree(nextRecord, len);
+                assert g != null;
+                
+                // remove also the current gap, we will write a new gap entry
+                removeFromFree(thisGap.seek, thisGap.size);
+                
+                // overwrite the size bytes
+                this.file.seek(nextRecord);
+                this.file.write(0);this.file.write(0);this.file.write(0);this.file.write(0);
+                
+                // the new size of the current gap: old size + len + 4
+                int newLen = thisGap.size + 4 + len;
+                this.file.seek(thisGap.seek);
+                this.file.writeInt(newLen);
+                
+                // register new gap in the free array
+                gap newGap = new gap(thisGap.seek, newLen);
+                this.free.add(newGap);
+                
+                // recursively go on
+                tryMergeGaps(newGap);
+            }
+        }
+    }
+    
+    private gap removeFromFree(long pos, int len) {
+        Iterator<gap> i = this.free.iterator();
+        gap g;
+        while (i.hasNext()) {
+            g = i.next();
+            if (g.seek == pos && g.size == len) {
+                i.remove();
+                return g;
+            }
+        }
+        return null;
+    }
+    
     /**
      * iterator over all keys
      * @param up
