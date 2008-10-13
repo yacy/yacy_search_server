@@ -235,6 +235,10 @@ public class diskUsage {
     private static void checkVolumesInUseUnix (final String path) {
         final File file = new File(path);
         final File[] fileList = file.listFiles();
+        if (fileList == null) {
+            // the file is not a directory
+            return;
+        }
         String base;
         String dir;
         
