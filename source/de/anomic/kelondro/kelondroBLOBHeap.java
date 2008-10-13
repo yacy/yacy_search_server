@@ -29,8 +29,10 @@ package de.anomic.kelondro;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import de.anomic.server.serverMemory;
 import de.anomic.server.logging.serverLog;
@@ -38,19 +40,10 @@ import de.anomic.server.logging.serverLog;
 public final class kelondroBLOBHeap implements kelondroBLOB {
 
     private kelondroBytesLongMap    index;    // key/seek relation for used records
-    private ArrayList<gap>          free;     // list of {size, seek} pairs denoting space and position of free records
+    private TreeMap<Long, Integer>  free;     // list of {size, seek} pairs denoting space and position of free records
     private final File              heapFile; // the file of the heap
     private final kelondroByteOrder ordering; // the ordering on keys
     private RandomAccessFile        file;     // a random access to the file
-
-    public static class gap {
-        public long seek;
-        public int size;
-        public gap(final long seek, final int size) {
-            this.seek = seek;
-            this.size = size;
-        }
-    }
     
     /*
      * This class implements a BLOB management based on a sequence of records in a random access file
@@ -87,7 +80,7 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
         this.heapFile = heapFile;
         
         this.index = new kelondroBytesLongMap(keylength, this.ordering, 0);
-        this.free = new ArrayList<gap>();
+        this.free = new TreeMap<Long, Integer>();
         this.file = new RandomAccessFile(heapFile, "rw");
         final byte[] key = new byte[keylength];
         int reclen;
@@ -119,7 +112,7 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
             // check if this record is empty
             if (key == null || key[0] == 0) {
                 // it is an empty record, store to free list
-                if (reclen > 0) free.add(new gap(seek, reclen));
+                if (reclen > 0) free.put(seek, reclen);
             } else {
                 // store key and access address of entry in index
                 try {
@@ -140,19 +133,19 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
         // try to merge free entries
         if (this.free.size() > 1) {
             int merged = 0;
-            gap lastFree, nextFree;
-            final Iterator<gap> i = this.free.iterator();
+            Map.Entry<Long, Integer> lastFree, nextFree;
+            final Iterator<Map.Entry<Long, Integer>> i = this.free.entrySet().iterator();
             lastFree = i.next();
             while (i.hasNext()) {
                 nextFree = i.next();
                 //System.out.println("*** DEBUG BLOB: free-seek = " + nextFree.seek + ", size = " + nextFree.size);
                 // check if they follow directly
-                if (lastFree.seek + lastFree.size + 4 == nextFree.seek) {
+                if (lastFree.getKey() + lastFree.getValue() + 4 == nextFree.getKey()) {
                     // merge those records
-                    file.seek(lastFree.seek);
-                    lastFree.size = lastFree.size + nextFree.size + 4; // this updates also the free array
-                    file.writeInt(lastFree.size);
-                    file.seek(nextFree.seek);
+                    file.seek(lastFree.getKey());
+                    lastFree.setValue(lastFree.getValue() + nextFree.getValue() + 4); // this updates also the free map
+                    file.writeInt(lastFree.getValue());
+                    file.seek(nextFree.getKey());
                     file.write(0);file.write(0);file.write(0);file.write(0);
                     i.remove();
                     merged++;
@@ -285,8 +278,10 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
 
     /**
      * close the BLOB table
+     * @throws  
      */
     public synchronized void close() {
+        shrinkWithGapsAtEnd();
         index.close();
         free.clear();
         try {
@@ -328,34 +323,34 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
             long lseek = -1;
             int  lsize = 0;
             final int reclen = b.length + index.row().primaryKeyLength;
-            gap entry;
-            Iterator<gap> i = this.free.iterator();
+            Map.Entry<Long, Integer> entry;
+            Iterator<Map.Entry<Long, Integer>> i = this.free.entrySet().iterator();
             while (i.hasNext()) {
                 entry = i.next();
-                if (entry.size == reclen) {
+                if (entry.getValue().intValue() == reclen) {
                     // we found an entry that has exactly the size that we need!
                     // we use that entry and stop looking for a larger entry
-                    file.seek(entry.seek);
+                    file.seek(entry.getKey());
                     final int reclenf = file.readInt();
                     assert reclenf == reclen;
                     file.write(key);
                     file.write(b);
                     
+                    // add the entry to the index
+                    this.index.putl(key, entry.getKey());
+                    
                     // remove the entry from the free list
                     i.remove();
                     
-                    // add the entry to the index
-                    this.index.putl(key, entry.seek);
-                    
-                    //System.out.println("*** DEBUG BLOB: replaced-fit record at " + entry.seek + ", reclen=" + reclen + ", key=" + new String(key));
+                     //System.out.println("*** DEBUG BLOB: replaced-fit record at " + entry.seek + ", reclen=" + reclen + ", key=" + new String(key));
                     
                     // finished!
                     return;
                 }
                 // look for the biggest size
-                if (entry.size > lsize) {
-                    lseek = entry.seek;
-                    lsize = entry.size;
+                if (entry.getValue() > lsize) {
+                    lseek = entry.getKey();
+                    lsize = entry.getValue();
                 }
             }
             
@@ -381,18 +376,10 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
                 file.writeInt(newfreereclen);
                 
                 // remove the old free entry
-                i = this.free.iterator();
-                while (i.hasNext()) {
-                    entry = i.next();
-                    if (entry.size == (long) lsize && entry.seek == lseek) {
-                        // remove the entry from the free list
-                        i.remove();
-                        break;
-                    }
-                }
+                this.free.remove(lseek);
                 
                 // add a new free entry
-                free.add(new gap(lseek + 4 + reclen, newfreereclen));
+                this.free.put(lseek + 4 + reclen, newfreereclen);
                 
                 //System.out.println("*** DEBUG BLOB: replaced-split record at " + lseek + ", reclen=" + reclen + ", new reclen=" + newfreereclen + ", key=" + new String(key));
                 
@@ -414,84 +401,127 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
         assert index.row().primaryKeyLength == key.length;
         
         // check if the index contains the key
-        final long pos = index.getl(key);
-        if (pos < 0) return;
+        final long seek = index.getl(key);
+        if (seek < 0) return;
         
         // access the file and read the container
-        this.file.seek(pos);
-        int len = file.readInt();
+        this.file.seek(seek);
+        int size = file.readInt();
+        //assert seek + size + 4 <= this.file.length() : heapFile.getName() + ": too long size " + size + " in record at " + seek;
+        long filelength = this.file.length(); // put in separate variable for debugging
+        if (seek + size + 4 > filelength) {
+            serverLog.logSevere("BLOBHeap", heapFile.getName() + ": too long size " + size + " in record at " + seek);
+            throw new IOException(heapFile.getName() + ": too long size " + size + " in record at " + seek);
+        }
         
         // add entry to free array
-        gap thisGap = new gap(pos, len);
-        this.free.add(thisGap);
+        this.free.put(seek, size);
         
         // fill zeros to the content
-        while (len-- > 0) this.file.write(0);
+        int l = size; while (l-- > 0) this.file.write(0);
         
         // remove entry from index
         this.index.removel(key);
         
         // recursively merge gaps
-        tryMergeGaps(thisGap);
+        tryMergeNextGaps(seek, size);
+        tryMergePreviousGap(seek);
+    }
+    
+    private void tryMergePreviousGap(final long thisSeek) throws IOException {
+        // this is called after a record has been removed. That may cause that a new
+        // empty record was surrounded by gaps. We merge with a previous gap, if this
+        // is also empty, but don't do that recursively
+        // If this is successful, it removes the given marker for thisSeed and
+        // because of this, this method MUST be called AFTER tryMergeNextGaps was called.
+        
+        // first find the gap entry for the closest gap in front of the give gap
+        SortedMap<Long, Integer> head = this.free.headMap(thisSeek);
+        if (head.size() == 0) return;
+        long previousSeek = head.lastKey().longValue();
+        int previousSize = head.get(previousSeek).intValue();
+        
+        // check if this is directly in front
+        if (previousSeek + previousSize + 4 == thisSeek) {
+            // right in front! merge the gaps
+            Integer thisSize = this.free.get(thisSeek);
+            assert thisSize != null;
+            mergeGaps(previousSeek, previousSize, thisSeek, thisSize.intValue());
+        }
     }
 
-    private void tryMergeGaps(final gap thisGap) throws IOException {
+    private void tryMergeNextGaps(final long thisSeek, final int thisSize) throws IOException {
         // try to merge two gaps if one gap has been processed already and the position of the next record is known
         // if the next record is also a gap, merge these gaps and go on recursively
         
         // first check if next gap position is outside of file size
-        long nextRecord = thisGap.seek + thisGap.size + 4;
-        if (nextRecord >= this.file.length()) return; // end of recursion
+        long nextSeek = thisSeek + thisSize + 4;
+        if (nextSeek >= this.file.length()) return; // end of recursion
         
         // move to next position and read record size
-        this.file.seek(nextRecord);
-        int len = file.readInt();
+        Integer nextSize = this.free.get(nextSeek);
+        if (nextSize == null) return; // finished, this is not a gap
         
         // check if the record is a gap-record
-        assert len > 0;
-        if (len == 0) {
+        assert nextSize.intValue() > 0;
+        if (nextSize.intValue() == 0) {
             // a strange gap record: we can extend the thisGap with four bytes
+            // the nextRecord is a gap record; we remove that from the free list because it will be joined with the current gap
+            mergeGaps(thisSeek, thisSize, nextSeek, 0);
+                
+            // recursively go on
+            tryMergeNextGaps(thisSeek, thisSize + 4);
         } else {
+            // check if this is a true gap!
+            this.file.seek(nextSeek + 4);
             int t = this.file.read();
+            assert t == 0;
             if (t == 0) {
-                System.out.println("*** DEBUG-BLOBHeap " + heapFile.getName() + ": merging gap from pos " + thisGap.seek + ", len " + thisGap.size + " with next record of size " + len + " (+ 4)");
                 // the nextRecord is a gap record; we remove that from the free list because it will be joined with the current gap
-                gap g = removeFromFree(nextRecord, len);
-                assert g != null;
-                
-                // remove also the current gap, we will write a new gap entry
-                removeFromFree(thisGap.seek, thisGap.size);
-                
-                // overwrite the size bytes
-                this.file.seek(nextRecord);
-                this.file.write(0);this.file.write(0);this.file.write(0);this.file.write(0);
-                
-                // the new size of the current gap: old size + len + 4
-                int newLen = thisGap.size + 4 + len;
-                this.file.seek(thisGap.seek);
-                this.file.writeInt(newLen);
-                
-                // register new gap in the free array
-                gap newGap = new gap(thisGap.seek, newLen);
-                this.free.add(newGap);
+                mergeGaps(thisSeek, thisSize, nextSeek, nextSize.intValue());
                 
                 // recursively go on
-                tryMergeGaps(newGap);
+                tryMergeNextGaps(thisSeek, thisSize + 4 + nextSize.intValue());
             }
         }
     }
     
-    private gap removeFromFree(long pos, int len) {
-        Iterator<gap> i = this.free.iterator();
-        gap g;
-        while (i.hasNext()) {
-            g = i.next();
-            if (g.seek == pos && g.size == len) {
-                i.remove();
-                return g;
+    private void mergeGaps(final long seek0, final int size0, final long seek1, final int size1) throws IOException {
+        System.out.println("*** DEBUG-BLOBHeap " + heapFile.getName() + ": merging gap from pos " + seek0 + ", len " + size0 + " with next record of size " + size1 + " (+ 4)");
+        
+        Integer g = this.free.remove(seek1); // g is only used for debugging
+        assert g != null;
+        assert g.intValue() == size1;
+        
+        // overwrite the size bytes of next records with zeros
+        this.file.seek(seek1);
+        this.file.write(0);this.file.write(0);this.file.write(0);this.file.write(0);
+        
+        // the new size of the current gap: old size + len + 4
+        int newSize = size0 + 4 + size1;
+        this.file.seek(seek0);
+        this.file.writeInt(newSize);
+        
+        // register new gap in the free array; overwrite old gap entry
+        g = this.free.put(seek0, newSize);
+        assert g != null;
+        assert g.intValue() == size0;
+    }
+    
+    private void shrinkWithGapsAtEnd() {
+        // find gaps at the end of the file and shrink the file by these gaps
+        try {
+            while (this.free.size() > 0) {
+                Long seek = this.free.lastKey();
+                int size = this.free.get(seek).intValue();
+                if (seek.longValue() + size + 4 != this.file.length()) return;
+                // shrink the file
+                this.file.setLength(seek.longValue());
+                this.free.remove(seek);
             }
+        } catch (IOException e) {
+            // do nothing
         }
-        return null;
     }
     
     /**
