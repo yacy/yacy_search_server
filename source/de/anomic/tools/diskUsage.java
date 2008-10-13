@@ -253,8 +253,10 @@ public class diskUsage {
                         || dir.endsWith ("RELEASE")
                         || dir.endsWith ("collection.0028.commons")) {
                     checkPathUsageUnix (dir);
-                } else {
+                } else if (dir != null) {
                     checkVolumesInUseUnix (dir);
+                } else {
+                	log.logSevere("directory is null: " + dir);
                 }
             } else {
                 try {
