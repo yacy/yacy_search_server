@@ -44,7 +44,7 @@ binary-indep: install
 binary-arch: install
 	dh_installchangelogs 
 	dh_installdocs
-	dh_installinit
+	dh_installinit -- defaults 95 05
 #	dh_installman
 	dh_installdeb
 	dh_gencontrol
