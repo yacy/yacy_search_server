@@ -23,7 +23,18 @@ ifdef(`Fedora', `
 # Provides:          yacy
 # Required-Start:    $network
 # Required-Stop:     $network
+ifdef(`openSUSE', `
 # Default-Start:     3 5
+')dnl
+ifdef(`Debian', `
+# Default-Start:     2
+')dnl
+ifdef(`Fedora', `
+# Default-Start:     3 5
+')dnl
+ifdef(`Mandriva', `
+# Default-Start:     3 5
+')dnl
 # Default-Stop:
 # Short-Description: Distributed web search engine
 # Description:       yacy is a distributed search engine
