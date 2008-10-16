@@ -796,7 +796,7 @@ public class plasmaSnippetCache {
 
             // STEP 3: if the metadata is still null try to guess the mimeType of the resource
             if (responseHeader == null) {
-                final String filename = plasmaHTCache.getCachePath(url).getName();
+                final String filename = url.getFileName();
                 final int p = filename.lastIndexOf('.');
                 if (    // if no extension is available
                         (p < 0) ||

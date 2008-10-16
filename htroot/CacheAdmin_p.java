@@ -35,6 +35,7 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.Writer;
+import java.net.MalformedURLException;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -68,7 +69,7 @@ public class CacheAdmin_p {
     private static final int SecurityError = 4;
     
     public static final class Filter implements FilenameFilter {
-        private static final String EXCLUDE_NAME = plasmaHTCache.DB_NAME;
+        private static final String EXCLUDE_NAME = plasmaHTCache.RESPONSE_HEADER_DB_NAME;
         private final File EXCLUDE_DIR;
         public Filter(final File path) { this.EXCLUDE_DIR = path; }
         public boolean accept(final File dir, final String name) {
@@ -82,7 +83,6 @@ public class CacheAdmin_p {
 
         final String action = ((post == null) ? "info" : post.get("action", "info"));
         String pathString = ((post == null) ? "" : post.get("path", "/"));
-//      String pathString = ((post == null) ? "" : post.get("path", "/").replaceAll("//", "/")); // where is the BUG ?
 
         // don't leave the htCachePath
         File file = new File(switchboard.htCachePath, pathString);
@@ -100,7 +100,12 @@ public class CacheAdmin_p {
         final StringBuffer tree = new StringBuffer();
         final StringBuffer info = new StringBuffer();
 
-        final yacyURL  url  = plasmaHTCache.getURL(file);
+        yacyURL url = null;
+        try {
+            url = new yacyURL(pathString, null);
+        } catch (MalformedURLException e1) {
+            e1.printStackTrace();
+        }
         
         String urlstr = "";
         
@@ -228,7 +233,7 @@ public class CacheAdmin_p {
             }
         }
         
-        prop.putNum("cachesize", plasmaHTCache.curCacheSize/1024);
+        prop.putNum("cachesize", (plasmaHTCache.fileDBSize() + plasmaHTCache.responseHeaderDBSize()) / 1024);
         prop.putNum("cachemax", plasmaHTCache.maxCacheSize/1024);
         prop.put("path", path.toString());
         prop.putHTML("info_info", info.toString());

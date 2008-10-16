@@ -28,10 +28,7 @@
 package de.anomic.crawler;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.PrintStream;
-import java.io.PrintWriter;
 import java.util.Date;
 
 import de.anomic.http.JakartaCommonsHttpClient;
@@ -80,7 +77,6 @@ public class FTPLoader {
     public indexDocumentMetadata load(final CrawlEntry entry) {
         final yacyURL entryUrl = entry.url();
         final String fullPath = getPath(entryUrl);
-        final File cacheFile = createCachefile(entryUrl);
 
         // the return value
         indexDocumentMetadata htCache = null;
@@ -124,13 +120,14 @@ public class FTPLoader {
                     // directory -> get list of files
                     // create a htcache entry
                     htCache = createCacheEntry(entry, "text/html", new Date());
-                    if (!generateDirlist(ftpClient, entry, path, cacheFile)) {
+                    byte[] dirList = generateDirlist(ftpClient, entry, path);
+                    if (dirList == null) {
                         htCache = null;
                     }
                 } else {
                     // file -> download
                     try {
-                        htCache = getFile(ftpClient, entry, cacheFile);
+                        htCache = getFile(ftpClient, entry);
                     } catch (final Exception e) {
                         // add message to errorLog
                         (new PrintStream(berr)).print(e.getMessage());
@@ -147,37 +144,9 @@ public class FTPLoader {
             final String detail = (berr.size() > 0) ? "\n    Errorlog: " + berr.toString() : "";
             log.logWarning("Unable to download URL " + entry.url().toString() + detail);
             sb.crawlQueues.errorURL.newEntry(entry, sb.webIndex.seedDB.mySeed().hash, new Date(), 1, ErrorURL.DENIED_SERVER_DOWNLOAD_ERROR);
-
-            // an error has occured. cleanup
-            if (cacheFile.exists()) {
-                cacheFile.delete();
-            }
-        } else {
-            // announce the file
-            plasmaHTCache.writeFileAnnouncement(cacheFile);
         }
 
         return htCache;
-    }
-
-    /**
-     * creating a cache file object
-     * 
-     * @param entryUrl
-     * @return
-     */
-    private File createCachefile(final yacyURL entryUrl) {
-        final File cacheFile = plasmaHTCache.getCachePath(entryUrl);
-
-        // testing if the file already exists
-        if (cacheFile.isFile()) {
-            // delete the file if it already exists
-            plasmaHTCache.deleteURLfromCache(entryUrl, false);
-        } else {
-            // create parent directories
-            cacheFile.getParentFile().mkdirs();
-        }
-        return cacheFile;
     }
 
     /**
@@ -242,8 +211,7 @@ public class FTPLoader {
      * @return
      * @throws Exception
      */
-    private indexDocumentMetadata getFile(final ftpc ftpClient, final CrawlEntry entry, final File cacheFile)
-            throws Exception {
+    private indexDocumentMetadata getFile(final ftpc ftpClient, final CrawlEntry entry) throws Exception {
         // determine the mimetype of the resource
         final yacyURL entryUrl = entry.url();
         final String extension = plasmaParser.getFileExt(entryUrl);
@@ -267,7 +235,8 @@ public class FTPLoader {
                 htCache = createCacheEntry(entry, mimeType, fileDate);
 
                 // download the remote file
-                ftpClient.exec("get \"" + path + "\" \"" + cacheFile.getAbsolutePath() + "\"", false);
+                byte[] b = ftpClient.get(path);
+                htCache.setCacheArray(b);
             } else {
                 log.logInfo("REJECTED TOO BIG FILE with size " + size + " Bytes for URL " + entry.url().toString());
                 sb.crawlQueues.errorURL.newEntry(entry, this.sb.webIndex.seedDB.mySeed().hash, new Date(), 1,
@@ -299,8 +268,7 @@ public class FTPLoader {
      * @param cacheFile
      * @return
      */
-    private boolean generateDirlist(final ftpc ftpClient, final CrawlEntry entry, final String path,
-            final File cacheFile) {
+    private byte[] generateDirlist(final ftpc ftpClient, final CrawlEntry entry, final String path) {
         // getting the dirlist
         final yacyURL entryUrl = entry.url();
 
@@ -309,17 +277,12 @@ public class FTPLoader {
 
         if (dirList != null && dirList.length() > 0) {
             try {
-                // write it into a file
-                final PrintWriter writer = new PrintWriter(new FileOutputStream(cacheFile), false);
-                writer.write(dirList.toString());
-                writer.flush();
-                writer.close();
-                return true;
+                return dirList.toString().getBytes();
             } catch (final Exception e) {
                 log.logInfo("Unable to write dirlist for URL " + entryUrl.toString());
             }
         }
-        return false;
+        return null;
     }
 
     /**

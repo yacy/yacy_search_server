@@ -1041,10 +1041,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             if (entry.cacheArray() != null) {
                 final String error = entry.shallStoreCacheForProxy();
                 if (error == null) {
-                    plasmaHTCache.writeResourceContent(entry.url(), entry.cacheArray());
-                    if (this.log.isFine()) this.log.logFine("WROTE FILE (" + entry.cacheArray().length + " bytes) for " + entry.cacheFile());
+                    plasmaHTCache.storeFile(entry.url(), entry.cacheArray());
+                    if (this.log.isFine()) this.log.logFine("WROTE FILE (" + entry.cacheArray().length + " bytes) for " + entry.url());
                 } else {
-                    if (this.log.isFine()) this.log.logFine("WRITE OF FILE " + entry.cacheFile() + " FORBIDDEN: " + error);
+                    if (this.log.isFine()) this.log.logFine("WRITE OF FILE " + entry.url() + " FORBIDDEN: " + error);
                 }
             //} else {
                 //this.log.logFine("EXISTING FILE (" + entry.cacheFile.length() + " bytes) for " + entry.cacheFile);
@@ -1068,8 +1068,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
                     entry.name()
             ));
         } else {
-            if (!entry.profile().storeHTCache() && entry.cacheFile().exists()) {
-                plasmaHTCache.deleteURLfromCache(entry.url(), false);                
+            if (!entry.profile().storeHTCache()) {
+                try {
+                    plasmaHTCache.deleteFromCache(entry.url());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }                
             }
         }
         }
@@ -1581,7 +1585,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
 
         try {
             // parse the document
-            document = parser.parseSource(entry.url(), entry.getMimeType(), entry.getCharacterEncoding(), entry.cacheFile());
+            document = parser.parseSource(entry.url(), entry.getMimeType(), entry.getCharacterEncoding(), plasmaHTCache.getResourceContent(entry.url()));
             assert(document != null) : "Unexpected error. Parser returned null.";
             if (document == null) return null;
         } catch (final ParserException e) {

@@ -34,58 +34,41 @@
 
 package de.anomic.plasma;
 
-import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.InetAddress;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import de.anomic.http.httpResponseHeader;
 import de.anomic.index.indexDocumentMetadata;
 import de.anomic.kelondro.kelondroBLOB;
+import de.anomic.kelondro.kelondroBLOBArray;
 import de.anomic.kelondro.kelondroBLOBHeap;
-import de.anomic.kelondro.kelondroBLOBTree;
 import de.anomic.kelondro.kelondroBase64Order;
-import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroMap;
-import de.anomic.server.serverCodings;
-import de.anomic.server.serverDomains;
-import de.anomic.server.serverFileUtils;
-import de.anomic.server.serverInstantBusyThread;
-import de.anomic.server.serverThread;
 import de.anomic.server.logging.serverLog;
-import de.anomic.tools.enumerateFiles;
-import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyURL;
 
 public final class plasmaHTCache {
     
-    public static final String DB_NAME = "responseHeader.heap";
+    public static final String RESPONSE_HEADER_DB_NAME = "responseHeader.heap";
+    public static final String FILE_DB_NAME = "file.array";
     
     private static final int stackLimit = 150; // if we exceed that limit, we do not check idle
-    public  static final long oneday = 1000 * 60 * 60 * 24; // milliseconds of a day
+    public  static final long oneday = 1000L * 60L * 60L * 24L; // milliseconds of a day
 
     private static kelondroMap responseHeaderDB = null;
+    private static kelondroBLOBArray fileDB = null;
+    
     private static final ConcurrentLinkedQueue<indexDocumentMetadata> cacheStack = new ConcurrentLinkedQueue<indexDocumentMetadata>();
-    private static final SortedMap<String, File> cacheAge = Collections.synchronizedSortedMap(new TreeMap<String, File>()); // a <date+hash, cache-path> - relation
-    public static long curCacheSize = 0;
     public static long maxCacheSize = 0l;
     public static File cachePath = null;
     public static final serverLog log = new serverLog("HTCACHE");
-    private static long lastcleanup = System.currentTimeMillis();
     
-    private static serverThread cacheScanThread = null;
 
     // URL attributes
     public static final int UA_LOCAL    =  0; // URL was crawled locally
@@ -101,7 +84,6 @@ public final class plasmaHTCache {
         
         cachePath = htCachePath;
         maxCacheSize = CacheSizeMax;
-        
 
         // reset old HTCache ?
         String[] list = cachePath.list();
@@ -110,37 +92,14 @@ public final class plasmaHTCache {
             for (int i = list.length - 1; i >= 0; i--) {
                 object = new File(cachePath, list[i]);
 
-                if (!object.isDirectory()) { continue; }
-
-                if (!object.getName().equals("http") &&
-                    !object.getName().equals("yacy") &&
-                    !object.getName().equals("https") &&
-                    !object.getName().equals("ftp")) {
+                if (object.getName().equals("http") ||
+                    object.getName().equals("yacy") ||
+                    object.getName().equals("https") ||
+                    object.getName().equals("ftp")) {
                     deleteOldHTCache(cachePath);
-                    break;
-
                 }
             }
         }
-        File testpath = new File(cachePath, "/http/");
-        list = testpath.list();
-        if (list != null) {
-            File object;
-            for (int i = list.length - 1; i >= 0; i--) {
-                object = new File(testpath, list[i]);
-
-                if (!object.isDirectory()) { continue; }
-
-                if (!object.getName().equals("ip") &&
-                    !object.getName().equals("other") &&
-                    !object.getName().equals("www")) {
-                    deleteOldHTCache(cachePath);
-                    break;
-                }
-            }
-        }
-        testpath = null;
-
 
         // set/make cache path
         if (!htCachePath.exists()) {
@@ -153,39 +112,32 @@ public final class plasmaHTCache {
         }
 
         // open the response header database
-        openResponseHeaderDB();
-
-        // start the cache startup thread
-        // this will collect information about the current cache size and elements
-        try {
-            cacheScanThread = serverInstantBusyThread.oneTimeJob(Class.forName("de.anomic.plasma.plasmaHTCache"), "cacheScan", log, 120000);
-        } catch (final ClassNotFoundException e) {
-            e.printStackTrace();
-        }
+        openDB();
     }
 
-    static void resetResponseHeaderDB() {
+    static void resetDB() {
         log.logFine("reset responseHeader DB with "+ responseHeaderDB.size() +" entries");
         if (responseHeaderDB != null) responseHeaderDB.close();
-        final File dbfile = new File(cachePath, DB_NAME);
+        final File dbfile = new File(cachePath, RESPONSE_HEADER_DB_NAME);
         if (dbfile.exists()) dbfile.delete();
-        openResponseHeaderDB();
+        openDB();
     }
     
-    private static void openResponseHeaderDB() {
+    private static void openDB() {
         // open the response header database
-        final File dbfile = new File(cachePath, DB_NAME);
+        final File dbfile = new File(cachePath, RESPONSE_HEADER_DB_NAME);
         kelondroBLOB blob = null;
-        if (DB_NAME.endsWith("heap")) {
-            try {
-                blob = new kelondroBLOBHeap(dbfile, yacySeedDB.commonHashLength, kelondroBase64Order.enhancedCoder);
-            } catch (final IOException e) {
-                e.printStackTrace();
-            }
-        } else {
-            blob = new kelondroBLOBTree(dbfile, true, true, yacySeedDB.commonHashLength, 150, '#', kelondroBase64Order.enhancedCoder, false, false, true);
+        try {
+            blob = new kelondroBLOBHeap(dbfile, yacySeedDB.commonHashLength, kelondroBase64Order.enhancedCoder);
+        } catch (final IOException e) {
+            e.printStackTrace();
         }
         responseHeaderDB = new kelondroMap(blob, 500);
+        try {
+            fileDB = new kelondroBLOBArray(new File(cachePath, FILE_DB_NAME), 12, kelondroBase64Order.enhancedCoder, kelondroBLOBArray.oneMonth, kelondroBLOBArray.oneGigabyte);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
     
     private static void deleteOldHTCache(final File directory) {
@@ -208,8 +160,12 @@ public final class plasmaHTCache {
         return cacheStack.size();
     }
 
-    public static int dbSize() {
+    public static int responseHeaderDBSize() {
         return responseHeaderDB.size();
+    }
+    
+    public static long fileDBSize() {
+        return fileDB.length();
     }
     
     public static void push(final indexDocumentMetadata entry) {
@@ -233,181 +189,13 @@ public final class plasmaHTCache {
      * @return the cache size in bytes
      */
     public static long getFreeSize() {
-        return (curCacheSize >= maxCacheSize) ? 0 : maxCacheSize - curCacheSize;
+        long l = fileDB.length();
+        return (l >= maxCacheSize) ? 0 : maxCacheSize - l;
     }
-
-    private static boolean deleteFile(final File obj) {
-        if (obj.exists()) {
-            final long size = obj.length();
-            if (obj.delete()) {
-                curCacheSize -= size;
-                return true;
-            }
-        }
-       return false;
-    }
-
-    private static boolean deleteFileandDirs(File path, final String msg) {
-        if (deleteFile(path)) {
-            log.logInfo("DELETED " + msg + " CACHE: " + path.toString());
-            path = path.getParentFile(); // returns null if the path does not have a parent
-            // If the has been emptied, remove it
-            // Loop as long as we produce empty directories, but stop at HTCACHE
-            while (path != null && !(path.equals(cachePath)) && path.isDirectory() && path.list().length == 0) { // NPE
-                if (path.delete()) if (log.isFine()) log.logFine("DELETED EMPTY DIRECTORY : " + path.toString());
-                path = path.getParentFile(); // returns null if the path does not have a parent
-            }
-            return true;
-         }
-        return false;
-    }
-
-    private static void cleanupDoIt(final long newCacheSize) {
-        File file;
-        String key;
-        while (!cacheAge.isEmpty() && curCacheSize >= newCacheSize) {
-            if (Thread.currentThread().isInterrupted()) return;
-            key = cacheAge.firstKey();
-            file = cacheAge.get(key);
-            final long t = Long.parseLong(key.substring(0, 16), 16);
-            if (System.currentTimeMillis() - t < 300000) return; // files must have been at least 5 minutes in the cache before they are deleted
-            if (file != null) {
-                if (log.isFinest()) log.logFinest("Trying to delete [" + key + "] = old file: " + file.toString());
-                // This needs to be called *before* the file is deleted
-                final String urlHash = getHash(file);
-                if (deleteFileandDirs(file, "OLD")) {
-                    try {
-                        // As the file is gone, the entry in responseHeader.db is not needed anymore
-                        if (urlHash != null) {
-                            if (log.isFinest()) log.logFinest("Trying to remove responseHeader for URLhash: " + urlHash);
-                            responseHeaderDB.remove(urlHash);
-                        } else {
-                            final yacyURL url = getURL(file);
-                            if (url != null) {
-                                if (log.isFinest()) log.logFinest("Trying to remove responseHeader for URL: " + url.toNormalform(false, true));
-                                responseHeaderDB.remove(url.hash());
-                            }
-                        }
-                    } catch (final IOException e) {
-                        log.logInfo("IOExeption removing response header from DB: " + e.getMessage(), e);
-                    }
-                }
-            }
-            cacheAge.remove(key);
-        }
-    }
-
-    private static void cleanup() {
-        // clean up cache to have 4% (enough) space for next entries
-        if (cacheAge.size() > 0 &&
-            curCacheSize >= maxCacheSize &&
-            maxCacheSize > 0) {
-            cleanupDoIt(maxCacheSize - (maxCacheSize / 100) * 4);
-        }
-    }
-
+    
     public static void close() {
-        // closing cache scan if still running
-        if ((cacheScanThread != null) && (cacheScanThread.isAlive())) {
-            cacheScanThread.terminate(true);
-        }
-        
-        // closing DB
         responseHeaderDB.close();
-    }
-
-    private static String ageString(final long date, final File f) {
-        final StringBuffer sb = new StringBuffer(32);
-        String s = Long.toHexString(date);
-        for (int i = s.length(); i < 16; i++) sb.append('0');
-            sb.append(s);
-            s = Integer.toHexString(f.hashCode());
-            for (int i = s.length(); i < 8; i++) sb.append('0');
-            sb.append(s);
-        return sb.toString();
-    }
-
-    public static void cacheScan() {
-        log.logConfig("STARTING HTCACHE SCANNING");
-        final kelondroMScoreCluster<String> doms = new kelondroMScoreCluster<String>();
-        int fileCount = 0;
-        final enumerateFiles fileEnum = new enumerateFiles(cachePath, true, false, true, true);
-        final File dbfile = new File(cachePath, DB_NAME);
-        while (fileEnum.hasMoreElements()) {
-            if (Thread.currentThread().isInterrupted()) return;
-            fileCount++;
-            final File nextFile = fileEnum.nextElement();
-            final long nextFileModDate = nextFile.lastModified();
-            //System.out.println("Cache: " + dom(f));
-            doms.incScore(dom(nextFile));
-            curCacheSize += nextFile.length();
-            if (!dbfile.equals(nextFile)) cacheAge.put(ageString(nextFileModDate, nextFile), nextFile);
-            try {
-                Thread.sleep(10);
-            } catch (final InterruptedException e) {
-                return;
-            }
-        }
-        //System.out.println("%" + (String) cacheAge.firstKey() + "=" + cacheAge.get(cacheAge.firstKey()));
-        long ageHours = 0;
-        if (!cacheAge.isEmpty()) {
-            try {
-                ageHours = (System.currentTimeMillis() - Long.parseLong(cacheAge.firstKey().substring(0, 16), 16)) / 3600000;
-            } catch (final NumberFormatException e) {
-                ageHours = 0;
-            }
-        }
-        log.logConfig("CACHE SCANNED, CONTAINS " + fileCount +
-                      " FILES = " + curCacheSize/1048576 + "MB, OLDEST IS " + 
-            ((ageHours < 24) ? (ageHours + " HOURS") : ((ageHours / 24) + " DAYS")) + " OLD");
-        cleanup();
-
-        log.logConfig("STARTING DNS PREFETCH");
-        // start to prefetch IPs from DNS
-        String dom;
-        final long start = System.currentTimeMillis();
-        String result = "";
-        fileCount = 0;
-        while ((doms.size() > 0) && (fileCount < 50) && ((System.currentTimeMillis() - start) < 60000)) {
-            if (Thread.currentThread().isInterrupted()) return;
-            dom = doms.getMaxObject();
-            final InetAddress ip = serverDomains.dnsResolve(dom);
-            if (ip == null) continue;
-            result += ", " + dom + "=" + ip.getHostAddress();
-            log.logConfig("PRE-FILLED " + dom + "=" + ip.getHostAddress());
-            fileCount++;
-            doms.deleteScore(dom);
-            // wait a short while to prevent that this looks like a DoS
-            try {
-                Thread.sleep(100);
-            } catch (final InterruptedException e) {
-                return;
-            }
-        }
-        if (result.length() > 2) log.logConfig("PRE-FILLED DNS CACHE, FETCHED " + fileCount +
-                                               " ADDRESSES: " + result.substring(2));
-    }
-
-    private static String dom(final File f) {
-        String s = f.toString().substring(cachePath.toString().length() + 1);
-        int p = s.indexOf("/");
-        if (p < 0) p = s.indexOf("\\");
-        if (p < 0) return null;
-        // remove the protokoll
-        s = s.substring(p + 1);
-        p = s.indexOf("/");
-        if (p < 0) p = s.indexOf("\\");
-        if (p < 0) return null;
-        String prefix = "";
-        if (s.startsWith("www")) prefix = "www.";
-        // remove the www|other|ip directory
-        s = s.substring(p + 1);
-        p = s.indexOf("/");
-        if (p < 0) p = s.indexOf("\\");
-        if (p < 0) return null;
-        final int e = s.indexOf("!");
-        if ((e > 0) && (e < p)) p = e; // strip port
-        return prefix + s.substring(0, p);
+        fileDB.close();
     }
 
     public static boolean full() {
@@ -446,259 +234,7 @@ public final class plasmaHTCache {
         return plasmaParser.mediaExtContains(urlString);
     }
 
-    private static String replaceRegex(String input, final String regex, final String replacement) {
-        if (input == null) { return ""; }
-        if (input.length() > 0) {
-            final Pattern searchPattern = Pattern.compile(regex);
-            final Matcher matcher = searchPattern.matcher(input);
-            while (matcher.find()) {
-                input = matcher.replaceAll(replacement);
-                matcher.reset(input);
-            }
-        }
-        return input;
-    }
 
-    /**
-     * this method creates from a given host and path a cache path
-     * from a given host (which may also be an IPv4 - number, but not IPv6 or
-     * a domain; all without leading 'http://') and a path (which must start
-     * with a leading '/', and may also end in an '/') a path to a file
-     * in the file system with root as given in cachePath is constructed
-     * it will also be ensured, that the complete path exists; if necessary
-     * that path will be generated
-     * @return new File
-     */
-    public static File getCachePath(final yacyURL url) {
-//      this.log.logFinest("plasmaHTCache: getCachePath:  IN=" + url.toString());
-
-        // peer.yacy || www.peer.yacy  = http/yacy/peer
-        // protocol://www.doamin.net   = protocol/www/domain.net
-        // protocol://other.doamin.net = protocol/other/other.domain.net
-        // protocol://xxx.xxx.xxx.xxx  = protocol/ip/xxx.xxx.xxx.xxx
-
-        String host = url.getHost().toLowerCase();
-
-        String path = url.getPath();
-        final String query = url.getQuery();
-        if (!path.startsWith("/")) { path = "/" + path; }
-        if (path.endsWith("/") && query == null) { path = path + "ndx"; }
-
-        // yes this is not reversible, but that is not needed
-        path = replaceRegex(path, "/\\.\\./", "/!!/");
-        path = replaceRegex(path, "(\"|\\\\|\\*|\\?|:|<|>|\\|+)", "_"); // hier wird kein '/' gefiltert
-        String extention = null;
-        final int d = path.lastIndexOf(".");
-        final int s = path.lastIndexOf("/");
-        if ((d >= 0) && (d > s)) {
-            extention = path.substring(d);
-        } else if (path.endsWith("/ndx")) {
-            extention = ".html"; // Just a wild guess
-        }
-        path = path.concat(replaceRegex(query, "(\"|\\\\|\\*|\\?|/|:|<|>|\\|+)", "_"));
-
-        // only set NO default ports
-        int port = url.getPort();
-        String protocol = url.getProtocol();
-        if (port >= 0) {
-            if ((port ==  80 && protocol.equals("http" )) ||
-                (port == 443 && protocol.equals("https")) ||
-                (port ==  21 && protocol.equals("ftp"  ))) {
-                 port = -1;
-            }
-        }
-        if (host.endsWith(".yacy")) {
-            host = host.substring(0, host.length() - 5);
-            if (host.startsWith("www.")) {
-                host = host.substring(4);
-            }
-            protocol = "yacy";
-        } else if (host.startsWith("www.")) {
-            host = "www/" + host.substring(4);
-        } else if (host.matches("\\d{2,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}")) {
-            host = "ip/" + host;
-        } else {
-            host = "other/" + host;
-        }
-        final StringBuffer fileName = new StringBuffer();
-        fileName.append(protocol).append('/').append(host);
-        if (port >= 0) {
-            fileName.append('!').append(port);
-        }
-
-        // generate cache path
-        final File FileFlat = hashFile(fileName, "hash", extention, url.hash());
-        return FileFlat;
-    }
-    
-    private static File hashFile(final StringBuffer fileName, final String prefix, final String extention, final String urlhash) {
-        final String hexHash = yacySeed.b64Hash2hexHash(urlhash);
-        final StringBuffer f = new StringBuffer(fileName.length() + 30);
-        f.append(fileName);
-        if (prefix != null) f.append('/').append(prefix);
-        f.append('/').append(hexHash.substring(0,2)).append('/').append(hexHash.substring(2,4)).append('/').append(hexHash);
-        if (extention != null) fileName.append(extention);
-        return new File(cachePath, f.toString());
-    }
-    
-    /**
-     * This is a helper function that extracts the Hash from the filename
-     */
-    public static String getHash(final File f) {
-        if ((!f.isFile()) || (f.getPath().indexOf("hash") < 0)) return null;
-        final String name = f.getName();
-        if (name.length() < 18) return null; // not a hash file name
-        final String hexHash = name.substring(0,18);
-        if (hexHash.indexOf('.') >= 0) return null;
-        try {
-            final String hash = kelondroBase64Order.enhancedCoder.encode(serverCodings.decodeHex(hexHash));
-            if (hash.length() == yacySeedDB.commonHashLength) return hash;
-            return null;
-        } catch (final Exception e) {
-            //log.logWarning("getHash: " + e.getMessage(), e);
-            return null;
-        }
-    }
-
-    /**
-     * this is the reverse function to getCachePath: it constructs the url as string
-     * from a given storage path
-     */
-    public static yacyURL getURL(final File f) {
-//      this.log.logFinest("plasmaHTCache: getURL:  IN: Path=[" + cachePath + "] File=[" + f + "]");
-        final String urlHash = getHash(f);
-        if (urlHash != null) {
-            yacyURL url = null;
-            // try the urlPool
-            try {
-                url = plasmaSwitchboard.getSwitchboard().getURL(urlHash);
-            } catch (final Exception e) {
-                log.logWarning("getURL(" + urlHash + "): " /*+ e.getMessage()*/, e);
-                url = null;
-            }
-            if (url != null) return url;
-            // try responseHeaderDB
-            Map<String, String> hdb;
-            try {
-                hdb = responseHeaderDB.get(urlHash);
-            } catch (final IOException e1) {
-                hdb = null;
-            }
-            if (hdb != null) {
-                final Object origRequestLine = hdb.get(httpResponseHeader.X_YACY_ORIGINAL_REQUEST_LINE);
-                if ((origRequestLine != null)&&(origRequestLine instanceof String)) {
-                    int i = ((String)origRequestLine).indexOf(" ");
-                    if (i >= 0) {
-                        final String s = ((String)origRequestLine).substring(i).trim();
-                        i = s.indexOf(" ");
-                        try {
-                            url = new yacyURL((i<0) ? s : s.substring(0,i), urlHash);
-                        } catch (final Exception e) {
-                            url = null;
-                        }
-                    }
-                }
-            }
-            if (url != null) return url;
-        }
-        // If we can't get the correct URL, it seems to be a treeed file
-        final String c = cachePath.toString().replace('\\', '/');
-        String path = f.toString().replace('\\', '/');
-        int pos;
-        if ((pos = path.indexOf("/tree")) >= 0) path = path.substring(0, pos) + path.substring(pos + 5);
-        
-        if (path.endsWith("ndx")) { path = path.substring(0, path.length() - 3); }
-        
-        if ((pos = path.lastIndexOf(c)) == 0) {
-            path = path.substring(pos + c.length());
-            while (path.startsWith("/")) { path = path.substring(1); }
-
-            pos = path.indexOf("!");
-            if (pos >= 0) {
-                path = path.substring(0, pos) + ":" + path.substring(pos + 1);
-            }
-
-            String protocol = "http://";
-            String host = "";
-            if (path.startsWith("yacy/")) {
-                path = path.substring(5);
-
-                pos = path.indexOf("/");
-                if (pos > 0) {
-                    host = path.substring(0, pos);
-                    path = path.substring(pos);
-                } else {
-                    host = path;
-                    path = "";
-                }
-                pos = host.indexOf(":");
-                if (pos > 0) {
-                    host = host.substring(0, pos) + ".yacy" + host.substring(pos);
-                } else {
-                    host = host + ".yacy";
-                }
-
-            } else {
-                if (path.startsWith("http/")) {
-                    path = path.substring(5);
-                } else if (path.startsWith("https/")) {
-                    protocol = "https://";
-                    path = path.substring(6);
-                } else if (path.startsWith("ftp/")) {
-                    protocol = "ftp://";
-                    path = path.substring(4);
-                } else {
-                    return null;
-                }
-                if (path.startsWith("www/")) {
-                    path = path.substring(4);
-                    host = "www.";
-                } else if (path.startsWith("other/")) {
-                    path = path.substring(6);
-                } else if (path.startsWith("ip/")) {
-                    path = path.substring(3);
-                }
-                pos = path.indexOf("/");
-                if (pos > 0) {
-                    host = host + path.substring(0, pos);
-                    path = path.substring(pos);
-                } else {
-                    host = host + path;
-                    path = "";
-                }
-            }
-
-            if (!path.equals("")) {
-                final Pattern pathPattern = Pattern.compile("/!!/");
-                final Matcher matcher = pathPattern.matcher(path);
-                while (matcher.find()) {
-                    path = matcher.replaceAll("/\\.\\./");
-                    matcher.reset(path);
-                }
-            }
-
-//          this.log.logFinest("plasmaHTCache: getURL: OUT=" + s);
-            try {
-                return new yacyURL(protocol + host + path, null);
-            } catch (final Exception e) {
-                return null;
-            }
-        }
-        return null;
-    }
-    
-    /**
-     * @return the responseHeaderDB
-     */
-    static kelondroMap getResponseHeaderDB() {
-        return responseHeaderDB;
-    }
-
-    
-    /*
-     * ACCESS METHODS
-     */
-    
     // Store to Cache
     
     public static void storeMetadata(
@@ -715,62 +251,18 @@ public final class plasmaHTCache {
         } catch (final Exception e) {
             log.logWarning("could not write ResourceInfo: "
                     + e.getClass() + ": " + e.getMessage());
-            resetResponseHeaderDB();
+            resetDB();
         }
     }
 
-    public static boolean writeResourceContent(final yacyURL url, final byte[] array) {
-        if (array == null) return false;
-        final File file = getCachePath(url);
+    
+    public static void storeFile(yacyURL url, byte[] file) {
         try {
-            deleteFile(file);
-            file.getParentFile().mkdirs();
-            serverFileUtils.copy(array, file);
-        } catch (final FileNotFoundException e) {
-            // this is the case of a "(Not a directory)" error, which should be prohibited
-            // by the shallStoreCache() property. However, sometimes the error still occurs
-            // In this case do nothing.
-            log.logSevere("File storage failed (not a directory): " + e.getMessage());
-            return false;
-        } catch (final IOException e) {
-            log.logSevere("File storage failed (IO error): " + e.getMessage());
-            return false;
-        }
-        writeFileAnnouncement(file);
-        return true;
-    }
-
-    public static void writeFileAnnouncement(final File file) {
-        if (file.exists()) {
-            curCacheSize += file.length();
-            if (System.currentTimeMillis() - lastcleanup > 300000) {
-                // call the cleanup job only every 5 minutes
-                cleanup();
-                lastcleanup = System.currentTimeMillis();
-            }
-            cacheAge.put(ageString(file.lastModified(), file), file);
+            fileDB.put(url.hash().getBytes(), file);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
-
-    // Delete from Cache
-    
-    public static boolean deleteURLfromCache(final yacyURL url, final boolean keepHeader) {
-        if (deleteFileandDirs(getCachePath(url), "FROM") && !keepHeader) {
-            try {
-                // As the file is gone, the entry in responseHeader.db is not needed anymore
-                if (log.isFinest()) log.logFinest("Trying to remove responseHeader from URL: " + url.toNormalform(false, true));
-                responseHeaderDB.remove(url.hash());
-            } catch (final IOException e) {
-                resetResponseHeaderDB();
-                log.logWarning("IOExeption removing response header from DB: " + e.getMessage(), e);
-            }
-           return true;
-       }
-        return false;
-    }
-    
-    
-    // Read from Cache
     
     /**
      * Returns an object containing metadata about a cached resource
@@ -804,24 +296,33 @@ public final class plasmaHTCache {
      */
     public static InputStream getResourceContentStream(final yacyURL url) {
         // load the url as resource from the cache
-        final File f = getCachePath(url);
-        if (f.exists() && f.canRead()) try {
-            return new BufferedInputStream(new FileInputStream(f));
-        } catch (final IOException e) {
-            log.logSevere("Unable to create a BufferedInputStream from file " + f,e);
+        byte[] b = getResourceContent(url);
+        if (b == null) return null;
+        return new ByteArrayInputStream(b);
+    }
+    
+    public static byte[] getResourceContent(final yacyURL url) {
+        // load the url as resource from the cache
+        try {
+            return fileDB.get(url.hash().getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
             return null;
         }
-        return null;        
     }
     
     public static long getResourceContentLength(final yacyURL url) {
         // load the url as resource from the cache
-        final File f = getCachePath(url);
-        if (f.exists() && f.canRead()) {
-            return f.length();
-        } 
-        return 0;           
+        try {
+            return fileDB.length(url.hash().getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+            return -1;
+        }
     }
 
-    
+    public static void deleteFromCache(yacyURL url) throws IOException {
+        responseHeaderDB.remove(url.hash());
+        fileDB.remove(url.hash().getBytes());
+    }
 }

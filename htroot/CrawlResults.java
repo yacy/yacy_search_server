@@ -32,7 +32,6 @@ import java.util.Locale;
 
 import de.anomic.http.httpRequestHeader;
 import de.anomic.index.indexURLReference;
-import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -168,7 +167,7 @@ public class CrawlResults {
 
             boolean dark = true;
             String urlHash, initiatorHash, executorHash;
-            String cachepath, urlstr, urltxt;
+            String urlstr, urltxt;
             yacySeed initiatorSeed, executorSeed;
             indexURLReference urle;
             indexURLReference.Components comp;
@@ -184,13 +183,11 @@ public class CrawlResults {
                         serverLog.logWarning("PLASMA", "CrawlResults: URL not in index for crawl result "+ i +" with hash "+ urlHash);
                         urlstr = null;
                         urltxt = null;
-                        cachepath = null;
                         comp = null;
                     } else {
                         comp = urle.comp();
                         urlstr = comp.url().toNormalform(false, true);
                         urltxt = nxTools.shortenURLString(urlstr, 72); // shorten the string text like a URL
-                        cachepath = plasmaHTCache.getCachePath(new yacyURL(urlstr, null)).toString().replace('\\', '/').substring(plasmaHTCache.cachePath.toString().length() + 1);
                     }
                     initiatorSeed = sb.webIndex.seedDB.getConnected(initiatorHash);
                     executorSeed = sb.webIndex.seedDB.getConnected(executorHash);
@@ -226,9 +223,6 @@ public class CrawlResults {
 
                     if (showTitle) {
                         prop.put("table_indexed_" + cnt + "_showTitle", (showTitle) ? "1" : "0");
-                        if (cachepath == null) {
-                            prop.put("table_indexed_" + cnt + "_showTitle_available", "0");
-                        } else {
                             prop.put("table_indexed_" + cnt + "_showTitle_available", "1");
 
                             if (comp == null || comp.dc_title() == null || comp.dc_title().trim().length() == 0)
@@ -238,23 +232,18 @@ public class CrawlResults {
                                 prop.putHTML("table_indexed_" + cnt + "_showTitle_available_nodescr_urldescr", comp.dc_title());
                             }
 
-                            prop.put("table_indexed_" + cnt + "_showTitle_available_cachepath", cachepath);
+                            prop.put("table_indexed_" + cnt + "_showTitle_available_cachepath", "");
                             prop.putHTML("table_indexed_" + cnt + "_showTitle_available_urltitle", urlstr);
-                        }
                     } else
                         prop.put("table_indexed_" + cnt + "_showTitle", "0");
 
                     if (showURL) {
                         prop.put("table_indexed_" + cnt + "_showURL", "1");
-                        if (cachepath == null) {
-                            prop.put("table_indexed_" + cnt + "_showURL_available", "0");
-                        } else {
                             prop.put("table_indexed_" + cnt + "_showURL_available", "1");
 
-                            prop.put("table_indexed_" + cnt + "_showURL_available_cachepath", cachepath);
+                            prop.put("table_indexed_" + cnt + "_showURL_available_cachepath", "");
                             prop.putHTML("table_indexed_" + cnt + "_showURL_available_urltitle", urlstr);
                             prop.put("table_indexed_" + cnt + "_showURL_available_url", urltxt);
-                        }
                     } else
                         prop.put("table_indexed_" + cnt + "_showURL", "0");
 

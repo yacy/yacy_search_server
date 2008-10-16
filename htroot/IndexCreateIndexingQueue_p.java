@@ -67,7 +67,7 @@ public class IndexCreateIndexingQueue_p {
                         IndexingStack.QueueEntry entry = null;
                         while ((entry = sb.webIndex.queuePreStack.pop()) != null) {
                             if ((entry != null) && (entry.profile() != null) && (!(entry.profile().storeHTCache()))) {
-                                plasmaHTCache.deleteURLfromCache(entry.url(), false);
+                                plasmaHTCache.deleteFromCache(entry.url());
                             }                            
                         }
                         sb.webIndex.queuePreStack.clear(); // reset file to clean up content completely

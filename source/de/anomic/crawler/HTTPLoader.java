@@ -25,10 +25,7 @@
 
 package de.anomic.crawler;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.NoRouteToHostException;
 import java.net.SocketException;
@@ -40,8 +37,6 @@ import de.anomic.http.JakartaCommonsHttpClient;
 import de.anomic.http.JakartaCommonsHttpResponse;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpResponseHeader;
-import de.anomic.http.httpdBoundedSizeOutputStream;
-import de.anomic.http.httpdByteCountOutputStream;
 import de.anomic.http.httpdLimitExceededException;
 import de.anomic.http.httpdProxyCacheEntry;
 import de.anomic.index.indexDocumentMetadata;
@@ -50,7 +45,6 @@ import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
-import de.anomic.server.serverSystem;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyURL;
 
@@ -166,70 +160,31 @@ public final class HTTPLoader {
                 // create a new cache entry
                 htCache = createCacheEntry(entry, requestDate, requestHeader, res.getResponseHeader(), res.getStatusLine()); 
                 
-                // aborting download if content is to long ...
-                if (htCache.cacheFile().getAbsolutePath().length() > serverSystem.maxPathLength) {
-                    this.log.logInfo("REJECTED URL " + entry.url().toString() + " because path too long '" + plasmaHTCache.cachePath.getAbsolutePath() + "'");
-                    sb.crawlQueues.errorURL.newEntry(entry, sb.webIndex.seedDB.mySeed().hash, new Date(), 1, ErrorURL.DENIED_CACHEFILE_PATH_TOO_LONG);                    
-                    return (htCache = null);
-                }
-
-                // reserve cache entry
-                if (!htCache.cacheFile().getCanonicalPath().startsWith(plasmaHTCache.cachePath.getCanonicalPath())) {
-                    // if the response has not the right file type then reject file
-                    this.log.logInfo("REJECTED URL " + entry.url().toString() + " because of an invalid file path ('" +
-                                htCache.cacheFile().getCanonicalPath() + "' does not start with '" +
-                                plasmaHTCache.cachePath.getAbsolutePath() + "').");
-                    sb.crawlQueues.errorURL.newEntry(entry, sb.webIndex.seedDB.mySeed().hash, new Date(), 1, ErrorURL.DENIED_INVALID_CACHEFILE_PATH);
-                    return (htCache = null);
-                }
-
                 // request has been placed and result has been returned. work off response
-                final File cacheFile = plasmaHTCache.getCachePath(entry.url());
                 try {
                     if (plasmaParser.supportedContent(parserMode, entry.url(), res.getResponseHeader().mime())) {
-                        // delete old content
-                        if (cacheFile.isFile()) {
-                            // TODO why is content and metadata so separated? htcache holds metadata, but deleteURLfromCache deletes it???
-                            plasmaHTCache.deleteURLfromCache(entry.url(), true);
+                        
+                        // get the content length and check if the length is allowed
+                        long contentLength = res.getResponseHeader().getContentLength();
+                        if (maxFileSize >= 0 && contentLength > maxFileSize) {
+                            this.log.logInfo("REJECTED URL " + entry.url() + " because file size '" + contentLength + "' exceeds max filesize limit of " + maxFileSize + " bytes.");
+                            sb.crawlQueues.errorURL.newEntry(entry, sb.webIndex.seedDB.mySeed().hash, new Date(), 1, ErrorURL.DENIED_FILESIZE_LIMIT_EXCEEDED);                    
+                            return null;
                         }
-                        
-                        // create parent directories
-                        cacheFile.getParentFile().mkdirs();
-                        
-                        OutputStream fos = null;
-                        try {
-                            // creating an output stream
-                            fos = new FileOutputStream(cacheFile); 
-                            
-                            // getting content length
-                            final long contentLength = res.getResponseHeader().getContentLength();
-                            
-                            // check the maximum allowed file size                     
-                            if (contentLength == -1 || maxFileSize == -1) {
-                                if(maxFileSize == -1) {
-                                    // unlimited
-                                    fos = new httpdByteCountOutputStream(fos);
-                                } else {
-                                    // check filesize while loading page
-                                    fos = new httpdBoundedSizeOutputStream(fos, maxFileSize);                     
-                                }
-                            } else if (contentLength > maxFileSize) {
-                                this.log.logInfo("REJECTED URL " + entry.url() + " because file size '" + contentLength + "' exceeds max filesize limit of " + maxFileSize + " bytes.");
-                                sb.crawlQueues.errorURL.newEntry(entry, sb.webIndex.seedDB.mySeed().hash, new Date(), 1, ErrorURL.DENIED_FILESIZE_LIMIT_EXCEEDED);                    
-                                return null;
-                            }
 
-                            // we write the new cache entry to file system directly
-                            res.setAccountingName("CRAWLER");
-                            final byte[] responseBody = res.getData();
-                            fos.write(responseBody);
-                            htCache.setCacheArray(responseBody);
-                            plasmaHTCache.writeFileAnnouncement(cacheFile);
-                            //htCache.writeResourceInfo(); // write header to header BLOB-database
-                        } finally {
-                            if (fos!=null)try{fos.close();}catch(final Exception e){/* ignore this */}
+                        // we write the new cache entry to file system directly
+                        res.setAccountingName("CRAWLER");
+                        final byte[] responseBody = res.getData();
+                        contentLength = responseBody.length;
+                        
+                        // check length again in case it was not possible to get the length before loading
+                        if (maxFileSize >= 0 && contentLength > maxFileSize) {
+                            this.log.logInfo("REJECTED URL " + entry.url() + " because file size '" + contentLength + "' exceeds max filesize limit of " + maxFileSize + " bytes.");
+                            sb.crawlQueues.errorURL.newEntry(entry, sb.webIndex.seedDB.mySeed().hash, new Date(), 1, ErrorURL.DENIED_FILESIZE_LIMIT_EXCEEDED);                    
+                            return null;
                         }
                         
+                        htCache.setCacheArray(responseBody);
                     } else {
                         // if the response has not the right file type then reject file
                         this.log.logInfo("REJECTED WRONG MIME/EXT TYPE " + res.getResponseHeader().mime() + " for URL " + entry.url().toString());
@@ -243,7 +198,6 @@ public final class HTTPLoader {
                     // in that case, we are not responsible and just forget it
                     // but we clean the cache also, since it may be only partial
                     // and most possible corrupted
-                    if (cacheFile.exists()) cacheFile.delete();
                     this.log.logSevere("CRAWLER LOADER ERROR1: with URL=" + entry.url().toString() + ": " + e.toString());
                     sb.crawlQueues.errorURL.newEntry(entry, sb.webIndex.seedDB.mySeed().hash, new Date(), 1, ErrorURL.DENIED_CONNECTION_ERROR);
                     htCache = null;
@@ -288,7 +242,6 @@ public final class HTTPLoader {
                         // retry crawling with new url
                         entry.redirectURL(redirectionUrl);
                         return load(entry, plasmaParser.PARSER_MODE_URLREDIRECTOR, retryCount - 1);
-                        
                     }
             } else {
                 // if the response has not the right response type then reject file

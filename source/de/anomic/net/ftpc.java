@@ -2319,6 +2319,58 @@ public class ftpc {
         }
     }
 
+    public byte[] get(final String fileName) throws IOException {
+
+        createDataSocket();
+
+        // set type of the transfer
+        sendTransferType(transferType);
+
+        // send command to the control port
+        send("RETR " + fileName);
+
+        // read status of the command from the control port
+        String reply = receive();
+
+        // get status code
+        final int status = getStatus(reply);
+
+        // starting data transaction
+        if (status == 1) {
+            Socket data = null;
+            InputStream ClientStream = null;
+            ByteArrayOutputStream os = new ByteArrayOutputStream();
+            int length = 0;
+            try {
+                data = getDataSocket();
+                ClientStream = data.getInputStream();
+    
+                // write remote file to local file
+                final byte[] block = new byte[blockSize];
+                int numRead;
+    
+                while ((numRead = ClientStream.read(block)) != -1) {
+                    os.write(block, 0, numRead);
+                    length = length + numRead;
+                }
+    
+                // after stream is empty we should get control completion echo
+                /*reply =*/ receive();
+                // boolean success = !isNotPositiveCompletion(reply);
+            } finally {
+                // shutdown connection
+                if(ClientStream != null) {
+                    ClientStream.close();
+                }
+                closeDataSocket();
+            }
+            return os.toByteArray();
+        } else {
+            throw new IOException(reply);
+        }
+    }
+
+    
     private void put(final String fileName, final String fileDest) throws IOException {
 
         createDataSocket();

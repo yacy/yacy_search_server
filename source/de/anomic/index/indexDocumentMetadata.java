@@ -26,7 +26,6 @@
 
 package de.anomic.index;
 
-import java.io.File;
 import java.util.Date;
 
 import de.anomic.crawler.CrawlProfile;
@@ -59,8 +58,6 @@ public interface indexDocumentMetadata {
     public int depth();
 
     public yacyURL referrerURL();
-
-    public File cacheFile();
 
     public void setCacheArray(final byte[] data);
 

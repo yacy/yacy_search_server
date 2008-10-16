@@ -26,14 +26,12 @@
 
 package de.anomic.http;
 
-import java.io.File;
 import java.util.Date;
 
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.index.indexDocumentMetadata;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.server.serverDate;
-import de.anomic.server.serverSystem;
 import de.anomic.yacy.yacyURL;
 
 public class httpdProxyCacheEntry implements indexDocumentMetadata {
@@ -54,7 +52,6 @@ public class httpdProxyCacheEntry implements indexDocumentMetadata {
     // the class objects
     private final  int                depth;           // the depth of pre-fetching
     private final  String             responseStatus;
-    private final  File               cacheFile;       // the cache file
     private        byte[]             cacheArray;      // or the cache as byte-array
     private final  yacyURL            url;
     private final  String             name;            // the name of the link, read as anchor from an <a>-tag
@@ -151,7 +148,6 @@ public class httpdProxyCacheEntry implements indexDocumentMetadata {
         this.responseHeader = responseHeader;
         this.url = url;
         this.name = name;
-        this.cacheFile = plasmaHTCache.getCachePath(this.url);
 
         // assigned:
         this.depth = depth;
@@ -221,17 +217,17 @@ public class httpdProxyCacheEntry implements indexDocumentMetadata {
     }
 
     public long size() {
-        if (this.cacheArray == null)
-            return 0;
-        return this.cacheArray.length;
+        if (this.cacheArray != null) return this.cacheArray.length;
+        if (this.responseHeader != null) {
+            // take the size from the response header
+            return this.responseHeader.getContentLength();
+        }
+        // the size is unknown
+        return -1;
     }
 
     public int depth() {
         return this.depth;
-    }
-
-    public File cacheFile() {
-        return this.cacheFile;
     }
 
     public void setCacheArray(final byte[] data) {
@@ -258,25 +254,13 @@ public class httpdProxyCacheEntry implements indexDocumentMetadata {
         // the cache or not
         // if the storage was requested by prefetching, the request map is null
 
+        // check storage size: all files will be handled in RAM before storage, so they must not exceed
+        // a given size, which we consider as 1MB
+        if (this.size() > 1024L * 1024L) return "too_large_for_caching_" + this.size();
+        
         // check status code
         if (!validResponseStatus()) {
             return "bad_status_" + this.responseStatus.substring(0, 3);
-        }
-
-        // check storage location
-        // sometimes a file name is equal to a path name in the same directory;
-        // or sometimes a file name is equal a directory name created earlier;
-        // we cannot match that here in the cache file path and therefore omit
-        // writing into the cache
-        if (this.cacheFile.getParentFile().isFile()
-                || this.cacheFile.isDirectory()) {
-            return "path_ambiguous";
-        }
-        if (this.cacheFile.toString().indexOf("..") >= 0) {
-            return "path_dangerous";
-        }
-        if (this.cacheFile.getAbsolutePath().length() > serverSystem.maxPathLength) {
-            return "path too long";
         }
 
         // -CGI access in request

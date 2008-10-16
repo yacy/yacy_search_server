@@ -94,9 +94,10 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
             
                 // read length of the following record without the length of the record size bytes
                 reclen = file.readInt();
-                assert reclen > 0;
+                //assert reclen > 0 : " reclen == 0 at seek pos " + seek;
                 if (reclen == 0) {
                     // very bad file inconsistency
+                    serverLog.logSevere("kelondroBLOBHeap", "reclen == 0 at seek pos " + seek + " in file " + heapFile);
                     this.file.setLength(seek); // delete everything else at the remaining of the file :-(
                     break loop;
                 }
@@ -260,6 +261,24 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
         return blob;
     }
 
+    /**
+     * retrieve the size of the BLOB
+     * @param key
+     * @return the size of the BLOB or -1 if the BLOB does not exist
+     * @throws IOException
+     */
+    public long length(byte[] key) throws IOException {
+        assert index.row().primaryKeyLength == key.length;
+        
+        // check if the index contains the key
+        final long pos = index.getl(key);
+        if (pos < 0) return -1;
+        
+        // access the file and read the size of the container
+        file.seek(pos);
+        return file.readInt() - index.row().primaryKeyLength;
+    }
+    
     /**
      * clears the content of the database
      * @throws IOException

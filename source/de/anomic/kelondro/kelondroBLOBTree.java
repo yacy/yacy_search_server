@@ -453,4 +453,10 @@ public class kelondroBLOBTree implements kelondroBLOB {
             return -1;
         }
     }
+
+    public long length(byte[] key) throws IOException {
+        byte[] b = get(key);
+        if (b == null) return -1;
+        return b.length;
+    }
 }

@@ -48,7 +48,6 @@ import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -386,11 +385,7 @@ public final class httpdProxyHandler {
 
             prepareRequestHeader(conProp, requestHeader, hostlow);
             
-            // decide whether to use a cache entry or connect to the network
-            final File cacheFile = plasmaHTCache.getCachePath(url);
-            
             httpResponseHeader cachedResponseHeader = plasmaHTCache.loadResponseHeader(url);
-            final boolean cacheExists = cacheFile.isFile() && (cachedResponseHeader != null);
             
             // why are files unzipped upon arrival? why not zip all files in cache?
             // This follows from the following premises
@@ -416,7 +411,7 @@ public final class httpdProxyHandler {
             // case 1 and case 3
             if (cachedResponseHeader == null) {
                 if (theLogger.isFinest()) theLogger.logFinest(reqID + " page not in cache: fulfill request from web");
-                    fulfillRequestFromWeb(conProp,url,ext,requestHeader,cachedResponseHeader,cacheFile,countedRespond);
+                    fulfillRequestFromWeb(conProp, url, ext, requestHeader, cachedResponseHeader, countedRespond);
             } else {
                 final indexDocumentMetadata cacheEntry = new httpdProxyCacheEntry(
                         0,                               // crawling depth
@@ -430,13 +425,14 @@ public final class httpdProxyHandler {
                         switchboard.webIndex.defaultProxyProfile  // profile
                 );
                 plasmaHTCache.storeMetadata(cachedResponseHeader, cacheEntry); // TODO: check if this storeMetadata is necessary
-                
-                if (cacheExists && cacheEntry.shallUseCacheForProxy()) {
+
+                byte[] cacheContent = plasmaHTCache.getResourceContent(url);
+                if (cacheContent != null && cacheEntry.shallUseCacheForProxy()) {
                     if (theLogger.isFinest()) theLogger.logFinest(reqID + " fulfill request from cache");
-                    fulfillRequestFromCache(conProp,url,ext,requestHeader,cachedResponseHeader,cacheFile,countedRespond);
-                } else {            
+                    fulfillRequestFromCache(conProp, url, ext, requestHeader, cachedResponseHeader, cacheContent, countedRespond);
+                } else {
                     if (theLogger.isFinest()) theLogger.logFinest(reqID + " fulfill request from web");
-                    fulfillRequestFromWeb(conProp,url,ext,requestHeader,cachedResponseHeader,cacheFile,countedRespond);
+                    fulfillRequestFromWeb(conProp, url, ext, requestHeader, cachedResponseHeader, countedRespond);
                 }
             }
             
@@ -466,7 +462,7 @@ public final class httpdProxyHandler {
         }
     }
     
-    private static void fulfillRequestFromWeb(final Properties conProp, final yacyURL url,final String ext, final httpRequestHeader requestHeader, final httpResponseHeader cachedResponseHeader, final File cacheFile, final OutputStream respond) {
+    private static void fulfillRequestFromWeb(final Properties conProp, final yacyURL url,final String ext, final httpRequestHeader requestHeader, final httpResponseHeader cachedResponseHeader, final OutputStream respond) {
         
         final GZIPOutputStream gzippedOut = null; 
         Writer textOutput = null;
@@ -520,21 +516,15 @@ public final class httpdProxyHandler {
                 throw new Exception(res.getStatusLine());
             }
             
-            final httpChunkedOutputStream chunkedOut = setTransferEncoding(conProp, responseHeader, res.getStatusCode(), respond);        
-            
-//          if (((String)requestHeader.get(httpHeader.ACCEPT_ENCODING,"")).indexOf("gzip") != -1) {
-//          zipped = new GZIPOutputStream((chunked != null) ? chunked : respond);
-//          res.responseHeader.put(httpHeader.CONTENT_ENCODING, "gzip");
-//          res.responseHeader.remove(httpHeader.CONTENT_LENGTH);
-//          }
+            final httpChunkedOutputStream chunkedOut = setTransferEncoding(conProp, responseHeader, res.getStatusCode(), respond);
 
             // the cache does either not exist or is (supposed to be) stale
             long sizeBeforeDelete = -1;
-            if ((cacheFile.isFile()) && (cachedResponseHeader != null)) {
+            if (cachedResponseHeader != null) {
                 // delete the cache
-                sizeBeforeDelete = cacheFile.length();
-                plasmaHTCache.deleteURLfromCache(url, false);
-                conProp.setProperty(httpHeader.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_REFRESH_MISS");
+                sizeBeforeDelete = plasmaHTCache.getResourceContentLength(url);
+                plasmaHTCache.deleteFromCache(url);
+                conProp.setProperty(httpHeader.CONNECTION_PROP_PROXY_RESPOND_CODE, "TCP_REFRESH_MISS");
             }            
 
             // reserver cache entry
@@ -609,84 +599,47 @@ public final class httpdProxyHandler {
                      */
                     ((storeHTCache) || (isSupportedContent))
             ) {
-                final long contentLength = responseHeader.getContentLength();
-                // we write a new cache entry
-                if ((contentLength > 0) && (contentLength < 1048576)) // if the length is known and < 1 MB
-                {
-                    // ok, we don't write actually into a file, only to RAM, and schedule writing the file.
-                    final ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
-                    if(isBinary) {
-                        final OutputStream toClientAndMemory = new MultiOutputStream(new OutputStream[] {outStream, byteStream});
-                        serverFileUtils.copy(res.getDataAsStream(), toClientAndMemory);
-                    } else {
-                        writeTextContent(res, new BufferedWriter(textOutput), byteStream);
-                    }
-                    // cached bytes
-                    byte[] cacheArray;
-                    if(byteStream.size() > 0) {
-                        cacheArray = byteStream.toByteArray();
-                    } else {
-                        cacheArray = null;
-                    }
-                    if (theLogger.isFine()) theLogger.logFine(reqID +" writeContent of " + url + " produced cacheArray = " + ((cacheArray == null) ? "null" : ("size=" + cacheArray.length)));
-
-                    if (textOutput instanceof htmlFilterWriter) ((htmlFilterWriter) textOutput).close();
-
-                    if (sizeBeforeDelete == -1) {
-                        // totally fresh file
-                        //cacheEntry.status = plasmaHTCache.CACHE_FILL; // it's an insert
-                        cacheEntry.setCacheArray(cacheArray);
-                        plasmaHTCache.push(cacheEntry);
-                        conProp.setProperty(httpHeader.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_MISS");
-                    } else if (cacheArray != null && sizeBeforeDelete == cacheArray.length) {
-                        // before we came here we deleted a cache entry
-                        cacheArray = null;
-                        //cacheEntry.status = plasmaHTCache.CACHE_STALE_RELOAD_BAD;
-                        //cacheManager.push(cacheEntry); // unnecessary update
-                        conProp.setProperty(httpHeader.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_REF_FAIL_HIT");                                
-                    } else {
-                        // before we came here we deleted a cache entry
-                        //cacheEntry.status = plasmaHTCache.CACHE_STALE_RELOAD_GOOD;
-                        cacheEntry.setCacheArray(cacheArray);
-                        plasmaHTCache.push(cacheEntry); // necessary update, write response header to cache
-                        conProp.setProperty(httpHeader.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_REFRESH_MISS");
-                    }
+                // we don't write actually into a file, only to RAM, and schedule writing the file.
+                final ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+                if(isBinary) {
+                    final OutputStream toClientAndMemory = new MultiOutputStream(new OutputStream[] {outStream, byteStream});
+                    serverFileUtils.copy(res.getDataAsStream(), toClientAndMemory);
                 } else {
-                    // the file is too big to cache it in the ram, or the size is unknown
-                    // write to file right here.
-                    cacheFile.getParentFile().mkdirs();
-                    final OutputStream fileStream = new FileOutputStream(cacheFile);
-                    if(isBinary) {
-                        OutputStream toClientAndFile = new MultiOutputStream(new OutputStream[] {outStream, fileStream});
-                        serverFileUtils.copy(res.getDataAsStream(), toClientAndFile);
-                    } else {
-                        writeTextContent(res, new BufferedWriter(textOutput), fileStream);
-                    }
-                    if (textOutput instanceof htmlFilterWriter) ((htmlFilterWriter) textOutput).close();
-                    if (theLogger.isFine()) theLogger.logFine(reqID +" for write-file of " + url + ": contentLength = " + contentLength + ", sizeBeforeDelete = " + sizeBeforeDelete);
-                    plasmaHTCache.writeFileAnnouncement(cacheFile);
-                    if (sizeBeforeDelete == -1) {
-                        // totally fresh file
-                        //cacheEntry.status = plasmaHTCache.CACHE_FILL; // it's an insert
-                        plasmaHTCache.push(cacheEntry);
-                        conProp.setProperty(httpHeader.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_MISS");
-                    } else if (sizeBeforeDelete == cacheFile.length()) {
-                        // before we came here we deleted a cache entry
-                        //cacheEntry.status = plasmaHTCache.CACHE_STALE_RELOAD_BAD;
-                        //cacheManager.push(cacheEntry); // unnecessary update
-                        conProp.setProperty(httpHeader.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_REF_FAIL_HIT");
-                    } else {
-                        // before we came here we deleted a cache entry
-                        //cacheEntry.status = plasmaHTCache.CACHE_STALE_RELOAD_GOOD;
-                        plasmaHTCache.push(cacheEntry); // necessary update, write response header to cache
-                        conProp.setProperty(httpHeader.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_REFRESH_MISS");
-                    }
-                    // beware! all these writings will not fill the cacheEntry.cacheArray
-                    // that means they are not available for the indexer (except they are scraped before)
+                    writeTextContent(res, new BufferedWriter(textOutput), byteStream);
+                }
+                // cached bytes
+                byte[] cacheArray;
+                if(byteStream.size() > 0) {
+                    cacheArray = byteStream.toByteArray();
+                } else {
+                    cacheArray = null;
+                }
+                if (theLogger.isFine()) theLogger.logFine(reqID +" writeContent of " + url + " produced cacheArray = " + ((cacheArray == null) ? "null" : ("size=" + cacheArray.length)));
+
+                if (textOutput instanceof htmlFilterWriter) ((htmlFilterWriter) textOutput).close();
+
+                if (sizeBeforeDelete == -1) {
+                    // totally fresh file
+                    //cacheEntry.status = plasmaHTCache.CACHE_FILL; // it's an insert
+                    cacheEntry.setCacheArray(cacheArray);
+                    plasmaHTCache.push(cacheEntry);
+                    conProp.setProperty(httpHeader.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_MISS");
+                } else if (cacheArray != null && sizeBeforeDelete == cacheArray.length) {
+                    // before we came here we deleted a cache entry
+                    cacheArray = null;
+                    //cacheEntry.status = plasmaHTCache.CACHE_STALE_RELOAD_BAD;
+                    //cacheManager.push(cacheEntry); // unnecessary update
+                    conProp.setProperty(httpHeader.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_REF_FAIL_HIT");                                
+                } else {
+                    // before we came here we deleted a cache entry
+                    //cacheEntry.status = plasmaHTCache.CACHE_STALE_RELOAD_GOOD;
+                    cacheEntry.setCacheArray(cacheArray);
+                    plasmaHTCache.push(cacheEntry); // necessary update, write response header to cache
+                    conProp.setProperty(httpHeader.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_REFRESH_MISS");
                 }
             } else {
                 // no caching
-                if (theLogger.isFine()) theLogger.logFine(reqID +" "+ cacheFile.toString() + " not cached." +
+                if (theLogger.isFine()) theLogger.logFine(reqID +" "+ url.toString() + " not cached." +
                         " StoreError=" + ((storeError==null)?"None":storeError) + 
                         " StoreHTCache=" + storeHTCache + 
                         " SupportetContent=" + isSupportedContent);
@@ -699,15 +652,6 @@ public final class httpdProxyHandler {
                     writeTextContent(res, new BufferedWriter(textOutput));
                 }
                 if (textOutput instanceof htmlFilterWriter) ((htmlFilterWriter) textOutput).close();
-                /*if (sizeBeforeDelete == -1) {
-                    // no old file and no load. just data passing
-                    //cacheEntry.status = plasmaHTCache.CACHE_PASSING;
-                    //cacheManager.push(cacheEntry);
-                } else {
-                    // before we came here we deleted a cache entry
-                    //cacheEntry.status = plasmaHTCache.CACHE_STALE_NO_RELOAD;
-                    //cacheManager.push(cacheEntry);
-                }*/
                 conProp.setProperty(httpHeader.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_MISS");
             }
             
@@ -727,8 +671,6 @@ public final class httpdProxyHandler {
                 }
             }
         } catch (final Exception e) {
-            // deleting cached content
-            if (cacheFile.exists()) cacheFile.delete();
             handleProxyException(e,conProp,respond,url);
         }
     }
@@ -756,7 +698,7 @@ public final class httpdProxyHandler {
             final String ext,
             final httpRequestHeader requestHeader, 
             final httpResponseHeader cachedResponseHeader,
-            final File cacheFile,
+            final byte[] cacheEntry,
             final OutputStream respond
     ) throws IOException {
         
@@ -788,7 +730,7 @@ public final class httpdProxyHandler {
             if (requestHeader.containsKey(httpRequestHeader.IF_MODIFIED_SINCE)) {
                 // conditional request: freshness of cache for that condition was already
                 // checked within shallUseCache(). Now send only a 304 response
-                theLogger.logInfo("CACHE HIT/304 " + cacheFile.toString());
+                theLogger.logInfo("CACHE HIT/304 " + url.toString());
                 conProp.setProperty(httpHeader.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_REFRESH_HIT");
                 
                 // setting the content length header to 0
@@ -799,11 +741,11 @@ public final class httpdProxyHandler {
                 //respondHeader(respond, "304 OK", cachedResponseHeader); // respond with 'not modified'
             } else {
                 // unconditional request: send content of cache
-                theLogger.logInfo("CACHE HIT/203 " + cacheFile.toString());
+                theLogger.logInfo("CACHE HIT/203 " + url.toString());
                 conProp.setProperty(httpHeader.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_HIT");
                 
                 // setting the content header to the proper length
-                cachedResponseHeader.put(httpResponseHeader.CONTENT_LENGTH, Long.toString(cacheFile.length()));
+                cachedResponseHeader.put(httpResponseHeader.CONTENT_LENGTH, Long.toString(cacheEntry.length));
                 
                 // send cached header with replaced date and added length 
                 httpd.sendRespondHeader(conProp,respond,httpVer,203,cachedResponseHeader);
@@ -822,12 +764,7 @@ public final class httpdProxyHandler {
                 
                 // send also the complete body now from the cache
                 // simply read the file and transfer to out socket
-                if(textOutput != null && !isBinary(cachedResponseHeader)) {
-                    // send as encoded text
-                    serverFileUtils.copy(cacheFile, charSet, textOutput);
-                } else {
-                    serverFileUtils.copy(cacheFile, outStream);
-                }
+                serverFileUtils.copy(cacheEntry, outStream);
                 
                 if (textOutput != null) textOutput.close();
                 if (gzippedOut != null) gzippedOut.finish();

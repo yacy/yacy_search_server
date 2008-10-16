@@ -28,7 +28,6 @@ import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -387,23 +386,15 @@ public class icapd implements serverHandler, Cloneable {
                     null, 
                     switchboard.webIndex.defaultProxyProfile
             );
-            plasmaHTCache.storeMetadata(httpResHeader, cacheEntry);
-            
-            // getting the filename/path to store the response body
-            final File cacheFile = plasmaHTCache.getCachePath(httpRequestURL);
-            
-            // if the file already exits we delete it
-            if (cacheFile.isFile()) {
-                plasmaHTCache.deleteURLfromCache(httpRequestURL, false);
-            }                        
-            // we write the new cache entry to file system directly
-            cacheFile.getParentFile().mkdirs();            
             
             // copy the response body into the file
-            serverFileUtils.copy(resBodyStream,cacheFile);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            serverFileUtils.copy(resBodyStream, baos);
             if(resBodyStream != null) {
                 resBodyStream.close(); resBodyStream = null;
             }
+            cacheEntry.setCacheArray(baos.toByteArray());
+            plasmaHTCache.storeMetadata(httpResHeader, cacheEntry);
             
             // indexing the response
             plasmaHTCache.push(cacheEntry);    

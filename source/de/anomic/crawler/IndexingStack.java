@@ -308,10 +308,6 @@ public class IndexingStack {
             return (flags & 1) == 1;
         }
 
-        public File cacheFile() {
-            return plasmaHTCache.getCachePath(url);
-        }
-
         public boolean proxy() {
             // FIXME the equals seems to be incorrect: String.equals(boolean)
             return (initiator == null) || (initiator.equals(initiator.length() == 0));
@@ -336,8 +332,7 @@ public class IndexingStack {
         }
 
         public long size() {
-            if (cacheFile().exists()) return cacheFile().length();
-            return 0;
+            return plasmaHTCache.getResourceContentLength(this.url);
         }
 
         public CrawlProfile.entry profile() {
