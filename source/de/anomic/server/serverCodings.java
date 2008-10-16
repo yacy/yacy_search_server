@@ -97,7 +97,7 @@ public final class serverCodings {
         try {
             final MessageDigest digest = MessageDigest.getInstance("MD5");
             digest.reset();
-            digest.update(key.getBytes());
+            digest.update(key.getBytes(Charset.forName("UTF-8")));
             return digest.digest();
         } catch (final java.security.NoSuchAlgorithmException e) {
             System.out.println("Internal Error at md5:" + e.getMessage());
