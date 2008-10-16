@@ -207,7 +207,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
         this.sslSocketFactory = initSSLFactory();
 
         // init session parameter
-        maxBusySessions = Integer.valueOf(switchboard.getConfig("httpdMaxBusySessions","100")).intValue();
+        maxBusySessions = Math.max(1, Integer.valueOf(switchboard.getConfig("httpdMaxBusySessions","100")).intValue());
         busySessions = new ConcurrentHashMap<Session, Object>();
         
         // init servercore
@@ -323,13 +323,21 @@ public final class serverCore extends serverAbstractBusyThread implements server
             // idleThreadCheck();
             this.switchboard.handleBusyState(this.busySessions.size());
             if (log.isFinest()) this.log.logFinest("* waiting for connections, " + this.busySessions.size() + " sessions running");
-                        
+            
             announceThreadBlockApply();
             
             // wait for new connection
             Socket controlSocket = this.socket.accept();
             
             announceThreadBlockRelease();
+            
+            if(this.busySessions.size() >= this.maxBusySessions)
+            {
+                // immediatly close connection if too much sessions are still running
+                if (log.isFinest()) this.log.logFinest("* connections exceeding limit, closing new incoming connection from "+ controlSocket.getRemoteSocketAddress());
+                controlSocket.close();
+                return false;
+            }
             
             final String cIP = clientAddress(controlSocket);
             //System.out.println("server bfHosts=" + bfHost.toString());
@@ -645,9 +653,26 @@ public final class serverCore extends serverAbstractBusyThread implements server
                 } catch (final IOException e) {
                     e.printStackTrace();
                 }
-                if (busySessions != null) busySessions.remove(this);
+                if (busySessions != null)
+                {
+                    busySessions.remove(this);
+                    if(log.isFinest()) log.logFinest("* removed session "+ this.controlSocket.getRemoteSocketAddress() + this.request);
+                }
             }
             
+        }
+        
+        /*
+         * (non-Javadoc)
+         * 
+         * @see java.lang.Object#finalize()
+         */
+        protected void finalize() {
+            if (busySessions != null && busySessions.contains(this))
+            {
+                busySessions.remove(this);
+                if(log.isFinest()) log.logFinest("* removed session "+ this.controlSocket.getRemoteSocketAddress() + this.request);
+            }
         }
         
         private void listen() {

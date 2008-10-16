@@ -260,7 +260,7 @@ public class diskUsage {
                 } else if (dir != null) {
                     checkVolumesInUseUnix (dir);
                 } else {
-                	log.logSevere("directory is null: " + dir);
+                	log.logSevere("directory is null: " + element);
                 }
             } else {
                 try {

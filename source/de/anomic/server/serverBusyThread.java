@@ -26,46 +26,77 @@ package de.anomic.server;
 
 public interface serverBusyThread extends serverThread {
 
+    /**
+     * sets a sleep time before execution of the job-loop
+     * @param milliseconds
+     */
     public void setStartupSleep(long milliseconds);
-    // sets a sleep time before execution of the job-loop
 
+    /**
+     * sets a sleep time for pauses between two jobs if the job returns false (idle)
+     * @param milliseconds
+     * @return
+     */
     public long setIdleSleep(long milliseconds);
-    // sets a sleep time for pauses between two jobs if the job returns false (idle)
 
+    /**
+     * sets a sleep time for pauses between two jobs if the job returns true (busy)
+     * @param milliseconds
+     * @return
+     */
     public long setBusySleep(long milliseconds);
-    // sets a sleep time for pauses between two jobs if the job returns true (busy)
  
+    /**
+     * sets minimum required amount of memory for the job execution
+     * @param freeBytes
+     */
     public void setMemPreReqisite(long freeBytes);
-    // sets minimum required amount of memory for the job execution
  
+    /**
+     * defines if the thread should obey the intermission command
+     * @param obey
+     */
     public void setObeyIntermission(boolean obey);
-    // defines if the thread should obey the intermission command
  
+    /**
+     * @return the total number of cycles of job execution with idle-result
+     */
     public long getIdleCycles();
-    // returns the total number of cycles of job execution with idle-result
  
+    /**
+     * @return the total number of cycles of job execution with busy-result
+     */
     public long getBusyCycles();
-    // returns the total number of cycles of job execution with busy-result
  
+    /**
+     * @return the total number of cycles where a job execution was omitted
+     *         because of memory shortage
+     */
     public long getOutOfMemoryCycles();
-    // returns the total number of cycles where
-    // a job execution was omitted because of memory shortage
  
+    /**
+     * @return the total time that this thread has slept so far
+     */
     public long getSleepTime();
-    // returns the total time that this thread has slept so far
  
+    /**
+     * the thread is forced to pause for a specific time
+     * if the thread is busy meanwhile, the pause is ommitted
+     * @param pause
+     */
     public void intermission(long pause);
-    // the thread is forced to pause for a specific time
-    // if the thread is busy meanwhile, the pause is ommitted
  
+    /**
+     * performes one job procedure; this loopes until terminate() is called
+     * @return true if it has done something, false if it is idle and does not expect to work on more for a longer time
+     */
     public boolean job() throws Exception;
-    // performes one job procedure; this loopes until terminate() is called
-    // job returns true if it has done something
-    // it returns false if it is idle and does not expect to work on more for a longer time
 
+    /**
+     * is called when an outOfMemoryCycle is performed
+     * this method should try to free some memory, so that the job can be executed
+     */
     public void freemem();
-    // is called when an outOfMemoryCycle is performed
-    // this method should try to free some memory, so that the job can be executed
 
     public void notifyThread();
 }
