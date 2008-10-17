@@ -131,6 +131,7 @@ public class CrawlEntry {
         assert url != null;
         assert initiator != null;
         assert referrerhash != null;
+        assert profileHandle.length() == yacySeedDB.commonHashLength : profileHandle + " != " + yacySeedDB.commonHashLength;
         this.initiator     = initiator;
         this.url           = url;
         this.refhash       = referrerhash;
@@ -285,6 +286,7 @@ public class CrawlEntry {
 
     public String profileHandle() {
         // the handle of the crawl profile
+        assert profileHandle.length() == yacySeedDB.commonHashLength : profileHandle + " != " + yacySeedDB.commonHashLength;
         return this.profileHandle;
     }
     

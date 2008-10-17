@@ -1,4 +1,4 @@
-// plasmaCrawlQueues.java
+// CrawlQueues.java
 // (C) 2007 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 29.10.2007 on http://yacy.net
 //
@@ -217,7 +217,7 @@ public class CrawlQueues {
      * @param stats String for log prefixing
      * @return
      */
-    private void generateCrawl(CrawlEntry urlEntry, final String profileHandle, final String stats) {
+    private void generateCrawl(CrawlEntry urlEntry, final String stats, final String profileHandle) {
         final CrawlProfile.entry profile = sb.webIndex.profilesActiveCrawls.getEntry(profileHandle);
         if (profile != null) {
 
