@@ -30,7 +30,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.nio.charset.Charset;
+import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
@@ -98,7 +98,13 @@ public final class serverCodings {
         try {
             final MessageDigest digest = MessageDigest.getInstance("MD5");
             digest.reset();
-            digest.update(key.getBytes(Charset.forName("UTF-8")));
+            byte[] keyBytes;
+            try {
+                keyBytes = key.getBytes("UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                keyBytes = key.getBytes();
+            }
+            digest.update(keyBytes);
             return digest.digest();
         } catch (final java.security.NoSuchAlgorithmException e) {
             System.out.println("Internal Error at md5:" + e.getMessage());
