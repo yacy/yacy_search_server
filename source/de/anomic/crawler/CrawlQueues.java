@@ -181,33 +181,9 @@ public class CrawlQueues {
                     ", robinsonMode=" + ((sb.isRobinsonMode()) ? "on" : "off"));
         }
         
-        if (noticeURL.stackSize(NoticedURL.STACK_TYPE_CORE) == 0) {
-            //log.logDebug("CoreCrawl: queue is empty");
-            return false;
-        }
-        if (sb.webIndex.queuePreStack.size() >= (int) sb.getConfigLong(plasmaSwitchboardConstants.INDEXER_SLOTS, 30)) {
-            if (this.log.isFine()) log.logFine("CoreCrawl: too many processes in indexing queue, dismissed (" + "sbQueueSize=" + sb.webIndex.queuePreStack.size() + ")");
-            return false;
-        }
-        if (this.size() >= sb.getConfigLong(plasmaSwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX, 10)) {
-            if (this.log.isFine()) log.logFine("CoreCrawl: too many processes in loader queue, dismissed (" + "cacheLoader=" + this.size() + ")");
-            return false;
-        }
-        if (sb.onlineCaution()) {
-            if (this.log.isFine()) log.logFine("CoreCrawl: online caution, omitting processing");
-            return false;
-        }
+        if(!crawlIsPossible(NoticedURL.STACK_TYPE_CORE, "Core")) return false;
         
-        // if crawling was paused we have to wait until we wer notified to continue
-        final Object[] status = sb.crawlJobsStatus.get(plasmaSwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
-        synchronized(status[plasmaSwitchboardConstants.CRAWLJOB_SYNC]) {
-            if (((Boolean)status[plasmaSwitchboardConstants.CRAWLJOB_STATUS]).booleanValue()) {
-                try {
-                    status[plasmaSwitchboardConstants.CRAWLJOB_SYNC].wait();
-                }
-                catch (final InterruptedException e) {return false;}
-            }
-        }
+        if(isPaused(plasmaSwitchboardConstants.CRAWLJOB_LOCAL_CRAWL)) return false;
         
         // do a local crawl        
         CrawlEntry urlEntry = null;
@@ -223,29 +199,93 @@ public class CrawlQueues {
                     log.logSevere(stats + ": NULL PROFILE HANDLE '" + urlEntry.profileHandle() + "' for URL " + urlEntry.url());
                     return true;
                 }
-                final CrawlProfile.entry profile = sb.webIndex.profilesActiveCrawls.getEntry(profileHandle);
-                if (profile == null) {
-                    log.logWarning(stats + ": LOST LOCALCRAWL PROFILE HANDLE '" + urlEntry.profileHandle() + "' for URL " + urlEntry.url());
-                    return true;
-                }
-                
-                // check if the protocol is supported
-                final yacyURL url = urlEntry.url();
-                final String urlProtocol = url.getProtocol();
-                if (!this.sb.crawlQueues.isSupportedProtocol(urlProtocol)) {
-                    this.log.logSevere("Unsupported protocol in URL '" + url.toString());
-                    return true;            
-                }
-                
-                if (this.log.isFine()) log.logFine("LOCALCRAWL: URL=" + urlEntry.url() + ", initiator=" + urlEntry.initiator() + ", crawlOrder=" + ((profile.remoteIndexing()) ? "true" : "false") + ", depth=" + urlEntry.depth() + ", crawlDepth=" + profile.generalDepth() + ", filter=" + profile.generalFilter()
-                        + ", permission=" + ((sb.webIndex.seedDB == null) ? "undefined" : (((sb.webIndex.seedDB.mySeed().isSenior()) || (sb.webIndex.seedDB.mySeed().isPrincipal())) ? "true" : "false")));
-                
-                processLocalCrawling(urlEntry, stats);
+                generateCrawl(urlEntry, stats, profileHandle);
                 return true;
             } catch (final IOException e) {
                 log.logSevere(stats + ": CANNOT FETCH ENTRY: " + e.getMessage(), e);
                 if (e.getMessage().indexOf("hash is null") > 0) noticeURL.clear(NoticedURL.STACK_TYPE_CORE);
             }
+        }
+        return true;
+    }
+
+    /**
+     * Make some checks if crawl is valid and start it
+     * 
+     * @param urlEntry
+     * @param profileHandle
+     * @param stats String for log prefixing
+     * @return
+     */
+    private void generateCrawl(CrawlEntry urlEntry, final String profileHandle, final String stats) {
+        final CrawlProfile.entry profile = sb.webIndex.profilesActiveCrawls.getEntry(profileHandle);
+        if (profile != null) {
+
+            // check if the protocol is supported
+            final yacyURL url = urlEntry.url();
+            final String urlProtocol = url.getProtocol();
+            if (this.sb.crawlQueues.isSupportedProtocol(urlProtocol)) {
+
+                if (this.log.isFine())
+                    log.logFine(stats + ": URL=" + urlEntry.url()
+                            + ", initiator=" + urlEntry.initiator()
+                            + ", crawlOrder=" + ((profile.remoteIndexing()) ? "true" : "false")
+                            + ", depth=" + urlEntry.depth()
+                            + ", crawlDepth=" + profile.generalDepth()
+                            + ", filter=" + profile.generalFilter()
+                            + ", permission=" + ((sb.webIndex.seedDB == null) ? "undefined" : (((sb.webIndex.seedDB.mySeed().isSenior()) || (sb.webIndex.seedDB.mySeed().isPrincipal())) ? "true" : "false")));
+
+                processLocalCrawling(urlEntry, stats);
+            } else {
+                this.log.logSevere("Unsupported protocol in URL '" + url.toString());
+            }
+        } else {
+            log.logWarning(stats + ": LOST PROFILE HANDLE '" + urlEntry.profileHandle() + "' for URL " + urlEntry.url());
+        }
+    }
+
+    /**
+     * if crawling was paused we have to wait until we wer notified to continue
+     * blocks until pause is ended
+     * @param crawljob
+     * @return
+     */
+    private boolean isPaused(String crawljob) {
+        final Object[] status = sb.crawlJobsStatus.get(crawljob);
+        boolean pauseEnded = false;
+        synchronized(status[plasmaSwitchboardConstants.CRAWLJOB_SYNC]) {
+            if (((Boolean)status[plasmaSwitchboardConstants.CRAWLJOB_STATUS]).booleanValue()) {
+                try {
+                    status[plasmaSwitchboardConstants.CRAWLJOB_SYNC].wait();
+                }
+                catch (final InterruptedException e) { pauseEnded = true;}
+            }
+        }
+        return pauseEnded;
+    }
+
+    /**
+     * Checks if crawl queue has elements and new crawl will not exceed thread-limit
+     * @param stackType 
+     * @param type
+     * @return
+     */
+    private boolean crawlIsPossible(int stackType, final String type) {
+        if (noticeURL.stackSize(stackType) == 0) {
+            //log.logDebug("GlobalCrawl: queue is empty");
+            return false;
+        }
+        if (sb.webIndex.queuePreStack.size() >= (int) sb.getConfigLong(plasmaSwitchboardConstants.INDEXER_SLOTS, 30)) {
+            if (this.log.isFine()) log.logFine(type + "Crawl: too many processes in indexing queue, dismissed (" + "sbQueueSize=" + sb.webIndex.queuePreStack.size() + ")");
+            return false;
+        }
+        if (this.size() >= sb.getConfigLong(plasmaSwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX, 10)) {
+            if (this.log.isFine()) log.logFine(type + "Crawl: too many processes in loader queue, dismissed (" + "cacheLoader=" + this.size() + ")");
+            return false;
+        }
+        if (sb.onlineCaution()) {
+            if (this.log.isFine()) log.logFine(type + "Crawl: online caution, omitting processing");
+            return false;
         }
         return true;
     }
@@ -390,33 +430,9 @@ public class CrawlQueues {
         
         // do nothing if either there are private processes to be done
         // or there is no global crawl on the stack
-        if (noticeURL.stackSize(NoticedURL.STACK_TYPE_REMOTE) == 0) {
-            //log.logDebug("GlobalCrawl: queue is empty");
-            return false;
-        }
-        if (sb.webIndex.queuePreStack.size() >= (int) sb.getConfigLong(plasmaSwitchboardConstants.INDEXER_SLOTS, 30)) {
-            if (this.log.isFine()) log.logFine("GlobalCrawl: too many processes in indexing queue, dismissed (" + "sbQueueSize=" + sb.webIndex.queuePreStack.size() + ")");
-            return false;
-        }
-        if (this.size() >= sb.getConfigLong(plasmaSwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX, 10)) {
-            if (this.log.isFine()) log.logFine("GlobalCrawl: too many processes in loader queue, dismissed (" + "cacheLoader=" + this.size() + ")");
-            return false;
-        }        
-        if (sb.onlineCaution()) {
-            if (this.log.isFine()) log.logFine("GlobalCrawl: online caution, omitting processing");
-            return false;
-        }
+        if(!crawlIsPossible(NoticedURL.STACK_TYPE_REMOTE, "Global")) return false;
 
-        // if crawling was paused we have to wait until we wer notified to continue
-        final Object[] status = sb.crawlJobsStatus.get(plasmaSwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
-        synchronized(status[plasmaSwitchboardConstants.CRAWLJOB_SYNC]) {
-            if (((Boolean)status[plasmaSwitchboardConstants.CRAWLJOB_STATUS]).booleanValue()) {
-                try {
-                    status[plasmaSwitchboardConstants.CRAWLJOB_SYNC].wait();
-                }
-                catch (final InterruptedException e){ return false;}
-            }
-        }
+        if(isPaused(plasmaSwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL)) return false;
         
         // we don't want to crawl a global URL globally, since WE are the global part. (from this point of view)
         final String stats = "REMOTETRIGGEREDCRAWL[" + noticeURL.stackSize(NoticedURL.STACK_TYPE_CORE) + ", " + noticeURL.stackSize(NoticedURL.STACK_TYPE_LIMIT) + ", " + noticeURL.stackSize(NoticedURL.STACK_TYPE_OVERHANG) + ", "
@@ -427,25 +443,7 @@ public class CrawlQueues {
             // System.out.println("DEBUG plasmaSwitchboard.processCrawling:
             // profileHandle = " + profileHandle + ", urlEntry.url = " +
             // urlEntry.url());
-            final CrawlProfile.entry profile = sb.webIndex.profilesActiveCrawls.getEntry(profileHandle);
-
-            if (profile == null) {
-                log.logWarning(stats + ": LOST REMOTETRIGGEREDCRAWL PROFILE HANDLE '" + urlEntry.profileHandle() + "' for URL " + urlEntry.url());
-                return false;
-            }
-            
-            // check if the protocol is supported
-            final yacyURL url = urlEntry.url();
-            final String urlProtocol = url.getProtocol();
-            if (!this.sb.crawlQueues.isSupportedProtocol(urlProtocol)) {
-                this.log.logSevere("Unsupported protocol in URL '" + url.toString());
-                return true;            
-            }
-            
-            if (this.log.isFine()) log.logFine("plasmaSwitchboard.remoteTriggeredCrawlJob: url=" + urlEntry.url() + ", initiator=" + urlEntry.initiator() + ", crawlOrder=" + ((profile.remoteIndexing()) ? "true" : "false") + ", depth=" + urlEntry.depth() + ", crawlDepth=" + profile.generalDepth() + ", filter="
-                        + profile.generalFilter() + ", permission=" + ((sb.webIndex.seedDB == null) ? "undefined" : (((sb.webIndex.seedDB.mySeed().isSenior()) || (sb.webIndex.seedDB.mySeed().isPrincipal())) ? "true" : "false")));
-
-            processLocalCrawling(urlEntry, stats);
+            generateCrawl(urlEntry, stats, profileHandle);
             return true;
         } catch (final IOException e) {
             log.logSevere(stats + ": CANNOT FETCH ENTRY: " + e.getMessage(), e);
