@@ -66,7 +66,12 @@ public class ViewFile {
     public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
 
         final serverObjects prop = new serverObjects();
-        final plasmaSwitchboard sb = (plasmaSwitchboard)env;     
+        final plasmaSwitchboard sb = (plasmaSwitchboard)env;
+        
+        final int display = (post == null) ? 0 : post.getInt("display", 0);
+        
+        prop.put("display", display);
+        prop.put("error_display", display);
 
         if (post != null && post.containsKey("words"))
             prop.putHTML("error_words", post.get("words"));

@@ -69,6 +69,7 @@ public class yacysearchitem {
         final boolean authenticated = sb.adminAuthenticated(header) >= 2;
         final int item = post.getInt("item", -1);
         final boolean auth = ((String) header.get(httpRequestHeader.CONNECTION_PROP_CLIENTIP, "")).equals("localhost") || sb.verifyAuthentication(header, true);
+        final int display = (post == null) ? 0 : post.getInt("display", 0);
         
         // default settings for blank item
         prop.put("content", "0");
@@ -198,6 +199,7 @@ public class yacysearchitem {
             prop.put("content_authorized_urlhash", result.hash());
             prop.putHTML("content_description", result.title());
             prop.putHTML("content_url", result.urlstring());
+            prop.put("content_display", display);
         
             final int port=result.url().getPort();
             yacyURL faviconURL;

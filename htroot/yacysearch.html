@@ -116,11 +116,11 @@ var progressbar = new Progressbar(#[results]#, document.getElementById("results"
 <!-- linklist begin -->
 #(resultTable)#::<table width="100%"><tr class="TableHeader"><td width="30%">Media</td><td width="70%">URL</tr>#(/resultTable)#
 #{results}#
-<!--#include virtual="yacysearchitem.html?rss=false&item=#[item]#&eventID=#[eventID]#" -->
+<!--#include virtual="yacysearchitem.html?rss=false&item=#[item]#&eventID=#[eventID]#&display=#[display]#" -->
 #{/results}#
 #(resultTable)#::</table>#(/resultTable)#
 <!-- linklist end -->
 <!-- attach the bottomline -->
-<!--#include virtual="yacysearchitem.html?bottomline=true&eventID=#[eventID]#" -->
+<!--#include virtual="yacysearchitem.html?bottomline=true&eventID=#[eventID]#&display=#[display]#" -->
 </body>
 </html>

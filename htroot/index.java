@@ -56,7 +56,8 @@ public class index {
         
         final boolean global = (post == null) ? true : post.get("resource", "global").equals("global");
         final boolean authenticated = sb.adminAuthenticated(header) >= 2;
-        final int display = (post == null) ? 0 : post.getInt("display", 0);
+        int display = (post == null) ? 0 : post.getInt("display", 0);
+        if ((display == 1) && (!authenticated)) display = 0;
         final int searchoptions = (post == null) ? 0 : post.getInt("searchoptions", 0);
         final String former = (post == null) ? "" : post.get("former", "");
         final int count = Math.min(100, (post == null) ? 10 : post.getInt("count", 10));

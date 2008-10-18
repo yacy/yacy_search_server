@@ -383,6 +383,7 @@ public class yacysearch {
             for (int i = 0; i < theQuery.displayResults(); i++) {
                 prop.put("results_" + i + "_item", offset + i);
                 prop.put("results_" + i + "_eventID", theQuery.id(false));
+                prop.put("results_" + i + "_display", display);
             }
             prop.put("results", theQuery.displayResults());
             prop.put("resultTable", (contentdomCode <= 1) ? "0" : "1");

@@ -5,7 +5,13 @@
     #%env/templates/metas.template%#
   </head>
   <body>
+    #(display)#
+    #%env/templates/simpleheader.template%#
+    ::
     #%env/templates/header.template%#
+    ::
+    #%env/templates/embeddedheader.template%#
+    #(/display)#
     <h2>View URL Content</h2>
 
     #(error)#
@@ -32,6 +38,7 @@
         </dl>
         <input type="hidden" name="words" value="#[words]#" />
         <input type="hidden" name="urlHash" value="#[hash]#" />
+        <input type="hidden" name="display" value="#[display]#" />
       </fieldset>
     </form>
 :: <!-- 1 -->
