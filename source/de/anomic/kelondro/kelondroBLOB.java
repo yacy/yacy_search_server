@@ -83,6 +83,14 @@ public interface kelondroBLOB {
     public byte[] get(byte[] key) throws IOException;
     
     /**
+     * retrieve the size of the database
+     * @param 
+     * @return the size of the database in bytes
+     * @throws IOException
+     */
+    public long length() throws IOException;
+    
+    /**
      * retrieve the size of the BLOB
      * @param key
      * @return the size of the BLOB or -1 if the BLOB does not exist

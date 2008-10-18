@@ -189,7 +189,7 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
      */
     public synchronized boolean has(final byte[] key) {
         assert index != null;
-        assert index.row().primaryKeyLength == key.length;
+        assert index.row().primaryKeyLength == key.length : index.row().primaryKeyLength + "!=" + key.length;
         
         // check if the index contains the key
         try {
@@ -218,7 +218,7 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
      */
     private void add(final byte[] key, final byte[] blob, final int offset, final int len) throws IOException {
         assert len > 0;
-        assert index.row().primaryKeyLength == key.length;
+        assert index.row().primaryKeyLength == key.length : index.row().primaryKeyLength + "!=" + key.length;
         assert blob == null || blob.length - offset >= len;
         if ((blob == null) || (blob.length == 0)) return;
         final int pos = (int) file.length();
@@ -236,7 +236,7 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
      * @throws IOException
      */
     public synchronized byte[] get(final byte[] key) throws IOException {
-        assert index.row().primaryKeyLength == key.length;
+        assert index.row().primaryKeyLength == key.length : index.row().primaryKeyLength + "!=" + key.length;
         
         // check if the index contains the key
         final long pos = index.getl(key);
@@ -268,7 +268,7 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
      * @throws IOException
      */
     public long length(byte[] key) throws IOException {
-        assert index.row().primaryKeyLength == key.length;
+        assert index.row().primaryKeyLength == key.length : index.row().primaryKeyLength + "!=" + key.length;
         
         // check if the index contains the key
         final long pos = index.getl(key);
@@ -328,7 +328,7 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
      * @throws IOException
      */
     public synchronized void put(final byte[] key, final byte[] b) throws IOException {
-        assert key.length == index.row().primaryKeyLength;
+        assert index.row().primaryKeyLength == key.length : index.row().primaryKeyLength + "!=" + key.length;
         
         // we do not write records of length 0 into the BLOB
         if (b.length == 0) return;
@@ -417,7 +417,7 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
      * @throws IOException
      */
     public synchronized void remove(final byte[] key) throws IOException {
-        assert index.row().primaryKeyLength == key.length;
+        assert index.row().primaryKeyLength == key.length : index.row().primaryKeyLength + "!=" + key.length;
         
         // check if the index contains the key
         final long seek = index.getl(key);
@@ -563,6 +563,10 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
      */
     public synchronized kelondroCloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) throws IOException {
         return this.index.keys(up, firstKey);
+    }
+
+    public long length() throws IOException {
+        return this.heapFile.length();
     }
 
     public static void main(final String[] args) {

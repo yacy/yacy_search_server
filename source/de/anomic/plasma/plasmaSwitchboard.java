@@ -1113,12 +1113,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         crawlStacker.close();
         robots.close();
         parser.close();
-        plasmaHTCache.close();
         webStructure.flushCitationReference("crg");
         webStructure.close();
         crawlQueues.close();
         log.logConfig("SWITCHBOARD SHUTDOWN STEP 3: sending termination signal to database manager (stand by...)");
         webIndex.close();
+        plasmaHTCache.close();
         yacyTray.removeTray();
         log.logConfig("SWITCHBOARD SHUTDOWN TERMINATED");
     }

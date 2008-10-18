@@ -46,6 +46,7 @@ import de.anomic.http.httpResponseHeader;
 import de.anomic.index.indexDocumentMetadata;
 import de.anomic.kelondro.kelondroBLOB;
 import de.anomic.kelondro.kelondroBLOBArray;
+import de.anomic.kelondro.kelondroBLOBBuffer;
 import de.anomic.kelondro.kelondroBLOBHeap;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroMap;
@@ -62,7 +63,7 @@ public final class plasmaHTCache {
     public  static final long oneday = 1000L * 60L * 60L * 24L; // milliseconds of a day
 
     private static kelondroMap responseHeaderDB = null;
-    private static kelondroBLOBArray fileDB = null;
+    private static kelondroBLOBBuffer fileDB = null;
     
     private static final ConcurrentLinkedQueue<indexDocumentMetadata> cacheStack = new ConcurrentLinkedQueue<indexDocumentMetadata>();
     public static long maxCacheSize = 0l;
@@ -134,7 +135,9 @@ public final class plasmaHTCache {
         }
         responseHeaderDB = new kelondroMap(blob, 500);
         try {
-            fileDB = new kelondroBLOBArray(new File(cachePath, FILE_DB_NAME), 12, kelondroBase64Order.enhancedCoder, kelondroBLOBArray.oneMonth, kelondroBLOBArray.oneGigabyte);
+            kelondroBLOBArray fileDBunbuffered = new kelondroBLOBArray(new File(cachePath, FILE_DB_NAME), 12, kelondroBase64Order.enhancedCoder, kelondroBLOBArray.oneMonth, kelondroBLOBArray.oneGigabyte);
+            fileDB = new kelondroBLOBBuffer(fileDBunbuffered, 1024 * 1024, true);
+            fileDB.start();
         } catch (IOException e) {
             e.printStackTrace();
         }

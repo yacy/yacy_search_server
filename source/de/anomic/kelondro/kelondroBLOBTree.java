@@ -53,11 +53,13 @@ public class kelondroBLOBTree implements kelondroBLOB {
     private final kelondroIndex index;
     private kelondroObjectBuffer buffer;
     private final kelondroRow rowdef;
+    private File file;
     
     public kelondroBLOBTree(final File file, final boolean useNodeCache, final boolean useObjectCache, final int key,
             final int nodesize, final char fillChar, final kelondroByteOrder objectOrder, final boolean usetree, final boolean writebuffer, final boolean resetOnFail) {
         // creates or opens a dynamic tree
         rowdef = new kelondroRow("byte[] key-" + (key + counterlen) + ", byte[] node-" + nodesize, objectOrder, 0);
+        this.file = file;
         kelondroIndex fbi;
         if (usetree) {
 			try {
@@ -458,5 +460,9 @@ public class kelondroBLOBTree implements kelondroBLOB {
         byte[] b = get(key);
         if (b == null) return -1;
         return b.length;
+    }
+
+    public long length() throws IOException {
+        return this.file.length();
     }
 }
