@@ -133,6 +133,7 @@ public class ZURL {
    
     public synchronized Entry getEntry(final String urlhash) {
         try {
+            if (urlIndex == null) return null;
             final kelondroRow.Entry entry = urlIndex.get(urlhash.getBytes());
             if (entry == null) return null;
             return new Entry(entry);

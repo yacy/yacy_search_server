@@ -65,9 +65,9 @@ public class plasmaSnippetCache {
     public static final int ERROR_PARSER_NO_LINES = 15;
     public static final int ERROR_NO_MATCH = 16;
     
-    private static int                   snippetsScoreCounter = 0;
+    private static int                           snippetsScoreCounter = 0;
     private static kelondroMScoreCluster<String> snippetsScore = null;
-    private static final HashMap<String, String>       snippetsCache = new HashMap<String, String>();
+    private static final HashMap<String, String> snippetsCache = new HashMap<String, String>();
     
     /**
      * a cache holding URLs to favicons specified by the page content, e.g. by using the html link-tag. e.g.
@@ -78,13 +78,16 @@ public class plasmaSnippetCache {
     private static final HashMap<String, yacyURL> faviconCache = new HashMap<String, yacyURL>();
     private static plasmaParser          parser = null;
     private static serverLog             log = null;
+    private static plasmaSwitchboard     sb = null;
     
     public static void init(
             final plasmaParser parserx,
-            final serverLog logx
+            final serverLog logx,
+            final plasmaSwitchboard switchboard
     ) {
         parser = parserx;
         log = logx;
+        sb = switchboard;
         snippetsScoreCounter = 0;
         snippetsScore = new kelondroMScoreCluster<String>();
         snippetsCache.clear(); 
@@ -290,7 +293,7 @@ public class plasmaSnippetCache {
                 // getting resource metadata (e.g. the http headers for http resources)
                 if (entry != null) {
                     // place entry on crawl queue
-                    plasmaHTCache.push(entry);
+                    sb.htEntryStoreProcess(entry);
                     
                     // read resource body (if it is there)
                     final byte []resourceArray = entry.cacheArray();

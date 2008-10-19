@@ -544,7 +544,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         
         // generate snippets cache
         log.logConfig("Initializing Snippet Cache");
-        plasmaSnippetCache.init(parser, log);
+        plasmaSnippetCache.init(parser, log, this);
         
         final String wikiParserClassName = getConfig(plasmaSwitchboardConstants.WIKIPARSER_CLASS, plasmaSwitchboardConstants.WIKIPARSER_CLASS_DEFAULT);
         this.log.logConfig("Loading wiki parser " + wikiParserClassName + " ...");
@@ -590,24 +590,21 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         moreMemory.schedule(new MoreMemory(), 300000, 600000);
         
         deployThread(plasmaSwitchboardConstants.CLEANUP, "Cleanup", "simple cleaning process for monitoring information", null,
-        new serverInstantBusyThread(this, plasmaSwitchboardConstants.CLEANUP_METHOD_START, plasmaSwitchboardConstants.CLEANUP_METHOD_JOBCOUNT, plasmaSwitchboardConstants.CLEANUP_METHOD_FREEMEM), 600000); // all 5 Minutes, wait 10 minutes until first run
+                     new serverInstantBusyThread(this, plasmaSwitchboardConstants.CLEANUP_METHOD_START, plasmaSwitchboardConstants.CLEANUP_METHOD_JOBCOUNT, plasmaSwitchboardConstants.CLEANUP_METHOD_FREEMEM), 600000); // all 5 Minutes, wait 10 minutes until first run
         deployThread(plasmaSwitchboardConstants.CRAWLSTACK, "Crawl URL Stacker", "process that checks url for double-occurrences and for allowance/disallowance by robots.txt", null,
-        new serverInstantBusyThread(crawlStacker, plasmaSwitchboardConstants.CRAWLSTACK_METHOD_START, plasmaSwitchboardConstants.CRAWLSTACK_METHOD_JOBCOUNT, plasmaSwitchboardConstants.CRAWLSTACK_METHOD_FREEMEM), 8000);
+                     new serverInstantBusyThread(crawlStacker, plasmaSwitchboardConstants.CRAWLSTACK_METHOD_START, plasmaSwitchboardConstants.CRAWLSTACK_METHOD_JOBCOUNT, plasmaSwitchboardConstants.CRAWLSTACK_METHOD_FREEMEM), 8000);
         deployThread(plasmaSwitchboardConstants.INDEXER, "Indexing", "thread that either initiates a parsing/indexing queue, distributes the index into the DHT, stores parsed documents or flushes the index cache", "/IndexCreateIndexingQueue_p.html",
-        new serverInstantBusyThread(this, plasmaSwitchboardConstants.INDEXER_METHOD_START, plasmaSwitchboardConstants.INDEXER_METHOD_JOBCOUNT, plasmaSwitchboardConstants.INDEXER_METHOD_FREEMEM), 10000);
-        deployThread(plasmaSwitchboardConstants.PROXY_CACHE_ENQUEUE, "Proxy Cache Enqueue", "job takes new input files from RAM stack, stores them, and hands over to the Indexing Stack", null,
-        new serverInstantBusyThread(this, plasmaSwitchboardConstants.PROXY_CACHE_ENQUEUE_METHOD_START, plasmaSwitchboardConstants.PROXY_CACHE_ENQUEUE_METHOD_JOBCOUNT, plasmaSwitchboardConstants.PROXY_CACHE_ENQUEUE_METHOD_FREEMEM), 10000);
+                     new serverInstantBusyThread(this, plasmaSwitchboardConstants.INDEXER_METHOD_START, plasmaSwitchboardConstants.INDEXER_METHOD_JOBCOUNT, plasmaSwitchboardConstants.INDEXER_METHOD_FREEMEM), 10000);
         deployThread(plasmaSwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL, "Remote Crawl Job", "thread that performes a single crawl/indexing step triggered by a remote peer", null,
-        new serverInstantBusyThread(crawlQueues, plasmaSwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_START, plasmaSwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_JOBCOUNT, plasmaSwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_FREEMEM), 30000);
+                     new serverInstantBusyThread(crawlQueues, plasmaSwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_START, plasmaSwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_JOBCOUNT, plasmaSwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_FREEMEM), 30000);
         deployThread(plasmaSwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER, "Remote Crawl URL Loader", "thread that loads remote crawl lists from other peers", "",
-        new serverInstantBusyThread(crawlQueues, plasmaSwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_METHOD_START, plasmaSwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_METHOD_JOBCOUNT, plasmaSwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_METHOD_FREEMEM), 30000); // error here?
+                     new serverInstantBusyThread(crawlQueues, plasmaSwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_METHOD_START, plasmaSwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_METHOD_JOBCOUNT, plasmaSwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_METHOD_FREEMEM), 30000); // error here?
         deployThread(plasmaSwitchboardConstants.CRAWLJOB_LOCAL_CRAWL, "Local Crawl", "thread that performes a single crawl step from the local crawl queue", "/IndexCreateWWWLocalQueue_p.html",
-        new serverInstantBusyThread(crawlQueues, plasmaSwitchboardConstants.CRAWLJOB_LOCAL_CRAWL_METHOD_START, plasmaSwitchboardConstants.CRAWLJOB_LOCAL_CRAWL_METHOD_JOBCOUNT, plasmaSwitchboardConstants.CRAWLJOB_LOCAL_CRAWL_METHOD_FREEMEM), 10000);
+                     new serverInstantBusyThread(crawlQueues, plasmaSwitchboardConstants.CRAWLJOB_LOCAL_CRAWL_METHOD_START, plasmaSwitchboardConstants.CRAWLJOB_LOCAL_CRAWL_METHOD_JOBCOUNT, plasmaSwitchboardConstants.CRAWLJOB_LOCAL_CRAWL_METHOD_FREEMEM), 10000);
         deployThread(plasmaSwitchboardConstants.SEED_UPLOAD, "Seed-List Upload", "task that a principal peer performes to generate and upload a seed-list to a ftp account", null,
-        new serverInstantBusyThread(yc, plasmaSwitchboardConstants.SEED_UPLOAD_METHOD_START, plasmaSwitchboardConstants.SEED_UPLOAD_METHOD_JOBCOUNT, plasmaSwitchboardConstants.SEED_UPLOAD_METHOD_FREEMEM), 180000);
+                     new serverInstantBusyThread(yc, plasmaSwitchboardConstants.SEED_UPLOAD_METHOD_START, plasmaSwitchboardConstants.SEED_UPLOAD_METHOD_JOBCOUNT, plasmaSwitchboardConstants.SEED_UPLOAD_METHOD_FREEMEM), 180000);
         deployThread(plasmaSwitchboardConstants.PEER_PING, "YaCy Core", "this is the p2p-control and peer-ping task", null,
-        new serverInstantBusyThread(yc, plasmaSwitchboardConstants.PEER_PING_METHOD_START, plasmaSwitchboardConstants.PEER_PING_METHOD_JOBCOUNT, plasmaSwitchboardConstants.PEER_PING_METHOD_FREEMEM), 2000);
-        
+                     new serverInstantBusyThread(yc, plasmaSwitchboardConstants.PEER_PING_METHOD_START, plasmaSwitchboardConstants.PEER_PING_METHOD_JOBCOUNT, plasmaSwitchboardConstants.PEER_PING_METHOD_FREEMEM), 2000);
         deployThread(plasmaSwitchboardConstants.INDEX_DIST, "DHT Distribution", "selection, transfer and deletion of index entries that are not searched on your peer, but on others", null,
             new serverInstantBusyThread(this, plasmaSwitchboardConstants.INDEX_DIST_METHOD_START, plasmaSwitchboardConstants.INDEX_DIST_METHOD_JOBCOUNT, plasmaSwitchboardConstants.INDEX_DIST_METHOD_FREEMEM), 60000,
             Long.parseLong(getConfig(plasmaSwitchboardConstants.INDEX_DIST_IDLESLEEP , "5000")),
@@ -932,14 +929,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
                   new plasmaSearchRankingProfile("", crypt.simpleDecode(sb.getConfig("rankingProfile", ""), null));
     }
     
-    /**
-     * This method changes the HTCache size.<br>
-     * @param newCacheSize in MB
-     */
-    public final void setCacheSize(final long newCacheSize) {
-        plasmaHTCache.setCacheSize(1048576 * newCacheSize);
-    }
-    
     public boolean onlineCaution() {
         return
            (System.currentTimeMillis() - this.proxyLastAccess < Integer.parseInt(getConfig(plasmaSwitchboardConstants.PROXY_ONLINE_CAUTION_DELAY, "30000"))) ||
@@ -1079,15 +1068,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         }
         
         return true;
-    }
-    
-    public boolean htEntryStoreJob() {
-        if (plasmaHTCache.empty()) return false;
-        return htEntryStoreProcess(plasmaHTCache.pop());
-    }
-    
-    public int htEntrySize() {
-        return plasmaHTCache.size();
     }
     
     public void close() {
@@ -1882,12 +1862,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         if (thread != null) {
         	setConfig(plasmaSwitchboardConstants.CRAWLJOB_LOCAL_CRAWL_BUSYSLEEP , thread.setBusySleep(newBusySleep));
         	thread.setIdleSleep(2000);
-        }
-        
-        thread = getThread(plasmaSwitchboardConstants.PROXY_CACHE_ENQUEUE);
-        if (thread != null) {
-            setConfig(plasmaSwitchboardConstants.PROXY_CACHE_ENQUEUE_BUSYSLEEP , thread.setBusySleep(0));
-            thread.setIdleSleep(2000);
         }
         
         thread = getThread(plasmaSwitchboardConstants.INDEXER);

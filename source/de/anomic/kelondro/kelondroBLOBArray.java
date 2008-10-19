@@ -67,14 +67,13 @@ public class kelondroBLOBArray implements kelondroBLOB {
     
     public kelondroBLOBArray(
             final File heapLocation,
-            final int keylength, final kelondroByteOrder ordering,
-            long agelimit, long sizelimit
-            ) throws IOException {
+            final int keylength,
+            final kelondroByteOrder ordering) throws IOException {
         this.keylength = keylength;
         this.ordering = ordering;
         this.heapLocation = heapLocation;
-        this.fileAgeLimit = agelimit;
-        this.fileSizeLimit = sizelimit;
+        this.fileAgeLimit = oneMonth;
+        this.fileSizeLimit = oneGigabyte;
         this.repositoryAgeMax = Long.MAX_VALUE;
         this.repositorySizeMax = Long.MAX_VALUE;
 
@@ -111,10 +110,12 @@ public class kelondroBLOBArray implements kelondroBLOB {
     
     public void setMaxAge(long maxAge) {
         this.repositoryAgeMax = maxAge;
+        this.fileAgeLimit = Math.min(oneMonth, maxAge / 10);
     }
     
     public void setMaxSize(long maxSize) {
         this.repositorySizeMax = maxSize;
+        this.fileSizeLimit = Math.min(oneGigabyte, maxSize / 10);
     }
     
     private void executeLimits() {
@@ -311,7 +312,7 @@ public class kelondroBLOBArray implements kelondroBLOB {
         final File f = new File("/Users/admin/blobarraytest");
         try {
             //f.delete();
-            final kelondroBLOBArray heap = new kelondroBLOBArray(f, 12, kelondroNaturalOrder.naturalOrder, oneMonth, oneGigabyte);
+            final kelondroBLOBArray heap = new kelondroBLOBArray(f, 12, kelondroNaturalOrder.naturalOrder);
             heap.put("aaaaaaaaaaaa".getBytes(), "eins zwei drei".getBytes());
             heap.put("aaaaaaaaaaab".getBytes(), "vier fuenf sechs".getBytes());
             heap.put("aaaaaaaaaaac".getBytes(), "sieben acht neun".getBytes());

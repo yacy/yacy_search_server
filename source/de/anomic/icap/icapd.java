@@ -71,16 +71,16 @@ public class icapd implements serverHandler, Cloneable {
     // needed for logging
     private final serverLog log = new serverLog("ICAPD");
     
-    private static plasmaSwitchboard switchboard = null;
+    private static plasmaSwitchboard sb = null;
     private static String virtualHost = null;
     private static boolean keepAliveSupport = true;
     
     
     
     public icapd() {
-        if (switchboard == null) {
-            switchboard = plasmaSwitchboard.getSwitchboard();
-            virtualHost = switchboard.getConfig("fileHost","localhost");
+        if (sb == null) {
+            sb = plasmaSwitchboard.getSwitchboard();
+            virtualHost = sb.getConfig("fileHost","localhost");
         }
         
     }
@@ -124,9 +124,9 @@ public class icapd implements serverHandler, Cloneable {
     public icapHeader getDefaultHeaders() {
         final icapHeader newHeaders = new icapHeader();
         
-        newHeaders.put(icapHeader.SERVER,"YaCy/" + switchboard.getConfig("vString",""));
+        newHeaders.put(icapHeader.SERVER,"YaCy/" + sb.getConfig("vString",""));
         newHeaders.put(icapHeader.DATE, HttpClient.dateString(new Date()));
-        newHeaders.put(icapHeader.ISTAG, "\"" + switchboard.getConfig("vString","") + "\"");
+        newHeaders.put(icapHeader.ISTAG, "\"" + sb.getConfig("vString","") + "\"");
         
         return newHeaders;
     }
@@ -384,7 +384,7 @@ public class icapd implements serverHandler, Cloneable {
                     httpRespStatusLine,
                     httpReqHeader, httpResHeader,
                     null, 
-                    switchboard.webIndex.defaultProxyProfile
+                    sb.webIndex.defaultProxyProfile
             );
             
             // copy the response body into the file
@@ -397,7 +397,7 @@ public class icapd implements serverHandler, Cloneable {
             plasmaHTCache.storeMetadata(httpResHeader, cacheEntry);
             
             // indexing the response
-            plasmaHTCache.push(cacheEntry);    
+            sb.htEntryStoreProcess(cacheEntry);
         } catch (final Exception e) {
             e.printStackTrace();
         }

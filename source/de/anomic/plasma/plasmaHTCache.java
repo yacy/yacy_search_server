@@ -40,7 +40,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 import de.anomic.http.httpResponseHeader;
 import de.anomic.index.indexDocumentMetadata;
@@ -59,13 +58,12 @@ public final class plasmaHTCache {
     public static final String RESPONSE_HEADER_DB_NAME = "responseHeader.heap";
     public static final String FILE_DB_NAME = "file.array";
     
-    private static final int stackLimit = 150; // if we exceed that limit, we do not check idle
     public  static final long oneday = 1000L * 60L * 60L * 24L; // milliseconds of a day
 
     private static kelondroMap responseHeaderDB = null;
     private static kelondroBLOBBuffer fileDB = null;
+    private static kelondroBLOBArray fileDBunbuffered = null;
     
-    private static final ConcurrentLinkedQueue<indexDocumentMetadata> cacheStack = new ConcurrentLinkedQueue<indexDocumentMetadata>();
     public static long maxCacheSize = 0l;
     public static File cachePath = null;
     public static final serverLog log = new serverLog("HTCACHE");
@@ -135,9 +133,10 @@ public final class plasmaHTCache {
         }
         responseHeaderDB = new kelondroMap(blob, 500);
         try {
-            kelondroBLOBArray fileDBunbuffered = new kelondroBLOBArray(new File(cachePath, FILE_DB_NAME), 12, kelondroBase64Order.enhancedCoder, kelondroBLOBArray.oneMonth, kelondroBLOBArray.oneGigabyte);
-            fileDB = new kelondroBLOBBuffer(fileDBunbuffered, 1024 * 1024, true);
-            fileDB.start();
+            fileDBunbuffered = new kelondroBLOBArray(new File(cachePath, FILE_DB_NAME), 12, kelondroBase64Order.enhancedCoder);
+            fileDBunbuffered.setMaxSize(maxCacheSize);
+            fileDB = new kelondroBLOBBuffer(fileDBunbuffered, 2 * 1024 * 1024, true);
+            //fileDB.start();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -159,24 +158,12 @@ public final class plasmaHTCache {
         directory.delete();
     }
 
-    public static int size() {
-        return cacheStack.size();
-    }
-
     public static int responseHeaderDBSize() {
         return responseHeaderDB.size();
     }
     
     public static long fileDBSize() {
         return fileDB.length();
-    }
-    
-    public static void push(final indexDocumentMetadata entry) {
-        cacheStack.add(entry);
-    }
-
-    public static indexDocumentMetadata pop() {
-        return cacheStack.poll();
     }
 
     /**
@@ -185,6 +172,7 @@ public final class plasmaHTCache {
      */
     public static void setCacheSize(final long newCacheSize) {
         maxCacheSize = newCacheSize;
+        fileDBunbuffered.setMaxSize(maxCacheSize);
     }
 
     /**
@@ -199,14 +187,6 @@ public final class plasmaHTCache {
     public static void close() {
         responseHeaderDB.close();
         fileDB.close();
-    }
-
-    public static boolean full() {
-        return (cacheStack.size() > stackLimit);
-    }
-
-    public static boolean empty() {
-        return (cacheStack.size() == 0);
     }
 
     public static boolean isPicture(final String mimeType) {

@@ -110,20 +110,6 @@ public final class plasmaSwitchboardConstants {
     public static final String CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_FREEMEM   = null;
     public static final String CRAWLJOB_REMOTE_TRIGGERED_CRAWL_IDLESLEEP        = "62_remotetriggeredcrawl_idlesleep";
     public static final String CRAWLJOB_REMOTE_TRIGGERED_CRAWL_BUSYSLEEP        = "62_remotetriggeredcrawl_busysleep";
-    // 70_cachemanager
-    /**
-     * <p><code>public static final String <strong>PROXY_CACHE_ENQUEUE</strong> = "70_cachemanager"</code></p>
-     * <p>Name of the proxy cache enqueue thread which fetches a given website and saves the site itself as well as it's
-     * HTTP-headers in the HTCACHE</p>
-     * 
-     * @see plasmaSwitchboard#PROXY_CACHE_PATH
-     */
-    public static final String PROXY_CACHE_ENQUEUE                  = "70_cachemanager";
-    public static final String PROXY_CACHE_ENQUEUE_METHOD_START     = "htEntryStoreJob";
-    public static final String PROXY_CACHE_ENQUEUE_METHOD_JOBCOUNT  = "htEntrySize";
-    public static final String PROXY_CACHE_ENQUEUE_METHOD_FREEMEM   = null;
-    public static final String PROXY_CACHE_ENQUEUE_IDLESLEEP        = "70_cachemanager_idlesleep";
-    public static final String PROXY_CACHE_ENQUEUE_BUSYSLEEP        = "70_cachemanager_busysleep";
     // 74_parsing
     /**
      * <p><code>public static final String <strong>INDEXER</strong> = "80_indexing"</code></p>

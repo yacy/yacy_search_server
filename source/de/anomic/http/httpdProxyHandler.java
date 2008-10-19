@@ -98,7 +98,7 @@ public final class httpdProxyHandler {
     
     // static variables
     // can only be instantiated upon first instantiation of this class object
-    private static plasmaSwitchboard switchboard = null;
+    private static plasmaSwitchboard sb = null;
     private static final HashSet<String> yellowList;
     private static int timeout = 30000;
     private static boolean yacyTrigger = true;
@@ -165,16 +165,16 @@ public final class httpdProxyHandler {
             theLogger.logSevere("Unable to configure proxy access logging.",e);        
         }
         
-        switchboard = plasmaSwitchboard.getSwitchboard();
-        if (switchboard != null) {
+        sb = plasmaSwitchboard.getSwitchboard();
+        if (sb != null) {
             
-        isTransparentProxy = Boolean.valueOf(switchboard.getConfig("isTransparentProxy","false")).booleanValue();
+        isTransparentProxy = Boolean.valueOf(sb.getConfig("isTransparentProxy","false")).booleanValue();
             
         // set timeout
-        timeout = Integer.parseInt(switchboard.getConfig("proxy.clientTimeout", "10000"));
+        timeout = Integer.parseInt(sb.getConfig("proxy.clientTimeout", "10000"));
             
         // create a htRootPath: system pages
-        htRootPath = new File(switchboard.getRootPath(), switchboard.getConfig("htRootPath","htroot"));
+        htRootPath = new File(sb.getRootPath(), sb.getConfig("htRootPath","htroot"));
         if (!(htRootPath.exists())) {
             if(!htRootPath.mkdir())
                 serverLog.logSevere("PROXY", "could not create htRoot "+ htRootPath);
@@ -182,10 +182,10 @@ public final class httpdProxyHandler {
             
         // load a transformer
         transformer = new htmlFilterContentTransformer();
-        transformer.init(new File(switchboard.getRootPath(), switchboard.getConfig(plasmaSwitchboardConstants.LIST_BLUE, "")).toString());
+        transformer.init(new File(sb.getRootPath(), sb.getConfig(plasmaSwitchboardConstants.LIST_BLUE, "")).toString());
             
         // load the yellow-list
-        final String f = switchboard.getConfig("proxyYellowList", null);
+        final String f = sb.getConfig("proxyYellowList", null);
         if (f != null) {
             yellowList = serverFileUtils.loadList(new File(f)); 
             theLogger.logConfig("loaded yellow-list from file " + f + ", " + yellowList.size() + " entries");
@@ -193,7 +193,7 @@ public final class httpdProxyHandler {
             yellowList = new HashSet<String>();
         }
         
-        final String redirectorPath = switchboard.getConfig("externalRedirector", "");
+        final String redirectorPath = sb.getConfig("externalRedirector", "");
         if (redirectorPath.length() > 0 && redirectorEnabled == false){    
             try {
                 redirectorProcess=Runtime.getRuntime().exec(redirectorPath);
@@ -260,11 +260,11 @@ public final class httpdProxyHandler {
          path            =       "$Path" "=" value
          domain          =       "$Domain" "=" value
          */
-        if (switchboard.getConfigBool("proxy.monitorCookies", false)) {
+        if (sb.getConfigBool("proxy.monitorCookies", false)) {
             if (requestHeader.containsKey(httpRequestHeader.COOKIE)) {
                 final Object[] entry = new Object[]{new Date(), clienthost, requestHeader.getMultiple(httpRequestHeader.COOKIE)};
-                synchronized(switchboard.outgoingCookies) {
-                    switchboard.outgoingCookies.put(targethost, entry);
+                synchronized(sb.outgoingCookies) {
+                    sb.outgoingCookies.put(targethost, entry);
                 }
             }
         }
@@ -286,11 +286,11 @@ public final class httpdProxyHandler {
          |       "Secure"
          |       "Version" "=" 1*DIGIT
          */
-        if (switchboard.getConfigBool("proxy.monitorCookies", false)) {
+        if (sb.getConfigBool("proxy.monitorCookies", false)) {
             if (respondHeader.containsKey(httpResponseHeader.SET_COOKIE)) {
                 final Object[] entry = new Object[]{new Date(), targetclient, respondHeader.getMultiple(httpResponseHeader.SET_COOKIE)};
-                synchronized(switchboard.incomingCookies) {
-                    switchboard.incomingCookies.put(serverhost, entry);
+                synchronized(sb.incomingCookies) {
+                    sb.incomingCookies.put(serverhost, entry);
                 }
             }
         }
@@ -310,7 +310,7 @@ public final class httpdProxyHandler {
             final Date requestDate = new Date(); // remember the time...
             conProp.put(httpHeader.CONNECTION_PROP_REQUEST_START, Long.valueOf(requestDate.getTime()));
             if (yacyTrigger) de.anomic.yacy.yacyCore.triggerOnlineAction();
-            switchboard.proxyLastAccess = System.currentTimeMillis();
+            sb.proxyLastAccess = System.currentTimeMillis();
 
             // using an ByteCount OutputStream to count the send bytes (needed for the logfile)
             countedRespond = new httpdByteCountOutputStream(respond,conProp.getProperty(httpHeader.CONNECTION_PROP_REQUESTLINE).length() + 2,"PROXY");
@@ -422,7 +422,7 @@ public final class httpdProxyHandler {
                         requestHeader,
                         cachedResponseHeader,
                         null,                            // initiator
-                        switchboard.webIndex.defaultProxyProfile  // profile
+                        sb.webIndex.defaultProxyProfile  // profile
                 );
                 plasmaHTCache.storeMetadata(cachedResponseHeader, cacheEntry); // TODO: check if this storeMetadata is necessary
 
@@ -536,7 +536,7 @@ public final class httpdProxyHandler {
                     requestHeader,
                     responseHeader,
                     null, 
-                    switchboard.webIndex.defaultProxyProfile
+                    sb.webIndex.defaultProxyProfile
             );
             plasmaHTCache.storeMetadata(responseHeader, cacheEntry);
 
@@ -622,7 +622,7 @@ public final class httpdProxyHandler {
                     // totally fresh file
                     //cacheEntry.status = plasmaHTCache.CACHE_FILL; // it's an insert
                     cacheEntry.setCacheArray(cacheArray);
-                    plasmaHTCache.push(cacheEntry);
+                    sb.htEntryStoreProcess(cacheEntry);
                     conProp.setProperty(httpHeader.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_MISS");
                 } else if (cacheArray != null && sizeBeforeDelete == cacheArray.length) {
                     // before we came here we deleted a cache entry
@@ -634,7 +634,7 @@ public final class httpdProxyHandler {
                     // before we came here we deleted a cache entry
                     //cacheEntry.status = plasmaHTCache.CACHE_STALE_RELOAD_GOOD;
                     cacheEntry.setCacheArray(cacheArray);
-                    plasmaHTCache.push(cacheEntry); // necessary update, write response header to cache
+                    sb.htEntryStoreProcess(cacheEntry);
                     conProp.setProperty(httpHeader.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_REFRESH_MISS");
                 }
             } else {
@@ -858,7 +858,7 @@ public final class httpdProxyHandler {
             final Date requestDate = new Date(); // remember the time...
             conProp.put(httpHeader.CONNECTION_PROP_REQUEST_START, Long.valueOf(requestDate.getTime()));
             if (yacyTrigger) de.anomic.yacy.yacyCore.triggerOnlineAction();
-            switchboard.proxyLastAccess = System.currentTimeMillis();
+            sb.proxyLastAccess = System.currentTimeMillis();
             
             // using an ByteCount OutputStream to count the send bytes
             respond = new httpdByteCountOutputStream(respond,conProp.getProperty(httpHeader.CONNECTION_PROP_REQUESTLINE).length() + 2,"PROXY");                                   
@@ -958,7 +958,7 @@ public final class httpdProxyHandler {
             final Date requestDate = new Date(); // remember the time...
             conProp.put(httpHeader.CONNECTION_PROP_REQUEST_START, Long.valueOf(requestDate.getTime()));
             if (yacyTrigger) de.anomic.yacy.yacyCore.triggerOnlineAction();
-            switchboard.proxyLastAccess = System.currentTimeMillis();
+            sb.proxyLastAccess = System.currentTimeMillis();
             
             // using an ByteCount OutputStream to count the send bytes
             countedRespond  = new httpdByteCountOutputStream(respond,conProp.getProperty(httpHeader.CONNECTION_PROP_REQUESTLINE).length() + 2,"PROXY");
@@ -1252,7 +1252,7 @@ public final class httpdProxyHandler {
      */
     private static void addXForwardedForHeader(final Properties conProp, final httpRequestHeader requestHeader) {
         // setting the X-Forwarded-For Header
-        if (switchboard.getConfigBool("proxy.sendXForwardedForHeader", true)) {
+        if (sb.getConfigBool("proxy.sendXForwardedForHeader", true)) {
             requestHeader.put(httpHeader.X_FORWARDED_FOR, conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP));
         }
     }
@@ -1294,7 +1294,7 @@ public final class httpdProxyHandler {
     }
 
     private static void setViaHeader(final httpHeader header, final String httpVer) {
-        if (!switchboard.getConfigBool("proxy.sendViaHeader", true)) return;
+        if (!sb.getConfigBool("proxy.sendViaHeader", true)) return;
         final String myAddress = (httpd.getAlternativeResolver() == null) ? null : httpd.getAlternativeResolver().myAlternativeAddress();
         if (myAddress != null) {
     
@@ -1307,7 +1307,7 @@ public final class httpdProxyHandler {
             viaValue
             .append(httpVer).append(" ")
             .append(myAddress).append(" ")
-            .append("(YaCy ").append(switchboard.getConfig("vString", "0.0")).append(")");
+            .append("(YaCy ").append(sb.getConfig("vString", "0.0")).append(")");
             
             // storing header back
             header.put(httpHeader.VIA, new String(viaValue));
@@ -1316,7 +1316,7 @@ public final class httpdProxyHandler {
 
     public static void doConnect(final Properties conProp, final httpRequestHeader requestHeader, final InputStream clientIn, final OutputStream clientOut) throws IOException {
         
-        switchboard.proxyLastAccess = System.currentTimeMillis();
+        sb.proxyLastAccess = System.currentTimeMillis();
     
         String host = conProp.getProperty(httpHeader.CONNECTION_PROP_HOST);
         final String httpVersion = conProp.getProperty(httpHeader.CONNECTION_PROP_HTTP_VER);
@@ -1666,7 +1666,7 @@ public final class httpdProxyHandler {
             userAgentStr
             .append(browserUserAgent.substring(0,pos))
             .append("; YaCy ")
-            .append(switchboard.getConfig("vString","0.1"))
+            .append(sb.getConfig("vString","0.1"))
             .append("; yacy.net")
             .append(browserUserAgent.substring(pos));
         } else {

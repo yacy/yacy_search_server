@@ -136,9 +136,10 @@ public class kelondroBLOBBuffer extends Thread implements kelondroBLOB {
     private byte[] compress(byte[] b) {
         // compressed a byte array and adds a leading magic for the compression
         try {
-            final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            System.out.print("/"); // DEBUG
+            final ByteArrayOutputStream baos = new ByteArrayOutputStream(b.length / 5);
             baos.write(gzipMagic);
-            final OutputStream os = new GZIPOutputStream(baos, 128);
+            final OutputStream os = new GZIPOutputStream(baos, 512);
             os.write(b);
             os.close();
             baos.close();
@@ -150,6 +151,7 @@ public class kelondroBLOBBuffer extends Thread implements kelondroBLOB {
     }
     
     private byte[] markWithPlainMagic(byte[] b) {
+        System.out.print("+"); // DEBUG
         byte[] r = new byte[b.length + 2];
         r[0] = plainMagic[0];
         r[1] = plainMagic[1];
@@ -160,6 +162,7 @@ public class kelondroBLOBBuffer extends Thread implements kelondroBLOB {
     private byte[] decompress(byte[] b) {
         // use a magic in the head of the bytes to identify compression type
         if (kelondroByteArray.equals(b, gzipMagic)) {
+            System.out.print("\\"); // DEBUG
             ByteArrayInputStream bais = new ByteArrayInputStream(b);
             // eat up the magic
             bais.read();
@@ -168,7 +171,7 @@ public class kelondroBLOBBuffer extends Thread implements kelondroBLOB {
             InputStream gis;
             try {
                 gis = new GZIPInputStream(bais);
-                final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                final ByteArrayOutputStream baos = new ByteArrayOutputStream(b.length);
                 final byte[] buf = new byte[1024];
                 int n;
                 while ((n = gis.read(buf)) > 0) baos.write(buf, 0, n);
@@ -182,6 +185,7 @@ public class kelondroBLOBBuffer extends Thread implements kelondroBLOB {
                 return null;
             }
         } else if (kelondroByteArray.equals(b, plainMagic)) {
+            System.out.print("-"); // DEBUG
             byte[] r = new byte[b.length - 2];
             System.arraycopy(b, 2, r, 0, b.length - 2);
             return r;
@@ -286,20 +290,12 @@ public class kelondroBLOBBuffer extends Thread implements kelondroBLOB {
         
         // check if the buffer is full or could be full after this write
         if (this.queueLength + b.length * 2 > this.maxCacheSize) flushAll();
-        
-        // depending on execution cases, write into different queues
-        if (!this.executing && this.compress) {
-            // files are compressed when they arrive and written to the compressed queue
-            byte[] bb = compress(b);
-            this.compressedQueue.add(new Entry(key, bb));
-            this.queueLength += bb.length;
-        } else {
-            // files are written uncompressed to the uncompressed-queue
-            // they are either written uncompressed to the database
-            // or compressed with the concurrent thread and written later
-            this.rawQueue.add(new Entry(key, b));
-            this.queueLength += b.length;
-        }
+
+        // files are written uncompressed to the uncompressed-queue
+        // they are either written uncompressed to the database
+        // or compressed with the concurrent thread and written later
+        this.rawQueue.add(new Entry(key, b));
+        this.queueLength += b.length;
     }
 
     public synchronized void remove(byte[] key) throws IOException {
@@ -322,15 +318,11 @@ public class kelondroBLOBBuffer extends Thread implements kelondroBLOB {
     }
     
     private boolean flushOne(boolean block) throws IOException {
-        if (!this.executing && this.compress) {
+        if (rawQueue.size() > 0) {
             // files are compressed when they arrive and written to the compressed queue
-            return flushOneCompressed(block);
+            return flushOneRaw(block);
         } else {
-            // files are written uncompressed to the uncompressed-queue
-            // they are either written uncompressed to the database
-            // or compressed with the concurrent thread and written later
-            if (flushOneRaw(block)) return true;
-            else return flushOneCompressed(block);
+            return flushOneCompressed(block);
         }
     }
     
@@ -371,7 +363,7 @@ public class kelondroBLOBBuffer extends Thread implements kelondroBLOB {
     }
 
     private void flushAll() throws IOException {
-        while ((this.rawQueue != null && this.rawQueue.size() > 0) ||
+        while (this.rawQueue.size() > 0 ||
                (this.compressedQueue != null && this.compressedQueue.size() > 0)) {
             if (!flushOne(false)) break;
         }

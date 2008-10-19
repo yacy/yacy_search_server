@@ -31,6 +31,7 @@ import java.io.File;
 import java.io.IOException;
 
 import de.anomic.http.httpRequestHeader;
+import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.server.serverObjects;
@@ -88,11 +89,11 @@ public class ProxyIndexingMonitor_p {
                 if (!cache.isDirectory() && !cache.isFile()) cache.mkdirs();
 
                 // proxyCacheSize 
-                oldProxyCacheSize = getStringLong(env.getConfig("proxyCacheSize", "64"));
-                newProxyCacheSize = getStringLong(post.get("proxyCacheSize", "64"));
+                oldProxyCacheSize = getStringLong(env.getConfig(plasmaSwitchboardConstants.PROXY_CACHE_SIZE, "64"));
+                newProxyCacheSize = getStringLong(post.get(plasmaSwitchboardConstants.PROXY_CACHE_SIZE, "64"));
                 if (getLong(newProxyCacheSize) < 4) { newProxyCacheSize = "4"; }
-                env.setConfig("proxyCacheSize", newProxyCacheSize);
-                sb.setCacheSize(Long.parseLong(newProxyCacheSize));                
+                env.setConfig(plasmaSwitchboardConstants.PROXY_CACHE_SIZE, newProxyCacheSize);
+                plasmaHTCache.setCacheSize(Long.parseLong(newProxyCacheSize) * 1024 * 1024);                
 
                 // implant these settings also into the crawling profile for the proxy
                 if (sb.webIndex.defaultProxyProfile == null) {
@@ -152,7 +153,7 @@ public class ProxyIndexingMonitor_p {
         prop.put("proxyIndexingLocalText", env.getConfig("proxyIndexingLocalText", "").equals("true") ? "1" : "0");
         prop.put("proxyIndexingLocalMedia", env.getConfig("proxyIndexingLocalMedia", "").equals("true") ? "1" : "0");
         prop.put("proxyCache", env.getConfig(plasmaSwitchboardConstants.HTCACHE_PATH, plasmaSwitchboardConstants.HTCACHE_PATH_DEFAULT));
-        prop.put("proxyCacheSize", env.getConfigLong("proxyCacheSize", 64));
+        prop.put("proxyCacheSize", env.getConfigLong(plasmaSwitchboardConstants.PROXY_CACHE_SIZE, 64));
         // return rewrite properties
         return prop;
     }
