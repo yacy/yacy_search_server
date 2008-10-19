@@ -136,7 +136,6 @@ public final class plasmaHTCache {
             fileDBunbuffered = new kelondroBLOBArray(new File(cachePath, FILE_DB_NAME), 12, kelondroBase64Order.enhancedCoder);
             fileDBunbuffered.setMaxSize(maxCacheSize);
             fileDB = new kelondroBLOBBuffer(fileDBunbuffered, 2 * 1024 * 1024, true);
-            //fileDB.start();
         } catch (IOException e) {
             e.printStackTrace();
         }

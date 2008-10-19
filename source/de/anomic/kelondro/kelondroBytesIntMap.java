@@ -49,6 +49,10 @@ public class kelondroBytesIntMap {
         return index.row();
     }
     
+    public void clear() throws IOException {
+        this.index.clear();
+    }
+    
     public synchronized boolean has(final byte[] key) {
         assert (key != null);
         return index.has(key);

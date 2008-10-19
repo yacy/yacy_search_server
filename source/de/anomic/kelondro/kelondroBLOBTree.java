@@ -118,6 +118,10 @@ public class kelondroBLOBTree implements kelondroBLOB {
         return this.keylen;
     }
     
+    public kelondroByteOrder ordering() {
+        return this.rowdef.objectOrder;
+    }
+    
     public synchronized int size() {
         return index.size();
     }

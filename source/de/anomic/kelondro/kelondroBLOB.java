@@ -37,6 +37,12 @@ public interface kelondroBLOB {
     public int keylength();
     
     /**
+     * return the underlying odering
+     * @return
+     */
+    public kelondroByteOrder ordering();
+    
+    /**
      * clears the content of the database
      * @throws IOException
      */

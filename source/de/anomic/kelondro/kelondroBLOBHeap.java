@@ -182,6 +182,10 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
         return this.index.size();
     }
 
+    public kelondroByteOrder ordering() {
+        return this.ordering;
+    }
+    
     /**
      * test if a key is in the heap file. This does not need any IO, because it uses only the ram index
      * @param key
@@ -506,7 +510,7 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
     }
     
     private void mergeGaps(final long seek0, final int size0, final long seek1, final int size1) throws IOException {
-        System.out.println("*** DEBUG-BLOBHeap " + heapFile.getName() + ": merging gap from pos " + seek0 + ", len " + size0 + " with next record of size " + size1 + " (+ 4)");
+        //System.out.println("*** DEBUG-BLOBHeap " + heapFile.getName() + ": merging gap from pos " + seek0 + ", len " + size0 + " with next record of size " + size1 + " (+ 4)");
         
         Integer g = this.free.remove(seek1); // g is only used for debugging
         assert g != null;

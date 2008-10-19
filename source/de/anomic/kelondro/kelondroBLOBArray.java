@@ -148,6 +148,10 @@ public class kelondroBLOBArray implements kelondroBLOB {
         return s;
     }
     
+    public kelondroByteOrder ordering() {
+        return this.ordering;
+    }
+    
     private class blobItem {
         Date creation;
         File location;
