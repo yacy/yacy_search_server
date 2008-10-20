@@ -69,8 +69,8 @@ public class kelondroEcoFS {
     /**
      * stay below hard disc cache (is that necessary?)
      */
-    private static final int maxReadCache = 8 * 1024;
-    private static final int maxWriteBuffer = 4 * 1024;
+    private static final int maxReadCache = 512 * 1024;
+    private static final int maxWriteBuffer = 512 * 1024;
     
     
     public kelondroEcoFS(final File tablefile, final int recordsize) throws IOException {
@@ -267,7 +267,7 @@ public class kelondroEcoFS {
 
     public synchronized void put(final long index, final byte[] b, final int start) throws IOException {
         assert b.length - start >= this.recordsize;
-        final long s = size();
+        final long s = filesize() + this.buffercount;
         if (index > s) throw new IndexOutOfBoundsException("kelondroEcoFS.put(" + index + ") outside bounds (" + this.size() + ")");
         
         // check if this is an empty entry

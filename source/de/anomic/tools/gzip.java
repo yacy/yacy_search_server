@@ -75,7 +75,7 @@ public class gzip {
     public static byte[] gzipString(final String in) {
 	try {
 	    final InputStream  fin  = new ByteArrayInputStream(in.getBytes("UTF8"));
-	    final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+	    final ByteArrayOutputStream baos = new ByteArrayOutputStream(in.length() / 3);
 	    final OutputStream fout = new GZIPOutputStream(baos, 128);
 	    copy(fout, fin, 128);
 	    fin.close();
@@ -90,7 +90,7 @@ public class gzip {
 	
     public static String gunzipString(final byte[] in) throws IOException {
 	    final InputStream  fin  = new GZIPInputStream(new ByteArrayInputStream(in));
-	    final ByteArrayOutputStream fout = new ByteArrayOutputStream();
+	    final ByteArrayOutputStream fout = new ByteArrayOutputStream(in.length / 3);
 	    copy(fout, fin, 128);
 	    fin.close();
 	    fout.close();

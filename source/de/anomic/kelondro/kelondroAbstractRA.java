@@ -75,7 +75,7 @@ abstract class kelondroAbstractRA implements kelondroRA {
     }
     
     public byte[] readFully() throws IOException {
-        final ByteArrayOutputStream dest = new ByteArrayOutputStream();
+        final ByteArrayOutputStream dest = new ByteArrayOutputStream(512);
         final byte[] buffer = new byte[1024];
         
         int c, total = 0;

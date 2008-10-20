@@ -342,7 +342,7 @@ public class JakartaCommonsHttpClient {
      */
     private RequestEntity zipRequest(final RequestEntity data) throws IOException {
         // cache data and gzip it
-        final ByteArrayOutputStream zippedBytes = new ByteArrayOutputStream();
+        final ByteArrayOutputStream zippedBytes = new ByteArrayOutputStream(512);
         final GZIPOutputStream toZip = new GZIPOutputStream(zippedBytes);
         data.writeRequest(toZip);
         toZip.finish();

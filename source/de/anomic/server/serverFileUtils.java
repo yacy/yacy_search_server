@@ -249,15 +249,17 @@ public final class serverFileUtils {
         return read(source,-1);
     }
     
-    public static byte[] read(final InputStream source, final long count) throws IOException {
-        final ByteArrayOutputStream baos = (count > 0) 
-                                   ? new ByteArrayOutputStream((int)count) 
-                                   : new ByteArrayOutputStream();
-        copy(source, baos, count);
-        baos.close();
-        
-        // convert Stream into array
-        return baos.toByteArray();        
+    public static byte[] read(final InputStream source, final int count) throws IOException {
+        if (count > 0) {
+            byte[] b = new byte[count];
+            source.read(b, 0, count);
+            return b;
+        } else {
+            final ByteArrayOutputStream baos = new ByteArrayOutputStream(512);
+            copy(source, baos, count);
+            baos.close();
+            return baos.toByteArray();
+        }
     }
 
     public static byte[] read(final File source) throws IOException {
@@ -331,7 +333,7 @@ public final class serverFileUtils {
             System.out.println("DEBUG: uncompressGZipArray - uncompressing source");
             try {
                 final ByteArrayInputStream byteInput = new ByteArrayInputStream(source);
-                final ByteArrayOutputStream byteOutput = new ByteArrayOutputStream();
+                final ByteArrayOutputStream byteOutput = new ByteArrayOutputStream(source.length / 5);
                 final GZIPInputStream zippedContent = new GZIPInputStream(byteInput);
                 final byte[] data = new byte[1024];
                 int read = 0;

@@ -246,7 +246,7 @@ public final class httpTemplate {
 
         while (transferUntil(pis, out, hasha)) {
             bb = pis.read();
-            keyStream = new ByteArrayOutputStream();
+            keyStream = new ByteArrayOutputStream(512);
 
             if( (bb & 0xFF) == lcbr ){ //multi
                 if( transferUntil(pis, keyStream, mClose) ){ //close tag
@@ -256,7 +256,7 @@ public final class httpTemplate {
                         pis.unread(bb);
                     }
                     multi_key = keyStream.toByteArray(); //IMPORTANT: no prefix here
-                    keyStream = new ByteArrayOutputStream(); //reset stream
+                    keyStream.reset(); //reset stream
 
                     /* DEBUG - print key + value
 			try{
@@ -318,7 +318,7 @@ public final class httpTemplate {
 		}
                  */
 
-                keyStream=new ByteArrayOutputStream(); //clear
+                keyStream.reset(); //clear
 
                 boolean byName=false;
                 int whichPattern=0;
@@ -337,7 +337,7 @@ public final class httpTemplate {
 
                 int currentPattern=0;
                 boolean found=false;
-                keyStream = new ByteArrayOutputStream(); //reset stream
+                keyStream.reset(); //reset stream
                 if(byName){
                     //TODO: better Error Handling
                     transferUntil(pis, keyStream,appendBytes("%%".getBytes("UTF-8"),patternName,null,null));
@@ -345,7 +345,7 @@ public final class httpTemplate {
                         serverLog.logSevere("TEMPLATE", "No such Template: %%"+new String(patternName));
                         return structure.getBytes();
                     }
-                    keyStream=new ByteArrayOutputStream();
+                    keyStream.reset();
                     transferUntil(pis, keyStream, "::".getBytes());
                     pis2 = new PushbackInputStream(new ByteArrayInputStream(keyStream.toByteArray()));
                     structure.append(writeTemplate(pis2, out, pattern, dflt, newPrefix(prefix,key)));
@@ -376,7 +376,7 @@ public final class httpTemplate {
                                     others++;
                                     text.append("#(".getBytes("UTF-8")).append(keyStream.toByteArray()).append(")#".getBytes("UTF-8"));
                                 }
-                                keyStream = new ByteArrayOutputStream(); //reset stream
+                                keyStream.reset(); //reset stream
                                 continue;
                             } //is not #(
                             pis.unread(bb);//is processed in next loop
@@ -436,7 +436,7 @@ public final class httpTemplate {
                 }
             }else if( (bb & 0xFF) == ps){ //include
                 final serverByteBuffer include = new serverByteBuffer();                
-                keyStream = new ByteArrayOutputStream(); //reset stream
+                keyStream.reset(); //reset stream
                 if(transferUntil(pis, keyStream, iClose)){
                     byte[] filename = keyStream.toByteArray();
                     //if(filename.startsWith( Character.toString((char)lbr) ) && filename.endsWith( Character.toString((char)rbr) )){ //simple pattern for filename

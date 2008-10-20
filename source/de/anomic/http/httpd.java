@@ -747,7 +747,7 @@ public final class httpd implements serverHandler, Cloneable {
             assert bytesRead == buffer.length;
         // parsing post request bodies which are gzip content-encoded
         } else {
-            ByteArrayOutputStream bout = new ByteArrayOutputStream();
+            ByteArrayOutputStream bout = new ByteArrayOutputStream(512);
             serverFileUtils.copy(in,bout);
             buffer = bout.toByteArray();
             bout.close(); bout = null;
@@ -1206,7 +1206,7 @@ public final class httpd implements serverHandler, Cloneable {
             
             httpTemplate.writeTemplate(
                     fis = new FileInputStream(new File(htRootPath, "/proxymsg/error.html")), 
-                    o = new ByteArrayOutputStream(), 
+                    o = new ByteArrayOutputStream(512), 
                     tp, 
                     "-UNRESOLVED_PATTERN-".getBytes()
             );

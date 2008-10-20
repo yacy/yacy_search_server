@@ -600,7 +600,8 @@ public final class httpdProxyHandler {
                     ((storeHTCache) || (isSupportedContent))
             ) {
                 // we don't write actually into a file, only to RAM, and schedule writing the file.
-                final ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+                int l = res.getResponseHeader().size();
+                final ByteArrayOutputStream byteStream = new ByteArrayOutputStream((l < 32) ? 32 : l);
                 if(isBinary) {
                     final OutputStream toClientAndMemory = new MultiOutputStream(new OutputStream[] {outStream, byteStream});
                     serverFileUtils.copy(res.getDataAsStream(), toClientAndMemory);
@@ -1014,17 +1015,17 @@ public final class httpdProxyHandler {
             // "if there is a body to the call, we would have a CONTENT-LENGTH tag in the requestHeader"
             // it seems that it is a HTTP/1.1 connection which stays open (the inputStream) and endlessly waits for
             // input so we have to end it to do the request
-            final long requestLength = requestHeader.getContentLength();
-            if(requestLength > -1) {
+            final int contentLength = requestHeader.getContentLength();
+            if (contentLength > -1) {
                 final byte[] bodyData;
-                if(requestLength == 0) {
+                if(contentLength == 0) {
                     // no body
                     bodyData = new byte[0];
                 } else {
                     // read content-length bytes into memory
-                    final ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-                    serverFileUtils.copy(body, buffer, requestLength);
-                    bodyData = buffer.toByteArray();
+                    bodyData = new byte[contentLength];
+                    int r = body.read(bodyData, 0, contentLength);
+                    if (r < contentLength) throw new IOException("not all read: " + r + " from " + contentLength);
                 }
                 body = new ByteArrayInputStream(bodyData);
             }

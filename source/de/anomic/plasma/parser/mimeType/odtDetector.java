@@ -82,7 +82,7 @@ public class odtDetector implements MagicDetector {
             
             // read in the content of the file
             final InputStream zippedContent = zipFile.getInputStream(mimeTypeInfo); 
-            final String realMimeType = new String(serverFileUtils.read(zippedContent, mimeTypeInfo.getSize()));
+            final String realMimeType = new String(serverFileUtils.read(zippedContent, (int) mimeTypeInfo.getSize()));
             
             return new String[]{realMimeType};
         } catch (final Exception e) {
