@@ -232,7 +232,7 @@ public class CrawlResults {
                                 prop.putHTML("table_indexed_" + cnt + "_showTitle_available_nodescr_urldescr", comp.dc_title());
                             }
 
-                            prop.put("table_indexed_" + cnt + "_showTitle_available_cachepath", "");
+                            prop.put("table_indexed_" + cnt + "_showTitle_available_urlHash", urlHash);
                             prop.putHTML("table_indexed_" + cnt + "_showTitle_available_urltitle", urlstr);
                     } else
                         prop.put("table_indexed_" + cnt + "_showTitle", "0");
@@ -241,7 +241,7 @@ public class CrawlResults {
                         prop.put("table_indexed_" + cnt + "_showURL", "1");
                             prop.put("table_indexed_" + cnt + "_showURL_available", "1");
 
-                            prop.put("table_indexed_" + cnt + "_showURL_available_cachepath", "");
+                            prop.put("table_indexed_" + cnt + "_showURL_available_urlHash", urlHash);
                             prop.putHTML("table_indexed_" + cnt + "_showURL_available_urltitle", urlstr);
                             prop.put("table_indexed_" + cnt + "_showURL_available_url", urltxt);
                     } else

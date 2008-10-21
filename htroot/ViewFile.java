@@ -76,9 +76,7 @@ public class ViewFile {
         if (post != null && post.containsKey("words"))
             prop.putHTML("error_words", post.get("words"));
         else {
-            prop.put("error", "1");
-            prop.put("viewmode", "0");    
-            return prop;
+            prop.putHTML("error_words", "");
         }
 
         final String viewMode = post.get("viewMode","sentences");
@@ -344,11 +342,11 @@ public class ViewFile {
     }
 
     private static final String[] wordArray(String words) {
-        String[] w = null;
-        if (words != null) try {
+        String[] w = new String[0];
+        if (words == null || words.length() == 0) return w;
+        try {
             words = URLDecoder.decode(words, "UTF-8");
             w = words.substring(1, words.length() - 1).split(",");
-            if (w.length == 0) return null;
         } catch (final UnsupportedEncodingException e) {}
         return w;
     }
