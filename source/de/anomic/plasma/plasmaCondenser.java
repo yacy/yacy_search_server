@@ -40,6 +40,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
@@ -234,13 +235,13 @@ public final class plasmaCondenser {
         indexWord wprop;
         sievedWordsEnum wordenum;
         try {
-            wordenum = new sievedWordsEnum(new ByteArrayInputStream(text.getBytes()), "UTF-8");
+            wordenum = new sievedWordsEnum(new ByteArrayInputStream(text.getBytes()));
         } catch (final UnsupportedEncodingException e) {
             return;
         }
         int pip = 0;
         while (wordenum.hasMoreElements()) {
-            word = (new String(wordenum.nextElement())).toLowerCase();
+            word = (new String(wordenum.nextElement())).toLowerCase(Locale.ENGLISH);
             if (useForLanguageIdentification) languageIdentificator.add(word);
             if (word.length() < 3) continue;
             wprop = words.get(word);
@@ -321,7 +322,7 @@ public final class plasmaCondenser {
         // read source
         final sievedWordsEnum wordenum = new sievedWordsEnum(is, charset);
         while (wordenum.hasMoreElements()) {
-            word = (new String(wordenum.nextElement())).toLowerCase(); // TODO: does toLowerCase work for non ISO-8859-1 chars?
+            word = (new String(wordenum.nextElement())).toLowerCase(Locale.ENGLISH); // TODO: does toLowerCase work for non ISO-8859-1 chars?
             if (languageIdentificator != null) languageIdentificator.add(word);
             if (word.length() < wordminsize) continue;
             //System.out.println("PARSED-WORD " + word);
@@ -509,8 +510,8 @@ public final class plasmaCondenser {
         StringBuffer buffer = null;
         unsievedWordsEnum e;
 
-        public sievedWordsEnum(final InputStream is, final String charset) throws UnsupportedEncodingException {
-            e = new unsievedWordsEnum(is, charset);
+        public sievedWordsEnum(final InputStream is) throws UnsupportedEncodingException {
+            e = new unsievedWordsEnum(is);
             buffer = nextElement0();
         }
 
@@ -555,8 +556,8 @@ public final class plasmaCondenser {
         sentencesFromInputStreamEnum e;
         StringBuffer s;
 
-        public unsievedWordsEnum(final InputStream is, final String charset) throws UnsupportedEncodingException {
-            e = new sentencesFromInputStreamEnum(is, charset);
+        public unsievedWordsEnum(final InputStream is) throws UnsupportedEncodingException {
+            e = new sentencesFromInputStreamEnum(is);
             s = new StringBuffer(20);
             buffer = nextElement0();
         }
@@ -616,9 +617,9 @@ public final class plasmaCondenser {
         return sb;
     }
     
-    public static sentencesFromInputStreamEnum sentencesFromInputStream(final InputStream is, final String charset) {
+    public static sentencesFromInputStreamEnum sentencesFromInputStream(final InputStream is) {
         try {
-            return new sentencesFromInputStreamEnum(is, charset);
+            return new sentencesFromInputStreamEnum(is);
         } catch (final UnsupportedEncodingException e) {
             return null;
         }
@@ -633,8 +634,8 @@ public final class plasmaCondenser {
         int counter = 0;
         boolean pre = false;
 
-        public sentencesFromInputStreamEnum(final InputStream is, final String charset) throws UnsupportedEncodingException {
-            raf = new BufferedReader((charset == null) ? new InputStreamReader(is) : new InputStreamReader(is, charset));
+        public sentencesFromInputStreamEnum(final InputStream is) throws UnsupportedEncodingException {
+            raf = new BufferedReader(new InputStreamReader(is, "UTF-8"));
             buffer = nextElement0();
             counter = 0;
             pre = false;
