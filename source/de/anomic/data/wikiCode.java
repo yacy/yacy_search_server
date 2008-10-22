@@ -35,6 +35,7 @@ import java.util.HashMap;
 
 import de.anomic.data.wiki.abstractWikiParser;
 import de.anomic.data.wiki.wikiParser;
+import de.anomic.htmlFilter.htmlFilterCharacterCoding;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 
@@ -757,7 +758,7 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
     public String transformLine(String result, final String publicAddress, final plasmaSwitchboard switchboard) {
         //If HTML has not bee replaced yet (can happen if method gets called in recursion), replace now!
         if (!replacedHTML || preformattedSpan){
-            result = htmlTools.encodeUnicode2html(result, true);
+            result = htmlFilterCharacterCoding.unicode2html(result, true);
             replacedHTML = true;
         }
 

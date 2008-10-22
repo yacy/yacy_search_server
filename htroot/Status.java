@@ -170,8 +170,8 @@ public class Status {
 
         if (sb.getConfig("remoteProxyUse", "false").equals("true")) {
             prop.put("remoteProxy", "1");
-            prop.putHTML("remoteProxy_host", sb.getConfig("remoteProxyHost", "<unknown>"), true);
-            prop.putHTML("remoteProxy_port", sb.getConfig("remoteProxyPort", "<unknown>"), true);
+            prop.putXML("remoteProxy_host", sb.getConfig("remoteProxyHost", "<unknown>"));
+            prop.putXML("remoteProxy_port", sb.getConfig("remoteProxyPort", "<unknown>"));
             prop.put("remoteProxy_4Yacy", sb.getConfig("remoteProxyUse4Yacy", "true").equalsIgnoreCase("true") ? "0" : "1");
         } else {
             prop.put("remoteProxy", "0"); // not used
@@ -201,7 +201,7 @@ public class Status {
             } else {
                 prop.put("peerAddress", "1"); // Address
                 prop.put("peerAddress_address", sb.webIndex.seedDB.mySeed().getPublicAddress());
-                prop.putHTML("peerAddress_peername", sb.getConfig("peerName", "<nameless>").toLowerCase(), true);
+                prop.putXML("peerAddress_peername", sb.getConfig("peerName", "<nameless>").toLowerCase());
             }
         }
         final String peerStatus = ((sb.webIndex.seedDB.mySeed() == null) ? yacySeed.PEERTYPE_VIRGIN : sb.webIndex.seedDB.mySeed().get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN));

@@ -96,9 +96,9 @@ public class ysearchitem {
             if (rss) {
                 // text search for rss output
                 prop.put("rss", "1"); // switch on specific content
-                prop.putHTML("rss_title", result.title(), true);
-                prop.putHTML("rss_description", result.textSnippet().getLineRaw(), true);
-                prop.putHTML("rss_link", result.urlstring(), true);
+                prop.putXML("rss_title", result.title());
+                prop.putXML("rss_description", result.textSnippet().getLineRaw());
+                prop.putXML("rss_link", result.urlstring());
                 prop.put("rss_urlhash", result.hash());
                 prop.put("rss_date", plasmaSwitchboard.dateString822(result.modified()));
                 return prop;

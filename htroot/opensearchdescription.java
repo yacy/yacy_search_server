@@ -43,9 +43,9 @@ public class opensearchdescription {
         if (thisaddress.indexOf(":") == -1) thisaddress += ":" + serverCore.getPortNr(env.getConfig("port", "8080"));
         
         final serverObjects prop = new serverObjects();
-        prop.putHTML("thisaddress", thisaddress, true);
-        prop.putHTML("SearchPageGreeting", promoteSearchPageGreeting, true);
-        prop.putHTML("clientname", sb.webIndex.seedDB.mySeed().getName(), true);
+        prop.putXML("thisaddress", thisaddress);
+        prop.putXML("SearchPageGreeting", promoteSearchPageGreeting);
+        prop.putXML("clientname", sb.webIndex.seedDB.mySeed().getName());
         
         // return rewrite properties
         return prop;

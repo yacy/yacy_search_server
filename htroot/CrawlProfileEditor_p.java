@@ -212,7 +212,7 @@ public class CrawlProfileEditor_p {
         prop.put("crawlProfiles_" + count + "_dark", dark ? "1" : "0");
         prop.put("crawlProfiles_" + count + "_status", active ? "1" : "0");
         prop.put("crawlProfiles_" + count + "_name", profile.name());
-        prop.putHTML("crawlProfiles_" + count + "_startURL", profile.startURL(), true);
+        prop.putXML("crawlProfiles_" + count + "_startURL", profile.startURL());
         prop.put("crawlProfiles_" + count + "_handle", profile.handle());
         prop.put("crawlProfiles_" + count + "_depth", profile.generalDepth());
         prop.put("crawlProfiles_" + count + "_filter", profile.generalFilter());

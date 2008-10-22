@@ -65,7 +65,7 @@ public class getpageinfo_p {
             String url=post.get("url");
 			if(url.toLowerCase().startsWith("ftp://")){
 				prop.put("robots-allowed", "1");
-				prop.putHTML("title", "FTP: "+url, true);
+				prop.putXML("title", "FTP: "+url);
                 return prop;
 			} else if (!(url.toLowerCase().startsWith("http://") || url.toLowerCase().startsWith("https://"))) {
                 url = "http://" + url;
@@ -86,7 +86,7 @@ public class getpageinfo_p {
                     writer.close();
                     
                     // put the document title 
-                    prop.putHTML("title", scraper.getTitle(), true);
+                    prop.putXML("title", scraper.getTitle());
                     
                     // put the favicon that belongs to the document
                     prop.put("favicon", (scraper.getFavicon()==null) ? "" : scraper.getFavicon().toString());
@@ -97,16 +97,16 @@ public class getpageinfo_p {
                     for(int i=0;i<list.length;i++){
                     	String tag = list[i];
                     	if (!tag.equals("")) {                   	                 	
-                    		prop.putHTML("tags_"+count+"_tag", tag, true);
+                    		prop.putXML("tags_"+count+"_tag", tag);
                     		count++;
                     	}
                     }
                     prop.put("tags", count);
                     // put description                    
-                    prop.putHTML("desc", scraper.getDescription(), true);
+                    prop.putXML("desc", scraper.getDescription());
                     // put language
                     Set<String> languages = scraper.getContentLanguages();
-                    prop.putHTML("lang", (languages == null) ? "unknown" : languages.iterator().next(), true);
+                    prop.putXML("lang", (languages == null) ? "unknown" : languages.iterator().next());
 
                 } catch (final MalformedURLException e) { /* ignore this */
                 } catch (final IOException e) { /* ignore this */
@@ -121,7 +121,7 @@ public class getpageinfo_p {
                     
                     // get the sitemap URL of the domain
                     final yacyURL sitemapURL = sb.robots.getSitemapURL(theURL);
-                    prop.putHTML("sitemap", (sitemapURL==null)?"":sitemapURL.toString(), true);
+                    prop.putXML("sitemap", (sitemapURL==null)?"":sitemapURL.toString());
                 } catch (final MalformedURLException e) {}
             }
             

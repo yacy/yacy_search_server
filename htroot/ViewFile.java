@@ -33,8 +33,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import de.anomic.data.htmlTools;
 import de.anomic.htmlFilter.htmlFilterImageEntry;
+import de.anomic.htmlFilter.htmlFilterCharacterCoding;
 import de.anomic.http.HttpClient;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpResponseHeader;
@@ -352,7 +352,7 @@ public class ViewFile {
     }
     
     private static final String markup(final String[] wordArray, String message) {
-        message = htmlTools.encodeUnicode2html(message, true);
+        message = htmlFilterCharacterCoding.unicode2html(message, true);
         if (wordArray != null)
             for (int j = 0; j < wordArray.length; j++) {
                 final String currentWord = wordArray[j].trim();

@@ -52,7 +52,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import de.anomic.data.htmlTools;
+import de.anomic.htmlFilter.htmlFilterCharacterCoding;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.tools.yFormatter;
 
@@ -146,10 +146,10 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
      * @param key   key name as String.
      * @param value a String that will be reencoded for HTML output.
      * @return      the modified String that was added to the map.
-     * @see htmlTools#encodeUnicode2html(String, boolean)
+     * @see htmlFilterCharacterCoding#encodeUnicode2html(String, boolean)
      */
     public String putHTML(final String key, final String value) {
-        return putHTML(key, value, false);
+        return put(key, htmlFilterCharacterCoding.unicode2html(value, true));
     }
 
     /**
@@ -158,8 +158,8 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
      * If forXML is <code>true</code>, then only the characters <b>&amp; &quot; &lt; &gt;</b> will be
      * replaced in the returned String.
      */
-    public String putHTML(final String key, final String value, final boolean forXML) {
-        return put(key, htmlTools.encodeUnicode2html(value, true, forXML));
+    public String putXML(final String key, final String value) {
+        return put(key, htmlFilterCharacterCoding.unicode2xml(value, true));
     }
 
     /**

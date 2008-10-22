@@ -319,7 +319,7 @@ prop.putHTML("asd", "0");
 	                while ((peername = hostList.firstKey()) != null) {
 	                    final String Hash = hostList.get(peername);
 	                    prop.putHTML(DISABLED + "otherHosts_" + peerCount + "_hash", Hash);
-	                    prop.putHTML(DISABLED + "otherHosts_" + peerCount + "_name", peername, true);
+	                    prop.putXML(DISABLED + "otherHosts_" + peerCount + "_name", peername);
 	                    hostList.remove(peername);
 	                    peerCount++;
 	                }
@@ -332,14 +332,14 @@ prop.putHTML("asd", "0");
         int blacklistCount = 0;
         if (dirlist != null) {
             for (int i = 0; i <= dirlist.length - 1; i++) {
-                prop.putHTML(DISABLED + BLACKLIST + blacklistCount + "_name", dirlist[i], true);
+                prop.putXML(DISABLED + BLACKLIST + blacklistCount + "_name", dirlist[i]);
                 prop.put(DISABLED + BLACKLIST + blacklistCount + "_selected", "0");
 
                 if (dirlist[i].equals(blacklistToUse)) { //current List
                     prop.put(DISABLED + BLACKLIST + blacklistCount + "_selected", "1");
 
                     for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
-                        prop.putHTML(DISABLED + "currentActiveFor_" + blTypes + "_blTypeName",supportedBlacklistTypes[blTypes], true);
+                        prop.putXML(DISABLED + "currentActiveFor_" + blTypes + "_blTypeName",supportedBlacklistTypes[blTypes]);
                         prop.put(DISABLED + "currentActiveFor_" + blTypes + "_checked",
                                 listManager.listSetContains(supportedBlacklistTypes[blTypes] + ".BlackLists",dirlist[i]) ? "0" : "1");
                     }
@@ -366,7 +366,7 @@ prop.putHTML("asd", "0");
         }
         prop.put(DISABLED + "blackLists", blacklistCount);
         
-        prop.putHTML(DISABLED + "currentBlacklist", (blacklistToUse==null) ? "" : blacklistToUse, true);
+        prop.putXML(DISABLED + "currentBlacklist", (blacklistToUse==null) ? "" : blacklistToUse);
         prop.put("disabled", (blacklistToUse == null) ? "1" : "0");
         return prop;
     }

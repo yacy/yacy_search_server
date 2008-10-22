@@ -162,7 +162,7 @@ public final class Settings_p {
         }
         
         // clientIP
-        prop.putHTML("clientIP", (String) header.get(httpRequestHeader.CONNECTION_PROP_CLIENTIP, "<unknown>"), true); // read an artificial header addendum
+        prop.putXML("clientIP", (String) header.get(httpRequestHeader.CONNECTION_PROP_CLIENTIP, "<unknown>")); // read an artificial header addendum
         
         /* 
          * seed upload settings
@@ -239,7 +239,7 @@ public final class Settings_p {
         while (availableParserIter.hasNext()) {
             final ParserInfo parserInfo = availableParserIter.next();
             prop.put("parser_" + parserIdx + "_name", parserInfo.parserName);
-            prop.putHTML("parser_" + parserIdx + "_version", parserInfo.parserVersionNr, true);
+            prop.putXML("parser_" + parserIdx + "_version", parserInfo.parserVersionNr);
             prop.put("parser_" + parserIdx + "_usage", parserInfo.usageCount);
             prop.put("parser_" + parserIdx + "_colspan", configArray.length);
             

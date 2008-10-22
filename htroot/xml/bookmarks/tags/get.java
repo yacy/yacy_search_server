@@ -88,7 +88,7 @@ public class get {
             while (it.hasNext()) {
                 tag = it.next();
                 if(!tag.getTagName().startsWith("/")) {						// ignore folder tags
-                	prop.putHTML("tags_"+count+"_name", tag.getTagName(), true);
+                	prop.putXML("tags_"+count+"_name", tag.getTagName());
                 	prop.put("tags_"+count+"_count", tag.size());
                 	count++;
                 }

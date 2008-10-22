@@ -44,7 +44,6 @@ import java.util.Properties;
 import javax.swing.event.EventListenerList;
 
 import de.anomic.crawler.HTTPLoader;
-import de.anomic.data.htmlTools;
 import de.anomic.http.HttpClient;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.server.serverCharBuffer;
@@ -166,11 +165,11 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         if (tagname.equalsIgnoreCase("meta")) {
             String name = tagopts.getProperty("name", "");
             if (name.length() > 0) {
-                metas.put(name.toLowerCase(), htmlTools.decodeHtml2Unicode(tagopts.getProperty("content","")));
+                metas.put(name.toLowerCase(), htmlFilterCharacterCoding.html2unicode(tagopts.getProperty("content","")));
             } else {
                 name = tagopts.getProperty("http-equiv", "");
                 if (name.length() > 0) {
-                    metas.put(name.toLowerCase(), htmlTools.decodeHtml2Unicode(tagopts.getProperty("content","")));
+                    metas.put(name.toLowerCase(), htmlFilterCharacterCoding.html2unicode(tagopts.getProperty("content","")));
                 }
             }
         }

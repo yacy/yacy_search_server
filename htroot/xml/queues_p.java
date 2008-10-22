@@ -110,8 +110,8 @@ public class queues_p {
                     prop.putHTML("list-indexing_"+i+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()));
                     prop.put("list-indexing_"+i+"_depth", pcentry.depth());
                     prop.put("list-indexing_"+i+"_modified", pcentry.getModificationDate());
-                    prop.putHTML("list-indexing_"+i+"_anchor", (pcentry.anchorName()==null) ? "" : pcentry.anchorName(), true);
-                    prop.putHTML("list-indexing_"+i+"_url", pcentry.url().toNormalform(false, true), true);
+                    prop.putXML("list-indexing_"+i+"_anchor", (pcentry.anchorName()==null) ? "" : pcentry.anchorName());
+                    prop.putXML("list-indexing_"+i+"_url", pcentry.url().toNormalform(false, true));
                     prop.putNum("list-indexing_"+i+"_size", entrySize);
                     prop.put("list-indexing_"+i+"_inProcess", (inProcess) ? "1" : "0");
                     prop.put("list-indexing_"+i+"_hash", pcentry.urlHash());
@@ -135,7 +135,7 @@ public class queues_p {
                 initiator = sb.webIndex.seedDB.getConnected(w[i].initiator());
                 prop.putHTML("list-loader_"+count+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()));
                 prop.put("list-loader_"+count+"_depth", w[i].depth());
-                prop.putHTML("list-loader_"+count+"_url", w[i].url().toString(), true);
+                prop.putXML("list-loader_"+count+"_url", w[i].url().toString());
                 count++;
             }
             prop.put("list-loader", count);
@@ -181,8 +181,8 @@ public class queues_p {
                 prop.put(tableName + "_" + showNum + "_initiator", ((initiator == null) ? "proxy" : initiator.getName()));
                 prop.put(tableName + "_" + showNum + "_depth", urle.depth());
                 prop.put(tableName + "_" + showNum + "_modified", daydate(urle.loaddate()));
-                prop.putHTML(tableName + "_" + showNum + "_anchor", urle.name(), true);
-                prop.putHTML(tableName + "_" + showNum + "_url", urle.url().toNormalform(false, true), true);
+                prop.putXML(tableName + "_" + showNum + "_anchor", urle.name());
+                prop.putXML(tableName + "_" + showNum + "_url", urle.url().toNormalform(false, true));
                 prop.put(tableName + "_" + showNum + "_hash", urle.url().hash());
                 showNum++;
             }

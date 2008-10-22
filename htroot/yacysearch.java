@@ -439,7 +439,7 @@ public class yacysearch {
         prop.put("input_contentdomCheckApp", (contentdomCode == plasmaSearchQuery.CONTENTDOM_APP) ? "1" : "0");
         
         // for RSS: don't HTML encode some elements
-        prop.putHTML("rss_query", querystring, true);
+        prop.putXML("rss_query", querystring);
         prop.put("rss_queryenc", yacyURL.escape(querystring.replace(' ', '+')));
 
         sb.localSearchLastAccess = System.currentTimeMillis();

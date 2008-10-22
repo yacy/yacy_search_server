@@ -39,7 +39,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeSet;
 
-import de.anomic.data.htmlTools;
+import de.anomic.htmlFilter.htmlFilterCharacterCoding;
 import de.anomic.http.JakartaCommonsHttpClient;
 import de.anomic.http.JakartaCommonsHttpResponse;
 import de.anomic.http.httpRemoteProxyConfig;
@@ -452,14 +452,14 @@ public final class indexRepositoryReference {
                             pw.println(url);
                         }
                         if (format == 1) {
-                            pw.println("<a href=\"" + url + "\">" + htmlTools.encodeUnicode2html(comp.dc_title(), true, true) + "</a><br>");
+                            pw.println("<a href=\"" + url + "\">" + htmlFilterCharacterCoding.unicode2xml(comp.dc_title(), true) + "</a><br>");
                         }
                         if (format == 2) {
                             pw.println("<item>");
-                            pw.println("<title>" + htmlTools.encodeUnicode2html(comp.dc_title(), true, true) + "</title>");
+                            pw.println("<title>" + htmlFilterCharacterCoding.unicode2xml(comp.dc_title(), true) + "</title>");
                             pw.println("<link>" + yacyURL.escape(url) + "</link>");
-                            if (comp.dc_creator().length() > 0) pw.println("<author>" + htmlTools.encodeUnicode2html(comp.dc_creator(), true, true) + "</author>");
-                            if (comp.dc_subject().length() > 0) pw.println("<description>" + htmlTools.encodeUnicode2html(comp.dc_subject(), true, true) + "</description>");
+                            if (comp.dc_creator().length() > 0) pw.println("<author>" + htmlFilterCharacterCoding.unicode2xml(comp.dc_creator(), true) + "</author>");
+                            if (comp.dc_subject().length() > 0) pw.println("<description>" + htmlFilterCharacterCoding.unicode2xml(comp.dc_subject(), true) + "</description>");
                             pw.println("<pubDate>" + entry.moddate().toString() + "</pubDate>");
                             pw.println("<guid isPermaLink=\"false\">" + entry.hash() + "</guid>");
                             pw.println("</item>");

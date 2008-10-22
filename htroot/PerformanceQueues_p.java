@@ -111,14 +111,14 @@ public class PerformanceQueues_p {
             // set values to templates
             prop.put("table_" + c + "_threadname", threadName);
 
-			prop.putHTML("table_" + c + "_hasurl_shortdescr", thread.getShortDescription(), xml);
+			prop.putHTML("table_" + c + "_hasurl_shortdescr", thread.getShortDescription());
 			if(thread.getMonitorURL() == null) {
 				prop.put("table_"+c+"_hasurl", "0");
 			}else{
 				prop.put("table_"+c+"_hasurl", "1");
 				prop.put("table_" + c + "_hasurl_url", thread.getMonitorURL());
 			}
-            prop.putHTML("table_" + c + "_longdescr", thread.getLongDescription(), xml);
+            prop.putHTML("table_" + c + "_longdescr", thread.getLongDescription());
             queuesize = thread.getJobCount();
             prop.put("table_" + c + "_queuesize", (queuesize == Integer.MAX_VALUE) ? "unlimited" : yFormatter.number(queuesize, !xml));
             

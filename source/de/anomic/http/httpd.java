@@ -59,8 +59,8 @@ import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.httpclient.ChunkedInputStream;
 import org.apache.commons.httpclient.ContentLengthInputStream;
 
-import de.anomic.data.htmlTools;
 import de.anomic.data.userDB;
+import de.anomic.htmlFilter.htmlFilterCharacterCoding;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverByteBuffer;
@@ -850,7 +850,7 @@ public final class httpd implements serverHandler, Cloneable {
     // 06.01.2007: decode HTML entities by [FB]
     public static String decodeHtmlEntities(String s) {
         // replace all entities defined in wikiCode.characters and htmlentities
-        s = htmlTools.decodeHtml2Unicode(s);
+        s = htmlFilterCharacterCoding.html2unicode(s);
         
         // replace all other 
         final CharArrayWriter b = new CharArrayWriter(s.length());

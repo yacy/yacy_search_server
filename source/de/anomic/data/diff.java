@@ -30,6 +30,8 @@ package de.anomic.data;
 
 import java.util.ArrayList;
 
+import de.anomic.htmlFilter.htmlFilterCharacterCoding;
+
 /**
  * This class provides a diff-functionality.
  */
@@ -253,7 +255,7 @@ public class diff {
                 case diff.Part.ADDED: sb.append("added"); break;
                 case diff.Part.DELETED: sb.append("deleted"); break;
                 }
-                sb.append("\">").append(htmlTools.encodeUnicode2html(ps[j].getString(), true).replaceAll("\n", "<br />"));
+                sb.append("\">").append(htmlFilterCharacterCoding.unicode2html(ps[j].getString(), true).replaceAll("\n", "<br />"));
                 sb.append("</span>");
             }
             sb.append("</p>");

@@ -26,8 +26,8 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 
-import de.anomic.data.htmlTools;
 import de.anomic.htmlFilter.htmlFilterAbstractScraper;
+import de.anomic.htmlFilter.htmlFilterCharacterCoding;
 import de.anomic.index.indexWord;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroBitfield;
@@ -266,7 +266,7 @@ public final class plasmaSearchQuery {
     
     public String queryString(final boolean encodeHTML) {
     	if(encodeHTML){
-    		return htmlTools.encodeUnicode2html(this.queryString, true);
+    		return htmlFilterCharacterCoding.unicode2html(this.queryString, true);
     	}
     	return this.queryString;
     }

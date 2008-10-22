@@ -81,7 +81,7 @@ public class MessageSend_p {
                     peerName = targetPeer.get(yacySeed.NAME,"nameless");
             }
 
-            prop.putHTML("mode_permission_peerName", peerName, true);
+            prop.putXML("mode_permission_peerName", peerName);
             final String response = (result == null) ? null : (String) result.get("response");
             if (response == null || result == null) {
                 // we don't have permission or other peer does not exist
@@ -98,11 +98,11 @@ public class MessageSend_p {
                     final int messagesize = Integer.parseInt(result.get("messagesize"));
                     final int attachmentsize = Integer.parseInt(result.get("attachmentsize"));
 
-                    prop.putHTML("mode_permission_response", response, true);
+                    prop.putXML("mode_permission_response", response);
                     prop.put("mode_permission_messagesize", messagesize);
                     prop.put("mode_permission_attachmentsize", attachmentsize);
-                    prop.putHTML("mode_permission_subject", subject, true);
-                    prop.putHTML("mode_permission_message", message, true);
+                    prop.putXML("mode_permission_subject", subject);
+                    prop.putXML("mode_permission_message", message);
                     prop.putHTML("mode_permission_hash", hash);
                     if (post.containsKey("preview")) {
                         prop.putWiki("mode_permission_previewmessage", message);
@@ -140,7 +140,7 @@ public class MessageSend_p {
                 prop.put("mode_status", "1");
 
                 // "unresolved pattern", the remote peer is alive but had an exception
-                prop.putHTML("mode_status_message", message, true);
+                prop.putXML("mode_status_message", message);
             }
         }
         return prop;

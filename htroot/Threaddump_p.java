@@ -35,7 +35,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import de.anomic.data.htmlTools;
+import de.anomic.htmlFilter.htmlFilterCharacterCoding;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverFileUtils;
@@ -122,9 +122,9 @@ public class Threaddump_p {
                         line = null;
                     }
                     if ((line != null) && (line.length() > 0)) {
-                        bufferappend(buffer, plain, tracename + "at " + htmlTools.encodeUnicode2html(ste.toString(), true) + " [" + line.trim() + "]");
+                        bufferappend(buffer, plain, tracename + "at " + htmlFilterCharacterCoding.unicode2html(ste.toString(), true) + " [" + line.trim() + "]");
                     } else {
-                        bufferappend(buffer, plain, tracename + "at " + htmlTools.encodeUnicode2html(ste.toString(), true));
+                        bufferappend(buffer, plain, tracename + "at " + htmlFilterCharacterCoding.unicode2html(ste.toString(), true));
                     }
                 }
                 bufferappend(buffer, plain, "");

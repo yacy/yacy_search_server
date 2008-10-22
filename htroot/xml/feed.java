@@ -66,8 +66,8 @@ public class feed {
 
             RSSMessage message = feed.getChannel();
             if (message != null) {
-                prop.putHTML("channel_title", message.getTitle(), true);
-                prop.putHTML("channel_description", message.getDescription(), true);
+                prop.putXML("channel_title", message.getTitle());
+                prop.putXML("channel_description", message.getDescription());
                 prop.put("channel_pubDate", message.getPubDate());
             }
             while ((messageMaxCount > 0) && (feed.size() > 0)) {
@@ -75,9 +75,9 @@ public class feed {
                 if (message == null) continue;
 
                 // create RSS entry
-                prop.putHTML("item_" + messageCount + "_title", channels[channelIndex] + ": " + message.getTitle(), true);
-                prop.putHTML("item_" + messageCount + "_description", message.getDescription(), true);
-                prop.putHTML("item_" + messageCount + "_link", message.getLink(), true);
+                prop.putXML("item_" + messageCount + "_title", channels[channelIndex] + ": " + message.getTitle());
+                prop.putXML("item_" + messageCount + "_description", message.getDescription());
+                prop.putXML("item_" + messageCount + "_link", message.getLink());
                 prop.put("item_" + messageCount + "_pubDate", message.getPubDate());
                 prop.put("item_" + messageCount + "_guid", message.getGuid());
                 messageCount++;

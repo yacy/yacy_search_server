@@ -180,9 +180,9 @@ public class Blog {
                 try {
                     prop.put("mode", "1"); //edit
                     prop.put("mode_commentMode", page.getCommentMode());
-                    prop.putHTML("mode_author", new String(page.getAuthor(),"UTF-8"), xml);
+                    prop.putHTML("mode_author", new String(page.getAuthor(),"UTF-8"));
                     prop.put("mode_pageid", page.getKey());
-                    prop.putHTML("mode_subject", new String(page.getSubject(), "UTF-8"), xml);
+                    prop.putHTML("mode_subject", new String(page.getSubject(), "UTF-8"));
                     prop.put("mode_page-code", new String(page.getPage(), "UTF-8"));
                 } catch (final UnsupportedEncodingException e) {}
             }
@@ -195,16 +195,16 @@ public class Blog {
             if(hasRights) {
                 prop.put("mode", "2");//preview
                 prop.put("mode_commentMode", post.getInt("commentMode", 1));
-                prop.putHTML("mode_pageid", pagename, xml);
+                prop.putHTML("mode_pageid", pagename);
                 try {
-                    prop.putHTML("mode_author", new String(author, "UTF-8"), xml);
+                    prop.putHTML("mode_author", new String(author, "UTF-8"));
                 } catch (final UnsupportedEncodingException e) {
-                    prop.putHTML("mode_author", new String(author), xml);
+                    prop.putHTML("mode_author", new String(author));
                 }
-                prop.putHTML("mode_subject", post.get("subject",""), xml);
+                prop.putHTML("mode_subject", post.get("subject",""));
                 prop.put("mode_date", dateString(new Date()));
                 prop.putWiki("mode_page", post.get("content", ""));
-                prop.putHTML("mode_page-code", post.get("content", ""), xml);
+                prop.putHTML("mode_page-code", post.get("content", ""));
             }
             else {
                 prop.put("mode", "3"); //access denied (no rights)
@@ -213,16 +213,16 @@ public class Blog {
         else if(post.get("delete", "").equals("try")) {
             if(hasRights) {
                 prop.put("mode", "4");
-                prop.putHTML("mode_pageid", pagename, xml);
+                prop.putHTML("mode_pageid", pagename);
                 try {
-                    prop.putHTML("mode_author",new String(page.getAuthor(), "UTF-8"), xml);
+                    prop.putHTML("mode_author",new String(page.getAuthor(), "UTF-8"));
                 } catch (final UnsupportedEncodingException e) {
-                    prop.putHTML("mode_author",new String(page.getAuthor()), xml);
+                    prop.putHTML("mode_author",new String(page.getAuthor()));
                 }
                 try {
-                    prop.putHTML("mode_subject",new String(page.getSubject(),"UTF-8"), xml);
+                    prop.putHTML("mode_subject",new String(page.getSubject(),"UTF-8"));
                 } catch (final UnsupportedEncodingException e) {
-                    prop.putHTML("mode_subject",new String(page.getSubject()), xml);
+                    prop.putHTML("mode_subject",new String(page.getSubject()));
                 }
             }
             else prop.put("mode", "3"); //access denied (no rights)
@@ -246,7 +246,7 @@ public class Blog {
             if(pagename.equals(DEFAULT_PAGE)) {
                 // XXX: where are "peername" and "address" used in the template?
                 // XXX: "clientname" is already set to the peername, no need for a new setting
-                prop.putHTML("peername", sb.webIndex.seedDB.mySeed().getName(), xml);
+                prop.putHTML("peername", sb.webIndex.seedDB.mySeed().getName());
                 prop.put("address", address);
                 //index all entries
                 putBlogDefault(prop, sb, address, start, num, hasRights, xml);
@@ -321,16 +321,16 @@ public class Blog {
     {
         // subject
         try {
-            prop.putHTML("mode_entries_" + number + "_subject", new String(entry.getSubject(),"UTF-8"), xml);
+            prop.putHTML("mode_entries_" + number + "_subject", new String(entry.getSubject(),"UTF-8"));
         } catch (final UnsupportedEncodingException e) {
-            prop.putHTML("mode_entries_" + number + "_subject", new String(entry.getSubject()), xml);
+            prop.putHTML("mode_entries_" + number + "_subject", new String(entry.getSubject()));
         }
 
         // author
         try {
-            prop.putHTML("mode_entries_" + number + "_author", new String(entry.getAuthor(),"UTF-8"), xml);
+            prop.putHTML("mode_entries_" + number + "_author", new String(entry.getAuthor(),"UTF-8"));
         } catch (final UnsupportedEncodingException e) {
-            prop.putHTML("mode_entries_" + number + "_author", new String(entry.getAuthor()), xml);
+            prop.putHTML("mode_entries_" + number + "_author", new String(entry.getAuthor()));
         }
 
         // comments

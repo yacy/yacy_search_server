@@ -1,13 +1,8 @@
-// htmlTools.java
-// -----------------------
-// (C) by Michael Peter Christen; mc@yacy.net, 
-// (C) by Jan Sandbrink (NN), Franz Brausse (FB, karlchenofhell),
-// (C) by Bjoern 'fuchs' Krombholz (fuchsi)
-// first published on http://www.yacy.net
-//
-// $LastChangedDate: $
-// $LastChangedRevision: $
-// $LastChangedBy: $
+// htmlFilterCharacterCoding.java
+// ----------------------------------
+// (C) 22.10.2008 by Michael Peter Christen; mc@yacy.net
+// first published on http://yacy.net
+// Frankfurt, Germany, 2008
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -23,114 +18,22 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.data;
+package de.anomic.htmlFilter;
 
-public class htmlTools {
+import java.util.HashMap;
 
-    /** Replaces characters in a string with other entities according to HTML standards.
-      * @param text a string that possibly contains special characters
-      * @param includingAmpersand if <code>false</code> ampersands are not encoded
-      * @param forXML if <code>true</code> then only &amp;, &quot;, &lt; and &gt; will
-      *               be transcoded. 
-      * @return the string with all characters replaced by the corresponding character from array
-      */
-    public static String encodeUnicode2html(final String text, final boolean includingAmpersand, final boolean forXML) {
-        if (text == null) 
-            return null;
-        
-        final int spos = (includingAmpersand ? 0 : 2);
-        // if (forXML), then only encode ampersand, quotation mark, less than and 
-        // greather than which are the first 4 pairs in default mapping table
-        final int epos = (forXML ? 8 : mapping.length);
+public class htmlFilterCharacterCoding {
 
-        return encode(text, mapping, spos, epos);
-    }
+    private static final char amp_unicode = "\u0026".charAt(0);
+    private static final String amp_html = "&amp;";
     
-    /**
-     * Like {@link #encodeUnicode2html(String, boolean, boolean)} with <code>forXML = false</code>
-     */
-    public static String encodeUnicode2html(final String text, final boolean includingAmpersand) {
-        return encodeUnicode2html(text, includingAmpersand, false);
-    }
-
-
-    /**
-     * Replaces special entities ampersand, quotation marks, and less than/graiter than
-     * by the escaping entities allowed in XML documents.
-     * 
-     * Like {@link #encodeUnicode2html(String, boolean, boolean)} with
-     * <code>includingAmpersand = true</code> and <code>foxXML = true</code>.
-     * 
-     * @param text the original String
-     * @return the encoded String
-     */
-    public static String encodeUnicode2xml(final String text) {
-        return encodeUnicode2html(text, true, true);
-    }
-
-    /**
-     * Generic method that replaces occurences of special character entities defined in map 
-     * array with their corresponding mapping.
-     * @param text The String too process.
-     * @param map  An array defining the entity mapping.
-     * @param spos It is possible to use a subset of the map only. This parameter defines the
-     *             starting point in the map array. 
-     * @param epos The ending point, see above.
-     * @return A copy of the original String with all entities defined in map replaced.
-     */
-    public static String encode(final String text, final String[] map, final int spos, final int epos) {
-        final StringBuffer sb = new StringBuffer(text.length());
-        int textpos = 0;
-        search: while (textpos < text.length()) {
-            // find a (forward) mapping
-            loop: for (int i = spos; i < epos; i += 2) {
-                if (text.charAt(textpos) != map[i].charAt(0)) continue loop;
-                // found match
-                sb.append(map[i + 1]);
-                textpos++;
-                continue search;
-            }
-            // not found match
-            sb.append(text.charAt(textpos));
-            textpos++;
-        }
-
-        return sb.toString();
-    }
+    private static final String[] mapping4xml = {
+        "\"","&quot;",      //quotation mark
+        "\u003C","&lt;",    //less than
+        "\u003E","&gt;",    //greater than
+    };
     
-    public static String decodeHtml2Unicode(final String text) {
-        if (text == null) return null;
-        int pos = 0;
-        final StringBuffer sb = new StringBuffer(text.length());
-        search: while (pos < text.length()) {
-            // find a reverse mapping. TODO: replace matching with hashtable(s)
-            loop: for (int i = 0; i < mapping.length; i += 2) {
-                if (pos + mapping[i + 1].length() > text.length()) continue loop;
-                for (int j = mapping[i + 1].length() - 1; j >= 0; j--) {
-                    if (text.charAt(pos + j) != mapping[i + 1].charAt(j)) continue loop;
-                }
-                // found match
-                sb.append(mapping[i]);
-                pos = pos + mapping[i + 1].length();
-                continue search;
-            }
-            // not found match
-            sb.append(text.charAt(pos));
-            pos++;
-        }
-        return new String(sb);
-    }
-
-    //This array contains codes (see http://mindprod.com/jgloss/unicode.html for details) 
-    //that will be replaced. To add new codes or patterns, just put them at the end
-    //of the list. Codes or patterns in this list can not be escaped with [= or <pre>
-    private static final String[] mapping = {
-        // Ampersands _have_ to be replaced first. If they were replaced later,
-        // other replaced characters containing ampersands would get messed up.
-        "\u0026","&amp;",      //ampersand
-        "\"","&quot;",         //quotation mark
-        "\u003C","&lt;",       //less than
-        "\u003E","&gt;",       //greater than
+    private static final String[] mapping4html = {
         "\\",    "&#092;",  // Backslash
         "\u005E","&#094;",  // Caret
 
@@ -267,15 +170,109 @@ public class htmlTools {
         "\u00FF","&yuml;"
     };
     
+    private final static HashMap<String, Character> html2unicode4xml = new HashMap<String, Character>();
+    private final static HashMap<String, Character> html2unicode4html = new HashMap<String, Character>();
+    private final static HashMap<Character, String> unicode2html4xml = new HashMap<Character, String>();
+    private final static HashMap<Character, String> unicode2html4html = new HashMap<Character, String>();
+    static {
+        Character c;
+        for (int i = 0; i < mapping4html.length; i += 2) {
+            c = new Character(mapping4html[i].charAt(0));
+            html2unicode4html.put(mapping4html[i + 1], c);
+            unicode2html4html.put(c, mapping4html[i + 1]);
+        }
+        for (int i = 0; i < mapping4xml.length; i += 2) {
+            c = new Character(mapping4xml[i].charAt(0));
+            html2unicode4xml.put(mapping4xml[i + 1], c);
+            unicode2html4xml.put(c, mapping4xml[i + 1]);
+        }
+    }
+    
+    public static String unicode2xml(final String text, boolean amp) {
+        return unicode2html(text, amp, false);
+    }
+    
+    public static String unicode2html(final String text, boolean amp) {
+        return unicode2html(text, amp, true);
+    }
+    
+    private static String unicode2html(final String text, boolean amp, boolean html) {
+        if (text == null) return null;
+        final StringBuffer sb = new StringBuffer(text.length() * 12 / 10);
+        int textpos = 0;
+        String r;
+        char c;
+        while (textpos < text.length()) {
+            // find a (forward) mapping
+            c = text.charAt(textpos);
+            if (amp &&  c == amp_unicode) {
+                sb.append(amp_html);
+                textpos++;
+                continue;
+            }
+            if ((r = unicode2html4xml.get(c)) != null) {
+                sb.append(r);
+                textpos++;
+                continue;
+            }
+            if (html && (r = unicode2html4html.get(c)) != null) {
+                sb.append(r);
+                textpos++;
+                continue;
+            }
+            sb.append(c);
+            textpos++;
+        }
+        return sb.toString();
+    }
+    
+    public static String html2unicode(final String text) {
+        if (text == null) return null;
+        int p = 0, p1, q;
+        final StringBuffer sb = new StringBuffer(text.length());
+        String s;
+        Character r;
+        while (p < text.length()) {
+            p1 = text.indexOf('&', p);
+            if (p1 < 0) p1 = text.length();
+            sb.append(text.subSequence(p, p1));
+            p = p1;
+            if (p >= text.length()) break;
+            q = text.indexOf(';', p);
+            if (q < 0) {
+                p++;
+                continue;
+            }
+            s = text.substring(p, q + 1);
+            if (s.equals(amp_html)) {
+                sb.append(amp_unicode);
+                p = q + 1;
+                continue;
+            }
+            if ((r = html2unicode4xml.get(s)) != null) {
+                sb.append(r.charValue());
+                p = q + 1;
+                continue;
+            }
+            if ((r = html2unicode4html.get(s)) != null) {
+                sb.append(r);
+                p = q + 1;
+                continue;
+            }
+            // the entity is unknown, skip it
+        }
+        return new String(sb);
+    }
+
     public static void main(final String[] args) {
         final String text = "Test-Text mit & um zyklische &uuml; &amp; Ersetzungen auszuschliessen";
-        final String txet = encodeUnicode2html(text, true);
+        final String txet = unicode2html(text, true);
         System.out.println(txet);
-        System.out.println(decodeHtml2Unicode(txet));
-        if (decodeHtml2Unicode(txet).equals(text)) System.out.println("correct");
+        System.out.println(html2unicode(txet));
+        if (html2unicode(txet).equals(text)) System.out.println("correct");
         
         final String text2 = "encodeUnicode2xml: & \" < >";
         System.out.println(text2);
-        System.out.println(encodeUnicode2xml(text2));
+        System.out.println(unicode2xml(text2, true));
     }
 }

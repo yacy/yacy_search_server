@@ -59,13 +59,13 @@ public class all {
         Date date;
         while(it.hasNext()){
             bookmark=switchboard.bookmarksDB.getBookmark(it.next());
-            prop.putHTML("posts_"+count+"_url", bookmark.getUrl(), true);
-            prop.putHTML("posts_"+count+"_title", bookmark.getTitle(), true);
-            prop.putHTML("posts_"+count+"_description", bookmark.getDescription(), true);
-            prop.putHTML("posts_"+count+"_md5", serverCodings.encodeMD5Hex(bookmark.getUrl()), true);
+            prop.putXML("posts_"+count+"_url", bookmark.getUrl());
+            prop.putXML("posts_"+count+"_title", bookmark.getTitle());
+            prop.putXML("posts_"+count+"_description", bookmark.getDescription());
+            prop.putXML("posts_"+count+"_md5", serverCodings.encodeMD5Hex(bookmark.getUrl()));
             date=new Date(bookmark.getTimeStamp());
-            prop.putHTML("posts_"+count+"_time", serverDate.formatISO8601(date), true);
-            prop.putHTML("posts_"+count+"_tags", bookmark.getTagsString().replaceAll(","," "), true);
+            prop.putXML("posts_"+count+"_time", serverDate.formatISO8601(date));
+            prop.putXML("posts_"+count+"_tags", bookmark.getTagsString().replaceAll(","," "));
             
             // additional XML tags
             prop.put("posts_"+count+"_isExtended",extendedXML ? "1" : "0");

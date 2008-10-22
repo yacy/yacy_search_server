@@ -4,7 +4,7 @@ import java.util.Date;
 import java.util.Iterator;
 
 import de.anomic.data.bookmarksDB;
-import de.anomic.data.htmlTools;
+import de.anomic.htmlFilter.htmlFilterCharacterCoding;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverDate;
@@ -83,7 +83,7 @@ public class xbel {
     		count++;
     		  		
     		final String title = fn; // just to make sure fn stays untouched    		
-    		prop.put("xbel_"+count+"_elements", "<title>" + htmlTools.encodeUnicode2xml(title.replaceAll("(/.[^/]*)*/", "")) + "</title>");   		
+    		prop.put("xbel_"+count+"_elements", "<title>" + htmlFilterCharacterCoding.unicode2xml(title.replaceAll("(/.[^/]*)*/", ""), true) + "</title>");   		
     		count++;    
     		final Iterator<String> bit=switchboard.bookmarksDB.getBookmarksIterator(fn, isAdmin);
     		count = print_XBEL(bit, count);
@@ -106,19 +106,19 @@ public class xbel {
 			bookmark=switchboard.bookmarksDB.getBookmark(bit.next());
 			date=new Date(bookmark.getTimeStamp());
 			prop.put("xbel_"+count+"_elements", "<bookmark id=\"" + bookmark.getUrlHash()
-					+ "\" href=\"" + htmlTools.encodeUnicode2xml(bookmark.getUrl())
-					+ "\" added=\"" + htmlTools.encodeUnicode2xml(serverDate.formatISO8601(date))+"\">");
+					+ "\" href=\"" + htmlFilterCharacterCoding.unicode2xml(bookmark.getUrl(), true)
+					+ "\" added=\"" + htmlFilterCharacterCoding.unicode2xml(serverDate.formatISO8601(date), true)+"\">");
     		count++; 
     		prop.put("xbel_"+count+"_elements", "<title>");
     		count++;
-    		prop.putHTML("xbel_"+count+"_elements", bookmark.getTitle(), true);   		
+    		prop.putXML("xbel_"+count+"_elements", bookmark.getTitle());   		
     		count++; 
     		prop.put("xbel_"+count+"_elements", "</title>");
     		count++;
     		prop.put("xbel_"+count+"_elements", "<info>");   		
     		count++;
     		prop.put("xbel_"+count+"_elements", "<metadata owner=\"Mozilla\" ShortcutURL=\""
-				+ htmlTools.encodeUnicode2xml(bookmark.getTagsString().replaceAll("/.*,", "").toLowerCase())
+				+ htmlFilterCharacterCoding.unicode2xml(bookmark.getTagsString().replaceAll("/.*,", "").toLowerCase(), true)
 				+ "\"/>");   		
     		count++;
     		prop.put("xbel_"+count+"_elements", "<metadata owner=\"YaCy\" public=\""+Boolean.toString(bookmark.getPublic())+"\"/>");   		
@@ -127,7 +127,7 @@ public class xbel {
     		count++;
     		prop.put("xbel_"+count+"_elements", "<desc>");
     		count++;
-    		prop.putHTML("xbel_"+count+"_elements", bookmark.getDescription(), true);   		
+    		prop.putXML("xbel_"+count+"_elements", bookmark.getDescription());   		
     		count++; 
     		prop.put("xbel_"+count+"_elements", "</desc>");
     		count++;

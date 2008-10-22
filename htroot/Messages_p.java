@@ -58,7 +58,7 @@ public class Messages_p {
         final String peerAddress = sb.webIndex.seedDB.mySeed().getPublicAddress();
         final String peerName = sb.webIndex.seedDB.mySeed().getName();
         prop.put("peerAddress", peerAddress);
-        prop.putHTML("peerName", peerName, true);
+        prop.putXML("peerName", peerName);
 
         // List known hosts for message sending (from Blacklist_p.java)
         if (sb.webIndex.seedDB != null && sb.webIndex.seedDB.sizeConnected() > 0) {
@@ -76,7 +76,7 @@ public class Messages_p {
                 while ((peername = hostList.firstKey()) != null) {
                     final String Hash = hostList.get(peername);
                     prop.put(PEERSKNOWN + "peers_" + peerCount + "_hash", Hash);
-                    prop.putHTML(PEERSKNOWN + "peers_" + peerCount + "_name", peername, true);
+                    prop.putXML(PEERSKNOWN + "peers_" + peerCount + "_name", peername);
                     hostList.remove(peername);
                     peerCount++;
                 }
@@ -119,11 +119,11 @@ public class Messages_p {
                     message = sb.messageDB.read(key);
                     prop.put("mode_messages_"+count+"_dark", ((dark) ? "1" : "0") );
                     prop.put("mode_messages_"+count+"_date", dateString(message.date()));
-                    prop.putHTML("mode_messages_"+count+"_from", message.author(), true);
-                    prop.putHTML("mode_messages_"+count+"_to", message.recipient(), true);
-                    prop.putHTML("mode_messages_"+count+"_subject", message.subject(), true);
-                    prop.putHTML("mode_messages_"+count+"_category", message.category(), true);
-                    prop.putHTML("mode_messages_"+count+"_key", key, true);
+                    prop.putXML("mode_messages_"+count+"_from", message.author());
+                    prop.putXML("mode_messages_"+count+"_to", message.recipient());
+                    prop.putXML("mode_messages_"+count+"_subject", message.subject());
+                    prop.putXML("mode_messages_"+count+"_category", message.category());
+                    prop.putXML("mode_messages_"+count+"_key", key);
                     prop.put("mode_messages_"+count+"_hash", message.authorHash());
 
                     if ((header.get(httpRequestHeader.CONNECTION_PROP_PATH)).endsWith(".rss")) {
@@ -135,7 +135,7 @@ public class Messages_p {
 
                     	// also write out the message body (needed for the RSS feed)
                         try {
-                        	prop.putHTML("mode_messages_"+count+"_body",new String(message.message(), "UTF-8"), true);
+                        	prop.putXML("mode_messages_"+count+"_body",new String(message.message(), "UTF-8"));
                         } catch (final UnsupportedEncodingException e) {
                             // can not happen, because UTF-8 must be supported by every JVM
                         }
@@ -157,10 +157,10 @@ public class Messages_p {
             message = sb.messageDB.read(key);
             if (message == null) throw new NullPointerException("Message with ID " + key + " does not exist");
 
-            prop.putHTML("mode_from", message.author(), true);
-            prop.putHTML("mode_to", message.recipient(), true);
+            prop.putXML("mode_from", message.author());
+            prop.putXML("mode_to", message.recipient());
             prop.put("mode_date", dateString(message.date()));
-            prop.putHTML("mode_subject", message.subject(), true);
+            prop.putXML("mode_subject", message.subject());
             String theMessage = null;
             try {
                 theMessage = new String(message.message(), "UTF-8");
@@ -169,7 +169,7 @@ public class Messages_p {
             }
             prop.putWiki("mode_message", theMessage);
             prop.put("mode_hash", message.authorHash());
-            prop.putHTML("mode_key", key, true);
+            prop.putXML("mode_key", key);
         }
 
         // return rewrite properties
