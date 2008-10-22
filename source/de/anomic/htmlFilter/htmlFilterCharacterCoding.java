@@ -244,19 +244,17 @@ public class htmlFilterCharacterCoding {
                 continue;
             }
             s = text.substring(p, q + 1);
+            p = q + 1;
             if (s.equals(amp_html)) {
                 sb.append(amp_unicode);
-                p = q + 1;
                 continue;
             }
             if ((r = html2unicode4xml.get(s)) != null) {
                 sb.append(r.charValue());
-                p = q + 1;
                 continue;
             }
             if ((r = html2unicode4html.get(s)) != null) {
                 sb.append(r);
-                p = q + 1;
                 continue;
             }
             // the entity is unknown, skip it
