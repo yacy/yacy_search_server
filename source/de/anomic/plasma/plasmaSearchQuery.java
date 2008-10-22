@@ -33,7 +33,6 @@ import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroMSetTools;
 import de.anomic.kelondro.kelondroNaturalOrder;
-import de.anomic.server.serverCharBuffer;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyURL;
@@ -240,7 +239,7 @@ public final class plasmaSearchQuery {
     	if ((querystring == null) || (querystring.length() == 0)) return new TreeSet[]{new TreeSet<String>(kelondroNaturalOrder.naturalComparator), new TreeSet<String>(kelondroNaturalOrder.naturalComparator)};
         
         // convert Umlaute
-        querystring = htmlFilterAbstractScraper.convertUmlaute(new serverCharBuffer(querystring.toCharArray())).toString().toLowerCase().trim();
+        querystring = htmlFilterAbstractScraper.stripAll(querystring).toLowerCase().trim();
         int c;
         for (int i = 0; i < seps.length(); i++) {
             while ((c = querystring.indexOf(seps.charAt(i))) >= 0) { querystring = querystring.substring(0, c) + (((c + 1) < querystring.length()) ? (" " + querystring.substring(c + 1)) : ""); }

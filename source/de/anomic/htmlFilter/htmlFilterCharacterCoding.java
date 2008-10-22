@@ -257,6 +257,14 @@ public class htmlFilterCharacterCoding {
                 sb.append(r);
                 continue;
             }
+            if (s.charAt(1) == '#') {
+                if (s.charAt(2) == 'x' || s.charAt(2) == 'X') {
+                    sb.append(new char[] {(char) Integer.parseInt(s.substring(3, s.length() - 1), 16)});
+                    continue;
+                }
+                sb.append(new char[] {(char) Integer.parseInt(s.substring(2, s.length() - 1))});
+                continue;
+            }
             // the entity is unknown, skip it
         }
         return new String(sb);

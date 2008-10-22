@@ -118,9 +118,7 @@ public class rssParser extends AbstractParser implements Parser {
                     anchors.put(itemURL, itemTitle);
                     
                 	if ((text.length() != 0) && (text.byteAt(text.length() - 1) != 32)) text.append((byte) 32);
-                	serverCharBuffer scb = new serverCharBuffer(htmlFilterAbstractScraper.stripAll(new serverCharBuffer(itemDescr.toCharArray())));
-                	text.append(scb.trim().toString()).append(' ');
-                	scb.close();
+                	text.append(htmlFilterAbstractScraper.stripAll(itemDescr).trim()).append(' ');
                     
                     final String itemContent = item.getDescription();
                     if ((itemContent != null) && (itemContent.length() > 0)) {

@@ -117,14 +117,14 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
     
     public void scrapeText(final char[] newtext, final String insideTag) {
         // System.out.println("SCRAPE: " + new String(newtext));
-        final serverCharBuffer b = super.stripAll(new serverCharBuffer(newtext, newtext.length + 1)).trim();
+        String b = super.stripAll(new String(newtext)).trim();
         if ((insideTag != null) && (!(insideTag.equals("a")))) {
             // texts inside tags sometimes have no punctuation at the line end
             // this is bad for the text sematics, because it is not possible for the
             // condenser to distinguish headlines from text beginnings.
             // to make it easier for the condenser, a dot ('.') is appended in case that
             // no punctuation is part of the newtext line
-            if ((b.length() != 0) && (!(punctuation(b.charAt(b.length() - 1))))) b.append((int) '.');
+            if ((b.length() != 0) && (!(punctuation(b.charAt(b.length() - 1))))) b = b + '.';
             //System.out.println("*** Appended dot: " + b.toString());
         }
         if (b.length() != 0) content.append(b).append(32);
@@ -222,32 +222,32 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
                 final String type = (p < 0) ? "" : f.substring(p + 1);
                 if (type.equals("png") || type.equals("gif") || type.equals("jpg") || type.equals("jpeg")) {
                     // special handling of such urls: put them to the image urls
-                    final htmlFilterImageEntry ie = new htmlFilterImageEntry(url, super.stripAll(new serverCharBuffer(text)).trim().toString(), -1, -1);
+                    final htmlFilterImageEntry ie = new htmlFilterImageEntry(url, super.stripAll(new String(text)).trim(), -1, -1);
                     addImage(images, ie);
                 } else {
-                    anchors.put(url, super.stripAll(new serverCharBuffer(text)).trim().toString());
+                    anchors.put(url, super.stripAll(new String(text)).trim());
                 }
             }
         }
         String h;
         if ((tagname.equalsIgnoreCase("h1")) && (text.length < 1024)) {
-            h = cleanLine(super.stripAll(new serverCharBuffer(text)).toString());
+            h = cleanLine(super.stripAll(new String(text)));
             if (h.length() > 0) headlines[0].add(h);
         }
         if ((tagname.equalsIgnoreCase("h2")) && (text.length < 1024)) {
-            h = cleanLine(super.stripAll(new serverCharBuffer(text)).toString());
+            h = cleanLine(super.stripAll(new String(text)));
             if (h.length() > 0) headlines[1].add(h);
         }
         if ((tagname.equalsIgnoreCase("h3")) && (text.length < 1024)) {
-            h = cleanLine(super.stripAll(new serverCharBuffer(text)).toString());
+            h = cleanLine(super.stripAll(new String(text)));
             if (h.length() > 0) headlines[2].add(h);
         }
         if ((tagname.equalsIgnoreCase("h4")) && (text.length < 1024)) {
-            h = cleanLine(super.stripAll(new serverCharBuffer(text)).toString());
+            h = cleanLine(super.stripAll(new String(text)));
             if (h.length() > 0) headlines[3].add(h);
         }
         if ((tagname.equalsIgnoreCase("title")) && (text.length < 1024)) {
-            title = cleanLine(super.stripAll(new serverCharBuffer(text)).toString());
+            title = cleanLine(super.stripAll(new String(text)));
         }
 
         // fire event
@@ -255,26 +255,16 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
     }
 
     private static String cleanLine(String s) {
-        /*
         // may contain too many funny symbols
         for (int i = 0; i < s.length(); i++)
             if (s.charAt(i) < ' ') s = s.substring(0, i) + " " + s.substring(i + 1);
-        */
 
-        int p;
-
-        // CR/LF entfernen, dabei koennen doppelte Leerzeichen enstehen die aber weiter unten entfernt werden - thq
-        while ((p = s.indexOf("\n")) >= 0) s = s.substring(0, p) + ((p + 1 == s.length()) ? "" : " " + s.substring(p + 1));
-       
         // remove double-spaces
+        int p;
         while ((p = s.indexOf("  ")) >= 0) s = s.substring(0, p) + s.substring(p + 1);
 
-        // we don't accept headlines that are too short
-        s = s.trim();
-        if (s.length() < 4) s = "";
-
         // return result
-        return s;
+        return s.trim();
     }
     
     public String getTitle() {
