@@ -78,7 +78,11 @@ public class indexWord {
 
     // create a word hash
     public static final String word2hash(final String word) {
-        return kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(word.toLowerCase(Locale.ENGLISH))).substring(0, yacySeedDB.commonHashLength);
+        String e = kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(word.toLowerCase(Locale.ENGLISH))).substring(0, yacySeedDB.commonHashLength);
+        if (word.startsWith("hofbr")) {
+            System.out.println("*** DEBUG ENCODING: " + word + " -> " + e);
+        }
+        return e;
     }
     
     public static final Set<String> words2hashSet(final String[] words) {

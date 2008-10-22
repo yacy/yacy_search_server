@@ -491,8 +491,7 @@ public final class plasmaCondenser {
     }
 
     public final static boolean invisible(final char c) {
-        // TODO: Bugfix for UTF-8: does this work for non ISO-8859-1 chars?
-        if ((c < ' ') || (c > 'z')) return true;
+        if (c - ' ' >= invisibleChar.length) return false;
         return invisibleChar[c - ' '];
     }
 
@@ -521,17 +520,11 @@ public final class plasmaCondenser {
         
         private StringBuffer nextElement0() {
             StringBuffer s;
-            char c;
             loop: while (e.hasMoreElements()) {
                 s = e.nextElement();
                 if ((s.length() == 1) && (htmlFilterContentScraper.punctuation(s.charAt(0)))) return s;
                 for (int i = 0; i < s.length(); i++) {
-                    c = s.charAt(i);
-                    // TODO: Bugfix needed for UTF-8
-                    if (((c < 'a') || (c > 'z')) &&
-                        ((c < 'A') || (c > 'Z')) &&
-                        ((c < '0') || (c > '9')))
-                       continue loop; // go to next while loop
+                    if (invisible(s.charAt(i))) continue loop;
                 }
                 return s;
             }

@@ -74,7 +74,7 @@ public abstract class htmlFilterAbstractScraper implements htmlFilterScraper {
                 bc++;
                 r.append(' ');
             } else if (c == rb) {
-                bc --;
+                bc--;
             } else if (bc <= 0) {
                 r.append(c);
             }

@@ -267,7 +267,7 @@ public class htmlFilterCharacterCoding {
             }
             // the entity is unknown, skip it
         }
-        return new String(sb);
+        return sb.toString();
     }
 
     public static void main(final String[] args) {
