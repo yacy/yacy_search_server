@@ -26,7 +26,6 @@
 
 package de.anomic.htmlFilter;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Properties;
 
@@ -42,6 +41,7 @@ public abstract class htmlFilterAbstractScraper implements htmlFilterScraper {
     private HashSet<String> tags1;
 
     // define a translation table for html character codings
+    /*
     private static HashMap<String, String> trans = new HashMap<String, String>(300);
     static {
         trans.put("&quot;", "\""); //Anf&uuml;hrungszeichen oben
@@ -288,7 +288,7 @@ public abstract class htmlFilterAbstractScraper implements htmlFilterScraper {
         trans.put("&lsaquo;", ""); //angewinkeltes einzelnes Anf.zeichen links
         trans.put("&rsaquo;", ""); //angewinkeltes einzelnes Anf.zeichen rechts
     }
-
+*/
     /**
      * create a scraper. the tag sets must contain tags in lowercase!
      * @param tags0
@@ -316,6 +316,7 @@ public abstract class htmlFilterAbstractScraper implements htmlFilterScraper {
     public abstract void scrapeTag1(String tagname, Properties tagopts, char[] text);
 
     // string conversions
+    /*
     private static String code_iso8859s(final char c) {
         switch (c) {
         
@@ -356,8 +357,10 @@ public abstract class htmlFilterAbstractScraper implements htmlFilterScraper {
         default: return null;
         }
     }
-
+    
+  */
     public static serverCharBuffer convertUmlaute(final serverCharBuffer bb) {
+        return bb; /*
         if (bb.length() == 0) return bb;
 
             final serverCharBuffer t = new serverCharBuffer(bb.length() + 20);
@@ -369,45 +372,7 @@ public abstract class htmlFilterAbstractScraper implements htmlFilterScraper {
                 else t.append(z);
             }
             return t;
-
-        
-//        serverByteBuffer t = new serverByteBuffer(bb.length() + 20);
-//        int b0, b1, b2;
-//        String z;
-//        int i = 0;
-//        while (i < bb.length()) {
-//            b0 = bb.byteAt(i) & 0xff;
-//            // check utf-8 encoding
-//            if ((b0 < 128) || (i + 1 == bb.length())) {
-//                t.append(b0);
-//                i++;
-//            } else {
-//                b1 = bb.byteAt(i + 1) & 0xff;
-//                if (b1 > 0x3f) {
-//                    z = code_iso8859s(b0);
-//                    i++;
-//                } else if ((b0 > 0xbf) && (b0 < 0xe0)) {
-//                    z = code_iso8859s(((b0 & 0x1f) << 0x6) | (b1 & 0x3f));
-//                    i += 2;
-//                } else {
-//                    if (i + 2 >= bb.length()) {
-//                        z = null;
-//                        i++;
-//                    } else {
-//                        b2 = bb.byteAt(i + 2) & 0xff;
-//                        if (b2 > 0x3f) {
-//                            z = code_iso8859s(b0);
-//                            i++;
-//                        } else {
-//                            z = code_iso8859s(((b0 & 0xf) << 0xc) | ((b1 & 0x3f) << 0x6) | (b2 & 0x3f));
-//                            i += 3;
-//                        }
-//                    }
-//                }
-//                if (z == null) t.append(b0); else t.append(z);
-//            }
-//        }
-//        return t;
+            */
     }
 
     private static char[] transscript(final char[] code) {
@@ -417,9 +382,11 @@ public abstract class htmlFilterAbstractScraper implements htmlFilterScraper {
             }
             return new char[] {(char) Integer.parseInt((new String(code)).substring(2, code.length - 1))};
         }
+        return new char[0]; /*
         final String t = trans.get(new String(code)); 
         if (t == null) return new char[0];
         return t.toCharArray();
+        */
     }
 
     protected static serverCharBuffer transscriptAll(serverCharBuffer bb) {
