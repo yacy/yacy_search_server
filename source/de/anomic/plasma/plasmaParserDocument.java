@@ -282,7 +282,7 @@ dc_rights
     
     public Iterator<StringBuffer> getSentences(final boolean pre) {
         if (this.text == null) return null;
-        final plasmaCondenser.sentencesFromInputStreamEnum e = plasmaCondenser.sentencesFromInputStream(getText(), this.charset);
+        final plasmaCondenser.sentencesFromInputStreamEnum e = plasmaCondenser.sentencesFromInputStream(getText());
         e.pre(pre);
         return e;
     }

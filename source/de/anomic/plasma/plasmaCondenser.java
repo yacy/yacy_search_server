@@ -320,7 +320,7 @@ public final class plasmaCondenser {
         }
         
         // read source
-        final sievedWordsEnum wordenum = new sievedWordsEnum(is, charset);
+        final sievedWordsEnum wordenum = new sievedWordsEnum(is);
         while (wordenum.hasMoreElements()) {
             word = (new String(wordenum.nextElement())).toLowerCase(Locale.ENGLISH); // TODO: does toLowerCase work for non ISO-8859-1 chars?
             if (languageIdentificator != null) languageIdentificator.add(word);
@@ -498,7 +498,7 @@ public final class plasmaCondenser {
 
     public static Enumeration<StringBuffer> wordTokenizer(final String s, final String charset) {
         try {
-            return new sievedWordsEnum(new ByteArrayInputStream(s.getBytes()), charset);
+            return new sievedWordsEnum(new ByteArrayInputStream(s.getBytes(), "UTF-8"));
         } catch (final Exception e) {
             return null;
         }
@@ -720,7 +720,7 @@ public final class plasmaCondenser {
         // returns a word/indexWord relation map
         if (text == null) return null;
         final ByteArrayInputStream buffer = new ByteArrayInputStream(text);
-        return new plasmaCondenser(buffer, charset, 2, 1).words();
+        return new plasmaCondenser(buffer, "UTF-8", 2, 1).words();
     }
     
     public static Map<String, indexWord> getWords(final String text) {
