@@ -498,7 +498,7 @@ public final class plasmaCondenser {
 
     public static Enumeration<StringBuffer> wordTokenizer(final String s, final String charset) {
         try {
-            return new sievedWordsEnum(new ByteArrayInputStream(s.getBytes(), "UTF-8"));
+            return new sievedWordsEnum(new ByteArrayInputStream(s.getBytes()));
         } catch (final Exception e) {
             return null;
         }
