@@ -388,8 +388,11 @@ public class kelondroRowCollection {
         this.lastTimeWrote = System.currentTimeMillis();
     }
     
+    /**
+     * removes the last entry from the collection
+     * @return
+     */
     public synchronized kelondroRow.Entry removeOne() {
-    	// removes the last entry from the collection
         if (chunkcount == 0) return null;
         final kelondroRow.Entry r = get(chunkcount - 1, true);
         if (chunkcount == sortBound) sortBound--;
@@ -610,10 +613,14 @@ public class kelondroRowCollection {
         }
     }
     
+    /**
+     * @param L is the first element in the sequence
+     * @param R is the right bound of the sequence, and outside of the sequence
+     * @param S is the bound of the sorted elements in the sequence
+     * @param swapspace
+     * @return
+     */
     final int partition(final int L, final int R, int S, final byte[] swapspace) {
-		// L is the first element in the sequence
-        // R is the right bound of the sequence, and outside of the sequence
-        // S is the bound of the sorted elements in the sequence
         assert (L < R - 1): "L = " + L + ", R = " + R + ", S = " + S;
         assert (R - L >= isortlimit): "L = " + L + ", R = " + R + ", S = " + S;
         

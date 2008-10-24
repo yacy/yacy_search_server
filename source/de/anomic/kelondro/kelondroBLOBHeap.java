@@ -189,7 +189,7 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
     /**
      * test if a key is in the heap file. This does not need any IO, because it uses only the ram index
      * @param key
-     * @return true if the key exists, false othervise
+     * @return true if the key exists, false otherwise
      */
     public synchronized boolean has(final byte[] key) {
         assert index != null;
