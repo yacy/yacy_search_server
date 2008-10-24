@@ -314,25 +314,29 @@ public final class indexContainerHeap {
             return new heapCacheIterator((String) secondWordHash, rot);
         }
         
-        public boolean hasNext() {
+        public synchronized boolean hasNext() {
             if (rot) return true;
             return iterator.hasNext();
         }
 
-        public indexContainer next() {
-            if (iterator.hasNext()) {
+        public synchronized indexContainer next() {
+            synchronized(iterator) {
+                if (iterator.hasNext()) {
+                    return (iterator.next()).topLevelClone();
+                }
+                // rotation iteration
+                if (!rot) {
+                    return null;
+                }
+                iterator = cache.values().iterator();
                 return (iterator.next()).topLevelClone();
             }
-            // rotation iteration
-            if (!rot) {
-                return null;
-            }
-            iterator = cache.values().iterator();
-            return (iterator.next()).topLevelClone();
         }
 
-        public void remove() {
-            iterator.remove();
+        public synchronized void remove() {
+            synchronized(iterator) {
+                iterator.remove();
+            }
         }
 
         public Iterator<indexContainer> iterator() {
