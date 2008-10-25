@@ -49,6 +49,7 @@ import de.anomic.server.serverSwitch;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyURL;
+import java.util.List;
 
 public class Blacklist_p {
     private final static String DISABLED         = "disabled_";
@@ -64,12 +65,15 @@ public class Blacklist_p {
         
         // getting the list of supported blacklist types
         final String supportedBlacklistTypesStr = indexAbstractReferenceBlacklist.BLACKLIST_TYPES_STRING;
-        final String[] supportedBlacklistTypes = supportedBlacklistTypesStr.split(",");        
+        final String[] supportedBlacklistTypes = supportedBlacklistTypesStr.split(",");
+        
+        // loading all blacklist files located in the directory
+        final List<String> dirlist = listManager.getDirListing(listManager.listsPath);
         
         String blacklistToUse = null;
         final serverObjects prop = new serverObjects();
         prop.putHTML("blacklistEngine", plasmaSwitchboard.urlBlacklist.getEngineInfo());
-prop.putHTML("asd", "0");        
+       
         // do all post operations
         if (post != null) {
             
@@ -112,21 +116,37 @@ prop.putHTML("asd", "0");
                     prop.put("LOCATION","");
                     return prop;
                 }   
+                   
+                // Check if blacklist name only consists of "legal" characters.
+                // This is mainly done to prevent files from being written to other directories
+                // than the LISTS directory.
+                if (!blacklistToUse.matches("^[\\p{L}\\d\\+\\-_]+[\\p{L}\\d\\+\\-_.]*(\\.black){0,1}$")) {
+                    prop.put("error", 1);
+                    prop.putHTML("error_name", blacklistToUse);
+                    blacklistToUse = null;
+                } else {
                 
-                if (!blacklistToUse.endsWith(".black")) blacklistToUse += ".black";
+                    if (!blacklistToUse.endsWith(".black")) blacklistToUse += ".black";
 
-                try {
-                    final File newFile = new File(listManager.listsPath, blacklistToUse);
-                    newFile.createNewFile();
-                    
-                    // share the newly created blacklist
-                    listManager.updateListSet(BLACKLIST_SHARED, blacklistToUse);
-                    
-                    // activate it for all known blacklist types
-                    for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
-                        listManager.updateListSet(supportedBlacklistTypes[blTypes] + ".BlackLists",blacklistToUse);
-                    }                                 
-                } catch (final IOException e) {/* */}
+                    if (!dirlist.contains(blacklistToUse)) {
+                        try {
+                            final File newFile = new File(listManager.listsPath, blacklistToUse);
+                            newFile.createNewFile();
+
+                            // share the newly created blacklist
+                            listManager.updateListSet(BLACKLIST_SHARED, blacklistToUse);
+
+                            // activate it for all known blacklist types
+                            for (int blTypes = 0; blTypes < supportedBlacklistTypes.length; blTypes++) {
+                                listManager.updateListSet(supportedBlacklistTypes[blTypes] + ".BlackLists", blacklistToUse);
+                            }                            
+                        } catch (final IOException e) {/* */}
+                    } else {
+                        prop.put("error", 2);
+                        prop.putHTML("error_name", blacklistToUse);
+                        blacklistToUse = null;
+                    }
+                }
                 
             } else if (post.containsKey("deleteList")) {
                 /* ===========================================================
@@ -250,7 +270,7 @@ prop.putHTML("asd", "0");
                     }
                     
                     /* ===========================================================
-                     * Thent add new entry to blacklist
+                     * Then add new entry to blacklist
                      * =========================================================== */
                     temp = addBlacklistEntry(post.get("currentBlacklist"),
                             post.get("editedBlacklistEntry"), header, supportedBlacklistTypes);
@@ -273,19 +293,15 @@ prop.putHTML("asd", "0");
 
         }
 
-        // loading all blacklist files located in the directory
-        final String[] dirlist = listManager.getDirListing(listManager.listsPath);
-        
         // if we have not chosen a blacklist until yet we use the first file
-        if (blacklistToUse == null && dirlist != null && dirlist.length > 0) {
-            blacklistToUse = dirlist[0];
+        if (blacklistToUse == null && dirlist != null && dirlist.size() > 0) {
+            blacklistToUse = dirlist.get(0);
         }
-        
 
         // Read the blacklist items from file
         if (blacklistToUse != null) {
             int entryCount = 0;
-            final ArrayList<String> list = listManager.getListArray(new File(listManager.listsPath, blacklistToUse));
+            final List<String> list = listManager.getListArray(new File(listManager.listsPath, blacklistToUse));
             
             // sort them
             final String[] sortedlist = new String[list.size()];
@@ -331,23 +347,24 @@ prop.putHTML("asd", "0");
         // List BlackLists
         int blacklistCount = 0;
         if (dirlist != null) {
-            for (int i = 0; i <= dirlist.length - 1; i++) {
-                prop.putXML(DISABLED + BLACKLIST + blacklistCount + "_name", dirlist[i]);
+
+            for (String element : dirlist) {
+                prop.putXML(DISABLED + BLACKLIST + blacklistCount + "_name", element);
                 prop.put(DISABLED + BLACKLIST + blacklistCount + "_selected", "0");
 
-                if (dirlist[i].equals(blacklistToUse)) { //current List
+                if (element.equals(blacklistToUse)) { //current List
                     prop.put(DISABLED + BLACKLIST + blacklistCount + "_selected", "1");
 
                     for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
                         prop.putXML(DISABLED + "currentActiveFor_" + blTypes + "_blTypeName",supportedBlacklistTypes[blTypes]);
                         prop.put(DISABLED + "currentActiveFor_" + blTypes + "_checked",
-                                listManager.listSetContains(supportedBlacklistTypes[blTypes] + ".BlackLists",dirlist[i]) ? "0" : "1");
+                                listManager.listSetContains(supportedBlacklistTypes[blTypes] + ".BlackLists", element) ? "0" : "1");
                     }
                     prop.put(DISABLED + "currentActiveFor", supportedBlacklistTypes.length);
 
                 }
                 
-                if (listManager.listSetContains(BLACKLIST_SHARED, dirlist[i])) {
+                if (listManager.listSetContains(BLACKLIST_SHARED, element)) {
                     prop.put(DISABLED + BLACKLIST + blacklistCount + "_shared", "1");
                 } else {
                     prop.put(DISABLED + BLACKLIST + blacklistCount + "_shared", "0");
@@ -355,7 +372,7 @@ prop.putHTML("asd", "0");
 
                 int activeCount = 0;
                 for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
-                    if (listManager.listSetContains(supportedBlacklistTypes[blTypes] + ".BlackLists",dirlist[i])) {
+                    if (listManager.listSetContains(supportedBlacklistTypes[blTypes] + ".BlackLists", element)) {
                         prop.putHTML(DISABLED + BLACKLIST + blacklistCount + "_active_" + activeCount + "_blTypeName", supportedBlacklistTypes[blTypes]);
                         activeCount++;
                     }                

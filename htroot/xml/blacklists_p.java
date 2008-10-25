@@ -21,6 +21,7 @@
 package xml;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 
 import de.anomic.data.listManager;
 import de.anomic.http.httpRequestHeader;
@@ -35,16 +36,16 @@ public class blacklists_p {
         final serverObjects prop = new serverObjects();
         
         listManager.listsPath = new File(listManager.switchboard.getRootPath(),listManager.switchboard.getConfig("listManager.listsPath", "DATA/LISTS"));
-        final String[] dirlist = listManager.getDirListing(listManager.listsPath);
+        final List<String> dirlist = listManager.getDirListing(listManager.listsPath);
         int blacklistCount=0;
         
         ArrayList<String> list;
         int count;
         if (dirlist != null) {
-            for (int i = 0; i <= dirlist.length - 1; i++) {
-                prop.putHTML("lists_" + blacklistCount + "_name", dirlist[i]);
+            for (String element : dirlist) {
+                prop.putHTML("lists_" + blacklistCount + "_name", element);
          
-                if (listManager.listSetContains("BlackLists.Shared", dirlist[i])) {
+                if (listManager.listSetContains("BlackLists.Shared", element)) {
                     prop.put("lists_" + blacklistCount + "_shared", "1");
                 } else {
                     prop.put("lists_" + blacklistCount + "_shared", "0");
@@ -54,11 +55,11 @@ public class blacklists_p {
                 for (int j=0; j<types.length; j++) {
                     prop.put("lists_" + blacklistCount + "_types_" + j + "_name", types[j]);
                     prop.put("lists_" + blacklistCount + "_types_" + j + "_value",
-                            listManager.listSetContains(types[j] + ".Blacklist", dirlist[i]) ? 1 : 0);
+                            listManager.listSetContains(types[j] + ".Blacklist", element) ? 1 : 0);
                 }
                 prop.put("lists_" + blacklistCount + "_types", types.length);
                 
-                list = listManager.getListArray(new File(listManager.listsPath, dirlist[i]));
+                list = listManager.getListArray(new File(listManager.listsPath, element));
                 
                 count=0;
                 for (int j=0;j<list.size();++j){

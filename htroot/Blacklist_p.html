@@ -40,24 +40,38 @@
         #(/testlist)#
       </form>
     </fieldset>
+    
     <fieldset class="selectList">
       <legend>Select list:</legend>
-      <form action="Blacklist_p.html" method="post" enctype="multipart/form-data">#(disabled)#
-        <div style="display:inline;">
-          <select name="selectedListName" size="1">
-            #{blackLists}#
-            <option value="#[name]#" #(selected)#::selected="selected"#(/selected)#>#[name]# [#(shared)#not shared::shared#(/shared)#] #{active}# #[blTypeName]##{/active}#</option>
-            #{/blackLists}#
-          </select>
-          <input type="submit" name="selectList" value="select" />
-        </div>::#(/disabled)#
-        <div style="display:inline;">
-          <label for="newListName">New list</label>:
-          <input type="text" id="newListName" name="newListName" />
-          <input type="submit" name="createNewList" value="create" />
-        </div>
+      #(disabled)#
+      <form action="Blacklist_p.html" method="post" enctype="multipart/form-data">
+        <select name="selectedListName" size="1">
+          #{blackLists}#
+          <option value="#[name]#" #(selected)#::selected="selected"#(/selected)#>#[name]# [#(shared)#not shared::shared#(/shared)#] #{active}# #[blTypeName]##{/active}#</option>
+          #{/blackLists}#
+        </select>
+        <input type="submit" name="selectList" value="select" />
       </form>
+        ::
+      #(/disabled)#
     </fieldset>
+    
+    <fieldset class=" createList">
+      <legend>Create new list:</legend>
+      #(error)#
+          ::
+          <p>Unable to create list <strong>#[name]#</strong> since it contains illegal characters. 
+          A legal name is made up from a letter, digit, minus, plus or underscore as the first character
+          followed by letters, digits, minus, plus, underscores or dots.</p>
+          ::
+          <p>Unable to create list <strong>#[name]#</strong> since a list of this name exists already.</p>
+      #(/error)#
+        <form action="Blacklist_p.html" method="post" enctype="multipart/form-data">
+          <input type="text" id="newListName" size ="50" name="newListName" />
+          <input type="submit" name="createNewList" value="create" />
+        </form>
+    </fieldset>
+    
 #(disabled)#
     <fieldset class="listSettings">
       <legend>Settings for this list</legend>

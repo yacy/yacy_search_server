@@ -37,6 +37,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
@@ -219,7 +221,7 @@ public class listManager {
     }
 
     // get a Directory Listing as a String Array
-    public static String[] getDirListing(final String dirname){
+    public static List<String> getDirListing(final String dirname){
         final File dir = new File(dirname);
         return getDirListing(dir);
     }
@@ -231,8 +233,8 @@ public class listManager {
      * it will be created.
      * @return array of file names
      */
-    public static String[] getDirListing(final File dir){
-        String[] fileListString;
+    public static List<String> getDirListing(final File dir){
+        List<String> ret = new LinkedList();
         File[] fileList;
 
         if (dir != null ) {
@@ -240,11 +242,10 @@ public class listManager {
                 dir.mkdir();
             }
             fileList = dir.listFiles();
-            fileListString = new String[fileList.length];
             for (int i=0; i<= fileList.length-1; i++) {
-                fileListString[i]=fileList[i].getName();
+                ret.add(fileList[i].getName());
             }
-            return fileListString;
+            return ret;
         }
         return null;
     }    

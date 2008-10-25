@@ -34,6 +34,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 
 import de.anomic.crawler.HTTPLoader;
 import de.anomic.data.listManager;
@@ -57,7 +58,7 @@ public class ConfigLanguage_p {
         //prop.put("currentlang", ""); //is done by Translationtemplate
         prop.put("status", "0");//nothing
 
-        String[] langFiles = listManager.getDirListing(langPath);
+        List<String> langFiles = listManager.getDirListing(langPath);
         if(langFiles == null){
             return prop;
         }
@@ -116,22 +117,24 @@ public class ConfigLanguage_p {
         prop.put("langlist_0_name", ((langNames.get("default") == null) ? "default" : (String) langNames.get("default")));
         prop.put("langlist_0_selected", "selected=\"selected\"");
 
-        for(i=0;i<= langFiles.length-1 ;i++){
-            if(langFiles[i].endsWith(".lng")){
+        int count = 0;
+        for(String langFile : langFiles){
+            if(langFile.endsWith(".lng")){
                 //+1 because of the virtual entry "default" at top
-                langKey = langFiles[i].substring(0, langFiles[i].length() -4);
+                langKey = langFile.substring(0, langFile.length() -4);
                 langName = langNames.get(langKey);
-                prop.put("langlist_"+(i+1)+"_file", langFiles[i]);
-                prop.put("langlist_"+(i+1)+"_name", ((langName == null) ? langKey : langName));
+                prop.put("langlist_" + (count + 1) + "_file", langFile);
+                prop.put("langlist_" + (count + 1) + "_name", ((langName == null) ? langKey : langName));
                 if(env.getConfig("locale.language", "default").equals(langKey)) {
-                    prop.put("langlist_"+(i+1)+"_selected", "selected=\"selected\"");
+                    prop.put("langlist_" + (count + 1) + "_selected", "selected=\"selected\"");
                     prop.put("langlist_0_selected", " "); // reset Default
                 } else {
-                    prop.put("langlist_"+(i+1)+"_selected", " ");
+                    prop.put("langlist_" + (count + 1) + "_selected", " ");
                 }
+                count++;
             }
         }
-        prop.put("langlist", (i+1));
+        prop.put("langlist", (count + 1));
 
         //is done by Translationtemplate
         //langName = (String) langNames.get(env.getConfig("locale.language", "default"));

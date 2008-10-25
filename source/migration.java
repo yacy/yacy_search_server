@@ -20,6 +20,7 @@
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 import de.anomic.data.listManager;
 import de.anomic.http.httpd;
@@ -80,12 +81,12 @@ public class migration {
         final File skinsPath = sb.getConfigPath("skinPath", "DATA/SKINS");
         final File defaultSkinsPath = new File(sb.getRootPath(), "skins");
         if(defaultSkinsPath.exists()){
-            final String[] skinFiles = listManager.getDirListing(defaultSkinsPath.getAbsolutePath());
+            final List<String> skinFiles = listManager.getDirListing(defaultSkinsPath.getAbsolutePath());
             mkdirs(skinsPath);
-            for(int i=0;i<skinFiles.length;i++){
-                if(skinFiles[i].endsWith(".css")){
+            for(String skinFile : skinFiles){
+                if(skinFile.endsWith(".css")){
                     try{
-                        serverFileUtils.copy(new File(defaultSkinsPath, skinFiles[i]), new File(skinsPath, skinFiles[i]));
+                        serverFileUtils.copy(new File(defaultSkinsPath, skinFile), new File(skinsPath, skinFile));
                     }catch(final IOException e){}
                 }
             }

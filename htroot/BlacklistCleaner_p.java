@@ -38,6 +38,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
@@ -129,19 +130,21 @@ public class BlacklistCleaner_p {
         return prop;
     }
     
-    private static void putBlacklists(final serverObjects prop, final String[] lists, final String selected) {
+    private static void putBlacklists(final serverObjects prop, final List<String> lists, final String selected) {
         boolean supported = false;
         for (int i=0; i<supportedBLEngines.length && !supported; i++) {
             supported |= (plasmaSwitchboard.urlBlacklist.getClass() == supportedBLEngines[i]);
         }
         
         if (supported) {
-            if (lists.length > 0) {
+            if (lists.size() > 0) {
                 prop.put("disabled", "0");
-                prop.put(DISABLED + "blacklists", lists.length);
-                for (int i=0; i<lists.length; i++) {
-                    prop.putHTML(DISABLED + BLACKLISTS + i + "_name", lists[i]);
-                    prop.put(DISABLED + BLACKLISTS + i + "_selected", (lists[i].equals(selected)) ? "1" : "0");
+                prop.put(DISABLED + "blacklists", lists.size());
+                int count = 0;
+                for (String list : lists) {
+                    prop.putHTML(DISABLED + BLACKLISTS + count + "_name", list);
+                    prop.put(DISABLED + BLACKLISTS + count + "_selected", (list.equals(selected)) ? "1" : "0");
+                    count++;
                 }
             } else {
                 prop.put("disabled", "2");

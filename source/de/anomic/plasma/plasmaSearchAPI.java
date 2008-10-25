@@ -30,6 +30,7 @@ package de.anomic.plasma;
 
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 
 import de.anomic.data.listManager;
 import de.anomic.index.indexRWIEntry;
@@ -194,9 +195,10 @@ public class plasmaSearchAPI {
         }
     }
     
-    public static void putBlacklists(final serverObjects prop, final String[] lists) {
-        prop.put("genUrlList_blacklists", lists.length);
-        for (int i=0; i<lists.length; i++)
-            prop.put("genUrlList_blacklists_" + i + "_name", lists[i]);
+    public static void putBlacklists(final serverObjects prop, final List<String> lists) {
+        prop.put("genUrlList_blacklists", lists.size());
+        int i = 0;
+        for (String list : lists)
+            prop.put("genUrlList_blacklists_" + i++ + "_name", list);
     }
 }

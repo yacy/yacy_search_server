@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import de.anomic.crawler.HTTPLoader;
 import de.anomic.data.listManager;
@@ -55,14 +56,14 @@ public class ConfigAppearance_p {
         prop.put("currentskin", "");
         prop.put("status", "0"); // nothing
 
-        String[] skinFiles = listManager.getDirListing(skinPath);
+        List<String> skinFiles = listManager.getDirListing(skinPath);
         if (skinFiles == null) {
             return prop;
         }
 
         // if there are no skins, use the current style as default
         // normally only invoked at first start of YaCy
-        if (skinFiles.length == 0) {
+        if (skinFiles.size() == 0) {
             try {
                 serverFileUtils.copy(new File(env.getRootPath(), "htroot/env/style.css"), new File(skinPath, "default.css"));
                 env.setConfig("currentSkin", "default");
@@ -131,14 +132,15 @@ public class ConfigAppearance_p {
 
         // reread skins
         skinFiles = listManager.getDirListing(skinPath);
-        int i;
-        for (i = 0; i <= skinFiles.length - 1; i++) {
-            if (skinFiles[i].endsWith(".css")) {
-                prop.put("skinlist_" + i + "_file", skinFiles[i]);
-                prop.put("skinlist_" + i + "_name", skinFiles[i].substring(0, skinFiles[i].length() - 4));
+        int count = 0;
+        for (String skinFile : skinFiles) {
+            if (skinFile.endsWith(".css")) {
+                prop.put("skinlist_" + count + "_file", skinFile);
+                prop.put("skinlist_" + count + "_name", skinFile.substring(0, skinFile.length() - 4));
+                count++;
             }
         }
-        prop.put("skinlist", i);
+        prop.put("skinlist", count);
 
         prop.putHTML("currentskin", env.getConfig("currentSkin", "default"));
         

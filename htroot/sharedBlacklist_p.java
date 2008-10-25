@@ -97,10 +97,12 @@ public class sharedBlacklist_p {
                         downloadURL = "http://" + IP + ":" + Port + "/yacy/list.html?col=black";
                     } else {
                         prop.put("status", STATUS_PEER_UNKNOWN);//YaCy-Peer not found
+                        prop.putHTML("status_name", Hash);
                         prop.put("page", "1");
                     }
                 } else {
                     prop.put("status", STATUS_PEER_UNKNOWN);//YaCy-Peer not found
+                    prop.putHTML("status_name", Hash);
                     prop.put("page", "1");
                 }
                 
@@ -117,6 +119,7 @@ public class sharedBlacklist_p {
                         otherBlacklist = nxTools.strings(HttpClient.wget(u.toString(), reqHeader, 1000), "UTF-8"); 
                     } catch (final Exception e) {
                         prop.put("status", STATUS_PEER_UNKNOWN);
+                        prop.putHTML("status_name", Hash);
                         prop.put("page", "1");
                     }
                 }
