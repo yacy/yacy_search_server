@@ -1,4 +1,4 @@
-// Blog.java
+// BlogComments.java
 // -----------------------
 // part of YACY
 // (C) by Michael Peter Christen; mc@yacy.net
@@ -108,6 +108,7 @@ public class BlogComments {
         }
 
         page = sb.blogDB.readBlogEntry(pagename); //maybe "if(page == null)"
+        final boolean pageExists = sb.blogDB.contains(pagename); // [MN]
         
         // comments not allowed
         if (page.getCommentMode() == 0) {
@@ -116,7 +117,7 @@ public class BlogComments {
             prop.put("mode_allow", 1);
         } 
 
-        if (post.containsKey("submit") && page.getCommentMode() != 0) {
+        if (post.containsKey("submit") && page.getCommentMode() != 0 && pageExists) {
             // store a new/edited blog-entry
             byte[] content;
             if(!post.get("content", "").equals(""))

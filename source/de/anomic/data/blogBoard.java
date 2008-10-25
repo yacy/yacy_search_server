@@ -1,4 +1,4 @@
-// wikiBoard.java 
+// blogBoard.java 
 // -------------------------------------
 // (C) by Michael Peter Christen; mc@yacy.net
 // first published on http://www.anomic.de
@@ -68,16 +68,33 @@ public class blogBoard {
             database = new kelondroMap(new kelondroBLOBTree(actpath, true, true, keyLength, recordSize, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 500);
         }
     }
+    
     public int size() {
         return database.size();
     }
+    
+    /**
+     * Tells if the database contains an element.
+     * @param key the ID of the element
+     * @return true if the database contains the element, else false
+     */
+    public boolean contains(final String key) {
+        try {
+            return database.has(key);
+        } catch (IOException ex) {
+            return false;
+        }
+    }
+    
     public void close() {
         database.close();
     }
+    
     private static String normalize(final String key) {
         if (key == null) return "null";
         return key.trim().toLowerCase();
     }
+    
     public static String webalize(String key) {
         if (key == null) return "null";
         key = key.trim().toLowerCase();
@@ -86,9 +103,11 @@ public class blogBoard {
             key = key.substring(0, p) + "%20" + key.substring(p +1);
         return key;
     }
+    
     public String guessAuthor(final String ip) {
         return wikiBoard.guessAuthor(ip);
     }
+    
     /**
      * Create a new BlogEntry an return it
      * @param key
@@ -116,9 +135,11 @@ public class blogBoard {
             return null;
         }
     }
+    
     public BlogEntry readBlogEntry(final String key) {
         return readBlogEntry(key, database);
     }
+    
     private BlogEntry readBlogEntry(String key, final kelondroMap base) {
     	key = normalize(key);
         if (key.length() > keyLength) key = key.substring(0, keyLength);
@@ -132,6 +153,7 @@ public class blogBoard {
             return newEntry(key, "".getBytes(), "anonymous".getBytes(), "127.0.0.1", new Date(), "".getBytes(), null, null);
         return new BlogEntry(key, record);
     }
+    
     public boolean importXML(final String input) {
     	final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
     	try {
@@ -144,6 +166,7 @@ public class blogBoard {
 		
     	return false;
     }
+    
     private boolean parseXMLimport(final Document doc) {
     	if(!doc.getDocumentElement().getTagName().equals("blog"))
     		return false;
@@ -207,15 +230,18 @@ public class blogBoard {
     	}
     	return true;
     }
+    
     public void deleteBlogEntry(String key) {
     	key = normalize(key);
     	try {
 			database.remove(key);
 		} catch (final IOException e) { }
     }
+    
     public Iterator<byte[]> keys(final boolean up) throws IOException {
         return database.keys(up, false);
     }
+    
     /**
      * Comparator to sort objects of type Blog according to their timestamps
      */
@@ -245,6 +271,7 @@ public class blogBoard {
             return -1;
         }
     }
+    
     public Iterator<String> getBlogIterator(final boolean priv){
         final TreeSet<String> set = new TreeSet<String>(new BlogComparator(true));
         final Iterator<BlogEntry> iterator = blogIterator(true);
@@ -257,6 +284,7 @@ public class blogBoard {
         }
         return set.iterator();
     }
+    
     public Iterator<BlogEntry> blogIterator(final boolean up){
         try {
             return new BlogIterator(up);
@@ -264,6 +292,7 @@ public class blogBoard {
             return new HashSet<BlogEntry>().iterator();
         }
     }
+    
     /**
      * Subclass of blogBoard, which provides the blogIterator object-type
      */
@@ -326,20 +355,24 @@ public class blogBoard {
             
             wikiBoard.setAuthor(ip, new String(author));
         }
+        
         BlogEntry(final String key, final Map<String, String> record) {
             this.key = key;
             this.record = record;
             if (this.record.get("comments")==null) this.record.put("comments", listManager.collection2string(new ArrayList<String>()));
             if (this.record.get("commentMode")==null || this.record.get("commentMode").equals("")) this.record.put("commentMode", "1");
         }
+        
         private void setKey(final String key) {
             if (key.length() > keyLength) 
                 this.key = key.substring(0, keyLength);
             this.key = key;
         }
+        
         public String getKey() {
             return key;
         }
+        
         public byte[] getSubject() {
             final String m = record.get("subject");
             if (m == null) return new byte[0];
@@ -347,12 +380,14 @@ public class blogBoard {
             if (b == null) return "".getBytes();
             return b;
         }
+        
         private void setSubject(final byte[] subject) {
             if (subject == null) 
                 record.put("subject","");
             else 
                 record.put("subject", kelondroBase64Order.enhancedCoder.encode(subject));
         }
+        
         public Date getDate() {
             try {
                 final String date = record.get("date");
@@ -365,11 +400,13 @@ public class blogBoard {
                 return new Date();
             }
         }
+        
         private void setDate(Date date) {
             if(date == null) 
                 date = new Date();
             record.put("date", serverDate.formatShortSecond(date));
         }
+        
         public String getTimestamp() {
             final String timestamp = record.get("date");
             if (timestamp == null) {
@@ -378,6 +415,7 @@ public class blogBoard {
             }
             return timestamp;
         }
+        
         public byte[] getAuthor() {
             final String author = record.get("author");
             if (author == null) return new byte[0];
@@ -385,12 +423,14 @@ public class blogBoard {
             if (b == null) return "".getBytes();
             return b;
         }
+        
         private void setAuthor(final byte[] author) {
             if (author == null) 
                 record.put("author","");
             else 
                 record.put("author", kelondroBase64Order.enhancedCoder.encode(author));
         }
+        
         public int getCommentsSize() {
             // This ist a Bugfix for Version older than 4443.
             if(record.get("comments").startsWith(",")) {
@@ -400,50 +440,59 @@ public class blogBoard {
             final ArrayList<String> commentsize = listManager.string2arraylist(record.get("comments"));
             return commentsize.size();
         }
+        
         public ArrayList<String> getComments() {
             final ArrayList<String> comments = listManager.string2arraylist(record.get("comments"));
             return comments;
         }
+        
         private void setComments(final ArrayList<String> comments) {
             if (comments == null) 
                 record.put("comments", listManager.collection2string(new ArrayList<String>()));
             else 
                 record.put("comments", listManager.collection2string(comments));
         }
+        
         public String getIp() {
             final String ip = record.get("ip");
             if (ip == null) return "127.0.0.1";
             return ip;
         }
+        
         private void setIp(String ip) {
             if ((ip == null) || (ip.length() == 0)) 
                 ip = "";
             record.put("ip", ip);
         }
+        
         public byte[] getPage() {
             final String page = record.get("page");
             if (page == null) return new byte[0];
             final byte[] page_as_byte = kelondroBase64Order.enhancedCoder.decode(page, "de.anomic.data.blogBoard.page()");
             if (page_as_byte == null) return "".getBytes();
             return page_as_byte;
-        }        
+        }  
+        
         private void setPage(final byte[] page) {
             if (page == null) 
                 record.put("page", "");
             else 
                 record.put("page", kelondroBase64Order.enhancedCoder.encode(page));
         }
+        
         public void addComment(final String commentID) {
             final ArrayList<String> comments = listManager.string2arraylist(record.get("comments"));
             comments.add(commentID);
             record.put("comments", listManager.collection2string(comments));
         }
+        
         public boolean removeComment(final String commentID) {
             final ArrayList<String> comments = listManager.string2arraylist(record.get("comments"));
             final boolean success = comments.remove(commentID);
             record.put("comments", listManager.collection2string(comments));
             return success;
         }
+        
         /**
          * returns the comment mode
          * 0 - no comments allowed
@@ -454,12 +503,14 @@ public class blogBoard {
         public int getCommentMode(){
             return Integer.parseInt(record.get("commentMode"));
         }
+        
         private void setCommentMode(final String mode) {
             if (mode == null) 
                 record.put("commentMode", "1");
             else 
                 record.put("commentMode", mode);
         }
+        
         public boolean isPublic() {
             final String privacy = record.get("privacy");
             if (privacy == null)
@@ -468,5 +519,6 @@ public class blogBoard {
                 return true;
             return false;
         }
+        
     }
 }
