@@ -231,7 +231,7 @@ public class sharedBlacklist_p {
                     if( !Blacklist.contains(tmp) && (!tmp.equals("")) ){
                         //newBlacklist.add(tmp);
                         prop.put("page_urllist_" + count + "_dark", count % 2 == 0 ? "0" : "1");
-                        prop.put("page_urllist_" + count + "_url", tmp);
+                        prop.putHTML("page_urllist_" + count + "_url", tmp);
                         prop.put("page_urllist_" + count + "_count", count);
                         count++;
                     }
