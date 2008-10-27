@@ -1,6 +1,6 @@
 // /xml/blacklists_p.java
 // -------------------------------
-// (C) 2006 Alexander Schier
+// (C) 2006 Alexander Schier, changes by Marc Nause
 // part of YaCy
 //
 // This program is free software; you can redistribute it and/or modify
@@ -20,7 +20,6 @@
 
 package xml;
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
 import de.anomic.data.listManager;
@@ -39,11 +38,11 @@ public class blacklists_p {
         final List<String> dirlist = listManager.getDirListing(listManager.listsPath);
         int blacklistCount=0;
         
-        ArrayList<String> list;
+        List<String> list;
         int count;
         if (dirlist != null) {
             for (String element : dirlist) {
-                prop.putHTML("lists_" + blacklistCount + "_name", element);
+                prop.putXML("lists_" + blacklistCount + "_name", element);
          
                 if (listManager.listSetContains("BlackLists.Shared", element)) {
                     prop.put("lists_" + blacklistCount + "_shared", "1");
@@ -53,9 +52,9 @@ public class blacklists_p {
                 
                 final String[] types = indexAbstractReferenceBlacklist.BLACKLIST_TYPES_STRING.split(",");
                 for (int j=0; j<types.length; j++) {
-                    prop.put("lists_" + blacklistCount + "_types_" + j + "_name", types[j]);
+                    prop.putXML("lists_" + blacklistCount + "_types_" + j + "_name", types[j]);
                     prop.put("lists_" + blacklistCount + "_types_" + j + "_value",
-                            listManager.listSetContains(types[j] + ".Blacklist", element) ? 1 : 0);
+                            listManager.listSetContains(types[j] + ".BlackLists", element) ? 1 : 0);
                 }
                 prop.put("lists_" + blacklistCount + "_types", types.length);
                 
@@ -68,7 +67,7 @@ public class blacklists_p {
                     if (nextEntry.length() == 0) continue;
                     if (nextEntry.startsWith("#")) continue;
         
-                    prop.putHTML("lists_" + blacklistCount + "_items_" + count + "_item", nextEntry);
+                    prop.putXML("lists_" + blacklistCount + "_items_" + count + "_item", nextEntry);
                     count++;
                 }
                 prop.put("lists_" + blacklistCount + "_items", count);

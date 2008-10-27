@@ -234,7 +234,7 @@ public class listManager {
      * @return array of file names
      */
     public static List<String> getDirListing(final File dir){
-        List<String> ret = new LinkedList();
+        List<String> ret = new LinkedList<String>();
         File[] fileList;
 
         if (dir != null ) {
