@@ -486,16 +486,16 @@ public final class httpdProxyHandler {
             }            
             
             // resolve yacy and yacyh domains
-            final String yAddress = resolveYacyDomains(host);
+            String yAddress = resolveYacyDomains(host);
             
             // re-calc the url path
             String remotePath = (args == null) ? path : (path + "?" + args); // with leading '/'
-            
-            // attach possible yacy-sublevel-domain
-            if ((yAddress != null) &&
-                    ((pos = yAddress.indexOf("/")) >= 0) &&
-                    (!(remotePath.startsWith("/env"))) // this is the special path, staying always at root-level
-            ) remotePath = yAddress.substring(pos) + remotePath;            
+
+            // remove yacy-subdomain-path, when accessing /env
+            if ( (yAddress != null)
+            		&& (remotePath.startsWith("/env"))
+            		&& ((pos = yAddress.indexOf('/')) != -1)
+            ) yAddress = yAddress.substring(0, yAddress.indexOf('/'));
             
             modifyProxyHeaders(requestHeader, httpVer);
             
@@ -905,10 +905,13 @@ public final class httpdProxyHandler {
             prepareRequestHeader(conProp, requestHeader, hostlow);
             
             // resolve yacy and yacyh domains
-            final String yAddress = resolveYacyDomains(host);
+            String yAddress = resolveYacyDomains(host);
             
-            // attach possible yacy-sublevel-domain
-            if ((yAddress != null) && ((pos = yAddress.indexOf("/")) >= 0)) remotePath = yAddress.substring(pos) + remotePath;
+            // remove yacy-subdomain-path, when accessing /env
+            if ( (yAddress != null)
+            		&& (remotePath.startsWith("/env"))
+            		&& ((pos = yAddress.indexOf('/')) != -1)
+            ) yAddress = yAddress.substring(0, yAddress.indexOf('/'));
             
             modifyProxyHeaders(requestHeader, httpVer);            
             
@@ -991,14 +994,17 @@ public final class httpdProxyHandler {
             
             prepareRequestHeader(conProp, requestHeader, host.toLowerCase());
             
-            final String yAddress = resolveYacyDomains(host);
+            String yAddress = resolveYacyDomains(host);
             
             // re-calc the url path
             String remotePath = (args == null) ? path : (path + "?" + args);
             
-            // attach possible yacy-sublevel-domain
-            if ((yAddress != null) && ((pos = yAddress.indexOf("/")) >= 0)) remotePath = yAddress.substring(pos) + remotePath;
-                  
+            // remove yacy-subdomain-path, when accessing /env
+            if ( (yAddress != null)
+            		&& (remotePath.startsWith("/env"))
+            		&& ((pos = yAddress.indexOf('/')) != -1)
+            ) yAddress = yAddress.substring(0, yAddress.indexOf('/'));
+            
             modifyProxyHeaders(requestHeader, httpVer); 
             
             final String connectHost = hostPart(host, port, yAddress);
