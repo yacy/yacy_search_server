@@ -41,6 +41,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -264,13 +265,24 @@ public class BlacklistCleaner_p {
         // load blacklist data from file
         final ArrayList<String> list = listManager.getListArray(new File(listManager.listsPath, blacklistToUse));
         
+        boolean listChanged = false;
+        
         // delete the old entry from file
         String s;
         for (int i=0; i<entries.length; i++) {
             s = entries[i];
+            
             if (list != null){
-                while (list.contains(s)) {
+                
+                // getting rid of escape characters which make it impossible to
+                // properly use contains()
+                if (s.contains("\\\\")) {
+                    s = s.replaceAll(Pattern.quote("\\\\"), Matcher.quoteReplacement("\\"));
+                }
+                
+                if (list.contains(s)) {
                     list.remove(s);
+                    listChanged = true;
                 }
             }
             
@@ -289,7 +301,7 @@ public class BlacklistCleaner_p {
                 }                
             }    
         }
-        if (list != null){
+        if (listChanged){
             listManager.writeList(new File(listManager.listsPath, blacklistToUse), list.toArray(new String[list.size()]));
         }
         return entries.length;
