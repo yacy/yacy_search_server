@@ -217,6 +217,12 @@ public class Blacklist_p {
                 }
             } else if (post.containsKey("deleteBlacklistEntry")) {
                 
+                /* ===========================================================
+                 * Delete an entry from a blacklist
+                 * =========================================================== */
+                
+                blacklistToUse = post.get("currentBlacklist");
+                
                 final String temp = deleteBlacklistEntry(post.get("currentBlacklist"),
                         post.get("selectedEntry"), header, supportedBlacklistTypes);
                 if (temp != null) {
@@ -225,7 +231,13 @@ public class Blacklist_p {
                 }
 
             } else if (post.containsKey("addBlacklistEntry")) {
+                
+                /* ===========================================================
+                 * Add new entry to blacklist
+                 * =========================================================== */
 
+                blacklistToUse = post.get("currentBlacklist");
+                
                 final String temp = addBlacklistEntry(post.get("currentBlacklist"),
                         post.get("newEntry"), header, supportedBlacklistTypes);
                 if (temp != null) {
@@ -234,51 +246,56 @@ public class Blacklist_p {
                 }
                 
             } else if (post.containsKey("moveBlacklistEntry")) {
-
-                /* ===========================================================
-                 * First add entry to blacklist item moves to
-                 * =========================================================== */
-                String temp = addBlacklistEntry(post.get("targetBlacklist"),
-                        post.get("selectedEntry"), header, supportedBlacklistTypes);
-                if (temp != null) {
-                    prop.put("LOCATION", temp);
-                    return prop;
-                }
                 
                 /* ===========================================================
-                 * Then delete item from blacklist it is moved away from
+                 * Move an entry from one blacklist to another
                  * =========================================================== */
-                temp = deleteBlacklistEntry(post.get("currentBlacklist"),
-                        post.get("selectedEntry"), header, supportedBlacklistTypes);
-                if (temp != null) {
-                    prop.put("LOCATION", temp);
-                    return prop;
-                }
-
-            } else if (post.containsKey("editBlacklistEntry")) {
                 
-                if(post.containsKey("editedBlacklistEntry")) {
+                blacklistToUse = post.get("currentBlacklist");
 
-                    /* ===========================================================
-                     * First delete old item from blacklist
-                     * =========================================================== */
-                    String temp = deleteBlacklistEntry(post.get("currentBlacklist"),
-                            post.get("selectedBlacklistEntry"), header, supportedBlacklistTypes);
+                if (!post.get("targetBlacklist").equals(post.get("currentBlacklist"))) {
+                    String temp = addBlacklistEntry(post.get("targetBlacklist"),
+                            post.get("selectedEntry"), header, supportedBlacklistTypes);
                     if (temp != null) {
                         prop.put("LOCATION", temp);
                         return prop;
                     }
                     
-                    /* ===========================================================
-                     * Then add new entry to blacklist
-                     * =========================================================== */
-                    temp = addBlacklistEntry(post.get("currentBlacklist"),
-                            post.get("editedBlacklistEntry"), header, supportedBlacklistTypes);
+                    temp = deleteBlacklistEntry(post.get("currentBlacklist"),
+                            post.get("selectedEntry"), header, supportedBlacklistTypes);
                     if (temp != null) {
                         prop.put("LOCATION", temp);
                         return prop;
                     }
+                }
 
+            } else if (post.containsKey("editBlacklistEntry")) {
+                
+                /* ===========================================================
+                 * Edit entry of a blacklist
+                 * =========================================================== */
+                
+                blacklistToUse = post.get("currentBlacklist");
+                
+                // if edited entry has been posted, save changes
+                if(post.containsKey("editedBlacklistEntry")) {
+
+                    if (!post.get("selectedBlacklistEntry").equals(post.get("editedBlacklistEntry"))) {
+                        String temp = deleteBlacklistEntry(post.get("currentBlacklist"),
+                                post.get("selectedBlacklistEntry"), header, supportedBlacklistTypes);
+                        if (temp != null) {
+                            prop.put("LOCATION", temp);
+                            return prop;
+                        }
+
+                        temp = addBlacklistEntry(post.get("currentBlacklist"),
+                                post.get("editedBlacklistEntry"), header, supportedBlacklistTypes);
+                        if (temp != null) {
+                            prop.put("LOCATION", temp);
+                            return prop;
+                        }
+                    }
+                // else return entry to be edited
                 } else {
 
                     final String selectedEntry = post.get("selectedEntry");
@@ -392,6 +409,8 @@ public class Blacklist_p {
      * This method adds a new entry to the chosen blacklist.
      * @param blacklistToUse the name of the blacklist the entry is to be added to
      * @param newEntry the entry that is to be added
+     * @param header
+     * @param supportedBlacklistTypes
      * @return null if no error occured, else a String to put into LOCATION
      */
     private static String addBlacklistEntry(final String blacklistToUse, String newEntry, 
@@ -444,6 +463,8 @@ public class Blacklist_p {
      * This method deletes a blacklist entry.
      * @param blacklistToUse the name of the blacklist the entry is to be deleted from
      * @param oldEntry the entry that is to be deleted
+     * @param header
+     * @param supportedBlacklistTypes
      * @return null if no error occured, else a String to put into LOCATION
      */
     private static String deleteBlacklistEntry(final String blacklistToUse, String oldEntry, 
