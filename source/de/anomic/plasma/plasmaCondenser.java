@@ -88,19 +88,6 @@ public final class plasmaCondenser {
     
     private final static int numlength = 5;
 
-    // initialize array of invisible characters
-    private static boolean[] invisibleChar = new boolean['z' - ' ' + 1];
-    static {
-        // initialize array of invisible charachters
-        final String invisibleString = "\"$%&/()=`^+*#'-_:;,<>[]\\";
-        for (int i = ' '; i <= 'z'; i++) {
-            invisibleChar[i - ' '] = false;
-        }
-        for (int i = 0; i < invisibleString.length(); i++) {
-            invisibleChar[invisibleString.charAt(i) - ' '] = true;
-        }
-    }
-    
     //private Properties analysis;
     private TreeMap<String, indexWord> words; // a string (the words) to (indexWord) - relation
     private final int wordminsize;
@@ -491,8 +478,18 @@ public final class plasmaCondenser {
     }
 
     public final static boolean invisible(final char c) {
-        if (c - ' ' >= invisibleChar.length) return false;
-        return invisibleChar[c - ' '];
+    	final int type = Character.getType(c);
+    	if(
+    			(type == Character.LOWERCASE_LETTER)
+    			|| (type == Character.DECIMAL_DIGIT_NUMBER)
+				|| (type == Character.UPPERCASE_LETTER)
+    			|| (type == Character.MODIFIER_LETTER)
+				|| (type == Character.OTHER_LETTER)
+				|| (type == Character.TITLECASE_LETTER)
+				|| (htmlFilterContentScraper.punctuation(c)))
+    		return false;
+    	else
+    		return true;
     }
 
     public static Enumeration<StringBuffer> wordTokenizer(final String s, final String charset) {
