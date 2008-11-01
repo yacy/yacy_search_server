@@ -485,10 +485,14 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         final byte[] page = serverFileUtils.read(file);
         if (page == null) throw new IOException("no content in file " + file.toString());
         
+        // scrape document to look up charset
+        final htmlFilterInputStream htmlFilter = new htmlFilterInputStream(new ByteArrayInputStream(page),"UTF-8",new yacyURL("http://localhost", null),null,false);
+        final String charset = htmlFilter.detectCharset();
+        
         // scrape content
         final htmlFilterContentScraper scraper = new htmlFilterContentScraper(new yacyURL("http://localhost", null));
         final Writer writer = new htmlFilterWriter(null, null, scraper, null, false);
-        serverFileUtils.copy(new ByteArrayInputStream(page), writer, Charset.forName("UTF-8"));
+        serverFileUtils.copy(new ByteArrayInputStream(page), writer, Charset.forName(charset));
         
         return scraper;
     }
