@@ -55,6 +55,11 @@ public final class ResourceObserver {
     private int disksFree;
     private int memoryFree;
     
+    /**
+     * The ResourceObserver checks the resources
+     * and pauses crawls if necessary
+     * @param sb the plasmaSwitchboard
+     */
     public ResourceObserver(final plasmaSwitchboard sb) {
         this.sb = sb;
         this.log.logInfo("initializing the resource observer");
@@ -87,6 +92,9 @@ public final class ResourceObserver {
         memoryFree = HIGH;
     }
 
+    /**
+     * checks the resources and pauses crawls if necessary
+     */
     public void resourceObserverJob() {
         checkDiskUsageCount++;
         checkMemoryUsageCount++;
@@ -126,10 +134,16 @@ public final class ResourceObserver {
         }
     }
     
+    /**
+     * @return <code>true</code> if disk space is available
+     */
     public boolean getDisksOK () {
         return disksFree == HIGH;
     }
     
+    /**
+     * @return <code>true</code> if memory is available
+     */
     public boolean getMemoryOK () {
         return memoryFree == HIGH;
     }
@@ -149,7 +163,6 @@ public final class ResourceObserver {
      * <li><code>LOW</code> if lower than 100MB or 1/5 disk space is available</li>
      * </ul>
      */
-    
     private int checkDisks() {
         int ret = HIGH;   
     
