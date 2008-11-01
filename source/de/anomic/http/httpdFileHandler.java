@@ -76,6 +76,7 @@ import java.util.Properties;
 import java.util.zip.GZIPOutputStream;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
+import de.anomic.htmlFilter.htmlFilterInputStream;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
@@ -88,6 +89,7 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.servletProperties;
 import de.anomic.server.logging.serverLog;
+import de.anomic.yacy.yacyURL;
 import de.anomic.ymage.ymageMatrix;
 
 public final class httpdFileHandler {
@@ -564,7 +566,7 @@ public final class httpdFileHandler {
                 // we have found a file that can be written to the client
                 // if this file uses templates, then we use the template
                 // re-write - method to create an result
-                final String mimeType = mimeTable.getProperty(targetExt,"text/html");
+                String mimeType = mimeTable.getProperty(targetExt,"text/html");
                 final boolean zipContent = requestHeader.acceptGzip() && httpd.shallTransportZipped("." + conProp.getProperty("EXT",""));
                 if (path.endsWith("html") || 
                         path.endsWith("xml") || 
@@ -692,6 +694,19 @@ public final class httpdFileHandler {
                     } else {
                         fis = new BufferedInputStream(new FileInputStream(targetFile));
                     }
+                    
+                    // detect charset of html-files
+                	if(path.endsWith("html") || path.endsWith("htm")) {
+                		// save position
+                		fis.mark(1000);
+                        // scrape document to look up charset
+                        final htmlFilterInputStream htmlFilter = new htmlFilterInputStream(fis,"UTF-8",new yacyURL("http://localhost", null),null,false);
+                        final String charset = htmlFilter.detectCharset();
+                        // reset position
+                        fis.reset();
+                        if(charset != null)
+                        	mimeType = mimeType + "; charset="+charset;
+                	}
 
                     // write the array to the client
                     // we can do that either in standard mode (whole thing completely) or in chunked mode
