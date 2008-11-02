@@ -62,7 +62,7 @@ public class kelondroEcoTable implements kelondroIndex {
     public static final int tailCacheUsageAuto  = 2;
     
     public static final long maxarraylength = 134217727L; // that may be the maxmimum size of array length in some JVMs
-    
+    private static final long minmemremaining = 20 * 1024 * 1024; // if less than this memory is remaininig, the memory copy of a table is abandoned
     kelondroRowSet table;
     kelondroBytesIntMap index;
     kelondroBufferedEcoFS file;
@@ -157,12 +157,10 @@ public class kelondroEcoTable implements kelondroIndex {
                     
                     // write the tail into the table
                     table.addUnique(taildef.newEntry(record, rowdef.primaryKeyLength, true));
-                    /*
-                    if ((i % 10000) == 0) {
-                        System.out.print('.');
-                        System.out.flush();
+                    if (abandonTable()) {
+                        table = null;
+                        break;
                     }
-                    */
                 }
             }
             
@@ -214,6 +212,11 @@ public class kelondroEcoTable implements kelondroIndex {
         
         // track this table
         tableTracker.put(tablefile.toString(), this);
+    }
+    
+    private boolean abandonTable() {
+        // check if not enough memory is there to maintain a memory copy of the table
+        return serverMemory.available() < minmemremaining;
     }
     
     /**
@@ -278,6 +281,7 @@ public class kelondroEcoTable implements kelondroIndex {
         if (table != null) {
             assert table.size() == i;
             table.addUnique(taildef.newEntry(row.bytes(), rowdef.primaryKeyLength, true));
+            if (abandonTable()) table = null;
         }
         file.add(row.bytes(), 0);
         assert file.size() == index.size() + fail : "file.size() = " + file.size() + ", index.size() = " + index.size();
@@ -571,7 +575,7 @@ public class kelondroEcoTable implements kelondroIndex {
         }
         
         // initialize index and copy table
-        table = new kelondroRowSet(taildef, 1);
+        table = (table == null) ? null : new kelondroRowSet(taildef, 1);
         index = new kelondroBytesIntMap(rowdef.primaryKeyLength, rowdef.objectOrder, 1);        
     }
 
