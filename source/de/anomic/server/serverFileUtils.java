@@ -620,4 +620,25 @@ public final class serverFileUtils {
         writer1.flush();
         return count;
     }
+    
+    /**
+     * delete a directory
+     * if the directory is not empty, delete also everything inside
+     * @param directory
+     */
+    public static void deleteDirectory(final File directory) {
+        final String[] list = directory.list();
+        if (list != null) {
+            File object;
+            for (int i = list.length - 1; i >= 0; i--) {
+                object = new File(directory, list[i]);
+                if (object.isFile()) {
+                    object.delete();
+                } else {
+                    deleteDirectory(object);
+                }
+            }
+        }
+        directory.delete();
+    }
 }

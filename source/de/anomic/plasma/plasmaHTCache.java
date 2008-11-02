@@ -49,6 +49,7 @@ import de.anomic.kelondro.kelondroBLOBBuffer;
 import de.anomic.kelondro.kelondroBLOBHeap;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroMap;
+import de.anomic.server.serverFileUtils;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyURL;
@@ -95,7 +96,7 @@ public final class plasmaHTCache {
                     object.getName().equals("yacy") ||
                     object.getName().equals("https") ||
                     object.getName().equals("ftp")) {
-                    deleteOldHTCache(cachePath);
+                    serverFileUtils.deleteDirectory(cachePath);
                 }
             }
         }
@@ -139,22 +140,6 @@ public final class plasmaHTCache {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-    
-    private static void deleteOldHTCache(final File directory) {
-        final String[] list = directory.list();
-        if (list != null) {
-            File object;
-            for (int i = list.length - 1; i >= 0; i--) {
-                object = new File(directory, list[i]);
-                if (object.isFile()) {
-                    object.delete();
-                } else {
-                    deleteOldHTCache(object);
-                }
-            }
-        }
-        directory.delete();
     }
 
     public static int responseHeaderDBSize() {

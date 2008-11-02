@@ -59,7 +59,7 @@ public class kelondroCollectionIndex {
     private final int           keylength;
     private final File          path;
     private final String        filenameStub;
-    private final File          commonsPath;
+    private final File          commonsPath1;
     private final int           loadfactor;
     private Map<String, kelondroFixedWidthArray> arrays; // Map of (partitionNumber"-"chunksize)/kelondroFixedWidthArray - Objects
     private final kelondroRow   payloadrow; // definition of the payload (chunks inside the collections)
@@ -113,7 +113,7 @@ public class kelondroCollectionIndex {
     }
     
     public kelondroCollectionIndex(final File path, final String filenameStub, final int keyLength, final kelondroByteOrder indexOrder,
-                                   final int loadfactor, final int maxpartitions, final kelondroRow rowdef) throws IOException {
+                                   final int loadfactor, final int maxpartitions, final kelondroRow rowdef, boolean useCommons) throws IOException {
         // the buffersize is number of bytes that are only used if the kelondroFlexTable is backed up with a kelondroTree
         indexErrors = 0;
         this.path = path;
@@ -122,8 +122,13 @@ public class kelondroCollectionIndex {
         this.payloadrow = rowdef;
         this.loadfactor = loadfactor;
         this.maxPartitions = maxpartitions;
-        this.commonsPath = new File(path, filenameStub + "." + fillZ(Integer.toHexString(rowdef.objectsize).toUpperCase(), 4) + ".commons");
-        this.commonsPath.mkdirs();
+        File cop = new File(path, filenameStub + "." + fillZ(Integer.toHexString(rowdef.objectsize).toUpperCase(), 4) + ".commons");
+        this.commonsPath1 = (useCommons) ? cop : null;
+        if (this.commonsPath1 == null) {
+            serverFileUtils.deleteDirectory(cop);
+        } else {
+            this.commonsPath1.mkdirs();
+        }
         final File f = new File(path, filenameStub + ".index");
         
         if (f.exists()) {
@@ -640,21 +645,22 @@ public class kelondroCollectionIndex {
         serverLog.logInfo("kelondroCollectionIndex", "shrinked common word " + new String(key) + "; old size = " + oldsize + ", new size = " + collection.size() + ", maximum size = " + targetSize + ", newcommon size = " + newcommon.size() + ", first newcommon = " + firstnewcommon);
         
         // finally dump the removed entries to a file
-        newcommon.sort();
-        final SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
-        formatter.setTimeZone(TimeZone.getTimeZone("GMT"));
-        final String filename = serverCodings.encodeHex(kelondroBase64Order.enhancedCoder.decode(new String(key), "de.anomic.kelondro.kelondroCollectionIndex.shrinkCollection(...)")) + "_" + formatter.format(new Date()) + ".collection";
-        final File storagePath = new File(commonsPath, filename.substring(0, 2)); // make a subpath
-        storagePath.mkdirs();
-        final File file = new File(storagePath, filename);
-        try {
-            newcommon.saveCollection(file);
-            serverLog.logInfo("kelondroCollectionIndex", "dumped common word " + new String(key) + " to " + file.toString() + "; size = " + newcommon.size());
-        } catch (final IOException e) {
-            e.printStackTrace();
-            serverLog.logWarning("kelondroCollectionIndex", "failed to dump common word " + new String(key) + " to " + file.toString() + "; size = " + newcommon.size());
-        }
-        
+        if (commonsPath1 != null) {
+            newcommon.sort();
+            final SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
+            formatter.setTimeZone(TimeZone.getTimeZone("GMT"));
+            final String filename = serverCodings.encodeHex(kelondroBase64Order.enhancedCoder.decode(new String(key), "de.anomic.kelondro.kelondroCollectionIndex.shrinkCollection(...)")) + "_" + formatter.format(new Date()) + ".collection";
+            final File storagePath = new File(commonsPath1, filename.substring(0, 2)); // make a subpath
+            storagePath.mkdirs();
+            final File file = new File(storagePath, filename);
+            try {
+                newcommon.saveCollection(file);
+                serverLog.logInfo("kelondroCollectionIndex", "dumped common word " + new String(key) + " to " + file.toString() + "; size = " + newcommon.size());
+            } catch (final IOException e) {
+                e.printStackTrace();
+                serverLog.logWarning("kelondroCollectionIndex", "failed to dump common word " + new String(key) + " to " + file.toString() + "; size = " + newcommon.size());
+            }
+        }        
     }
     
     public synchronized int remove(final byte[] key, final Set<String> removekeys) throws IOException, kelondroOutOfLimitsException {
@@ -885,7 +891,7 @@ public class kelondroCollectionIndex {
             final kelondroCollectionIndex collectionIndex  = new kelondroCollectionIndex(
                         path, filenameStub, 9 /*keyLength*/,
                         kelondroNaturalOrder.naturalOrder,
-                        4 /*loadfactor*/, 7, rowdef);
+                        4 /*loadfactor*/, 7, rowdef, false);
             
             // fill index with values
             kelondroRowSet collection = new kelondroRowSet(rowdef, 0);

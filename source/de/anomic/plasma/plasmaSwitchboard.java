@@ -304,7 +304,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         // start indexing management
         log.logConfig("Starting Indexing Management");
         final String networkName = getConfig(plasmaSwitchboardConstants.NETWORK_NAME, "");
-        webIndex = new plasmaWordIndex(networkName, log, indexPrimaryPath, indexSecondaryPath, wordCacheMaxCount);
+        final boolean useCommons = getConfigBool("index.storeCommons", false);
+        webIndex = new plasmaWordIndex(networkName, log, indexPrimaryPath, indexSecondaryPath, wordCacheMaxCount, useCommons);
         crawlResults = new ResultURLs();
         
         // start yacy core
@@ -738,7 +739,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             final File indexPrimaryPath = getConfigPath(plasmaSwitchboardConstants.INDEX_PRIMARY_PATH, plasmaSwitchboardConstants.INDEX_PATH_DEFAULT);
             final File indexSecondaryPath = (getConfig(plasmaSwitchboardConstants.INDEX_SECONDARY_PATH, "").length() == 0) ? indexPrimaryPath : new File(getConfig(plasmaSwitchboardConstants.INDEX_SECONDARY_PATH, ""));
             final int wordCacheMaxCount = (int) getConfigLong(plasmaSwitchboardConstants.WORDCACHE_MAX_COUNT, 20000);
-            this.webIndex = new plasmaWordIndex(getConfig(plasmaSwitchboardConstants.NETWORK_NAME, ""), getLog(), indexPrimaryPath, indexSecondaryPath, wordCacheMaxCount);
+            final boolean useCommons = getConfigBool("index.storeCommons", false);
+            this.webIndex = new plasmaWordIndex(getConfig(plasmaSwitchboardConstants.NETWORK_NAME, ""), getLog(), indexPrimaryPath, indexSecondaryPath, wordCacheMaxCount, useCommons);
         }
         // start up crawl jobs
         continueCrawlJob(plasmaSwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);

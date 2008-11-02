@@ -115,7 +115,7 @@ public final class plasmaWordIndex implements indexRI {
     private final File                     queuesRoot;
     public  yacyPeerActions                peerActions;
 
-    public plasmaWordIndex(final String networkName, final serverLog log, final File indexPrimaryRoot, final File indexSecondaryRoot, final int entityCacheMaxSize) {
+    public plasmaWordIndex(final String networkName, final serverLog log, final File indexPrimaryRoot, final File indexSecondaryRoot, final int entityCacheMaxSize, boolean useCommons) {
         if (networkName == null || networkName.length() == 0) {
             log.logSevere("no network name given - shutting down");
             System.exit(0);
@@ -148,7 +148,7 @@ public final class plasmaWordIndex implements indexRI {
         // create collections storage path
         final File textindexcollections = new File(indexPrimaryTextLocation, "RICOLLECTION");
         if (!(textindexcollections.exists())) textindexcollections.mkdirs();
-        this.collections = new indexCollectionRI(textindexcollections, "collection", maxCollectionPartition, indexRWIRowEntry.urlEntryRow);
+        this.collections = new indexCollectionRI(textindexcollections, "collection", maxCollectionPartition, indexRWIRowEntry.urlEntryRow, useCommons);
 
         // create LURL-db
         referenceURL = new indexRepositoryReference(this.secondaryRoot);

@@ -260,6 +260,13 @@ dbPath=DATA/PLASMADB
 indexPrimaryPath=DATA/INDEX
 indexSecondaryPath=
 
+# the commons are words that appear in the index more than 64k times in references.
+# Since indexes with such size cannot be handled efficiently, they are sorted in such a way that references with high ranking
+# are stored back into the index, and references with bad ranking are sorted out. Such sorted-out references can be stored
+# for later use (but there is no at this time). If the sorted-out references should be stored, the following property should be
+# set to true. If set to false, they are abandoned (deleted), and previously stored commons are removed.
+index.storeCommons=true
+
 # the path to the LISTS files. Most lists are used to filter web content
 listsPath=DATA/LISTS
 
