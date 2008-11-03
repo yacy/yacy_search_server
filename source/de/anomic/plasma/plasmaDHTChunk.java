@@ -39,7 +39,7 @@ import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.server.serverCodings;
 import de.anomic.server.logging.serverLog;
-import de.anomic.yacy.yacyDHTAction;
+import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacySeedDB;
 
 public class plasmaDHTChunk {
@@ -112,7 +112,7 @@ public class plasmaDHTChunk {
             this.log = log;
             this.wordIndex = wordIndex;
             this.startPointHash = selectTransferStart();
-            if (this.log.isFine()) log.logFine("Selected hash " + this.startPointHash + " as start point for index distribution, distance = " + yacyDHTAction.dhtDistance(wordIndex.seedDB.mySeed().hash, this.startPointHash));
+            if (this.log.isFine()) log.logFine("Selected hash " + this.startPointHash + " as start point for index distribution, distance = " + yacySeed.dhtDistance(this.startPointHash, wordIndex.seedDB.mySeed()));
             selectTransferContainers(this.startPointHash, minCount, maxCount, maxtime);
 
             // count the indexes, can be smaller as expected
@@ -130,7 +130,7 @@ public class plasmaDHTChunk {
         try {
             this.log = log;
             this.wordIndex = wordIndex;
-            if (this.log.isFine()) log.logFine("Demanded hash " + startHash + " as start point for index distribution, distance = " + yacyDHTAction.dhtDistance(wordIndex.seedDB.mySeed().hash, this.startPointHash));
+            if (this.log.isFine()) log.logFine("Demanded hash " + startHash + " as start point for index distribution, distance = " + yacySeed.dhtDistance(this.startPointHash, wordIndex.seedDB.mySeed()));
             selectTransferContainers(startHash, minCount, maxCount, maxtime);
 
             // count the indexes, can be smaller as expected
@@ -145,27 +145,7 @@ public class plasmaDHTChunk {
     }
 
     private String selectTransferStart() {
-        String startPointHash;
-        // first try to select with increasing probality a good start point
-        final double minimumDistance = ((double) peerRedundancy) / ((double) wordIndex.seedDB.sizeConnected());
-        double d, bestDistance = 0.0;
-        String bestHash = null;
-        for (int i = wordIndex.seedDB.sizeConnected() / 8; i > 0; i--) {
-            startPointHash = kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(Long.toString(i + System.currentTimeMillis()))).substring(2, 2 + yacySeedDB.commonHashLength);
-            d = yacyDHTAction.dhtDistance(wordIndex.seedDB.mySeed().hash, startPointHash);
-            if (d > (minimumDistance + ((double) i / (double) 10))) {
-                return startPointHash;
-            }
-            if (d > bestDistance) {
-                bestDistance = d;
-                bestHash = startPointHash;
-            }
-        }
-        // if that fails, take simply the best start point
-        if (bestHash == null) {
-            return wordIndex.seedDB.mySeed().hash.substring(0, 11) + "z";
-        }
-        return bestHash;
+        return kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(Long.toString(System.currentTimeMillis()))).substring(2, 2 + yacySeedDB.commonHashLength);
     }
 
     private void selectTransferContainers(final String hash, final int mincount, final int maxcount, final int maxtime) throws InterruptedException {        
@@ -198,7 +178,7 @@ public class plasmaDHTChunk {
             int wholesize;
 
             urlCache = new HashMap<String, indexURLReference>();
-            final double maximumDistance = ((double) peerRedundancy * 2) / (wordIndex.seedDB.sizeConnected());
+            final long maximumDistanceLong = Long.MAX_VALUE / wordIndex.seedDB.sizeConnected() * peerRedundancy * 2;
             final long timeout = (maxtime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxtime;
             while (
                     (maxcount > refcount) &&
@@ -206,7 +186,7 @@ public class plasmaDHTChunk {
                     ((container = indexContainerIterator.next()) != null) &&
                     (container.size() > 0) &&
                     ((tmpContainers.size() == 0) ||
-                     (yacyDHTAction.dhtDistance(container.getWordHash(), tmpContainers.get(0).getWordHash()) < maximumDistance)) &&
+                     (Math.abs(yacySeed.dhtPosition(container.getWordHash()) - yacySeed.dhtPosition(tmpContainers.get(0).getWordHash())) < maximumDistanceLong)) &&
                     (System.currentTimeMillis() < timeout)
             ) {
                 // check for interruption

@@ -263,6 +263,16 @@ public class kelondroBase64Order extends kelondroAbstractOrder<byte[]> implement
         return c;
     }
 
+    public final byte[] uncardinal(long c) {
+        c = c >> 3;
+        byte[] b = new byte[10];
+        for (int p = 9; p >= 0; p--) {
+            b[p] = (byte) alpha[(int) (c & 0x3fL)];
+            c = c >> 6;
+        }
+        return b;
+    }
+    
     public final long cardinal(final byte[] key) {
         if (this.zero == null) return cardinalI(key);
         final long zeroCardinal = cardinalI(this.zero);
@@ -373,9 +383,10 @@ public class kelondroBase64Order extends kelondroAbstractOrder<byte[]> implement
     }
 
     public static void main(final String[] s) {
+        // java -classpath classes de.anomic.kelondro.kelondroBase64Order
         final kelondroBase64Order b64 = new kelondroBase64Order(true, true);
         if (s.length == 0) {
-            System.out.println("usage: -[ec|dc|es|ds|s2m] <arg>");
+            System.out.println("usage: -[ec|dc|es|ds|clcn] <arg>");
             System.exit(0);
         }
         if (s[0].equals("-ec")) {
@@ -393,6 +404,14 @@ public class kelondroBase64Order extends kelondroAbstractOrder<byte[]> implement
         if (s[0].equals("-ds")) {
             // generate a b64 decoding from a given string
             System.out.println(b64.decodeString(s[1], ""));
+        }
+        if (s[0].equals("-cl")) {
+            // return the cardinal of a given string as long value with the enhanced encoder
+            System.out.println(kelondroBase64Order.enhancedCoder.cardinal(s[1].getBytes()));
+        }
+        if (s[0].equals("-cn")) {
+            // return the cardinal of a given string as normalized float 0 .. 1 with the enhanced encoder
+            System.out.println(((double) kelondroBase64Order.enhancedCoder.cardinal(s[1].getBytes())) / ((double) Long.MAX_VALUE));
         }
     }
 }

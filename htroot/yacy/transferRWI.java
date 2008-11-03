@@ -43,7 +43,6 @@ import de.anomic.tools.nxTools;
 import de.anomic.xml.RSSFeed;
 import de.anomic.xml.RSSMessage;
 import de.anomic.yacy.yacyCore;
-import de.anomic.yacy.yacyDHTAction;
 import de.anomic.yacy.yacyNetwork;
 import de.anomic.yacy.yacySeed;
 
@@ -193,7 +192,7 @@ public final class transferRWI {
             if ((wordhashes.length == 0) || (received == 0)) {
                 sb.getLog().logInfo("Received 0 RWIs from " + otherPeerName + ", processed in " + (System.currentTimeMillis() - startProcess) + " milliseconds, requesting " + unknownURL.size() + " URLs, blocked " + blocked + " RWIs");
             } else {
-                final double avdist = (yacyDHTAction.dhtDistance(sb.webIndex.seedDB.mySeed().hash, wordhashes[0]) + yacyDHTAction.dhtDistance(sb.webIndex.seedDB.mySeed().hash, wordhashes[received - 1])) / 2.0;
+                final long avdist = (yacySeed.dhtDistance(wordhashes[0], sb.webIndex.seedDB.mySeed()) + yacySeed.dhtDistance(wordhashes[received - 1], sb.webIndex.seedDB.mySeed())) / 2;
                 sb.getLog().logInfo("Received " + received + " Entries " + wordc + " Words [" + wordhashes[0] + " .. " + wordhashes[received - 1] + "]/" + avdist + " from " + otherPeerName + ", processed in " + (System.currentTimeMillis() - startProcess) + " milliseconds, requesting " + unknownURL.size() + "/" + receivedURL + " URLs, blocked " + blocked + " RWIs");
                 RSSFeed.channels(RSSFeed.INDEXRECEIVE).addMessage(new RSSMessage("Received " + received + " RWIs [" + wordhashes[0] + " .. " + wordhashes[received - 1] + "]/" + avdist + " from " + otherPeerName + ", requesting " + unknownURL.size() + " URLs, blocked " + blocked, "", ""));
             }

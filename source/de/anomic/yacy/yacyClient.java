@@ -479,7 +479,7 @@ public final class yacyClient {
         try {
           	result = nxTools.table(wput("http://" + target.getClusterAddress() + "/yacy/search.html", target.getHexHash() + ".yacyh", post, 60000), "UTF-8");
         } catch (final IOException e) {
-            yacyCore.log.logInfo("SEARCH failed, Peer: " + target.hash + ":" + target.getName() + " (" + e.getMessage() + "), score=" + target.selectscore + ", DHTdist=" + yacyDHTAction.dhtDistance(target.hash, wordhashes.substring(0, 12)));
+            yacyCore.log.logInfo("SEARCH failed, Peer: " + target.hash + ":" + target.getName() + " (" + e.getMessage() + "), score=" + target.selectscore + ", DHTdist=" + yacySeed.dhtDistance(wordhashes.substring(0, 12), target));
             //yacyCore.peerActions.peerDeparture(target, "search request to peer created io exception: " + e.getMessage());
             return null;
         }
@@ -492,8 +492,7 @@ public final class yacyClient {
 					+ " (zero response), score="
 					+ target.selectscore
 					+ ", DHTdist="
-					+ yacyDHTAction.dhtDistance(target.hash, wordhashes
-							.substring(0, 12)));
+					+ yacySeed.dhtDistance(wordhashes.substring(0, 12), target));
 			return null;
 		}
 
@@ -653,9 +652,7 @@ public final class yacyClient {
 				+ ", score="
 				+ target.selectscore
 				+ ", DHTdist="
-				+ ((wordhashes.length() < 12) ? "void" : Double
-						.toString(yacyDHTAction.dhtDistance(target.hash,
-								wordhashes.substring(0, 12))))
+				+ ((wordhashes.length() < 12) ? "void" : yacySeed.dhtDistance(wordhashes.substring(0, 12), target))
 				+ ", searchtime=" + searchtime + ", netdelay="
 				+ (totalrequesttime - searchtime) + ", references="
 				+ result.get("references"));

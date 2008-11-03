@@ -302,35 +302,13 @@ public class yacyDHTAction {
     public static boolean shallBeOwnWord(final yacySeedDB seedDB, final String wordhash) {
         if (seedDB == null) return false;
         if (seedDB.mySeed().isPotential()) return false;
-        final double distance = dhtDistance(seedDB.mySeed().hash, wordhash);
-        final double max = 1.2 / seedDB.sizeConnected();
+        final long distance = yacySeed.dhtDistance(wordhash, seedDB.mySeed());
+        final long max = Long.MAX_VALUE / seedDB.sizeConnected() * 2;
         //System.out.println("Distance for " + wordhash + ": " + distance + "; max is " + max);
         return (distance > 0) && (distance <= max);
     }
     
-    public static double dhtDistance(final String peer, final String word) {
-        // the dht distance is a positive value between 0 and 1
-        // if the distance is small, the word more probably belongs to the peer
-        final double d = hashDistance(peer, word);
-        if (d > 0) {
-            return d; // case where the word is 'before' the peer
-        }
-        return 1 + d; // wrap-around case
-    }
-    
-    private static double hashDistance(final String from, final String to) {
-        // computes the distance between two hashes.
-        // the maximum distance between two hashes is 1, the minimum -1
-        // this can be used like "from - to"
-        // the result is positive if from > to
-        assert (from != null);
-        assert (to != null);
-        assert (from.length() == 12) : "from.length = " + from.length() + ", from = " + from;
-        assert (to.length() == 12) : "to.length = " + to.length() + ", to = " + to;
-        return ((double) (kelondroBase64Order.enhancedCoder.cardinal(from.getBytes()) - kelondroBase64Order.enhancedCoder.cardinal(to.getBytes()))) / ((double) Long.MAX_VALUE);
-    }
-    
-    public synchronized ArrayList<yacySeed> getDHTTargets(final yacySeedDB seedDB, final serverLog log, final int primaryPeerCount, final int reservePeerCount, final String firstKey, final String lastKey, final double maxDist) {
+    public synchronized ArrayList<yacySeed> getDHTTargets(final yacySeedDB seedDB, final serverLog log, final int primaryPeerCount, final int reservePeerCount, final String firstKey, final String lastKey) {
         // find a list of DHT-peers
         assert firstKey != null;
         assert lastKey != null;
@@ -347,7 +325,7 @@ public class yacyDHTAction {
         //double ownDistance = Math.min(yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed.hash, firstKey), yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed.hash, lastKey));
         //double maxDistance = Math.min(ownDistance, maxDist);
 
-        double firstdist, lastdist;
+        long firstdist, lastdist;
         Iterator<yacySeed> e = this.getAcceptRemoteIndexSeeds(lastKey);
         final TreeSet<String> doublecheck = new TreeSet<String>(kelondroBase64Order.enhancedComparator);
         int maxloop = Math.min(100, seedDB.sizeConnected()); // to ensure termination
@@ -355,11 +333,9 @@ public class yacyDHTAction {
         while ((e.hasNext()) && (seeds.size() < (primaryPeerCount + reservePeerCount)) && (maxloop-- > 0)) {
             seed = e.next();
             if (seed == null || seed.hash == null) continue;
-        	firstdist = yacyDHTAction.dhtDistance(seed.hash, firstKey);
-        	lastdist = yacyDHTAction.dhtDistance(seed.hash, lastKey);
-            if (lastdist > maxDist) {
-                if (log != null && yacyCore.log.isFine()) log.logFine("Discarded too distant DHT target peer " + seed.getName() + ":" + seed.hash + ", distance2first = " + firstdist + ", distance2last = " + lastdist);
-            } else if (doublecheck.contains(seed.hash)) {
+        	firstdist = yacySeed.dhtDistance(firstKey, seed);
+        	lastdist = yacySeed.dhtDistance(lastKey, seed);
+            if (doublecheck.contains(seed.hash)) {
                 if (log != null && yacyCore.log.isFine()) log.logFine("Discarded double DHT target peer " + seed.getName() + ":" + seed.hash + ", distance2first = " + firstdist + ", distance2last = " + lastdist);
             } else {
                 if (log != null) log.logInfo("Selected  " + ((seeds.size() < primaryPeerCount) ? "primary" : "reserve") + "  DHT target peer " + seed.getName() + ":" + seed.hash + ", distance2first = " + firstdist + ", distance2last = " + lastdist);

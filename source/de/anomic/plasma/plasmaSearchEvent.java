@@ -49,7 +49,6 @@ import de.anomic.kelondro.kelondroSortStore;
 import de.anomic.plasma.plasmaSnippetCache.MediaSnippet;
 import de.anomic.server.serverProfiling;
 import de.anomic.server.logging.serverLog;
-import de.anomic.yacy.yacyDHTAction;
 import de.anomic.yacy.yacySearch;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyURL;
@@ -174,7 +173,7 @@ public final class plasmaSearchEvent {
                 final Iterator<Map.Entry<String, indexContainer>> ci = this.rankedCache.searchContainerMaps()[0].entrySet().iterator();
                 Map.Entry<String, indexContainer> entry;
                 int maxcount = -1;
-                double mindhtdistance = 1.1, d;
+                long mindhtdistance = Long.MAX_VALUE, l;
                 String wordhash;
                 while (ci.hasNext()) {
                     entry = ci.next();
@@ -185,10 +184,10 @@ public final class plasmaSearchEvent {
                         IAmaxcounthash = wordhash;
                         maxcount = container.size();
                     }
-                    d = yacyDHTAction.dhtDistance(wordIndex.seedDB.mySeed().hash, wordhash);
-                    if (d < mindhtdistance) {
+                    l = yacySeed.dhtDistance(wordhash, wordIndex.seedDB.mySeed());
+                    if (l < mindhtdistance) {
                         // calculate the word hash that is closest to our dht position
-                        mindhtdistance = d;
+                        mindhtdistance = l;
                         IAneardhthash = wordhash;
                     }
                     IACount.put(wordhash, Integer.valueOf(container.size()));

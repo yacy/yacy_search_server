@@ -123,14 +123,12 @@ public class plasmaGrafics {
         final int cx = eventPicture.getWidth() / 2;
         final int cy = eventPicture.getHeight() / 2;
 
-        String hash;
         int angle;
 
         // draw in the primary search peers
         for (int j = 0; j < primarySearches.length; j++) {
             eventPicture.setColor((primarySearches[j].isAlive()) ? ymageMatrix.RED : ymageMatrix.GREEN);
-            hash = primarySearches[j].target().hash;
-            angle = (int) (360 * yacySeed.dhtPosition(hash));
+            angle = (int) (360.0 * (((double) primarySearches[j].target().dhtPosition()) / ((double) Long.MAX_VALUE)));
             eventPicture.arcLine(cx, cy, cr - 20, cr, angle);
         }
 
@@ -138,8 +136,7 @@ public class plasmaGrafics {
         if (secondarySearches != null) {
             for (int j = 0; j < secondarySearches.length; j++) {
                 eventPicture.setColor((secondarySearches[j].isAlive()) ? ymageMatrix.RED : ymageMatrix.GREEN);
-                hash = secondarySearches[j].target().hash;
-                angle = (int) (360 * yacySeed.dhtPosition(hash));
+                angle = (int) (360.0 * (((double) secondarySearches[j].target().dhtPosition()) / ((double) Long.MAX_VALUE)));
                 eventPicture.arcLine(cx, cy, cr - 10, cr, angle - 1);
                 eventPicture.arcLine(cx, cy, cr - 10, cr, angle + 1);
             }
@@ -150,8 +147,7 @@ public class plasmaGrafics {
         final Iterator<String> i = query.queryHashes.iterator();
         eventPicture.setColor(ymageMatrix.GREY);
         while (i.hasNext()) {
-            hash = i.next();
-            angle = (int) (360 * yacySeed.dhtPosition(hash));
+            angle = (int) (360.0 * (((double) yacySeed.dhtPosition(i.next())) / ((double) Long.MAX_VALUE)));
             eventPicture.arcLine(cx, cy, cr - 20, cr, angle);
         }
 
@@ -249,7 +245,7 @@ public class plasmaGrafics {
         final String name = seed.getName().toUpperCase() /*+ ":" + seed.hash + ":" + (((double) ((int) (100 * (((double) yacySeed.dhtPosition(seed.hash)) / ((double) yacySeed.maxDHTDistance))))) / 100.0)*/;
         if (name.length() < shortestName) shortestName = name.length();
         if (name.length() > longestName) longestName = name.length();
-        final int angle = (int) (360 * seed.dhtPosition());
+        final int angle = (int) (360.0 * (((double) seed.dhtPosition()) / ((double) Long.MAX_VALUE)));
         //System.out.println("Seed " + seed.hash + " has distance " + seed.dhtDistance() + ", angle = " + angle);
         int linelength = 20 + outerradius * (20 * (name.length() - shortestName) / (longestName - shortestName) + Math.abs(seed.hash.hashCode() % 20)) / 60;
         if (linelength > outerradius) linelength = outerradius;
