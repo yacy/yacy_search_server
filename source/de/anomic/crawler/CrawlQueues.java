@@ -366,7 +366,8 @@ public class CrawlQueues {
             // something is wrong with this provider. To prevent that we get not stuck with this peer
             // we remove it from the peer list
             sb.webIndex.peerActions.peerDeparture(seed, "no results from provided remote crawls");
-            return true;
+            // ask another peer
+            return remoteCrawlLoaderJob();
         }
         
         // parse the rss
