@@ -195,7 +195,7 @@ public class urlRedirectord implements serverHandler, Cloneable {
                             sb.crawlQueues.errorURL.remove(urlhash);                            
                             
                             // enqueuing URL for crawling
-                            reasonString = sb.crawlStacker.stackCrawl(
+                            sb.crawlStacker.enqueueEntry(
                                     reqURL, 
                                     null, 
                                     sb.webIndex.seedDB.mySeed().hash, 

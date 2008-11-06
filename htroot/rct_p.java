@@ -76,17 +76,7 @@ public class rct_p {
                         if (urlRejectReason == null) {
                             // stack url
                             if (sb.getLog().isFinest()) sb.getLog().logFinest("crawlOrder: stack: url='" + url + "'");
-                            final String reasonString = sb.crawlStacker.stackCrawl(url, referrer, peerhash, "REMOTE-CRAWLING", loaddate, 0, sb.webIndex.defaultRemoteProfile);
-
-                            if (reasonString == null) {
-                                // done
-                                env.getLog().logInfo("crawlOrder: added remote crawl url: " + urlToString(url));
-                            } else if (reasonString.startsWith("double")) {
-                                // case where we have already the url loaded;
-                                env.getLog().logInfo("crawlOrder: ignored double remote crawl url: " + urlToString(url));
-                            } else {
-                                env.getLog().logInfo("crawlOrder: ignored [" + reasonString + "] remote crawl url: " + urlToString(url));
-                            }
+                            sb.crawlStacker.enqueueEntry(url, (referrer == null) ? null : referrer.hash(), peerhash, "REMOTE-CRAWLING", loaddate, 0, sb.webIndex.defaultRemoteProfile);
                         } else {
                             env.getLog().logWarning("crawlOrder: Rejected URL '" + urlToString(url) + "': " + urlRejectReason);
                         }

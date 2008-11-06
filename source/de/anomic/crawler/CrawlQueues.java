@@ -362,7 +362,13 @@ public class CrawlQueues {
         
         // we know a peer which should provide remote crawl entries. load them now.
         final RSSFeed feed = yacyClient.queryRemoteCrawlURLs(sb.webIndex.seedDB, seed, 30, 5000);
-        if (feed == null) return true;
+        if (feed == null || feed.size() == 0) {
+            // something is wrong with this provider. To prevent that we get not stuck with this peer
+            // we remove it from the peer list
+            sb.webIndex.peerActions.peerDeparture(seed, "no results from provided remote crawls");
+            return true;
+        }
+        
         // parse the rss
         yacyURL url, referrer;
         Date loaddate;
@@ -389,17 +395,7 @@ public class CrawlQueues {
             if (urlRejectReason == null) {
                 // stack url
                 if (sb.getLog().isFinest()) sb.getLog().logFinest("crawlOrder: stack: url='" + url + "'");
-                final String reasonString = sb.crawlStacker.stackCrawl(url, referrer, hash, item.getDescription(), loaddate, 0, sb.webIndex.defaultRemoteProfile);
-
-                if (reasonString == null) {
-                    // done
-                    log.logInfo("crawlOrder: added remote crawl url: " + urlToString(url));
-                } else if (reasonString.startsWith("double")) {
-                    // case where we have already the url loaded;
-                    log.logInfo("crawlOrder: ignored double remote crawl url: " + urlToString(url));
-                } else {
-                    log.logInfo("crawlOrder: ignored [" + reasonString + "] remote crawl url: " + urlToString(url));
-                }
+                sb.crawlStacker.enqueueEntry(url, (referrer == null) ? null : referrer.hash(), hash, item.getDescription(), loaddate, 0, sb.webIndex.defaultRemoteProfile);
             } else {
                 log.logWarning("crawlOrder: Rejected URL '" + urlToString(url) + "': " + urlRejectReason);
             }

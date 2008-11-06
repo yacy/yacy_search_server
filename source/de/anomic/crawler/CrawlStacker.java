@@ -210,6 +210,33 @@ public final class CrawlStacker extends Thread {
         return true;
     }
     
+    public String stackCrawl(
+            final yacyURL url,
+            final String referrerhash,
+            final String initiatorHash,
+            final String name,
+            final Date loadDate,
+            final int currentdepth,
+            final CrawlProfile.entry profile) {
+        // stacks a crawl item. The position can also be remote
+        // returns null if successful, a reason string if not successful
+        //this.log.logFinest("stackCrawl: nexturlString='" + nexturlString + "'");
+        
+        // add the url into the crawling queue
+        final CrawlEntry entry = new CrawlEntry(
+                initiatorHash,                               // initiator, needed for p2p-feedback
+                url,                                         // url clear text string
+                (referrerhash == null) ? "" : referrerhash,  // last url in crawling queue
+                name,                                        // load date
+                loadDate,                                    // the anchor name
+                (profile == null) ? null : profile.handle(), // profile must not be null!
+                currentdepth,                                // depth so far
+                0,                                           // anchors, default value
+                0                                            // forkfactor, default value
+        );
+        return stackCrawl(entry);
+    }
+    
     public void enqueueEntry(
             final yacyURL nexturl, 
             final String referrerhash, 
@@ -340,26 +367,6 @@ public final class CrawlStacker extends Thread {
 
         if ((urlHash == null) || (entry == null)) return null;
         return new CrawlEntry(entry);
-    }
-    
-    public String stackCrawl(final yacyURL url, final yacyURL referrer, final String initiatorHash, final String name, final Date loadDate, final int currentdepth, final CrawlProfile.entry profile) {
-        // stacks a crawl item. The position can also be remote
-        // returns null if successful, a reason string if not successful
-        //this.log.logFinest("stackCrawl: nexturlString='" + nexturlString + "'");
-        
-        // add the url into the crawling queue
-        final CrawlEntry entry = new CrawlEntry(
-                initiatorHash,                               // initiator, needed for p2p-feedback
-                url,                                         // url clear text string
-                (referrer == null) ? "" : referrer.hash(),   // last url in crawling queue
-                name,                                        // load date
-                loadDate,                                    // the anchor name
-                (profile == null) ? null : profile.handle(), // profile must not be null!
-                currentdepth,                                // depth so far
-                0,                                           // anchors, default value
-                0                                            // forkfactor, default value
-        );
-        return stackCrawl(entry);
     }
     
     public String stackCrawl(final CrawlEntry entry) {
