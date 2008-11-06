@@ -41,6 +41,7 @@ import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNetwork;
+import de.anomic.yacy.yacyPeerSelection;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyVersion;
 
@@ -183,7 +184,7 @@ public final class hello {
             if (count > 100) { count = 100; }
             
             // latest seeds
-            final Map<String, yacySeed> ySeeds = sb.webIndex.seedDB.seedsByAge(true, count); // peerhash/yacySeed relation
+            final Map<String, yacySeed> ySeeds = yacyPeerSelection.seedsByAge(sb.webIndex.seedDB, true, count); // peerhash/yacySeed relation
             
             // attach also my own seed
             seeds.append("seed0=").append(sb.webIndex.seedDB.mySeed().genSeedStr(key)).append(serverCore.CRLF_STRING);

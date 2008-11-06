@@ -170,6 +170,7 @@ import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacyNewsRecord;
+import de.anomic.yacy.yacyPeerSelection;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyTray;
 import de.anomic.yacy.yacyURL;
@@ -305,7 +306,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         log.logConfig("Starting Indexing Management");
         final String networkName = getConfig(plasmaSwitchboardConstants.NETWORK_NAME, "");
         final boolean useCommons = getConfigBool("index.storeCommons", false);
-        webIndex = new plasmaWordIndex(networkName, log, indexPrimaryPath, indexSecondaryPath, wordCacheMaxCount, useCommons);
+        final int redundancy = (int) sb.getConfigLong("network.unit.dhtredundancy.senior", 1);
+        webIndex = new plasmaWordIndex(networkName, log, indexPrimaryPath, indexSecondaryPath, wordCacheMaxCount, useCommons, redundancy);
         crawlResults = new ResultURLs();
         
         // start yacy core
@@ -740,7 +742,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             final File indexSecondaryPath = (getConfig(plasmaSwitchboardConstants.INDEX_SECONDARY_PATH, "").length() == 0) ? indexPrimaryPath : new File(getConfig(plasmaSwitchboardConstants.INDEX_SECONDARY_PATH, ""));
             final int wordCacheMaxCount = (int) getConfigLong(plasmaSwitchboardConstants.WORDCACHE_MAX_COUNT, 20000);
             final boolean useCommons = getConfigBool("index.storeCommons", false);
-            this.webIndex = new plasmaWordIndex(getConfig(plasmaSwitchboardConstants.NETWORK_NAME, ""), getLog(), indexPrimaryPath, indexSecondaryPath, wordCacheMaxCount, useCommons);
+            final int redundancy = (int) sb.getConfigLong("network.unit.dhtredundancy.senior", 1);
+            this.webIndex = new plasmaWordIndex(getConfig(plasmaSwitchboardConstants.NETWORK_NAME, ""), getLog(), indexPrimaryPath, indexSecondaryPath, wordCacheMaxCount, useCommons, redundancy);
         }
         // start up crawl jobs
         continueCrawlJob(plasmaSwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
@@ -1192,7 +1195,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
                )) {
                 // generate new chunk
                 final int minChunkSize = (int) getConfigLong(plasmaSwitchboardConstants.INDEX_DIST_CHUNK_SIZE_MIN, 30);
-                dhtTransferChunk = new plasmaDHTChunk(this.log, webIndex, minChunkSize, dhtTransferIndexCount, 5000);
+                dhtTransferChunk = new plasmaDHTChunk(this.log, webIndex, minChunkSize, dhtTransferIndexCount, 5000, plasmaDHTChunk.selectTransferStart());
                 doneSomething = true;
             }
 
@@ -2005,11 +2008,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
 
         try {
             // find a list of DHT-peers
-            final ArrayList<yacySeed> seeds = webIndex.peerActions.dhtAction.getDHTTargets(webIndex.seedDB, log, peerCount, 9, dhtChunk.firstContainer().getWordHash(), dhtChunk.lastContainer().getWordHash());
-            if (seeds.size() < peerCount) {
-                log.logWarning("found not enough (" + seeds.size() + ") peers for distribution for dhtchunk [" + dhtChunk.firstContainer().getWordHash() + " .. " + dhtChunk.lastContainer().getWordHash() + "]");
-                return false;
-            }
+            if (log != null) log.logInfo("Collecting DHT target peers for first_hash = " + dhtChunk.firstContainer().getWordHash() + ", last_hash = " + dhtChunk.lastContainer().getWordHash());
+            final Iterator<yacySeed> seedIter = yacyPeerSelection.getAcceptRemoteIndexSeeds(webIndex.seedDB, dhtChunk.lastContainer().getWordHash(), peerCount + 9);
 
             // send away the indexes to all these peers
             int hc1 = 0;
@@ -2019,8 +2019,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             final int timeout = (int)getConfigLong(plasmaSwitchboardConstants.INDEX_DIST_TIMEOUT, 60000);
             final int retries = 0;
 
-            // starting up multiple DHT transfer threads   
-            final Iterator<yacySeed> seedIter = seeds.iterator();
+            // starting up multiple DHT transfer threads
+            yacySeed seed;
+            long firstdist, lastdist;
             final ArrayList<plasmaDHTTransfer> transfer = new ArrayList<plasmaDHTTransfer>(peerCount);
             while (hc1 < peerCount && (transfer.size() > 0 || seedIter.hasNext())) {
                 
@@ -2031,7 +2032,11 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
                     checkInterruption();
                                         
                     if (seedIter.hasNext()) {
-                        final plasmaDHTTransfer t = new plasmaDHTTransfer(log, webIndex.seedDB, webIndex.peerActions, seedIter.next(), dhtChunk,gzipBody,timeout,retries);
+                        seed = seedIter.next();
+                        firstdist = yacySeed.dhtDistance(dhtChunk.firstContainer().getWordHash(), seed);
+                        lastdist = yacySeed.dhtDistance(dhtChunk.lastContainer().getWordHash(), seed);
+                        if (log != null) log.logInfo("Selected DHT target peer " + seed.getName() + ":" + seed.hash + ", distance2first = " + firstdist + ", distance2last = " + lastdist);
+                        final plasmaDHTTransfer t = new plasmaDHTTransfer(log, webIndex.seedDB, webIndex.peerActions, seed, dhtChunk, gzipBody, timeout, retries);
                         t.start();
                         transfer.add(t);
                     } else {

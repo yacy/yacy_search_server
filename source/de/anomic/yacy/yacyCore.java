@@ -305,7 +305,7 @@ public class yacyCore {
             if (sb.webIndex.seedDB.mySeed().get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN).equals(yacySeed.PEERTYPE_VIRGIN)) {
                 if (attempts > PING_INITIAL) { attempts = PING_INITIAL; }
                 final Map<String, String> ch = plasmaSwitchboard.getSwitchboard().clusterhashes;
-                seeds = sb.webIndex.seedDB.seedsByAge(true, attempts - ((ch == null) ? 0 : ch.size())); // best for fast connection
+                seeds = yacyPeerSelection.seedsByAge(sb.webIndex.seedDB, true, attempts - ((ch == null) ? 0 : ch.size())); // best for fast connection
                 // add also all peers from cluster if this is a public robinson cluster
                 if (ch != null) {
                     final Iterator<Map.Entry<String, String>> i = ch.entrySet().iterator();
@@ -332,7 +332,7 @@ public class yacyCore {
                 } else {
                     if (attempts > PING_MIN_RUNNING) { attempts = PING_MIN_RUNNING; }
                 }
-                seeds = sb.webIndex.seedDB.seedsByAge(false, attempts); // best for seed list maintenance/cleaning
+                seeds = yacyPeerSelection.seedsByAge(sb.webIndex.seedDB, false, attempts); // best for seed list maintenance/cleaning
             }
 
             if ((seeds == null) || seeds.size() == 0) { return 0; }

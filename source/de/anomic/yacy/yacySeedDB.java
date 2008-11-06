@@ -34,7 +34,6 @@ import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -50,11 +49,9 @@ import de.anomic.http.httpdAlternativeDomainNames;
 import de.anomic.kelondro.kelondroBLOBHeap;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroException;
-import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroMapDataMining;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.server.serverCore;
-import de.anomic.server.serverDate;
 import de.anomic.server.serverDomains;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverSwitch;
@@ -366,45 +363,6 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
         // return just any seed that has a specific minimum version number
         final Iterator<yacySeed> e = seedsConnected(true, true, yacySeed.randomHash(), minVersion);
         return e.next();
-    }
-
-    public HashMap<String, yacySeed> seedsByAge(final boolean up, int count) {
-    	// returns a peerhash/yacySeed relation
-        // to get most recent peers, set up = true; for oldest peers, set up = false
-    	
-        if (count > sizeConnected()) count = sizeConnected();
-
-        // fill a score object
-        final kelondroMScoreCluster<String> seedScore = new kelondroMScoreCluster<String>();
-        yacySeed ys;
-        long absage;
-        final Iterator<yacySeed> s = seedsConnected(true, false, null, (float) 0.0);
-        int searchcount = 1000;
-        if (searchcount > sizeConnected()) searchcount = sizeConnected();
-        try {
-            while ((s.hasNext()) && (searchcount-- > 0)) {
-                ys = s.next();
-                if ((ys != null) && (ys.get(yacySeed.LASTSEEN, "").length() > 10)) try {
-                    absage = Math.abs(System.currentTimeMillis() + serverDate.dayMillis - ys.getLastSeenUTC());
-                    seedScore.addScore(ys.hash, (int) absage); // the higher absage, the older is the peer
-                } catch (final Exception e) {}
-            }
-            
-            // result is now in the score object; create a result vector
-            final HashMap<String, yacySeed> result = new HashMap<String, yacySeed>();
-            final Iterator<String> it = seedScore.scores(up);
-            int c = 0;
-            while ((c < count) && (it.hasNext())) {
-            	c++;
-            	ys = getConnected(it.next());
-            	if ((ys != null) && (ys.hash != null)) result.put(ys.hash, ys);
-            }
-            return result;
-        } catch (final kelondroException e) {
-            seedActiveDB = resetSeedTable(seedActiveDB, seedActiveDBFile);
-            if (yacyCore.log.isFine()) yacyCore.log.logFine("Internal Error at yacySeedDB.seedsByAge: " + e.getMessage(), e);
-            return null;
-        }
     }
 
     public int sizeConnected() {

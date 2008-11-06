@@ -130,7 +130,7 @@ public final class plasmaSearchEvent {
             // do a global search
             this.rankedCache = new plasmaSearchRankingProcess(wordIndex, query, max_results_preparation, 16);
             
-            final int fetchpeers = 10;
+            final int fetchpeers = 12;
 
             // the result of the fetch is then in the rcGlobal
             final long timer = System.currentTimeMillis();

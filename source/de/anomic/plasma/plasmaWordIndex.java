@@ -67,9 +67,9 @@ import de.anomic.server.logging.serverLog;
 import de.anomic.tools.iso639;
 import de.anomic.xml.RSSFeed;
 import de.anomic.xml.RSSMessage;
-import de.anomic.yacy.yacyDHTAction;
 import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacyPeerActions;
+import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyURL;
 
@@ -114,13 +114,15 @@ public final class plasmaWordIndex implements indexRI {
     public  CrawlProfile.entry             defaultMediaSnippetLocalProfile, defaultMediaSnippetGlobalProfile;
     private final File                     queuesRoot;
     public  yacyPeerActions                peerActions;
+    public  int                            netRedundancy;
 
-    public plasmaWordIndex(final String networkName, final serverLog log, final File indexPrimaryRoot, final File indexSecondaryRoot, final int entityCacheMaxSize, boolean useCommons) {
+    public plasmaWordIndex(final String networkName, final serverLog log, final File indexPrimaryRoot, final File indexSecondaryRoot, final int entityCacheMaxSize, boolean useCommons, int redundancy) {
         if (networkName == null || networkName.length() == 0) {
             log.logSevere("no network name given - shutting down");
             System.exit(0);
         }
         this.log = log;
+        this.netRedundancy = redundancy;
         this.primaryRoot = new File(indexPrimaryRoot, networkName);
         this.secondaryRoot = new File(indexSecondaryRoot, networkName);
         File indexPrimaryTextLocation = new File(this.primaryRoot, "TEXT");
@@ -494,7 +496,7 @@ public final class plasmaWordIndex implements indexRI {
 
     public void addEntry(final String wordHash, final indexRWIRowEntry entry, final long updateTime, boolean dhtInCase) {
         // set dhtInCase depending on wordHash
-        if ((!dhtInCase) && (yacyDHTAction.shallBeOwnWord(seedDB, wordHash))) dhtInCase = true;
+        if ((!dhtInCase) && (yacySeed.shallBeOwnWord(seedDB, wordHash, this.netRedundancy))) dhtInCase = true;
         
         // add the entry
         if (dhtInCase) {
@@ -514,7 +516,7 @@ public final class plasmaWordIndex implements indexRI {
         assert (entries.row().objectsize == indexRWIRowEntry.urlEntryRow.objectsize);
         
         // set dhtInCase depending on wordHash
-        if ((!dhtInCase) && (yacyDHTAction.shallBeOwnWord(seedDB, entries.getWordHash()))) dhtInCase = true;
+        if ((!dhtInCase) && (yacySeed.shallBeOwnWord(seedDB, entries.getWordHash(), this.netRedundancy))) dhtInCase = true;
         
         // add the entry
         if (dhtInCase) {

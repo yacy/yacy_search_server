@@ -320,7 +320,7 @@ public class IndexControlRWIs_p {
                 sb.webIndex.removeEntries(keyhash, urlHashes);
             }
         
-            if (prop.getInt("searchresult", 0) == 3) plasmaSearchAPI.listHosts(prop, keyhash, sb.webIndex.peerActions);
+            if (prop.getInt("searchresult", 0) == 3) plasmaSearchAPI.listHosts(prop, keyhash, sb);
         }
         
 

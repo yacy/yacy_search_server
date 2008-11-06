@@ -108,7 +108,6 @@ public class ConfigLanguage_p {
 
         //reread language files
         langFiles = listManager.getDirListing(langPath);
-        int i;
         final HashMap<String, String> langNames = translator.langMap(env);
         String langKey, langName;
 

@@ -39,6 +39,7 @@ import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverMemory;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.yacy.yacyPeerSelection;
 import de.anomic.yacy.yacySeed;
 
 public final class IndexTransfer_p {
@@ -111,7 +112,7 @@ public final class IndexTransfer_p {
         yacySeed seed;
         int hc = 0;
         if ((sb.webIndex.seedDB != null) && (sb.webIndex.seedDB.sizeConnected() > 0)) {
-            final Iterator<yacySeed> e = sb.webIndex.peerActions.dhtAction.getAcceptRemoteIndexSeeds("------------");
+            final Iterator<yacySeed> e = yacyPeerSelection.getAcceptRemoteIndexSeeds(sb.webIndex.seedDB, "AAAAAAAAAAAA", sb.webIndex.seedDB.sizeConnected());
             final TreeMap<String, String> hostList = new TreeMap<String, String>();
             while (e.hasNext()) {
                 seed = e.next();

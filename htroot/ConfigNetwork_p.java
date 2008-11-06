@@ -149,8 +149,21 @@ public class ConfigNetwork_p {
                     newppm = Math.max(1, Integer.parseInt(post.get("acceptCrawlLimit", "1")));
                 } catch (final NumberFormatException e) {}
                 final long newBusySleep = Math.max(100, 60000 / newppm);
+                
+                // propagate to crawler
                 final serverBusyThread rct = sb.getThread(plasmaSwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
+                sb.setConfig(plasmaSwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_BUSYSLEEP, newBusySleep);
+                sb.setConfig(plasmaSwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_IDLESLEEP, newBusySleep * 3);
                 rct.setBusySleep(newBusySleep);
+                rct.setIdleSleep(newBusySleep * 3);
+                
+                // propagate to loader
+                final serverBusyThread rcl = sb.getThread(plasmaSwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER);
+                sb.setConfig(plasmaSwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_BUSYSLEEP, newBusySleep * 5);
+                sb.setConfig(plasmaSwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_IDLESLEEP, newBusySleep * 10);
+                rcl.setBusySleep(newBusySleep * 5);
+                rcl.setIdleSleep(newBusySleep * 10);
+                
                 sb.setConfig(plasmaSwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_BUSYSLEEP, Long.toString(newBusySleep));
                 
                 sb.setConfig("cluster.peers.ipport", checkIPPortList(post.get("cluster.peers.ipport", "")));

@@ -46,6 +46,7 @@ import de.anomic.server.logging.serverLog;
 import de.anomic.xml.RSSFeed;
 import de.anomic.xml.RSSMessage;
 import de.anomic.yacy.yacyClient;
+import de.anomic.yacy.yacyPeerSelection;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyURL;
 
@@ -318,28 +319,25 @@ public class CrawlQueues {
             return false;
         }
         
-        if (remoteTriggeredCrawlJobSize() > 0) {
+        if (remoteTriggeredCrawlJobSize() > 100) {
             if (this.log.isFine()) log.logFine("remoteCrawlLoaderJob: the remote-triggered crawl job queue is filled, omitting processing");
             return false;
         }
         
-        /*
         if (coreCrawlJobSize() > 0) {
             if (this.log.isFine()) log.logFine("remoteCrawlLoaderJob: a local crawl is running, omitting processing");
             return false;
         }
-        */
         
         // check if we have an entry in the provider list, otherwise fill the list
         yacySeed seed;
         if (remoteCrawlProviderHashes.size() == 0) {
             if (sb.webIndex.seedDB != null && sb.webIndex.seedDB.sizeConnected() > 0) {
-                final Iterator<yacySeed> e = sb.webIndex.peerActions.dhtAction.getProvidesRemoteCrawlURLs();
+                final Iterator<yacySeed> e = yacyPeerSelection.getProvidesRemoteCrawlURLs(sb.webIndex.seedDB);
                 while (e.hasNext()) {
                     seed = e.next();
                     if (seed != null) {
                         remoteCrawlProviderHashes.add(seed.hash);
-                        
                     }
                 }
             }
@@ -363,7 +361,7 @@ public class CrawlQueues {
         if (seed == null) return false;
         
         // we know a peer which should provide remote crawl entries. load them now.
-        final RSSFeed feed = yacyClient.queryRemoteCrawlURLs(sb.webIndex.seedDB, seed, 20);
+        final RSSFeed feed = yacyClient.queryRemoteCrawlURLs(sb.webIndex.seedDB, seed, 30, 5000);
         if (feed == null) return true;
         // parse the rss
         yacyURL url, referrer;

@@ -377,7 +377,7 @@ public final class yacyClient {
         }
     }
 
-    public static RSSFeed queryRemoteCrawlURLs(final yacySeedDB seedDB, final yacySeed target, final int count) {
+    public static RSSFeed queryRemoteCrawlURLs(final yacySeedDB seedDB, final yacySeed target, final int maxCount, final long maxTime) {
         // returns a list of 
         if (target == null) { return null; }
         
@@ -385,7 +385,8 @@ public final class yacyClient {
         final String salt = crypt.randomSalt();
         final List<Part> post = yacyNetwork.basicRequestPost(plasmaSwitchboard.getSwitchboard(), target.hash, salt);
         post.add(new DefaultCharsetStringPart("call", "remotecrawl"));
-        post.add(new DefaultCharsetStringPart("count", Integer.toString(count)));
+        post.add(new DefaultCharsetStringPart("count", Integer.toString(maxCount)));
+        post.add(new DefaultCharsetStringPart("time", Long.toString(maxTime)));
         
         // send request
         try {

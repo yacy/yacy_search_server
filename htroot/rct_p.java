@@ -38,6 +38,7 @@ import de.anomic.server.serverSwitch;
 import de.anomic.xml.RSSFeed;
 import de.anomic.xml.RSSMessage;
 import de.anomic.yacy.yacyClient;
+import de.anomic.yacy.yacyPeerSelection;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyURL;
 
@@ -52,7 +53,7 @@ public class rct_p {
             if (post.containsKey("retrieve")) {
                 final String peerhash = post.get("peer", null);
                 final yacySeed seed = (peerhash == null) ? null : sb.webIndex.seedDB.getConnected(peerhash);
-                final RSSFeed feed = (seed == null) ? null : yacyClient.queryRemoteCrawlURLs(sb.webIndex.seedDB, seed, 10);
+                final RSSFeed feed = (seed == null) ? null : yacyClient.queryRemoteCrawlURLs(sb.webIndex.seedDB, seed, 20, 10000);
                 if (feed != null) {
                     for (final RSSMessage item: feed) {
                         //System.out.println("URL=" + item.getLink() + ", desc=" + item.getDescription() + ", pubDate=" + item.getPubDate());
@@ -113,7 +114,7 @@ public class rct_p {
         yacySeed seed;
         int hc = 0;
         if (sb.webIndex.seedDB != null && sb.webIndex.seedDB.sizeConnected() > 0) {
-            final Iterator<yacySeed> e = sb.webIndex.peerActions.dhtAction.getProvidesRemoteCrawlURLs();
+            final Iterator<yacySeed> e = yacyPeerSelection.getProvidesRemoteCrawlURLs(sb.webIndex.seedDB);
             while (e.hasNext()) {
                 seed = e.next();
                 if (seed != null) {

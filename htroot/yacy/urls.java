@@ -58,11 +58,15 @@ public class urls {
         if (post.get("call", "").equals("remotecrawl")) {
             // perform a remote crawl url handover
             final int stackType = NoticedURL.STACK_TYPE_LIMIT;
-            int count = Math.min(100, post.getInt("count", 0));
+            int maxCount = Math.min(100, post.getInt("count", 10));
+            long maxTime = Math.min(20000, Math.max(1000, post.getInt("time", 10000)));
+            long timeout = System.currentTimeMillis() + maxTime;
             int c = 0;
             CrawlEntry entry;
             yacyURL referrer;
-            while ((count > 0) && (sb.crawlQueues.noticeURL.stackSize(stackType) > 0)) {
+            while ((maxCount > 0) &&
+                   (System.currentTimeMillis() < timeout) &&
+                   (sb.crawlQueues.noticeURL.stackSize(stackType) > 0)) {
                 try {
                     entry = sb.crawlQueues.noticeURL.pop(stackType, false, sb.webIndex.profilesActiveCrawls);
                 } catch (final IOException e) {
@@ -92,7 +96,7 @@ public class urls {
                 prop.put("item_" + c + "_pubDate", serverDate.formatShortSecond(entry.appdate()));
                 prop.put("item_" + c + "_guid", entry.url().hash());
                 c++;
-                count--;
+                maxCount--;
             }
             prop.put("item", c);
             prop.putHTML("response", "ok");

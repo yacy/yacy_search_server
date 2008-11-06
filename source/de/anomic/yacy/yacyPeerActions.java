@@ -1,7 +1,7 @@
 // yacyPeerActions.java 
 // -------------------------------------
 // (C) by Michael Peter Christen; mc@yacy.net
-// first published on http://www.anomic.de
+// first published on http://yacy.net
 // Frankfurt, Germany, 2005
 //
 // $LastChangedDate$
@@ -38,7 +38,6 @@ public class yacyPeerActions {
     private final yacySeedDB seedDB;
     private HashMap<String, String> userAgents;
     public  long disconnects;
-    public  yacyDHTAction dhtAction;
     private final yacyNewsPool newsPool;
     
     public yacyPeerActions(final yacySeedDB seedDB, final yacyNewsPool newsPool) {
@@ -46,14 +45,12 @@ public class yacyPeerActions {
         this.newsPool = newsPool;
         this.userAgents = new HashMap<String, String>();
         this.disconnects = 0;
-        this.dhtAction = new yacyDHTAction(seedDB);
     }
 
     public void close() {
         // the seedDB and newsPool should be cleared elsewhere
         if (userAgents != null) userAgents.clear();
         userAgents = null;
-        if (dhtAction != null) dhtAction.close();
     }
     
     public synchronized boolean connectPeer(final yacySeed seed, final boolean direct) {
@@ -198,7 +195,6 @@ public class yacyPeerActions {
         final boolean res = connectPeer(peer, direct);
         if (res) {
             // perform all actions if peer is effective new
-            dhtAction.processPeerArrival(peer, direct);
             this.processPeerArrival(peer, direct);
             RSSFeed.channels(RSSFeed.PEERNEWS).addMessage(new RSSMessage(peer.getName() + " joined the network", "", ""));
         }
@@ -214,8 +210,6 @@ public class yacyPeerActions {
             peer.put("dct", Long.toString(System.currentTimeMillis()));
             seedDB.addDisconnected(peer); // update info
         }
-        // perform all actions
-        dhtAction.processPeerDeparture(peer);
         RSSFeed.channels(RSSFeed.PEERNEWS).addMessage(new RSSMessage(peer.getName() + " left the network", "", ""));
     }
     
@@ -259,4 +253,5 @@ public class yacyPeerActions {
         final String userAgent = userAgents.get(IP);
         return (userAgent == null) ? "" : userAgent;
     }
+
 }

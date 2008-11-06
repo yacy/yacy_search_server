@@ -67,6 +67,7 @@ import de.anomic.tools.crypt;
 
 public class yacySeed implements Cloneable {
 
+    public static final int partitionExponent = 1;
     public static final int maxsize = 4096;
     /**
      * <b>substance</b> "sI" (send index/words)
@@ -731,6 +732,7 @@ public class yacySeed implements Cloneable {
     }
     
     public final static long dhtPosition(final String wordHash, final String urlHash, final int e) {
+        // this creates 1^^e different positions for the same word hash (according to url hash)
         assert wordHash != null;
         assert urlHash != null;
         if (urlHash == null || e < 1) return dhtPosition(wordHash);
@@ -782,6 +784,10 @@ public class yacySeed implements Cloneable {
         assert from != null;
         final long toPos = dhtPosition(to);
         final long fromPos = dhtPosition(from);
+        return dhtDistance(fromPos, toPos);
+    }
+    
+    public final static long dhtDistance(final long fromPos, final long toPos) {
         final long d = toPos - fromPos;
         return (d >= 0) ? d : (d + Long.MAX_VALUE) + 1;
     }
@@ -836,7 +842,7 @@ public class yacySeed implements Cloneable {
         return gaps;
     }
     
-    private static String positionToHash(final double t) {
+    static String positionToHash(final double t) {
         // transform the position of a peer position into a close peer hash
         assert t >= 0.0 : "t = " + t;
         assert t < 1.0 : "t = " + t;
@@ -844,7 +850,7 @@ public class yacySeed implements Cloneable {
         return new String(kelondroBase64Order.enhancedCoder.uncardinal((long) (((double) Long.MAX_VALUE) * t))) + "AA";
     }
     
-    private static String positionToHash(final long l) {
+    public static String positionToHash(final long l) {
         // transform the position of a peer position into a close peer hash
        
         return new String(kelondroBase64Order.enhancedCoder.uncardinal(l)) + "AA";
@@ -1006,6 +1012,37 @@ public class yacySeed implements Cloneable {
         }
     }
 
+
+    
+    private static int guessedOwn = 0;
+    private static int verifiedOwn = 0;
+    
+    public static boolean shallBeOwnWord(final yacySeedDB seedDB, final String wordhash, int redundancy) {
+        if (!guessIfOwnWord(seedDB, wordhash)) return false;
+        guessedOwn++;
+        if (yacyPeerSelection.verifyIfOwnWord(seedDB, wordhash, redundancy)) {
+            verifiedOwn++;
+            System.out.println("*** DEBUG shallBeOwnWord: true. verified/guessed ration = " + verifiedOwn + "/" + guessedOwn);
+            return true;
+        } else {
+            System.out.println("*** DEBUG shallBeOwnWord: false. verified/guessed ration = " + verifiedOwn + "/" + guessedOwn);
+            return false;
+        }
+    }
+    
+    private static boolean guessIfOwnWord(final yacySeedDB seedDB, final String wordhash) {
+        if (seedDB == null) return false;
+        if (seedDB.mySeed().isPotential()) return false;
+        final long[] targets = yacySeed.dhtPositions(wordhash, yacySeed.partitionExponent);
+        final long mypos = yacySeed.dhtPosition(seedDB.mySeed().hash);
+        for (int i = 0; i < targets.length; i++) {
+            long distance = yacySeed.dhtDistance(targets[i], mypos);
+            if (distance <= 0) continue;
+            if (distance <= Long.MAX_VALUE / seedDB.sizeConnected() * 2) return true;
+        }
+        return false;
+    }
+    
     public static void main(String[] args) {
         // java -classpath classes de.anomic.yacy.yacySeed hHJBztzcFn76
         // java -classpath classes de.anomic.yacy.yacySeed hHJBztzcFG76 M8hgtrHG6g12 3

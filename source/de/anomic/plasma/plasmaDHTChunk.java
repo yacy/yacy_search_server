@@ -51,8 +51,6 @@ public class plasmaDHTChunk {
     public static final int chunkStatus_INTERRUPTED =  3;
     public static final int chunkStatus_COMPLETE    =  4;
     
-    public static final int peerRedundancy = 3;
-    
     private plasmaWordIndex wordIndex;
     private serverLog log;
     
@@ -107,11 +105,11 @@ public class plasmaDHTChunk {
         return this.status;
     }
     
-    public plasmaDHTChunk(final serverLog log, final plasmaWordIndex wordIndex, final int minCount, final int maxCount, final int maxtime) {
+    public plasmaDHTChunk(final serverLog log, final plasmaWordIndex wordIndex, final int minCount, final int maxCount, final int maxtime, String startPointHash) {
         try {
             this.log = log;
             this.wordIndex = wordIndex;
-            this.startPointHash = selectTransferStart();
+            this.startPointHash = startPointHash;
             if (this.log.isFine()) log.logFine("Selected hash " + this.startPointHash + " as start point for index distribution, distance = " + yacySeed.dhtDistance(this.startPointHash, wordIndex.seedDB.mySeed()));
             selectTransferContainers(this.startPointHash, minCount, maxCount, maxtime);
 
@@ -126,25 +124,7 @@ public class plasmaDHTChunk {
         }
     }
 
-    public plasmaDHTChunk(final serverLog log, final plasmaWordIndex wordIndex, final int minCount, final int maxCount, final int maxtime, final String startHash) {
-        try {
-            this.log = log;
-            this.wordIndex = wordIndex;
-            if (this.log.isFine()) log.logFine("Demanded hash " + startHash + " as start point for index distribution, distance = " + yacySeed.dhtDistance(this.startPointHash, wordIndex.seedDB.mySeed()));
-            selectTransferContainers(startHash, minCount, maxCount, maxtime);
-
-            // count the indexes, can be smaller as expected
-            this.idxCount = indexCounter();
-            if (this.idxCount < minCount) {
-                if (this.log.isFine()) log.logFine("Too few (" + this.idxCount + ") indexes selected for transfer.");
-                this.status = chunkStatus_FAILED;
-            }
-        } catch (final InterruptedException e) {
-            this.status = chunkStatus_INTERRUPTED;
-        }
-    }
-
-    private String selectTransferStart() {
+    public static String selectTransferStart() {
         return kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(Long.toString(System.currentTimeMillis()))).substring(2, 2 + yacySeedDB.commonHashLength);
     }
 
@@ -178,7 +158,7 @@ public class plasmaDHTChunk {
             int wholesize;
 
             urlCache = new HashMap<String, indexURLReference>();
-            final long maximumDistanceLong = Long.MAX_VALUE / wordIndex.seedDB.sizeConnected() * peerRedundancy * 2;
+            final long maximumDistanceLong = Long.MAX_VALUE / wordIndex.seedDB.sizeConnected() * wordIndex.netRedundancy * 2;
             final long timeout = (maxtime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxtime;
             while (
                     (maxcount > refcount) &&
