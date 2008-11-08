@@ -35,7 +35,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import de.anomic.htmlFilter.htmlFilterCharacterCoding;
 import de.anomic.htmlFilter.htmlFilterImageEntry;
 import de.anomic.http.HttpClient;
 import de.anomic.http.httpResponseHeader;
@@ -102,6 +105,27 @@ public class plasmaSnippetCache {
         Set<String> remaingHashes;
         private final yacyURL favicon;
         
+        /**
+         * <code>\\A[^\\p{L}\\p{N}].+</code>
+         */
+        private final static Pattern p1 = Pattern.compile("\\A[^\\p{L}\\p{N}].+");
+        /**
+         * <code>.+[^\\p{L}\\p{N}]\\Z</code>
+         */
+        private final static Pattern p2 = Pattern.compile(".+[^\\p{L}\\p{N}]\\Z");
+        /**
+         * <code>\\A[\\p{L}\\p{N}]+[^\\p{L}\\p{N}].+\\Z</code>
+         */
+        private final static Pattern p3 = Pattern.compile("\\A[\\p{L}\\p{N}]+[^\\p{L}\\p{N}].+\\Z");
+        /**
+         * <code>[^\\p{L}\\p{N}]</code>
+         */
+        private final static Pattern p4 = Pattern.compile("[^\\p{L}\\p{N}]");
+        /**
+         * <code>(.*?)(\\&lt;b\\&gt;.+?\\&lt;/b\\&gt;)(.*)</code>
+         */
+		private final static Pattern p01 = Pattern.compile("(.*?)(\\<b\\>.+?\\</b\\>)(.*)"); // marked words are in <b>-tags
+        
         public TextSnippet(final yacyURL url, final String line, final int errorCode, final Set<String> remaingHashes, final String errortext) {
         	this(url,line,errorCode,remaingHashes,errortext,null);
         }
@@ -116,6 +140,9 @@ public class plasmaSnippetCache {
         }
         public yacyURL getUrl() {
             return this.url;
+        }
+        public yacyURL getFavicon() {
+        	return this.favicon;
         }
         public boolean exists() {
             return line != null;
@@ -142,60 +169,18 @@ public class plasmaSnippetCache {
             final Iterator<String> i = queryHashes.iterator();
             String h;
             final String[] w = line.split(" ");
-            String prefix = "";
-            String postfix = "";
-            int len = 0;
             while (i.hasNext()) {
                 h = i.next();
                 for (int j = 0; j < w.length; j++) {
-                    //ignore punctuation marks (contrib [MN])
-                    //note to myself:
-                    //For details on regex see "Mastering regular expressions" by J.E.F. Friedl
-                    //especially p. 123 and p. 390/391 (in the German version of the 2nd edition)
-
-                    prefix = "";
-                    postfix = "";
-
-                    // cut off prefix if it contains of non-characters or non-numbers
-                    while(w[j].matches("\\A[^\\p{L}\\p{N}].+")) {
-                        prefix = prefix + w[j].substring(0,1);
-                        w[j] = w[j].substring(1);
-                    }
-
-                    // cut off postfix if it contains of non-characters or non-numbers
-                    while(w[j].matches(".+[^\\p{L}\\p{N}]\\Z")) {
-                        len = w[j].length();
-                        postfix = w[j].substring(len-1,len) + postfix;
-                        w[j] = w[j].substring(0,len-1);
-                    }
-
-                    //special treatment if there is a special character in the word
-                    if(w[j].matches("\\A[\\p{L}\\p{N}]+[^\\p{L}\\p{N}].+\\Z")) {
-                        String out = "";
-                        String temp = "";
-                        for(int k=0; k < w[j].length(); k++) {
-                            //is character a special character?
-                            if(w[j].substring(k,k+1).matches("[^\\p{L}\\p{N}]")) {
-                                if (indexWord.word2hash(temp).equals(h)) temp = "<b>" + temp + "</b>";
-                                out = out + temp + w[j].substring(k,k+1);
-                                temp = "";
-                            }
-                            //last character
-                            else if(k == (w[j].length()-1)) {
-                                temp = temp + w[j].substring(k,k+1);
-                                if (indexWord.word2hash(temp).equals(h)) temp = "<b>" + temp + "</b>";
-                                out = out + temp;
-                                temp = "";
-                            }
-                            else temp = temp + w[j].substring(k,k+1);
-                        }
-                        w[j] = out;
-                    }
-
-                    //end contrib [MN]
-                    else if (indexWord.word2hash(w[j]).equals(h)) w[j] = "<b>" + w[j] + "</b>";
-
-                    w[j] = prefix + w[j] + postfix;
+            		final ArrayList<String> al = markedWordArrayList(w[j]); // mark special character separated words correctly if more than 1 word has to be marked
+            		w[j] = "";
+            		for (int k = 0; k < al.size(); k++) {
+            			if(k % 2 == 0){ // word has not been marked
+            				w[j] += getWordMarked(al.get(k), h);
+            			} else { // word has been marked, do not encode again
+            				w[j] += al.get(k);
+            			}
+            		}
                 }
             }
             final StringBuffer l = new StringBuffer(line.length() + queryHashes.size() * 8);
@@ -205,10 +190,89 @@ public class plasmaSnippetCache {
             }
             return l.toString().trim();
         }
-        
-        public yacyURL getFavicon() {
-        	return this.favicon;
+
+        /**
+         * mark words with &lt;b&gt;-tags
+         * @param word the word to mark
+         * @param h the hash of the word to mark
+         * @return the marked word if hash matches, else the unmarked word
+         * @see #getLineMarked(Set)
+         */
+        private static String getWordMarked(String word, String h){
+            //ignore punctuation marks (contrib [MN])
+            //note to myself:
+            //For details on regex see "Mastering regular expressions" by J.E.F. Friedl
+            //especially p. 123 and p. 390/391 (in the German version of the 2nd edition)
+
+            String prefix = "";
+            String postfix = "";
+            int len = 0;
+
+            // cut off prefix if it contains of non-characters or non-numbers
+            while(p1.matcher(word).find()) {
+                prefix = prefix + word.substring(0,1);
+                word = word.substring(1);
+            }
+
+            // cut off postfix if it contains of non-characters or non-numbers
+            while(p2.matcher(word).find()) {
+                len = word.length();
+                postfix = word.substring(len-1,len) + postfix;
+                word = word.substring(0,len-1);
+            }
+
+            //special treatment if there is a special character in the word
+            if(p3.matcher(word).find()) {
+                String out = "";
+                String temp = "";
+                for(int k=0; k < word.length(); k++) {
+                    //is character a special character?
+                    if(p4.matcher(word.substring(k,k+1)).find()) {
+                        if (indexWord.word2hash(temp).equals(h)) temp = "<b>" + htmlFilterCharacterCoding.unicode2html(temp, false) + "</b>";
+                        out = out + temp + htmlFilterCharacterCoding.unicode2html(word.substring(k,k+1), false);
+                        temp = "";
+                    }
+                    //last character
+                    else if(k == (word.length()-1)) {
+                        temp = temp + word.substring(k,k+1);
+                        if (indexWord.word2hash(temp).equals(h)) temp = "<b>" + htmlFilterCharacterCoding.unicode2html(temp, false) + "</b>";
+                        out = out + temp;
+                        temp = "";
+                    }
+                    else temp = temp + word.substring(k,k+1);
+                }
+                word = out;
+            }
+
+            //end contrib [MN]
+            else if (indexWord.word2hash(word).equals(h)) word = "<b>" + htmlFilterCharacterCoding.unicode2html(word, false) + "</b>";
+
+            word = htmlFilterCharacterCoding.unicode2html(prefix, false)
+            	+ word
+            	+ htmlFilterCharacterCoding.unicode2html(postfix, false);
+            return word;
         }
+        
+    	/**
+    	 * words that already has been marked has index <code>(i % 2 == 1)</code>
+    	 * words that has not yet been marked has index <code>(i % 2 == 0)</code>
+    	 * @param string the String to be processed
+    	 * @return words that already has and has not yet been marked
+    	 * @author [DW], 08.11.2008
+    	 */
+    	private static ArrayList<String> markedWordArrayList(String string){
+    	    ArrayList<String> al = new java.util.ArrayList<String>(1);
+    		Matcher m = p01.matcher(string);
+    		while (m.find()) {
+    			al.add(m.group(1));
+    			al.add(m.group(2));
+    			string = m.group(3); // the postfix
+    			m = p01.matcher(string);
+    			}
+    		al.add(string);
+    		return al;
+    	}
+
     }
     
     public static class MediaSnippet {
