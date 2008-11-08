@@ -506,10 +506,10 @@ public final class httpTemplate {
     public static void main(final String[] args) {
         // arg1 = test input; arg2 = replacement for pattern 'test'; arg3 = default replacement
         try {
-            final InputStream i = new ByteArrayInputStream(args[0].getBytes());
+            final InputStream i = new ByteArrayInputStream(args[0].getBytes("UTF-8"));
             final HashMap<String, String> h = new HashMap<String, String>();
             h.put("test", args[1]);
-            writeTemplate(new PushbackInputStream(i, 100), System.out, h, args[2].getBytes());
+            writeTemplate(new PushbackInputStream(i, 100), System.out, h, args[2].getBytes("UTF-8"));
             System.out.flush();
         } catch (final Exception e) {
             e.printStackTrace();

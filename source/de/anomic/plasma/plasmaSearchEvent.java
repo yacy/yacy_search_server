@@ -768,20 +768,16 @@ public final class plasmaSearchEvent {
                 final String filename = urlcomps.url().getFile();
                 String address = null;
                 if ((seed == null) || ((address = seed.getPublicAddress()) == null)) {
-                    // seed is not known from here
-                    try {
-                        wordIndex.removeWordReferences(
-                            plasmaCondenser.getWords(
-                                ("yacyshare " +
-                                 filename.replace('?', ' ') +
-                                 " " +
-                                 urlcomps.dc_title()).getBytes(), "UTF-8").keySet(),
-                                 urlentry.hash());
-                        wordIndex.removeURL(urlentry.hash()); // clean up
-                        throw new RuntimeException("index void");
-                    } catch (final UnsupportedEncodingException e) {
-                        throw new RuntimeException("parser failed: " + e.getMessage());
-                    }
+                	// seed is not known from here
+                    wordIndex.removeWordReferences(
+					    plasmaCondenser.getWords(
+					        ("yacyshare " +
+					         filename.replace('?', ' ') +
+					         " " +
+					         urlcomps.dc_title())).keySet(),
+					         urlentry.hash());
+					wordIndex.removeURL(urlentry.hash()); // clean up
+					throw new RuntimeException("index void");
                 }
                 alternative_urlstring = "http://" + address + "/" + host.substring(0, p) + filename;
                 alternative_urlname = "http://share." + seed.getName() + ".yacy" + filename;

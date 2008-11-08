@@ -225,7 +225,7 @@ public final class plasmaHTCache {
     
     public static void storeFile(yacyURL url, byte[] file) {
         try {
-            fileDB.put(url.hash().getBytes(), file);
+            fileDB.put(url.hash().getBytes("UTF-8"), file);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -271,7 +271,7 @@ public final class plasmaHTCache {
     public static byte[] getResourceContent(final yacyURL url) {
         // load the url as resource from the cache
         try {
-            return fileDB.get(url.hash().getBytes());
+            return fileDB.get(url.hash().getBytes("UTF-8"));
         } catch (IOException e) {
             e.printStackTrace();
             return null;
@@ -281,7 +281,7 @@ public final class plasmaHTCache {
     public static long getResourceContentLength(final yacyURL url) {
         // load the url as resource from the cache
         try {
-            return fileDB.length(url.hash().getBytes());
+            return fileDB.length(url.hash().getBytes("UTF-8"));
         } catch (IOException e) {
             e.printStackTrace();
             return -1;
@@ -290,6 +290,6 @@ public final class plasmaHTCache {
 
     public static void deleteFromCache(yacyURL url) throws IOException {
         responseHeaderDB.remove(url.hash());
-        fileDB.remove(url.hash().getBytes());
+        fileDB.remove(url.hash().getBytes("UTF-8"));
     }
 }

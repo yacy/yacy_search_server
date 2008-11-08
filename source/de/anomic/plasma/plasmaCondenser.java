@@ -222,7 +222,7 @@ public final class plasmaCondenser {
         indexWord wprop;
         sievedWordsEnum wordenum;
         try {
-            wordenum = new sievedWordsEnum(new ByteArrayInputStream(text.getBytes()));
+            wordenum = new sievedWordsEnum(new ByteArrayInputStream(text.getBytes("UTF-8")));
         } catch (final UnsupportedEncodingException e) {
             return;
         }
@@ -494,7 +494,7 @@ public final class plasmaCondenser {
 
     public static Enumeration<StringBuffer> wordTokenizer(final String s, final String charset) {
         try {
-            return new sievedWordsEnum(new ByteArrayInputStream(s.getBytes()));
+            return new sievedWordsEnum(new ByteArrayInputStream(s.getBytes("UTF-8")));
         } catch (final Exception e) {
             return null;
         }
@@ -706,17 +706,15 @@ public final class plasmaCondenser {
         return s;
     }
 
-    public static Map<String, indexWord> getWords(final byte[] text, final String charset) throws UnsupportedEncodingException {
-        // returns a word/indexWord relation map
-        if (text == null) return null;
-        final ByteArrayInputStream buffer = new ByteArrayInputStream(text);
-        return new plasmaCondenser(buffer, "UTF-8", 2, 1).words();
-    }
-    
     public static Map<String, indexWord> getWords(final String text) {
         // returns a word/indexWord relation map
         if (text == null) return null;
-        final ByteArrayInputStream buffer = new ByteArrayInputStream(text.getBytes());
+        ByteArrayInputStream buffer;
+		try {
+			buffer = new ByteArrayInputStream(text.getBytes("UTF-8"));
+		} catch (UnsupportedEncodingException e1) {
+			buffer = new ByteArrayInputStream(text.getBytes());
+		}
         try {
             return new plasmaCondenser(buffer, "UTF-8", 2, 1).words();
         } catch (final UnsupportedEncodingException e) {

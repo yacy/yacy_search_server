@@ -475,7 +475,7 @@ public final class httpdFileHandler {
                     // write the list to the client
                     httpd.sendRespondHeader(conProp, out, httpVersion, 200, null, "text/html", aBuffer.length(), new Date(dir.lastModified()), null, new httpResponseHeader(), null, null, true);
                     if (!method.equals(httpHeader.METHOD_HEAD)) {
-                        out.write(aBuffer.toString().getBytes());
+                        out.write(aBuffer.toString().getBytes("UTF-8"));
                     }
                     return;
                 }

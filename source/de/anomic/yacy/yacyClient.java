@@ -623,7 +623,12 @@ public final class yacyClient {
 					synchronized (abstractCache) {
 						singleAbstract = abstractCache.get(wordhash); // a mapping from url-hashes to a string of peer-hashes
 						if (singleAbstract == null) singleAbstract = new TreeMap<String, String>();
-						ci = new serverByteBuffer(entry.getValue().getBytes());
+						try {
+							ci = new serverByteBuffer(entry.getValue().getBytes("UTF-8"));
+						} catch (UnsupportedEncodingException e) {
+							e.printStackTrace();
+							return null;
+						}
 						//System.out.println("DEBUG-ABSTRACTFETCH: for word hash " + wordhash + " received " + ci.toString());
 						indexContainer.decompressIndex(singleAbstract, ci, target.hash);
 						abstractCache.put(wordhash, singleAbstract);

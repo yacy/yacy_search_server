@@ -26,6 +26,7 @@
 
 package de.anomic.index;
 
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -146,13 +147,21 @@ public class indexURLReference {
         encodeDate(col_mod, mod);
         encodeDate(col_load, load);
         encodeDate(col_fresh, fresh);
-        this.entry.setCol(col_referrer, (referrer == null) ? null : referrer.getBytes());
+        try {
+			this.entry.setCol(col_referrer, (referrer == null) ? null : referrer.getBytes("UTF-8"));
+		} catch (UnsupportedEncodingException e) {
+			this.entry.setCol(col_referrer, (referrer == null) ? null : referrer.getBytes());
+		}
         this.entry.setCol(col_md5, md5);
         this.entry.setCol(col_size, size);
         this.entry.setCol(col_wc, wc);
         this.entry.setCol(col_dt, new byte[]{(byte) dt});
         this.entry.setCol(col_flags, flags.bytes());
-        this.entry.setCol(col_lang, lang.getBytes());
+        try {
+			this.entry.setCol(col_lang, lang.getBytes("UTF-8"));
+		} catch (UnsupportedEncodingException e) {
+			this.entry.setCol(col_lang, lang.getBytes());
+		}
         this.entry.setCol(col_llocal, llocal);
         this.entry.setCol(col_lother, lother);
         this.entry.setCol(col_limage, limage);
@@ -181,7 +190,11 @@ public class indexURLReference {
         s.append(dc_creator).append(10);
         s.append(dc_subject).append(10);
         s.append(ETag).append(10);
-        return s.toString().getBytes();
+        try {
+			return s.toString().getBytes("UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			return s.toString().getBytes();
+		}
     }
     
     public indexURLReference(final kelondroRow.Entry entry, final indexRWIEntry searchedWord, final long ranking) {
@@ -224,14 +237,22 @@ public class indexURLReference {
         } catch (final ParseException e) {
             encodeDate(col_fresh, new Date());
         }
-        this.entry.setCol(col_referrer, prop.getProperty("referrer", "").getBytes());
+        try {
+			this.entry.setCol(col_referrer, prop.getProperty("referrer", "").getBytes("UTF-8"));
+		} catch (UnsupportedEncodingException e1) {
+			this.entry.setCol(col_referrer, prop.getProperty("referrer", "").getBytes());
+		}
         this.entry.setCol(col_md5, serverCodings.decodeHex(prop.getProperty("md5", "")));
         this.entry.setCol(col_size, Integer.parseInt(prop.getProperty("size", "0")));
         this.entry.setCol(col_wc, Integer.parseInt(prop.getProperty("wc", "0")));
         this.entry.setCol(col_dt, new byte[]{(byte) prop.getProperty("dt", "t").charAt(0)});
         final String flags = prop.getProperty("flags", "AAAAAA");
         this.entry.setCol(col_flags, (flags.length() > 6) ? plasmaSearchQuery.empty_constraint.bytes() : (new kelondroBitfield(4, flags)).bytes());
-        this.entry.setCol(col_lang, prop.getProperty("lang", "uk").getBytes());
+        try {
+			this.entry.setCol(col_lang, prop.getProperty("lang", "uk").getBytes("UTF-8"));
+		} catch (UnsupportedEncodingException e) {
+			this.entry.setCol(col_lang, prop.getProperty("lang", "uk").getBytes());
+		}
         this.entry.setCol(col_llocal, Integer.parseInt(prop.getProperty("llocal", "0")));
         this.entry.setCol(col_lother, Integer.parseInt(prop.getProperty("lother", "0")));
         this.entry.setCol(col_limage, Integer.parseInt(prop.getProperty("limage", "0")));

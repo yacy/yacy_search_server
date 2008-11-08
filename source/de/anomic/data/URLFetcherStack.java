@@ -67,7 +67,7 @@ public class URLFetcherStack {
     public boolean push(final yacyURL url) {
         try {
             this.db.push(this.db.row().newEntry(
-                    new byte[][] { url.toNormalform(true, true).getBytes() }
+                    new byte[][] { url.toNormalform(true, true).getBytes("UTF-8") }
             ));
             this.pushed++;
             return true;

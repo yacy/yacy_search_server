@@ -158,7 +158,7 @@ public class blogBoard {
     	final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
     	try {
 			final DocumentBuilder builder = factory.newDocumentBuilder();
-			final Document doc = builder.parse(new ByteArrayInputStream(input.getBytes()));
+			final Document doc = builder.parse(new ByteArrayInputStream(input.getBytes("UTF-8")));
 			return parseXMLimport(doc);
 		} catch (final ParserConfigurationException e) {
 		} catch (final SAXException e) {
