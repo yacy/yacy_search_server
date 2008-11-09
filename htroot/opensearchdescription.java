@@ -41,8 +41,14 @@ public class opensearchdescription {
 
         String thisaddress = (String) header.get("Host", "localhost");
         if (thisaddress.indexOf(":") == -1) thisaddress += ":" + serverCore.getPortNr(env.getConfig("port", "8080"));
+
+	int compareyacy = 0;
+	if(post != null && post.get("compare_yacy", "false").equals("true"))
+		compareyacy = 1;
         
         final serverObjects prop = new serverObjects();
+        prop.put("compareyacy", compareyacy);
+        prop.putXML("compareyacy_thisaddress", thisaddress);
         prop.putXML("thisaddress", thisaddress);
         prop.putXML("SearchPageGreeting", promoteSearchPageGreeting);
         prop.putXML("clientname", sb.webIndex.seedDB.mySeed().getName());
