@@ -1,4 +1,5 @@
 @Echo Off
+title YaCy
 If %1.==CPGEN. GoTo :CPGEN
 
 Rem Generating the proper classpath unsing loops and labels
@@ -6,7 +7,7 @@ Set CLASSPATH=classes;htroot
 For %%X in (lib/*.jar) Do Call %0 CPGEN lib\%%X
 For %%X in (libx/*.jar) Do Call %0 CPGEN libx\%%X
 
-Rem Starting yacy
+Rem Stopping yacy
 Echo Generated Classpath:%CLASSPATH%
 java -classpath %CLASSPATH% yacy -shutdown
 
