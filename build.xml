@@ -1039,7 +1039,7 @@
     <taskdef name="nsis" classname="net.sf.nsisant.Task">
       <classpath location="libbuild/nsisant-1.2.jar"/>
     </taskdef>
-    <nsis script="${release_windows}/build.nsi" nocd="yes" />
+    <nsis script="${release_windows}/build.nsi" nocd="yes" verbosity="2" />
     <move file="${release_windows}/yacy_v${releaseVersion}_${DSTAMP}_${releaseNr}.exe"
           tofile="${release}/yacy_v${releaseVersion}_${DSTAMP}_${releaseNr}.exe" />
   	
