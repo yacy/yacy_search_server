@@ -94,9 +94,9 @@ public class yacyPeerSelection {
         public acceptRemoteIndexSeedEnum(yacySeedDB seedDB, final String starthash, int max) {
             this.seedDB = seedDB;
             this.se = getDHTSeeds(seedDB, starthash, yacyVersion.YACY_HANDLES_COLLECTION_INDEX);
-            this.nextSeed = nextInternal();
-            this.doublecheck = new HashSet<String>();
             this.remaining = max;
+            this.doublecheck = new HashSet<String>();
+            this.nextSeed = nextInternal();
         }
         
         public boolean hasNext() {
