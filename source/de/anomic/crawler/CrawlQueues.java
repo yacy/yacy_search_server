@@ -78,8 +78,8 @@ public class CrawlQueues {
             // this is useful because there is currently no re-use of the data in this table.
             if (errorDBFile.isDirectory()) kelondroFlexWidthArray.delete(plasmaPath, "urlError2.db"); else errorDBFile.delete();
         }
-        errorURL = new ZURL(plasmaPath, "urlError2.db", false);
-        delegatedURL = new ZURL(plasmaPath, "urlDelegated2.db", true);
+        errorURL = new ZURL(plasmaPath, "urlError3.db", false);
+        delegatedURL = new ZURL(plasmaPath, "urlDelegated3.db", true);
     }
     
     public String urlExists(final String hash) {

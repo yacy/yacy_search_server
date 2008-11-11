@@ -265,8 +265,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         setLog(new serverLog("PLASMA"));
         if (applyPro) this.log.logInfo("This is the pro-version of YaCy");
         
-	// init TrayIcon if possible
-	yacyTray.init(this);
+        // init TrayIcon if possible
+        yacyTray.init(this);
         
         // remote proxy configuration
         httpRemoteProxyConfig.init(this);
@@ -406,7 +406,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         htCachePath = getConfigPath(plasmaSwitchboardConstants.HTCACHE_PATH, plasmaSwitchboardConstants.HTCACHE_PATH_DEFAULT);
         this.log.logInfo("HTCACHE Path = " + htCachePath.getAbsolutePath());
         final long maxCacheSize = 1024 * 1024 * Long.parseLong(getConfig(plasmaSwitchboardConstants.PROXY_CACHE_SIZE, "2")); // this is megabyte
-        plasmaHTCache.init(htCachePath, maxCacheSize);
+        plasmaHTCache.init(htCachePath, webIndex.seedDB.mySeed().hash, maxCacheSize);
         
         // create the release download directory
         releasePath = getConfigPath(plasmaSwitchboardConstants.RELEASE_PATH, plasmaSwitchboardConstants.RELEASE_PATH_DEFAULT);

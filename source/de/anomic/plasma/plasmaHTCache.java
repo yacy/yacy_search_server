@@ -67,6 +67,7 @@ public final class plasmaHTCache {
     
     public static long maxCacheSize = 0l;
     public static File cachePath = null;
+    public static String salt;
     public static final serverLog log = new serverLog("HTCACHE");
     
 
@@ -80,11 +81,12 @@ public final class plasmaHTCache {
     public static final char LT_GLOBAL  = 'G';
 
     
-    public static void init(final File htCachePath, final long CacheSizeMax) {
+    public static void init(final File htCachePath, String peerSalt, final long CacheSizeMax) {
         
         cachePath = htCachePath;
         maxCacheSize = CacheSizeMax;
-
+        salt = peerSalt;
+        
         // reset old HTCache ?
         String[] list = cachePath.list();
         if (list != null) {
@@ -134,7 +136,7 @@ public final class plasmaHTCache {
         }
         responseHeaderDB = new kelondroMap(blob, 500);
         try {
-            fileDBunbuffered = new kelondroBLOBArray(new File(cachePath, FILE_DB_NAME), 12, kelondroBase64Order.enhancedCoder);
+            fileDBunbuffered = new kelondroBLOBArray(new File(cachePath, FILE_DB_NAME), salt, 12, kelondroBase64Order.enhancedCoder);
             fileDBunbuffered.setMaxSize(maxCacheSize);
             fileDB = new kelondroBLOBBuffer(fileDBunbuffered, 2 * 1024 * 1024, true);
         } catch (IOException e) {

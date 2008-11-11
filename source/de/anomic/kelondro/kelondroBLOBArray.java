@@ -64,12 +64,15 @@ public class kelondroBLOBArray implements kelondroBLOB {
     private long repositoryAgeMax;
     private long repositorySizeMax;
     private List<blobItem> blobs;
+    private String blobSalt;
     
     public kelondroBLOBArray(
             final File heapLocation,
+            final String blobSalt,
             final int keylength,
             final kelondroByteOrder ordering) throws IOException {
         this.keylength = keylength;
+        this.blobSalt = blobSalt;
         this.ordering = ordering;
         this.heapLocation = heapLocation;
         this.fileAgeLimit = oneMonth;
@@ -91,7 +94,7 @@ public class kelondroBLOBArray implements kelondroBLOB {
         kelondroBLOB oneBlob;
         File f;
         for (int i = 0; i < files.length; i++) {
-            if (files[i].length() == 19 && files[i].endsWith("blob")) {
+            if (files[i].length() >= 19 && files[i].endsWith(".blob")) {
                try {
                    d = serverDate.parseShortSecond(files[i].substring(0, 14));
                } catch (ParseException e) {continue;}
@@ -164,7 +167,7 @@ public class kelondroBLOBArray implements kelondroBLOB {
         public blobItem() throws IOException {
             // make a new blob file and assign it in this item
             this.creation = new Date();
-            this.location = new File(heapLocation, serverDate.formatShortSecond(creation) + ".blob");
+            this.location = new File(heapLocation, serverDate.formatShortSecond(creation) + "." + blobSalt + ".blob");
             this.blob = new kelondroBLOBHeap(location, keylength, ordering);
         }
     }
@@ -316,7 +319,7 @@ public class kelondroBLOBArray implements kelondroBLOB {
         final File f = new File("/Users/admin/blobarraytest");
         try {
             //f.delete();
-            final kelondroBLOBArray heap = new kelondroBLOBArray(f, 12, kelondroNaturalOrder.naturalOrder);
+            final kelondroBLOBArray heap = new kelondroBLOBArray(f, "test", 12, kelondroNaturalOrder.naturalOrder);
             heap.put("aaaaaaaaaaaa".getBytes(), "eins zwei drei".getBytes());
             heap.put("aaaaaaaaaaab".getBytes(), "vier fuenf sechs".getBytes());
             heap.put("aaaaaaaaaaac".getBytes(), "sieben acht neun".getBytes());

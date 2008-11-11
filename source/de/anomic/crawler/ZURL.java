@@ -51,7 +51,7 @@ public class ZURL {
             "String executor-"  + yacySeedDB.commonHashLength + ", " + // the crawling executor
             "Cardinal workdate-8 {b256}, " +                           // the time when the url was last time tried to load
             "Cardinal workcount-4 {b256}, " +                          // number of load retries
-            "String anycause-80, " +                                   // string describing load failure
+            "String anycause-132, " +                                   // string describing load failure
             "byte[] entry-" + CrawlEntry.rowdef.objectsize,                                          // extra space
             kelondroBase64Order.enhancedCoder,
             0);
