@@ -25,6 +25,7 @@
 package de.anomic.plasma;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -906,8 +907,9 @@ public class plasmaSnippetCache {
      * <tr><td>[0]</td><td>the content as {@link InputStream}</td></tr>
      * <tr><td>[1]</td><td>the content-length as {@link Integer}</td></tr>
      * </table>
+     * @throws IOException 
      */
-    public static Object[] getResource(final yacyURL url, final boolean fetchOnline, final int socketTimeout, final boolean forText, final boolean reindexing) {
+    public static Object[] getResource(final yacyURL url, final boolean fetchOnline, final int socketTimeout, final boolean forText, final boolean reindexing) throws IOException {
         // load the url as resource from the web
             long contentLength = -1;
             

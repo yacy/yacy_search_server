@@ -38,6 +38,7 @@ import javax.imageio.ImageIO;
 import de.anomic.index.indexDocumentMetadata;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyURL;
 
 public class ymageOSM {
@@ -79,7 +80,13 @@ public class ymageOSM {
         InputStream tileStream = plasmaHTCache.getResourceContentStream(tileURL);
         if (tileStream == null) {
             // download resource using the crawler and keep resource in memory if possible
-            final indexDocumentMetadata entry = plasmaSwitchboard.getSwitchboard().crawlQueues.loadResourceFromWeb(tileURL, 20000, true, false, false);
+            indexDocumentMetadata entry = null;
+            try {
+                entry = plasmaSwitchboard.getSwitchboard().crawlQueues.loadResourceFromWeb(tileURL, 20000, true, false, false);
+            } catch (IOException e) {
+                serverLog.logWarning("yamyOSM", "cannot load: " + e.getMessage());
+                return null;
+            }
             if ((entry == null) || (entry.cacheArray() == null)) return null;
             tileStream = new ByteArrayInputStream(entry.cacheArray());
         }

@@ -104,7 +104,7 @@ public class FTPLoader {
 
         if (openConnection(ftpClient, entryUrl)) {
             // ftp stuff
-            try {
+            //try {
                 // testing if the specified file is a directory
                 if (file.length() > 0) {
                     ftpClient.exec("cd \"" + path + "\"", false);
@@ -133,9 +133,12 @@ public class FTPLoader {
                         (new PrintStream(berr)).print(e.getMessage());
                     }
                 }
+                /*
             } finally {
                 closeConnection(ftpClient);
             }
+            */
+            closeConnection(ftpClient);
         }
 
         // pass the downloaded resource to the cache manager
@@ -143,7 +146,7 @@ public class FTPLoader {
             // some error logging
             final String detail = (berr.size() > 0) ? "\n    Errorlog: " + berr.toString() : "";
             log.logWarning("Unable to download URL " + entry.url().toString() + detail);
-            sb.crawlQueues.errorURL.newEntry(entry, sb.webIndex.seedDB.mySeed().hash, new Date(), 1, ErrorURL.DENIED_SERVER_DOWNLOAD_ERROR);
+            sb.crawlQueues.errorURL.newEntry(entry, sb.webIndex.seedDB.mySeed().hash, new Date(), 1, "server download" + detail);
         }
 
         return htCache;
@@ -239,14 +242,13 @@ public class FTPLoader {
                 htCache.setCacheArray(b);
             } else {
                 log.logInfo("REJECTED TOO BIG FILE with size " + size + " Bytes for URL " + entry.url().toString());
-                sb.crawlQueues.errorURL.newEntry(entry, this.sb.webIndex.seedDB.mySeed().hash, new Date(), 1,
-                        ErrorURL.DENIED_FILESIZE_LIMIT_EXCEEDED);
+                sb.crawlQueues.errorURL.newEntry(entry, this.sb.webIndex.seedDB.mySeed().hash, new Date(), 1, "file size limit exceeded");
                 throw new Exception("file size exceeds limit");
             }
         } else {
             // if the response has not the right file type then reject file
             log.logInfo("REJECTED WRONG MIME/EXT TYPE " + mimeType + " for URL " + entry.url().toString());
-            sb.crawlQueues.errorURL.newEntry(entry, this.sb.webIndex.seedDB.mySeed().hash, new Date(), 1, ErrorURL.DENIED_WRONG_MIMETYPE_OR_EXT);
+            sb.crawlQueues.errorURL.newEntry(entry, this.sb.webIndex.seedDB.mySeed().hash, new Date(), 1, "wrong mime type or wrong extension");
             throw new Exception("response has not the right file type -> rejected");
         }
         return htCache;

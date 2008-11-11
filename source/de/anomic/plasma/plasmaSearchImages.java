@@ -22,6 +22,7 @@
 
 package de.anomic.plasma;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.util.HashMap;
@@ -31,6 +32,7 @@ import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterImageEntry;
 import de.anomic.plasma.parser.ParserException;
 import de.anomic.server.serverDate;
+import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyURL;
 
 public final class plasmaSearchImages {
@@ -41,7 +43,13 @@ public final class plasmaSearchImages {
         final long start = System.currentTimeMillis();
         this.images = new HashMap<String, htmlFilterImageEntry>();
         if (maxTime > 10) {
-            final Object[] resource = plasmaSnippetCache.getResource(url, true, (int) maxTime, false, indexing);
+            Object[] resource = null;
+            try {
+                resource = plasmaSnippetCache.getResource(url, true, (int) maxTime, false, indexing);
+            } catch (IOException e) {
+                serverLog.logWarning("ViewImage", "cannot load: " + e.getMessage());
+            }
+            if (resource == null) return;
             final InputStream res = (InputStream) resource[0];
             final Long resLength = (Long) resource[1];
             if (res != null) {
@@ -51,6 +59,7 @@ public final class plasmaSearchImages {
                     document = plasmaSnippetCache.parseDocument(url, resLength.longValue(), res);
                 } catch (final ParserException e) {
                     // parsing failed
+                    serverLog.logWarning("ViewImage", "cannot parse: " + e.getMessage());
                 } finally {
                     try { res.close(); } catch (final Exception e) {/* ignore this */}
                 }

@@ -465,7 +465,7 @@ public class CrawlQueues {
             final boolean keepInMemory,
             final boolean forText,
             final boolean global
-    ) {
+    ) throws IOException {
         
         final CrawlEntry centry = new CrawlEntry(
                 sb.webIndex.seedDB.mySeed().hash, 

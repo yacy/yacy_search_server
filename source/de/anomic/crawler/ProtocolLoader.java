@@ -26,6 +26,7 @@
 
 package de.anomic.crawler;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -68,14 +69,14 @@ public final class ProtocolLoader {
         return (HashSet<String>) this.supportedProtocols.clone();
     }
     
-    public indexDocumentMetadata load(final CrawlEntry entry, final String parserMode) {
-        // getting the protocol of the next URL                
+    public indexDocumentMetadata load(final CrawlEntry entry, final String parserMode) throws IOException {
+        // getting the protocol of the next URL
         final String protocol = entry.url().getProtocol();
         final String host = entry.url().getHost();
         
         // check if this loads a page from localhost, which must be prevented to protect the server
         // against attacks to the administration interface when localhost access is granted
-        if (serverCore.isLocalhost(host) && sb.getConfigBool("adminAccountForLocalhost", false)) return null;
+        if (serverCore.isLocalhost(host) && sb.getConfigBool("adminAccountForLocalhost", false)) throw new IOException("access to localhost not granted for url " + entry.url());
         
         // check access time
         if (!entry.url().isLocal()) {
@@ -102,8 +103,7 @@ public final class ProtocolLoader {
         if ((protocol.equals("http") || (protocol.equals("https")))) return httpLoader.load(entry, parserMode);
         if (protocol.equals("ftp")) return ftpLoader.load(entry);
         
-        this.log.logWarning("Unsupported protocol '" + protocol + "' in url " + entry.url());
-        return null;
+        throw new IOException("Unsupported protocol '" + protocol + "' in url " + entry.url());
     }
     
     public String process(final CrawlEntry entry, final String parserMode) {
@@ -112,13 +112,14 @@ public final class ProtocolLoader {
         indexDocumentMetadata h;
         try {
             h = load(entry, parserMode);
+            assert h != null;
             entry.setStatus("loaded");
-            if (h == null) return "load failed";
             final boolean stored = sb.htEntryStoreProcess(h);
             entry.setStatus("stored-" + ((stored) ? "ok" : "fail"));
             return (stored) ? null : "not stored";
-        } catch (final Exception e) {
-            log.logWarning("problem loading " + entry.url().toString(), e);
+        } catch (IOException e) {
+            entry.setStatus("error");
+            log.logWarning("problem loading " + entry.url().toString());
             return "load error - " + e.getMessage();
         }
     }

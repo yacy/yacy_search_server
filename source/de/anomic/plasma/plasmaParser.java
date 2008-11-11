@@ -52,7 +52,6 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import de.anomic.crawler.ErrorURL;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterImageEntry;
 import de.anomic.htmlFilter.htmlFilterInputStream;
@@ -546,7 +545,7 @@ public final class plasmaParser {
             if (sourceArray == null || sourceArray.length == 0) {
                 final String errorMsg = "No resource content available (1).";
                 this.theLogger.logInfo("Unable to parse '" + location + "'. " + errorMsg);
-                throw new ParserException(errorMsg,location,ErrorURL.DENIED_NOT_PARSEABLE_NO_CONTENT);
+                throw new ParserException(errorMsg,location, "document has no content");
             }              
             
             // creating an InputStream
@@ -580,7 +579,7 @@ public final class plasmaParser {
             if (!(sourceFile.exists() && sourceFile.canRead() && sourceFile.length() > 0)) {
                 final String errorMsg = sourceFile.exists() ? "Empty resource file." : "No resource content available (2).";
                 this.theLogger.logInfo("Unable to parse '" + location + "'. " + errorMsg);
-                throw new ParserException(errorMsg,location,ErrorURL.DENIED_NOT_PARSEABLE_NO_CONTENT);
+                throw new ParserException(errorMsg,location, "document has no content");
             }        
             
             // create a new InputStream
@@ -634,7 +633,7 @@ public final class plasmaParser {
             if (!plasmaParser.supportedContent(location,mimeType)) {
                 final String errorMsg = "No parser available to parse mimetype '" + mimeType + "'";
                 this.theLogger.logInfo("Unable to parse '" + location + "'. " + errorMsg);
-                throw new ParserException(errorMsg,location,ErrorURL.DENIED_WRONG_MIMETYPE_OR_EXT);
+                throw new ParserException(errorMsg,location, "wrong mime type or wrong extension");
             }
             
             if (this.theLogger.isFine())
@@ -656,7 +655,7 @@ public final class plasmaParser {
             } else {
                 final String errorMsg = "No parser available to parse mimetype '" + mimeType + "'";
                 this.theLogger.logInfo("Unable to parse '" + location + "'. " + errorMsg);
-                throw new ParserException(errorMsg,location,ErrorURL.DENIED_WRONG_MIMETYPE_OR_EXT);                
+                throw new ParserException(errorMsg,location, "wrong mime type or wrong extension");                
             }
             
             // check result
@@ -668,9 +667,9 @@ public final class plasmaParser {
             return doc;
             
         } catch (final UnsupportedEncodingException e) {
-            final String errorMsg = "Unsupported charset encoding: " + e.getMessage();
+            final String errorMsg = "unsupported charset encoding: " + e.getMessage();
             this.theLogger.logSevere("Unable to parse '" + location + "'. " + errorMsg, e);
-            throw new ParserException(errorMsg,location,ErrorURL.DENIED_UNSUPPORTED_CHARSET);                	
+            throw new ParserException(errorMsg,location, errorMsg);                	
         } catch (final Exception e) {
             // Interrupted- and Parser-Exceptions should pass through
             if (e instanceof InterruptedException) throw (InterruptedException) e;

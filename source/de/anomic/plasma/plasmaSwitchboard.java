@@ -112,7 +112,6 @@ import de.anomic.crawler.CrawlEntry;
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.CrawlQueues;
 import de.anomic.crawler.CrawlStacker;
-import de.anomic.crawler.ErrorURL;
 import de.anomic.crawler.HTTPLoader;
 import de.anomic.crawler.ImporterManager;
 import de.anomic.crawler.IndexingStack;
@@ -1229,7 +1228,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             }
             
             // check if the document should be indexed
-            String noIndexReason = ErrorURL.DENIED_UNSPECIFIED_INDEXING_ERROR;
+            String noIndexReason = "unspecified indexing error";
             if (queueEntry.processCase() == plasmaSwitchboardConstants.PROCESSCASE_4_PROXY_LOAD) {
                 // proxy-load
                 noIndexReason = queueEntry.shallIndexCacheForProxy();
@@ -1685,7 +1684,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         // STORE WORD INDEX
         if ((!queueEntry.profile().indexText()) && (!queueEntry.profile().indexMedia())) {
             if (this.log.isFine()) log.logFine("Not Indexed Resource '" + queueEntry.url().toNormalform(false, true) + "': process case=" + processCase);
-            addURLtoErrorDB(queueEntry.url(), referrerURL.hash(), queueEntry.initiator(), dc_title, ErrorURL.DENIED_UNKNOWN_INDEXING_PROCESS_CASE);
+            addURLtoErrorDB(queueEntry.url(), referrerURL.hash(), queueEntry.initiator(), dc_title, "unknown indexing process case"  + processCase);
             return;
         }
         
@@ -1768,7 +1767,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         InputStream resourceContent = null;
         try {
             // get the resource content
-            final Object[] resource = plasmaSnippetCache.getResource(comp.url(), fetchOnline, 10000, true, false);
+            Object[] resource = null;
+            try {
+                resource = plasmaSnippetCache.getResource(comp.url(), fetchOnline, 10000, true, false);
+            } catch (IOException e) {
+                serverLog.logWarning("removeAllUrlReferences", "cannot load: " + e.getMessage());
+            }
             if (resource == null) {
                 // delete just the url entry
                 webIndex.removeURL(urlhash);

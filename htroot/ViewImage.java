@@ -35,6 +35,7 @@ import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyURL;
 import de.anomic.ymage.ymageImageParser;
 
@@ -79,7 +80,12 @@ public class ViewImage {
         // getting the image as stream
         Image scaled = iconcache.get(urlString);
         if (scaled == null) {
-            final Object[] resource = plasmaSnippetCache.getResource(url, true, timeout, false, true);
+            Object[] resource = null;
+            try {
+                resource = plasmaSnippetCache.getResource(url, true, timeout, false, true);
+            } catch (IOException e) {
+                serverLog.logWarning("ViewImage", "cannot load: " + e.getMessage());
+            }
             byte[] imgb = null;
             if (resource == null) {
                 if (urlString.endsWith(".ico")) {

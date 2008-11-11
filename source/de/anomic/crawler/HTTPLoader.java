@@ -26,10 +26,6 @@
 package de.anomic.crawler;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.NoRouteToHostException;
-import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.util.Date;
 
 import de.anomic.http.HttpClient;
@@ -37,14 +33,12 @@ import de.anomic.http.JakartaCommonsHttpClient;
 import de.anomic.http.JakartaCommonsHttpResponse;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpResponseHeader;
-import de.anomic.http.httpdLimitExceededException;
 import de.anomic.http.httpdProxyCacheEntry;
 import de.anomic.index.indexDocumentMetadata;
 import de.anomic.index.indexReferenceBlacklist;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyURL;
 
@@ -105,16 +99,15 @@ public final class HTTPLoader {
         return metadata;
     }    
    
-    public indexDocumentMetadata load(final CrawlEntry entry, final String parserMode) {
+    public indexDocumentMetadata load(final CrawlEntry entry, final String parserMode) throws IOException {
         return load(entry, parserMode, DEFAULT_CRAWLING_RETRY_COUNT);
     }
     
-    private indexDocumentMetadata load(final CrawlEntry entry, final String parserMode, final int retryCount) {
+    private indexDocumentMetadata load(final CrawlEntry entry, final String parserMode, final int retryCount) throws IOException {
 
         if (retryCount < 0) {
-            this.log.logInfo("Redirection counter exceeded for URL " + entry.url().toString() + ". Processing aborted.");
-            sb.crawlQueues.errorURL.newEntry(entry, sb.webIndex.seedDB.mySeed().hash, new Date(), 1, ErrorURL.DENIED_REDIRECTION_COUNTER_EXCEEDED).store();
-            return null;
+            sb.crawlQueues.errorURL.newEntry(entry, sb.webIndex.seedDB.mySeed().hash, new Date(), 1, "redirection counter exceeded").store();
+            throw new IOException("Redirection counter exceeded for URL " + entry.url().toString() + ". Processing aborted.");
         }
         
         final Date requestDate = new Date(); // remember the time...
@@ -127,15 +120,14 @@ public final class HTTPLoader {
         // check if url is in blacklist
         final String hostlow = host.toLowerCase();
         if (plasmaSwitchboard.urlBlacklist.isListed(indexReferenceBlacklist.BLACKLIST_CRAWLER, hostlow, path)) {
-            this.log.logInfo("CRAWLER Rejecting URL '" + entry.url().toString() + "'. URL is in blacklist.");
-            sb.crawlQueues.errorURL.newEntry(entry, sb.webIndex.seedDB.mySeed().hash, new Date(), 1, ErrorURL.DENIED_URL_IN_BLACKLIST).store();
-            return null;
+            sb.crawlQueues.errorURL.newEntry(entry, sb.webIndex.seedDB.mySeed().hash, new Date(), 1, "url in blacklist").store();
+            throw new IOException("CRAWLER Rejecting URL '" + entry.url().toString() + "'. URL is in blacklist.");
         }
         
         // take a file from the net
         indexDocumentMetadata htCache = null;
         final long maxFileSize = sb.getConfigLong("crawler.http.maxFileSize", DEFAULT_MAXFILESIZE);
-        try {
+        //try {
             // create a request header
             final httpRequestHeader requestHeader = new httpRequestHeader();
             requestHeader.put(httpRequestHeader.USER_AGENT, crawlerUserAgent);
@@ -150,7 +142,7 @@ public final class HTTPLoader {
             final JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(socketTimeout, requestHeader);
             
             JakartaCommonsHttpResponse res = null;
-            try {
+            //try {
                 // send request
                 res = client.GET(entry.url().toString());
 
@@ -161,15 +153,14 @@ public final class HTTPLoader {
                 htCache = createCacheEntry(entry, requestDate, requestHeader, res.getResponseHeader(), res.getStatusLine()); 
                 
                 // request has been placed and result has been returned. work off response
-                try {
+                //try {
                     if (plasmaParser.supportedContent(parserMode, entry.url(), res.getResponseHeader().mime())) {
                         
                         // get the content length and check if the length is allowed
                         long contentLength = res.getResponseHeader().getContentLength();
                         if (maxFileSize >= 0 && contentLength > maxFileSize) {
-                            this.log.logInfo("REJECTED URL " + entry.url() + " because file size '" + contentLength + "' exceeds max filesize limit of " + maxFileSize + " bytes.");
-                            sb.crawlQueues.errorURL.newEntry(entry, sb.webIndex.seedDB.mySeed().hash, new Date(), 1, ErrorURL.DENIED_FILESIZE_LIMIT_EXCEEDED);                    
-                            return null;
+                            sb.crawlQueues.errorURL.newEntry(entry, sb.webIndex.seedDB.mySeed().hash, new Date(), 1, "file size limit exceeded");                    
+                            throw new IOException("REJECTED URL " + entry.url() + " because file size '" + contentLength + "' exceeds max filesize limit of " + maxFileSize + " bytes.");
                         }
 
                         // we write the new cache entry to file system directly
@@ -179,19 +170,19 @@ public final class HTTPLoader {
                         
                         // check length again in case it was not possible to get the length before loading
                         if (maxFileSize >= 0 && contentLength > maxFileSize) {
-                            this.log.logInfo("REJECTED URL " + entry.url() + " because file size '" + contentLength + "' exceeds max filesize limit of " + maxFileSize + " bytes.");
-                            sb.crawlQueues.errorURL.newEntry(entry, sb.webIndex.seedDB.mySeed().hash, new Date(), 1, ErrorURL.DENIED_FILESIZE_LIMIT_EXCEEDED);                    
-                            return null;
+                            sb.crawlQueues.errorURL.newEntry(entry, sb.webIndex.seedDB.mySeed().hash, new Date(), 1, "file size limit exceeded");                    
+                            throw new IOException("REJECTED URL " + entry.url() + " because file size '" + contentLength + "' exceeds max filesize limit of " + maxFileSize + " bytes.");
                         }
                         
                         htCache.setCacheArray(responseBody);
                     } else {
                         // if the response has not the right file type then reject file
                         this.log.logInfo("REJECTED WRONG MIME/EXT TYPE " + res.getResponseHeader().mime() + " for URL " + entry.url().toString());
-                        sb.crawlQueues.errorURL.newEntry(entry, sb.webIndex.seedDB.mySeed().hash, new Date(), 1, ErrorURL.DENIED_WRONG_MIMETYPE_OR_EXT);
+                        sb.crawlQueues.errorURL.newEntry(entry, sb.webIndex.seedDB.mySeed().hash, new Date(), 1, "wrong mime type or wrong extension");
                         htCache = null;
                     }
                     return htCache;
+                    /*
                 } catch (final SocketException e) {
                     // this may happen if the client suddenly closes its connection
                     // maybe the user has stopped loading
@@ -201,7 +192,7 @@ public final class HTTPLoader {
                     this.log.logSevere("CRAWLER LOADER ERROR1: with URL=" + entry.url().toString() + ": " + e.toString());
                     sb.crawlQueues.errorURL.newEntry(entry, sb.webIndex.seedDB.mySeed().hash, new Date(), 1, ErrorURL.DENIED_CONNECTION_ERROR);
                     htCache = null;
-                }
+                }*/
             } else if (res.getStatusLine().startsWith("30")) {
                     if (res.getResponseHeader().containsKey(httpRequestHeader.LOCATION)) {
                         // getting redirection URL
@@ -209,9 +200,8 @@ public final class HTTPLoader {
                         redirectionUrlString = redirectionUrlString.trim();
 
                         if (redirectionUrlString.length() == 0) {
-                            this.log.logWarning("CRAWLER Redirection of URL=" + entry.url().toString() + " aborted. Location header is empty.");
-                            sb.crawlQueues.errorURL.newEntry(entry, sb.webIndex.seedDB.mySeed().hash, new Date(), 1, ErrorURL.DENIED_REDIRECTION_HEADER_EMPTY);
-                            return null;
+                            sb.crawlQueues.errorURL.newEntry(entry, sb.webIndex.seedDB.mySeed().hash, new Date(), 1, "redirection header empy");
+                            throw new IOException("CRAWLER Redirection of URL=" + entry.url().toString() + " aborted. Location header is empty.");
                         }
                         
                         // normalizing URL
@@ -223,9 +213,8 @@ public final class HTTPLoader {
 
                         // if we are already doing a shutdown we don't need to retry crawling
                         if (Thread.currentThread().isInterrupted()) {
-                            this.log.logSevere("CRAWLER Retry of URL=" + entry.url().toString() + " aborted because of server shutdown.");
-                            sb.crawlQueues.errorURL.newEntry(entry, sb.webIndex.seedDB.mySeed().hash, new Date(), 1, ErrorURL.DENIED_SERVER_SHUTDOWN);
-                            return null;
+                            sb.crawlQueues.errorURL.newEntry(entry, sb.webIndex.seedDB.mySeed().hash, new Date(), 1, "server shutdown");
+                            throw new IOException("CRAWLER Retry of URL=" + entry.url().toString() + " aborted because of server shutdown.");
                         }
 
                         // generating url hash
@@ -234,9 +223,8 @@ public final class HTTPLoader {
                         // check if the url was already indexed
                         final String dbname = sb.urlExists(urlhash);
                         if (dbname != null) {
-                            this.log.logWarning("CRAWLER Redirection of URL=" + entry.url().toString() + " ignored. The url appears already in db " + dbname);
-                            sb.crawlQueues.errorURL.newEntry(entry, sb.webIndex.seedDB.mySeed().hash, new Date(), 1, ErrorURL.DENIED_REDIRECTION_TO_DOUBLE_CONTENT);
-                            return null;
+                            sb.crawlQueues.errorURL.newEntry(entry, sb.webIndex.seedDB.mySeed().hash, new Date(), 1, "redirection to double content");
+                            throw new IOException("CRAWLER Redirection of URL=" + entry.url().toString() + " ignored. The url appears already in db " + dbname);
                         }
                         
                         // retry crawling with new url
@@ -248,16 +236,17 @@ public final class HTTPLoader {
                 this.log.logInfo("REJECTED WRONG STATUS TYPE '" + res.getStatusLine() + "' for URL " + entry.url().toString());
                 
                 // not processed any further
-                sb.crawlQueues.errorURL.newEntry(entry, sb.webIndex.seedDB.mySeed().hash, new Date(), 1, ErrorURL.DENIED_WRONG_HTTP_STATUSCODE + res.getStatusCode() +  ")");
+                sb.crawlQueues.errorURL.newEntry(entry, sb.webIndex.seedDB.mySeed().hash, new Date(), 1, "wrong http status code " + res.getStatusCode() +  ")");
             }
-            
+            /*
             } finally {
                 if(res != null) {
                     // release connection
                     res.closeStream();
                 }
-            }
+            }*/
             return htCache;
+        /*
         } catch (final Exception e) {
             final String errorMsg = e.getMessage();
             String failreason = null;
@@ -340,7 +329,7 @@ public final class HTTPLoader {
                 sb.crawlQueues.errorURL.newEntry(entry, sb.webIndex.seedDB.mySeed().hash, new Date(), 1, failreason);
             }
             return null;
-        }
+        }*/
     }
     
 }

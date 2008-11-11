@@ -380,7 +380,7 @@ public final class CrawlStacker extends Thread {
         // check if the protocol is supported
         final String urlProtocol = entry.url().getProtocol();
         if (!sb.crawlQueues.isSupportedProtocol(urlProtocol)) {
-            reason = ErrorURL.DENIED_UNSUPPORTED_PROTOCOL;
+            reason = "unsupported protocol";
             this.log.logSevere("Unsupported protocol in URL '" + entry.url().toString() + "'. " + 
                                "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
             return reason;            
@@ -396,7 +396,7 @@ public final class CrawlStacker extends Thread {
         
         // check blacklist
         if (plasmaSwitchboard.urlBlacklist.isListed(indexReferenceBlacklist.BLACKLIST_CRAWLER, entry.url())) {
-            reason = ErrorURL.DENIED_URL_IN_BLACKLIST;
+            reason = "url in blacklist";
             if (this.log.isFine()) this.log.logFine("URL '" + entry.url().toString() + "' is in blacklist. " +
                              "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
             return reason;
@@ -411,8 +411,7 @@ public final class CrawlStacker extends Thread {
         
         // filter deny
         if ((entry.depth() > 0) && (!(entry.url().toString().matches(profile.generalFilter())))) {
-            reason = ErrorURL.DENIED_URL_DOES_NOT_MATCH_FILTER;
-
+            reason = "url does not match general filter";
             if (this.log.isFine()) this.log.logFine("URL '" + entry.url().toString() + "' does not match crawling filter '" + profile.generalFilter() + "'. " +
                              "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
             return reason;
@@ -420,7 +419,7 @@ public final class CrawlStacker extends Thread {
         
         // deny cgi
         if (entry.url().isCGI())  {
-            reason = ErrorURL.DENIED_CGI_URL;
+            reason = "cgi url not allowed";
 
             if (this.log.isFine()) this.log.logFine("URL '" + entry.url().toString() + "' is CGI URL. " + 
                              "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
@@ -429,7 +428,7 @@ public final class CrawlStacker extends Thread {
         
         // deny post properties
         if (entry.url().isPOST() && !(profile.crawlingQ()))  {
-            reason = ErrorURL.DENIED_POST_URL;
+            reason = "post url not allowed";
 
             if (this.log.isFine()) this.log.logFine("URL '" + entry.url().toString() + "' is post URL. " + 
                              "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
@@ -445,7 +444,7 @@ public final class CrawlStacker extends Thread {
 
         // deny urls that do not match with the profile domain list
         if (!(profile.grantedDomAppearance(entry.url().getHost()))) {
-            reason = ErrorURL.DENIED_NO_MATCH_WITH_DOMAIN_FILTER;
+            reason = "url does not match domain filter";
             if (this.log.isFine()) this.log.logFine("URL '" + entry.url().toString() + "' is not listed in granted domains. " + 
                              "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
             return reason;
@@ -453,7 +452,7 @@ public final class CrawlStacker extends Thread {
 
         // deny urls that exceed allowed number of occurrences
         if (!(profile.grantedDomCount(entry.url().getHost()))) {
-            reason = ErrorURL.DENIED_DOMAIN_COUNT_EXCEEDED;
+            reason = "domain counter exceeded";
             if (this.log.isFine()) this.log.logFine("URL '" + entry.url().toString() + "' appeared too often, a maximum of " + profile.domMaxPages() + " is allowed. "+ 
                              "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
             return reason;
@@ -465,12 +464,12 @@ public final class CrawlStacker extends Thread {
         final boolean recrawl = (oldEntry != null) && (profile.recrawlIfOlder() > oldEntry.loaddate().getTime());
         // do double-check
         if ((dbocc != null) && (!recrawl)) {
-            reason = ErrorURL.DOUBLE_REGISTERED + dbocc + ")";
+            reason = "double " + dbocc + ")";
             if (this.log.isFine()) this.log.logFine("URL '" + entry.url().toString() + "' is double registered in '" + dbocc + "'. " + "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
             return reason;
         }
         if ((oldEntry != null) && (!recrawl)) {
-            reason = ErrorURL.DOUBLE_REGISTERED + "LURL)";
+            reason = "double " + "LURL)";
             if (this.log.isFine()) this.log.logFine("URL '" + entry.url().toString() + "' is double registered in 'LURL'. " + "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
             return reason;
         }
