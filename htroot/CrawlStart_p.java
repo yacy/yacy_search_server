@@ -39,33 +39,20 @@ public class CrawlStart_p {
         
         // define visible variables
         String a = sb.webIndex.seedDB.mySeed().getPublicAddress();
-        prop.put("starturl", (sb.getConfig(plasmaSwitchboardConstants.NETWORK_NAME, "").equals("intranet")) ? "http://" + ((a == null) ? "localhost:" + sb.getConfig("port", "8080") : a) + "/repository/" : "http://");
+        boolean intranet = sb.getConfig(plasmaSwitchboardConstants.NETWORK_NAME, "").equals("intranet");
+        String repository = "http://" + ((a == null) ? "localhost:" + sb.getConfig("port", "8080") : a) + "/repository/";
+        prop.put("starturl", (intranet) ? repository : "http://");
         prop.put("proxyPrefetchDepth", env.getConfig("proxyPrefetchDepth", "0"));
         prop.put("crawlingDepth", env.getConfig("crawlingDepth", "0"));
-        prop.put("crawlingFilter", env.getConfig("crawlingFilter", "0"));
+        prop.put("crawlingFilter", (intranet) ? repository + ".*" : ".*");
         
-        final int crawlingIfOlder = (int) env.getConfigLong("crawlingIfOlder", -1);
-        prop.put("crawlingIfOlderCheck", (crawlingIfOlder == -1) ? "0" : "1");
+        prop.put("crawlingIfOlderCheck", "0");
         prop.put("crawlingIfOlderUnitYearCheck", "0");
-        prop.put("crawlingIfOlderUnitMonthCheck", "0");
+        prop.put("crawlingIfOlderUnitMonthCheck", "1");
         prop.put("crawlingIfOlderUnitDayCheck", "0");
         prop.put("crawlingIfOlderUnitHourCheck", "0");
-        if ((crawlingIfOlder == -1) || (crawlingIfOlder == Integer.MAX_VALUE)) {
-            prop.put("crawlingIfOlderNumber", "1");
-            prop.put("crawlingIfOlderUnitYearCheck", "1");
-        } else if (crawlingIfOlder >= 60*24*365) {
-            prop.put("crawlingIfOlderNumber", Math.round((float)crawlingIfOlder / (float)(60*24*365)));
-            prop.put("crawlingIfOlderUnitYearCheck", "1");
-        } else if (crawlingIfOlder >= 60*24*30) {
-            prop.put("crawlingIfOlderNumber", Math.round((float)crawlingIfOlder / (float)(60*24*30)));
-            prop.put("crawlingIfOlderUnitMonthCheck", "1");
-        } else if (crawlingIfOlder >= 60*24) {
-            prop.put("crawlingIfOlderNumber", Math.round((float)crawlingIfOlder / (float)(60*24)));
-            prop.put("crawlingIfOlderUnitDayCheck", "1");
-        } else {
-            prop.put("crawlingIfOlderNumber", Math.max(1, Math.round(crawlingIfOlder / 60f)));
-            prop.put("crawlingIfOlderUnitHourCheck", "1");
-        }
+        prop.put("crawlingIfOlderNumber", "3");
+        
         final int crawlingDomFilterDepth = (int) env.getConfigLong("crawlingDomFilterDepth", -1);
         prop.put("crawlingDomFilterCheck", (crawlingDomFilterDepth == -1) ? "0" : "1");
         prop.put("crawlingDomFilterDepth", (crawlingDomFilterDepth == -1) ? 1 : crawlingDomFilterDepth);
