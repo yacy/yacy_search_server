@@ -9,24 +9,24 @@
 # use section names to jump
 
 ############ Sections: ########################
-## "global elements"								##
+## "global elements"                         ##
 # all html elements without ".class" or "#id"
 ###############################################
-## "global classes"									##
+## "global classes"                          ##
 # i.e. ".strong"; ".left"; ".error";
 ###############################################
-## "privat classes"									##
+## "privat classes"                          ##
 # all htnml-elements with a specific class
 # i.e. "div.content"; "span.left";
 # and
 # "div.content span a."; "form.search fieldset legend";
 # sorted by the last html-element
 ###############################################
-## "site specific"									##
+## "site specific"                           ##
 # all site specific elements
 # i.e. "body#search form"; "body#stats table td.strong";
 ###############################################
-## "other"												##
+## "other"                                   ##
 # all "other" elements
 # i.e. "#left"; "#myID.div";
 */
@@ -675,9 +675,23 @@ img.bookmarkIcon {
 
 /* site specific ------------------------------------*/
 
+body#Blacklist fieldset.selectList {
+  float:left;
+  margin-top:0;
+  width:45%;
+}
+body#Blacklist fieldset.createList {
+  margin-top:0;
+  width:45%;
+}
 body#Blacklist fieldset.editList {
   float:left;
   margin-top:0;
+  width:45%;
+}
+body#Blacklist fieldset.listSettings {
+  margin-top:0;
+  width:45%;
 }
 body#PerformanceQueues table, body#PerformanceQueues table input, body#PerformanceMemory table, body#PerformanceMemory table input {
   font-size:90%;

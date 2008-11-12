@@ -32,9 +32,9 @@
 import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 
 import de.anomic.crawler.HTTPLoader;
 import de.anomic.data.listManager;
@@ -74,8 +74,27 @@ public class sharedBlacklist_p {
         prop.putHTML("page_target", selectedBlacklistName);
         
         if (post != null) {
-            ArrayList<String> otherBlacklist = null;
             
+            // initialize the list manager
+            listManager.switchboard = (plasmaSwitchboard) env;
+            listManager.listsPath = new File(listManager.switchboard.getRootPath(),listManager.switchboard.getConfig("listManager.listsPath", "DATA/LISTS"));
+        
+            
+            // loading all blacklist files located in the directory
+            final List<String> dirlist = listManager.getDirListing(listManager.listsPath);
+            
+            // List BlackLists
+            int blacklistCount = 0;
+
+            if (dirlist != null) {
+                for (String element : dirlist) {
+                    prop.putXML("page_blackLists_" + blacklistCount + "_name", element);
+                    blacklistCount++;
+                }
+            }
+            prop.put("page_blackLists", blacklistCount);
+            
+            List<String> otherBlacklist = null;
             if (post.containsKey("hash")) {
                 /* ======================================================
                  * Import blacklist from other peer 
@@ -86,6 +105,7 @@ public class sharedBlacklist_p {
                 
                 // generate the download URL
                 String downloadURL = null;
+                String downloadURLOld = null;
                 if( sb.webIndex.seedDB != null ){ //no nullpointer error..
                     final yacySeed seed = sb.webIndex.seedDB.getConnected(Hash); 
                     if (seed != null) {
@@ -94,7 +114,8 @@ public class sharedBlacklist_p {
                         final String peerName = seed.get(yacySeed.NAME, "<" + IP + ":" + Port + ">");
                         prop.putHTML("page_source", peerName);
 
-                        downloadURL = "http://" + IP + ":" + Port + "/yacy/list.html?col=black";
+                        downloadURL = "http://" + IP + ":" + Port + "/xml/blacklists.xml";
+                        downloadURLOld = "http://" + IP + ":" + Port + "/yacy/list.html?col=black";
                     } else {
                         prop.put("status", STATUS_PEER_UNKNOWN);//YaCy-Peer not found
                         prop.putHTML("status_name", Hash);
@@ -106,7 +127,7 @@ public class sharedBlacklist_p {
                     prop.put("page", "1");
                 }
                 
-                if (downloadURL != null) {
+                if (downloadURLOld != null) {
                     // download the blacklist
                     try {
                         final httpRequestHeader reqHeader = new httpRequestHeader();
@@ -115,8 +136,9 @@ public class sharedBlacklist_p {
                         reqHeader.put(httpRequestHeader.USER_AGENT, HTTPLoader.yacyUserAgent);
                         
                         // get List
-                        final yacyURL u = new yacyURL(downloadURL, null);
-                        otherBlacklist = nxTools.strings(HttpClient.wget(u.toString(), reqHeader, 1000), "UTF-8"); 
+                        yacyURL u = new yacyURL(downloadURLOld, null);
+
+                        otherBlacklist = nxTools.strings(HttpClient.wget(u.toString(), reqHeader, 1000), "UTF-8");
                     } catch (final Exception e) {
                         prop.put("status", STATUS_PEER_UNKNOWN);
                         prop.putHTML("status_name", Hash);

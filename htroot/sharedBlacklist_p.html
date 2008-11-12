@@ -24,6 +24,7 @@
   </head>
   <body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
     #%env/templates/header.template%#
+    #%env/templates/submenuBlacklist.template%#
     <br />
     <br />
     <h2>Add Items to Blacklist</h2>
@@ -50,7 +51,6 @@
 
     <form action="sharedBlacklist_p.html" method="post" enctype="multipart/form-data">
       <input type="hidden" name="num" value="#[num]#" />
-      <input type="hidden" name="currentBlacklist" value="#[currentBlacklist]#" />
       #(page)#<!-- [0] -->
       <table>
         <tr>
@@ -59,7 +59,15 @@
         </tr>
         <tr>
           <td><b>Blacklist target:</b></td>
-          <td><span class="settingsValue">#[target]#</span></td>
+          <td>
+              
+          <select name="currentBlacklist" size="1">
+          #{blackLists}#
+          <option value="#[name]#">#[name]#</option>
+          #{/blackLists}#
+        </select>
+              
+          </td>
         </tr>
       </table>
       <table border="0" cellspacing="1" cellpadding="3" >

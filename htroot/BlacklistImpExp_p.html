@@ -1,0 +1,52 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Blacklist Administration</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body id="Blacklist">
+    #%env/templates/header.template%#
+    #%env/templates/submenuBlacklist.template%#
+  
+    <h2>Blacklist Import</h2>
+    <p>Used Blacklist engine: <span class="settingsValue">#[blacklistEngine]#</span></p>
+
+    #(disabled)#
+    <fieldset class="importListItems">
+      <legend>Import blacklist items from...</legend>
+      <!-- Blacklist import from other peer -->
+      <form action="sharedBlacklist_p.html" method="get">
+        <fieldset>
+          <legend>other YaCy peers:</legend>
+          <select name="hash">
+            #{otherHosts}#
+            <option value="#[hash]#">#[name]#</option>
+            #{/otherHosts}#
+          </select>
+          <input type="submit" value="Load new blacklist items" />
+        </fieldset>
+      </form>
+
+      <!-- blacklist import from url -->
+      <form action="sharedBlacklist_p.html" method="get">
+        <fieldset>
+          <legend>URL:</legend>
+          <input type="hidden" name="currentBlacklist" value="#[currentBlacklist]#" />
+          <input type="text" name="url" />
+          <input type="submit" value="Load new blacklist items" />
+        </fieldset>
+      </form>
+    
+      <!-- blacklist import from file -->	
+      <form action="sharedBlacklist_p.html" method="get">	
+        <fieldset>
+          <legend>file:</legend>
+          <input type="hidden" name="currentBlacklist" value="#[currentBlacklist]#" />
+          <input type="text" name="file" />
+          <input type="submit" value="Load new blacklist items" />
+        </fieldset>
+      </form>
+    </fieldset>::#(/disabled)#
+    #%env/templates/footer.template%#
+  </body>
+</html>

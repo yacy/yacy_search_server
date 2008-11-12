@@ -279,7 +279,7 @@ public class BlacklistCleaner_p {
                 if (s.contains("\\\\")) {
                     s = s.replaceAll(Pattern.quote("\\\\"), Matcher.quoteReplacement("\\"));
                 }
-                
+           
                 if (list.contains(s)) {
                     list.remove(s);
                     listChanged = true;
