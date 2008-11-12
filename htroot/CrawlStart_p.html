@@ -5,6 +5,11 @@
     #%env/templates/metas.template%#
     <script type="text/javascript" src="/js/ajax.js"></script>
     <script type="text/javascript" src="/js/IndexCreate.js"></script>
+    <script type="text/javascript">
+        function check(key){
+            document.getElementById(key).checked = 'checked';
+        }
+    </script>
   </head>
   <body id="IndexCreate">
     #%env/templates/header.template%#
@@ -31,7 +36,7 @@
                 <td><label for="url"><nobr>From URL</nobr></label>:</td>
                 <td><input type="radio" name="crawlingMode" id="url" value="url" checked="checked" /></td>
                 <td>
-                  <input name="crawlingURL" type="text" size="41" maxlength="256" value="#[starturl]#" onkeypress="changed()" />                                    
+                  <input name="crawlingURL" type="text" size="41" maxlength="256" value="#[starturl]#" onkeypress="changed()" onfocus="check('url')" />                                    
                 </td>
               </tr>
               <tr>
@@ -44,7 +49,7 @@
               <tr>
                 <td><label for="file"><nobr>From File</nobr></label>:</td>
                 <td><input type="radio" name="crawlingMode" id="file" value="file" /></td>
-                <td><input type="file" name="crawlingFile" size="28" /></td>
+                <td><input type="file" name="crawlingFile" size="28" onfocus="check('file')" /></td>
               </tr>
               <tr>
               	<td colspan="3" class="commit">
