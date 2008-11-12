@@ -350,8 +350,8 @@ public final class plasmaParser {
      */
     public static String patchCharsetEncoding(String encoding) {
         
-        // return a default encoding
-    	if ((encoding == null) || (encoding.length() < 3)) return "ISO-8859-1";
+        // return the system default encoding
+    	if ((encoding == null) || (encoding.length() < 3)) return Charset.defaultCharset().name();
     	
     	// trim encoding string
     	encoding = encoding.trim();
@@ -362,6 +362,7 @@ public final class plasmaParser {
     	if (encoding.startsWith("BIG")) return "Big5";
     	// all other names but such with "windows" use uppercase
     	if (encoding.startsWith("WINDOWS")) encoding = "windows" + encoding.substring(7);
+    	if (encoding.startsWith("MACINTOSH")) encoding = "MacRoman";
     	
     	// fix wrong fill characters
     	encoding = encoding.replaceAll("_", "-");

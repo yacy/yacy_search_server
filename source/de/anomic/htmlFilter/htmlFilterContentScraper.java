@@ -46,6 +46,7 @@ import javax.swing.event.EventListenerList;
 import de.anomic.crawler.HTTPLoader;
 import de.anomic.http.HttpClient;
 import de.anomic.http.httpRequestHeader;
+import de.anomic.plasma.plasmaParser;
 import de.anomic.server.serverCharBuffer;
 import de.anomic.server.serverFileUtils;
 import de.anomic.yacy.yacyURL;
@@ -487,7 +488,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         
         // scrape document to look up charset
         final htmlFilterInputStream htmlFilter = new htmlFilterInputStream(new ByteArrayInputStream(page),"UTF-8",new yacyURL("http://localhost", null),null,false);
-        final String charset = htmlFilter.detectCharset();
+        final String charset = plasmaParser.patchCharsetEncoding(htmlFilter.detectCharset());
         
         // scrape content
         final htmlFilterContentScraper scraper = new htmlFilterContentScraper(new yacyURL("http://localhost", null));

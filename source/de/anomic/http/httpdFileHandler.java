@@ -569,6 +569,7 @@ public final class httpdFileHandler {
                 String mimeType = mimeTable.getProperty(targetExt,"text/html");
                 final boolean zipContent = requestHeader.acceptGzip() && httpd.shallTransportZipped("." + conProp.getProperty("EXT",""));
                 if (path.endsWith("html") || 
+                        path.endsWith("htm") || 
                         path.endsWith("xml") || 
                         path.endsWith("rdf") || 
                         path.endsWith("rss") || 
@@ -701,7 +702,7 @@ public final class httpdFileHandler {
                 		fis.mark(1000);
                         // scrape document to look up charset
                         final htmlFilterInputStream htmlFilter = new htmlFilterInputStream(fis,"UTF-8",new yacyURL("http://localhost", null),null,false);
-                        final String charset = htmlFilter.detectCharset();
+                        final String charset = plasmaParser.patchCharsetEncoding(htmlFilter.detectCharset());
                         // reset position
                         fis.reset();
                         if(charset != null)
