@@ -1037,7 +1037,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
                     plasmaHTCache.storeFile(entry.url(), entry.cacheArray());
                     if (this.log.isFine()) this.log.logFine("WROTE FILE (" + entry.cacheArray().length + " bytes) for " + entry.url());
                 } else {
-                    if (this.log.isFine()) this.log.logFine("WRITE OF FILE " + entry.url() + " FORBIDDEN: " + error);
+                    if (this.log.isWarning()) this.log.logWarning("WRITE OF FILE " + entry.url() + " FORBIDDEN: " + error);
                 }
             //} else {
                 //this.log.logFine("EXISTING FILE (" + entry.cacheFile.length() + " bytes) for " + entry.cacheFile);
