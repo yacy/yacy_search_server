@@ -644,7 +644,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
                     this.out.close();                   
                     
                     // sleep for a while
-                    try {Thread.sleep(1000);} catch (final InterruptedException e) {}                                                           
+                    //try {Thread.sleep(500);} catch (final InterruptedException e) {}                                                           
                     
                     // close everything                    
                     this.controlSocket.close();

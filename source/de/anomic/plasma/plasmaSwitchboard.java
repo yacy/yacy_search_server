@@ -519,23 +519,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         rankingOn = getConfig(plasmaSwitchboardConstants.RANKING_DIST_ON, "true").equals("true") && networkName.equals("freeworld");
         rankingOwnDistribution = new plasmaRankingDistribution(log, webIndex.seedDB, new File(rankingPath, getConfig(plasmaSwitchboardConstants.RANKING_DIST_0_PATH, plasmaRankingDistribution.CR_OWN)), (int) getConfigLong(plasmaSwitchboardConstants.RANKING_DIST_0_METHOD, plasmaRankingDistribution.METHOD_ANYSENIOR), (int) getConfigLong(plasmaSwitchboardConstants.RANKING_DIST_0_METHOD, 0), getConfig(plasmaSwitchboardConstants.RANKING_DIST_0_TARGET, ""));
         rankingOtherDistribution = new plasmaRankingDistribution(log, webIndex.seedDB, new File(rankingPath, getConfig(plasmaSwitchboardConstants.RANKING_DIST_1_PATH, plasmaRankingDistribution.CR_OTHER)), (int) getConfigLong(plasmaSwitchboardConstants.RANKING_DIST_1_METHOD, plasmaRankingDistribution.METHOD_MIXEDSENIOR), (int) getConfigLong(plasmaSwitchboardConstants.RANKING_DIST_1_METHOD, 30), getConfig(plasmaSwitchboardConstants.RANKING_DIST_1_TARGET, "kaskelix.de:8080,yacy.dyndns.org:8000"));
-        
-        // init facility DB
-        /*
-        log.logSystem("Starting Facility Database");
-        File facilityDBpath = new File(getRootPath(), "DATA/SETTINGS/");
-        facilityDB = new kelondroTables(facilityDBpath);
-        facilityDB.declareMaps("backlinks", 250, 500, new String[] {"date"}, null);
-        log.logSystem("..opened backlinks");
-        facilityDB.declareMaps("zeitgeist",  40, 500);
-        log.logSystem("..opened zeitgeist");
-        facilityDB.declareTree("statistik", new int[]{11, 8, 8, 8, 8, 8, 8}, 0x400);
-        log.logSystem("..opened statistik");
-        facilityDB.update("statistik", (new serverDate()).toShortString(false).substring(0, 11), new long[]{1,2,3,4,5,6});
-        long[] testresult = facilityDB.selectLong("statistik", "yyyyMMddHHm");
-        testresult = facilityDB.selectLong("statistik", (new serverDate()).toShortString(false).substring(0, 11));
-         */
-        
+
         // init nameCacheNoCachingList
         final String noCachingList = getConfig(plasmaSwitchboardConstants.HTTPC_NAME_CACHE_CACHING_PATTERNS_NO,"");
         final String[] noCachingEntries = noCachingList.split(",");

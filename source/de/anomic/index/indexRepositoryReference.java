@@ -219,7 +219,7 @@ public final class indexRepositoryReference {
                     log.logSevere("RuntimeException:", e);
                 }
             }
-            try { Thread.sleep(1000); } catch (final InterruptedException e) { }
+            //try { Thread.sleep(1000); } catch (final InterruptedException e) { }
             log.logInfo("URLs vorher: " + urlIndexFile.size() + " Entries loaded during Iteratorloop: " + iteratorCount + " kaputte URLs: " + damagedURLS.size());
 
             final Iterator<String> eiter2 = damagedURLS.iterator();

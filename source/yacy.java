@@ -440,7 +440,7 @@ public final class yacy {
                     
                     // idle until the processes are down
                     if (server.isAlive()) {
-                        Thread.sleep(2000); // wait a while
+                        //Thread.sleep(2000); // wait a while
                         server.interrupt();
                         MultiThreadedHttpConnectionManager.shutdownAll();
                     }
