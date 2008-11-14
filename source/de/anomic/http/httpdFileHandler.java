@@ -696,17 +696,24 @@ public final class httpdFileHandler {
                         fis = new BufferedInputStream(new FileInputStream(targetFile));
                     }
                     
-                    // detect charset of html-files
-                	if(path.endsWith("html") || path.endsWith("htm")) {
-                		// save position
-                		fis.mark(1000);
-                        // scrape document to look up charset
-                        final htmlFilterInputStream htmlFilter = new htmlFilterInputStream(fis,"UTF-8",new yacyURL("http://localhost", null),null,false);
-                        final String charset = plasmaParser.patchCharsetEncoding(htmlFilter.detectCharset());
-                        // reset position
-                        fis.reset();
-                        if(charset != null)
-                        	mimeType = mimeType + "; charset="+charset;
+                    if(mimeType.startsWith("text")) {
+                    	// every text-file distributed by yacy is UTF-8
+                    	if(!path.startsWith("/repository")) {
+                    		mimeType = mimeType + "; charset=UTF-8";
+                    	} else {
+                    		// detect charset of html-files
+                    		if((path.endsWith("html") || path.endsWith("htm"))) {
+                    			// save position
+                    			fis.mark(1000);
+                    			// scrape document to look up charset
+                    			final htmlFilterInputStream htmlFilter = new htmlFilterInputStream(fis,"UTF-8",new yacyURL("http://localhost", null),null,false);
+                    			final String charset = plasmaParser.patchCharsetEncoding(htmlFilter.detectCharset());
+                    			if(charset != null)
+                    				mimeType = mimeType + "; charset="+charset;
+                    			// reset position
+                    			fis.reset();
+                    		}
+                    	}
                 	}
 
                     // write the array to the client
