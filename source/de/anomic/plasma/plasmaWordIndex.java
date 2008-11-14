@@ -279,8 +279,7 @@ public final class plasmaWordIndex implements indexRI {
         
         if (this.defaultProxyProfile == null) {
             // generate new default entry for proxy crawling
-            this.defaultProxyProfile = this.profilesActiveCrawls.newEntry("proxy", null, ".*", ".*",
-                    0 /*Integer.parseInt(getConfig(PROXY_PREFETCH_DEPTH, "0"))*/,
+            this.defaultProxyProfile = this.profilesActiveCrawls.newEntry("proxy", null, CrawlProfile.KEYWORDS_PROXY, CrawlProfile.MATCH_ALL, CrawlProfile.MATCH_NEVER,
                     0 /*Integer.parseInt(getConfig(PROXY_PREFETCH_DEPTH, "0"))*/,
                     this.profilesActiveCrawls.getRecrawlDate(CRAWL_PROFILE_PROXY_RECRAWL_CYCLE), -1, -1, false,
                     true /*getConfigBool(PROXY_INDEXING_LOCAL_TEXT, true)*/,
@@ -290,27 +289,27 @@ public final class plasmaWordIndex implements indexRI {
         }
         if (this.defaultRemoteProfile == null) {
             // generate new default entry for remote crawling
-            defaultRemoteProfile = this.profilesActiveCrawls.newEntry(CRAWL_PROFILE_REMOTE, null, ".*", ".*", 0, 0,
+            defaultRemoteProfile = this.profilesActiveCrawls.newEntry(CRAWL_PROFILE_REMOTE, null, CrawlProfile.KEYWORDS_REMOTE, CrawlProfile.MATCH_ALL, CrawlProfile.MATCH_NEVER, 0,
                     -1, -1, -1, true, true, true, false, true, false, true, true, false);
         }
         if (this.defaultTextSnippetLocalProfile == null) {
             // generate new default entry for snippet fetch and optional crawling
-            defaultTextSnippetLocalProfile = this.profilesActiveCrawls.newEntry(CRAWL_PROFILE_SNIPPET_LOCAL_TEXT, null, ".*", ".*", 0, 0,
+            defaultTextSnippetLocalProfile = this.profilesActiveCrawls.newEntry(CRAWL_PROFILE_SNIPPET_LOCAL_TEXT, null, CrawlProfile.KEYWORDS_SNIPPET, CrawlProfile.MATCH_ALL, CrawlProfile.MATCH_NEVER, 0,
             		this.profilesActiveCrawls.getRecrawlDate(CRAWL_PROFILE_SNIPPET_LOCAL_TEXT_RECRAWL_CYCLE), -1, -1, true, false, false, false, false, false, true, true, false);
         }
         if (this.defaultTextSnippetGlobalProfile == null) {
             // generate new default entry for snippet fetch and optional crawling
-            defaultTextSnippetGlobalProfile = this.profilesActiveCrawls.newEntry(CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT, null, ".*", ".*", 0, 0,
+            defaultTextSnippetGlobalProfile = this.profilesActiveCrawls.newEntry(CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT, null, CrawlProfile.KEYWORDS_SNIPPET, CrawlProfile.MATCH_ALL, CrawlProfile.MATCH_NEVER, 0,
             		this.profilesActiveCrawls.getRecrawlDate(CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT_RECRAWL_CYCLE), -1, -1, true, true, true, true, true, false, true, true, false);
         }
         if (this.defaultMediaSnippetLocalProfile == null) {
             // generate new default entry for snippet fetch and optional crawling
-            defaultMediaSnippetLocalProfile = this.profilesActiveCrawls.newEntry(CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA, null, ".*", ".*", 0, 0,
+            defaultMediaSnippetLocalProfile = this.profilesActiveCrawls.newEntry(CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA, null, CrawlProfile.KEYWORDS_SNIPPET, CrawlProfile.MATCH_ALL, CrawlProfile.MATCH_NEVER, 0,
             		this.profilesActiveCrawls.getRecrawlDate(CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA_RECRAWL_CYCLE), -1, -1, true, false, false, false, false, false, true, true, false);
         }
         if (this.defaultMediaSnippetGlobalProfile == null) {
             // generate new default entry for snippet fetch and optional crawling
-            defaultMediaSnippetGlobalProfile = this.profilesActiveCrawls.newEntry(CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA, null, ".*", ".*", 0, 0,
+            defaultMediaSnippetGlobalProfile = this.profilesActiveCrawls.newEntry(CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA, null, CrawlProfile.KEYWORDS_SNIPPET, CrawlProfile.MATCH_ALL, CrawlProfile.MATCH_NEVER, 0,
             		this.profilesActiveCrawls.getRecrawlDate(CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA_RECRAWL_CYCLE), -1, -1, true, false, true, true, true, false, true, true, false);
         }
     }

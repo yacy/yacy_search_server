@@ -24,6 +24,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+import de.anomic.crawler.CrawlProfile;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
@@ -44,7 +45,8 @@ public class CrawlStart_p {
         prop.put("starturl", (intranet) ? repository : "http://");
         prop.put("proxyPrefetchDepth", env.getConfig("proxyPrefetchDepth", "0"));
         prop.put("crawlingDepth", env.getConfig("crawlingDepth", "0"));
-        prop.put("crawlingFilter", (intranet) ? repository + ".*" : ".*");
+        prop.put("mustmatch", (intranet) ? repository + ".*" : CrawlProfile.MATCH_ALL);
+        prop.put("mustnotmatch", CrawlProfile.MATCH_NEVER);
         
         prop.put("crawlingIfOlderCheck", "0");
         prop.put("crawlingIfOlderUnitYearCheck", "0");

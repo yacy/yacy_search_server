@@ -104,7 +104,6 @@ public class sharedBlacklist_p {
                 final String Hash = post.get("hash");
                 
                 // generate the download URL
-                String downloadURL = null;
                 String downloadURLOld = null;
                 if( sb.webIndex.seedDB != null ){ //no nullpointer error..
                     final yacySeed seed = sb.webIndex.seedDB.getConnected(Hash); 
@@ -113,8 +112,6 @@ public class sharedBlacklist_p {
                         final String Port = seed.get(yacySeed.PORT, "8080");
                         final String peerName = seed.get(yacySeed.NAME, "<" + IP + ":" + Port + ">");
                         prop.putHTML("page_source", peerName);
-
-                        downloadURL = "http://" + IP + ":" + Port + "/xml/blacklists.xml";
                         downloadURLOld = "http://" + IP + ":" + Port + "/yacy/list.html?col=black";
                     } else {
                         prop.put("status", STATUS_PEER_UNKNOWN);//YaCy-Peer not found

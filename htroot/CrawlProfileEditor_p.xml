@@ -6,7 +6,8 @@
 		<status>#(status)#terminated::active#(/status)#</status>
 		<starturl>#[startURL]#</starturl>
 		<depth>#[depth]#</depth>
-		<filter>#[filter]#</filter>
+		<mustmatch>#[mustmatch]#</mustmatch>
+		<mustnotmatch>#[mustnotmatch]#</mustnotmatch>
 		<crawlingIfOlder>#[crawlingIfOlder]#</crawlingIfOlder>
 		<crawlingDomFilterDepth>#[crawlingDomFilterDepth]#</crawlingDomFilterDepth>
 		<crawlingDomFilterContent>

@@ -28,6 +28,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
+import java.util.regex.Pattern;
 
 import de.anomic.kelondro.kelondroBLOB;
 import de.anomic.kelondro.kelondroBLOBHeap;
@@ -42,6 +44,20 @@ import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyURL;
 
 public class CrawlProfile {
+    
+    public static final String MATCH_ALL = ".*";
+    public static final String MATCH_NEVER = "";
+    public static final HashSet<String> NO_KEYWORDS      = new HashSet<String>(0);
+    public static final HashSet<String> KEYWORDS_PROXY   = word2set("xproxy");
+    public static final HashSet<String> KEYWORDS_REMOTE  = word2set("xremote");
+    public static final HashSet<String> KEYWORDS_USER    = word2set("xuser");
+    public static final HashSet<String> KEYWORDS_SNIPPET = word2set("xsnippet");
+    
+    private static final HashSet<String> word2set(String word) {
+        HashSet<String> s = new HashSet<String>(1);
+        s.add(word);
+        return s;
+    }
     
     static HashMap<String, Map<String, DomProfile>> domsCache = new HashMap<String, Map<String, DomProfile>>();
     
@@ -145,8 +161,11 @@ public class CrawlProfile {
         return ne;        
     }
     
-    public entry newEntry(final String name, final yacyURL startURL, final String generalFilter, final String specificFilter,
-                           final int generalDepth, final int specificDepth,
+    public entry newEntry( final String name,
+                           final yacyURL startURL,
+                           final Set<String> keywords,
+                           final String mustmatch, final String mustnotmatch,
+                           final int generalDepth,
                            final long recrawlIfOlder /*date*/, final int domFilterDepth,  final int domMaxPages,
                            final boolean crawlingQ,
                            final boolean indexText, final boolean indexMedia,
@@ -154,8 +173,11 @@ public class CrawlProfile {
                            final boolean remoteIndexing,
                            final boolean xsstopw, final boolean xdstopw, final boolean xpstopw) {
         
-        final entry ne = new entry(name, startURL, generalFilter, specificFilter,
-                             generalDepth, specificDepth,
+        final entry ne = new entry(
+                             name, startURL,
+                             keywords,
+                             mustmatch, mustnotmatch,
+                             generalDepth,
                              recrawlIfOlder, domFilterDepth, domMaxPages,
                              crawlingQ,
                              indexText, indexMedia,
@@ -235,10 +257,9 @@ public class CrawlProfile {
         public static final String HANDLE           = "handle";
         public static final String NAME             = "name";
         public static final String START_URL        = "startURL";
-        public static final String GENERAL_FILTER   = "generalFilter";
-        public static final String SPECIFIC_FILTER  = "specificFilter";
-        public static final String GENERAL_DEPTH    = "generalDepth";
-        public static final String SPECIFIC_DEPTH   = "specificDepth";
+        public static final String FILTER_MUSTMATCH = "generalFilter";
+        public static final String FILTER_MUSTNOTMATCH = "nevermatch";
+        public static final String DEPTH            = "generalDepth";
         public static final String RECRAWL_IF_OLDER = "recrawlIfOlder";
         public static final String DOM_FILTER_DEPTH = "domFilterDepth";
         public static final String DOM_MAX_PAGES    = "domMaxPages";
@@ -254,10 +275,16 @@ public class CrawlProfile {
         
         Map<String, String> mem;
         private Map<String, DomProfile> doms;
+        private Pattern mustmatch = null, mustnotmatch = null;
         
-        public entry(final String name, final yacyURL startURL, final String generalFilter, final String specificFilter,
-                     final int generalDepth, final int specificDepth,
-                     final long recrawlIfOlder /*date*/, final int domFilterDepth, final int domMaxPages,
+        
+        public entry(final String name, final yacyURL startURL,
+                     final Set<String> keywords,
+                     final String mustmatch,
+                     final String mustnotmatch,
+                     final int depth,
+                     final long recrawlIfOlder /*date*/,
+                     final int domFilterDepth, final int domMaxPages,
                      final boolean crawlingQ,
                      final boolean indexText, final boolean indexMedia,
                      final boolean storeHTCache, final boolean storeTXCache,
@@ -269,10 +296,9 @@ public class CrawlProfile {
             mem.put(HANDLE,           handle);
             mem.put(NAME,             name);
             mem.put(START_URL,        (startURL == null) ? "" : startURL.toNormalform(true, false));
-            mem.put(GENERAL_FILTER,   (generalFilter == null) ? ".*" : generalFilter);
-            mem.put(SPECIFIC_FILTER,  (specificFilter == null) ? ".*" : specificFilter);
-            mem.put(GENERAL_DEPTH,    Integer.toString(generalDepth));
-            mem.put(SPECIFIC_DEPTH,   Integer.toString(specificDepth));
+            mem.put(FILTER_MUSTMATCH,   (mustmatch == null) ? MATCH_ALL : mustmatch);
+            mem.put(FILTER_MUSTNOTMATCH,   (mustnotmatch == null) ? MATCH_NEVER : mustnotmatch);
+            mem.put(DEPTH,    Integer.toString(depth));
             mem.put(RECRAWL_IF_OLDER, Long.toString(recrawlIfOlder));
             mem.put(DOM_FILTER_DEPTH, Integer.toString(domFilterDepth));
             mem.put(DOM_MAX_PAGES,    Integer.toString(domMaxPages));
@@ -322,27 +348,24 @@ public class CrawlProfile {
             final String r = mem.get(START_URL);
             return r;
         }
-        public String generalFilter() {
-            final String r = mem.get(GENERAL_FILTER);
-            if (r == null) return ".*";
-            return r;
-        }
-        public String specificFilter() {
-            final String r = mem.get(SPECIFIC_FILTER);
-            if (r == null) return ".*";
-            return r;
-        }
-        public int generalDepth() {
-            final String r = mem.get(GENERAL_DEPTH);
-            if (r == null) return 0;
-            try {
-                return Integer.parseInt(r);
-            } catch (final NumberFormatException e) {
-                return 0;
+        public Pattern mustMatchPattern() {
+            if (this.mustmatch == null) {
+                String r = mem.get(FILTER_MUSTMATCH);
+                if (r == null) r = MATCH_ALL;
+                this.mustmatch = Pattern.compile(r);
             }
+            return this.mustmatch;
         }
-        public int specificDepth() {
-            final String r = mem.get(SPECIFIC_DEPTH);
+        public Pattern mustNotMatchPattern() {
+            if (this.mustnotmatch == null) {
+                String r = mem.get(FILTER_MUSTNOTMATCH);
+                if (r == null) r = MATCH_NEVER;
+                this.mustnotmatch = Pattern.compile(r);
+            }
+            return this.mustnotmatch;
+        }
+        public int depth() {
+            final String r = mem.get(DEPTH);
             if (r == null) return 0;
             try {
                 return Integer.parseInt(r);
@@ -497,4 +520,5 @@ public class CrawlProfile {
             return domname;
         }
     }
+    
 }

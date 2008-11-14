@@ -232,8 +232,9 @@ public class CrawlQueues {
                             + ", initiator=" + urlEntry.initiator()
                             + ", crawlOrder=" + ((profile.remoteIndexing()) ? "true" : "false")
                             + ", depth=" + urlEntry.depth()
-                            + ", crawlDepth=" + profile.generalDepth()
-                            + ", filter=" + profile.generalFilter()
+                            + ", crawlDepth=" + profile.depth()
+                            + ", must-match=" + profile.mustMatchPattern().toString()
+                            + ", must-not-match=" + profile.mustNotMatchPattern().toString()
                             + ", permission=" + ((sb.webIndex.seedDB == null) ? "undefined" : (((sb.webIndex.seedDB.mySeed().isSenior()) || (sb.webIndex.seedDB.mySeed().isPrincipal())) ? "true" : "false")));
 
                 processLocalCrawling(urlEntry, stats);

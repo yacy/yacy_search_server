@@ -91,7 +91,8 @@ public class QuickCrawlLink_p {
         final String title = post.get("title",null);
         
         // getting other parameters if set
-        final String crawlingFilter  = post.get("crawlingFilter", ".*");
+        final String crawlingMustMatch  = post.get("mustmatch", CrawlProfile.MATCH_ALL);
+        final String crawlingMustNotMatch  = post.get("mustnotmatch", CrawlProfile.MATCH_NEVER);
         final int CrawlingDepth      = Integer.parseInt(post.get("crawlingDepth", "0"));        
         final boolean crawlDynamic   = post.get("crawlingQ", "").equals("on");
         final boolean indexText      = post.get("indexText", "on").equals("on");
@@ -129,11 +130,11 @@ public class QuickCrawlLink_p {
             try {
                 pe = sb.webIndex.profilesActiveCrawls.newEntry(
                         crawlingStartURL.getHost(), 
-                        crawlingStartURL, 
-                        crawlingFilter, 
-                        crawlingFilter, 
-                        CrawlingDepth, 
-                        CrawlingDepth, 
+                        crawlingStartURL,
+                        CrawlProfile.KEYWORDS_USER,
+                        crawlingMustMatch,
+                        crawlingMustNotMatch,
+                        CrawlingDepth,
                         60 * 24 * 30, // recrawlIfOlder (minutes); here: one month
                         -1, // domFilterDepth, if negative: no auto-filter
                         -1, // domMaxPages, if negative: no count restriction

@@ -330,26 +330,27 @@ public class SitemapParser extends DefaultHandler {
     }
 
     private CrawlProfile.entry createProfile(final String domainName, final yacyURL sitemapURL) {
-        return this.sb.webIndex.profilesActiveCrawls.newEntry(domainName, sitemapURL,
-        // crawlingFilter
-                                                              ".*", ".*",
-                                                              // Depth
-                                                              0, 0,
-                                                              // force recrawling
-                                                              0,
-                                                              // disable Auto-Dom-Filter
-                                                              -1, -1,
-                                                              // allow crawling of dynamic URLs
-                                                              true,
-                                                              // index text + media
-                                                              true, true,
-                                                              // don't store downloaded pages to Web Cache
-                                                              false,
-                                                              // store to TX cache
-                                                              true,
-                                                              // remote Indexing disabled
-                                                              false,
-                                                              // exclude stop-words
-                                                              true, true, true);
+        return this.sb.webIndex.profilesActiveCrawls.newEntry(
+                domainName, sitemapURL, CrawlProfile.KEYWORDS_USER,
+                // crawling Filter
+                CrawlProfile.MATCH_ALL, CrawlProfile.MATCH_NEVER,
+                // Depth
+                0,
+                // force recrawling
+                0,
+                // disable Auto-Dom-Filter
+                -1, -1,
+                // allow crawling of dynamic URLs
+                true,
+                // index text + media
+                true, true,
+                // don't store downloaded pages to Web Cache
+                false,
+                // store to TX cache
+                true,
+                // remote Indexing disabled
+                false,
+                // exclude stop-words
+                true, true, true);
     }
 }

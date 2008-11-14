@@ -1558,8 +1558,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         
         if (this.log.isFine()) log.logFine("processResourceStack processCase=" + processCase +
                 ", depth=" + entry.depth() +
-                ", maxDepth=" + ((entry.profile() == null) ? "null" : Integer.toString(entry.profile().generalDepth())) +
-                ", filter=" + ((entry.profile() == null) ? "null" : entry.profile().generalFilter()) +
+                ", maxDepth=" + ((entry.profile() == null) ? "null" : Integer.toString(entry.profile().depth())) +
+                ", must-match=" + ((entry.profile() == null) ? "null" : entry.profile().mustMatchPattern().toString()) +
+                ", must-not-match=" + ((entry.profile() == null) ? "null" : entry.profile().mustNotMatchPattern().toString()) +
                 ", initiatorHash=" + entry.initiator() +
                 //", responseHeader=" + ((entry.responseHeader() == null) ? "null" : entry.responseHeader().toString()) +
                 ", url=" + entry.url()); // DEBUG
@@ -1591,7 +1592,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         final long stackStartTime = System.currentTimeMillis();
         if (
                 ((processCase == plasmaSwitchboardConstants.PROCESSCASE_4_PROXY_LOAD) || (processCase == plasmaSwitchboardConstants.PROCESSCASE_5_LOCAL_CRAWLING)) &&
-                ((entry.profile() == null) || (entry.depth() < entry.profile().generalDepth()))
+                ((entry.profile() == null) || (entry.depth() < entry.profile().depth()))
         ) {
             final Map<yacyURL, String> hl = document.getHyperlinks();
             final Iterator<Map.Entry<yacyURL, String>> i = hl.entrySet().iterator();

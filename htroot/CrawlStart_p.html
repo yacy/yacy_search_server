@@ -100,16 +100,28 @@
           </td>
         </tr>
         <tr valign="top" class="TableCellDark">
-          <td><label for="crawlingFilter">Crawling Filter</label>:</td>
+          <td><label for="mustmatch">Must-Match Filter</label>:</td>
           <td>
 			<input type="radio" name="range" value="wide" checked="checked" />Use filter&nbsp;&nbsp;
-			<input name="crawlingFilter" id="crawlingFilter" type="text" size="20" maxlength="100" value="#[crawlingFilter]#" /><br />
+			<input name="mustmatch" id="mustmatch" type="text" size="60" maxlength="100" value="#[mustmatch]#" /><br />
 			<input type="radio" name="range" value="domain" />Restrict to start domain<br />
 			<input type="radio" name="range" value="subpath" />Restrict to sub-path
 		  </td>
           <td>
-            The filter is an emacs-like regular expression that must match with the URLs which are used to be crawled; default is 'catch all'.
+            The filter is an emacs-like regular expression that must match with the URLs which are used to be crawled;
+            default is 'catch all'.
             You can also use an automatic domain-restriction to fully crawl a single domain.
+          </td>
+        </tr>
+        <tr valign="top" class="TableCellDark">
+          <td><label for="mustnotmatch">Must-Not-Match Filter</label>:</td>
+          <td>
+			<input name="mustnotmatch" id="mustnotmatch" type="text" size="80" maxlength="100" value="#[mustnotmatch]#" />
+		  </td>
+          <td>
+            This filter must not match to allow that the page is accepted for crawling.
+            The empty string is a never-match filter which should do well for most cases.
+            If you don't know what this means, please leave this field empty.
           </td>
         </tr>
         <tr valign="top" class="TableCellLight">

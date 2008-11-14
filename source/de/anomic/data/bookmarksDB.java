@@ -226,22 +226,22 @@ public class bookmarksDB {
 	    			int pos = 0;					
 					// set crawlingStart to BookmarkUrl    			
 	    			String crawlingStart = bm.getUrl();                    
-	    			String newcrawlingfilter = crawlingfilter;
+	    			String newcrawlingMustMatch = crawlingfilter;
 	    			
                     yacyURL crawlingStartURL = new yacyURL(crawlingStart, null);
                     
                     // set the crawling filter                    
-                    if (newcrawlingfilter.length() < 2) newcrawlingfilter = ".*"; // avoid that all urls are filtered out if bad value was submitted
+                    if (newcrawlingMustMatch.length() < 2) newcrawlingMustMatch = ".*"; // avoid that all urls are filtered out if bad value was submitted
                     
-                    if (crawlingStartURL!= null && newcrawlingfilter.equals("dom")) {
-                        newcrawlingfilter = ".*" + crawlingStartURL.getHost() + ".*";
+                    if (crawlingStartURL!= null && newcrawlingMustMatch.equals("dom")) {
+                        newcrawlingMustMatch = ".*" + crawlingStartURL.getHost() + ".*";
                     }
-                    if (crawlingStart!= null && newcrawlingfilter.equals("sub") && (pos = crawlingStart.lastIndexOf("/")) > 0) {
-                        newcrawlingfilter = crawlingStart.substring(0, pos + 1) + ".*";
+                    if (crawlingStart!= null && newcrawlingMustMatch.equals("sub") && (pos = crawlingStart.lastIndexOf("/")) > 0) {
+                        newcrawlingMustMatch = crawlingStart.substring(0, pos + 1) + ".*";
                     }                    				
 					
 					// check if the crawl filter works correctly    			
-	    			Pattern.compile(newcrawlingfilter);	    			
+	    			Pattern.compile(newcrawlingMustMatch);	    			
                     
                     String urlhash = crawlingStartURL.hash();
                     sb.webIndex.removeURL(urlhash);
@@ -251,8 +251,10 @@ public class bookmarksDB {
 	                // stack url
 	                sb.webIndex.profilesPassiveCrawls.removeEntry(crawlingStartURL.hash()); // if there is an old entry, delete it
 	                CrawlProfile.entry pe = sb.webIndex.profilesActiveCrawls.newEntry(
-	                        folder+"/"+crawlingStartURL, crawlingStartURL, newcrawlingfilter, newcrawlingfilter,
-	                        newcrawlingdepth, newcrawlingdepth,
+	                        folder+"/"+crawlingStartURL, crawlingStartURL, CrawlProfile.KEYWORDS_USER,
+	                        newcrawlingMustMatch,
+	                        CrawlProfile.MATCH_NEVER,
+	                        newcrawlingdepth,
 	                        sb.webIndex.profilesActiveCrawls.getRecrawlDate(crawlingIfOlder), crawlingDomFilterDepth, crawlingDomMaxPages,
 	                        crawlingQ,
 	                        indexText, indexMedia,

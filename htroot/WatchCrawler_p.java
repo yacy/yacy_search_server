@@ -123,16 +123,16 @@ public class WatchCrawler_p {
                     crawlingStart = (crawlingStartURL == null) ? null : crawlingStartURL.toNormalform(true, true);
                     
                     // set the crawling filter
-                    String newcrawlingfilter = post.get("crawlingFilter", ".*");
-                    if (newcrawlingfilter.length() < 2) newcrawlingfilter = ".*"; // avoid that all urls are filtered out if bad value was submitted
-                    
+                    String newcrawlingMustMatch = post.get("mustmatch", CrawlProfile.MATCH_ALL);
+                    String newcrawlingMustNotMatch = post.get("mustnotmatch", CrawlProfile.MATCH_NEVER);
+                    if (newcrawlingMustMatch.length() < 2) newcrawlingMustMatch = CrawlProfile.MATCH_ALL; // avoid that all urls are filtered out if bad value was submitted
+                    // special cases:
                     if (crawlingStartURL!= null && fullDomain) {
-                        newcrawlingfilter = ".*" + crawlingStartURL.getHost() + ".*";
+                        newcrawlingMustMatch = ".*" + crawlingStartURL.getHost() + ".*";
                     }
                     if (crawlingStart!= null && subPath && (pos = crawlingStart.lastIndexOf("/")) > 0) {
-                        newcrawlingfilter = crawlingStart.substring(0, pos + 1) + ".*";
+                        newcrawlingMustMatch = crawlingStart.substring(0, pos + 1) + ".*";
                     }
-                    env.setConfig("crawlingFilter", newcrawlingfilter);
                     
                     final boolean crawlOrder = post.get("crawlOrder", "off").equals("on");
                     env.setConfig("crawlOrder", (crawlOrder) ? "true" : "false");
@@ -183,12 +183,12 @@ public class WatchCrawler_p {
                         if ((crawlingStart == null || crawlingStartURL == null) /* || (!(crawlingStart.matches(newcrawlingfilter))) */) {
                             // print error message
                             prop.put("info", "4"); //crawlfilter does not match url
-                            prop.putHTML("info_newcrawlingfilter", newcrawlingfilter);
+                            prop.putHTML("info_newcrawlingfilter", newcrawlingMustMatch);
                             prop.putHTML("info_crawlingStart", crawlingStart);
                         } else try {
                             
                             // check if the crawl filter works correctly
-                            Pattern.compile(newcrawlingfilter);
+                            Pattern.compile(newcrawlingMustMatch);
                             
                             // stack request
                             // first delete old entry, if exists
@@ -201,8 +201,12 @@ public class WatchCrawler_p {
                             // stack url
                             sb.webIndex.profilesPassiveCrawls.removeEntry(crawlingStartURL.hash()); // if there is an old entry, delete it
                             final CrawlProfile.entry pe = sb.webIndex.profilesActiveCrawls.newEntry(
-                                    crawlingStartURL.getHost(), crawlingStartURL, newcrawlingfilter, newcrawlingfilter,
-                                    newcrawlingdepth, newcrawlingdepth,
+                                    crawlingStartURL.getHost(),
+                                    crawlingStartURL,
+                                    CrawlProfile.KEYWORDS_USER,
+                                    newcrawlingMustMatch,
+                                    newcrawlingMustNotMatch,
+                                    newcrawlingdepth,
                                     crawlingIfOlder, crawlingDomFilterDepth, crawlingDomMaxPages,
                                     crawlingQ,
                                     indexText, indexMedia,
@@ -270,7 +274,7 @@ public class WatchCrawler_p {
                             }
                         } catch (final PatternSyntaxException e) {
                             prop.put("info", "4"); //crawlfilter does not match url
-                            prop.putHTML("info_newcrawlingfilter", newcrawlingfilter);
+                            prop.putHTML("info_newcrawlingfilter", newcrawlingMustMatch);
                             prop.putHTML("info_error", e.getMessage());
                         } catch (final Exception e) {
                             // mist
@@ -286,7 +290,7 @@ public class WatchCrawler_p {
                             final String fileName = post.get("crawlingFile");  
                             try {
                                 // check if the crawl filter works correctly
-                                Pattern.compile(newcrawlingfilter);
+                                Pattern.compile(newcrawlingMustMatch);
                                 
                                 // loading the file content
                                 final File file = new File(fileName);
@@ -306,7 +310,21 @@ public class WatchCrawler_p {
                                 
                                 // creating a crawler profile
                                 final yacyURL crawlURL = new yacyURL("file://" + file.toString(), null);
-                                final CrawlProfile.entry profile = sb.webIndex.profilesActiveCrawls.newEntry(fileName, crawlURL, newcrawlingfilter, newcrawlingfilter, newcrawlingdepth, newcrawlingdepth, crawlingIfOlder, crawlingDomFilterDepth, crawlingDomMaxPages, crawlingQ, indexText, indexMedia, storeHTCache, true, crawlOrder, xsstopw, xdstopw, xpstopw);
+                                final CrawlProfile.entry profile = sb.webIndex.profilesActiveCrawls.newEntry(
+                                        fileName, crawlURL, CrawlProfile.KEYWORDS_USER,
+                                        newcrawlingMustMatch,
+                                        CrawlProfile.MATCH_NEVER,
+                                        newcrawlingdepth,
+                                        crawlingIfOlder,
+                                        crawlingDomFilterDepth,
+                                        crawlingDomMaxPages,
+                                        crawlingQ,
+                                        indexText,
+                                        indexMedia,
+                                        storeHTCache,
+                                        true,
+                                        crawlOrder,
+                                        xsstopw, xdstopw, xpstopw);
                                 
                                 // pause local crawl here
                                 sb.pauseCrawlJob(plasmaSwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
@@ -333,7 +351,7 @@ public class WatchCrawler_p {
                             } catch (final PatternSyntaxException e) {
                                 // print error message
                                 prop.put("info", "4"); //crawlfilter does not match url
-                                prop.putHTML("info_newcrawlingfilter", newcrawlingfilter);
+                                prop.putHTML("info_newcrawlingfilter", newcrawlingMustMatch);
                                 prop.putHTML("info_error", e.getMessage());
                             } catch (final Exception e) {
                                 // mist
@@ -353,8 +371,10 @@ public class WatchCrawler_p {
                             
                     		// create a new profile
                     		final CrawlProfile.entry pe = sb.webIndex.profilesActiveCrawls.newEntry(
-                    				sitemapURLStr, sitemapURL, newcrawlingfilter, newcrawlingfilter,
-                    				newcrawlingdepth, newcrawlingdepth,
+                    				sitemapURLStr, sitemapURL, CrawlProfile.KEYWORDS_USER,
+                    				newcrawlingMustMatch,
+                    				CrawlProfile.MATCH_NEVER,
+                    				newcrawlingdepth,
                     				crawlingIfOlder, crawlingDomFilterDepth, crawlingDomMaxPages,
                     				crawlingQ,
                     				indexText, indexMedia,

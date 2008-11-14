@@ -62,10 +62,8 @@ public class CrawlProfileEditor_p {
     static {
         labels.add(new eentry(entry.NAME,             "Name",                 true,  eentry.STRING));
         labels.add(new eentry(entry.START_URL,        "Start URL",            true,  eentry.STRING));
-        labels.add(new eentry(entry.GENERAL_FILTER,   "General Filter",       false, eentry.STRING));
-        labels.add(new eentry(entry.SPECIFIC_FILTER,  "Specific Filter",      false, eentry.STRING));
-        labels.add(new eentry(entry.GENERAL_DEPTH,    "General Depth",        false, eentry.INTEGER));
-        labels.add(new eentry(entry.SPECIFIC_DEPTH,   "Specific Depth",       false, eentry.INTEGER));
+        labels.add(new eentry(entry.FILTER_MUSTMATCH,   "General Filter",       false, eentry.STRING));
+        labels.add(new eentry(entry.DEPTH,    "General Depth",        false, eentry.INTEGER));
         labels.add(new eentry(entry.RECRAWL_IF_OLDER, "Recrawl If Older",     false, eentry.INTEGER));
         labels.add(new eentry(entry.DOM_FILTER_DEPTH, "Domain Filter Depth",  false, eentry.INTEGER));
         labels.add(new eentry(entry.DOM_MAX_PAGES,    "Domain Max. Pages",    false, eentry.INTEGER));
@@ -214,8 +212,9 @@ public class CrawlProfileEditor_p {
         prop.put("crawlProfiles_" + count + "_name", profile.name());
         prop.putXML("crawlProfiles_" + count + "_startURL", profile.startURL());
         prop.put("crawlProfiles_" + count + "_handle", profile.handle());
-        prop.put("crawlProfiles_" + count + "_depth", profile.generalDepth());
-        prop.put("crawlProfiles_" + count + "_filter", profile.generalFilter());
+        prop.put("crawlProfiles_" + count + "_depth", profile.depth());
+        prop.put("crawlProfiles_" + count + "_mustmatch", profile.mustMatchPattern().toString());
+        prop.put("crawlProfiles_" + count + "_mustnotmatch", profile.mustNotMatchPattern().toString());
         prop.put("crawlProfiles_" + count + "_crawlingIfOlder", (profile.recrawlIfOlder() == 0L) ? "no re-crawl" : ""+ SimpleDateFormat.getDateTimeInstance().format(profile.recrawlIfOlder()));
         prop.put("crawlProfiles_" + count + "_crawlingDomFilterDepth", (profile.domFilterDepth() == Integer.MAX_VALUE) ? "inactive" : Integer.toString(profile.domFilterDepth()));
 

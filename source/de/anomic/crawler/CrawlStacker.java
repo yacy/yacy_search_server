@@ -409,14 +409,22 @@ public final class CrawlStacker extends Thread {
             return errorMsg;
         }
         
-        // filter deny
-        if ((entry.depth() > 0) && (!(entry.url().toString().matches(profile.generalFilter())))) {
-            reason = "url does not match general filter";
-            if (this.log.isFine()) this.log.logFine("URL '" + entry.url().toString() + "' does not match crawling filter '" + profile.generalFilter() + "'. " +
+        // filter with must-match
+        if ((entry.depth() > 0) && !profile.mustMatchPattern().matcher(entry.url().toString()).matches()) {
+            reason = "url does not match must-match filter";
+            if (this.log.isFine()) this.log.logFine("URL '" + entry.url().toString() + "' does not match must-match crawling filter '" + profile.mustMatchPattern().toString() + "'. " +
                              "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
             return reason;
         }
-        
+
+        // filter with must-not-match
+        if ((entry.depth() > 0) && profile.mustNotMatchPattern().matcher(entry.url().toString()).matches()) {
+            reason = "url matches must-not-match filter";
+            if (this.log.isFine()) this.log.logFine("URL '" + entry.url().toString() + "' does matches do-not-match crawling filter '" + profile.mustNotMatchPattern().toString() + "'. " +
+                             "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
+            return reason;
+        }
+
         // deny cgi
         if (entry.url().isCGI())  {
             reason = "cgi url not allowed";
@@ -486,7 +494,7 @@ public final class CrawlStacker extends Thread {
         final boolean remote = profile.handle().equals(this.sb.webIndex.defaultRemoteProfile.handle());
         final boolean global = 
             (profile.remoteIndexing()) /* granted */ &&
-            (entry.depth() == profile.generalDepth()) /* leaf node */ && 
+            (entry.depth() == profile.depth()) /* leaf node */ && 
             //(initiatorHash.equals(yacyCore.seedDB.mySeed.hash)) /* not proxy */ &&
             (
                     (sb.webIndex.seedDB.mySeed().isSenior()) ||
