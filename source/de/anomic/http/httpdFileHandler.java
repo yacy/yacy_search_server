@@ -473,7 +473,7 @@ public final class httpdFileHandler {
                     aBuffer.append("  </ul>\n</body>\n</html>\n");
 
                     // write the list to the client
-                    httpd.sendRespondHeader(conProp, out, httpVersion, 200, null, "text/html", aBuffer.length(), new Date(dir.lastModified()), null, new httpResponseHeader(), null, null, true);
+                    httpd.sendRespondHeader(conProp, out, httpVersion, 200, null, "text/html; charset=UTF-8", aBuffer.length(), new Date(dir.lastModified()), null, new httpResponseHeader(), null, null, true);
                     if (!method.equals(httpHeader.METHOD_HEAD)) {
                         out.write(aBuffer.toString().getBytes("UTF-8"));
                     }
