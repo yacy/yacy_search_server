@@ -70,9 +70,9 @@ public class LogStatistics_p {
         prop.put("results", "1");
         String[] t;
         float l;
-        prop.put(RESULTS + LogParserPLASMA.DHT_DISTANCE_AVERAGE, (Double) r.get(LogParserPLASMA.DHT_DISTANCE_AVERAGE));
-        prop.put(RESULTS + LogParserPLASMA.DHT_DISTANCE_MAX, (Double) r.get(LogParserPLASMA.DHT_DISTANCE_MAX));
-        prop.put(RESULTS + LogParserPLASMA.DHT_DISTANCE_MIN, (Double) r.get(LogParserPLASMA.DHT_DISTANCE_MIN));
+        prop.putNum(RESULTS + LogParserPLASMA.DHT_DISTANCE_AVERAGE, (Long) r.get(LogParserPLASMA.DHT_DISTANCE_AVERAGE));
+        prop.putNum(RESULTS + LogParserPLASMA.DHT_DISTANCE_MAX, (Long) r.get(LogParserPLASMA.DHT_DISTANCE_MAX));
+        prop.putNum(RESULTS + LogParserPLASMA.DHT_DISTANCE_MIN, (Long) r.get(LogParserPLASMA.DHT_DISTANCE_MIN));
         prop.put(RESULTS + LogParserPLASMA.DHT_REJECTED, (Integer) r.get(LogParserPLASMA.DHT_REJECTED));
         prop.put(RESULTS + LogParserPLASMA.DHT_SELECTED, (Integer) r.get(LogParserPLASMA.DHT_SELECTED));
         prop.put(RESULTS + LogParserPLASMA.DHT_SENT_FAILED, (Integer) r.get(LogParserPLASMA.DHT_SENT_FAILED));

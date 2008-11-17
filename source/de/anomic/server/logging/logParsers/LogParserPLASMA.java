@@ -89,13 +89,13 @@ public class LogParserPLASMA implements LogParser{
     /** total time selecting words for index distribution - <strong>Integer</strong> */
     public static final String DHT_WORDS_SELECTED_TIME  = "DHTSelectionWordsTimeCount";
     
-    /** the minimal DHT distance during peer-selection for index distribution - <strong>Double</strong> */
+    /** the minimal DHT distance during peer-selection for index distribution - <strong>Long</strong> */
     public static final String DHT_DISTANCE_MIN         = "minDHTDist";
     
-    /** the maximal DHT distance during peer-selection for index distribution - <strong>Double</strong> */
+    /** the maximal DHT distance during peer-selection for index distribution - <strong>Long</strong> */
     public static final String DHT_DISTANCE_MAX         = "maxDHTDist";
     
-    /** the average DHT distance during peer-selection for index distribution - <strong>Double</strong> */
+    /** the average DHT distance during peer-selection for index distribution - <strong>Long</strong> */
     public static final String DHT_DISTANCE_AVERAGE     = "avgDHTDist";
     
     /** how many times remote peers were too busy to accept the index transfer - <strong>Integer</strong> */
@@ -171,7 +171,7 @@ public class LogParserPLASMA implements LogParser{
     private static final Pattern i2_2 = Pattern.compile("Received (\\d*) Entries (\\d*) Words \\[[\\w-_]{12} .. [\\w-_]{12}\\]/[\\w.-]* from [\\w-_]{12}:[\\w-_]*, processed in (\\d*) milliseconds, requesting (\\d*)/(\\d*) URLs, blocked (\\d*) RWIs");
     private static final Pattern i3 = Pattern.compile("Index transfer of (\\d*) words \\[[\\w-_]{12} .. [\\w-_]{12}\\] to peer ([\\w-_]*):([\\w-_]{12}) in (\\d*) seconds successful \\((\\d*) words/s, (\\d*) Bytes\\)");
     private static final Pattern i4 = Pattern.compile("Index transfer of (\\d*) entries (\\d*) words \\[[\\w-_]{12} .. [\\w-_]{12}\\] and (\\d*) URLs to peer ([\\w-_]*):([\\w-_]{12}) in (\\d*) seconds successful \\((\\d*) words/s, (\\d*) Bytes\\)");
-    private static final Pattern i5 = Pattern.compile("Selected  \\w*  DHT target peer ([\\w-_]*):([\\w-_]{12}), distance2first = ([\\w.-]*), distance2last = ([\\w.-]*)");
+    private static final Pattern i5 = Pattern.compile("Selected DHT target peer ([\\w-_]*):([\\w-_]{12}), distance2first = ([\\d]*), distance2last = ([\\d]*)");
     private static final Pattern i6 = Pattern.compile("Rejecting RWIs from peer ([\\w-_]{12}):([\\w-_]*)/([\\w.]*). ([\\w. ]*)");
     private static final Pattern i7 = Pattern.compile("DHT distribution: transfer to peer [\\w-]* finished.");
     private static final Pattern i8 = Pattern.compile("Index selection of (\\d*) words \\[[\\w-_]{12} .. [\\w-_]{12}\\] in (\\d*) seconds");
@@ -212,12 +212,12 @@ public class LogParserPLASMA implements LogParser{
     private final HashSet<String> RWIRejectPeerHashs = new HashSet<String>();
     private final HashSet<String> DHTPeerNames = new HashSet<String>();
     private final HashSet<String> DHTPeerHashs = new HashSet<String>();
-    private int DHTSelectionTargetCount = 0;
+    private int DHTSelectionTargetCount = 1;
     private int DHTSelectionWordsCount = 0;
     private int DHTSelectionWordsTimeCount = 0;
-    private double minDHTDist = 1;
-    private double maxDHTDist = 0;
-    private double avgDHTDist = 0;
+    private long minDHTDist = Long.MAX_VALUE;
+    private long maxDHTDist = 0;
+    private long avgDHTDist = 0;
     private int busyPeerCount = 0;
     private int notEnoughDHTPeers = 0;
     private int failedIndexDistributionCount = 0;
@@ -302,9 +302,9 @@ public class LogParserPLASMA implements LogParser{
             m = i5.matcher (logLine);
             
             if (m.find () && m.groupCount() >= 4) {
-                minDHTDist = Math.min(minDHTDist, Math.min(Double.parseDouble(m.group(3)), Double.parseDouble(m.group(4))));
-                maxDHTDist = Math.max(maxDHTDist, Math.max(Double.parseDouble(m.group(3)), Double.parseDouble(m.group(4))));
-                avgDHTDist += Double.parseDouble(m.group(3));
+                minDHTDist = Math.min(minDHTDist, Math.min(Long.parseLong(m.group(3)), Long.parseLong(m.group(4))));
+                maxDHTDist = Math.max(maxDHTDist, Math.max(Long.parseLong(m.group(3)), Long.parseLong(m.group(4))));
+                avgDHTDist += Long.parseLong(m.group(3));
                 DHTSelectionTargetCount++;
                 totalParserTime += (System.currentTimeMillis() - start);
                 totalParserRuns++;
@@ -453,9 +453,9 @@ public class LogParserPLASMA implements LogParser{
         results.put(DHT_SELECTED            , Integer.valueOf(DHTSelectionTargetCount));
         results.put(DHT_WORDS_SELECTED      , Integer.valueOf(DHTSelectionWordsCount));
         results.put(DHT_WORDS_SELECTED_TIME , Integer.valueOf(DHTSelectionWordsTimeCount));
-        results.put(DHT_DISTANCE_MIN        , Double.valueOf(minDHTDist));
-        results.put(DHT_DISTANCE_MAX        , Double.valueOf(maxDHTDist));
-        results.put(DHT_DISTANCE_AVERAGE    , Double.valueOf(avgDHTDist / DHTSelectionTargetCount));
+        results.put(DHT_DISTANCE_MIN        , Long.valueOf(minDHTDist));
+        results.put(DHT_DISTANCE_MAX        , Long.valueOf(maxDHTDist));
+        results.put(DHT_DISTANCE_AVERAGE    , Long.valueOf(avgDHTDist / DHTSelectionTargetCount / Long.MAX_VALUE)); //FIXME: broken avg
         results.put(PEERS_BUSY              , Integer.valueOf(busyPeerCount));
         results.put(PEERS_TOO_LESS          , Integer.valueOf(notEnoughDHTPeers));
         results.put(DHT_SENT_FAILED         , Integer.valueOf(failedIndexDistributionCount));
