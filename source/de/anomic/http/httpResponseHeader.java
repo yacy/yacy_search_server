@@ -24,6 +24,7 @@
 package de.anomic.http;
 
 import java.nio.charset.Charset;
+import java.nio.charset.IllegalCharsetNameException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -129,10 +130,14 @@ public class httpResponseHeader extends httpHeader {
             charSetName = DEFAULT_CHARSET;
         }
         // maybe the charset is valid but not installed on this computer
-        if(!Charset.isSupported(charSetName)) {
-            serverLog.logWarning("httpHeader", "charset '"+ charSetName +"' is not supported on this machine, using default ("+ Charset.defaultCharset().name() +")");
-            // use system default
-            return Charset.defaultCharset();
+        try {
+            if(!Charset.isSupported(charSetName)) {
+                serverLog.logWarning("httpHeader", "charset '"+ charSetName +"' is not supported on this machine, using default ("+ Charset.defaultCharset().name() +")");
+                // use system default
+                return Charset.defaultCharset();
+            }
+        } catch(IllegalCharsetNameException e) {
+            serverLog.logSevere("httpHeader", "Charset in header is illegal: '"+ charSetName +"'\n    "+ toString());
         }
         return Charset.forName(charSetName);
     } 
