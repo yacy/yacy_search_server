@@ -138,6 +138,8 @@ public class httpResponseHeader extends httpHeader {
             }
         } catch(IllegalCharsetNameException e) {
             serverLog.logSevere("httpHeader", "Charset in header is illegal: '"+ charSetName +"'\n    "+ toString());
+            // use system default
+            return Charset.defaultCharset();
         }
         return Charset.forName(charSetName);
     } 
