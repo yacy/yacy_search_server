@@ -1,0 +1,545 @@
+<mediawiki xmlns="http://www.mediawiki.org/xml/export-0.3/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-insta
+nce" xsi:schemaLocation="http://www.mediawiki.org/xml/export-0.3/ http://www.mediawiki.org/xml/export-0.3.xsd
+" version="0.3" xml:lang="de">
+  <siteinfo>
+    <sitename>Wikipedia</sitename>
+    <base>http://de.wikipedia.org/wiki/Wikipedia:Hauptseite</base>
+    <generator>MediaWiki 1.14alpha</generator>
+    <case>first-letter</case>
+      <namespaces>
+      <namespace key="-2">Media</namespace>
+      <namespace key="-1">Spezial</namespace>
+      <namespace key="0" />
+      <namespace key="1">Diskussion</namespace>
+      <namespace key="2">Benutzer</namespace>
+      <namespace key="3">Benutzer Diskussion</namespace>
+      <namespace key="4">Wikipedia</namespace>
+      <namespace key="5">Wikipedia Diskussion</namespace>
+      <namespace key="6">Bild</namespace>
+      <namespace key="7">Bild Diskussion</namespace>
+      <namespace key="8">MediaWiki</namespace>
+      <namespace key="9">MediaWiki Diskussion</namespace>
+      <namespace key="10">Vorlage</namespace>
+      <namespace key="11">Vorlage Diskussion</namespace>
+      <namespace key="12">Hilfe</namespace>
+      <namespace key="13">Hilfe Diskussion</namespace>
+      <namespace key="14">Kategorie</namespace>
+      <namespace key="15">Kategorie Diskussion</namespace>
+      <namespace key="100">Portal</namespace>
+      <namespace key="101">Portal Diskussion</namespace>
+    </namespaces>
+  </siteinfo>
+  <page>
+    <title>Gottesbeweis</title>
+    <id>35094</id>
+    <revision>
+      <id>51637191</id>
+      <timestamp>2008-10-09T04:25:49Z</timestamp>
+      <contributor>
+        <username>Zorrobot</username>
+        <id>564937</id>
+      </contributor>
+      <minor />
+      <comment>Bot:  Ändere: [[pl:Dowodzenie istnienia Boga]]</comment>
+      <text xml:space="preserve">Ein '''Gottesbeweis''' ist der Versuch, die [[Existenz]] eines [[Gott]]es od
+er [[Ursprung]]sprinzips – teilweise unter Einbeziehung [[Empirie|empirischer]] Beobachtungen – zu [[Beweis (
+Logik)|beweisen]], oder zumindest Hinweise dafür zu finden. Diese [[Rationalität|rationale]] Methode steht da
+mit zumindest tendenziell im Gegensatz zu jeder Form eines religiösen [[Irrationalismus]], der die Erkenntnis
+ [[Gott]]es als [[Mysterium]] versteht, das sich der Mitteilung und logischen Analyse wesentlich entzieht. Ei
+n allgemein anerkannter Beweis für die Existenz eines Gottes konnte bisher nicht erbracht werden. Gottesbewei
+se beziehen sich nicht notwendigerweise auf einen bestimmten Gott in einer bestimmten Religion, sind aber his
+torisch im Anschluss an die [[Metaphysik]] der griechischen [[Philosophie]] ([[Platon]], [[Aristoteles]]) vor
+ allem im Geltungsbereich des [[Islam]]s, des [[Judentum]]s und [[Christentum]]s systematisch ausformuliert w
+orden.
+
+== Einleitung ==
+=== Geschichte ===
+Die neuzeitliche Einschätzung von Gottesbeweisen beruht weitgehend auf [[Immanuel Kant]]s Kritik an ihnen. Ka
+nts ''[[Kritik der reinen Vernunft]]'' beschränkt mögliche Erkenntnisse über Sachverhalte auf den Bereich des
+ sinnlich Wahrnehmbaren. Die klassischen Gottesbeweise sind nach dieser Auffassung nicht mehr schlüssig. Dies
+ betraf speziell die mittelalterlichen ([[Scholastik|scholastischen]]) Gottesbeweise, darunter den [[Ontologi
+e|ontologischen]] Gottesbeweis. Spätere [[Religionskritik]]er wie [[Ludwig Feuerbach]], nach dessen [[Projekt
+ionstheorie]] Gottes Existenz eine Fiktion ist, versuchten zu beweisen, dass Gott nicht existiere.
+
+Trotz dieser neuzeitlichen Kritik vertraten [[Neuscholastik]]er und vertreten einige Religionsphilosophen auc
+h heute noch ähnliche Denkfiguren, etwa im Rahmen einer [[Natürliche Theologie|Natürlichen Theologie]]. Ander
+erseits greifen Philosophen des 20. Jahrhunderts wie der analytische Philosoph [[John Leslie Mackie]] Kants K
+ritik auf. Andere analytische Philosophen wie [[Alvin Plantinga]] oder [[Richard Swinburne]] dagegen versuche
+n eine neue Formulierung von Gottesbeweisen, darunter auch des ontologischen Gottesbeweises.
+
+=== Motive ===
+In der vorchristlichen [[Antike]] und im christlichen [[Mittelalter]] spielten Gottesbeweise für das Leben de
+r Gläubigen eine andere Rolle. Die Existenz von Göttern oder eines [[Gott]]es stand meist nicht in Frage. Zud
+em war sie in frühen staatlichen Gesellschaften oft zusammen mit der jeweiligen Staatsreligion [[Doktrin|dokt
+rinär]] festgeschrieben. Infragestellung wurde oft als [[Atheismus|Gottlosigkeit]] mit erheblichen Sanktionen
+ belegt. Die theoretischen Überlegungen sollten dann lediglich die vorhandenen Grundüberzeugungen stützen ode
+r präzisieren. 
+
+Viele Frühscholastiker betonen die Notwendigkeit einer Vermittlung von Vernunft und Glaube. Wesentliches Mome
+nt dafür ist die Auffassung, dass der Vernunft die Existenz Gottes einsichtig sei. In diesem Sinne hatten ber
+eits arabische (besonders kalamitische) und jüdische Denker Gottesbeweise entwickelt. 
+
+Ein weiteres Motiv für Gottesbeweise wird die Bekehrung von [[Heidentum|Heiden]]. Durch politische Machtmecha
+nismen lässt sich in heidnisch geprägten Gesellschaften eine bestimmte Religiosität kaum erzwingen. Wo zudem 
+die [[Bibel]] noch nicht als unumstößliche Wahrheit anerkannt ist, kann nicht offenbarungstheologisch argumen
+tiert werden.
+
+Die eigentliche Zeit der Gottesbeweise war die [[Frühe Neuzeit]] und die deutsche [[Zeitalter der Aufklärung|
+Aufklärung]]. Für [[Deismus|deistische]] Aufklärer sollten die Gottesbeweise eine auf der Vernunft basierende
+ Religion etablieren. Diese sogenannte ''natürliche Religion'' sollte ohne irgendwelche [[Offenbarung]]seleme
+nte auskommen. Diese Vorstellung wurde besonders von Hume kritisiert. Mit der einflussreichen Kritik Kants an
+ den Gottesbeweisen verlieren sie in philosophischen Diskussionen an Bedeutung. Auf anderer Basis, anknüpfend
+ beim [[Subjekt (Philosophie)|Subjekt]], versuchen etwa [[Friedrich Schleiermacher]] und [[Søren Kierkegaard]
+] eine Rehabilitierung von Gottesbeweisen. Mit voranschreitendem Entstehen einer [[Säkularismus|säkularisiert
+en]] Gesellschaft und philosophischen Vorbehalten gegen ihre Durchführbarkeit sind Gottesbeweise weitgehend n
+ur für religiöse oder speziell philosophisch interessierte Kreise bedeutsam.
+
+== Typen von Gottesbeweisen ==
+Die Gottesbeweise lassen sich grundsätzlich in apriorische und aposteriorische Beweise einteilen. Als klassis
+cher [[apriori]]scher Gottesbeweis gilt der ontologische Gottesbeweis des [[Anselm von Canterbury]], da er di
+e Existenz Gottes aus dessen Begriff zu beweisen versucht. Die sog. „fünf Wege“ in der Tradition des [[Thomas
+ von Aquin]] dagegen sind [[A posteriori|aposteriorische]] Gottesbeweise. Thomas unterscheidet den Aufweis Go
+ttes aus der Bewegung (''ex parte motus''), aus der Wirkursache (''ex ratione causae efficientis''), aus dem 
+Möglichen und Notwendigen (''ex possibili et necessario''), aus den Graden der Vollkommenheit (''ex gradibus'
+') und aus der [[Teleologie]] (''ex gubernatione rerum''). Jeder dieser Wege geht von Erfahrungstatsachen aus
+, d.h. er enthält empirische Prämissen. Diese können in der Argumentation Thomas’ nicht zugleich wahr und ihr
+e Konklusion, die Existenz Gottes, falsch sein. 
+
+=== Der kausale Gottesbeweis ===
+==== Argumentation ====
+Der kausale Gottesbeweis geht davon aus, dass alles, was in dieser Welt existiert, [[Kontingenz (Philosophie)
+|kontingent]] ist. Da man die Reihe der Ursachen nicht unendlich fortsetzen könne, müsse eine erste nicht kon
+tingente Ursache ([[causa prima]]) existieren. Schon [[Aristoteles]] [[Postulat|postulierte]] eine solche ers
+te Ursache, die selbst unverursacht sei, und nannte sie &quot;das erste unbewegte Bewegende&quot; (πρῶτον κιν
+οῦν ἀκίνητον) oder den &quot;unbewegten Beweger&quot;. Viele mittelalterliche Denker, auch [[Thomas von Aquin
+]], identifizierten diesen mit Gott. Die Argumentation des Aristoteles liegt auch dem &quot;[[kosmologisch]]e
+n Gottesbeweis&quot; (s. u.) zugrunde und wird von manchen zu einem &quot;Kontingenzbeweis&quot; (s. u.) vera
+llgemeinert.
+
+==== Kritik ====
+Varianten des kausalen Gottesbeweises wurden vielfach der Kritik unterzogen. Typische Einwände sind etwa die 
+folgenden:
+* Der kausale Gottesbeweis sei [[Inkonsistenz|inkonsistent]]. Bei der [[Konklusion]], dass ein bestimmter Got
+t aller Dinge Anfang ist, werde die [[Prämisse]] verworfen, dass alles eine Ursache hat. Schränke man, um die
+s zu vermeiden, die Prämisse darauf ein, dass alles ''Kontingente'' eine Ursache hat, mache eine solche Refor
+mulierung den Beweis [[Zirkelschluss|zirkulär]].
+* Aus dem Prinzip, dass alles eine Ursache hat, könne nicht geschlossen werden, dass es eine ''erste'' Ursach
+e gibt. Wer so argumentiere, breche die [[Kausalität|Kausalkette]] willkürlich ab. Denkbar seien demgegenüber
+ verschiedene Alternativen: Zum einen könne die Kausalitätskette ins Unendliche fortgesetzt werden. Es könne 
+beispielsweise mehrere Götter geben, die einander der Reihe nach erschaffen (dies wendet z.B. [[Bertrand Russ
+ell]] ein). Zum anderen könne das Universum ewig existieren, was nach einigen kosmologischen Modellen mit der
+ [[Urknall]]theorie vereinbar sei. Auch lassen bestimmte kosmologische Modelle ([[Raumzeit]]-Topologien) in s
+ich geschlossene Kausalketten zu. Eine erste Ursache anzunehmen wäre demnach keine logische oder metaphysisch
+e Notwendigkeit, sondern entsprünge unserer Art, die Welt wahrzunehmen.
+* Kant verweist darauf, dass der kausale Gottesbeweis aus den oben genannten Gründen ein notwendig Existieren
+des, also einen ontologischen Beweis vorausetzt, womit dem kausalen Beweis keine Beweiskraft im strengen Sinn
+ zukommt. Außerdem nimmt der Beweis an, dass jedes Ereignis in der Welt eine Ursache habe, um dies dann auf d
+ie Welt als solche auszudehnen, indem er annimmt, dass die Welt eine Ursache habe. Dass dies zulässig ist, is
+t ebenfalls unbewiesen. Kant streitet es sogar ab, was er damit begründet, dass die Welt ein Transzendentalbe
+griff sei.
+* Verschiedene (makroskopische) Systeme zeigten unter bestimmten Bedingungen &quot;spontan&quot; ohne Auslöse
+r auftretende Phänomene, Strukturen oder Entitäten ([[Selbstorganisation]], [[Strukturbildung]]prozesse, [[Em
+ergenz]]). Diese Entitäten könnten wiederum die Grundbausteine für übergeordnete Strukturen bilden. Dies mach
+e es prinzipiell denkbar, dass nicht alles auf eine ''erste'' Ursache zurückgeht. Diese erste Ursache könne s
+ich auch in einem ungeformten Ur-Substrat verlieren. Vertreter der Gottesbeweise können darauf bestehen, dass
+ ein solches &quot;Ur-Substrat&quot; formbar und damit kontingent ist und nicht ursachenlos existieren könnte
+.
+* Kritisiert wird auch der Kausalitätsbegriff: Entfernt man sich von der Annahme, dass Ursachen stets ihrer W
+irkung ''zeitlich vorausliegen'', ist nicht mehr beweisbar, dass eine erste Ursache notwendig existieren muss
+. 
+* Selbst wenn man den Beweisgang akzeptiert, folge daraus nur, dass es eine erste Ursache gibt – nicht aber, 
+dass diese mit Gott gleichzusetzen ist. Die Annahme, dass Gott ohne Grund existieren könne, könne ebenso gut 
+auf das Universum übertragen werden. Befürworter des kausalen Gottesbeweises (besonders in der [[Natürliche T
+heologie|Natürlichen Theologie]]) beanspruchen demgegenüber, Gott als Erstursache identifizieren zu können.
+
+=== Der ontologische Gottesbeweis ===
+
+Die erste bekannte Version des [[Ontologie|ontologischen]] Gottesbeweises wurde von [[Anselm von Canterbury]]
+ (1033-1109) im [[Proslogion]]&lt;ref&gt;[http://www.ub.uni-freiburg.de/referate/04/verweyen/anselm8.htm Kapi
+tel II-IV]&lt;/ref&gt; formuliert, danach nicht zuletzt von [[René Descartes]] (1596-1650). Seinen Namen erhi
+elt der Beweis nach dem darin vorgenommenen [[Schlussfolgerung|Schluss]] von der [[Logik|logisch]]-begrifflic
+hen Ebene zur Ebene des [[Sein (Philosophie)|Seins]] ([[Griechische Sprache|griech.]] ''to on'', Gen. ''ontos
+'').
+
+==== Argumentation ====
+Ausgangspunkt des Beweises bei Anselm ist der im gläubigen Nachdenken („[[Intellectus fidei|fides quaerens in
+tellectum]]“) gefundene „Begriff“ Gottes als desjenigen, „worüber hinaus nichts Größeres (Vollkommeneres) ged
+acht werden kann“ („quo nihil maius cogitari potest“).
+Der denkende Nachvollzug dieses „Begriffs“ führe auch den (noch) nicht Gläubigen zur Erkenntnis, dass dieses 
+„worüber hinaus nichts Größeres gedacht werden kann“ nicht nur existiert, sondern notwendig existiert, d. h. 
+dass nicht einmal gedacht werden kann, es existiere nicht, ohne dass das zu einem logischen Widerspruch führe
+n würde.
+
+Der Argumentationsgang Anselms lässt sich in seiner logischen Struktur wie folgt zusammenfassen: 
+&lt;ref&gt;Gekürzt wiedergegeben nach Edgar Morscher: ''Was sind und was sollen die Gottesbeweise? Bemerkunge
+n zu Anselms Gottesbeweis(en)'', in: Friedo Ricken (Hrsg.): ''Klassische Gottesbeweise in der Sicht der gegen
+wärtigen Logik und Wissenschaftstheorie.'', S. 64f.&lt;/ref&gt; 
+
+# ''Das, worüber hinaus nichts Größeres gedacht werden kann'', existiert nicht in Wirklichkeit, sondern nur i
+m Verstand [Annahme des Gegenteils].
+# Wenn ''das, worüber hinaus nichts Größeres gedacht werden kann'', nicht in Wirklichkeit, sondern nur im Ver
+stand existiert, dann kann etwas gedacht werden, das größer ist als ''das, worüber hinaus nichts Größeres ged
+acht werden kann''.
+# Wenn etwas gedacht werden kann, das größer ist als ''das, worüber hinaus nichts Größeres gedacht werden kan
+n'', dann ist ''das, worüber hinaus nichts Größeres gedacht werden kann'', etwas, worüber hinaus Größeres ged
+acht werden kann.
+# ''Das, worüber hinaus nichts Größeres gedacht werden kann'', ist etwas, worüber hinaus Größeres gedacht wer
+den kann [aus (1), (2) und (3) durch zweimalige Anwendung des [[Modus Ponens]]].
+# Daher: ''Das, worüber hinaus nichts Größeres gedacht werden kann'' [für Anselm identisch mit Gott], existie
+rt in Wirklichkeit und nicht nur im Verstand [aus (1)-(4) durch [[Indirekter Beweis|indirekten Beweis]]].
+
+==== Kritik ====
+Bereits der Mönch Gaunilo, ein Zeitgenosse Anselms, dann [[Thomas von Aquin]] kritisierten dessen Version des
+ ontologischen Gottesbeweises. 
+
+Gaunilo hält Anselm entgegen, man könne aus dem Begriff nicht auf die Existenz des damit bezeichneten Sachver
+halts schließen. Der (bloße) Begriff einer &quot;vollkommenen Insel&quot; etwa beweise nicht (schon) deren ta
+tsächliche Existenz. Anselm erwidert, die Logik seiner Argumentation lasse sich auf nichts anderes anwenden a
+ls &quot;das, worüber hinaus nichts Größeres gedacht werden kann&quot;.&lt;ref&gt;Hansjürgen Verweyen: ''Nach
+ Gott fragen''. Anselms Gottesbegriff als Anleitung. Essen: Ludgerus 1978. (Christliche Strukturen in der mod
+ernen Welt. Hg. v. Wilhelm Plöger; 23), S. 38. [http://www.ub.uni-freiburg.de/referate/04/verweyen/anselm5.ht
+m Online-Text]&lt;/ref&gt;
+
+Thomas von Aquin versucht den ontologischen Gottesbeweis in seiner [[Summa contra gentiles]] (Buch I, Kapitel
+ 11) zu widerlegen, freilich ohne Anselm explizit als Urheber dieses Gottesbeweises zu nennen. Nach Thomas vo
+n Aquin ist der Begriff von Gott als etwas, über das hinaus nichts Größeres gedacht werden kann, nicht unmitt
+elbar einleuchtend. Daraus, dass dieser verstanden wird, folge lediglich, dass Gott im Verstande ist, nicht a
+ber, dass er tatsächlich existiert. Zudem habe Anselm nicht unterschieden zwischen dem, was schlechthin einle
+uchtend (per se notum simpliciter) und dem, was für den Menschen unmittelbar einleuchtend (per se notum quoad
+ nos) ist. Da der Mensch das Wesen (essentia) Gottes mit seinem menschlichen Verstand gar nicht ergreifen kan
+n, könne man auch nicht damit argumentieren, dass Gottes Existenz unmittelbar einleuchtend sei, da sein Sein 
+ja sein Wesen sei (esse est essentia). 
+
+In der Neuzeit hat [[Gottfried Wilhelm Leibniz|Leibniz]] die [[Descartes]]'sche Variante des Gottesbeweises d
+ahingehend korrigiert, dass zunächst die Möglichkeit der Existenz Gottes zu zeigen sei, unter dieser Vorausse
+tzung aber dem Beweis zugestimmt.
+
+Die bekannteste neuzeitliche Kritik des ontologischen Gottesbeweises stammt von [[Immanuel Kant]]. In seiner 
+[[Kritik der reinen Vernunft]] (1. Aufl. 1781, 2. Aufl. 1787) versucht er zu zeigen, dass der ontologische Be
+weis verschiedene Kategorien vermenge. So werde der [[Grammatik|grammatische]] Begriff ''sein'' wie ein Eigen
+schaftswort verwendet. Weiterhin setze die Definition des vollkommenen Wesens dessen Existenz bereits voraus.
+ Zu sagen, dass ein Ding ''ist'' oder ''existiert'', füge ihm nichts (keine Eigenschaft) hinzu. Der einzige B
+eweis für eine Existenz sei die Erfahrung. Man wiederhole daher nur, dass man ''erfahren'' hat, dass dieses D
+ing existiert. Der ontologische Beweis sei daher schlicht ein [[Zirkelschluss]] oder eine [[Tautologie (Logik
+)|Tautologie]]. Da Gott keine objektive Realität besitze, liege kein Widerspruch in der Verneinung von Gottes
+ Existenz, es werde damit nicht einmal die Vorstellung des Wesens an sich geleugnet. Wenn aber der Satz &quot
+;Ein vollkommenes Wesen existiert nicht!&quot; nicht logisch widersprüchlich ist, dann ist der Satz &quot;Ein
+ vollkommenes Wesen existiert!&quot; nicht logisch notwendig.
+
+Die Kantsche Argumentation hatte weitreichende Folgen. So führte sie den [[Logik]]er [[Gottlob Frege]] dazu, 
+in der [[Formalisierung]] der Logik Existenz nicht als [[Prädikat (Logik)|Prädikat]], sondern durch einen Ope
+rator, den so genannten [[Quantor|Existenzquantor]], auszudrücken.
+
+[[Alfred Jules Ayer]] hat darauf hingewiesen, dass man durchaus darauf beharren könne, dass zum Begriff &quot
+;Gott&quot; auch die Existenzbehauptung gehören möge. Aber aus der Annahme, dass das größte denkbare Wesen au
+ch existieren müsse, folge noch nicht, dass auch ein Wesen tatsächlich vorhanden ist, das dem so bestimmten B
+egriff entspricht.
+
+[[Bertrand Russell]] kritisierte am ontologischen Gottesbeweis, dass er nur dann wahr sein könne, wenn es ein
+en direkten Weg aus der Phantasie in die Realität gebe. Ähnlich argumentiert auch [[Norbert Hoerster]]. Nach 
+ihm sagt es nichts über die Wahrheit einer [[Hypothese]] aus, wenn ihr Erfinder die Existenz mit in die Defin
+ition aufnimmt.
+
+=== Der Kontingenzbeweis ===
+Der Gedankengang des Kontingenzbeweis ist folgender: Es gibt nichtnotwendiges Seiendes (das Zufällige, [[Kont
+ingenz (Philosophie)|Kontingente]]). Dieses nichtnotwendige Seiende könnte genauso gut nicht sein. ''Dass'' e
+s aber ist, ist nur damit erklärbar, dass es seine Existenz einem anderen Sein verdankt. Diese Abhängigkeitsk
+ette lässt sich nur dann überhaupt stabil erklären, wenn es ein aus sich heraus Seiendes (''ens a se'') gibt,
+ von dem alles kontingent Seiende abhängig ist. Dieses absolut Seiende (Absolute) heißt Gott. (Vgl. auch die 
+Erklärung im Artikel ''[[Natürliche Theologie]]'').
+
+Argumentationen nach diesem Muster sehen sich verschiedenen Einwänden ausgesetzt: die Argumentation ist nur u
+nter bestimmten Voraussetzungen schlüssig, die nicht von jeder Ontologie geteilt werden. Dazu zählen: die Prä
+misse, dass es überhaupt eine objektive Unterscheidung von kontingent und notwendig in einem für solche Argum
+ente relevanten Sinne gibt; dass Fragen nach dem Warum der Existenz eines Objekts stets die Erwähnung eines a
+nderen Objekts in der Antwort verlangen; dass trotzdem der Ausnahmefall überhaupt sinnvoll ist, dass es auch 
+etwas (&quot;erstes&quot;) gibt, wofür ebendies nicht gilt; dass dieses mit Gott (insb. dem Gott einer spezif
+ischen Religion) identifiziert werden kann.
+
+=== Der teleologische Gottesbeweis ===
+;Beweisgang bei Thomas
+Der Begriff [[Teleologie]] bezieht sich traditionell, etwa bei [[Thomas von Aquin]], auf eine planvolle Einri
+chtung der Welt, durch welche die Dinge eine höhere Vollkommenheit erreichen.&lt;ref&gt;De ente et essentia 4
+: &quot;Non autem potest esse quod ipsum esse sit causatum ab ipsa forma uel quiditate rei, dico sicut a caus
+a efficiente, quia sic aliqua res esset sui ipsius causa et aliqua res se ipsam in esse produceret: quod est 
+impossibile.&quot;&lt;/ref&gt;&lt;ref&gt;I 3 4: &quot;Si igitur esse rei sit aliud ab ejus essentia, necesse 
+est, quod esse illius rei vel sit causatum ab aliquo exteriori, vel a principiis essentialibus ejusdem rei. I
+MPOSSIBILE est autem, quod esse sit causatum tantum ex principiis essentialibus rei, quia NULLA res sufficit,
+ quod sit sibi causa essendi, si habeat esse causatum. Oportet ergo, quod illud cujus esse est aliud ab essen
+tia sua, habeat esse causatum ab ALIO.&quot;&lt;/ref&gt;&lt;ref&gt;ST I-II q 1 a 2 &quot;Prima autem inter om
+nes causas est causa finalis. Cujus ratio est, quia materia non consequitur formam, nisi secundum quod movetu
+r ab agente: nihil enim reducit se de potentia ad actum.&quot;&lt;/ref&gt;. Die Teleologie geht also über die
+ ursprüngliche Vollkommenheit der Dinge hinaus, bezieht sich auf eine offene Naturkausalität&lt;ref&gt;ST I 1
+03 a 1 resp &quot;Ultima autem perfectio uniuscujusque est in consecutione finis. Unde ad divinam bonitatem p
+ertinet, ut sicut produxit res in esse, ita etiam eas ad finem PERDUCAT; quod EST gubernare.&quot;&lt;/ref&gt
+;&lt;ref&gt;ST I 103 a 1 resp &quot;Cum enim optimi sit optima producere, non convenit summae Dei bonitati qu
+od res productas ad perfectum non perducat.&quot;&lt;/ref&gt; und bedarf einer äußeren Ursache. Diese ist auf
+grund einer intentionalen Ordnung notwendigerweise intelligent&lt;ref&gt;ST I-II q 1 a 2 &quot;Illa quae rati
+onem habent, seipsa movent ad finem, quia habent dominium suum actuum per liberum arbitrium, quod est faculta
+s voluntatis et rationis; illa vero quae ratione carent, tendunt in finem propter naturalem inclinationem, qu
+asi ab alio mota, non autem a seipsis, cum non cognoscant rationem finis; et ideo nihil in finem ordinari pos
+sunt, sed solum in finem ab alio ordinantur.&quot; Aristoteles Phys. lib. II, text. 49.&lt;/ref&gt;.
+
+Der teleologische Gottesbeweis geht dabei traditionell von der Weltenlenkung aus (gubernatio rerum)&lt;ref&gt
+;ST q 2 a 3 resp&lt;/ref&gt;. Es sei feststellbar, dass es in den Dingen dauerhafte oder angehäufte Verbesser
+ungen gibt. Diese bedürften notwendigerweise einer Weltenlenkung&lt;ref&gt;Videmus enim in rebus naturalibus 
+provenire quod melius est, aut semper, aut in pluribus; quod NON CONTINGERET, nisi per aliquam providentiam r
+es naturales dirigerentur ad finem boni, quod EST gubernare. ST I q 103 a 1 resp.&lt;/ref&gt;. Unvernünftige 
+Dinge seien nicht in der Lage, ein Ziel zu verfolgen und bedürfen anderer Dinge, die sie zum Ziel bestimmen.&
+lt;ref&gt;ST I q 2 a 3 resp &quot;Ea autem quae non habent cognitionem, non tendunt in finem, nisi directa ab
+ aliquo cognoscente et intelligente, sicut sagitta a sagittante.&quot;&lt;/ref&gt; An oberster Stelle müsse e
+in intelligentes Wesen stehen, das eben in der Lage ist, ein Ziel vorzugeben.&lt;ref&gt;ST I q 2 a 3 resp &qu
+ot;Ergo est aliquid intelligens, a quo omnes res naturales ordinantur ad finem;&quot;&lt;/ref&gt;
+
+;Kritik
+Ein früher Kritiker des teleologischen Gottesbeweises ist [[David Hume]] in seinen ''Dialogues Concerning Nat
+ural Religion''. Immanuel Kant spricht dem Beweis, den er [[Physikotheologie|physiko-theologischen]] Beweis n
+ennt, die Beweiskraft ab, weil er zwingend einen Schöpfer und damit einen schlüssigen kausalen Beweis vorauss
+etzen muss. Der kausale Beweis wiederum setze wiederum zwingend einen schlüssigen ontologischen Beweis voraus
+.
+
+Kritiken des teleologischen Beweises setzen meist an einer der beiden Fragen an: &quot;Bestehen Ordnung, Schö
+nheit und Zweckmäßigkeit wirklich?&quot; und &quot;Wenn Zweckmäßigkeit wirklich besteht, muss deswegen eine I
+nstanz existieren, die diese geschaffen hat?&quot; Die zweite Frage wird oft mit dem Hinweis verneint, dass Z
+weckmäßigkeit auch anders erklärbar sei, etwa über Varianten der [[Evolutionstheorie]]. 
+
+Nach einigen Verteidigern des teleologischen Gottesbeweises liegt in dieser Kritik ein Kategorienfehler vor. 
+Denn Begriffe wie Ordnung, Schönheit und Zweckmäßigkeit meinten hier keine naturwissenschaftlich zugängliche 
+Zweckmäßigkeit. Es gehe hier um den Sinn der Existenz, also die Frage nach dem &quot;wozu?&quot; und nicht na
+ch dem &quot;warum?&quot;. Diesen gewähre nur ein übernatürlicher (transzendenter) Zweck.
+
+Die theologisch umstrittene ''[[Intelligent Design|Intelligent-Design]]''-Theorie ist eine Variante des teleo
+logischen Arguments für die Existenz eines Gottes.
+
+Eine spezielle Variante teleologischer Argumentation kann sich auf die Struktur religiöser Überlieferungen be
+ziehen. So wird in islamischen Traditionen &lt;ref&gt;Vgl. Schimmel, Annemarie: ''Die Zeichen Gottes – Die re
+ligiöse Welt des Islam'', München: C.H.Beck, S. 150 ff insbesondere S. 153: sog. i gaz al-qur'an – Unnachahml
+ichkeit des heiligen Buches; ferner Aslan, Resa: ''Kein Gott außer Gott – Der Glaube der Muslime von Muhammad
+ bis zur Gegenwart'', München: C.H.Beck, S. 70 ff.&lt;/ref&gt; eine Art &quot;ästhetischer Gottesbeweis&quot;
+ geführt: Da der Prophet Mohammed illiterat gewesen sei, könne er nicht den Koran als das unmittelbar von Got
+t an ihn gerichtete Wort selbst ersonnen oder hervorgebracht haben. Die Schönheit des Textes lasse es daher a
+ls unabdingbar erscheinen, dass Gott selbst dem Propheten den Text übermittelt habe und ihm aufgetragen habe,
+ diesen an die Umma zu tradieren.
+
+;Teleonome Beweise
+{{Belege}}
+Biologische Erklärungen beziehen sich oftmals auf scheinbare Zielgerichtetheit. Colin Pittendrigh hat versuch
+t, solche Erklärungen auch begrifflich abzukoppeln von den Konnotationen des klassischen Begriffs der Teleolo
+gie, mit welchem oft die Unterstellung einer wirklichen Planung einhergeht. Stattdessen hat er den Begriff &q
+uot;[[Teleonomie]]&quot; vorgeschlagen&lt;ref&gt;Behavior and Evolution, 1958&lt;/ref&gt;, welche sich nur au
+f Naturgesetze bezieht. 
+
+&lt;!-- Auch durch teleonome Beweisführung aber wurde und wird noch versucht, die Existenz eines [[Gott]]es z
+u beweisen: Nach dem teleonomen ''Gottesbeweis'' ist alles in der Welt zielgerichtet und auf Ordnung, Schönhe
+it und Zweckmäßigkeit hin ausgelegt. Dies lässt, so die Argumentation, nur den Schluss zu, dass ein [[Schöpfu
+ng|Schöpfergott]] existiert, der die Welt so eingerichtet hat. Der teleonome &quot;Gottesbeweis&quot; hat als
+o als Hintergrund eine geschlossene Naturkausalität. Selbst Evolutionisten wie [[Richard Dawkins]] oder [[Mar
+tin Rhonheimer]] vertreten Teleonomie. Allerdings sieht nur Rhonheimer darin einen Gottesbeweis. Auch die Int
+erpretation des teleologischen Gottesbeweises durch [[Robert Spaemann]] und [[Reinhard Löw]] geht nicht über 
+Teleonomie hinaus, obwohl beide Erklärungsdefizite in der Teleonomie aufgezeigt haben. BELEGE FEHLEN. in welc
+her reputablen quelle steht, dass spaemann nicht über teleonomie hinausgeht? --&gt;
+
+=== Der kosmologische Gottesbeweis ===
+Die antiken und mittelalterlichen Varianten des kosmologischen Beweises gehen in irgendeiner Form davon aus, 
+dass das Universum eine Ursache außerhalb seiner selbst haben müsse.
+
+==== Klassische Formulierung ====
+Die klassische Formulierung des kosmologischen Gottesbeweises findet sich bei [[Thomas von Aquin]] in der [[S
+umma theologica]]&lt;ref&gt;[http://www.aristoteles-heute.de/sein_a/sein_A/unbewegt/Theologie/summa/ftp/dtTho
+mas.qq/11002.html#3 I, q. 2, a. 3]&lt;/ref&gt;, der dabei seinerseits auf Gedankengänge von [[Platon]]&lt;ref
+&gt;vgl. Platon, Phaidros 245 c ff., Nomoi 891 b ff.&lt;/ref&gt; und [[Aristoteles]]&lt;ref&gt;vgl. Aristotel
+es, Physik VII-VIII; Metaphysik XII.&lt;/ref&gt; zurückgriff: Der erste der „fünf Wege“ (quinque viae), die e
+s gebe, „das Dasein Gottes zu beweisen“, geht aus von der empirisch feststellbaren Tatsache der [[Bewegung]] 
+in der Welt (deshalb auch „kinesiologischer“ Gottesbeweis genannt).
+„Bewegung“ versteht Thomas dabei nicht nur physikalisch als Ortsveränderung, sondern im weiteren  (philosophi
+sch-aristotelischen) Sinn als [[Physik (Aristoteles)#Bewegung|„Übergang von der Möglichkeit in die Wirklichke
+it“]] (also auch in der Bedeutung von „Werden“, „Veränderung“, „Entwicklung“).
+Von der Möglichkeit in die Wirklichkeit übergeführt werden kann etwas – nach dem [[Kausalitätsprinzip]] bzw. 
+dem [[Satz vom zureichenden Grund]] – aber nur durch etwas, das selbst in Wirklichkeit ist.
+Alles, was in Bewegung ist, muss also durch etwas anderes – eine wirkende Ursache – bewegt worden sein.
+Dass sich etwas „von selbst“ bewegen kann, schließt Thomas durch den [[Satz vom ausgeschlossenen Widerspruch|
+„Satz vom Widerspruch“]] aus, nach dem es unmöglich ist, dass etwas zugleich und in derselben Hinsicht in Mög
+lichkeit und in Wirklichkeit existiert. Es ist deshalb auch unmöglich, dass etwas zugleich und in derselben H
+insicht bewegend und bewegt, also Ursache und Wirkung in einem, ist.
+Jede Bewegung (Wirkung) ist also selbst wieder durch etwas anderes bewegt (bewirkt bzw. verursacht), diese wi
+ederum durch eine andere und so weiter.
+In dieser Weise lässt sich jedoch nicht [[Infiniter Regress|bis ins Unendliche zurückgehen]], da sonst die ge
+samte Kette von Bewegendem (Ursachen) und Bewegtem (Wirkungen) – und damit auch die von uns zweifellos festst
+ellbare Bewegung in der Welt – gar nicht in Gang gekommen wäre.
+Also muss – nach Thomas von Aquin – notwendigerweise ein „[[Erste Ursache|erstes unbewegtes Bewegendes]]“ („p
+rimum movens immobile“) vorausgesetzt werden, das die Kausalkette des Werdens in Gang gesetzt hat, ohne selbs
+t Teil dieser Kausalkette zu sein.
+„Und dieses“, behauptet Thomas von Aquin, „erkennen alle als Gott“.
+
+==== Varianten ====
+Eine Variante dazu stammt von [[Gottfried Wilhelm Leibniz|Leibniz]], der annahm, es müsse einen letzten Grund
+ der Dinge geben, der außerhalb der Welt und damit bei Gott liegt. Gott sei der zureichende Grund der Welt.
+
+Moderne Varianten des [[Kosmologie|kosmologischen]] Gottesbeweises argumentieren wie folgt: Die [[Physikalisc
+he Konstante|physikalischen Naturkonstanten]] seien so aufeinander abgestimmt, dass Leben, wie wir es kennen,
+ möglich ist – was sich bei Abweichung um wenige Promille ändern würde. Diese Abstimmung sei nur erklärbar al
+s planvolle Wahl – durch einen Schöpfergott. (''Näheres dazu im Artikel [[Feinabstimmung der Naturkonstanten]
+].'')
+
+Dieser Argumentation steht das so genannte [[Anthropisches Prinzip|anthropische Prinzip]] gegenüber: ''&quot;
+Weil es Beobachter des Universums gibt, muss es Eigenschaften besitzen, die die Existenz von Beobachtern zula
+ssen&quot;''. Wenn dieses Prinzip bereits teleologisch verstanden wird (das Universum besitzt Eigenschaften '
+'zweckhafter'' Art), wird die Argumentation Kritikern zufolge zirkulär. Wird umgekehrt das anthropische Prinz
+ip nicht-teleologisch verstanden, also die scheinbare Zweckhaftigkeit naturwissenschaftlich erklärt, wird die
+ Argumentation des &quot;kosmologischen Gottesbeweises&quot; Kritikern zufolge unschlüssig.
+
+== Einzelnachweise ==
+&lt;references/&gt;
+
+== Literatur ==
+{{Philosophiebibliographie1|Gottesbeweis}}
+;Allgemeines
+* [[William Lane Craig]]: ''Die Existenz Gottes und der Ursprung des Universums.'' Brockhaus, Wuppertal und Z
+ürich 1989, ISBN 3-417-20443-7
+* [[Dieter Henrich (Philosoph)|Dieter Henrich]]: ''Der Ontologische Gottesbeweis: sein Problem und seine Gesc
+hichte in der Neuzeit.'' Tübingen 1967
+* John Leslie Mackie: ''Das Wunder des Theismus. Argumente für und gegen die Existenz Gottes.'' Reclam, Stutt
+gart 2002, ISBN 3-15-008075-4 (RUB 8075, Nachdruck)
+* Graham Oppy: ''Ontological Arguments and Belief in God.'' Cambridge University Press, Cambridge 1995, ISBN 
+0-521-48120-1
+* [[Friedo Ricken]] (Hrsg.): ''Klassische Gottesbeweise in der Sicht der gegenwärtigen Logik und Wissenschaft
+stheorie.'' 2. Aufl. Kohlhammer, Stuttgart 1998, ISBN 3-17-014416-2 (Münchener philosophische Studien NF Bd. 
+4)
+* Josef Schmidt: ''Philosophische Theologie.'' Kohlhammer, Stuttgart 2003, ISBN 3-17-017958-6 (Grundkurs Phil
+osophie 5)
+* [[Hansjürgen Verweyen]]: ''Nach Gott fragen''. Anselms Gottesbegriff als Anleitung. Essen: Ludgerus 1978. (
+Christliche Strukturen in der modernen Welt. Hg. v. Wilhelm Plöger; 23)&lt;ref&gt;[http://www.ub.uni-freiburg
+.de/referate/04/verweyen/anselm0.htm Online-Ausgabe]&lt;/ref&gt;
+
+;Populäre Literatur
+&lt;!--
+* [[Hans Küng]]: ''Der Anfang aller Dinge, Naturwissenschaft und Religion.'' 2. Auflage. Piper, München und Z
+ürich 2005, ISBN 978-3-492-04787-6 --&gt;
+* Hans-Dietrich Matschke: ''Gottesbeweise und ihre Kritik.'' 6. Aufl. Vandenhoeck und Ruprecht, Göttingen 197
+9, ISBN 3-525-77410-9 (Göttinger Quellenhefte für Unterricht und Arbeitsgemeinschaft Bd. 1)
+
+== Siehe auch ==
+* [[Gottesbild]]
+* [[Gottesbeweis von Descartes]]
+
+== Weblinks ==
+{{wiktionary|Gottesbeweis}}
+;Bibliographien
+* [http://www.ucl.ac.uk/philosophy/LPSG/Ch09.pdf Bibliographie] des London Philosophy Study Guide (Englisch)
+* R. Corazzon: [http://www.formalontology.it/ontological_proof.htm History of the ontological argument] Bibli
+ographie zur Geschichte des ontologischen Gottesbeweises (Englisch)
+* [http://www.infidels.org/library/modern/graham_oppy/ Graham Oppy] - Website mit Aufsätzen zum Thema Gottesb
+eweise (Englisch)
+;Überblicksdarstellungen
+* [http://www.hwph.ch/inhalt/artikelbeispiel_3.html G. Gabriel: ''Gottesbeweis, ontologischer''], in: [[Histo
+risches Wörterbuch der Philosophie]]
+* Verschiedene Einträge in der [[Stanford Encyclopedia of Philosophy]]: [http://plato.stanford.edu/entries/go
+d-necessary-being/ ''God and Other Necessary Beings.''], [http://plato.stanford.edu/entries/moral-arguments-g
+od/ ''Moral Arguments for the Existence of God.''], [http://plato.stanford.edu/entries/ontological-arguments/
+ ''Ontological Arguments''], [http://plato.stanford.edu/entries/pragmatic-belief-god/ ''Pragmatic Arguments''
+], [http://plato.stanford.edu/entries/teleological-arguments/ ''Teleological Arguments''] (Englisch)
+;Essays
+* [[Robert Spaemann]]: [http://www.welt.de/print-welt/article560135/Der_Gottesbeweis.html?print=yes ''Warum w
+ir, wenn es Gott nicht gibt, überhaupt nichts denken können.'']
+
+{{Lesenswert}}
+
+[[Kategorie:Theologie]]
+[[Kategorie:Natürliche Theologie]]
+
+[[ar:وجود الله]]
+[[en:Existence of God]]
+[[es:Existencia de Dios]]
+[[et:Jumalatõestus]]
+[[fi:Jumalan olemassaolo]]
+[[fr:Arguments sur l'existence de Dieu]]
+[[he:אלוהים#טיעונים לקיום אלוהים]]
+[[hi:प्रूफ़ फॉर थे एक्सिस्तेंस ऑफ़ गोद]]
+[[hu:Istenérv]]
+[[it:Esistenza di Dio]]
+[[ja:神の存在証明]]
+[[lv:Dieva eksistence]]
+[[nl:Godsbewijs]]
+[[no:Gudsbevis]]
+[[pl:Dowodzenie istnienia Boga]]
+[[pt:Existência de Deus]]
+[[sk:Dôkaz existencie boha]]
+[[sr:Постојање Бога]]
+[[sv:Gudsbevis]]
+[[tr:Tanrı'nın varlığı]]
+[[uz:Xudoning mavjudligi]]</text>
+    </revision>
+  </page>
+  <page>
+    <title>Metzger</title>
+    <id>35102</id>
+    <revision>
+      <id>51270539</id>
+      <timestamp>2008-09-29T07:36:54Z</timestamp>
+      <contributor>
+        <username>RedBot</username>
+        <id>59105</id>
+      </contributor>
+      <minor />
+      <comment>Bot-unterstützte Begriffsklärung: Helmut Metzger - Link(s) ersetzt durch [[Helmut Metzger (Reg
+isseur)]]; kosmetische Änderungen</comment>
+      <text xml:space="preserve">'''Metzger''' steht für:
+* den Beruf des Metzgers, siehe [[Fleischer]]
+* [[Metzger (Kartenspiel)]]
+
+
+'''Metzger''' ist der Familienname folgender Personen:
+*[[Albrecht Metzger]] (* 1945), deutscher Moderator, Journalist und Kabarettist
+*[[Alexander Metzger (Bobfahrer)]] (* 1973), deutscher Bobfahrer
+*[[Alexander Metzger (Musiker)]] (* 1969), deutscher Musikproduzent
+*[[Ambrosius Metzger]] (1573–1632), deutscher [[Meistersinger]]
+*[[Andre Metzger]] (* 1960), US-amerikanischer Ringer
+*[[Axel Metzger]] (* 1971), deutscher Rechtswissenschaftler
+*[[Balthasar Metzger]] (1623–1687), deutscher Arzt
+*[[Bruce Metzger]] (1914–2007), US-amerikanischer evangelischer Theologe (Neutestamentler, Textkritiker)
+*[[Dagmar Metzger]] (* 1958), hessische Politikerin (SPD) und Abgeordnete des Hessischen Landtags
+*[[Erika Metzger]], deutsche Tischtennisspielerin
+*[[Fritz Metzger]] (1898-1973), Schweizer Kirchenarchitekt
+*[[Gabriele Metzger]] (* 1961), deutsche Schauspielerin
+*[[Giovanni Metzger]] (1772–1844), deutsch-italienischer Kupferstecher und Kunsthändler
+*[[Günther Metzger]] (* 1933), deutscher Jurist und Politiker (SPD)
+*[[Gustav Metzger]] (* 1926), Künstler
+*[[Heinz-Klaus Metzger]] (* 1932), deutscher Musikwissenschaftlicher
+*[[Helmut Metzger (Regisseur)|Helmut Metzger]] (* 1959), deutscher Fernseh- und Spielfilmregisseur
+*[[Helmut Metzger (Autor)]] (1917–1995), Pfälzer Mundartdichter 
+*[[Heribert Metzger]] (* 1950), österreichischer Organist
+*[[Johann Baptist Metzger]] (1771-1844), deutscher Kupferstecher und Kunsthändler
+*[[Johann Christian Metzger]] (1789–1852), deutscher Landschaftsarchitekt und Gartendirektor
+*[[Johann Peter Metzger]] (Johann (Nepomuk) Peter Metzger von Alcantara; 1723–1795), Bürgermeister der Stadt 
+Salzburg 
+*[[Ludwig Metzger]] (1902–1993), deutscher Jurist und Politiker (SPD)
+*[[Max Josef Metzger]] (1887–1944), deutscher katholischer Priester, Opfer der NS-Justiz
+*[[Martin Metzger]] (* 1928), deutscher Theologieprofessor (Baptist) für Altes Testament und Biblische Archäo
+logie (Uni Kiel)
+*[[Oswald Metzger]] (* 1954), deutscher Politiker (CDU)
+*[[Ottilie Metzger-Lattermann]] (1878-1943), deutsche Sängerin
+*[[Radley Metzger]] (* 1929), US-amerikanischer Regisseur, Filmproduzent, Autor und Filmverleiher
+*[[Stein Metzger]] (* 1972), US-amerikanischer Beachvolleyballspieler
+*[[Wilhelm Metzger]] (1848-1914), deutscher Politiker (SPD), Mitglied des Reichstages
+*[[Wolfgang Metzger]] (1899–1979), deutscher Psychologe
+*[[Yona Metzger]] (* 1953), israelischer Großrabbiner
+
+''siehe auch:''
+* [[Mezger]]
+* [[Kunstwerkstätte E. &amp; V. Mezger]] in Karlsruhe
+
+'''Siehe auch:'''
+{{Wiktionary|Metzger}}
+{{Begriffsklärung}}
+
+[[en:Metzger]]
+[[pt:Metzger]]
+[[ru:Мецгер]]</text>
+    </revision>
+  </page>
+  <page>
+    <title>Fleischer</title>
+    <id>35104</id>
+    <revision>
+</page>
+</mediawiki>
