@@ -39,6 +39,8 @@ Server Access Details==Server Zugriffs Details
 Local Search Log==Lokale Suche Log
 Local Search Host Tracker==Lokale Suche Host Tracker
 Remote Search Log==Remote Suche Log
+#Total:==Total:
+Success:==Erfolgreich:
 Remote Search Host Tracker==Remote Suche Host Tracker
 This is a list of searches that had been requested from this\' peer search interface==Dies ist eine Liste aller Suchanfragen, die von diesem Peer ausgef&uuml;hrt wurden. 
 Showing \#\[num\]\# entries from a total of \#\[total\]\# requests.==Es werden #[num]# Eintr&auml;ge von insgesamt #[total]# Anfragen angezeigt.
@@ -69,37 +71,24 @@ You may also provide your blacklist to other peers by sharing them; in return yo
 collect blacklist entries from other peers.==Im Gegenzug k&ouml;nnen Sie sich selber von anderen Peers Blacklists runterladen.
 Active list:==Aktivierte Liste:
 No blacklist selected==Keine Blacklist gew&auml;hlt
-Test list:==Teste Liste:
-"Test"=="Testen"
-The tested URL was==Die getestete URL warIt is blocked for the following cases:==Sie wird in den folgenden F&auml;llen geblockt:
-#Crawling==Crawling
-#DHT==DHT
-#News==News
-#Proxy==Proxy
-Search==Suche
-Surftips==Surftipps
 Select list:==Liste ausw&auml;hlen:
 not shared::shared==nicht freigegeben::freigegeben
 "select"=="w&auml;hlen"
-New list==Neue Liste
+Create new list:==Neue Liste anlegen:
 "create"=="anlegen"
 Settings for this list==Einstellungen dieser Liste
 "Save"=="Speichern"
 Share/don't share this list==Liste freigeben/nicht freigeben
 Delete this list==Liste l&ouml;schen
 Edit this list==Diese Liste bearbeiten
-These are the domain name / path patterns in this blacklist:==Dies sind die Domainnamen / -pfade die in der Blacklist sind:
-You can select them here for deletion==Sie k&ouml;nnen sie einzeln zum L&ouml;schen w&auml;hlen
-"Delete URL pattern"=="URL-Eintrag aus der Liste l&ouml;schen"
-"Edit URL pattern"=="URL-Eintrag bearbeiten"
+These are the domain name/path patterns in==Dies sind die Domainnamen/-pfade in
+Blacklist Pattern==Blacklisteintrag
+Edit selected pattern\(s\)==Bearbeite gew&auml;hlten Eintrag
+Delete selected pattern\(s\)==L&ouml;sche gew&auml;hlten Eintrag
+Move selected pattern\(s\) to==Verschiebe gew&auml;hlten Eintrag zu
 "Save URL pattern"=="URL-Eintrag speichern"
-"Move URL pattern to"=="URL verschieben zu"
+You can select them here for deletion==Sie k&ouml;nnen sie einzeln zum L&ouml;schen w&auml;hlen
 Add URL pattern==URL hinzuf&uuml;gen
-Import blacklist items from...==Importiere Blacklist von...
-other YaCy peers:==anderen YaCy Peers:
-file:==Datei:
-"Load new blacklist items"=="Lade neue Blacklist"
-#URL:==URL:
 was removed from blacklist==wurde aus Blacklist entfernt
 was added to the blacklist==wurde zur Blacklist hinzugef&uuml;gt
 Activate this list for==Diese Liste ist g&uuml;ltig f&uuml;r
@@ -124,6 +113,32 @@ Double==Doppelt
 "Change Selected"=="Markierte bearbeiten"
 "Delete Selected"=="Markierte l&ouml;schen"
 No Blacklist selected==Es wurde keine Blacklist ausgew&auml;hlt
+#---------------------------
+
+#File: BlacklistImpExp_p.html
+#---------------------------
+#Blacklist Import==Blacklist Import
+Used Blacklist engine:==Benutzte Blacklist Verwaltung:
+Import blacklist items from...==Importiere Blacklist von...
+other YaCy peers:==anderen YaCy Peers:
+"Load new blacklist items"=="Lade neue Blacklist"
+#URL:==URL:
+file:==Datei:
+#---------------------------
+
+#File: BlacklistTest_p.html
+#---------------------------
+Blacklist Test==Blacklist testen
+Used Blacklist engine:==Benutzte Blacklist Verwaltung:
+Test list:==Teste Liste:
+"Test"=="Testen"
+The tested URL was==Die getestete URL warIt is blocked for the following cases:==Sie wird in den folgenden F&auml;llen geblockt:
+#Crawling==Crawling
+#DHT==DHT
+#News==News
+#Proxy==Proxy
+Search==Suche
+Surftips==Surftipps
 #---------------------------
 
 #File: Blog.html
@@ -575,7 +590,8 @@ Crawl Thread==Crawl Art
 #Status==Status
 #Start URL==Start URL
 >Depth</strong>==>Tiefe</strong>
-Filter</strong>==Maske</strong>
+Must Match==Muss zutreffen
+Must Not Match==Muss nicht zutreffen
 MaxAge</strong>==Max. Alter</strong>
 Auto Filter Depth</strong>==Auto Filter Tiefe</strong>
 Auto Filter Content</strong>==Auto Inhalts Filter</strong>
@@ -689,11 +705,17 @@ A minimum of 0 is recommended and means that the page you enter under \"Starting
 to the index, but no linked content is indexed. 2-4 is good for normal indexing.==dem Index zugef&uuml;gt wird, verlinkter Inhalt allerdings nicht. 2-4 ist gut f&uuml;r normales Indexieren.
 Be careful with the depth. Consider a branching factor of average 20;==Seien Sie vorsichtig mit der Crawl-Tiefe. Erw&auml;gen Sie einen durchschnittlichen Verzweigungsfaktor von 20;
 A prefetch-depth of 8 would index 25.600.000.000 pages, maybe this is the whole WWW.==eine Crawl-Tiefe 8 wird 25.600.000.000 Seiten indexieren, vielleicht sogar das ganze WWW.
-Crawling Filter==Crawling Filter
+Must-Match Filter==Muss-entsprechen Filter
 Use filter==Filter nutzen
 Restrict to start domain==Auf Startdomain beschr&auml;nken
-The filter is an emacs-like regular expression that must match with the URLs which are used to be crawled; default is 'catch all'.==Dieser Filter ist ein emacs-&auml;hnlicher regul&auml;rer Ausdruck, der mit den zu crawlenden URLs &uuml;bereinstimmen muss; standard ist 'sammel alle'.
+Restrict to sub-path==Auf Sub-Pfad beschr&auml;nken
+The filter is an emacs-like regular expression that must match with the URLs which are used to be crawled;==Dieser Filter ist ein emacs-&auml;hnlicher regul&auml;rer Ausdruck, der mit den zu crawlenden URLs &uuml;bereinstimmen muss;
+default is 'catch all'.==standard ist 'sammel alle'.
 You can also use an automatic domain-restriction to fully crawl a single domain.==Sie k&ouml;nnen aber auch eine automatische Domain-Beschr&auml;nkung benutzen, um eine einzelne Domain komplett zu crawlen.
+Must-Not-Match Filter==Muss-nicht-entsprechen Filter
+This filter must not match to allow that the page is accepted for crawling.==Dieser Filter muss nicht passen, um zu erlauben, dass die Seite zum crawlen akzeptiert wird.
+The empty string is a never-match filter which should do well for most cases.==Ein leeres Feld ist ein niemals-passend Filter, der in den meisten F&auml;llen gute Dienste leisten sollte.
+If you don't know what this means, please leave this field empty.==Wenn Sie nicht wissen, was dies bedeutet, lassen Sie das Feld einfach leer.
 Re-crawl known URLs:==Re-crawl bekannter URLs:
 Use</label>:==Benutzen</label>:
 If older than==Wenn &auml;lter als
@@ -2418,12 +2440,11 @@ Topwords</strong>:==Topw&ouml;rter</strong>:
 #File: env/templates/simpleheader.template
 #---------------------------
 #Peer Administration==Peer Administration
-Confirm Shutdown==Best&auml;tige Herunterfahren
->Shutdown==>Herunterfahren
 Web Search==Web Suche
+Compare YaCy==Vergleiche YaCy
+Surftips</a>==Surftipps</a>
 Peer Owner Profile==Impressum dieses Peers
 Help / Wiki==Hilfe / Wiki
-Surftips</a>==Surftipps</a>
 Project Home==Projektseite
 #-----------------------------
 
@@ -2432,7 +2453,6 @@ Project Home==Projektseite
 YaCy - Distributed Search Engine==YaCy - Verteilte Suchmaschine
 Search&nbsp;&amp;&nbsp;Browse==Suchen&nbsp;&amp;&nbsp;Surfen
 Search Page==Suchseite
-Search Page \(alternative\)==(alternative) Suchseite
 Rich Client Search==Rich Client Suche
 Compare Search==Vergleichs-Suche
 Ranking Config==Ranking Einstellungen
@@ -2489,6 +2509,8 @@ Remote&nbsp;Search==Remote Suche
 #Filter &amp; Blacklistsu==Filter &amp; Blacklists
 Blacklist Administration==Blacklist Verwaltung
 Blacklist Cleaner==Blacklist aufr&auml;umen
+Blacklist Test==Blacklist testen
+#Import/Export==Import/Export
 #-----------------------------
 
 #File: env/templates/submenuConfig.template
