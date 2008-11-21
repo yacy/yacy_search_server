@@ -90,11 +90,12 @@ public class mediawikiIndex {
         
         // init reader, producer and consumer
         PositionAwareReader in = new PositionAwareReader(dumpFile);
-        ExecutorService service = Executors.newFixedThreadPool(2 /*Runtime.getRuntime().availableProcessors() + 1*/);
         indexProducer producer = new indexProducer(100, idxFromWikimediaXML(dumpFile));
         wikiConsumer consumer = new wikiConsumer(100, producer);
+        ExecutorService service = Executors.newFixedThreadPool(2);
         Future<Integer> producerResult = service.submit(consumer);
         Future<Integer> consumerResult = service.submit(producer);
+        service.shutdown();
         
         // read the wiki dump
         long start, stop;
@@ -121,7 +122,6 @@ public class mediawikiIndex {
             e.printStackTrace();
             return;
         }
-        service.shutdown();
         in.close();
     }
 

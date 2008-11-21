@@ -139,7 +139,7 @@ public final class yacy {
      * Semaphore needed by {@link yacy#setUpdaterCallback(serverUpdaterCallback)} to block 
      * until the {@link plasmaSwitchboard }object was created.
      */
-    private static serverSemaphore sbSync = new serverSemaphore(0);
+    //private static serverSemaphore sbSync = new serverSemaphore(0);
     
     /**
      * Semaphore needed by {@link yacy#waitForFinishedStartup()} to block 
@@ -222,7 +222,7 @@ public final class yacy {
                     serverLog.logSevere("STARTUP", "WARNING: the file " + oldconffile + " can not be renamed to "+ newconfFile +"!");
             }
             sb = new plasmaSwitchboard(homePath, "defaults/yacy.init".replace("/", File.separator), newconf, pro);
-            sbSync.V(); // signal that the sb reference was set
+            //sbSync.V(); // signal that the sb reference was set
             
             // save information about available memory at startup time
             sb.setConfig("memoryFreeAfterStartup", startupMemFree);

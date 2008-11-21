@@ -126,26 +126,19 @@ public class kelondroEcoTable implements kelondroIndex {
             int i = 0;
             byte[] key;
             if (table == null) {
-                final Iterator<byte[]> ki = keyIterator(tablefile, rowdef);
+                final Iterator<byte[]> ki = new kelondroChunkIterator(tablefile, rowdef.objectsize, rowdef.primaryKeyLength);
                 while (ki.hasNext()) {
                     key = ki.next();
-                
                     // write the key into the index table
                     assert key != null;
                     if (key == null) {i++; continue;}
                     if (!index.addi(key, i++)) fail++;
                     assert index.size() + fail == i : "index.size() = " + index.size() + ", i = " + i + ", fail = " + fail + ", key = '" + new String(key) + "'";
-                    /*
-                    if ((i % 10000) == 0) {
-                        System.out.print('.');
-                        System.out.flush();
-                    }
-                    */
                 }
             } else {
                 byte[] record;
                 key = new byte[rowdef.primaryKeyLength];
-                final Iterator<byte[]> ri = new kelondroEcoFS.ChunkIterator(tablefile, rowdef.objectsize, rowdef.objectsize);
+                final Iterator<byte[]> ri = new kelondroChunkIterator(tablefile, rowdef.objectsize, rowdef.objectsize);
                 while (ri.hasNext()) {
                     record = ri.next();
                     assert record != null;
@@ -217,18 +210,6 @@ public class kelondroEcoTable implements kelondroIndex {
     private boolean abandonTable() {
         // check if not enough memory is there to maintain a memory copy of the table
         return serverMemory.available() < minmemremaining;
-    }
-    
-    /**
-     * a KeyIterator
-     * @param file: the eco-file
-     * @param rowdef: the row definition
-     * @throws FileNotFoundException 
-     * @return an iterator for all keys in the file
-     */
-    public Iterator<byte[]> keyIterator(final File file, final kelondroRow rowdef) throws FileNotFoundException {
-        assert rowdef.primaryKeyIndex == 0;
-        return new kelondroEcoFS.ChunkIterator(file, rowdef.objectsize, rowdef.primaryKeyLength);
     }
     
     public static long tableSize(final File tablefile, final int recordsize) {

@@ -313,7 +313,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         log.logConfig("Starting YaCy Protocol Core");
         this.yc = new yacyCore(this);
         serverInstantBusyThread.oneTimeJob(this, "loadSeedLists", yacyCore.log, 0);
-        final long startedSeedListAquisition = System.currentTimeMillis();
+        //final long startedSeedListAquisition = System.currentTimeMillis();
         
         // set up local robots.txt
         this.robotstxtConfig = httpdRobotsTxtConfig.init(this);
@@ -558,7 +558,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         
         // init robinson cluster
         // before we do that, we wait some time until the seed list is loaded.
-        while (((System.currentTimeMillis() - startedSeedListAquisition) < 8000) && (this.webIndex.seedDB.sizeConnected() == 0)) try {Thread.sleep(1000);} catch (final InterruptedException e) {}
+        //while (((System.currentTimeMillis() - startedSeedListAquisition) < 8000) && (this.webIndex.seedDB.sizeConnected() == 0)) try {Thread.sleep(1000);} catch (final InterruptedException e) {}
         try {Thread.sleep(1000);} catch (final InterruptedException e) {}
         this.clusterhashes = this.webIndex.seedDB.clusterHashes(getConfig("cluster.peers.yacydomain", ""));
         

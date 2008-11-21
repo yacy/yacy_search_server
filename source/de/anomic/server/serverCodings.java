@@ -28,6 +28,7 @@ package de.anomic.server;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
@@ -118,37 +119,6 @@ public final class serverCodings {
         }
         return null;
     }
-
-    /*
-    public static byte[] encodeMD5Raw(final File file) {
-    	try {
-    	    final MessageDigest digest = MessageDigest.getInstance("MD5");
-    	    digest.reset();
-    	    // we read directly from a FileInputStream 
-    	    final FileInputStream  in = new FileInputStream(file);
-    	    int a = in.available();
-    	    if (a <= 0) a = 4096;
-    	    long free = Runtime.getRuntime().freeMemory();
-    	    if (a > free / 4) a = (int) (free / 4);
-    	    final byte[] buf = new byte[a];
-    	    int n;
-    	    while ((n = in.read(buf)) > 0) digest.update(buf, 0, n);
-    	    in.close();
-    	    // now compute the hex-representation of the md5 digest
-    	    return digest.digest();
-    	} catch (final java.security.NoSuchAlgorithmException e) {
-    	    System.out.println("Internal Error at md5:" + e.getMessage());
-    	} catch (final java.io.FileNotFoundException e) {
-    	    System.out.println("file not found:" + file.toString());
-    	    e.printStackTrace();
-    	} catch (final java.io.IOException e) {
-    	    System.out.println("file error with " + file.toString() + ": " + e.getMessage());
-    	}
-    	return null;
-    }
-    */
-    
-    public final static ExecutorService service = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() + 1);
     
     public static byte[] encodeMD5Raw(final File file) {
         FileInputStream  in;
@@ -163,7 +133,9 @@ public final class serverCodings {
         // create a concurrent thread that consumes data as it is read
         // and computes the md5 while doing IO
         md5DataConsumer md5consumer = new md5DataConsumer(1024 * 64, 8);
+        ExecutorService service = Executors.newSingleThreadExecutor();
         Future<MessageDigest> md5result = service.submit(md5consumer);
+        service.shutdown();
         
         filechunk c;
         try {
@@ -174,14 +146,13 @@ public final class serverCodings {
                 md5consumer.consume(c);
             }
             in.close();
-        } catch (final java.io.IOException e) {
+        } catch (final IOException e) {
             System.out.println("file error with " + file.toString() + ": " + e.getMessage());
             md5consumer.consume(md5DataConsumer.poison);
             return null;
-        } finally {
-            // put in poison into queue to tell the consumer to stop
-            md5consumer.consume(md5DataConsumer.poison);
         }
+        // put in poison into queue to tell the consumer to stop
+        md5consumer.consume(md5DataConsumer.poison);
         
         // return the md5 digest from future task
         try {
@@ -253,43 +224,41 @@ public final class serverCodings {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            filed.clear();
-            empty.clear();
             return digest;
         }
         
     }
 
     private static byte[] encodeMD5Raw(final byte[] b) {
-	try {
-	    final MessageDigest digest = MessageDigest.getInstance("MD5");
-	    digest.reset();
-	    final InputStream  in = new ByteArrayInputStream(b);
-	    final byte[] buf = new byte[2048];
-	    int n;
-	    while ((n = in.read(buf)) > 0) digest.update(buf, 0, n);
-	    in.close();
-	    // now compute the hex-representation of the md5 digest
-	    return digest.digest();
-	} catch (final java.security.NoSuchAlgorithmException e) {
-	    System.out.println("Internal Error at md5:" + e.getMessage());
-	} catch (final java.io.IOException e) {
-	    System.out.println("byte[] error: " + e.getMessage());
-	}
-	return null;
+    	try {
+    	    final MessageDigest digest = MessageDigest.getInstance("MD5");
+    	    digest.reset();
+    	    final InputStream  in = new ByteArrayInputStream(b);
+    	    final byte[] buf = new byte[2048];
+    	    int n;
+    	    while ((n = in.read(buf)) > 0) digest.update(buf, 0, n);
+    	    in.close();
+    	    // now compute the hex-representation of the md5 digest
+    	    return digest.digest();
+    	} catch (final java.security.NoSuchAlgorithmException e) {
+    	    System.out.println("Internal Error at md5:" + e.getMessage());
+    	} catch (final java.io.IOException e) {
+    	    System.out.println("byte[] error: " + e.getMessage());
+    	}
+    	return null;
     }
 
     public static Properties s2p(final String s) {
-	final Properties p = new Properties();
-	int pos;
-	final StringTokenizer st = new StringTokenizer(s, ",");
-	String token;
-	while (st.hasMoreTokens()) {
-	    token = st.nextToken().trim();
-	    pos = token.indexOf("=");
-	    if (pos > 0) p.setProperty(token.substring(0, pos).trim(), token.substring(pos + 1).trim());
-	}
-	return p;
+    	final Properties p = new Properties();
+    	int pos;
+    	final StringTokenizer st = new StringTokenizer(s, ",");
+    	String token;
+    	while (st.hasMoreTokens()) {
+    	    token = st.nextToken().trim();
+    	    pos = token.indexOf("=");
+    	    if (pos > 0) p.setProperty(token.substring(0, pos).trim(), token.substring(pos + 1).trim());
+    	}
+    	return p;
     }
     
     public static HashMap<String, String> string2map(String string, final String separator) {
@@ -376,7 +345,7 @@ public final class serverCodings {
         }
         
         // usage example:
-        // java -classpath classes de.anomic.server.serverCodings -md5 DATA/HTDOCS/mediawiki/dewiki-latest-pages-articles.xml
+        // java -classpath classes de.anomic.server.serverCodings -md5 DATA/HTCACHE/mediawiki/wikipedia.de.xml
         // java -classpath classes de.anomic.server.serverCodings -md5 readme.txt
         // compare with:
         // md5 readme.txt
@@ -385,7 +354,6 @@ public final class serverCodings {
             File f = new File(s[1]);
             System.out.println("MD5 (" + f.getName() + ") = " + encodeMD5Hex(f));
         }
-        service.shutdown();
     }
 
 }
