@@ -109,7 +109,7 @@ public class Balancer {
     }
     
     public synchronized void close() {
-        while (domainStacksNotEmpty()) flushOnceDomStacks(0, true, false); // flush to ram, because the ram flush is optimized
+        while (domainStacksNotEmpty()) flushOnceDomStacks(true, false, Integer.MAX_VALUE); // flush to ram, because the ram flush is optimized
         size();
         try { flushAllRamStack(); } catch (final IOException e) {}
         if (urlFileIndex != null) {
@@ -272,10 +272,10 @@ public class Balancer {
     private int sizeDomainStacks() {
         if (domainStacks == null) return 0;
         int sum = 0;
-        synchronized (domainStacks) {
+        //synchronized (domainStacks) {
             final Iterator<LinkedList<String>> i = domainStacks.values().iterator();
             while (i.hasNext()) sum += i.next().size();
-        }
+        //}
         return sum;
     }
     
@@ -285,7 +285,7 @@ public class Balancer {
      * @param ram
      * @param onlyReadyForAccess
      */
-    private void flushOnceDomStacks(final int minimumleft, final boolean ram, final boolean onlyReadyForAccess) {
+    private void flushOnceDomStacks(final boolean ram, final boolean onlyReadyForAccess, int max) {
         // takes one entry from every domain stack and puts it on the ram or file stack
         // the minimumleft value is a limit for the number of entries that should be left
         if (domainStacks.size() == 0) return;
@@ -293,20 +293,20 @@ public class Balancer {
             final Iterator<Map.Entry<String, LinkedList<String>>> i = domainStacks.entrySet().iterator();
             Map.Entry<String, LinkedList<String>> entry;
             LinkedList<String> list;
-            while (i.hasNext()) {
+            int c = 0;
+            while (i.hasNext() && c < max) {
                 entry = i.next();
                 list = entry.getValue();
-                if (list.size() > minimumleft) {
-                    if (onlyReadyForAccess && CrawlEntry.waitingRemainingGuessed(list.getFirst(), minimumLocalDelta, minimumGlobalDelta) > 0) continue;
-                    if (ram) {
-                        urlRAMStack.add(list.removeFirst());
-                    } else try {
-                        urlFileStack.push(urlFileStack.row().newEntry(new byte[][] { (list.removeFirst()).getBytes() }));
-                    } catch (final IOException e) {
-                        e.printStackTrace();
-                    }
+                if (onlyReadyForAccess && CrawlEntry.waitingRemainingGuessed(list.getFirst(), minimumLocalDelta, minimumGlobalDelta) > 0) continue;
+                if (ram) {
+                    urlRAMStack.add(list.removeFirst());
+                } else try {
+                    urlFileStack.push(urlFileStack.row().newEntry(new byte[][] { (list.removeFirst()).getBytes() }));
+                } catch (final IOException e) {
+                    e.printStackTrace();
                 }
                 if (list.size() == 0)  i.remove();
+                c++;
             }
         }
     }
@@ -394,7 +394,7 @@ public class Balancer {
         
         // check size of domainStacks and flush
         if (flush && (domainStacks.size() > 100) || (sizeDomainStacks() > 1000)) {
-            flushOnceDomStacks(1, urlRAMStack.size() < 100, true); // when the ram stack is small, flush it there
+            flushOnceDomStacks(urlRAMStack.size() < 100, true, 100); // when the ram stack is small, flush it there
         }
     }
     
@@ -615,11 +615,11 @@ public class Balancer {
         
         // flush from the domain stacks first until they are empty
         if ((domainStacksNotEmpty()) && (urlRAMStack.size() <= count)) {
-            flushOnceDomStacks(0, true, true);
+            flushOnceDomStacks(true, true, 100);
         }
         while ((domainStacksNotEmpty()) && (urlRAMStack.size() <= count)) {
             // flush only that much as we need to display
-            flushOnceDomStacks(0, true, false);
+            flushOnceDomStacks(true, false, 100);
         }
         
         // if the ram is still not full enough, use the file stack
