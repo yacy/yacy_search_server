@@ -28,6 +28,7 @@
 package de.anomic.crawler;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Date;
 
@@ -74,7 +75,7 @@ public class FTPLoader {
      * @param entry
      * @return
      */
-    public indexDocumentMetadata load(final CrawlEntry entry) {
+    public indexDocumentMetadata load(final CrawlEntry entry) throws IOException {
         final yacyURL entryUrl = entry.url();
         final String fullPath = getPath(entryUrl);
 
@@ -133,11 +134,6 @@ public class FTPLoader {
                         (new PrintStream(berr)).print(e.getMessage());
                     }
                 }
-                /*
-            } finally {
-                closeConnection(ftpClient);
-            }
-            */
             closeConnection(ftpClient);
         }
 
@@ -145,8 +141,8 @@ public class FTPLoader {
         if (berr.size() > 0 || htCache == null) {
             // some error logging
             final String detail = (berr.size() > 0) ? "\n    Errorlog: " + berr.toString() : "";
-            log.logWarning("Unable to download URL " + entry.url().toString() + detail);
             sb.crawlQueues.errorURL.newEntry(entry, sb.webIndex.seedDB.mySeed().hash, new Date(), 1, "server download" + detail);
+            throw new IOException("FTPLoader: Unable to download URL " + entry.url().toString() + detail);
         }
 
         return htCache;

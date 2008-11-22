@@ -177,9 +177,8 @@ public final class HTTPLoader {
                         htCache.setCacheArray(responseBody);
                     } else {
                         // if the response has not the right file type then reject file
-                        this.log.logInfo("REJECTED WRONG MIME/EXT TYPE " + res.getResponseHeader().mime() + " for URL " + entry.url().toString());
                         sb.crawlQueues.errorURL.newEntry(entry, sb.webIndex.seedDB.mySeed().hash, new Date(), 1, "wrong mime type or wrong extension");
-                        htCache = null;
+                        throw new IOException("REJECTED WRONG MIME/EXT TYPE " + res.getResponseHeader().mime() + " for URL " + entry.url().toString());
                     }
                     return htCache;
                     /*
@@ -233,10 +232,8 @@ public final class HTTPLoader {
                     }
             } else {
                 // if the response has not the right response type then reject file
-                this.log.logInfo("REJECTED WRONG STATUS TYPE '" + res.getStatusLine() + "' for URL " + entry.url().toString());
-                
-                // not processed any further
                 sb.crawlQueues.errorURL.newEntry(entry, sb.webIndex.seedDB.mySeed().hash, new Date(), 1, "wrong http status code " + res.getStatusCode() +  ")");
+                throw new IOException("REJECTED WRONG STATUS TYPE '" + res.getStatusLine() + "' for URL " + entry.url().toString());
             }
             /*
             } finally {
