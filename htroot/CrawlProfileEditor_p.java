@@ -60,22 +60,23 @@ public class CrawlProfileEditor_p {
     
     private static final ArrayList <eentry> labels = new ArrayList<eentry>();
     static {
-        labels.add(new eentry(entry.NAME,             "Name",                 true,  eentry.STRING));
-        labels.add(new eentry(entry.START_URL,        "Start URL",            true,  eentry.STRING));
-        labels.add(new eentry(entry.FILTER_MUSTMATCH,   "General Filter",       false, eentry.STRING));
-        labels.add(new eentry(entry.DEPTH,    "General Depth",        false, eentry.INTEGER));
-        labels.add(new eentry(entry.RECRAWL_IF_OLDER, "Recrawl If Older",     false, eentry.INTEGER));
-        labels.add(new eentry(entry.DOM_FILTER_DEPTH, "Domain Filter Depth",  false, eentry.INTEGER));
-        labels.add(new eentry(entry.DOM_MAX_PAGES,    "Domain Max. Pages",    false, eentry.INTEGER));
-        labels.add(new eentry(entry.CRAWLING_Q,       "CrawlingQ / '?'-URLs", false, eentry.BOOLEAN));
-        labels.add(new eentry(entry.INDEX_TEXT,       "Index Text",           false, eentry.BOOLEAN));
-        labels.add(new eentry(entry.INDEX_MEDIA,      "Index Media",          false, eentry.BOOLEAN));
-        labels.add(new eentry(entry.STORE_HTCACHE,    "Store in HTCache",     false, eentry.BOOLEAN));
-        labels.add(new eentry(entry.STORE_TXCACHE,    "Store in TXCache",     false, eentry.BOOLEAN));
-        labels.add(new eentry(entry.REMOTE_INDEXING,  "Remote Indexing",      false, eentry.BOOLEAN));
-        labels.add(new eentry(entry.XSSTOPW,          "Static stop-words",    false, eentry.BOOLEAN));
-        labels.add(new eentry(entry.XDSTOPW,          "Dynamic stop-words",   false, eentry.BOOLEAN));
-        labels.add(new eentry(entry.XPSTOPW,          "Parent stop-words",    false, eentry.BOOLEAN));
+        labels.add(new eentry(entry.NAME,                "Name",                  true,  eentry.STRING));
+        labels.add(new eentry(entry.START_URL,           "Start URL",             true,  eentry.STRING));
+        labels.add(new eentry(entry.FILTER_MUSTMATCH,    "Must-Match Filter",     false, eentry.STRING));
+        labels.add(new eentry(entry.FILTER_MUSTNOTMATCH, "Must-Not-Match Filter", false, eentry.STRING));
+        labels.add(new eentry(entry.DEPTH,               "Crawl Depth",           false, eentry.INTEGER));
+        labels.add(new eentry(entry.RECRAWL_IF_OLDER,    "Recrawl If Older",      false, eentry.INTEGER));
+        labels.add(new eentry(entry.DOM_FILTER_DEPTH,    "Domain Filter Depth",   false, eentry.INTEGER));
+        labels.add(new eentry(entry.DOM_MAX_PAGES,       "Domain Max. Pages",     false, eentry.INTEGER));
+        labels.add(new eentry(entry.CRAWLING_Q,          "CrawlingQ / '?'-URLs",  false, eentry.BOOLEAN));
+        labels.add(new eentry(entry.INDEX_TEXT,          "Index Text",            false, eentry.BOOLEAN));
+        labels.add(new eentry(entry.INDEX_MEDIA,         "Index Media",           false, eentry.BOOLEAN));
+        labels.add(new eentry(entry.STORE_HTCACHE,       "Store in HTCache",      false, eentry.BOOLEAN));
+        labels.add(new eentry(entry.STORE_TXCACHE,       "Store in TXCache",      false, eentry.BOOLEAN));
+        labels.add(new eentry(entry.REMOTE_INDEXING,     "Remote Indexing",       false, eentry.BOOLEAN));
+        labels.add(new eentry(entry.XSSTOPW,             "Static stop-words",     false, eentry.BOOLEAN));
+        labels.add(new eentry(entry.XDSTOPW,             "Dynamic stop-words",    false, eentry.BOOLEAN));
+        labels.add(new eentry(entry.XPSTOPW,             "Parent stop-words",     false, eentry.BOOLEAN));
     }
     
     public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {

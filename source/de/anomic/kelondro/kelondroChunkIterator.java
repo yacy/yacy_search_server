@@ -24,6 +24,8 @@
 
 package de.anomic.kelondro;
 
+import java.io.BufferedInputStream;
+import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -32,9 +34,6 @@ import java.util.Iterator;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 public class kelondroChunkIterator implements Iterator<byte[]> {
 
@@ -50,9 +49,11 @@ public class kelondroChunkIterator implements Iterator<byte[]> {
      * @throws FileNotFoundException 
      */
     
-    /*
+    
     private final DataInputStream stream;
     private byte[] nextBytes;
+    private int recordsize;
+    
     public kelondroChunkIterator(final File file, final int recordsize, final int chunksize) throws FileNotFoundException {
         assert (file.exists());
         assert file.length() % recordsize == 0;
@@ -95,9 +96,9 @@ public class kelondroChunkIterator implements Iterator<byte[]> {
     public void remove() {
         throw new UnsupportedOperationException();
     }
-    */
     
     
+    /*
     ExecutorService service = Executors.newFixedThreadPool(2);
     filechunkProducer producer;
     filechunkSlicer slicer;
@@ -142,6 +143,7 @@ public class kelondroChunkIterator implements Iterator<byte[]> {
     public void remove() {
         throw new UnsupportedOperationException();
     }
+    */
     
     private static class filechunkSlicer implements Callable<Integer> {
 
