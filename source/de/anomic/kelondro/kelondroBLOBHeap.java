@@ -33,6 +33,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.concurrent.ExecutionException;
 
 import de.anomic.server.serverMemory;
 import de.anomic.server.logging.serverLog;
@@ -79,13 +80,14 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
         this.ordering = ordering;
         this.heapFile = heapFile;
         
-        this.index = new kelondroBytesLongMap(keylength, this.ordering, 0);
+        this.index = null; // will be created as result of initialization process
         this.free = new TreeMap<Long, Integer>();
         this.file = new RandomAccessFile(heapFile, "rw");
-        final byte[] key = new byte[keylength];
+        byte[] key = new byte[keylength];
         int reclen;
         long seek = 0;
-
+        kelondroBytesLongMap.initDataConsumer indexready = kelondroBytesLongMap.asynchronusInitializer(keylength, this.ordering, 0, Math.max(10, (int) (Runtime.getRuntime().freeMemory() / (10 * 1024 * 1024))));
+        
         loop: while (true) { // don't test available() here because this does not work for files > 2GB
             
             try {
@@ -115,21 +117,17 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
                 // it is an empty record, store to free list
                 if (reclen > 0) free.put(seek, reclen);
             } else {
-                // store key and access address of entry in index
-                try {
-                    if (this.ordering.wellformed(key)) {
-                        index.addl(key, seek);
-                    } else {
-                        serverLog.logWarning("kelondroBLOBHeap", "BLOB " + heapFile.getName() + ": skiped not wellformed key " + new String(key) + " at seek pos " + seek);
-                    }
-                } catch (final IOException e) {
-                    e.printStackTrace();
-                    break loop;
+                if (this.ordering.wellformed(key)) {
+                    indexready.consume(key, seek);
+                    key = new byte[keylength];
+                } else {
+                    serverLog.logWarning("kelondroBLOBHeap", "BLOB " + heapFile.getName() + ": skiped not wellformed key " + new String(key) + " at seek pos " + seek);
                 }
             }            
             // new seek position
             seek += 4L + reclen;
         }
+        indexready.finish();
         
         // try to merge free entries
         if (this.free.size() > 1) {
@@ -155,6 +153,14 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
                 }
             }
             serverLog.logInfo("kelondroBLOBHeap", "BLOB " + heapFile.getName() + ": merged " + merged + " free records");
+        }
+        
+        try {
+            this.index = indexready.result();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
         }
         
         // DEBUG

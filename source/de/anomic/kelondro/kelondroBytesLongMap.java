@@ -27,18 +27,18 @@ package de.anomic.kelondro;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public class kelondroBytesLongMap {
     
     private final kelondroRow rowdef;
-    private kelondroIndex index;
-    
-    public kelondroBytesLongMap(final kelondroIndex ki) {
-        assert (ki.row().columns() == 2); // must be a key/index relation
-        assert (ki.row().width(1) == 8);  // the value must be a b256-encoded int, 4 bytes long
-        this.index = ki;
-        this.rowdef = ki.row();
-    }
+    private kelondroRAMIndex index;
     
     public kelondroBytesLongMap(final int keylength, final kelondroByteOrder objectOrder, final int space) {
         this.rowdef = new kelondroRow(new kelondroColumn[]{new kelondroColumn("key", kelondroColumn.celltype_binary, kelondroColumn.encoder_bytes, keylength, "key"), new kelondroColumn("long c-8 {b256}")}, objectOrder, 0);
@@ -132,4 +132,73 @@ public class kelondroBytesLongMap {
         index = null;
     }
     
+    public static initDataConsumer asynchronusInitializer(final int keylength, final kelondroByteOrder objectOrder, final int space, int bufferSize) {
+        initDataConsumer initializer = new initDataConsumer(new kelondroBytesLongMap(keylength, objectOrder, space), bufferSize);
+        ExecutorService service = Executors.newSingleThreadExecutor();
+        initializer.setResult(service.submit(initializer));
+        service.shutdown();
+        return initializer;
+    }
+
+    public static class entry {
+        public byte[] key;
+        public long l;
+        public entry(final byte[] key, final long l) {
+            this.key = key;
+            this.l = l;
+        }
+    }
+    
+    public static class initDataConsumer implements Callable<kelondroBytesLongMap> {
+
+        private BlockingQueue<entry> cache;
+        private final entry poison = new entry(new byte[0], 0);
+        private kelondroBytesLongMap map;
+        private Future<kelondroBytesLongMap> result;
+        
+        public initDataConsumer(kelondroBytesLongMap map, int bufferCount) {
+            this.map = map;
+            cache = new ArrayBlockingQueue<entry>(bufferCount);
+        }
+        
+        protected void setResult(Future<kelondroBytesLongMap> result) {
+            this.result = result;
+        }
+        
+        public void consume(final byte[] key, final long l) {
+            try {
+                cache.put(new entry(key, l));
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        
+        public void finish() {
+            try {
+                cache.put(poison);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        
+        public kelondroBytesLongMap result() throws InterruptedException, ExecutionException {
+            return this.result.get();
+        }
+        
+        public kelondroBytesLongMap call() throws IOException {
+            try {
+                entry c;
+                while(true) {
+                    c = cache.take();
+                    if (c == poison) break;
+                    map.addl(c.key, c.l);
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            map.index.finishInitialization();
+            return map;
+        }
+        
+    }
 }

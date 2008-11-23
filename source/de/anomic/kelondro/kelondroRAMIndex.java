@@ -57,7 +57,7 @@ public class kelondroRAMIndex implements kelondroIndex {
         return index0.row();
     }
     
-    private final void finishInitialization() {
+    protected final void finishInitialization() {
     	if (index1 == null) {
             // finish initialization phase
             index0.sort();
