@@ -320,6 +320,7 @@ public final class indexRAMRI implements indexRI, indexRIReader {
         // dump cache
         try {
             heap.dump(this.indexHeapFile);
+            //heap.dump2(new File(this.indexHeapFile.getAbsolutePath() + ".blob"));
         } catch (final IOException e){
             log.logSevere("unable to dump cache: " + e.getMessage(), e);
         }

@@ -34,7 +34,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
@@ -42,8 +41,11 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import de.anomic.kelondro.kelondroBLOB;
+import de.anomic.kelondro.kelondroBLOBBuffer;
+import de.anomic.kelondro.kelondroBLOBHeap;
+import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroByteOrder;
-import de.anomic.kelondro.kelondroBytesLongMap;
 import de.anomic.kelondro.kelondroCloneableIterator;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroRowSet;
@@ -53,24 +55,7 @@ public final class indexContainerHeap {
 
     private final kelondroRow payloadrow;
     private final serverLog log;
-    private kelondroBytesLongMap index;
     private SortedMap<String, indexContainer> cache;
-    private File backupFile;
-    private boolean readOnlyMode;
-    // index xor cache is used. If one is not null, then the other must be null
-    
-    /*
-     * An indexContainerHeap is a caching structure for indexContainer objects
-     * A heap can have the following stati:
-     * write: the heap can be extended with more indexContainer entries.
-     * a heap that is open to be written may be dumped to a heap file.
-     * after that, the heap is still accessible, but only in read-status,
-     * which is not reversible. Once a heap is dumped, it can never be extended with new
-     * indexConatiner entries.
-     * A write-heap can also initiated using a restore of a dumped heap.
-     * read: a dumped head can be accessed using a heap index. when the heap is
-     * accessed the first time, all entries are scanned and an index is computed
-     */
     
     /**
      * opens an existing heap file in undefined mode
@@ -83,13 +68,9 @@ public final class indexContainerHeap {
         this.payloadrow = payloadrow;
         this.log = log;
         this.cache = null;
-        this.index = null;
-        this.backupFile = null;
-        this.readOnlyMode = false;
     }
     
     public void clear() throws IOException {
-        if (index != null) index.clear();
         if (cache != null) cache.clear();
         initWriteMode();
     }
@@ -100,7 +81,6 @@ public final class indexContainerHeap {
      */
     public void initWriteMode() {
         this.cache = Collections.synchronizedSortedMap(new TreeMap<String, indexContainer>(new kelondroByteOrder.StringOrder(payloadrow.getOrdering())));
-        this.readOnlyMode = false;
     }
     
     /**
@@ -111,7 +91,6 @@ public final class indexContainerHeap {
      * @throws IOException
      */
     public void initWriteMode(final File heapFile) throws IOException {
-        this.readOnlyMode = false;
         if (log != null) log.logInfo("restoring dump for rwi heap '" + heapFile.getName() + "'");
         final long start = System.currentTimeMillis();
         this.cache = Collections.synchronizedSortedMap(new TreeMap<String, indexContainer>(new kelondroByteOrder.StringOrder(payloadrow.getOrdering())));
@@ -125,60 +104,6 @@ public final class indexContainerHeap {
             }
         }
         if (log != null) log.logInfo("finished rwi heap restore: " + cache.size() + " words, " + urlCount + " word/URL relations in " + ((System.currentTimeMillis() - start) / 1000) + " seconds");
-    }
-    
-    /**
-     * init a heap file in read-only mode
-     * this initiates a heap index generation which is then be used to access elements of the heap
-     * during the life-time of this object, the file is _not_ open; it is opened each time
-     * the heap is accessed for reading
-     * @param heapFile
-     * @throws IOException 
-     */
-    public void initReadMode(final File heapFile) throws IOException {
-        this.readOnlyMode = true;
-        assert this.cache == null;
-        assert this.index == null;
-        this.backupFile = heapFile;
-        if (!(heapFile.exists())) throw new IOException("file " + heapFile + " does not exist");
-        if (heapFile.length() >= Integer.MAX_VALUE) throw new IOException("file " + heapFile + " too large, index can only be crated for files less than 2GB");
-        if (log != null) log.logInfo("creating index for rwi heap '" + heapFile.getName() + "'");
-        
-        final long start = System.currentTimeMillis();
-        this.index = new kelondroBytesLongMap(payloadrow.primaryKeyLength, (kelondroByteOrder) payloadrow.getOrdering(), 0);
-        DataInputStream is = null;
-        final long urlCount = 0;
-        String wordHash;
-        final byte[] word = new byte[payloadrow.primaryKeyLength];
-        long seek = 0, seek0;
-        synchronized (index) {
-            is = new DataInputStream(new BufferedInputStream(new FileInputStream(heapFile), 64*1024));
-        
-            // don't test available() here because this does not work for files > 2GB
-            loop: while (true) {
-                // remember seek position
-                seek0 = seek;
-            
-                // read word
-                try {
-                    is.readFully(word);
-                } catch (final IOException e) {
-                    break loop; // terminate loop
-                }
-                wordHash = new String(word);
-                seek += wordHash.length();
-            
-                // read collection
-                try {
-                    seek += kelondroRowSet.skipNextRowSet(is, payloadrow);
-                } catch (final IOException e) {
-                    break loop; // terminate loop
-                }
-                index.addl(word, seek0);
-            }
-        }
-        is.close();
-        if (log != null) log.logInfo("finished rwi heap indexing: " + urlCount + " word/URL relations in " + ((System.currentTimeMillis() - start) / 1000) + " seconds");
     }
     
     public void dump(final File heapFile) throws IOException {
@@ -213,10 +138,35 @@ public final class indexContainerHeap {
         os.flush();
         os.close();
         if (log != null) log.logInfo("finished rwi heap dump: " + wordcount + " words, " + urlcount + " word/URL relations in " + ((System.currentTimeMillis() - startTime) / 1000) + " seconds");
+    }
+    
+    public void dump2(final File heapFile) throws IOException {
+        assert this.cache != null;
+        if (log != null) log.logInfo("creating alternative rwi heap dump '" + heapFile.getName() + "', " + cache.size() + " rwi's");
+        if (heapFile.exists()) heapFile.delete();
+        final kelondroBLOB dump = new kelondroBLOBBuffer(new kelondroBLOBHeap(heapFile, payloadrow.primaryKeyLength, kelondroBase64Order.enhancedCoder), 1024 * 1024 * 2, true);
+        final long startTime = System.currentTimeMillis();
+        long wordcount = 0, urlcount = 0;
+        String wordHash;
+        indexContainer container;
         
-        // finally delete the internal cache to switch handling to read-only mode
-        this.cache = null;
-        // if the cache will be used in read-only mode afterwards, it must be initiated with initReadMode(file);
+        // write wCache
+        synchronized (cache) {
+            for (final Map.Entry<String, indexContainer> entry: cache.entrySet()) {
+                // get entries
+                wordHash = entry.getKey();
+                container = entry.getValue();
+                
+                // put entries on heap
+                if (container != null && wordHash.length() == payloadrow.primaryKeyLength) {
+                    dump.put(wordHash.getBytes(), container.exportCollection());
+                    urlcount += container.size();
+                }
+                wordcount++;
+            }
+        }
+        dump.close();
+        if (log != null) log.logInfo("finished alternative rwi heap dump: " + wordcount + " words, " + urlcount + " word/URL relations in " + ((System.currentTimeMillis() - startTime) / 1000) + " seconds");
     }
     
     public int size() {
@@ -348,18 +298,6 @@ public final class indexContainerHeap {
      * @return true, if the key is used in the heap; false othervise
      */
     public boolean has(final String key) {
-        if (this.readOnlyMode) {
-            assert index != null;
-            assert index.row().primaryKeyLength == key.length();
-            
-            // check if the index contains the key
-            try {
-                return index.getl(key.getBytes()) >= 0;
-            } catch (final IOException e) {
-                e.printStackTrace();
-                return false;
-            }
-        }
         return this.cache.containsKey(key);
     }
     
@@ -369,32 +307,6 @@ public final class indexContainerHeap {
      * @return the indexContainer if one exist, null otherwise
      */
     public indexContainer get(final String key) {
-        if (this.readOnlyMode) try {
-            assert index != null;
-            assert index.row().primaryKeyLength == key.length();
-            
-            // check if the index contains the key
-            final long pos = index.getl(key.getBytes());
-            if (pos < 0) return null;
-            
-            // access the file and read the container
-            final RandomAccessFile raf = new RandomAccessFile(backupFile, "r");
-            final byte[] word = new byte[index.row().primaryKeyLength];
-            
-            raf.seek(pos);
-            final int bytesRead = raf.read(word);
-            assert bytesRead == word.length;
-            assert key.equals(new String(word));
-            
-            // read collection
-            final indexContainer container = new indexContainer(key, kelondroRowSet.importRowSet(raf, payloadrow));
-            raf.close();
-            return container;
-        } catch (final IOException e) {
-            log.logSevere("error accessing entry in heap file " + this.backupFile + ": " + e.getMessage());
-            return null;
-        }
-        
         return this.cache.get(key);
     }
     
@@ -406,14 +318,12 @@ public final class indexContainerHeap {
     public synchronized indexContainer delete(final String wordHash) {
         // returns the index that had been deleted
         assert this.cache != null;
-        assert !this.readOnlyMode;
         return cache.remove(wordHash);
     }
 
     
     public synchronized boolean removeReference(final String wordHash, final String urlHash) {
         assert this.cache != null;
-        assert !this.readOnlyMode;
         final indexContainer c = cache.get(wordHash);
         if ((c != null) && (c.remove(urlHash) != null)) {
             // removal successful
@@ -429,7 +339,6 @@ public final class indexContainerHeap {
     
     public synchronized int removeReferences(final String wordHash, final Set<String> urlHashes) {
         assert this.cache != null;
-        assert !this.readOnlyMode;
         if (urlHashes.size() == 0) return 0;
         final indexContainer c = cache.get(wordHash);
         int count;
@@ -450,7 +359,6 @@ public final class indexContainerHeap {
         int added = 0;
         if ((container == null) || (container.size() == 0)) return 0;
         assert this.cache != null;
-        assert !this.readOnlyMode;
         
         // put new words into cache
         final String wordHash = container.getWordHash();
@@ -470,7 +378,6 @@ public final class indexContainerHeap {
 
     public synchronized void addEntry(final String wordHash, final indexRWIRowEntry newEntry) {
         assert this.cache != null;
-        assert !this.readOnlyMode;
         indexContainer container = cache.get(wordHash);
         if (container == null) container = new indexContainer(wordHash, this.payloadrow, 1);
         container.put(newEntry);

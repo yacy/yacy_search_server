@@ -24,6 +24,8 @@
 
 package de.anomic.kelondro;
 
+import java.io.BufferedInputStream;
+import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -49,7 +51,7 @@ public class kelondroChunkIterator implements Iterator<byte[]> {
      * @param chunksize: the size of the chunks that are returned by next(). remaining bytes until the lenght of recordsize are skipped
      * @throws FileNotFoundException 
      */
-    /*
+    
     
     private final DataInputStream stream;
     private byte[] nextBytes;
@@ -99,7 +101,7 @@ public class kelondroChunkIterator implements Iterator<byte[]> {
     }
     
     
-    */
+    /*
     ExecutorService service = Executors.newFixedThreadPool(2);
     filechunkProducer producer;
     filechunkSlicer slicer;
@@ -142,7 +144,7 @@ public class kelondroChunkIterator implements Iterator<byte[]> {
     public void remove() {
         throw new UnsupportedOperationException();
     }
-    
+    */
     private static class filechunkSlicer implements Callable<Integer> {
 
         private filechunkProducer producer;
@@ -160,7 +162,7 @@ public class kelondroChunkIterator implements Iterator<byte[]> {
 
         public byte[] consume() {
             try {
-                byte[] b = slices.take(); // leer
+                byte[] b = slices.take();
                 if (b == poison) return null; else return b;
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -212,7 +214,6 @@ public class kelondroChunkIterator implements Iterator<byte[]> {
                     }
                 }
             } catch (InterruptedException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
             
@@ -220,7 +221,7 @@ public class kelondroChunkIterator implements Iterator<byte[]> {
         }
         
     }
-    
+   
     private static class filechunk {
         public byte[] b;
         public int n;
@@ -265,6 +266,11 @@ public class kelondroChunkIterator implements Iterator<byte[]> {
                 if (f == poison) return null; else return f;
             } catch (InterruptedException e) {
                 e.printStackTrace();
+                try {
+                    this.fis.close();
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
                 return null;
             }
         }
@@ -272,7 +278,7 @@ public class kelondroChunkIterator implements Iterator<byte[]> {
         public Integer call() {
             try {
                 filechunk c;
-                while(true) {
+                while (true) {
                     c = empty.take(); // leer
                     c.n = fis.read(c.b);
                     if (c.n <= 0) break;
