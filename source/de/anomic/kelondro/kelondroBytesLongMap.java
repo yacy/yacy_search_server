@@ -132,6 +132,16 @@ public class kelondroBytesLongMap {
         index = null;
     }
     
+    /**
+     * this method creates a concurrent thread that can take entries that are used to initialize the map
+     * it should be used when a bytesLongMap is initialized when a file is read. Concurrency of FileIO and
+     * map creation will speed up the initialization process.
+     * @param keylength
+     * @param objectOrder
+     * @param space
+     * @param bufferSize
+     * @return
+     */
     public static initDataConsumer asynchronusInitializer(final int keylength, final kelondroByteOrder objectOrder, final int space, int bufferSize) {
         initDataConsumer initializer = new initDataConsumer(new kelondroBytesLongMap(keylength, objectOrder, space), bufferSize);
         ExecutorService service = Executors.newSingleThreadExecutor();
@@ -140,7 +150,7 @@ public class kelondroBytesLongMap {
         return initializer;
     }
 
-    public static class entry {
+    private static class entry {
         public byte[] key;
         public long l;
         public entry(final byte[] key, final long l) {
@@ -165,6 +175,11 @@ public class kelondroBytesLongMap {
             this.result = result;
         }
         
+        /**
+         * hand over another entry that shall be inserted into the BytesLongMap with an addl method
+         * @param key
+         * @param l
+         */
         public void consume(final byte[] key, final long l) {
             try {
                 cache.put(new entry(key, l));
@@ -173,6 +188,10 @@ public class kelondroBytesLongMap {
             }
         }
         
+        /**
+         * to signal the initialization thread that no more entries will be sublitted with consumer()
+         * this method must be called. The process will not terminate if this is not called before.
+         */
         public void finish() {
             try {
                 cache.put(poison);
@@ -181,6 +200,14 @@ public class kelondroBytesLongMap {
             }
         }
         
+        /**
+         * this must be called after a finish() was called. this method blocks until all entries
+         * had been processed, and the content was sorted. It returns the kelondroBytesLongMap
+         * that the user wanted to initialize
+         * @return
+         * @throws InterruptedException
+         * @throws ExecutionException
+         */
         public kelondroBytesLongMap result() throws InterruptedException, ExecutionException {
             return this.result.get();
         }
@@ -188,9 +215,7 @@ public class kelondroBytesLongMap {
         public kelondroBytesLongMap call() throws IOException {
             try {
                 entry c;
-                while(true) {
-                    c = cache.take();
-                    if (c == poison) break;
+                while ((c = cache.take()) != poison) {
                     map.addl(c.key, c.l);
                 }
             } catch (InterruptedException e) {
