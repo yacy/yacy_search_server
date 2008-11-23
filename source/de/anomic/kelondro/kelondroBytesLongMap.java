@@ -71,13 +71,13 @@ public class kelondroBytesLongMap {
         return oldentry.getColLong(1);
     }
     
-    public synchronized boolean addl(final byte[] key, final long l) throws IOException {
+    public synchronized void addl(final byte[] key, final long l) throws IOException {
         assert l >= 0 : "l = " + l;
         assert (key != null);
         final kelondroRow.Entry newentry = this.rowdef.newEntry();
         newentry.setCol(0, key);
         newentry.setCol(1, l);
-        return index.addUnique(newentry);
+        index.addUnique(newentry);
     }
     
     public synchronized ArrayList<Long[]> removeDoubles() throws IOException {

@@ -27,6 +27,13 @@ package de.anomic.kelondro;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public class kelondroBytesIntMap {
     
@@ -76,13 +83,13 @@ public class kelondroBytesIntMap {
         return (int) oldentry.getColLong(1);
     }
     
-    public synchronized boolean addi(final byte[] key, final int i) throws IOException {
+    public synchronized void addi(final byte[] key, final int i) throws IOException {
         assert i >= 0 : "i = " + i;
         assert (key != null);
         final kelondroRow.Entry newentry = this.rowdef.newEntry();
         newentry.setCol(0, key);
         newentry.setCol(1, i);
-        return index.addUnique(newentry);
+        index.addUnique(newentry);
     }
     
     public synchronized ArrayList<Integer[]> removeDoubles() throws IOException {
@@ -139,4 +146,103 @@ public class kelondroBytesIntMap {
         index = null;
     }
     
+    private static class entry {
+        public byte[] key;
+        public int l;
+        public entry(final byte[] key, final int l) {
+            this.key = key;
+            this.l = l;
+        }
+    }
+    
+    /**
+     * this method creates a concurrent thread that can take entries that are used to initialize the map
+     * it should be used when a bytesLongMap is initialized when a file is read. Concurrency of FileIO and
+     * map creation will speed up the initialization process.
+     * @param keylength
+     * @param objectOrder
+     * @param space
+     * @param bufferSize
+     * @return
+     */
+    public static initDataConsumer asynchronusInitializer(final int keylength, final kelondroByteOrder objectOrder, final int space, int bufferSize) {
+        initDataConsumer initializer = new initDataConsumer(new kelondroBytesIntMap(keylength, objectOrder, space), bufferSize);
+        ExecutorService service = Executors.newSingleThreadExecutor();
+        initializer.setResult(service.submit(initializer));
+        service.shutdown();
+        return initializer;
+    }
+    
+    public static class initDataConsumer implements Callable<kelondroBytesIntMap> {
+
+        private BlockingQueue<entry> cache;
+        private final entry poison = new entry(new byte[0], 0);
+        private kelondroBytesIntMap map;
+        private Future<kelondroBytesIntMap> result;
+        private boolean sortAtEnd;
+        
+        public initDataConsumer(kelondroBytesIntMap map, int bufferCount) {
+            this.map = map;
+            cache = new ArrayBlockingQueue<entry>(bufferCount);
+            sortAtEnd = false;
+        }
+        
+        protected void setResult(Future<kelondroBytesIntMap> result) {
+            this.result = result;
+        }
+        
+        /**
+         * hand over another entry that shall be inserted into the BytesLongMap with an addl method
+         * @param key
+         * @param l
+         */
+        public void consume(final byte[] key, final int l) {
+            try {
+                cache.put(new entry(key, l));
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        
+        /**
+         * to signal the initialization thread that no more entries will be sublitted with consumer()
+         * this method must be called. The process will not terminate if this is not called before.
+         */
+        public void finish(boolean sortAtEnd) {
+            this.sortAtEnd = sortAtEnd;
+            try {
+                cache.put(poison);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        
+        /**
+         * this must be called after a finish() was called. this method blocks until all entries
+         * had been processed, and the content was sorted. It returns the kelondroBytesLongMap
+         * that the user wanted to initialize
+         * @return
+         * @throws InterruptedException
+         * @throws ExecutionException
+         */
+        public kelondroBytesIntMap result() throws InterruptedException, ExecutionException {
+            return this.result.get();
+        }
+        
+        public kelondroBytesIntMap call() throws IOException {
+            try {
+                entry c;
+                while ((c = cache.take()) != poison) {
+                    map.addi(c.key, c.l);
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            if (sortAtEnd && map.index instanceof kelondroRAMIndex) {
+                ((kelondroRAMIndex) map.index).finishInitialization();
+            }
+            return map;
+        }
+        
+    }
 }

@@ -132,8 +132,7 @@ public class kelondroEcoTable implements kelondroIndex {
                     // write the key into the index table
                     assert key != null;
                     if (key == null) {i++; continue;}
-                    if (!index.addi(key, i++)) fail++;
-                    assert index.size() + fail == i : "index.size() = " + index.size() + ", i = " + i + ", fail = " + fail + ", key = '" + new String(key) + "'";
+                    index.addi(key, i++);
                 }
             } else {
                 byte[] record;
@@ -146,7 +145,7 @@ public class kelondroEcoTable implements kelondroIndex {
                     System.arraycopy(record, 0, key, 0, rowdef.primaryKeyLength);
                     
                     // write the key into the index table
-                    if (!index.addi(key, i++)) fail++;
+                    index.addi(key, i++);
                     
                     // write the tail into the table
                     table.addUnique(taildef.newEntry(record, rowdef.primaryKeyLength, true));
@@ -173,7 +172,7 @@ public class kelondroEcoTable implements kelondroIndex {
                 for (final Integer[] ds: doubles) {
                     file.get(ds[0].intValue(), record, 0);
                     System.arraycopy(record, 0, key, 0, rowdef.primaryKeyLength);
-                    if (!index.addi(key, ds[0].intValue())) fail++;
+                    index.addi(key, ds[0].intValue());
                 }
                 // then remove the other doubles by removing them from the table, but do a re-indexing while doing that
                 // first aggregate all the delete positions because the elements from the top positions must be removed first
@@ -250,15 +249,11 @@ public class kelondroEcoTable implements kelondroIndex {
         return (int) ((rowdef.primaryKeyLength + 4) * tableSize(f, rowdef.objectsize) * kelondroRowCollection.growfactor);
     }
     
-    public synchronized boolean addUnique(final Entry row) throws IOException {
+    public synchronized void addUnique(final Entry row) throws IOException {
         assert file.size() == index.size() + fail : "file.size() = " + file.size() + ", index.size() = " + index.size();
         assert ((table == null) || (table.size() == index.size()));
         final int i = (int) file.size();
-        final boolean added = index.addi(row.getPrimaryKeyBytes(), i);
-        if (!added) {
-            fail++;
-            return false;
-        }
+        index.addi(row.getPrimaryKeyBytes(), i);
         if (table != null) {
             assert table.size() == i;
             table.addUnique(taildef.newEntry(row.bytes(), rowdef.primaryKeyLength, true));
@@ -266,18 +261,15 @@ public class kelondroEcoTable implements kelondroIndex {
         }
         file.add(row.bytes(), 0);
         assert file.size() == index.size() + fail : "file.size() = " + file.size() + ", index.size() = " + index.size();
-        return true;
     }
 
-    public synchronized int addUniqueMultiple(final List<Entry> rows) throws IOException {
+    public synchronized void addUniqueMultiple(final List<Entry> rows) throws IOException {
         assert file.size() == index.size() + fail : "file.size() = " + file.size() + ", index.size() = " + index.size();
         final Iterator<Entry> i = rows.iterator();
-        int c = 0;
         while (i.hasNext()) {
-            if (addUnique(i.next())) c++;
+            addUnique(i.next());
         }
         assert file.size() == index.size() + fail : "file.size() = " + file.size() + ", index.size() = " + index.size();
-        return c;
     }
 
     /**

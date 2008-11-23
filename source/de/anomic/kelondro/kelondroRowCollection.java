@@ -301,26 +301,22 @@ public class kelondroRowCollection {
         set(index, a);
     }
     
-    public synchronized boolean addUnique(final kelondroRow.Entry row) {
+    public synchronized void addUnique(final kelondroRow.Entry row) {
         final byte[] r = row.bytes();
-        return addUnique(r, 0, r.length);
+        addUnique(r, 0, r.length);
     }
 
-    public synchronized int addUniqueMultiple(final List<kelondroRow.Entry> rows) {
+    public synchronized void addUniqueMultiple(final List<kelondroRow.Entry> rows) {
         assert this.sortBound == 0 : "sortBound = " + this.sortBound + ", chunkcount = " + this.chunkcount;
         final Iterator<kelondroRow.Entry> i = rows.iterator();
-        int c = 0;
-        while (i.hasNext()) {
-            if (addUnique(i.next())) c++;
-        }
-        return c;
+        while (i.hasNext()) addUnique(i.next());
     }
     
     public synchronized void add(final byte[] a) {
         addUnique(a, 0, a.length);
     }
     
-    private final boolean addUnique(final byte[] a, final int astart, final int alength) {
+    private final void addUnique(final byte[] a, final int astart, final int alength) {
         assert (a != null);
         assert (astart >= 0) && (astart < a.length) : " astart = " + astart;
         assert (!(serverLog.allZero(a, astart, alength))) : "a = " + serverLog.arrayList(a, astart, alength);
@@ -338,7 +334,6 @@ public class kelondroRowCollection {
         System.arraycopy(a, astart, chunkcache, rowdef.objectsize * chunkcount, l);
         chunkcount++;
         this.lastTimeWrote = System.currentTimeMillis();
-        return true;
     }
     
     public synchronized final void addAllUnique(final kelondroRowCollection c) {

@@ -482,23 +482,17 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
         return result;
     }
 
-    public synchronized boolean addUnique(final kelondroRow.Entry row) throws IOException {
-        final int s = this.size();
+    public synchronized void addUnique(final kelondroRow.Entry row) throws IOException {
         this.put(row);
-        return this.size() > s;
     }
     
     public synchronized void addUnique(final kelondroRow.Entry row, final Date entryDate) throws IOException {
         this.put(row, entryDate);
     }
     
-    public synchronized int addUniqueMultiple(final List<kelondroRow.Entry> rows) throws IOException {
+    public synchronized void addUniqueMultiple(final List<kelondroRow.Entry> rows) throws IOException {
         final Iterator<kelondroRow.Entry> i = rows.iterator();
-        int c = 0;
-        while (i.hasNext()) {
-            if (addUnique(i.next())) c++;
-        }
-        return c;
+        while (i.hasNext()) addUnique(i.next());
     }
     
     private void assignChild(final kelondroNode parentNode, final kelondroNode childNode, final int childType) throws IOException {
