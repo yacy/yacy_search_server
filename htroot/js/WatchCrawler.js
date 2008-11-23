@@ -9,6 +9,8 @@ var queuesRPC;
 var refreshInterval=5;
 var wait=0;
 var changing=false; //change the interval
+var statusLoaded=true;
+var queueLoaded=true;
 
 refresh();
 //loadInterval=window.setInterval("refresh()", refreshInterval*1000);
@@ -31,14 +33,18 @@ function newInterval(){
 	changing=false;
 }
 function countdown(){
-	document.getElementById("nextUpdate").value=wait;
-	wait--;
-	if(wait==0){
-		refresh();
+	if(statusLoaded && queueLoaded){
+		document.getElementById("nextUpdate").value=wait;
+		wait--;
+		if(wait==0){
+			refresh();
+		}
 	}
 }
 function refresh(){
 	wait=refreshInterval;
+	statusLoaded=false;
+	queueLoaded=false;
 	requestStatus();
 	requestQueues();
 }
@@ -108,6 +114,7 @@ function handleStatus(){
 		img.setAttribute("src", BAR_IMG1);
 		wordCacheSpan.appendChild(img);
 	}
+	statusLoaded=true;
 }
 
 function handleQueues(){
@@ -166,6 +173,7 @@ function handleQueues(){
 		putQueueState("remotecrawler", remotecrawlerqueue_state);
 		updateTable(remotecrawlerqueue, "remote crawler");
 	}
+	queueLoaded=true;
 }
 
 function putQueueState(queue, state) {

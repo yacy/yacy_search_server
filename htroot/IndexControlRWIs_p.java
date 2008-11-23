@@ -106,7 +106,7 @@ public class IndexControlRWIs_p {
             }
             
             // delete everything
-            if (post.containsKey("deletecomplete")) {
+            if (post.containsKey("deletecomplete") && post.containsKey("confirmDelete")) {
                 sb.webIndex.clear();
                 sb.crawlQueues.clear();
                 try {
