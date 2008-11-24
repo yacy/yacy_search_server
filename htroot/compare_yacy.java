@@ -36,14 +36,17 @@ import java.util.Map;
 public class compare_yacy {
     
     private static final String defaultsearch = "YaCy";
-    private static final String[] order = {defaultsearch, "YaCy (local)", "google.de", "google.com", "metager.de", "yahoo.com", "romso.de", "search.live.com", "Wikipedia English", "Wikipedia Deutsch", "Sciencenet"};
+    private static final String[] order = {defaultsearch, "YaCy (local)", "google.de", "google.com", "scroogle.org", "metager.de", "metager2.de (web)", "metager2.de (international)", "yahoo.com", "romso.de", "search.live.com", "Wikipedia English", "Wikipedia Deutsch", "Sciencenet"};
     private static final Map<String, String> searchengines = new HashMap<String, String>();
     static {
         searchengines.put(defaultsearch, "yacysearch.html?display=2&verify=true&resource=global&query=");
         searchengines.put("YaCy (local)", "yacysearch.html?display=2&verify=true&resource=local&query=");
         searchengines.put("google.de", "http://www.google.de/search?q=");
         searchengines.put("google.com", "http://www.google.com/search?q=");
+        searchengines.put("scroogle.org", "http://www.scroogle.org/cgi-bin/nbbw.cgi?Gw=");
         searchengines.put("metager.de", "http://www.metager.de/meta/cgi-bin/meta.ger1?eingabe=");
+        searchengines.put("metager2.de (web)", "http://www.metager2.de/search.php?ses=web&q=");
+        searchengines.put("metager2.de (international)", "http://www.metager2.de/search.php?ses=international&q=");
         searchengines.put("yahoo.com", "http://search.yahoo.com/search?p=");
         searchengines.put("romso.de", "http://romso.de/?q=");
         searchengines.put("search.live.com", "http://search.live.com/results.aspx?q=");
