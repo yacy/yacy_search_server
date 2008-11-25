@@ -54,6 +54,8 @@ public class Blacklist_p {
     private final static String BLACKLIST        = "blackLists_";
     private final static String BLACKLIST_MOVE   = "blackListsMove_";
     private final static String BLACKLIST_SHARED = "BlackLists.Shared";
+    
+    private final static String BLACKLIST_FILENAME_FILTER = "^.*\\.black$";
 
     public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
         
@@ -66,7 +68,7 @@ public class Blacklist_p {
         final String[] supportedBlacklistTypes = supportedBlacklistTypesStr.split(",");
         
         // loading all blacklist files located in the directory
-        List<String> dirlist = listManager.getDirListing(listManager.listsPath);
+        List<String> dirlist = listManager.getDirListing(listManager.listsPath, BLACKLIST_FILENAME_FILTER);
         
         String blacklistToUse = null;
         final serverObjects prop = new serverObjects();
@@ -148,7 +150,7 @@ public class Blacklist_p {
                     }
                     
                     // reload Blacklists
-                    dirlist = listManager.getDirListing(listManager.listsPath);
+                    dirlist = listManager.getDirListing(listManager.listsPath, BLACKLIST_FILENAME_FILTER);
                 }
                 
             } else if (post.containsKey("deleteList")) {
@@ -176,7 +178,7 @@ public class Blacklist_p {
                 blacklistToUse = null;
                 
                 // reload Blacklists
-                dirlist = listManager.getDirListing(listManager.listsPath);
+                dirlist = listManager.getDirListing(listManager.listsPath, BLACKLIST_FILENAME_FILTER);
 
             } else if (post.containsKey("activateList")) {
 

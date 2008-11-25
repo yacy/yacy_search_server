@@ -48,6 +48,7 @@ import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 
 // The Naming of the functions is a bit strange...
+import java.io.FileFilter;
 
 public class listManager {
     public static plasmaSwitchboard switchboard = null;
@@ -220,12 +221,29 @@ public class listManager {
         return new String(temp);
     }
 
-    // get a Directory Listing as a String Array
+    /**
+     * Read content of a directory into a String array of file names.
+     * @param dirname The directory to get the file listing from. If it doesn't exist yet,
+     * it will be created.
+     * @return array of file names
+     */
     public static List<String> getDirListing(final String dirname){
-        final File dir = new File(dirname);
-        return getDirListing(dir);
+        return getDirListing(dirname, null);
     }
     
+    /**
+     * Read content of a directory into a String array of file names.
+     * @param dirname The directory to get the file listing from. If it doesn't exist yet,
+     * it will be created.
+     * @param filter String which contains a regular expression which has to be matched by
+     * file names in order to appear in returned array. All file names will be returned if
+     * filter is null.
+     * @return array of file names
+     */
+    public static List<String> getDirListing(final String dirname, final String filter) {
+        return getDirListing(new File(dirname), filter);
+    }
+
     /**
      * Read content of a directory into a String array of file names.
      * 
@@ -234,16 +252,30 @@ public class listManager {
      * @return array of file names
      */
     public static List<String> getDirListing(final File dir){
+        return getDirListing(dir, null);
+    }
+    
+    /**
+     * Read content of a directory into a String array of file names.
+     * @param dir The directory to get the file listing from. If it doesn't exist yet,
+     * it will be created.
+     * @param filter String which contains a regular expression which has to be matched by
+     * file names in order to appear in returned array. All file names will be returned if
+     * filter is null.
+     * @return array of file names
+     */
+    public static List<String> getDirListing(final File dir, final String filter){
         List<String> ret = new LinkedList<String>();
         File[] fileList;
-
         if (dir != null ) {
             if (!dir.exists()) {
                 dir.mkdir();
             }
             fileList = dir.listFiles();
             for (int i=0; i<= fileList.length-1; i++) {
-                ret.add(fileList[i].getName());
+                if (filter == null || fileList[i].getName().matches(filter)) {
+                    ret.add(fileList[i].getName());
+                }
             }
             return ret;
         }

@@ -69,6 +69,8 @@ public class BlacklistCleaner_p {
     private static final int ERR_HOST_WRONG_CHARS = 4;
     private static final int ERR_DOUBLE_OCCURANCE = 5;
     
+    private final static String BLACKLIST_FILENAME_FILTER = "^.*\\.black$";
+    
     public static final Class<?>[] supportedBLEngines = {
         indexDefaultReferenceBlacklist.class
     };
@@ -87,7 +89,7 @@ public class BlacklistCleaner_p {
         
         if (post == null) {
             prop.put("results", "0");
-            putBlacklists(prop, listManager.getDirListing(listManager.listsPath), blacklistToUse);
+            putBlacklists(prop, listManager.getDirListing(listManager.listsPath, BLACKLIST_FILENAME_FILTER), blacklistToUse);
             return prop;
         }
         
@@ -97,7 +99,7 @@ public class BlacklistCleaner_p {
                 prop.put("results", "2");
         }
         
-        putBlacklists(prop, listManager.getDirListing(listManager.listsPath), blacklistToUse);
+        putBlacklists(prop, listManager.getDirListing(listManager.listsPath, BLACKLIST_FILENAME_FILTER), blacklistToUse);
         
         if (blacklistToUse != null) {
             prop.put("results", "1");
