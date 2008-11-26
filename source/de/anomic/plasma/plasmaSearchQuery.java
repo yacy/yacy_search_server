@@ -117,6 +117,7 @@ public final class plasmaSearchQuery {
     public plasmaSearchQuery(
 		final String queryString, final TreeSet<String> queryHashes,
 		final TreeSet<String> excludeHashes, 
+        final TreeSet<String> fullqueryHashes,
         final plasmaSearchRankingProfile ranking,
         final int maxDistance, final String prefer, final int contentdom,
         final String language,
@@ -130,7 +131,7 @@ public final class plasmaSearchQuery {
 		this.queryString = queryString;
 		this.queryHashes = queryHashes;
 		this.excludeHashes = excludeHashes;
-		this.fullqueryHashes = queryHashes; //FIXME: refactor this method to get the proper hashes
+		this.fullqueryHashes = fullqueryHashes;
 		this.ranking = ranking;
 		this.maxDistance = maxDistance;
 		this.prefer = prefer;
@@ -248,6 +249,7 @@ public final class plasmaSearchQuery {
         }
         
         String s;
+        int l;
         // the string is clean now, but we must generate a set out of it
         final TreeSet<String> query = new TreeSet<String>(kelondroNaturalOrder.naturalComparator);
         final TreeSet<String> exclude = new TreeSet<String>(kelondroNaturalOrder.naturalComparator);
@@ -259,12 +261,14 @@ public final class plasmaSearchQuery {
         	} else {
         		while ((c = a[i].indexOf('-')) >= 0) {
         			s = a[i].substring(0, c);
-        			if(s.length() > 2) query.add(s);
-        			fullquery.add(s);
+        			l = s.length();
+					if(l > 2) query.add(s);
+        			if(l > 0) fullquery.add(s);
         			a[i] = a[i].substring(c + 1);
         		}
-        		if (a[i].length() > 2) query.add(a[i]);
-        		fullquery.add(a[i]);
+        		l = a[i].length();
+				if (l > 2) query.add(a[i]);
+        		if (l > 0) fullquery.add(a[i]);
         	}
         }
         return new TreeSet[]{query, exclude, fullquery};

@@ -134,7 +134,7 @@ public class ysearchitem {
                     ((yacyURL.probablyRootURL(result.hash())) ? ", probablyRootURL" : "") + 
                     (((wordURL = yacyURL.probablyWordURL(result.hash(), query[0])) != null) ? ", probablyWordURL=" + wordURL.toNormalform(false, true) : ""));
             final plasmaSnippetCache.TextSnippet snippet = result.textSnippet();
-            prop.put("content_snippet", (snippet == null) ? "(snippet not found)" : snippet.getLineMarked(theQuery.queryHashes));
+            prop.put("content_snippet", (snippet == null) ? "(snippet not found)" : snippet.getLineMarked(theQuery.fullqueryHashes));
             return prop;
         }
         
