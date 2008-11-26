@@ -56,7 +56,7 @@ public final class plasmaSearchQuery {
     public static final kelondroBitfield catchall_constraint = new kelondroBitfield(4, "______");
     
     public String queryString;
-    public TreeSet<String> queryHashes, excludeHashes;
+    public TreeSet<String> fullqueryHashes, queryHashes, excludeHashes;
     public int linesPerPage, offset;
     public String prefer;
     public int contentdom;
@@ -92,6 +92,7 @@ public final class plasmaSearchQuery {
     		final TreeSet<String>[] cq = cleanQuery(queryString);
     		this.queryHashes = indexWord.words2hashes(cq[0]);
     		this.excludeHashes = indexWord.words2hashes(cq[1]);
+    		this.fullqueryHashes = indexWord.words2hashes(cq[2]);
     	}
     	this.ranking = ranking;
         this.maxDistance = Integer.MAX_VALUE;
@@ -129,6 +130,7 @@ public final class plasmaSearchQuery {
 		this.queryString = queryString;
 		this.queryHashes = queryHashes;
 		this.excludeHashes = excludeHashes;
+		this.fullqueryHashes = queryHashes; //FIXME: refactor this method to get the proper hashes
 		this.ranking = ranking;
 		this.maxDistance = maxDistance;
 		this.prefer = prefer;
@@ -235,7 +237,7 @@ public final class plasmaSearchQuery {
     
     @SuppressWarnings("unchecked")
     public static TreeSet<String>[] cleanQuery(String querystring) {
-    	// returns two sets: a query set and a exclude set
+    	// returns three sets: a query set, a exclude set and a full query set
     	if ((querystring == null) || (querystring.length() == 0)) return new TreeSet[]{new TreeSet<String>(kelondroNaturalOrder.naturalComparator), new TreeSet<String>(kelondroNaturalOrder.naturalComparator)};
         
         // convert Umlaute
@@ -245,22 +247,27 @@ public final class plasmaSearchQuery {
             while ((c = querystring.indexOf(seps.charAt(i))) >= 0) { querystring = querystring.substring(0, c) + (((c + 1) < querystring.length()) ? (" " + querystring.substring(c + 1)) : ""); }
         }
         
+        String s;
         // the string is clean now, but we must generate a set out of it
         final TreeSet<String> query = new TreeSet<String>(kelondroNaturalOrder.naturalComparator);
         final TreeSet<String> exclude = new TreeSet<String>(kelondroNaturalOrder.naturalComparator);
+        final TreeSet<String> fullquery = new TreeSet<String>(kelondroNaturalOrder.naturalComparator);
         final String[] a = querystring.split(" ");
         for (int i = 0; i < a.length; i++) {
         	if (a[i].startsWith("-")) {
         		exclude.add(a[i].substring(1));
         	} else {
         		while ((c = a[i].indexOf('-')) >= 0) {
-        			query.add(a[i].substring(0, c));
+        			s = a[i].substring(0, c);
+        			if(s.length() > 2) query.add(s);
+        			fullquery.add(s);
         			a[i] = a[i].substring(c + 1);
         		}
-        		if (a[i].length() > 0) query.add(a[i]);
+        		if (a[i].length() > 2) query.add(a[i]);
+        		fullquery.add(a[i]);
         	}
         }
-        return new TreeSet[]{query, exclude};
+        return new TreeSet[]{query, exclude, fullquery};
     }
     
     public String queryString(final boolean encodeHTML) {
