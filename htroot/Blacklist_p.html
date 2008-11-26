@@ -66,8 +66,8 @@
             </tr>
             #{Itemlist}#
               <tr class="TableCell#(dark)#Light::Dark#(/dark)#"> 
-                <td><input type="checkbox" name="selectedEntry.#[count]#" value="#[item]#" /></td>
-                <td>#[item]#</td>
+                <td><input type="checkbox" name="selectedEntry.#[count]#" id="selectedEntry.#[count]#" value="#[item]#" /></td>
+                <td><label for="selectedEntry.#[count]#">#[item]#</label></td>
               </tr>  
             #{/Itemlist}#
           </table>
