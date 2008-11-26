@@ -131,10 +131,10 @@ tt, *.tt {
   font-size:90%;
 }
 
-.snippetLoaded {
+/* .snippetLoaded {
   font-style:italic;
   color: #666;
-}
+} */
 
 .snippetLoaded b {
   color: black;
