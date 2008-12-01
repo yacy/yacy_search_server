@@ -170,6 +170,7 @@ public class yacySeed implements Cloneable {
 
     public yacySeed(final String theHash, final Map<String, String> theDna) {
         // create a seed with a pre-defined hash map
+        assert theHash != null;
         this.hash = theHash;
         this.dna = theDna;
         final String flags = this.dna.get(yacySeed.FLAGS);
@@ -901,6 +902,7 @@ public class yacySeed implements Cloneable {
         // extract hash
         final HashMap<String, String> dna = serverCodings.string2map(seed, ",");
         final String hash = dna.remove(yacySeed.HASH);
+        if (hash == null) return null;
         final yacySeed resultSeed = new yacySeed(hash, dna);
 
         // check semantics of content

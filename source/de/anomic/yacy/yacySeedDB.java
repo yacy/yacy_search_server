@@ -954,11 +954,13 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
         public yacySeed internalNext() {
             if ((it == null) || (!(it.hasNext()))) return null;
             try {
-                final Map<String, String> dna = it.next();
-                if (dna == null) return null;
-                final String hash = dna.remove("key");
-                //while (hash.length() < commonHashLength) { hash = hash + "_"; }
-                return new yacySeed(hash, dna);
+                while (true) {
+                    final Map<String, String> dna = it.next();
+                    if (dna == null) return null;
+                    final String hash = dna.remove("key");
+                    if (hash == null) { continue; } // bad seed
+                    return new yacySeed(hash, dna);
+                }
             } catch (final Exception e) {
                 e.printStackTrace();
                 yacyCore.log.logSevere("ERROR internalNext: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
