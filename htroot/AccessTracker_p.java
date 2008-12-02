@@ -144,6 +144,9 @@ public class AccessTracker_p {
             long utimeSum = 0;
             long stimeSum = 0;
             long rtimeSum = 0;
+            long utimeSum1 = 0;
+            long stimeSum1 = 0;
+            long rtimeSum1 = 0;
             
             for (int entCount = 0; entCount < m; entCount++) {
                 searchProfile = array.get(array.size() - entCount - 1);
@@ -170,10 +173,15 @@ public class AccessTracker_p {
                 prop.putNum("page_list_" + entCount + "_resulttime", searchProfile.searchtime);
                 qcountSum += searchProfile.linesPerPage;
                 rcountSum += searchProfile.resultcount;
-                if (searchProfile.resultcount > 0) rcount++;
                 utimeSum += searchProfile.urlretrievaltime;
                 stimeSum += searchProfile.snippetcomputationtime;
                 rtimeSum += searchProfile.searchtime;
+                if (searchProfile.resultcount > 0){
+                	rcount++;
+                    utimeSum1 += searchProfile.urlretrievaltime;
+                    stimeSum1 += searchProfile.snippetcomputationtime;
+                    rtimeSum1 += searchProfile.searchtime;
+                }
             }
             prop.put("page_list", m);
             prop.put("page_num", m);
@@ -187,11 +195,10 @@ public class AccessTracker_p {
             prop.putNum("page_urltime_avg", (double) utimeSum / m);
             prop.putNum("page_snippettime_avg", (double) stimeSum / m);
             prop.putNum("page_resulttime_avg", (double) rtimeSum / m);
-            prop.putNum("page_querycount_avg1", (double) qcountSum / rcount);
             prop.putNum("page_resultcount_avg1", (double) rcountSum / rcount);
-            prop.putNum("page_urltime_avg1", (double) utimeSum / rcount);
-            prop.putNum("page_snippettime_avg1", (double) stimeSum / rcount);
-            prop.putNum("page_resulttime_avg1", (double) rtimeSum / rcount);
+            prop.putNum("page_urltime_avg1", (double) utimeSum1 / rcount);
+            prop.putNum("page_snippettime_avg1", (double) stimeSum1 / rcount);
+            prop.putNum("page_resulttime_avg1", (double) rtimeSum1 / rcount);
             prop.putNum("page_total", (page == 2) ? sb.localSearches.size() : sb.remoteSearches.size());
         }
         if ((page == 3) || (page == 5)) {
