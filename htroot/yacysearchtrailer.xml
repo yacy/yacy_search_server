@@ -1,0 +1,5 @@
+<yacy:topwords>
+#{words}#
+<yacy:item>#[word]#</yacy:item>
+#{/words}#
+</yacy:topwords>

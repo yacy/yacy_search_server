@@ -1,0 +1,7 @@
+#(content)#::<item>
+<title>#[title]#</title>
+<link>#[link]#</link>
+<description>#[description]#</description>
+<pubDate>#[date822]#</pubDate>
+<guid isPermaLink="false">#[urlhash]#</guid>
+</item>#(/content)#

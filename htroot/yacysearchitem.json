@@ -1,0 +1,7 @@
+#(content)#::    {
+      "title": "#[title]#",
+      "link": "#[link]#",
+      "description": "#[description]#",
+      "pubDate": "#[date822]#",
+      "guid": "#[urlhash]#"
+    },#(/content)#

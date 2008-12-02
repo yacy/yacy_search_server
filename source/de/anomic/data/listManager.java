@@ -48,7 +48,6 @@ import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 
 // The Naming of the functions is a bit strange...
-import java.io.FileFilter;
 
 public class listManager {
     public static plasmaSwitchboard switchboard = null;

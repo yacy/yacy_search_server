@@ -571,6 +571,7 @@ public final class httpdFileHandler {
                 if (path.endsWith("html") || 
                         path.endsWith("htm") || 
                         path.endsWith("xml") || 
+                        path.endsWith("json") || 
                         path.endsWith("rdf") || 
                         path.endsWith("rss") || 
                         path.endsWith("csv") ||

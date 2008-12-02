@@ -80,7 +80,7 @@ public class yacysearch {
         boolean fetchSnippets = (post != null && post.get("verify", "false").equals("true"));
         final serverObjects prop = new serverObjects();
         
-        final boolean rss = (post == null) ? false : post.get("rss", "false").equals("true");
+        //final boolean rss = (post == null) ? false : post.get("rss", "false").equals("true");
         prop.put("input_promoteSearchPageGreeting", promoteSearchPageGreeting);
         prop.put("input_promoteSearchPageGreeting.homepage", sb.getConfig("promoteSearchPageGreeting.homepage", ""));
         prop.put("input_promoteSearchPageGreeting.smallImage", sb.getConfig("promoteSearchPageGreeting.smallImage", ""));
@@ -348,12 +348,12 @@ public class yacysearch {
             prop.put("num-results_offset", offset);
             prop.put("num-results_itemscount", "0");
             prop.put("num-results_itemsPerPage", itemsPerPage);
-            prop.put("num-results_totalcount", yFormatter.number(totalcount, !rss));
+            prop.put("num-results_totalcount", yFormatter.number(totalcount, true));
             prop.put("num-results_globalresults", (globalsearch) ? "1" : "0");
-            prop.put("num-results_globalresults_localResourceSize", yFormatter.number(theSearch.getRankingResult().getLocalResourceSize(), !rss));
-            prop.put("num-results_globalresults_remoteResourceSize", yFormatter.number(theSearch.getRankingResult().getRemoteResourceSize(), !rss));
-            prop.put("num-results_globalresults_remoteIndexCount", yFormatter.number(theSearch.getRankingResult().getRemoteIndexCount(), !rss));
-            prop.put("num-results_globalresults_remotePeerCount", yFormatter.number(theSearch.getRankingResult().getRemotePeerCount(), !rss));
+            prop.put("num-results_globalresults_localResourceSize", yFormatter.number(theSearch.getRankingResult().getLocalResourceSize(), true));
+            prop.put("num-results_globalresults_remoteResourceSize", yFormatter.number(theSearch.getRankingResult().getRemoteResourceSize(), true));
+            prop.put("num-results_globalresults_remoteIndexCount", yFormatter.number(theSearch.getRankingResult().getRemoteIndexCount(), true));
+            prop.put("num-results_globalresults_remotePeerCount", yFormatter.number(theSearch.getRankingResult().getRemotePeerCount(), true));
             
             // compose page navigation
             final StringBuffer resnav = new StringBuffer();
