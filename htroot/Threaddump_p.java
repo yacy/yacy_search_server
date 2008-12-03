@@ -57,37 +57,49 @@ public class Threaddump_p {
     	sb = (plasmaSwitchboard) env;
     	final StringBuffer buffer = new StringBuffer(1000);
     	
-    	if (post != null && post.containsKey("createThreaddump")) {
-    	    final boolean plain = post.get("plain", "false").equals("true");
-    	    final int sleep = post.getInt("sleep", 0); // a sleep before creation of a thread dump can be used for profiling
-    	    if (sleep > 0) try {Thread.sleep(sleep);} catch (final InterruptedException e) {}
-    	    prop.put("dump", "1");
-        	// Thread dump
-        	final Map<Thread,StackTraceElement[]> stackTraces = Thread.getAllStackTraces();
-        	final Date dt = new Date();
-        	final String versionstring = yacyVersion.combined2prettyVersion(sb.getConfig("version","0.1"));
-        	
-        	bufferappend(buffer, plain, "************* Start Thread Dump " + dt + " *******************");
-        	bufferappend(buffer, plain, "");
-        	bufferappend(buffer, plain, "YaCy Version: " + versionstring);
-        	bufferappend(buffer, plain, "Total Memory = " + (Runtime.getRuntime().totalMemory()));
-        	bufferappend(buffer, plain, "Used&nbsp;&nbsp;Memory = " + (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()));
-        	bufferappend(buffer, plain, "Free&nbsp;&nbsp;Memory = " + (Runtime.getRuntime().freeMemory()));
-        	bufferappend(buffer, plain, "");
-        	bufferappend(buffer, plain, "");
-            
-        	appendStackTraces(sb.getRootPath(), buffer, stackTraces, plain, Thread.State.BLOCKED);
-        	appendStackTraces(sb.getRootPath(), buffer, stackTraces, plain, Thread.State.RUNNABLE);
-        	appendStackTraces(sb.getRootPath(), buffer, stackTraces, plain, Thread.State.TIMED_WAITING);
-        	appendStackTraces(sb.getRootPath(), buffer, stackTraces, plain, Thread.State.WAITING);
-        	appendStackTraces(sb.getRootPath(), buffer, stackTraces, plain, Thread.State.NEW);
-        	appendStackTraces(sb.getRootPath(), buffer, stackTraces, plain, Thread.State.TERMINATED);
-            
-        	bufferappend(buffer, plain, "************* End Thread Dump " + dt + " *******************");
+	    final boolean plain = post.get("plain", "false").equals("true");
+	    final int sleep = post.getInt("sleep", 0); // a sleep before creation of a thread dump can be used for profiling
+	    if (sleep > 0) try {Thread.sleep(sleep);} catch (final InterruptedException e) {}
+	    prop.put("dump", "1");
+    	// Thread dump
+    	final Date dt = new Date();
+    	final String versionstring = yacyVersion.combined2prettyVersion(sb.getConfig("version","0.1"));
+    	
+    	bufferappend(buffer, plain, "************* Start Thread Dump " + dt + " *******************");
+    	bufferappend(buffer, plain, "");
+    	bufferappend(buffer, plain, "YaCy Version: " + versionstring);
+    	bufferappend(buffer, plain, "Total Memory = " + (Runtime.getRuntime().totalMemory()));
+    	bufferappend(buffer, plain, "Used&nbsp;&nbsp;Memory = " + (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()));
+    	bufferappend(buffer, plain, "Free&nbsp;&nbsp;Memory = " + (Runtime.getRuntime().freeMemory()));
+    	bufferappend(buffer, plain, "");
+    	bufferappend(buffer, plain, "");
+    	
+        if (post != null && post.containsKey("multipleThreaddump")) {
+            final ArrayList<Map<Thread,StackTraceElement[]>> traces = new ArrayList<Map<Thread,StackTraceElement[]>>();
+            for (int i = 0; i < 100; i++) {
+                traces.add(Thread.getAllStackTraces());
+            }
+            appendStackTraceStats(sb.getRootPath(), buffer, traces, plain, Thread.State.BLOCKED);
+            appendStackTraceStats(sb.getRootPath(), buffer, traces, plain, Thread.State.RUNNABLE);
+            appendStackTraceStats(sb.getRootPath(), buffer, traces, plain, Thread.State.TIMED_WAITING);
+            appendStackTraceStats(sb.getRootPath(), buffer, traces, plain, Thread.State.WAITING);
+            appendStackTraceStats(sb.getRootPath(), buffer, traces, plain, Thread.State.NEW);
+            appendStackTraceStats(sb.getRootPath(), buffer, traces, plain, Thread.State.TERMINATED);
+        } else {
+            // generate a single thread dump
+            final Map<Thread,StackTraceElement[]> stackTraces = Thread.getAllStackTraces();
+            appendStackTraces(sb.getRootPath(), buffer, stackTraces, plain, Thread.State.BLOCKED);
+            appendStackTraces(sb.getRootPath(), buffer, stackTraces, plain, Thread.State.RUNNABLE);
+            appendStackTraces(sb.getRootPath(), buffer, stackTraces, plain, Thread.State.TIMED_WAITING);
+            appendStackTraces(sb.getRootPath(), buffer, stackTraces, plain, Thread.State.WAITING);
+            appendStackTraces(sb.getRootPath(), buffer, stackTraces, plain, Thread.State.NEW);
+            appendStackTraces(sb.getRootPath(), buffer, stackTraces, plain, Thread.State.TERMINATED);
+        }
         
-        	prop.put("plain_content", buffer.toString());
-        	prop.put("plain", (plain) ? 1 : 0);
-    	}
+    	bufferappend(buffer, plain, "************* End Thread Dump " + dt + " *******************");
+    
+    	prop.put("plain_content", buffer.toString());
+    	prop.put("plain", (plain) ? 1 : 0);
     	
        	return prop;    // return from serverObjects respond()
     }    
@@ -95,7 +107,66 @@ public class Threaddump_p {
     private static void appendStackTraces(final File rootPath, final StringBuffer buffer, final Map<Thread,StackTraceElement[]> stackTraces, final boolean plain, final Thread.State stateIn) {
         bufferappend(buffer, plain, "THREADS WITH STATES: " + stateIn.toString());
         bufferappend(buffer, plain, "");
+        // collect single dumps
+        HashMap<String, ArrayList<String>> dumps = dumpCollection(rootPath, stackTraces, plain, stateIn);
         
+        // write dumps
+        for (final Entry<String, ArrayList<String>> entry: dumps.entrySet()) {
+            ArrayList<String> threads = entry.getValue();
+            for (int i = 0; i < threads.size(); i++) bufferappend(buffer, plain, threads.get(i));
+            bufferappend(buffer, plain, entry.getKey());
+            bufferappend(buffer, plain, "");
+        }
+        bufferappend(buffer, plain, "");
+    }
+    
+    private static void appendStackTraceStats(final File rootPath, final StringBuffer buffer, final ArrayList<Map<Thread,StackTraceElement[]>> traces, final boolean plain, final Thread.State stateIn) {
+        bufferappend(buffer, plain, "THREADS WITH STATES: " + stateIn.toString());
+        bufferappend(buffer, plain, "");
+        // collect single dumps
+        HashMap<String, Integer> dumps = dumpStatistic(rootPath, traces, plain, stateIn);
+        
+        // write dumps
+        while (dumps.size() > 0) {
+            Entry<String, Integer> e = removeMax(dumps);
+            bufferappend(buffer, plain, "Occurrences: " + e.getValue());
+            bufferappend(buffer, plain, e.getKey());
+            bufferappend(buffer, plain, "");
+        }
+        bufferappend(buffer, plain, "");
+    }
+    
+    private static Entry<String, Integer> removeMax(HashMap<String, Integer> result) {
+        Entry<String, Integer> max = null;
+        for (final Entry<String, Integer> e: result.entrySet()) {
+            if (max == null || e.getValue().intValue() > max.getValue().intValue()) {
+                max = e;
+            }
+        }
+        result.remove(max.getKey());
+        return max;
+    }
+    
+    private static HashMap<String, Integer> dumpStatistic(final File rootPath, final ArrayList<Map<Thread,StackTraceElement[]>> stackTraces, final boolean plain, final Thread.State stateIn) {
+        Map<Thread,StackTraceElement[]> trace;
+        HashMap<String, Integer> result = new HashMap<String, Integer>();
+        HashMap<String, ArrayList<String>> x;
+        for (int i = 0; i < stackTraces.size(); i++) {
+            trace = stackTraces.get(i);
+            x = dumpCollection(rootPath, trace, plain, stateIn);
+            for (final Entry<String, ArrayList<String>> e: x.entrySet()) {
+                Integer c = result.get(e.getKey());
+                if (c == null) result.put(e.getKey(), new Integer(1));
+                else {
+                    c = new Integer(c.intValue() + 1);
+                    result.put(e.getKey(), c);
+                }
+            }
+        }
+        return result;
+    }
+    
+    private static HashMap<String, ArrayList<String>> dumpCollection(final File rootPath, final Map<Thread,StackTraceElement[]> stackTraces, final boolean plain, final Thread.State stateIn) {
         final File classPath = new File(rootPath, "source");
   
         Thread thread;
@@ -139,15 +210,7 @@ public class Threaddump_p {
                 dumps.put(threaddump, threads);
             }
         }
-        
-        // write dumps
-        for (final Entry<String, ArrayList<String>> entry: dumps.entrySet()) {
-            ArrayList<String> threads = entry.getValue();
-            for (int i = 0; i < threads.size(); i++) bufferappend(buffer, plain, threads.get(i));
-            bufferappend(buffer, plain, entry.getKey());
-            bufferappend(buffer, plain, "");
-        }
-        bufferappend(buffer, plain, "");
+        return dumps;
     }
     
     private static File getClassFile(final File sourcePath, final String classname) {
