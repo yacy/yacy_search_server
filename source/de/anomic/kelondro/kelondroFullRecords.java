@@ -161,10 +161,10 @@ public class kelondroFullRecords extends kelondroAbstractRecords {
 
             // read record
             this.ohChunk = new byte[overhead];
-            this.bodyChunk = new byte[ROW.objectsize];
             if (overhead > 0) entryFile.readFully(seekpos(this.handle), this.ohChunk, 0, overhead);
+            this.bodyChunk = null; /*new byte[ROW.objectsize];
             entryFile.readFully(seekpos(this.handle) + overhead, this.bodyChunk, 0, this.bodyChunk.length);
-            
+            */
             // mark chunks as not changed
             this.ohChanged = false;
             this.bodyChanged = false;
@@ -222,11 +222,17 @@ public class kelondroFullRecords extends kelondroAbstractRecords {
         public synchronized boolean valid() {
             // returns true if the key starts with non-zero byte
             // this may help to detect deleted entries
-            return (this.bodyChunk[0] != 0) && ((this.bodyChunk[0] != -128) || (this.bodyChunk[1] != 0));
+            return this.bodyChunk == null || (this.bodyChunk[0] != 0) && ((this.bodyChunk[0] != -128) || (this.bodyChunk[1] != 0));
         }
 
-        public synchronized byte[] getKey() {
+        public synchronized byte[] getKey() throws IOException {
             // read key
+            if (this.bodyChunk == null) {
+                // load all values from the database file
+                this.bodyChunk = new byte[ROW.objectsize];
+                // read values
+                entryFile.readFully(seekpos(this.handle) + overhead, this.bodyChunk, 0, this.bodyChunk.length);
+            }
             return trimCopy(this.bodyChunk, 0, ROW.width(0));
         }
 

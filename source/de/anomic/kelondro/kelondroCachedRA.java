@@ -82,7 +82,7 @@ public class kelondroCachedRA extends kelondroAbstractRA implements kelondroRA {
             cache = new byte[cacheElementSize];
             //System.out.println("buffernr=" + bufferNr + ", elSize=" + bufferElementSize);
             ra.seek(cacheNr * (long) cacheElementSize);
-            ra.read(cache, 0, cacheElementSize);
+            ra.readFully(cache, 0, cacheElementSize);
             cacheMemory.put(cacheNrI, cache);
         }
         cacheScore.setScore(cacheNrI, (int) (0xFFFFFFFFL & System.currentTimeMillis()));
@@ -115,7 +115,7 @@ public class kelondroCachedRA extends kelondroAbstractRA implements kelondroRA {
         //writeBuffer(buffer, bn);
     }
 
-    public int read(final byte[] b, final int off, final int len) throws IOException {
+    public void readFully(byte[] b, int off, int len) throws IOException {
         final int bn1 = cacheElementNumber(seekpos);
         final int bn2 = cacheElementNumber(seekpos + len - 1);
         final int offset = cacheElementOffset(seekpos);
@@ -125,7 +125,7 @@ public class kelondroCachedRA extends kelondroAbstractRA implements kelondroRA {
             //System.out.println("C1: bn1=" + bn1 + ", offset=" + offset + ", off=" + off + ", len=" + len);
             System.arraycopy(buffer, offset, b, off, len);
             seekpos += len;
-            return len;
+            return;
         }
         
         // do recursively
@@ -133,7 +133,8 @@ public class kelondroCachedRA extends kelondroAbstractRA implements kelondroRA {
         //System.out.println("C2: bn1=" + bn1 + ", bn2=" + bn2 +", offset=" + offset + ", off=" + off + ", len=" + len + ", thislen=" + thislen);
         System.arraycopy(buffer, offset, b, off, thislen);
         seekpos += thislen;
-        return thislen + read(b, off + thislen, len - thislen);
+        readFully(b, off + thislen, len - thislen);
+        return;
     }
 
     public void write(final byte[] b, final int off, final int len) throws IOException {
@@ -179,4 +180,5 @@ public class kelondroCachedRA extends kelondroAbstractRA implements kelondroRA {
             close();
         } catch (final IOException e) {}
     }
+
 }

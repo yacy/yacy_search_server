@@ -232,7 +232,7 @@ public final class httpdFileHandler {
             ext = path.substring(pos + 1).toLowerCase();
         }
         headers.put(httpResponseHeader.SERVER, "AnomicHTTPD (www.anomic.de)");
-        headers.put(httpResponseHeader.DATE, HttpClient.dateString(new Date()));
+        headers.put(httpResponseHeader.DATE, serverDate.formatRFC1123(new Date()));
         if(!(plasmaParser.mediaExtContains(ext))){
             headers.put(httpResponseHeader.PRAGMA, "no-cache");         
         }

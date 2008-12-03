@@ -46,16 +46,15 @@ public interface kelondroRA {
     public long available() throws IOException;
     
     public int read() throws IOException;
+    public void readFully(byte[] b, int off, int len) throws IOException;
     public void write(int b) throws IOException;
 
-    public int read(byte[] b, int off, int len) throws IOException;
     public void write(byte[] b, int off, int len) throws IOException;
 
     public void seek(long pos) throws IOException;
     public void close() throws IOException;
 
     // derived methods:
-    public void readFully(byte[] b, int off, int len) throws IOException;
     public byte[] readFully() throws IOException;
     public byte readByte() throws IOException;
     public void writeByte(int v) throws IOException;

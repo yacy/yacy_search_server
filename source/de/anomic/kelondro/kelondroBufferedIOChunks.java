@@ -60,7 +60,7 @@ public final class kelondroBufferedIOChunks extends kelondroAbstractIOChunks imp
         return ra.length();
     }
     
-    public synchronized int read(final long pos, final byte[] b, final int off, final int len) throws IOException {
+    public synchronized void readFully(final long pos, final byte[] b, final int off, final int len) throws IOException {
         assert (b.length >= off + len): "read pos=" + pos  + ", b.length=" + b.length + ", off=" + off + ", len=" + len;
         
         // check commit time
@@ -77,18 +77,19 @@ public final class kelondroBufferedIOChunks extends kelondroAbstractIOChunks imp
                 // entry not known, read directly from IO
                 synchronized (this.ra) {
                     this.ra.seek(pos + off);
-                    return ra.read(b, off, len);
+                    ra.readFully(b, off, len);
+                    return;
                 }
             }
             // use buffered entry
             if (bb.length >= off + len) {
                 // the buffered entry is long enough
                 System.arraycopy(bb, off, b, off, len);
-                return len;
+                return;
             }
             // the entry is not long enough. transmit only a part
             System.arraycopy(bb, off, b, off, bb.length - off);
-            return bb.length - off;
+            return;
         }
     }
 
@@ -172,4 +173,5 @@ public final class kelondroBufferedIOChunks extends kelondroAbstractIOChunks imp
     public void deleteOnExit() {
         this.ra.deleteOnExit();
     }
+
 }

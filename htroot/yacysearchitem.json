@@ -4,4 +4,4 @@
       "description": "#[description]#",
       "pubDate": "#[date822]#",
       "guid": "#[urlhash]#"
-    },#(/content)#
+    }#(/content)#

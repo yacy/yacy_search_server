@@ -222,7 +222,7 @@ public class NoticedURL {
                     if (s > balancer.size()) continue;
                     final int aftersize = balancer.size();
                     balancer.clear(); // the balancer is broken and cannot shrink
-                    throw new IOException("entry is null, balancer cannot shrink (bevore pop = " + s + ", after pop = " + aftersize + "); reset of balancer");
+                    serverLog.logWarning("BALANCER", "entry is null, balancer cannot shrink (bevore pop = " + s + ", after pop = " + aftersize + "); reset of balancer");
                 }
                 return entry;
             }

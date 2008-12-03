@@ -971,7 +971,12 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
                     serverLog.logSevere("kelondroCachedRecords", filename + " failed with " + e.getMessage(), e);
                     return null;
                 }
-                final byte[] key = nn.getKey();
+                byte[] key = null;
+                try {
+                    key = nn.getKey();
+                } catch (IOException e1) {
+                    return null;
+                }
                 if ((key == null) ||
                     ((key.length == 1) && (key[0] == (byte) 0x80)) || // the NUL pointer ('lost' chain terminator)
                     (key.length < 3) ||

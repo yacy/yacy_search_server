@@ -164,11 +164,10 @@ public class kelondroNIOFileRA extends kelondroAbstractRA implements kelondroRA 
         seekPos++;
     }
 
-    public int read(final byte[] b, final int off, final int len) throws IOException {
-	for (int i = 0; i < len; i++) {
+    public void readFully(final byte[] b, final int off, final int len) throws IOException {
+        for (int i = 0; i < len; i++) {
             b[off + i] = (byte) read();
         }
-        return len;
     }
 
     public void write(final byte[] b, final int off, final int len) throws IOException {

@@ -38,7 +38,7 @@ public interface kelondroNode {
     public void commit() throws IOException;
     public void setValueRow(byte[] row) throws IOException;
     public boolean valid();
-    public byte[] getKey();
+    public byte[] getKey() throws IOException;
     public byte[] getValueRow() throws IOException;
     public String toString();
 

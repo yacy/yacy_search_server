@@ -18,8 +18,9 @@
     "items": [
 #{results}#
 <!--#include virtual="yacysearchitem.json?item=#[item]#&eventID=#[eventID]#" -->
+#(nl)#::    ,#(/nl)#
 #{/results}#
-    {}],
+    ],
 <!--#include virtual="yacysearchtrailer.json?eventID=#[eventID]#" -->
   }]
 }

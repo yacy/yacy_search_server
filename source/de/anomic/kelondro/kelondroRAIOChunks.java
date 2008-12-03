@@ -40,19 +40,6 @@ public final class kelondroRAIOChunks extends kelondroAbstractIOChunks implement
     public synchronized long length() throws IOException {
         return ra.length();
     }
-    
-    public synchronized int read(final long pos, final byte[] b, final int off, final int len) throws IOException {
-        if (len == 0) return 0;
-        this.ra.seek(pos);
-        final long available = ra.available();
-        if (available >= len) {
-            return ra.read(b, off, len);
-        } else if (available == 0) {
-            return -1;
-        } else {
-            return ra.read(b, off, (int) available);
-        }
-    }
 
     public synchronized void write(final long pos, final byte[] b, final int off, final int len) throws IOException {
         this.ra.seek(pos);

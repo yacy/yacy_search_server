@@ -168,11 +168,6 @@ public class kelondroByteArray {
     public void write(final int to_position, final kelondroByteArray from_array, final int from_offset, final int from_length) {
         System.arraycopy(from_array.buffer, from_array.offset + from_offset, this.buffer, this.offset + to_position, from_length);
     }
-
-    public int write(final int to_position, final kelondroRA from_file, final int len) throws IOException {
-        if (len == 0) return 0;
-        return from_file.read(this.buffer, to_position, len);
-    }
     
     public static boolean equals(final byte[] buffer, final byte[] pattern) {
         return equals(buffer, 0, pattern);

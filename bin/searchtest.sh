@@ -4,7 +4,7 @@ S=`date "+%s"`
 C=0
 for N in `cat searchtest.words`; do 
   echo search for $N:
-  ./localsearch.sh $N
+  ./localsearch.sh $N > /dev/null
   C=$(($C+1))
 done
 T=`date "+%s"`

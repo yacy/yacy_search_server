@@ -27,7 +27,6 @@ package de.anomic.kelondro;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -56,36 +55,16 @@ abstract class kelondroAbstractRA implements kelondroRA {
     abstract public int read() throws IOException;
     abstract public void write(int b) throws IOException;
 
-    abstract public int read(byte[] b, int off, int len) throws IOException;
     abstract public void write(byte[] b, int off, int len) throws IOException;
 
     abstract public void seek(long pos) throws IOException;
     abstract public void close() throws IOException;
 
     // derived methods:
-    public void readFully(final byte[] b, int off, int len) throws IOException {
-        if (len < 0) throw new IndexOutOfBoundsException("length is negative:" + len);
-        if (b.length < off + len) throw new IndexOutOfBoundsException("bounds do not fit: b.length=" + b.length + ", off=" + off + ", len=" + len);
-        while (len > 0) {
-            final int r = read(b, off, len);
-            if (r < 0) throw new IOException("EOF"); // read exceeded EOF
-            off += r;
-            len -= r;
-        }
-    }
-    
     public byte[] readFully() throws IOException {
-        final ByteArrayOutputStream dest = new ByteArrayOutputStream(512);
-        final byte[] buffer = new byte[1024];
-        
-        int c, total = 0;
-        while ((c = read(buffer, 0, 1024)) > 0) {
-            dest.write(buffer, 0, c);
-            total += c;
-        }
-        dest.flush();
-        dest.close();
-        return dest.toByteArray();
+        final byte[] buffer = new byte[(int) this.available()];
+        this.readFully(buffer, 0, buffer.length);
+        return buffer;
     }
     
     public byte readByte() throws IOException {
@@ -234,7 +213,7 @@ abstract class kelondroAbstractRA implements kelondroRA {
         seek(0);
         final int l = readInt();
         final byte[] b = new byte[l];
-        read(b, 0, l);
+        readFully(b, 0, l);
         return b;
     }
     

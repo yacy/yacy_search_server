@@ -229,6 +229,8 @@ public class yacyURL implements Serializable {
         escape();
     }
 
+    private final Pattern backPathPattern = Pattern.compile("(/[^/]+(?<!/\\.{1,2})/)[.]{2}(?=/|$)|/\\.(?=/)|/(?=/)");
+    
     //  resolve '..'
     String resolveBackpath(String path) /* throws MalformedURLException */ {
         /* original version by [MC]
@@ -243,8 +245,7 @@ public class yacyURL implements Serializable {
         /* by [MT] */
         if (path.length() == 0 || path.charAt(0) != '/') { path = "/" + path; }
 
-        final Pattern pathPattern = Pattern.compile("(/[^/]+(?<!/\\.{1,2})/)[.]{2}(?=/|$)|/\\.(?=/)|/(?=/)");
-        final Matcher matcher = pathPattern.matcher(path);
+        final Matcher matcher = backPathPattern.matcher(path);
         while (matcher.find()) {
             path = matcher.replaceAll("");
             matcher.reset(path);

@@ -30,7 +30,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.zip.GZIPOutputStream;
@@ -58,7 +57,6 @@ import org.apache.commons.httpclient.params.DefaultHttpParams;
 import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
-import org.apache.commons.httpclient.util.DateUtil;
 
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.server.logging.serverLog;
@@ -583,20 +581,6 @@ public class JakartaCommonsHttpClient {
             hostConfig = null;
         }
         return hostConfig;
-    }
-
-    /**
-     * Returns the given date in an HTTP-usable format. (according to RFC1123/RFC822)
-     * 
-     * @param date The Date-Object to be converted.
-     * @return String with the date.
-     */
-    public static String date2String(final Date date) { // TODO: merge this method with serverDate
-        if (date == null) {
-            return "";
-        }
-
-        return DateUtil.formatDate(date);
     }
 
     /**

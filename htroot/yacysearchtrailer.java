@@ -101,12 +101,13 @@ public class yacysearchtrailer {
                     prop.put("words_" + hintcount + "_offset", "0");
                     prop.put("words_" + hintcount + "_contentdom", theQuery.contentdom());
                     prop.put("words_" + hintcount + "_resource", ((theQuery.isLocal()) ? "local" : "global"));
+                    prop.put("words_" + hintcount + "_nl", (iter.hasNext() && hintcount < MAX_TOPWORDS) ? 1 : 0);
                 }
-                prop.put("words", hintcount);
                 if (hintcount++ > MAX_TOPWORDS) {
                     break;
                 }
             }
+            prop.put("words", hintcount);
         }
         serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(theQuery.id(true), plasmaSearchEvent.FINALIZATION + "-" + "bottomline", 0, 0));
         

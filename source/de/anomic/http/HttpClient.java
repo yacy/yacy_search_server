@@ -27,7 +27,6 @@
 package de.anomic.http;
 
 import java.io.IOException;
-import java.util.Date;
 
 import de.anomic.server.logging.serverLog;
 
@@ -66,18 +65,6 @@ public abstract class HttpClient {
     public static String getSystemOST() {
         return systemOST;
     }
-
-    /**
-     * for easy access
-     * 
-     * @see date2String(Date)
-     * @param date
-     * @return
-     */
-    public static String dateString(final Date date) {
-        return JakartaCommonsHttpClient.date2String(date);
-    }
-
     
     /**
      * Gets a page (as raw bytes) addressing vhost at host in uri with specified header and timeout

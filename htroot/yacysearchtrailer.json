@@ -1,5 +1,5 @@
 "yacy$topwords": [
 #{words}#
-{ "word": "#[word]#" },
+{ "word": "#[word]#" }#(nl)#::,#(/nl)#
 #{/words}#
-{}]
+]

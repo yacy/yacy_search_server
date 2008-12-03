@@ -34,13 +34,12 @@ public interface kelondroIOChunks {
     
     // pseudo-native methods:
     public long length() throws IOException;
-    public int read(long pos, byte[] b, int off, int len) throws IOException;
+    public void readFully(long pos, byte[] b, int off, int len) throws IOException;
     public void write(long pos, byte[] b, int off, int len) throws IOException;
     public void commit() throws IOException;
     public void close() throws IOException;
 
     // derived methods:
-    public void readFully(long pos, byte[] b, int off, int len) throws IOException;
     public byte readByte(long pos) throws IOException;
     public void writeByte(long pos, int v) throws IOException;
 

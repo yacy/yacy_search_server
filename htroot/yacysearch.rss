@@ -20,9 +20,9 @@
 		<atom:link rel="related" href="opensearchdescription.xml" type="application/opensearchdescription+xml"/>
 		<opensearch:Query role="request" searchTerms="#[rss_queryenc]#" />
 		
-		#{results}#
+#{results}#
 <!--#include virtual="yacysearchitem.xml?item=#[item]#&eventID=#[eventID]#" -->
-		#{/results}#
+#{/results}#
 		
 <!--#include virtual="yacysearchtrailer.xml?eventID=#[eventID]#" -->
 	</channel>

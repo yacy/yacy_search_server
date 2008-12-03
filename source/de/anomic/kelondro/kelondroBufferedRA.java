@@ -61,11 +61,10 @@ public class kelondroBufferedRA extends kelondroAbstractRA implements kelondroRA
         return 0xff & sbb.byteAt((int) pos++);
     }
 
-    public int read(final byte[] b, final int off, final int len) throws IOException {
+    public void readFully(final byte[] b, final int off, final int len) throws IOException {
         final byte[] g = sbb.getBytes((int) pos, len);
         pos += g.length;
         System.arraycopy(g, 0, b, off, g.length);
-        return g.length;
     }
 
     public void seek(final long pos) throws IOException {

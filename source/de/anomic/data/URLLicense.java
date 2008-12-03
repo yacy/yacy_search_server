@@ -26,8 +26,9 @@
 
 package de.anomic.data;
 
-import java.util.HashMap;
 import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import de.anomic.yacy.yacyURL;
 
@@ -35,13 +36,19 @@ public class URLLicense {
 
     // this class defines a license-generation for URLs
     // it is used in case of snippet- and preview-Image-fetching to grant also non-authorized users the usage of a image-fetcher servlet
-
+    private static final int maxQueue = 500;
+    private static final long minCheck = 5000;
+    
     private final Random random;
-    private final HashMap<String, yacyURL> permissions;
-    private final int keylen;
+    private final ConcurrentHashMap<String, yacyURL> permissions;
+    private final ConcurrentLinkedQueue<String> aging;
+    private long lastCheck;
+    private int keylen;
     
     public URLLicense(final int keylen) {
-        this.permissions = new HashMap<String, yacyURL>();
+        this.permissions = new ConcurrentHashMap<String, yacyURL>();
+        this.aging = new ConcurrentLinkedQueue<String>();
+        this.lastCheck = System.currentTimeMillis();
         this.random = new Random(System.currentTimeMillis());
         this.keylen = keylen;
     }
@@ -52,8 +59,16 @@ public class URLLicense {
         while (license.length() < keylen) license += Integer.toHexString(random.nextInt());
         license = license.substring(0, keylen);
         // store reference to url with license key
-        synchronized (permissions) {
-            permissions.put(license, url);
+        permissions.put(license, url);
+        aging.add(license);
+        if (System.currentTimeMillis() - this.lastCheck > minCheck) {
+            // check aging
+            this.lastCheck = System.currentTimeMillis();
+            String s;
+            while (aging.size() > maxQueue) {
+                s = aging.poll();
+                if (s != null) permissions.remove(s);
+            }
         }
         // return the license key
         return license;
@@ -61,9 +76,7 @@ public class URLLicense {
     
     public yacyURL releaseLicense(final String license) {
         yacyURL url = null;
-        synchronized (permissions) {
-            url = permissions.remove(license);
-        }
+        url = permissions.remove(license);
         /*
         if (url == null) {
             System.out.println("DEBUG-URLLICENSE: no URL license present for code=" + license);

@@ -60,8 +60,8 @@ public final class kelondroFileRA extends kelondroAbstractRA implements kelondro
         RAFile.write(b);
     }
 
-    public int read(final byte[] b, final int off, final int len) throws IOException {
-        return RAFile.read(b, off, len);
+    public final void readFully(final byte[] b, final int off, final int len) throws IOException {
+        RAFile.readFully(b, off, len);
     }
 
     public void write(final byte[] b, final int off, final int len) throws IOException {

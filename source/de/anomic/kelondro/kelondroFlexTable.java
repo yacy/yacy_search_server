@@ -166,7 +166,12 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         while (content.hasNext()) {
             node = content.next();
             i = node.handle().hashCode();
-            key = node.getKey();
+            try {
+                key = node.getKey();
+            } catch (IOException e1) {
+                e1.printStackTrace();
+                break;
+            }
             assert (key != null) : "DEBUG: empty key in initializeRamIndex"; // should not happen; if it does, it is an error of the condentNodes iterator
             //System.out.println("ENTRY: " + serverLog.arrayList(indexentry.bytes(), 0, indexentry.objectsize()));
             try { ri.addi(key, i); } catch (final IOException e) {} // no IOException can happen here

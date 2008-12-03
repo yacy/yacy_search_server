@@ -139,10 +139,26 @@ public final class serverDate {
      * @param date The Date instance to transform.
      * @return A fixed width (20 chars) ISO8601 date String.
      */
-    public static String formatISO8601(final Date date){
-            return format(FORMAT_ISO8601, date);
+    public static final String formatISO8601(final Date date) {
+        if (date == null) return "";
+        return format(FORMAT_ISO8601, date);
     }
 
+    private static long lastRFC1123long = 0;
+    private static String lastRFC1123string = "";
+    
+    public static final String formatRFC1123(final Date date) {
+        if (date == null) return "";
+        if (date.getTime() - lastRFC1123long < 1000) {
+            //System.out.println("date cache hit - " + lastRFC1123string);
+            return lastRFC1123string;
+        }
+        String s = format(FORMAT_RFC1123, date);
+        lastRFC1123long = date.getTime();
+        lastRFC1123string = s;
+        return s;
+    }
+    
     /**
      * Parse dates as defined in {@linkplain http://www.w3.org/TR/NOTE-datetime}.
      * This format (also specified in ISO8601) allows different "precisions".

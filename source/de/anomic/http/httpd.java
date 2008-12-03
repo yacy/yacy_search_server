@@ -67,6 +67,7 @@ import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverByteBuffer;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverCore;
+import de.anomic.server.serverDate;
 import de.anomic.server.serverDomains;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverHandler;
@@ -1199,7 +1200,7 @@ public final class httpd implements serverHandler, Cloneable {
             
             // Generated Tue, 23 Aug 2005 11:19:14 GMT by brain.wg (squid/2.5.STABLE3)
             // adding some system information
-            final String systemDate = HttpClient.dateString(new Date());
+            final String systemDate = serverDate.formatRFC1123(new Date());
             tp.put("date", systemDate);
             
             // rewrite the file
@@ -1299,9 +1300,9 @@ public final class httpd implements serverHandler, Cloneable {
         final Date now = new Date(System.currentTimeMillis());
         
         headers.put(httpResponseHeader.SERVER, "AnomicHTTPD (www.anomic.de)");
-        headers.put(httpResponseHeader.DATE, HttpClient.dateString(now));
+        headers.put(httpResponseHeader.DATE, serverDate.formatRFC1123(now));
         if (moddate.after(now)) moddate = now;
-        headers.put(httpResponseHeader.LAST_MODIFIED, HttpClient.dateString(moddate));
+        headers.put(httpResponseHeader.LAST_MODIFIED, serverDate.formatRFC1123(moddate));
         
         if (nocache) {
             if (httpVersion.toUpperCase().equals(httpHeader.HTTP_VERSION_1_1)) headers.put(httpResponseHeader.CACHE_CONTROL, "no-cache");
@@ -1315,7 +1316,7 @@ public final class httpd implements serverHandler, Cloneable {
         headers.put(httpHeader.CONTENT_TYPE, contentType);  
         if (contentLength > 0)   headers.put(httpResponseHeader.CONTENT_LENGTH, Long.toString(contentLength));
         //if (cookie != null)      headers.put(httpResponseHeader.SET_COOKIE, cookie);
-        if (expires != null)     headers.put(httpResponseHeader.EXPIRES, HttpClient.dateString(expires));
+        if (expires != null)     headers.put(httpResponseHeader.EXPIRES, serverDate.formatRFC1123(expires));
         if (contentEnc != null)  headers.put(httpResponseHeader.CONTENT_ENCODING, contentEnc);
         if (transferEnc != null) headers.put(httpResponseHeader.TRANSFER_ENCODING, transferEnc);
         
@@ -1366,7 +1367,7 @@ public final class httpd implements serverHandler, Cloneable {
 
                 // prepare header
                 if (!responseHeader.containsKey(httpHeader.DATE)) 
-                    responseHeader.put(httpHeader.DATE, HttpClient.dateString(new Date()));
+                    responseHeader.put(httpHeader.DATE, serverDate.formatRFC1123(new Date()));
                 if (!responseHeader.containsKey(httpHeader.CONTENT_TYPE)) 
                     responseHeader.put(httpHeader.CONTENT_TYPE, "text/html; charset=UTF-8"); // fix this
                 if (!responseHeader.containsKey(httpRequestHeader.CONNECTION) && conProp.containsKey(httpHeader.CONNECTION_PROP_PERSISTENT))

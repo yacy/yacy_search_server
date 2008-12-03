@@ -36,7 +36,6 @@ import java.net.InetAddress;
 import java.util.Date;
 import java.util.Properties;
 
-import de.anomic.http.HttpClient;
 import de.anomic.http.httpChunkedInputStream;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpResponseHeader;
@@ -46,6 +45,7 @@ import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
+import de.anomic.server.serverDate;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverHandler;
 import de.anomic.server.logging.serverLog;
@@ -125,7 +125,7 @@ public class icapd implements serverHandler, Cloneable {
         final icapHeader newHeaders = new icapHeader();
         
         newHeaders.put(icapHeader.SERVER,"YaCy/" + sb.getConfig("vString",""));
-        newHeaders.put(icapHeader.DATE, HttpClient.dateString(new Date()));
+        newHeaders.put(icapHeader.DATE, serverDate.formatRFC1123(new Date()));
         newHeaders.put(icapHeader.ISTAG, "\"" + sb.getConfig("vString","") + "\"");
         
         return newHeaders;

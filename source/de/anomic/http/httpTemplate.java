@@ -402,11 +402,11 @@ public final class httpTemplate {
                             text.append(":".getBytes("UTF-8"));
                         }
                         if(!found){
-                            text.append((byte)bb);
+                            text.append((byte)bb);/*
                             if(pis.available()==0){
                                 serverLog.logSevere("TEMPLATE", "No Close Key found for #("+new String(key)+")# (by Index)");
                                 found=true;
-                            }
+                            }*/
                         }
                     }//while
                 }//if(byName) (else branch)

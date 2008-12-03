@@ -399,14 +399,13 @@ public class kelondroBLOBTree implements kelondroBLOB {
             put(filekey, seekpos++, i);
         }
 
-        public int read(final byte[] b, final int off, final int len) throws IOException {
+        public void readFully(final byte[] b, final int off, final int len) throws IOException {
             int l = Math.min(b.length - off, len);
             final byte[] buf = get(filekey, seekpos, l);
-            if (buf == null) return -1;
+            if (buf == null) throw new IOException("record at off " + off + ", len " + len + " not found");
             l = Math.min(buf.length, l);
             System.arraycopy(buf, 0, b, off, l);
             seekpos += l;
-            return l;
         }
 
         public void write(final byte[] b, final int off, final int len) throws IOException {

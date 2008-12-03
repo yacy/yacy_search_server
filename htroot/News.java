@@ -29,7 +29,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import de.anomic.http.HttpClient;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverDate;
@@ -117,7 +116,7 @@ public class News {
                     prop.put("table_list_" + i + "_id", record.id());
                     prop.putHTML("table_list_" + i + "_ori", (seed == null) ? record.originator() : seed.getName());
                     prop.put("table_list_" + i + "_cre", serverDate.formatShortSecond(record.created()));
-                    prop.put("table_list_" + i + "_crerfcdate", HttpClient.dateString(record.created()));
+                    prop.put("table_list_" + i + "_crerfcdate", serverDate.formatRFC1123(record.created()));
                     prop.putHTML("table_list_" + i + "_cat", category);
                     prop.put("table_list_" + i + "_rec", (record.received() == null) ? "-" : serverDate.formatShortSecond(record.received()));
                     prop.put("table_list_" + i + "_dis", record.distributed());

@@ -39,23 +39,24 @@ public class httpSSI {
         writeSSI(in, 0, out, authorization, requesthost);
     }
     
-    public static void writeSSI(final serverByteBuffer in, final int off, final OutputStream out, final String authorization, final String requesthost) throws IOException {
-        final int p = in.indexOf("<!--#".getBytes(), off);
-        if (p >= 0) {
-            final int q = in.indexOf("-->".getBytes(), p + 10);
+    public static void writeSSI(final serverByteBuffer in, int off, final OutputStream out, final String authorization, final String requesthost) throws IOException {
+        int p = in.indexOf("<!--#".getBytes(), off);
+        int q;
+        while (p >= 0) {
+            q = in.indexOf("-->".getBytes(), p + 10);
             if (out instanceof httpChunkedOutputStream) {
                 ((httpChunkedOutputStream) out).write(in, off, p - off);
             } else {
                 out.write(in.getBytes(off, p - off));
             }
             parseSSI(in, p, q + 3 - p, out, authorization, requesthost);
-            writeSSI(in, q + 3, out, authorization, requesthost);
-        } else /* p < 0 */ {
-            if (out instanceof httpChunkedOutputStream) {
-                ((httpChunkedOutputStream) out).write(in, off, in.length() - off);
-            } else {
-                out.write(in.getBytes(off, in.length() - off));
-            }
+            off = q + 3;
+            p = in.indexOf("<!--#".getBytes(), off);
+        }
+        if (out instanceof httpChunkedOutputStream) {
+            ((httpChunkedOutputStream) out).write(in, off, in.length() - off);
+        } else {
+            out.write(in.getBytes(off, in.length() - off));
         }
     }
     

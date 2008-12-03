@@ -34,6 +34,8 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 import de.anomic.htmlFilter.htmlFilterCharacterCoding;
 import de.anomic.http.httpRequestHeader;
@@ -97,6 +99,8 @@ public class Threaddump_p {
         final File classPath = new File(rootPath, "source");
   
         Thread thread;
+        // collect single dumps
+        HashMap<String, ArrayList<String>> dumps = new HashMap<String, ArrayList<String>>();
         for (final Entry<Thread, StackTraceElement[]> entry: stackTraces.entrySet()) {
             thread = entry.getKey();
             final StackTraceElement[] stackTraceElements = entry.getValue();
@@ -104,7 +108,8 @@ public class Threaddump_p {
             String line;
             String tracename = "";
             File classFile;
-            if ((stateIn.equals(thread.getState()))  && (stackTraceElements.length > 0)) {
+            if ((stateIn.equals(thread.getState())) && (stackTraceElements.length > 0)) {
+                StringBuffer sb = new StringBuffer();
                 if (plain) {
                     classFile = getClassFile(classPath, stackTraceElements[stackTraceElements.length - 1].getClassName());
                     tracename = classFile.getName();
@@ -113,7 +118,7 @@ public class Threaddump_p {
                     while (tracename.length() < 20) tracename = tracename + "_";
                     tracename = "[" + tracename + "] ";                
                 }                
-                bufferappend(buffer, plain, tracename + "Thread= " + thread.getName() + " " + (thread.isDaemon()?"daemon":"") + " id=" + thread.getId() + " " + thread.getState().toString());
+                String threadtitle = tracename + "Thread= " + thread.getName() + " " + (thread.isDaemon()?"daemon":"") + " id=" + thread.getId() + " " + thread.getState().toString();
                 for (int i = 0; i < stackTraceElements.length; i++) {
                     ste = stackTraceElements[i];
                     if (i == 0) {
@@ -122,13 +127,25 @@ public class Threaddump_p {
                         line = null;
                     }
                     if ((line != null) && (line.length() > 0)) {
-                        bufferappend(buffer, plain, tracename + "at " + htmlFilterCharacterCoding.unicode2html(ste.toString(), true) + " [" + line.trim() + "]");
+                        bufferappend(sb, plain, tracename + "at " + htmlFilterCharacterCoding.unicode2html(ste.toString(), true) + " [" + line.trim() + "]");
                     } else {
-                        bufferappend(buffer, plain, tracename + "at " + htmlFilterCharacterCoding.unicode2html(ste.toString(), true));
+                        bufferappend(sb, plain, tracename + "at " + htmlFilterCharacterCoding.unicode2html(ste.toString(), true));
                     }
                 }
-                bufferappend(buffer, plain, "");
+                String threaddump = sb.toString();
+                ArrayList<String> threads = dumps.get(threaddump);
+                if (threads == null) threads = new ArrayList<String>();
+                threads.add(threadtitle);
+                dumps.put(threaddump, threads);
             }
+        }
+        
+        // write dumps
+        for (final Entry<String, ArrayList<String>> entry: dumps.entrySet()) {
+            ArrayList<String> threads = entry.getValue();
+            for (int i = 0; i < threads.size(); i++) bufferappend(buffer, plain, threads.get(i));
+            bufferappend(buffer, plain, entry.getKey());
+            bufferappend(buffer, plain, "");
         }
         bufferappend(buffer, plain, "");
     }
