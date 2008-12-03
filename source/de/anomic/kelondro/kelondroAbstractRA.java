@@ -62,8 +62,10 @@ abstract class kelondroAbstractRA implements kelondroRA {
 
     // derived methods:
     public byte[] readFully() throws IOException {
-        final byte[] buffer = new byte[(int) this.available()];
-        this.readFully(buffer, 0, buffer.length);
+        int a = (int) this.available();
+        if (a <= 0) return null;
+        final byte[] buffer = new byte[a];
+        this.readFully(buffer, 0, a);
         return buffer;
     }
     
