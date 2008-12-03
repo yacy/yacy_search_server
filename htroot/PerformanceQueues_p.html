@@ -5,34 +5,12 @@
   #%env/templates/metas.template%#
   <script type="text/javascript" src="js/html.js"></script>
   </head>
-  <body id="PerformanceQueues" #(enableSimpleConfig)#::onload="hide('expert_settings')"#(/enableSimpleConfig)#>
+  <body id="PerformanceQueues">
   #%env/templates/header.template%#
   #%env/templates/submenuConfig.template%#
   <h2>Performance Settings of Queues and Processes</h2>
   
   <form action="PerformanceQueues_p.html" method="post" enctype="multipart/form-data">
-	<fieldset><legend>Use Default Profile:</legend>
-		<p>
-			<select name="defaultFile">
-			#{profile}#
-			<option value="#[filename]#"#(used)#:: selected="selected"#(/used)#>#[description]#</option>
-			#{/profile}#
-			</select>
-			and use
-			<select name="profileSpeed">
-			#{speed}#
-			<option value="#[value]#"#(used)#:: selected="selected"#(/used)#>#[label]#</option>
-			#{/speed}#
-			</select>
-			of the defined performance.
-		</p>
-		<p><input type="submit" name="submitdefault" value="Save" /> Changes take effect immediately</p>
-	</fieldset>
-	
-	<a href="javascript:show('expert_settings')">show expert settings</a>
-	
-	<div id="expert_settings">
-
 	<fieldset><legend>Scheduled tasks overview and waiting time settings:</legend>
 	    <table border="0" cellpadding="2" cellspacing="1">
 	      <tr class="TableHeader" valign="bottom">
@@ -217,57 +195,6 @@
 	      </tr>
 	    </table>
 	  </fieldset>
-  </form>
-  
-  </div> <!-- /expert_settings -->
-  
-  <form action="PerformanceQueues_p.html" method="post" enctype="multipart/form-data">
-	  <fieldset><legend>Online Caution Settings:</legend>
-	  <p>
-	    This is the time that the crawler idles when the proxy is accessed, or a local or remote search is done.
-	    The delay is extended by this time each time the proxy is accessed afterwards.
-	    This shall improve performance of the affected process (proxy or search).
-	    (current delta is #[crawlPauseProxyCurrent]#/#[crawlPauseLocalsearchCurrent]#/#[crawlPauseRemotesearchCurrent]#
-	    seconds since last proxy/local-search/remote-search access.)
-	  </p>
-	    <table border="0" cellpadding="2" cellspacing="1">
-	      <tr class="TableHeader" valign="bottom">
-	        <td>Online Caution Case</td>
-	        <td>indexer delay (milliseconds) after case occurency</td>
-	      </tr>
-	      <tr class="TableCellDark">
-	        <td>Proxy:</td>
-	        <td align="right"><input id="crawlPauseProxy" name="crawlPauseProxy" type="text" size="20" maxlength="100" value="#[crawlPauseProxy]#" /></td>
-	      </tr>
-	      <tr class="TableCellDark">
-	        <td>Local Search:</td>
-	        <td align="right"><input id="crawlPauseLocalsearch" name="crawlPauseLocalsearch" type="text" size="20" maxlength="100" value="#[crawlPauseLocalsearch]#" /></td>
-	      </tr>
-	      <tr class="TableCellDark">
-	        <td>Remote Search:</td>
-	        <td align="right"><input id="crawlPauseRemotesearch" name="crawlPauseRemotesearch" type="text" size="20" maxlength="100" value="#[crawlPauseRemotesearch]#" /></td>
-	      </tr>
-	      <tr class="TableCellLight">
-	        <td align="left" colspan="2"><input type="submit" name="onlineCautionSubmit" value="Enter New Parameters" />
-	        Changes take effect immediately</td>
-	      </tr>
-	    </table>
-	  </fieldset>
-  </form>
-  
-  <form action="PerformanceQueues_p.html" method="post" enctype="multipart/form-data">
-    <fieldset><legend>YaCy Priority Settings</legend>
-      <dl>
-        <dt><label for="priority">YaCy Process Priority</label>:</dt>
-        <dd><select id="priority" name="YaCyPriority">
-          <option value="0"#(priority_normal)#:: selected="selected"#(/priority_normal)#>Normal</option>
-          <option value="10"#(priority_below)#:: selected="selected"#(/priority_below)#>Below normal</option>
-          <option value="20"#(priority_low)#:: selected="selected"#(/priority_low)#>Idle</option>
-        </select></dd>
-        <dt><input type="submit" name="PrioritySubmit" value="Set new Priority" /></dt>
-        <dd>Changes take effect after <strong>restart</strong> of YaCy</dd>
-      </dl>
-    </fieldset>
   </form>
   
   #%env/templates/footer.template%#

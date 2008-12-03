@@ -1417,6 +1417,37 @@ Attributes==Attribute
 "\#\(page\)\#::Process All News::Delete All News::Abort Publication of All News::Delete All News\#\(/page\)\#"=="#(page)#::Alle&nbsp;News&nbsp;als&nbsp;gelesen&nbsp;markieren::Alle&nbsp;News&nbsp;l&ouml;schen::Verbreitung&nbsp;von&nbsp;allen&nbsp;News&nbsp;abbrechen::Alle&nbsp;News&nbsp;l&ouml;schen#(/page)#"
 #-----------------------------
 
+#File: Performance_p.html
+#---------------------------
+Performance Settings==Leistungseinstellungen
+Memory Settings==Speicher Einstellungen
+Memory reserved for JVM==F&uuml;r JVM reservierter Speicher
+"Set"=="Setzen"
+Accepted change. This will take effect after <strong>restart</strong> of YaCy==&Auml;nderung akzeptiert. Diese werden erst nach einem <strong>Neustart</strong> von YaCy wirksam
+refresh graph==aktualisiere Diagramm
+show memory tables==Zeige Speicher-Tabellen
+Use Default Profile:==Standard Profil benutzen:
+and use==und nutze
+of the defined performance.==der vorgegebenen Geschwindigkeit.
+Save==Speichern
+Changes take effect immediately==&Auml;nderungen werden sofort wirksam
+Online Caution Settings==Online Caution Einstellungen
+This is the time that the crawler idles when the proxy is accessed, or a local or remote search is done.==Dies ist die Zeit die der Crawler pausiert, wenn auf den Proxy zugegriffen wird, oder eine lokale oder globale Suche durchgef&uuml;hrt wird.
+The delay is extended by this time each time the proxy is accessed afterwards.==Die normale Verz&ouml;gerung wird um diese Zeit verl&auml;ngert, wenn auf den Proxy zugegriffen wird.
+This shall improve performance of the affected process \(proxy or search\).==Dies soll die Performance des betroffenen Prozesses (Proxy oder Suche) erh&ouml;hen.
+\(current delta is==(Seit dem letzten Zugriff auf Proxy/Lokale-Suche/Globale-Suche sind
+seconds since last proxy/local-search/remote-search access.\)==Sekunden vergangen.)
+Enter New Parameters==Neue Parameter eintragen
+milliseconds==Millisekunden
+YaCy Priority Settings==YaCy Priorit&auml;t Einstellungen
+YaCy Process Priority==YaCy Prozess Priorit&auml;t
+#Normal==Normal
+Below normal==unter Normal
+Idle</option>==unt&auml;tig</option>
+"Set new Priority"=="Neue Priorit&auml;t speichern"
+Changes take effect after <strong>restart</strong> of YaCy==&Auml;nderungen werden erst nach einem <strong>Neustart</strong> von YaCy wirksam.
+#-----------------------------
+
 #File: PerformanceQueues_p.html
 #---------------------------
 Performance Settings of Queues and Processes==Performanceeinstellungen f&uuml;r Puffer und Prozesse
@@ -1439,11 +1470,6 @@ Short Mem<br />Cycles==Durchl.<br />ohne ausr. Speicher
 Minimum of<br />Required Memory==Mindestens<br />ben&ouml;tigter Speicher
 Full Description==vollst&auml;ndige Beschreibung
 Submit New Delay Values==Neue Verz&ouml;gerungswerte speichern
-Use Default Profile:==Standard Profil benutzen:
-Save==Speichern
-and use==und nutze
-of the defined performance.==der vorgegebenen Geschwindigkeit.
-show expert settings==Zeige Experten-Einstellungen
 Changes take effect immediately==&Auml;nderungen werden sofort wirksam
 Cache Settings:==Cache Einstellungen:
 Cache Type==Cache Typ
@@ -1475,26 +1501,12 @@ Thread pool settings:==Threadpool Einstellungen:
 maximum Active==max. aktiv
 current Active==derzeit aktiv
 Enter new Threadpool Configuration==neue Threadpoolkonfiguration eintragen
-YaCy Priority Settings==YaCy Priorit&auml;t Einstellungen
-YaCy Process Priority==YaCy Prozess Priorit&auml;t
-#Normal==Normal
-Below normal==unter Normal
-Idle</option>==unt&auml;tig</option>
-"Set new Priority"=="Neue Priorit&auml;t speichern"
-Changes take effect after <strong>restart</strong> of YaCy==&Auml;nderungen werden erst nach einem <strong>Neustart</strong> von YaCy wirksam.
-Proxy Performance Settings==Proxy Performance Einstellungen
-This is the time that the crawler idles when the proxy is accessed, or a local or remote search is done.==Dies ist die Zeit die der Crawler pausiert, wenn auf den Proxy zugegriffen wird, oder eine lokale oder globale Suche durchgef&uuml;hrt wird.
-The delay is extended by this time each time the proxy is accessed afterwards.==Die normale Verz&ouml;gerung wird um diese Zeit verl&auml;ngert, wenn auf den Proxy zugegriffen wird.
-This shall improve performance of the affected process \(proxy or search\).==Dies soll die Performance des betroffenen Prozesses (Proxy oder Suche) erh&ouml;hen.
-\(current delta is==(Seit dem letzten Zugriff auf Proxy/Lokale-Suche/Globale-Suche sind
-seconds since last proxy/local-search/remote-search access.\)==Sekunden vergangen.)
-Enter New Parameters==Neue Parameter eintragen
-milliseconds==Millisekunden
 #-----------------------------
 
 #File: PerformanceMemory_p.html
 #---------------------------
 Performance Settings for Memory==Performanceeinstellungen f&uuml;r Speicher
+refresh graph==aktualisiere Diagramm
 Memory Usage:==Speichernutzung:
 After Startup==Nach Start
 After Initializations==Nach Initialisierungen
@@ -1512,12 +1524,6 @@ total memory taken from the OS==gesamter vom Betriebssystem zugewiesener Speiche
 free memory in the JVM within total amount==freier Speicher in der JVM innerhalb des Gesamten Speichers
 >Used<==>Belegt<
 used memory in the JVM within total amount==genutzter Speicher in der JVM innerhalb des Gesamten Speichers
-Memory Settings==Speicher Einstellungen
-Memory reserved for JVM==F&uuml;r JVM reservierter Speicher
-"Set"=="Setzen"
-Accepted change. This will take effect after <strong>restart</strong> of YaCy==&Auml;nderung akzeptiert. Diese werden erst nach einem <strong>Neustart</strong> von YaCy wirksam
-auto-reload graph==Grafik automatisch neu laden
-show memory tables==Zeige Speicher-Tabellen
 EcoTable RAM Index:==EcoTabelle RAM Index:
 >Size==>Gr&ouml;sse
 >Key==>Schl&uuml;ssel
@@ -1679,6 +1685,9 @@ Advanced Settings==Erweiterte Einstellungen
 If you want to restore all settings to the default values,==Wenn Sie alle Einstellungen auf die urspr&uuml;nglichen Werte zur&uuml;cksetzen wollen,
 but <strong>forgot your administration password</strong>, you must stop the proxy,==aber Ihr <strong>Administatorpasswort vergessen haben</strong>, m&uuml;ssen Sie YaCy stoppen,
 delete the file 'DATA/SETTINGS/yacy.conf' in the YaCy application root folder and start YaCy again.==die Datei 'DATA/SETTINGS/yacy.conf' im YaCy Hauptordner l&ouml;schen und YaCy neu starten.
+Performance Settings of Queues and Processes==Performanceeinstellungen f&uuml;r Puffer und Prozesse
+Performance Settings for Memory==Performanceeinstellungen f&uuml;r Speicher
+Performance Settings of Search Sequence==Performanceeinstellungen des Suchablaufs
 Server Access Settings==Server Zugangs-Einstellungen
 Proxy Access Settings==Proxy Zugangs-Einstellungen
 Content Parser Settings==Inhalt Parser Einstellungen

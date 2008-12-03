@@ -54,17 +54,8 @@ public class PerformanceMemory_p {
             defaultSettings = serverFileUtils.loadHashMap(new File(env.getRootPath(), "defaults/yacy.init"));
         }
         
-        prop.put("enableSimpleConfig", env.getConfigBool("enableSimpleConfig", true) ? "1" : "0");
-        
         prop.put("gc", "0");
         if (post != null) {
-            int xmx = 120; // default maximum heap size
-            if (post.containsKey("Xmx")) {
-                try { xmx = Integer.valueOf(post.get("Xmx", "120")).intValue(); } catch (final NumberFormatException e){}
-                env.setConfig("javastart_Xmx", "Xmx" + xmx + "m");
-                env.setConfig("javastart_Xms", "Xms" + xmx + "m");
-                prop.put("setStartupCommit", "1");
-            }
             if (post.containsKey("gc")) {
                 System.gc();
                 prop.put("gc", "1");
@@ -212,12 +203,6 @@ public class PerformanceMemory_p {
         prop.putNum("objectCacheStartShrink", kelondroCache.getMemStartShrink() / (1024 * 1024d));
         prop.putNum("objectHitCacheTotalMem", totalhitmem / (1024 * 1024d));
         prop.putNum("objectMissCacheTotalMem", totalmissmem / (1024 * 1024d));
-
-        // parse initialization memory settings
-        final String Xmx = env.getConfig("javastart_Xmx", "Xmx120m").substring(3);
-        prop.put("Xmx", Xmx.substring(0, Xmx.length() - 1));
-        final String Xms = env.getConfig("javastart_Xms", "Xms120m").substring(3);
-        prop.put("Xms", Xms.substring(0, Xms.length() - 1));
         
         // other caching structures
         long amount = serverDomains.nameCacheHitSize();

@@ -56,12 +56,21 @@ public class PerformanceQueues_p {
         final plasmaSwitchboard switchboard = (plasmaSwitchboard) sb;
         final serverObjects prop = new serverObjects();
         File defaultSettingsFile = new File(switchboard.getRootPath(), "defaults/yacy.init");
-        if(post != null && post.containsKey("defaultFile")) {
-            // TODO check file-path!
-            final File value = new File(switchboard.getRootPath(), post.get("defaultFile", "defaults/yacy.init"));
-            // check if value is readable file
-            if(value.exists() && value.isFile() && value.canRead()) {
-                defaultSettingsFile = value;
+        if(post != null) {
+        	if(post.containsKey("defaultFile")){
+	            // TODO check file-path!
+	            final File value = new File(switchboard.getRootPath(), post.get("defaultFile", "defaults/yacy.init"));
+	            // check if value is readable file
+	            if(value.exists() && value.isFile() && value.canRead()) {
+	                defaultSettingsFile = value;
+	            }
+        	}
+            if (post.containsKey("Xmx")) {
+                int xmx = 120; // default maximum heap size
+                try { xmx = Integer.valueOf(post.get("Xmx", "120")).intValue(); } catch (final NumberFormatException e){}
+                sb.setConfig("javastart_Xmx", "Xmx" + xmx + "m");
+                sb.setConfig("javastart_Xms", "Xms" + xmx + "m");
+                prop.put("setStartupCommit", "1");
             }
         }
         final Map<String, String> defaultSettings = ((post == null) || (!(post.containsKey("submitdefault")))) ? null : serverFileUtils.loadHashMap(defaultSettingsFile);
@@ -71,8 +80,6 @@ public class PerformanceQueues_p {
         
         final boolean xml = (header.get("PATH")).endsWith(".xml");
         prop.setLocalized(!xml);
-        
-        prop.put("enableSimpleConfig", sb.getConfigBool("enableSimpleConfig", true) ? "1" : "0");
         
         // calculate totals
         long blocktime_total = 0, sleeptime_total = 0, exectime_total = 0;
@@ -314,6 +321,12 @@ public class PerformanceQueues_p {
         prop.put("priority_normal",(curr_prio==0) ? "1" : "0");
         prop.put("priority_below",(curr_prio==10) ? "1" : "0");
         prop.put("priority_low",(curr_prio==20) ? "1" : "0");
+        
+        // parse initialization memory settings
+        final String Xmx = sb.getConfig("javastart_Xmx", "Xmx120m").substring(3);
+        prop.put("Xmx", Xmx.substring(0, Xmx.length() - 1));
+        final String Xms = sb.getConfig("javastart_Xms", "Xms120m").substring(3);
+        prop.put("Xms", Xms.substring(0, Xms.length() - 1));
         
         // return rewrite values for templates
         return prop;
