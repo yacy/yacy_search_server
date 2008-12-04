@@ -177,7 +177,7 @@ public class diff {
     public Part[] getParts() { return this.parts.toArray(new Part[this.parts.size()]); }
     
     public String toString() {
-        final StringBuffer sb = new StringBuffer(this.parts.size() * 20);
+        final StringBuilder sb = new StringBuilder(this.parts.size() * 20);
         for (int j=0; j<this.parts.size(); j++)
             sb.append(this.parts.get(j).toString()).append("\n");
         return new String(sb);
@@ -217,7 +217,7 @@ public class diff {
          * @return the plain string this diff-part cares about
          */
         public String getString() {
-            final StringBuffer sb = new StringBuffer(this.posNew - this.posOld);
+            final StringBuilder sb = new StringBuilder(this.posNew - this.posOld);
             if (this.action == ADDED) {
                 for (int i=this.posOld; i<this.posNew; i++)
                     sb.append(diff.this.n[i]);
@@ -243,7 +243,7 @@ public class diff {
     }
     
     public static String toHTML(final diff[] diffs) {
-        final StringBuffer sb = new StringBuffer(diffs.length * 60);
+        final StringBuilder sb = new StringBuilder(diffs.length * 60);
         diff.Part[] ps;
         for (int i=0; i<diffs.length; i++) {
             sb.append("<p class=\"diff\">\n");

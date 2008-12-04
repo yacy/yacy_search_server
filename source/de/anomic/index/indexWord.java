@@ -26,6 +26,7 @@
 
 package de.anomic.index;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
@@ -77,12 +78,14 @@ public class indexWord {
     // static methods
 
     // create a word hash
+    private static final HashMap<String, String> hashCache = new HashMap<String, String>();
     public static final String word2hash(final String word) {
-        String e = kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(word.toLowerCase(Locale.ENGLISH))).substring(0, yacySeedDB.commonHashLength);
-        if (word.startsWith("hofbr")) {
-            System.out.println("*** DEBUG ENCODING: " + word + " -> " + e);
-        }
-        return e;
+        String h = hashCache.get(word);
+        if (h != null) return h;
+        h = kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(word.toLowerCase(Locale.ENGLISH))).substring(0, yacySeedDB.commonHashLength);
+        hashCache.put(word, h); // prevent expensive MD5 computation and encoding
+        if (hashCache.size() > 100000) hashCache.clear(); // prevent memory laeak
+        return h;
     }
     
     public static final Set<String> words2hashSet(final String[] words) {
@@ -92,7 +95,7 @@ public class indexWord {
     }
 
     public static final String words2hashString(final String[] words) {
-        final StringBuffer sb = new StringBuffer();
+        final StringBuilder sb = new StringBuilder();
         for (int i = 0; i < words.length; i++) sb.append(word2hash(words[i]));
         return new String(sb);
     }

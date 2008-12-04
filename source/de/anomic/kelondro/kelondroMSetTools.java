@@ -423,7 +423,7 @@ public class kelondroMSetTools {
     
     public static String setToString(final Set<String> set, final char separator) {
         final Iterator<String> i = set.iterator();
-        final StringBuffer sb = new StringBuffer(set.size() * 7);
+        final StringBuilder sb = new StringBuilder(set.size() * 7);
         if (i.hasNext()) sb.append(i.next());
         while (i.hasNext()) {
             sb.append(separator).append(i.next());

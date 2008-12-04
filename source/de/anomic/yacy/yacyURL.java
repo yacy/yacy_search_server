@@ -356,7 +356,7 @@ public class yacyURL implements Serializable {
     // from: http://www.w3.org/International/URLUTF8Encoder.java
     public static String escape(final String s)
     {
-        final StringBuffer sbuf = new StringBuffer();
+        final StringBuilder sbuf = new StringBuilder();
         final int len = s.length();
         for (int i = 0; i < len; i++) {
             final int ch = s.charAt(i);
@@ -391,7 +391,7 @@ public class yacyURL implements Serializable {
     
     // from: http://www.w3.org/International/unescape.java
     public static String unescape(final String s) {
-        final StringBuffer sbuf = new StringBuffer();
+        final StringBuilder sbuf = new StringBuilder();
         final int l  = s.length();
         int ch = -1;
         int b, sumb = 0;

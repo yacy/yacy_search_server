@@ -390,12 +390,12 @@ public class httpHeader extends TreeMap<String, String> implements Map<String, S
         return !(httpVer.equals(HTTP_VERSION_0_9) || httpVer.equals(HTTP_VERSION_1_0));
     }    
     
-    public StringBuffer toHeaderString(
+    public StringBuilder toHeaderString(
             final String httpVersion, 
             final int httpStatusCode, 
             final String httpStatusText) {
         // creating a new buffer to store the header as string
-        final StringBuffer theHeader = new StringBuffer();
+        final StringBuilder theHeader = new StringBuilder();
         
         // generating the header string
         this.toHeaderString(httpVersion,httpStatusCode,httpStatusText,theHeader);
@@ -409,7 +409,7 @@ public class httpHeader extends TreeMap<String, String> implements Map<String, S
             String httpVersion, 
             final int httpStatusCode, 
             String httpStatusText, 
-            final StringBuffer theHeader) {        
+            final StringBuilder theHeader) {        
         
         if (theHeader == null) throw new IllegalArgumentException();
         

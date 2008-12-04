@@ -188,7 +188,7 @@ public class knwikiParser implements wikiParser {
 	}
 	
 	private String replaceBRs(final String text) {
-		final StringBuffer sb = new StringBuffer(text.length());
+		final StringBuilder sb = new StringBuilder(text.length());
 		final String[] tt = text.split("\n");
 		boolean replace;
 		for (int i=0, j; i<tt.length; i++) {
@@ -266,7 +266,7 @@ public class knwikiParser implements wikiParser {
 		}
 		
 		static String mergeTexts(final Text[] texts) {
-			final StringBuffer sb = new StringBuffer();
+			final StringBuilder sb = new StringBuilder(2000);
 			for (int n=0; n < texts.length; n++)
 				sb.append(texts[n].getTextPlain());
 			return new String(sb);

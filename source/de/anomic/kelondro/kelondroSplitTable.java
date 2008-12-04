@@ -167,7 +167,7 @@ public class kelondroSplitTable implements kelondroIndex {
     private static final Calendar thisCalendar = Calendar.getInstance();
     public static final String dateSuffix(final Date date) {
         int month, year;
-        final StringBuffer suffix = new StringBuffer(6);
+        final StringBuilder suffix = new StringBuilder(6);
         synchronized (thisCalendar) {
             thisCalendar.setTime(date);
             month = thisCalendar.get(Calendar.MONTH) + 1;

@@ -316,7 +316,7 @@ public class CrawlProfile {
         }
         
         public String toString() {
-            final StringBuffer str = new StringBuffer();
+            final StringBuilder str = new StringBuilder();
             
             if (this.mem != null) {     
                 str.append(this.mem.toString());

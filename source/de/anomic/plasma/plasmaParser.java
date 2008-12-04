@@ -475,7 +475,7 @@ public final class plasmaParser {
 		    
 		    // testing if all needed libx libraries are available
 		    final String[] neededLibx = theParser.getLibxDependences();
-		    final StringBuffer neededLibxBuf = new StringBuffer();
+		    final StringBuilder neededLibxBuf = new StringBuilder();
 		    if (neededLibx != null) {
 			for (int libxId=0; libxId < neededLibx.length; libxId++) {
 			    if (javaClassPath.indexOf(neededLibx[libxId]) == -1) {
@@ -937,7 +937,7 @@ public final class plasmaParser {
                 System.out.println(document.dc_title());
                 
                 // found text
-                final Iterator<StringBuffer> sentences = document.getSentences(false);
+                final Iterator<StringBuilder> sentences = document.getSentences(false);
                 int i = 0;
                 if (sentences != null) while (sentences.hasNext()) {
                         System.out.print("line " + i + ": ");

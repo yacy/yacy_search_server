@@ -89,7 +89,7 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
             final int length,
             final String publicAddress,
             final plasmaSwitchboard switchboard) throws IOException {
-        final StringBuffer out = new StringBuffer(length);
+        final StringBuilder out = new StringBuilder(length);
         String line;
         while ((line = reader.readLine()) != null)
             out.append(transformLine(line, publicAddress, switchboard)).append(serverCore.CRLF_STRING);
@@ -187,9 +187,9 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
       * @param properties A string that may contain several table properties and/or junk.
       * @return A string that only contains table properties.
       */
-    private static StringBuffer parseTableProperties(final String properties) {
+    private static StringBuilder parseTableProperties(final String properties) {
         final String[] values = properties.replaceAll("&quot;", "").split("[= ]");     //splitting the string at = and blanks
-        final StringBuffer sb = new StringBuffer(properties.length());
+        final StringBuilder sb = new StringBuilder(properties.length());
         String key, value;
         String[] posVals;
         final int numberofvalues = values.length;
@@ -213,7 +213,7 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
         return sb;
     }
     
-    private static StringBuffer addPair(final String key, final String value, final StringBuffer sb) {
+    private static StringBuilder addPair(final String key, final String value, final StringBuilder sb) {
         return sb.append(" ").append(key).append("=\"").append(value).append("\"");
     }
 

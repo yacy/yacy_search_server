@@ -135,7 +135,7 @@ public final class kelondroRow {
     }
     
     public final String toString() {
-        final StringBuffer s = new StringBuffer();
+        final StringBuilder s = new StringBuilder();
         s.append(row[0].toString());
         for (int i = 1; i < row.length; i++) {
             s.append(", ");

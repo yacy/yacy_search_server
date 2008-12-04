@@ -94,7 +94,7 @@ public class rpmParser extends AbstractParser implements Parser {
         try {
             String summary = null, description = null, packager = null, name = sourceFile.getName();
             final HashMap<yacyURL, String> anchors = new HashMap<yacyURL, String>();
-            final StringBuffer content = new StringBuffer();            
+            final StringBuilder content = new StringBuilder();            
             
             // opening the rpm file
             rpmFile = new RPMFile(sourceFile);

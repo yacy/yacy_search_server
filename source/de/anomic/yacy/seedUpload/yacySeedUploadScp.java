@@ -196,7 +196,7 @@ class sshc {
         if(b==-1) return b;
         
         if(b==1 || b==2){
-            final StringBuffer sb=new StringBuffer();
+            final StringBuilder sb=new StringBuilder();
             int c;
             do {
                 c=in.read();
@@ -272,7 +272,7 @@ implements UserInfo, UIKeyboardInteractive {
     }
     
     String arrayToString2(final String[] a, final String separator) {
-        final StringBuffer result = new StringBuffer();// start with first element
+        final StringBuilder result = new StringBuilder();// start with first element
         if (a.length > 0) {
             result.append(a[0]);
             for (int i=1; i<a.length; i++) {
@@ -284,7 +284,7 @@ implements UserInfo, UIKeyboardInteractive {
     }
     
     String arrayToString2(final boolean[] a, final String separator) {
-        final StringBuffer result = new StringBuffer();// start with first element
+        final StringBuilder result = new StringBuilder();// start with first element
         if (a.length > 0) {
             result.append(a[0]);
             for (int i=1; i<a.length; i++) {

@@ -222,9 +222,9 @@ public final class httpdProxyHandler {
     private static final StringBuilder logMessage = new StringBuilder();
     
     /**
-     * Reusable {@link StringBuffer} to generate the useragent string
+     * Reusable {@link StringBuilder} to generate the useragent string
      */
-    private static final StringBuffer userAgentStr = new StringBuffer();
+    private static final StringBuilder userAgentStr = new StringBuilder();
     
     /**
      * A Set of media types which are known to only contain binary data (no readable text)
@@ -1307,7 +1307,7 @@ public final class httpdProxyHandler {
         if (myAddress != null) {
     
             // getting header set by other proxies in the chain
-            final StringBuffer viaValue = new StringBuffer();
+            final StringBuilder viaValue = new StringBuilder();
             if (header.containsKey(httpHeader.VIA)) viaValue.append(header.get(httpHeader.VIA));
             if (viaValue.length() > 0) viaValue.append(", ");
               

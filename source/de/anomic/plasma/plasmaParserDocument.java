@@ -52,10 +52,10 @@ public class plasmaParserDocument {
     private final String mimeType;              // mimeType as taken from http header
     private final String charset;               // the charset of the document
     private final List<String> keywords;        // most resources provide a keyword field
-    private final StringBuffer title;           // a document title, taken from title or h1 tag; shall appear as headline of search result
-    private final StringBuffer creator;         // author or copyright
-    private final List<String> sections;        // if present: more titles/headlines appearing in the document
-    private final StringBuffer description;     // an abstract, if present: short content description
+    private final StringBuilder title;          // a document title, taken from title or h1 tag; shall appear as headline of search result
+    private final StringBuilder creator;        // author or copyright
+    private final List<String>  sections;       // if present: more titles/headlines appearing in the document
+    private final StringBuilder description;    // an abstract, if present: short content description
     private Object text;                  // the clear text, all that is visible
     private final Map<yacyURL, String> anchors; // all links embedded as clickeable entities (anchor tags)
     private final HashMap<String, htmlFilterImageEntry> images; // all visible pictures in document
@@ -78,10 +78,10 @@ public class plasmaParserDocument {
         this.mimeType = (mimeType == null) ? "application/octet-stream" : mimeType;
         this.charset = charset;
         this.keywords = (keywords == null) ? new LinkedList<String>() : Arrays.asList(keywords);
-        this.title = (title == null) ? new StringBuffer() : new StringBuffer(title);
-        this.creator = (author == null) ? new StringBuffer() : new StringBuffer(author);
+        this.title = (title == null) ? new StringBuilder(0) : new StringBuilder(title);
+        this.creator = (author == null) ? new StringBuilder(0) : new StringBuilder(author);
         this.sections = (sections == null) ? new LinkedList<String>() : Arrays.asList(sections);
-        this.description = (abstrct == null) ? new StringBuffer() : new StringBuffer(abstrct);
+        this.description = (abstrct == null) ? new StringBuilder(0) : new StringBuilder(abstrct);
         this.anchors = (anchors == null) ? new HashMap<yacyURL, String>(0) : anchors;
         this.images =  (images == null) ? new HashMap<String, htmlFilterImageEntry>() : images;
         this.hyperlinks = null;
@@ -98,7 +98,7 @@ public class plasmaParserDocument {
             this.text = new serverCachedFileOutputStream(Parser.MAX_KEEP_IN_MEMORY_SIZE);
         } catch (final IOException e) {
             e.printStackTrace();
-            this.text = new StringBuffer();
+            this.text = new StringBuilder();
         } else {
             this.text = text;
         }
@@ -187,7 +187,7 @@ dc_rights
         }
         if (hs.size() == 0) return "";
         // generate a new list
-        final StringBuffer sb = new StringBuffer(this.keywords.size() * 6);
+        final StringBuilder sb = new StringBuilder(this.keywords.size() * 6);
         final Iterator<String> i = hs.iterator();
         while (i.hasNext()) sb.append(i.next()).append(separator);
         return sb.substring(0, sb.length() - 1);
@@ -280,7 +280,7 @@ dc_rights
         return -1; 
     }
     
-    public Iterator<StringBuffer> getSentences(final boolean pre) {
+    public Iterator<StringBuilder> getSentences(final boolean pre) {
         if (this.text == null) return null;
         final plasmaCondenser.sentencesFromInputStreamEnum e = plasmaCondenser.sentencesFromInputStream(getText());
         e.pre(pre);

@@ -51,7 +51,7 @@ public class plasmaWebStructure {
     public static int maxref = 300; // maximum number of references, to avoid overflow when a large link farm occurs (i.e. wikipedia)
     public static int maxhosts = 8000; // maximum number of hosts in web structure map
     
-    private StringBuffer crg;     // global citation references
+    private StringBuilder crg;     // global citation references
     private final serverLog    log;
     private final File         rankingPath, structureFile;
     private final String       crlFile, crgFile;
@@ -62,7 +62,7 @@ public class plasmaWebStructure {
         this.rankingPath = rankingPath;
         this.crlFile = crlFile;
         this.crgFile = crgFile;
-        this.crg = new StringBuffer(maxCRGDump);
+        this.crg = new StringBuilder(maxCRGDump);
         this.structure_old = new TreeMap<String, String>();
         this.structure_new = new TreeMap<String, String>();
         this.structureFile = structureFile;
@@ -97,8 +97,8 @@ public class plasmaWebStructure {
         final Map<yacyURL, String> hl = document.getHyperlinks();
         final Iterator<yacyURL> it = hl.keySet().iterator();
         String nexturlhash;
-        final StringBuffer cpg = new StringBuffer(12 * (hl.size() + 1) + 1);
-        final StringBuffer cpl = new StringBuffer(12 * (hl.size() + 1) + 1);
+        final StringBuilder cpg = new StringBuilder(12 * (hl.size() + 1) + 1);
+        final StringBuilder cpl = new StringBuilder(12 * (hl.size() + 1) + 1);
         final String lhp = url.hash().substring(6); // local hash part
         int GCount = 0;
         int LCount = 0;
@@ -140,12 +140,12 @@ public class plasmaWebStructure {
         /*
         if (crl.length() > maxCRLDump) {
             flushCitationReference(crl, "crl");
-            crl = new StringBuffer(maxCRLDump);
+            crl = new StringBuilder(maxCRLDump);
         }
          **/
         if (crg.length() > maxCRGDump) {
             flushCitationReference("crg");
-            crg = new StringBuffer(maxCRGDump);
+            crg = new StringBuilder(maxCRGDump);
         }
         
         return new Integer[] {Integer.valueOf(LCount), Integer.valueOf(GCount)};
@@ -159,7 +159,7 @@ public class plasmaWebStructure {
         final File file = new File(path, filename);
         
         // generate header
-        final StringBuffer header = new StringBuffer(200);
+        final StringBuilder header = new StringBuilder(200);
         header.append("# Name=YaCy " + ((type.equals("crl")) ? "Local" : "Global") + " Citation Reference Ticket"); header.append((char) 13); header.append((char) 10);
         header.append("# Created=" + System.currentTimeMillis()); header.append((char) 13); header.append((char) 10);
         header.append("# Structure=<Referee-12>,'=',<UDate-3>,<VDate-3>,<LCount-2>,<GCount-2>,<ICount-2>,<DCount-2>,<TLength-3>,<WACount-3>,<WUCount-3>,<Flags-1>,'|',*<Anchor-" + ((type.equals("crl")) ? "6" : "12") + ">"); header.append((char) 13); header.append((char) 10);
@@ -192,7 +192,7 @@ public class plasmaWebStructure {
     }
     
     private static String map2refstr(final Map<String, Integer> map) {
-        final StringBuffer s = new StringBuffer(map.size() * 10);
+        final StringBuilder s = new StringBuilder(map.size() * 10);
         s.append(serverDate.formatShortDay(new Date()));
         String h;
         for (final Map.Entry<String, Integer> entry : map.entrySet()) {
@@ -292,7 +292,7 @@ public class plasmaWebStructure {
         return null;
     }
     
-    private void learn(final yacyURL url, final StringBuffer reference /*string of b64(12digits)-hashes*/) {
+    private void learn(final yacyURL url, final StringBuilder reference /*string of b64(12digits)-hashes*/) {
         final String domhash = url.hash().substring(6);
 
         // parse the new reference string and join it with the stored references

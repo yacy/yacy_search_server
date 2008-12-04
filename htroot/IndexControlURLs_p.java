@@ -182,7 +182,7 @@ public class IndexControlURLs_p {
         if (post.containsKey("urlhashsimilar")) {
             try {
                 final Iterator<indexURLReference> entryIt = new kelondroRotateIterator<indexURLReference>(sb.webIndex.entriesURL(true, urlhash), new String(kelondroBase64Order.zero((urlhash == null ? 0 : urlhash.length()))), sb.webIndex.size()); 
-                final StringBuffer result = new StringBuffer("Sequential List of URL-Hashes:<br />");
+                final StringBuilder result = new StringBuilder("Sequential List of URL-Hashes:<br />");
                 indexURLReference entry;
                 int i = 0;
                 int rows = 0, cols = 0;

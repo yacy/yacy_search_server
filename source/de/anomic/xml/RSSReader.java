@@ -44,13 +44,13 @@ public class RSSReader extends DefaultHandler {
     
     // class variables
     private RSSMessage item;
-    private final StringBuffer buffer;
+    private final StringBuilder buffer;
     private boolean parsingChannel, parsingImage, parsingItem;
     private final RSSFeed theChannel;
     
     public RSSReader() {
         theChannel = new RSSFeed();
-        buffer = new StringBuffer();
+        buffer = new StringBuilder();
         item = null;
         parsingChannel = false;
         parsingImage = false;

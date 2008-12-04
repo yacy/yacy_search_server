@@ -200,7 +200,7 @@ public final class serverLog {
     public static final String format(final String s, int n, final int fillChar) {
         final int l = s.length();
         if (l >= n) return s;
-        final StringBuffer sb = new StringBuffer(l + n);
+        final StringBuilder sb = new StringBuilder(l + n);
         for (final int i = l + n; i > n; n--) sb.insert(0, fillChar);
         return sb.toString();
     }
@@ -209,7 +209,7 @@ public final class serverLog {
         if (b == null) return "NULL";
         if (b.length == 0) return "[]";
         length = Math.min(length, b.length - start);
-        final StringBuffer sb = new StringBuffer(b.length * 4);
+        final StringBuilder sb = new StringBuilder(b.length * 4);
         sb.append('[').append(Integer.toString(b[start])).append(',');
         for (int i = 1; i < length; i++) sb.append(' ').append(Integer.toString(b[start + i])).append(',');
         sb.append(']');
@@ -219,7 +219,7 @@ public final class serverLog {
     public static final String table(final byte[] b, final int linewidth, final int marker) {
         if (b == null) return "NULL";
         if (b.length == 0) return "[]";
-        final StringBuffer sb = new StringBuffer(b.length * 4);
+        final StringBuilder sb = new StringBuilder(b.length * 4);
         for (int i = 0; i < b.length; i++) {
             if (i % linewidth == 0)
                 sb.append('\n').append("# ").append(Integer.toHexString(i)).append(": ");

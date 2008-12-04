@@ -177,7 +177,7 @@ public final class hello {
         }
 
         serverCore.checkInterruption();
-        final StringBuffer seeds = new StringBuffer(768);
+        final StringBuilder seeds = new StringBuilder(768);
         // attach some more seeds, as requested
         if (sb.webIndex.seedDB.sizeConnected() > 0) {
             if (count > sb.webIndex.seedDB.sizeConnected()) { count = sb.webIndex.seedDB.sizeConnected(); }

@@ -372,7 +372,7 @@ public final class serverDate {
         try {
             final long mins = millis / 60000;
             
-            final StringBuffer uptime = new StringBuffer();
+            final StringBuilder uptime = new StringBuilder();
             
             final int uptimeDays  = (int) (Math.floor(mins/1440.0));
             final int uptimeHours = (int) (Math.floor(mins/60.0)%24);

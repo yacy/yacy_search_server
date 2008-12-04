@@ -79,7 +79,7 @@ public class psParser extends AbstractParser implements Parser {
     public boolean testForPs2Ascii() {
         try {
             String procOutputLine = null;
-            final StringBuffer procOutput = new StringBuffer();
+            final StringBuilder procOutput = new StringBuilder();
             
             final Process ps2asciiProc = Runtime.getRuntime().exec(new String[]{"ps2ascii", "--version"});
             final BufferedReader stdOut = new BufferedReader(new InputStreamReader(ps2asciiProc.getInputStream()));
@@ -177,7 +177,7 @@ public class psParser extends AbstractParser implements Parser {
                 }
               
             } else  if (version.startsWith("3")) {
-                final StringBuffer stmt = new StringBuffer();
+                final StringBuilder stmt = new StringBuilder();
                 boolean isBMP = false;
                 boolean isStore = false;
                 int store = 0;
@@ -234,11 +234,11 @@ public class psParser extends AbstractParser implements Parser {
      */
     private void parseUsingPS2ascii(final File inputFile, final File outputFile) throws Exception {
     	int execCode = 0;
-    	StringBuffer procErr = null;
+    	StringBuilder procErr = null;
     	try {
     		String procOutputLine = null;
-    		final StringBuffer procOut = new StringBuffer();
-    		procErr = new StringBuffer();
+    		final StringBuilder procOut = new StringBuilder();
+    		procErr = new StringBuilder();
     		
     		final Process ps2asciiProc = Runtime.getRuntime().exec(new String[]{"ps2ascii", inputFile.getAbsolutePath(),outputFile.getAbsolutePath()});
     		final BufferedReader stdOut = new BufferedReader(new InputStreamReader(ps2asciiProc.getInputStream()));

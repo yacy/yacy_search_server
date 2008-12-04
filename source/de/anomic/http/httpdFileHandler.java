@@ -424,7 +424,7 @@ public final class httpdFileHandler {
                 
                 //no defaultfile, send a dirlisting
                 if (targetFile == null || !targetFile.exists()) {
-                    final StringBuffer aBuffer = new StringBuffer();
+                    final StringBuilder aBuffer = new StringBuilder();
                     aBuffer.append("<html>\n<head>\n</head>\n<body>\n<h1>Index of " + path + "</h1>\n  <ul>\n");
                     final File dir = new File(htDocsPath, path);
                     String[] list = dir.list();
@@ -875,7 +875,7 @@ public final class httpdFileHandler {
                 // doing some errorhandling ...
                 int httpStatusCode = 400; 
                 final String httpStatusText = null; 
-                final StringBuffer errorMessage = new StringBuffer(); 
+                final StringBuilder errorMessage = new StringBuilder(2000); 
                 Exception errorExc = null;            
                 
                 final String errorMsg = e.getMessage();

@@ -149,7 +149,7 @@ public class sidebar_navigation {
         prop.put("navigation_languagezone", (z) ? "1" : "0");
         
         // compose page navigation
-        final StringBuffer resnav = new StringBuffer();
+        final StringBuilder resnav = new StringBuilder();
         final int thispage = offset / theQuery.displayResults();
         if (thispage == 0) resnav.append("&lt;&nbsp;"); else {
             resnav.append(navurla(thispage - 1, theQuery));

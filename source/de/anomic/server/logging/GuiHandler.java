@@ -152,7 +152,7 @@ public class GuiHandler extends Handler{
         
         if ((lineCount > this.count)||(lineCount < 0)) lineCount = this.count;
         
-        final StringBuffer logMessages = new StringBuffer(this.count*40);
+        final StringBuilder logMessages = new StringBuilder(this.count*40);
         final Formatter logFormatter = getFormatter();
         
         try {

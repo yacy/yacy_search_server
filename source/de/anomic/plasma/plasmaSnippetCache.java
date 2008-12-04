@@ -184,7 +184,7 @@ public class plasmaSnippetCache {
             		}
                 }
             }
-            final StringBuffer l = new StringBuffer(line.length() + queryHashes.size() * 8);
+            final StringBuilder l = new StringBuilder(line.length() + queryHashes.size() * 8);
             for (int j = 0; j < w.length; j++) {
                 l.append(w[j]);
                 l.append(' ');
@@ -405,7 +405,7 @@ public class plasmaSnippetCache {
         // we have found a parseable non-empty file: use the lines
 
         // compute snippet from text
-        final Iterator<StringBuffer> sentences = document.getSentences(pre);
+        final Iterator<StringBuilder> sentences = document.getSentences(pre);
         if (sentences == null) return new TextSnippet(url, null, ERROR_PARSER_NO_LINES, queryhashes, "parser returned no sentences",resFavicon);
         final Object[] tsr = computeTextSnippet(sentences, queryhashes, snippetMaxLength);
         final String textline = (tsr == null) ? null : (String) tsr[0];
@@ -570,14 +570,14 @@ public class plasmaSnippetCache {
     
     @SuppressWarnings("unchecked")
     private static Object[] /*{String - the snippet, Set - remaining hashes}*/
-            computeTextSnippet(final Iterator<StringBuffer> sentences, final Set<String> queryhashes, int maxLength) {
+            computeTextSnippet(final Iterator<StringBuilder> sentences, final Set<String> queryhashes, int maxLength) {
         try {
             if (sentences == null) return null;
             if ((queryhashes == null) || (queryhashes.size() == 0)) return null;
             Iterator<String> j;
             HashMap<String, Integer> hs;
-            StringBuffer sentence;
-            final TreeMap<Integer, StringBuffer> os = new TreeMap<Integer, StringBuffer>();
+            StringBuilder sentence;
+            final TreeMap<Integer, StringBuilder> os = new TreeMap<Integer, StringBuilder>();
             int uniqCounter = 9999;
             int score;
             while (sentences.hasNext()) {
@@ -800,9 +800,9 @@ public class plasmaSnippetCache {
     private static HashMap<String, Integer> hashSentence(final String sentence) {
         // generates a word-wordPos mapping
         final HashMap<String, Integer> map = new HashMap<String, Integer>();
-        final Enumeration<StringBuffer> words = plasmaCondenser.wordTokenizer(sentence, "UTF-8");
+        final Enumeration<StringBuilder> words = plasmaCondenser.wordTokenizer(sentence, "UTF-8");
         int pos = 0;
-        StringBuffer word;
+        StringBuilder word;
         String hash;
         while (words.hasMoreElements()) {
             word = words.nextElement();

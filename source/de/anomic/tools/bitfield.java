@@ -79,7 +79,7 @@ public class bitfield {
     public String toString() {
         throw new UnsupportedOperationException("testing");
         /*
-        StringBuffer sb = new StringBuffer(length());
+        StringBuilder sb = new StringBuilder(length());
         for (int i = length() - 1; i >= 0; i--) sb.append((get(i)) ? '1' : '0');
         return sb.toString();
          */

@@ -99,7 +99,7 @@ public class NoticeURLImporter extends AbstractImporter implements Importer {
     }
 
     public String getStatus() {
-        final StringBuffer theStatus = new StringBuffer();
+        final StringBuilder theStatus = new StringBuilder();
         
         theStatus.append("#URLs=").append(this.urlCount).append("\n");
         theStatus.append("#Profiles=").append(this.profileCount);

@@ -172,7 +172,7 @@ public final class search {
         final plasmaSearchRankingProfile rankingProfile = (profile.length() == 0) ? new plasmaSearchRankingProfile(plasmaSearchQuery.contentdomParser(contentdom)) : new plasmaSearchRankingProfile("", profile);
         
         // prepare an abstract result
-        final StringBuffer indexabstract = new StringBuffer();
+        final StringBuilder indexabstract = new StringBuilder();
         int indexabstractContainercount = 0;
         int joincount = 0;
         plasmaSearchQuery theQuery = null;
@@ -220,7 +220,7 @@ public final class search {
                 prop.put("joincount", "0");
             } else {
                 // attach information about index abstracts
-                final StringBuffer indexcount = new StringBuffer();
+                final StringBuilder indexcount = new StringBuilder();
                 Map.Entry<String, Integer> entry;
                 final Iterator<Map.Entry<String, Integer>> i = theSearch.IACount.entrySet().iterator();
                 while (i.hasNext()) {
@@ -272,7 +272,7 @@ public final class search {
             // prepare reference hints
             final long timer = System.currentTimeMillis();
             final Set<String> ws = theSearch.references(10);
-            final StringBuffer refstr = new StringBuffer();
+            final StringBuilder refstr = new StringBuilder();
             final Iterator<String> j = ws.iterator();
             while (j.hasNext()) {
                 refstr.append(",").append(j.next());
@@ -293,7 +293,7 @@ public final class search {
         } else {
             // result is a List of urlEntry elements
             final long timer = System.currentTimeMillis();
-            final StringBuffer links = new StringBuffer();
+            final StringBuilder links = new StringBuilder();
             String resource = null;
             kelondroSortStack<plasmaSearchEvent.ResultEntry>.stackElement entry;
             for (int i = 0; i < accu.size(); i++) {

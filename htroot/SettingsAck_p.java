@@ -485,7 +485,7 @@ public class SettingsAck_p {
             }
             
             int enabledMimesCount = 0;
-            final StringBuffer currEnabledMimesTxt = new StringBuffer();
+            final StringBuilder currEnabledMimesTxt = new StringBuilder();
             parserModeIter = newConfigList.keySet().iterator();
             while (parserModeIter.hasNext()) {                
                 final String currParserMode = parserModeIter.next();

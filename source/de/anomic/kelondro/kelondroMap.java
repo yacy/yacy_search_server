@@ -75,7 +75,7 @@ public class kelondroMap {
     private static String map2string(final Map<String, String> map, final String comment) {
         final Iterator<Map.Entry<String, String>> iter = map.entrySet().iterator();
         Map.Entry<String, String> entry;
-        final StringBuffer bb = new StringBuffer(map.size() * 40);
+        final StringBuilder bb = new StringBuilder(map.size() * 40);
         bb.append("# ").append(comment).append("\r\n");
         while (iter.hasNext()) {
             entry = iter.next();

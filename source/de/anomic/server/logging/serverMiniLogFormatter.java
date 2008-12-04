@@ -30,7 +30,7 @@ import java.util.logging.SimpleFormatter;
 
 public final class serverMiniLogFormatter extends SimpleFormatter {
 
-      private final StringBuffer buffer = new StringBuffer();
+      private final StringBuilder buffer = new StringBuilder();
   
       public serverMiniLogFormatter() {
           super();
@@ -38,7 +38,7 @@ public final class serverMiniLogFormatter extends SimpleFormatter {
       
       public synchronized String format(final LogRecord record) {
           
-          final StringBuffer buffer = this.buffer;
+          final StringBuilder buffer = this.buffer;
           buffer.setLength(0);
 
           buffer.append(formatMessage(record));

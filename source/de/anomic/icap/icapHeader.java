@@ -151,14 +151,14 @@ public class icapHeader extends TreeMap<String, String> implements Map<String, S
         return get("*" + key + "-" + count, null);
     }
     
-    public StringBuffer toHeaderString(final String icapVersion, final int icapStatusCode, String icapStatusText) {
+    public StringBuilder toHeaderString(final String icapVersion, final int icapStatusCode, String icapStatusText) {
         
         if ((icapStatusText == null)||(icapStatusText.length()==0)) {
             if (icapVersion.equals("ICAP/1.0") && icapHeader.icap1_0.containsKey(Integer.toString(icapStatusCode))) 
                 icapStatusText = icapHeader.icap1_0.get(Integer.toString(icapStatusCode));
         }
         
-        final StringBuffer theHeader = new StringBuffer();        
+        final StringBuilder theHeader = new StringBuilder();        
         
         // write status line
         theHeader.append(icapVersion).append(" ")

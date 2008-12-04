@@ -322,7 +322,7 @@ public class RobotsTxt {
             if ((allowPathList != null)&&(allowPathList.size()>0)) {
                 this.allowPathList.addAll(allowPathList);
                 
-                final StringBuffer pathListStr = new StringBuffer();
+                final StringBuilder pathListStr = new StringBuilder();
                 for (int i=0; i<allowPathList.size();i++) {
                     pathListStr.append(allowPathList.get(i))
                                .append(ROBOTS_DB_PATH_SEPARATOR);
@@ -333,7 +333,7 @@ public class RobotsTxt {
             if ((disallowPathList != null)&&(disallowPathList.size()>0)) {
                 this.denyPathList.addAll(disallowPathList);
                 
-                final StringBuffer pathListStr = new StringBuffer();
+                final StringBuilder pathListStr = new StringBuilder();
                 for (int i=0; i<disallowPathList.size();i++) {
                     pathListStr.append(disallowPathList.get(i))
                                .append(ROBOTS_DB_PATH_SEPARATOR);
@@ -343,7 +343,7 @@ public class RobotsTxt {
         }
         
         public String toString() {
-            final StringBuffer str = new StringBuffer();
+            final StringBuilder str = new StringBuilder();
             str.append((this.hostName==null)?"null":this.hostName)
                .append(": ");
             

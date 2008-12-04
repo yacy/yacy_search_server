@@ -1356,12 +1356,12 @@ public final class httpd implements serverHandler, Cloneable {
                 else httpStatusText = "Unknown";
             }
             
-            final StringBuffer headerStringBuffer = new StringBuffer(560);
+            final StringBuilder header = new StringBuilder(560);
             
             // "HTTP/0.9" does not have a status line or header in the response
             if (! httpVersion.toUpperCase().equals(httpHeader.HTTP_VERSION_0_9)) {                
                 // write status line
-                headerStringBuffer.append(httpVersion).append(" ")
+                header.append(httpVersion).append(" ")
                                   .append(Integer.toString(httpStatusCode)).append(" ")
                                   .append(httpStatusText).append("\r\n");
 
@@ -1398,7 +1398,7 @@ public final class httpd implements serverHandler, Cloneable {
                 		//Append user properties to the main String
                 		//TODO: Should we check for user properites. What if they intersect properties that are already in header?
                 	    final httpResponseHeader.Entry e = it.next();
-                        headerStringBuffer.append(e.getKey()).append(": ").append(e.getValue()).append("\r\n");   
+                	    header.append(e.getKey()).append(": ").append(e.getValue()).append("\r\n");   
                 	}
                 	
                 	/*
@@ -1417,17 +1417,17 @@ public final class httpd implements serverHandler, Cloneable {
                     if ((tag != '*') && (tag != '#')) { // '#' in key is reserved for proxy attributes as artificial header values
                         count = responseHeader.keyCount(key);
                         for (int j = 0; j < count; j++) {
-                            headerStringBuffer.append(key).append(": ").append((String) responseHeader.getSingle(key, j)).append("\r\n");  
+                            header.append(key).append(": ").append((String) responseHeader.getSingle(key, j)).append("\r\n");  
                         }
                         //System.out.println("#" + key + ": " + value);
                     }            
                 }
                 
                 // end header
-                headerStringBuffer.append("\r\n");
+                header.append("\r\n");
                 
                 // sending headers to the client
-                respond.write(headerStringBuffer.toString().getBytes());            
+                respond.write(header.toString().getBytes());            
                 
                 // flush stream
                 respond.flush();

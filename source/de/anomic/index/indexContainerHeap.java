@@ -34,6 +34,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
@@ -231,6 +232,66 @@ public final class indexContainerHeap {
         }
     }
 
+    public synchronized int maxReferences() {
+        // iterate to find the max score
+        int max = 0;
+        for (indexContainer container : cache.values()) {
+            if (container.size() > max) max = container.size();
+        }
+        return max;
+    }
+    
+    public synchronized String maxReferencesHash() {
+        // iterate to find the max score
+        int max = 0;
+        String hash = null;
+        for (indexContainer container : cache.values()) {
+            if (container.size() > max) {
+                max = container.size();
+                hash = container.getWordHash();
+            }
+        }
+        return hash;
+    }
+    
+    public synchronized ArrayList<String> maxReferencesHash(int bound) {
+        // iterate to find the max score
+        ArrayList<String> hashes = new ArrayList<String>();
+        for (indexContainer container : cache.values()) {
+            if (container.size() >= bound) {
+                hashes.add(container.getWordHash());
+            }
+        }
+        return hashes;
+    }
+    
+    public synchronized indexContainer latest() {
+        indexContainer c = null;
+        for (indexContainer container : cache.values()) {
+            if (c == null) {c = container; continue;}
+            if (container.lastWrote() > c.lastWrote()) {c = container; continue;}
+        }
+        return c;
+    }
+    
+    public synchronized indexContainer first() {
+        indexContainer c = null;
+        for (indexContainer container : cache.values()) {
+            if (c == null) {c = container; continue;}
+            if (container.lastWrote() < c.lastWrote()) {c = container; continue;}
+        }
+        return c;
+    }
+    
+    public synchronized ArrayList<String> overAge(long maxage) {
+        ArrayList<String> hashes = new ArrayList<String>();
+        long limit = System.currentTimeMillis() - maxage;
+        for (indexContainer container : cache.values()) {
+            if (container.lastWrote() < limit) hashes.add(container.getWordHash());
+        }
+        return hashes;
+    }
+    
     /**
      * return an iterator object that creates top-level-clones of the indexContainers
      * in the cache, so that manipulations of the iterated objects do not change

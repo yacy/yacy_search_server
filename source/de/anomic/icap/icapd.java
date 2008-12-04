@@ -171,8 +171,8 @@ public class icapd implements serverHandler, Cloneable {
         }
         
         
-        final StringBuffer headerStringBuffer = resHeader.toHeaderString("ICAP/1.0",200,null);        
-        out.write(headerStringBuffer.toString().getBytes());
+        final StringBuilder header = resHeader.toHeaderString("ICAP/1.0",200,null);        
+        out.write(header.toString().getBytes());
         out.flush();        
         
         return this.prop.getProperty(icapHeader.CONNECTION_PROP_PERSISTENT).equals("keep-alive") ? serverCore.RESUME_CONNECTION : serverCore.TERMINATE_CONNECTION;
@@ -206,8 +206,8 @@ public class icapd implements serverHandler, Cloneable {
                 icapResHeader.put(icapHeader.SERVICE, "YaCy ICAP Service 1.0");
                 // icapResHeader.put(icapHeader.CONNECTION, "close");    
                 
-                final StringBuffer headerStringBuffer = icapResHeader.toHeaderString("ICAP/1.0",404,null);            
-                out.write((new String(headerStringBuffer)).getBytes());
+                final StringBuilder header = icapResHeader.toHeaderString("ICAP/1.0",404,null);            
+                out.write((new String(header)).getBytes());
                 out.flush();    
             }
             
@@ -286,16 +286,16 @@ public class icapd implements serverHandler, Cloneable {
                 icapResHeader.put(icapHeader.SERVICE, "YaCy ICAP Service 1.0");
                 // resHeader.put(icapHeader.CONNECTION, "close");    
                 
-                final StringBuffer headerStringBuffer = icapResHeader.toHeaderString("ICAP/1.0",204,null);            
-                out.write((new String(headerStringBuffer)).getBytes());
+                final StringBuilder header = icapResHeader.toHeaderString("ICAP/1.0",204,null);            
+                out.write((new String(header)).getBytes());
                 out.flush();
             } else {
                 icapResHeader.put(icapHeader.ENCAPSULATED,reqHeader.get(icapHeader.ENCAPSULATED));
                 icapResHeader.put(icapHeader.SERVICE, "YaCy ICAP Service 1.0");
                 // icapResHeader.put(icapHeader.CONNECTION, "close");    
                 
-                final StringBuffer headerStringBuffer = icapResHeader.toHeaderString("ICAP/1.0",503,null);            
-                out.write((new String(headerStringBuffer)).getBytes());
+                final StringBuilder header = icapResHeader.toHeaderString("ICAP/1.0",503,null);            
+                out.write((new String(header)).getBytes());
                 out.flush();                
             }
             

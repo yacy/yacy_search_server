@@ -93,7 +93,7 @@ public class SimpleToken extends AbstractToken {
 	}
 	
 	protected String getMarkup(final String[] es, final boolean closing) {
-		final StringBuffer result = new StringBuffer();
+		final StringBuilder result = new StringBuilder();
 		// backwards if closing
 		for (
 				int i = (closing) ? es.length - 1 : 0, j;

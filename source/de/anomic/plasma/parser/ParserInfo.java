@@ -18,7 +18,7 @@ public class ParserInfo {
     public int usageCount = 0;
     
     public String toString() {
-        final StringBuffer toStr = new StringBuffer();
+        final StringBuilder toStr = new StringBuilder();
         
         toStr.append(this.parserName).append(" V")
              .append((this.parserVersionNr==null)?"0.0":this.parserVersionNr).append(" | ")

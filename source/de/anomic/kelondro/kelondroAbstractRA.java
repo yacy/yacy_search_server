@@ -51,12 +51,7 @@ abstract class kelondroAbstractRA implements kelondroRA {
     // pseudo-native methods:
     abstract public long length() throws IOException;
     abstract public long available() throws IOException;
-    
-    abstract public int read() throws IOException;
-    abstract public void write(int b) throws IOException;
-
     abstract public void write(byte[] b, int off, int len) throws IOException;
-
     abstract public void seek(long pos) throws IOException;
     abstract public void close() throws IOException;
 
@@ -68,40 +63,35 @@ abstract class kelondroAbstractRA implements kelondroRA {
         this.readFully(buffer, 0, a);
         return buffer;
     }
-    
-    public byte readByte() throws IOException {
-        final int ch = this.read();
-        if (ch < 0) throw new IOException();
-        return (byte)(ch);
-    }
-
-    public void writeByte(final int v) throws IOException {
-        this.write(v);
-    }
 
     public short readShort() throws IOException {
-        final int ch1 = this.read();
-        final int ch2 = this.read();
-        if ((ch1 | ch2) < 0) throw new IOException();
-        return (short) ((ch1 << 8) | (ch2 << 0));
+        byte[] b = new byte[2];
+        this.readFully(b, 0, 2);
+        if ((b[0] | b[1]) < 0) throw new IOException("kelondroAbstractRA.readInt: wrong values; ch1=" + (b[0] & 0xFF) + ", ch2=" + (b[1] & 0xFF));
+        return (short) (((b[0] & 0xFF) << 8) | (b[1] & 0xFF));
     }
 
     public void writeShort(final int v) throws IOException {
-        this.write((v >>> 8) & 0xFF); this.write((v >>> 0) & 0xFF);
+        byte[] b = new byte[2];
+        b[0] = (byte) ((v >>>  8) & 0xFF);
+        b[1] = (byte) ( v         & 0xFF);
+        this.write(b);
     }
 
     public int readInt() throws IOException {
-        final int ch1 = this.read();
-        final int ch2 = this.read();
-        final int ch3 = this.read();
-        final int ch4 = this.read();
-        if ((ch1 | ch2 | ch3 | ch4) < 0) throw new IOException("kelondroAbstractRA.readInt: wrong values; ch1=" + ch1 + ", ch2=" + ch2 + ", ch3=" + ch3 + ", ch4=" + ch4);
-        return ((ch1 << 24) | (ch2 << 16) | (ch3 << 8) | ch4);
+        byte[] b = new byte[4];
+        this.readFully(b, 0, 4);
+        if ((b[0] | b[1] | b[2] | b[3]) < 0) throw new IOException("kelondroAbstractRA.readInt: wrong values; ch1=" + (b[0] & 0xFF) + ", ch2=" + (b[1] & 0xFF) + ", ch3=" + (b[2] & 0xFF) + ", ch4=" + (b[3] & 0xFF));
+        return (((b[0] & 0xFF) << 24) | ((b[1] & 0xFF) << 16) | ((b[2] & 0xFF) << 8) | (b[3] & 0xFF));
     }
 
     public void writeInt(final int v) throws IOException {
-        this.write((v >>> 24) & 0xFF); this.write((v >>> 16) & 0xFF);
-        this.write((v >>>  8) & 0xFF); this.write((v >>>  0) & 0xFF);
+        byte[] b = new byte[4];
+        b[0] = (byte) ((v >>> 24) & 0xFF);
+        b[1] = (byte) ((v >>> 16) & 0xFF);
+        b[2] = (byte) ((v >>>  8) & 0xFF);
+        b[3] = (byte) ( v         & 0xFF);
+        this.write(b);
     }
 
     public long readLong() throws IOException {
@@ -109,10 +99,16 @@ abstract class kelondroAbstractRA implements kelondroRA {
     }
 
     public void writeLong(final long v) throws IOException {
-        this.write((int) (v >>> 56) & 0xFF); this.write((int) (v >>> 48) & 0xFF);
-        this.write((int) (v >>> 40) & 0xFF); this.write((int) (v >>> 32) & 0xFF);
-        this.write((int) (v >>> 24) & 0xFF); this.write((int) (v >>> 16) & 0xFF);
-        this.write((int) (v >>>  8) & 0xFF); this.write((int) (v >>>  0) & 0xFF);
+        byte[] b = new byte[8];
+        b[0] = (byte) ((v >>> 56) & 0xFF);
+        b[1] = (byte) ((v >>> 48) & 0xFF);
+        b[2] = (byte) ((v >>> 40) & 0xFF);
+        b[3] = (byte) ((v >>> 32) & 0xFF);
+        b[4] = (byte) ((v >>> 24) & 0xFF);
+        b[5] = (byte) ((v >>> 16) & 0xFF);
+        b[6] = (byte) ((v >>>  8) & 0xFF);
+        b[7] = (byte) ( v         & 0xFF);
+        this.write(b);
     }
 
     public void write(final byte[] b) throws IOException {
@@ -137,33 +133,7 @@ abstract class kelondroAbstractRA implements kelondroRA {
         b[b.length - 1] = lf;
         this.write(b);
     }
-
-    public String readLine() throws IOException {
-        // with these functions, we consider a line as always terminated by CRLF
-        byte[] bb = new byte[80];
-        int bbsize = 0;
-        int c;
-        while (true) {
-            c = read();
-            if (c < 0) {
-                if (bbsize == 0) return null;
-                return new String(bb, 0, bbsize);
-            }
-            if (c == cr) continue;
-            if (c == lf) return new String(bb, 0, bbsize, "UTF-8");
-
-            // append to bb
-            if (bbsize == bb.length) {
-                // extend bb size
-                byte[] newbb = new byte[bb.length * 2];
-                System.arraycopy(bb, 0, newbb, 0, bb.length);
-                bb = newbb;
-                newbb = null;
-            }
-            bb[bbsize++] = (byte) c;
-        }
-    }
-
+    
     public void writeMap(final Map<String, String> map, final String comment) throws IOException {
         this.seek(0);
         final Iterator<Map.Entry<String, String>> iter = map.entrySet().iterator();
@@ -197,26 +167,6 @@ abstract class kelondroAbstractRA implements kelondroRA {
             map.put(line.substring(0, pos), line.substring(pos + 1));
         }
         return map;
-    }
-    
-    
-    /**
-     * this does not write the content to the see position
-     * but to the very beginning of the record
-     * some additional bytes will ensure that we know the correct content size later on
-     */
-    public void writeArray(final byte[] b) throws IOException {
-        seek(0);
-        writeInt(b.length);
-        write(b);
-    }
-
-    public byte[] readArray() throws IOException {
-        seek(0);
-        final int l = readInt();
-        final byte[] b = new byte[l];
-        readFully(b, 0, l);
-        return b;
     }
     
     public void deleteOnExit() {

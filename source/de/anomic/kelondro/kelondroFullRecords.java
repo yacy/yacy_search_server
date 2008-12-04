@@ -69,8 +69,8 @@ public class kelondroFullRecords extends kelondroAbstractRecords {
     }
     
     public synchronized void close() {
-        recordTracker.remove(this.filename);
         super.close();
+        recordTracker.remove(this.filename);
     }
     
     public kelondroNode newNode(final kelondroHandle handle, final byte[] bulk, final int offset) throws IOException {

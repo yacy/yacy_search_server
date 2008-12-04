@@ -227,7 +227,7 @@ public class plasmaSearchRankingProfile {
     public String toExternalURLGet(final String prefix) {
         final Iterator<Map.Entry<String, String>> i = toExternalMap("").entrySet().iterator();
         Map.Entry<String, String> entry;
-        final StringBuffer ext = new StringBuffer();
+        final StringBuilder ext = new StringBuilder();
         while (i.hasNext()) {
             entry = i.next();
             ext.append("&");

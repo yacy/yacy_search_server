@@ -81,8 +81,8 @@ public class vcfParser extends AbstractParser implements Parser {
     public plasmaParserDocument parse(final yacyURL url, final String mimeType, final String charset, final InputStream source) throws ParserException, InterruptedException {
         
         try {
-            final StringBuffer parsedTitle = new StringBuffer();
-            final StringBuffer parsedDataText = new StringBuffer();
+            final StringBuilder parsedTitle = new StringBuilder();
+            final StringBuilder parsedDataText = new StringBuilder();
             final HashMap<String, String> parsedData = new HashMap<String, String>();
             final HashMap<yacyURL, String> anchors = new HashMap<yacyURL, String>();
             final LinkedList<String> parsedNames = new LinkedList<String>();
@@ -251,7 +251,7 @@ public class vcfParser extends AbstractParser implements Parser {
     public static final String decodeQuotedPrintable(final String s) {
 		if (s == null) return null;
 		final byte[] b = s.getBytes();
-		final StringBuffer sb = new StringBuffer();
+		final StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < b.length; i++) {
 			final int c = b[i];
 			if (c == '=') {

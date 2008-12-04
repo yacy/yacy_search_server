@@ -45,10 +45,8 @@ public interface kelondroRA {
     public long length() throws IOException;
     public long available() throws IOException;
     
-    public int read() throws IOException;
     public void readFully(byte[] b, int off, int len) throws IOException;
-    public void write(int b) throws IOException;
-
+    
     public void write(byte[] b, int off, int len) throws IOException;
 
     public void seek(long pos) throws IOException;
@@ -56,9 +54,7 @@ public interface kelondroRA {
 
     // derived methods:
     public byte[] readFully() throws IOException;
-    public byte readByte() throws IOException;
-    public void writeByte(int v) throws IOException;
-
+    
     public short readShort() throws IOException;
     public void writeShort(int v) throws IOException;
 
@@ -71,13 +67,9 @@ public interface kelondroRA {
     public void write(byte[] b) throws IOException;
 
     public void writeLine(String line) throws IOException;
-    public String readLine() throws IOException;
-
+    
     public void writeMap(Map<String, String> props, String comment) throws IOException;
     public HashMap<String, String> readMap() throws IOException;
 
-    public void writeArray(byte[] b) throws IOException;
-    public byte[] readArray() throws IOException;
-    
     public void deleteOnExit();
 }

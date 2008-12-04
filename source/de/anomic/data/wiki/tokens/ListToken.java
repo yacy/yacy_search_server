@@ -86,13 +86,13 @@ public class ListToken extends AbstractToken {
 	}
 	
 	protected void parse() {
-		final StringBuffer sb = new StringBuffer(this.text.length());
+		final StringBuilder sb = new StringBuilder(this.text.length());
 		parse(this.text.split("\n"), 0, sb);
 		this.markup = new String(sb);
 		this.parsed = true;
 	}
 	
-	protected StringBuffer parse(final String[] t, final int depth, final StringBuffer sb) {
+	protected StringBuilder parse(final String[] t, final int depth, final StringBuilder sb) {
 		if (this.listBlockElement != null) sb.append("<").append(this.listBlockElement).append(">\n");
 		while (this.aktline < t.length && getGrade(t[this.aktline]) >= depth) {
 			if (recursion) for (int j=0; j<depth + 1; j++) sb.append("\t");

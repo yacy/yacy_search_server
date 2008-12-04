@@ -30,11 +30,7 @@ import java.util.Map;
 
 public final class kelondroFileRA extends kelondroAbstractRA implements kelondroRA {
 
-    protected RandomAccessFile RAFile;
-    
-    public kelondroFileRA(final String file) throws IOException, FileNotFoundException {
-        this(new File(file));
-    }
+    private RandomAccessFile RAFile;
 
     public kelondroFileRA(final File file) throws IOException, FileNotFoundException {
         this.name = file.getName();

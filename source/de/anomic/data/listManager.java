@@ -172,7 +172,7 @@ public class listManager {
      * @return returns <code>true</code> if successful, <code>false</code> otherwise
      */
     public static boolean writeList(final File listFile, final String[] list){
-        final StringBuffer out = new StringBuffer();
+        final StringBuilder out = new StringBuilder();
         for(int i=0;i < list.length; i++){
             out
             .append(list[i])
@@ -195,7 +195,7 @@ public class listManager {
      * @return String representation of the file content.
      */
     public static String getListString(final File listFile, final boolean withcomments){
-        final StringBuffer temp = new StringBuffer();
+        final StringBuilder temp = new StringBuilder();
         
         BufferedReader br = null;        
         try{
@@ -321,7 +321,7 @@ public class listManager {
      * @return String with elements from set separated by comma.
      */
     public static String collection2string(final Collection<String> col){
-        final StringBuffer str = new StringBuffer();
+        final StringBuilder str = new StringBuilder();
         
         if (col != null && (col.size() > 0)) {
             final Iterator<String> it = col.iterator();

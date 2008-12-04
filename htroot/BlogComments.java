@@ -332,7 +332,7 @@ public class BlogComments {
             final String[] sendMail = sendMailStr.trim().split(" ");
 
             // building the message text
-            final StringBuffer emailTxt = new StringBuffer();
+            final StringBuilder emailTxt = new StringBuilder();
             emailTxt.append("To: ")
             .append(sendMailTo)
             .append("\nFrom: ")

@@ -61,7 +61,7 @@ public final class serverCodings {
     
     public static String encodeOctal(final byte[] in) {
         if (in == null) return "";
-        final StringBuffer result = new StringBuffer(in.length * 8 / 3);
+        final StringBuilder result = new StringBuilder(in.length * 8 / 3);
         for (int i = 0; i < in.length; i++) {
             if ((0Xff & in[i]) < 8) result.append('0');
             result.append(Integer.toOctalString(0Xff & in[i]));
@@ -71,7 +71,7 @@ public final class serverCodings {
     
     public static String encodeHex(final byte[] in) {
         if (in == null) return "";
-        final StringBuffer result = new StringBuffer(in.length * 2);
+        final StringBuilder result = new StringBuilder(in.length * 2);
         for (int i = 0; i < in.length; i++) {
             if ((0Xff & in[i]) < 16) result.append('0');
             result.append(Integer.toHexString(0Xff & in[i]));
@@ -281,7 +281,7 @@ public final class serverCodings {
     public static String map2string(final Map<String, String> m, final String separator, final boolean braces) {
         // m must be synchronized to prevent that a ConcurrentModificationException occurs
         synchronized (m) {
-            final StringBuffer buf = new StringBuffer(20 * m.size());
+            final StringBuilder buf = new StringBuilder(20 * m.size());
             if (braces) { buf.append("{"); }
             int retry = 10;
             critical: while (retry > 0) {
@@ -320,7 +320,7 @@ public final class serverCodings {
     }
     
     public static String set2string(final Set<String> s, final String separator, final boolean braces) {
-        final StringBuffer buf = new StringBuffer();
+        final StringBuilder buf = new StringBuilder();
         if (braces) buf.append("{");
         final Iterator<String> i = s.iterator();
         boolean hasNext = i.hasNext();

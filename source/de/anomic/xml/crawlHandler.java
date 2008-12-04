@@ -63,7 +63,7 @@ public class crawlHandler extends DefaultHandler {
     
     // class variables
     private Startpoint channel, startpoint;
-    private StringBuffer buffer;
+    private StringBuilder buffer;
     private boolean parsingAttributes, parsingStartpoint;
     private ArrayList<String> startpointsGUID; // a list of GUIDs, so the items can be retrieved by a specific order
     private HashMap<String, Startpoint> startpoints; // a guid:Item map
@@ -82,7 +82,7 @@ public class crawlHandler extends DefaultHandler {
     private void init() {
         startpointsGUID = new ArrayList<String>();
         startpoints = new HashMap<String, Startpoint>();
-        buffer = new StringBuffer();
+        buffer = new StringBuilder();
         startpoint = null;
         channel = null;
         parsingAttributes = false;

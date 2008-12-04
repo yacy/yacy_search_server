@@ -204,7 +204,7 @@ public final class plasmaSearchQuery {
     
     public static String hashSet2hashString(final Set<String> hashes) {
         final Iterator<String> i = hashes.iterator();
-        final StringBuffer sb = new StringBuffer(hashes.size() * yacySeedDB.commonHashLength);
+        final StringBuilder sb = new StringBuilder(hashes.size() * yacySeedDB.commonHashLength);
         while (i.hasNext()) sb.append(i.next());
         return new String(sb);
     }
@@ -212,7 +212,7 @@ public final class plasmaSearchQuery {
     public static String anonymizedQueryHashes(final Set<String> hashes) {
         // create a more anonymized representation of a query hashes for logging
         final Iterator<String> i = hashes.iterator();
-        final StringBuffer sb = new StringBuffer(hashes.size() * (yacySeedDB.commonHashLength + 2) + 2);
+        final StringBuilder sb = new StringBuilder(hashes.size() * (yacySeedDB.commonHashLength + 2) + 2);
         sb.append("[");
         String hash;
         if (i.hasNext()) {

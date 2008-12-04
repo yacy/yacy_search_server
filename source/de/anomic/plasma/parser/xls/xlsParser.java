@@ -44,8 +44,8 @@ import de.anomic.yacy.yacyURL;
 
 public class xlsParser extends AbstractParser implements Parser, HSSFListener {
 
-    //StringBuffer for parsed text
-    private StringBuffer sbFoundStrings = null;
+    //StringBuilder for parsed text
+    private StringBuilder sbFoundStrings = null;
     
     //sstrecord needed for event parsing
     private SSTRecord sstrec;
@@ -86,8 +86,8 @@ public class xlsParser extends AbstractParser implements Parser, HSSFListener {
             final String charset, final InputStream source) throws ParserException,
             InterruptedException {
         try {
-            //generate new StringBuffer for parsing
-            sbFoundStrings = new StringBuffer();
+            //generate new StringBuilder for parsing
+            sbFoundStrings = new StringBuilder();
             
             //create a new org.apache.poi.poifs.filesystem.Filesystem
             final POIFSFileSystem poifs = new POIFSFileSystem(source);
@@ -104,7 +104,7 @@ public class xlsParser extends AbstractParser implements Parser, HSSFListener {
             //close our document input stream (don't want to leak these!)
             din.close();
             
-            //now the parsed strings are in the StringBuffer, now convert them to a String
+            //now the parsed strings are in the StringBuilder, now convert them to a String
             final String contents = sbFoundStrings.toString();
             
             /*

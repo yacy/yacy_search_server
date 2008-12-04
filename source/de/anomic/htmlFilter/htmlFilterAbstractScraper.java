@@ -65,7 +65,7 @@ public abstract class htmlFilterAbstractScraper implements htmlFilterScraper {
     public abstract void scrapeTag1(String tagname, Properties tagopts, char[] text);
 
     protected static String stripAllTags(String s) {
-        StringBuffer r = new StringBuffer(s.length());
+        StringBuilder r = new StringBuilder(s.length());
         int bc = 0;
         char c;
         for (int p = 0; p < s.length(); p++) {

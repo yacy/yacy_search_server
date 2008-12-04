@@ -280,7 +280,7 @@ public final class plasmaCondenser {
 
     private void createCondensement(final InputStream is, final String charset) throws UnsupportedEncodingException {
         final HashSet<String> currsentwords = new HashSet<String>();
-        StringBuffer sentence = new StringBuffer(100);
+        StringBuilder sentence = new StringBuilder(100);
         String word = "";
         String k;
         int wordlen;
@@ -296,7 +296,7 @@ public final class plasmaCondenser {
         boolean comb_indexof = false, last_last = false, last_index = false;
         RandomAccessFile fa;
         final boolean dumpWords = false;
-        final HashMap<StringBuffer, indexPhrase> sentences = new HashMap<StringBuffer, indexPhrase>();
+        final HashMap<StringBuilder, indexPhrase> sentences = new HashMap<StringBuilder, indexPhrase>();
         
         if (dumpWords) try {
             fa = new RandomAccessFile(new File("dump.txt"), "rw");
@@ -351,7 +351,7 @@ public final class plasmaCondenser {
                         words.put(k, wsp); // is that necessary?
                     }
                 }
-                sentence = new StringBuffer(100);
+                sentence = new StringBuilder(100);
                 currsentwords.clear();
                 wordInSentenceCounter = 1;
             } else {
@@ -413,11 +413,11 @@ public final class plasmaCondenser {
         String[] s;
         int wc;
         Object o;
-        final Iterator<StringBuffer> sit = sentences.keySet().iterator();
+        final Iterator<StringBuilder> sit = sentences.keySet().iterator();
         while (sit.hasNext()) {
             o = sit.next();
             if (o != null) {
-                sentence = (StringBuffer) o;
+                sentence = (StringBuilder) o;
                 wc = (sentence.length() - 1) / numlength;
                 s = new String[wc + 2];
                 psp = sentences.get(sentence);
@@ -492,7 +492,7 @@ public final class plasmaCondenser {
     		return true;
     }
 
-    public static Enumeration<StringBuffer> wordTokenizer(final String s, final String charset) {
+    public static Enumeration<StringBuilder> wordTokenizer(final String s, final String charset) {
         try {
             return new sievedWordsEnum(new ByteArrayInputStream(s.getBytes("UTF-8")));
         } catch (final Exception e) {
@@ -500,10 +500,10 @@ public final class plasmaCondenser {
         }
     }
 	
-    public static class sievedWordsEnum implements Enumeration<StringBuffer> {
+    public static class sievedWordsEnum implements Enumeration<StringBuilder> {
         // this enumeration removes all words that contain either wrong characters or are too short
         
-        StringBuffer buffer = null;
+        StringBuilder buffer = null;
         unsievedWordsEnum e;
 
         public sievedWordsEnum(final InputStream is) throws UnsupportedEncodingException {
@@ -515,8 +515,8 @@ public final class plasmaCondenser {
             e.pre(x);
         }
         
-        private StringBuffer nextElement0() {
-            StringBuffer s;
+        private StringBuilder nextElement0() {
+            StringBuilder s;
             loop: while (e.hasMoreElements()) {
                 s = e.nextElement();
                 if ((s.length() == 1) && (htmlFilterContentScraper.punctuation(s.charAt(0)))) return s;
@@ -532,23 +532,23 @@ public final class plasmaCondenser {
             return buffer != null;
         }
 
-        public StringBuffer nextElement() {
-            final StringBuffer r = buffer;
+        public StringBuilder nextElement() {
+            final StringBuilder r = buffer;
             buffer = nextElement0();
             return r;
         }
 
     }
 
-    private static class unsievedWordsEnum implements Enumeration<StringBuffer> {
-        // returns an enumeration of StringBuffer Objects
-        StringBuffer buffer = null;
+    private static class unsievedWordsEnum implements Enumeration<StringBuilder> {
+        // returns an enumeration of StringBuilder Objects
+        StringBuilder buffer = null;
         sentencesFromInputStreamEnum e;
-        StringBuffer s;
+        StringBuilder s;
 
         public unsievedWordsEnum(final InputStream is) throws UnsupportedEncodingException {
             e = new sentencesFromInputStreamEnum(is);
-            s = new StringBuffer(20);
+            s = new StringBuilder(20);
             buffer = nextElement0();
         }
 
@@ -556,16 +556,16 @@ public final class plasmaCondenser {
             e.pre(x);
         }
         
-        private StringBuffer nextElement0() {
-            StringBuffer r;
-            StringBuffer sb;
+        private StringBuilder nextElement0() {
+            StringBuilder r;
+            StringBuilder sb;
             char c;
             while (s.length() == 0) {
                 if (e.hasNext()) {
                     r = e.next();
                     if (r == null) return null;
                     r = trim(r);
-                    sb = new StringBuffer(r.length() * 2);
+                    sb = new StringBuilder(r.length() * 2);
                     for (int i = 0; i < r.length(); i++) {
                         c = r.charAt(i);
                         if (invisible(c)) sb = sb.append(' '); // TODO: Bugfix needed for UTF-8
@@ -581,10 +581,10 @@ public final class plasmaCondenser {
             final int p = s.indexOf(" ");
             if (p < 0) {
                 r = s;
-                s = new StringBuffer();
+                s = new StringBuilder();
                 return r;
             }
-            r = trim(new StringBuffer(s.substring(0, p)));
+            r = trim(new StringBuilder(s.substring(0, p)));
             s = trim(s.delete(0, p + 1));
             return r;
         }
@@ -593,15 +593,15 @@ public final class plasmaCondenser {
             return buffer != null;
         }
 
-        public StringBuffer nextElement() {
-            final StringBuffer r = buffer;
+        public StringBuilder nextElement() {
+            final StringBuilder r = buffer;
             buffer = nextElement0();
             return r;
         }
 
     }
     
-    static StringBuffer trim(StringBuffer sb) {
+    static StringBuilder trim(StringBuilder sb) {
         while ((sb.length() > 0) && (sb.charAt(0) <= ' ')) sb = sb.deleteCharAt(0);
         while ((sb.length() > 0) && (sb.charAt(sb.length() - 1) <= ' ')) sb = sb.deleteCharAt(sb.length() - 1);
         return sb;
@@ -615,11 +615,11 @@ public final class plasmaCondenser {
         }
     }
     
-    public static class sentencesFromInputStreamEnum implements Iterator<StringBuffer> {
+    public static class sentencesFromInputStreamEnum implements Iterator<StringBuilder> {
         // read sentences from a given input stream
-        // this enumerates StringBuffer objects
+        // this enumerates StringBuilder objects
         
-        StringBuffer buffer = null;
+        StringBuilder buffer = null;
         BufferedReader raf;
         int counter = 0;
         boolean pre = false;
@@ -635,9 +635,9 @@ public final class plasmaCondenser {
             this.pre = x;
         }
         
-        private StringBuffer nextElement0() {
+        private StringBuilder nextElement0() {
             try {
-                final StringBuffer s = readSentence(raf, pre);
+                final StringBuilder s = readSentence(raf, pre);
                 //System.out.println(" SENTENCE='" + s + "'"); // DEBUG 
                 if (s == null) {
                     raf.close();
@@ -657,12 +657,12 @@ public final class plasmaCondenser {
             return buffer != null;
         }
 
-        public StringBuffer next() {
+        public StringBuilder next() {
             if (buffer == null) {
                 return null;
             }
             counter = counter + buffer.length() + 1;
-            final StringBuffer r = buffer;
+            final StringBuilder r = buffer;
             buffer = nextElement0();
             return r;
         }
@@ -676,8 +676,8 @@ public final class plasmaCondenser {
         }
     }
 
-    static StringBuffer readSentence(final Reader reader, final boolean pre) throws IOException {
-        final StringBuffer s = new StringBuffer(40);
+    static StringBuilder readSentence(final Reader reader, final boolean pre) throws IOException {
+        final StringBuilder s = new StringBuilder(40);
         int nextChar;
         char c, lc = ' '; // starting with ' ' as last character prevents that the result string starts with a ' '
         
@@ -728,7 +728,7 @@ public final class plasmaCondenser {
             final File f = new File(args[0]);
             final Properties p = new Properties();
             p.load(new FileInputStream(f));
-            final StringBuffer sb = new StringBuffer();
+            final StringBuilder sb = new StringBuilder();
             sb.append("{\n");
             for (int i = 0; i <= 15; i++) {
                 sb.append('"');

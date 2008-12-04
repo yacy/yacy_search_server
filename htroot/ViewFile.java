@@ -276,7 +276,7 @@ public class ViewFile {
                 
             } else if (viewMode.equals("sentences")) {
                 prop.put("viewMode", VIEW_MODE_AS_PARSED_SENTENCES);
-                final Iterator<StringBuffer> sentences = document.getSentences(pre);
+                final Iterator<StringBuilder> sentences = document.getSentences(pre);
 
                 boolean dark = true;
                 int i = 0;

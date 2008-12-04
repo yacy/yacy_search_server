@@ -124,7 +124,7 @@ public class kelondroBase64Order extends kelondroAbstractOrder<byte[]> implement
 
     public final String encodeLongSmart(final long c, int length) {
         if (c >= max(length)) {
-            final StringBuffer s = new StringBuffer(length);
+            final StringBuilder s = new StringBuilder(length);
             s.setLength(length);
             while (length > 0) s.setCharAt(--length, alpha[63]);
             return new String(s);
@@ -133,7 +133,7 @@ public class kelondroBase64Order extends kelondroAbstractOrder<byte[]> implement
     }
 
     public final String encodeLong(long c, int length) {
-        final StringBuffer s = new StringBuffer(length);
+        final StringBuilder s = new StringBuilder(length);
         s.setLength(length);
         while (length > 0) {
             s.setCharAt(--length, alpha[(byte) (c & 0x3F)]);
@@ -185,7 +185,7 @@ public class kelondroBase64Order extends kelondroAbstractOrder<byte[]> implement
     // we will do that by grouping each three input bytes to four output bytes.
     public final String encode(final byte[] in) {
         if (in.length == 0) return "";
-        StringBuffer out = new StringBuffer(in.length / 3 * 4 + 3);
+        StringBuilder out = new StringBuilder(in.length / 3 * 4 + 3);
         int pos = 0;
         long l;
         while (in.length - pos >= 3) {

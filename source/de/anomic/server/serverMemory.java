@@ -183,7 +183,7 @@ public class serverMemory {
      */
     public static String bytesToString(final long byteCount) {
         try {
-            final StringBuffer byteString = new StringBuffer();
+            final StringBuilder byteString = new StringBuilder();
 
             if (byteCount > 1073741824) {
                 byteString.append(yFormatter.number((double)byteCount / (double)1073741824 ))

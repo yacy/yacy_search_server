@@ -55,7 +55,7 @@ public class Threaddump_p {
 
     	prop.clear();
     	sb = (plasmaSwitchboard) env;
-    	final StringBuffer buffer = new StringBuffer(1000);
+    	final StringBuilder buffer = new StringBuilder(1000);
     	
 	    final boolean plain = post.get("plain", "false").equals("true");
 	    final int sleep = post.getInt("sleep", 0); // a sleep before creation of a thread dump can be used for profiling
@@ -76,7 +76,7 @@ public class Threaddump_p {
     	
         if (post != null && post.containsKey("multipleThreaddump")) {
             final ArrayList<Map<Thread,StackTraceElement[]>> traces = new ArrayList<Map<Thread,StackTraceElement[]>>();
-            for (int i = 0; i < 100; i++) {
+            for (int i = 0; i < 1000; i++) {
                 traces.add(Thread.getAllStackTraces());
             }
             appendStackTraceStats(sb.getRootPath(), buffer, traces, plain, Thread.State.BLOCKED);
@@ -104,7 +104,7 @@ public class Threaddump_p {
        	return prop;    // return from serverObjects respond()
     }    
     
-    private static void appendStackTraces(final File rootPath, final StringBuffer buffer, final Map<Thread,StackTraceElement[]> stackTraces, final boolean plain, final Thread.State stateIn) {
+    private static void appendStackTraces(final File rootPath, final StringBuilder buffer, final Map<Thread,StackTraceElement[]> stackTraces, final boolean plain, final Thread.State stateIn) {
         bufferappend(buffer, plain, "THREADS WITH STATES: " + stateIn.toString());
         bufferappend(buffer, plain, "");
         // collect single dumps
@@ -120,7 +120,7 @@ public class Threaddump_p {
         bufferappend(buffer, plain, "");
     }
     
-    private static void appendStackTraceStats(final File rootPath, final StringBuffer buffer, final ArrayList<Map<Thread,StackTraceElement[]>> traces, final boolean plain, final Thread.State stateIn) {
+    private static void appendStackTraceStats(final File rootPath, final StringBuilder buffer, final ArrayList<Map<Thread,StackTraceElement[]>> traces, final boolean plain, final Thread.State stateIn) {
         bufferappend(buffer, plain, "THREADS WITH STATES: " + stateIn.toString());
         bufferappend(buffer, plain, "");
         // collect single dumps
@@ -180,7 +180,7 @@ public class Threaddump_p {
             String tracename = "";
             File classFile;
             if ((stateIn.equals(thread.getState())) && (stackTraceElements.length > 0)) {
-                StringBuffer sb = new StringBuffer();
+                StringBuilder sb = new StringBuilder(3000);
                 if (plain) {
                     classFile = getClassFile(classPath, stackTraceElements[stackTraceElements.length - 1].getClassName());
                     tracename = classFile.getName();
@@ -231,7 +231,7 @@ public class Threaddump_p {
         }
     }
     
-    private static void bufferappend(final StringBuffer buffer, final boolean plain, final String a) {
+    private static void bufferappend(final StringBuilder buffer, final boolean plain, final String a) {
         buffer.append(a);
         if (plain) {
             buffer.append("\n");

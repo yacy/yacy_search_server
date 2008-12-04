@@ -280,10 +280,10 @@ public class indexURLReference {
         }
     }
 
-    private StringBuffer corePropList() {
+    private StringBuilder corePropList() {
         // generate a parseable string; this is a simple property-list
         final indexURLReference.Components comp = this.comp();
-        final StringBuffer s = new StringBuffer(300);
+        final StringBuilder s = new StringBuilder(300);
         //System.out.println("author=" + comp.author());
         try {
             s.append("hash=").append(hash());
@@ -443,7 +443,7 @@ public class indexURLReference {
 
     public String toString(final String snippet) {
         // add information needed for remote transport
-        final StringBuffer core = corePropList();
+        final StringBuilder core = corePropList();
         if (core == null)
             return null;
 
@@ -475,7 +475,7 @@ public class indexURLReference {
      * <pre>{hash=jmqfMk7Y3NKw,referrer=------------,mod=20050610,load=20051003,size=51666,wc=1392,cc=0,local=true,q=AEn,dt=h,lang=uk,url=b|aHR0cDovL3d3dy50cmFuc3BhcmVuY3kub3JnL3N1cnZleXMv,descr=b|S25vd2xlZGdlIENlbnRyZTogQ29ycnVwdGlvbiBTdXJ2ZXlzIGFuZCBJbmRpY2Vz}</pre>
      */
     public String toString() {
-        final StringBuffer core = corePropList();
+        final StringBuilder core = corePropList();
         if (core == null) return null;
 
         core.insert(0, "{");

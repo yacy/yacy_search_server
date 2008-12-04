@@ -198,7 +198,7 @@ public class htmlFilterCharacterCoding {
     
     private static String unicode2html(final String text, boolean amp, boolean html) {
         if (text == null) return null;
-        final StringBuffer sb = new StringBuffer(text.length() * 12 / 10);
+        final StringBuilder sb = new StringBuilder(text.length() * 12 / 10);
         int textpos = 0;
         String r;
         char c;
@@ -229,7 +229,7 @@ public class htmlFilterCharacterCoding {
     public static String html2unicode(final String text) {
         if (text == null) return null;
         int p = 0, p1, q;
-        final StringBuffer sb = new StringBuffer(text.length());
+        final StringBuilder sb = new StringBuilder(text.length());
         String s;
         Character r;
         while (p < text.length()) {

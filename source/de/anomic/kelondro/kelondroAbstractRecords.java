@@ -44,6 +44,8 @@ import de.anomic.server.logging.serverLog;
 
 public abstract class kelondroAbstractRecords implements kelondroRecords {
 
+    private static final boolean useChannel = false;
+    
     // static seek pointers
     private   static int  LEN_DESCR      = 60;
     private   static long POS_MAGIC      = 0;                     // 1 byte, byte: file type magic
@@ -247,7 +249,7 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
                         } else {
                             // read link to next element of FREEH chain
                             USAGE.FREEH.index = entryFile.readInt(seekp);
-                            assert ((USAGE.FREEH.index == kelondroHandle.NUL) && (USAGE.FREEC == 0)) || seekpos(USAGE.FREEH) < entryFile.length() : "allocatePayload: USAGE.FREEH.index = " + USAGE.FREEH.index + ", seekp = " + seekp;
+                            assert ((USAGE.FREEH.index == kelondroHandle.NUL) && (USAGE.FREEC == 0)) || seekpos(USAGE.FREEH) < entryFile.length() : "allocatePayload: USAGE.FREEH.index = " + USAGE.FREEH.index + ", entryFile.length() = " + entryFile.length();
                         }
                     }
                     USAGE.writeused(false);
@@ -321,7 +323,7 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
     public static int staticsize(final File file) {
         if (!(file.exists())) return 0;
         try {
-            final kelondroRA ra = new kelondroFileRA(file.getCanonicalPath());
+            final kelondroRA ra = (useChannel) ? new kelondroChannelRA(new File(file.getCanonicalPath())) : new kelondroFileRA(new File(file.getCanonicalPath()));
             final kelondroIOChunks entryFile = new kelondroRAIOChunks(ra, ra.name());
 
             final int used = entryFile.readInt(POS_USEDC); // works only if consistency with file size is given
@@ -355,14 +357,14 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
         if (file.exists()) {
             // opens an existing tree
             this.filename = file.getCanonicalPath();
-            final kelondroRA raf = new kelondroFileRA(this.filename);
+            final kelondroRA raf = (useChannel) ? new kelondroChannelRA(new File(this.filename)) : new kelondroFileRA(new File(this.filename));
             //kelondroRA raf = new kelondroBufferedRA(new kelondroFileRA(this.filename), 1024, 100);
             //kelondroRA raf = new kelondroCachedRA(new kelondroFileRA(this.filename), 5000000, 1000);
             //kelondroRA raf = new kelondroNIOFileRA(this.filename, (file.length() < 4000000), 10000);
             initExistingFile(raf, useNodeCache);
         } else {
             this.filename = file.getCanonicalPath();
-            final kelondroRA raf = new kelondroFileRA(this.filename);
+            final kelondroRA raf = (useChannel) ? new kelondroChannelRA(new File(this.filename)) : new kelondroFileRA(new File(this.filename));
             // kelondroRA raf = new kelondroBufferedRA(new kelondroFileRA(this.filename), 1024, 100);
             // kelondroRA raf = new kelondroNIOFileRA(this.filename, false, 10000);
             initNewFile(raf, FHandles, txtProps);
@@ -408,7 +410,7 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
         assert f != null;
         this.entryFile.close();
         f.delete();
-        ra = new kelondroFileRA(f);
+        ra = (useChannel) ? new kelondroChannelRA(f) : new kelondroFileRA(f);
         initNewFile(ra, this.HANDLES.length, this.TXTPROPS.length);
     }
     
@@ -742,7 +744,6 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
         }
         return markedDeleted;
     }
-    
     
     public synchronized void close() {
         if (entryFile == null) {

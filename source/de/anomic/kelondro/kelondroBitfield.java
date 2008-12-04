@@ -98,7 +98,7 @@ public class kelondroBitfield implements Cloneable {
     }
     
     public String toString() {
-        final StringBuffer sb = new StringBuffer(length());
+        final StringBuilder sb = new StringBuilder(length());
         for (int i = length() - 1; i >= 0; i--) sb.append((this.get(i)) ? '1' : '0');
         return new String(sb);
     }

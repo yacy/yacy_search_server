@@ -45,7 +45,7 @@ public class TableToken extends AbstractToken {
 	protected void parse() {
 		final String[] t = text.split("\n");
 		String[] tds;
-		final StringBuffer sb = new StringBuffer();
+		final StringBuilder sb = new StringBuilder();
 		sb.append("<table");
 		if (t[0].length() > 2) sb.append(parseTableProperties(t[0].substring(2)));
 		sb.append(">\n");
@@ -95,9 +95,9 @@ public class TableToken extends AbstractToken {
       * @param properties A string that may contain several table properties and/or junk.
       * @return A string that only contains table properties.
       */
-    private static StringBuffer parseTableProperties(final String properties) {
+    private static StringBuilder parseTableProperties(final String properties) {
         final String[] values = properties.replaceAll("&quot;", "").split("[= ]");     //splitting the string at = and blanks
-        final StringBuffer sb = new StringBuffer(properties.length());
+        final StringBuilder sb = new StringBuilder(properties.length());
         String key, value;
         String[] posVals;
         final int numberofvalues = values.length;
@@ -121,7 +121,7 @@ public class TableToken extends AbstractToken {
         return sb;
     }
     
-    private static StringBuffer addPair(final String key, final String value, final StringBuffer sb) {
+    private static StringBuilder addPair(final String key, final String value, final StringBuilder sb) {
     	return sb.append(" ").append(key).append("=\"").append(value).append("\"");
     }
 	

@@ -88,7 +88,7 @@ public class LinkToken extends AbstractToken {
 	}
 	
 	protected void parse() throws wikiParserException {
-		final StringBuffer sb = new StringBuffer();
+		final StringBuilder sb = new StringBuilder();
         if (this.patternNr < 0 || this.patternNr >= patterns.length)
             throw new wikiParserException("patternNr was not set correctly: " + this.patternNr);
 		final Matcher m = patterns[this.patternNr].matcher(this.text);
@@ -139,7 +139,7 @@ public class LinkToken extends AbstractToken {
         return link;
     }
     
-    private StringBuffer appendLinks(final Link[] links, final StringBuffer sb) {
+    private StringBuilder appendLinks(final Link[] links, final StringBuilder sb) {
         for (int i=0; i<links.length; i++)
             sb.append(links[i].toString());
         return sb;
@@ -172,7 +172,7 @@ public class LinkToken extends AbstractToken {
         }
         
         public String toString() {
-            final StringBuffer sb = new StringBuffer();
+            final StringBuilder sb = new StringBuilder();
             sb.append("<a href=\"").append(this.href).append("\"");
             if (this.title != null) sb.append(" title=\"").append(this.title).append("\"");
             sb.append(">");

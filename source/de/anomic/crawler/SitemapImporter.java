@@ -81,7 +81,7 @@ public class SitemapImporter extends AbstractImporter implements Importer {
 	 * @see Importer#getStatus()
 	 */
 	public String getStatus() {
-        final StringBuffer theStatus = new StringBuffer();
+        final StringBuilder theStatus = new StringBuilder();
         
         theStatus.append("#URLs=").append((this.parser==null)?0:this.parser.getUrlcount());
         

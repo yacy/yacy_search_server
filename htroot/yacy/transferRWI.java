@@ -87,7 +87,7 @@ public final class transferRWI {
         
         // response values
         String       result      = "ok";
-        final StringBuffer unknownURLs = new StringBuffer();
+        final StringBuilder unknownURLs = new StringBuilder();
         int          pause       = 10000;
         
         if ((youare == null) || (!youare.equals(sb.webIndex.seedDB.mySeed().hash))) {

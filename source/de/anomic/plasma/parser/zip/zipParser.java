@@ -91,10 +91,10 @@ public class zipParser extends AbstractParser implements Parser {
                 docText = new serverByteBuffer();
             }
             
-            final StringBuffer docKeywords = new StringBuffer();
-            final StringBuffer docLongTitle = new StringBuffer();   
+            final StringBuilder docKeywords = new StringBuilder();
+            final StringBuilder docLongTitle = new StringBuilder();   
             final LinkedList<String> docSections = new LinkedList<String>();
-            final StringBuffer docAbstrct = new StringBuffer();
+            final StringBuilder docAbstrct = new StringBuilder();
             final Map<yacyURL, String> docAnchors = new HashMap<yacyURL, String>();
             final HashMap<String, htmlFilterImageEntry> docImages = new HashMap<String, htmlFilterImageEntry>(); 
             

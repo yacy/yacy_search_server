@@ -952,7 +952,7 @@ public final class yacyClient {
         post.add(new DefaultCharsetStringPart("wordc", Integer.toString(indexes.length)));
         
         int indexcount = 0;
-        final StringBuffer entrypost = new StringBuffer(indexes.length*73);
+        final StringBuilder entrypost = new StringBuilder(indexes.length*73);
         Iterator<indexRWIRowEntry> eenum;
         indexRWIEntry entry;
         for (int i = 0; i < indexes.length; i++) {

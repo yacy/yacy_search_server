@@ -193,7 +193,7 @@ public class kelondroColumn {
     }
     
     public String toString() {
-        final StringBuffer s = new StringBuffer();
+        final StringBuilder s = new StringBuilder();
         switch (celltype) {
         case celltype_undefined:
             s.append(nickname);

@@ -556,7 +556,7 @@ public final class userDB {
         		logout("xxxxxx");
         }
         public String toString() {
-            final StringBuffer str = new StringBuffer();
+            final StringBuilder str = new StringBuilder();
             str.append((this.userName==null)?"null":this.userName)
             .append(": ");
             

@@ -91,7 +91,7 @@ public final class httpdRobotsTxtConfig {
     
     public String toString() {
         if (this.allDisallowed) return ALL;
-        final StringBuffer sb = new StringBuffer();
+        final StringBuilder sb = new StringBuilder();
         if (this.blogDisallowed) sb.append(BLOG).append(",");
         if (this.bookmarksDisallowed) sb.append(BOOKMARKS).append(",");
         if (this.dirsDisallowed) sb.append(DIRS).append(",");

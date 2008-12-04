@@ -50,7 +50,7 @@ public class plasmaDbImporter extends AbstractImporter implements Importer {
      * @see Importer#getStatus()
      */
     public String getStatus() {
-        final StringBuffer theStatus = new StringBuffer();
+        final StringBuilder theStatus = new StringBuilder();
         
         theStatus.append("Hash=").append(this.wordHash).append("\n");
         theStatus.append("#URL=").append(this.urlCounter).append("\n");

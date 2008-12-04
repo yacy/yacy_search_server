@@ -164,7 +164,7 @@ public class kelondroAttrSeq {
     
     public void toFile(final File out) throws IOException {
         // generate header
-        final StringBuffer sb = new StringBuffer(2000);
+        final StringBuilder sb = new StringBuilder(2000);
         sb.append("# Name=" + this.name); sb.append((char) 13); sb.append((char) 10);
         sb.append("# Created=" + this.created); sb.append((char) 13); sb.append((char) 10);
         sb.append("# Structure=" + this.structure.toString()); sb.append((char) 13); sb.append((char) 10);
@@ -302,7 +302,7 @@ public class kelondroAttrSeq {
             }
             
             // generate rowdef for seq row definition
-            final StringBuffer rowdef = new StringBuffer();
+            final StringBuilder rowdef = new StringBuilder();
             rowdef.append("byte[] ");
             rowdef.append(seq_names[0]);
             rowdef.append('-');
@@ -318,7 +318,7 @@ public class kelondroAttrSeq {
         }
         
         public String toString() {
-            final StringBuffer sb = new StringBuffer(100);
+            final StringBuilder sb = new StringBuilder(100);
             sb.append('<'); sb.append(pivot_name); sb.append('-'); sb.append(Integer.toString(pivot_len)); sb.append(">,'=',");
             if (prop_names.length > 0) {
                 for (int i = 0; i < prop_names.length; i++) {
@@ -405,7 +405,7 @@ public class kelondroAttrSeq {
         
         public String toString() {
             // creates only the attribute field and the sequence, not the pivot
-            final StringBuffer sb = new StringBuffer(100 + structure.seq_len[0] * seq.size());
+            final StringBuilder sb = new StringBuilder(100 + structure.seq_len[0] * seq.size());
             Long val;
             for (int i = 0; i < structure.prop_names.length; i++) {
                 val = attrs.get(structure.prop_names[i]);

@@ -24,7 +24,7 @@ package de.anomic.kelondro;
 
 import java.io.IOException;
 
-public abstract class kelondroAbstractIOChunks {
+public abstract class kelondroAbstractIOChunks implements kelondroIOChunks {
 
     // logging support
     protected String name = null;
@@ -42,18 +42,7 @@ public abstract class kelondroAbstractIOChunks {
     abstract public long length() throws IOException;
     abstract public void write(long pos, byte[] b, int off, int len) throws IOException;
     abstract public void close() throws IOException;
-    
-
-    // derived methods:
-    public synchronized void readFully(long pos, final byte[] b, int off, int len) throws IOException {
-        final long handle = profile.startRead();
-        if (len < 0) throw new IndexOutOfBoundsException("length is negative:" + len);
-        if (b.length < off + len) throw new IndexOutOfBoundsException("bounds do not fit: b.length=" + b.length + ", off=" + off + ", len=" + len);
-        if (len > 0) {
-            readFully(pos, b, off, len);
-        }
-        profile.stopRead(handle);
-    }
+    abstract public void readFully(long pos, final byte[] b, int off, int len) throws IOException;
 
     public synchronized byte readByte(final long pos) throws IOException {
         final byte[] b = new byte[1];

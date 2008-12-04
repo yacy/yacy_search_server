@@ -840,7 +840,7 @@ public class kelondroRowCollection {
     }
     
     public synchronized String toString() {
-        final StringBuffer s = new StringBuffer();
+        final StringBuilder s = new StringBuilder();
         final Iterator<kelondroRow.Entry> i = rows();
         if (i.hasNext()) s.append(i.next().toString());
         while (i.hasNext()) s.append(", " + (i.next()).toString());
