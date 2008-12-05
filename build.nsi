@@ -37,7 +37,7 @@ SetCompressor /SOLID LZMA
 ; JAVA VERSION
 
 !define JRE_VERSION6 "1.6"
-!define JRE_URL "http://javadl.sun.com/webapps/download/AutoDL?BundleId=23112" ;jre-6u7-windows-i586-p.exe
+!define JRE_URL "http://javadl.sun.com/webapps/download/AutoDL?BundleId=26224" ;jre-6u11-windows-i586-p.exe
 
 ; ----------------------------------------
 ; GENERAL APPEARANCE
