@@ -98,7 +98,7 @@ public class Threaddump_p {
         
     	bufferappend(buffer, plain, "************* End Thread Dump " + dt + " *******************");
     
-    	prop.putHTML("plain_content", buffer.toString());
+    	prop.put("plain_content", buffer.toString());
     	prop.put("plain", (plain) ? 1 : 0);
     	
        	return prop;    // return from serverObjects respond()

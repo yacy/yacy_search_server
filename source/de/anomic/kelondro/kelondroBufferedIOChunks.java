@@ -26,29 +26,21 @@
 package de.anomic.kelondro;
 
 import java.io.IOException;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.TreeMap;
 
 public final class kelondroBufferedIOChunks extends kelondroAbstractIOChunks implements kelondroIOChunks {
 
     protected kelondroRA ra;
-    private final long bufferMaxSize;
-    private long bufferCurrSize;
+    private int bufferSize;
     private final long commitTimeout;
-    private final TreeMap<Long, byte[]> buffer;
+    private final byte[] buffer;
     private long lastCommit = 0;
     
-    private static final int overhead = 40;
-    
-    
-    public kelondroBufferedIOChunks(final kelondroRA ra, final String name, final long buffer, final long commitTimeout) {
+    public kelondroBufferedIOChunks(final kelondroRA ra, final String name, final int buffersize, final long commitTimeout) {
         this.name = name;
         this.ra = ra;
-        this.bufferMaxSize = buffer;
-        this.bufferCurrSize = 0;
+        this.bufferSize = 0;
         this.commitTimeout = commitTimeout;
-        this.buffer = new TreeMap<Long, byte[]>();
+        this.buffer = new byte[buffersize]; // this is a buffer at the end of the file
         this.lastCommit = System.currentTimeMillis();
     }
 
@@ -57,104 +49,68 @@ public final class kelondroBufferedIOChunks extends kelondroAbstractIOChunks imp
     }
     
     public long length() throws IOException {
-        return ra.length();
+        return ra.length() + this.bufferSize;
     }
     
     public synchronized void readFully(final long pos, final byte[] b, final int off, final int len) throws IOException {
         assert (b.length >= off + len): "read pos=" + pos  + ", b.length=" + b.length + ", off=" + off + ", len=" + len;
         
         // check commit time
-        if ((bufferCurrSize > bufferMaxSize) ||
-            (this.lastCommit + this.commitTimeout > System.currentTimeMillis())) {
+        if (this.lastCommit + this.commitTimeout > System.currentTimeMillis()) {
             commit();
-            this.lastCommit = System.currentTimeMillis();
         }
 
         // do the read
-        synchronized (this.buffer) {
-            final byte[] bb = buffer.get(Long.valueOf(pos));
-            if (bb == null) {
-                // entry not known, read directly from IO
-                synchronized (this.ra) {
-                    this.ra.seek(pos + off);
-                    ra.readFully(b, off, len);
-                    return;
-                }
-            }
-            // use buffered entry
-            if (bb.length >= off + len) {
-                // the buffered entry is long enough
-                System.arraycopy(bb, off, b, off, len);
-                return;
-            }
-            // the entry is not long enough. transmit only a part
-            System.arraycopy(bb, off, b, off, bb.length - off);
-            return;
+        if (pos >= this.ra.length()) {
+            // read from the buffer
+            System.arraycopy(this.buffer, (int) (pos - this.ra.length()), b, off, len);
+        } else if (pos + len >= this.ra.length()) {
+            // the content is partly in the file and partly in the buffer
+            commit();
+            this.ra.seek(pos);
+            ra.readFully(b, off, len);
+        } else {
+            // read from the file
+            this.ra.seek(pos);
+            ra.readFully(b, off, len);
         }
     }
 
     public synchronized void write(final long pos, final byte[] b, final int off, final int len) throws IOException {
         assert (b.length >= off + len): "write pos=" + pos + ", b.length=" + b.length + ", b='" + new String(b) + "', off=" + off + ", len=" + len;
-
-        //if (len > 10) System.out.println("WRITE(" + name + ", " + pos + ", " + b.length + ", "  + off + ", "  + len + ")");
+        //assert pos <= this.ra.length(): "pos = " + pos + ", this.ra.length() = " + this.ra.length();
         
-        // do the write into buffer
-        final byte[] bb = kelondroObjectSpace.alloc(len);
-        System.arraycopy(b, off, bb, 0, len);
-        synchronized (buffer) {
-            buffer.put(Long.valueOf(pos + off), bb);
-            bufferCurrSize += overhead + len;
-        }
-        
-        // check commit time
-        if ((bufferCurrSize > bufferMaxSize) ||
-            (this.lastCommit + this.commitTimeout > System.currentTimeMillis())) {
+        if (pos >= this.ra.length()) {
+            // the position is fully outside of the file
+            if (pos - this.ra.length() + len > this.buffer.length) {
+                // this does not fit into the buffer
+                commit();
+                this.ra.seek(pos);
+                this.ra.write(b, off, len);
+                return;
+            }
+            System.arraycopy(b, off, this.buffer, (int) (pos - this.ra.length()), len);
+            this.bufferSize = (int) Math.max(this.bufferSize, pos - this.ra.length() + len);
+            return;
+        } else if (pos + len >= this.ra.length()) {
+            // the content is partly in the file and partly in the buffer
             commit();
-            this.lastCommit = System.currentTimeMillis();
+            this.ra.seek(pos);
+            this.ra.write(b, off, len);
+            return;
+        } else {
+            // the position is fully inside the file
+            this.ra.seek(pos);
+            this.ra.write(b, off, len);
+            return;
         }
     }
 
     public synchronized void commit() throws IOException {
-        synchronized (buffer) {
-            if (buffer.size() == 0) return;
-            final Iterator<Map.Entry<Long, byte[]>> i = buffer.entrySet().iterator();
-            Map.Entry<Long, byte[]> entry = i.next();
-            long lastPos = (entry.getKey()).longValue();
-            byte[] lastChunk = entry.getValue();
-            long nextPos;
-            byte[] nextChunk, tmpChunk;
-            synchronized (this.ra) {
-                while (i.hasNext()) {
-                    entry = i.next();
-                    nextPos = (entry.getKey()).longValue();
-                    nextChunk = entry.getValue();
-                    if (lastPos + lastChunk.length == nextPos) {
-                        // try to combine the new chunk with the previous chunk
-                        //System.out.println("combining chunks pos0=" + lastPos + ", chunk0.length=" + lastChunk.length + ", pos1=" + nextPos + ", chunk1.length=" + nextChunk.length);
-                        tmpChunk = kelondroObjectSpace.alloc(lastChunk.length + nextChunk.length);
-                        System.arraycopy(lastChunk, 0, tmpChunk, 0, lastChunk.length);
-                        System.arraycopy(nextChunk, 0, tmpChunk, lastChunk.length, nextChunk.length);
-                        kelondroObjectSpace.recycle(lastChunk);
-                        lastChunk = tmpChunk;
-                        tmpChunk = null;
-                        kelondroObjectSpace.recycle(nextChunk);
-                    } else {
-                        // write the last chunk and take nextChunk next time als lastChunk
-                        this.ra.seek(lastPos);
-                        this.ra.write(lastChunk);
-                        kelondroObjectSpace.recycle(lastChunk);
-                        lastPos = nextPos;
-                        lastChunk = nextChunk;
-                    }
-                }
-                // at the end write just the last chunk
-                this.ra.seek(lastPos);
-                this.ra.write(lastChunk);
-                kelondroObjectSpace.recycle(lastChunk);
-            }
-            buffer.clear();
-            bufferCurrSize = 0;
-        }
+        this.ra.seek(this.ra.length()); // move to end of file
+        this.ra.write(this.buffer, 0, this.bufferSize);
+        this.bufferSize = 0;
+        this.lastCommit = System.currentTimeMillis();
     }
     
     public synchronized void close() throws IOException {

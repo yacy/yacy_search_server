@@ -26,8 +26,8 @@
 
 package de.anomic.index;
 
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Set;
@@ -78,7 +78,7 @@ public class indexWord {
     // static methods
 
     // create a word hash
-    private static final HashMap<String, String> hashCache = new HashMap<String, String>();
+    private static final Hashtable<String, String> hashCache = new Hashtable<String, String>();
     public static final String word2hash(final String word) {
         String h = hashCache.get(word);
         if (h != null) return h;

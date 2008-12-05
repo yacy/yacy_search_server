@@ -563,10 +563,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         this.clusterhashes = this.webIndex.seedDB.clusterHashes(getConfig("cluster.peers.yacydomain", ""));
         
         // deploy blocking threads
-        indexingStorageProcessor      = new serverProcessor<indexingQueueEntry>(this, "storeDocumentIndex", 1, null);
+        indexingStorageProcessor      = new serverProcessor<indexingQueueEntry>(this, "storeDocumentIndex", serverProcessor.useCPU, null, 1);
         indexingAnalysisProcessor     = new serverProcessor<indexingQueueEntry>(this, "webStructureAnalysis", serverProcessor.useCPU + 1, indexingStorageProcessor);
-        indexingCondensementProcessor = new serverProcessor<indexingQueueEntry>(this, "condenseDocument", serverProcessor.useCPU + 1, indexingAnalysisProcessor);
-        indexingDocumentProcessor     = new serverProcessor<indexingQueueEntry>(this, "parseDocument", serverProcessor.useCPU + 1, indexingCondensementProcessor);
+        indexingCondensementProcessor = new serverProcessor<indexingQueueEntry>(this, "condenseDocument", serverProcessor.useCPU + 2, indexingAnalysisProcessor);
+        indexingDocumentProcessor     = new serverProcessor<indexingQueueEntry>(this, "parseDocument", serverProcessor.useCPU + 3, indexingCondensementProcessor);
         
         // deploy busy threads
         log.logConfig("Starting Threads");

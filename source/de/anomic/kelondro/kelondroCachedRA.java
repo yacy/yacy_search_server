@@ -2,10 +2,9 @@
 // -----------------------
 // part of The Kelondro Database
 // (C) by Michael Peter Christen; mc@yacy.net
-// first published on http://www.anomic.de
-// Frankfurt, Germany, 2004, 2005
-// last major change: 06.10.2004
-// this file was previously named kelondroBufferedRA
+// first published on http://yacy.net
+// Frankfurt, Germany, 2004-2008
+// last major change: 04.12.2008
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -26,153 +25,159 @@ package de.anomic.kelondro;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
+
+import de.anomic.server.serverMemory;
 
 public class kelondroCachedRA extends kelondroAbstractRA implements kelondroRA {
 
-    protected kelondroRA ra; 
-    protected kelondroMScoreCluster<Integer> cacheScore;
-    protected HashMap<Integer, byte[]> cacheMemory;
-    private final int cacheMaxElements;
-    private final int cacheElementSize;
-    private long seekpos;
+    // a shared cache for all users of this class
+    private static final int elementsize = 8192;
+    private static final int remainingfree = 30 * 1024 * 1024;
+    private static HashMap<String, byte[]> cacheMemory = new HashMap<String, byte[]>();
     
-    public kelondroCachedRA(final kelondroRA ra, final int cachesize, final int elementsize) {
-	this.ra  = ra;
+    // class variables
+    protected kelondroRA ra; 
+    private long seekpos;
+    private String id;
+    
+    public kelondroCachedRA(final kelondroRA ra) {
+        this.ra  = ra;
         this.name = ra.name();
         this.file = ra.file();
-        this.cacheMemory = new HashMap<Integer, byte[]>();
-        this.cacheScore = new kelondroMScoreCluster<Integer>();
-        this.cacheElementSize = elementsize;
-        this.cacheMaxElements = cachesize / cacheElementSize;
+        this.id = file.toString();
         this.seekpos = 0;
     }
-    
-    public long length() throws IOException {
-        return ra.available();
+
+    public synchronized long length() throws IOException {
+        return ra.length();
     }
     
-    public long available() throws IOException {
-        synchronized (ra) {
-            ra.seek(seekpos);
-            return ra.available();
-        }
+    public synchronized long available() throws IOException {
+        return ra.length() - seekpos;
     }
     
     private int cacheElementNumber(final long address) {
-        return (int) address / cacheElementSize;
+        return (int) address / elementsize;
     }
     
     private int cacheElementOffset(final long address) {
-        return (int) address % cacheElementSize;
+        return (int) address % elementsize;
     }
     
     private byte[] readCache(final int cacheNr) throws IOException {
-        final Integer cacheNrI = Integer.valueOf(cacheNr);
-        byte[] cache = cacheMemory.get(cacheNrI);
+        String key = this.id + cacheNr;
+        byte[] cache = cacheMemory.get(key);
         if (cache == null) {
-            if (cacheMemory.size() >= cacheMaxElements) {
+            if (serverMemory.available() < remainingfree) {
                 // delete elements in buffer if buffer too big
-                final Iterator<Integer> it = cacheScore.scores(true);
-                final Integer element = it.next();
-                writeCache(cacheMemory.get(element), element.intValue());
-                cacheMemory.remove(element);
-                cacheScore.deleteScore(element);
+                synchronized(cacheMemory) {
+                    Iterator<Map.Entry<String, byte[]>> i = cacheMemory.entrySet().iterator();
+                    for (int j = 0; j < 10; j++) {
+                        if (!i.hasNext()) break;
+                        i.next();
+                        i.remove();
+                    }
+                }
             }
+            // check if we have enough space in the file to read a complete cache element
+            long seek = cacheNr * (long) elementsize;
+            if (ra.length() - seek < elementsize) return null;
             // add new element
-            cache = new byte[cacheElementSize];
-            //System.out.println("buffernr=" + bufferNr + ", elSize=" + bufferElementSize);
-            ra.seek(cacheNr * (long) cacheElementSize);
-            ra.readFully(cache, 0, cacheElementSize);
-            cacheMemory.put(cacheNrI, cache);
+            cache = new byte[elementsize];
+            ra.seek(seek);
+            ra.readFully(cache, 0, elementsize);
+            cacheMemory.put(key, cache);
         }
-        cacheScore.setScore(cacheNrI, (int) (0xFFFFFFFFL & System.currentTimeMillis()));
         return cache;
     }
     
-    private void writeCache(final byte[] cache, final int cacheNr) throws IOException {
-        if (cache == null) return;
-        final Integer cacheNrI = Integer.valueOf(cacheNr);
-        ra.seek(cacheNr * (long) cacheElementSize);
-        ra.write(cache, 0, cacheElementSize);
-        cacheScore.setScore(cacheNrI, (int) (0xFFFFFFFFL & System.currentTimeMillis()));
+    private boolean existCache(final int cacheNr) throws IOException {
+        return cacheMemory.containsKey(Integer.valueOf(cacheNr));
     }
     
-    // pseudo-native method read
-    public int read() throws IOException {
-        final int bn = cacheElementNumber(seekpos);
-        final int offset = cacheElementOffset(seekpos);
-        seekpos++;
-        return 0xFF & readCache(bn)[offset];
-    }
-
-    // pseudo-native method write
-    public void write(final int b) throws IOException {
-        final int bn = cacheElementNumber(seekpos);
-        final int offset = cacheElementOffset(seekpos);
-        final byte[] cache = readCache(bn);
-        seekpos++;
-        cache[offset] = (byte) b;
-        //writeBuffer(buffer, bn);
-    }
-
-    public void readFully(byte[] b, int off, int len) throws IOException {
-        final int bn1 = cacheElementNumber(seekpos);
-        final int bn2 = cacheElementNumber(seekpos + len - 1);
-        final int offset = cacheElementOffset(seekpos);
-        final byte[] buffer = readCache(bn1);
-        if (bn1 == bn2) {
-            // simple case
-            //System.out.println("C1: bn1=" + bn1 + ", offset=" + offset + ", off=" + off + ", len=" + len);
-            System.arraycopy(buffer, offset, b, off, len);
-            seekpos += len;
-            return;
-        }
-        
-        // do recursively
-        final int thislen = cacheElementSize - offset;
-        //System.out.println("C2: bn1=" + bn1 + ", bn2=" + bn2 +", offset=" + offset + ", off=" + off + ", len=" + len + ", thislen=" + thislen);
-        System.arraycopy(buffer, offset, b, off, thislen);
-        seekpos += thislen;
-        readFully(b, off + thislen, len - thislen);
-        return;
-    }
-
-    public void write(final byte[] b, final int off, final int len) throws IOException {
+    public synchronized void readFully(byte[] b, int off, int len) throws IOException {
         final int bn1 = cacheElementNumber(seekpos);
         final int bn2 = cacheElementNumber(seekpos + len - 1);
         final int offset = cacheElementOffset(seekpos);
         final byte[] cache = readCache(bn1);
         if (bn1 == bn2) {
             // simple case
-            System.arraycopy(b, off, cache, offset, len);
+            if (cache == null) {
+                ra.seek(seekpos);
+                ra.readFully(b, off, len);
+                seekpos += len;
+                return;
+            }
+            //System.out.println("cache hit");
+            System.arraycopy(cache, offset, b, off, len);
             seekpos += len;
-            //writeBuffer(buffer, bn1);
-        } else {
-            // do recursively
-            final int thislen = cacheElementSize - offset;
-            System.arraycopy(b, off, cache, offset, thislen);
-            seekpos += thislen;
-            //writeBuffer(buffer, bn1);
-            write(b, off + thislen, len - thislen);
+            return;
         }
+        assert cache != null;
+        
+        // do recursively
+        final int thislen = elementsize - offset;
+        System.arraycopy(cache, offset, b, off, thislen);
+        seekpos += thislen;
+        readFully(b, off + thislen, len - thislen);
     }
 
-    public void seek(final long pos) throws IOException {
+    public synchronized void write(final byte[] b, final int off, final int len) throws IOException {
+        final int bn1 = cacheElementNumber(seekpos);
+        final int bn2 = cacheElementNumber(seekpos + len - 1);
+        final int offset = cacheElementOffset(seekpos);
+        if (bn1 == bn2) {
+            if (existCache(bn1)) {
+                // write to cache and file; here: write only to cache
+                final byte[] cache = readCache(bn1);
+                assert cache != null;
+                System.arraycopy(b, off, cache, offset, len);
+            } else {
+                // in case that the cache could be filled completely
+                // create a new entry here and store it also to the cache
+                if (offset == 0 && len >= elementsize) {
+                    final byte[] cache = new byte[elementsize];
+                    System.arraycopy(b, off, cache, 0, elementsize);
+                    cacheMemory.put(this.id + bn1, cache);
+                }
+            }
+            // write to file
+            ra.seek(seekpos);
+            ra.write(b, off, len);
+            seekpos += len;
+            return;
+        }
+        
+        // do recursively
+        final int thislen = elementsize - offset;
+        if (existCache(bn1)) {
+            // write to cache and file; here: write only to cache
+            final byte[] cache = readCache(bn1);
+            assert cache != null;
+            System.arraycopy(b, off, cache, offset, thislen);
+        } else {
+            // in case that the cache could be filled completely
+            // create a new entry here and store it also to the cache
+            if (offset == 0 && len >= elementsize) {
+                final byte[] cache = new byte[elementsize];
+                System.arraycopy(b, off, cache, 0, elementsize);
+                cacheMemory.put(this.id + bn1, cache);
+            }
+        }
+        // write to file
+        ra.seek(seekpos);
+        ra.write(b, off, thislen);
+        seekpos += thislen;
+        write(b, off + thislen, len - thislen);
+    }
+
+    public synchronized void seek(final long pos) throws IOException {
         seekpos = pos;
     }
 
-    public void close() throws IOException {
-        // write all unwritten buffers
-        if (cacheMemory == null) return;
-        final Iterator<Integer> it = cacheScore.scores(true);
-        while (it.hasNext()) {
-            final Integer element = it.next();
-            writeCache(cacheMemory.get(element), element.intValue());
-            cacheMemory.remove(element);
-        }
+    public synchronized void close() throws IOException {
         ra.close();
-        cacheScore = null;
-        cacheMemory = null;
     }
 
     protected void finalize() {

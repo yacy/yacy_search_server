@@ -46,18 +46,13 @@ public class kelondroCachedRecords extends kelondroAbstractRecords implements ke
     private static long memStartShrink =  6000000; // a limit for the node cache to start with shrinking if less than this memory amount is available
     
     // caching buffer
-    kelondroIntBytesMap   cacheHeaders; // the cache; holds overhead values and key element
-    int readHit;
-
-    int readMiss;
-
-    int writeUnique;
-
-    int writeDouble;
-
-    int cacheDelete;
-
-    int cacheFlush;
+    private kelondroIntBytesMap   cacheHeaders; // the cache; holds overhead values and key element
+    private int readHit;
+    private int readMiss;
+    private int writeUnique;
+    private int writeDouble;
+    private int cacheDelete;
+    private int cacheFlush;
     
     
     public kelondroCachedRecords(

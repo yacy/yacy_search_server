@@ -337,7 +337,6 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
         }
     }
 
-    
     public kelondroAbstractRecords(final File file, final boolean useNodeCache,
                            final short ohbytec, final short ohhandlec,
                            final kelondroRow rowdef, final int FHandles, final int txtProps, final int txtPropWidth) throws IOException {
@@ -357,10 +356,11 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
         if (file.exists()) {
             // opens an existing tree
             this.filename = file.getCanonicalPath();
-            final kelondroRA raf = (useChannel) ? new kelondroChannelRA(new File(this.filename)) : new kelondroFileRA(new File(this.filename));
+            kelondroRA raf = (useChannel) ? new kelondroChannelRA(new File(this.filename)) : new kelondroFileRA(new File(this.filename));
             //kelondroRA raf = new kelondroBufferedRA(new kelondroFileRA(this.filename), 1024, 100);
             //kelondroRA raf = new kelondroCachedRA(new kelondroFileRA(this.filename), 5000000, 1000);
             //kelondroRA raf = new kelondroNIOFileRA(this.filename, (file.length() < 4000000), 10000);
+            //raf = new kelondroCachedRA(raf);
             initExistingFile(raf, useNodeCache);
         } else {
             this.filename = file.getCanonicalPath();
@@ -525,10 +525,11 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
         readOrderType();
     }
 
-    private void initExistingFile(final kelondroRA ra, final boolean useBuffer) throws IOException {
+    private void initExistingFile(final kelondroRA ra, boolean useBuffer) throws IOException {
         // read from Chunked IO
+        //useBuffer = false;
         if (useBuffer) {
-            this.entryFile = new kelondroBufferedIOChunks(ra, ra.name(), 0, 30000 + random.nextLong() % 30000);
+            this.entryFile = new kelondroBufferedIOChunks(ra, ra.name(), 1024*1024, 30000 + random.nextLong() % 30000);
         } else {
             this.entryFile = new kelondroRAIOChunks(ra, ra.name());
         }

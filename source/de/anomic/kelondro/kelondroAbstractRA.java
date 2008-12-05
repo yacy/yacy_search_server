@@ -49,6 +49,7 @@ abstract class kelondroAbstractRA implements kelondroRA {
     }
 
     // pseudo-native methods:
+    abstract public void readFully(byte[] b, int off, int len) throws IOException;
     abstract public long length() throws IOException;
     abstract public long available() throws IOException;
     abstract public void write(byte[] b, int off, int len) throws IOException;
