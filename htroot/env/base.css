@@ -105,6 +105,10 @@ legend {
   text-align:center;
 }
 
+label {
+    cursor:pointer;
+}
+
 input {
 margin:0.2em;
 margin-top:0px;
