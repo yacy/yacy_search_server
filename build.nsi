@@ -25,7 +25,7 @@ OutFile "RELEASE\WINDOWS\yacy_v@REPL_VERSION@_@REPL_DATE@_@REPL_REVISION_NR@.exe
 
 ;default installation folder
 InstallDir "$PROFILE\YaCy"
-InstallDirRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\YaCy" "UninstallString"
+InstallDirRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\YaCy" "UninstallString"
 
 ;requested execution level on Vista
 RequestExecutionLevel user
@@ -154,8 +154,8 @@ Section "YaCy"
 	File /r "RELEASE\MAIN\*"
 	File /r "RELEASE\EXT\*"
 
-	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\YaCy" "DisplayName" "YaCy"
-	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\YaCy" "UninstallString" '"$INSTDIR\uninstall.exe"'
+	WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\YaCy" "DisplayName" "YaCy"
+	WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\YaCy" "UninstallString" '"$INSTDIR\uninstall.exe"'
 	WriteUninstaller "uninstall.exe"
 SectionEnd
 
@@ -170,7 +170,6 @@ Section "Start Menu Group"
 	SetShellVarContext current
 	CreateDirectory "$SMPROGRAMS\YaCy"
 	CreateShortCut "$SMPROGRAMS\YaCy\YaCy.lnk" "$INSTDIR\startYACY.bat" "" "$INSTDIR\addon\YaCy.ico" "" SW_SHOWMINIMIZED
-	CreateShortCut "$SMPROGRAMS\YaCy\stop.lnk" "$INSTDIR\stopYACY.bat" "" "$INSTDIR\addon\YaCy.ico" "" SW_SHOWMINIMIZED
 	CreateShortCut "$SMPROGRAMS\YaCy\Readme.lnk" "$INSTDIR\readme.txt"
 	CreateShortCut "$SMPROGRAMS\YaCy\Uninstall.lnk" "$INSTDIR\Uninstall.exe"
 SectionEnd
@@ -222,7 +221,7 @@ Section "Uninstall"
 	Delete "$DESKTOP\YaCy.lnk"
 	Delete "$SMSTARTUP\YaCy.lnk"
 	
-	DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\YaCy"
+	DeleteRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\YaCy"
 	nouninstall:
 SectionEnd
 
