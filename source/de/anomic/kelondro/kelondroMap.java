@@ -52,6 +52,29 @@ public class kelondroMap {
         this.cacheScore = new kelondroMScoreCluster<String>();
         this.startup = System.currentTimeMillis();
         this.cachesize = cachesize;
+        
+        /*
+        // debug
+        try {
+            kelondroCloneableIterator<byte[]> i = keys(true, false);
+            int c = 20;
+            HashSet<String> t = new HashSet<String>();
+            while (i.hasNext()) {
+                c--; if (c <= 0) break;
+                byte[] b = i.next();
+                String s = new String(b);
+                System.out.println("*** DEBUG kelondroMap " + blob.name() + " KEY=" + s);
+                t.add(s);
+            }
+            Iterator<String> j = t.iterator();
+            while (j.hasNext()) {
+                String s = j.next();
+                if (this.get(s) == null) System.out.println("*** DEBUG kelondroMap " + blob.name() + " KEY=" + s + " cannot be found.");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        */
     }
    
     /**

@@ -43,7 +43,7 @@ public interface kelondroRA {
     
     // pseudo-native methods:
     public long length() throws IOException;
-    public long available() throws IOException;
+    public int available() throws IOException;
     
     public void readFully(byte[] b, int off, int len) throws IOException;
     

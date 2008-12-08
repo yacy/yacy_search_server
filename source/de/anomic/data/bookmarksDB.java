@@ -511,7 +511,8 @@ public class bookmarksDB {
         Tag ret=null;
         try {
             map = tagsTable.get(hash);
-        } catch (final IOException e) {
+        } catch (final Exception e) {
+            e.printStackTrace();
             return null;
         }
         if(map!=null){
@@ -582,6 +583,7 @@ public class bookmarksDB {
         try {
             return new tagIterator(up);
         } catch (final IOException e) {
+            e.printStackTrace();
             return new HashSet<Tag>().iterator();
         }
     }
@@ -1299,17 +1301,21 @@ public class bookmarksDB {
         public boolean hasNext() {
             try {
                 return this.tagIter.hasNext();
-            } catch (final kelondroException e) {
-                //resetDatabase();
+            } catch (final Exception e) {
+                e.printStackTrace();
                 return false;
             }
         }
         
         public Tag next() {
             try {
-                return getTag(new String(this.tagIter.next()));
-            } catch (final kelondroException e) {
-                //resetDatabase();
+                byte[] b = this.tagIter.next();
+                String s = new String(b);
+                //System.out.println("### DEBUG tagIterator - " + s);
+                Tag t = getTag(s);
+                return t;
+            } catch (final Exception e) {
+                e.printStackTrace();
                 return null;
             }
         }
@@ -1349,7 +1355,8 @@ public class bookmarksDB {
         
         public Bookmark next() {
             try {
-                return getBookmark(new String(this.bookmarkIter.next()));
+                String s = new String(this.bookmarkIter.next());
+                return getBookmark(s);
             } catch (final kelondroException e) {
                 //resetDatabase();
                 return null;

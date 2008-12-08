@@ -97,6 +97,31 @@ public class kelondroBLOBTree implements kelondroBLOB {
         //this.segmentCount = 0;
         //if (!(tree.fileExisted)) writeSegmentCount();
         buffer = new kelondroObjectBuffer(file.toString());
+        /*
+        // debug
+        try {
+            kelondroCloneableIterator<byte[]> i = keys(true, false);
+            HashSet<String> t = new HashSet<String>();
+            while (i.hasNext()) {
+                byte[] b = i.next();
+                String s = new String(b);
+                t.add(s);
+                System.out.println("*** DEBUG BLOBTree " + file.getName() + " KEY=" + s);
+            }
+            Iterator<String> j = t.iterator();
+            while (j.hasNext()) {
+                String s = j.next();
+                byte[] r = this.get(s.getBytes());
+                if (r == null) System.out.println("*** DEBUG BLOBTree " + file.getName() + " KEY=" + s + " cannot be retrieved");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        */
+    }
+    
+    public String name() {
+        return this.file.getName();
     }
     
     public static final void delete(final File file) {
@@ -376,7 +401,8 @@ public class kelondroBLOBTree implements kelondroBLOB {
     public class RARecord extends kelondroAbstractRA implements kelondroRA {
 
         int seekpos = 0;
-
+        int compLength = -1;
+        
         String filekey;
 
         public RARecord(final String filekey) {
@@ -384,11 +410,15 @@ public class kelondroBLOBTree implements kelondroBLOB {
         }
 
         public long length() throws IOException {
-            return Long.MAX_VALUE;
+            if (compLength >= 0) return compLength;
+            int p = 0;
+            while (get(filekey, p, reclen) != null) p+= reclen;
+            compLength = p-1;
+            return p-1;
         }
         
-        public long available() throws IOException {
-            return Long.MAX_VALUE;
+        public int available() throws IOException {
+            return (int) (length() - seekpos);
         }
         
         public int read() throws IOException {
@@ -436,7 +466,7 @@ public class kelondroBLOBTree implements kelondroBLOB {
         if (args.length == 1) {
             // open a db and list keys
             try {
-                final kelondroBLOB kd = new kelondroBLOBTree(new File(args[0]), true, true, 4 ,100, '_', kelondroNaturalOrder.naturalOrder, false, false, true);
+                final kelondroBLOB kd = new kelondroBLOBTree(new File(args[0]), true, true, 4 ,100, '_', kelondroNaturalOrder.naturalOrder, true, false, false);
                 System.out.println(kd.size() + " elements in DB");
                 final Iterator<byte[]> i = kd.keys(true, false);
                 while (i.hasNext())

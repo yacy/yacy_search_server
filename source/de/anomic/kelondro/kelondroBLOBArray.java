@@ -111,6 +111,10 @@ public class kelondroBLOBArray implements kelondroBLOB {
         }
     }
     
+    public String name() {
+        return this.heapLocation.getName();
+    }
+    
     public void setMaxAge(long maxAge) {
         this.repositoryAgeMax = maxAge;
         this.fileAgeLimit = Math.min(oneMonth, maxAge / 10);

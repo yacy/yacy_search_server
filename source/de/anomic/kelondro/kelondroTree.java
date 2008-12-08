@@ -1395,8 +1395,8 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
     public static void main(final String[] args) {
         //cmd(args);
         //iterationtest();
-        //bigtest(Integer.parseInt(args[0]));
-        randomtest(Integer.parseInt(args[0]));
+        bigtest(Integer.parseInt(args[0]));
+        //randomtest(Integer.parseInt(args[0]));
         //smalltest();
     }
  

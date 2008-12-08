@@ -83,6 +83,10 @@ public class kelondroBLOBBuffer extends Thread implements kelondroBLOB {
         initQueues(compress);
     }
     
+    public String name() {
+        return this.backend.name();
+    }
+    
     public synchronized void clear() throws IOException {
         initQueues(this.compressedQueue != null);
         this.backend.clear();

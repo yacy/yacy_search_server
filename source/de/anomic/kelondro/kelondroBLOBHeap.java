@@ -163,21 +163,26 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
             e.printStackTrace();
         }
         
-        // DEBUG
         /*
+        // DEBUG
         Iterator<byte[]> i = index.keys(true, null);
-        byte[] b;
+        //byte[] b;
         int c = 0;
         while (i.hasNext()) {
             key = i.next();
-            System.out.println("KEY=" + new String(key));
-            b = get(key);
-            System.out.println("BLOB=" + new String(b));
-            System.out.println();
+            System.out.println("*** DEBUG BLOBHeap " + this.name() + " KEY=" + new String(key));
+            //b = get(key);
+            //System.out.println("BLOB=" + new String(b));
+            //System.out.println();
             c++;
+            if (c >= 20) break;
         }
         System.out.println("*** DEBUG - counted " + c + " BLOBs");
         */
+    }
+    
+    public String name() {
+        return this.heapFile.getName();
     }
     
     /**

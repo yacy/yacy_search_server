@@ -53,8 +53,8 @@ public class kelondroCachedRA extends kelondroAbstractRA implements kelondroRA {
         return ra.length();
     }
     
-    public synchronized long available() throws IOException {
-        return ra.length() - seekpos;
+    public synchronized int available() throws IOException {
+        return (int) (ra.length() - seekpos);
     }
     
     private int cacheElementNumber(final long address) {

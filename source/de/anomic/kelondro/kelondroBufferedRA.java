@@ -45,8 +45,8 @@ public class kelondroBufferedRA extends kelondroAbstractRA implements kelondroRA
         return this.sbb;
     }
     
-    public long available() throws IOException {
-        return Long.MAX_VALUE - sbb.length();
+    public int available() throws IOException {
+        return Integer.MAX_VALUE - sbb.length();
     }
 
     public void close() throws IOException {

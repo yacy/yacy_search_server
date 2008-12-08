@@ -151,7 +151,6 @@ public class ConfigAccounts_p {
             prop.put("text", "0");
             prop.put("error", "0");
 
-            
             final String username=post.get("username");
             final String pw1=post.get("password");
             final String pw2=post.get("password2");
@@ -191,7 +190,6 @@ public class ConfigAccounts_p {
                     prop.put("error", "3");
                 }
                 
-                
             } else { //edit user
 
                 entry = sb.userDB.getEntry(username);
@@ -223,6 +221,7 @@ public class ConfigAccounts_p {
         int numUsers=0;
         while(it.hasNext()){
             entry = it.next();
+            if (entry == null) continue;
             prop.putHTML("users_"+numUsers+"_user", entry.getUserName());
             numUsers++;
         }

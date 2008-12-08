@@ -31,6 +31,12 @@ import java.io.IOException;
 public interface kelondroBLOB {
     
     /**
+     * return a name of the BLOB; can be the file name
+     * @return
+     */
+    public String name();
+    
+    /**
      * ask for the length of the primary key
      * @return the length of the key
      */

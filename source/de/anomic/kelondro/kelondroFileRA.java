@@ -42,8 +42,8 @@ public final class kelondroFileRA extends kelondroAbstractRA implements kelondro
         return RAFile.length();
     }
     
-    public long available() throws IOException {
-        return RAFile.length() - RAFile.getFilePointer();
+    public int available() throws IOException {
+        return (int) (RAFile.length() - RAFile.getFilePointer());
     }
     
     // pseudo-native method read
