@@ -51,17 +51,19 @@ abstract class kelondroAbstractRA implements kelondroRA {
     // pseudo-native methods:
     abstract public void readFully(byte[] b, int off, int len) throws IOException;
     abstract public long length() throws IOException;
-    abstract public int available() throws IOException;
+    abstract public void setLength(long length) throws IOException;
+    abstract public long available() throws IOException;
     abstract public void write(byte[] b, int off, int len) throws IOException;
     abstract public void seek(long pos) throws IOException;
     abstract public void close() throws IOException;
 
     // derived methods:
     public byte[] readFully() throws IOException {
-        int a = this.available();
+        long a = this.available();
         if (a <= 0) return null;
-        final byte[] buffer = new byte[a];
-        this.readFully(buffer, 0, a);
+        if (a > Integer.MAX_VALUE) throw new IOException("available too large for a single array");
+        final byte[] buffer = new byte[(int) a];
+        this.readFully(buffer, 0, (int) a);
         return buffer;
     }
 

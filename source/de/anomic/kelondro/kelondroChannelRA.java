@@ -45,8 +45,12 @@ public final class kelondroChannelRA extends kelondroAbstractRA implements kelon
         return channel.size();
     }
     
-    public int available() throws IOException {
-        return (int) (channel.size() - channel.position());
+    public void setLength(long length) throws IOException {
+        channel.truncate(length);
+    }
+    
+    public long available() throws IOException {
+        return channel.size() - channel.position();
     }
 
     public final void readFully(final byte[] b, final int off, final int len) throws IOException {

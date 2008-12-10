@@ -45,7 +45,7 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
     private TreeMap<Long, Integer>  free;       // list of {size, seek} pairs denoting space and position of free records
     private final File              heapFile;   // the file of the heap
     private final kelondroByteOrder ordering;   // the ordering on keys
-    private kelondroFileRA          file;       // a random access to the file
+    private kelondroCachedFileRA          file;       // a random access to the file
     private HashMap<String, byte[]> buffer;     // a write buffer to limit IO to the file; attention: Maps cannot use byte[] as key
     private int                     buffersize; // bytes that are buffered in buffer
     private int                     buffermax;  // maximum size of the buffer
@@ -89,7 +89,7 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
         this.free = new TreeMap<Long, Integer>();
         this.buffer = new HashMap<String, byte[]>();
         this.buffersize = 0;
-        this.file = new kelondroFileRA(heapFile);
+        this.file = new kelondroCachedFileRA(heapFile);
         byte[] key = new byte[keylength];
         int reclen;
         long seek = 0;
@@ -356,7 +356,7 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
             e.printStackTrace();
         }
         this.heapFile.delete();
-        this.file = new kelondroFileRA(heapFile);
+        this.file = new kelondroCachedFileRA(heapFile);
     }
 
     /**

@@ -970,7 +970,7 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
                 try {
                     nn = next00();
                 } catch (final IOException e) {
-                    serverLog.logSevere("kelondroCachedRecords", filename + " failed with " + e.getMessage(), e);
+                    serverLog.logSevere("kelondroAbstractRecords", filename + " failed with " + e.getMessage(), e);
                     return null;
                 }
                 byte[] key = null;
@@ -1001,9 +1001,9 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
                 bulkstart = pos.index;
                 final int maxlength = Math.min(USAGE.allCount() - bulkstart, bulksize);
                 if (((POS_NODES) + ((long) bulkstart) * ((long) recordsize)) < 0)
-                    serverLog.logSevere("kelondroCachedRecords", "DEBUG: negative offset. POS_NODES = " + POS_NODES + ", bulkstart = " + bulkstart + ", recordsize = " + recordsize);
+                    serverLog.logSevere("kelondroAbstractRecords", "DEBUG: negative offset. POS_NODES = " + POS_NODES + ", bulkstart = " + bulkstart + ", recordsize = " + recordsize);
                 if ((maxlength * recordsize) < 0)
-                    serverLog.logSevere("kelondroCachedRecords", "DEBUG: negative length. maxlength = " + maxlength + ", recordsize = " + recordsize);
+                    serverLog.logSevere("kelondroAbstractRecords", "DEBUG: negative length. maxlength = " + maxlength + ", recordsize = " + recordsize);
                 entryFile.readFully((POS_NODES) + ((long) bulkstart) * ((long) recordsize), bulk, 0, maxlength * recordsize);
             }
             /* POS_NODES = 302, bulkstart = 3277, recordsize = 655386

@@ -417,8 +417,12 @@ public class kelondroBLOBTree implements kelondroBLOB {
             return p-1;
         }
         
-        public int available() throws IOException {
-            return (int) (length() - seekpos);
+        public void setLength(long length) throws IOException {
+            throw new UnsupportedOperationException();
+        }
+        
+        public long available() throws IOException {
+            return length() - seekpos;
         }
         
         public int read() throws IOException {

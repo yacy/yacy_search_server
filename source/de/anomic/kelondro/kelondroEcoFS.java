@@ -92,7 +92,7 @@ public class kelondroEcoFS {
         
         // open an existing table file
         try {
-            raf = new RandomAccessFile(tablefile, "rw");
+            raf = new RandomAccessFile(tablefile,"rw");
         } catch (final FileNotFoundException e) {
             // should never happen
             e.printStackTrace();

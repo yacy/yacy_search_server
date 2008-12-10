@@ -31,87 +31,30 @@ import java.util.Map;
 public final class kelondroFileRA extends kelondroAbstractRA implements kelondroRA {
 
     private RandomAccessFile RAFile;
-    private byte[] cache;
-    private long cachestart;
-    private int cachelen;
 
     public kelondroFileRA(final File file) throws IOException, FileNotFoundException {
         this.name = file.getName();
         this.file = file;
         RAFile = new RandomAccessFile(file, "rw");
-        cache = new byte[8192];
-        cachestart = 0;
-        cachelen = 0;
-    }	
+    }   
     
     public synchronized long length() throws IOException {
         return this.RAFile.length();
     }
     
     public synchronized void setLength(long length) throws IOException {
-        cachelen = 0;
         RAFile.setLength(length);
     }
     
-    public synchronized int available() throws IOException {
-        return (int) (this.length() - RAFile.getFilePointer());
+    public synchronized long available() throws IOException {
+        return this.length() - RAFile.getFilePointer();
     }
 
     public synchronized final void readFully(final byte[] b, final int off, int len) throws IOException {
-        long seek = RAFile.getFilePointer();
-        if (cache != null && cachestart <= seek && cachelen - seek + cachestart >= len) {
-            // read from cache
-            //System.out.println("*** DEBUG FileRA " + this.file.getName() + ": CACHE HIT at " + seek);
-            System.arraycopy(cache, (int) (seek - cachestart), b, off, len);
-            RAFile.seek(seek + len);
-            return;
-        }
-        if (cache == null || cache.length < len) {
-            // cannot fill cache here
-            RAFile.readFully(b, off, len);
-            return;
-        }
-        // we fill the cache here
-        int available = (int) (this.RAFile.length() - seek);
-        if (available < len) throw new IOException("EOF, available = " + available + ", requested = " + len);
-        if (cachestart + cachelen == seek && cache.length - cachelen >= len) {
-            RAFile.readFully(cache, cachelen, len);
-            //System.out.println("*** DEBUG FileRA " + this.file.getName() + ": append fill " + len + " bytes");
-            System.arraycopy(cache, cachelen, b, off, len);
-            cachelen += len;
-        } else {
-            // fill the cache as much as possible
-            int m = Math.min(available, cache.length);
-            RAFile.readFully(cache, 0, m);
-            cachestart = seek;
-            cachelen = m;
-            if (m != len) RAFile.seek(seek + len);
-            //System.out.println("*** DEBUG FileRA " + this.file.getName() + ": replace fill " + len + " bytes");
-            System.arraycopy(cache, 0, b, off, len);
-        }
-        
+        RAFile.readFully(b, off, len);
     }
 
     public synchronized void write(final byte[] b, final int off, final int len) throws IOException {
-        //assert len > 0;
-        // write to file
-        //if (this.cache.length > 2048) this.cache = new byte[2048]; // the large cache is only useful during an initialization phase
-        long seekpos = this.RAFile.getFilePointer();
-        if (this.cachelen + len <= this.cache.length && this.cachestart + this.cachelen == seekpos) {
-            // append to cache
-            System.arraycopy(b, off, this.cache, this.cachelen, len);
-            //System.out.println("*** DEBUG FileRA " + this.file.getName() + ": write append " + len + " bytes");
-            this.cachelen += len;
-        } else if (len <= this.cache.length) {
-            // copy to cache
-            System.arraycopy(b, off, this.cache, 0, len);
-            //System.out.println("*** DEBUG FileRA " + this.file.getName() + ": write copy " + len + " bytes");
-            this.cachelen = len;
-            this.cachestart = seekpos;
-        } else {
-            // delete cache
-            this.cachelen = 0;
-        }
         RAFile.write(b, off, len);
     }
 
@@ -121,7 +64,6 @@ public final class kelondroFileRA extends kelondroAbstractRA implements kelondro
 
     public synchronized void close() throws IOException {
         if (RAFile != null) RAFile.close();
-        this.cache = null;
         this.RAFile = null;
     }
 
@@ -138,7 +80,7 @@ public final class kelondroFileRA extends kelondroAbstractRA implements kelondro
         if (fp != null) fp.mkdirs();
         kelondroRA kra = null;
         try {
-            kra = new kelondroFileRA(f);
+            kra = new kelondroCachedFileRA(f);
             kra.writeMap(map, comment);
             kra.close();
         } finally {
@@ -149,7 +91,7 @@ public final class kelondroFileRA extends kelondroAbstractRA implements kelondro
     public static Map<String, String> readMap(final File f) throws IOException {
         kelondroRA kra = null;
         try {
-            kra = new kelondroFileRA(f);
+            kra = new kelondroCachedFileRA(f);
             final Map<String, String> map = kra.readMap();
             kra.close();
             return map;
