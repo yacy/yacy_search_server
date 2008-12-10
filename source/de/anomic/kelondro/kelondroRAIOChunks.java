@@ -42,11 +42,13 @@ public final class kelondroRAIOChunks extends kelondroAbstractIOChunks implement
     }
 
     public synchronized void readFully(long pos, final byte[] b, int off, int len) throws IOException {
+        if (len == 0) return;
         this.ra.seek(pos);
         this.ra.readFully(b, off, len);
     }
 
     public synchronized void write(final long pos, final byte[] b, final int off, final int len) throws IOException {
+        if (len == 0) return;
         this.ra.seek(pos);
         this.ra.write(b, off, len);
     }

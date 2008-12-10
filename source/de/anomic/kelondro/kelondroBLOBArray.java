@@ -65,15 +65,18 @@ public class kelondroBLOBArray implements kelondroBLOB {
     private long repositorySizeMax;
     private List<blobItem> blobs;
     private String blobSalt;
+    private int buffersize;
     
     public kelondroBLOBArray(
             final File heapLocation,
             final String blobSalt,
             final int keylength,
-            final kelondroByteOrder ordering) throws IOException {
+            final kelondroByteOrder ordering,
+            final int buffersize) throws IOException {
         this.keylength = keylength;
         this.blobSalt = blobSalt;
         this.ordering = ordering;
+        this.buffersize = buffersize;
         this.heapLocation = heapLocation;
         this.fileAgeLimit = oneMonth;
         this.fileSizeLimit = oneGigabyte;
@@ -93,14 +96,26 @@ public class kelondroBLOBArray implements kelondroBLOB {
         TreeMap<Long, blobItem> sortedItems = new TreeMap<Long, blobItem>();
         kelondroBLOB oneBlob;
         File f;
+        long time, maxtime = 0;
+        // first find maximum time: the file with this time will be given a write buffer
         for (int i = 0; i < files.length; i++) {
             if (files[i].length() >= 19 && files[i].endsWith(".blob")) {
                try {
                    d = serverDate.parseShortSecond(files[i].substring(0, 14));
+                   time = d.getTime();
+                   if (time > maxtime) maxtime = time;
                } catch (ParseException e) {continue;}
-               f = new File(heapLocation, files[i]);
-               oneBlob = new kelondroBLOBHeap(f, keylength, ordering);
-               sortedItems.put(Long.valueOf(d.getTime()), new blobItem(d, f, oneBlob));
+            }
+        }
+        for (int i = 0; i < files.length; i++) {
+            if (files[i].length() >= 19 && files[i].endsWith(".blob")) {
+               try {
+                   d = serverDate.parseShortSecond(files[i].substring(0, 14));
+                   f = new File(heapLocation, files[i]);
+                   time = d.getTime();
+                   oneBlob = new kelondroBLOBHeap(f, keylength, ordering, (time == maxtime) ? buffersize : 0);
+                   sortedItems.put(Long.valueOf(time), new blobItem(d, f, oneBlob));
+               } catch (ParseException e) {continue;}
             }
         }
         
@@ -172,7 +187,7 @@ public class kelondroBLOBArray implements kelondroBLOB {
             // make a new blob file and assign it in this item
             this.creation = new Date();
             this.location = new File(heapLocation, serverDate.formatShortSecond(creation) + "." + blobSalt + ".blob");
-            this.blob = new kelondroBLOBHeap(location, keylength, ordering);
+            this.blob = new kelondroBLOBHeap(location, keylength, ordering, buffersize);
         }
     }
     
@@ -323,7 +338,7 @@ public class kelondroBLOBArray implements kelondroBLOB {
         final File f = new File("/Users/admin/blobarraytest");
         try {
             //f.delete();
-            final kelondroBLOBArray heap = new kelondroBLOBArray(f, "test", 12, kelondroNaturalOrder.naturalOrder);
+            final kelondroBLOBArray heap = new kelondroBLOBArray(f, "test", 12, kelondroNaturalOrder.naturalOrder, 512 * 1024);
             heap.put("aaaaaaaaaaaa".getBytes(), "eins zwei drei".getBytes());
             heap.put("aaaaaaaaaaab".getBytes(), "vier fuenf sechs".getBytes());
             heap.put("aaaaaaaaaaac".getBytes(), "sieben acht neun".getBytes());

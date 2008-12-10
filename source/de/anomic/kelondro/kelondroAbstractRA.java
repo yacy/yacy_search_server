@@ -68,7 +68,7 @@ abstract class kelondroAbstractRA implements kelondroRA {
     public short readShort() throws IOException {
         byte[] b = new byte[2];
         this.readFully(b, 0, 2);
-        if ((b[0] | b[1]) < 0) throw new IOException("kelondroAbstractRA.readInt: wrong values; ch1=" + (b[0] & 0xFF) + ", ch2=" + (b[1] & 0xFF));
+        //if ((b[0] | b[1]) < 0) throw new IOException("kelondroAbstractRA.readInt: wrong values; ch1=" + (b[0] & 0xFF) + ", ch2=" + (b[1] & 0xFF));
         return (short) (((b[0] & 0xFF) << 8) | (b[1] & 0xFF));
     }
 
@@ -82,17 +82,21 @@ abstract class kelondroAbstractRA implements kelondroRA {
     public int readInt() throws IOException {
         byte[] b = new byte[4];
         this.readFully(b, 0, 4);
-        if ((b[0] | b[1] | b[2] | b[3]) < 0) throw new IOException("kelondroAbstractRA.readInt: wrong values; ch1=" + (b[0] & 0xFF) + ", ch2=" + (b[1] & 0xFF) + ", ch3=" + (b[2] & 0xFF) + ", ch4=" + (b[3] & 0xFF));
+        //if ((b[0] | b[1] | b[2] | b[3]) < 0) throw new IOException("kelondroAbstractRA.readInt: wrong values; ch1=" + (b[0] & 0xFF) + ", ch2=" + (b[1] & 0xFF) + ", ch3=" + (b[2] & 0xFF) + ", ch4=" + (b[3] & 0xFF));
         return (((b[0] & 0xFF) << 24) | ((b[1] & 0xFF) << 16) | ((b[2] & 0xFF) << 8) | (b[3] & 0xFF));
     }
 
     public void writeInt(final int v) throws IOException {
+        this.write(int2array(v));
+    }
+    
+    public final static byte[] int2array(final int v) throws IOException {
         byte[] b = new byte[4];
         b[0] = (byte) ((v >>> 24) & 0xFF);
         b[1] = (byte) ((v >>> 16) & 0xFF);
         b[2] = (byte) ((v >>>  8) & 0xFF);
         b[3] = (byte) ( v         & 0xFF);
-        this.write(b);
+        return b;
     }
 
     public long readLong() throws IOException {

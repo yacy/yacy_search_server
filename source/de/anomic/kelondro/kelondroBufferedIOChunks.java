@@ -80,6 +80,7 @@ public final class kelondroBufferedIOChunks extends kelondroAbstractIOChunks imp
         assert (b.length >= off + len): "write pos=" + pos + ", b.length=" + b.length + ", b='" + new String(b) + "', off=" + off + ", len=" + len;
         //assert pos <= this.ra.length(): "pos = " + pos + ", this.ra.length() = " + this.ra.length();
         
+        if (len == 0) return;
         if (pos >= this.ra.length()) {
             // the position is fully outside of the file
             if (pos - this.ra.length() + len > this.buffer.length) {
@@ -107,10 +108,11 @@ public final class kelondroBufferedIOChunks extends kelondroAbstractIOChunks imp
     }
 
     public synchronized void commit() throws IOException {
+        this.lastCommit = System.currentTimeMillis();
+        if (this.bufferSize == 0) return;
         this.ra.seek(this.ra.length()); // move to end of file
         this.ra.write(this.buffer, 0, this.bufferSize);
         this.bufferSize = 0;
-        this.lastCommit = System.currentTimeMillis();
     }
     
     public synchronized void close() throws IOException {

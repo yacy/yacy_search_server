@@ -67,7 +67,7 @@ public class CrawlProfile {
     public CrawlProfile(final File file) throws IOException {
         this.profileTableFile = file;
         profileTableFile.getParentFile().mkdirs();
-        final kelondroBLOB dyn = new kelondroBLOBHeap(profileTableFile, yacySeedDB.commonHashLength, kelondroNaturalOrder.naturalOrder);
+        final kelondroBLOB dyn = new kelondroBLOBHeap(profileTableFile, yacySeedDB.commonHashLength, kelondroNaturalOrder.naturalOrder, 1024 * 64);
         profileTable = new kelondroMap(dyn, 500);
     }
     

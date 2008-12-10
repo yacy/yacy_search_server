@@ -71,7 +71,7 @@ public class RobotsTxt {
         kelondroBLOB blob = null;
         if (robotsTableFile.getName().endsWith(".heap")) {
             try {
-                blob = new kelondroBLOBHeap(robotsTableFile, 64, kelondroNaturalOrder.naturalOrder);
+                blob = new kelondroBLOBHeap(robotsTableFile, 64, kelondroNaturalOrder.naturalOrder, 1024 * 1024);
             } catch (final IOException e) {
                 e.printStackTrace();
             }

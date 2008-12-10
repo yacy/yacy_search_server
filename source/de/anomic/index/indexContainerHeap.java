@@ -43,7 +43,6 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import de.anomic.kelondro.kelondroBLOB;
-import de.anomic.kelondro.kelondroBLOBBuffer;
 import de.anomic.kelondro.kelondroBLOBHeap;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroByteOrder;
@@ -145,7 +144,7 @@ public final class indexContainerHeap {
         assert this.cache != null;
         if (log != null) log.logInfo("creating alternative rwi heap dump '" + heapFile.getName() + "', " + cache.size() + " rwi's");
         if (heapFile.exists()) heapFile.delete();
-        final kelondroBLOB dump = new kelondroBLOBBuffer(new kelondroBLOBHeap(heapFile, payloadrow.primaryKeyLength, kelondroBase64Order.enhancedCoder), 1024 * 1024 * 2, true);
+        final kelondroBLOB dump = new kelondroBLOBHeap(heapFile, payloadrow.primaryKeyLength, kelondroBase64Order.enhancedCoder, 1024 * 1024 * 10);
         final long startTime = System.currentTimeMillis();
         long wordcount = 0, urlcount = 0;
         String wordHash;

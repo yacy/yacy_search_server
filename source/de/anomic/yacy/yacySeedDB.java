@@ -240,12 +240,12 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
             initializeHandlerMethod = null;
         }
         try {
-            return new kelondroMapDataMining(new kelondroBLOBHeap(seedDBFile, commonHashLength, kelondroBase64Order.enhancedCoder), 500, sortFields, longaccFields, doubleaccFields, initializeHandlerMethod, this);
+            return new kelondroMapDataMining(new kelondroBLOBHeap(seedDBFile, commonHashLength, kelondroBase64Order.enhancedCoder, 1024 * 512), 500, sortFields, longaccFields, doubleaccFields, initializeHandlerMethod, this);
         } catch (final Exception e) {
             // try again
             seedDBFile.delete();
             try {
-                return new kelondroMapDataMining(new kelondroBLOBHeap(seedDBFile, commonHashLength, kelondroBase64Order.enhancedCoder), 500, sortFields, longaccFields, doubleaccFields, initializeHandlerMethod, this);
+                return new kelondroMapDataMining(new kelondroBLOBHeap(seedDBFile, commonHashLength, kelondroBase64Order.enhancedCoder, 1024 * 512), 500, sortFields, longaccFields, doubleaccFields, initializeHandlerMethod, this);
             } catch (IOException e1) {
                 e1.printStackTrace();
                 System.exit(-1);

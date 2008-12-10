@@ -336,7 +336,7 @@ public class kelondroMap {
         if (f.exists()) f.delete();
         try {
             // make a blob
-            kelondroBLOB blob = new kelondroBLOBHeap(f, 12, kelondroNaturalOrder.naturalOrder);
+            kelondroBLOB blob = new kelondroBLOBHeap(f, 12, kelondroNaturalOrder.naturalOrder, 1024 * 1024);
             // make map
             kelondroMap map = new kelondroMap(blob, 1024);
             // put some values into the map
