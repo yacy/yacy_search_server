@@ -151,14 +151,16 @@ public class Threaddump_p {
         Map<Thread,StackTraceElement[]> trace;
         HashMap<String, Integer> result = new HashMap<String, Integer>();
         HashMap<String, ArrayList<String>> x;
+        int count;
         for (int i = 0; i < stackTraces.size(); i++) {
             trace = stackTraces.get(i);
             x = dumpCollection(rootPath, trace, plain, stateIn);
             for (final Entry<String, ArrayList<String>> e: x.entrySet()) {
                 Integer c = result.get(e.getKey());
-                if (c == null) result.put(e.getKey(), new Integer(1));
+                count = e.getValue().size();
+                if (c == null) result.put(e.getKey(), new Integer(count));
                 else {
-                    c = new Integer(c.intValue() + 1);
+                    c = new Integer(c.intValue() + count);
                     result.put(e.getKey(), c);
                 }
             }
@@ -192,6 +194,7 @@ public class Threaddump_p {
                 String threadtitle = tracename + "Thread= " + thread.getName() + " " + (thread.isDaemon()?"daemon":"") + " id=" + thread.getId() + " " + thread.getState().toString();
                 for (int i = 0; i < stackTraceElements.length; i++) {
                     ste = stackTraceElements[i];
+                    if (ste.getClassName().startsWith("java.") || ste.getClassName().startsWith("sun.")) continue;
                     if (i == 0) {
                         line = getLine(getClassFile(classPath, ste.getClassName()), ste.getLineNumber());
                     } else {
