@@ -120,6 +120,7 @@ public class kelondroBLOBCompressor extends Thread implements kelondroBLOB {
 
     private byte[] decompress(byte[] b) {
         // use a magic in the head of the bytes to identify compression type
+        if (b == null) return null;
         if (kelondroByteArray.equals(b, gzipMagic)) {
             //System.out.print("\\"); // DEBUG
             cdr--;
@@ -194,7 +195,10 @@ public class kelondroBLOBCompressor extends Thread implements kelondroBLOB {
     public synchronized long length(byte[] key) throws IOException {
         byte[] b = buffer.get(new String(key));
         if (b != null) return b.length;
-        return decompress(this.backend.get(key)).length;
+        b = this.backend.get(key);
+        if (b == null) return 0;
+        b = decompress(b);
+        return (b == null) ? 0 : b.length;
     }
     
     private int removeFromQueues(byte[] key) throws IOException {

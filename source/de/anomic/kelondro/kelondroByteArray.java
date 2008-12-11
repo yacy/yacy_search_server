@@ -170,13 +170,11 @@ public class kelondroByteArray {
     }
     
     public static boolean equals(final byte[] buffer, final byte[] pattern) {
-        return equals(buffer, 0, pattern);
-    }
-    
-    public static boolean equals(final byte[] buffer, final int offset, final byte[] pattern) {
         // compares two byte arrays: true, if pattern appears completely at offset position
-        if (buffer.length < offset + pattern.length) return false;
-        for (int i = 0; i < pattern.length; i++) if (buffer[offset + i] != pattern[i]) return false;
+        if (buffer == null && pattern == null) return true;
+        if (buffer == null || pattern == null) return false;
+        if (buffer.length < pattern.length) return false;
+        for (int i = 0; i < pattern.length; i++) if (buffer[i] != pattern[i]) return false;
         return true;
     }
 
