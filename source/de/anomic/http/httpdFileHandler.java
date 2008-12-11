@@ -489,7 +489,7 @@ public final class httpdFileHandler {
             
             //File targetClass = rewriteClassFile(targetFile);
             //We need tp here
-            servletProperties tp = new servletProperties();
+            servletProperties templatePatterns = null;
             Date targetDate;
             boolean nocache = false;
             
@@ -602,14 +602,14 @@ public final class httpdFileHandler {
                             final Object tmp = invokeServlet(targetClass, requestHeader, args);
                             if (tmp == null) {
                                 // if no args given, then tp will be an empty Hashtable object (not null)
-                                tp = new servletProperties();
+                                templatePatterns = new servletProperties();
                             } else if (tmp instanceof servletProperties) {
-                                tp = (servletProperties) tmp;
+                                templatePatterns = (servletProperties) tmp;
                             } else {
-                                tp = new servletProperties((serverObjects) tmp);
+                                templatePatterns = new servletProperties((serverObjects) tmp);
                             }
                             // check if the servlets requests authentification
-                            if (tp.containsKey(servletProperties.ACTION_AUTHENTICATE)) {
+                            if (templatePatterns.containsKey(servletProperties.ACTION_AUTHENTICATE)) {
                                 // handle brute-force protection
                                 if (authorization != null) {
                                     serverLog.logInfo("HTTPD", "dynamic log-in for account 'admin' in http file handler for path '" + path + "' from host '" + clientIP + "'");
@@ -621,24 +621,24 @@ public final class httpdFileHandler {
                                 }
                                 // send authentication request to browser
                                 final httpResponseHeader headers = getDefaultHeaders(path);
-                                headers.put(httpRequestHeader.WWW_AUTHENTICATE,"Basic realm=\"" + tp.get(servletProperties.ACTION_AUTHENTICATE, "") + "\"");
+                                headers.put(httpRequestHeader.WWW_AUTHENTICATE,"Basic realm=\"" + templatePatterns.get(servletProperties.ACTION_AUTHENTICATE, "") + "\"");
                                 httpd.sendRespondHeader(conProp,out,httpVersion,401,headers);
                                 return;
-                            } else if (tp.containsKey(servletProperties.ACTION_LOCATION)) {
-                                String location = tp.get(servletProperties.ACTION_LOCATION, "");
+                            } else if (templatePatterns.containsKey(servletProperties.ACTION_LOCATION)) {
+                                String location = templatePatterns.get(servletProperties.ACTION_LOCATION, "");
                                 if (location.length() == 0) location = path;
                                 
                                 final httpResponseHeader headers = getDefaultHeaders(path);
-                                headers.setCookieVector(tp.getOutgoingHeader().getCookieVector()); //put the cookies into the new header TODO: can we put all headerlines, without trouble?
+                                headers.setCookieVector(templatePatterns.getOutgoingHeader().getCookieVector()); //put the cookies into the new header TODO: can we put all headerlines, without trouble?
                                 headers.put(httpHeader.LOCATION,location);
                                 httpd.sendRespondHeader(conProp,out,httpVersion,302,headers);
                                 return;
                             }
                             // add the application version, the uptime and the client name to every rewrite table
-                            tp.put(servletProperties.PEER_STAT_VERSION, switchboard.getConfig("version", ""));
-                            tp.put(servletProperties.PEER_STAT_UPTIME, ((System.currentTimeMillis() -  serverCore.startupTime) / 1000) / 60); // uptime in minutes
-                            tp.putHTML(servletProperties.PEER_STAT_CLIENTNAME, switchboard.getConfig("peerName", "anomic"));
-                            tp.put(servletProperties.PEER_STAT_MYTIME, serverDate.formatShortSecond());
+                            templatePatterns.put(servletProperties.PEER_STAT_VERSION, switchboard.getConfig("version", ""));
+                            templatePatterns.put(servletProperties.PEER_STAT_UPTIME, ((System.currentTimeMillis() -  serverCore.startupTime) / 1000) / 60); // uptime in minutes
+                            templatePatterns.putHTML(servletProperties.PEER_STAT_CLIENTNAME, switchboard.getConfig("peerName", "anomic"));
+                            templatePatterns.put(servletProperties.PEER_STAT_MYTIME, serverDate.formatShortSecond());
                             //System.out.println("respond props: " + ((tp == null) ? "null" : tp.toString())); // debug
                         } catch (final InvocationTargetException e) {
                             if (e.getCause() instanceof InterruptedException) {
@@ -726,8 +726,8 @@ public final class httpdFileHandler {
                         // send page in chunks and parse SSIs
                         final serverByteBuffer o = new serverByteBuffer();
                         // apply templates
-                        httpTemplate.writeTemplate(fis, o, tp, "-UNRESOLVED_PATTERN-".getBytes("UTF-8"));
-                        httpd.sendRespondHeader(conProp, out, httpVersion, 200, null, mimeType, -1, targetDate, null, tp.getOutgoingHeader(), null, "chunked", nocache);
+                        httpTemplate.writeTemplate(fis, o, templatePatterns, "-UNRESOLVED_PATTERN-".getBytes("UTF-8"));
+                        httpd.sendRespondHeader(conProp, out, httpVersion, 200, null, mimeType, -1, targetDate, null, (templatePatterns == null) ? new httpResponseHeader() : templatePatterns.getOutgoingHeader(), null, "chunked", nocache);
                         // send the content in chunked parts, see RFC 2616 section 3.6.1
                         final httpChunkedOutputStream chos = new httpChunkedOutputStream(out);
                         httpSSI.writeSSI(o, chos, authorization, clientIP);
@@ -738,7 +738,7 @@ public final class httpdFileHandler {
                         final String contentEncoding = (zipContent) ? "gzip" : null;
                         // apply templates
                         final serverByteBuffer o1 = new serverByteBuffer();
-                        httpTemplate.writeTemplate(fis, o1, tp, "-UNRESOLVED_PATTERN-".getBytes("UTF-8"));
+                        httpTemplate.writeTemplate(fis, o1, templatePatterns, "-UNRESOLVED_PATTERN-".getBytes("UTF-8"));
                         
                         final serverByteBuffer o = new serverByteBuffer();
                         
@@ -757,13 +757,13 @@ public final class httpdFileHandler {
                         if (method.equals(httpHeader.METHOD_HEAD)) {
                             httpd.sendRespondHeader(conProp, out,
                                     httpVersion, 200, null, mimeType, o.length(),
-                                    targetDate, null, tp.getOutgoingHeader(),
+                                    targetDate, null, (templatePatterns == null) ? new httpResponseHeader() : templatePatterns.getOutgoingHeader(),
                                     contentEncoding, null, nocache);
                         } else {
                             final byte[] result = o.getBytes(); // this interrupts streaming (bad idea!)
                             httpd.sendRespondHeader(conProp, out,
                                     httpVersion, 200, null, mimeType, result.length,
-                                    targetDate, null, tp.getOutgoingHeader(),
+                                    targetDate, null, (templatePatterns == null) ? new httpResponseHeader() : templatePatterns.getOutgoingHeader(),
                                     contentEncoding, null, nocache);
                             serverFileUtils.copy(result, out);
                         }  

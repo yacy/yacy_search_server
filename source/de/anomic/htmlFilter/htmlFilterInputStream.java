@@ -128,6 +128,7 @@ public class htmlFilterInputStream extends InputStream implements htmlFilterEven
         int c;
         while ((c = this.reader.read())!= -1) {
             this.writer.write(c);
+            if (this.charsetChanged) break; // thats enough
         }
         
         // free writer

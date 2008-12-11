@@ -118,7 +118,6 @@ public class htmlFilterContentTransformer extends htmlFilterAbstractTransformer 
         
         final serverByteBuffer sbb = new serverByteBuffer(text);
         final serverByteBuffer[] sbbs = httpTemplate.splitQuotations(sbb);
-        //sbb = new serverByteBuffer();
         for (int i = 0; i < sbbs.length; i++) {
             // TODO: avoid empty if statements
             if (sbbs[i].isWhitespace(true)) {

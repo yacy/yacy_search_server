@@ -49,7 +49,6 @@ package de.anomic.http;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -122,48 +121,46 @@ import de.anomic.server.logging.serverLog;
  */
 public final class httpTemplate {
 
-    public  static final byte hash = (byte)'#';
-    private static final byte[] hasha = {hash};
+    public  final static byte hash = (byte)'#';
 
-    private static final byte dp = (byte)':';
-    public  static final byte[] dpdpa = {dp, dp};
+    public  final static byte[] dpdpa = "::".getBytes();
 
-    private static final byte lbr  = (byte)'[';
-    private static final byte rbr  = (byte)']';
-    private static final byte[] pOpen  = {hash, lbr};
-    private static final byte[] pClose = {rbr, hash};
+    private final static byte lbr  = (byte)'[';
+    private final static byte rbr  = (byte)']';
+    private final static byte[] pOpen  = {hash, lbr};
+    private final static byte[] pClose = {rbr, hash};
 
-    private static final byte lcbr  = (byte)'{';
-    private static final byte rcbr  = (byte)'}';
-    private static final byte[] mOpen  = {hash, lcbr};
-    private static final byte[] mClose = {rcbr, hash};
+    private final static byte lcbr  = (byte)'{';
+    private final static byte rcbr  = (byte)'}';
+    private final static byte[] mOpen  = {hash, lcbr};
+    private final static byte[] mClose = {rcbr, hash};
 
-    private static final byte lrbr  = (byte)'(';
-    private static final byte rrbr  = (byte)')';
-    private static final byte[] aOpen  = {hash, lrbr};
-    private static final byte[] aClose = {rrbr, hash};
+    private final static byte lrbr  = (byte)'(';
+    private final static byte rrbr  = (byte)')';
+    private final static byte[] aOpen  = {hash, lrbr};
+    private final static byte[] aClose = {rrbr, hash};
 
-    private static final byte ps  = (byte)'%';
-    private static final byte[] iOpen  = {hash, ps};
-    private static final byte[] iClose = {ps, hash};
+    private final static byte ps  = (byte)'%';
+    private final static byte[] iOpen  = {hash, ps};
+    private final static byte[] iClose = {ps, hash};
 
-    public static final byte[] slash = {(byte)'/'};
+    private final static byte[] slash = {(byte)'/'};
     
-    public static final Object[] meta_quotation = new Object[] {
+    private final static Object[] meta_quotation = new Object[] {
         new Object[] {pOpen, pClose},
         new Object[] {mOpen, mClose},
         new Object[] {aOpen, aClose},
         new Object[] {iOpen, iClose}
     };
 
-    public static serverByteBuffer[] splitQuotations(final serverByteBuffer text) {
+    public final static serverByteBuffer[] splitQuotations(final serverByteBuffer text) {
         final List<serverByteBuffer> l = splitQuotation(text, 0);
         final serverByteBuffer[] sbbs = new serverByteBuffer[l.size()];
         for (int i = 0; i < l.size(); i++) sbbs[i] = l.get(i);
         return sbbs;
     }
 
-    public static List<serverByteBuffer> splitQuotation(serverByteBuffer text, int qoff) {
+    private final static List<serverByteBuffer> splitQuotation(serverByteBuffer text, int qoff) {
         final ArrayList<serverByteBuffer> l = new ArrayList<serverByteBuffer>();
         if (qoff >= meta_quotation.length) {
             if (text.length() > 0) l.add(text);
@@ -205,20 +202,20 @@ public final class httpTemplate {
      * transfer until a specified pattern is found; everything but the pattern is transfered so far
      * the function returns true, if the pattern is found
      */
-    private static boolean transferUntil(final PushbackInputStream i, final OutputStream o, final byte[] pattern) throws IOException {
+    private final static boolean transferUntil(final PushbackInputStream i, final OutputStream o, final byte[] pattern) throws IOException {
         int b, bb;
         boolean equal;
         while ((b = i.read()) > 0) {
             if ((b & 0xFF) == pattern[0]) {
                 // read the whole pattern
                 equal = true;
-                for (int n = 1; n < pattern.length; n++) {
+                lo: for (int n = 1; n < pattern.length; n++) {
                     if (((bb = i.read()) & 0xFF) != pattern[n]) {
                         // push back all
                         i.unread(bb);
                         equal = false;
                         for (int nn = n - 1; nn > 0; nn--) i.unread(pattern[nn]);
-                        break;
+                        break lo;
                     }
                 }
                 if (equal) return true;
@@ -227,47 +224,52 @@ public final class httpTemplate {
         }
         return false;
     }
+    
+    private final static boolean transferUntil(final PushbackInputStream i, final OutputStream o, final byte p) throws IOException {
+        int b;
+        while ((b = i.read()) > 0) {
+            if ((b & 0xFF) == p) return true;
+            o.write(b);
+        }
+        return false;
+    }
 
-    public static void writeTemplate(final InputStream in, final OutputStream out, final HashMap<String, String> pattern, final byte[] dflt) throws IOException {
-        writeTemplate(in, out, pattern, dflt, new byte[0]);
+    public final static void writeTemplate(final InputStream in, final OutputStream out, final HashMap<String, String> pattern, final byte[] dflt) throws IOException {
+        if (pattern == null) {
+            serverFileUtils.copy(in, out);
+        } else {
+            writeTemplate(in, out, pattern, dflt, new byte[0]);
+        }
     }
 
     /**
      * Reads a input stream, and writes the data with replaced templates on a output stream
      */
-    public static byte[] writeTemplate(final InputStream in, final OutputStream out, final HashMap<String, String> pattern, final byte[] dflt, final byte[] prefix) throws IOException {
+    private final static byte[] writeTemplate(final InputStream in, final OutputStream out, final HashMap<String, String> pattern, final byte[] dflt, final byte[] prefix) throws IOException {
         final PushbackInputStream pis = new PushbackInputStream(in, 100);
-        ByteArrayOutputStream keyStream;
+        ByteArrayOutputStream keyStream = new ByteArrayOutputStream(512);
         byte[] key;
         byte[] multi_key;
         byte[] replacement;
         int bb;
-        final serverByteBuffer structure=new serverByteBuffer();
-
-        while (transferUntil(pis, out, hasha)) {
+        final serverByteBuffer structure = new serverByteBuffer();
+        while (transferUntil(pis, out, hash)) {
             bb = pis.read();
-            keyStream = new ByteArrayOutputStream(512);
-
-            if( (bb & 0xFF) == lcbr ){ //multi
-                if( transferUntil(pis, keyStream, mClose) ){ //close tag
+            keyStream.reset();
+            
+            // #{
+            if ((bb & 0xFF) == lcbr) { //multi
+                if (transferUntil(pis, keyStream, mClose)) { //close tag
                     //multi_key =  "_" + keyStream.toString(); //for _Key
                     bb = pis.read();
-                    if( (bb & 0xFF) != 10){ //kill newline
+                    if ((bb & 0xFF) != 10){ //kill newline
                         pis.unread(bb);
                     }
                     multi_key = keyStream.toByteArray(); //IMPORTANT: no prefix here
                     keyStream.reset(); //reset stream
 
-                    /* DEBUG - print key + value
-			try{
-				System.out.println("Key: "+prefix+multi_key+ "; Value: "+pattern.get(prefix+multi_key));
-			}catch(NullPointerException e){
-				System.out.println("Key: "+prefix+multi_key);
-			}
-                     */
-
                     //this needs multi_key without prefix
-                    if( transferUntil(pis, keyStream, appendBytes(mOpen,slash,multi_key,mClose))){
+                    if (transferUntil(pis, keyStream, appendBytes(mOpen,slash,multi_key,mClose))){
                         bb = pis.read();
                         if((bb & 0xFF) != 10){ //kill newline
                             pis.unread(bb);
@@ -282,41 +284,32 @@ public final class httpTemplate {
                             }catch(final NumberFormatException e){
                                 num=0;
                             }
-                            //System.out.println(multi_key + ": " + num); //DEBUG
                         }
 
-                        //Enumeration enx = pattern.keys(); while (enx.hasMoreElements()) System.out.println("KEY=" + enx.nextElement()); // DEBUG
-                        structure.append("<".getBytes("UTF-8"))
+                        structure.append('<')
                                  .append(multi_key)
-                                 .append(" type=\"multi\" num=\"".getBytes("UTF-8"))
-                                 .append(Integer.toString(num).getBytes("UTF-8"))
-                                 .append("\">\n".getBytes("UTF-8"));
-                        for(int i=0;i < num;i++ ){
+                                 .append(" type=\"multi\" num=\"".getBytes())
+                                 .append(Integer.toString(num).getBytes())
+                                 .append("\">\n".getBytes());
+                        for(int i=0;i < num;i++) {
                             final PushbackInputStream pis2 = new PushbackInputStream(new ByteArrayInputStream(text));
                             //System.out.println("recursing with text(prefix="+ multi_key + "_" + i + "_" +"):"); //DEBUG
                             //System.out.println(text);
                             structure.append(writeTemplate(pis2, out, pattern, dflt, newPrefix(prefix,multi_key,i)));
                         }//for
-                        structure.append("</".getBytes("UTF-8")).append(multi_key).append(">\n".getBytes("UTF-8"));
-                    }else{//transferUntil
+                        structure.append("</".getBytes()).append(multi_key).append(">\n".getBytes());
+                    } else {//transferUntil
                         serverLog.logSevere("TEMPLATE", "No Close Key found for #{"+new String(multi_key)+"}#"); //prefix here?
                     }
                 }
-            }else if( (bb & 0xFF) == lrbr ){ //alternatives
+                
+            // #(
+            } else if ((bb & 0xFF) == lrbr) { //alternative
                 int others=0;
                 final serverByteBuffer text= new serverByteBuffer();
-                PushbackInputStream pis2;
-
+                
                 transferUntil(pis, keyStream, aClose);
                 key = keyStream.toByteArray(); //Caution: Key does not contain prefix
-
-                /* DEBUG - print key + value
-		try{
-			System.out.println("Key: "+prefix+key+ "; Value: "+pattern.get(prefix+key));
-		}catch(NullPointerException e){
-			System.out.println("Key: "+prefix+key);
-		}
-                 */
 
                 keyStream.reset(); //clear
 
@@ -338,43 +331,44 @@ public final class httpTemplate {
                 int currentPattern=0;
                 boolean found=false;
                 keyStream.reset(); //reset stream
-                if(byName){
+                PushbackInputStream pis2;
+                if (byName) {
                     //TODO: better Error Handling
-                    transferUntil(pis, keyStream,appendBytes("%%".getBytes("UTF-8"),patternName,null,null));
+                    transferUntil(pis, keyStream, appendBytes("%%".getBytes(), patternName, null, null));
                     if(pis.available()==0){
                         serverLog.logSevere("TEMPLATE", "No such Template: %%"+new String(patternName));
                         return structure.getBytes();
                     }
                     keyStream.reset();
-                    transferUntil(pis, keyStream, "::".getBytes());
+                    transferUntil(pis, keyStream, dpdpa);
                     pis2 = new PushbackInputStream(new ByteArrayInputStream(keyStream.toByteArray()));
                     structure.append(writeTemplate(pis2, out, pattern, dflt, newPrefix(prefix,key)));
-                    transferUntil(pis, keyStream, appendBytes("#(/".getBytes("UTF-8"),key,")#".getBytes("UTF-8"),null));
+                    transferUntil(pis, keyStream, appendBytes("#(/".getBytes(),key,")#".getBytes("UTF-8"),null));
                     if(pis.available()==0){
                         serverLog.logSevere("TEMPLATE", "No Close Key found for #("+new String(key)+")# (by Name)");
                     }
-                }else{
+                } else {
                     while(!found){
-                        bb=pis.read();
-                        if( (bb & 0xFF) == hash){
+                        bb=pis.read(); // performance problem? trace always points to this line
+                        if ((bb & 0xFF) == hash){
                             bb=pis.read();
-                            if( (bb & 0xFF) == lrbr){
+                            if ((bb & 0xFF) == lrbr){
                                 transferUntil(pis, keyStream, aClose);
 
                                 //reached the end. output last string.                                
                                 if (java.util.Arrays.equals(keyStream.toByteArray(),appendBytes(slash, key, null,null))) {
                                     pis2 = new PushbackInputStream(new ByteArrayInputStream(text.getBytes()));
                                     //this maybe the wrong, but its the last
-                                    structure.append("<".getBytes("UTF-8")).append(key).append(" type=\"alternative\" which=\"".getBytes("UTF-8")).append(Integer.toString(whichPattern).getBytes("UTF-8")).append("\" found=\"0\">\n".getBytes("UTF-8"));
+                                    structure.append('<').append(key).append(" type=\"alternative\" which=\"".getBytes()).append(Integer.toString(whichPattern).getBytes("UTF-8")).append("\" found=\"0\">\n".getBytes());
                                     structure.append(writeTemplate(pis2, out, pattern, dflt, newPrefix(prefix,key)));
-                                    structure.append("</".getBytes("UTF-8")).append(key).append(">\n".getBytes("UTF-8"));
+                                    structure.append("</".getBytes()).append(key).append(">\n".getBytes());
                                     found=true;
                                 }else if(others >0 && keyStream.toString().startsWith("/")){ //close nested
                                     others--;
-                                    text.append("#(".getBytes("UTF-8")).append(keyStream.toByteArray()).append(")#".getBytes("UTF-8"));
-                                }else{ //nested
+                                    text.append(aOpen).append(keyStream.toByteArray()).append(")#".getBytes());
+                                } else { //nested
                                     others++;
-                                    text.append("#(".getBytes("UTF-8")).append(keyStream.toByteArray()).append(")#".getBytes("UTF-8"));
+                                    text.append(aOpen).append(keyStream.toByteArray()).append(")#".getBytes());
                                 }
                                 keyStream.reset(); //reset stream
                                 continue;
@@ -382,16 +376,16 @@ public final class httpTemplate {
                             pis.unread(bb);//is processed in next loop
                             bb = (hash);//will be added to text this loop
                             //text += "#";
-                        }else if( (bb & 0xFF) == ':' && others==0){//ignore :: in nested Expressions
+                        }else if ((bb & 0xFF) == ':' && others==0){//ignore :: in nested Expressions
                             bb=pis.read();
-                            if( (bb & 0xFF) == ':'){
+                            if ((bb & 0xFF) == ':'){
                                 if(currentPattern == whichPattern){ //found the pattern
                                     pis2 = new PushbackInputStream(new ByteArrayInputStream(text.getBytes()));
-                                    structure.append("<".getBytes("UTF-8")).append(key).append(" type=\"alternative\" which=\"".getBytes("UTF-8")).append(Integer.toString(whichPattern).getBytes("UTF-8")).append("\" found=\"0\">\n".getBytes("UTF-8"));
+                                    structure.append("<".getBytes()).append(key).append(" type=\"alternative\" which=\"".getBytes()).append(Integer.toString(whichPattern).getBytes("UTF-8")).append("\" found=\"0\">\n".getBytes());
                                     structure.append(writeTemplate(pis2, out, pattern, dflt, newPrefix(prefix,key)));
-                                    structure.append("</".getBytes("UTF-8")).append(key).append(">\n".getBytes("UTF-8"));
+                                    structure.append("</".getBytes()).append(key).append(">\n".getBytes());
 
-                                    transferUntil(pis, keyStream, appendBytes("#(/".getBytes("UTF-8"),key,")#".getBytes("UTF-8"),null));//to #(/key)#.
+                                    transferUntil(pis, keyStream, appendBytes("#(/".getBytes(),key,")#".getBytes("UTF-8"),null));//to #(/key)#.
 
                                     found=true;
                                 }
@@ -399,7 +393,7 @@ public final class httpTemplate {
                                 text.clear();
                                 continue;
                             }
-                            text.append(":".getBytes("UTF-8"));
+                            text.append(":".getBytes());
                         }
                         if(!found){
                             text.append((byte)bb);/*
@@ -410,23 +404,17 @@ public final class httpTemplate {
                         }
                     }//while
                 }//if(byName) (else branch)
-            }else if( (bb & 0xFF) == lbr ){ //normal
+                
+            // #[
+            } else if ((bb & 0xFF) == lbr) { //normal
                 if (transferUntil(pis, keyStream, pClose)) {
                     // pattern detected, write replacement
                     key = keyStream.toByteArray();
                     final String patternKey = getPatternKey(prefix, key);
                     replacement = replacePattern(patternKey, pattern, dflt); //replace
-                    structure.append("<".getBytes("UTF-8")).append(key).append(" type=\"normal\">\n".getBytes("UTF-8"));
+                    structure.append("<".getBytes()).append(key).append(" type=\"normal\">\n".getBytes());
                     structure.append(replacement);
-                    structure.append("</".getBytes("UTF-8")).append(key).append(">\n".getBytes("UTF-8"));
-
-                    /* DEBUG
-			try{
-				System.out.println("Key: "+key+ "; Value: "+pattern.get(key));
-			}catch(NullPointerException e){
-				System.out.println("Key: "+key);
-			}
-                     */
+                    structure.append("</".getBytes()).append(key).append(">\n".getBytes());
 
                     serverFileUtils.copy(replacement, out);
                 } else {
@@ -434,7 +422,9 @@ public final class httpTemplate {
                     serverFileUtils.copy(pis, out);
                     return structure.getBytes();
                 }
-            }else if( (bb & 0xFF) == ps){ //include
+                
+            // #%
+            } else if ((bb & 0xFF) == ps) { //include
                 final serverByteBuffer include = new serverByteBuffer();                
                 keyStream.reset(); //reset stream
                 if(transferUntil(pis, keyStream, iClose)){
@@ -453,8 +443,8 @@ public final class httpTemplate {
                             br = new BufferedReader( new InputStreamReader(new FileInputStream( httpdFileHandler.getLocalizedFile(new String(filename,"UTF-8"))),"UTF-8") ); //YaCy (with Locales)
                             //Read the Include
                             String line = "";
-                            while( (line = br.readLine()) != null ){
-                                include.append(line.getBytes("UTF-8")).append(de.anomic.server.serverCore.CRLF_STRING.getBytes("UTF-8"));
+                            while ((line = br.readLine()) != null) {
+                                include.append(line.getBytes("UTF-8")).append(de.anomic.server.serverCore.CRLF_STRING.getBytes());
                             }
                         } catch (final IOException e) {
                             //file not found?                    
@@ -463,23 +453,22 @@ public final class httpTemplate {
                             if (br != null) try { br.close(); br=null; } catch (final Exception e) {}
                         }
                         final PushbackInputStream pis2 = new PushbackInputStream(new ByteArrayInputStream(include.getBytes()));
-                        structure.append("<fileinclude file=\"".getBytes("UTF-8")).append(filename).append(">\n".getBytes("UTF-8"));
+                        structure.append("<fileinclude file=\"".getBytes()).append(filename).append(">\n".getBytes());
                         structure.append(writeTemplate(pis2, out, pattern, dflt, prefix));
-                        structure.append("</fileinclude>\n".getBytes("UTF-8"));
+                        structure.append("</fileinclude>\n".getBytes());
                     }
                 }
-            }else{ //no match, but a single hash (output # + bb)
-                final byte[] tmp=new byte[2];
-                tmp[0]=hash;
-                tmp[1]=(byte)bb;
-                serverFileUtils.copy(tmp, out);
+                
+            // # - no special character. This is simply a '#' without meaning
+            } else { //no match, but a single hash (output # + bb)
+                out.write(hash);
+                out.write(bb);
             }
         }
-        //System.out.println(structure.toString()); //DEBUG
         return structure.getBytes();
     }
 
-    public static byte[] replacePattern(final String key, final HashMap<String, String> pattern, final byte dflt[]) {
+    private final static byte[] replacePattern(final String key, final HashMap<String, String> pattern, final byte dflt[]) {
         byte[] replacement;
         Object value;
         if (pattern.containsKey(key)) {
@@ -503,6 +492,66 @@ public final class httpTemplate {
         return replacement;
     }
 
+    private final static byte[] newPrefix(final byte[] oldPrefix, final byte[] key) {
+        final serverByteBuffer newPrefix = new serverByteBuffer();
+        newPrefix.append(oldPrefix)
+        .append(key)
+        .append("_".getBytes());
+        byte[] result = newPrefix.getBytes();
+        try {
+            newPrefix.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    private final static byte[] newPrefix(final byte[] oldPrefix, final byte[] multi_key, final int i) {
+        final serverByteBuffer newPrefix = new serverByteBuffer();
+        newPrefix.append(oldPrefix)
+        .append(multi_key)
+        .append("_".getBytes())
+        .append(Integer.toString(i).getBytes())
+        .append("_".getBytes());
+        try {
+            newPrefix.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return newPrefix.getBytes();
+    }
+
+    private final static String getPatternKey(final byte[] prefix, final byte[] key) {
+        final serverByteBuffer patternKey = new serverByteBuffer();
+        patternKey.append(prefix).append(key);
+        try {
+            return new String(patternKey.getBytes(),"UTF-8");
+        } catch (final UnsupportedEncodingException e) {
+            return null;
+        } finally {
+            try {
+                patternKey.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    
+    private final static byte[] appendBytes(final byte[] b1, final byte[] b2, final byte[] b3, final byte[] b4) {
+        final serverByteBuffer byteArray = new serverByteBuffer();
+        byteArray.append(b1)
+                 .append(b2);
+        if (b3 != null) byteArray.append(b3);
+        if (b4 != null) byteArray.append(b4);
+        final byte[] result = byteArray.getBytes();
+        try {
+            byteArray.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
     public static void main(final String[] args) {
         // arg1 = test input; arg2 = replacement for pattern 'test'; arg3 = default replacement
         try {
@@ -515,92 +564,4 @@ public final class httpTemplate {
             e.printStackTrace();
         }
     }
-    /*
-     * loads all Files from path into a filename->content HashMap
-     */
-    public static HashMap<String, String> loadTemplates(File path) {
-        // reads all templates from a path
-        // we use only the folder from the given file path
-        final HashMap<String, String> result = new HashMap<String, String>();
-        if (path == null) return result;
-        if (!(path.isDirectory())) path = path.getParentFile();
-        if ((path == null) || (!(path.isDirectory()))) return result;
-        final String[] templates = path.list();
-        for (int i = 0; i < templates.length; i++) {
-            if (templates[i].endsWith(".template")) 
-                try {
-                    //System.out.println("TEMPLATE " + templates[i].substring(0, templates[i].length() - 9) + ": " + new String(buf, 0, c));
-                    result.put(templates[i].substring(0, templates[i].length() - 9),
-                            new String(serverFileUtils.read(new File(path, templates[i]))));
-                } catch (final Exception e) {}
-        }
-        return result;
-    }
-
-    public static byte[] newPrefix(final byte[] oldPrefix, final byte[] key) {
-        final serverByteBuffer newPrefix = new serverByteBuffer();
-        newPrefix.append(oldPrefix)
-        .append(key)
-        .append("_".getBytes());
-        byte[] result = newPrefix.getBytes();
-        try {
-			newPrefix.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-        return result;
-    }
-
-    public static byte[] newPrefix(final byte[] oldPrefix, final byte[] multi_key, final int i) {
-        final serverByteBuffer newPrefix = new serverByteBuffer();
-        try {        
-            newPrefix.append(oldPrefix)
-            .append(multi_key)
-            .append("_".getBytes())
-            .append(Integer.toString(i).getBytes("UTF-8"))
-            .append("_".getBytes());
-
-        } catch (final UnsupportedEncodingException e) {}
-        finally {
-        	try {
-				newPrefix.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-        }
-        return newPrefix.getBytes();
-    }
-
-    public static String getPatternKey(final byte[] prefix, final byte[] key) {
-        final serverByteBuffer patternKey = new serverByteBuffer();
-        patternKey.append(prefix)
-                  .append(key);
-        try {
-            return new String(patternKey.getBytes(),"UTF-8");
-        } catch (final UnsupportedEncodingException e) {
-            return null;
-        } finally {
-        	try {
-				patternKey.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-        }
-    }
-    
-    public static byte[] appendBytes(final byte[] b1, final byte[] b2, final byte[] b3, final byte[] b4) {
-        final serverByteBuffer byteArray = new serverByteBuffer();
-        byteArray.append(b1)
-                 .append(b2);
-        if (b3 != null) byteArray.append(b3);
-        if (b4 != null) byteArray.append(b4);
-        final byte[] result = byteArray.getBytes();
-        try {
-			byteArray.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-        return result;
-    }
-    
 }
