@@ -161,7 +161,8 @@ function processRSS() {
       }
     }
     else
-      alert("Error code " + xhr.status + " received: " + xhr.statusText);
+      //alert("Error code " + xhr.status + " received: " + xhr.statusText);
+      return false;
   }
 }
 
