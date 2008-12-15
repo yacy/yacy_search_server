@@ -128,7 +128,7 @@ public final class transferURL {
                 }
                 
                 // check if the entry is in our network domain
-                final String urlRejectReason = sb.acceptURL(comp.url());
+                final String urlRejectReason = sb.crawlStacker.urlInAcceptedDomain(comp.url());
                 if (urlRejectReason != null) {
                     if (yacyCore.log.isFine()) yacyCore.log.logFine("transferURL: blocked URL '" + comp.url() + "' (" + urlRejectReason + ") from peer " + otherPeerName);
                     lEntry = null;

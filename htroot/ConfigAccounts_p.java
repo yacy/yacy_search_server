@@ -62,7 +62,7 @@ public class ConfigAccounts_p {
             }
             
             if (localhostAccess) {
-                if (sb.acceptLocalURLs) {
+                if (sb.crawlStacker.acceptLocalURLs()) {
                     // in this case it is not allowed to use a localhostAccess option
                     prop.put("commitIntranetWarning", 1);
                     localhostAccess = false;

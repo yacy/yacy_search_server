@@ -1017,19 +1017,45 @@ public class yacySeed implements Cloneable {
 
     
     private static int guessedOwn = 0;
+    //private static int guessedNotOwn = 0;
     private static int verifiedOwn = 0;
+    private static int verifiedNotOwn = 0;
     
     public static boolean shallBeOwnWord(final yacySeedDB seedDB, final String wordhash, int redundancy) {
-        if (!guessIfOwnWord(seedDB, wordhash)) return false;
-        guessedOwn++;
-        if (yacyPeerSelection.verifyIfOwnWord(seedDB, wordhash, redundancy)) {
-            verifiedOwn++;
-            System.out.println("*** DEBUG shallBeOwnWord: true. verified/guessed ration = " + verifiedOwn + "/" + guessedOwn);
-            return true;
+        // the guessIfOwnWord is a fast method that should only fail in case that a 'true' may be incorrect, but a 'false' shall always be correct
+        if (guessIfOwnWord(seedDB, wordhash)) {
+            // this case must be verified, because it can be wrong.
+            guessedOwn++;
+            if (yacyPeerSelection.verifyIfOwnWord(seedDB, wordhash, redundancy)) {
+                // this is the correct case, but does not need to be an average case
+                verifiedOwn++;
+                //System.out.println("*** DEBUG shallBeOwnWord: true. guessed: true. verified/guessed ration = " + verifiedOwn + "/" + guessedOwn);
+                return true;
+            } else {
+                // this may happen, but can be corrected
+                verifiedNotOwn++;
+                //System.out.println("*** DEBUG shallBeOwnWord: false. guessed: true. verified/guessed ration = " + verifiedNotOwn + "/" + guessedNotOwn);
+                return false;
+            }
         } else {
-            System.out.println("*** DEBUG shallBeOwnWord: false. verified/guessed ration = " + verifiedOwn + "/" + guessedOwn);
             return false;
+            /*
+            // this should mean that the guessing should not be wrong
+            guessedNotOwn++;
+            if (yacyPeerSelection.verifyIfOwnWord(seedDB, wordhash, redundancy)) {
+                // this should never happen
+                verifiedOwn++;
+                System.out.println("*** DEBUG shallBeOwnWord: true. guessed: false. verified/guessed ration = " + verifiedOwn + "/" + guessedOwn);
+                return true;
+            } else {
+                // this should always happen
+                verifiedNotOwn++;
+                //System.out.println("*** DEBUG shallBeOwnWord: false. guessed: false. verified/guessed ration = " + verifiedNotOwn + "/" + guessedNotOwn);
+                return false;
+            }
+            */
         }
+        
     }
     
     private static boolean guessIfOwnWord(final yacySeedDB seedDB, final String wordhash) {

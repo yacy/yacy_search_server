@@ -234,7 +234,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     public  int                            totalPPM = 0;
     public  double                         totalQPM = 0d;
     public  TreeMap<String, String>        clusterhashes; // map of peerhash(String)/alternative-local-address as ip:port or only ip (String) or null if address in seed should be used
-    public  boolean                        acceptLocalURLs, acceptGlobalURLs;
     public  URLLicense                     licensedURLs;
     public  Timer                          moreMemory;
     
@@ -548,9 +547,11 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         this.observer.resourceObserverJob();
         
         // initializing the stackCrawlThread
-        this.crawlStacker = new CrawlStacker(this, this.plasmaPath, (int) getConfigLong("tableTypeForPreNURL", 0), (((int) getConfigLong("tableTypeForPreNURL", 0) == 0) && (getConfigLong(plasmaSwitchboardConstants.CRAWLSTACK_BUSYSLEEP, 0) <= 100)));
-        //this.sbStackCrawlThread = new plasmaStackCrawlThread(this,this.plasmaPath,ramPreNURL);
-        //this.sbStackCrawlThread.start();
+        this.crawlStacker = new CrawlStacker(
+                crawlQueues,
+                this.webIndex,
+                "local.any".indexOf(getConfig("network.unit.domain", "global")) >= 0,
+                "global.any".indexOf(getConfig("network.unit.domain", "global")) >= 0);
         
         // initializing dht chunk generation
         this.dhtTransferChunk = null;
@@ -680,10 +681,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         // initiate url license object
         licensedURLs = new URLLicense(8);
         
-        // set URL domain acceptance
-        acceptGlobalURLs = "global.any".indexOf(getConfig("network.unit.domain", "global")) >= 0;
-        acceptLocalURLs = "local.any".indexOf(getConfig("network.unit.domain", "global")) >= 0;
-        
         /*
         // in intranet and portal network set robinson mode
         if (networkUnitDefinition.equals("defaults/yacy.network.webportal.unit") ||
@@ -736,7 +733,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         // that an automatic authorization of localhost is done, because in this case crawls from local
         // addresses are blocked to prevent attack szenarios where remote pages contain links to localhost
         // addresses that can steer a YaCy peer
-        if ((this.acceptLocalURLs) && (getConfigBool("adminAccountForLocalhost", false))) {
+        if ((crawlStacker.acceptLocalURLs()) && (getConfigBool("adminAccountForLocalhost", false))) {
             setConfig("adminAccountForLocalhost", false);
             if (getConfig(httpd.ADMIN_ACCOUNT_B64MD5, "").startsWith("0000")) {
                 // the password was set automatically with a random value.
@@ -856,36 +853,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     	}
     }
    
-    /**
-     * Test a url if it can be used for crawling/indexing
-     * This mainly checks if the url is in the declared domain (local/global)
-     * @param url
-     * @return null if the url can be accepted, a string containing a rejection reason if the url cannot be accepted
-     */
-    public String acceptURL(final yacyURL url) {
-        // returns true if the url can be accepted accoring to network.unit.domain
-        if (url == null) return "url is null";
-        final String host = url.getHost();
-        if (host == null) return "url.host is null";
-        if (this.acceptGlobalURLs && this.acceptLocalURLs) return null; // fast shortcut to avoid dnsResolve
-        /*
-        InetAddress hostAddress = serverDomains.dnsResolve(host);
-        // if we don't know the host, we cannot load that resource anyway.
-        // But in case we use a proxy, it is possible that we dont have a DNS service.
-        final httpRemoteProxyConfig remoteProxyConfig = httpdProxyHandler.getRemoteProxyConfig();
-        if (hostAddress == null) {
-            if ((remoteProxyConfig != null) && (remoteProxyConfig.useProxy())) return null; else return "the dns of the host '" + host + "' cannot be resolved";
-        }
-        */
-        // check if this is a local address and we are allowed to index local pages:
-        //boolean local = hostAddress.isSiteLocalAddress() || hostAddress.isLoopbackAddress();
-        final boolean local = url.isLocal();
-        //assert local == yacyURL.isLocalDomain(url.hash()); // TODO: remove the dnsResolve above!
-        if ((this.acceptGlobalURLs && !local) || (this.acceptLocalURLs && local)) return null;
-        return (local) ?
-            ("the host '" + host + "' is local, but local addresses are not accepted") :
-            ("the host '" + host + "' is global, but global addresses are not accepted");
-    }
     
     public String urlExists(final String hash) {
         // tests if hash occurrs in any database
@@ -992,7 +959,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
          * 
          * check if ip is local ip address // TODO: remove this procotol specific code here
          * ========================================================================= */
-        final String urlRejectReason = acceptURL(entry.url());
+        final String urlRejectReason = crawlStacker.urlInAcceptedDomain(entry.url());
         if (urlRejectReason != null) {
             if (this.log.isFine()) this.log.logFine("Rejected URL '" + entry.url() + "': " + urlRejectReason);
             doIndexing = false;
@@ -1298,7 +1265,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             }
             
             // set a random password if no password is configured
-            if (!this.acceptLocalURLs && getConfigBool("adminAccountForLocalhost", false) && getConfig(httpd.ADMIN_ACCOUNT_B64MD5, "").length() == 0) {
+            if (!crawlStacker.acceptLocalURLs() && getConfigBool("adminAccountForLocalhost", false) && getConfig(httpd.ADMIN_ACCOUNT_B64MD5, "").length() == 0) {
                 // make a 'random' password
                 setConfig(httpd.ADMIN_ACCOUNT_B64MD5, "0000" + serverCodings.encodeMD5Hex(System.getProperties().toString() + System.currentTimeMillis()));
                 setConfig("adminAccount", "");
@@ -1998,7 +1965,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         try {
             // find a list of DHT-peers
             if (log != null) log.logInfo("Collecting DHT target peers for first_hash = " + dhtChunk.firstContainer().getWordHash() + ", last_hash = " + dhtChunk.lastContainer().getWordHash());
-            final Iterator<yacySeed> seedIter = yacyPeerSelection.getAcceptRemoteIndexSeeds(webIndex.seedDB, dhtChunk.lastContainer().getWordHash(), peerCount + 9);
+            final Iterator<yacySeed> seedIter = yacyPeerSelection.getAcceptRemoteIndexSeeds(webIndex.seedDB, dhtChunk.lastContainer().getWordHash(), peerCount + 9, false);
 
             // send away the indexes to all these peers
             int hc1 = 0;

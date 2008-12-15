@@ -72,7 +72,7 @@ public class rct_p {
                             loaddate = new Date();
                         }
                         final yacyURL referrer = null; // referrer needed!
-                        final String urlRejectReason = sb.acceptURL(url);
+                        final String urlRejectReason = sb.crawlStacker.urlInAcceptedDomain(url);
                         if (urlRejectReason == null) {
                             // stack url
                             if (sb.getLog().isFinest()) sb.getLog().logFinest("crawlOrder: stack: url='" + url + "'");

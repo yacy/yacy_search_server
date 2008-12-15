@@ -548,7 +548,7 @@ public final class yacyClient {
 				continue; // block with backlist
 			}
             
-			final String urlRejectReason = plasmaSwitchboard.getSwitchboard().acceptURL(comp.url());
+			final String urlRejectReason = plasmaSwitchboard.getSwitchboard().crawlStacker.urlInAcceptedDomain(comp.url());
             if (urlRejectReason != null) {
                 yacyCore.log.logInfo("remote search (client): rejected url '" + comp.url() + "' (" + urlRejectReason + ") from peer " + target.getName());
                 continue; // reject url outside of our domain

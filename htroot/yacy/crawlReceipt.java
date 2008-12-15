@@ -127,7 +127,7 @@ public final class crawlReceipt {
         }
         
         // check if the entry is in our network domain
-        final String urlRejectReason = sb.acceptURL(comp.url());
+        final String urlRejectReason = sb.crawlStacker.urlInAcceptedDomain(comp.url());
         if (urlRejectReason != null) {
             log.logWarning("crawlReceipt: RECEIVED wrong RECEIPT (" + urlRejectReason + ") for hash " + entry.hash() + " from peer " + iam + "\n\tURL properties: "+ propStr);
             prop.put("delay", "9999");

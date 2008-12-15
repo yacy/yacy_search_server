@@ -105,14 +105,12 @@ public final class IndexTransfer_p {
         } else {
             if (!prop.containsKey("running_status")) prop.put("running_status","Not running");
         }
-        
-        
-        
+
         //List known hosts
         yacySeed seed;
         int hc = 0;
         if ((sb.webIndex.seedDB != null) && (sb.webIndex.seedDB.sizeConnected() > 0)) {
-            final Iterator<yacySeed> e = yacyPeerSelection.getAcceptRemoteIndexSeeds(sb.webIndex.seedDB, "AAAAAAAAAAAA", sb.webIndex.seedDB.sizeConnected());
+            final Iterator<yacySeed> e = yacyPeerSelection.getAcceptRemoteIndexSeeds(sb.webIndex.seedDB, null, sb.webIndex.seedDB.sizeConnected(), false);
             final TreeMap<String, String> hostList = new TreeMap<String, String>();
             while (e.hasNext()) {
                 seed = e.next();

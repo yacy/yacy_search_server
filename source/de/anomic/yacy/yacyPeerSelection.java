@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 
+import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.server.serverDate;
@@ -48,7 +49,7 @@ public class yacyPeerSelection {
         long distance;
         for (int v = 0; v < dhtVerticalTargets.length; v++) {
             wordhash = yacySeed.positionToHash(dhtVerticalTargets[v]);
-            Iterator<yacySeed> dhtEnum = getAcceptRemoteIndexSeeds(seedDB, wordhash, redundancy);
+            Iterator<yacySeed> dhtEnum = getAcceptRemoteIndexSeeds(seedDB, wordhash, redundancy, false);
             int c = Math.min(seedDB.sizeConnected(), redundancy);
             int cc = 3; // select a maximum of 3, this is enough redundancy
             while (dhtEnum.hasNext() && c > 0 && cc-- > 0) {
@@ -64,23 +65,24 @@ public class yacyPeerSelection {
         }
     }
     
-    public static boolean verifyIfOwnWord(final yacySeedDB seedDB, final String wordhash, int redundancy) {
+    public static boolean verifyIfOwnWord(final yacySeedDB seedDB, String wordhash, int redundancy) {
         String myHash = seedDB.mySeed().hash;
-        long[] dhtVerticalTargets = yacySeed.dhtPositions(wordhash, yacySeed.partitionExponent);
-        for (int v = 0; v < dhtVerticalTargets.length; v++) {
-            Iterator<yacySeed> dhtEnum = getAcceptRemoteIndexSeeds(seedDB, yacySeed.positionToHash(dhtVerticalTargets[v]), redundancy);
+        //long[] dhtVerticalTargets = yacySeed.dhtPositions(wordhash, yacySeed.partitionExponent);
+        //for (int v = 0; v < dhtVerticalTargets.length; v++) {
+            //wordhash = yacySeed.positionToHash(dhtVerticalTargets[0]);
+            Iterator<yacySeed> dhtEnum = getAcceptRemoteIndexSeeds(seedDB, wordhash, redundancy, true);
             while (dhtEnum.hasNext()) {
-                if (dhtEnum.next().equals(myHash)) return true;
+                if (dhtEnum.next().hash.equals(myHash)) return true;
             }
-        }
+        //}
         return false;
     }
     
-    public static Iterator<yacySeed> getAcceptRemoteIndexSeeds(yacySeedDB seedDB, final String starthash, int max) {
+    public static Iterator<yacySeed> getAcceptRemoteIndexSeeds(yacySeedDB seedDB, final String starthash, int max, boolean alsoMyOwn) {
         // returns an enumeration of yacySeed-Objects
         // that have the AcceptRemoteIndex-Flag set
         // the seeds are enumerated in the right order according DHT
-        return new acceptRemoteIndexSeedEnum(seedDB, starthash, Math.max(max, seedDB.sizeConnected()));
+        return new acceptRemoteIndexSeedEnum(seedDB, starthash, Math.min(max, seedDB.sizeConnected()), alsoMyOwn);
     }
     
     private static class acceptRemoteIndexSeedEnum implements Iterator<yacySeed> {
@@ -90,13 +92,15 @@ public class yacyPeerSelection {
         private yacySeedDB seedDB;
         private HashSet<String> doublecheck;
         private int remaining;
+        private boolean alsoMyOwn;
         
-        public acceptRemoteIndexSeedEnum(yacySeedDB seedDB, final String starthash, int max) {
+        public acceptRemoteIndexSeedEnum(yacySeedDB seedDB, final String starthash, int max, boolean alsoMyOwn) {
             this.seedDB = seedDB;
             this.se = getDHTSeeds(seedDB, starthash, yacyVersion.YACY_HANDLES_COLLECTION_INDEX);
             this.remaining = max;
             this.doublecheck = new HashSet<String>();
             this.nextSeed = nextInternal();
+            this.alsoMyOwn = alsoMyOwn && (kelondroBase64Order.enhancedCoder.compare(seedDB.mySeed().hash.getBytes(), nextSeed.hash.getBytes()) > 0);
         }
         
         public boolean hasNext() {
@@ -127,9 +131,15 @@ public class yacyPeerSelection {
         }
         
         public yacySeed next() {
-            final yacySeed next = nextSeed;
-            nextSeed = nextInternal();
-            return next;
+            if (alsoMyOwn && kelondroBase64Order.enhancedCoder.compare(seedDB.mySeed().hash.getBytes(), nextSeed.hash.getBytes()) < 0) {
+                // take my own seed hash instead the enumeration result
+                alsoMyOwn = false;
+                return seedDB.mySeed();
+            } else {
+                final yacySeed next = nextSeed;
+                nextSeed = nextInternal();
+                return next;
+            }
         }
 
         public void remove() {
