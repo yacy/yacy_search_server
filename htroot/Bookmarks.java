@@ -400,6 +400,7 @@ public class Bookmarks {
     		final Iterator<String> bit=sb.bookmarksDB.getBookmarksIterator(fn, isAdmin);
     		while(bit.hasNext()){
     			bookmark=sb.bookmarksDB.getBookmark(bit.next());
+    			if(bookmark == null) break;
     			prop.put("folderlist_"+count+"_folder", "<li><a href=\""+bookmark.getUrl()+"\" title=\""+bookmark.getDescription()+"\">"+ bookmark.getTitle()+"</a></li>");
     			count++;
     		}    	
