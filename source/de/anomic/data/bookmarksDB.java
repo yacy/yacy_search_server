@@ -537,6 +537,7 @@ public class bookmarksDB {
      * @param tag an object of type Tag to be stored/removed
      */
     public void storeTag(final Tag tag){
+    	if (tag == null) return;
         try {
             if(tag.size() >0){
                 bookmarksDB.this.tagsTable.put(tag.getTagHash(), tag.getMap());
