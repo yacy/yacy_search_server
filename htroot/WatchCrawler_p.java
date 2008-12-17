@@ -211,7 +211,18 @@ public class WatchCrawler_p {
                                     crawlingQ,
                                     indexText, indexMedia,
                                     storeHTCache, true, crawlOrder, xsstopw, xdstopw, xpstopw);
-                            final String reasonString = sb.crawlStacker.stackCrawl(url, null, sb.webIndex.seedDB.mySeed().hash, "CRAWLING-ROOT", new Date(), 0, pe);
+                            final String reasonString = sb.crawlStacker.stackCrawl(new CrawlEntry(
+                                    sb.webIndex.seedDB.mySeed().hash,
+                                    url,
+                                    null,
+                                    "CRAWLING-ROOT",
+                                    new Date(),
+                                    null,
+                                    pe.handle(),
+                                    0,
+                                    0,
+                                    0
+                                    ));
                             
                             if (reasonString == null) {
                             	// create a bookmark from crawl start url
@@ -260,6 +271,7 @@ public class WatchCrawler_p {
                                                 "", 
                                                 "", 
                                                 new Date(),
+                                                null,
                                                 pe.handle(),
                                                 0, 
                                                 0, 
@@ -338,14 +350,18 @@ public class WatchCrawler_p {
                                     if (nexturl == null) continue;
                                     
                                     // enqueuing the url for crawling
-                                    sb.crawlStacker.enqueueEntry(
+                                    sb.crawlStacker.enqueueEntry(new CrawlEntry(
+                                            sb.webIndex.seedDB.mySeed().hash, 
                                             nexturl, 
                                             "", 
-                                            sb.webIndex.seedDB.mySeed().hash, 
                                             e.getValue(), 
-                                            new Date(), 
-                                            0, 
-                                            profile);
+                                            new Date(),
+                                            null,
+                                            profile.handle(),
+                                            0,
+                                            0,
+                                            0
+                                            ));
                                 }
                                
                             } catch (final PatternSyntaxException e) {

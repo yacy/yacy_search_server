@@ -109,11 +109,7 @@ public class IndexControlRWIs_p {
             if (post.containsKey("deletecomplete") && post.containsKey("confirmDelete")) {
                 sb.webIndex.clear();
                 sb.crawlQueues.clear();
-                try {
-                    sb.crawlStacker.clear();
-                } catch (final IOException e) {
-                    e.printStackTrace();
-                }
+                sb.crawlStacker.clear();
                 try {
                     sb.robots.clear();
                 } catch (final IOException e) {

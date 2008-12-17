@@ -28,17 +28,15 @@
 
 package de.anomic.crawler;
 
-import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.LinkedList;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import de.anomic.index.indexReferenceBlacklist;
 import de.anomic.index.indexURLReference;
-import de.anomic.kelondro.kelondroIndex;
-import de.anomic.kelondro.kelondroRow;
-import de.anomic.kelondro.kelondroRowSet;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.server.serverDomains;
@@ -49,13 +47,11 @@ public final class CrawlStacker {
     
     final serverLog log = new serverLog("STACKCRAWL");
     
-    private final LinkedList<String> urlEntryHashCache; // the order how this queue is processed; entries with known DNS entries go first
-    private kelondroIndex            urlEntryCache;     // the entries in the queue
-    private long                     dnsHit, dnsMiss;
-    private int                      alternateCount;
-    private CrawlQueues              nextQueue;
-    private plasmaWordIndex          wordIndex;
-    private boolean                  acceptLocalURLs, acceptGlobalURLs;
+    private BlockingQueue<CrawlEntry> fastQueue, slowQueue;
+    private long                      dnsHit, dnsMiss;
+    private CrawlQueues               nextQueue;
+    private plasmaWordIndex           wordIndex;
+    private boolean                   acceptLocalURLs, acceptGlobalURLs;
     
     // objects for the prefetch task
     private final ArrayList<String> dnsfetchHosts = new ArrayList<String>();    
@@ -68,26 +64,21 @@ public final class CrawlStacker {
         this.wordIndex = wordIndex;
         this.dnsHit = 0;
         this.dnsMiss = 0;
-        this.alternateCount = 0;
         this.acceptLocalURLs = acceptLocalURLs;
         this.acceptGlobalURLs = acceptGlobalURLs;
         
-        // init the message list
-        this.urlEntryHashCache = new LinkedList<String>();
-
-        this.urlEntryCache = new kelondroRowSet(CrawlEntry.rowdef, 0);
+        this.fastQueue = new LinkedBlockingQueue<CrawlEntry>();
+        this.slowQueue = new ArrayBlockingQueue<CrawlEntry>(1000);
         this.log.logInfo("STACKCRAWL thread initialized.");
     }
 
     public int size() {
-        synchronized (this.urlEntryHashCache) {
-            return this.urlEntryHashCache.size();
-        }
+        return this.fastQueue.size() + this.slowQueue.size();
     }
 
-    public void clear() throws IOException {
-        this.urlEntryHashCache.clear();
-        this.urlEntryCache.clear();
+    public void clear() {
+        this.fastQueue.clear();
+        this.slowQueue.clear();
     }
     
     public void close() {
@@ -98,11 +89,7 @@ public final class CrawlStacker {
         
         this.log.logInfo("Shutdown. Closing stackCrawl queue.");
 
-        // closing the db
-        this.urlEntryCache.close();
-            
-        // clearing the hash list
-        this.urlEntryHashCache.clear();
+        clear();
     }
 
     private boolean prefetchHost(final String host) {
@@ -121,41 +108,17 @@ public final class CrawlStacker {
     }
     
     public boolean job() {
+        if (this.fastQueue.size() > 0 && job(this.fastQueue)) return true;
+        if (this.slowQueue.size() == 0) return false;
+        return job(this.slowQueue);
+    }
+    
+    private boolean job(BlockingQueue<CrawlEntry> queue) {
         // this is the method that is called by the busy thread from outside
-        if (this.urlEntryHashCache.size() == 0) return false;
+        if (queue.size() == 0) return false;
         
         // get the next entry from the queue
-        String urlHash = null;
-        kelondroRow.Entry ec = null;
-        synchronized (this.urlEntryHashCache) {
-            urlHash = this.urlEntryHashCache.removeFirst();
-            if (urlHash == null) {
-                urlEntryHashCache.clear();
-                try {
-                    urlEntryCache.clear();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                return false;
-            }
-            try {
-                ec = this.urlEntryCache.remove(urlHash.getBytes());
-            } catch (IOException e) {
-                e.printStackTrace();
-                return false;
-            }
-        }
-        if (urlHash == null || ec == null) return false;
-        
-        // make a crawl Entry out of it
-        CrawlEntry entry = null;
-        try {
-            entry = new CrawlEntry(ec);
-        } catch (IOException e1) {
-            e1.printStackTrace();
-            return false;
-        }
-            
+        CrawlEntry entry = queue.poll();
         if (entry == null) return false;
 
         try {
@@ -173,95 +136,30 @@ public final class CrawlStacker {
         }
         return true;
     }
-    
-    public String stackCrawl(
-            final yacyURL url,
-            final String referrerhash,
-            final String initiatorHash,
-            final String name,
-            final Date loadDate,
-            final int currentdepth,
-            final CrawlProfile.entry profile) {
-        // stacks a crawl item. The position can also be remote
-        // returns null if successful, a reason string if not successful
-        //this.log.logFinest("stackCrawl: nexturlString='" + nexturlString + "'");
-        
-        // add the url into the crawling queue
-        final CrawlEntry entry = new CrawlEntry(
-                initiatorHash,                               // initiator, needed for p2p-feedback
-                url,                                         // url clear text string
-                (referrerhash == null) ? "" : referrerhash,  // last url in crawling queue
-                name,                                        // load date
-                loadDate,                                    // the anchor name
-                (profile == null) ? null : profile.handle(), // profile must not be null!
-                currentdepth,                                // depth so far
-                0,                                           // anchors, default value
-                0                                            // forkfactor, default value
-        );
-        return stackCrawl(entry);
-    }
-    
-    public void enqueueEntry(
-            final yacyURL nexturl, 
-            final String referrerhash, 
-            final String initiatorHash, 
-            final String name, 
-            final Date loadDate, 
-            final int currentdepth, 
-            final CrawlProfile.entry profile) {
-        if (profile == null) return;
-        
+ 
+    public void enqueueEntry(final CrawlEntry entry) {
+     
         // DEBUG
-        if (log.isFinest()) log.logFinest("ENQUEUE "+ nexturl +", referer="+referrerhash +", initiator="+initiatorHash +", name="+name +", load="+loadDate +", depth="+currentdepth);
-        
-        // check first before we create a big object
-        if (this.urlEntryCache.has(nexturl.hash().getBytes())) return;
+        if (log.isFinest()) log.logFinest("ENQUEUE "+ entry.url() +", referer="+entry.referrerhash() +", initiator="+entry.initiator() +", name="+entry.name() +", load="+entry.loaddate() +", depth="+entry.depth());
 
-        // now create the big object before we enter the synchronized block
-        final CrawlEntry newEntry = new CrawlEntry(
-                    initiatorHash,
-                    nexturl,
-                    referrerhash,
-                    name,
-                    loadDate,
-                    profile.handle(),
-                    currentdepth,
-                    0,
-                    0
-                    );
-        if (newEntry == null) return;
-        final kelondroRow.Entry newEntryRow = newEntry.toRow();
-                
-        synchronized(this.urlEntryHashCache) {
-            kelondroRow.Entry oldValue;
+        if (prefetchHost(entry.url().getHost())) {
             try {
-                oldValue = this.urlEntryCache.put(newEntryRow);
-            } catch (final IOException e) {
-                oldValue = null;
-            }                        
-            if (oldValue == null) {
-                //System.out.println("*** debug crawlStacker dnsHit=" + this.dnsHit + ", dnsMiss=" + this.dnsMiss + ", alternateCount=" + this.alternateCount + ((this.dnsMiss > 0) ? (", Q=" + (this.dnsHit / this.dnsMiss)) : ""));
-                if (prefetchHost(nexturl.getHost())) {
-                    this.alternateCount++;
-                    this.urlEntryHashCache.addFirst(newEntry.url().hash());
-                    this.dnsHit++;
-                } else {
-                    if ((this.dnsMiss > 0) && (this.alternateCount > 2 * this.dnsHit / this.dnsMiss)) {
-                        this.urlEntryHashCache.addFirst(newEntry.url().hash());
-                        this.alternateCount = 0;
-                        //System.out.println("*** debug crawlStacker alternate switch, dnsHit=" + this.dnsHit + ", dnsMiss=" + this.dnsMiss + ", alternateCount=" + this.alternateCount + ", Q=" + (this.dnsHit / this.dnsMiss));
-                    } else {
-                        this.urlEntryHashCache.addLast(newEntry.url().hash());
-                    }
-                    this.dnsMiss++; 
-                }
+                this.fastQueue.put(entry);
+                this.dnsHit++;
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        } else {
+            try {
+                this.slowQueue.put(entry);
+                this.dnsMiss++; 
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
     }
     
-    
-    
-    private String stackCrawl(final CrawlEntry entry) {
+    public String stackCrawl(final CrawlEntry entry) {
         // stacks a crawl item. The position can also be remote
         // returns null if successful, a reason string if not successful
         //this.log.logFinest("stackCrawl: nexturlString='" + nexturlString + "'");

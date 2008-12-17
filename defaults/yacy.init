@@ -568,9 +568,12 @@ performanceSpeed=100
 80_indexing_idlesleep=1000
 80_indexing_busysleep=10
 80_indexing_memprereq=6291456
-82_crawlstack_idlesleep=5000
+82_crawlstack_idlesleep=1000
 82_crawlstack_busysleep=0
 82_crawlstack_memprereq=1048576
+83_crawlstack_idlesleep=1200
+83_crawlstack_busysleep=0
+83_crawlstack_memprereq=1048576
 90_cleanup_idlesleep=300000
 90_cleanup_busysleep=300000
 90_cleanup_memprereq=0
@@ -817,12 +820,6 @@ externalRedirector=
 svnRevision=0
 
 currentSkin=default
-
-# temporary flag for new database structure. set only true for testing
-# ALL DATA THAT IS CREATED WITH THIS FLAG ON WILL BE VOID IN A FINAL VERSION
-# table-types: RAM = 0, TREE = 1, FLEX = 2;
-# if you set this to a non-RAM value, you should increase the stacker.slots value
-tableTypeForPreNURL=0
 
 # flag to show if pages shall be usable for non-admin users
 # this can be applied to the Surftips.html and yacysearch.html page

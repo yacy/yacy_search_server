@@ -36,6 +36,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import de.anomic.index.indexDocumentMetadata;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
+import de.anomic.server.serverProcessorJob;
 import de.anomic.server.logging.serverLog;
 
 public final class ProtocolLoader {
@@ -111,14 +112,15 @@ public final class ProtocolLoader {
         // returns null if everything went fine, a fail reason string if a problem occurred
         indexDocumentMetadata h;
         try {
+            entry.setStatus("loading", serverProcessorJob.STATUS_RUNNING);
             h = load(entry, parserMode);
             assert h != null;
-            entry.setStatus("loaded");
+            entry.setStatus("loaded", serverProcessorJob.STATUS_RUNNING);
             final boolean stored = sb.htEntryStoreProcess(h);
-            entry.setStatus("stored-" + ((stored) ? "ok" : "fail"));
+            entry.setStatus("stored-" + ((stored) ? "ok" : "fail"), serverProcessorJob.STATUS_FINISHED);
             return (stored) ? null : "not stored";
         } catch (IOException e) {
-            entry.setStatus("error");
+            entry.setStatus("error", serverProcessorJob.STATUS_FINISHED);
             log.logWarning("problem loading " + entry.url().toString());
             return "load error - " + e.getMessage();
         }

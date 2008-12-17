@@ -30,6 +30,7 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.Iterator;
 
+import de.anomic.crawler.CrawlEntry;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverDate;
@@ -76,7 +77,18 @@ public class rct_p {
                         if (urlRejectReason == null) {
                             // stack url
                             if (sb.getLog().isFinest()) sb.getLog().logFinest("crawlOrder: stack: url='" + url + "'");
-                            sb.crawlStacker.enqueueEntry(url, (referrer == null) ? null : referrer.hash(), peerhash, "REMOTE-CRAWLING", loaddate, 0, sb.webIndex.defaultRemoteProfile);
+                            sb.crawlStacker.enqueueEntry(new CrawlEntry(
+                                    peerhash,
+                                    url,
+                                    (referrer == null) ? null : referrer.hash(),
+                                    "REMOTE-CRAWLING",
+                                    null,
+                                    loaddate,
+                                    sb.webIndex.defaultRemoteProfile.handle(),
+                                    0,
+                                    0,
+                                    0
+                                    ));
                         } else {
                             env.getLog().logWarning("crawlOrder: Rejected URL '" + urlToString(url) + "': " + urlRejectReason);
                         }

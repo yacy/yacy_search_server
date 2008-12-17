@@ -140,7 +140,8 @@ public final class plasmaSwitchboardConstants {
      * <p><code>public static final String <strong>CRAWLSTACK</strong> = "82_crawlstack"</code></p>
      * <p>Name of the crawl stacker thread, performing several checks on new URLs to crawl, i.e. double-check</p>
      */
-    public static final String CRAWLSTACK                   = "82_crawlstack";
+    public static final String CRAWLSTACK0                   = "82_crawlstack";
+    public static final String CRAWLSTACK1                   = "83_crawlstack";
     public static final String CRAWLSTACK_METHOD_START      = "job";
     public static final String CRAWLSTACK_METHOD_JOBCOUNT   = "size";
     public static final String CRAWLSTACK_METHOD_FREEMEM    = null;

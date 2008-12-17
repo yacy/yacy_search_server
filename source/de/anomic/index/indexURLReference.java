@@ -462,6 +462,7 @@ public class indexURLReference {
                 comp().url(), 
                 referrerHash(), 
                 comp().dc_title(),
+                null,
                 loaddate(), 
                 null,
                 0, 

@@ -42,6 +42,7 @@ import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.server.serverDate;
+import de.anomic.server.serverProcessorJob;
 import de.anomic.server.logging.serverLog;
 import de.anomic.xml.RSSFeed;
 import de.anomic.xml.RSSMessage;
@@ -397,7 +398,18 @@ public class CrawlQueues {
             if (urlRejectReason == null) {
                 // stack url
                 if (sb.getLog().isFinest()) sb.getLog().logFinest("crawlOrder: stack: url='" + url + "'");
-                sb.crawlStacker.enqueueEntry(url, (referrer == null) ? null : referrer.hash(), hash, item.getDescription(), loaddate, 0, sb.webIndex.defaultRemoteProfile);
+                sb.crawlStacker.enqueueEntry(new CrawlEntry(
+                        hash,
+                        url,
+                        (referrer == null) ? null : referrer.hash(),
+                        item.getDescription(),
+                        null,
+                        loaddate,
+                        sb.webIndex.defaultRemoteProfile.handle(),
+                        0,
+                        0,
+                        0
+                ));
             } else {
                 log.logWarning("crawlOrder: Rejected URL '" + urlToString(url) + "': " + urlRejectReason);
             }
@@ -474,6 +486,7 @@ public class CrawlQueues {
                 "", 
                 "", 
                 new Date(),
+                new Date(),
                 (forText) ?
                     ((global) ?
                         sb.webIndex.defaultTextSnippetGlobalProfile.handle() :
@@ -500,7 +513,7 @@ public class CrawlQueues {
         
         public crawlWorker(final CrawlEntry entry) {
             this.entry = entry;
-            this.entry.setStatus("worker-initialized");
+            this.entry.setStatus("worker-initialized", serverProcessorJob.STATUS_INITIATED);
             this.code = Integer.valueOf(entry.hashCode());
             if (!workers.containsKey(code)) {
                 workers.put(code, this);
@@ -511,7 +524,7 @@ public class CrawlQueues {
         public void run() {
             try {
                 // checking robots.txt for http(s) resources
-                this.entry.setStatus("worker-checkingrobots");
+                this.entry.setStatus("worker-checkingrobots", serverProcessorJob.STATUS_STARTED);
                 if ((entry.url().getProtocol().equals("http") || entry.url().getProtocol().equals("https")) && sb.robots.isDisallowed(entry.url())) {
                     if (log.isFine()) log.logFine("Crawling of URL '" + entry.url().toString() + "' disallowed by robots.txt.");
                     final ZURL.Entry eentry = errorURL.newEntry(
@@ -524,7 +537,7 @@ public class CrawlQueues {
                     errorURL.push(eentry);         
                 } else {
                     // starting a load from the internet
-                    this.entry.setStatus("worker-loading");
+                    this.entry.setStatus("worker-loading", serverProcessorJob.STATUS_RUNNING);
                     final String result = loader.process(this.entry, plasmaParser.PARSER_MODE_CRAWLER);
                     if (result != null) {
                         final ZURL.Entry eentry = errorURL.newEntry(
@@ -536,7 +549,7 @@ public class CrawlQueues {
                         eentry.store();
                         errorURL.push(eentry);
                     } else {
-                        this.entry.setStatus("worker-processed");
+                        this.entry.setStatus("worker-processed", serverProcessorJob.STATUS_FINISHED);
                     }
                 }
             } catch (final Exception e) {
@@ -551,7 +564,7 @@ public class CrawlQueues {
                 e.printStackTrace();
             } finally {
                 workers.remove(code);
-                this.entry.setStatus("worker-finalized");
+                this.entry.setStatus("worker-finalized", serverProcessorJob.STATUS_FINISHED);
             }
         }
         

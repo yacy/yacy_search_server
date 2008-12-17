@@ -41,7 +41,6 @@ import org.xml.sax.helpers.DefaultHandler;
 import de.anomic.crawler.CrawlEntry;
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.HTTPLoader;
-import de.anomic.crawler.ZURL;
 import de.anomic.http.JakartaCommonsHttpClient;
 import de.anomic.http.JakartaCommonsHttpResponse;
 import de.anomic.http.httpRequestHeader;
@@ -272,42 +271,20 @@ public class SitemapParser extends DefaultHandler {
             }
 
             // URL needs to crawled
-            String error = null;
-            error = this.sb.crawlStacker.stackCrawl(url,
-                                                             null, // this.siteMapURL.toString(),
-                                                             this.sb.webIndex.seedDB.mySeed().hash, this.nextURL, new Date(),
-                                                             0, this.crawlingProfile);
-
-            if (error != null) {
-                try {
-                    this.logger.logInfo("The URL '" + this.nextURL + "' can not be crawled. Reason: " + error);
-
-                    // insert URL into the error DB
-                    final ZURL.Entry ee = this.sb.crawlQueues.errorURL.newEntry(
-                            new CrawlEntry(
-                                    sb.webIndex.seedDB.mySeed().hash, 
-                                    new yacyURL(this.nextURL, null), 
-                                    "", 
-                                    "", 
-                                    new Date(),
-                                    null,
-                                    0, 
-                                    0, 
-                                    0),
-                            this.sb.webIndex.seedDB.mySeed().hash,
-                            new Date(),
-                            1,
-                            error);
-                    ee.store();
-                    this.sb.crawlQueues.errorURL.push(ee);
-                } catch (final MalformedURLException e) {/* ignore this */
-                }
-            } else {
-                this.logger.logInfo("New URL '" + this.nextURL + "' added for crawling.");
-
-                // count successfully added URLs
-                this.urlCounter++;
-            }
+            this.sb.crawlStacker.enqueueEntry(new CrawlEntry(
+                    this.sb.webIndex.seedDB.mySeed().hash,
+                    url,
+                    null, // this.siteMapURL.toString(),
+                    this.nextURL,
+                    new Date(),
+                    null,
+                    this.crawlingProfile.handle(),
+                    0,
+                    0,
+                    0
+                    ));
+            this.logger.logInfo("New URL '" + this.nextURL + "' added for crawling.");
+            this.urlCounter++;
         }
     }
 

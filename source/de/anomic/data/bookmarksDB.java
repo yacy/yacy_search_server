@@ -62,7 +62,6 @@ import org.xml.sax.SAXException;
 
 import de.anomic.crawler.CrawlEntry;
 import de.anomic.crawler.CrawlProfile;
-import de.anomic.crawler.ZURL;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterWriter;
 import de.anomic.index.indexWord;
@@ -259,49 +258,37 @@ public class bookmarksDB {
 	                        crawlingQ,
 	                        indexText, indexMedia,
 	                        storeHTCache, true, crawlOrder, xsstopw, xdstopw, xpstopw);
-	                String reasonString = sb.crawlStacker.stackCrawl(crawlingStartURL, null, sb.webIndex.seedDB.mySeed().hash, "CRAWLING-ROOT", new Date(), 0, pe);
-	                
-	                if (reasonString == null) {
-	                	serverLog.logInfo("BOOKMARKS", "autoReCrawl - adding crawl profile for: " + crawlingStart);
-	                	// serverLog.logInfo("BOOKMARKS", "autoReCrawl - crawl filter is set to: " + newcrawlingfilter);
-	                	// generate a YaCyNews if the global flag was set
-	                    if (crawlOrder) {
-	                        Map<String, String> m = new HashMap<String, String>(pe.map()); // must be cloned
-	                        m.remove("specificDepth");
-	                        m.remove("indexText");
-	                        m.remove("indexMedia");
-	                        m.remove("remoteIndexing");
-	                        m.remove("xsstopw");
-	                        m.remove("xpstopw");
-	                        m.remove("xdstopw");
-	                        m.remove("storeTXCache");
-	                        m.remove("storeHTCache");
-	                        m.remove("generalFilter");
-	                        m.remove("specificFilter");
-	                        m.put("intention", "Automatic ReCrawl!");
-	                        sb.webIndex.newsPool.publishMyNews(yacyNewsRecord.newRecord(sb.webIndex.seedDB.mySeed(), yacyNewsPool.CATEGORY_CRAWL_START, m));	                      
-	                    }                    
-	                } else {
-	                	serverLog.logInfo("BOOKMARKS", "autoReCrawl - error adding crawl profile: " + crawlingStart + "- " + reasonString);                	
-	                	ZURL.Entry ee = sb.crawlQueues.errorURL.newEntry(
-	                            new CrawlEntry(
-	                                    sb.webIndex.seedDB.mySeed().hash, 
-	                                    crawlingStartURL, 
-	                                    "", 
-	                                    "", 
-	                                    new Date(),
-	                                    pe.handle(),
-	                                    0, 
-	                                    0, 
-	                                    0),
-	                            sb.webIndex.seedDB.mySeed().hash,
-	                            new Date(),
-	                            1,
-	                            reasonString);
-	                    
-	                    ee.store();
-	                    sb.crawlQueues.errorURL.push(ee);
-	                }              
+	                sb.crawlStacker.enqueueEntry(new CrawlEntry(
+	                        sb.webIndex.seedDB.mySeed().hash,
+                            crawlingStartURL,
+	                        null,
+	                        "CRAWLING-ROOT",
+	                        new Date(),
+	                        null,
+	                        pe.handle(),
+	                        0,
+	                        0,
+	                        0
+	                        ));
+                	serverLog.logInfo("BOOKMARKS", "autoReCrawl - adding crawl profile for: " + crawlingStart);
+                	// serverLog.logInfo("BOOKMARKS", "autoReCrawl - crawl filter is set to: " + newcrawlingfilter);
+                	// generate a YaCyNews if the global flag was set
+                    if (crawlOrder) {
+                        Map<String, String> m = new HashMap<String, String>(pe.map()); // must be cloned
+                        m.remove("specificDepth");
+                        m.remove("indexText");
+                        m.remove("indexMedia");
+                        m.remove("remoteIndexing");
+                        m.remove("xsstopw");
+                        m.remove("xpstopw");
+                        m.remove("xdstopw");
+                        m.remove("storeTXCache");
+                        m.remove("storeHTCache");
+                        m.remove("generalFilter");
+                        m.remove("specificFilter");
+                        m.put("intention", "Automatic ReCrawl!");
+                        sb.webIndex.newsPool.publishMyNews(yacyNewsRecord.newRecord(sb.webIndex.seedDB.mySeed(), yacyNewsPool.CATEGORY_CRAWL_START, m));	                      
+                    }
 	    		} catch (MalformedURLException e1) {}
 			} // if
 		} // while(bit.hasNext())    	

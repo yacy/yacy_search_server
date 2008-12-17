@@ -36,10 +36,11 @@ import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.server.serverProcessorJob;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyURL;
 
-public class CrawlEntry {
+public class CrawlEntry extends serverProcessorJob {
     
     // row definition for balancer-related NURL-entries
     public final static kelondroRow rowdef = new kelondroRow(
@@ -80,7 +81,7 @@ public class CrawlEntry {
     private int      forkfactor;    // sum of anchors of all ancestors
     private kelondroBitfield flags;
     private int      handle;
-    private String   status;
+    private String   statusMessage;
     private int      initialHash;   // to provide a object hash that does not change even if the url changes because of redirection
     
     public static class domaccess {
@@ -116,38 +117,38 @@ public class CrawlEntry {
      * @param forkfactor sum of anchors of all ancestors
      */
     public CrawlEntry(
-                 final String initiator, 
-                 final yacyURL url, 
-                 final String referrerhash, 
-                 final String name, 
-                 final Date appdate,
-                 final String profileHandle,
-                 final int depth, 
-                 final int anchors, 
-                 final int forkfactor
+            final String initiator, 
+            final yacyURL url, 
+            final String referrerhash, 
+            final String name, 
+            final Date appdate,
+            final Date loaddate,
+            final String profileHandle,
+            final int depth, 
+            final int anchors, 
+            final int forkfactor
     ) {
         // create new entry and store it into database
-        assert appdate != null;
         assert url != null;
         assert initiator != null;
-        assert referrerhash != null;
         assert profileHandle.length() == yacySeedDB.commonHashLength : profileHandle + " != " + yacySeedDB.commonHashLength;
         this.initiator     = initiator;
         this.url           = url;
-        this.refhash       = referrerhash;
+        this.refhash       = (referrerhash == null) ? "" : referrerhash;
         this.name          = (name == null) ? "" : name;
         this.appdate       = (appdate == null) ? 0 : appdate.getTime();
+        this.loaddate      = (loaddate == null) ? 0 : loaddate.getTime();
         this.profileHandle = profileHandle; // must not be null
         this.depth         = depth;
         this.anchors       = anchors;
         this.forkfactor    = forkfactor;
         this.flags         = new kelondroBitfield(rowdef.width(10));
         this.handle        = 0;
-        this.loaddate      = 0;
         this.serverdate    = 0;
         this.imsdate       = 0;
-        this.status        = "loaded(args)";
+        this.statusMessage = "loaded(args)";
         this.initialHash   = url.hashCode();
+        this.status        = serverProcessorJob.STATUS_INITIATED;
     }
     
     public CrawlEntry(final kelondroRow.Entry entry) throws IOException {
@@ -172,7 +173,7 @@ public class CrawlEntry {
         this.loaddate = entry.getColLong(12);
         this.serverdate = entry.getColLong(13);
         this.imsdate = entry.getColLong(14);
-        this.status        = "loaded(kelondroRow.Entry)";
+        this.statusMessage        = "loaded(kelondroRow.Entry)";
         this.initialHash   = url.hashCode();
         return;
     }
@@ -182,12 +183,13 @@ public class CrawlEntry {
         return this.initialHash;
     }
     
-    public void setStatus(final String s) {
-        this.status = s;
+    public void setStatus(final String s, int code) {
+        this.statusMessage = s;
+        this.status = code;
     }
     
     public String getStatus() {
-        return this.status;
+        return this.statusMessage;
     }
     
     private static String normalizeHandle(final int h) {

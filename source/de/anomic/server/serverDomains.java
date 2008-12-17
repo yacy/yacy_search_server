@@ -389,6 +389,7 @@ public class serverDomains {
     public static final int TLD_NorthAmericaOceania_ID = 4; // english-speaking countries
     public static final int TLD_Africa_ID              = 5; // africa
     public static final int TLD_Generic_ID             = 6; // anything else, also raw ip numbers
+    public static final int TLD_Local_ID               = 7; // a local address
 
     static {
         // assign TLD-ids and names
@@ -552,7 +553,7 @@ public class serverDomains {
         }
         final Integer i = TLDID.get(tld);
         if (i == null) {
-            return (isLocal(host)) ? 7 : TLD_Generic_ID;
+            return (isLocal(host)) ? TLD_Local_ID : TLD_Generic_ID;
         }
         return i.intValue();
     }

@@ -32,7 +32,7 @@ public class serverProcessorJob {
     public final static int STATUS_FINISHED  =  3;
     public final static int STATUS_POISON    = 99;
     
-    public int status = 0;
+    public int status = STATUS_INITIATED;
     
     public serverProcessorJob() {
         this.status = STATUS_INITIATED;

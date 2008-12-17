@@ -578,8 +578,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         
         deployThread(plasmaSwitchboardConstants.CLEANUP, "Cleanup", "simple cleaning process for monitoring information", null,
                      new serverInstantBusyThread(this, plasmaSwitchboardConstants.CLEANUP_METHOD_START, plasmaSwitchboardConstants.CLEANUP_METHOD_JOBCOUNT, plasmaSwitchboardConstants.CLEANUP_METHOD_FREEMEM), 600000); // all 5 Minutes, wait 10 minutes until first run
-        deployThread(plasmaSwitchboardConstants.CRAWLSTACK, "Crawl URL Stacker", "process that checks url for double-occurrences and for allowance/disallowance by robots.txt", null,
+        deployThread(plasmaSwitchboardConstants.CRAWLSTACK0, "Crawl URL Stacker", "process that checks url for double-occurrences and for allowance/disallowance by robots.txt", null,
                      new serverInstantBusyThread(crawlStacker, plasmaSwitchboardConstants.CRAWLSTACK_METHOD_START, plasmaSwitchboardConstants.CRAWLSTACK_METHOD_JOBCOUNT, plasmaSwitchboardConstants.CRAWLSTACK_METHOD_FREEMEM), 8000);
+        deployThread(plasmaSwitchboardConstants.CRAWLSTACK1, "Crawl URL Stacker", "process that checks url for double-occurrences and for allowance/disallowance by robots.txt", null,
+                    new serverInstantBusyThread(crawlStacker, plasmaSwitchboardConstants.CRAWLSTACK_METHOD_START, plasmaSwitchboardConstants.CRAWLSTACK_METHOD_JOBCOUNT, plasmaSwitchboardConstants.CRAWLSTACK_METHOD_FREEMEM), 8000);
         deployThread(plasmaSwitchboardConstants.INDEXER, "Indexing", "thread that either initiates a parsing/indexing queue, distributes the index into the DHT, stores parsed documents or flushes the index cache", "/IndexCreateIndexingQueue_p.html",
                      new serverInstantBusyThread(this, plasmaSwitchboardConstants.INDEXER_METHOD_START, plasmaSwitchboardConstants.INDEXER_METHOD_JOBCOUNT, plasmaSwitchboardConstants.INDEXER_METHOD_FREEMEM), 10000);
         deployThread(plasmaSwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL, "Remote Crawl Job", "thread that performes a single crawl/indexing step triggered by a remote peer", null,
@@ -716,6 +718,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             synchronized (this.webIndex) {
                 this.webIndex.close();
             }
+            // TODO: restart CrawlStacker
             setConfig("network.unit.definition", networkDefinition);
             overwriteNetworkDefinition();
             final File indexPrimaryPath = getConfigPath(plasmaSwitchboardConstants.INDEX_PRIMARY_PATH, plasmaSwitchboardConstants.INDEX_PATH_DEFAULT);
@@ -1557,7 +1560,18 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
                 nextEntry = i.next();
                 nextUrl = nextEntry.getKey();
                 // enqueue the hyperlink into the pre-notice-url db
-                crawlStacker.enqueueEntry(nextUrl, entry.urlHash(), entry.initiator(), nextEntry.getValue(), docDate, entry.depth() + 1, entry.profile());
+                crawlStacker.enqueueEntry(new CrawlEntry(
+                        entry.initiator(),
+                        nextUrl,
+                        entry.urlHash(),
+                        nextEntry.getValue(),
+                        null,
+                        docDate,
+                        entry.profile().handle(),
+                        entry.depth() + 1,
+                        0,
+                        0
+                        ));
             }
             final long stackEndTime = System.currentTimeMillis();
             if (log.isInfo()) log.logInfo("CRAWL: ADDED " + hl.size() + " LINKS FROM " + entry.url().toNormalform(false, true) +
@@ -2049,7 +2063,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
                 url, 
                 referrerHash, 
                 (name == null) ? "" : name, 
-                new Date(), 
+                new Date(),
+                null,
                 null,
                 0, 
                 0, 

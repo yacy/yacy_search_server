@@ -7,6 +7,7 @@ import java.io.PrintWriter;
 import java.net.MalformedURLException;
 import java.util.Date;
 
+import de.anomic.crawler.CrawlEntry;
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.data.userDB;
 import de.anomic.http.HttpClient;
@@ -195,15 +196,18 @@ public class urlRedirectord implements serverHandler, Cloneable {
                             sb.crawlQueues.errorURL.remove(urlhash);                            
                             
                             // enqueuing URL for crawling
-                            sb.crawlStacker.enqueueEntry(
+                            sb.crawlStacker.enqueueEntry(new CrawlEntry(
+                                    sb.webIndex.seedDB.mySeed().hash, 
                                     reqURL, 
                                     null, 
-                                    sb.webIndex.seedDB.mySeed().hash, 
                                     "URL Redirector", 
                                     new Date(), 
+                                    null,
+                                    profile.handle(),
                                     0, 
-                                    profile
-                            );   
+                                    0,
+                                    0
+                            ));   
                         } else {
                             reasonString = "Unsupporte file extension";
                         } 
