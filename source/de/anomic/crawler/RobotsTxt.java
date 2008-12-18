@@ -45,7 +45,6 @@ import de.anomic.http.JakartaCommonsHttpResponse;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.kelondroBLOB;
 import de.anomic.kelondro.kelondroBLOBHeap;
-import de.anomic.kelondro.kelondroBLOBTree;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMap;
 import de.anomic.kelondro.kelondroNaturalOrder;
@@ -69,14 +68,10 @@ public class RobotsTxt {
         this.robotsTableFile = robotsTableFile;
         robotsTableFile.getParentFile().mkdirs();
         kelondroBLOB blob = null;
-        if (robotsTableFile.getName().endsWith(".heap")) {
-            try {
-                blob = new kelondroBLOBHeap(robotsTableFile, 64, kelondroNaturalOrder.naturalOrder, 1024 * 1024);
-            } catch (final IOException e) {
-                e.printStackTrace();
-            }
-        } else {
-            blob = new kelondroBLOBTree(robotsTableFile, true, true, 256, 512, '_', kelondroNaturalOrder.naturalOrder, false, false, true);
+        try {
+            blob = new kelondroBLOBHeap(robotsTableFile, 64, kelondroNaturalOrder.naturalOrder, 1024 * 1024);
+        } catch (final IOException e) {
+            e.printStackTrace();
         }
         robotsTable = new kelondroMap(blob, 100);
         syncObjects = new ConcurrentHashMap<String, Long>();
@@ -87,7 +82,14 @@ public class RobotsTxt {
         if (robotsTable != null) robotsTable.close();
         if (!(robotsTableFile.delete())) throw new RuntimeException("cannot delete robots.txt database");
         robotsTableFile.getParentFile().mkdirs();
-        robotsTable = new kelondroMap(new kelondroBLOBTree(robotsTableFile, true, true, 256, 512, '_', kelondroNaturalOrder.naturalOrder, false, false, true), 100);
+        kelondroBLOB blob = null;
+        try {
+            blob = new kelondroBLOBHeap(robotsTableFile, 64, kelondroNaturalOrder.naturalOrder, 1024 * 1024);
+        } catch (final IOException e) {
+            e.printStackTrace();
+        }
+        robotsTable = new kelondroMap(blob, 100);
+        syncObjects.clear();
     }
     
     public void clear() throws IOException {

@@ -59,7 +59,7 @@ import de.anomic.index.indexRWIRowEntry;
 import de.anomic.index.indexRepositoryReference;
 import de.anomic.index.indexURLReference;
 import de.anomic.index.indexWord;
-import de.anomic.kelondro.kelondroBLOBTree;
+import de.anomic.kelondro.kelondroBLOBHeap;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroMapDataMining;
@@ -929,7 +929,7 @@ public final class yacy {
             final String[] dbFileNames = {"seed.new.db","seed.old.db","seed.pot.db"};
             for (int i=0; i < dbFileNames.length; i++) {
                 final File dbFile = new File(yacyDBPath,dbFileNames[i]);
-                final kelondroMapDataMining db = new kelondroMapDataMining(new kelondroBLOBTree(dbFile, true, true, yacySeedDB.commonHashLength, 480, '#', kelondroBase64Order.enhancedCoder, true, false, true), 500, yacySeedDB.sortFields, yacySeedDB.longaccFields, yacySeedDB.doubleaccFields, null, null);
+                final kelondroMapDataMining db = new kelondroMapDataMining(new kelondroBLOBHeap(dbFile, yacySeedDB.commonHashLength, kelondroBase64Order.enhancedCoder, 1024 * 512), 500, yacySeedDB.sortFields, yacySeedDB.longaccFields, yacySeedDB.doubleaccFields, null, null);
                 
                 kelondroMapDataMining.mapIterator it;
                 it = db.maps(true, false);

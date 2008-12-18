@@ -33,7 +33,6 @@ import java.util.regex.Pattern;
 
 import de.anomic.kelondro.kelondroBLOB;
 import de.anomic.kelondro.kelondroBLOBHeap;
-import de.anomic.kelondro.kelondroBLOBTree;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroCloneableIterator;
 import de.anomic.kelondro.kelondroException;
@@ -76,7 +75,12 @@ public class CrawlProfile {
         if (profileTable != null) profileTable.close();
         if (!(profileTableFile.delete())) throw new RuntimeException("cannot delete crawl profile database");
         profileTableFile.getParentFile().mkdirs();
-        final kelondroBLOB dyn = new kelondroBLOBTree(profileTableFile, true, true, yacySeedDB.commonHashLength, 2000, '#', kelondroNaturalOrder.naturalOrder, false, false, true);
+        kelondroBLOB dyn = null;
+        try {
+            dyn = new kelondroBLOBHeap(profileTableFile, yacySeedDB.commonHashLength, kelondroNaturalOrder.naturalOrder, 1024 * 64);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         profileTable = new kelondroMap(dyn, 500);
     }
     
