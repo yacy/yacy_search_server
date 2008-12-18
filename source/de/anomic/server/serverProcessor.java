@@ -63,7 +63,24 @@ public class serverProcessor<J extends serverProcessorJob> {
     }
     
     public int queueSize() {
-        return input.size();
+        return this.input.size();
+    }
+    
+    public void clear() {
+        if (this.input != null) this.input.clear();
+    }
+    
+    public synchronized void relaxCapacity() {
+        if (this.input.size() == 0) return;
+        if (this.input.remainingCapacity() > 1000) return;
+        BlockingQueue<J> i = new LinkedBlockingQueue<J>();
+        J e;
+        while (this.input.size() > 0) {
+            e = this.input.poll();
+            if (e == null) break;
+            i.add(e);
+        }
+        this.input = i;
     }
     
     @SuppressWarnings("unchecked")
@@ -89,20 +106,31 @@ public class serverProcessor<J extends serverProcessorJob> {
     }
     
     @SuppressWarnings("unchecked")
-    public void shutdown(final long millisTimeout) {
+    public void announceShutdown() {
         if (executor == null) return;
         if (executor.isShutdown()) return;
+        // before we put pills into the queue, make sure that they will take them
+        relaxCapacity();
         // put poison pills into the queue
         for (int i = 0; i < poolsize; i++) {
             try {
+                serverLog.logInfo("serverProcessor", "putting poison pill in queue for " + this.methodName + ", thread " + i);
                 input.put((J) serverProcessorJob.poisonPill); // put a poison pill into the queue which will kill the job
+                serverLog.logInfo("serverProcessor", ".. poison pill is in queue for " + this.methodName + ", thread " + i + ". awaiting termination");
             } catch (final InterruptedException e) { }
         }
-        // wait for shutdown
-        try {
-            executor.awaitTermination(millisTimeout, TimeUnit.MILLISECONDS);
-        } catch (final InterruptedException e) {}
-        executor.shutdown();
+    }
+    
+    public void awaitShutdown(final long millisTimeout) {
+        if (executor != null & !executor.isShutdown()) {
+            // wait for shutdown
+            try {
+                executor.awaitTermination(millisTimeout, TimeUnit.MILLISECONDS);
+                
+            } catch (final InterruptedException e) {}
+            executor.shutdown();
+        }
+        serverLog.logInfo("serverProcessor", "queue for " + this.methodName + ": shutdown.");
         this.executor = null;
         this.input = null;
     }

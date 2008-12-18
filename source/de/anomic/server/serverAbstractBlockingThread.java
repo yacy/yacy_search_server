@@ -46,6 +46,7 @@ public abstract class serverAbstractBlockingThread<J extends serverProcessorJob>
         return this.output;
     }
 
+    @SuppressWarnings("unchecked")
     public void run() {
         this.open();
         if (log != null) {
@@ -61,10 +62,11 @@ public abstract class serverAbstractBlockingThread<J extends serverProcessorJob>
                 timestamp = System.currentTimeMillis();
                 memstamp0 = serverMemory.used();
                 final J in = this.input.take();
-                if ((in == null) || (in.status == serverProcessorJob.STATUS_POISON)) {
+                if ((in == null) || (in == serverProcessorJob.poisonPill) || (in.status == serverProcessorJob.STATUS_POISON)) {
                     // the poison pill: shutdown
                     // a null element is pushed to the queue on purpose to signal
                     // that a termination should be made
+                    if (this.output != null) this.output.enQueue((J) serverProcessorJob.poisonPill); // pass on the pill
                     this.running = false;
                     break;
                 }

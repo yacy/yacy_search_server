@@ -578,10 +578,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         
         deployThread(plasmaSwitchboardConstants.CLEANUP, "Cleanup", "simple cleaning process for monitoring information", null,
                      new serverInstantBusyThread(this, plasmaSwitchboardConstants.CLEANUP_METHOD_START, plasmaSwitchboardConstants.CLEANUP_METHOD_JOBCOUNT, plasmaSwitchboardConstants.CLEANUP_METHOD_FREEMEM), 600000); // all 5 Minutes, wait 10 minutes until first run
-        deployThread(plasmaSwitchboardConstants.CRAWLSTACK0, "Crawl URL Stacker", "process that checks url for double-occurrences and for allowance/disallowance by robots.txt", null,
-                     new serverInstantBusyThread(crawlStacker, plasmaSwitchboardConstants.CRAWLSTACK_METHOD_START, plasmaSwitchboardConstants.CRAWLSTACK_METHOD_JOBCOUNT, plasmaSwitchboardConstants.CRAWLSTACK_METHOD_FREEMEM), 8000);
-        deployThread(plasmaSwitchboardConstants.CRAWLSTACK1, "Crawl URL Stacker", "process that checks url for double-occurrences and for allowance/disallowance by robots.txt", null,
-                    new serverInstantBusyThread(crawlStacker, plasmaSwitchboardConstants.CRAWLSTACK_METHOD_START, plasmaSwitchboardConstants.CRAWLSTACK_METHOD_JOBCOUNT, plasmaSwitchboardConstants.CRAWLSTACK_METHOD_FREEMEM), 8000);
         deployThread(plasmaSwitchboardConstants.INDEXER, "Indexing", "thread that either initiates a parsing/indexing queue, distributes the index into the DHT, stores parsed documents or flushes the index cache", "/IndexCreateIndexingQueue_p.html",
                      new serverInstantBusyThread(this, plasmaSwitchboardConstants.INDEXER_METHOD_START, plasmaSwitchboardConstants.INDEXER_METHOD_JOBCOUNT, plasmaSwitchboardConstants.INDEXER_METHOD_FREEMEM), 10000);
         deployThread(plasmaSwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL, "Remote Crawl Job", "thread that performes a single crawl/indexing step triggered by a remote peer", null,
@@ -1036,10 +1032,15 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         if (transferIdxThread != null) stopTransferWholeIndex(false);
         log.logConfig("SWITCHBOARD SHUTDOWN STEP 2: sending termination signal to threaded indexing");
         // closing all still running db importer jobs
-        indexingDocumentProcessor.shutdown(4000);
-        indexingCondensementProcessor.shutdown(3000);
-        indexingAnalysisProcessor.shutdown(2000);
-        indexingStorageProcessor.shutdown(1000);
+        indexingDocumentProcessor.announceShutdown();
+        crawlStacker.close();
+        indexingDocumentProcessor.awaitShutdown(4000);
+        indexingCondensementProcessor.announceShutdown();
+        indexingAnalysisProcessor.announceShutdown();
+        indexingStorageProcessor.announceShutdown();
+        indexingCondensementProcessor.awaitShutdown(3000);
+        indexingAnalysisProcessor.awaitShutdown(2000);
+        indexingStorageProcessor.awaitShutdown(1000);
         this.dbImportManager.close();
         JakartaCommonsHttpClient.closeAllConnections();
         wikiDB.close();
@@ -1048,7 +1049,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         userDB.close();
         bookmarksDB.close();
         messageDB.close();
-        crawlStacker.close();
         robots.close();
         parser.close();
         webStructure.flushCitationReference("crg");
@@ -1159,11 +1159,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             if (webIndex.queuePreStack.size() == 0) {
                 //log.logFine("deQueue: nothing to do, queue is emtpy");
                 return doneSomething; // nothing to do
-            }
-
-            if (crawlStacker.size() >= getConfigLong(plasmaSwitchboardConstants.CRAWLSTACK_SLOTS, 2000)) {
-                if (this.log.isFine()) log.logFine("deQueue: too many processes in stack crawl thread queue (" + "stackCrawlQueue=" + crawlStacker.size() + ")");
-                return doneSomething;
             }
 
             // if we were interrupted we should return now

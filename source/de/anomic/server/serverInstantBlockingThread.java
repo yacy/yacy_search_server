@@ -76,7 +76,10 @@ public class serverInstantBlockingThread<J extends serverProcessorJob> extends s
         
     @SuppressWarnings("unchecked")
     public J job(final J next) throws Exception {
-        if (next == null || next == serverProcessorJob.poisonPill) return null; // poison pill: shutdown
+        // see if we got a poison pill to tell us to shut down
+        if (next == null) return (J) serverProcessorJob.poisonPill;
+        if (next == serverProcessorJob.poisonPill || next.status == serverProcessorJob.STATUS_POISON) return next;
+
         instantThreadCounter++;
         //System.out.println("started job " + this.handle + ": " + this.getName());
         jobs.put(this.handle, this.getName());

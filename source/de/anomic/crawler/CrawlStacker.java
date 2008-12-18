@@ -31,15 +31,13 @@ package de.anomic.crawler;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 
 import de.anomic.index.indexReferenceBlacklist;
 import de.anomic.index.indexURLReference;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.server.serverDomains;
+import de.anomic.server.serverProcessor;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyURL;
 
@@ -47,7 +45,7 @@ public final class CrawlStacker {
     
     final serverLog log = new serverLog("STACKCRAWL");
     
-    private BlockingQueue<CrawlEntry> fastQueue, slowQueue;
+    private serverProcessor<CrawlEntry> fastQueue, slowQueue;
     private long                      dnsHit, dnsMiss;
     private CrawlQueues               nextQueue;
     private plasmaWordIndex           wordIndex;
@@ -67,13 +65,14 @@ public final class CrawlStacker {
         this.acceptLocalURLs = acceptLocalURLs;
         this.acceptGlobalURLs = acceptGlobalURLs;
         
-        this.fastQueue = new LinkedBlockingQueue<CrawlEntry>();
-        this.slowQueue = new ArrayBlockingQueue<CrawlEntry>(1000);
+        this.fastQueue = new serverProcessor<CrawlEntry>(this, "job", 10000, null, 2);
+        this.slowQueue = new serverProcessor<CrawlEntry>(this, "job",  1000, null, 5);
+        
         this.log.logInfo("STACKCRAWL thread initialized.");
     }
 
     public int size() {
-        return this.fastQueue.size() + this.slowQueue.size();
+        return this.fastQueue.queueSize() + this.slowQueue.queueSize();
     }
 
     public void clear() {
@@ -83,9 +82,10 @@ public final class CrawlStacker {
     
     public void close() {
         this.log.logInfo("Shutdown. Flushing remaining " + size() + " crawl stacker job entries. please wait.");
-        while (size() > 0) {
-            if (!job()) break;
-        }
+        this.fastQueue.announceShutdown();
+        this.slowQueue.announceShutdown();
+        this.fastQueue.awaitShutdown(2000);
+        this.slowQueue.awaitShutdown(2000);
         
         this.log.logInfo("Shutdown. Closing stackCrawl queue.");
 
@@ -107,19 +107,17 @@ public final class CrawlStacker {
         }
     }
     
+    /*
     public boolean job() {
-        if (this.fastQueue.size() > 0 && job(this.fastQueue)) return true;
-        if (this.slowQueue.size() == 0) return false;
+        if (this.fastQueue.queueSize() > 0 && job(this.fastQueue)) return true;
+        if (this.slowQueue.queueSize() == 0) return false;
         return job(this.slowQueue);
     }
+    */
     
-    private boolean job(BlockingQueue<CrawlEntry> queue) {
+    public CrawlEntry job(CrawlEntry entry) {
         // this is the method that is called by the busy thread from outside
-        if (queue.size() == 0) return false;
-        
-        // get the next entry from the queue
-        CrawlEntry entry = queue.poll();
-        if (entry == null) return false;
+        if (entry == null) return null;
 
         try {
             final String rejectReason = stackCrawl(entry);
@@ -132,9 +130,9 @@ public final class CrawlStacker {
             }
         } catch (final Exception e) {
             CrawlStacker.this.log.logWarning("Error while processing stackCrawl entry.\n" + "Entry: " + entry.toString() + "Error: " + e.toString(), e);
-            return false;
+            return null;
         }
-        return true;
+        return null;
     }
  
     public void enqueueEntry(final CrawlEntry entry) {
@@ -144,14 +142,14 @@ public final class CrawlStacker {
 
         if (prefetchHost(entry.url().getHost())) {
             try {
-                this.fastQueue.put(entry);
+                this.fastQueue.enQueue(entry);
                 this.dnsHit++;
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         } else {
             try {
-                this.slowQueue.put(entry);
+                this.slowQueue.enQueue(entry);
                 this.dnsMiss++; 
             } catch (InterruptedException e) {
                 e.printStackTrace();
