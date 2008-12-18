@@ -294,6 +294,7 @@ public class kelondroEcoTable implements kelondroIndex {
                 L = is[j];
                 assert L.intValue() < file.size() : "L.intValue() = " + L.intValue() + ", file.size = " + file.size(); // prevent ooBounds Exception
                 d.add(L);
+                if (L.intValue() >= file.size()) continue; // prevent IndexOutOfBoundsException
                 file.get(L.intValue(), b, 0); // TODO: fix IndexOutOfBoundsException here
                 inconsistentEntry = rowdef.newEntry(b);
                 rows.addUnique(inconsistentEntry);
