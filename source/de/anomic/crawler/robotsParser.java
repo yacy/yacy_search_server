@@ -147,15 +147,18 @@ public final class robotsParser {
                         if (isRule4YaCyAgent) rule4YaCyFound = true;
                     }
                 } else if (lineUpper.startsWith(ROBOTS_CRAWL_DELAY)) {
-                    pos = line.indexOf(" ");
-                    if (pos != -1) {
-                    	try {
-                    	    // the crawl delay can be a float number and means number of seconds
-                    	    crawlDelayMillis = (long) (1000.0 * Float.parseFloat(line.substring(pos).trim()));
-                    	} catch (final NumberFormatException e) {
-                    		// invalid crawling delay
-                    	}
-                    } 
+                    inBlock = true;
+                	if (isRule4YaCyAgent || isRule4AllAgents) {
+                		pos = line.indexOf(" ");
+                		if (pos != -1) {
+                			try {
+                				// the crawl delay can be a float number and means number of seconds
+                				crawlDelayMillis = (long) (1000.0 * Float.parseFloat(line.substring(pos).trim()));
+                			} catch (final NumberFormatException e) {
+                				// invalid crawling delay
+                			}
+                		}
+                	}
                 } else if (lineUpper.startsWith(ROBOTS_DISALLOW) || 
                            lineUpper.startsWith(ROBOTS_ALLOW)) {
                     inBlock = true;
