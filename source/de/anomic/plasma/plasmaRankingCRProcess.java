@@ -34,7 +34,7 @@ import de.anomic.kelondro.kelondroAttrSeq;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroCollectionIndex;
-import de.anomic.kelondro.kelondroFlexTable;
+import de.anomic.kelondro.kelondroEcoTable;
 import de.anomic.kelondro.kelondroIndex;
 import de.anomic.kelondro.kelondroMicroDate;
 import de.anomic.kelondro.kelondroRow;
@@ -242,7 +242,7 @@ public class plasmaRankingCRProcess {
         kelondroCollectionIndex newseq = null;
         if (newdb) {
             final File path = to_file.getParentFile(); // path to storage place
-            newacc = new kelondroFlexTable(path, CRG_accname, CRG_accrow, 0, false);
+            newacc = new kelondroEcoTable(new File(path, CRG_accname), CRG_accrow, kelondroEcoTable.tailCacheUsageAuto, 0, 0);
             newseq = new kelondroCollectionIndex(path, CRG_seqname, 12, kelondroBase64Order.enhancedCoder, 2, 9, CRG_colrow, false);
         } else {
             if (!(to_file.exists())) {

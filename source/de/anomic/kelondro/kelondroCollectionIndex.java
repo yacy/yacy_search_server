@@ -105,12 +105,6 @@ public class kelondroCollectionIndex {
         final String sn = fillZ(Integer.toHexString(serialNumber).toUpperCase(), 2);
         return new File(path, filenameStub + "." + lf + "." + cs + "." + pn + "." + sn + ".kca"); // kelondro collection array
     }
-   
-    private static File propertyFile(final File path, final String filenameStub, final int loadfactor, final int chunksize) {
-        final String lf = fillZ(Integer.toHexString(loadfactor).toUpperCase(), 2);
-        final String cs = fillZ(Integer.toHexString(chunksize).toUpperCase(), 4);
-        return new File(path, filenameStub + "." + lf + "." + cs + ".properties");
-    }
     
     public kelondroCollectionIndex(final File path, final String filenameStub, final int keyLength, final kelondroByteOrder indexOrder,
                                    final int loadfactor, final int maxpartitions, final kelondroRow rowdef, boolean useCommons) throws IOException {
@@ -130,7 +124,9 @@ public class kelondroCollectionIndex {
             this.commonsPath.mkdirs();
         }
         final File f = new File(path, filenameStub + ".index");
-        
+        if (f.isDirectory()) {
+            kelondroFlexTable.delete(path, filenameStub + ".index");
+        }
         if (f.exists()) {
             serverLog.logFine("STARTUP", "OPENING COLLECTION INDEX");
             
@@ -161,16 +157,9 @@ public class kelondroCollectionIndex {
             serverLog.logFine("STARTUP", "STARTED INITIALIZATION OF NEW COLLECTION INDEX WITH " + initialSpace + " ENTRIES.  THIS WILL TAKE SOME TIME. " + (serverMemory.available() / 1024 / 1024) + "MB AVAILABLE.");
             final kelondroRow indexRowdef = indexRow(keyLength, indexOrder);
             final long necessaryRAM4fullTable = minimumRAM4Eco + (indexRowdef.objectsize + 4) * initialSpace * 3 / 2;
-            final long necessaryRAM4fullIndex = minimumRAM4Eco + (indexRowdef.primaryKeyLength + 4) * initialSpace * 3 / 2;
             
             // initialize (new generation) index table from file
-            if (serverMemory.request(necessaryRAM4fullTable, false)) {
-                index = new kelondroEcoTable(f, indexRowdef, kelondroEcoTable.tailCacheUsageAuto, EcoFSBufferSize, initialSpace);
-            } else if (serverMemory.request(necessaryRAM4fullIndex, false)) {
-                index = new kelondroEcoTable(f, indexRowdef, kelondroEcoTable.tailCacheDenyUsage, EcoFSBufferSize, initialSpace);
-            } else {
-                index = new kelondroFlexTable(path, filenameStub + ".index", indexRowdef, initialSpace, true);
-            }
+            index = new kelondroEcoTable(f, indexRowdef, (serverMemory.request(necessaryRAM4fullTable, false)) ? kelondroEcoTable.tailCacheUsageAuto : kelondroEcoTable.tailCacheDenyUsage, EcoFSBufferSize, initialSpace);
             
             // open array files
             this.arrays = new HashMap<String, kelondroFixedWidthArray>(); // all entries will be dynamically created with getArray()
@@ -283,35 +272,18 @@ public class kelondroCollectionIndex {
         final kelondroRow indexRowdef = indexRow(keylength, indexOrder);
         kelondroIndex theindex;
         if (f.isDirectory()) {
-            // use a flextable
-            theindex = new kelondroCache(new kelondroFlexTable(path, filenameStub + ".index", indexRowdef, initialSpace, true));
-        
-            // save/check property file for this array
-            final File propfile = propertyFile(path, filenameStub, loadfactor, rowdef.objectsize);
-            Map<String, String> props = new HashMap<String, String>();
-            if (propfile.exists()) {
-                props = serverFileUtils.loadHashMap(propfile);
-                final String stored_rowdef = props.get("rowdef");
-                if ((rowdef != null) && (!(rowdef.subsumes(new kelondroRow(stored_rowdef, rowdef.objectOrder, 0))))) {
-                    System.out.println("FATAL ERROR: stored rowdef '" + stored_rowdef + "' does not match with new rowdef '" + 
-                            rowdef + "' for array cluster '" + path + "/" + filenameStub + "'");
-                    System.exit(-1);
-                }
-            }
-            props.put("rowdef", rowdef.toString());
-            serverFileUtils.saveMap(propfile, props, "CollectionIndex properties");
+            kelondroFlexTable.delete(path, filenameStub + ".index");
+        }
+        // open a ecotable
+        final long records = f.length() / indexRowdef.objectsize;
+        final long necessaryRAM4fullTable = minimumRAM4Eco + (indexRowdef.objectsize + 4) * records * 3 / 2;
+        final boolean fullCache = serverMemory.request(necessaryRAM4fullTable, false);
+        if (fullCache) {
+            theindex = new kelondroEcoTable(f, indexRowdef, kelondroEcoTable.tailCacheUsageAuto, EcoFSBufferSize, initialSpace);
+            //if (!((kelondroEcoTable) theindex).usesFullCopy()) theindex = new kelondroCache(theindex);
         } else {
-            // open a ecotable
-            final long records = f.length() / indexRowdef.objectsize;
-            final long necessaryRAM4fullTable = minimumRAM4Eco + (indexRowdef.objectsize + 4) * records * 3 / 2;
-            final boolean fullCache = serverMemory.request(necessaryRAM4fullTable, false);
-            if (fullCache) {
-                theindex = new kelondroEcoTable(f, indexRowdef, kelondroEcoTable.tailCacheUsageAuto, EcoFSBufferSize, initialSpace);
-                //if (!((kelondroEcoTable) theindex).usesFullCopy()) theindex = new kelondroCache(theindex);
-            } else {
-                //theindex = new kelondroCache(new kelondroEcoTable(f, indexRowdef, kelondroEcoTable.tailCacheDenyUsage, EcoFSBufferSize, initialSpace));
-                theindex = new kelondroEcoTable(f, indexRowdef, kelondroEcoTable.tailCacheDenyUsage, EcoFSBufferSize, initialSpace);
-            }
+            //theindex = new kelondroCache(new kelondroEcoTable(f, indexRowdef, kelondroEcoTable.tailCacheDenyUsage, EcoFSBufferSize, initialSpace));
+            theindex = new kelondroEcoTable(f, indexRowdef, kelondroEcoTable.tailCacheDenyUsage, EcoFSBufferSize, initialSpace);
         }
         return theindex;
     }
@@ -918,7 +890,7 @@ public class kelondroCollectionIndex {
             
             // printout of index
             collectionIndex.close();
-            final kelondroFlexTable index = new kelondroFlexTable(path, filenameStub + ".index", kelondroCollectionIndex.indexRow(9, kelondroNaturalOrder.naturalOrder), 0, true);
+            final kelondroEcoTable index = new kelondroEcoTable(new File(path, filenameStub + ".index"), kelondroCollectionIndex.indexRow(9, kelondroNaturalOrder.naturalOrder), kelondroEcoTable.tailCacheUsageAuto, 0, 0);
             index.print();
             index.close();
         } catch (final IOException e) {

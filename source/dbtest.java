@@ -13,10 +13,8 @@ import java.util.Random;
 import javax.imageio.ImageIO;
 
 import de.anomic.kelondro.kelondroBase64Order;
-import de.anomic.kelondro.kelondroCache;
 import de.anomic.kelondro.kelondroCloneableIterator;
 import de.anomic.kelondro.kelondroEcoTable;
-import de.anomic.kelondro.kelondroFlexTable;
 import de.anomic.kelondro.kelondroIndex;
 import de.anomic.kelondro.kelondroIntBytesMap;
 import de.anomic.kelondro.kelondroProfile;
@@ -197,14 +195,6 @@ public class dbtest {
     public static kelondroIndex selectTableType(final String dbe, final String tablename, final kelondroRow testRow) throws Exception {
         if (dbe.equals("kelondroRowSet")) {
             return new kelondroRowSet(testRow, 0);
-        }
-        if (dbe.equals("kelondroTree")) {
-            final File tablefile = new File(tablename + ".kelondro.db");
-            return new kelondroCache(new kelondroTree(tablefile, true, 0, testRow));
-        }
-        if (dbe.equals("kelondroFlexTable")) {
-            final File tablepath = new File(tablename).getParentFile();
-            return new kelondroFlexTable(tablepath, new File(tablename).getName(), testRow, 0, true);
         }
         if (dbe.equals("kelondroSplitTable")) {
             final File tablepath = new File(tablename).getParentFile();

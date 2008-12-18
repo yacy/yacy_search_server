@@ -676,6 +676,20 @@ public class kelondroEcoTable implements kelondroIndex {
         }
     }
     
+    public void print() throws IOException {
+        System.out.println("PRINTOUT of table, length=" + size());
+        Entry row;
+        byte[] key;
+        kelondroCloneableIterator<byte[]> i = keys(true, null);
+        while (i.hasNext()) {
+            System.out.print("row " + i + ": ");
+            key = i.next();
+            row = get(key);
+            System.out.println(row.toString());
+        }
+        System.out.println("EndOfTable");
+    }
+
     public static void main(final String[] args) {
         // open a file, add one entry and exit
         final File f = new File(args[0]);

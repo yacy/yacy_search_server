@@ -47,6 +47,10 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
     protected kelondroBytesIntMap index;
     private boolean RAMIndex;
     
+    /**
+     * Deprecated Class. Please use kelondroEcoTable instead
+     */
+    @Deprecated
     public kelondroFlexTable(final File path, final String tablename, final kelondroRow rowdef, int minimumSpace, final boolean resetOnFail) {
     	// the buffersize applies to a possible load of the ram-index
         // the minimumSpace is a initial allocation space for the index; names the number of index slots
@@ -72,43 +76,21 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         System.out.println("*** Last Startup time: " + stt + " milliseconds");
         final long start = System.currentTimeMillis();
 
-        if (serverMemory.request(neededRAM, false)) {
-			// we can use a RAM index
-			if (indexfile.exists()) {
-				// delete existing index file
-				System.out.println("*** Delete File index " + indexfile);
-				indexfile.delete();
-			}
-
-			// fill the index
-			System.out.print("*** Loading RAM index for " + size() + " entries from " + newpath + "; available RAM = " + (serverMemory.available() >> 20) + " MB, allocating " + (neededRAM >> 20) + " MB for index.");
-			index = initializeRamIndex(minimumSpace);
-
-			System.out.println(" -done-");
-			System.out.println(index.size() + " index entries initialized and sorted from " + super.col[0].size() + " keys.");
-			RAMIndex = true;
-			tableTracker.put(this.filename(), this);
-		} else {
-			// too less ram for a ram index
-			kelondroIndex ki;
-			if (indexfile.exists()) {
-				// use existing index file
-				System.out.println("*** Using File index " + indexfile);
-				ki = new kelondroCache(kelondroTree.open(indexfile, true, 0, treeIndexRow(rowdef.width(0), rowdef.objectOrder), 2, 80));
-				RAMIndex = false;
-			} else {
-				// generate new index file
-				System.out.println("*** Generating File index for " + size() + " entries from " + indexfile);
-				System.out.println("*** Cause: too less RAM (" + serverMemory.available() + " Bytes) configured. Assign at least " + (neededRAM / 1024 / 1024) + " MB more RAM to enable a RAM index.");
-				ki = initializeTreeIndex(indexfile, 0, rowdef.objectOrder);
-
-				System.out.println(" -done-");
-				System.out.println(ki.size() + " entries indexed from " + super.col[0].size() + " keys.");
-				RAMIndex = false;
-			}
-			index = new kelondroBytesIntMap(ki);
-			assert this.size() == index.size() : "content.size() = " + this.size() + ", index.size() = " + index.size();
+		// we use a RAM index
+		if (indexfile.exists()) {
+			// delete existing index file
+			System.out.println("*** Delete File index " + indexfile);
+			indexfile.delete();
 		}
+
+		// fill the index
+		System.out.print("*** Loading RAM index for " + size() + " entries from " + newpath + "; available RAM = " + (serverMemory.available() >> 20) + " MB, allocating " + (neededRAM >> 20) + " MB for index.");
+		index = initializeRamIndex(minimumSpace);
+
+		System.out.println(" -done-");
+		System.out.println(index.size() + " index entries initialized and sorted from " + super.col[0].size() + " keys.");
+		RAMIndex = true;
+		tableTracker.put(this.filename(), this);
 
         // check consistency
         final ArrayList<Integer[]> doubles = index.removeDoubles();
@@ -185,36 +167,6 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         return ri;
     }
 
-    private kelondroIndex initializeTreeIndex(final File indexfile, final long preloadTime, final kelondroByteOrder objectOrder) throws IOException {
-		final kelondroIndex treeindex = new kelondroCache(new kelondroTree(indexfile, true, preloadTime, treeIndexRow(rowdef.primaryKeyLength, objectOrder), 2, 80));
-		final Iterator<kelondroNode> content = super.col[0].contentNodes(-1);
-		kelondroNode node;
-		kelondroRow.Entry indexentry;
-		int i, c = 0;
-        final int all = super.col[0].size();
-		final long start = System.currentTimeMillis();
-		long last = start;
-		while (content.hasNext()) {
-			node = content.next();
-			i = node.handle().hashCode();
-			indexentry = treeindex.row().newEntry();
-			indexentry.setCol(0, node.getValueRow());
-			indexentry.setCol(1, i);
-			treeindex.addUnique(indexentry);
-			c++;
-			if (System.currentTimeMillis() - last > 30000) {
-				System.out.println(".. generated " + c + "/" + all + " entries, " + ((System.currentTimeMillis() - start) / c * (all - c) / 60000) + " minutes remaining");
-				System.out.flush();
-				last = System.currentTimeMillis();
-			}
-		}
-		return treeindex;
-	}
-
-	private static final kelondroRow treeIndexRow(final int keywidth, final kelondroByteOrder objectOrder) {
-		return new kelondroRow("byte[] key-" + keywidth + ", int reference-4 {b256}", objectOrder, 0);
-	}
-    
     public synchronized kelondroRow.Entry get(final byte[] key) throws IOException {
         if (index == null) return null; // case may happen during shutdown
 		final int pos = index.geti(key);

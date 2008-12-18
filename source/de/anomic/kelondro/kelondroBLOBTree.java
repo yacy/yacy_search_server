@@ -55,6 +55,10 @@ public class kelondroBLOBTree implements kelondroBLOB {
     private final kelondroRow rowdef;
     private File file;
     
+    /**
+     * Deprecated Class. Please use kelondroBLOBHeap instead
+     */
+    @Deprecated
     public kelondroBLOBTree(final File file, final boolean useNodeCache, final boolean useObjectCache, final int key,
             final int nodesize, final char fillChar, final kelondroByteOrder objectOrder, final boolean usetree, final boolean writebuffer, final boolean resetOnFail) {
         // creates or opens a dynamic tree

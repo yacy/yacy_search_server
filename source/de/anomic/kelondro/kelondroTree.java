@@ -74,10 +74,15 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
     protected       int                readAheadChunkSize = 100;
     protected       long               lastIteratorCount = readAheadChunkSize;
     
+    /**
+     * Deprecated Class. Please use kelondroEcoTable instead
+     */
+    @Deprecated
     public kelondroTree(final File file, final boolean useNodeCache, final long preloadTime, final kelondroRow rowdef) throws IOException {
         this(file, useNodeCache, preloadTime, rowdef, rowdef.columns() /* txtProps */, 80 /* txtPropWidth */);
     }
 
+    @Deprecated
     public kelondroTree(final File file, final boolean useNodeCache, final long preloadTime, final kelondroRow rowdef, final int txtProps, final int txtPropsWidth) throws IOException {
         // opens an existing tree file or creates a new tree file
         super(file, useNodeCache, preloadTime,
@@ -91,10 +96,7 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
         this.loopDetectionOrder = new kelondroByteOrder.StringOrder(rowdef.objectOrder);
     }
     
-    public static final kelondroTree open(final File file, final boolean useNodeCache, final long preloadTime, final kelondroRow rowdef) {
-        return open(file, useNodeCache, preloadTime, rowdef, rowdef.columns() /* txtProps */, 80 /* txtPropWidth */);
-    }
-    
+    @Deprecated
     public static final kelondroTree open(final File file, final boolean useNodeCache, final long preloadTime, final kelondroRow rowdef, final int txtProps, final int txtPropsWidth) {
         // opens new or existing file; in case that any error occur the file is deleted again and it is tried to create the file again
         // if that fails, the method returns null
@@ -113,33 +115,6 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
         }
     }
     
-    public kelondroTree(final kelondroRA ra, final String filename, final boolean useNodeCache, final long preloadTime, final kelondroRow rowdef, final boolean exitOnFail) {
-        // this creates a new tree within a kelondroRA
-        this(ra, filename, useNodeCache, preloadTime, rowdef, new kelondroNaturalOrder(true), rowdef.columns() /* txtProps */, 80 /* txtPropWidth */, exitOnFail);
-    }
-
-    public kelondroTree(final kelondroRA ra, final String filename, final boolean useNodeCache, final long preloadTime, final kelondroRow rowdef, final kelondroByteOrder objectOrder, final int txtProps, final int txtPropsWidth, final boolean exitOnFail) {
-        // this creates a new tree within a kelondroRA
-        super(ra, filename, useNodeCache, preloadTime,
-              thisOHBytes, thisOHHandles, rowdef,
-              thisFHandles, txtProps, txtPropsWidth, exitOnFail);
-        try {
-            setHandle(root, null); // define the root value
-        } catch (final IOException e) {
-            super.logFailure("cannot set root handle / " + e.getMessage());
-            if (exitOnFail) System.exit(-1);
-            throw new RuntimeException("cannot set root handle / " + e.getMessage());
-        }
-        super.setLogger(log);
-        this.loopDetectionOrder = new kelondroByteOrder.StringOrder(rowdef.objectOrder);
-    }
-    
-    public kelondroTree(final kelondroRA ra, final String filename, final boolean useNodeCache, final long preloadTime) throws IOException {
-        // this opens a file with an existing tree in a kelondroRA
-        super(ra, filename, useNodeCache, preloadTime);
-        super.setLogger(log);
-    }
-
     public void clear() throws IOException {
     	super.clear();
         setHandle(root, null); 
