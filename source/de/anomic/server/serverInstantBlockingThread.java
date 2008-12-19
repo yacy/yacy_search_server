@@ -26,7 +26,6 @@ package de.anomic.server;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 
 import de.anomic.server.logging.serverLog;
@@ -40,13 +39,12 @@ public class serverInstantBlockingThread<J extends serverProcessorJob> extends s
     public static int instantThreadCounter = 0;
     public static final ConcurrentHashMap<Long, String> jobs = new ConcurrentHashMap<Long, String>();
     
-    public serverInstantBlockingThread(final Object env, final String jobExec, final BlockingQueue<J> input, final serverProcessor<J> output) {
+    public serverInstantBlockingThread(final Object env, final String jobExec, final serverProcessor<J> manager) {
         // jobExec is the name of a method of the object 'env' that executes the one-step-run
         // jobCount is the name of a method that returns the size of the job
         
-        // set the blocking queues for input and output
-        this.setInputQueue(input);
-        this.setOutputProcess(output);
+        // set the manager of blocking queues for input and output
+        this.setManager(manager);
         
         // define execution class
         this.jobExecMethod = execMethod(env, jobExec);
@@ -71,7 +69,7 @@ public class serverInstantBlockingThread<J extends serverProcessorJob> extends s
     }
     
     public int getJobCount() {
-        return this.getInputQueue().size();
+        return this.getManager().queueSize();
     }
         
     @SuppressWarnings("unchecked")
@@ -79,7 +77,8 @@ public class serverInstantBlockingThread<J extends serverProcessorJob> extends s
         // see if we got a poison pill to tell us to shut down
         if (next == null) return (J) serverProcessorJob.poisonPill;
         if (next == serverProcessorJob.poisonPill || next.status == serverProcessorJob.STATUS_POISON) return next;
-
+        long t = System.currentTimeMillis();
+        
         instantThreadCounter++;
         //System.out.println("started job " + this.handle + ": " + this.getName());
         jobs.put(this.handle, this.getName());
@@ -107,6 +106,7 @@ public class serverInstantBlockingThread<J extends serverProcessorJob> extends s
         }
         instantThreadCounter--;
         jobs.remove(this.handle);
+        this.getManager().increaseJobTime(System.currentTimeMillis() - t);
         return out;
     }
     

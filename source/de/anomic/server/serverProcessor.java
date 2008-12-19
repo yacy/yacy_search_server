@@ -25,6 +25,8 @@
 package de.anomic.server;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -37,33 +39,71 @@ public class serverProcessor<J extends serverProcessorJob> {
 
     public static final int availableCPU = Runtime.getRuntime().availableProcessors();
     public static int       useCPU = availableCPU;
+    private static final ArrayList<serverProcessor<?>> processMonitor = new ArrayList<serverProcessor<?>>();
 
     private ExecutorService executor;
     private BlockingQueue<J> input;
     private serverProcessor<J> output;
     private int poolsize;
     private Object environment;
-    private String methodName;
+    private String processName, methodName, description;
+    private String[] childs;
+    private long blockTime, execTime, passOnTime; 
+    private long execCount;
     
-    public serverProcessor(final Object env, final String jobExec, final int inputQueueSize, final serverProcessor<J> output) {
-        this(env, jobExec, inputQueueSize, output, useCPU + 1);
-    }
-
-    public serverProcessor(final Object env, final String jobExec, final int inputQueueSize, final serverProcessor<J> output, final int poolsize) {
+    public serverProcessor(
+            String name, String description, String[] childnames,
+            final Object env, final String jobExecMethod, final int inputQueueSize, final serverProcessor<J> output, final int poolsize) {
         // start a fixed number of executors that handle entries in the process queue
         this.environment = env;
-        this.methodName = jobExec;
+        this.processName = name;
+        this.description = description;
+        this.methodName = jobExecMethod;
+        this.childs = childnames;
         this.input = new LinkedBlockingQueue<J>(inputQueueSize);
         this.output = output;
         this.poolsize = poolsize;
-        executor = Executors.newCachedThreadPool(new NamePrefixThreadFactory(jobExec));
+        this.executor = Executors.newCachedThreadPool(new NamePrefixThreadFactory(jobExecMethod));
         for (int i = 0; i < poolsize; i++) {
-            executor.submit(new serverInstantBlockingThread<J>(env, jobExec, input, output));
+            this.executor.submit(new serverInstantBlockingThread<J>(env, jobExecMethod, this));
         }
+        // init statistics
+        blockTime = 0;
+        execTime = 0;
+        passOnTime = 0;
+        execCount = 0;
+        
+        // store this object for easy monitoring
+        processMonitor.add(this);
     }
     
     public int queueSize() {
         return this.input.size();
+    }
+    
+    public int queueSizeMax() {
+        return this.input.size() + this.input.remainingCapacity();
+    }
+    
+    public int concurrency() {
+        return this.poolsize;
+    }
+    
+    public J take() throws InterruptedException {
+        // read from the input queue
+        long t = System.currentTimeMillis();
+        J j = this.input.take();
+        this.blockTime += System.currentTimeMillis() - t;
+        return j;
+    }
+    
+    public void passOn(J next) throws InterruptedException {
+        // don't mix this method up with enQueue()!
+        // this method enqueues into the _next_ queue, not this queue!
+        if (this.output == null) return;
+        long t = System.currentTimeMillis();
+        this.output.enQueue(next);
+        this.passOnTime += System.currentTimeMillis() - t;
     }
     
     public void clear() {
@@ -114,9 +154,9 @@ public class serverProcessor<J extends serverProcessorJob> {
         // put poison pills into the queue
         for (int i = 0; i < poolsize; i++) {
             try {
-                serverLog.logInfo("serverProcessor", "putting poison pill in queue for " + this.methodName + ", thread " + i);
+                serverLog.logInfo("serverProcessor", "putting poison pill in queue " + this.processName + ", thread " + i);
                 input.put((J) serverProcessorJob.poisonPill); // put a poison pill into the queue which will kill the job
-                serverLog.logInfo("serverProcessor", ".. poison pill is in queue for " + this.methodName + ", thread " + i + ". awaiting termination");
+                serverLog.logInfo("serverProcessor", ".. poison pill is in queue " + this.processName + ", thread " + i + ". awaiting termination");
             } catch (final InterruptedException e) { }
         }
     }
@@ -130,9 +170,73 @@ public class serverProcessor<J extends serverProcessorJob> {
             } catch (final InterruptedException e) {}
             executor.shutdown();
         }
-        serverLog.logInfo("serverProcessor", "queue for " + this.methodName + ": shutdown.");
+        serverLog.logInfo("serverProcessor", "queue " + this.processName + ": shutdown.");
         this.executor = null;
         this.input = null;
+        // remove entry from monitor
+        Iterator<serverProcessor<?>> i = processes();
+        serverProcessor<?> p;
+        while (i.hasNext()) {
+            p = i.next();
+            if (p == this) {
+                i.remove();
+                break;
+            }
+        }
+    }
+    
+    public static Iterator<serverProcessor<?>> processes() {
+        return processMonitor.iterator();
+    }
+    
+    protected void increaseJobTime(long time) {
+        this.execTime += time;
+        this.execCount++;
+    }
+    
+    public String getName() {
+        return this.processName;
+    }
+    
+    public String getDescription() {
+        return this.description;
+    }
+    
+    public String getChilds() {
+        StringBuilder s = new StringBuilder();
+        for (int i = 0; i < this.childs.length; i++) {
+            s.append(this.childs[i]);
+            s.append(' ');
+        }
+        return s.toString();
+    }
+    
+    /**
+     * the block time is the time that a take() blocks until it gets a value
+     * @return
+     */
+    public long getBlockTime() {
+        return blockTime;
+    }
+    
+    /**
+     * the exec time is the complete time of the execution and processing of the value from take()
+     * @return
+     */
+    public long getExecTime() {
+        return execTime;
+    }
+    public long getExecCount() {
+        return execCount;
+    }
+    
+    /**
+     * the passOn time is the time that a put() takes to enqueue a result value to the next queue
+     * in case that the target queue is limited and may be full, this value may increase
+     * @return
+     */
+    public long getPassOnTime() {
+        return passOnTime;
     }
     
 }

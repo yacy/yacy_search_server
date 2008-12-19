@@ -564,10 +564,26 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         this.clusterhashes = this.webIndex.seedDB.clusterHashes(getConfig("cluster.peers.yacydomain", ""));
         
         // deploy blocking threads
-        indexingStorageProcessor      = new serverProcessor<indexingQueueEntry>(this, "storeDocumentIndex", serverProcessor.useCPU, null, 1);
-        indexingAnalysisProcessor     = new serverProcessor<indexingQueueEntry>(this, "webStructureAnalysis", serverProcessor.useCPU + 1, indexingStorageProcessor);
-        indexingCondensementProcessor = new serverProcessor<indexingQueueEntry>(this, "condenseDocument", serverProcessor.useCPU + 2, indexingAnalysisProcessor);
-        indexingDocumentProcessor     = new serverProcessor<indexingQueueEntry>(this, "parseDocument", serverProcessor.useCPU + 3, indexingCondensementProcessor);
+        indexingStorageProcessor      = new serverProcessor<indexingQueueEntry>(
+                "storeDocumentIndex",
+                "This is the sequencing step of the indexing queue: no concurrency is wanted here, because the access of the indexer works better if it is not concurrent. Files are written as streams, councurrency would destroy IO performance. In this process the words are written to the RWI cache, which flushes if it is full.",
+                new String[]{"RWI/Cache/Collections"},
+                this, "storeDocumentIndex", serverProcessor.useCPU + 40, null, 1);
+        indexingAnalysisProcessor     = new serverProcessor<indexingQueueEntry>(
+                "webStructureAnalysis",
+                "This just stores the link structure of the document into a web structure database.",
+                new String[]{"storeDocumentIndex"},
+                this, "webStructureAnalysis", serverProcessor.useCPU + 20, indexingStorageProcessor, serverProcessor.useCPU + 1);
+        indexingCondensementProcessor = new serverProcessor<indexingQueueEntry>(
+                "condenseDocument",
+                "This does a structural analysis of plain texts: markup of headlines, slicing into phrases (i.e. sentences), markup with position, counting of words, calculation of term frequency.",
+                new String[]{"webStructureAnalysis"},
+                this, "condenseDocument", serverProcessor.useCPU + 10, indexingAnalysisProcessor, serverProcessor.useCPU + 1);
+        indexingDocumentProcessor     = new serverProcessor<indexingQueueEntry>(
+                "parseDocument",
+                "This does the parsing of the newly loaded documents from the web. The result is not only a plain text document, but also a list of URLs that are embedded into the document. The urls are handed over to the CrawlStacker. This process has two child process queues!",
+                new String[]{"condenseDocument", "CrawlStacker"},
+                this, "parseDocument", serverProcessor.useCPU + 1, indexingCondensementProcessor, serverProcessor.useCPU + 1);
         
         // deploy busy threads
         log.logConfig("Starting Threads");
@@ -711,10 +727,14 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         plasmaSearchEvent.cleanupEvents(true);
         // switch the networks
         synchronized (this) {
+            // shut down
             synchronized (this.webIndex) {
                 this.webIndex.close();
             }
-            // TODO: restart CrawlStacker
+            this.crawlStacker.announceClose();
+            this.crawlStacker.close();
+            
+            // start up
             setConfig("network.unit.definition", networkDefinition);
             overwriteNetworkDefinition();
             final File indexPrimaryPath = getConfigPath(plasmaSwitchboardConstants.INDEX_PRIMARY_PATH, plasmaSwitchboardConstants.INDEX_PATH_DEFAULT);
@@ -723,6 +743,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             final boolean useCommons = getConfigBool("index.storeCommons", false);
             final int redundancy = (int) sb.getConfigLong("network.unit.dhtredundancy.senior", 1);
             this.webIndex = new plasmaWordIndex(getConfig(plasmaSwitchboardConstants.NETWORK_NAME, ""), getLog(), indexPrimaryPath, indexSecondaryPath, wordCacheMaxCount, useCommons, redundancy);
+            // we need a new stacker, because this uses network-specific attributes to sort out urls (local, global)
+            this.crawlStacker = new CrawlStacker(
+                    crawlQueues,
+                    this.webIndex,
+                    "local.any".indexOf(getConfig("network.unit.domain", "global")) >= 0,
+                    "global.any".indexOf(getConfig("network.unit.domain", "global")) >= 0);
         }
         // start up crawl jobs
         continueCrawlJob(plasmaSwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
@@ -1033,14 +1059,15 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         log.logConfig("SWITCHBOARD SHUTDOWN STEP 2: sending termination signal to threaded indexing");
         // closing all still running db importer jobs
         indexingDocumentProcessor.announceShutdown();
-        crawlStacker.close();
         indexingDocumentProcessor.awaitShutdown(4000);
+        crawlStacker.announceClose();
         indexingCondensementProcessor.announceShutdown();
         indexingAnalysisProcessor.announceShutdown();
         indexingStorageProcessor.announceShutdown();
         indexingCondensementProcessor.awaitShutdown(3000);
         indexingAnalysisProcessor.awaitShutdown(2000);
         indexingStorageProcessor.awaitShutdown(1000);
+        crawlStacker.close();
         this.dbImportManager.close();
         JakartaCommonsHttpClient.closeAllConnections();
         wikiDB.close();

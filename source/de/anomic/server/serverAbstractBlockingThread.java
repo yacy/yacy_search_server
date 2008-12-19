@@ -24,26 +24,17 @@
 
 package de.anomic.server;
 
-import java.util.concurrent.BlockingQueue;
-
 import de.anomic.server.logging.serverLog;
 
 public abstract class serverAbstractBlockingThread<J extends serverProcessorJob> extends serverAbstractThread implements serverBlockingThread<J> {
 
-    private BlockingQueue<J> input = null;
-    private serverProcessor<J> output = null;
+    private serverProcessor<J> manager = null;
 
-    public void setInputQueue(final BlockingQueue<J> queue) {
-        this.input = queue;
+    public void setManager(final serverProcessor<J> manager) {
+        this.manager = manager;
     }
-    public void setOutputProcess(final serverProcessor<J> processor) {
-        this.output = processor;
-    }
-    public BlockingQueue<J> getInputQueue() {
-        return this.input;
-    }
-    public serverProcessor<J> getOutputProcess() {
-        return this.output;
+    public serverProcessor<J> getManager() {
+        return this.manager;
     }
 
     @SuppressWarnings("unchecked")
@@ -61,17 +52,17 @@ public abstract class serverAbstractBlockingThread<J extends serverProcessorJob>
                 // do job
                 timestamp = System.currentTimeMillis();
                 memstamp0 = serverMemory.used();
-                final J in = this.input.take();
+                final J in = this.manager.take();
                 if ((in == null) || (in == serverProcessorJob.poisonPill) || (in.status == serverProcessorJob.STATUS_POISON)) {
                     // the poison pill: shutdown
                     // a null element is pushed to the queue on purpose to signal
                     // that a termination should be made
-                    if (this.output != null) this.output.enQueue((J) serverProcessorJob.poisonPill); // pass on the pill
+                    //this.manager.enQueueNext((J) serverProcessorJob.poisonPill); // pass on the pill
                     this.running = false;
                     break;
                 }
                 final J out = this.job(in);
-                if ((out != null) && (this.output != null)) this.output.enQueue(out);
+                if (out != null) this.manager.passOn(out);
                 // do memory and busy/idle-count/time monitoring
                 memstamp1 = serverMemory.used();
                 if (memstamp1 >= memstamp0) {

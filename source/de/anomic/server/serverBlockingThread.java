@@ -24,14 +24,10 @@
 
 package de.anomic.server;
 
-import java.util.concurrent.BlockingQueue;
-
 public interface serverBlockingThread<J extends serverProcessorJob> extends serverThread {
 
-    public void setInputQueue(BlockingQueue<J> queue);
-    public void setOutputProcess(serverProcessor<J> queue);
-    public BlockingQueue<J> getInputQueue();
-    public serverProcessor<J> getOutputProcess();
+    public void setManager(serverProcessor<J> queue);
+    public serverProcessor<J> getManager();
 
     public J job(J next) throws Exception;
     // performes one job procedure; this loopes until terminate() is called

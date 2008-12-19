@@ -65,8 +65,8 @@ public final class CrawlStacker {
         this.acceptLocalURLs = acceptLocalURLs;
         this.acceptGlobalURLs = acceptGlobalURLs;
         
-        this.fastQueue = new serverProcessor<CrawlEntry>(this, "job", 10000, null, 2);
-        this.slowQueue = new serverProcessor<CrawlEntry>(this, "job",  1000, null, 5);
+        this.fastQueue = new serverProcessor<CrawlEntry>("CrawlStackerFast", "This process checks new urls before they are enqueued into the balancer (proper, double-check, correct domain, filter)", new String[]{"Balancer"}, this, "job", 10000, null, 2);
+        this.slowQueue = new serverProcessor<CrawlEntry>("CrawlStackerSlow", "This is like CrawlStackerFast, but does additionaly a DNS lookup. The CrawlStackerFast does not need this because it can use the DNS cache.", new String[]{"Balancer"}, this, "job",  1000, null, 5);
         
         this.log.logInfo("STACKCRAWL thread initialized.");
     }
@@ -80,8 +80,14 @@ public final class CrawlStacker {
         this.slowQueue.clear();
     }
     
+    public void announceClose() {
+        this.log.logInfo("Flushing remaining " + size() + " crawl stacker job entries.");
+        this.fastQueue.announceShutdown();
+        this.slowQueue.announceShutdown();
+    }
+    
     public void close() {
-        this.log.logInfo("Shutdown. Flushing remaining " + size() + " crawl stacker job entries. please wait.");
+        this.log.logInfo("Shutdown. waiting for remaining " + size() + " crawl stacker job entries. please wait.");
         this.fastQueue.announceShutdown();
         this.slowQueue.announceShutdown();
         this.fastQueue.awaitShutdown(2000);
