@@ -44,7 +44,9 @@ public final class list {
     public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
         if (post == null || env == null) throw new NullPointerException("post: " + post + ", sb: " + env);
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
-        
+
+        final String blackListName = post.get("listname", "");
+
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
         if ((post == null) || (env == null)) return prop;
@@ -73,9 +75,11 @@ public final class list {
 
             if (filenamesarray.length > 0){
                 for (int i = 0;i < filenamesarray.length; i++) {
-                    final String filename = filenamesarray[i];
-                    final File fileObj = new File(listsPath,filename);
-                    out.append(listManager.getListString(fileObj, false)).append(serverCore.CRLF_STRING);
+                    if (blackListName.equals("") || filenamesarray[i].equals(blackListName)) {
+                        final String filename = filenamesarray[i];
+                        final File fileObj = new File(listsPath,filename);
+                        out.append(listManager.getListString(fileObj, false)).append(serverCore.CRLF_STRING);
+                    }
                 }
             }
 
