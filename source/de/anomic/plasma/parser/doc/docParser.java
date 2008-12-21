@@ -27,7 +27,8 @@ package de.anomic.plasma.parser.doc;
 import java.io.InputStream;
 import java.util.Hashtable;
 
-import org.textmining.text.extraction.WordExtractor;
+import org.textmining.extraction.TextExtractor;
+import org.textmining.extraction.word.WordTextExtractorFactory;
 
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.parser.AbstractParser;
@@ -49,7 +50,7 @@ public class docParser extends AbstractParser implements Parser {
      * @see Parser#getLibxDependences()
      */
     private static final String[] LIBX_DEPENDENCIES = new String[] {
-        "tm-extractors-0.4.jar"
+        "tm-extractors-1.0.jar"
     };    
     
 	public docParser() {
@@ -62,8 +63,9 @@ public class docParser extends AbstractParser implements Parser {
 
         
 		try {	
-			  final WordExtractor extractor = new WordExtractor();
-			  final String contents = extractor.extractText(source);
+			  final WordTextExtractorFactory extractorFactory = new WordTextExtractorFactory();
+			  final TextExtractor extractor = extractorFactory.textExtractor(source);
+			  final String contents = extractor.getText();
 
               final plasmaParserDocument theDoc = new plasmaParserDocument(
                       location,

@@ -20,7 +20,7 @@
 	<classpathentry kind="lib" path="libx/log4j-1.2.9.jar"/>
 	<classpathentry kind="lib" path="libx/odf_utils_05_11_29.jar"/>
 	<classpathentry kind="lib" path="libx/sbbi-upnplib-1.0.3.jar"/>
-	<classpathentry kind="lib" path="libx/tm-extractors-0.4.jar"/>
+	<classpathentry kind="lib" path="libx/tm-extractors-1.0.jar"/>
 	<classpathentry kind="lib" path="libx/wsdl4j.jar"/>
 	<classpathentry kind="lib" path="libx/xerces.jar"/>
 	<classpathentry kind="lib" path="libx/poi-3.0-alpha2-20060616.jar"/>
