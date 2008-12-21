@@ -16,8 +16,6 @@
        <classPath>..\..\lib\commons-pool.jar</classPath>
        <classPath>..\..\libx\poi-3.0-alpha2-20060616.jar</classPath>
        <classPath>..\..\libx\poi-scratchpad-3.0-20060616.jar</classPath>
-       <classPath>..\..\libx\axis-ant.jar</classPath>
-       <classPath>..\..\libx\axis.jar</classPath>
        <classPath>..\..\libx\bzip2.jar</classPath>
        <classPath>..\..\libx\commons-codec-1.3.jar</classPath>
        <classPath>..\..\libx\commons-discovery.jar</classPath>
@@ -31,7 +29,6 @@
        <classPath>..\..\libx\log4j-1.2.9.jar</classPath>
        <classPath>..\..\libx\odf_utils_05_11_29.jar</classPath>
        <classPath>..\..\libx\PDFBox-0.7.2.jar</classPath>
-       <classPath>..\..\libx\saaj.jar</classPath>
        <classPath>..\..\libx\sbbi-upnplib-1.0.3.jar</classPath>
        <classPath>..\..\libx\tar.jar</classPath>
        <classPath>..\..\libx\tm-extractors-0.4.jar</classPath>

@@ -19,7 +19,6 @@
 	<classpathentry kind="lib" path="libx/jsch-0.1.21.jar"/>
 	<classpathentry kind="lib" path="libx/log4j-1.2.9.jar"/>
 	<classpathentry kind="lib" path="libx/odf_utils_05_11_29.jar"/>
-	<classpathentry kind="lib" path="libx/saaj.jar"/>
 	<classpathentry kind="lib" path="libx/sbbi-upnplib-1.0.3.jar"/>
 	<classpathentry kind="lib" path="libx/tm-extractors-0.4.jar"/>
 	<classpathentry kind="lib" path="libx/wsdl4j.jar"/>
