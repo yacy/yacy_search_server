@@ -219,7 +219,7 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
                     if (USAGE.FREEC == 0) {
                         // generate new entry
                         final int index = USAGE.allCount();
-                        entryFile.write(seekpos(index) + overhead, chunk, 0, ROW.objectsize); // occupy space, othervise the USAGE computaton does not work
+                        entryFile.write(seekpos(index) + overhead, chunk, 0, ROW.objectsize); // occupy space, otherwise the USAGE computation does not work
                         USAGE.USEDC++;
                         writeused(false);
                         return index;
@@ -230,13 +230,14 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
                     // take link
                     int index = USAGE.FREEH.index;
                     if (index == kelondroHandle.NUL) {
-                        serverLog.logSevere("kelondroTray/" + filename, "INTERNAL ERROR (DATA INCONSISTENCY): re-use of records failed, lost " + (USAGE.FREEC + 1) + " records.");
+                        serverLog.logSevere("kelondroAbstractRecords/" + filename, "INTERNAL ERROR (DATA INCONSISTENCY): re-use of records failed, lost " + (USAGE.FREEC + 1) + " records.");
                         // try to heal..
-                        USAGE.USEDC = USAGE.allCount() + 1;
+                        USAGE.USEDC = (int) ((entryFile.length() - POS_NODES) / recordsize);
+                        index = USAGE.USEDC;
+                        USAGE.USEDC++;
                         USAGE.FREEC = 0;
-                        index = USAGE.USEDC - 1;
+                        //entryFile.write(seekpos(index) + overhead, spaceChunk, 0, ROW.objectsize); // overwrite space
                     } else {
-                        //System.out.println("*DEBUG* ALLOCATED DELETED INDEX " + index);
                         // check for valid seek position
                         final long seekp = seekpos(USAGE.FREEH);
                         if (seekp >= entryFile.length()) {
@@ -249,12 +250,23 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
                         } else {
                             // read link to next element of FREEH chain
                             USAGE.FREEH.index = entryFile.readInt(seekp);
-                            assert ((USAGE.FREEH.index == kelondroHandle.NUL) && (USAGE.FREEC == 0)) || seekpos(USAGE.FREEH) < entryFile.length() : "allocatePayload: USAGE.FREEH.index = " + USAGE.FREEH.index + ", entryFile.length() = " + entryFile.length();
+                            // check consistency
+                            if (((USAGE.FREEH.index != kelondroHandle.NUL) || (USAGE.FREEC != 0)) && seekpos(USAGE.FREEH) >= entryFile.length()) {
+                                // the FREEH pointer cannot be correct, because it points to a place outside of the file.
+                                // to correct this, we reset the FREH pointer and return a index that has been calculated as if USAGE.FREE == 0
+                                serverLog.logSevere("kelondroAbstractRecords/" + filename, "INTERNAL ERROR (DATA INCONSISTENCY): USAGE.FREEH.index = " + USAGE.FREEH.index + ", entryFile.length() = " + entryFile.length() + "; wrong FREEH has been patched, lost " + (USAGE.FREEC + 1) + " records.");
+                                // try to heal..
+                                USAGE.USEDC = (int) ((entryFile.length() - POS_NODES) / recordsize);
+                                index = USAGE.USEDC;
+                                USAGE.USEDC++;
+                                USAGE.FREEC = 0;
+                                //entryFile.write(seekpos(index) + overhead, spaceChunk, 0, ROW.objectsize); // overwrite space
+                            }
                         }
                     }
+                    entryFile.write(seekpos(index) + overhead, chunk, 0, ROW.objectsize); // overwrite space
                     USAGE.writeused(false);
                     USAGE.writefree();
-                    entryFile.write(seekpos(index) + overhead, chunk, 0, ROW.objectsize); // overwrite space
                     return index;
                 }
             //}

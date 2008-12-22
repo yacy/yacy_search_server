@@ -373,20 +373,26 @@ public class kelondroCollectionIndex {
         arrayEntry.setCol(1, collection.exportCollection());
 
         // write a new entry in this array
-        final int newRowNumber = array.add(arrayEntry);
+        try {
+            final int newRowNumber = array.add(arrayEntry);
 
-        // store the new row number in the index
-        indexrow.setCol(idx_col_key, key);
-        indexrow.setCol(idx_col_chunksize, this.payloadrow.objectsize);
-        indexrow.setCol(idx_col_chunkcount, collection.size());
-        indexrow.setCol(idx_col_clusteridx, (byte) partitionNumber);
-        indexrow.setCol(idx_col_flags, (byte) 0);
-        indexrow.setCol(idx_col_indexpos, newRowNumber);
-        indexrow.setCol(idx_col_lastread, kelondroRowCollection.daysSince2000(System.currentTimeMillis()));
-        indexrow.setCol(idx_col_lastwrote, kelondroRowCollection.daysSince2000(System.currentTimeMillis()));
+            // store the new row number in the index
+            indexrow.setCol(idx_col_key, key);
+            indexrow.setCol(idx_col_chunksize, this.payloadrow.objectsize);
+            indexrow.setCol(idx_col_chunkcount, collection.size());
+            indexrow.setCol(idx_col_clusteridx, (byte) partitionNumber);
+            indexrow.setCol(idx_col_flags, (byte) 0);
+            indexrow.setCol(idx_col_indexpos, newRowNumber);
+            indexrow.setCol(idx_col_lastread, kelondroRowCollection.daysSince2000(System.currentTimeMillis()));
+            indexrow.setCol(idx_col_lastwrote, kelondroRowCollection.daysSince2000(System.currentTimeMillis()));
 
-        // after calling this method there must be an index.addUnique(indexrow);
-        return indexrow;
+            // after calling this method there must be an index.addUnique(indexrow);
+            return indexrow;
+        } catch (Exception e) {
+            // the index appears to be corrupted at a particular point
+            serverLog.logWarning("kelondroCollectionIndex", "array " + arrayFile(this.path, this.filenameStub, this.loadfactor, this.payloadrow.objectsize, partitionNumber, serialNumber).toString() + " has errors \"" + e.getMessage() + "\" (error #" + indexErrors + ")");
+            return null;
+        }
     }
     
     private void array_add(
@@ -451,7 +457,7 @@ public class kelondroCollectionIndex {
             // create new row and index entry
             if ((collection != null) && (collection.size() > 0)) {
                 indexrow = array_new(key, collection); // modifies indexrow
-                index.addUnique(indexrow);
+                if (indexrow != null) index.addUnique(indexrow);
             }
             return;
         }
@@ -497,7 +503,7 @@ public class kelondroCollectionIndex {
         kelondroRow.Entry indexrow = index.get(key);
         if (indexrow == null) {
             indexrow = array_new(key, container); // modifies indexrow
-            index.addUnique(indexrow); // write modified indexrow
+            if (indexrow != null) index.addUnique(indexrow); // write modified indexrow
         } else {
             // merge with the old collection
             // attention! this modifies the indexrow entry which must be written with index.put(indexrow) afterwards!
