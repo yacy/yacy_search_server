@@ -712,8 +712,8 @@ public final class httpdProxyHandler {
         
         // we respond on the request by using the cache, the cache is fresh        
         try {
-            modifyProxyHeaders(cachedResponseHeader, httpVer);
-            
+            prepareResponseHeader(cachedResponseHeader, httpVer);               
+
             // replace date field in old header by actual date, this is according to RFC
             cachedResponseHeader.put(httpHeader.DATE, serverDate.formatRFC1123(new Date()));
             
@@ -1031,8 +1031,10 @@ public final class httpdProxyHandler {
                 } else {
                     // read content-length bytes into memory
                     bodyData = new byte[contentLength];
-                    int r = body.read(bodyData, 0, contentLength);
-                    if (r < contentLength) throw new IOException("not all read: " + r + " from " + contentLength);
+                    int bytes_read = 0;
+                    while(bytes_read < contentLength) {
+                        bytes_read += body.read(bodyData, bytes_read, contentLength-bytes_read);
+                    }
                 }
                 body = new ByteArrayInputStream(bodyData);
             }
@@ -1050,7 +1052,7 @@ public final class httpdProxyHandler {
             
             final httpChunkedOutputStream chunked = setTransferEncoding(conProp, responseHeader, res.getStatusCode(), countedRespond);
             
-            prepareResponseHeader(responseHeader, res.getHttpVer()); 
+            prepareResponseHeader(responseHeader, res.getHttpVer());
             
             // sending the respond header back to the client
             if (chunked != null) {
