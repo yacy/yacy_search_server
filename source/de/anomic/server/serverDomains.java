@@ -37,7 +37,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.plasma.plasmaSwitchboard;
 
 public class serverDomains {
@@ -45,15 +44,10 @@ public class serverDomains {
     // a dns cache
     private static final Map<String, InetAddress> nameCacheHit = new ConcurrentHashMap<String, InetAddress>(); // a not-synchronized map resulted in deadlocks
     private static final Set<String> nameCacheMiss = Collections.synchronizedSet(new HashSet<String>());
-    private static final kelondroMScoreCluster<String> nameCacheHitAges = new kelondroMScoreCluster<String>();
-    private static final kelondroMScoreCluster<String> nameCacheMissAges = new kelondroMScoreCluster<String>();
-    private static final int maxNameCacheHitAge = 24 * 60 * 60; // 24 hours in minutes
-    private static final int maxNameCacheMissAge = 24 * 60 * 60; // 24 hours in minutes
-    private static final int maxNameCacheHitSize = 3000; 
-    private static final int maxNameCacheMissSize = 3000; 
+    private static final int maxNameCacheHitSize = 8000; 
+    private static final int maxNameCacheMissSize = 8000; 
     public  static final List<String> nameCacheNoCachingPatterns = Collections.synchronizedList(new LinkedList<String>());
     private static final Set<String> nameCacheNoCachingList = Collections.synchronizedSet(new HashSet<String>());
-    private static final long startTime = System.currentTimeMillis();
 
     /**
      * ! ! !   A T T E N T I O N   A T T E N T I O N   A T T E N T I O N   ! ! !
@@ -90,7 +84,7 @@ public class serverDomains {
          "GD=Grenada",
          "GP=Guadeloupe",
          "GS=South Georgia and the South Sandwich Islands", // south of south america, but administrated by british, has only a scientific base
-         "GU=Guam", // strategical US basis close to Japan
+         "GU=Guam", // strategic US basis close to Japan
          "HM=Heard and McDonald Islands", // uninhabited, sub-Antarctic island, owned by Australia
          "HT=Haiti",
          "IO=British Indian Ocean Territory", // UK-US naval support facility in the Indian Ocean
@@ -402,16 +396,6 @@ public class serverDomains {
         insertTLDProps(TLD_Generic,             TLD_Generic_ID);
         // the id=7 is used to flag local addresses
     }
-     
-    /**
-    * Converts the time to a non negative int
-    *
-    * @param longTime Time in miliseconds since 01/01/1970 00:00 GMT
-    * @return int seconds since startTime
-    */
-    private static int intTime(final long longTime) {
-        return (int) Math.max(0, ((longTime - startTime) / 1000));
-    }
 
     /**
     * Does an DNS-Check to resolve a hostname to an IP.
@@ -443,10 +427,10 @@ public class serverDomains {
         //System.out.println("***DEBUG dnsResolve(" + host + ")");
         try {
             boolean doCaching = true;
-            ip = InetAddress.getByName(host);
+            ip = InetAddress.getByName(host); // this makes the DNS request to backbone
             if ((ip == null) ||
                 (ip.isLoopbackAddress()) ||
-                (nameCacheNoCachingList.contains(ip.getHostName()))
+                (nameCacheNoCachingList.contains(host))
             ) {
                 doCaching = false;
             } else {
@@ -454,9 +438,9 @@ public class serverDomains {
                 String nextPattern;
                 while (noCachingPatternIter.hasNext()) {
                     nextPattern = noCachingPatternIter.next();
-                    if (ip.getHostName().matches(nextPattern)) {
+                    if (host.matches(nextPattern)) {
                         // disallow dns caching for this host
-                        nameCacheNoCachingList.add(ip.getHostName());
+                        nameCacheNoCachingList.add(host);
                         doCaching = false;
                         break;
                     }
@@ -468,10 +452,7 @@ public class serverDomains {
                 flushHitNameCache();
                 
                 // add new entries
-                synchronized (nameCacheHit) {
-                    nameCacheHit.put(ip.getHostName(), ip);
-                    nameCacheHitAges.setScore(ip.getHostName(), intTime(System.currentTimeMillis()));
-                }
+                nameCacheHit.put(host, ip);
             }
             return ip;
         } catch (final UnknownHostException e) {
@@ -480,7 +461,6 @@ public class serverDomains {
             
             // add new entries
             nameCacheMiss.add(host);
-            nameCacheMissAges.setScore(host, intTime(System.currentTimeMillis()));
         }
         return null;
     }
@@ -512,28 +492,14 @@ public class serverDomains {
     * Removes old entries from the dns hit cache
     */
     public static void flushHitNameCache() {
-        final int cutofftime = intTime(System.currentTimeMillis()) - maxNameCacheHitAge;
-        String k;
-        while ((nameCacheHitAges.size() > maxNameCacheHitSize) || (nameCacheHitAges.getMinScore() < cutofftime)) {
-            k = nameCacheHitAges.getMinObject();
-            if (nameCacheHit.remove(k) == null) break; // ensure termination
-            nameCacheHitAges.deleteScore(k);
-        }
-        
+        if (nameCacheHit.size() > maxNameCacheHitSize) nameCacheHit.clear();
     }
     
     /**
      * Removes old entries from the dns miss cache
      */
      public static void flushMissNameCache() {
-        final int cutofftime = intTime(System.currentTimeMillis()) - maxNameCacheMissAge;
-        String k;
-        while ((nameCacheMissAges.size() > maxNameCacheMissSize) || (nameCacheMissAges.getMinScore() < cutofftime)) {
-            k = nameCacheMissAges.getMinObject();
-            if (!nameCacheMiss.remove(k)) break; // ensure termination
-            nameCacheMissAges.deleteScore(k);
-        }
-        
+         if (nameCacheMiss.size() > maxNameCacheMissSize) nameCacheMiss.clear();
     }
 
     private static InetAddress[] localAddresses = null;

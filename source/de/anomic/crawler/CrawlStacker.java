@@ -29,7 +29,6 @@
 package de.anomic.crawler;
 
 import java.net.UnknownHostException;
-import java.util.ArrayList;
 import java.util.Date;
 
 import de.anomic.index.indexReferenceBlacklist;
@@ -50,10 +49,6 @@ public final class CrawlStacker {
     private CrawlQueues               nextQueue;
     private plasmaWordIndex           wordIndex;
     private boolean                   acceptLocalURLs, acceptGlobalURLs;
-    
-    // objects for the prefetch task
-    private final ArrayList<String> dnsfetchHosts = new ArrayList<String>();    
-    
     
     // this is the process that checks url for double-occurrences and for allowance/disallowance by robots.txt
     
@@ -102,15 +97,13 @@ public final class CrawlStacker {
         // returns true when the host was known in the dns cache.
         // If not, the host is stacked on the fetch stack and false is returned
         try {
-            serverDomains.dnsResolveFromCache(host);
-            return true;
+            if (serverDomains.dnsResolveFromCache(host) != null) return true; // found entry
         } catch (final UnknownHostException e) {
-            synchronized (this) {
-                dnsfetchHosts.add(host);
-                notifyAll();
-            }
+            // we know that this is unknown
             return false;
         }
+        // we just don't know anything about that host
+        return false;
     }
     
     /*

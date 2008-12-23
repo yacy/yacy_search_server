@@ -91,6 +91,7 @@ public class serverProcessor<J extends serverProcessorJob> {
     
     public J take() throws InterruptedException {
         // read from the input queue
+        if (this.input == null) return null;
         long t = System.currentTimeMillis();
         J j = this.input.take();
         this.blockTime += System.currentTimeMillis() - t;
