@@ -61,6 +61,7 @@ import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.NoRouteToHostException;
 import java.net.Socket;
+import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
@@ -665,6 +666,9 @@ public final class httpdProxyHandler {
                 chunkedOut.flush();
             }
             } // end hasBody
+            } catch(SocketException se) {
+        	// client cut proxy connection, abort download
+        	res.abort();
             } finally {
                 // if opened ...
                 if(res != null) {
@@ -1090,6 +1094,9 @@ public final class httpdProxyHandler {
                 chunked.finish();
             }
             outStream.flush();
+            } catch(SocketException se) {
+        	// connection closed by client, abort download
+        	res.abort();
             } finally {
                 // if opened ...
                 if(res != null) {
@@ -1383,6 +1390,9 @@ public final class httpdProxyHandler {
                     forceConnectionClose(conProp);
                     return;
                 }
+            } catch (SocketException se) {
+        	// connection closed by client, abort download
+        	response.abort();
             } catch (final Exception e) {
                 throw new IOException(e.getMessage());
             } finally {

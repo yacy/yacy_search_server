@@ -123,6 +123,15 @@ public class JakartaCommonsHttpResponse {
 		return new httpdByteCountInputStream(inStream, incomingAccountingName);
 	}
 
+	/**
+	 * Abort Download, e. g. when proxy connection was closed 
+	 * Do not forget to call closeStream afterwards...
+	 * 
+	 */
+	public void abort() {
+		method.abort();
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
