@@ -354,6 +354,10 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
             }
             try {
                 serverFileUtils.copyToStream(new BufferedInputStream(res.getDataAsStream()), new BufferedOutputStream(new FileOutputStream(download)));
+            } catch(IOException ie) {
+        	// Saving file failed, abort download
+        	res.abort();
+        	throw ie;
             } finally {
                 res.closeStream();
             }
