@@ -31,6 +31,7 @@
 
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -47,6 +48,9 @@ import de.anomic.server.serverSwitch;
 import de.anomic.tools.nxTools;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyURL;
+import java.util.LinkedList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class sharedBlacklist_p {
 
@@ -72,7 +76,7 @@ public class sharedBlacklist_p {
         
         prop.putHTML("currentBlacklist", selectedBlacklistName);
         prop.putHTML("page_target", selectedBlacklistName);
-        
+
         if (post != null) {
             
             // initialize the list manager
@@ -167,12 +171,14 @@ public class sharedBlacklist_p {
                 final String sourceFileName = post.get("file");
                 prop.putHTML("page_source", sourceFileName);
                 
-                final File sourceFile = new File(listManager.listsPath, sourceFileName);
-                if (!sourceFile.exists() || !sourceFile.canRead() || !sourceFile.isFile()) {
-                    prop.put("status", STATUS_FILE_ERROR);
-                    prop.put("page", "1");
-                } else {
-                    otherBlacklist = listManager.getListArray(sourceFile);
+                final String fileString = post.get("file$file");
+
+                if (fileString != null) {
+                    try {
+                        otherBlacklist = nxTools.strings(fileString.getBytes("UTF-8"), "UTF-8");
+                    } catch (IOException ex) {
+                        Logger.getLogger(sharedBlacklist_p.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                 }
                 
             } else if (post.containsKey("add")) {

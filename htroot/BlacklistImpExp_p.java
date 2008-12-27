@@ -42,7 +42,7 @@ import de.anomic.yacy.yacySeed;
 import java.util.List;
 
 public class BlacklistImpExp_p {
-    private final static String DISABLED         = "disabled_";
+    private final static String DISABLED = "disabled_";
 
     public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
@@ -62,7 +62,6 @@ public class BlacklistImpExp_p {
         if (blacklistToUse == null && dirlist != null && dirlist.size() > 0) {
             blacklistToUse = dirlist.get(0);
         }
-
 
         // List known hosts for BlackList retrieval
         if (sb.webIndex.seedDB != null && sb.webIndex.seedDB.sizeConnected() > 0) { // no nullpointer error
@@ -87,9 +86,18 @@ public class BlacklistImpExp_p {
             prop.put(DISABLED + "otherHosts", peerCount);
         }
 
-        
         prop.putXML(DISABLED + "currentBlacklist", (blacklistToUse==null) ? "" : blacklistToUse);
         prop.put("disabled", (blacklistToUse == null) ? "1" : "0");
+
+        int count = 0;
+        for (String element : dirlist) {
+            if (element.endsWith(".black")) {
+                prop.putHTML("blackListNames_" + count + "_blackListName", element);
+                count++;
+            }
+        }
+        prop.put("blackListNames", count);
+        
         return prop;
     }
 }
