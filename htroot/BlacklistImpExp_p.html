@@ -36,13 +36,14 @@
           <input type="submit" value="Load new blacklist items" />
         </fieldset>
       </form>
-    
-      <!-- blacklist import from file -->	
+
+      <!-- blacklist import from text file -->
       <form action="sharedBlacklist_p.html" method="post" enctype="multipart/form-data">
         <fieldset>
           <legend>plain text file:</legend>
           Upload a regular text file which contains one blacklist entry per line.<br /><br />
           <input type="hidden" name="currentBlacklist" value="#[currentBlacklist]#" />
+          <input type="hidden" name="type" value="plaintext" />
           <input type="file" name="file" />
           <input type="submit" value="Load new blacklist items" />
         </fieldset>
