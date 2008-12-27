@@ -114,6 +114,7 @@ public class BlacklistCleaner_p {
             
             // list illegal entries
             final HashMap<String, Integer> ies = getIllegalEntries(blacklistToUse, supportedBlacklistTypes, plasmaSwitchboard.urlBlacklist);
+            prop.put(RESULTS + "blList", blacklistToUse);
             prop.put(RESULTS + "entries", ies.size());
             prop.putHTML(RESULTS + "blEngine", plasmaSwitchboard.urlBlacklist.getEngineInfo());
             prop.put(RESULTS + "disabled", (ies.size() == 0) ? "1" : "0");
