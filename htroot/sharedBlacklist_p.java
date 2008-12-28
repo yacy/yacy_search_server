@@ -39,6 +39,7 @@ import java.util.List;
 
 import de.anomic.crawler.HTTPLoader;
 import de.anomic.data.listManager;
+import de.anomic.htmlFilter.htmlFilterCharacterCoding;
 import de.anomic.http.HttpClient;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.index.indexAbstractReferenceBlacklist;
@@ -233,8 +234,12 @@ public class sharedBlacklist_p {
                 } finally {
                     if (pw != null) try { pw.close(); } catch (final Exception e){ /* */}
                 }
-                
-                prop.putHTML("LOCATION","Blacklist_p.html?selectedListName=" + selectedBlacklistName + "&selectList=");
+
+                /* unable to use prop.putHTML() or prop.putXML() here because they
+                 * turn the ampersand into &amp; which renders the parameters
+                 * useless (at least when using Opera 9.53, haven't tested other browsers)
+                 */
+                prop.put("LOCATION","Blacklist_p.html?selectedListName=" + htmlFilterCharacterCoding.unicode2html(selectedBlacklistName, true) + "&selectList=select");
                 return prop;
             }
             
