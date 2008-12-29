@@ -206,6 +206,14 @@ public class yacysearch {
                 	lr = querystring.substring(lrp + 9, lrp + 11).toLowerCase();
                 query[0].remove("language:" + lr);
             }
+            int filetype = querystring.indexOf("filetype:");
+            if (filetype >= 0) {
+                int ftb = querystring.indexOf(' ', filetype);
+                if (ftb == -1) ftb = querystring.length();
+                String ft = querystring.substring(filetype + 9, ftb);
+                query[0].remove("filetype:" + ft.toLowerCase());
+                urlmask = ".*." + ft;
+            }
            
             // read the language from the language-restrict option 'lr'
             // if no one is given, use the user agent or the system language as default
