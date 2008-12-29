@@ -260,7 +260,8 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
         final int pos = (int) file.length();
         int posFile = pos;
         int posBuffer = 0;
-        byte[] ba = new byte[this.buffersize + (4 + this.index.row().primaryKeyLength) * this.buffer.size()];
+        
+        byte[] ba = new byte[l + (4 + this.index.row().primaryKeyLength) * this.buffer.size()];
         Map.Entry<String, byte[]> entry;
         byte[] key, blob, b;
         while (i.hasNext()) {
