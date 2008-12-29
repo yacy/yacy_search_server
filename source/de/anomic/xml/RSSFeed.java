@@ -34,6 +34,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class RSSFeed implements Iterable<RSSMessage> {
 
     // static channel names of feeds
+    public static final String TEST           = "TEST";
     public static final String PEERNEWS       = "PEERNEWS";
     public static final String REMOTESEARCH   = "REMOTESEARCH";
     public static final String LOCALSEARCH    = "LOCALSEARCH";

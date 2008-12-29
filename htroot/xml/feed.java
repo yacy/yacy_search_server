@@ -26,6 +26,8 @@
 
 package xml;
 
+import java.util.Date;
+
 import de.anomic.http.httpRequestHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
@@ -60,6 +62,21 @@ public class feed {
             // prevent that unauthorized access to this servlet get results from private data
             if ((!authorized) && (RSSFeed.privateChannels.contains(channels[channelIndex]))) continue channelIteration; // allow only public channels if not authorized
 
+            if (channels[channelIndex].equals("TEST")) {
+                // for interface testing return at least one single result
+                prop.putXML("channel_title", "YaCy News Testchannel");
+                prop.putXML("channel_description", "");
+                prop.put("channel_pubDate", (new Date()).toString());
+                prop.putXML("item_" + messageCount + "_title", channels[channelIndex] + ": " + "YaCy Test Entry " + (new Date()).toString());
+                prop.putXML("item_" + messageCount + "_description", "abcdefg");
+                prop.putXML("item_" + messageCount + "_link", "http://yacy.net");
+                prop.put("item_" + messageCount + "_pubDate", (new Date()).toString());
+                prop.put("item_" + messageCount + "_guid", System.currentTimeMillis());
+                messageCount++;
+                messageMaxCount--;
+                continue channelIteration;
+            }
+            
             // read the channel
             feed = RSSFeed.channels(channels[channelIndex]);
             if ((feed == null) || (feed.size() == 0)) continue channelIteration;
