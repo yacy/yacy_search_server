@@ -24,7 +24,14 @@
 
 package de.anomic.kelondro;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -40,9 +47,61 @@ public class kelondroBytesLongMap {
     private final kelondroRow rowdef;
     private kelondroRAMIndex index;
     
+    /**
+     * initialize a BytesLongMap
+     * This may store a key and a long value for each key.
+     * The class is used as index for database files
+     * @param keylength
+     * @param objectOrder
+     * @param space
+     */
     public kelondroBytesLongMap(final int keylength, final kelondroByteOrder objectOrder, final int space) {
         this.rowdef = new kelondroRow(new kelondroColumn[]{new kelondroColumn("key", kelondroColumn.celltype_binary, kelondroColumn.encoder_bytes, keylength, "key"), new kelondroColumn("long c-8 {b256}")}, objectOrder, 0);
         this.index = new kelondroRAMIndex(rowdef, space);
+    }
+
+    /**
+     * initialize a BytesLongMap with the content of a dumped index
+     * @param keylength
+     * @param objectOrder
+     * @param file
+     * @throws IOException 
+     */
+    public kelondroBytesLongMap(final int keylength, final kelondroByteOrder objectOrder, final File file) throws IOException {
+        this(keylength, objectOrder, (int) (file.length() / (keylength + 8)));
+        // read the index dump and fill the index
+        InputStream is = new BufferedInputStream(new FileInputStream(file), 1024 * 1024);
+        byte[] a = new byte[keylength + 8];
+        int c;
+        while (true) {
+            c = is.read(a);
+            if (c <= 0) break;
+            this.index.addUnique(this.rowdef.newEntry(a));
+        }
+        assert this.index.size() == file.length() / (keylength + 8);
+    }
+
+    /**
+     * write a dump of the index to a file. All entries are written in order
+     * which makes it possible to read them again in a fast way
+     * @param file
+     * @return the number of written entries
+     * @throws IOException
+     */
+    public int dump(File file) throws IOException {
+        // we must use an iterator from the combined index, because we need the entries sorted
+        // otherwise we could just write the byte[] from the in kelondroRowSet which would make
+        // everything much faster, but this is not an option here.
+        Iterator<kelondroRow.Entry> i = this.index.rows(true, null);
+        OutputStream os = new BufferedOutputStream(new FileOutputStream(file), 1024 * 1024);
+        int c = 0;
+        while (i.hasNext()) {
+            os.write(i.next().bytes());
+            c++;
+        }
+        os.flush();
+        os.close();
+        return c;
     }
     
     public kelondroRow row() {

@@ -40,12 +40,12 @@ import de.anomic.server.logging.serverLog;
 
 public final class kelondroBLOBHeap implements kelondroBLOB {
 
-    
+    private int                     keylength;  // the length of the primary key
     private kelondroBytesLongMap    index;      // key/seek relation for used records
     private TreeMap<Long, Integer>  free;       // list of {size, seek} pairs denoting space and position of free records
     private final File              heapFile;   // the file of the heap
     private final kelondroByteOrder ordering;   // the ordering on keys
-    private kelondroCachedFileRA          file;       // a random access to the file
+    private kelondroCachedFileRA    file;       // a random access to the file
     private HashMap<String, byte[]> buffer;     // a write buffer to limit IO to the file; attention: Maps cannot use byte[] as key
     private int                     buffersize; // bytes that are buffered in buffer
     private int                     buffermax;  // maximum size of the buffer
@@ -84,17 +84,105 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
         this.ordering = ordering;
         this.heapFile = heapFile;
         this.buffermax = buffermax;
-        
+        this.keylength = keylength;
         this.index = null; // will be created as result of initialization process
         this.free = new TreeMap<Long, Integer>();
         this.buffer = new HashMap<String, byte[]>();
         this.buffersize = 0;
         this.file = new kelondroCachedFileRA(heapFile);
+        
+        // read or initialize the index
+        if (initIndexReadDump(heapFile)) {
+            // verify that everything worked just fine
+            // pick some elements of the index
+            Iterator<byte[]> i = this.index.keys(true, null);
+            int c = 3;
+            byte[] b, b1 = new byte[index.row().primaryKeyLength];
+            long pos;
+            boolean ok = true;
+            while (i.hasNext() && c-- > 0) {
+                b = i.next();
+                pos = this.index.getl(b);
+                file.seek(pos + 4);
+                file.readFully(b1, 0, b1.length);
+                if (this.ordering.compare(b, b1) != 0) {
+                    ok = false;
+                    break;
+                }
+            }
+            if (!ok) {
+                serverLog.logWarning("kelondroBLOBHeap", "verification of idx file for " + heapFile.toString() + " failed, re-building index");
+                initIndexReadFromHeap();
+            } else {
+                serverLog.logInfo("kelondroBLOBHeap", "using a dump of the index of " + heapFile.toString() + ".");
+            }
+        } else {
+            // if we did not have a dump, create a new index
+            initIndexReadFromHeap();
+        }
+        
+        /*
+        // DEBUG
+        Iterator<byte[]> i = index.keys(true, null);
+        //byte[] b;
+        int c = 0;
+        while (i.hasNext()) {
+            key = i.next();
+            System.out.println("*** DEBUG BLOBHeap " + this.name() + " KEY=" + new String(key));
+            //b = get(key);
+            //System.out.println("BLOB=" + new String(b));
+            //System.out.println();
+            c++;
+            if (c >= 20) break;
+        }
+        System.out.println("*** DEBUG - counted " + c + " BLOBs");
+        */
+    }
+    
+    private boolean initIndexReadDump(File f) {
+        // look for an index dump and read it if it exist
+        // if this is successfull, return true; otherwise false
+        File ff = fingerprintFile(f);
+        if (!ff.exists()) {
+            deleteAllFingerprints(f);
+            return false;
+        }
+        
+        // there is a file: read it:
+        try {
+            this.index = new kelondroBytesLongMap(this.keylength, this.ordering, ff);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+        // an index file is a one-time throw-away object, so just delete it now
+        ff.delete();
+        
+        // everything is fine now
+        return this.index.size() > 0;
+    }
+    
+    private File fingerprintFile(File f) {
+        String fingerprint = kelondroDigest.fastFingerprintB64(f, false).substring(0, 12);
+        return new File(f.getParentFile(), f.getName() + "." + fingerprint + ".idx");
+    }
+    
+    private void deleteAllFingerprints(File f) {
+        File d = f.getParentFile();
+        String n = f.getName();
+        String[] l = d.list();
+        for (int i = 0; i < l.length; i++) {
+            if (l[i].startsWith(n) && l[i].endsWith(".idx")) new File(d, l[i]).delete();
+        }
+    }
+    
+    private void initIndexReadFromHeap() throws IOException {
+        // this initializes the this.index object by reading positions from the heap file
+        
+        kelondroBytesLongMap.initDataConsumer indexready = kelondroBytesLongMap.asynchronusInitializer(keylength, this.ordering, 0, Math.max(10, (int) (Runtime.getRuntime().freeMemory() / (10 * 1024 * 1024))));
         byte[] key = new byte[keylength];
         int reclen;
         long seek = 0;
-        kelondroBytesLongMap.initDataConsumer indexready = kelondroBytesLongMap.asynchronusInitializer(keylength, this.ordering, 0, Math.max(10, (int) (Runtime.getRuntime().freeMemory() / (10 * 1024 * 1024))));
-        
         loop: while (true) { // don't test available() here because this does not work for files > 2GB
             
             try {
@@ -136,6 +224,21 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
         }
         indexready.finish();
         
+        // do something useful in between
+        mergeFreeEntries();
+        
+        // finish the index generation
+        try {
+            this.index = indexready.result();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    private void mergeFreeEntries() throws IOException {
+
         // try to merge free entries
         if (this.free.size() > 1) {
             int merged = 0;
@@ -148,11 +251,11 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
                 // check if they follow directly
                 if (lastFree.getKey() + lastFree.getValue() + 4 == nextFree.getKey()) {
                     // merge those records
-                    file.seek(lastFree.getKey());
+                    this.file.seek(lastFree.getKey());
                     lastFree.setValue(lastFree.getValue() + nextFree.getValue() + 4); // this updates also the free map
-                    file.writeInt(lastFree.getValue());
-                    file.seek(nextFree.getKey());
-                    file.writeInt(0);
+                    this.file.writeInt(lastFree.getValue());
+                    this.file.seek(nextFree.getKey());
+                    this.file.writeInt(0);
                     i.remove();
                     merged++;
                 } else {
@@ -162,30 +265,6 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
             serverLog.logInfo("kelondroBLOBHeap", "BLOB " + heapFile.getName() + ": merged " + merged + " free records");
         }
         
-        try {
-            this.index = indexready.result();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
-        
-        /*
-        // DEBUG
-        Iterator<byte[]> i = index.keys(true, null);
-        //byte[] b;
-        int c = 0;
-        while (i.hasNext()) {
-            key = i.next();
-            System.out.println("*** DEBUG BLOBHeap " + this.name() + " KEY=" + new String(key));
-            //b = get(key);
-            //System.out.println("BLOB=" + new String(b));
-            //System.out.println();
-            c++;
-            if (c >= 20) break;
-        }
-        System.out.println("*** DEBUG - counted " + c + " BLOBs");
-        */
     }
     
     public String name() {
@@ -311,7 +390,14 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
         // read the key
         final byte[] keyf = new byte[index.row().primaryKeyLength];
         file.readFully(keyf, 0, keyf.length);
-        assert this.ordering.compare(key, keyf) == 0;
+        if (this.ordering.compare(key, keyf) != 0) {
+            // verification of the indexed access failed. we must re-read the index
+            serverLog.logWarning("kelondroBLOBHeap", "verification indexed access for " + heapFile.toString() + " failed, re-building index");
+            // this is a severe operation, it should never happen.
+            // but if the process ends in this state, it would completey fail
+            // if the index is not rebuild now at once
+            initIndexReadFromHeap();
+        }
         
         // read the blob
         blob = new byte[len];
@@ -371,16 +457,24 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        index.close();
-        free.clear();
         try {
             file.close();
         } catch (final IOException e) {
             e.printStackTrace();
         }
+        file = null;
+        // now we can create a dump of the index, to speed up the next start
+        try {
+            long start = System.currentTimeMillis();
+            index.dump(fingerprintFile(this.heapFile));
+            serverLog.logInfo("kelondroBLOBHeap", "wrote a dump for the " + this.index.size() +  " index entries of " + heapFile.getName()+ " in " + (System.currentTimeMillis() - start) + " milliseconds.");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        index.close();
+        free.clear();
         index = null;
         free = null;
-        file = null;
     }
 
     /**
