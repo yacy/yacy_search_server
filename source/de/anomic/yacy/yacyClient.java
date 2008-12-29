@@ -75,6 +75,7 @@ import de.anomic.index.indexURLReference;
 import de.anomic.index.indexWord;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroBitfield;
+import de.anomic.kelondro.kelondroDigest;
 import de.anomic.plasma.plasmaSearchRankingProcess;
 import de.anomic.plasma.plasmaSearchRankingProfile;
 import de.anomic.plasma.plasmaSnippetCache;
@@ -82,7 +83,6 @@ import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.server.serverByteBuffer;
-import de.anomic.server.serverCodings;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDomains;
 import de.anomic.tools.crypt;
@@ -757,7 +757,7 @@ public final class yacyClient {
         post.add(new DefaultCharsetStringPart("process", "store"));
         post.add(new DefaultCharsetStringPart("purpose", "crcon"));
         post.add(new DefaultCharsetStringPart("filesize", Long.toString(file.length)));
-        post.add(new DefaultCharsetStringPart("md5", serverCodings.encodeMD5Hex(file)));
+        post.add(new DefaultCharsetStringPart("md5", kelondroDigest.encodeMD5Hex(file)));
         post.add(new DefaultCharsetStringPart("access", access));
         post.add(new DefaultCharsetFilePart("filename", new ByteArrayPartSource(filename, file)));
         
@@ -783,7 +783,7 @@ public final class yacyClient {
         String response = phase1.get("response");
         if ((response == null) || (protocol == null) || (access == null)) return "wrong return values from other peer; phase 1";
         if (!(response.equals("ok"))) return "remote peer rejected transfer: " + response;
-        final String accesscode = serverCodings.encodeMD5Hex(kelondroBase64Order.standardCoder.encodeString(access));
+        final String accesscode = kelondroDigest.encodeMD5Hex(kelondroBase64Order.standardCoder.encodeString(access));
         if (protocol.equals("http")) {
             final HashMap<String, String> phase2 = transferStore(nextaddress, accesscode, filename, file);
             if (phase2 == null) return "no connection to remote address " + targetAddress + "; phase 2";

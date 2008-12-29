@@ -143,12 +143,12 @@ import de.anomic.index.indexReferenceBlacklist;
 import de.anomic.index.indexURLReference;
 import de.anomic.kelondro.kelondroCache;
 import de.anomic.kelondro.kelondroCachedRecords;
+import de.anomic.kelondro.kelondroDigest;
 import de.anomic.kelondro.kelondroMSetTools;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.plasma.parser.ParserException;
 import de.anomic.server.serverAbstractSwitch;
 import de.anomic.server.serverBusyThread;
-import de.anomic.server.serverCodings;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverDomains;
@@ -1292,7 +1292,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             // set a random password if no password is configured
             if (!crawlStacker.acceptLocalURLs() && getConfigBool("adminAccountForLocalhost", false) && getConfig(httpd.ADMIN_ACCOUNT_B64MD5, "").length() == 0) {
                 // make a 'random' password
-                setConfig(httpd.ADMIN_ACCOUNT_B64MD5, "0000" + serverCodings.encodeMD5Hex(System.getProperties().toString() + System.currentTimeMillis()));
+                setConfig(httpd.ADMIN_ACCOUNT_B64MD5, "0000" + kelondroDigest.encodeMD5Hex(System.getProperties().toString() + System.currentTimeMillis()));
                 setConfig("adminAccount", "");
             }
             

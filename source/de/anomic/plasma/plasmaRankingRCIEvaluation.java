@@ -36,7 +36,7 @@ import java.util.TreeSet;
 
 import de.anomic.kelondro.kelondroAttrSeq;
 import de.anomic.kelondro.kelondroBase64Order;
-import de.anomic.server.serverCodings;
+import de.anomic.kelondro.kelondroDigest;
 import de.anomic.server.serverFileUtils;
 import de.anomic.yacy.yacyURL;
 
@@ -169,7 +169,7 @@ public class plasmaRankingRCIEvaluation {
         String filename;
         if (!(tablePath.exists())) tablePath.mkdirs();
         for (int i = 0; i < ranking.length - 1; i++) {
-            filename = "YBR-4-" + serverCodings.encodeHex(i, 2) + ".idx";
+            filename = "YBR-4-" + kelondroDigest.encodeHex(i, 2) + ".idx";
             serverFileUtils.saveSet(new File(tablePath, filename), "plain", ranking[i], "");
         }
     }

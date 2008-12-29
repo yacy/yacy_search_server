@@ -35,10 +35,10 @@ import de.anomic.kelondro.kelondroBLOB;
 import de.anomic.kelondro.kelondroBLOBHeap;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroCloneableIterator;
+import de.anomic.kelondro.kelondroDigest;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMap;
 import de.anomic.kelondro.kelondroNaturalOrder;
-import de.anomic.server.serverCodings;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyURL;
 
@@ -295,7 +295,7 @@ public class CrawlProfile {
                      final boolean remoteIndexing,
                      final boolean xsstopw, final boolean xdstopw, final boolean xpstopw) {
             if (name == null || name.length() == 0) throw new NullPointerException("name must not be null");
-            final String handle = (startURL == null) ? kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(Long.toString(System.currentTimeMillis()))).substring(0, yacySeedDB.commonHashLength) : startURL.hash();
+            final String handle = (startURL == null) ? kelondroBase64Order.enhancedCoder.encode(kelondroDigest.encodeMD5Raw(Long.toString(System.currentTimeMillis()))).substring(0, yacySeedDB.commonHashLength) : startURL.hash();
             mem = new HashMap<String, String>();
             mem.put(HANDLE,           handle);
             mem.put(NAME,             name);

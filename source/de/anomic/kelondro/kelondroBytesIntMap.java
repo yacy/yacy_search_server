@@ -40,13 +40,6 @@ public class kelondroBytesIntMap {
     private final kelondroRow rowdef;
     private kelondroIndex index;
     
-    public kelondroBytesIntMap(final kelondroIndex ki) {
-        assert (ki.row().columns() == 2); // must be a key/index relation
-        assert (ki.row().width(1) == 4);  // the value must be a b256-encoded int, 4 bytes long
-        this.index = ki;
-        this.rowdef = ki.row();
-    }
-    
     public kelondroBytesIntMap(final int keylength, final kelondroByteOrder objectOrder, final int space) {
         this.rowdef = new kelondroRow(new kelondroColumn[]{new kelondroColumn("key", kelondroColumn.celltype_binary, kelondroColumn.encoder_bytes, keylength, "key"), new kelondroColumn("int c-4 {b256}")}, objectOrder, 0);
         this.index = new kelondroRAMIndex(rowdef, space);

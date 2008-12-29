@@ -36,7 +36,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import de.anomic.kelondro.kelondroBase64Order;
-import de.anomic.server.serverCodings;
+import de.anomic.kelondro.kelondroDigest;
 import de.anomic.server.serverDomains;
 import de.anomic.tools.Punycode;
 import de.anomic.tools.Punycode.PunycodeException;
@@ -711,7 +711,7 @@ public class yacyURL implements Serializable {
         // combine the attributes
         final StringBuilder hash = new StringBuilder(12);
         // form the 'local' part of the hash
-        hash.append(kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(toNormalform(true, true))).substring(0, 5)); // 5 chars
+        hash.append(kelondroBase64Order.enhancedCoder.encode(kelondroDigest.encodeMD5Raw(toNormalform(true, true))).substring(0, 5)); // 5 chars
         hash.append(subdomPortPath(subdom, port, rootpath)); // 1 char
         // form the 'global' part of the hash
         hash.append(hosthash5(this.protocol, host, port)); // 5 chars
@@ -722,7 +722,7 @@ public class yacyURL implements Serializable {
     }
     
     private static char subdomPortPath(final String subdom, final int port, final String rootpath) {
-        return kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(subdom + ":" + port + ":" + rootpath)).charAt(0);
+        return kelondroBase64Order.enhancedCoder.encode(kelondroDigest.encodeMD5Raw(subdom + ":" + port + ":" + rootpath)).charAt(0);
     }
 
     private static final char rootURLFlag0 = subdomPortPath("", 80, "");
@@ -733,7 +733,7 @@ public class yacyURL implements Serializable {
     }
 
     private static final String hosthash5(final String protocol, final String host, final int port) {
-        return kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(protocol + ":" + host + ":" + port)).substring(0, 5);
+        return kelondroBase64Order.enhancedCoder.encode(kelondroDigest.encodeMD5Raw(protocol + ":" + host + ":" + port)).substring(0, 5);
     }
     
     /**

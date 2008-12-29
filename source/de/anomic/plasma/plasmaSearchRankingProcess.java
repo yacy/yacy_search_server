@@ -44,9 +44,9 @@ import de.anomic.index.indexRWIVarEntry;
 import de.anomic.index.indexURLReference;
 import de.anomic.index.indexWord;
 import de.anomic.kelondro.kelondroBinSearch;
+import de.anomic.kelondro.kelondroDigest;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroSortStack;
-import de.anomic.server.serverCodings;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverProfiling;
 import de.anomic.yacy.yacyURL;
@@ -400,7 +400,7 @@ public final class plasmaSearchRankingProcess {
             File f;
             try {
                 for (int i = 0; i < count; i++) {
-                    ybrName = "YBR-4-" + serverCodings.encodeHex(i, 2) + ".idx";
+                    ybrName = "YBR-4-" + kelondroDigest.encodeHex(i, 2) + ".idx";
                     f = new File(rankingPath, ybrName);
                     if (f.exists()) {
                         ybrTables[i] = new kelondroBinSearch(serverFileUtils.read(f), 6);

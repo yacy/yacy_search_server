@@ -39,6 +39,7 @@ import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroRow;
+import de.anomic.kelondro.kelondroDigest;
 import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.server.serverCharBuffer;
 import de.anomic.server.serverCodings;
@@ -242,7 +243,7 @@ public class indexURLReference {
 		} catch (UnsupportedEncodingException e1) {
 			this.entry.setCol(col_referrer, prop.getProperty("referrer", "").getBytes());
 		}
-        this.entry.setCol(col_md5, serverCodings.decodeHex(prop.getProperty("md5", "")));
+        this.entry.setCol(col_md5, kelondroDigest.decodeHex(prop.getProperty("md5", "")));
         this.entry.setCol(col_size, Integer.parseInt(prop.getProperty("size", "0")));
         this.entry.setCol(col_wc, Integer.parseInt(prop.getProperty("wc", "0")));
         this.entry.setCol(col_dt, new byte[]{(byte) prop.getProperty("dt", "t").charAt(0)});
@@ -370,7 +371,7 @@ public class indexURLReference {
 
     public String md5() {
         // returns the md5 in hex representation
-        return serverCodings.encodeHex(entry.getColBytes(col_md5));
+        return kelondroDigest.encodeHex(entry.getColBytes(col_md5));
     }
 
     public char doctype() {

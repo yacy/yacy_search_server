@@ -35,7 +35,7 @@ import java.util.TreeSet;
 
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroBitfield;
-import de.anomic.server.serverCodings;
+import de.anomic.kelondro.kelondroDigest;
 import de.anomic.yacy.yacySeedDB;
 
 public class indexWord {
@@ -82,7 +82,7 @@ public class indexWord {
     public static final String word2hash(final String word) {
         String h = hashCache.get(word);
         if (h != null) return h;
-        h = kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(word.toLowerCase(Locale.ENGLISH))).substring(0, yacySeedDB.commonHashLength);
+        h = kelondroBase64Order.enhancedCoder.encode(kelondroDigest.encodeMD5Raw(word.toLowerCase(Locale.ENGLISH))).substring(0, yacySeedDB.commonHashLength);
         hashCache.put(word, h); // prevent expensive MD5 computation and encoding
         if (hashCache.size() > 100000) hashCache.clear(); // prevent memory laeak
         return h;

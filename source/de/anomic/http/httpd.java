@@ -63,6 +63,7 @@ import org.apache.commons.httpclient.ContentLengthInputStream;
 import de.anomic.data.userDB;
 import de.anomic.htmlFilter.htmlFilterCharacterCoding;
 import de.anomic.kelondro.kelondroBase64Order;
+import de.anomic.kelondro.kelondroDigest;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverByteBuffer;
 import de.anomic.server.serverCodings;
@@ -295,7 +296,7 @@ public final class httpd implements serverHandler, Cloneable {
         //if (authorization.length() < 6) return 1; // no authentication information given
         final String adminAccountBase64MD5 = sw.getConfig(ADMIN_ACCOUNT_B64MD5, "");
         if (adminAccountBase64MD5.length() == 0) return 2; // no password stored
-        if (adminAccountBase64MD5.equals(serverCodings.encodeMD5Hex(authorization))) return 4; // hard-authenticated, all ok
+        if (adminAccountBase64MD5.equals(kelondroDigest.encodeMD5Hex(authorization))) return 4; // hard-authenticated, all ok
         return 1;
     }
     
@@ -317,7 +318,7 @@ public final class httpd implements serverHandler, Cloneable {
                 this.session.out.write((httpResponseHeader.CONTENT_LENGTH + ": 0\r\n").getBytes());
                 this.session.out.write("\r\n".getBytes());
                 return false;
-            } else if (!this.serverAccountBase64MD5.equals(serverCodings.encodeMD5Hex(auth.trim().substring(6)))) {
+            } else if (!this.serverAccountBase64MD5.equals(kelondroDigest.encodeMD5Hex(auth.trim().substring(6)))) {
                 // wrong password given: ask for authenticate again
                 log.logInfo("Wrong log-in for account 'server' in HTTPD.GET " + this.prop.getProperty("PATH") + " from IP " + this.clientIP);
                 this.session.out.write((httpVersion + " 401 log-in required" + serverCore.CRLF_STRING +

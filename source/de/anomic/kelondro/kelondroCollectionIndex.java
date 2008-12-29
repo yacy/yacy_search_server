@@ -42,7 +42,6 @@ import java.util.TimeZone;
 
 import de.anomic.index.indexContainer;
 import de.anomic.kelondro.kelondroRow.EntryIndex;
-import de.anomic.server.serverCodings;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverMemory;
 import de.anomic.server.logging.serverLog;
@@ -627,7 +626,7 @@ public class kelondroCollectionIndex {
             newcommon.sort();
             final SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
             formatter.setTimeZone(TimeZone.getTimeZone("GMT"));
-            final String filename = serverCodings.encodeHex(kelondroBase64Order.enhancedCoder.decode(new String(key), "de.anomic.kelondro.kelondroCollectionIndex.shrinkCollection(...)")) + "_" + formatter.format(new Date()) + ".collection";
+            final String filename = kelondroDigest.encodeHex(kelondroBase64Order.enhancedCoder.decode(new String(key), "de.anomic.kelondro.kelondroCollectionIndex.shrinkCollection(...)")) + "_" + formatter.format(new Date()) + ".collection";
             final File storagePath = new File(commonsPath, filename.substring(0, 2)); // make a subpath
             storagePath.mkdirs();
             final File file = new File(storagePath, filename);

@@ -43,6 +43,8 @@ public class kelondroRAMIndex implements kelondroIndex {
         reset(initialspace);
     }
     
+    // TODO: import and export method to write index completely as-is to file and restore it again
+    
     public void clear() {
 		reset(0);
 	}

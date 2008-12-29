@@ -36,8 +36,8 @@ import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexRWIRowEntry;
 import de.anomic.index.indexURLReference;
 import de.anomic.kelondro.kelondroBase64Order;
+import de.anomic.kelondro.kelondroDigest;
 import de.anomic.kelondro.kelondroException;
-import de.anomic.server.serverCodings;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacySeedDB;
@@ -125,7 +125,7 @@ public class plasmaDHTChunk {
     }
 
     public static String selectTransferStart() {
-        return kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(Long.toString(System.currentTimeMillis()))).substring(2, 2 + yacySeedDB.commonHashLength);
+        return kelondroBase64Order.enhancedCoder.encode(kelondroDigest.encodeMD5Raw(Long.toString(System.currentTimeMillis()))).substring(2, 2 + yacySeedDB.commonHashLength);
     }
 
     private void selectTransferContainers(final String hash, final int mincount, final int maxcount, final int maxtime) throws InterruptedException {        

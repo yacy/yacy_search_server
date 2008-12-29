@@ -313,8 +313,10 @@ public class kelondroEcoTable implements kelondroIndex {
     }
     
     public void close() {
-        file.close();
-        file = null;
+        this.file.close();
+        this.file = null;
+        this.table = null;
+        this.index = null;
     }
     
     protected void finalize() {

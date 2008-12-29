@@ -26,8 +26,8 @@ import java.util.Iterator;
 
 import de.anomic.data.bookmarksDB;
 import de.anomic.http.httpRequestHeader;
+import de.anomic.kelondro.kelondroDigest;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.server.serverCodings;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -74,7 +74,7 @@ public class get {
                 prop.putHTML("posts_"+count+"_url", bookmark.getUrl());
                 prop.putHTML("posts_"+count+"_title", bookmark.getTitle());
                 prop.putHTML("posts_"+count+"_description", bookmark.getDescription());
-                prop.put("posts_"+count+"_md5", serverCodings.encodeMD5Hex(bookmark.getUrl()));
+                prop.put("posts_"+count+"_md5", kelondroDigest.encodeMD5Hex(bookmark.getUrl()));
                 prop.put("posts_"+count+"_time", date);
                 prop.putHTML("posts_"+count+"_tags", bookmark.getTagsString().replaceAll(","," "));
                 

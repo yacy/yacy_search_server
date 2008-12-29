@@ -53,7 +53,7 @@ import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.PBEParameterSpec;
 
 import de.anomic.kelondro.kelondroBase64Order;
-import de.anomic.server.serverCodings;
+import de.anomic.kelondro.kelondroDigest;
 
 public class cryptbig {
 
@@ -634,7 +634,7 @@ public class cryptbig {
 	if (s[0].equals("-md5")) {
 	    // generate a public key from a password that can be used for encryption
 	    if (s.length != 2) {help(); System.exit(-1);}
-	    final String md5s = serverCodings.encodeMD5Hex(new File(s[1]));
+	    final String md5s = kelondroDigest.encodeMD5Hex(new File(s[1]));
 	    System.out.println(md5s);
 	    System.exit(0);
 	}

@@ -57,6 +57,7 @@ import java.util.TreeMap;
 
 import de.anomic.index.indexWord;
 import de.anomic.kelondro.kelondroBase64Order;
+import de.anomic.kelondro.kelondroDigest;
 import de.anomic.net.natLib;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverDate;
@@ -401,7 +402,7 @@ public class yacySeed implements Cloneable {
      * @return the octal representation of the given base64 hash
      */
     public static String b64Hash2octalHash(final String b64Hash) {
-        return serverCodings.encodeOctal(kelondroBase64Order.enhancedCoder.decode(b64Hash, "de.anomic.yacy.yacySeed.b64Hash2octalHash()"));
+        return kelondroDigest.encodeOctal(kelondroBase64Order.enhancedCoder.decode(b64Hash, "de.anomic.yacy.yacySeed.b64Hash2octalHash()"));
     }
 
     /**
@@ -411,7 +412,7 @@ public class yacySeed implements Cloneable {
      */
     public static String b64Hash2hexHash(final String b64Hash) {
         // the hash string represents 12 * 6 bit = 72 bits. This is too much for a long integer.
-        return serverCodings.encodeHex(kelondroBase64Order.enhancedCoder.decode(b64Hash, "de.anomic.yacy.yacySeed.b64Hash2hexHash()"));
+        return kelondroDigest.encodeHex(kelondroBase64Order.enhancedCoder.decode(b64Hash, "de.anomic.yacy.yacySeed.b64Hash2hexHash()"));
     }
     
     /**
@@ -419,7 +420,7 @@ public class yacySeed implements Cloneable {
      * @return the base64 representation of the given hex hash
      */
     public static String hexHash2b64Hash(final String hexHash) {
-        return kelondroBase64Order.enhancedCoder.encode(serverCodings.decodeHex(hexHash));
+        return kelondroBase64Order.enhancedCoder.encode(kelondroDigest.decodeHex(hexHash));
     }
 
     /**
@@ -885,8 +886,8 @@ public class yacySeed implements Cloneable {
 
     public static String randomHash() {
         final String hash =
-            kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(Long.toString(random.nextLong()))).substring(0, 6) +
-            kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(Long.toString(random.nextLong()))).substring(0, 6);
+            kelondroBase64Order.enhancedCoder.encode(kelondroDigest.encodeMD5Raw(Long.toString(random.nextLong()))).substring(0, 6) +
+            kelondroBase64Order.enhancedCoder.encode(kelondroDigest.encodeMD5Raw(Long.toString(random.nextLong()))).substring(0, 6);
         return hash;
     }
 
