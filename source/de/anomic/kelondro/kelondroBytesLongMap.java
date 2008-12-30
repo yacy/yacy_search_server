@@ -103,7 +103,7 @@ public class kelondroBytesLongMap {
         os.close();
         return c;
     }
-    
+
     public kelondroRow row() {
         return index.row();
     }

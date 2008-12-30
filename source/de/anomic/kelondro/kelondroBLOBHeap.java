@@ -32,7 +32,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.SortedMap;
-import java.util.TreeMap;
 import java.util.concurrent.ExecutionException;
 
 import de.anomic.server.serverMemory;
@@ -42,7 +41,7 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
 
     private int                     keylength;  // the length of the primary key
     private kelondroBytesLongMap    index;      // key/seek relation for used records
-    private TreeMap<Long, Integer>  free;       // list of {size, seek} pairs denoting space and position of free records
+    private kelondroBLOBGap         free;       // set of {seek, size} pairs denoting space and position of free records
     private final File              heapFile;   // the file of the heap
     private final kelondroByteOrder ordering;   // the ordering on keys
     private kelondroCachedFileRA    file;       // a random access to the file
@@ -86,7 +85,7 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
         this.buffermax = buffermax;
         this.keylength = keylength;
         this.index = null; // will be created as result of initialization process
-        this.free = new TreeMap<Long, Integer>();
+        this.free = null; // will be initialized later depending on existing idx/gap file
         this.buffer = new HashMap<String, byte[]>();
         this.buffersize = 0;
         this.file = new kelondroCachedFileRA(heapFile);
@@ -142,43 +141,63 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
     private boolean initIndexReadDump(File f) {
         // look for an index dump and read it if it exist
         // if this is successfull, return true; otherwise false
-        File ff = fingerprintFile(f);
-        if (!ff.exists()) {
+        File fif = fingerprintIndexFile(f);
+        File fgf = fingerprintGapFile(f);
+        if (!fif.exists() || !fgf.exists()) {
             deleteAllFingerprints(f);
             return false;
         }
         
-        // there is a file: read it:
+        // there is an index and a gap file:
+        // read the index file:
         try {
-            this.index = new kelondroBytesLongMap(this.keylength, this.ordering, ff);
+            this.index = new kelondroBytesLongMap(this.keylength, this.ordering, fif);
         } catch (IOException e) {
             e.printStackTrace();
             return false;
         }
         // an index file is a one-time throw-away object, so just delete it now
-        ff.delete();
+        fif.delete();
+        
+        // read the gap file:
+        try {
+            this.free = new kelondroBLOBGap(fgf);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+        // same with gap file
+        fgf.delete();
         
         // everything is fine now
         return this.index.size() > 0;
     }
     
-    private File fingerprintFile(File f) {
-        String fingerprint = kelondroDigest.fastFingerprintB64(f, false).substring(0, 12);
-        return new File(f.getParentFile(), f.getName() + "." + fingerprint + ".idx");
+    private static File fingerprintIndexFile(File f) {
+        return new File(f.getParentFile(), f.getName() + "." + fingerprintFileHash(f) + ".idx");
     }
     
-    private void deleteAllFingerprints(File f) {
+    private static File fingerprintGapFile(File f) {
+        return new File(f.getParentFile(), f.getName() + "." + fingerprintFileHash(f) + ".gap");
+    }
+    
+    private static String fingerprintFileHash(File f) {
+        return kelondroDigest.fastFingerprintB64(f, false).substring(0, 12);
+    }
+    
+    private static void deleteAllFingerprints(File f) {
         File d = f.getParentFile();
         String n = f.getName();
         String[] l = d.list();
         for (int i = 0; i < l.length; i++) {
-            if (l[i].startsWith(n) && l[i].endsWith(".idx")) new File(d, l[i]).delete();
+            if (l[i].startsWith(n) && (l[i].endsWith(".idx") || l[i].endsWith(".gap"))) new File(d, l[i]).delete();
         }
     }
     
     private void initIndexReadFromHeap() throws IOException {
         // this initializes the this.index object by reading positions from the heap file
-        
+
+        this.free = new kelondroBLOBGap();
         kelondroBytesLongMap.initDataConsumer indexready = kelondroBytesLongMap.asynchronusInitializer(keylength, this.ordering, 0, Math.max(10, (int) (Runtime.getRuntime().freeMemory() / (10 * 1024 * 1024))));
         byte[] key = new byte[keylength];
         int reclen;
@@ -463,20 +482,31 @@ public final class kelondroBLOBHeap implements kelondroBLOB {
             e.printStackTrace();
         }
         file = null;
-        // now we can create a dump of the index, to speed up the next start
-        try {
-            long start = System.currentTimeMillis();
-            index.dump(fingerprintFile(this.heapFile));
-            serverLog.logInfo("kelondroBLOBHeap", "wrote a dump for the " + this.index.size() +  " index entries of " + heapFile.getName()+ " in " + (System.currentTimeMillis() - start) + " milliseconds.");
-        } catch (IOException e) {
-            e.printStackTrace();
+        
+        if (index.size() > 3 || free.size() > 3) {
+            // now we can create a dump of the index and the gap information
+            // to speed up the next start
+            try {
+                long start = System.currentTimeMillis();
+                free.dump(fingerprintGapFile(this.heapFile));
+                free.clear();
+                free = null;
+                index.dump(fingerprintIndexFile(this.heapFile));
+                serverLog.logInfo("kelondroBLOBHeap", "wrote a dump for the " + this.index.size() +  " index entries of " + heapFile.getName()+ " in " + (System.currentTimeMillis() - start) + " milliseconds.");
+                index.close();
+                index = null;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            // this is small.. just free resources, do not write index
+            free.clear();
+            free = null;
+            index.close();
+            index = null;
         }
-        index.close();
-        free.clear();
-        index = null;
-        free = null;
     }
-
+    
     /**
      * ask for the length of the primary key
      * @return the length of the key
