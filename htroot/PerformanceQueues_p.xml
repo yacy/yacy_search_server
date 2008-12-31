@@ -17,7 +17,7 @@
 	        <sleeppercycle>#[sleeppercycle]#</sleeppercycle>
 	        <execpercycle>#[execpercycle]#</execpercycle>
 	        <memusepercycle>#[memusepercycle]#</memusepercycle>
-	        <delayIdleLoop>#[idlesleep]#"</delayIdleLoop>
+	        <delayIdleLoop>#[idlesleep]#</delayIdleLoop>
 	        <delayBusyLoop>#[busysleep]#</delayBusyLoop>
 	        <minMemory>#[memprereq]#</minMemory>
 	        <description><![CDATA[#[longdescr]##(recommendation)#::<br/>recommended: #[value]##(/recommendation)#]]></description>
