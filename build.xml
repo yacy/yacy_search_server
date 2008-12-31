@@ -43,6 +43,7 @@
   <property name="lib" location="lib"/>
   <property name="libx" location="libx"/>
   <property name="libt" location="libt"/>
+  <property name="libbuild" location="libbuild"/>
   <property name="build" location="classes"/>
   <property name="htroot" location="htroot"/>
   <property name="locales" location="locales"/>
@@ -77,9 +78,9 @@
 -->
 
   <target name="buildSvnRevNr">
-    <delete file="${lib}/svnRevNr.jar" failonerror="false" />
-    <javac srcdir="${lib}/svnRevNr" />
-    <jar destfile="${lib}/svnRevNr.jar" basedir="${lib}/svnRevNr">
+    <delete file="${libbuild}/svnRevNr.jar" failonerror="false" />
+    <javac srcdir="${libbuild}/svnRevNr" />
+    <jar destfile="${libbuild}/svnRevNr.jar" basedir="${libbuild}/svnRevNr">
       <manifest>
         <attribute name="Main-Class" value="svnRevNrParser"/>
       </manifest>
@@ -88,7 +89,7 @@
 
   <target name="determineRevisionNr" if="svnEntriesFileExists" depends="buildSvnRevNr">
     <!-- define a custom ant task to read the revision number from file -->
-    <taskdef resource="svnRevNrParser.properties" classpath="${lib}/svnRevNr.jar"/>
+    <taskdef resource="svnRevNrParser.properties" classpath="${libbuild}/svnRevNr.jar"/>
 
     <!-- determine the revision number -->
     <echo message="Trying to read Revision number from file ${svnEntriesFile}"/>
@@ -741,11 +742,13 @@
     <delete file="${build}/yacy.java" failonerror="false"/>
     <delete file="yacy.jar" failonerror="false"/>
     <delete file="yacy.exe" failonerror="false"/>
-    <delete file="lib/svnRevNr.jar" failonerror="false"/>
+    <delete file="${lib}/svnRevNr.jar" failonerror="false"/>
+    <delete file="${libbuild}/svnRevNr.jar" failonerror="false"/>
     <delete failonerror="false">
       <fileset dir="${src}" includes="**/*.class" />
       <fileset dir="${build}" includes="**/*.class" />
       <fileset dir="${htroot}" includes="**/*.class" />
+      <fileset dir="${libbuild}/svnRevNr" includes="**/*.class" />
     </delete>
   </target>
 
@@ -1035,7 +1038,7 @@
     <mkdir dir="${release_windows}" />
     <copy file="build.nsi" tofile="${release_windows}/build.nsi" overwrite="true" filtering="true" />
     <taskdef name="nsis" classname="net.sf.nsisant.Task">
-      <classpath location="libbuild/nsisant-1.2.jar"/>
+	    <classpath location="${libbuild}/nsisant-1.2.jar"/>
     </taskdef>
     <nsis script="${release_windows}/build.nsi" nocd="yes" verbosity="2" />
     <move file="${release_windows}/yacy_v${releaseVersion}_${DSTAMP}_${releaseNr}.exe"
