@@ -68,6 +68,7 @@ public final class htmlFilterWriter extends Writer {
     private boolean inDoubleQuote;
     private boolean inComment;
     private boolean inScript;
+    private boolean inStyle;
     private boolean binaryUnsuspect;
     private final boolean passbyIfBinarySuspect;
 
@@ -89,6 +90,7 @@ public final class htmlFilterWriter extends Writer {
         this.inDoubleQuote = false;
         this.inComment     = false;
         this.inScript      = false;
+        this.inStyle      = false;
         this.binaryUnsuspect = true;
         this.passbyIfBinarySuspect = passbyIfBinarySuspect;
         
@@ -411,6 +413,23 @@ public final class htmlFilterWriter extends Writer {
                     // buffer = new serverByteBuffer();
                     buffer.reset();
                 }
+            } else if (inStyle) {
+                buffer.append(c);
+                final int bufferLength = buffer.length();
+                if ((c == rb) && (bufferLength > 13) &&
+                    (buffer.charAt(bufferLength - 8) == lb) &&
+                    (buffer.charAt(bufferLength - 7) == '/') &&
+                    (buffer.charAt(bufferLength - 6) == 's') &&
+                    (buffer.charAt(bufferLength - 5) == 't') &&
+                    (buffer.charAt(bufferLength - 4) == 'y') &&
+                    (buffer.charAt(bufferLength - 3) == 'l') &&
+                    (buffer.charAt(bufferLength - 2) == 'e')) {
+                    // style is at end
+                    inStyle = false;
+                    if (out != null) out.write(buffer.getChars());
+                    // buffer = new serverByteBuffer();
+                    buffer.reset();
+                }
             } else {
                 if (buffer.length() == 0) {
                     if (c == rb) {
@@ -435,9 +454,18 @@ public final class htmlFilterWriter extends Writer {
                                (buffer.charAt(4) == 'i') &&
                                (buffer.charAt(5) == 'p') &&
                                              (c  == 't')) {
-                        // this is the start of a comment
+                        // this is the start of a javascript
                         inScript = true;
                         buffer.append(c);
+                    } else if ((buffer.length() >= 5) &&
+                            (buffer.charAt(1) == 's') &&
+                            (buffer.charAt(2) == 't') &&
+                            (buffer.charAt(3) == 'y') &&
+                            (buffer.charAt(4) == 'l') &&
+                                          (c  == 'e')) {
+                     // this is the start of a css-style
+                     inStyle = true;
+                     buffer.append(c);
                     } else if (c == rb) {
                         buffer.append(c);
                         // the tag ends here. after filtering: pass on
