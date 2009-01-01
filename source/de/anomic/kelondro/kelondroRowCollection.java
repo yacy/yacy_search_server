@@ -26,7 +26,6 @@ package de.anomic.kelondro;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -64,9 +63,8 @@ public class kelondroRowCollection {
     private static final int exp_last_read   = 1;
     private static final int exp_last_wrote  = 2;
     private static final int exp_order_type  = 3;
-    private static final int exp_order_col   = 4;
-    private static final int exp_order_bound = 5;
-    private static final int exp_collection  = 6;
+    private static final int exp_order_bound = 4;
+    private static final int exp_collection  = 5;
     
     public kelondroRowCollection(final kelondroRowCollection rc) {
         this.rowdef = rc.rowdef;
@@ -95,12 +93,12 @@ public class kelondroRowCollection {
         this.lastTimeWrote = System.currentTimeMillis();
     }
     
-    public kelondroRowCollection(final kelondroRow rowdef, final kelondroRow.Entry exportedCollectionRowEnvironment, final int columnInEnvironment) {
+    public kelondroRowCollection(final kelondroRow rowdef, final kelondroRow.Entry exportedCollectionRowEnvironment) {
+        final int chunkcachelength = exportedCollectionRowEnvironment.cellwidth(1) - exportOverheadSize;
+        final kelondroRow.Entry exportedCollection = exportRow(chunkcachelength).newEntry(exportedCollectionRowEnvironment, 1);
+        
         this.rowdef = rowdef;
-        final int chunkcachelength = exportedCollectionRowEnvironment.cellwidth(columnInEnvironment) - exportOverheadSize;
-        final kelondroRow.Entry exportedCollection = exportRow(chunkcachelength).newEntry(exportedCollectionRowEnvironment, columnInEnvironment);
         this.chunkcount = (int) exportedCollection.getColLong(exp_chunkcount);
-        //assert (this.chunkcount <= chunkcachelength / rowdef.objectsize) : "chunkcount = " + this.chunkcount + ", chunkcachelength = " + chunkcachelength + ", rowdef.objectsize = " + rowdef.objectsize;
         if ((this.chunkcount > chunkcachelength / rowdef.objectsize)) {
             serverLog.logWarning("RowCollection", "corrected wrong chunkcount; chunkcount = " + this.chunkcount + ", chunkcachelength = " + chunkcachelength + ", rowdef.objectsize = " + rowdef.objectsize);
             this.chunkcount = chunkcachelength / rowdef.objectsize; // patch problem
@@ -117,10 +115,7 @@ public class kelondroRowCollection {
         }
         if ((rowdef.objectOrder != null) && (oldOrder != null) && (!(rowdef.objectOrder.signature().equals(oldOrder.signature()))))
             throw new kelondroException("old collection order does not match with new order; objectOrder.signature = " + rowdef.objectOrder.signature() + ", oldOrder.signature = " + oldOrder.signature());
-        if (rowdef.primaryKeyIndex != (int) exportedCollection.getColLong(exp_order_col))
-            throw new kelondroException("old collection primary key does not match with new primary key");
         this.sortBound = (int) exportedCollection.getColLong(exp_order_bound);
-        //assert (sortBound <= chunkcount) : "sortBound = " + sortBound + ", chunkcount = " + chunkcount;
         if (sortBound > chunkcount) {
             serverLog.logWarning("RowCollection", "corrected wrong sortBound; sortBound = " + sortBound + ", chunkcount = " + chunkcount);
             this.sortBound = chunkcount;
@@ -155,8 +150,7 @@ public class kelondroRowCollection {
                 "short lastread-2 {b256}," + // as daysSince2000
                 "short lastwrote-2 {b256}," + // as daysSince2000
                 "byte[] orderkey-2," +
-                "short ordercol-2 {b256}," +
-                "short orderbound-2 {b256}," +
+                "int orderbound-4 {b256}," +
                 "byte[] collection-" + chunkcachelength,
                 kelondroNaturalOrder.naturalOrder, 0
                 );
@@ -176,33 +170,9 @@ public class kelondroRowCollection {
         entry.setCol(exp_last_read, daysSince2000(this.lastTimeRead));
         entry.setCol(exp_last_wrote, daysSince2000(this.lastTimeWrote));
         entry.setCol(exp_order_type, (this.rowdef.objectOrder == null) ? "__".getBytes() :this.rowdef.objectOrder.signature().getBytes());
-        entry.setCol(exp_order_col, this.rowdef.primaryKeyIndex);
         entry.setCol(exp_order_bound, this.sortBound);
         entry.setCol(exp_collection, this.chunkcache);
         return entry.bytes();
-    }
-    
-    public static kelondroRowCollection importCollection(final InputStream is, final kelondroRow rowdef) throws IOException {
-        final byte[] byte2 = new byte[2];
-        final byte[] byte4 = new byte[4];
-        int bytesRead;
-        bytesRead = is.read(byte4); final int size = (int) kelondroNaturalOrder.decodeLong(byte4);
-        assert bytesRead == byte4.length;
-        bytesRead = is.read(byte2); //short lastread = (short) kelondroNaturalOrder.decodeLong(byte2);
-        assert bytesRead == byte2.length;
-        bytesRead = is.read(byte2); //short lastwrote = (short) kelondroNaturalOrder.decodeLong(byte2);
-        assert bytesRead == byte2.length;
-        bytesRead = is.read(byte2); //String orderkey = new String(byte2);
-        assert bytesRead == byte2.length;
-        bytesRead = is.read(byte2); final short ordercol = (short) kelondroNaturalOrder.decodeLong(byte2);
-        assert bytesRead == byte2.length;
-        bytesRead = is.read(byte2); final short orderbound = (short) kelondroNaturalOrder.decodeLong(byte2);
-        assert bytesRead == byte2.length;
-        assert rowdef.primaryKeyIndex == ordercol;
-        final byte[] chunkcache = new byte[size * rowdef.objectsize];
-        bytesRead =  is.read(chunkcache);
-        assert bytesRead == chunkcache.length;
-        return new kelondroRowCollection(rowdef, size, chunkcache, orderbound);
     }
     
     public void saveCollection(final File file) throws IOException {
@@ -284,7 +254,8 @@ public class kelondroRowCollection {
         assert (index >= 0) : "set: access with index " + index + " is below zero";
         ensureSize(index + 1);
         a.writeToArray(chunkcache, index * rowdef.objectsize);
-        if (index >= chunkcount) chunkcount = index + 1;
+        if (index >= this.chunkcount) this.chunkcount = index + 1;
+        if (index < this.sortBound) this.sortBound = index;
         this.lastTimeWrote = System.currentTimeMillis();
     }
     
@@ -322,17 +293,20 @@ public class kelondroRowCollection {
         assert (!(serverLog.allZero(a, astart, alength))) : "a = " + serverLog.arrayList(a, astart, alength);
         assert (alength > 0);
         assert (astart + alength <= a.length);
-        /*
-        if (bugappearance(a, astart, alength)) {
-            serverLog.logWarning("RowCollection", "wrong a = " + serverLog.arrayList(a, astart, alength));
-            //return false; // TODO: this is temporary; remote peers may still submit bad entries
-        }
-        */
-        //assert (!(bugappearance(a, astart, alength))) : "a = " + serverLog.arrayList(a, astart, alength);
         final int l = Math.min(rowdef.objectsize, Math.min(alength, a.length - astart));
         ensureSize(chunkcount + 1);
         System.arraycopy(a, astart, chunkcache, rowdef.objectsize * chunkcount, l);
         chunkcount++;
+        // if possible, increase the sortbound value to suppress unnecessary sorting
+        if (this.chunkcount == 1) {
+            assert this.sortBound == 0;
+            this.sortBound = 1;
+        } else if (
+                this.sortBound + 1 == chunkcount &&
+                this.rowdef.objectOrder.compare(chunkcache, rowdef.objectsize * (chunkcount - 2), rowdef.primaryKeyLength,
+                                                chunkcache, rowdef.objectsize * (chunkcount - 1), rowdef.primaryKeyLength) == -1) {
+            this.sortBound = chunkcount;
+        }
         this.lastTimeWrote = System.currentTimeMillis();
     }
     

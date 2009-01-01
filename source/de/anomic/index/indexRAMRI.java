@@ -47,11 +47,19 @@ public final class indexRAMRI implements indexRI, indexRIReader {
     public  int   cacheReferenceCountLimit;  // the maximum number of references to a single RWI entity
     public  long  cacheReferenceAgeLimit;    // the maximum age (= time not changed) of a RWI entity
     private final serverLog log;
-    private final File indexHeapFile;
+    private final File oldDumpFile, newDumpFile;
     private indexContainerHeap heap;
     
     @SuppressWarnings("unchecked")
-    public indexRAMRI(final File databaseRoot, final kelondroRow payloadrow, final int entityCacheMaxSize, final int wCacheReferenceCountLimitInit, final long wCacheReferenceAgeLimitInit, final String newHeapName, final serverLog log) {
+    public indexRAMRI(
+            final File databaseRoot,
+            final kelondroRow payloadrow,
+            final int entityCacheMaxSize,
+            final int wCacheReferenceCountLimitInit,
+            final long wCacheReferenceAgeLimitInit,
+            final String oldHeapName,
+            final String newHeapName,
+            final serverLog log) {
 
         // creates a new index cache
         // the cache has a back-end where indexes that do not fit in the cache are flushed
@@ -62,25 +70,37 @@ public final class indexRAMRI implements indexRI, indexRIReader {
         this.cacheReferenceCountLimit = wCacheReferenceCountLimitInit;
         this.cacheReferenceAgeLimit = wCacheReferenceAgeLimitInit;
         this.log = log;
-        this.indexHeapFile = new File(databaseRoot, newHeapName);
+        this.oldDumpFile = new File(databaseRoot, oldHeapName);
+        this.newDumpFile = new File(databaseRoot, newHeapName);
         this.heap = new indexContainerHeap(payloadrow, log);
         
         // read in dump of last session
-        if (indexHeapFile.exists()) {
-            try {
-                heap.initWriteMode(indexHeapFile);
-                for (final indexContainer ic : (Iterable<indexContainer>) heap.wordContainers(null, false)) {
-                    this.hashDate.setScore(ic.getWordHash(), intTime(ic.lastWrote()));
-                    this.hashScore.setScore(ic.getWordHash(), ic.size());
-                }
-            } catch (final IOException e){
-                log.logSevere("unable to restore cache dump: " + e.getMessage(), e);
-                // get empty dump
-                heap.initWriteMode();
-            } catch (final NegativeArraySizeException e){
-            	log.logSevere("unable to restore cache dump: " + e.getMessage(), e);
-                // get empty dump
-                heap.initWriteMode();
+        boolean initFailed = false;
+        if (newDumpFile.exists() && oldDumpFile.exists()) {
+            // we need only one, delete the old
+            oldDumpFile.delete();
+        }
+        if (oldDumpFile.exists()) try {
+            heap.initWriteModeFromHeap(oldDumpFile);
+        } catch (IOException e) {
+            initFailed = true;
+            e.printStackTrace();
+        }
+        if (newDumpFile.exists()) try {
+            heap.initWriteModeFromBLOB(newDumpFile);
+        } catch (IOException e) {
+            initFailed = true;
+            e.printStackTrace();
+        }
+        if (initFailed) {
+            log.logSevere("unable to restore cache dump");
+            // get empty dump
+            heap.initWriteMode();
+        } else if (oldDumpFile.exists() || newDumpFile.exists()) {
+            // initialize scores for cache organization
+            for (final indexContainer ic : (Iterable<indexContainer>) heap.wordContainers(null, false)) {
+                this.hashDate.setScore(ic.getWordHash(), intTime(ic.lastWrote()));
+                this.hashScore.setScore(ic.getWordHash(), ic.size());
             }
         } else {
             heap.initWriteMode();
@@ -319,8 +339,8 @@ public final class indexRAMRI implements indexRI, indexRIReader {
     public synchronized void close() {
         // dump cache
         try {
-            heap.dump(this.indexHeapFile);
-            //heap.dump2(new File(this.indexHeapFile.getAbsolutePath() + ".blob"));
+            //heap.dumpold(this.oldDumpFile);
+            heap.dump(this.newDumpFile);
         } catch (final IOException e){
             log.logSevere("unable to dump cache: " + e.getMessage(), e);
         }

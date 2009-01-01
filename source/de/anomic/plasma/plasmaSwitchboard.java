@@ -583,7 +583,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
                 "parseDocument",
                 "This does the parsing of the newly loaded documents from the web. The result is not only a plain text document, but also a list of URLs that are embedded into the document. The urls are handed over to the CrawlStacker. This process has two child process queues!",
                 new String[]{"condenseDocument", "CrawlStacker"},
-                this, "parseDocument", serverProcessor.useCPU + 1, indexingCondensementProcessor, serverProcessor.useCPU + 1);
+                this, "parseDocument", 2 * serverProcessor.useCPU + 1, indexingCondensementProcessor, 2 * serverProcessor.useCPU + 1);
         
         // deploy busy threads
         log.logConfig("Starting Threads");

@@ -27,12 +27,9 @@
 package de.anomic.index;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -42,8 +39,8 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import de.anomic.kelondro.kelondroBLOB;
-import de.anomic.kelondro.kelondroBLOBHeap;
+import de.anomic.kelondro.kelondroBLOBHeapReader;
+import de.anomic.kelondro.kelondroBLOBHeapWriter;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroByteOrder;
 import de.anomic.kelondro.kelondroCloneableIterator;
@@ -90,7 +87,7 @@ public final class indexContainerHeap {
      * @param heapFile
      * @throws IOException
      */
-    public void initWriteMode(final File heapFile) throws IOException {
+    public void initWriteModeFromHeap(final File heapFile) throws IOException {
         if (log != null) log.logInfo("restoring dump for rwi heap '" + heapFile.getName() + "'");
         final long start = System.currentTimeMillis();
         this.cache = Collections.synchronizedSortedMap(new TreeMap<String, indexContainer>(new kelondroByteOrder.StringOrder(payloadrow.getOrdering())));
@@ -103,10 +100,33 @@ public final class indexContainerHeap {
                 urlCount += container.size();
             }
         }
-        if (log != null) log.logInfo("finished rwi heap restore: " + cache.size() + " words, " + urlCount + " word/URL relations in " + ((System.currentTimeMillis() - start) / 1000) + " seconds");
+        if (log != null) log.logInfo("finished rwi heap restore: " + cache.size() + " words, " + urlCount + " word/URL relations in " + (System.currentTimeMillis() - start) + " milliseconds");
     }
     
-    public void dump(final File heapFile) throws IOException {
+    /**
+     * this is the new cache file format initialization
+     * @param heapFile
+     * @throws IOException
+     */
+    public void initWriteModeFromBLOB(final File blobFile) throws IOException {
+        if (log != null) log.logInfo("restoring rwi blob dump '" + blobFile.getName() + "'");
+        final long start = System.currentTimeMillis();
+        this.cache = Collections.synchronizedSortedMap(new TreeMap<String, indexContainer>(new kelondroByteOrder.StringOrder(payloadrow.getOrdering())));
+        int urlCount = 0;
+        synchronized (cache) {
+            for (final indexContainer container : new blobFileEntries(blobFile, this.payloadrow)) {
+                // TODO: in this loop a lot of memory may be allocated. A check if the memory gets low is necessary. But what do when the memory is low?
+                if (container == null) break;
+                cache.put(container.getWordHash(), container);
+                urlCount += container.size();
+            }
+        }
+        // remove idx and gap files if they exist here
+        kelondroBLOBHeapWriter.deleteAllFingerprints(blobFile);
+        if (log != null) log.logInfo("finished rwi blob restore: " + cache.size() + " words, " + urlCount + " word/URL relations in " + (System.currentTimeMillis() - start) + " milliseconds");
+    }
+    /*
+    public void dumpold(final File heapFile) throws IOException {
         assert this.cache != null;
         if (log != null) log.logInfo("creating rwi heap dump '" + heapFile.getName() + "', " + cache.size() + " rwi's");
         if (heapFile.exists()) heapFile.delete();
@@ -137,14 +157,14 @@ public final class indexContainerHeap {
         }
         os.flush();
         os.close();
-        if (log != null) log.logInfo("finished rwi heap dump: " + wordcount + " words, " + urlcount + " word/URL relations in " + ((System.currentTimeMillis() - startTime) / 1000) + " seconds");
+        if (log != null) log.logInfo("finished rwi heap dump: " + wordcount + " words, " + urlcount + " word/URL relations in " + (System.currentTimeMillis() - startTime) + " milliseconds");
     }
-    
-    public void dump2(final File heapFile) throws IOException {
+    */
+    public void dump(final File heapFile) throws IOException {
         assert this.cache != null;
         if (log != null) log.logInfo("creating alternative rwi heap dump '" + heapFile.getName() + "', " + cache.size() + " rwi's");
         if (heapFile.exists()) heapFile.delete();
-        final kelondroBLOB dump = new kelondroBLOBHeap(heapFile, payloadrow.primaryKeyLength, kelondroBase64Order.enhancedCoder, 1024 * 1024 * 10);
+        final kelondroBLOBHeapWriter dump = new kelondroBLOBHeapWriter(heapFile, payloadrow.primaryKeyLength, kelondroBase64Order.enhancedCoder);
         final long startTime = System.currentTimeMillis();
         long wordcount = 0, urlcount = 0;
         String wordHash;
@@ -159,14 +179,14 @@ public final class indexContainerHeap {
                 
                 // put entries on heap
                 if (container != null && wordHash.length() == payloadrow.primaryKeyLength) {
-                    dump.put(wordHash.getBytes(), container.exportCollection());
+                    dump.add(wordHash.getBytes(), container.exportCollection());
                     urlcount += container.size();
                 }
                 wordcount++;
             }
         }
         dump.close();
-        if (log != null) log.logInfo("finished alternative rwi heap dump: " + wordcount + " words, " + urlcount + " word/URL relations in " + ((System.currentTimeMillis() - startTime) / 1000) + " seconds");
+        if (log != null) log.logInfo("finished alternative rwi heap dump: " + wordcount + " words, " + urlcount + " word/URL relations in " + (System.currentTimeMillis() - startTime) + " milliseconds");
     }
     
     public int size() {
@@ -184,7 +204,7 @@ public final class indexContainerHeap {
         
         public heapFileEntries(final File heapFile, final kelondroRow payloadrow) throws IOException {
             if (!(heapFile.exists())) throw new IOException("file " + heapFile + " does not exist");
-            is = new DataInputStream(new BufferedInputStream(new FileInputStream(heapFile), 64*1024));
+            is = new DataInputStream(new BufferedInputStream(new FileInputStream(heapFile), 1024*1024));
             word = new byte[payloadrow.primaryKeyLength];
             this.payloadrow = payloadrow;
             this.nextContainer = next0();
@@ -224,6 +244,53 @@ public final class indexContainerHeap {
         public void close() {
             if (is != null) try { is.close(); } catch (final IOException e) {}
             is = null;
+        }
+        
+        protected void finalize() {
+            this.close();
+        }
+    }
+
+    /**
+     * static iterator of BLOBHeap files: is used to import heap dumps into a write-enabled index heap
+     */
+    public static class blobFileEntries implements Iterator<indexContainer>, Iterable<indexContainer> {
+        Iterator<Map.Entry<String, byte[]>> blobs;
+        kelondroRow payloadrow;
+        
+        public blobFileEntries(final File blobFile, final kelondroRow payloadrow) throws IOException {
+            this.blobs = new kelondroBLOBHeapReader.entries(blobFile, payloadrow.primaryKeyLength);
+            this.payloadrow = payloadrow;
+        }
+        
+        public boolean hasNext() {
+            return blobs.hasNext();
+        }
+
+        /**
+         * return an index container
+         * because they may get very large, it is wise to deallocate some memory before calling next()
+         */
+        public indexContainer next() {
+            try {
+                Map.Entry<String, byte[]> entry = blobs.next();
+                byte[] payload = entry.getValue();
+                return new indexContainer(entry.getKey(), kelondroRowSet.importRowSet(payload, payloadrow));
+            } catch (final IOException e) {
+                return null;
+            }
+        }
+        
+        public void remove() {
+            throw new UnsupportedOperationException("heap dumps are read-only");
+        }
+
+        public Iterator<indexContainer> iterator() {
+            return this;
+        }
+        
+        public void close() {
+            blobs = null;
         }
         
         protected void finalize() {

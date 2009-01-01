@@ -28,12 +28,12 @@ package de.anomic.kelondro;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
@@ -56,21 +56,24 @@ public class kelondroBLOBGap extends TreeMap<Long, Integer> {
      * initialize a kelondroBLOBGap with the content of a dump
      * @param file
      * @throws IOException 
+     * @throws IOException 
      */
     public kelondroBLOBGap(final File file) throws IOException {
         super();
         // read the index dump and fill the index
-        InputStream is = new BufferedInputStream(new FileInputStream(file), 1024 * 1024);
-        byte[] k = new byte[8];
-        byte[] v = new byte[4];
-        int c;
+        DataInputStream is = new DataInputStream(new BufferedInputStream(new FileInputStream(file), 1024 * 1024));
+        long p;
+        int l;
         while (true) {
-            c = is.read(k);
-            if (c <= 0) break;
-            c = is.read(v);
-            if (c <= 0) break;
-            this.put(new Long(kelondroNaturalOrder.decodeLong(k)), new Integer((int) kelondroNaturalOrder.decodeLong(v)));
+            try {
+                p = is.readLong();
+                l = is.readInt();
+                this.put(new Long(p), new Integer(l));
+            } catch (IOException e) {
+                break;
+            }
         }
+        is.close();
     }
     
     /**
@@ -81,13 +84,13 @@ public class kelondroBLOBGap extends TreeMap<Long, Integer> {
      */
     public int dump(File file) throws IOException {
         Iterator<Map.Entry<Long, Integer>> i = this.entrySet().iterator();
-        OutputStream os = new BufferedOutputStream(new FileOutputStream(file), 1024 * 1024);
+        DataOutputStream os = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file), 1024 * 1024));
         int c = 0;
         Map.Entry<Long, Integer> e;
         while (i.hasNext()) {
             e = i.next();
-            os.write(kelondroNaturalOrder.encodeLong(e.getKey().longValue(), 8));
-            os.write(kelondroNaturalOrder.encodeLong(e.getValue().longValue(), 4));
+            os.writeLong(e.getKey().longValue());
+            os.writeInt(e.getValue().intValue());
             c++;
         }
         os.flush();

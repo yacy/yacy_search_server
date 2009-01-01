@@ -25,7 +25,6 @@
 package de.anomic.kelondro;
 
 import java.io.DataInput;
-import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.Date;
 import java.util.Iterator;
@@ -57,8 +56,14 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         this.profile = new kelondroProfile();
     }
     
-    public kelondroRowSet(final kelondroRow rowdef, final kelondroRow.Entry exportedCollectionRowEnvironment, final int columnInEnvironment) {
-        super(rowdef, exportedCollectionRowEnvironment, columnInEnvironment);
+    /**
+     * import an exported collection
+     * @param rowdef
+     * @param exportedCollectionRowEnvironment
+     * @param columnInEnvironment
+     */
+    public kelondroRowSet(final kelondroRow rowdef, final kelondroRow.Entry exportedCollectionRowEnvironment) {
+        super(rowdef, exportedCollectionRowEnvironment);
         assert rowdef.objectOrder != null;
         this.profile = new kelondroProfile();
     }
@@ -74,33 +79,25 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
     }
     
     public static kelondroRowSet importRowSet(final DataInput is, final kelondroRow rowdef) throws IOException {
-        final byte[] byte2 = new byte[2];
-        final byte[] byte4 = new byte[4];
-        is.readFully(byte4); final int size = (int) kelondroNaturalOrder.decodeLong(byte4);
-        is.readFully(byte2); //short lastread = (short) kelondroNaturalOrder.decodeLong(byte2);
-        is.readFully(byte2); //short lastwrote = (short) kelondroNaturalOrder.decodeLong(byte2);
-        is.readFully(byte2); //String orderkey = new String(byte2);
-        is.readFully(byte2); final short ordercol = (short) kelondroNaturalOrder.decodeLong(byte2);
-        is.readFully(byte2); final short orderbound = (short) kelondroNaturalOrder.decodeLong(byte2);
-        assert rowdef.primaryKeyIndex == ordercol;
+        final byte[] byte6 = new byte[6];
+        final int size = is.readInt();
+        is.readFully(byte6);
+        //short lastread = (short) kelondroNaturalOrder.decodeLong(byte2);
+        //short lastwrote = (short) kelondroNaturalOrder.decodeLong(byte2);
+        //String orderkey = new String(byte2);
+        final int orderbound = is.readInt();
         final byte[] chunkcache = new byte[size * rowdef.objectsize];
         is.readFully(chunkcache);
         return new kelondroRowSet(rowdef, size, chunkcache, orderbound);
     }
     
-    public static int skipNextRowSet(final DataInputStream is, final kelondroRow rowdef) throws IOException {
-        final byte[] byte2 = new byte[2];
-        final byte[] byte4 = new byte[4];
-        is.readFully(byte4); final int size = (int) kelondroNaturalOrder.decodeLong(byte4);
-        is.readFully(byte2); //short lastread = (short) kelondroNaturalOrder.decodeLong(byte2);
-        is.readFully(byte2); //short lastwrote = (short) kelondroNaturalOrder.decodeLong(byte2);
-        is.readFully(byte2); //String orderkey = new String(byte2);
-        is.readFully(byte2); final short ordercol = (short) kelondroNaturalOrder.decodeLong(byte2);
-        is.readFully(byte2);
-        assert rowdef.primaryKeyIndex == ordercol;
-        int skip = size * rowdef.objectsize;
-        while (skip > 0) skip -= is.skip(skip);
-        return size * rowdef.objectsize + 14;
+    public static kelondroRowSet importRowSet(byte[] b, final kelondroRow rowdef) throws IOException {
+        final int size = (int) kelondroNaturalOrder.decodeLong(b, 0, 4);
+        final int orderbound = (int) kelondroNaturalOrder.decodeLong(b, 10, 4);
+        final byte[] chunkcache = new byte[size * rowdef.objectsize];
+        assert b.length - exportOverheadSize == size * rowdef.objectsize;
+        System.arraycopy(b, 14, chunkcache, 0, chunkcache.length);
+        return new kelondroRowSet(rowdef, size, chunkcache, orderbound);
     }
     
 	public void reset() {

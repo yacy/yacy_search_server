@@ -776,7 +776,8 @@ public class kelondroCollectionIndex {
             serverLog.logSevere("kelondroCollectionIndex." + array.filename, "lost a RowCollection because of a bad arraykey (error #" + indexErrors + ")");
             return new kelondroRowSet(this.payloadrow, 0);
         }
-        final kelondroRowSet collection = new kelondroRowSet(this.payloadrow, arrayrow, 1); // FIXME: this does not yet work with different rowdef in case of several rowdef.objectsize()
+        
+        final kelondroRowSet collection = new kelondroRowSet(this.payloadrow, arrayrow); // FIXME: this does not yet work with different rowdef in case of several rowdef.objectsize()
         if ((!(index.row().objectOrder.wellformed(indexkey))) || (index.row().objectOrder.compare(arraykey, indexkey) != 0)) {
             // check if we got the right row; this row is wrong. Fix it:
             index.remove(indexkey); // the wrong row cannot be fixed
