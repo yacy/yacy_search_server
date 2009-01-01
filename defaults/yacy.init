@@ -875,3 +875,7 @@ compare_yacy.right = YaCy
 
 # minimum free disk space for crawling (MiB)
 disk.free = 3000
+
+# setting if execution of CGI files is allowed or not
+cgi.allow = false
+cgi.suffixes = cgi,pl

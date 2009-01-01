@@ -3,7 +3,9 @@
 // (C) by Michael Peter Christen; mc@yacy.net
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2004, 2005
-// last major change: 05.10.2005
+// last major change: 01.01.2009
+//
+// CGI additions by Marc Nause
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -57,6 +59,7 @@ package de.anomic.http;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -73,6 +76,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.zip.GZIPOutputStream;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
@@ -193,7 +197,7 @@ public final class httpdFileHandler {
         return getLocalizedFile(path, switchboard.getConfig("locale.language","default"));
     }
     
-    /** Returns a path to the localized or default file according to the parameter localeSelection
+    /** Returns a path to the localized or default file according to the parameter localeSelectionhttp://localhost:8080/
 	 * @param path relative from htroot
 	 * @param localeSelection language of localized file; locale.language from switchboard is used if localeSelection.equals("") */
 	public static File getLocalizedFile(final String path, final String localeSelection){
@@ -256,7 +260,7 @@ public final class httpdFileHandler {
     }
     
     public static void doResponse(final Properties conProp, final httpRequestHeader requestHeader, final OutputStream out, final InputStream body) {
-        
+  
         String path = null;
         try {
             // getting some connection properties            
@@ -280,7 +284,7 @@ public final class httpdFileHandler {
                 assert(false) : "UnsupportedEncodingException: " + e.getMessage();
             }
             
-            // check again hack attacks in path
+            // check against hack attacks in path
             if (path.indexOf("..") >= 0) {
                 httpd.sendRespondError(conProp,out,4,403,null,"Access not allowed",null);
                 return;
@@ -340,7 +344,14 @@ public final class httpdFileHandler {
                 // no args here, maybe a POST with multipart extension
                 int length = requestHeader.getContentLength();
                 //System.out.println("HEADER: " + requestHeader.toString()); // DEBUG
-                if (method.equals(httpHeader.METHOD_POST)) {
+
+                /* don't parse body in case of a POST CGI call since it has to be
+                 * handed over to the CGI script unaltered and parsed by the script
+                 */
+                if (method.equals(httpHeader.METHOD_POST) &&
+                        !(switchboard.getConfigBool("cgi.allow", false) &&
+                        httpdFileHandler.matchesSuffix(path, switchboard.getConfig("cgi.suffixes", null)))
+                        ) {
 
                     // if its a POST, it can be either multipart or as args in the body
                     if ((requestHeader.containsKey(httpHeader.CONTENT_TYPE)) &&
@@ -410,7 +421,7 @@ public final class httpdFileHandler {
                     localeSelection = localeSelection.substring(0, localeSelection.indexOf("."));
             }
             
-            File   targetFile  = getLocalizedFile(path, localeSelection);
+            File targetFile = getLocalizedFile(path, localeSelection);
             final String targetExt   = conProp.getProperty("EXT","");
             targetClass = rewriteClassFile(new File(htDefaultPath, path));
             if (path.endsWith("/")) {
@@ -485,7 +496,11 @@ public final class httpdFileHandler {
                 }
             } else {
                     //XXX: you cannot share a .png/.gif file with a name like a class in htroot.
-                    if ( !(targetFile.exists()) && !((path.endsWith("png")||path.endsWith("gif")||path.endsWith(".stream"))&&targetClass!=null ) ){
+                    if ( !(targetFile.exists()) &&
+                            !((path.endsWith("png")||path.endsWith("gif") ||
+                            matchesSuffix(path, switchboard.getConfig("cgi.suffixes", null)) ||
+                            path.endsWith(".stream")) &&
+                            targetClass!=null ) ){
                         targetFile = new File(htDocsPath, path);
                         targetClass = rewriteClassFile(new File(htDocsPath, path));
                     }
@@ -553,6 +568,148 @@ public final class httpdFileHandler {
                         }
                     }
                 }
+            } else if (((switchboard.getConfigBool("cgi.allow", false)) &&                                  // check if CGI execution is allowed in config
+                    (httpdFileHandler.matchesSuffix(path, switchboard.getConfig("cgi.suffixes", null))) &&  // "right" file extension?
+                    (path.substring(0, path.indexOf(targetFile.getName())).contains("/CGI-BIN/") ||
+                    path.substring(0, path.indexOf(targetFile.getName())).contains("/cgi-bin/")) &&         // file in right directory?
+                    targetFile.exists())
+                    ) {
+
+                String mimeType = "text/html";
+                int statusCode = 200;
+
+                boolean argToCommandline = false;
+                // see http://hoohoo.ncsa.uiuc.edu/cgi/cl.html)
+                if (argsString != null && !argsString.contains("=")) {
+                    argToCommandline = true;
+                }
+
+                ProcessBuilder pb;
+
+                if (argToCommandline) {
+                    pb = new ProcessBuilder(targetFile.getAbsolutePath(), argsString);
+                } else {
+                    pb = new ProcessBuilder(targetFile.getAbsolutePath());
+                }
+
+                // set environment variables
+                Map<String, String> env = pb.environment();
+                env.put("SERVER_SOFTWARE", getDefaultHeaders(path).get(httpResponseHeader.SERVER));
+                env.put("SERVER_NAME", switchboard.getConfig("peerName", "<nameless>"));
+                env.put("GATEWAY_INTERFACE", "CGI/1.1");
+                if (httpVersion != null) {
+                    env.put("SERVER_PROTOCOL", httpVersion);
+                }
+                env.put("SERVER_PORT", switchboard.getConfig("port", "8080"));
+                env.put("REQUEST_METHOD", method);
+//                env.put("PATH_INFO", "");         // TODO: implement
+//                env.put("PATH_TRANSLATED", "");   // TODO: implement
+                env.put("SCRIPT_NAME", path);
+                if (argsString != null) {
+                    env.put("QUERY_STRING", argsString);
+                }
+                env.put("REMOTE_HOST", refererHost);
+                env.put("REMOTE_ADDR", clientIP);
+//                env.put("AUTH_TYPE", "");         // TODO: implement
+//                env.put("REMOTE_USER", "");       // TODO: implement
+//                env.put("REMOTE_IDENT", "");      // I don't think we need this
+                if (requestHeader.getContentType() != null) {
+                    env.put("CONTENT_TYPE", requestHeader.getContentType());
+                }
+                if (method.equalsIgnoreCase(httpHeader.METHOD_POST) && body != null) {
+                    env.put("CONTENT_LENGTH", requestHeader.getContentLength() + "");
+                }
+
+                // add values from request header to environment (see: http://hoohoo.ncsa.uiuc.edu/cgi/env.html#headers)
+                Set<String> requestHeaderKeys = requestHeader.keySet();
+                for (String requestHeaderKey : requestHeaderKeys) {
+                    env.put("HTTP_" + requestHeaderKey.toUpperCase().replace("-", "_"), requestHeader.get(requestHeaderKey));
+                }
+
+// TODO: set directory path for CGI script if this is necessary at all
+                //pb.directory(new File(targetFile.getAbsolutePath().substring(0, path.lastIndexOf("/"))));
+
+                // start execution of script
+                Process p = pb.start();
+
+                OutputStream os = new BufferedOutputStream(p.getOutputStream());
+
+                if (!argToCommandline && method.equalsIgnoreCase(httpHeader.METHOD_POST) && body != null) {
+                    byte[] buffer = new byte[1024];
+                    int len = requestHeader.getContentLength();
+                    while (len > 0) {
+                        body.read(buffer);
+                        len = len - buffer.length;
+                        os.write(buffer);
+                    }
+                }
+
+                os.close();
+
+                try {
+                    p.waitFor();
+                } catch (InterruptedException ex) {
+
+                }
+
+                int exitValue = p.exitValue();
+
+                InputStream is = new BufferedInputStream(p.getInputStream());
+
+                StringBuilder stringBuffer = new StringBuilder(1024);
+
+                while (is.available() > 0) {
+                    stringBuffer.append((char) is.read());
+                }
+
+                String cgiReturn = stringBuffer.toString();
+                int indexOfDelimiter = cgiReturn.indexOf("\n\n");
+                String[] cgiHeader = new String[0];
+                if (indexOfDelimiter > -1) {
+                    cgiHeader = cgiReturn.substring(0, indexOfDelimiter).split("\n");
+                }
+                String cgiBody = cgiReturn.substring(indexOfDelimiter + 1);
+
+                String key;
+                String value;
+                for (int i = 0; i < cgiHeader.length; i++) {
+                    indexOfDelimiter = cgiHeader[i].indexOf(":");
+                    key = cgiHeader[i].substring(0, indexOfDelimiter).trim();
+                    value = cgiHeader[i].substring(indexOfDelimiter + 1).trim();
+                    conProp.setProperty(key, value);
+                    if (key.equals("Cache-Control") && value.equals("no-cache")) {
+                        nocache = true;
+                    } else if (key.equals("Content-type")) {
+                        mimeType = value;
+                    } else if (key.equals("Status")) {
+                        if (key.length() > 2) {
+                            try {
+                                statusCode = Integer.parseInt(value.substring(0, 3));
+                            } catch (NumberFormatException ex) {
+                                /* tough luck, we will just have to use 200 as default value */
+                            }
+                        }
+                    }
+                }
+
+                /* did the script return an exit value != 0 and still there is supposed to be
+                 * everything right with the HTTP status? -> change status to 500 since 200 would
+                 * be a lie
+                 */
+                if (exitValue != 0 && statusCode == 200) {
+                    statusCode = 500;
+                }
+
+                targetDate = new Date(System.currentTimeMillis());
+
+                if (exitValue == 0 || (cgiBody != null && !cgiBody.equals(""))) {
+                    httpd.sendRespondHeader(conProp, out, httpVersion, statusCode, null, mimeType, cgiBody.length(), targetDate, null, null, null, null, nocache);
+                    out.write(cgiBody.getBytes());
+                } else {
+                    httpd.sendRespondError(conProp, out, exitValue, statusCode, null, httpHeader.http1_1.get(statusCode + ""), null);
+                }
+                
+
             } else if ((targetClass != null) && (path.endsWith(".stream"))) {
                 // call rewrite-class
                 requestHeader.put(httpHeader.CONNECTION_PROP_CLIENTIP, conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP));
@@ -1030,5 +1187,28 @@ public final class httpdFileHandler {
 //    public void doConnect(Properties conProp, httpHeader requestHeader, InputStream clientIn, OutputStream clientOut) {
 //        throw new UnsupportedOperationException();
 //    }
+
+    /**
+     * Tells if a filename ends with a suffix from a given list.
+     * @param filename the filename
+     * @param suffixList the list of suffixes which is a string of suffixes separated by commas
+     * @return true if the filename ends with a suffix from the list, else false
+     */
+    private static boolean matchesSuffix(String name, String suffixList) {
+        boolean ret = false;
+
+        if (suffixList != null && name != null) {
+            String[] suffixes = suffixList.split(",");
+            find:
+            for (int i = 0; i < suffixes.length; i++) {
+                if (name.endsWith("." + suffixes[i].trim())) {
+                    ret = true;
+                    break find;
+                }
+            }
+        }
+
+        return ret;
+    }
     
 }
