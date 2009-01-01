@@ -108,8 +108,12 @@ public final class httpdFileHandler {
     private static String[] defaultFiles   = null;
     private static File     htDefaultPath  = null;
     private static File     htLocalePath   = null;
-
-    private static final HashMap<File, SoftReference<byte[]>> templateCache;    
+    
+    private static final class TemplateCacheEntry {
+	Date lastModified;
+	byte[] content;
+    }
+    private static final HashMap<File, SoftReference<TemplateCacheEntry>> templateCache;    
     private static final HashMap<File, SoftReference<Method>> templateMethodCache;
     
     public static final boolean useTemplateCache;
@@ -121,7 +125,7 @@ public final class httpdFileHandler {
     static {
         final serverSwitch<?> theSwitchboard = plasmaSwitchboard.getSwitchboard();
         useTemplateCache = theSwitchboard.getConfig("enableTemplateCache","true").equalsIgnoreCase("true");
-        templateCache = (useTemplateCache)? new HashMap<File, SoftReference<byte[]>>() : new HashMap<File, SoftReference<byte[]>>(0);
+        templateCache = (useTemplateCache)? new HashMap<File, SoftReference<TemplateCacheEntry>>() : new HashMap<File, SoftReference<TemplateCacheEntry>>(0);
         templateMethodCache = (useTemplateCache) ? new HashMap<File, SoftReference<Method>>() : new HashMap<File, SoftReference<Method>>(0);
         
         if (httpdFileHandler.switchboard == null) {
@@ -661,24 +665,27 @@ public final class httpdFileHandler {
                     InputStream fis = null;
                     
                     // read the file/template
-                    byte[] templateContent = null;
+                    TemplateCacheEntry templateCacheEntry = null;
                     if (useTemplateCache) {
                         final long fileSize = targetFile.length();
                         if (fileSize <= 512 * 1024) {
                             // read from cache
-                            SoftReference<byte[]> ref = templateCache.get(targetFile);
+                            SoftReference<TemplateCacheEntry> ref = templateCache.get(targetFile);
                             if (ref != null) {
-                                templateContent = ref.get();
-                                if (templateContent == null) templateCache.remove(targetFile);
+                                templateCacheEntry = ref.get();
+                                if (templateCacheEntry == null) templateCache.remove(targetFile);
                             }
 
-                            if (templateContent == null) {
+                            Date targetFileDate = new Date(targetFile.lastModified());
+                            if (templateCacheEntry == null || targetFileDate.after(templateCacheEntry.lastModified)) {
                                 // loading the content of the template file into
                                 // a byte array
-                                templateContent = serverFileUtils.read(targetFile);
+                        	templateCacheEntry = new TemplateCacheEntry();
+                                templateCacheEntry.lastModified = targetFileDate;
+                                templateCacheEntry.content = serverFileUtils.read(targetFile);
 
                                 // storing the content into the cache
-                                ref = new SoftReference<byte[]>(templateContent);
+                                ref = new SoftReference<TemplateCacheEntry>(templateCacheEntry);
                                 templateCache.put(targetFile, ref);
                                 if (theLogger.isFinest()) theLogger.logFinest("Cache MISS for file " + targetFile);
                             } else {
@@ -687,8 +694,8 @@ public final class httpdFileHandler {
 
                             // creating an inputstream needed by the template
                             // rewrite function
-                            fis = new ByteArrayInputStream(templateContent);
-                            templateContent = null;
+                            fis = new ByteArrayInputStream(templateCacheEntry.content);
+                            templateCacheEntry = null;
                         } else {
                             // read from file directly
                             fis = new BufferedInputStream(new FileInputStream(targetFile));
