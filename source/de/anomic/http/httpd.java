@@ -80,7 +80,7 @@ import de.anomic.yacy.yacyURL;
 
 /**
  * Instances of this class can be passed as argument to the serverCore.
- * The generic server dispatches HTTP commands and calls the serverObjects
+ * The generic server dispatches HTTP commands and calls the
  * method GET, HEAD or POST in this class
  * these methods parse the command line and decide wether to call
  * a proxy servlet or a file server servlet 

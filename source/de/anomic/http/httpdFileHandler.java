@@ -197,7 +197,7 @@ public final class httpdFileHandler {
         return getLocalizedFile(path, switchboard.getConfig("locale.language","default"));
     }
     
-    /** Returns a path to the localized or default file according to the parameter localeSelectionhttp://localhost:8080/
+    /** Returns a path to the localized or default file according to the parameter localeSelection
 	 * @param path relative from htroot
 	 * @param localeSelection language of localized file; locale.language from switchboard is used if localeSelection.equals("") */
 	public static File getLocalizedFile(final String path, final String localeSelection){
