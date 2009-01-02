@@ -578,19 +578,9 @@ public final class httpdFileHandler {
                 String mimeType = "text/html";
                 int statusCode = 200;
 
-                boolean argToCommandline = false;
-                // see http://hoohoo.ncsa.uiuc.edu/cgi/cl.html)
-                if (argsString != null && !argsString.contains("=")) {
-                    argToCommandline = true;
-                }
-
                 ProcessBuilder pb;
 
-                if (argToCommandline) {
-                    pb = new ProcessBuilder(targetFile.getAbsolutePath(), argsString);
-                } else {
-                    pb = new ProcessBuilder(targetFile.getAbsolutePath());
-                }
+                pb = new ProcessBuilder(targetFile.getAbsolutePath());
 
                 // set environment variables
                 Map<String, String> env = pb.environment();
@@ -634,7 +624,7 @@ public final class httpdFileHandler {
 
                 OutputStream os = new BufferedOutputStream(p.getOutputStream());
 
-                if (!argToCommandline && method.equalsIgnoreCase(httpHeader.METHOD_POST) && body != null) {
+                if (method.equalsIgnoreCase(httpHeader.METHOD_POST) && body != null) {
                     byte[] buffer = new byte[1024];
                     int len = requestHeader.getContentLength();
                     while (len > 0) {
