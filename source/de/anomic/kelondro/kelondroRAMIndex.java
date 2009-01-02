@@ -214,12 +214,6 @@ public class kelondroRAMIndex implements kelondroIndex {
                 true);
     }
     
-    public kelondroProfile profile() {
-        if (index0 == null) return index1.profile();
-        if (index1 == null) return index0.profile();
-        return kelondroProfile.consolidate(index0.profile(), index1.profile());
-    }
-    
     public synchronized void close() {
         if (index0 != null) index0.close();
         if (index1 != null) index1.close();

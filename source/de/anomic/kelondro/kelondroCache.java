@@ -92,10 +92,6 @@ public class kelondroCache implements kelondroIndex {
     public int writeBufferSize() {
         return 0;
     }
-    
-    public kelondroProfile profile() {
-        return index.profile(); // TODO: implement own profile and merge with global
-    }
 
     public static void setCacheGrowStati(final long memStopGrowNew, final long memStartShrinkNew) {
         memStopGrow = memStopGrowNew;

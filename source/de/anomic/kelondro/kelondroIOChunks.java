@@ -53,8 +53,6 @@ public interface kelondroIOChunks {
     public void writeLong(long pos, long v) throws IOException;
 
     public void write(long pos, byte[] b) throws IOException;
-
-    public kelondroProfile profile();
     
     public void deleteOnExit();
 }

@@ -17,7 +17,6 @@ import de.anomic.kelondro.kelondroCloneableIterator;
 import de.anomic.kelondro.kelondroEcoTable;
 import de.anomic.kelondro.kelondroIndex;
 import de.anomic.kelondro.kelondroIntBytesMap;
-import de.anomic.kelondro.kelondroProfile;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroRowSet;
 import de.anomic.kelondro.kelondroSQLTable;
@@ -306,22 +305,12 @@ public class dbtest {
                 final long randomstart = Long.parseLong(args[5]);
                 final Random random = new Random(randomstart);
                 byte[] key;
-                kelondroProfile ioProfileAcc = new kelondroProfile();
-                kelondroProfile cacheProfileAcc = new kelondroProfile();
-                kelondroProfile[] profiles;
                 for (int i = 0; i < count; i++) {
                     key = randomHash(random);
                     table_test.put(testRow.newEntry(new byte[][]{key, key, dummyvalue2}));
                     if (table_reference != null) table_reference.put(testRow.newEntry(new byte[][]{key, key, dummyvalue2}));
                     if (i % 1000 == 0) {
                         System.out.println(i + " entries. ");
-                        if (table_test instanceof kelondroTree) {
-                            profiles = ((kelondroTree) table_test).profiles();
-                            System.out.println("Cache Delta: " + kelondroProfile.delta(profiles[0], cacheProfileAcc).toString());
-                            System.out.println("IO    Delta: " + kelondroProfile.delta(profiles[1],    ioProfileAcc).toString());
-                            cacheProfileAcc = profiles[0].clone();
-                               ioProfileAcc = profiles[1].clone();
-                        }
                     }
                 }
             }

@@ -36,24 +36,19 @@ import de.anomic.server.logging.serverLog;
 public class kelondroRowSet extends kelondroRowCollection implements kelondroIndex, Iterable<kelondroRow.Entry> {
 
     private static final int collectionReSortLimit = 400;
-    
-    private kelondroProfile profile;
 
     public kelondroRowSet(final kelondroRowSet rs) {
         super(rs);
-        this.profile = rs.profile;
     }
 
     public kelondroRowSet(final kelondroRow rowdef, final int objectCount, final byte[] cache, final int sortBound) {
         super(rowdef, objectCount, cache, sortBound);
         assert rowdef.objectOrder != null;
-        this.profile = new kelondroProfile();
     }
         
     public kelondroRowSet(final kelondroRow rowdef, final int objectCount) {
         super(rowdef, objectCount);
         assert rowdef.objectOrder != null;
-        this.profile = new kelondroProfile();
     }
     
     /**
@@ -65,7 +60,6 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
     public kelondroRowSet(final kelondroRow rowdef, final kelondroRow.Entry exportedCollectionRowEnvironment) {
         super(rowdef, exportedCollectionRowEnvironment);
         assert rowdef.objectOrder != null;
-        this.profile = new kelondroProfile();
     }
 
     public void setOrdering(final kelondroByteOrder newOrder, final int newColumn) {
@@ -102,13 +96,10 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
     
 	public void reset() {
 		super.reset();
-		this.profile = new kelondroProfile();
 	}
    
     public synchronized boolean has(final byte[] key) {
-        final long handle = profile.startRead();
         final int index = find(key, 0, key.length);
-        profile.stopRead(handle);
         return index >= 0;
     }
     
@@ -117,10 +108,8 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
     }
     
     private kelondroRow.Entry get(final byte[] key, final int astart, final int alength) {
-        final long handle = profile.startRead();
         final int index = find(key, astart, alength);
         final kelondroRow.Entry entry = (index >= 0) ? get(index, true) : null;
-        profile.stopRead(handle);
         return entry;
     }
     
@@ -136,8 +125,6 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
     public synchronized kelondroRow.Entry put(final kelondroRow.Entry entry) {
         assert (entry != null);
         assert (entry.getPrimaryKeyBytes() != null);
-        //assert (!(serverLog.allZero(entry.getColBytes(super.sortColumn))));
-        final long handle = profile.startWrite();
         int index = -1;
         kelondroRow.Entry oldentry = null;
         // when reaching a specific amount of un-sorted entries, re-sort all
@@ -151,19 +138,15 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
             oldentry = get(index, true);
             set(index, entry);
         }
-        profile.stopWrite(handle);
         return oldentry;
     }
 
     private synchronized kelondroRow.Entry remove(final byte[] a, final int start, final int length) {
         final int index = find(a, start, length);
         if (index < 0) return null;
-        //System.out.println("remove: chunk found at index position (before remove) " + index + ", inset=" + serverLog.arrayList(super.chunkcache, super.rowdef.objectsize() * index, length + 10) + ", searchkey=" + serverLog.arrayList(a, start, length));
         final kelondroRow.Entry entry = super.get(index, true);
         super.removeRow(index, true);
-        //System.out.println("remove: chunk found at index position (after  remove) " + index + ", inset=" + serverLog.arrayList(super.chunkcache, super.rowdef.objectsize() * index, length) + ", searchkey=" + serverLog.arrayList(a, start, length));
         int findagainindex = 0;
-        //System.out.println("kelondroRowSet.remove");
         assert (findagainindex = find(a, start, length)) < 0 : "remove: chunk found again at index position (after  remove) " + findagainindex + ", index(before) = " + index + ", inset=" + serverLog.arrayList(super.chunkcache, super.rowdef.objectsize * findagainindex, length) + ", searchkey=" + serverLog.arrayList(a, start, length); // check if the remove worked
         return entry;
     }
@@ -260,7 +243,7 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         return -1;
     }
 
-    public int binaryPosition(final byte[] key, final int astart, final int alength) {
+    private int binaryPosition(final byte[] key, final int astart, final int alength) {
         // returns the exact position of the key if the key exists,
         // or a position of an entry that is greater than the key if the
         // key does not exist
@@ -276,10 +259,6 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
             if (d < 0) rbound = p; else l = p + 1;
         }
         return l;
-    }
-    
-    public kelondroProfile profile() {
-        return profile;
     }
     
     public synchronized Iterator<byte[]> keys() {
@@ -391,6 +370,84 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         public void remove() {
             throw new UnsupportedOperationException();
         }
+    }
+
+    /**
+     * merge this row collection with another row collection.
+     * The resulting collection is sorted and does not contain any doubles, which are also removed during the merge.
+     * The new collection may be a copy of one of the old one, or can be an alteration of one of the input collections
+     * After this merge, none of the input collections should be used, because they can be altered 
+     * @param c
+     * @return
+     */
+    public kelondroRowSet merge(kelondroRowSet c) {
+        /*
+        if (this.isSorted() && this.size() >= c.size()) {
+            return mergeInsert(this, c);
+        }*/
+        return mergeEnum(this, c);
+    }
+    /*
+    private static kelondroRowSet mergeInsert(kelondroRowSet sorted, kelondroRowCollection small) {
+        assert sorted.rowdef == small.rowdef;
+        assert sorted.isSorted();
+        assert small.size() <= sorted.size();
+        sorted.ensureSize(sorted.size() + small.size());
+        for (int i = 0; i < small.size(); i++) {
+            
+        }
+        
+        return sorted;
+    }
+*/
+    
+    /**
+     * merge this row collection with another row collection using an simultanous iteration of the input collections
+     * the current collection is not altered in any way, the returned collection is a new collection with copied content.
+     * @param c
+     * @return
+     */
+    protected static kelondroRowSet mergeEnum(kelondroRowCollection c0, kelondroRowCollection c1) {
+        assert c0.rowdef == c1.rowdef;
+        kelondroRowSet r = new kelondroRowSet(c0.rowdef, c0.size() + c1.size());
+        c0.sort();
+        c1.sort();
+        int c0i = 0, c1i = 0;
+        int c0p, c1p;
+        int o;
+        final int objectsize = c0.rowdef.objectsize;
+        while (c0i < c0.size() && c1i < c1.size()) {
+            c0p = c0i * objectsize;
+            c1p = c1i * objectsize;
+            o = c0.rowdef.objectOrder.compare(
+                    c0.chunkcache, c0p, c0.rowdef.primaryKeyLength,
+                    c1.chunkcache, c1p, c0.rowdef.primaryKeyLength);
+            if (o == 0) {
+                r.addSorted(c0.chunkcache, c0p, objectsize);
+                c0i++;
+                c1i++;
+                continue;
+            }
+            if (o < 0) {
+                r.addSorted(c0.chunkcache, c0p, objectsize);
+                c0i++;
+                continue;
+            }
+            if (o > 0) {
+                r.addSorted(c1.chunkcache, c1p, objectsize);
+                c1i++;
+                continue;
+            }
+        }
+        while (c0i < c0.size()) {
+            r.addSorted(c0.chunkcache, c0i * objectsize, objectsize);
+            c0i++;
+        }
+        while (c1i < c1.size()) {
+            r.addSorted(c1.chunkcache, c1i * objectsize, objectsize);
+            c1i++;
+        }
+        return r;
     }
     
     public static void main(final String[] args) {

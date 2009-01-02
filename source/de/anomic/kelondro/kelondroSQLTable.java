@@ -274,10 +274,6 @@ public class kelondroSQLTable implements kelondroIndex {
         return 0;
     }
     
-    public kelondroProfile profile() {
-        return new kelondroProfile();
-    }
-    
     public final int cacheObjectChunkSize() {
         // dummy method
         return -1;

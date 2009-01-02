@@ -389,21 +389,9 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         
     }
     
-    public kelondroProfile profile() {
-        return index.profile();
-    }
-    
     public static final Iterator<String> filenames() {
         // iterates string objects; all file names from record tracker
         return tableTracker.keySet().iterator();
-    }
-
-    public static final kelondroProfile profileStats(final String filename) {
-        // returns a map for each file in the tracker;
-        // the map represents properties for each record oobjects,
-        // i.e. for cache memory allocation
-        final kelondroFlexTable theFlexTable = tableTracker.get(filename);
-        return theFlexTable.profile();
     }
     
     public static final Map<String, String> memoryStats(final String filename) {

@@ -366,10 +366,6 @@ public class kelondroEcoTable implements kelondroIndex {
         return index.keys(up, firstKey);
     }
 
-    public kelondroProfile profile() {
-        return null;
-    }
-
     public synchronized Entry put(final Entry row) throws IOException {
         assert file.size() == index.size() + fail : "file.size() = " + file.size() + ", index.size() = " + index.size();
         assert ((table == null) || (table.size() == index.size()));

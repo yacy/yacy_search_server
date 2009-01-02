@@ -185,14 +185,6 @@ public class kelondroSplitTable implements kelondroIndex {
         return s;
     }
     
-    public synchronized kelondroProfile profile() {
-        final kelondroProfile[] profiles = new kelondroProfile[tables.size()];
-        final Iterator<kelondroIndex> i = tables.values().iterator();
-        int c = 0;
-        while (i.hasNext()) profiles[c++] = (i.next()).profile();
-        return kelondroProfile.consolidate(profiles);
-    }
-    
     public int writeBufferSize() {
         int s = 0;
         for (final kelondroIndex index : tables.values()) {

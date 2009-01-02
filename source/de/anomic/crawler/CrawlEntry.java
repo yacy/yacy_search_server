@@ -131,7 +131,7 @@ public class CrawlEntry extends serverProcessorJob {
         // create new entry and store it into database
         assert url != null;
         assert initiator != null;
-        assert profileHandle.length() == yacySeedDB.commonHashLength : profileHandle + " != " + yacySeedDB.commonHashLength;
+        assert profileHandle == null || profileHandle.length() == yacySeedDB.commonHashLength : profileHandle + " != " + yacySeedDB.commonHashLength;
         this.initiator     = initiator;
         this.url           = url;
         this.refhash       = (referrerhash == null) ? "" : referrerhash;

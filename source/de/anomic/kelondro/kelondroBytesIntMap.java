@@ -127,10 +127,6 @@ public class kelondroBytesIntMap {
         return index.rows(up, firstKey);
     }
     
-    public kelondroProfile profile() {
-        return index.profile();
-    }
-    
     public synchronized void close() {
         index.close();
         index = null;

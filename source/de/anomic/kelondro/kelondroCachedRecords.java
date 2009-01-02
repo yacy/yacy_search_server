@@ -244,18 +244,6 @@ public class kelondroCachedRecords extends kelondroAbstractRecords implements ke
         super.close();
         this.cacheHeaders = null;
     }
-
-    public kelondroProfile[] profiles() {
-        return new kelondroProfile[]{
-                (cacheHeaders == null) ? new kelondroProfile() :
-                cacheHeaders.profile(),
-                entryFile.profile()
-        };
-    }
-    
-    public kelondroProfile profile() {
-        return kelondroProfile.consolidate(profiles());
-    }
     
     public void print() throws IOException {
         super.print();

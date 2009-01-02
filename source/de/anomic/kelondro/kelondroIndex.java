@@ -40,7 +40,6 @@ public interface kelondroIndex {
 
     public String filename(); // returns a unique identified for this index; can be a real or artificial file name
     public int size();
-    public kelondroProfile profile();
     public kelondroRow row();
     public boolean has(byte[] key); // use this only if there is no get in case that has returns true
     public kelondroRow.Entry get(byte[] key) throws IOException;

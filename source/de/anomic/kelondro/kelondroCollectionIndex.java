@@ -503,7 +503,7 @@ public class kelondroCollectionIndex {
         } else {
             // merge with the old collection
             // attention! this modifies the indexrow entry which must be written with index.put(indexrow) afterwards!
-            kelondroRowCollection collection = container;
+            kelondroRowSet collection = container;
             
             // read old information
             final int oldchunksize       = (int) indexrow.getColLong(idx_col_chunksize);  // needed only for migration
@@ -515,7 +515,7 @@ public class kelondroCollectionIndex {
 
             // load the old collection and join it
             try {
-                kelondroRowCollection krc = getwithparams(indexrow, oldchunksize, oldchunkcount, oldPartitionNumber, oldrownumber, oldSerialNumber, false);
+                kelondroRowSet krc = getwithparams(indexrow, oldchunksize, oldchunkcount, oldPartitionNumber, oldrownumber, oldSerialNumber, false);
                 //System.out.println("***DEBUG kelondroCollectionIndex.merge before merge*** krc.size = " + krc.size() + ", krc.sortbound = " + krc.sortBound + ", collection.size = " + collection.size() + ", collection.sortbound = " + collection.sortBound);
                 collection = collection.merge(krc);
                 //System.out.println("***DEBUG kelondroCollectionIndex.merge  after merge*** collection.size = " + collection.size() + ", collection.sortbound = " + collection.sortBound);

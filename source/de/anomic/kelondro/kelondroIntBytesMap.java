@@ -210,12 +210,6 @@ public class kelondroIntBytesMap {
         }
     }
     
-    public kelondroProfile profile() {
-        if (index0 == null) return index1.profile();
-        if (index1 == null) return index0.profile();
-        return kelondroProfile.consolidate(index0.profile(), index1.profile());
-    }
-    
     public static void main(final String[] args) {
     	boolean assertEnabled = false;
     	assert  assertEnabled = true;

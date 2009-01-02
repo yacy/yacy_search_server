@@ -183,7 +183,7 @@ public class kelondroRowCollection implements Iterable<kelondroRow.Entry> {
         return this.rowdef;
     }
     
-    private final void ensureSize(final int elements) {
+    protected final void ensureSize(final int elements) {
         final int needed = elements * rowdef.objectsize;
         if (chunkcache.length >= needed) return;
         byte[] newChunkcache = new byte[(int) (needed * growfactor)]; // increase space
@@ -312,7 +312,7 @@ public class kelondroRowCollection implements Iterable<kelondroRow.Entry> {
         this.lastTimeWrote = System.currentTimeMillis();
     }
     
-    private final void addSorted(final byte[] a, final int astart, final int alength) {
+    protected final void addSorted(final byte[] a, final int astart, final int alength) {
         assert (a != null);
         assert (astart >= 0) && (astart < a.length) : " astart = " + astart;
         assert (!(serverLog.allZero(a, astart, alength))) : "a = " + serverLog.arrayList(a, astart, alength);
@@ -836,56 +836,6 @@ public class kelondroRowCollection implements Iterable<kelondroRow.Entry> {
         	}
         }
         return true;
-    }
-    
-    /**
-     * merge this row collection with another row collection.
-     * the current collection is not altered in any way, the returned collection is a new collection with copied content.
-     * The resulting collection is sorted and does not contain any doubles, which are also removed during the merge
-     * @param c
-     * @return
-     */
-    public kelondroRowCollection merge(kelondroRowCollection c) {
-        assert this.rowdef == c.rowdef;
-        kelondroRowCollection r = new kelondroRowCollection(this.rowdef, this.size() + c.size());
-        this.sort();
-        c.sort();
-        int ti = 0, ci = 0;
-        int tp, cp;
-        int o;
-        final int pkl = this.rowdef.primaryKeyLength;
-        while (ti < this.size() && ci < c.size()) {
-            tp = ti * this.rowdef.objectsize;
-            cp = ci * this.rowdef.objectsize;
-            o = this.rowdef.objectOrder.compare(this.chunkcache, tp, pkl, c.chunkcache, cp, pkl);
-            if (o == 0) {
-                r.addSorted(this.chunkcache, tp, this.rowdef.objectsize);
-                ti++;
-                ci++;
-                continue;
-            }
-            if (o < 0) {
-                r.addSorted(this.chunkcache, tp, this.rowdef.objectsize);
-                ti++;
-                continue;
-            }
-            if (o > 0) {
-                r.addSorted(c.chunkcache, cp, this.rowdef.objectsize);
-                ci++;
-                continue;
-            }
-        }
-        while (ti < this.size()) {
-            tp = ti * this.rowdef.objectsize;
-            r.addSorted(this.chunkcache, tp, this.rowdef.objectsize);
-            ti++;
-        }
-        while (ci < c.size()) {
-            cp = ci * this.rowdef.objectsize;
-            r.addSorted(c.chunkcache, cp, this.rowdef.objectsize);
-            ci++;
-        }
-        return r;
     }
     
     public synchronized String toString() {
