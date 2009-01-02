@@ -26,7 +26,6 @@ package de.anomic.kelondro;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
@@ -88,15 +87,13 @@ public class kelondroBytesIntMap {
     public synchronized ArrayList<Integer[]> removeDoubles() throws IOException {
         final ArrayList<Integer[]> report = new ArrayList<Integer[]>();
         Integer[] is;
-        Iterator<kelondroRow.Entry> ei;
         int c, i;
         final int initialSize = this.size();
         for (final kelondroRowCollection delset: index.removeDoubles()) {
             is = new Integer[delset.size()];
-            ei = delset.rows();
             c = 0;
-            while (ei.hasNext()) {
-                i = (int) ei.next().getColLong(1);
+            for (kelondroRow.Entry e : delset) {
+                i = (int) e.getColLong(1);
                 assert i < initialSize : "i = " + i + ", initialSize = " + initialSize;
                 is[c++] = Integer.valueOf(i);
             }

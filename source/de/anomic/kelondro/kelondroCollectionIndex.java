@@ -238,17 +238,14 @@ public class kelondroCollectionIndex {
             }
         }
         // care for double entries
-        Iterator<kelondroRow.Entry> rowiter;
         int partition, maxpartition;
-        kelondroRow.Entry entry, maxentry;
+        kelondroRow.Entry maxentry;
         int doublecount = 0;
         for (final kelondroRowCollection doubleset: index.removeDoubles()) {
             // for each entry in doubleset choose one which we want to keep
-            rowiter = doubleset.rows();
             maxentry = null;
             maxpartition = -1;
-            while (rowiter.hasNext()) {
-                entry = rowiter.next();
+            for (kelondroRow.Entry entry: doubleset) {
                 partition = (int) entry.getColLong(idx_col_clusteridx);
                 if (partition > maxpartition) {
                     maxpartition = partition;
@@ -506,7 +503,7 @@ public class kelondroCollectionIndex {
         } else {
             // merge with the old collection
             // attention! this modifies the indexrow entry which must be written with index.put(indexrow) afterwards!
-            final kelondroRowCollection collection = container;
+            kelondroRowCollection collection = container;
             
             // read old information
             final int oldchunksize       = (int) indexrow.getColLong(idx_col_chunksize);  // needed only for migration
@@ -518,13 +515,15 @@ public class kelondroCollectionIndex {
 
             // load the old collection and join it
             try {
-                collection.addAllUnique(getwithparams(indexrow, oldchunksize, oldchunkcount, oldPartitionNumber, oldrownumber, oldSerialNumber, false));
+                kelondroRowCollection krc = getwithparams(indexrow, oldchunksize, oldchunkcount, oldPartitionNumber, oldrownumber, oldSerialNumber, false);
+                //System.out.println("***DEBUG kelondroCollectionIndex.merge before merge*** krc.size = " + krc.size() + ", krc.sortbound = " + krc.sortBound + ", collection.size = " + collection.size() + ", collection.sortbound = " + collection.sortBound);
+                collection = collection.merge(krc);
+                //System.out.println("***DEBUG kelondroCollectionIndex.merge  after merge*** collection.size = " + collection.size() + ", collection.sortbound = " + collection.sortBound);
+                
             } catch (kelondroException e) {
                 // an error like "array does not contain expected row" may appear here. Just go on like if the collection does not exist
                 e.printStackTrace();
             }
-            collection.sort();
-            collection.uniq(); // FIXME: not clear if it would be better to insert the collection with put to avoid double-entries
             collection.trim(false);
             
             // check for size of collection:
@@ -564,7 +563,6 @@ public class kelondroCollectionIndex {
     }
     
     private void shrinkCollection(final byte[] key, final kelondroRowCollection collection, final int targetSize) {
-        //TODO Remove timing before release
         // removes entries from collection
         // the removed entries are stored in a 'commons' dump file
 
@@ -573,52 +571,37 @@ public class kelondroCollectionIndex {
         final int oldsize = collection.size();
         if (oldsize <= targetSize) return;
         final kelondroRowSet newcommon = new kelondroRowSet(collection.rowdef, 0);
-        long sadd1 = 0, srem1 = 0, sadd2 = 0, srem2 = 0, tot1 = 0, tot2 = 0;
-        long t1 = 0, t2 = 0;
         
         // delete some entries, which are bad rated
-        Iterator<kelondroRow.Entry> i = collection.rows();
+        Iterator<kelondroRow.Entry> i = collection.iterator();
         kelondroRow.Entry entry;
         byte[] ref;
-        t1 = System.currentTimeMillis();
         while (i.hasNext()) {
             entry = i.next();
             ref = entry.getColBytes(0);
             if ((ref.length != 12) || (!yacyURL.probablyRootURL(new String(ref)))) {
-                t2 = System.currentTimeMillis();
                 newcommon.addUnique(entry);
-                sadd1 += System.currentTimeMillis() - t2;
-                t2 = System.currentTimeMillis();
                 i.remove();
-                srem1 += System.currentTimeMillis() - t2;
             }
         }
         final int firstnewcommon = newcommon.size();
-        tot1 = System.currentTimeMillis() - t1;
         
         // check if we shrinked enough
         final Random rand = new Random(System.currentTimeMillis());
-        t1 = System.currentTimeMillis();
         while (collection.size() > targetSize) {
             // now delete randomly more entries from the survival collection
-            i = collection.rows();
+            i = collection.iterator();
             while (i.hasNext()) {
                 entry = i.next();
                 ref = entry.getColBytes(0);
                 if (rand.nextInt() % 4 != 0) {
-                    t2 = System.currentTimeMillis();
                     newcommon.addUnique(entry);
-                    sadd2 += System.currentTimeMillis() - t2;
-                    t2 = System.currentTimeMillis();
                     i.remove();
-                    srem2 += System.currentTimeMillis() - t2;
                 }
             }
         }
-        tot2 = System.currentTimeMillis() - t1;
         collection.trim(false);
         
-        serverLog.logFine("kelondroCollectionIndex", "tot= "+tot1+'/'+tot2+" # add/rem(1)= "+sadd1+'/'+srem1+" # add/rem(2)= "+sadd2+'/'+srem2);
         serverLog.logInfo("kelondroCollectionIndex", "shrinked common word " + new String(key) + "; old size = " + oldsize + ", new size = " + collection.size() + ", maximum size = " + targetSize + ", newcommon size = " + newcommon.size() + ", first newcommon = " + firstnewcommon);
         
         // finally dump the removed entries to a file

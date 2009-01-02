@@ -463,7 +463,7 @@ public final class serverFileUtils {
             os = zos;
         }
         if(os != null) {
-            final Iterator<kelondroRow.Entry> i = set.rows();
+            final Iterator<kelondroRow.Entry> i = set.iterator();
             String key;
             if (i.hasNext()) {
                 key = new String(i.next().getColBytes(0));

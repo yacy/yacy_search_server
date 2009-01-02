@@ -391,11 +391,7 @@ public class plasmaRankingCRProcess {
             cr_entry = (kelondroRowSet) keycollection[1];
             
             // loop over all anchors
-            final Iterator<kelondroRow.Entry> j = cr_entry.rows();
-            kelondroRow.Entry entry;
-            while (j.hasNext()) {
-                // get domain of anchors
-                entry = j.next();
+            for (kelondroRow.Entry entry: cr_entry) {
                 anchor = entry.getColString(0, null);
                 if (anchor.length() == 6) anchorDom = anchor; else anchorDom = anchor.substring(6);
 

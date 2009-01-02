@@ -44,7 +44,7 @@ import de.anomic.server.serverProcessor;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySeedDB;
 
-public class kelondroRowCollection {
+public class kelondroRowCollection implements Iterable<kelondroRow.Entry> {
 
     public  static final double growfactor = 1.4;
     private static final int isortlimit = 20;
@@ -284,6 +284,7 @@ public class kelondroRowCollection {
     }
     
     public synchronized void add(final byte[] a) {
+        assert a.length == this.rowdef.objectsize;
         addUnique(a, 0, a.length);
     }
     
@@ -293,6 +294,7 @@ public class kelondroRowCollection {
         assert (!(serverLog.allZero(a, astart, alength))) : "a = " + serverLog.arrayList(a, astart, alength);
         assert (alength > 0);
         assert (astart + alength <= a.length);
+        assert alength == rowdef.objectsize : "alength =" + alength + ", rowdef.objectsize = " + rowdef.objectsize;
         final int l = Math.min(rowdef.objectsize, Math.min(alength, a.length - astart));
         ensureSize(chunkcount + 1);
         System.arraycopy(a, astart, chunkcache, rowdef.objectsize * chunkcount, l);
@@ -307,6 +309,21 @@ public class kelondroRowCollection {
                                                 chunkcache, rowdef.objectsize * (chunkcount - 1), rowdef.primaryKeyLength) == -1) {
             this.sortBound = chunkcount;
         }
+        this.lastTimeWrote = System.currentTimeMillis();
+    }
+    
+    private final void addSorted(final byte[] a, final int astart, final int alength) {
+        assert (a != null);
+        assert (astart >= 0) && (astart < a.length) : " astart = " + astart;
+        assert (!(serverLog.allZero(a, astart, alength))) : "a = " + serverLog.arrayList(a, astart, alength);
+        assert (alength > 0);
+        assert (astart + alength <= a.length);
+        assert alength == rowdef.objectsize : "alength =" + alength + ", rowdef.objectsize = " + rowdef.objectsize;
+        final int l = Math.min(rowdef.objectsize, Math.min(alength, a.length - astart));
+        ensureSize(chunkcount + 1);
+        System.arraycopy(a, astart, chunkcache, rowdef.objectsize * chunkcount, l);
+        this.chunkcount++;
+        this.sortBound = this.chunkcount;
         this.lastTimeWrote = System.currentTimeMillis();
     }
     
@@ -379,7 +396,11 @@ public class kelondroRowCollection {
     }
     
     public int size() {
-        return chunkcount;
+        return this.chunkcount;
+    }
+    
+    public int sorted() {
+        return this.sortBound;
     }
     
     public synchronized Iterator<byte[]> keys() {
@@ -413,9 +434,12 @@ public class kelondroRowCollection {
             p--;
             removeRow(p, false);
         }
-    }
-    
-    public synchronized Iterator<kelondroRow.Entry> rows() {
+    }    
+
+    /**
+     * return an iterator for the row entries in this object
+     */
+    public Iterator<kelondroRow.Entry> iterator() {
         // iterates kelondroRow.Entry - type entries
         return new rowIterator();
     }
@@ -446,12 +470,13 @@ public class kelondroRowCollection {
             p--;
             removeRow(p, false);
         }
+
     }
     
     public synchronized void select(final Set<String> keys) {
         // removes all entries but the ones given by urlselection
         if ((keys == null) || (keys.isEmpty())) return;
-        final Iterator<kelondroRow.Entry> i = rows();
+        final Iterator<kelondroRow.Entry> i = iterator();
         kelondroRow.Entry row;
         while (i.hasNext()) {
             row = i.next();
@@ -813,9 +838,59 @@ public class kelondroRowCollection {
         return true;
     }
     
+    /**
+     * merge this row collection with another row collection.
+     * the current collection is not altered in any way, the returned collection is a new collection with copied content.
+     * The resulting collection is sorted and does not contain any doubles, which are also removed during the merge
+     * @param c
+     * @return
+     */
+    public kelondroRowCollection merge(kelondroRowCollection c) {
+        assert this.rowdef == c.rowdef;
+        kelondroRowCollection r = new kelondroRowCollection(this.rowdef, this.size() + c.size());
+        this.sort();
+        c.sort();
+        int ti = 0, ci = 0;
+        int tp, cp;
+        int o;
+        final int pkl = this.rowdef.primaryKeyLength;
+        while (ti < this.size() && ci < c.size()) {
+            tp = ti * this.rowdef.objectsize;
+            cp = ci * this.rowdef.objectsize;
+            o = this.rowdef.objectOrder.compare(this.chunkcache, tp, pkl, c.chunkcache, cp, pkl);
+            if (o == 0) {
+                r.addSorted(this.chunkcache, tp, this.rowdef.objectsize);
+                ti++;
+                ci++;
+                continue;
+            }
+            if (o < 0) {
+                r.addSorted(this.chunkcache, tp, this.rowdef.objectsize);
+                ti++;
+                continue;
+            }
+            if (o > 0) {
+                r.addSorted(c.chunkcache, cp, this.rowdef.objectsize);
+                ci++;
+                continue;
+            }
+        }
+        while (ti < this.size()) {
+            tp = ti * this.rowdef.objectsize;
+            r.addSorted(this.chunkcache, tp, this.rowdef.objectsize);
+            ti++;
+        }
+        while (ci < c.size()) {
+            cp = ci * this.rowdef.objectsize;
+            r.addSorted(c.chunkcache, cp, this.rowdef.objectsize);
+            ci++;
+        }
+        return r;
+    }
+    
     public synchronized String toString() {
         final StringBuilder s = new StringBuilder();
-        final Iterator<kelondroRow.Entry> i = rows();
+        final Iterator<kelondroRow.Entry> i = iterator();
         if (i.hasNext()) s.append(i.next().toString());
         while (i.hasNext()) s.append(", " + (i.next()).toString());
         return new String(s);
@@ -919,7 +994,7 @@ public class kelondroRowCollection {
     	a.add("CCCCCCCCCCCC".getBytes());
     	final ArrayList<kelondroRowCollection> del = a.removeDoubles();
     	System.out.println(del + "rows double");
-    	final Iterator<kelondroRow.Entry> j = a.rows();
+    	final Iterator<kelondroRow.Entry> j = a.iterator();
     	while (j.hasNext()) System.out.println(new String(j.next().bytes()));
     	
         System.out.println("kelondroRowCollection test with size = " + testsize);

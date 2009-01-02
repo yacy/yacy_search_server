@@ -143,14 +143,12 @@ public class kelondroBytesLongMap {
         final ArrayList<kelondroRowCollection> indexreport = index.removeDoubles();
         final ArrayList<Long[]> report = new ArrayList<Long[]>();
         Long[] is;
-        Iterator<kelondroRow.Entry> ei;
         int c;
         for (final kelondroRowCollection rowset: indexreport) {
             is = new Long[rowset.size()];
-            ei = rowset.rows();
             c = 0;
-            while (ei.hasNext()) {
-                is[c++] = Long.valueOf(ei.next().getColLong(1));
+            for (kelondroRow.Entry e: rowset) {
+                is[c++] = Long.valueOf(e.getColLong(1));
             }
             report.add(is);
         }

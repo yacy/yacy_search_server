@@ -117,6 +117,7 @@ public final class indexContainerHeap {
             for (final indexContainer container : new blobFileEntries(blobFile, this.payloadrow)) {
                 // TODO: in this loop a lot of memory may be allocated. A check if the memory gets low is necessary. But what do when the memory is low?
                 if (container == null) break;
+                //System.out.println("***DEBUG indexContainerHeap.initwriteModeFromBLOB*** container.size = " + container.size() + ", container.sorted = " + container.sorted());
                 cache.put(container.getWordHash(), container);
                 urlCount += container.size();
             }

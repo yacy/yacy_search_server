@@ -175,7 +175,7 @@ public class indexContainer extends kelondroRowSet {
         Iterator<kelondroRow.Entry> rowEntryIterator;
         
         public entryIterator() {
-            rowEntryIterator = rows();
+            rowEntryIterator = iterator();
         }
         
         public boolean hasNext() {

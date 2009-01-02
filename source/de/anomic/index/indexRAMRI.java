@@ -193,6 +193,7 @@ public final class indexRAMRI implements indexRI, indexRIReader {
         // - the entry with maximum count
         if (heap.size() == 0) return null;
         try {
+            //return hashScore.getMaxObject();
             String hash = null;
             final int count = hashScore.getMaxScore();
             if ((count >= cacheReferenceCountLimit) &&
@@ -220,6 +221,7 @@ public final class indexRAMRI implements indexRI, indexRIReader {
                 if (ic != null) hash = ic.getWordHash();
             }
             return hash;
+            
         } catch (final Exception e) {
             log.logSevere("flushFromMem: " + e.getMessage(), e);
         }

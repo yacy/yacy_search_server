@@ -472,7 +472,7 @@ public final class plasmaWordIndex implements indexRI {
             // To ensure termination an additional counter is used
             int l = 0;
             while ((l++ < 100) && (theCache.maxURLinCache() > wCacheMaxChunk)) {
-                flushCache(theCache, Math.min(10, theCache.size()));
+                flushCache(theCache, Math.min(20, theCache.size()));
             }
             // next flush more entries if the size exceeds the maximum size of the cache
             if ((theCache.size() > theCache.getMaxWordCount()) ||

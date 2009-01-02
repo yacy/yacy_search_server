@@ -33,7 +33,7 @@ import java.util.Random;
 
 import de.anomic.server.logging.serverLog;
 
-public class kelondroRowSet extends kelondroRowCollection implements kelondroIndex {
+public class kelondroRowSet extends kelondroRowCollection implements kelondroIndex, Iterable<kelondroRow.Entry> {
 
     private static final int collectionReSortLimit = 400;
     
@@ -337,10 +337,10 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         }
     }
     
-    public synchronized Iterator<kelondroRow.Entry> rows() {
+    public synchronized Iterator<kelondroRow.Entry> iterator() {
         // iterates kelondroRow.Entry - type entries
         sort();
-        return super.rows();
+        return super.iterator();
     }
     
     public synchronized kelondroCloneableIterator<kelondroRow.Entry> rows(final boolean up, final byte[] firstKey) {
@@ -420,7 +420,7 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         for (int ii = 0; ii < test.length; ii++) d.add(test[ii].getBytes());
         d.sort();
         d.remove("fuenf".getBytes(), 0, 5);
-        final Iterator<kelondroRow.Entry> ii = d.rows();
+        final Iterator<kelondroRow.Entry> ii = d.iterator();
         String s;
         System.out.print("INPUT-ITERATOR: ");
         kelondroRow.Entry entry;
