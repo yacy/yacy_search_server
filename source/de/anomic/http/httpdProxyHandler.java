@@ -478,135 +478,139 @@ public final class httpdProxyHandler {
             
             // send request
             try {
-            res = client.GET(getUrl);
-            if (theLogger.isFinest()) theLogger.logFinest(reqID +"    response status: "+ res.getStatusLine());
-            conProp.put(httpHeader.CONNECTION_PROP_CLIENT_REQUEST_HEADER, requestHeader);
-            
-            final httpResponseHeader responseHeader = res.getResponseHeader();
-            // determine if it's an internal error of the httpc
-            if (responseHeader.size() == 0) {
-                throw new Exception(res.getStatusLine());
-            }
-            
-            final httpChunkedOutputStream chunkedOut = setTransferEncoding(conProp, responseHeader, res.getStatusCode(), respond);
+                res = client.GET(getUrl);
+                if (theLogger.isFinest()) theLogger.logFinest(reqID +"    response status: "+ res.getStatusLine());
+                conProp.put(httpHeader.CONNECTION_PROP_CLIENT_REQUEST_HEADER, requestHeader);
 
-            // the cache does either not exist or is (supposed to be) stale
-            long sizeBeforeDelete = -1;
-            if (cachedResponseHeader != null) {
-                // delete the cache
-                sizeBeforeDelete = plasmaHTCache.getResourceContentLength(url);
-                plasmaHTCache.deleteFromCache(url);
-                conProp.setProperty(httpHeader.CONNECTION_PROP_PROXY_RESPOND_CODE, "TCP_REFRESH_MISS");
-            }            
-
-            // reserver cache entry
-            final indexDocumentMetadata cacheEntry = new httpdProxyCacheEntry(
-                    0, 
-                    url,
-                    "",
-                    res.getStatusLine(),
-                    requestHeader,
-                    responseHeader,
-                    null, 
-                    sb.webIndex.defaultProxyProfile
-            );
-            plasmaHTCache.storeMetadata(responseHeader, cacheEntry);
-
-            // handle incoming cookies
-            handleIncomingCookies(responseHeader, host, ip);
-            
-            prepareResponseHeader(responseHeader, res.getHttpVer());               
-            
-            // sending the respond header back to the client
-            if (chunkedOut != null) {
-                responseHeader.put(httpResponseHeader.TRANSFER_ENCODING, "chunked");
-            }
-            
-            if (theLogger.isFinest()) theLogger.logFinest(reqID +"    sending response header: "+ responseHeader);
-            httpd.sendRespondHeader(
-                    conProp,
-                    respond,
-                    httpVer,
-                    res.getStatusCode(),
-                    res.getStatusLine().substring(4), // status text 
-                    responseHeader);
-            
-            if(hasBody(res.getStatusCode())) {
-            
-            final OutputStream outStream = (gzippedOut != null) ? gzippedOut : ((chunkedOut != null)? chunkedOut : respond);
-                
-            final String storeError = cacheEntry.shallStoreCacheForProxy();
-            final boolean storeHTCache = cacheEntry.profile().storeHTCache();
-            final boolean isSupportedContent = plasmaParser.supportedContent(plasmaParser.PARSER_MODE_PROXY,cacheEntry.url(),cacheEntry.getMimeType());
-            if (
-                    /*
-                     * Now we store the response into the htcache directory if 
-                     * a) the response is cacheable AND 
-                     */
-                    (storeError == null) &&
-                    /*  
-                     * b) the user has configured to use the htcache OR
-                     * c) the content should be indexed
-                     */
-                    ((storeHTCache) || (isSupportedContent))
-            ) {
-                // we don't write actually into a file, only to RAM, and schedule writing the file.
-                int l = res.getResponseHeader().size();
-                final ByteArrayOutputStream byteStream = new ByteArrayOutputStream((l < 32) ? 32 : l);
-
-                final OutputStream toClientAndMemory = new MultiOutputStream(new OutputStream[] {outStream, byteStream});
-                serverFileUtils.copy(res.getDataAsStream(), toClientAndMemory);
-                // cached bytes
-                byte[] cacheArray;
-                if(byteStream.size() > 0) {
-                    cacheArray = byteStream.toByteArray();
-                } else {
-                    cacheArray = null;
+                final httpResponseHeader responseHeader = res.getResponseHeader();
+                // determine if it's an internal error of the httpc
+                if (responseHeader.size() == 0) {
+                    throw new Exception(res.getStatusLine());
                 }
-                if (theLogger.isFine()) theLogger.logFine(reqID +" writeContent of " + url + " produced cacheArray = " + ((cacheArray == null) ? "null" : ("size=" + cacheArray.length)));
 
-                if (sizeBeforeDelete == -1) {
-                    // totally fresh file
-                    //cacheEntry.status = plasmaHTCache.CACHE_FILL; // it's an insert
-                    cacheEntry.setCacheArray(cacheArray);
-                    sb.htEntryStoreProcess(cacheEntry);
-                    conProp.setProperty(httpHeader.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_MISS");
-                } else if (cacheArray != null && sizeBeforeDelete == cacheArray.length) {
-                    // before we came here we deleted a cache entry
-                    cacheArray = null;
-                    //cacheEntry.status = plasmaHTCache.CACHE_STALE_RELOAD_BAD;
-                    //cacheManager.push(cacheEntry); // unnecessary update
-                    conProp.setProperty(httpHeader.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_REF_FAIL_HIT");                                
-                } else {
-                    // before we came here we deleted a cache entry
-                    //cacheEntry.status = plasmaHTCache.CACHE_STALE_RELOAD_GOOD;
-                    cacheEntry.setCacheArray(cacheArray);
-                    sb.htEntryStoreProcess(cacheEntry);
-                    conProp.setProperty(httpHeader.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_REFRESH_MISS");
+                final httpChunkedOutputStream chunkedOut = setTransferEncoding(conProp, responseHeader, res.getStatusCode(), respond);
+
+                // the cache does either not exist or is (supposed to be) stale
+                long sizeBeforeDelete = -1;
+                if (cachedResponseHeader != null) {
+                    // delete the cache
+                    sizeBeforeDelete = plasmaHTCache.getResourceContentLength(url);
+                    plasmaHTCache.deleteFromCache(url);
+                    conProp.setProperty(httpHeader.CONNECTION_PROP_PROXY_RESPOND_CODE, "TCP_REFRESH_MISS");
                 }
-            } else {
-                // no caching
-                if (theLogger.isFine()) theLogger.logFine(reqID +" "+ url.toString() + " not cached." +
-                        " StoreError=" + ((storeError==null)?"None":storeError) + 
-                        " StoreHTCache=" + storeHTCache + 
-                        " SupportetContent=" + isSupportedContent);
 
-                serverFileUtils.copy(res.getDataAsStream(), outStream);
+                // reserver cache entry
+                final indexDocumentMetadata cacheEntry = new httpdProxyCacheEntry(
+                        0,
+                        url,
+                        "",
+                        res.getStatusLine(),
+                        requestHeader,
+                        responseHeader,
+                        null,
+                        sb.webIndex.defaultProxyProfile
+                );
+                plasmaHTCache.storeMetadata(responseHeader, cacheEntry);
 
-                conProp.setProperty(httpHeader.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_MISS");
-            }
-            
-            if (gzippedOut != null) {
-                gzippedOut.finish();
-            }
-            if (chunkedOut != null) {
-                chunkedOut.finish();
-                chunkedOut.flush();
-            }
-            } // end hasBody
+                // handle incoming cookies
+                handleIncomingCookies(responseHeader, host, ip);
+
+                prepareResponseHeader(responseHeader, res.getHttpVer());
+
+                // sending the respond header back to the client
+                if (chunkedOut != null) {
+                    responseHeader.put(httpResponseHeader.TRANSFER_ENCODING, "chunked");
+                }
+
+                if (theLogger.isFinest()) theLogger.logFinest(reqID +"    sending response header: "+ responseHeader);
+                httpd.sendRespondHeader(
+                        conProp,
+                        respond,
+                        httpVer,
+                        res.getStatusCode(),
+                        res.getStatusLine().substring(4), // status text
+                        responseHeader);
+
+                if(hasBody(res.getStatusCode())) {
+
+                    final OutputStream outStream = (gzippedOut != null) ? gzippedOut : ((chunkedOut != null)? chunkedOut : respond);
+
+                    final String storeError = cacheEntry.shallStoreCacheForProxy();
+                    final boolean storeHTCache = cacheEntry.profile().storeHTCache();
+                    final boolean isSupportedContent = plasmaParser.supportedContent(plasmaParser.PARSER_MODE_PROXY,cacheEntry.url(),cacheEntry.getMimeType());
+                    if (
+                            /*
+                             * Now we store the response into the htcache directory if
+                             * a) the response is cacheable AND
+                             */
+                            (storeError == null) &&
+                            /*
+                             * b) the user has configured to use the htcache OR
+                             * c) the content should be indexed
+                             */
+                            ((storeHTCache) || (isSupportedContent))
+                    ) {
+                        // we don't write actually into a file, only to RAM, and schedule writing the file.
+                        int l = res.getResponseHeader().size();
+                        final ByteArrayOutputStream byteStream = new ByteArrayOutputStream((l < 32) ? 32 : l);
+
+                        final OutputStream toClientAndMemory = new MultiOutputStream(new OutputStream[] {outStream, byteStream});
+                        serverFileUtils.copy(res.getDataAsStream(), toClientAndMemory);
+                        // cached bytes
+                        byte[] cacheArray;
+                        if(byteStream.size() > 0) {
+                            cacheArray = byteStream.toByteArray();
+                        } else {
+                            cacheArray = null;
+                        }
+                        if (theLogger.isFine()) theLogger.logFine(reqID +" writeContent of " + url + " produced cacheArray = " + ((cacheArray == null) ? "null" : ("size=" + cacheArray.length)));
+
+                        if (sizeBeforeDelete == -1) {
+                            // totally fresh file
+                            //cacheEntry.status = plasmaHTCache.CACHE_FILL; // it's an insert
+                            cacheEntry.setCacheArray(cacheArray);
+                            sb.htEntryStoreProcess(cacheEntry);
+                            conProp.setProperty(httpHeader.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_MISS");
+                        } else if (cacheArray != null && sizeBeforeDelete == cacheArray.length) {
+                            // before we came here we deleted a cache entry
+                            cacheArray = null;
+                            //cacheEntry.status = plasmaHTCache.CACHE_STALE_RELOAD_BAD;
+                            //cacheManager.push(cacheEntry); // unnecessary update
+                            conProp.setProperty(httpHeader.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_REF_FAIL_HIT");
+                        } else {
+                            // before we came here we deleted a cache entry
+                            //cacheEntry.status = plasmaHTCache.CACHE_STALE_RELOAD_GOOD;
+                            cacheEntry.setCacheArray(cacheArray);
+                            sb.htEntryStoreProcess(cacheEntry);
+                            conProp.setProperty(httpHeader.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_REFRESH_MISS");
+                        }
+                    } else {
+                        // no caching
+                        if (theLogger.isFine()) theLogger.logFine(reqID +" "+ url.toString() + " not cached." +
+                                " StoreError=" + ((storeError==null)?"None":storeError) +
+                                " StoreHTCache=" + storeHTCache +
+                                " SupportetContent=" + isSupportedContent);
+
+                        serverFileUtils.copy(res.getDataAsStream(), outStream);
+
+                        conProp.setProperty(httpHeader.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_MISS");
+                    }
+
+                    if (gzippedOut != null) {
+                        gzippedOut.finish();
+                    }
+                    if (chunkedOut != null) {
+                        chunkedOut.finish();
+                        chunkedOut.flush();
+                    }
+                } // end hasBody
             } catch(SocketException se) {
-        	// client cut proxy connection, abort download
-        	res.abort();
+                // if opened ...
+                if(res != null) {
+                    // client cut proxy connection, abort download
+                    res.abort();
+                }
+                handleProxyException(se,conProp,respond,url);
             } finally {
                 // if opened ...
                 if(res != null) {
