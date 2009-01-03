@@ -155,6 +155,11 @@ public class yacySeed implements Cloneable {
     /** zero-value */
     public static final String ZERO      = "0";
     
+    private static final int FLAG_DIRECT_CONNECT            = 0;
+    private static final int FLAG_ACCEPT_REMOTE_CRAWL       = 1;
+    private static final int FLAG_ACCEPT_REMOTE_INDEX       = 2;
+    private static final int FLAG_ACCEPT_CITATION_REFERENCE = 3;
+    
     public static final String DFLT_NETWORK_UNIT = "freeworld";
     public static final String DFLT_NETWORK_GROUP = "";
 
@@ -623,10 +628,10 @@ public class yacySeed implements Cloneable {
         dna.put(yacySeed.FLAGS, new String(f.getBytes()));
     }
 
-    public final void setFlagDirectConnect(final boolean value) { setFlag(0, value); }
-    public final void setFlagAcceptRemoteCrawl(final boolean value) { setFlag(1, value); }
-    public final void setFlagAcceptRemoteIndex(final boolean value) { setFlag(2, value); }
-    public final void setFlagAcceptCitationReference(final boolean value) { setFlag(3, value); }
+    public final void setFlagDirectConnect(final boolean value) { setFlag(FLAG_DIRECT_CONNECT, value); }
+    public final void setFlagAcceptRemoteCrawl(final boolean value) { setFlag(FLAG_ACCEPT_REMOTE_CRAWL, value); }
+    public final void setFlagAcceptRemoteIndex(final boolean value) { setFlag(FLAG_ACCEPT_REMOTE_INDEX, value); }
+    public final void setFlagAcceptCitationReference(final boolean value) { setFlag(FLAG_ACCEPT_CITATION_REFERENCE, value); }
     public final boolean getFlagDirectConnect() { return getFlag(0); }
     public final boolean getFlagAcceptRemoteCrawl() {
         //if (getVersion() < 0.300) return false;

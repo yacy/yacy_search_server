@@ -1332,7 +1332,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             int count = rankingOwnDistribution.size() / 100;
             if (count == 0) count = 1;
             if (count > 5) count = 5;
-            if (rankingOn) {
+            if (rankingOn && !isRobinsonMode()) {
                 rankingOwnDistribution.transferRanking(count);
                 rankingOtherDistribution.transferRanking(1);
             }
