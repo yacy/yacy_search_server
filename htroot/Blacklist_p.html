@@ -3,8 +3,15 @@
   <head>
     <title>YaCy '#[clientname]#': Blacklist Administration</title>
     #%env/templates/metas.template%#
+#(disabled)##(edit)#
+    <script type="text/javascript">
+    function switchTargetBlacklist(disabled){
+      document.editBlacklistPatterns.targetBlacklist.disabled=disabled;
+    }
+    </script>
+::#(/edit)#::#(/disabled)#
   </head>
-  <body id="Blacklist">
+  <body id="Blacklist"#(disabled)##(edit)# onload="switchTargetBlacklist(1)"::#(/edit)#::#(/disabled)#>
     #%env/templates/header.template%#
     #%env/templates/submenuBlacklist.template%#
   
@@ -54,8 +61,26 @@
     <fieldset class="editList">
       <legend>Edit this list</legend>
       <!-- Blacklist configuration -->
-      #(edit)# 
-      <form action="Blacklist_p.html" method="post" enctype="multipart/form-data">	
+      #(edit)#
+
+      <form action="Blacklist_p.html" method="post" enctype="multipart/form-data">
+        <p>Add new pattern:</p>
+        <div>
+          <input type="hidden" name="currentBlacklist" value="#[currentBlacklist]#" />
+          <input type="text" name="newEntry" size="50" />
+          <input type="submit" name="addBlacklistEntry" value="Add URL pattern" />
+        </div>
+        <ul>
+          <li>domain/fullpath</li>
+          <li>domain/.* or <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/util/regex/Pattern.html">regexpr</a></li>
+          <li>*.domain/.* or <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/util/regex/Pattern.html">regexpr</a></li>
+          <li>domain.*/.* or <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/util/regex/Pattern.html">regexpr</a></li>
+          <li>*.sub.domain/.* or <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/util/regex/Pattern.html">regexpr</a></li>
+          <li>sub.domain.*/.* or <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/util/regex/Pattern.html">regexpr</a></li>
+        </ul>
+      </form>
+
+      <form name="editBlacklistPatterns" action="Blacklist_p.html" method="post" enctype="multipart/form-data">
         <p>These are the domain name/path patterns in <strong><em>#[currentBlacklist]#</em></strong>:</p>
         <div>
           <input type="hidden" name="currentBlacklist" value="#[currentBlacklist]#" />
@@ -73,9 +98,9 @@
           </table>
           <br />
           <select name="action" size="1">
-            <option value="editBlacklistEntry">Edit selected pattern(s)</option>
-            <option value="deleteBlacklistEntry">Delete selected pattern(s)</option>
-            <option value="moveBlacklistEntry">Move selected pattern(s) to</option>
+            <option value="editBlacklistEntry" onclick="switchTargetBlacklist(1)">Edit selected pattern(s)</option>
+            <option value="deleteBlacklistEntry" onclick="switchTargetBlacklist(1)">Delete selected pattern(s)</option>
+            <option value="moveBlacklistEntry" onclick="switchTargetBlacklist(0)">Move selected pattern(s) to</option>
           </select>
           &nbsp;
           <select name="targetBlacklist" size="1">
@@ -88,6 +113,7 @@
           </div>
       </form>
       ::
+      <p>Edit existing pattern(s):</p>
       <form action="Blacklist_p.html" method="post" enctype="multipart/form-data">
         <div>
           <input type="hidden" name="currentBlacklist" value="#[currentBlacklist]#" />
@@ -96,26 +122,12 @@
           <input type="hidden" name="selectedBlacklistEntry.#[count]#" value="#[item]#"/>
           #{/editList}#
           <input type="hidden" name="action" value="editBlacklistEntry" />
-          <input type="submit" value="Save URL pattern" />
+          <br /><br />
+          <input type="submit" value="Save URL pattern(s)" />
         </div>
       </form>
       #(/edit)#
 
-      <form action="Blacklist_p.html" method="post" enctype="multipart/form-data">
-        <ul>
-          <li>domain/fullpath</li>
-          <li>domain/.* or <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/util/regex/Pattern.html">regexpr</a></li>
-          <li>*.domain/.* or <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/util/regex/Pattern.html">regexpr</a></li>
-          <li>domain.*/.* or <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/util/regex/Pattern.html">regexpr</a></li>
-          <li>*.sub.domain/.* or <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/util/regex/Pattern.html">regexpr</a></li>
-          <li>sub.domain.*/.* or <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/util/regex/Pattern.html">regexpr</a></li>
-        </ul>
-        <div>
-          <input type="hidden" name="currentBlacklist" value="#[currentBlacklist]#" />
-          <input type="text" name="newEntry" size="50" />
-          <input type="submit" name="addBlacklistEntry" value="Add URL pattern" />
-        </div>
-      </form>
     </fieldset>
     
     <fieldset class="listSettings">
