@@ -58,6 +58,8 @@ public class sharedBlacklist_p {
     public static final int STATUS_PEER_UNKNOWN = 3;
     public static final int STATUS_URL_PROBLEM = 4;
     public static final int STATUS_WRONG_INVOCATION = 5;
+
+    private final static String BLACKLIST_FILENAME_FILTER = "^.*\\.black$";
     
     public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
@@ -83,7 +85,7 @@ public class sharedBlacklist_p {
         
             
             // loading all blacklist files located in the directory
-            final List<String> dirlist = listManager.getDirListing(listManager.listsPath);
+            final List<String> dirlist = listManager.getDirListing(listManager.listsPath, BLACKLIST_FILENAME_FILTER);
             
             // List BlackLists
             int blacklistCount = 0;
