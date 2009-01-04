@@ -29,6 +29,7 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URLDecoder;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -59,6 +60,7 @@ public class ViewFile {
     public static final int VIEW_MODE_AS_PARSED_SENTENCES = 3;
     public static final int VIEW_MODE_AS_IFRAME = 4;
     public static final int VIEW_MODE_AS_LINKLIST = 5;
+    public static final int VIEW_MODE_AS_PARSED_WORDS = 6;
     
     private static final String HIGHLIGHT_CSS = "searchHighlight";
     private static final int MAX_HIGHLIGHTS = 6;
@@ -240,7 +242,7 @@ public class ViewFile {
             prop.put("viewMode", VIEW_MODE_AS_IFRAME);
             prop.put("viewMode_url", url.toNormalform(false, true));
             
-        } else if (viewMode.equals("parsed") || viewMode.equals("sentences") || viewMode.equals("links")) {
+        } else if (viewMode.equals("parsed") || viewMode.equals("sentences")  || viewMode.equals("words") || viewMode.equals("links")) {
             // parsing the resource content
             plasmaParserDocument document = null;
             try {
@@ -296,6 +298,33 @@ public class ViewFile {
                     }
                 }
                 prop.put("viewMode_sentences", i);
+
+            } else if (viewMode.equals("words")) {
+                prop.put("viewMode", VIEW_MODE_AS_PARSED_WORDS);
+                final Iterator<StringBuilder> sentences = document.getSentences(pre);
+
+                boolean dark = true;
+                int i = 0;
+                String sentence, token;
+                if (sentences != null) {
+                    
+                    // Search word highlighting
+                    while (sentences.hasNext()) {
+                        sentence = sentences.next().toString();
+                        Enumeration<StringBuilder> tokens = plasmaCondenser.wordTokenizer(sentence, "UTF-8");
+                        while (tokens.hasMoreElements()) {
+                            token = tokens.nextElement().toString();
+                            if (token.length() > 0) {
+                                prop.put("viewMode_words_" + i + "_nr", i + 1);
+                                prop.put("viewMode_words_" + i + "_word", token);
+                                prop.put("viewMode_words_" + i + "_dark", dark ? "1" : "0");
+                                dark = !dark;
+                                i++;
+                            }
+                        }
+                    }
+                }
+                prop.put("viewMode_words", i);
 
             } else if (viewMode.equals("links")) {
                 prop.put("viewMode", VIEW_MODE_AS_LINKLIST);

@@ -100,7 +100,7 @@ public class yacyPeerSelection {
             this.remaining = max;
             this.doublecheck = new HashSet<String>();
             this.nextSeed = nextInternal();
-            this.alsoMyOwn = alsoMyOwn && (kelondroBase64Order.enhancedCoder.compare(seedDB.mySeed().hash.getBytes(), nextSeed.hash.getBytes()) > 0);
+            this.alsoMyOwn = alsoMyOwn && nextSeed != null && (kelondroBase64Order.enhancedCoder.compare(seedDB.mySeed().hash.getBytes(), nextSeed.hash.getBytes()) > 0);
         }
         
         public boolean hasNext() {

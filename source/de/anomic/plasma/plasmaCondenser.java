@@ -108,13 +108,15 @@ public final class plasmaCondenser {
         this.wordcut = 2;
         this.words = new TreeMap<String, indexWord>();
         this.RESULT_FLAGS = new kelondroBitfield(4);
+
+        // construct flag set for document
+        if (document.getImages().size() > 0) RESULT_FLAGS.set(flag_cat_hasimage, true);
+        if (document.getAudiolinks().size() > 0) RESULT_FLAGS.set(flag_cat_hasaudio, true);
+        if (document.getVideolinks().size() > 0) RESULT_FLAGS.set(flag_cat_hasvideo, true);
+        if (document.getApplinks().size()   > 0) RESULT_FLAGS.set(flag_cat_hasapp,   true);
         
         this.languageIdentificator = new Identificator();
         
-        //System.out.println("DEBUG: condensing " + document.getMainLongTitle() + ", indexText=" + Boolean.toString(indexText) + ", indexMedia=" + Boolean.toString(indexMedia));
-
-        // add the URL components to the word list
-        insertTextToWords(document.dc_source().toNormalform(false, true), 0, indexRWIEntry.flag_app_dc_identifier, RESULT_FLAGS, false);
         
         Map.Entry<yacyURL, String> entry;
         if (indexText) {
@@ -161,6 +163,9 @@ public final class plasmaCondenser {
             this.RESULT_DIFF_SENTENCES = 0;
         }
         
+        // add the URL components to the word list
+        insertTextToWords(document.dc_source().toNormalform(false, true), 0, indexRWIEntry.flag_app_dc_identifier, RESULT_FLAGS, false);
+
         if (indexMedia) {
             // add anchor descriptions: here, we also add the url components
             // audio
@@ -209,12 +214,6 @@ public final class plasmaCondenser {
                 }
             }
         }
-        
-        // construct flag set for document
-        if (document.getImages().size() > 0) RESULT_FLAGS.set(flag_cat_hasimage, true);
-        if (document.getAudiolinks().size() > 0) RESULT_FLAGS.set(flag_cat_hasaudio, true);
-        if (document.getVideolinks().size() > 0) RESULT_FLAGS.set(flag_cat_hasvideo, true);
-        if (document.getApplinks().size()   > 0) RESULT_FLAGS.set(flag_cat_hasapp,   true);
     }
     
     private void insertTextToWords(final String text, final int phrase, final int flagpos, final kelondroBitfield flagstemplate, boolean useForLanguageIdentification) {
@@ -360,7 +359,7 @@ public final class plasmaCondenser {
                     this.RESULT_FLAGS.set(flag_cat_indexof, true);
                     wordenum.pre(true); // parse lines as they come with CRLF
                 }
-                if ((last_index) && (word.equals("of"))) comb_indexof = true;
+                if ((last_index) && (wordminsize > 2 || (word.equals("of")))) comb_indexof = true;
                 last_last = word.equals("last");
                 last_index = word.equals("index");
                 
@@ -491,10 +490,10 @@ public final class plasmaCondenser {
     	else
     		return true;
     }
-
+    
     public static Enumeration<StringBuilder> wordTokenizer(final String s, final String charset) {
         try {
-            return new sievedWordsEnum(new ByteArrayInputStream(s.getBytes("UTF-8")));
+            return new sievedWordsEnum(new ByteArrayInputStream(s.getBytes(charset)));
         } catch (final Exception e) {
             return null;
         }

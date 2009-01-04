@@ -330,13 +330,9 @@ public class plasmaSnippetCache {
             // trying to load the resource from the cache
             resContent = plasmaHTCache.getResourceContentStream(url);
             responseHeader = plasmaHTCache.loadResponseHeader(url);
-            if (resContent != null) {
-                // if the content was found
-                resContentLength = plasmaHTCache.getResourceContentLength(url);
-                if ((resContentLength > maxDocLen) && (!fetchOnline)) {
-                    // content may be too large to be parsed here. To be fast, we omit calculation of snippet here
-                    return new TextSnippet(url, null, ERROR_SOURCE_LOADING, queryhashes, "resource available, but too large: " + resContentLength + " bytes");
-                }
+            if (resContent != null && ((resContentLength = plasmaHTCache.getResourceContentLength(url)) > maxDocLen) && (!fetchOnline)) {
+                // content may be too large to be parsed here. To be fast, we omit calculation of snippet here
+                return new TextSnippet(url, null, ERROR_SOURCE_LOADING, queryhashes, "resource available, but too large: " + resContentLength + " bytes");
             } else if (containsAllHashes(comp.dc_title(), queryhashes)) {
                 // try to create the snippet from information given in the url itself
                 return new TextSnippet(url, (comp.dc_subject().length() > 0) ? comp.dc_creator() : comp.dc_subject(), SOURCE_METADATA, null, null, faviconCache.get(url.hash()));
@@ -346,7 +342,7 @@ public class plasmaSnippetCache {
             } else if (containsAllHashes(comp.dc_subject(), queryhashes)) {
                 // try to create the snippet from information given in the subject metadata
                 return new TextSnippet(url, (comp.dc_creator().length() > 0) ? comp.dc_creator() : comp.dc_subject(), SOURCE_METADATA, null, null, faviconCache.get(url.hash()));
-            } else if (containsAllHashes(comp.url().toNormalform(true, true), queryhashes)) {
+            } else if (containsAllHashes(comp.url().toNormalform(true, true).replace('-', ' '), queryhashes)) {
                 // try to create the snippet from information given in the subject metadata
                 return new TextSnippet(url, (comp.dc_creator().length() > 0) ? comp.dc_creator() : comp.dc_subject(), SOURCE_METADATA, null, null, faviconCache.get(url.hash()));
             } else if (fetchOnline) {
@@ -673,7 +669,7 @@ public class plasmaSnippetCache {
                 final int newlen = Math.max(10, maxpos - minpos + 10);
                 final int around = (maxLength - newlen) / 2;
                 assert minpos - around < sentence.length() : "maxpos = " + maxpos + ", minpos = " + minpos + ", around = " + around + ", sentence.length() = " + sentence.length();
-                assert ((maxpos + around) <= sentence.length()) && ((maxpos + around) <= sentence.length()) : "maxpos = " + maxpos + ", minpos = " + minpos + ", around = " + around + ", sentence.length() = " + sentence.length();
+                //assert ((maxpos + around) <= sentence.length()) && ((maxpos + around) <= sentence.length()) : "maxpos = " + maxpos + ", minpos = " + minpos + ", around = " + around + ", sentence.length() = " + sentence.length();
                 sentence = "[..] " + sentence.substring(minpos - around, ((maxpos + around) > sentence.length()) ? sentence.length() : (maxpos + around)).trim() + " [..]";
                 minpos = around;
                 maxpos = sentence.length() - around - 5;
