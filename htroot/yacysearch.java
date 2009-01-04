@@ -212,7 +212,15 @@ public class yacysearch {
                 if (ftb == -1) ftb = querystring.length();
                 String ft = querystring.substring(filetype + 9, ftb);
                 query[0].remove("filetype:" + ft.toLowerCase());
-                urlmask = ".*." + ft;
+                urlmask = ".*\\." + ft;
+            }
+            int site = querystring.indexOf("site:");
+            if (site >= 0) {
+                int ftb = querystring.indexOf(' ', site);
+                if (ftb == -1) ftb = querystring.length();
+                String domain = querystring.substring(site + 5, ftb);
+                query[0].remove("site:" + domain.toLowerCase());
+                urlmask = ".*\\." + domain + "/.*";
             }
            
             // read the language from the language-restrict option 'lr'
