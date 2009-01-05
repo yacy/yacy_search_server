@@ -375,25 +375,25 @@ public class yacySeed implements Cloneable {
     public final void incSI(final int count) {
         String v = this.dna.get(yacySeed.INDEX_OUT);
         if (v == null) { v = yacySeed.ZERO; }
-        dna.put(yacySeed.INDEX_OUT, Integer.toString(Integer.parseInt(v) + count));
+        dna.put(yacySeed.INDEX_OUT, Long.toString(Long.parseLong(v) + (long) count));
     }
 
     public final void incRI(final int count) {
         String v = this.dna.get(yacySeed.INDEX_IN);
         if (v == null) { v = yacySeed.ZERO; }
-        dna.put(yacySeed.INDEX_IN, Integer.toString(Integer.parseInt(v) + count));
+        dna.put(yacySeed.INDEX_IN, Long.toString(Long.parseLong(v) + (long) count));
     }
 
     public final void incSU(final int count) {
         String v = this.dna.get(yacySeed.URL_OUT);
         if (v == null) { v = yacySeed.ZERO; }
-        dna.put(yacySeed.URL_OUT, Integer.toString(Integer.parseInt(v) + count));
+        dna.put(yacySeed.URL_OUT, Long.toString(Long.parseLong(v) + (long) count));
     }
 
     public final void incRU(final int count) {
         String v = this.dna.get(yacySeed.URL_IN);
         if (v == null) { v = yacySeed.ZERO; }
-        dna.put(yacySeed.URL_IN, Integer.toString(Integer.parseInt(v) + count));
+        dna.put(yacySeed.URL_IN, Long.toString(Long.parseLong(v) + (long) count));
     }
 
     /**
