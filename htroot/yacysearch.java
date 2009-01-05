@@ -220,7 +220,7 @@ public class yacysearch {
                 if (ftb == -1) ftb = querystring.length();
                 String domain = querystring.substring(site + 5, ftb);
                 query[0].remove("site:" + domain.toLowerCase());
-                urlmask = ".*\\." + domain + "/.*";
+                urlmask = "[a-zA-Z]*://[^/]*\\." + domain + "/.*";
             }
            
             // read the language from the language-restrict option 'lr'
