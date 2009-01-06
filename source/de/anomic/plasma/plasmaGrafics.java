@@ -249,7 +249,7 @@ public class plasmaGrafics {
         //System.out.println("Seed " + seed.hash + " has distance " + seed.dhtDistance() + ", angle = " + angle);
         int linelength = 20 + outerradius * (20 * (name.length() - shortestName) / (longestName - shortestName) + Math.abs(seed.hash.hashCode() % 20)) / 60;
         if (linelength > outerradius) linelength = outerradius;
-        int dotsize = 5 + (int) (seed.getLinkCount() / 1000000L);
+        int dotsize = 4 + (int) (seed.getLinkCount() / 2000000L);
         if (dotsize > 18) dotsize = 18;
         // draw dot
         img.setColor(colorDot);
