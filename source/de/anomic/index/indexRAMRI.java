@@ -169,12 +169,12 @@ public final class indexRAMRI implements indexRI, indexRIReader {
         return null;
     }
     
-    private String bestFlushWordHash() {
+    public String bestFlushWordHash() {
         // select appropriate hash
         // we have 2 different methods to find a good hash:
         // - the oldest entry in the cache
         // - the entry with maximum count
-        if (heap.size() == 0) return null;
+        if (heap == null || heap.size() == 0) return null;
         try {
             //return hashScore.getMaxObject();
             String hash = null;
@@ -265,6 +265,7 @@ public final class indexRAMRI implements indexRI, indexRIReader {
 
     public synchronized indexContainer deleteContainer(final String wordHash) {
         // returns the index that had been deleted
+    	if (wordHash == null) return null;
         final indexContainer container = heap.delete(wordHash);
         hashScore.deleteScore(wordHash);
         hashDate.deleteScore(wordHash);

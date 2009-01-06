@@ -319,6 +319,11 @@ public class kelondroBase64Order extends kelondroAbstractOrder<byte[]> implement
             bc = b[boffset + i];
             if ((ac == 0) && (bc == 0)) return 0; // zero-terminated length
             assert (bc >= 0) && (bc < 128) : "bc = " + bc + ", b = " + serverLog.arrayList(b, boffset, al);
+            if (ac == bc) {
+            	// shortcut in case of equality: we don't need to lookup the ahpla value
+            	i++;
+            	continue;
+            }
             acc = ahpla[ac];
             assert (acc >= 0) : "acc = " + acc + ", a = " + serverLog.arrayList(a, aoffset, al) + "/" + new String(a, aoffset, al) + ", aoffset = 0x" + Integer.toHexString(aoffset) + ", i = " + i + "\n" + serverLog.table(a, 16, aoffset);
             bcc = ahpla[bc];

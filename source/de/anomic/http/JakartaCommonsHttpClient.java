@@ -95,7 +95,7 @@ public class JakartaCommonsHttpClient {
         // conManager.getParams().setDefaultMaxConnectionsPerHost(4); // default 2
         conManager.getParams().setMaxTotalConnections(200); // Proxy may need many connections
         conManager.getParams().setConnectionTimeout(60000); // set a default timeout
-        conManager.getParams().setDefaultMaxConnectionsPerHost(20); // prevent DoS by mistake
+        conManager.getParams().setDefaultMaxConnectionsPerHost(10); // prevent DoS by mistake
         // TODO should this be configurable?
 
         // accept self-signed or untrusted certificates

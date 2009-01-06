@@ -594,7 +594,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         
         deployThread(plasmaSwitchboardConstants.CLEANUP, "Cleanup", "simple cleaning process for monitoring information", null,
                      new serverInstantBusyThread(this, plasmaSwitchboardConstants.CLEANUP_METHOD_START, plasmaSwitchboardConstants.CLEANUP_METHOD_JOBCOUNT, plasmaSwitchboardConstants.CLEANUP_METHOD_FREEMEM), 600000); // all 5 Minutes, wait 10 minutes until first run
-        deployThread(plasmaSwitchboardConstants.INDEXER, "Indexing", "thread that either initiates a parsing/indexing queue, distributes the index into the DHT, stores parsed documents or flushes the index cache", "/IndexCreateIndexingQueue_p.html",
+        deployThread(plasmaSwitchboardConstants.CACHEFLUSH, "Cache Flush", "thread that flushes the index cache", "",
+                     new serverInstantBusyThread(this, plasmaSwitchboardConstants.CACHEFLUSH_METHOD_START, plasmaSwitchboardConstants.CACHEFLUSH_METHOD_JOBCOUNT, plasmaSwitchboardConstants.CACHEFLUSH_METHOD_FREEMEM), 3000);
+        deployThread(plasmaSwitchboardConstants.INDEXER, "Indexing", "thread that either initiates a parsing/indexing queue, distributes the index into the DHT, stores parsed documents", "/IndexCreateIndexingQueue_p.html",
                      new serverInstantBusyThread(this, plasmaSwitchboardConstants.INDEXER_METHOD_START, plasmaSwitchboardConstants.INDEXER_METHOD_JOBCOUNT, plasmaSwitchboardConstants.INDEXER_METHOD_FREEMEM), 10000);
         deployThread(plasmaSwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL, "Remote Crawl Job", "thread that performes a single crawl/indexing step triggered by a remote peer", null,
                      new serverInstantBusyThread(crawlQueues, plasmaSwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_START, plasmaSwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_JOBCOUNT, plasmaSwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_FREEMEM), 30000);
@@ -1088,6 +1090,16 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         log.logConfig("SWITCHBOARD SHUTDOWN TERMINATED");
     }
     
+    public int rwiCacheSize() {
+    	return webIndex.cacheSize();
+    }
+    
+    public boolean rwiCacheFlush() {
+    	if (rwiCacheSize() == 0) return false;
+    	webIndex.flushCacheFor((int) ((this.getConfigLong(plasmaSwitchboardConstants.CACHEFLUSH_BUSYSLEEP, 10000) * this.getConfigLong("performanceIO", 10)) / 100));
+    	return true;
+    }
+    
     public int queueSize() {
         return webIndex.queuePreStack.size();
     }
@@ -1103,7 +1115,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     
     public void deQueueFreeMem() {
         // flush some entries from the RAM cache
-        webIndex.flushCacheSome();
+        webIndex.flushCacheFor(3000);
         // empty some caches
         webIndex.clearCache();
         plasmaSearchEvent.cleanupEvents(true);
@@ -1153,11 +1165,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             }
             
             boolean doneSomething = false;
- 
-            // flush some entries from the RAM cache
-            if (webIndex.queuePreStack.size() == 0) {
-                doneSomething = webIndex.flushCacheSome() > 0; // permanent flushing only if we are not busy
-            }
             
             // possibly delete entries from last chunk
             if ((this.dhtTransferChunk != null) && (this.dhtTransferChunk.getStatus() == plasmaDHTChunk.chunkStatus_COMPLETE)) {

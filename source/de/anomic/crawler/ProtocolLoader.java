@@ -87,13 +87,7 @@ public final class ProtocolLoader {
             if (wait > 0) {
                 // force a sleep here. Instead just sleep we clean up the accessTime map
                 final long untilTime = System.currentTimeMillis() + wait;
-                final Iterator<Map.Entry<String, Long>> i = accessTime.entrySet().iterator();
-                Map.Entry<String, Long> e;
-                while (i.hasNext()) {
-                    e = i.next();
-                    if (System.currentTimeMillis() > untilTime) break;
-                    if (System.currentTimeMillis() - e.getValue().longValue() > minDelay) i.remove();
-                }
+                cleanupAccessTimeTable(untilTime);
                 if (System.currentTimeMillis() < untilTime)
                     try {Thread.sleep(untilTime - System.currentTimeMillis());} catch (final InterruptedException ee) {}
             }
@@ -105,6 +99,16 @@ public final class ProtocolLoader {
         if (protocol.equals("ftp")) return ftpLoader.load(entry);
         
         throw new IOException("Unsupported protocol '" + protocol + "' in url " + entry.url());
+    }
+    
+    public synchronized void cleanupAccessTimeTable(long timeout) {
+    	final Iterator<Map.Entry<String, Long>> i = accessTime.entrySet().iterator();
+        Map.Entry<String, Long> e;
+        while (i.hasNext()) {
+            e = i.next();
+            if (System.currentTimeMillis() > timeout) break;
+            if (System.currentTimeMillis() - e.getValue().longValue() > minDelay) i.remove();
+        }
     }
     
     public String process(final CrawlEntry entry, final String parserMode) {
@@ -121,7 +125,7 @@ public final class ProtocolLoader {
             return (stored) ? null : "not stored";
         } catch (IOException e) {
             entry.setStatus("error", serverProcessorJob.STATUS_FINISHED);
-            log.logWarning("problem loading " + entry.url().toString());
+            log.logWarning("problem loading " + entry.url().toString() + ": " + e.getMessage());
             return "load error - " + e.getMessage();
         }
     }

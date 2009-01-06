@@ -28,6 +28,9 @@
 80_indexing_idlesleep=1000
 80_indexing_busysleep=100
 80_indexing_memprereq=6291456
+85_cacheflush_idlesleep=120000
+85_cacheflush_busysleep=60000
+85_cacheflush_memprereq=0
 82_crawlstack_idlesleep=5000
 82_crawlstack_busysleep=1
 82_crawlstack_memprereq=1048576

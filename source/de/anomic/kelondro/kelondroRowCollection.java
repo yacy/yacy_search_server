@@ -161,7 +161,7 @@ public class kelondroRowCollection implements Iterable<kelondroRow.Entry> {
     public synchronized byte[] exportCollection() {
         // returns null if the collection is empty
         trim(false);
-        assert this.size() * this.rowdef.objectsize == this.chunkcache.length;
+        assert this.size() * this.rowdef.objectsize == this.chunkcache.length : "this.size() = " + this.size() + ", objectsize = " + this.rowdef.objectsize + ", chunkcache.length = " + this.chunkcache.length;
         final kelondroRow row = exportRow(chunkcache.length);
         final kelondroRow.Entry entry = row.newEntry();
         assert (sortBound <= chunkcount) : "sortBound = " + sortBound + ", chunkcount = " + chunkcount;

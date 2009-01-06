@@ -542,8 +542,6 @@ filterOutStopwordsFromTopwords=true
 # the prereq-value is a memory pre-requisite: that much bytes must
 # be available/free in the heap; othervise the loop is not executed
 # and another idlesleep is performed
-performanceProfile=defaults/yacy.init
-performanceSpeed=100
 20_dhtdistribution_idlesleep=30000
 20_dhtdistribution_busysleep=10000
 20_dhtdistribution_memprereq=6291456
@@ -568,9 +566,19 @@ performanceSpeed=100
 80_indexing_idlesleep=1000
 80_indexing_busysleep=10
 80_indexing_memprereq=6291456
+85_cacheflush_idlesleep=60000
+85_cacheflush_busysleep=10000
+85_cacheflush_memprereq=0
 90_cleanup_idlesleep=300000
 90_cleanup_busysleep=300000
 90_cleanup_memprereq=0
+
+# additional attributes:
+# performanceIO is a percent-value. a value of 10 means, that 10% of the busysleep time
+# is used to flush the RAM cache, which is the major part of the IO in YaCy
+performanceProfile=defaults/yacy.init
+performanceSpeed=100
+performanceIO=10
 
 # cleanup-process:
 # properties for tasks that are performed during cleanup

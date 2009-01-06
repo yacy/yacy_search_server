@@ -471,13 +471,14 @@ public final class plasmaWordIndex implements indexRI {
             serverProfiling.update("wordcache", Long.valueOf(cs));
             // To ensure termination an additional counter is used
             int l = 0;
-            while ((l++ < 100) && (theCache.maxURLinCache() > wCacheMaxChunk)) {
-                flushCache(theCache, Math.min(20, theCache.size()));
+            while (theCache.size() > 0 && (l++ < 100) && (theCache.maxURLinCache() > wCacheMaxChunk)) {
+                flushCacheOne(theCache);
             }
             // next flush more entries if the size exceeds the maximum size of the cache
-            if ((theCache.size() > theCache.getMaxWordCount()) ||
-                    (serverMemory.available() < collections.minMem())) {
-                flushCache(theCache, Math.min(theCache.size() - theCache.getMaxWordCount() + 1, theCache.size()));
+            while (theCache.size() > 0 &&
+            		((theCache.size() > theCache.getMaxWordCount()) ||
+                    (serverMemory.available() < collections.minMem()))) {
+                flushCacheOne(theCache);
             }
             if (cacheSize() != cs) serverProfiling.update("wordcache", Long.valueOf(cacheSize()));
         }
@@ -520,40 +521,33 @@ public final class plasmaWordIndex implements indexRI {
             dhtFlushControl(this.dhtOutCache);
         }
     }
-
-    public int flushCacheSome() {
-    	final int fo = flushCache(dhtOutCache, Math.max(1, dhtOutCache.size() / lowcachedivisor));
-    	final int fi = flushCache(dhtInCache, Math.max(1, dhtInCache.size() / lowcachedivisor));
-    	return fo + fi;
+    
+    public void flushCacheFor(int time) {
+    	flushCacheUntil(System.currentTimeMillis() + time);
     }
     
-    private int flushCache(final indexRAMRI ram, int count) {
-        if (count <= 0) return 0;
-        
+    private synchronized void flushCacheUntil(long timeout) {
+    	while (System.currentTimeMillis() < timeout &&
+    			(dhtOutCache.size() > 0 || dhtInCache.size() > 0)) {
+    		flushCacheOne(dhtOutCache);
+    		flushCacheOne(dhtInCache);
+    	}
+    }
+    
+    private synchronized void flushCacheOne(final indexRAMRI ram) {
+    	if (ram.size() > 0) collections.addEntries(flushContainer(ram));
+    }
+    
+    private indexContainer flushContainer(final indexRAMRI ram) {
         String wordHash;
-        final ArrayList<indexContainer> containerList = new ArrayList<indexContainer>();
-        count = Math.min(5000, Math.min(count, ram.size()));
-        boolean collectMax = true;
         indexContainer c;
-        while (collectMax) {
-            synchronized (ram) {
-                wordHash = ram.maxScoreWordHash();
-                c = ram.getContainer(wordHash, null);
-                if ((c != null) && (c.size() > wCacheMaxChunk)) {
-                    containerList.add(ram.deleteContainer(wordHash));
-                    if (serverMemory.available() < collections.minMem()) break; // protect memory during flush
-                } else {
-                    collectMax = false;
-                }
-            }
+        wordHash = ram.maxScoreWordHash();
+        c = ram.getContainer(wordHash, null);
+        if ((c != null) && (c.size() > wCacheMaxChunk)) {
+            return ram.deleteContainer(wordHash);
+        } else {
+            return ram.deleteContainer(ram.bestFlushWordHash());
         }
-        count = count - containerList.size();
-        containerList.addAll(ram.bestFlushContainers(count));
-        
-        // flush the containers
-        for (final indexContainer container : containerList) collections.addEntries(container);
-        //System.out.println("DEBUG-Finished flush of " + count + " entries from RAM to DB in " + (System.currentTimeMillis() - start) + " milliseconds");
-        return containerList.size();
     }
     
     

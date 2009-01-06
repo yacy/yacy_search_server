@@ -194,7 +194,7 @@ public class Threaddump_p {
                 String threadtitle = tracename + "Thread= " + thread.getName() + " " + (thread.isDaemon()?"daemon":"") + " id=" + thread.getId() + " " + thread.getState().toString();
                 for (int i = 0; i < stackTraceElements.length; i++) {
                     ste = stackTraceElements[i];
-                    if (ste.getClassName().startsWith("java.") || ste.getClassName().startsWith("sun.")) continue;
+                    //if (ste.getClassName().startsWith("java.") || ste.getClassName().startsWith("sun.")) continue;
                     if (i == 0) {
                         line = getLine(getClassFile(classPath, ste.getClassName()), ste.getLineNumber());
                     } else {

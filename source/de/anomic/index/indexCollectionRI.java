@@ -159,6 +159,7 @@ public class indexCollectionRI implements indexRI {
     }
 
     public void addEntries(final indexContainer newEntries) {
+    	if (newEntries == null) return;
         try {
             collectionIndex.merge(newEntries);
         } catch (final kelondroOutOfLimitsException e) {

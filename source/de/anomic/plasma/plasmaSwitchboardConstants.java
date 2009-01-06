@@ -135,6 +135,18 @@ public final class plasmaSwitchboardConstants {
     public static final String INDEXER_METHOD_JOBCOUNT      = "queueSize";
     public static final String INDEXER_METHOD_FREEMEM       = "deQueueFreeMem";
     public static final String INDEXER_SLOTS                = "indexer.slots";
+    // 85_cacheflush
+    /**
+     * the cache flush thread starts a flush of the RAM cache.
+     * This periodic flushing replaces the permanent flushing
+     */
+    public static final String CACHEFLUSH                   = "85_cacheflush";
+    public static final String CACHEFLUSH_MEMPREREQ         = "85_cacheflush_memprereq";
+    public static final String CACHEFLUSH_IDLESLEEP         = "85_cacheflush_idlesleep";
+    public static final String CACHEFLUSH_BUSYSLEEP         = "85_cacheflush_busysleep";
+    public static final String CACHEFLUSH_METHOD_START      = "rwiCacheFlush";
+    public static final String CACHEFLUSH_METHOD_JOBCOUNT   = "rwiCacheSize";
+    public static final String CACHEFLUSH_METHOD_FREEMEM    = "deQueueFreeMem";
     // 90_cleanup
     /**
      * <p><code>public static final String <strong>CLEANUP</strong> = "90_cleanup"</code></p>
