@@ -94,7 +94,13 @@ public final class kelondroCachedFileRA extends kelondroAbstractRA implements ke
     public synchronized void write(final byte[] b, final int off, final int len) throws IOException {
         //assert len > 0;
         // write to file
-        if (this.cache.length > 512) this.cache = new byte[512]; // the large cache is only useful during an initialization phase
+        if (this.cache.length > 512) {
+        	// the large cache is only useful during an initialization phase
+        	byte[] newcache = new byte[512];
+        	System.arraycopy(this.cache, 0, newcache, 0, newcache.length);
+        	this.cache = newcache;
+        	if (this.cachelen > this.cache.length) this.cachelen = this.cache.length;
+        }
         long seekpos = this.RAFile.getFilePointer();
         if (this.cachelen + len <= this.cache.length && this.cachestart + this.cachelen == seekpos) {
             // append to cache
