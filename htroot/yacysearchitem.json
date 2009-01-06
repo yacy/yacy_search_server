@@ -1,4 +1,5 @@
-#(content)#::    {
+#(content)#::#(nl)#::    ,#(/nl)#
+    {
       "title": "#[title]#",
       "link": "#[link]#",
       "description": "#[description]#",

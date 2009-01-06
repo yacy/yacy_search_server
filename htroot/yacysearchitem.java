@@ -126,7 +126,8 @@ public class yacysearchitem {
             prop.put("content_date822", plasmaSwitchboard.dateString822(result.modified()));
             prop.put("content_ybr", plasmaSearchRankingProcess.ybr(result.hash()));
             prop.putNum("content_size", result.filesize());
-        
+            prop.put("content_nl", (item == 0) ? 0 : 1);
+            
             final TreeSet<String>[] query = theQuery.queryWords();
             yacyURL wordURL = null;
             try {
