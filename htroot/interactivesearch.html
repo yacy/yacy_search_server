@@ -37,7 +37,7 @@ function updatepage(str){
   html += "<table class=\"networkTable\" border=\"0\" cellpadding=\"2\" cellspacing=\"1\">";
   html += "<tr class=\"TableHeader\" valign=\"bottom\"><td>Name</td><td>Description</td><td>Link</td></tr>";
   for (var i = 0; i < firstChannel.items.length; i++) {
-    item = firstChannel.items[i];
+      item = firstChannel.items[i];
       html += "<tr class=\"TableCellLight\"><td>"+ item.title + "</td>";
       html += "<td>" + item.description + "</td>";
       html += "<td><a href=\"" + item.link + "\">" + item.link + "</a></td></tr>";

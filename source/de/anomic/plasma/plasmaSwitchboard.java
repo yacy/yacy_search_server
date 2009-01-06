@@ -595,7 +595,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         deployThread(plasmaSwitchboardConstants.CLEANUP, "Cleanup", "simple cleaning process for monitoring information", null,
                      new serverInstantBusyThread(this, plasmaSwitchboardConstants.CLEANUP_METHOD_START, plasmaSwitchboardConstants.CLEANUP_METHOD_JOBCOUNT, plasmaSwitchboardConstants.CLEANUP_METHOD_FREEMEM), 600000); // all 5 Minutes, wait 10 minutes until first run
         deployThread(plasmaSwitchboardConstants.CACHEFLUSH, "Cache Flush", "thread that flushes the index cache", "",
-                     new serverInstantBusyThread(this, plasmaSwitchboardConstants.CACHEFLUSH_METHOD_START, plasmaSwitchboardConstants.CACHEFLUSH_METHOD_JOBCOUNT, plasmaSwitchboardConstants.CACHEFLUSH_METHOD_FREEMEM), 3000);
+                     new serverInstantBusyThread(this, plasmaSwitchboardConstants.CACHEFLUSH_METHOD_START, plasmaSwitchboardConstants.CACHEFLUSH_METHOD_JOBCOUNT, plasmaSwitchboardConstants.CACHEFLUSH_METHOD_FREEMEM), 120000); // the cache flush does not need to be started soon, start it late after 2 minutes
         deployThread(plasmaSwitchboardConstants.INDEXER, "Indexing", "thread that either initiates a parsing/indexing queue, distributes the index into the DHT, stores parsed documents", "/IndexCreateIndexingQueue_p.html",
                      new serverInstantBusyThread(this, plasmaSwitchboardConstants.INDEXER_METHOD_START, plasmaSwitchboardConstants.INDEXER_METHOD_JOBCOUNT, plasmaSwitchboardConstants.INDEXER_METHOD_FREEMEM), 10000);
         deployThread(plasmaSwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL, "Remote Crawl Job", "thread that performes a single crawl/indexing step triggered by a remote peer", null,
