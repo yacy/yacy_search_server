@@ -212,7 +212,8 @@ public class yacysearch {
                 if (ftb == -1) ftb = querystring.length();
                 String ft = querystring.substring(filetype + 9, ftb);
                 query[0].remove("filetype:" + ft.toLowerCase());
-                urlmask = ".*\\." + ft;
+                while(ft.startsWith(".")) ft = ft.substring(1);
+                if(ft.length() > 0) urlmask = ".*\\." + ft;
             }
             int site = querystring.indexOf("site:");
             if (site >= 0) {
@@ -220,7 +221,8 @@ public class yacysearch {
                 if (ftb == -1) ftb = querystring.length();
                 String domain = querystring.substring(site + 5, ftb);
                 query[0].remove("site:" + domain.toLowerCase());
-                urlmask = "[a-zA-Z]*://[^/]*\\." + domain + "/.*";
+                while(domain.startsWith(".")) domain = domain.substring(1);
+                if(domain.length() > 0) urlmask = "[a-zA-Z]*://[^/]*\\." + domain + "/.*";
             }
            
             // read the language from the language-restrict option 'lr'
