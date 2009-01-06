@@ -150,7 +150,10 @@ Section "YaCy"
 	Delete "$SMSTARTUP\start YaCy (no console).lnk" ;old
 	
 	SetOutPath $INSTDIR
-	
+	;set noindex attribute for windows indexing service
+    Exec 'attrib +I "$INSTDIR"'
+    Exec 'attrib +I "$INSTDIR\*" /S /D'
+    
 	File /r "RELEASE\MAIN\*"
 	File /r "RELEASE\EXT\*"
 
