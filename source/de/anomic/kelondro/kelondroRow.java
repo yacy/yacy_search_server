@@ -102,7 +102,7 @@ public final class kelondroRow {
         this.primaryKeyLength = (primaryKey < 0) ? this.objectsize : row[primaryKeyIndex].cellwidth;
     }
     
-    public final kelondroOrder<byte[]> getOrdering() {
+    public final kelondroByteOrder getOrdering() {
         return this.objectOrder;
     }
     

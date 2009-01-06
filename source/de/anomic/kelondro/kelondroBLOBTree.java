@@ -392,8 +392,12 @@ public class kelondroBLOBTree implements kelondroBLOB {
         //segmentCount--; writeSegmentCount();
     }
 
-    public synchronized boolean has(final byte[] key) throws IOException {
-        return (key != null) && (getValueCached(elementKey(new String(key), 0)) != null);
+    public synchronized boolean has(final byte[] key) {
+        try {
+			return (key != null) && (getValueCached(elementKey(new String(key), 0)) != null);
+		} catch (IOException e) {
+			return false;
+		}
     }
 
     public synchronized kelondroRA getRA(final String filekey) {

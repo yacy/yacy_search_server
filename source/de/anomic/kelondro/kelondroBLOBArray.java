@@ -113,7 +113,7 @@ public class kelondroBLOBArray implements kelondroBLOB {
                    d = serverDate.parseShortSecond(files[i].substring(0, 14));
                    f = new File(heapLocation, files[i]);
                    time = d.getTime();
-                   oneBlob = new kelondroBLOBHeap(f, keylength, ordering, (time == maxtime) ? buffersize : 0);
+                   oneBlob = (time == maxtime && buffersize > 0) ? new kelondroBLOBHeap(f, keylength, ordering, buffersize) : new kelondroBLOBHeapModifier(f, keylength, ordering);
                    sortedItems.put(Long.valueOf(time), new blobItem(d, f, oneBlob));
                } catch (ParseException e) {continue;}
             }
@@ -183,12 +183,16 @@ public class kelondroBLOBArray implements kelondroBLOB {
             this.location = location;
             this.blob = blob;
         }
-        public blobItem() throws IOException {
+        public blobItem(int buffer) throws IOException {
             // make a new blob file and assign it in this item
             this.creation = new Date();
-            this.location = new File(heapLocation, serverDate.formatShortSecond(creation) + "." + blobSalt + ".blob");
-            this.blob = new kelondroBLOBHeap(location, keylength, ordering, buffersize);
+            this.location = newBLOB(this.creation);
+            this.blob = (buffer == 0) ? new kelondroBLOBHeapModifier(location, keylength, ordering) : new kelondroBLOBHeap(location, keylength, ordering, buffer);
         }
+    }
+    
+    public File newBLOB(Date creation) {
+    	return new File(heapLocation, serverDate.formatShortSecond(creation) + "." + blobSalt + ".blob");
     }
     
     /**
@@ -257,7 +261,7 @@ public class kelondroBLOBArray implements kelondroBLOB {
      * @return
      * @throws IOException
      */
-    public boolean has(byte[] key) throws IOException {
+    public boolean has(byte[] key) {
         for (blobItem bi: blobs) if (bi.blob.has(key)) return true;
         return false;
     }
@@ -275,6 +279,23 @@ public class kelondroBLOBArray implements kelondroBLOB {
             if (b != null) return b;
         }
         return null;
+    }
+    
+    /**
+     * get all BLOBs in the array.
+     * this is useful when it is not clear if an entry is unique in all BLOBs in this array.
+     * @param key
+     * @return
+     * @throws IOException
+     */
+    public List<byte[]> getAll(byte[] key) throws IOException {
+        byte[] b;
+        ArrayList<byte[]> l = new ArrayList<byte[]>(blobs.size());
+        for (blobItem bi: blobs) {
+            b = bi.blob.get(key);
+            if (b != null) l.add(b);
+        }
+        return l;
     }
     
     /**
@@ -308,9 +329,10 @@ public class kelondroBLOBArray implements kelondroBLOB {
             System.out.println("bi.location.length() > this.maxsize");
         if ((bi == null) || (System.currentTimeMillis() - bi.creation.getTime() > this.fileAgeLimit) || (bi.location.length() > this.fileSizeLimit)) {
             // add a new blob to the array
-            bi = new blobItem();
+            bi = new blobItem(buffersize);
             blobs.add(bi);
         }
+        assert bi.blob instanceof kelondroBLOBHeap;
         bi.blob.put(key, b);
         executeLimits();
     }

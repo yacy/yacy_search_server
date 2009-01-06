@@ -95,5 +95,27 @@ public abstract class kelondroAbstractIOChunks implements kelondroIOChunks {
     public synchronized void write(final long pos, final byte[] b) throws IOException {
         this.write(pos, b, 0, b.length);
     }
+    
+    public synchronized void writeSpace(long pos, int spaceCount) throws IOException {
+        if (spaceCount < 512) {
+        	write(pos, space(spaceCount));
+        	return;
+        }
+        byte[] b = space(512);
+        while (spaceCount > b.length) {
+        	write(pos, b);
+        	pos += b.length;
+        	spaceCount -= b.length;
+        }
+        if (spaceCount > 0) {
+        	write(pos, space(spaceCount));
+        }
+    }
+    
+    private byte[] space(int count) {
+    	byte[] s = new byte[count];
+    	while (count-- > 0) s[count] = 0;
+    	return s;
+    }
 
 }

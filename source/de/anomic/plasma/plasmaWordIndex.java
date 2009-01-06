@@ -483,12 +483,6 @@ public final class plasmaWordIndex implements indexRI {
         }
     }
     
-    public long getUpdateTime(final String wordHash) {
-        final indexContainer entries = getContainer(wordHash, null);
-        if (entries == null) return 0;
-        return entries.updated();
-    }
-    
     public static indexContainer emptyContainer(final String wordHash, final int elementCount) {
     	return new indexContainer(wordHash, indexRWIRowEntry.urlEntryRow, elementCount);
     }
@@ -729,14 +723,6 @@ public final class plasmaWordIndex implements indexRI {
     public int cacheSize() {
         return dhtInCache.size() + dhtOutCache.size();
     }
-    
-    public int indexSize(final String wordHash) {
-        int size = 0;
-        size += dhtInCache.indexSize(wordHash);
-        size += dhtOutCache.indexSize(wordHash);
-        size += collections.indexSize(wordHash);
-        return size;
-    }
 
     public void close() {
         dhtInCache.close();
@@ -754,7 +740,7 @@ public final class plasmaWordIndex implements indexRI {
         final indexContainer c = new indexContainer(
                 wordHash,
                 indexRWIRowEntry.urlEntryRow,
-                dhtInCache.sizeContainer(wordHash) + dhtOutCache.sizeContainer(wordHash) + collections.indexSize(wordHash)
+                dhtInCache.sizeContainer(wordHash) + dhtOutCache.sizeContainer(wordHash)
                 );
         c.addAllUnique(dhtInCache.deleteContainer(wordHash));
         c.addAllUnique(dhtOutCache.deleteContainer(wordHash));

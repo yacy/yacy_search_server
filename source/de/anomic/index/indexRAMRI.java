@@ -48,7 +48,7 @@ public final class indexRAMRI implements indexRI, indexRIReader {
     public  long  cacheReferenceAgeLimit;    // the maximum age (= time not changed) of a RWI entity
     private final serverLog log;
     private final File oldDumpFile, newDumpFile;
-    private indexContainerHeap heap;
+    private indexContainerRAMHeap heap;
     
     @SuppressWarnings("unchecked")
     public indexRAMRI(
@@ -72,7 +72,7 @@ public final class indexRAMRI implements indexRI, indexRIReader {
         this.log = log;
         this.oldDumpFile = new File(databaseRoot, oldHeapName);
         this.newDumpFile = new File(databaseRoot, newHeapName);
-        this.heap = new indexContainerHeap(payloadrow, log);
+        this.heap = new indexContainerRAMHeap(payloadrow);
         
         // read in dump of last session
         boolean initFailed = false;
@@ -115,23 +115,13 @@ public final class indexRAMRI implements indexRI, indexRIReader {
         hashScore.clear();
         hashDate.clear();
         initTime = System.currentTimeMillis();
-        try {
-            heap.clear();
-        } catch (final IOException e) {
-            e.printStackTrace();
-        }
+        heap.clear();
     }
 
     public int minMem() {
         // there is no specific large array that needs to be maintained
         // this value is just a guess of the possible overhead
         return 100 * 1024; // 100 kb
-    }
-    
-    public synchronized long getUpdateTime(final String wordHash) {
-        final indexContainer entries = getContainer(wordHash, null);
-        if (entries == null) return 0;
-        return entries.updated();
     }
     
     // cache settings
@@ -162,19 +152,12 @@ public final class indexRAMRI implements indexRI, indexRIReader {
         return heap.size();
     }
 
-    public synchronized int indexSize(final String wordHash) {
-        final indexContainer cacheIndex = heap.get(wordHash);
-        if (cacheIndex == null) return 0;
-        return cacheIndex.size();
-    }
-
     public synchronized kelondroCloneableIterator<indexContainer> wordContainers(final String startWordHash, final boolean rot) {
         // we return an iterator object that creates top-level-clones of the indexContainers
         // in the cache, so that manipulations of the iterated objects do not change
         // objects in the cache.
         return heap.wordContainers(startWordHash, rot);
     }
-
 
     public synchronized String maxScoreWordHash() {
         if (heap == null || heap.size() == 0) return null;

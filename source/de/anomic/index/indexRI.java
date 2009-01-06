@@ -28,6 +28,7 @@
 
 package de.anomic.index;
 
+import java.io.IOException;
 import java.util.Set;
 
 import de.anomic.kelondro.kelondroCloneableIterator;
@@ -37,15 +38,13 @@ public interface indexRI {
     public int size();
     public int minMem();
     public kelondroCloneableIterator<indexContainer> wordContainers(String startWordHash, boolean rot); // method to replace wordHashes
-    public long getUpdateTime(String wordHash);
-    public int indexSize(String wordHash);
     public boolean hasContainer(String wordHash); // should only be used if in case that true is returned the getContainer is NOT called
-    public indexContainer getContainer(String wordHash, Set<String> urlselection); // if urlselection != null all url references which are not in urlselection are removed from the container
-    public indexContainer deleteContainer(String wordHash);
+    public indexContainer getContainer(String wordHash, Set<String> urlselection) throws IOException; // if urlselection != null all url references which are not in urlselection are removed from the container
+    public indexContainer deleteContainer(String wordHash) throws IOException;
     public boolean removeEntry(String wordHash, String urlHash);
     public int removeEntries(String wordHash, Set<String> urlHashes);
     public void addEntries(indexContainer newEntries);
-    public void clear();
+    public void clear() throws IOException;
     public void close();
 
 }

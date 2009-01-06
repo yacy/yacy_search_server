@@ -151,6 +151,11 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         return entry;
     }
 
+    /**
+     * remove a byte[] from the set.
+     * if the entry was found, return the entry, but delete the entry from the set
+     * if the entry was not found, return null.
+     */
     public kelondroRow.Entry remove(final byte[] a) {
         return remove(a, 0, a.length);
     }

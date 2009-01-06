@@ -259,7 +259,7 @@ public class plasmaDHTChunk {
             } catch (kelondroException e) {
                 e.printStackTrace();
             }
-            if (this.log.isFine()) log.logFine("Deleted partial index (" + c + " URLs) for word " + wordHash + "; " + this.wordIndex.indexSize(wordHash) + " entries left");
+            if (this.log.isFine()) log.logFine("Deleted partial index (" + c + " URLs) for word " + wordHash);
             this.indexContainers[i] = null;
         }
         return count;

@@ -77,7 +77,7 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
     protected int              headchunksize;// overheadsize + key element column size
     protected int              tailchunksize;// sum(all: COLWIDTHS) minus the size of the key element colum
     protected int              recordsize;   // (overhead + sum(all: COLWIDTHS)) = the overall size of a record
-    byte[]           spaceChunk;   // a chunk of data that is used to reserve space within the file
+    //byte[]           spaceChunk;   // a chunk of data that is used to reserve space within the file
     
     // dynamic run-time seek pointers
     private   long POS_HANDLES  = 0; // starts after end of POS_COLWIDHS which is POS_COLWIDTHS + COLWIDTHS.length * 4
@@ -206,20 +206,21 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
             //}
         }
         
-        protected synchronized int allocatePayload(byte[] chunk) throws IOException {
+        protected synchronized int allocatePayload(byte[] chunk0) throws IOException {
             // reserves a new record and returns index of record
             // the return value is not a seek position
             // the seek position can be retrieved using the seekpos() function
-            if (chunk == null) {
-                chunk = spaceChunk;
-            }
-            assert (chunk.length == ROW.objectsize) : "chunk.length = " + chunk.length + ", ROW.objectsize() = " + ROW.objectsize;
+            assert (chunk0 == null || chunk0.length == ROW.objectsize) : "chunk.length = " + chunk0.length + ", ROW.objectsize() = " + ROW.objectsize;
             //synchronized (USAGE) {
                 synchronized (entryFile) {
                     if (USAGE.FREEC == 0) {
                         // generate new entry
                         final int index = USAGE.allCount();
-                        entryFile.write(seekpos(index) + overhead, chunk, 0, ROW.objectsize); // occupy space, otherwise the USAGE computation does not work
+                        if (chunk0 == null) {
+                        	entryFile.writeSpace(seekpos(index) + overhead, ROW.objectsize);
+                        } else {
+                        	entryFile.write(seekpos(index) + overhead, chunk0, 0, ROW.objectsize); // occupy space, otherwise the USAGE computation does not work
+                        }
                         USAGE.USEDC++;
                         writeused(false);
                         return index;
@@ -264,7 +265,11 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
                             }
                         }
                     }
-                    entryFile.write(seekpos(index) + overhead, chunk, 0, ROW.objectsize); // overwrite space
+                    if (chunk0 == null) {
+                    	entryFile.writeSpace(seekpos(index) + overhead, ROW.objectsize);
+                    } else {
+                    	entryFile.write(seekpos(index) + overhead, chunk0, 0, ROW.objectsize); // overwrite space
+                    }
                     USAGE.writeused(false);
                     USAGE.writefree();
                     return index;
@@ -299,7 +304,7 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
                         while (index > USAGE.allCount()) {
                             h = new kelondroHandle(USAGE.allCount());
                             USAGE.FREEC++;
-                            entryFile.write(seekpos(h), spaceChunk); // occupy space, othervise the USAGE computaton does not work
+                            entryFile.writeSpace(seekpos(h), overhead + ROW.objectsize); // occupy space, otherwise the USAGE computation does not work
                             entryFile.writeInt(seekpos(h), USAGE.FREEH.index);
                             USAGE.FREEH = h;
                             assert ((USAGE.FREEH.index == kelondroHandle.NUL) && (USAGE.FREEC == 0)) || seekpos(USAGE.FREEH) < entryFile.length() : "allocateRecord: USAGE.FREEH.index = " + USAGE.FREEH.index;
@@ -436,7 +441,6 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
         this.recordsize = this.overhead + ROW.objectsize;
         this.headchunksize = overhead + ROW.width(0);
         this.tailchunksize = this.recordsize - this.headchunksize;
-        this.spaceChunk = fillSpaceChunk(recordsize);
 
         // store dynamic run-time seek pointers
         POS_HANDLES = POS_COLWIDTHS + ROW.columns() * 4;
@@ -484,12 +488,6 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
         }
         
         this.entryFile.commit();
-    }
-
-    private static final byte[] fillSpaceChunk(int size) {
-        final byte[] chunk = new byte[size];
-        while (--size >= 0) chunk[size] = (byte) 0xff;
-        return chunk;
     }
     
     public void setDescription(final byte[] description) throws IOException {
@@ -583,7 +581,6 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
         this.recordsize = this.overhead + ROW.objectsize;
         this.headchunksize = this.overhead + this.ROW.width(0);
         this.tailchunksize = this.recordsize - this.headchunksize;
-        this.spaceChunk = fillSpaceChunk(recordsize);
         
         // init USAGE, must be done at the end because it needs the recordsize value
         this.USAGE = new usageControl(false);

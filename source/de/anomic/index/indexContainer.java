@@ -105,6 +105,10 @@ public class indexContainer extends kelondroRowSet {
         return c;
     }
     
+    public indexContainer merge(final indexContainer c) {
+    	return new indexContainer(this.wordHash, this.merge(c));
+    }
+    
     public indexRWIEntry put(final indexRWIRowEntry entry) {
         assert entry.toKelondroEntry().objectsize() == super.rowdef.objectsize;
         final kelondroRow.Entry r = super.put(entry.toKelondroEntry());
@@ -152,6 +156,11 @@ public class indexContainer extends kelondroRowSet {
         return new indexRWIRowEntry(entry);
     }
 
+    /**
+     * remove a url reference from the container.
+     * if the url hash was found, return the entry, but delete the entry from the container
+     * if the entry was not found, return null.
+     */
     public indexRWIEntry remove(final String urlHash) {
         final kelondroRow.Entry entry = remove(urlHash.getBytes());
         if (entry == null) return null;

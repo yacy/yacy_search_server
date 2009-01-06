@@ -84,7 +84,7 @@ public interface kelondroBLOB {
      * @return
      * @throws IOException
      */
-    public boolean has(byte[] key) throws IOException;
+    public boolean has(byte[] key);
     
     /**
      * retrieve the whole BLOB from the table

@@ -68,22 +68,8 @@ public class indexCollectionRI implements indexRI {
         }
     }
     
-    public long getUpdateTime(final String wordHash) {
-        final indexContainer entries = getContainer(wordHash, null);
-        if (entries == null) return 0;
-        return entries.updated();
-    }
-    
     public int size() {
         return collectionIndex.size();
-    }
-    
-    public int indexSize(final String wordHash) {
-        try {
-            return collectionIndex.indexSize(wordHash.getBytes());
-        } catch (final IOException e) {
-            return 0;
-        }
     }
 
     public int minMem() {

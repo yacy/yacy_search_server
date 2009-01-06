@@ -693,12 +693,6 @@ public class kelondroCollectionIndex {
         return removed;
     }
     
-    public synchronized int indexSize(final byte[] key) throws IOException {
-        final kelondroRow.Entry indexrow = index.get(key);
-        if (indexrow == null) return 0;
-        return (int) indexrow.getColLong(idx_col_chunkcount);
-    }
-    
     public synchronized boolean has(final byte[] key) {
         return index.has(key);
     }

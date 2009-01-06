@@ -174,7 +174,7 @@ public class kelondroBLOBCompressor extends Thread implements kelondroBLOB {
         return decompress(b);
     }
 
-    public synchronized boolean has(byte[] key) throws IOException {
+    public synchronized boolean has(byte[] key) {
         return 
           this.buffer.containsKey(new String(key)) || this.backend.has(key);
     }
