@@ -648,16 +648,16 @@ public final class serverCore extends serverAbstractBusyThread implements server
                     
                     // close everything                    
                     this.controlSocket.close();
-                    this.controlSocket = null;
-                                      
+
                 } catch (final IOException e) {
                     e.printStackTrace();
                 }
                 if (busySessions != null)
                 {
                     busySessions.remove(this);
-                    if(log.isFinest()) log.logFinest("* removed session "+ this.controlSocket.getRemoteSocketAddress() + this.request);
+                    if(log.isFinest()) log.logFinest("* removed session "+ this.controlSocket.getRemoteSocketAddress() + " " + this.request);
                 }
+                this.controlSocket = null;
             }
             
         }
