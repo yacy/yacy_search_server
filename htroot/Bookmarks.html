@@ -11,6 +11,17 @@
 		onload="treeMenu_init(document.getElementById('folder'), window.name)"
 		onunload="window.name = treeMenu_store(document.getElementById('folder'))"
 	>
+
+<div id="api">
+<script type="text/javascript">
+document.write("\<a href=\"Bookmarks.rss?" + window.location.search.substring(1) + "\"\>")
+</script>
+<img src="env/grafics/api.png"></a>
+<span>The bookmarks list can also be retrieved as RSS feed. This can also be done when you select a specific tag.
+Click the API icon to load the RSS from the current selection.
+To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.</span>
+</div>
+
 		#%env/templates/header.template%#
 		#(mode)#
 		<!-- SubMenu (mode=0) -->

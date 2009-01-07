@@ -831,8 +831,9 @@ ul.folder li.treeMenu_closed ul {
 /* API */
 div#api {
   position:fixed;
-  top:30px;
-  right:30px;
+  top:20px;
+  right:20px;
+  z-index: 100;
 }
 
 div#api span {
@@ -843,12 +844,13 @@ div#api:hover span {
    display: block;
    position: absolute;
    font-size:1em;
-   top: 100px; 
+   top: 90px; 
    left: 0; 
    width: 90px;
-   padding: 5px;
+   padding: 3px;
    color: #000000; 
    background: #DDDDDD;
    text-align: center;
    border: 1px dashed black;
+   z-index: 100;
  }
