@@ -826,3 +826,29 @@ ul.folder li.treeMenu_opened ul {
 ul.folder li.treeMenu_closed ul {
  	display: none;
 }
+
+
+/* API */
+div#api {
+  position:fixed;
+  top:30px;
+  right:30px;
+}
+
+div#api span {
+  display: none;
+}
+
+div#api:hover span {
+   display: block;
+   position: absolute;
+   font-size:1em;
+   top: 100px; 
+   left: 0; 
+   width: 90px;
+   padding: 5px;
+   color: #000000; 
+   background: #DDDDDD;
+   text-align: center;
+   border: 1px dashed black;
+ }

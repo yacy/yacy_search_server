@@ -50,6 +50,12 @@ function updatepage(str){
 <body>
 #%env/templates/header.template%#
 
+<div id="api"><a href="yacysearch.json?query=yacy"><img src="env/grafics/api.png"></a>
+<span>This page uses the JSON search API to display search results as you type.
+Click the API icon to see an example call to the native API.
+To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.</span>
+</div>
+
 <form name="searchform" onkeyup='xmlhttpPost(); return false;'>
   <p>Query: <input name="query" type="text">  
   <!--<input value="Search" type="submit">--></p>
