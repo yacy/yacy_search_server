@@ -206,6 +206,14 @@ public class yacysearch {
                 	lr = querystring.substring(lrp + 9, lrp + 11).toLowerCase();
                 query[0].remove("language:" + lr);
             }
+            int inurl = querystring.indexOf("inurl:");
+            if (inurl >= 0) {
+                int ftb = querystring.indexOf(' ', inurl);
+                if (ftb == -1) ftb = querystring.length();
+                String urlstr = querystring.substring(inurl + 6, ftb);
+                query[0].remove("inurl:" + urlstr.toLowerCase());
+                if(urlstr.length() > 0) urlmask = ".*" + urlstr + ".*";
+            }
             int filetype = querystring.indexOf("filetype:");
             if (filetype >= 0) {
                 int ftb = querystring.indexOf(' ', filetype);
