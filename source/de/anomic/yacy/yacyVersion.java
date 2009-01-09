@@ -217,7 +217,12 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
         final yacyVersion latestmain = (releasess.main.size() == 0) ? null : releasess.main.last();
         final yacyVersion latestdev  = (releasess.dev.size() == 0) ? null : releasess.dev.last();
         final String concept = sb.getConfig("update.concept", "any");
-        final String blacklist = sb.getConfig("update.blacklist", ".\\...[123]");
+        String blacklist = sb.getConfig("update.blacklist", "...[123]");
+        if (blacklist.equals("....[123]")) {
+        	// patch the blacklist because of a release strategy change from 0.7 and up
+        	blacklist = "...[123]";
+        	sb.setConfig("update.blacklist", blacklist);
+        }
         
         if ((manual) || (concept.equals("any"))) {
             // return a dev-release or a main-release
