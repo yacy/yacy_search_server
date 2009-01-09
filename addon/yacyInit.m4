@@ -85,7 +85,7 @@ ifdef(`Fedora', `dnl
 
 [ -e /etc/sysconfig/$NAME ] && . /etc/sysconfig/$NAME
 ')dnl
-if [ "$(id -u)" != "0" ] ; then
+if [ "$(id -u)" != "0" -a "$(whoami)" != "$USER" ] ; then
 	echo "please run this script as root!"
 	exit 4
 fi
@@ -126,16 +126,29 @@ for name in /usr/share/java/yacy/*.jar; do
 	CP=$CP:$name
 done
 ifdef(`Debian', `
-#CP="$CP:/usr/share/java/javatar.jar"
-#CP="$CP:/usr/share/java/commons-httpclient.jar"
-#CP="$CP:/usr/share/java/commons-logging.jar"
-#CP="$CP:/usr/share/java/commons-codec.jar"
-#CP="$CP:/usr/share/java/commons-discovery.jar"
-#CP="$CP:/usr/share/java/pdfbox.jar"
-#CP="$CP:/usr/share/java/jakarta-poi.jar"
-#CP="$CP:/usr/share/java/oro.jar"
-#CP="$CP:/usr/share/java/xerces.jar"
-#CP="$CP:/usr/share/java/jsch.jar"
+CP="$CP:/usr/share/java/javatar.jar"
+CP="$CP:/usr/share/java/commons-httpclient.jar"
+CP="$CP:/usr/share/java/commons-fileupload.jar"
+CP="$CP:/usr/share/java/commons-logging.jar"
+CP="$CP:/usr/share/java/commons-codec.jar"
+CP="$CP:/usr/share/java/commons-discovery.jar"
+CP="$CP:/usr/share/java/commons-io.jar"
+CP="$CP:/usr/share/java/pdfbox.jar"
+CP="$CP:/usr/share/java/bcprov.jar"
+CP="$CP:/usr/share/java/bcmail.jar"
+CP="$CP:/usr/share/java/jakarta-poi.jar"
+CP="$CP:/usr/share/java/jakarta-poi-scratchpad.jar"
+CP="$CP:/usr/share/java/oro.jar"
+CP="$CP:/usr/share/java/xerces.jar"
+CP="$CP:/usr/share/java/jsch.jar"
+CP="$CP:/usr/share/java/ant.jar"    # bzip-stuff
+CP="$CP:/usr/share/java/jmimemagic.jar"
+CP="$CP:/usr/share/java/log4j-1.2.jar"
+CP="$CP:/usr/share/java/odfutils.jar"
+CP="$CP:/usr/share/java/jrpm.jar"
+CP="$CP:/usr/share/java/tmextractors.jar"
+CP="$CP:/usr/share/java/servlet-api.jar"
+CP="$CP:/usr/share/java/j7zip.jar"
 ')dnl
 CLASSPATH=$CP
 
@@ -196,6 +209,7 @@ ifdef(`ArchLinux', `
 		stat_done
 ')dnl
 		RETVAL=0
+		chown yacy:root $PID_FILE
 	else
 ifdef(`Debian', `
 		echo "failed."
@@ -258,7 +272,9 @@ ifdef(`Debian', `KILL_YACY_WITH_START_STOP_DAEMON()')dnl
 			sleep 1
 			pidno=$( ps ax | grep $pid | awk '{ print $1 }' | grep $pid )
 		done
-		rm $PID_FILE
+		if [ "$2" != "--leave-pidfile" ]; then
+			rm $PID_FILE
+		fi
 		cd - >/dev/null
 ifdef(`Debian', `
 		echo "$NAME."
@@ -279,11 +295,14 @@ ifdef(`ArchLinux', `
 	;;
 
   restart)
-	$0 stop
+	$0 stop --leave-pidfile
 	sleep 1
-	$0 start 
+	$0 start
 	;;
   reload)
+	$0 restart
+	;;
+  force-reload)
 	$0 restart
 	;;
   status)
