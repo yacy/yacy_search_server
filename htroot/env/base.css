@@ -844,9 +844,9 @@ div#api:hover span {
    display: block;
    position: absolute;
    font-size:1em;
-   top: 90px; 
-   left: 0; 
-   width: 90px;
+   top: 40px; 
+   left: -170px; /* 30 - width */
+   width: 200px;
    padding: 3px;
    color: #000000; 
    background: #DDDDDD;
