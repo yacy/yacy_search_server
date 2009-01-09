@@ -200,7 +200,7 @@ public final class plasmaSearchEvent {
             // start worker threads to fetch urls and snippets
             this.workerThreads = new resultWorker[workerThreadCount];
             for (int i = 0; i < workerThreadCount; i++) {
-                this.workerThreads[i] = new resultWorker(i, 6000, 2);
+                this.workerThreads[i] = new resultWorker(i, 10000, 2);
                 this.workerThreads[i].start();
             }
             serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), "online snippet fetch threads started", 0, 0));
@@ -375,6 +375,15 @@ public final class plasmaSearchEvent {
         return false;
     }
     
+    private int countWorkerFinished() {
+        if (this.workerThreads == null) return 0;
+        int c = 0;
+        for (int i = 0; i < workerThreadCount; i++) {
+           if (this.workerThreads[i] == null || !this.workerThreads[i].isAlive()) c++;
+        }
+        return c;
+    }
+    
     boolean anyRemoteSearchAlive() {
         // check primary search threads
         if ((this.primarySearchThreads != null) && (this.primarySearchThreads.length != 0)) {
@@ -547,6 +556,10 @@ public final class plasmaSearchEvent {
     }
     
     public ResultEntry oneResult(final int item) {
+    	return oneResult(item, System.currentTimeMillis() + 100);
+    }
+    
+    public ResultEntry oneResult(final int item, long timeout) {
         // check if we already retrieved this item (happens if a search pages is accessed a second time)
         serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), "obtain one result entry - start", 0, 0));
         if (this.result.sizeStore() > item) {
@@ -557,21 +570,28 @@ public final class plasmaSearchEvent {
         if ((query.domType == plasmaSearchQuery.SEARCHDOM_GLOBALDHT) ||
             (query.domType == plasmaSearchQuery.SEARCHDOM_CLUSTERALL)) {
             // this is a search using remote search threads. Also the local search thread is started as background process
-            if ((localSearchThread != null) && (localSearchThread.isAlive())) {
+            while (
+            	localSearchThread != null &&
+            	localSearchThread.isAlive() &&
+            	System.currentTimeMillis() < timeout) {
                 // in case that the local search takes longer than some other remote search requests, 
                 // do some sleeps to give the local process a chance to contribute
-                try {Thread.sleep(item * 100L);} catch (final InterruptedException e) {}
+                try {Thread.sleep(10);} catch (final InterruptedException e) {}
             }
             // now wait until as many remote worker threads have finished, as we want to display results
-            while ((this.primarySearchThreads != null) && (this.primarySearchThreads.length > item) && (anyWorkerAlive()) && 
-                   ((result.size() <= item) || (countFinishedRemoteSearch() <= item))) {
-                try {Thread.sleep(100);} catch (final InterruptedException e) {}
+            while (
+            	this.primarySearchThreads != null &&
+            	anyWorkerAlive() &&
+            	countWorkerFinished() <= item &&
+            	System.currentTimeMillis() < timeout &&
+                (result.size() <= item || countFinishedRemoteSearch() <= item)) {
+                try {Thread.sleep(10);} catch (final InterruptedException e) {}
             }
             
         }
         // finally wait until enough results are there produced from the snippet fetch process
-        while ((anyWorkerAlive()) && (result.size() <= item)) {
-            try {Thread.sleep(100);} catch (final InterruptedException e) {}
+        while (anyWorkerAlive() && result.size() <= item) {
+            try {Thread.sleep(10);} catch (final InterruptedException e) {}
         }
         
         // finally, if there is something, return the result

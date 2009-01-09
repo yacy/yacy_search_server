@@ -88,8 +88,6 @@ public class yacysearchitem {
         prop.put("remoteResourceSize", yFormatter.number(theSearch.getRankingResult().getRemoteResourceSize(), true));
         prop.put("remoteIndexCount", yFormatter.number(theSearch.getRankingResult().getRemoteIndexCount(), true));
         prop.put("remotePeerCount", yFormatter.number(theSearch.getRankingResult().getRemotePeerCount(), true));
-    
-        prop.put("rss", "0");
         
         if (theQuery.contentdom == plasmaSearchQuery.CONTENTDOM_TEXT) {
             // text search
