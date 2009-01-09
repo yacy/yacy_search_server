@@ -255,24 +255,26 @@ public final class CrawlStacker {
 
         // check if the url is double registered
         final String dbocc = nextQueue.urlExists(entry.url().hash());
-        final indexURLReference oldEntry = wordIndex.getURL(entry.url().hash(), null, 0);
-        final boolean recrawl = (oldEntry != null) && (profile.recrawlIfOlder() > oldEntry.loaddate().getTime());
-        // do double-check
-        if ((dbocc != null) && (!recrawl)) {
-            reason = "double " + dbocc + ")";
-            if (this.log.isFine()) this.log.logFine("URL '" + entry.url().toString() + "' is double registered in '" + dbocc + "'. " + "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
-            return reason;
-        }
-        if ((oldEntry != null) && (!recrawl)) {
-            reason = "double " + "LURL)";
-            if (this.log.isFine()) this.log.logFine("URL '" + entry.url().toString() + "' is double registered in 'LURL'. " + "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
-            return reason;
-        }
-
-        // show potential re-crawl
-        if (recrawl && oldEntry != null) {
-            if (this.log.isFine()) this.log.logFine("RE-CRAWL of URL '" + entry.url().toString() + "': this url was crawled " +
-                    ((System.currentTimeMillis() - oldEntry.loaddate().getTime()) / 60000 / 60 / 24) + " days ago.");
+        if (dbocc != null || wordIndex.existsURL(entry.url().hash())) {
+            final indexURLReference oldEntry = wordIndex.getURL(entry.url().hash(), null, 0);
+            final boolean recrawl = (oldEntry != null) && (profile.recrawlIfOlder() > oldEntry.loaddate().getTime());
+            // do double-check
+            if ((dbocc != null) && (!recrawl)) {
+                reason = "double " + dbocc + ")";
+                if (this.log.isFine()) this.log.logFine("URL '" + entry.url().toString() + "' is double registered in '" + dbocc + "'. " + "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
+                return reason;
+            }
+            if ((oldEntry != null) && (!recrawl)) {
+                reason = "double " + "LURL)";
+                if (this.log.isFine()) this.log.logFine("URL '" + entry.url().toString() + "' is double registered in 'LURL'. " + "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
+                return reason;
+            }
+    
+            // show potential re-crawl
+            if (recrawl && oldEntry != null) {
+                if (this.log.isFine()) this.log.logFine("RE-CRAWL of URL '" + entry.url().toString() + "': this url was crawled " +
+                        ((System.currentTimeMillis() - oldEntry.loaddate().getTime()) / 60000 / 60 / 24) + " days ago.");
+            }
         }
         
         // store information

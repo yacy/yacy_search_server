@@ -146,7 +146,7 @@ public final class indexRepositoryReference {
         }
     }
 
-    public synchronized boolean exists(final String urlHash) {
+    public boolean exists(final String urlHash) {
         if (urlIndexFile == null) return false; // case may happen during shutdown
         return urlIndexFile.has(urlHash.getBytes());
     }

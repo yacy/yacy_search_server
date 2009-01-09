@@ -403,9 +403,9 @@ public class kelondroRowCollection implements Iterable<kelondroRow.Entry> {
         return this.sortBound;
     }
     
-    public synchronized Iterator<byte[]> keys() {
+    public synchronized Iterator<byte[]> keys(boolean keepOrderWhenRemoving) {
         // iterates byte[] - type entries
-        return new keyIterator();
+        return new keyIterator(keepOrderWhenRemoving);
     }
     
     /**
@@ -417,9 +417,11 @@ public class kelondroRowCollection implements Iterable<kelondroRow.Entry> {
     public class keyIterator implements Iterator<byte[]> {
 
         private int p;
+        private boolean keepOrderWhenRemoving;
         
-        public keyIterator() {
-            p = 0;
+        public keyIterator(boolean keepOrderWhenRemoving) {
+            this.p = 0;
+            this.keepOrderWhenRemoving = keepOrderWhenRemoving;
         }
         
         public boolean hasNext() {
@@ -432,7 +434,7 @@ public class kelondroRowCollection implements Iterable<kelondroRow.Entry> {
         
         public void remove() {
             p--;
-            removeRow(p, false);
+            removeRow(p, keepOrderWhenRemoving);
         }
     }    
 
@@ -446,9 +448,8 @@ public class kelondroRowCollection implements Iterable<kelondroRow.Entry> {
     
     /**
      * Iterator for kelondroRowCollection.
-     * It supports remove() though it doesn't contain the order of the underlying
+     * It supports remove() and keeps the order of the underlying
      * collection during removes.
-     *
      */
     public class rowIterator implements Iterator<kelondroRow.Entry> {
 
@@ -468,7 +469,7 @@ public class kelondroRowCollection implements Iterable<kelondroRow.Entry> {
         
         public void remove() {
             p--;
-            removeRow(p, false);
+            removeRow(p, true);
         }
 
     }
@@ -828,6 +829,7 @@ public class kelondroRowCollection implements Iterable<kelondroRow.Entry> {
         assert (this.rowdef.objectOrder != null);
         if (chunkcount <= 1) return true;
         if (chunkcount != this.sortBound) return false;
+        /*
         for (int i = 0; i < chunkcount - 1; i++) {
         	//System.out.println("*" + new String(get(i).getColBytes(0)));
         	if (compare(i, i + 1) > 0) {
@@ -835,6 +837,7 @@ public class kelondroRowCollection implements Iterable<kelondroRow.Entry> {
         		return false;
         	}
         }
+        */
         return true;
     }
     

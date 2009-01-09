@@ -145,7 +145,7 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         final int index = find(a, start, length);
         if (index < 0) return null;
         final kelondroRow.Entry entry = super.get(index, true);
-        super.removeRow(index, true);
+        super.removeRow(index, true); // keep order of collection!
         int findagainindex = 0;
         assert (findagainindex = find(a, start, length)) < 0 : "remove: chunk found again at index position (after  remove) " + findagainindex + ", index(before) = " + index + ", inset=" + serverLog.arrayList(super.chunkcache, super.rowdef.objectsize * findagainindex, length) + ", searchkey=" + serverLog.arrayList(a, start, length); // check if the remove worked
         return entry;
@@ -268,7 +268,7 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
     
     public synchronized Iterator<byte[]> keys() {
         sort();
-        return super.keys();
+        return super.keys(true);
     }
     
     public synchronized kelondroCloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) {

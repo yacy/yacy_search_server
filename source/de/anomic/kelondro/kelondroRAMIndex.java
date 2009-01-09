@@ -69,6 +69,7 @@ public class kelondroRAMIndex implements kelondroIndex {
     public synchronized kelondroRow.Entry get(final byte[] key) {
         assert (key != null);
         finishInitialization();
+        assert index0.isSorted();
         final kelondroRow.Entry indexentry = index0.get(key);
         if (indexentry != null) return indexentry;
         return index1.get(key);
@@ -77,6 +78,7 @@ public class kelondroRAMIndex implements kelondroIndex {
 	public boolean has(final byte[] key) {
 		assert (key != null);
         finishInitialization();
+        assert index0.isSorted();
         if (index0.has(key)) return true;
         return index1.has(key);
 	}
@@ -85,9 +87,10 @@ public class kelondroRAMIndex implements kelondroIndex {
     	assert (entry != null);
     	finishInitialization();
         // if the new entry is within the initialization part, just overwrite it
-        final kelondroRow.Entry indexentry = index0.get(entry.getPrimaryKeyBytes());
+    	assert index0.isSorted();
+        final kelondroRow.Entry indexentry = index0.remove(entry.getPrimaryKeyBytes()); // keeps ordering
         if (indexentry != null) {
-        	index0.put(entry);
+            index1.put(entry);
             return indexentry;
         }
         // else place it in the index1
