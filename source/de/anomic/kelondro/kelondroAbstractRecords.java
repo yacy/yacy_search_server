@@ -119,8 +119,7 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
                 this.FREEC = 0;
                 this.FREEH = new kelondroHandle(kelondroHandle.NUL);
             } else {
-                readfree();
-                readused();
+                readusedfree();
                 try {
                     final int rest = (int) ((entryFile.length() - POS_NODES) % recordsize);// == 0 : "rest = " + ((entryFile.length()  - POS_NODES) % ((long) recordsize)) + ", USEDC = " + this.USEDC + ", FREEC = " + this.FREEC  + ", recordsize = " + recordsize + ", file = " + filename;
                     final int calculated_used = (int) ((entryFile.length() - POS_NODES) / recordsize);
@@ -151,26 +150,31 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
         }
         
         private synchronized void writefree() throws IOException {
-            //synchronized (entryFile) {
+            synchronized (entryFile) {
                 entryFile.writeInt(POS_FREEC, FREEC);
                 entryFile.writeInt(POS_FREEH, FREEH.index);
                 entryFile.commit();
                 checkConsistency();
-            //}
+            }
         }
         
-        private synchronized void readused() throws IOException {
-            //synchronized (entryFile) {
+        private synchronized void readusedfree() throws IOException {
+            synchronized (entryFile) {
                 this.USEDC = entryFile.readInt(POS_USEDC);
                 assert this.USEDC >= 0 : "this.USEDC = " + this.USEDC + ", filename = " + filename;
-            //}
-        }
-        
-        private synchronized void readfree() throws IOException {
-            //synchronized (entryFile) {
-                this.FREEC = entryFile.readInt(POS_FREEC);
-                this.FREEH = new kelondroHandle(entryFile.readInt(POS_FREEH));
-            //}
+                int freeh = entryFile.readInt(POS_FREEH);
+                if (freeh > this.USEDC) {
+                	logFailure("INCONSISTENCY in FREEH reading: USEDC = " + this.USEDC + ", FREEC = " + this.FREEC  + ", this.FREEH = " + freeh + ", file = " + filename);
+                	this.FREEH = new kelondroHandle(kelondroHandle.NUL);
+                	this.FREEC = 0;
+                	entryFile.writeInt(POS_FREEC, FREEC);
+                    entryFile.writeInt(POS_FREEH, FREEH.index);
+                    entryFile.commit();
+                } else {
+                	this.FREEH = new kelondroHandle(freeh);
+                	this.FREEC = entryFile.readInt(POS_FREEC);
+                }
+            }
         }
         
         protected synchronized int allCount() {
@@ -189,7 +193,7 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
             // re-used change counter
             assert (h.index >= 0);
             assert (h.index != kelondroHandle.NUL);
-            //synchronized (USAGE) {
+            synchronized (USAGE) {
                 synchronized (entryFile) {
                     assert (h.index < USEDC + FREEC) : "USEDC = " + USEDC + ", FREEC = " + FREEC + ", h.index = " + h.index;
                     final long sp = seekpos(h);
@@ -203,7 +207,7 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
                     writefree();
                     writeused(false);
                 }
-            //}
+            }
         }
         
         protected synchronized int allocatePayload(byte[] chunk0) throws IOException {
@@ -211,7 +215,7 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
             // the return value is not a seek position
             // the seek position can be retrieved using the seekpos() function
             assert (chunk0 == null || chunk0.length == ROW.objectsize) : "chunk.length = " + chunk0.length + ", ROW.objectsize() = " + ROW.objectsize;
-            //synchronized (USAGE) {
+            synchronized (USAGE) {
                 synchronized (entryFile) {
                     if (USAGE.FREEC == 0) {
                         // generate new entry
@@ -274,7 +278,7 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
                     USAGE.writefree();
                     return index;
                 }
-            //}
+            }
         }
         
         protected synchronized void allocateRecord(final int index, byte[] bulkchunk, int offset) throws IOException {
@@ -286,7 +290,7 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
                 offset = 0;
             }
             //assert (chunk.length == ROW.objectsize()) : "chunk.length = " + chunk.length + ", ROW.objectsize() = " + ROW.objectsize();
-            //synchronized (USAGE) {
+            synchronized (USAGE) {
                 synchronized (entryFile) {
                     if (index < USAGE.allCount()) {
                         // write within the file
@@ -322,7 +326,7 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
                         }
                     }
                 }
-            //}
+            }
         }
         
         private synchronized void checkConsistency() {

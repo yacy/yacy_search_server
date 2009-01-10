@@ -33,6 +33,7 @@ public class kelondroHandle implements Comparable<kelondroHandle> {
     protected int index;
 
     protected kelondroHandle(final int i) {
+    	assert i != 1198412402;
         assert (i == NUL) || (i >= 0) : "node handle index too low: " + i;
         //assert (i == NUL) || (i < USAGE.allCount()) : "node handle index too high: " + i + ", USEDC=" + USAGE.USEDC + ", FREEC=" + USAGE.FREEC;
         this.index = i;
