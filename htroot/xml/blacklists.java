@@ -36,7 +36,7 @@ public class blacklists {
         final List<String> dirlist = listManager.getDirListing(listManager.listsPath);
         int blacklistCount=0;
 
-        final String blackListName = post.get("listname", "");
+        final String blackListName = (post == null) ? "" : post.get("listname", "");
         
         List<String> list;
         int count;

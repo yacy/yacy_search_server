@@ -38,7 +38,7 @@ public class plasmaDHTTransfer extends Thread {
     
     // connection properties
     private boolean gzipBody4Transfer = false;
-    private int timeout4Transfer = 60000;    
+    private int timeout4Transfer;    
 
     // status fields
     private boolean stopped = false;
