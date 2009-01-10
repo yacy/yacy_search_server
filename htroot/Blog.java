@@ -7,7 +7,7 @@
 //
 // This File is contributed by Jan Sandbrink
 // Contains contributions from Marc Nause [MN]
-// last change: 06.05.2006
+// last change: 10.01.2009
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -153,7 +153,7 @@ public class Blog {
                 comments = page.getComments();
                 date = page.getDate();
             }
-            final String commentMode = post.get("commentMode", "1");
+            final String commentMode = post.get("commentMode", "2");
             final String StrSubject = post.get("subject", "");
             byte[] subject;
             try {
@@ -194,7 +194,7 @@ public class Blog {
             //preview the page
             if(hasRights) {
                 prop.put("mode", "2");//preview
-                prop.put("mode_commentMode", post.getInt("commentMode", 1));
+                prop.put("mode_commentMode", post.getInt("commentMode", 2));
                 prop.putHTML("mode_pageid", pagename);
                 try {
                     prop.putHTML("mode_author", new String(author, "UTF-8"));

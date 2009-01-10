@@ -48,6 +48,7 @@
     </p>
     ::
     <!-- 1: edit -->
+    <h2>Edit</h2>
     <form action="Blog.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
       <fieldset>
         <dl>
@@ -115,6 +116,7 @@
             <select name="commentMode" id="commentMode">
               <option value="0" #(commentMode)#selected="selected"::#(/commentMode)#>deactivated</option>
               <option value="1" #(commentMode)#::selected="selected"#(/commentMode)#>activated</option>
+              <option value="2" #(commentMode)#::::selected="selected"#(/commentMode)#>moderated</option>
             </select>
           </dd>
         </dl>

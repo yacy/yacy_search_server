@@ -360,7 +360,7 @@ public class blogBoard {
             this.key = key;
             this.record = record;
             if (this.record.get("comments")==null) this.record.put("comments", listManager.collection2string(new ArrayList<String>()));
-            if (this.record.get("commentMode")==null || this.record.get("commentMode").equals("")) this.record.put("commentMode", "1");
+            if (this.record.get("commentMode")==null || this.record.get("commentMode").equals("")) this.record.put("commentMode", "2");
         }
         
         private void setKey(final String key) {
@@ -506,7 +506,7 @@ public class blogBoard {
         
         private void setCommentMode(final String mode) {
             if (mode == null) 
-                record.put("commentMode", "1");
+                record.put("commentMode", "2");
             else 
                 record.put("commentMode", mode);
         }
