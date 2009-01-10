@@ -582,6 +582,8 @@ public final class httpdFileHandler {
 
                 pb = new ProcessBuilder(targetFile.getAbsolutePath());
 
+                String fileSeparator = System.getProperty("file.separator", "/");
+
                 // set environment variables
                 Map<String, String> env = pb.environment();
                 env.put("SERVER_SOFTWARE", getDefaultHeaders(path).get(httpResponseHeader.SERVER));
@@ -603,6 +605,7 @@ public final class httpdFileHandler {
 //                env.put("AUTH_TYPE", "");         // TODO: implement
 //                env.put("REMOTE_USER", "");       // TODO: implement
 //                env.put("REMOTE_IDENT", "");      // I don't think we need this
+                env.put("DOCUMENT_ROOT", switchboard.getRootPath().getAbsolutePath() + fileSeparator + switchboard.getConfig("htDocsPath", "DATA/HTDOCS"));
                 if (requestHeader.getContentType() != null) {
                     env.put("CONTENT_TYPE", requestHeader.getContentType());
                 }
@@ -616,70 +619,74 @@ public final class httpdFileHandler {
                     env.put("HTTP_" + requestHeaderKey.toUpperCase().replace("-", "_"), requestHeader.get(requestHeaderKey));
                 }
 
-// TODO: set directory path for CGI script if this is necessary at all
-                //pb.directory(new File(targetFile.getAbsolutePath().substring(0, path.lastIndexOf("/"))));
-
-                // start execution of script
-                Process p = pb.start();
-
-                OutputStream os = new BufferedOutputStream(p.getOutputStream());
-
-                if (method.equalsIgnoreCase(httpHeader.METHOD_POST) && body != null) {
-                    byte[] buffer = new byte[1024];
-                    int len = requestHeader.getContentLength();
-                    while (len > 0) {
-                        body.read(buffer);
-                        len = len - buffer.length;
-                        os.write(buffer);
-                    }
-                }
-
-                os.close();
+                int exitValue = 0;
+                String cgiBody = null;
 
                 try {
-                    p.waitFor();
-                } catch (InterruptedException ex) {
+                    // start execution of script
+                    Process p = pb.start();
 
-                }
+                    OutputStream os = new BufferedOutputStream(p.getOutputStream());
 
-                int exitValue = p.exitValue();
+                    if (method.equalsIgnoreCase(httpHeader.METHOD_POST) && body != null) {
+                        byte[] buffer = new byte[1024];
+                        int len = requestHeader.getContentLength();
+                        while (len > 0) {
+                            body.read(buffer);
+                            len = len - buffer.length;
+                            os.write(buffer);
+                        }
+                    }
 
-                InputStream is = new BufferedInputStream(p.getInputStream());
+                    os.close();
 
-                StringBuilder stringBuffer = new StringBuilder(1024);
+                    try {
+                        p.waitFor();
+                    } catch (InterruptedException ex) {
 
-                while (is.available() > 0) {
-                    stringBuffer.append((char) is.read());
-                }
+                    }
 
-                String cgiReturn = stringBuffer.toString();
-                int indexOfDelimiter = cgiReturn.indexOf("\n\n");
-                String[] cgiHeader = new String[0];
-                if (indexOfDelimiter > -1) {
-                    cgiHeader = cgiReturn.substring(0, indexOfDelimiter).split("\n");
-                }
-                String cgiBody = cgiReturn.substring(indexOfDelimiter + 1);
+                    exitValue = p.exitValue();
 
-                String key;
-                String value;
-                for (int i = 0; i < cgiHeader.length; i++) {
-                    indexOfDelimiter = cgiHeader[i].indexOf(":");
-                    key = cgiHeader[i].substring(0, indexOfDelimiter).trim();
-                    value = cgiHeader[i].substring(indexOfDelimiter + 1).trim();
-                    conProp.setProperty(key, value);
-                    if (key.equals("Cache-Control") && value.equals("no-cache")) {
-                        nocache = true;
-                    } else if (key.equals("Content-type")) {
-                        mimeType = value;
-                    } else if (key.equals("Status")) {
-                        if (key.length() > 2) {
-                            try {
-                                statusCode = Integer.parseInt(value.substring(0, 3));
-                            } catch (NumberFormatException ex) {
-                                /* tough luck, we will just have to use 200 as default value */
+                    InputStream is = new BufferedInputStream(p.getInputStream());
+
+                    StringBuilder stringBuffer = new StringBuilder(1024);
+
+                    while (is.available() > 0) {
+                        stringBuffer.append((char) is.read());
+                    }
+
+                    String cgiReturn = stringBuffer.toString();
+                    int indexOfDelimiter = cgiReturn.indexOf("\n\n");
+                    String[] cgiHeader = new String[0];
+                    if (indexOfDelimiter > -1) {
+                        cgiHeader = cgiReturn.substring(0, indexOfDelimiter).split("\n");
+                    }
+                    cgiBody = cgiReturn.substring(indexOfDelimiter + 1);
+
+                    String key;
+                    String value;
+                    for (int i = 0; i < cgiHeader.length; i++) {
+                        indexOfDelimiter = cgiHeader[i].indexOf(":");
+                        key = cgiHeader[i].substring(0, indexOfDelimiter).trim();
+                        value = cgiHeader[i].substring(indexOfDelimiter + 1).trim();
+                        conProp.setProperty(key, value);
+                        if (key.equals("Cache-Control") && value.equals("no-cache")) {
+                            nocache = true;
+                        } else if (key.equals("Content-type")) {
+                            mimeType = value;
+                        } else if (key.equals("Status")) {
+                            if (key.length() > 2) {
+                                try {
+                                    statusCode = Integer.parseInt(value.substring(0, 3));
+                                } catch (NumberFormatException ex) {
+                                    /* tough luck, we will just have to use 200 as default value */
+                                }
                             }
                         }
                     }
+                } catch (IOException ex) {
+                    exitValue = -1;
                 }
 
                 /* did the script return an exit value != 0 and still there is supposed to be
