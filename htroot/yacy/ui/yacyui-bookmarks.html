@@ -3,68 +3,51 @@
 	$(document).ready(function() {
 		$("#side1").accordion("activate", 0);
 		// $("#side2").accordion("activate", 1);
-		// $('#yoptions').resetForm();
-		
-		$.ajax({
-			type: "POST",
-			async: true,
-			url: "/xml/bookmarks/xbel/xbel.xml?tag="+qtag,			
-			dataType: "xml",
-			success: function(xml) {
-				$(xml).find('bookmark').each(function(){
-					var link = $(this).attr('href');
-					var hash = $(this).attr('id');
-					var title = $(this).find('title').text();
-					var date = $(this).attr('added');
-					var desc = $(this).find('desc').text();
-					var pub = $(this).find('metadata[owner=YaCy][public]').attr('public');										
-					var tags = $(this).find('metadata[owner=Mozilla][ShortcutURL]').attr('ShortcutURL');
-					if (tags != undefined) {
-						tags = tags.replace(",",", ","g");
-					} else {
-						tags ="";
-					}					
-					if (pub == "true") {
-						icon = '<img src="img-2/world2.png" alt="public" title="public bookmark"/>'
-					} else {
-						 var icon = '<img src="img-2/lock.png" alt="private" title="private bookmark"/>'
-					}				
-					$('<tr></tr')
-						.html('<td>' +hash+ '</td><td>' +icon+ '</td><td><h3 class="linktitle">' +HTMLenc(title)+ '</h3><p class="desc">' +HTMLenc(desc)+ '</p><p class="url"><a href="' +link+ '">' +link+ '</a></p><td class="tags">' +HTMLenc(tags)+ ' </td><td class="date">' +date+ '</td>')						
-						.appendTo('#ymarks tbody');					
-				}); //close each(
-				var height=document.documentElement.clientHeight - 205;    			
-    			$('#ymarks').flexigrid({
-    				colModel: [
-						{display: 'Hash', name : 'hash', width : 50, sortable : false, align: 'center', hide: true},
-						{display: '', name : 'public', width : 25, sortable : true, align: 'center'},
-						{display: 'Title', name : 'title', width : 450, sortable : true, align: 'left'},
-						{display: 'Tags', name : 'tags', width : 240, sortable : false, align: 'left'},
-						{display: 'Date', name : 'date', width : 130, sortable : true, align: 'left'}
-					],
-					buttons: [
-						{name: 'Crawl', bclass: 'crawl', onpress: bm_action},
-						{separator: true},
-						{name: 'Bookmark', bclass: 'bookmark', onpress: bm_action},
-						{separator: true},
-						{name: 'Edit', bclass: 'edit', onpress: bm_action},
-						{name: 'Delete', bclass: 'delete', onpress: bm_action},
-						{separator: true},
-						{name: 'RSS', bclass: 'rss', onpress: bm_action},
-						{name: 'XBEL', bclass: 'xml', onpress: bm_action},
-						{name: 'XML', bclass: 'xml', onpress: bm_action},
-						{separator: true},
-						{name: 'Import', bclass: 'import', onpress: bm_action},
-						{separator: true},
-						{name: 'Help', bclass: 'help', onpress: bm_action},
-					],										
-					striped: true,
-					nowrap: false,			 									    				
-    				height: height,
-    				title: 'YaCy Bookmarks: ' + HTMLenc(qtag)										    				
-    			});    			
-			}
-		}); //close $.ajax(
+		// $('#yoptions').resetForm();		
+
+		var height=document.documentElement.clientHeight - 240;    			
+ 		$('#ymarks').flexigrid({
+	 		url: '/xml/bookmarks/get_bookmarks.json?display=1',
+			dataType: 'json',
+	 		method: 'GET',
+	 		colModel: [	
+				{display: 'Hash', name : 'hash', width : 50, sortable : false, align: 'center', hide: true},
+				{display: 'Public', name : 'public', width : 25, sortable : true, align: 'center'},
+				{display: 'Title', name : 'title', width : 450, sortable : true, align: 'left'},
+				{display: 'Tags', name : 'tags', width : 240, sortable : false, align: 'left'},
+				{display: 'Folders', name : 'folders', width : 240, sortable : false, align: 'left', hide: true},
+				{display: 'Date', name : 'date', width : 100, sortable : true, align: 'left'}
+			],
+			buttons: [
+				{name: 'Crawl', bclass: 'crawl', onpress: bm_action},
+				{separator: true},
+				{name: 'Bookmark', bclass: 'bookmark', onpress: bm_action},
+				{separator: true},
+				{name: 'Edit', bclass: 'edit', onpress: bm_action},
+				{name: 'Delete', bclass: 'delete', onpress: bm_action},
+				{separator: true},
+				{name: 'RSS', bclass: 'rss', onpress: bm_action},
+				{name: 'XBEL', bclass: 'xml', onpress: bm_action},
+				{name: 'XML', bclass: 'xml', onpress: bm_action},
+				{separator: true},
+				{name: 'Import', bclass: 'import', onpress: bm_action},
+				{separator: true},
+				{name: 'Help', bclass: 'help', onpress: bm_action},
+			],
+			searchitems : [
+				{display: 'Tags', name : 'tags'}
+			],													
+			useRp: true,
+			rp: 15,
+			sortname: "date",
+			sortorder: "asc",
+			usepager: true,					
+			striped: true,
+			nowrap: false,			 									    				
+	 		height: height,
+	 		title: 'YaCy Bookmarks: ' + HTMLenc(qtag)										    				
+ 		});    			
+
 	});
 	function bm_action(com,grid) {
 		if (com=='XBEL') {
@@ -121,8 +104,8 @@
 			$("input[@name='bm_url']").setValue($('.trSelected',grid).find('.url').text());
             $("textarea[@name='bm_title']").setValue($('.trSelected',grid).find('h3.linktitle').text().replace(/^\s+/g,""));
             $("textarea[@name='bm_desc']").setValue($('.trSelected',grid).find('p.desc').text().replace(/^\s+/g,""));            		
-            $("input[@name='bm_tags']").setValue($('.trSelected',grid).find('td.tags').text());            
-            // $("input[@name='bm_path']").setValue($('.trSelected',grid).find('.path').text());
+            $("input[@name='bm_tags']").setValue($('.trSelected',grid).find('p.tags').text().replace(/\s+/g,""));            
+            $("input[@name='bm_path']").setValue($('.trSelected',grid).find('p.folders').text());
             $("select[@name='bm_public']").setValue($('.trSelected',grid).find('img').attr('alt'));
             $("#bmadd").dialog('open'); 
 		}		
