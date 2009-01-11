@@ -298,17 +298,14 @@ public final class CrawlStacker {
                 if (proxy) this.log.logWarning("URL '" + entry.url().toString() + "' has conflicting initiator properties: global = true, proxy = true, initiator = " + entry.initiator() + ", profile.handle = " + profile.handle());
                 if (remote) this.log.logWarning("URL '" + entry.url().toString() + "' has conflicting initiator properties: global = true, remote = true, initiator = " + entry.initiator() + ", profile.handle = " + profile.handle());
                 nextQueue.noticeURL.push(NoticedURL.STACK_TYPE_LIMIT, entry);
-            }
-            if (local) {
+            } else if (local) {
                 if (proxy) this.log.logWarning("URL '" + entry.url().toString() + "' has conflicting initiator properties: local = true, proxy = true, initiator = " + entry.initiator() + ", profile.handle = " + profile.handle());
                 if (remote) this.log.logWarning("URL '" + entry.url().toString() + "' has conflicting initiator properties: local = true, remote = true, initiator = " + entry.initiator() + ", profile.handle = " + profile.handle());
                 nextQueue.noticeURL.push(NoticedURL.STACK_TYPE_CORE, entry);
-            }
-            if (proxy) {
+            } else if (proxy) {
                 if (remote) this.log.logWarning("URL '" + entry.url().toString() + "' has conflicting initiator properties: proxy = true, remote = true, initiator = " + entry.initiator() + ", profile.handle = " + profile.handle());
                 nextQueue.noticeURL.push(NoticedURL.STACK_TYPE_CORE, entry);
-            }
-            if (remote) {
+            } else if (remote) {
                 nextQueue.noticeURL.push(NoticedURL.STACK_TYPE_REMOTE, entry);
             }
         }
