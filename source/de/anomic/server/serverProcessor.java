@@ -166,10 +166,9 @@ public class serverProcessor<J extends serverProcessorJob> {
         if (executor != null & !executor.isShutdown()) {
             // wait for shutdown
             try {
+                executor.shutdown();
                 executor.awaitTermination(millisTimeout, TimeUnit.MILLISECONDS);
-                
             } catch (final InterruptedException e) {}
-            executor.shutdown();
         }
         serverLog.logInfo("serverProcessor", "queue " + this.processName + ": shutdown.");
         this.executor = null;
