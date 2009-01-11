@@ -227,6 +227,7 @@ public class PerformanceQueues_p {
             final int wordCacheMaxCount = post.getInt("wordCacheMaxCount", 20000);
             switchboard.setConfig(plasmaSwitchboardConstants.WORDCACHE_MAX_COUNT, Integer.toString(wordCacheMaxCount));
             switchboard.webIndex.setMaxWordCount(wordCacheMaxCount);
+            switchboard.setConfig(plasmaSwitchboardConstants.INDEX_DIST_DHT_RECEIPT_LIMIT, wordCacheMaxCount);
             
             final int wordCacheInitCount = post.getInt(plasmaSwitchboardConstants.WORDCACHE_INIT_COUNT, 30000);
             switchboard.setConfig(plasmaSwitchboardConstants.WORDCACHE_INIT_COUNT, Integer.toString(wordCacheInitCount));

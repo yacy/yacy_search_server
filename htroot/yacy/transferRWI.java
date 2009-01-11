@@ -35,6 +35,7 @@ import de.anomic.http.httpRequestHeader;
 import de.anomic.index.indexRWIRowEntry;
 import de.anomic.index.indexReferenceBlacklist;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -81,7 +82,7 @@ public final class transferRWI {
         boolean granted       = sb.getConfig("allowReceiveIndex", "false").equals("true");
         final boolean blockBlacklist = sb.getConfig("indexReceiveBlockBlacklist", "false").equals("true");
         final boolean checkLimit    = sb.getConfigBool("indexDistribution.transferRWIReceiptLimitEnabled", true);
-        final long cachelimit = sb.getConfigLong("indexDistribution.dhtReceiptLimit", 10000);
+        final long cachelimit = sb.getConfigLong(plasmaSwitchboardConstants.INDEX_DIST_DHT_RECEIPT_LIMIT, 10000);
         final yacySeed otherPeer = sb.webIndex.seedDB.get(iam);
         final String otherPeerName = iam + ":" + ((otherPeer == null) ? "NULL" : (otherPeer.getName() + "/" + otherPeer.getVersion()));                
         

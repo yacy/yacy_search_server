@@ -527,11 +527,19 @@ public final class plasmaWordIndex implements indexRI {
     }
     
     private synchronized void flushCacheUntil(long timeout) {
-    	while (System.currentTimeMillis() < timeout &&
-    			(dhtOutCache.size() > 0 || dhtInCache.size() > 0)) {
-    		flushCacheOne(dhtOutCache);
+        long timeout0 = System.currentTimeMillis() + (timeout - System.currentTimeMillis()) / 10 * 6;
+        // we give 60% for dhtIn to prefer filling of cache with dht transmission
+        //int cIn = 0;
+    	while (System.currentTimeMillis() < timeout0 && dhtInCache.size() > 0) {
     		flushCacheOne(dhtInCache);
+    		//cIn++;
     	}
+    	//int cOut = 0;
+    	while (System.currentTimeMillis() < timeout && dhtOutCache.size() > 0) {
+            flushCacheOne(dhtOutCache);
+            //cOut++;
+        }
+    	//System.out.println("*** DEBUG cache flush: cIn = " + cIn + ", cOut = " + cOut);
     }
     
     private synchronized void flushCacheOne(final indexRAMRI ram) {
