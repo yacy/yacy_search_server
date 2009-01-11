@@ -1061,14 +1061,14 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         log.logConfig("SWITCHBOARD SHUTDOWN STEP 2: sending termination signal to threaded indexing");
         // closing all still running db importer jobs
         indexingDocumentProcessor.announceShutdown();
-        indexingDocumentProcessor.awaitShutdown(4000);
+        indexingDocumentProcessor.awaitShutdown(12000);
         crawlStacker.announceClose();
         indexingCondensementProcessor.announceShutdown();
         indexingAnalysisProcessor.announceShutdown();
         indexingStorageProcessor.announceShutdown();
-        indexingCondensementProcessor.awaitShutdown(3000);
-        indexingAnalysisProcessor.awaitShutdown(2000);
-        indexingStorageProcessor.awaitShutdown(1000);
+        indexingCondensementProcessor.awaitShutdown(12000);
+        indexingAnalysisProcessor.awaitShutdown(12000);
+        indexingStorageProcessor.awaitShutdown(12000);
         crawlStacker.close();
         this.dbImportManager.close();
         JakartaCommonsHttpClient.closeAllConnections();
