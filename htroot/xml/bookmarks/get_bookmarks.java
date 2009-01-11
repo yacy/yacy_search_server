@@ -163,11 +163,17 @@ public class get_bookmarks {
 	       			prop.put("display_bookmarks_"+count+"_hash", bookmark.getUrlHash());
 	       			prop.put("display_bookmarks_"+count+"_comma", ",");
 	       			
-	       			// offer both HTML encoded
-	       			prop.putHTML("display_bookmarks_"+count+"_title-enc", bookmark.getTitle());
-	   				prop.putHTML("display_bookmarks_"+count+"_desc-enc", bookmark.getDescription());
-	   				prop.putHTML("display_bookmarks_"+count+"_tags-enc", bookmark.getTagsString().replaceAll(",", ", "));
-	       			prop.putHTML("display_bookmarks_"+count+"_folders-enc", (bookmark.getFoldersString()));
+	       			// offer HTML encoded
+	       			prop.putHTML("display_bookmarks_"+count+"_title-html", bookmark.getTitle());
+	   				prop.putHTML("display_bookmarks_"+count+"_desc-html", bookmark.getDescription());
+	   				prop.putHTML("display_bookmarks_"+count+"_tags-html", bookmark.getTagsString().replaceAll(",", ", "));
+	       			prop.putHTML("display_bookmarks_"+count+"_folders-html", (bookmark.getFoldersString()));
+	       			
+	       			// XML encoded
+	   				prop.putXML("display_bookmarks_"+count+"_title-xml", bookmark.getTitle());
+	   				prop.putXML("display_bookmarks_"+count+"_desc-xml", bookmark.getDescription());
+	   				prop.putXML("display_bookmarks_"+count+"_tags-xml", bookmark.getTagsString());
+	       			prop.putXML("display_bookmarks_"+count+"_folders-xml", (bookmark.getFoldersString()));	       			
 	       			
 	       			// and plain text (potentially unsecure)
 	   				prop.put("display_bookmarks_"+count+"_title", bookmark.getTitle());
