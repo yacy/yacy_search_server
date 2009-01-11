@@ -323,8 +323,8 @@ public class bookmarksDB {
     	Tag tag;
     	
     	while(it.hasNext()){
-    		tag=it.next();
-    		if (tag.getFriendlyName().startsWith(root)) {
+    		tag=it.next();    		
+    		if (tag.getFriendlyName().startsWith((root.equals("/") ? root : root+"/"))) {
     			path = tag.getFriendlyName();
     			path = cleanTagsString(path);                  
     			while(path.length() > 0 && !path.equals(root)){

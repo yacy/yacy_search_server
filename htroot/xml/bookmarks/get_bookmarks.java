@@ -213,7 +213,7 @@ public class get_bookmarks {
     		return count;
     	}
    
-    	if(fn.startsWith(root)){
+    	if(fn.startsWith((root.equals("/") ? root : root+"/"))){
     		prop.put("display_xbel_"+count+"_elements", "<folder id=\""+bookmarksDB.tagHash(fn)+"\">");
     		count++;
     		  		
@@ -226,8 +226,10 @@ public class get_bookmarks {
     			count = recurseFolders(it, fn, count, true, fn);
     		}
     	} else {		
-    		prop.put("display_xbel_"+count+"_elements", "</folder>");        		
-    		count++;
+    		if (count > 0) {
+    			prop.put("display_xbel_"+count+"_elements", "</folder>");        		
+    			count++;
+    		}    		
     		root = root.replaceAll("(/.[^/]*$)", ""); 		
     		if(root.equals("")) root = "/";    		
     		count = recurseFolders(it, root, count, false, fn);

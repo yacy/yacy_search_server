@@ -380,7 +380,7 @@ public class Bookmarks {
     private static int recurseFolders(final Iterator<String> it, String root, int count, final boolean next, final String prev){
     	String fn="";    	
     	bookmarksDB.Bookmark bookmark;
-   	
+    	
     	if (next) fn = it.next();    		
     	else fn = prev;
 
@@ -394,7 +394,7 @@ public class Bookmarks {
     		return count;
     	}
    
-    	if(fn.startsWith(root)){
+    	if(fn.startsWith((root.equals("/") ? root : root+"/"))){
     		prop.put("folderlist_"+count+"_folder", "<li>"+fn.replaceFirst(root+"/*","")+"<ul class=\"folder\">");
     		count++;    
     		final Iterator<String> bit=sb.bookmarksDB.getBookmarksIterator(fn, isAdmin);
