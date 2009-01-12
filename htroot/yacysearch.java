@@ -119,17 +119,15 @@ public class yacysearch {
         }
 
         // collect search attributes
+        boolean newsearch = post.hasValue("query") && post.hasValue("former") && !post.get("query","").equalsIgnoreCase(post.get("former","")); //new search term
+        
         int itemsPerPage = Math.min((authenticated) ? 1000 : 10, post.getInt("maximumRecords", post.getInt("count", 10))); // SRU syntax with old property as alternative
-        int offset = (post.hasValue("query") && post.hasValue("former") && !post.get("query","").equalsIgnoreCase(post.get("former",""))) ? 0 : post.getInt("startRecord", post.getInt("offset", 0));
+        int offset = (newsearch) ? 0 : post.getInt("startRecord", post.getInt("offset", 0));
         
         boolean global = (post == null) ? true : post.get("resource", "global").equals("global");
         final boolean indexof = (post != null && post.get("indexof","").equals("on")); 
+        
         String urlmask = "";
-        if (post != null && post.containsKey("urlmask") && post.get("urlmask").equals("no")) {
-            urlmask = ".*";
-        } else {
-            urlmask = (post != null && post.containsKey("urlmaskfilter")) ? (String) post.get("urlmaskfilter") : ".*";
-        }
         String prefermask = (post == null ? "" : post.get("prefermaskfilter", ""));
         if ((prefermask.length() > 0) && (prefermask.indexOf(".*") < 0)) prefermask = ".*" + prefermask + ".*";
 
@@ -234,7 +232,7 @@ public class yacysearch {
                 String ft = querystring.substring(filetype + 9, ftb);
                 query[0].remove("filetype:" + ft.toLowerCase());
                 while(ft.startsWith(".")) ft = ft.substring(1);
-                if(ft.length() > 0) urlmask = ".*\\." + ft;
+                if(ft.length() > 0) urlmask = urlmask + ".*\\." + ft;
             }
             int site = querystring.indexOf("site:");
             if (site >= 0) {
@@ -244,8 +242,15 @@ public class yacysearch {
                 query[0].remove("site:" + domain.toLowerCase());
                 while(domain.startsWith(".")) domain = domain.substring(1);
                 if (domain.indexOf(".") < 0) domain = "\\." + domain; // is tld
-                if (domain.length() > 0) urlmask = "[a-zA-Z]*://[^/]*" + domain + "/.*";
+                if (domain.length() > 0) urlmask = "[a-zA-Z]*://[^/]*" + domain + "/.*" + urlmask;
             }
+            if (urlmask.length() == 0 && post != null && post.containsKey("urlmask") && post.get("urlmask").equals("no")) { // option search all
+                urlmask = ".*";
+            } else if (urlmask.length() == 0 && !newsearch && post.containsKey("urlmaskfilter")) {
+                final String purlmaskfilter = post.get("urlmaskfilter", ".*");
+                if(!purlmaskfilter.equals(".*")) urlmask = purlmaskfilter;
+            }
+            if(urlmask.length() == 0) urlmask = ".*"; //if no urlmask was given
            
             // read the language from the language-restrict option 'lr'
             // if no one is given, use the user agent or the system language as default
