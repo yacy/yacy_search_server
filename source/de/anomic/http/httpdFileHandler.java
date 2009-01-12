@@ -70,6 +70,7 @@ import java.io.UnsupportedEncodingException;
 import java.lang.ref.SoftReference;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.InetAddress;
 import java.net.URLDecoder;
 import java.util.Date;
 import java.util.HashMap;
@@ -600,7 +601,7 @@ public final class httpdFileHandler {
                 if (argsString != null) {
                     env.put("QUERY_STRING", argsString);
                 }
-                env.put("REMOTE_HOST", refererHost);
+                env.put("REMOTE_HOST", InetAddress.getByName(clientIP).getHostName());
                 env.put("REMOTE_ADDR", clientIP);
 //                env.put("AUTH_TYPE", "");         // TODO: implement
 //                env.put("REMOTE_USER", "");       // TODO: implement
