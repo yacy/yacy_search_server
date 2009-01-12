@@ -99,6 +99,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
@@ -107,6 +108,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.regex.Pattern;
 
 import de.anomic.crawler.CrawlEntry;
 import de.anomic.crawler.CrawlProfile;
@@ -236,6 +238,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     public  TreeMap<String, String>        clusterhashes; // map of peerhash(String)/alternative-local-address as ip:port or only ip (String) or null if address in seed should be used
     public  URLLicense                     licensedURLs;
     public  Timer                          moreMemory;
+    public  List<Pattern>                  networkWhitelist, networkBlacklist;
     
     public serverProcessor<indexingQueueEntry> indexingDocumentProcessor;
     public serverProcessor<indexingQueueEntry> indexingCondensementProcessor;
@@ -520,12 +523,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         rankingOtherDistribution = new plasmaRankingDistribution(log, webIndex.seedDB, new File(rankingPath, getConfig(plasmaSwitchboardConstants.RANKING_DIST_1_PATH, plasmaRankingDistribution.CR_OTHER)), (int) getConfigLong(plasmaSwitchboardConstants.RANKING_DIST_1_METHOD, plasmaRankingDistribution.METHOD_MIXEDSENIOR), (int) getConfigLong(plasmaSwitchboardConstants.RANKING_DIST_1_METHOD, 30), getConfig(plasmaSwitchboardConstants.RANKING_DIST_1_TARGET, "kaskelix.de:8080,yacy.dyndns.org:8000"));
 
         // init nameCacheNoCachingList
-        final String noCachingList = getConfig(plasmaSwitchboardConstants.HTTPC_NAME_CACHE_CACHING_PATTERNS_NO,"");
-        final String[] noCachingEntries = noCachingList.split(",");
-        for (int i = 0; i < noCachingEntries.length; i++) {
-            final String entry = noCachingEntries[i].trim();
-            serverDomains.nameCacheNoCachingPatterns.add(entry);
-        }
+        serverDomains.setNoCachingPatterns(getConfig(plasmaSwitchboardConstants.HTTPC_NAME_CACHE_CACHING_PATTERNS_NO,""));
         
         // generate snippets cache
         log.logConfig("Initializing Snippet Cache");
@@ -696,6 +694,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         
         // initiate url license object
         licensedURLs = new URLLicense(8);
+        
+        // set white/blacklists
+        this.networkWhitelist = serverDomains.makePatterns(getConfig(plasmaSwitchboardConstants.NETWORK_WHITELIST, ""));
+        this.networkBlacklist = serverDomains.makePatterns(getConfig(plasmaSwitchboardConstants.NETWORK_BLACKLIST, ""));
         
         /*
         // in intranet and portal network set robinson mode
@@ -1203,7 +1205,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             
             // get next queue entry and start a queue processing
             final IndexingStack.QueueEntry queueEntry = deQueue();
-            assert queueEntry != null;
             if (queueEntry == null) return true;
             if (queueEntry.profile() == null) {
                 queueEntry.close();

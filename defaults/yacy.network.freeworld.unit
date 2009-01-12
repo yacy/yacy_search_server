@@ -29,3 +29,7 @@ network.unit.update.location3 = http://www.yacystats.de/yacybuild/
 
 # properties for in-protocol response authentication:
 network.unit.protocol.control = uncontrolled
+
+# white/blacklists
+network.unit.access.whitelist = 10.*,127.*,172.16.*,169.254.*,192.168.*,localhost
+network.unit.access.blacklist =

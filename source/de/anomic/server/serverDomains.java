@@ -27,28 +27,32 @@ package de.anomic.server;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
 
 import de.anomic.plasma.plasmaSwitchboard;
 
 public class serverDomains {
 
+	private static final String localPatterns = "10.*,127.*,172.16.*,169.254.*,192.168.*,localhost";
+    
     // a dns cache
     private static final Map<String, InetAddress> nameCacheHit = new ConcurrentHashMap<String, InetAddress>(); // a not-synchronized map resulted in deadlocks
     private static final Set<String> nameCacheMiss = Collections.synchronizedSet(new HashSet<String>());
     private static final int maxNameCacheHitSize = 8000; 
     private static final int maxNameCacheMissSize = 8000; 
-    public  static final List<String> nameCacheNoCachingPatterns = Collections.synchronizedList(new LinkedList<String>());
+    public  static       List<Pattern> nameCacheNoCachingPatterns = Collections.synchronizedList(new LinkedList<Pattern>());
+    public  static final List<Pattern> localhostPatterns = makePatterns(localPatterns);
     private static final Set<String> nameCacheNoCachingList = Collections.synchronizedSet(new HashSet<String>());
-
+    
     /**
      * ! ! !   A T T E N T I O N   A T T E N T I O N   A T T E N T I O N   ! ! !
      * 
@@ -415,6 +419,26 @@ public class serverDomains {
         throw new UnknownHostException("host not in cache");
     }
     
+    public static void setNoCachingPatterns(String patternList) {
+        nameCacheNoCachingPatterns = makePatterns(patternList);
+    }
+    
+    public static List<Pattern> makePatterns(String patternList) {
+    	final String[] entries = patternList.split(",");
+    	final List<Pattern> patterns = new ArrayList<Pattern>(entries.length);
+    	for (int i = 0; i < entries.length; i++) {
+            patterns.add(Pattern.compile(entries[i].trim()));
+        }
+    	return patterns;
+    }
+
+    public static boolean matchesList(String obj, List<Pattern> patterns) {
+        for (Pattern nextPattern: patterns) {
+            if (nextPattern.matcher(obj).matches()) return true;
+        }
+        return false;
+    }
+    
     public static InetAddress dnsResolve(String host) {
         if ((host == null) || (host.length() == 0)) return null;
         host = host.toLowerCase().trim();        
@@ -434,17 +458,10 @@ public class serverDomains {
             ) {
                 doCaching = false;
             } else {
-                final Iterator<String> noCachingPatternIter = nameCacheNoCachingPatterns.iterator();
-                String nextPattern;
-                while (noCachingPatternIter.hasNext()) {
-                    nextPattern = noCachingPatternIter.next();
-                    if (host.matches(nextPattern)) {
-                        // disallow dns caching for this host
-                        nameCacheNoCachingList.add(host);
-                        doCaching = false;
-                        break;
-                    }
-                }
+            	if (matchesList(host, nameCacheNoCachingPatterns)) {
+            		nameCacheNoCachingList.add(host);
+                    doCaching = false;
+            	}
             }
             
             if (doCaching && ip != null) {
@@ -533,29 +550,7 @@ public class serverDomains {
 
         // FIXME IPv4 only
         // check local ip addresses
-        if (host.equals("localhost") || host.startsWith("127")
-                || host.startsWith("192.168")
-                || host.startsWith("10.")
-                || host.startsWith("169.254")
-                ||
-                // 172.16.0.0-172.31.255.255 (I think this is faster than a regex)
-                (host.startsWith("172.") && (host.startsWith("172.16.")
-                        || host.startsWith("172.17.")
-                        || host.startsWith("172.18.")
-                        || host.startsWith("172.19.")
-                        || host.startsWith("172.20.")
-                        || host.startsWith("172.21.")
-                        || host.startsWith("172.22.")
-                        || host.startsWith("172.23.")
-                        || host.startsWith("172.24.")
-                        || host.startsWith("172.25.")
-                        || host.startsWith("172.26.")
-                        || host.startsWith("172.27.")
-                        || host.startsWith("172.28.")
-                        || host.startsWith("172.29.")
-                        || host.startsWith("172.30.")
-                        || host.startsWith("172.31."))))
-            return true;
+        if (matchesList(host, localhostPatterns)) return true;
         
         // check the tld list
         final int p = host.lastIndexOf('.');
@@ -653,5 +648,4 @@ public class serverDomains {
             return null;
         }
     }
-
 }

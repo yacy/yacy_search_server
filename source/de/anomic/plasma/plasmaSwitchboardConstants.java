@@ -522,4 +522,7 @@ public final class plasmaSwitchboardConstants {
      * 
      */
     public static final String NETWORK_NAME = "network.unit.name";
+    public static final String NETWORK_WHITELIST = "network.unit.access.whitelist";
+    public static final String NETWORK_BLACKLIST = "network.unit.access.blacklist";
+    
 }

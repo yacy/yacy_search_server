@@ -45,6 +45,7 @@ import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.server.serverCore;
+import de.anomic.server.serverDomains;
 import de.anomic.server.serverMemory;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverProfiling;
@@ -159,25 +160,37 @@ public class yacysearch {
         TreeSet<Long> trackerHandles = sb.localSearchTracker.get(client);
         if (trackerHandles == null) trackerHandles = new TreeSet<Long>();
         boolean block = false;
-        if (global || fetchSnippets) {
+        if (serverDomains.matchesList(client, sb.networkBlacklist)) {
+        	global = false;
+            fetchSnippets = false;
+            block = true;
+            serverLog.logWarning("LOCAL_SEARCH", "ACCECC CONTROL: BLACKLISTED CLIENT FROM " + client + " gets no permission to search");
+        } else if (serverDomains.matchesList(client, sb.networkWhitelist)) {
+        	serverLog.logInfo("LOCAL_SEARCH", "ACCECC CONTROL: WHITELISTED CLIENT FROM " + client + " gets no search restrictions");
+        } else if (global || fetchSnippets) {
             // in case that we do a global search or we want to fetch snippets, we check for DoS cases
-            if (trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() - 1000)).size() > 2) {
-                global = false;
-                fetchSnippets = false;
-            }
-            if (trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() - 3000)).size() > 1) {
-                global = false;
-                fetchSnippets = false;
-            }
-            if (trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() - 60000)).size() > 200) {
+            int accInOneSecond = trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() - 1000)).size();
+            int accInThreeSeconds = trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() - 3000)).size();
+            int accInOneMinute = trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() - 60000)).size();
+            int accInTenMinutes = trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() - 600000)).size();
+            if (accInTenMinutes > 600) {
                 global = false;
                 fetchSnippets = false;
                 block = true;
-            }
-            if (trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() - 600000)).size() > 600) {
+                serverLog.logWarning("LOCAL_SEARCH", "ACCECC CONTROL: CLIENT FROM " + client + ": " + accInTenMinutes + " searches in ten minutes, fully blocked (no results generated)");
+            } else if (accInOneMinute > 200) {
                 global = false;
                 fetchSnippets = false;
                 block = true;
+                serverLog.logWarning("LOCAL_SEARCH", "ACCECC CONTROL: CLIENT FROM " + client + ": " + accInOneMinute + " searches in one minute, fully blocked (no results generated)");
+            } else if (accInThreeSeconds > 1) {
+                global = false;
+                fetchSnippets = false;
+                serverLog.logWarning("LOCAL_SEARCH", "ACCECC CONTROL: CLIENT FROM " + client + ": " + accInThreeSeconds + " searches in three seconds, blocked global search and snippets");
+            } else if (accInOneSecond > 2) {
+                global = false;
+                fetchSnippets = false;
+                serverLog.logWarning("LOCAL_SEARCH", "ACCECC CONTROL: CLIENT FROM " + client + ": " + accInOneSecond + " searches in one second, blocked global search and snippets");
             }
         }
         
