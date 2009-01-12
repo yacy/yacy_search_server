@@ -555,6 +555,7 @@ public final class plasmaSearchEvent {
         serverLog.logInfo("search", "sorted out hash " + urlhash + " during search: " + reason);
     }
     
+    /*
     public ResultEntry oneResult(final int item) {
     	return oneResult(item, System.currentTimeMillis() + 100);
     }
@@ -598,7 +599,47 @@ public final class plasmaSearchEvent {
         if (this.result.size() <= item) return null;
         return this.result.element(item).element;
     }
+     */
+    
+    public ResultEntry oneResult(final int item) {
+        // check if we already retrieved this item (happens if a search
+        // pages is accessed a second time)
+        serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), "obtain one result entry - start", 0, 0));
+        if (this.result.sizeStore() > item) {
+            // we have the wanted result already in the result array .. return that
+            return this.result.element(item).element;
+        }
+        if ((query.domType == plasmaSearchQuery.SEARCHDOM_GLOBALDHT) ||
+             (query.domType == plasmaSearchQuery.SEARCHDOM_CLUSTERALL)) {
+            // this is a search using remote search threads. Also the local
+            // search thread is started as background process
+            if ((localSearchThread != null) && (localSearchThread.isAlive())) {
+                // in case that the local search takes longer than some other
+                // remote search requests, do some sleeps to give the local process
+                // a chance to contribute
+                try {Thread.sleep(item * 50L);} catch (final InterruptedException e) {}
+            }
+            // now wait until as many remote worker threads have finished, as we
+            // want to display results
+            while (this.primarySearchThreads != null &&
+                   this.primarySearchThreads.length > item &&
+                   anyWorkerAlive() &&
+                   (result.size() <= item || countFinishedRemoteSearch() <= item)) {
+                try {Thread.sleep(item * 50L);} catch (final InterruptedException e) {}
+            }
 
+        }
+        // finally wait until enough results are there produced from the
+        // snippet fetch process
+        while ((anyWorkerAlive()) && (result.size() <= item)) {
+            try {Thread.sleep(item * 50L);} catch (final InterruptedException e) {}
+        }
+
+        // finally, if there is something, return the result
+        if (this.result.size() <= item) return null;
+        return this.result.element(item).element;
+    }
+    
     private int resultCounter = 0;
     public ResultEntry nextResult() {
         final ResultEntry re = oneResult(resultCounter);
@@ -767,8 +808,8 @@ public final class plasmaSearchEvent {
         public long dbRetrievalTime, snippetComputationTime;
         
         public ResultEntry(final indexURLReference urlentry, final plasmaWordIndex wordIndex,
-        				   final plasmaSnippetCache.TextSnippet textSnippet,
-        				   final ArrayList<plasmaSnippetCache.MediaSnippet> mediaSnippets,
+                           final plasmaSnippetCache.TextSnippet textSnippet,
+                           final ArrayList<plasmaSnippetCache.MediaSnippet> mediaSnippets,
                            final long dbRetrievalTime, final long snippetComputationTime) {
             this.urlentry = urlentry;
             this.urlcomps = urlentry.comp();
@@ -787,16 +828,16 @@ public final class plasmaSearchEvent {
                 final String filename = urlcomps.url().getFile();
                 String address = null;
                 if ((seed == null) || ((address = seed.getPublicAddress()) == null)) {
-                	// seed is not known from here
+                    // seed is not known from here
                     wordIndex.removeWordReferences(
-					    plasmaCondenser.getWords(
-					        ("yacyshare " +
-					         filename.replace('?', ' ') +
-					         " " +
-					         urlcomps.dc_title())).keySet(),
-					         urlentry.hash());
-					wordIndex.removeURL(urlentry.hash()); // clean up
-					throw new RuntimeException("index void");
+                        plasmaCondenser.getWords(
+                            ("yacyshare " +
+                             filename.replace('?', ' ') +
+                             " " +
+                             urlcomps.dc_title())).keySet(),
+                             urlentry.hash());
+                    wordIndex.removeURL(urlentry.hash()); // clean up
+                    throw new RuntimeException("index void");
                 }
                 alternative_urlstring = "http://" + address + "/" + host.substring(0, p) + filename;
                 alternative_urlname = "http://share." + seed.getName() + ".yacy" + filename;

@@ -42,7 +42,7 @@ import de.anomic.plasma.plasmaSwitchboard;
 
 public class serverDomains {
 
-	private static final String localPatterns = "10.*,127.*,172.16.*,169.254.*,192.168.*,localhost";
+	private static final String localPatterns = "10\\..*,127.*,172.(1[6-9]|2[0-9]|3[0-1])\\..*,169.254.*,192.168.*,localhost";
     
     // a dns cache
     private static final Map<String, InetAddress> nameCacheHit = new ConcurrentHashMap<String, InetAddress>(); // a not-synchronized map resulted in deadlocks
