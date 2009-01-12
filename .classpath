@@ -4,7 +4,6 @@
 	<classpathentry excluding="user/|user/|ui/" kind="src" path="htroot/yacy"/>
 	<classpathentry kind="src" path="htroot/env"/>
 	<classpathentry kind="src" path="source"/>
-	<classpathentry kind="src" path="htroot/yacy/user"/>
 	<classpathentry kind="src" path="htroot/yacy/ui"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/tar.jar"/>
