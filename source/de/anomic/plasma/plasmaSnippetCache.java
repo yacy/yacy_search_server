@@ -375,7 +375,7 @@ public class plasmaSnippetCache {
                 return new TextSnippet(url, null, ERROR_SOURCE_LOADING, queryhashes, "no resource available");
             }
         } catch (final Exception e) {
-            e.printStackTrace();
+            //e.printStackTrace();
             return new TextSnippet(url, null, ERROR_SOURCE_LOADING, queryhashes, "error loading resource: " + e.getMessage());
         } 
         
