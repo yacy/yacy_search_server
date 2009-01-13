@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE metadata [ <!ELEMENT metadata (#PCDATA)> ]>
+
+<!-- 
+this is a xml file with embedded dublin core properties
+you can validate it with http://www.stg.brown.edu/service/xmlvalid/
+-->
+
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:yacy="http://yacy.net/">
+  <dc:Title LANG="#[dc_language]#">#[dc_title]#</dc:Title>
+  <dc:Creator>#[dc_creator]#</dc:Creator>
+  <dc:Contributor>#[dc_contributor]#</dc:Contributor>
+  <dc:Subject SCHEME="item-list">#[dc_subject]#</dc:Subject>
+  <dc:Description LANG="#[dc_language]#">#[dc_description]#</dc:Description>
+  <dc:Publisher.URL>#[dc_publisher]#</dc:Publisher.URL>
+  <dc:Date>#[dc_date]#</dc:Date>
+  <dc:Type>yacy:doctype:#[dc_type]#</dc:Type>
+  <dc:Identifier SCHEME="yacy:urlhash">yacy:urlhash:#[dc_identifier]#</dc:Identifier>
+  <dc:Identifier SCHEME="URL">#[dc_publisher]#</dc:Identifier>
+  <dc:Format.Extent>#[yacy_size]#</dc:Format.Extent>
+  <dc:Language SCHEME="ISO639-2">#[dc_language]#</dc:Language>
+  <yacy:loaddate>#[yacy_loaddate]#</yacy:loaddate>
+  <yacy:referrer.hash>yacy:urlhash:#[yacy_referrer_hash]#</yacy:referrer.hash>
+  <yacy:referrer.url>#[yacy_referrer_url]#</yacy:referrer.url>
+  <yacy:words>#[yacy_words]#</yacy:words>
+</metadata>

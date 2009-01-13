@@ -112,22 +112,17 @@
     
     #(genUrlProfile)#
     ::No entry found for URL-hash #[urlhash]#
-    ::<table>
-		<tr><td class="small">URL String</td><td class="tt"><a href="#[urlNormalform]#">#[urlNormalform]#</a></td></tr>
-		<tr><td class="small">Hash</td><td class="tt">#[urlhash]#</td></tr>
-		<tr><td class="small">Description</td><td class="tt">#[urlDescr]#</td></tr>
-		<tr><td class="small">Modified-Date</td><td class="tt">#[moddate]#</td></tr>
-		<tr><td class="small">Loaded-Date</td><td class="tt">#[loaddate]#</td></tr>
-		#(referrer)#
-		<tr><td class="small">Referrer</td><td class="tt">unknown</td></tr>
-		::
-		<tr><td class="small">Referrer</td><td class="tt"><a href="IndexControlURLs_p.html?urlhashsearch=&urlhash=#[hash]#">#[url]#</a></td></tr>
-		#(/referrer)#
-		<tr><td class="small">Doctype</td><td class="tt">#[doctype]#</td></tr>
-		<tr><td class="small">Language</td><td class="tt">#[language]#</td></tr>
-		<tr><td class="small">Size</td><td class="tt">#[size]#</td></tr>
-		<tr><td class="small">Words</td><td class="tt">#[wordCount]#</td></tr>
-	</table><br />
+    ::<iframe src="/api/yacydoc.html?urlhash=#[urlhash]#" width="100%" height="360" frameborder="0" scrolling="no"></iframe><br />
+    <div id="api">
+    <a href="/api/yacydoc.html?urlhash=#[urlhash]#">
+    <img src="env/grafics/api.png"></a>
+    <span>These document details can be retrieved as <a href="http://www.w3.org/TR/xhtml-rdfa-primer/">XHTML+RDFa</a>
+    document containg <a href="http://www.w3.org/RDF/">RDF</a> annotations in <a href="http://dublincore.org/">Dublin Core</a> vocabulary.
+    The XHTML+RDFa data format is both a XML content format and a HTML display format and is considered as an important <a href="http://www.w3.org/2001/sw/">Semantic Web</a> content format.
+    The same content can also be retrieved as pure <a href="/api/yacydoc.xml?urlhash=#[urlhash]#">XML metadata</a> with DC tag name vocabulary.
+    Click the API icon to see an example call to the search rss API.
+    To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.</span>
+    </div>
 	<form action="IndexControlURLs_p.html" method="post" enctype="multipart/form-data">
 		<input type="hidden" name="keystring" value="" />
 		<input type="hidden" name="keyhash" value="" />
