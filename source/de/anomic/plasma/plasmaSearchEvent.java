@@ -243,10 +243,13 @@ public final class plasmaSearchEvent {
             cleanEvent = i.next();
             if ((all) || (cleanEvent.eventTime + eventLifetime < System.currentTimeMillis())) {
                 // execute deletion of failed words
-                final Set<String> removeWords = cleanEvent.query.queryHashes;
-                removeWords.addAll(cleanEvent.query.excludeHashes);
-                cleanEvent.wordIndex.removeEntriesMultiple(removeWords, cleanEvent.failedURLs.keySet());
-                serverLog.logInfo("SearchEvents", "cleaning up event " + cleanEvent.query.id(true) + ", removed " + cleanEvent.failedURLs.size() + " URL references on " + removeWords.size() + " words");
+                int rw = cleanEvent.failedURLs.size();
+                if (rw > 0) {
+                    final Set<String> removeWords = cleanEvent.query.queryHashes;
+                    removeWords.addAll(cleanEvent.query.excludeHashes);
+                    cleanEvent.wordIndex.removeEntriesMultiple(removeWords, cleanEvent.failedURLs.keySet());
+                    serverLog.logInfo("SearchEvents", "cleaning up event " + cleanEvent.query.id(true) + ", removed " + rw + " URL references on " + removeWords.size() + " words");
+                }                
                 
                 // remove the event
                 i.remove();
