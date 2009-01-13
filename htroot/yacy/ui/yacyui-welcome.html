@@ -1,12 +1,13 @@
 <h3>Overview</h3>
 <p>
-	YaCy-UI is going to be a rich client for YaCy based on the existing YaCY-API. 
-	YaCy-UI makes heavy use of jQuery, JavaScript, Ajax, XML and XSLT. 
-	Currently YaCy-UI is at most alpha status, so I would be very greatful for feedback and bug reports!
+	YaCy-UI is going to be a JavaScript based client for YaCy based on the existing XML and JSON API. 
+	YaCy-UI is at most alpha status, as there is still problems with retriving the search results.
+	I am currently changing the backend to a more application friendly format and getting good results with it (I will check that in some time after the stable release 0.7).
+	For now have a look at the bookmarks, performance has increased significantly, due to the use of JSON and Flexigrid! 
 </p>
 apfelmaennchen
 <h3>Change Log</h3>
-	<ul>		
+	<ul>
 		<li>11-01-2009: support for new unified bookmark api ==> much improved handling due to json and flexigrid</li>
 		<li>27-09-2008: Enabled edit bookmark and added some more icons to toolbar</li>
 		<li>27-09-2008: Added scrollbar to folder widget</li>
@@ -34,7 +35,8 @@ apfelmaennchen
 <h3>Bug Tracker</h3>
 	<ul>		
 		<li>Please report bugs in the official <a href="http://forum.yacy-websuche.de/">YaCy-Forum</a> - thanks!</li> 
-		<li>29-09-2008: <img src="img-2/stop.png" /><b>Bookmarks may crash if you create folders like /news and /newspaper with the same beginning! This is a bug in the folder recursion!</b></li>
+		<li>29-09-2008: There seems to be timing problems with the RSS search result. In some cases no result is shown at all, even after a page reload!</li>
+		<li>29-09-2008: <strike>Bookmarks may crash if you create folders like /news and /newspaper with the same beginning! This is a bug in the folder recursion!</strike></li>
 		<li>15-09-2008: <strike>there seems to be a bug with the German translation: the link yacyui-bookmarks.html gets translated into yacyui-Lesezeichen.html :-(</strike></li> 
 		<li>12-05-2008: <strike>if you click a tag in the tagcloud, the bookmarks table doesn't update properly and JavaScript returns a 'tabs is undefined' error...</strike></li>
 		<li>10-05-2008: <strike>there is an issue with Firefox 3.0b5 and the jQuery XML parsing of the search result (one symptom is the broken pagination)</strike></li>
