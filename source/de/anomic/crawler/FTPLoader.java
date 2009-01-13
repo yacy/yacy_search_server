@@ -57,12 +57,14 @@ public class FTPLoader {
     }
 
     protected indexDocumentMetadata createCacheEntry(final CrawlEntry entry, final String mimeType, final Date fileDate) {
+        if (entry == null) return null;
         httpRequestHeader requestHeader = new httpRequestHeader();
-        requestHeader.put(httpRequestHeader.REFERER, sb.getURL(entry.referrerhash()).toNormalform(true, false));
+        if (entry.referrerhash() != null) requestHeader.put(httpRequestHeader.REFERER, sb.getURL(entry.referrerhash()).toNormalform(true, false));
         httpResponseHeader responseHeader = new httpResponseHeader();
         responseHeader.put(httpResponseHeader.LAST_MODIFIED, serverDate.formatRFC1123(fileDate));
         responseHeader.put(httpResponseHeader.CONTENT_TYPE, mimeType);
-        indexDocumentMetadata metadata = new httpdProxyCacheEntry(entry.depth(), entry.url(), entry.name(), "OK",
+        indexDocumentMetadata metadata = new httpdProxyCacheEntry(
+                entry.depth(), entry.url(), entry.name(), "OK",
                 requestHeader, responseHeader,
                 entry.initiator(), sb.webIndex.profilesActiveCrawls.getEntry(entry.profileHandle()));
         plasmaHTCache.storeMetadata(responseHeader, metadata);
