@@ -362,6 +362,13 @@
                
     </copy>
 
+    <!-- copy build libs -->
+    <copy todir="${release_main}/libbuild">
+      <fileset dir="${libbuild}" 
+               includes="**/*"/>
+               
+    </copy>
+
     <!-- copy configuration files -->
     <copy todir="${release_main}">
       <fileset dir=".">
