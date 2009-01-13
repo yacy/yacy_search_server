@@ -527,7 +527,7 @@ public final class httpdFileHandler {
                     " target exception at " + targetClass + ": " +
                     e.getTargetException().toString() + ":" +
                     e.getTargetException().getMessage() +
-                    "; java.awt.graphicsenv='" + System.getProperty("java.awt.graphicsenv","") + "'",e);
+                    "; java.awt.graphicsenv='" + System.getProperty("java.awt.graphicsenv","") + "'");
                     targetClass = null;
                 }
                 if (img == null) {
