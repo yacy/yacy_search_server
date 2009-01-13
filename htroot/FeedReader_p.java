@@ -21,6 +21,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 
 import de.anomic.http.httpRequestHeader;
@@ -52,28 +53,32 @@ public class FeedReader_p {
             
             // int maxitems=Integer.parseInt(post.get("max", "0"));
             // int offset=Integer.parseInt(post.get("offset", "0")); //offset to the first displayed item
-            final RSSFeed feed = new RSSReader(url.toString()).getFeed();
-
-            prop.putHTML("page_title", feed.getChannel().getTitle());
-            if (feed.getChannel().getAuthor() == null) {
-                prop.put("page_hasAuthor", "0");
-            } else {
-                prop.put("page_hasAuthor", "1");
-                prop.putHTML("page_hasAuthor_author", feed.getChannel().getAuthor());
+            try {
+                final RSSFeed feed = new RSSReader(url.toString()).getFeed();
+    
+                prop.putHTML("page_title", feed.getChannel().getTitle());
+                if (feed.getChannel().getAuthor() == null) {
+                    prop.put("page_hasAuthor", "0");
+                } else {
+                    prop.put("page_hasAuthor", "1");
+                    prop.putHTML("page_hasAuthor_author", feed.getChannel().getAuthor());
+                }
+                prop.putHTML("page_description", feed.getChannel().getDescription());
+    
+                int i = 0;
+                for (final RSSMessage item: feed) {
+                    prop.putHTML("page_items_" + i + "_author", item.getAuthor());
+                    prop.putHTML("page_items_" + i + "_title", item.getTitle());
+                    prop.putHTML("page_items_" + i + "_link", item.getLink());
+                    prop.putHTML("page_items_" + i + "_description", item.getDescription());
+                    prop.putHTML("page_items_" + i + "_date", item.getPubDate());
+                    i++;
+                }
+                prop.put("page_items", feed.size());
+                prop.put("page", "1");
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-            prop.putHTML("page_description", feed.getChannel().getDescription());
-
-            int i = 0;
-            for (final RSSMessage item: feed) {
-                prop.putHTML("page_items_" + i + "_author", item.getAuthor());
-                prop.putHTML("page_items_" + i + "_title", item.getTitle());
-                prop.putHTML("page_items_" + i + "_link", item.getLink());
-                prop.putHTML("page_items_" + i + "_description", item.getDescription());
-                prop.putHTML("page_items_" + i + "_date", item.getPubDate());
-                i++;
-            }
-            prop.put("page_items", feed.size());
-            prop.put("page", "1");
         }
     
         // return rewrite properties

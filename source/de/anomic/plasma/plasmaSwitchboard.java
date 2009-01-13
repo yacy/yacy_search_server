@@ -1236,25 +1236,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             // check for interruption
             checkInterruption();
 
+            // enqueue to indexing queue
             this.indexingDocumentProcessor.enQueue(new indexingQueueEntry(queueEntry, null, null));
-            /*
-            
-            // THE FOLLOWING CAN BE CONCURRENT ->
-            
-            // parse and index the resource
-            indexingQueueEntry document = parseDocument(new indexingQueueEntry(queueEntry, null, null));
-            
-            // do condensing
-            indexingQueueEntry condensement = condenseDocument(document);
-            
-            // do a web structure analysis
-            indexingQueueEntry analysis = webStructureAnalysis(condensement);
-            
-            // <- CONCURRENT UNTIL HERE, THEN SERIALIZE AGAIN
-            
-            // store the result
-            storeDocumentIndex(analysis);
-            */
             return true;
         } catch (final InterruptedException e) {
             log.logInfo("DEQUEUE: Shutdown detected.");

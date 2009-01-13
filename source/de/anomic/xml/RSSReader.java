@@ -30,6 +30,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
@@ -57,25 +58,29 @@ public class RSSReader extends DefaultHandler {
         parsingItem = false;
     }
     
-    public RSSReader(final String path) {
+    public RSSReader(final String path) throws IOException {
         this();
+        final SAXParserFactory factory = SAXParserFactory.newInstance();
         try {
-            final SAXParserFactory factory = SAXParserFactory.newInstance();
             final SAXParser saxParser = factory.newSAXParser();
             saxParser.parse(path, this);
-        } catch (final Exception e) {
-            e.printStackTrace();
+        } catch (SAXException e) {
+            throw new IOException (e.getMessage());
+        } catch (ParserConfigurationException e) {
+            throw new IOException (e.getMessage());
         }
     }
     
-    public RSSReader(final InputStream stream) {
+    public RSSReader(final InputStream stream) throws IOException {
         this();
+        final SAXParserFactory factory = SAXParserFactory.newInstance();
         try {
-            final SAXParserFactory factory = SAXParserFactory.newInstance();
             final SAXParser saxParser = factory.newSAXParser();
             saxParser.parse(stream, this);
-        } catch (final Exception e) {
-            e.printStackTrace();
+        } catch (SAXException e) {
+            throw new IOException (e.getMessage());
+        } catch (ParserConfigurationException e) {
+            throw new IOException (e.getMessage());
         }
     }
     
