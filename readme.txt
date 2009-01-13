@@ -1,4 +1,4 @@
-README for YaCy (C) by Michael Peter Christen; mc@anomic.de
+README for YaCy (C) by Michael Peter Christen; mc@yacy.net
 ---------------------------------------------------------------------------
 Please visit www.yacy.net for latest changes or new documentation.
 YaCy comes with ABSOLUTELY NO WARRANTY!
@@ -15,14 +15,6 @@ You can also use this software to set up your own search portal, for your
 intranet or the internet.
 
 
-WHERE IS THE DOCUMENTATION?
-
-The complete documentation can be found at:
-(English)  http://yacy.net/
-(Wiki:de)  http://www.yacy-websuche.de/wiki/index.php/De:Start
-(Wiki:en)  http://www.yacy-websearch.net/wiki/index.php/En:Start
-
-
 WHAT CAN I DO WITH THIS SOFTWARE?
 
 - search the web (automatically using all other YaCy peers)
@@ -30,7 +22,16 @@ WHAT CAN I DO WITH THIS SOFTWARE?
 - set up your own search portal
 - use it as your personal web server
 - use it as your web proxy (..and visited pages are indexed)
+- ensure your privacy when browsing and searching the web
 - many more
+
+
+WHERE IS THE DOCUMENTATION?
+
+The complete documentation can be found at:
+(English)  http://yacy.net/
+(Wiki:de)  http://www.yacy-websuche.de/wiki/index.php/De:Start
+(Wiki:en)  http://www.yacy-websearch.net/wiki/index.php/En:Start
 
 
 DEPENDENCIES? WHAT OTHER SOFTWARE DO I NEED?
@@ -91,5 +92,5 @@ feel free to ask the author for a business proposal to customize YaCy
 according to your needs. We also provide integration solutions if the
 software is about to be integrated into your enterprise application.
 
-Germany, Frankfurt a.M., 12.06.2008
+Germany, Frankfurt a.M., 14.01.2009
 Michael Peter Christen
