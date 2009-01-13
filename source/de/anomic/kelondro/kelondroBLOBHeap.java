@@ -200,7 +200,7 @@ public final class kelondroBLOBHeap extends kelondroBLOBHeapModifier implements 
      * @return the size of the BLOB or -1 if the BLOB does not exist
      * @throws IOException
      */
-    public long length(byte[] key) throws IOException {
+    public synchronized long length(byte[] key) throws IOException {
         assert index.row().primaryKeyLength == key.length : index.row().primaryKeyLength + "!=" + key.length;
         
         // check the buffer
@@ -394,7 +394,7 @@ public final class kelondroBLOBHeap extends kelondroBLOBHeapModifier implements 
         return super.keys(up, firstKey);
     }
 
-    public long length() throws IOException {
+    public synchronized long length() throws IOException {
         return super.length() + this.buffersize;
     }
 
