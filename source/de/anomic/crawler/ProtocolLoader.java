@@ -125,7 +125,7 @@ public final class ProtocolLoader {
             return (stored) ? null : "not stored";
         } catch (IOException e) {
             entry.setStatus("error", serverProcessorJob.STATUS_FINISHED);
-            log.logWarning("problem loading " + entry.url().toString() + ": " + e.getMessage());
+            if (log.isFine()) log.logFine("problem loading " + entry.url().toString() + ": " + e.getMessage());
             return "load error - " + e.getMessage();
         }
     }
