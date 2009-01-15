@@ -296,13 +296,16 @@ public final class httpdFileHandler {
             if (authorization != null && authorization.length() == 0) authorization = null;
             final String adminAccountBase64MD5 = switchboard.getConfig(httpd.ADMIN_ACCOUNT_B64MD5, "");
             
-            int pos = path.lastIndexOf(".");
-            
+            // a bad patch to map the /xml/ path to /api/
+            if (path.startsWith("/xml/")) {
+                path = "/api/" + path.substring(5);
+            }
+
             final boolean adminAccountForLocalhost = sb.getConfigBool("adminAccountForLocalhost", false);
             final String refererHost = requestHeader.refererHost();
             final boolean accessFromLocalhost = serverCore.isLocalhost(clientIP) && (refererHost.length() == 0 || serverCore.isLocalhost(refererHost));
             final boolean grantedForLocalhost = adminAccountForLocalhost && accessFromLocalhost;
-            final boolean protectedPage = (path.substring(0,(pos==-1)?path.length():pos)).endsWith("_p");
+            final boolean protectedPage = path.indexOf("_p.") > 0;
             final boolean accountEmpty = adminAccountBase64MD5.length() == 0;
             
             if (!grantedForLocalhost && protectedPage && !accountEmpty) {
@@ -946,14 +949,14 @@ public final class httpdFileHandler {
                         if (targetMd5File.exists()) {
                             //String description = null;
                             targetMD5 = new String(serverFileUtils.read(targetMd5File));
-                            pos = targetMD5.indexOf('\n');
-                           if (pos >= 0) {
-                               //description = targetMD5.substring(pos + 1);
-                               targetMD5 = targetMD5.substring(0, pos);
-                           }         
-                           
-                           // using the checksum as ETAG header
-                           header.put(httpHeader.ETAG, targetMD5);
+                            int pos = targetMD5.indexOf('\n');
+                            if (pos >= 0) {
+                                //description = targetMD5.substring(pos + 1);
+                                targetMD5 = targetMD5.substring(0, pos);
+                            }
+
+                            // using the checksum as ETAG header
+                            header.put(httpHeader.ETAG, targetMD5);
                         }
                     } catch (final IOException e) {
                         e.printStackTrace();

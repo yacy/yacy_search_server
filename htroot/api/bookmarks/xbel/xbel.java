@@ -1,4 +1,4 @@
-package xml.bookmarks.xbel;
+
 
 import java.util.Date;
 import java.util.Iterator;
