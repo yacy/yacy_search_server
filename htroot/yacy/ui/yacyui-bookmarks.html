@@ -7,7 +7,7 @@
 
 		var height=document.documentElement.clientHeight - 240;    			
  		$('#ymarks').flexigrid({
-	 		url: '/xml/bookmarks/get_bookmarks.json?display=1',
+	 		url: '/api/bookmarks/get_bookmarks.json?display=1',
 			dataType: 'json',
 	 		method: 'GET',
 	 		colModel: [	
@@ -51,18 +51,18 @@
 	});
 	function bm_action(com,grid) {
 		if (com=='XBEL') {
-			window.document.location.href = '/xml/bookmarks/xbel/xbel.xml';
+			window.document.location.href = '/api/bookmarks/xbel/xbel.xml';
 		}
 		else if (com=='RSS') {
 			window.document.location.href = '/Bookmarks.rss';
 		}
 		else if (com=='XML') {
-			window.document.location.href = '/xml/bookmarks/posts/all.xml';
+			window.document.location.href = '/api/bookmarks/posts/all.xml';
 		}
 		else if (com=='Delete') {
 			confirm('Delete ' + $('.trSelected',grid).length + ' bookmark(s)?')				
 			$('.trSelected',grid).each(function(){
-				var url = "/xml/bookmarks/posts/delete_p.xml?login=&urlhash="+$(this).find('td :first').text();					
+				var url = "/api/bookmarks/posts/delete_p.xml?login=&urlhash="+$(this).find('td :first').text();					
 				$.ajax({
 					type: 'POST',
 					url: url,			
@@ -79,7 +79,7 @@
 				var url = $("input[@name='bm_url']").getValue();
 				$.ajax({
 					type: "GET",
-					url: "/xml/util/getpageinfo_p.xml?url="+url,			
+					url: "/api/util/getpageinfo_p.xml?url="+url,			
 					dataType: "xml",
 					success: function(xml) {
 						var title = $(xml).find('title').text();

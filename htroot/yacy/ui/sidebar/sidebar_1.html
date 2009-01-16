@@ -12,11 +12,11 @@
 		/* Menu .click(function() */
 		$("#login").click(function() {
 			$.ajax({
-    			url: "/xml/bookmarks/xbel/xbel.xml?login=true",
+    			url: "/api/bookmarks/xbel/xbel.xml?login=true",
     			method : "GET",
     			dataType: "xml",    			
     			success: function(xml) {
-    				// ToDo: /xml/util/login.xml
+    				// ToDo: /api/util/login.xml
     				// alert("Login");
     			}    			
 			});          
@@ -73,7 +73,7 @@
 				<option value="/yacysearch.rss?resource=global&verify=true" selected="selected">freeworld</option>
 				<option value="/yacysearch.rss?resource=local&verify=true" >local peer</option>
 				<option value="ymarks" >bookmarks</option>
-				<option value="/xml/util/ynetSearch.xml?login=&url=http://sciencenet.fzk.de:8080/yacysearch.rss?resource=global&verify=true" >sciencenet</option>
+				<option value="/api/util/ynetSearch.xml?login=&url=http://sciencenet.fzk.de:8080/yacysearch.rss?resource=global&verify=true" >sciencenet</option>
 			</select>
 			<br />								
 			<label for="resource">Language:</label>	

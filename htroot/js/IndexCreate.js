@@ -64,5 +64,5 @@ function loadInfos(){
 	document.getElementsByName("ajax")[0].setAttribute("src",AJAX_ON);	
 	
 	url=document.getElementsByName("crawlingURL")[0].value;
-	sndReq('/xml/util/getpageinfo_p.xml?actions=title,robots&url='+url);
+	sndReq('/api/util/getpageinfo_p.xml?actions=title,robots&url='+url);
 }

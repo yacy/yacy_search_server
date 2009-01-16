@@ -24,7 +24,7 @@
 	});
 	function loadFolders() {
 		$("#yfolder *").remove();		
-		$("#yfolder").getTransform('xsl/xbel2folder-ul.xsl','/xml/bookmarks/xbel/xbel.xml');		
+		$("#yfolder").getTransform('xsl/xbel2folder-ul.xsl','/api/bookmarks/xbel/xbel.xml');		
 		$("#yfolder").treeview({
 			collapsed: true,
 			unique: true			
@@ -35,7 +35,7 @@
 		$("#sidebar-2-1").toggleClass("loading");
 		$.ajax({
 			type: "POST",
-			url: "/xml/bookmarks/tags/get.xml?top=25&sort=alpha",			
+			url: "/api/bookmarks/tags/getTag.xml?top=25&sort=alpha",			
 			dataType: "xml",
 			cache: false,
 			success: function(xml) {				

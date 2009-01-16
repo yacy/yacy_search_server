@@ -140,7 +140,7 @@
         // var query = "&url="+url+"&title="+title+"&description="+desc+"&tags="+tags+"&path="+path+"&public="+pub+"&add=create";            		
         $.ajax({
 			type: "POST",
-			url: "/xml/bookmarks/posts/add_p.xml",
+			url: "/api/bookmarks/posts/add_p.xml",
 			data: "login=&url="+url+"&title="+title+"&description="+desc+"&tags="+tags+"&path="+path+"&public="+pub+"&add=create",						
 			dataType: "xml",
 			success: function(xml) {

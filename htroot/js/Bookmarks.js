@@ -24,7 +24,7 @@ function loadTitle(){
 	
 	url=document.getElementsByName("url")[0].value;
 	if(document.getElementsByName("title")[0].value==""){
-		sndReq('/xml/util/getpageinfo_p.xml?actions=title&url='+url);
+		sndReq('/api/util/getpageinfo_p.xml?actions=title&url='+url);
 	}
 }
 

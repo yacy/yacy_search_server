@@ -51,13 +51,13 @@ function refresh(){
 
 function requestStatus(){
 	statusRPC=createRequestObject();
-	statusRPC.open('get', '/xml/status_p.xml?html=');
+	statusRPC.open('get', '/api/status_p.xml?html=');
 	statusRPC.onreadystatechange = handleStatus;
 	statusRPC.send(null);
 }
 function requestQueues(){
 	queuesRPC=createRequestObject();
-	queuesRPC.open('get', '/xml/queues_p.xml?html=');
+	queuesRPC.open('get', '/api/queues_p.xml?html=');
 	queuesRPC.onreadystatechange = handleQueues;
 	queuesRPC.send(null);
 
