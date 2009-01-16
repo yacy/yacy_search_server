@@ -114,6 +114,7 @@ public class yacysearchitem {
             prop.put("content_authorized_urlhash", result.hash());
 
             prop.putHTML("content_title", result.title());
+            prop.putXML("content_title-xml", result.title());
             prop.putHTML("content_link", result.urlstring());
             prop.put("content_display", display);
             prop.putHTML("content_faviconCode", sb.licensedURLs.aquireLicense(faviconURL)); // aquire license for favicon url loading
@@ -137,6 +138,7 @@ public class yacysearchitem {
                     (((wordURL = yacyURL.probablyWordURL(result.hash(), query[0])) != null) ? ", probablyWordURL=" + wordURL.toNormalform(false, true) : ""));
             final plasmaSnippetCache.TextSnippet snippet = result.textSnippet();
             prop.put("content_description", (snippet == null) ? "" : snippet.getLineMarked(theQuery.fullqueryHashes));
+            prop.putXML("content_description", (snippet == null) ? "" : snippet.getLineMarked(theQuery.fullqueryHashes));
             serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(theQuery.id(true), plasmaSearchEvent.FINALIZATION + "-" + item, 0, 0));
             
             return prop;

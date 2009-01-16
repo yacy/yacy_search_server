@@ -1,7 +1,7 @@
 #(content)#::<item>
-<title>#[title]#</title>
+<title>#[title-xml]#</title>
 <link>#[link]#</link>
-<description>#[description]#</description>
+<description>#[description-xml]#</description>
 <pubDate>#[date822]#</pubDate>
 <guid isPermaLink="false">#[urlhash]#</guid>
 </item>#(/content)#
