@@ -185,7 +185,11 @@ define(`START_YACY_WITH_START_STOP_DAEMON',`
 ')dnl
 define(`START_YACY_WITH_SUDO', `
 	cmdline="$JAVA $ARGS"
-	nice -$NICE_VAL sudo -u yacy $cmdline &>/dev/null &
+	if [ "$(whoami)" != "$USER" ]; then
+		nice -$NICE_VAL sudo -u yacy $cmdline &>/dev/null &
+	else
+		nice -$NICE_VAL $cmdline &>/dev/null &
+	fi
 	echo $! >$PID_FILE
 ')dnl
 ifdef(`ArchLinux', `START_YACY_WITH_SUDO()')dnl
@@ -206,6 +210,7 @@ ifdef(`openSUSE', `
 ')dnl
 ifdef(`ArchLinux', `
 		add_daemon yacy
+		chown yacy:root /var/run/daemons/yacy
 		stat_done
 ')dnl
 		RETVAL=0
@@ -244,7 +249,11 @@ ifdef(`ArchLinux', `
 ')dnl
 		cd $YACY_HOME
 		cmdline="$JAVA $JAVA_ARGS -cp $CLASSPATH yacy -shutdown"
-		sudo -u yacy $cmdline &>/dev/null & 
+		if [ "$(whoami)" != "$USER" ]; then
+			sudo -u yacy $cmdline &>/dev/null & 
+		else
+			$cmdline &>/dev/null & 
+		fi
 		shutdown_pid=$!
 
 		timeout=$SHUTDOWN_TIMEOUT
@@ -274,6 +283,9 @@ ifdef(`Debian', `KILL_YACY_WITH_START_STOP_DAEMON()')dnl
 		done
 		if [ "$2" != "--leave-pidfile" ]; then
 			rm $PID_FILE
+ifdef(`ArchLinux', `
+			rm_daemon yacy
+')dnl
 		fi
 		cd - >/dev/null
 ifdef(`Debian', `
@@ -286,7 +298,6 @@ ifdef(`openSUSE', `
 		rc_status -v
 ')dnl
 ifdef(`ArchLinux', `
-		rm_daemon yacy
 		stat_done
 ')dnl
 		exit 0
