@@ -269,7 +269,11 @@ public class Blacklist_p {
                 
                 final String[] selectedBlacklistEntries = post.getAll("selectedEntry.*");
                 
-                if (selectedBlacklistEntries.length > 0 && !targetBlacklist.equals(blacklistToUse)) {
+                if (selectedBlacklistEntries != null &&
+                        selectedBlacklistEntries.length > 0 &&
+                        targetBlacklist != null &&
+                        blacklistToUse != null &&
+                        !targetBlacklist.equals(blacklistToUse)) {
                     for (int i = 0; i < selectedBlacklistEntries.length; i++) {
 
                         temp = addBlacklistEntry(targetBlacklist,
@@ -333,7 +337,7 @@ public class Blacklist_p {
                 // else return entry to be edited
                 } else {
                     final String[] selectedEntries = post.getAll("selectedEntry.*");
-                    if (selectedEntries != null && blacklistToUse != null) {
+                    if (selectedEntries != null && selectedEntries.length > 0 && blacklistToUse != null) {
                         for (int i = 0; i < selectedEntries.length; i++) {
                             prop.putHTML(DISABLED + EDIT + "editList_" + i + "_item", selectedEntries[i]);
                             prop.put(DISABLED + EDIT + "editList_" + i + "_count", i);
