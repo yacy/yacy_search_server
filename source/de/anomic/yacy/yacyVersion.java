@@ -123,7 +123,7 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
         } catch (final NumberFormatException e) {
             throw new RuntimeException("release file name '" + release + "' is not valid, '" + comp[0] + "' should be a float number");
         }
-        this.mainRelease = ((int) (this.releaseNr * 1000)) % 10 == 0;
+        this.mainRelease = ((int) (this.releaseNr * 100)) % 10 == 0;
         //System.out.println("Release version " + this.releaseNr + " is " + ((this.mainRelease) ? "main" : "std"));
         this.dateStamp = comp[1];
         if (this.dateStamp.length() != 8) {
