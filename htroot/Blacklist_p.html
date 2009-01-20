@@ -5,13 +5,17 @@
     #%env/templates/metas.template%#
 #(disabled)##(edit)#
     <script type="text/javascript">
-    function switchTargetBlacklist(disabled){
-      document.editBlacklistPatterns.targetBlacklist.disabled=disabled;
+    function switchTargetBlacklist(value){
+        if (value == "moveBlacklistEntry") {
+            document.editBlacklistPatterns.targetBlacklist.disabled=false;
+        } else {
+            document.editBlacklistPatterns.targetBlacklist.disabled=true;
+        }
     }
     </script>
 ::#(/edit)#::#(/disabled)#
   </head>
-  <body id="Blacklist"#(disabled)##(edit)# onload="switchTargetBlacklist(1)"::#(/edit)#::#(/disabled)#>
+  <body id="Blacklist"#(disabled)##(edit)# onload="switchTargetBlacklist('');"::#(/edit)#::#(/disabled)#>
     #%env/templates/header.template%#
     #%env/templates/submenuBlacklist.template%#
   
@@ -97,10 +101,10 @@
             #{/Itemlist}#
           </table>
           <br />
-          <select name="action" size="1">
-            <option value="editBlacklistEntry" onclick="switchTargetBlacklist(1)">Edit selected pattern(s)</option>
-            <option value="deleteBlacklistEntry" onclick="switchTargetBlacklist(1)">Delete selected pattern(s)</option>
-            <option value="moveBlacklistEntry" onclick="switchTargetBlacklist(0)">Move selected pattern(s) to</option>
+          <select name="action" size="1" onchange="switchTargetBlacklist(this.value);">
+            <option value="editBlacklistEntry">Edit selected pattern(s)</option>
+            <option value="deleteBlacklistEntry">Delete selected pattern(s)</option>
+            <option value="moveBlacklistEntry">Move selected pattern(s) to</option>
           </select>
           &nbsp;
           <select name="targetBlacklist" size="1">
