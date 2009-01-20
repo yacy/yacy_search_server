@@ -1149,7 +1149,6 @@ public final class httpdFileHandler {
                     } else {
                         return m;
                     }
-                    
                 }          
             }
             
@@ -1184,10 +1183,6 @@ public final class httpdFileHandler {
         }
         return result;
     }
-
-//    public void doConnect(Properties conProp, httpHeader requestHeader, InputStream clientIn, OutputStream clientOut) {
-//        throw new UnsupportedOperationException();
-//    }
 
     /**
      * Tells if a filename ends with a suffix from a given list.
