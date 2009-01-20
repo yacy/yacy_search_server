@@ -1067,12 +1067,14 @@ public class yacySeed implements Cloneable {
     private static boolean guessIfOwnWord(final yacySeedDB seedDB, final String wordhash) {
         if (seedDB == null) return false;
         if (seedDB.mySeed().isPotential()) return false;
+        int connected = seedDB.sizeConnected();
+        if (connected == 0) return true;
         final long[] targets = yacySeed.dhtPositions(wordhash, yacySeed.partitionExponent);
         final long mypos = yacySeed.dhtPosition(seedDB.mySeed().hash);
         for (int i = 0; i < targets.length; i++) {
             long distance = yacySeed.dhtDistance(targets[i], mypos);
             if (distance <= 0) continue;
-            if (distance <= Long.MAX_VALUE / seedDB.sizeConnected() * 2) return true;
+            if (distance <= Long.MAX_VALUE / connected * 2) return true;
         }
         return false;
     }
