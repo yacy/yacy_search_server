@@ -30,6 +30,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.SortedMap;
 
+import de.anomic.server.serverMemory;
 import de.anomic.server.logging.serverLog;
 
 public class kelondroBLOBHeapModifier extends kelondroBLOBHeapReader implements kelondroBLOB {
@@ -273,5 +274,57 @@ public class kelondroBLOBHeapModifier extends kelondroBLOBHeapReader implements 
 	public void put(byte[] key, byte[] b) throws IOException {
 		throw new UnsupportedOperationException("put is not supported in BLOBHeapModifier");
 	}
+
+	public int replace(byte[] key, Rewriter rewriter) throws IOException {
+	    assert index.row().primaryKeyLength == key.length : index.row().primaryKeyLength + "!=" + key.length;
+        
+	    // check if the index contains the key
+        final long pos = index.getl(key);
+        if (pos < 0) return 0;
+        
+        // access the file and read the container
+        file.seek(pos);
+        final int len = file.readInt() - index.row().primaryKeyLength;
+        if (serverMemory.available() < len) {
+            if (!serverMemory.request(len, true)) return 0; // not enough memory available for this blob
+        }
+        
+        // read the key
+        final byte[] keyf = new byte[index.row().primaryKeyLength];
+        file.readFully(keyf, 0, keyf.length);
+        assert this.ordering.compare(key, keyf) == 0;
+        
+        // read the blob
+        byte[] blob = new byte[len];
+        file.readFully(blob, 0, blob.length);
+        
+        // rewrite the entry
+        blob = rewriter.rewrite(blob);
+        int reduction = len - blob.length;
+        if (reduction == 0) return 0; // nothing to do
+        
+        // check if the new entry is smaller than the old entry
+        if (blob.length > len - 4) throw new IOException("replace of BLOB for key " + new String(key) + " failed (too large): new size = " + blob.length + ", old size = " + (len - 4));
+        
+        // replace old content
+        this.file.seek(pos);
+        file.writeInt(blob.length + key.length);
+        file.write(key);
+        file.write(blob);
+        
+        // define the new empty entry
+        final int newfreereclen = reduction - 4;
+        assert newfreereclen > 0;
+        file.writeInt(newfreereclen);
+        
+        // fill zeros to the content
+        int l = newfreereclen; byte[] fill = new byte[newfreereclen];
+        while (l-- > 0) fill[l] = 0;
+        this.file.write(fill, 0, newfreereclen);
+        
+        // add a new free entry
+        this.free.put(pos + 4 + blob.length + key.length, newfreereclen);
+        return reduction;
+    }
 
 }

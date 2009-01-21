@@ -126,6 +126,61 @@ public class kelondroBLOBArray implements kelondroBLOB {
         }
     }
     
+    /**
+     * add a blob file to the array.
+     * note that this file must be generated with a file name from newBLOB()
+     * @param location
+     * @throws IOException
+     */
+    public void mountBLOB(File location) throws IOException {
+        Date d;
+        try {
+            d = serverDate.parseShortSecond(location.getName().substring(0, 14));
+        } catch (ParseException e) {
+            throw new IOException("date parse problem with file " + location.toString() + ": " + e.getMessage());
+        }
+        kelondroBLOB oneBlob = (buffersize > 0) ? new kelondroBLOBHeap(location, keylength, ordering, buffersize) : new kelondroBLOBHeapModifier(location, keylength, ordering);
+        blobs.add(new blobItem(d, location, oneBlob));
+    }
+    
+    public void unmountBLOB(File location) {
+        Iterator<blobItem> i = this.blobs.iterator();
+        blobItem b;
+        while (i.hasNext()) {
+            b = i.next();
+            if (b.location.equals(location)) {
+                i.remove();
+                b.blob.close();
+                return;
+            }
+        }
+    }
+    
+    public File unmountOldestBLOB() {
+        if (this.blobs.size() == 0) return null;
+        blobItem b = this.blobs.remove(0);
+        b.blob.close();
+        return b.location;
+    }
+    
+    /**
+     * return the number of BLOB files in this array
+     * @return
+     */
+    public int entries() {
+        return this.blobs.size();
+    }
+    
+    /**
+     * generate a new BLOB file name with a given date.
+     * This method is needed to generate a file name that matches to the name structure that is needed for parts of the array
+     * @param creation
+     * @return
+     */
+    public File newBLOB(Date creation) {
+        return new File(heapLocation, serverDate.formatShortSecond(creation) + "." + blobSalt + ".blob");
+    }
+    
     public String name() {
         return this.heapLocation.getName();
     }
@@ -190,11 +245,7 @@ public class kelondroBLOBArray implements kelondroBLOB {
             this.blob = (buffer == 0) ? new kelondroBLOBHeapModifier(location, keylength, ordering) : new kelondroBLOBHeap(location, keylength, ordering, buffer);
         }
     }
-    
-    public File newBLOB(Date creation) {
-    	return new File(heapLocation, serverDate.formatShortSecond(creation) + "." + blobSalt + ".blob");
-    }
-    
+
     /**
      * ask for the length of the primary key
      * @return the length of the key
@@ -335,6 +386,19 @@ public class kelondroBLOBArray implements kelondroBLOB {
         assert bi.blob instanceof kelondroBLOBHeap;
         bi.blob.put(key, b);
         executeLimits();
+    }
+    
+    /**
+     * replace a BLOB entry with another which must be smaller or same size
+     * @param key  the primary key
+     * @throws IOException
+     */
+    public int replace(byte[] key, Rewriter rewriter) throws IOException {
+        int d = 0;
+        for (blobItem bi: blobs) {
+            d += bi.blob.replace(key, rewriter);
+        }
+        return d;
     }
     
     /**

@@ -119,6 +119,21 @@ public interface kelondroBLOB {
     public void put(byte[] key, byte[] b) throws IOException;
     
     /**
+     * replace an existing entry in the BLOB with a new entry
+     * this method is similar to put, but it is necessary that a blob entry existed before
+     * and contains an entry of same size or bigger than the new entry.
+     * The old entry is then replaced by the new entry.
+     * This method throws a IOException if the new element is bigger than the old element.
+     * It is therefore necessary that it is known that the new entry will be smaller than the
+     * old entry before calling this method.
+     * @param key  the primary key
+     * @param b
+     * @return the number of bytes that the rewriter reduced the BLOB
+     * @throws IOException
+     */
+    public int replace(byte[] key, Rewriter rewriter) throws IOException;
+    
+    /**
      * remove a BLOB
      * @param key  the primary key
      * @throws IOException
@@ -129,5 +144,18 @@ public interface kelondroBLOB {
      * close the BLOB table
      */
     public void close();
+    
+    public interface Rewriter {
+        
+        /**
+         * a rewrite method that is used in the replace functionality of a BLOB
+         * the result of such a rewrite must be always smaller or equal in size
+         * if the input
+         * @param b
+         * @return an array that is equal or smaller in size than b
+         */
+        public byte[] rewrite(byte[] b);
+        
+    }
     
 }

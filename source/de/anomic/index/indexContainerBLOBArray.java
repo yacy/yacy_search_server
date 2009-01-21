@@ -32,12 +32,13 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import de.anomic.kelondro.kelondroBLOB;
 import de.anomic.kelondro.kelondroBLOBArray;
 import de.anomic.kelondro.kelondroCloneableIterator;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroRowSet;
 
-public final class indexContainerBLOBHeap {
+public final class indexContainerBLOBArray {
 
     private final kelondroRow payloadrow;
     private final kelondroBLOBArray array;
@@ -52,33 +53,40 @@ public final class indexContainerBLOBHeap {
      * @param log
      * @throws IOException 
      */
-    public indexContainerBLOBHeap(
+    public indexContainerBLOBArray(
     		final File heapLocation,
-    		final String blobSalt,
     		final kelondroRow payloadrow) throws IOException {
         this.payloadrow = payloadrow;
         this.array = new kelondroBLOBArray(
             heapLocation,
-            blobSalt,
+            "index",
             payloadrow.primaryKeyLength,
             payloadrow.getOrdering(),
             0);
     }
     
-    public void close() {
+    public synchronized void close() {
     	this.array.close();
     }
     
-    public void clear() throws IOException {
+    public synchronized void clear() throws IOException {
     	this.array.clear();
     }
     
-    public int size() {
+    public synchronized int size() {
         return (this.array == null) ? 0 : this.array.size();
     }
     
     public File newContainerBLOBFile() {
     	return this.array.newBLOB(new Date());
+    }
+    
+    public void mountBLOBContainer(File location) throws IOException {
+        this.array.mountBLOB(location);
+    }
+    
+    public kelondroRow rowdef() {
+        return this.payloadrow;
     }
     
     /**
@@ -159,7 +167,7 @@ public final class indexContainerBLOBHeap {
      * @return true, if the key is used in the heap; false othervise
      * @throws IOException 
      */
-    public boolean has(final String key) {
+    public synchronized boolean has(final String key) {
         return this.array.has(key.getBytes());
     }
     
@@ -169,7 +177,7 @@ public final class indexContainerBLOBHeap {
      * @return the indexContainer if one exist, null otherwise
      * @throws IOException 
      */
-    public indexContainer get(final String key) throws IOException {
+    public synchronized indexContainer get(final String key) throws IOException {
     	List<byte[]> entries = this.array.getAll(key.getBytes());
     	if (entries == null || entries.size() == 0) return null;
     	byte[] a = entries.remove(0);
@@ -190,4 +198,63 @@ public final class indexContainerBLOBHeap {
         // returns the index that had been deleted
     	array.remove(wordHash.getBytes());
     }
+    
+    public synchronized int replace(final String wordHash, ContainerRewriter rewriter) throws IOException {
+        return array.replace(wordHash.getBytes(), new BLOBRewriter(wordHash, rewriter));
+    }
+    
+    public class BLOBRewriter implements kelondroBLOB.Rewriter {
+
+        ContainerRewriter rewriter;
+        String wordHash;
+        
+        public BLOBRewriter(String wordHash, ContainerRewriter rewriter) {
+            this.rewriter = rewriter;
+            this.wordHash = wordHash;
+        }
+        
+        public byte[] rewrite(byte[] b) {
+            if (b == null) return null;
+            indexContainer c = rewriter.rewrite(new indexContainer(this.wordHash, kelondroRowSet.importRowSet(b, payloadrow)));
+            if (c == null) return null;
+            return c.exportCollection();
+        }
+    }
+/*
+    public int mergeOldest() {
+        if (this.array.entries() < 2) return 0;
+        File f1 = this.array.unmountOldestBLOB();
+        File f2 = this.array.unmountOldestBLOB();
+        // iterate both files and write a new one
+        new kelondroMergeIterator<indexContainer>(
+                (kelondroCloneableIterator<Map.Entry<String, byte[]>>) new kelondroBLOBHeapReader.entries(f1, this.payloadrow.objectsize),
+                null,
+                null,
+                null,
+                true);
+        return 0;
+    }
+    */
+    /*
+     *         new kelondroMergeIterator<indexContainer>(
+                new kelondroBLOBHeapReader.entries(f1, this.payloadrow.objectsize),
+                new kelondroBLOBHeapReader.entries(f2, this.payloadrow.objectsize),
+                this.payloadrow.getOrdering(),
+                indexContainer.containerMergeMethod,
+                true);
+     */
+    /*
+      public kelondroMergeIterator(
+      final kelondroCloneableIterator<E> a,
+      final kelondroCloneableIterator<E> b,
+      final Comparator<E> c,
+      final Method m, final boolean up) {
+     */
+    
+    public interface ContainerRewriter {
+        
+        public indexContainer rewrite(indexContainer container);
+        
+    }
+
 }

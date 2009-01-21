@@ -85,7 +85,7 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         return new kelondroRowSet(rowdef, size, chunkcache, orderbound);
     }
     
-    public static kelondroRowSet importRowSet(byte[] b, final kelondroRow rowdef) throws IOException {
+    public static kelondroRowSet importRowSet(byte[] b, final kelondroRow rowdef) {
         final int size = (int) kelondroNaturalOrder.decodeLong(b, 0, 4);
         final int orderbound = (int) kelondroNaturalOrder.decodeLong(b, 10, 4);
         final byte[] chunkcache = new byte[size * rowdef.objectsize];

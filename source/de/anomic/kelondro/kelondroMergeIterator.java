@@ -37,7 +37,12 @@ public class kelondroMergeIterator<E> implements kelondroCloneableIterator<E> {
     private final Method merger;
     private final boolean up;
     
-    public kelondroMergeIterator(final kelondroCloneableIterator<E> a, final kelondroCloneableIterator<E> b, final Comparator<E> c, final Method m, final boolean up) {
+    public kelondroMergeIterator(
+            final kelondroCloneableIterator<E> a,
+            final kelondroCloneableIterator<E> b,
+            final Comparator<E> c,
+            final Method m,
+            final boolean up) {
         // this works currently only for String-type key iterations
         this.a = a;
         this.b = b;
@@ -47,8 +52,8 @@ public class kelondroMergeIterator<E> implements kelondroCloneableIterator<E> {
         nexta();
         nextb();
     }
-    
-	public kelondroMergeIterator<E> clone(final Object modifier) {
+
+    public kelondroMergeIterator<E> clone(final Object modifier) {
         return new kelondroMergeIterator<E>(a.clone(modifier), b.clone(modifier), comp, merger, up);
     }
     

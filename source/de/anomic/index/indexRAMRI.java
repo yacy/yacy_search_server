@@ -29,6 +29,7 @@ package de.anomic.index;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Set;
 
 import de.anomic.kelondro.kelondroCloneableIterator;
@@ -37,7 +38,7 @@ import de.anomic.kelondro.kelondroRow;
 import de.anomic.server.serverMemory;
 import de.anomic.server.logging.serverLog;
 
-public final class indexRAMRI implements indexRI, indexRIReader {
+public final class indexRAMRI implements indexRI, indexRIReader, Iterable<indexContainer> {
 
     // class variables
     private final kelondroMScoreCluster<String> hashScore;
@@ -333,5 +334,10 @@ public final class indexRAMRI implements indexRI, indexRIReader {
         heap = null;
         hashScore.clear();
         hashDate.clear();
+    }
+
+    public Iterator iterator() {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

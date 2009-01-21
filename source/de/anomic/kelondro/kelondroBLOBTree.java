@@ -510,4 +510,17 @@ public class kelondroBLOBTree implements kelondroBLOB {
     public long length() throws IOException {
         return this.file.length();
     }
+
+    public int replace(byte[] key, Rewriter rewriter) throws IOException {
+        byte[] b = get(key);
+        if (b == null) {
+            remove(key);
+            return 0;
+        }
+        byte[] c = rewriter.rewrite(b);
+        int reduced = b.length - c.length;
+        assert reduced >= 0;
+        put(key, c);
+        return reduced;
+    }
 }

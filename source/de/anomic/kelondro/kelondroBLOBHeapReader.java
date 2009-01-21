@@ -31,6 +31,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
 
 import de.anomic.server.serverMemory;
@@ -232,7 +233,7 @@ public class kelondroBLOBHeapReader {
         file.seek(pos);
         final int len = file.readInt() - index.row().primaryKeyLength;
         if (serverMemory.available() < len) {
-            if (!serverMemory.request(len, false)) return null; // not enough memory available for this blob
+            if (!serverMemory.request(len, true)) return null; // not enough memory available for this blob
         }
         
         // read the key
@@ -327,16 +328,31 @@ public class kelondroBLOBHeapReader {
      * static iterator of entries in BLOBHeap files:
      * this is used to import heap dumps into a write-enabled index heap
      */
-    public static class entries implements Iterator<Map.Entry<String, byte[]>>, Iterable<Map.Entry<String, byte[]>> {
+    public static class entries implements
+        kelondroCloneableIterator<Map.Entry<String, byte[]>>,
+        Iterator<Map.Entry<String, byte[]>>,
+        Iterable<Map.Entry<String, byte[]>> {
+        
         DataInputStream is;
         int keylen;
+        private File blobFile;
         Map.Entry<String, byte[]> nextEntry;
         
         public entries(final File blobFile, final int keylen) throws IOException {
             if (!(blobFile.exists())) throw new IOException("file " + blobFile + " does not exist");
             this.is = new DataInputStream(new BufferedInputStream(new FileInputStream(blobFile), 1024*1024));
             this.keylen = keylen;
+            this.blobFile = blobFile;
             this.nextEntry = next0();
+        }
+
+        public kelondroCloneableIterator<Entry<String, byte[]>> clone(Object modifier) {
+            try {
+                return new entries(blobFile, keylen);
+            } catch (IOException e) {
+                e.printStackTrace();
+                return null;
+            }
         }
         
         public boolean hasNext() {

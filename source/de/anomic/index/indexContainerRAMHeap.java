@@ -65,6 +65,10 @@ public final class indexContainerRAMHeap {
         this.cache = null;
     }
     
+    public kelondroRow rowdef() {
+        return this.payloadrow;
+    }
+    
     public void clear() {
         if (cache != null) cache.clear();
         initWriteMode();
@@ -241,13 +245,9 @@ public final class indexContainerRAMHeap {
          * because they may get very large, it is wise to deallocate some memory before calling next()
          */
         public indexContainer next() {
-            try {
-                Map.Entry<String, byte[]> entry = blobs.next();
-                byte[] payload = entry.getValue();
-                return new indexContainer(entry.getKey(), kelondroRowSet.importRowSet(payload, payloadrow));
-            } catch (final IOException e) {
-                return null;
-            }
+            Map.Entry<String, byte[]> entry = blobs.next();
+            byte[] payload = entry.getValue();
+            return new indexContainer(entry.getKey(), kelondroRowSet.importRowSet(payload, payloadrow));
         }
         
         public void remove() {

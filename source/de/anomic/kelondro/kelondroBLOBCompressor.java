@@ -268,4 +268,15 @@ public class kelondroBLOBCompressor extends Thread implements kelondroBLOB {
         assert this.bufferlength == 0;
     }
 
+    public int replace(byte[] key, Rewriter rewriter) throws IOException {
+        byte[] b = get(key);
+        if (b == null) return 0;
+        byte[] c = rewriter.rewrite(b);
+        int reduction = c.length - b.length;
+        assert reduction >= 0;
+        if (reduction == 0) return 0;
+        this.put(key, c);
+        return reduction;
+    }
+
 }

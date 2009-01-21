@@ -141,7 +141,19 @@ public final class plasmaWordIndex implements indexRI {
                 }
             }
         }
-        
+        /*
+         * 
+        final File textindexcache = new File(indexPrimaryTextLocation, "RICACHE");
+        if (!(textindexcache.exists())) textindexcache.mkdirs();
+        if (new File(textindexcache, "index.dhtout.blob").exists()) {
+            this.dhtCache = new indexRAMRI(textindexcache, indexRWIRowEntry.urlEntryRow, entityCacheMaxSize, wCacheMaxChunk, wCacheMaxAge, "index.dhtout.heap", "index.dhtout.blob", log);
+            indexRAMRI dhtInCache  = new indexRAMRI(textindexcache, indexRWIRowEntry.urlEntryRow, entityCacheMaxSize, wCacheMaxChunk, wCacheMaxAge, "index.dhtin.heap", "index.dhtin.blob", log);
+            indexContainer c1;
+            for (indexContainer c: dhtInCache) {
+                this.dhtCache.addEntries(c);
+            }
+        }
+         */
         final File textindexcache = new File(indexPrimaryTextLocation, "RICACHE");
         if (!(textindexcache.exists())) textindexcache.mkdirs();
         this.dhtOutCache = new indexRAMRI(textindexcache, indexRWIRowEntry.urlEntryRow, entityCacheMaxSize, wCacheMaxChunk, wCacheMaxAge, "index.dhtout.heap", "index.dhtout.blob", log);
