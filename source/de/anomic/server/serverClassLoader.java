@@ -58,6 +58,7 @@ public final class serverClassLoader extends ClassLoader {
         // load the file from the file system
         byte[] b;
         try {
+            System.out.println("*** DEBUG CLASSLOADER: " + classfile + "; file " + (classfile.exists() ? "exists": "does not exist"));
             b = serverFileUtils.read(classfile);
             // make a class out of the stream
             c = this.defineClass(null, b, 0, b.length);
@@ -66,9 +67,9 @@ public final class serverClassLoader extends ClassLoader {
         } catch (final LinkageError ee) {
         	c = findLoadedClass(classname);
         	if (c != null) return c;
-            throw new ClassNotFoundException(classfile.toString());
+            throw new ClassNotFoundException("linkageError, " + ee.getMessage() + ":" + classfile.toString());
         } catch (final IOException ee) {
-            throw new ClassNotFoundException(classfile.toString());
+            throw new ClassNotFoundException(ee.getMessage() + ":" + classfile.toString());
         }
         return c;
     }
