@@ -68,14 +68,13 @@
 	  <fieldset><legend>Cache Settings:</legend>
 	    <table border="0" cellpadding="5" cellspacing="1">
 	      <tr valign="top" class="TableHeader">
-	        <td>Cache Type</td>
-	        <td>DHT-Out</td>
-	        <td>DHT-In</td>
+	        <td></td>
+	        <td>RAM Cache</td>
 	        <td>Description</td>
 	      </tr>
 	      <tr valign="top" class="TableCellDark">
 	        <td>URLs in RAM buffer:</td>
-	        <td colspan="2" align="center">#[urlCacheSize]#</td>
+	        <td align="center">#[urlCacheSize]#</td>
 	        <td>
 	          This is the size of the URL write buffer. Its purpose is to buffer incoming URLs
 	          in case of search result transmission and during DHT transfer.
@@ -83,8 +82,7 @@
 	      </tr>
 	      <tr valign="top" class="TableCellDark">
 	        <td>Words in RAM cache:<br />(Size in KBytes)</td>
-	        <td>#[wordCacheWSize]#<br />(#[wordCacheWSizeKBytes]# KB)</td>
-	        <td>#[wordCacheKSize]#<br />(#[wordCacheKSizeKBytes]# KB)</td>
+	        <td>#[wordCacheSize]#<br />(#[wordCacheSizeKBytes]# KB)</td>
 	        <td>
 	        This is the current size of the word caches.
 	        The indexing cache speeds up the indexing process, the DHT cache holds indexes temporary for approval.
@@ -93,8 +91,7 @@
 	      </tr>
 	      <tr valign="top" class="TableCellDark">
 	        <td>Maximum URLs currently assigned<br />to one cached word:</td>
-	        <td>#[maxURLinWCache]#</td>
-	        <td>#[maxURLinKCache]#</td>
+	        <td>#[maxURLinCache]#</td>
 	        <td>
 	        This is the maximum size of URLs assigned to a single word cache entry.
 	        If this is a big number, it shows that the caching works efficiently.
@@ -102,23 +99,21 @@
 	      </tr>
 	      <tr valign="top" class="TableCellDark">
 	        <td>Maximum age of a word:</td>
-	        <td>#[maxAgeOfWCache]#</td>
-	        <td>#[maxAgeOfKCache]#</td>
+	        <td>#[maxAgeOfCache]#</td>
 	        <td>
 	        This is the maximum age of a word in an index in minutes.
 	        </td>
 	      </tr>
 	      <tr valign="top" class="TableCellDark">
 	        <td>Minimum age of a word:</td>
-	        <td>#[minAgeOfWCache]#</td>
-	        <td>#[minAgeOfKCache]#</td>
+	        <td>#[minAgeOfCache]#</td>
 	        <td>
 	        This is the minimum age of a word in an index in minutes.
 	        </td>
 	      </tr>
 	      <tr valign="top" class="TableCellDark">
 	        <td>Maximum number of words in cache:</td>
-	        <td colspan="2">
+	        <td>
 	          <input name="wordCacheMaxCount" type="text" size="10" maxlength="100" value="#[wordCacheMaxCount]#" />
 	        </td>
 	        <td>
@@ -129,7 +124,7 @@
 	      </tr>
 	      <tr valign="top" class="TableCellDark">
 	        <td>Initial space of words in cache:</td>
-	        <td colspan="2">
+	        <td>
 	          <input name="wordCacheInitCount" type="text" size="10" maxlength="100" value="#[wordCacheInitCount]#" />
 	        </td>
 	        <td>

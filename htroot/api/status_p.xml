@@ -2,10 +2,8 @@
 <status>
   <ppm>#[ppm]#</ppm>
   <wordCacheSize>#[wordCacheSize]#</wordCacheSize>
-  <wordCacheWSize>#[wordCacheWSize]#</wordCacheWSize>
-  <wordCacheWCount>#[wordCacheWCount]#</wordCacheWCount>
-  <wordCacheKSize>#[wordCacheKSize]#</wordCacheKSize>
-  <wordCacheMaxSize>#[wordCacheMaxSize]#</wordCacheMaxSize>
+  <wordCacheSize>#[wordCacheSize]#</wordCacheSize>
+  <wordCacheCount>#[wordCacheCount]#</wordCacheCount>
   <wordCacheMaxCount>#[wordCacheMaxCount]#</wordCacheMaxCount>
 
   <memory>

@@ -69,7 +69,6 @@ import de.anomic.xml.RSSFeed;
 import de.anomic.xml.RSSMessage;
 import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacyPeerActions;
-import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyURL;
 
@@ -99,7 +98,7 @@ public final class plasmaWordIndex implements indexRI {
     
     
     private final kelondroByteOrder        indexOrder = kelondroBase64Order.enhancedCoder;
-    private final indexRAMRI               dhtOutCache, dhtInCache;
+    private final indexRAMRI               dhtCache;
     private final indexCollectionRI        collections;          // new database structure to replace AssortmentCluster and FileCluster
     private final serverLog                log;
     private indexRepositoryReference       referenceURL;
@@ -141,23 +140,21 @@ public final class plasmaWordIndex implements indexRI {
                 }
             }
         }
-        /*
-         * 
+
         final File textindexcache = new File(indexPrimaryTextLocation, "RICACHE");
         if (!(textindexcache.exists())) textindexcache.mkdirs();
-        if (new File(textindexcache, "index.dhtout.blob").exists()) {
-            this.dhtCache = new indexRAMRI(textindexcache, indexRWIRowEntry.urlEntryRow, entityCacheMaxSize, wCacheMaxChunk, wCacheMaxAge, "index.dhtout.heap", "index.dhtout.blob", log);
-            indexRAMRI dhtInCache  = new indexRAMRI(textindexcache, indexRWIRowEntry.urlEntryRow, entityCacheMaxSize, wCacheMaxChunk, wCacheMaxAge, "index.dhtin.heap", "index.dhtin.blob", log);
-            indexContainer c1;
+        if (new File(textindexcache, "index.dhtin.blob").exists()) {
+        	// migration of the both caches into one
+        	this.dhtCache = new indexRAMRI(textindexcache, indexRWIRowEntry.urlEntryRow, entityCacheMaxSize, wCacheMaxChunk, wCacheMaxAge, "index.dhtout.blob", log);
+            indexRAMRI dhtInCache  = new indexRAMRI(textindexcache, indexRWIRowEntry.urlEntryRow, entityCacheMaxSize, wCacheMaxChunk, wCacheMaxAge, "index.dhtin.blob", log);
             for (indexContainer c: dhtInCache) {
-                this.dhtCache.addEntries(c);
+        		this.dhtCache.addEntries(c);
             }
+            new File(textindexcache, "index.dhtin.blob").delete();
+        } else {
+        	// read in new BLOB
+        	this.dhtCache = new indexRAMRI(textindexcache, indexRWIRowEntry.urlEntryRow, entityCacheMaxSize, wCacheMaxChunk, wCacheMaxAge, "index.dhtout.blob", log);            
         }
-         */
-        final File textindexcache = new File(indexPrimaryTextLocation, "RICACHE");
-        if (!(textindexcache.exists())) textindexcache.mkdirs();
-        this.dhtOutCache = new indexRAMRI(textindexcache, indexRWIRowEntry.urlEntryRow, entityCacheMaxSize, wCacheMaxChunk, wCacheMaxAge, "index.dhtout.heap", "index.dhtout.blob", log);
-        this.dhtInCache  = new indexRAMRI(textindexcache, indexRWIRowEntry.urlEntryRow, entityCacheMaxSize, wCacheMaxChunk, wCacheMaxAge, "index.dhtin.heap", "index.dhtin.blob", log);
         
         // create collections storage path
         final File textindexcollections = new File(indexPrimaryTextLocation, "RICOLLECTION");
@@ -247,8 +244,7 @@ public final class plasmaWordIndex implements indexRI {
     }
 
     public void clear() {
-        dhtInCache.clear();
-        dhtOutCache.clear();
+        dhtCache.clear();
         collections.clear();
         try {
             referenceURL.clear();
@@ -421,46 +417,30 @@ public final class plasmaWordIndex implements indexRI {
     }
     
     public int minMem() {
-        return 1024*1024 /* indexing overhead */ + dhtOutCache.minMem() + dhtInCache.minMem() + collections.minMem();
+        return 1024*1024 /* indexing overhead */ + dhtCache.minMem() + collections.minMem();
     }
 
-    public int maxURLinDHTOutCache() {
-        return dhtOutCache.maxURLinCache();
+    public int maxURLinDHTCache() {
+        return dhtCache.maxURLinCache();
     }
 
-    public long minAgeOfDHTOutCache() {
-        return dhtOutCache.minAgeOfCache();
+    public long minAgeOfDHTCache() {
+        return dhtCache.minAgeOfCache();
     }
 
-    public long maxAgeOfDHTOutCache() {
-        return dhtOutCache.maxAgeOfCache();
+    public long maxAgeOfDHTCache() {
+        return dhtCache.maxAgeOfCache();
     }
 
-    public int maxURLinDHTInCache() {
-        return dhtInCache.maxURLinCache();
-    }
-
-    public long minAgeOfDHTInCache() {
-        return dhtInCache.minAgeOfCache();
-    }
-
-    public long maxAgeOfDHTInCache() {
-        return dhtInCache.maxAgeOfCache();
-    }
-
-    public int dhtOutCacheSize() {
-        return dhtOutCache.size();
-    }
-
-    public int dhtInCacheSize() {
-        return dhtInCache.size();
+    public int dhtCacheSize() {
+        return dhtCache.size();
     }
     
-    public long dhtCacheSizeBytes(final boolean in) {
+    public long dhtCacheSizeBytes() {
         // calculate the real size in bytes of DHT-In/Out-Cache
         long cacheBytes = 0;
         final long entryBytes = indexRWIRowEntry.urlEntryRow.objectsize;
-        final indexRAMRI cache = (in ? dhtInCache : dhtOutCache);
+        final indexRAMRI cache = (dhtCache);
         synchronized (cache) {
             final Iterator<indexContainer> it = cache.wordContainers(null, false);
             while (it.hasNext()) cacheBytes += it.next().size() * entryBytes;
@@ -469,8 +449,7 @@ public final class plasmaWordIndex implements indexRI {
     }
 
     public void setMaxWordCount(final int maxWords) {
-        dhtOutCache.setMaxWordCount(maxWords);
-        dhtInCache.setMaxWordCount(maxWords);
+        dhtCache.setMaxWordCount(maxWords);
     }
 
     public void dhtFlushControl(final indexRAMRI theCache) {
@@ -500,38 +479,18 @@ public final class plasmaWordIndex implements indexRI {
     	return new indexContainer(wordHash, indexRWIRowEntry.urlEntryRow, elementCount);
     }
 
-    public void addEntry(final String wordHash, final indexRWIRowEntry entry, final long updateTime, boolean dhtInCase) {
-        // set dhtInCase depending on wordHash
-        if ((!dhtInCase) && (yacySeed.shallBeOwnWord(seedDB, wordHash, this.netRedundancy))) dhtInCase = true;
-        
+    public void addEntry(final String wordHash, final indexRWIRowEntry entry, final long updateTime) {
         // add the entry
-        if (dhtInCase) {
-            dhtInCache.addEntry(wordHash, entry, updateTime, true);
-            dhtFlushControl(this.dhtInCache);
-        } else {
-            dhtOutCache.addEntry(wordHash, entry, updateTime, false);
-            dhtFlushControl(this.dhtOutCache);
-        }
+        dhtCache.addEntry(wordHash, entry, updateTime, true);
+        dhtFlushControl(this.dhtCache);
     }
     
     public void addEntries(final indexContainer entries) {
-        addEntries(entries, false);
-    }
-    
-    public void addEntries(final indexContainer entries, boolean dhtInCase) {
         assert (entries.row().objectsize == indexRWIRowEntry.urlEntryRow.objectsize);
-        
-        // set dhtInCase depending on wordHash
-        if ((!dhtInCase) && (yacySeed.shallBeOwnWord(seedDB, entries.getWordHash(), this.netRedundancy))) dhtInCase = true;
-        
+ 
         // add the entry
-        if (dhtInCase) {
-            dhtInCache.addEntries(entries);
-            dhtFlushControl(this.dhtInCache);
-        } else {
-            dhtOutCache.addEntries(entries);
-            dhtFlushControl(this.dhtOutCache);
-        }
+        dhtCache.addEntries(entries);
+        dhtFlushControl(this.dhtCache);
     }
     
     public void flushCacheFor(int time) {
@@ -539,19 +498,9 @@ public final class plasmaWordIndex implements indexRI {
     }
     
     private synchronized void flushCacheUntil(long timeout) {
-        long timeout0 = System.currentTimeMillis() + (timeout - System.currentTimeMillis()) / 10 * 6;
-        // we give 60% for dhtIn to prefer filling of cache with dht transmission
-        //int cIn = 0;
-    	while (System.currentTimeMillis() < timeout0 && dhtInCache.size() > 0) {
-    		flushCacheOne(dhtInCache);
-    		//cIn++;
+    	while (System.currentTimeMillis() < timeout && dhtCache.size() > 0) {
+    		flushCacheOne(dhtCache);
     	}
-    	//int cOut = 0;
-    	while (System.currentTimeMillis() < timeout && dhtOutCache.size() > 0) {
-            flushCacheOne(dhtOutCache);
-            //cOut++;
-        }
-    	//System.out.println("*** DEBUG cache flush: cIn = " + cIn + ", cOut = " + cOut);
     }
     
     private synchronized void flushCacheOne(final indexRAMRI ram) {
@@ -615,7 +564,7 @@ public final class plasmaWordIndex implements indexRI {
                         doctype,
                         outlinksSame, outlinksOther,
                         wprop.flags);
-            addEntry(indexWord.word2hash(word), ientry, System.currentTimeMillis(), false);
+            addEntry(indexWord.word2hash(word), ientry, System.currentTimeMillis());
             wordCount++;
         }
         
@@ -623,8 +572,7 @@ public final class plasmaWordIndex implements indexRI {
     }
 
     public boolean hasContainer(final String wordHash) {
-        if (dhtOutCache.hasContainer(wordHash)) return true;
-        if (dhtInCache.hasContainer(wordHash)) return true;
+        if (dhtCache.hasContainer(wordHash)) return true;
         if (collections.hasContainer(wordHash)) return true;
         return false;
     }
@@ -637,12 +585,7 @@ public final class plasmaWordIndex implements indexRI {
         
         // get from cache
         indexContainer container;
-        container = dhtOutCache.getContainer(wordHash, urlselection);
-        if (container == null) {
-            container = dhtInCache.getContainer(wordHash, urlselection);
-        } else {
-        	container.addAllUnique(dhtInCache.getContainer(wordHash, urlselection));
-        }
+        container = dhtCache.getContainer(wordHash, urlselection);
         
         // get from collection index
         if (container == null) {
@@ -727,7 +670,7 @@ public final class plasmaWordIndex implements indexRI {
     }
     
     public int size() {
-        return java.lang.Math.max(collections.size(), java.lang.Math.max(dhtInCache.size(), dhtOutCache.size()));
+        return java.lang.Math.max(collections.size(), dhtCache.size());
     }
 
     public int collectionsSize() {
@@ -735,12 +678,11 @@ public final class plasmaWordIndex implements indexRI {
     }
     
     public int cacheSize() {
-        return dhtInCache.size() + dhtOutCache.size();
+        return dhtCache.size();
     }
 
     public void close() {
-        dhtInCache.close();
-        dhtOutCache.close();
+        dhtCache.close();
         collections.close();
         referenceURL.close();
         seedDB.close();
@@ -754,18 +696,15 @@ public final class plasmaWordIndex implements indexRI {
         final indexContainer c = new indexContainer(
                 wordHash,
                 indexRWIRowEntry.urlEntryRow,
-                dhtInCache.sizeContainer(wordHash) + dhtOutCache.sizeContainer(wordHash)
-                );
-        c.addAllUnique(dhtInCache.deleteContainer(wordHash));
-        c.addAllUnique(dhtOutCache.deleteContainer(wordHash));
+                dhtCache.sizeContainer(wordHash));
+        c.addAllUnique(dhtCache.deleteContainer(wordHash));
         c.addAllUnique(collections.deleteContainer(wordHash));
         return c;
     }
     
     public boolean removeEntry(final String wordHash, final String urlHash) {
         boolean removed = false;
-        removed = removed | (dhtInCache.removeEntry(wordHash, urlHash));
-        removed = removed | (dhtOutCache.removeEntry(wordHash, urlHash));
+        removed = removed | (dhtCache.removeEntry(wordHash, urlHash));
         removed = removed | (collections.removeEntry(wordHash, urlHash));
         return removed;
     }
@@ -783,16 +722,14 @@ public final class plasmaWordIndex implements indexRI {
     
     public int removeEntries(final String wordHash, final Set<String> urlHashes) {
         int removed = 0;
-        removed += dhtInCache.removeEntries(wordHash, urlHashes);
-        removed += dhtOutCache.removeEntries(wordHash, urlHashes);
+        removed += dhtCache.removeEntries(wordHash, urlHashes);
         removed += collections.removeEntries(wordHash, urlHashes);
         return removed;
     }
     
     public String removeEntriesExpl(final String wordHash, final Set<String> urlHashes) {
         String removed = "";
-        removed += dhtInCache.removeEntries(wordHash, urlHashes) + ", ";
-        removed += dhtOutCache.removeEntries(wordHash, urlHashes) + ", ";
+        removed += dhtCache.removeEntries(wordHash, urlHashes) + ", ";
         removed += collections.removeEntries(wordHash, urlHashes);
         return removed;
     }
@@ -825,7 +762,7 @@ public final class plasmaWordIndex implements indexRI {
         containerOrder.rotate(emptyContainer(startHash, 0));
         final TreeSet<indexContainer> containers = new TreeSet<indexContainer>(containerOrder);
         final Iterator<indexContainer> i = wordContainers(startHash, ram, rot);
-        if (ram) count = Math.min(dhtOutCache.size(), count);
+        if (ram) count = Math.min(dhtCache.size(), count);
         indexContainer container;
         // this loop does not terminate using the i.hasNex() predicate when rot == true
         // because then the underlying iterator is a rotating iterator without termination
@@ -958,7 +895,7 @@ public final class plasmaWordIndex implements indexRI {
     public synchronized kelondroCloneableIterator<indexContainer> wordContainers(final String startHash, final boolean ram, final boolean rot) {
         final kelondroCloneableIterator<indexContainer> i = wordContainers(startHash, ram);
         if (rot) {
-            return new kelondroRotateIterator<indexContainer>(i, new String(kelondroBase64Order.zero(startHash.length())), dhtOutCache.size() + ((ram) ? 0 : collections.size()));
+            return new kelondroRotateIterator<indexContainer>(i, new String(kelondroBase64Order.zero(startHash.length())), dhtCache.size() + ((ram) ? 0 : collections.size()));
         }
         return i;
     }
@@ -967,10 +904,10 @@ public final class plasmaWordIndex implements indexRI {
         final kelondroOrder<indexContainer> containerOrder = new indexContainerOrder(indexOrder.clone());
         containerOrder.rotate(emptyContainer(startWordHash, 0));
         if (ram) {
-            return dhtOutCache.wordContainers(startWordHash, false);
+            return dhtCache.wordContainers(startWordHash, false);
         }
         return new kelondroMergeIterator<indexContainer>(
-                dhtOutCache.wordContainers(startWordHash, false),
+                dhtCache.wordContainers(startWordHash, false),
                 collections.wordContainers(startWordHash, false),
                 containerOrder,
                 indexContainer.containerMergeMethod,

@@ -639,7 +639,7 @@ public final class yacyClient {
 
 		// insert the containers to the index
         for (int m = 0; m < words; m++) {
-            wordIndex.addEntries(container[m], true);
+            wordIndex.addEntries(container[m]);
         }
         
         // generate statistics

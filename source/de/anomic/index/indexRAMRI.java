@@ -48,7 +48,7 @@ public final class indexRAMRI implements indexRI, indexRIReader, Iterable<indexC
     public  int   cacheReferenceCountLimit;  // the maximum number of references to a single RWI entity
     public  long  cacheReferenceAgeLimit;    // the maximum age (= time not changed) of a RWI entity
     private final serverLog log;
-    private final File oldDumpFile, newDumpFile;
+    private final File dumpFile;
     private indexContainerRAMHeap heap;
     
     @SuppressWarnings("unchecked")
@@ -58,7 +58,6 @@ public final class indexRAMRI implements indexRI, indexRIReader, Iterable<indexC
             final int entityCacheMaxSize,
             final int wCacheReferenceCountLimitInit,
             final long wCacheReferenceAgeLimitInit,
-            final String oldHeapName,
             final String newHeapName,
             final serverLog log) {
 
@@ -71,24 +70,13 @@ public final class indexRAMRI implements indexRI, indexRIReader, Iterable<indexC
         this.cacheReferenceCountLimit = wCacheReferenceCountLimitInit;
         this.cacheReferenceAgeLimit = wCacheReferenceAgeLimitInit;
         this.log = log;
-        this.oldDumpFile = new File(databaseRoot, oldHeapName);
-        this.newDumpFile = new File(databaseRoot, newHeapName);
+        this.dumpFile = new File(databaseRoot, newHeapName);
         this.heap = new indexContainerRAMHeap(payloadrow);
         
         // read in dump of last session
         boolean initFailed = false;
-        if (newDumpFile.exists() && oldDumpFile.exists()) {
-            // we need only one, delete the old
-            oldDumpFile.delete();
-        }
-        if (oldDumpFile.exists()) try {
-            heap.initWriteModeFromHeap(oldDumpFile);
-        } catch (IOException e) {
-            initFailed = true;
-            e.printStackTrace();
-        }
-        if (newDumpFile.exists()) try {
-            heap.initWriteModeFromBLOB(newDumpFile);
+        if (dumpFile.exists()) try {
+            heap.initWriteModeFromBLOB(dumpFile);
         } catch (IOException e) {
             initFailed = true;
             e.printStackTrace();
@@ -97,7 +85,7 @@ public final class indexRAMRI implements indexRI, indexRIReader, Iterable<indexC
             log.logSevere("unable to restore cache dump");
             // get empty dump
             heap.initWriteMode();
-        } else if (oldDumpFile.exists() || newDumpFile.exists()) {
+        } else if (dumpFile.exists()) {
             // initialize scores for cache organization
             for (final indexContainer ic : (Iterable<indexContainer>) heap.wordContainers(null, false)) {
                 this.hashDate.setScore(ic.getWordHash(), intTime(ic.lastWrote()));
@@ -327,7 +315,7 @@ public final class indexRAMRI implements indexRI, indexRIReader, Iterable<indexC
         // dump cache
         try {
             //heap.dumpold(this.oldDumpFile);
-            heap.dump(this.newDumpFile);
+            heap.dump(this.dumpFile);
         } catch (final IOException e){
             log.logSevere("unable to dump cache: " + e.getMessage(), e);
         }
@@ -336,8 +324,7 @@ public final class indexRAMRI implements indexRI, indexRIReader, Iterable<indexC
         hashDate.clear();
     }
 
-    public Iterator iterator() {
-        // TODO Auto-generated method stub
-        return null;
+    public Iterator<indexContainer> iterator() {
+        return wordContainers(null, false);
     }
 }

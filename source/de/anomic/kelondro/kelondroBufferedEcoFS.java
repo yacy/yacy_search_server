@@ -60,7 +60,7 @@ public class kelondroBufferedEcoFS {
     }
     
     public synchronized long size() throws IOException {
-        return efs.size();
+        return efs == null ? 0 : efs.size();
     }
     
     public File filename() {

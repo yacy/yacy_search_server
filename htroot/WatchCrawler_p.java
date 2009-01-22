@@ -36,7 +36,6 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import api.queues_p;
 import de.anomic.crawler.CrawlEntry;
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.SitemapImporter;
@@ -68,7 +67,23 @@ public class WatchCrawler_p {
         // return variable that accumulates replacements
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         // inital values for AJAX Elements (without JavaScript) 
-        final serverObjects prop = queues_p.respond(header, post, env);
+        final serverObjects prop = new serverObjects();
+        prop.put("rejected", 0);
+        prop.put("indexingSize", 0);
+        prop.put("indexingMax", 0);
+        prop.put("urlpublictextSize", 0);
+        prop.put("rwipublictextSize", 0);
+        prop.put("list", "0");
+        prop.put("loaderSize", 0);        
+        prop.put("loaderMax", 0);
+        prop.put("list-loader", 0);
+        prop.put("localCrawlSize", 0);
+        prop.put("localCrawlState", "");
+        prop.put("limitCrawlSize", 0);
+        prop.put("limitCrawlState", "");
+        prop.put("remoteCrawlSize", 0);
+        prop.put("remoteCrawlState", "");
+        prop.put("list-remote", 0);
         prop.put("forwardToCrawlStart", "0");
         
         prop.put("info", "0");
@@ -429,7 +444,7 @@ public class WatchCrawler_p {
         // return rewrite properties
         return prop;
     }
-
+    
     private static long recrawlIfOlderC(final boolean recrawlIfOlderCheck, final int recrawlIfOlderNumber, final String crawlingIfOlderUnit) {
         if (!recrawlIfOlderCheck) return 0L;
         if (crawlingIfOlderUnit.equals("year")) return System.currentTimeMillis() - (long) recrawlIfOlderNumber * 1000L * 60L * 60L * 24L * 365L;

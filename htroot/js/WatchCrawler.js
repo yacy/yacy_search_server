@@ -91,8 +91,8 @@ function handleStatus(){
     removeAllChildren(trafCrawlerSpan);
 	trafCrawlerSpan.appendChild(document.createTextNode(Math.round((trafficCrawler) / 1024 / 10.24) / 100));
     
-	var wordCache=getValue(getFirstChild(statusTag, "wordCacheWCount"));
-	var wordCacheSize=getValue(getFirstChild(statusTag, "wordCacheWSize"));
+	var wordCache=getValue(getFirstChild(statusTag, "wordCacheCount"));
+	var wordCacheSize=getValue(getFirstChild(statusTag, "wordCacheSize"));
 	var wordCacheMax=getValue(getFirstChild(statusTag, "wordCacheMaxCount"));
 	var wordCacheMaxSize=getValue(getFirstChild(statusTag, "wordCacheMaxSize"));
 
