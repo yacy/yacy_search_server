@@ -127,7 +127,7 @@ public class yacysearch {
         boolean global = (post == null) ? true : post.get("resource", "global").equals("global");
         final boolean indexof = (post != null && post.get("indexof","").equals("on")); 
         
-        String urlmask = "";
+        String urlmask = null;
         String prefermask = (post == null ? "" : post.get("prefermaskfilter", ""));
         if ((prefermask.length() > 0) && (prefermask.indexOf(".*") < 0)) prefermask = ".*" + prefermask + ".*";
 
@@ -244,13 +244,14 @@ public class yacysearch {
                 if (domain.indexOf(".") < 0) domain = "\\." + domain; // is tld
                 if (domain.length() > 0) urlmask = "[a-zA-Z]*://[^/]*" + domain + "/.*" + urlmask;
             }
-            if (urlmask.length() == 0 && post != null && post.containsKey("urlmask") && post.get("urlmask").equals("no")) { // option search all
-                urlmask = ".*";
-            } else if (urlmask.length() == 0 && !newsearch && post.containsKey("urlmaskfilter")) {
-                final String purlmaskfilter = post.get("urlmaskfilter", ".*");
-                if(!purlmaskfilter.equals(".*")) urlmask = purlmaskfilter;
+            if (urlmask == null){
+	            if (post.containsKey("urlmask") && post.get("urlmask").equals("no")) { // option search all
+	                urlmask = ".*";
+	            } else if (!newsearch && post.containsKey("urlmaskfilter")) {
+	                urlmask = post.get("urlmaskfilter", ".*");
+	            }
             }
-            if(urlmask.length() == 0) urlmask = ".*"; //if no urlmask was given
+            if (urlmask == null || urlmask.length() == 0) urlmask = ".*"; //if no urlmask was given
            
             // read the language from the language-restrict option 'lr'
             // if no one is given, use the user agent or the system language as default
