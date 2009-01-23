@@ -171,7 +171,6 @@ import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacyNewsRecord;
-import de.anomic.yacy.yacyPeerSelection;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyTray;
 import de.anomic.yacy.yacyURL;
@@ -308,7 +307,16 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         final String networkName = getConfig(plasmaSwitchboardConstants.NETWORK_NAME, "");
         final boolean useCommons = getConfigBool("index.storeCommons", false);
         final int redundancy = (int) sb.getConfigLong("network.unit.dhtredundancy.senior", 1);
-        webIndex = new plasmaWordIndex(networkName, log, indexPrimaryPath, indexSecondaryPath, wordCacheMaxCount, useCommons, redundancy);
+        final int paritionExponent = (int) sb.getConfigLong("network.unit.dht.partitionExponent", 0);
+        webIndex = new plasmaWordIndex(
+                networkName,
+                log,
+                indexPrimaryPath,
+                indexSecondaryPath,
+                wordCacheMaxCount,
+                useCommons,
+                redundancy,
+                paritionExponent);
         crawlResults = new ResultURLs();
         
         // start yacy core
@@ -746,7 +754,16 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             final int wordCacheMaxCount = (int) getConfigLong(plasmaSwitchboardConstants.WORDCACHE_MAX_COUNT, 20000);
             final boolean useCommons = getConfigBool("index.storeCommons", false);
             final int redundancy = (int) sb.getConfigLong("network.unit.dhtredundancy.senior", 1);
-            this.webIndex = new plasmaWordIndex(getConfig(plasmaSwitchboardConstants.NETWORK_NAME, ""), getLog(), indexPrimaryPath, indexSecondaryPath, wordCacheMaxCount, useCommons, redundancy);
+            final int paritionExponent = (int) sb.getConfigLong("network.unit.dht.partitionExponent", 0);
+            this.webIndex = new plasmaWordIndex(
+                    getConfig(plasmaSwitchboardConstants.NETWORK_NAME, ""),
+                    getLog(),
+                    indexPrimaryPath,
+                    indexSecondaryPath,
+                    wordCacheMaxCount,
+                    useCommons,
+                    redundancy,
+                    paritionExponent);
             // we need a new stacker, because this uses network-specific attributes to sort out urls (local, global)
             this.crawlStacker = new CrawlStacker(
                     crawlQueues,
@@ -1992,7 +2009,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         try {
             // find a list of DHT-peers
             if (log != null) log.logInfo("Collecting DHT target peers for first_hash = " + dhtChunk.firstContainer().getWordHash() + ", last_hash = " + dhtChunk.lastContainer().getWordHash());
-            final Iterator<yacySeed> seedIter = yacyPeerSelection.getAcceptRemoteIndexSeeds(webIndex.seedDB, dhtChunk.lastContainer().getWordHash(), peerCount + 9, false);
+            final Iterator<yacySeed> seedIter = dhtChunk.targets().iterator();
 
             // send away the indexes to all these peers
             int hc1 = 0;

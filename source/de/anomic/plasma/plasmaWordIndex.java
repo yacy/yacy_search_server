@@ -113,15 +113,21 @@ public final class plasmaWordIndex implements indexRI {
     public  CrawlProfile.entry             defaultMediaSnippetLocalProfile, defaultMediaSnippetGlobalProfile;
     private final File                     queuesRoot;
     public  yacyPeerActions                peerActions;
-    public  int                            netRedundancy;
 
-    public plasmaWordIndex(final String networkName, final serverLog log, final File indexPrimaryRoot, final File indexSecondaryRoot, final int entityCacheMaxSize, boolean useCommons, int redundancy) {
+    public plasmaWordIndex(
+            final String networkName,
+            final serverLog log,
+            final File indexPrimaryRoot,
+            final File indexSecondaryRoot,
+            final int entityCacheMaxSize,
+            final boolean useCommons, 
+            final int redundancy,
+            final int partitionExponent) {
         if (networkName == null || networkName.length() == 0) {
             log.logSevere("no network name given - shutting down");
             System.exit(0);
         }
         this.log = log;
-        this.netRedundancy = redundancy;
         this.primaryRoot = new File(indexPrimaryRoot, networkName);
         this.secondaryRoot = new File(indexSecondaryRoot, networkName);
         File indexPrimaryTextLocation = new File(this.primaryRoot, "TEXT");
@@ -229,7 +235,9 @@ public final class plasmaWordIndex implements indexRI {
                 new File(networkRoot, "seed.new.heap"),
                 new File(networkRoot, "seed.old.heap"),
                 new File(networkRoot, "seed.pot.heap"),
-                mySeedFile
+                mySeedFile,
+                redundancy,
+                partitionExponent
                 );
         
         // create or init news database

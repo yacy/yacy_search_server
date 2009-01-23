@@ -42,9 +42,9 @@ import de.anomic.server.logging.serverLog;
 
 public class yacyPeerSelection {
     
-    public static void selectDHTPositions(final yacySeedDB seedDB, String wordhash, int redundancy, HashMap<String, yacySeed> regularSeeds, kelondroMScoreCluster<String> ranking) {
+    public static void selectDHTPositions(final yacySeedDB seedDB, String wordhash, int redundancy, int partitionExponent, HashMap<String, yacySeed> regularSeeds, kelondroMScoreCluster<String> ranking) {
         // this method is called from the search target computation
-        long[] dhtVerticalTargets = yacySeed.dhtPositions(wordhash, yacySeed.partitionExponent);
+        long[] dhtVerticalTargets = yacySeed.dhtPositions(wordhash, partitionExponent);
         yacySeed seed;
         long distance;
         for (int v = 0; v < dhtVerticalTargets.length; v++) {
@@ -65,16 +65,16 @@ public class yacyPeerSelection {
         }
     }
     
-    public static boolean verifyIfOwnWord(final yacySeedDB seedDB, String wordhash, int redundancy) {
+    public static boolean verifyIfOwnWord(final yacySeedDB seedDB, String wordhash, int redundancy, int partitionExponent) {
         String myHash = seedDB.mySeed().hash;
-        //long[] dhtVerticalTargets = yacySeed.dhtPositions(wordhash, yacySeed.partitionExponent);
-        //for (int v = 0; v < dhtVerticalTargets.length; v++) {
-            //wordhash = yacySeed.positionToHash(dhtVerticalTargets[0]);
+        long[] dhtVerticalTargets = yacySeed.dhtPositions(wordhash, partitionExponent);
+        for (int v = 0; v < dhtVerticalTargets.length; v++) {
+            wordhash = yacySeed.positionToHash(dhtVerticalTargets[0]);
             Iterator<yacySeed> dhtEnum = getAcceptRemoteIndexSeeds(seedDB, wordhash, redundancy, true);
             while (dhtEnum.hasNext()) {
                 if (dhtEnum.next().hash.equals(myHash)) return true;
             }
-        //}
+        }
         return false;
     }
     

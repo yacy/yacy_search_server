@@ -68,7 +68,6 @@ import de.anomic.tools.crypt;
 
 public class yacySeed implements Cloneable {
 
-    public static final int partitionExponent = 1;
     public static final int maxsize = 4096;
     /**
      * <b>substance</b> "sI" (send index/words)
@@ -676,20 +675,18 @@ public class yacySeed implements Cloneable {
         return type.equals(yacySeed.PEERTYPE_SENIOR) || type.equals(yacySeed.PEERTYPE_PRINCIPAL);
     }
 
+    /**
+     * @deprecated this does not reflect the vertical DHT. A peer may have several positions now.
+     */
     public final long dhtPosition() {
         // normalized to Long.MAX_VALUE
         return dhtPosition(this.hash);
     }
-
-    private final static double dhtPositionDouble(final String wordHash) {
-        // normalized to 1.0
-        long c = kelondroBase64Order.enhancedCoder.cardinal(wordHash.getBytes());
-        assert c != Long.MAX_VALUE;
-        if (c == Long.MAX_VALUE) return 0.999999999999;
-        return ((double) c) / ((double) Long.MAX_VALUE);
-    }
- 
-    public final static long dhtPosition(final String wordHash) {
+    
+    /**
+     * @deprecated use dhtPosition(wordHash, urlHash, partitionExponent) instead
+     */
+    private final static long dhtPosition(final String wordHash) {
         // normalized to Long.MAX_VALUE
         long c = kelondroBase64Order.enhancedCoder.cardinal(wordHash.getBytes());
         assert c != Long.MAX_VALUE;
@@ -712,67 +709,51 @@ public class yacySeed implements Cloneable {
      * @param urlHash, the hash of a reference
      * @return a double in the range 0 .. 1.0 (including 0, excluding 1.0), the DHT position
      */
-    private final static double dhtPositionDouble(final String wordHash, final String urlHash, final int e) {
-        assert wordHash != null;
-        assert urlHash != null;
-        if (urlHash == null) return dhtPositionDouble(wordHash);
-        // calculate the primary DHT position:
-        // this is done first using the 'classic' dht position and then
-        // calculation an alternative 'first' position considering the partition size
-        // because of the number of partitions, the 'original' position is reached as one of the
-        // alternative dht positions within the partitions
-        double primary = dhtPositionDouble(wordHash); // the hash position for horizontal performance scaling
-        // the number of partitions is 2 ** e, the partitions may grow exponentially (every time it is doubled)
-        double partitions = (double) (1L << e);
-        // modification of the primary position using the partitions to create a normalization:
-        double normalization = Math.floor(primary * partitions) / partitions;
-        // calculate the shift: the alternative position for vertical performance scaling
-        double shift = Math.floor(dhtPositionDouble(urlHash) * partitions) / partitions;
-        // the final position is the primary, normalized position plus the shift
-        double p = primary - normalization + shift;
-        // one of the possible shift positions points to the original dht position:
-        // this is where the shift is equal to the normalization, when
-        // Math.floor(dhtPosition(wordHash) * partitions) == Math.floor(dhtPosition(urlHash) * partitions)
-        assert p < 1.0 : "p = " + p; // because of the normalization never an overflow should occur
-        assert p >= 0.0 : "p = " + p;
-        return (p < 1.0) ? p : p - 1.0;
-    }
-    
-    public final static long dhtPosition(final String wordHash, final String urlHash, final int e) {
+    public final static long dhtPosition(final String wordHash, final String urlHash, final int partitionExponent) {
         // this creates 1^^e different positions for the same word hash (according to url hash)
         assert wordHash != null;
         assert urlHash != null;
-        if (urlHash == null || e < 1) return dhtPosition(wordHash);
+        if (urlHash == null || partitionExponent < 1) return dhtPosition(wordHash);
         // the partition size is (Long.MAX + 1) / 2 ** e == 2 ** (63 - e)
-        assert e > 0;
-        long partitionMask = (1L << (Long.SIZE - 1 - e)) - 1L;
+        assert partitionExponent > 0;
+        long partitionMask = (1L << (Long.SIZE - 1 - partitionExponent)) - 1L;
+        // compute the position using a specific fragment of the word hash and the url hash:
+        // - from the word hash take the (63 - <partitionExponent>) lower bits
+        // - from the url hash take the (63 - <partitionExponent>) higher bits
+        // in case that the partitionExpoent is 1, only one bit is taken from the urlHash,
+        // which means that the partition is in two parts.
+        // With partitionExponent = 2 it is divided in four parts and so on.
         return (dhtPosition(wordHash) & partitionMask) | (dhtPosition(urlHash) & ~partitionMask);
+    }
+    
+    public final static long dhtPosition(final String wordHash, final int verticalPosition, final int partitionExponent) {
+        assert wordHash != null;
+        if (partitionExponent == 0) return dhtPosition(wordHash);
+        long partitionMask = (1L << (Long.SIZE - 1 - partitionExponent)) - 1L;
+        long verticalMask = verticalPosition << (Long.SIZE - 1 - partitionExponent);
+        return (dhtPosition(wordHash) & partitionMask) | verticalMask;
+    }
+    
+    public final static int verticalPosition(final String urlHash, final int partitionExponent) {
+        assert urlHash != null;
+        if (urlHash == null || partitionExponent < 1) return 0;
+        assert partitionExponent > 0;
+        long partitionMask = (1L << (Long.SIZE - 1 - partitionExponent)) - 1L;
+        return (int) (dhtPosition(urlHash) & ~partitionMask) >> (Long.SIZE - 1 - partitionExponent);
     }
     
     /**
      * compute all vertical DHT positions for a given word
+     * This is used when a word is searched and the peers holding the word must be computed
      * @param wordHash, the hash of the word
      * @param partitions, the number of partitions of the DHT
      * @return a vector of long values, the possible DHT positions
      */
-    private final static double[] dhtPositionsDouble(final String wordHash, final int e) {
+    public final static long[] dhtPositions(final String wordHash, final int partitionExponent) {
         assert wordHash != null;
-        int partitions = 1 << e;
-        double[] d = new double[partitions];
-        double primary = dhtPositionDouble(wordHash);
-        double partitionSize = 1.0 / (double) partitions;
-        d[0] = primary - Math.floor(primary * partitions) / partitions;
-        for (int i = 1; i < partitions; i++) {
-            d[i] = d[i - 1] + partitionSize;
-        }
-        return d;
-    }
-    
-    public final static long[] dhtPositions(final String wordHash, final int e) {
-        assert wordHash != null;
-        int partitions = 1 << e;
+        int partitions = 1 << partitionExponent;
         long[] l = new long[partitions];
-        long partitionSize = 1L << (Long.SIZE - 1 - e);
+        long partitionSize = 1L << (Long.SIZE - 1 - partitionExponent);
         l[0] = dhtPosition(wordHash) & (partitionSize - 1L);
         for (int i = 1; i < partitions; i++) {
             l[i] = l[i - 1] + partitionSize;
@@ -1027,12 +1008,12 @@ public class yacySeed implements Cloneable {
     private static int verifiedOwn = 0;
     private static int verifiedNotOwn = 0;
     
-    public static boolean shallBeOwnWord(final yacySeedDB seedDB, final String wordhash, int redundancy) {
+    public static boolean shallBeOwnWord(final yacySeedDB seedDB, final String wordhash, int redundancy, int partitionExponent) {
         // the guessIfOwnWord is a fast method that should only fail in case that a 'true' may be incorrect, but a 'false' shall always be correct
-        if (guessIfOwnWord(seedDB, wordhash)) {
+        if (guessIfOwnWord(seedDB, wordhash, partitionExponent)) {
             // this case must be verified, because it can be wrong.
             guessedOwn++;
-            if (yacyPeerSelection.verifyIfOwnWord(seedDB, wordhash, redundancy)) {
+            if (yacyPeerSelection.verifyIfOwnWord(seedDB, wordhash, redundancy, partitionExponent)) {
                 // this is the correct case, but does not need to be an average case
                 verifiedOwn++;
                 //System.out.println("*** DEBUG shallBeOwnWord: true. guessed: true. verified/guessed ration = " + verifiedOwn + "/" + guessedOwn);
@@ -1064,12 +1045,11 @@ public class yacySeed implements Cloneable {
         
     }
     
-    private static boolean guessIfOwnWord(final yacySeedDB seedDB, final String wordhash) {
+    private static boolean guessIfOwnWord(final yacySeedDB seedDB, final String wordhash, int partitionExponent) {
         if (seedDB == null) return false;
-        if (seedDB.mySeed().isPotential()) return false;
         int connected = seedDB.sizeConnected();
         if (connected == 0) return true;
-        final long[] targets = yacySeed.dhtPositions(wordhash, yacySeed.partitionExponent);
+        final long[] targets = yacySeed.dhtPositions(wordhash, partitionExponent);
         final long mypos = yacySeed.dhtPosition(seedDB.mySeed().hash);
         for (int i = 0; i < targets.length; i++) {
             long distance = yacySeed.dhtDistance(targets[i], mypos);
@@ -1084,35 +1064,37 @@ public class yacySeed implements Cloneable {
         // java -classpath classes de.anomic.yacy.yacySeed hHJBztzcFG76 M8hgtrHG6g12 3
         // test the DHT position calculation
         String wordHash = args[0];
-        double dhtd;
+        //double dhtd;
         long   dhtl;
         int partitionExponent = 0;
         if (args.length == 3) {
             // the horizontal and vertical position calculation
             String urlHash = args[1];
             partitionExponent = Integer.parseInt(args[2]);
-            dhtd = dhtPositionDouble(wordHash, urlHash, partitionExponent);
+            //dhtd = dhtPositionDouble(wordHash, urlHash, partitionExponent);
             dhtl = dhtPosition(wordHash, urlHash, partitionExponent);
         } else {
             // only a horizontal position calculation
-            dhtd = dhtPositionDouble(wordHash);
+            //dhtd = dhtPositionDouble(wordHash);
             dhtl = dhtPosition(wordHash);
         }
-        System.out.println("DHT Double              = " + dhtd);
+        //System.out.println("DHT Double              = " + dhtd);
         System.out.println("DHT Long                = " + dhtl);
         System.out.println("DHT as Double from Long = " + ((double) dhtl) / ((double) Long.MAX_VALUE));
-        System.out.println("DHT as Long from Double = " + (long) (Long.MAX_VALUE * dhtd));
-        System.out.println("DHT as b64 from Double  = " + positionToHash(dhtd));
+        //System.out.println("DHT as Long from Double = " + (long) (Long.MAX_VALUE * dhtd));
+        //System.out.println("DHT as b64 from Double  = " + positionToHash(dhtd));
         System.out.println("DHT as b64 from Long    = " + positionToHash(dhtl));
         
         System.out.print("all " + (1 << partitionExponent) + " DHT positions from doubles: ");
+        /*
+        
         double[] d = dhtPositionsDouble(wordHash, partitionExponent);
         for (int i = 0; i < d.length; i++) {
             if (i > 0) System.out.print(", ");
             System.out.print(positionToHash(d[i]));
         }
         System.out.println();
-        
+        */
         System.out.print("all " + (1 << partitionExponent) + " DHT positions from long   : ");
         long[] l = dhtPositions(wordHash, partitionExponent);
         for (int i = 0; i < l.length; i++) {

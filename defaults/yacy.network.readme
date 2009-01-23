@@ -32,6 +32,7 @@
 #     network.unit.description = <any string, just informal; appears in network graphic>
 #     network.unit.domain = 'global'|'local'|'any'
 #     network.unit.dhtredundancy = <integer number, 0 means no DHT enabled>
+#     network.unit.dht.partitionExponent = <integer number, 0 means no DHT parition, 1 is partition in two, 2 is partition in four and so on>
 #     network.unit.bootstrap.seedlist<n> = <an url to a seedlists-file, which is stored by a principal peer>
 #     network.unit.protocol.control = 'uncontrolled'|'moderated'|'controlled'
 #     network.unit.protocol.request.authentication.method = 'salted-magic'

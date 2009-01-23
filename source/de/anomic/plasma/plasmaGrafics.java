@@ -147,8 +147,11 @@ public class plasmaGrafics {
         final Iterator<String> i = query.queryHashes.iterator();
         eventPicture.setColor(ymageMatrix.GREY);
         while (i.hasNext()) {
-            angle = (int) (360.0 * (((double) yacySeed.dhtPosition(i.next())) / ((double) Long.MAX_VALUE)));
-            eventPicture.arcLine(cx, cy, cr - 20, cr, angle);
+            long[] positions = yacySeed.dhtPositions(i.next(), seedDB.partitionExponent);
+            for (int j = 0; j < positions.length; j++) {
+                angle = (int) (360.0 * (((double) positions[j]) / ((double) Long.MAX_VALUE)));
+                eventPicture.arcLine(cx, cy, cr - 20, cr, angle);
+            }
         }
 
         return eventPicture;

@@ -90,6 +90,9 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
     public int lastSeedUpload_seedDBSize = 0;
     public long lastSeedUpload_timeStamp = System.currentTimeMillis();
     public String lastSeedUpload_myIP = "";
+
+    public  int netRedundancy;
+    public  int partitionExponent;
     
     private yacySeed mySeed; // my own seed
     
@@ -100,12 +103,16 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
             final File seedActiveDBFile,
             final File seedPassiveDBFile,
             final File seedPotentialDBFile,
-            final File myOwnSeedFile) {
+            final File myOwnSeedFile, 
+            final int redundancy,
+            final int partitionExponent) {
         this.seedActiveDBFile = seedActiveDBFile;
         this.seedPassiveDBFile = seedPassiveDBFile;
         this.seedPotentialDBFile = seedPotentialDBFile;
         this.mySeed = null; // my own seed
         this.myOwnSeedFile = myOwnSeedFile;
+        this.netRedundancy = redundancy;
+        this.partitionExponent = partitionExponent;
         
         // set up seed database
         seedActiveDB = openSeedTable(seedActiveDBFile);

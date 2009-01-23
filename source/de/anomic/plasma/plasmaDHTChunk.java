@@ -39,6 +39,7 @@ import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroDigest;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.server.logging.serverLog;
+import de.anomic.yacy.yacyPeerSelection;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacySeedDB;
 
@@ -59,6 +60,7 @@ public class plasmaDHTChunk {
     private indexContainer[] indexContainers = null;
     private HashMap<String, indexURLReference> urlCache; // String (url-hash) / plasmaCrawlLURL.Entry
     private int idxCount;
+    private ArrayList<yacySeed> targets;
     
     private long selectionStartTime = 0;
     private long selectionEndTime = 0;
@@ -85,6 +87,10 @@ public class plasmaDHTChunk {
         return this.idxCount;
     }
     
+    public ArrayList<yacySeed> targets() {
+        return this.targets;
+    }
+    
     private int indexCounter() {
         int c = 0;
         for (int i = 0; i < indexContainers.length; i++) {
@@ -105,17 +111,43 @@ public class plasmaDHTChunk {
         return this.status;
     }
     
-    public plasmaDHTChunk(final serverLog log, final plasmaWordIndex wordIndex, final int minCount, final int maxCount, final int maxtime, String startPointHash) {
+    public plasmaDHTChunk(
+            final serverLog log,
+            final plasmaWordIndex wordIndex,
+            final int minContainerCount,
+            final int maxContainerCount,
+            final int maxtime,
+            final String startPointHash) {
         try {
             this.log = log;
             this.wordIndex = wordIndex;
             this.startPointHash = startPointHash;
             if (this.log.isFine()) log.logFine("Selected hash " + this.startPointHash + " as start point for index distribution, distance = " + yacySeed.dhtDistance(this.startPointHash, wordIndex.seedDB.mySeed()));
-            selectTransferContainers(this.startPointHash, minCount, maxCount, maxtime);
+            this.selectionStartTime = System.currentTimeMillis();
+            
+            // find target peers for the containers
+            int peerCount = wordIndex.seedDB.netRedundancy * 3 + 1;
+            final Iterator<yacySeed> seedIter = yacyPeerSelection.getAcceptRemoteIndexSeeds(wordIndex.seedDB, this.startPointHash, peerCount, false);
+            this.targets = new ArrayList<yacySeed>();
+            while (seedIter.hasNext() && peerCount-- > 0) this.targets.add(seedIter.next());
 
+            // select the containers:
+
+            // select from RAM
+            final int refcountRAM = selectTransferContainersResource(this.startPointHash, true, maxContainerCount, maxtime);
+            if (refcountRAM >= minContainerCount) {
+                if (this.log.isFine()) log.logFine("DHT selection from RAM: " + refcountRAM + " entries");
+            } else {
+                // select from DB
+                final int refcountFile = selectTransferContainersResource(this.startPointHash, false, maxContainerCount, maxtime);
+                if (this.log.isFine()) log.logFine("DHT selection from FILE: " + refcountFile + " entries, RAM provided only " + refcountRAM + " entries");
+            }
+            
+            this.selectionEndTime = System.currentTimeMillis();
+            
             // count the indexes, can be smaller as expected
             this.idxCount = indexCounter();
-            if (this.idxCount < minCount) {
+            if (this.idxCount < minContainerCount) {
                 if (this.log.isFine()) log.logFine("Too few (" + this.idxCount + ") indexes selected for transfer.");
                 this.status = chunkStatus_FAILED;
             }
@@ -125,31 +157,21 @@ public class plasmaDHTChunk {
     }
 
     public static String selectTransferStart() {
+        // a random start point. It is dangerous to take a computed start point, because it could cause a flooding at specific target peers, because
+        // the community of all peers would use the same method for target computation. It is better to just use a random start point.
         return kelondroBase64Order.enhancedCoder.encode(kelondroDigest.encodeMD5Raw(Long.toString(System.currentTimeMillis()))).substring(2, 2 + yacySeedDB.commonHashLength);
     }
 
-    private void selectTransferContainers(final String hash, final int mincount, final int maxcount, final int maxtime) throws InterruptedException {        
-        try {
-            this.selectionStartTime = System.currentTimeMillis();
-            final int refcountRAM = selectTransferContainersResource(hash, true, maxcount, maxtime);
-            if (refcountRAM >= mincount) {
-                if (this.log.isFine()) log.logFine("DHT selection from RAM: " + refcountRAM + " entries");
-                return;
-            }
-            final int refcountFile = selectTransferContainersResource(hash, false, maxcount, maxtime);
-            if (this.log.isFine()) log.logFine("DHT selection from FILE: " + refcountFile + " entries, RAM provided only " + refcountRAM + " entries");
-            return;
-        } finally {
-            this.selectionEndTime = System.currentTimeMillis();
-        }
-    }
-
-    private int selectTransferContainersResource(final String hash, final boolean ram, final int maxcount, final int maxtime) throws InterruptedException {
+    private int selectTransferContainersResource(final String hash, final boolean ram, final int maxContainerCount, final int maxtime) throws InterruptedException {
         // if (maxcount > 500) { maxcount = 500; } // flooding & OOM reduce
         // the hash is a start hash from where the indexes are picked
-        final ArrayList<indexContainer> tmpContainers = new ArrayList<indexContainer>(maxcount);
+
+        // the peer hash of the first peer is the upper limit for the collection
+        String limitHash = this.targets.get(0).hash;
+        
+        final ArrayList<indexContainer> tmpContainers = new ArrayList<indexContainer>(maxContainerCount);
         try {
-            final Iterator<indexContainer> indexContainerIterator = wordIndex.indexContainerSet(hash, ram, true, maxcount).iterator();
+            final Iterator<indexContainer> indexContainerIterator = wordIndex.indexContainerSet(hash, ram, true, maxContainerCount).iterator();
             indexContainer container;
             Iterator<indexRWIRowEntry> urlIter;
             indexRWIRowEntry iEntry;
@@ -158,15 +180,14 @@ public class plasmaDHTChunk {
             int wholesize;
 
             urlCache = new HashMap<String, indexURLReference>();
-            final long maximumDistanceLong = Long.MAX_VALUE / wordIndex.seedDB.sizeConnected() * wordIndex.netRedundancy * 2;
             final long timeout = (maxtime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxtime;
             while (
-                    (maxcount > refcount) &&
+                    (maxContainerCount > refcount) &&
                     (indexContainerIterator.hasNext()) &&
                     ((container = indexContainerIterator.next()) != null) &&
                     (container.size() > 0) &&
                     ((tmpContainers.size() == 0) ||
-                     (Math.abs(yacySeed.dhtPosition(container.getWordHash()) - yacySeed.dhtPosition(tmpContainers.get(0).getWordHash())) < maximumDistanceLong)) &&
+                     (kelondroBase64Order.enhancedComparator.compare(container.getWordHash(), limitHash) < 0)) &&
                     (System.currentTimeMillis() < timeout)
             ) {
                 // check for interruption
@@ -178,7 +199,7 @@ public class plasmaDHTChunk {
                     wholesize = container.size();
                     urlIter = container.entries();
                     // iterate over indexes to fetch url entries and store them in the urlCache
-                    while ((urlIter.hasNext()) && (maxcount > refcount) && (System.currentTimeMillis() < timeout)) {
+                    while ((urlIter.hasNext()) && (maxContainerCount > refcount) && (System.currentTimeMillis() < timeout)) {
                         // CPU & IO reduce
                         // try { Thread.sleep(50); } catch (InterruptedException e) { }
 
