@@ -37,6 +37,7 @@ import de.anomic.server.serverCore;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.server.serverSystem;
 import de.anomic.server.serverThread;
 import de.anomic.tools.yFormatter;
 
@@ -68,9 +69,11 @@ public class PerformanceQueues_p {
             if (post.containsKey("Xmx")) {
                 int xmx = 120; // default maximum heap size
                 try { xmx = Integer.valueOf(post.get("Xmx", "120")).intValue(); } catch (final NumberFormatException e){}
-                sb.setConfig("javastart_Xmx", "Xmx" + xmx + "m");
-                sb.setConfig("javastart_Xms", "Xms" + xmx + "m");
-                prop.put("setStartupCommit", "1");
+                if (!(serverSystem.isWin32 && xmx >= 2000)){
+	                sb.setConfig("javastart_Xmx", "Xmx" + xmx + "m");
+	                sb.setConfig("javastart_Xms", "Xms" + xmx + "m");
+	                prop.put("setStartupCommit", "1");
+                }
             }
         }
         final Map<String, String> defaultSettings = ((post == null) || (!(post.containsKey("submitdefault")))) ? null : serverFileUtils.loadHashMap(defaultSettingsFile);

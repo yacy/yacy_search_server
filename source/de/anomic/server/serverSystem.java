@@ -51,6 +51,7 @@ public final class serverSystem {
 	public static final boolean isUnixFS;
 	public static final boolean canExecUnix;
 	public static final boolean isWindows;
+	public static final boolean isWin32;
 
 	// calculated system constants
 	public static int maxPathLength = 65535;
@@ -83,6 +84,7 @@ public final class serverSystem {
 		isUnixFS = ((systemOS == systemMacOSX) || (systemOS == systemUnix));
 		canExecUnix = ((isUnixFS) || (!((systemOS == systemMacOSC) || (systemOS == systemWindows))));
 		isWindows = (systemOS == systemWindows);
+		isWin32 = (isWindows && System.getProperty("os.arch", "").contains("x86"));
 
 		// set up the MRJ Methods through reflection
 		if (isMacArchitecture) try {
