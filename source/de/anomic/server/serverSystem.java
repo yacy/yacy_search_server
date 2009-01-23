@@ -299,11 +299,11 @@ public final class serverSystem {
 					p.waitFor();
 					if (p.exitValue() != 0) throw new RuntimeException("EXEC ERROR: " + errorResponse(p));
 				} else if (systemOS == systemUnix) {
-					cmd = app + " -remote openURL(" + url + ") &";
+					cmd = app + " -remote openURL(" + url + ")";
 					p = Runtime.getRuntime().exec(cmd);
 					p.waitFor();
 					if (p.exitValue() != 0) {
-						cmd = app + " "  + url + " &";
+						cmd = app + " "  + url;
 						p = Runtime.getRuntime().exec(cmd);
 						// no error checking, because it blocks until firefox is closed
 					}
