@@ -124,17 +124,21 @@ public class yacyURL implements Serializable {
         
         // handle international domains
         if (!Punycode.isBasic(host)) try {
-            final int d1 = host.lastIndexOf('.');
-            if (d1 >= 0) {
-                final String tld = host.substring(d1 + 1);
-                final String dom = host.substring(0, d1);
-                final int d0 = dom.lastIndexOf('.');
-                if (d0 >= 0) {
-                    host = dom.substring(0, d0) + ".xn--" + Punycode.encode(dom.substring(d0 + 1)) + "." + tld;
-                } else {
-                    host = "xn--" + Punycode.encode(dom) + "." + tld;
-                }
+            final String[] domainParts = host.split("\\.");
+            StringBuilder buffer = new StringBuilder();
+            // encode each domainpart seperately
+            for(int i=0; i<domainParts.length; i++) {
+        	final String part = domainParts[i];
+        	if(!Punycode.isBasic(part)) {
+        	    buffer.append("xn--" + Punycode.encode(part));
+        	} else {
+        	    buffer.append(part);
+        	}
+        	if(i != domainParts.length-1) {
+        	    buffer.append('.');
+        	}
             }
+            host = buffer.toString();
         } catch (final PunycodeException e) {}
     }
 

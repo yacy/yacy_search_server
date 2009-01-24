@@ -1053,9 +1053,9 @@ public final class httpdFileHandler {
                 } else {
                     if ((errorMsg != null) && 
                         (
-                           errorMsg.startsWith("Broken pipe") || 
-                           errorMsg.startsWith("Connection reset") ||
-                           errorMsg.startsWith("Software caused connection abort")                           
+                           errorMsg.contains("broken pipe") || 
+                           errorMsg.contains("Connection reset") ||
+                           errorMsg.contains("Software caused connection abort")                           
                        )) {
                         // client closed the connection, so we just end silently
                         errorMessage.append("Client unexpectedly closed connection while processing query.");
