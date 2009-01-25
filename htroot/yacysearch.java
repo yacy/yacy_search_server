@@ -232,7 +232,13 @@ public class yacysearch {
                 String ft = querystring.substring(filetype + 9, ftb);
                 query[0].remove("filetype:" + ft.toLowerCase());
                 while(ft.startsWith(".")) ft = ft.substring(1);
-                if(ft.length() > 0) urlmask = urlmask + ".*\\." + ft;
+                if(ft.length() > 0) {
+                    if (urlmask == null) {
+                        urlmask = ".*\\." + ft;
+                    } else {
+                        urlmask = urlmask + ".*\\." + ft;
+                    }
+                }
             }
             int site = querystring.indexOf("site:");
             if (site >= 0) {
@@ -242,7 +248,13 @@ public class yacysearch {
                 query[0].remove("site:" + domain.toLowerCase());
                 while(domain.startsWith(".")) domain = domain.substring(1);
                 if (domain.indexOf(".") < 0) domain = "\\." + domain; // is tld
-                if (domain.length() > 0) urlmask = "[a-zA-Z]*://[^/]*" + domain + "/.*" + urlmask;
+                if (domain.length() > 0) {
+                    if (urlmask == null) {
+                        urlmask = "[a-zA-Z]*://[^/]*" + domain + "/.*";
+                    } else {
+                        urlmask = "[a-zA-Z]*://[^/]*" + domain + "/.*" + urlmask;
+                    }
+                }
             }
             if (urlmask == null){
 	            if (post.containsKey("urlmask") && post.get("urlmask").equals("no")) { // option search all
