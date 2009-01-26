@@ -10,6 +10,17 @@ function loadBanner() {
 }
 $(function() {
 	loaderBanner = window.setInterval("loadBanner()", 5000);
+	$("#login").click(function() {
+		$.ajax({
+   			url: "/api/bookmarks/xbel/xbel.xml?login=true",
+   			method : "GET",
+   			dataType: "xml",    			
+   			success: function(xml) {
+   				// ToDo: /api/util/login.xml
+   				// alert("Login");
+   			}    			
+		});          
+	});		
 }) 
 //]]>
 </script>
@@ -39,7 +50,7 @@ $(function() {
 			</a>
 		</td>
 		<td>
-			<a id="shutdown" href="#Shutdown">
+			<a href="../../Steering.html?shutdown=">
 				<img alt="Shutdown" title="Shutdown" src="img-1/Stop%20Red%20Button.png" border="0"/>
 				<br />
 				Shutdown

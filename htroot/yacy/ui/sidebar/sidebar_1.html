@@ -34,28 +34,6 @@
 		});
 		
 		/* Menu .click(function() */
-		$("#login").click(function() {
-			$.ajax({
-    			url: "/api/bookmarks/xbel/xbel.xml?login=true",
-    			method : "GET",
-    			dataType: "xml",    			
-    			success: function(xml) {
-    				// ToDo: /api/util/login.xml
-    				// alert("Login");
-    			}    			
-			});          
-		});
-		
-		$("#shutdown").click(function() {
-			if ( confirm("Shutdown YaCy-Peer?") ) {
-				$("body").load("../../Steering.html?shutdown=");
-			}		
-		});
-		
-		$("#admin").click(function() { 
-			$tabs.tabs('select',1); 
-		});
-		
 		$("#searchtext").click(function () { 
 			$("#side2").accordion("activate", 0); 
 		});
@@ -65,9 +43,9 @@
 			if ($("select[@name='resource']").getValue() == "ymarks") {								
 				qtag = $("input[@name='search']").getValue();				
 				if (tabid == "#Bookmarks") {
-					$tabs.tabs("load", 3);
+					reloadBM();
 				} else {
-					$tabs.tabs('select',3);
+					$tabs.tabs('select',2);
 				}						
 			} else {			
 				var tabnr = $tabs.tabs('length');			
