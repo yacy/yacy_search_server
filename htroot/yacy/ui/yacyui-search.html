@@ -1,137 +1,144 @@
-<script type="application/javascript">
-  //<![CDATA[
-	$(document).ready(function() {				
+<script type="text/javascript">
+   //<![CDATA[
+	$(document).ready(function() {
 		$("#side3").accordion("activate", 0);
-		$.ajax({
-			type: "GET",
-			url: query,
-			async: false,
-			dataType: "xml",
-			success: function(xml) {
-				if (($.browser.mozilla && (parseInt($.browser.version.replace(".","","g")) > 1800))) {					
-					var totalResults = parseInt($(xml).find('opensearch\\:totalResults').text().replace(",","","g"));
-					var startIndex = parseInt($(xml).find('opensearch\\:startIndex').text());				
-					var itemsPerPage = parseInt($(xml).find('opensearch\\:itemsPerPage').text());				
-					var query = $(xml).find('opensearch\\:Query').attr('searchTerms');													
-				} else {					
-					var totalResults = parseInt($(xml).find('totalResults').text().replace(",","","g"));
-					var startIndex = parseInt($(xml).find('startIndex').text());				
-					var itemsPerPage = parseInt($(xml).find('itemsPerPage').text());
-					var query = $(xml).find('Query').attr('searchTerms');
-				}
-				$(xml).find('item').each(function(){					
-					var title = $(this).find('title').text();
-					var link = $(this).find('link').text();
-					var desc = $(this).find('description').text();
-					var hash = $(this).find('guid').text();
-					var date = $(this).find('pubDate').text();
-					var tags = "";
-					$('<tr></tr')
-						.html('<td>' +hash+ '</td><td>' +''+ '</td><td><h3 class="linktitle">' +HTMLenc(title)+ '</h3><p class="desc">' +HTMLenc(desc)+ '</p><p class="url"><a href="' +link+ '">' +link+ '</a></p><td>' +HTMLenc(tags)+ ' </td><td>' +date+ '</td>')						
-						.appendTo(tabid+" .yresult tbody");										
-				}); //close each(
-				var height=document.documentElement.clientHeight - 205;    			
-    			var page = "&nbsp;" + (startIndex+1) + "-" + (startIndex+itemsPerPage) + " of " + totalResults;	
-				$(tabid+" .yresult").flexigrid({
-    				colModel: [
-						{display: 'Hash', name : 'hash', width : 50, sortable : false, align: 'center', hide: true},
-						{display: '', name : 'public', width : 25, sortable : true, align: 'center'},
-						{display: 'Title', name : 'title', width : 450, sortable : true, align: 'left'},
-						{display: 'Tags', name : 'tags', width : 240, sortable : false, align: 'left'},
-						{display: 'Date', name : 'date', width : 130, sortable : true, align: 'left'}
-					],
-					buttons: [
-						{name: 'Crawl', bclass: 'crawl', onpress: yaction},
-						{name: 'Open', bclass: 'pictures', onpress: yaction},
-						{separator: true},
-						{name: 'Bookmark', bclass: 'bookmark', onpress: yaction},
-						{separator: true},						
-						{name: 'Blacklist', bclass: 'blacklist', onpress: yaction},
-						{separator: true},
-						{name: 'Refresh', bclass: 'load', onpress: yload},
-						{name: 'RSS', bclass: 'rss', onpress: yaction},
-						{separator: true},						
-						{name: page, bclass: 'prev', onpress: yload},						
-						{name: '&nbsp;', bclass: 'next', onpress: yload},
-						{separator: true},
-						{name: 'Help', bclass: 'help', onpress:yaction},						
-					],										
-					striped: true,
-					nowrap: false,			 									    				
-    				height: height,					
-    				title: 'YaCy P2P Web Search: '+query										    				
-    			});	
-			}
-		}); //close $.ajax(
-		
-		/*
-		$(".linktitle a").faviconize({
-			position: "before",
-			defaultImage: "img-2/article.png",
-			className: "favicon"
-		});
-		*/
-		
-		function yaction(com, grid) { 
-			if (com == 'Bookmark') { 
-				confirm('Add ' + $('.trSelected',grid).length + ' search results to bookmark(s)?')				
-				$('.trSelected',grid).each(function(){
-					var url = $(this).find('.url').text();
-            		var title = $(this).find('.linktitle').text();
-            		var desc = $(this).find('.desc').text();            		
-            		var tags = $(tabid).attr('search');
-            		var path = "/searchResults";
-            		var pub = "private";            		
-            		var query = "&url="+url+"&title="+title+"&description="+desc+"&tags="+tags+"&path="+path+"&public="+pub+"&add=create";            		
-            		$.ajax({
-						type: "POST",
-						url: "/api/bookmarks/posts/add_p.xml?login="+query,			
-						dataType: "xml",
-						success: function(xml) {
-            				alert("Debug: posted bookmark for: "+url);            					
-            			}
-					});
-            	});	
-			} else if (com =='Open') {
-				$('.trSelected',grid).each(function(){
-					var url = $(this).find('.url').text();
-					window.open(url);
+		var height=document.documentElement.clientHeight - 240;
+				    			
+ 		$(tabid+" .yresult").flexigrid({
+	 		url: '/yacysearch.json',
+			dataType: 'json',
+	 		method: 'GET',
+	 		query: $(tabid).attr('search'),
+	 		colModel: [	
+				{display: 'Hash', name : 'hash', width : 50, sortable : false, align: 'center', hide: true},
+				{display: 'Public', name : 'public', width : 25, sortable : true, align: 'center'},
+				{display: 'Title', name : 'title', width : 450, sortable : true, align: 'left'},
+				{display: 'Tags', name : 'tags', width : 240, sortable : false, align: 'left'},
+				{display: 'Folders', name : 'folders', width : 240, sortable : false, align: 'left', hide: true},
+				{display: 'Date', name : 'date', width : 100, sortable : true, align: 'left'}
+			],
+			buttons: [
+				{name: 'Crawl', bclass: 'crawl', onpress: yaction},
+				{name: 'Open', bclass: 'pictures', onpress: yaction},
+				{separator: true},
+				{name: 'Bookmark', bclass: 'bookmark', onpress: yaction},						
+				{name: 'Blacklist', bclass: 'blacklist', onpress: yaction},
+				{separator: true},
+				{name: 'Help', bclass: 'help', onpress:yaction},						
+			],												
+			useRp: true,
+			rp: 10,
+			usepager: true,					
+			striped: true,
+			nowrap: false,			 									    				
+	 		height: height,
+	 		autoload: true,
+	 		onSuccess: function() {
+	 			$("a.favicon").faviconize({
+					position: "before",
+					defaultImage: "img-2/article.png",
+					className: "favicon"
 				});
-			} else {
-				alert("Test!");
-			}
+	 		},
+	 		preProcess: function(data) {
+		   		var total = data.channels[0].totalResults.replace(/[,.]/,"");  		
+		   		var page = (data.channels[0].startIndex / data.channels[0].itemsPerPage) + 1;				   		   	
+			   	var rows = {};
+			   	$.each (
+					data.channels[0].items,
+					function(i,item) {
+						if (item) {
+							var html = "<h3 class='linktitle'>"+item.title+"</h3><p class='desc'>"+item.description+"</p><p class='url'><a href='"+item.link+"'>"+item.link+"</a>"
+							var fav = "<a class='favicon' href='"+item.link+"'></a>";
+							rows[i] = {id: item.guid, cell: [item.guid, fav, html, "Tags", "Folders", item.pubDate]};
+						}								
+					}
+				);
+				var pdata = {
+					page: page,
+					total: total,
+					rows: rows							
+				};
+				return pdata;		 				
+	 		},	 		
+	 		onSubmit: function() {
+	 			var p = this;
+	 			var g = $(tabid+" .yresult");	 							
+
+				$('.pPageStat',this.pDiv).html(p.procmsg);
+				$('.pReload',this.pDiv).addClass('loading');
+				if (g.bDiv) $(g.block).css({top:g.bDiv.offsetTop});
+				if (p.hideOnSubmit) $(this.gDiv).prepend(g.block); //$(t).hide();
+				if ($.browser.opera) $(t).css('visibility','hidden');				
+				if (!p.newp) p.newp = 1;				
+				if (p.page>p.pages) p.page = p.pages;
+
+				var offset = p.newp * p.rp -p.rp; 				
+				
+				var param = [
+					 { name : 'startRecord', value : offset }
+					,{ name : 'maximumRecords', value : p.rp }
+					,{ name : 'resource', value : $(tabid).attr('resource')}
+					,{ name : 'verify', value : "true" }
+					,{ name : 'search', value : p.query}
+					,{ name : 'urlmaskfilter', value : $(tabid).attr('urlmaskfilter')}
+					,{ name : 'prefermaskfilter', value : $(tabid).attr('prefermaskfilter')}
+					,{ name : 'contentdom', value : $(tabid).attr('contentdom')}
+					,{ name : 'constraint', value : $(tabid).attr('constraint')}
+					,{ name : 'language', value : $(tabid).attr('language')}
+				];
+						 
+				if (p.params) {
+					for (var pi = 0; pi < p.params.length; pi++) param[param.length] = p.params[pi];
+				}
+				$.ajax({
+				   type: p.method,
+				   url: p.url,
+				   data: param,
+				   dataType: p.dataType,
+				   success: function(data){
+				   		/* yacy limits itemsPerPage for unauthenticated users */
+						p.rp = parseInt(data.channels[0].itemsPerPage);											
+						g.flexAddData(data);
+				   },
+				   error: function(data) { 
+				   		try { if (p.onError) p.onError(data); } catch (e) {} 
+				   }
+				});				
+	 		}								    				
+ 		});
+	});
+	function yaction(com, grid) { 
+		if (com == 'Bookmark') { 
+			confirm('Add ' + $('.trSelected',grid).length + ' search results to bookmark(s)?')				
+			$('.trSelected',grid).each(function(){
+				var url = $(this).find('.url').text();
+           		var title = $(this).find('.linktitle').text();
+           		var desc = $(this).find('.desc').text();            		
+           		var tags = $(tabid).attr('search');
+           		var path = "/searchResults";
+           		var pub = "private";            		
+           		var query = "&url="+url+"&title="+title+"&description="+desc+"&tags="+tags+"&path="+path+"&public="+pub+"&add=create";            		
+           		$.ajax({
+					type: "POST",
+					url: "/xml/bookmarks/posts/add_p.xml?login="+query,			
+					dataType: "xml",
+					success: function(xml) {
+           				alert("Debug: posted bookmark for: "+url);            					
+           			}
+				});
+           	});	
+		} else if (com =='Open') {
+			$('.trSelected',grid).each(function(){
+				var url = $(this).find('.url').text();
+				window.open(url);
+			});
+		} else {
+			alert("Test!");
 		}
-		function yload(com, grid) {
-			var $tabs = $('#container ul');
-			var count = parseInt($(tabid).attr('count'));
-			var offset = parseInt($(tabid).attr('offset'));			
-			if (com == '&nbsp;') { 
-				offset = offset+count;
-			}
-			else if (com == 'Refresh') {
-				offset = 0;
-			}
-			else if (offset > count) {
-				offset = offset-count;
-			}
-			$(tabid).attr('offset', offset);
-			query = $(tabid).attr('resource')
-				+"&search="+$(tabid).attr('search')
-				+"&contentdom="+$(tabid).attr('contentdom')
-				+"&count="+$(tabid).attr('count')			
-				+"&offset="+$(tabid).attr('offset')
-				+"&constraint="+$(tabid).attr('constraint')
-				+"&prefermaskfilter="+$(tabid).attr('prefermaskfilter')
-				+"&urlmaskfilter="+$(tabid).attr('urlmaskfilter');
-					
-			var selected = $tabs.data('selected.tabs');
-			$tabs.tabs("load", selected);
-			return false;
-		}					
-	 }); //close $(
+	}		
   //]]>
-</script>
+</script>		
 <table class="yresult">
 	<tbody></tbody>
 </table>
-

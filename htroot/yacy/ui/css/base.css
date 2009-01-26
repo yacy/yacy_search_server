@@ -7,6 +7,47 @@ div.main {
   height:100%;
 }
 
+.yresult .favicon {
+	width: 16px; 
+	height: 16px;
+	padding: 5px 1px 1px 15px;	/* top right bottom left */			
+}
+
+/* Admin Console */
+.banner {
+	margin-top: 20px;
+	margin-bottom: 0px;	
+}
+table.adminconsole {
+	width:100%;
+	margin:8px 0px 6px 0px;
+	display:inline-block;
+
+}
+table.adminconsole td {
+	width: 63px;
+	text-align:center;
+}
+table.adminconsole td.head {
+	text-align:left;
+}
+table.adminconsole h3 {
+	margin-top: 15px;
+	margin-bottom: 5px;
+	font-size: 14px;
+	color: #27537a;	
+}
+table.adminconsole img {
+	width: 32px; 
+	height: 32px;
+	padding: 1px 1px 7px 1px;	/* top right bottom left */
+	vertical-align: middle;
+}
+table.adminconsole a {
+	text-decoration:none;
+	color: black;	
+}
+
 
 /* Searchbox */
 table.contentdom {
@@ -57,19 +98,10 @@ div.ys {
 }
 
 /* Sidebar */
-
-
-
 div.sidebar {     
   margin-right: 1em;
   float:left;
   width:250px;
-}
-.menu img {
-  width: 32px; 
-  height: 32px;
-  padding: 2px 15px 2px 2px;
-  vertical-align: middle;
 }
 .menu img.logo {
   width: 256px; 
@@ -236,7 +268,7 @@ dl.pairs dt {
 	border: 1px solid black;
 	text-decoration: none;	
 	font-size: 14px;
-	max-height: 220px;
+	max-height: 320px;
 	overflow-x: hidden;
 	overflow-y: auto;
 }

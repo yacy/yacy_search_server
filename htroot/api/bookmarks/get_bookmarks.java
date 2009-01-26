@@ -114,7 +114,7 @@ public class get_bookmarks {
 	    	// default covers all non XBEL formats
        		
        		// set bookmark iterator according to query
-	       	if (qtype.equals("tags") && !query.equals("")) {       		
+	       	if (qtype.equals("tags") && !query.equals("") && !query.equals("/")) {       		
 	       		it = sb.bookmarksDB.getBookmarksIterator(query, isAdmin);
 	       	} else {       		
 	       		it = sb.bookmarksDB.getBookmarksIterator(isAdmin);

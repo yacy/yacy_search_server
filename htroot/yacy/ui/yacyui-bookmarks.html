@@ -1,10 +1,10 @@
 <script type="text/javascript">
    //<![CDATA[
 	$(document).ready(function() {
-		$("#side1").accordion("activate", 0);
+		$("#side1").accordion("activate", 1);
 		// $("#side2").accordion("activate", 1);
 		// $('#yoptions').resetForm();		
-
+		
 		var height=document.documentElement.clientHeight - 240;    			
  		$('#ymarks').flexigrid({
 	 		url: '/api/bookmarks/get_bookmarks.json?display=1',
@@ -45,19 +45,21 @@
 			striped: true,
 			nowrap: false,			 									    				
 	 		height: height,
+	 		query: qtag,
+	 		qtype: "tags",
 	 		title: 'YaCy Bookmarks: ' + HTMLenc(qtag)										    				
  		});    			
 
 	});
 	function bm_action(com,grid) {
 		if (com=='XBEL') {
-			window.document.location.href = '/api/bookmarks/xbel/xbel.xml';
+			window.document.location.href = '/api/bookmarks/get_bookmarks.xml?display=xbel';
 		}
 		else if (com=='RSS') {
 			window.document.location.href = '/Bookmarks.rss';
 		}
 		else if (com=='XML') {
-			window.document.location.href = '/api/bookmarks/posts/all.xml';
+			window.document.location.href = '/api/bookmarks/get_bookmarks.xml';
 		}
 		else if (com=='Delete') {
 			confirm('Delete ' + $('.trSelected',grid).length + ' bookmark(s)?')				

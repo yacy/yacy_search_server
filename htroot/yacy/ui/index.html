@@ -30,10 +30,13 @@
   <script src="js/jquery.field.min.js" type="text/javascript"></script>
   
   <script src="js/jquery.pagination.js" type="text/javascript"></script>
+  
   <script src="js/jquery-faviconize-1.0.js" type="text/javascript"></script>
   
-  <script src="js/jquery-flexigrid.js" type="text/javascript"></script>
+  <script src="js/jquery-flexigrid.js" type="text/javascript"></script>  
   <script src="js/jquery.treeview.min.js" type="text/javascript"></script>
+  <script src="js/jquery.treeview.async.js" type="text/javascript"></script>
+
   <script src="js/jquery.xslTransform.js" type="text/javascript"></script> 
   
   <script type="text/javascript">
@@ -81,30 +84,16 @@
 					$("select[@name='resource']").setValue('ymarks');
 					$("input[@name='contentdom']").setValue('text');
 					$("input[@name='search']").setValue(qtag);									
-				} else {				
-					/* set query string */				
+				} else {
 					var search = $(tabid).attr('search');
 					var contentdom = $(tabid).attr('contentdom');
-					var count = $(tabid).attr('count');
-					var offset = $(tabid).attr('offset');
 					var resource = $(tabid).attr('resource');
 					var constraint= $(tabid).attr('constraint');
 					var prefermaskfilter = $(tabid).attr('prefermaskfilter');
 					var urlmaskfilter = $(tabid).attr('urlmaskfilter');
 					var language = $(tabid).attr('language');
-
-					query = $(tabid).attr('resource')
-						+"&search="+search
-						+"&contentdom="+contentdom
-						+"&count="+count
-						+"&offset="+offset
-						+"&urlmaskfilter="+urlmaskfilter;
-					if (constraint!="") { query = query+"&constraint="+constraint; };
-					if (prefermaskfilter!="") { query = query+"&prefermaskfilter="+prefermaskfilter; };					
-					if (language!="") { query = query+"&lr=lang_"+language; };
 					
 					$("input[@name='search']").setValue(search);
-					$("select[@name='itemsPerPage']").setValue(count);
 					$("input[@name='contentdom']").setValue(contentdom);
 					$("select[@name='constraint']").setValue(constraint);
 					$("input[@name='prefermaskfilter']").setValue(prefermaskfilter);
@@ -136,8 +125,7 @@
         var desc = $("textarea[@name='bm_desc']").getValue();            		
         var tags = $("input[@name='bm_tags']").getValue()
         var path = $("input[@name='bm_path']").getValue();
-        var pub = $("select[@name='bm_public']").getValue();            		
-        // var query = "&url="+url+"&title="+title+"&description="+desc+"&tags="+tags+"&path="+path+"&public="+pub+"&add=create";            		
+        var pub = $("select[@name='bm_public']").getValue();
         $.ajax({
 			type: "POST",
 			url: "/api/bookmarks/posts/add_p.xml",
@@ -146,12 +134,19 @@
 			success: function(xml) {
          		$('#bmaddform').resetForm();
          		$("#bm_url").unbind('blur');
-         		$("#bmadd").dialog("close");		
-				loadFolders();
+         		$("#bmadd").dialog("close");				
 				loadTagCloud();
-				$tabs.tabs("load", 3);
+				reloadBM();
    			}
    		});	 
+	}
+	function reloadBM() {
+		$('#ymarks').flexOptions({
+			query: qtag,
+			qtype: "tags"
+		});
+		$('div.ftitle').empty().html('YaCy Bookmarks: ' + HTMLenc(qtag));
+		$('#ymarks').flexReload();
 	}
 	//]]>	
   </script>  
@@ -169,8 +164,7 @@
 		<ul>
 			<!-- initial tabs only, dynamic tabs are loaded via jQuery -->
 			<li><a href="yacyui-welcome.html" title="About YaCy-UI"><span>About YaCy-UI</span></a></li>
-			<li><a href="yacyui-admin.html" title="Admin Console"><span>Admin Console</span></a></li>
-			<li><a href="yacyui-compare.html" title="Compare Search"><span>Compare Search</span></a></li>			
+			<li><a href="yacyui-admin.html" title="Admin Console"><span>Admin Console</span></a></li>						
 			<li><a href="yacyui-bookmarks.html" title="Bookmarks"><span>Bookmarks</span></a></li>			
 		</ul>		
 	</div>

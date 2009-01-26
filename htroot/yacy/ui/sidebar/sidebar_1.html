@@ -5,9 +5,33 @@
   		/* Init Sidebar_1 */
   		$("#side1").accordion({
 			autoHeight: false,
+			clearStyle: true,
 			header: "h3"
 		});
 		$("#side1").accordion("activate", 2);		
+
+		$("#yfolder").treeview({
+			url: "/api/bookmarks/get_folders.json?bmtype=href",
+			unique: false,
+			toggle: function() {
+				var $this = $(this);
+				if ($this.hasClass("expandable")) {					
+					var select = "li:has(ul li[id="+$this.attr("id")+"])";
+					qtag = $(select).attr("id");
+					if (!qtag) qtag = "/";
+					$this.addClass("hasChildren");
+					$this.find("ul").empty();
+					if (tabid == "#Bookmarks") {
+						reloadBM();
+					}					
+				} else if ($this.hasClass("collapsable")) {					
+					qtag = $this.attr("id");
+					if (tabid == "#Bookmarks") {
+						reloadBM();
+					} 		
+				}
+			}				
+		});
 		
 		/* Menu .click(function() */
 		$("#login").click(function() {
@@ -239,29 +263,10 @@
 		</p>
 	</form>
 </div>
-<h3>YaCy Project</h3><!-- 1 -->
+<h3>Bookmark Folders<span id="sidebar-1-3"></span></h3><!-- 1 --> 
 <div class="menu">
-		<img alt="YaCy Project Home" title="YaCy Project Home" src="img-1/home.png" />
-			<a href="http://www.yacy.net" >YaCy Home</a><br />
-		<img alt="YaCy Statistics" title="YaCy Statistics" src="img-2/bar_graph.png" />
-			<a href="http://www.yacystats.de" >YaCy Statistics</a><br />
-		<img alt="YaCy Forum" title="YaCy Forum" src="img-1/Discussion.png" />
-			<a href="http://forum.yacy-websuche.de/" >YaCy Forum</a><br />
-		<img alt="Help" title="YaCy Wiki" src="img-1/Help%20Blue%20Button.png" />
-			<a href="http://yacy-websuche.de/wiki/index.php/Hauptseite" >YaCy Wiki</a><br />
+	<ul class="filetree" id="yfolder"></ul>
 </div>
-<h3>YaCy Peer Admin</h3><!-- 2 -->
-<div class="menu">
-		<img alt="Login" title="Login" src="img-1/User.png" />
-			<a id="login" href="#Login">Login</a><br />
-		<img alt="Admin Console" title="Admin Console" src="img-1/Gear.png" />
-			<a id="admin" href="#AdminConsole">Admin Console</a><br />
-		<img alt="Re-Start" title="Re-Start" src="img-1/Backup%20Green%20Button.png" />
-			<a href="../../Steering.html?restart=">Re-Start</a><br />
-		<img alt="Shutdown" title="Shutdown" src="img-1/Stop%20Red%20Button.png" />
-			<a id="shutdown" href="#Shutdown">Shutdown</a><br />		
-</div>
-
 
 
 
