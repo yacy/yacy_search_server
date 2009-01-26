@@ -30,6 +30,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
+import de.anomic.server.serverMemory;
+
 /**
  * The EcoFS is a flat file with records of fixed length. The file does not contain
  * any meta information and the first record starts right at file position 0
@@ -65,8 +67,8 @@ public class kelondroEcoFS {
     /**
      * stay below hard disc cache (is that necessary?)
      */
-    private static final int maxReadCache = 512 * 1024;
-    private static final int maxWriteBuffer = 512 * 1024;
+    private static final int maxReadCache = 256 * 1024;
+    private static final int maxWriteBuffer = 256 * 1024;
     
     
     public kelondroEcoFS(final File tablefile, final int recordsize) throws IOException {
@@ -99,8 +101,19 @@ public class kelondroEcoFS {
         }
         
         // initialize cache and buffer
-        cache = new byte[Math.max(1, (maxReadCache / recordsize)) * recordsize];
-        buffer = new byte[Math.max(1, (maxWriteBuffer / recordsize)) * recordsize];
+        int cachesize = Math.max(1, (maxReadCache / recordsize)) * recordsize;
+        int buffersize = Math.max(1, (maxWriteBuffer / recordsize)) * recordsize;
+        if (!serverMemory.request(cachesize + buffersize + 1024 * 1024 * 20, true)) {
+        	// not enough memory there, take less
+        	long lessmem = Math.min(Math.min(maxReadCache, maxWriteBuffer) / 8, serverMemory.available() - (1024 * 1024 * 6) / 6);
+        	//System.out.println("newmem vorher: cachesize = " + cachesize + ", buffersize = " + buffersize + ", available = " + serverMemory.available() + ", lessmem = " + lessmem);
+        	cachesize = Math.max(1, (int) (lessmem / recordsize)) * recordsize;
+            buffersize = Math.max(1, (int) (lessmem / recordsize)) * recordsize;
+            //System.out.println("newmem nachher: cachesize = " + cachesize + ", buffersize = " + buffersize);
+        }
+        
+        cache = new byte[cachesize];
+        buffer = new byte[buffersize];
         this.buffercount = 0;
         
         // first-time read of cache
