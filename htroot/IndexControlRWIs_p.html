@@ -187,10 +187,10 @@
       #{urlList}#
       <tr class="TableCellLight">
       #(urlExists)#
-        <td class="TableCellDark"><input type="checkbox" id="urlhx.#[urlhxCount]#" name="urlhx.#[urlhxCount]#" checked value="#[urlhxValue]#" align="top" />
-            <label for="urlhx.#[urlhxCount]#" class="tt">#[urlhxValue]#</label></td>
-        <td>&lt;unresolved URL Hash&gt;</td>
-        <td colspan="15"></td>
+        <td><input type="checkbox" id="urlhx.#[urlhxCount]#" name="urlhx.#[urlhxCount]#" checked value="#[urlhxValue]#" align="top" />
+            <label for="urlhx.#[urlhxCount]#" class="tt"></label></td>
+        <td>#[urlhxValue]#</td>
+        <td colspan="20">unresolved URL Hash</td>
         ::
         <td><input type="checkbox" id="urlhx.#[urlhxCount]#" name="urlhx.#[urlhxCount]#" #(urlhxChecked)#::checked="checked" #(/urlhxChecked)#value="#[urlhxValue]#" align="top" />
             <label for="urlhx.#[urlhxCount]#" class="tt"></label></td>
