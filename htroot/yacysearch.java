@@ -265,13 +265,6 @@ public class yacysearch {
                     }
                 }
             }
-//            if (urlmask == null){
-//	            if (post.containsKey("urlmask") && post.get("urlmask").equals("no")) { // option search all
-//	                urlmask = ".*";
-//	            } else if (!newsearch && post.containsKey("urlmaskfilter")) {
-//	                urlmask = post.get("urlmaskfilter", ".*");
-//	            }
-//            }
             if (urlmask == null || urlmask.length() == 0) urlmask = originalUrlMask; //if no urlmask was given
            
             // read the language from the language-restrict option 'lr'
