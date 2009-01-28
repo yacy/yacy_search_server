@@ -128,6 +128,15 @@ public class yacysearch {
         final boolean indexof = (post != null && post.get("indexof","").equals("on")); 
         
         String urlmask = null;
+        String originalUrlMask = null;
+        if (post.containsKey("urlmask") && post.get("urlmask").equals("no")) { // option search all
+            originalUrlMask = ".*";
+        } else if (!newsearch && post.containsKey("urlmaskfilter")) {
+            originalUrlMask = post.get("urlmaskfilter", ".*");
+        } else {
+            originalUrlMask = ".*";
+        }
+
         String prefermask = (post == null ? "" : post.get("prefermaskfilter", ""));
         if ((prefermask.length() > 0) && (prefermask.indexOf(".*") < 0)) prefermask = ".*" + prefermask + ".*";
 
@@ -256,14 +265,14 @@ public class yacysearch {
                     }
                 }
             }
-            if (urlmask == null){
-	            if (post.containsKey("urlmask") && post.get("urlmask").equals("no")) { // option search all
-	                urlmask = ".*";
-	            } else if (!newsearch && post.containsKey("urlmaskfilter")) {
-	                urlmask = post.get("urlmaskfilter", ".*");
-	            }
-            }
-            if (urlmask == null || urlmask.length() == 0) urlmask = ".*"; //if no urlmask was given
+//            if (urlmask == null){
+//	            if (post.containsKey("urlmask") && post.get("urlmask").equals("no")) { // option search all
+//	                urlmask = ".*";
+//	            } else if (!newsearch && post.containsKey("urlmaskfilter")) {
+//	                urlmask = post.get("urlmaskfilter", ".*");
+//	            }
+//            }
+            if (urlmask == null || urlmask.length() == 0) urlmask = originalUrlMask; //if no urlmask was given
            
             // read the language from the language-restrict option 'lr'
             // if no one is given, use the user agent or the system language as default
@@ -417,7 +426,7 @@ public class yacysearch {
             final StringBuilder resnav = new StringBuilder();
             final int thispage = offset / theQuery.displayResults();
             if (thispage == 0) resnav.append("&lt;&nbsp;"); else {
-                resnav.append(navurla(thispage - 1, display, theQuery));
+                resnav.append(navurla(thispage - 1, display, theQuery, originalUrlMask));
                 resnav.append("<strong>&lt;</strong></a>&nbsp;");
             }
             final int numberofpages = Math.min(10, Math.max(thispage + 2, totalcount / theQuery.displayResults()));
@@ -427,13 +436,13 @@ public class yacysearch {
                     resnav.append(i + 1);
                     resnav.append("</strong>&nbsp;");
                 } else {
-                    resnav.append(navurla(i, display, theQuery));
+                    resnav.append(navurla(i, display, theQuery, originalUrlMask));
                     resnav.append(i + 1);
                     resnav.append("</a>&nbsp;");
                 }
             }
             if (thispage >= numberofpages) resnav.append("&gt;"); else {
-                resnav.append(navurla(thispage + 1, display, theQuery));
+                resnav.append(navurla(thispage + 1, display, theQuery, originalUrlMask));
                 resnav.append("<strong>&gt;</strong></a>");
             }
             prop.put("num-results_resnav", resnav.toString());
@@ -485,7 +494,7 @@ public class yacysearch {
         prop.put("input_count", itemsPerPage);
         prop.put("input_offset", offset);
         prop.put("input_resource", global ? "global" : "local");
-        prop.putHTML("input_urlmaskfilter", urlmask);
+        prop.putHTML("input_urlmaskfilter", originalUrlMask);
         prop.putHTML("input_prefermaskfilter", prefermask);
         prop.put("input_indexof", (indexof) ? "on" : "off");
         prop.put("input_constraint", (constraint == null) ? "" : constraint.exportB64());
@@ -510,7 +519,7 @@ public class yacysearch {
     /**
      * generates the page navigation bar
      */
-    private static String navurla(final int page, final int display, final plasmaSearchQuery theQuery) {
+    private static String navurla(final int page, final int display, final plasmaSearchQuery theQuery, final String originalUrlMask) {
         return
         "<a href=\"yacysearch.html?display=" + display +
         "&amp;search=" + theQuery.queryString(true) +
@@ -518,7 +527,7 @@ public class yacysearch {
         "&amp;startRecord=" + (page * theQuery.displayResults()) +
         "&amp;resource=" + ((theQuery.isLocal()) ? "local" : "global") +
         "&amp;verify=" + ((theQuery.onlineSnippetFetch) ? "true" : "false") +
-        "&amp;urlmaskfilter=" + theQuery.urlMask +
+        "&amp;urlmaskfilter=" + originalUrlMask +
         "&amp;prefermaskfilter=" + theQuery.prefer +
         "&amp;cat=href&amp;constraint=" + ((theQuery.constraint == null) ? "" : theQuery.constraint.exportB64()) +
         "&amp;contentdom=" + theQuery.contentdom() +
