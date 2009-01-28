@@ -719,32 +719,35 @@ public class bookmarksDB {
 	// -------------------------------------
     
     public boolean renameTag(final String oldName, final String newName){
-    	
-    	final String oldHash=tagHash(oldName);
-    	//String newHash=tagHash(newName);
-    	final Tag tag=getTag(oldHash);							// set tag to oldHash
-    	if (tag != null) {
-    		final Set<String> urlHashes = tag.getUrlHashes();				// preserve urlHashes of tag
-    		removeTag(oldHash);
-    		final Iterator<String> it = urlHashes.iterator();
-            Bookmark bookmark;                
-            Set<String> tags; 
-            String tagsString;            
-            while (it.hasNext()) {							// looping through all bookmarks which were tagged with oldName
+ 	
+    	final Tag oldTag=getTag(tagHash(oldName));
+    	if (oldTag != null) {
+    		final Set<String> urlHashes = oldTag.getUrlHashes();	// preserve urlHashes of oldTag
+    		removeTag(tagHash(oldName));							// remove oldHash from TagsDB
+    		final Iterator<String> it = urlHashes.iterator();		
+            Bookmark bookmark;
+            Set<String> tags = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
+            while (it.hasNext()) {									// looping through all bookmarks which were tagged with oldName
                 bookmark = getBookmark(it.next());
-                tagsString = bookmark.getTagsString();				
-                // Set<String> tags is difficult with case sensitivity, so I tried 
-                // Set<String> tags = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER), but it didn't do the trick :-(
-                // so I chose the tagsString and replaceAll() as workaround 
-                // unfortunately doing the replaceAll with Patterns (regexp) really costs performance
-                tags=listManager.string2set(Pattern.compile(oldName,66).matcher(tagsString).replaceAll(newName)); // TODO: need better solution for renaming tags
-                bookmark.setTags(tags, true);	// I had to adjust setTags() for this to work
+                tags = bookmark.getTags();
+                tags.remove(oldName);
+                bookmark.setTags(tags, true);						// might not be needed, but doesn't hurt
+                if(!newName.equals("")) bookmark.addTag(newName);                
                 saveBookmark(bookmark);
             }
             return true;
     	}
     	return false;
     }
+    public void addTag(final String selectTag, final String newTag){    		
+    	final Iterator<String> it = getTag(tagHash(selectTag)).getUrlHashes().iterator();	// get urlHashes for selectTag        
+    	Bookmark bookmark;
+    	while (it.hasNext()) {	// looping through all bookmarks which were tagged with selectTag
+    		bookmark = getBookmark(it.next());
+    		bookmark.addTag(newTag);    		
+        }
+    }
+    
 
     // --------------------------------------
 	// bookmarksDB's Import/Export functions
@@ -1071,11 +1074,10 @@ public class bookmarksDB {
         
         public Bookmark(final String urlHash, final Map<String, String> map) {
             this.entry = map;
-            this.urlHash=urlHash;
+            this.urlHash=urlHash;    
+            tags=new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
             if(map.containsKey(BOOKMARK_TAGS))
-                tags=listManager.string2set(map.get(BOOKMARK_TAGS));
-            else
-                tags=new HashSet<String>();
+                tags.addAll(listManager.string2set(map.get(BOOKMARK_TAGS)));
             loadTimestamp();
         }
         
@@ -1230,8 +1232,9 @@ public class bookmarksDB {
             //setBookmarksTable();
         }
         
-        public void addTag(final String tag){
-            tags.add(tag);
+        public void addTag(final String tagName){
+            tags.add(tagName);
+            setTags(tags);
         }
         
         /**

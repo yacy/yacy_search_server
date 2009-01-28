@@ -158,6 +158,15 @@ img.help {
 .flexigrid div.fbutton .load {
 	background: url(../img/flexigrid/load.png) no-repeat center left;
 }
+.flexigrid div.fbutton .addTag {
+	background: url(../img/tags/tag_blue_add.png) no-repeat center left;
+}
+.flexigrid div.fbutton .editTag {
+	background: url(../img/tags/tag_blue_edit.png) no-repeat center left;
+}
+.flexigrid div.fbutton .deleteTag {
+	background: url(../img/tags/tag_blue_delete.png) no-repeat center left;
+}
 
 /* YaCy Bookmarks ---------------------------*/
 .url {

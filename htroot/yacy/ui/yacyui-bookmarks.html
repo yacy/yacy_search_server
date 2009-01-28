@@ -13,16 +13,14 @@
 	 		colModel: [	
 				{display: 'Hash', name : 'hash', width : 50, sortable : false, align: 'center', hide: true},
 				{display: 'Public', name : 'public', width : 25, sortable : true, align: 'center'},
-				{display: 'Title', name : 'title', width : 450, sortable : true, align: 'left'},
-				{display: 'Tags', name : 'tags', width : 240, sortable : false, align: 'left'},
-				{display: 'Folders', name : 'folders', width : 240, sortable : false, align: 'left', hide: true},
+				{display: 'Title', name : 'title', width : 400, sortable : true, align: 'left'},
+				{display: 'Tags', name : 'tags', width : 160, sortable : false, align: 'left'},
+				{display: 'Folders', name : 'folders', width : 160, sortable : false, align: 'left', hide: false},
 				{display: 'Date', name : 'date', width : 100, sortable : true, align: 'left'}
 			],
-			buttons: [
+			buttons: [				
+				{name: 'Add', bclass: 'bookmark', onpress: bm_action},
 				{name: 'Crawl', bclass: 'crawl', onpress: bm_action},
-				{separator: true},
-				{name: 'Bookmark', bclass: 'bookmark', onpress: bm_action},
-				{separator: true},
 				{name: 'Edit', bclass: 'edit', onpress: bm_action},
 				{name: 'Delete', bclass: 'delete', onpress: bm_action},
 				{separator: true},
@@ -30,7 +28,8 @@
 				{name: 'XBEL', bclass: 'xml', onpress: bm_action},
 				{name: 'XML', bclass: 'xml', onpress: bm_action},
 				{separator: true},
-				{name: 'Import', bclass: 'import', onpress: bm_action},
+				{name: 'Add', bclass: 'addTag', onpress: tag_action},
+				{name: 'Rename', bclass: 'editTag', onpress: tag_action},							
 				{separator: true},
 				{name: 'Help', bclass: 'help', onpress: bm_action},
 			],
@@ -53,13 +52,15 @@
 	});
 	function bm_action(com,grid) {
 		if (com=='XBEL') {
-			window.document.location.href = '/api/bookmarks/get_bookmarks.xml?display=xbel';
+			var qtype = "tags";
+			if (qtag.startsWith("/")) qtype = "folders";
+			window.document.location.href = '/api/bookmarks/get_bookmarks.xml?display=xbel&qtype='+qtype+'&query='+qtag;
 		}
 		else if (com=='RSS') {
-			window.document.location.href = '/Bookmarks.rss';
+			window.document.location.href = '/Bookmarks.rss?qtype=tags&query='+qtag;
 		}
 		else if (com=='XML') {
-			window.document.location.href = '/api/bookmarks/get_bookmarks.xml';
+			window.document.location.href = '/api/bookmarks/get_bookmarks.xml?tag='+qtag;
 		}
 		else if (com=='Delete') {
 			confirm('Delete ' + $('.trSelected',grid).length + ' bookmark(s)?')				
@@ -71,11 +72,10 @@
 					dataType: 'xml'						
 				}); // close $.ajax(					
 			}); //close each(
-			loadFolders();
 			loadTagCloud();
-			$tabs.tabs("load", 3);	
+			reloadBM();	
 		}
-		else if (com=='Bookmark') {			
+		else if (com=='Add') {			
 			$('#bmaddform').resetForm();
 			$("#bm_url").blur(function() { 
 				var url = $("input[@name='bm_url']").getValue();
@@ -104,13 +104,23 @@
 				return false;
 			}
 			$("input[@name='bm_url']").setValue($('.trSelected',grid).find('.url').text());
-            $("textarea[@name='bm_title']").setValue($('.trSelected',grid).find('h3.linktitle').text().replace(/^\s+/g,""));
-            $("textarea[@name='bm_desc']").setValue($('.trSelected',grid).find('p.desc').text().replace(/^\s+/g,""));            		
-            $("input[@name='bm_tags']").setValue($('.trSelected',grid).find('p.tags').text().replace(/\s+/g,""));            
-            $("input[@name='bm_path']").setValue($('.trSelected',grid).find('p.folders').text());
+            $("textarea[@name='bm_title']").setValue($('.trSelected',grid).find('h3.linktitle').text().trim());
+            $("textarea[@name='bm_desc']").setValue($('.trSelected',grid).find('p.desc').text().trim());            		
+            $("input[@name='bm_tags']").setValue($('.trSelected',grid).find('p.tags').text().trim().replace(/,\s/g,","));            
+            $("input[@name='bm_path']").setValue($('.trSelected',grid).find('p.folders').text().replace(/,\s/g,","));
             $("select[@name='bm_public']").setValue($('.trSelected',grid).find('img').attr('alt'));
             $("#bmadd").dialog('open'); 
 		}		
+	}
+	function tag_action(com,grid) {
+		if (com=='Add') {
+			flex = grid;			
+			$('#tagaddform').resetForm();
+			$("#tagadd").dialog('open');
+		} else 	{
+			$('#tageditform').resetForm();
+			$("#tagedit").dialog('open');
+		}				
 	}
   //]]>
 </script>

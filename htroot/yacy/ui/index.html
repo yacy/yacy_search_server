@@ -40,12 +40,22 @@
   <script src="js/jquery.xslTransform.js" type="text/javascript"></script> 
   
   <script type="text/javascript">
-   //<![CDATA[
+   //<![CDATA[	
 	HTMLenc = function(s) {
 		return $('<div/>').text(s).html();			
+	}
+	String.prototype.startsWith = function(str) {
+		return (this.match("^"+str)==str)
+	}
+	String.prototype.trim = function() {
+		return (this.replace(/^[\s\xA0]+/, "").replace(/[\s\xA0]+$/, ""))
+	}
+	String.prototype.endsWith = function(str) {
+		return (this.match(str+"$")==str)
 	}	
 	$(function() {		
 		qtag = "";
+		flex = {};
 		tabid = "Welcome";
 		/* Initialize Tabs and set up close function */
 		$tabs = $('#container ul').tabs({
@@ -113,7 +123,80 @@
         		OK: bookmark,
         		Cancel: function() { $("#bmadd").dialog("close"); }
     		} 
-		}); 
+		});
+		/* Initialize Edit Tags Dialog */		
+		$("#tagedit").dialog({			
+			autoOpen: false,
+			height: 250,
+			width: 250,
+			resizable: false,
+			buttons: { 
+        		Add: function() {
+					data = {
+						selectTag: $("input[@name='tag1']").getValue(),
+						addTag: $("input[@name='tag2']").getValue()
+					};
+					$.ajax({
+						type: "GET",
+						url: "/api/bookmarks/tags/addTag.xml",
+						data: data,			
+						dataType: "xml",
+						success: function(xml) {
+							alert($(xml).find('result').text());
+							loadTagCloud();
+							reloadBM();
+							$("#tagadd").dialog('close');							
+						}					
+					});
+        		},
+        		Edit: function() {
+					data = {
+						old: $("input[@name='tag1']").getValue(),
+						new: $("input[@name='tag2']").getValue()
+					};
+					$.ajax({
+						type: "GET",
+						url: "/api/bookmarks/tags/editTag.xml",
+						data: data,			
+						dataType: "xml"				
+					});
+					loadTagCloud();
+					reloadBM();
+					$("#tagedit").dialog('close');
+        		},
+        		Cancel: function() { $("#tagedit").dialog("close"); }
+    		} 
+		});
+		/* Initialize Add Tags Dialog */		
+		$("#tagadd").dialog({			
+			autoOpen: false,
+			height: 225,
+			width: 250,
+			resizable: false,
+			buttons: { 
+        		Add: function() { 
+					$('.trSelected',flex).each(function() {
+						data = {
+							urlhash: $(this).find('td :first').text(),
+							addTag: $("input[@name='tag']").getValue()
+						};					
+						$.ajax({
+							type: 'POST',
+							url: "/api/bookmarks/tags/addTag.xml",
+							data: data,			
+							dataType: 'xml'
+						}); // close $.ajax(					
+					}); //close each(
+					loadTagCloud();
+					reloadBM();
+					$("#tagadd").dialog("close");	 
+        		},
+        		Cancel: function() {
+        			$("input[@name='tag1']").setValue("cancel");
+        			$("#tagadd").dialog("close"); 
+        		}
+    		} 
+		});  
 		/* Load Sidebar */
 		$("#side1").load("sidebar/sidebar_1.html");
 		$("#side2").load("sidebar/sidebar_2.html");
@@ -199,6 +282,30 @@
 				<option value="public">yes</option>
 				<option value="private">no</option>
 			</select>
+		</form>
+	</div>
+	<!-- Tag Edit Dialog -->	
+	<div id="tagedit" class="bmdialog" title="YaCy Bookmark Edit Tags">
+		<p>This dialog lets you rename (edit) tag names. You can also add a new tag to all bookmarks tagged with old tag. 
+		</p>
+		<form id="tageditform" class="small" method="post" accept-charset="UTF-8" action="jQuery">
+			<label for="qtag">Old Tag:</label>
+			<br />					
+			<input type="text" name="tag1" id="tag1" class="filter" size="80" />
+			<br />
+			<label for="tag">New Tag:</label>
+			<br />					
+			<input type="text" name="tag2" id="tag2" class="filter" size="80" />
+			<br />		
+		</form>
+	</div>
+	<!-- Tag Add Dialog -->	
+	<div id="tagadd" class="bmdialog" title="YaCy Bookmark Add Tags">
+		<p>This dialog lets you add tags or folders to the selected bookmarks.</p>
+		<form id="tagaddform" class="small" method="post" accept-charset="UTF-8" action="jQuery">
+			<label for="qtag">Tag Name:</label>
+			<br />					
+			<input type="text" name="tag" id="tag" class="filter" size="80" />
 		</form>
 	</div>		
 </body>
