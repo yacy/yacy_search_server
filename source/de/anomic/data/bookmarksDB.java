@@ -744,7 +744,8 @@ public class bookmarksDB {
     	Bookmark bookmark;
     	while (it.hasNext()) {	// looping through all bookmarks which were tagged with selectTag
     		bookmark = getBookmark(it.next());
-    		bookmark.addTag(newTag);    		
+    		bookmark.addTag(newTag);
+    		saveBookmark(bookmark);
         }
     }
     
@@ -1235,6 +1236,7 @@ public class bookmarksDB {
         public void addTag(final String tagName){
             tags.add(tagName);
             setTags(tags);
+            saveBookmark(this);
         }
         
         /**
