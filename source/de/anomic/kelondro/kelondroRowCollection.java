@@ -253,9 +253,11 @@ public class kelondroRowCollection implements Iterable<kelondroRow.Entry> {
     public synchronized final void set(final int index, final kelondroRow.Entry a) {
         assert (index >= 0) : "set: access with index " + index + " is below zero";
         ensureSize(index + 1);
+        boolean sameKey = match(a.bytes(), 0, a.cellwidth(0), index);
+        //if (sameKey) System.out.print("$");
         a.writeToArray(chunkcache, index * rowdef.objectsize);
         if (index >= this.chunkcount) this.chunkcount = index + 1;
-        if (index < this.sortBound) this.sortBound = index;
+        if (!sameKey && index < this.sortBound) this.sortBound = index;
         this.lastTimeWrote = System.currentTimeMillis();
     }
     
