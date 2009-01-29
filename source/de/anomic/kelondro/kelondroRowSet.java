@@ -136,7 +136,9 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
             super.addUnique(entry);
         } else {
             oldentry = get(index, true);
-            set(index, entry);
+            int sb = this.sortBound; // save the sortBound, because it is not altered (we replace at the same place)
+            set(index, entry);       // this may alter the sortBound, which we will revert in the next step
+            this.sortBound = sb;     // revert a sortBound altering
         }
         return oldentry;
     }
