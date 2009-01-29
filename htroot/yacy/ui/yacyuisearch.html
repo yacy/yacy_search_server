@@ -15,12 +15,11 @@
 			$(document).ready(function() {
 				
 				var height = document.documentElement.clientHeight - 240;
-				var query = $.query.get('query');				
-				$.query.REMOVE('query');
-				var url = '/yacysearch.json' + $.query.toString();
+				var query = $.query.get('search');				
+				$.query.REMOVE('search');				
 										    			
 		 		$(".yresult").flexigrid({
-			 		url: url,
+			 		url: '/yacysearch.json',
 					dataType: 'json',
 			 		method: 'GET',
 			 		query: query,
@@ -55,7 +54,7 @@
 			 		},
 			 		preProcess: function(data) {
 				   		var total = data.channels[0].totalResults.replace(/[,.]/,"");  		
-				   		var page = (data.channels[0].startIndex / data.channels[0].itemsPerPage) + 1;				   		   	
+				   		var page = (data.channels[0].startIndex / data.channels[0].itemsPerPage) + 1;
 					   	var rows = {};
 					   	$.each (
 							data.channels[0].items,
@@ -86,11 +85,29 @@
 						if (!p.newp) p.newp = 1;				
 						if (p.page>p.pages) p.page = p.pages;
 		
-						var offset = p.newp * p.rp -p.rp; 		
+						var offset = p.newp * p.rp -p.rp;												
+						
+						var prefermaskfilter = $.query.get('prefermaskfilter');
+						if(!prefermaskfilter) prefermaskfilter = '';						
+						var constraint = $.query.get('constraint');
+						if(!constraint) constraint = '';						
+						var language = $.query.get('language');
+						if (!language) language = '';						
+						var verify = $.query.get('verify');
+						if (!verify) verify = 'true';						
+						var urlmaskfilter = $.query.get('urlmaskfilter');
+						if (!urlmaskfilter) urlmaskfilter = '.*';						
+						
 						var param = [
-							 { name : 'startRecord', value : offset }							 
-							,{ name : 'maximumRecords', value : p.rp }
+							 { name : 'startRecord', value : offset }
+							,{ name : 'maximumRecords', value : p.rp }		
 							,{ name : 'search', value : p.query}
+							,{ name : 'urlmaskfilter', value : urlmaskfilter}
+							,{ name : 'prefermaskfilter', value: prefermaskfilter}
+							,{ name : 'verify', value : verify}
+							,{ name : 'contentdom', value : 'text'}
+							,{ name : 'constraint', value : constraint}
+							,{ name : 'language', value : language}
 						];											
 										 
 						if (p.params) {

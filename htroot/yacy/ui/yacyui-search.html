@@ -4,10 +4,11 @@
 		$("#side1").accordion("activate", 0);
 		$("#side2").accordion("activate", 0);
 		
-		var height=document.documentElement.clientHeight - 240;
+		var height = document.documentElement.clientHeight - 240;
+		var url = $(tabid).attr('resource');		
 				    			
  		$(tabid+" .yresult").flexigrid({
-	 		url: '/yacysearch.json',
+	 		url: url,
 			dataType: 'json',
 	 		method: 'GET',
 	 		query: $(tabid).attr('search'),
@@ -79,16 +80,14 @@
 				
 				var param = [
 					 { name : 'startRecord', value : offset }
-					,{ name : 'maximumRecords', value : p.rp }
-					,{ name : 'resource', value : $(tabid).attr('resource')}
-					,{ name : 'verify', value : "true" }
+					,{ name : 'maximumRecords', value : p.rp }		
 					,{ name : 'search', value : p.query}
 					,{ name : 'urlmaskfilter', value : $(tabid).attr('urlmaskfilter')}
 					,{ name : 'prefermaskfilter', value : $(tabid).attr('prefermaskfilter')}
 					,{ name : 'contentdom', value : $(tabid).attr('contentdom')}
 					,{ name : 'constraint', value : $(tabid).attr('constraint')}
 					,{ name : 'language', value : $(tabid).attr('language')}
-				];
+				];		
 						 
 				if (p.params) {
 					for (var pi = 0; pi < p.params.length; pi++) param[param.length] = p.params[pi];

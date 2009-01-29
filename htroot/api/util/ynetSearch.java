@@ -3,6 +3,7 @@
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Iterator;
 import java.util.Scanner;
 
 import de.anomic.http.httpRequestHeader;
@@ -32,11 +33,20 @@ public class ynetSearch {
     			        // a relative path .. this addresses the local peer
     			        searchaddress = "http://" + switchboard.webIndex.seedDB.mySeed().getPublicAddress() + (searchaddress.startsWith("/") ? "" : "/") + searchaddress;
     			    }
-    				final String s = searchaddress+"&search="+post.get("search")+"&count="+post.get("count")+"&offset="+post.get("offset");    				   				
+    			    post.remove("url");
+    			    post.remove("login");
+    			    final Iterator <String> it = post.keySet().iterator();
+    			    String s = searchaddress;
+    			    String k = "";
+    			    while(it.hasNext()) {
+    			    	k = it.next();
+    			    	s = s + "&"+k+"="+post.get(k);    			    	
+    			    }
+    				// final String s = searchaddress+"&search="+post.get("search")+"&maximumRecords="+post.get("maximumRecords")+"&startRecord="+post.get("startRecord");    				   				
     				final URL url = new URL(s);     				
     				is = url.openStream(); 
-    				final String httpout = new Scanner(is).useDelimiter( "\\Z" ).next();
-    				prop.put("http", httpout);    		    	
+    				final String httpout = new Scanner(is).useDelimiter( "\\Z" ).next();    				
+    				prop.put("http", httpout);
     			} 
     			catch ( final Exception e ) { 
     				prop.put("url", "error!");
