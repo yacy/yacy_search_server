@@ -34,7 +34,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import de.anomic.kelondro.tools.ByteBuffer;
+import de.anomic.kelondro.util.ByteBuffer;
 
 public abstract class AbstractRandomAccess implements RandomAccessInterface {
 

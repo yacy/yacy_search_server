@@ -24,7 +24,7 @@
   This class extends the kelondroRecords and adds a stack structure
 */
 
-package de.anomic.kelondro;
+package de.anomic.kelondro.table;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -36,11 +36,9 @@ import java.util.StringTokenizer;
 
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.order.NaturalOrder;
-import de.anomic.kelondro.table.FullRecords;
-import de.anomic.kelondro.table.RecordHandle;
-import de.anomic.kelondro.table.Node;
+import de.anomic.kelondro.util.kelondroException;
 
-public final class kelondroStack extends FullRecords {
+public final class Stack extends FullRecords {
 
     // define the Over-Head-Array
     private static short thisOHBytes   = 0; // our record definition does not need extra bytes
@@ -53,7 +51,7 @@ public final class kelondroStack extends FullRecords {
     protected static final int root  = 0; // pointer for FHandles-array: pointer to root node
     protected static final int toor  = 1; // pointer for FHandles-array: pointer to root node
 
-    public kelondroStack(final File file, final Row rowdef) throws IOException {
+    public Stack(final File file, final Row rowdef) throws IOException {
         // this creates a new stack
         super(file, thisOHBytes, thisOHHandles, rowdef, thisFHandles, rowdef.columns() /* txtProps */, 80 /* txtPropWidth */);
         if (super.fileExisted) {
@@ -64,13 +62,13 @@ public final class kelondroStack extends FullRecords {
         }
     }
 
-    public static final kelondroStack open(final File file, final Row rowdef) {
+    public static final Stack open(final File file, final Row rowdef) {
         try {
-            return new kelondroStack(file, rowdef);
+            return new Stack(file, rowdef);
         } catch (final IOException e) {
             file.delete();
             try {
-                return new kelondroStack(file, rowdef);
+                return new Stack(file, rowdef);
             } catch (final IOException ee) {
                 System.out.println("kelondroStack: cannot open or create file " + file.toString());
                 e.printStackTrace();
@@ -80,7 +78,7 @@ public final class kelondroStack extends FullRecords {
         }
     }
     
-    public static kelondroStack reset(final kelondroStack stack) {
+    public static Stack reset(final Stack stack) {
         // memorize settings to this file
         final File f = new File(stack.filename);
         final Row row = stack.row();
@@ -317,12 +315,12 @@ public final class kelondroStack extends FullRecords {
 		System.err.println("( create, push, view, (g)pop, imp, shell)");
 		System.exit(0);
 	    } else if (args.length == 2) {
-		kelondroStack fm = new kelondroStack(new File(args[1]), lens);
+		Stack fm = new Stack(new File(args[1]), lens);
 		if (args[0].equals("-v")) {
 		    fm.print();
 		    ret = null;
 		} else if (args[0].equals("-g")) {
-		    fm = new kelondroStack(new File(args[1]), lens);
+		    fm = new Stack(new File(args[1]), lens);
 		    final Row.Entry ret2 = fm.pop();
 		    ret = ((ret2 == null) ? null : ret2.getColBytes(1)); 
 		    fm.close();
@@ -330,7 +328,7 @@ public final class kelondroStack extends FullRecords {
 		fm.close();
 	    } else if (args.length == 3) {
 		if (args[0].equals("-i")) {
-		    final kelondroStack fm = new kelondroStack(new File(args[2]), lens);
+		    final Stack fm = new Stack(new File(args[2]), lens);
 		    final int i = fm.imp(new File(args[1]),";");
 		    fm.close();
 		    ret = (i + " records imported").getBytes();
@@ -354,7 +352,7 @@ public final class kelondroStack extends FullRecords {
                 if (f != null) try {f.close();}catch(final Exception e) {}
             }
 		} else if (args[0].equals("-g")) {
-		    final kelondroStack fm = new kelondroStack(new File(args[2]), lens);
+		    final Stack fm = new Stack(new File(args[2]), lens);
             final Row.Entry ret2 = fm.pop();
 		    ret = ((ret2 == null) ? null : ret2.getColBytes(1)); 
 		    fm.close();
@@ -364,10 +362,10 @@ public final class kelondroStack extends FullRecords {
 		    // create <keylen> <valuelen> <filename>
 		    final File f = new File(args[3]);
 		    if (f.exists()) f.delete();
-		    final kelondroStack fm = new kelondroStack(f, lens);
+		    final Stack fm = new Stack(f, lens);
 		    fm.close();
 		} else if (args[0].equals("-p")) {
-		    final kelondroStack fm = new kelondroStack(new File(args[3]), lens);
+		    final Stack fm = new Stack(new File(args[3]), lens);
 		    fm.push(fm.row().newEntry(new byte[][] {args[1].getBytes(), args[2].getBytes()}));
 		    fm.close();
 		}

@@ -24,7 +24,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.kelondro;
+package de.anomic.kelondro.table;
 
 import java.io.File;
 import java.io.IOException;
@@ -46,6 +46,7 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import de.anomic.kelondro.blob.Cache;
 import de.anomic.kelondro.index.Column;
 import de.anomic.kelondro.index.RAMIndex;
 import de.anomic.kelondro.index.Row;
@@ -53,16 +54,13 @@ import de.anomic.kelondro.index.RowCollection;
 import de.anomic.kelondro.index.ObjectIndex;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.NaturalOrder;
-import de.anomic.kelondro.order.kelondroMergeIterator;
-import de.anomic.kelondro.order.kelondroOrder;
-import de.anomic.kelondro.table.EcoTable;
-import de.anomic.kelondro.table.FlexTable;
-import de.anomic.kelondro.table.FlexWidthArray;
+import de.anomic.kelondro.order.MergeIterator;
+import de.anomic.kelondro.order.Order;
 import de.anomic.server.NamePrefixThreadFactory;
 import de.anomic.server.serverProcessor;
 import de.anomic.server.logging.serverLog;
 
-public class kelondroSplitTable implements ObjectIndex {
+public class SplitTable implements ObjectIndex {
 
     // this is a set of kelondro tables
     // the set is divided into tables with different entry date
@@ -78,9 +76,9 @@ public class kelondroSplitTable implements ObjectIndex {
     private final Row rowdef;
     private final File path;
     private final String tablename;
-    private final kelondroOrder<Row.Entry> entryOrder;
+    private final Order<Row.Entry> entryOrder;
     
-    public kelondroSplitTable(final File path, final String tablename, final Row rowdef, final boolean resetOnFail) {
+    public SplitTable(final File path, final String tablename, final Row rowdef, final boolean resetOnFail) {
         this.path = path;
         this.tablename = tablename;
         this.rowdef = rowdef;
@@ -200,7 +198,7 @@ public class kelondroSplitTable implements ObjectIndex {
     public int writeBufferSize() {
         int s = 0;
         for (final ObjectIndex index : tables.values()) {
-            if (index instanceof kelondroCache) s += ((kelondroCache) index).writeBufferSize();
+            if (index instanceof Cache) s += ((Cache) index).writeBufferSize();
         }
         return s;
     }
@@ -367,7 +365,7 @@ public class kelondroSplitTable implements ObjectIndex {
         while (i.hasNext()) {
             c.add(i.next().keys(up, firstKey));
         }
-        return kelondroMergeIterator.cascade(c, rowdef.objectOrder, kelondroMergeIterator.simpleMerge, up);
+        return MergeIterator.cascade(c, rowdef.objectOrder, MergeIterator.simpleMerge, up);
     }
     
     public synchronized CloneableIterator<Row.Entry> rows(final boolean up, final byte[] firstKey) throws IOException {
@@ -376,7 +374,7 @@ public class kelondroSplitTable implements ObjectIndex {
         while (i.hasNext()) {
             c.add(i.next().rows(up, firstKey));
         }
-        return kelondroMergeIterator.cascade(c, entryOrder, kelondroMergeIterator.simpleMerge, up);
+        return MergeIterator.cascade(c, entryOrder, MergeIterator.simpleMerge, up);
     }
 
     public final int cacheObjectChunkSize() {

@@ -116,7 +116,7 @@ import java.io.IOException;
 import de.anomic.kelondro.index.Column;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.order.Base64Order;
-import de.anomic.kelondro.tools.SetTools;
+import de.anomic.kelondro.util.SetTools;
 
 public class Hashtable {
     

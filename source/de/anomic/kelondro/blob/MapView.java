@@ -25,7 +25,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.kelondro;
+package de.anomic.kelondro.blob;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -36,15 +36,15 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import de.anomic.kelondro.blob.BLOB;
-import de.anomic.kelondro.blob.BLOBHeap;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.kelondro.order.NaturalOrder;
-import de.anomic.kelondro.tools.ScoreCluster;
+import de.anomic.kelondro.order.RotateIterator;
+import de.anomic.kelondro.util.ScoreCluster;
+import de.anomic.kelondro.util.kelondroException;
 
 
-public class kelondroMap {
+public class MapView {
 
     private final BLOB blob;
     private ScoreCluster<String> cacheScore;
@@ -52,7 +52,7 @@ public class kelondroMap {
     private final long startup;
     private final int cachesize;
 
-    public kelondroMap(final BLOB blob, final int cachesize) {
+    public MapView(final BLOB blob, final int cachesize) {
         this.blob = blob;
         this.cache = new HashMap<String, Map<String, String>>();
         this.cacheScore = new ScoreCluster<String>();
@@ -264,7 +264,7 @@ public class kelondroMap {
     public synchronized CloneableIterator<byte[]> keys(final boolean up, final boolean rotating, final byte[] firstKey, final byte[] secondKey) throws IOException {
         // simple enumeration of key names without special ordering
         final CloneableIterator<byte[]> i = blob.keys(up, firstKey);
-        if (rotating) return new kelondroRotateIterator<byte[]>(i, secondKey, blob.size());
+        if (rotating) return new RotateIterator<byte[]>(i, secondKey, blob.size());
         return i;
     }
 
@@ -344,7 +344,7 @@ public class kelondroMap {
             // make a blob
             BLOB blob = new BLOBHeap(f, 12, NaturalOrder.naturalOrder, 1024 * 1024);
             // make map
-            kelondroMap map = new kelondroMap(blob, 1024);
+            MapView map = new MapView(blob, 1024);
             // put some values into the map
             Map<String, String> m = new HashMap<String, String>();
             m.put("k", "000"); map.put("123", m);

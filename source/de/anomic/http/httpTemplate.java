@@ -60,7 +60,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import de.anomic.kelondro.tools.ByteBuffer;
+import de.anomic.kelondro.util.ByteBuffer;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.logging.serverLog;
 

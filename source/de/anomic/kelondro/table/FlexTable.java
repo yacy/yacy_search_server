@@ -35,7 +35,6 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.index.BytesIntMap;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.RowCollection;
@@ -43,7 +42,8 @@ import de.anomic.kelondro.index.RowSet;
 import de.anomic.kelondro.index.ObjectIndex;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.NaturalOrder;
-import de.anomic.kelondro.tools.MemoryControl;
+import de.anomic.kelondro.util.MemoryControl;
+import de.anomic.kelondro.util.kelondroException;
 import de.anomic.server.logging.serverLog;
 
 public class FlexTable extends FlexWidthArray implements ObjectIndex {

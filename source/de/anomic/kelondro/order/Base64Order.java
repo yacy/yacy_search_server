@@ -78,7 +78,7 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Cod
         return z;
     }
     
-    public kelondroOrder<byte[]> clone() {
+    public Order<byte[]> clone() {
         final Base64Order o = new Base64Order(this.asc, this.rfc1113compliant);
         o.rotate(zero);
         return o;

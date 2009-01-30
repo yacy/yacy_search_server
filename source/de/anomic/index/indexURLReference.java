@@ -34,13 +34,13 @@ import java.util.Date;
 import java.util.Properties;
 
 import de.anomic.crawler.CrawlEntry;
-import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.kelondro.order.Digest;
 import de.anomic.kelondro.order.NaturalOrder;
+import de.anomic.kelondro.util.kelondroException;
 import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.server.serverCharBuffer;
 import de.anomic.server.serverCodings;

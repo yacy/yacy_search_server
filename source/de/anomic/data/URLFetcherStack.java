@@ -28,11 +28,11 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import de.anomic.kelondro.kelondroException;
-import de.anomic.kelondro.kelondroStack;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.Row.EntryIndex;
 import de.anomic.kelondro.order.Base64Order;
+import de.anomic.kelondro.table.Stack;
+import de.anomic.kelondro.util.kelondroException;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyURL;
 
@@ -45,14 +45,14 @@ public class URLFetcherStack {
             Base64Order.enhancedCoder,
             0
     );
-    private final kelondroStack db;
+    private final Stack db;
     private final serverLog log;
     
     private int popped = 0;
     private int pushed = 0;
     
     public URLFetcherStack(final File path) throws IOException {
-        this.db = new kelondroStack(new File(path, DBFILE), rowdef);
+        this.db = new Stack(new File(path, DBFILE), rowdef);
         this.log = new serverLog("URLFETCHERSTACK");
     }
     

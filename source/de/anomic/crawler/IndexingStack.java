@@ -36,11 +36,11 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import de.anomic.http.httpResponseHeader;
 import de.anomic.index.indexURLReference;
-import de.anomic.kelondro.kelondroStack;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.kelondro.order.NaturalOrder;
+import de.anomic.kelondro.table.Stack;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.plasma.plasmaWordIndex;
@@ -51,7 +51,7 @@ import de.anomic.yacy.yacyURL;
 
 public class IndexingStack {
 
-    kelondroStack sbQueueStack;
+    Stack sbQueueStack;
     CrawlProfile profiles;
     plasmaWordIndex wordIndex;
     private final File sbQueueStackPath;
@@ -79,7 +79,7 @@ public class IndexingStack {
             0);
     
     private void initQueueStack() {
-        sbQueueStack = kelondroStack.open(sbQueueStackPath, rowdef);
+        sbQueueStack = Stack.open(sbQueueStackPath, rowdef);
     }
     
     /*
@@ -131,7 +131,7 @@ public class IndexingStack {
     }
 
     public void clear() {
-        sbQueueStack = kelondroStack.reset(sbQueueStack);
+        sbQueueStack = Stack.reset(sbQueueStack);
     }
 
     public void close() {

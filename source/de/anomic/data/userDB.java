@@ -36,20 +36,20 @@ import java.util.Map;
 import java.util.Random;
 
 import de.anomic.http.httpRequestHeader;
-import de.anomic.kelondro.kelondroException;
-import de.anomic.kelondro.kelondroMap;
 import de.anomic.kelondro.blob.BLOBTree;
+import de.anomic.kelondro.blob.MapView;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.Digest;
 import de.anomic.kelondro.order.NaturalOrder;
+import de.anomic.kelondro.util.kelondroException;
 
 public final class userDB {
     
     public static final int USERNAME_MAX_LENGTH = 128;
     public static final int USERNAME_MIN_LENGTH = 4;
     
-    kelondroMap userTable;
+    MapView userTable;
     private final File userTableFile;
 	HashMap<String, String> ipUsers = new HashMap<String, String>();
     HashMap<String, Object> cookieUsers = new HashMap<String, Object>();
@@ -57,7 +57,7 @@ public final class userDB {
     public userDB(final File userTableFile) {
         this.userTableFile = userTableFile;
         userTableFile.getParentFile().mkdirs();
-        this.userTable = new kelondroMap(new BLOBTree(userTableFile, true, true, 128, 256, '_', NaturalOrder.naturalOrder, true, false, false), 10);
+        this.userTable = new MapView(new BLOBTree(userTableFile, true, true, 128, 256, '_', NaturalOrder.naturalOrder, true, false, false), 10);
     }
     
     void resetDatabase() {
@@ -65,7 +65,7 @@ public final class userDB {
         if (userTable != null) userTable.close();
         if (!(userTableFile.delete())) throw new RuntimeException("cannot delete user database");
         userTableFile.getParentFile().mkdirs();
-        userTable = new kelondroMap(new BLOBTree(userTableFile, true, true, 256, 512, '_', NaturalOrder.naturalOrder, true, false, false), 10);
+        userTable = new MapView(new BLOBTree(userTableFile, true, true, 256, 512, '_', NaturalOrder.naturalOrder, true, false, false), 10);
     }
     
     public void close() {

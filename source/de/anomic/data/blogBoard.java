@@ -47,12 +47,12 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import de.anomic.kelondro.kelondroException;
-import de.anomic.kelondro.kelondroMap;
 import de.anomic.kelondro.blob.BLOBTree;
+import de.anomic.kelondro.blob.MapView;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.kelondro.order.NaturalOrder;
+import de.anomic.kelondro.util.kelondroException;
 import de.anomic.server.logging.serverLog;
 
 public class blogBoard {
@@ -60,12 +60,12 @@ public class blogBoard {
     public  static final int keyLength = 64;
     private static final int recordSize = 512;
     
-    kelondroMap database = null;
+    MapView database = null;
     
     public blogBoard(final File actpath) {
     		new File(actpath.getParent()).mkdir();
         if (database == null) {
-            database = new kelondroMap(new BLOBTree(actpath, true, true, keyLength, recordSize, '_', NaturalOrder.naturalOrder, true, false, false), 500);
+            database = new MapView(new BLOBTree(actpath, true, true, keyLength, recordSize, '_', NaturalOrder.naturalOrder, true, false, false), 500);
         }
     }
     
@@ -140,7 +140,7 @@ public class blogBoard {
         return readBlogEntry(key, database);
     }
     
-    private BlogEntry readBlogEntry(String key, final kelondroMap base) {
+    private BlogEntry readBlogEntry(String key, final MapView base) {
     	key = normalize(key);
         if (key.length() > keyLength) key = key.substring(0, keyLength);
         Map<String, String> record;

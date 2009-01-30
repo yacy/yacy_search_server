@@ -30,7 +30,7 @@ package de.anomic.kelondro.order;
 import java.util.Comparator;
 
 
-public interface ByteOrder extends kelondroOrder<byte[]> {
+public interface ByteOrder extends Order<byte[]> {
 
     public boolean wellformed(byte[] a, int start, int len);
     
@@ -43,7 +43,7 @@ public interface ByteOrder extends kelondroOrder<byte[]> {
     		this.baseOrder = base;
     	}
     	
-    	public StringOrder(final kelondroOrder<byte[]> base) {
+    	public StringOrder(final Order<byte[]> base) {
             this.baseOrder = (ByteOrder) base;
         }
         

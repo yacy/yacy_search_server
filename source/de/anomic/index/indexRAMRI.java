@@ -34,8 +34,8 @@ import java.util.Set;
 
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.order.CloneableIterator;
-import de.anomic.kelondro.tools.ScoreCluster;
-import de.anomic.kelondro.tools.MemoryControl;
+import de.anomic.kelondro.util.MemoryControl;
+import de.anomic.kelondro.util.ScoreCluster;
 import de.anomic.server.logging.serverLog;
 
 public final class indexRAMRI implements indexRI, indexRIReader, Iterable<indexContainer> {

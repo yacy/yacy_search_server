@@ -12,8 +12,6 @@ import java.util.Random;
 
 import javax.imageio.ImageIO;
 
-import de.anomic.kelondro.kelondroSQLTable;
-import de.anomic.kelondro.kelondroSplitTable;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.RowSet;
 import de.anomic.kelondro.index.ObjectIndex;
@@ -23,7 +21,9 @@ import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.table.EcoTable;
 import de.anomic.kelondro.table.Tree;
-import de.anomic.kelondro.tools.MemoryControl;
+import de.anomic.kelondro.table.SQLTable;
+import de.anomic.kelondro.table.SplitTable;
+import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.server.serverInstantBusyThread;
 import de.anomic.ymage.ymageChart;
 
@@ -197,16 +197,16 @@ public class dbtest {
         }
         if (dbe.equals("kelondroSplitTable")) {
             final File tablepath = new File(tablename).getParentFile();
-            return new kelondroSplitTable(tablepath, new File(tablename).getName(), testRow, true);
+            return new SplitTable(tablepath, new File(tablename).getName(), testRow, true);
         }
         if (dbe.equals("kelondroEcoTable")) {
             return new EcoTable(new File(tablename), testRow, EcoTable.tailCacheForceUsage, 1000, 0);
         }
         if (dbe.equals("mysql")) {
-            return new kelondroSQLTable("mysql", testRow);
+            return new SQLTable("mysql", testRow);
         }
         if (dbe.equals("pgsql")) {
-            return new kelondroSQLTable("pgsql", testRow);
+            return new SQLTable("pgsql", testRow);
         }
         return null;
     }
@@ -391,7 +391,7 @@ public class dbtest {
             if (command.equals("list")) {
                 CloneableIterator<Row.Entry> i = null;
                 if (table_test instanceof Tree) i = ((Tree) table_test).rows(true, null);
-                if (table_test instanceof kelondroSQLTable) i = ((kelondroSQLTable) table_test).rows(true, null);
+                if (table_test instanceof SQLTable) i = ((SQLTable) table_test).rows(true, null);
                 if(i != null) {
                     Row.Entry row;
                     while (i.hasNext()) {

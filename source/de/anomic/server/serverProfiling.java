@@ -31,7 +31,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import de.anomic.kelondro.tools.MemoryControl;
+import de.anomic.kelondro.util.MemoryControl;
 
 public class serverProfiling extends Thread {
     

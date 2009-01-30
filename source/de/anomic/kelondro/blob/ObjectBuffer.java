@@ -54,11 +54,11 @@
 // A re-distribution must contain the intact and unchanged copyright statement.
 
 
-package de.anomic.kelondro;
+package de.anomic.kelondro.blob;
 
 import de.anomic.kelondro.order.NaturalOrder;
 
-public class kelondroObjectBuffer {
+public class ObjectBuffer {
 
     // this is a buffer for a single (only one) key/value object
     // without an index-backend
@@ -68,7 +68,7 @@ public class kelondroObjectBuffer {
     private byte[] key;
     private Object value;
     
-    public kelondroObjectBuffer(final String name) {
+    public ObjectBuffer(final String name) {
         this.name = name;
         this.readHit = 0;
         this.readMiss = 0;

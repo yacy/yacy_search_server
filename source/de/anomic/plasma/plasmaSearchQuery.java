@@ -32,7 +32,7 @@ import de.anomic.index.indexWord;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.order.NaturalOrder;
-import de.anomic.kelondro.tools.SetTools;
+import de.anomic.kelondro.util.SetTools;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyURL;

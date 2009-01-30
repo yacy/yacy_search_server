@@ -30,11 +30,11 @@ import java.util.Iterator;
 import java.util.Map;
 
 import de.anomic.http.httpRequestHeader;
-import de.anomic.kelondro.kelondroCache;
+import de.anomic.kelondro.blob.Cache;
 import de.anomic.kelondro.table.CachedRecords;
 import de.anomic.kelondro.table.EcoTable;
 import de.anomic.kelondro.table.FlexTable;
-import de.anomic.kelondro.tools.MemoryControl;
+import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverDomains;
 import de.anomic.server.serverFileUtils;
@@ -162,12 +162,12 @@ public class PerformanceMemory_p {
         prop.putNum("nodeCacheTotalMem", totalmem / (1024 * 1024d));
         
         // write object cache table
-        i = kelondroCache.filenames();
+        i = Cache.filenames();
         c = 0;
         long hitmem, missmem, totalhitmem = 0, totalmissmem = 0;
         while (i.hasNext()) {
             filename = i.next();
-            map = kelondroCache.memoryStats(filename);
+            map = Cache.memoryStats(filename);
             prop.put("ObjectList_" + c + "_objectCachePath", ((p = filename.indexOf("DATA")) < 0) ? filename : filename.substring(p));
             
             // hit cache
@@ -199,8 +199,8 @@ public class PerformanceMemory_p {
             c++;
         }
         prop.put("ObjectList", c);
-        prop.putNum("objectCacheStopGrow", kelondroCache.getMemStopGrow() / (1024 * 1024d));
-        prop.putNum("objectCacheStartShrink", kelondroCache.getMemStartShrink() / (1024 * 1024d));
+        prop.putNum("objectCacheStopGrow", Cache.getMemStopGrow() / (1024 * 1024d));
+        prop.putNum("objectCacheStartShrink", Cache.getMemStartShrink() / (1024 * 1024d));
         prop.putNum("objectHitCacheTotalMem", totalhitmem / (1024 * 1024d));
         prop.putNum("objectMissCacheTotalMem", totalmissmem / (1024 * 1024d));
         

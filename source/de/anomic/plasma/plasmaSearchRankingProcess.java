@@ -43,10 +43,10 @@ import de.anomic.index.indexRWIEntryOrder;
 import de.anomic.index.indexRWIVarEntry;
 import de.anomic.index.indexURLReference;
 import de.anomic.index.indexWord;
-import de.anomic.kelondro.kelondroSortStack;
 import de.anomic.kelondro.index.BinSearch;
 import de.anomic.kelondro.order.Digest;
-import de.anomic.kelondro.tools.ScoreCluster;
+import de.anomic.kelondro.util.ScoreCluster;
+import de.anomic.kelondro.util.SortStack;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverProfiling;
 import de.anomic.yacy.yacyURL;
@@ -58,8 +58,8 @@ public final class plasmaSearchRankingProcess {
     private static boolean useYBR = true;
     private static final int maxDoubleDomAll = 20, maxDoubleDomSpecial = 10000;
     
-    private final kelondroSortStack<indexRWIVarEntry> stack;
-    private final HashMap<String, kelondroSortStack<indexRWIVarEntry>> doubleDomCache; // key = domhash (6 bytes); value = like stack
+    private final SortStack<indexRWIVarEntry> stack;
+    private final HashMap<String, SortStack<indexRWIVarEntry>> doubleDomCache; // key = domhash (6 bytes); value = like stack
     private final HashMap<String, String> handover; // key = urlhash, value = urlstring; used for double-check of urls that had been handed over to search process
     private final plasmaSearchQuery query;
     private final int maxentries;
@@ -78,8 +78,8 @@ public final class plasmaSearchRankingProcess {
         // attention: if minEntries is too high, this method will not terminate within the maxTime
         // sortorder: 0 = hash, 1 = url, 2 = ranking
         this.localSearchContainerMaps = null;
-        this.stack = new kelondroSortStack<indexRWIVarEntry>(maxentries);
-        this.doubleDomCache = new HashMap<String, kelondroSortStack<indexRWIVarEntry>>();
+        this.stack = new SortStack<indexRWIVarEntry>(maxentries);
+        this.doubleDomCache = new HashMap<String, SortStack<indexRWIVarEntry>>();
         this.handover = new HashMap<String, String>();
         this.order = (query == null) ? null : new indexRWIEntryOrder(query.ranking, query.targetlang);
         this.query = query;
@@ -242,10 +242,10 @@ public final class plasmaSearchRankingProcess {
     // - root-domain guessing to prefer the root domain over other urls if search word appears in domain name
     
     
-    private kelondroSortStack<indexRWIVarEntry>.stackElement bestRWI(final boolean skipDoubleDom) {
+    private SortStack<indexRWIVarEntry>.stackElement bestRWI(final boolean skipDoubleDom) {
         // returns from the current RWI list the best entry and removes this entry from the list
-        kelondroSortStack<indexRWIVarEntry> m;
-        kelondroSortStack<indexRWIVarEntry>.stackElement rwi;
+        SortStack<indexRWIVarEntry> m;
+        SortStack<indexRWIVarEntry>.stackElement rwi;
         while (stack.size() > 0) {
             rwi = stack.pop();
             if (rwi == null) continue; // in case that a synchronization problem occurred just go lazy over it
@@ -255,7 +255,7 @@ public final class plasmaSearchRankingProcess {
             m = this.doubleDomCache.get(domhash);
             if (m == null) {
                 // first appearance of dom
-                m = new kelondroSortStack<indexRWIVarEntry>((query.specialRights) ? maxDoubleDomSpecial : maxDoubleDomAll);
+                m = new SortStack<indexRWIVarEntry>((query.specialRights) ? maxDoubleDomSpecial : maxDoubleDomAll);
                 this.doubleDomCache.put(domhash, m);
                 return rwi;
             }
@@ -264,9 +264,9 @@ public final class plasmaSearchRankingProcess {
         }
         // no more entries in sorted RWI entries. Now take Elements from the doubleDomCache
         // find best entry from all caches
-        final Iterator<kelondroSortStack<indexRWIVarEntry>> i = this.doubleDomCache.values().iterator();
-        kelondroSortStack<indexRWIVarEntry>.stackElement bestEntry = null;
-        kelondroSortStack<indexRWIVarEntry>.stackElement o;
+        final Iterator<SortStack<indexRWIVarEntry>> i = this.doubleDomCache.values().iterator();
+        SortStack<indexRWIVarEntry>.stackElement bestEntry = null;
+        SortStack<indexRWIVarEntry>.stackElement o;
         while (i.hasNext()) {
             m = i.next();
             if (m == null) continue;
@@ -292,7 +292,7 @@ public final class plasmaSearchRankingProcess {
         // returns from the current RWI list the best URL entry and removed this entry from the list
         while ((stack.size() > 0) || (size() > 0)) {
                 if (((stack.size() == 0) && (size() == 0))) break;
-                final kelondroSortStack<indexRWIVarEntry>.stackElement obrwi = bestRWI(skipDoubleDom);
+                final SortStack<indexRWIVarEntry>.stackElement obrwi = bestRWI(skipDoubleDom);
                 if (obrwi == null) continue; // *** ? this happened and the thread was suspended silently. cause?
                 final indexURLReference u = wordIndex.getURL(obrwi.element.urlHash(), obrwi.element, obrwi.weight.longValue());
                 if (u != null) {
@@ -308,7 +308,7 @@ public final class plasmaSearchRankingProcess {
     public int size() {
         //assert sortedRWIEntries.size() == urlhashes.size() : "sortedRWIEntries.size() = " + sortedRWIEntries.size() + ", urlhashes.size() = " + urlhashes.size();
         int c = stack.size();
-        final Iterator<kelondroSortStack<indexRWIVarEntry>> i = this.doubleDomCache.values().iterator();
+        final Iterator<SortStack<indexRWIVarEntry>> i = this.doubleDomCache.values().iterator();
         while (i.hasNext()) c += i.next().size();
         return c;
     }
@@ -345,7 +345,7 @@ public final class plasmaSearchRankingProcess {
     }
     
     public indexRWIEntry remove(final String urlHash) {
-        final kelondroSortStack<indexRWIVarEntry>.stackElement se = stack.remove(urlHash.hashCode());
+        final SortStack<indexRWIVarEntry>.stackElement se = stack.remove(urlHash.hashCode());
         if (se == null) return null;
         urlhashes.remove(urlHash);
         return se.element;

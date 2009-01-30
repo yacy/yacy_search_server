@@ -30,7 +30,7 @@ import java.util.Iterator;
 import de.anomic.crawler.IndexingStack;
 import de.anomic.crawler.ZURL;
 import de.anomic.http.httpRequestHeader;
-import de.anomic.kelondro.tools.MemoryControl;
+import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;

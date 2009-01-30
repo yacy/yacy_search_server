@@ -41,7 +41,7 @@ import com.ice.tar.TarInputStream;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterImageEntry;
-import de.anomic.kelondro.tools.ByteBuffer;
+import de.anomic.kelondro.util.ByteBuffer;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.parser.AbstractParser;

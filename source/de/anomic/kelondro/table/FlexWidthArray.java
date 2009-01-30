@@ -33,11 +33,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.index.Array;
 import de.anomic.kelondro.index.Column;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.order.NaturalOrder;
+import de.anomic.kelondro.util.kelondroException;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.logging.serverLog;
 

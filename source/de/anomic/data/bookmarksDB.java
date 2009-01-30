@@ -65,12 +65,12 @@ import de.anomic.crawler.CrawlProfile;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterWriter;
 import de.anomic.index.indexWord;
-import de.anomic.kelondro.kelondroException;
-import de.anomic.kelondro.kelondroMap;
 import de.anomic.kelondro.blob.BLOBTree;
+import de.anomic.kelondro.blob.MapView;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.kelondro.order.NaturalOrder;
+import de.anomic.kelondro.util.kelondroException;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverBusyThread;
 import de.anomic.server.serverFileUtils;
@@ -91,14 +91,14 @@ public class bookmarksDB {
 	final static String SLEEP_TIME = "3600000"; // default sleepTime: check for recrawls every hour
 	
 	// bookmarks
-    kelondroMap bookmarksTable;		// kelondroMap bookmarksTable;
+    MapView bookmarksTable;		// kelondroMap bookmarksTable;
     
     // tags
-    kelondroMap tagsTable;
+    MapView tagsTable;
     HashMap<String, Tag> tagCache;					
     
     // dates
-    kelondroMap datesTable;
+    MapView datesTable;
     
     // autoReCrawl    
     private serverBusyThread autoReCrawl;
@@ -112,17 +112,17 @@ public class bookmarksDB {
         tagCache=new HashMap<String, Tag>();
         bookmarksFile.getParentFile().mkdirs();
         //this.bookmarksTable = new kelondroMap(kelondroDyn.open(bookmarksFile, bufferkb * 1024, preloadTime, 12, 256, '_', true, false));
-        this.bookmarksTable = new kelondroMap(new BLOBTree(bookmarksFile, true, true, 12, 256, '_', NaturalOrder.naturalOrder, true, false, false), 1000);
+        this.bookmarksTable = new MapView(new BLOBTree(bookmarksFile, true, true, 12, 256, '_', NaturalOrder.naturalOrder, true, false, false), 1000);
 
         // tags
         tagsFile.getParentFile().mkdirs();
         final boolean tagsFileExisted = tagsFile.exists();
-        this.tagsTable = new kelondroMap(new BLOBTree(tagsFile, true, true, 12, 256, '_', NaturalOrder.naturalOrder, true, false, false), 500);
+        this.tagsTable = new MapView(new BLOBTree(tagsFile, true, true, 12, 256, '_', NaturalOrder.naturalOrder, true, false, false), 500);
         if (!tagsFileExisted) rebuildTags();
 
         // dates
         final boolean datesExisted = datesFile.exists();
-        this.datesTable = new kelondroMap(new BLOBTree(datesFile, true, true, 20, 256, '_', NaturalOrder.naturalOrder, true, false, false), 500);
+        this.datesTable = new MapView(new BLOBTree(datesFile, true, true, 20, 256, '_', NaturalOrder.naturalOrder, true, false, false), 500);
         if (!datesExisted) rebuildDates();
 
         // autoReCrawl

@@ -53,15 +53,15 @@ import de.anomic.index.indexRepositoryReference;
 import de.anomic.index.indexURLReference;
 import de.anomic.index.indexWord;
 import de.anomic.index.indexRepositoryReference.Export;
-import de.anomic.kelondro.kelondroException;
-import de.anomic.kelondro.kelondroRotateIterator;
 import de.anomic.kelondro.index.RowCollection;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.CloneableIterator;
-import de.anomic.kelondro.order.kelondroMergeIterator;
-import de.anomic.kelondro.order.kelondroOrder;
-import de.anomic.kelondro.tools.MemoryControl;
+import de.anomic.kelondro.order.MergeIterator;
+import de.anomic.kelondro.order.Order;
+import de.anomic.kelondro.order.RotateIterator;
+import de.anomic.kelondro.util.MemoryControl;
+import de.anomic.kelondro.util.kelondroException;
 import de.anomic.server.serverProfiling;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.iso639;
@@ -766,7 +766,7 @@ public final class plasmaWordIndex implements indexRI {
     public synchronized TreeSet<indexContainer> indexContainerSet(final String startHash, final boolean ram, final boolean rot, int count) {
         // creates a set of indexContainers
         // this does not use the dhtInCache
-        final kelondroOrder<indexContainer> containerOrder = new indexContainerOrder(indexOrder.clone());
+        final Order<indexContainer> containerOrder = new indexContainerOrder(indexOrder.clone());
         containerOrder.rotate(emptyContainer(startHash, 0));
         final TreeSet<indexContainer> containers = new TreeSet<indexContainer>(containerOrder);
         final Iterator<indexContainer> i = wordContainers(startHash, ram, rot);
@@ -903,18 +903,18 @@ public final class plasmaWordIndex implements indexRI {
     public synchronized CloneableIterator<indexContainer> wordContainers(final String startHash, final boolean ram, final boolean rot) {
         final CloneableIterator<indexContainer> i = wordContainers(startHash, ram);
         if (rot) {
-            return new kelondroRotateIterator<indexContainer>(i, new String(Base64Order.zero(startHash.length())), dhtCache.size() + ((ram) ? 0 : collections.size()));
+            return new RotateIterator<indexContainer>(i, new String(Base64Order.zero(startHash.length())), dhtCache.size() + ((ram) ? 0 : collections.size()));
         }
         return i;
     }
 
     public synchronized CloneableIterator<indexContainer> wordContainers(final String startWordHash, final boolean ram) {
-        final kelondroOrder<indexContainer> containerOrder = new indexContainerOrder(indexOrder.clone());
+        final Order<indexContainer> containerOrder = new indexContainerOrder(indexOrder.clone());
         containerOrder.rotate(emptyContainer(startWordHash, 0));
         if (ram) {
             return dhtCache.wordContainers(startWordHash, false);
         }
-        return new kelondroMergeIterator<indexContainer>(
+        return new MergeIterator<indexContainer>(
                 dhtCache.wordContainers(startWordHash, false),
                 collections.wordContainers(startWordHash, false),
                 containerOrder,

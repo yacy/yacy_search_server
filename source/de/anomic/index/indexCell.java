@@ -33,8 +33,8 @@ import java.util.Set;
 
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.order.CloneableIterator;
-import de.anomic.kelondro.order.kelondroMergeIterator;
-import de.anomic.kelondro.order.kelondroOrder;
+import de.anomic.kelondro.order.MergeIterator;
+import de.anomic.kelondro.order.Order;
 
 /*
  * an index cell is a part of the horizontal index in the new segment-oriented index
@@ -178,12 +178,12 @@ public final class indexCell implements indexRI {
     }
     
     public synchronized CloneableIterator<indexContainer> wordContainers(final String startWordHash, boolean rot, final boolean ramOnly) throws IOException {
-        final kelondroOrder<indexContainer> containerOrder = new indexContainerOrder(this.ram.rowdef().getOrdering().clone());
+        final Order<indexContainer> containerOrder = new indexContainerOrder(this.ram.rowdef().getOrdering().clone());
         containerOrder.rotate(new indexContainer(startWordHash, this.ram.rowdef(), 0));
         if (ramOnly) {
             return this.ram.wordContainers(startWordHash, false);
         }
-        return new kelondroMergeIterator<indexContainer>(
+        return new MergeIterator<indexContainer>(
                 this.ram.wordContainers(startWordHash, false),
                 this.array.wordContainers(startWordHash, false),
                 containerOrder,

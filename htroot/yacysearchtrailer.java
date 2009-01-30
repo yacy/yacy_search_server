@@ -30,7 +30,7 @@ import java.util.TreeSet;
 
 import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.order.NaturalOrder;
-import de.anomic.kelondro.tools.SetTools;
+import de.anomic.kelondro.util.SetTools;
 import de.anomic.plasma.plasmaProfiling;
 import de.anomic.plasma.plasmaSearchEvent;
 import de.anomic.plasma.plasmaSearchQuery;

@@ -43,13 +43,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import de.anomic.http.JakartaCommonsHttpClient;
 import de.anomic.http.JakartaCommonsHttpResponse;
 import de.anomic.http.httpRequestHeader;
-import de.anomic.kelondro.kelondroException;
-import de.anomic.kelondro.kelondroMap;
 import de.anomic.kelondro.blob.BLOB;
 import de.anomic.kelondro.blob.BLOBHeap;
+import de.anomic.kelondro.blob.MapView;
 import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.kelondro.order.NaturalOrder;
-import de.anomic.kelondro.tools.ByteBuffer;
+import de.anomic.kelondro.util.ByteBuffer;
+import de.anomic.kelondro.util.kelondroException;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyURL;
@@ -59,7 +59,7 @@ public class RobotsTxt {
     public static final String ROBOTS_DB_PATH_SEPARATOR = ";";    
     private static final serverLog log = new serverLog("ROBOTS");
     
-    kelondroMap robotsTable;
+    MapView robotsTable;
     private final File robotsTableFile;
     private final ConcurrentHashMap<String, Long> syncObjects;
     //private static final HashSet<String> loadedRobots = new HashSet<String>(); // only for debugging
@@ -73,7 +73,7 @@ public class RobotsTxt {
         } catch (final IOException e) {
             e.printStackTrace();
         }
-        robotsTable = new kelondroMap(blob, 100);
+        robotsTable = new MapView(blob, 100);
         syncObjects = new ConcurrentHashMap<String, Long>();
     }
     
@@ -88,7 +88,7 @@ public class RobotsTxt {
         } catch (final IOException e) {
             e.printStackTrace();
         }
-        robotsTable = new kelondroMap(blob, 100);
+        robotsTable = new MapView(blob, 100);
         syncObjects.clear();
     }
     

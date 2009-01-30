@@ -24,14 +24,14 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.kelondro;
+package de.anomic.kelondro.util;
 
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
-public class kelondroSortStack<E> {
+public class SortStack<E> {
 
     // implements a stack where elements 'float' on-top of the stack according to a weight value.
     // objects pushed on the stack must implement the hashCode() method to provide a handle
@@ -41,7 +41,7 @@ public class kelondroSortStack<E> {
     protected HashSet<Integer> instack; // keeps track which element has been on the stack or is now in the offstack
     protected int maxsize;
     
-    public kelondroSortStack(final int maxsize) {
+    public SortStack(final int maxsize) {
         // the maxsize is the maximum number of entries in the stack
         // if this is set to -1, the size is unlimited
         this.onstack = new TreeMap<Long, E>();

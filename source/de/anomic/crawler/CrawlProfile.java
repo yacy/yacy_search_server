@@ -31,14 +31,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import de.anomic.kelondro.kelondroException;
-import de.anomic.kelondro.kelondroMap;
 import de.anomic.kelondro.blob.BLOB;
 import de.anomic.kelondro.blob.BLOBHeap;
+import de.anomic.kelondro.blob.MapView;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.Digest;
 import de.anomic.kelondro.order.NaturalOrder;
+import de.anomic.kelondro.util.kelondroException;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyURL;
 
@@ -60,14 +60,14 @@ public class CrawlProfile {
     
     static HashMap<String, Map<String, DomProfile>> domsCache = new HashMap<String, Map<String, DomProfile>>();
     
-    kelondroMap profileTable;
+    MapView profileTable;
     private final File profileTableFile;
     
     public CrawlProfile(final File file) throws IOException {
         this.profileTableFile = file;
         profileTableFile.getParentFile().mkdirs();
         final BLOB dyn = new BLOBHeap(profileTableFile, yacySeedDB.commonHashLength, NaturalOrder.naturalOrder, 1024 * 64);
-        profileTable = new kelondroMap(dyn, 500);
+        profileTable = new MapView(dyn, 500);
     }
     
     public void clear() {
@@ -81,7 +81,7 @@ public class CrawlProfile {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        profileTable = new kelondroMap(dyn, 500);
+        profileTable = new MapView(dyn, 500);
     }
     
     public void close() {

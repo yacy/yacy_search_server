@@ -24,7 +24,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.kelondro;
+package de.anomic.kelondro.table;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -55,7 +55,7 @@ import de.anomic.kelondro.order.NaturalOrder;
  * grant ALL on yacy.* to yacy;
  */
 
-public class kelondroSQLTable implements ObjectIndex {
+public class SQLTable implements ObjectIndex {
 
     private static final String db_driver_str_mysql = "org.gjt.mm.mysql.Driver";
     private static final String db_driver_str_pgsql = "org.postgresql.Driver";
@@ -70,7 +70,7 @@ public class kelondroSQLTable implements ObjectIndex {
     private final ByteOrder order = new NaturalOrder(true);
     private final Row rowdef;
     
-    public kelondroSQLTable(final String dbType, final Row rowdef) throws Exception {
+    public SQLTable(final String dbType, final Row rowdef) throws Exception {
         this.rowdef = rowdef;
         openDatabaseConnection(dbType);
     }

@@ -50,16 +50,16 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 
-import de.anomic.kelondro.kelondroStack;
 import de.anomic.kelondro.index.Column;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.kelondro.order.NaturalOrder;
+import de.anomic.kelondro.table.Stack;
 
 public class yacyNewsQueue {
 
     private final File path;
-    kelondroStack queueStack;
+    Stack queueStack;
     private final yacyNewsDB newsDB;
     
     public static final Row rowdef = new Row(new Column[]{
@@ -72,13 +72,13 @@ public class yacyNewsQueue {
     public yacyNewsQueue(final File path, final yacyNewsDB newsDB) {
         this.path = path;
         this.newsDB = newsDB;
-        this.queueStack = kelondroStack.open(path, rowdef);
+        this.queueStack = Stack.open(path, rowdef);
     }
 
     private void resetDB() {
         try {close();} catch (final Exception e) {}
         if (path.exists()) path.delete();
-        queueStack = kelondroStack.open(path, rowdef);
+        queueStack = Stack.open(path, rowdef);
     }
 
     public void clear() {

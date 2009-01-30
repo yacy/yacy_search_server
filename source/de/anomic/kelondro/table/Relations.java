@@ -24,7 +24,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.kelondro;
+package de.anomic.kelondro.table;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,14 +33,13 @@ import java.util.HashMap;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.ObjectIndex;
 import de.anomic.kelondro.order.NaturalOrder;
-import de.anomic.kelondro.table.EcoTable;
 
-public class kelondroRelations {
+public class Relations {
 
     private final File baseDir;
     private HashMap<String, ObjectIndex> relations;
     
-    public kelondroRelations(final File location) {
+    public Relations(final File location) {
         this.baseDir = location;
     }
     
@@ -159,7 +158,7 @@ public class kelondroRelations {
     }
     
     public static void main(final String args[]) {
-        final kelondroRelations r = new kelondroRelations(new File("/Users/admin/"));
+        final Relations r = new Relations(new File("/Users/admin/"));
         try {
             final String table1 = "test1";
             r.declareRelation(table1, 12, 30);

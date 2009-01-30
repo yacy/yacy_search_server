@@ -35,7 +35,7 @@ import java.util.Properties;
 import java.util.TreeSet;
 
 import de.anomic.http.httpTemplate;
-import de.anomic.kelondro.tools.ByteBuffer;
+import de.anomic.kelondro.util.ByteBuffer;
 import de.anomic.server.serverCharBuffer;
 
 public class htmlFilterContentTransformer extends htmlFilterAbstractTransformer implements htmlFilterTransformer {

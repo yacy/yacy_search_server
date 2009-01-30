@@ -31,8 +31,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TimeZone;
 
-import de.anomic.kelondro.kelondroMap;
 import de.anomic.kelondro.blob.BLOBTree;
+import de.anomic.kelondro.blob.MapView;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.NaturalOrder;
 
@@ -48,13 +48,13 @@ public class messageBoard {
         SimpleFormatter.setTimeZone(TimeZone.getTimeZone("GMT"));
     }
 
-    kelondroMap database = null;
+    MapView database = null;
     private int sn = 0;
 
     public messageBoard(final File path) {
         new File(path.getParent()).mkdir();
         if (database == null) {
-            database = new kelondroMap(new BLOBTree(path, true, true, categoryLength + dateFormat.length() + 2, recordSize, '_', NaturalOrder.naturalOrder, true, false, false), 500);
+            database = new MapView(new BLOBTree(path, true, true, categoryLength + dateFormat.length() + 2, recordSize, '_', NaturalOrder.naturalOrder, true, false, false), 500);
         }
         sn = 0;
     }

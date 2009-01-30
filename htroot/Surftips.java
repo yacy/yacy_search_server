@@ -37,7 +37,7 @@ import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.Row.Entry;
 import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.kelondro.order.NaturalOrder;
-import de.anomic.kelondro.tools.ScoreCluster;
+import de.anomic.kelondro.util.ScoreCluster;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;

@@ -32,7 +32,7 @@ import java.util.SortedMap;
 
 import de.anomic.kelondro.io.CachedRandomAccess;
 import de.anomic.kelondro.order.ByteOrder;
-import de.anomic.kelondro.tools.MemoryControl;
+import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.server.logging.serverLog;
 
 public class BLOBHeapModifier extends HeapReader implements BLOB {

@@ -41,10 +41,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 
-import de.anomic.kelondro.kelondroCache;
-import de.anomic.kelondro.kelondroException;
-import de.anomic.kelondro.kelondroObjectBuffer;
-import de.anomic.kelondro.kelondroRotateIterator;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.ObjectIndex;
 import de.anomic.kelondro.io.AbstractRandomAccess;
@@ -52,10 +48,12 @@ import de.anomic.kelondro.io.RandomAccessInterface;
 import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.NaturalOrder;
+import de.anomic.kelondro.order.RotateIterator;
 import de.anomic.kelondro.table.EcoTable;
 import de.anomic.kelondro.table.FlexTable;
 import de.anomic.kelondro.table.FlexWidthArray;
 import de.anomic.kelondro.table.Tree;
+import de.anomic.kelondro.util.kelondroException;
 
 public class BLOBTree implements BLOB {
 
@@ -67,7 +65,7 @@ public class BLOBTree implements BLOB {
     //private int segmentCount;
     private final char fillChar;
     private final ObjectIndex index;
-    private kelondroObjectBuffer buffer;
+    private ObjectBuffer buffer;
     private final Row rowdef;
     private File file;
     
@@ -110,13 +108,13 @@ public class BLOBTree implements BLOB {
                 fbi = new EcoTable(file, rowdef, EcoTable.tailCacheUsageAuto, EcoFSBufferSize, 0);
             }
         }
-        this.index = ((useObjectCache) && (!(fbi instanceof EcoTable))) ? (ObjectIndex) new kelondroCache(fbi) : fbi;
+        this.index = ((useObjectCache) && (!(fbi instanceof EcoTable))) ? (ObjectIndex) new Cache(fbi) : fbi;
         this.keylen = key;
         this.reclen = nodesize;
         this.fillChar = fillChar;
         //this.segmentCount = 0;
         //if (!(tree.fileExisted)) writeSegmentCount();
-        buffer = new kelondroObjectBuffer(file.toString());
+        buffer = new ObjectBuffer(file.toString());
         /*
         // debug
         try {
@@ -156,7 +154,7 @@ public class BLOBTree implements BLOB {
     public void clear() throws IOException {
     	final String name = this.index.filename();
     	this.index.clear();
-    	this.buffer = new kelondroObjectBuffer(name);
+    	this.buffer = new ObjectBuffer(name);
     }
     
     public int keylength() {
@@ -248,7 +246,7 @@ public class BLOBTree implements BLOB {
         // iterates only the keys of the Nodes
         // enumerated objects are of type String
         final keyIterator i = new keyIterator(index.rows(up, null));
-        if (rotating) return new kelondroRotateIterator<byte[]>(i, null, index.size());
+        if (rotating) return new RotateIterator<byte[]>(i, null, index.size());
         return i;
     }
 

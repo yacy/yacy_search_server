@@ -40,7 +40,7 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import de.anomic.kelondro.tools.ByteBuffer;
+import de.anomic.kelondro.util.ByteBuffer;
 import de.anomic.server.logging.serverLog;
 
 public class opensearchdescriptionReader extends DefaultHandler {

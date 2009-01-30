@@ -34,12 +34,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
 
-import de.anomic.kelondro.kelondroRotateIterator;
 import de.anomic.kelondro.index.BytesLongMap;
 import de.anomic.kelondro.io.CachedRandomAccess;
 import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.CloneableIterator;
-import de.anomic.kelondro.tools.MemoryControl;
+import de.anomic.kelondro.order.RotateIterator;
+import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.server.logging.serverLog;
 
 public class HeapReader {
@@ -311,7 +311,7 @@ public class HeapReader {
      * @throws IOException
      */
     public synchronized CloneableIterator<byte[]> keys(final boolean up, final boolean rotating) throws IOException {
-        return new kelondroRotateIterator<byte[]>(this.index.keys(up, null), null, this.index.size());
+        return new RotateIterator<byte[]>(this.index.keys(up, null), null, this.index.size());
     }
 
     /**

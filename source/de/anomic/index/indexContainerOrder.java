@@ -27,13 +27,13 @@
 package de.anomic.index;
 
 import de.anomic.kelondro.order.AbstractOrder;
-import de.anomic.kelondro.order.kelondroOrder;
+import de.anomic.kelondro.order.Order;
 
-public class indexContainerOrder extends AbstractOrder<indexContainer> implements kelondroOrder<indexContainer>, Cloneable {
+public class indexContainerOrder extends AbstractOrder<indexContainer> implements Order<indexContainer>, Cloneable {
 
-    private final kelondroOrder<byte[]> embeddedOrder;
+    private final Order<byte[]> embeddedOrder;
 
-    public indexContainerOrder(final kelondroOrder<byte[]> embedOrder) {
+    public indexContainerOrder(final Order<byte[]> embedOrder) {
         this.embeddedOrder = embedOrder;
     }
 
@@ -58,7 +58,7 @@ public class indexContainerOrder extends AbstractOrder<indexContainer> implement
         this.zero = new indexContainer(new String(this.embeddedOrder.zero()), zero);
     }
 
-    public kelondroOrder<indexContainer> clone() {
+    public Order<indexContainer> clone() {
         return new indexContainerOrder(this.embeddedOrder.clone());
     }
 
@@ -70,7 +70,7 @@ public class indexContainerOrder extends AbstractOrder<indexContainer> implement
         return this.embeddedOrder.cardinal(key);
     }
     
-    public boolean equals(final kelondroOrder<indexContainer> otherOrder) {
+    public boolean equals(final Order<indexContainer> otherOrder) {
         if (!(otherOrder instanceof indexContainerOrder)) return false;
         return this.embeddedOrder.equals(((indexContainerOrder) otherOrder).embeddedOrder);
     }

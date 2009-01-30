@@ -45,7 +45,7 @@ public final class NaturalOrder extends AbstractOrder<byte[]> implements ByteOrd
         return true;
     }
     
-    public final kelondroOrder<byte[]> clone() {
+    public final Order<byte[]> clone() {
         final NaturalOrder o = new NaturalOrder(this.asc);
         o.rotate(this.zero);
         return o;
@@ -205,7 +205,7 @@ public final class NaturalOrder extends AbstractOrder<byte[]> implements ByteOrd
         final byte[] t = new byte[12];
         for (int i = 0; i < 12; i++) t[i] = (byte) 255;
         t[0] = (byte) 127;
-        final kelondroOrder<byte[]> o = new NaturalOrder(true);
+        final Order<byte[]> o = new NaturalOrder(true);
         System.out.println(o.partition(t, 16));
     }
     

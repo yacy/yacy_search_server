@@ -53,7 +53,7 @@ import java.util.TreeMap;
 import de.anomic.crawler.ResultURLs;
 import de.anomic.index.indexReferenceBlacklist;
 import de.anomic.kelondro.order.Bitfield;
-import de.anomic.kelondro.tools.ScoreCluster;
+import de.anomic.kelondro.util.ScoreCluster;
 import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSearchRankingProcess;
 import de.anomic.plasma.plasmaSearchRankingProfile;

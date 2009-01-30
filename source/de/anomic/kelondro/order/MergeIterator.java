@@ -30,7 +30,7 @@ import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 
 
-public class kelondroMergeIterator<E> implements CloneableIterator<E> {
+public class MergeIterator<E> implements CloneableIterator<E> {
     
     private Comparator<E> comp;
     private CloneableIterator<E> a, b;
@@ -38,7 +38,7 @@ public class kelondroMergeIterator<E> implements CloneableIterator<E> {
     private final Method merger;
     private final boolean up;
     
-    public kelondroMergeIterator(
+    public MergeIterator(
             final CloneableIterator<E> a,
             final CloneableIterator<E> b,
             final Comparator<E> c,
@@ -54,8 +54,8 @@ public class kelondroMergeIterator<E> implements CloneableIterator<E> {
         nextb();
     }
 
-    public kelondroMergeIterator<E> clone(final Object modifier) {
-        return new kelondroMergeIterator<E>(a.clone(modifier), b.clone(modifier), comp, merger, up);
+    public MergeIterator<E> clone(final Object modifier) {
+        return new MergeIterator<E>(a.clone(modifier), b.clone(modifier), comp, merger, up);
     }
     
     private void nexta() {
@@ -125,7 +125,7 @@ public class kelondroMergeIterator<E> implements CloneableIterator<E> {
         throw new java.lang.UnsupportedOperationException("merge does not support remove");
     }
     
-    public static <A> CloneableIterator<A> cascade(final Collection<CloneableIterator<A>> iterators, final kelondroOrder<A> c, final Method merger, final boolean up) {
+    public static <A> CloneableIterator<A> cascade(final Collection<CloneableIterator<A>> iterators, final Order<A> c, final Method merger, final boolean up) {
         // this extends the ability to combine two iterators
         // to the ability of combining a set of iterators
         if (iterators == null) return null;
@@ -133,12 +133,12 @@ public class kelondroMergeIterator<E> implements CloneableIterator<E> {
         return cascade(iterators.iterator(), c, merger, up);
     }
     
-    private static <A> CloneableIterator<A> cascade(final Iterator<CloneableIterator<A>> iiterators, final kelondroOrder<A> c, final Method merger, final boolean up) {
+    private static <A> CloneableIterator<A> cascade(final Iterator<CloneableIterator<A>> iiterators, final Order<A> c, final Method merger, final boolean up) {
         if (iiterators == null) return null;
         if (!(iiterators.hasNext())) return null;
         final CloneableIterator<A> one = iiterators.next();
         if (!(iiterators.hasNext())) return one;
-        return new kelondroMergeIterator<A>(one, cascade(iiterators, c, merger, up), c, merger, up);
+        return new MergeIterator<A>(one, cascade(iiterators, c, merger, up), c, merger, up);
     }
     
     public static final Method simpleMerge;

@@ -43,12 +43,12 @@ import de.anomic.htmlFilter.htmlFilterCharacterCoding;
 import de.anomic.http.JakartaCommonsHttpClient;
 import de.anomic.http.JakartaCommonsHttpResponse;
 import de.anomic.http.httpRemoteProxyConfig;
-import de.anomic.kelondro.kelondroCache;
-import de.anomic.kelondro.kelondroSplitTable;
+import de.anomic.kelondro.blob.Cache;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.ObjectIndex;
 import de.anomic.kelondro.order.CloneableIterator;
-import de.anomic.kelondro.tools.ScoreCluster;
+import de.anomic.kelondro.table.SplitTable;
+import de.anomic.kelondro.util.ScoreCluster;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyURL;
 
@@ -63,11 +63,11 @@ public final class indexRepositoryReference {
     public indexRepositoryReference(final File indexSecondaryPath) {
         super();
         this.location = new File(indexSecondaryPath, "TEXT");        
-        urlIndexFile = new kelondroCache(new kelondroSplitTable(this.location, "urls", indexURLReference.rowdef, false));
+        urlIndexFile = new Cache(new SplitTable(this.location, "urls", indexURLReference.rowdef, false));
     }
 
     public void clearCache() {
-        if (urlIndexFile instanceof kelondroCache) ((kelondroCache) urlIndexFile).clearCache();
+        if (urlIndexFile instanceof Cache) ((Cache) urlIndexFile).clearCache();
         statsDump = null;
     }
     
@@ -90,8 +90,8 @@ public final class indexRepositoryReference {
     }
 
     public synchronized int writeCacheSize() {
-        if (urlIndexFile instanceof kelondroSplitTable) return ((kelondroSplitTable) urlIndexFile).writeBufferSize();
-        if (urlIndexFile instanceof kelondroCache) return ((kelondroCache) urlIndexFile).writeBufferSize();
+        if (urlIndexFile instanceof SplitTable) return ((SplitTable) urlIndexFile).writeBufferSize();
+        if (urlIndexFile instanceof Cache) return ((Cache) urlIndexFile).writeBufferSize();
         return 0;
     }
 

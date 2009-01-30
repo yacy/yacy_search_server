@@ -37,16 +37,15 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.NaturalOrder;
-import de.anomic.kelondro.tools.MemoryControl;
+import de.anomic.kelondro.util.MemoryControl;
+import de.anomic.kelondro.util.kelondroException;
 import de.anomic.server.NamePrefixThreadFactory;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverProcessor;
 import de.anomic.server.logging.serverLog;
-import de.anomic.yacy.yacySeedDB;
 
 public class RowCollection implements Iterable<Row.Entry> {
 
@@ -942,7 +941,7 @@ public class RowCollection implements Iterable<Row.Entry> {
     
     public static void test(final int testsize) {
     	final Row r = new Row(new Column[]{
-    			new Column("hash", Column.celltype_string, Column.encoder_bytes, yacySeedDB.commonHashLength, "hash")},
+    			new Column("hash", Column.celltype_string, Column.encoder_bytes, 12, "hash")},
     			Base64Order.enhancedCoder, 0);
     	
     	RowCollection a = new RowCollection(r, testsize);

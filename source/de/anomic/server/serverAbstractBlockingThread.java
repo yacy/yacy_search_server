@@ -24,7 +24,7 @@
 
 package de.anomic.server;
 
-import de.anomic.kelondro.tools.MemoryControl;
+import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.server.logging.serverLog;
 
 public abstract class serverAbstractBlockingThread<J extends serverProcessorJob> extends serverAbstractThread implements serverBlockingThread<J> {

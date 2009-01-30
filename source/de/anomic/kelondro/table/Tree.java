@@ -45,7 +45,6 @@ import java.util.TreeSet;
 import java.util.Vector;
 import java.util.logging.Logger;
 
-import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.RowCollection;
 import de.anomic.kelondro.index.ObjectIndex;
@@ -54,6 +53,7 @@ import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.table.CachedRecords.CacheNode;
+import de.anomic.kelondro.util.kelondroException;
 import de.anomic.server.logging.serverLog;
 
 public class Tree extends CachedRecords implements ObjectIndex {

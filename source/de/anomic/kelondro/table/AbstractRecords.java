@@ -39,7 +39,6 @@ import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.index.Column;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.Row.EntryIndex;
@@ -52,6 +51,7 @@ import de.anomic.kelondro.io.RandomAccessIOChunks;
 import de.anomic.kelondro.io.RandomAccessRecords;
 import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.NaturalOrder;
+import de.anomic.kelondro.util.kelondroException;
 import de.anomic.server.logging.serverLog;
 
 public abstract class AbstractRecords implements RandomAccessRecords {

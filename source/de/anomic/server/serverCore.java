@@ -57,8 +57,8 @@ import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
 import de.anomic.icap.icapd;
-import de.anomic.kelondro.tools.ByteBuffer;
-import de.anomic.kelondro.tools.MemoryControl;
+import de.anomic.kelondro.util.ByteBuffer;
+import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.PKCS12Tool;
 import de.anomic.urlRedirector.urlRedirectord;

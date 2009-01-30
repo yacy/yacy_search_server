@@ -36,9 +36,9 @@ import java.util.TreeSet;
 
 import de.anomic.http.httpRequestHeader;
 import de.anomic.index.indexContainer;
-import de.anomic.kelondro.kelondroSortStack;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.Bitfield;
+import de.anomic.kelondro.util.SortStack;
 import de.anomic.net.natLib;
 import de.anomic.plasma.plasmaProfiling;
 import de.anomic.plasma.plasmaSearchEvent;
@@ -176,7 +176,7 @@ public final class search {
         int indexabstractContainercount = 0;
         int joincount = 0;
         plasmaSearchQuery theQuery = null;
-        ArrayList<kelondroSortStack<ResultEntry>.stackElement> accu = null;
+        ArrayList<SortStack<ResultEntry>.stackElement> accu = null;
         plasmaSearchEvent theSearch = null;
         if ((query.length() == 0) && (abstractSet != null)) {
             // this is _not_ a normal search, only a request for index abstracts
@@ -295,7 +295,7 @@ public final class search {
             final long timer = System.currentTimeMillis();
             final StringBuilder links = new StringBuilder();
             String resource = null;
-            kelondroSortStack<plasmaSearchEvent.ResultEntry>.stackElement entry;
+            SortStack<plasmaSearchEvent.ResultEntry>.stackElement entry;
             for (int i = 0; i < accu.size(); i++) {
                 entry = accu.get(i);
                 resource = entry.element.resource();

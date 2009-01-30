@@ -43,11 +43,11 @@ import java.util.Map;
 
 import de.anomic.http.httpResponseHeader;
 import de.anomic.index.indexDocumentMetadata;
-import de.anomic.kelondro.kelondroMap;
 import de.anomic.kelondro.blob.BLOB;
 import de.anomic.kelondro.blob.BLOBArray;
 import de.anomic.kelondro.blob.BLOBCompressor;
 import de.anomic.kelondro.blob.BLOBHeap;
+import de.anomic.kelondro.blob.MapView;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.logging.serverLog;
@@ -61,7 +61,7 @@ public final class plasmaHTCache {
     
     public  static final long oneday = 1000L * 60L * 60L * 24L; // milliseconds of a day
 
-    private static kelondroMap responseHeaderDB = null;
+    private static MapView responseHeaderDB = null;
     private static BLOBCompressor fileDB = null;
     private static BLOBArray fileDBunbuffered = null;
     
@@ -134,7 +134,7 @@ public final class plasmaHTCache {
         } catch (final IOException e) {
             e.printStackTrace();
         }
-        responseHeaderDB = new kelondroMap(blob, 500);
+        responseHeaderDB = new MapView(blob, 500);
         try {
             fileDBunbuffered = new BLOBArray(new File(cachePath, FILE_DB_NAME), salt, 12, Base64Order.enhancedCoder, 1024 * 1024 * 2);
             fileDBunbuffered.setMaxSize(maxCacheSize);

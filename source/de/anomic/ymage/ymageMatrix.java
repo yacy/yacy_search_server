@@ -44,8 +44,8 @@ import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 
-import de.anomic.kelondro.tools.ByteBuffer;
-import de.anomic.kelondro.tools.MemoryControl;
+import de.anomic.kelondro.util.ByteBuffer;
+import de.anomic.kelondro.util.MemoryControl;
 
 public class ymageMatrix {
     

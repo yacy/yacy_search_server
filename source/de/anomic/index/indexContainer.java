@@ -37,7 +37,7 @@ import java.util.TreeMap;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.RowSet;
 import de.anomic.kelondro.order.Base64Order;
-import de.anomic.kelondro.tools.ByteBuffer;
+import de.anomic.kelondro.util.ByteBuffer;
 import de.anomic.plasma.plasmaWordIndex;
 
 public class indexContainer extends RowSet {

@@ -41,7 +41,7 @@ import java.util.List;
 
 import de.anomic.index.indexURLReference;
 import de.anomic.kelondro.order.Bitfield;
-import de.anomic.kelondro.tools.ScoreCluster;
+import de.anomic.kelondro.util.ScoreCluster;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyURL;

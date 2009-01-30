@@ -51,10 +51,13 @@ import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.Digest;
 import de.anomic.kelondro.order.NaturalOrder;
+import de.anomic.kelondro.order.RotateIterator;
 import de.anomic.kelondro.table.EcoTable;
 import de.anomic.kelondro.table.FixedWidthArray;
 import de.anomic.kelondro.table.FlexTable;
-import de.anomic.kelondro.tools.MemoryControl;
+import de.anomic.kelondro.util.MemoryControl;
+import de.anomic.kelondro.util.kelondroException;
+import de.anomic.kelondro.util.kelondroOutOfLimitsException;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyURL;
@@ -815,7 +818,7 @@ public class kelondroCollectionIndex {
         public keycollectionIterator(final byte[] startKey, final byte[] secondKey, final boolean rot) throws IOException {
             // iterator of {byte[], kelondroRowSet} Objects
             final CloneableIterator<Row.Entry> i = index.rows(true, startKey);
-            indexRowIterator = (rot) ? new kelondroRotateIterator<Row.Entry>(i, secondKey, index.size()) : i;
+            indexRowIterator = (rot) ? new RotateIterator<Row.Entry>(i, secondKey, index.size()) : i;
         }
         
         public boolean hasNext() {

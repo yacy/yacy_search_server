@@ -31,7 +31,7 @@ import java.util.List;
 
 import de.anomic.kelondro.index.Row.Entry;
 import de.anomic.kelondro.order.CloneableIterator;
-import de.anomic.kelondro.order.kelondroMergeIterator;
+import de.anomic.kelondro.order.MergeIterator;
 
 public class RAMIndex implements ObjectIndex {
     
@@ -185,11 +185,11 @@ public class RAMIndex implements ObjectIndex {
         // sort index1 to enable working of the merge iterator
         index1.sort();
         //assert consistencyAnalysis0() : "consistency problem: " + consistencyAnalysis();
-        return new kelondroMergeIterator<byte[]>(
+        return new MergeIterator<byte[]>(
                 index0.keys(up, firstKey),
                 index1.keys(up, firstKey),
                 rowdef.objectOrder,
-                kelondroMergeIterator.simpleMerge,
+                MergeIterator.simpleMerge,
                 true);
     }
 
@@ -211,11 +211,11 @@ public class RAMIndex implements ObjectIndex {
         // sort index1 to enable working of the merge iterator
         index1.sort();
         //assert consistencyAnalysis0() : "consistency problem: " + consistencyAnalysis();
-        return new kelondroMergeIterator<Row.Entry>(
+        return new MergeIterator<Row.Entry>(
                 index0.rows(up, firstKey),
                 index1.rows(up, firstKey),
                 entryComparator,
-                kelondroMergeIterator.simpleMerge,
+                MergeIterator.simpleMerge,
                 true);
     }
     

@@ -40,7 +40,7 @@ import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.kelondro.order.NaturalOrder;
-import de.anomic.kelondro.order.kelondroMergeIterator;
+import de.anomic.kelondro.order.MergeIterator;
 
 public class BLOBArray implements BLOB {
 
@@ -291,7 +291,7 @@ public class BLOBArray implements BLOB {
         while (i.hasNext()) {
             c.add(i.next().blob.keys(up, rotating));
         }
-        return kelondroMergeIterator.cascade(c, this.ordering, kelondroMergeIterator.simpleMerge, up);
+        return MergeIterator.cascade(c, this.ordering, MergeIterator.simpleMerge, up);
     }
     
     /**
@@ -307,7 +307,7 @@ public class BLOBArray implements BLOB {
         while (i.hasNext()) {
             c.add(i.next().blob.keys(up, firstKey));
         }
-        return kelondroMergeIterator.cascade(c, this.ordering, kelondroMergeIterator.simpleMerge, up);
+        return MergeIterator.cascade(c, this.ordering, MergeIterator.simpleMerge, up);
     }
     
     /**

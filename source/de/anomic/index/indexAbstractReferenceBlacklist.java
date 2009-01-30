@@ -40,7 +40,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import de.anomic.kelondro.tools.SetTools;
+import de.anomic.kelondro.util.SetTools;
 import de.anomic.yacy.yacyURL;
 
 public abstract class indexAbstractReferenceBlacklist implements indexReferenceBlacklist {

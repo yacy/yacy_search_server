@@ -39,7 +39,7 @@ import java.util.zip.GZIPOutputStream;
 
 import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.CloneableIterator;
-import de.anomic.kelondro.tools.ByteArray;
+import de.anomic.kelondro.util.ByteArray;
 
 public class BLOBCompressor extends Thread implements BLOB {
 

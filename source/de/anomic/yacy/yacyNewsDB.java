@@ -49,12 +49,12 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Iterator;
 
-import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.ObjectIndex;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.kelondro.table.EcoTable;
+import de.anomic.kelondro.util.kelondroException;
 import de.anomic.server.serverCodings;
 
 public class yacyNewsDB {

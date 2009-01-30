@@ -35,7 +35,7 @@ import java.util.NoSuchElementException;
 import java.util.TreeMap;
 
 import de.anomic.http.httpRequestHeader;
-import de.anomic.kelondro.tools.MemoryControl;
+import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;

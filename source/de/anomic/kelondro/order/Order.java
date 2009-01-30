@@ -28,11 +28,11 @@ package de.anomic.kelondro.order;
 
 import java.util.Comparator;
 
-public interface kelondroOrder<A> extends Comparator<A> {
+public interface Order<A> extends Comparator<A> {
 
     public boolean wellformed(A a); // returns true if and only if a has only characters that belong to the implemented order
     
-    public kelondroOrder<A> clone();
+    public Order<A> clone();
     
     public void direction(boolean ascending); // the ordering direction can be changed at any time
     
@@ -48,6 +48,6 @@ public interface kelondroOrder<A> extends Comparator<A> {
 
     public void rotate(A zero); // defines that the ordering rotates, and sets the zero point for the rotation
     
-    public boolean equals(kelondroOrder<A> o); // used to compare different order objects; they may define the same ordering
+    public boolean equals(Order<A> o); // used to compare different order objects; they may define the same ordering
 
 }

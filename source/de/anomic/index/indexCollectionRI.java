@@ -33,11 +33,11 @@ import java.util.Iterator;
 import java.util.Set;
 
 import de.anomic.kelondro.kelondroCollectionIndex;
-import de.anomic.kelondro.kelondroOutOfLimitsException;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.RowSet;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.CloneableIterator;
+import de.anomic.kelondro.util.kelondroOutOfLimitsException;
 import de.anomic.server.logging.serverLog;
 
 public class indexCollectionRI implements indexRI {

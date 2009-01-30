@@ -41,10 +41,10 @@ import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexRWIVarEntry;
 import de.anomic.index.indexURLReference;
-import de.anomic.kelondro.kelondroSortStack;
-import de.anomic.kelondro.kelondroSortStore;
 import de.anomic.kelondro.order.Bitfield;
-import de.anomic.kelondro.tools.SetTools;
+import de.anomic.kelondro.util.SetTools;
+import de.anomic.kelondro.util.SortStack;
+import de.anomic.kelondro.util.SortStore;
 import de.anomic.plasma.plasmaSnippetCache.MediaSnippet;
 import de.anomic.server.serverProfiling;
 import de.anomic.server.logging.serverLog;
@@ -81,8 +81,8 @@ public final class plasmaSearchEvent {
     public  TreeMap<String, Integer> IACount;
     public  String IAmaxcounthash, IAneardhthash;
     private resultWorker[] workerThreads;
-    kelondroSortStore<ResultEntry> result;
-    kelondroSortStore<plasmaSnippetCache.MediaSnippet> images; // container to sort images by size
+    SortStore<ResultEntry> result;
+    SortStore<plasmaSnippetCache.MediaSnippet> images; // container to sort images by size
     HashMap<String, String> failedURLs; // a mapping from a urlhash to a fail reason string
     TreeSet<String> snippetFetchWordHashes; // a set of word hashes that are used to match with the snippets
     long urlRetrievalAllTime;
@@ -111,8 +111,8 @@ public final class plasmaSearchEvent {
         this.snippetComputationAllTime = 0;
         this.workerThreads = null;
         this.localSearchThread = null;
-        this.result = new kelondroSortStore<ResultEntry>(-1); // this is the result, enriched with snippets, ranked and ordered by ranking
-        this.images = new kelondroSortStore<plasmaSnippetCache.MediaSnippet>(-1);
+        this.result = new SortStore<ResultEntry>(-1); // this is the result, enriched with snippets, ranked and ordered by ranking
+        this.images = new SortStore<plasmaSnippetCache.MediaSnippet>(-1);
         this.failedURLs = new HashMap<String, String>(); // a map of urls to reason strings where a worker thread tried to work on, but failed.
         
         // snippets do not need to match with the complete query hashes,
@@ -680,7 +680,7 @@ public final class plasmaSearchEvent {
         return this.images.element(item).element;
     }
     
-    public ArrayList<kelondroSortStack<ResultEntry>.stackElement> completeResults(final long waitingtime) {
+    public ArrayList<SortStack<ResultEntry>.stackElement> completeResults(final long waitingtime) {
         final long timeout = System.currentTimeMillis() + waitingtime;
         while ((result.size() < query.neededResults()) && (anyWorkerAlive()) && (System.currentTimeMillis() < timeout)) {
             try {Thread.sleep(100);} catch (final InterruptedException e) {}

@@ -25,7 +25,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.kelondro;
+package de.anomic.kelondro.blob;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -34,18 +34,17 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import de.anomic.kelondro.blob.BLOB;
 import de.anomic.kelondro.order.CloneableIterator;
-import de.anomic.kelondro.tools.ScoreCluster;
+import de.anomic.kelondro.util.ScoreCluster;
 
-public class kelondroMapDataMining extends kelondroMap {
+public class MapDataMining extends MapView {
 
     private final String[] sortfields, longaccfields, doubleaccfields;
     private HashMap<String, ScoreCluster<String>> sortClusterMap; // a String-kelondroMScoreCluster - relation
     private HashMap<String, Object> accMap; // to store accumulations of specific fields
     
 	@SuppressWarnings("unchecked")
-	public kelondroMapDataMining(final BLOB dyn, final int cachesize, final String[] sortfields, final String[] longaccfields, final String[] doubleaccfields, final Method externalInitializer, final Object externalHandler) {
+	public MapDataMining(final BLOB dyn, final int cachesize, final String[] sortfields, final String[] longaccfields, final String[] doubleaccfields, final Method externalInitializer, final Object externalHandler) {
         super(dyn, cachesize);
         
         // create fast ordering clusters and acc fields

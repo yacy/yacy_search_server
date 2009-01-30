@@ -34,14 +34,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.order.AbstractOrder;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.NaturalOrder;
-import de.anomic.kelondro.order.kelondroOrder;
-import de.anomic.kelondro.tools.ByteBuffer;
+import de.anomic.kelondro.order.Order;
+import de.anomic.kelondro.util.ByteBuffer;
+import de.anomic.kelondro.util.kelondroException;
 import de.anomic.server.logging.serverLog;
 
 public final class Row {
@@ -201,7 +201,7 @@ public final class Row {
         return new EntryIndex(rowinstance, index);
     }
     
-    public static class EntryComparator extends AbstractOrder<Entry> implements kelondroOrder<Entry>, Comparator<Entry>, Cloneable {
+    public static class EntryComparator extends AbstractOrder<Entry> implements Order<Entry>, Comparator<Entry>, Cloneable {
 
         ByteOrder base;
         public EntryComparator(final ByteOrder baseOrder) {
@@ -212,7 +212,7 @@ public final class Row {
             return a.compareTo(b);
         }
 
-        public kelondroOrder<Entry> clone() {
+        public Order<Entry> clone() {
             return new EntryComparator(base);
         }
 

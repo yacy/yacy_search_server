@@ -24,18 +24,17 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.kelondro;
+package de.anomic.kelondro.order;
 
-import de.anomic.kelondro.order.CloneableIterator;
 
-public class kelondroRotateIterator<E> implements CloneableIterator<E> {
+public class RotateIterator<E> implements CloneableIterator<E> {
     
     CloneableIterator<E> a, clone;
     Object modifier;
     boolean nempty;
     int terminationCount;
     
-    public kelondroRotateIterator(final CloneableIterator<E> a, final Object modifier, final int terminationCount) {
+    public RotateIterator(final CloneableIterator<E> a, final Object modifier, final int terminationCount) {
         // this works currently only for String-type key iterations
         this.a = a;
         this.modifier = modifier;
@@ -44,8 +43,8 @@ public class kelondroRotateIterator<E> implements CloneableIterator<E> {
         this.nempty = this.clone.hasNext();
     }
     
-	public kelondroRotateIterator<E> clone(final Object modifier) {
-        return new kelondroRotateIterator<E>(a, modifier, terminationCount - 1);
+	public RotateIterator<E> clone(final Object modifier) {
+        return new RotateIterator<E>(a, modifier, terminationCount - 1);
     }
     
     public boolean hasNext() {

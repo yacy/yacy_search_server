@@ -32,11 +32,11 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
-import de.anomic.kelondro.kelondroStack;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.ObjectIndex;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.table.EcoTable;
+import de.anomic.kelondro.table.Stack;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySeedDB;
 
@@ -53,7 +53,7 @@ public class Balancer {
     private final ConcurrentHashMap<String, LinkedList<String>>
                                      domainStacks;    // a map from domain name part to Lists with url hashs
     private final ArrayList<String>  urlRAMStack;     // a list that is flushed first
-    private kelondroStack            urlFileStack;    // a file with url hashes
+    private Stack            urlFileStack;    // a file with url hashes
     private ObjectIndex            urlFileIndex;
     private final File               cacheStacksPath;
     private final String             stackname;
@@ -67,7 +67,7 @@ public class Balancer {
         this.cacheStacksPath = cachePath;
         this.stackname = stackname;
         final File stackFile = new File(cachePath, stackname + stackSuffix);
-        this.urlFileStack   = kelondroStack.open(stackFile, stackrow);
+        this.urlFileStack   = Stack.open(stackFile, stackrow);
         this.domainStacks   = new ConcurrentHashMap<String, LinkedList<String>>();
         this.urlRAMStack    = new ArrayList<String>();
         this.top            = true;
@@ -81,7 +81,7 @@ public class Balancer {
         if (urlFileStack.size() != urlFileIndex.size() || (urlFileIndex.size() < 10000 && urlFileIndex.size() > 0)) {
             // fix the file stack
             serverLog.logInfo("Balancer", "re-creating the " + stackname + " balancer stack, size = " + urlFileIndex.size() + ((urlFileStack.size() == urlFileIndex.size()) ? "" : " (the old stack size was wrong)" ));
-            urlFileStack = kelondroStack.reset(urlFileStack);
+            urlFileStack = Stack.reset(urlFileStack);
             try {
                 final Iterator<byte[]> i = urlFileIndex.keys(true, null);
                 byte[] hash;
@@ -130,7 +130,7 @@ public class Balancer {
     }
     
     public synchronized void clear() {
-        urlFileStack = kelondroStack.reset(urlFileStack);
+        urlFileStack = Stack.reset(urlFileStack);
         domainStacks.clear();
         urlRAMStack.clear();
         resetFileIndex();
@@ -544,7 +544,7 @@ public class Balancer {
             if (nextentry == null) {
                 // emergency case: this means that something with the stack organization is wrong
                 // the file appears to be broken. We kill the file.
-                kelondroStack.reset(urlFileStack);
+                Stack.reset(urlFileStack);
                 serverLog.logSevere("BALANCER", "get() failed to fetch entry from file stack. reset stack file.");
             } else {
                 final String nexthash = new String(nextentry.getColBytes(0));

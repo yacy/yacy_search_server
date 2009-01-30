@@ -33,9 +33,9 @@ import java.util.Iterator;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.index.indexRepositoryReference;
 import de.anomic.index.indexURLReference;
-import de.anomic.kelondro.kelondroRotateIterator;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.DateFormatter;
+import de.anomic.kelondro.order.RotateIterator;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -181,7 +181,7 @@ public class IndexControlURLs_p {
         // generate list
         if (post.containsKey("urlhashsimilar")) {
             try {
-                final Iterator<indexURLReference> entryIt = new kelondroRotateIterator<indexURLReference>(sb.webIndex.entriesURL(true, urlhash), new String(Base64Order.zero((urlhash == null ? 0 : urlhash.length()))), sb.webIndex.size()); 
+                final Iterator<indexURLReference> entryIt = new RotateIterator<indexURLReference>(sb.webIndex.entriesURL(true, urlhash), new String(Base64Order.zero((urlhash == null ? 0 : urlhash.length()))), sb.webIndex.size()); 
                 final StringBuilder result = new StringBuilder("Sequential List of URL-Hashes:<br />");
                 indexURLReference entry;
                 int i = 0;

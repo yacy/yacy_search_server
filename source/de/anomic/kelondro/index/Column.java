@@ -27,7 +27,7 @@
 
 package de.anomic.kelondro.index;
 
-import de.anomic.kelondro.kelondroException;
+import de.anomic.kelondro.util.kelondroException;
 
 public class Column {
 

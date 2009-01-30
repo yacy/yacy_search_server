@@ -24,7 +24,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.kelondro;
+package de.anomic.kelondro.util;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -47,10 +47,9 @@ import de.anomic.kelondro.index.Column;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.RowCollection;
 import de.anomic.kelondro.order.Base64Order;
-import de.anomic.kelondro.tools.MemoryControl;
 import de.anomic.server.serverFileUtils;
 
-public class kelondroAttrSeq {
+public class AttrSeq {
     
     // class objects
     private final File file;
@@ -62,7 +61,7 @@ public class kelondroAttrSeq {
     // optional logger
     protected Logger theLogger = null;
     
-    public kelondroAttrSeq(final File file, final boolean tree) throws IOException {
+    public AttrSeq(final File file, final boolean tree) throws IOException {
         this.file = file;
         this.structure = null;
         this.created = -1;
@@ -71,7 +70,7 @@ public class kelondroAttrSeq {
         readAttrFile(file);
     }
 
-    public kelondroAttrSeq(final String name, final String struct, final boolean tree) {
+    public AttrSeq(final String name, final String struct, final boolean tree) {
         this.file = null;
         this.structure = new Structure(struct);
         this.created = System.currentTimeMillis();
@@ -441,9 +440,9 @@ public class kelondroAttrSeq {
     }
     
     public static void transcode(final File from_file, final File to_file) throws IOException {
-        final kelondroAttrSeq crp = new kelondroAttrSeq(from_file, true);
+        final AttrSeq crp = new AttrSeq(from_file, true);
         //crp.toFile(new File(args[1]));
-        final kelondroAttrSeq cro = new kelondroAttrSeq(crp.name + "/Transcoded from " + crp.file.getName(), crp.structure.toString(), true);
+        final AttrSeq cro = new AttrSeq(crp.name + "/Transcoded from " + crp.file.getName(), crp.structure.toString(), true);
         final Iterator<String> i = crp.entries.keySet().iterator();
         while (i.hasNext()) {
             cro.putEntry(crp.getEntry(i.next()));

@@ -30,7 +30,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import de.anomic.kelondro.tools.ByteBuffer;
+import de.anomic.kelondro.util.ByteBuffer;
 
 /**
  * Some parts of this class code was copied from <a href="http://www.devdaily.com/java/jwarehouse/commons-httpclient-2.0/src/java/org/apache/commons/httpclient/ChunkedInputStream.shtml">Apache httpclient Project.</a>

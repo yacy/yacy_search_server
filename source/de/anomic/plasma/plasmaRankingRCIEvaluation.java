@@ -34,21 +34,21 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.TreeSet;
 
-import de.anomic.kelondro.kelondroAttrSeq;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.Digest;
+import de.anomic.kelondro.util.AttrSeq;
 import de.anomic.server.serverFileUtils;
 import de.anomic.yacy.yacyURL;
 
 public class plasmaRankingRCIEvaluation {
     
-    public static int[] rcieval(final kelondroAttrSeq rci) {
+    public static int[] rcieval(final AttrSeq rci) {
         // collect information about which entry has how many references
         // the output is a reference-count:occurrences relation
         final HashMap<Integer, Integer> counts = new HashMap<Integer, Integer>();
         final Iterator<String> i = rci.keys();
         String key;
-        kelondroAttrSeq.Entry entry;
+        AttrSeq.Entry entry;
         Integer count_key, count_count;
         int c, maxcount = 0;
         while (i.hasNext()) {
@@ -135,12 +135,12 @@ public class plasmaRankingRCIEvaluation {
     }
     
     @SuppressWarnings("unchecked")
-    public static TreeSet<String>[] genRankingTable(final kelondroAttrSeq rci, final int[] partition) {
+    public static TreeSet<String>[] genRankingTable(final AttrSeq rci, final int[] partition) {
         final TreeSet<String>[] ranked = new TreeSet[partition.length];
         for (int i = 0; i < partition.length; i++) ranked[i] = new TreeSet<String>(Base64Order.enhancedComparator);
         final Iterator<String> i = rci.keys();
         String key;
-        kelondroAttrSeq.Entry entry;
+        AttrSeq.Entry entry;
         while (i.hasNext()) {
             key = i.next();
             entry = rci.getEntry(key);
@@ -183,7 +183,7 @@ public class plasmaRankingRCIEvaluation {
                 if (!(rci_file.exists())) return;
                 
                 // create partition table
-                final kelondroAttrSeq rci = new kelondroAttrSeq(rci_file, false);
+                final AttrSeq rci = new AttrSeq(rci_file, false);
                 final int counts[] = rcieval(rci);
                 final int[] partition = interval(counts, 16);
                 

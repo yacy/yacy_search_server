@@ -28,12 +28,12 @@ package de.anomic.kelondro.order;
 
 
 
-public abstract class AbstractOrder<A> implements kelondroOrder<A> {
+public abstract class AbstractOrder<A> implements Order<A> {
 
     protected A zero = null;
     protected boolean asc = true;
     
-    abstract public kelondroOrder<A> clone();
+    abstract public Order<A> clone();
 
     public A zero() {
     	return zero;
@@ -52,7 +52,7 @@ public abstract class AbstractOrder<A> implements kelondroOrder<A> {
         this.zero = newzero;
     }
     
-    public boolean equals(final kelondroOrder<A> otherOrder) {
+    public boolean equals(final Order<A> otherOrder) {
         if (otherOrder == null) return false;
         final String thisSig = this.signature();
         final String otherSig = otherOrder.signature();

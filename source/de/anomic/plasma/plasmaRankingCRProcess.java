@@ -30,7 +30,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 
-import de.anomic.kelondro.kelondroAttrSeq;
 import de.anomic.kelondro.kelondroCollectionIndex;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.RowSet;
@@ -40,7 +39,8 @@ import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.kelondro.order.MicroDate;
 import de.anomic.kelondro.table.EcoTable;
-import de.anomic.kelondro.tools.MemoryControl;
+import de.anomic.kelondro.util.MemoryControl;
+import de.anomic.kelondro.util.AttrSeq;
 import de.anomic.server.serverFileUtils;
 
 public class plasmaRankingCRProcess {
@@ -66,11 +66,11 @@ public class plasmaRankingCRProcess {
     public static final Row RCI_coli = new Row("byte[] RefereeDom-6", Base64Order.enhancedCoder, 0);
     public static final String RCI_colname = "RCI-a-coli";
 
-    private static boolean accumulate_upd(final File f, final kelondroAttrSeq acc) {
+    private static boolean accumulate_upd(final File f, final AttrSeq acc) {
         // open file
-        kelondroAttrSeq source_cr = null;
+        AttrSeq source_cr = null;
         try {
-            source_cr = new kelondroAttrSeq(f, false);
+            source_cr = new AttrSeq(f, false);
         } catch (final IOException e) {
             return false;
         }
@@ -78,7 +78,7 @@ public class plasmaRankingCRProcess {
         // put elements in accumulator file
         final Iterator<String> el = source_cr.keys();
         String key;
-        kelondroAttrSeq.Entry new_entry, acc_entry;
+        AttrSeq.Entry new_entry, acc_entry;
         int FUDate, FDDate, LUDate, UCount, PCount, ACount, VCount, Vita;
         Bitfield acc_flags, new_flags;
         while (el.hasNext()) {
@@ -141,9 +141,9 @@ public class plasmaRankingCRProcess {
     
     private static boolean accumulate_upd(final File f, final ObjectIndex acc, final kelondroCollectionIndex seq) throws IOException {
         // open file
-        kelondroAttrSeq source_cr = null;
+        AttrSeq source_cr = null;
         try {
-            source_cr = new kelondroAttrSeq(f, false);
+            source_cr = new AttrSeq(f, false);
         } catch (final IOException e) {
             return false;
         }
@@ -151,7 +151,7 @@ public class plasmaRankingCRProcess {
         // put elements in accumulator file
         final Iterator<String> el = source_cr.keys();
         String key;
-        kelondroAttrSeq.Entry new_entry;
+        AttrSeq.Entry new_entry;
         Row.Entry acc_entry;
         int FUDate, FDDate, LUDate, UCount, PCount, ACount, VCount, Vita;
         Bitfield acc_flags, new_flags;
@@ -237,7 +237,7 @@ public class plasmaRankingCRProcess {
         }
         
         // open target file
-        kelondroAttrSeq acc = null;
+        AttrSeq acc = null;
         ObjectIndex newacc = null;
         kelondroCollectionIndex newseq = null;
         if (newdb) {
@@ -246,14 +246,14 @@ public class plasmaRankingCRProcess {
             newseq = new kelondroCollectionIndex(path, CRG_seqname, 12, Base64Order.enhancedCoder, 2, 9, CRG_colrow, false);
         } else {
             if (!(to_file.exists())) {
-                acc = new kelondroAttrSeq("Global Ranking Accumulator File",
+                acc = new AttrSeq("Global Ranking Accumulator File",
                     "<Referee-12>,'='," +
                     "<UDate-3>,<VDate-3>,<LCount-2>,<GCount-2>,<ICount-2>,<DCount-2>,<TLength-3>,<WACount-3>,<WUCount-3>,<Flags-1>," +
                     "<FUDate-3>,<FDDate-3>,<LUDate-3>,<UCount-2>,<PCount-2>,<ACount-2>,<VCount-2>,<Vita-2>," +
                     "'|',*<Anchor-12>", false);
                 acc.toFile(to_file);
             }
-            acc = new kelondroAttrSeq(to_file, false);
+            acc = new AttrSeq(to_file, false);
         }        
         // collect source files
         File source_file = null;
@@ -310,16 +310,16 @@ public class plasmaRankingCRProcess {
     
     public static int genrci(File cr_in, final File rci_out) throws IOException {
         if (!(cr_in.exists())) return 0;
-        kelondroAttrSeq cr = new kelondroAttrSeq(cr_in, false);
+        AttrSeq cr = new AttrSeq(cr_in, false);
         //if (rci_out.exists()) rci_out.delete(); // we want only fresh rci here (during testing) 
         if (!(rci_out.exists())) {
-            final kelondroAttrSeq rcix = new kelondroAttrSeq("Global Ranking Reverse Citation Index",
+            final AttrSeq rcix = new AttrSeq("Global Ranking Reverse Citation Index",
                     "<AnchorDom-6>,'='," +
                     "<UDate-3>," +
                     "'|',*<Referee-12>", false);
             rcix.toFile(rci_out);
         }
-        final kelondroAttrSeq rci = new kelondroAttrSeq(rci_out, false);
+        final AttrSeq rci = new AttrSeq(rci_out, false);
         
         // loop over all referees
         int count = 0;
@@ -328,7 +328,7 @@ public class plasmaRankingCRProcess {
         long l;
         final Iterator<String> i = cr.keys();
         String referee, anchor, anchorDom;
-        kelondroAttrSeq.Entry cr_entry, rci_entry;
+        AttrSeq.Entry cr_entry, rci_entry;
         long cr_UDate, rci_UDate;
         while (i.hasNext()) {
             referee = i.next();
@@ -460,7 +460,7 @@ public class plasmaRankingCRProcess {
                 for (int i = 0; i < list.length; i++) {
                     f = new File(acc_dir, list[i]);
                     try {
-                        d = (System.currentTimeMillis() - (new kelondroAttrSeq(f, false)).created()) / 3600000;
+                        d = (System.currentTimeMillis() - (new AttrSeq(f, false)).created()) / 3600000;
                         if (d > max_age_hours) {
                             // file is considered to be too old, it is not recycled
                             System.out.println("file " + f.getName() + " is old (" + d + " hours) and not recycled, only moved to backup");

@@ -24,7 +24,7 @@ package de.anomic.kelondro.io;
 
 import java.io.IOException;
 
-import de.anomic.kelondro.tools.ByteBuffer;
+import de.anomic.kelondro.util.ByteBuffer;
 
 public class BufferedRandomAccess extends AbstractRandomAccess implements RandomAccessInterface {
 

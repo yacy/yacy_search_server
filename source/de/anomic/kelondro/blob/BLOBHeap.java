@@ -32,7 +32,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import de.anomic.kelondro.kelondroMap;
 import de.anomic.kelondro.io.AbstractRandomAccess;
 import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.CloneableIterator;
@@ -441,7 +440,7 @@ public final class BLOBHeap extends BLOBHeapModifier implements BLOB {
         final File f = new File("/Users/admin/blobtest.heap");
         try {
             //f.delete();
-            final kelondroMap heap = new kelondroMap(new BLOBHeap(f, 12, NaturalOrder.naturalOrder, 1024 * 512), 500);
+            final MapView heap = new MapView(new BLOBHeap(f, 12, NaturalOrder.naturalOrder, 1024 * 512), 500);
             heap.put("aaaaaaaaaaaa", map("aaaaaaaaaaaa", "eins zwei drei"));
             heap.put("aaaaaaaaaaab", map("aaaaaaaaaaab", "vier fuenf sechs"));
             heap.put("aaaaaaaaaaac", map("aaaaaaaaaaac", "sieben acht neun"));

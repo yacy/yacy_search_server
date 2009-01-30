@@ -25,7 +25,7 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 
-package de.anomic.kelondro;
+package de.anomic.kelondro.blob;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -44,9 +44,9 @@ import de.anomic.kelondro.index.ObjectIndex;
 import de.anomic.kelondro.index.Row.Entry;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.table.CachedRecords;
-import de.anomic.kelondro.tools.MemoryControl;
+import de.anomic.kelondro.util.MemoryControl;
 
-public class kelondroCache implements ObjectIndex {
+public class Cache implements ObjectIndex {
 
     // this is a combined read cache and write buffer
     // we maintain four tables:
@@ -57,7 +57,7 @@ public class kelondroCache implements ObjectIndex {
     // furthermore, if we access a kelondroFlexTable, we can use the ram index of the underlying index
 
     // static object tracker; stores information about object cache usage
-    private static final TreeMap<String, kelondroCache> objectTracker = new TreeMap<String, kelondroCache>();
+    private static final TreeMap<String, Cache> objectTracker = new TreeMap<String, Cache>();
     private static long memStopGrow    = 12 * 1024 * 1024; // a limit for the node cache to stop growing if less than this memory amount is available
     private static long memStartShrink =  8 * 1024 * 1024; // a limit for the node cache to start with shrinking if less than this memory amount is available
     
@@ -69,7 +69,7 @@ public class kelondroCache implements ObjectIndex {
     private int            readHit, readMiss, writeUnique, writeDouble, cacheDelete, cacheFlush;
     private int            hasnotHit, hasnotMiss, hasnotUnique, hasnotDouble, hasnotDelete;
     
-    public kelondroCache(final ObjectIndex backupIndex) {
+    public Cache(final ObjectIndex backupIndex) {
         this.index = backupIndex;
         init();
         objectTracker.put(backupIndex.filename(), this);
@@ -122,7 +122,7 @@ public class kelondroCache implements ObjectIndex {
         // returns a map for each file in the tracker;
         // the map represents properties for each record oobjects,
         // i.e. for cache memory allocation
-        final kelondroCache theObjectsCache = objectTracker.get(filename);
+        final Cache theObjectsCache = objectTracker.get(filename);
         return theObjectsCache.memoryStats();
     }
     

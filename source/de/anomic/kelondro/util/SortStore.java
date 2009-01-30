@@ -24,12 +24,13 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.kelondro;
+package de.anomic.kelondro.util;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 
-public class kelondroSortStore<E> extends kelondroSortStack<E> {
+
+public class SortStore<E> extends SortStack<E> {
 
     // extends the sortStack in such a way that it adds a list where objects, that had
     // been pulled from the stack with pop are listed. Provides access methods to address
@@ -37,7 +38,7 @@ public class kelondroSortStore<E> extends kelondroSortStack<E> {
     
     private final ArrayList<stackElement> offstack; // objects that had been on the stack but had been removed
     
-    public kelondroSortStore(final int maxsize) {
+    public SortStore(final int maxsize) {
         super(maxsize);
         this.offstack = new ArrayList<stackElement>();
     }

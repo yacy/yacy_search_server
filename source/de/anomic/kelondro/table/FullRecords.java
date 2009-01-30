@@ -31,9 +31,9 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.TreeMap;
 
-import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.io.RandomAccessInterface;
+import de.anomic.kelondro.util.kelondroException;
 
 public class FullRecords extends AbstractRecords {
 

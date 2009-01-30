@@ -38,7 +38,6 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.index.BytesIntMap;
 import de.anomic.kelondro.index.Column;
 import de.anomic.kelondro.index.Row;
@@ -50,7 +49,8 @@ import de.anomic.kelondro.io.kelondroBufferedEcoFS;
 import de.anomic.kelondro.io.kelondroEcoFS;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.NaturalOrder;
-import de.anomic.kelondro.tools.MemoryControl;
+import de.anomic.kelondro.util.MemoryControl;
+import de.anomic.kelondro.util.kelondroException;
 import de.anomic.server.logging.serverLog;
 
 /*

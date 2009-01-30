@@ -46,8 +46,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import de.anomic.kelondro.kelondroMap;
 import de.anomic.kelondro.blob.BLOBTree;
+import de.anomic.kelondro.blob.MapView;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.server.logging.serverLog;
@@ -63,11 +63,11 @@ public class blogBoardComments {
     static {
         SimpleFormatter.setTimeZone(TimeZone.getTimeZone("GMT"));
     }
-    private kelondroMap database = null;
+    private MapView database = null;
     public blogBoardComments(final File actpath) {
     		new File(actpath.getParent()).mkdir();
         if (database == null) {
-            database = new kelondroMap(new BLOBTree(actpath, true, true, keyLength, recordSize, '_', NaturalOrder.naturalOrder, false, false, false), 500);
+            database = new MapView(new BLOBTree(actpath, true, true, keyLength, recordSize, '_', NaturalOrder.naturalOrder, false, false, false), 500);
         }
     }
     public int size() {
@@ -112,7 +112,7 @@ public class blogBoardComments {
         //System.out.println("DEBUG: read from blogBoardComments");
         return read(key, database);
     }
-    private CommentEntry read(String key, final kelondroMap base) {
+    private CommentEntry read(String key, final MapView base) {
         key = normalize(key);
         if (key.length() > keyLength) key = key.substring(0, keyLength);
         Map<String, String> record;

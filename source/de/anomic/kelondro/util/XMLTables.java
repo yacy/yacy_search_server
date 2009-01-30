@@ -6,9 +6,9 @@
 // Frankfurt, Germany, 2006
 // created 09.02.2006
 //
-// $LastChangedDate$
-// $LastChangedRevision$
-// $LastChangedBy$
+// $LastChangedDate: 2008-08-06 19:43:12 +0000 (Mi, 06 Aug 2008) $
+// $LastChangedRevision: 5039 $
+// $LastChangedBy: danielr $
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.kelondro;
+package de.anomic.kelondro.util;
 
 import java.beans.XMLDecoder;
 import java.beans.XMLEncoder;
@@ -35,7 +35,7 @@ import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
-public class kelondroXMLTables {
+public class XMLTables {
 
     private Hashtable<String, Hashtable<String, String>> tables;
 
@@ -43,14 +43,14 @@ public class kelondroXMLTables {
     private File propFile;
     private long timestamp;
 
-    public kelondroXMLTables() {
+    public XMLTables() {
         this.propFile = null;
         this.timestamp = System.currentTimeMillis();
         this.tables = new Hashtable<String, Hashtable<String, String>>();
     }
 
     @SuppressWarnings("unchecked")
-    public kelondroXMLTables(final File file) throws IOException {
+    public XMLTables(final File file) throws IOException {
         this.propFile = file;
         this.timestamp = System.currentTimeMillis();
         if (propFile.exists()) {

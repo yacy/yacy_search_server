@@ -31,7 +31,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Properties;
 
-import de.anomic.kelondro.tools.ByteBuffer;
+import de.anomic.kelondro.util.ByteBuffer;
 
 public class httpSSI {
 

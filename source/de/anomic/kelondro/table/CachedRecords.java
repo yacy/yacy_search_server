@@ -33,12 +33,12 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
-import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.IntBytesMap;
 import de.anomic.kelondro.io.RandomAccessInterface;
 import de.anomic.kelondro.io.RandomAccessRecords;
-import de.anomic.kelondro.tools.MemoryControl;
+import de.anomic.kelondro.util.MemoryControl;
+import de.anomic.kelondro.util.kelondroException;
 
 public class CachedRecords extends AbstractRecords implements RandomAccessRecords {
 
