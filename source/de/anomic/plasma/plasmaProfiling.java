@@ -55,6 +55,7 @@ public class plasmaProfiling {
         final int maxppm = (int) maxPayload("ppm", 25);
         final int maxwords = (int) maxPayload("wordcache", 12000);
         final long maxbytes = maxPayload("memory", 110 * 1024 * 1024);
+        final int maxmbytes = (int)(maxbytes / 1024 / 1024);
         
         // declare graph and set dimensions
         final int leftborder = 30;
@@ -62,7 +63,7 @@ public class plasmaProfiling {
         final int topborder = 20;
         final int bottomborder = 20;
         final int leftscale = 10000;
-        final int rightscale = 100;
+        final int rightscale; if (maxmbytes > 3000) rightscale = 500; else if (maxmbytes > 1500) rightscale = 200; else rightscale = 100;
         final int anotscale = 50;
         final int bottomscale = 60;
         final int vspace = height - topborder - bottomborder;
@@ -71,7 +72,7 @@ public class plasmaProfiling {
         ymageChart chart = new ymageChart(width, height, "FFFFFF", "000000", "AAAAAA", leftborder, rightborder, topborder, bottomborder, "YACY PEER PERFORMANCE: MAIN MEMORY, WORD CACHE AND PAGES/MINUTE (PPM)", subline);
         chart.declareDimension(ymageChart.DIMENSION_BOTTOM, bottomscale, hspace / (maxtime / bottomscale), -maxtime, "000000", "CCCCCC", "TIME/SECONDS");
         chart.declareDimension(ymageChart.DIMENSION_LEFT, leftscale, vspace * leftscale / maxwords, 0, "008800", null , "INDEXING, WORDS IN CACHE");
-        chart.declareDimension(ymageChart.DIMENSION_RIGHT, rightscale, vspace * rightscale / (int)(maxbytes / 1024 / 1024), 0, "0000FF", "CCCCCC", "MEMORY/MEGABYTE");
+        chart.declareDimension(ymageChart.DIMENSION_RIGHT, rightscale, vspace * rightscale / maxmbytes, 0, "0000FF", "CCCCCC", "MEMORY/MEGABYTE");
         chart.declareDimension(ymageChart.DIMENSION_ANOT0, anotscale, vspace * anotscale / maxppm, 0, "008800", null , "PPM [PAGES/MINUTE]");
         chart.declareDimension(ymageChart.DIMENSION_ANOT1, vspace / 6, vspace / 6, 0, "888800", null , "URL");
         
