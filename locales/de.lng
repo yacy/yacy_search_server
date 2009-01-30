@@ -699,6 +699,7 @@ Create Bookmark==Lesezeichen erstellen
 Title<==Titel<
 Folder<==Ordner<
 This option lets you create a bookmark from your crawl start URL. For automatic re-crawling you can use the following default folders:==Diese Option gibt Ihnen die M&ouml;glichkeit ein Lesezeichen aus Ihrer Crawl Start URL zu erstellen. Um diese automatisch wieder zu crawlen, k&ouml;nnen Sie diese folgenden standard Ordner benutzen:
+Attention: recrawl settings depend on the folder. They can be adjusted in==Achtung: Recrawl-Einstellungen sind vom Ordner abh&auml;ngig. Diese k&ouml;nnen angepasst werden in
 Crawling Depth</label>==Crawling-Tiefe</label>
 This defines how often the Crawler will follow links embedded in websites.==Dies definiert, wie oft der Crawler eingebetteten Links in Webseiten folgen wird.
 A minimum of 0 is recommended and means that the page you enter under \"Starting Point\" will be added==Ein Minimum von 0 wird empfohlen und bedeutet, dass die Seite, die Sie unter "Startpunkt" angegeben haben, 
