@@ -43,12 +43,12 @@ import de.anomic.data.bookmarksDB.Tag;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.index.indexURLReference;
 import de.anomic.kelondro.order.DateFormatter;
+import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacyNewsRecord;
 import de.anomic.yacy.yacyURL;
@@ -220,12 +220,12 @@ public class Bookmarks {
     			if(tags.equals("")){
     				tags="unsorted";
     			}
-    			serverLog.logInfo("BOOKMARKS", "I try to import bookmarks from HTML-file");
+    			Log.logInfo("BOOKMARKS", "I try to import bookmarks from HTML-file");
     			try {
     				final File file=new File(post.get("htmlfile"));    			
     				sb.bookmarksDB.importFromBookmarks(new yacyURL(file) , post.get("htmlfile$file"), tags, isPublic);
     			} catch (final MalformedURLException e) {}
-    			serverLog.logInfo("BOOKMARKS", "success!!");
+    			Log.logInfo("BOOKMARKS", "success!!");
     		}else if(post.containsKey("xmlfile")){
     			boolean isPublic=false;
     			if((post.get("public")).equals("public")){

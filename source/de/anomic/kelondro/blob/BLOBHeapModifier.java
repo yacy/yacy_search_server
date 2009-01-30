@@ -33,7 +33,7 @@ import java.util.SortedMap;
 import de.anomic.kelondro.io.CachedRandomAccess;
 import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.util.MemoryControl;
-import de.anomic.server.logging.serverLog;
+import de.anomic.kelondro.util.Log;
 
 public class BLOBHeapModifier extends HeapReader implements BLOB {
  
@@ -79,7 +79,7 @@ public class BLOBHeapModifier extends HeapReader implements BLOB {
                     lastFree = nextFree;
                 }
             }
-            serverLog.logInfo("kelondroBLOBHeap", "BLOB " + heapFile.getName() + ": merged " + merged + " free records");
+            Log.logInfo("kelondroBLOBHeap", "BLOB " + heapFile.getName() + ": merged " + merged + " free records");
         }
     }
     
@@ -122,7 +122,7 @@ public class BLOBHeapModifier extends HeapReader implements BLOB {
                 free.clear();
                 free = null;
                 index.dump(HeapWriter.fingerprintIndexFile(this.heapFile));
-                serverLog.logInfo("kelondroBLOBHeap", "wrote a dump for the " + this.index.size() +  " index entries of " + heapFile.getName()+ " in " + (System.currentTimeMillis() - start) + " milliseconds.");
+                Log.logInfo("kelondroBLOBHeap", "wrote a dump for the " + this.index.size() +  " index entries of " + heapFile.getName()+ " in " + (System.currentTimeMillis() - start) + " milliseconds.");
                 index.close();
                 index = null;
             } catch (IOException e) {
@@ -155,7 +155,7 @@ public class BLOBHeapModifier extends HeapReader implements BLOB {
         //assert seek + size + 4 <= this.file.length() : heapFile.getName() + ": too long size " + size + " in record at " + seek;
         long filelength = this.file.length(); // put in separate variable for debugging
         if (seek + size + 4 > filelength) {
-            serverLog.logSevere("BLOBHeap", heapFile.getName() + ": too long size " + size + " in record at " + seek);
+            Log.logSevere("BLOBHeap", heapFile.getName() + ": too long size " + size + " in record at " + seek);
             throw new IOException(heapFile.getName() + ": too long size " + size + " in record at " + seek);
         }
         

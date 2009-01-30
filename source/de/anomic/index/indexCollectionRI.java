@@ -38,7 +38,7 @@ import de.anomic.kelondro.index.RowSet;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.util.kelondroOutOfLimitsException;
-import de.anomic.server.logging.serverLog;
+import de.anomic.kelondro.util.Log;
 
 public class indexCollectionRI implements indexRI {
 
@@ -56,7 +56,7 @@ public class indexCollectionRI implements indexRI {
                     payloadrow,
                     useCommons);
         } catch (final IOException e) {
-            serverLog.logSevere("PLASMA", "unable to open collection index at " + path.toString() + ":" + e.getMessage());
+            Log.logSevere("PLASMA", "unable to open collection index at " + path.toString() + ":" + e.getMessage());
         }
     }
     

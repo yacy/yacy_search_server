@@ -27,7 +27,7 @@ package de.anomic.server;
 import java.net.SocketException;
 
 import de.anomic.kelondro.util.MemoryControl;
-import de.anomic.server.logging.serverLog;
+import de.anomic.kelondro.util.Log;
 
 public abstract class serverAbstractBusyThread extends serverAbstractThread implements serverBusyThread {
 
@@ -217,7 +217,7 @@ public abstract class serverAbstractBusyThread extends serverAbstractThread impl
     }
     
     private void logSystem(final String text) {
-        if (log == null) serverLog.logConfig("THREAD-CONTROL", text);
+        if (log == null) Log.logConfig("THREAD-CONTROL", text);
         else log.logConfig(text);
     }
 }

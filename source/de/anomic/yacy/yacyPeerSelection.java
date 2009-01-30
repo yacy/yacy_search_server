@@ -32,7 +32,7 @@ import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.kelondro.util.ScoreCluster;
 import de.anomic.kelondro.util.kelondroException;
-import de.anomic.server.logging.serverLog;
+import de.anomic.kelondro.util.Log;
 
 
 /*
@@ -57,7 +57,7 @@ public class yacyPeerSelection {
                 if (seed == null || seed.hash == null) continue;
                 distance = yacySeed.dhtDistance(wordhash, seed);
                 if (!seed.getFlagAcceptRemoteIndex()) continue; // probably a robinson peer
-                if (serverLog.isFine("PLASMA")) serverLog.logFine("PLASMA", "selectPeers/DHTorder: " + seed.hash + ":" + seed.getName() + "/" + distance + " for wordhash " + wordhash + ", score " + c);
+                if (Log.isFine("PLASMA")) Log.logFine("PLASMA", "selectPeers/DHTorder: " + seed.hash + ":" + seed.getName() + "/" + distance + " for wordhash " + wordhash + ", score " + c);
                 ranking.addScore(seed.hash, 2 * c);
                 regularSeeds.put(seed.hash, seed);
                 c--;

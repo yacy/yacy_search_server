@@ -39,11 +39,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import de.anomic.index.indexDocumentMetadata;
 import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.kelondro.table.FlexWidthArray;
+import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.server.serverProcessorJob;
-import de.anomic.server.logging.serverLog;
 import de.anomic.xml.RSSFeed;
 import de.anomic.xml.RSSMessage;
 import de.anomic.yacy.yacyClient;
@@ -54,7 +54,7 @@ import de.anomic.yacy.yacyURL;
 public class CrawlQueues {
 
     plasmaSwitchboard sb;
-    serverLog log;
+    Log log;
     Map<Integer, crawlWorker> workers; // mapping from url hash to Worker thread object
     ProtocolLoader loader;
     private final ArrayList<String> remoteCrawlProviderHashes;
@@ -64,7 +64,7 @@ public class CrawlQueues {
     
     public CrawlQueues(final plasmaSwitchboard sb, final File plasmaPath) {
         this.sb = sb;
-        this.log = new serverLog("CRAWLER");
+        this.log = new Log("CRAWLER");
         this.workers = new ConcurrentHashMap<Integer, crawlWorker>();
         this.loader = new ProtocolLoader(sb, log);
         this.remoteCrawlProviderHashes = new ArrayList<String>();

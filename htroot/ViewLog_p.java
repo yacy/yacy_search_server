@@ -36,8 +36,8 @@ import java.util.regex.PatternSyntaxException;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.server.logging.GuiHandler;
-import de.anomic.server.logging.LogalizerHandler;
+import de.anomic.yacy.logging.GuiHandler;
+import de.anomic.yacy.logging.LogalizerHandler;
 
 public class ViewLog_p {
     

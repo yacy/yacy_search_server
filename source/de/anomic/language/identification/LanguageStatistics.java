@@ -33,14 +33,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import de.anomic.server.logging.serverLog;
+import de.anomic.kelondro.util.Log;
 
 /**
  * This class can store statistical data of a language.
  */
 public class LanguageStatistics {
     
-    private static serverLog logger = new serverLog("LANGUAGESTATISTICS");
+    private static Log logger = new Log("LANGUAGESTATISTICS");
 
     /** This variable holds the name of the language. */
     private String langName = null;

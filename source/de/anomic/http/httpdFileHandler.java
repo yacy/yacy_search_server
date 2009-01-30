@@ -84,6 +84,7 @@ import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterInputStream;
 import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.kelondro.util.ByteBuffer;
+import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
@@ -93,7 +94,6 @@ import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.servletProperties;
-import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyURL;
 import de.anomic.ymage.ymageMatrix;
 
@@ -125,7 +125,7 @@ public final class httpdFileHandler {
     
     //private Properties connectionProperties = null;
     // creating a logger
-    private static final serverLog theLogger = new serverLog("FILEHANDLER");
+    private static final Log theLogger = new Log("FILEHANDLER");
     
     static {
         final serverSwitch<?> theSwitchboard = plasmaSwitchboard.getSwitchboard();
@@ -141,11 +141,11 @@ public final class httpdFileHandler {
                 final String mimeTablePath = theSwitchboard.getConfig("mimeConfig","");
                 BufferedInputStream mimeTableInputStream = null;
                 try {
-                    serverLog.logConfig("HTTPDFiles", "Loading mime mapping file " + mimeTablePath);
+                    Log.logConfig("HTTPDFiles", "Loading mime mapping file " + mimeTablePath);
                     mimeTableInputStream = new BufferedInputStream(new FileInputStream(new File(theSwitchboard.getRootPath(), mimeTablePath)));
                     mimeTable.load(mimeTableInputStream);
                 } catch (final Exception e) {                
-                    serverLog.logSevere("HTTPDFiles", "ERROR: path to configuration file or configuration invalid\n" + e);
+                    Log.logSevere("HTTPDFiles", "ERROR: path to configuration file or configuration invalid\n" + e);
                     System.exit(1);
                 } finally {
                     if (mimeTableInputStream != null) try { mimeTableInputStream.close(); } catch (final Exception e1) {}                
@@ -314,7 +314,7 @@ public final class httpdFileHandler {
                     serverCore.bfHost.remove(conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP));
                 } else {
                     // a wrong authentication was given or the userDB user does not have admin access. Ask again
-                    serverLog.logInfo("HTTPD", "Wrong log-in for account 'admin' in http file handler for path '" + path + "' from host '" + clientIP + "'");
+                    Log.logInfo("HTTPD", "Wrong log-in for account 'admin' in http file handler for path '" + path + "' from host '" + clientIP + "'");
                     final Integer attempts = serverCore.bfHost.get(clientIP);
                     if (attempts == null)
                         serverCore.bfHost.put(clientIP, Integer.valueOf(1));
@@ -761,7 +761,7 @@ public final class httpdFileHandler {
                             if (templatePatterns.containsKey(servletProperties.ACTION_AUTHENTICATE)) {
                                 // handle brute-force protection
                                 if (authorization != null) {
-                                    serverLog.logInfo("HTTPD", "dynamic log-in for account 'admin' in http file handler for path '" + path + "' from host '" + clientIP + "'");
+                                    Log.logInfo("HTTPD", "dynamic log-in for account 'admin' in http file handler for path '" + path + "' from host '" + clientIP + "'");
                                     final Integer attempts = serverCore.bfHost.get(clientIP);
                                     if (attempts == null)
                                         serverCore.bfHost.put(clientIP, Integer.valueOf(1));

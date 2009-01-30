@@ -3,8 +3,8 @@
 // (C) by Michael Peter Christen; mc@yacy.net
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2004
-//last major change: $LastChangedDate$ by $LastChangedBy$
-//Revision: $LastChangedRevision$
+// last major change: $LastChangedDate: 2009-01-30 14:48:11 +0000 (Fr, 30 Jan 2009) $ by $LastChangedBy: orbiter $
+// Revision: $LastChangedRevision: 5539 $
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.server.logging;
+package de.anomic.kelondro.util;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -30,7 +30,7 @@ import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
-public final class serverLog {
+public final class Log {
 
     // log-level categories
     public static final int LOGLEVEL_ZERO    = Level.OFF.intValue(); // no output at all
@@ -54,7 +54,7 @@ public final class serverLog {
 
     private final Logger theLogger;
 
-    public serverLog(final String appName) {
+    public Log(final String appName) {
         this.theLogger = Logger.getLogger(appName);
         //this.theLogger.setLevel(Level.FINEST); // set a default level
     }

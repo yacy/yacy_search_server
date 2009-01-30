@@ -28,7 +28,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.concurrent.ConcurrentHashMap;
 
-import de.anomic.server.logging.serverLog;
+import de.anomic.kelondro.util.Log;
 
 public class serverInstantBlockingThread<J extends serverProcessorJob> extends serverAbstractBlockingThread<J> implements serverBlockingThread<J> {
 
@@ -86,22 +86,22 @@ public class serverInstantBlockingThread<J extends serverProcessorJob> extends s
         try {
             out = (J) jobExecMethod.invoke(environment, new Object[]{next});
         } catch (final IllegalAccessException e) {
-            serverLog.logSevere("BLOCKINGTHREAD", "Internal Error in serverInstantThread.job: " + e.getMessage());
-            serverLog.logSevere("BLOCKINGTHREAD", "shutting down thread '" + this.getName() + "'");
+            Log.logSevere("BLOCKINGTHREAD", "Internal Error in serverInstantThread.job: " + e.getMessage());
+            Log.logSevere("BLOCKINGTHREAD", "shutting down thread '" + this.getName() + "'");
             this.terminate(false);
         } catch (final IllegalArgumentException e) {
-            serverLog.logSevere("BLOCKINGTHREAD", "Internal Error in serverInstantThread.job: " + e.getMessage());
-            serverLog.logSevere("BLOCKINGTHREAD", "shutting down thread '" + this.getName() + "'");
+            Log.logSevere("BLOCKINGTHREAD", "Internal Error in serverInstantThread.job: " + e.getMessage());
+            Log.logSevere("BLOCKINGTHREAD", "shutting down thread '" + this.getName() + "'");
             this.terminate(false);
         } catch (final InvocationTargetException e) {
             final String targetException = e.getTargetException().getMessage();
             e.getTargetException().printStackTrace();
             e.printStackTrace();
             if ((targetException != null) && ((targetException.indexOf("heap space") > 0) || (targetException.indexOf("NullPointerException") > 0))) e.getTargetException().printStackTrace();
-            serverLog.logSevere("BLOCKINGTHREAD", "Runtime Error in serverInstantThread.job, thread '" + this.getName() + "': " + e.getMessage() + "; target exception: " + targetException, e.getTargetException());
+            Log.logSevere("BLOCKINGTHREAD", "Runtime Error in serverInstantThread.job, thread '" + this.getName() + "': " + e.getMessage() + "; target exception: " + targetException, e.getTargetException());
             e.getTargetException().printStackTrace();
         } catch (final OutOfMemoryError e) {
-            serverLog.logSevere("BLOCKINGTHREAD", "OutOfMemory Error in serverInstantThread.job, thread '" + this.getName() + "': " + e.getMessage());
+            Log.logSevere("BLOCKINGTHREAD", "OutOfMemory Error in serverInstantThread.job, thread '" + this.getName() + "': " + e.getMessage());
             e.printStackTrace();
         }
         instantThreadCounter--;

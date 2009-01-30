@@ -29,8 +29,8 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.Hashtable;
 
+import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaParserDocument;
-import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyURL;
 
 /**
@@ -107,9 +107,9 @@ public interface Parser {
     
     /**
      * Can be used to set the logger that should be used by the parser module
-     * @param log the {@link serverLog logger} that should be used 
+     * @param log the {@link Log logger} that should be used 
      */
-    public void setLogger(serverLog log);
+    public void setLogger(Log log);
     
     /**
      * Returns the version number of the current parser

@@ -6,8 +6,8 @@
 //Frankfurt, Germany, 2004
 //
 //This file ist contributed by Martin Thelian
-//last major change: $LastChangedDate$ by $LastChangedBy$
-//Revision: $LastChangedRevision$
+//last major change: $LastChangedDate: 2008-12-04 12:54:16 +0000 (Do, 04 Dez 2008) $ by $LastChangedBy: orbiter $
+//Revision: $LastChangedRevision: 5379 $
 //
 //This program is free software; you can redistribute it and/or modify
 //it under the terms of the GNU General Public License as published by
@@ -23,16 +23,16 @@
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.server.logging;
+package de.anomic.http;
 
 import java.util.logging.LogRecord;
 import java.util.logging.SimpleFormatter;
 
-public final class serverMiniLogFormatter extends SimpleFormatter {
+public final class ProxyLogFormatter extends SimpleFormatter {
 
       private final StringBuilder buffer = new StringBuilder();
   
-      public serverMiniLogFormatter() {
+      public ProxyLogFormatter() {
           super();
       }        
       

@@ -31,7 +31,7 @@ import java.util.Hashtable;
 import java.util.Properties;
 import java.util.Vector;
 
-import de.anomic.server.logging.serverLog;
+import de.anomic.kelondro.util.Log;
 
 public final class serverSystem {
 
@@ -330,7 +330,7 @@ public final class serverSystem {
 			try {
 				Runtime.getRuntime().exec("chmod 755 " + scriptFile.getAbsolutePath().replaceAll(" ", "\\ ")).waitFor();
 			} catch (final InterruptedException e) {
-				serverLog.logSevere("DEPLOY", "deploy of script file failed. file = " + scriptFile.getAbsolutePath(), e);
+				Log.logSevere("DEPLOY", "deploy of script file failed. file = " + scriptFile.getAbsolutePath(), e);
 				throw new IOException(e.getMessage());
 			}
 		}

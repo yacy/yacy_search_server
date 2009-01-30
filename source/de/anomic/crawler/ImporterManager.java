@@ -2,7 +2,7 @@ package de.anomic.crawler;
 
 import java.util.Vector;
 
-import de.anomic.server.logging.serverLog;
+import de.anomic.kelondro.util.Log;
 
 public class ImporterManager {
 
@@ -65,7 +65,7 @@ public class ImporterManager {
         
         if (threadCount == 0) return;
         
-        final serverLog log = new serverLog("DB-IMPORT");
+        final Log log = new Log("DB-IMPORT");
         try {
             // trying to gracefull stop all still running sessions ...
             log.logInfo("Signaling shutdown to " + threadCount + " remaining dbImporter threads ...");

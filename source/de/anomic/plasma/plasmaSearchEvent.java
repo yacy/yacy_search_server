@@ -45,9 +45,9 @@ import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.util.SetTools;
 import de.anomic.kelondro.util.SortStack;
 import de.anomic.kelondro.util.SortStore;
+import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaSnippetCache.MediaSnippet;
 import de.anomic.server.serverProfiling;
-import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySearch;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyURL;
@@ -133,7 +133,7 @@ public final class plasmaSearchEvent {
 
             // the result of the fetch is then in the rcGlobal
             final long timer = System.currentTimeMillis();
-            serverLog.logFine("SEARCH_EVENT", "STARTING " + fetchpeers + " THREADS TO CATCH EACH " + query.displayResults() + " URLs");
+            Log.logFine("SEARCH_EVENT", "STARTING " + fetchpeers + " THREADS TO CATCH EACH " + query.displayResults() + " URLs");
             this.primarySearchThreads = yacySearch.primaryRemoteSearches(
                     plasmaSearchQuery.hashSet2hashString(query.queryHashes),
                     plasmaSearchQuery.hashSet2hashString(query.excludeHashes),
@@ -159,7 +159,7 @@ public final class plasmaSearchEvent {
             localSearchThread.start();
            
             // finished searching
-            serverLog.logFine("SEARCH_EVENT", "SEARCH TIME AFTER GLOBAL-TRIGGER TO " + primarySearchThreads.length + " PEERS: " + ((System.currentTimeMillis() - start) / 1000) + " seconds");
+            Log.logFine("SEARCH_EVENT", "SEARCH TIME AFTER GLOBAL-TRIGGER TO " + primarySearchThreads.length + " PEERS: " + ((System.currentTimeMillis() - start) / 1000) + " seconds");
         } else {
             // do a local search
             this.rankedCache = new plasmaSearchRankingProcess(wordIndex, query, max_results_preparation, 2);
@@ -248,7 +248,7 @@ public final class plasmaSearchEvent {
                     final Set<String> removeWords = cleanEvent.query.queryHashes;
                     removeWords.addAll(cleanEvent.query.excludeHashes);
                     cleanEvent.wordIndex.removeEntriesMultiple(removeWords, cleanEvent.failedURLs.keySet());
-                    serverLog.logInfo("SearchEvents", "cleaning up event " + cleanEvent.query.id(true) + ", removed " + rw + " URL references on " + removeWords.size() + " words");
+                    Log.logInfo("SearchEvents", "cleaning up event " + cleanEvent.query.id(true) + ", removed " + rw + " URL references on " + removeWords.size() + " words");
                 }                
                 
                 // remove the event
@@ -332,7 +332,7 @@ public final class plasmaSearchEvent {
             startTime = System.currentTimeMillis();
             final plasmaSnippetCache.TextSnippet snippet = plasmaSnippetCache.retrieveTextSnippet(comp, snippetFetchWordHashes, (snippetFetchMode == 2), ((query.constraint != null) && (query.constraint.get(plasmaCondenser.flag_cat_indexof))), 180, 3000, (snippetFetchMode == 2) ? Integer.MAX_VALUE : 30000, query.isGlobal());
             final long snippetComputationTime = System.currentTimeMillis() - startTime;
-            serverLog.logInfo("SEARCH_EVENT", "text snippet load time for " + comp.url() + ": " + snippetComputationTime + ", " + ((snippet.getErrorCode() < 11) ? "snippet found" : ("no snippet found (" + snippet.getError() + ")")));
+            Log.logInfo("SEARCH_EVENT", "text snippet load time for " + comp.url() + ": " + snippetComputationTime + ", " + ((snippet.getErrorCode() < 11) ? "snippet found" : ("no snippet found (" + snippet.getError() + ")")));
             
             if (snippet.getErrorCode() < 11) {
                 // we loaded the file and found the snippet
@@ -352,7 +352,7 @@ public final class plasmaSearchEvent {
             startTime = System.currentTimeMillis();
             final ArrayList<MediaSnippet> mediaSnippets = plasmaSnippetCache.retrieveMediaSnippets(comp.url(), snippetFetchWordHashes, query.contentdom, (snippetFetchMode == 2), 6000, query.isGlobal());
             final long snippetComputationTime = System.currentTimeMillis() - startTime;
-            serverLog.logInfo("SEARCH_EVENT", "media snippet load time for " + comp.url() + ": " + snippetComputationTime);
+            Log.logInfo("SEARCH_EVENT", "media snippet load time for " + comp.url() + ": " + snippetComputationTime);
             
             if ((mediaSnippets != null) && (mediaSnippets.size() > 0)) {
                 // found media snippets, return entry
@@ -545,7 +545,7 @@ public final class plasmaSearchEvent {
                 }
                 //System.out.println("DEBUG SNIPPET_LOADING: thread " + id + " got " + resultEntry.url());
             }
-            serverLog.logInfo("SEARCH", "resultWorker thread " + id + " terminated");
+            Log.logInfo("SEARCH", "resultWorker thread " + id + " terminated");
         }
         
         public long busytime() {
@@ -555,7 +555,7 @@ public final class plasmaSearchEvent {
     
     private void registerFailure(final String urlhash, final String reason) {
         this.failedURLs.put(urlhash, reason);
-        serverLog.logInfo("search", "sorted out hash " + urlhash + " during search: " + reason);
+        Log.logInfo("search", "sorted out hash " + urlhash + " during search: " + reason);
     }
     
     /*

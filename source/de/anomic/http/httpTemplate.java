@@ -61,8 +61,8 @@ import java.util.HashMap;
 import java.util.List;
 
 import de.anomic.kelondro.util.ByteBuffer;
+import de.anomic.kelondro.util.Log;
 import de.anomic.server.serverFileUtils;
-import de.anomic.server.logging.serverLog;
 
 /**
  * A template engine, which substitutes patterns in strings<br>
@@ -299,7 +299,7 @@ public final class httpTemplate {
                         }//for
                         structure.append("</".getBytes()).append(multi_key).append(">\n".getBytes());
                     } else {//transferUntil
-                        serverLog.logSevere("TEMPLATE", "No Close Key found for #{"+new String(multi_key)+"}#"); //prefix here?
+                        Log.logSevere("TEMPLATE", "No Close Key found for #{"+new String(multi_key)+"}#"); //prefix here?
                     }
                 }
                 
@@ -336,7 +336,7 @@ public final class httpTemplate {
                     //TODO: better Error Handling
                     transferUntil(pis, keyStream, appendBytes("%%".getBytes(), patternName, null, null));
                     if(pis.available()==0){
-                        serverLog.logSevere("TEMPLATE", "No such Template: %%"+new String(patternName));
+                        Log.logSevere("TEMPLATE", "No such Template: %%"+new String(patternName));
                         return structure.getBytes();
                     }
                     keyStream.reset();
@@ -345,7 +345,7 @@ public final class httpTemplate {
                     structure.append(writeTemplate(pis2, out, pattern, dflt, newPrefix(prefix,key)));
                     transferUntil(pis, keyStream, appendBytes("#(/".getBytes(),key,")#".getBytes("UTF-8"),null));
                     if(pis.available()==0){
-                        serverLog.logSevere("TEMPLATE", "No Close Key found for #("+new String(key)+")# (by Name)");
+                        Log.logSevere("TEMPLATE", "No Close Key found for #("+new String(key)+")# (by Name)");
                     }
                 } else {
                     while(!found){
@@ -448,7 +448,7 @@ public final class httpTemplate {
                             }
                         } catch (final IOException e) {
                             //file not found?                    
-                            serverLog.logSevere("FILEHANDLER","Include Error with file " + new String(filename, "UTF-8") + ": " + e.getMessage());
+                            Log.logSevere("FILEHANDLER","Include Error with file " + new String(filename, "UTF-8") + ": " + e.getMessage());
                         } finally {
                             if (br != null) try { br.close(); br=null; } catch (final Exception e) {}
                         }

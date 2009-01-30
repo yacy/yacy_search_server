@@ -38,7 +38,7 @@ import de.anomic.index.indexURLReference;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.Digest;
 import de.anomic.kelondro.util.kelondroException;
-import de.anomic.server.logging.serverLog;
+import de.anomic.kelondro.util.Log;
 import de.anomic.yacy.yacyPeerSelection;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacySeedDB;
@@ -53,7 +53,7 @@ public class plasmaDHTChunk {
     public static final int chunkStatus_COMPLETE    =  4;
     
     private plasmaWordIndex wordIndex;
-    private serverLog log;
+    private Log log;
     
     private int status = chunkStatus_UNDEFINED;
     private String startPointHash = "AAAAAAAAAAAA";
@@ -112,7 +112,7 @@ public class plasmaDHTChunk {
     }
     
     public plasmaDHTChunk(
-            final serverLog log,
+            final Log log,
             final plasmaWordIndex wordIndex,
             final int minContainerCount,
             final int maxContainerCount,

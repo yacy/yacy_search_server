@@ -34,10 +34,10 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import de.anomic.index.indexDocumentMetadata;
+import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverProcessorJob;
-import de.anomic.server.logging.serverLog;
 
 public final class ProtocolLoader {
 
@@ -45,12 +45,12 @@ public final class ProtocolLoader {
     private static final ConcurrentHashMap<String, Long> accessTime = new ConcurrentHashMap<String, Long>(); // to protect targets from DDoS
     
     private final plasmaSwitchboard sb;
-    private final serverLog log;
+    private final Log log;
     private final HashSet<String> supportedProtocols;
     private final HTTPLoader httpLoader;
     private final FTPLoader ftpLoader;
     
-    public ProtocolLoader(final plasmaSwitchboard sb, final serverLog log) {
+    public ProtocolLoader(final plasmaSwitchboard sb, final Log log) {
         this.sb = sb;
         this.log = log;
         this.supportedProtocols = new HashSet<String>(Arrays.asList(new String[]{"http","https","ftp"}));

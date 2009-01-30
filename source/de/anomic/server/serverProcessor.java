@@ -33,7 +33,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import de.anomic.server.logging.serverLog;
+import de.anomic.kelondro.util.Log;
 
 public class serverProcessor<J extends serverProcessorJob> {
 
@@ -129,7 +129,7 @@ public class serverProcessor<J extends serverProcessorJob> {
         // ensure that enough job executors are running
         if ((this.input == null) || (executor == null) || (executor.isShutdown()) || (executor.isTerminated())) {
             // execute serialized without extra thread
-            serverLog.logWarning("PROCESSOR", "executing job " + environment.getClass().getName() + "." + methodName + " serialized");
+            Log.logWarning("PROCESSOR", "executing job " + environment.getClass().getName() + "." + methodName + " serialized");
             try {
                 final J out = (J) serverInstantBlockingThread.execMethod(this.environment, this.methodName).invoke(environment, new Object[]{in});
                 if ((out != null) && (output != null)) output.enQueue(out);
@@ -155,9 +155,9 @@ public class serverProcessor<J extends serverProcessorJob> {
         // put poison pills into the queue
         for (int i = 0; i < poolsize; i++) {
             try {
-                serverLog.logInfo("serverProcessor", "putting poison pill in queue " + this.processName + ", thread " + i);
+                Log.logInfo("serverProcessor", "putting poison pill in queue " + this.processName + ", thread " + i);
                 input.put((J) serverProcessorJob.poisonPill); // put a poison pill into the queue which will kill the job
-                serverLog.logInfo("serverProcessor", ".. poison pill is in queue " + this.processName + ", thread " + i + ". awaiting termination");
+                Log.logInfo("serverProcessor", ".. poison pill is in queue " + this.processName + ", thread " + i + ". awaiting termination");
             } catch (final InterruptedException e) { }
         }
     }
@@ -170,7 +170,7 @@ public class serverProcessor<J extends serverProcessorJob> {
                 executor.awaitTermination(millisTimeout, TimeUnit.MILLISECONDS);
             } catch (final InterruptedException e) {}
         }
-        serverLog.logInfo("serverProcessor", "queue " + this.processName + ": shutdown.");
+        Log.logInfo("serverProcessor", "queue " + this.processName + ": shutdown.");
         this.executor = null;
         this.input = null;
         // remove entry from monitor

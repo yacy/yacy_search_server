@@ -26,10 +26,10 @@ import de.anomic.data.listManager;
 import de.anomic.http.httpd;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.Digest;
+import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.server.serverFileUtils;
-import de.anomic.server.logging.serverLog;
 
 public class migration {
     //SVN constants
@@ -48,7 +48,7 @@ public class migration {
             if(fromRev < NEW_OVERLAYS){
                 migrateDefaultFiles(sb);
             }
-            serverLog.logInfo("MIGRATION", "Migrating from "+String.valueOf(fromRev)+ " to "+String.valueOf(toRev));
+            Log.logInfo("MIGRATION", "Migrating from "+String.valueOf(fromRev)+ " to "+String.valueOf(toRev));
             presetPasswords(sb);
             migrateSwitchConfigSettings(sb);
             migrateWorkFiles(sb);
@@ -102,17 +102,17 @@ public class migration {
         final File styleFile=new File(htdocsPath, "style.css");
         if(!skinFile.exists()){
             if(styleFile.exists()){
-                serverLog.logInfo("MIGRATION", "Skin "+skin+" not found. Keeping old skin.");
+                Log.logInfo("MIGRATION", "Skin "+skin+" not found. Keeping old skin.");
             }else{
-                serverLog.logSevere("MIGRATION", "Skin "+skin+" and no existing Skin found.");
+                Log.logSevere("MIGRATION", "Skin "+skin+" and no existing Skin found.");
             }
         }else{
             try {
                 mkdirs(styleFile.getParentFile());
                 serverFileUtils.copy(skinFile, styleFile);
-                serverLog.logInfo("MIGRATION", "copied new Skinfile");
+                Log.logInfo("MIGRATION", "copied new Skinfile");
             } catch (final IOException e) {
-                serverLog.logSevere("MIGRATION", "Cannot copy skinfile.");
+                Log.logSevere("MIGRATION", "Cannot copy skinfile.");
             }
         }
     }
@@ -123,7 +123,7 @@ public class migration {
 	private static void mkdirs(final File path) {
 		if (!path.exists()) {
 			if(!path.mkdirs())
-				serverLog.logWarning("MIGRATION", "could not create directories for "+ path);
+				Log.logWarning("MIGRATION", "could not create directories for "+ path);
 		}
 	}
     public static void migrateBookmarkTagsDB(final plasmaSwitchboard sb){
@@ -131,7 +131,7 @@ public class migration {
         final File tagsDBFile=new File(sb.workPath, "bookmarkTags.db");
         if(tagsDBFile.exists()){
             delete(tagsDBFile);
-            serverLog.logInfo("MIGRATION", "Migrating bookmarkTags.db to use wordhashs as keys.");
+            Log.logInfo("MIGRATION", "Migrating bookmarkTags.db to use wordhashs as keys.");
         }
         sb.initBookmarks();
     }
@@ -141,13 +141,13 @@ public class migration {
 	 */
 	private static void delete(final File filename) {
 		if(!filename.delete())
-			serverLog.logWarning("MIGRATION", "could not delete "+ filename);
+			Log.logWarning("MIGRATION", "could not delete "+ filename);
 	}
     public static void migrateWorkFiles(final plasmaSwitchboard sb){
         File file=new File(sb.getRootPath(), "DATA/SETTINGS/wiki.db");
         File file2;
         if (file.exists()) {
-            serverLog.logInfo("MIGRATION", "Migrating wiki.db to "+ sb.workPath);
+            Log.logInfo("MIGRATION", "Migrating wiki.db to "+ sb.workPath);
             sb.wikiDB.close();
             file2 = new File(sb.workPath, "wiki.db");
             try {
@@ -158,7 +158,7 @@ public class migration {
             
             file = new File(sb.getRootPath(), "DATA/SETTINGS/wiki-bkp.db");
             if (file.exists()) {
-                serverLog.logInfo("MIGRATION", "Migrating wiki-bkp.db to "+ sb.workPath);
+                Log.logInfo("MIGRATION", "Migrating wiki-bkp.db to "+ sb.workPath);
                 file2 = new File(sb.workPath, "wiki-bkp.db");
                 try {
                     serverFileUtils.copy(file, file2);
@@ -171,7 +171,7 @@ public class migration {
         
         file=new File(sb.getRootPath(), "DATA/SETTINGS/message.db");
         if(file.exists()){
-            serverLog.logInfo("MIGRATION", "Migrating message.db to "+ sb.workPath);
+            Log.logInfo("MIGRATION", "Migrating message.db to "+ sb.workPath);
             sb.messageDB.close();
             file2=new File(sb.workPath, "message.db");
             try {

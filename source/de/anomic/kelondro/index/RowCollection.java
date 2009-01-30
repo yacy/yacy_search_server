@@ -42,10 +42,10 @@ import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.kelondroException;
+import de.anomic.kelondro.util.Log;
 import de.anomic.server.NamePrefixThreadFactory;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverProcessor;
-import de.anomic.server.logging.serverLog;
 
 public class RowCollection implements Iterable<Row.Entry> {
 
@@ -103,7 +103,7 @@ public class RowCollection implements Iterable<Row.Entry> {
         this.rowdef = rowdef;
         this.chunkcount = (int) exportedCollection.getColLong(exp_chunkcount);
         if ((this.chunkcount > chunkcachelength / rowdef.objectsize)) {
-            serverLog.logWarning("RowCollection", "corrected wrong chunkcount; chunkcount = " + this.chunkcount + ", chunkcachelength = " + chunkcachelength + ", rowdef.objectsize = " + rowdef.objectsize);
+            Log.logWarning("RowCollection", "corrected wrong chunkcount; chunkcount = " + this.chunkcount + ", chunkcachelength = " + chunkcachelength + ", rowdef.objectsize = " + rowdef.objectsize);
             this.chunkcount = chunkcachelength / rowdef.objectsize; // patch problem
         }
         this.lastTimeRead = (exportedCollection.getColLong(exp_last_read) + 10957) * day;
@@ -120,7 +120,7 @@ public class RowCollection implements Iterable<Row.Entry> {
             throw new kelondroException("old collection order does not match with new order; objectOrder.signature = " + rowdef.objectOrder.signature() + ", oldOrder.signature = " + oldOrder.signature());
         this.sortBound = (int) exportedCollection.getColLong(exp_order_bound);
         if (sortBound > chunkcount) {
-            serverLog.logWarning("RowCollection", "corrected wrong sortBound; sortBound = " + sortBound + ", chunkcount = " + chunkcount);
+            Log.logWarning("RowCollection", "corrected wrong sortBound; sortBound = " + sortBound + ", chunkcount = " + chunkcount);
             this.sortBound = chunkcount;
         }
         this.chunkcache = exportedCollection.getColBytes(exp_collection);        
@@ -296,7 +296,7 @@ public class RowCollection implements Iterable<Row.Entry> {
     private final void addUnique(final byte[] a, final int astart, final int alength) {
         assert (a != null);
         assert (astart >= 0) && (astart < a.length) : " astart = " + astart;
-        assert (!(serverLog.allZero(a, astart, alength))) : "a = " + NaturalOrder.arrayList(a, astart, alength);
+        assert (!(Log.allZero(a, astart, alength))) : "a = " + NaturalOrder.arrayList(a, astart, alength);
         assert (alength > 0);
         assert (astart + alength <= a.length);
         assert alength == rowdef.objectsize : "alength =" + alength + ", rowdef.objectsize = " + rowdef.objectsize;
@@ -320,7 +320,7 @@ public class RowCollection implements Iterable<Row.Entry> {
     protected final void addSorted(final byte[] a, final int astart, final int alength) {
         assert (a != null);
         assert (astart >= 0) && (astart < a.length) : " astart = " + astart;
-        assert (!(serverLog.allZero(a, astart, alength))) : "a = " + NaturalOrder.arrayList(a, astart, alength);
+        assert (!(Log.allZero(a, astart, alength))) : "a = " + NaturalOrder.arrayList(a, astart, alength);
         assert (alength > 0);
         assert (astart + alength <= a.length);
         assert alength == rowdef.objectsize : "alength =" + alength + ", rowdef.objectsize = " + rowdef.objectsize;
@@ -785,7 +785,7 @@ public class RowCollection implements Iterable<Row.Entry> {
                 }
             }
         } catch (final RuntimeException e) {
-            serverLog.logWarning("kelondroRowCollection", e.getMessage(), e);
+            Log.logWarning("kelondroRowCollection", e.getMessage(), e);
         } finally {
             if (!u) this.sort();
         }
@@ -823,7 +823,7 @@ public class RowCollection implements Iterable<Row.Entry> {
                 i--;
             }
         } catch (final RuntimeException e) {
-            serverLog.logWarning("kelondroRowCollection", e.getMessage(), e);
+            Log.logWarning("kelondroRowCollection", e.getMessage(), e);
         } finally {
             if (!u) this.sort();
         }

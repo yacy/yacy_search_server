@@ -30,7 +30,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import de.anomic.server.logging.serverLog;
+import de.anomic.kelondro.util.Log;
 
 /**
  * Information about a connection
@@ -163,10 +163,10 @@ public class HttpConnectionInfo {
                         allConnections.remove(con);
                     }
                 }
-                if (serverLog.isFine("HTTPC")) serverLog.logFine("HTTPC", "cleanUp ConnectionInfo removed "+ (sizeBefore - allConnections.size()));
+                if (Log.isFine("HTTPC")) Log.logFine("HTTPC", "cleanUp ConnectionInfo removed "+ (sizeBefore - allConnections.size()));
             }
         } catch (final java.util.ConcurrentModificationException e) {
-            serverLog.logWarning("HTTPC", "cleanUp ConnectionInfo interrupted by ConcurrentModificationException");
+            Log.logWarning("HTTPC", "cleanUp ConnectionInfo interrupted by ConcurrentModificationException");
         }
     }
     

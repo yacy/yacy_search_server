@@ -50,14 +50,14 @@ import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.util.ByteBuffer;
 import de.anomic.kelondro.util.kelondroException;
+import de.anomic.kelondro.util.Log;
 import de.anomic.server.serverFileUtils;
-import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyURL;
 
 public class RobotsTxt {
     
     public static final String ROBOTS_DB_PATH_SEPARATOR = ";";    
-    private static final serverLog log = new serverLog("ROBOTS");
+    private static final Log log = new Log("ROBOTS");
     
     MapView robotsTable;
     private final File robotsTableFile;

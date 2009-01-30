@@ -34,12 +34,12 @@ package de.anomic.server;
 
 import java.nio.channels.ClosedByInterruptException;
 
-import de.anomic.server.logging.serverLog;
+import de.anomic.kelondro.util.Log;
 
 public abstract class serverAbstractThread extends Thread implements serverThread {
 
     protected boolean running = true;
-    protected serverLog log = null;
+    protected Log log = null;
     protected long busytime = 0, memuse = 0;
     private   long blockPause = 0;
     private   String shortDescr = "", longDescr = "";
@@ -100,7 +100,7 @@ public abstract class serverAbstractThread extends Thread implements serverThrea
         return memuse;
     }
 
-    public final void setLog(final serverLog log) {
+    public final void setLog(final Log log) {
         // defines a log where process states can be written to
         this.log = log;
     }
@@ -127,7 +127,7 @@ public abstract class serverAbstractThread extends Thread implements serverThrea
     }
     
     private final void logError(final String text,final Throwable thrown) {
-        if (log == null) serverLog.logSevere("THREAD-CONTROL", text, thrown);
+        if (log == null) Log.logSevere("THREAD-CONTROL", text, thrown);
         else log.logSevere(text,thrown);
     }
     

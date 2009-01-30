@@ -36,6 +36,7 @@ import de.anomic.index.indexWord;
 import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.SetTools;
+import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaCondenser;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.plasmaProfiling;
@@ -50,7 +51,6 @@ import de.anomic.server.serverDomains;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverProfiling;
 import de.anomic.server.serverSwitch;
-import de.anomic.server.logging.serverLog;
 import de.anomic.tools.iso639;
 import de.anomic.tools.yFormatter;
 import de.anomic.xml.RSSFeed;
@@ -171,9 +171,9 @@ public class yacysearch {
         	global = false;
             fetchSnippets = false;
             block = true;
-            serverLog.logWarning("LOCAL_SEARCH", "ACCECC CONTROL: BLACKLISTED CLIENT FROM " + client + " gets no permission to search");
+            Log.logWarning("LOCAL_SEARCH", "ACCECC CONTROL: BLACKLISTED CLIENT FROM " + client + " gets no permission to search");
         } else if (serverDomains.matchesList(client, sb.networkWhitelist)) {
-        	serverLog.logInfo("LOCAL_SEARCH", "ACCECC CONTROL: WHITELISTED CLIENT FROM " + client + " gets no search restrictions");
+        	Log.logInfo("LOCAL_SEARCH", "ACCECC CONTROL: WHITELISTED CLIENT FROM " + client + " gets no search restrictions");
         } else if (global || fetchSnippets) {
             // in case that we do a global search or we want to fetch snippets, we check for DoS cases
             int accInOneSecond = trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() - 1000)).size();
@@ -184,20 +184,20 @@ public class yacysearch {
                 global = false;
                 fetchSnippets = false;
                 block = true;
-                serverLog.logWarning("LOCAL_SEARCH", "ACCECC CONTROL: CLIENT FROM " + client + ": " + accInTenMinutes + " searches in ten minutes, fully blocked (no results generated)");
+                Log.logWarning("LOCAL_SEARCH", "ACCECC CONTROL: CLIENT FROM " + client + ": " + accInTenMinutes + " searches in ten minutes, fully blocked (no results generated)");
             } else if (accInOneMinute > 200) {
                 global = false;
                 fetchSnippets = false;
                 block = true;
-                serverLog.logWarning("LOCAL_SEARCH", "ACCECC CONTROL: CLIENT FROM " + client + ": " + accInOneMinute + " searches in one minute, fully blocked (no results generated)");
+                Log.logWarning("LOCAL_SEARCH", "ACCECC CONTROL: CLIENT FROM " + client + ": " + accInOneMinute + " searches in one minute, fully blocked (no results generated)");
             } else if (accInThreeSeconds > 1) {
                 global = false;
                 fetchSnippets = false;
-                serverLog.logWarning("LOCAL_SEARCH", "ACCECC CONTROL: CLIENT FROM " + client + ": " + accInThreeSeconds + " searches in three seconds, blocked global search and snippets");
+                Log.logWarning("LOCAL_SEARCH", "ACCECC CONTROL: CLIENT FROM " + client + ": " + accInThreeSeconds + " searches in three seconds, blocked global search and snippets");
             } else if (accInOneSecond > 2) {
                 global = false;
                 fetchSnippets = false;
-                serverLog.logWarning("LOCAL_SEARCH", "ACCECC CONTROL: CLIENT FROM " + client + ": " + accInOneSecond + " searches in one second, blocked global search and snippets");
+                Log.logWarning("LOCAL_SEARCH", "ACCECC CONTROL: CLIENT FROM " + client + ": " + accInOneSecond + " searches in one second, blocked global search and snippets");
             }
         }
         
@@ -370,7 +370,7 @@ public class yacysearch {
             theQuery.filterOut(plasmaSwitchboard.blueList);
             
             // log
-            serverLog.logInfo("LOCAL_SEARCH", "INIT WORD SEARCH: " + theQuery.queryString + ":" + theQuery.queryHashes + " - " + theQuery.neededResults() + " links to be computed, " + theQuery.displayResults() + " lines to be displayed");
+            Log.logInfo("LOCAL_SEARCH", "INIT WORD SEARCH: " + theQuery.queryString + ":" + theQuery.queryHashes + " - " + theQuery.neededResults() + " links to be computed, " + theQuery.displayResults() + " lines to be displayed");
             RSSFeed.channels(RSSFeed.LOCALSEARCH).addMessage(new RSSMessage("Local Search Request", theQuery.queryString, ""));
             final long timestamp = System.currentTimeMillis();
 
@@ -389,7 +389,7 @@ public class yacysearch {
             //serverLog.logFine("LOCAL_SEARCH", "SEARCH TIME AFTER XREF PREPARATION: " + (System.currentTimeMillis() - timestamp) + " ms");
 
             // log
-            serverLog.logInfo("LOCAL_SEARCH", "EXIT WORD SEARCH: " + theQuery.queryString + " - " +
+            Log.logInfo("LOCAL_SEARCH", "EXIT WORD SEARCH: " + theQuery.queryString + " - " +
                     (theSearch.getRankingResult().getLocalResourceSize() + theSearch.getRankingResult().getRemoteResourceSize()) + " links found, " +
                     (System.currentTimeMillis() - timestamp) + " ms");
 

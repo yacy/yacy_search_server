@@ -48,11 +48,11 @@ import de.anomic.http.JakartaCommonsHttpClient;
 import de.anomic.http.JakartaCommonsHttpResponse;
 import de.anomic.http.httpResponseHeader;
 import de.anomic.http.httpRequestHeader;
+import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverSystem;
-import de.anomic.server.logging.serverLog;
 import de.anomic.tools.tarTools;
 
 public final class yacyVersion implements Comparator<yacyVersion>, Comparable<yacyVersion> {
@@ -368,10 +368,10 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
             }
             if ((!download.exists()) || (download.length() == 0)) throw new IOException("wget of url " + release.url + " failed");
         } catch (final IOException e) {
-            serverLog.logSevere("yacyVersion", "download of " + release.name + " failed: " + e.getMessage());
+            Log.logSevere("yacyVersion", "download of " + release.name + " failed: " + e.getMessage());
             if (download != null && download.exists())
             	if(!download.delete())
-            		serverLog.logWarning("yacyVersion", "could not delete file "+ download);
+            		Log.logWarning("yacyVersion", "could not delete file "+ download);
             download = null;
         } finally {
             if (res != null) {
@@ -394,7 +394,7 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
         	if (startType.exists()) starterFile = "startYACY.bat"; // startType noconsole
         	
         	try{
-                serverLog.logInfo("RESTART", "INITIATED");
+                Log.logInfo("RESTART", "INITIATED");
         		final String script =
 	            	"@echo off" + serverCore.LF_STRING +
 	            	"title YaCy restarter" + serverCore.LF_STRING +
@@ -411,12 +411,12 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
 	            	"start /MIN CMD /C " + starterFile + serverCore.LF_STRING;
 	            final File scriptFile = new File(sb.getRootPath(), "DATA/RELEASE/restart.bat".replace("/", File.separator));
 	            serverSystem.deployScript(scriptFile, script);
-	            serverLog.logInfo("RESTART", "wrote restart-script to " + scriptFile.getAbsolutePath());
+	            Log.logInfo("RESTART", "wrote restart-script to " + scriptFile.getAbsolutePath());
 	            serverSystem.execAsynchronous(scriptFile);
-	            serverLog.logInfo("RESTART", "script is running");
+	            Log.logInfo("RESTART", "script is running");
 	            sb.terminate(5000);
 	        } catch (final IOException e) {
-	            serverLog.logSevere("RESTART", "restart failed", e);
+	            Log.logSevere("RESTART", "restart failed", e);
 	        }
         
             // create yacy.restart file which is used in Windows startscript
@@ -435,7 +435,7 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
         if (serverSystem.canExecUnix) {
             // start a re-start daemon
             try {
-                serverLog.logInfo("RESTART", "INITIATED");
+                Log.logInfo("RESTART", "INITIATED");
                 final String script =
                     "#!/bin/sh" + serverCore.LF_STRING +
                     "cd " + sb.getRootPath() + "/DATA/RELEASE/" + serverCore.LF_STRING +
@@ -446,12 +446,12 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
                     "nohup ./startYACY.sh > /dev/null" + serverCore.LF_STRING;
                 final File scriptFile = new File(sb.getRootPath(), "DATA/RELEASE/restart.sh");
                 serverSystem.deployScript(scriptFile, script);
-                serverLog.logInfo("RESTART", "wrote restart-script to " + scriptFile.getAbsolutePath());
+                Log.logInfo("RESTART", "wrote restart-script to " + scriptFile.getAbsolutePath());
                 serverSystem.execAsynchronous(scriptFile);
-                serverLog.logInfo("RESTART", "script is running");
+                Log.logInfo("RESTART", "script is running");
                 sb.terminate(5000);
             } catch (final IOException e) {
-                serverLog.logSevere("RESTART", "restart failed", e);
+                Log.logSevere("RESTART", "restart failed", e);
             }
         }
     }
@@ -461,11 +461,11 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
         try {
             final plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
             final String apphome = sb.getRootPath().toString();
-            serverLog.logInfo("UPDATE", "INITIATED");
+            Log.logInfo("UPDATE", "INITIATED");
             try{
             tarTools.unTar(tarTools.getInputStream(releaseFile), sb.getRootPath() + "/DATA/RELEASE/".replace("/", File.separator));
             } catch (final Exception e){
-            	serverLog.logSevere("UNTAR", "failed", e);
+            	Log.logSevere("UNTAR", "failed", e);
             }
             String script = null;
             String scriptFileName = null;
@@ -539,13 +539,13 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
             }
             final File scriptFile = new File(sb.getRootPath(), "DATA/RELEASE/".replace("/", File.separator) + scriptFileName); 
             serverSystem.deployScript(scriptFile, script);
-            serverLog.logInfo("UPDATE", "wrote update-script to " + scriptFile.getAbsolutePath());
+            Log.logInfo("UPDATE", "wrote update-script to " + scriptFile.getAbsolutePath());
             serverSystem.execAsynchronous(scriptFile);
-            serverLog.logInfo("UPDATE", "script is running");
+            Log.logInfo("UPDATE", "script is running");
             sb.setConfig("update.time.deploy", System.currentTimeMillis());
             sb.terminate(5000);
         } catch (final IOException e) {
-            serverLog.logSevere("UPDATE", "update failed", e);
+            Log.logSevere("UPDATE", "update failed", e);
         }
     }
     
@@ -565,7 +565,7 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
          final Matcher matcher = Pattern.compile("\\A(\\d+\\.\\d{1,3})(\\d{0,5})\\z").matcher(ver); 
 
          if (!matcher.find()) { 
-             serverLog.logWarning("STARTUP", "Peer '"+computerName+"': wrong format of version-string: '" + ver + "'. Using default string 'dev/00000' instead");   
+             Log.logWarning("STARTUP", "Peer '"+computerName+"': wrong format of version-string: '" + ver + "'. Using default string 'dev/00000' instead");   
              return "dev/00000";
          }
          
@@ -622,7 +622,7 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
         
         // if we have some files
         if(downloadedreleases.size() > 0) {
-            serverLog.logFine("STARTUP", "deleting downloaded releases older than "+ deleteAfterDays +" days");
+            Log.logFine("STARTUP", "deleting downloaded releases older than "+ deleteAfterDays +" days");
             
             // keep latest version
             final yacyVersion latest = downloadedreleases.last();
@@ -651,7 +651,7 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
                 if (now - downloadedFile.lastModified() > deleteAfterMillis) {
                     // delete file
                     if (!downloadedFile.delete()) {
-                        serverLog.logWarning("STARTUP", "cannot delete old release " + downloadedFile.getAbsolutePath());
+                        Log.logWarning("STARTUP", "cannot delete old release " + downloadedFile.getAbsolutePath());
                     }
                 }
             }

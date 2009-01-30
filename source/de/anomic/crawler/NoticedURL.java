@@ -30,7 +30,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 
-import de.anomic.server.logging.serverLog;
+import de.anomic.kelondro.util.Log;
 
 public class NoticedURL {
     
@@ -95,7 +95,7 @@ public class NoticedURL {
     
     protected void finalize() {
         if ((coreStack != null) || (limitStack != null) || (remoteStack != null)) {
-            serverLog.logWarning("plasmaCrawlNURL", "NURL stack closed by finalizer");
+            Log.logWarning("plasmaCrawlNURL", "NURL stack closed by finalizer");
             close();
         }
     }
@@ -222,7 +222,7 @@ public class NoticedURL {
                     if (s > balancer.size()) continue;
                     final int aftersize = balancer.size();
                     balancer.clear(); // the balancer is broken and cannot shrink
-                    serverLog.logWarning("BALANCER", "entry is null, balancer cannot shrink (bevore pop = " + s + ", after pop = " + aftersize + "); reset of balancer");
+                    Log.logWarning("BALANCER", "entry is null, balancer cannot shrink (bevore pop = " + s + ", after pop = " + aftersize + "); reset of balancer");
                 }
                 return entry;
             }

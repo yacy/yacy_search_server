@@ -51,7 +51,7 @@ import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.kelondroException;
-import de.anomic.server.logging.serverLog;
+import de.anomic.kelondro.util.Log;
 
 /*
  * The EcoIndex builds upon the EcoFS and tries to reduce the number of IO requests that the
@@ -119,21 +119,21 @@ public class EcoTable implements ObjectIndex {
                      ((useTailCache == tailCacheForceUsage) ||
                       ((useTailCache == tailCacheUsageAuto) && (MemoryControl.free() > neededRAM4table + 200 * 1024 * 1024)))) ?
                     new RowSet(taildef, records) : null;
-            serverLog.logInfo("ECOTABLE", "initialization of " + tablefile + ": available RAM: " + (MemoryControl.available() / 1024 / 1024) + "MB, allocating space for " + records + " entries");
+            Log.logInfo("ECOTABLE", "initialization of " + tablefile + ": available RAM: " + (MemoryControl.available() / 1024 / 1024) + "MB, allocating space for " + records + " entries");
             final long neededRAM4index = 2 * 1024 * 1024 + records * (rowdef.primaryKeyLength + 4) * 3 / 2;
             if (!MemoryControl.request(neededRAM4index, false)) {
                 // despite calculations seemed to show that there is enough memory for the table AND the index
                 // there is now not enough memory left for the index. So delete the table again to free the memory
                 // for the index
-                serverLog.logSevere("ECOTABLE", tablefile + ": not enough RAM (" + (MemoryControl.available() / 1024 / 1024) + "MB) left for index, deleting allocated table space to enable index space allocation (needed: " + (neededRAM4index / 1024 / 1024) + "MB)");
+                Log.logSevere("ECOTABLE", tablefile + ": not enough RAM (" + (MemoryControl.available() / 1024 / 1024) + "MB) left for index, deleting allocated table space to enable index space allocation (needed: " + (neededRAM4index / 1024 / 1024) + "MB)");
                 table = null; System.gc();
-                serverLog.logSevere("ECOTABLE", tablefile + ": RAM after releasing the table: " + (MemoryControl.available() / 1024 / 1024) + "MB");
+                Log.logSevere("ECOTABLE", tablefile + ": RAM after releasing the table: " + (MemoryControl.available() / 1024 / 1024) + "MB");
             }
             index = new BytesIntMap(rowdef.primaryKeyLength, rowdef.objectOrder, records);
-            serverLog.logInfo("ECOTABLE", tablefile + ": EcoTable " + tablefile.toString() + " has table copy " + ((table == null) ? "DISABLED" : "ENABLED"));
+            Log.logInfo("ECOTABLE", tablefile + ": EcoTable " + tablefile.toString() + " has table copy " + ((table == null) ? "DISABLED" : "ENABLED"));
 
             // read all elements from the file into the copy table
-            serverLog.logInfo("ECOTABLE", "initializing RAM index for EcoTable " + tablefile.getName() + ", please wait.");
+            Log.logInfo("ECOTABLE", "initializing RAM index for EcoTable " + tablefile.getName() + ", please wait.");
             int i = 0;
             byte[] key;
             if (table == null) {
@@ -175,7 +175,7 @@ public class EcoTable implements ObjectIndex {
             //assert index.size() + doubles.size() + fail == i;
             //System.out.println(" -removed " + doubles.size() + " doubles- done.");
             if (doubles.size() > 0) {
-                serverLog.logInfo("ECOTABLE", tablefile + ": WARNING - EcoTable " + tablefile + " has " + doubles.size() + " doubles");
+                Log.logInfo("ECOTABLE", tablefile + ": WARNING - EcoTable " + tablefile + " has " + doubles.size() + " doubles");
                 // from all the doubles take one, put it back to the index and remove the others from the file
                 // first put back one element each
                 final byte[] record = new byte[rowdef.objectsize];

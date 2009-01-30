@@ -33,7 +33,7 @@ import de.anomic.kelondro.index.Row.EntryIndex;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.table.Stack;
 import de.anomic.kelondro.util.kelondroException;
-import de.anomic.server.logging.serverLog;
+import de.anomic.kelondro.util.Log;
 import de.anomic.yacy.yacyURL;
 
 public class URLFetcherStack {
@@ -46,14 +46,14 @@ public class URLFetcherStack {
             0
     );
     private final Stack db;
-    private final serverLog log;
+    private final Log log;
     
     private int popped = 0;
     private int pushed = 0;
     
     public URLFetcherStack(final File path) throws IOException {
         this.db = new Stack(new File(path, DBFILE), rowdef);
-        this.log = new serverLog("URLFETCHERSTACK");
+        this.log = new Log("URLFETCHERSTACK");
     }
     
     public int getPopped() { return this.popped; }

@@ -33,8 +33,8 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Set;
 
+import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.parser.Parser;
-import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyURL;
 
 public class plasmaParserConfig {
@@ -157,7 +157,7 @@ public class plasmaParserConfig {
                         newEnabledParsers.add(mimeType);
                         
                     } catch (final Exception e) {
-                        serverLog.logSevere("PARSER", "error in setEnabledParserList", e);
+                        Log.logSevere("PARSER", "error in setEnabledParserList", e);
                     } finally {
                         if (theParser != null)
                             theParser = null; // destroy object

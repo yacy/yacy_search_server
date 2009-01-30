@@ -47,8 +47,8 @@ import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpdByteCountInputStream;
 import de.anomic.index.indexURLReference;
 import de.anomic.kelondro.order.DateFormatter;
+import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyURL;
 
 /**
@@ -114,7 +114,7 @@ public class SitemapParser extends DefaultHandler {
     /**
      * the logger
      */
-    private final serverLog logger = new serverLog("SITEMAP");
+    private final Log logger = new Log("SITEMAP");
 
     /**
      * The location of the sitemap file

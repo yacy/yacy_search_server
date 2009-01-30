@@ -41,7 +41,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 import de.anomic.kelondro.util.ByteBuffer;
-import de.anomic.server.logging.serverLog;
+import de.anomic.kelondro.util.Log;
 
 public class opensearchdescriptionReader extends DefaultHandler {
     
@@ -136,20 +136,20 @@ public class opensearchdescriptionReader extends DefaultHandler {
 
         // check integrity of array
         if ((a == null) || (a.length == 0)) {
-            serverLog.logWarning("opensearchdescriptionReader", "response=null");
+            Log.logWarning("opensearchdescriptionReader", "response=null");
             return null;
         }
         if (a.length < 100) {
-            serverLog.logWarning("opensearchdescriptionReader", "response=" + new String(a));
+            Log.logWarning("opensearchdescriptionReader", "response=" + new String(a));
             return null;
         }
         if (!ByteBuffer.equals(a, "<?xml".getBytes())) {
-            serverLog.logWarning("opensearchdescriptionReader", "response does not contain valid xml");
+            Log.logWarning("opensearchdescriptionReader", "response does not contain valid xml");
             return null;
         }
         final String end = new String(a, a.length - 10, 10);
         if (end.indexOf("rss") < 0) {
-            serverLog.logWarning("opensearchdescriptionReader", "response incomplete");
+            Log.logWarning("opensearchdescriptionReader", "response incomplete");
             return null;
         }
         
@@ -161,7 +161,7 @@ public class opensearchdescriptionReader extends DefaultHandler {
         try {
             reader = new opensearchdescriptionReader(bais);
         } catch (final Exception e) {
-            serverLog.logWarning("opensearchdescriptionReader", "parse exception: " + e);
+            Log.logWarning("opensearchdescriptionReader", "parse exception: " + e);
             return null;
         }
         try { bais.close(); } catch (final IOException e) {}

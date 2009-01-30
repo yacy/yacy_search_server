@@ -52,7 +52,7 @@ import de.anomic.kelondro.io.RandomAccessRecords;
 import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.util.kelondroException;
-import de.anomic.server.logging.serverLog;
+import de.anomic.kelondro.util.Log;
 
 public abstract class AbstractRecords implements RandomAccessRecords {
 
@@ -247,7 +247,7 @@ public abstract class AbstractRecords implements RandomAccessRecords {
                     // take link
                     int index = USAGE.FREEH.index;
                     if (index == RecordHandle.NUL) {
-                        serverLog.logSevere("kelondroAbstractRecords/" + filename, "INTERNAL ERROR (DATA INCONSISTENCY): re-use of records failed, lost " + (USAGE.FREEC + 1) + " records.");
+                        Log.logSevere("kelondroAbstractRecords/" + filename, "INTERNAL ERROR (DATA INCONSISTENCY): re-use of records failed, lost " + (USAGE.FREEC + 1) + " records.");
                         // try to heal..
                         USAGE.USEDC = (int) ((entryFile.length() - POS_NODES) / recordsize);
                         index = USAGE.USEDC;
@@ -259,7 +259,7 @@ public abstract class AbstractRecords implements RandomAccessRecords {
                         final long seekp = seekpos(USAGE.FREEH);
                         if (seekp >= entryFile.length()) {
                             // this is a severe inconsistency. try to heal..
-                            serverLog.logSevere("kelondroTray/" + filename, "new Handle: lost " + USAGE.FREEC + " marked nodes; seek position " + seekp + "/" + USAGE.FREEH.index + " out of file size " + entryFile.length() + "/" + ((entryFile.length() - POS_NODES) / recordsize));
+                            Log.logSevere("kelondroTray/" + filename, "new Handle: lost " + USAGE.FREEC + " marked nodes; seek position " + seekp + "/" + USAGE.FREEH.index + " out of file size " + entryFile.length() + "/" + ((entryFile.length() - POS_NODES) / recordsize));
                             index = USAGE.allCount(); // a place at the end of the file
                             USAGE.USEDC += USAGE.FREEC; // to avoid that non-empty records at the end are overwritten
                             USAGE.FREEC = 0; // discard all possible empty nodes
@@ -271,7 +271,7 @@ public abstract class AbstractRecords implements RandomAccessRecords {
                             if (((USAGE.FREEH.index != RecordHandle.NUL) || (USAGE.FREEC != 0)) && seekpos(USAGE.FREEH) >= entryFile.length()) {
                                 // the FREEH pointer cannot be correct, because it points to a place outside of the file.
                                 // to correct this, we reset the FREH pointer and return a index that has been calculated as if USAGE.FREE == 0
-                                serverLog.logSevere("kelondroAbstractRecords/" + filename, "INTERNAL ERROR (DATA INCONSISTENCY): USAGE.FREEH.index = " + USAGE.FREEH.index + ", entryFile.length() = " + entryFile.length() + "; wrong FREEH has been patched, lost " + (USAGE.FREEC + 1) + " records.");
+                                Log.logSevere("kelondroAbstractRecords/" + filename, "INTERNAL ERROR (DATA INCONSISTENCY): USAGE.FREEH.index = " + USAGE.FREEH.index + ", entryFile.length() = " + entryFile.length() + "; wrong FREEH has been patched, lost " + (USAGE.FREEC + 1) + " records.");
                                 // try to heal..
                                 USAGE.USEDC = (int) ((entryFile.length() - POS_NODES) / recordsize);
                                 index = USAGE.USEDC;
@@ -995,7 +995,7 @@ public abstract class AbstractRecords implements RandomAccessRecords {
                 try {
                     nn = next00();
                 } catch (final IOException e) {
-                    serverLog.logSevere("kelondroAbstractRecords", filename + " failed with " + e.getMessage(), e);
+                    Log.logSevere("kelondroAbstractRecords", filename + " failed with " + e.getMessage(), e);
                     return null;
                 }
                 byte[] key = null;
@@ -1026,9 +1026,9 @@ public abstract class AbstractRecords implements RandomAccessRecords {
                 bulkstart = pos.index;
                 final int maxlength = Math.min(USAGE.allCount() - bulkstart, bulksize);
                 if (((POS_NODES) + ((long) bulkstart) * ((long) recordsize)) < 0)
-                    serverLog.logSevere("kelondroAbstractRecords", "DEBUG: negative offset. POS_NODES = " + POS_NODES + ", bulkstart = " + bulkstart + ", recordsize = " + recordsize);
+                    Log.logSevere("kelondroAbstractRecords", "DEBUG: negative offset. POS_NODES = " + POS_NODES + ", bulkstart = " + bulkstart + ", recordsize = " + recordsize);
                 if ((maxlength * recordsize) < 0)
-                    serverLog.logSevere("kelondroAbstractRecords", "DEBUG: negative length. maxlength = " + maxlength + ", recordsize = " + recordsize);
+                    Log.logSevere("kelondroAbstractRecords", "DEBUG: negative length. maxlength = " + maxlength + ", recordsize = " + recordsize);
                 entryFile.readFully((POS_NODES) + ((long) bulkstart) * ((long) recordsize), bulk, 0, maxlength * recordsize);
             }
             /* POS_NODES = 302, bulkstart = 3277, recordsize = 655386

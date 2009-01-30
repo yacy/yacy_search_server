@@ -28,9 +28,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
-import de.anomic.server.logging.serverLog;
 import de.anomic.tools.diskUsage;
 
 public final class ResourceObserver {
@@ -47,7 +47,7 @@ public final class ResourceObserver {
     private static final int MEDIUM = 1;
     private static final int HIGH = 2;
     
-    private final serverLog log = new serverLog("RESOURCE OBSERVER");
+    private final Log log = new Log("RESOURCE OBSERVER");
     private final plasmaSwitchboard sb;
 
     private int checkDiskUsageCount;

@@ -50,12 +50,12 @@ import de.anomic.kelondro.blob.BLOBHeap;
 import de.anomic.kelondro.blob.MapDataMining;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.util.kelondroException;
+import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDomains;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverSwitch;
-import de.anomic.server.logging.serverLog;
 import de.anomic.tools.nxTools;
 
 public final class yacySeedDB implements httpdAlternativeDomainNames {
@@ -144,23 +144,23 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
             if(mySeed == null) throw new IOException("current seed is null");
         } catch (final IOException e) {
             // create new identity
-            serverLog.logSevere("SEEDDB", "could not load stored mySeed.txt from " + myOwnSeedFile.toString() + ": " + e.getMessage() + ". creating new seed.", e);
+            Log.logSevere("SEEDDB", "could not load stored mySeed.txt from " + myOwnSeedFile.toString() + ": " + e.getMessage() + ". creating new seed.", e);
             mySeed = yacySeed.genLocalSeed(this);
             try {
                 mySeed.save(myOwnSeedFile);
             } catch (final IOException ee) {
-                serverLog.logSevere("SEEDDB", "error saving mySeed.txt (1) to " + myOwnSeedFile.toString() + ": " + ee.getMessage(), ee);
+                Log.logSevere("SEEDDB", "error saving mySeed.txt (1) to " + myOwnSeedFile.toString() + ": " + ee.getMessage(), ee);
                 ee.printStackTrace();
                 System.exit(-1);
             }
         } else {
             // create new identity
-            serverLog.logInfo("SEEDDB", "could not find stored mySeed.txt at " + myOwnSeedFile.toString() + ": " + ". creating new seed.");
+            Log.logInfo("SEEDDB", "could not find stored mySeed.txt at " + myOwnSeedFile.toString() + ": " + ". creating new seed.");
             mySeed = yacySeed.genLocalSeed(this);
             try {
                 mySeed.save(myOwnSeedFile);
             } catch (final IOException ee) {
-                serverLog.logSevere("SEEDDB", "error saving mySeed.txt (2) to " + myOwnSeedFile.toString() + ": " + ee.getMessage(), ee);
+                Log.logSevere("SEEDDB", "error saving mySeed.txt (2) to " + myOwnSeedFile.toString() + ": " + ee.getMessage(), ee);
                 ee.printStackTrace();
                 System.exit(-1);
             }
@@ -209,13 +209,13 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
             seedActiveDB.remove(mySeed.hash);
             seedPassiveDB.remove(mySeed.hash);
             seedPotentialDB.remove(mySeed.hash);
-        } catch (final IOException e) { serverLog.logWarning("yacySeedDB", "could not remove hash ("+ e.getClass() +"): "+ e.getMessage()); }
+        } catch (final IOException e) { Log.logWarning("yacySeedDB", "could not remove hash ("+ e.getClass() +"): "+ e.getMessage()); }
     }
     
     public void saveMySeed() {
         try {
           this.mySeed().save(myOwnSeedFile);
-        } catch (final IOException e) { serverLog.logWarning("yacySeedDB", "could not save mySeed '"+ myOwnSeedFile +"': "+ e.getMessage()); }
+        } catch (final IOException e) { Log.logWarning("yacySeedDB", "could not save mySeed '"+ myOwnSeedFile +"': "+ e.getMessage()); }
     }
     
     public boolean noDHTActivity() {
@@ -228,7 +228,7 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
         final File parentDir = new File(seedDBFile.getParent());  
         if (!parentDir.exists()) {
 			if(!parentDir.mkdirs())
-				serverLog.logWarning("yacySeedDB", "could not create directories for "+ seedDBFile.getParent());
+				Log.logWarning("yacySeedDB", "could not create directories for "+ seedDBFile.getParent());
 		}
         Class[] args;
         try {
@@ -268,7 +268,7 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
         yacyCore.log.logWarning("seed-db " + seedDBFile.toString() + " reset (on-the-fly)");
         seedDB.close();
         if(!seedDBFile.delete())
-        	serverLog.logWarning("yacySeedDB", "could not delete file "+ seedDBFile);
+        	Log.logWarning("yacySeedDB", "could not delete file "+ seedDBFile);
         // create new seed database
         seedDB = openSeedTable(seedDBFile);
         return seedDB;
@@ -423,7 +423,7 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
             nameLookupCache.remove(seed.getName());
             seedActiveDB.remove(seed.hash);
             seedPotentialDB.remove(seed.hash);
-        } catch (final Exception e) { serverLog.logWarning("yacySeedDB", "could not remove hash ("+ e.getClass() +"): "+ e.getMessage()); }
+        } catch (final Exception e) { Log.logWarning("yacySeedDB", "could not remove hash ("+ e.getClass() +"): "+ e.getMessage()); }
         //seed.put(yacySeed.LASTSEEN, yacyCore.shortFormatter.format(new Date(yacyCore.universalTime())));
         try {
             final Map<String, String> seedPropMap = seed.getMap();
@@ -448,7 +448,7 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
             nameLookupCache.remove(seed.getName());
             seedActiveDB.remove(seed.hash);
             seedPassiveDB.remove(seed.hash);
-        } catch (final Exception e) { serverLog.logWarning("yacySeedDB", "could not remove hash ("+ e.getClass() +"): "+ e.getMessage()); }
+        } catch (final Exception e) { Log.logWarning("yacySeedDB", "could not remove hash ("+ e.getClass() +"): "+ e.getMessage()); }
         //seed.put(yacySeed.LASTSEEN, yacyCore.shortFormatter.format(new Date(yacyCore.universalTime())));
         try {
             final Map<String, String> seedPropMap = seed.getMap();
@@ -471,14 +471,14 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
     	if(peerHash == null) return;
     	try {
 			seedPassiveDB.remove(peerHash);
-		} catch (final IOException e) { serverLog.logWarning("yacySeedDB", "could not remove hash ("+ e.getClass() +"): "+ e.getMessage()); }
+		} catch (final IOException e) { Log.logWarning("yacySeedDB", "could not remove hash ("+ e.getClass() +"): "+ e.getMessage()); }
     }
     
     public synchronized void removePotential(final String peerHash) {
     	if(peerHash == null) return;
     	try {
 			seedPotentialDB.remove(peerHash);
-		} catch (final IOException e) { serverLog.logWarning("yacySeedDB", "could not remove hash ("+ e.getClass() +"): "+ e.getMessage()); }
+		} catch (final IOException e) { Log.logWarning("yacySeedDB", "could not remove hash ("+ e.getClass() +"): "+ e.getMessage()); }
     }
         
     public boolean hasConnected(final String hash) {
@@ -626,7 +626,7 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
                     if (seed != null) {
                         addressStr = seed.getPublicAddress();
                         if (addressStr == null) {
-                        	serverLog.logWarning("YACY","lookupByIP/Connected: address of seed " + seed.getName() + "/" + seed.hash + " is null.");
+                        	Log.logWarning("YACY","lookupByIP/Connected: address of seed " + seed.getName() + "/" + seed.hash + " is null.");
                         	badPeerHashes.add(seed.hash);
                         	continue; 
                         }
@@ -655,7 +655,7 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
                     if (seed != null) {
                         addressStr = seed.getPublicAddress();
                         if (addressStr == null) {
-                            serverLog.logWarning("YACY","lookupByIPDisconnected: address of seed " + seed.getName() + "/" + seed.hash + " is null.");
+                            Log.logWarning("YACY","lookupByIPDisconnected: address of seed " + seed.getName() + "/" + seed.hash + " is null.");
                             badPeerHashes.add(seed.hash);
                             continue;
                         }
@@ -767,15 +767,15 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
             // create a seed file which for uploading ...    
             seedFile = File.createTempFile("seedFile",".txt", plasmaHTCache.cachePath);
             seedFile.deleteOnExit();
-            if (serverLog.isFine("YACY")) serverLog.logFine("YACY", "SaveSeedList: Storing seedlist into tempfile " + seedFile.toString());
+            if (Log.isFine("YACY")) Log.logFine("YACY", "SaveSeedList: Storing seedlist into tempfile " + seedFile.toString());
             final ArrayList<String> uv = storeCache(seedFile, true);            
             
             // uploading the seed file
-            if (serverLog.isFine("YACY")) serverLog.logFine("YACY", "SaveSeedList: Trying to upload seed-file, " + seedFile.length() + " bytes, " + uv.size() + " entries.");
+            if (Log.isFine("YACY")) Log.logFine("YACY", "SaveSeedList: Trying to upload seed-file, " + seedFile.length() + " bytes, " + uv.size() + " entries.");
             log = uploader.uploadSeedFile(sb,seedDB,seedFile);
             
             // test download
-            if (serverLog.isFine("YACY")) serverLog.logFine("YACY", "SaveSeedList: Trying to download seed-file '" + seedURL + "'.");
+            if (Log.isFine("YACY")) Log.logFine("YACY", "SaveSeedList: Trying to download seed-file '" + seedURL + "'.");
             final ArrayList<String> check = downloadSeedFile(seedURL);
             
             // Comparing if local copy and uploaded copy are equal
@@ -838,14 +838,14 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
 
     private String checkCache(final ArrayList<String> uv, final ArrayList<String> check) {                
         if ((check == null) || (uv == null) || (uv.size() != check.size())) {
-            if (serverLog.isFine("YACY")) serverLog.logFine("YACY", "SaveSeedList: Local and uploades seed-list " +
+            if (Log.isFine("YACY")) Log.logFine("YACY", "SaveSeedList: Local and uploades seed-list " +
                                "contains varying numbers of entries." +
                                "\n\tLocal seed-list:  " + ((uv == null) ? "null" : Integer.toString(uv.size())) + " entries" + 
                                "\n\tRemote seed-list: " + ((check == null) ? "null" : Integer.toString(check.size())) + " enties");
             return "Entry count is different: uv.size() = " + ((uv == null) ? "null" : Integer.toString(uv.size())) + ", check = " + ((check == null) ? "null" : Integer.toString(check.size()));
         } 
         	
-        if (serverLog.isFine("YACY")) serverLog.logFine("YACY", "SaveSeedList: Comparing local and uploades seed-list entries ...");
+        if (Log.isFine("YACY")) Log.logFine("YACY", "SaveSeedList: Comparing local and uploades seed-list entries ...");
         int i;
         for (i = 0; i < uv.size(); i++) {
         	if (!((uv.get(i)).equals(check.get(i)))) return "Element at position " + i + " is different.";

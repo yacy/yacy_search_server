@@ -6,8 +6,8 @@
 //Frankfurt, Germany, 2004
 //
 //This file ist contributed by Matthias Soehnholz
-//last major change: $LastChangedDate$ by $LastChangedBy$
-//Revision: $LastChangedRevision$
+//last major change: $LastChangedDate: 2008-11-17 16:23:17 +0000 (Mo, 17 Nov 2008) $ by $LastChangedBy: lotus $
+//Revision: $LastChangedRevision: 5349 $
 //
 //This program is free software; you can redistribute it and/or modify
 //it under the terms of the GNU General Public License as published by
@@ -23,14 +23,15 @@
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.server.logging.logParsers;
+package de.anomic.plasma;
 
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class LogParserPLASMA implements LogParser{
+
+public class LogParser {
     
     /** the version of the LogParser - <strong>Double</strong>*/
     public static final String PARSER_VERSION           = "version";

@@ -25,7 +25,6 @@
 
 package de.anomic.kelondro.util;
 
-import de.anomic.server.logging.serverLog;
 import de.anomic.tools.yFormatter;
 
 /**
@@ -34,7 +33,7 @@ import de.anomic.tools.yFormatter;
 public class MemoryControl {
 
     private static final Runtime runtime = Runtime.getRuntime();
-    private static final serverLog log = new serverLog("MEMORY");
+    private static final Log log = new Log("MEMORY");
     
     private static final long[] gcs = new long[5];
     private static int gcs_pos = 0;

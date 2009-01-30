@@ -54,11 +54,11 @@ import de.anomic.crawler.ResultURLs;
 import de.anomic.index.indexReferenceBlacklist;
 import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.util.ScoreCluster;
+import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSearchRankingProcess;
 import de.anomic.plasma.plasmaSearchRankingProfile;
 import de.anomic.plasma.plasmaWordIndex;
-import de.anomic.server.logging.serverLog;
 
 public class yacySearch extends Thread {
 
@@ -198,7 +198,7 @@ public class yacySearch extends Thread {
             if (seed == null) continue;
             if (!seed.getFlagAcceptRemoteIndex()) continue; // probably a robinson peer
             score = (int) Math.round(Math.random() * ((c / 3) + 3));
-            if (serverLog.isFine("PLASMA")) serverLog.logFine("PLASMA", "selectPeers/RWIcount: " + seed.hash + ":" + seed.getName() + ", RWIcount=" + seed.get(yacySeed.ICOUNT,"") + ", score " + score);
+            if (Log.isFine("PLASMA")) Log.logFine("PLASMA", "selectPeers/RWIcount: " + seed.hash + ":" + seed.getName() + ", RWIcount=" + seed.get(yacySeed.ICOUNT,"") + ", score " + score);
             ranking.addScore(seed.hash, score);
             regularSeeds.put(seed.hash, seed);
             c--;
@@ -211,12 +211,12 @@ public class yacySearch extends Thread {
         	seed = dhtEnum.next();
             if (seed == null) continue;
             if (seed.matchPeerTags(wordhashes)) {
-                serverLog.logInfo("PLASMA", "selectPeers/PeerTags: " + seed.hash + ":" + seed.getName() + ", is specialized peer for " + seed.getPeerTags().toString());
+                Log.logInfo("PLASMA", "selectPeers/PeerTags: " + seed.hash + ":" + seed.getName() + ", is specialized peer for " + seed.getPeerTags().toString());
                 regularSeeds.remove(seed.hash);
                 ranking.deleteScore(seed.hash);
                 matchingSeeds.put(seed.hash, seed);
             } else if (seed.getFlagAcceptRemoteIndex() && seed.getAge() < 1) { // the 'workshop feature'
-                serverLog.logInfo("PLASMA", "selectPeers/Age: " + seed.hash + ":" + seed.getName() + ", is newbie, age = " + seed.getAge());
+                Log.logInfo("PLASMA", "selectPeers/Age: " + seed.hash + ":" + seed.getName() + ", is newbie, age = " + seed.getAge());
                 regularSeeds.remove(seed.hash);
                 ranking.deleteScore(seed.hash);
                 matchingSeeds.put(seed.hash, seed);
@@ -231,12 +231,12 @@ public class yacySearch extends Thread {
         while (iter.hasNext() && c < seedcount) {
             seed = regularSeeds.get(iter.next());
             seed.selectscore = c;
-            serverLog.logInfo("PLASMA", "selectPeers/_dht_: " + seed.hash + ":" + seed.getName() + " is choice " + c);
+            Log.logInfo("PLASMA", "selectPeers/_dht_: " + seed.hash + ":" + seed.getName() + " is choice " + c);
             result[c++] = seed;
         }
         for (final yacySeed s: matchingSeeds.values()) {
             s.selectscore = c;
-            serverLog.logInfo("PLASMA", "selectPeers/_match_: " + s.hash + ":" + s.getName() + " is choice " + c);
+            Log.logInfo("PLASMA", "selectPeers/_match_: " + s.hash + ":" + s.getName() + " is choice " + c);
             result[c++] = s;
         }
 

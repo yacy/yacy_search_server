@@ -12,11 +12,11 @@ import de.anomic.crawler.CrawlProfile;
 import de.anomic.data.userDB;
 import de.anomic.http.HttpClient;
 import de.anomic.http.httpResponseHeader;
+import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverHandler;
-import de.anomic.server.logging.serverLog;
 import de.anomic.server.serverCore.Session;
 import de.anomic.yacy.yacyURL;
 
@@ -24,7 +24,7 @@ public class urlRedirectord implements serverHandler, Cloneable {
     
     private serverCore.Session session;
     private static plasmaSwitchboard sb = null;
-    private final serverLog theLogger = new serverLog("URL-REDIRECTOR");
+    private final Log theLogger = new Log("URL-REDIRECTOR");
     private static CrawlProfile.entry profile = null;
     private String nextURL;
     

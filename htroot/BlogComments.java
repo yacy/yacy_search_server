@@ -41,11 +41,11 @@ import de.anomic.data.messageBoard;
 import de.anomic.data.userDB;
 import de.anomic.data.blogBoard.BlogEntry;
 import de.anomic.http.httpRequestHeader;
+import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyCore;
 
 public class BlogComments {
@@ -171,7 +171,7 @@ public class BlogComments {
                 try {
                     serverFileUtils.copy(notifierSource, notifierDest);
                 } catch (final IOException e) {
-                    serverLog.logSevere("MESSAGE", "NEW MESSAGE ARRIVED! (error: " + e.getMessage() + ")");
+                    Log.logSevere("MESSAGE", "NEW MESSAGE ARRIVED! (error: " + e.getMessage() + ")");
 
                 }
             }

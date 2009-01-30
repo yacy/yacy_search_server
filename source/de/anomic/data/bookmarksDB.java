@@ -71,11 +71,11 @@ import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.util.kelondroException;
+import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverBusyThread;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverInstantBusyThread;
-import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacyNewsRecord;
 import de.anomic.yacy.yacyURL;
@@ -132,7 +132,7 @@ public class bookmarksDB {
         sb.deployThread("autoReCrawl", "autoReCrawl Scheduler", "simple scheduler for automatic re-crawls of bookmarked urls", null, autoReCrawl, 120000,
                 sleepTime, sleepTime, Long.parseLong(sb.getConfig("autoReCrawl_memprereq" , "-1"))
         );
-        serverLog.logInfo("BOOKMARKS", "autoReCrawl - serverBusyThread initialized checking every "+(sleepTime/1000/60)+" minutes for recrawls");
+        Log.logInfo("BOOKMARKS", "autoReCrawl - serverBusyThread initialized checking every "+(sleepTime/1000/60)+" minutes for recrawls");
     }
 
     // -----------------------------------------------------
@@ -157,7 +157,7 @@ public class bookmarksDB {
         String s;
         try {                    	
         	BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(f)));
-        	serverLog.logInfo("BOOKMARKS", "autoReCrawl - reading schedules from " + f);
+        	Log.logInfo("BOOKMARKS", "autoReCrawl - reading schedules from " + f);
         	while( null != (s = in.readLine()) ) {
         		if (!s.startsWith("#") && s.length()>0) {        			
         			String parser[] = s.split("\t");
@@ -174,7 +174,7 @@ public class bookmarksDB {
         	in.close();
         } catch( FileNotFoundException ex ) {        	
         	try {
-        		serverLog.logInfo("BOOKMARKS", "autoReCrawl - creating new autoReCrawl.conf"); 
+        		Log.logInfo("BOOKMARKS", "autoReCrawl - creating new autoReCrawl.conf"); 
         		File inputFile = new File(plasmaSwitchboard.getSwitchboard().getRootPath(),"defaults/autoReCrawl.conf");
 	            File outputFile = new File(plasmaSwitchboard.getSwitchboard().getRootPath(),"DATA/SETTINGS/autoReCrawl.conf");	
 	            FileReader i = new FileReader(inputFile);
@@ -187,14 +187,14 @@ public class bookmarksDB {
 	            autoReCrawl();
 	        	return true;
         	} catch( FileNotFoundException e ) {
-        		 serverLog.logSevere("BOOKMARKS", "autoReCrawl - file not found error: defaults/autoReCrawl.conf", e);
+        		 Log.logSevere("BOOKMARKS", "autoReCrawl - file not found error: defaults/autoReCrawl.conf", e);
         		 return false;
         	} catch (IOException e) {
-        		serverLog.logSevere("BOOKMARKS", "autoReCrawl - IOException: defaults/autoReCrawl.conf", e);
+        		Log.logSevere("BOOKMARKS", "autoReCrawl - IOException: defaults/autoReCrawl.conf", e);
        		 	return false;
         	}
         } catch( Exception ex ) {
-        	serverLog.logSevere("BOOKMARKS", "autoReCrawl - error reading " + f, ex);
+        	Log.logSevere("BOOKMARKS", "autoReCrawl - error reading " + f, ex);
         	return false;
         }
     	return true;
@@ -206,7 +206,7 @@ public class bookmarksDB {
 
 	    plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
 	    Iterator<String> bit=getBookmarksIterator(folder, true);    		
-		serverLog.logInfo("BOOKMARKS", "autoReCrawl - processing: "+folder);
+		Log.logInfo("BOOKMARKS", "autoReCrawl - processing: "+folder);
 		 
 		boolean xdstopw = xsstopw;
 		boolean xpstopw = xsstopw;
@@ -218,7 +218,7 @@ public class bookmarksDB {
 			long interTime = (System.currentTimeMillis()-bm.getTimeStamp())%schedule;
 			
 			Date date=new Date(bm.getTimeStamp());
-			serverLog.logInfo("BOOKMARKS", "autoReCrawl - checking schedule for: "+"["+DateFormatter.formatISO8601(date)+"] "+bm.getUrl());
+			Log.logInfo("BOOKMARKS", "autoReCrawl - checking schedule for: "+"["+DateFormatter.formatISO8601(date)+"] "+bm.getUrl());
 			
 			if (interTime >= 0 && interTime < sleepTime) {			
 				try {
@@ -270,7 +270,7 @@ public class bookmarksDB {
 	                        0,
 	                        0
 	                        ));
-                	serverLog.logInfo("BOOKMARKS", "autoReCrawl - adding crawl profile for: " + crawlingStart);
+                	Log.logInfo("BOOKMARKS", "autoReCrawl - adding crawl profile for: " + crawlingStart);
                 	// serverLog.logInfo("BOOKMARKS", "autoReCrawl - crawl filter is set to: " + newcrawlingfilter);
                 	// generate a YaCyNews if the global flag was set
                     if (crawlOrder) {
@@ -658,7 +658,7 @@ public class bookmarksDB {
     
     // rebuilds the tagsDB from the bookmarksDB
     public void rebuildTags(){
-        serverLog.logInfo("BOOKMARKS", "rebuilding tags.db from bookmarks.db...");
+        Log.logInfo("BOOKMARKS", "rebuilding tags.db from bookmarks.db...");
         final Iterator<Bookmark> it = bookmarkIterator(true);
         Bookmark bookmark;
         Tag tag;
@@ -677,7 +677,7 @@ public class bookmarksDB {
             }
         }
         flushTagCache();
-        serverLog.logInfo("BOOKMARKS", "Rebuilt "+tagsTable.size()+" tags using your "+bookmarksTable.size()+" bookmarks.");
+        Log.logInfo("BOOKMARKS", "Rebuilt "+tagsTable.size()+" tags using your "+bookmarksTable.size()+" bookmarks.");
     }
  
     // ---------------------------------------
@@ -696,7 +696,7 @@ public class bookmarksDB {
     }
     // rebuilds the datesDB from the bookmarksDB
     public void rebuildDates(){
-        serverLog.logInfo("BOOKMARKS", "rebuilding dates.db from bookmarks.db...");
+        Log.logInfo("BOOKMARKS", "rebuilding dates.db from bookmarks.db...");
         final Iterator<Bookmark> it=bookmarkIterator(true);
         Bookmark bookmark;        
         String date;
@@ -711,7 +711,7 @@ public class bookmarksDB {
             bmDate.add(bookmark.getUrlHash());
             bmDate.setDatesTable();
         }
-        serverLog.logInfo("BOOKMARKS", "Rebuilt "+datesTable.size()+" dates using your "+bookmarksTable.size()+" bookmarks.");
+        Log.logInfo("BOOKMARKS", "Rebuilt "+datesTable.size()+" dates using your "+bookmarksTable.size()+" bookmarks.");
     }
   
     // -------------------------------------
@@ -784,11 +784,11 @@ public class bookmarksDB {
     		serverFileUtils.copy(input,writer);
     		writer.close();
     		links = scraper.getAnchors();    		
-    	} catch (final IOException e) { serverLog.logWarning("BOOKMARKS", "error during load of links: "+ e.getClass() +" "+ e.getMessage());}
+    	} catch (final IOException e) { Log.logWarning("BOOKMARKS", "error during load of links: "+ e.getClass() +" "+ e.getMessage());}
     	for (Entry<yacyURL, String> link: links.entrySet()) {
     		url= link.getKey();
     		title=link.getValue();
-    		serverLog.logInfo("BOOKMARKS", "links.get(url)");
+    		Log.logInfo("BOOKMARKS", "links.get(url)");
     		if(title.equals("")){//cannot be displayed
     			title=url.toString();
     		}

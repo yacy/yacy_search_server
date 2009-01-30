@@ -42,10 +42,10 @@ import de.anomic.data.listManager;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.index.indexAbstractReferenceBlacklist;
 import de.anomic.index.indexReferenceBlacklist;
+import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyURL;
 
 public class Blacklist_p {
@@ -166,7 +166,7 @@ public class Blacklist_p {
                 
                 final File BlackListFile = new File(listManager.listsPath, blacklistToUse);
                 if(!BlackListFile.delete()) {
-                    serverLog.logWarning("Blacklist", "file "+ BlackListFile +" could not be deleted!");
+                    Log.logWarning("Blacklist", "file "+ BlackListFile +" could not be deleted!");
                 }
 
                 for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
@@ -472,7 +472,7 @@ public class Blacklist_p {
         } catch (final IOException e) {
             e.printStackTrace();
         } finally {
-            if (pw != null) try { pw.close(); } catch (final Exception e){ serverLog.logWarning("Blacklist", "could not close stream to "+ blacklistToUse +"! "+ e.getMessage());}
+            if (pw != null) try { pw.close(); } catch (final Exception e){ Log.logWarning("Blacklist", "could not close stream to "+ blacklistToUse +"! "+ e.getMessage());}
         }
 
         // add to blacklist

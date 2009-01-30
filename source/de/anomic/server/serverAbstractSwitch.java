@@ -31,7 +31,7 @@ import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import de.anomic.server.logging.serverLog;
+import de.anomic.kelondro.util.Log;
 
 public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
     
@@ -42,7 +42,7 @@ public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
     private final   String    configComment;
     private final   File      rootPath;
     protected boolean firstInit;
-    protected serverLog log;
+    protected Log log;
     protected int       serverJobs;
     protected long      maxTrackingTime;
     private   Map<String, String>                    configProps;
@@ -147,11 +147,11 @@ public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
     }
     
     // a logger for this switchboard
-    public void setLog(final serverLog log) {
+    public void setLog(final Log log) {
 	this.log = log;
     }
 
-    public serverLog getLog() {
+    public Log getLog() {
 	return log;
     }
     

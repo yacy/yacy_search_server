@@ -42,7 +42,7 @@ import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.order.Order;
 import de.anomic.kelondro.util.ByteBuffer;
 import de.anomic.kelondro.util.kelondroException;
-import de.anomic.server.logging.serverLog;
+import de.anomic.kelondro.util.Log;
 
 public final class Row {
    
@@ -159,7 +159,7 @@ public final class Row {
         if (rowinstance == null) return null;
         //assert (rowinstance[0] != 0);
         if (!(this.objectOrder.wellformed(rowinstance, 0, row[0].cellwidth))) {
-            serverLog.logWarning("kelondroRow", "row not well-formed: rowinstance[0] = " + new String(rowinstance, 0, row[0].cellwidth) + " / " + NaturalOrder.arrayList(rowinstance, 0, row[0].cellwidth));
+            Log.logWarning("kelondroRow", "row not well-formed: rowinstance[0] = " + new String(rowinstance, 0, row[0].cellwidth) + " / " + NaturalOrder.arrayList(rowinstance, 0, row[0].cellwidth));
             return null;
         }
         return new Entry(rowinstance, false);
@@ -301,7 +301,7 @@ public final class Row {
                             try {
                                 setCol(nick, Long.parseLong(elts[i].substring(p + 1).trim()));
                             } catch (final NumberFormatException e) {
-                                serverLog.logSevere("kelondroRow", "NumberFormatException for celltype_cardinal; row = " + i + ", celltype = " + row[i].celltype + ", encoder = " + row[i].encoder + ", value = '" + elts[i].substring(p + 1).trim() + "'");
+                                Log.logSevere("kelondroRow", "NumberFormatException for celltype_cardinal; row = " + i + ", celltype = " + row[i].celltype + ", encoder = " + row[i].encoder + ", value = '" + elts[i].substring(p + 1).trim() + "'");
                                 setCol(nick, 0);
                             }
                         } else if ((decimalCardinal) && (row[i].celltype == Column.celltype_binary)) {
@@ -309,7 +309,7 @@ public final class Row {
                             try {
                                 setCol(nick, new byte[]{(byte) Integer.parseInt(elts[i].substring(p + 1).trim())});
                             } catch (final NumberFormatException e) {
-                                serverLog.logSevere("kelondroRow", "NumberFormatException for celltype_binary; row = " + i + ", celltype = " + row[i].celltype + ", encoder = " + row[i].encoder + ", value = '" + elts[i].substring(p + 1).trim() + "'");
+                                Log.logSevere("kelondroRow", "NumberFormatException for celltype_binary; row = " + i + ", celltype = " + row[i].celltype + ", encoder = " + row[i].encoder + ", value = '" + elts[i].substring(p + 1).trim() + "'");
                                 setCol(nick, new byte[]{0});
                             }
                         } else if ((decimalCardinal) && (row[i].celltype == Column.celltype_bitfield)) {

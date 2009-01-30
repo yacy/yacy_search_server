@@ -40,8 +40,8 @@ import java.util.TreeSet;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.kelondro.order.MicroDate;
+import de.anomic.kelondro.util.Log;
 import de.anomic.server.serverFileUtils;
-import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyURL;
 
 public class plasmaWebStructure {
@@ -52,12 +52,12 @@ public class plasmaWebStructure {
     public static int maxhosts = 8000; // maximum number of hosts in web structure map
     
     private StringBuilder crg;     // global citation references
-    private final serverLog    log;
+    private final Log    log;
     private final File         rankingPath, structureFile;
     private final String       crlFile, crgFile;
     TreeMap<String, String> structure_old, structure_new; // <b64hash(6)>','<host> to <date-yyyymmdd(8)>{<target-b64hash(6)><target-count-hex(4)>}*
     
-    public plasmaWebStructure(final serverLog log, final File rankingPath, final String crlFile, final String crgFile, final File structureFile) {
+    public plasmaWebStructure(final Log log, final File rankingPath, final String crlFile, final String crgFile, final File structureFile) {
         this.log = log;
         this.rankingPath = rankingPath;
         this.crlFile = crlFile;

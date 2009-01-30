@@ -62,8 +62,8 @@ import de.anomic.kelondro.order.Order;
 import de.anomic.kelondro.order.RotateIterator;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.kelondroException;
+import de.anomic.kelondro.util.Log;
 import de.anomic.server.serverProfiling;
-import de.anomic.server.logging.serverLog;
 import de.anomic.tools.iso639;
 import de.anomic.xml.RSSFeed;
 import de.anomic.xml.RSSMessage;
@@ -100,7 +100,7 @@ public final class plasmaWordIndex implements indexRI {
     private final ByteOrder        indexOrder = Base64Order.enhancedCoder;
     private final indexRAMRI               dhtCache;
     private final indexCollectionRI        collections;          // new database structure to replace AssortmentCluster and FileCluster
-    private final serverLog                log;
+    private final Log                log;
     private indexRepositoryReference       referenceURL;
     public  final yacySeedDB               seedDB;
     public        yacyNewsPool             newsPool;
@@ -116,7 +116,7 @@ public final class plasmaWordIndex implements indexRI {
 
     public plasmaWordIndex(
             final String networkName,
-            final serverLog log,
+            final Log log,
             final File indexPrimaryRoot,
             final File indexSecondaryRoot,
             final int entityCacheMaxSize,
@@ -944,7 +944,7 @@ public final class plasmaWordIndex implements indexRI {
         }
         
         public void run() {
-            serverLog.logInfo("INDEXCLEANER", "IndexCleaner-Thread started");
+            Log.logInfo("INDEXCLEANER", "IndexCleaner-Thread started");
             indexContainer container = null;
             indexRWIRowEntry entry = null;
             yacyURL url = null;
@@ -972,7 +972,7 @@ public final class plasmaWordIndex implements indexRI {
                 }
                 if (urlHashs.size() > 0) {
                     final int removed = removeEntries(container.getWordHash(), urlHashs);
-                    serverLog.logFine("INDEXCLEANER", container.getWordHash() + ": " + removed + " of " + container.size() + " URL-entries deleted");
+                    Log.logFine("INDEXCLEANER", container.getWordHash() + ": " + removed + " of " + container.size() + " URL-entries deleted");
                     lastWordHash = container.getWordHash();
                     lastDeletionCounter = urlHashs.size();
                     urlHashs.clear();
@@ -987,7 +987,7 @@ public final class plasmaWordIndex implements indexRI {
                     }
                 }
             }
-            serverLog.logInfo("INDEXCLEANER", "IndexCleaner-Thread stopped");
+            Log.logInfo("INDEXCLEANER", "IndexCleaner-Thread stopped");
         }
         
         public void abort() {
@@ -1001,7 +1001,7 @@ public final class plasmaWordIndex implements indexRI {
             synchronized (this) {
                 if (!pause) {
                     pause = true;
-                    serverLog.logInfo("INDEXCLEANER", "IndexCleaner-Thread paused");
+                    Log.logInfo("INDEXCLEANER", "IndexCleaner-Thread paused");
                 }
             }
         }
@@ -1011,7 +1011,7 @@ public final class plasmaWordIndex implements indexRI {
                 if (pause) {
                     pause = false;
                     this.notifyAll();
-                    serverLog.logInfo("INDEXCLEANER", "IndexCleaner-Thread resumed");
+                    Log.logInfo("INDEXCLEANER", "IndexCleaner-Thread resumed");
                 }
             }
         }

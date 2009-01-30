@@ -28,7 +28,7 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.util.Vector;
 
-import de.anomic.server.logging.serverLog;
+import de.anomic.kelondro.util.Log;
 
 /**
  * This class loads and provides several language statistics to the system.
@@ -67,7 +67,7 @@ public class LanguageStatisticsHolder extends Vector<LanguageStatistics> {
         
         final File folder = new File(directory);
         if (!folder.exists()) {
-            serverLog.logSevere("LanguageStatistics", "the language statistics folder " + directory + " cannot be found");
+            Log.logSevere("LanguageStatistics", "the language statistics folder " + directory + " cannot be found");
             return;
         }
         final FilenameFilter filter = new LanguageFilenameFilter();

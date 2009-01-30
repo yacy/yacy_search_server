@@ -36,9 +36,9 @@ import java.net.MalformedURLException;
 import javax.imageio.ImageIO;
 
 import de.anomic.index.indexDocumentMetadata;
+import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyURL;
 
 public class ymageOSM {
@@ -84,7 +84,7 @@ public class ymageOSM {
             try {
                 entry = plasmaSwitchboard.getSwitchboard().crawlQueues.loadResourceFromWeb(tileURL, 20000, true, false, false);
             } catch (IOException e) {
-                serverLog.logWarning("yamyOSM", "cannot load: " + e.getMessage());
+                Log.logWarning("yamyOSM", "cannot load: " + e.getMessage());
                 return null;
             }
             if ((entry == null) || (entry.cacheArray() == null)) return null;

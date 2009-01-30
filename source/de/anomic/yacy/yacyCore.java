@@ -52,10 +52,10 @@ import java.util.List;
 import java.util.Map;
 
 import de.anomic.kelondro.order.DateFormatter;
+import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverSemaphore;
-import de.anomic.server.logging.serverLog;
 import de.anomic.xml.RSSFeed;
 import de.anomic.xml.RSSMessage;
 
@@ -64,7 +64,7 @@ public class yacyCore {
     // statics
     public static final ThreadGroup publishThreadGroup = new ThreadGroup("publishThreadGroup");
     public static final HashMap<String, String> seedUploadMethods = new HashMap<String, String>();
-    public static final serverLog log = new serverLog("YACY");
+    public static final Log log = new Log("YACY");
     public static long lastOnlineTime = 0;
     /** pseudo-random key derived from a time-interval while YaCy startup*/
     public static long speedKey = 0;

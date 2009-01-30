@@ -42,13 +42,13 @@ import de.anomic.http.httpResponseHeader;
 import de.anomic.http.httpdProxyCacheEntry;
 import de.anomic.index.indexDocumentMetadata;
 import de.anomic.kelondro.order.DateFormatter;
+import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverHandler;
-import de.anomic.server.logging.serverLog;
 import de.anomic.server.serverCore.Session;
 import de.anomic.yacy.yacyURL;
 
@@ -69,7 +69,7 @@ public class icapd implements serverHandler, Cloneable {
     private int keepAliveRequestCount = 0;
     
     // needed for logging
-    private final serverLog log = new serverLog("ICAPD");
+    private final Log log = new Log("ICAPD");
     
     private static plasmaSwitchboard sb = null;
     private static String virtualHost = null;

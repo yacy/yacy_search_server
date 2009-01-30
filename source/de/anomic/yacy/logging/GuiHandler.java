@@ -23,7 +23,7 @@
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.server.logging;
+package de.anomic.yacy.logging;
 
 import java.util.ArrayList;
 import java.util.logging.ErrorManager;
@@ -35,7 +35,7 @@ import java.util.logging.LogManager;
 import java.util.logging.LogRecord;
 import java.util.logging.SimpleFormatter;
 
-public class GuiHandler extends Handler{
+public class GuiHandler extends Handler {
 
     private final static int DEFAULT_SIZE = 400;
     private int size = DEFAULT_SIZE;    

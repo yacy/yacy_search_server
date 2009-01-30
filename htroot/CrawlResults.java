@@ -32,10 +32,10 @@ import java.util.Locale;
 
 import de.anomic.http.httpRequestHeader;
 import de.anomic.index.indexURLReference;
+import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.server.logging.serverLog;
 import de.anomic.tools.nxTools;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyURL;
@@ -180,7 +180,7 @@ public class CrawlResults {
                 try {
                     urle = sb.webIndex.getURL(urlHash, null, 0);
                     if(urle == null) {
-                        serverLog.logWarning("PLASMA", "CrawlResults: URL not in index for crawl result "+ i +" with hash "+ urlHash);
+                        Log.logWarning("PLASMA", "CrawlResults: URL not in index for crawl result "+ i +" with hash "+ urlHash);
                         urlstr = null;
                         urltxt = null;
                         comp = null;
@@ -250,7 +250,7 @@ public class CrawlResults {
                     dark = !dark;
                     cnt++;
                 } catch (final Exception e) {
-                    serverLog.logSevere("PLASMA", "genTableProps", e);
+                    Log.logSevere("PLASMA", "genTableProps", e);
                 }
             }
             prop.put("table_indexed", cnt);

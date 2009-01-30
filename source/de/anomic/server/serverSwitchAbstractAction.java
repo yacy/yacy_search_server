@@ -21,11 +21,11 @@
 
 package de.anomic.server;
 
-import de.anomic.server.logging.serverLog;
+import de.anomic.kelondro.util.Log;
 
 public abstract class serverSwitchAbstractAction {
 
-    protected serverLog log = null;
+    protected Log log = null;
     private String shortDescr = "", longDescr = "";
     
     public void setDescription(final String shortText, final String longText) {
@@ -44,7 +44,7 @@ public abstract class serverSwitchAbstractAction {
 	return this.longDescr;
     }
 
-    public void setLog(final serverLog log) {
+    public void setLog(final Log log) {
         // defines a log where process states can be written to
         this.log = log;
     }

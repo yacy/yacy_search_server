@@ -59,7 +59,7 @@ import javax.net.ssl.SSLSocketFactory;
 import de.anomic.icap.icapd;
 import de.anomic.kelondro.util.ByteBuffer;
 import de.anomic.kelondro.util.MemoryControl;
-import de.anomic.server.logging.serverLog;
+import de.anomic.kelondro.util.Log;
 import de.anomic.tools.PKCS12Tool;
 import de.anomic.urlRedirector.urlRedirectord;
 
@@ -203,7 +203,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
         this.switchboard = switchboard;
         
         // initialize logger
-        this.log = new serverLog("SERVER");
+        this.log = new Log("SERVER");
 
         // init the ssl socket factory
         this.sslSocketFactory = initSSLFactory();
@@ -889,10 +889,10 @@ public final class serverCore extends serverAbstractBusyThread implements server
             if (bufferSize == 0 && b == -1) return null;
             return readLineBuffer.getBytes();
         } catch (final ClosedByInterruptException e) {
-            if (logerr) serverLog.logSevere("SERVER", "receive interrupted - timeout");
+            if (logerr) Log.logSevere("SERVER", "receive interrupted - timeout");
             return null;            
         } catch (final IOException e) {
-            if (logerr) serverLog.logSevere("SERVER", "receive interrupted - exception 2 = " + e.getMessage());
+            if (logerr) Log.logSevere("SERVER", "receive interrupted - exception 2 = " + e.getMessage());
             return null;
         } finally {
         	try {

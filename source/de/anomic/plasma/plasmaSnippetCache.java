@@ -48,8 +48,8 @@ import de.anomic.index.indexURLReference;
 import de.anomic.index.indexWord;
 import de.anomic.kelondro.util.ScoreCluster;
 import de.anomic.kelondro.util.SetTools;
+import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.parser.ParserException;
-import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySearch;
 import de.anomic.yacy.yacyURL;
 
@@ -81,12 +81,12 @@ public class plasmaSnippetCache {
      */
     private static final HashMap<String, yacyURL> faviconCache = new HashMap<String, yacyURL>();
     private static plasmaParser          parser = null;
-    private static serverLog             log = null;
+    private static Log             log = null;
     private static plasmaSwitchboard     sb = null;
     
     public static void init(
             final plasmaParser parserx,
-            final serverLog logx,
+            final Log logx,
             final plasmaSwitchboard switchboard
     ) {
         parser = parserx;
@@ -478,15 +478,15 @@ public class plasmaSnippetCache {
                 
                 // if it is still not available, report an error
                 if (resContent == null) {
-                    serverLog.logFine("snippet fetch", "plasmaHTCache.Entry cache is NULL for url " + url);
+                    Log.logFine("snippet fetch", "plasmaHTCache.Entry cache is NULL for url " + url);
                     return null;
                 }
             } else {
-                serverLog.logFine("snippet fetch", "no resource available for url " + url);
+                Log.logFine("snippet fetch", "no resource available for url " + url);
                 return null;
             }
         } catch (final Exception e) {
-            serverLog.logFine("snippet fetch", "error loading resource: " + e.getMessage() + " for url " + url);
+            Log.logFine("snippet fetch", "error loading resource: " + e.getMessage() + " for url " + url);
             return null;
         } 
 
@@ -495,7 +495,7 @@ public class plasmaSnippetCache {
         try {
             document = parseDocument(url, resContentLength, resContent, responseHeader);            
         } catch (final ParserException e) {
-            serverLog.logFine("snippet fetch", "parser error " + e.getMessage() + " for url " + url);
+            Log.logFine("snippet fetch", "parser error " + e.getMessage() + " for url " + url);
             return null;
         } finally {
             try { resContent.close(); } catch (final Exception e) {}
@@ -695,7 +695,7 @@ public class plasmaSnippetCache {
     
     public static ArrayList<MediaSnippet> retrieveMediaSnippets(final yacyURL url, final Set<String> queryhashes, final int mediatype, final boolean fetchOnline, final int timeout, final boolean reindexing) {
         if (queryhashes.size() == 0) {
-            serverLog.logFine("snippet fetch", "no query hashes given for url " + url);
+            Log.logFine("snippet fetch", "no query hashes given for url " + url);
             return new ArrayList<MediaSnippet>();
         }
         

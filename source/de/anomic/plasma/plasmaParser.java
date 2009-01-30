@@ -58,11 +58,11 @@ import de.anomic.htmlFilter.htmlFilterInputStream;
 import de.anomic.htmlFilter.htmlFilterWriter;
 import de.anomic.http.JakartaCommonsHttpClient;
 import de.anomic.http.JakartaCommonsHttpResponse;
+import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.parser.Parser;
 import de.anomic.plasma.parser.ParserException;
 import de.anomic.plasma.parser.ParserInfo;
 import de.anomic.server.serverFileUtils;
-import de.anomic.server.logging.serverLog;
 import de.anomic.tools.ListDirs;
 import de.anomic.yacy.yacyURL;
 
@@ -173,9 +173,9 @@ public final class plasmaParser {
         loadAvailableParserList();      
     }
     
-    private final serverLog theLogger = new serverLog("PARSER");
+    private final Log theLogger = new Log("PARSER");
     
-    public serverLog getLogger() {
+    public Log getLogger() {
         return this.theLogger;
     }
     
@@ -441,11 +441,11 @@ public final class plasmaParser {
             
             // getting the current package name
             final String plasmaParserPkgName = plasmaParser.class.getPackage().getName() + ".parser";
-            serverLog.logInfo("PARSER","Searching for additional content parsers in package " + plasmaParserPkgName);
+            Log.logInfo("PARSER","Searching for additional content parsers in package " + plasmaParserPkgName);
             
             // getting an uri to the parser subpackage
             final String packageURI = plasmaParser.class.getResource("/"+plasmaParserPkgName.replace('.','/')).toString() + "/";
-            serverLog.logFine("PARSER", "Parser directory is " + packageURI);
+            Log.logFine("PARSER", "Parser directory is " + packageURI);
             
             /*
              * loop through all subdirectories and test if we can
@@ -459,7 +459,7 @@ public final class plasmaParser {
 	    final Pattern patternGetFullClassName = Pattern.compile(".*(\\"+ File.separator +"[^\\"+ File.separator +"]+\\"+ File.separator +"[^\\"+ File.separator +"]+)\\.class");
                 
             for (final String parserClassFile: parserClasses) {
-		serverLog.logFine("PARSER", "Testing parser class " + parserClassFile);
+		Log.logFine("PARSER", "Testing parser class " + parserClassFile);
 		final Matcher matcherClassName = patternGetClassName.matcher(parserClassFile);
 		matcherClassName.find();
 		final String className = matcherClassName.group(1);
@@ -503,7 +503,7 @@ public final class plasmaParser {
 		    while (mimeTypeIterator.hasNext()) {
 			final String mimeType = mimeTypeIterator.next();
 			availableParserList.put(mimeType, parserInfo);
-			serverLog.logInfo("PARSER", "Found functional parser for mimeType '" + mimeType + "'." +
+			Log.logInfo("PARSER", "Found functional parser for mimeType '" + mimeType + "'." +
 					  "\n\tName:    " + parserInfo.parserName + 
 					  "\n\tVersion: " + parserInfo.parserVersionNr + 
 					  "\n\tClass:   " + parserInfo.parserClassName +
@@ -511,16 +511,16 @@ public final class plasmaParser {
 		    }
 		    
 		} catch (final Exception e) { /* we can ignore this for the moment */
-		    serverLog.logWarning("PARSER", "Parser '" + className + "' doesn't work correctly and will be ignored.\n [" + e.getClass().getName() + "]: " + e.getMessage());
+		    Log.logWarning("PARSER", "Parser '" + className + "' doesn't work correctly and will be ignored.\n [" + e.getClass().getName() + "]: " + e.getMessage());
 		    e.printStackTrace();
 		} catch (final Error e) { /* we can ignore this for the moment */
-		    serverLog.logWarning("PARSER", "Parser '" + className + "' doesn't work correctly and will be ignored.\n [" + e.getClass().getName() + "]: " + e.getMessage());
+		    Log.logWarning("PARSER", "Parser '" + className + "' doesn't work correctly and will be ignored.\n [" + e.getClass().getName() + "]: " + e.getMessage());
 		    e.printStackTrace();
 		}
 	    }
             
         } catch (final Exception e) {
-            serverLog.logSevere("PARSER", "Unable to determine all installed parsers. " + e.toString());
+            Log.logSevere("PARSER", "Unable to determine all installed parsers. " + e.toString());
         }
     }
     
@@ -1043,7 +1043,7 @@ public final class plasmaParser {
         // setting logger that should by used
         final String parserShortName = ((String)name).substring("de.anomic.plasma.parser.".length(),((String)name).lastIndexOf("."));
         
-        final serverLog theLogger = new serverLog("PARSER." + parserShortName.toUpperCase());
+        final Log theLogger = new Log("PARSER." + parserShortName.toUpperCase());
         theParser.setLogger(theLogger);
         
         return theParser;

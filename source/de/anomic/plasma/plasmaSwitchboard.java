@@ -149,6 +149,7 @@ import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.table.CachedRecords;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.SetTools;
+import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.parser.ParserException;
 import de.anomic.server.serverAbstractSwitch;
 import de.anomic.server.serverBusyThread;
@@ -163,7 +164,6 @@ import de.anomic.server.serverProfiling;
 import de.anomic.server.serverSemaphore;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.serverThread;
-import de.anomic.server.logging.serverLog;
 import de.anomic.tools.crypt;
 import de.anomic.tools.nxTools;
 import de.anomic.yacy.yacyClient;
@@ -262,7 +262,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         sb=this;
         
         // set loglevel and log
-        setLog(new serverLog("PLASMA"));
+        setLog(new Log("PLASMA"));
         if (applyPro) this.log.logInfo("This is the pro-version of YaCy");
         
         // init TrayIcon if possible
@@ -1766,7 +1766,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             try {
                 resource = plasmaSnippetCache.getResource(comp.url(), fetchOnline, 10000, true, false);
             } catch (IOException e) {
-                serverLog.logWarning("removeAllUrlReferences", "cannot load: " + e.getMessage());
+                Log.logWarning("removeAllUrlReferences", "cannot load: " + e.getMessage());
             }
             if (resource == null) {
                 // delete just the url entry

@@ -41,10 +41,10 @@ import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.table.Stack;
+import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.plasma.plasmaWordIndex;
-import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyURL;
@@ -344,7 +344,7 @@ public class IndexingStack {
             if (this.responseHeader == null) try {
                 this.responseHeader = plasmaHTCache.loadResponseHeader(this.url);
             } catch (final Exception e) {
-                serverLog.logSevere("PLASMA", "responseHeader: failed to get header", e);
+                Log.logSevere("PLASMA", "responseHeader: failed to get header", e);
             }
         }
 

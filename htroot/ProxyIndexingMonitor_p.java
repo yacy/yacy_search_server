@@ -31,12 +31,12 @@ import java.io.File;
 import java.io.IOException;
 
 import de.anomic.http.httpRequestHeader;
+import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.server.logging.serverLog;
 
 public class ProxyIndexingMonitor_p {
 
@@ -143,7 +143,7 @@ public class ProxyIndexingMonitor_p {
             } catch (final Exception e) {
                 prop.put("info", "2"); //Error: errmsg
                 prop.putHTML("info_error", e.getMessage());
-                serverLog.logSevere("SERVLET", "ProxyIndexingMonitor.case3", e);
+                Log.logSevere("SERVLET", "ProxyIndexingMonitor.case3", e);
             }
         }
 

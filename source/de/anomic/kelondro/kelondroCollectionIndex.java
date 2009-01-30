@@ -58,8 +58,8 @@ import de.anomic.kelondro.table.FlexTable;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.kelondroException;
 import de.anomic.kelondro.util.kelondroOutOfLimitsException;
+import de.anomic.kelondro.util.Log;
 import de.anomic.server.serverFileUtils;
-import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyURL;
 
 public class kelondroCollectionIndex {
@@ -142,7 +142,7 @@ public class kelondroCollectionIndex {
             FlexTable.delete(path, filenameStub + ".index");
         }
         if (f.exists()) {
-            serverLog.logFine("STARTUP", "OPENING COLLECTION INDEX");
+            Log.logFine("STARTUP", "OPENING COLLECTION INDEX");
             
             // open index and array files
             this.arrays = new HashMap<String, FixedWidthArray>(); // all entries will be dynamically created with getArray()
@@ -168,7 +168,7 @@ public class kelondroCollectionIndex {
                     continue;
                 }
             }
-            serverLog.logFine("STARTUP", "STARTED INITIALIZATION OF NEW COLLECTION INDEX WITH " + initialSpace + " ENTRIES.  THIS WILL TAKE SOME TIME. " + (MemoryControl.available() / 1024 / 1024) + "MB AVAILABLE.");
+            Log.logFine("STARTUP", "STARTED INITIALIZATION OF NEW COLLECTION INDEX WITH " + initialSpace + " ENTRIES.  THIS WILL TAKE SOME TIME. " + (MemoryControl.available() / 1024 / 1024) + "MB AVAILABLE.");
             final Row indexRowdef = indexRow(keyLength, indexOrder);
             final long necessaryRAM4fullTable = minimumRAM4Eco + (indexRowdef.objectsize + 4) * initialSpace * 3 / 2;
             
@@ -246,7 +246,7 @@ public class kelondroCollectionIndex {
                     
                     // write a log
                     if (System.currentTimeMillis() - lastlog > 30000) {
-                        serverLog.logFine("STARTUP", "created " + count + " RWI index entries. " + (((System.currentTimeMillis() - start) * (array.size() + array.free() - count) / count) / 60000) + " minutes remaining for this array");
+                        Log.logFine("STARTUP", "created " + count + " RWI index entries. " + (((System.currentTimeMillis() - start) * (array.size() + array.free() - count) / count) / 60000) + " minutes remaining for this array");
                         lastlog = System.currentTimeMillis();
                     }
                 }
@@ -273,7 +273,7 @@ public class kelondroCollectionIndex {
                 doublecount++;
             }
         }
-        if (doublecount > 0) serverLog.logWarning("STARTUP", "found " + doublecount + " RWI entries with references to several collections. All have been fixed (zombies still exists).");
+        if (doublecount > 0) Log.logWarning("STARTUP", "found " + doublecount + " RWI entries with references to several collections. All have been fixed (zombies still exists).");
     }
     
     private ObjectIndex openIndexFile(final File path, final String filenameStub, final ByteOrder indexOrder,
@@ -310,7 +310,7 @@ public class kelondroCollectionIndex {
                 );
         if ((!(f.exists())) && (!create)) return null;
         final FixedWidthArray a = new FixedWidthArray(f, rowdef, 0);
-        serverLog.logFine("STARTUP", "opened array file " + f + " with " + a.size() + " RWIs");
+        Log.logFine("STARTUP", "opened array file " + f + " with " + a.size() + " RWIs");
         return a;
     }
     
@@ -401,7 +401,7 @@ public class kelondroCollectionIndex {
             return indexrow;
         } catch (Exception e) {
             // the index appears to be corrupted at a particular point
-            serverLog.logWarning("kelondroCollectionIndex", "array " + arrayFile(this.path, this.filenameStub, this.loadfactor, this.payloadrow.objectsize, partitionNumber, serialNumber).toString() + " has errors \"" + e.getMessage() + "\" (error #" + indexErrors + ")");
+            Log.logWarning("kelondroCollectionIndex", "array " + arrayFile(this.path, this.filenameStub, this.loadfactor, this.payloadrow.objectsize, partitionNumber, serialNumber).toString() + " has errors \"" + e.getMessage() + "\" (error #" + indexErrors + ")");
             return null;
         }
     }
@@ -501,7 +501,7 @@ public class kelondroCollectionIndex {
         if ((int) indexrow.getColLong(idx_col_chunkcount) != collection.size()) {
             this.indexErrors++;
             if (this.indexErrors == errorLimit) deleteIndexOnExit(); // delete index on exit for rebuild
-        	serverLog.logSevere("kelondroCollectionIndex", "UPDATE (put) ERROR: array has different chunkcount than index after merge: index = " + (int) indexrow.getColLong(idx_col_chunkcount) + ", collection.size() = " + collection.size() + " (error #" + indexErrors + ")");
+        	Log.logSevere("kelondroCollectionIndex", "UPDATE (put) ERROR: array has different chunkcount than index after merge: index = " + (int) indexrow.getColLong(idx_col_chunkcount) + ", collection.size() = " + collection.size() + " (error #" + indexErrors + ")");
         }
         index.put(indexrow); // write modified indexrow
     }
@@ -571,7 +571,7 @@ public class kelondroCollectionIndex {
             if (indexrowcount != collectionsize) {
                 this.indexErrors++;
                 if (this.indexErrors == errorLimit) deleteIndexOnExit(); // delete index on exit for rebuild
-            	serverLog.logSevere("kelondroCollectionIndex", "UPDATE (merge) ERROR: array has different chunkcount than index after merge: index = " + indexrowcount + ", collection.size() = " + collectionsize + " (error #" + indexErrors + ")");
+            	Log.logSevere("kelondroCollectionIndex", "UPDATE (merge) ERROR: array has different chunkcount than index after merge: index = " + indexrowcount + ", collection.size() = " + collectionsize + " (error #" + indexErrors + ")");
             }
             index.put(indexrow); // write modified indexrow
         }
@@ -617,7 +617,7 @@ public class kelondroCollectionIndex {
         }
         collection.trim(false);
         
-        serverLog.logInfo("kelondroCollectionIndex", "shrinked common word " + new String(key) + "; old size = " + oldsize + ", new size = " + collection.size() + ", maximum size = " + targetSize + ", newcommon size = " + newcommon.size() + ", first newcommon = " + firstnewcommon);
+        Log.logInfo("kelondroCollectionIndex", "shrinked common word " + new String(key) + "; old size = " + oldsize + ", new size = " + collection.size() + ", maximum size = " + targetSize + ", newcommon size = " + newcommon.size() + ", first newcommon = " + firstnewcommon);
         
         // finally dump the removed entries to a file
         if (commonsPath != null) {
@@ -630,10 +630,10 @@ public class kelondroCollectionIndex {
             final File file = new File(storagePath, filename);
             try {
                 newcommon.saveCollection(file);
-                serverLog.logInfo("kelondroCollectionIndex", "dumped common word " + new String(key) + " to " + file.toString() + "; size = " + newcommon.size());
+                Log.logInfo("kelondroCollectionIndex", "dumped common word " + new String(key) + " to " + file.toString() + "; size = " + newcommon.size());
             } catch (final IOException e) {
                 e.printStackTrace();
-                serverLog.logWarning("kelondroCollectionIndex", "failed to dump common word " + new String(key) + " to " + file.toString() + "; size = " + newcommon.size());
+                Log.logWarning("kelondroCollectionIndex", "failed to dump common word " + new String(key) + " to " + file.toString() + "; size = " + newcommon.size());
             }
         }        
     }
@@ -752,7 +752,7 @@ public class kelondroCollectionIndex {
             // the index appears to be corrupted
             this.indexErrors++;
             if (this.indexErrors == errorLimit) deleteIndexOnExit(); // delete index on exit for rebuild
-            serverLog.logWarning("kelondroCollectionIndex", "array " + arrayFile(this.path, this.filenameStub, this.loadfactor, chunksize, clusteridx, serialnumber).toString() + " does not contain expected row (error #" + indexErrors + ")");
+            Log.logWarning("kelondroCollectionIndex", "array " + arrayFile(this.path, this.filenameStub, this.loadfactor, chunksize, clusteridx, serialnumber).toString() + " does not contain expected row (error #" + indexErrors + ")");
             return new RowSet(this.payloadrow, 0);
         }
 
@@ -765,7 +765,7 @@ public class kelondroCollectionIndex {
             array.remove(rownumber); // loose the RowCollection (we don't know how much is lost)
             this.indexErrors++;
             if (this.indexErrors == errorLimit) deleteIndexOnExit(); // delete index on exit for rebuild
-            serverLog.logSevere("kelondroCollectionIndex." + array.filename, "lost a RowCollection because of a bad arraykey (error #" + indexErrors + ")");
+            Log.logSevere("kelondroCollectionIndex." + array.filename, "lost a RowCollection because of a bad arraykey (error #" + indexErrors + ")");
             return new RowSet(this.payloadrow, 0);
         }
         
@@ -786,7 +786,7 @@ public class kelondroCollectionIndex {
             index.put(indexEntry);
             this.indexErrors++;
             if (this.indexErrors == errorLimit) deleteIndexOnExit(); // delete index on exit for rebuild
-            serverLog.logSevere("kelondroCollectionIndex." + array.filename, "array contains wrong row '" + new String(arrayrow.getColBytes(0)) + "', expected is '" + new String(indexrow.getColBytes(idx_col_key)) + "', the row has been fixed (error #" + indexErrors + ")");
+            Log.logSevere("kelondroCollectionIndex." + array.filename, "array contains wrong row '" + new String(arrayrow.getColBytes(0)) + "', expected is '" + new String(indexrow.getColBytes(idx_col_key)) + "', the row has been fixed (error #" + indexErrors + ")");
         }
         final int chunkcountInArray = collection.size();
         if (chunkcountInArray != chunkcount) {

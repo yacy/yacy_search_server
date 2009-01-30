@@ -25,7 +25,7 @@ package de.anomic.plasma;
 
 import java.util.HashMap;
 
-import de.anomic.server.logging.serverLog;
+import de.anomic.kelondro.util.Log;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacyPeerActions;
 import de.anomic.yacy.yacySeed;
@@ -58,10 +58,10 @@ public class plasmaDHTTransfer extends Thread {
     private final yacyPeerActions peerActions;
     private final int maxRetry;
     private int transferMode = TRANSFER_MODE_DISTRIBUTION;
-    serverLog log;
+    Log log;
 
     public plasmaDHTTransfer(
-            final serverLog log,
+            final Log log,
             final yacySeedDB seedDB,
             final yacyPeerActions peerActions,
             final yacySeed destSeed, 

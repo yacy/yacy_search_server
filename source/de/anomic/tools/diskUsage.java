@@ -35,11 +35,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import de.anomic.server.logging.serverLog;
+import de.anomic.kelondro.util.Log;
 
 public class diskUsage {
     
-    private static serverLog log = new serverLog("DISK USAGE");
+    private static Log log = new Log("DISK USAGE");
     
     private static final List<String> allVolumes = new ArrayList<String>();
     private static final List<String> allMountPoints = new ArrayList<String>();

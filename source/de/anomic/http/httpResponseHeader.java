@@ -29,7 +29,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import de.anomic.server.logging.serverLog;
+import de.anomic.kelondro.util.Log;
 
 public class httpResponseHeader extends httpHeader {
 
@@ -132,12 +132,12 @@ public class httpResponseHeader extends httpHeader {
         // maybe the charset is valid but not installed on this computer
         try {
             if(!Charset.isSupported(charSetName)) {
-                serverLog.logWarning("httpHeader", "charset '"+ charSetName +"' is not supported on this machine, using default ("+ Charset.defaultCharset().name() +")");
+                Log.logWarning("httpHeader", "charset '"+ charSetName +"' is not supported on this machine, using default ("+ Charset.defaultCharset().name() +")");
                 // use system default
                 return Charset.defaultCharset();
             }
         } catch(IllegalCharsetNameException e) {
-            serverLog.logSevere("httpHeader", "Charset in header is illegal: '"+ charSetName +"'\n    "+ toString());
+            Log.logSevere("httpHeader", "Charset in header is illegal: '"+ charSetName +"'\n    "+ toString());
             // use system default
             return Charset.defaultCharset();
         }

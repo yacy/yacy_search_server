@@ -34,11 +34,11 @@ import java.io.OutputStream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-import de.anomic.server.logging.serverLog;
+import de.anomic.kelondro.util.Log;
 
 public class gzip {
 
-    private static serverLog logger = new serverLog("GZIP");
+    private static Log logger = new Log("GZIP");
     
     public static void gzipFile(final String inFile, final String outFile) {
 	try {

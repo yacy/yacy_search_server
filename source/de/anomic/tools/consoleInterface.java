@@ -28,17 +28,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 
-import de.anomic.server.logging.serverLog;
+import de.anomic.kelondro.util.Log;
 
 public class consoleInterface extends Thread
 {
     private final InputStream stream;
     private final List<String> output = new ArrayList<String>();
     private final Semaphore dataIsRead = new Semaphore(1);
-    private final serverLog log;
+    private final Log log;
     
 
-    public consoleInterface(final InputStream stream, final serverLog log)
+    public consoleInterface(final InputStream stream, final Log log)
     {
         this.log = log;
         this.stream = stream;

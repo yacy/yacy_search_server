@@ -39,7 +39,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 import de.anomic.kelondro.util.ByteBuffer;
-import de.anomic.server.logging.serverLog;
+import de.anomic.kelondro.util.Log;
 
 public class RSSReader extends DefaultHandler {
     
@@ -88,20 +88,20 @@ public class RSSReader extends DefaultHandler {
 
         // check integrity of array
         if ((a == null) || (a.length == 0)) {
-            serverLog.logWarning("rssReader", "response=null");
+            Log.logWarning("rssReader", "response=null");
             return null;
         }
         if (a.length < 100) {
-            serverLog.logWarning("rssReader", "response=" + new String(a));
+            Log.logWarning("rssReader", "response=" + new String(a));
             return null;
         }
         if (!ByteBuffer.equals(a, "<?xml".getBytes())) {
-            serverLog.logWarning("rssReader", "response does not contain valid xml");
+            Log.logWarning("rssReader", "response does not contain valid xml");
             return null;
         }
         final String end = new String(a, a.length - 10, 10);
         if (end.indexOf("rss") < 0) {
-            serverLog.logWarning("rssReader", "response incomplete");
+            Log.logWarning("rssReader", "response incomplete");
             return null;
         }
         
@@ -113,7 +113,7 @@ public class RSSReader extends DefaultHandler {
         try {
             reader = new RSSReader(bais);
         } catch (final Exception e) {
-            serverLog.logWarning("rssReader", "parse exception: " + e);
+            Log.logWarning("rssReader", "parse exception: " + e);
             return null;
         }
         try { bais.close(); } catch (final IOException e) {}

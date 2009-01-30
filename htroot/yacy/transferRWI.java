@@ -34,12 +34,12 @@ import java.util.List;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.index.indexRWIRowEntry;
 import de.anomic.index.indexReferenceBlacklist;
+import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.server.logging.serverLog;
 import de.anomic.tools.nxTools;
 import de.anomic.xml.RSSFeed;
 import de.anomic.xml.RSSMessage;
@@ -217,6 +217,6 @@ public final class transferRWI {
      * @param msg
      */
     private static void logWarning(final String requestIdentifier, final String msg) {
-        serverLog.logWarning("transferRWI", requestIdentifier +" "+ msg);
+        Log.logWarning("transferRWI", requestIdentifier +" "+ msg);
     }
 }

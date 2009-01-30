@@ -32,10 +32,10 @@ import java.io.IOException;
 import de.anomic.crawler.ZURL;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.index.indexURLReference;
+import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.server.logging.serverLog;
 import de.anomic.tools.crypt;
 import de.anomic.yacy.yacyNetwork;
 import de.anomic.yacy.yacySeed;
@@ -54,7 +54,7 @@ public final class crawlReceipt {
         if ((post == null) || (env == null)) return prop;
         if (!yacyNetwork.authentifyRequest(post, env)) return prop;
         
-        final serverLog log = sb.getLog();
+        final Log log = sb.getLog();
 
         //int proxyPrefetchDepth = Integer.parseInt(env.getConfig("proxyPrefetchDepth", "0"));
         //int crawlingDepth = Integer.parseInt(env.getConfig("crawlingDepth", "0"));

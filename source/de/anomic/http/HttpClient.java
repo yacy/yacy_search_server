@@ -28,7 +28,7 @@ package de.anomic.http;
 
 import java.io.IOException;
 
-import de.anomic.server.logging.serverLog;
+import de.anomic.kelondro.util.Log;
 
 /**
  * Client who does http requests
@@ -88,7 +88,7 @@ public abstract class HttpClient {
             final JakartaCommonsHttpResponse response = client.GET(uri);
             return response.getData();
         } catch (final IOException e) {
-            serverLog.logWarning("HTTPC", "wget(" + uri + ") failed: " + e.getMessage());
+            Log.logWarning("HTTPC", "wget(" + uri + ") failed: " + e.getMessage());
         }
         return null;
     }
@@ -134,7 +134,7 @@ public abstract class HttpClient {
             response = client.HEAD(uri);
             return response.getResponseHeader();
         } catch (final IOException e) {
-            serverLog.logWarning("HTTPC", "whead(" + uri + ") failed: " + e.getMessage());
+            Log.logWarning("HTTPC", "whead(" + uri + ") failed: " + e.getMessage());
             return null;
         } finally {
             if (response != null) {

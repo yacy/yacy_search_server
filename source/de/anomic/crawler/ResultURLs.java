@@ -42,7 +42,7 @@ import java.util.List;
 import de.anomic.index.indexURLReference;
 import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.util.ScoreCluster;
-import de.anomic.server.logging.serverLog;
+import de.anomic.kelondro.util.Log;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyURL;
 
@@ -152,7 +152,7 @@ public final class ResultURLs {
         final String result = getResultStackAt(stack, pos);
         if(result != null) {
             if(result.length() < yacySeedDB.commonHashLength * 3) {
-                serverLog.logSevere("ResultURLs", "unexpected error: result of stack is too short: "+ result.length());
+                Log.logSevere("ResultURLs", "unexpected error: result of stack is too short: "+ result.length());
                 if(result.length() <= yacySeedDB.commonHashLength * 2) {
                     return null;
                 }
@@ -161,7 +161,7 @@ public final class ResultURLs {
             }
             return result.substring(yacySeedDB.commonHashLength * index, yacySeedDB.commonHashLength * (index + 1));
         } else if(isValidStack(stack)) {
-            serverLog.logSevere("ResultURLs", "unexpected error: result of stack is null: "+ stack +","+ pos);
+            Log.logSevere("ResultURLs", "unexpected error: result of stack is null: "+ stack +","+ pos);
         }
         return result;
     }
@@ -183,7 +183,7 @@ public final class ResultURLs {
         }
         assert pos < resultStack.size() : "pos = " + pos + ", resultStack.size() = " + resultStack.size();
         if(pos >= resultStack.size()) {
-            serverLog.logSevere("ResultURLs", "unexpected error: Index out of Bounds "+ pos +" of "+ resultStack.size());
+            Log.logSevere("ResultURLs", "unexpected error: Index out of Bounds "+ pos +" of "+ resultStack.size());
             return null;
         }
         

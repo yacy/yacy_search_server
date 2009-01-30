@@ -33,7 +33,7 @@ import java.io.IOException;
 import de.anomic.kelondro.index.BytesLongMap;
 import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.Digest;
-import de.anomic.server.logging.serverLog;
+import de.anomic.kelondro.util.Log;
 
 public final class HeapWriter  {
 
@@ -138,7 +138,7 @@ public final class HeapWriter  {
                 long start = System.currentTimeMillis();
                 new Gap().dump(fingerprintGapFile(this.heapFile));
                 index.dump(fingerprintIndexFile(this.heapFile));
-                serverLog.logInfo("kelondroBLOBHeapWriter", "wrote a dump for the " + this.index.size() +  " index entries of " + heapFile.getName()+ " in " + (System.currentTimeMillis() - start) + " milliseconds.");
+                Log.logInfo("kelondroBLOBHeapWriter", "wrote a dump for the " + this.index.size() +  " index entries of " + heapFile.getName()+ " in " + (System.currentTimeMillis() - start) + " milliseconds.");
                 index.close();
                 index = null;
             } catch (IOException e) {

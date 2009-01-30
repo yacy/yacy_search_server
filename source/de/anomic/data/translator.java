@@ -48,8 +48,8 @@ import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import de.anomic.kelondro.util.Log;
 import de.anomic.server.serverSwitch;
-import de.anomic.server.logging.serverLog;
 import de.anomic.tools.yFormatter;
 
 /**
@@ -71,7 +71,7 @@ public class translator {
 			} else {
 				//Filename not available, but it will be printed in Log 
 				//after all untranslated Strings as "Translated file: "
-				if (serverLog.isFine("TRANSLATOR")) serverLog.logFine("TRANSLATOR", "Unused String: "+key); 
+				if (Log.isFine("TRANSLATOR")) Log.logFine("TRANSLATOR", "Unused String: "+key); 
 			}
 		}
 		return result;
@@ -182,16 +182,16 @@ public class translator {
                     relativePath=sourceFiles[i].getAbsolutePath().substring(baseDir.getAbsolutePath().length()+1); //+1 to get the "/"
                     relativePath = relativePath.replace(File.separatorChar, '/');
                 }catch(final IndexOutOfBoundsException e){
-					serverLog.logSevere("TRANSLATOR", "Error creating relative Path for "+sourceFiles[i].getAbsolutePath());
+					Log.logSevere("TRANSLATOR", "Error creating relative Path for "+sourceFiles[i].getAbsolutePath());
                     relativePath="wrong path"; //not in translationLists
                 } 
 				if(translationLists.containsKey(relativePath)){
-                    serverLog.logInfo("TRANSLATOR", "Translating file: "+ relativePath);
+                    Log.logInfo("TRANSLATOR", "Translating file: "+ relativePath);
 					if(!translateFile(
                                       sourceFiles[i]
                                     , new File(destDir, sourceFiles[i].getName().replace('/', File.separatorChar))
                                     , translationLists.get(relativePath))){
-						serverLog.logSevere("TRANSLATOR", "File error while translating file "+relativePath);
+						Log.logSevere("TRANSLATOR", "File error while translating file "+relativePath);
 					}
 				//}else{
 						//serverLog.logInfo("TRANSLATOR", "No translation for file: "+relativePath);

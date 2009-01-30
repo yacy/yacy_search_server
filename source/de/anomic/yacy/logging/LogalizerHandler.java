@@ -23,7 +23,7 @@
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.server.logging;
+package de.anomic.yacy.logging;
 
 import java.io.File;
 import java.io.IOException;
@@ -39,8 +39,8 @@ import java.util.logging.LogRecord;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import de.anomic.plasma.LogParser;
 import de.anomic.plasma.plasmaParser;
-import de.anomic.server.logging.logParsers.LogParser;
 import de.anomic.tools.ListDirs;
 
 public class LogalizerHandler extends Handler {

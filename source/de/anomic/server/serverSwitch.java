@@ -36,7 +36,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
-import de.anomic.server.logging.serverLog;
+import de.anomic.kelondro.util.Log;
 
 public interface serverSwitch<E> {
 
@@ -44,8 +44,8 @@ public interface serverSwitch<E> {
     public File getRootPath();
 
     // a logger for this switchboard
-    public void setLog(serverLog log);
-    public serverLog getLog();
+    public void setLog(Log log);
+    public Log getLog();
 
     // access tracker
     public void track(String host, String accessPath); // learn that a specific host has accessed a specific path

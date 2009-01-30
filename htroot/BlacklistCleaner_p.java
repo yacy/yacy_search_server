@@ -50,10 +50,10 @@ import de.anomic.http.httpRequestHeader;
 import de.anomic.index.indexAbstractReferenceBlacklist;
 import de.anomic.index.indexDefaultReferenceBlacklist;
 import de.anomic.index.indexReferenceBlacklist;
+import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.server.logging.serverLog;
 
 public class BlacklistCleaner_p {
     
@@ -299,7 +299,7 @@ public class BlacklistCleaner_p {
                             host,path);
                     } catch (final RuntimeException e) {
                         //System.err.println(e.getMessage() + ": " + host + "/" + path);
-                        serverLog.logSevere("BLACKLIST-CLEANER", e.getMessage() + ": " + host + "/" + path);
+                        Log.logSevere("BLACKLIST-CLEANER", e.getMessage() + ": " + host + "/" + path);
                     }
                 }                
             }    
@@ -341,7 +341,7 @@ public class BlacklistCleaner_p {
             }
             pw.close();
         } catch (final IOException e) {
-            serverLog.logSevere("BLACKLIST-CLEANER", "error on writing altered entries to blacklist", e);
+            Log.logSevere("BLACKLIST-CLEANER", "error on writing altered entries to blacklist", e);
         }
         return newE.length;
     }

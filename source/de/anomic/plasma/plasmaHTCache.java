@@ -49,8 +49,8 @@ import de.anomic.kelondro.blob.BLOBCompressor;
 import de.anomic.kelondro.blob.BLOBHeap;
 import de.anomic.kelondro.blob.MapView;
 import de.anomic.kelondro.order.Base64Order;
+import de.anomic.kelondro.util.Log;
 import de.anomic.server.serverFileUtils;
-import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyURL;
 
@@ -68,7 +68,7 @@ public final class plasmaHTCache {
     public static long maxCacheSize = 0l;
     public static File cachePath = null;
     public static String salt;
-    public static final serverLog log = new serverLog("HTCACHE");
+    public static final Log log = new Log("HTCACHE");
     
 
     // URL attributes

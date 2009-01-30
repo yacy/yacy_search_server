@@ -21,7 +21,7 @@
 
 package de.anomic.server;
 
-import de.anomic.server.logging.serverLog;
+import de.anomic.kelondro.util.Log;
 
 public interface serverSwitchAction {
 
@@ -38,7 +38,7 @@ public interface serverSwitchAction {
     public String getLongDescription();
     // returns long description string for online display
     
-    public void setLog(serverLog log);
+    public void setLog(Log log);
     // defines a log where process states can be written to
 
     // ---------------------------------------------------------------------

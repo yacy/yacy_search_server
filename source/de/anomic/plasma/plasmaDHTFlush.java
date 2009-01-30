@@ -25,7 +25,7 @@ package de.anomic.plasma;
 
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.Digest;
-import de.anomic.server.logging.serverLog;
+import de.anomic.kelondro.util.Log;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacySeedDB;
 
@@ -45,10 +45,10 @@ public class plasmaDHTFlush extends Thread {
         private final long startingTime = System.currentTimeMillis();
         private final plasmaSwitchboard sb;
         private plasmaDHTTransfer worker = null;
-        private final serverLog log;
+        private final Log log;
         private final plasmaWordIndex wordIndex;
         
-        public plasmaDHTFlush(final serverLog log, final plasmaWordIndex wordIndex, final yacySeed seed, final boolean delete, final boolean gzipBody, final int timeout) {
+        public plasmaDHTFlush(final Log log, final plasmaWordIndex wordIndex, final yacySeed seed, final boolean delete, final boolean gzipBody, final int timeout) {
             super(new ThreadGroup("TransferIndexThreadGroup"),"TransferIndex_" + seed.getName());
             this.log = log;
             this.wordIndex = wordIndex;

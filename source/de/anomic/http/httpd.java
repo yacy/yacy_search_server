@@ -66,6 +66,7 @@ import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.kelondro.order.Digest;
 import de.anomic.kelondro.util.ByteBuffer;
+import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverCore;
@@ -74,7 +75,6 @@ import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverHandler;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyURL;
 
 
@@ -142,7 +142,7 @@ public final class httpd implements serverHandler, Cloneable {
     private int keepAliveRequestCount = 0;
     
     // needed for logging
-    private final static serverLog log = new serverLog("HTTPD");
+    private final static Log log = new Log("HTTPD");
 
     // class methods
     public httpd(final serverSwitch<?> s) {

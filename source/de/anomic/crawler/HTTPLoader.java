@@ -36,10 +36,10 @@ import de.anomic.http.httpResponseHeader;
 import de.anomic.http.httpdProxyCacheEntry;
 import de.anomic.index.indexDocumentMetadata;
 import de.anomic.index.indexReferenceBlacklist;
+import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyURL;
 
 public final class HTTPLoader {
@@ -66,9 +66,9 @@ public final class HTTPLoader {
     //private String acceptLanguage;
     //private String acceptCharset;
     private final plasmaSwitchboard sb;
-    private final serverLog log;
+    private final Log log;
     
-    public HTTPLoader(final plasmaSwitchboard sb, final serverLog theLog) {
+    public HTTPLoader(final plasmaSwitchboard sb, final Log theLog) {
         this.sb = sb;
         this.log = theLog;
         

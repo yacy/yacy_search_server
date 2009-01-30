@@ -44,7 +44,7 @@ import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.kelondroException;
-import de.anomic.server.logging.serverLog;
+import de.anomic.kelondro.util.Log;
 
 public class FlexTable extends FlexWidthArray implements ObjectIndex {
 
@@ -140,7 +140,7 @@ public class FlexTable extends FlexWidthArray implements ObjectIndex {
     public synchronized boolean has(final byte[] key) {
         // it is not recommended to implement or use a has predicate unless
         // it can be ensured that it causes no IO
-        if ((AbstractRecords.debugmode) && (RAMIndex != true)) serverLog.logWarning("kelondroFlexTable", "RAM index warning in file " + super.tablename);
+        if ((AbstractRecords.debugmode) && (RAMIndex != true)) Log.logWarning("kelondroFlexTable", "RAM index warning in file " + super.tablename);
         assert this.size() == index.size() : "content.size() = " + this.size() + ", index.size() = " + index.size();
         return index.has(key);
     }
@@ -233,7 +233,7 @@ public class FlexTable extends FlexWidthArray implements ObjectIndex {
     
     public synchronized Row.Entry put(final Row.Entry row) throws IOException {
         assert (row != null);
-        assert (!(serverLog.allZero(row.getColBytes(0))));
+        assert (!(Log.allZero(row.getColBytes(0))));
         assert row.objectsize() <= this.rowdef.objectsize;
         final byte[] key = row.getColBytes(0);
         if (index == null) return null; // case may appear during shutdown
@@ -248,7 +248,7 @@ public class FlexTable extends FlexWidthArray implements ObjectIndex {
         final Row.Entry oldentry = super.get(pos);
         assert this.size() == index.size() : "content.size() = " + this.size() + ", index.size() = " + index.size();
         if (oldentry == null) {
-        	serverLog.logSevere("kelondroFlexTable", "put(): index failure; the index pointed to a cell which is empty. content.size() = " + this.size() + ", index.size() = " + index.size());
+        	Log.logSevere("kelondroFlexTable", "put(): index failure; the index pointed to a cell which is empty. content.size() = " + this.size() + ", index.size() = " + index.size());
         	// patch bug ***** FIND CAUSE! (see also: remove)
         	final int oldindex = index.removei(key);
         	assert oldindex >= 0;
@@ -318,7 +318,7 @@ public class FlexTable extends FlexWidthArray implements ObjectIndex {
         }
         final Row.Entry r = super.getOmitCol0(i, key);
         if (r == null) {
-        	serverLog.logSevere("kelondroFlexTable", "remove(): index failure; the index pointed to a cell which is empty. content.size() = " + this.size() + ", index.size() = " + ((index == null) ? 0 : index.size()));
+        	Log.logSevere("kelondroFlexTable", "remove(): index failure; the index pointed to a cell which is empty. content.size() = " + this.size() + ", index.size() = " + ((index == null) ? 0 : index.size()));
         	// patch bug ***** FIND CAUSE! (see also: put)
         	assert this.size() == index.size() : "content.size() = " + this.size() + ", index.size() = " + index.size();
     		return null;
@@ -379,7 +379,7 @@ public class FlexTable extends FlexWidthArray implements ObjectIndex {
                 idxEntry = indexIterator.next();
             }
             if (idxEntry == null) {
-                serverLog.logSevere("kelondroFlexTable.rowIterator: " + tablename, "indexIterator returned null");
+                Log.logSevere("kelondroFlexTable.rowIterator: " + tablename, "indexIterator returned null");
                 return null;
             }
             final int idx = (int) idxEntry.getColLong(1);
@@ -421,10 +421,10 @@ public class FlexTable extends FlexWidthArray implements ObjectIndex {
     
     public synchronized void close() {
         if (tableTracker.remove(this.filename) == null) {
-            serverLog.logWarning("kelondroFlexTable", "close(): file '" + this.filename + "' was not tracked with record tracker.");
+            Log.logWarning("kelondroFlexTable", "close(): file '" + this.filename + "' was not tracked with record tracker.");
         }
         if ((index != null) && (this.size() != ((index == null) ? 0 : index.size()))) {
-            serverLog.logSevere("kelondroFlexTable", this.filename + " close(): inconsistent content/index size. content.size() = " + this.size() + ", index.size() = " + ((index == null) ? 0 : index.size()));
+            Log.logSevere("kelondroFlexTable", this.filename + " close(): inconsistent content/index size. content.size() = " + this.size() + ", index.size() = " + ((index == null) ? 0 : index.size()));
         }
         
         if (index != null) {index.close(); index = null;}

@@ -66,6 +66,7 @@ import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.ScoreCluster;
+import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.plasma.plasmaWordIndex;
@@ -73,7 +74,6 @@ import de.anomic.server.serverCore;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverSemaphore;
 import de.anomic.server.serverSystem;
-import de.anomic.server.logging.serverLog;
 import de.anomic.tools.enumerateFiles;
 import de.anomic.tools.yFormatter;
 import de.anomic.yacy.yacyClient;
@@ -192,24 +192,24 @@ public final class yacy {
                 System.out.println("could not copy yacy.logging");
             }
             try{
-                serverLog.configureLogging(homePath, new File(homePath, "DATA/LOG/yacy.logging"));
+                Log.configureLogging(homePath, new File(homePath, "DATA/LOG/yacy.logging"));
             } catch (final IOException e) {
                 System.out.println("could not find logging properties in homePath=" + homePath);
                 e.printStackTrace();
             }
-            serverLog.logConfig("STARTUP", "Java version: " + System.getProperty("java.version", "no-java-version"));
-            serverLog.logConfig("STARTUP", "Operation system: " + System.getProperty("os.name","unknown"));
-            serverLog.logConfig("STARTUP", "Application root-path: " + homePath);
-            serverLog.logConfig("STARTUP", "Time zone: UTC" + DateFormatter.UTCDiffString() + "; UTC+0000 is " + System.currentTimeMillis());
-            serverLog.logConfig("STARTUP", "Maximum file system path length: " + serverSystem.maxPathLength);
+            Log.logConfig("STARTUP", "Java version: " + System.getProperty("java.version", "no-java-version"));
+            Log.logConfig("STARTUP", "Operation system: " + System.getProperty("os.name","unknown"));
+            Log.logConfig("STARTUP", "Application root-path: " + homePath);
+            Log.logConfig("STARTUP", "Time zone: UTC" + DateFormatter.UTCDiffString() + "; UTC+0000 is " + System.currentTimeMillis());
+            Log.logConfig("STARTUP", "Maximum file system path length: " + serverSystem.maxPathLength);
             
             f = new File(homePath, "DATA/yacy.running");
             if (f.exists()) {                // another instance running? VM crash? User will have to care about this
-                serverLog.logSevere("STARTUP", "WARNING: the file " + f + " exists, this usually means that a YaCy instance is still running");
+                Log.logSevere("STARTUP", "WARNING: the file " + f + " exists, this usually means that a YaCy instance is still running");
                 delete(f);
             }
             if(!f.createNewFile())
-                serverLog.logSevere("STARTUP", "WARNING: the file " + f + " can not be created!");
+                Log.logSevere("STARTUP", "WARNING: the file " + f + " can not be created!");
             f.deleteOnExit();
             
             pro = new File(homePath, "libx").exists();
@@ -219,7 +219,7 @@ public final class yacy {
             if (oldconffile.exists()) {
             	final File newconfFile = new File(homePath, newconf);
                 if(!oldconffile.renameTo(newconfFile))
-                    serverLog.logSevere("STARTUP", "WARNING: the file " + oldconffile + " can not be renamed to "+ newconfFile +"!");
+                    Log.logSevere("STARTUP", "WARNING: the file " + oldconffile + " can not be renamed to "+ newconfFile +"!");
             }
             sb = new plasmaSwitchboard(homePath, "defaults/yacy.init".replace("/", File.separator), newconf, pro);
             //sbSync.V(); // signal that the sb reference was set
@@ -238,7 +238,7 @@ public final class yacy {
             try {
                 buildProp.load(new FileInputStream(buildPropFile));
             } catch (final Exception e) {
-                serverLog.logWarning("STARTUP", buildPropFile.toString() + " not found in settings path");
+                Log.logWarning("STARTUP", buildPropFile.toString() + " not found in settings path");
             }
             
             oldRev=Integer.parseInt(sb.getConfig("svnRevision", "0"));
@@ -266,7 +266,7 @@ public final class yacy {
             sb.setConfig("vString", yacyVersion.combined2prettyVersion(Double.toString(version)));
             sb.setConfig("vdate", (vDATE.startsWith("@")) ? DateFormatter.formatShortDay() : vDATE);
             sb.setConfig("applicationRoot", homePath.toString());
-            serverLog.logConfig("STARTUP", "YACY Version: " + version + ", Built " + sb.getConfig("vdate", "00000000"));
+            Log.logConfig("STARTUP", "YACY Version: " + version + ", Built " + sb.getConfig("vdate", "00000000"));
             yacyVersion.latestRelease = version;
 
             // read environment
@@ -334,7 +334,7 @@ public final class yacy {
                 server.setPriority(Thread.MAX_PRIORITY);
                 server.setObeyIntermission(false);
                 if (server == null) {
-                    serverLog.logSevere("STARTUP", "Failed to start server. Probably port " + port + " already in use.");
+                    Log.logSevere("STARTUP", "Failed to start server. Probably port " + port + " already in use.");
                 } else {
                     // first start the server
                     sb.deployThread("10_httpd", "HTTPD Server/Proxy", "the HTTPD, used as web server and proxy", null, server, 0, 0, 0, 0);
@@ -367,9 +367,9 @@ public final class yacy {
                                 serverFileUtils.copy(locale_source_files[i], target);
                             }
                         }
-                        serverLog.logInfo("STARTUP", "Copied the default locales to " + locale_work.toString());
+                        Log.logInfo("STARTUP", "Copied the default locales to " + locale_work.toString());
                     }catch(final NullPointerException e){
-                        serverLog.logSevere("STARTUP", "Nullpointer Exception while copying the default Locales");
+                        Log.logSevere("STARTUP", "Nullpointer Exception while copying the default Locales");
                     }
 
                     //regenerate Locales from Translationlist, if needed
@@ -399,7 +399,7 @@ public final class yacy {
                     yFormatter.setLocale(lang);
                     
                     // registering shutdown hook
-                    serverLog.logConfig("STARTUP", "Registering Shutdown Hook");
+                    Log.logConfig("STARTUP", "Registering Shutdown Hook");
                     final Runtime run = Runtime.getRuntime();
                     run.addShutdownHook(new shutdownHookThread(Thread.currentThread(), sb));
 
@@ -419,11 +419,11 @@ public final class yacy {
                     try {
                         sb.waitForShutdown();
                     } catch (final Exception e) {
-                        serverLog.logSevere("MAIN CONTROL LOOP", "PANIC: " + e.getMessage(),e);
+                        Log.logSevere("MAIN CONTROL LOOP", "PANIC: " + e.getMessage(),e);
                     }
                     // shut down
                     if (RowCollection.sortingthreadexecutor != null) RowCollection.sortingthreadexecutor.shutdown();
-                    serverLog.logConfig("SHUTDOWN", "caught termination signal");
+                    Log.logConfig("SHUTDOWN", "caught termination signal");
                     server.terminate(false);
                     server.interrupt();
                     server.close();
@@ -431,9 +431,9 @@ public final class yacy {
                         // TODO only send request, don't read response (cause server is already down resulting in error)
                         final yacyURL u = new yacyURL((server.withSSL()?"https":"http")+"://localhost:" + serverCore.getPortNr(port), null);
                         HttpClient.wget(u.toString(), null, 10000); // kick server
-                        serverLog.logConfig("SHUTDOWN", "sent termination signal to server socket");
+                        Log.logConfig("SHUTDOWN", "sent termination signal to server socket");
                     } catch (final IOException ee) {
-                        serverLog.logConfig("SHUTDOWN", "termination signal to server socket missed (server shutdown, ok)");
+                        Log.logConfig("SHUTDOWN", "termination signal to server socket missed (server shutdown, ok)");
                     }
                     JakartaCommonsHttpClient.closeAllConnections();
                     MultiThreadedHttpConnectionManager.shutdownAll();
@@ -444,20 +444,20 @@ public final class yacy {
                         server.interrupt();
                         MultiThreadedHttpConnectionManager.shutdownAll();
                     }
-                    serverLog.logConfig("SHUTDOWN", "server has terminated");
+                    Log.logConfig("SHUTDOWN", "server has terminated");
                     sb.close();
                     MultiThreadedHttpConnectionManager.shutdownAll();
                 }
             } catch (final Exception e) {
-                serverLog.logSevere("STARTUP", "Unexpected Error: " + e.getClass().getName(),e);
+                Log.logSevere("STARTUP", "Unexpected Error: " + e.getClass().getName(),e);
                 //System.exit(1);
             }
         } catch (final Exception ee) {
-            serverLog.logSevere("STARTUP", "FATAL ERROR: " + ee.getMessage(),ee);
+            Log.logSevere("STARTUP", "FATAL ERROR: " + ee.getMessage(),ee);
         } finally {
         	startupFinishedSync.V();
         }
-        serverLog.logConfig("SHUTDOWN", "goodbye. (this is the last line)");
+        Log.logConfig("SHUTDOWN", "goodbye. (this is the last line)");
         try {
             System.exit(0);
         } catch (Exception e) {} // was once stopped by de.anomic.net.ftpc$sm.checkExit(ftpc.java:1790)
@@ -468,7 +468,7 @@ public final class yacy {
 	 */
 	private static void delete(File f) {
 		if(!f.delete())
-		    serverLog.logSevere("STARTUP", "WARNING: the file " + f + " can not be deleted!");
+		    Log.logSevere("STARTUP", "WARNING: the file " + f + " can not be deleted!");
 	}
 
 	/**
@@ -478,7 +478,7 @@ public final class yacy {
 	private static void mkdirIfNeseccary(final File path) {
 		if (!(path.exists()))
 			if(!path.mkdir())
-				serverLog.logWarning("STARTUP", "could not create directory "+ path.toString());
+				Log.logWarning("STARTUP", "could not create directory "+ path.toString());
 	}
 
 	/**
@@ -488,7 +488,7 @@ public final class yacy {
 	private static void mkdirsIfNeseccary(final File path) {
 		if (!(path.exists()))
 			if(!path.mkdirs())
-				serverLog.logWarning("STARTUP", "could not create directories "+ path.toString());
+				Log.logWarning("STARTUP", "could not create directories "+ path.toString());
 	}
 
 	/**
@@ -502,12 +502,12 @@ public final class yacy {
     * @return Properties read from the configurationfile.
     */
     private static Properties configuration(final String mes, final File homePath) {
-        serverLog.logConfig(mes, "Application Root Path: " + homePath.toString());
+        Log.logConfig(mes, "Application Root Path: " + homePath.toString());
 
         // read data folder
         final File dataFolder = new File(homePath, "DATA");
         if (!(dataFolder.exists())) {
-            serverLog.logSevere(mes, "Application was never started or root path wrong.");
+            Log.logSevere(mes, "Application was never started or root path wrong.");
             System.exit(-1);
         }
 
@@ -517,10 +517,10 @@ public final class yacy {
         	fis  = new FileInputStream(new File(homePath, "DATA/SETTINGS/yacy.conf"));
             config.load(fis);
         } catch (final FileNotFoundException e) {
-            serverLog.logSevere(mes, "could not find configuration file.");
+            Log.logSevere(mes, "could not find configuration file.");
             System.exit(-1);
         } catch (final IOException e) {
-            serverLog.logSevere(mes, "could not read configuration file.");
+            Log.logSevere(mes, "could not read configuration file.");
             System.exit(-1);
         } finally {
         	if(fis != null) {
@@ -575,8 +575,8 @@ public final class yacy {
 
             // read response
             if (res.getStatusLine().startsWith("2")) {
-                serverLog.logConfig("REMOTE-SHUTDOWN", "YACY accepted shutdown command.");
-                serverLog.logConfig("REMOTE-SHUTDOWN", "Stand by for termination, which may last some seconds.");
+                Log.logConfig("REMOTE-SHUTDOWN", "YACY accepted shutdown command.");
+                Log.logConfig("REMOTE-SHUTDOWN", "Stand by for termination, which may last some seconds.");
                 final ByteArrayOutputStream bos = new ByteArrayOutputStream();
                 try {
                     serverFileUtils.copyToStream(new BufferedInputStream(res.getDataAsStream()), new BufferedOutputStream(bos));
@@ -584,11 +584,11 @@ public final class yacy {
                     res.closeStream();
                 }
             } else {
-                serverLog.logSevere("REMOTE-SHUTDOWN", "error response from YACY socket: " + res.getStatusLine());
+                Log.logSevere("REMOTE-SHUTDOWN", "error response from YACY socket: " + res.getStatusLine());
                 System.exit(-1);
             }
         } catch (final IOException e) {
-            serverLog.logSevere("REMOTE-SHUTDOWN", "could not establish connection to YACY socket: " + e.getMessage());
+            Log.logSevere("REMOTE-SHUTDOWN", "could not establish connection to YACY socket: " + e.getMessage());
             System.exit(-1);
         } finally {
             // release connection
@@ -598,8 +598,8 @@ public final class yacy {
         }
 
         // finished
-        serverLog.logConfig("REMOTE-SHUTDOWN", "SUCCESSFULLY FINISHED remote-shutdown:");
-        serverLog.logConfig("REMOTE-SHUTDOWN", "YACY will terminate after working off all enqueued tasks.");
+        Log.logConfig("REMOTE-SHUTDOWN", "SUCCESSFULLY FINISHED remote-shutdown:");
+        Log.logConfig("REMOTE-SHUTDOWN", "YACY will terminate after working off all enqueued tasks.");
     }
 
     /**
@@ -620,11 +620,11 @@ public final class yacy {
         final Properties config = configuration("GEN-WORDSTAT", homePath);
 
         // load words
-        serverLog.logInfo("GEN-WORDSTAT", "loading words...");
+        Log.logInfo("GEN-WORDSTAT", "loading words...");
         final HashMap<String, String> words = loadWordMap(new File(homePath, "yacy.words"));
 
         // find all hashes
-        serverLog.logInfo("GEN-WORDSTAT", "searching all word-hash databases...");
+        Log.logInfo("GEN-WORDSTAT", "searching all word-hash databases...");
         final File dbRoot = new File(homePath, config.getProperty("dbPath"));
         final enumerateFiles ef = new enumerateFiles(new File(dbRoot, "WORDS"), true, false, true, true);
         File f;
@@ -637,7 +637,7 @@ public final class yacy {
         }
 
         // list the hashes in reverse order
-        serverLog.logInfo("GEN-WORDSTAT", "listing words in reverse size order...");
+        Log.logInfo("GEN-WORDSTAT", "listing words in reverse size order...");
         String w;
         final Iterator<String> i = hs.scores(false);
         while (i.hasNext()) {
@@ -648,7 +648,7 @@ public final class yacy {
         }
 
         // finished
-        serverLog.logConfig("GEN-WORDSTAT", "FINISHED");
+        Log.logConfig("GEN-WORDSTAT", "FINISHED");
     }
     
     /**
@@ -657,11 +657,11 @@ public final class yacy {
      */
     public static void minimizeUrlDB(final File homePath, final String networkName) {
         // run with "java -classpath classes yacy -minimizeUrlDB"
-        try {serverLog.configureLogging(homePath, new File(homePath, "DATA/LOG/yacy.logging"));} catch (final Exception e) {}
+        try {Log.configureLogging(homePath, new File(homePath, "DATA/LOG/yacy.logging"));} catch (final Exception e) {}
         final File indexPrimaryRoot = new File(homePath, "DATA/INDEX");
         final File indexSecondaryRoot = new File(homePath, "DATA/INDEX");
         final File indexRoot2 = new File(homePath, "DATA/INDEX2");
-        final serverLog log = new serverLog("URL-CLEANUP");
+        final Log log = new Log("URL-CLEANUP");
         try {
             log.logInfo("STARTING URL CLEANUP");
             
@@ -777,7 +777,7 @@ public final class yacy {
         // start up
         System.out.println(copyright);
         System.out.println(hline);
-        serverLog.logConfig("CLEAN-WORDLIST", "START");
+        Log.logConfig("CLEAN-WORDLIST", "START");
 
         String word;
         final TreeSet<String> wordset = new TreeSet<String>();
@@ -804,17 +804,17 @@ public final class yacy {
                     wordset.remove(word);
                 }
                 bw.close();
-                serverLog.logInfo("CLEAN-WORDLIST", "shrinked wordlist by " + count + " words.");
+                Log.logInfo("CLEAN-WORDLIST", "shrinked wordlist by " + count + " words.");
             } else {
-                serverLog.logInfo("CLEAN-WORDLIST", "not necessary to change wordlist");
+                Log.logInfo("CLEAN-WORDLIST", "not necessary to change wordlist");
             }
         } catch (final IOException e) {
-            serverLog.logSevere("CLEAN-WORDLIST", "ERROR: " + e.getMessage());
+            Log.logSevere("CLEAN-WORDLIST", "ERROR: " + e.getMessage());
             System.exit(-1);
         }
 
         // finished
-        serverLog.logConfig("CLEAN-WORDLIST", "FINISHED");
+        Log.logConfig("CLEAN-WORDLIST", "FINISHED");
     }
 
     private static void transferCR(final String targetaddress, final String crfile) {
@@ -823,11 +823,11 @@ public final class yacy {
             final byte[] b = serverFileUtils.read(f);
             final String result = yacyClient.transfer(targetaddress, f.getName(), b);
             if (result == null)
-                serverLog.logInfo("TRANSFER-CR", "transmitted file " + crfile + " to " + targetaddress + " successfully");
+                Log.logInfo("TRANSFER-CR", "transmitted file " + crfile + " to " + targetaddress + " successfully");
             else
-                serverLog.logInfo("TRANSFER-CR", "error transmitting file " + crfile + " to " + targetaddress + ": " + result);
+                Log.logInfo("TRANSFER-CR", "error transmitting file " + crfile + " to " + targetaddress + ": " + result);
         } catch (final IOException e) {
-            serverLog.logInfo("TRANSFER-CR", "could not read file " + crfile);
+            Log.logInfo("TRANSFER-CR", "could not read file " + crfile);
         }
     }
     
@@ -847,7 +847,7 @@ public final class yacy {
     private static void urldbcleanup(final File homePath, final String networkName) {
         final File root = homePath;
         final File indexroot = new File(root, "DATA/INDEX");
-        try {serverLog.configureLogging(homePath, new File(homePath, "DATA/LOG/yacy.logging"));} catch (final Exception e) {}
+        try {Log.configureLogging(homePath, new File(homePath, "DATA/LOG/yacy.logging"));} catch (final Exception e) {}
         final indexRepositoryReference currentUrlDB = new indexRepositoryReference(new File(indexroot, networkName));
         currentUrlDB.deadlinkCleaner(null);
         currentUrlDB.close();
@@ -855,11 +855,11 @@ public final class yacy {
     
     private static void RWIHashList(final File homePath, final String targetName, final String resource, final String format) {
         plasmaWordIndex WordIndex = null;
-        final serverLog log = new serverLog("HASHLIST");
+        final Log log = new Log("HASHLIST");
         final File indexPrimaryRoot = new File(homePath, "DATA/INDEX");
         final File indexSecondaryRoot = new File(homePath, "DATA/INDEX");
         final String wordChunkStartHash = "AAAAAAAAAAAA";
-        try {serverLog.configureLogging(homePath, new File(homePath, "DATA/LOG/yacy.logging"));} catch (final Exception e) {}
+        try {Log.configureLogging(homePath, new File(homePath, "DATA/LOG/yacy.logging"));} catch (final Exception e) {}
         log.logInfo("STARTING CREATION OF RWI-HASHLIST");
         final File root = homePath;
         try {
@@ -1056,20 +1056,20 @@ class shutdownHookThread extends Thread {
     public void run() {
         try {
             if (!this.sb.isTerminated()) {
-                serverLog.logConfig("SHUTDOWN","Shutdown via shutdown hook.");
+                Log.logConfig("SHUTDOWN","Shutdown via shutdown hook.");
 
                 // sending the yacy main thread a shutdown signal
-                serverLog.logFine("SHUTDOWN","Signaling shutdown to the switchboard.");
+                Log.logFine("SHUTDOWN","Signaling shutdown to the switchboard.");
                 this.sb.terminate();
 
                 // waiting for the yacy thread to finish execution
-                serverLog.logFine("SHUTDOWN","Waiting for main thread to finish.");
+                Log.logFine("SHUTDOWN","Waiting for main thread to finish.");
                 if (this.mainThread.isAlive() && !this.sb.isTerminated()) {
                     this.mainThread.join();
                 }
             }
         } catch (final Exception e) {
-            serverLog.logSevere("SHUTDOWN","Unexpected error. " + e.getClass().getName(),e);
+            Log.logSevere("SHUTDOWN","Unexpected error. " + e.getClass().getName(),e);
         }
     }
 }

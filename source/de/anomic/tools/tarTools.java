@@ -35,7 +35,7 @@ import java.util.zip.GZIPInputStream;
 import com.ice.tar.TarEntry;
 import com.ice.tar.TarInputStream;
 
-import de.anomic.server.logging.serverLog;
+import de.anomic.kelondro.util.Log;
 
 public class tarTools {
 	
@@ -57,7 +57,7 @@ public class tarTools {
 	 * @throws Exception (IOException or FileNotFoundException)
 	 */
 	public static void unTar(final InputStream in, final String untarDir) throws Exception{
-		serverLog.logInfo("UNTAR", "starting");
+		Log.logInfo("UNTAR", "starting");
 		if(new File(untarDir).exists()){
 			final TarInputStream tin = new TarInputStream(in);
 			TarEntry tarEntry = tin.getNextEntry();
@@ -75,9 +75,9 @@ public class tarTools {
 			}
 			tin.close();
 		} else { // untarDir doesn't exist
-			serverLog.logWarning("UNTAR", "destination " + untarDir + " doesn't exist.");
+			Log.logWarning("UNTAR", "destination " + untarDir + " doesn't exist.");
 		}
-		serverLog.logInfo("UNTAR", "finished");
+		Log.logInfo("UNTAR", "finished");
 	}
 	
 	public static void main(final String args[]){

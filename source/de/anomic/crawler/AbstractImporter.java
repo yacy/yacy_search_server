@@ -1,12 +1,12 @@
 package de.anomic.crawler;
 
-import de.anomic.server.logging.serverLog;
+import de.anomic.kelondro.util.Log;
 
 public abstract class AbstractImporter extends Thread implements Importer {
 
     protected int jobID = -1;
     protected String jobType;
-    protected serverLog log;
+    protected Log log;
     protected boolean stopped = false;
     protected boolean paused = false;
     protected long globalStart = System.currentTimeMillis();
@@ -19,7 +19,7 @@ public abstract class AbstractImporter extends Thread implements Importer {
     	this.jobType = theJobType;
 
         // initializing the logger and setting a more verbose thread name
-        this.log = new serverLog("IMPORT_" + this.jobType + "_" + this.jobID);
+        this.log = new Log("IMPORT_" + this.jobType + "_" + this.jobID);
         this.setName("IMPORT_" + this.jobType + "_" + this.jobID);
     }
     

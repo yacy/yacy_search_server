@@ -30,8 +30,8 @@ import java.io.IOException;
 import java.util.Random;
 import java.util.StringTokenizer;
 
+import de.anomic.kelondro.util.Log;
 import de.anomic.server.serverFileUtils;
-import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacySeedDB;
@@ -49,7 +49,7 @@ public final class plasmaRankingDistribution {
     public static final int METHOD_MIXEDPRINCIPAL = 10;
     public static final int METHOD_FIXEDADDRESS   = 99;
     
-    private final serverLog log;
+    private final Log log;
     private final File sourcePath;     // where to load CR-files
     private int method;          // of peer selection
     private int percentage;      // to select any other peer
@@ -57,7 +57,7 @@ public final class plasmaRankingDistribution {
     private final yacySeedDB seedDB;
     private static Random random = new Random(System.currentTimeMillis());
     
-    public plasmaRankingDistribution(final serverLog log, final yacySeedDB seedDB, final File sourcePath, final int method, final int percentage, final String addresses) {
+    public plasmaRankingDistribution(final Log log, final yacySeedDB seedDB, final File sourcePath, final int method, final int percentage, final String addresses) {
         this.log        = log;
         this.seedDB     = seedDB;
         this.sourcePath = sourcePath;

@@ -25,7 +25,7 @@
 package de.anomic.server;
 
 import de.anomic.kelondro.util.MemoryControl;
-import de.anomic.server.logging.serverLog;
+import de.anomic.kelondro.util.Log;
 
 public abstract class serverAbstractBlockingThread<J extends serverProcessorJob> extends serverAbstractThread implements serverBlockingThread<J> {
 
@@ -91,7 +91,7 @@ public abstract class serverAbstractBlockingThread<J extends serverProcessorJob>
     }
     
     private void logSystem(final String text) {
-        if (log == null) serverLog.logConfig("THREAD-CONTROL", text);
+        if (log == null) Log.logConfig("THREAD-CONTROL", text);
         else log.logConfig(text);
     }
 }

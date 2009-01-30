@@ -49,7 +49,7 @@ import de.anomic.kelondro.index.ObjectIndex;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.table.SplitTable;
 import de.anomic.kelondro.util.ScoreCluster;
-import de.anomic.server.logging.serverLog;
+import de.anomic.kelondro.util.Log;
 import de.anomic.yacy.yacyURL;
 
 public final class indexRepositoryReference {
@@ -203,7 +203,7 @@ public final class indexRepositoryReference {
      * @param proxyConfig 
      */
     public void deadlinkCleaner(final httpRemoteProxyConfig proxyConfig) {
-        final serverLog log = new serverLog("URLDBCLEANUP");
+        final Log log = new Log("URLDBCLEANUP");
         final HashSet<String> damagedURLS = new HashSet<String>();
         try {
             final Iterator<indexURLReference> eiter = entries(true, null);
@@ -298,7 +298,7 @@ public final class indexRepositoryReference {
 
         public void run() {
             try {
-                serverLog.logInfo("URLDBCLEANER", "UrldbCleaner-Thread startet");
+                Log.logInfo("URLDBCLEANER", "UrldbCleaner-Thread startet");
                 final Iterator<indexURLReference> eiter = entries(true, null);
                 while (eiter.hasNext() && run) {
                     synchronized (this) {
@@ -306,7 +306,7 @@ public final class indexRepositoryReference {
                             try {
                                 this.wait();
                             } catch (final InterruptedException e) {
-                                serverLog.logWarning("URLDBCLEANER", "InterruptedException", e);
+                                Log.logWarning("URLDBCLEANER", "InterruptedException", e);
                                 this.run = false;
                                 return;
                             }
@@ -314,23 +314,23 @@ public final class indexRepositoryReference {
                     }
                     final indexURLReference entry = eiter.next();
                     if (entry == null) {
-                        if (serverLog.isFine("URLDBCLEANER")) serverLog.logFine("URLDBCLEANER", "entry == null");
+                        if (Log.isFine("URLDBCLEANER")) Log.logFine("URLDBCLEANER", "entry == null");
                     } else if (entry.hash() == null) {
-                        if (serverLog.isFine("URLDBCLEANER")) serverLog.logFine("URLDBCLEANER", ++blacklistedUrls + " blacklisted (" + ((double) blacklistedUrls / totalSearchedUrls) * 100 + "%): " + "hash == null");
+                        if (Log.isFine("URLDBCLEANER")) Log.logFine("URLDBCLEANER", ++blacklistedUrls + " blacklisted (" + ((double) blacklistedUrls / totalSearchedUrls) * 100 + "%): " + "hash == null");
                     } else {
                         final indexURLReference.Components comp = entry.comp();
                         totalSearchedUrls++;
                         if (comp.url() == null) {
-                            if (serverLog.isFine("URLDBCLEANER")) serverLog.logFine("URLDBCLEANER", ++blacklistedUrls + " blacklisted (" + ((double) blacklistedUrls / totalSearchedUrls) * 100 + "%): " + entry.hash() + "URL == null");
+                            if (Log.isFine("URLDBCLEANER")) Log.logFine("URLDBCLEANER", ++blacklistedUrls + " blacklisted (" + ((double) blacklistedUrls / totalSearchedUrls) * 100 + "%): " + entry.hash() + "URL == null");
                             remove(entry.hash());
                         } else if (blacklist.isListed(indexReferenceBlacklist.BLACKLIST_CRAWLER, comp.url()) ||
                                 blacklist.isListed(indexReferenceBlacklist.BLACKLIST_DHT, comp.url())) {
                             lastBlacklistedUrl = comp.url().toNormalform(true, true);
                             lastBlacklistedHash = entry.hash();
-                            if (serverLog.isFine("URLDBCLEANER")) serverLog.logFine("URLDBCLEANER", ++blacklistedUrls + " blacklisted (" + ((double) blacklistedUrls / totalSearchedUrls) * 100 + "%): " + entry.hash() + " " + comp.url().toNormalform(false, true));
+                            if (Log.isFine("URLDBCLEANER")) Log.logFine("URLDBCLEANER", ++blacklistedUrls + " blacklisted (" + ((double) blacklistedUrls / totalSearchedUrls) * 100 + "%): " + entry.hash() + " " + comp.url().toNormalform(false, true));
                             remove(entry.hash());
                             if (blacklistedUrls % 100 == 0) {
-                                serverLog.logInfo("URLDBCLEANER", "Deleted " + blacklistedUrls + " URLs until now. Last deleted URL-Hash: " + lastBlacklistedUrl);
+                                Log.logInfo("URLDBCLEANER", "Deleted " + blacklistedUrls + " URLs until now. Last deleted URL-Hash: " + lastBlacklistedUrl);
                             }
                         }
                         lastUrl = comp.url().toNormalform(true, true);
@@ -339,17 +339,17 @@ public final class indexRepositoryReference {
                 }
             } catch (final RuntimeException e) {
                 if (e.getMessage() != null && e.getMessage().indexOf("not found in LURL") != -1) {
-                    serverLog.logWarning("URLDBCLEANER", "urlHash not found in LURL", e);
+                    Log.logWarning("URLDBCLEANER", "urlHash not found in LURL", e);
                 }
                 else {
-                    serverLog.logWarning("URLDBCLEANER", "RuntimeException", e);
+                    Log.logWarning("URLDBCLEANER", "RuntimeException", e);
                     run = false;
                 }
             } catch (final IOException e) {
                 e.printStackTrace();
                 run = false;
             }
-            serverLog.logInfo("URLDBCLEANER", "UrldbCleaner-Thread stopped");
+            Log.logInfo("URLDBCLEANER", "UrldbCleaner-Thread stopped");
         }
 
         public void abort() {
@@ -363,7 +363,7 @@ public final class indexRepositoryReference {
             synchronized(this) {
                 if (!pause) {
                     pause = true;
-                    serverLog.logInfo("URLDBCLEANER", "UrldbCleaner-Thread paused");
+                    Log.logInfo("URLDBCLEANER", "UrldbCleaner-Thread paused");
                 }
             }
         }
@@ -373,7 +373,7 @@ public final class indexRepositoryReference {
                 if (pause) {
                     pause = false;
                     this.notifyAll();
-                    serverLog.logInfo("URLDBCLEANER", "UrldbCleaner-Thread resumed");
+                    Log.logInfo("URLDBCLEANER", "UrldbCleaner-Thread resumed");
                 }
             }
         }
@@ -382,7 +382,7 @@ public final class indexRepositoryReference {
     // export methods
     public Export export(final File f, final String filter, final int format, final boolean dom) {
         if ((exportthread != null) && (exportthread.isAlive())) {
-            serverLog.logWarning("LURL-EXPORT", "cannot start another export thread, already one running");
+            Log.logWarning("LURL-EXPORT", "cannot start another export thread, already one running");
             return exportthread;
         }
         this.exportthread = new Export(f, filter, format, dom);

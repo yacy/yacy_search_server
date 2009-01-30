@@ -31,8 +31,8 @@ import java.util.Iterator;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterImageEntry;
 import de.anomic.kelondro.order.DateFormatter;
+import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.parser.ParserException;
-import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyURL;
 
 public final class plasmaSearchImages {
@@ -47,7 +47,7 @@ public final class plasmaSearchImages {
             try {
                 resource = plasmaSnippetCache.getResource(url, true, (int) maxTime, false, indexing);
             } catch (IOException e) {
-                serverLog.logWarning("ViewImage", "cannot load: " + e.getMessage());
+                Log.logWarning("ViewImage", "cannot load: " + e.getMessage());
             }
             if (resource == null) return;
             final InputStream res = (InputStream) resource[0];
@@ -59,7 +59,7 @@ public final class plasmaSearchImages {
                     document = plasmaSnippetCache.parseDocument(url, resLength.longValue(), res);
                 } catch (final ParserException e) {
                     // parsing failed
-                    serverLog.logWarning("ViewImage", "cannot parse: " + e.getMessage());
+                    Log.logWarning("ViewImage", "cannot parse: " + e.getMessage());
                 } finally {
                     try { res.close(); } catch (final Exception e) {/* ignore this */}
                 }

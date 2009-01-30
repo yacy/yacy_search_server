@@ -37,7 +37,7 @@ import de.anomic.kelondro.index.ObjectIndex;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.table.EcoTable;
 import de.anomic.kelondro.table.Stack;
-import de.anomic.server.logging.serverLog;
+import de.anomic.kelondro.util.Log;
 import de.anomic.yacy.yacySeedDB;
 
 public class Balancer {
@@ -80,7 +80,7 @@ public class Balancer {
         openFileIndex();
         if (urlFileStack.size() != urlFileIndex.size() || (urlFileIndex.size() < 10000 && urlFileIndex.size() > 0)) {
             // fix the file stack
-            serverLog.logInfo("Balancer", "re-creating the " + stackname + " balancer stack, size = " + urlFileIndex.size() + ((urlFileStack.size() == urlFileIndex.size()) ? "" : " (the old stack size was wrong)" ));
+            Log.logInfo("Balancer", "re-creating the " + stackname + " balancer stack, size = " + urlFileIndex.size() + ((urlFileStack.size() == urlFileIndex.size()) ? "" : " (the old stack size was wrong)" ));
             urlFileStack = Stack.reset(urlFileStack);
             try {
                 final Iterator<byte[]> i = urlFileIndex.keys(true, null);
@@ -124,7 +124,7 @@ public class Balancer {
     
     protected void finalize() {
         if (urlFileStack != null) {
-            serverLog.logWarning("Balancer", "crawl stack " + stackname + " closed by finalizer");
+            Log.logWarning("Balancer", "crawl stack " + stackname + " closed by finalizer");
             close();
         }
     }
@@ -545,7 +545,7 @@ public class Balancer {
                 // emergency case: this means that something with the stack organization is wrong
                 // the file appears to be broken. We kill the file.
                 Stack.reset(urlFileStack);
-                serverLog.logSevere("BALANCER", "get() failed to fetch entry from file stack. reset stack file.");
+                Log.logSevere("BALANCER", "get() failed to fetch entry from file stack. reset stack file.");
             } else {
                 final String nexthash = new String(nextentry.getColBytes(0));
 
@@ -565,7 +565,7 @@ public class Balancer {
         
         // check case where we did not found anything
         if (result == null) {
-            serverLog.logSevere("BALANCER", "get() was not able to find a valid urlhash - total size = " + size() + ", fileStack.size() = " + urlFileStack.size() + ", ramStack.size() = " + urlRAMStack.size() + ", domainStacks.size() = " + domainStacks.size());
+            Log.logSevere("BALANCER", "get() was not able to find a valid urlhash - total size = " + size() + ", fileStack.size() = " + urlFileStack.size() + ", ramStack.size() = " + urlRAMStack.size() + ", domainStacks.size() = " + domainStacks.size());
             return null;
         }
         
@@ -587,7 +587,7 @@ public class Balancer {
             // in best case, this should never happen if the balancer works propertly
             // this is only to protection against the worst case, where the crawler could
             // behave in a DoS-manner
-            serverLog.logInfo("BALANCER", "forcing crawl-delay of " + sleeptime + " milliseconds for " + crawlEntry.url().getHost() + ((sleeptime > Math.max(minimumLocalDelta, minimumGlobalDelta)) ? " (caused by robots.txt)" : ""));
+            Log.logInfo("BALANCER", "forcing crawl-delay of " + sleeptime + " milliseconds for " + crawlEntry.url().getHost() + ((sleeptime > Math.max(minimumLocalDelta, minimumGlobalDelta)) ? " (caused by robots.txt)" : ""));
             try {synchronized(this) { this.wait(sleeptime); }} catch (final InterruptedException e) {}
         }
         

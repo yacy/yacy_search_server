@@ -33,16 +33,16 @@ import java.util.Date;
 
 import de.anomic.index.indexReferenceBlacklist;
 import de.anomic.index.indexURLReference;
+import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.server.serverDomains;
 import de.anomic.server.serverProcessor;
-import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyURL;
 
 public final class CrawlStacker {
     
-    final serverLog log = new serverLog("STACKCRAWL");
+    final Log log = new Log("STACKCRAWL");
     
     private serverProcessor<CrawlEntry> fastQueue, slowQueue;
     private long                      dnsHit, dnsMiss;

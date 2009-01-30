@@ -30,13 +30,13 @@ package de.anomic.index;
 import java.io.File;
 import java.io.InputStream;
 
-import de.anomic.server.logging.serverLog;
+import de.anomic.kelondro.util.Log;
 import de.anomic.yacy.yacyURL;
 
 
 public class indexDocumentCache {
     
-    public static final serverLog log = new serverLog("DOCUMENT-CACHE");
+    public static final Log log = new Log("DOCUMENT-CACHE");
 
     public indexDocumentCache(final File htCachePath, final long CacheSizeMax) {
         

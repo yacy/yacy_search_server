@@ -28,8 +28,8 @@ import java.io.IOException;
 import java.util.HashMap;
 
 import de.anomic.kelondro.order.DateFormatter;
+import de.anomic.kelondro.util.Log;
 import de.anomic.server.serverCodings;
-import de.anomic.server.logging.serverLog;
 import de.anomic.xml.RSSFeed;
 import de.anomic.xml.RSSMessage;
 
@@ -239,7 +239,7 @@ public class yacyPeerActions {
             try {
                 synchronized (this.newsPool) {this.newsPool.enqueueIncomingNews(record);}
             } catch (final IOException e) {
-                serverLog.logSevere("YACY", "processPeerArrival", e);
+                Log.logSevere("YACY", "processPeerArrival", e);
             }
         }
     }

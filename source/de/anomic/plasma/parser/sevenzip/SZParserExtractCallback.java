@@ -32,26 +32,26 @@ import java.util.Map;
 import SevenZip.ArchiveExtractCallback;
 import SevenZip.Archive.IInArchive;
 import SevenZip.Archive.SevenZipEntry;
+import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.parser.AbstractParser;
 import de.anomic.plasma.parser.ParserException;
 import de.anomic.server.serverCachedFileOutputStream;
-import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyURL;
 
 // wrapper class to redirect output of standard ArchiveExtractCallback to serverLog
 // and parse the extracted content
 public class SZParserExtractCallback extends ArchiveExtractCallback {
     
-    private final serverLog log;
+    private final Log log;
     private final long maxRamSize;
     private serverCachedFileOutputStream cfos = null;
     private final plasmaParser parser;
     private final plasmaParserDocument doc;
     private final String prefix;
     
-    public SZParserExtractCallback(final serverLog logger, final IInArchive handler,
+    public SZParserExtractCallback(final Log logger, final IInArchive handler,
             final long maxRamSize, final plasmaParserDocument doc, final String prefix) {
         super.Init(handler);
         this.log = logger;

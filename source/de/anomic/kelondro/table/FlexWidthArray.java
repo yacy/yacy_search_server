@@ -38,8 +38,8 @@ import de.anomic.kelondro.index.Column;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.util.kelondroException;
+import de.anomic.kelondro.util.Log;
 import de.anomic.server.serverFileUtils;
-import de.anomic.server.logging.serverLog;
 
 public class FlexWidthArray implements Array {
 
@@ -57,7 +57,7 @@ public class FlexWidthArray implements Array {
 			init();
 		} catch (final IOException e) {
 			if (resetOnFail) {
-				serverLog.logSevere("kelondroFlexWidthArray", "IOException during initialization of " + new File(path, tablename).toString() + ": reset");
+				Log.logSevere("kelondroFlexWidthArray", "IOException during initialization of " + new File(path, tablename).toString() + ": reset");
 				delete(path, tablename);
 				try {
 					init();
@@ -70,7 +70,7 @@ public class FlexWidthArray implements Array {
 			}
 		} catch (final kelondroException e) {
 			if (resetOnFail) {
-				serverLog.logSevere("kelondroFlexWidthArray", "kelondroException during initialization of " + new File(path, tablename).toString() + ": reset");
+				Log.logSevere("kelondroFlexWidthArray", "kelondroException during initialization of " + new File(path, tablename).toString() + ": reset");
 				delete(path, tablename);
 				try {
 					init();

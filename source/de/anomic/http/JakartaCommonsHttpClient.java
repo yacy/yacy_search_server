@@ -59,7 +59,7 @@ import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
 
 import de.anomic.kelondro.order.Base64Order;
-import de.anomic.server.logging.serverLog;
+import de.anomic.kelondro.util.Log;
 
 /**
  * HttpClient implementation which uses Jakarta Commons HttpClient 3.x {@link http://hc.apache.org/httpclient-3.x/}
@@ -431,8 +431,8 @@ public class JakartaCommonsHttpClient {
         HttpConnectionInfo.addConnection(generateConInfo(method));
 
         // execute (send request)
-        if (serverLog.isFine("HTTPC")) serverLog.logFine("HTTPC", "executing " + method.hashCode() + " " + method.getName() + " " + method.getURI());
-        if (serverLog.isFinest("HTTPC")) serverLog.logFinest("HTTPC", "->" + method.hashCode() + " request headers " +
+        if (Log.isFine("HTTPC")) Log.logFine("HTTPC", "executing " + method.hashCode() + " " + method.getName() + " " + method.getURI());
+        if (Log.isFinest("HTTPC")) Log.logFinest("HTTPC", "->" + method.hashCode() + " request headers " +
                 Arrays.toString(method.getRequestHeaders()));
         try {
             if (hostConfig == null) {
@@ -449,7 +449,7 @@ public class JakartaCommonsHttpClient {
             HttpConnectionInfo.removeConnection(generateConInfo(method));
             throw new IOException(e.getMessage());
         }
-        if (serverLog.isFinest("HTTPC")) serverLog.logFinest("HTTPC", "<-" + method.hashCode() + " response headers " +
+        if (Log.isFinest("HTTPC")) Log.logFinest("HTTPC", "<-" + method.hashCode() + " response headers " +
                 Arrays.toString(method.getResponseHeaders()));
 
         // return response
@@ -467,7 +467,7 @@ public class JakartaCommonsHttpClient {
         try {
             host  = method.getURI().getHost();
         } catch (final URIException e) {
-            serverLog.logWarning("HTTPC", "could not extract host of uri: "+ e.getMessage());
+            Log.logWarning("HTTPC", "could not extract host of uri: "+ e.getMessage());
             throw e;
         }
         final httpRemoteProxyConfig hostProxyConfig = getProxyConfig(host);
@@ -533,7 +533,7 @@ public class JakartaCommonsHttpClient {
             final String remoteProxyUser = hostProxyConfig.getProxyUser();
             if (remoteProxyUser != null && remoteProxyUser.length() > 0) {
                 if (remoteProxyUser.contains(":")) {
-                    serverLog.logWarning("HTTPC", "Proxy authentication contains invalid characters, trying anyway");
+                    Log.logWarning("HTTPC", "Proxy authentication contains invalid characters, trying anyway");
                 }
                 final String remoteProxyPwd = hostProxyConfig.getProxyPwd();
                 final String credentials = Base64Order.standardCoder.encodeString(remoteProxyUser.replace(":",

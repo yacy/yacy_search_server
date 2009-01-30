@@ -46,7 +46,7 @@ import de.anomic.kelondro.index.RowSet;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.CloneableIterator;
-import de.anomic.server.logging.serverLog;
+import de.anomic.kelondro.util.Log;
 
 public final class indexContainerRAMHeap {
 
@@ -94,7 +94,7 @@ public final class indexContainerRAMHeap {
      * @throws IOException
      */
     public void initWriteModeFromHeap(final File heapFile) throws IOException {
-        serverLog.logInfo("indexContainerRAMHeap", "restoring dump for rwi heap '" + heapFile.getName() + "'");
+        Log.logInfo("indexContainerRAMHeap", "restoring dump for rwi heap '" + heapFile.getName() + "'");
         final long start = System.currentTimeMillis();
         this.cache = Collections.synchronizedSortedMap(new TreeMap<String, indexContainer>(new ByteOrder.StringOrder(payloadrow.getOrdering())));
         int urlCount = 0;
@@ -106,7 +106,7 @@ public final class indexContainerRAMHeap {
                 urlCount += container.size();
             }
         }
-        serverLog.logInfo("indexContainerRAMHeap", "finished rwi heap restore: " + cache.size() + " words, " + urlCount + " word/URL relations in " + (System.currentTimeMillis() - start) + " milliseconds");
+        Log.logInfo("indexContainerRAMHeap", "finished rwi heap restore: " + cache.size() + " words, " + urlCount + " word/URL relations in " + (System.currentTimeMillis() - start) + " milliseconds");
     }
     
     /**
@@ -115,7 +115,7 @@ public final class indexContainerRAMHeap {
      * @throws IOException
      */
     public void initWriteModeFromBLOB(final File blobFile) throws IOException {
-        serverLog.logInfo("indexContainerRAMHeap", "restoring rwi blob dump '" + blobFile.getName() + "'");
+        Log.logInfo("indexContainerRAMHeap", "restoring rwi blob dump '" + blobFile.getName() + "'");
         final long start = System.currentTimeMillis();
         this.cache = Collections.synchronizedSortedMap(new TreeMap<String, indexContainer>(new ByteOrder.StringOrder(payloadrow.getOrdering())));
         int urlCount = 0;
@@ -130,12 +130,12 @@ public final class indexContainerRAMHeap {
         }
         // remove idx and gap files if they exist here
         HeapWriter.deleteAllFingerprints(blobFile);
-        serverLog.logInfo("indexContainerRAMHeap", "finished rwi blob restore: " + cache.size() + " words, " + urlCount + " word/URL relations in " + (System.currentTimeMillis() - start) + " milliseconds");
+        Log.logInfo("indexContainerRAMHeap", "finished rwi blob restore: " + cache.size() + " words, " + urlCount + " word/URL relations in " + (System.currentTimeMillis() - start) + " milliseconds");
     }
     
     public void dump(final File heapFile) throws IOException {
         assert this.cache != null;
-        serverLog.logInfo("indexContainerRAMHeap", "creating alternative rwi heap dump '" + heapFile.getName() + "', " + cache.size() + " rwi's");
+        Log.logInfo("indexContainerRAMHeap", "creating alternative rwi heap dump '" + heapFile.getName() + "', " + cache.size() + " rwi's");
         if (heapFile.exists()) heapFile.delete();
         final HeapWriter dump = new HeapWriter(heapFile, payloadrow.primaryKeyLength, Base64Order.enhancedCoder);
         final long startTime = System.currentTimeMillis();
@@ -159,7 +159,7 @@ public final class indexContainerRAMHeap {
             }
         }
         dump.close();
-        serverLog.logInfo("indexContainerRAMHeap", "finished alternative rwi heap dump: " + wordcount + " words, " + urlcount + " word/URL relations in " + (System.currentTimeMillis() - startTime) + " milliseconds");
+        Log.logInfo("indexContainerRAMHeap", "finished alternative rwi heap dump: " + wordcount + " words, " + urlcount + " word/URL relations in " + (System.currentTimeMillis() - startTime) + " milliseconds");
     }
     
     public int size() {

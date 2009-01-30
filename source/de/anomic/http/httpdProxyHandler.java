@@ -77,6 +77,7 @@ import de.anomic.htmlFilter.htmlFilterTransformer;
 import de.anomic.index.indexDocumentMetadata;
 import de.anomic.index.indexReferenceBlacklist;
 import de.anomic.kelondro.order.DateFormatter;
+import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -85,8 +86,6 @@ import de.anomic.server.serverCore;
 import de.anomic.server.serverDomains;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
-import de.anomic.server.logging.serverLog;
-import de.anomic.server.logging.serverMiniLogFormatter;
 import de.anomic.yacy.yacyURL;
 
 public final class httpdProxyHandler {
@@ -108,7 +107,7 @@ public final class httpdProxyHandler {
 
     //private Properties connectionProperties = null;
     // creating a logger
-    private static final serverLog theLogger = new serverLog("PROXY");
+    private static final Log theLogger = new Log("PROXY");
     
     private static boolean doAccessLogging = false; 
 	/**
@@ -144,7 +143,7 @@ public final class httpdProxyHandler {
                 proxyLogger.setLevel(Level.FINEST);
                 
                 final FileHandler txtLog = new FileHandler(pattern,limit,count,true);
-                txtLog.setFormatter(new serverMiniLogFormatter());
+                txtLog.setFormatter(new ProxyLogFormatter());
                 txtLog.setLevel(Level.FINEST);
                 proxyLogger.addHandler(txtLog);     
                 
@@ -172,7 +171,7 @@ public final class httpdProxyHandler {
         htRootPath = new File(sb.getRootPath(), sb.getConfig("htRootPath","htroot"));
         if (!(htRootPath.exists())) {
             if(!htRootPath.mkdir())
-                serverLog.logSevere("PROXY", "could not create htRoot "+ htRootPath);
+                Log.logSevere("PROXY", "could not create htRoot "+ htRootPath);
         }
             
         // load a transformer
@@ -208,7 +207,7 @@ public final class httpdProxyHandler {
      * Special logger instance for proxy access logging much similar
      * to the squid access.log file 
      */
-    private static final serverLog proxyLog = new serverLog("PROXY.access");
+    private static final Log proxyLog = new Log("PROXY.access");
     
     /**
      * Reusable {@link StringBuilder} for logging

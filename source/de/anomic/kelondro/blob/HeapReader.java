@@ -40,7 +40,7 @@ import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.RotateIterator;
 import de.anomic.kelondro.util.MemoryControl;
-import de.anomic.server.logging.serverLog;
+import de.anomic.kelondro.util.Log;
 
 public class HeapReader {
 
@@ -82,10 +82,10 @@ public class HeapReader {
                 }
             }
             if (!ok) {
-                serverLog.logWarning("kelondroBLOBHeap", "verification of idx file for " + heapFile.toString() + " failed, re-building index");
+                Log.logWarning("kelondroBLOBHeap", "verification of idx file for " + heapFile.toString() + " failed, re-building index");
                 initIndexReadFromHeap();
             } else {
-                serverLog.logInfo("kelondroBLOBHeap", "using a dump of the index of " + heapFile.toString() + ".");
+                Log.logInfo("kelondroBLOBHeap", "using a dump of the index of " + heapFile.toString() + ".");
             }
         } else {
             // if we did not have a dump, create a new index
@@ -147,7 +147,7 @@ public class HeapReader {
                 //assert reclen > 0 : " reclen == 0 at seek pos " + seek;
                 if (reclen == 0) {
                     // very bad file inconsistency
-                    serverLog.logSevere("kelondroBLOBHeap", "reclen == 0 at seek pos " + seek + " in file " + heapFile);
+                    Log.logSevere("kelondroBLOBHeap", "reclen == 0 at seek pos " + seek + " in file " + heapFile);
                     this.file.setLength(seek); // delete everything else at the remaining of the file :-(
                     break loop;
                 }
@@ -169,7 +169,7 @@ public class HeapReader {
                     indexready.consume(key, seek);
                     key = new byte[keylength];
                 } else {
-                    serverLog.logWarning("kelondroBLOBHeap", "BLOB " + heapFile.getName() + ": skiped not wellformed key " + new String(key) + " at seek pos " + seek);
+                    Log.logWarning("kelondroBLOBHeap", "BLOB " + heapFile.getName() + ": skiped not wellformed key " + new String(key) + " at seek pos " + seek);
                 }
             }            
             // new seek position
@@ -246,7 +246,7 @@ public class HeapReader {
         file.readFully(keyf, 0, keyf.length);
         if (this.ordering.compare(key, keyf) != 0) {
             // verification of the indexed access failed. we must re-read the index
-            serverLog.logWarning("kelondroBLOBHeap", "verification indexed access for " + heapFile.toString() + " failed, re-building index");
+            Log.logWarning("kelondroBLOBHeap", "verification indexed access for " + heapFile.toString() + " failed, re-building index");
             // this is a severe operation, it should never happen.
             // but if the process ends in this state, it would completely fail
             // if the index is not rebuild now at once

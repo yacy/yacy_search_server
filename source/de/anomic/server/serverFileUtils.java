@@ -53,7 +53,7 @@ import java.util.zip.ZipOutputStream;
 
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.RowSet;
-import de.anomic.server.logging.serverLog;
+import de.anomic.kelondro.util.Log;
 import de.anomic.tools.nxTools;
 
 public final class serverFileUtils {
@@ -165,7 +165,7 @@ public final class serverFileUtils {
             fos = new FileOutputStream(dest);
             copy(source, fos, count);
         } finally {
-            if (fos != null) try {fos.close();} catch (final Exception e) { serverLog.logWarning("FileUtils", "cannot close FileOutputStream for "+ dest +"! "+ e.getMessage()); }
+            if (fos != null) try {fos.close();} catch (final Exception e) { Log.logWarning("FileUtils", "cannot close FileOutputStream for "+ dest +"! "+ e.getMessage()); }
         }
     }
 
@@ -504,7 +504,7 @@ public final class serverFileUtils {
         final String[] list = from_dir.list();
         for (int i = 0; i < list.length; i++) {
         	if(!new File(from_dir, list[i]).renameTo(new File(to_dir, list[i])))
-        		serverLog.logWarning("serverFileUtils", "moveAll(): could not move from "+ from_dir + list[i] +" to "+ to_dir + list[i]);
+        		Log.logWarning("serverFileUtils", "moveAll(): could not move from "+ from_dir + list[i] +" to "+ to_dir + list[i]);
         }
     }
     

@@ -33,10 +33,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
+import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.server.serverThread;
-import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyURL;
 
 /**
@@ -56,7 +56,7 @@ public abstract class AbstractParser implements Parser{
      * the logger class that should be used by the parser module for logging
      * purposes.
      */
-    protected serverLog theLogger = null;
+    protected Log theLogger = null;
 
     /**
      * Version number of the parser
@@ -248,7 +248,7 @@ public abstract class AbstractParser implements Parser{
     /**
      * Setting the logger that should be used by this parser class ...
      */
-    public void setLogger(final serverLog log) {
+    public void setLogger(final Log log) {
         this.theLogger = log;
     }
     

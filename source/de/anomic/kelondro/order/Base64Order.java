@@ -30,7 +30,7 @@ package de.anomic.kelondro.order;
 import java.io.UnsupportedEncodingException;
 import java.util.Comparator;
 
-import de.anomic.server.logging.serverLog;
+import de.anomic.kelondro.util.Log;
 
 public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Coding, Comparator<byte[]>, Cloneable {
 
@@ -50,7 +50,7 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Cod
         }
     }
 
-    private final serverLog log;
+    private final Log log;
 
     public static final Base64Order standardCoder = new Base64Order(true, true);
     public static final Base64Order enhancedCoder = new Base64Order(true, false);
@@ -69,7 +69,7 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Cod
         alpha = (rfc1113compliant) ? alpha_standard : alpha_enhanced;
         ahpla = (rfc1113compliant) ? ahpla_standard : ahpla_enhanced;
 
-        this.log = new serverLog("BASE64");
+        this.log = new Log("BASE64");
     }
 
     public static byte[] zero(int length) {

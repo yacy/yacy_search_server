@@ -54,7 +54,7 @@ import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.table.CachedRecords.CacheNode;
 import de.anomic.kelondro.util.kelondroException;
-import de.anomic.server.logging.serverLog;
+import de.anomic.kelondro.util.Log;
 
 public class Tree extends CachedRecords implements ObjectIndex {
 	
@@ -326,7 +326,7 @@ public class Tree extends CachedRecords implements ObjectIndex {
     public Row.Entry put(final Row.Entry newrow) throws IOException {
         assert (newrow != null);
         assert (newrow.columns() == row().columns());
-        assert (!(serverLog.allZero(newrow.getPrimaryKeyBytes())));
+        assert (!(Log.allZero(newrow.getPrimaryKeyBytes())));
         assert newrow.objectsize() <= super.row().objectsize;
         // Associates the specified value with the specified key in this map
         Row.Entry result = null;

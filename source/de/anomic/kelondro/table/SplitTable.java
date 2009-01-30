@@ -56,9 +56,9 @@ import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.order.MergeIterator;
 import de.anomic.kelondro.order.Order;
+import de.anomic.kelondro.util.Log;
 import de.anomic.server.NamePrefixThreadFactory;
 import de.anomic.server.serverProcessor;
-import de.anomic.server.logging.serverLog;
 
 public class SplitTable implements ObjectIndex {
 
@@ -146,9 +146,9 @@ public class SplitTable implements ObjectIndex {
                 if (f.isDirectory()) {
                     // this is a kelonodroFlex table
                     FlexTable.delete(path, maxf);
-                    serverLog.logInfo("kelondroSplitTable", "replaced partial flex table " + f + " by new eco table");
+                    Log.logInfo("kelondroSplitTable", "replaced partial flex table " + f + " by new eco table");
                 }
-                serverLog.logInfo("kelondroSplitTable", "opening partial eco table " + f);
+                Log.logInfo("kelondroSplitTable", "opening partial eco table " + f);
                 table = new EcoTable(f, rowdef, EcoTable.tailCacheUsageAuto, EcoFSBufferSize, 0);
                 tables.put(date, table);
             }

@@ -36,7 +36,7 @@ import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.ScoreCluster;
-import de.anomic.server.logging.serverLog;
+import de.anomic.kelondro.util.Log;
 
 public final class indexRAMRI implements indexRI, indexRIReader, Iterable<indexContainer> {
 
@@ -47,7 +47,7 @@ public final class indexRAMRI implements indexRI, indexRIReader, Iterable<indexC
     private int   cacheEntityMaxCount;       // the maximum number of cache slots for RWI entries
     public  int   cacheReferenceCountLimit;  // the maximum number of references to a single RWI entity
     public  long  cacheReferenceAgeLimit;    // the maximum age (= time not changed) of a RWI entity
-    private final serverLog log;
+    private final Log log;
     private final File dumpFile;
     private indexContainerRAMHeap heap;
     
@@ -59,7 +59,7 @@ public final class indexRAMRI implements indexRI, indexRIReader, Iterable<indexC
             final int wCacheReferenceCountLimitInit,
             final long wCacheReferenceAgeLimitInit,
             final String newHeapName,
-            final serverLog log) {
+            final Log log) {
 
         // creates a new index cache
         // the cache has a back-end where indexes that do not fit in the cache are flushed

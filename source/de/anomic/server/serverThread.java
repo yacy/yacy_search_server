@@ -24,7 +24,7 @@
 
 package de.anomic.server;
 
-import de.anomic.server.logging.serverLog;
+import de.anomic.kelondro.util.Log;
 
 public interface serverThread {
     
@@ -58,7 +58,7 @@ public interface serverThread {
     public long getMemoryUse();
     // returns the sum of all memory usage differences before and after one busy job
     
-    public void setLog(serverLog log);
+    public void setLog(Log log);
     // defines a log where process states can be written to
 
     public void jobExceptionHandler(Exception e);

@@ -36,11 +36,11 @@ import java.util.Date;
 
 import de.anomic.data.messageBoard;
 import de.anomic.http.httpRequestHeader;
+import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.server.logging.serverLog;
 import de.anomic.tools.crypt;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNetwork;
@@ -144,7 +144,7 @@ public final class message {
             try {
                 serverFileUtils.copy(notifierSource, notifierDest);
             } catch (final IOException e) {
-            	serverLog.logSevere("MESSAGE", "NEW MESSAGE ARRIVED! (error: " + e.getMessage() + ")");
+            	Log.logSevere("MESSAGE", "NEW MESSAGE ARRIVED! (error: " + e.getMessage() + ")");
               
             }
         }

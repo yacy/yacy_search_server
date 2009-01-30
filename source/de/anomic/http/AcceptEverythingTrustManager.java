@@ -7,7 +7,7 @@ import java.security.cert.X509Certificate;
 
 import javax.net.ssl.X509TrustManager;
 
-import de.anomic.server.logging.serverLog;
+import de.anomic.kelondro.util.Log;
 
 /**
  * trust every server
@@ -39,7 +39,7 @@ class AcceptEverythingTrustManager extends EasyX509TrustManager implements X509T
             super.checkServerTrusted(chain, authType);
         } catch (final Exception e) {
             // trusted but logged
-            serverLog.logWarning("HTTPC", "trusting SSL certificate with " + e.getClass() + ": " + e.getMessage());
+            Log.logWarning("HTTPC", "trusting SSL certificate with " + e.getClass() + ": " + e.getMessage());
         }
     }
 
