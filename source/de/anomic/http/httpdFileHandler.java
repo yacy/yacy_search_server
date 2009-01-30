@@ -202,34 +202,21 @@ public final class httpdFileHandler {
 	 * @param path relative from htroot
 	 * @param localeSelection language of localized file; locale.language from switchboard is used if localeSelection.equals("") */
 	public static File getLocalizedFile(final String path, final String localeSelection){
-        if (htDefaultPath == null) htDefaultPath = switchboard.getConfigPath("htDefaultPath","htroot");
-        if (htLocalePath == null) htLocalePath = switchboard.getConfigPath("locale.translated_html","DATA/LOCALE/htroot");
+        //if (htDefaultPath == null) htDefaultPath = switchboard.getConfigPath("htDefaultPath", "htroot");
+        //if (htLocalePath == null) htLocalePath = switchboard.getConfigPath("locale.translated_html", "DATA/LOCALE/htroot");
+	    //if (htDocsPath == null) htDocsPath = switchboard.getConfigPath(plasmaSwitchboardConstants.HTDOCS_PATH, plasmaSwitchboardConstants.HTDOCS_PATH_DEFAULT);
 
+        if (path.startsWith("/repository/"))
+            return new File(switchboard.getConfig("repositoryPath", "DATA/HTDOCS/repository"), path.substring(11));
         if (!(localeSelection.equals("default"))) {
             final File localePath = new File(htLocalePath, localeSelection + '/' + path);
-            if (localePath.exists())  // avoid "NoSuchFile" troubles if the "localeSelection" is misspelled
-                return localePath;
+            if (localePath.exists()) return localePath;  // avoid "NoSuchFile" troubles if the "localeSelection" is misspelled
         }
+
+        File docsPath  = new File(htDocsPath, path);
+        if (docsPath.exists()) return docsPath;
         return new File(htDefaultPath, path);
 	}
-    
-//    private void textMessage(OutputStream out, int retcode, String body) throws IOException {
-//        httpd.sendRespondHeader(
-//                this.connectionProperties,  // the connection properties 
-//                out,                        // the output stream
-//                "HTTP/1.1",                 // the http version that should be used
-//                retcode,                    // the http status code
-//                null,                       // the http status message
-//                "text/plain",               // the mimetype
-//                body.length(),              // the content length
-//                httpc.nowDate(),            // the modification date
-//                null,                       // the expires date
-//                null,                       // cookies
-//                null,                       // content encoding
-//                null);                      // transfer encoding
-//        out.write(body.getBytes());
-//        out.flush();
-//    }
     
     private static final httpResponseHeader getDefaultHeaders(final String path) {
         final httpResponseHeader headers = new httpResponseHeader();
@@ -412,7 +399,7 @@ public final class httpdFileHandler {
             File targetClass=null;
 
             // locate the file
-            if (!(path.startsWith("/"))) path = "/" + path; // attach leading slash
+            if (!path.startsWith("/") && !path.startsWith("\\")) path = "/" + path; // attach leading slash
             
             // a different language can be desired (by i.e. ConfigBasic.html) than the one stored in the locale.language
             String localeSelection = switchboard.getConfig("locale.language","default");
@@ -426,9 +413,9 @@ public final class httpdFileHandler {
             }
             
             File targetFile = getLocalizedFile(path, localeSelection);
-            final String targetExt   = conProp.getProperty("EXT","");
+            final String targetExt = conProp.getProperty("EXT","");
             targetClass = rewriteClassFile(new File(htDefaultPath, path));
-            if (path.endsWith("/")) {
+            if (path.endsWith("/") || path.endsWith("\\")) {
                 String testpath;
                 // attach default file name
                 for (int i = 0; i < defaultFiles.length; i++) {
@@ -440,13 +427,13 @@ public final class httpdFileHandler {
                         break;
                     }
                 }
+                targetFile = getLocalizedFile(path, localeSelection);
                 
                 //no defaultfile, send a dirlisting
-                if (targetFile == null || !targetFile.exists()) {
+                if (targetFile == null || !targetFile.exists() || (targetFile.exists() && targetFile.isDirectory())) {
                     final StringBuilder aBuffer = new StringBuilder();
                     aBuffer.append("<html>\n<head>\n</head>\n<body>\n<h1>Index of " + path + "</h1>\n  <ul>\n");
-                    final File dir = new File(htDocsPath, path);
-                    String[] list = dir.list();
+                    String[] list = targetFile.list();
                     if (list == null) list = new String[0]; // should not occur!
                     File f;
                     String size;
@@ -455,7 +442,7 @@ public final class httpdFileHandler {
                     int images, links;
                     htmlFilterContentScraper scraper;
                     for (int i = 0; i < list.length; i++) {
-                        f = new File(dir, list[i]);
+                        f = new File(targetFile, list[i]);
                         if (f.isDirectory()) {
                             aBuffer.append("    <li><a href=\"" + path + list[i] + "/\">" + list[i] + "/</a><br></li>\n");
                         } else {
@@ -492,7 +479,7 @@ public final class httpdFileHandler {
                     aBuffer.append("  </ul>\n</body>\n</html>\n");
 
                     // write the list to the client
-                    httpd.sendRespondHeader(conProp, out, httpVersion, 200, null, "text/html; charset=UTF-8", aBuffer.length(), new Date(dir.lastModified()), null, new httpResponseHeader(), null, null, true);
+                    httpd.sendRespondHeader(conProp, out, httpVersion, 200, null, "text/html; charset=UTF-8", aBuffer.length(), new Date(targetFile.lastModified()), null, new httpResponseHeader(), null, null, true);
                     if (!method.equals(httpHeader.METHOD_HEAD)) {
                         out.write(aBuffer.toString().getBytes("UTF-8"));
                     }
@@ -724,7 +711,7 @@ public final class httpdFileHandler {
                 /* servletProperties tp = (servlerObjects) */ invokeServlet(targetClass, requestHeader, args);
                 forceConnectionClose(conProp);
                 return;                
-            } else if ((targetFile.exists()) && (targetFile.canRead())) {
+            } else if (targetFile.exists() && targetFile.isFile() && targetFile.canRead()) {
                 // we have found a file that can be written to the client
                 // if this file uses templates, then we use the template
                 // re-write - method to create an result
