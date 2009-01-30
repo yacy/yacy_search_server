@@ -34,8 +34,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import de.anomic.server.serverByteBuffer;
-
 abstract class kelondroAbstractRA implements kelondroRA {
 
     // logging support
@@ -145,7 +143,7 @@ abstract class kelondroAbstractRA implements kelondroRA {
         this.seek(0);
         final Iterator<Map.Entry<String, String>> iter = map.entrySet().iterator();
         Map.Entry<String, String> entry;
-        final serverByteBuffer bb = new serverByteBuffer(map.size() * 40);
+        final kelondroByteBuffer bb = new kelondroByteBuffer(map.size() * 40);
         bb.append("# ").append(comment).append("\r\n");
         while (iter.hasNext()) {
             entry = iter.next();

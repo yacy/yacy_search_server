@@ -52,7 +52,7 @@ import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMap;
 import de.anomic.kelondro.kelondroNaturalOrder;
-import de.anomic.server.serverDate;
+import de.anomic.kelondro.kelondroDate;
 import de.anomic.server.logging.serverLog;
 
 public class blogBoard {
@@ -201,7 +201,7 @@ public class blogBoard {
     		}
     		
     		try {
-				date = serverDate.parseShortSecond(StrDate);
+				date = kelondroDate.parseShortSecond(StrDate);
 			} catch (final ParseException e1) {
 				date = new Date();
 			}
@@ -395,7 +395,7 @@ public class blogBoard {
                     if (serverLog.isFinest("Blog")) serverLog.logFinest("Blog", "ERROR: date field missing in blogBoard");
                     return new Date();
                 }
-                return serverDate.parseShortSecond(date);
+                return kelondroDate.parseShortSecond(date);
             } catch (final ParseException e) {
                 return new Date();
             }
@@ -404,14 +404,14 @@ public class blogBoard {
         private void setDate(Date date) {
             if(date == null) 
                 date = new Date();
-            record.put("date", serverDate.formatShortSecond(date));
+            record.put("date", kelondroDate.formatShortSecond(date));
         }
         
         public String getTimestamp() {
             final String timestamp = record.get("date");
             if (timestamp == null) {
                 if (serverLog.isFinest("Blog")) serverLog.logFinest("Blog", "ERROR: date field missing in blogBoard");
-                return serverDate.formatShortSecond();
+                return kelondroDate.formatShortSecond();
             }
             return timestamp;
         }

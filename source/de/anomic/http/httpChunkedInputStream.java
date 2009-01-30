@@ -30,7 +30,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import de.anomic.server.serverByteBuffer;
+import de.anomic.kelondro.kelondroByteBuffer;
 
 /**
  * Some parts of this class code was copied from <a href="http://www.devdaily.com/java/jwarehouse/commons-httpclient-2.0/src/java/org/apache/commons/httpclient/ChunkedInputStream.shtml">Apache httpclient Project.</a>
@@ -122,9 +122,9 @@ public final class httpChunkedInputStream extends InputStream {
     
     private void readTrailer() throws IOException {
         BufferedReader reader = null;
-        serverByteBuffer bout = null;
+        kelondroByteBuffer bout = null;
         try {
-            bout = new serverByteBuffer();
+            bout = new kelondroByteBuffer();
             do {
                 int ch;
                 while ((ch = this.inputStream.read()) >= 0) {
@@ -148,7 +148,7 @@ public final class httpChunkedInputStream extends InputStream {
     
     private static int readChunkFromStream(final InputStream in) throws IOException {           
         
-        final serverByteBuffer baos = new serverByteBuffer();
+        final kelondroByteBuffer baos = new kelondroByteBuffer();
         int state = READ_CHUNK_STATE_NORMAL; 
         while (state != READ_CHUNK_STATE_FINISHED) {
             final int b = in.read();

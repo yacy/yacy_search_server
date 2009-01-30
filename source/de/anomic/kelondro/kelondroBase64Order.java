@@ -312,22 +312,22 @@ public class kelondroBase64Order extends kelondroAbstractOrder<byte[]> implement
         byte ac, bc;
         byte acc, bcc;
         while ((i < al) && (i < bl)) {
-            assert (i + aoffset < a.length) : "i = " + i + ", aoffset = " + aoffset + ", a.length = " + a.length + ", a = " + serverLog.arrayList(a, aoffset, al);
-            assert (i + boffset < b.length) : "i = " + i + ", boffset = " + boffset + ", b.length = " + b.length + ", b = " + serverLog.arrayList(b, boffset, al);
+            assert (i + aoffset < a.length) : "i = " + i + ", aoffset = " + aoffset + ", a.length = " + a.length + ", a = " + kelondroNaturalOrder.arrayList(a, aoffset, al);
+            assert (i + boffset < b.length) : "i = " + i + ", boffset = " + boffset + ", b.length = " + b.length + ", b = " + kelondroNaturalOrder.arrayList(b, boffset, al);
             ac = a[aoffset + i];
-            assert (ac >= 0) && (ac < 128) : "ac = " + ac + ", a = " + serverLog.arrayList(a, aoffset, al);
+            assert (ac >= 0) && (ac < 128) : "ac = " + ac + ", a = " + kelondroNaturalOrder.arrayList(a, aoffset, al);
             bc = b[boffset + i];
             if ((ac == 0) && (bc == 0)) return 0; // zero-terminated length
-            assert (bc >= 0) && (bc < 128) : "bc = " + bc + ", b = " + serverLog.arrayList(b, boffset, al);
+            assert (bc >= 0) && (bc < 128) : "bc = " + bc + ", b = " + kelondroNaturalOrder.arrayList(b, boffset, al);
             if (ac == bc) {
             	// shortcut in case of equality: we don't need to lookup the ahpla value
             	i++;
             	continue;
             }
             acc = ahpla[ac];
-            assert (acc >= 0) : "acc = " + acc + ", a = " + serverLog.arrayList(a, aoffset, al) + "/" + new String(a, aoffset, al) + ", aoffset = 0x" + Integer.toHexString(aoffset) + ", i = " + i + "\n" + serverLog.table(a, 16, aoffset);
+            assert (acc >= 0) : "acc = " + acc + ", a = " + kelondroNaturalOrder.arrayList(a, aoffset, al) + "/" + new String(a, aoffset, al) + ", aoffset = 0x" + Integer.toHexString(aoffset) + ", i = " + i + "\n" + kelondroNaturalOrder.table(a, 16, aoffset);
             bcc = ahpla[bc];
-            assert (bcc >= 0) : "bcc = " + bcc + ", b = " + serverLog.arrayList(b, boffset, bl) + "/" + new String(b, boffset, bl) + ", boffset = 0x" + Integer.toHexString(boffset) + ", i = " + i + "\n" + serverLog.table(b, 16, boffset);
+            assert (bcc >= 0) : "bcc = " + bcc + ", b = " + kelondroNaturalOrder.arrayList(b, boffset, bl) + "/" + new String(b, boffset, bl) + ", boffset = 0x" + Integer.toHexString(boffset) + ", i = " + i + "\n" + kelondroNaturalOrder.table(b, 16, boffset);
             if (acc > bcc) return 1;
             if (acc < bcc) return -1;
             // else the bytes are equal and it may go on yet undecided
@@ -360,7 +360,7 @@ public class kelondroBase64Order extends kelondroAbstractOrder<byte[]> implement
             assert bb >= 0;
             assert bb < 128;
             bcc = ahpla[bb];
-            assert (bcc >= 0) : "bcc = " + bcc + ", b = " + serverLog.arrayList(b, boffset, bl) + "/" + new String(b, boffset, bl) + ", boffset = 0x" + Integer.toHexString(boffset) + ", i = " + i + "\n" + serverLog.table(b, 16, boffset);
+            assert (bcc >= 0) : "bcc = " + bcc + ", b = " + kelondroNaturalOrder.arrayList(b, boffset, bl) + "/" + new String(b, boffset, bl) + ", boffset = 0x" + Integer.toHexString(boffset) + ", i = " + i + "\n" + kelondroNaturalOrder.table(b, 16, boffset);
             if (acc > bcc) return 1;
             if (acc < bcc) return -1;
             // else the bytes are equal and it may go on yet undecided

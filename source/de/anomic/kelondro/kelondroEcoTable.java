@@ -39,7 +39,6 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import de.anomic.kelondro.kelondroRow.Entry;
-import de.anomic.server.serverMemory;
 import de.anomic.server.logging.serverLog;
 
 /*
@@ -106,17 +105,17 @@ public class kelondroEcoTable implements kelondroIndex {
             final long neededRAM4table = (records) * ((rowdef.objectsize) + 4L) * 3L;
             table = ((neededRAM4table < maxarraylength) &&
                      ((useTailCache == tailCacheForceUsage) ||
-                      ((useTailCache == tailCacheUsageAuto) && (serverMemory.free() > neededRAM4table + 200 * 1024 * 1024)))) ?
+                      ((useTailCache == tailCacheUsageAuto) && (kelondroMemory.free() > neededRAM4table + 200 * 1024 * 1024)))) ?
                     new kelondroRowSet(taildef, records) : null;
-            serverLog.logInfo("ECOTABLE", "initialization of " + tablefile + ": available RAM: " + (serverMemory.available() / 1024 / 1024) + "MB, allocating space for " + records + " entries");
+            serverLog.logInfo("ECOTABLE", "initialization of " + tablefile + ": available RAM: " + (kelondroMemory.available() / 1024 / 1024) + "MB, allocating space for " + records + " entries");
             final long neededRAM4index = 2 * 1024 * 1024 + records * (rowdef.primaryKeyLength + 4) * 3 / 2;
-            if (!serverMemory.request(neededRAM4index, false)) {
+            if (!kelondroMemory.request(neededRAM4index, false)) {
                 // despite calculations seemed to show that there is enough memory for the table AND the index
                 // there is now not enough memory left for the index. So delete the table again to free the memory
                 // for the index
-                serverLog.logSevere("ECOTABLE", tablefile + ": not enough RAM (" + (serverMemory.available() / 1024 / 1024) + "MB) left for index, deleting allocated table space to enable index space allocation (needed: " + (neededRAM4index / 1024 / 1024) + "MB)");
+                serverLog.logSevere("ECOTABLE", tablefile + ": not enough RAM (" + (kelondroMemory.available() / 1024 / 1024) + "MB) left for index, deleting allocated table space to enable index space allocation (needed: " + (neededRAM4index / 1024 / 1024) + "MB)");
                 table = null; System.gc();
-                serverLog.logSevere("ECOTABLE", tablefile + ": RAM after releasing the table: " + (serverMemory.available() / 1024 / 1024) + "MB");
+                serverLog.logSevere("ECOTABLE", tablefile + ": RAM after releasing the table: " + (kelondroMemory.available() / 1024 / 1024) + "MB");
             }
             index = new kelondroBytesIntMap(rowdef.primaryKeyLength, rowdef.objectOrder, records);
             serverLog.logInfo("ECOTABLE", tablefile + ": EcoTable " + tablefile.toString() + " has table copy " + ((table == null) ? "DISABLED" : "ENABLED"));
@@ -208,7 +207,7 @@ public class kelondroEcoTable implements kelondroIndex {
     
     private boolean abandonTable() {
         // check if not enough memory is there to maintain a memory copy of the table
-        return serverMemory.available() < minmemremaining;
+        return kelondroMemory.available() < minmemremaining;
     }
     
     public static long tableSize(final File tablefile, final int recordsize) {

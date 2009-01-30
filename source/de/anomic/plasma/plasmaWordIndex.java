@@ -61,7 +61,7 @@ import de.anomic.kelondro.kelondroMergeIterator;
 import de.anomic.kelondro.kelondroOrder;
 import de.anomic.kelondro.kelondroRotateIterator;
 import de.anomic.kelondro.kelondroRowCollection;
-import de.anomic.server.serverMemory;
+import de.anomic.kelondro.kelondroMemory;
 import de.anomic.server.serverProfiling;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.iso639;
@@ -476,7 +476,7 @@ public final class plasmaWordIndex implements indexRI {
             // next flush more entries if the size exceeds the maximum size of the cache
             while (theCache.size() > 0 &&
             		((theCache.size() > theCache.getMaxWordCount()) ||
-                    (serverMemory.available() < collections.minMem()))) {
+                    (kelondroMemory.available() < collections.minMem()))) {
                 flushCacheOne(theCache);
             }
             if (cacheSize() != cs) serverProfiling.update("wordcache", Long.valueOf(cacheSize()));

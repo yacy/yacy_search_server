@@ -36,9 +36,9 @@ import de.anomic.index.indexReferenceBlacklist;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroRow;
+import de.anomic.kelondro.kelondroDate;
 import de.anomic.kelondro.kelondroRow.Entry;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.tools.crypt;
@@ -112,7 +112,7 @@ public class Surftips {
             //accumulateVotes(negativeHashes, positiveHashes, yacyNewsPool.OUTGOING_DB);
             //accumulateVotes(negativeHashes, positiveHashes, yacyNewsPool.PUBLISHED_DB);
             final kelondroMScoreCluster<String> ranking = new kelondroMScoreCluster<String>(); // score cluster for url hashes
-            final kelondroRow rowdef = new kelondroRow("String url-255, String title-120, String description-120, String refid-" + (serverDate.PATTERN_SHORT_SECOND.length() + 12), kelondroNaturalOrder.naturalOrder, 0);
+            final kelondroRow rowdef = new kelondroRow("String url-255, String title-120, String description-120, String refid-" + (kelondroDate.PATTERN_SHORT_SECOND.length() + 12), kelondroNaturalOrder.naturalOrder, 0);
             final HashMap<String, Entry> surftips = new HashMap<String, Entry>(); // a mapping from an url hash to a kelondroRow.Entry with display properties
             accumulateSurftips(sb, surftips, ranking, rowdef, negativeHashes, positiveHashes, yacyNewsPool.INCOMING_DB);
             //accumulateSurftips(surftips, ranking, rowdef, negativeHashes, positiveHashes, yacyNewsPool.OUTGOING_DB);

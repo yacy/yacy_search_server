@@ -31,7 +31,7 @@ import java.util.Iterator;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMScoreCluster;
-import de.anomic.server.serverDate;
+import de.anomic.kelondro.kelondroDate;
 import de.anomic.server.logging.serverLog;
 
 
@@ -263,7 +263,7 @@ public class yacyPeerSelection {
             while ((s.hasNext()) && (searchcount-- > 0)) {
                 ys = s.next();
                 if ((ys != null) && (ys.get(yacySeed.LASTSEEN, "").length() > 10)) try {
-                    absage = Math.abs(System.currentTimeMillis() + serverDate.dayMillis - ys.getLastSeenUTC());
+                    absage = Math.abs(System.currentTimeMillis() + kelondroDate.dayMillis - ys.getLastSeenUTC());
                     seedScore.addScore(ys.hash, (int) absage); // the higher absage, the older is the peer
                 } catch (final Exception e) {}
             }

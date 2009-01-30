@@ -34,7 +34,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
 
-import de.anomic.server.serverMemory;
 import de.anomic.server.logging.serverLog;
 
 public class kelondroBLOBHeapReader {
@@ -232,8 +231,8 @@ public class kelondroBLOBHeapReader {
         // access the file and read the container
         file.seek(pos);
         final int len = file.readInt() - index.row().primaryKeyLength;
-        if (serverMemory.available() < len) {
-            if (!serverMemory.request(len, true)) return null; // not enough memory available for this blob
+        if (kelondroMemory.available() < len) {
+            if (!kelondroMemory.request(len, true)) return null; // not enough memory available for this blob
         }
         
         // read the key

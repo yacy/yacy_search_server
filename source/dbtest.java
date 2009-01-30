@@ -17,14 +17,14 @@ import de.anomic.kelondro.kelondroCloneableIterator;
 import de.anomic.kelondro.kelondroEcoTable;
 import de.anomic.kelondro.kelondroIndex;
 import de.anomic.kelondro.kelondroIntBytesMap;
+import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroRowSet;
 import de.anomic.kelondro.kelondroSQLTable;
 import de.anomic.kelondro.kelondroSplitTable;
 import de.anomic.kelondro.kelondroTree;
+import de.anomic.kelondro.kelondroMemory;
 import de.anomic.server.serverInstantBusyThread;
-import de.anomic.server.serverMemory;
-import de.anomic.server.logging.serverLog;
 import de.anomic.ymage.ymageChart;
 
 public class dbtest {
@@ -122,7 +122,7 @@ public class dbtest {
 
         public void run() {
             final STEntry entry = new STEntry(this.getSource());
-            System.out.println("write:  " + serverLog.arrayList(entry.getKey(), 0, entry.getKey().length));
+            System.out.println("write:  " + kelondroNaturalOrder.arrayList(entry.getKey(), 0, entry.getKey().length));
             try {
                 getTable_test().put(getTable_test().row().newEntry(new byte[][] { entry.getKey(), entry.getValue() , entry.getValue() }));
                 if (getTable_reference() != null) getTable_reference().put(getTable_test().row().newEntry(new byte[][] { entry.getKey(), entry.getValue() , entry.getValue() }));
@@ -141,7 +141,7 @@ public class dbtest {
 
         public void run() {
             final STEntry entry = new STEntry(this.getSource());
-            System.out.println("remove: " + serverLog.arrayList(entry.getKey(), 0, entry.getKey().length));
+            System.out.println("remove: " + kelondroNaturalOrder.arrayList(entry.getKey(), 0, entry.getKey().length));
             try {
                 getTable_test().remove(entry.getKey());
                 if (getTable_reference() != null) getTable_reference().remove(entry.getKey());
@@ -259,7 +259,7 @@ public class dbtest {
         boolean assertionenabled = false;
         assert assertionenabled = true;
         if (assertionenabled) System.out.println("*** Asserts are enabled"); else System.out.println("*** HINT: YOU SHOULD ENABLE ASSERTS! (include -ea in start arguments");
-        final long mb = serverMemory.available() / 1024 / 1024;
+        final long mb = kelondroMemory.available() / 1024 / 1024;
         System.out.println("*** RAM = " + mb + " MB");
         System.out.print(">java " +
                 ((assertionenabled) ? "-ea " : "") +
@@ -376,14 +376,14 @@ public class dbtest {
                     
                     System.out.println("Loop " + loop + ": Write = " + write + ", Remove = " + remove);
                     System.out.println(" bevore GC: " +
-                              "free = " + serverMemory.free() +
-                            ", max = " + serverMemory.max() +
-                            ", total = " + serverMemory.total());
+                              "free = " + kelondroMemory.free() +
+                            ", max = " + kelondroMemory.max() +
+                            ", total = " + kelondroMemory.total());
                     System.gc();
                     System.out.println(" after  GC: " +
-                            "free = " + serverMemory.free() +
-                          ", max = " + serverMemory.max() +
-                          ", total = " + serverMemory.total());
+                            "free = " + kelondroMemory.free() +
+                          ", max = " + kelondroMemory.max() +
+                          ", total = " + kelondroMemory.total());
                   loop++;
                 }
             }
@@ -538,7 +538,7 @@ final class memprofiler extends Thread {
         while(run) {
             memChart.setColor("FF0000");
             seconds1 = (int) ((System.currentTimeMillis() - start) / 1000);
-            kilobytes1 = (int) (serverMemory.used() / 1024);
+            kilobytes1 = (int) (kelondroMemory.used() / 1024);
             memChart.chartLine(ymageChart.DIMENSION_BOTTOM, ymageChart.DIMENSION_LEFT, seconds0, kilobytes0, seconds1, kilobytes1);
             seconds0 = seconds1;
             kilobytes0 = kilobytes1;

@@ -37,8 +37,8 @@ import java.util.TreeMap;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroRowSet;
+import de.anomic.kelondro.kelondroByteBuffer;
 import de.anomic.plasma.plasmaWordIndex;
-import de.anomic.server.serverByteBuffer;
 
 public class indexContainer extends kelondroRowSet {
 
@@ -466,7 +466,7 @@ public class indexContainer extends kelondroRowSet {
     }
     
 
-    public static final serverByteBuffer compressIndex(final indexContainer inputContainer, final indexContainer excludeContainer, final long maxtime) {
+    public static final kelondroByteBuffer compressIndex(final indexContainer inputContainer, final indexContainer excludeContainer, final long maxtime) {
         // collect references according to domains
         final long timeout = (maxtime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxtime;
         final TreeMap<String, String> doms = new TreeMap<String, String>();
@@ -488,7 +488,7 @@ public class indexContainer extends kelondroRowSet {
             }
         }
         // construct a result string
-        final serverByteBuffer bb = new serverByteBuffer(inputContainer.size() * 6);
+        final kelondroByteBuffer bb = new kelondroByteBuffer(inputContainer.size() * 6);
         bb.append('{');
         final Iterator<Map.Entry<String, String>> i = doms.entrySet().iterator();
         Map.Entry<String, String> entry;
@@ -506,7 +506,7 @@ public class indexContainer extends kelondroRowSet {
         return bb;
     }
 
-    public static final void decompressIndex(final TreeMap<String, String> target, serverByteBuffer ci, final String peerhash) {
+    public static final void decompressIndex(final TreeMap<String, String> target, kelondroByteBuffer ci, final String peerhash) {
         // target is a mapping from url-hashes to a string of peer-hashes
         if ((ci.byteAt(0) == '{') && (ci.byteAt(ci.length() - 1) == '}')) {
             //System.out.println("DEBUG-DECOMPRESS: input is " + ci.toString());

@@ -58,9 +58,9 @@ import java.util.TreeMap;
 import de.anomic.index.indexWord;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroDigest;
+import de.anomic.kelondro.kelondroDate;
 import de.anomic.net.natLib;
 import de.anomic.server.serverCodings;
-import de.anomic.server.serverDate;
 import de.anomic.server.serverDomains;
 import de.anomic.server.serverSystem;
 import de.anomic.tools.bitfield;
@@ -212,7 +212,7 @@ public class yacySeed implements Cloneable {
         this.dna.put(yacySeed.IPTYPE, "&empty;");
 
         // settings that can only be computed by visiting peer
-        this.dna.put(yacySeed.LASTSEEN, serverDate.formatShortSecond(new Date(System.currentTimeMillis() - serverDate.UTCDiff()))); // for last-seen date
+        this.dna.put(yacySeed.LASTSEEN, kelondroDate.formatShortSecond(new Date(System.currentTimeMillis() - kelondroDate.UTCDiff()))); // for last-seen date
         this.dna.put(yacySeed.USPEED, yacySeed.ZERO);  // the computated uplink speed of the peer
 
         this.dna.put(yacySeed.CRWCNT, yacySeed.ZERO);
@@ -516,7 +516,7 @@ public class yacySeed implements Cloneable {
         String utc = this.dna.get(yacySeed.UTC);
         if (utc == null) { utc = "+0130"; }
         try {
-            return serverDate.UTCDiff(utc);
+            return kelondroDate.UTCDiff(utc);
         } catch (final IllegalArgumentException e) {
             return 0;
         }
@@ -527,7 +527,7 @@ public class yacySeed implements Cloneable {
         // because java thinks it must apply the UTC offset to the current time,
         // to create a string that looks like our current time, it adds the local UTC offset to the
         // time. To create a corrected UTC Date string, we first subtract the local UTC offset.
-        dna.put(yacySeed.LASTSEEN, serverDate.formatShortSecond(new Date(System.currentTimeMillis() - serverDate.UTCDiff())) );
+        dna.put(yacySeed.LASTSEEN, kelondroDate.formatShortSecond(new Date(System.currentTimeMillis() - kelondroDate.UTCDiff())) );
     }
     
     /**
@@ -535,18 +535,18 @@ public class yacySeed implements Cloneable {
      */
     public final long getLastSeenUTC() {
         try {
-            final long t = serverDate.parseShortSecond(get(yacySeed.LASTSEEN, "20040101000000")).getTime();
+            final long t = kelondroDate.parseShortSecond(get(yacySeed.LASTSEEN, "20040101000000")).getTime();
             // getTime creates a UTC time number. But in this case java thinks, that the given
             // time string is a local time, which has a local UTC offset applied.
             // Therefore java subtracts the local UTC offset, to get a UTC number.
             // But the given time string is already in UTC time, so the subtraction
             // of the local UTC offset is wrong. We correct this here by adding the local UTC
             // offset again.
-            return t + serverDate.UTCDiff();
+            return t + kelondroDate.UTCDiff();
         } catch (final java.text.ParseException e) { // in case of an error make seed look old!!!
-            return System.currentTimeMillis() - serverDate.dayMillis;
+            return System.currentTimeMillis() - kelondroDate.dayMillis;
         } catch (final java.lang.NumberFormatException e) {
-            return System.currentTimeMillis() - serverDate.dayMillis;
+            return System.currentTimeMillis() - kelondroDate.dayMillis;
         }
     }
     
@@ -562,8 +562,8 @@ public class yacySeed implements Cloneable {
     /** @return the age of the seed in number of days */
     public final int getAge() {
         try {
-            final long t = serverDate.parseShortSecond(get(yacySeed.BDATE, "20040101000000")).getTime();
-            return (int) ((System.currentTimeMillis() - (t - getUTCDiff() + serverDate.UTCDiff())) / 1000 / 60 / 60 / 24);
+            final long t = kelondroDate.parseShortSecond(get(yacySeed.BDATE, "20040101000000")).getTime();
+            return (int) ((System.currentTimeMillis() - (t - getUTCDiff() + kelondroDate.UTCDiff())) / 1000 / 60 / 60 / 24);
         } catch (final java.text.ParseException e) {
             return -1;
         } catch (final java.lang.NumberFormatException e) {
@@ -860,9 +860,9 @@ public class yacySeed implements Cloneable {
         // now calculate other information about the host
         newSeed.dna.put(yacySeed.NAME, (name) == null ? "anonymous" : name);
         newSeed.dna.put(yacySeed.PORT, Integer.toString((port <= 0) ? 8080 : port));
-        newSeed.dna.put(yacySeed.BDATE, serverDate.formatShortSecond(new Date(System.currentTimeMillis() - serverDate.UTCDiff())) );
+        newSeed.dna.put(yacySeed.BDATE, kelondroDate.formatShortSecond(new Date(System.currentTimeMillis() - kelondroDate.UTCDiff())) );
         newSeed.dna.put(yacySeed.LASTSEEN, newSeed.dna.get(yacySeed.BDATE)); // just as initial setting
-        newSeed.dna.put(yacySeed.UTC, serverDate.UTCDiffString());
+        newSeed.dna.put(yacySeed.UTC, kelondroDate.UTCDiffString());
         newSeed.dna.put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN);
 
         return newSeed;

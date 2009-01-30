@@ -64,13 +64,13 @@ import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroMapDataMining;
 import de.anomic.kelondro.kelondroRowCollection;
+import de.anomic.kelondro.kelondroDate;
+import de.anomic.kelondro.kelondroMemory;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.server.serverCore;
-import de.anomic.server.serverDate;
 import de.anomic.server.serverFileUtils;
-import de.anomic.server.serverMemory;
 import de.anomic.server.serverSemaphore;
 import de.anomic.server.serverSystem;
 import de.anomic.server.logging.serverLog;
@@ -200,7 +200,7 @@ public final class yacy {
             serverLog.logConfig("STARTUP", "Java version: " + System.getProperty("java.version", "no-java-version"));
             serverLog.logConfig("STARTUP", "Operation system: " + System.getProperty("os.name","unknown"));
             serverLog.logConfig("STARTUP", "Application root-path: " + homePath);
-            serverLog.logConfig("STARTUP", "Time zone: UTC" + serverDate.UTCDiffString() + "; UTC+0000 is " + System.currentTimeMillis());
+            serverLog.logConfig("STARTUP", "Time zone: UTC" + kelondroDate.UTCDiffString() + "; UTC+0000 is " + System.currentTimeMillis());
             serverLog.logConfig("STARTUP", "Maximum file system path length: " + serverSystem.maxPathLength);
             
             f = new File(homePath, "DATA/yacy.running");
@@ -264,7 +264,7 @@ public final class yacy {
 
             sb.setConfig("version", Double.toString(version));
             sb.setConfig("vString", yacyVersion.combined2prettyVersion(Double.toString(version)));
-            sb.setConfig("vdate", (vDATE.startsWith("@")) ? serverDate.formatShortDay() : vDATE);
+            sb.setConfig("vdate", (vDATE.startsWith("@")) ? kelondroDate.formatShortDay() : vDATE);
             sb.setConfig("applicationRoot", homePath.toString());
             serverLog.logConfig("STARTUP", "YACY Version: " + version + ", Built " + sb.getConfig("vdate", "00000000"));
             yacyVersion.latestRelease = version;
@@ -405,11 +405,11 @@ public final class yacy {
 
                     // save information about available memory after all initializations
                     //try {
-                        sb.setConfig("memoryFreeAfterInitBGC", serverMemory.free());
-                        sb.setConfig("memoryTotalAfterInitBGC", serverMemory.total());
+                        sb.setConfig("memoryFreeAfterInitBGC", kelondroMemory.free());
+                        sb.setConfig("memoryTotalAfterInitBGC", kelondroMemory.total());
                         System.gc();
-                        sb.setConfig("memoryFreeAfterInitAGC", serverMemory.free());
-                        sb.setConfig("memoryTotalAfterInitAGC", serverMemory.total());
+                        sb.setConfig("memoryFreeAfterInitAGC", kelondroMemory.free());
+                        sb.setConfig("memoryTotalAfterInitAGC", kelondroMemory.total());
                     //} catch (ConcurrentModificationException e) {}
                     
                     // signal finished startup
@@ -671,7 +671,7 @@ public final class yacy {
             // db used to hold all neede urls
             final indexRepositoryReference minimizedUrlDB = new indexRepositoryReference(new File(indexRoot2, networkName));
             
-            final int cacheMem = (int)(serverMemory.max() - serverMemory.total());
+            final int cacheMem = (int)(kelondroMemory.max() - kelondroMemory.total());
             if (cacheMem < 2048000) throw new OutOfMemoryError("Not enough memory available to start clean up.");
                 
             final plasmaWordIndex wordIndex = new plasmaWordIndex(networkName, log, indexPrimaryRoot, indexSecondaryRoot, 10000, false, 1, 0);
@@ -710,8 +710,8 @@ public final class yacy {
                         log.logInfo(wordCounter + " words scanned " +
                                 "[" + wordChunkStartHash + " .. " + wordChunkEndHash + "]\n" + 
                                 "Duration: "+ 500*1000/duration + " words/s" +
-                                " | Free memory: " + serverMemory.free() + 
-                                " | Total memory: " + serverMemory.total());
+                                " | Free memory: " + kelondroMemory.free() + 
+                                " | Total memory: " + kelondroMemory.total());
                         wordChunkStart = wordChunkEnd;
                         wordChunkStartHash = wordChunkEndHash;
                     }
@@ -970,8 +970,8 @@ public final class yacy {
         
         // check memory amount
         System.gc();
-        final long startupMemFree  = serverMemory.free();
-        final long startupMemTotal = serverMemory.total();
+        final long startupMemFree  = kelondroMemory.free();
+        final long startupMemTotal = kelondroMemory.total();
         
         // go into headless awt mode
         System.setProperty("java.awt.headless", "true");

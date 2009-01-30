@@ -35,8 +35,8 @@ import de.anomic.index.indexRepositoryReference;
 import de.anomic.index.indexURLReference;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroRotateIterator;
+import de.anomic.kelondro.kelondroDate;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacySeedDB;
@@ -72,7 +72,7 @@ public class IndexControlURLs_p {
             prop.put("reload", 1);
         } else {
             prop.put("lurlexport", 1);
-            prop.put("lurlexport_exportfile", sb.getRootPath() + "/DATA/EXPORT/" + serverDate.formatShortSecond());
+            prop.put("lurlexport_exportfile", sb.getRootPath() + "/DATA/EXPORT/" + kelondroDate.formatShortSecond());
             if (export == null) {
                 // there has never been an export
                 prop.put("lurlexportfinished", 0);

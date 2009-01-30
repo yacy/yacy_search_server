@@ -30,8 +30,8 @@ import java.util.Iterator;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterImageEntry;
+import de.anomic.kelondro.kelondroDate;
 import de.anomic.plasma.parser.ParserException;
-import de.anomic.server.serverDate;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyURL;
 
@@ -75,7 +75,7 @@ public final class plasmaSearchImages {
                     while (i.hasNext()) {
                         try {
                             nexturlstring = i.next().toNormalform(true, true);
-                            addAll(new plasmaSearchImages(serverDate.remainingTime(start, maxTime, 10), new yacyURL(nexturlstring, null), depth - 1, indexing));
+                            addAll(new plasmaSearchImages(kelondroDate.remainingTime(start, maxTime, 10), new yacyURL(nexturlstring, null), depth - 1, indexing));
                         } catch (final MalformedURLException e1) {
                             e1.printStackTrace();
                         }

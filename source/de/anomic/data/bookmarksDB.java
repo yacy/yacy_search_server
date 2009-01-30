@@ -70,9 +70,9 @@ import de.anomic.kelondro.kelondroCloneableIterator;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMap;
 import de.anomic.kelondro.kelondroNaturalOrder;
+import de.anomic.kelondro.kelondroDate;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverBusyThread;
-import de.anomic.server.serverDate;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverInstantBusyThread;
 import de.anomic.server.logging.serverLog;
@@ -218,7 +218,7 @@ public class bookmarksDB {
 			long interTime = (System.currentTimeMillis()-bm.getTimeStamp())%schedule;
 			
 			Date date=new Date(bm.getTimeStamp());
-			serverLog.logInfo("BOOKMARKS", "autoReCrawl - checking schedule for: "+"["+serverDate.formatISO8601(date)+"] "+bm.getUrl());
+			serverLog.logInfo("BOOKMARKS", "autoReCrawl - checking schedule for: "+"["+kelondroDate.formatISO8601(date)+"] "+bm.getUrl());
 			
 			if (interTime >= 0 && interTime < sleepTime) {			
 				try {
@@ -873,7 +873,7 @@ public class bookmarksDB {
             	
             	Date parsedDate = null;
             	try {
-					parsedDate = serverDate.parseISO8601(time);
+					parsedDate = kelondroDate.parseISO8601(time);
 				} catch (final ParseException e) {
 					parsedDate = new Date();
 				}            	

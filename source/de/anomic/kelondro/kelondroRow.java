@@ -34,7 +34,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import de.anomic.server.serverByteBuffer;
 import de.anomic.server.logging.serverLog;
 
 public final class kelondroRow {
@@ -152,7 +151,7 @@ public final class kelondroRow {
         if (rowinstance == null) return null;
         //assert (rowinstance[0] != 0);
         if (!(this.objectOrder.wellformed(rowinstance, 0, row[0].cellwidth))) {
-            serverLog.logWarning("kelondroRow", "row not well-formed: rowinstance[0] = " + new String(rowinstance, 0, row[0].cellwidth) + " / " + serverLog.arrayList(rowinstance, 0, row[0].cellwidth));
+            serverLog.logWarning("kelondroRow", "row not well-formed: rowinstance[0] = " + new String(rowinstance, 0, row[0].cellwidth) + " / " + kelondroNaturalOrder.arrayList(rowinstance, 0, row[0].cellwidth));
             return null;
         }
         return new Entry(rowinstance, false);
@@ -572,7 +571,7 @@ public final class kelondroRow {
         }
         
         public final String toPropertyForm(final boolean includeBraces, final boolean decimalCardinal, final boolean longname) {
-            final serverByteBuffer bb = new serverByteBuffer();
+            final kelondroByteBuffer bb = new kelondroByteBuffer();
             if (includeBraces) bb.append('{');
             for (int i = 0; i < row.length; i++) {
                 bb.append((longname) ? row[i].description : row[i].nickname);

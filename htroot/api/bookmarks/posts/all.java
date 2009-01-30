@@ -5,8 +5,8 @@ import java.util.Iterator;
 import de.anomic.data.bookmarksDB;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.kelondroDigest;
+import de.anomic.kelondro.kelondroDate;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -37,7 +37,7 @@ public class all {
             prop.putXML("posts_"+count+"_description", bookmark.getDescription());
             prop.putXML("posts_"+count+"_md5", kelondroDigest.encodeMD5Hex(bookmark.getUrl()));
             date=new Date(bookmark.getTimeStamp());
-            prop.putXML("posts_"+count+"_time", serverDate.formatISO8601(date));
+            prop.putXML("posts_"+count+"_time", kelondroDate.formatISO8601(date));
             prop.putXML("posts_"+count+"_tags", bookmark.getTagsString().replaceAll(","," "));
             
             // additional XML tags

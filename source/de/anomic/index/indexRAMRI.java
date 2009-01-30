@@ -35,7 +35,7 @@ import java.util.Set;
 import de.anomic.kelondro.kelondroCloneableIterator;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroRow;
-import de.anomic.server.serverMemory;
+import de.anomic.kelondro.kelondroMemory;
 import de.anomic.server.logging.serverLog;
 
 public final class indexRAMRI implements indexRI, indexRIReader, Iterable<indexContainer> {
@@ -181,7 +181,7 @@ public final class indexRAMRI implements indexRI, indexRIReader, Iterable<indexC
                 return hash;
             }
             // cases with respect to memory situation
-            if (serverMemory.free() < 100000) {
+            if (kelondroMemory.free() < 100000) {
                 // urgent low-memory case
                 hash = hashScore.getMaxObject(); // flush high-score entries (saves RAM)
             } else {

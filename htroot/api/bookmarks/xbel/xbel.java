@@ -6,8 +6,8 @@ import java.util.Iterator;
 import de.anomic.data.bookmarksDB;
 import de.anomic.htmlFilter.htmlFilterCharacterCoding;
 import de.anomic.http.httpRequestHeader;
+import de.anomic.kelondro.kelondroDate;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -109,7 +109,7 @@ public class xbel {
 			date=new Date(bookmark.getTimeStamp());
 			prop.put("xbel_"+count+"_elements", "<bookmark id=\"" + bookmark.getUrlHash()
 					+ "\" href=\"" + htmlFilterCharacterCoding.unicode2xml(bookmark.getUrl(), true)
-					+ "\" added=\"" + htmlFilterCharacterCoding.unicode2xml(serverDate.formatISO8601(date), true)+"\">");
+					+ "\" added=\"" + htmlFilterCharacterCoding.unicode2xml(kelondroDate.formatISO8601(date), true)+"\">");
     		count++; 
     		prop.put("xbel_"+count+"_elements", "<title>");
     		count++;

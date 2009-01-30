@@ -31,8 +31,8 @@ import de.anomic.crawler.CrawlEntry;
 import de.anomic.crawler.NoticedURL;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.index.indexURLReference;
+import de.anomic.kelondro.kelondroDate;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyNetwork;
@@ -93,7 +93,7 @@ public class urls {
                 prop.putHTML("item_" + c + "_referrer", (referrer == null) ? "" : referrer.toNormalform(true, false));
                 prop.putHTML("item_" + c + "_description", entry.name());
                 prop.put("item_" + c + "_author", "");
-                prop.put("item_" + c + "_pubDate", serverDate.formatShortSecond(entry.appdate()));
+                prop.put("item_" + c + "_pubDate", kelondroDate.formatShortSecond(entry.appdate()));
                 prop.put("item_" + c + "_guid", entry.url().hash());
                 c++;
                 maxCount--;
@@ -123,7 +123,7 @@ public class urls {
                 prop.putHTML("item_" + c + "_referrer", (referrer == null) ? "" : referrer.toNormalform(true, false));
                 prop.putHTML("item_" + c + "_description", comp.dc_title());
                 prop.put("item_" + c + "_author", comp.dc_creator());
-                prop.put("item_" + c + "_pubDate", serverDate.formatShortSecond(entry.moddate()));
+                prop.put("item_" + c + "_pubDate", kelondroDate.formatShortSecond(entry.moddate()));
                 prop.put("item_" + c + "_guid", entry.hash());
                 c++;
             }

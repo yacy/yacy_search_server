@@ -54,7 +54,7 @@ import de.anomic.kelondro.kelondroColumn;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroStack;
-import de.anomic.server.serverDate;
+import de.anomic.kelondro.kelondroDate;
 
 public class yacyNewsQueue {
 
@@ -64,7 +64,7 @@ public class yacyNewsQueue {
     
     public static final kelondroRow rowdef = new kelondroRow(new kelondroColumn[]{
             new kelondroColumn("newsid", kelondroColumn.celltype_string, kelondroColumn.encoder_bytes, yacyNewsRecord.idLength, "id = created + originator"),
-            new kelondroColumn("last touched", kelondroColumn.celltype_string, kelondroColumn.encoder_bytes, serverDate.PATTERN_SHORT_SECOND.length(), "")
+            new kelondroColumn("last touched", kelondroColumn.celltype_string, kelondroColumn.encoder_bytes, kelondroDate.PATTERN_SHORT_SECOND.length(), "")
         },
         kelondroNaturalOrder.naturalOrder, 0
     );
@@ -162,7 +162,7 @@ public class yacyNewsQueue {
         }
         final kelondroRow.Entry b = queueStack.row().newEntry(new byte[][]{
                 r.id().getBytes(),
-                serverDate.formatShortSecond(new Date()).getBytes()});
+                kelondroDate.formatShortSecond(new Date()).getBytes()});
         return b;
     }
     

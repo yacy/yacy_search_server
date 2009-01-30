@@ -57,6 +57,8 @@ import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
 import de.anomic.icap.icapd;
+import de.anomic.kelondro.kelondroMemory;
+import de.anomic.kelondro.kelondroByteBuffer;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.PKCS12Tool;
 import de.anomic.urlRedirector.urlRedirectord;
@@ -313,7 +315,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
     
     public void freemem() {
         // FIXME: can we something here to flush memory? Idea: Reduce the size of some of our various caches.
-        serverMemory.gc(2000, "serverCore.freemem()"); // thq
+        kelondroMemory.gc(2000, "serverCore.freemem()"); // thq
     }
     
     // class body
@@ -853,7 +855,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
     public static byte[] receive(final PushbackInputStream pbis, final int maxSize, final boolean logerr) {
 
         // reuse an existing linebuffer
-        final serverByteBuffer readLineBuffer = new serverByteBuffer(80);
+        final kelondroByteBuffer readLineBuffer = new kelondroByteBuffer(80);
 
         int bufferSize = 0, b = 0;
         try {

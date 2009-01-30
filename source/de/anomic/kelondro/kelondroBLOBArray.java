@@ -36,8 +36,6 @@ import java.util.List;
 import java.util.TreeMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import de.anomic.server.serverDate;
-
 public class kelondroBLOBArray implements kelondroBLOB {
 
     /*
@@ -101,7 +99,7 @@ public class kelondroBLOBArray implements kelondroBLOB {
         for (int i = 0; i < files.length; i++) {
             if (files[i].length() >= 19 && files[i].endsWith(".blob")) {
                try {
-                   d = serverDate.parseShortSecond(files[i].substring(0, 14));
+                   d = kelondroDate.parseShortSecond(files[i].substring(0, 14));
                    time = d.getTime();
                    if (time > maxtime) maxtime = time;
                } catch (ParseException e) {continue;}
@@ -110,7 +108,7 @@ public class kelondroBLOBArray implements kelondroBLOB {
         for (int i = 0; i < files.length; i++) {
             if (files[i].length() >= 19 && files[i].endsWith(".blob")) {
                try {
-                   d = serverDate.parseShortSecond(files[i].substring(0, 14));
+                   d = kelondroDate.parseShortSecond(files[i].substring(0, 14));
                    f = new File(heapLocation, files[i]);
                    time = d.getTime();
                    oneBlob = (time == maxtime && buffersize > 0) ? new kelondroBLOBHeap(f, keylength, ordering, buffersize) : new kelondroBLOBHeapModifier(f, keylength, ordering);
@@ -135,7 +133,7 @@ public class kelondroBLOBArray implements kelondroBLOB {
     public void mountBLOB(File location) throws IOException {
         Date d;
         try {
-            d = serverDate.parseShortSecond(location.getName().substring(0, 14));
+            d = kelondroDate.parseShortSecond(location.getName().substring(0, 14));
         } catch (ParseException e) {
             throw new IOException("date parse problem with file " + location.toString() + ": " + e.getMessage());
         }
@@ -178,7 +176,7 @@ public class kelondroBLOBArray implements kelondroBLOB {
      * @return
      */
     public File newBLOB(Date creation) {
-        return new File(heapLocation, serverDate.formatShortSecond(creation) + "." + blobSalt + ".blob");
+        return new File(heapLocation, kelondroDate.formatShortSecond(creation) + "." + blobSalt + ".blob");
     }
     
     public String name() {

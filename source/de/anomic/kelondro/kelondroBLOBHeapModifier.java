@@ -30,7 +30,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.SortedMap;
 
-import de.anomic.server.serverMemory;
 import de.anomic.server.logging.serverLog;
 
 public class kelondroBLOBHeapModifier extends kelondroBLOBHeapReader implements kelondroBLOB {
@@ -285,8 +284,8 @@ public class kelondroBLOBHeapModifier extends kelondroBLOBHeapReader implements 
         // access the file and read the container
         file.seek(pos);
         final int len = file.readInt() - index.row().primaryKeyLength;
-        if (serverMemory.available() < len) {
-            if (!serverMemory.request(len, true)) return 0; // not enough memory available for this blob
+        if (kelondroMemory.available() < len) {
+            if (!kelondroMemory.request(len, true)) return 0; // not enough memory available for this blob
         }
         
         // read the key

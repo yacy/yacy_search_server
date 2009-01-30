@@ -44,8 +44,8 @@ import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 
-import de.anomic.server.serverByteBuffer;
-import de.anomic.server.serverMemory;
+import de.anomic.kelondro.kelondroMemory;
+import de.anomic.kelondro.kelondroByteBuffer;
 
 public class ymageMatrix {
     
@@ -75,7 +75,7 @@ public class ymageMatrix {
     }
     
     public ymageMatrix(final int width, final int height, final byte drawMode, final long backgroundColor) {
-        if (!(serverMemory.request(1024 * 1024 + 3 * width * height, false))) throw new RuntimeException("ymage: not enough memory (" + serverMemory.available() + ") available");
+        if (!(kelondroMemory.request(1024 * 1024 + 3 * width * height, false))) throw new RuntimeException("ymage: not enough memory (" + kelondroMemory.available() + ") available");
         this.width = width;
         this.height = height;
         this.backgroundCol = backgroundColor;
@@ -661,11 +661,11 @@ public class ymageMatrix {
     }
 */  
     private static class sbbBuffer {
-    	protected serverByteBuffer buffer;
+    	protected kelondroByteBuffer buffer;
     	protected int              pixel;
     	protected long             access;
     	public sbbBuffer(final int width, final int height) {
-    		this.buffer = new serverByteBuffer();
+    		this.buffer = new kelondroByteBuffer();
     		this.access = System.currentTimeMillis();
     		this.pixel = width * height;
     	}
@@ -677,7 +677,7 @@ public class ymageMatrix {
     	}
     }
     private static final ArrayList<sbbBuffer> sbbPool = new ArrayList<sbbBuffer>();
-    private static serverByteBuffer sbbFromPool(final int width, final int height, final long timeout) {
+    private static kelondroByteBuffer sbbFromPool(final int width, final int height, final long timeout) {
     	// returns an Image object from the image pool
     	// if the pooled Image was created recently (before timeout), it is not used
     	synchronized (sbbPool) {
@@ -698,10 +698,10 @@ public class ymageMatrix {
     	}
     }
     
-    public static serverByteBuffer exportImage(final BufferedImage image, final String targetExt) {
+    public static kelondroByteBuffer exportImage(final BufferedImage image, final String targetExt) {
     	// generate an byte array from the given image
     	//serverByteBuffer baos = new serverByteBuffer();
-    	final serverByteBuffer baos = sbbFromPool(image.getWidth(), image.getHeight(), 1000);
+    	final kelondroByteBuffer baos = sbbFromPool(image.getWidth(), image.getHeight(), 1000);
     	try {
     		ImageIO.write(image, targetExt, baos);
     		return baos;

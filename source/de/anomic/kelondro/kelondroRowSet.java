@@ -31,8 +31,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
-import de.anomic.server.logging.serverLog;
-
 public class kelondroRowSet extends kelondroRowCollection implements kelondroIndex, Iterable<kelondroRow.Entry> {
 
     private static final int collectionReSortLimit = 400;
@@ -149,7 +147,7 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         final kelondroRow.Entry entry = super.get(index, true);
         super.removeRow(index, true); // keep order of collection!
         int findagainindex = 0;
-        assert (findagainindex = find(a, start, length)) < 0 : "remove: chunk found again at index position (after  remove) " + findagainindex + ", index(before) = " + index + ", inset=" + serverLog.arrayList(super.chunkcache, super.rowdef.objectsize * findagainindex, length) + ", searchkey=" + serverLog.arrayList(a, start, length); // check if the remove worked
+        assert (findagainindex = find(a, start, length)) < 0 : "remove: chunk found again at index position (after  remove) " + findagainindex + ", index(before) = " + index + ", inset=" + kelondroNaturalOrder.arrayList(super.chunkcache, super.rowdef.objectsize * findagainindex, length) + ", searchkey=" + kelondroNaturalOrder.arrayList(a, start, length); // check if the remove worked
         return entry;
     }
 

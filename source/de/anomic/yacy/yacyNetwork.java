@@ -35,9 +35,9 @@ import org.apache.commons.httpclient.methods.multipart.Part;
 
 import de.anomic.http.DefaultCharsetStringPart;
 import de.anomic.kelondro.kelondroDigest;
+import de.anomic.kelondro.kelondroDate;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
-import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -83,7 +83,7 @@ public class yacyNetwork {
 		if (targetHash != null) post.add(new DefaultCharsetStringPart("youare", targetHash));
         
         // time information for synchronization
-		post.add(new DefaultCharsetStringPart("mytime", serverDate.formatShortSecond(new Date())));
+		post.add(new DefaultCharsetStringPart("mytime", kelondroDate.formatShortSecond(new Date())));
 		post.add(new DefaultCharsetStringPart("myUTC", Long.toString(System.currentTimeMillis())));
 
         // network identification

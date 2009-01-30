@@ -76,13 +76,13 @@ import de.anomic.index.indexWord;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroDigest;
+import de.anomic.kelondro.kelondroByteBuffer;
 import de.anomic.plasma.plasmaSearchRankingProcess;
 import de.anomic.plasma.plasmaSearchRankingProfile;
 import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.plasma.plasmaWordIndex;
-import de.anomic.server.serverByteBuffer;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDomains;
 import de.anomic.tools.crypt;
@@ -615,7 +615,7 @@ public final class yacyClient {
 			Map.Entry<String, String> entry;
 			TreeMap<String, String> singleAbstract;
 			String wordhash;
-			serverByteBuffer ci;
+			kelondroByteBuffer ci;
 			while (i.hasNext()) {
 				entry = i.next();
 				if (entry.getKey().startsWith("indexabstract.")) {
@@ -624,7 +624,7 @@ public final class yacyClient {
 						singleAbstract = abstractCache.get(wordhash); // a mapping from url-hashes to a string of peer-hashes
 						if (singleAbstract == null) singleAbstract = new TreeMap<String, String>();
 						try {
-							ci = new serverByteBuffer(entry.getValue().getBytes("UTF-8"));
+							ci = new kelondroByteBuffer(entry.getValue().getBytes("UTF-8"));
 						} catch (UnsupportedEncodingException e) {
 							e.printStackTrace();
 							return null;

@@ -54,8 +54,8 @@ import de.anomic.kelondro.kelondroEcoTable;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroIndex;
 import de.anomic.kelondro.kelondroRow;
+import de.anomic.kelondro.kelondroDate;
 import de.anomic.server.serverCodings;
-import de.anomic.server.serverDate;
 
 public class yacyNewsDB {
 
@@ -140,7 +140,7 @@ public class yacyNewsDB {
         return yacyNewsRecord.newRecord(
             b.getColString(0, null),
             b.getColString(1, "UTF-8"),
-            (b.empty(2)) ? null : serverDate.parseShortSecond(b.getColString(2, null), serverDate.UTCDiffString()),
+            (b.empty(2)) ? null : kelondroDate.parseShortSecond(b.getColString(2, null), kelondroDate.UTCDiffString()),
             (int) b.getColLong(3),
             serverCodings.string2map(b.getColString(4, "UTF-8"), ",")
         );
@@ -154,7 +154,7 @@ public class yacyNewsDB {
             final kelondroRow.Entry entry = this.news.row().newEntry();
             entry.setCol(0, r.id().getBytes());
             entry.setCol(1, r.category().getBytes("UTF-8"));
-            entry.setCol(2, (r.received() == null) ? null : serverDate.formatShortSecond(r.received()).getBytes());
+            entry.setCol(2, (r.received() == null) ? null : kelondroDate.formatShortSecond(r.received()).getBytes());
             entry.setCol(3, kelondroBase64Order.enhancedCoder.encodeLong(r.distributed(), 2).getBytes());
             entry.setCol(4, attributes.getBytes("UTF-8"));
             return entry;

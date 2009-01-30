@@ -50,7 +50,7 @@ import java.util.Properties;
 import java.util.TreeMap;
 import java.util.Vector;
 
-import de.anomic.server.serverDate;
+import de.anomic.kelondro.kelondroDate;
 import de.anomic.yacy.yacyURL;
 
 
@@ -375,7 +375,7 @@ public class httpHeader extends TreeMap<String, String> implements Map<String, S
     
     protected Date headerDate(final String kind) {
         if (containsKey(kind)) {
-            Date parsedDate = serverDate.parseHTTPDate(get(kind));
+            Date parsedDate = kelondroDate.parseHTTPDate(get(kind));
             if (parsedDate == null) parsedDate = new Date();
             return parsedDate;
         }

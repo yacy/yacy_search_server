@@ -26,6 +26,7 @@ package de.anomic.server;
 
 import java.net.SocketException;
 
+import de.anomic.kelondro.kelondroMemory;
 import de.anomic.server.logging.serverLog;
 
 public abstract class serverAbstractBusyThread extends serverAbstractThread implements serverBusyThread {
@@ -135,14 +136,14 @@ public abstract class serverAbstractBusyThread extends serverAbstractThread impl
                 ratz(this.idlePause);
                 idletime += System.currentTimeMillis() - timestamp;
             //} else if ((memnow = serverMemory.available()) > memprereq) try {
-            } else if (serverMemory.request(memprereq, false)) try {
+            } else if (kelondroMemory.request(memprereq, false)) try {
                 // do job
                 timestamp = System.currentTimeMillis();
-                memstamp0 = serverMemory.used();
+                memstamp0 = kelondroMemory.used();
                 isBusy = this.job();
                 // do memory and busy/idle-count/time monitoring
                 if (isBusy) {
-                    memstamp1 = serverMemory.used();
+                    memstamp1 = kelondroMemory.used();
                     if (memstamp1 >= memstamp0) {
                         // no GC in between. this is not shure but most probable
                         memuse += memstamp1 - memstamp0;
@@ -172,7 +173,7 @@ public abstract class serverAbstractBusyThread extends serverAbstractThread impl
                 busyCycles++;
             } else {
                 log.logWarning("Thread '" + this.getName() + "' runs short memory cycle. Free mem: " +
-                        (serverMemory.available() / 1024) + " KB, needed: " + (memprereq / 1024) + " KB");
+                        (kelondroMemory.available() / 1024) + " KB, needed: " + (memprereq / 1024) + " KB");
                 // omit job, not enough memory
                 // process scheduled pause
                 timestamp = System.currentTimeMillis();

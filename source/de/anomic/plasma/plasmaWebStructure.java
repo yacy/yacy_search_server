@@ -39,7 +39,7 @@ import java.util.TreeSet;
 
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroMicroDate;
-import de.anomic.server.serverDate;
+import de.anomic.kelondro.kelondroDate;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyURL;
@@ -153,7 +153,7 @@ public class plasmaWebStructure {
     
     public void flushCitationReference(final String type) {
         if (crg.length() < 12) return;
-        final String filename = type.toUpperCase() + "-A-" + new serverDate().toShortString(true) + "." + crg.substring(0, 12) + ".cr.gz";
+        final String filename = type.toUpperCase() + "-A-" + new kelondroDate().toShortString(true) + "." + crg.substring(0, 12) + ".cr.gz";
         final File path = new File(rankingPath, (type.equals("crl")) ? crlFile : crgFile);
         path.mkdirs();
         final File file = new File(path, filename);
@@ -193,7 +193,7 @@ public class plasmaWebStructure {
     
     private static String map2refstr(final Map<String, Integer> map) {
         final StringBuilder s = new StringBuilder(map.size() * 10);
-        s.append(serverDate.formatShortDay(new Date()));
+        s.append(kelondroDate.formatShortDay(new Date()));
         String h;
         for (final Map.Entry<String, Integer> entry : map.entrySet()) {
             s.append(entry.getKey());

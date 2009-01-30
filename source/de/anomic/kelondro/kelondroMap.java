@@ -36,7 +36,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import de.anomic.server.serverDate;
 
 public class kelondroMap {
 
@@ -140,7 +139,7 @@ public class kelondroMap {
         while (key.length() < blob.keylength()) key += "_";
         
         // write entry
-        blob.put(key.getBytes(), map2string(newMap, "W" + serverDate.formatShortSecond() + " ").getBytes());
+        blob.put(key.getBytes(), map2string(newMap, "W" + kelondroDate.formatShortSecond() + " ").getBytes());
 
         // check for space in cache
         checkCacheSpace();

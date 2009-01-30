@@ -39,7 +39,6 @@ import java.util.concurrent.Future;
 
 import de.anomic.server.NamePrefixThreadFactory;
 import de.anomic.server.serverFileUtils;
-import de.anomic.server.serverMemory;
 import de.anomic.server.serverProcessor;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySeedDB;
@@ -202,7 +201,7 @@ public class kelondroRowCollection implements Iterable<kelondroRow.Entry> {
         if (needed >= chunkcache.length)
             return; // in case that the growfactor causes that the cache would
                     // grow instead of shrink, simply ignore the growfactor
-        if (serverMemory.available() + 1000 < needed)
+        if (kelondroMemory.available() + 1000 < needed)
             return; // if the swap buffer is not available, we must give up.
                     // This is not critical. Otherwise we provoke a serious
                     // problem with OOM
@@ -293,7 +292,7 @@ public class kelondroRowCollection implements Iterable<kelondroRow.Entry> {
     private final void addUnique(final byte[] a, final int astart, final int alength) {
         assert (a != null);
         assert (astart >= 0) && (astart < a.length) : " astart = " + astart;
-        assert (!(serverLog.allZero(a, astart, alength))) : "a = " + serverLog.arrayList(a, astart, alength);
+        assert (!(serverLog.allZero(a, astart, alength))) : "a = " + kelondroNaturalOrder.arrayList(a, astart, alength);
         assert (alength > 0);
         assert (astart + alength <= a.length);
         assert alength == rowdef.objectsize : "alength =" + alength + ", rowdef.objectsize = " + rowdef.objectsize;
@@ -317,7 +316,7 @@ public class kelondroRowCollection implements Iterable<kelondroRow.Entry> {
     protected final void addSorted(final byte[] a, final int astart, final int alength) {
         assert (a != null);
         assert (astart >= 0) && (astart < a.length) : " astart = " + astart;
-        assert (!(serverLog.allZero(a, astart, alength))) : "a = " + serverLog.arrayList(a, astart, alength);
+        assert (!(serverLog.allZero(a, astart, alength))) : "a = " + kelondroNaturalOrder.arrayList(a, astart, alength);
         assert (alength > 0);
         assert (astart + alength <= a.length);
         assert alength == rowdef.objectsize : "alength =" + alength + ", rowdef.objectsize = " + rowdef.objectsize;

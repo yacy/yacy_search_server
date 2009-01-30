@@ -19,7 +19,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.server;
+package de.anomic.kelondro;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -29,7 +29,7 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Properties;
 
-public final class serverByteBuffer extends OutputStream {
+public final class kelondroByteBuffer extends OutputStream {
     
     public static final byte singlequote = (byte) 39;
     public static final byte doublequote = (byte) 34;
@@ -40,32 +40,32 @@ public final class serverByteBuffer extends OutputStream {
     private int length;
 
     
-    public serverByteBuffer() {
+    public kelondroByteBuffer() {
         buffer = new byte[10];
         length = 0;
         offset = 0;
     }
     
-    public serverByteBuffer(final int initLength) {
+    public kelondroByteBuffer(final int initLength) {
         this.buffer = new byte[initLength];
         this.length = 0;
         this.offset = 0;
     }        
     
-    public serverByteBuffer(final byte[] bb) {
+    public kelondroByteBuffer(final byte[] bb) {
         buffer = bb;
         length = bb.length;
         offset = 0;
     }
 
-    public serverByteBuffer(final byte[] bb, final int initLength) {
+    public kelondroByteBuffer(final byte[] bb, final int initLength) {
         this.buffer = new byte[initLength];
         System.arraycopy(bb, 0, buffer, 0, bb.length);
         length = bb.length;
         offset = 0;
     }
     
-    public serverByteBuffer(final byte[] bb, final int of, final int le) {
+    public kelondroByteBuffer(final byte[] bb, final int of, final int le) {
         if (of * 2 > bb.length) {
             buffer = new byte[le];
             System.arraycopy(bb, of, buffer, 0, le);
@@ -78,13 +78,13 @@ public final class serverByteBuffer extends OutputStream {
         }
     }
 
-    public serverByteBuffer(final serverByteBuffer bb) {
+    public kelondroByteBuffer(final kelondroByteBuffer bb) {
         buffer = bb.buffer;
         length = bb.length;
         offset = bb.offset;
     }
 
-    public serverByteBuffer(final File f) throws IOException {
+    public kelondroByteBuffer(final File f) throws IOException {
     // initially fill the byte buffer with the content of a file
     if (f.length() > Integer.MAX_VALUE) throw new IOException("file is too large for buffering");
 
@@ -167,39 +167,39 @@ public final class serverByteBuffer extends OutputStream {
         if (pos + le > length) length = pos + le;
     }
     
-    public serverByteBuffer append(final byte b) {
+    public kelondroByteBuffer append(final byte b) {
         write(b);
         return this;
     }
 
-    public serverByteBuffer append(final int i) {
+    public kelondroByteBuffer append(final int i) {
         write((byte) (i & 0xFF));
         return this;
     }
 
-    public serverByteBuffer append(final byte[] bb) {
+    public kelondroByteBuffer append(final byte[] bb) {
         write(bb);
         return this;
     }
 
-    public serverByteBuffer append(final byte[] bb, final int of, final int le) {
+    public kelondroByteBuffer append(final byte[] bb, final int of, final int le) {
         write(bb, of, le);
         return this;
     }
 
-    public serverByteBuffer append(final String s) {
+    public kelondroByteBuffer append(final String s) {
         return append(s.getBytes());
     }
     
-    public serverByteBuffer append(final String s, final String charset) throws UnsupportedEncodingException {
+    public kelondroByteBuffer append(final String s, final String charset) throws UnsupportedEncodingException {
         return append(s.getBytes(charset));
     }    
 
-    public serverByteBuffer append(final serverByteBuffer bb) {
+    public kelondroByteBuffer append(final kelondroByteBuffer bb) {
         return append(bb.buffer, bb.offset, bb.length);
     }
 
-    public serverByteBuffer append(final Object o) {
+    public kelondroByteBuffer append(final Object o) {
         if (o instanceof String) return append((String) o);
         if (o instanceof byte[]) return append((byte[]) o);
         return null;
@@ -286,19 +286,19 @@ public final class serverByteBuffer extends OutputStream {
         return tmp;
     }
     
-    public serverByteBuffer trim(final int start) {
+    public kelondroByteBuffer trim(final int start) {
         trim(start, this.length - start);
         return this;
     }
 
-    public serverByteBuffer trim(final int start, final int len) {
+    public kelondroByteBuffer trim(final int start, final int len) {
         if (start + len > this.length) throw new IndexOutOfBoundsException("trim: start + len > length; this.offset = " + this.offset + ", this.length = " + this.length + ", start = " + start + ", len = " + len);
         this.offset = this.offset + start;
         this.length = len;
         return this;
     }
 
-    public serverByteBuffer trim() {
+    public kelondroByteBuffer trim() {
         int l = 0;
         while ((l < length) && (buffer[offset + l] <= 32)) {
             l++;

@@ -37,7 +37,7 @@ import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexReferenceBlacklist;
 import de.anomic.index.indexURLReference;
 import de.anomic.kelondro.kelondroBitfield;
-import de.anomic.server.serverDate;
+import de.anomic.kelondro.kelondroDate;
 import de.anomic.server.serverObjects;
 import de.anomic.yacy.yacyPeerSelection;
 import de.anomic.yacy.yacySeed;
@@ -147,7 +147,7 @@ public class plasmaSearchAPI {
                 prop.putNum("genUrlList_urlList_"+i+"_urlExists_ybr", plasmaSearchRankingProcess.ybr(entry.hash()));
                 prop.putNum("genUrlList_urlList_"+i+"_urlExists_tf", 1000.0 * entry.word().termFrequency());
                 prop.putNum("genUrlList_urlList_"+i+"_urlExists_authority", (ranked.getOrder() == null) ? -1 : ranked.getOrder().authority(entry.hash()));
-                prop.put("genUrlList_urlList_"+i+"_urlExists_date", serverDate.formatShortDay(new Date(entry.word().lastModified())));
+                prop.put("genUrlList_urlList_"+i+"_urlExists_date", kelondroDate.formatShortDay(new Date(entry.word().lastModified())));
                 prop.putNum("genUrlList_urlList_"+i+"_urlExists_wordsintitle", entry.word().wordsintitle());
                 prop.putNum("genUrlList_urlList_"+i+"_urlExists_wordsintext", entry.word().wordsintext());
                 prop.putNum("genUrlList_urlList_"+i+"_urlExists_phrasesintext", entry.word().phrasesintext());

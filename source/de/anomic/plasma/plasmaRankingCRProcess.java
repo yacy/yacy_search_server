@@ -39,9 +39,9 @@ import de.anomic.kelondro.kelondroIndex;
 import de.anomic.kelondro.kelondroMicroDate;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroRowSet;
-import de.anomic.server.serverDate;
+import de.anomic.kelondro.kelondroDate;
+import de.anomic.kelondro.kelondroMemory;
 import de.anomic.server.serverFileUtils;
-import de.anomic.server.serverMemory;
 
 public class plasmaRankingCRProcess {
     
@@ -357,7 +357,7 @@ public class plasmaRankingCRProcess {
             count++;
             if ((count % 1000) == 0) {
                 l = java.lang.Math.max(1, (System.currentTimeMillis() - start) / 1000);
-                System.out.println("processed " + count + " citations, " + (count / l) + " per second, rci.size = " + rci.size() + ", " + ((size - count) / (count / l)) + " seconds remaining; mem = " + serverMemory.available());  
+                System.out.println("processed " + count + " citations, " + (count / l) + " per second, rci.size = " + rci.size() + ", " + ((size - count) / (count / l)) + " seconds remaining; mem = " + kelondroMemory.available());  
             }
             i.remove();
         }
@@ -365,7 +365,7 @@ public class plasmaRankingCRProcess {
         // finished. write to file
         cr = null;
         cr_in = null;
-        serverMemory.gc(1000, "plasmaRankingCRProcess.genrci(...)"); // thq
+        kelondroMemory.gc(1000, "plasmaRankingCRProcess.genrci(...)"); // thq
         rci.toFile(rci_out);
         return count;
     }
@@ -406,7 +406,7 @@ public class plasmaRankingCRProcess {
             count++;
             if ((count % 1000) == 0) {
                 l = java.lang.Math.max(1, (System.currentTimeMillis() - start) / 1000);
-                System.out.println("processed " + count + " citations, " + (count / l) + " per second, rci.size = " + rci.size() + ", " + ((size - count) / (count / l) / 60) + " minutes remaining; mem = " + serverMemory.free());
+                System.out.println("processed " + count + " citations, " + (count / l) + " per second, rci.size = " + rci.size() + ", " + ((size - count) / (count / l) / 60) + " minutes remaining; mem = " + kelondroMemory.free());
             }
         }
 
@@ -429,7 +429,7 @@ public class plasmaRankingCRProcess {
                 final File tmp_dir = new File(root_path, "DATA/RANKING/GLOBAL/016_tmp");
                 final File err_dir = new File(root_path, "DATA/RANKING/GLOBAL/017_err");
                 final File acc_dir = new File(root_path, "DATA/RANKING/GLOBAL/018_acc");
-                final String filename = "CRG-a-" + new serverDate().toShortString(true) + ".cr.gz";
+                final String filename = "CRG-a-" + new kelondroDate().toShortString(true) + ".cr.gz";
                 final File to_file = new File(root_path, "DATA/RANKING/GLOBAL/020_con0/" + filename);
                 if (!(ready_dir.exists())) ready_dir.mkdirs();
                 if (!(tmp_dir.exists())) tmp_dir.mkdirs();

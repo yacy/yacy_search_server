@@ -22,7 +22,7 @@
 
 // this class is needed to replace the slow java built-in date method by a faster version
 
-package de.anomic.server;
+package de.anomic.kelondro;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -34,9 +34,7 @@ import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
 
-import de.anomic.server.logging.serverLog;
-
-public final class serverDate {
+public final class kelondroDate {
     
     /** minimal date format without time information (fixed width: 8) */
     public static final String PATTERN_SHORT_DAY    = "yyyyMMdd";
@@ -96,8 +94,8 @@ public final class serverDate {
         // the year value starting with 1970
         CAL_GMT.setTimeInMillis(0);
         
-        for (int i = 0; i < serverDate.FORMATS_HTTP.length; i++) {
-            final SimpleDateFormat f = serverDate.FORMATS_HTTP[i];
+        for (int i = 0; i < kelondroDate.FORMATS_HTTP.length; i++) {
+            final SimpleDateFormat f = kelondroDate.FORMATS_HTTP[i];
             f.setTimeZone(TZ_GMT);
             f.set2DigitYearStart(CAL_GMT.getTime());
         }
@@ -118,7 +116,7 @@ public final class serverDate {
         s = s.trim();
         if ((s == null) || (s.length() < 9)) return null;
     
-        for(int i = 0; i < FORMATS_HTTP.length; i++) {
+        for (int i = 0; i < FORMATS_HTTP.length; i++) {
             try {
                 return parse(FORMATS_HTTP[i], s);
             } catch (final ParseException e) {
@@ -127,7 +125,7 @@ public final class serverDate {
         }
     
         // the method didn't return a Date, so we got an illegal String
-        serverLog.logSevere("HTTPC-header", "DATE ERROR (Parse): " + s);
+        //serverLog.logSevere("HTTPC-header", "DATE ERROR (Parse): " + s);
         return null;
     }
 
@@ -256,7 +254,7 @@ public final class serverDate {
             // ignore this as it is perfectly fine to have non-complete date in this format
         } catch (final Exception e) {
             // catch all Exceptions and return what we parsed so far
-            serverLog.logInfo("SERVER", "parseISO8601: DATE ERROR with: '" + s + "' got so far: '" + cal.toString());
+            //serverLog.logInfo("SERVER", "parseISO8601: DATE ERROR with: '" + s + "' got so far: '" + cal.toString());
         }
         
         // in case we couldn't even parse a year
@@ -353,12 +351,12 @@ public final class serverDate {
         if (remoteTimeString == null || remoteTimeString.length() == 0) { return new Date(); }
         if (remoteUTCOffset == null || remoteUTCOffset.length() == 0) { return new Date(); }
         try {
-            return new Date(parse(FORMAT_SHORT_SECOND, remoteTimeString).getTime() - serverDate.UTCDiff() + serverDate.UTCDiff(remoteUTCOffset));
+            return new Date(parse(FORMAT_SHORT_SECOND, remoteTimeString).getTime() - kelondroDate.UTCDiff() + kelondroDate.UTCDiff(remoteUTCOffset));
         } catch (final java.text.ParseException e) {
-            serverLog.logFinest("parseUniversalDate", e.getMessage() + ", remoteTimeString=[" + remoteTimeString + "]");
+            //serverLog.logFinest("parseUniversalDate", e.getMessage() + ", remoteTimeString=[" + remoteTimeString + "]");
             return new Date();
         } catch (final java.lang.NumberFormatException e) {
-            serverLog.logFinest("parseUniversalDate", e.getMessage() + ", remoteTimeString=[" + remoteTimeString + "]");
+            //serverLog.logFinest("parseUniversalDate", e.getMessage() + ", remoteTimeString=[" + remoteTimeString + "]");
             return new Date();
         }
     }
@@ -513,11 +511,11 @@ public final class serverDate {
         return System.currentTimeMillis() - UTCDiff();
     }
     
-    public serverDate() {
+    public kelondroDate() {
         this(System.currentTimeMillis());
     }
     
-    public serverDate(final long utime) {
+    public kelondroDate(final long utime) {
         // set the time as the difference, measured in milliseconds,
         // between the current time and midnight, January 1, 1970 UTC/GMT
         this.utime = utime;
@@ -547,7 +545,7 @@ public final class serverDate {
         this.dow = (int) (((utime / dayMillis) + 3) % 7);
     }
         
-    public serverDate(final String datestring) throws java.text.ParseException {
+    public kelondroDate(final String datestring) throws java.text.ParseException {
         // parse a date string; othervise throw a java.text.ParseException
         if ((datestring.length() == 14) || (datestring.length() == 17)) {
             // parse a ShortString
@@ -636,18 +634,18 @@ public final class serverDate {
     public static void main(final String[] args) {
         //System.out.println("kelondroDate is (" + new kelondroDate().toString() + ")");
         System.out.println("offset is " + (UTCDiff()/1000/60/60) + " hours, javaDate is " + new Date() + ", correctedDate is " + new Date(correctedUTCTime()));
-        System.out.println("serverDate : " + new serverDate().toShortString(false));
+        System.out.println("serverDate : " + new kelondroDate().toShortString(false));
         System.out.println("  javaDate : " + formatShortSecond());
-        System.out.println("serverDate : " + new serverDate().toString());
+        System.out.println("serverDate : " + new kelondroDate().toString());
         System.out.println("  JavaDate : " + DateFormat.getDateInstance().format(new Date()));
-        System.out.println("serverDate0: " + new serverDate(0).toShortString(false));
+        System.out.println("serverDate0: " + new kelondroDate(0).toShortString(false));
         System.out.println("  JavaDate0: " + format(FORMAT_SHORT_SECOND, new Date(0)));
-        System.out.println("serverDate0: " + new serverDate(0).toString());
+        System.out.println("serverDate0: " + new kelondroDate(0).toString());
         System.out.println("  JavaDate0: " + DateFormat.getDateInstance().format(new Date(0)));
         // parse test
         try {
-            System.out.println("serverDate re-parse short: " + new serverDate(new serverDate().toShortString(false)).toShortString(true));
-            System.out.println("serverDate re-parse long : " + new serverDate(new serverDate().toShortString(true)).toShortString(true));
+            System.out.println("serverDate re-parse short: " + new kelondroDate(new kelondroDate().toShortString(false)).toShortString(true));
+            System.out.println("serverDate re-parse long : " + new kelondroDate(new kelondroDate().toShortString(true)).toShortString(true));
         } catch (final java.text.ParseException e) {
             System.out.println("Parse Exception: " + e.getMessage() + ", pos " + e.getErrorOffset());
         }
@@ -657,7 +655,7 @@ public final class serverDate {
         
         final String[] testresult = new String[10000];
         start = System.currentTimeMillis();
-        for (int i = 0; i < cycles; i++) testresult[i] = new serverDate().toShortString(false);
+        for (int i = 0; i < cycles; i++) testresult[i] = new kelondroDate().toShortString(false);
         System.out.println("time for " + cycles + " calls to serverDate:" + (System.currentTimeMillis() - start) + " milliseconds");
         
         start = System.currentTimeMillis();

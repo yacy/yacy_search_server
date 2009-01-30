@@ -76,12 +76,12 @@ import de.anomic.htmlFilter.htmlFilterContentTransformer;
 import de.anomic.htmlFilter.htmlFilterTransformer;
 import de.anomic.index.indexDocumentMetadata;
 import de.anomic.index.indexReferenceBlacklist;
+import de.anomic.kelondro.kelondroDate;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.server.serverCore;
-import de.anomic.server.serverDate;
 import de.anomic.server.serverDomains;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
@@ -660,7 +660,7 @@ public final class httpdProxyHandler {
             prepareResponseHeader(cachedResponseHeader, httpVer);               
 
             // replace date field in old header by actual date, this is according to RFC
-            cachedResponseHeader.put(httpHeader.DATE, serverDate.formatRFC1123(new Date()));
+            cachedResponseHeader.put(httpHeader.DATE, kelondroDate.formatRFC1123(new Date()));
             
 //          if (((String)requestHeader.get(httpHeader.ACCEPT_ENCODING,"")).indexOf("gzip") != -1) {
 //          chunked = new httpChunkedOutputStream(respond);

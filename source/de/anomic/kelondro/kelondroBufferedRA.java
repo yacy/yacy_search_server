@@ -24,24 +24,22 @@ package de.anomic.kelondro;
 
 import java.io.IOException;
 
-import de.anomic.server.serverByteBuffer;
-
 public class kelondroBufferedRA extends kelondroAbstractRA implements kelondroRA {
 
-    private serverByteBuffer sbb;
+    private kelondroByteBuffer sbb;
     private long pos;
     
     public kelondroBufferedRA() {
-        sbb = new serverByteBuffer();
+        sbb = new kelondroByteBuffer();
         pos = 0;
     }
     
-    public kelondroBufferedRA(final serverByteBuffer bb) {
+    public kelondroBufferedRA(final kelondroByteBuffer bb) {
         sbb = bb;
         pos = 0;
     }
     
-    public serverByteBuffer getBuffer() {
+    public kelondroByteBuffer getBuffer() {
         return this.sbb;
     }
     

@@ -8,8 +8,8 @@ import java.util.Iterator;
 import de.anomic.data.bookmarksDB;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.kelondroDigest;
+import de.anomic.kelondro.kelondroDate;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -29,7 +29,7 @@ public class get {
         if(post != null && post.containsKey("date")){
             date=post.get("date");
         }else{
-            date=serverDate.formatISO8601(new Date(System.currentTimeMillis()));
+            date=kelondroDate.formatISO8601(new Date(System.currentTimeMillis()));
         }
         
         // if an extended xml should be used
@@ -39,7 +39,7 @@ public class get {
         
         Date parsedDate = null; 
         try {
-			parsedDate = serverDate.parseISO8601(date);
+			parsedDate = kelondroDate.parseISO8601(date);
 		} catch (final ParseException e) {
 			parsedDate = new Date();
 		}
@@ -49,7 +49,7 @@ public class get {
         bookmarksDB.Bookmark bookmark=null;
         while(it.hasNext()){
             bookmark=switchboard.bookmarksDB.getBookmark(it.next());
-            if(serverDate.formatISO8601(new Date(bookmark.getTimeStamp())).equals(date) &&
+            if(kelondroDate.formatISO8601(new Date(bookmark.getTimeStamp())).equals(date) &&
                     tag==null || bookmark.getTags().contains(tag) &&
                     isAdmin || bookmark.getPublic()){
                 prop.putHTML("posts_"+count+"_url", bookmark.getUrl());

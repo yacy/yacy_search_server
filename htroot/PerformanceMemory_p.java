@@ -34,10 +34,10 @@ import de.anomic.kelondro.kelondroCache;
 import de.anomic.kelondro.kelondroCachedRecords;
 import de.anomic.kelondro.kelondroEcoTable;
 import de.anomic.kelondro.kelondroFlexTable;
+import de.anomic.kelondro.kelondroMemory;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverDomains;
 import de.anomic.server.serverFileUtils;
-import de.anomic.server.serverMemory;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -62,15 +62,15 @@ public class PerformanceMemory_p {
             }
         }
         
-        final long memoryFreeNow = serverMemory.free();
+        final long memoryFreeNow = kelondroMemory.free();
         final long memoryFreeAfterInitBGC = Long.parseLong(env.getConfig("memoryFreeAfterInitBGC", "0"));
         final long memoryFreeAfterInitAGC = Long.parseLong(env.getConfig("memoryFreeAfterInitAGC", "0"));
         final long memoryFreeAfterStartup = Long.parseLong(env.getConfig("memoryFreeAfterStartup", "0"));
-        final long memoryTotalNow = serverMemory.total();
+        final long memoryTotalNow = kelondroMemory.total();
         final long memoryTotalAfterInitBGC = Long.parseLong(env.getConfig("memoryTotalAfterInitBGC", "0"));
         final long memoryTotalAfterInitAGC = Long.parseLong(env.getConfig("memoryTotalAfterInitAGC", "0"));
         final long memoryTotalAfterStartup = Long.parseLong(env.getConfig("memoryTotalAfterStartup", "0"));
-        final long memoryMax = serverMemory.max();
+        final long memoryMax = kelondroMemory.max();
         
         prop.putNum("memoryMax", memoryMax / MB);
         prop.putNum("memoryAvailAfterStartup", (memoryMax - memoryTotalAfterStartup + memoryFreeAfterStartup) / MB);
@@ -104,7 +104,7 @@ public class PerformanceMemory_p {
             prop.put("TableList_" + c + "_tableIndexPath", ((p = filename.indexOf("DATA")) < 0) ? filename : filename.substring(p));
             prop.put("TableList_" + c + "_tableIndexChunkSize", map.get("tableIndexChunkSize"));
             prop.putNum("TableList_" + c + "_tableIndexCount", map.get("tableIndexCount"));
-            prop.put("TableList_" + c + "_tableIndexMem", serverMemory.bytesToString(mem));
+            prop.put("TableList_" + c + "_tableIndexMem", kelondroMemory.bytesToString(mem));
             c++;
         }
         prop.put("TableList", c);
@@ -122,12 +122,12 @@ public class PerformanceMemory_p {
             
             mem = Long.parseLong(map.get("tableKeyMem"));
             totalmem += mem;
-            prop.put("EcoList_" + c + "_tableKeyMem", serverMemory.bytesToString(mem));
+            prop.put("EcoList_" + c + "_tableKeyMem", kelondroMemory.bytesToString(mem));
             prop.put("EcoList_" + c + "_tableKeyChunkSize", map.get("tableKeyChunkSize"));
             
             mem = Long.parseLong(map.get("tableValueMem"));
             totalmem += mem;
-            prop.put("EcoList_" + c + "_tableValueMem", serverMemory.bytesToString(mem));
+            prop.put("EcoList_" + c + "_tableValueMem", kelondroMemory.bytesToString(mem));
             prop.put("EcoList_" + c + "_tableValueChunkSize", map.get("tableValueChunkSize"));
             
             c++;
@@ -147,7 +147,7 @@ public class PerformanceMemory_p {
             prop.put("NodeList_" + c + "_nodeCachePath", ((p = filename.indexOf("DATA")) < 0) ? filename : filename.substring(p));
             prop.put("NodeList_" + c + "_nodeChunkSize", map.get("nodeChunkSize"));
             prop.putNum("NodeList_" + c + "_nodeCacheCount", map.get("nodeCacheCount"));
-            prop.put("NodeList_" + c + "_nodeCacheMem", serverMemory.bytesToString(mem));
+            prop.put("NodeList_" + c + "_nodeCacheMem", kelondroMemory.bytesToString(mem));
             prop.putNum("NodeList_" + c + "_nodeCacheReadHit", map.get("nodeCacheReadHit"));
             prop.putNum("NodeList_" + c + "_nodeCacheReadMiss", map.get("nodeCacheReadMiss"));
             prop.putNum("NodeList_" + c + "_nodeCacheWriteUnique", map.get("nodeCacheWriteUnique"));
@@ -175,7 +175,7 @@ public class PerformanceMemory_p {
             totalhitmem += hitmem;
             prop.put("ObjectList_" + c + "_objectHitChunkSize", map.get("objectHitChunkSize"));
             prop.putNum("ObjectList_" + c + "_objectHitCacheCount", map.get("objectHitCacheCount"));
-            prop.put("ObjectList_" + c + "_objectHitCacheMem", serverMemory.bytesToString(hitmem));
+            prop.put("ObjectList_" + c + "_objectHitCacheMem", kelondroMemory.bytesToString(hitmem));
             prop.putNum("ObjectList_" + c + "_objectHitCacheReadHit", map.get("objectHitCacheReadHit"));
             prop.putNum("ObjectList_" + c + "_objectHitCacheReadMiss", map.get("objectHitCacheReadMiss"));
             prop.putNum("ObjectList_" + c + "_objectHitCacheWriteUnique", map.get("objectHitCacheWriteUnique"));
@@ -188,7 +188,7 @@ public class PerformanceMemory_p {
             totalmissmem += missmem;
             prop.put("ObjectList_" + c + "_objectMissChunkSize", map.get("objectMissChunkSize"));
             prop.putNum("ObjectList_" + c + "_objectMissCacheCount", map.get("objectMissCacheCount"));
-            prop.putHTML("ObjectList_" + c + "_objectMissCacheMem", serverMemory.bytesToString(missmem));
+            prop.putHTML("ObjectList_" + c + "_objectMissCacheMem", kelondroMemory.bytesToString(missmem));
             prop.putNum("ObjectList_" + c + "_objectMissCacheReadHit", map.get("objectMissCacheReadHit"));
             prop.putNum("ObjectList_" + c + "_objectMissCacheReadMiss", map.get("objectMissCacheReadMiss"));
             prop.putNum("ObjectList_" + c + "_objectMissCacheWriteUnique", map.get("objectMissCacheWriteUnique"));

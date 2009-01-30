@@ -3,9 +3,9 @@
 // (C) 2005 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 22.09.2005 on http://yacy.net
 //
-// $LastChangedDate$
-// $LastChangedRevision$
-// $LastChangedBy$
+// $LastChangedDate: 2008-12-04 13:54:16 +0100 (Do, 04 Dez 2008) $
+// $LastChangedRevision: 5379 $
+// $LastChangedBy: orbiter $
 //
 // LICENSE
 // 
@@ -23,7 +23,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.server;
+package de.anomic.kelondro;
 
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.yFormatter;
@@ -31,7 +31,7 @@ import de.anomic.tools.yFormatter;
 /**
  * Use this to get information about memory usage or try to free some memory
  */
-public class serverMemory {
+public class kelondroMemory {
 
     private static final Runtime runtime = Runtime.getRuntime();
     private static final serverLog log = new serverLog("MEMORY");

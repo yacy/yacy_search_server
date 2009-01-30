@@ -30,8 +30,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
-import de.anomic.server.serverMemory;
-
 /**
  * The EcoFS is a flat file with records of fixed length. The file does not contain
  * any meta information and the first record starts right at file position 0
@@ -103,9 +101,9 @@ public class kelondroEcoFS {
         // initialize cache and buffer
         int cachesize = Math.max(1, (maxReadCache / recordsize)) * recordsize;
         int buffersize = Math.max(1, (maxWriteBuffer / recordsize)) * recordsize;
-        if (!serverMemory.request(cachesize + buffersize + 1024 * 1024 * 20, true)) {
+        if (!kelondroMemory.request(cachesize + buffersize + 1024 * 1024 * 20, true)) {
         	// not enough memory there, take less
-        	long lessmem = Math.min(Math.min(maxReadCache, maxWriteBuffer) / 8, serverMemory.available() - (1024 * 1024 * 6) / 6);
+        	long lessmem = Math.min(Math.min(maxReadCache, maxWriteBuffer) / 8, kelondroMemory.available() - (1024 * 1024 * 6) / 6);
         	//System.out.println("newmem vorher: cachesize = " + cachesize + ", buffersize = " + buffersize + ", available = " + serverMemory.available() + ", lessmem = " + lessmem);
         	cachesize = Math.max(1, (int) (lessmem / recordsize)) * recordsize;
             buffersize = Math.max(1, (int) (lessmem / recordsize)) * recordsize;

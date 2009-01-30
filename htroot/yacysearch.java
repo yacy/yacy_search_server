@@ -35,6 +35,7 @@ import de.anomic.index.indexURLReference;
 import de.anomic.index.indexWord;
 import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroMSetTools;
+import de.anomic.kelondro.kelondroMemory;
 import de.anomic.plasma.plasmaCondenser;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.plasmaProfiling;
@@ -46,7 +47,6 @@ import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDomains;
-import de.anomic.server.serverMemory;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverProfiling;
 import de.anomic.server.serverSwitch;
@@ -204,7 +204,7 @@ public class yacysearch {
         if ((!block) && (post == null || post.get("cat", "href").equals("href"))) {
             
             // check available memory and clean up if necessary
-            if (!serverMemory.request(8000000L, false)) {
+            if (!kelondroMemory.request(8000000L, false)) {
                 sb.webIndex.clearCache();
                 plasmaSearchEvent.cleanupEvents(true);
             }

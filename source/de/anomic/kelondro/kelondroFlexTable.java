@@ -35,7 +35,6 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import de.anomic.server.serverMemory;
 import de.anomic.server.logging.serverLog;
 
 public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondroIndex {
@@ -84,7 +83,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
 		}
 
 		// fill the index
-		System.out.print("*** Loading RAM index for " + size() + " entries from " + newpath + "; available RAM = " + (serverMemory.available() >> 20) + " MB, allocating " + (neededRAM >> 20) + " MB for index.");
+		System.out.print("*** Loading RAM index for " + size() + " entries from " + newpath + "; available RAM = " + (kelondroMemory.available() >> 20) + " MB, allocating " + (neededRAM >> 20) + " MB for index.");
 		index = initializeRamIndex(minimumSpace);
 
 		System.out.println(" -done-");
@@ -251,7 +250,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
             return null;
         }
         assert oldentry != null : "overwrite of empty position " + pos + ", index management must have failed before";
-        assert rowdef.objectOrder.compare(oldentry.getPrimaryKeyBytes(), key) == 0 : "key and row does not match; key = " + serverLog.arrayList(key, 0, key.length) + " row.key = " + serverLog.arrayList(oldentry.getPrimaryKeyBytes(), 0, rowdef.primaryKeyLength);
+        assert rowdef.objectOrder.compare(oldentry.getPrimaryKeyBytes(), key) == 0 : "key and row does not match; key = " + kelondroNaturalOrder.arrayList(key, 0, key.length) + " row.key = " + kelondroNaturalOrder.arrayList(oldentry.getPrimaryKeyBytes(), 0, rowdef.primaryKeyLength);
         super.set(pos, row);
         assert this.size() == index.size() : "content.size() = " + this.size() + ", index.size() = " + index.size();
         return oldentry;
@@ -316,9 +315,9 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
     		return null;
         }
         assert r != null : "r == null"; // should be avoided with path above
-        assert rowdef.objectOrder.compare(r.getPrimaryKeyBytes(), key) == 0 : "key and row does not match; key = " + serverLog.arrayList(key, 0, key.length) + " row.key = " + serverLog.arrayList(r.getPrimaryKeyBytes(), 0, rowdef.primaryKeyLength);
+        assert rowdef.objectOrder.compare(r.getPrimaryKeyBytes(), key) == 0 : "key and row does not match; key = " + kelondroNaturalOrder.arrayList(key, 0, key.length) + " row.key = " + kelondroNaturalOrder.arrayList(r.getPrimaryKeyBytes(), 0, rowdef.primaryKeyLength);
         super.remove(i);
-        assert super.get(i) == null : "i = " + i + ", get(i) = " + serverLog.arrayList(super.get(i).bytes(), 0, 12);
+        assert super.get(i) == null : "i = " + i + ", get(i) = " + kelondroNaturalOrder.arrayList(super.get(i).bytes(), 0, 12);
         assert this.size() == index.size() : "content.size() = " + this.size() + ", index.size() = " + index.size();
 		return r;
     }

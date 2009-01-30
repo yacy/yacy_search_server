@@ -60,7 +60,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import de.anomic.server.serverByteBuffer;
+import de.anomic.kelondro.kelondroByteBuffer;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.logging.serverLog;
 
@@ -153,15 +153,15 @@ public final class httpTemplate {
         new Object[] {iOpen, iClose}
     };
 
-    public final static serverByteBuffer[] splitQuotations(final serverByteBuffer text) {
-        final List<serverByteBuffer> l = splitQuotation(text, 0);
-        final serverByteBuffer[] sbbs = new serverByteBuffer[l.size()];
+    public final static kelondroByteBuffer[] splitQuotations(final kelondroByteBuffer text) {
+        final List<kelondroByteBuffer> l = splitQuotation(text, 0);
+        final kelondroByteBuffer[] sbbs = new kelondroByteBuffer[l.size()];
         for (int i = 0; i < l.size(); i++) sbbs[i] = l.get(i);
         return sbbs;
     }
 
-    private final static List<serverByteBuffer> splitQuotation(serverByteBuffer text, int qoff) {
-        final ArrayList<serverByteBuffer> l = new ArrayList<serverByteBuffer>();
+    private final static List<kelondroByteBuffer> splitQuotation(kelondroByteBuffer text, int qoff) {
+        final ArrayList<kelondroByteBuffer> l = new ArrayList<kelondroByteBuffer>();
         if (qoff >= meta_quotation.length) {
             if (text.length() > 0) l.add(text);
             return l;
@@ -174,22 +174,22 @@ public final class httpTemplate {
             q = text.indexOf(right, p + 1);
             if (q >= 0) {
                 // found a pattern
-                l.addAll(splitQuotation(new serverByteBuffer(text.getBytes(0, p)), qoff));
-                l.add(new serverByteBuffer(text.getBytes(p, q + right.length - p)));
-                text = new serverByteBuffer(text.getBytes(q + right.length));
+                l.addAll(splitQuotation(new kelondroByteBuffer(text.getBytes(0, p)), qoff));
+                l.add(new kelondroByteBuffer(text.getBytes(p, q + right.length - p)));
+                text = new kelondroByteBuffer(text.getBytes(q + right.length));
             } else {
                 // found only pattern start, no closing parantesis (a syntax error that is silently accepted here)
-                l.addAll(splitQuotation(new serverByteBuffer(text.getBytes(0, p)), qoff));
-                l.addAll(splitQuotation(new serverByteBuffer(text.getBytes(p)), qoff));
+                l.addAll(splitQuotation(new kelondroByteBuffer(text.getBytes(0, p)), qoff));
+                l.addAll(splitQuotation(new kelondroByteBuffer(text.getBytes(p)), qoff));
                 text.clear();
             }
         }
 
         // find double-points
         while ((text.length() > 0) && ((p = text.indexOf(dpdpa)) >= 0)) {
-            l.addAll(splitQuotation(new serverByteBuffer(text.getBytes(0, p)), qoff));
-            l.add(new serverByteBuffer(dpdpa));
-            l.addAll(splitQuotation(new serverByteBuffer(text.getBytes(p + 2)), qoff));
+            l.addAll(splitQuotation(new kelondroByteBuffer(text.getBytes(0, p)), qoff));
+            l.add(new kelondroByteBuffer(dpdpa));
+            l.addAll(splitQuotation(new kelondroByteBuffer(text.getBytes(p + 2)), qoff));
             text.clear();
         }
 
@@ -252,7 +252,7 @@ public final class httpTemplate {
         byte[] multi_key;
         byte[] replacement;
         int bb;
-        final serverByteBuffer structure = new serverByteBuffer();
+        final kelondroByteBuffer structure = new kelondroByteBuffer();
         while (transferUntil(pis, out, hash)) {
             bb = pis.read();
             keyStream.reset();
@@ -306,7 +306,7 @@ public final class httpTemplate {
             // #(
             } else if ((bb & 0xFF) == lrbr) { //alternative
                 int others=0;
-                final serverByteBuffer text= new serverByteBuffer();
+                final kelondroByteBuffer text= new kelondroByteBuffer();
                 
                 transferUntil(pis, keyStream, aClose);
                 key = keyStream.toByteArray(); //Caution: Key does not contain prefix
@@ -425,7 +425,7 @@ public final class httpTemplate {
                 
             // #%
             } else if ((bb & 0xFF) == ps) { //include
-                final serverByteBuffer include = new serverByteBuffer();                
+                final kelondroByteBuffer include = new kelondroByteBuffer();                
                 keyStream.reset(); //reset stream
                 if(transferUntil(pis, keyStream, iClose)){
                     byte[] filename = keyStream.toByteArray();
@@ -493,7 +493,7 @@ public final class httpTemplate {
     }
 
     private final static byte[] newPrefix(final byte[] oldPrefix, final byte[] key) {
-        final serverByteBuffer newPrefix = new serverByteBuffer();
+        final kelondroByteBuffer newPrefix = new kelondroByteBuffer();
         newPrefix.append(oldPrefix)
         .append(key)
         .append("_".getBytes());
@@ -507,7 +507,7 @@ public final class httpTemplate {
     }
 
     private final static byte[] newPrefix(final byte[] oldPrefix, final byte[] multi_key, final int i) {
-        final serverByteBuffer newPrefix = new serverByteBuffer();
+        final kelondroByteBuffer newPrefix = new kelondroByteBuffer();
         newPrefix.append(oldPrefix)
         .append(multi_key)
         .append("_".getBytes())
@@ -522,7 +522,7 @@ public final class httpTemplate {
     }
 
     private final static String getPatternKey(final byte[] prefix, final byte[] key) {
-        final serverByteBuffer patternKey = new serverByteBuffer();
+        final kelondroByteBuffer patternKey = new kelondroByteBuffer();
         patternKey.append(prefix).append(key);
         try {
             return new String(patternKey.getBytes(),"UTF-8");
@@ -538,7 +538,7 @@ public final class httpTemplate {
     }
     
     private final static byte[] appendBytes(final byte[] b1, final byte[] b2, final byte[] b3, final byte[] b4) {
-        final serverByteBuffer byteArray = new serverByteBuffer();
+        final kelondroByteBuffer byteArray = new kelondroByteBuffer();
         byteArray.append(b1)
                  .append(b2);
         if (b3 != null) byteArray.append(b3);

@@ -48,8 +48,8 @@ import de.anomic.kelondro.kelondroBLOBHeap;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMap;
 import de.anomic.kelondro.kelondroNaturalOrder;
-import de.anomic.server.serverByteBuffer;
-import de.anomic.server.serverDate;
+import de.anomic.kelondro.kelondroDate;
+import de.anomic.kelondro.kelondroByteBuffer;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyURL;
@@ -518,7 +518,7 @@ public class RobotsTxt {
             oldEtag = entry.getETag();
             reqHeaders = new httpRequestHeader();
             final Date modDate = entry.getModDate();
-            if (modDate != null) reqHeaders.put(httpRequestHeader.IF_MODIFIED_SINCE, serverDate.formatRFC1123(entry.getModDate()));
+            if (modDate != null) reqHeaders.put(httpRequestHeader.IF_MODIFIED_SINCE, kelondroDate.formatRFC1123(entry.getModDate()));
             
         }
         
@@ -551,7 +551,7 @@ public class RobotsTxt {
                     }
                     
                     // downloading the content
-                    final serverByteBuffer sbb = new serverByteBuffer();
+                    final kelondroByteBuffer sbb = new kelondroByteBuffer();
                     try {
                         serverFileUtils.copyToStream(new BufferedInputStream(res.getDataAsStream()), new BufferedOutputStream(sbb));
                     } finally {

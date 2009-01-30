@@ -174,6 +174,33 @@ public final class kelondroNaturalOrder extends kelondroAbstractOrder<byte[]> im
         return 0;
     }
 
+    public static final String arrayList(final byte[] b, final int start, int length) {
+        if (b == null) return "NULL";
+        if (b.length == 0) return "[]";
+        length = Math.min(length, b.length - start);
+        final StringBuilder sb = new StringBuilder(b.length * 4);
+        sb.append('[').append(Integer.toString(b[start])).append(',');
+        for (int i = 1; i < length; i++) sb.append(' ').append(Integer.toString(b[start + i])).append(',');
+        sb.append(']');
+        return sb.toString();
+    }
+    
+    public static final String table(final byte[] b, final int linewidth, final int marker) {
+        if (b == null) return "NULL";
+        if (b.length == 0) return "[]";
+        final StringBuilder sb = new StringBuilder(b.length * 4);
+        for (int i = 0; i < b.length; i++) {
+            if (i % linewidth == 0)
+                sb.append('\n').append("# ").append(Integer.toHexString(i)).append(": ");
+            else
+                sb.append(',');
+            sb.append(' ').append(Integer.toString(0xff & b[i]));
+            if (i >= 65535) break;
+        }
+        sb.append('\n');
+        return sb.toString();
+    }
+    
     public static void main(final String[] args) {
         final byte[] t = new byte[12];
         for (int i = 0; i < 12; i++) t[i] = (byte) 255;

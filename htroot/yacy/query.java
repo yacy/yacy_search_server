@@ -28,8 +28,8 @@
 // if the shell's current path is HTROOT
 
 import de.anomic.http.httpRequestHeader;
+import de.anomic.kelondro.kelondroDate;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyNetwork;
@@ -69,7 +69,7 @@ public final class query {
         final String obj    = post.get("object", ""); // keyword for query subject
         final String env    = post.get("env", "");    // argument to query
 
-        prop.put("mytime", serverDate.formatShortSecond());
+        prop.put("mytime", kelondroDate.formatShortSecond());
 
         // check if we are the right target and requester has correct information about this peer
         if (sb.webIndex.seedDB.mySeed() == null || !sb.webIndex.seedDB.mySeed().hash.equals(youare)) {

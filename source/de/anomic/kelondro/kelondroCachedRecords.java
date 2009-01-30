@@ -33,8 +33,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
-import de.anomic.server.serverMemory;
-
 public class kelondroCachedRecords extends kelondroAbstractRecords implements kelondroRecords {
 
     // memory calculation
@@ -116,7 +114,7 @@ public class kelondroCachedRecords extends kelondroAbstractRecords implements ke
     }
 
     int cacheGrowStatus() {
-        final long available = serverMemory.available();
+        final long available = kelondroMemory.available();
         if ((cacheHeaders != null) && (available < cacheHeaders.memoryNeededForGrow())) return 0;
         return cacheGrowStatus(available, memStopGrow, memStartShrink);
     }
@@ -128,10 +126,10 @@ public class kelondroCachedRecords extends kelondroAbstractRecords implements ke
         // 2: cache is allowed to grow and must not shrink
         if (available > stopGrow) return 2;
         if (available > startShrink) {
-            serverMemory.gc(30000, "kelendroCacheRecords.cacheGrowStatus(...) 1"); // thq
+            kelondroMemory.gc(30000, "kelendroCacheRecords.cacheGrowStatus(...) 1"); // thq
             return 1;
         }
-        serverMemory.gc(3000, "kelendroCacheRecords.cacheGrowStatus(...) 0"); // thq
+        kelondroMemory.gc(3000, "kelendroCacheRecords.cacheGrowStatus(...) 0"); // thq
         return 0;
     }
     

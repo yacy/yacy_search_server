@@ -44,7 +44,6 @@ import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
 
 import de.anomic.server.serverFileUtils;
-import de.anomic.server.serverMemory;
 
 public class kelondroAttrSeq {
     
@@ -431,7 +430,7 @@ public class kelondroAttrSeq {
     private static boolean shortmemstate = false;
     private static boolean shortmem() {
         if ((cc % 300) == 0) {
-            shortmemstate = (serverMemory.available() < 20000000L);
+            shortmemstate = (kelondroMemory.available() < 20000000L);
         }
         return shortmemstate;
     }

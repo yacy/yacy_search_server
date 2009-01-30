@@ -31,6 +31,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import de.anomic.kelondro.kelondroMemory;
+
 public class serverProfiling extends Thread {
     
     private static final Map<String, ConcurrentLinkedQueue<Event>> historyMaps = new ConcurrentHashMap<String, ConcurrentLinkedQueue<Event>>(); // value=TreeMap of Long/Event
@@ -56,7 +58,7 @@ public class serverProfiling extends Thread {
     
     public void run() {
     	while (running) {
-    		update("memory", Long.valueOf(serverMemory.used()));
+    		update("memory", Long.valueOf(kelondroMemory.used()));
     		try {
 				Thread.sleep(this.delaytime);
 			} catch (final InterruptedException e) {

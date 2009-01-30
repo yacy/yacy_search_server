@@ -31,8 +31,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import de.anomic.kelondro.kelondroDate;
 import de.anomic.server.serverCore;
-import de.anomic.server.serverDate;
 
 public class httpRequestHeader extends httpHeader {
 
@@ -94,7 +94,7 @@ public class httpRequestHeader extends httpHeader {
     
     public Object ifRange() {
         if (containsKey(IF_RANGE)) {
-            final Date rangeDate = serverDate.parseHTTPDate(get(IF_RANGE));
+            final Date rangeDate = kelondroDate.parseHTTPDate(get(IF_RANGE));
             if (rangeDate != null) 
                 return rangeDate;
             

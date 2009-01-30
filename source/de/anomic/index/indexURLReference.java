@@ -40,10 +40,10 @@ import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroDigest;
+import de.anomic.kelondro.kelondroDate;
 import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.server.serverCharBuffer;
 import de.anomic.server.serverCodings;
-import de.anomic.server.serverDate;
 import de.anomic.tools.crypt;
 import de.anomic.tools.nxTools;
 import de.anomic.yacy.yacyURL;
@@ -224,17 +224,17 @@ public class indexURLReference {
         this.entry.setCol(col_hash, url.hash(), null); // FIXME potential null pointer access
         this.entry.setCol(col_comp, encodeComp(url, descr, dc_creator, tags, ETag));
         try {
-            encodeDate(col_mod, serverDate.parseShortDay(prop.getProperty("mod", "20000101")));
+            encodeDate(col_mod, kelondroDate.parseShortDay(prop.getProperty("mod", "20000101")));
         } catch (final ParseException e) {
             encodeDate(col_mod, new Date());
         }
         try {
-            encodeDate(col_load, serverDate.parseShortDay(prop.getProperty("load", "20000101")));
+            encodeDate(col_load, kelondroDate.parseShortDay(prop.getProperty("load", "20000101")));
         } catch (final ParseException e) {
             encodeDate(col_load, new Date());
         }
         try {
-            encodeDate(col_fresh, serverDate.parseShortDay(prop.getProperty("fresh", "20000101")));
+            encodeDate(col_fresh, kelondroDate.parseShortDay(prop.getProperty("fresh", "20000101")));
         } catch (final ParseException e) {
             encodeDate(col_fresh, new Date());
         }
@@ -293,9 +293,9 @@ public class indexURLReference {
             s.append(",author=").append(crypt.simpleEncode(comp.dc_creator()));
             s.append(",tags=").append(crypt.simpleEncode(comp.dc_subject()));
             s.append(",ETag=").append(crypt.simpleEncode(comp.ETag()));
-            s.append(",mod=").append(serverDate.formatShortDay(moddate()));
-            s.append(",load=").append(serverDate.formatShortDay(loaddate()));
-            s.append(",fresh=").append(serverDate.formatShortDay(freshdate()));
+            s.append(",mod=").append(kelondroDate.formatShortDay(moddate()));
+            s.append(",load=").append(kelondroDate.formatShortDay(loaddate()));
+            s.append(",fresh=").append(kelondroDate.formatShortDay(freshdate()));
             s.append(",referrer=").append(referrerHash());
             s.append(",md5=").append(md5());
             s.append(",size=").append(size());

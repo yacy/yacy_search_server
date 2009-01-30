@@ -38,10 +38,10 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import de.anomic.index.indexDocumentMetadata;
 import de.anomic.kelondro.kelondroFlexWidthArray;
+import de.anomic.kelondro.kelondroDate;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
-import de.anomic.server.serverDate;
 import de.anomic.server.serverProcessorJob;
 import de.anomic.server.logging.serverLog;
 import de.anomic.xml.RSSFeed;
@@ -390,7 +390,7 @@ public class CrawlQueues {
                 referrer = null;
             }
             try {
-                loaddate = serverDate.parseShortSecond(item.getPubDate());
+                loaddate = kelondroDate.parseShortSecond(item.getPubDate());
             } catch (final ParseException e) {
                 loaddate = new Date();
             }

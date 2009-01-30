@@ -39,12 +39,12 @@ import java.util.zip.ZipInputStream;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterImageEntry;
+import de.anomic.kelondro.kelondroByteBuffer;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.parser.AbstractParser;
 import de.anomic.plasma.parser.Parser;
 import de.anomic.plasma.parser.ParserException;
-import de.anomic.server.serverByteBuffer;
 import de.anomic.server.serverFileUtils;
 import de.anomic.yacy.yacyURL;
 
@@ -88,7 +88,7 @@ public class zipParser extends AbstractParser implements Parser {
                 outputFile = File.createTempFile("zipParser",".tmp");
                 docText = new BufferedOutputStream(new FileOutputStream(outputFile));
             } else {
-                docText = new serverByteBuffer();
+                docText = new kelondroByteBuffer();
             }
             
             final StringBuilder docKeywords = new StringBuilder();
@@ -167,7 +167,7 @@ public class zipParser extends AbstractParser implements Parser {
         
             plasmaParserDocument result = null;
             
-            if (docText instanceof serverByteBuffer) {
+            if (docText instanceof kelondroByteBuffer) {
                 result = new plasmaParserDocument(
                     location,
                     mimeType,
@@ -178,7 +178,7 @@ public class zipParser extends AbstractParser implements Parser {
                     "", // TODO: AUTHOR
                     docSections.toArray(new String[docSections.size()]),
                     docAbstrct.toString(),
-                    ((serverByteBuffer)docText).getBytes(),
+                    ((kelondroByteBuffer)docText).getBytes(),
                     docAnchors,
                     docImages);
             } else {

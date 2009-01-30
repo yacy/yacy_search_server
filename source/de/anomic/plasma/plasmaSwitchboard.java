@@ -148,15 +148,15 @@ import de.anomic.kelondro.kelondroCachedRecords;
 import de.anomic.kelondro.kelondroDigest;
 import de.anomic.kelondro.kelondroMSetTools;
 import de.anomic.kelondro.kelondroNaturalOrder;
+import de.anomic.kelondro.kelondroDate;
+import de.anomic.kelondro.kelondroMemory;
 import de.anomic.plasma.parser.ParserException;
 import de.anomic.server.serverAbstractSwitch;
 import de.anomic.server.serverBusyThread;
 import de.anomic.server.serverCore;
-import de.anomic.server.serverDate;
 import de.anomic.server.serverDomains;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverInstantBusyThread;
-import de.anomic.server.serverMemory;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverProcessor;
 import de.anomic.server.serverProcessorJob;
@@ -593,7 +593,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         
         // deploy busy threads
         log.logConfig("Starting Threads");
-        serverMemory.gc(1000, "plasmaSwitchboard, help for profiler"); // help for profiler - thq
+        kelondroMemory.gc(1000, "plasmaSwitchboard, help for profiler"); // help for profiler - thq
 
         moreMemory = new Timer(); // init GC Thread - thq
         moreMemory.schedule(new MoreMemory(), 300000, 600000);
@@ -1292,7 +1292,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             boolean hasDoneSomething = false;
             
             // clear caches if necessary
-            if (!serverMemory.request(8000000L, false)) {
+            if (!kelondroMemory.request(8000000L, false)) {
                 webIndex.clearCache();
                 plasmaSearchEvent.cleanupEvents(true);
             }
@@ -2150,7 +2150,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         webIndex.seedDB.mySeed().put(yacySeed.VERSION, getConfig("version", ""));
         webIndex.seedDB.mySeed().setFlagDirectConnect(true);
         webIndex.seedDB.mySeed().setLastSeenUTC();
-        webIndex.seedDB.mySeed().put(yacySeed.UTC, serverDate.UTCDiffString());
+        webIndex.seedDB.mySeed().put(yacySeed.UTC, kelondroDate.UTCDiffString());
         webIndex.seedDB.mySeed().setFlagAcceptRemoteCrawl(getConfig("crawlResponse", "").equals("true"));
         webIndex.seedDB.mySeed().setFlagAcceptRemoteIndex(getConfig("allowReceiveIndex", "").equals("true"));
         //mySeed.setFlagAcceptRemoteIndex(true);
@@ -2282,7 +2282,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
 
 class MoreMemory extends TimerTask {
     public final void run() {
-        serverMemory.gc(10000, "MoreMemory()");
+        kelondroMemory.gc(10000, "MoreMemory()");
     }
 }
 

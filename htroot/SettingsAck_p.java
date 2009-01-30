@@ -44,11 +44,11 @@ import de.anomic.http.httpd;
 import de.anomic.http.httpdProxyHandler;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroDigest;
+import de.anomic.kelondro.kelondroDate;
+import de.anomic.kelondro.kelondroMemory;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
-import de.anomic.server.serverDate;
-import de.anomic.server.serverMemory;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
@@ -558,9 +558,9 @@ public class SettingsAck_p {
             }                        
             
             // everything is ok
-            prop.put("info_crawler.clientTimeout",(crawlerTimeout==0) ? "0" :serverDate.formatInterval(crawlerTimeout));
-            prop.put("info_crawler.http.maxFileSize",(maxHttpSize==-1)? "-1":serverMemory.bytesToString(maxHttpSize));
-            prop.put("info_crawler.ftp.maxFileSize", (maxFtpSize==-1) ? "-1":serverMemory.bytesToString(maxFtpSize));
+            prop.put("info_crawler.clientTimeout",(crawlerTimeout==0) ? "0" :kelondroDate.formatInterval(crawlerTimeout));
+            prop.put("info_crawler.http.maxFileSize",(maxHttpSize==-1)? "-1":kelondroMemory.bytesToString(maxHttpSize));
+            prop.put("info_crawler.ftp.maxFileSize", (maxFtpSize==-1) ? "-1":kelondroMemory.bytesToString(maxFtpSize));
             prop.put("info", "28");
             return prop;
         }

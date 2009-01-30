@@ -31,15 +31,15 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Properties;
 
-import de.anomic.server.serverByteBuffer;
+import de.anomic.kelondro.kelondroByteBuffer;
 
 public class httpSSI {
 
-    public static void writeSSI(final serverByteBuffer in, final OutputStream out, final String authorization, final String requesthost) throws IOException {
+    public static void writeSSI(final kelondroByteBuffer in, final OutputStream out, final String authorization, final String requesthost) throws IOException {
         writeSSI(in, 0, out, authorization, requesthost);
     }
     
-    public static void writeSSI(final serverByteBuffer in, int off, final OutputStream out, final String authorization, final String requesthost) throws IOException {
+    public static void writeSSI(final kelondroByteBuffer in, int off, final OutputStream out, final String authorization, final String requesthost) throws IOException {
         int p = in.indexOf("<!--#".getBytes(), off);
         int q;
         while (p >= 0) {
@@ -60,7 +60,7 @@ public class httpSSI {
         }
     }
     
-    private static void parseSSI(final serverByteBuffer in, final int off, final int len, final OutputStream out, final String authorization, final String requesthost) {
+    private static void parseSSI(final kelondroByteBuffer in, final int off, final int len, final OutputStream out, final String authorization, final String requesthost) {
         if (in.startsWith("<!--#include virtual=\"".getBytes(), off)) {
             final int q = in.indexOf("\"".getBytes(), off + 22);
             if (q > 0) {

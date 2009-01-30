@@ -43,7 +43,6 @@ import java.util.TimeZone;
 import de.anomic.index.indexContainer;
 import de.anomic.kelondro.kelondroRow.EntryIndex;
 import de.anomic.server.serverFileUtils;
-import de.anomic.server.serverMemory;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyURL;
 
@@ -153,12 +152,12 @@ public class kelondroCollectionIndex {
                     continue;
                 }
             }
-            serverLog.logFine("STARTUP", "STARTED INITIALIZATION OF NEW COLLECTION INDEX WITH " + initialSpace + " ENTRIES.  THIS WILL TAKE SOME TIME. " + (serverMemory.available() / 1024 / 1024) + "MB AVAILABLE.");
+            serverLog.logFine("STARTUP", "STARTED INITIALIZATION OF NEW COLLECTION INDEX WITH " + initialSpace + " ENTRIES.  THIS WILL TAKE SOME TIME. " + (kelondroMemory.available() / 1024 / 1024) + "MB AVAILABLE.");
             final kelondroRow indexRowdef = indexRow(keyLength, indexOrder);
             final long necessaryRAM4fullTable = minimumRAM4Eco + (indexRowdef.objectsize + 4) * initialSpace * 3 / 2;
             
             // initialize (new generation) index table from file
-            index = new kelondroEcoTable(f, indexRowdef, (serverMemory.request(necessaryRAM4fullTable, false)) ? kelondroEcoTable.tailCacheUsageAuto : kelondroEcoTable.tailCacheDenyUsage, EcoFSBufferSize, initialSpace);
+            index = new kelondroEcoTable(f, indexRowdef, (kelondroMemory.request(necessaryRAM4fullTable, false)) ? kelondroEcoTable.tailCacheUsageAuto : kelondroEcoTable.tailCacheDenyUsage, EcoFSBufferSize, initialSpace);
             
             // open array files
             this.arrays = new HashMap<String, kelondroFixedWidthArray>(); // all entries will be dynamically created with getArray()
@@ -273,7 +272,7 @@ public class kelondroCollectionIndex {
         // open a ecotable
         final long records = f.length() / indexRowdef.objectsize;
         final long necessaryRAM4fullTable = minimumRAM4Eco + (indexRowdef.objectsize + 4) * records * 3 / 2;
-        final boolean fullCache = serverMemory.request(necessaryRAM4fullTable, false);
+        final boolean fullCache = kelondroMemory.request(necessaryRAM4fullTable, false);
         if (fullCache) {
             theindex = new kelondroEcoTable(f, indexRowdef, kelondroEcoTable.tailCacheUsageAuto, EcoFSBufferSize, initialSpace);
             //if (!((kelondroEcoTable) theindex).usesFullCopy()) theindex = new kelondroCache(theindex);

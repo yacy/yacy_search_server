@@ -40,10 +40,10 @@ import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroStack;
+import de.anomic.kelondro.kelondroDate;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.plasma.plasmaWordIndex;
-import de.anomic.server.serverDate;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacySeedDB;
@@ -474,7 +474,7 @@ public class IndexingStack {
                     // parse date
                     Date d = responseHeader.lastModified();
                     if (d == null) {
-                        d = new Date(serverDate.correctedUTCTime());
+                        d = new Date(kelondroDate.correctedUTCTime());
                     }
                     // finally, we shall treat the cache as stale if the modification time is after the if-.. time
                     if (d.after(ifModifiedSince)) {
@@ -499,7 +499,7 @@ public class IndexingStack {
                 // sometimes, the expires date is set to the past to prevent that a page is cached
                 // we use that information to see if we should index it
                 final Date expires = responseHeader.expires();
-                if (expires != null && expires.before(new Date(serverDate.correctedUTCTime()))) {
+                if (expires != null && expires.before(new Date(kelondroDate.correctedUTCTime()))) {
                     return "Stale_(Expired)";
                 }
     
@@ -532,7 +532,7 @@ public class IndexingStack {
                         }
                         try {
                             final long ttl = 1000 * Long.parseLong(cacheControl.substring(8)); // milliseconds to live
-                            if (serverDate.correctedUTCTime() - date.getTime() > ttl) {
+                            if (kelondroDate.correctedUTCTime() - date.getTime() > ttl) {
                                 //System.out.println("***not indexed because cache-control");
                                 return "Stale_(expired_by_cache-control)";
                             }

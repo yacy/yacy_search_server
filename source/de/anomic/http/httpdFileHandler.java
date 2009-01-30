@@ -82,13 +82,13 @@ import java.util.zip.GZIPOutputStream;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterInputStream;
+import de.anomic.kelondro.kelondroDate;
+import de.anomic.kelondro.kelondroByteBuffer;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
-import de.anomic.server.serverByteBuffer;
 import de.anomic.server.serverClassLoader;
 import de.anomic.server.serverCore;
-import de.anomic.server.serverDate;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -228,7 +228,7 @@ public final class httpdFileHandler {
             ext = path.substring(pos + 1).toLowerCase();
         }
         headers.put(httpResponseHeader.SERVER, "AnomicHTTPD (www.anomic.de)");
-        headers.put(httpResponseHeader.DATE, serverDate.formatRFC1123(new Date()));
+        headers.put(httpResponseHeader.DATE, kelondroDate.formatRFC1123(new Date()));
         if(!(plasmaParser.mediaExtContains(ext))){
             headers.put(httpResponseHeader.PRAGMA, "no-cache");         
         }
@@ -473,7 +473,7 @@ public final class httpdFileHandler {
                             aBuffer.append("<a href=\"" + path + list[i] + "\">" + list[i] + "</a><br>");
                             if ((author != null) && (author.length() > 0)) aBuffer.append("Author: " + author + "<br>");
                             if ((description != null) && (description.length() > 0)) aBuffer.append("Description: " + description + "<br>");
-                            aBuffer.append(serverDate.formatShortDay(new Date(f.lastModified())) + ", " + size + ((images > 0) ? ", " + images + " images" : "") + ((links > 0) ? ", " + links + " links" : "") + "<br></li>\n");
+                            aBuffer.append(kelondroDate.formatShortDay(new Date(f.lastModified())) + ", " + size + ((images > 0) ? ", " + images + " images" : "") + ((links > 0) ? ", " + links + " links" : "") + "<br></li>\n");
                         }
                     }
                     aBuffer.append("  </ul>\n</body>\n</html>\n");
@@ -530,7 +530,7 @@ public final class httpdFileHandler {
                         targetDate = new Date(System.currentTimeMillis());
                         nocache = true;
                         final String mimeType = mimeTable.getProperty(targetExt, "text/html");
-                        final serverByteBuffer result = ymageMatrix.exportImage(yp.getImage(), targetExt);
+                        final kelondroByteBuffer result = ymageMatrix.exportImage(yp.getImage(), targetExt);
 
                         // write the array to the client
                         httpd.sendRespondHeader(conProp, out, httpVersion, 200, null, mimeType, result.length(), targetDate, null, null, null, null, nocache);
@@ -550,7 +550,7 @@ public final class httpdFileHandler {
                         int height = i.getHeight(null); if (height < 0) height = 96; // bad hack
                         final BufferedImage bi = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
                         bi.createGraphics().drawImage(i, 0, 0, width, height, null); 
-                        final serverByteBuffer result = ymageMatrix.exportImage(bi, targetExt);
+                        final kelondroByteBuffer result = ymageMatrix.exportImage(bi, targetExt);
 
                         // write the array to the client
                         httpd.sendRespondHeader(conProp, out, httpVersion, 200, null, mimeType, result.length(), targetDate, null, null, null, null, nocache);
@@ -787,7 +787,7 @@ public final class httpdFileHandler {
                             templatePatterns.put(servletProperties.PEER_STAT_VERSION, switchboard.getConfig("version", ""));
                             templatePatterns.put(servletProperties.PEER_STAT_UPTIME, ((System.currentTimeMillis() -  serverCore.startupTime) / 1000) / 60); // uptime in minutes
                             templatePatterns.putHTML(servletProperties.PEER_STAT_CLIENTNAME, switchboard.getConfig("peerName", "anomic"));
-                            templatePatterns.put(servletProperties.PEER_STAT_MYTIME, serverDate.formatShortSecond());
+                            templatePatterns.put(servletProperties.PEER_STAT_MYTIME, kelondroDate.formatShortSecond());
                             //System.out.println("respond props: " + ((tp == null) ? "null" : tp.toString())); // debug
                         } catch (final InvocationTargetException e) {
                             if (e.getCause() instanceof InterruptedException) {
@@ -876,7 +876,7 @@ public final class httpdFileHandler {
                     final boolean chunked = !method.equals(httpHeader.METHOD_HEAD) && !yacyClient && httpVersion.equals(httpHeader.HTTP_VERSION_1_1);
                     if (chunked) {
                         // send page in chunks and parse SSIs
-                        final serverByteBuffer o = new serverByteBuffer();
+                        final kelondroByteBuffer o = new kelondroByteBuffer();
                         // apply templates
                         httpTemplate.writeTemplate(fis, o, templatePatterns, "-UNRESOLVED_PATTERN-".getBytes("UTF-8"));
                         httpd.sendRespondHeader(conProp, out, httpVersion, 200, null, mimeType, -1, targetDate, null, (templatePatterns == null) ? new httpResponseHeader() : templatePatterns.getOutgoingHeader(), null, "chunked", nocache);
@@ -889,10 +889,10 @@ public final class httpdFileHandler {
                         // send page as whole thing, SSIs are not possible
                         final String contentEncoding = (zipContent) ? "gzip" : null;
                         // apply templates
-                        final serverByteBuffer o1 = new serverByteBuffer();
+                        final kelondroByteBuffer o1 = new kelondroByteBuffer();
                         httpTemplate.writeTemplate(fis, o1, templatePatterns, "-UNRESOLVED_PATTERN-".getBytes("UTF-8"));
                         
-                        final serverByteBuffer o = new serverByteBuffer();
+                        final kelondroByteBuffer o = new kelondroByteBuffer();
                         
                         if (zipContent) {
                             GZIPOutputStream zippedOut = new GZIPOutputStream(o);

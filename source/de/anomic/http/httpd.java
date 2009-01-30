@@ -64,11 +64,11 @@ import de.anomic.data.userDB;
 import de.anomic.htmlFilter.htmlFilterCharacterCoding;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroDigest;
+import de.anomic.kelondro.kelondroDate;
+import de.anomic.kelondro.kelondroByteBuffer;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.server.serverByteBuffer;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverCore;
-import de.anomic.server.serverDate;
 import de.anomic.server.serverDomains;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverHandler;
@@ -1192,7 +1192,7 @@ public final class httpd implements serverHandler, Cloneable {
             // building the stacktrace            
             if (stackTrace != null) {  
                 tp.put("printStackTrace",1);
-                final serverByteBuffer errorMsg = new serverByteBuffer(100);
+                final kelondroByteBuffer errorMsg = new kelondroByteBuffer(100);
                 stackTrace.printStackTrace(new PrintStream(errorMsg));
                 tp.put("printStackTrace_exception", stackTrace.toString());
                 tp.put("printStackTrace_stacktrace", new String(errorMsg.getBytes(),"UTF-8"));
@@ -1202,7 +1202,7 @@ public final class httpd implements serverHandler, Cloneable {
             
             // Generated Tue, 23 Aug 2005 11:19:14 GMT by brain.wg (squid/2.5.STABLE3)
             // adding some system information
-            final String systemDate = serverDate.formatRFC1123(new Date());
+            final String systemDate = kelondroDate.formatRFC1123(new Date());
             tp.put("date", systemDate);
             
             // rewrite the file
@@ -1302,9 +1302,9 @@ public final class httpd implements serverHandler, Cloneable {
         final Date now = new Date(System.currentTimeMillis());
         
         headers.put(httpResponseHeader.SERVER, "AnomicHTTPD (www.anomic.de)");
-        headers.put(httpResponseHeader.DATE, serverDate.formatRFC1123(now));
+        headers.put(httpResponseHeader.DATE, kelondroDate.formatRFC1123(now));
         if (moddate.after(now)) moddate = now;
-        headers.put(httpResponseHeader.LAST_MODIFIED, serverDate.formatRFC1123(moddate));
+        headers.put(httpResponseHeader.LAST_MODIFIED, kelondroDate.formatRFC1123(moddate));
         
         if (nocache) {
             if (httpVersion.toUpperCase().equals(httpHeader.HTTP_VERSION_1_1)) headers.put(httpResponseHeader.CACHE_CONTROL, "no-cache");
@@ -1318,7 +1318,7 @@ public final class httpd implements serverHandler, Cloneable {
         headers.put(httpHeader.CONTENT_TYPE, contentType);  
         if (contentLength > 0)   headers.put(httpResponseHeader.CONTENT_LENGTH, Long.toString(contentLength));
         //if (cookie != null)      headers.put(httpResponseHeader.SET_COOKIE, cookie);
-        if (expires != null)     headers.put(httpResponseHeader.EXPIRES, serverDate.formatRFC1123(expires));
+        if (expires != null)     headers.put(httpResponseHeader.EXPIRES, kelondroDate.formatRFC1123(expires));
         if (contentEnc != null)  headers.put(httpResponseHeader.CONTENT_ENCODING, contentEnc);
         if (transferEnc != null) headers.put(httpResponseHeader.TRANSFER_ENCODING, transferEnc);
         
@@ -1369,7 +1369,7 @@ public final class httpd implements serverHandler, Cloneable {
 
                 // prepare header
                 if (!responseHeader.containsKey(httpHeader.DATE)) 
-                    responseHeader.put(httpHeader.DATE, serverDate.formatRFC1123(new Date()));
+                    responseHeader.put(httpHeader.DATE, kelondroDate.formatRFC1123(new Date()));
                 if (!responseHeader.containsKey(httpHeader.CONTENT_TYPE)) 
                     responseHeader.put(httpHeader.CONTENT_TYPE, "text/html; charset=UTF-8"); // fix this
                 if (!responseHeader.containsKey(httpRequestHeader.CONNECTION) && conProp.containsKey(httpHeader.CONNECTION_PROP_PERSISTENT))

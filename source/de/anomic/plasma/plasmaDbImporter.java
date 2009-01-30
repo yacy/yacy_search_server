@@ -10,7 +10,7 @@ import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexRWIRowEntry;
 import de.anomic.index.indexURLReference;
-import de.anomic.server.serverDate;
+import de.anomic.kelondro.kelondroDate;
 
 public class plasmaDbImporter extends AbstractImporter implements Importer {
 	
@@ -187,8 +187,8 @@ public class plasmaDbImporter extends AbstractImporter implements Importer {
                                 "[" + this.wordChunkStartHash + " .. " + this.wordChunkEndHash + "] " +
                                 this.getProcessingStatusPercent() + "%\n" + 
                                 "Speed: "+ 500*1000/duration + " word entities/s" +
-                                " | Elapsed time: " + serverDate.formatInterval(getElapsedTime()) +
-                                " | Estimated time: " + serverDate.formatInterval(getEstimatedTime()) + "\n" + 
+                                " | Elapsed time: " + kelondroDate.formatInterval(getElapsedTime()) +
+                                " | Estimated time: " + kelondroDate.formatInterval(getEstimatedTime()) + "\n" + 
                                 "Home Words = " + homeWordIndex.size() + 
                                 " | Import Words = " + this.importWordIndex.size());
                         this.wordChunkStart = this.wordChunkEnd;

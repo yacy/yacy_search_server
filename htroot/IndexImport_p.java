@@ -35,9 +35,9 @@ import java.util.Date;
 import de.anomic.crawler.Importer;
 import de.anomic.crawler.NoticeURLImporter;
 import de.anomic.http.httpRequestHeader;
+import de.anomic.kelondro.kelondroDate;
+import de.anomic.kelondro.kelondroByteBuffer;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.server.serverByteBuffer;
-import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -65,7 +65,7 @@ public final class IndexImport_p {
                         return prop;
                     } 
                 } catch (final Exception e) { 
-                    final serverByteBuffer errorMsg = new serverByteBuffer(100);
+                    final kelondroByteBuffer errorMsg = new kelondroByteBuffer(100);
                     final PrintStream errorOut = new PrintStream(errorMsg);
                     e.printStackTrace(errorOut);
                     
@@ -138,8 +138,8 @@ public final class IndexImport_p {
             
             // other information
             prop.putNum("running.jobs_" + i + "_percent", currThread.getProcessingStatusPercent());
-            prop.put("running.jobs_" + i + "_elapsed", serverDate.formatInterval(currThread.getElapsedTime()));
-            prop.put("running.jobs_" + i + "_estimated", serverDate.formatInterval(currThread.getEstimatedTime()));
+            prop.put("running.jobs_" + i + "_elapsed", kelondroDate.formatInterval(currThread.getElapsedTime()));
+            prop.put("running.jobs_" + i + "_estimated", kelondroDate.formatInterval(currThread.getEstimatedTime()));
             prop.putHTML("running.jobs_" + i + "_status", currThread.getStatus().replaceAll("\n", "<br>"));
             
             // job number of the importer thread
@@ -166,7 +166,7 @@ public final class IndexImport_p {
                 prop.put("finished.jobs_" + i + "_runningStatus", "0");
             }
             prop.putNum("finished.jobs_" + i + "_percent", currThread.getProcessingStatusPercent());
-            prop.put("finished.jobs_" + i + "_elapsed", serverDate.formatInterval(currThread.getElapsedTime()));
+            prop.put("finished.jobs_" + i + "_elapsed", kelondroDate.formatInterval(currThread.getElapsedTime()));
             prop.putHTML("finished.jobs_" + i + "_status", currThread.getStatus().replaceAll("\n", "<br>"));
         }
         prop.put("finished.jobs",finishedJobs.length);

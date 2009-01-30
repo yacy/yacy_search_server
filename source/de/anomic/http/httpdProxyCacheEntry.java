@@ -30,8 +30,8 @@ import java.util.Date;
 
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.index.indexDocumentMetadata;
+import de.anomic.kelondro.kelondroDate;
 import de.anomic.plasma.plasmaHTCache;
-import de.anomic.server.serverDate;
 import de.anomic.yacy.yacyURL;
 
 public class httpdProxyCacheEntry implements indexDocumentMetadata {
@@ -193,7 +193,7 @@ public class httpdProxyCacheEntry implements indexDocumentMetadata {
             docDate = responseHeader.lastModified();
             if (docDate == null) docDate = responseHeader.date();
         }
-        if (docDate == null) docDate = new Date(serverDate.correctedUTCTime());   
+        if (docDate == null) docDate = new Date(kelondroDate.correctedUTCTime());   
         
         return docDate;
     }
@@ -322,7 +322,7 @@ public class httpdProxyCacheEntry implements indexDocumentMetadata {
                     if (date == null) return "stale_no_date_given_in_response";
                     try {
                         final long ttl = 1000 * Long.parseLong(cacheControl.substring(8)); // milliseconds to live
-                        if (serverDate.correctedUTCTime() - date.getTime() > ttl) {
+                        if (kelondroDate.correctedUTCTime() - date.getTime() > ttl) {
                             //System.out.println("***not indexed because cache-control");
                             return "stale_expired";
                         }
@@ -382,8 +382,8 @@ public class httpdProxyCacheEntry implements indexDocumentMetadata {
                 if (!responseHeader.containsKey(httpResponseHeader.LAST_MODIFIED)) { return false; }
                 // parse date
                 Date d1, d2;
-                d2 = responseHeader.lastModified(); if (d2 == null) { d2 = new Date(serverDate.correctedUTCTime()); }
-                d1 = requestHeader.ifModifiedSince(); if (d1 == null) { d1 = new Date(serverDate.correctedUTCTime()); }
+                d2 = responseHeader.lastModified(); if (d2 == null) { d2 = new Date(kelondroDate.correctedUTCTime()); }
+                d1 = requestHeader.ifModifiedSince(); if (d1 == null) { d1 = new Date(kelondroDate.correctedUTCTime()); }
                 // finally, we shall treat the cache as stale if the modification time is after the if-.. time
                 if (d2.after(d1)) { return false; }
             }
@@ -424,7 +424,7 @@ public class httpdProxyCacheEntry implements indexDocumentMetadata {
             final Date expires = responseHeader.expires();
             if (expires != null) {
     //          System.out.println("EXPIRES-TEST: expires=" + expires + ", NOW=" + serverDate.correctedGMTDate() + ", url=" + url);
-                if (expires.before(new Date(serverDate.correctedUTCTime()))) { return false; }
+                if (expires.before(new Date(kelondroDate.correctedUTCTime()))) { return false; }
             }
             final Date lastModified = responseHeader.lastModified();
             cacheControl = responseHeader.get(httpResponseHeader.CACHE_CONTROL);
@@ -438,13 +438,13 @@ public class httpdProxyCacheEntry implements indexDocumentMetadata {
             // file may only be treated as fresh for one more month, not more.
             Date date = responseHeader.date();
             if (lastModified != null) {
-                if (date == null) { date = new Date(serverDate.correctedUTCTime()); }
+                if (date == null) { date = new Date(kelondroDate.correctedUTCTime()); }
                 final long age = date.getTime() - lastModified.getTime();
                 if (age < 0) { return false; }
                 // TTL (Time-To-Live) is age/10 = (d2.getTime() - d1.getTime()) / 10
                 // the actual living-time is serverDate.correctedGMTDate().getTime() - d2.getTime()
                 // therefore the cache is stale, if serverDate.correctedGMTDate().getTime() - d2.getTime() > age/10
-                if (serverDate.correctedUTCTime() - date.getTime() > age / 10) { return false; }
+                if (kelondroDate.correctedUTCTime() - date.getTime() > age / 10) { return false; }
             }
     
             // -cache-control in cached response
@@ -463,7 +463,7 @@ public class httpdProxyCacheEntry implements indexDocumentMetadata {
                     if (date == null) { return false; }
                     try {
                         final long ttl = 1000 * Long.parseLong(cacheControl.substring(8)); // milliseconds to live
-                        if (serverDate.correctedUTCTime() - date.getTime() > ttl) {
+                        if (kelondroDate.correctedUTCTime() - date.getTime() > ttl) {
                             return false;
                         }
                     } catch (final Exception e) {
