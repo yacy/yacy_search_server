@@ -37,7 +37,7 @@ import java.util.Iterator;
 import de.anomic.data.blogBoard;
 import de.anomic.data.userDB;
 import de.anomic.http.httpRequestHeader;
-import de.anomic.kelondro.kelondroDate;
+import de.anomic.kelondro.coding.DateFormatter;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -344,7 +344,7 @@ public class Blog {
         }
 
         prop.put("mode_entries_" + number + "_date", dateString(entry.getDate()));
-        prop.put("mode_entries_" + number + "_rfc822date", kelondroDate.formatRFC1123(entry.getDate()));
+        prop.put("mode_entries_" + number + "_rfc822date", DateFormatter.formatRFC1123(entry.getDate()));
         prop.put("mode_entries_" + number + "_pageid", entry.getKey());
         prop.put("mode_entries_" + number + "_address", address);
         prop.put("mode_entries_" + number + "_ip", entry.getIp());

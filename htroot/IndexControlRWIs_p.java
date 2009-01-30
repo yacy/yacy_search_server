@@ -42,7 +42,7 @@ import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexRWIRowEntry;
 import de.anomic.index.indexURLReference;
 import de.anomic.index.indexWord;
-import de.anomic.kelondro.kelondroBitfield;
+import de.anomic.kelondro.coding.Bitfield;
 import de.anomic.plasma.plasmaSearchAPI;
 import de.anomic.plasma.plasmaSearchEvent;
 import de.anomic.plasma.plasmaSearchRankingProcess;
@@ -168,7 +168,7 @@ public class IndexControlRWIs_p {
                 if (keystring.length() == 0 || !indexWord.word2hash(keystring).equals(keyhash)) {
                     prop.put("keystring", "&lt;not possible to compute word from hash&gt;");
                 }
-                final kelondroBitfield flags = plasmaSearchAPI.compileFlags(post);
+                final Bitfield flags = plasmaSearchAPI.compileFlags(post);
                 final int count = (post.get("lines", "all").equals("all")) ? -1 : post.getInt("lines", -1);
                 final plasmaSearchRankingProcess ranking = plasmaSearchAPI.genSearchresult(prop, sb, keyhash, flags);
                 plasmaSearchAPI.genURLList(prop, keyhash, keystring, ranking, flags, count);

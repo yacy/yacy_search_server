@@ -51,7 +51,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import de.anomic.kelondro.kelondroDate;
+import de.anomic.kelondro.coding.DateFormatter;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverSemaphore;
@@ -253,14 +253,14 @@ public class yacyCore {
                             if (newSeed.getLastSeenUTC() >= this.seed.getLastSeenUTC()) {
                                 if (log.isFine()) log.logFine("publish: recently handshaked " + this.seed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR) +
                                     " peer '" + this.seed.getName() + "' at " + this.seed.getPublicAddress() + " with old LastSeen: '" +
-                                    kelondroDate.formatShortSecond(new Date(newSeed.getLastSeenUTC())) + "'");
+                                    DateFormatter.formatShortSecond(new Date(newSeed.getLastSeenUTC())) + "'");
                                 newSeed.setLastSeenUTC();
                                 sb.webIndex.peerActions.peerArrival(newSeed, true);
                             } else {
                                 if (log.isFine()) log.logFine("publish: recently handshaked " + this.seed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR) +
                                     " peer '" + this.seed.getName() + "' at " + this.seed.getPublicAddress() + " with old LastSeen: '" +
-                                    kelondroDate.formatShortSecond(new Date(newSeed.getLastSeenUTC())) + "', this is more recent: '" +
-                                    kelondroDate.formatShortSecond(new Date(this.seed.getLastSeenUTC())) + "'");
+                                    DateFormatter.formatShortSecond(new Date(newSeed.getLastSeenUTC())) + "', this is more recent: '" +
+                                    DateFormatter.formatShortSecond(new Date(this.seed.getLastSeenUTC())) + "'");
                                 this.seed.setLastSeenUTC();
                                 sb.webIndex.peerActions.peerArrival(this.seed, true);
                             }

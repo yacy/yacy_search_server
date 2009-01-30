@@ -37,7 +37,7 @@ import de.anomic.http.HttpConnectionInfo;
 import de.anomic.http.JakartaCommonsHttpClient;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpd;
-import de.anomic.kelondro.kelondroDate;
+import de.anomic.kelondro.coding.DateFormatter;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverHandler;
@@ -183,7 +183,7 @@ public final class Connections_p {
                 prop.put("list_" + idx + "_proto", prot);
                 if (sessionTime > 1000*60) {
                     prop.put("list_" + idx + "_ms", "0");
-                    prop.put("list_" + idx + "_ms_duration",kelondroDate.formatInterval(sessionTime));
+                    prop.put("list_" + idx + "_ms_duration",DateFormatter.formatInterval(sessionTime));
                 } else {
                     prop.put("list_" + idx + "_ms", "1");
                     prop.putNum("list_" + idx + "_ms_duration", sessionTime);

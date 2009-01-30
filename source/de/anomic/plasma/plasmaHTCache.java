@@ -47,8 +47,8 @@ import de.anomic.kelondro.kelondroBLOB;
 import de.anomic.kelondro.kelondroBLOBArray;
 import de.anomic.kelondro.kelondroBLOBCompressor;
 import de.anomic.kelondro.kelondroBLOBHeap;
-import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroMap;
+import de.anomic.kelondro.coding.Base64Order;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySeedDB;
@@ -130,13 +130,13 @@ public final class plasmaHTCache {
         final File dbfile = new File(cachePath, RESPONSE_HEADER_DB_NAME);
         kelondroBLOB blob = null;
         try {
-            blob = new kelondroBLOBHeap(dbfile, yacySeedDB.commonHashLength, kelondroBase64Order.enhancedCoder, 1024 * 1024);
+            blob = new kelondroBLOBHeap(dbfile, yacySeedDB.commonHashLength, Base64Order.enhancedCoder, 1024 * 1024);
         } catch (final IOException e) {
             e.printStackTrace();
         }
         responseHeaderDB = new kelondroMap(blob, 500);
         try {
-            fileDBunbuffered = new kelondroBLOBArray(new File(cachePath, FILE_DB_NAME), salt, 12, kelondroBase64Order.enhancedCoder, 1024 * 1024 * 2);
+            fileDBunbuffered = new kelondroBLOBArray(new File(cachePath, FILE_DB_NAME), salt, 12, Base64Order.enhancedCoder, 1024 * 1024 * 2);
             fileDBunbuffered.setMaxSize(maxCacheSize);
             fileDB = new kelondroBLOBCompressor(fileDBunbuffered, 2 * 1024 * 1024);
         } catch (IOException e) {

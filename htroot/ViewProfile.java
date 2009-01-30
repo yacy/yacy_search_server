@@ -37,7 +37,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import de.anomic.http.httpRequestHeader;
-import de.anomic.kelondro.kelondroBase64Order;
+import de.anomic.kelondro.coding.Base64Order;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -162,7 +162,7 @@ public class ViewProfile {
                                 ((String) entry.getValue()).replaceAll("\r", "").replaceAll("\\\\n", "\n"),
                                 address
                         );
-                        prop.put("success_" + key + "_b64value",kelondroBase64Order.standardCoder.encodeString((String) entry.getValue()));
+                        prop.put("success_" + key + "_b64value",Base64Order.standardCoder.encodeString((String) entry.getValue()));
                     }else{
                         prop.putHTML("success_" + key + "_value", value); //put replaces HTML Chars by entities.
                     }

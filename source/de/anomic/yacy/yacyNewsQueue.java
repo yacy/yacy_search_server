@@ -50,11 +50,11 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 
-import de.anomic.kelondro.kelondroColumn;
-import de.anomic.kelondro.kelondroNaturalOrder;
-import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroStack;
-import de.anomic.kelondro.kelondroDate;
+import de.anomic.kelondro.coding.DateFormatter;
+import de.anomic.kelondro.coding.NaturalOrder;
+import de.anomic.kelondro.index.Column;
+import de.anomic.kelondro.index.Row;
 
 public class yacyNewsQueue {
 
@@ -62,11 +62,11 @@ public class yacyNewsQueue {
     kelondroStack queueStack;
     private final yacyNewsDB newsDB;
     
-    public static final kelondroRow rowdef = new kelondroRow(new kelondroColumn[]{
-            new kelondroColumn("newsid", kelondroColumn.celltype_string, kelondroColumn.encoder_bytes, yacyNewsRecord.idLength, "id = created + originator"),
-            new kelondroColumn("last touched", kelondroColumn.celltype_string, kelondroColumn.encoder_bytes, kelondroDate.PATTERN_SHORT_SECOND.length(), "")
+    public static final Row rowdef = new Row(new Column[]{
+            new Column("newsid", Column.celltype_string, Column.encoder_bytes, yacyNewsRecord.idLength, "id = created + originator"),
+            new Column("last touched", Column.celltype_string, Column.encoder_bytes, DateFormatter.PATTERN_SHORT_SECOND.length(), "")
         },
-        kelondroNaturalOrder.naturalOrder, 0
+        NaturalOrder.naturalOrder, 0
     );
 
     public yacyNewsQueue(final File path, final yacyNewsDB newsDB) {
@@ -145,14 +145,14 @@ public class yacyNewsQueue {
         return null;
     }
 
-    yacyNewsRecord b2r(final kelondroRow.Entry b) throws IOException {
+    yacyNewsRecord b2r(final Row.Entry b) throws IOException {
         if (b == null) return null;
         final String id = b.getColString(0, null);
         //Date touched = yacyCore.parseUniversalDate(new String(b[1]));
         return newsDB.get(id);
     }
 
-    private kelondroRow.Entry r2b(final yacyNewsRecord r, final boolean updateDB) throws IOException {
+    private Row.Entry r2b(final yacyNewsRecord r, final boolean updateDB) throws IOException {
         if (r == null) return null;
         if (updateDB) {
             newsDB.put(r);
@@ -160,9 +160,9 @@ public class yacyNewsQueue {
             final yacyNewsRecord r1 = newsDB.get(r.id());
             if (r1 == null) newsDB.put(r);
         }
-        final kelondroRow.Entry b = queueStack.row().newEntry(new byte[][]{
+        final Row.Entry b = queueStack.row().newEntry(new byte[][]{
                 r.id().getBytes(),
-                kelondroDate.formatShortSecond(new Date()).getBytes()});
+                DateFormatter.formatShortSecond(new Date()).getBytes()});
         return b;
     }
     
@@ -175,7 +175,7 @@ public class yacyNewsQueue {
     public class newsIterator implements Iterator<yacyNewsRecord> {
         // iterates yacyNewsRecord-type objects
         
-        Iterator<kelondroRow.Entry> stackNodeIterator;
+        Iterator<Row.Entry> stackNodeIterator;
         
         public newsIterator(final boolean up) {
             stackNodeIterator = queueStack.stackIterator(up);
@@ -186,7 +186,7 @@ public class yacyNewsQueue {
         }
 
         public yacyNewsRecord next() {
-            final kelondroRow.Entry row = stackNodeIterator.next();
+            final Row.Entry row = stackNodeIterator.next();
             try {
                 return b2r(row);
             } catch (final IOException e) {

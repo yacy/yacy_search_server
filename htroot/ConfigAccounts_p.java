@@ -33,8 +33,8 @@ import java.util.Iterator;
 import de.anomic.data.userDB;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpd;
-import de.anomic.kelondro.kelondroBase64Order;
-import de.anomic.kelondro.kelondroDigest;
+import de.anomic.kelondro.coding.Base64Order;
+import de.anomic.kelondro.coding.Digest;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -57,7 +57,7 @@ public class ConfigAccounts_p {
             // may be overwritten if new password is given
             if ((user.length() > 0) && (pw1.length() > 3) && (pw1.equals(pw2))) {
                 // check passed. set account:
-                env.setConfig(httpd.ADMIN_ACCOUNT_B64MD5, kelondroDigest.encodeMD5Hex(kelondroBase64Order.standardCoder.encodeString(user + ":" + pw1)));
+                env.setConfig(httpd.ADMIN_ACCOUNT_B64MD5, Digest.encodeMD5Hex(Base64Order.standardCoder.encodeString(user + ":" + pw1)));
                 env.setConfig("adminAccount", "");
             }
             
@@ -73,7 +73,7 @@ public class ConfigAccounts_p {
                     // if not, set a random password
                     if (post != null && env.getConfig(httpd.ADMIN_ACCOUNT_B64MD5, "").length() == 0) {
                         // make a 'random' password
-                        env.setConfig(httpd.ADMIN_ACCOUNT_B64MD5, "0000" + kelondroDigest.encodeMD5Hex(System.getProperties().toString() + System.currentTimeMillis()));
+                        env.setConfig(httpd.ADMIN_ACCOUNT_B64MD5, "0000" + Digest.encodeMD5Hex(System.getProperties().toString() + System.currentTimeMillis()));
                         env.setConfig("adminAccount", "");
                     }
                 }
@@ -171,7 +171,7 @@ public class ConfigAccounts_p {
             if( post.get("current_user").equals("newuser")){ //new user
                 
 				if(!pw1.equals("")){ //change only if set
-	                mem.put(userDB.Entry.MD5ENCODED_USERPWD_STRING, kelondroDigest.encodeMD5Hex(username+":"+pw1));
+	                mem.put(userDB.Entry.MD5ENCODED_USERPWD_STRING, Digest.encodeMD5Hex(username+":"+pw1));
 				}
 				mem.put(userDB.Entry.USER_FIRSTNAME, firstName);
 				mem.put(userDB.Entry.USER_LASTNAME, lastName);
@@ -196,7 +196,7 @@ public class ConfigAccounts_p {
 				if(entry != null){
 	                try{
 						if(! pw1.equals("")){
-			                entry.setProperty(userDB.Entry.MD5ENCODED_USERPWD_STRING, kelondroDigest.encodeMD5Hex(username+":"+pw1));
+			                entry.setProperty(userDB.Entry.MD5ENCODED_USERPWD_STRING, Digest.encodeMD5Hex(username+":"+pw1));
 						}
 						entry.setProperty(userDB.Entry.USER_FIRSTNAME, firstName);
 						entry.setProperty(userDB.Entry.USER_LASTNAME, lastName);

@@ -62,10 +62,10 @@ import org.apache.commons.httpclient.ContentLengthInputStream;
 
 import de.anomic.data.userDB;
 import de.anomic.htmlFilter.htmlFilterCharacterCoding;
-import de.anomic.kelondro.kelondroBase64Order;
-import de.anomic.kelondro.kelondroDigest;
-import de.anomic.kelondro.kelondroDate;
-import de.anomic.kelondro.kelondroByteBuffer;
+import de.anomic.kelondro.coding.Base64Order;
+import de.anomic.kelondro.coding.DateFormatter;
+import de.anomic.kelondro.coding.Digest;
+import de.anomic.kelondro.tools.ByteBuffer;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverCore;
@@ -296,7 +296,7 @@ public final class httpd implements serverHandler, Cloneable {
         //if (authorization.length() < 6) return 1; // no authentication information given
         final String adminAccountBase64MD5 = sw.getConfig(ADMIN_ACCOUNT_B64MD5, "");
         if (adminAccountBase64MD5.length() == 0) return 2; // no password stored
-        if (adminAccountBase64MD5.equals(kelondroDigest.encodeMD5Hex(authorization))) return 4; // hard-authenticated, all ok
+        if (adminAccountBase64MD5.equals(Digest.encodeMD5Hex(authorization))) return 4; // hard-authenticated, all ok
         return 1;
     }
     
@@ -318,7 +318,7 @@ public final class httpd implements serverHandler, Cloneable {
                 this.session.out.write((httpResponseHeader.CONTENT_LENGTH + ": 0\r\n").getBytes());
                 this.session.out.write("\r\n".getBytes());
                 return false;
-            } else if (!this.serverAccountBase64MD5.equals(kelondroDigest.encodeMD5Hex(auth.trim().substring(6)))) {
+            } else if (!this.serverAccountBase64MD5.equals(Digest.encodeMD5Hex(auth.trim().substring(6)))) {
                 // wrong password given: ask for authenticate again
                 log.logInfo("Wrong log-in for account 'server' in HTTPD.GET " + this.prop.getProperty("PATH") + " from IP " + this.clientIP);
                 this.session.out.write((httpVersion + " 401 log-in required" + serverCore.CRLF_STRING +
@@ -357,7 +357,7 @@ public final class httpd implements serverHandler, Cloneable {
         // pw = addressed peer hash (b64-hash)
         final String auth = (String) header.get(httpRequestHeader.PROXY_AUTHORIZATION,"xxxxxx");
         if (getAlternativeResolver() != null) {
-            final String test = kelondroBase64Order.standardCoder.encodeString(getAlternativeResolver().myName() + ":" + getAlternativeResolver().myID());
+            final String test = Base64Order.standardCoder.encodeString(getAlternativeResolver().myName() + ":" + getAlternativeResolver().myID());
             if (!test.equals(auth.trim().substring(6))) return false;
         }
         
@@ -1192,7 +1192,7 @@ public final class httpd implements serverHandler, Cloneable {
             // building the stacktrace            
             if (stackTrace != null) {  
                 tp.put("printStackTrace",1);
-                final kelondroByteBuffer errorMsg = new kelondroByteBuffer(100);
+                final ByteBuffer errorMsg = new ByteBuffer(100);
                 stackTrace.printStackTrace(new PrintStream(errorMsg));
                 tp.put("printStackTrace_exception", stackTrace.toString());
                 tp.put("printStackTrace_stacktrace", new String(errorMsg.getBytes(),"UTF-8"));
@@ -1202,7 +1202,7 @@ public final class httpd implements serverHandler, Cloneable {
             
             // Generated Tue, 23 Aug 2005 11:19:14 GMT by brain.wg (squid/2.5.STABLE3)
             // adding some system information
-            final String systemDate = kelondroDate.formatRFC1123(new Date());
+            final String systemDate = DateFormatter.formatRFC1123(new Date());
             tp.put("date", systemDate);
             
             // rewrite the file
@@ -1302,9 +1302,9 @@ public final class httpd implements serverHandler, Cloneable {
         final Date now = new Date(System.currentTimeMillis());
         
         headers.put(httpResponseHeader.SERVER, "AnomicHTTPD (www.anomic.de)");
-        headers.put(httpResponseHeader.DATE, kelondroDate.formatRFC1123(now));
+        headers.put(httpResponseHeader.DATE, DateFormatter.formatRFC1123(now));
         if (moddate.after(now)) moddate = now;
-        headers.put(httpResponseHeader.LAST_MODIFIED, kelondroDate.formatRFC1123(moddate));
+        headers.put(httpResponseHeader.LAST_MODIFIED, DateFormatter.formatRFC1123(moddate));
         
         if (nocache) {
             if (httpVersion.toUpperCase().equals(httpHeader.HTTP_VERSION_1_1)) headers.put(httpResponseHeader.CACHE_CONTROL, "no-cache");
@@ -1318,7 +1318,7 @@ public final class httpd implements serverHandler, Cloneable {
         headers.put(httpHeader.CONTENT_TYPE, contentType);  
         if (contentLength > 0)   headers.put(httpResponseHeader.CONTENT_LENGTH, Long.toString(contentLength));
         //if (cookie != null)      headers.put(httpResponseHeader.SET_COOKIE, cookie);
-        if (expires != null)     headers.put(httpResponseHeader.EXPIRES, kelondroDate.formatRFC1123(expires));
+        if (expires != null)     headers.put(httpResponseHeader.EXPIRES, DateFormatter.formatRFC1123(expires));
         if (contentEnc != null)  headers.put(httpResponseHeader.CONTENT_ENCODING, contentEnc);
         if (transferEnc != null) headers.put(httpResponseHeader.TRANSFER_ENCODING, transferEnc);
         
@@ -1369,7 +1369,7 @@ public final class httpd implements serverHandler, Cloneable {
 
                 // prepare header
                 if (!responseHeader.containsKey(httpHeader.DATE)) 
-                    responseHeader.put(httpHeader.DATE, kelondroDate.formatRFC1123(new Date()));
+                    responseHeader.put(httpHeader.DATE, DateFormatter.formatRFC1123(new Date()));
                 if (!responseHeader.containsKey(httpHeader.CONTENT_TYPE)) 
                     responseHeader.put(httpHeader.CONTENT_TYPE, "text/html; charset=UTF-8"); // fix this
                 if (!responseHeader.containsKey(httpRequestHeader.CONNECTION) && conProp.containsKey(httpHeader.CONNECTION_PROP_PERSISTENT))

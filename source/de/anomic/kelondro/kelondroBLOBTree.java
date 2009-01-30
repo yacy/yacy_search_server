@@ -41,6 +41,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 
+import de.anomic.kelondro.coding.ByteOrder;
+import de.anomic.kelondro.coding.NaturalOrder;
+import de.anomic.kelondro.index.Row;
+import de.anomic.kelondro.index.ObjectIndex;
+import de.anomic.kelondro.io.AbstractRandomAccess;
+import de.anomic.kelondro.io.RandomAccessInterface;
+
 public class kelondroBLOBTree implements kelondroBLOB {
 
     private static final int counterlen = 8;
@@ -50,9 +57,9 @@ public class kelondroBLOBTree implements kelondroBLOB {
     private final int reclen;
     //private int segmentCount;
     private final char fillChar;
-    private final kelondroIndex index;
+    private final ObjectIndex index;
     private kelondroObjectBuffer buffer;
-    private final kelondroRow rowdef;
+    private final Row rowdef;
     private File file;
     
     /**
@@ -60,11 +67,11 @@ public class kelondroBLOBTree implements kelondroBLOB {
      */
     @Deprecated
     public kelondroBLOBTree(final File file, final boolean useNodeCache, final boolean useObjectCache, final int key,
-            final int nodesize, final char fillChar, final kelondroByteOrder objectOrder, final boolean usetree, final boolean writebuffer, final boolean resetOnFail) {
+            final int nodesize, final char fillChar, final ByteOrder objectOrder, final boolean usetree, final boolean writebuffer, final boolean resetOnFail) {
         // creates or opens a dynamic tree
-        rowdef = new kelondroRow("byte[] key-" + (key + counterlen) + ", byte[] node-" + nodesize, objectOrder, 0);
+        rowdef = new Row("byte[] key-" + (key + counterlen) + ", byte[] node-" + nodesize, objectOrder, 0);
         this.file = file;
-        kelondroIndex fbi;
+        ObjectIndex fbi;
         if (usetree) {
 			try {
 				fbi = new kelondroTree(file, useNodeCache, 0, rowdef, 1, 8);
@@ -94,7 +101,7 @@ public class kelondroBLOBTree implements kelondroBLOB {
                 fbi = new kelondroEcoTable(file, rowdef, kelondroEcoTable.tailCacheUsageAuto, EcoFSBufferSize, 0);
             }
         }
-        this.index = ((useObjectCache) && (!(fbi instanceof kelondroEcoTable))) ? (kelondroIndex) new kelondroCache(fbi) : fbi;
+        this.index = ((useObjectCache) && (!(fbi instanceof kelondroEcoTable))) ? (ObjectIndex) new kelondroCache(fbi) : fbi;
         this.keylen = key;
         this.reclen = nodesize;
         this.fillChar = fillChar;
@@ -147,7 +154,7 @@ public class kelondroBLOBTree implements kelondroBLOB {
         return this.keylen;
     }
     
-    public kelondroByteOrder ordering() {
+    public ByteOrder ordering() {
         return this.rowdef.objectOrder;
     }
     
@@ -177,10 +184,10 @@ public class kelondroBLOBTree implements kelondroBLOB {
 
     public class keyIterator implements kelondroCloneableIterator<byte[]> {
         // the iterator iterates all keys
-        kelondroCloneableIterator<kelondroRow.Entry> ri;
+        kelondroCloneableIterator<Row.Entry> ri;
         String nextKey;
 
-        public keyIterator(final kelondroCloneableIterator<kelondroRow.Entry> iter) {
+        public keyIterator(final kelondroCloneableIterator<Row.Entry> iter) {
             ri = iter;
             nextKey = n();
         }
@@ -208,7 +215,7 @@ public class kelondroBLOBTree implements kelondroBLOB {
             String k;
             String v;
             int c;
-            kelondroRow.Entry nt;
+            Row.Entry nt;
             while (ri.hasNext()) {
                 nt = ri.next();
                 if (nt == null) return null;
@@ -247,7 +254,7 @@ public class kelondroBLOBTree implements kelondroBLOB {
         if (buffered != null) return buffered;
         
         // read from db
-        final kelondroRow.Entry result = index.get(key);
+        final Row.Entry result = index.get(key);
         if (result == null) return null;
 
         // return result
@@ -273,7 +280,7 @@ public class kelondroBLOBTree implements kelondroBLOB {
     }
     
     public synchronized byte[] get(final byte[] key) throws IOException {
-        final kelondroRA ra = getRA(new String(key));
+        final RandomAccessInterface ra = getRA(new String(key));
         if (ra == null) return null;
         return ra.readFully();
     }
@@ -400,13 +407,13 @@ public class kelondroBLOBTree implements kelondroBLOB {
 		}
     }
 
-    public synchronized kelondroRA getRA(final String filekey) {
+    public synchronized RandomAccessInterface getRA(final String filekey) {
         // this returns always a RARecord, even if no existed bevore
         //return new kelondroBufferedRA(new RARecord(filekey), 512, 0);
         return new RARecord(filekey);
     }
 
-    public class RARecord extends kelondroAbstractRA implements kelondroRA {
+    public class RARecord extends AbstractRandomAccess implements RandomAccessInterface {
 
         int seekpos = 0;
         int compLength = -1;
@@ -478,7 +485,7 @@ public class kelondroBLOBTree implements kelondroBLOB {
         if (args.length == 1) {
             // open a db and list keys
             try {
-                final kelondroBLOB kd = new kelondroBLOBTree(new File(args[0]), true, true, 4 ,100, '_', kelondroNaturalOrder.naturalOrder, true, false, false);
+                final kelondroBLOB kd = new kelondroBLOBTree(new File(args[0]), true, true, 4 ,100, '_', NaturalOrder.naturalOrder, true, false, false);
                 System.out.println(kd.size() + " elements in DB");
                 final Iterator<byte[]> i = kd.keys(true, false);
                 while (i.hasNext())

@@ -32,6 +32,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import de.anomic.kelondro.coding.ByteOrder;
+import de.anomic.kelondro.coding.NaturalOrder;
+import de.anomic.kelondro.io.AbstractRandomAccess;
+
 public final class kelondroBLOBHeap extends kelondroBLOBHeapModifier implements kelondroBLOB {
 
     private HashMap<String, byte[]> buffer;     // a write buffer to limit IO to the file; attention: Maps cannot use byte[] as key
@@ -71,7 +75,7 @@ public final class kelondroBLOBHeap extends kelondroBLOBHeapModifier implements 
     public kelondroBLOBHeap(
             final File heapFile,
             final int keylength,
-            final kelondroByteOrder ordering,
+            final ByteOrder ordering,
             int buffermax) throws IOException {
         super(heapFile, keylength, ordering);
         this.buffermax = buffermax;
@@ -163,7 +167,7 @@ public final class kelondroBLOBHeap extends kelondroBLOBHeapModifier implements 
             key = entry.getKey().getBytes();
             blob = entry.getValue();
             index.putl(key, posFile);
-            b = kelondroAbstractRA.int2array(key.length + blob.length);
+            b = AbstractRandomAccess.int2array(key.length + blob.length);
             assert b.length == 4;
             System.arraycopy(b, 0, ba, posBuffer, 4);
             System.arraycopy(key, 0, ba, posBuffer + 4, key.length);
@@ -402,7 +406,7 @@ public final class kelondroBLOBHeap extends kelondroBLOBHeapModifier implements 
         final File f = new File("/Users/admin/blobtest.heap");
         try {
             //f.delete();
-            final kelondroBLOBHeap heap = new kelondroBLOBHeap(f, 12, kelondroNaturalOrder.naturalOrder, 1024 * 512);
+            final kelondroBLOBHeap heap = new kelondroBLOBHeap(f, 12, NaturalOrder.naturalOrder, 1024 * 512);
             heap.put("aaaaaaaaaaaa".getBytes(), "eins zwei drei".getBytes());
             heap.put("aaaaaaaaaaab".getBytes(), "vier fuenf sechs".getBytes());
             heap.put("aaaaaaaaaaac".getBytes(), "sieben acht neun".getBytes());
@@ -435,7 +439,7 @@ public final class kelondroBLOBHeap extends kelondroBLOBHeapModifier implements 
         final File f = new File("/Users/admin/blobtest.heap");
         try {
             //f.delete();
-            final kelondroMap heap = new kelondroMap(new kelondroBLOBHeap(f, 12, kelondroNaturalOrder.naturalOrder, 1024 * 512), 500);
+            final kelondroMap heap = new kelondroMap(new kelondroBLOBHeap(f, 12, NaturalOrder.naturalOrder, 1024 * 512), 500);
             heap.put("aaaaaaaaaaaa", map("aaaaaaaaaaaa", "eins zwei drei"));
             heap.put("aaaaaaaaaaab", map("aaaaaaaaaaab", "vier fuenf sechs"));
             heap.put("aaaaaaaaaaac", map("aaaaaaaaaaac", "sieben acht neun"));

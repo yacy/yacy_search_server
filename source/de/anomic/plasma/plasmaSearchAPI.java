@@ -36,8 +36,8 @@ import de.anomic.data.listManager;
 import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexReferenceBlacklist;
 import de.anomic.index.indexURLReference;
-import de.anomic.kelondro.kelondroBitfield;
-import de.anomic.kelondro.kelondroDate;
+import de.anomic.kelondro.coding.Bitfield;
+import de.anomic.kelondro.coding.DateFormatter;
 import de.anomic.server.serverObjects;
 import de.anomic.yacy.yacyPeerSelection;
 import de.anomic.yacy.yacySeed;
@@ -47,12 +47,12 @@ public class plasmaSearchAPI {
     // collection of static methods for a search servlet. Exists only to prevent that the same processes are defined more than once.
     
 
-    public static kelondroBitfield compileFlags(final serverObjects post) {
-        final kelondroBitfield b = new kelondroBitfield(4);
+    public static Bitfield compileFlags(final serverObjects post) {
+        final Bitfield b = new Bitfield(4);
         if (post.get("allurl", "").equals("on")) return null;
         if (post.get("flags") != null) {
             if (post.get("flags","").length() == 0) return null;
-            return new kelondroBitfield(4, post.get("flags"));
+            return new Bitfield(4, post.get("flags"));
         }
         if (post.get("description", "").equals("on")) b.set(indexRWIEntry.flag_app_dc_description, true);
         if (post.get("title", "").equals("on")) b.set(indexRWIEntry.flag_app_dc_title, true);
@@ -85,7 +85,7 @@ public class plasmaSearchAPI {
         prop.put("searchresult_hosts", hc);
     }
 
-    public static plasmaSearchRankingProcess genSearchresult(final serverObjects prop, final plasmaSwitchboard sb, final String keyhash, final kelondroBitfield filter) {
+    public static plasmaSearchRankingProcess genSearchresult(final serverObjects prop, final plasmaSwitchboard sb, final String keyhash, final Bitfield filter) {
         final plasmaSearchQuery query = new plasmaSearchQuery(keyhash, -1, sb.getRanking(), filter);
         final plasmaSearchRankingProcess ranked = new plasmaSearchRankingProcess(sb.webIndex, query, Integer.MAX_VALUE, 1);
         ranked.execQuery();
@@ -111,7 +111,7 @@ public class plasmaSearchAPI {
         return ranked;
     }
     
-    public static void genURLList(final serverObjects prop, final String keyhash, final String keystring, final plasmaSearchRankingProcess ranked, final kelondroBitfield flags, final int maxlines) {
+    public static void genURLList(final serverObjects prop, final String keyhash, final String keystring, final plasmaSearchRankingProcess ranked, final Bitfield flags, final int maxlines) {
         // search for a word hash and generate a list of url links
         prop.put("genUrlList_keyHash", keyhash);
         
@@ -147,7 +147,7 @@ public class plasmaSearchAPI {
                 prop.putNum("genUrlList_urlList_"+i+"_urlExists_ybr", plasmaSearchRankingProcess.ybr(entry.hash()));
                 prop.putNum("genUrlList_urlList_"+i+"_urlExists_tf", 1000.0 * entry.word().termFrequency());
                 prop.putNum("genUrlList_urlList_"+i+"_urlExists_authority", (ranked.getOrder() == null) ? -1 : ranked.getOrder().authority(entry.hash()));
-                prop.put("genUrlList_urlList_"+i+"_urlExists_date", kelondroDate.formatShortDay(new Date(entry.word().lastModified())));
+                prop.put("genUrlList_urlList_"+i+"_urlExists_date", DateFormatter.formatShortDay(new Date(entry.word().lastModified())));
                 prop.putNum("genUrlList_urlList_"+i+"_urlExists_wordsintitle", entry.word().wordsintitle());
                 prop.putNum("genUrlList_urlList_"+i+"_urlExists_wordsintext", entry.word().wordsintext());
                 prop.putNum("genUrlList_urlList_"+i+"_urlExists_phrasesintext", entry.word().phrasesintext());

@@ -32,9 +32,9 @@ import java.util.Map;
 import java.util.TimeZone;
 
 import de.anomic.kelondro.kelondroBLOBTree;
-import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroMap;
-import de.anomic.kelondro.kelondroNaturalOrder;
+import de.anomic.kelondro.coding.Base64Order;
+import de.anomic.kelondro.coding.NaturalOrder;
 
 public class messageBoard {
     
@@ -54,7 +54,7 @@ public class messageBoard {
     public messageBoard(final File path) {
         new File(path.getParent()).mkdir();
         if (database == null) {
-            database = new kelondroMap(new kelondroBLOBTree(path, true, true, categoryLength + dateFormat.length() + 2, recordSize, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 500);
+            database = new kelondroMap(new kelondroBLOBTree(path, true, true, categoryLength + dateFormat.length() + 2, recordSize, '_', NaturalOrder.naturalOrder, true, false, false), 500);
         }
         sn = 0;
     }
@@ -115,7 +115,7 @@ public class messageBoard {
             if (message == null)
 		record.put("message", "");
 	    else
-		record.put("message", kelondroBase64Order.enhancedCoder.encode(message));
+		record.put("message", Base64Order.enhancedCoder.encode(message));
             record.put("read", "false");
 	}
 
@@ -176,7 +176,7 @@ public class messageBoard {
 	    final String m = record.get("message");
 	    if (m == null) return new byte[0];
             record.put("read", "true");
-	    return kelondroBase64Order.enhancedCoder.decode(m, "de.anomic.data.messageBoard.message()");
+	    return Base64Order.enhancedCoder.decode(m, "de.anomic.data.messageBoard.message()");
 	}
         
         public boolean read() {

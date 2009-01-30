@@ -26,7 +26,7 @@
 
 package de.anomic.index;
 
-import de.anomic.kelondro.kelondroBitfield;
+import de.anomic.kelondro.coding.Bitfield;
 
 public interface indexRWIEntry {
 
@@ -76,7 +76,7 @@ public interface indexRWIEntry {
     
     public int urlcomps();
     
-    public kelondroBitfield flags();
+    public Bitfield flags();
     
     public double termFrequency();
     

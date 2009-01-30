@@ -39,10 +39,21 @@ import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import de.anomic.kelondro.kelondroRow.EntryIndex;
+import de.anomic.kelondro.coding.ByteOrder;
+import de.anomic.kelondro.coding.NaturalOrder;
+import de.anomic.kelondro.index.Column;
+import de.anomic.kelondro.index.Row;
+import de.anomic.kelondro.index.Row.EntryIndex;
+import de.anomic.kelondro.io.BufferedIOChunks;
+import de.anomic.kelondro.io.ChannelRandomAccess;
+import de.anomic.kelondro.io.FileRandomAccess;
+import de.anomic.kelondro.io.IOChunksInterface;
+import de.anomic.kelondro.io.RandomAccessInterface;
+import de.anomic.kelondro.io.RandomAccessIOChunks;
+import de.anomic.kelondro.io.RandomAccessRecords;
 import de.anomic.server.logging.serverLog;
 
-public abstract class kelondroAbstractRecords implements kelondroRecords {
+public abstract class kelondroAbstractRecords implements RandomAccessRecords {
 
     private static final boolean useChannel = false;
     
@@ -72,7 +83,7 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
 
     // values that are only present at run-time
     protected String           filename;     // the database's file name
-    protected kelondroIOChunks entryFile;    // the database file
+    protected IOChunksInterface entryFile;    // the database file
     protected int              overhead;     // OHBYTEC + 4 * OHHANDLEC = size of additional control bytes
     protected int              headchunksize;// overheadsize + key element column size
     protected int              tailchunksize;// sum(all: COLWIDTHS) minus the size of the key element colum
@@ -88,7 +99,7 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
     protected usageControl      USAGE;       // counter for used and re-use records and pointer to free-list
     protected short             OHBYTEC;     // number of extra bytes in each node
     protected short             OHHANDLEC;   // number of handles in each node
-    protected kelondroRow       ROW;         // array with widths of columns
+    protected Row       ROW;         // array with widths of columns
     private   kelondroHandle    HANDLES[];   // array with handles
     private   byte[]            TXTPROPS[];  // array with text properties
     private   int               TXTPROPW;    // size of a single TXTPROPS element
@@ -344,8 +355,8 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
     public static int staticsize(final File file) {
         if (!(file.exists())) return 0;
         try {
-            final kelondroRA ra = (useChannel) ? new kelondroChannelRA(new File(file.getCanonicalPath())) : new kelondroFileRA(new File(file.getCanonicalPath()));
-            final kelondroIOChunks entryFile = new kelondroRAIOChunks(ra, ra.name());
+            final RandomAccessInterface ra = (useChannel) ? new ChannelRandomAccess(new File(file.getCanonicalPath())) : new FileRandomAccess(new File(file.getCanonicalPath()));
+            final IOChunksInterface entryFile = new RandomAccessIOChunks(ra, ra.name());
 
             final int used = entryFile.readInt(POS_USEDC); // works only if consistency with file size is given
             entryFile.close();
@@ -360,7 +371,7 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
 
     public kelondroAbstractRecords(final File file, final boolean useNodeCache,
                            final short ohbytec, final short ohhandlec,
-                           final kelondroRow rowdef, final int FHandles, final int txtProps, final int txtPropWidth) throws IOException {
+                           final Row rowdef, final int FHandles, final int txtProps, final int txtPropWidth) throws IOException {
         // opens an existing file or creates a new file
         // file: the file that shall be created
         // oha : overhead size array of four bytes: oha[0]=# of bytes, oha[1]=# of shorts, oha[2]=# of ints, oha[3]=# of longs, 
@@ -377,7 +388,7 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
         if (file.exists()) {
             // opens an existing tree
             this.filename = file.getCanonicalPath();
-            kelondroRA raf = (useChannel) ? new kelondroChannelRA(new File(this.filename)) : new kelondroFileRA(new File(this.filename));
+            RandomAccessInterface raf = (useChannel) ? new ChannelRandomAccess(new File(this.filename)) : new FileRandomAccess(new File(this.filename));
             //kelondroRA raf = new kelondroBufferedRA(new kelondroFileRA(this.filename), 1024, 100);
             //kelondroRA raf = new kelondroCachedRA(new kelondroFileRA(this.filename), 5000000, 1000);
             //kelondroRA raf = new kelondroNIOFileRA(this.filename, (file.length() < 4000000), 10000);
@@ -385,14 +396,14 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
             initExistingFile(raf, useNodeCache);
         } else {
             this.filename = file.getCanonicalPath();
-            final kelondroRA raf = (useChannel) ? new kelondroChannelRA(new File(this.filename)) : new kelondroFileRA(new File(this.filename));
+            final RandomAccessInterface raf = (useChannel) ? new ChannelRandomAccess(new File(this.filename)) : new FileRandomAccess(new File(this.filename));
             // kelondroRA raf = new kelondroBufferedRA(new kelondroFileRA(this.filename), 1024, 100);
             // kelondroRA raf = new kelondroNIOFileRA(this.filename, false, 10000);
             initNewFile(raf, FHandles, txtProps);
         }
         assignRowdef(rowdef);
         if (fileExisted) {
-        	final kelondroByteOrder oldOrder = readOrderType();
+        	final ByteOrder oldOrder = readOrderType();
             if ((oldOrder != null) && (!(oldOrder.equals(rowdef.objectOrder)))) {
                 writeOrderType(); // write new order type
                 //throw new IOException("wrong object order upon initialization. new order is " + rowdef.objectOrder.toString() + ", old order was " + oldOrder.toString());
@@ -403,9 +414,9 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
         }
     }
 
-    public kelondroAbstractRecords(final kelondroRA ra, final String filename, final boolean useCache,
+    public kelondroAbstractRecords(final RandomAccessInterface ra, final String filename, final boolean useCache,
                            final short ohbytec, final short ohhandlec,
-                           final kelondroRow rowdef, final int FHandles, final int txtProps, final int txtPropWidth,
+                           final Row rowdef, final int FHandles, final int txtProps, final int txtPropWidth,
                            final boolean exitOnFail) {
         // this always creates a new file
         this.fileExisted = false;
@@ -426,19 +437,19 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
     }
 
     public void clear() throws IOException {
-        kelondroRA ra = this.entryFile.getRA();
+        RandomAccessInterface ra = this.entryFile.getRA();
         final File f = ra.file();
         assert f != null;
         this.entryFile.close();
         f.delete();
-        ra = (useChannel) ? new kelondroChannelRA(f) : new kelondroFileRA(f);
+        ra = (useChannel) ? new ChannelRandomAccess(f) : new FileRandomAccess(f);
         initNewFile(ra, this.HANDLES.length, this.TXTPROPS.length);
     }
     
-    private void initNewFile(final kelondroRA ra, final int FHandles, final int txtProps) throws IOException {
+    private void initNewFile(final RandomAccessInterface ra, final int FHandles, final int txtProps) throws IOException {
 
         // create new Chunked IO
-        this.entryFile = new kelondroRAIOChunks(ra, ra.name());
+        this.entryFile = new RandomAccessIOChunks(ra, ra.name());
         
         // store dynamic run-time data
         this.overhead = this.OHBYTEC + 4 * this.OHHANDLEC;
@@ -532,20 +543,20 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
             this.theLogger.fine("KELONDRO DEBUG " + this.filename + ": " + message);
     }
 
-    public kelondroAbstractRecords(final kelondroRA ra, final String filename, final boolean useNodeCache) throws IOException{
+    public kelondroAbstractRecords(final RandomAccessInterface ra, final String filename, final boolean useNodeCache) throws IOException{
         this.fileExisted = false;
         this.filename = filename;
         initExistingFile(ra, useNodeCache);
         readOrderType();
     }
 
-    private void initExistingFile(final kelondroRA ra, boolean useBuffer) throws IOException {
+    private void initExistingFile(final RandomAccessInterface ra, boolean useBuffer) throws IOException {
         // read from Chunked IO
         //useBuffer = false;
         if (useBuffer) {
-            this.entryFile = new kelondroBufferedIOChunks(ra, ra.name(), 1024*1024, 30000 + random.nextLong() % 30000);
+            this.entryFile = new BufferedIOChunks(ra, ra.name(), 1024*1024, 30000 + random.nextLong() % 30000);
         } else {
-            this.entryFile = new kelondroRAIOChunks(ra, ra.name());
+            this.entryFile = new RandomAccessIOChunks(ra, ra.name());
         }
 
         // read dynamic variables that are back-ups of stored values in file;
@@ -554,7 +565,7 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
         this.OHBYTEC = entryFile.readShort(POS_OHBYTEC);
         this.OHHANDLEC = entryFile.readShort(POS_OHHANDLEC);
 
-        final kelondroColumn[] COLDEFS = new kelondroColumn[entryFile.readShort(POS_COLUMNS)];
+        final Column[] COLDEFS = new Column[entryFile.readShort(POS_COLUMNS)];
         this.HANDLES = new kelondroHandle[entryFile.readInt(POS_INTPROPC)];
         this.TXTPROPS = new byte[entryFile.readInt(POS_TXTPROPC)][];
         this.TXTPROPW = entryFile.readInt(POS_TXTPROPW);
@@ -569,7 +580,7 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
 
         // read configuration arrays
         for (int i = 0; i < COLDEFS.length; i++) {
-            COLDEFS[i] = new kelondroColumn("col-" + i, kelondroColumn.celltype_binary, kelondroColumn.encoder_bytes, entryFile.readInt(POS_COLWIDTHS + 4 * i), "");
+            COLDEFS[i] = new Column("col-" + i, Column.celltype_binary, Column.encoder_bytes, entryFile.readInt(POS_COLWIDTHS + 4 * i), "");
         }
         for (int i = 0; i < HANDLES.length; i++) {
             HANDLES[i] = new kelondroHandle(entryFile.readInt(POS_HANDLES + 4 * i));
@@ -578,7 +589,7 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
             TXTPROPS[i] = new byte[TXTPROPW];
             entryFile.readFully(POS_TXTPROPS + TXTPROPW * i, TXTPROPS[i], 0, TXTPROPS[i].length);
         }
-        this.ROW = new kelondroRow(COLDEFS, readOrderType(), 0);
+        this.ROW = new Row(COLDEFS, readOrderType(), 0);
         
         // assign remaining values that are only present at run-time
         this.overhead = OHBYTEC + 4 * OHHANDLEC;
@@ -596,11 +607,11 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
         } catch (final IOException e) {}
     }
     
-    private kelondroByteOrder readOrderType() {
+    private ByteOrder readOrderType() {
         try {
             final byte[] d = getDescription();
             final String s = new String(d).substring(0, 2);
-            return kelondroNaturalOrder.orderBySignature(s);
+            return NaturalOrder.orderBySignature(s);
         } catch (final IOException e) {
             return null;
         }
@@ -628,16 +639,16 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
         USAGE.dispose(handle);
     }
     
-    protected void printChunk(final kelondroRow.Entry chunk) {
+    protected void printChunk(final Row.Entry chunk) {
         for (int j = 0; j < chunk.columns(); j++)
             System.out.print(new String(chunk.getColBytes(j)) + ", ");
     }
 
-    public final kelondroRow row() {
+    public final Row row() {
         return this.ROW;
     }
     
-    private final void assignRowdef(final kelondroRow rowdef) {
+    private final void assignRowdef(final Row rowdef) {
         // overwrites a given rowdef
         // the new rowdef must be compatible
         /*

@@ -33,9 +33,9 @@ import java.util.Iterator;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.index.indexRepositoryReference;
 import de.anomic.index.indexURLReference;
-import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroRotateIterator;
-import de.anomic.kelondro.kelondroDate;
+import de.anomic.kelondro.coding.Base64Order;
+import de.anomic.kelondro.coding.DateFormatter;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -72,7 +72,7 @@ public class IndexControlURLs_p {
             prop.put("reload", 1);
         } else {
             prop.put("lurlexport", 1);
-            prop.put("lurlexport_exportfile", sb.getRootPath() + "/DATA/EXPORT/" + kelondroDate.formatShortSecond());
+            prop.put("lurlexport_exportfile", sb.getRootPath() + "/DATA/EXPORT/" + DateFormatter.formatShortSecond());
             if (export == null) {
                 // there has never been an export
                 prop.put("lurlexportfinished", 0);
@@ -181,7 +181,7 @@ public class IndexControlURLs_p {
         // generate list
         if (post.containsKey("urlhashsimilar")) {
             try {
-                final Iterator<indexURLReference> entryIt = new kelondroRotateIterator<indexURLReference>(sb.webIndex.entriesURL(true, urlhash), new String(kelondroBase64Order.zero((urlhash == null ? 0 : urlhash.length()))), sb.webIndex.size()); 
+                final Iterator<indexURLReference> entryIt = new kelondroRotateIterator<indexURLReference>(sb.webIndex.entriesURL(true, urlhash), new String(Base64Order.zero((urlhash == null ? 0 : urlhash.length()))), sb.webIndex.size()); 
                 final StringBuilder result = new StringBuilder("Sequential List of URL-Hashes:<br />");
                 indexURLReference entry;
                 int i = 0;

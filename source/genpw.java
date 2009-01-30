@@ -2,8 +2,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-import de.anomic.kelondro.kelondroBase64Order;
-import de.anomic.kelondro.kelondroDigest;
+import de.anomic.kelondro.coding.Base64Order;
+import de.anomic.kelondro.coding.Digest;
 
 // migration.java
 // -----------------------
@@ -50,6 +50,6 @@ public class genpw {
             }
         }
         
-		System.out.println(kelondroDigest.encodeMD5Hex(kelondroBase64Order.standardCoder.encodeString(username+":"+password)));
+		System.out.println(Digest.encodeMD5Hex(Base64Order.standardCoder.encodeString(username+":"+password)));
 	}
 }

@@ -40,7 +40,7 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import de.anomic.kelondro.kelondroByteBuffer;
+import de.anomic.kelondro.tools.ByteBuffer;
 import de.anomic.server.logging.serverLog;
 
 public class opensearchdescriptionReader extends DefaultHandler {
@@ -143,7 +143,7 @@ public class opensearchdescriptionReader extends DefaultHandler {
             serverLog.logWarning("opensearchdescriptionReader", "response=" + new String(a));
             return null;
         }
-        if (!kelondroByteBuffer.equals(a, "<?xml".getBytes())) {
+        if (!ByteBuffer.equals(a, "<?xml".getBytes())) {
             serverLog.logWarning("opensearchdescriptionReader", "response does not contain valid xml");
             return null;
         }

@@ -26,12 +26,12 @@
 
 package de.anomic.index;
 
-import de.anomic.kelondro.kelondroBitfield;
-import de.anomic.kelondro.kelondroMicroDate;
+import de.anomic.kelondro.coding.Bitfield;
+import de.anomic.kelondro.coding.MicroDate;
 
 public class indexRWIVarEntry implements indexRWIEntry, Cloneable {
 
-    public kelondroBitfield flags;
+    public Bitfield flags;
     public long freshUntil, lastModified;
     public String language, urlHash;
     public char type;
@@ -57,13 +57,13 @@ public class indexRWIVarEntry implements indexRWIEntry, Cloneable {
             final char     doctype,       // type of document
             final int      outlinksSame,  // outlinks to same domain
             final int      outlinksOther, // outlinks to other domain
-            final kelondroBitfield flags,  // attributes to the url and to the word according the url
+            final Bitfield flags,  // attributes to the url and to the word according the url
             final int      worddistance,
             final double   termfrequency
     ) {
         if ((language == null) || (language.length() != 2)) language = "uk";
-        final int mddlm = kelondroMicroDate.microDateDays(lastmodified);
-        final int mddct = kelondroMicroDate.microDateDays(updatetime);
+        final int mddlm = MicroDate.microDateDays(lastmodified);
+        final int mddct = MicroDate.microDateDays(updatetime);
         this.flags = flags;
         this.freshUntil = Math.max(0, mddlm + (mddct - mddlm) * 2);
         this.lastModified = lastmodified;
@@ -145,7 +145,7 @@ public class indexRWIVarEntry implements indexRWIEntry, Cloneable {
         this.termFrequency = this.termFrequency + oe.termFrequency;
     }
 
-    public kelondroBitfield flags() {
+    public Bitfield flags() {
         return flags;
     }
 

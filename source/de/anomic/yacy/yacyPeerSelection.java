@@ -28,10 +28,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 
-import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroException;
-import de.anomic.kelondro.kelondroMScoreCluster;
-import de.anomic.kelondro.kelondroDate;
+import de.anomic.kelondro.coding.Base64Order;
+import de.anomic.kelondro.coding.DateFormatter;
+import de.anomic.kelondro.tools.ScoreCluster;
 import de.anomic.server.logging.serverLog;
 
 
@@ -42,7 +42,7 @@ import de.anomic.server.logging.serverLog;
 
 public class yacyPeerSelection {
     
-    public static void selectDHTPositions(final yacySeedDB seedDB, String wordhash, int redundancy, int partitionExponent, HashMap<String, yacySeed> regularSeeds, kelondroMScoreCluster<String> ranking) {
+    public static void selectDHTPositions(final yacySeedDB seedDB, String wordhash, int redundancy, int partitionExponent, HashMap<String, yacySeed> regularSeeds, ScoreCluster<String> ranking) {
         // this method is called from the search target computation
         long[] dhtVerticalTargets = yacySeed.dhtPositions(wordhash, partitionExponent);
         yacySeed seed;
@@ -100,7 +100,7 @@ public class yacyPeerSelection {
             this.remaining = max;
             this.doublecheck = new HashSet<String>();
             this.nextSeed = nextInternal();
-            this.alsoMyOwn = alsoMyOwn && nextSeed != null && (kelondroBase64Order.enhancedCoder.compare(seedDB.mySeed().hash.getBytes(), nextSeed.hash.getBytes()) > 0);
+            this.alsoMyOwn = alsoMyOwn && nextSeed != null && (Base64Order.enhancedCoder.compare(seedDB.mySeed().hash.getBytes(), nextSeed.hash.getBytes()) > 0);
         }
         
         public boolean hasNext() {
@@ -131,7 +131,7 @@ public class yacyPeerSelection {
         }
         
         public yacySeed next() {
-            if (alsoMyOwn && kelondroBase64Order.enhancedCoder.compare(seedDB.mySeed().hash.getBytes(), nextSeed.hash.getBytes()) < 0) {
+            if (alsoMyOwn && Base64Order.enhancedCoder.compare(seedDB.mySeed().hash.getBytes(), nextSeed.hash.getBytes()) < 0) {
                 // take my own seed hash instead the enumeration result
                 alsoMyOwn = false;
                 return seedDB.mySeed();
@@ -253,7 +253,7 @@ public class yacyPeerSelection {
         if (count > seedDB.sizeConnected()) count = seedDB.sizeConnected();
 
         // fill a score object
-        final kelondroMScoreCluster<String> seedScore = new kelondroMScoreCluster<String>();
+        final ScoreCluster<String> seedScore = new ScoreCluster<String>();
         yacySeed ys;
         long absage;
         final Iterator<yacySeed> s = seedDB.seedsConnected(true, false, null, (float) 0.0);
@@ -263,7 +263,7 @@ public class yacyPeerSelection {
             while ((s.hasNext()) && (searchcount-- > 0)) {
                 ys = s.next();
                 if ((ys != null) && (ys.get(yacySeed.LASTSEEN, "").length() > 10)) try {
-                    absage = Math.abs(System.currentTimeMillis() + kelondroDate.dayMillis - ys.getLastSeenUTC());
+                    absage = Math.abs(System.currentTimeMillis() + DateFormatter.dayMillis - ys.getLastSeenUTC());
                     seedScore.addScore(ys.hash, (int) absage); // the higher absage, the older is the peer
                 } catch (final Exception e) {}
             }

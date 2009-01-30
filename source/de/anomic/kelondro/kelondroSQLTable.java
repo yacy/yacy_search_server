@@ -37,6 +37,12 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import de.anomic.kelondro.coding.ByteOrder;
+import de.anomic.kelondro.coding.NaturalOrder;
+import de.anomic.kelondro.index.Row;
+import de.anomic.kelondro.index.RowCollection;
+import de.anomic.kelondro.index.ObjectIndex;
+
 /*
  * Commands to create a database using mysql:
  * 
@@ -48,7 +54,7 @@ import java.util.List;
  * grant ALL on yacy.* to yacy;
  */
 
-public class kelondroSQLTable implements kelondroIndex {
+public class kelondroSQLTable implements ObjectIndex {
 
     private static final String db_driver_str_mysql = "org.gjt.mm.mysql.Driver";
     private static final String db_driver_str_pgsql = "org.postgresql.Driver";
@@ -60,10 +66,10 @@ public class kelondroSQLTable implements kelondroIndex {
     private static final String db_pwd_str    = "yacy";
     
     private Connection theDBConnection = null;
-    private final kelondroByteOrder order = new kelondroNaturalOrder(true);
-    private final kelondroRow rowdef;
+    private final ByteOrder order = new NaturalOrder(true);
+    private final Row rowdef;
     
-    public kelondroSQLTable(final String dbType, final kelondroRow rowdef) throws Exception {
+    public kelondroSQLTable(final String dbType, final Row rowdef) throws Exception {
         this.rowdef = rowdef;
         openDatabaseConnection(dbType);
     }
@@ -128,7 +134,7 @@ public class kelondroSQLTable implements kelondroIndex {
         }
     }
     
-    public kelondroRow row() {
+    public Row row() {
         return this.rowdef;
     }
     
@@ -140,11 +146,11 @@ public class kelondroSQLTable implements kelondroIndex {
         }
     }
     
-    public ArrayList<kelondroRowCollection> removeDoubles() {
-        return new ArrayList<kelondroRowCollection>();
+    public ArrayList<RowCollection> removeDoubles() {
+        return new ArrayList<RowCollection>();
     }
     
-    public kelondroRow.Entry get(final byte[] key) throws IOException {
+    public Row.Entry get(final byte[] key) throws IOException {
         try {
             final String sqlQuery = "SELECT value from test where hash = ?";
             
@@ -161,26 +167,26 @@ public class kelondroSQLTable implements kelondroIndex {
             sqlStatement.close();
             
             if (value == null) return null;
-            final kelondroRow.Entry entry = this.rowdef.newEntry(value);
+            final Row.Entry entry = this.rowdef.newEntry(value);
             return entry;
         } catch (final Exception e) {
             throw new IOException(e.getMessage());
         }
     }
 
-    public synchronized void putMultiple(final List<kelondroRow.Entry> rows) throws IOException {
-        final Iterator<kelondroRow.Entry> i = rows.iterator();
+    public synchronized void putMultiple(final List<Row.Entry> rows) throws IOException {
+        final Iterator<Row.Entry> i = rows.iterator();
         while (i.hasNext()) put(i.next());
     }
     
-    public kelondroRow.Entry put(final kelondroRow.Entry row, final Date entryDate) throws IOException {
+    public Row.Entry put(final Row.Entry row, final Date entryDate) throws IOException {
         return put(row);
     }
     
-    public kelondroRow.Entry put(final kelondroRow.Entry row) throws IOException {
+    public Row.Entry put(final Row.Entry row) throws IOException {
         try {
             
-            final kelondroRow.Entry oldEntry = remove(row.getColBytes(0));            
+            final Row.Entry oldEntry = remove(row.getColBytes(0));            
             
             final String sqlQuery = "INSERT INTO test (" +
                     "hash, " +
@@ -202,23 +208,23 @@ public class kelondroSQLTable implements kelondroIndex {
         }
     }
 
-    public synchronized void addUnique(final kelondroRow.Entry row) throws IOException {
+    public synchronized void addUnique(final Row.Entry row) throws IOException {
         throw new UnsupportedOperationException();
     }
     
-    public synchronized void addUnique(final kelondroRow.Entry row, final Date entryDate) {
+    public synchronized void addUnique(final Row.Entry row, final Date entryDate) {
         throw new UnsupportedOperationException();
     }
     
-    public synchronized void addUniqueMultiple(final List<kelondroRow.Entry> rows) throws IOException {
+    public synchronized void addUniqueMultiple(final List<Row.Entry> rows) throws IOException {
         throw new UnsupportedOperationException();
     }
     
-    public kelondroRow.Entry remove(final byte[] key) throws IOException {
+    public Row.Entry remove(final byte[] key) throws IOException {
         PreparedStatement sqlStatement = null;
         try {
             
-            final kelondroRow.Entry entry =  this.get(key);
+            final Row.Entry entry =  this.get(key);
             if (entry == null) return null;
             
             final String sqlQuery = "DELETE FROM test WHERE hash = ?";                
@@ -242,11 +248,11 @@ public class kelondroSQLTable implements kelondroIndex {
         }
     }
     
-    public kelondroRow.Entry removeOne() {
+    public Row.Entry removeOne() {
         return null;
     }
     
-    public kelondroCloneableIterator<kelondroRow.Entry> rows(final boolean up, final byte[] startKey) throws IOException {
+    public kelondroCloneableIterator<Row.Entry> rows(final boolean up, final byte[] startKey) throws IOException {
         // Objects are of type kelondroRow.Entry
         return null;
     }
@@ -266,7 +272,7 @@ public class kelondroSQLTable implements kelondroIndex {
         return 0;
     }
 
-    public kelondroByteOrder order() {
+    public ByteOrder order() {
         return this.order;
     }
     

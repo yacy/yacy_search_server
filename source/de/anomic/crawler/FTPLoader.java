@@ -36,7 +36,7 @@ import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpResponseHeader;
 import de.anomic.http.httpdProxyCacheEntry;
 import de.anomic.index.indexDocumentMetadata;
-import de.anomic.kelondro.kelondroDate;
+import de.anomic.kelondro.coding.DateFormatter;
 import de.anomic.net.ftpc;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaParser;
@@ -61,7 +61,7 @@ public class FTPLoader {
         httpRequestHeader requestHeader = new httpRequestHeader();
         if (entry.referrerhash() != null) requestHeader.put(httpRequestHeader.REFERER, sb.getURL(entry.referrerhash()).toNormalform(true, false));
         httpResponseHeader responseHeader = new httpResponseHeader();
-        responseHeader.put(httpResponseHeader.LAST_MODIFIED, kelondroDate.formatRFC1123(fileDate));
+        responseHeader.put(httpResponseHeader.LAST_MODIFIED, DateFormatter.formatRFC1123(fileDate));
         responseHeader.put(httpResponseHeader.CONTENT_TYPE, mimeType);
         indexDocumentMetadata metadata = new httpdProxyCacheEntry(
                 entry.depth(), entry.url(), entry.name(), "OK",

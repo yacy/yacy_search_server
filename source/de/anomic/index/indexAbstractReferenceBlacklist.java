@@ -40,7 +40,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import de.anomic.kelondro.kelondroMSetTools;
+import de.anomic.kelondro.tools.SetTools;
 import de.anomic.yacy.yacyURL;
 
 public abstract class indexAbstractReferenceBlacklist implements indexReferenceBlacklist {
@@ -159,7 +159,7 @@ public abstract class indexAbstractReferenceBlacklist implements indexReferenceB
                 } catch (final IOException e) { /* */ }
                 
                 // join all blacklists from files into one internal blacklist map
-                loadedBlacklist = kelondroMSetTools.loadMapMultiValsPerKey(file.toString(), sep).entrySet();
+                loadedBlacklist = SetTools.loadMapMultiValsPerKey(file.toString(), sep).entrySet();
                 for (final Iterator<Map.Entry<String, ArrayList<String>>> mi = loadedBlacklist.iterator(); mi.hasNext(); ) {
                     loadedEntry = mi.next();
                     loadedPaths = loadedEntry.getValue();

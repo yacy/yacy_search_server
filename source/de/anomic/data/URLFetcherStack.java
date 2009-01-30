@@ -28,11 +28,11 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroException;
-import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroStack;
-import de.anomic.kelondro.kelondroRow.EntryIndex;
+import de.anomic.kelondro.coding.Base64Order;
+import de.anomic.kelondro.index.Row;
+import de.anomic.kelondro.index.Row.EntryIndex;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyURL;
 
@@ -40,9 +40,9 @@ public class URLFetcherStack {
     
     public static final String DBFILE = "urlRemote2.stack";
     
-    private static final kelondroRow rowdef = new kelondroRow(
+    private static final Row rowdef = new Row(
             "String urlstring-256",
-            kelondroBase64Order.enhancedCoder,
+            Base64Order.enhancedCoder,
             0
     );
     private final kelondroStack db;
@@ -79,7 +79,7 @@ public class URLFetcherStack {
     
     public yacyURL pop() {
         try {
-            final kelondroRow.Entry r = this.db.pop();
+            final Row.Entry r = this.db.pop();
             if (r == null) return null;
             final String url = r.getColString(0, null);
             try {
@@ -99,7 +99,7 @@ public class URLFetcherStack {
         try {
             final ArrayList<String> ar = new ArrayList<String>();
             final Iterator<EntryIndex> it = db.contentRows(500);
-            kelondroRow.EntryIndex ei;
+            Row.EntryIndex ei;
             for (int i=0; i<count && it.hasNext(); i++) {
                 ei = it.next();
                 if (ei == null) continue;

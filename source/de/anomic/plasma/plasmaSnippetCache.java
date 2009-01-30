@@ -46,8 +46,8 @@ import de.anomic.http.httpResponseHeader;
 import de.anomic.index.indexDocumentMetadata;
 import de.anomic.index.indexURLReference;
 import de.anomic.index.indexWord;
-import de.anomic.kelondro.kelondroMScoreCluster;
-import de.anomic.kelondro.kelondroMSetTools;
+import de.anomic.kelondro.tools.ScoreCluster;
+import de.anomic.kelondro.tools.SetTools;
 import de.anomic.plasma.parser.ParserException;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySearch;
@@ -70,7 +70,7 @@ public class plasmaSnippetCache {
     public static final int ERROR_NO_MATCH = 16;
     
     private static int                           snippetsScoreCounter = 0;
-    private static kelondroMScoreCluster<String> snippetsScore = null;
+    private static ScoreCluster<String> snippetsScore = null;
     private static final HashMap<String, String> snippetsCache = new HashMap<String, String>();
     
     /**
@@ -93,7 +93,7 @@ public class plasmaSnippetCache {
         log = logx;
         sb = switchboard;
         snippetsScoreCounter = 0;
-        snippetsScore = new kelondroMScoreCluster<String>();
+        snippetsScore = new ScoreCluster<String>();
         snippetsCache.clear(); 
         faviconCache.clear();
     }
@@ -518,7 +518,7 @@ public class plasmaSnippetCache {
         // care for counter
         if (snippetsScoreCounter == java.lang.Integer.MAX_VALUE) {
             snippetsScoreCounter = 0;
-            snippetsScore = new kelondroMScoreCluster<String>();
+            snippetsScore = new ScoreCluster<String>();
             snippetsCache.clear();
         }
         
@@ -940,7 +940,7 @@ public class plasmaSnippetCache {
     public static String failConsequences(final TextSnippet snippet, final String eventID) {
         // problems with snippet fetch
         final String urlHash = snippet.getUrl().hash();
-        final String querystring = kelondroMSetTools.setToString(snippet.getRemainingHashes(), ' ');
+        final String querystring = SetTools.setToString(snippet.getRemainingHashes(), ' ');
         if ((snippet.getErrorCode() == ERROR_SOURCE_LOADING) ||
             (snippet.getErrorCode() == ERROR_RESOURCE_LOADING) ||
             (snippet.getErrorCode() == ERROR_PARSER_FAILED) ||

@@ -34,8 +34,8 @@ import java.util.List;
 import org.apache.commons.httpclient.methods.multipart.Part;
 
 import de.anomic.http.DefaultCharsetStringPart;
-import de.anomic.kelondro.kelondroDigest;
-import de.anomic.kelondro.kelondroDate;
+import de.anomic.kelondro.coding.DateFormatter;
+import de.anomic.kelondro.coding.Digest;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.server.serverObjects;
@@ -64,7 +64,7 @@ public class yacyNetwork {
             final String salt = post.get("key", "");
             final String iam = post.get("iam", "");
             final String magic = env.getConfig("network.unit.protocol.request.authentification.essentials", "");
-            final String md5 = kelondroDigest.encodeMD5Hex(salt + iam + magic);
+            final String md5 = Digest.encodeMD5Hex(salt + iam + magic);
 			return post.get("magicmd5", "").equals(md5);
 		}
 		
@@ -83,7 +83,7 @@ public class yacyNetwork {
 		if (targetHash != null) post.add(new DefaultCharsetStringPart("youare", targetHash));
         
         // time information for synchronization
-		post.add(new DefaultCharsetStringPart("mytime", kelondroDate.formatShortSecond(new Date())));
+		post.add(new DefaultCharsetStringPart("mytime", DateFormatter.formatShortSecond(new Date())));
 		post.add(new DefaultCharsetStringPart("myUTC", Long.toString(System.currentTimeMillis())));
 
         // network identification
@@ -96,7 +96,7 @@ public class yacyNetwork {
             if (authentificationMethod.equals("salted-magic-sim")) {
                 // generate an authentification essential using the salt, the iam-hash and the network magic
                 final String magic = sb.getConfig("network.unit.protocol.request.authentification.essentials", "");
-                final String md5 = kelondroDigest.encodeMD5Hex(salt + sb.webIndex.seedDB.mySeed().hash + magic);
+                final String md5 = Digest.encodeMD5Hex(salt + sb.webIndex.seedDB.mySeed().hash + magic);
                 post.add(new DefaultCharsetStringPart("magicmd5", md5));
             }
         }        

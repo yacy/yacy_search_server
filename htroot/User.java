@@ -33,8 +33,8 @@ import de.anomic.data.userDB;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpResponseHeader;
 import de.anomic.http.httpd;
-import de.anomic.kelondro.kelondroBase64Order;
-import de.anomic.kelondro.kelondroDigest;
+import de.anomic.kelondro.coding.Base64Order;
+import de.anomic.kelondro.coding.Digest;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -95,8 +95,8 @@ public class User{
             
             entry=sb.userDB.passwordAuth(username, password);
             final boolean staticAdmin = sb.getConfig(httpd.ADMIN_ACCOUNT_B64MD5, "").equals(
-                    kelondroDigest.encodeMD5Hex(
-                            kelondroBase64Order.standardCoder.encodeString(username + ":" + password)
+                    Digest.encodeMD5Hex(
+                            Base64Order.standardCoder.encodeString(username + ":" + password)
                     )
             );
             String cookie="";
@@ -123,11 +123,11 @@ public class User{
         if(post!= null && entry != null){
         		if(post.containsKey("changepass")){
         			prop.put("status", "1"); //password
-        			if(entry.getMD5EncodedUserPwd().equals(kelondroDigest.encodeMD5Hex(entry.getUserName()+":"+post.get("oldpass", "")))){
+        			if(entry.getMD5EncodedUserPwd().equals(Digest.encodeMD5Hex(entry.getUserName()+":"+post.get("oldpass", "")))){
         			if(post.get("newpass").equals(post.get("newpass2"))){
         			if(!post.get("newpass", "").equals("")){
         				try {
-							entry.setProperty(userDB.Entry.MD5ENCODED_USERPWD_STRING, kelondroDigest.encodeMD5Hex(entry.getUserName()+":"+post.get("newpass", "")));
+							entry.setProperty(userDB.Entry.MD5ENCODED_USERPWD_STRING, Digest.encodeMD5Hex(entry.getUserName()+":"+post.get("newpass", "")));
 							prop.put("status_password", "0"); //changes
 						} catch (final IOException e) {}
         			}else{

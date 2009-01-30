@@ -51,16 +51,16 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Map.Entry;
 
-import de.anomic.kelondro.kelondroNaturalOrder;
-import de.anomic.kelondro.kelondroRow;
-import de.anomic.kelondro.kelondroDate;
+import de.anomic.kelondro.coding.DateFormatter;
+import de.anomic.kelondro.coding.NaturalOrder;
+import de.anomic.kelondro.index.Row;
 import de.anomic.server.serverCodings;
 
 public class yacyNewsRecord {
 
     public static final int maxNewsRecordLength  = 512;
     public static final int categoryStringLength = 8;
-    public static final int idLength = kelondroDate.PATTERN_SHORT_SECOND.length() + yacySeedDB.commonHashLength;
+    public static final int idLength = DateFormatter.PATTERN_SHORT_SECOND.length() + yacySeedDB.commonHashLength;
 
     private final String originator;  // hash of originating peer
     private final Date   created;     // Date when news was created by originator
@@ -72,16 +72,16 @@ public class yacyNewsRecord {
     public static final int attributesMaxLength = maxNewsRecordLength
                                                   - idLength
                                                   - categoryStringLength
-                                                  - kelondroDate.PATTERN_SHORT_SECOND.length()
+                                                  - DateFormatter.PATTERN_SHORT_SECOND.length()
                                                   - 2;
     
-    public static final kelondroRow rowdef = new kelondroRow(
+    public static final Row rowdef = new Row(
             "String idx-" + idLength + " \"id = created + originator\"," +
             "String cat-" + categoryStringLength + "," +
-            "String rec-" + kelondroDate.PATTERN_SHORT_SECOND.length() + "," +
+            "String rec-" + DateFormatter.PATTERN_SHORT_SECOND.length() + "," +
             "short  dis-2 {b64e}," +
             "String att-" + attributesMaxLength,
-            kelondroNaturalOrder.naturalOrder, 0
+            NaturalOrder.naturalOrder, 0
     );
     
     public static yacyNewsRecord newRecord(final String newsString) {
@@ -132,8 +132,8 @@ public class yacyNewsRecord {
         if (attributes.toString().length() > attributesMaxLength) throw new IllegalArgumentException("attributes length (" + attributes.toString().length() + ") exceeds maximum (" + attributesMaxLength + ")");
         this.category = (attributes.containsKey("cat")) ? (String) attributes.get("cat") : "";
         if (category.length() > categoryStringLength) throw new IllegalArgumentException("category length (" + category.length() + ") exceeds maximum (" + categoryStringLength + ")");
-        this.received = (attributes.containsKey("rec")) ? kelondroDate.parseShortSecond(attributes.get("rec"), kelondroDate.UTCDiffString()) : new Date();
-        this.created = (attributes.containsKey("cre")) ? kelondroDate.parseShortSecond(attributes.get("cre"), kelondroDate.UTCDiffString()) : new Date();
+        this.received = (attributes.containsKey("rec")) ? DateFormatter.parseShortSecond(attributes.get("rec"), DateFormatter.UTCDiffString()) : new Date();
+        this.created = (attributes.containsKey("cre")) ? DateFormatter.parseShortSecond(attributes.get("cre"), DateFormatter.UTCDiffString()) : new Date();
         this.distributed = (attributes.containsKey("dis")) ? Integer.parseInt(attributes.get("dis")) : 0;
         this.originator = (attributes.containsKey("ori")) ? (String) attributes.get("ori") : "";
         removeStandards();
@@ -156,10 +156,10 @@ public class yacyNewsRecord {
         if (attributes.toString().length() > attributesMaxLength) throw new IllegalArgumentException("attributes length (" + attributes.toString().length() + ") exceeds maximum (" + attributesMaxLength + ")");
         this.attributes = attributes;
         this.received = received;
-        this.created = kelondroDate.parseShortSecond(id.substring(0, kelondroDate.PATTERN_SHORT_SECOND.length()), kelondroDate.UTCDiffString());
+        this.created = DateFormatter.parseShortSecond(id.substring(0, DateFormatter.PATTERN_SHORT_SECOND.length()), DateFormatter.UTCDiffString());
         this.category = category;
         this.distributed = distributed;
-        this.originator = id.substring(kelondroDate.PATTERN_SHORT_SECOND.length());
+        this.originator = id.substring(DateFormatter.PATTERN_SHORT_SECOND.length());
         removeStandards();
     }
 
@@ -176,8 +176,8 @@ public class yacyNewsRecord {
         // attention: this has no additional encoding
         if (this.originator != null) attributes.put("ori", this.originator);
         if (this.category != null)   attributes.put("cat", this.category);
-        if (this.created != null)    attributes.put("cre", kelondroDate.formatShortSecond(this.created));
-        if (this.received != null)   attributes.put("rec", kelondroDate.formatShortSecond(this.received));
+        if (this.created != null)    attributes.put("cre", DateFormatter.formatShortSecond(this.created));
+        if (this.received != null)   attributes.put("rec", DateFormatter.formatShortSecond(this.received));
         attributes.put("dis", Integer.toString(this.distributed));
         final String theString = attributes.toString();
         removeStandards();
@@ -185,7 +185,7 @@ public class yacyNewsRecord {
     }
 
     public String id() {
-        return kelondroDate.formatShortSecond(created) + originator;
+        return DateFormatter.formatShortSecond(created) + originator;
     }
 
     public String originator() {

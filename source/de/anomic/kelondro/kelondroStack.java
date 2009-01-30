@@ -34,6 +34,9 @@ import java.io.RandomAccessFile;
 import java.util.Iterator;
 import java.util.StringTokenizer;
 
+import de.anomic.kelondro.coding.NaturalOrder;
+import de.anomic.kelondro.index.Row;
+
 public final class kelondroStack extends kelondroFullRecords {
 
     // define the Over-Head-Array
@@ -47,7 +50,7 @@ public final class kelondroStack extends kelondroFullRecords {
     protected static final int root  = 0; // pointer for FHandles-array: pointer to root node
     protected static final int toor  = 1; // pointer for FHandles-array: pointer to root node
 
-    public kelondroStack(final File file, final kelondroRow rowdef) throws IOException {
+    public kelondroStack(final File file, final Row rowdef) throws IOException {
         // this creates a new stack
         super(file, thisOHBytes, thisOHHandles, rowdef, thisFHandles, rowdef.columns() /* txtProps */, 80 /* txtPropWidth */);
         if (super.fileExisted) {
@@ -58,7 +61,7 @@ public final class kelondroStack extends kelondroFullRecords {
         }
     }
 
-    public static final kelondroStack open(final File file, final kelondroRow rowdef) {
+    public static final kelondroStack open(final File file, final Row rowdef) {
         try {
             return new kelondroStack(file, rowdef);
         } catch (final IOException e) {
@@ -77,7 +80,7 @@ public final class kelondroStack extends kelondroFullRecords {
     public static kelondroStack reset(final kelondroStack stack) {
         // memorize settings to this file
         final File f = new File(stack.filename);
-        final kelondroRow row = stack.row();
+        final Row row = stack.row();
         
         // close and delete the file
         try {stack.close();} catch (final Exception e) {}
@@ -87,13 +90,13 @@ public final class kelondroStack extends kelondroFullRecords {
         return open(f, row);
     }
 
-    public Iterator<kelondroRow.Entry> stackIterator(final boolean up) {
+    public Iterator<Row.Entry> stackIterator(final boolean up) {
         // iterates the elements in an ordered way.
         // returns kelondroRow.Entry - type Objects
         return new stackIterator(up);
     }
 
-    public class stackIterator implements Iterator<kelondroRow.Entry> {
+    public class stackIterator implements Iterator<Row.Entry> {
         kelondroHandle nextHandle = null;
         kelondroHandle lastHandle = null;
         boolean up;
@@ -107,7 +110,7 @@ public final class kelondroStack extends kelondroFullRecords {
             return (nextHandle != null);
         }
 
-        public kelondroRow.Entry next() {
+        public Row.Entry next() {
         	lastHandle = nextHandle;
             try {
                 nextHandle = new EcoNode(nextHandle).getOHHandle((up) ? right : left);
@@ -131,7 +134,7 @@ public final class kelondroStack extends kelondroFullRecords {
         return super.size();
     }
     
-    public synchronized void push(final kelondroRow.Entry row) throws IOException {
+    public synchronized void push(final Row.Entry row) throws IOException {
         // check if there is already a stack
         if (getHandle(toor) == null) {
             if (getHandle(root) != null) throw new RuntimeException("push: internal organisation of root and toor");
@@ -159,11 +162,11 @@ public final class kelondroStack extends kelondroFullRecords {
         }
     }
 
-    public synchronized kelondroRow.Entry pop() throws IOException {
+    public synchronized Row.Entry pop() throws IOException {
         // return row ontop of the stack and shrink stack by one
         final kelondroNode n = topNode();
         if (n == null) return null;
-        final kelondroRow.Entry ret = row().newEntry(n.getValueRow());
+        final Row.Entry ret = row().newEntry(n.getValueRow());
 
         // remove node
         unlinkNode(n);
@@ -172,18 +175,18 @@ public final class kelondroStack extends kelondroFullRecords {
         return ret;
     }
     
-    public synchronized kelondroRow.Entry top() throws IOException {
+    public synchronized Row.Entry top() throws IOException {
         // return row ontop of the stack
         final kelondroNode n = topNode();
         if (n == null) return null;
         return row().newEntry(n.getValueRow());
     }
 
-    public synchronized kelondroRow.Entry pot() throws IOException {
+    public synchronized Row.Entry pot() throws IOException {
         // return row on the bottom of the stack and remove record
         final kelondroNode n = botNode();
         if (n == null) return null;
-        final kelondroRow.Entry ret = row().newEntry(n.getValueRow());
+        final Row.Entry ret = row().newEntry(n.getValueRow());
 
         // remove node
         unlinkNode(n);
@@ -192,7 +195,7 @@ public final class kelondroStack extends kelondroFullRecords {
         return ret;
     }
     
-    public synchronized kelondroRow.Entry bot() throws IOException {
+    public synchronized Row.Entry bot() throws IOException {
         // return row on the bottom of the stack
         final kelondroNode n = botNode();
         if (n == null) return null;
@@ -251,7 +254,7 @@ public final class kelondroStack extends kelondroFullRecords {
             String s;
             StringTokenizer st;
             int recs = 0;
-            final kelondroRow.Entry buffer = row().newEntry();
+            final Row.Entry buffer = row().newEntry();
             int c;
             int line = 0;
             while ((s = f.readLine()) != null) {
@@ -287,8 +290,8 @@ public final class kelondroStack extends kelondroFullRecords {
 
     public void print() throws IOException {
         super.print();
-        final Iterator<kelondroRow.Entry> it = stackIterator(true);
-        kelondroRow.Entry r;
+        final Iterator<Row.Entry> it = stackIterator(true);
+        Row.Entry r;
         while (it.hasNext()) {
             r = it.next();
             System.out.print("  KEY:'" + r.getColString(0, null) + "'");
@@ -304,7 +307,7 @@ public final class kelondroStack extends kelondroFullRecords {
 	for (int i = 0; i < args.length; i++) System.out.print(args[i] + " ");
 	System.out.println("");
 	byte[] ret = null;
-    final kelondroRow lens = new kelondroRow("byte[] key-" + Integer.parseInt(args[1]) + ", byte[] value-" + Integer.parseInt(args[2]), kelondroNaturalOrder.naturalOrder, 0);
+    final Row lens = new Row("byte[] key-" + Integer.parseInt(args[1]) + ", byte[] value-" + Integer.parseInt(args[2]), NaturalOrder.naturalOrder, 0);
 	try {
 	    if ((args.length > 4) || (args.length < 2)) {
 		System.err.println("usage: kelondroStack -c|-p|-v|-g|-i|-s [file]|[key [value]] <db-file>");
@@ -317,7 +320,7 @@ public final class kelondroStack extends kelondroFullRecords {
 		    ret = null;
 		} else if (args[0].equals("-g")) {
 		    fm = new kelondroStack(new File(args[1]), lens);
-		    final kelondroRow.Entry ret2 = fm.pop();
+		    final Row.Entry ret2 = fm.pop();
 		    ret = ((ret2 == null) ? null : ret2.getColBytes(1)); 
 		    fm.close();
 		}
@@ -349,7 +352,7 @@ public final class kelondroStack extends kelondroFullRecords {
             }
 		} else if (args[0].equals("-g")) {
 		    final kelondroStack fm = new kelondroStack(new File(args[2]), lens);
-            final kelondroRow.Entry ret2 = fm.pop();
+            final Row.Entry ret2 = fm.pop();
 		    ret = ((ret2 == null) ? null : ret2.getColBytes(1)); 
 		    fm.close();
 		}

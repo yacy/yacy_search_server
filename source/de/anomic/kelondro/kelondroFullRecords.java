@@ -31,6 +31,9 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.TreeMap;
 
+import de.anomic.kelondro.index.Row;
+import de.anomic.kelondro.io.RandomAccessInterface;
+
 public class kelondroFullRecords extends kelondroAbstractRecords {
 
     // static supervision objects: recognize and coordinate all activities
@@ -39,22 +42,22 @@ public class kelondroFullRecords extends kelondroAbstractRecords {
     public kelondroFullRecords(
             final File file,
             final short ohbytec, final short ohhandlec,
-            final kelondroRow rowdef, final int FHandles, final int txtProps, final int txtPropWidth) throws IOException {
+            final Row rowdef, final int FHandles, final int txtProps, final int txtPropWidth) throws IOException {
         super(file, true, ohbytec, ohhandlec, rowdef, FHandles, txtProps, txtPropWidth);
         recordTracker.put(this.filename, this);
     }
     
     public kelondroFullRecords(
-            final kelondroRA ra, final String filename,
+            final RandomAccessInterface ra, final String filename,
             final short ohbytec, final short ohhandlec,
-            final kelondroRow rowdef, final int FHandles, final int txtProps, final int txtPropWidth,
+            final Row rowdef, final int FHandles, final int txtProps, final int txtPropWidth,
             final boolean exitOnFail) {
         super(ra, filename, true, ohbytec, ohhandlec, rowdef, FHandles, txtProps, txtPropWidth, exitOnFail);
         recordTracker.put(this.filename, this);
     }
     
     public kelondroFullRecords(
-            final kelondroRA ra, final String filename) throws IOException{
+            final RandomAccessInterface ra, final String filename) throws IOException{
         super(ra, filename, true);
         recordTracker.put(this.filename, this);
     }

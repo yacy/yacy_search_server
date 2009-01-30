@@ -35,7 +35,7 @@ import java.util.Properties;
 import java.util.TreeSet;
 
 import de.anomic.http.httpTemplate;
-import de.anomic.kelondro.kelondroByteBuffer;
+import de.anomic.kelondro.tools.ByteBuffer;
 import de.anomic.server.serverCharBuffer;
 
 public class htmlFilterContentTransformer extends htmlFilterAbstractTransformer implements htmlFilterTransformer {
@@ -116,8 +116,8 @@ public class htmlFilterContentTransformer extends htmlFilterAbstractTransformer 
     public ArrayList<String> getStrings(final byte[] text){
         final ArrayList<String> result = new ArrayList<String>();
         
-        final kelondroByteBuffer sbb = new kelondroByteBuffer(text);
-        final kelondroByteBuffer[] sbbs = httpTemplate.splitQuotations(sbb);
+        final ByteBuffer sbb = new ByteBuffer(text);
+        final ByteBuffer[] sbbs = httpTemplate.splitQuotations(sbb);
         for (int i = 0; i < sbbs.length; i++) {
             // TODO: avoid empty if statements
             if (sbbs[i].isWhitespace(true)) {

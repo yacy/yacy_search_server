@@ -27,7 +27,7 @@ package de.anomic.yacy;
 import java.io.IOException;
 import java.util.HashMap;
 
-import de.anomic.kelondro.kelondroDate;
+import de.anomic.kelondro.coding.DateFormatter;
 import de.anomic.server.serverCodings;
 import de.anomic.server.logging.serverLog;
 import de.anomic.xml.RSSFeed;
@@ -107,7 +107,7 @@ public class yacyPeerActions {
         }
         if (Math.abs(nowUTC0Time - ctimeUTC0) > 60 * 60 * 24 * 1000) {
             // the new connection is out-of-age, we reject the connection
-            if (yacyCore.log.isFine()) yacyCore.log.logFine("connect: rejecting out-dated peer '" + seed.getName() + "' from " + seed.getPublicAddress() + "; nowUTC0=" + nowUTC0Time + ", seedUTC0=" + ctimeUTC0 + ", TimeDiff=" + kelondroDate.formatInterval(Math.abs(nowUTC0Time - ctimeUTC0)));
+            if (yacyCore.log.isFine()) yacyCore.log.logFine("connect: rejecting out-dated peer '" + seed.getName() + "' from " + seed.getPublicAddress() + "; nowUTC0=" + nowUTC0Time + ", seedUTC0=" + ctimeUTC0 + ", TimeDiff=" + DateFormatter.formatInterval(Math.abs(nowUTC0Time - ctimeUTC0)));
             return false;
         }
 

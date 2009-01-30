@@ -34,10 +34,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import de.anomic.kelondro.tools.ScoreCluster;
+
 public class kelondroMapDataMining extends kelondroMap {
 
     private final String[] sortfields, longaccfields, doubleaccfields;
-    private HashMap<String, kelondroMScoreCluster<String>> sortClusterMap; // a String-kelondroMScoreCluster - relation
+    private HashMap<String, ScoreCluster<String>> sortClusterMap; // a String-kelondroMScoreCluster - relation
     private HashMap<String, Object> accMap; // to store accumulations of specific fields
     
 	@SuppressWarnings("unchecked")
@@ -49,12 +51,12 @@ public class kelondroMapDataMining extends kelondroMap {
         this.longaccfields = longaccfields;
         this.doubleaccfields = doubleaccfields;
 
-        kelondroMScoreCluster<String>[] cluster = null;
+        ScoreCluster<String>[] cluster = null;
         if (sortfields == null) sortClusterMap = null; else {
-            sortClusterMap = new HashMap<String, kelondroMScoreCluster<String>>();
-            cluster = new kelondroMScoreCluster[sortfields.length];
+            sortClusterMap = new HashMap<String, ScoreCluster<String>>();
+            cluster = new ScoreCluster[sortfields.length];
             for (int i = 0; i < sortfields.length; i++) {
-                cluster[i] = new kelondroMScoreCluster<String>();   
+                cluster[i] = new ScoreCluster<String>();   
             }
         }
 
@@ -93,7 +95,7 @@ public class kelondroMapDataMining extends kelondroMap {
                 
                 if (sortfields != null && cluster != null) for (int i = 0; i < sortfields.length; i++) {
                     cell = map.get(sortfields[i]);
-                    if (cell != null) cluster[i].setScore(mapname, kelondroMScoreCluster.object2score(cell));
+                    if (cell != null) cluster[i].setScore(mapname, ScoreCluster.object2score(cell));
                 }
 
                 if (longaccfields != null && longaccumulator != null) for (int i = 0; i < longaccfields.length; i++) {
@@ -141,9 +143,9 @@ public class kelondroMapDataMining extends kelondroMap {
     public synchronized void clear() throws IOException {
     	super.clear();
         if (sortfields == null) sortClusterMap = null; else {
-            sortClusterMap = new HashMap<String, kelondroMScoreCluster<String>>();
+            sortClusterMap = new HashMap<String, ScoreCluster<String>>();
             for (int i = 0; i < sortfields.length; i++) {
-            	sortClusterMap.put(sortfields[i], new kelondroMScoreCluster<String>());
+            	sortClusterMap.put(sortfields[i], new ScoreCluster<String>());
             }
         }
         
@@ -225,12 +227,12 @@ public class kelondroMapDataMining extends kelondroMap {
 
     private void updateSortCluster(final String key, final Map<String, String> map) {
         Object cell;
-        kelondroMScoreCluster<String> cluster;
+        ScoreCluster<String> cluster;
         for (int i = 0; i < sortfields.length; i++) {
             cell = map.get(sortfields[i]);
             if (cell != null) {
                 cluster = sortClusterMap.get(sortfields[i]);
-                cluster.setScore(key, kelondroMScoreCluster.object2score(cell));
+                cluster.setScore(key, ScoreCluster.object2score(cell));
                 sortClusterMap.put(sortfields[i], cluster);
             }
         }
@@ -256,7 +258,7 @@ public class kelondroMapDataMining extends kelondroMap {
     
     private void deleteSortCluster(final String key) {
         if (key == null) return;
-        kelondroMScoreCluster<String> cluster;
+        ScoreCluster<String> cluster;
         for (int i = 0; i < sortfields.length; i++) {
             cluster = sortClusterMap.get(sortfields[i]);
             cluster.deleteScore(key);
@@ -267,7 +269,7 @@ public class kelondroMapDataMining extends kelondroMap {
     public synchronized Iterator<byte[]> keys(final boolean up, /* sorted by */ final String field) {
         // sorted iteration using the sortClusters
         if (sortClusterMap == null) return null;
-        final kelondroMScoreCluster<String> cluster = sortClusterMap.get(field);
+        final ScoreCluster<String> cluster = sortClusterMap.get(field);
         if (cluster == null) return null; // sort field does not exist
         //System.out.println("DEBUG: cluster for field " + field + ": " + cluster.toString());
         return new string2bytearrayIterator(cluster.scores(up));

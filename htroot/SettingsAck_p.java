@@ -42,10 +42,10 @@ import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpRemoteProxyConfig;
 import de.anomic.http.httpd;
 import de.anomic.http.httpdProxyHandler;
-import de.anomic.kelondro.kelondroBase64Order;
-import de.anomic.kelondro.kelondroDigest;
-import de.anomic.kelondro.kelondroDate;
-import de.anomic.kelondro.kelondroMemory;
+import de.anomic.kelondro.coding.Base64Order;
+import de.anomic.kelondro.coding.DateFormatter;
+import de.anomic.kelondro.coding.Digest;
+import de.anomic.kelondro.tools.MemoryControl;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
@@ -95,7 +95,7 @@ public class SettingsAck_p {
                 return prop;
             }
             // check passed. set account:
-            env.setConfig(httpd.ADMIN_ACCOUNT_B64MD5, kelondroDigest.encodeMD5Hex(kelondroBase64Order.standardCoder.encodeString(user + ":" + pw1)));
+            env.setConfig(httpd.ADMIN_ACCOUNT_B64MD5, Digest.encodeMD5Hex(Base64Order.standardCoder.encodeString(user + ":" + pw1)));
             env.setConfig("adminAccount", "");
             prop.put("info", "5");//admin account changed
             prop.putHTML("info_user", user);
@@ -558,9 +558,9 @@ public class SettingsAck_p {
             }                        
             
             // everything is ok
-            prop.put("info_crawler.clientTimeout",(crawlerTimeout==0) ? "0" :kelondroDate.formatInterval(crawlerTimeout));
-            prop.put("info_crawler.http.maxFileSize",(maxHttpSize==-1)? "-1":kelondroMemory.bytesToString(maxHttpSize));
-            prop.put("info_crawler.ftp.maxFileSize", (maxFtpSize==-1) ? "-1":kelondroMemory.bytesToString(maxFtpSize));
+            prop.put("info_crawler.clientTimeout",(crawlerTimeout==0) ? "0" :DateFormatter.formatInterval(crawlerTimeout));
+            prop.put("info_crawler.http.maxFileSize",(maxHttpSize==-1)? "-1":MemoryControl.bytesToString(maxHttpSize));
+            prop.put("info_crawler.ftp.maxFileSize", (maxFtpSize==-1) ? "-1":MemoryControl.bytesToString(maxFtpSize));
             prop.put("info", "28");
             return prop;
         }

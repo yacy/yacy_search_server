@@ -33,9 +33,9 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.TreeSet;
 
-import de.anomic.kelondro.kelondroBase64Order;
-import de.anomic.kelondro.kelondroBitfield;
-import de.anomic.kelondro.kelondroDigest;
+import de.anomic.kelondro.coding.Base64Order;
+import de.anomic.kelondro.coding.Bitfield;
+import de.anomic.kelondro.coding.Digest;
 import de.anomic.yacy.yacySeedDB;
 
 public class indexWord {
@@ -47,7 +47,7 @@ public class indexWord {
     public  int              posInPhrase; // position of word in phrase
     public  int              numOfPhrase; // number of phrase. 'normal' phrases begin with number 100
     HashSet<Integer>         phrases;        // a set of handles to all phrases where this word appears
-    public  kelondroBitfield flags;       // the flag bits for each word
+    public  Bitfield flags;       // the flag bits for each word
 
     public indexWord(final int handle, final int pip, final int nop) {
         this.count = 1;
@@ -82,14 +82,14 @@ public class indexWord {
     public static final String word2hash(final String word) {
         String h = hashCache.get(word);
         if (h != null) return h;
-        h = kelondroBase64Order.enhancedCoder.encode(kelondroDigest.encodeMD5Raw(word.toLowerCase(Locale.ENGLISH))).substring(0, yacySeedDB.commonHashLength);
+        h = Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(word.toLowerCase(Locale.ENGLISH))).substring(0, yacySeedDB.commonHashLength);
         hashCache.put(word, h); // prevent expensive MD5 computation and encoding
         if (hashCache.size() > 100000) hashCache.clear(); // prevent memory laeak
         return h;
     }
     
     public static final Set<String> words2hashSet(final String[] words) {
-        final TreeSet<String> hashes = new TreeSet<String>(kelondroBase64Order.enhancedComparator);
+        final TreeSet<String> hashes = new TreeSet<String>(Base64Order.enhancedComparator);
         for (int i = 0; i < words.length; i++) hashes.add(word2hash(words[i]));
         return hashes;
     }
@@ -102,7 +102,7 @@ public class indexWord {
 
     public static final TreeSet<String> words2hashes(final Set<String> words) {
         final Iterator<String> i = words.iterator();
-        final TreeSet<String> hashes = new TreeSet<String>(kelondroBase64Order.enhancedComparator);
+        final TreeSet<String> hashes = new TreeSet<String>(Base64Order.enhancedComparator);
         while (i.hasNext()) hashes.add(word2hash(i.next()));
         return hashes;
     }

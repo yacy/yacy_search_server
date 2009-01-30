@@ -32,7 +32,7 @@ import java.util.Iterator;
 
 import de.anomic.crawler.CrawlEntry;
 import de.anomic.http.httpRequestHeader;
-import de.anomic.kelondro.kelondroDate;
+import de.anomic.kelondro.coding.DateFormatter;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -68,7 +68,7 @@ public class rct_p {
                         }
                         Date loaddate;
                         try {
-                            loaddate = kelondroDate.parseShortSecond(item.getPubDate());
+                            loaddate = DateFormatter.parseShortSecond(item.getPubDate());
                         } catch (final ParseException e) {
                             loaddate = new Date();
                         }

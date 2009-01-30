@@ -3,7 +3,7 @@
 import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpdByteCountInputStream;
 import de.anomic.http.httpdByteCountOutputStream;
-import de.anomic.kelondro.kelondroMemory;
+import de.anomic.kelondro.tools.MemoryControl;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.server.serverObjects;
@@ -33,9 +33,9 @@ public class status_p {
 
 		//
 		// memory usage and system attributes
-        prop.putNum("freeMemory", kelondroMemory.free());
-        prop.putNum("totalMemory", kelondroMemory.total());
-        prop.putNum("maxMemory", kelondroMemory.max());
+        prop.putNum("freeMemory", MemoryControl.free());
+        prop.putNum("totalMemory", MemoryControl.total());
+        prop.putNum("maxMemory", MemoryControl.max());
         prop.putNum("processors", serverProcessor.availableCPU);
 
 		// proxy traffic

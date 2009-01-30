@@ -29,8 +29,8 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import de.anomic.http.httpRequestHeader;
-import de.anomic.kelondro.kelondroMSetTools;
-import de.anomic.kelondro.kelondroNaturalOrder;
+import de.anomic.kelondro.coding.NaturalOrder;
+import de.anomic.kelondro.tools.SetTools;
 import de.anomic.plasma.plasmaProfiling;
 import de.anomic.plasma.plasmaSearchEvent;
 import de.anomic.plasma.plasmaSearchQuery;
@@ -65,7 +65,7 @@ public class yacysearchtrailer {
         final Set<String> references = theSearch.references(20);
         if (references.size() > 0) {
             // get the topwords
-            final TreeSet<String> topwords = new TreeSet<String>(kelondroNaturalOrder.naturalComparator);
+            final TreeSet<String> topwords = new TreeSet<String>(NaturalOrder.naturalComparator);
             String tmp = "";
             final Iterator<String> i = references.iterator();
             while (i.hasNext()) {
@@ -76,15 +76,15 @@ public class yacysearchtrailer {
             }
 
             // filter out the badwords
-            final TreeSet<String> filteredtopwords = kelondroMSetTools.joinConstructive(topwords, plasmaSwitchboard.badwords);
+            final TreeSet<String> filteredtopwords = SetTools.joinConstructive(topwords, plasmaSwitchboard.badwords);
             if (filteredtopwords.size() > 0) {
-                kelondroMSetTools.excludeDestructive(topwords, plasmaSwitchboard.badwords);
+                SetTools.excludeDestructive(topwords, plasmaSwitchboard.badwords);
             }
 
             // avoid stopwords being topwords
             if (env.getConfig("filterOutStopwordsFromTopwords", "true").equals("true")) {
                 if ((plasmaSwitchboard.stopwords != null) && (plasmaSwitchboard.stopwords.size() > 0)) {
-                    kelondroMSetTools.excludeDestructive(topwords, plasmaSwitchboard.stopwords);
+                    SetTools.excludeDestructive(topwords, plasmaSwitchboard.stopwords);
                 }
             }
         

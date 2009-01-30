@@ -31,7 +31,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import de.anomic.kelondro.kelondroMemory;
+import de.anomic.kelondro.tools.MemoryControl;
 
 public class serverProfiling extends Thread {
     
@@ -58,7 +58,7 @@ public class serverProfiling extends Thread {
     
     public void run() {
     	while (running) {
-    		update("memory", Long.valueOf(kelondroMemory.used()));
+    		update("memory", Long.valueOf(MemoryControl.used()));
     		try {
 				Thread.sleep(this.delaytime);
 			} catch (final InterruptedException e) {

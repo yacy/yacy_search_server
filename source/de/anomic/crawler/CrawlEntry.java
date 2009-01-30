@@ -31,10 +31,10 @@ import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import java.util.concurrent.ConcurrentHashMap;
 
-import de.anomic.kelondro.kelondroBase64Order;
-import de.anomic.kelondro.kelondroBitfield;
-import de.anomic.kelondro.kelondroNaturalOrder;
-import de.anomic.kelondro.kelondroRow;
+import de.anomic.kelondro.coding.Base64Order;
+import de.anomic.kelondro.coding.Bitfield;
+import de.anomic.kelondro.coding.NaturalOrder;
+import de.anomic.kelondro.index.Row;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverProcessorJob;
 import de.anomic.yacy.yacySeedDB;
@@ -43,7 +43,7 @@ import de.anomic.yacy.yacyURL;
 public class CrawlEntry extends serverProcessorJob {
     
     // row definition for balancer-related NURL-entries
-    public final static kelondroRow rowdef = new kelondroRow(
+    public final static Row rowdef = new Row(
         "String urlhash-" + yacySeedDB.commonHashLength + ", " +    // the url's hash
         "String initiator-" + yacySeedDB.commonHashLength + ", " +  // the crawling initiator
         "String urlstring-256, " +                                  // the url as string
@@ -59,7 +59,7 @@ public class CrawlEntry extends serverProcessorJob {
         "Cardinal loaddate-8 {b256}," +                             // time when the file was loaded
         "Cardinal serverdate-8 {b256}," +                           // time when that the server returned as document date
         "Cardinal modifiedSince-8 {b256}",                          // time that was given to server as ifModifiedSince
-        kelondroBase64Order.enhancedCoder,
+        Base64Order.enhancedCoder,
         0
         );
     
@@ -79,7 +79,7 @@ public class CrawlEntry extends serverProcessorJob {
     private int      depth;         // the prefetch depth so far, starts at 0
     private int      anchors;       // number of anchors of the parent
     private int      forkfactor;    // sum of anchors of all ancestors
-    private kelondroBitfield flags;
+    private Bitfield flags;
     private int      handle;
     private String   statusMessage;
     private int      initialHash;   // to provide a object hash that does not change even if the url changes because of redirection
@@ -142,7 +142,7 @@ public class CrawlEntry extends serverProcessorJob {
         this.depth         = depth;
         this.anchors       = anchors;
         this.forkfactor    = forkfactor;
-        this.flags         = new kelondroBitfield(rowdef.width(10));
+        this.flags         = new Bitfield(rowdef.width(10));
         this.handle        = 0;
         this.serverdate    = 0;
         this.imsdate       = 0;
@@ -151,12 +151,12 @@ public class CrawlEntry extends serverProcessorJob {
         this.status        = serverProcessorJob.STATUS_INITIATED;
     }
     
-    public CrawlEntry(final kelondroRow.Entry entry) throws IOException {
+    public CrawlEntry(final Row.Entry entry) throws IOException {
         assert (entry != null);
         insertEntry(entry);
     }
 
-    private void insertEntry(final kelondroRow.Entry entry) throws IOException {
+    private void insertEntry(final Row.Entry entry) throws IOException {
         final String urlstring = entry.getColString(2, null);
         if (urlstring == null) throw new IOException ("url string is null");
         this.initiator = entry.getColString(1, null);
@@ -168,7 +168,7 @@ public class CrawlEntry extends serverProcessorJob {
         this.depth = (int) entry.getColLong(7);
         this.anchors = (int) entry.getColLong(8);
         this.forkfactor = (int) entry.getColLong(9);
-        this.flags = new kelondroBitfield(entry.getColBytes(10));
+        this.flags = new Bitfield(entry.getColBytes(10));
         this.handle = Integer.parseInt(entry.getColString(11, null), 16);
         this.loaddate = entry.getColLong(12);
         this.serverdate = entry.getColLong(13);
@@ -198,11 +198,11 @@ public class CrawlEntry extends serverProcessorJob {
         return d;
     }
     
-    public kelondroRow.Entry toRow() {
-        final byte[] appdatestr = kelondroNaturalOrder.encodeLong(appdate, rowdef.width(5));
-        final byte[] loaddatestr = kelondroNaturalOrder.encodeLong(loaddate, rowdef.width(12));
-        final byte[] serverdatestr = kelondroNaturalOrder.encodeLong(serverdate, rowdef.width(13));
-        final byte[] imsdatestr = kelondroNaturalOrder.encodeLong(imsdate, rowdef.width(14));
+    public Row.Entry toRow() {
+        final byte[] appdatestr = NaturalOrder.encodeLong(appdate, rowdef.width(5));
+        final byte[] loaddatestr = NaturalOrder.encodeLong(loaddate, rowdef.width(12));
+        final byte[] serverdatestr = NaturalOrder.encodeLong(serverdate, rowdef.width(13));
+        final byte[] imsdatestr = NaturalOrder.encodeLong(imsdate, rowdef.width(14));
         // store the hash in the hash cache
         byte[] namebytes;
         try {
@@ -218,9 +218,9 @@ public class CrawlEntry extends serverProcessorJob {
                 namebytes,
                 appdatestr,
                 (this.profileHandle == null) ? null : this.profileHandle.getBytes(),
-                kelondroNaturalOrder.encodeLong(this.depth, rowdef.width(7)),
-                kelondroNaturalOrder.encodeLong(this.anchors, rowdef.width(8)),
-                kelondroNaturalOrder.encodeLong(this.forkfactor, rowdef.width(9)),
+                NaturalOrder.encodeLong(this.depth, rowdef.width(7)),
+                NaturalOrder.encodeLong(this.anchors, rowdef.width(8)),
+                NaturalOrder.encodeLong(this.forkfactor, rowdef.width(9)),
                 this.flags.bytes(),
                 normalizeHandle(this.handle).getBytes(),
                 loaddatestr,

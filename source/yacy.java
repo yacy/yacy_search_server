@@ -60,12 +60,12 @@ import de.anomic.index.indexRepositoryReference;
 import de.anomic.index.indexURLReference;
 import de.anomic.index.indexWord;
 import de.anomic.kelondro.kelondroBLOBHeap;
-import de.anomic.kelondro.kelondroBase64Order;
-import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroMapDataMining;
-import de.anomic.kelondro.kelondroRowCollection;
-import de.anomic.kelondro.kelondroDate;
-import de.anomic.kelondro.kelondroMemory;
+import de.anomic.kelondro.coding.Base64Order;
+import de.anomic.kelondro.coding.DateFormatter;
+import de.anomic.kelondro.index.RowCollection;
+import de.anomic.kelondro.tools.ScoreCluster;
+import de.anomic.kelondro.tools.MemoryControl;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.plasma.plasmaWordIndex;
@@ -200,7 +200,7 @@ public final class yacy {
             serverLog.logConfig("STARTUP", "Java version: " + System.getProperty("java.version", "no-java-version"));
             serverLog.logConfig("STARTUP", "Operation system: " + System.getProperty("os.name","unknown"));
             serverLog.logConfig("STARTUP", "Application root-path: " + homePath);
-            serverLog.logConfig("STARTUP", "Time zone: UTC" + kelondroDate.UTCDiffString() + "; UTC+0000 is " + System.currentTimeMillis());
+            serverLog.logConfig("STARTUP", "Time zone: UTC" + DateFormatter.UTCDiffString() + "; UTC+0000 is " + System.currentTimeMillis());
             serverLog.logConfig("STARTUP", "Maximum file system path length: " + serverSystem.maxPathLength);
             
             f = new File(homePath, "DATA/yacy.running");
@@ -264,7 +264,7 @@ public final class yacy {
 
             sb.setConfig("version", Double.toString(version));
             sb.setConfig("vString", yacyVersion.combined2prettyVersion(Double.toString(version)));
-            sb.setConfig("vdate", (vDATE.startsWith("@")) ? kelondroDate.formatShortDay() : vDATE);
+            sb.setConfig("vdate", (vDATE.startsWith("@")) ? DateFormatter.formatShortDay() : vDATE);
             sb.setConfig("applicationRoot", homePath.toString());
             serverLog.logConfig("STARTUP", "YACY Version: " + version + ", Built " + sb.getConfig("vdate", "00000000"));
             yacyVersion.latestRelease = version;
@@ -405,11 +405,11 @@ public final class yacy {
 
                     // save information about available memory after all initializations
                     //try {
-                        sb.setConfig("memoryFreeAfterInitBGC", kelondroMemory.free());
-                        sb.setConfig("memoryTotalAfterInitBGC", kelondroMemory.total());
+                        sb.setConfig("memoryFreeAfterInitBGC", MemoryControl.free());
+                        sb.setConfig("memoryTotalAfterInitBGC", MemoryControl.total());
                         System.gc();
-                        sb.setConfig("memoryFreeAfterInitAGC", kelondroMemory.free());
-                        sb.setConfig("memoryTotalAfterInitAGC", kelondroMemory.total());
+                        sb.setConfig("memoryFreeAfterInitAGC", MemoryControl.free());
+                        sb.setConfig("memoryTotalAfterInitAGC", MemoryControl.total());
                     //} catch (ConcurrentModificationException e) {}
                     
                     // signal finished startup
@@ -422,7 +422,7 @@ public final class yacy {
                         serverLog.logSevere("MAIN CONTROL LOOP", "PANIC: " + e.getMessage(),e);
                     }
                     // shut down
-                    if (kelondroRowCollection.sortingthreadexecutor != null) kelondroRowCollection.sortingthreadexecutor.shutdown();
+                    if (RowCollection.sortingthreadexecutor != null) RowCollection.sortingthreadexecutor.shutdown();
                     serverLog.logConfig("SHUTDOWN", "caught termination signal");
                     server.terminate(false);
                     server.interrupt();
@@ -629,7 +629,7 @@ public final class yacy {
         final enumerateFiles ef = new enumerateFiles(new File(dbRoot, "WORDS"), true, false, true, true);
         File f;
         String h;
-        final kelondroMScoreCluster<String> hs = new kelondroMScoreCluster<String>();
+        final ScoreCluster<String> hs = new ScoreCluster<String>();
         while (ef.hasMoreElements()) {
             f = ef.nextElement();
             h = f.getName().substring(0, yacySeedDB.commonHashLength);
@@ -671,7 +671,7 @@ public final class yacy {
             // db used to hold all neede urls
             final indexRepositoryReference minimizedUrlDB = new indexRepositoryReference(new File(indexRoot2, networkName));
             
-            final int cacheMem = (int)(kelondroMemory.max() - kelondroMemory.total());
+            final int cacheMem = (int)(MemoryControl.max() - MemoryControl.total());
             if (cacheMem < 2048000) throw new OutOfMemoryError("Not enough memory available to start clean up.");
                 
             final plasmaWordIndex wordIndex = new plasmaWordIndex(networkName, log, indexPrimaryRoot, indexSecondaryRoot, 10000, false, 1, 0);
@@ -710,8 +710,8 @@ public final class yacy {
                         log.logInfo(wordCounter + " words scanned " +
                                 "[" + wordChunkStartHash + " .. " + wordChunkEndHash + "]\n" + 
                                 "Duration: "+ 500*1000/duration + " words/s" +
-                                " | Free memory: " + kelondroMemory.free() + 
-                                " | Total memory: " + kelondroMemory.total());
+                                " | Free memory: " + MemoryControl.free() + 
+                                " | Total memory: " + MemoryControl.total());
                         wordChunkStart = wordChunkEnd;
                         wordChunkStartHash = wordChunkEndHash;
                     }
@@ -929,7 +929,7 @@ public final class yacy {
             final String[] dbFileNames = {"seed.new.db","seed.old.db","seed.pot.db"};
             for (int i=0; i < dbFileNames.length; i++) {
                 final File dbFile = new File(yacyDBPath,dbFileNames[i]);
-                final kelondroMapDataMining db = new kelondroMapDataMining(new kelondroBLOBHeap(dbFile, yacySeedDB.commonHashLength, kelondroBase64Order.enhancedCoder, 1024 * 512), 500, yacySeedDB.sortFields, yacySeedDB.longaccFields, yacySeedDB.doubleaccFields, null, null);
+                final kelondroMapDataMining db = new kelondroMapDataMining(new kelondroBLOBHeap(dbFile, yacySeedDB.commonHashLength, Base64Order.enhancedCoder, 1024 * 512), 500, yacySeedDB.sortFields, yacySeedDB.longaccFields, yacySeedDB.doubleaccFields, null, null);
                 
                 kelondroMapDataMining.mapIterator it;
                 it = db.maps(true, false);
@@ -970,8 +970,8 @@ public final class yacy {
         
         // check memory amount
         System.gc();
-        final long startupMemFree  = kelondroMemory.free();
-        final long startupMemTotal = kelondroMemory.total();
+        final long startupMemFree  = MemoryControl.free();
+        final long startupMemTotal = MemoryControl.total();
         
         // go into headless awt mode
         System.setProperty("java.awt.headless", "true");

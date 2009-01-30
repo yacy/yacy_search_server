@@ -34,22 +34,22 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import de.anomic.kelondro.kelondroBase64Order;
-import de.anomic.kelondro.kelondroRow;
-import de.anomic.kelondro.kelondroRowSet;
-import de.anomic.kelondro.kelondroByteBuffer;
+import de.anomic.kelondro.coding.Base64Order;
+import de.anomic.kelondro.index.Row;
+import de.anomic.kelondro.index.RowSet;
+import de.anomic.kelondro.tools.ByteBuffer;
 import de.anomic.plasma.plasmaWordIndex;
 
-public class indexContainer extends kelondroRowSet {
+public class indexContainer extends RowSet {
 
     private String wordHash;
 
-    public indexContainer(final String wordHash, final kelondroRowSet collection) {
+    public indexContainer(final String wordHash, final RowSet collection) {
         super(collection);
         this.wordHash = wordHash;
     }
     
-    public indexContainer(final String wordHash, final kelondroRow rowdef, final int objectCount) {
+    public indexContainer(final String wordHash, final Row rowdef, final int objectCount) {
         super(rowdef, objectCount);
         this.wordHash = wordHash;
         this.lastTimeWrote = 0;
@@ -111,7 +111,7 @@ public class indexContainer extends kelondroRowSet {
     
     public indexRWIEntry put(final indexRWIRowEntry entry) {
         assert entry.toKelondroEntry().objectsize() == super.rowdef.objectsize;
-        final kelondroRow.Entry r = super.put(entry.toKelondroEntry());
+        final Row.Entry r = super.put(entry.toKelondroEntry());
         if (r == null) return null;
         return new indexRWIRowEntry(r);
     }
@@ -119,7 +119,7 @@ public class indexContainer extends kelondroRowSet {
     public boolean putRecent(final indexRWIRowEntry entry) {
         assert entry.toKelondroEntry().objectsize() == super.rowdef.objectsize;
         // returns true if the new entry was added, false if it already existed
-        final kelondroRow.Entry oldEntryRow = this.put(entry.toKelondroEntry());
+        final Row.Entry oldEntryRow = this.put(entry.toKelondroEntry());
         if (oldEntryRow == null) {
             return true;
         }
@@ -151,7 +151,7 @@ public class indexContainer extends kelondroRowSet {
     }
     
     public indexRWIEntry get(final String urlHash) {
-        final kelondroRow.Entry entry = this.get(urlHash.getBytes());
+        final Row.Entry entry = this.get(urlHash.getBytes());
         if (entry == null) return null;
         return new indexRWIRowEntry(entry);
     }
@@ -162,7 +162,7 @@ public class indexContainer extends kelondroRowSet {
      * if the entry was not found, return null.
      */
     public indexRWIEntry remove(final String urlHash) {
-        final kelondroRow.Entry entry = remove(urlHash.getBytes());
+        final Row.Entry entry = remove(urlHash.getBytes());
         if (entry == null) return null;
         return new indexRWIRowEntry(entry);
     }
@@ -181,7 +181,7 @@ public class indexContainer extends kelondroRowSet {
 
     public class entryIterator implements Iterator<indexRWIRowEntry> {
 
-        Iterator<kelondroRow.Entry> rowEntryIterator;
+        Iterator<Row.Entry> rowEntryIterator;
         
         public entryIterator() {
             rowEntryIterator = iterator();
@@ -192,7 +192,7 @@ public class indexContainer extends kelondroRowSet {
         }
 
         public indexRWIRowEntry next() {
-            final kelondroRow.Entry rentry = rowEntryIterator.next();
+            final Row.Entry rentry = rowEntryIterator.next();
             if (rentry == null) return null;
             return new indexRWIRowEntry(rentry);
         }
@@ -462,11 +462,11 @@ public class indexContainer extends kelondroRowSet {
     }
     
     public int hashCode() {
-        return (int) kelondroBase64Order.enhancedCoder.decodeLong(this.wordHash.substring(0, 4));
+        return (int) Base64Order.enhancedCoder.decodeLong(this.wordHash.substring(0, 4));
     }
     
 
-    public static final kelondroByteBuffer compressIndex(final indexContainer inputContainer, final indexContainer excludeContainer, final long maxtime) {
+    public static final ByteBuffer compressIndex(final indexContainer inputContainer, final indexContainer excludeContainer, final long maxtime) {
         // collect references according to domains
         final long timeout = (maxtime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxtime;
         final TreeMap<String, String> doms = new TreeMap<String, String>();
@@ -488,7 +488,7 @@ public class indexContainer extends kelondroRowSet {
             }
         }
         // construct a result string
-        final kelondroByteBuffer bb = new kelondroByteBuffer(inputContainer.size() * 6);
+        final ByteBuffer bb = new ByteBuffer(inputContainer.size() * 6);
         bb.append('{');
         final Iterator<Map.Entry<String, String>> i = doms.entrySet().iterator();
         Map.Entry<String, String> entry;
@@ -506,7 +506,7 @@ public class indexContainer extends kelondroRowSet {
         return bb;
     }
 
-    public static final void decompressIndex(final TreeMap<String, String> target, kelondroByteBuffer ci, final String peerhash) {
+    public static final void decompressIndex(final TreeMap<String, String> target, ByteBuffer ci, final String peerhash) {
         // target is a mapping from url-hashes to a string of peer-hashes
         if ((ci.byteAt(0) == '{') && (ci.byteAt(ci.length() - 1) == '}')) {
             //System.out.println("DEBUG-DECOMPRESS: input is " + ci.toString());

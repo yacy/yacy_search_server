@@ -40,8 +40,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 import de.anomic.index.indexURLReference;
-import de.anomic.kelondro.kelondroBitfield;
-import de.anomic.kelondro.kelondroMScoreCluster;
+import de.anomic.kelondro.coding.Bitfield;
+import de.anomic.kelondro.tools.ScoreCluster;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyURL;
@@ -58,12 +58,12 @@ public final class ResultURLs {
     private final LinkedList<String> lcrawlResultStack; // 5 - local index: result of local crawling
     private final LinkedList<String> gcrawlResultStack; // 6 - local index: triggered external
 
-    private final kelondroMScoreCluster<String> externResultDomains;
-    private final kelondroMScoreCluster<String> searchResultDomains;
-    private final kelondroMScoreCluster<String> transfResultDomains;
-    private final kelondroMScoreCluster<String> proxyResultDomains;
-    private final kelondroMScoreCluster<String> lcrawlResultDomains;
-    private final kelondroMScoreCluster<String> gcrawlResultDomains;
+    private final ScoreCluster<String> externResultDomains;
+    private final ScoreCluster<String> searchResultDomains;
+    private final ScoreCluster<String> transfResultDomains;
+    private final ScoreCluster<String> proxyResultDomains;
+    private final ScoreCluster<String> lcrawlResultDomains;
+    private final ScoreCluster<String> gcrawlResultDomains;
 
     public ResultURLs() {
         // init result stacks
@@ -74,12 +74,12 @@ public final class ResultURLs {
         lcrawlResultStack = new LinkedList<String>();
         gcrawlResultStack = new LinkedList<String>();
         // init result domain statistics
-        externResultDomains = new kelondroMScoreCluster<String>();
-        searchResultDomains = new kelondroMScoreCluster<String>();
-        transfResultDomains = new kelondroMScoreCluster<String>();
-        proxyResultDomains = new kelondroMScoreCluster<String>();
-        lcrawlResultDomains = new kelondroMScoreCluster<String>();
-        gcrawlResultDomains = new kelondroMScoreCluster<String>();
+        externResultDomains = new ScoreCluster<String>();
+        searchResultDomains = new ScoreCluster<String>();
+        transfResultDomains = new ScoreCluster<String>();
+        proxyResultDomains = new ScoreCluster<String>();
+        lcrawlResultDomains = new ScoreCluster<String>();
+        gcrawlResultDomains = new ScoreCluster<String>();
     }
 
     public synchronized void stack(final indexURLReference e, final String initiatorHash, final String executorHash, final int stackType) {
@@ -96,7 +96,7 @@ public final class ResultURLs {
             return;
         }
         try {
-            final kelondroMScoreCluster<String> domains = getDomains(stackType);
+            final ScoreCluster<String> domains = getDomains(stackType);
             if (domains != null) {
                 domains.incScore(e.comp().url().getHost());
             }
@@ -113,7 +113,7 @@ public final class ResultURLs {
     }
     
     public synchronized int getDomainListSize(final int stack) {
-        final kelondroMScoreCluster<String> domains = getDomains(stack);
+        final ScoreCluster<String> domains = getDomains(stack);
         if (domains == null) return 0;
         return domains.size();
     }
@@ -240,7 +240,7 @@ public final class ResultURLs {
                 return null;
         }
     }
-    private kelondroMScoreCluster<String> getDomains(final int stack) {
+    private ScoreCluster<String> getDomains(final int stack) {
         switch (stack) {
             case 1: return externResultDomains;
             case 2: return searchResultDomains;
@@ -274,7 +274,7 @@ public final class ResultURLs {
     public synchronized void clearStack(final int stack) {
         final List<String> resultStack = getStack(stack);
         if (resultStack != null) resultStack.clear();
-        final kelondroMScoreCluster<String> resultDomains = getDomains(stack);
+        final ScoreCluster<String> resultDomains = getDomains(stack);
         if (resultDomains != null) {
             // we do not clear this completely, just remove most of the less important entries
             resultDomains.shrinkToMaxSize(100);
@@ -305,7 +305,7 @@ public final class ResultURLs {
         final ResultURLs results = new ResultURLs();
         try {
             final yacyURL url = new yacyURL("http", "www.yacy.net", 80, "/");
-            final indexURLReference urlRef = new indexURLReference(url, "YaCy Homepage", "", "", "", new Date(), new Date(), new Date(), "", new byte[] {}, 123, 42, '?', new kelondroBitfield(), "de", 0, 0, 0, 0, 0, 0);
+            final indexURLReference urlRef = new indexURLReference(url, "YaCy Homepage", "", "", "", new Date(), new Date(), new Date(), "", new byte[] {}, 123, 42, '?', new Bitfield(), "de", 0, 0, 0, 0, 0, 0);
             int stackNo = 1;
             System.out.println("valid test:\n=======");
             // add

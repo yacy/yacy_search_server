@@ -46,7 +46,7 @@ import de.anomic.http.JakartaCommonsHttpResponse;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpdByteCountInputStream;
 import de.anomic.index.indexURLReference;
-import de.anomic.kelondro.kelondroDate;
+import de.anomic.kelondro.coding.DateFormatter;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyURL;
@@ -299,7 +299,7 @@ public class SitemapParser extends DefaultHandler {
         } else if (this.currentElement.equalsIgnoreCase(SITEMAP_URL_LASTMOD)) {
             final String dateStr = new String(buf, offset, len);
             try {
-                this.lastMod = kelondroDate.parseISO8601(dateStr);
+                this.lastMod = DateFormatter.parseISO8601(dateStr);
             } catch (final ParseException e) {
                 this.logger.logInfo("Unable to parse datestring '" + dateStr + "'");
             }

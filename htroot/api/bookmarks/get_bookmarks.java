@@ -7,7 +7,7 @@ import de.anomic.data.bookmarksDB;
 import de.anomic.data.userDB;
 import de.anomic.htmlFilter.htmlFilterCharacterCoding;
 import de.anomic.http.httpRequestHeader;
-import de.anomic.kelondro.kelondroDate;
+import de.anomic.kelondro.coding.DateFormatter;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -138,8 +138,8 @@ public class get_bookmarks {
 	       		if(bookmark!=null) {       			       			      			
 	       			prop.put("display_bookmarks_"+count+"_id",count);
 	       			prop.put("display_bookmarks_"+count+"_link",bookmark.getUrl());
-	       			prop.put("display_bookmarks_"+count+"_date", kelondroDate.formatISO8601(new Date(bookmark.getTimeStamp())));
-	       			prop.put("display_bookmarks_"+count+"_rfc822date", kelondroDate.formatRFC1123(new Date(bookmark.getTimeStamp())));
+	       			prop.put("display_bookmarks_"+count+"_date", DateFormatter.formatISO8601(new Date(bookmark.getTimeStamp())));
+	       			prop.put("display_bookmarks_"+count+"_rfc822date", DateFormatter.formatRFC1123(new Date(bookmark.getTimeStamp())));
 	       			prop.put("display_bookmarks_"+count+"_public", (bookmark.getPublic() ? "0" : "1"));
 	       			prop.put("display_bookmarks_"+count+"_hash", bookmark.getUrlHash());
 	       			prop.put("display_bookmarks_"+count+"_comma", ",");
@@ -232,7 +232,7 @@ public class get_bookmarks {
 			date=new Date(bookmark.getTimeStamp());
 			prop.put("display_xbel_"+count+"_elements", "<bookmark id=\"" + bookmark.getUrlHash()
 					+ "\" href=\"" + htmlFilterCharacterCoding.unicode2xml(bookmark.getUrl(), true)
-					+ "\" added=\"" + htmlFilterCharacterCoding.unicode2xml(kelondroDate.formatISO8601(date), true)+"\">");
+					+ "\" added=\"" + htmlFilterCharacterCoding.unicode2xml(DateFormatter.formatISO8601(date), true)+"\">");
     		count++; 
     		prop.put("display_xbel_"+count+"_elements", "<title>");
     		count++;

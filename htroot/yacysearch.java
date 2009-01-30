@@ -33,9 +33,9 @@ import java.util.TreeSet;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.index.indexURLReference;
 import de.anomic.index.indexWord;
-import de.anomic.kelondro.kelondroBitfield;
-import de.anomic.kelondro.kelondroMSetTools;
-import de.anomic.kelondro.kelondroMemory;
+import de.anomic.kelondro.coding.Bitfield;
+import de.anomic.kelondro.tools.SetTools;
+import de.anomic.kelondro.tools.MemoryControl;
 import de.anomic.plasma.plasmaCondenser;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.plasmaProfiling;
@@ -140,9 +140,9 @@ public class yacysearch {
         String prefermask = (post == null ? "" : post.get("prefermaskfilter", ""));
         if ((prefermask.length() > 0) && (prefermask.indexOf(".*") < 0)) prefermask = ".*" + prefermask + ".*";
 
-        kelondroBitfield constraint = (post != null && post.containsKey("constraint") && post.get("constraint", "").length() > 0) ? new kelondroBitfield(4, post.get("constraint", "______")) : null;
+        Bitfield constraint = (post != null && post.containsKey("constraint") && post.get("constraint", "").length() > 0) ? new Bitfield(4, post.get("constraint", "______")) : null;
         if (indexof) {
-            constraint = new kelondroBitfield(4);
+            constraint = new Bitfield(4);
             constraint.set(plasmaCondenser.flag_cat_indexof, true);
         }
         
@@ -204,7 +204,7 @@ public class yacysearch {
         if ((!block) && (post == null || post.get("cat", "href").equals("href"))) {
             
             // check available memory and clean up if necessary
-            if (!kelondroMemory.request(8000000L, false)) {
+            if (!MemoryControl.request(8000000L, false)) {
                 sb.webIndex.clearCache();
                 plasmaSearchEvent.cleanupEvents(true);
             }
@@ -282,9 +282,9 @@ public class yacysearch {
             int maxDistance = (querystring.indexOf('"') >= 0) ? maxDistance = query.length - 1 : Integer.MAX_VALUE;
 
             // filter out stopwords
-            final TreeSet<String> filtered = kelondroMSetTools.joinConstructive(query[0], plasmaSwitchboard.stopwords);
+            final TreeSet<String> filtered = SetTools.joinConstructive(query[0], plasmaSwitchboard.stopwords);
             if (filtered.size() > 0) {
-                kelondroMSetTools.excludeDestructive(query[0], plasmaSwitchboard.stopwords);
+                SetTools.excludeDestructive(query[0], plasmaSwitchboard.stopwords);
             }
 
             // if a minus-button was hit, remove a special reference first

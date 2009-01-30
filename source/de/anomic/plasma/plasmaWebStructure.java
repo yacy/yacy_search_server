@@ -37,9 +37,9 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import de.anomic.kelondro.kelondroBase64Order;
-import de.anomic.kelondro.kelondroMicroDate;
-import de.anomic.kelondro.kelondroDate;
+import de.anomic.kelondro.coding.Base64Order;
+import de.anomic.kelondro.coding.DateFormatter;
+import de.anomic.kelondro.coding.MicroDate;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyURL;
@@ -120,16 +120,16 @@ public class plasmaWebStructure {
         // append this reference to buffer
         // generate header info
         final String head = url.hash() + "=" +
-        kelondroMicroDate.microDateHoursStr(docDate.getTime()) +          // latest update timestamp of the URL
-        kelondroMicroDate.microDateHoursStr(System.currentTimeMillis()) + // last visit timestamp of the URL
-        kelondroBase64Order.enhancedCoder.encodeLongSmart(LCount, 2) +  // count of links to local resources
-        kelondroBase64Order.enhancedCoder.encodeLongSmart(GCount, 2) +  // count of links to global resources
-        kelondroBase64Order.enhancedCoder.encodeLongSmart(document.getImages().size(), 2) + // count of Images in document
-        kelondroBase64Order.enhancedCoder.encodeLongSmart(0, 2) +       // count of links to other documents
-        kelondroBase64Order.enhancedCoder.encodeLongSmart(document.getTextLength(), 3) +   // length of plain text in bytes
-        kelondroBase64Order.enhancedCoder.encodeLongSmart(condenser.RESULT_NUMB_WORDS, 3) + // count of all appearing words
-        kelondroBase64Order.enhancedCoder.encodeLongSmart(condenser.words().size(), 3) + // count of all unique words
-        kelondroBase64Order.enhancedCoder.encodeLongSmart(0, 1); // Flags (update, popularity, attention, vote)
+        MicroDate.microDateHoursStr(docDate.getTime()) +          // latest update timestamp of the URL
+        MicroDate.microDateHoursStr(System.currentTimeMillis()) + // last visit timestamp of the URL
+        Base64Order.enhancedCoder.encodeLongSmart(LCount, 2) +  // count of links to local resources
+        Base64Order.enhancedCoder.encodeLongSmart(GCount, 2) +  // count of links to global resources
+        Base64Order.enhancedCoder.encodeLongSmart(document.getImages().size(), 2) + // count of Images in document
+        Base64Order.enhancedCoder.encodeLongSmart(0, 2) +       // count of links to other documents
+        Base64Order.enhancedCoder.encodeLongSmart(document.getTextLength(), 3) +   // length of plain text in bytes
+        Base64Order.enhancedCoder.encodeLongSmart(condenser.RESULT_NUMB_WORDS, 3) + // count of all appearing words
+        Base64Order.enhancedCoder.encodeLongSmart(condenser.words().size(), 3) + // count of all unique words
+        Base64Order.enhancedCoder.encodeLongSmart(0, 1); // Flags (update, popularity, attention, vote)
         
         //crl.append(head); crl.append ('|'); crl.append(cpl); crl.append((char) 13); crl.append((char) 10);
         crg.append(head); crg.append('|'); crg.append(cpg); crg.append((char) 13); crg.append((char) 10);
@@ -153,7 +153,7 @@ public class plasmaWebStructure {
     
     public void flushCitationReference(final String type) {
         if (crg.length() < 12) return;
-        final String filename = type.toUpperCase() + "-A-" + new kelondroDate().toShortString(true) + "." + crg.substring(0, 12) + ".cr.gz";
+        final String filename = type.toUpperCase() + "-A-" + new DateFormatter().toShortString(true) + "." + crg.substring(0, 12) + ".cr.gz";
         final File path = new File(rankingPath, (type.equals("crl")) ? crlFile : crgFile);
         path.mkdirs();
         final File file = new File(path, filename);
@@ -193,7 +193,7 @@ public class plasmaWebStructure {
     
     private static String map2refstr(final Map<String, Integer> map) {
         final StringBuilder s = new StringBuilder(map.size() * 10);
-        s.append(kelondroDate.formatShortDay(new Date()));
+        s.append(DateFormatter.formatShortDay(new Date()));
         String h;
         for (final Map.Entry<String, Integer> entry : map.entrySet()) {
             s.append(entry.getKey());

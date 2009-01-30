@@ -51,8 +51,8 @@ import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import de.anomic.kelondro.kelondroRow;
-import de.anomic.kelondro.kelondroRowSet;
+import de.anomic.kelondro.index.Row;
+import de.anomic.kelondro.index.RowSet;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.nxTools;
 
@@ -448,7 +448,7 @@ public final class serverFileUtils {
         forceMove(tf, file);
     }
 
-    public static void saveSet(final File file, final String format, final kelondroRowSet set, final String sep) throws IOException {
+    public static void saveSet(final File file, final String format, final RowSet set, final String sep) throws IOException {
         final File tf = new File(file.toString() + ".tmp" + (System.currentTimeMillis() % 1000));
         OutputStream os = null;
         if ((format == null) || (format.equals("plain"))) {
@@ -463,7 +463,7 @@ public final class serverFileUtils {
             os = zos;
         }
         if(os != null) {
-            final Iterator<kelondroRow.Entry> i = set.iterator();
+            final Iterator<Row.Entry> i = set.iterator();
             String key;
             if (i.hasNext()) {
                 key = new String(i.next().getColBytes(0));

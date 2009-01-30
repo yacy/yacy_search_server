@@ -85,7 +85,6 @@
 
 package de.anomic.plasma;
 
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -145,11 +144,11 @@ import de.anomic.index.indexReferenceBlacklist;
 import de.anomic.index.indexURLReference;
 import de.anomic.kelondro.kelondroCache;
 import de.anomic.kelondro.kelondroCachedRecords;
-import de.anomic.kelondro.kelondroDigest;
-import de.anomic.kelondro.kelondroMSetTools;
-import de.anomic.kelondro.kelondroNaturalOrder;
-import de.anomic.kelondro.kelondroDate;
-import de.anomic.kelondro.kelondroMemory;
+import de.anomic.kelondro.coding.DateFormatter;
+import de.anomic.kelondro.coding.Digest;
+import de.anomic.kelondro.coding.NaturalOrder;
+import de.anomic.kelondro.tools.SetTools;
+import de.anomic.kelondro.tools.MemoryControl;
 import de.anomic.plasma.parser.ParserException;
 import de.anomic.server.serverAbstractSwitch;
 import de.anomic.server.serverBusyThread;
@@ -342,7 +341,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             // read only once upon first instantiation of this class
             final String f = getConfig(plasmaSwitchboardConstants.LIST_BLUE, plasmaSwitchboardConstants.LIST_BLUE_DEFAULT);
             final File plasmaBlueListFile = new File(f);
-            if (f != null) blueList = kelondroMSetTools.loadList(plasmaBlueListFile, kelondroNaturalOrder.naturalComparator); else blueList= new TreeSet<String>();
+            if (f != null) blueList = SetTools.loadList(plasmaBlueListFile, NaturalOrder.naturalComparator); else blueList= new TreeSet<String>();
             this.log.logConfig("loaded blue-list from file " + plasmaBlueListFile.getName() + ", " +
             blueList.size() + " entries, " +
             ppRamString(plasmaBlueListFile.length()/1024));
@@ -380,7 +379,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         // load badwords (to filter the topwords)
         if (badwords == null) {
             final File badwordsFile = new File(rootPath, plasmaSwitchboardConstants.LIST_BADWORDS_DEFAULT);
-            badwords = kelondroMSetTools.loadList(badwordsFile, kelondroNaturalOrder.naturalComparator);
+            badwords = SetTools.loadList(badwordsFile, NaturalOrder.naturalComparator);
             this.log.logConfig("loaded badwords from file " + badwordsFile.getName() +
                                ", " + badwords.size() + " entries, " +
                                ppRamString(badwordsFile.length()/1024));
@@ -389,7 +388,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         // load stopwords
         if (stopwords == null) {
             final File stopwordsFile = new File(rootPath, plasmaSwitchboardConstants.LIST_STOPWORDS_DEFAULT);
-            stopwords = kelondroMSetTools.loadList(stopwordsFile, kelondroNaturalOrder.naturalComparator);
+            stopwords = SetTools.loadList(stopwordsFile, NaturalOrder.naturalComparator);
             this.log.logConfig("loaded stopwords from file " + stopwordsFile.getName() + ", " +
             stopwords.size() + " entries, " +
             ppRamString(stopwordsFile.length()/1024));
@@ -593,7 +592,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         
         // deploy busy threads
         log.logConfig("Starting Threads");
-        kelondroMemory.gc(1000, "plasmaSwitchboard, help for profiler"); // help for profiler - thq
+        MemoryControl.gc(1000, "plasmaSwitchboard, help for profiler"); // help for profiler - thq
 
         moreMemory = new Timer(); // init GC Thread - thq
         moreMemory.schedule(new MoreMemory(), 300000, 600000);
@@ -1292,7 +1291,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             boolean hasDoneSomething = false;
             
             // clear caches if necessary
-            if (!kelondroMemory.request(8000000L, false)) {
+            if (!MemoryControl.request(8000000L, false)) {
                 webIndex.clearCache();
                 plasmaSearchEvent.cleanupEvents(true);
             }
@@ -1300,7 +1299,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             // set a random password if no password is configured
             if (!crawlStacker.acceptLocalURLs() && getConfigBool("adminAccountForLocalhost", false) && getConfig(httpd.ADMIN_ACCOUNT_B64MD5, "").length() == 0) {
                 // make a 'random' password
-                setConfig(httpd.ADMIN_ACCOUNT_B64MD5, "0000" + kelondroDigest.encodeMD5Hex(System.getProperties().toString() + System.currentTimeMillis()));
+                setConfig(httpd.ADMIN_ACCOUNT_B64MD5, "0000" + Digest.encodeMD5Hex(System.getProperties().toString() + System.currentTimeMillis()));
                 setConfig("adminAccount", "");
             }
             
@@ -1719,10 +1718,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         }
     }
     
-    private static SimpleDateFormat DateFormatter = new SimpleDateFormat("EEE, dd MMM yyyy");
+    private static SimpleDateFormat DateFormat1 = new SimpleDateFormat("EEE, dd MMM yyyy");
     public static String dateString(final Date date) {
         if (date == null) return "";
-        return DateFormatter.format(date);
+        return DateFormat1.format(date);
     }
     
     // we need locale independent RFC-822 dates at some places
@@ -2150,7 +2149,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         webIndex.seedDB.mySeed().put(yacySeed.VERSION, getConfig("version", ""));
         webIndex.seedDB.mySeed().setFlagDirectConnect(true);
         webIndex.seedDB.mySeed().setLastSeenUTC();
-        webIndex.seedDB.mySeed().put(yacySeed.UTC, kelondroDate.UTCDiffString());
+        webIndex.seedDB.mySeed().put(yacySeed.UTC, DateFormatter.UTCDiffString());
         webIndex.seedDB.mySeed().setFlagAcceptRemoteCrawl(getConfig("crawlResponse", "").equals("true"));
         webIndex.seedDB.mySeed().setFlagAcceptRemoteIndex(getConfig("allowReceiveIndex", "").equals("true"));
         //mySeed.setFlagAcceptRemoteIndex(true);
@@ -2282,7 +2281,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
 
 class MoreMemory extends TimerTask {
     public final void run() {
-        kelondroMemory.gc(10000, "MoreMemory()");
+        MemoryControl.gc(10000, "MoreMemory()");
     }
 }
 

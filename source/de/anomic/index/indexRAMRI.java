@@ -33,16 +33,16 @@ import java.util.Iterator;
 import java.util.Set;
 
 import de.anomic.kelondro.kelondroCloneableIterator;
-import de.anomic.kelondro.kelondroMScoreCluster;
-import de.anomic.kelondro.kelondroRow;
-import de.anomic.kelondro.kelondroMemory;
+import de.anomic.kelondro.index.Row;
+import de.anomic.kelondro.tools.ScoreCluster;
+import de.anomic.kelondro.tools.MemoryControl;
 import de.anomic.server.logging.serverLog;
 
 public final class indexRAMRI implements indexRI, indexRIReader, Iterable<indexContainer> {
 
     // class variables
-    private final kelondroMScoreCluster<String> hashScore;
-    private final kelondroMScoreCluster<String> hashDate;
+    private final ScoreCluster<String> hashScore;
+    private final ScoreCluster<String> hashDate;
     private long  initTime;
     private int   cacheEntityMaxCount;       // the maximum number of cache slots for RWI entries
     public  int   cacheReferenceCountLimit;  // the maximum number of references to a single RWI entity
@@ -54,7 +54,7 @@ public final class indexRAMRI implements indexRI, indexRIReader, Iterable<indexC
     @SuppressWarnings("unchecked")
     public indexRAMRI(
             final File databaseRoot,
-            final kelondroRow payloadrow,
+            final Row payloadrow,
             final int entityCacheMaxSize,
             final int wCacheReferenceCountLimitInit,
             final long wCacheReferenceAgeLimitInit,
@@ -63,8 +63,8 @@ public final class indexRAMRI implements indexRI, indexRIReader, Iterable<indexC
 
         // creates a new index cache
         // the cache has a back-end where indexes that do not fit in the cache are flushed
-        this.hashScore = new kelondroMScoreCluster<String>();
-        this.hashDate  = new kelondroMScoreCluster<String>();
+        this.hashScore = new ScoreCluster<String>();
+        this.hashDate  = new ScoreCluster<String>();
         this.initTime = System.currentTimeMillis();
         this.cacheEntityMaxCount = entityCacheMaxSize;
         this.cacheReferenceCountLimit = wCacheReferenceCountLimitInit;
@@ -181,7 +181,7 @@ public final class indexRAMRI implements indexRI, indexRIReader, Iterable<indexC
                 return hash;
             }
             // cases with respect to memory situation
-            if (kelondroMemory.free() < 100000) {
+            if (MemoryControl.free() < 100000) {
                 // urgent low-memory case
                 hash = hashScore.getMaxObject(); // flush high-score entries (saves RAM)
             } else {

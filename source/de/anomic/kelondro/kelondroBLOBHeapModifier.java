@@ -30,6 +30,9 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.SortedMap;
 
+import de.anomic.kelondro.coding.ByteOrder;
+import de.anomic.kelondro.io.CachedRandomAccess;
+import de.anomic.kelondro.tools.MemoryControl;
 import de.anomic.server.logging.serverLog;
 
 public class kelondroBLOBHeapModifier extends kelondroBLOBHeapReader implements kelondroBLOB {
@@ -46,7 +49,7 @@ public class kelondroBLOBHeapModifier extends kelondroBLOBHeapReader implements 
      * @param ordering
      * @throws IOException
      */
-    public kelondroBLOBHeapModifier(final File heapFile, final int keylength, final kelondroByteOrder ordering) throws IOException {
+    public kelondroBLOBHeapModifier(final File heapFile, final int keylength, final ByteOrder ordering) throws IOException {
         super(heapFile, keylength, ordering);
         mergeFreeEntries();
     }
@@ -93,7 +96,7 @@ public class kelondroBLOBHeapModifier extends kelondroBLOBHeapReader implements 
             e.printStackTrace();
         }
         this.heapFile.delete();
-        this.file = new kelondroCachedFileRA(heapFile);
+        this.file = new CachedRandomAccess(heapFile);
     }
 
     /**
@@ -284,8 +287,8 @@ public class kelondroBLOBHeapModifier extends kelondroBLOBHeapReader implements 
         // access the file and read the container
         file.seek(pos);
         final int len = file.readInt() - index.row().primaryKeyLength;
-        if (kelondroMemory.available() < len) {
-            if (!kelondroMemory.request(len, true)) return 0; // not enough memory available for this blob
+        if (MemoryControl.available() < len) {
+            if (!MemoryControl.request(len, true)) return 0; // not enough memory available for this blob
         }
         
         // read the key

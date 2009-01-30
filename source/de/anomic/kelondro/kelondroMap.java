@@ -36,11 +36,15 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import de.anomic.kelondro.coding.DateFormatter;
+import de.anomic.kelondro.coding.NaturalOrder;
+import de.anomic.kelondro.tools.ScoreCluster;
+
 
 public class kelondroMap {
 
     private final kelondroBLOB blob;
-    private kelondroMScoreCluster<String> cacheScore;
+    private ScoreCluster<String> cacheScore;
     private HashMap<String, Map<String, String>> cache;
     private final long startup;
     private final int cachesize;
@@ -48,7 +52,7 @@ public class kelondroMap {
     public kelondroMap(final kelondroBLOB blob, final int cachesize) {
         this.blob = blob;
         this.cache = new HashMap<String, Map<String, String>>();
-        this.cacheScore = new kelondroMScoreCluster<String>();
+        this.cacheScore = new ScoreCluster<String>();
         this.startup = System.currentTimeMillis();
         this.cachesize = cachesize;
         
@@ -91,7 +95,7 @@ public class kelondroMap {
     public void clear() throws IOException {
     	this.blob.clear();
         this.cache = new HashMap<String, Map<String, String>>();
-        this.cacheScore = new kelondroMScoreCluster<String>();
+        this.cacheScore = new ScoreCluster<String>();
     }
 
     private static String map2string(final Map<String, String> map, final String comment) {
@@ -139,7 +143,7 @@ public class kelondroMap {
         while (key.length() < blob.keylength()) key += "_";
         
         // write entry
-        blob.put(key.getBytes(), map2string(newMap, "W" + kelondroDate.formatShortSecond() + " ").getBytes());
+        blob.put(key.getBytes(), map2string(newMap, "W" + DateFormatter.formatShortSecond() + " ").getBytes());
 
         // check for space in cache
         checkCacheSpace();
@@ -335,7 +339,7 @@ public class kelondroMap {
         if (f.exists()) f.delete();
         try {
             // make a blob
-            kelondroBLOB blob = new kelondroBLOBHeap(f, 12, kelondroNaturalOrder.naturalOrder, 1024 * 1024);
+            kelondroBLOB blob = new kelondroBLOBHeap(f, 12, NaturalOrder.naturalOrder, 1024 * 1024);
             // make map
             kelondroMap map = new kelondroMap(blob, 1024);
             // put some values into the map

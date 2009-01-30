@@ -30,12 +30,15 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import de.anomic.kelondro.coding.ByteOrder;
+import de.anomic.kelondro.coding.Digest;
+import de.anomic.kelondro.index.BytesLongMap;
 import de.anomic.server.logging.serverLog;
 
 public final class kelondroBLOBHeapWriter  {
 
     private int                     keylength;  // the length of the primary key
-    private kelondroBytesLongMap    index;      // key/seek relation for used records
+    private BytesLongMap    index;      // key/seek relation for used records
     private final File              heapFile;   // the file of the heap
     private DataOutputStream        os;         // the output stream where the BLOB is written
     private long                    seek;       // the current write position
@@ -65,10 +68,10 @@ public final class kelondroBLOBHeapWriter  {
      * @param ordering
      * @throws IOException
      */
-    public kelondroBLOBHeapWriter(final File heapFile, final int keylength, final kelondroByteOrder ordering) throws IOException {
+    public kelondroBLOBHeapWriter(final File heapFile, final int keylength, final ByteOrder ordering) throws IOException {
         this.heapFile = heapFile;
         this.keylength = keylength;
-        this.index = new kelondroBytesLongMap(keylength, ordering, 10);
+        this.index = new BytesLongMap(keylength, ordering, 10);
         this.os = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(heapFile), 1024 * 1024));
         this.seek = 0;
     }
@@ -103,7 +106,7 @@ public final class kelondroBLOBHeapWriter  {
     }
     
     protected static String fingerprintFileHash(File f) {
-        return kelondroDigest.fastFingerprintB64(f, false).substring(0, 12);
+        return Digest.fastFingerprintB64(f, false).substring(0, 12);
     }
     
     public static void deleteAllFingerprints(File f) {

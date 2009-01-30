@@ -32,7 +32,7 @@ import java.text.ParseException;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.index.indexReferenceBlacklist;
 import de.anomic.index.indexURLReference;
-import de.anomic.kelondro.kelondroDate;
+import de.anomic.kelondro.coding.DateFormatter;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
@@ -49,7 +49,7 @@ public final class transferURL {
     public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) throws InterruptedException {
         final long start = System.currentTimeMillis();
         long freshdate = 0;
-        try {freshdate = kelondroDate.parseShortDay("20061101").getTime();} catch (final ParseException e1) {}
+        try {freshdate = DateFormatter.parseShortDay("20061101").getTime();} catch (final ParseException e1) {}
         
         // return variable that accumulates replacements
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;

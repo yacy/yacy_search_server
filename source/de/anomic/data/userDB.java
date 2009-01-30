@@ -37,12 +37,12 @@ import java.util.Random;
 
 import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.kelondroBLOBTree;
-import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroCloneableIterator;
-import de.anomic.kelondro.kelondroDigest;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMap;
-import de.anomic.kelondro.kelondroNaturalOrder;
+import de.anomic.kelondro.coding.Base64Order;
+import de.anomic.kelondro.coding.Digest;
+import de.anomic.kelondro.coding.NaturalOrder;
 
 public final class userDB {
     
@@ -57,7 +57,7 @@ public final class userDB {
     public userDB(final File userTableFile) {
         this.userTableFile = userTableFile;
         userTableFile.getParentFile().mkdirs();
-        this.userTable = new kelondroMap(new kelondroBLOBTree(userTableFile, true, true, 128, 256, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 10);
+        this.userTable = new kelondroMap(new kelondroBLOBTree(userTableFile, true, true, 128, 256, '_', NaturalOrder.naturalOrder, true, false, false), 10);
     }
     
     void resetDatabase() {
@@ -65,7 +65,7 @@ public final class userDB {
         if (userTable != null) userTable.close();
         if (!(userTableFile.delete())) throw new RuntimeException("cannot delete user database");
         userTableFile.getParentFile().mkdirs();
-        userTable = new kelondroMap(new kelondroBLOBTree(userTableFile, true, true, 256, 512, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 10);
+        userTable = new kelondroMap(new kelondroBLOBTree(userTableFile, true, true, 256, 512, '_', NaturalOrder.naturalOrder, true, false, false), 10);
     }
     
     public void close() {
@@ -121,7 +121,7 @@ public final class userDB {
 		auth=auth.trim().substring(6);
         
         try{
-            auth=kelondroBase64Order.standardCoder.decodeString(auth, "de.anomic.data.userDB.proxyAuth()");
+            auth=Base64Order.standardCoder.decodeString(auth, "de.anomic.data.userDB.proxyAuth()");
         }catch(final RuntimeException e){} //no valid Base64
         final String[] tmp=auth.split(":");
         if(tmp.length == 2){
@@ -197,7 +197,7 @@ public final class userDB {
 	}
     public Entry passwordAuth(final String user, final String password){
         final Entry entry=this.getEntry(user);
-        if( entry != null && entry.getMD5EncodedUserPwd().equals(kelondroDigest.encodeMD5Hex(user+":"+password)) ){
+        if( entry != null && entry.getMD5EncodedUserPwd().equals(Digest.encodeMD5Hex(user+":"+password)) ){
                 if(entry.isLoggedOut()){
                     try{
                         entry.setProperty(Entry.LOGGED_OUT, "false");

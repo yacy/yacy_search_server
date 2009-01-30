@@ -47,9 +47,9 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import de.anomic.kelondro.kelondroBLOBTree;
-import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroMap;
-import de.anomic.kelondro.kelondroNaturalOrder;
+import de.anomic.kelondro.coding.Base64Order;
+import de.anomic.kelondro.coding.NaturalOrder;
 import de.anomic.server.logging.serverLog;
 
 public class blogBoardComments {
@@ -67,7 +67,7 @@ public class blogBoardComments {
     public blogBoardComments(final File actpath) {
     		new File(actpath.getParent()).mkdir();
         if (database == null) {
-            database = new kelondroMap(new kelondroBLOBTree(actpath, true, true, keyLength, recordSize, '_', kelondroNaturalOrder.naturalOrder, false, false, false), 500);
+            database = new kelondroMap(new kelondroBLOBTree(actpath, true, true, keyLength, recordSize, '_', NaturalOrder.naturalOrder, false, false, false), 500);
         }
     }
     public int size() {
@@ -245,12 +245,12 @@ public class blogBoardComments {
             if (subject == null) 
                 record.put("subject","");
             else 
-                record.put("subject", kelondroBase64Order.enhancedCoder.encode(subject));
+                record.put("subject", Base64Order.enhancedCoder.encode(subject));
         }
         public byte[] getSubject() {
             final String subject = record.get("subject");
             if (subject == null) return new byte[0];
-            final byte[] subject_bytes = kelondroBase64Order.enhancedCoder.decode(subject, "de.anomic.data.blogBoardComments.subject()");
+            final byte[] subject_bytes = Base64Order.enhancedCoder.decode(subject, "de.anomic.data.blogBoardComments.subject()");
             if (subject_bytes == null) return "".getBytes();
             return subject_bytes;
         }
@@ -286,13 +286,13 @@ public class blogBoardComments {
             if (author == null) 
                 record.put("author","");
             else 
-                record.put("author", kelondroBase64Order.enhancedCoder.encode(author));
+                record.put("author", Base64Order.enhancedCoder.encode(author));
         }
         public byte[] getAuthor() {
             final String author = record.get("author");
             if (author == null) 
                 return new byte[0];
-            final byte[] author_byte = kelondroBase64Order.enhancedCoder.decode(author, "de.anomic.data.blogBoardComments.author()");
+            final byte[] author_byte = Base64Order.enhancedCoder.decode(author, "de.anomic.data.blogBoardComments.author()");
             if (author_byte == null) 
                 return "".getBytes();
             return author_byte;
@@ -312,13 +312,13 @@ public class blogBoardComments {
             if (page == null) 
                 record.put("page", "");
             else 
-                record.put("page", kelondroBase64Order.enhancedCoder.encode(page));
+                record.put("page", Base64Order.enhancedCoder.encode(page));
         }
         public byte[] getPage() {
             final String page = record.get("page");
             if (page == null) 
                 return new byte[0];
-            final byte[] page_byte = kelondroBase64Order.enhancedCoder.decode(page, "de.anomic.data.blogBoardComments.page()");
+            final byte[] page_byte = Base64Order.enhancedCoder.decode(page, "de.anomic.data.blogBoardComments.page()");
             if (page_byte == null) 
                 return "".getBytes();
             return page_byte;

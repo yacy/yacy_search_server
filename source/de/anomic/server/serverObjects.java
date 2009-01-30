@@ -53,7 +53,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import de.anomic.htmlFilter.htmlFilterCharacterCoding;
-import de.anomic.kelondro.kelondroDate;
+import de.anomic.kelondro.coding.DateFormatter;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.tools.yFormatter;
 
@@ -134,7 +134,7 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
         return this.put(key, value.toString());
     }
     
-    public String put(final String key, final kelondroDate value) {
+    public String put(final String key, final DateFormatter value) {
         return this.put(key, value.toString());
     }
     

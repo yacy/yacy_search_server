@@ -42,7 +42,7 @@ import de.anomic.data.userDB;
 import de.anomic.data.bookmarksDB.Tag;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.index.indexURLReference;
-import de.anomic.kelondro.kelondroDate;
+import de.anomic.kelondro.coding.DateFormatter;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -292,8 +292,8 @@ public class Bookmarks {
        				prop.put("bookmarks_"+count+"_link",bookmark.getUrl());
        			prop.putHTML("bookmarks_"+count+"_title", bookmark.getTitle());
        			prop.putHTML("bookmarks_"+count+"_description", bookmark.getDescription());
-       			prop.put("bookmarks_"+count+"_date", kelondroDate.formatISO8601(new Date(bookmark.getTimeStamp())));
-       			prop.put("bookmarks_"+count+"_rfc822date", kelondroDate.formatRFC1123(new Date(bookmark.getTimeStamp())));
+       			prop.put("bookmarks_"+count+"_date", DateFormatter.formatISO8601(new Date(bookmark.getTimeStamp())));
+       			prop.put("bookmarks_"+count+"_rfc822date", DateFormatter.formatRFC1123(new Date(bookmark.getTimeStamp())));
        			prop.put("bookmarks_"+count+"_public", (bookmark.getPublic() ? "1" : "0"));
             
        			//List Tags.

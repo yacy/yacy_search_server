@@ -52,8 +52,8 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.PBEParameterSpec;
 
-import de.anomic.kelondro.kelondroBase64Order;
-import de.anomic.kelondro.kelondroDigest;
+import de.anomic.kelondro.coding.Base64Order;
+import de.anomic.kelondro.coding.Digest;
 
 public class cryptbig {
 
@@ -70,7 +70,7 @@ public class cryptbig {
         saltcounter++;
         // we generate 48-bit salt values, that are represented as 8-character
         // b64-encoded strings
-        return kelondroBase64Order.standardCoder.encodeLong(salt & 0XffffffffffffL, 8);
+        return Base64Order.standardCoder.encodeLong(salt & 0XffffffffffffL, 8);
     }
 
     // --------------------------------------------------------
@@ -132,7 +132,7 @@ public class cryptbig {
 	    final byte[] utf = str.getBytes("UTF8");
 	    final byte[] enc = encryptArray(utf);
 	    if (enc == null) return null;
-	    return kelondroBase64Order.standardCoder.encode(enc);
+	    return Base64Order.standardCoder.encode(enc);
 	} catch (final UnsupportedEncodingException e) {
 	}
 	return null;
@@ -141,7 +141,7 @@ public class cryptbig {
     // Decode a string into a new string using b64, crypt and utf-8
     public String decryptString(final String str) {
 	try {
-	    final byte[] b64dec = kelondroBase64Order.standardCoder.decode(str, "de.anomic.tools.cryptbig.decryptString()");
+	    final byte[] b64dec = Base64Order.standardCoder.decode(str, "de.anomic.tools.cryptbig.decryptString()");
 	    if (b64dec == null) return null; // error in input string (inconsistency)
 	    final byte[] dec = decryptArray(b64dec);
 	    if (dec == null) return null;
@@ -232,7 +232,7 @@ public class cryptbig {
 	    final File   inFile           = new File(inFileName);
 	    final String inFileDate       = dateFormatter.format(new Date(inFile.lastModified())); // 17 byte
 	    final String encryptionDate   = dateFormatter.format(new Date()); // 17 byte
-	    final String inFileSize       = kelondroBase64Order.standardCoder.encodeLong(inFile.length(), 11); // 64 / 6 = 11; 11 byte
+	    final String inFileSize       = Base64Order.standardCoder.encodeLong(inFile.length(), 11); // 64 / 6 = 11; 11 byte
 	    final String flag             = "1"; // 1 byte
 	    //int    inFileNameLength = inFileName.length(); // 256
 	    final String X                = inFileDate + encryptionDate + inFileSize + flag + inFileName;
@@ -257,8 +257,8 @@ public class cryptbig {
 	    // - after the magic String we write C, B and A
 	    try {
 		final String A = new String(ecipher.doFinal(X.getBytes("UTF8")));
-		final String B = new String(ecipher.doFinal(kelondroBase64Order.standardCoder.encodeLong(A.length(), 2).getBytes("UTF8"))); // most probable not longer than 4
-		final String C = kelondroBase64Order.standardCoder.encodeLong(B.length(), 1); // fixed length 1 (6 bits, that should be enough)
+		final String B = new String(ecipher.doFinal(Base64Order.standardCoder.encodeLong(A.length(), 2).getBytes("UTF8"))); // most probable not longer than 4
+		final String C = Base64Order.standardCoder.encodeLong(B.length(), 1); // fixed length 1 (6 bits, that should be enough)
 		fout.write(magicString.getBytes()); // the magic string, used to identify a 'crypt'-file
 		fout.write(C.getBytes());
 		fout.write(B.getBytes());
@@ -297,9 +297,9 @@ public class cryptbig {
 	    }
 	    final byte[] C = new byte[1];
 	    fin.read(C); // the length of the following String, encoded as b64
-	    final byte[] B = new byte[(int) kelondroBase64Order.standardCoder.decodeLong(new String(C))];
+	    final byte[] B = new byte[(int) Base64Order.standardCoder.decodeLong(new String(C))];
 	    fin.read(B); // this is again the length of the following string, as encrypted b64-ed integer
-	    final byte[] A = new byte[(int) kelondroBase64Order.standardCoder.decodeLong(new String(dcipher.doFinal(B), "UTF8"))];
+	    final byte[] A = new byte[(int) Base64Order.standardCoder.decodeLong(new String(dcipher.doFinal(B), "UTF8"))];
 	    fin.read(A);
 	    final String X = new String(dcipher.doFinal(A), "UTF8");
 
@@ -308,7 +308,7 @@ public class cryptbig {
 	    // reconstruct the properties
 	    final Date   inFileDate     = dateFormatter.parse(X.substring(0, 17), new ParsePosition(0));
 	    final Date   encryptionDate = dateFormatter.parse(X.substring(17, 34),  new ParsePosition(0));
-	    final long   inFileSize     = kelondroBase64Order.standardCoder.decodeLong(X.substring(34, 45));
+	    final long   inFileSize     = Base64Order.standardCoder.decodeLong(X.substring(34, 45));
 	    final String flag           = X.substring(45, 46);
 	    final String origFileName   = X.substring(46);
 
@@ -382,7 +382,7 @@ public class cryptbig {
 	if (gz == null) return null;
 	final byte[] enc = c.encryptArray(gz);
 	if (enc == null) return null;
-	return salt + ((gzFlag) ? "1" : "0") + kelondroBase64Order.enhancedCoder.encode(enc);
+	return salt + ((gzFlag) ? "1" : "0") + Base64Order.enhancedCoder.encode(enc);
     }
 
     public static String descrambleString(final String key, String s) throws IOException {
@@ -390,7 +390,7 @@ public class cryptbig {
 	final boolean gzFlag = (s.charAt(8) == '1');
 	s = s.substring(9);
 	final cryptbig c = new cryptbig(key, salt);
-	final byte[] b64dec = kelondroBase64Order.enhancedCoder.decode(s, "de.anomic.tools.cryptbig.descrambleString()");
+	final byte[] b64dec = Base64Order.enhancedCoder.decode(s, "de.anomic.tools.cryptbig.descrambleString()");
 	if (b64dec == null) return null; // error in input string (inconsistency)
 	final byte[] dec = c.decryptArray(b64dec);
 	if (dec == null) return null;
@@ -420,8 +420,8 @@ public class cryptbig {
     public static String simpleEncode(final String content, String key, final char method) {
 	if (key == null) key = "NULL";
 	if (method == 'p') return "p|" + content;
-	if (method == 'b') return "b|" + kelondroBase64Order.enhancedCoder.encodeString(content);
-	if (method == 'z') return "z|" + kelondroBase64Order.enhancedCoder.encode(gzip.gzipString(content));
+	if (method == 'b') return "b|" + Base64Order.enhancedCoder.encodeString(content);
+	if (method == 'z') return "z|" + Base64Order.enhancedCoder.encode(gzip.gzipString(content));
 	if (method == 'c') return "c|" + scrambleString(key, content);
 	return null;
     }
@@ -432,8 +432,8 @@ public class cryptbig {
 	final char method = encoded.charAt(0);
 	encoded = encoded.substring(2);
 	if (method == 'p') return encoded;
-	if (method == 'b') return kelondroBase64Order.enhancedCoder.decodeString(encoded, "de.anomic.tools.cryptbig.simpleDecode()");
-	if (method == 'z') return gzip.gunzipString(kelondroBase64Order.enhancedCoder.decode(encoded, "de.anomic.tools.cryptbig.simpleDecode()"));
+	if (method == 'b') return Base64Order.enhancedCoder.decodeString(encoded, "de.anomic.tools.cryptbig.simpleDecode()");
+	if (method == 'z') return gzip.gunzipString(Base64Order.enhancedCoder.decode(encoded, "de.anomic.tools.cryptbig.simpleDecode()"));
 	if (method == 'c') return descrambleString(key, encoded);
 	return null;
     }
@@ -579,25 +579,25 @@ public class cryptbig {
 	if (s[0].equals("-ec64")) {
 	    // generate a b64 encoding from a given cardinal
 	    if (s.length != 2) {help(); System.exit(-1);}
-	    System.out.println(kelondroBase64Order.standardCoder.encodeLong(Long.parseLong(s[1]), 0));
+	    System.out.println(Base64Order.standardCoder.encodeLong(Long.parseLong(s[1]), 0));
 	    System.exit(0);
 	}
 	if (s[0].equals("-dc64")) {
 	    // generate a b64 decoding from a given cardinal
 	    if (s.length != 2) {help(); System.exit(-1);}
-	    System.out.println(kelondroBase64Order.standardCoder.decodeLong(s[1]));
+	    System.out.println(Base64Order.standardCoder.decodeLong(s[1]));
 	    System.exit(0);
 	}
 	if (s[0].equals("-es64")) {
 	    // generate a b64 encoding from a given string
 	    if (s.length != 2) {help(); System.exit(-1);}
-	    System.out.println(kelondroBase64Order.standardCoder.encodeString(s[1]));
+	    System.out.println(Base64Order.standardCoder.encodeString(s[1]));
 	    System.exit(0);
 	}
 	if (s[0].equals("-ds64")) {
 	    // generate a b64 decoding from a given string
 	    if (s.length != 2) {help(); System.exit(-1);}
-	    System.out.println(kelondroBase64Order.standardCoder.decodeString(s[1], ""));
+	    System.out.println(Base64Order.standardCoder.decodeString(s[1], ""));
 	    System.exit(0);
 	}
 	if (s[0].equals("-ess")) {
@@ -634,7 +634,7 @@ public class cryptbig {
 	if (s[0].equals("-md5")) {
 	    // generate a public key from a password that can be used for encryption
 	    if (s.length != 2) {help(); System.exit(-1);}
-	    final String md5s = kelondroDigest.encodeMD5Hex(new File(s[1]));
+	    final String md5s = Digest.encodeMD5Hex(new File(s[1]));
 	    System.out.println(md5s);
 	    System.exit(0);
 	}

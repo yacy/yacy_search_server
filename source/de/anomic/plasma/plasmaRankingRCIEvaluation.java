@@ -35,8 +35,8 @@ import java.util.Iterator;
 import java.util.TreeSet;
 
 import de.anomic.kelondro.kelondroAttrSeq;
-import de.anomic.kelondro.kelondroBase64Order;
-import de.anomic.kelondro.kelondroDigest;
+import de.anomic.kelondro.coding.Base64Order;
+import de.anomic.kelondro.coding.Digest;
 import de.anomic.server.serverFileUtils;
 import de.anomic.yacy.yacyURL;
 
@@ -137,7 +137,7 @@ public class plasmaRankingRCIEvaluation {
     @SuppressWarnings("unchecked")
     public static TreeSet<String>[] genRankingTable(final kelondroAttrSeq rci, final int[] partition) {
         final TreeSet<String>[] ranked = new TreeSet[partition.length];
-        for (int i = 0; i < partition.length; i++) ranked[i] = new TreeSet<String>(kelondroBase64Order.enhancedComparator);
+        for (int i = 0; i < partition.length; i++) ranked[i] = new TreeSet<String>(Base64Order.enhancedComparator);
         final Iterator<String> i = rci.keys();
         String key;
         kelondroAttrSeq.Entry entry;
@@ -169,7 +169,7 @@ public class plasmaRankingRCIEvaluation {
         String filename;
         if (!(tablePath.exists())) tablePath.mkdirs();
         for (int i = 0; i < ranking.length - 1; i++) {
-            filename = "YBR-4-" + kelondroDigest.encodeHex(i, 2) + ".idx";
+            filename = "YBR-4-" + Digest.encodeHex(i, 2) + ".idx";
             serverFileUtils.saveSet(new File(tablePath, filename), "plain", ranking[i], "");
         }
     }

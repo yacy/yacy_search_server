@@ -34,13 +34,13 @@ import java.util.Date;
 import java.util.Properties;
 
 import de.anomic.crawler.CrawlEntry;
-import de.anomic.kelondro.kelondroBase64Order;
-import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroException;
-import de.anomic.kelondro.kelondroNaturalOrder;
-import de.anomic.kelondro.kelondroRow;
-import de.anomic.kelondro.kelondroDigest;
-import de.anomic.kelondro.kelondroDate;
+import de.anomic.kelondro.coding.Base64Order;
+import de.anomic.kelondro.coding.Bitfield;
+import de.anomic.kelondro.coding.DateFormatter;
+import de.anomic.kelondro.coding.Digest;
+import de.anomic.kelondro.coding.NaturalOrder;
+import de.anomic.kelondro.index.Row;
 import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.server.serverCharBuffer;
 import de.anomic.server.serverCodings;
@@ -52,7 +52,7 @@ public class indexURLReference {
 
     // this object stores attributes for URL entries
     
-    public static final kelondroRow rowdef = new kelondroRow(
+    public static final Row rowdef = new Row(
         "String hash-12, " +            // the url's hash
         "String comp-360, " +           // components: the url, description, author and tags. As 5th element, an ETag is possible
         "Cardinal mod-4 {b256}, " +     // last-modified from the httpd
@@ -71,7 +71,7 @@ public class indexURLReference {
         "Cardinal laudio-2 {b256}, " +  // # of embedded audio links; for audio: track number; for video: number of audio tracks
         "Cardinal lvideo-2 {b256}, " +  // # of embedded video links
         "Cardinal lapp-2 {b256}",       // # of embedded links to applications
-        kelondroBase64Order.enhancedCoder,
+        Base64Order.enhancedCoder,
         0);      
     
     /* ===========================================================================
@@ -114,7 +114,7 @@ public class indexURLReference {
     /** of embedded links to applications */
     private static final int col_lapp     = 17;
     
-    private final kelondroRow.Entry entry;
+    private final Row.Entry entry;
     private final String snippet;
     private indexRWIEntry word; // this is only used if the url is transported via remote search requests
     private final long ranking; // during generation of a search result this value is set
@@ -133,7 +133,7 @@ public class indexURLReference {
             final long size,
             final int wc,
             final char dt,
-            final kelondroBitfield flags,
+            final Bitfield flags,
             final String lang,
             final int llocal,
             final int lother,
@@ -177,7 +177,7 @@ public class indexURLReference {
 
     private void encodeDate(final int col, final Date d) {
         // calculates the number of days since 1.1.1970 and returns this as 4-byte array
-        this.entry.setCol(col, kelondroNaturalOrder.encodeLong(d.getTime() / 86400000, 4));
+        this.entry.setCol(col, NaturalOrder.encodeLong(d.getTime() / 86400000, 4));
     }
 
     private Date decodeDate(final int col) {
@@ -198,7 +198,7 @@ public class indexURLReference {
 		}
     }
     
-    public indexURLReference(final kelondroRow.Entry entry, final indexRWIEntry searchedWord, final long ranking) {
+    public indexURLReference(final Row.Entry entry, final indexRWIEntry searchedWord, final long ranking) {
         this.entry = entry;
         this.snippet = null;
         this.word = searchedWord;
@@ -224,17 +224,17 @@ public class indexURLReference {
         this.entry.setCol(col_hash, url.hash(), null); // FIXME potential null pointer access
         this.entry.setCol(col_comp, encodeComp(url, descr, dc_creator, tags, ETag));
         try {
-            encodeDate(col_mod, kelondroDate.parseShortDay(prop.getProperty("mod", "20000101")));
+            encodeDate(col_mod, DateFormatter.parseShortDay(prop.getProperty("mod", "20000101")));
         } catch (final ParseException e) {
             encodeDate(col_mod, new Date());
         }
         try {
-            encodeDate(col_load, kelondroDate.parseShortDay(prop.getProperty("load", "20000101")));
+            encodeDate(col_load, DateFormatter.parseShortDay(prop.getProperty("load", "20000101")));
         } catch (final ParseException e) {
             encodeDate(col_load, new Date());
         }
         try {
-            encodeDate(col_fresh, kelondroDate.parseShortDay(prop.getProperty("fresh", "20000101")));
+            encodeDate(col_fresh, DateFormatter.parseShortDay(prop.getProperty("fresh", "20000101")));
         } catch (final ParseException e) {
             encodeDate(col_fresh, new Date());
         }
@@ -243,12 +243,12 @@ public class indexURLReference {
 		} catch (UnsupportedEncodingException e1) {
 			this.entry.setCol(col_referrer, prop.getProperty("referrer", "").getBytes());
 		}
-        this.entry.setCol(col_md5, kelondroDigest.decodeHex(prop.getProperty("md5", "")));
+        this.entry.setCol(col_md5, Digest.decodeHex(prop.getProperty("md5", "")));
         this.entry.setCol(col_size, Integer.parseInt(prop.getProperty("size", "0")));
         this.entry.setCol(col_wc, Integer.parseInt(prop.getProperty("wc", "0")));
         this.entry.setCol(col_dt, new byte[]{(byte) prop.getProperty("dt", "t").charAt(0)});
         final String flags = prop.getProperty("flags", "AAAAAA");
-        this.entry.setCol(col_flags, (flags.length() > 6) ? plasmaSearchQuery.empty_constraint.bytes() : (new kelondroBitfield(4, flags)).bytes());
+        this.entry.setCol(col_flags, (flags.length() > 6) ? plasmaSearchQuery.empty_constraint.bytes() : (new Bitfield(4, flags)).bytes());
         try {
 			this.entry.setCol(col_lang, prop.getProperty("lang", "uk").getBytes("UTF-8"));
 		} catch (UnsupportedEncodingException e) {
@@ -264,7 +264,7 @@ public class indexURLReference {
         this.word = null;
         if (prop.containsKey("word")) throw new kelondroException("old database structure is not supported");
         if (prop.containsKey("wi")) {
-            this.word = new indexRWIRowEntry(kelondroBase64Order.enhancedCoder.decodeString(prop.getProperty("wi", ""), "de.anomic.index.indexURLEntry.indexURLEntry()"));
+            this.word = new indexRWIRowEntry(Base64Order.enhancedCoder.decodeString(prop.getProperty("wi", ""), "de.anomic.index.indexURLEntry.indexURLEntry()"));
         }
         this.ranking = 0;
     }
@@ -293,9 +293,9 @@ public class indexURLReference {
             s.append(",author=").append(crypt.simpleEncode(comp.dc_creator()));
             s.append(",tags=").append(crypt.simpleEncode(comp.dc_subject()));
             s.append(",ETag=").append(crypt.simpleEncode(comp.ETag()));
-            s.append(",mod=").append(kelondroDate.formatShortDay(moddate()));
-            s.append(",load=").append(kelondroDate.formatShortDay(loaddate()));
-            s.append(",fresh=").append(kelondroDate.formatShortDay(freshdate()));
+            s.append(",mod=").append(DateFormatter.formatShortDay(moddate()));
+            s.append(",load=").append(DateFormatter.formatShortDay(loaddate()));
+            s.append(",fresh=").append(DateFormatter.formatShortDay(freshdate()));
             s.append(",referrer=").append(referrerHash());
             s.append(",md5=").append(md5());
             s.append(",size=").append(size());
@@ -312,7 +312,7 @@ public class indexURLReference {
             
             if (this.word != null) {
                 // append also word properties
-                s.append(",wi=").append(kelondroBase64Order.enhancedCoder.encodeString(word.toPropertyForm()));
+                s.append(",wi=").append(Base64Order.enhancedCoder.encodeString(word.toPropertyForm()));
             }
             return s;
 
@@ -325,7 +325,7 @@ public class indexURLReference {
         }
     }
 
-    public kelondroRow.Entry toRowEntry() {
+    public Row.Entry toRowEntry() {
         return this.entry;
     }
 
@@ -371,7 +371,7 @@ public class indexURLReference {
 
     public String md5() {
         // returns the md5 in hex representation
-        return kelondroDigest.encodeHex(entry.getColBytes(col_md5));
+        return Digest.encodeHex(entry.getColBytes(col_md5));
     }
 
     public char doctype() {
@@ -386,8 +386,8 @@ public class indexURLReference {
         return (int) this.entry.getColLong(col_size);
     }
 
-    public kelondroBitfield flags() {
-        return new kelondroBitfield(this.entry.getColBytes(col_flags));
+    public Bitfield flags() {
+        return new Bitfield(this.entry.getColBytes(col_flags));
     }
 
     public int wordCount() {

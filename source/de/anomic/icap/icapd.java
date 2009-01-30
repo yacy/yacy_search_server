@@ -41,7 +41,7 @@ import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpResponseHeader;
 import de.anomic.http.httpdProxyCacheEntry;
 import de.anomic.index.indexDocumentMetadata;
-import de.anomic.kelondro.kelondroDate;
+import de.anomic.kelondro.coding.DateFormatter;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -125,7 +125,7 @@ public class icapd implements serverHandler, Cloneable {
         final icapHeader newHeaders = new icapHeader();
         
         newHeaders.put(icapHeader.SERVER,"YaCy/" + sb.getConfig("vString",""));
-        newHeaders.put(icapHeader.DATE, kelondroDate.formatRFC1123(new Date()));
+        newHeaders.put(icapHeader.DATE, DateFormatter.formatRFC1123(new Date()));
         newHeaders.put(icapHeader.ISTAG, "\"" + sb.getConfig("vString","") + "\"");
         
         return newHeaders;

@@ -56,9 +56,9 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import de.anomic.index.indexWord;
-import de.anomic.kelondro.kelondroBase64Order;
-import de.anomic.kelondro.kelondroDigest;
-import de.anomic.kelondro.kelondroDate;
+import de.anomic.kelondro.coding.Base64Order;
+import de.anomic.kelondro.coding.DateFormatter;
+import de.anomic.kelondro.coding.Digest;
 import de.anomic.net.natLib;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverDomains;
@@ -212,7 +212,7 @@ public class yacySeed implements Cloneable {
         this.dna.put(yacySeed.IPTYPE, "&empty;");
 
         // settings that can only be computed by visiting peer
-        this.dna.put(yacySeed.LASTSEEN, kelondroDate.formatShortSecond(new Date(System.currentTimeMillis() - kelondroDate.UTCDiff()))); // for last-seen date
+        this.dna.put(yacySeed.LASTSEEN, DateFormatter.formatShortSecond(new Date(System.currentTimeMillis() - DateFormatter.UTCDiff()))); // for last-seen date
         this.dna.put(yacySeed.USPEED, yacySeed.ZERO);  // the computated uplink speed of the peer
 
         this.dna.put(yacySeed.CRWCNT, yacySeed.ZERO);
@@ -406,7 +406,7 @@ public class yacySeed implements Cloneable {
      * @return the octal representation of the given base64 hash
      */
     public static String b64Hash2octalHash(final String b64Hash) {
-        return kelondroDigest.encodeOctal(kelondroBase64Order.enhancedCoder.decode(b64Hash, "de.anomic.yacy.yacySeed.b64Hash2octalHash()"));
+        return Digest.encodeOctal(Base64Order.enhancedCoder.decode(b64Hash, "de.anomic.yacy.yacySeed.b64Hash2octalHash()"));
     }
 
     /**
@@ -416,7 +416,7 @@ public class yacySeed implements Cloneable {
      */
     public static String b64Hash2hexHash(final String b64Hash) {
         // the hash string represents 12 * 6 bit = 72 bits. This is too much for a long integer.
-        return kelondroDigest.encodeHex(kelondroBase64Order.enhancedCoder.decode(b64Hash, "de.anomic.yacy.yacySeed.b64Hash2hexHash()"));
+        return Digest.encodeHex(Base64Order.enhancedCoder.decode(b64Hash, "de.anomic.yacy.yacySeed.b64Hash2hexHash()"));
     }
     
     /**
@@ -424,7 +424,7 @@ public class yacySeed implements Cloneable {
      * @return the base64 representation of the given hex hash
      */
     public static String hexHash2b64Hash(final String hexHash) {
-        return kelondroBase64Order.enhancedCoder.encode(kelondroDigest.decodeHex(hexHash));
+        return Base64Order.enhancedCoder.encode(Digest.decodeHex(hexHash));
     }
 
     /**
@@ -434,7 +434,7 @@ public class yacySeed implements Cloneable {
      */
     public static byte[] b64Hash2b256Hash(final String b64Hash) {
         assert b64Hash.length() == 12;
-        return kelondroBase64Order.enhancedCoder.decode(b64Hash, "de.anomic.yacy.yacySeed.b64Hash2b256Hash()");
+        return Base64Order.enhancedCoder.decode(b64Hash, "de.anomic.yacy.yacySeed.b64Hash2b256Hash()");
     }
     
     /**
@@ -443,7 +443,7 @@ public class yacySeed implements Cloneable {
      */
     public static String b256Hash2b64Hash(final byte[] b256Hash) {
         assert b256Hash.length == 9;
-        return kelondroBase64Order.enhancedCoder.encode(b256Hash);
+        return Base64Order.enhancedCoder.encode(b256Hash);
     }
     
     /**
@@ -516,7 +516,7 @@ public class yacySeed implements Cloneable {
         String utc = this.dna.get(yacySeed.UTC);
         if (utc == null) { utc = "+0130"; }
         try {
-            return kelondroDate.UTCDiff(utc);
+            return DateFormatter.UTCDiff(utc);
         } catch (final IllegalArgumentException e) {
             return 0;
         }
@@ -527,7 +527,7 @@ public class yacySeed implements Cloneable {
         // because java thinks it must apply the UTC offset to the current time,
         // to create a string that looks like our current time, it adds the local UTC offset to the
         // time. To create a corrected UTC Date string, we first subtract the local UTC offset.
-        dna.put(yacySeed.LASTSEEN, kelondroDate.formatShortSecond(new Date(System.currentTimeMillis() - kelondroDate.UTCDiff())) );
+        dna.put(yacySeed.LASTSEEN, DateFormatter.formatShortSecond(new Date(System.currentTimeMillis() - DateFormatter.UTCDiff())) );
     }
     
     /**
@@ -535,18 +535,18 @@ public class yacySeed implements Cloneable {
      */
     public final long getLastSeenUTC() {
         try {
-            final long t = kelondroDate.parseShortSecond(get(yacySeed.LASTSEEN, "20040101000000")).getTime();
+            final long t = DateFormatter.parseShortSecond(get(yacySeed.LASTSEEN, "20040101000000")).getTime();
             // getTime creates a UTC time number. But in this case java thinks, that the given
             // time string is a local time, which has a local UTC offset applied.
             // Therefore java subtracts the local UTC offset, to get a UTC number.
             // But the given time string is already in UTC time, so the subtraction
             // of the local UTC offset is wrong. We correct this here by adding the local UTC
             // offset again.
-            return t + kelondroDate.UTCDiff();
+            return t + DateFormatter.UTCDiff();
         } catch (final java.text.ParseException e) { // in case of an error make seed look old!!!
-            return System.currentTimeMillis() - kelondroDate.dayMillis;
+            return System.currentTimeMillis() - DateFormatter.dayMillis;
         } catch (final java.lang.NumberFormatException e) {
-            return System.currentTimeMillis() - kelondroDate.dayMillis;
+            return System.currentTimeMillis() - DateFormatter.dayMillis;
         }
     }
     
@@ -562,8 +562,8 @@ public class yacySeed implements Cloneable {
     /** @return the age of the seed in number of days */
     public final int getAge() {
         try {
-            final long t = kelondroDate.parseShortSecond(get(yacySeed.BDATE, "20040101000000")).getTime();
-            return (int) ((System.currentTimeMillis() - (t - getUTCDiff() + kelondroDate.UTCDiff())) / 1000 / 60 / 60 / 24);
+            final long t = DateFormatter.parseShortSecond(get(yacySeed.BDATE, "20040101000000")).getTime();
+            return (int) ((System.currentTimeMillis() - (t - getUTCDiff() + DateFormatter.UTCDiff())) / 1000 / 60 / 60 / 24);
         } catch (final java.text.ParseException e) {
             return -1;
         } catch (final java.lang.NumberFormatException e) {
@@ -688,7 +688,7 @@ public class yacySeed implements Cloneable {
      */
     private final static long dhtPosition(final String wordHash) {
         // normalized to Long.MAX_VALUE
-        long c = kelondroBase64Order.enhancedCoder.cardinal(wordHash.getBytes());
+        long c = Base64Order.enhancedCoder.cardinal(wordHash.getBytes());
         assert c != Long.MAX_VALUE;
         if (c == Long.MAX_VALUE) return Long.MAX_VALUE - 1;
         return c;
@@ -835,13 +835,13 @@ public class yacySeed implements Cloneable {
         assert t >= 0.0 : "t = " + t;
         assert t < 1.0 : "t = " + t;
         
-        return new String(kelondroBase64Order.enhancedCoder.uncardinal((long) (((double) Long.MAX_VALUE) * t))) + "AA";
+        return new String(Base64Order.enhancedCoder.uncardinal((long) (((double) Long.MAX_VALUE) * t))) + "AA";
     }
     
     public static String positionToHash(final long l) {
         // transform the position of a peer position into a close peer hash
        
-        return new String(kelondroBase64Order.enhancedCoder.uncardinal(l)) + "AA";
+        return new String(Base64Order.enhancedCoder.uncardinal(l)) + "AA";
     }
     
     public static yacySeed genLocalSeed(final yacySeedDB db) {
@@ -860,9 +860,9 @@ public class yacySeed implements Cloneable {
         // now calculate other information about the host
         newSeed.dna.put(yacySeed.NAME, (name) == null ? "anonymous" : name);
         newSeed.dna.put(yacySeed.PORT, Integer.toString((port <= 0) ? 8080 : port));
-        newSeed.dna.put(yacySeed.BDATE, kelondroDate.formatShortSecond(new Date(System.currentTimeMillis() - kelondroDate.UTCDiff())) );
+        newSeed.dna.put(yacySeed.BDATE, DateFormatter.formatShortSecond(new Date(System.currentTimeMillis() - DateFormatter.UTCDiff())) );
         newSeed.dna.put(yacySeed.LASTSEEN, newSeed.dna.get(yacySeed.BDATE)); // just as initial setting
-        newSeed.dna.put(yacySeed.UTC, kelondroDate.UTCDiffString());
+        newSeed.dna.put(yacySeed.UTC, DateFormatter.UTCDiffString());
         newSeed.dna.put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN);
 
         return newSeed;
@@ -872,8 +872,8 @@ public class yacySeed implements Cloneable {
 
     public static String randomHash() {
         final String hash =
-            kelondroBase64Order.enhancedCoder.encode(kelondroDigest.encodeMD5Raw(Long.toString(random.nextLong()))).substring(0, 6) +
-            kelondroBase64Order.enhancedCoder.encode(kelondroDigest.encodeMD5Raw(Long.toString(random.nextLong()))).substring(0, 6);
+            Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(Long.toString(random.nextLong()))).substring(0, 6) +
+            Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(Long.toString(random.nextLong()))).substring(0, 6);
         return hash;
     }
 

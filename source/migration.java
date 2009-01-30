@@ -24,8 +24,8 @@ import java.util.List;
 
 import de.anomic.data.listManager;
 import de.anomic.http.httpd;
-import de.anomic.kelondro.kelondroBase64Order;
-import de.anomic.kelondro.kelondroDigest;
+import de.anomic.kelondro.coding.Base64Order;
+import de.anomic.kelondro.coding.Digest;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.server.serverFileUtils;
@@ -186,33 +186,33 @@ public class migration {
         // set preset accounts/passwords
         String acc;
         if ((acc = sb.getConfig("serverAccount", "")).length() > 0) {
-            sb.setConfig("serverAccountBase64MD5", kelondroDigest.encodeMD5Hex(kelondroBase64Order.standardCoder.encodeString(acc)));
+            sb.setConfig("serverAccountBase64MD5", Digest.encodeMD5Hex(Base64Order.standardCoder.encodeString(acc)));
             sb.setConfig("serverAccount", "");
         }
         if ((acc = sb.getConfig("adminAccount", "")).length() > 0) {
-            sb.setConfig(httpd.ADMIN_ACCOUNT_B64MD5, kelondroDigest.encodeMD5Hex(kelondroBase64Order.standardCoder.encodeString(acc)));
+            sb.setConfig(httpd.ADMIN_ACCOUNT_B64MD5, Digest.encodeMD5Hex(Base64Order.standardCoder.encodeString(acc)));
             sb.setConfig("adminAccount", "");
         }
     
         // fix unsafe old passwords
         if ((acc = sb.getConfig("proxyAccountBase64", "")).length() > 0) {
-            sb.setConfig("proxyAccountBase64MD5", kelondroDigest.encodeMD5Hex(acc));
+            sb.setConfig("proxyAccountBase64MD5", Digest.encodeMD5Hex(acc));
             sb.setConfig("proxyAccountBase64", "");
         }
         if ((acc = sb.getConfig("serverAccountBase64", "")).length() > 0) {
-            sb.setConfig("serverAccountBase64MD5", kelondroDigest.encodeMD5Hex(acc));
+            sb.setConfig("serverAccountBase64MD5", Digest.encodeMD5Hex(acc));
             sb.setConfig("serverAccountBase64", "");
         }
         if ((acc = sb.getConfig("adminAccountBase64", "")).length() > 0) {
-            sb.setConfig(httpd.ADMIN_ACCOUNT_B64MD5, kelondroDigest.encodeMD5Hex(acc));
+            sb.setConfig(httpd.ADMIN_ACCOUNT_B64MD5, Digest.encodeMD5Hex(acc));
             sb.setConfig("adminAccountBase64", "");
         }
         if ((acc = sb.getConfig("uploadAccountBase64", "")).length() > 0) {
-            sb.setConfig("uploadAccountBase64MD5", kelondroDigest.encodeMD5Hex(acc));
+            sb.setConfig("uploadAccountBase64MD5", Digest.encodeMD5Hex(acc));
             sb.setConfig("uploadAccountBase64", "");
         }
         if ((acc = sb.getConfig("downloadAccountBase64", "")).length() > 0) {
-            sb.setConfig("downloadAccountBase64MD5", kelondroDigest.encodeMD5Hex(acc));
+            sb.setConfig("downloadAccountBase64MD5", Digest.encodeMD5Hex(acc));
             sb.setConfig("downloadAccountBase64", "");
         }
     }

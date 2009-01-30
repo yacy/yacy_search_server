@@ -26,41 +26,41 @@
 
 package de.anomic.index;
 
-import de.anomic.kelondro.kelondroBase64Order;
-import de.anomic.kelondro.kelondroBitfield;
-import de.anomic.kelondro.kelondroColumn;
-import de.anomic.kelondro.kelondroMicroDate;
-import de.anomic.kelondro.kelondroRow;
-import de.anomic.kelondro.kelondroRow.Entry;
+import de.anomic.kelondro.coding.Base64Order;
+import de.anomic.kelondro.coding.Bitfield;
+import de.anomic.kelondro.coding.MicroDate;
+import de.anomic.kelondro.index.Column;
+import de.anomic.kelondro.index.Row;
+import de.anomic.kelondro.index.Row.Entry;
 import de.anomic.yacy.yacySeedDB;
 
 public final class indexRWIRowEntry implements indexRWIEntry, Cloneable {
 
     // this object stores attributes to URL references inside RWI collections
 
-    public static final kelondroRow urlEntryRow = new kelondroRow(new kelondroColumn[]{
-            new kelondroColumn("h", kelondroColumn.celltype_string,    kelondroColumn.encoder_bytes, yacySeedDB.commonHashLength, "urlhash"),
-            new kelondroColumn("a", kelondroColumn.celltype_cardinal,  kelondroColumn.encoder_b256,  2, "lastModified"),
-            new kelondroColumn("s", kelondroColumn.celltype_cardinal,  kelondroColumn.encoder_b256,  2, "freshUntil"),
-            new kelondroColumn("u", kelondroColumn.celltype_cardinal,  kelondroColumn.encoder_b256,  1, "wordsInTitle"),
-            new kelondroColumn("w", kelondroColumn.celltype_cardinal,  kelondroColumn.encoder_b256,  2, "wordsInText"),
-            new kelondroColumn("p", kelondroColumn.celltype_cardinal,  kelondroColumn.encoder_b256,  2, "phrasesInText"),
-            new kelondroColumn("d", kelondroColumn.celltype_binary,    kelondroColumn.encoder_bytes, 1, "doctype"),
-            new kelondroColumn("l", kelondroColumn.celltype_string,    kelondroColumn.encoder_bytes, 2, "language"),
-            new kelondroColumn("x", kelondroColumn.celltype_cardinal,  kelondroColumn.encoder_b256,  1, "llocal"),
-            new kelondroColumn("y", kelondroColumn.celltype_cardinal,  kelondroColumn.encoder_b256,  1, "lother"),
-            new kelondroColumn("m", kelondroColumn.celltype_cardinal,  kelondroColumn.encoder_b256,  1, "urlLength"),
-            new kelondroColumn("n", kelondroColumn.celltype_cardinal,  kelondroColumn.encoder_b256,  1, "urlComps"),
-            new kelondroColumn("g", kelondroColumn.celltype_binary,    kelondroColumn.encoder_bytes, 1, "typeofword"),
-            new kelondroColumn("z", kelondroColumn.celltype_bitfield,  kelondroColumn.encoder_bytes, 4, "flags"),
-            new kelondroColumn("c", kelondroColumn.celltype_cardinal,  kelondroColumn.encoder_b256,  1, "hitcount"),
-            new kelondroColumn("t", kelondroColumn.celltype_cardinal,  kelondroColumn.encoder_b256,  2, "posintext"),
-            new kelondroColumn("r", kelondroColumn.celltype_cardinal,  kelondroColumn.encoder_b256,  1, "posinphrase"),
-            new kelondroColumn("o", kelondroColumn.celltype_cardinal,  kelondroColumn.encoder_b256,  1, "posofphrase"),
-            new kelondroColumn("i", kelondroColumn.celltype_cardinal,  kelondroColumn.encoder_b256,  1, "worddistance"),
-            new kelondroColumn("k", kelondroColumn.celltype_cardinal,  kelondroColumn.encoder_b256,  1, "reserve")
+    public static final Row urlEntryRow = new Row(new Column[]{
+            new Column("h", Column.celltype_string,    Column.encoder_bytes, yacySeedDB.commonHashLength, "urlhash"),
+            new Column("a", Column.celltype_cardinal,  Column.encoder_b256,  2, "lastModified"),
+            new Column("s", Column.celltype_cardinal,  Column.encoder_b256,  2, "freshUntil"),
+            new Column("u", Column.celltype_cardinal,  Column.encoder_b256,  1, "wordsInTitle"),
+            new Column("w", Column.celltype_cardinal,  Column.encoder_b256,  2, "wordsInText"),
+            new Column("p", Column.celltype_cardinal,  Column.encoder_b256,  2, "phrasesInText"),
+            new Column("d", Column.celltype_binary,    Column.encoder_bytes, 1, "doctype"),
+            new Column("l", Column.celltype_string,    Column.encoder_bytes, 2, "language"),
+            new Column("x", Column.celltype_cardinal,  Column.encoder_b256,  1, "llocal"),
+            new Column("y", Column.celltype_cardinal,  Column.encoder_b256,  1, "lother"),
+            new Column("m", Column.celltype_cardinal,  Column.encoder_b256,  1, "urlLength"),
+            new Column("n", Column.celltype_cardinal,  Column.encoder_b256,  1, "urlComps"),
+            new Column("g", Column.celltype_binary,    Column.encoder_bytes, 1, "typeofword"),
+            new Column("z", Column.celltype_bitfield,  Column.encoder_bytes, 4, "flags"),
+            new Column("c", Column.celltype_cardinal,  Column.encoder_b256,  1, "hitcount"),
+            new Column("t", Column.celltype_cardinal,  Column.encoder_b256,  2, "posintext"),
+            new Column("r", Column.celltype_cardinal,  Column.encoder_b256,  1, "posinphrase"),
+            new Column("o", Column.celltype_cardinal,  Column.encoder_b256,  1, "posofphrase"),
+            new Column("i", Column.celltype_cardinal,  Column.encoder_b256,  1, "worddistance"),
+            new Column("k", Column.celltype_cardinal,  Column.encoder_b256,  1, "reserve")
     },
-    kelondroBase64Order.enhancedCoder,
+    Base64Order.enhancedCoder,
     0);
     // available chars: b,e,j,q
     
@@ -88,7 +88,7 @@ public final class indexRWIRowEntry implements indexRWIEntry, Cloneable {
     private static final int col_reserve1      = 18; // i  1 reserve1
     private static final int col_reserve2      = 19; // k  1 reserve2
 
-    private final kelondroRow.Entry entry;
+    private final Row.Entry entry;
     
     public indexRWIRowEntry(final String  urlHash,
             final int      urlLength,     // byte-length of complete URL
@@ -106,14 +106,14 @@ public final class indexRWIRowEntry implements indexRWIEntry, Cloneable {
             final char     doctype,       // type of document
             final int      outlinksSame,  // outlinks to same domain
             final int      outlinksOther, // outlinks to other domain
-            final kelondroBitfield flags  // attributes to the url and to the word according the url
+            final Bitfield flags  // attributes to the url and to the word according the url
     ) {
 
         assert (urlHash.length() == 12) : "urlhash = " + urlHash;
         if ((language == null) || (language.length() != urlEntryRow.width(col_language))) language = "uk";
         this.entry = urlEntryRow.newEntry();
-        final int mddlm = kelondroMicroDate.microDateDays(lastmodified);
-        final int mddct = kelondroMicroDate.microDateDays(updatetime);
+        final int mddlm = MicroDate.microDateDays(lastmodified);
+        final int mddct = MicroDate.microDateDays(updatetime);
         this.entry.setCol(col_urlhash, urlHash, null);
         this.entry.setCol(col_lastModified, mddlm);
         this.entry.setCol(col_freshUntil, Math.max(0, mddlm + (mddct - mddlm) * 2)); // TTL computation
@@ -153,7 +153,7 @@ public final class indexRWIRowEntry implements indexRWIEntry, Cloneable {
         this.entry = urlEntryRow.newEntry(row, offset, clone);
     }
     
-    public indexRWIRowEntry(final kelondroRow.Entry rentry) {
+    public indexRWIRowEntry(final Row.Entry rentry) {
         // FIXME: see if cloning is necessary
         this.entry = rentry;
     }
@@ -181,11 +181,11 @@ public final class indexRWIRowEntry implements indexRWIEntry, Cloneable {
     }
 
     public long lastModified() {
-        return kelondroMicroDate.reverseMicroDateDays((int) this.entry.getColLong(col_lastModified));
+        return MicroDate.reverseMicroDateDays((int) this.entry.getColLong(col_lastModified));
     }
     
     public long freshUntil() {
-        return kelondroMicroDate.reverseMicroDateDays((int) this.entry.getColLong(col_freshUntil));
+        return MicroDate.reverseMicroDateDays((int) this.entry.getColLong(col_freshUntil));
     }
 
     public int hitcount() {
@@ -240,8 +240,8 @@ public final class indexRWIRowEntry implements indexRWIEntry, Cloneable {
         return (int) this.entry.getColLong(col_urlComps);
     }
     
-    public kelondroBitfield flags() {
-        return new kelondroBitfield(this.entry.getColBytes(col_flags));
+    public Bitfield flags() {
+        return new Bitfield(this.entry.getColBytes(col_flags));
     }
     
     public double termFrequency() {

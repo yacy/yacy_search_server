@@ -33,11 +33,11 @@ import java.util.Iterator;
 
 import de.anomic.http.httpRequestHeader;
 import de.anomic.index.indexReferenceBlacklist;
-import de.anomic.kelondro.kelondroMScoreCluster;
-import de.anomic.kelondro.kelondroNaturalOrder;
-import de.anomic.kelondro.kelondroRow;
-import de.anomic.kelondro.kelondroDate;
-import de.anomic.kelondro.kelondroRow.Entry;
+import de.anomic.kelondro.coding.DateFormatter;
+import de.anomic.kelondro.coding.NaturalOrder;
+import de.anomic.kelondro.index.Row;
+import de.anomic.kelondro.index.Row.Entry;
+import de.anomic.kelondro.tools.ScoreCluster;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -103,8 +103,8 @@ public class Supporter {
             accumulateVotes(sb, negativeHashes, positiveHashes, yacyNewsPool.INCOMING_DB);
             //accumulateVotes(negativeHashes, positiveHashes, yacyNewsPool.OUTGOING_DB);
             //accumulateVotes(negativeHashes, positiveHashes, yacyNewsPool.PUBLISHED_DB);
-            final kelondroMScoreCluster<String> ranking = new kelondroMScoreCluster<String>(); // score cluster for url hashes
-            final kelondroRow rowdef = new kelondroRow("String url-255, String title-120, String description-120, String refid-" + (kelondroDate.PATTERN_SHORT_SECOND.length() + 12), kelondroNaturalOrder.naturalOrder, 0);
+            final ScoreCluster<String> ranking = new ScoreCluster<String>(); // score cluster for url hashes
+            final Row rowdef = new Row("String url-255, String title-120, String description-120, String refid-" + (DateFormatter.PATTERN_SHORT_SECOND.length() + 12), NaturalOrder.naturalOrder, 0);
             final HashMap<String, Entry> Supporter = new HashMap<String, Entry>(); // a mapping from an url hash to a kelondroRow.Entry with display properties
             accumulateSupporter(sb, Supporter, ranking, rowdef, negativeHashes, positiveHashes, yacyNewsPool.INCOMING_DB);
             //accumulateSupporter(Supporter, ranking, rowdef, negativeHashes, positiveHashes, yacyNewsPool.OUTGOING_DB);
@@ -113,7 +113,7 @@ public class Supporter {
             // read out surftipp array and create property entries
             final Iterator<String> k = ranking.scores(false);
             int i = 0;
-            kelondroRow.Entry row;
+            Row.Entry row;
             String url, urlhash, refid, title, description;
             boolean voted;
             while (k.hasNext()) {
@@ -196,14 +196,14 @@ public class Supporter {
     
     private static void accumulateSupporter(
             final plasmaSwitchboard sb,
-            final HashMap<String, Entry> Supporter, final kelondroMScoreCluster<String> ranking, final kelondroRow rowdef,
+            final HashMap<String, Entry> Supporter, final ScoreCluster<String> ranking, final Row rowdef,
             final HashMap<String, Integer> negativeHashes, final HashMap<String, Integer> positiveHashes, final int dbtype) {
         final int maxCount = Math.min(1000, sb.webIndex.newsPool.size(dbtype));
         yacyNewsRecord record;
         final Iterator<yacyNewsRecord> recordIterator = sb.webIndex.newsPool.recordIterator(dbtype, true);
         int j = 0;
         String url = "", urlhash;
-        kelondroRow.Entry entry;
+        Row.Entry entry;
         int score = 0;
         Integer vote;
         yacySeed seed;

@@ -26,10 +26,10 @@
 
 package de.anomic.index;
 
-import de.anomic.kelondro.kelondroAbstractOrder;
-import de.anomic.kelondro.kelondroOrder;
+import de.anomic.kelondro.coding.AbstractOrder;
+import de.anomic.kelondro.coding.kelondroOrder;
 
-public class indexContainerOrder extends kelondroAbstractOrder<indexContainer> implements kelondroOrder<indexContainer>, Cloneable {
+public class indexContainerOrder extends AbstractOrder<indexContainer> implements kelondroOrder<indexContainer>, Cloneable {
 
     private final kelondroOrder<byte[]> embeddedOrder;
 

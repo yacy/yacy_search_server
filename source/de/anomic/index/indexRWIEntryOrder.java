@@ -31,8 +31,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import de.anomic.kelondro.kelondroBitfield;
-import de.anomic.kelondro.kelondroMScoreCluster;
+import de.anomic.kelondro.coding.Bitfield;
+import de.anomic.kelondro.tools.ScoreCluster;
 import de.anomic.plasma.plasmaCondenser;
 import de.anomic.plasma.plasmaSearchRankingProcess;
 import de.anomic.plasma.plasmaSearchRankingProfile;
@@ -42,7 +42,7 @@ import de.anomic.yacy.yacyURL;
 public class indexRWIEntryOrder {
     private indexRWIVarEntry min, max;
     private final plasmaSearchRankingProfile ranking;
-    private final kelondroMScoreCluster<String> doms; // collected for "authority" heuristic 
+    private final ScoreCluster<String> doms; // collected for "authority" heuristic 
     private int maxdomcount;
     private String language;
     
@@ -50,7 +50,7 @@ public class indexRWIEntryOrder {
         this.min = null;
         this.max = null;
         this.ranking = profile;
-        this.doms = new kelondroMScoreCluster<String>();
+        this.doms = new ScoreCluster<String>();
         this.maxdomcount = 0;
         this.language = language;
     }
@@ -115,7 +115,7 @@ public class indexRWIEntryOrder {
     public long cardinal(final indexRWIVarEntry t) {
         //return Long.MAX_VALUE - preRanking(ranking, iEntry, this.entryMin, this.entryMax, this.searchWords);
         // the normalizedEntry must be a normalized indexEntry
-        final kelondroBitfield flags = t.flags();
+        final Bitfield flags = t.flags();
         final long tf = ((max.termFrequency() == min.termFrequency()) ? 0 : (((int)(((t.termFrequency()-min.termFrequency())*256.0)/(max.termFrequency() - min.termFrequency())))) << ranking.coeff_termfrequency);
         //System.out.println("tf(" + t.urlHash + ") = " + Math.floor(1000 * t.termFrequency()) + ", min = " + Math.floor(1000 * min.termFrequency()) + ", max = " + Math.floor(1000 * max.termFrequency()) + ", tf-normed = " + tf);
         final long r =

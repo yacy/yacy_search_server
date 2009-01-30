@@ -30,7 +30,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import de.anomic.http.httpRequestHeader;
-import de.anomic.kelondro.kelondroDate;
+import de.anomic.kelondro.coding.DateFormatter;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -115,10 +115,10 @@ public class News {
                     final String category = record.category();
                     prop.put("table_list_" + i + "_id", record.id());
                     prop.putHTML("table_list_" + i + "_ori", (seed == null) ? record.originator() : seed.getName());
-                    prop.put("table_list_" + i + "_cre", kelondroDate.formatShortSecond(record.created()));
-                    prop.put("table_list_" + i + "_crerfcdate", kelondroDate.formatRFC1123(record.created()));
+                    prop.put("table_list_" + i + "_cre", DateFormatter.formatShortSecond(record.created()));
+                    prop.put("table_list_" + i + "_crerfcdate", DateFormatter.formatRFC1123(record.created()));
                     prop.putHTML("table_list_" + i + "_cat", category);
-                    prop.put("table_list_" + i + "_rec", (record.received() == null) ? "-" : kelondroDate.formatShortSecond(record.received()));
+                    prop.put("table_list_" + i + "_rec", (record.received() == null) ? "-" : DateFormatter.formatShortSecond(record.received()));
                     prop.put("table_list_" + i + "_dis", record.distributed());
                     
                     final Map<String, String> attributeMap = record.attributes();

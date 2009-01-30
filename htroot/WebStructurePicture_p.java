@@ -31,7 +31,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import de.anomic.http.httpRequestHeader;
-import de.anomic.kelondro.kelondroBase64Order;
+import de.anomic.kelondro.coding.Base64Order;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaWebStructure;
 import de.anomic.server.serverObjects;
@@ -145,7 +145,7 @@ public class WebStructurePicture_p {
             targets.add(new String[] {targethash, targethost});
             if (graph.getPoint(targethost) != null) continue;
             // set a new point. It is placed on a circle around the host point
-            final double angle = kelondroBase64Order.enhancedCoder.cardinal((targethash + "____").getBytes()) / maxlongd * 2 * Math.PI;
+            final double angle = Base64Order.enhancedCoder.cardinal((targethash + "____").getBytes()) / maxlongd * 2 * Math.PI;
             //System.out.println("ANGLE = " + angle);
             rr = radius * 0.25 * (1 - targetrefs / (double) maxtargetrefs);
             re = radius * 0.5 * (thisrefs / (double) maxthisrefs);

@@ -38,7 +38,7 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import de.anomic.kelondro.kelondroByteBuffer;
+import de.anomic.kelondro.tools.ByteBuffer;
 import de.anomic.server.logging.serverLog;
 
 public class RSSReader extends DefaultHandler {
@@ -95,7 +95,7 @@ public class RSSReader extends DefaultHandler {
             serverLog.logWarning("rssReader", "response=" + new String(a));
             return null;
         }
-        if (!kelondroByteBuffer.equals(a, "<?xml".getBytes())) {
+        if (!ByteBuffer.equals(a, "<?xml".getBytes())) {
             serverLog.logWarning("rssReader", "response does not contain valid xml");
             return null;
         }

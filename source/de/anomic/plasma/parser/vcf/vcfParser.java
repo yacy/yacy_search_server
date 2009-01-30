@@ -37,7 +37,7 @@ import java.util.LinkedList;
 import de.anomic.crawler.HTTPLoader;
 import de.anomic.http.HttpClient;
 import de.anomic.http.httpRequestHeader;
-import de.anomic.kelondro.kelondroBase64Order;
+import de.anomic.kelondro.coding.Base64Order;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.parser.AbstractParser;
 import de.anomic.plasma.parser.Parser;
@@ -150,7 +150,7 @@ public class vcfParser extends AbstractParser implements Parser {
                                         if (!useLastLine) value += line.trim();
                                         else break;
                                     } while (line.length()!=0);
-                                    value = kelondroBase64Order.standardCoder.decodeString(value, "de.anomic.plasma.parser.vcf.vcfParser.parse(...)");
+                                    value = Base64Order.standardCoder.decodeString(value, "de.anomic.plasma.parser.vcf.vcfParser.parse(...)");
                                 }  
                             } catch (final Exception ey) {
                                 // Encoding error: This could occure e.g. if the base64 doesn't 

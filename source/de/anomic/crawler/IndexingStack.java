@@ -36,11 +36,11 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import de.anomic.http.httpResponseHeader;
 import de.anomic.index.indexURLReference;
-import de.anomic.kelondro.kelondroBase64Order;
-import de.anomic.kelondro.kelondroNaturalOrder;
-import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroStack;
-import de.anomic.kelondro.kelondroDate;
+import de.anomic.kelondro.coding.Base64Order;
+import de.anomic.kelondro.coding.DateFormatter;
+import de.anomic.kelondro.coding.NaturalOrder;
+import de.anomic.kelondro.index.Row;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.plasma.plasmaWordIndex;
@@ -66,7 +66,7 @@ public class IndexingStack {
         initQueueStack();
     }
     
-    public static final kelondroRow rowdef = new kelondroRow(
+    public static final Row rowdef = new Row(
             "String url-256, " +                                       // the url
             "String refhash-" + yacySeedDB.commonHashLength + ", " +   // the url's referrer hash
             "Cardinal modifiedsince-11 {b64e}, " +                     // from ifModifiedSince
@@ -75,7 +75,7 @@ public class IndexingStack {
             "Cardinal depth-2 {b64e}, " +                              // the prefetch depth so far, starts at 0
             "String profile-" + yacySeedDB.commonHashLength + ", " +   // the name of the prefetch profile handle
             "String urldescr-80",
-            kelondroNaturalOrder.naturalOrder,
+            NaturalOrder.naturalOrder,
             0);
     
     private void initQueueStack() {
@@ -99,10 +99,10 @@ public class IndexingStack {
         sbQueueStack.push(sbQueueStack.row().newEntry(new byte[][]{
             entry.url.toString().getBytes(),
             (entry.referrerHash == null) ? "".getBytes() : entry.referrerHash.getBytes(),
-            kelondroBase64Order.enhancedCoder.encodeLong((entry.ifModifiedSince == null) ? 0 : entry.ifModifiedSince.getTime(), 11).getBytes(),
+            Base64Order.enhancedCoder.encodeLong((entry.ifModifiedSince == null) ? 0 : entry.ifModifiedSince.getTime(), 11).getBytes(),
             new byte[]{entry.flags},
             (entry.initiator == null) ? "".getBytes() : entry.initiator.getBytes(),
-            kelondroBase64Order.enhancedCoder.encodeLong(entry.depth, rowdef.width(5)).getBytes(),
+            Base64Order.enhancedCoder.encodeLong(entry.depth, rowdef.width(5)).getBytes(),
             (entry.profileHandle == null) ? "".getBytes() : entry.profileHandle.getBytes(),
             (entry.anchorName == null) ? "-".getBytes("UTF-8") : entry.anchorName.getBytes("UTF-8")
         }));
@@ -110,14 +110,14 @@ public class IndexingStack {
 
     public synchronized QueueEntry pop() throws IOException {
         if (sbQueueStack.size() == 0) return null;
-        final kelondroRow.Entry b = sbQueueStack.pot();
+        final Row.Entry b = sbQueueStack.pot();
         if (b == null) return null;
         return new QueueEntry(b);
     }
 
     public synchronized QueueEntry remove(final String urlHash) {
-        final Iterator<kelondroRow.Entry> i = sbQueueStack.stackIterator(true);
-        kelondroRow.Entry rowentry;
+        final Iterator<Row.Entry> i = sbQueueStack.stackIterator(true);
+        Row.Entry rowentry;
         QueueEntry entry;
         while (i.hasNext()) {
             rowentry = i.next();
@@ -158,7 +158,7 @@ public class IndexingStack {
 
     public class entryIterator implements Iterator<QueueEntry> {
 
-        Iterator<kelondroRow.Entry> rows;
+        Iterator<Row.Entry> rows;
         
         public entryIterator(final boolean up) {
             rows = sbQueueStack.stackIterator(up);
@@ -240,7 +240,7 @@ public class IndexingStack {
             this.status = QUEUE_STATE_FRESH;
         }
 
-        public QueueEntry(final kelondroRow.Entry row) {
+        public QueueEntry(final Row.Entry row) {
             final long ims = row.getColLong(2);
             final byte flags = row.getColByte(3);
             try {
@@ -263,7 +263,7 @@ public class IndexingStack {
         }
 
         public QueueEntry(final byte[][] row) throws IOException {
-            final long ims = (row[2] == null) ? 0 : kelondroBase64Order.enhancedCoder.decodeLong(new String(row[2], "UTF-8"));
+            final long ims = (row[2] == null) ? 0 : Base64Order.enhancedCoder.decodeLong(new String(row[2], "UTF-8"));
             final byte flags = (row[3] == null) ? 0 : row[3][0];
             try {
                 this.url = new yacyURL(new String(row[0], "UTF-8"), null);
@@ -274,7 +274,7 @@ public class IndexingStack {
             this.ifModifiedSince = (ims == 0) ? null : new Date(ims);
             this.flags = ((flags & 1) == 1) ? (byte) 1 : (byte) 0;
             this.initiator = (row[4] == null) ? null : new String(row[4], "UTF-8");
-            this.depth = (int) kelondroBase64Order.enhancedCoder.decodeLong(new String(row[5], "UTF-8"));
+            this.depth = (int) Base64Order.enhancedCoder.decodeLong(new String(row[5], "UTF-8"));
             this.profileHandle = new String(row[6], "UTF-8");
             this.anchorName = (row[7] == null) ? null : (new String(row[7], "UTF-8")).trim();
 
@@ -474,7 +474,7 @@ public class IndexingStack {
                     // parse date
                     Date d = responseHeader.lastModified();
                     if (d == null) {
-                        d = new Date(kelondroDate.correctedUTCTime());
+                        d = new Date(DateFormatter.correctedUTCTime());
                     }
                     // finally, we shall treat the cache as stale if the modification time is after the if-.. time
                     if (d.after(ifModifiedSince)) {
@@ -499,7 +499,7 @@ public class IndexingStack {
                 // sometimes, the expires date is set to the past to prevent that a page is cached
                 // we use that information to see if we should index it
                 final Date expires = responseHeader.expires();
-                if (expires != null && expires.before(new Date(kelondroDate.correctedUTCTime()))) {
+                if (expires != null && expires.before(new Date(DateFormatter.correctedUTCTime()))) {
                     return "Stale_(Expired)";
                 }
     
@@ -532,7 +532,7 @@ public class IndexingStack {
                         }
                         try {
                             final long ttl = 1000 * Long.parseLong(cacheControl.substring(8)); // milliseconds to live
-                            if (kelondroDate.correctedUTCTime() - date.getTime() > ttl) {
+                            if (DateFormatter.correctedUTCTime() - date.getTime() > ttl) {
                                 //System.out.println("***not indexed because cache-control");
                                 return "Stale_(expired_by_cache-control)";
                             }

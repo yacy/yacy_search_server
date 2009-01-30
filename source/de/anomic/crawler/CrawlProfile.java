@@ -33,12 +33,12 @@ import java.util.regex.Pattern;
 
 import de.anomic.kelondro.kelondroBLOB;
 import de.anomic.kelondro.kelondroBLOBHeap;
-import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroCloneableIterator;
-import de.anomic.kelondro.kelondroDigest;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMap;
-import de.anomic.kelondro.kelondroNaturalOrder;
+import de.anomic.kelondro.coding.Base64Order;
+import de.anomic.kelondro.coding.Digest;
+import de.anomic.kelondro.coding.NaturalOrder;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyURL;
 
@@ -66,7 +66,7 @@ public class CrawlProfile {
     public CrawlProfile(final File file) throws IOException {
         this.profileTableFile = file;
         profileTableFile.getParentFile().mkdirs();
-        final kelondroBLOB dyn = new kelondroBLOBHeap(profileTableFile, yacySeedDB.commonHashLength, kelondroNaturalOrder.naturalOrder, 1024 * 64);
+        final kelondroBLOB dyn = new kelondroBLOBHeap(profileTableFile, yacySeedDB.commonHashLength, NaturalOrder.naturalOrder, 1024 * 64);
         profileTable = new kelondroMap(dyn, 500);
     }
     
@@ -77,7 +77,7 @@ public class CrawlProfile {
         profileTableFile.getParentFile().mkdirs();
         kelondroBLOB dyn = null;
         try {
-            dyn = new kelondroBLOBHeap(profileTableFile, yacySeedDB.commonHashLength, kelondroNaturalOrder.naturalOrder, 1024 * 64);
+            dyn = new kelondroBLOBHeap(profileTableFile, yacySeedDB.commonHashLength, NaturalOrder.naturalOrder, 1024 * 64);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -295,7 +295,7 @@ public class CrawlProfile {
                      final boolean remoteIndexing,
                      final boolean xsstopw, final boolean xdstopw, final boolean xpstopw) {
             if (name == null || name.length() == 0) throw new NullPointerException("name must not be null");
-            final String handle = (startURL == null) ? kelondroBase64Order.enhancedCoder.encode(kelondroDigest.encodeMD5Raw(Long.toString(System.currentTimeMillis()))).substring(0, yacySeedDB.commonHashLength) : startURL.hash();
+            final String handle = (startURL == null) ? Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(Long.toString(System.currentTimeMillis()))).substring(0, yacySeedDB.commonHashLength) : startURL.hash();
             mem = new HashMap<String, String>();
             mem.put(HANDLE,           handle);
             mem.put(NAME,             name);

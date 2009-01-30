@@ -38,7 +38,7 @@ import de.anomic.htmlFilter.htmlFilterAbstractScraper;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterImageEntry;
 import de.anomic.htmlFilter.htmlFilterWriter;
-import de.anomic.kelondro.kelondroByteBuffer;
+import de.anomic.kelondro.tools.ByteBuffer;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.parser.AbstractParser;
 import de.anomic.plasma.parser.Parser;
@@ -81,7 +81,7 @@ public class rssParser extends AbstractParser implements Parser {
             final LinkedList<String> feedSections = new LinkedList<String>();
             final HashMap<yacyURL, String> anchors = new HashMap<yacyURL, String>();
             final HashMap<String, htmlFilterImageEntry> images  = new HashMap<String, htmlFilterImageEntry>();
-            final kelondroByteBuffer text = new kelondroByteBuffer();
+            final ByteBuffer text = new ByteBuffer();
             final serverCharBuffer authors = new serverCharBuffer();
             
             final RSSFeed feed = new RSSReader(source).getFeed();

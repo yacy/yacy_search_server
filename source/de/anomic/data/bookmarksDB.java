@@ -69,8 +69,8 @@ import de.anomic.kelondro.kelondroBLOBTree;
 import de.anomic.kelondro.kelondroCloneableIterator;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMap;
-import de.anomic.kelondro.kelondroNaturalOrder;
-import de.anomic.kelondro.kelondroDate;
+import de.anomic.kelondro.coding.DateFormatter;
+import de.anomic.kelondro.coding.NaturalOrder;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverBusyThread;
 import de.anomic.server.serverFileUtils;
@@ -112,17 +112,17 @@ public class bookmarksDB {
         tagCache=new HashMap<String, Tag>();
         bookmarksFile.getParentFile().mkdirs();
         //this.bookmarksTable = new kelondroMap(kelondroDyn.open(bookmarksFile, bufferkb * 1024, preloadTime, 12, 256, '_', true, false));
-        this.bookmarksTable = new kelondroMap(new kelondroBLOBTree(bookmarksFile, true, true, 12, 256, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 1000);
+        this.bookmarksTable = new kelondroMap(new kelondroBLOBTree(bookmarksFile, true, true, 12, 256, '_', NaturalOrder.naturalOrder, true, false, false), 1000);
 
         // tags
         tagsFile.getParentFile().mkdirs();
         final boolean tagsFileExisted = tagsFile.exists();
-        this.tagsTable = new kelondroMap(new kelondroBLOBTree(tagsFile, true, true, 12, 256, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 500);
+        this.tagsTable = new kelondroMap(new kelondroBLOBTree(tagsFile, true, true, 12, 256, '_', NaturalOrder.naturalOrder, true, false, false), 500);
         if (!tagsFileExisted) rebuildTags();
 
         // dates
         final boolean datesExisted = datesFile.exists();
-        this.datesTable = new kelondroMap(new kelondroBLOBTree(datesFile, true, true, 20, 256, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 500);
+        this.datesTable = new kelondroMap(new kelondroBLOBTree(datesFile, true, true, 20, 256, '_', NaturalOrder.naturalOrder, true, false, false), 500);
         if (!datesExisted) rebuildDates();
 
         // autoReCrawl
@@ -218,7 +218,7 @@ public class bookmarksDB {
 			long interTime = (System.currentTimeMillis()-bm.getTimeStamp())%schedule;
 			
 			Date date=new Date(bm.getTimeStamp());
-			serverLog.logInfo("BOOKMARKS", "autoReCrawl - checking schedule for: "+"["+kelondroDate.formatISO8601(date)+"] "+bm.getUrl());
+			serverLog.logInfo("BOOKMARKS", "autoReCrawl - checking schedule for: "+"["+DateFormatter.formatISO8601(date)+"] "+bm.getUrl());
 			
 			if (interTime >= 0 && interTime < sleepTime) {			
 				try {
@@ -873,7 +873,7 @@ public class bookmarksDB {
             	
             	Date parsedDate = null;
             	try {
-					parsedDate = kelondroDate.parseISO8601(time);
+					parsedDate = DateFormatter.parseISO8601(time);
 				} catch (final ParseException e) {
 					parsedDate = new Date();
 				}            	

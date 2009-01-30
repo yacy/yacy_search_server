@@ -30,16 +30,20 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 
+import de.anomic.kelondro.coding.NaturalOrder;
+import de.anomic.kelondro.index.Row;
+import de.anomic.kelondro.index.ObjectIndex;
+
 public class kelondroRelations {
 
     private final File baseDir;
-    private HashMap<String, kelondroIndex> relations;
+    private HashMap<String, ObjectIndex> relations;
     
     public kelondroRelations(final File location) {
         this.baseDir = location;
     }
     
-    private static kelondroRow rowdef(String filename) {
+    private static Row rowdef(String filename) {
         int p = filename.lastIndexOf('.');
         if (p >= 0) filename = filename.substring(0, p);
         p = filename.lastIndexOf('-');
@@ -52,13 +56,13 @@ public class kelondroRelations {
         return rowdef(keysize, payloadsize);
     }
     
-    private static kelondroRow rowdef(final int keysize, final int payloadsize) {
-        return new kelondroRow(
+    private static Row rowdef(final int keysize, final int payloadsize) {
+        return new Row(
                 "byte[] key-" + keysize + ", " +
                 "long time-8" + keysize + ", " +
                 "int ttl-4" + keysize + ", " +
                 "byte[] node-" + payloadsize,
-                kelondroNaturalOrder.naturalOrder, 0);
+                NaturalOrder.naturalOrder, 0);
     }
     
     private static String filename(final String tablename, final int keysize, final int payloadsize) {
@@ -67,7 +71,7 @@ public class kelondroRelations {
     
     public void declareRelation(final String name, final int keysize, final int payloadsize) {
         // try to get the relation from the relation-cache
-        final kelondroIndex relation = relations.get(name);
+        final ObjectIndex relation = relations.get(name);
         if (relation != null) return;
         // try to find the relation as stored on file
         final String[] list = baseDir.list();
@@ -75,29 +79,29 @@ public class kelondroRelations {
         for (int i = 0; i < list.length; i++) {
             if (list[i].startsWith(name)) {
                 if (!list[i].equals(targetfilename)) continue;
-                final kelondroRow row = rowdef(list[i]);
+                final Row row = rowdef(list[i]);
                 if (row.primaryKeyLength != keysize || row.column(1).cellwidth != payloadsize) continue; // a wrong table
-                final kelondroIndex table = new kelondroEcoTable(new File(baseDir, list[i]), row, kelondroEcoTable.tailCacheUsageAuto, 1024*1024, 0);
+                final ObjectIndex table = new kelondroEcoTable(new File(baseDir, list[i]), row, kelondroEcoTable.tailCacheUsageAuto, 1024*1024, 0);
                 relations.put(name, table);
                 return;
             }
         }
         // the relation does not exist, create it
-        final kelondroRow row = rowdef(keysize, payloadsize);
-        final kelondroIndex table = new kelondroEcoTable(new File(baseDir, targetfilename), row, kelondroEcoTable.tailCacheUsageAuto, 1024*1024, 0);
+        final Row row = rowdef(keysize, payloadsize);
+        final ObjectIndex table = new kelondroEcoTable(new File(baseDir, targetfilename), row, kelondroEcoTable.tailCacheUsageAuto, 1024*1024, 0);
         relations.put(name, table);
     }
     
-    public kelondroIndex getRelation(final String name) {
+    public ObjectIndex getRelation(final String name) {
         // try to get the relation from the relation-cache
-        final kelondroIndex relation = relations.get(name);
+        final ObjectIndex relation = relations.get(name);
         if (relation != null) return relation;
         // try to find the relation as stored on file
         final String[] list = baseDir.list();
         for (int i = 0; i < list.length; i++) {
             if (list[i].startsWith(name)) {
-                final kelondroRow row = rowdef(list[i]);
-                final kelondroIndex table = new kelondroEcoTable(new File(baseDir, list[i]), row, kelondroEcoTable.tailCacheUsageAuto, 1024*1024, 0);
+                final Row row = rowdef(list[i]);
+                final ObjectIndex table = new kelondroEcoTable(new File(baseDir, list[i]), row, kelondroEcoTable.tailCacheUsageAuto, 1024*1024, 0);
                 relations.put(name, table);
                 return table;
             }
@@ -113,14 +117,14 @@ public class kelondroRelations {
     }
     
     public byte[] putRelation(final String name, final byte[] key, final byte[] value) throws IOException {
-        final kelondroIndex table = getRelation(name);
+        final ObjectIndex table = getRelation(name);
         if (table == null) return null;
-        final kelondroRow.Entry entry = table.row().newEntry();
+        final Row.Entry entry = table.row().newEntry();
         entry.setCol(0, key);
         entry.setCol(1, System.currentTimeMillis());
         entry.setCol(2, 1000000);
         entry.setCol(3, value);
-        final kelondroRow.Entry oldentry = table.put(entry);
+        final Row.Entry oldentry = table.put(entry);
         if (oldentry == null) return null;
         return oldentry.getColBytes(3);
     }
@@ -132,23 +136,23 @@ public class kelondroRelations {
     }
     
     public byte[] getRelation(final String name, final byte[] key) throws IOException {
-        final kelondroIndex table = getRelation(name);
+        final ObjectIndex table = getRelation(name);
         if (table == null) return null;
-        final kelondroRow.Entry entry = table.get(key);
+        final Row.Entry entry = table.get(key);
         if (entry == null) return null;
         return entry.getColBytes(3);
     }
     
     public boolean hasRelation(final String name, final byte[] key) {
-        final kelondroIndex table = getRelation(name);
+        final ObjectIndex table = getRelation(name);
         if (table == null) return false;
         return table.has(key);
     }
     
     public byte[] removeRelation(final String name, final byte[] key) throws IOException {
-        final kelondroIndex table = getRelation(name);
+        final ObjectIndex table = getRelation(name);
         if (table == null) return null;
-        final kelondroRow.Entry entry = table.remove(key);
+        final Row.Entry entry = table.remove(key);
         if (entry == null) return null;
         return entry.getColBytes(3);
     }

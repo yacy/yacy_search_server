@@ -33,7 +33,12 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
-public class kelondroCachedRecords extends kelondroAbstractRecords implements kelondroRecords {
+import de.anomic.kelondro.index.Row;
+import de.anomic.kelondro.io.RandomAccessInterface;
+import de.anomic.kelondro.io.RandomAccessRecords;
+import de.anomic.kelondro.tools.MemoryControl;
+
+public class kelondroCachedRecords extends kelondroAbstractRecords implements RandomAccessRecords {
 
     // memory calculation
     private   static final int element_in_cache = 4; // for kelondroCollectionObjectMap: 4; for HashMap: 52
@@ -56,16 +61,16 @@ public class kelondroCachedRecords extends kelondroAbstractRecords implements ke
     public kelondroCachedRecords(
             final File file, final boolean useNodeCache, final long preloadTime,
             final short ohbytec, final short ohhandlec,
-            final kelondroRow rowdef, final int FHandles, final int txtProps, final int txtPropWidth) throws IOException {
+            final Row rowdef, final int FHandles, final int txtProps, final int txtPropWidth) throws IOException {
         super(file, useNodeCache, ohbytec, ohhandlec, rowdef, FHandles, txtProps, txtPropWidth);
         initCache(useNodeCache, preloadTime);
         if (useNodeCache) recordTracker.put(this.filename, this);
     }
     
     public kelondroCachedRecords(
-            final kelondroRA ra, final String filename, final boolean useNodeCache, final long preloadTime,
+            final RandomAccessInterface ra, final String filename, final boolean useNodeCache, final long preloadTime,
             final short ohbytec, final short ohhandlec,
-            final kelondroRow rowdef, final int FHandles, final int txtProps, final int txtPropWidth,
+            final Row rowdef, final int FHandles, final int txtProps, final int txtPropWidth,
             final boolean exitOnFail) {
         super(ra, filename, useNodeCache, ohbytec, ohhandlec, rowdef, FHandles, txtProps, txtPropWidth, exitOnFail);
         initCache(useNodeCache, preloadTime);
@@ -73,7 +78,7 @@ public class kelondroCachedRecords extends kelondroAbstractRecords implements ke
     }
     
     public kelondroCachedRecords(
-            final kelondroRA ra, final String filename, final boolean useNodeCache, final long preloadTime) throws IOException{
+            final RandomAccessInterface ra, final String filename, final boolean useNodeCache, final long preloadTime) throws IOException{
         super(ra, filename, useNodeCache);
         initCache(useNodeCache, preloadTime);
         if (useNodeCache) recordTracker.put(this.filename, this);
@@ -114,7 +119,7 @@ public class kelondroCachedRecords extends kelondroAbstractRecords implements ke
     }
 
     int cacheGrowStatus() {
-        final long available = kelondroMemory.available();
+        final long available = MemoryControl.available();
         if ((cacheHeaders != null) && (available < cacheHeaders.memoryNeededForGrow())) return 0;
         return cacheGrowStatus(available, memStopGrow, memStartShrink);
     }
@@ -126,10 +131,10 @@ public class kelondroCachedRecords extends kelondroAbstractRecords implements ke
         // 2: cache is allowed to grow and must not shrink
         if (available > stopGrow) return 2;
         if (available > startShrink) {
-            kelondroMemory.gc(30000, "kelendroCacheRecords.cacheGrowStatus(...) 1"); // thq
+            MemoryControl.gc(30000, "kelendroCacheRecords.cacheGrowStatus(...) 1"); // thq
             return 1;
         }
-        kelondroMemory.gc(3000, "kelendroCacheRecords.cacheGrowStatus(...) 0"); // thq
+        MemoryControl.gc(3000, "kelendroCacheRecords.cacheGrowStatus(...) 0"); // thq
         return 0;
     }
     
@@ -205,8 +210,8 @@ public class kelondroCachedRecords extends kelondroAbstractRecords implements ke
         } else {
             System.out.println("### cache report: " + cacheHeaders.size() + " entries");
             
-                final Iterator<kelondroRow.Entry> i = cacheHeaders.rows();
-                kelondroRow.Entry entry;
+                final Iterator<Row.Entry> i = cacheHeaders.rows();
+                Row.Entry entry;
                 while (i.hasNext()) {
                     entry = i.next();
                     
@@ -578,7 +583,7 @@ public class kelondroCachedRecords extends kelondroAbstractRecords implements ke
                     h = getOHHandle(i);
                     if (h == null) s = s + ":hNULL"; else s = s + ":h" + h.toString();
                 }
-                final kelondroRow.Entry content = row().newEntry(getValueRow());
+                final Row.Entry content = row().newEntry(getValueRow());
                 for (int i = 0; i < row().columns(); i++) s = s + ":" + ((content.empty(i)) ? "NULL" : content.getColString(i, "UTF-8").trim());
             } catch (final IOException e) {
                 s = s + ":***LOAD ERROR***:" + e.getMessage();

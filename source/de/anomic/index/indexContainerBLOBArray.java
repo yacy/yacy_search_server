@@ -35,12 +35,12 @@ import java.util.List;
 import de.anomic.kelondro.kelondroBLOB;
 import de.anomic.kelondro.kelondroBLOBArray;
 import de.anomic.kelondro.kelondroCloneableIterator;
-import de.anomic.kelondro.kelondroRow;
-import de.anomic.kelondro.kelondroRowSet;
+import de.anomic.kelondro.index.Row;
+import de.anomic.kelondro.index.RowSet;
 
 public final class indexContainerBLOBArray {
 
-    private final kelondroRow payloadrow;
+    private final Row payloadrow;
     private final kelondroBLOBArray array;
     
     /**
@@ -55,7 +55,7 @@ public final class indexContainerBLOBArray {
      */
     public indexContainerBLOBArray(
     		final File heapLocation,
-    		final kelondroRow payloadrow) throws IOException {
+    		final Row payloadrow) throws IOException {
         this.payloadrow = payloadrow;
         this.array = new kelondroBLOBArray(
             heapLocation,
@@ -85,7 +85,7 @@ public final class indexContainerBLOBArray {
         this.array.mountBLOB(location);
     }
     
-    public kelondroRow rowdef() {
+    public Row rowdef() {
         return this.payloadrow;
     }
     
@@ -181,9 +181,9 @@ public final class indexContainerBLOBArray {
     	List<byte[]> entries = this.array.getAll(key.getBytes());
     	if (entries == null || entries.size() == 0) return null;
     	byte[] a = entries.remove(0);
-    	indexContainer c = new indexContainer(key, kelondroRowSet.importRowSet(a, payloadrow));
+    	indexContainer c = new indexContainer(key, RowSet.importRowSet(a, payloadrow));
     	while (entries.size() > 0) {
-    		c = c.merge(new indexContainer(key, kelondroRowSet.importRowSet(entries.remove(0), payloadrow)));
+    		c = c.merge(new indexContainer(key, RowSet.importRowSet(entries.remove(0), payloadrow)));
     	}
     	return c;
     }
@@ -215,7 +215,7 @@ public final class indexContainerBLOBArray {
         
         public byte[] rewrite(byte[] b) {
             if (b == null) return null;
-            indexContainer c = rewriter.rewrite(new indexContainer(this.wordHash, kelondroRowSet.importRowSet(b, payloadrow)));
+            indexContainer c = rewriter.rewrite(new indexContainer(this.wordHash, RowSet.importRowSet(b, payloadrow)));
             if (c == null) return null;
             return c.exportCollection();
         }

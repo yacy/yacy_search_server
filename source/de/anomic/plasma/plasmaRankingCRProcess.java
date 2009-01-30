@@ -31,16 +31,16 @@ import java.io.IOException;
 import java.util.Iterator;
 
 import de.anomic.kelondro.kelondroAttrSeq;
-import de.anomic.kelondro.kelondroBase64Order;
-import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroCollectionIndex;
 import de.anomic.kelondro.kelondroEcoTable;
-import de.anomic.kelondro.kelondroIndex;
-import de.anomic.kelondro.kelondroMicroDate;
-import de.anomic.kelondro.kelondroRow;
-import de.anomic.kelondro.kelondroRowSet;
-import de.anomic.kelondro.kelondroDate;
-import de.anomic.kelondro.kelondroMemory;
+import de.anomic.kelondro.coding.Base64Order;
+import de.anomic.kelondro.coding.Bitfield;
+import de.anomic.kelondro.coding.DateFormatter;
+import de.anomic.kelondro.coding.MicroDate;
+import de.anomic.kelondro.index.Row;
+import de.anomic.kelondro.index.RowSet;
+import de.anomic.kelondro.index.ObjectIndex;
+import de.anomic.kelondro.tools.MemoryControl;
 import de.anomic.server.serverFileUtils;
 
 public class plasmaRankingCRProcess {
@@ -52,18 +52,18 @@ public class plasmaRankingCRProcess {
     header.append("# ---"); header.append((char) 13); header.append((char) 10);
     */
     
-    public static final kelondroRow CRG_accrow = new kelondroRow(
+    public static final Row CRG_accrow = new Row(
             "byte[] Referee-12," +
             "Cardinal UDate-3 {b64e}, Cardinal VDate-3 {b64e}, " +
             "Cardinal LCount-2 {b64e}, Cardinal GCount-2 {b64e}, Cardinal ICount-2 {b64e}, Cardinal DCount-2 {b64e}, Cardinal TLength-3 {b64e}, " +
             "Cardinal WACount-3 {b64e}, Cardinal WUCount-3 {b64e}, Cardinal Flags-1 {b64e}, " +
             "Cardinal FUDate-3 {b64e}, Cardinal FDDate-3 {b64e}, Cardinal LUDate-3 {b64e}, " + 
             "Cardinal UCount-2 {b64e}, Cardinal PCount-2 {b64e}, Cardinal ACount-2 {b64e}, Cardinal VCount-2 {b64e}, Cardinal Vita-2 {b64e}",
-            kelondroBase64Order.enhancedCoder, 0);
-    public static final kelondroRow CRG_colrow = new kelondroRow("byte[] Anchor-12", kelondroBase64Order.enhancedCoder, 0);
+            Base64Order.enhancedCoder, 0);
+    public static final Row CRG_colrow = new Row("byte[] Anchor-12", Base64Order.enhancedCoder, 0);
     public static final String CRG_accname = "CRG-a-attr";
     public static final String CRG_seqname = "CRG-a-coli";
-    public static final kelondroRow RCI_coli = new kelondroRow("byte[] RefereeDom-6", kelondroBase64Order.enhancedCoder, 0);
+    public static final Row RCI_coli = new Row("byte[] RefereeDom-6", Base64Order.enhancedCoder, 0);
     public static final String RCI_colname = "RCI-a-coli";
 
     private static boolean accumulate_upd(final File f, final kelondroAttrSeq acc) {
@@ -80,11 +80,11 @@ public class plasmaRankingCRProcess {
         String key;
         kelondroAttrSeq.Entry new_entry, acc_entry;
         int FUDate, FDDate, LUDate, UCount, PCount, ACount, VCount, Vita;
-        kelondroBitfield acc_flags, new_flags;
+        Bitfield acc_flags, new_flags;
         while (el.hasNext()) {
             key = el.next();
             new_entry = source_cr.getEntry(key);
-            new_flags = new kelondroBitfield(kelondroBase64Order.enhancedCoder.encodeLong(new_entry.getAttr("Flags", 0), 1).getBytes());
+            new_flags = new Bitfield(Base64Order.enhancedCoder.encodeLong(new_entry.getAttr("Flags", 0), 1).getBytes());
             // enrich information with additional values
             if ((acc_entry = acc.getEntry(key)) != null) {
                 FUDate = (int) acc_entry.getAttr("FUDate", 0);
@@ -105,16 +105,16 @@ public class plasmaRankingCRProcess {
                 VCount += (new_flags.get(3)) ? 1 : 0;
                 
                 // 'OR' the flags
-                acc_flags = new kelondroBitfield(kelondroBase64Order.enhancedCoder.encodeLong(acc_entry.getAttr("Flags", 0), 1).getBytes());
+                acc_flags = new Bitfield(Base64Order.enhancedCoder.encodeLong(acc_entry.getAttr("Flags", 0), 1).getBytes());
                 for (int i = 0; i < 6; i++) {
                     if (new_flags.get(i)) acc_flags.set(i, true);
                 }
-                acc_entry.setAttr("Flags", (int) kelondroBase64Order.enhancedCoder.decodeLong(acc_flags.exportB64()));
+                acc_entry.setAttr("Flags", (int) Base64Order.enhancedCoder.decodeLong(acc_flags.exportB64()));
             } else {
                 // initialize counters and dates
                 acc_entry = acc.newEntry(key, new_entry.getAttrs(), new_entry.getSeqSet());
-                FUDate = kelondroMicroDate.microDateHoursInt(System.currentTimeMillis()); // first update date
-                FDDate = kelondroMicroDate.microDateHoursInt(System.currentTimeMillis()); // very difficult to compute; this is only a quick-hack
+                FUDate = MicroDate.microDateHoursInt(System.currentTimeMillis()); // first update date
+                FDDate = MicroDate.microDateHoursInt(System.currentTimeMillis()); // very difficult to compute; this is only a quick-hack
                 LUDate = (int) new_entry.getAttr("VDate", 0);
                 UCount = 0;
                 PCount = (new_flags.get(1)) ? 1 : 0;
@@ -139,7 +139,7 @@ public class plasmaRankingCRProcess {
         return true;
     }
     
-    private static boolean accumulate_upd(final File f, final kelondroIndex acc, final kelondroCollectionIndex seq) throws IOException {
+    private static boolean accumulate_upd(final File f, final ObjectIndex acc, final kelondroCollectionIndex seq) throws IOException {
         // open file
         kelondroAttrSeq source_cr = null;
         try {
@@ -152,13 +152,13 @@ public class plasmaRankingCRProcess {
         final Iterator<String> el = source_cr.keys();
         String key;
         kelondroAttrSeq.Entry new_entry;
-        kelondroRow.Entry acc_entry;
+        Row.Entry acc_entry;
         int FUDate, FDDate, LUDate, UCount, PCount, ACount, VCount, Vita;
-        kelondroBitfield acc_flags, new_flags;
+        Bitfield acc_flags, new_flags;
         while (el.hasNext()) {
             key = el.next();
             new_entry = source_cr.getEntry(key);
-            new_flags = new kelondroBitfield(kelondroBase64Order.enhancedCoder.encodeLong(new_entry.getAttr("Flags", 0), 1).getBytes());
+            new_flags = new Bitfield(Base64Order.enhancedCoder.encodeLong(new_entry.getAttr("Flags", 0), 1).getBytes());
             // enrich information with additional values
             if ((acc_entry = acc.get(key.getBytes())) != null) {
                 FUDate = (int) acc_entry.getColLong("FUDate", 0);
@@ -179,11 +179,11 @@ public class plasmaRankingCRProcess {
                 VCount += (new_flags.get(3)) ? 1 : 0;
                 
                 // 'OR' the flags
-                acc_flags = new kelondroBitfield(kelondroBase64Order.enhancedCoder.encodeLong(acc_entry.getColLong("Flags", 0), 1).getBytes());
+                acc_flags = new Bitfield(Base64Order.enhancedCoder.encodeLong(acc_entry.getColLong("Flags", 0), 1).getBytes());
                 for (int i = 0; i < 6; i++) {
                     if (new_flags.get(i)) acc_flags.set(i, true);
                 }
-                acc_entry.setCol("Flags", (int) kelondroBase64Order.enhancedCoder.decodeLong(acc_flags.exportB64()));
+                acc_entry.setCol("Flags", (int) Base64Order.enhancedCoder.decodeLong(acc_flags.exportB64()));
             } else {
                 // initialize counters and dates
                 acc_entry = acc.row().newEntry();
@@ -192,8 +192,8 @@ public class plasmaRankingCRProcess {
                     acc_entry.setCol(i, new_entry.getAttr(acc.row().column(i).nickname, 0));
                 }
                 seq.put(key.getBytes(), new_entry.getSeqCollection());
-                FUDate = kelondroMicroDate.microDateHoursInt(System.currentTimeMillis()); // first update date
-                FDDate = kelondroMicroDate.microDateHoursInt(System.currentTimeMillis()); // very difficult to compute; this is only a quick-hack
+                FUDate = MicroDate.microDateHoursInt(System.currentTimeMillis()); // first update date
+                FDDate = MicroDate.microDateHoursInt(System.currentTimeMillis()); // very difficult to compute; this is only a quick-hack
                 LUDate = (int) new_entry.getAttr("VDate", 0);
                 UCount = 0;
                 PCount = (new_flags.get(1)) ? 1 : 0;
@@ -238,12 +238,12 @@ public class plasmaRankingCRProcess {
         
         // open target file
         kelondroAttrSeq acc = null;
-        kelondroIndex newacc = null;
+        ObjectIndex newacc = null;
         kelondroCollectionIndex newseq = null;
         if (newdb) {
             final File path = to_file.getParentFile(); // path to storage place
             newacc = new kelondroEcoTable(new File(path, CRG_accname), CRG_accrow, kelondroEcoTable.tailCacheUsageAuto, 0, 0);
-            newseq = new kelondroCollectionIndex(path, CRG_seqname, 12, kelondroBase64Order.enhancedCoder, 2, 9, CRG_colrow, false);
+            newseq = new kelondroCollectionIndex(path, CRG_seqname, 12, Base64Order.enhancedCoder, 2, 9, CRG_colrow, false);
         } else {
             if (!(to_file.exists())) {
                 acc = new kelondroAttrSeq("Global Ranking Accumulator File",
@@ -357,7 +357,7 @@ public class plasmaRankingCRProcess {
             count++;
             if ((count % 1000) == 0) {
                 l = java.lang.Math.max(1, (System.currentTimeMillis() - start) / 1000);
-                System.out.println("processed " + count + " citations, " + (count / l) + " per second, rci.size = " + rci.size() + ", " + ((size - count) / (count / l)) + " seconds remaining; mem = " + kelondroMemory.available());  
+                System.out.println("processed " + count + " citations, " + (count / l) + " per second, rci.size = " + rci.size() + ", " + ((size - count) / (count / l)) + " seconds remaining; mem = " + MemoryControl.available());  
             }
             i.remove();
         }
@@ -365,15 +365,15 @@ public class plasmaRankingCRProcess {
         // finished. write to file
         cr = null;
         cr_in = null;
-        kelondroMemory.gc(1000, "plasmaRankingCRProcess.genrci(...)"); // thq
+        MemoryControl.gc(1000, "plasmaRankingCRProcess.genrci(...)"); // thq
         rci.toFile(rci_out);
         return count;
     }
     
     public static int genrcix(final File cr_path_in, final File rci_path_out) throws IOException {
         //kelondroFlexTable       acc = new kelondroFlexTable(cr_path_in, CRG_accname, kelondroBase64Order.enhancedCoder, 128 * 1024 * 1024, -1, CRG_accrow, true);
-        final kelondroCollectionIndex seq = new kelondroCollectionIndex(cr_path_in, CRG_seqname, 12, kelondroBase64Order.enhancedCoder, 2, 9, CRG_colrow, false);
-        final kelondroCollectionIndex rci = new kelondroCollectionIndex(rci_path_out, RCI_colname, 6, kelondroBase64Order.enhancedCoder, 2, 9, RCI_coli, false);
+        final kelondroCollectionIndex seq = new kelondroCollectionIndex(cr_path_in, CRG_seqname, 12, Base64Order.enhancedCoder, 2, 9, CRG_colrow, false);
+        final kelondroCollectionIndex rci = new kelondroCollectionIndex(rci_path_out, RCI_colname, 6, Base64Order.enhancedCoder, 2, 9, RCI_coli, false);
         
         // loop over all referees
         int count = 0;
@@ -383,21 +383,21 @@ public class plasmaRankingCRProcess {
         final Iterator<Object[]> i = seq.keycollections(null, null, false);
         Object[] keycollection;
         String referee, refereeDom, anchor, anchorDom;
-        kelondroRowSet cr_entry, rci_entry;
+        RowSet cr_entry, rci_entry;
         while (i.hasNext()) {
             keycollection = i.next();
             referee = new String((byte[]) keycollection[0]);
             if (referee.length() == 6) refereeDom = referee; else refereeDom = referee.substring(6);
-            cr_entry = (kelondroRowSet) keycollection[1];
+            cr_entry = (RowSet) keycollection[1];
             
             // loop over all anchors
-            for (kelondroRow.Entry entry: cr_entry) {
+            for (Row.Entry entry: cr_entry) {
                 anchor = entry.getColString(0, null);
                 if (anchor.length() == 6) anchorDom = anchor; else anchorDom = anchor.substring(6);
 
                 // update domain-specific entry
                 rci_entry = rci.get(anchorDom.getBytes());
-                if (rci_entry == null) rci_entry = new kelondroRowSet(RCI_coli, 0);
+                if (rci_entry == null) rci_entry = new RowSet(RCI_coli, 0);
                 rci_entry.add(refereeDom.getBytes());
                 
                 // insert entry
@@ -406,7 +406,7 @@ public class plasmaRankingCRProcess {
             count++;
             if ((count % 1000) == 0) {
                 l = java.lang.Math.max(1, (System.currentTimeMillis() - start) / 1000);
-                System.out.println("processed " + count + " citations, " + (count / l) + " per second, rci.size = " + rci.size() + ", " + ((size - count) / (count / l) / 60) + " minutes remaining; mem = " + kelondroMemory.free());
+                System.out.println("processed " + count + " citations, " + (count / l) + " per second, rci.size = " + rci.size() + ", " + ((size - count) / (count / l) / 60) + " minutes remaining; mem = " + MemoryControl.free());
             }
         }
 
@@ -429,7 +429,7 @@ public class plasmaRankingCRProcess {
                 final File tmp_dir = new File(root_path, "DATA/RANKING/GLOBAL/016_tmp");
                 final File err_dir = new File(root_path, "DATA/RANKING/GLOBAL/017_err");
                 final File acc_dir = new File(root_path, "DATA/RANKING/GLOBAL/018_acc");
-                final String filename = "CRG-a-" + new kelondroDate().toShortString(true) + ".cr.gz";
+                final String filename = "CRG-a-" + new DateFormatter().toShortString(true) + ".cr.gz";
                 final File to_file = new File(root_path, "DATA/RANKING/GLOBAL/020_con0/" + filename);
                 if (!(ready_dir.exists())) ready_dir.mkdirs();
                 if (!(tmp_dir.exists())) tmp_dir.mkdirs();

@@ -37,6 +37,9 @@ import java.util.Map;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+import de.anomic.kelondro.coding.ByteOrder;
+import de.anomic.kelondro.tools.ByteArray;
+
 public class kelondroBLOBCompressor extends Thread implements kelondroBLOB {
 
     static byte[] gzipMagic  = {(byte) 'z', (byte) '|'}; // magic for gzip-encoded content
@@ -69,7 +72,7 @@ public class kelondroBLOBCompressor extends Thread implements kelondroBLOB {
         this.bufferlength = 0;
     }
 
-    public kelondroByteOrder ordering() {
+    public ByteOrder ordering() {
         return this.backend.ordering();
     }
     
@@ -121,7 +124,7 @@ public class kelondroBLOBCompressor extends Thread implements kelondroBLOB {
     private byte[] decompress(byte[] b) {
         // use a magic in the head of the bytes to identify compression type
         if (b == null) return null;
-        if (kelondroByteArray.equals(b, gzipMagic)) {
+        if (ByteArray.equals(b, gzipMagic)) {
             //System.out.print("\\"); // DEBUG
             cdr--;
             ByteArrayInputStream bais = new ByteArrayInputStream(b);
@@ -145,7 +148,7 @@ public class kelondroBLOBCompressor extends Thread implements kelondroBLOB {
                 e.printStackTrace();
                 return null;
             }
-        } else if (kelondroByteArray.equals(b, plainMagic)) {
+        } else if (ByteArray.equals(b, plainMagic)) {
             System.out.print("-"); // DEBUG
             byte[] r = new byte[b.length - 2];
             System.arraycopy(b, 2, r, 0, b.length - 2);

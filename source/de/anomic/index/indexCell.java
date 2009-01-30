@@ -33,8 +33,8 @@ import java.util.Set;
 
 import de.anomic.kelondro.kelondroCloneableIterator;
 import de.anomic.kelondro.kelondroMergeIterator;
-import de.anomic.kelondro.kelondroOrder;
-import de.anomic.kelondro.kelondroRow;
+import de.anomic.kelondro.coding.kelondroOrder;
+import de.anomic.kelondro.index.Row;
 
 /*
  * an index cell is a part of the horizontal index in the new segment-oriented index
@@ -57,7 +57,7 @@ public final class indexCell implements indexRI {
     @SuppressWarnings("unchecked")
     public indexCell(
             final File cellPath,
-            final kelondroRow payloadrow,
+            final Row payloadrow,
             final int maxRamEntries
             ) throws IOException {
         this.array = new indexContainerBLOBArray(cellPath, payloadrow);

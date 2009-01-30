@@ -28,8 +28,8 @@ import java.io.File;
 import java.io.IOException;
 
 import de.anomic.http.httpRequestHeader;
-import de.anomic.kelondro.kelondroBase64Order;
-import de.anomic.kelondro.kelondroDigest;
+import de.anomic.kelondro.coding.Base64Order;
+import de.anomic.kelondro.coding.Digest;
 import de.anomic.plasma.plasmaRankingDistribution;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverFileUtils;
@@ -85,14 +85,14 @@ public final class transfer {
                 // consolidation of cr files
                 //System.out.println("yacy/transfer:post=" + post.toString());
                 //String cansendprotocol = (String) post.get("can-send-protocol", "http");
-                final String access = kelondroBase64Order.enhancedCoder.encode(kelondroDigest.encodeMD5Raw(otherpeer + ":" + filename)) + ":" + kelondroBase64Order.enhancedCoder.encode(kelondroDigest.encodeMD5Raw("" + System.currentTimeMillis()));
+                final String access = Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(otherpeer + ":" + filename)) + ":" + Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw("" + System.currentTimeMillis()));
                 prop.put("response", "ok");
                 prop.put("process_access", access);
                 prop.put("process_address", sb.webIndex.seedDB.mySeed().getPublicAddress());
                 prop.put("process_protocol", "http");
                 prop.put("process_path", "");  // currently empty; the store process will find a path
                 prop.put("process_maxsize", "-1"); // if response is too big we return the size of the file
-                sb.rankingPermissions.put(kelondroDigest.encodeMD5Hex(kelondroBase64Order.standardCoder.encodeString(access)), filename);
+                sb.rankingPermissions.put(Digest.encodeMD5Hex(Base64Order.standardCoder.encodeString(access)), filename);
                 if (sb.getLog().isFine()) sb.getLog().logFine("RankingTransmission: granted peer " + otherpeerName + " to send CR file " + filename);
             }
             return prop;
@@ -120,7 +120,7 @@ public final class transfer {
                     try {
                         if (file.getCanonicalPath().startsWith(path.getCanonicalPath())){
                             serverFileUtils.copy(fileString.getBytes(), file);
-                            final String md5t = kelondroDigest.encodeMD5Hex(file);
+                            final String md5t = Digest.encodeMD5Hex(file);
                             if (md5t.equals(md5)) {
                                 prop.put("response", "ok");
                                 if (sb.getLog().isFine()) sb.getLog().logFine("RankingTransmission: received from peer " + otherpeerName + " CR file " + filename);

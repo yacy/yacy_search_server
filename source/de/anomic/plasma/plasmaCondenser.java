@@ -51,8 +51,8 @@ import de.anomic.htmlFilter.htmlFilterImageEntry;
 import de.anomic.index.indexPhrase;
 import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexWord;
-import de.anomic.kelondro.kelondroBitfield;
-import de.anomic.kelondro.kelondroMSetTools;
+import de.anomic.kelondro.coding.Bitfield;
+import de.anomic.kelondro.tools.SetTools;
 import de.anomic.language.identification.Identificator;
 import de.anomic.yacy.yacyURL;
 
@@ -98,7 +98,7 @@ public final class plasmaCondenser {
     public int RESULT_DIFF_WORDS = -1;
     public int RESULT_NUMB_SENTENCES = -1;
     public int RESULT_DIFF_SENTENCES = -1;
-    public kelondroBitfield RESULT_FLAGS = new kelondroBitfield(4);
+    public Bitfield RESULT_FLAGS = new Bitfield(4);
     Identificator languageIdentificator;
     
     public plasmaCondenser(final plasmaParserDocument document, final boolean indexText, final boolean indexMedia) throws UnsupportedEncodingException {
@@ -107,7 +107,7 @@ public final class plasmaCondenser {
         this.wordminsize = 3;
         this.wordcut = 2;
         this.words = new TreeMap<String, indexWord>();
-        this.RESULT_FLAGS = new kelondroBitfield(4);
+        this.RESULT_FLAGS = new Bitfield(4);
 
         // construct flag set for document
         if (document.getImages().size() > 0) RESULT_FLAGS.set(flag_cat_hasimage, true);
@@ -216,7 +216,7 @@ public final class plasmaCondenser {
         }
     }
     
-    private void insertTextToWords(final String text, final int phrase, final int flagpos, final kelondroBitfield flagstemplate, boolean useForLanguageIdentification) {
+    private void insertTextToWords(final String text, final int phrase, final int flagpos, final Bitfield flagstemplate, boolean useForLanguageIdentification) {
         String word;
         indexWord wprop;
         sievedWordsEnum wordenum;
@@ -258,7 +258,7 @@ public final class plasmaCondenser {
         // subtracts the given stopwords from the word list
         // the word list shrinkes. This returns the number of shrinked words
         final int oldsize = words.size();
-        words = kelondroMSetTools.excludeConstructive(words, stopwords);
+        words = SetTools.excludeConstructive(words, stopwords);
         return oldsize - words.size();
     }
 

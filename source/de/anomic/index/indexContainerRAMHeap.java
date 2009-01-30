@@ -41,16 +41,16 @@ import java.util.TreeMap;
 
 import de.anomic.kelondro.kelondroBLOBHeapReader;
 import de.anomic.kelondro.kelondroBLOBHeapWriter;
-import de.anomic.kelondro.kelondroBase64Order;
-import de.anomic.kelondro.kelondroByteOrder;
 import de.anomic.kelondro.kelondroCloneableIterator;
-import de.anomic.kelondro.kelondroRow;
-import de.anomic.kelondro.kelondroRowSet;
+import de.anomic.kelondro.coding.Base64Order;
+import de.anomic.kelondro.coding.ByteOrder;
+import de.anomic.kelondro.index.Row;
+import de.anomic.kelondro.index.RowSet;
 import de.anomic.server.logging.serverLog;
 
 public final class indexContainerRAMHeap {
 
-    private final kelondroRow payloadrow;
+    private final Row payloadrow;
     private SortedMap<String, indexContainer> cache;
     
     /**
@@ -60,12 +60,12 @@ public final class indexContainerRAMHeap {
      * @param payloadrow
      * @param log
      */
-    public indexContainerRAMHeap(final kelondroRow payloadrow) {
+    public indexContainerRAMHeap(final Row payloadrow) {
         this.payloadrow = payloadrow;
         this.cache = null;
     }
     
-    public kelondroRow rowdef() {
+    public Row rowdef() {
         return this.payloadrow;
     }
     
@@ -83,7 +83,7 @@ public final class indexContainerRAMHeap {
      * another dump reading afterwards is not possible
      */
     public void initWriteMode() {
-        this.cache = Collections.synchronizedSortedMap(new TreeMap<String, indexContainer>(new kelondroByteOrder.StringOrder(payloadrow.getOrdering())));
+        this.cache = Collections.synchronizedSortedMap(new TreeMap<String, indexContainer>(new ByteOrder.StringOrder(payloadrow.getOrdering())));
     }
     
     /**
@@ -96,7 +96,7 @@ public final class indexContainerRAMHeap {
     public void initWriteModeFromHeap(final File heapFile) throws IOException {
         serverLog.logInfo("indexContainerRAMHeap", "restoring dump for rwi heap '" + heapFile.getName() + "'");
         final long start = System.currentTimeMillis();
-        this.cache = Collections.synchronizedSortedMap(new TreeMap<String, indexContainer>(new kelondroByteOrder.StringOrder(payloadrow.getOrdering())));
+        this.cache = Collections.synchronizedSortedMap(new TreeMap<String, indexContainer>(new ByteOrder.StringOrder(payloadrow.getOrdering())));
         int urlCount = 0;
         synchronized (cache) {
             for (final indexContainer container : new heapFileEntries(heapFile, this.payloadrow)) {
@@ -117,7 +117,7 @@ public final class indexContainerRAMHeap {
     public void initWriteModeFromBLOB(final File blobFile) throws IOException {
         serverLog.logInfo("indexContainerRAMHeap", "restoring rwi blob dump '" + blobFile.getName() + "'");
         final long start = System.currentTimeMillis();
-        this.cache = Collections.synchronizedSortedMap(new TreeMap<String, indexContainer>(new kelondroByteOrder.StringOrder(payloadrow.getOrdering())));
+        this.cache = Collections.synchronizedSortedMap(new TreeMap<String, indexContainer>(new ByteOrder.StringOrder(payloadrow.getOrdering())));
         int urlCount = 0;
         synchronized (cache) {
             for (final indexContainer container : new blobFileEntries(blobFile, this.payloadrow)) {
@@ -137,7 +137,7 @@ public final class indexContainerRAMHeap {
         assert this.cache != null;
         serverLog.logInfo("indexContainerRAMHeap", "creating alternative rwi heap dump '" + heapFile.getName() + "', " + cache.size() + " rwi's");
         if (heapFile.exists()) heapFile.delete();
-        final kelondroBLOBHeapWriter dump = new kelondroBLOBHeapWriter(heapFile, payloadrow.primaryKeyLength, kelondroBase64Order.enhancedCoder);
+        final kelondroBLOBHeapWriter dump = new kelondroBLOBHeapWriter(heapFile, payloadrow.primaryKeyLength, Base64Order.enhancedCoder);
         final long startTime = System.currentTimeMillis();
         long wordcount = 0, urlcount = 0;
         String wordHash;
@@ -172,10 +172,10 @@ public final class indexContainerRAMHeap {
     public static class heapFileEntries implements Iterator<indexContainer>, Iterable<indexContainer> {
         DataInputStream is;
         byte[] word;
-        kelondroRow payloadrow;
+        Row payloadrow;
         indexContainer nextContainer;
         
-        public heapFileEntries(final File heapFile, final kelondroRow payloadrow) throws IOException {
+        public heapFileEntries(final File heapFile, final Row payloadrow) throws IOException {
             if (!(heapFile.exists())) throw new IOException("file " + heapFile + " does not exist");
             is = new DataInputStream(new BufferedInputStream(new FileInputStream(heapFile), 1024*1024));
             word = new byte[payloadrow.primaryKeyLength];
@@ -190,7 +190,7 @@ public final class indexContainerRAMHeap {
         private indexContainer next0() {
             try {
                 is.readFully(word);
-                return new indexContainer(new String(word), kelondroRowSet.importRowSet(is, payloadrow));
+                return new indexContainer(new String(word), RowSet.importRowSet(is, payloadrow));
             } catch (final IOException e) {
                 return null;
             }
@@ -229,9 +229,9 @@ public final class indexContainerRAMHeap {
      */
     public static class blobFileEntries implements Iterator<indexContainer>, Iterable<indexContainer> {
         Iterator<Map.Entry<String, byte[]>> blobs;
-        kelondroRow payloadrow;
+        Row payloadrow;
         
-        public blobFileEntries(final File blobFile, final kelondroRow payloadrow) throws IOException {
+        public blobFileEntries(final File blobFile, final Row payloadrow) throws IOException {
             this.blobs = new kelondroBLOBHeapReader.entries(blobFile, payloadrow.primaryKeyLength);
             this.payloadrow = payloadrow;
         }
@@ -247,7 +247,7 @@ public final class indexContainerRAMHeap {
         public indexContainer next() {
             Map.Entry<String, byte[]> entry = blobs.next();
             byte[] payload = entry.getValue();
-            return new indexContainer(entry.getKey(), kelondroRowSet.importRowSet(payload, payloadrow));
+            return new indexContainer(entry.getKey(), RowSet.importRowSet(payload, payloadrow));
         }
         
         public void remove() {

@@ -56,6 +56,8 @@
 
 package de.anomic.kelondro;
 
+import de.anomic.kelondro.coding.NaturalOrder;
+
 public class kelondroObjectBuffer {
 
     // this is a buffer for a single (only one) key/value object
@@ -108,7 +110,7 @@ public class kelondroObjectBuffer {
     public void put(final byte[] key, final Object value) {
         if ((key == null) || (value == null)) return;
         synchronized(this) {
-            if (kelondroNaturalOrder.equal(this.key, key)){
+            if (NaturalOrder.equal(this.key, key)){
                 this.writeDouble++;
             } else {
                 this.writeUnique++; 
@@ -121,7 +123,7 @@ public class kelondroObjectBuffer {
     public void put(final String key, final Object value) {
         if ((key == null) || (value == null)) return;
         synchronized(this) {
-            if (kelondroNaturalOrder.equal(this.key, key.getBytes())){
+            if (NaturalOrder.equal(this.key, key.getBytes())){
                 this.writeDouble++;
             } else {
                 this.writeUnique++; 
@@ -134,7 +136,7 @@ public class kelondroObjectBuffer {
     public Object get(final byte[] key) {
         if (key == null) return null;
         synchronized(this) {
-            if (kelondroNaturalOrder.equal(this.key, key)){
+            if (NaturalOrder.equal(this.key, key)){
                 this.readHit++;
                 return this.value;
             } else {
@@ -147,7 +149,7 @@ public class kelondroObjectBuffer {
     public Object get(final String key) {
         if (key == null) return null;
         synchronized(this) {
-            if (kelondroNaturalOrder.equal(this.key, key.getBytes())){
+            if (NaturalOrder.equal(this.key, key.getBytes())){
                 this.readHit++;
                 return this.value;
             } else {
@@ -160,7 +162,7 @@ public class kelondroObjectBuffer {
     public void remove(final byte[] key) {
         if (key == null) return;
         synchronized(this) {
-            if (kelondroNaturalOrder.equal(this.key, key)){
+            if (NaturalOrder.equal(this.key, key)){
                 this.key = null;
                 this.value = null;
             }
@@ -170,7 +172,7 @@ public class kelondroObjectBuffer {
     public void remove(final String key) {
         if (key == null) return;
         synchronized(this) {
-            if (kelondroNaturalOrder.equal(this.key, key.getBytes())){
+            if (NaturalOrder.equal(this.key, key.getBytes())){
                 this.key = null;
                 this.value = null;
             }

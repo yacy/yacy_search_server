@@ -47,9 +47,9 @@ import de.anomic.kelondro.kelondroBLOB;
 import de.anomic.kelondro.kelondroBLOBHeap;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMap;
-import de.anomic.kelondro.kelondroNaturalOrder;
-import de.anomic.kelondro.kelondroDate;
-import de.anomic.kelondro.kelondroByteBuffer;
+import de.anomic.kelondro.coding.DateFormatter;
+import de.anomic.kelondro.coding.NaturalOrder;
+import de.anomic.kelondro.tools.ByteBuffer;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyURL;
@@ -69,7 +69,7 @@ public class RobotsTxt {
         robotsTableFile.getParentFile().mkdirs();
         kelondroBLOB blob = null;
         try {
-            blob = new kelondroBLOBHeap(robotsTableFile, 64, kelondroNaturalOrder.naturalOrder, 1024 * 1024);
+            blob = new kelondroBLOBHeap(robotsTableFile, 64, NaturalOrder.naturalOrder, 1024 * 1024);
         } catch (final IOException e) {
             e.printStackTrace();
         }
@@ -84,7 +84,7 @@ public class RobotsTxt {
         robotsTableFile.getParentFile().mkdirs();
         kelondroBLOB blob = null;
         try {
-            blob = new kelondroBLOBHeap(robotsTableFile, 64, kelondroNaturalOrder.naturalOrder, 1024 * 1024);
+            blob = new kelondroBLOBHeap(robotsTableFile, 64, NaturalOrder.naturalOrder, 1024 * 1024);
         } catch (final IOException e) {
             e.printStackTrace();
         }
@@ -518,7 +518,7 @@ public class RobotsTxt {
             oldEtag = entry.getETag();
             reqHeaders = new httpRequestHeader();
             final Date modDate = entry.getModDate();
-            if (modDate != null) reqHeaders.put(httpRequestHeader.IF_MODIFIED_SINCE, kelondroDate.formatRFC1123(entry.getModDate()));
+            if (modDate != null) reqHeaders.put(httpRequestHeader.IF_MODIFIED_SINCE, DateFormatter.formatRFC1123(entry.getModDate()));
             
         }
         
@@ -551,7 +551,7 @@ public class RobotsTxt {
                     }
                     
                     // downloading the content
-                    final kelondroByteBuffer sbb = new kelondroByteBuffer();
+                    final ByteBuffer sbb = new ByteBuffer();
                     try {
                         serverFileUtils.copyToStream(new BufferedInputStream(res.getDataAsStream()), new BufferedOutputStream(sbb));
                     } finally {

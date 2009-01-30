@@ -34,27 +34,31 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
 
+import de.anomic.kelondro.coding.ByteOrder;
+import de.anomic.kelondro.index.BytesLongMap;
+import de.anomic.kelondro.io.CachedRandomAccess;
+import de.anomic.kelondro.tools.MemoryControl;
 import de.anomic.server.logging.serverLog;
 
 public class kelondroBLOBHeapReader {
 
     protected int                     keylength;  // the length of the primary key
-    protected kelondroBytesLongMap    index;      // key/seek relation for used records
+    protected BytesLongMap    index;      // key/seek relation for used records
     protected kelondroBLOBGap         free;       // set of {seek, size} pairs denoting space and position of free records
     protected final File              heapFile;   // the file of the heap
-    protected final kelondroByteOrder ordering;   // the ordering on keys
-    protected kelondroCachedFileRA    file;       // a random access to the file
+    protected final ByteOrder ordering;   // the ordering on keys
+    protected CachedRandomAccess    file;       // a random access to the file
     
     public kelondroBLOBHeapReader(
             final File heapFile,
             final int keylength,
-            final kelondroByteOrder ordering) throws IOException {
+            final ByteOrder ordering) throws IOException {
         this.ordering = ordering;
         this.heapFile = heapFile;
         this.keylength = keylength;
         this.index = null; // will be created as result of initialization process
         this.free = null; // will be initialized later depending on existing idx/gap file
-        this.file = new kelondroCachedFileRA(heapFile);
+        this.file = new CachedRandomAccess(heapFile);
         
         // read or initialize the index
         if (initIndexReadDump(heapFile)) {
@@ -100,7 +104,7 @@ public class kelondroBLOBHeapReader {
         // there is an index and a gap file:
         // read the index file:
         try {
-            this.index = new kelondroBytesLongMap(this.keylength, this.ordering, fif);
+            this.index = new BytesLongMap(this.keylength, this.ordering, fif);
         } catch (IOException e) {
             e.printStackTrace();
             return false;
@@ -126,7 +130,7 @@ public class kelondroBLOBHeapReader {
         // this initializes the this.index object by reading positions from the heap file
 
         this.free = new kelondroBLOBGap();
-        kelondroBytesLongMap.initDataConsumer indexready = kelondroBytesLongMap.asynchronusInitializer(keylength, this.ordering, 0, Math.max(10, (int) (Runtime.getRuntime().freeMemory() / (10 * 1024 * 1024))));
+        BytesLongMap.initDataConsumer indexready = BytesLongMap.asynchronusInitializer(keylength, this.ordering, 0, Math.max(10, (int) (Runtime.getRuntime().freeMemory() / (10 * 1024 * 1024))));
         byte[] key = new byte[keylength];
         int reclen;
         long seek = 0;
@@ -211,7 +215,7 @@ public class kelondroBLOBHeapReader {
         }
     }
 
-    public kelondroByteOrder ordering() {
+    public ByteOrder ordering() {
         return this.ordering;
     }
     
@@ -231,8 +235,8 @@ public class kelondroBLOBHeapReader {
         // access the file and read the container
         file.seek(pos);
         final int len = file.readInt() - index.row().primaryKeyLength;
-        if (kelondroMemory.available() < len) {
-            if (!kelondroMemory.request(len, true)) return null; // not enough memory available for this blob
+        if (MemoryControl.available() < len) {
+            if (!MemoryControl.request(len, true)) return null; // not enough memory available for this blob
         }
         
         // read the key

@@ -46,33 +46,40 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import de.anomic.kelondro.coding.NaturalOrder;
+import de.anomic.kelondro.coding.kelondroOrder;
+import de.anomic.kelondro.index.Column;
+import de.anomic.kelondro.index.RAMIndex;
+import de.anomic.kelondro.index.Row;
+import de.anomic.kelondro.index.RowCollection;
+import de.anomic.kelondro.index.ObjectIndex;
 import de.anomic.server.NamePrefixThreadFactory;
 import de.anomic.server.serverProcessor;
 import de.anomic.server.logging.serverLog;
 
-public class kelondroSplitTable implements kelondroIndex {
+public class kelondroSplitTable implements ObjectIndex {
 
     // this is a set of kelondro tables
     // the set is divided into tables with different entry date
     // the table type can be either kelondroFlex or kelondroEco
 
     private static final int EcoFSBufferSize = 20;
-    static final kelondroIndex dummyIndex = new kelondroRAMIndex(new kelondroRow(new kelondroColumn[]{new kelondroColumn("key", kelondroColumn.celltype_binary, kelondroColumn.encoder_bytes, 2, "key")}, kelondroNaturalOrder.naturalOrder, 0), 0);
+    static final ObjectIndex dummyIndex = new RAMIndex(new Row(new Column[]{new Column("key", Column.celltype_binary, Column.encoder_bytes, 2, "key")}, NaturalOrder.naturalOrder, 0), 0);
 
     // the thread pool for the keeperOf executor service
     private ExecutorService executor;
     
-    private HashMap<String, kelondroIndex> tables; // a map from a date string to a kelondroIndex object
-    private final kelondroRow rowdef;
+    private HashMap<String, ObjectIndex> tables; // a map from a date string to a kelondroIndex object
+    private final Row rowdef;
     private final File path;
     private final String tablename;
-    private final kelondroOrder<kelondroRow.Entry> entryOrder;
+    private final kelondroOrder<Row.Entry> entryOrder;
     
-    public kelondroSplitTable(final File path, final String tablename, final kelondroRow rowdef, final boolean resetOnFail) {
+    public kelondroSplitTable(final File path, final String tablename, final Row rowdef, final boolean resetOnFail) {
         this.path = path;
         this.tablename = tablename;
         this.rowdef = rowdef;
-        this.entryOrder = new kelondroRow.EntryComparator(rowdef.objectOrder);
+        this.entryOrder = new Row.EntryComparator(rowdef.objectOrder);
         init(resetOnFail);
     }
     
@@ -82,7 +89,7 @@ public class kelondroSplitTable implements kelondroIndex {
         this.executor = new ThreadPoolExecutor(serverProcessor.useCPU + 1, serverProcessor.useCPU + 1, 10, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(), new NamePrefixThreadFactory(tablename));
         
         // initialized tables map
-        this.tables = new HashMap<String, kelondroIndex>();
+        this.tables = new HashMap<String, ObjectIndex>();
         if (!(path.exists())) path.mkdirs();
         final String[] tablefile = path.list();
         String date;
@@ -113,7 +120,7 @@ public class kelondroSplitTable implements kelondroIndex {
         Map.Entry<String, Long> entry;
         String maxf;
         long maxram;
-        kelondroIndex table;
+        ObjectIndex table;
         while (t.size() > 0) {
             // find maximum table
             maxram = 0;
@@ -179,7 +186,7 @@ public class kelondroSplitTable implements kelondroIndex {
     }
     
     public int size() {
-        final Iterator<kelondroIndex> i = tables.values().iterator();
+        final Iterator<ObjectIndex> i = tables.values().iterator();
         int s = 0;
         while (i.hasNext()) s += i.next().size();
         return s;
@@ -187,13 +194,13 @@ public class kelondroSplitTable implements kelondroIndex {
     
     public int writeBufferSize() {
         int s = 0;
-        for (final kelondroIndex index : tables.values()) {
+        for (final ObjectIndex index : tables.values()) {
             if (index instanceof kelondroCache) s += ((kelondroCache) index).writeBufferSize();
         }
         return s;
     }
     
-    public kelondroRow row() {
+    public Row row() {
         return this.rowdef;
     }
     
@@ -201,28 +208,28 @@ public class kelondroSplitTable implements kelondroIndex {
         return keeperOf(key) != null;
     }
     
-    public synchronized kelondroRow.Entry get(final byte[] key) throws IOException {
-        final kelondroIndex keeper = keeperOf(key);
+    public synchronized Row.Entry get(final byte[] key) throws IOException {
+        final ObjectIndex keeper = keeperOf(key);
         if (keeper == null) return null;
         return keeper.get(key);
     }
     
-    public synchronized void putMultiple(final List<kelondroRow.Entry> rows) throws IOException {
+    public synchronized void putMultiple(final List<Row.Entry> rows) throws IOException {
         throw new UnsupportedOperationException("not yet implemented");
     }
     
-    public synchronized kelondroRow.Entry put(final kelondroRow.Entry row) throws IOException {
+    public synchronized Row.Entry put(final Row.Entry row) throws IOException {
         return put(row, null); // entry for current date
     }
     
-    public synchronized kelondroRow.Entry put(final kelondroRow.Entry row, Date entryDate) throws IOException {
+    public synchronized Row.Entry put(final Row.Entry row, Date entryDate) throws IOException {
         assert row.objectsize() <= this.rowdef.objectsize;
-        final kelondroIndex keeper = keeperOf(row.getColBytes(0));
+        final ObjectIndex keeper = keeperOf(row.getColBytes(0));
         if (keeper != null) return keeper.put(row);
         if ((entryDate == null) || (entryDate.after(new Date()))) entryDate = new Date(); // fix date
         final String suffix = dateSuffix(entryDate);
         if (suffix == null) return null;
-        kelondroIndex table = tables.get(suffix);
+        ObjectIndex table = tables.get(suffix);
         if (table == null) {
             // open table
             final File f = new File(path, tablename + "." + suffix);
@@ -242,20 +249,20 @@ public class kelondroSplitTable implements kelondroIndex {
         return null;
     }
     
-    public synchronized kelondroIndex keeperOf(final byte[] key) {
+    public synchronized ObjectIndex keeperOf(final byte[] key) {
         // because the index is stored only in one table,
         // and the index is completely in RAM, a concurrency will create
         // not concurrent File accesses
         //long start = System.currentTimeMillis();
         
         // start a concurrent query to database tables
-        final CompletionService<kelondroIndex> cs = new ExecutorCompletionService<kelondroIndex>(executor);
+        final CompletionService<ObjectIndex> cs = new ExecutorCompletionService<ObjectIndex>(executor);
         final int s = tables.size();
         int rejected = 0;
-        for (final kelondroIndex table : tables.values()) {
+        for (final ObjectIndex table : tables.values()) {
             try {
-                cs.submit(new Callable<kelondroIndex>() {
-                    public kelondroIndex call() {
+                cs.submit(new Callable<ObjectIndex>() {
+                    public ObjectIndex call() {
                         if (table.has(key)) return table;
                         return dummyIndex;
                     }
@@ -271,8 +278,8 @@ public class kelondroSplitTable implements kelondroIndex {
         // read the result
         try {
             for (int i = 0, n = s - rejected; i < n; i++) {
-                final Future<kelondroIndex> f = cs.take();
-                final kelondroIndex index = f.get();
+                final Future<ObjectIndex> f = cs.take();
+                final ObjectIndex index = f.get();
                 if (index != dummyIndex) {
                     //System.out.println("*DEBUG SplitTable success.time = " + (System.currentTimeMillis() - start) + " ms");
                     return index;
@@ -289,16 +296,16 @@ public class kelondroSplitTable implements kelondroIndex {
         return null;
     }
     
-    public synchronized void addUnique(final kelondroRow.Entry row) throws IOException {
+    public synchronized void addUnique(final Row.Entry row) throws IOException {
         addUnique(row, null);
     }
     
-    public synchronized void addUnique(final kelondroRow.Entry row, Date entryDate) throws IOException {
+    public synchronized void addUnique(final Row.Entry row, Date entryDate) throws IOException {
         assert row.objectsize() <= this.rowdef.objectsize;
         if ((entryDate == null) || (entryDate.after(new Date()))) entryDate = new Date(); // fix date
         final String suffix = dateSuffix(entryDate);
         if (suffix == null) return;
-        kelondroIndex table = tables.get(suffix);
+        ObjectIndex table = tables.get(suffix);
         if (table == null) {
             // make new table
             table = new kelondroEcoTable(new File(path, tablename + "." + suffix), rowdef, kelondroEcoTable.tailCacheDenyUsage, EcoFSBufferSize, 0);
@@ -307,34 +314,34 @@ public class kelondroSplitTable implements kelondroIndex {
         table.addUnique(row);
     }
     
-    public synchronized void addUniqueMultiple(final List<kelondroRow.Entry> rows) throws IOException {
-        final Iterator<kelondroRow.Entry> i = rows.iterator();
+    public synchronized void addUniqueMultiple(final List<Row.Entry> rows) throws IOException {
+        final Iterator<Row.Entry> i = rows.iterator();
         while (i.hasNext()) addUnique(i.next());
     }
     
-    public synchronized void addUniqueMultiple(final List<kelondroRow.Entry> rows, final Date entryDate) throws IOException {
-        final Iterator<kelondroRow.Entry> i = rows.iterator();
+    public synchronized void addUniqueMultiple(final List<Row.Entry> rows, final Date entryDate) throws IOException {
+        final Iterator<Row.Entry> i = rows.iterator();
         while (i.hasNext()) addUnique(i.next(), entryDate);
     }
     
-    public ArrayList<kelondroRowCollection> removeDoubles() throws IOException {
-        final Iterator<kelondroIndex> i = tables.values().iterator();
-        final ArrayList<kelondroRowCollection> report = new ArrayList<kelondroRowCollection>();
+    public ArrayList<RowCollection> removeDoubles() throws IOException {
+        final Iterator<ObjectIndex> i = tables.values().iterator();
+        final ArrayList<RowCollection> report = new ArrayList<RowCollection>();
         while (i.hasNext()) {
             report.addAll(i.next().removeDoubles());
         }
         return report;
     }
     
-    public synchronized kelondroRow.Entry remove(final byte[] key) throws IOException {
-        final kelondroIndex table = keeperOf(key);
+    public synchronized Row.Entry remove(final byte[] key) throws IOException {
+        final ObjectIndex table = keeperOf(key);
         if (table == null) return null;
         return table.remove(key);
     }
     
-    public synchronized kelondroRow.Entry removeOne() throws IOException {
-        final Iterator<kelondroIndex> i = tables.values().iterator();
-        kelondroIndex table, maxtable = null;
+    public synchronized Row.Entry removeOne() throws IOException {
+        final Iterator<ObjectIndex> i = tables.values().iterator();
+        ObjectIndex table, maxtable = null;
         int maxcount = -1;
         while (i.hasNext()) {
             table = i.next();
@@ -351,16 +358,16 @@ public class kelondroSplitTable implements kelondroIndex {
     
     public synchronized kelondroCloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) throws IOException {
         final List<kelondroCloneableIterator<byte[]>> c = new ArrayList<kelondroCloneableIterator<byte[]>>(tables.size());
-        final Iterator<kelondroIndex> i = tables.values().iterator();
+        final Iterator<ObjectIndex> i = tables.values().iterator();
         while (i.hasNext()) {
             c.add(i.next().keys(up, firstKey));
         }
         return kelondroMergeIterator.cascade(c, rowdef.objectOrder, kelondroMergeIterator.simpleMerge, up);
     }
     
-    public synchronized kelondroCloneableIterator<kelondroRow.Entry> rows(final boolean up, final byte[] firstKey) throws IOException {
-        final List<kelondroCloneableIterator<kelondroRow.Entry>> c = new ArrayList<kelondroCloneableIterator<kelondroRow.Entry>>(tables.size());
-        final Iterator<kelondroIndex> i = tables.values().iterator();
+    public synchronized kelondroCloneableIterator<Row.Entry> rows(final boolean up, final byte[] firstKey) throws IOException {
+        final List<kelondroCloneableIterator<Row.Entry>> c = new ArrayList<kelondroCloneableIterator<Row.Entry>>(tables.size());
+        final Iterator<ObjectIndex> i = tables.values().iterator();
         while (i.hasNext()) {
             c.add(i.next().rows(up, firstKey));
         }
@@ -395,7 +402,7 @@ public class kelondroSplitTable implements kelondroIndex {
         } catch (final InterruptedException e) {
         }
         this.executor = null;
-        final Iterator<kelondroIndex> i = tables.values().iterator();
+        final Iterator<ObjectIndex> i = tables.values().iterator();
         while (i.hasNext()) {
             i.next().close();
         }
@@ -407,7 +414,7 @@ public class kelondroSplitTable implements kelondroIndex {
     }
 
     public void deleteOnExit() {
-        for (kelondroIndex i: this.tables.values()) i.deleteOnExit();
+        for (ObjectIndex i: this.tables.values()) i.deleteOnExit();
     }
     
 }

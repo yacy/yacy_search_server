@@ -47,7 +47,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import de.anomic.kelondro.kelondroByteBuffer;
+import de.anomic.kelondro.tools.ByteBuffer;
 
 /*
  * this class provides data structures to read a mediawiki dump file in xml format
@@ -267,16 +267,16 @@ public class mediawikiIndex {
     
         private InputStream is;
         private long seekpos;
-        private kelondroByteBuffer bb;
+        private ByteBuffer bb;
         
         public PositionAwareReader(File dumpFile) throws FileNotFoundException {
             this.is = new BufferedInputStream(new FileInputStream(dumpFile), 64 *1024);
             this.seekpos = 0;
-            this.bb = new kelondroByteBuffer();
+            this.bb = new ByteBuffer();
         }
         
         public void resetBuffer() {
-            if (bb.length() > 10 * 1024) bb = new kelondroByteBuffer(); else bb.clear();
+            if (bb.length() > 10 * 1024) bb = new ByteBuffer(); else bb.clear();
         }
         
         public boolean seek(byte[] pattern) throws IOException {

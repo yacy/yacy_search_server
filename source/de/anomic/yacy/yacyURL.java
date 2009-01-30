@@ -35,8 +35,8 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import de.anomic.kelondro.kelondroBase64Order;
-import de.anomic.kelondro.kelondroDigest;
+import de.anomic.kelondro.coding.Base64Order;
+import de.anomic.kelondro.coding.Digest;
 import de.anomic.server.serverDomains;
 import de.anomic.tools.Punycode;
 import de.anomic.tools.Punycode.PunycodeException;
@@ -659,15 +659,15 @@ public class yacyURL implements Serializable {
     // static methods from plasmaURL
 
     public static final int flagTypeID(final String hash) {
-        return (kelondroBase64Order.enhancedCoder.decodeByte(hash.charAt(11)) & 32) >> 5;
+        return (Base64Order.enhancedCoder.decodeByte(hash.charAt(11)) & 32) >> 5;
     }
 
     public static final int flagTLDID(final String hash) {
-        return (kelondroBase64Order.enhancedCoder.decodeByte(hash.charAt(11)) & 28) >> 2;
+        return (Base64Order.enhancedCoder.decodeByte(hash.charAt(11)) & 28) >> 2;
     }
 
     public static final int flagLengthID(final String hash) {
-        return (kelondroBase64Order.enhancedCoder.decodeByte(hash.charAt(11)) & 3);
+        return (Base64Order.enhancedCoder.decodeByte(hash.charAt(11)) & 3);
     }
 
     public final String hash() {
@@ -715,18 +715,18 @@ public class yacyURL implements Serializable {
         // combine the attributes
         final StringBuilder hash = new StringBuilder(12);
         // form the 'local' part of the hash
-        hash.append(kelondroBase64Order.enhancedCoder.encode(kelondroDigest.encodeMD5Raw(toNormalform(true, true))).substring(0, 5)); // 5 chars
+        hash.append(Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(toNormalform(true, true))).substring(0, 5)); // 5 chars
         hash.append(subdomPortPath(subdom, port, rootpath)); // 1 char
         // form the 'global' part of the hash
         hash.append(hosthash5(this.protocol, host, port)); // 5 chars
-        hash.append(kelondroBase64Order.enhancedCoder.encodeByte(flagbyte)); // 1 char
+        hash.append(Base64Order.enhancedCoder.encodeByte(flagbyte)); // 1 char
 
         // return result hash
         return hash.toString();
     }
     
     private static char subdomPortPath(final String subdom, final int port, final String rootpath) {
-        return kelondroBase64Order.enhancedCoder.encode(kelondroDigest.encodeMD5Raw(subdom + ":" + port + ":" + rootpath)).charAt(0);
+        return Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(subdom + ":" + port + ":" + rootpath)).charAt(0);
     }
 
     private static final char rootURLFlag0 = subdomPortPath("", 80, "");
@@ -737,7 +737,7 @@ public class yacyURL implements Serializable {
     }
 
     private static final String hosthash5(final String protocol, final String host, final int port) {
-        return kelondroBase64Order.enhancedCoder.encode(kelondroDigest.encodeMD5Raw(protocol + ":" + host + ":" + port)).substring(0, 5);
+        return Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(protocol + ":" + host + ":" + port)).substring(0, 5);
     }
     
     /**
@@ -758,7 +758,7 @@ public class yacyURL implements Serializable {
         final int domlengthKey = (l <= 8) ? 0 : (l <= 12) ? 1 : (l <= 16) ? 2 : 3;
         final byte flagbyte = (byte) (((protocol.equals("http")) ? 0 : 32) | (id << 2) | domlengthKey);
         hash.append(hosthash5(protocol, host, port)); // 5 chars
-        hash.append(kelondroBase64Order.enhancedCoder.encodeByte(flagbyte)); // 1 char
+        hash.append(Base64Order.enhancedCoder.encodeByte(flagbyte)); // 1 char
 
         // return result hash
         return hash.toString();
@@ -801,7 +801,7 @@ public class yacyURL implements Serializable {
         // generates an estimation of the original domain length
         assert (urlHash != null);
         assert (urlHash.length() == 12) : "urlhash = " + urlHash;
-        final int flagbyte = kelondroBase64Order.enhancedCoder.decodeByte(urlHash.charAt(11));
+        final int flagbyte = Base64Order.enhancedCoder.decodeByte(urlHash.charAt(11));
         final int domLengthKey = flagbyte & 3;
         switch (domLengthKey) {
         case 0:
@@ -824,7 +824,7 @@ public class yacyURL implements Serializable {
         // returns the ID of the domain of the domain
         assert (urlHash != null);
         assert (urlHash.length() == 12 || urlHash.length() == 6) : "urlhash = " + urlHash;
-        return (kelondroBase64Order.enhancedCoder.decodeByte(urlHash.charAt((urlHash.length() == 12) ? 11 : 5)) & 28) >> 2;
+        return (Base64Order.enhancedCoder.decodeByte(urlHash.charAt((urlHash.length() == 12) ? 11 : 5)) & 28) >> 2;
     }
 
     public static boolean isDomDomain(final String urlHash, final int id) {

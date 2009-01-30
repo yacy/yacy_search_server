@@ -24,7 +24,7 @@
 
 package de.anomic.server;
 
-import de.anomic.kelondro.kelondroMemory;
+import de.anomic.kelondro.tools.MemoryControl;
 import de.anomic.server.logging.serverLog;
 
 public abstract class serverAbstractBlockingThread<J extends serverProcessorJob> extends serverAbstractThread implements serverBlockingThread<J> {
@@ -52,7 +52,7 @@ public abstract class serverAbstractBlockingThread<J extends serverProcessorJob>
             try {
                 // do job
                 timestamp = System.currentTimeMillis();
-                memstamp0 = kelondroMemory.used();
+                memstamp0 = MemoryControl.used();
                 final J in = this.manager.take();
                 if ((in == null) || (in == serverProcessorJob.poisonPill) || (in.status == serverProcessorJob.STATUS_POISON)) {
                     // the poison pill: shutdown
@@ -65,7 +65,7 @@ public abstract class serverAbstractBlockingThread<J extends serverProcessorJob>
                 final J out = this.job(in);
                 if (out != null) this.manager.passOn(out);
                 // do memory and busy/idle-count/time monitoring
-                memstamp1 = kelondroMemory.used();
+                memstamp1 = MemoryControl.used();
                 if (memstamp1 >= memstamp0) {
                     // no GC in between. this is not shure but most probable
                     memuse += memstamp1 - memstamp0;

@@ -29,6 +29,8 @@ import java.util.Comparator;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 
+import de.anomic.kelondro.coding.kelondroOrder;
+
 public class kelondroMergeIterator<E> implements kelondroCloneableIterator<E> {
     
     private Comparator<E> comp;

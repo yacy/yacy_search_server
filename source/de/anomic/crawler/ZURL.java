@@ -32,12 +32,12 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroEcoTable;
 import de.anomic.kelondro.kelondroFlexWidthArray;
-import de.anomic.kelondro.kelondroIndex;
-import de.anomic.kelondro.kelondroRow;
-import de.anomic.kelondro.kelondroRowSet;
+import de.anomic.kelondro.coding.Base64Order;
+import de.anomic.kelondro.index.Row;
+import de.anomic.kelondro.index.RowSet;
+import de.anomic.kelondro.index.ObjectIndex;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyURL;
 
@@ -46,18 +46,18 @@ public class ZURL {
     private static final int EcoFSBufferSize = 200;
     private static final int maxStackSize    = 300;
     
-    public final static kelondroRow rowdef = new kelondroRow(
+    public final static Row rowdef = new Row(
             "String urlhash-"   + yacySeedDB.commonHashLength + ", " + // the url's hash
             "String executor-"  + yacySeedDB.commonHashLength + ", " + // the crawling executor
             "Cardinal workdate-8 {b256}, " +                           // the time when the url was last time tried to load
             "Cardinal workcount-4 {b256}, " +                          // number of load retries
             "String anycause-132, " +                                   // string describing load failure
             "byte[] entry-" + CrawlEntry.rowdef.objectsize,                                          // extra space
-            kelondroBase64Order.enhancedCoder,
+            Base64Order.enhancedCoder,
             0);
 
     // the class object
-    kelondroIndex urlIndex = null;
+    ObjectIndex urlIndex = null;
     private final LinkedList<String> stack = new LinkedList<String>(); // strings: url
     
     public ZURL(final File cachePath, final String tablename, final boolean startWithEmptyFile) {
@@ -75,7 +75,7 @@ public class ZURL {
     
     public ZURL() {
         // creates a new ZUR in RAM
-        urlIndex = new kelondroRowSet(rowdef, 0);
+        urlIndex = new RowSet(rowdef, 0);
     }
     
     public int size() {
@@ -134,7 +134,7 @@ public class ZURL {
     public synchronized Entry getEntry(final String urlhash) {
         try {
             if (urlIndex == null) return null;
-            final kelondroRow.Entry entry = urlIndex.get(urlhash.getBytes());
+            final Row.Entry entry = urlIndex.get(urlhash.getBytes());
             if (entry == null) return null;
             return new Entry(entry);
         } catch (final IOException e) {
@@ -181,7 +181,7 @@ public class ZURL {
             stored = false;
         }
 
-        public Entry(final kelondroRow.Entry entry) throws IOException {
+        public Entry(final Row.Entry entry) throws IOException {
             assert (entry != null);
             this.executor = entry.getColString(1, "UTF-8");
             this.workdate = new Date(entry.getColLong(2));
@@ -197,7 +197,7 @@ public class ZURL {
             // stores the values from the object variables into the database
             if (this.stored) return;
             if (this.bentry == null) return;
-            final kelondroRow.Entry newrow = rowdef.newEntry();
+            final Row.Entry newrow = rowdef.newEntry();
             newrow.setCol(0, this.bentry.url().hash().getBytes());
             newrow.setCol(1, this.executor.getBytes());
             newrow.setCol(2, this.workdate.getTime());
@@ -245,7 +245,7 @@ public class ZURL {
 
     public class kiter implements Iterator<Entry> {
         // enumerates entry elements
-        Iterator<kelondroRow.Entry> i;
+        Iterator<Row.Entry> i;
         boolean error = false;
         
         public kiter(final boolean up, final String firstHash) throws IOException {
@@ -259,7 +259,7 @@ public class ZURL {
         }
 
         public Entry next() throws RuntimeException {
-            final kelondroRow.Entry e = i.next();
+            final Row.Entry e = i.next();
             if (e == null) return null;
             try {
                 return new Entry(e);

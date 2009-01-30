@@ -49,18 +49,18 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Iterator;
 
-import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroEcoTable;
 import de.anomic.kelondro.kelondroException;
-import de.anomic.kelondro.kelondroIndex;
-import de.anomic.kelondro.kelondroRow;
-import de.anomic.kelondro.kelondroDate;
+import de.anomic.kelondro.coding.Base64Order;
+import de.anomic.kelondro.coding.DateFormatter;
+import de.anomic.kelondro.index.Row;
+import de.anomic.kelondro.index.ObjectIndex;
 import de.anomic.server.serverCodings;
 
 public class yacyNewsDB {
 
     private final File path;
-    protected kelondroIndex news;
+    protected ObjectIndex news;
 
     public yacyNewsDB(final File path) {
         this.path = path;
@@ -107,7 +107,7 @@ public class yacyNewsDB {
 
     public class recordIterator implements Iterator<yacyNewsRecord> {
 
-        Iterator<kelondroRow.Entry> rowIterator;
+        Iterator<Row.Entry> rowIterator;
 
         public recordIterator() throws IOException {
             rowIterator = news.rows(true, null);
@@ -135,27 +135,27 @@ public class yacyNewsDB {
         }
     }
 
-    protected final static yacyNewsRecord b2r(final kelondroRow.Entry b) {
+    protected final static yacyNewsRecord b2r(final Row.Entry b) {
         if (b == null) return null;
         return yacyNewsRecord.newRecord(
             b.getColString(0, null),
             b.getColString(1, "UTF-8"),
-            (b.empty(2)) ? null : kelondroDate.parseShortSecond(b.getColString(2, null), kelondroDate.UTCDiffString()),
+            (b.empty(2)) ? null : DateFormatter.parseShortSecond(b.getColString(2, null), DateFormatter.UTCDiffString()),
             (int) b.getColLong(3),
             serverCodings.string2map(b.getColString(4, "UTF-8"), ",")
         );
     }
 
-    protected final kelondroRow.Entry r2b(final yacyNewsRecord r) {
+    protected final Row.Entry r2b(final yacyNewsRecord r) {
         if (r == null) return null;
         try {
             final String attributes = r.attributes().toString();
             if (attributes.length() > yacyNewsRecord.attributesMaxLength) throw new IllegalArgumentException("attribute length=" + attributes.length() + " exceeds maximum size=" + yacyNewsRecord.attributesMaxLength);
-            final kelondroRow.Entry entry = this.news.row().newEntry();
+            final Row.Entry entry = this.news.row().newEntry();
             entry.setCol(0, r.id().getBytes());
             entry.setCol(1, r.category().getBytes("UTF-8"));
-            entry.setCol(2, (r.received() == null) ? null : kelondroDate.formatShortSecond(r.received()).getBytes());
-            entry.setCol(3, kelondroBase64Order.enhancedCoder.encodeLong(r.distributed(), 2).getBytes());
+            entry.setCol(2, (r.received() == null) ? null : DateFormatter.formatShortSecond(r.received()).getBytes());
+            entry.setCol(3, Base64Order.enhancedCoder.encodeLong(r.distributed(), 2).getBytes());
             entry.setCol(4, attributes.getBytes("UTF-8"));
             return entry;
         } catch(final UnsupportedEncodingException e) {

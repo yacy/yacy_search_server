@@ -52,8 +52,8 @@ import java.util.TreeMap;
 
 import de.anomic.crawler.ResultURLs;
 import de.anomic.index.indexReferenceBlacklist;
-import de.anomic.kelondro.kelondroBitfield;
-import de.anomic.kelondro.kelondroMScoreCluster;
+import de.anomic.kelondro.coding.Bitfield;
+import de.anomic.kelondro.tools.ScoreCluster;
 import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSearchRankingProcess;
 import de.anomic.plasma.plasmaSearchRankingProfile;
@@ -74,7 +74,7 @@ public class yacySearch extends Thread {
     private final int count, maxDistance;
     final private plasmaSearchRankingProfile rankingProfile;
     final private String prefer, filter, language;
-    final private kelondroBitfield constraint;
+    final private Bitfield constraint;
     
     ResultURLs crawlResults;
     
@@ -87,7 +87,7 @@ public class yacySearch extends Thread {
                       final Map<String, TreeMap<String, String>> abstractCache,
                       final indexReferenceBlacklist blacklist,
                       final plasmaSearchRankingProfile rankingProfile,
-                      final kelondroBitfield constraint) {
+                      final Bitfield constraint) {
         super("yacySearch_" + targetPeer.getName());
         //System.out.println("DEBUG - yacySearch thread " + this.getName() + " initialized " + ((urlhashes.length() == 0) ? "(primary)" : "(secondary)"));
         this.wordhashes = wordhashes;
@@ -179,7 +179,7 @@ public class yacySearch extends Thread {
         }
         
         // put in seeds according to dht
-        final kelondroMScoreCluster<String> ranking = new kelondroMScoreCluster<String>();
+        final ScoreCluster<String> ranking = new ScoreCluster<String>();
         final HashMap<String, yacySeed> regularSeeds = new HashMap<String, yacySeed>();
         final HashMap<String, yacySeed> matchingSeeds = new HashMap<String, yacySeed>();
         yacySeed seed;
@@ -255,7 +255,7 @@ public class yacySearch extends Thread {
             int targets,
             final indexReferenceBlacklist blacklist,
             final plasmaSearchRankingProfile rankingProfile,
-            final kelondroBitfield constraint,
+            final Bitfield constraint,
             final TreeMap<String, String> clusterselection) {
         // check own peer status
         //if (wordIndex.seedDB.mySeed() == null || wordIndex.seedDB.mySeed().getPublicAddress() == null) { return null; }
@@ -292,7 +292,7 @@ public class yacySearch extends Thread {
             final plasmaSearchRankingProcess containerCache,
             final String targethash, final indexReferenceBlacklist blacklist,
             final plasmaSearchRankingProfile rankingProfile,
-            final kelondroBitfield constraint, final TreeMap<String, String> clusterselection) {
+            final Bitfield constraint, final TreeMap<String, String> clusterselection) {
         // check own peer status
         if (wordIndex.seedDB.mySeed() == null || wordIndex.seedDB.mySeed().getPublicAddress() == null) { return null; }
 

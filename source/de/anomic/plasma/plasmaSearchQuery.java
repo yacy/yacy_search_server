@@ -29,10 +29,10 @@ import java.util.TreeSet;
 import de.anomic.htmlFilter.htmlFilterAbstractScraper;
 import de.anomic.htmlFilter.htmlFilterCharacterCoding;
 import de.anomic.index.indexWord;
-import de.anomic.kelondro.kelondroBase64Order;
-import de.anomic.kelondro.kelondroBitfield;
-import de.anomic.kelondro.kelondroMSetTools;
-import de.anomic.kelondro.kelondroNaturalOrder;
+import de.anomic.kelondro.coding.Base64Order;
+import de.anomic.kelondro.coding.Bitfield;
+import de.anomic.kelondro.coding.NaturalOrder;
+import de.anomic.kelondro.tools.SetTools;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyURL;
@@ -52,8 +52,8 @@ public final class plasmaSearchQuery {
     public static final int CONTENTDOM_VIDEO = 3;
     public static final int CONTENTDOM_APP   = 4;
     
-    public static final kelondroBitfield empty_constraint    = new kelondroBitfield(4, "AAAAAA");
-    public static final kelondroBitfield catchall_constraint = new kelondroBitfield(4, "______");
+    public static final Bitfield empty_constraint    = new Bitfield(4, "AAAAAA");
+    public static final Bitfield catchall_constraint = new Bitfield(4, "______");
     
     public String queryString;
     public TreeSet<String> fullqueryHashes, queryHashes, excludeHashes;
@@ -66,7 +66,7 @@ public final class plasmaSearchQuery {
     public int zonecode;
     public int domMaxTargets;
     public int maxDistance;
-    public kelondroBitfield constraint;
+    public Bitfield constraint;
     public boolean allofconstraint;
     public boolean onlineSnippetFetch;
     public plasmaSearchRankingProfile ranking;
@@ -81,8 +81,8 @@ public final class plasmaSearchQuery {
     public plasmaSearchQuery(final String queryString,
     						 final int lines,
     		                 final plasmaSearchRankingProfile ranking,
-    		                 final kelondroBitfield constraint) {
-    	if ((queryString.length() == 12) && (kelondroBase64Order.enhancedCoder.wellformed(queryString.getBytes()))) {
+    		                 final Bitfield constraint) {
+    	if ((queryString.length() == 12) && (Base64Order.enhancedCoder.wellformed(queryString.getBytes()))) {
     		this.queryString = null;
             this.queryHashes = new TreeSet<String>();
             this.excludeHashes = new TreeSet<String>();
@@ -124,7 +124,7 @@ public final class plasmaSearchQuery {
         final boolean onlineSnippetFetch,
         final int lines, final int offset, final String urlMask,
         final int domType, final String domGroupName, final int domMaxTargets,
-        final kelondroBitfield constraint, final boolean allofconstraint,
+        final Bitfield constraint, final boolean allofconstraint,
         final int domainzone,
         final String host,
         final boolean specialRights) {
@@ -194,8 +194,8 @@ public final class plasmaSearchQuery {
     }
     
     public static TreeSet<String> hashes2Set(final String query) {
-        if (query == null) return new TreeSet<String>(kelondroBase64Order.enhancedComparator);
-        final TreeSet<String> keyhashes = new TreeSet<String>(kelondroBase64Order.enhancedComparator);
+        if (query == null) return new TreeSet<String>(Base64Order.enhancedComparator);
+        final TreeSet<String> keyhashes = new TreeSet<String>(Base64Order.enhancedComparator);
         for (int i = 0; i < (query.length() / yacySeedDB.commonHashLength); i++) {
             keyhashes.add(query.substring(i * yacySeedDB.commonHashLength, (i + 1) * yacySeedDB.commonHashLength));
         }
@@ -231,7 +231,7 @@ public final class plasmaSearchQuery {
     	// returns true if any of the word hashes in keyhashes appear in the String text
     	// to do this, all words in the string must be recognized and transcoded to word hashes
     	final TreeSet<String> wordhashes = indexWord.words2hashes(plasmaCondenser.getWords(text).keySet());
-    	return kelondroMSetTools.anymatch(wordhashes, keyhashes);
+    	return SetTools.anymatch(wordhashes, keyhashes);
     }
     
     private static String seps = "'.,/&_"; static {seps += '"';}
@@ -239,7 +239,7 @@ public final class plasmaSearchQuery {
     @SuppressWarnings("unchecked")
     public static TreeSet<String>[] cleanQuery(String querystring) {
     	// returns three sets: a query set, a exclude set and a full query set
-    	if ((querystring == null) || (querystring.length() == 0)) return new TreeSet[]{new TreeSet<String>(kelondroNaturalOrder.naturalComparator), new TreeSet<String>(kelondroNaturalOrder.naturalComparator)};
+    	if ((querystring == null) || (querystring.length() == 0)) return new TreeSet[]{new TreeSet<String>(NaturalOrder.naturalComparator), new TreeSet<String>(NaturalOrder.naturalComparator)};
         
         // convert Umlaute
         querystring = htmlFilterAbstractScraper.stripAll(querystring).toLowerCase().trim();
@@ -251,9 +251,9 @@ public final class plasmaSearchQuery {
         String s;
         int l;
         // the string is clean now, but we must generate a set out of it
-        final TreeSet<String> query = new TreeSet<String>(kelondroNaturalOrder.naturalComparator);
-        final TreeSet<String> exclude = new TreeSet<String>(kelondroNaturalOrder.naturalComparator);
-        final TreeSet<String> fullquery = new TreeSet<String>(kelondroNaturalOrder.naturalComparator);
+        final TreeSet<String> query = new TreeSet<String>(NaturalOrder.naturalComparator);
+        final TreeSet<String> exclude = new TreeSet<String>(NaturalOrder.naturalComparator);
+        final TreeSet<String> fullquery = new TreeSet<String>(NaturalOrder.naturalComparator);
         final String[] a = querystring.split(" ");
         for (int i = 0; i < a.length; i++) {
         	if (a[i].startsWith("-")) {
@@ -289,7 +289,7 @@ public final class plasmaSearchQuery {
         // filter out words that appear in this set
     	// this is applied to the queryHashes
     	final TreeSet<String> blues = indexWord.words2hashes(blueList);
-    	kelondroMSetTools.excludeDestructive(queryHashes, blues);
+    	SetTools.excludeDestructive(queryHashes, blues);
     }
 
     public String id(final boolean anonymized) {

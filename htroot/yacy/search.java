@@ -36,9 +36,9 @@ import java.util.TreeSet;
 
 import de.anomic.http.httpRequestHeader;
 import de.anomic.index.indexContainer;
-import de.anomic.kelondro.kelondroBase64Order;
-import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroSortStack;
+import de.anomic.kelondro.coding.Base64Order;
+import de.anomic.kelondro.coding.Bitfield;
 import de.anomic.net.natLib;
 import de.anomic.plasma.plasmaProfiling;
 import de.anomic.plasma.plasmaSearchEvent;
@@ -99,7 +99,7 @@ public final class search {
         String  profile = post.get("profile", ""); // remote profile hand-over
         if (profile.length() > 0) profile = crypt.simpleDecode(profile, null);
         //final boolean includesnippet = post.get("includesnippet", "false").equals("true");
-        kelondroBitfield constraint = ((post.containsKey("constraint")) && (post.get("constraint", "").length() > 0)) ? new kelondroBitfield(4, post.get("constraint", "______")) : null;
+        Bitfield constraint = ((post.containsKey("constraint")) && (post.get("constraint", "").length() > 0)) ? new Bitfield(4, post.get("constraint", "______")) : null;
         if (constraint != null) {
         	// check bad handover parameter from older versions
             boolean allon = true;
@@ -165,7 +165,7 @@ public final class search {
 
         // prepare search
         final TreeSet<String> queryhashes = plasmaSearchQuery.hashes2Set(query);
-        final TreeSet<String> excludehashes = (exclude.length() == 0) ? new TreeSet<String>(kelondroBase64Order.enhancedComparator) : plasmaSearchQuery.hashes2Set(exclude);
+        final TreeSet<String> excludehashes = (exclude.length() == 0) ? new TreeSet<String>(Base64Order.enhancedComparator) : plasmaSearchQuery.hashes2Set(exclude);
         final long timestamp = System.currentTimeMillis();
         
     	// prepare a search profile
@@ -180,7 +180,7 @@ public final class search {
         plasmaSearchEvent theSearch = null;
         if ((query.length() == 0) && (abstractSet != null)) {
             // this is _not_ a normal search, only a request for index abstracts
-            theQuery = new plasmaSearchQuery(null, abstractSet, new TreeSet<String>(kelondroBase64Order.enhancedComparator), null, rankingProfile, maxdist, prefer, plasmaSearchQuery.contentdomParser(contentdom), language, false, count, 0, filter, plasmaSearchQuery.SEARCHDOM_LOCAL, null, -1, null, false, yacyURL.TLD_any_zone_filter, client, false);
+            theQuery = new plasmaSearchQuery(null, abstractSet, new TreeSet<String>(Base64Order.enhancedComparator), null, rankingProfile, maxdist, prefer, plasmaSearchQuery.contentdomParser(contentdom), language, false, count, 0, filter, plasmaSearchQuery.SEARCHDOM_LOCAL, null, -1, null, false, yacyURL.TLD_any_zone_filter, client, false);
             theQuery.domType = plasmaSearchQuery.SEARCHDOM_LOCAL;
             yacyCore.log.logInfo("INIT HASH SEARCH (abstracts only): " + plasmaSearchQuery.anonymizedQueryHashes(theQuery.queryHashes) + " - " + theQuery.displayResults() + " links");
 

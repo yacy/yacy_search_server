@@ -58,7 +58,7 @@ import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
 
-import de.anomic.kelondro.kelondroBase64Order;
+import de.anomic.kelondro.coding.Base64Order;
 import de.anomic.server.logging.serverLog;
 
 /**
@@ -536,7 +536,7 @@ public class JakartaCommonsHttpClient {
                     serverLog.logWarning("HTTPC", "Proxy authentication contains invalid characters, trying anyway");
                 }
                 final String remoteProxyPwd = hostProxyConfig.getProxyPwd();
-                final String credentials = kelondroBase64Order.standardCoder.encodeString(remoteProxyUser.replace(":",
+                final String credentials = Base64Order.standardCoder.encodeString(remoteProxyUser.replace(":",
                                                                                                                   "") +
                         ":" + remoteProxyPwd);
                 method.setRequestHeader(httpRequestHeader.PROXY_AUTHORIZATION, "Basic " + credentials);

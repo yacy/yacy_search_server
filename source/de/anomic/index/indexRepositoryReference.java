@@ -45,17 +45,17 @@ import de.anomic.http.JakartaCommonsHttpResponse;
 import de.anomic.http.httpRemoteProxyConfig;
 import de.anomic.kelondro.kelondroCache;
 import de.anomic.kelondro.kelondroCloneableIterator;
-import de.anomic.kelondro.kelondroIndex;
-import de.anomic.kelondro.kelondroMScoreCluster;
-import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroSplitTable;
+import de.anomic.kelondro.index.Row;
+import de.anomic.kelondro.index.ObjectIndex;
+import de.anomic.kelondro.tools.ScoreCluster;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyURL;
 
 public final class indexRepositoryReference {
 
     // class objects
-    kelondroIndex urlIndexFile;
+    ObjectIndex urlIndexFile;
     private Export      exportthread    = null; // will have a export thread assigned if exporter is running
     private File        location        = null;
     ArrayList<hostStat> statsDump       = null;
@@ -101,7 +101,7 @@ public final class indexRepositoryReference {
         if (urlHash == null) return null;
         assert urlIndexFile != null;
         try {
-            final kelondroRow.Entry entry = urlIndexFile.get(urlHash.getBytes());
+            final Row.Entry entry = urlIndexFile.get(urlHash.getBytes());
             if (entry == null) return null;
             return new indexURLReference(entry, searchedWord, ranking);
         } catch (final IOException e) {
@@ -138,7 +138,7 @@ public final class indexRepositoryReference {
     public synchronized boolean remove(final String urlHash) {
         if (urlHash == null) return false;
         try {
-            final kelondroRow.Entry r = urlIndexFile.remove(urlHash.getBytes());
+            final Row.Entry r = urlIndexFile.remove(urlHash.getBytes());
             if (r != null) statsDump = null;
             return r != null;
         } catch (final IOException e) {
@@ -158,7 +158,7 @@ public final class indexRepositoryReference {
 
     public class kiter implements kelondroCloneableIterator<indexURLReference> {
         // enumerates entry elements
-        private final Iterator<kelondroRow.Entry> iter;
+        private final Iterator<Row.Entry> iter;
         private final boolean error;
         boolean up;
 
@@ -183,7 +183,7 @@ public final class indexRepositoryReference {
         }
 
         public final indexURLReference next() {
-            kelondroRow.Entry e = null;
+            Row.Entry e = null;
             if (this.iter == null) { return null; }
             if (this.iter.hasNext()) { e = this.iter.next(); }
             if (e == null) { return null; }
@@ -231,7 +231,7 @@ public final class indexRepositoryReference {
                 String oldUrlStr = null;
                 try {
                     // getting the url data as byte array
-                    final kelondroRow.Entry entry = urlIndexFile.get(urlHash.getBytes());
+                    final Row.Entry entry = urlIndexFile.get(urlHash.getBytes());
 
                     // getting the wrong url string
                     oldUrlStr = entry.getColString(1, null).trim();
@@ -544,7 +544,7 @@ public final class indexRepositoryReference {
         HashMap<String, hashStat> map = domainSampleCollector();
         
         // order elements by size
-        kelondroMScoreCluster<String> s = new kelondroMScoreCluster<String>();
+        ScoreCluster<String> s = new ScoreCluster<String>();
         for (Map.Entry<String, hashStat> e: map.entrySet()) {
             s.addScore(e.getValue().urlhash, e.getValue().count);
         }

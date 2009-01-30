@@ -32,11 +32,11 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
-import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroEcoTable;
-import de.anomic.kelondro.kelondroIndex;
-import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroStack;
+import de.anomic.kelondro.coding.Base64Order;
+import de.anomic.kelondro.index.Row;
+import de.anomic.kelondro.index.ObjectIndex;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySeedDB;
 
@@ -47,14 +47,14 @@ public class Balancer {
     private static final int EcoFSBufferSize = 200;
 
     // definition of payload for fileStack
-    private static final kelondroRow stackrow = new kelondroRow("byte[] urlhash-" + yacySeedDB.commonHashLength, kelondroBase64Order.enhancedCoder, 0);
+    private static final Row stackrow = new Row("byte[] urlhash-" + yacySeedDB.commonHashLength, Base64Order.enhancedCoder, 0);
     
     // class variables
     private final ConcurrentHashMap<String, LinkedList<String>>
                                      domainStacks;    // a map from domain name part to Lists with url hashs
     private final ArrayList<String>  urlRAMStack;     // a list that is flushed first
     private kelondroStack            urlFileStack;    // a file with url hashes
-    private kelondroIndex            urlFileIndex;
+    private ObjectIndex            urlFileIndex;
     private final File               cacheStacksPath;
     private final String             stackname;
     private boolean                  top;             // to alternate between top and bottom of the file stack
@@ -153,7 +153,7 @@ public class Balancer {
     public synchronized CrawlEntry get(final String urlhash) throws IOException {
         assert urlhash != null;
         if (urlFileIndex == null) return null; // case occurs during shutdown
-        final kelondroRow.Entry entry = urlFileIndex.get(urlhash.getBytes());
+        final Row.Entry entry = urlFileIndex.get(urlhash.getBytes());
         if (entry == null) return null;
         return new CrawlEntry(entry);
     }
@@ -164,9 +164,9 @@ public class Balancer {
         // returns number of deletions
         
         // first find a list of url hashes that shall be deleted
-        final Iterator<kelondroRow.Entry> i = urlFileIndex.rows(true, null);
+        final Iterator<Row.Entry> i = urlFileIndex.rows(true, null);
         final HashSet<String> urlHashes = new HashSet<String>();
-        kelondroRow.Entry rowEntry;
+        Row.Entry rowEntry;
         CrawlEntry crawlEntry;
         final long terminate = (timeout > 0) ? System.currentTimeMillis() + timeout : Long.MAX_VALUE;
         while (i.hasNext() && (System.currentTimeMillis() < terminate)) {
@@ -193,7 +193,7 @@ public class Balancer {
         final int s = urlFileIndex.size();
         int removedCounter = 0;
         for (final String urlhash: urlHashes) {
-            final kelondroRow.Entry entry = urlFileIndex.remove(urlhash.getBytes());
+            final Row.Entry entry = urlFileIndex.remove(urlhash.getBytes());
             if (entry != null) removedCounter++;
         }
         if (removedCounter == 0) return 0;
@@ -211,7 +211,7 @@ public class Balancer {
        
        // iterate through the file stack
        // in general this is a bad idea. But this can only be avoided by avoidance of this method
-       final Iterator<kelondroRow.Entry> j = urlFileStack.stackIterator(true);
+       final Iterator<Row.Entry> j = urlFileStack.stackIterator(true);
        while (j.hasNext()) {
            h = new String(j.next().getColBytes(0));
            if (urlHashes.contains(h)) j.remove();
@@ -327,7 +327,7 @@ public class Balancer {
             // flush some entries from disc to ram stack
             try {
                 // one from the top:
-                kelondroRow.Entry t = urlFileStack.pop();
+                Row.Entry t = urlFileStack.pop();
                 if (t == null) break;
                 pushHashToDomainStacks(new String(t.getColBytes(0)), false);
                 count--;
@@ -348,7 +348,7 @@ public class Balancer {
             // flush some entries from disc to ram stack
             try {
                 // one from the top:
-                kelondroRow.Entry t = urlFileStack.pop();
+                Row.Entry t = urlFileStack.pop();
                 if (t == null) break;
                 urlRAMStack.add(new String(t.getColBytes(0)));
                 if (urlFileStack.size() == 0) break;
@@ -540,7 +540,7 @@ public class Balancer {
         
         // 3rd: take entry from file
         if ((result == null) && (urlFileStack.size() > 0)) {
-            final kelondroRow.Entry nextentry = (top) ? urlFileStack.top() : urlFileStack.bot();
+            final Row.Entry nextentry = (top) ? urlFileStack.top() : urlFileStack.bot();
             if (nextentry == null) {
                 // emergency case: this means that something with the stack organization is wrong
                 // the file appears to be broken. We kill the file.
@@ -571,7 +571,7 @@ public class Balancer {
         
         // finally: check minimumDelta and if necessary force a sleep
         final int s = urlFileIndex.size();
-        kelondroRow.Entry rowEntry = urlFileIndex.remove(result.getBytes());
+        Row.Entry rowEntry = urlFileIndex.remove(result.getBytes());
         if (rowEntry == null) {
             throw new IOException("get() found a valid urlhash, but failed to fetch the corresponding url entry - total size = " + size() + ", fileStack.size() = " + urlFileStack.size() + ", ramStack.size() = " + urlRAMStack.size() + ", domainStacks.size() = " + domainStacks.size());
         }
@@ -630,7 +630,7 @@ public class Balancer {
         final ArrayList<CrawlEntry> list = new ArrayList<CrawlEntry>();
         for (int i = 0; i < count; i++) {
             final String urlhash = urlRAMStack.get(i);
-            final kelondroRow.Entry entry = urlFileIndex.get(urlhash.getBytes());
+            final Row.Entry entry = urlFileIndex.get(urlhash.getBytes());
             if (entry == null) break;
             list.add(new CrawlEntry(entry));
         }
@@ -643,7 +643,7 @@ public class Balancer {
     
     private class EntryIterator implements Iterator<CrawlEntry> {
 
-        private Iterator<kelondroRow.Entry> rowIterator;
+        private Iterator<Row.Entry> rowIterator;
         
         public EntryIterator() throws IOException {
             rowIterator = urlFileIndex.rows(true, null);
@@ -654,7 +654,7 @@ public class Balancer {
         }
 
         public CrawlEntry next() {
-            final kelondroRow.Entry entry = rowIterator.next();
+            final Row.Entry entry = rowIterator.next();
             try {
                 return (entry == null) ? null : new CrawlEntry(entry);
             } catch (final IOException e) {

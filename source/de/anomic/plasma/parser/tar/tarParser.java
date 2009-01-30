@@ -41,7 +41,7 @@ import com.ice.tar.TarInputStream;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterImageEntry;
-import de.anomic.kelondro.kelondroByteBuffer;
+import de.anomic.kelondro.tools.ByteBuffer;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.parser.AbstractParser;
@@ -90,7 +90,7 @@ public class tarParser extends AbstractParser implements Parser {
                 outputFile = File.createTempFile("zipParser",".tmp");
                 docText = new BufferedOutputStream(new FileOutputStream(outputFile));
             } else {
-                docText = new kelondroByteBuffer();
+                docText = new ByteBuffer();
             }            
             
             // creating a new parser class to parse the unzipped content
@@ -183,7 +183,7 @@ public class tarParser extends AbstractParser implements Parser {
             
             plasmaParserDocument result = null;
             
-            if (docText instanceof kelondroByteBuffer) {
+            if (docText instanceof ByteBuffer) {
                 result = new plasmaParserDocument(
                     location,
                     mimeType,
@@ -194,7 +194,7 @@ public class tarParser extends AbstractParser implements Parser {
                     "", // TODO: AUTHOR
                     docSections.toArray(new String[docSections.size()]),
                     docAbstrct.toString(),
-                    ((kelondroByteBuffer)docText).getBytes(),
+                    ((ByteBuffer)docText).getBytes(),
                     docAnchors,
                     docImages);
             } else {

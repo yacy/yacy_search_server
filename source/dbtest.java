@@ -12,18 +12,18 @@ import java.util.Random;
 
 import javax.imageio.ImageIO;
 
-import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroCloneableIterator;
 import de.anomic.kelondro.kelondroEcoTable;
-import de.anomic.kelondro.kelondroIndex;
 import de.anomic.kelondro.kelondroIntBytesMap;
-import de.anomic.kelondro.kelondroNaturalOrder;
-import de.anomic.kelondro.kelondroRow;
-import de.anomic.kelondro.kelondroRowSet;
 import de.anomic.kelondro.kelondroSQLTable;
 import de.anomic.kelondro.kelondroSplitTable;
 import de.anomic.kelondro.kelondroTree;
-import de.anomic.kelondro.kelondroMemory;
+import de.anomic.kelondro.coding.Base64Order;
+import de.anomic.kelondro.coding.NaturalOrder;
+import de.anomic.kelondro.index.Row;
+import de.anomic.kelondro.index.RowSet;
+import de.anomic.kelondro.index.ObjectIndex;
+import de.anomic.kelondro.tools.MemoryControl;
 import de.anomic.server.serverInstantBusyThread;
 import de.anomic.ymage.ymageChart;
 
@@ -42,8 +42,8 @@ public class dbtest {
     public static byte[] randomHash(final long r0, final long r1) {
         // a long can have 64 bit, but a 12-byte hash can have 6 * 12 = 72 bits
         // so we construct a generic Hash using two long values
-        final String s = (kelondroBase64Order.enhancedCoder.encodeLong(Math.abs(r0), 6) +
-                    kelondroBase64Order.enhancedCoder.encodeLong(Math.abs(r1), 6));
+        final String s = (Base64Order.enhancedCoder.encodeLong(Math.abs(r0), 6) +
+                    Base64Order.enhancedCoder.encodeLong(Math.abs(r1), 6));
         return s.getBytes();
     }
     
@@ -90,21 +90,21 @@ public class dbtest {
     }
 
     public static abstract class STJob implements Runnable {
-        private final kelondroIndex table_test, table_reference;
+        private final ObjectIndex table_test, table_reference;
 
         private final long source;
 
-        public STJob(final kelondroIndex table_test, final kelondroIndex table_reference, final long aSource) {
+        public STJob(final ObjectIndex table_test, final ObjectIndex table_reference, final long aSource) {
             this.table_test = table_test;
             this.table_reference = table_reference;
             this.source = aSource;
         }
 
-        public kelondroIndex getTable_test() {
+        public ObjectIndex getTable_test() {
             return this.table_test;
         }
 
-        public kelondroIndex getTable_reference() {
+        public ObjectIndex getTable_reference() {
             return this.table_reference;
         }
 
@@ -116,13 +116,13 @@ public class dbtest {
     }
 
     public static final class WriteJob extends STJob {
-        public WriteJob(final kelondroIndex table_test, final kelondroIndex table_reference, final long aSource) {
+        public WriteJob(final ObjectIndex table_test, final ObjectIndex table_reference, final long aSource) {
             super(table_test, table_reference, aSource);
         }
 
         public void run() {
             final STEntry entry = new STEntry(this.getSource());
-            System.out.println("write:  " + kelondroNaturalOrder.arrayList(entry.getKey(), 0, entry.getKey().length));
+            System.out.println("write:  " + NaturalOrder.arrayList(entry.getKey(), 0, entry.getKey().length));
             try {
                 getTable_test().put(getTable_test().row().newEntry(new byte[][] { entry.getKey(), entry.getValue() , entry.getValue() }));
                 if (getTable_reference() != null) getTable_reference().put(getTable_test().row().newEntry(new byte[][] { entry.getKey(), entry.getValue() , entry.getValue() }));
@@ -135,13 +135,13 @@ public class dbtest {
     }
 
     public static final class RemoveJob extends STJob {
-        public RemoveJob(final kelondroIndex table_test, final kelondroIndex table_reference, final long aSource) {
+        public RemoveJob(final ObjectIndex table_test, final ObjectIndex table_reference, final long aSource) {
             super(table_test, table_reference, aSource);
         }
 
         public void run() {
             final STEntry entry = new STEntry(this.getSource());
-            System.out.println("remove: " + kelondroNaturalOrder.arrayList(entry.getKey(), 0, entry.getKey().length));
+            System.out.println("remove: " + NaturalOrder.arrayList(entry.getKey(), 0, entry.getKey().length));
             try {
                 getTable_test().remove(entry.getKey());
                 if (getTable_reference() != null) getTable_reference().remove(entry.getKey());
@@ -154,14 +154,14 @@ public class dbtest {
     }
 
     public static final class ReadJob extends STJob {
-        public ReadJob(final kelondroIndex table_test, final kelondroIndex table_reference, final long aSource) {
+        public ReadJob(final ObjectIndex table_test, final ObjectIndex table_reference, final long aSource) {
             super(table_test, table_reference, aSource);
         }
 
         public void run() {
             final STEntry entry = new STEntry(this.getSource());
             try {
-                kelondroRow.Entry entryBytes = getTable_test().get(entry.getKey());
+                Row.Entry entryBytes = getTable_test().get(entry.getKey());
                 if (entryBytes != null) {
                     final STEntry dbEntry = new STEntry(entryBytes.getColBytes(0), entryBytes.getColBytes(1));
                     if (!dbEntry.isValid()) {
@@ -191,9 +191,9 @@ public class dbtest {
         }
     }
     
-    public static kelondroIndex selectTableType(final String dbe, final String tablename, final kelondroRow testRow) throws Exception {
+    public static ObjectIndex selectTableType(final String dbe, final String tablename, final Row testRow) throws Exception {
         if (dbe.equals("kelondroRowSet")) {
-            return new kelondroRowSet(testRow, 0);
+            return new RowSet(testRow, 0);
         }
         if (dbe.equals("kelondroSplitTable")) {
             final File tablepath = new File(tablename).getParentFile();
@@ -211,7 +211,7 @@ public class dbtest {
         return null;
     }
     
-    public static boolean checkEquivalence(final kelondroIndex test, final kelondroIndex reference) throws IOException {
+    public static boolean checkEquivalence(final ObjectIndex test, final ObjectIndex reference) throws IOException {
         if (reference == null) return true;
         if (test.size() == reference.size()) {
             System.out.println("* Testing equivalence of test table to reference table, " + test.size() + " entries");
@@ -220,9 +220,9 @@ public class dbtest {
             return false;
         }
         boolean eq = true;
-        kelondroRow.Entry test_entry, reference_entry;
+        Row.Entry test_entry, reference_entry;
         
-        Iterator<kelondroRow.Entry> i = test.rows(true, null);
+        Iterator<Row.Entry> i = test.rows(true, null);
         System.out.println("* Testing now by enumeration over test table");
         final long ts = System.currentTimeMillis();
         while (i.hasNext()) {
@@ -259,7 +259,7 @@ public class dbtest {
         boolean assertionenabled = false;
         assert assertionenabled = true;
         if (assertionenabled) System.out.println("*** Asserts are enabled"); else System.out.println("*** HINT: YOU SHOULD ENABLE ASSERTS! (include -ea in start arguments");
-        final long mb = kelondroMemory.available() / 1024 / 1024;
+        final long mb = MemoryControl.available() / 1024 / 1024;
         System.out.println("*** RAM = " + mb + " MB");
         System.out.print(">java " +
                 ((assertionenabled) ? "-ea " : "") +
@@ -284,9 +284,9 @@ public class dbtest {
             profiler.start();
             
             // create the database access
-            final kelondroRow testRow = new kelondroRow("byte[] key-" + keylength + ", byte[] dummy-" + keylength + ", value-" + valuelength, kelondroBase64Order.enhancedCoder, 0);
-            final kelondroIndex table_test = selectTableType(dbe_test, tablename_test, testRow);
-            final kelondroIndex table_reference = (dbe_reference == null) ? null : selectTableType(dbe_reference, tablename_reference, testRow);
+            final Row testRow = new Row("byte[] key-" + keylength + ", byte[] dummy-" + keylength + ", value-" + valuelength, Base64Order.enhancedCoder, 0);
+            final ObjectIndex table_test = selectTableType(dbe_test, tablename_test, testRow);
+            final ObjectIndex table_reference = (dbe_reference == null) ? null : selectTableType(dbe_reference, tablename_reference, testRow);
             
             final long afterinit = System.currentTimeMillis();
             System.out.println("Test for db-engine " + dbe_test +  " started to create file " + tablename_test + " with test " + command);
@@ -321,7 +321,7 @@ public class dbtest {
                 final long count = Long.parseLong(args[4]);
                 final long randomstart = Long.parseLong(args[5]);
                 final Random random = new Random(randomstart);
-                kelondroRow.Entry entry;
+                Row.Entry entry;
                 byte[] key;
                 for (int i = 0; i < count; i++) {
                     key = randomHash(random);
@@ -376,24 +376,24 @@ public class dbtest {
                     
                     System.out.println("Loop " + loop + ": Write = " + write + ", Remove = " + remove);
                     System.out.println(" bevore GC: " +
-                              "free = " + kelondroMemory.free() +
-                            ", max = " + kelondroMemory.max() +
-                            ", total = " + kelondroMemory.total());
+                              "free = " + MemoryControl.free() +
+                            ", max = " + MemoryControl.max() +
+                            ", total = " + MemoryControl.total());
                     System.gc();
                     System.out.println(" after  GC: " +
-                            "free = " + kelondroMemory.free() +
-                          ", max = " + kelondroMemory.max() +
-                          ", total = " + kelondroMemory.total());
+                            "free = " + MemoryControl.free() +
+                          ", max = " + MemoryControl.max() +
+                          ", total = " + MemoryControl.total());
                   loop++;
                 }
             }
             
             if (command.equals("list")) {
-                kelondroCloneableIterator<kelondroRow.Entry> i = null;
+                kelondroCloneableIterator<Row.Entry> i = null;
                 if (table_test instanceof kelondroTree) i = ((kelondroTree) table_test).rows(true, null);
                 if (table_test instanceof kelondroSQLTable) i = ((kelondroSQLTable) table_test).rows(true, null);
                 if(i != null) {
-                    kelondroRow.Entry row;
+                    Row.Entry row;
                     while (i.hasNext()) {
                         row = i.next();
                         for (int j = 0; j < row.columns(); j++) System.out.print(row.getColString(j, null) + ",");
@@ -538,7 +538,7 @@ final class memprofiler extends Thread {
         while(run) {
             memChart.setColor("FF0000");
             seconds1 = (int) ((System.currentTimeMillis() - start) / 1000);
-            kilobytes1 = (int) (kelondroMemory.used() / 1024);
+            kilobytes1 = (int) (MemoryControl.used() / 1024);
             memChart.chartLine(ymageChart.DIMENSION_BOTTOM, ymageChart.DIMENSION_LEFT, seconds0, kilobytes0, seconds1, kilobytes1);
             seconds0 = seconds1;
             kilobytes0 = kilobytes1;

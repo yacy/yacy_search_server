@@ -33,13 +33,18 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
-public class kelondroFixedWidthArray extends kelondroFullRecords implements kelondroArray {
+import de.anomic.kelondro.coding.NaturalOrder;
+import de.anomic.kelondro.index.Array;
+import de.anomic.kelondro.index.Row;
+import de.anomic.kelondro.io.RandomAccessInterface;
+
+public class kelondroFixedWidthArray extends kelondroFullRecords implements Array {
 
     // define the Over-Head-Array
     private static short thisOHBytes   = 0; // our record definition does not need extra bytes
     private static short thisOHHandles = 0; // and no handles
     
-    public kelondroFixedWidthArray(final File file, final kelondroRow rowdef, final int intprops) throws IOException {
+    public kelondroFixedWidthArray(final File file, final Row rowdef, final int intprops) throws IOException {
         // this creates a new array
         //super(file, true, -1, thisOHBytes, thisOHHandles, rowdef, intprops, rowdef.columns() /* txtProps */, 80 /* txtPropWidth */);
         super(file, thisOHBytes, thisOHHandles, rowdef, intprops, rowdef.columns() /* txtProps */, 80 /* txtPropWidth */);
@@ -54,7 +59,7 @@ public class kelondroFixedWidthArray extends kelondroFullRecords implements kelo
         }
     }
     
-    public kelondroFixedWidthArray(final kelondroRA ra, final String filename, final kelondroRow rowdef, final int intprops) throws IOException {
+    public kelondroFixedWidthArray(final RandomAccessInterface ra, final String filename, final Row rowdef, final int intprops) throws IOException {
         // this creates a new array
         //super(ra, filename, true, -1, thisOHBytes, thisOHHandles, rowdef, intprops, rowdef.columns() /* txtProps */, 80 /* txtPropWidth */, false);
         super(ra, filename, thisOHBytes, thisOHHandles, rowdef, intprops, rowdef.columns() /* txtProps */, 80 /* txtPropWidth */, false);
@@ -67,7 +72,7 @@ public class kelondroFixedWidthArray extends kelondroFullRecords implements kelo
         }
     }
     
-    public static kelondroFixedWidthArray open(final File file, final kelondroRow rowdef, final int intprops) {
+    public static kelondroFixedWidthArray open(final File file, final Row rowdef, final int intprops) {
         try {
             return new kelondroFixedWidthArray(file, rowdef, intprops);
         } catch (final IOException e) {
@@ -83,7 +88,7 @@ public class kelondroFixedWidthArray extends kelondroFullRecords implements kelo
         }
     }
     
-    public synchronized void set(final int index, final kelondroRow.Entry rowentry) throws IOException {
+    public synchronized void set(final int index, final Row.Entry rowentry) throws IOException {
         // this writes a row without reading the row from the file system first
         
         // create a node at position index with rowentry
@@ -94,9 +99,9 @@ public class kelondroFixedWidthArray extends kelondroFullRecords implements kelo
         // the OHbytes and OHhandles are zero.
     }
     
-    public synchronized void setMultiple(final TreeMap<Integer, kelondroRow.Entry> rows) throws IOException {
-        final Iterator<Map.Entry<Integer, kelondroRow.Entry>> i = rows.entrySet().iterator();
-        Map.Entry<Integer, kelondroRow.Entry> entry;
+    public synchronized void setMultiple(final TreeMap<Integer, Row.Entry> rows) throws IOException {
+        final Iterator<Map.Entry<Integer, Row.Entry>> i = rows.entrySet().iterator();
+        Map.Entry<Integer, Row.Entry> entry;
         int k;
         while (i.hasNext()) {
             entry = i.next();
@@ -105,14 +110,14 @@ public class kelondroFixedWidthArray extends kelondroFullRecords implements kelo
         }
     }
    
-    public synchronized kelondroRow.Entry getIfValid(final int index) throws IOException {
+    public synchronized Row.Entry getIfValid(final int index) throws IOException {
     	final byte[] b = (new EcoNode(new kelondroHandle(index))).getValueRow();
     	if (b[0] == 0) return null;
     	if ((b[0] == -128) && (b[1] == 0)) return null;
     	return row().newEntry(b);
     }
     
-    public synchronized kelondroRow.Entry get(final int index) throws IOException {
+    public synchronized Row.Entry get(final int index) throws IOException {
     	return row().newEntry(new EcoNode(new kelondroHandle(index)).getValueRow());
     }
 
@@ -126,7 +131,7 @@ public class kelondroFixedWidthArray extends kelondroFullRecords implements kelo
         return getHandle(index).hashCode();
     }
 
-    public synchronized int add(final kelondroRow.Entry rowentry) throws IOException {
+    public synchronized int add(final Row.Entry rowentry) throws IOException {
         // adds a new rowentry, but re-uses a previously as-deleted marked entry
         final kelondroNode n = new EcoNode(rowentry.bytes());
         n.commit();
@@ -150,7 +155,7 @@ public class kelondroFixedWidthArray extends kelondroFullRecords implements kelo
     
     public void print() throws IOException {
         System.out.println("PRINTOUT of table, length=" + size());
-        kelondroRow.Entry row;
+        Row.Entry row;
         for (int i = 0; i < (super.free() + super.size()); i++) {
             System.out.print("row " + i + ": ");
             row = get(i);
@@ -163,7 +168,7 @@ public class kelondroFixedWidthArray extends kelondroFullRecords implements kelo
     public static void main(final String[] args) {
         //File f = new File("d:\\\\mc\\privat\\fixtest.db");
         final File f = new File("/Users/admin/fixtest.db");
-        final kelondroRow rowdef = new kelondroRow("byte[] a-12, byte[] b-4", kelondroNaturalOrder.naturalOrder, 0);
+        final Row rowdef = new Row("byte[] a-12, byte[] b-4", NaturalOrder.naturalOrder, 0);
         try {
             System.out.println("erster Test");
             f.delete();

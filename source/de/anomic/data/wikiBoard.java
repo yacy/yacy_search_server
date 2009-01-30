@@ -32,9 +32,9 @@ import java.util.Map;
 import java.util.TimeZone;
 
 import de.anomic.kelondro.kelondroBLOBTree;
-import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroMap;
-import de.anomic.kelondro.kelondroNaturalOrder;
+import de.anomic.kelondro.coding.Base64Order;
+import de.anomic.kelondro.coding.NaturalOrder;
 
 public class wikiBoard {
 
@@ -55,11 +55,11 @@ public class wikiBoard {
     public wikiBoard(final File actpath, final File bkppath) {
         new File(actpath.getParent()).mkdirs();
         if (datbase == null) {
-            datbase = new kelondroMap(new kelondroBLOBTree(actpath, true, true, keyLength, recordSize, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 500);
+            datbase = new kelondroMap(new kelondroBLOBTree(actpath, true, true, keyLength, recordSize, '_', NaturalOrder.naturalOrder, true, false, false), 500);
         }
         new File(bkppath.getParent()).mkdirs();
         if (bkpbase == null) {
-            bkpbase = new kelondroMap(new kelondroBLOBTree(bkppath, true, true, keyLength + dateFormat.length(), recordSize, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 500);
+            bkpbase = new kelondroMap(new kelondroBLOBTree(bkppath, true, true, keyLength + dateFormat.length(), recordSize, '_', NaturalOrder.naturalOrder, true, false, false), 500);
         }
     }
 
@@ -125,15 +125,15 @@ public class wikiBoard {
             if (key.length() > keyLength) key = key.substring(0, keyLength);
             record.put("date", dateString());
             if ((author == null) || (author.length() == 0)) author = "anonymous";
-            record.put("author", kelondroBase64Order.enhancedCoder.encode(author.getBytes("UTF-8")));
+            record.put("author", Base64Order.enhancedCoder.encode(author.getBytes("UTF-8")));
             if ((ip == null) || (ip.length() == 0)) ip = "";
             record.put("ip", ip);
             if ((reason == null) || (reason.length() == 0)) reason = "";
-            record.put("reason", kelondroBase64Order.enhancedCoder.encode(reason.getBytes("UTF-8")));
+            record.put("reason", Base64Order.enhancedCoder.encode(reason.getBytes("UTF-8")));
             if (page == null)
                 record.put("page", "");
             else
-                record.put("page", kelondroBase64Order.enhancedCoder.encode(page));
+                record.put("page", Base64Order.enhancedCoder.encode(page));
             authors.put(ip, author);
             //System.out.println("DEBUG: setting author " + author + " for ip = " + ip + ", authors = " + authors.toString());
         }
@@ -165,7 +165,7 @@ public class wikiBoard {
         public String author() {
             final String a = record.get("author");
             if (a == null) return "anonymous";
-            final byte[] b = kelondroBase64Order.enhancedCoder.decode(a, "de.anomic.data.wikiBoard.author()");
+            final byte[] b = Base64Order.enhancedCoder.decode(a, "de.anomic.data.wikiBoard.author()");
             if (b == null) return "anonymous";
             return new String(b);
         }
@@ -173,7 +173,7 @@ public class wikiBoard {
         public String reason() {
             final String r = record.get("reason");
             if (r == null) return "";
-            final byte[] b = kelondroBase64Order.enhancedCoder.decode(r, "de.anomic.data.wikiBoard.reason()");
+            final byte[] b = Base64Order.enhancedCoder.decode(r, "de.anomic.data.wikiBoard.reason()");
             if (b == null) return "unknown";
             return new String(b);
         }
@@ -181,7 +181,7 @@ public class wikiBoard {
         public byte[] page() {
             final String m = record.get("page");
             if (m == null) return new byte[0];
-            final byte[] b = kelondroBase64Order.enhancedCoder.decode(m, "de.anomic.data.wikiBoard.page()");
+            final byte[] b = Base64Order.enhancedCoder.decode(m, "de.anomic.data.wikiBoard.page()");
             if (b == null) return "".getBytes();
             return b;
         }
@@ -221,13 +221,13 @@ public class wikiBoard {
         }
 
         void setChild(final String subject) {
-            record.put("child", kelondroBase64Order.enhancedCoder.encode(subject.getBytes()));
+            record.put("child", Base64Order.enhancedCoder.encode(subject.getBytes()));
         }
 
         private String getChildName() {
             final String c = record.get("child");
             if (c == null) return null;
-            final byte[] subject = kelondroBase64Order.enhancedCoder.decode(c, "de.anomic.data.wikiBoard.getChildName()");
+            final byte[] subject = Base64Order.enhancedCoder.decode(c, "de.anomic.data.wikiBoard.getChildName()");
             if (subject == null) return null;
             return new String(subject);
         }
@@ -235,7 +235,7 @@ public class wikiBoard {
         public boolean hasChild() {
             final String c = record.get("child");
             if (c == null) return false;
-            final byte[] subject = kelondroBase64Order.enhancedCoder.decode(c, "de.anomic.data.wikiBoard.hasChild()");
+            final byte[] subject = Base64Order.enhancedCoder.decode(c, "de.anomic.data.wikiBoard.hasChild()");
             return (subject != null);
         }
 

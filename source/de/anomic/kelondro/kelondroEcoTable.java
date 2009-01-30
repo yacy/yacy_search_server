@@ -38,7 +38,17 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import de.anomic.kelondro.kelondroRow.Entry;
+import de.anomic.kelondro.coding.NaturalOrder;
+import de.anomic.kelondro.index.BytesIntMap;
+import de.anomic.kelondro.index.Column;
+import de.anomic.kelondro.index.Row;
+import de.anomic.kelondro.index.RowCollection;
+import de.anomic.kelondro.index.RowSet;
+import de.anomic.kelondro.index.ObjectIndex;
+import de.anomic.kelondro.index.Row.Entry;
+import de.anomic.kelondro.io.kelondroBufferedEcoFS;
+import de.anomic.kelondro.io.kelondroEcoFS;
+import de.anomic.kelondro.tools.MemoryControl;
 import de.anomic.server.logging.serverLog;
 
 /*
@@ -51,7 +61,7 @@ import de.anomic.server.logging.serverLog;
  * The content cache can also be deleted during run-time, if the available RAM gets too low.
  */
 
-public class kelondroEcoTable implements kelondroIndex {
+public class kelondroEcoTable implements ObjectIndex {
 
     // static tracker objects
     private static TreeMap<String, kelondroEcoTable> tableTracker = new TreeMap<String, kelondroEcoTable>();
@@ -62,26 +72,26 @@ public class kelondroEcoTable implements kelondroIndex {
     
     public static final long maxarraylength = 134217727L; // that may be the maxmimum size of array length in some JVMs
     private static final long minmemremaining = 20 * 1024 * 1024; // if less than this memory is remaininig, the memory copy of a table is abandoned
-    kelondroRowSet table;
-    kelondroBytesIntMap index;
+    RowSet table;
+    BytesIntMap index;
     kelondroBufferedEcoFS file;
-    kelondroRow rowdef;
+    Row rowdef;
     int fail;
 
-    kelondroRow taildef;
+    Row taildef;
     private final int buffersize;
     
-    public kelondroEcoTable(final File tablefile, final kelondroRow rowdef, final int useTailCache, final int buffersize, final int initialSpace) {
+    public kelondroEcoTable(final File tablefile, final Row rowdef, final int useTailCache, final int buffersize, final int initialSpace) {
         this.rowdef = rowdef;
         this.buffersize = buffersize;
         //this.fail = 0;
         assert rowdef.primaryKeyIndex == 0;
         // define the taildef, a row like the rowdef but without the first column
-        final kelondroColumn[] cols = new kelondroColumn[rowdef.columns() - 1];
+        final Column[] cols = new Column[rowdef.columns() - 1];
         for (int i = 0; i < cols.length; i++) {
             cols[i] = rowdef.column(i + 1);
         }
-        this.taildef = new kelondroRow(cols, kelondroNaturalOrder.naturalOrder, -1);
+        this.taildef = new Row(cols, NaturalOrder.naturalOrder, -1);
         
         // initialize table file
         if (!tablefile.exists()) {
@@ -105,19 +115,19 @@ public class kelondroEcoTable implements kelondroIndex {
             final long neededRAM4table = (records) * ((rowdef.objectsize) + 4L) * 3L;
             table = ((neededRAM4table < maxarraylength) &&
                      ((useTailCache == tailCacheForceUsage) ||
-                      ((useTailCache == tailCacheUsageAuto) && (kelondroMemory.free() > neededRAM4table + 200 * 1024 * 1024)))) ?
-                    new kelondroRowSet(taildef, records) : null;
-            serverLog.logInfo("ECOTABLE", "initialization of " + tablefile + ": available RAM: " + (kelondroMemory.available() / 1024 / 1024) + "MB, allocating space for " + records + " entries");
+                      ((useTailCache == tailCacheUsageAuto) && (MemoryControl.free() > neededRAM4table + 200 * 1024 * 1024)))) ?
+                    new RowSet(taildef, records) : null;
+            serverLog.logInfo("ECOTABLE", "initialization of " + tablefile + ": available RAM: " + (MemoryControl.available() / 1024 / 1024) + "MB, allocating space for " + records + " entries");
             final long neededRAM4index = 2 * 1024 * 1024 + records * (rowdef.primaryKeyLength + 4) * 3 / 2;
-            if (!kelondroMemory.request(neededRAM4index, false)) {
+            if (!MemoryControl.request(neededRAM4index, false)) {
                 // despite calculations seemed to show that there is enough memory for the table AND the index
                 // there is now not enough memory left for the index. So delete the table again to free the memory
                 // for the index
-                serverLog.logSevere("ECOTABLE", tablefile + ": not enough RAM (" + (kelondroMemory.available() / 1024 / 1024) + "MB) left for index, deleting allocated table space to enable index space allocation (needed: " + (neededRAM4index / 1024 / 1024) + "MB)");
+                serverLog.logSevere("ECOTABLE", tablefile + ": not enough RAM (" + (MemoryControl.available() / 1024 / 1024) + "MB) left for index, deleting allocated table space to enable index space allocation (needed: " + (neededRAM4index / 1024 / 1024) + "MB)");
                 table = null; System.gc();
-                serverLog.logSevere("ECOTABLE", tablefile + ": RAM after releasing the table: " + (kelondroMemory.available() / 1024 / 1024) + "MB");
+                serverLog.logSevere("ECOTABLE", tablefile + ": RAM after releasing the table: " + (MemoryControl.available() / 1024 / 1024) + "MB");
             }
-            index = new kelondroBytesIntMap(rowdef.primaryKeyLength, rowdef.objectOrder, records);
+            index = new BytesIntMap(rowdef.primaryKeyLength, rowdef.objectOrder, records);
             serverLog.logInfo("ECOTABLE", tablefile + ": EcoTable " + tablefile.toString() + " has table copy " + ((table == null) ? "DISABLED" : "ENABLED"));
 
             // read all elements from the file into the copy table
@@ -207,7 +217,7 @@ public class kelondroEcoTable implements kelondroIndex {
     
     private boolean abandonTable() {
         // check if not enough memory is there to maintain a memory copy of the table
-        return kelondroMemory.available() < minmemremaining;
+        return MemoryControl.available() < minmemremaining;
     }
     
     public static long tableSize(final File tablefile, final int recordsize) {
@@ -234,9 +244,9 @@ public class kelondroEcoTable implements kelondroIndex {
         final HashMap<String, String> map = new HashMap<String, String>();
         map.put("tableSize", Integer.toString(index.size()));
         map.put("tableKeyChunkSize", Integer.toString(index.row().objectsize));
-        map.put("tableKeyMem", Integer.toString((int) (index.row().objectsize * index.size() * kelondroRowCollection.growfactor)));
+        map.put("tableKeyMem", Integer.toString((int) (index.row().objectsize * index.size() * RowCollection.growfactor)));
         map.put("tableValueChunkSize", (table == null) ? "0" : Integer.toString(table.row().objectsize));
-        map.put("tableValueMem", (table == null) ? "0" : Integer.toString((int) (table.row().objectsize * table.size() * kelondroRowCollection.growfactor)));
+        map.put("tableValueMem", (table == null) ? "0" : Integer.toString((int) (table.row().objectsize * table.size() * RowCollection.growfactor)));
         return map;
     }
     
@@ -244,8 +254,8 @@ public class kelondroEcoTable implements kelondroIndex {
         return this.table != null;
     }
     
-    public static int staticRAMIndexNeed(final File f, final kelondroRow rowdef) {
-        return (int) ((rowdef.primaryKeyLength + 4) * tableSize(f, rowdef.objectsize) * kelondroRowCollection.growfactor);
+    public static int staticRAMIndexNeed(final File f, final Row rowdef) {
+        return (int) ((rowdef.primaryKeyLength + 4) * tableSize(f, rowdef.objectsize) * RowCollection.growfactor);
     }
     
     public synchronized void addUnique(final Entry row) throws IOException {
@@ -276,19 +286,19 @@ public class kelondroEcoTable implements kelondroIndex {
      * this process calls the underlying removeDoubles() method from the table index
      * and 
      */
-    public synchronized ArrayList<kelondroRowCollection> removeDoubles() throws IOException {
+    public synchronized ArrayList<RowCollection> removeDoubles() throws IOException {
         assert file.size() == index.size() + fail : "file.size() = " + file.size() + ", index.size() = " + index.size();
-        final ArrayList<kelondroRowCollection> report = new ArrayList<kelondroRowCollection>();
-        kelondroRowSet rows;
+        final ArrayList<RowCollection> report = new ArrayList<RowCollection>();
+        RowSet rows;
         final TreeSet<Integer> d = new TreeSet<Integer>();
         final byte[] b = new byte[rowdef.objectsize];
         Integer L;
-        kelondroRow.Entry inconsistentEntry;
+        Row.Entry inconsistentEntry;
         // iterate over all entries that have inconsistent index references
         for (final Integer[] is: index.removeDoubles()) {
             // 'is' is the set of all indexes, that have the same reference
             // we collect that entries now here
-            rows = new kelondroRowSet(this.rowdef, is.length);
+            rows = new RowSet(this.rowdef, is.length);
             for (int j = 0; j < is.length; j++) {
                 L = is[j];
                 assert L.intValue() < file.size() : "L.intValue() = " + L.intValue() + ", file.size = " + file.size(); // prevent ooBounds Exception
@@ -338,7 +348,7 @@ public class kelondroEcoTable implements kelondroIndex {
             file.get(i, b, 0);
         } else {
             // construct the row using the copy in RAM
-            final kelondroRow.Entry v = table.get(i, false);
+            final Row.Entry v = table.get(i, false);
             assert v != null;
             if (v == null) return null;
             assert key.length == rowdef.primaryKeyLength;
@@ -385,7 +395,7 @@ public class kelondroEcoTable implements kelondroIndex {
             file.put(i, row.bytes(), 0);
         } else {
             // read old value
-            final kelondroRow.Entry v = table.get(i, false);
+            final Row.Entry v = table.get(i, false);
             assert v != null;
             System.arraycopy(row.getPrimaryKeyBytes(), 0, b, 0, rowdef.primaryKeyLength);
             System.arraycopy(v.bytes(), 0, b, rowdef.primaryKeyLength, rowdef.objectsize - rowdef.primaryKeyLength);
@@ -433,12 +443,12 @@ public class kelondroEcoTable implements kelondroIndex {
                 file.cleanLast();
             } else {
                 // switch values
-                final kelondroRow.Entry te = table.removeOne();
+                final Row.Entry te = table.removeOne();
                 table.set(i, te);
 
                 file.cleanLast(p, 0);
                 file.put(i, p, 0);
-                final kelondroRow.Entry lr = rowdef.newEntry(p);
+                final Row.Entry lr = rowdef.newEntry(p);
                 index.puti(lr.getPrimaryKeyBytes(), i);
             }
         }
@@ -476,7 +486,7 @@ public class kelondroEcoTable implements kelondroIndex {
             assert (file.size() == index.size() + fail);
         } else {
             // get result value from the table copy, so we don't need to read it from the file
-            final kelondroRow.Entry v = table.get(i, false);
+            final Row.Entry v = table.get(i, false);
             System.arraycopy(key, 0, b, 0, key.length);
             System.arraycopy(v.bytes(), 0, b, rowdef.primaryKeyLength, taildef.objectsize);
             
@@ -491,12 +501,12 @@ public class kelondroEcoTable implements kelondroIndex {
                 ix = index.removei(key);
                 assert ix == i;
                 
-                final kelondroRow.Entry te = table.removeOne();
+                final Row.Entry te = table.removeOne();
                 table.set(i, te);
 
                 file.cleanLast(p, 0);
                 file.put(i, p, 0);
-                final kelondroRow.Entry lr = rowdef.newEntry(p);
+                final Row.Entry lr = rowdef.newEntry(p);
                 index.puti(lr.getPrimaryKeyBytes(), i);
             }
             assert (file.size() == index.size() + fail);
@@ -513,7 +523,7 @@ public class kelondroEcoTable implements kelondroIndex {
         assert ((table == null) || (table.size() == index.size()));
         final byte[] le = new byte[rowdef.objectsize];
         file.cleanLast(le, 0);
-        final kelondroRow.Entry lr = rowdef.newEntry(le);
+        final Row.Entry lr = rowdef.newEntry(le);
         final int i = index.removei(lr.getPrimaryKeyBytes());
         assert i >= 0;
         if (table != null) table.removeOne();
@@ -546,11 +556,11 @@ public class kelondroEcoTable implements kelondroIndex {
         }
         
         // initialize index and copy table
-        table = (table == null) ? null : new kelondroRowSet(taildef, 1);
-        index = new kelondroBytesIntMap(rowdef.primaryKeyLength, rowdef.objectOrder, 1);        
+        table = (table == null) ? null : new RowSet(taildef, 1);
+        index = new BytesIntMap(rowdef.primaryKeyLength, rowdef.objectOrder, 1);        
     }
 
-    public kelondroRow row() {
+    public Row row() {
         return this.rowdef;
     }
 
@@ -611,7 +621,7 @@ public class kelondroEcoTable implements kelondroIndex {
                 }
             } else {
                 // compose from table and key
-                final kelondroRow.Entry v = table.get(this.c, false);
+                final Row.Entry v = table.get(this.c, false);
                 assert v != null;
                 if (v == null) return null;
                 System.arraycopy(k, 0, b, 0, rowdef.primaryKeyLength);
@@ -626,12 +636,12 @@ public class kelondroEcoTable implements kelondroIndex {
         
     }
     
-    public static kelondroIndex testTable(final File f, final String testentities, final int testcase) throws IOException {
+    public static ObjectIndex testTable(final File f, final String testentities, final int testcase) throws IOException {
         if (f.exists()) f.delete();
-        final kelondroRow rowdef = new kelondroRow("byte[] a-4, byte[] b-4", kelondroNaturalOrder.naturalOrder, 0);
-        final kelondroIndex tt = new kelondroEcoTable(f, rowdef, testcase, 100, 0);
+        final Row rowdef = new Row("byte[] a-4, byte[] b-4", NaturalOrder.naturalOrder, 0);
+        final ObjectIndex tt = new kelondroEcoTable(f, rowdef, testcase, 100, 0);
         byte[] b;
-        final kelondroRow.Entry row = rowdef.newEntry();
+        final Row.Entry row = rowdef.newEntry();
         for (int i = 0; i < testentities.length(); i++) {
             b = kelondroTree.testWord(testentities.charAt(i));
             row.setCol(0, b);
@@ -645,7 +655,7 @@ public class kelondroEcoTable implements kelondroIndex {
         System.out.println("starting big test with " + elements + " elements:");
         final long start = System.currentTimeMillis();
         final String[] s = kelondroTree.permutations(elements);
-        kelondroIndex tt;
+        ObjectIndex tt;
         try {
             for (int i = 0; i < s.length; i++) {
                 System.out.println("*** probing tree " + i + " for permutation " + s[i]);

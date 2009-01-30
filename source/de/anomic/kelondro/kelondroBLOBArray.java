@@ -36,6 +36,10 @@ import java.util.List;
 import java.util.TreeMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import de.anomic.kelondro.coding.ByteOrder;
+import de.anomic.kelondro.coding.DateFormatter;
+import de.anomic.kelondro.coding.NaturalOrder;
+
 public class kelondroBLOBArray implements kelondroBLOB {
 
     /*
@@ -55,7 +59,7 @@ public class kelondroBLOBArray implements kelondroBLOB {
     public static final long oneGigabyte = 1024 * 1024 * 1024;
     
     private int keylength;
-    private kelondroByteOrder ordering;
+    private ByteOrder ordering;
     private File heapLocation;
     private long fileAgeLimit;
     private long fileSizeLimit;
@@ -69,7 +73,7 @@ public class kelondroBLOBArray implements kelondroBLOB {
             final File heapLocation,
             final String blobSalt,
             final int keylength,
-            final kelondroByteOrder ordering,
+            final ByteOrder ordering,
             final int buffersize) throws IOException {
         this.keylength = keylength;
         this.blobSalt = blobSalt;
@@ -99,7 +103,7 @@ public class kelondroBLOBArray implements kelondroBLOB {
         for (int i = 0; i < files.length; i++) {
             if (files[i].length() >= 19 && files[i].endsWith(".blob")) {
                try {
-                   d = kelondroDate.parseShortSecond(files[i].substring(0, 14));
+                   d = DateFormatter.parseShortSecond(files[i].substring(0, 14));
                    time = d.getTime();
                    if (time > maxtime) maxtime = time;
                } catch (ParseException e) {continue;}
@@ -108,7 +112,7 @@ public class kelondroBLOBArray implements kelondroBLOB {
         for (int i = 0; i < files.length; i++) {
             if (files[i].length() >= 19 && files[i].endsWith(".blob")) {
                try {
-                   d = kelondroDate.parseShortSecond(files[i].substring(0, 14));
+                   d = DateFormatter.parseShortSecond(files[i].substring(0, 14));
                    f = new File(heapLocation, files[i]);
                    time = d.getTime();
                    oneBlob = (time == maxtime && buffersize > 0) ? new kelondroBLOBHeap(f, keylength, ordering, buffersize) : new kelondroBLOBHeapModifier(f, keylength, ordering);
@@ -133,7 +137,7 @@ public class kelondroBLOBArray implements kelondroBLOB {
     public void mountBLOB(File location) throws IOException {
         Date d;
         try {
-            d = kelondroDate.parseShortSecond(location.getName().substring(0, 14));
+            d = DateFormatter.parseShortSecond(location.getName().substring(0, 14));
         } catch (ParseException e) {
             throw new IOException("date parse problem with file " + location.toString() + ": " + e.getMessage());
         }
@@ -176,7 +180,7 @@ public class kelondroBLOBArray implements kelondroBLOB {
      * @return
      */
     public File newBLOB(Date creation) {
-        return new File(heapLocation, kelondroDate.formatShortSecond(creation) + "." + blobSalt + ".blob");
+        return new File(heapLocation, DateFormatter.formatShortSecond(creation) + "." + blobSalt + ".blob");
     }
     
     public String name() {
@@ -223,7 +227,7 @@ public class kelondroBLOBArray implements kelondroBLOB {
         return s;
     }
     
-    public kelondroByteOrder ordering() {
+    public ByteOrder ordering() {
         return this.ordering;
     }
     
@@ -422,7 +426,7 @@ public class kelondroBLOBArray implements kelondroBLOB {
         final File f = new File("/Users/admin/blobarraytest");
         try {
             //f.delete();
-            final kelondroBLOBArray heap = new kelondroBLOBArray(f, "test", 12, kelondroNaturalOrder.naturalOrder, 512 * 1024);
+            final kelondroBLOBArray heap = new kelondroBLOBArray(f, "test", 12, NaturalOrder.naturalOrder, 512 * 1024);
             heap.put("aaaaaaaaaaaa".getBytes(), "eins zwei drei".getBytes());
             heap.put("aaaaaaaaaaab".getBytes(), "vier fuenf sechs".getBytes());
             heap.put("aaaaaaaaaaac".getBytes(), "sieben acht neun".getBytes());

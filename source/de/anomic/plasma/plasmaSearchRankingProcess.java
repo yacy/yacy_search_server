@@ -43,17 +43,17 @@ import de.anomic.index.indexRWIEntryOrder;
 import de.anomic.index.indexRWIVarEntry;
 import de.anomic.index.indexURLReference;
 import de.anomic.index.indexWord;
-import de.anomic.kelondro.kelondroBinSearch;
-import de.anomic.kelondro.kelondroDigest;
-import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroSortStack;
+import de.anomic.kelondro.coding.Digest;
+import de.anomic.kelondro.index.BinSearch;
+import de.anomic.kelondro.tools.ScoreCluster;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverProfiling;
 import de.anomic.yacy.yacyURL;
 
 public final class plasmaSearchRankingProcess {
     
-    public  static kelondroBinSearch[] ybrTables = null; // block-rank tables
+    public  static BinSearch[] ybrTables = null; // block-rank tables
     public  static final int maxYBR = 3; // the lower this value, the faster the search
     private static boolean useYBR = true;
     private static final int maxDoubleDomAll = 20, maxDoubleDomSpecial = 10000;
@@ -66,7 +66,7 @@ public final class plasmaSearchRankingProcess {
     private int remote_peerCount, remote_indexCount, remote_resourceSize, local_resourceSize;
     private final indexRWIEntryOrder order;
     private final ConcurrentHashMap<String, Integer> urlhashes; // map for double-check; String/Long relation, addresses ranking number (backreference for deletion)
-    private final kelondroMScoreCluster<String> ref;  // reference score computation for the commonSense heuristic
+    private final ScoreCluster<String> ref;  // reference score computation for the commonSense heuristic
     private final int[] flagcount; // flag counter
     private final TreeSet<String> misses; // contains url-hashes that could not been found in the LURL-DB
     private final plasmaWordIndex wordIndex;
@@ -89,7 +89,7 @@ public final class plasmaSearchRankingProcess {
         this.remote_resourceSize = 0;
         this.local_resourceSize = 0;
         this.urlhashes = new ConcurrentHashMap<String, Integer>(0, 0.75f, concurrency);
-        this.ref = new kelondroMScoreCluster<String>();
+        this.ref = new ScoreCluster<String>();
         this.misses = new TreeSet<String>();
         this.wordIndex = wordIndex;
         this.flagcount = new int[32];
@@ -395,15 +395,15 @@ public final class plasmaSearchRankingProcess {
     public static void loadYBR(final File rankingPath, final int count) {
         // load ranking tables
         if (rankingPath.exists()) {
-            ybrTables = new kelondroBinSearch[count];
+            ybrTables = new BinSearch[count];
             String ybrName;
             File f;
             try {
                 for (int i = 0; i < count; i++) {
-                    ybrName = "YBR-4-" + kelondroDigest.encodeHex(i, 2) + ".idx";
+                    ybrName = "YBR-4-" + Digest.encodeHex(i, 2) + ".idx";
                     f = new File(rankingPath, ybrName);
                     if (f.exists()) {
-                        ybrTables[i] = new kelondroBinSearch(serverFileUtils.read(f), 6);
+                        ybrTables[i] = new BinSearch(serverFileUtils.read(f), 6);
                     } else {
                         ybrTables[i] = null;
                     }

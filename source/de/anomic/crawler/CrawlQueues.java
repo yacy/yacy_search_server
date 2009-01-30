@@ -38,7 +38,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import de.anomic.index.indexDocumentMetadata;
 import de.anomic.kelondro.kelondroFlexWidthArray;
-import de.anomic.kelondro.kelondroDate;
+import de.anomic.kelondro.coding.DateFormatter;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
@@ -390,7 +390,7 @@ public class CrawlQueues {
                 referrer = null;
             }
             try {
-                loaddate = kelondroDate.parseShortSecond(item.getPubDate());
+                loaddate = DateFormatter.parseShortSecond(item.getPubDate());
             } catch (final ParseException e) {
                 loaddate = new Date();
             }

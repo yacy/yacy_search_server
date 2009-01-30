@@ -32,25 +32,25 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroCloneableIterator;
 import de.anomic.kelondro.kelondroCollectionIndex;
 import de.anomic.kelondro.kelondroOutOfLimitsException;
-import de.anomic.kelondro.kelondroRow;
-import de.anomic.kelondro.kelondroRowSet;
+import de.anomic.kelondro.coding.Base64Order;
+import de.anomic.kelondro.index.Row;
+import de.anomic.kelondro.index.RowSet;
 import de.anomic.server.logging.serverLog;
 
 public class indexCollectionRI implements indexRI {
 
     kelondroCollectionIndex collectionIndex;
     
-    public indexCollectionRI(final File path, final String filenameStub, final int maxpartition, final kelondroRow payloadrow, boolean useCommons) {
+    public indexCollectionRI(final File path, final String filenameStub, final int maxpartition, final Row payloadrow, boolean useCommons) {
         try {
             collectionIndex = new kelondroCollectionIndex(
                     path,
                     filenameStub,
                     12 /*keyLength*/,
-                    kelondroBase64Order.enhancedCoder,
+                    Base64Order.enhancedCoder,
                     4 /*loadfactor*/,
                     maxpartition,
                     payloadrow,
@@ -89,7 +89,7 @@ public class indexCollectionRI implements indexRI {
         
         public wordContainersIterator(final String startWordHash, final boolean rot) {
             this.rot = rot;
-            this.wci = collectionIndex.keycollections(startWordHash.getBytes(), kelondroBase64Order.zero(startWordHash.length()), rot);
+            this.wci = collectionIndex.keycollections(startWordHash.getBytes(), Base64Order.zero(startWordHash.length()), rot);
         }
         
         public wordContainersIterator clone(final Object secondWordHash) {
@@ -104,7 +104,7 @@ public class indexCollectionRI implements indexRI {
             final Object[] oo = wci.next();
             if (oo == null) return null;
             final byte[] key = (byte[]) oo[0];
-            final kelondroRowSet collection = (kelondroRowSet) oo[1];
+            final RowSet collection = (RowSet) oo[1];
             if (collection == null) return null;
             return new indexContainer(new String(key), collection);
         }
@@ -121,7 +121,7 @@ public class indexCollectionRI implements indexRI {
     
     public indexContainer getContainer(final String wordHash, final Set<String> urlselection) {
         try {
-            final kelondroRowSet collection = collectionIndex.get(wordHash.getBytes());
+            final RowSet collection = collectionIndex.get(wordHash.getBytes());
             if (collection != null) collection.select(urlselection);
             if ((collection == null) || (collection.size() == 0)) return null;
             return new indexContainer(wordHash, collection);
@@ -132,7 +132,7 @@ public class indexCollectionRI implements indexRI {
 
     public indexContainer deleteContainer(final String wordHash) {
         try {
-            final kelondroRowSet collection = collectionIndex.delete(wordHash.getBytes());
+            final RowSet collection = collectionIndex.delete(wordHash.getBytes());
             if (collection == null) return null;
             return new indexContainer(wordHash, collection);
         } catch (final IOException e) {

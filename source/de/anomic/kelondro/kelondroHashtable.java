@@ -113,17 +113,22 @@ package de.anomic.kelondro;
 import java.io.File;
 import java.io.IOException;
 
+import de.anomic.kelondro.coding.Base64Order;
+import de.anomic.kelondro.index.Column;
+import de.anomic.kelondro.index.Row;
+import de.anomic.kelondro.tools.SetTools;
+
 public class kelondroHashtable {
     
     private final   kelondroFixedWidthArray hashArray;
     protected int offset;
     protected int maxk;
     private   int maxrehash;
-    private   kelondroRow.Entry dummyRow;
+    private   Row.Entry dummyRow;
     
-    private   static final byte[] dummyKey = kelondroBase64Order.enhancedCoder.encodeLong(0, 5).getBytes();
+    private   static final byte[] dummyKey = Base64Order.enhancedCoder.encodeLong(0, 5).getBytes();
 
-    public kelondroHashtable(final File file, final kelondroRow rowdef, final int offset, final int maxsize, final int maxrehash) throws IOException {
+    public kelondroHashtable(final File file, final Row rowdef, final int offset, final int maxsize, final int maxrehash) throws IOException {
         // this creates a new hashtable
         // the key element is not part of the columns array
         // this is unlike the kelondroTree, where the key is part of a row
@@ -141,8 +146,8 @@ public class kelondroHashtable {
             this.maxrehash = hashArray.geti(2);
         } else {
             this.offset = offset;
-            this.maxk = kelondroMSetTools.log2a(maxsize); // equal to |log2(maxsize)| + 1
-            if (this.maxk >= kelondroMSetTools.log2a(maxsize + power2(offset + 1) + 1) - 1) this.maxk--;
+            this.maxk = SetTools.log2a(maxsize); // equal to |log2(maxsize)| + 1
+            if (this.maxk >= SetTools.log2a(maxsize + power2(offset + 1) + 1) - 1) this.maxk--;
             this.maxrehash = maxrehash;
             dummyRow = this.hashArray.row().newEntry();
             dummyRow.setCol(0, dummyKey);
@@ -153,11 +158,11 @@ public class kelondroHashtable {
         }
     }
     
-    private kelondroRow extCol(final kelondroRow rowdef) {
-        final kelondroColumn[] newCol = new kelondroColumn[rowdef.columns() + 1];
-        newCol[0] = new kelondroColumn("Cardinal key-4 {b256}");
+    private Row extCol(final Row rowdef) {
+        final Column[] newCol = new Column[rowdef.columns() + 1];
+        newCol[0] = new Column("Cardinal key-4 {b256}");
         for (int i = 0; i < rowdef.columns(); i++) newCol[i + 1] = rowdef.column(i);
-        return new kelondroRow(newCol, rowdef.objectOrder, rowdef.primaryKeyIndex);
+        return new Row(newCol, rowdef.objectOrder, rowdef.primaryKeyIndex);
     } 
     
     public static int power2(int x) {
@@ -175,24 +180,24 @@ public class kelondroHashtable {
         return result;
     }
 
-    public synchronized kelondroRow.Entry put(final int key, final kelondroRow.Entry rowentry) throws IOException {
+    public synchronized Row.Entry put(final int key, final Row.Entry rowentry) throws IOException {
         final Hash hash = new Hash(key);
         
         // find row
         final Object[] search = search(hash);
-        kelondroRow.Entry oldhkrow;
+        Row.Entry oldhkrow;
         final int rowNumber = ((Integer) search[0]).intValue();
         if (search[1] == null) {
             oldhkrow = null;
         } else {
-            oldhkrow = (kelondroRow.Entry) search[1];
+            oldhkrow = (Row.Entry) search[1];
         }
         
         // make space
         while (rowNumber >= hashArray.size()) hashArray.set(hashArray.size(), dummyRow);
         
         // write row
-        final kelondroRow.Entry newhkrow = hashArray.row().newEntry();
+        final Row.Entry newhkrow = hashArray.row().newEntry();
         newhkrow.setCol(0, hash.key());
         newhkrow.setCol(1, rowentry.bytes());
         hashArray.set(rowNumber, newhkrow);
@@ -200,7 +205,7 @@ public class kelondroHashtable {
     }
     
     private Object[] search(final Hash hash) throws IOException {
-        kelondroRow.Entry hkrow;
+        Row.Entry hkrow;
         int rowKey;
         int rowNumber;
         do {

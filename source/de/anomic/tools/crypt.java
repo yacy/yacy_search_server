@@ -28,7 +28,7 @@ import java.text.SimpleDateFormat;
 import java.util.Locale;
 import java.util.Random;
 
-import de.anomic.kelondro.kelondroBase64Order;
+import de.anomic.kelondro.coding.Base64Order;
 
 public class crypt {
 
@@ -45,7 +45,7 @@ public class crypt {
         saltcounter++;
         // we generate 48-bit salt values, that are represented as 8-character
         // b64-encoded strings
-        return kelondroBase64Order.standardCoder.encodeLong(salt & 0XffffffffffffL, 8);
+        return Base64Order.standardCoder.encodeLong(salt & 0XffffffffffffL, 8);
     }
 
     // --------------------------------------------------------
@@ -94,8 +94,8 @@ public class crypt {
     public static String simpleEncode(final String content, String key, final char method) {
     if (key == null) { key = "NULL"; }
     switch (method) {
-    case 'b' : return "b|" + kelondroBase64Order.enhancedCoder.encodeString(content);
-    case 'z' : return "z|" + kelondroBase64Order.enhancedCoder.encode(gzip.gzipString(content));
+    case 'b' : return "b|" + Base64Order.enhancedCoder.encodeString(content);
+    case 'z' : return "z|" + Base64Order.enhancedCoder.encode(gzip.gzipString(content));
     case 'p' : return "p|" + content;
     default  : return null;
     }
@@ -110,11 +110,11 @@ public class crypt {
         } // not encoded
         switch (encoded.charAt(0)) {
         case 'b': {
-            return kelondroBase64Order.enhancedCoder.decodeString(encoded.substring(2), "de.anomic.tools.crypt.simpleDecode()");
+            return Base64Order.enhancedCoder.decodeString(encoded.substring(2), "de.anomic.tools.crypt.simpleDecode()");
         }
         case 'z':
             try {
-                return gzip.gunzipString(kelondroBase64Order.enhancedCoder.decode(encoded.substring(2), "de.anomic.tools.crypt.simpleDecode()"));
+                return gzip.gunzipString(Base64Order.enhancedCoder.decode(encoded.substring(2), "de.anomic.tools.crypt.simpleDecode()"));
             } catch (final Exception e) {
                 e.printStackTrace();
                 return null;

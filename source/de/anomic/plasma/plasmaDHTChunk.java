@@ -35,9 +35,9 @@ import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexRWIRowEntry;
 import de.anomic.index.indexURLReference;
-import de.anomic.kelondro.kelondroBase64Order;
-import de.anomic.kelondro.kelondroDigest;
 import de.anomic.kelondro.kelondroException;
+import de.anomic.kelondro.coding.Base64Order;
+import de.anomic.kelondro.coding.Digest;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyPeerSelection;
 import de.anomic.yacy.yacySeed;
@@ -159,7 +159,7 @@ public class plasmaDHTChunk {
     public static String selectTransferStart() {
         // a random start point. It is dangerous to take a computed start point, because it could cause a flooding at specific target peers, because
         // the community of all peers would use the same method for target computation. It is better to just use a random start point.
-        return kelondroBase64Order.enhancedCoder.encode(kelondroDigest.encodeMD5Raw(Long.toString(System.currentTimeMillis()))).substring(2, 2 + yacySeedDB.commonHashLength);
+        return Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(Long.toString(System.currentTimeMillis()))).substring(2, 2 + yacySeedDB.commonHashLength);
     }
 
     private int selectTransferContainersResource(final String hash, final boolean ram, final int maxContainerCount, final int maxtime) throws InterruptedException {
@@ -187,7 +187,7 @@ public class plasmaDHTChunk {
                     ((container = indexContainerIterator.next()) != null) &&
                     (container.size() > 0) &&
                     ((tmpContainers.size() == 0) ||
-                     (kelondroBase64Order.enhancedComparator.compare(container.getWordHash(), limitHash) < 0)) &&
+                     (Base64Order.enhancedComparator.compare(container.getWordHash(), limitHash) < 0)) &&
                     (System.currentTimeMillis() < timeout)
             ) {
                 // check for interruption

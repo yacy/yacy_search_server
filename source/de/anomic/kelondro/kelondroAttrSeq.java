@@ -43,6 +43,11 @@ import java.util.TreeSet;
 import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
 
+import de.anomic.kelondro.coding.Base64Order;
+import de.anomic.kelondro.index.Column;
+import de.anomic.kelondro.index.Row;
+import de.anomic.kelondro.index.RowCollection;
+import de.anomic.kelondro.tools.MemoryControl;
 import de.anomic.server.serverFileUtils;
 
 public class kelondroAttrSeq {
@@ -241,7 +246,7 @@ public class kelondroAttrSeq {
         protected int[]    prop_len = null, prop_pos = null;
         protected String[] seq_names = null;
         protected int[]    seq_len = null, seq_pos = null;
-        protected kelondroRow seqrow;
+        protected Row seqrow;
         // example:
         //# Structure=<pivot-12>,'=',<UDate-3>,<VDate-3>,<LCount-2>,<GCount-2>,<ICount-2>,<DCount-2>,<TLength-3>,<WACount-3>,<WUCount-3>,<Flags-1>,'|',*<Anchor-12>
 
@@ -253,19 +258,19 @@ public class kelondroAttrSeq {
             if (p < 0) return;
             final String pivot = structure.substring(0, p);
             structure = structure.substring(p + 5);
-            kelondroColumn a = new kelondroColumn(pivot);
+            Column a = new Column(pivot);
             pivot_name = a.nickname;
             pivot_len = a.cellwidth;
             
             // parse property part definition:
             p = structure.indexOf(",'|'");
             if (p < 0) return;
-            ArrayList<kelondroColumn> l = new ArrayList<kelondroColumn>();
+            ArrayList<Column> l = new ArrayList<Column>();
             final String attr = structure.substring(0, p);
             String seqs = structure.substring(p + 5);
             StringTokenizer st = new StringTokenizer(attr, ",");
             while (st.hasMoreTokens()) {
-                a = new kelondroColumn(st.nextToken());
+                a = new Column(st.nextToken());
                 l.add(a);
             }
             prop_names = new String[l.size()];
@@ -282,10 +287,10 @@ public class kelondroAttrSeq {
             
             // parse sequence definition:
             if (seqs.startsWith("*")) seqs = seqs.substring(1);
-            l = new ArrayList<kelondroColumn>();
+            l = new ArrayList<Column>();
             st = new StringTokenizer(seqs, ",");
             while (st.hasMoreTokens()) {
-                a = new kelondroColumn(st.nextToken());
+                a = new Column(st.nextToken());
                 l.add(a);
             }
             seq_names = new String[l.size()];
@@ -313,7 +318,7 @@ public class kelondroAttrSeq {
                 rowdef.append('-');
                 rowdef.append(seq_len[i]);
             }
-            seqrow = new kelondroRow(new String(rowdef), null, 0);
+            seqrow = new Row(new String(rowdef), null, 0);
         }
         
         public String toString() {
@@ -350,7 +355,7 @@ public class kelondroAttrSeq {
             attrs = new HashMap<String, Long>();
             seq = (tree) ? (Set<String>) new TreeSet<String>() : (Set<String>) new HashSet<String>();
             for (int i = 0; i < structure.prop_names.length; i++) {
-                attrs.put(structure.prop_names[i], Long.valueOf(kelondroBase64Order.enhancedCoder.decodeLong(attrseq.substring(structure.prop_pos[i], structure.prop_pos[i] + structure.prop_len[i]))));
+                attrs.put(structure.prop_names[i], Long.valueOf(Base64Order.enhancedCoder.decodeLong(attrseq.substring(structure.prop_pos[i], structure.prop_pos[i] + structure.prop_len[i]))));
             }
             
             int p = attrseq.indexOf('|') + 1;
@@ -385,8 +390,8 @@ public class kelondroAttrSeq {
             return seq;
         }
         
-        public kelondroRowCollection getSeqCollection() {
-            final kelondroRowCollection collection = new kelondroRowCollection(structure.seqrow, seq.size());
+        public RowCollection getSeqCollection() {
+            final RowCollection collection = new RowCollection(structure.seqrow, seq.size());
             final Iterator<String> i = seq.iterator();
             while (i.hasNext()) {
                 collection.addUnique(structure.seqrow.newEntry(i.next().getBytes()));
@@ -408,7 +413,7 @@ public class kelondroAttrSeq {
             Long val;
             for (int i = 0; i < structure.prop_names.length; i++) {
                 val = attrs.get(structure.prop_names[i]);
-                sb.append(kelondroBase64Order.enhancedCoder.encodeLongSmart((val == null) ? 0 : val.longValue(), structure.prop_len[i]));
+                sb.append(Base64Order.enhancedCoder.encodeLongSmart((val == null) ? 0 : val.longValue(), structure.prop_len[i]));
             }
             sb.append('|');
             final Iterator<String> q = seq.iterator();
@@ -430,7 +435,7 @@ public class kelondroAttrSeq {
     private static boolean shortmemstate = false;
     private static boolean shortmem() {
         if ((cc % 300) == 0) {
-            shortmemstate = (kelondroMemory.available() < 20000000L);
+            shortmemstate = (MemoryControl.available() < 20000000L);
         }
         return shortmemstate;
     }

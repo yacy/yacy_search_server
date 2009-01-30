@@ -53,15 +53,15 @@ import de.anomic.index.indexRepositoryReference;
 import de.anomic.index.indexURLReference;
 import de.anomic.index.indexWord;
 import de.anomic.index.indexRepositoryReference.Export;
-import de.anomic.kelondro.kelondroBase64Order;
-import de.anomic.kelondro.kelondroByteOrder;
 import de.anomic.kelondro.kelondroCloneableIterator;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMergeIterator;
-import de.anomic.kelondro.kelondroOrder;
 import de.anomic.kelondro.kelondroRotateIterator;
-import de.anomic.kelondro.kelondroRowCollection;
-import de.anomic.kelondro.kelondroMemory;
+import de.anomic.kelondro.coding.Base64Order;
+import de.anomic.kelondro.coding.ByteOrder;
+import de.anomic.kelondro.coding.kelondroOrder;
+import de.anomic.kelondro.index.RowCollection;
+import de.anomic.kelondro.tools.MemoryControl;
 import de.anomic.server.serverProfiling;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.iso639;
@@ -97,7 +97,7 @@ public final class plasmaWordIndex implements indexRI {
     public static final long CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA_RECRAWL_CYCLE = 60L * 24L * 30L;
     
     
-    private final kelondroByteOrder        indexOrder = kelondroBase64Order.enhancedCoder;
+    private final ByteOrder        indexOrder = Base64Order.enhancedCoder;
     private final indexRAMRI               dhtCache;
     private final indexCollectionRI        collections;          // new database structure to replace AssortmentCluster and FileCluster
     private final serverLog                log;
@@ -476,7 +476,7 @@ public final class plasmaWordIndex implements indexRI {
             // next flush more entries if the size exceeds the maximum size of the cache
             while (theCache.size() > 0 &&
             		((theCache.size() > theCache.getMaxWordCount()) ||
-                    (kelondroMemory.available() < collections.minMem()))) {
+                    (MemoryControl.available() < collections.minMem()))) {
                 flushCacheOne(theCache);
             }
             if (cacheSize() != cs) serverProfiling.update("wordcache", Long.valueOf(cacheSize()));
@@ -606,8 +606,8 @@ public final class plasmaWordIndex implements indexRI {
         
         // check doubles
         final int beforeDouble = container.size();
-        final ArrayList<kelondroRowCollection> d = container.removeDoubles();
-        kelondroRowCollection set;
+        final ArrayList<RowCollection> d = container.removeDoubles();
+        RowCollection set;
         for (int i = 0; i < d.size(); i++) {
             // for each element in the double-set, take that one that is the most recent one
             set = d.get(i);
@@ -903,7 +903,7 @@ public final class plasmaWordIndex implements indexRI {
     public synchronized kelondroCloneableIterator<indexContainer> wordContainers(final String startHash, final boolean ram, final boolean rot) {
         final kelondroCloneableIterator<indexContainer> i = wordContainers(startHash, ram);
         if (rot) {
-            return new kelondroRotateIterator<indexContainer>(i, new String(kelondroBase64Order.zero(startHash.length())), dhtCache.size() + ((ram) ? 0 : collections.size()));
+            return new kelondroRotateIterator<indexContainer>(i, new String(Base64Order.zero(startHash.length())), dhtCache.size() + ((ram) ? 0 : collections.size()));
         }
         return i;
     }

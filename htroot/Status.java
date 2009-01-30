@@ -33,8 +33,8 @@ import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpd;
 import de.anomic.http.httpdByteCountInputStream;
 import de.anomic.http.httpdByteCountOutputStream;
-import de.anomic.kelondro.kelondroDate;
-import de.anomic.kelondro.kelondroMemory;
+import de.anomic.kelondro.coding.DateFormatter;
+import de.anomic.kelondro.tools.MemoryControl;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.server.serverCore;
@@ -130,7 +130,7 @@ public class Status {
         // free disk space
         if ((adminaccess) && (!sb.observer.getDisksOK()))
         {
-            final String minFree = kelondroMemory.bytesToString(sb.observer.getMinFreeDiskSpace());
+            final String minFree = MemoryControl.bytesToString(sb.observer.getMinFreeDiskSpace());
             prop.put("warningDiskSpaceLow", "1");
             prop.put("warningDiskSpaceLow_minSpace", minFree);
         }
@@ -187,7 +187,7 @@ public class Status {
         } else {
             final long uptime = 60000 * Long.parseLong(sb.webIndex.seedDB.mySeed().get(yacySeed.UPTIME, "0"));
             prop.put("peerStatistics", "1");
-            prop.put("peerStatistics_uptime", kelondroDate.formatInterval(uptime));
+            prop.put("peerStatistics_uptime", DateFormatter.formatInterval(uptime));
             prop.putNum("peerStatistics_pagesperminute", sb.webIndex.seedDB.mySeed().getPPM());
             prop.putNum("peerStatistics_queriesperhour", Math.round(6000d * sb.webIndex.seedDB.mySeed().getQPM()) / 100d);
             prop.putNum("peerStatistics_links", sb.webIndex.seedDB.mySeed().getLinkCount());
@@ -246,7 +246,7 @@ public class Status {
                 prop.putHTML("seedServer_seedFile", sb.getConfig("seedFilePath", ""));
             }
             prop.put("seedServer_lastUpload",
-                    kelondroDate.formatInterval(System.currentTimeMillis() - sb.webIndex.seedDB.lastSeedUpload_timeStamp));
+                    DateFormatter.formatInterval(System.currentTimeMillis() - sb.webIndex.seedDB.lastSeedUpload_timeStamp));
         } else {
             prop.put(SEEDSERVER, "0"); // disabled
         }
@@ -271,15 +271,15 @@ public class Status {
         }
 
         // memory usage and system attributes
-        prop.put("freeMemory", kelondroMemory.bytesToString(kelondroMemory.free()));
-        prop.put("totalMemory", kelondroMemory.bytesToString(kelondroMemory.total()));
-        prop.put("maxMemory", kelondroMemory.bytesToString(kelondroMemory.max()));
+        prop.put("freeMemory", MemoryControl.bytesToString(MemoryControl.free()));
+        prop.put("totalMemory", MemoryControl.bytesToString(MemoryControl.total()));
+        prop.put("maxMemory", MemoryControl.bytesToString(MemoryControl.max()));
         prop.put("processors", serverProcessor.availableCPU);
 
         // proxy traffic
         //prop.put("trafficIn",bytesToString(httpdByteCountInputStream.getGlobalCount()));
-        prop.put("trafficProxy", kelondroMemory.bytesToString(httpdByteCountOutputStream.getAccountCount("PROXY")));
-        prop.put("trafficCrawler", kelondroMemory.bytesToString(httpdByteCountInputStream.getAccountCount("CRAWLER")));
+        prop.put("trafficProxy", MemoryControl.bytesToString(httpdByteCountOutputStream.getAccountCount("PROXY")));
+        prop.put("trafficCrawler", MemoryControl.bytesToString(httpdByteCountInputStream.getAccountCount("CRAWLER")));
 
         // connection information
         final serverCore httpd = (serverCore) sb.getThread("10_httpd");

@@ -41,10 +41,10 @@ import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexRWIVarEntry;
 import de.anomic.index.indexURLReference;
-import de.anomic.kelondro.kelondroBitfield;
-import de.anomic.kelondro.kelondroMSetTools;
 import de.anomic.kelondro.kelondroSortStack;
 import de.anomic.kelondro.kelondroSortStore;
+import de.anomic.kelondro.coding.Bitfield;
+import de.anomic.kelondro.tools.SetTools;
 import de.anomic.plasma.plasmaSnippetCache.MediaSnippet;
 import de.anomic.server.serverProfiling;
 import de.anomic.server.logging.serverLog;
@@ -117,10 +117,10 @@ public final class plasmaSearchEvent {
         
         // snippets do not need to match with the complete query hashes,
         // only with the query minus the stopwords which had not been used for the search
-        final TreeSet<String> filtered = kelondroMSetTools.joinConstructive(query.queryHashes, plasmaSwitchboard.stopwords);
+        final TreeSet<String> filtered = SetTools.joinConstructive(query.queryHashes, plasmaSwitchboard.stopwords);
         this.snippetFetchWordHashes = (TreeSet<String>) query.queryHashes.clone();
         if ((filtered != null) && (filtered.size() > 0)) {
-            kelondroMSetTools.excludeDestructive(this.snippetFetchWordHashes, plasmaSwitchboard.stopwords);
+            SetTools.excludeDestructive(this.snippetFetchWordHashes, plasmaSwitchboard.stopwords);
         }
         
         final long start = System.currentTimeMillis();
@@ -708,7 +708,7 @@ public final class plasmaSearchEvent {
             System.out.println("DEBUG-INDEXABSTRACT: hash " + (String) entry.getKey() + ": " + ((query.queryHashes.contains((String) entry.getKey())) ? "NEEDED" : "NOT NEEDED") + "; " + ((TreeMap) entry.getValue()).size() + " entries");
         }
          */
-        final TreeMap<String, String> abstractJoin = (rcAbstracts.size() == query.queryHashes.size()) ? kelondroMSetTools.joinConstructive(rcAbstracts.values(), true) : new TreeMap<String, String>();
+        final TreeMap<String, String> abstractJoin = (rcAbstracts.size() == query.queryHashes.size()) ? SetTools.joinConstructive(rcAbstracts.values(), true) : new TreeMap<String, String>();
         if (abstractJoin.size() != 0) {
             //System.out.println("DEBUG-INDEXABSTRACT: index abstracts delivered " + abstractJoin.size() + " additional results for secondary search");
             // generate query for secondary search
@@ -856,7 +856,7 @@ public final class plasmaSearchEvent {
         public yacyURL url() {
             return urlcomps.url();
         }
-        public kelondroBitfield flags() {
+        public Bitfield flags() {
             return urlentry.flags();
         }
         public String urlstring() {

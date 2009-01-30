@@ -28,6 +28,8 @@ package de.anomic.kelondro;
 
 import java.io.IOException;
 
+import de.anomic.kelondro.coding.ByteOrder;
+
 public interface kelondroBLOB {
     
     /**
@@ -46,7 +48,7 @@ public interface kelondroBLOB {
      * return the underlying odering
      * @return
      */
-    public kelondroByteOrder ordering();
+    public ByteOrder ordering();
     
     /**
      * clears the content of the database

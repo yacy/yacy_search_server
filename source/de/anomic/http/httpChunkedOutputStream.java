@@ -29,7 +29,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import de.anomic.kelondro.kelondroByteBuffer;
+import de.anomic.kelondro.tools.ByteBuffer;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverFileUtils;
 
@@ -77,7 +77,7 @@ public final class httpChunkedOutputStream extends FilterOutputStream {
         this.out.flush();
     }
     
-    public void write(final kelondroByteBuffer b, final int off, final int len) throws IOException {
+    public void write(final ByteBuffer b, final int off, final int len) throws IOException {
         if (this.finished) throw new IOException("ChunkedOutputStream already finalized.");
         if (len == 0) return;
         
