@@ -38,9 +38,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import de.anomic.kelondro.kelondroException;
-import de.anomic.kelondro.coding.Base64Order;
-import de.anomic.kelondro.coding.ByteOrder;
-import de.anomic.kelondro.coding.NaturalOrder;
+import de.anomic.kelondro.order.Base64Order;
+import de.anomic.kelondro.order.ByteOrder;
+import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.tools.MemoryControl;
 import de.anomic.server.NamePrefixThreadFactory;
 import de.anomic.server.serverFileUtils;

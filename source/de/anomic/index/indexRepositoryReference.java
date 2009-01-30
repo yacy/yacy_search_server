@@ -44,10 +44,10 @@ import de.anomic.http.JakartaCommonsHttpClient;
 import de.anomic.http.JakartaCommonsHttpResponse;
 import de.anomic.http.httpRemoteProxyConfig;
 import de.anomic.kelondro.kelondroCache;
-import de.anomic.kelondro.kelondroCloneableIterator;
 import de.anomic.kelondro.kelondroSplitTable;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.ObjectIndex;
+import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.tools.ScoreCluster;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyURL;
@@ -151,12 +151,12 @@ public final class indexRepositoryReference {
         return urlIndexFile.has(urlHash.getBytes());
     }
 
-    public kelondroCloneableIterator<indexURLReference> entries(final boolean up, final String firstHash) throws IOException {
+    public CloneableIterator<indexURLReference> entries(final boolean up, final String firstHash) throws IOException {
         // enumerates entry elements
         return new kiter(up, firstHash);
     }
 
-    public class kiter implements kelondroCloneableIterator<indexURLReference> {
+    public class kiter implements CloneableIterator<indexURLReference> {
         // enumerates entry elements
         private final Iterator<Row.Entry> iter;
         private final boolean error;
@@ -499,7 +499,7 @@ public final class indexRepositoryReference {
     private HashMap<String, hashStat> domainSampleCollector() throws IOException {
         HashMap<String, hashStat> map = new HashMap<String, hashStat>();
         // first collect all domains and calculate statistics about it
-        kelondroCloneableIterator<byte[]> i = this.urlIndexFile.keys(true, null);
+        CloneableIterator<byte[]> i = this.urlIndexFile.keys(true, null);
         String urlhash, hosthash;
         hashStat ds;
         if (i != null) while (i.hasNext()) {
@@ -607,7 +607,7 @@ public final class indexRepositoryReference {
         // first collect all url hashes that belong to the domain
         assert hosthash.length() == 6;
         ArrayList<String> l = new ArrayList<String>();
-        kelondroCloneableIterator<byte[]> i = this.urlIndexFile.keys(true, null);
+        CloneableIterator<byte[]> i = this.urlIndexFile.keys(true, null);
         String hash;
         while (i.hasNext()) {
             hash = new String(i.next());

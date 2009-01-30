@@ -46,10 +46,10 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import de.anomic.kelondro.kelondroBLOBTree;
 import de.anomic.kelondro.kelondroMap;
-import de.anomic.kelondro.coding.Base64Order;
-import de.anomic.kelondro.coding.NaturalOrder;
+import de.anomic.kelondro.blob.BLOBTree;
+import de.anomic.kelondro.order.Base64Order;
+import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.server.logging.serverLog;
 
 public class blogBoardComments {
@@ -67,7 +67,7 @@ public class blogBoardComments {
     public blogBoardComments(final File actpath) {
     		new File(actpath.getParent()).mkdir();
         if (database == null) {
-            database = new kelondroMap(new kelondroBLOBTree(actpath, true, true, keyLength, recordSize, '_', NaturalOrder.naturalOrder, false, false, false), 500);
+            database = new kelondroMap(new BLOBTree(actpath, true, true, keyLength, recordSize, '_', NaturalOrder.naturalOrder, false, false, false), 500);
         }
     }
     public int size() {

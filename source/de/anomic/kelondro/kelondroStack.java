@@ -34,10 +34,13 @@ import java.io.RandomAccessFile;
 import java.util.Iterator;
 import java.util.StringTokenizer;
 
-import de.anomic.kelondro.coding.NaturalOrder;
 import de.anomic.kelondro.index.Row;
+import de.anomic.kelondro.order.NaturalOrder;
+import de.anomic.kelondro.table.FullRecords;
+import de.anomic.kelondro.table.RecordHandle;
+import de.anomic.kelondro.table.Node;
 
-public final class kelondroStack extends kelondroFullRecords {
+public final class kelondroStack extends FullRecords {
 
     // define the Over-Head-Array
     private static short thisOHBytes   = 0; // our record definition does not need extra bytes
@@ -97,8 +100,8 @@ public final class kelondroStack extends kelondroFullRecords {
     }
 
     public class stackIterator implements Iterator<Row.Entry> {
-        kelondroHandle nextHandle = null;
-        kelondroHandle lastHandle = null;
+        RecordHandle nextHandle = null;
+        RecordHandle lastHandle = null;
         boolean up;
 
         public stackIterator(final boolean up) {
@@ -139,7 +142,7 @@ public final class kelondroStack extends kelondroFullRecords {
         if (getHandle(toor) == null) {
             if (getHandle(root) != null) throw new RuntimeException("push: internal organisation of root and toor");
             // create node
-            final kelondroNode n = new EcoNode(row.bytes());
+            final Node n = new EcoNode(row.bytes());
             n.setOHHandle(left, null);
             n.setOHHandle(right, null);
             n.commit();
@@ -149,10 +152,10 @@ public final class kelondroStack extends kelondroFullRecords {
             // thats it
         } else {
             // expand the list at the end
-            final kelondroNode n = new EcoNode(row.bytes());
+            final Node n = new EcoNode(row.bytes());
             n.setOHHandle(left, getHandle(toor));
             n.setOHHandle(right, null);
-            final kelondroNode n1 = new EcoNode(getHandle(toor));
+            final Node n1 = new EcoNode(getHandle(toor));
             n1.setOHHandle(right, n.handle());
             n.commit();
             n1.commit();
@@ -164,7 +167,7 @@ public final class kelondroStack extends kelondroFullRecords {
 
     public synchronized Row.Entry pop() throws IOException {
         // return row ontop of the stack and shrink stack by one
-        final kelondroNode n = topNode();
+        final Node n = topNode();
         if (n == null) return null;
         final Row.Entry ret = row().newEntry(n.getValueRow());
 
@@ -177,14 +180,14 @@ public final class kelondroStack extends kelondroFullRecords {
     
     public synchronized Row.Entry top() throws IOException {
         // return row ontop of the stack
-        final kelondroNode n = topNode();
+        final Node n = topNode();
         if (n == null) return null;
         return row().newEntry(n.getValueRow());
     }
 
     public synchronized Row.Entry pot() throws IOException {
         // return row on the bottom of the stack and remove record
-        final kelondroNode n = botNode();
+        final Node n = botNode();
         if (n == null) return null;
         final Row.Entry ret = row().newEntry(n.getValueRow());
 
@@ -197,22 +200,22 @@ public final class kelondroStack extends kelondroFullRecords {
     
     public synchronized Row.Entry bot() throws IOException {
         // return row on the bottom of the stack
-        final kelondroNode n = botNode();
+        final Node n = botNode();
         if (n == null) return null;
         return row().newEntry(n.getValueRow());
     }
     
-    void unlinkNode(final kelondroNode n) throws IOException {
+    void unlinkNode(final Node n) throws IOException {
         // join chaines over node
-        final kelondroHandle l = n.getOHHandle(left);
-        final kelondroHandle r = n.getOHHandle(right);
+        final RecordHandle l = n.getOHHandle(left);
+        final RecordHandle r = n.getOHHandle(right);
         // look left
         if (l == null) {
             // reached the root on left side
             setHandle(root, r);
         } else {
             // un-link the previous record
-            final kelondroNode k = new EcoNode(l);
+            final Node k = new EcoNode(l);
             k.setOHHandle(left, k.getOHHandle(left));
             k.setOHHandle(right, r);
             k.commit();
@@ -223,25 +226,25 @@ public final class kelondroStack extends kelondroFullRecords {
             setHandle(toor, l);
         } else {
             // un-link the following record
-            final kelondroNode k = new EcoNode(r);
+            final Node k = new EcoNode(r);
             k.setOHHandle(left, l);
             k.setOHHandle(right, k.getOHHandle(right));
             k.commit();
         }
     }
     
-    private kelondroNode topNode() throws IOException {
+    private Node topNode() throws IOException {
         // return node ontop of the stack
         if (size() == 0) return null;
-        final kelondroHandle h = getHandle(toor);
+        final RecordHandle h = getHandle(toor);
         if (h == null) return null;
         return new EcoNode(h);
     }
     
-    private kelondroNode botNode() throws IOException {
+    private Node botNode() throws IOException {
         // return node on bottom of the stack
         if (size() == 0) return null;
-        final kelondroHandle h = getHandle(root);
+        final RecordHandle h = getHandle(root);
         if (h == null) return null;
         return new EcoNode(h);
     }
@@ -282,7 +285,7 @@ public final class kelondroStack extends kelondroFullRecords {
         }
     }
 
-    public String hp(final kelondroHandle h) {
+    public String hp(final RecordHandle h) {
         if (h == null)
             return "NULL";
         return h.toString();

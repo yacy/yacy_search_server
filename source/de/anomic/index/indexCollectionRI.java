@@ -32,12 +32,12 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import de.anomic.kelondro.kelondroCloneableIterator;
 import de.anomic.kelondro.kelondroCollectionIndex;
 import de.anomic.kelondro.kelondroOutOfLimitsException;
-import de.anomic.kelondro.coding.Base64Order;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.RowSet;
+import de.anomic.kelondro.order.Base64Order;
+import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.server.logging.serverLog;
 
 public class indexCollectionRI implements indexRI {
@@ -78,11 +78,11 @@ public class indexCollectionRI implements indexRI {
         return 100 * 1024 /* overhead here */ + collectionIndex.minMem();
     }
 
-    public synchronized kelondroCloneableIterator<indexContainer> wordContainers(final String startWordHash, final boolean rot) {
+    public synchronized CloneableIterator<indexContainer> wordContainers(final String startWordHash, final boolean rot) {
         return new wordContainersIterator(startWordHash, rot);
     }
 
-    public class wordContainersIterator implements kelondroCloneableIterator<indexContainer> {
+    public class wordContainersIterator implements CloneableIterator<indexContainer> {
 
         private final Iterator<Object[]> wci;
         private final boolean rot;

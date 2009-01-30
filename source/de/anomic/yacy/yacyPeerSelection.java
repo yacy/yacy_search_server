@@ -29,8 +29,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 
 import de.anomic.kelondro.kelondroException;
-import de.anomic.kelondro.coding.Base64Order;
-import de.anomic.kelondro.coding.DateFormatter;
+import de.anomic.kelondro.order.Base64Order;
+import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.kelondro.tools.ScoreCluster;
 import de.anomic.server.logging.serverLog;
 

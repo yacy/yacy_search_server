@@ -35,8 +35,8 @@ import java.util.Iterator;
 import java.util.TreeSet;
 
 import de.anomic.kelondro.kelondroAttrSeq;
-import de.anomic.kelondro.coding.Base64Order;
-import de.anomic.kelondro.coding.Digest;
+import de.anomic.kelondro.order.Base64Order;
+import de.anomic.kelondro.order.Digest;
 import de.anomic.server.serverFileUtils;
 import de.anomic.yacy.yacyURL;
 

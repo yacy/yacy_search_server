@@ -10,7 +10,7 @@ import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexRWIRowEntry;
 import de.anomic.index.indexURLReference;
-import de.anomic.kelondro.coding.DateFormatter;
+import de.anomic.kelondro.order.DateFormatter;
 
 public class plasmaDbImporter extends AbstractImporter implements Importer {
 	

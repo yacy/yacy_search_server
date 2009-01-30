@@ -32,7 +32,7 @@ import java.text.ParseException;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.index.indexReferenceBlacklist;
 import de.anomic.index.indexURLReference;
-import de.anomic.kelondro.coding.DateFormatter;
+import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;

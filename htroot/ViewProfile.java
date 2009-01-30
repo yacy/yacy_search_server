@@ -37,7 +37,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import de.anomic.http.httpRequestHeader;
-import de.anomic.kelondro.coding.Base64Order;
+import de.anomic.kelondro.order.Base64Order;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;

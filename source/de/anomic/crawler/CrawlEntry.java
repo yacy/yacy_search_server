@@ -31,10 +31,10 @@ import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import java.util.concurrent.ConcurrentHashMap;
 
-import de.anomic.kelondro.coding.Base64Order;
-import de.anomic.kelondro.coding.Bitfield;
-import de.anomic.kelondro.coding.NaturalOrder;
 import de.anomic.kelondro.index.Row;
+import de.anomic.kelondro.order.Base64Order;
+import de.anomic.kelondro.order.Bitfield;
+import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverProcessorJob;
 import de.anomic.yacy.yacySeedDB;

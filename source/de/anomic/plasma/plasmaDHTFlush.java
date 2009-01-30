@@ -23,8 +23,8 @@
 
 package de.anomic.plasma;
 
-import de.anomic.kelondro.coding.Base64Order;
-import de.anomic.kelondro.coding.Digest;
+import de.anomic.kelondro.order.Base64Order;
+import de.anomic.kelondro.order.Digest;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacySeedDB;

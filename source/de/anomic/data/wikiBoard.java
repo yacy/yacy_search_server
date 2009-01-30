@@ -31,10 +31,10 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TimeZone;
 
-import de.anomic.kelondro.kelondroBLOBTree;
 import de.anomic.kelondro.kelondroMap;
-import de.anomic.kelondro.coding.Base64Order;
-import de.anomic.kelondro.coding.NaturalOrder;
+import de.anomic.kelondro.blob.BLOBTree;
+import de.anomic.kelondro.order.Base64Order;
+import de.anomic.kelondro.order.NaturalOrder;
 
 public class wikiBoard {
 
@@ -55,11 +55,11 @@ public class wikiBoard {
     public wikiBoard(final File actpath, final File bkppath) {
         new File(actpath.getParent()).mkdirs();
         if (datbase == null) {
-            datbase = new kelondroMap(new kelondroBLOBTree(actpath, true, true, keyLength, recordSize, '_', NaturalOrder.naturalOrder, true, false, false), 500);
+            datbase = new kelondroMap(new BLOBTree(actpath, true, true, keyLength, recordSize, '_', NaturalOrder.naturalOrder, true, false, false), 500);
         }
         new File(bkppath.getParent()).mkdirs();
         if (bkpbase == null) {
-            bkpbase = new kelondroMap(new kelondroBLOBTree(bkppath, true, true, keyLength + dateFormat.length(), recordSize, '_', NaturalOrder.naturalOrder, true, false, false), 500);
+            bkpbase = new kelondroMap(new BLOBTree(bkppath, true, true, keyLength + dateFormat.length(), recordSize, '_', NaturalOrder.naturalOrder, true, false, false), 500);
         }
     }
 

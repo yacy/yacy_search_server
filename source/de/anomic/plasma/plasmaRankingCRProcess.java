@@ -32,14 +32,14 @@ import java.util.Iterator;
 
 import de.anomic.kelondro.kelondroAttrSeq;
 import de.anomic.kelondro.kelondroCollectionIndex;
-import de.anomic.kelondro.kelondroEcoTable;
-import de.anomic.kelondro.coding.Base64Order;
-import de.anomic.kelondro.coding.Bitfield;
-import de.anomic.kelondro.coding.DateFormatter;
-import de.anomic.kelondro.coding.MicroDate;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.RowSet;
 import de.anomic.kelondro.index.ObjectIndex;
+import de.anomic.kelondro.order.Base64Order;
+import de.anomic.kelondro.order.Bitfield;
+import de.anomic.kelondro.order.DateFormatter;
+import de.anomic.kelondro.order.MicroDate;
+import de.anomic.kelondro.table.EcoTable;
 import de.anomic.kelondro.tools.MemoryControl;
 import de.anomic.server.serverFileUtils;
 
@@ -242,7 +242,7 @@ public class plasmaRankingCRProcess {
         kelondroCollectionIndex newseq = null;
         if (newdb) {
             final File path = to_file.getParentFile(); // path to storage place
-            newacc = new kelondroEcoTable(new File(path, CRG_accname), CRG_accrow, kelondroEcoTable.tailCacheUsageAuto, 0, 0);
+            newacc = new EcoTable(new File(path, CRG_accname), CRG_accrow, EcoTable.tailCacheUsageAuto, 0, 0);
             newseq = new kelondroCollectionIndex(path, CRG_seqname, 12, Base64Order.enhancedCoder, 2, 9, CRG_colrow, false);
         } else {
             if (!(to_file.exists())) {

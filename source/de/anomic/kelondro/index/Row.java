@@ -35,12 +35,12 @@ import java.util.Map;
 import java.util.StringTokenizer;
 
 import de.anomic.kelondro.kelondroException;
-import de.anomic.kelondro.coding.AbstractOrder;
-import de.anomic.kelondro.coding.Base64Order;
-import de.anomic.kelondro.coding.Bitfield;
-import de.anomic.kelondro.coding.ByteOrder;
-import de.anomic.kelondro.coding.NaturalOrder;
-import de.anomic.kelondro.coding.kelondroOrder;
+import de.anomic.kelondro.order.AbstractOrder;
+import de.anomic.kelondro.order.Base64Order;
+import de.anomic.kelondro.order.Bitfield;
+import de.anomic.kelondro.order.ByteOrder;
+import de.anomic.kelondro.order.NaturalOrder;
+import de.anomic.kelondro.order.kelondroOrder;
 import de.anomic.kelondro.tools.ByteBuffer;
 import de.anomic.server.logging.serverLog;
 

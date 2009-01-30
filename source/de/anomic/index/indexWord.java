@@ -33,9 +33,9 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.TreeSet;
 
-import de.anomic.kelondro.coding.Base64Order;
-import de.anomic.kelondro.coding.Bitfield;
-import de.anomic.kelondro.coding.Digest;
+import de.anomic.kelondro.order.Base64Order;
+import de.anomic.kelondro.order.Bitfield;
+import de.anomic.kelondro.order.Digest;
 import de.anomic.yacy.yacySeedDB;
 
 public class indexWord {

@@ -43,12 +43,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import de.anomic.http.JakartaCommonsHttpClient;
 import de.anomic.http.JakartaCommonsHttpResponse;
 import de.anomic.http.httpRequestHeader;
-import de.anomic.kelondro.kelondroBLOB;
-import de.anomic.kelondro.kelondroBLOBHeap;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMap;
-import de.anomic.kelondro.coding.DateFormatter;
-import de.anomic.kelondro.coding.NaturalOrder;
+import de.anomic.kelondro.blob.BLOB;
+import de.anomic.kelondro.blob.BLOBHeap;
+import de.anomic.kelondro.order.DateFormatter;
+import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.tools.ByteBuffer;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.logging.serverLog;
@@ -67,9 +67,9 @@ public class RobotsTxt {
     public RobotsTxt(final File robotsTableFile) {
         this.robotsTableFile = robotsTableFile;
         robotsTableFile.getParentFile().mkdirs();
-        kelondroBLOB blob = null;
+        BLOB blob = null;
         try {
-            blob = new kelondroBLOBHeap(robotsTableFile, 64, NaturalOrder.naturalOrder, 1024 * 1024);
+            blob = new BLOBHeap(robotsTableFile, 64, NaturalOrder.naturalOrder, 1024 * 1024);
         } catch (final IOException e) {
             e.printStackTrace();
         }
@@ -82,9 +82,9 @@ public class RobotsTxt {
         if (robotsTable != null) robotsTable.close();
         if (!(robotsTableFile.delete())) throw new RuntimeException("cannot delete robots.txt database");
         robotsTableFile.getParentFile().mkdirs();
-        kelondroBLOB blob = null;
+        BLOB blob = null;
         try {
-            blob = new kelondroBLOBHeap(robotsTableFile, 64, NaturalOrder.naturalOrder, 1024 * 1024);
+            blob = new BLOBHeap(robotsTableFile, 64, NaturalOrder.naturalOrder, 1024 * 1024);
         } catch (final IOException e) {
             e.printStackTrace();
         }

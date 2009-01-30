@@ -35,7 +35,7 @@ import java.util.Date;
 import de.anomic.crawler.Importer;
 import de.anomic.crawler.NoticeURLImporter;
 import de.anomic.http.httpRequestHeader;
-import de.anomic.kelondro.coding.DateFormatter;
+import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.kelondro.tools.ByteBuffer;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;

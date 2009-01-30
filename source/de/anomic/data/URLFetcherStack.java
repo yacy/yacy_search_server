@@ -30,9 +30,9 @@ import java.util.Iterator;
 
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroStack;
-import de.anomic.kelondro.coding.Base64Order;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.Row.EntryIndex;
+import de.anomic.kelondro.order.Base64Order;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyURL;
 

@@ -28,8 +28,8 @@ import java.io.File;
 import java.io.IOException;
 
 import de.anomic.http.httpRequestHeader;
-import de.anomic.kelondro.coding.Base64Order;
-import de.anomic.kelondro.coding.Digest;
+import de.anomic.kelondro.order.Base64Order;
+import de.anomic.kelondro.order.Digest;
 import de.anomic.plasma.plasmaRankingDistribution;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverFileUtils;

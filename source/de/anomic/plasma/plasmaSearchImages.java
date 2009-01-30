@@ -30,7 +30,7 @@ import java.util.Iterator;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterImageEntry;
-import de.anomic.kelondro.coding.DateFormatter;
+import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.plasma.parser.ParserException;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyURL;

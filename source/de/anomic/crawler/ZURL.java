@@ -32,12 +32,12 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-import de.anomic.kelondro.kelondroEcoTable;
-import de.anomic.kelondro.kelondroFlexWidthArray;
-import de.anomic.kelondro.coding.Base64Order;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.RowSet;
 import de.anomic.kelondro.index.ObjectIndex;
+import de.anomic.kelondro.order.Base64Order;
+import de.anomic.kelondro.table.EcoTable;
+import de.anomic.kelondro.table.FlexWidthArray;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyURL;
 
@@ -66,10 +66,10 @@ public class ZURL {
         final File f = new File(cachePath, tablename);
         if (startWithEmptyFile) {
             if (f.exists()) {
-                if (f.isDirectory()) kelondroFlexWidthArray.delete(cachePath, tablename); else f.delete();
+                if (f.isDirectory()) FlexWidthArray.delete(cachePath, tablename); else f.delete();
             }
         }
-        urlIndex = new kelondroEcoTable(f, rowdef, kelondroEcoTable.tailCacheDenyUsage, EcoFSBufferSize, 0);
+        urlIndex = new EcoTable(f, rowdef, EcoTable.tailCacheDenyUsage, EcoFSBufferSize, 0);
         //urlIndex = new kelondroFlexTable(cachePath, tablename, -1, rowdef, 0, true);
     }
     

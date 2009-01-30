@@ -26,14 +26,16 @@
 
 package de.anomic.kelondro;
 
-public class kelondroRotateIterator<E> implements kelondroCloneableIterator<E> {
+import de.anomic.kelondro.order.CloneableIterator;
+
+public class kelondroRotateIterator<E> implements CloneableIterator<E> {
     
-    kelondroCloneableIterator<E> a, clone;
+    CloneableIterator<E> a, clone;
     Object modifier;
     boolean nempty;
     int terminationCount;
     
-    public kelondroRotateIterator(final kelondroCloneableIterator<E> a, final Object modifier, final int terminationCount) {
+    public kelondroRotateIterator(final CloneableIterator<E> a, final Object modifier, final int terminationCount) {
         // this works currently only for String-type key iterations
         this.a = a;
         this.modifier = modifier;

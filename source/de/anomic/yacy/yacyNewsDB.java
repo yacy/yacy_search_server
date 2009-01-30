@@ -49,12 +49,12 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Iterator;
 
-import de.anomic.kelondro.kelondroEcoTable;
 import de.anomic.kelondro.kelondroException;
-import de.anomic.kelondro.coding.Base64Order;
-import de.anomic.kelondro.coding.DateFormatter;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.ObjectIndex;
+import de.anomic.kelondro.order.Base64Order;
+import de.anomic.kelondro.order.DateFormatter;
+import de.anomic.kelondro.table.EcoTable;
 import de.anomic.server.serverCodings;
 
 public class yacyNewsDB {
@@ -64,14 +64,14 @@ public class yacyNewsDB {
 
     public yacyNewsDB(final File path) {
         this.path = path;
-        this.news = new kelondroEcoTable(path, yacyNewsRecord.rowdef, kelondroEcoTable.tailCacheUsageAuto, 10, 0);
+        this.news = new EcoTable(path, yacyNewsRecord.rowdef, EcoTable.tailCacheUsageAuto, 10, 0);
         //this.news = new kelondroCache(kelondroTree.open(path, true, preloadTime, yacyNewsRecord.rowdef));
     }
 
     private void resetDB() {
         try {close();} catch (final Exception e) {}
         if (path.exists()) path.delete();
-        this.news = new kelondroEcoTable(path, yacyNewsRecord.rowdef, kelondroEcoTable.tailCacheUsageAuto, 10, 0);
+        this.news = new EcoTable(path, yacyNewsRecord.rowdef, EcoTable.tailCacheUsageAuto, 10, 0);
     }
     
     public void close() {

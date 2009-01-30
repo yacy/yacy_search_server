@@ -29,10 +29,10 @@ package de.anomic.kelondro.tools;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
-import de.anomic.kelondro.coding.Base64Order;
-import de.anomic.kelondro.coding.ByteOrder;
-import de.anomic.kelondro.coding.NaturalOrder;
 import de.anomic.kelondro.io.RandomAccessInterface;
+import de.anomic.kelondro.order.Base64Order;
+import de.anomic.kelondro.order.ByteOrder;
+import de.anomic.kelondro.order.NaturalOrder;
 
 // this class is a experimental replacement of byte[]. It should be used
 // if frequent System.arraycopy usage is common for byte[] data types

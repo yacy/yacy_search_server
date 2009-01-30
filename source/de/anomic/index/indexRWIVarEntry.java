@@ -26,8 +26,8 @@
 
 package de.anomic.index;
 
-import de.anomic.kelondro.coding.Bitfield;
-import de.anomic.kelondro.coding.MicroDate;
+import de.anomic.kelondro.order.Bitfield;
+import de.anomic.kelondro.order.MicroDate;
 
 public class indexRWIVarEntry implements indexRWIEntry, Cloneable {
 

@@ -37,9 +37,9 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import de.anomic.kelondro.coding.Base64Order;
-import de.anomic.kelondro.coding.DateFormatter;
-import de.anomic.kelondro.coding.MicroDate;
+import de.anomic.kelondro.order.Base64Order;
+import de.anomic.kelondro.order.DateFormatter;
+import de.anomic.kelondro.order.MicroDate;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyURL;

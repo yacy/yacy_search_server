@@ -28,7 +28,7 @@ import java.text.SimpleDateFormat;
 import java.util.Locale;
 import java.util.Random;
 
-import de.anomic.kelondro.coding.Base64Order;
+import de.anomic.kelondro.order.Base64Order;
 
 public class crypt {
 

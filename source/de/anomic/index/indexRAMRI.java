@@ -32,8 +32,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Set;
 
-import de.anomic.kelondro.kelondroCloneableIterator;
 import de.anomic.kelondro.index.Row;
+import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.tools.ScoreCluster;
 import de.anomic.kelondro.tools.MemoryControl;
 import de.anomic.server.logging.serverLog;
@@ -141,7 +141,7 @@ public final class indexRAMRI implements indexRI, indexRIReader, Iterable<indexC
         return heap.size();
     }
 
-    public synchronized kelondroCloneableIterator<indexContainer> wordContainers(final String startWordHash, final boolean rot) {
+    public synchronized CloneableIterator<indexContainer> wordContainers(final String startWordHash, final boolean rot) {
         // we return an iterator object that creates top-level-clones of the indexContainers
         // in the cache, so that manipulations of the iterated objects do not change
         // objects in the cache.

@@ -33,7 +33,7 @@ import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpd;
 import de.anomic.http.httpdByteCountInputStream;
 import de.anomic.http.httpdByteCountOutputStream;
-import de.anomic.kelondro.coding.DateFormatter;
+import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.kelondro.tools.MemoryControl;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;

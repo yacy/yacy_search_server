@@ -26,7 +26,7 @@
 
 package de.anomic.index;
 
-import de.anomic.kelondro.coding.Bitfield;
+import de.anomic.kelondro.order.Bitfield;
 
 public interface indexRWIEntry {
 

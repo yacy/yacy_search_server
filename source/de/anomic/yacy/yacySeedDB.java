@@ -46,10 +46,10 @@ import de.anomic.http.JakartaCommonsHttpResponse;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpd;
 import de.anomic.http.httpdAlternativeDomainNames;
-import de.anomic.kelondro.kelondroBLOBHeap;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMapDataMining;
-import de.anomic.kelondro.coding.Base64Order;
+import de.anomic.kelondro.blob.BLOBHeap;
+import de.anomic.kelondro.order.Base64Order;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDomains;
@@ -248,12 +248,12 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
             initializeHandlerMethod = null;
         }
         try {
-            return new kelondroMapDataMining(new kelondroBLOBHeap(seedDBFile, commonHashLength, Base64Order.enhancedCoder, 1024 * 512), 500, sortFields, longaccFields, doubleaccFields, initializeHandlerMethod, this);
+            return new kelondroMapDataMining(new BLOBHeap(seedDBFile, commonHashLength, Base64Order.enhancedCoder, 1024 * 512), 500, sortFields, longaccFields, doubleaccFields, initializeHandlerMethod, this);
         } catch (final Exception e) {
             // try again
             seedDBFile.delete();
             try {
-                return new kelondroMapDataMining(new kelondroBLOBHeap(seedDBFile, commonHashLength, Base64Order.enhancedCoder, 1024 * 512), 500, sortFields, longaccFields, doubleaccFields, initializeHandlerMethod, this);
+                return new kelondroMapDataMining(new BLOBHeap(seedDBFile, commonHashLength, Base64Order.enhancedCoder, 1024 * 512), 500, sortFields, longaccFields, doubleaccFields, initializeHandlerMethod, this);
             } catch (IOException e1) {
                 e1.printStackTrace();
                 System.exit(-1);

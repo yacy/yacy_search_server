@@ -28,14 +28,14 @@ package de.anomic.index;
 
 import java.util.Set;
 
-import de.anomic.kelondro.kelondroCloneableIterator;
+import de.anomic.kelondro.order.CloneableIterator;
 
 public interface indexRIReader {
 
     public int size();
     public boolean hasContainer(String wordHash); // should only be used if in case that true is returned the getContainer is NOT called
     public indexContainer getContainer(String wordHash, Set<String> urlselection); 
-    public kelondroCloneableIterator<indexContainer> wordContainers(String startWordHash, boolean rot);
+    public CloneableIterator<indexContainer> wordContainers(String startWordHash, boolean rot);
     public void close();
     
 }

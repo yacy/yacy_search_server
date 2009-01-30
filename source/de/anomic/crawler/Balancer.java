@@ -32,11 +32,11 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
-import de.anomic.kelondro.kelondroEcoTable;
 import de.anomic.kelondro.kelondroStack;
-import de.anomic.kelondro.coding.Base64Order;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.ObjectIndex;
+import de.anomic.kelondro.order.Base64Order;
+import de.anomic.kelondro.table.EcoTable;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySeedDB;
 
@@ -138,7 +138,7 @@ public class Balancer {
     
     private void openFileIndex() {
         cacheStacksPath.mkdirs();
-        urlFileIndex = new kelondroEcoTable(new File(cacheStacksPath, stackname + indexSuffix), CrawlEntry.rowdef, (fullram) ? kelondroEcoTable.tailCacheUsageAuto : kelondroEcoTable.tailCacheDenyUsage, EcoFSBufferSize, 0);
+        urlFileIndex = new EcoTable(new File(cacheStacksPath, stackname + indexSuffix), CrawlEntry.rowdef, (fullram) ? EcoTable.tailCacheUsageAuto : EcoTable.tailCacheDenyUsage, EcoFSBufferSize, 0);
     }
     
     private void resetFileIndex() {

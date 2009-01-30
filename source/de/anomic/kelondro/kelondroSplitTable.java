@@ -46,13 +46,18 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import de.anomic.kelondro.coding.NaturalOrder;
-import de.anomic.kelondro.coding.kelondroOrder;
 import de.anomic.kelondro.index.Column;
 import de.anomic.kelondro.index.RAMIndex;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.RowCollection;
 import de.anomic.kelondro.index.ObjectIndex;
+import de.anomic.kelondro.order.CloneableIterator;
+import de.anomic.kelondro.order.NaturalOrder;
+import de.anomic.kelondro.order.kelondroMergeIterator;
+import de.anomic.kelondro.order.kelondroOrder;
+import de.anomic.kelondro.table.EcoTable;
+import de.anomic.kelondro.table.FlexTable;
+import de.anomic.kelondro.table.FlexWidthArray;
 import de.anomic.server.NamePrefixThreadFactory;
 import de.anomic.server.serverProcessor;
 import de.anomic.server.logging.serverLog;
@@ -104,9 +109,9 @@ public class kelondroSplitTable implements ObjectIndex {
                 (tablefile[i].length() == tablename.length() + 7)) {
                 f = new File(path, tablefile[i]);
                 if (f.isDirectory()) {
-                    ram = kelondroFlexTable.staticRAMIndexNeed(path, tablefile[i], rowdef);
+                    ram = FlexTable.staticRAMIndexNeed(path, tablefile[i], rowdef);
                 } else {
-                    ram = kelondroEcoTable.staticRAMIndexNeed(f, rowdef);
+                    ram = EcoTable.staticRAMIndexNeed(f, rowdef);
                 }
                 if (ram > 0) {
                     t.put(tablefile[i], Long.valueOf(ram));
@@ -142,11 +147,11 @@ public class kelondroSplitTable implements ObjectIndex {
                 f = new File(path, maxf);
                 if (f.isDirectory()) {
                     // this is a kelonodroFlex table
-                    kelondroFlexTable.delete(path, maxf);
+                    FlexTable.delete(path, maxf);
                     serverLog.logInfo("kelondroSplitTable", "replaced partial flex table " + f + " by new eco table");
                 }
                 serverLog.logInfo("kelondroSplitTable", "opening partial eco table " + f);
-                table = new kelondroEcoTable(f, rowdef, kelondroEcoTable.tailCacheUsageAuto, EcoFSBufferSize, 0);
+                table = new EcoTable(f, rowdef, EcoTable.tailCacheUsageAuto, EcoFSBufferSize, 0);
                 tables.put(date, table);
             }
         }
@@ -158,7 +163,7 @@ public class kelondroSplitTable implements ObjectIndex {
     	for (int i = 0; i < l.length; i++) {
     		if (l[i].startsWith(tablename)) {
     		    final File f = new File(path, l[i]);
-    		    if (f.isDirectory()) kelondroFlexWidthArray.delete(path, l[i]); else f.delete();
+    		    if (f.isDirectory()) FlexWidthArray.delete(path, l[i]); else f.delete();
     		}
     	}
     	init(true);
@@ -235,13 +240,13 @@ public class kelondroSplitTable implements ObjectIndex {
             final File f = new File(path, tablename + "." + suffix);
             if (f.exists()) {
                 if (f.isDirectory()) {
-                    kelondroFlexTable.delete(path, tablename + "." + suffix);
+                    FlexTable.delete(path, tablename + "." + suffix);
                 }
                 // open a eco table
-                table = new kelondroEcoTable(f, rowdef, kelondroEcoTable.tailCacheDenyUsage, EcoFSBufferSize, 0);
+                table = new EcoTable(f, rowdef, EcoTable.tailCacheDenyUsage, EcoFSBufferSize, 0);
             } else {
                 // make new table
-                table = new kelondroEcoTable(f, rowdef, kelondroEcoTable.tailCacheDenyUsage, EcoFSBufferSize, 0);
+                table = new EcoTable(f, rowdef, EcoTable.tailCacheDenyUsage, EcoFSBufferSize, 0);
             }
             tables.put(suffix, table);
         }
@@ -308,7 +313,7 @@ public class kelondroSplitTable implements ObjectIndex {
         ObjectIndex table = tables.get(suffix);
         if (table == null) {
             // make new table
-            table = new kelondroEcoTable(new File(path, tablename + "." + suffix), rowdef, kelondroEcoTable.tailCacheDenyUsage, EcoFSBufferSize, 0);
+            table = new EcoTable(new File(path, tablename + "." + suffix), rowdef, EcoTable.tailCacheDenyUsage, EcoFSBufferSize, 0);
             tables.put(suffix, table);
         }
         table.addUnique(row);
@@ -356,8 +361,8 @@ public class kelondroSplitTable implements ObjectIndex {
         return maxtable.removeOne();
     }
     
-    public synchronized kelondroCloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) throws IOException {
-        final List<kelondroCloneableIterator<byte[]>> c = new ArrayList<kelondroCloneableIterator<byte[]>>(tables.size());
+    public synchronized CloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) throws IOException {
+        final List<CloneableIterator<byte[]>> c = new ArrayList<CloneableIterator<byte[]>>(tables.size());
         final Iterator<ObjectIndex> i = tables.values().iterator();
         while (i.hasNext()) {
             c.add(i.next().keys(up, firstKey));
@@ -365,8 +370,8 @@ public class kelondroSplitTable implements ObjectIndex {
         return kelondroMergeIterator.cascade(c, rowdef.objectOrder, kelondroMergeIterator.simpleMerge, up);
     }
     
-    public synchronized kelondroCloneableIterator<Row.Entry> rows(final boolean up, final byte[] firstKey) throws IOException {
-        final List<kelondroCloneableIterator<Row.Entry>> c = new ArrayList<kelondroCloneableIterator<Row.Entry>>(tables.size());
+    public synchronized CloneableIterator<Row.Entry> rows(final boolean up, final byte[] firstKey) throws IOException {
+        final List<CloneableIterator<Row.Entry>> c = new ArrayList<CloneableIterator<Row.Entry>>(tables.size());
         final Iterator<ObjectIndex> i = tables.values().iterator();
         while (i.hasNext()) {
             c.add(i.next().rows(up, firstKey));

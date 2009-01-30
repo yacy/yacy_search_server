@@ -36,7 +36,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import de.anomic.kelondro.kelondroCloneableIterator;
+import de.anomic.kelondro.order.CloneableIterator;
 
 public interface ObjectIndex {
 
@@ -53,8 +53,8 @@ public interface ObjectIndex {
     public ArrayList<RowCollection> removeDoubles() throws IOException; // removes all elements that are double (to be used after all addUnique)
     public Row.Entry remove(byte[] key) throws IOException;
     public Row.Entry removeOne() throws IOException;
-    public kelondroCloneableIterator<byte[]> keys(boolean up, byte[] firstKey) throws IOException; // iterates only the key
-    public kelondroCloneableIterator<Row.Entry> rows(boolean up, byte[] firstKey) throws IOException; // iterates the whole row
+    public CloneableIterator<byte[]> keys(boolean up, byte[] firstKey) throws IOException; // iterates only the key
+    public CloneableIterator<Row.Entry> rows(boolean up, byte[] firstKey) throws IOException; // iterates the whole row
     public void deleteOnExit();
     public void clear() throws IOException;
     public void close();

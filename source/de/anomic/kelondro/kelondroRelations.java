@@ -30,9 +30,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 
-import de.anomic.kelondro.coding.NaturalOrder;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.ObjectIndex;
+import de.anomic.kelondro.order.NaturalOrder;
+import de.anomic.kelondro.table.EcoTable;
 
 public class kelondroRelations {
 
@@ -81,14 +82,14 @@ public class kelondroRelations {
                 if (!list[i].equals(targetfilename)) continue;
                 final Row row = rowdef(list[i]);
                 if (row.primaryKeyLength != keysize || row.column(1).cellwidth != payloadsize) continue; // a wrong table
-                final ObjectIndex table = new kelondroEcoTable(new File(baseDir, list[i]), row, kelondroEcoTable.tailCacheUsageAuto, 1024*1024, 0);
+                final ObjectIndex table = new EcoTable(new File(baseDir, list[i]), row, EcoTable.tailCacheUsageAuto, 1024*1024, 0);
                 relations.put(name, table);
                 return;
             }
         }
         // the relation does not exist, create it
         final Row row = rowdef(keysize, payloadsize);
-        final ObjectIndex table = new kelondroEcoTable(new File(baseDir, targetfilename), row, kelondroEcoTable.tailCacheUsageAuto, 1024*1024, 0);
+        final ObjectIndex table = new EcoTable(new File(baseDir, targetfilename), row, EcoTable.tailCacheUsageAuto, 1024*1024, 0);
         relations.put(name, table);
     }
     
@@ -101,7 +102,7 @@ public class kelondroRelations {
         for (int i = 0; i < list.length; i++) {
             if (list[i].startsWith(name)) {
                 final Row row = rowdef(list[i]);
-                final ObjectIndex table = new kelondroEcoTable(new File(baseDir, list[i]), row, kelondroEcoTable.tailCacheUsageAuto, 1024*1024, 0);
+                final ObjectIndex table = new EcoTable(new File(baseDir, list[i]), row, EcoTable.tailCacheUsageAuto, 1024*1024, 0);
                 relations.put(name, table);
                 return table;
             }

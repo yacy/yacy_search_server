@@ -31,10 +31,10 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
-import de.anomic.kelondro.kelondroCloneableIterator;
-import de.anomic.kelondro.kelondroMergeIterator;
-import de.anomic.kelondro.coding.kelondroOrder;
 import de.anomic.kelondro.index.Row;
+import de.anomic.kelondro.order.CloneableIterator;
+import de.anomic.kelondro.order.kelondroMergeIterator;
+import de.anomic.kelondro.order.kelondroOrder;
 
 /*
  * an index cell is a part of the horizontal index in the new segment-oriented index
@@ -173,11 +173,11 @@ public final class indexCell implements indexRI {
         return this.ram.size() + this.array.size();
     }
 
-    public kelondroCloneableIterator<indexContainer> wordContainers(String startWordHash, boolean rot) throws IOException {
+    public CloneableIterator<indexContainer> wordContainers(String startWordHash, boolean rot) throws IOException {
         return wordContainers(startWordHash, rot, false);
     }
     
-    public synchronized kelondroCloneableIterator<indexContainer> wordContainers(final String startWordHash, boolean rot, final boolean ramOnly) throws IOException {
+    public synchronized CloneableIterator<indexContainer> wordContainers(final String startWordHash, boolean rot, final boolean ramOnly) throws IOException {
         final kelondroOrder<indexContainer> containerOrder = new indexContainerOrder(this.ram.rowdef().getOrdering().clone());
         containerOrder.rotate(new indexContainer(startWordHash, this.ram.rowdef(), 0));
         if (ramOnly) {

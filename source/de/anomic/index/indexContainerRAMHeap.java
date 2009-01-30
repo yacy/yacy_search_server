@@ -39,13 +39,13 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import de.anomic.kelondro.kelondroBLOBHeapReader;
-import de.anomic.kelondro.kelondroBLOBHeapWriter;
-import de.anomic.kelondro.kelondroCloneableIterator;
-import de.anomic.kelondro.coding.Base64Order;
-import de.anomic.kelondro.coding.ByteOrder;
+import de.anomic.kelondro.blob.HeapReader;
+import de.anomic.kelondro.blob.HeapWriter;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.RowSet;
+import de.anomic.kelondro.order.Base64Order;
+import de.anomic.kelondro.order.ByteOrder;
+import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.server.logging.serverLog;
 
 public final class indexContainerRAMHeap {
@@ -129,7 +129,7 @@ public final class indexContainerRAMHeap {
             }
         }
         // remove idx and gap files if they exist here
-        kelondroBLOBHeapWriter.deleteAllFingerprints(blobFile);
+        HeapWriter.deleteAllFingerprints(blobFile);
         serverLog.logInfo("indexContainerRAMHeap", "finished rwi blob restore: " + cache.size() + " words, " + urlCount + " word/URL relations in " + (System.currentTimeMillis() - start) + " milliseconds");
     }
     
@@ -137,7 +137,7 @@ public final class indexContainerRAMHeap {
         assert this.cache != null;
         serverLog.logInfo("indexContainerRAMHeap", "creating alternative rwi heap dump '" + heapFile.getName() + "', " + cache.size() + " rwi's");
         if (heapFile.exists()) heapFile.delete();
-        final kelondroBLOBHeapWriter dump = new kelondroBLOBHeapWriter(heapFile, payloadrow.primaryKeyLength, Base64Order.enhancedCoder);
+        final HeapWriter dump = new HeapWriter(heapFile, payloadrow.primaryKeyLength, Base64Order.enhancedCoder);
         final long startTime = System.currentTimeMillis();
         long wordcount = 0, urlcount = 0;
         String wordHash;
@@ -232,7 +232,7 @@ public final class indexContainerRAMHeap {
         Row payloadrow;
         
         public blobFileEntries(final File blobFile, final Row payloadrow) throws IOException {
-            this.blobs = new kelondroBLOBHeapReader.entries(blobFile, payloadrow.primaryKeyLength);
+            this.blobs = new HeapReader.entries(blobFile, payloadrow.primaryKeyLength);
             this.payloadrow = payloadrow;
         }
         
@@ -332,7 +332,7 @@ public final class indexContainerRAMHeap {
      * in the cache, so that manipulations of the iterated objects do not change
      * objects in the cache.
      */
-    public synchronized kelondroCloneableIterator<indexContainer> wordContainers(final String startWordHash, final boolean rot) {
+    public synchronized CloneableIterator<indexContainer> wordContainers(final String startWordHash, final boolean rot) {
         return new heapCacheIterator(startWordHash, rot);
     }
 
@@ -340,7 +340,7 @@ public final class indexContainerRAMHeap {
      * cache iterator: iterates objects within the heap cache. This can only be used
      * for write-enabled heaps, read-only heaps do not have a heap cache
      */
-    public class heapCacheIterator implements kelondroCloneableIterator<indexContainer>, Iterable<indexContainer> {
+    public class heapCacheIterator implements CloneableIterator<indexContainer>, Iterable<indexContainer> {
 
         // this class exists, because the wCache cannot be iterated with rotation
         // and because every indexContainer Object that is iterated must be returned as top-level-clone

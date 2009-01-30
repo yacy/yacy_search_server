@@ -29,7 +29,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import de.anomic.http.httpRequestHeader;
-import de.anomic.kelondro.coding.DateFormatter;
+import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;

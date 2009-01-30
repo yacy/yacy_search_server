@@ -42,8 +42,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import de.anomic.kelondro.kelondroCloneableIterator;
-import de.anomic.kelondro.coding.ByteOrder;
+import de.anomic.kelondro.order.ByteOrder;
+import de.anomic.kelondro.order.CloneableIterator;
 
 public class BytesLongMap {
     
@@ -175,11 +175,11 @@ public class BytesLongMap {
         return index.size();
     }
     
-    public synchronized kelondroCloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) throws IOException {
+    public synchronized CloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) throws IOException {
         return index.keys(up, firstKey);
     }
 
-    public synchronized kelondroCloneableIterator<Row.Entry> rows(final boolean up, final byte[] firstKey) throws IOException {
+    public synchronized CloneableIterator<Row.Entry> rows(final boolean up, final byte[] firstKey) throws IOException {
         return index.rows(up, firstKey);
     }
     

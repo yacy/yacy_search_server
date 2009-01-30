@@ -52,8 +52,8 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.PBEParameterSpec;
 
-import de.anomic.kelondro.coding.Base64Order;
-import de.anomic.kelondro.coding.Digest;
+import de.anomic.kelondro.order.Base64Order;
+import de.anomic.kelondro.order.Digest;
 
 public class cryptbig {
 

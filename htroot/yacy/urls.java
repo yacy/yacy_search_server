@@ -31,7 +31,7 @@ import de.anomic.crawler.CrawlEntry;
 import de.anomic.crawler.NoticedURL;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.index.indexURLReference;
-import de.anomic.kelondro.coding.DateFormatter;
+import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;

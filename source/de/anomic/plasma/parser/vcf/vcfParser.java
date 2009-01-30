@@ -37,7 +37,7 @@ import java.util.LinkedList;
 import de.anomic.crawler.HTTPLoader;
 import de.anomic.http.HttpClient;
 import de.anomic.http.httpRequestHeader;
-import de.anomic.kelondro.coding.Base64Order;
+import de.anomic.kelondro.order.Base64Order;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.parser.AbstractParser;
 import de.anomic.plasma.parser.Parser;

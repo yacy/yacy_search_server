@@ -26,8 +26,8 @@
 
 package de.anomic.index;
 
-import de.anomic.kelondro.coding.AbstractOrder;
-import de.anomic.kelondro.coding.kelondroOrder;
+import de.anomic.kelondro.order.AbstractOrder;
+import de.anomic.kelondro.order.kelondroOrder;
 
 public class indexContainerOrder extends AbstractOrder<indexContainer> implements kelondroOrder<indexContainer>, Cloneable {
 

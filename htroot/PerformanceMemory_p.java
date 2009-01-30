@@ -31,9 +31,9 @@ import java.util.Map;
 
 import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.kelondroCache;
-import de.anomic.kelondro.kelondroCachedRecords;
-import de.anomic.kelondro.kelondroEcoTable;
-import de.anomic.kelondro.kelondroFlexTable;
+import de.anomic.kelondro.table.CachedRecords;
+import de.anomic.kelondro.table.EcoTable;
+import de.anomic.kelondro.table.FlexTable;
 import de.anomic.kelondro.tools.MemoryControl;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverDomains;
@@ -91,14 +91,14 @@ public class PerformanceMemory_p {
         prop.putNum("memoryUsedNow", (memoryTotalNow - memoryFreeNow) / MB);
         
         // write table for FlexTable index sizes
-        Iterator<String> i = kelondroFlexTable.filenames();
+        Iterator<String> i = FlexTable.filenames();
         String filename;
         Map<String, String> map;
         int p, c = 0;
         long mem, totalmem = 0;
         while (i.hasNext()) {
             filename = i.next();
-            map = kelondroFlexTable.memoryStats(filename);
+            map = FlexTable.memoryStats(filename);
             mem = Long.parseLong(map.get("tableIndexMem"));
             totalmem += mem;
             prop.put("TableList_" + c + "_tableIndexPath", ((p = filename.indexOf("DATA")) < 0) ? filename : filename.substring(p));
@@ -111,12 +111,12 @@ public class PerformanceMemory_p {
         prop.putNum("TableIndexTotalMem", totalmem / (1024 * 1024d));
         
         // write table for EcoTable index sizes
-        i = kelondroEcoTable.filenames();
+        i = EcoTable.filenames();
         c = 0;
         totalmem = 0;
         while (i.hasNext()) {
             filename = i.next();
-            map = kelondroEcoTable.memoryStats(filename);
+            map = EcoTable.memoryStats(filename);
             prop.put("EcoList_" + c + "_tableIndexPath", ((p = filename.indexOf("DATA")) < 0) ? filename : filename.substring(p));
             prop.putNum("EcoList_" + c + "_tableSize", map.get("tableSize"));
             
@@ -136,12 +136,12 @@ public class PerformanceMemory_p {
         prop.putNum("EcoIndexTotalMem", totalmem / (1024 * 1024d));
         
         // write node cache table
-        i = kelondroCachedRecords.filenames();
+        i = CachedRecords.filenames();
         c = 0;
         totalmem = 0;
         while (i.hasNext()) {
             filename = i.next();
-            map = kelondroCachedRecords.memoryStats(filename);
+            map = CachedRecords.memoryStats(filename);
             mem = Long.parseLong(map.get("nodeCacheMem"));
             totalmem += mem;
             prop.put("NodeList_" + c + "_nodeCachePath", ((p = filename.indexOf("DATA")) < 0) ? filename : filename.substring(p));
@@ -157,8 +157,8 @@ public class PerformanceMemory_p {
             c++;
         }
         prop.put("NodeList", c);
-        prop.putNum("nodeCacheStopGrow", kelondroCachedRecords.getMemStopGrow() / (1024 * 1024d));
-        prop.putNum("nodeCacheStartShrink", kelondroCachedRecords.getMemStartShrink() / (1024 * 1024d));
+        prop.putNum("nodeCacheStopGrow", CachedRecords.getMemStopGrow() / (1024 * 1024d));
+        prop.putNum("nodeCacheStartShrink", CachedRecords.getMemStartShrink() / (1024 * 1024d));
         prop.putNum("nodeCacheTotalMem", totalmem / (1024 * 1024d));
         
         // write object cache table

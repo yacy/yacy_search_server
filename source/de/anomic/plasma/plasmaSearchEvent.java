@@ -43,7 +43,7 @@ import de.anomic.index.indexRWIVarEntry;
 import de.anomic.index.indexURLReference;
 import de.anomic.kelondro.kelondroSortStack;
 import de.anomic.kelondro.kelondroSortStore;
-import de.anomic.kelondro.coding.Bitfield;
+import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.tools.SetTools;
 import de.anomic.plasma.plasmaSnippetCache.MediaSnippet;
 import de.anomic.server.serverProfiling;

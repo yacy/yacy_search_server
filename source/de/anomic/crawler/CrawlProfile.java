@@ -31,14 +31,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import de.anomic.kelondro.kelondroBLOB;
-import de.anomic.kelondro.kelondroBLOBHeap;
-import de.anomic.kelondro.kelondroCloneableIterator;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMap;
-import de.anomic.kelondro.coding.Base64Order;
-import de.anomic.kelondro.coding.Digest;
-import de.anomic.kelondro.coding.NaturalOrder;
+import de.anomic.kelondro.blob.BLOB;
+import de.anomic.kelondro.blob.BLOBHeap;
+import de.anomic.kelondro.order.Base64Order;
+import de.anomic.kelondro.order.CloneableIterator;
+import de.anomic.kelondro.order.Digest;
+import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyURL;
 
@@ -66,7 +66,7 @@ public class CrawlProfile {
     public CrawlProfile(final File file) throws IOException {
         this.profileTableFile = file;
         profileTableFile.getParentFile().mkdirs();
-        final kelondroBLOB dyn = new kelondroBLOBHeap(profileTableFile, yacySeedDB.commonHashLength, NaturalOrder.naturalOrder, 1024 * 64);
+        final BLOB dyn = new BLOBHeap(profileTableFile, yacySeedDB.commonHashLength, NaturalOrder.naturalOrder, 1024 * 64);
         profileTable = new kelondroMap(dyn, 500);
     }
     
@@ -75,9 +75,9 @@ public class CrawlProfile {
         if (profileTable != null) profileTable.close();
         if (!(profileTableFile.delete())) throw new RuntimeException("cannot delete crawl profile database");
         profileTableFile.getParentFile().mkdirs();
-        kelondroBLOB dyn = null;
+        BLOB dyn = null;
         try {
-            dyn = new kelondroBLOBHeap(profileTableFile, yacySeedDB.commonHashLength, NaturalOrder.naturalOrder, 1024 * 64);
+            dyn = new BLOBHeap(profileTableFile, yacySeedDB.commonHashLength, NaturalOrder.naturalOrder, 1024 * 64);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -103,7 +103,7 @@ public class CrawlProfile {
     
     public class profileIterator implements Iterator<entry> {
         // the iterator iterates all keys, which are byte[] objects
-        kelondroCloneableIterator<byte[]> handleIterator;
+        CloneableIterator<byte[]> handleIterator;
         String lastkey;
         public profileIterator(final boolean up) throws IOException {
             handleIterator = profileTable.keys(up, false);

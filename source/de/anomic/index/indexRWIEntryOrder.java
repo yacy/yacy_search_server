@@ -31,7 +31,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import de.anomic.kelondro.coding.Bitfield;
+import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.tools.ScoreCluster;
 import de.anomic.plasma.plasmaCondenser;
 import de.anomic.plasma.plasmaSearchRankingProcess;

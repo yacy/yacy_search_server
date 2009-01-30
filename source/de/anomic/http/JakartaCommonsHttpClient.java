@@ -58,7 +58,7 @@ import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
 
-import de.anomic.kelondro.coding.Base64Order;
+import de.anomic.kelondro.order.Base64Order;
 import de.anomic.server.logging.serverLog;
 
 /**

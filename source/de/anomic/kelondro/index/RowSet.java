@@ -31,10 +31,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
-import de.anomic.kelondro.kelondroCloneableIterator;
-import de.anomic.kelondro.coding.Base64Order;
-import de.anomic.kelondro.coding.ByteOrder;
-import de.anomic.kelondro.coding.NaturalOrder;
+import de.anomic.kelondro.order.Base64Order;
+import de.anomic.kelondro.order.ByteOrder;
+import de.anomic.kelondro.order.CloneableIterator;
+import de.anomic.kelondro.order.NaturalOrder;
 
 public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.Entry> {
 
@@ -276,11 +276,11 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
         return super.keys(true);
     }
     
-    public synchronized kelondroCloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) {
+    public synchronized CloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) {
         return new keyIterator(up, firstKey);
     }
     
-    public class keyIterator implements kelondroCloneableIterator<byte[]> {
+    public class keyIterator implements CloneableIterator<byte[]> {
 
         private final boolean up;
         private final byte[] first;
@@ -332,11 +332,11 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
         return super.iterator();
     }
     
-    public synchronized kelondroCloneableIterator<Row.Entry> rows(final boolean up, final byte[] firstKey) {
+    public synchronized CloneableIterator<Row.Entry> rows(final boolean up, final byte[] firstKey) {
         return new rowIterator(up, firstKey);
     }
     
-    public class rowIterator implements kelondroCloneableIterator<Row.Entry> {
+    public class rowIterator implements CloneableIterator<Row.Entry> {
 
         private final boolean up;
         private final byte[] first;

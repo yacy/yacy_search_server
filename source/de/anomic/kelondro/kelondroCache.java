@@ -42,6 +42,8 @@ import de.anomic.kelondro.index.RowCollection;
 import de.anomic.kelondro.index.RowSet;
 import de.anomic.kelondro.index.ObjectIndex;
 import de.anomic.kelondro.index.Row.Entry;
+import de.anomic.kelondro.order.CloneableIterator;
+import de.anomic.kelondro.table.CachedRecords;
 import de.anomic.kelondro.tools.MemoryControl;
 
 public class kelondroCache implements ObjectIndex {
@@ -152,7 +154,7 @@ public class kelondroCache implements ObjectIndex {
     }
     
     private int cacheGrowStatus() {
-        return kelondroCachedRecords.cacheGrowStatus(MemoryControl.available(), memStopGrow, memStartShrink);
+        return CachedRecords.cacheGrowStatus(MemoryControl.available(), memStopGrow, memStartShrink);
     }
     
     private boolean checkMissSpace() {
@@ -435,11 +437,11 @@ public class kelondroCache implements ObjectIndex {
         return index.row();
     }
 
-    public synchronized kelondroCloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) throws IOException {
+    public synchronized CloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) throws IOException {
         return index.keys(up, firstKey);
     }
 
-    public synchronized kelondroCloneableIterator<Row.Entry> rows(final boolean up, final byte[] firstKey) throws IOException {
+    public synchronized CloneableIterator<Row.Entry> rows(final boolean up, final byte[] firstKey) throws IOException {
         return index.rows(up, firstKey);
     }
 

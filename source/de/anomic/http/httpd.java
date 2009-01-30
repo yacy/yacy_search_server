@@ -62,9 +62,9 @@ import org.apache.commons.httpclient.ContentLengthInputStream;
 
 import de.anomic.data.userDB;
 import de.anomic.htmlFilter.htmlFilterCharacterCoding;
-import de.anomic.kelondro.coding.Base64Order;
-import de.anomic.kelondro.coding.DateFormatter;
-import de.anomic.kelondro.coding.Digest;
+import de.anomic.kelondro.order.Base64Order;
+import de.anomic.kelondro.order.DateFormatter;
+import de.anomic.kelondro.order.Digest;
 import de.anomic.kelondro.tools.ByteBuffer;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCodings;

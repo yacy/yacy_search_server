@@ -38,7 +38,7 @@ import java.util.regex.PatternSyntaxException;
 import de.anomic.crawler.HTTPLoader;
 import de.anomic.http.HttpClient;
 import de.anomic.http.httpRequestHeader;
-import de.anomic.kelondro.coding.DateFormatter;
+import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.server.serverCodings;

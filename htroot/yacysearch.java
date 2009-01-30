@@ -33,7 +33,7 @@ import java.util.TreeSet;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.index.indexURLReference;
 import de.anomic.index.indexWord;
-import de.anomic.kelondro.coding.Bitfield;
+import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.tools.SetTools;
 import de.anomic.kelondro.tools.MemoryControl;
 import de.anomic.plasma.plasmaCondenser;

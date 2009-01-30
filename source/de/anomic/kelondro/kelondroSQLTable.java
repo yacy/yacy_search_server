@@ -37,11 +37,12 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-import de.anomic.kelondro.coding.ByteOrder;
-import de.anomic.kelondro.coding.NaturalOrder;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.RowCollection;
 import de.anomic.kelondro.index.ObjectIndex;
+import de.anomic.kelondro.order.ByteOrder;
+import de.anomic.kelondro.order.CloneableIterator;
+import de.anomic.kelondro.order.NaturalOrder;
 
 /*
  * Commands to create a database using mysql:
@@ -252,12 +253,12 @@ public class kelondroSQLTable implements ObjectIndex {
         return null;
     }
     
-    public kelondroCloneableIterator<Row.Entry> rows(final boolean up, final byte[] startKey) throws IOException {
+    public CloneableIterator<Row.Entry> rows(final boolean up, final byte[] startKey) throws IOException {
         // Objects are of type kelondroRow.Entry
         return null;
     }
 
-    public kelondroCloneableIterator<byte[]> keys(final boolean up, final byte[] startKey) {
+    public CloneableIterator<byte[]> keys(final boolean up, final byte[] startKey) {
         // Objects are of type byte[]
         return null;
     }

@@ -27,7 +27,7 @@ package de.anomic.yacy;
 import java.io.IOException;
 import java.util.HashMap;
 
-import de.anomic.kelondro.coding.DateFormatter;
+import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.server.serverCodings;
 import de.anomic.server.logging.serverLog;
 import de.anomic.xml.RSSFeed;

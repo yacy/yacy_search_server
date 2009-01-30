@@ -30,7 +30,7 @@ import java.util.Date;
 
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.index.indexDocumentMetadata;
-import de.anomic.kelondro.coding.DateFormatter;
+import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.yacy.yacyURL;
 

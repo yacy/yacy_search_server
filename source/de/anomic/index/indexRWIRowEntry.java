@@ -26,12 +26,12 @@
 
 package de.anomic.index;
 
-import de.anomic.kelondro.coding.Base64Order;
-import de.anomic.kelondro.coding.Bitfield;
-import de.anomic.kelondro.coding.MicroDate;
 import de.anomic.kelondro.index.Column;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.Row.Entry;
+import de.anomic.kelondro.order.Base64Order;
+import de.anomic.kelondro.order.Bitfield;
+import de.anomic.kelondro.order.MicroDate;
 import de.anomic.yacy.yacySeedDB;
 
 public final class indexRWIRowEntry implements indexRWIEntry, Cloneable {

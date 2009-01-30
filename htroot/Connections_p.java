@@ -37,7 +37,7 @@ import de.anomic.http.HttpConnectionInfo;
 import de.anomic.http.JakartaCommonsHttpClient;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpd;
-import de.anomic.kelondro.coding.DateFormatter;
+import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverHandler;

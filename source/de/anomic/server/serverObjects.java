@@ -53,7 +53,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import de.anomic.htmlFilter.htmlFilterCharacterCoding;
-import de.anomic.kelondro.coding.DateFormatter;
+import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.tools.yFormatter;
 

@@ -36,20 +36,23 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import de.anomic.kelondro.coding.DateFormatter;
-import de.anomic.kelondro.coding.NaturalOrder;
+import de.anomic.kelondro.blob.BLOB;
+import de.anomic.kelondro.blob.BLOBHeap;
+import de.anomic.kelondro.order.CloneableIterator;
+import de.anomic.kelondro.order.DateFormatter;
+import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.tools.ScoreCluster;
 
 
 public class kelondroMap {
 
-    private final kelondroBLOB blob;
+    private final BLOB blob;
     private ScoreCluster<String> cacheScore;
     private HashMap<String, Map<String, String>> cache;
     private final long startup;
     private final int cachesize;
 
-    public kelondroMap(final kelondroBLOB blob, final int cachesize) {
+    public kelondroMap(final BLOB blob, final int cachesize) {
         this.blob = blob;
         this.cache = new HashMap<String, Map<String, String>>();
         this.cacheScore = new ScoreCluster<String>();
@@ -242,7 +245,7 @@ public class kelondroMap {
      * @return
      * @throws IOException
      */
-    public synchronized kelondroCloneableIterator<byte[]> keys(final boolean up, final boolean rotating) throws IOException {
+    public synchronized CloneableIterator<byte[]> keys(final boolean up, final boolean rotating) throws IOException {
         // simple enumeration of key names without special ordering
         return blob.keys(up, rotating);
     }
@@ -254,13 +257,13 @@ public class kelondroMap {
      * @return
      * @throws IOException
      */
-    public kelondroCloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) throws IOException {
+    public CloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) throws IOException {
         return keys(up, false, firstKey, null);
     }
     
-    public synchronized kelondroCloneableIterator<byte[]> keys(final boolean up, final boolean rotating, final byte[] firstKey, final byte[] secondKey) throws IOException {
+    public synchronized CloneableIterator<byte[]> keys(final boolean up, final boolean rotating, final byte[] firstKey, final byte[] secondKey) throws IOException {
         // simple enumeration of key names without special ordering
-        final kelondroCloneableIterator<byte[]> i = blob.keys(up, firstKey);
+        final CloneableIterator<byte[]> i = blob.keys(up, firstKey);
         if (rotating) return new kelondroRotateIterator<byte[]>(i, secondKey, blob.size());
         return i;
     }
@@ -339,7 +342,7 @@ public class kelondroMap {
         if (f.exists()) f.delete();
         try {
             // make a blob
-            kelondroBLOB blob = new kelondroBLOBHeap(f, 12, NaturalOrder.naturalOrder, 1024 * 1024);
+            BLOB blob = new BLOBHeap(f, 12, NaturalOrder.naturalOrder, 1024 * 1024);
             // make map
             kelondroMap map = new kelondroMap(blob, 1024);
             // put some values into the map

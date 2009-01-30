@@ -12,17 +12,17 @@ import java.util.Random;
 
 import javax.imageio.ImageIO;
 
-import de.anomic.kelondro.kelondroCloneableIterator;
-import de.anomic.kelondro.kelondroEcoTable;
-import de.anomic.kelondro.kelondroIntBytesMap;
 import de.anomic.kelondro.kelondroSQLTable;
 import de.anomic.kelondro.kelondroSplitTable;
-import de.anomic.kelondro.kelondroTree;
-import de.anomic.kelondro.coding.Base64Order;
-import de.anomic.kelondro.coding.NaturalOrder;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.RowSet;
 import de.anomic.kelondro.index.ObjectIndex;
+import de.anomic.kelondro.index.IntBytesMap;
+import de.anomic.kelondro.order.Base64Order;
+import de.anomic.kelondro.order.CloneableIterator;
+import de.anomic.kelondro.order.NaturalOrder;
+import de.anomic.kelondro.table.EcoTable;
+import de.anomic.kelondro.table.Tree;
 import de.anomic.kelondro.tools.MemoryControl;
 import de.anomic.server.serverInstantBusyThread;
 import de.anomic.ymage.ymageChart;
@@ -200,7 +200,7 @@ public class dbtest {
             return new kelondroSplitTable(tablepath, new File(tablename).getName(), testRow, true);
         }
         if (dbe.equals("kelondroEcoTable")) {
-            return new kelondroEcoTable(new File(tablename), testRow, kelondroEcoTable.tailCacheForceUsage, 1000, 0);
+            return new EcoTable(new File(tablename), testRow, EcoTable.tailCacheForceUsage, 1000, 0);
         }
         if (dbe.equals("mysql")) {
             return new kelondroSQLTable("mysql", testRow);
@@ -389,8 +389,8 @@ public class dbtest {
             }
             
             if (command.equals("list")) {
-                kelondroCloneableIterator<Row.Entry> i = null;
-                if (table_test instanceof kelondroTree) i = ((kelondroTree) table_test).rows(true, null);
+                CloneableIterator<Row.Entry> i = null;
+                if (table_test instanceof Tree) i = ((Tree) table_test).rows(true, null);
                 if (table_test instanceof kelondroSQLTable) i = ((kelondroSQLTable) table_test).rows(true, null);
                 if(i != null) {
                     Row.Entry row;
@@ -425,7 +425,7 @@ public class dbtest {
                 int p, rc=0;
                 final ArrayList<Long> ra = new ArrayList<Long>();
                 final HashSet<Long> jcontrol = new HashSet<Long>();
-                final kelondroIntBytesMap kcontrol = new kelondroIntBytesMap(1, 0);
+                final IntBytesMap kcontrol = new IntBytesMap(1, 0);
                 for (int i = 0; i < writeCount; i++) {
                     r = Math.abs(random.nextLong() % 1000);
                     jcontrol.add(Long.valueOf(r));
@@ -465,7 +465,7 @@ public class dbtest {
                 int p, rc=0;
                 final ArrayList<Long> ra = new ArrayList<Long>();
                 final HashSet<Long> jcontrol = new HashSet<Long>();
-                final kelondroIntBytesMap kcontrol = new kelondroIntBytesMap(1, 0);
+                final IntBytesMap kcontrol = new IntBytesMap(1, 0);
                 for (int i = 0; i < writeCount; i++) {
                     //if (i == 30) random = new Random(randomstart);
                     r = Math.abs(random.nextLong() % 1000);

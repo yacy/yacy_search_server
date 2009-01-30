@@ -34,6 +34,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import de.anomic.kelondro.blob.BLOB;
+import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.tools.ScoreCluster;
 
 public class kelondroMapDataMining extends kelondroMap {
@@ -43,7 +45,7 @@ public class kelondroMapDataMining extends kelondroMap {
     private HashMap<String, Object> accMap; // to store accumulations of specific fields
     
 	@SuppressWarnings("unchecked")
-	public kelondroMapDataMining(final kelondroBLOB dyn, final int cachesize, final String[] sortfields, final String[] longaccfields, final String[] doubleaccfields, final Method externalInitializer, final Object externalHandler) {
+	public kelondroMapDataMining(final BLOB dyn, final int cachesize, final String[] sortfields, final String[] longaccfields, final String[] doubleaccfields, final Method externalInitializer, final Object externalHandler) {
         super(dyn, cachesize);
         
         // create fast ordering clusters and acc fields
@@ -82,7 +84,7 @@ public class kelondroMapDataMining extends kelondroMap {
 
         // fill cluster and accumulator with values
         if ((sortfields != null) || (longaccfields != null) || (doubleaccfields != null)) try {
-            final kelondroCloneableIterator<byte[]> it = dyn.keys(true, false);
+            final CloneableIterator<byte[]> it = dyn.keys(true, false);
             String mapname;
             Object cell;
             long valuel;

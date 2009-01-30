@@ -53,14 +53,14 @@ import de.anomic.index.indexRepositoryReference;
 import de.anomic.index.indexURLReference;
 import de.anomic.index.indexWord;
 import de.anomic.index.indexRepositoryReference.Export;
-import de.anomic.kelondro.kelondroCloneableIterator;
 import de.anomic.kelondro.kelondroException;
-import de.anomic.kelondro.kelondroMergeIterator;
 import de.anomic.kelondro.kelondroRotateIterator;
-import de.anomic.kelondro.coding.Base64Order;
-import de.anomic.kelondro.coding.ByteOrder;
-import de.anomic.kelondro.coding.kelondroOrder;
 import de.anomic.kelondro.index.RowCollection;
+import de.anomic.kelondro.order.Base64Order;
+import de.anomic.kelondro.order.ByteOrder;
+import de.anomic.kelondro.order.CloneableIterator;
+import de.anomic.kelondro.order.kelondroMergeIterator;
+import de.anomic.kelondro.order.kelondroOrder;
 import de.anomic.kelondro.tools.MemoryControl;
 import de.anomic.server.serverProfiling;
 import de.anomic.server.logging.serverLog;
@@ -404,7 +404,7 @@ public final class plasmaWordIndex implements indexRI {
         return this.referenceURL.export();
     }
     
-    public kelondroCloneableIterator<indexURLReference> entriesURL(final boolean up, final String firstHash) throws IOException {
+    public CloneableIterator<indexURLReference> entriesURL(final boolean up, final String firstHash) throws IOException {
         return this.referenceURL.entries(up, firstHash);
     }
     
@@ -900,15 +900,15 @@ public final class plasmaWordIndex implements indexRI {
         return newEntry;
     }
     
-    public synchronized kelondroCloneableIterator<indexContainer> wordContainers(final String startHash, final boolean ram, final boolean rot) {
-        final kelondroCloneableIterator<indexContainer> i = wordContainers(startHash, ram);
+    public synchronized CloneableIterator<indexContainer> wordContainers(final String startHash, final boolean ram, final boolean rot) {
+        final CloneableIterator<indexContainer> i = wordContainers(startHash, ram);
         if (rot) {
             return new kelondroRotateIterator<indexContainer>(i, new String(Base64Order.zero(startHash.length())), dhtCache.size() + ((ram) ? 0 : collections.size()));
         }
         return i;
     }
 
-    public synchronized kelondroCloneableIterator<indexContainer> wordContainers(final String startWordHash, final boolean ram) {
+    public synchronized CloneableIterator<indexContainer> wordContainers(final String startWordHash, final boolean ram) {
         final kelondroOrder<indexContainer> containerOrder = new indexContainerOrder(indexOrder.clone());
         containerOrder.rotate(emptyContainer(startWordHash, 0));
         if (ram) {

@@ -143,10 +143,10 @@ import de.anomic.index.indexDocumentMetadata;
 import de.anomic.index.indexReferenceBlacklist;
 import de.anomic.index.indexURLReference;
 import de.anomic.kelondro.kelondroCache;
-import de.anomic.kelondro.kelondroCachedRecords;
-import de.anomic.kelondro.coding.DateFormatter;
-import de.anomic.kelondro.coding.Digest;
-import de.anomic.kelondro.coding.NaturalOrder;
+import de.anomic.kelondro.order.DateFormatter;
+import de.anomic.kelondro.order.Digest;
+import de.anomic.kelondro.order.NaturalOrder;
+import de.anomic.kelondro.table.CachedRecords;
 import de.anomic.kelondro.tools.SetTools;
 import de.anomic.kelondro.tools.MemoryControl;
 import de.anomic.plasma.parser.ParserException;
@@ -446,7 +446,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         // long memprereq = Math.max(getConfigLong(INDEXER_MEMPREREQ, 0), wordIndex.minMem());
         // setConfig(INDEXER_MEMPREREQ, memprereq);
         // setThreadPerformance(INDEXER, getConfigLong(INDEXER_IDLESLEEP, 0), getConfigLong(INDEXER_BUSYSLEEP, 0), memprereq);
-        kelondroCachedRecords.setCacheGrowStati(40 * 1024 * 1024, 20 * 1024 * 1024);
+        CachedRecords.setCacheGrowStati(40 * 1024 * 1024, 20 * 1024 * 1024);
         kelondroCache.setCacheGrowStati(40 * 1024 * 1024, 20 * 1024 * 1024);
         
         // make parser

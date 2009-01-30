@@ -56,7 +56,7 @@
 
 package de.anomic.kelondro;
 
-import de.anomic.kelondro.coding.NaturalOrder;
+import de.anomic.kelondro.order.NaturalOrder;
 
 public class kelondroObjectBuffer {
 

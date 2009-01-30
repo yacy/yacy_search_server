@@ -51,10 +51,10 @@ import java.util.HashSet;
 import java.util.Iterator;
 
 import de.anomic.kelondro.kelondroStack;
-import de.anomic.kelondro.coding.DateFormatter;
-import de.anomic.kelondro.coding.NaturalOrder;
 import de.anomic.kelondro.index.Column;
 import de.anomic.kelondro.index.Row;
+import de.anomic.kelondro.order.DateFormatter;
+import de.anomic.kelondro.order.NaturalOrder;
 
 public class yacyNewsQueue {
 

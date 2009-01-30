@@ -31,10 +31,10 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TimeZone;
 
-import de.anomic.kelondro.kelondroBLOBTree;
 import de.anomic.kelondro.kelondroMap;
-import de.anomic.kelondro.coding.Base64Order;
-import de.anomic.kelondro.coding.NaturalOrder;
+import de.anomic.kelondro.blob.BLOBTree;
+import de.anomic.kelondro.order.Base64Order;
+import de.anomic.kelondro.order.NaturalOrder;
 
 public class messageBoard {
     
@@ -54,7 +54,7 @@ public class messageBoard {
     public messageBoard(final File path) {
         new File(path.getParent()).mkdir();
         if (database == null) {
-            database = new kelondroMap(new kelondroBLOBTree(path, true, true, categoryLength + dateFormat.length() + 2, recordSize, '_', NaturalOrder.naturalOrder, true, false, false), 500);
+            database = new kelondroMap(new BLOBTree(path, true, true, categoryLength + dateFormat.length() + 2, recordSize, '_', NaturalOrder.naturalOrder, true, false, false), 500);
         }
         sn = 0;
     }

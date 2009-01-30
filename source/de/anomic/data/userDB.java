@@ -36,13 +36,13 @@ import java.util.Map;
 import java.util.Random;
 
 import de.anomic.http.httpRequestHeader;
-import de.anomic.kelondro.kelondroBLOBTree;
-import de.anomic.kelondro.kelondroCloneableIterator;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMap;
-import de.anomic.kelondro.coding.Base64Order;
-import de.anomic.kelondro.coding.Digest;
-import de.anomic.kelondro.coding.NaturalOrder;
+import de.anomic.kelondro.blob.BLOBTree;
+import de.anomic.kelondro.order.Base64Order;
+import de.anomic.kelondro.order.CloneableIterator;
+import de.anomic.kelondro.order.Digest;
+import de.anomic.kelondro.order.NaturalOrder;
 
 public final class userDB {
     
@@ -57,7 +57,7 @@ public final class userDB {
     public userDB(final File userTableFile) {
         this.userTableFile = userTableFile;
         userTableFile.getParentFile().mkdirs();
-        this.userTable = new kelondroMap(new kelondroBLOBTree(userTableFile, true, true, 128, 256, '_', NaturalOrder.naturalOrder, true, false, false), 10);
+        this.userTable = new kelondroMap(new BLOBTree(userTableFile, true, true, 128, 256, '_', NaturalOrder.naturalOrder, true, false, false), 10);
     }
     
     void resetDatabase() {
@@ -65,7 +65,7 @@ public final class userDB {
         if (userTable != null) userTable.close();
         if (!(userTableFile.delete())) throw new RuntimeException("cannot delete user database");
         userTableFile.getParentFile().mkdirs();
-        userTable = new kelondroMap(new kelondroBLOBTree(userTableFile, true, true, 256, 512, '_', NaturalOrder.naturalOrder, true, false, false), 10);
+        userTable = new kelondroMap(new BLOBTree(userTableFile, true, true, 256, 512, '_', NaturalOrder.naturalOrder, true, false, false), 10);
     }
     
     public void close() {
@@ -581,7 +581,7 @@ public final class userDB {
 
     public class userIterator implements Iterator<Entry> {
         // the iterator iterates all userNames
-        kelondroCloneableIterator<byte[]> userIter;
+        CloneableIterator<byte[]> userIter;
         //userDB.Entry nextEntry;
         
         public userIterator(final boolean up) throws IOException {

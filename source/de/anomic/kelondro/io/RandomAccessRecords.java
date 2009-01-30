@@ -28,8 +28,8 @@ package de.anomic.kelondro.io;
 
 import java.io.IOException;
 
-import de.anomic.kelondro.kelondroHandle;
-import de.anomic.kelondro.kelondroNode;
+import de.anomic.kelondro.table.RecordHandle;
+import de.anomic.kelondro.table.Node;
 
 public interface RandomAccessRecords {
     
@@ -37,6 +37,6 @@ public interface RandomAccessRecords {
     // the newNode method is used to define a enumeration in kelondroTray, but is still there abstract
     // the real implementation is done in kelondroEcoRecords and kelondroCachedRecords
     
-    public kelondroNode newNode(kelondroHandle handle, byte[] bulk, int offset) throws IOException;
+    public Node newNode(RecordHandle handle, byte[] bulk, int offset) throws IOException;
     
 }

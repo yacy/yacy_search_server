@@ -34,7 +34,7 @@ import java.util.TreeSet;
 import java.util.Map.Entry;
 
 import de.anomic.http.httpRequestHeader;
-import de.anomic.kelondro.coding.DateFormatter;
+import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.net.natLib;
 import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSwitchboard;

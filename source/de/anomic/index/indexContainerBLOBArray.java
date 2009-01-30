@@ -32,16 +32,16 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-import de.anomic.kelondro.kelondroBLOB;
-import de.anomic.kelondro.kelondroBLOBArray;
-import de.anomic.kelondro.kelondroCloneableIterator;
+import de.anomic.kelondro.blob.BLOB;
+import de.anomic.kelondro.blob.BLOBArray;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.RowSet;
+import de.anomic.kelondro.order.CloneableIterator;
 
 public final class indexContainerBLOBArray {
 
     private final Row payloadrow;
-    private final kelondroBLOBArray array;
+    private final BLOBArray array;
     
     /**
      * open a index container based on a BLOB dump. The content of the BLOB will not be read
@@ -57,7 +57,7 @@ public final class indexContainerBLOBArray {
     		final File heapLocation,
     		final Row payloadrow) throws IOException {
         this.payloadrow = payloadrow;
-        this.array = new kelondroBLOBArray(
+        this.array = new BLOBArray(
             heapLocation,
             "index",
             payloadrow.primaryKeyLength,
@@ -95,7 +95,7 @@ public final class indexContainerBLOBArray {
      * objects in the cache.
      * @throws IOException 
      */
-    public synchronized kelondroCloneableIterator<indexContainer> wordContainers(final String startWordHash, final boolean rot) throws IOException {
+    public synchronized CloneableIterator<indexContainer> wordContainers(final String startWordHash, final boolean rot) throws IOException {
         return new heapCacheIterator(startWordHash, rot);
     }
 
@@ -103,7 +103,7 @@ public final class indexContainerBLOBArray {
      * cache iterator: iterates objects within the heap cache. This can only be used
      * for write-enabled heaps, read-only heaps do not have a heap cache
      */
-    public class heapCacheIterator implements kelondroCloneableIterator<indexContainer>, Iterable<indexContainer> {
+    public class heapCacheIterator implements CloneableIterator<indexContainer>, Iterable<indexContainer> {
 
         // this class exists, because the wCache cannot be iterated with rotation
         // and because every indexContainer Object that is iterated must be returned as top-level-clone
@@ -111,7 +111,7 @@ public final class indexContainerBLOBArray {
         // plus the mentioned features
         
         private final boolean rot;
-        private kelondroCloneableIterator<byte[]> iterator;
+        private CloneableIterator<byte[]> iterator;
         
         public heapCacheIterator(final String startWordHash, final boolean rot) throws IOException {
             this.rot = rot;
@@ -203,7 +203,7 @@ public final class indexContainerBLOBArray {
         return array.replace(wordHash.getBytes(), new BLOBRewriter(wordHash, rewriter));
     }
     
-    public class BLOBRewriter implements kelondroBLOB.Rewriter {
+    public class BLOBRewriter implements BLOB.Rewriter {
 
         ContainerRewriter rewriter;
         String wordHash;

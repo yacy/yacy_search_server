@@ -65,12 +65,12 @@ import de.anomic.crawler.CrawlProfile;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterWriter;
 import de.anomic.index.indexWord;
-import de.anomic.kelondro.kelondroBLOBTree;
-import de.anomic.kelondro.kelondroCloneableIterator;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMap;
-import de.anomic.kelondro.coding.DateFormatter;
-import de.anomic.kelondro.coding.NaturalOrder;
+import de.anomic.kelondro.blob.BLOBTree;
+import de.anomic.kelondro.order.CloneableIterator;
+import de.anomic.kelondro.order.DateFormatter;
+import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverBusyThread;
 import de.anomic.server.serverFileUtils;
@@ -112,17 +112,17 @@ public class bookmarksDB {
         tagCache=new HashMap<String, Tag>();
         bookmarksFile.getParentFile().mkdirs();
         //this.bookmarksTable = new kelondroMap(kelondroDyn.open(bookmarksFile, bufferkb * 1024, preloadTime, 12, 256, '_', true, false));
-        this.bookmarksTable = new kelondroMap(new kelondroBLOBTree(bookmarksFile, true, true, 12, 256, '_', NaturalOrder.naturalOrder, true, false, false), 1000);
+        this.bookmarksTable = new kelondroMap(new BLOBTree(bookmarksFile, true, true, 12, 256, '_', NaturalOrder.naturalOrder, true, false, false), 1000);
 
         // tags
         tagsFile.getParentFile().mkdirs();
         final boolean tagsFileExisted = tagsFile.exists();
-        this.tagsTable = new kelondroMap(new kelondroBLOBTree(tagsFile, true, true, 12, 256, '_', NaturalOrder.naturalOrder, true, false, false), 500);
+        this.tagsTable = new kelondroMap(new BLOBTree(tagsFile, true, true, 12, 256, '_', NaturalOrder.naturalOrder, true, false, false), 500);
         if (!tagsFileExisted) rebuildTags();
 
         // dates
         final boolean datesExisted = datesFile.exists();
-        this.datesTable = new kelondroMap(new kelondroBLOBTree(datesFile, true, true, 20, 256, '_', NaturalOrder.naturalOrder, true, false, false), 500);
+        this.datesTable = new kelondroMap(new BLOBTree(datesFile, true, true, 20, 256, '_', NaturalOrder.naturalOrder, true, false, false), 500);
         if (!datesExisted) rebuildDates();
 
         // autoReCrawl
@@ -1282,7 +1282,7 @@ public class bookmarksDB {
      * Subclass of bookmarksDB, which provides the tagIterator object-type
      */
     public class tagIterator implements Iterator<Tag> {
-        kelondroCloneableIterator<byte[]> tagIter;
+        CloneableIterator<byte[]> tagIter;
         //bookmarksDB.Tag nextEntry;
         
         public tagIterator(final boolean up) throws IOException {

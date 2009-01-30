@@ -51,7 +51,7 @@ import de.anomic.htmlFilter.htmlFilterImageEntry;
 import de.anomic.index.indexPhrase;
 import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexWord;
-import de.anomic.kelondro.coding.Bitfield;
+import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.tools.SetTools;
 import de.anomic.language.identification.Identificator;
 import de.anomic.yacy.yacyURL;

@@ -50,7 +50,7 @@ import java.util.Properties;
 import java.util.TreeMap;
 import java.util.Vector;
 
-import de.anomic.kelondro.coding.DateFormatter;
+import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.yacy.yacyURL;
 
 

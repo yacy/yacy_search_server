@@ -29,9 +29,9 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-import de.anomic.kelondro.kelondroCloneableIterator;
-import de.anomic.kelondro.kelondroMergeIterator;
 import de.anomic.kelondro.index.Row.Entry;
+import de.anomic.kelondro.order.CloneableIterator;
+import de.anomic.kelondro.order.kelondroMergeIterator;
 
 public class RAMIndex implements ObjectIndex {
     
@@ -167,7 +167,7 @@ public class RAMIndex implements ObjectIndex {
         return index0.size() + index1.size();
     }
     
-    public synchronized kelondroCloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) {
+    public synchronized CloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) {
         // returns the key-iterator of the underlying kelondroIndex
         if (index1 == null) {
             // finish initialization phase
@@ -193,7 +193,7 @@ public class RAMIndex implements ObjectIndex {
                 true);
     }
 
-    public synchronized kelondroCloneableIterator<Row.Entry> rows(final boolean up, final byte[] firstKey) {
+    public synchronized CloneableIterator<Row.Entry> rows(final boolean up, final byte[] firstKey) {
         // returns the row-iterator of the underlying kelondroIndex
         if (index1 == null) {
             // finish initialization phase

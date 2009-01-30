@@ -34,7 +34,7 @@ import java.util.TreeMap;
 
 import de.anomic.data.messageBoard;
 import de.anomic.http.httpRequestHeader;
-import de.anomic.kelondro.coding.DateFormatter;
+import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;

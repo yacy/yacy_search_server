@@ -33,10 +33,10 @@ import java.util.Iterator;
 
 import de.anomic.http.httpRequestHeader;
 import de.anomic.index.indexReferenceBlacklist;
-import de.anomic.kelondro.coding.DateFormatter;
-import de.anomic.kelondro.coding.NaturalOrder;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.Row.Entry;
+import de.anomic.kelondro.order.DateFormatter;
+import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.tools.ScoreCluster;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;

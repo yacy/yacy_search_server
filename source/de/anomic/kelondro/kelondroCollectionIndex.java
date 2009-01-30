@@ -41,15 +41,19 @@ import java.util.Set;
 import java.util.TimeZone;
 
 import de.anomic.index.indexContainer;
-import de.anomic.kelondro.coding.Base64Order;
-import de.anomic.kelondro.coding.ByteOrder;
-import de.anomic.kelondro.coding.Digest;
-import de.anomic.kelondro.coding.NaturalOrder;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.RowCollection;
 import de.anomic.kelondro.index.RowSet;
 import de.anomic.kelondro.index.ObjectIndex;
 import de.anomic.kelondro.index.Row.EntryIndex;
+import de.anomic.kelondro.order.Base64Order;
+import de.anomic.kelondro.order.ByteOrder;
+import de.anomic.kelondro.order.CloneableIterator;
+import de.anomic.kelondro.order.Digest;
+import de.anomic.kelondro.order.NaturalOrder;
+import de.anomic.kelondro.table.EcoTable;
+import de.anomic.kelondro.table.FixedWidthArray;
+import de.anomic.kelondro.table.FlexTable;
 import de.anomic.kelondro.tools.MemoryControl;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.logging.serverLog;
@@ -68,7 +72,7 @@ public class kelondroCollectionIndex {
     private final String        filenameStub;
     private final File          commonsPath;
     private final int           loadfactor;
-    private Map<String, kelondroFixedWidthArray> arrays; // Map of (partitionNumber"-"chunksize)/kelondroFixedWidthArray - Objects
+    private Map<String, FixedWidthArray> arrays; // Map of (partitionNumber"-"chunksize)/kelondroFixedWidthArray - Objects
     private final Row   payloadrow; // definition of the payload (chunks inside the collections)
     private final int           maxPartitions;  // this is the maxmimum number of array files
     private int                 indexErrors; // counter for exceptions when index returned wrong value
@@ -132,19 +136,19 @@ public class kelondroCollectionIndex {
         }
         final File f = new File(path, filenameStub + ".index");
         if (f.isDirectory()) {
-            kelondroFlexTable.delete(path, filenameStub + ".index");
+            FlexTable.delete(path, filenameStub + ".index");
         }
         if (f.exists()) {
             serverLog.logFine("STARTUP", "OPENING COLLECTION INDEX");
             
             // open index and array files
-            this.arrays = new HashMap<String, kelondroFixedWidthArray>(); // all entries will be dynamically created with getArray()
+            this.arrays = new HashMap<String, FixedWidthArray>(); // all entries will be dynamically created with getArray()
             index = openIndexFile(path, filenameStub, indexOrder, loadfactor, rowdef, 0);
             openAllArrayFiles(false, indexOrder);
         } else {
             // calculate initialSpace
             final String[] list = this.path.list();
-            kelondroFixedWidthArray array;
+            FixedWidthArray array;
             int initialSpace = 0;
             for (int i = 0; i < list.length; i++) if (list[i].endsWith(".kca")) {
                 // open array
@@ -166,17 +170,17 @@ public class kelondroCollectionIndex {
             final long necessaryRAM4fullTable = minimumRAM4Eco + (indexRowdef.objectsize + 4) * initialSpace * 3 / 2;
             
             // initialize (new generation) index table from file
-            index = new kelondroEcoTable(f, indexRowdef, (MemoryControl.request(necessaryRAM4fullTable, false)) ? kelondroEcoTable.tailCacheUsageAuto : kelondroEcoTable.tailCacheDenyUsage, EcoFSBufferSize, initialSpace);
+            index = new EcoTable(f, indexRowdef, (MemoryControl.request(necessaryRAM4fullTable, false)) ? EcoTable.tailCacheUsageAuto : EcoTable.tailCacheDenyUsage, EcoFSBufferSize, initialSpace);
             
             // open array files
-            this.arrays = new HashMap<String, kelondroFixedWidthArray>(); // all entries will be dynamically created with getArray()
+            this.arrays = new HashMap<String, FixedWidthArray>(); // all entries will be dynamically created with getArray()
             openAllArrayFiles(true, indexOrder);
         }
     }
     
     public void clear() throws IOException {
         index.clear();
-        for (final kelondroFixedWidthArray array: arrays.values()) {
+        for (final FixedWidthArray array: arrays.values()) {
             array.clear();
         }
     }
@@ -189,7 +193,7 @@ public class kelondroCollectionIndex {
     private void openAllArrayFiles(final boolean indexGeneration, final ByteOrder indexOrder) throws IOException {
         
         final String[] list = this.path.list();
-        kelondroFixedWidthArray array;
+        FixedWidthArray array;
         
         final Row irow = indexRow(keylength, indexOrder);
         final int t = RowCollection.daysSince2000(System.currentTimeMillis());
@@ -276,23 +280,23 @@ public class kelondroCollectionIndex {
         final Row indexRowdef = indexRow(keylength, indexOrder);
         ObjectIndex theindex;
         if (f.isDirectory()) {
-            kelondroFlexTable.delete(path, filenameStub + ".index");
+            FlexTable.delete(path, filenameStub + ".index");
         }
         // open a ecotable
         final long records = f.length() / indexRowdef.objectsize;
         final long necessaryRAM4fullTable = minimumRAM4Eco + (indexRowdef.objectsize + 4) * records * 3 / 2;
         final boolean fullCache = MemoryControl.request(necessaryRAM4fullTable, false);
         if (fullCache) {
-            theindex = new kelondroEcoTable(f, indexRowdef, kelondroEcoTable.tailCacheUsageAuto, EcoFSBufferSize, initialSpace);
+            theindex = new EcoTable(f, indexRowdef, EcoTable.tailCacheUsageAuto, EcoFSBufferSize, initialSpace);
             //if (!((kelondroEcoTable) theindex).usesFullCopy()) theindex = new kelondroCache(theindex);
         } else {
             //theindex = new kelondroCache(new kelondroEcoTable(f, indexRowdef, kelondroEcoTable.tailCacheDenyUsage, EcoFSBufferSize, initialSpace));
-            theindex = new kelondroEcoTable(f, indexRowdef, kelondroEcoTable.tailCacheDenyUsage, EcoFSBufferSize, initialSpace);
+            theindex = new EcoTable(f, indexRowdef, EcoTable.tailCacheDenyUsage, EcoFSBufferSize, initialSpace);
         }
         return theindex;
     }
     
-    private kelondroFixedWidthArray openArrayFile(final int partitionNumber, final int serialNumber, final ByteOrder indexOrder, final boolean create) throws IOException {
+    private FixedWidthArray openArrayFile(final int partitionNumber, final int serialNumber, final ByteOrder indexOrder, final boolean create) throws IOException {
         final File f = arrayFile(path, filenameStub, loadfactor, payloadrow.objectsize, partitionNumber, serialNumber);
         final int load = arrayCapacity(partitionNumber);
         final Row rowdef = new Row(
@@ -302,14 +306,14 @@ public class kelondroCollectionIndex {
                 0
                 );
         if ((!(f.exists())) && (!create)) return null;
-        final kelondroFixedWidthArray a = new kelondroFixedWidthArray(f, rowdef, 0);
+        final FixedWidthArray a = new FixedWidthArray(f, rowdef, 0);
         serverLog.logFine("STARTUP", "opened array file " + f + " with " + a.size() + " RWIs");
         return a;
     }
     
-    private kelondroFixedWidthArray getArray(final int partitionNumber, final int serialNumber, final ByteOrder indexOrder, final int chunksize) {
+    private FixedWidthArray getArray(final int partitionNumber, final int serialNumber, final ByteOrder indexOrder, final int chunksize) {
         final String accessKey = partitionNumber + "-" + chunksize;
-        kelondroFixedWidthArray array = arrays.get(accessKey);
+        FixedWidthArray array = arrays.get(accessKey);
         if (array != null) return array;
         try {
             array = openArrayFile(partitionNumber, serialNumber, indexOrder, true);
@@ -358,7 +362,7 @@ public class kelondroCollectionIndex {
             final int oldRownumber) throws IOException {
         // we need a new slot, that means we must first delete the old entry
         // find array file
-        final kelondroFixedWidthArray array = getArray(oldPartitionNumber, serialNumber, index.row().objectOrder, chunkSize);
+        final FixedWidthArray array = getArray(oldPartitionNumber, serialNumber, index.row().objectOrder, chunkSize);
 
         // delete old entry
         array.remove(oldRownumber);
@@ -369,7 +373,7 @@ public class kelondroCollectionIndex {
         // the collection is new
         final int partitionNumber = arrayIndex(collection.size());
         final Row.Entry indexrow = index.row().newEntry();
-        final kelondroFixedWidthArray array = getArray(partitionNumber, serialNumber, index.row().objectOrder, this.payloadrow.objectsize);
+        final FixedWidthArray array = getArray(partitionNumber, serialNumber, index.row().objectOrder, this.payloadrow.objectsize);
 
         // define row
         final Row.Entry arrayEntry = array.row().newEntry();
@@ -404,7 +408,7 @@ public class kelondroCollectionIndex {
             final int partitionNumber, final int serialNumber, final int chunkSize) throws IOException {
 
         // write a new entry in the other array
-        final kelondroFixedWidthArray array = getArray(partitionNumber, serialNumber, index.row().objectOrder, chunkSize);
+        final FixedWidthArray array = getArray(partitionNumber, serialNumber, index.row().objectOrder, chunkSize);
         
         // define new row
         final Row.Entry arrayEntry = array.row().newEntry();
@@ -430,7 +434,7 @@ public class kelondroCollectionIndex {
         // we don't need a new slot, just write collection into the old one
 
         // find array file
-        final kelondroFixedWidthArray array = getArray(partitionNumber, serialNumber, index.row().objectOrder, chunkSize);
+        final FixedWidthArray array = getArray(partitionNumber, serialNumber, index.row().objectOrder, chunkSize);
 
         // define new row
         final Row.Entry arrayEntry = array.row().newEntry();
@@ -739,7 +743,7 @@ public class kelondroCollectionIndex {
 
     private synchronized RowSet getwithparams(final Row.Entry indexrow, final int chunksize, final int chunkcount, final int clusteridx, final int rownumber, final int serialnumber, final boolean remove) throws IOException {
         // open array entry
-        final kelondroFixedWidthArray array = getArray(clusteridx, serialnumber, index.row().objectOrder, chunksize);
+        final FixedWidthArray array = getArray(clusteridx, serialnumber, index.row().objectOrder, chunksize);
         final Row.Entry arrayrow = array.get(rownumber);
         if (arrayrow == null) {
             // the index appears to be corrupted
@@ -810,7 +814,7 @@ public class kelondroCollectionIndex {
         
         public keycollectionIterator(final byte[] startKey, final byte[] secondKey, final boolean rot) throws IOException {
             // iterator of {byte[], kelondroRowSet} Objects
-            final kelondroCloneableIterator<Row.Entry> i = index.rows(true, startKey);
+            final CloneableIterator<Row.Entry> i = index.rows(true, startKey);
             indexRowIterator = (rot) ? new kelondroRotateIterator<Row.Entry>(i, secondKey, index.size()) : i;
         }
         
@@ -838,7 +842,7 @@ public class kelondroCollectionIndex {
     
     public synchronized void close() {
         this.index.close();
-        final Iterator<kelondroFixedWidthArray> i = arrays.values().iterator();
+        final Iterator<FixedWidthArray> i = arrays.values().iterator();
         while (i.hasNext()) i.next().close();
     }
     
@@ -881,7 +885,7 @@ public class kelondroCollectionIndex {
             
             // printout of index
             collectionIndex.close();
-            final kelondroEcoTable index = new kelondroEcoTable(new File(path, filenameStub + ".index"), kelondroCollectionIndex.indexRow(9, NaturalOrder.naturalOrder), kelondroEcoTable.tailCacheUsageAuto, 0, 0);
+            final EcoTable index = new EcoTable(new File(path, filenameStub + ".index"), kelondroCollectionIndex.indexRow(9, NaturalOrder.naturalOrder), EcoTable.tailCacheUsageAuto, 0, 0);
             index.print();
             index.close();
         } catch (final IOException e) {
