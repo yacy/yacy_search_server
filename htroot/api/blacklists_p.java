@@ -18,7 +18,8 @@ public class blacklists_p {
         final List<String> dirlist = listManager.getDirListing(listManager.listsPath);
         int blacklistCount=0;
 
-        final String blackListName = post.get("listname", "");
+        final String blackListName = (post == null) ? "" : post.get("listname", "");
+        final String attrOnly = (post == null) ? "" : post.get("attrOnly", "");
 
         List<String> list;
         int count;
@@ -41,19 +42,21 @@ public class blacklists_p {
                     }
                     prop.put("lists_" + blacklistCount + "_types", types.length);
 
-                    list = listManager.getListArray(new File(listManager.listsPath, element));
+                    if ( ! (attrOnly.equals("1") || attrOnly.equals("true"))) {
+                	list = listManager.getListArray(new File(listManager.listsPath, element));
 
-                    count=0;
-                    for (int j=0;j<list.size();++j){
-                        final String nextEntry = list.get(j);
+                	count=0;
+                	for (int j=0;j<list.size();++j){
+                	    final String nextEntry = list.get(j);
 
-                        if (nextEntry.length() == 0) continue;
-                        if (nextEntry.startsWith("#")) continue;
+                	    if (nextEntry.length() == 0) continue;
+                	    if (nextEntry.startsWith("#")) continue;
 
-                        prop.putXML("lists_" + blacklistCount + "_items_" + count + "_item", nextEntry);
-                        count++;
+                	    prop.putXML("lists_" + blacklistCount + "_items_" + count + "_item", nextEntry);
+                	    count++;
+                	}
+                	prop.put("lists_" + blacklistCount + "_items", count);
                     }
-                    prop.put("lists_" + blacklistCount + "_items", count);
                     blacklistCount++;
                 }
             }
