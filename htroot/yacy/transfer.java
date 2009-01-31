@@ -30,9 +30,9 @@ import java.io.IOException;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.Digest;
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaRankingDistribution;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyNetwork;
@@ -119,7 +119,7 @@ public final class transfer {
                     final File file = new File(path, filename);
                     try {
                         if (file.getCanonicalPath().startsWith(path.getCanonicalPath())){
-                            serverFileUtils.copy(fileString.getBytes(), file);
+                            FileUtils.copy(fileString.getBytes(), file);
                             final String md5t = Digest.encodeMD5Hex(file);
                             if (md5t.equals(md5)) {
                                 prop.put("response", "ok");

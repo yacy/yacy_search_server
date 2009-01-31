@@ -49,9 +49,9 @@ import de.anomic.http.JakartaCommonsHttpResponse;
 import de.anomic.http.httpResponseHeader;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.util.Log;
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
-import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverSystem;
 import de.anomic.tools.tarTools;
 
@@ -358,7 +358,7 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
                 download = new File(storagePath, name);
             }
             try {
-                serverFileUtils.copyToStream(new BufferedInputStream(res.getDataAsStream()), new BufferedOutputStream(new FileOutputStream(download)));
+                FileUtils.copyToStream(new BufferedInputStream(res.getDataAsStream()), new BufferedOutputStream(new FileOutputStream(download)));
             } catch(IOException ie) {
         	// Saving file failed, abort download
         	res.abort();

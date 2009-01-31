@@ -52,7 +52,7 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverProfiling;
 import de.anomic.server.serverSwitch;
 import de.anomic.tools.iso639;
-import de.anomic.tools.yFormatter;
+import de.anomic.tools.Formatter;
 import de.anomic.xml.RSSFeed;
 import de.anomic.xml.RSSMessage;
 import de.anomic.yacy.yacyNewsPool;
@@ -408,12 +408,12 @@ public class yacysearch {
             prop.put("num-results_offset", offset);
             prop.put("num-results_itemscount", "0");
             prop.put("num-results_itemsPerPage", itemsPerPage);
-            prop.put("num-results_totalcount", yFormatter.number(totalcount, true));
+            prop.put("num-results_totalcount", Formatter.number(totalcount, true));
             prop.put("num-results_globalresults", (globalsearch) ? "1" : "0");
-            prop.put("num-results_globalresults_localResourceSize", yFormatter.number(theSearch.getRankingResult().getLocalResourceSize(), true));
-            prop.put("num-results_globalresults_remoteResourceSize", yFormatter.number(theSearch.getRankingResult().getRemoteResourceSize(), true));
-            prop.put("num-results_globalresults_remoteIndexCount", yFormatter.number(theSearch.getRankingResult().getRemoteIndexCount(), true));
-            prop.put("num-results_globalresults_remotePeerCount", yFormatter.number(theSearch.getRankingResult().getRemotePeerCount(), true));
+            prop.put("num-results_globalresults_localResourceSize", Formatter.number(theSearch.getRankingResult().getLocalResourceSize(), true));
+            prop.put("num-results_globalresults_remoteResourceSize", Formatter.number(theSearch.getRankingResult().getRemoteResourceSize(), true));
+            prop.put("num-results_globalresults_remoteIndexCount", Formatter.number(theSearch.getRankingResult().getRemoteIndexCount(), true));
+            prop.put("num-results_globalresults_remotePeerCount", Formatter.number(theSearch.getRankingResult().getRemotePeerCount(), true));
             
             // compose page navigation
             final StringBuilder resnav = new StringBuilder();

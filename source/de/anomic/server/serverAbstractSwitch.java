@@ -32,6 +32,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import de.anomic.kelondro.util.Log;
+import de.anomic.kelondro.util.FileUtils;
 
 public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
     
@@ -71,7 +72,7 @@ public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
         // predefine init's
         Map<String, String> initProps;
         if (initFile.exists())
-            initProps = serverFileUtils.loadHashMap(initFile);
+            initProps = FileUtils.loadMap(initFile);
         else
             initProps = new HashMap<String, String>();
         
@@ -98,7 +99,7 @@ public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
         
         // load config's from last save
         if (configFile.exists())
-            configProps = serverFileUtils.loadHashMap(configFile);
+            configProps = FileUtils.loadMap(configFile);
         else
             configProps = new HashMap<String, String>();
 
@@ -340,7 +341,7 @@ public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
     private void saveConfig() {
         try {
             synchronized (configProps) {
-                serverFileUtils.saveMap(configFile, configProps, configComment);
+                FileUtils.saveMap(configFile, configProps, configComment);
             }
         } catch (final IOException e) {
             System.out.println("ERROR: cannot write config file " + configFile.toString() + ": " + e.getMessage());

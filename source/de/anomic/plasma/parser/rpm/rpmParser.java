@@ -36,11 +36,11 @@ import com.jguild.jrpm.io.datatype.DataTypeIf;
 import de.anomic.crawler.HTTPLoader;
 import de.anomic.http.HttpClient;
 import de.anomic.http.httpRequestHeader;
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.parser.AbstractParser;
 import de.anomic.plasma.parser.Parser;
 import de.anomic.plasma.parser.ParserException;
-import de.anomic.server.serverFileUtils;
 import de.anomic.yacy.yacyURL;
 
 /**
@@ -80,7 +80,7 @@ public class rpmParser extends AbstractParser implements Parser {
         File dstFile = null;
         try {
             dstFile = File.createTempFile("rpmParser",".tmp");
-            serverFileUtils.copy(source,dstFile);
+            FileUtils.copy(source,dstFile);
             return parse(location,mimeType,charset,dstFile);
         } catch (final Exception e) {            
             return null;

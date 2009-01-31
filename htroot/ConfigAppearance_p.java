@@ -38,11 +38,10 @@ import de.anomic.crawler.HTTPLoader;
 import de.anomic.data.listManager;
 import de.anomic.http.HttpClient;
 import de.anomic.http.httpRequestHeader;
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.tools.nxTools;
 import de.anomic.yacy.yacyURL;
 
 public class ConfigAppearance_p {
@@ -65,7 +64,7 @@ public class ConfigAppearance_p {
         // normally only invoked at first start of YaCy
         if (skinFiles.size() == 0) {
             try {
-                serverFileUtils.copy(new File(env.getRootPath(), "htroot/env/style.css"), new File(skinPath, "default.css"));
+                FileUtils.copy(new File(env.getRootPath(), "htroot/env/style.css"), new File(skinPath, "default.css"));
                 env.setConfig("currentSkin", "default");
             } catch (final IOException e) {
                 e.printStackTrace();
@@ -92,7 +91,7 @@ public class ConfigAppearance_p {
                     final yacyURL u = new yacyURL(url, null);
                     final httpRequestHeader reqHeader = new httpRequestHeader();
                     reqHeader.put(httpRequestHeader.USER_AGENT, HTTPLoader.yacyUserAgent);
-                    skinVector = nxTools.strings(HttpClient.wget(u.toString(), reqHeader, 10000), "UTF-8");
+                    skinVector = FileUtils.strings(HttpClient.wget(u.toString(), reqHeader, 10000), "UTF-8");
                 } catch (final IOException e) {
                     prop.put("status", "1");// unable to get URL
                     prop.put("status_url", url);
@@ -161,7 +160,7 @@ public class ConfigAppearance_p {
 
         styleFile.getParentFile().mkdirs();
         try {
-            serverFileUtils.copy(skinFile, styleFile);
+            FileUtils.copy(skinFile, styleFile);
             sb.setConfig("currentSkin", skin.substring(0, skin.length() - 4));
             return true;
         } catch (final IOException e) {

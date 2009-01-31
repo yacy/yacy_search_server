@@ -42,8 +42,8 @@ import de.anomic.data.userDB;
 import de.anomic.data.blogBoard.BlogEntry;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.util.Log;
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
@@ -169,7 +169,7 @@ public class BlogComments {
                 final File notifierSource = new File(sb.getRootPath(), sb.getConfig("htRootPath","htroot") + "/env/grafics/message.gif");
                 final File notifierDest   = new File(sb.getConfigPath("htDocsPath", "DATA/HTDOCS"), "notifier.gif");
                 try {
-                    serverFileUtils.copy(notifierSource, notifierDest);
+                    FileUtils.copy(notifierSource, notifierDest);
                 } catch (final IOException e) {
                     Log.logSevere("MESSAGE", "NEW MESSAGE ARRIVED! (error: " + e.getMessage() + ")");
 

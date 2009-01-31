@@ -51,7 +51,7 @@ import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.util.ByteBuffer;
 import de.anomic.kelondro.util.kelondroException;
 import de.anomic.kelondro.util.Log;
-import de.anomic.server.serverFileUtils;
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.yacy.yacyURL;
 
 public class RobotsTxt {
@@ -553,7 +553,7 @@ public class RobotsTxt {
                     // downloading the content
                     final ByteBuffer sbb = new ByteBuffer();
                     try {
-                        serverFileUtils.copyToStream(new BufferedInputStream(res.getDataAsStream()), new BufferedOutputStream(sbb));
+                        FileUtils.copyToStream(new BufferedInputStream(res.getDataAsStream()), new BufferedOutputStream(sbb));
                     } finally {
                         res.closeStream();
                     }

@@ -30,11 +30,11 @@ import java.util.Iterator;
 import de.anomic.crawler.IndexingStack;
 import de.anomic.crawler.ZURL;
 import de.anomic.http.httpRequestHeader;
-import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.tools.Formatter;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyURL;
 
@@ -123,7 +123,7 @@ public class IndexCreateIndexingQueue_p {
                     prop.put("indexing-queue_list_"+entryCount+"_modified", pcentry.getModificationDate().toString());
                     prop.putHTML("indexing-queue_list_"+entryCount+"_anchor", (pcentry.anchorName()==null)?"":pcentry.anchorName());
                     prop.putHTML("indexing-queue_list_"+entryCount+"_url", pcentry.url().toNormalform(false, true));
-                    prop.put("indexing-queue_list_"+entryCount+"_size", MemoryControl.bytesToString(entrySize));
+                    prop.put("indexing-queue_list_"+entryCount+"_size", Formatter.bytesToString(entrySize));
                     prop.put("indexing-queue_list_"+entryCount+"_inProcess", inProcess ? "1" :"0");
                     prop.put("indexing-queue_list_"+entryCount+"_inProcess_hash", pcentry.urlHash());
                     dark = !dark;
@@ -133,7 +133,7 @@ public class IndexCreateIndexingQueue_p {
             
             prop.putNum("indexing-queue_show", entryCount);//show shown entries
             prop.putNum("indexing-queue_num", totalCount); //num entries in queue 
-            prop.put("indexing-queue_totalSize", MemoryControl.bytesToString(totalSize));//num entries in queue 
+            prop.put("indexing-queue_totalSize", Formatter.bytesToString(totalSize));//num entries in queue 
             prop.putNum("indexing-queue_list", entryCount);
         }
         

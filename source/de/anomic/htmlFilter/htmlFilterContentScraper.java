@@ -46,9 +46,9 @@ import javax.swing.event.EventListenerList;
 import de.anomic.crawler.HTTPLoader;
 import de.anomic.http.HttpClient;
 import de.anomic.http.httpRequestHeader;
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.server.serverCharBuffer;
-import de.anomic.server.serverFileUtils;
 import de.anomic.yacy.yacyURL;
 import de.anomic.tools.iso639;
 
@@ -483,7 +483,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
     
     public static htmlFilterContentScraper parseResource(final File file) throws IOException {
         // load page
-        final byte[] page = serverFileUtils.read(file);
+        final byte[] page = FileUtils.read(file);
         if (page == null) throw new IOException("no content in file " + file.toString());
         
         // scrape document to look up charset
@@ -493,7 +493,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         // scrape content
         final htmlFilterContentScraper scraper = new htmlFilterContentScraper(new yacyURL("http://localhost", null));
         final Writer writer = new htmlFilterWriter(null, null, scraper, null, false);
-        serverFileUtils.copy(new ByteArrayInputStream(page), writer, Charset.forName(charset));
+        FileUtils.copy(new ByteArrayInputStream(page), writer, Charset.forName(charset));
         
         return scraper;
     }
@@ -508,7 +508,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         // scrape content
         final htmlFilterContentScraper scraper = new htmlFilterContentScraper(location);
         final Writer writer = new htmlFilterWriter(null, null, scraper, null, false);
-        serverFileUtils.copy(new ByteArrayInputStream(page), writer, Charset.forName("UTF-8"));
+        FileUtils.copy(new ByteArrayInputStream(page), writer, Charset.forName("UTF-8"));
         
         return scraper;
     }

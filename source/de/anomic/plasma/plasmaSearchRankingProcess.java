@@ -47,7 +47,7 @@ import de.anomic.kelondro.index.BinSearch;
 import de.anomic.kelondro.order.Digest;
 import de.anomic.kelondro.util.ScoreCluster;
 import de.anomic.kelondro.util.SortStack;
-import de.anomic.server.serverFileUtils;
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.server.serverProfiling;
 import de.anomic.yacy.yacyURL;
 
@@ -403,7 +403,7 @@ public final class plasmaSearchRankingProcess {
                     ybrName = "YBR-4-" + Digest.encodeHex(i, 2) + ".idx";
                     f = new File(rankingPath, ybrName);
                     if (f.exists()) {
-                        ybrTables[i] = new BinSearch(serverFileUtils.read(f), 6);
+                        ybrTables[i] = new BinSearch(FileUtils.read(f), 6);
                     } else {
                         ybrTables[i] = null;
                     }

@@ -34,13 +34,13 @@ import java.util.List;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.index.indexRWIRowEntry;
 import de.anomic.index.indexReferenceBlacklist;
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.tools.nxTools;
 import de.anomic.xml.RSSFeed;
 import de.anomic.xml.RSSMessage;
 import de.anomic.yacy.yacyCore;
@@ -119,7 +119,7 @@ public final class transferRWI {
             final long startProcess = System.currentTimeMillis();
 
             // decode request
-            final List<String> v = nxTools.strings(indexes, null);
+            final List<String> v = FileUtils.strings(indexes, null);
 
             // free memory
             indexes = null;

@@ -39,12 +39,12 @@ import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterImageEntry;
 import de.anomic.htmlFilter.htmlFilterWriter;
 import de.anomic.kelondro.util.ByteBuffer;
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.parser.AbstractParser;
 import de.anomic.plasma.parser.Parser;
 import de.anomic.plasma.parser.ParserException;
 import de.anomic.server.serverCharBuffer;
-import de.anomic.server.serverFileUtils;
 import de.anomic.xml.RSSFeed;
 import de.anomic.xml.RSSMessage;
 import de.anomic.xml.RSSReader;
@@ -125,7 +125,7 @@ public class rssParser extends AbstractParser implements Parser {
                         
                         final htmlFilterContentScraper scraper = new htmlFilterContentScraper(itemURL);
                         final Writer writer = new htmlFilterWriter(null, null, scraper, null, false);
-                        serverFileUtils.copy(new ByteArrayInputStream(itemContent.getBytes("UTF-8")), writer, Charset.forName("UTF-8"));
+                        FileUtils.copy(new ByteArrayInputStream(itemContent.getBytes("UTF-8")), writer, Charset.forName("UTF-8"));
                         
                         final String itemHeadline = scraper.getTitle();     
                         if ((itemHeadline != null) && (itemHeadline.length() > 0)) {

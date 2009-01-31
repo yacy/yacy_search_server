@@ -32,6 +32,7 @@ import java.util.Properties;
 import java.util.Vector;
 
 import de.anomic.kelondro.util.Log;
+import de.anomic.kelondro.util.FileUtils;
 
 public final class serverSystem {
 
@@ -325,7 +326,7 @@ public final class serverSystem {
 	}
 
 	public static void deployScript(final File scriptFile, final String theScript) throws IOException {
-		serverFileUtils.copy(theScript.getBytes(), scriptFile);
+		FileUtils.copy(theScript.getBytes(), scriptFile);
 		if(!isWindows){ // set executable
 			try {
 				Runtime.getRuntime().exec("chmod 755 " + scriptFile.getAbsolutePath().replaceAll(" ", "\\ ")).waitFor();

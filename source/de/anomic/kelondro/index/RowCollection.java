@@ -41,10 +41,10 @@ import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.util.MemoryControl;
+import de.anomic.kelondro.util.NamePrefixThreadFactory;
 import de.anomic.kelondro.util.kelondroException;
 import de.anomic.kelondro.util.Log;
-import de.anomic.server.NamePrefixThreadFactory;
-import de.anomic.server.serverFileUtils;
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.server.serverProcessor;
 
 public class RowCollection implements Iterable<Row.Entry> {
@@ -179,7 +179,7 @@ public class RowCollection implements Iterable<Row.Entry> {
     }
     
     public void saveCollection(final File file) throws IOException {
-        serverFileUtils.copy(exportCollection(), file);
+        FileUtils.copy(exportCollection(), file);
     }
 
     public Row row() {

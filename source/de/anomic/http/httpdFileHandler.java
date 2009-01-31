@@ -85,12 +85,12 @@ import de.anomic.htmlFilter.htmlFilterInputStream;
 import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.kelondro.util.ByteBuffer;
 import de.anomic.kelondro.util.Log;
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.server.serverClassLoader;
 import de.anomic.server.serverCore;
-import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.servletProperties;
@@ -827,7 +827,7 @@ public final class httpdFileHandler {
                                 // a byte array
                         	templateCacheEntry = new TemplateCacheEntry();
                                 templateCacheEntry.lastModified = targetFileDate;
-                                templateCacheEntry.content = serverFileUtils.read(targetFile);
+                                templateCacheEntry.content = FileUtils.read(targetFile);
 
                                 // storing the content into the cache
                                 ref = new SoftReference<TemplateCacheEntry>(templateCacheEntry);
@@ -917,7 +917,7 @@ public final class httpdFileHandler {
                                     httpVersion, 200, null, mimeType, result.length,
                                     targetDate, null, (templatePatterns == null) ? new httpResponseHeader() : templatePatterns.getOutgoingHeader(),
                                     contentEncoding, null, nocache);
-                            serverFileUtils.copy(result, out);
+                            FileUtils.copy(result, out);
                         }  
                     }
                 } else { // no html
@@ -935,7 +935,7 @@ public final class httpdFileHandler {
                     try {
                         if (targetMd5File.exists()) {
                             //String description = null;
-                            targetMD5 = new String(serverFileUtils.read(targetMd5File));
+                            targetMD5 = new String(FileUtils.read(targetMd5File));
                             int pos = targetMD5.indexOf('\n');
                             if (pos >= 0) {
                                 //description = targetMD5.substring(pos + 1);
@@ -991,7 +991,7 @@ public final class httpdFileHandler {
                             newOut = zipped;
                         }
                         
-                        serverFileUtils.copyRange(targetFile, newOut, rangeStartOffset);
+                        FileUtils.copyRange(targetFile, newOut, rangeStartOffset);
                         
                         if (zipped != null) {
                             zipped.flush();

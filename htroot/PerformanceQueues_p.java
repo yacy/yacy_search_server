@@ -30,16 +30,16 @@ import java.util.Iterator;
 import java.util.Map;
 
 import de.anomic.http.httpRequestHeader;
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.server.serverBusyThread;
 import de.anomic.server.serverCore;
-import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.serverSystem;
 import de.anomic.server.serverThread;
-import de.anomic.tools.yFormatter;
+import de.anomic.tools.Formatter;
 
 public class PerformanceQueues_p {
     /**
@@ -76,7 +76,7 @@ public class PerformanceQueues_p {
                 }
             }
         }
-        final Map<String, String> defaultSettings = ((post == null) || (!(post.containsKey("submitdefault")))) ? null : serverFileUtils.loadHashMap(defaultSettingsFile);
+        final Map<String, String> defaultSettings = ((post == null) || (!(post.containsKey("submitdefault")))) ? null : FileUtils.loadMap(defaultSettingsFile);
         Iterator<String> threads = switchboard.threadNames();
         String threadName;
         serverBusyThread thread;
@@ -130,7 +130,7 @@ public class PerformanceQueues_p {
 			}
             prop.putHTML("table_" + c + "_longdescr", thread.getLongDescription());
             queuesize = thread.getJobCount();
-            prop.put("table_" + c + "_queuesize", (queuesize == Integer.MAX_VALUE) ? "unlimited" : yFormatter.number(queuesize, !xml));
+            prop.put("table_" + c + "_queuesize", (queuesize == Integer.MAX_VALUE) ? "unlimited" : Formatter.number(queuesize, !xml));
             
             blocktime = thread.getBlockTime();
             sleeptime = thread.getSleepTime();

@@ -45,8 +45,8 @@ import de.anomic.kelondro.index.RowCollection;
 import de.anomic.kelondro.index.RowSet;
 import de.anomic.kelondro.index.ObjectIndex;
 import de.anomic.kelondro.index.Row.Entry;
-import de.anomic.kelondro.io.kelondroBufferedEcoFS;
-import de.anomic.kelondro.io.kelondroEcoFS;
+import de.anomic.kelondro.io.BufferedEcoFS;
+import de.anomic.kelondro.io.EcoFS;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.util.MemoryControl;
@@ -76,7 +76,7 @@ public class EcoTable implements ObjectIndex {
     private static final long minmemremaining = 20 * 1024 * 1024; // if less than this memory is remaininig, the memory copy of a table is abandoned
     RowSet table;
     BytesIntMap index;
-    kelondroBufferedEcoFS file;
+    BufferedEcoFS file;
     Row rowdef;
     int fail;
 
@@ -170,7 +170,7 @@ public class EcoTable implements ObjectIndex {
             // check consistency
             //System.out.print(" -ordering- ..");
             //System.out.flush();
-            this.file = new kelondroBufferedEcoFS(new kelondroEcoFS(tablefile, rowdef.objectsize), this.buffersize);
+            this.file = new BufferedEcoFS(new EcoFS(tablefile, rowdef.objectsize), this.buffersize);
             final ArrayList<Integer[]> doubles = index.removeDoubles();
             //assert index.size() + doubles.size() + fail == i;
             //System.out.println(" -removed " + doubles.size() + " doubles- done.");
@@ -224,7 +224,7 @@ public class EcoTable implements ObjectIndex {
     
     public static long tableSize(final File tablefile, final int recordsize) {
         // returns number of records in table
-        return kelondroEcoFS.tableSize(tablefile, recordsize);
+        return EcoFS.tableSize(tablefile, recordsize);
     }
 
     public static final Iterator<String> filenames() {
@@ -551,7 +551,7 @@ public class EcoTable implements ObjectIndex {
         
         // open an existing table file
         try {
-            this.file = new kelondroBufferedEcoFS(new kelondroEcoFS(f, rowdef.objectsize), this.buffersize);
+            this.file = new BufferedEcoFS(new EcoFS(f, rowdef.objectsize), this.buffersize);
         } catch (final FileNotFoundException e) {
             // should never happen
             e.printStackTrace();

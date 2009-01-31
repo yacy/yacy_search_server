@@ -25,7 +25,6 @@
 
 package de.anomic.kelondro.util;
 
-import de.anomic.tools.yFormatter;
 
 /**
  * Use this to get information about memory usage or try to free some memory
@@ -53,7 +52,7 @@ public class MemoryControl {
             System.gc();
             //System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ if you see this many times please report to forum");
             lastGC = System.currentTimeMillis();
-            if (log.isFine()) log.logInfo("[gc] before: " + bytesToString(free) + ", after: " + bytesToString(free()) + ", call: " + info);
+            if (log.isFine()) log.logInfo("[gc] before: " + free + ", after: " + free() + ", call: " + info);
         } else if (log.isFine()) {
             if (log.isFinest()) log.logFinest("[gc] no execute, last run: " + (elapsed / 1000) + " seconds ago, call: " + info);
         }
@@ -173,35 +172,6 @@ public class MemoryControl {
      */
     public static long used() {
         return total() - free();
-    }
-    
-    /**
-     * Formats a number if it are bytes to greatest unit (1024 based)
-     * @param byteCount
-     * @return formatted String with unit
-     */
-    public static String bytesToString(final long byteCount) {
-        try {
-            final StringBuilder byteString = new StringBuilder();
-
-            if (byteCount > 1073741824) {
-                byteString.append(yFormatter.number((double)byteCount / (double)1073741824 ))
-                          .append(" GB");
-            } else if (byteCount > 1048576) {
-                byteString.append(yFormatter.number((double)byteCount / (double)1048576))
-                          .append(" MB");
-            } else if (byteCount > 1024) {
-                byteString.append(yFormatter.number((double)byteCount / (double)1024))
-                          .append(" KB");
-            } else {
-                byteString.append(Long.toString(byteCount))
-                .append(" Bytes");
-            }
-
-            return byteString.toString();
-        } catch (final Exception e) {
-            return "unknown";
-        }
     }
     
     /**

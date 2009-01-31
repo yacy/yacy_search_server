@@ -33,11 +33,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Hashtable;
 
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.parser.AbstractParser;
 import de.anomic.plasma.parser.Parser;
 import de.anomic.plasma.parser.ParserException;
-import de.anomic.server.serverFileUtils;
 import de.anomic.yacy.yacyURL;
 
 public class psParser extends AbstractParser implements Parser {
@@ -275,7 +275,7 @@ public class psParser extends AbstractParser implements Parser {
             tempFile.deleteOnExit();
             
             // copying inputstream into file
-            serverFileUtils.copy(source,tempFile);
+            FileUtils.copy(source,tempFile);
             
             // parsing the file
             return parse(location,mimeType,charset,tempFile);

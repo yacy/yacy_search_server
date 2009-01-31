@@ -41,13 +41,13 @@ import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpResponseHeader;
 import de.anomic.index.indexDocumentMetadata;
 import de.anomic.index.indexURLReference;
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaCondenser;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.parser.ParserException;
-import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyURL;
@@ -219,7 +219,7 @@ public class ViewFile {
             // TODO: how to handle very large files here ?
             String content;
             try {
-                content = new String(serverFileUtils.read(resource), "UTF-8");
+                content = new String(FileUtils.read(resource), "UTF-8");
             } catch (final Exception e) {
                 prop.put("error", "4");
                 prop.putHTML("error_errorText", e.getMessage());

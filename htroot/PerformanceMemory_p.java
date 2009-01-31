@@ -35,11 +35,12 @@ import de.anomic.kelondro.table.CachedRecords;
 import de.anomic.kelondro.table.EcoTable;
 import de.anomic.kelondro.table.FlexTable;
 import de.anomic.kelondro.util.MemoryControl;
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverDomains;
-import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.tools.Formatter;
 
 public class PerformanceMemory_p {
     
@@ -51,7 +52,7 @@ public class PerformanceMemory_p {
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
         if (defaultSettings == null) {
-            defaultSettings = serverFileUtils.loadHashMap(new File(env.getRootPath(), "defaults/yacy.init"));
+            defaultSettings = FileUtils.loadMap(new File(env.getRootPath(), "defaults/yacy.init"));
         }
         
         prop.put("gc", "0");
@@ -104,7 +105,7 @@ public class PerformanceMemory_p {
             prop.put("TableList_" + c + "_tableIndexPath", ((p = filename.indexOf("DATA")) < 0) ? filename : filename.substring(p));
             prop.put("TableList_" + c + "_tableIndexChunkSize", map.get("tableIndexChunkSize"));
             prop.putNum("TableList_" + c + "_tableIndexCount", map.get("tableIndexCount"));
-            prop.put("TableList_" + c + "_tableIndexMem", MemoryControl.bytesToString(mem));
+            prop.put("TableList_" + c + "_tableIndexMem", Formatter.bytesToString(mem));
             c++;
         }
         prop.put("TableList", c);
@@ -122,12 +123,12 @@ public class PerformanceMemory_p {
             
             mem = Long.parseLong(map.get("tableKeyMem"));
             totalmem += mem;
-            prop.put("EcoList_" + c + "_tableKeyMem", MemoryControl.bytesToString(mem));
+            prop.put("EcoList_" + c + "_tableKeyMem", Formatter.bytesToString(mem));
             prop.put("EcoList_" + c + "_tableKeyChunkSize", map.get("tableKeyChunkSize"));
             
             mem = Long.parseLong(map.get("tableValueMem"));
             totalmem += mem;
-            prop.put("EcoList_" + c + "_tableValueMem", MemoryControl.bytesToString(mem));
+            prop.put("EcoList_" + c + "_tableValueMem", Formatter.bytesToString(mem));
             prop.put("EcoList_" + c + "_tableValueChunkSize", map.get("tableValueChunkSize"));
             
             c++;
@@ -147,7 +148,7 @@ public class PerformanceMemory_p {
             prop.put("NodeList_" + c + "_nodeCachePath", ((p = filename.indexOf("DATA")) < 0) ? filename : filename.substring(p));
             prop.put("NodeList_" + c + "_nodeChunkSize", map.get("nodeChunkSize"));
             prop.putNum("NodeList_" + c + "_nodeCacheCount", map.get("nodeCacheCount"));
-            prop.put("NodeList_" + c + "_nodeCacheMem", MemoryControl.bytesToString(mem));
+            prop.put("NodeList_" + c + "_nodeCacheMem", Formatter.bytesToString(mem));
             prop.putNum("NodeList_" + c + "_nodeCacheReadHit", map.get("nodeCacheReadHit"));
             prop.putNum("NodeList_" + c + "_nodeCacheReadMiss", map.get("nodeCacheReadMiss"));
             prop.putNum("NodeList_" + c + "_nodeCacheWriteUnique", map.get("nodeCacheWriteUnique"));
@@ -175,7 +176,7 @@ public class PerformanceMemory_p {
             totalhitmem += hitmem;
             prop.put("ObjectList_" + c + "_objectHitChunkSize", map.get("objectHitChunkSize"));
             prop.putNum("ObjectList_" + c + "_objectHitCacheCount", map.get("objectHitCacheCount"));
-            prop.put("ObjectList_" + c + "_objectHitCacheMem", MemoryControl.bytesToString(hitmem));
+            prop.put("ObjectList_" + c + "_objectHitCacheMem", Formatter.bytesToString(hitmem));
             prop.putNum("ObjectList_" + c + "_objectHitCacheReadHit", map.get("objectHitCacheReadHit"));
             prop.putNum("ObjectList_" + c + "_objectHitCacheReadMiss", map.get("objectHitCacheReadMiss"));
             prop.putNum("ObjectList_" + c + "_objectHitCacheWriteUnique", map.get("objectHitCacheWriteUnique"));
@@ -188,7 +189,7 @@ public class PerformanceMemory_p {
             totalmissmem += missmem;
             prop.put("ObjectList_" + c + "_objectMissChunkSize", map.get("objectMissChunkSize"));
             prop.putNum("ObjectList_" + c + "_objectMissCacheCount", map.get("objectMissCacheCount"));
-            prop.putHTML("ObjectList_" + c + "_objectMissCacheMem", MemoryControl.bytesToString(missmem));
+            prop.putHTML("ObjectList_" + c + "_objectMissCacheMem", Formatter.bytesToString(missmem));
             prop.putNum("ObjectList_" + c + "_objectMissCacheReadHit", map.get("objectMissCacheReadHit"));
             prop.putNum("ObjectList_" + c + "_objectMissCacheReadMiss", map.get("objectMissCacheReadMiss"));
             prop.putNum("ObjectList_" + c + "_objectMissCacheWriteUnique", map.get("objectMissCacheWriteUnique"));

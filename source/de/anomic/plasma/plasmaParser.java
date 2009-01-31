@@ -59,10 +59,10 @@ import de.anomic.htmlFilter.htmlFilterWriter;
 import de.anomic.http.JakartaCommonsHttpClient;
 import de.anomic.http.JakartaCommonsHttpResponse;
 import de.anomic.kelondro.util.Log;
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.parser.Parser;
 import de.anomic.plasma.parser.ParserException;
 import de.anomic.plasma.parser.ParserInfo;
-import de.anomic.server.serverFileUtils;
 import de.anomic.tools.ListDirs;
 import de.anomic.yacy.yacyURL;
 
@@ -706,7 +706,7 @@ public final class plasmaParser {
         // parsing the content
         final htmlFilterContentScraper scraper = new htmlFilterContentScraper(location);        
         final htmlFilterWriter writer = new htmlFilterWriter(null,null,scraper,null,false);
-        serverFileUtils.copy(htmlFilter, writer, Charset.forName(charset));
+        FileUtils.copy(htmlFilter, writer, Charset.forName(charset));
         writer.close();
         //OutputStream hfos = new htmlFilterOutputStream(null, scraper, null, false);            
         //serverFileUtils.copy(sourceFile, hfos);

@@ -37,12 +37,12 @@ import net.sf.jmimemagic.MagicMatchNotFoundException;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.parser.AbstractParser;
 import de.anomic.plasma.parser.Parser;
 import de.anomic.plasma.parser.ParserException;
-import de.anomic.server.serverFileUtils;
 import de.anomic.yacy.yacyURL;
 
 public class mimeTypeParser extends AbstractParser implements Parser {
@@ -173,7 +173,7 @@ public class mimeTypeParser extends AbstractParser implements Parser {
         File dstFile = null;
         try {
             dstFile = File.createTempFile("mimeTypeParser",".tmp");
-            serverFileUtils.copy(source,dstFile);
+            FileUtils.copy(source,dstFile);
             return parse(location,mimeType,charset,dstFile);
         } catch (final IOException e) {
             throw new ParserException("Unexpected error while detect mimetype of resource. " + e.getMessage(),location);

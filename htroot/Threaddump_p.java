@@ -39,8 +39,8 @@ import java.util.HashMap;
 
 import de.anomic.htmlFilter.htmlFilterCharacterCoding;
 import de.anomic.http.httpRequestHeader;
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.tools.nxTools;
@@ -226,7 +226,7 @@ public class Threaddump_p {
         // find class
         if (!file.exists()) return "";
         try {
-            final String lineString = nxTools.line(serverFileUtils.read(file), line);
+            final String lineString = nxTools.line(FileUtils.read(file), line);
             if (lineString == null) return "@ERROR";
             return lineString;
         } catch (final IOException e) {

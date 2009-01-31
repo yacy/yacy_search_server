@@ -62,7 +62,7 @@ import java.util.List;
 
 import de.anomic.kelondro.util.ByteBuffer;
 import de.anomic.kelondro.util.Log;
-import de.anomic.server.serverFileUtils;
+import de.anomic.kelondro.util.FileUtils;
 
 /**
  * A template engine, which substitutes patterns in strings<br>
@@ -236,7 +236,7 @@ public final class httpTemplate {
 
     public final static void writeTemplate(final InputStream in, final OutputStream out, final HashMap<String, String> pattern, final byte[] dflt) throws IOException {
         if (pattern == null) {
-            serverFileUtils.copy(in, out);
+            FileUtils.copy(in, out);
         } else {
             writeTemplate(in, out, pattern, dflt, new byte[0]);
         }
@@ -416,10 +416,10 @@ public final class httpTemplate {
                     structure.append(replacement);
                     structure.append("</".getBytes()).append(key).append(">\n".getBytes());
 
-                    serverFileUtils.copy(replacement, out);
+                    FileUtils.copy(replacement, out);
                 } else {
                     // inconsistency, simply finalize this
-                    serverFileUtils.copy(pis, out);
+                    FileUtils.copy(pis, out);
                     return structure.getBytes();
                 }
                 

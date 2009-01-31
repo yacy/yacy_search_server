@@ -47,7 +47,6 @@ import de.anomic.kelondro.index.Column;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.RowCollection;
 import de.anomic.kelondro.order.Base64Order;
-import de.anomic.server.serverFileUtils;
 
 public class AttrSeq {
     
@@ -186,9 +185,9 @@ public class AttrSeq {
             sb.append((char) 13); sb.append((char) 10);
         }
         if (out.toString().endsWith(".gz")) {
-            serverFileUtils.writeAndGZip((new String(sb)).getBytes(), out);
+            FileUtils.writeAndGZip((new String(sb)).getBytes(), out);
         } else {
-            serverFileUtils.copy((new String(sb)).getBytes(), out);
+            FileUtils.copy((new String(sb)).getBytes(), out);
         }
     }
     

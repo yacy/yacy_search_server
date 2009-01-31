@@ -46,12 +46,12 @@ import de.anomic.crawler.HTTPLoader;
 import de.anomic.http.HttpClient;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.util.Log;
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.parser.AbstractParser;
 import de.anomic.plasma.parser.Parser;
 import de.anomic.plasma.parser.ParserException;
 import de.anomic.server.serverCharBuffer;
-import de.anomic.server.serverFileUtils;
 import de.anomic.yacy.yacyURL;
 
 public class odtParser extends AbstractParser implements Parser {
@@ -121,7 +121,7 @@ public class odtParser extends AbstractParser implements Parser {
                     // extract data
                     final InputStream zipFileEntryStream = zipFile.getInputStream(zipEntry);
                     final OpenDocumentTextInputStream odStream = new OpenDocumentTextInputStream(zipFileEntryStream);
-                    serverFileUtils.copy(odStream, writer, Charset.forName("UTF-8"));
+                    FileUtils.copy(odStream, writer, Charset.forName("UTF-8"));
                 
                     // close readers and writers
                     odStream.close();
@@ -211,7 +211,7 @@ public class odtParser extends AbstractParser implements Parser {
             dest.deleteOnExit();
             
             // copying the stream into a file
-            serverFileUtils.copy(source, dest);
+            FileUtils.copy(source, dest);
             
             // parsing the content
             return parse(location, mimeType, charset, dest);

@@ -37,13 +37,13 @@ import java.util.TreeMap;
  * That means, each time, an entry is written to the end of the file, it is NOT buffered here,
  * but possibly buffered in the enclosed kelondroEcoFS
  */
-public class kelondroBufferedEcoFS {
+public class BufferedEcoFS {
 
-    private kelondroEcoFS efs;
+    private EcoFS efs;
     private final int maxEntries;
     private final TreeMap<Long, byte[]> buffer;
     
-    public kelondroBufferedEcoFS(final kelondroEcoFS efs, final int maxEntries) {
+    public BufferedEcoFS(final EcoFS efs, final int maxEntries) {
         this.efs = efs;
         this.maxEntries = maxEntries;
         this.buffer = new TreeMap<Long, byte[]>();

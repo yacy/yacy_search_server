@@ -72,9 +72,9 @@ import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.util.kelondroException;
 import de.anomic.kelondro.util.Log;
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverBusyThread;
-import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverInstantBusyThread;
 import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacyNewsRecord;
@@ -781,7 +781,7 @@ public class bookmarksDB {
     		final htmlFilterContentScraper scraper = new htmlFilterContentScraper(baseURL);    		
     		//OutputStream os = new htmlFilterOutputStream(null, scraper, null, false);
     		final Writer writer= new htmlFilterWriter(null,null,scraper, null, false);
-    		serverFileUtils.copy(input,writer);
+    		FileUtils.copy(input,writer);
     		writer.close();
     		links = scraper.getAnchors();    		
     	} catch (final IOException e) { Log.logWarning("BOOKMARKS", "error during load of links: "+ e.getClass() +" "+ e.getMessage());}

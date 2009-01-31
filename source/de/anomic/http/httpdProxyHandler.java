@@ -78,13 +78,13 @@ import de.anomic.index.indexDocumentMetadata;
 import de.anomic.index.indexReferenceBlacklist;
 import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.kelondro.util.Log;
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDomains;
-import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.yacy.yacyURL;
 
@@ -181,7 +181,7 @@ public final class httpdProxyHandler {
         // load the yellow-list
         final String f = sb.getConfig("proxyYellowList", null);
         if (f != null) {
-            yellowList = serverFileUtils.loadList(new File(f)); 
+            yellowList = FileUtils.loadList(new File(f)); 
             theLogger.logConfig("loaded yellow-list from file " + f + ", " + yellowList.size() + " entries");
         } else {
             yellowList = new HashSet<String>();
@@ -554,7 +554,7 @@ public final class httpdProxyHandler {
                         final ByteArrayOutputStream byteStream = new ByteArrayOutputStream((l < 32) ? 32 : l);
 
                         final OutputStream toClientAndMemory = new MultiOutputStream(new OutputStream[] {outStream, byteStream});
-                        serverFileUtils.copy(res.getDataAsStream(), toClientAndMemory);
+                        FileUtils.copy(res.getDataAsStream(), toClientAndMemory);
                         // cached bytes
                         byte[] cacheArray;
                         if(byteStream.size() > 0) {
@@ -590,7 +590,7 @@ public final class httpdProxyHandler {
                                 " StoreHTCache=" + storeHTCache +
                                 " SupportetContent=" + isSupportedContent);
 
-                        serverFileUtils.copy(res.getDataAsStream(), outStream);
+                        FileUtils.copy(res.getDataAsStream(), outStream);
 
                         conProp.setProperty(httpHeader.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_MISS");
                     }
@@ -701,7 +701,7 @@ public final class httpdProxyHandler {
 
                 // send also the complete body now from the cache
                 // simply read the file and transfer to out socket
-                serverFileUtils.copy(cacheEntry, outStream);
+                FileUtils.copy(cacheEntry, outStream);
                 
                 if (gzippedOut != null) gzippedOut.finish();
                 if (chunkedOut != null) chunkedOut.finish();
@@ -952,7 +952,7 @@ public final class httpdProxyHandler {
             if (chunked != null)  chunked.finish();
             */
             final OutputStream outStream = (chunked != null) ? chunked : countedRespond;
-            serverFileUtils.copy(res.getDataAsStream(), outStream);
+            FileUtils.copy(res.getDataAsStream(), outStream);
             
             if (chunked != null) {
                 chunked.finish();

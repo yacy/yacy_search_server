@@ -27,9 +27,9 @@ import de.anomic.http.httpd;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.Digest;
 import de.anomic.kelondro.util.Log;
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
-import de.anomic.server.serverFileUtils;
 
 public class migration {
     //SVN constants
@@ -87,7 +87,7 @@ public class migration {
             for(String skinFile : skinFiles){
                 if(skinFile.endsWith(".css")){
                     try{
-                        serverFileUtils.copy(new File(defaultSkinsPath, skinFile), new File(skinsPath, skinFile));
+                        FileUtils.copy(new File(defaultSkinsPath, skinFile), new File(skinsPath, skinFile));
                     }catch(final IOException e){}
                 }
             }
@@ -109,7 +109,7 @@ public class migration {
         }else{
             try {
                 mkdirs(styleFile.getParentFile());
-                serverFileUtils.copy(skinFile, styleFile);
+                FileUtils.copy(skinFile, styleFile);
                 Log.logInfo("MIGRATION", "copied new Skinfile");
             } catch (final IOException e) {
                 Log.logSevere("MIGRATION", "Cannot copy skinfile.");
@@ -151,7 +151,7 @@ public class migration {
             sb.wikiDB.close();
             file2 = new File(sb.workPath, "wiki.db");
             try {
-                serverFileUtils.copy(file, file2);
+                FileUtils.copy(file, file2);
                 file.delete();
             } catch (final IOException e) {
             }
@@ -161,7 +161,7 @@ public class migration {
                 Log.logInfo("MIGRATION", "Migrating wiki-bkp.db to "+ sb.workPath);
                 file2 = new File(sb.workPath, "wiki-bkp.db");
                 try {
-                    serverFileUtils.copy(file, file2);
+                    FileUtils.copy(file, file2);
                     file.delete();
                 } catch (final IOException e) {}        
             }
@@ -175,7 +175,7 @@ public class migration {
             sb.messageDB.close();
             file2=new File(sb.workPath, "message.db");
             try {
-                serverFileUtils.copy(file, file2);
+                FileUtils.copy(file, file2);
                 file.delete();
             } catch (final IOException e) {}
             sb.initMessages();

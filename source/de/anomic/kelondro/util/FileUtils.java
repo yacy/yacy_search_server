@@ -19,7 +19,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.server;
+package de.anomic.kelondro.util;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -37,15 +37,20 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
+import java.util.Vector;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
@@ -53,10 +58,8 @@ import java.util.zip.ZipOutputStream;
 
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.RowSet;
-import de.anomic.kelondro.util.Log;
-import de.anomic.tools.nxTools;
 
-public final class serverFileUtils {
+public final class FileUtils {
 
     private static final int DEFAULT_BUFFER_SIZE = 1024; // this is also the maximum chunk size
     
@@ -374,11 +377,11 @@ public final class serverFileUtils {
         return set;
     }
 
-    public static Map<String, String> loadHashMap(final File f) {
+    public static Map<String, String> loadMap(final File f) {
         // load props
         try {
             final byte[] b = read(f);
-            return nxTools.table(nxTools.strings(b));
+            return table(strings(b));
         } catch (final IOException e2) {
             System.err.println("ERROR: " + f.toString() + " not found in settings path");
             return null;
@@ -462,7 +465,7 @@ public final class serverFileUtils {
             zos.putNextEntry(new ZipEntry(name + ".txt"));
             os = zos;
         }
-        if(os != null) {
+        if (os != null) {
             final Iterator<Row.Entry> i = set.iterator();
             String key;
             if (i.hasNext()) {
@@ -479,6 +482,92 @@ public final class serverFileUtils {
         forceMove(tf, file);
     }
 
+
+    public static HashMap<String, String> table(final Vector<String> list) {
+    	final Enumeration<String> i = list.elements();
+    	int pos;
+    	String line;
+    	final HashMap<String, String> props = new HashMap<String, String>(list.size());
+    	while (i.hasMoreElements()) {
+    		line = (i.nextElement()).trim();
+    		pos = line.indexOf("=");
+    		if (pos > 0) props.put(line.substring(0, pos).trim(), line.substring(pos + 1).trim());
+    	}
+    	return props;
+	}
+    
+    public static HashMap<String, String> table(final byte[] a, final String encoding) {
+        return table(strings(a, encoding));
+    }
+    
+    /**
+     * parse config files
+     * 
+     * splits the lines in list into pairs sperarated by =, lines beginning with # are ignored
+     * ie:
+     * abc=123
+     * # comment
+     * fg=dcf
+     * => Map{abc => 123, fg => dcf}
+     * @param list
+     * @return
+     */
+    public static HashMap<String, String> table(final ArrayList<String> list) {
+        if (list == null) return new HashMap<String, String>();
+        final Iterator<String> i = list.iterator();
+        int pos;
+        String line;
+        final HashMap<String, String> props = new HashMap<String, String>(list.size());
+        while (i.hasNext()) {
+            line = (i.next()).trim();
+            if (line.startsWith("#")) continue; // exclude comments
+            //System.out.println("NXTOOLS_PROPS - LINE:" + line);
+            pos = line.indexOf("=");
+            if (pos > 0) props.put(line.substring(0, pos).trim(), line.substring(pos + 1).trim());
+        }
+        return props;
+    }
+
+    public static ArrayList<String> strings(final byte[] a) {
+        return strings(a, null);
+    }
+    
+    public static ArrayList<String> strings(final byte[] a, final String encoding) {
+        if (a == null) return new ArrayList<String>();
+        int s = 0;
+        int e;
+        final ArrayList<String> v = new ArrayList<String>();
+        byte b;
+        while (s < a.length) {
+            // find eol
+            e = s;
+            while (e < a.length) {
+                b = a[e];
+                if ((b == 10) || (b == 13) || (b == 0)) break;
+                e++;
+            }
+            
+            // read line
+            if (encoding == null) {
+                v.add(new String(a, s, e - s));
+            } else try {
+                v.add(new String(a, s, e - s, encoding));
+            } catch (final UnsupportedEncodingException xcptn) {
+                return v;
+            }
+            
+            // eat up additional eol bytes
+            s = e + 1;
+            while (s < a.length) {
+                b = a[s];
+                if ((b != 10) && (b != 13)) break;
+                s++;
+            }
+        }
+        return v;
+    }
+   
+    
     /**
      * @param from
      * @param to

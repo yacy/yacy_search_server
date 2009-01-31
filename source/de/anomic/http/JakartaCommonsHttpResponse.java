@@ -33,7 +33,7 @@ import java.util.zip.GZIPInputStream;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpMethod;
 
-import de.anomic.server.serverFileUtils;
+import de.anomic.kelondro.util.FileUtils;
 
 /**
  * container for http-response data
@@ -94,7 +94,7 @@ public class JakartaCommonsHttpResponse {
 			try {
 				instream = getDataAsStream();
 				if (instream != null) {
-					responseBody = serverFileUtils.read(instream);
+					responseBody = FileUtils.read(instream);
 				}
 			} finally {
 				if (instream != null) {

@@ -30,8 +30,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import de.anomic.kelondro.util.ByteBuffer;
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.server.serverCore;
-import de.anomic.server.serverFileUtils;
 
 public final class httpChunkedOutputStream extends FilterOutputStream {
     private boolean finished = false; 
@@ -95,7 +95,7 @@ public final class httpChunkedOutputStream extends FilterOutputStream {
         
         this.out.write(Integer.toHexString(len).getBytes());
         this.out.write(serverCore.CRLF);
-        serverFileUtils.copy(b, out, len);
+        FileUtils.copy(b, out, len);
         this.out.write(serverCore.CRLF);
         this.out.flush();
     }

@@ -41,9 +41,9 @@ import java.util.TreeSet;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterImageEntry;
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.parser.Parser;
 import de.anomic.server.serverCachedFileOutputStream;
-import de.anomic.server.serverFileUtils;
 import de.anomic.yacy.yacyURL;
 
 public class plasmaParserDocument {
@@ -253,13 +253,13 @@ dc_rights
             if (this.text == null) return new byte[0];
 
             if (this.text instanceof File) {
-                return serverFileUtils.read((File)this.text);
+                return FileUtils.read((File)this.text);
             } else if (this.text instanceof byte[]) {
                 return (byte[])this.text;
             } else if (this.text instanceof serverCachedFileOutputStream) {
                 final serverCachedFileOutputStream ffbaos = (serverCachedFileOutputStream)this.text;
                 if (ffbaos.isFallback()) {
-                    return serverFileUtils.read(ffbaos.getContent());
+                    return FileUtils.read(ffbaos.getContent());
                 }
                 return ffbaos.getContentBAOS();
             }
@@ -416,9 +416,9 @@ dc_rights
         
         if (!(this.text instanceof serverCachedFileOutputStream)) {
             this.text = new serverCachedFileOutputStream(Parser.MAX_KEEP_IN_MEMORY_SIZE);
-            serverFileUtils.copy(getText(), (serverCachedFileOutputStream)this.text);
+            FileUtils.copy(getText(), (serverCachedFileOutputStream)this.text);
         }
-        serverFileUtils.copy(doc.getText(), (serverCachedFileOutputStream)this.text);
+        FileUtils.copy(doc.getText(), (serverCachedFileOutputStream)this.text);
         
         anchors.putAll(doc.getAnchors());
         htmlFilterContentScraper.addAllImages(images, doc.getImages());

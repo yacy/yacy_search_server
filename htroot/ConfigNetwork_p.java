@@ -30,11 +30,11 @@ import java.util.HashSet;
 
 import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpd;
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.server.serverBusyThread;
 import de.anomic.server.serverCodings;
-import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -48,7 +48,7 @@ public class ConfigNetwork_p {
         
         // load all options for network definitions
         final File networkBootstrapLocationsFile = new File(new File(sb.getRootPath(), "defaults"), "yacy.networks");
-        final HashSet<String> networkBootstrapLocations = serverFileUtils.loadList(networkBootstrapLocationsFile);
+        final HashSet<String> networkBootstrapLocations = FileUtils.loadList(networkBootstrapLocationsFile);
         
         
         if (post != null) {

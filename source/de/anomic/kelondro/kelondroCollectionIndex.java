@@ -59,7 +59,7 @@ import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.kelondroException;
 import de.anomic.kelondro.util.kelondroOutOfLimitsException;
 import de.anomic.kelondro.util.Log;
-import de.anomic.server.serverFileUtils;
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.yacy.yacyURL;
 
 public class kelondroCollectionIndex {
@@ -133,7 +133,7 @@ public class kelondroCollectionIndex {
         File cop = new File(path, filenameStub + "." + fillZ(Integer.toHexString(rowdef.objectsize).toUpperCase(), 4) + ".commons");
         this.commonsPath = (useCommons) ? cop : null;
         if (this.commonsPath == null) {
-            serverFileUtils.deleteDirectory(cop);
+            FileUtils.deleteDirectory(cop);
         } else {
             this.commonsPath.mkdirs();
         }

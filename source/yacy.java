@@ -67,15 +67,15 @@ import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.ScoreCluster;
 import de.anomic.kelondro.util.Log;
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.server.serverCore;
-import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverSemaphore;
 import de.anomic.server.serverSystem;
 import de.anomic.tools.enumerateFiles;
-import de.anomic.tools.yFormatter;
+import de.anomic.tools.Formatter;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyTray;
@@ -187,7 +187,7 @@ public final class yacy {
             mkdirsIfNeseccary(f);
 			f = new File(homePath, "DATA/LOG/yacy.logging");
 			if (!f.exists()) try {
-			    serverFileUtils.copy(new File(homePath, "yacy.logging"), f);
+			    FileUtils.copy(new File(homePath, "yacy.logging"), f);
             } catch (final IOException e){
                 System.out.println("could not copy yacy.logging");
             }
@@ -281,12 +281,12 @@ public final class yacy {
             // create default notifier picture
             //TODO: Use templates instead of copying images ...
             if (!((new File(htDocsPath, "notifier.gif")).exists())) try {
-                serverFileUtils.copy(new File(htRootPath, "env/grafics/empty.gif"),
+                FileUtils.copy(new File(htRootPath, "env/grafics/empty.gif"),
                                      new File(htDocsPath, "notifier.gif"));
             } catch (final IOException e) {}
 
             final File htdocsReadme = new File(htDocsPath, "readme.txt");
-            if (!(htdocsReadme.exists())) try {serverFileUtils.copy((
+            if (!(htdocsReadme.exists())) try {FileUtils.copy((
                     "This is your root directory for individual Web Content\r\n" +
                     "\r\n" +
                     "Please place your html files into the www subdirectory.\r\n" +
@@ -364,7 +364,7 @@ public final class yacy {
                         	target = new File(locale_work, locale_source_files[i].getName());
                             if (locale_source_files[i].getName().endsWith(".lng")) {
                             	if (target.exists()) delete(target);
-                                serverFileUtils.copy(locale_source_files[i], target);
+                                FileUtils.copy(locale_source_files[i], target);
                             }
                         }
                         Log.logInfo("STARTUP", "Copied the default locales to " + locale_work.toString());
@@ -396,7 +396,7 @@ public final class yacy {
                         } catch (final IOException e) {}
                     }
                     // initialize number formatter with this locale
-                    yFormatter.setLocale(lang);
+                    Formatter.setLocale(lang);
                     
                     // registering shutdown hook
                     Log.logConfig("STARTUP", "Registering Shutdown Hook");
@@ -579,7 +579,7 @@ public final class yacy {
                 Log.logConfig("REMOTE-SHUTDOWN", "Stand by for termination, which may last some seconds.");
                 final ByteArrayOutputStream bos = new ByteArrayOutputStream();
                 try {
-                    serverFileUtils.copyToStream(new BufferedInputStream(res.getDataAsStream()), new BufferedOutputStream(bos));
+                    FileUtils.copyToStream(new BufferedInputStream(res.getDataAsStream()), new BufferedOutputStream(bos));
                 } finally {
                     res.closeStream();
                 }
@@ -820,7 +820,7 @@ public final class yacy {
     private static void transferCR(final String targetaddress, final String crfile) {
         final File f = new File(crfile);
         try {
-            final byte[] b = serverFileUtils.read(f);
+            final byte[] b = FileUtils.read(f);
             final String result = yacyClient.transfer(targetaddress, f.getName(), b);
             if (result == null)
                 Log.logInfo("TRANSFER-CR", "transmitted file " + crfile + " to " + targetaddress + " successfully");

@@ -42,12 +42,12 @@ import com.ice.tar.TarInputStream;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterImageEntry;
 import de.anomic.kelondro.util.ByteBuffer;
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.parser.AbstractParser;
 import de.anomic.plasma.parser.Parser;
 import de.anomic.plasma.parser.ParserException;
-import de.anomic.server.serverFileUtils;
 import de.anomic.yacy.yacyURL;
 
 public class tarParser extends AbstractParser implements Parser {
@@ -142,7 +142,7 @@ public class tarParser extends AbstractParser implements Parser {
                     subDocTempFile = createTempFile(entryName);
                     
                     // copy the data into the file
-                    serverFileUtils.copy(tin,subDocTempFile,entry.getSize());
+                    FileUtils.copy(tin,subDocTempFile,entry.getSize());
                     
                     // check for interruption
                     checkInterruption();
@@ -170,7 +170,7 @@ public class tarParser extends AbstractParser implements Parser {
 
                 if (subDoc.getTextLength() > 0) {
                     if (docTextLength > 0) docText.write('\n');
-                    docTextLength += serverFileUtils.copy(subDoc.getText(), docText);
+                    docTextLength += FileUtils.copy(subDoc.getText(), docText);
                 }               
                 
                 docAnchors.putAll(subDoc.getAnchors());

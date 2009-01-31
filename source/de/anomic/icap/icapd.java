@@ -43,11 +43,11 @@ import de.anomic.http.httpdProxyCacheEntry;
 import de.anomic.index.indexDocumentMetadata;
 import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.kelondro.util.Log;
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
-import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverHandler;
 import de.anomic.server.serverCore.Session;
 import de.anomic.yacy.yacyURL;
@@ -389,7 +389,7 @@ public class icapd implements serverHandler, Cloneable {
             
             // copy the response body into the file
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            serverFileUtils.copy(resBodyStream, baos);
+            FileUtils.copy(resBodyStream, baos);
             if(resBodyStream != null) {
                 resBodyStream.close(); resBodyStream = null;
             }

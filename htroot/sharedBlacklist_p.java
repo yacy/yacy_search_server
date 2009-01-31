@@ -43,10 +43,10 @@ import de.anomic.htmlFilter.htmlFilterCharacterCoding;
 import de.anomic.http.HttpClient;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.index.indexAbstractReferenceBlacklist;
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.tools.nxTools;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyURL;
 
@@ -139,7 +139,7 @@ public class sharedBlacklist_p {
                         // get List
                         yacyURL u = new yacyURL(downloadURLOld, null);
 
-                        otherBlacklist = nxTools.strings(HttpClient.wget(u.toString(), reqHeader, 1000), "UTF-8");
+                        otherBlacklist = FileUtils.strings(HttpClient.wget(u.toString(), reqHeader, 1000), "UTF-8");
                     } catch (final Exception e) {
                         prop.put("status", STATUS_PEER_UNKNOWN);
                         prop.putHTML("status_name", Hash);
@@ -158,7 +158,7 @@ public class sharedBlacklist_p {
                     final yacyURL u = new yacyURL(downloadURL, null);
                     final httpRequestHeader reqHeader = new httpRequestHeader();
                     reqHeader.put(httpRequestHeader.USER_AGENT, HTTPLoader.yacyUserAgent);
-                    otherBlacklist = nxTools.strings(HttpClient.wget(u.toString(), reqHeader, 10000), "UTF-8"); //get List
+                    otherBlacklist = FileUtils.strings(HttpClient.wget(u.toString(), reqHeader, 10000), "UTF-8"); //get List
                 } catch (final Exception e) {
                     prop.put("status", STATUS_URL_PROBLEM);
                     prop.putHTML("status_address",downloadURL);
@@ -175,7 +175,7 @@ public class sharedBlacklist_p {
 
                 if (fileString != null) {
                     try {
-                        otherBlacklist = nxTools.strings(fileString.getBytes("UTF-8"), "UTF-8");
+                        otherBlacklist = FileUtils.strings(fileString.getBytes("UTF-8"), "UTF-8");
                     } catch (IOException ex) {
                         prop.put("status", STATUS_FILE_ERROR);
                     }

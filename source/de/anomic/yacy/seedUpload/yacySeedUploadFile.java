@@ -27,7 +27,7 @@ package de.anomic.yacy.seedUpload;
 
 import java.io.File;
 
-import de.anomic.server.serverFileUtils;
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacySeedUploader;
@@ -44,7 +44,7 @@ public class yacySeedUploadFile implements yacySeedUploader {
             if (seedFilePath.length() == 0) throw new Exception("Path to seed file is not configured properly");
             
             final File publicSeedFile = new File(seedFilePath);            
-            serverFileUtils.copy(seedFile,publicSeedFile);
+            FileUtils.copy(seedFile,publicSeedFile);
             
             return "Seed-List file stored successfully";
         } catch (final Exception e) {

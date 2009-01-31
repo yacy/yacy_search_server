@@ -42,7 +42,7 @@ import de.anomic.server.serverProfiling;
 import de.anomic.server.serverSwitch;
 import de.anomic.tools.crypt;
 import de.anomic.tools.nxTools;
-import de.anomic.tools.yFormatter;
+import de.anomic.tools.Formatter;
 import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyURL;
@@ -83,11 +83,11 @@ public class yacysearchitem {
         final int offset = theQuery.neededResults() - theQuery.displayResults() + 1;
         prop.put("offset", offset);
         prop.put("itemscount", (item < 0) ? theQuery.neededResults() : item + 1);
-        prop.put("totalcount", yFormatter.number(theSearch.getRankingResult().getLocalResourceSize() + theSearch.getRankingResult().getRemoteResourceSize(), true));
-        prop.put("localResourceSize", yFormatter.number(theSearch.getRankingResult().getLocalResourceSize(), true));
-        prop.put("remoteResourceSize", yFormatter.number(theSearch.getRankingResult().getRemoteResourceSize(), true));
-        prop.put("remoteIndexCount", yFormatter.number(theSearch.getRankingResult().getRemoteIndexCount(), true));
-        prop.put("remotePeerCount", yFormatter.number(theSearch.getRankingResult().getRemotePeerCount(), true));
+        prop.put("totalcount", Formatter.number(theSearch.getRankingResult().getLocalResourceSize() + theSearch.getRankingResult().getRemoteResourceSize(), true));
+        prop.put("localResourceSize", Formatter.number(theSearch.getRankingResult().getLocalResourceSize(), true));
+        prop.put("remoteResourceSize", Formatter.number(theSearch.getRankingResult().getRemoteResourceSize(), true));
+        prop.put("remoteIndexCount", Formatter.number(theSearch.getRankingResult().getRemoteIndexCount(), true));
+        prop.put("remotePeerCount", Formatter.number(theSearch.getRankingResult().getRemotePeerCount(), true));
         
         if (theQuery.contentdom == plasmaSearchQuery.CONTENTDOM_TEXT) {
             // text search

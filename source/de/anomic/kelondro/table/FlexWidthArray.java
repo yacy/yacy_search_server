@@ -27,7 +27,6 @@ package de.anomic.kelondro.table;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -39,7 +38,6 @@ import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.util.kelondroException;
 import de.anomic.kelondro.util.Log;
-import de.anomic.server.serverFileUtils;
 
 public class FlexWidthArray implements Array {
 
@@ -105,10 +103,11 @@ public class FlexWidthArray implements Array {
         this.filename = tabledir.getCanonicalPath();
 
         // save/check property file for this array
+        /*
         final File propfile = new File(tabledir, "properties");
         Map<String, String> props = new HashMap<String, String>();
         if (propfile.exists()) {
-            props = serverFileUtils.loadHashMap(propfile);
+            props = serverFileUtils.loadMap(propfile);
             final String stored_rowdef = props.get("rowdef");
             if ((stored_rowdef != null) && (!(rowdef.subsumes(new Row(stored_rowdef, rowdef.objectOrder, 0))))) {
                 System.out.println("FATAL ERROR: stored rowdef '" + stored_rowdef + "' does not match with new rowdef '" + 
@@ -118,6 +117,7 @@ public class FlexWidthArray implements Array {
         }
         props.put("rowdef", rowdef.toString());
         serverFileUtils.saveMap(propfile, props, "FlexWidthArray properties");
+        */
         
         // open existing files
         final String[] files = tabledir.list();

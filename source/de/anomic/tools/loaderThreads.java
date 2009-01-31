@@ -28,6 +28,7 @@ import de.anomic.crawler.HTTPLoader;
 import de.anomic.http.HttpClient;
 import de.anomic.http.httpRemoteProxyConfig;
 import de.anomic.http.httpRequestHeader;
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.yacy.yacyURL;
 
 public class loaderThreads {
@@ -177,7 +178,7 @@ public class loaderThreads {
             int line = 0;
             String s, key, value;
             int p;
-            final ArrayList<String> lines = nxTools.strings(v);
+            final ArrayList<String> lines = FileUtils.strings(v);
             try {
                 while ((this.run) && (line < lines.size())) {
                     // parse line and construct a property

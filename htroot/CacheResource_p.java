@@ -28,9 +28,9 @@ import java.io.File;
 import java.io.IOException;
 
 import de.anomic.http.httpRequestHeader;
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
-import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -49,7 +49,7 @@ public class CacheResource_p {
         byte[] resource;
 
         try {
-            resource = serverFileUtils.read(f);
+            resource = FileUtils.read(f);
             prop.put("resource", resource);
         } catch (final IOException e) {
             prop.put("resource", new byte[0]);

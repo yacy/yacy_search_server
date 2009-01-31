@@ -52,7 +52,6 @@ import de.anomic.kelondro.index.Row.Entry;
 import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.NaturalOrder;
-import de.anomic.kelondro.table.CachedRecords.CacheNode;
 import de.anomic.kelondro.util.kelondroException;
 import de.anomic.kelondro.util.Log;
 

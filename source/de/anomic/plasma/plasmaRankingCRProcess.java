@@ -41,7 +41,7 @@ import de.anomic.kelondro.order.MicroDate;
 import de.anomic.kelondro.table.EcoTable;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.AttrSeq;
-import de.anomic.server.serverFileUtils;
+import de.anomic.kelondro.util.FileUtils;
 
 public class plasmaRankingCRProcess {
     
@@ -299,11 +299,11 @@ public class plasmaRankingCRProcess {
                 to_file.delete();
                 tmp_file.renameTo(to_file);
             }
-            serverFileUtils.moveAll(tmp_dir, bkp_dir);
+            FileUtils.moveAll(tmp_dir, bkp_dir);
         } catch (final IOException e) {
             // move previously processed files back
             e.printStackTrace();
-            serverFileUtils.moveAll(tmp_dir, from_dir);
+            FileUtils.moveAll(tmp_dir, from_dir);
         }
         
     }
@@ -436,7 +436,7 @@ public class plasmaRankingCRProcess {
                 if (!(err_dir.exists())) err_dir.mkdirs();
                 if (!(acc_dir.exists())) acc_dir.mkdirs();
                 if (!(to_file.getParentFile().exists())) to_file.getParentFile().mkdirs();
-                serverFileUtils.moveAll(from_dir, ready_dir);
+                FileUtils.moveAll(from_dir, ready_dir);
                 final long start = System.currentTimeMillis();
                 final int files = ready_dir.list().length;
                 accumulate(ready_dir, tmp_dir, err_dir, acc_dir, to_file, 1000, true);
@@ -468,7 +468,7 @@ public class plasmaRankingCRProcess {
                         } else {
                             // file is fresh, it is duplicated and moved to be transferred to other peers again
                             System.out.println("file " + f.getName() + " is fresh (" + d + " hours old), recycled and moved to backup");
-                            serverFileUtils.copy(f, new File(own_dir, list[i]));
+                            FileUtils.copy(f, new File(own_dir, list[i]));
                             f.renameTo(new File(bkp_dir, list[i]));
                         }
                     } catch (final IOException e) {

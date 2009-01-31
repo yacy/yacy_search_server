@@ -47,60 +47,12 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Vector;
 
 public class nxTools {
-
-
-    public static HashMap<String, String> table(final Vector<String> list) {
-    	final Enumeration<String> i = list.elements();
-    	int pos;
-    	String line;
-    	final HashMap<String, String> props = new HashMap<String, String>(list.size());
-    	while (i.hasMoreElements()) {
-    		line = (i.nextElement()).trim();
-    		pos = line.indexOf("=");
-    		if (pos > 0) props.put(line.substring(0, pos).trim(), line.substring(pos + 1).trim());
-    	}
-    	return props;
-	}
-    
-    public static HashMap<String, String> table(final byte[] a, final String encoding) {
-        return table(strings(a, encoding));
-    }
-    
-    /**
-     * parse config files
-     * 
-     * splits the lines in list into pairs sperarated by =, lines beginning with # are ignored
-     * ie:
-     * abc=123
-     * # comment
-     * fg=dcf
-     * => Map{abc => 123, fg => dcf}
-     * @param list
-     * @return
-     */
-    public static HashMap<String, String> table(final ArrayList<String> list) {
-        if (list == null) return new HashMap<String, String>();
-        final Iterator<String> i = list.iterator();
-        int pos;
-        String line;
-        final HashMap<String, String> props = new HashMap<String, String>(list.size());
-        while (i.hasNext()) {
-            line = (i.next()).trim();
-            if (line.startsWith("#")) continue; // exclude comments
-            //System.out.println("NXTOOLS_PROPS - LINE:" + line);
-            pos = line.indexOf("=");
-            if (pos > 0) props.put(line.substring(0, pos).trim(), line.substring(pos + 1).trim());
-        }
-        return props;
-    }
 
     public static Vector<String> grep(final Vector<String> list, final int afterContext, final String pattern) {
     	final Enumeration<String> i = list.elements();
@@ -166,45 +118,6 @@ public class nxTools {
         return null;
     }
 
-    public static ArrayList<String> strings(final byte[] a) {
-        return strings(a, null);
-    }
-    
-    public static ArrayList<String> strings(final byte[] a, final String encoding) {
-        if (a == null) return new ArrayList<String>();
-        int s = 0;
-        int e;
-        final ArrayList<String> v = new ArrayList<String>();
-        byte b;
-        while (s < a.length) {
-            // find eol
-            e = s;
-            while (e < a.length) {
-                b = a[e];
-                if ((b == 10) || (b == 13) || (b == 0)) break;
-                e++;
-            }
-            
-            // read line
-            if (encoding == null) {
-                v.add(new String(a, s, e - s));
-            } else try {
-                v.add(new String(a, s, e - s, encoding));
-            } catch (final UnsupportedEncodingException xcptn) {
-                return v;
-            }
-            
-            // eat up additional eol bytes
-            s = e + 1;
-            while (s < a.length) {
-                b = a[s];
-                if ((b != 10) && (b != 13)) break;
-                s++;
-            }
-        }
-        return v;
-    }
-    
     public static String line(final byte[] a, final int lineNr) {
         final InputStreamReader r = new InputStreamReader(new ByteArrayInputStream(a));
         final LineNumberReader lnr = new LineNumberReader(r);

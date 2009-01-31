@@ -45,9 +45,9 @@ import de.anomic.data.listManager;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterWriter;
 import de.anomic.http.httpRequestHeader;
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
-import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyNewsPool;
@@ -329,7 +329,7 @@ public class WatchCrawler_p {
                                 final htmlFilterContentScraper scraper = new htmlFilterContentScraper(new yacyURL(file));
                                 //OutputStream os = new htmlFilterOutputStream(null, scraper, null, false);
                                 final Writer writer = new htmlFilterWriter(null,null,scraper,null,false);
-                                serverFileUtils.copy(fileString, writer);
+                                FileUtils.copy(fileString, writer);
                                 writer.close();
                                 
                                 //String headline = scraper.getHeadline();

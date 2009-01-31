@@ -25,6 +25,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 
+import de.anomic.kelondro.util.FileUtils;
+
 public final class serverClassLoader extends ClassLoader {
     /**
      * directory of class files
@@ -59,7 +61,7 @@ public final class serverClassLoader extends ClassLoader {
         byte[] b;
         try {
             //System.out.println("*** DEBUG CLASSLOADER: " + classfile + "; file " + (classfile.exists() ? "exists": "does not exist"));
-            b = serverFileUtils.read(classfile);
+            b = FileUtils.read(classfile);
             // make a class out of the stream
             c = this.defineClass(null, b, 0, b.length);
             resolveClass(c);

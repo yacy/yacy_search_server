@@ -35,8 +35,8 @@ import java.util.TreeMap;
 import de.anomic.data.messageBoard;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.order.DateFormatter;
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacySeed;
@@ -96,7 +96,7 @@ public class Messages_p {
         final File notifierSource = new File(sb.getRootPath(), sb.getConfig("htRootPath", "htroot") + "/env/grafics/empty.gif");
         final File notifierDest = new File(sb.getConfigPath("htDocsPath", "DATA/HTDOCS"), "notifier.gif");
         try {
-            serverFileUtils.copy(notifierSource, notifierDest);
+            FileUtils.copy(notifierSource, notifierDest);
         } catch (final IOException e) {
         }
 

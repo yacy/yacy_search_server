@@ -67,11 +67,11 @@ import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.kelondro.order.Digest;
 import de.anomic.kelondro.util.ByteBuffer;
 import de.anomic.kelondro.util.Log;
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDomains;
-import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverHandler;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -751,7 +751,7 @@ public final class httpd implements serverHandler, Cloneable {
         // parsing post request bodies which are gzip content-encoded
         } else {
             ByteArrayOutputStream bout = new ByteArrayOutputStream(512);
-            serverFileUtils.copy(in,bout);
+            FileUtils.copy(in,bout);
             buffer = bout.toByteArray();
             bout.close(); bout = null;
         }
@@ -924,7 +924,7 @@ public final class httpd implements serverHandler, Cloneable {
             } else {
                 // file
                 args.put(item.getFieldName(), item.getName());
-                final byte[] fileContent = serverFileUtils.read(item.getInputStream());
+                final byte[] fileContent = FileUtils.read(item.getInputStream());
                 item.getInputStream().close();
                 files.put(item.getFieldName(), fileContent);
             }
@@ -1228,7 +1228,7 @@ public final class httpd implements serverHandler, Cloneable {
 
             if (! method.equals(httpHeader.METHOD_HEAD)) {
                 // write the array to the client
-                serverFileUtils.copy(result, respond);
+                FileUtils.copy(result, respond);
             }
             respond.flush();
         } finally {

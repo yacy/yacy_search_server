@@ -31,12 +31,12 @@ import java.util.Hashtable;
 import SevenZip.IInStream;
 import SevenZip.MyRandomAccessFile;
 import SevenZip.Archive.SevenZip.Handler;
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.parser.AbstractParser;
 import de.anomic.plasma.parser.Parser;
 import de.anomic.plasma.parser.ParserException;
 import de.anomic.server.serverCachedFileOutputStream;
-import de.anomic.server.serverFileUtils;
 import de.anomic.yacy.yacyURL;
 
 public class sevenzipParser extends AbstractParser implements Parser {
@@ -109,7 +109,7 @@ public class sevenzipParser extends AbstractParser implements Parser {
             final InputStream source) throws ParserException, InterruptedException {
         try {
             final serverCachedFileOutputStream cfos = new serverCachedFileOutputStream(Parser.MAX_KEEP_IN_MEMORY_SIZE);
-            serverFileUtils.copy(source, cfos);
+            FileUtils.copy(source, cfos);
             if (cfos.isFallback()) {
                 return parse(location, mimeType, charset, cfos.getContentFile());
             }

@@ -51,12 +51,11 @@ import de.anomic.kelondro.blob.MapDataMining;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.util.kelondroException;
 import de.anomic.kelondro.util.Log;
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDomains;
-import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverSwitch;
-import de.anomic.tools.nxTools;
 
 public final class yacySeedDB implements httpdAlternativeDomainNames {
   
@@ -827,10 +826,10 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
             
         try {
             // uncompress it if it is gzipped
-            content = serverFileUtils.uncompressGZipArray(content);
+            content = FileUtils.uncompressGZipArray(content);
 
             // convert it into an array
-            return nxTools.strings(content,"UTF-8");
+            return FileUtils.strings(content,"UTF-8");
         } catch (final Exception e) {
         	throw new IOException("Unable to download seed file '" + seedURL + "'. " + e.getMessage());
         }

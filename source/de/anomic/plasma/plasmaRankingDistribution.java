@@ -31,7 +31,7 @@ import java.util.Random;
 import java.util.StringTokenizer;
 
 import de.anomic.kelondro.util.Log;
-import de.anomic.server.serverFileUtils;
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacySeedDB;
@@ -175,7 +175,7 @@ public final class plasmaRankingDistribution {
         final long starttime = System.currentTimeMillis();
         String result = "unknown";
         try {
-            final byte[] b = serverFileUtils.read(crfile);
+            final byte[] b = FileUtils.read(crfile);
             result = yacyClient.transfer(address, crfile.getName(), b);
             if (result == null) {
                 log.logInfo("RankingDistribution - transmitted file " + crfile + " to " + address + " successfully in " + ((System.currentTimeMillis() - starttime) / 1000) + " seconds");

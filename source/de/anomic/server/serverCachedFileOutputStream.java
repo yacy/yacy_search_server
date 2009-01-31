@@ -34,6 +34,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import de.anomic.kelondro.util.FileUtils;
+
 public class serverCachedFileOutputStream extends ByteArrayOutputStream {
     
     protected File fallbackFile;
@@ -91,7 +93,7 @@ public class serverCachedFileOutputStream extends ByteArrayOutputStream {
         }
         final OutputStream os = new FileOutputStream(this.fallbackFile);
         this.fallback = (this.buffered) ? new BufferedOutputStream(os) : os;
-        serverFileUtils.copy(new ByteArrayInputStream(super.buf), this.fallback);
+        FileUtils.copy(new ByteArrayInputStream(super.buf), this.fallback);
         super.buf = new byte[0];
         super.count = 0;
         super.reset();

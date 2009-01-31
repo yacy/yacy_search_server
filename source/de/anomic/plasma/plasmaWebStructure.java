@@ -41,7 +41,7 @@ import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.kelondro.order.MicroDate;
 import de.anomic.kelondro.util.Log;
-import de.anomic.server.serverFileUtils;
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.yacy.yacyURL;
 
 public class plasmaWebStructure {
@@ -68,7 +68,7 @@ public class plasmaWebStructure {
         this.structureFile = structureFile;
         
         // load web structure
-        final Map<String, String> loadedStructure = (this.structureFile.exists()) ? serverFileUtils.loadHashMap(this.structureFile) : new TreeMap<String, String>();
+        final Map<String, String> loadedStructure = (this.structureFile.exists()) ? FileUtils.loadMap(this.structureFile) : new TreeMap<String, String>();
         if (loadedStructure != null) this.structure_old.putAll(loadedStructure);
         
         // delete out-dated entries in case the structure is too big
@@ -166,7 +166,7 @@ public class plasmaWebStructure {
         header.append("# ---"); header.append((char) 13); header.append((char) 10);
         crg.insert(0, header.toString());
         try {
-            serverFileUtils.writeAndGZip(crg.toString().getBytes(), file);
+            FileUtils.writeAndGZip(crg.toString().getBytes(), file);
             if (this.log.isFine()) log.logFine("wrote citation reference dump " + file.toString());
         } catch (final IOException e) {
             e.printStackTrace();
@@ -366,7 +366,7 @@ public class plasmaWebStructure {
         joinOldNew();
         try {
             synchronized(structure_old) {
-                serverFileUtils.saveMap(this.structureFile, this.structure_old, "Web Structure Syntax: <b64hash(6)>','<host> to <date-yyyymmdd(8)>{<target-b64hash(6)><target-count-hex(4)>}*");
+                FileUtils.saveMap(this.structureFile, this.structure_old, "Web Structure Syntax: <b64hash(6)>','<host> to <date-yyyymmdd(8)>{<target-b64hash(6)><target-count-hex(4)>}*");
             }
         } catch (final IOException e) {
             e.printStackTrace();

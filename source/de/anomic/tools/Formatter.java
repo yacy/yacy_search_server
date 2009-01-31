@@ -35,7 +35,7 @@ import java.util.Locale;
  * At the moment yFormatter can be used to format numbers according
  * to the locale set for YaCy.
  */
-public final class yFormatter {
+public final class Formatter {
     // default formatter
     private static NumberFormat numForm = NumberFormat.getInstance(new Locale("en"));
     
@@ -105,5 +105,31 @@ public final class yFormatter {
         } catch (final NumberFormatException e) { /* empty */ }
         
         return (ret == null ? "-" : ret);
+    }
+
+    
+    /**
+     * Formats a number if it are bytes to greatest unit (1024 based)
+     * @param byteCount
+     * @return formatted String with unit
+     */
+    public static String bytesToString(final long byteCount) {
+        try {
+            final StringBuilder byteString = new StringBuilder();
+
+            if (byteCount > 1073741824) {
+                byteString.append(number((double)byteCount / (double)1073741824 )).append(" GB");
+            } else if (byteCount > 1048576) {
+                byteString.append(number((double)byteCount / (double)1048576)).append(" MB");
+            } else if (byteCount > 1024) {
+                byteString.append(number((double)byteCount / (double)1024)).append(" KB");
+            } else {
+                byteString.append(Long.toString(byteCount)).append(" Bytes");
+            }
+
+            return byteString.toString();
+        } catch (final Exception e) {
+            return "unknown";
+        }
     }
 }

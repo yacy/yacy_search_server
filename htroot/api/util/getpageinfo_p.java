@@ -9,8 +9,8 @@ import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterWriter;
 import de.anomic.http.HttpClient;
 import de.anomic.http.httpRequestHeader;
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyURL;
@@ -55,7 +55,7 @@ public class getpageinfo_p {
                     final htmlFilterContentScraper scraper = new htmlFilterContentScraper(u);
                     //OutputStream os = new htmlFilterOutputStream(null, scraper, null, false);
                     final Writer writer = new htmlFilterWriter(null,null,scraper,null,false);
-                    serverFileUtils.copy(contentString,writer);
+                    FileUtils.copy(contentString,writer);
                     writer.close();
                     
                     // put the document title 

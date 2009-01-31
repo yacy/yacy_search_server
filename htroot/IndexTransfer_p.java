@@ -35,10 +35,10 @@ import java.util.NoSuchElementException;
 import java.util.TreeMap;
 
 import de.anomic.http.httpRequestHeader;
-import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.tools.Formatter;
 import de.anomic.yacy.yacyPeerSelection;
 import de.anomic.yacy.yacySeed;
 
@@ -95,7 +95,7 @@ public final class IndexTransfer_p {
             
             prop.putNum("running_twEntityCount", sb.transferIdxThread.getTransferedContainerCount());
             prop.putNum("running_twEntryCount", sb.transferIdxThread.getTransferedEntryCount());
-            prop.put("running_twPayloadSize", MemoryControl.bytesToString(sb.transferIdxThread.getTransferedBytes()));
+            prop.put("running_twPayloadSize", Formatter.bytesToString(sb.transferIdxThread.getTransferedBytes()));
             prop.putNum("running_twEntityPercent", sb.transferIdxThread.getTransferedContainerPercent());
             prop.putNum("running_twEntrySpeed", sb.transferIdxThread.getTransferedEntrySpeed());
             

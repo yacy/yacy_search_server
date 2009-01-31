@@ -31,9 +31,9 @@ import java.util.HashMap;
 
 import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.util.Log;
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyURL;
@@ -91,7 +91,7 @@ public class ViewImage {
                 if (urlString.endsWith(".ico")) {
                     // load default favicon dfltfvcn.ico
                     try {
-                        imgb = serverFileUtils.read(new File(sb.getRootPath(), defaulticon));
+                        imgb = FileUtils.read(new File(sb.getRootPath(), defaulticon));
                     } catch (final IOException e) {
                         return null;
                     }
@@ -104,7 +104,7 @@ public class ViewImage {
 
                 // read image data
                 try {
-                    imgb = serverFileUtils.read(imgStream);
+                    imgb = FileUtils.read(imgStream);
                 } catch (final IOException e) {
                     return null;
                 } finally {

@@ -50,7 +50,7 @@ import java.util.regex.Pattern;
 
 import de.anomic.kelondro.util.Log;
 import de.anomic.server.serverSwitch;
-import de.anomic.tools.yFormatter;
+import de.anomic.tools.Formatter;
 
 /**
  * Wordlist based translator
@@ -248,7 +248,7 @@ public class translator {
         if(translator.translateFilesRecursive(sourceDir, destDir,
         translationFile, "html,template,inc", "locale")){
             env.setConfig("locale.language", lang.substring(0, lang.length() - 4));
-            yFormatter.setLocale(env.getConfig("locale.language", "en"));
+            Formatter.setLocale(env.getConfig("locale.language", "en"));
             try {
                 final BufferedWriter bw = new BufferedWriter(new PrintWriter(new FileWriter(new File(destDir, "version"))));
                 bw.write(env.getConfig("svnRevision", "Error getting Version"));

@@ -618,4 +618,5 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
     public void deleteOnExit() {
         // do nothing, there is no file
     }
+
 }

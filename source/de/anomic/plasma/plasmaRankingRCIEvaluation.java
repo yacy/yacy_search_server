@@ -37,7 +37,7 @@ import java.util.TreeSet;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.Digest;
 import de.anomic.kelondro.util.AttrSeq;
-import de.anomic.server.serverFileUtils;
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.yacy.yacyURL;
 
 public class plasmaRankingRCIEvaluation {
@@ -150,7 +150,7 @@ public class plasmaRankingRCIEvaluation {
     }
 
     public static HashMap<String, String> genReverseDomHash(final File domlist) {
-        final HashSet<String> domset = serverFileUtils.loadList(domlist);
+        final HashSet<String> domset = FileUtils.loadList(domlist);
         final HashMap<String, String> dommap = new HashMap<String, String>();
         final Iterator<String> i = domset.iterator();
         String dom;
@@ -170,7 +170,7 @@ public class plasmaRankingRCIEvaluation {
         if (!(tablePath.exists())) tablePath.mkdirs();
         for (int i = 0; i < ranking.length - 1; i++) {
             filename = "YBR-4-" + Digest.encodeHex(i, 2) + ".idx";
-            serverFileUtils.saveSet(new File(tablePath, filename), "plain", ranking[i], "");
+            FileUtils.saveSet(new File(tablePath, filename), "plain", ranking[i], "");
         }
     }
     

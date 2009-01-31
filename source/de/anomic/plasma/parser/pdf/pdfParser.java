@@ -39,12 +39,12 @@ import org.pdfbox.pdmodel.encryption.AccessPermission;
 import org.pdfbox.pdmodel.encryption.StandardDecryptionMaterial;
 import org.pdfbox.util.PDFTextStripper;
 
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.parser.AbstractParser;
 import de.anomic.plasma.parser.Parser;
 import de.anomic.plasma.parser.ParserException;
 import de.anomic.server.serverCharBuffer;
-import de.anomic.server.serverFileUtils;
 import de.anomic.yacy.yacyURL;
 
 public class pdfParser extends AbstractParser implements Parser {
@@ -232,7 +232,7 @@ public class pdfParser extends AbstractParser implements Parser {
                     System.out.println("\tParsed text with " + document.getTextLength() + " chars of text and " + document.getAnchors().size() + " anchors");
                     try {
                         // write file
-                        serverFileUtils.copy(document.getText(), new File("parsedPdf.txt"));
+                        FileUtils.copy(document.getText(), new File("parsedPdf.txt"));
                     } catch (final IOException e) {
                         System.err.println("error saving parsed document");
                         e.printStackTrace();

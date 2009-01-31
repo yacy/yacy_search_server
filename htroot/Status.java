@@ -42,7 +42,7 @@ import de.anomic.server.serverDomains;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverProcessor;
 import de.anomic.server.serverSwitch;
-import de.anomic.tools.yFormatter;
+import de.anomic.tools.Formatter;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyVersion;
 
@@ -130,7 +130,7 @@ public class Status {
         // free disk space
         if ((adminaccess) && (!sb.observer.getDisksOK()))
         {
-            final String minFree = MemoryControl.bytesToString(sb.observer.getMinFreeDiskSpace());
+            final String minFree = Formatter.bytesToString(sb.observer.getMinFreeDiskSpace());
             prop.put("warningDiskSpaceLow", "1");
             prop.put("warningDiskSpaceLow_minSpace", minFree);
         }
@@ -191,9 +191,9 @@ public class Status {
             prop.putNum("peerStatistics_pagesperminute", sb.webIndex.seedDB.mySeed().getPPM());
             prop.putNum("peerStatistics_queriesperhour", Math.round(6000d * sb.webIndex.seedDB.mySeed().getQPM()) / 100d);
             prop.putNum("peerStatistics_links", sb.webIndex.seedDB.mySeed().getLinkCount());
-            prop.put("peerStatistics_words", yFormatter.number(sb.webIndex.seedDB.mySeed().get(yacySeed.ICOUNT, "0")));
+            prop.put("peerStatistics_words", Formatter.number(sb.webIndex.seedDB.mySeed().get(yacySeed.ICOUNT, "0")));
             prop.putNum("peerStatistics_disconnects", sb.webIndex.peerActions.disconnects);
-            prop.put("peerStatistics_connects", yFormatter.number(sb.webIndex.seedDB.mySeed().get(yacySeed.CCOUNT, "0")));
+            prop.put("peerStatistics_connects", Formatter.number(sb.webIndex.seedDB.mySeed().get(yacySeed.CCOUNT, "0")));
             thisHash = sb.webIndex.seedDB.mySeed().hash;
             if (sb.webIndex.seedDB.mySeed().getPublicAddress() == null) {
                 prop.put("peerAddress", "0"); // not assigned + instructions
@@ -271,15 +271,15 @@ public class Status {
         }
 
         // memory usage and system attributes
-        prop.put("freeMemory", MemoryControl.bytesToString(MemoryControl.free()));
-        prop.put("totalMemory", MemoryControl.bytesToString(MemoryControl.total()));
-        prop.put("maxMemory", MemoryControl.bytesToString(MemoryControl.max()));
+        prop.put("freeMemory", Formatter.bytesToString(MemoryControl.free()));
+        prop.put("totalMemory", Formatter.bytesToString(MemoryControl.total()));
+        prop.put("maxMemory", Formatter.bytesToString(MemoryControl.max()));
         prop.put("processors", serverProcessor.availableCPU);
 
         // proxy traffic
         //prop.put("trafficIn",bytesToString(httpdByteCountInputStream.getGlobalCount()));
-        prop.put("trafficProxy", MemoryControl.bytesToString(httpdByteCountOutputStream.getAccountCount("PROXY")));
-        prop.put("trafficCrawler", MemoryControl.bytesToString(httpdByteCountInputStream.getAccountCount("CRAWLER")));
+        prop.put("trafficProxy", Formatter.bytesToString(httpdByteCountOutputStream.getAccountCount("PROXY")));
+        prop.put("trafficCrawler", Formatter.bytesToString(httpdByteCountInputStream.getAccountCount("CRAWLER")));
 
         // connection information
         final serverCore httpd = (serverCore) sb.getThread("10_httpd");

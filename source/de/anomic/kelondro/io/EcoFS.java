@@ -48,7 +48,7 @@ import de.anomic.kelondro.util.MemoryControl;
  * All access to the file is made with byte[] that are generated outside of this class
  * This class only references byte[] that are handed over to methods of this class.
  */
-public class kelondroEcoFS {
+public class EcoFS {
     
     private RandomAccessFile raf;
     private final File tablefile;
@@ -71,7 +71,7 @@ public class kelondroEcoFS {
     private static final int maxWriteBuffer = 256 * 1024;
     
     
-    public kelondroEcoFS(final File tablefile, final int recordsize) throws IOException {
+    public EcoFS(final File tablefile, final int recordsize) throws IOException {
         this.tablefile = tablefile;
         this.recordsize = recordsize;
 
@@ -574,7 +574,7 @@ public class kelondroEcoFS {
         final File f = new File(args[0]);
         if (f.exists()) f.delete();
         try {
-            final kelondroEcoFS t = new kelondroEcoFS(f, 8);
+            final EcoFS t = new EcoFS(f, 8);
             final byte[] b = new byte[8];
             t.add("01234567".getBytes(), 0);
             t.add("ABCDEFGH".getBytes(), 0);

@@ -50,7 +50,7 @@ import de.anomic.kelondro.blob.BLOBHeap;
 import de.anomic.kelondro.blob.MapView;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.util.Log;
-import de.anomic.server.serverFileUtils;
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyURL;
 
@@ -98,7 +98,7 @@ public final class plasmaHTCache {
                     object.getName().equals("yacy") ||
                     object.getName().equals("https") ||
                     object.getName().equals("ftp")) {
-                    serverFileUtils.deleteDirectory(cachePath);
+                    FileUtils.deleteDirectory(cachePath);
                 }
             }
         }

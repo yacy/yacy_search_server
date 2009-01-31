@@ -40,12 +40,12 @@ import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.kelondro.order.Digest;
 import de.anomic.kelondro.order.NaturalOrder;
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.kelondroException;
 import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.server.serverCharBuffer;
 import de.anomic.server.serverCodings;
 import de.anomic.tools.crypt;
-import de.anomic.tools.nxTools;
 import de.anomic.yacy.yacyURL;
 
 public class indexURLReference {
@@ -342,7 +342,7 @@ public class indexURLReference {
     }
     
     public indexURLReference.Components comp() {
-        final ArrayList<String> cl = nxTools.strings(this.entry.getCol("comp", null), "UTF-8");
+        final ArrayList<String> cl = FileUtils.strings(this.entry.getCol("comp", null), "UTF-8");
         return new indexURLReference.Components(
                 (cl.size() > 0) ? (cl.get(0)).trim() : "",
                 hash(),

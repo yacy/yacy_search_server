@@ -55,7 +55,7 @@ import java.util.Map;
 import de.anomic.htmlFilter.htmlFilterCharacterCoding;
 import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.tools.yFormatter;
+import de.anomic.tools.Formatter;
 
 public class serverObjects extends HashMap<String, String> implements Cloneable {
 
@@ -165,14 +165,14 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
 
     /**
      * Add a byte/long/integer to the map. The number will be encoded into a String using
-     * a localized format specified by {@link yFormatter} and {@link #setLocalized(boolean)}.
+     * a localized format specified by {@link Formatter} and {@link #setLocalized(boolean)}.
      * @param key   key name as String.
      * @param value integer type value to be added to the map in its formatted String 
      *              representation.
      * @return the String value added to the map.
      */
     public String putNum(final String key, final long value) {
-        return this.put(key, yFormatter.number(value, this.localized));
+        return this.put(key, Formatter.number(value, this.localized));
     }
 
     /**
@@ -180,7 +180,7 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
      * @see #putNum(String, long)
      */
     public String putNum(final String key, final double value) {
-        return this.put(key, yFormatter.number(value, this.localized));
+        return this.put(key, Formatter.number(value, this.localized));
     }
 
     /**
@@ -188,7 +188,7 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
      * @see #putNum(String, long)
      */
     public String putNum(final String key, final String value) {
-        return this.put(key, yFormatter.number(value));
+        return this.put(key, Formatter.number(value));
     }
 
     
@@ -322,7 +322,7 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
      * Currently it is used for numbers added with the putNum() methods only.
      * @param loc if <code>true</code> store numbers in a localized format, otherwise
      *            use a default english locale without grouping.
-     * @see yFormatter#setLocale(String) 
+     * @see Formatter#setLocale(String) 
      */
     public void setLocalized(final boolean loc) {
         this.localized = loc;

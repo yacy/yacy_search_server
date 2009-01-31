@@ -32,7 +32,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import net.sf.jmimemagic.MagicDetector;
-import de.anomic.server.serverFileUtils;
+import de.anomic.kelondro.util.FileUtils;
 
 public class odtDetector implements MagicDetector {
 
@@ -61,7 +61,7 @@ public class odtDetector implements MagicDetector {
         File dstFile = null;
         try {
             dstFile = File.createTempFile("mimeTypeParser",".tmp");
-            serverFileUtils.copy(data,dstFile);
+            FileUtils.copy(data,dstFile);
             return process(dstFile, offset, length, bitmask, comparator, mimeType, params);
         } catch (final IOException e) {
             return null;
@@ -82,7 +82,7 @@ public class odtDetector implements MagicDetector {
             
             // read in the content of the file
             final InputStream zippedContent = zipFile.getInputStream(mimeTypeInfo); 
-            final String realMimeType = new String(serverFileUtils.read(zippedContent, (int) mimeTypeInfo.getSize()));
+            final String realMimeType = new String(FileUtils.read(zippedContent, (int) mimeTypeInfo.getSize()));
             
             return new String[]{realMimeType};
         } catch (final Exception e) {

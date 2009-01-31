@@ -41,9 +41,9 @@ import de.anomic.data.listManager;
 import de.anomic.data.translator;
 import de.anomic.http.HttpClient;
 import de.anomic.http.httpRequestHeader;
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.tools.nxTools;
 import de.anomic.yacy.yacyURL;
 
 
@@ -81,7 +81,7 @@ public class ConfigLanguage_p {
                     final yacyURL u = new yacyURL(url, null);
                     final httpRequestHeader reqHeader = new httpRequestHeader();
                     reqHeader.put(httpRequestHeader.USER_AGENT, HTTPLoader.yacyUserAgent);
-                    langVector = nxTools.strings(HttpClient.wget(u.toString(), reqHeader, 10000), "UTF-8");
+                    langVector = FileUtils.strings(HttpClient.wget(u.toString(), reqHeader, 10000), "UTF-8");
                 }catch(final IOException e){
                     prop.put("status", "1");//unable to get url
                     prop.put("status_url", url);

@@ -68,30 +68,31 @@ public class LogalizerHandler extends Handler {
             if(parserDirFiles.size() == 0 && debug) {
                 System.out.println("Can't find any parsers in "+parserDir.toString());
             }
-	    for(final String filename: parserDirFiles) {
-		final Pattern patternGetClassName = Pattern.compile(".*\\"+ File.separator +"([^\\"+ File.separator +"]+)\\.class");
-		final Matcher matcherClassName = patternGetClassName.matcher(filename);
-		matcherClassName.find();
-                final String className = matcherClassName.group(1);
-                final Class<?> tempClass = Class.forName(logParserPackage+"."+className);
-                if (tempClass.isInterface()) {
-                    if (debug) System.out.println(tempClass.getName() + " is an Interface");
-                } else {
-                    final Object theParser = tempClass.newInstance();
-                    if (theParser instanceof LogParser) {
-                        final LogParser theLogParser = (LogParser) theParser;
-                        //System.out.println(bla.getName() + " is a logParser");
-                        logParsers.put(theLogParser.getParserType(), theParser);
-                        
-                        if (debug) System.out.println("Added " + theLogParser.getClass().getName() + " as " + theLogParser.getParserType() + " Parser.");
-                    }
-                    else {
-                        //System.out.println(bla.getName() + " is not a logParser");
-                        if (debug) System.out.println("Rejected " + tempClass.getName() + ". Class does not implement the logParser-Interface");
-
-                    }
-                }
-            }
+		    for (final String filename: parserDirFiles) {
+		    	if (filename.endsWith("LogalizerHandler.class")) continue;
+		    	final Pattern patternGetClassName = Pattern.compile(".*\\"+ File.separator +"([^\\"+ File.separator +"]+)\\.class");
+		    	final Matcher matcherClassName = patternGetClassName.matcher(filename);
+		    	matcherClassName.find();
+	            final String className = matcherClassName.group(1);
+	            final Class<?> tempClass = Class.forName(logParserPackage+"."+className);
+	            if (tempClass.isInterface()) {
+	                if (debug) System.out.println(tempClass.getName() + " is an Interface");
+	            } else {
+	                final Object theParser = tempClass.newInstance();
+	                if (theParser instanceof LogParser) {
+	                    final LogParser theLogParser = (LogParser) theParser;
+	                    //System.out.println(bla.getName() + " is a logParser");
+	                    logParsers.put(theLogParser.getParserType(), theParser);
+	                    
+	                    if (debug) System.out.println("Added " + theLogParser.getClass().getName() + " as " + theLogParser.getParserType() + " Parser.");
+	                }
+	                else {
+	                    //System.out.println(bla.getName() + " is not a logParser");
+	                    if (debug) System.out.println("Rejected " + tempClass.getName() + ". Class does not implement the logParser-Interface");
+	
+	                }
+	            }
+	        }
         } catch (final ClassNotFoundException e) {
             e.printStackTrace();
         } catch (final InstantiationException e) {

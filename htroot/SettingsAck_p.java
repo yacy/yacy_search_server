@@ -45,12 +45,12 @@ import de.anomic.http.httpdProxyHandler;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.kelondro.order.Digest;
-import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.tools.Formatter;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacySeedUploader;
@@ -559,8 +559,8 @@ public class SettingsAck_p {
             
             // everything is ok
             prop.put("info_crawler.clientTimeout",(crawlerTimeout==0) ? "0" :DateFormatter.formatInterval(crawlerTimeout));
-            prop.put("info_crawler.http.maxFileSize",(maxHttpSize==-1)? "-1":MemoryControl.bytesToString(maxHttpSize));
-            prop.put("info_crawler.ftp.maxFileSize", (maxFtpSize==-1) ? "-1":MemoryControl.bytesToString(maxFtpSize));
+            prop.put("info_crawler.http.maxFileSize",(maxHttpSize==-1)? "-1":Formatter.bytesToString(maxHttpSize));
+            prop.put("info_crawler.ftp.maxFileSize", (maxFtpSize==-1) ? "-1":Formatter.bytesToString(maxFtpSize));
             prop.put("info", "28");
             return prop;
         }

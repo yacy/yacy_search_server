@@ -150,12 +150,12 @@ import de.anomic.kelondro.table.CachedRecords;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.SetTools;
 import de.anomic.kelondro.util.Log;
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.parser.ParserException;
 import de.anomic.server.serverAbstractSwitch;
 import de.anomic.server.serverBusyThread;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDomains;
-import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverInstantBusyThread;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverProcessor;
@@ -165,7 +165,6 @@ import de.anomic.server.serverSemaphore;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.serverThread;
 import de.anomic.tools.crypt;
-import de.anomic.tools.nxTools;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNewsPool;
@@ -505,7 +504,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         final File notifierSource = new File(getRootPath(), getConfig(plasmaSwitchboardConstants.HTROOT_PATH, plasmaSwitchboardConstants.HTROOT_PATH_DEFAULT) + "/env/grafics/empty.gif");
         final File notifierDest = new File(getConfigPath(plasmaSwitchboardConstants.HTDOCS_PATH, plasmaSwitchboardConstants.HTDOCS_PATH_DEFAULT), "notifier.gif");
         try {
-            serverFileUtils.copy(notifierSource, notifierDest);
+            FileUtils.copy(notifierSource, notifierDest);
         } catch (final IOException e) {
         }
         
@@ -669,7 +668,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         } else {
             final File networkUnitDefinitionFile = (networkUnitDefinition.startsWith("/")) ? new File(networkUnitDefinition) : new File(getRootPath(), networkUnitDefinition);
             if (networkUnitDefinitionFile.exists()) {
-                initProps = serverFileUtils.loadHashMap(networkUnitDefinitionFile);
+                initProps = FileUtils.loadMap(networkUnitDefinitionFile);
                 setConfig(initProps);
             }
         }
@@ -680,7 +679,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         } else {
             final File networkGroupDefinitionFile = new File(getRootPath(), networkGroupDefinition);
             if (networkGroupDefinitionFile.exists()) {
-                initProps = serverFileUtils.loadHashMap(networkGroupDefinitionFile);
+                initProps = FileUtils.loadMap(networkGroupDefinitionFile);
                 setConfig(initProps);
             }
         }
@@ -2204,7 +2203,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
                     } else {
                         ssc++;
                         final byte[] content = HttpClient.wget(url.toString(), reqHeader, (int) getConfigLong("bootstrapLoadTimeout", 20000));
-                        seedList = nxTools.strings(content, "UTF-8");
+                        seedList = FileUtils.strings(content, "UTF-8");
                         enu = seedList.iterator();
                         lc = 0;
                         while (enu.hasNext()) {
@@ -2270,7 +2269,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             // sending request
             final httpRequestHeader reqHeader = new httpRequestHeader();
             reqHeader.put(httpRequestHeader.USER_AGENT, HTTPLoader.yacyUserAgent);
-            final HashMap<String, String> result = nxTools.table(HttpClient.wget(url.toString(), reqHeader, 10000), "UTF-8");
+            final HashMap<String, String> result = FileUtils.table(HttpClient.wget(url.toString(), reqHeader, 10000), "UTF-8");
             if (result == null) return new HashMap<String, String>();
             return result;
         } catch (final Exception e) {

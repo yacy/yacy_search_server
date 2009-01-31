@@ -57,8 +57,7 @@ import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.order.MergeIterator;
 import de.anomic.kelondro.order.Order;
 import de.anomic.kelondro.util.Log;
-import de.anomic.server.NamePrefixThreadFactory;
-import de.anomic.server.serverProcessor;
+import de.anomic.kelondro.util.NamePrefixThreadFactory;
 
 public class SplitTable implements ObjectIndex {
 
@@ -89,7 +88,12 @@ public class SplitTable implements ObjectIndex {
     public void init(final boolean resetOnFail) {
 
         // init the thread pool for the keeperOf executor service
-        this.executor = new ThreadPoolExecutor(serverProcessor.useCPU + 1, serverProcessor.useCPU + 1, 10, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(), new NamePrefixThreadFactory(tablename));
+        this.executor = new ThreadPoolExecutor(
+        		Runtime.getRuntime().availableProcessors() + 1, 
+        		Runtime.getRuntime().availableProcessors() + 1, 10, 
+        		TimeUnit.SECONDS, 
+        		new LinkedBlockingQueue<Runnable>(), 
+        		new NamePrefixThreadFactory(tablename));
         
         // initialized tables map
         this.tables = new HashMap<String, ObjectIndex>();
