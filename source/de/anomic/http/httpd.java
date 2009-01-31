@@ -899,7 +899,7 @@ public final class httpd implements serverHandler, Cloneable {
         }
 
         // parse data in memory
-        FileItemFactory factory = new DiskFileItemFactory();
+        FileItemFactory factory = new DiskFileItemFactory(1024 * 1024, new File(System.getProperty("java.io.tmpdir")));
         FileUpload upload = new FileUpload(factory);
         List<FileItem> items;
         try {
