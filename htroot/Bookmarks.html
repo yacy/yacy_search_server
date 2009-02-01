@@ -2,16 +2,23 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 	<head>
 		<title>YaCy '#[clientname]#': Bookmarks</title>
-		#%env/templates/metas.template%#
+		#%env/templates/metas.template%#		
 		<script src="/js/ajax.js" type="text/javascript"></script>
-		<script src="/js/Bookmarks.js" type="text/javascript"></script>
+		#(display)#
+		<script src="/js/Bookmarks.js" type="text/javascript"></script>		
 		<link rel="alternate" type="application/rss+xml" title="RSS" href="Bookmarks.rss" />
+		::
+		#(/display)#
 	</head>
 	<body id="Bookmarks" 
+		#(display)#
 		onload="treeMenu_init(document.getElementById('folder'), window.name)"
 		onunload="window.name = treeMenu_store(document.getElementById('folder'))"
+		::
+		#(/display)#
 	>
 
+#(display)#
 <div id="api">
 <script type="text/javascript">
 document.write("\<a href=\"Bookmarks.rss?" + window.location.search.substring(1) + "\"\>")
@@ -21,6 +28,8 @@ document.write("\<a href=\"Bookmarks.rss?" + window.location.search.substring(1)
 Click the API icon to load the RSS from the current selection.
 To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.</span>
 </div>
+::
+#(/display)#
 
 		#%env/templates/header.template%#
 		<div class="SubMenu">
