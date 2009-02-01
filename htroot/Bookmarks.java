@@ -362,23 +362,23 @@ public class Bookmarks {
        	while(it.hasNext()){
        		tag=it.next();
        		if ((!tag.getTagName().startsWith("/")) && (!tag.getTagName().equals(""))) {
-       			prop.putHTML(id+"_"+count+"_name", tag.getFriendlyName());
-       			prop.putHTML(id+"_"+count+"_tag", tag.getTagName());
-       			prop.put(id+"_"+count+"_num", tag.size());
+       			prop.putHTML("display_"+id+"_"+count+"_name", tag.getFriendlyName());
+       			prop.putHTML("display_"+id+"_"+count+"_tag", tag.getTagName());
+       			prop.put("display_"+id+"_"+count+"_num", tag.size());
        			if (opt){
        				if(tagName.equals(tag.getFriendlyName())){
-       					prop.put(id+"_"+count+"_selected", " selected=\"selected\"");
+       					prop.put("display_"+id+"_"+count+"_selected", " selected=\"selected\"");
        				} else {
-       					prop.put(id+"_"+count+"_selected", "");
+       					prop.put("display_"+id+"_"+count+"_selected", "");
        				}
        			} else {
        				// font-size is pseudo-rounded to 2 decimals
-       				prop.put(id+"_"+count+"_size", Math.round((1.1+Math.log(tag.size())/4)*100)/100.);
+       				prop.put("display_"+id+"_"+count+"_size", Math.round((1.1+Math.log(tag.size())/4)*100)/100.);
        			}
        			count++;
        		}
        	}
-       	prop.put(id, count);    	
+       	prop.put("display_"+id, count);    	
     }
     
     private static int recurseFolders(final Iterator<String> it, String root, int count, final boolean next, final String prev){
