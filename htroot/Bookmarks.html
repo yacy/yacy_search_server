@@ -23,10 +23,10 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
 </div>
 
 		#%env/templates/header.template%#
-		#(mode)#
-		<!-- SubMenu (mode=0) -->
 		<div class="SubMenu">
 			<h3>Bookmarks</h3>
+		#(mode)#
+		<!-- SubMenu (mode=0) -->
 			<ul class="SubMenu">
 				<li><a href="Bookmarks.html?login=true" class="MenuItemLink">Login</a></li>
 				<li><a href="Bookmarks.html?login=true&mode=add" class="MenuItemLink lock">Add Bookmark</a></li>
@@ -36,10 +36,7 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
 				<li><a href="Bookmarks.rss" class="MenuItemLink lock">Bookmarks (RSS)</a></li>
 			</ul>
 			<p/>
-		</div>
 		:: <!-- Submenu isAdmin (mode=1) -->
-		<div class="SubMenu">
-			<h3>Bookmarks</h3>
 			<ul class="SubMenu">
 				<li><a href="Bookmarks.html?mode=add" class="MenuItemLink lock">Add Bookmark</a></li>
 				<li><a href="Bookmarks.html?mode=importxml" class="MenuItemLink lock">Import Bookmarks</a></li>
@@ -48,7 +45,6 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
 				<li><a href="Bookmarks.rss" class="MenuItemLink lock">Bookmarks (RSS)</a></li>
 			</ul>
 			<p/>
-		</div>
 		:: <!-- add or edit Bookmark (mode=2) -->
 		<form action="Bookmarks.html" method="get">
 			<fieldset>
@@ -163,42 +159,10 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
 			</fieldset>
 		</form>
 		:: 
-		<!-- manage Bookmarks (mode=4) -->
-		<fieldset>
-				<legend>Manage Bookmarks</legend>
-		</fieldset>		
-		<table border="0" width="60%" cellpadding="2" cellspacing="1">
-			<colgroup>
-				<col width="60" span="2" />
-				<col width="10" />
-				<col width="80" />
-				<col width="180" />
-				<col />
-				<col width="10" />
-			</colgroup>
-			<tr class="TableHeader">
-				<th>Initiator</th>
-				<th>Profile</th>
-				<th>Depth</th>
-				<th>Modified Date</th>
-				<th>Anchor Name</th>
-				<th>URL</th>
-				<th>Delete</th>
-			</tr>
-			#{bookmarks}#
-			<!--<tr class="TableCell#(dark)#Light::Dark#(/dark)#">-->
-			<tr>
-				<td>#[public]#</td>
-				<td><a href="#[link]#">#[title]#</a></td>
-				<td></td>
-				<td></td>
-				<td></td>
-				<td></td>
-				<td></td>
-			</tr>
-			#{/bookmarks}#
-		</table>		
+		<!-- (mode=4) -->
 		#(/mode)#
+		</div>
+		#(display)#
 		<!-- show Folders -->
 		<div class="TagList">
 			<fieldset>
@@ -274,6 +238,8 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
                                  Bookmarks per page. 
 			</p>
 		</div>
+		::
+		#(/display)#
 		#%env/templates/footer.template%#
 	</body>
 </html>
