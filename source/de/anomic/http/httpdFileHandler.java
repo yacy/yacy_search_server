@@ -518,6 +518,8 @@ public final class httpdFileHandler {
                     e.getTargetException().toString() + ":" +
                     e.getTargetException().getMessage() +
                     "; java.awt.graphicsenv='" + System.getProperty("java.awt.graphicsenv","") + "'");
+                    e.printStackTrace();
+                    e.getTargetException().printStackTrace();
                     targetClass = null;
                 }
                 if (img == null) {
@@ -1025,6 +1027,7 @@ public final class httpdFileHandler {
         } catch (final Exception e) {     
             try {
                 // doing some errorhandling ...
+            	e.printStackTrace();
                 int httpStatusCode = 400; 
                 final String httpStatusText = null; 
                 final StringBuilder errorMessage = new StringBuilder(2000); 

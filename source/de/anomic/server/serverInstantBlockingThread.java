@@ -99,7 +99,6 @@ public class serverInstantBlockingThread<J extends serverProcessorJob> extends s
             e.printStackTrace();
             if ((targetException != null) && ((targetException.indexOf("heap space") > 0) || (targetException.indexOf("NullPointerException") > 0))) e.getTargetException().printStackTrace();
             Log.logSevere("BLOCKINGTHREAD", "Runtime Error in serverInstantThread.job, thread '" + this.getName() + "': " + e.getMessage() + "; target exception: " + targetException, e.getTargetException());
-            e.getTargetException().printStackTrace();
         } catch (final OutOfMemoryError e) {
             Log.logSevere("BLOCKINGTHREAD", "OutOfMemory Error in serverInstantThread.job, thread '" + this.getName() + "': " + e.getMessage());
             e.printStackTrace();

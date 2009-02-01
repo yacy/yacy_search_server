@@ -107,6 +107,7 @@ public final class serverInstantBusyThread extends serverAbstractBusyThread impl
         } catch (final InvocationTargetException e) {
             final String targetException = e.getTargetException().getMessage();
             e.printStackTrace();
+            e.getTargetException().printStackTrace();
             Log.logSevere("BUSYTHREAD", "Runtime Error in serverInstantThread.job, thread '" + this.getName() + "': " + e.getMessage() + "; target exception: " + targetException, e.getTargetException());
         } catch (final OutOfMemoryError e) {
             Log.logSevere("BUSYTHREAD", "OutOfMemory Error in serverInstantThread.job, thread '" + this.getName() + "': " + e.getMessage());
