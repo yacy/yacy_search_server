@@ -81,12 +81,11 @@ public class index {
         if (cds.equals("app")) contentdom = plasmaSearchQuery.CONTENTDOM_APP;
         
         // we create empty entries for template strings
-        String promoteSearchPageGreeting = env.getConfig("promoteSearchPageGreeting", "");
-        if (env.getConfigBool("promoteSearchPageGreeting.useNetworkName", false)) promoteSearchPageGreeting = env.getConfig("network.unit.description", "");
-        if (promoteSearchPageGreeting.length() == 0) promoteSearchPageGreeting = "P2P Web Search";
-        prop.putHTML("promoteSearchPageGreeting", promoteSearchPageGreeting);
-        prop.put("promoteSearchPageGreeting.homepage", sb.getConfig("promoteSearchPageGreeting.homepage", ""));
-        prop.put("promoteSearchPageGreeting.largeImage", sb.getConfig("promoteSearchPageGreeting.largeImage", ""));
+        String promoteSearchPageGreeting = env.getConfig(plasmaSwitchboardConstants.GREETING, "");
+        if (env.getConfigBool(plasmaSwitchboardConstants.GREETING_NETWORK_NAME, false)) promoteSearchPageGreeting = env.getConfig("network.unit.description", "");
+        prop.putHTML(plasmaSwitchboardConstants.GREETING, promoteSearchPageGreeting);
+        prop.put(plasmaSwitchboardConstants.GREETING_HOMEPAGE, sb.getConfig(plasmaSwitchboardConstants.GREETING_HOMEPAGE, ""));
+        prop.put(plasmaSwitchboardConstants.GREETING_LARGE_IMAGE, sb.getConfig(plasmaSwitchboardConstants.GREETING_LARGE_IMAGE, ""));
         prop.putHTML("former", former);
         prop.put("num-results", "0");
         prop.put("excluded", "0");

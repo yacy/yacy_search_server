@@ -525,4 +525,13 @@ public final class plasmaSwitchboardConstants {
     public static final String NETWORK_WHITELIST = "network.unit.access.whitelist";
     public static final String NETWORK_BLACKLIST = "network.unit.access.blacklist";
     
+    /**
+     * appearance
+     */
+    public static final String GREETING              = "promoteSearchPageGreeting";
+    public static final String GREETING_NETWORK_NAME = "promoteSearchPageGreeting.useNetworkName";
+    public static final String GREETING_HOMEPAGE     = "promoteSearchPageGreeting.homepage";
+    public static final String GREETING_LARGE_IMAGE  = "promoteSearchPageGreeting.largeImage";
+    public static final String GREETING_SMALL_IMAGE  = "promoteSearchPageGreeting.smallImage";
+    
 }

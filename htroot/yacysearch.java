@@ -71,9 +71,8 @@ public class yacysearch {
         int display = (post == null) ? 0 : post.getInt("display", 0);
         if ((display == 1) && (!authenticated)) display = 0;
         final int input = (post == null) ? 2 : post.getInt("input", 2);
-        String promoteSearchPageGreeting = env.getConfig("promoteSearchPageGreeting", "");
-        if (env.getConfigBool("promoteSearchPageGreeting.useNetworkName", false)) promoteSearchPageGreeting = env.getConfig("network.unit.description", "");
-        if (promoteSearchPageGreeting.length() == 0) promoteSearchPageGreeting = "P2P Web Search";
+        String promoteSearchPageGreeting = env.getConfig(plasmaSwitchboardConstants.GREETING, "");
+        if (env.getConfigBool(plasmaSwitchboardConstants.GREETING_NETWORK_NAME, false)) promoteSearchPageGreeting = env.getConfig("network.unit.description", "");
         final String client = header.get(httpRequestHeader.CONNECTION_PROP_CLIENTIP); // the search client who initiated the search
         
         // get query
@@ -83,8 +82,8 @@ public class yacysearch {
         
         //final boolean rss = (post == null) ? false : post.get("rss", "false").equals("true");
         prop.put("input_promoteSearchPageGreeting", promoteSearchPageGreeting);
-        prop.put("input_promoteSearchPageGreeting.homepage", sb.getConfig("promoteSearchPageGreeting.homepage", ""));
-        prop.put("input_promoteSearchPageGreeting.smallImage", sb.getConfig("promoteSearchPageGreeting.smallImage", ""));
+        prop.put("input_promoteSearchPageGreeting.homepage", sb.getConfig(plasmaSwitchboardConstants.GREETING_HOMEPAGE, ""));
+        prop.put("input_promoteSearchPageGreeting.smallImage", sb.getConfig(plasmaSwitchboardConstants.GREETING_SMALL_IMAGE, ""));
         if ((post == null) || (env == null) || (querystring.length() == 0) || (!searchAllowed)) {
             // we create empty entries for template strings
             prop.put("searchagain", "0");

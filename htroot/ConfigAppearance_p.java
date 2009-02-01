@@ -40,6 +40,7 @@ import de.anomic.http.HttpClient;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyURL;
@@ -115,16 +116,16 @@ public class ConfigAppearance_p {
                 }
             }
             if (post.containsKey("searchpage_set")) {
-                sb.setConfig("promoteSearchPageGreeting", post.get("promoteSearchPageGreeting", ""));
-                sb.setConfig("promoteSearchPageGreeting.homepage", post.get("promoteSearchPageGreeting.homepage", ""));
-                sb.setConfig("promoteSearchPageGreeting.largeImage", post.get("promoteSearchPageGreeting.largeImage", ""));
-                sb.setConfig("promoteSearchPageGreeting.smallImage", post.get("promoteSearchPageGreeting.smallImage", ""));
+                sb.setConfig(plasmaSwitchboardConstants.GREETING, post.get(plasmaSwitchboardConstants.GREETING, ""));
+                sb.setConfig(plasmaSwitchboardConstants.GREETING_HOMEPAGE, post.get(plasmaSwitchboardConstants.GREETING_HOMEPAGE, ""));
+                sb.setConfig(plasmaSwitchboardConstants.GREETING_LARGE_IMAGE, post.get(plasmaSwitchboardConstants.GREETING_LARGE_IMAGE, ""));
+                sb.setConfig(plasmaSwitchboardConstants.GREETING_SMALL_IMAGE, post.get(plasmaSwitchboardConstants.GREETING_SMALL_IMAGE, ""));
             }
             if (post.containsKey("searchpage_default")) {
-                sb.setConfig("promoteSearchPageGreeting", "P2P Web Search");
-                sb.setConfig("promoteSearchPageGreeting.homepage", "http://yacy.net");
-                sb.setConfig("promoteSearchPageGreeting.largeImage", "/env/grafics/YaCyLogo_120ppi.png");
-                sb.setConfig("promoteSearchPageGreeting.smallImage", "/env/grafics/YaCyLogo_60ppi.png");
+                sb.setConfig(plasmaSwitchboardConstants.GREETING, "P2P Web Search");
+                sb.setConfig(plasmaSwitchboardConstants.GREETING_HOMEPAGE, "http://yacy.net");
+                sb.setConfig(plasmaSwitchboardConstants.GREETING_LARGE_IMAGE, "/env/grafics/YaCyLogo_120ppi.png");
+                sb.setConfig(plasmaSwitchboardConstants.GREETING_SMALL_IMAGE, "/env/grafics/YaCyLogo_60ppi.png");
             }
             
         }
@@ -143,10 +144,10 @@ public class ConfigAppearance_p {
 
         prop.putHTML("currentskin", env.getConfig("currentSkin", "default"));
         
-        prop.putHTML("promoteSearchPageGreeting", sb.getConfig("promoteSearchPageGreeting", ""));
-        prop.putHTML("promoteSearchPageGreeting.homepage", sb.getConfig("promoteSearchPageGreeting.homepage", ""));
-        prop.putHTML("promoteSearchPageGreeting.largeImage", sb.getConfig("promoteSearchPageGreeting.largeImage", ""));
-        prop.putHTML("promoteSearchPageGreeting.smallImage", sb.getConfig("promoteSearchPageGreeting.smallImage", ""));
+        prop.putHTML(plasmaSwitchboardConstants.GREETING, sb.getConfig(plasmaSwitchboardConstants.GREETING, ""));
+        prop.putHTML(plasmaSwitchboardConstants.GREETING_HOMEPAGE, sb.getConfig(plasmaSwitchboardConstants.GREETING_HOMEPAGE, ""));
+        prop.putHTML(plasmaSwitchboardConstants.GREETING_LARGE_IMAGE, sb.getConfig(plasmaSwitchboardConstants.GREETING_LARGE_IMAGE, ""));
+        prop.putHTML(plasmaSwitchboardConstants.GREETING_SMALL_IMAGE, sb.getConfig(plasmaSwitchboardConstants.GREETING_SMALL_IMAGE, ""));
         String myaddress = sb.webIndex.seedDB.mySeed().getPublicAddress();
         if (myaddress == null) myaddress = "localhost:" + sb.getConfig("port", "8080");
         prop.put("myaddress", myaddress);
