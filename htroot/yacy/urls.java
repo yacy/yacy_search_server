@@ -89,9 +89,9 @@ public class urls {
                 
                 // create RSS entry
                 prop.put("item_" + c + "_title", "");
-                prop.putHTML("item_" + c + "_link", entry.url().toNormalform(true, false));
-                prop.putHTML("item_" + c + "_referrer", (referrer == null) ? "" : referrer.toNormalform(true, false));
-                prop.putHTML("item_" + c + "_description", entry.name());
+                prop.putXML("item_" + c + "_link", entry.url().toNormalform(true, false));
+                prop.putXML("item_" + c + "_referrer", (referrer == null) ? "" : referrer.toNormalform(true, false));
+                prop.putXML("item_" + c + "_description", entry.name());
                 prop.put("item_" + c + "_author", "");
                 prop.put("item_" + c + "_pubDate", DateFormatter.formatShortSecond(entry.appdate()));
                 prop.put("item_" + c + "_guid", entry.url().hash());
@@ -99,7 +99,7 @@ public class urls {
                 maxCount--;
             }
             prop.put("item", c);
-            prop.putHTML("response", "ok");
+            prop.putXML("response", "ok");
         }
         
         if (post.get("call", "").equals("urlhashlist")) {
@@ -119,16 +119,16 @@ public class urls {
                 // create RSS entry
                 comp = entry.comp();
                 prop.put("item_" + c + "_title", comp.dc_title());
-                prop.putHTML("item_" + c + "_link", comp.url().toNormalform(true, false));
-                prop.putHTML("item_" + c + "_referrer", (referrer == null) ? "" : referrer.toNormalform(true, false));
-                prop.putHTML("item_" + c + "_description", comp.dc_title());
+                prop.putXML("item_" + c + "_link", comp.url().toNormalform(true, false));
+                prop.putXML("item_" + c + "_referrer", (referrer == null) ? "" : referrer.toNormalform(true, false));
+                prop.putXML("item_" + c + "_description", comp.dc_title());
                 prop.put("item_" + c + "_author", comp.dc_creator());
                 prop.put("item_" + c + "_pubDate", DateFormatter.formatShortSecond(entry.moddate()));
                 prop.put("item_" + c + "_guid", entry.hash());
                 c++;
             }
             prop.put("item", c);
-            prop.putHTML("response", "ok");
+            prop.putXML("response", "ok");
         }
 
         // return rewrite properties
