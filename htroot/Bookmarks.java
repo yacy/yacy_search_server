@@ -71,6 +71,7 @@ public class Bookmarks {
 
     	int max_count = 10;
     	int start=0;
+    	int display = 0;
     	String tagName = "";
     	String username="";
     	
@@ -124,9 +125,11 @@ public class Bookmarks {
     			if(mode.equals("add")){
     				prop.put("mode", "2");
     				prop.put("display", "1");
+    				display = 1;
     			}else if(mode.equals("importxml")){
     				prop.put("mode", "3");
     				prop.put("display", "1");
+    				display = 1;
     			}
     		}else if(post.containsKey("add")){ //add an Entry
     			final String url=post.get("url");
@@ -166,6 +169,7 @@ public class Bookmarks {
     			final String urlHash=post.get("edit");
     			prop.put("mode", "2");
     			prop.put("display", "1");
+    			display = 1;
     			if (urlHash.length() == 0) {
     				prop.put("mode_edit", "0"); // create mode
     				prop.putHTML("mode_title", post.get("title"));
@@ -251,101 +255,101 @@ public class Bookmarks {
     		}
     	} // END if(post != null)
     	
-    	
-    	//-----------------------
-    	// create tag list
-    	//-----------------------
-    	printTagList("taglist", tagName, SORT_SIZE, 25, false);
-    	printTagList("optlist", tagName, SORT_ALPHA, SHOW_ALL, true);
-    	       	
-    	//-----------------------
-    	// create bookmark list
-    	//-----------------------
-    	int count=0;
-        Iterator<String> it = null;    	
-       	bookmarksDB.Bookmark bookmark;
-       	Set<String> tags;
-       	Iterator<String> tagsIt;
-       	int tagCount;
-       	
-       	prop.put("display_num-bookmarks", sb.bookmarksDB.bookmarksSize());
-       	
-       	count=0;
-       	if(!tagName.equals("")){
-       		prop.put("display_selected", "");
-       		it=sb.bookmarksDB.getBookmarksIterator(tagName, isAdmin);
-       	}else{
-       		prop.put("display_selected", " selected=\"selected\"");
-       		it=sb.bookmarksDB.getBookmarksIterator(isAdmin);
-       	}
-       	
-       	//skip the first entries (display next page)
-       	count=0;
-       	while(count < start && it.hasNext()){
-       		it.next();
-       		count++;
-       	}
-       	
-       	count=0;
-       	while(count<max_count && it.hasNext()){
-       		bookmark=sb.bookmarksDB.getBookmark(it.next());
-       		if(bookmark!=null){
-       			if(bookmark.getFeed() && isAdmin)
-       				prop.put("display_bookmarks_"+count+"_link", "/FeedReader_p.html?url="+bookmark.getUrl());
-       			else
-       				prop.put("display_bookmarks_"+count+"_link",bookmark.getUrl());
-       			prop.putHTML("display_bookmarks_"+count+"_title", bookmark.getTitle());
-       			prop.putHTML("display_bookmarks_"+count+"_description", bookmark.getDescription());
-       			prop.put("display_bookmarks_"+count+"_date", DateFormatter.formatISO8601(new Date(bookmark.getTimeStamp())));
-       			prop.put("display_bookmarks_"+count+"_rfc822date", DateFormatter.formatRFC1123(new Date(bookmark.getTimeStamp())));
-       			prop.put("display_bookmarks_"+count+"_public", (bookmark.getPublic() ? "1" : "0"));
-            
-       			//List Tags.
-       			tags=bookmark.getTags();
-       			tagsIt=tags.iterator();
-       			tagCount=0;
-       			while (tagsIt.hasNext()) {            	
-       				final String tname = tagsIt.next();
-       				if ((!tname.startsWith("/")) && (!tname.equals(""))) {
-       					prop.putHTML("display_bookmarks_"+count+"_tags_"+tagCount+"_tag", tname);
-       					tagCount++;
-       				}
-       			}
-       			prop.put("display_bookmarks_"+count+"_tags", tagCount);
-       			prop.put("display_bookmarks_"+count+"_hash", bookmark.getUrlHash());
-       			count++;
-       		}
-       	}
-       	prop.putHTML("display_tag", tagName);
-       	prop.put("display_start", start);
-       	if(it.hasNext()){
-       		prop.put("display_next-page", "1");
-       		prop.put("display_next-page_start", start+max_count);
-       		prop.putHTML("display_next-page_tag", tagName);
-       		prop.put("display_next-page_num", max_count);
-       	}
-       	if(start >= max_count){
-       		start=start-max_count;
-       		if(start <0){
-       			start=0;
-       		}
-       		prop.put("display_prev-page", "1");
-       		prop.put("display_prev-page_start", start);
-       		prop.putHTML("display_prev-page_tag", tagName);
-       		prop.put("display_prev-page_num", max_count);
-       	}
-       	prop.put("display_bookmarks", count);
-    
-    
-    	//-----------------------
-    	// create folder list
-    	//-----------------------
-       	
-       	count = 0;
-       	count = recurseFolders(sb.bookmarksDB.getFolderList(isAdmin),"/",0,true,"");
-       	prop.put("display_folderlist", count);
-       	
-    
+    	if (display == 0) {
+    	    	
+	    	//-----------------------
+	    	// create tag list
+	    	//-----------------------
+	    	printTagList("taglist", tagName, SORT_SIZE, 25, false);
+	    	printTagList("optlist", tagName, SORT_ALPHA, SHOW_ALL, true);
+	    	       	
+	    	//-----------------------
+	    	// create bookmark list
+	    	//-----------------------
+	    	int count=0;
+	        Iterator<String> it = null;    	
+	       	bookmarksDB.Bookmark bookmark;
+	       	Set<String> tags;
+	       	Iterator<String> tagsIt;
+	       	int tagCount;
+	       	
+	       	prop.put("display_num-bookmarks", sb.bookmarksDB.bookmarksSize());
+	       	
+	       	count=0;
+	       	if(!tagName.equals("")){
+	       		prop.put("display_selected", "");
+	       		it=sb.bookmarksDB.getBookmarksIterator(tagName, isAdmin);
+	       	}else{
+	       		prop.put("display_selected", " selected=\"selected\"");
+	       		it=sb.bookmarksDB.getBookmarksIterator(isAdmin);
+	       	}
+	       	
+	       	//skip the first entries (display next page)
+	       	count=0;
+	       	while(count < start && it.hasNext()){
+	       		it.next();
+	       		count++;
+	       	}
+	       	
+	       	count=0;
+	       	while(count<max_count && it.hasNext()){
+	       		bookmark=sb.bookmarksDB.getBookmark(it.next());
+	       		if(bookmark!=null){
+	       			if(bookmark.getFeed() && isAdmin)
+	       				prop.put("display_bookmarks_"+count+"_link", "/FeedReader_p.html?url="+bookmark.getUrl());
+	       			else
+	       				prop.put("display_bookmarks_"+count+"_link",bookmark.getUrl());
+	       			prop.putHTML("display_bookmarks_"+count+"_title", bookmark.getTitle());
+	       			prop.putHTML("display_bookmarks_"+count+"_description", bookmark.getDescription());
+	       			prop.put("display_bookmarks_"+count+"_date", DateFormatter.formatISO8601(new Date(bookmark.getTimeStamp())));
+	       			prop.put("display_bookmarks_"+count+"_rfc822date", DateFormatter.formatRFC1123(new Date(bookmark.getTimeStamp())));
+	       			prop.put("display_bookmarks_"+count+"_public", (bookmark.getPublic() ? "1" : "0"));
+	            
+	       			//List Tags.
+	       			tags=bookmark.getTags();
+	       			tagsIt=tags.iterator();
+	       			tagCount=0;
+	       			while (tagsIt.hasNext()) {            	
+	       				final String tname = tagsIt.next();
+	       				if ((!tname.startsWith("/")) && (!tname.equals(""))) {
+	       					prop.putHTML("display_bookmarks_"+count+"_tags_"+tagCount+"_tag", tname);
+	       					tagCount++;
+	       				}
+	       			}
+	       			prop.put("display_bookmarks_"+count+"_tags", tagCount);
+	       			prop.put("display_bookmarks_"+count+"_hash", bookmark.getUrlHash());
+	       			count++;
+	       		}
+	       	}
+	       	prop.putHTML("display_tag", tagName);
+	       	prop.put("display_start", start);
+	       	if(it.hasNext()){
+	       		prop.put("display_next-page", "1");
+	       		prop.put("display_next-page_start", start+max_count);
+	       		prop.putHTML("display_next-page_tag", tagName);
+	       		prop.put("display_next-page_num", max_count);
+	       	}
+	       	if(start >= max_count){
+	       		start=start-max_count;
+	       		if(start <0){
+	       			start=0;
+	       		}
+	       		prop.put("display_prev-page", "1");
+	       		prop.put("display_prev-page_start", start);
+	       		prop.putHTML("display_prev-page_tag", tagName);
+	       		prop.put("display_prev-page_num", max_count);
+	       	}
+	       	prop.put("display_bookmarks", count);
+	    
+	    
+	    	//-----------------------
+	    	// create folder list
+	    	//-----------------------
+	       	
+	       	count = 0;
+	       	count = recurseFolders(sb.bookmarksDB.getFolderList(isAdmin),"/",0,true,"");
+	       	prop.put("display_folderlist", count);
+    	}
        	return prop;    // return from serverObjects respond()
     }    
     
