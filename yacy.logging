@@ -38,12 +38,12 @@ java.util.logging.FileHandler.limit = 1048576
 java.util.logging.FileHandler.count = 20
 java.util.logging.FileHandler.pattern = DATA/LOG/yacy%u%g.log
 java.util.logging.FileHandler.level = ALL
-java.util.logging.FileHandler.formatter=de.anomic.server.logging.serverSimpleLogFormatter
+java.util.logging.FileHandler.formatter=de.anomic.yacy.logging.SimpleLogFormatter
 java.util.logging.FileHandler.encoding=UTF-8
 
 # Properties for the GuiHandler
 de.anomic.yacy.logging.GuiHandler.level = ALL
-de.anomic.yacy.logging.GuiHandler.formatter=de.anomic.server.logging.serverSimpleLogFormatter
+de.anomic.yacy.logging.GuiHandler.formatter=de.anomic.yacy.logging.SimpleLogFormatter
 de.anomic.yacy.logging.GuiHandler.size = 400
 
 # Properties for the ConsoleOutErrHandler
@@ -51,7 +51,7 @@ de.anomic.yacy.logging.ConsoleOutErrHandler.level = ALL
 de.anomic.yacy.logging.ConsoleOutErrHandler.levelStdOut = ALL
 de.anomic.yacy.logging.ConsoleOutErrHandler.levelSplit = WARNING
 de.anomic.yacy.logging.ConsoleOutErrHandler.levelStdErr = ALL
-de.anomic.yacy.logging.ConsoleOutErrHandler.formatter=de.anomic.server.logging.serverSimpleLogFormatter
+de.anomic.yacy.logging.ConsoleOutErrHandler.formatter=de.anomic.yacy.logging.SimpleLogFormatter
 #de.anomic.yacy.logging.ConsoleOutErrHandler.ignoreCtrlChr=true
 
 # Properties for the proxy access logger
