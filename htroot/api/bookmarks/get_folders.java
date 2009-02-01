@@ -59,8 +59,9 @@ public class get_folders {
     		if (foldername.length == n+1) {
 	    		prop.put("folders_"+count+"_foldername", foldername[n]);
 	    		prop.put("folders_"+count+"_expanded", "false");
-	    		prop.put("folders_"+count+"_classes", "folder");
+	    		prop.put("folders_"+count+"_type", "folder");
 	    		prop.put("folders_"+count+"_hash", folder);				//TODO: switch from pathString to folderHash
+	    		prop.put("folders_"+count+"_url", "");					//TODO: insert folder url
 	    		prop.put("folders_"+count+"_hasChildren", "true");		//TODO: determine if folder has children
 	    		prop.put("folders_"+count+"_comma", ",");
 	    		count++;
@@ -72,6 +73,7 @@ public class get_folders {
     	bookmarksDB.Bookmark bm;
     	while (it.hasNext()) {
     		bm = sb.bookmarksDB.getBookmark(it.next());
+    		// TODO: get rid of bmtype
     		if (post.containsKey("bmtype")) {    			 
     			if (post.get("bmtype").equals("title")) {
     				prop.put("folders_"+count+"_foldername", bm.getTitle());
@@ -82,7 +84,8 @@ public class get_folders {
     			}
     		}    		
     		prop.put("folders_"+count+"_expanded", "false");
-    		prop.put("folders_"+count+"_classes", "file");
+    		prop.put("folders_"+count+"_url", bm.getUrl());
+    		prop.put("folders_"+count+"_type", "file");
     		prop.put("folders_"+count+"_hash", bm.getUrlHash());
     		prop.put("folders_"+count+"_hasChildren", "false");
     		prop.put("folders_"+count+"_comma", ",");

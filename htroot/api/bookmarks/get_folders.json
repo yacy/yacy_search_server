@@ -2,7 +2,7 @@
 #{folders}#{
 "text": "#[foldername]#",
 "expanded": #[expanded]#,
-"classes": "#[classes]#",
+"classes": "#[type]#",
 "id": "#[hash]#",
 "hasChildren": #[hasChildren]#
 }#[comma]##{/folders}#
