@@ -2015,8 +2015,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             // getting distribution configuration values
             final boolean gzipBody = getConfig(plasmaSwitchboardConstants.INDEX_DIST_GZIP_BODY, "false").equalsIgnoreCase("true");
             final int timeout = (int)getConfigLong(plasmaSwitchboardConstants.INDEX_DIST_TIMEOUT, 60000);
-            final int retries = 0;
-
+            
             // starting up multiple DHT transfer threads
             yacySeed seed;
             long firstdist, lastdist;
@@ -2034,7 +2033,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
                         firstdist = yacySeed.dhtDistance(dhtChunk.firstContainer().getWordHash(), seed);
                         lastdist = yacySeed.dhtDistance(dhtChunk.lastContainer().getWordHash(), seed);
                         if (log != null) log.logInfo("Selected DHT target peer " + seed.getName() + ":" + seed.hash + ", distance2first = " + firstdist + ", distance2last = " + lastdist);
-                        final plasmaDHTTransfer t = new plasmaDHTTransfer(log, webIndex.seedDB, webIndex.peerActions, seed, dhtChunk, gzipBody, timeout, retries);
+                        final plasmaDHTTransfer t = new plasmaDHTTransfer(log, webIndex.seedDB, webIndex.peerActions, seed, dhtChunk, gzipBody, timeout);
                         t.start();
                         transfer.add(t);
                     } else {
