@@ -77,20 +77,20 @@ public class yacydoc {
         }
         final indexURLReference le = ((entry.referrerHash() == null) || (entry.referrerHash().length() != yacySeedDB.commonHashLength)) ? null : sb.webIndex.getURL(entry.referrerHash(), null, 0);
         
-        prop.putHTML("dc_title", comp.dc_title());
-        prop.putHTML("dc_creator", comp.dc_creator());
-        prop.putHTML("dc_description", "");
-        prop.putHTML("dc_subject", comp.dc_subject());
-        prop.putHTML("dc_publisher", comp.url().toNormalform(false, true));
-        prop.putHTML("dc_contributor", "");
-        prop.putHTML("dc_date", entry.moddate().toString());
+        prop.putXML("dc_title", comp.dc_title());
+        prop.putXML("dc_creator", comp.dc_creator());
+        prop.putXML("dc_description", "");
+        prop.putXML("dc_subject", comp.dc_subject());
+        prop.putXML("dc_publisher", comp.url().toNormalform(false, true));
+        prop.putXML("dc_contributor", "");
+        prop.putXML("dc_date", entry.moddate().toString());
         prop.put("dc_type", entry.doctype());
-        prop.putHTML("dc_identifier", urlhash);
-        prop.putHTML("dc_language", entry.language());
+        prop.putXML("dc_identifier", urlhash);
+        prop.putXML("dc_language", entry.language());
 
-        prop.putHTML("yacy_loaddate", entry.loaddate().toString());
-        prop.putHTML("yacy_referrer_hash", (le == null) ? "" : le.hash());
-        prop.putHTML("yacy_referrer_url", (le == null) ? "" : le.comp().url().toNormalform(false, true));
+        prop.putXML("yacy_loaddate", entry.loaddate().toString());
+        prop.putXML("yacy_referrer_hash", (le == null) ? "" : le.hash());
+        prop.putXML("yacy_referrer_url", (le == null) ? "" : le.comp().url().toNormalform(false, true));
         prop.put("yacy_size", entry.size());
         prop.put("yacy_words",entry.wordCount());
         
