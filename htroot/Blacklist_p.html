@@ -116,16 +116,38 @@
           <input type="submit" />
           </div>
       </form>
+
+      <form name ="selectRange" action="Blacklist_p.html" method="post">
+          <input type="hidden" name="currentBlacklist" value="#[currentBlacklist]#" />
+          <input type="hidden" name="action" value="selectRange" />
+          <p>Show entries:
+          <select name="offset" size="1" onChange="document.selectRange.submit();">
+                #{subListOffset}#
+                <option value="#[value]#" #(selected)#::selected="selected"#(/selected)#>#[fvalue]# - #[tvalue]#</option>
+                #{/subListOffset}#
+          </select>
+          &nbsp;
+          Entries per page:
+          <select name="size" size="1" onChange="document.selectRange.submit();">
+                #{subListSize}#
+                <option value="#[value]#" #(selected)#::selected="selected"#(/selected)#>#[text]#</option>
+                #{/subListSize}#
+          </select>
+          &nbsp;
+          <input type="submit" value="Go" />
+          </p>
+      </form>
+
       ::
       <p>Edit existing pattern(s):</p>
-      <form action="Blacklist_p.html" method="post" enctype="multipart/form-data">
+      <form name="editBlacklistEntry" action="Blacklist_p.html" method="post" enctype="multipart/form-data">
         <div>
           <input type="hidden" name="currentBlacklist" value="#[currentBlacklist]#" />
+          <input type="hidden" name="action" value="editBlacklistEntry" />
           #{editList}#
           <input type="text" name="editedBlacklistEntry.#[count]#" size="50" value="#[item]#"/>
           <input type="hidden" name="selectedBlacklistEntry.#[count]#" value="#[item]#"/>
           #{/editList}#
-          <input type="hidden" name="action" value="editBlacklistEntry" />
           <br /><br />
           <input type="submit" value="Save URL pattern(s)" />
         </div>

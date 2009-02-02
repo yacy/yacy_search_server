@@ -347,6 +347,8 @@ public class Blacklist_p {
                         prop.put(DISABLED + EDIT + "editList", selectedEntries.length);
                     }
                 }
+            } else if (action.equals("selectRange")) {
+                blacklistToUse = post.get("currentBlacklist");
             }
 
         }
@@ -367,7 +369,22 @@ public class Blacklist_p {
             
             // display them
             boolean dark = true;
-            for (int j=0;j<sortedlist.length;++j){
+            int from = 0;
+            int size = 50;
+            int to = sortedlist.length;
+            if (post != null) {
+                from = post.getInt("offset", 0);
+                size = post.getInt("size", 50);
+                to = from + size;
+            }
+            if (from > sortedlist.length || from < 0) {
+                from = 0;
+            }
+            if (to > sortedlist.length || size < 1) {
+                to = sortedlist.length;
+            }
+
+            for (int j = from; j < to; ++j){
                 final String nextEntry = sortedlist[j];
                 
                 if (nextEntry.length() == 0) continue;
@@ -379,6 +396,43 @@ public class Blacklist_p {
                 entryCount++;
             }
             prop.put(DISABLED + EDIT + "Itemlist", entryCount);
+
+            // create selection of sublist
+            entryCount = 0;
+            int end = -1;
+            if (sortedlist.length > 0) {
+                while (end < sortedlist.length) {
+                    prop.put(DISABLED + EDIT + "subListOffset_" + entryCount + "_value", (entryCount * to));
+                    end = (entryCount + 1) * to;
+                    if (end > sortedlist.length) {
+                        end = sortedlist.length;
+                    }
+                    prop.put(DISABLED + EDIT + "subListOffset_" + entryCount + "_fvalue", (entryCount * to) + 1);
+                    prop.put(DISABLED + EDIT + "subListOffset_" + entryCount + "_tvalue", end);
+                    entryCount++;
+                }
+            } else {
+                prop.put(DISABLED + EDIT + "subListOffset_0_value", 0);
+                prop.put(DISABLED + EDIT + "subListOffset_0_fvalue", 0);
+                prop.put(DISABLED + EDIT + "subListOffset_0_tvalue", 0);
+                entryCount++;
+            }
+            prop.put(DISABLED + EDIT + "subListOffset", entryCount);
+
+            // create selection of list size
+            int[] sizes = {10,25,50,100,250,-1};
+            for (int i = 0; i < sizes.length; i++) {
+                prop.put(DISABLED + EDIT + "subListSize_" + i + "_value", sizes[i]);
+                if (sizes[i] == -1) {
+                    prop.put(DISABLED + EDIT + "subListSize_" + i + "_text", "all");
+                } else {
+                    prop.put(DISABLED + EDIT + "subListSize_" + i + "_text", sizes[i]);
+                }
+                if (sizes[i] == size) {
+                    prop.put(DISABLED + EDIT + "subListSize_" + i + "_selected", 1);
+                }
+            }
+            prop.put(DISABLED + EDIT + "subListSize", sizes.length);
         }
         
         // List BlackLists
