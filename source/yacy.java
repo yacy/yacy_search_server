@@ -186,7 +186,7 @@ public final class yacy {
 			f = new File(homePath, "DATA/LOG/");
             mkdirsIfNeseccary(f);
 			f = new File(homePath, "DATA/LOG/yacy.logging");
-			if (!f.exists()) try {
+			/*if (!f.exists())*/ try {
 			    FileUtils.copy(new File(homePath, "yacy.logging"), f);
             } catch (final IOException e){
                 System.out.println("could not copy yacy.logging");
