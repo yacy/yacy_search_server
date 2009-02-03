@@ -369,22 +369,22 @@ public class Blacklist_p {
             
             // display them
             boolean dark = true;
-            int from = 0;
+            int offset = 0;
             int size = 50;
             int to = sortedlist.length;
             if (post != null) {
-                from = post.getInt("offset", 0);
+                offset = post.getInt("offset", 0);
                 size = post.getInt("size", 50);
-                to = from + size;
+                to = offset + size;
             }
-            if (from > sortedlist.length || from < 0) {
-                from = 0;
+            if (offset > sortedlist.length || offset < 0) {
+                offset = 0;
             }
             if (to > sortedlist.length || size < 1) {
                 to = sortedlist.length;
             }
 
-            for (int j = from; j < to; ++j){
+            for (int j = offset; j < to; ++j){
                 final String nextEntry = sortedlist[j];
                 
                 if (nextEntry.length() == 0) continue;
@@ -400,15 +400,20 @@ public class Blacklist_p {
             // create selection of sublist
             entryCount = 0;
             int end = -1;
+            int start = -1;
             if (sortedlist.length > 0) {
                 while (end < sortedlist.length) {
-                    prop.put(DISABLED + EDIT + "subListOffset_" + entryCount + "_value", (entryCount * to));
-                    end = (entryCount + 1) * to;
+                    start = entryCount * size;
+                    end = (entryCount + 1) * size;
+                    prop.put(DISABLED + EDIT + "subListOffset_" + entryCount + "_value", start);
+                    prop.put(DISABLED + EDIT + "subListOffset_" + entryCount + "_fvalue", start + 1);
                     if (end > sortedlist.length) {
                         end = sortedlist.length;
                     }
-                    prop.put(DISABLED + EDIT + "subListOffset_" + entryCount + "_fvalue", (entryCount * to) + 1);
                     prop.put(DISABLED + EDIT + "subListOffset_" + entryCount + "_tvalue", end);
+                    if (start == offset) {
+                        prop.put(DISABLED + EDIT + "subListOffset_" + entryCount + "_selected", 1);
+                    }
                     entryCount++;
                 }
             } else {
