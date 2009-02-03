@@ -128,6 +128,19 @@ public class ConfigAppearance_p {
                 sb.setConfig(plasmaSwitchboardConstants.GREETING_SMALL_IMAGE, "/env/grafics/YaCyLogo_60ppi.png");
             }
             
+            if (post.containsKey("popup")) {
+                String popup = post.get("popup", "status");
+                if (popup.equals("front")) {
+                    sb.setConfig(plasmaSwitchboardConstants.BROWSER_POP_UP_PAGE, "index.html?display=2");
+                } else if (popup.equals("search")) {
+                    sb.setConfig(plasmaSwitchboardConstants.BROWSER_POP_UP_PAGE, "yacysearch.html?display=2");
+                } else if (popup.equals("interactive")) {
+                    sb.setConfig(plasmaSwitchboardConstants.BROWSER_POP_UP_PAGE, "yacyinteractive.html?display=2");
+                } else {
+                    sb.setConfig(plasmaSwitchboardConstants.BROWSER_POP_UP_PAGE, "Status.html");
+                }
+            }
+            
         }
 
         // reread skins
@@ -148,6 +161,22 @@ public class ConfigAppearance_p {
         prop.putHTML(plasmaSwitchboardConstants.GREETING_HOMEPAGE, sb.getConfig(plasmaSwitchboardConstants.GREETING_HOMEPAGE, ""));
         prop.putHTML(plasmaSwitchboardConstants.GREETING_LARGE_IMAGE, sb.getConfig(plasmaSwitchboardConstants.GREETING_LARGE_IMAGE, ""));
         prop.putHTML(plasmaSwitchboardConstants.GREETING_SMALL_IMAGE, sb.getConfig(plasmaSwitchboardConstants.GREETING_SMALL_IMAGE, ""));
+        
+        final String  browserPopUpPage = sb.getConfig(plasmaSwitchboardConstants.BROWSER_POP_UP_PAGE, "ConfigBasic.html");
+        prop.put("popupFront", 0);
+        prop.put("popupSearch", 0);
+        prop.put("popupInteractive", 0);
+        prop.put("popupStatus", 0);
+        if (browserPopUpPage.startsWith("index")) {
+            prop.put("popupFront", 1);
+        } else if (browserPopUpPage.startsWith("yacysearch")) {
+            prop.put("popupSearch", 1);
+        } else if (browserPopUpPage.startsWith("yacyinteractive")) {
+            prop.put("popupInteractive", 1);
+        } else {
+            prop.put("popupStatus", 1);
+        }
+        
         String myaddress = sb.webIndex.seedDB.mySeed().getPublicAddress();
         if (myaddress == null) myaddress = "localhost:" + sb.getConfig("port", "8080");
         prop.put("myaddress", myaddress);

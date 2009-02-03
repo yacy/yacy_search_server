@@ -35,34 +35,46 @@ function updatepage(str){
   var html = "<br>total results = " + totalResults;
   var item;
   html += "<table class=\"networkTable\" border=\"0\" cellpadding=\"2\" cellspacing=\"1\">";
-  html += "<tr class=\"TableHeader\" valign=\"bottom\"><td>Name</td><td>Description</td><td>Link</td></tr>";
+  html += "<tr class=\"TableHeader\" valign=\"bottom\">";
+  html += "<td>Name</td>";
+  //html += "<td>Description</td>";
+  html += "<td>Link</td></tr>";
   for (var i = 0; i < firstChannel.items.length; i++) {
       item = firstChannel.items[i];
       html += "<tr class=\"TableCellLight\"><td>"+ item.title + "</td>";
-      html += "<td>" + item.description + "</td>";
+      //html += "<td>" + item.description + "</td>";
       html += "<td><a href=\"" + item.link + "\">" + item.link + "</a></td></tr>";
   }
   html += "</table>";
-  document.getElementById("result").innerHTML = html;
+  document.getElementById("searchresults").innerHTML = html;
 }
 </script>
 </head>
 <body>
-#%env/templates/header.template%#
-
+#(display)#
+	#%env/templates/simpleheader.template%#
+	::
 <div id="api"><a href="yacysearch.json?query=yacy"><img src="env/grafics/api.png"></a>
 <span>This page uses the JSON search API to display search results as you type.
 Click the API icon to see an example call to the native API.
 To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.</span>
 </div>
+	#%env/templates/header.template%#
+    ::
+	#%env/templates/embeddedheader.template%#
+#(/display)#
 
-<form name="searchform" onkeyup='xmlhttpPost(); return false;'>
-  <p>Query: <input name="query" type="text">  
-  <!--<input value="Search" type="submit">--></p>
-  
-<div id="result"></div>
+
+<form class="search small" name="searchform" onkeyup='xmlhttpPost(); return false;'>
+  <h2>#[promoteSearchPageGreeting]#</h2>
+  <div class="yacylogo">
+    <a href="#[promoteSearchPageGreeting.homepage]#" class="yacylogo"><img src="#[promoteSearchPageGreeting.smallImage]#" alt="yacysearch" align="left"/></a></div>
+    <fieldset class="yacys"><input name="query" type="text" size="50" maxlength="80" /></fieldset>
+  <div id="searchresults"></div>
+  </div>
 <!--<pre>Raw JSON String: <div id="raw"></div></pre>-->
 </form>
+
 #%env/templates/footer.template%#
 </body>
 </html>

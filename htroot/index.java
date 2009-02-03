@@ -58,6 +58,12 @@ public class index {
         final boolean authenticated = sb.adminAuthenticated(header) >= 2;
         int display = (post == null) ? 0 : post.getInt("display", 0);
         if ((display == 1) && (!authenticated)) display = 0;
+        final boolean browserPopUpTrigger = sb.getConfig(plasmaSwitchboardConstants.BROWSER_POP_UP_TRIGGER, "true").equals("true");
+        if (browserPopUpTrigger) {
+            final String  browserPopUpPage = sb.getConfig(plasmaSwitchboardConstants.BROWSER_POP_UP_PAGE, "ConfigBasic.html");
+            if (browserPopUpPage.startsWith("index") || browserPopUpPage.startsWith("yacysearch")) display = 2;
+        }
+
         final int searchoptions = (post == null) ? 0 : post.getInt("searchoptions", 0);
         final String former = (post == null) ? "" : post.get("former", "");
         final int count = Math.min(100, (post == null) ? 10 : post.getInt("count", 10));

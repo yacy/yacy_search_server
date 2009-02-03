@@ -75,6 +75,14 @@
           <dt>URL of a Large Corporate Image</dt>
           <dd><input type="text" name="promoteSearchPageGreeting.largeImage" value="#[promoteSearchPageGreeting.largeImage]#" size="60" /></dd>
           
+          <dt>Default Pop-Up Page</dt>
+          <dd>
+          <input type="radio" name="popup" value="status" #(popupStatus)#::checked="checked"#(/popupStatus)# />Status Page&nbsp;
+          <input type="radio" name="popup" value="front" #(popupFront)#::checked="checked"#(/popupFront)# />Search Front Page&nbsp;
+          <input type="radio" name="popup" value="search" #(popupSearch)#::checked="checked"#(/popupSearch)# />Search Page (small header)&nbsp;
+          <input type="radio" name="popup" value="interactive" #(popupInteractive)#::checked="checked"#(/popupInteractive)# />Interactive Search Page&nbsp;
+          </dd>
+          
           <dd>
             <input type="submit" name="searchpage_set" value="Change Search Page" />&nbsp;&nbsp;
             <input type="submit" name="searchpage_default" value="Set to Default Values" />
@@ -83,10 +91,10 @@
       </fieldset>
     </form>
     
-    <p>
+    <h3>
       The search page can be integrated in your own web pages with an iframe. Simply use the following code:
-    <p>
-    <pre>
+    </h3>
+    <fieldset><pre>
       &lt;iframe name="target"
        src="http://#[myaddress]#/index.html?display=2&amp;resource=local"
        width="100%"
@@ -95,12 +103,58 @@
        scrolling="auto"
        id="target"&gt; 
       &lt;/iframe&gt;  
-    </pre>
+    </pre></fieldset>
     This would look like:
     <iframe name="target"
        src="http://#[myaddress]#/index.html?display=2&amp;resource=local"
        width="100%"
+       height="340"
+       frameborder="0"
+       scrolling="auto"
+       id="target">
+      </iframe>
+    
+    <h3>
+      For a search page with a small header, use this code:
+    </h3>
+    <fieldset><pre>
+      &lt;iframe name="target"
+       src="http://#[myaddress]#/yacysearch.html?display=2&amp;resource=local"
+       width="100%"
        height="560"
+       frameborder="0"
+       scrolling="auto"
+       id="target"&gt; 
+      &lt;/iframe&gt;  
+    </pre></fieldset>
+    This would look like:
+    <iframe name="target"
+       src="http://#[myaddress]#/yacysearch.html?display=2&amp;resource=local"
+       width="100%"
+       height="180"
+       frameborder="0"
+       scrolling="auto"
+       id="target">
+      </iframe>
+      
+    <h3>
+      A third option is the interactive search. Use this code:
+    </h3>
+    <fieldset><pre>
+      &lt;iframe name="target"
+       src="http://#[myaddress]#/yacyinteractive.html?display=2"
+       width="100%"
+       height="560"
+       frameborder="0"
+       scrolling="auto"
+       id="target"&gt; 
+      &lt;/iframe&gt;  
+    </pre></fieldset>
+    This would look like:
+    <iframe name="target"
+       src="http://#[myaddress]#/yacyinteractive.html?display=2"
+       width="100%"
+       height="180"
        frameborder="0"
        scrolling="auto"
        id="target">

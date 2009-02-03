@@ -70,6 +70,11 @@ public class yacysearch {
         final boolean authenticated = sb.adminAuthenticated(header) >= 2;
         int display = (post == null) ? 0 : post.getInt("display", 0);
         if ((display == 1) && (!authenticated)) display = 0;
+        final boolean browserPopUpTrigger = sb.getConfig(plasmaSwitchboardConstants.BROWSER_POP_UP_TRIGGER, "true").equals("true");
+        if (browserPopUpTrigger) {
+            final String  browserPopUpPage = sb.getConfig(plasmaSwitchboardConstants.BROWSER_POP_UP_PAGE, "ConfigBasic.html");
+            if (browserPopUpPage.startsWith("index") || browserPopUpPage.startsWith("yacysearch")) display = 2;
+        }
         final int input = (post == null) ? 2 : post.getInt("input", 2);
         String promoteSearchPageGreeting = env.getConfig(plasmaSwitchboardConstants.GREETING, "");
         if (env.getConfigBool(plasmaSwitchboardConstants.GREETING_NETWORK_NAME, false)) promoteSearchPageGreeting = env.getConfig("network.unit.description", "");
@@ -113,6 +118,10 @@ public class yacysearch {
             prop.put("results", "");
             prop.put("resultTable", "0");
             prop.put("num-results", searchAllowed ? "0" : "4");
+            prop.put("num-results_totalcount", 0);
+            prop.put("num-results_offset", 0);
+            prop.put("num-results_itemsPerPage", 10);
+            prop.put("rss_queryenc", "");
             
             return prop;
         }

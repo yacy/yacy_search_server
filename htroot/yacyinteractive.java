@@ -25,17 +25,33 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import de.anomic.http.httpRequestHeader;
+import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 // this is a dummy class. Without it, the templates in interactivesearch.html do not load
 
-public class interactivesearch {
+public class yacyinteractive {
 
     public static serverObjects respond(final httpRequestHeader header, serverObjects post, final serverSwitch<?> env) {
-        //final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final serverObjects prop = new serverObjects();
-
+        final boolean authenticated = sb.adminAuthenticated(header) >= 2;
+        int display = (post == null) ? 0 : post.getInt("display", 0);
+        if ((display == 1) && (!authenticated)) display = 0;
+        final boolean browserPopUpTrigger = sb.getConfig(plasmaSwitchboardConstants.BROWSER_POP_UP_TRIGGER, "true").equals("true");
+        if (browserPopUpTrigger) {
+            final String  browserPopUpPage = sb.getConfig(plasmaSwitchboardConstants.BROWSER_POP_UP_PAGE, "ConfigBasic.html");
+            if (browserPopUpPage.startsWith("yacyinteractive")) display = 2;
+        }
+        String promoteSearchPageGreeting = env.getConfig(plasmaSwitchboardConstants.GREETING, "");
+        if (env.getConfigBool(plasmaSwitchboardConstants.GREETING_NETWORK_NAME, false)) promoteSearchPageGreeting = env.getConfig("network.unit.description", "");
+        prop.put("promoteSearchPageGreeting", promoteSearchPageGreeting);
+        prop.put("promoteSearchPageGreeting.homepage", sb.getConfig(plasmaSwitchboardConstants.GREETING_HOMEPAGE, ""));
+        prop.put("promoteSearchPageGreeting.smallImage", sb.getConfig(plasmaSwitchboardConstants.GREETING_SMALL_IMAGE, ""));
+        
+        prop.put("display", display);
         return prop;
     }
 }

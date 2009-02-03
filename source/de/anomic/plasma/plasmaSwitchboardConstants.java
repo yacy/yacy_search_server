@@ -534,4 +534,10 @@ public final class plasmaSwitchboardConstants {
     public static final String GREETING_LARGE_IMAGE  = "promoteSearchPageGreeting.largeImage";
     public static final String GREETING_SMALL_IMAGE  = "promoteSearchPageGreeting.smallImage";
     
+    /**
+     * browser pop up
+     */
+    public static final String BROWSER_POP_UP_TRIGGER     = "browserPopUpTrigger";
+    public static final String BROWSER_POP_UP_APPLICATION = "browserPopUpApplication";
+    public static final String BROWSER_POP_UP_PAGE        = "browserPopUpPage";
 }
