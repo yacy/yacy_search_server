@@ -509,7 +509,7 @@ public class yacysearch {
         
         // for RSS: don't HTML encode some elements
         prop.putXML("rss_query", querystring);
-        prop.put("rss_queryenc", yacyURL.escape(querystring.replace(' ', '+')));
+        prop.put("rss_queryenc", querystring.replace(' ', '+'));
 
         sb.localSearchLastAccess = System.currentTimeMillis();
         

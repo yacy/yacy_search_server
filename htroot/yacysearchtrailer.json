@@ -1,4 +1,4 @@
-"yacy$topwords": [
+"topwords": [
 #{words}#
 { "word": "#[word]#" }#(nl)#::,#(/nl)#
 #{/words}#

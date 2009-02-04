@@ -50,8 +50,11 @@ public class yacyinteractive {
         prop.put("promoteSearchPageGreeting", promoteSearchPageGreeting);
         prop.put("promoteSearchPageGreeting.homepage", sb.getConfig(plasmaSwitchboardConstants.GREETING_HOMEPAGE, ""));
         prop.put("promoteSearchPageGreeting.smallImage", sb.getConfig(plasmaSwitchboardConstants.GREETING_SMALL_IMAGE, ""));
-        
         prop.put("display", display);
+        
+        String query = (post == null) ? "" : post.get("query", "");
+        prop.putHTML("query", query);
+        prop.putHTML("querys", query.replaceAll(" ", "+"));
         return prop;
     }
 }
