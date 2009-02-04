@@ -391,7 +391,7 @@ public final class yacyClient {
         // send request
         try {
             /* a long time-out is needed */
-            final byte[] result = wput("http://" + target.getClusterAddress() + "/yacy/urls.xml", target.getHexHash() + ".yacyh", post, 60000); 
+            final byte[] result = wput("http://" + target.getClusterAddress() + "/yacy/urls.xml", target.getHexHash() + ".yacyh", post, (int) maxTime); 
             final RSSReader reader = RSSReader.parse(result);
             if (reader == null) {
                 yacyCore.log.logWarning("yacyClient.queryRemoteCrawlURLs failed asking peer '" + target.getName() + "': probably bad response from remote peer (1), reader == null");

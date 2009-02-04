@@ -54,7 +54,7 @@ public class rct_p {
             if (post.containsKey("retrieve")) {
                 final String peerhash = post.get("peer", null);
                 final yacySeed seed = (peerhash == null) ? null : sb.webIndex.seedDB.getConnected(peerhash);
-                final RSSFeed feed = (seed == null) ? null : yacyClient.queryRemoteCrawlURLs(sb.webIndex.seedDB, seed, 20, 10000);
+                final RSSFeed feed = (seed == null) ? null : yacyClient.queryRemoteCrawlURLs(sb.webIndex.seedDB, seed, 20, 60000);
                 if (feed != null) {
                     for (final RSSMessage item: feed) {
                         //System.out.println("URL=" + item.getLink() + ", desc=" + item.getDescription() + ", pubDate=" + item.getPubDate());

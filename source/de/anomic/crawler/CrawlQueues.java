@@ -363,7 +363,7 @@ public class CrawlQueues {
         if (seed == null) return false;
         
         // we know a peer which should provide remote crawl entries. load them now.
-        final RSSFeed feed = yacyClient.queryRemoteCrawlURLs(sb.webIndex.seedDB, seed, 30, 5000);
+        final RSSFeed feed = yacyClient.queryRemoteCrawlURLs(sb.webIndex.seedDB, seed, 30, 60000);
         if (feed == null || feed.size() == 0) {
             // something is wrong with this provider. To prevent that we get not stuck with this peer
             // we remove it from the peer list
