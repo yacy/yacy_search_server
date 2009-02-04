@@ -113,7 +113,8 @@ public class RSSReader extends DefaultHandler {
         try {
             reader = new RSSReader(bais);
         } catch (final Exception e) {
-            Log.logWarning("rssReader", "parse exception: " + e);
+            e.printStackTrace();
+            Log.logWarning("rssReader", "parse exception: " + e.getMessage(), e);
             return null;
         }
         try { bais.close(); } catch (final IOException e) {}
