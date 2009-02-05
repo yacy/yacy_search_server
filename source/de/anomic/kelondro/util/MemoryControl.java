@@ -25,6 +25,7 @@
 
 package de.anomic.kelondro.util;
 
+import de.anomic.tools.Formatter;
 
 /**
  * Use this to get information about memory usage or try to free some memory
@@ -47,12 +48,17 @@ public class MemoryControl {
     public final synchronized static void gc(final int last, final String info) { // thq
         final long elapsed = System.currentTimeMillis() - lastGC;
         if (elapsed > last) {
-            final long free = free();
+            final long before = free();
             //System.out.println("vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv");
+            final long start = System.currentTimeMillis();
             System.gc();
             //System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ if you see this many times please report to forum");
             lastGC = System.currentTimeMillis();
-            if (log.isFine()) log.logInfo("[gc] before: " + free + ", after: " + free() + ", call: " + info);
+            final long after = free();
+            if (log.isFine()) log.logInfo("[gc] before: " + Formatter.bytesToString(before) +
+                                              ", after: " + Formatter.bytesToString(after) +
+                                              ", freed: " + Formatter.bytesToString(after - before) +
+                                              ", rt: " + (lastGC - start) + " ms, call: " + info);
         } else if (log.isFine()) {
             if (log.isFinest()) log.logFinest("[gc] no execute, last run: " + (elapsed / 1000) + " seconds ago, call: " + info);
         }
@@ -173,7 +179,7 @@ public class MemoryControl {
     public static long used() {
         return total() - free();
     }
-    
+
     /**
      * main
      * @param args
