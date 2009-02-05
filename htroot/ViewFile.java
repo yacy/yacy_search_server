@@ -102,7 +102,7 @@ public class ViewFile {
                 return prop;
             }            
             
-                // gettin the url that belongs to the entry
+                // getting the url that belongs to the entry
             final indexURLReference.Components comp = urlEntry.comp();
             if ((comp == null) || (comp.url() == null)) {
                 prop.put("error", "3");

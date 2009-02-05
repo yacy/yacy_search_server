@@ -1236,34 +1236,6 @@ public final class httpd implements serverHandler, Cloneable {
             if (o != null)   try { o.close();   } catch (final Exception e) { e.printStackTrace(); }
         }     
     }
-    
-    public static final void sendRespondHeader(
-            final Properties conProp,
-            final OutputStream respond,
-            final String httpVersion,
-            final int httpStatusCode, 
-            final String httpStatusText, 
-            final long contentLength
-    ) throws IOException { 
-        sendRespondHeader(conProp,respond,httpVersion,httpStatusCode,httpStatusText,null,contentLength,null,null,null,null,null);
-    }
-    
-    public static final void sendRespondHeader(
-            final Properties conProp,
-            final OutputStream respond,
-            final String httpVersion,
-            final int httpStatusCode, 
-            final String httpStatusText, 
-            final String contentType,
-            final long contentLength,
-            final Date moddate, 
-            final Date expires,
-            final httpResponseHeader headers,
-            final String contentEnc,
-            final String transferEnc
-    ) throws IOException {    
-        sendRespondHeader(conProp,respond,httpVersion,httpStatusCode,httpStatusText,contentType,contentLength,moddate,expires,headers,contentEnc,transferEnc,true);
-    }
 
     public static final void sendRespondHeader(
             final Properties conProp,
@@ -1303,7 +1275,10 @@ public final class httpd implements serverHandler, Cloneable {
         
         headers.put(httpResponseHeader.SERVER, "AnomicHTTPD (www.anomic.de)");
         headers.put(httpResponseHeader.DATE, DateFormatter.formatRFC1123(now));
-        if (moddate.after(now)) moddate = now;
+        if (moddate.after(now)) {
+            System.out.println("*** DEBUG: correcting moddate = " + moddate.toString() + " to now = " + now.toString());
+            moddate = now;
+        }
         headers.put(httpResponseHeader.LAST_MODIFIED, DateFormatter.formatRFC1123(moddate));
         
         if (nocache) {

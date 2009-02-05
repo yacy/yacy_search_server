@@ -147,7 +147,7 @@ public final class DateFormatter {
     
     public static final String formatRFC1123(final Date date) {
         if (date == null) return "";
-        if (date.getTime() - lastRFC1123long < 1000) {
+        if (Math.abs(date.getTime() - lastRFC1123long) < 1000) {
             //System.out.println("date cache hit - " + lastRFC1123string);
             return lastRFC1123string;
         }

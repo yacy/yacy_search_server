@@ -65,19 +65,22 @@ public class docParser extends AbstractParser implements Parser {
 		try {	
 			  final WordTextExtractorFactory extractorFactory = new WordTextExtractorFactory();
 			  final TextExtractor extractor = extractorFactory.textExtractor(source);
-			  final String contents = extractor.getText();
-
+			  final String contents = extractor.getText().trim();
+			  String title = contents.replaceAll("\r"," ").replaceAll("\n"," ").replaceAll("\t"," ").trim();
+			  if (title.length() > 80) title = title.substring(0, 80);
+			  int l = title.length();
+			  while (true) {
+			      title = title.replaceAll("  ", " ");
+			      if (title.length() == l) break;
+			      l = title.length();
+			  }
               final plasmaParserDocument theDoc = new plasmaParserDocument(
                       location,
                       mimeType,
                       "UTF-8",
                       null,
                       null,
-                      ((contents.length() > 80)? contents.substring(0, 80):contents.trim()).
-                          replaceAll("\r\n"," ").
-                          replaceAll("\n"," ").
-                          replaceAll("\r"," ").
-                          replaceAll("\t"," "),
+                      title,
                       "", // TODO: AUTHOR
                       null,
                       null,

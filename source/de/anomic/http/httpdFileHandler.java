@@ -742,9 +742,7 @@ public final class httpdFileHandler {
                     
                     // call rewrite-class
                    
-                    if (targetClass == null) {
-                        targetDate = new Date(targetFile.lastModified());
-                    } else {
+                    if (targetClass != null) {
                         // CGI-class: call the class to create a property for rewriting
                         try {
                             requestHeader.put(httpHeader.CONNECTION_PROP_CLIENTIP, conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP));
@@ -804,9 +802,10 @@ public final class httpdFileHandler {
                             targetClass = null;
                             throw e;
                         }
-                        targetDate = new Date(System.currentTimeMillis());
                         nocache = true;
                     }
+
+                    targetDate = new Date(targetFile.lastModified());
                     
                     // rewrite the file
                     InputStream fis = null;

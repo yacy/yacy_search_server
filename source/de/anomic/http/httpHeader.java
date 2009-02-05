@@ -73,7 +73,6 @@ public class httpHeader extends TreeMap<String, String> implements Map<String, S
      * ============================================================= */    
     
 
-    // TODO: sort these header properties into request and response properties (some are both)
     public static final String HOST = "Host";
     public static final String USER_AGENT = "User-Agent";
     
@@ -93,6 +92,7 @@ public class httpHeader extends TreeMap<String, String> implements Map<String, S
     public static final String CACHE_CONTROL = "Cache-Control";
     
     public static final String DATE = "Date";
+    public static final String LAST_MODIFIED = "Last-modified";
     public static final String SERVER = "Server";
     
     public static final String ACCEPT_RANGES = "Accept-Ranges";
@@ -105,7 +105,15 @@ public class httpHeader extends TreeMap<String, String> implements Map<String, S
     
     public static final String X_FORWARDED_FOR = "X-Forwarded-For";
     public static final String X_YACY_INDEX_CONTROL = "X-YACY-Index-Control";
+    public static final String X_YACY_PREVIOUS_REQUEST_LINE = "X-Previous-Request-Line";
+    public static final String X_YACY_KEEP_ALIVE_REQUEST_COUNT = "X-Keep-Alive-Request-Count";
+    public static final String X_YACY_ORIGINAL_REQUEST_LINE = "X-Original-Request-Line";
     
+    public static final String SET_COOKIE = "Set-Cookie";
+    public static final String SET_COOKIE2 = "Set-Cookie2";
+    public static final String EXPIRES = "Expires";
+    
+
     
     /* =============================================================
      * Constants for content-encodings

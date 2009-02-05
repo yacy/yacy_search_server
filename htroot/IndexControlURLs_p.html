@@ -123,6 +123,12 @@
     Click the API icon to see an example call to the search rss API.
     To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.</span>
     </div>
+    <form action="ViewFile.html" method="get">
+		<input type="hidden" name="viewMode" value="parsed" />
+		<input type="hidden" name="show" value="Show" />
+		<input type="hidden" name="urlHash" value="#[urlhash]#" />
+		<input type="submit" value="Show Content" name="showcontent" /><br />
+	</form>
 	<form action="IndexControlURLs_p.html" method="post" enctype="multipart/form-data">
 		<input type="hidden" name="keystring" value="" />
 		<input type="hidden" name="keyhash" value="" />

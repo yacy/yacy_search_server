@@ -105,7 +105,7 @@ public class xlsParser extends AbstractParser implements Parser, HSSFListener {
             din.close();
             
             //now the parsed strings are in the StringBuilder, now convert them to a String
-            final String contents = sbFoundStrings.toString();
+            final String contents = sbFoundStrings.toString().trim();
             
             /*
              * create the plasmaParserDocument for the database
@@ -117,11 +117,7 @@ public class xlsParser extends AbstractParser implements Parser, HSSFListener {
                     "UTF-8",
                     null,
                     null,
-                    ((contents.length() > 80) ? contents.substring(0, 80) : contents.trim()).
-                    replaceAll("\r\n"," ").
-                    replaceAll("\n"," ").
-                    replaceAll("\r"," ").
-                    replaceAll("\t"," "),
+                    location.getFile(),
                     "", // TODO: AUTHOR
                     null,
                     null,

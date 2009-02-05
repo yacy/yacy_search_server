@@ -77,7 +77,15 @@ public class pptParser extends AbstractParser implements Parser {
              * of the document
              */
             final PowerPointExtractor pptExtractor = new PowerPointExtractor(new BufferedInputStream(source));
-            final String contents = pptExtractor.getText(true, true);
+            final String contents = pptExtractor.getText(true, true).trim();
+            String title = contents.replaceAll("\r"," ").replaceAll("\n"," ").replaceAll("\t"," ").trim();
+            if (title.length() > 80) title = title.substring(0, 80);
+            int l = title.length();
+            while (true) {
+                title = title.replaceAll("  ", " ");
+                if (title.length() == l) break;
+                l = title.length();
+            }
             
             /*
              * create the plasmaParserDocument for the database
@@ -89,11 +97,7 @@ public class pptParser extends AbstractParser implements Parser {
                     "UTF-8",
                     null,
                     null,
-                    ((contents.length() > 80) ? contents.substring(0, 80) : contents.trim()).
-                    replaceAll("\r\n"," ").
-                    replaceAll("\n"," ").
-                    replaceAll("\r"," ").
-                    replaceAll("\t"," "),
+                    title,
                     "", // TODO: AUTHOR
                     null,
                     null,

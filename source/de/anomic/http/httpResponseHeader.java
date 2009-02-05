@@ -34,16 +34,7 @@ import de.anomic.kelondro.util.Log;
 public class httpResponseHeader extends httpHeader {
 
     // response header properties
-    public static final String X_YACY_PREVIOUS_REQUEST_LINE = "X-Previous-Request-Line";
-    public static final String X_YACY_KEEP_ALIVE_REQUEST_COUNT = "X-Keep-Alive-Request-Count";
-    public static final String X_YACY_ORIGINAL_REQUEST_LINE = "X-Original-Request-Line";
-    
-    public static final String SET_COOKIE = "Set-Cookie";
-    public static final String SET_COOKIE2 = "Set-Cookie2";
-    public static final String EXPIRES = "Expires";
-    
-    public static final String LAST_MODIFIED = "Last-modified";
-
+   
     private static final long serialVersionUID = 0L;
 
     public httpResponseHeader() {
@@ -57,11 +48,10 @@ public class httpResponseHeader extends httpHeader {
     public httpResponseHeader(final HashMap<String, String> reverseMappingCache, final Map<String, String> othermap)  {
         super(reverseMappingCache, othermap);
     }
-    
-
 
     public Date date() {
-        return headerDate(httpHeader.DATE);
+        Date d = headerDate(httpHeader.DATE);
+        if (d == null) return new Date(); else return d;
     }
     
     public Date expires() {
