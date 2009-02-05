@@ -46,7 +46,7 @@ public class natLib {
 	  rm status.htm
 	*/
 	try {
-	    ArrayList<String> x = FileUtils.strings(HttpClient.wget("http://admin:"+password+"@192.168.0.1:80/status.htm", null, 10000));
+	    ArrayList<String> x = FileUtils.strings(HttpClient.wget("http://admin:"+password+"@192.168.0.1:80/status.htm", null, 10000), "UTF-8");
 	    x = nxTools.grep(x, 1, "IP Address");
 	    if ((x == null) || (x.size() == 0)) return null;
 	    final String line = nxTools.tail1(x);
@@ -58,7 +58,8 @@ public class natLib {
 
     private static String getWhatIsMyIP() {
 	try {
-        ArrayList<String> x = FileUtils.strings(HttpClient.wget("http://www.whatismyip.com/", null, 10000));
+        ArrayList<String> x = FileUtils.strings(
+        	HttpClient.wget("http://www.whatismyip.com/", null, 10000), "UTF-8");
 	    x = nxTools.grep(x, 0, "Your IP is");
 	    final String line = nxTools.tail1(x);
 	    return nxTools.awk(line, " ", 4);
@@ -69,7 +70,9 @@ public class natLib {
 
     private static String getStanford() {
 	try {
-        ArrayList<String> x = FileUtils.strings(HttpClient.wget("http://www.slac.stanford.edu/cgi-bin/nph-traceroute.pl", null, 10000));
+        ArrayList<String> x = FileUtils.strings(
+        	HttpClient.wget("http://www.slac.stanford.edu/cgi-bin/nph-traceroute.pl", null, 10000),
+        	"UTF-8");
 	    x = nxTools.grep(x, 0, "firewall protecting your browser");
 	    final String line = nxTools.tail1(x);
 	    return nxTools.awk(line, " ", 7);

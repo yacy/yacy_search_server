@@ -381,7 +381,7 @@ public final class FileUtils {
         // load props
         try {
             final byte[] b = read(f);
-            return table(strings(b));
+            return table(strings(b, "UTF-8"));
         } catch (final IOException e2) {
             System.err.println("ERROR: " + f.toString() + " not found in settings path");
             return null;
@@ -391,7 +391,7 @@ public final class FileUtils {
     public static void saveMap(final File file, final Map<String, String> props, final String comment) throws IOException {
         PrintWriter pw = null;
         final File tf = new File(file.toString() + "." + (System.currentTimeMillis() % 1000));
-        pw = new PrintWriter(new BufferedOutputStream(new FileOutputStream(tf)));
+        pw = new PrintWriter(tf, "UTF-8");
         pw.println("# " + comment);
         String key, value;
         for (final Map.Entry<String, String> entry: props.entrySet()) {
@@ -412,7 +412,7 @@ public final class FileUtils {
         final Set<String> set = (tree) ? (Set<String>) new TreeSet<String>() : (Set<String>) new HashSet<String>();
         final byte[] b = read(file);
         for (int i = 0; (i + chunksize) <= b.length; i++) {
-            set.add(new String(b, i, chunksize));
+            set.add(new String(b, i, chunksize, "UTF-8"));
         }
         return set;
     }
@@ -443,8 +443,8 @@ public final class FileUtils {
         }
         if(os != null) {
             for (final Iterator<String> i = set.iterator(); i.hasNext(); ) {
-                os.write((i.next()).getBytes());
-                if (sep != null) os.write(sep.getBytes());
+                os.write((i.next()).getBytes("UTF-8"));
+                if (sep != null) os.write(sep.getBytes("UTF-8"));
             }
             os.close();
         }
@@ -470,12 +470,12 @@ public final class FileUtils {
             String key;
             if (i.hasNext()) {
                 key = new String(i.next().getColBytes(0));
-                os.write(key.getBytes());
+                os.write(key.getBytes("UTF-8"));
             }
             while (i.hasNext()) {
                 key = new String((i.next()).getColBytes(0));
-                if (sep != null) os.write(sep.getBytes());
-                os.write(key.getBytes());
+                if (sep != null) os.write(sep.getBytes("UTF-8"));
+                os.write(key.getBytes("UTF-8"));
             }
             os.close();
         }

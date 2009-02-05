@@ -188,7 +188,7 @@ public final class ByteBuffer extends OutputStream {
     }
 
     public ByteBuffer append(final String s) {
-        return append(s.getBytes());
+        return append(s.getBytes("UTF-8"));
     }
     
     public ByteBuffer append(final String s, final String charset) throws UnsupportedEncodingException {
@@ -376,7 +376,11 @@ public final class ByteBuffer extends OutputStream {
     
     
     public String toString() {
-        return new String(buffer, offset, length);
+	try {
+	    return new String(buffer, offset, length, "UTF-8");
+	} catch (UnsupportedEncodingException e) {
+	    return new String(buffer, offset, length);
+	}
     }
     
     public String toString(final String charsetName) {
@@ -388,7 +392,11 @@ public final class ByteBuffer extends OutputStream {
     }
 
     public String toString(final int left, final int rightbound) {
-        return new String(buffer, offset + left, rightbound - left);
+        try {
+	    return new String(buffer, offset + left, rightbound - left, "UTF-8");
+	} catch (UnsupportedEncodingException e) {
+	    return new String(buffer, offset, length);
+	}
     }
 
     public Properties propParser(final String charset) {

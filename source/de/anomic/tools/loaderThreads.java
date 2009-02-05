@@ -178,7 +178,7 @@ public class loaderThreads {
             int line = 0;
             String s, key, value;
             int p;
-            final ArrayList<String> lines = FileUtils.strings(v);
+            final ArrayList<String> lines = FileUtils.strings(v, "UTF-8");
             try {
                 while ((this.run) && (line < lines.size())) {
                     // parse line and construct a property

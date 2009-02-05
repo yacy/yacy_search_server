@@ -143,7 +143,11 @@ public class ByteArray {
     }
     
     public String readString(final int from_pos, final int length) {
-        return new String(buffer, this.offset + from_pos, length);
+        try {
+            return new String(buffer, this.offset + from_pos, length, "UTF-8");
+        } catch (final UnsupportedEncodingException e) {
+            return "";
+        }
     }
     
     public String readString(final int from_pos, final int length, final String encoding) {

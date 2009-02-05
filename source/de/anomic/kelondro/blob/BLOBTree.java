@@ -39,6 +39,7 @@ package de.anomic.kelondro.blob;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.Iterator;
 
 import de.anomic.kelondro.index.Row;
@@ -179,14 +180,22 @@ public class BLOBTree implements BLOB {
         if (key.length() > keylen) throw new RuntimeException("key len (" + key.length() + ") out of limit (" + keylen + "): '" + key + "'");
         while (key.length() < keylen) key = key + fillChar;
         key = key + counter(record);
-        return key.getBytes();
+        try {
+	    return key.getBytes("UTF-8");
+	} catch (UnsupportedEncodingException e) {
+	    return key.getBytes();
+	}
     }
 
     String origKey(final byte[] rawKey) {
         int n = keylen - 1;
         if (n >= rawKey.length) n = rawKey.length - 1;
         while ((n > 0) && (rawKey[n] == (byte) fillChar)) n--;
-        return new String(rawKey, 0, n + 1);
+        try {
+	    return new String(rawKey, 0, n + 1, "UTF-8");
+	} catch (UnsupportedEncodingException e) {
+	    return new String(rawKey, 0, n + 1);
+	}
     }
 
     public class keyIterator implements CloneableIterator<byte[]> {
@@ -210,7 +219,11 @@ public class BLOBTree implements BLOB {
         public byte[] next() {
             final String result = nextKey;
             nextKey = n();
-            return origKey(result.getBytes()).getBytes();
+            try {
+		return origKey(result.getBytes("UTF-8")).getBytes("UTF-8");
+	    } catch (UnsupportedEncodingException e) {
+		return origKey(result.getBytes()).getBytes();
+	    }
         }
 
         public void remove() {
@@ -228,8 +241,16 @@ public class BLOBTree implements BLOB {
                 if (nt == null) return null;
                 g = nt.getColBytes(0);
                 if (g == null) return null;
-                k = new String(g, 0, keylen);
-                v = new String(g, keylen, counterlen);
+                try {
+		    k = new String(g, 0, keylen, "UTF-8");
+		} catch (UnsupportedEncodingException e1) {
+		    k = new String(g, 0, keylen);
+		}
+                try {
+		    v = new String(g, keylen, counterlen, "UTF-8");
+		} catch (UnsupportedEncodingException e1) {
+		    v = new String(g, keylen, counterlen);
+		}
                 try {
                     c = Integer.parseInt(v, 16);
                 } catch (final NumberFormatException e) {
@@ -287,7 +308,7 @@ public class BLOBTree implements BLOB {
     }
     
     public synchronized byte[] get(final byte[] key) throws IOException {
-        final RandomAccessInterface ra = getRA(new String(key));
+        final RandomAccessInterface ra = getRA(new String(key, "UTF-8"));
         if (ra == null) return null;
         return ra.readFully();
     }
@@ -398,7 +419,7 @@ public class BLOBTree implements BLOB {
         if (key == null) return;
         int recpos = 0;
         byte[] k;
-        while (index.get(k = elementKey(new String(key), recpos)) != null) {
+        while (index.get(k = elementKey(new String(key, "UTF-8"), recpos)) != null) {
             index.remove(k);
             buffer.remove(k);
             recpos++;
