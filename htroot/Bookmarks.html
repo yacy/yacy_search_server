@@ -21,9 +21,11 @@
 #(display)#
 <div id="api">
 <script type="text/javascript">
+//<![CDATA[
 document.write("\<a href=\"Bookmarks.rss?" + window.location.search.substring(1) + "\"\>")
+//]]>
 </script>
-<img src="env/grafics/api.png"></a>
+<img src="env/grafics/api.png" alt="API" /></a>
 <span>The bookmarks list can also be retrieved as RSS feed. This can also be done when you select a specific tag.
 Click the API icon to load the RSS from the current selection.
 To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.</span>
@@ -38,8 +40,8 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
 		<!-- SubMenu (mode=0) -->
 			<ul class="SubMenu">
 				<li><a href="Bookmarks.html?login=true" class="MenuItemLink">Login</a></li>
-				<li><a href="Bookmarks.html?login=true&mode=add" class="MenuItemLink lock">Add Bookmark</a></li>
-				<li><a href="Bookmarks.html?login=true&mode=importxml" class="MenuItemLink lock">Import Bookmarks</a></li>
+				<li><a href="Bookmarks.html?login=true&amp;mode=add" class="MenuItemLink lock">Add Bookmark</a></li>
+				<li><a href="Bookmarks.html?login=true&amp;mode=importxml" class="MenuItemLink lock">Import Bookmarks</a></li>
 				<li><a href="xml/bookmarks/xbel/xbel.xml" class="MenuItemLink lock">Bookmarks (XBEL)</a></li>
 				<li><a href="xml/bookmarks/posts/all.xml" class="MenuItemLink lock">Bookmarks (XML)</a></li>
 				<li><a href="Bookmarks.rss" class="MenuItemLink lock">Bookmarks (RSS)</a></li>
@@ -191,16 +193,14 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
 		
 			<fieldset>
 				<legend>Tags</legend>
-				<p>
-					<form action="Bookmarks.html" name="choosetag" method="get" accept-charset="UTF-8">
-						<select size="1" name="tag" onChange="document.choosetag.submit();">
-							<option value=""#[selected]#>All (#[num-bookmarks]#)</option>
-							#{optlist}#<option value="#[name]#"#[selected]#>#[name]# (#[num]#)</option>
-							#{/optlist}#
-						</select>
-						<input type="submit" value=" ... ">
-					</form>
-				</p>
+				<form action="Bookmarks.html" id="choosetag" method="get" accept-charset="UTF-8"><div>
+					<select size="1" name="tag" onchange="document.choosetag.submit();">
+						<option value=""#[selected]#>All (#[num-bookmarks]#)</option>
+						#{optlist}#<option value="#[name]#"#[selected]#>#[name]# (#[num]#)</option>
+						#{/optlist}#
+					</select>
+					<input type="submit" value=" ... " />
+				</div></form>
 				<p>
 					#{taglist}#<span style="font-size:#[size]#em"><a href="Bookmarks.html?tag=#[name]#">#[name]#</a></span>
 					#{/taglist}#

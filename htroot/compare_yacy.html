@@ -29,7 +29,7 @@
                    #{/searchengines}#
                    </select>
                &nbsp;&nbsp;Query
-               <input type="text" name="query" value="#[search_query]#" size="60"><input type="submit" value="Compare" />
+               <input type="text" name="query" value="#[search_query]#" size="60" /><input type="submit" value="Compare" />
                <input type="hidden" name="display" value="#[display]#" />
            </p>
         </form>
@@ -38,8 +38,8 @@
     ::
     <fieldset>
         <legend>Search Result</legend>
-        <iframe src="#[left]##[query]#" width="49%" height="1600"></iframe> 
-        <iframe src="#[right]##[query]#" width="49%" height="1600"></iframe>
+        <object type="text/html" data="#[left]##[query]#" style="width:49%;height:1600px;overflow:scroll;"></object> 
+        <object type="text/html" data="#[right]##[query]#" style="width:49%;height:1600px;overflow:scroll;"></object>
     </fieldset>
     #(/search)#
     #%env/templates/footer.template%#

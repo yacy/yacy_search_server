@@ -38,7 +38,7 @@
          <img src="/env/grafics/empty.gif" title="" alt="" class="recommendIcon" />
          <img src="/env/grafics/empty.gif" title="" alt="" class="deleteIcon" />
          ::
-         <a href="/Surftips.html?votePositive=#[urlhash]#&amp;refid=#[refid]#&amp;url=#[url]#&amp;title=#[title]#&description=#[description]#&amp;display=#[display]##(showScore)#::&amp;score=true#(/showScore)#" title="positive vote" class="recommendlink" onclick="pcomment(this.href);void(0);"><img src="/env/grafics/empty.gif" title="positive vote" alt="Give positive vote" class="recommendIcon" /></a>
+         <a href="/Surftips.html?votePositive=#[urlhash]#&amp;refid=#[refid]#&amp;url=#[url]#&amp;title=#[title]#&amp;description=#[description]#&amp;display=#[display]##(showScore)#::&amp;score=true#(/showScore)#" title="positive vote" class="recommendlink" onclick="pcomment(this.href);void(0);"><img src="/env/grafics/empty.gif" title="positive vote" alt="Give positive vote" class="recommendIcon" /></a>
          <a href="/Surftips.html?voteNegative=#[urlhash]#&amp;refid=#[refid]#&amp;display=#[display]##(showScore)#::&amp;score=true#(/showScore)#" title="negative vote" class="deletelink" ><img src="/env/grafics/empty.gif" title="negative vote" alt="Give negative vote" class="deleteIcon" /></a>
          #(/recommend)#
        </div>
@@ -55,9 +55,10 @@
      </div>
     <!-- supporter page -->
     <p class="aftersurftips">
-    ...provided by YaCy peers using public bookmarks, link votes and crawl start points<br />
+    ...provided by YaCy peers using public bookmarks, link votes and crawl start points
+    </p>
     
-    <form action="Surftips.html" method="get" class="PeerControl">
+    <form action="Surftips.html" method="get" class="PeerControl"><div>
       <button type="submit" name="publicPage" value="0">
         <img src="/env/grafics/lock.gif" alt="authentication required" />
           Hide surftips for users without autorization
@@ -66,8 +67,7 @@
         <img src="/env/grafics/lock.gif" alt="authentication required" />
           Show surftips to everyone
       </button>
-    </form>
-    </p>
+    </div></form>
     <script type="text/javascript">
       addHover();
     </script>

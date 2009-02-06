@@ -10,6 +10,11 @@
             document.getElementById(key).checked = 'checked';
         }
     </script>
+    <style type="text/css">
+    	.nobr {
+    		white-space: nowrap;
+    	}
+    </style>
   </head>
   <body id="IndexCreate">
     #%env/templates/header.template%#
@@ -21,7 +26,7 @@
     You can define URLs as start points for Web page crawling and start crawling here. "Crawling" means that YaCy will download the given website, extract all links in it and then download the content behind these links. This is repeated as long as specified under "Crawling Depth".
     </p>
     
-    <form name="WatchCrawler" id="WatchCrawler" action="WatchCrawler_p.html" method="post" enctype="multipart/form-data">
+    <form id="WatchCrawler" action="WatchCrawler_p.html" method="post" enctype="multipart/form-data">
       <table border="0" cellpadding="5" cellspacing="1">
         <tr class="TableHeader">
           <td><strong>Attribut</strong></td>
@@ -33,21 +38,21 @@
           <td>
             <table cellpadding="0" cellspacing="0">            
               <tr>
-                <td><label for="url"><nobr>From URL</nobr></label>:</td>
+                <td><label for="url"><span class="nobr">From URL</span></label>:</td>
                 <td><input type="radio" name="crawlingMode" id="url" value="url" checked="checked" /></td>
                 <td>
                   <input name="crawlingURL" type="text" size="41" maxlength="256" value="#[starturl]#" onkeypress="changed()" onfocus="check('url')" />                                    
                 </td>
               </tr>
               <tr>
-                <td><label for="url"><nobr>From Sitemap</nobr></label>:</td>
+                <td><label for="url"><span class="nobr">From Sitemap</span></label>:</td>
                 <td><input type="radio" name="crawlingMode" id="sitemap" value="sitemap" disabled="disabled"/></td>
                 <td>
                   <input name="sitemapURL" type="text" size="41" maxlength="256" value="" readonly="readonly"/>
                 </td>              
               </tr>
               <tr>
-                <td><label for="file"><nobr>From File</nobr></label>:</td>
+                <td><label for="file"><span class="nobr">From File</span></label>:</td>
                 <td><input type="radio" name="crawlingMode" id="file" value="file" /></td>
                 <td><input type="file" name="crawlingFile" size="28" onfocus="check('file')" /></td>
               </tr>
@@ -55,7 +60,7 @@
               	<td colspan="3" class="commit">
 	              	<span id="robotsOK"></span>
 	              	<span id="title"><br/></span>
-	              	<img src="/env/grafics/empty.gif" name="ajax" alt="empty" />
+	              	<img src="/env/grafics/empty.gif" id="ajax" alt="empty" />
               	</td>
               </tr>
             </table>

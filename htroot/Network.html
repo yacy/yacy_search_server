@@ -4,7 +4,7 @@
     <title>YaCy '#[clientname]#': YaCy Network</title>
     #%env/templates/metas.template%#
     <style type="text/css">
-    #left {
+    .left {
       float: left;
     }
     </style>
@@ -13,9 +13,11 @@
   
 <div id="api">
 <script type="text/javascript">
+//<![CDATA[
 document.write("\<a href=\"Network.xml?" + window.location.search.substring(1) + "\"\>")
+//]]>
 </script>
-<img src="env/grafics/api.png"></a>
+<img src="env/grafics/api.png" alt="API"/></a>
 <span>The information that is presented on this page can also be retrieved as XML
 Click the API icon to see the XML.
 To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.</span>
@@ -62,14 +64,14 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
       <tr class="TableHeader" valign="bottom">
         <td>send&nbsp;<strong>M</strong>essage/<br />show&nbsp;<strong>P</strong>rofile/<br />edit&nbsp;<strong>W</strong>iki<br />&nbsp;</td>
         <td><strong>Name</strong><br />&nbsp;</td>
-        <td width="44"><strong>Info</strong><br />&nbsp;</td>
+        <td style="width:44px;"><strong>Info</strong><br />&nbsp;</td>
         <td><strong>Release/<br />SVN</strong><br />&nbsp;</td>
         <td><strong>PPM</strong><br />&nbsp;</td>
         <td><strong>QPH</strong><br />&nbsp;</td>
         <td><strong>Last<br />Seen</strong><br />&nbsp;&nbsp;<a href="/Network.html?page=#[page]#&amp;sort=LastSeen&amp;order=up">&lt;</a>&nbsp;<a href="/Network.html?page=#[page]#&amp;sort=LastSeen&amp;order=down">&gt;</a></td>
         <td><strong>UTC</strong><br />Offset<br />&nbsp;</td>
         <td><strong>Location</strong><br /><br />&nbsp;</td>
-        <td width="70"><strong>Uptime</strong><br />&nbsp;&nbsp;<a href="/Network.html?page=#[page]#&amp;sort=Uptime&amp;order=up">&lt;</a>&nbsp;<a href="/Network.html?page=#[page]#&amp;sort=Uptime&amp;order=down">&gt;</a></td>
+        <td style="width:70px;"><strong>Uptime</strong><br />&nbsp;&nbsp;<a href="/Network.html?page=#[page]#&amp;sort=Uptime&amp;order=up">&lt;</a>&nbsp;<a href="/Network.html?page=#[page]#&amp;sort=Uptime&amp;order=down">&gt;</a></td>
         <td><strong>Links</strong><br />&nbsp;&nbsp;<a href="/Network.html?page=#[page]#&amp;sort=LCount&amp;order=up">&lt;</a>&nbsp;<a href="/Network.html?page=#[page]#&amp;sort=LCount&amp;order=down">&gt;</a></td>
         <td><strong>RWIs</strong><br />&nbsp;&nbsp;<a href="/Network.html?page=#[page]#&amp;sort=ICount&amp;order=up">&lt;</a>&nbsp;<a href="/Network.html?page=#[page]#&amp;sort=ICount&amp;order=down">&gt;</a></td>
         <td><strong>URLs for<br />Remote<br />Crawl</strong><br />&nbsp;</td>
@@ -134,7 +136,7 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
       <em>runtime: #[rt]# ms</em>
     </p>
     ::
-    <div id="left">
+    <div class="left">
     <table border="0" cellpadding="2" cellspacing="1">
       <tr class="TableHeader">
         <td>Branch</td>
@@ -168,20 +170,20 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
       </tr>
     </table>
     </div>
-    <div id="left">
+    <div class="left">
     <ul>
     <li>Indexing Speed: #[gppm]# Pages Per Minute (PPM)</li>
     <li>Query Frequency: #[gqph]# Queries Per Hour (QPH)</li>
     </ul>
     </div>
     
-    <div id="left">
+    <div class="left">
     </div>
     
-    <div id="left">
+    <div class="left">
     <a href="NetworkPicture.png?width=768&amp;height=576&amp;bgcolor=FFFFFF"><img src="NetworkPicture.png?width=768&amp;height=576&amp;bgcolor=FFFFFF" alt="The yacy Network" /></a>
     </div>
-	<div id="left">
+	<div class="left">
     <table border="0">
             <tr>
                 <td>&nbsp;</td>
@@ -215,7 +217,7 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
             </tr>
     </table>
     </div>
-    <div id="left">
+    <div class="left">
     <p>Your Peer:</p>
     <table border="0" cellpadding="2" cellspacing="1">
       <tr class="TableHeader">

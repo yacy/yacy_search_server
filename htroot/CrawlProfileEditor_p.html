@@ -15,7 +15,7 @@
     
 <!-- crawl profile list -->
 <fieldset><legend>Crawl Profile List</legend>
-<table border="0" cellpadding="2" cellspacing="1">
+<table border="0" cellpadding="2" cellspacing="1" summary="A list of crawl profiles and their current settings.">
   <colgroup>
   <col width="120" />
   <col />
@@ -62,26 +62,26 @@
     <td>#(remoteIndexing)#no::yes#(/remoteIndexing)#</td>
     <td>#(terminateButton)#::
         <div style="text-decoration:blink">Running</div>
-        <form action="CrawlProfileEditor_p.html" method="get" enctype="multipart/form-data">
+        <form action="CrawlProfileEditor_p.html" method="get" enctype="multipart/form-data"><div>
         <input type="hidden" name="handle" value="#[handle]#" />
         <input type="submit" name="terminate" value="Terminate" />
-        </form>
+        </div></form>
         #(/terminateButton)#
 	    #(deleteButton)#::
 	    Finished
-        <form action="CrawlProfileEditor_p.html" method="get" enctype="multipart/form-data">
+        <form action="CrawlProfileEditor_p.html" method="get" enctype="multipart/form-data"><div>
         <input type="hidden" name="handle" value="#[handle]#" />
         <input type="submit" name="delete" value="Delete" />
-        </form>
+        </div></form>
         #(/deleteButton)#
 	</td>
   </tr>
   #{/crawlProfiles}# 
 </table>
 #(existPassiveCrawls)#::
-<form action="CrawlProfileEditor_p.html" method="post" enctype="multipart/form-data">
+<form action="CrawlProfileEditor_p.html" method="post" enctype="multipart/form-data"><div>
 <input type="submit" name="deleteTerminatedProfiles" value="Delete finished crawls" />
-</form>
+</div></form>
 #(/existPassiveCrawls)#
 </fieldset>
 

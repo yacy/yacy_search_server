@@ -31,11 +31,11 @@
       <a href="Wiki.html">Start Page</a> -
       <a href="Wiki.html?index=Index">Index</a> -
       <a href="Wiki.html?page=#[pagename]#&amp;diff=">Versions</a> -
-      <form method="post" action="Wiki.html">
-        <label for="access">Grant Write Access to</label>
-        #(access)#<input type="submit" name="access" value="all" />::<input type="submit" name="access" value="admin" />#(/access)#
-      </form>
     </p>
+    <form method="post" action="Wiki.html"><div>
+      <label for="access">Grant Write Access to</label>
+      #(access)#<input type="submit" id="access" name="access" value="all" />::<input type="submit" id="access" name="access" value="admin" />#(/access)#
+    </div></form>
     ::
     <!-- 1: edit -->
     <form action="Wiki.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">

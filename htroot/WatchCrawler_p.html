@@ -12,8 +12,8 @@
 #%env/templates/header.template%#
 #%env/templates/submenuIndexCreate.template%#
 <h2>Crawler Queues</h2>
-<p> Next update in <input type="text" id="nextUpdate" onfocus="changeInterval()" onblur="newInterval()" size="2" /> seconds. <img src="/env/grafics/empty.gif" name="ajax" alt="empty"/><noscript>(Please enable JavaScript to automatically update this page!)</noscript>
-</p>
+<noscript><p>(Please enable JavaScript to automatically update this page!)</p></noscript>
+<p> Next update in <input type="text" id="nextUpdate" onfocus="changeInterval()" onblur="newInterval()" size="2" /> seconds. <img src="/env/grafics/empty.gif" id="ajax" alt="empty"/></p>
       <table border="0" cellpadding="2" cellspacing="1" class="watchCrawler">
         <tbody>
           <tr class="TableHeader"> 
@@ -67,8 +67,8 @@
         </tbody>
       </table>
 
+      <form action="WatchCrawler_p.html" method="post" enctype="multipart/form-data">
       <table border="0" cellpadding="2" cellspacing="1" class="watchCrawler">
-        <form action="WatchCrawler_p.html" method="post" enctype="multipart/form-data">
         <tbody>
           <tr class="TableHeader"> 
             <th colspan="3">Speed</th>
@@ -79,8 +79,8 @@
             <td align="left" #(crawlingSpeedMaxChecked)#::class="TableCellDark"#(/crawlingSpeedMaxChecked)#><input type="submit" name="crawlingPerformance" value="maximum" /></td>
           </tr>
         </tbody>
-        </form>
       </table>
+      </form>
 
       <table border="0" cellpadding="2" cellspacing="1" class="watchCrawler">
         <tbody>

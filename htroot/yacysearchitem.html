@@ -1,14 +1,14 @@
 #(content)#::
   <div class="searchresults">
   <h4 class="linktitle">
-  <img src="ViewImage.png?width=16&height=16&code=#[faviconCode]#" id="f#[urlhash]#" class="favicon" width="16" height="16" alt="" />
-  <a href="#[link]#" target="_parent">#[title]#</a></h4>
+  <img src="ViewImage.png?width=16&amp;height=16&amp;code=#[faviconCode]#" id="f#[urlhash]#" class="favicon" style="width:16px; height:16px;" alt="favicon" />
+  <a href="#[link]#">#[title]#</a></h4>
   #(authorized)#::
     <div class="urlactions">
     <a href="/Bookmarks.html?edit=#[urlhash]#" class="bookmarklink" title="bookmark"><img src="/env/grafics/empty.gif" title="bookmark" alt="bookmark" class="bookmarkIcon" /></a>
     #(recommend)#
-      <img src="/env/grafics/empty.gif" title="" alt="" class="recommendIcon" />
-      <img src="/env/grafics/empty.gif" title="" alt="" class="deleteIcon" />
+      <img src="/env/grafics/empty.gif" title="" alt="recommend" class="recommendIcon" />
+      <img src="/env/grafics/empty.gif" title="" alt="delete" class="deleteIcon" />
       ::
       <a href="#[recommendlink]#" class="recommendlink" title="recommend"><img src="/env/grafics/empty.gif" title="recommend" alt="recommend" class="recommendIcon" /></a>
       <a href="#[deletelink]#" title="delete" class="deletelink" ><img src="/env/grafics/empty.gif" title="delete" alt="delete" class="deleteIcon" /></a>
@@ -16,14 +16,14 @@
     </div>
   #(/authorized)#
   <p class="snippet"><span class="snippetLoaded" id="h#[urlhash]#">#[description]#</span></p>
-  <p class="url"><a href="#[link]#" id="url#[urlhash]#" target="_parent">#[urlname]#</a></p>
+  <p class="url"><a href="#[link]#" id="url#[urlhash]#">#[urlname]#</a></p>
   <p class="urlinfo">#[date]# | YBR-#[ybr]# | <a href="ViewFile.html?urlHash=#[urlhash]#&amp;words=#[words]#&amp;display=#[display]#">Info</a> | <a href="yacysearch.html?cat=image&amp;url=#[link]#&amp;search=#[former]#&amp;display=#[display]#">Pictures</a></p>
   </div>
   ::
   #{items}#
   <div class="thumbcontainer">
     <a href="#[hrefCache]#" class="thumblink" onclick="return hs.expand(this)">
-      <img src="/ViewImage.png?maxwidth=96&maxheight=96&code=#[code]#" alt="#[name]#">
+      <img src="/ViewImage.png?maxwidth=96&amp;maxheight=96&amp;code=#[code]#" alt="#[name]#" />
     </a>
     <div class="highslide-caption"><a href="#[href]#">#[name]#<br \><a href="#[source]#">#[sourcedom]#</a></a></div>
     <div class="TableCellDark"><a href="#[href]#">#[name]#</a><br \>#[attr]#</div>
