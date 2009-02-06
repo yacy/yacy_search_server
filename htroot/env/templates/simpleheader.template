@@ -2,7 +2,7 @@
 <ul class="SubMenu">
 <li style="width:14%;"><a href="/Status.html" class="MenuItemLink">Peer Administration</a></li>
 <li style="width:14%;"><a href="/index.html" onclick="this.href='/index.html?handover='+document.searchform.search.value" class="MenuItemLink">Web Search</a></li>
-<li style="width:14%;"><a href="/compare_yacy.html" onclick="this.href='/compare_yacy.html?display=0&handover='+document.searchform.search.value" class="MenuItemLink">Compare YaCy</a></li>
+<li style="width:14%;"><a href="/compare_yacy.html" onclick="this.href='/compare_yacy.html?display=0&amp;handover='+document.searchform.search.value" class="MenuItemLink">Compare YaCy</a></li>
 <li style="width:14%;"><a href="/Surftips.html" class="MenuItemLink">Surftips</a></li>
 <li style="width:14%;"><a href="/ViewProfile.html?hash=localhash" class="MenuItemLink">Peer Owner Profile</a></li>
 <li style="width:14%;"><a href="http://www.yacy-websearch.net/wiki/" class="MenuItemLink">Help / Wiki</a></li>

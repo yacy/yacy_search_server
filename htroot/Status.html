@@ -7,7 +7,7 @@
       function loadBanner() {
         for (var i = 0; i < document.images.length; i++) {
           if (document.images[i].src.indexOf("Banner.png") > 0) {
-            document.images[i].src = "/Banner.png?textcolor=000000&amp;bgcolor=ddeeee&amp;bordercolor=aaaaaa&time=" + (new Date()).getTime();
+            document.images[i].src = "/Banner.png?textcolor=000000&amp;bgcolor=ddeeee&amp;bordercolor=aaaaaa&amp;time=" + (new Date()).getTime();
             break;
           }
         }
@@ -40,14 +40,13 @@
     <![endif]-->
     
     <div class="welcome">
-    <center>
-      <h2><img src="/env/grafics/kaskelix.png" align="middle" style="margin-right:5px;">Welcome to YaCy!</h2>
-      <iframe src="rssTerminal.html?set=PEERNEWS,REMOTESEARCH,LOCALSEARCH,REMOTEINDEXING,LOCALINDEXING,INDEXRECEIVE&width=600px&height=180px&maxlines=20&maxwidth=120"
-              width="600" height="180" scrolling="no" name="newsframe"
-              marginheight="0" marginwidth="0" frameborder="1"></iframe><br />
-      <img src="PerformanceGraph.png" name="graph" alt="PerformanceGraph"/><br />
+    <div style="margin:auto;text-align:center;">
+      <h2><img src="/env/grafics/kaskelix.png" alt="YaCy Websearch" style="margin-right:5px; vertical-align:middle;" />Welcome to YaCy!</h2>
+      <iframe src="rssTerminal.html?set=PEERNEWS,REMOTESEARCH,LOCALSEARCH,REMOTEINDEXING,LOCALINDEXING,INDEXRECEIVE&amp;width=600px&amp;height=180px&amp;maxlines=20&amp;maxwidth=120"
+              style="width:600px;height:180px;margin:0px;border:1px solid black;" scrolling="no" name="newsframe"></iframe><br />
+      <img src="PerformanceGraph.png" id="graph" alt="PerformanceGraph"/><br />
       <img src="Banner.png?textcolor=000000&amp;bgcolor=ddeeee&amp;bordercolor=aaaaaa" alt="banner" />
-    </center>
+    </div>
 
     <dl>
     
