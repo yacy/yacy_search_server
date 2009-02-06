@@ -323,6 +323,11 @@ public final class DateFormatter {
         return format(FORMAT_SHORT_SECOND, date);
     }
     
+    public static String formatShortMilliSecond(final Date date) {
+        return format(FORMAT_SHORT_MILSEC, date);
+    }
+    
+    
     /**
      * Identical to {@link #formatShortDay(Date, TimeZone)}, but for short second format.
      */

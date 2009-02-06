@@ -787,6 +787,7 @@ public final class httpdFileHandler {
                             templatePatterns.put(servletProperties.PEER_STAT_VERSION, switchboard.getConfig("version", ""));
                             templatePatterns.put(servletProperties.PEER_STAT_UPTIME, ((System.currentTimeMillis() -  serverCore.startupTime) / 1000) / 60); // uptime in minutes
                             templatePatterns.putHTML(servletProperties.PEER_STAT_CLIENTNAME, switchboard.getConfig("peerName", "anomic"));
+                            templatePatterns.putHTML(servletProperties.PEER_STAT_CLIENTID, ((plasmaSwitchboard) switchboard).webIndex.seedDB.myID());
                             templatePatterns.put(servletProperties.PEER_STAT_MYTIME, DateFormatter.formatShortSecond());
                             //System.out.println("respond props: " + ((tp == null) ? "null" : tp.toString())); // debug
                         } catch (final InvocationTargetException e) {
@@ -972,8 +973,8 @@ public final class httpdFileHandler {
                     // write the file to the client
                     targetDate = new Date(targetFile.lastModified());
                     final long   contentLength    = (zipContent)?-1:targetFile.length()-rangeStartOffset;
-                    final String contentEncoding  = (zipContent)?"gzip":null;
-                    final String transferEncoding = (!httpVersion.equals(httpHeader.HTTP_VERSION_1_1))?null:(zipContent)?"chunked":null;
+                    final String contentEncoding  = (zipContent) ? "gzip" : null;
+                    final String transferEncoding = (httpVersion.equals(httpHeader.HTTP_VERSION_1_1) && zipContent) ? "chunked" : null;
                     if (!httpVersion.equals(httpHeader.HTTP_VERSION_1_1) && zipContent) forceConnectionClose(conProp);
                     
                     httpd.sendRespondHeader(conProp, out, httpVersion, statusCode, null, mimeType, contentLength, targetDate, null, header, contentEncoding, transferEncoding, nocache);
@@ -1026,7 +1027,7 @@ public final class httpdFileHandler {
         } catch (final Exception e) {     
             try {
                 // doing some errorhandling ...
-            	e.printStackTrace();
+            	//e.printStackTrace();
                 int httpStatusCode = 400; 
                 final String httpStatusText = null; 
                 final StringBuilder errorMessage = new StringBuilder(2000); 

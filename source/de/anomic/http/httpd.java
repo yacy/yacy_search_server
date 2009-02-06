@@ -106,7 +106,7 @@ public final class httpd implements serverHandler, Cloneable {
      
      //TODO: Load this from a file
     private static final HashSet<String> disallowZippedContentEncoding = new HashSet<String>(Arrays.asList(new String[]{
-            ".gz", ".tgz", ".jpg", ".jpeg", ".gif", ".zip", ".rar", ".bz2", ".lha", ".jar", ".rpm", ".arc", ".arj", ".wmv", ".png", ".ico", ".bmp"
+            ".gz", ".tgz", ".jpg", ".jpeg", ".png", ".mp3", ".mov", ".avi", ".gif", ".zip", ".rar", ".bz2", ".lha", ".jar", ".rpm", ".arc", ".arj", ".wmv", ".ico", ".bmp"
     }));    
     
     // static objects

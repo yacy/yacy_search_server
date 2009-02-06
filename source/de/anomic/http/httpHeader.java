@@ -277,14 +277,14 @@ public class httpHeader extends TreeMap<String, String> implements Map<String, S
     }
     
     // a convenience method to access the map with fail-over defaults
-    public Object get(final Object key, final Object dflt) {
-        final Object result = get(key);
+    public String get(final String key, final String dflt) {
+        final String result = get(key);
         if (result == null) return dflt;
         return result;
     }
 
     // return multiple results
-    public Object getSingle(final Object key, final int count) {
+    public String getSingle(final String key, final int count) {
         if (count == 0) return get(key, null);
         return get("*" + key + "-" + count, null);
     }

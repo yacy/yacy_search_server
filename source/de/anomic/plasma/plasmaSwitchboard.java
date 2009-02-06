@@ -236,6 +236,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     public  URLLicense                     licensedURLs;
     public  Timer                          moreMemory;
     public  List<Pattern>                  networkWhitelist, networkBlacklist;
+    public  List<String>                   trail;
     
     public serverProcessor<indexingQueueEntry> indexingDocumentProcessor;
     public serverProcessor<indexingQueueEntry> indexingCondensementProcessor;
@@ -269,6 +270,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         
         // remote proxy configuration
         httpRemoteProxyConfig.init(this);
+        
+        this.trail = new ArrayList<String>();
         
         // load values from configs        
         this.plasmaPath   = getConfigPath(plasmaSwitchboardConstants.PLASMA_PATH, plasmaSwitchboardConstants.PLASMA_PATH_DEFAULT);
