@@ -27,12 +27,15 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Properties;
 import java.util.Vector;
 
 import de.anomic.kelondro.util.Log;
 import de.anomic.kelondro.util.FileUtils;
+import de.anomic.tools.consoleInterface;
 
 public final class serverSystem {
 
@@ -108,10 +111,6 @@ public final class serverSystem {
 		// set up maximum path length according to system
 		if (isWindows) maxPathLength = 255; else maxPathLength = 65535;
 	}
-
-	/*    public static boolean isWindows() {
-        return systemOS == systemWindows;
-    }*/
 
 	public static Object getMacOSTS(final String s) {
 		if ((isMacArchitecture) && (macMRJFileUtils != null)) try {
@@ -213,6 +212,38 @@ public final class serverSystem {
 		//System.out.println("***Setting creator for " + f.toString() + " to " + creator);
 		setMacFSCreator(f, creator);
 		return getMacFSCreator(f).equals(creator); // this is not always true! I guess it's caused by deprecation of the interface in 1.4er Apple Extensions
+	}
+	
+	/**
+	 * finds the maximum possible heap (may cause high system load)
+	 * @return heap in -Xmx<i>[heap]</i>m
+	 * @author [DW], 07.02.2009
+	 */
+	public static int getWin32MaxHeap() {
+		int maxmem = 1000;
+		while(checkWin32Heap(maxmem)) maxmem += 100;
+		while(!checkWin32Heap(maxmem)) maxmem -= 10;
+		return maxmem;
+	}
+	
+	/**
+	 * checks heap (may cause high system load)
+	 * @param mem heap to check in -Xmx<i>[heap]</i>m
+	 * @return true if possible
+	 * @author [DW], 07.02.2009
+	 */
+	public static boolean checkWin32Heap(int mem){
+		String line = "";
+        final List<String> processArgs = new ArrayList<String>();
+        processArgs.add("java");
+        processArgs.add("-Xms4m");
+        processArgs.add("-Xmx" + Integer.toString(mem) + "m");
+        try {
+    		line = consoleInterface.getLastLineConsoleOutput(processArgs, new Log("MEMCHECK"));
+		} catch (final IOException e) {
+			return false;
+		}
+		return (line.indexOf("space for object heap") > -1) ? false : true;
 	}
 
 	public static String infoString() {
@@ -382,6 +413,9 @@ public final class serverSystem {
 		}
 		if (args[0].equals("-u")) {
 			openBrowser(args[1]);
+		}
+		if (args[0].equals("-m")) {
+			System.out.println("Maximum possible memory: " + Integer.toString(getWin32MaxHeap()) + "m");
 		}
 	}
 

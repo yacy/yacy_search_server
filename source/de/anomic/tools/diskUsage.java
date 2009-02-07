@@ -228,7 +228,7 @@ public class diskUsage {
         if (usedOS != TRU64 && usedOS != HAIKU)
             processArgs.add("-l");
 
-        final List<String> lines = getConsoleOutput(processArgs);
+        final List<String> lines = consoleInterface.getConsoleOutput(processArgs, log);
         return lines;
     }
 
@@ -306,7 +306,7 @@ public class diskUsage {
         yacyUsedVolumes.add(path.substring(0, 1));
     }
 
-    public static HashMap<String, long[]> dfWindows() {
+    private static HashMap<String, long[]> dfWindows() {
         final HashMap<String, long[]> diskUsages = new HashMap<String, long[]>();
         for (int i = 0; i < yacyUsedVolumes.size(); i++){
             final List<String> processArgs = new ArrayList<String>();
@@ -316,7 +316,7 @@ public class diskUsage {
             processArgs.add(yacyUsedVolumes.get(i) + ":\\");
 
             try {
-                final List<String> lines = getConsoleOutput(processArgs);
+                final List<String> lines = consoleInterface.getConsoleOutput(processArgs, log);
 
                 String line = "";
                 for (int l = lines.size() - 1; l >= 0; l--) {
@@ -386,39 +386,6 @@ public class diskUsage {
         }
         if (index < 0)
             yacyUsedVolumes.add(sub);
-    }
-
-    private static List<String> getConsoleOutput(final List<String> processArgs) throws IOException {
-        final ProcessBuilder processBuilder = new ProcessBuilder(processArgs);
-        Process process = null;
-        consoleInterface inputStream = null;
-        consoleInterface errorStream = null;
-
-        try {
-            process = processBuilder.start();
-
-            inputStream = new consoleInterface(process.getInputStream(), log);
-            errorStream = new consoleInterface(process.getErrorStream(), log);
-
-            inputStream.start();
-            errorStream.start();
-
-            /*int retval =*/ process.waitFor();
-
-        } catch (final IOException iox) {
-            log.logWarning("logpoint 0 " + iox.getMessage());
-            throw new IOException(iox.getMessage());
-        } catch (final InterruptedException ix) {
-            log.logWarning("logpoint 1 " + ix.getMessage());
-            throw new IOException(ix.getMessage());
-        }
-        final List<String> list = inputStream.getOutput();
-        if (list.isEmpty()) {
-            final String error = errorStream.getOutput().toString();
-            log.logWarning("logpoint 2: "+ error);
-            throw new IOException("empty list: " + error);
-        }
-        return list;
     }
 
 }

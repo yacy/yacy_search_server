@@ -92,4 +92,53 @@ public class consoleInterface extends Thread
         dataIsRead.release();
         return output;
     }
+    
+    /**
+     * simple interface
+     * @return console output
+     * @throws IOException
+     */
+	public static List<String> getConsoleOutput(final List<String> processArgs, Log log) throws IOException {
+	    final ProcessBuilder processBuilder = new ProcessBuilder(processArgs);
+	    Process process = null;
+	    consoleInterface inputStream = null;
+	    consoleInterface errorStream = null;
+	
+	    try {
+	        process = processBuilder.start();
+	
+	        inputStream = new consoleInterface(process.getInputStream(), log);
+	        errorStream = new consoleInterface(process.getErrorStream(), log);
+	
+	        inputStream.start();
+	        errorStream.start();
+	
+	        /*int retval =*/ process.waitFor();
+	
+	    } catch (final IOException iox) {
+	        log.logWarning("logpoint 0 " + iox.getMessage());
+	        throw new IOException(iox.getMessage());
+	    } catch (final InterruptedException ix) {
+	        log.logWarning("logpoint 1 " + ix.getMessage());
+	        throw new IOException(ix.getMessage());
+	    }
+	    final List<String> list = inputStream.getOutput();
+	    if (list.isEmpty()) {
+	        final String error = errorStream.getOutput().toString();
+	        log.logWarning("logpoint 2: "+ error);
+	        throw new IOException("empty list: " + error);
+	    }
+	    return list;
+	}
+	
+	public static String getLastLineConsoleOutput(final List<String> processArgs, Log log) throws IOException {
+		List<String> lines = getConsoleOutput(processArgs, log);
+        String line = "";
+        for (int l = lines.size() - 1; l >= 0; l--) {
+            line = lines.get(l).trim();
+            if (line.length() > 0) break;
+        }
+        return line;
+	}
+
 }
