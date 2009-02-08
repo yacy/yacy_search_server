@@ -78,6 +78,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.zip.GZIPOutputStream;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
@@ -115,11 +116,11 @@ public final class httpdFileHandler {
     private static File     htLocalePath   = null;
     
     private static final class TemplateCacheEntry {
-	Date lastModified;
-	byte[] content;
+    	Date lastModified;
+    	byte[] content;
     }
-    private static final HashMap<File, SoftReference<TemplateCacheEntry>> templateCache;    
-    private static final HashMap<File, SoftReference<Method>> templateMethodCache;
+    private static final ConcurrentHashMap<File, SoftReference<TemplateCacheEntry>> templateCache;    
+    private static final ConcurrentHashMap<File, SoftReference<Method>> templateMethodCache;
     
     public static final boolean useTemplateCache;
     
@@ -130,8 +131,8 @@ public final class httpdFileHandler {
     static {
         final serverSwitch<?> theSwitchboard = plasmaSwitchboard.getSwitchboard();
         useTemplateCache = theSwitchboard.getConfig("enableTemplateCache","true").equalsIgnoreCase("true");
-        templateCache = (useTemplateCache)? new HashMap<File, SoftReference<TemplateCacheEntry>>() : new HashMap<File, SoftReference<TemplateCacheEntry>>(0);
-        templateMethodCache = (useTemplateCache) ? new HashMap<File, SoftReference<Method>>() : new HashMap<File, SoftReference<Method>>(0);
+        templateCache = (useTemplateCache)? new ConcurrentHashMap<File, SoftReference<TemplateCacheEntry>>() : new ConcurrentHashMap<File, SoftReference<TemplateCacheEntry>>(0);
+        templateMethodCache = (useTemplateCache) ? new ConcurrentHashMap<File, SoftReference<Method>>() : new ConcurrentHashMap<File, SoftReference<Method>>(0);
         
         if (httpdFileHandler.switchboard == null) {
             httpdFileHandler.switchboard = theSwitchboard;
