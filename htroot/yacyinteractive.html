@@ -3,10 +3,9 @@
   <head>
     <title>YaCy Interactive Search</title>
     #%env/templates/metas.template%#
-<script type="text/javascript">
+<script language="Javascript">
 //<![CDATA[
 function xmlhttpPost() {
-    
     var searchform = document.forms['searchform'];
     search(searchform.query.value);
 }
@@ -20,7 +19,7 @@ function search(query) {
     else if (window.ActiveXObject) { // IE
         self.xmlHttpReq = new ActiveXObject("Microsoft.XMLHTTP");
     }
-    self.xmlHttpReq.open('GET', "yacysearch.json?verify=false&amp;resource=local&amp;maximumRecords=100&amp;query=" + query, true);
+    self.xmlHttpReq.open('GET', "yacysearch.json?verify=false&resource=local&maximumRecords=100&query=" + query, true);
     self.xmlHttpReq.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
     self.xmlHttpReq.onreadystatechange = function() {
         if (self.xmlHttpReq.readyState == 4) {
@@ -80,7 +79,7 @@ if (q != "") search(q);
 #(display)#
 	#%env/templates/simpleheader.template%#
 	::
-<div id="api"><a href="yacysearch.json?query=yacy"><img src="env/grafics/api.png" alt="API" /></a>
+<div id="api"><a href="yacysearch.json?query=yacy"><img src="env/grafics/api.png" alt="API"/></a>
 <span>This page uses the JSON search API to display search results as you type.
 Click the API icon to see an example call to the native API.
 To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.</span>
@@ -90,10 +89,10 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
 	#%env/templates/embeddedheader.template%#
 #(/display)#
 
-<form class="search small" id="searchform" action="get" onkeyup="xmlhttpPost(); return false;">
+<form class="search small" name="searchform" action="yacyinteractive.html" method="get" onkeyup="xmlhttpPost(); return false;">
   <h2>#[promoteSearchPageGreeting]#</h2>
   <div class="yacylogo">
-    <a href="#[promoteSearchPageGreeting.homepage]#" class="yacylogo"><img src="#[promoteSearchPageGreeting.smallImage]#" alt="yacysearch" /></a>
+    <a href="#[promoteSearchPageGreeting.homepage]#" class="yacylogo"><img src="#[promoteSearchPageGreeting.smallImage]#" alt="yacysearch"/></a>
   </div>
   <fieldset class="yacys"><input name="query" type="text" value="#[query]#" size="50" maxlength="80" /></fieldset>
 
