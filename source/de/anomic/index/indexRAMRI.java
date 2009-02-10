@@ -256,7 +256,7 @@ public final class indexRAMRI implements indexRI, indexRIReader, Iterable<indexC
 
     public synchronized indexContainer deleteContainer(final String wordHash) {
         // returns the index that had been deleted
-    	if (wordHash == null) return null;
+    	if (wordHash == null || heap == null) return null;
         final indexContainer container = heap.deleteContainer(wordHash);
         hashScore.deleteScore(wordHash);
         hashDate.deleteScore(wordHash);

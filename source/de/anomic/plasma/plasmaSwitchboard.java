@@ -1084,6 +1084,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         terminateAllThreads(true);
         log.logConfig("SWITCHBOARD SHUTDOWN STEP 2: sending termination signal to threaded indexing");
         // closing all still running db importer jobs
+        dhtDispatcher.close();
         indexingDocumentProcessor.announceShutdown();
         indexingDocumentProcessor.awaitShutdown(12000);
         crawlStacker.announceClose();
@@ -2110,6 +2111,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     
     public boolean waitForShutdown() throws InterruptedException {
         this.shutdownSync.P();
+        dhtDispatcher.close();
         return this.terminate;
     }
 

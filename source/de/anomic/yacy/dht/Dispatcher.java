@@ -358,7 +358,7 @@ public class Dispatcher {
         
         if (chunk.canFinish()) {
             try {
-                this.indexingTransmissionProcessor.enQueue(chunk);
+                if (this.indexingTransmissionProcessor != null) this.indexingTransmissionProcessor.enQueue(chunk);
             } catch (InterruptedException e) {
                 e.printStackTrace();
                 return null;
@@ -371,15 +371,21 @@ public class Dispatcher {
         }
     }
 
-    public void close() throws IOException {
+    public void close() {
         // removes all entries from the dispatcher and puts them back to a RAMRI
-        this.indexingTransmissionProcessor.announceShutdown();
-        for (Map.Entry<String, Transmission.Chunk> e : this.transmissionCloud.entrySet()) {
-            for (indexContainer i : e.getValue()) this.backend.addEntries(i);
+        if (indexingTransmissionProcessor != null) this.indexingTransmissionProcessor.announceShutdown();
+        if (this.transmissionCloud != null) {
+        	for (Map.Entry<String, Transmission.Chunk> e : this.transmissionCloud.entrySet()) {
+        		for (indexContainer i : e.getValue()) try {this.backend.addEntries(i);} catch (IOException e1) {}
+        	}
+        	this.transmissionCloud.clear();
         }
-        this.transmissionCloud.clear();
         this.transmissionCloud = null;
-        this.indexingTransmissionProcessor.awaitShutdown(10000);
+        if (indexingTransmissionProcessor != null) {
+        	this.indexingTransmissionProcessor.awaitShutdown(10000);
+        	this.indexingTransmissionProcessor.clear();
+        }
+        this.indexingTransmissionProcessor = null;
     }
     
 }
