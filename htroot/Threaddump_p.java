@@ -132,7 +132,7 @@ public class Threaddump_p {
             Entry<String, Integer> e = removeMax(dumps);
             bufferappend(buffer, plain, "Occurrences: " + e.getValue());
             bufferappend(buffer, plain, e.getKey());
-            bufferappend(buffer, plain, "");
+            //bufferappend(buffer, plain, "");
         }
         bufferappend(buffer, plain, "");
     }
@@ -193,18 +193,24 @@ public class Threaddump_p {
                     tracename = "[" + tracename + "] ";                
                 }                
                 String threadtitle = tracename + "Thread= " + thread.getName() + " " + (thread.isDaemon()?"daemon":"") + " id=" + thread.getId() + " " + thread.getState().toString();
+                String className;
                 for (int i = 0; i < stackTraceElements.length; i++) {
                     ste = stackTraceElements[i];
-                    //if (ste.getClassName().startsWith("java.") || ste.getClassName().startsWith("sun.")) continue;
-                    if (i == 0) {
-                        line = getLine(getClassFile(classPath, ste.getClassName()), ste.getLineNumber());
+                    className = ste.getClassName();
+                    if (className.startsWith("java.") || className.startsWith("sun.")) {
+                    	sb.setLength(0);
+                    	bufferappend(sb, plain, tracename + "at " + htmlFilterCharacterCoding.unicode2html(ste.toString(), true));
                     } else {
-                        line = null;
-                    }
-                    if ((line != null) && (line.length() > 0)) {
-                        bufferappend(sb, plain, tracename + "at " + htmlFilterCharacterCoding.unicode2html(ste.toString(), true) + " [" + line.trim() + "]");
-                    } else {
-                        bufferappend(sb, plain, tracename + "at " + htmlFilterCharacterCoding.unicode2html(ste.toString(), true));
+	                    if (i == 0) {
+	                        line = getLine(getClassFile(classPath, className), ste.getLineNumber());
+	                    } else {
+	                        line = null;
+	                    }
+	                    if ((line != null) && (line.length() > 0)) {
+	                        bufferappend(sb, plain, tracename + "at " + htmlFilterCharacterCoding.unicode2html(ste.toString(), true) + " [" + line.trim() + "]");
+	                    } else {
+	                        bufferappend(sb, plain, tracename + "at " + htmlFilterCharacterCoding.unicode2html(ste.toString(), true));
+	                    }
                     }
                 }
                 String threaddump = sb.toString();

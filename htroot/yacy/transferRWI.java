@@ -101,9 +101,9 @@ public final class transferRWI {
             sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". Not granted.");
             result = "not_granted";
             pause = 0;
-        } else if (checkLimit && sb.webIndex.dhtCacheSize() > cachelimit) {
+        } else if (checkLimit && sb.webIndex.indexCacheSize() > cachelimit) {
             // we are too busy to receive indexes
-            sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". We are too busy (buffersize=" + sb.webIndex.dhtCacheSize() + ").");
+            sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". We are too busy (buffersize=" + sb.webIndex.indexCacheSize() + ").");
             granted = false; // don't accept more words if there are too many words to flush
             result = "busy";
             pause = 60000;
@@ -201,7 +201,7 @@ public final class transferRWI {
             result = "ok";
             
             if (checkLimit) {
-                pause = (sb.webIndex.dhtCacheSize() < 500) ? 0 : sb.webIndex.dhtCacheSize(); // estimation of necessary pause time
+                pause = (sb.webIndex.indexCacheSize() < 500) ? 0 : sb.webIndex.indexCacheSize(); // estimation of necessary pause time
             }
         }
 
