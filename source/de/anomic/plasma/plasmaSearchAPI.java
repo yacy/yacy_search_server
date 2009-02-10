@@ -39,9 +39,9 @@ import de.anomic.index.indexURLReference;
 import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.server.serverObjects;
-import de.anomic.yacy.yacyPeerSelection;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyURL;
+import de.anomic.yacy.dht.PeerSelection;
 
 public class plasmaSearchAPI {
     // collection of static methods for a search servlet. Exists only to prevent that the same processes are defined more than once.
@@ -73,7 +73,7 @@ public class plasmaSearchAPI {
         yacySeed seed;
         int hc = 0;
         prop.put("searchresult_keyhash", startHash);
-        final Iterator<yacySeed> e = yacyPeerSelection.getAcceptRemoteIndexSeeds(sb.webIndex.seedDB, startHash, sb.webIndex.seedDB.sizeConnected(), true);
+        final Iterator<yacySeed> e = PeerSelection.getAcceptRemoteIndexSeeds(sb.webIndex.seedDB, startHash, sb.webIndex.seedDB.sizeConnected(), true);
         while (e.hasNext()) {
             seed = e.next();
             if (seed != null) {

@@ -194,7 +194,7 @@ public class Transmission  {
             	log.logInfo("Transfer of chunk to myself-target");
             	return true;
             }
-            log.logInfo("starting new index transmission thread " + this.primaryTarget);
+            log.logInfo("starting new index transmission request to " + this.primaryTarget);
             long start = System.currentTimeMillis();
             final HashMap<String, Object> ohm = yacyClient.transferIndex(target, this.containers, this.references, gzipBody4Transfer, timeout4Transfer);
             final String result = (String) ohm.get("result");
@@ -219,7 +219,9 @@ public class Transmission  {
                 return true;
             }
             this.miss++;
-            seeds.peerActions.peerDeparture(target, "did not accept index");
+            // write information that peer does not receive index transmissions
+            target.setFlagAcceptRemoteIndex(false);
+            seeds.update(target.hash, target);
             log.logInfo("Transfer failed of chunk to target " + target.hash + "/" + target.getName());
             return false;
         }

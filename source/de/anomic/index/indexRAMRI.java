@@ -138,6 +138,7 @@ public final class indexRAMRI implements indexRI, indexRIReader, Iterable<indexC
     }
     
     public int size() {
+    	if (heap == null) return 0;
         return heap.size();
     }
 
