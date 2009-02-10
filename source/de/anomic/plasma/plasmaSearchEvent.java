@@ -376,15 +376,6 @@ public final class plasmaSearchEvent {
         return false;
     }
     
-    private int countWorkerFinished() {
-        if (this.workerThreads == null) return 0;
-        int c = 0;
-        for (int i = 0; i < workerThreadCount; i++) {
-           if (this.workerThreads[i] == null || !this.workerThreads[i].isAlive()) c++;
-        }
-        return c;
-    }
-    
     boolean anyRemoteSearchAlive() {
         // check primary search threads
         if ((this.primarySearchThreads != null) && (this.primarySearchThreads.length != 0)) {

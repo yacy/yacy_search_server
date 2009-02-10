@@ -107,7 +107,6 @@ public class NoticeURLImporter extends AbstractImporter implements Importer {
         return theStatus.toString();
     }
 
-    @SuppressWarnings("unchecked")
     public void run() {
         try {   
             // waiting on init thread to finish

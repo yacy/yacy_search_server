@@ -38,6 +38,7 @@ import java.util.Iterator;
 import de.anomic.yacy.yacySearch;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacySeedDB;
+import de.anomic.yacy.dht.FlatWordPartitionScheme;
 import de.anomic.ymage.ymageMatrix;
 import de.anomic.ymage.ymageToolPrint;
 
@@ -128,7 +129,7 @@ public class plasmaGrafics {
         // draw in the primary search peers
         for (int j = 0; j < primarySearches.length; j++) {
             eventPicture.setColor((primarySearches[j].isAlive()) ? ymageMatrix.RED : ymageMatrix.GREEN);
-            angle = (int) (360.0 * (((double) primarySearches[j].target().dhtPosition()) / ((double) Long.MAX_VALUE)));
+            angle = (int) (360.0 * (((double) FlatWordPartitionScheme.std.dhtPosition(primarySearches[j].target().hash, null)) / ((double) Long.MAX_VALUE)));
             eventPicture.arcLine(cx, cy, cr - 20, cr, angle);
         }
 
@@ -136,7 +137,7 @@ public class plasmaGrafics {
         if (secondarySearches != null) {
             for (int j = 0; j < secondarySearches.length; j++) {
                 eventPicture.setColor((secondarySearches[j].isAlive()) ? ymageMatrix.RED : ymageMatrix.GREEN);
-                angle = (int) (360.0 * (((double) secondarySearches[j].target().dhtPosition()) / ((double) Long.MAX_VALUE)));
+                angle = (int) (360.0 * (((double) FlatWordPartitionScheme.std.dhtPosition(secondarySearches[j].target().hash, null)) / ((double) Long.MAX_VALUE)));
                 eventPicture.arcLine(cx, cy, cr - 10, cr, angle - 1);
                 eventPicture.arcLine(cx, cy, cr - 10, cr, angle + 1);
             }
@@ -248,7 +249,7 @@ public class plasmaGrafics {
         final String name = seed.getName().toUpperCase() /*+ ":" + seed.hash + ":" + (((double) ((int) (100 * (((double) yacySeed.dhtPosition(seed.hash)) / ((double) yacySeed.maxDHTDistance))))) / 100.0)*/;
         if (name.length() < shortestName) shortestName = name.length();
         if (name.length() > longestName) longestName = name.length();
-        final int angle = (int) (360.0 * (((double) seed.dhtPosition()) / ((double) Long.MAX_VALUE)));
+        final int angle = (int) (360.0 * (((double) FlatWordPartitionScheme.std.dhtPosition(seed.hash, null)) / ((double) Long.MAX_VALUE)));
         //System.out.println("Seed " + seed.hash + " has distance " + seed.dhtDistance() + ", angle = " + angle);
         int linelength = 20 + outerradius * (20 * (name.length() - shortestName) / (longestName - shortestName) + Math.abs(seed.hash.hashCode() % 20)) / 60;
         if (linelength > outerradius) linelength = outerradius;

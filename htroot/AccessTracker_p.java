@@ -29,6 +29,7 @@ import java.util.ConcurrentModificationException;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.Map.Entry;
@@ -45,7 +46,7 @@ import de.anomic.yacy.yacySeed;
 
 public class AccessTracker_p {
     
-	private static final TreeMap<Long, String> treemapclone(final TreeMap<Long, String> m) {
+	private static final SortedMap<Long, String> treemapclone(final SortedMap<Long, String> m) {
 		final TreeMap<Long, String> accessClone = new TreeMap<Long, String>();
 		try {
 			accessClone.putAll(m);
@@ -68,7 +69,7 @@ public class AccessTracker_p {
         if (page == 0) {
             final Iterator<String> i = sb.accessHosts();
             String host;
-            TreeMap<Long, String> access;
+            SortedMap<Long, String> access;
             int entCount = 0;
             try {
             while ((entCount < maxCount) && (i.hasNext())) {
@@ -98,7 +99,7 @@ public class AccessTracker_p {
         if (page == 1) {
             String host = (post == null) ? "" : post.get("host", "");
             int entCount = 0;
-            TreeMap<Long, String> access;
+            SortedMap<Long, String> access;
             Map.Entry<Long, String> entry;
             if (host.length() > 0) {
 				access = sb.accessTrack(host);

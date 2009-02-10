@@ -34,7 +34,7 @@ import java.io.File;
 import java.net.InetAddress;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.TreeMap;
+import java.util.SortedMap;
 
 import de.anomic.kelondro.util.Log;
 
@@ -49,7 +49,7 @@ public interface serverSwitch<E> {
 
     // access tracker
     public void track(String host, String accessPath); // learn that a specific host has accessed a specific path
-    public TreeMap<Long, String> accessTrack(String host); // returns mapping from Long(accesstime) to path
+    public SortedMap<Long, String> accessTrack(String host); // returns mapping from Long(accesstime) to path
     public Iterator<String> accessHosts(); // returns an iterator of hosts in tracker (String)
         
     // a switchboard can have action listener

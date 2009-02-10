@@ -38,7 +38,6 @@ public abstract class serverAbstractBlockingThread<J extends serverProcessorJob>
         return this.manager;
     }
 
-    @SuppressWarnings("unchecked")
     public void run() {
         this.open();
         if (log != null) {

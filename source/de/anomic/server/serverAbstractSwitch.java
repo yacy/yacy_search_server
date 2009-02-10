@@ -27,6 +27,7 @@ import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -39,20 +40,20 @@ public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
     private static final long maxTrackingTimeDefault = 1000 * 60 * 60; // store only access data from the last hour to save ram space
     
     // configuration management
-    private final   File      configFile;
-    private final   String    configComment;
-    private final   File      rootPath;
-    protected boolean firstInit;
-    protected Log log;
-    protected int       serverJobs;
-    protected long      maxTrackingTime;
-    private   Map<String, String>                    configProps;
-    private final   Map<String, String>                    configRemoved;
-    private final   HashMap<InetAddress, String>           authorization;
-    private final   TreeMap<String, serverBusyThread>      workerThreads;
-    private final   TreeMap<String, serverSwitchAction>    switchActions;
-    protected ConcurrentHashMap<String, TreeMap<Long, String>> accessTracker; // mappings from requesting host to an ArrayList of serverTrack-entries
-    private final   LinkedBlockingQueue<E> cacheStack;
+    private   final File    configFile;
+    private   final String  configComment;
+    private   final File    rootPath;
+    protected       boolean firstInit;
+    protected       Log     log;
+    protected       int     serverJobs;
+    private         long    maxTrackingTime;
+    private         Map<String, String>                  configProps;
+    private   final Map<String, String>                  configRemoved;
+    private   final HashMap<InetAddress, String>         authorization;
+    private   final TreeMap<String, serverBusyThread>    workerThreads;
+    private   final TreeMap<String, serverSwitchAction>  switchActions;
+    private   final LinkedBlockingQueue<E>               cacheStack;
+    private   final ConcurrentHashMap<String, SortedMap<Long, String>> accessTracker; // mappings from requesting host to an ArrayList of serverTrack-entries
     
     public serverAbstractSwitch(final File rootPath, final String initPath, final String configPath, final boolean applyPro) {
         // we initialize the switchboard with a property file,
@@ -132,7 +133,7 @@ public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
 
         // other settings
         authorization = new HashMap<InetAddress, String>();
-        accessTracker = new ConcurrentHashMap<String, TreeMap<Long, String>>();
+        accessTracker = new ConcurrentHashMap<String, SortedMap<Long, String>>();
 
         // init thread control
         workerThreads = new TreeMap<String, serverBusyThread>();
@@ -160,7 +161,7 @@ public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
      * remove all entries from the access tracker where the age of the last access is greater than the given timeout
      */
     public void cleanupAccessTracker(final long timeout) {
-        final Iterator<Map.Entry<String, TreeMap<Long, String>>> i = accessTracker.entrySet().iterator();
+        final Iterator<Map.Entry<String, SortedMap<Long, String>>> i = accessTracker.entrySet().iterator();
         while (i.hasNext()) {
             if (i.next().getValue().tailMap(Long.valueOf(System.currentTimeMillis() - timeout)).size() == 0) i.remove();
         }
@@ -169,7 +170,7 @@ public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
     public void track(final String host, String accessPath) {
         // learn that a specific host has accessed a specific path
         if (accessPath == null) accessPath="NULL";
-        TreeMap<Long, String> access = accessTracker.get(host);
+        SortedMap<Long, String> access = accessTracker.get(host);
         if (access == null) access = new TreeMap<Long, String>();
         
         synchronized (access) {
@@ -179,10 +180,10 @@ public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
         }
     }
     
-    public TreeMap<Long, String> accessTrack(final String host) {
+    public SortedMap<Long, String> accessTrack(final String host) {
         // returns mapping from Long(accesstime) to path
         
-        TreeMap<Long, String> access = accessTracker.get(host);
+        SortedMap<Long, String> access = accessTracker.get(host);
         if (access == null) return null;
         // clear too old entries
         synchronized (access) {
@@ -198,13 +199,13 @@ public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
         return access;
     }
     
-    private TreeMap<Long, String> clearTooOldAccess(final TreeMap<Long, String> access) {
-        return new TreeMap<Long, String>(access.tailMap(Long.valueOf(System.currentTimeMillis() - maxTrackingTime)));
+    private SortedMap<Long, String> clearTooOldAccess(final SortedMap<Long, String> access) {
+        return access.tailMap(Long.valueOf(System.currentTimeMillis() - maxTrackingTime));
     }
     
     public Iterator<String> accessHosts() {
         // returns an iterator of hosts in tracker (String)
-    	final HashMap<String, TreeMap<Long, String>> accessTrackerClone = new HashMap<String, TreeMap<Long, String>>();
+    	final HashMap<String, SortedMap<Long, String>> accessTrackerClone = new HashMap<String, SortedMap<Long, String>>();
     	accessTrackerClone.putAll(accessTracker);
     	return accessTrackerClone.keySet().iterator();
     }

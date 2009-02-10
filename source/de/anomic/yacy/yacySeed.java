@@ -676,14 +676,6 @@ public class yacySeed implements Cloneable {
         return type.equals(yacySeed.PEERTYPE_SENIOR) || type.equals(yacySeed.PEERTYPE_PRINCIPAL);
     }
 
-    /**
-     * @deprecated this does not reflect the vertical DHT. A peer may have several positions now.
-     */
-    public final long dhtPosition() {
-        // normalized to Long.MAX_VALUE
-        return FlatWordPartitionScheme.std.dhtPosition(this.hash, null);
-    }
-    
     private static String bestGap(final yacySeedDB seedDB) {
         if ((seedDB == null) || (seedDB.sizeConnected() <= 2)) {
             // use random hash
