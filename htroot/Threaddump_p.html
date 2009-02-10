@@ -9,13 +9,20 @@
 	#%env/templates/header.template%#
 	#%env/templates/submenuViewLog.template%#
     <h2>Threaddump</h2>
-    <form action="Threaddump_p.html" method="get" >
+    <table border="0" cellpadding="0" cellspacing="0"><tr>
+    <td><form action="Threaddump_p.html" method="get" >
       <fieldset>
         <input type="submit" name="singleThreaddump" value="Single Threaddump" />
+      </fieldset>
+    </form></td>
+    
+    <td><form action="Threaddump_p.html" method="get" >
+      <fieldset>
+        <input type="text" name="count" value="#[count]#" size="4" maxlength="4" />
         <input type="submit" name="multipleThreaddump" value="Multiple Dump Statistic" />
       </fieldset>
-    </form>
-
+    </form></td>
+    </tr></table>
     
     <div>
     <tt>#[content]#</tt>

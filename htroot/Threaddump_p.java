@@ -48,13 +48,11 @@ import de.anomic.yacy.yacyVersion;
 
 public class Threaddump_p {
 
-	private static final serverObjects prop = new serverObjects();
-	private static plasmaSwitchboard sb = null;
-
     public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
-
-    	prop.clear();
-    	sb = (plasmaSwitchboard) env;
+    	
+    	serverObjects prop = new serverObjects();
+    	plasmaSwitchboard sb = (plasmaSwitchboard) env;
+    	
     	final StringBuilder buffer = new StringBuilder(1000);
     	
 	    final boolean plain = post.get("plain", "false").equals("true");
@@ -74,9 +72,11 @@ public class Threaddump_p {
     	bufferappend(buffer, plain, "");
     	bufferappend(buffer, plain, "");
     	
+    	int multipleCount = 1000;
         if (post != null && post.containsKey("multipleThreaddump")) {
+        	multipleCount = post.getInt("count", multipleCount);
             final ArrayList<Map<Thread,StackTraceElement[]>> traces = new ArrayList<Map<Thread,StackTraceElement[]>>();
-            for (int i = 0; i < 1000; i++) {
+            for (int i = 0; i < multipleCount; i++) {
                 traces.add(Thread.getAllStackTraces());
             }
             appendStackTraceStats(sb.getRootPath(), buffer, traces, plain, Thread.State.BLOCKED);
@@ -98,6 +98,7 @@ public class Threaddump_p {
         
     	bufferappend(buffer, plain, "************* End Thread Dump " + dt + " *******************");
     
+    	prop.put("plain_count", multipleCount);
     	prop.put("plain_content", buffer.toString());
     	prop.put("plain", (plain) ? 1 : 0);
     	
