@@ -29,27 +29,20 @@
 //javac -classpath .:../Classes IndexControl_p.java
 //if the shell's current path is HTROOT
 
-import java.util.Date;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
-import java.util.TreeMap;
 
 import de.anomic.http.httpRequestHeader;
-import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.tools.Formatter;
-import de.anomic.yacy.yacyPeerSelection;
-import de.anomic.yacy.yacySeed;
 
 public final class IndexTransfer_p {
     
     public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
         // return variable that accumulates replacements
-        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        //final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final serverObjects prop = new serverObjects();
         
-        if (post != null) {            
+        /*
+        if (post != null) {
             if (post.containsKey("startIndexTransfer")) {                
                 final yacySeed seed = sb.webIndex.seedDB.getConnected(post.get("hostHash", ""));                
                 if (seed == null) {
@@ -110,7 +103,7 @@ public final class IndexTransfer_p {
         yacySeed seed;
         int hc = 0;
         if ((sb.webIndex.seedDB != null) && (sb.webIndex.seedDB.sizeConnected() > 0)) {
-            final Iterator<yacySeed> e = yacyPeerSelection.getAcceptRemoteIndexSeeds(sb.webIndex.seedDB, null, sb.webIndex.seedDB.sizeConnected(), false);
+            final Iterator<yacySeed> e = PeerSelection.getAcceptRemoteIndexSeeds(sb.webIndex.seedDB, null, sb.webIndex.seedDB.sizeConnected(), false);
             final TreeMap<String, String> hostList = new TreeMap<String, String>();
             while (e.hasNext()) {
                 seed = e.next();
@@ -121,7 +114,7 @@ public final class IndexTransfer_p {
             try {
                 while ((hostName = hostList.firstKey()) != null) {
                     prop.put("running_hosts_" + hc + "_hosthash", hostList.get(hostName));
-                    prop.putHTML("running_hosts_" + hc + "_hostname", /*seed.hash + " " +*/ hostName);
+                    prop.putHTML("running_hosts_" + hc + "_hostname", hostName);
                     hc++;                
                     hostList.remove(hostName);
                 }
@@ -132,6 +125,7 @@ public final class IndexTransfer_p {
         }
 
         prop.put("date",(new Date()).toString());
+        */
         return prop;
     }
 }

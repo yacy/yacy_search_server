@@ -192,7 +192,7 @@ public class Status {
             prop.putNum("peerStatistics_queriesperhour", Math.round(6000d * sb.webIndex.seedDB.mySeed().getQPM()) / 100d);
             prop.putNum("peerStatistics_links", sb.webIndex.seedDB.mySeed().getLinkCount());
             prop.put("peerStatistics_words", Formatter.number(sb.webIndex.seedDB.mySeed().get(yacySeed.ICOUNT, "0")));
-            prop.putNum("peerStatistics_disconnects", sb.webIndex.peerActions.disconnects);
+            prop.putNum("peerStatistics_disconnects", sb.webIndex.seedDB.peerActions.disconnects);
             prop.put("peerStatistics_connects", Formatter.number(sb.webIndex.seedDB.mySeed().get(yacySeed.CCOUNT, "0")));
             thisHash = sb.webIndex.seedDB.mySeed().hash;
             if (sb.webIndex.seedDB.mySeed().getPublicAddress() == null) {

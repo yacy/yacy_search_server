@@ -158,17 +158,17 @@ public final class hello {
                 remoteSeed.put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR);
             }
             // connect the seed
-            sb.webIndex.peerActions.peerArrival(remoteSeed, true);
+            sb.webIndex.seedDB.peerActions.peerArrival(remoteSeed, true);
         } else {
             prop.put(yacySeed.YOURTYPE, yacySeed.PEERTYPE_JUNIOR);
             remoteSeed.put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_JUNIOR);
             yacyCore.log.logInfo("hello: responded remote junior peer '" + remoteSeed.getName() + "' from " + reportedip);
             // no connection here, instead store junior in connection cache
             if ((remoteSeed.hash != null) && (remoteSeed.isProper(false) == null)) {
-                sb.webIndex.peerActions.peerPing(remoteSeed);
+                sb.webIndex.seedDB.peerActions.peerPing(remoteSeed);
             }
         }
-        sb.webIndex.peerActions.setUserAgent(clientip, userAgent);
+        sb.webIndex.seedDB.peerActions.setUserAgent(clientip, userAgent);
         if (!(prop.get(yacySeed.YOURTYPE)).equals(reportedPeerType)) {
             yacyCore.log.logInfo("hello: changing remote peer '" + remoteSeed.getName() +
                                                            "' [" + reportedip +

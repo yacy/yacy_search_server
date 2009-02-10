@@ -108,6 +108,7 @@ public class ZURL {
 
     public boolean remove(final String hash) {
         if (hash == null) return false;
+        //System.out.println("*** DEBUG ZURL " + this.urlIndex.filename() + " remove " + hash);
         try {
             urlIndex.remove(hash.getBytes());
             return true;
@@ -134,6 +135,7 @@ public class ZURL {
     public synchronized Entry getEntry(final String urlhash) {
         try {
             if (urlIndex == null) return null;
+            //System.out.println("*** DEBUG ZURL " + this.urlIndex.filename() + " get " + urlhash);
             final Row.Entry entry = urlIndex.get(urlhash.getBytes());
             if (entry == null) return null;
             return new Entry(entry);
@@ -205,6 +207,7 @@ public class ZURL {
             newrow.setCol(4, this.anycause.getBytes());
             newrow.setCol(5, this.bentry.toRow().bytes());
             try {
+            	//System.out.println("*** DEBUG ZURL " + urlIndex.filename() + " store " + newrow.getColString(0, "UTF-8"));
                 if (urlIndex != null) urlIndex.put(newrow);
                 this.stored = true;
             } catch (final IOException e) {

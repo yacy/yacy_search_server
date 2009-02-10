@@ -185,7 +185,7 @@ public class Network {
                 yacySeed peer = new yacySeed(post.get("peerHash"),map);
 
                 sb.updateMySeed();
-                final int added = yacyClient.publishMySeed(sb.webIndex.seedDB.mySeed(), sb.webIndex.peerActions, peer.getPublicAddress(), peer.hash);
+                final int added = yacyClient.publishMySeed(sb.webIndex.seedDB.mySeed(), sb.webIndex.seedDB.peerActions, peer.getPublicAddress(), peer.hash);
 
                 if (added <= 0) {
                     prop.put("table_comment",1);
@@ -242,7 +242,7 @@ public class Network {
                     final HashMap<String, Map<String, String>> updatedBlog = new HashMap<String, Map<String, String>>();
                     final HashMap<String, String> isCrawling = new HashMap<String, String>();
                     yacyNewsRecord record;
-                    final Iterator<yacyNewsRecord> recordIterator = sb.webIndex.newsPool.recordIterator(yacyNewsPool.INCOMING_DB, true);
+                    final Iterator<yacyNewsRecord> recordIterator = sb.webIndex.seedDB.newsPool.recordIterator(yacyNewsPool.INCOMING_DB, true);
                     while (recordIterator.hasNext()) {
                         record = recordIterator.next();
                         if (record == null) {
@@ -350,7 +350,7 @@ public class Network {
                                 userAgent = HTTPLoader.yacyUserAgent;
                                 location = HttpClient.generateLocation();
                             } else {
-                               userAgent = sb.webIndex.peerActions.getUserAgent(seed.getIP());
+                               userAgent = sb.webIndex.seedDB.peerActions.getUserAgent(seed.getIP());
                                location = parseLocationInUserAgent(userAgent);
                             }
                             prop.put(STR_TABLE_LIST + conCount + "_location", location);

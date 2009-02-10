@@ -78,7 +78,7 @@ public class indexCollectionRI implements indexRI {
         return 100 * 1024 /* overhead here */ + collectionIndex.minMem();
     }
 
-    public synchronized CloneableIterator<indexContainer> wordContainers(final String startWordHash, final boolean rot) {
+    public synchronized CloneableIterator<indexContainer> wordContainerIterator(final String startWordHash, final boolean rot, final boolean ram) {
         return new wordContainersIterator(startWordHash, rot);
     }
 
@@ -171,6 +171,16 @@ public class indexCollectionRI implements indexRI {
 
     public void close() {
         collectionIndex.close();
+    }
+
+    public int sizeEntry(String key) {
+        try {
+            final RowSet collection = collectionIndex.get(key.getBytes());
+            if (collection == null) return 0;
+            return collection.size();
+        } catch (final IOException e) {
+            return 0;
+        }
     }
     
 }

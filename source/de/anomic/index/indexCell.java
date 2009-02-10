@@ -51,17 +51,16 @@ public final class indexCell implements indexRI {
 
     // class variables
     private indexContainerBLOBArray array;
-    private indexContainerRAMHeap ram;
+    private indexContainerCache ram;
     private int maxRamEntries;
     
-    @SuppressWarnings("unchecked")
     public indexCell(
             final File cellPath,
             final Row payloadrow,
             final int maxRamEntries
             ) throws IOException {
         this.array = new indexContainerBLOBArray(cellPath, payloadrow);
-        this.ram = new indexContainerRAMHeap(payloadrow);
+        this.ram = new indexContainerCache(payloadrow);
         this.maxRamEntries = maxRamEntries;
     }
     
@@ -70,7 +69,7 @@ public final class indexCell implements indexRI {
         File dumpFile = this.array.newContainerBLOBFile();
         this.ram.dump(dumpFile);
         // get a fresh ram cache
-        this.ram = new indexContainerRAMHeap(this.array.rowdef());
+        this.ram = new indexContainerCache(this.array.rowdef());
         // add the dumped indexContainerBLOB to the array
         this.array.mountBLOBContainer(dumpFile);
     }
@@ -80,7 +79,7 @@ public final class indexCell implements indexRI {
      * @throws IOException 
      */
     public synchronized void addEntries(indexContainer newEntries) throws IOException {
-        this.ram.add(newEntries);
+        this.ram.addEntries(newEntries);
         if (this.ram.size() > this.maxRamEntries) cacheDump();
     }
 
@@ -114,7 +113,7 @@ public final class indexCell implements indexRI {
      * the deleted containers are merged and returned as result of the method
      */
     public indexContainer deleteContainer(String wordHash) throws IOException {
-        indexContainer c0 = this.ram.delete(wordHash);
+        indexContainer c0 = this.ram.deleteContainer(wordHash);
         indexContainer c1 = this.array.get(wordHash);
         if (c1 == null) {
             if (c0 == null) return null;
@@ -129,7 +128,7 @@ public final class indexCell implements indexRI {
      * all containers in the BLOBs and the RAM are merged and returned
      */
     public indexContainer getContainer(String wordHash, Set<String> urlselection) throws IOException {
-        indexContainer c0 = this.ram.get(wordHash);
+        indexContainer c0 = this.ram.getContainer(wordHash, null);
         indexContainer c1 = this.array.get(wordHash);
         if (c1 == null) {
             if (c0 == null) return null;
@@ -139,11 +138,27 @@ public final class indexCell implements indexRI {
         return c1.merge(c0);
     }
 
+    public int sizeEntry(String wordHash) {
+        indexContainer c0 = this.ram.getContainer(wordHash, null);
+        indexContainer c1;
+        try {
+            c1 = this.array.get(wordHash);
+        } catch (IOException e) {
+            c1 = null;
+        }
+        if (c1 == null) {
+            if (c0 == null) return 0;
+            return c0.size();
+        }
+        if (c0 == null) return c1.size();
+        return c1.size() + c0.size();
+    }
+    
     /**
      * checks if there is any container for this wordHash, either in RAM or any BLOB
      */
     public boolean hasContainer(String wordHash) {
-        if (this.ram.has(wordHash)) return true;
+        if (this.ram.hasContainer(wordHash)) return true;
         return this.array.has(wordHash);
     }
 
@@ -173,19 +188,15 @@ public final class indexCell implements indexRI {
         return this.ram.size() + this.array.size();
     }
 
-    public CloneableIterator<indexContainer> wordContainers(String startWordHash, boolean rot) throws IOException {
-        return wordContainers(startWordHash, rot, false);
-    }
-    
-    public synchronized CloneableIterator<indexContainer> wordContainers(final String startWordHash, boolean rot, final boolean ramOnly) throws IOException {
+    public CloneableIterator<indexContainer> wordContainerIterator(String startWordHash, boolean rot, boolean ram) throws IOException {
         final Order<indexContainer> containerOrder = new indexContainerOrder(this.ram.rowdef().getOrdering().clone());
         containerOrder.rotate(new indexContainer(startWordHash, this.ram.rowdef(), 0));
-        if (ramOnly) {
-            return this.ram.wordContainers(startWordHash, false);
+        if (ram) {
+            return this.ram.wordContainerIterator(startWordHash, rot, true);
         }
         return new MergeIterator<indexContainer>(
-                this.ram.wordContainers(startWordHash, false),
-                this.array.wordContainers(startWordHash, false),
+                this.ram.wordContainerIterator(startWordHash, false, true),
+                this.array.wordContainerIterator(startWordHash, false, false),
                 containerOrder,
                 indexContainer.containerMergeMethod,
                 true);

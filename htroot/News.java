@@ -62,7 +62,7 @@ public class News {
                     if ((check.startsWith("del_")) && (post.get(check, "off").equals("on"))) {
                         id = check.substring(4);
                         try {
-                            sb.webIndex.newsPool.moveOff(tableID, id);
+                            sb.webIndex.seedDB.newsPool.moveOff(tableID, id);
                         } catch (final IOException ee) {ee.printStackTrace();}
                     }
                 }
@@ -75,9 +75,9 @@ public class News {
                 }
                 try {
                     if ((tableID == yacyNewsPool.PROCESSED_DB) || (tableID == yacyNewsPool.PUBLISHED_DB)) {
-                        sb.webIndex.newsPool.clear(tableID);
+                        sb.webIndex.seedDB.newsPool.clear(tableID);
                     } else {
-                        sb.webIndex.newsPool.moveOffAll(tableID);
+                        sb.webIndex.seedDB.newsPool.moveOffAll(tableID);
                     }
                 } catch (final IOException e) {
                     e.printStackTrace();
@@ -90,10 +90,10 @@ public class News {
             // show overview
             prop.put("table", "0");
             prop.put("page", "0");
-            prop.putNum("table_insize", sb.webIndex.newsPool.size(yacyNewsPool.INCOMING_DB));
-            prop.putNum("table_prsize", sb.webIndex.newsPool.size(yacyNewsPool.PROCESSED_DB));
-            prop.putNum("table_ousize", sb.webIndex.newsPool.size(yacyNewsPool.OUTGOING_DB));
-            prop.putNum("table_pusize", sb.webIndex.newsPool.size(yacyNewsPool.PUBLISHED_DB));
+            prop.putNum("table_insize", sb.webIndex.seedDB.newsPool.size(yacyNewsPool.INCOMING_DB));
+            prop.putNum("table_prsize", sb.webIndex.seedDB.newsPool.size(yacyNewsPool.PROCESSED_DB));
+            prop.putNum("table_ousize", sb.webIndex.seedDB.newsPool.size(yacyNewsPool.OUTGOING_DB));
+            prop.putNum("table_pusize", sb.webIndex.seedDB.newsPool.size(yacyNewsPool.PUBLISHED_DB));
         } else {
             // generate table
             prop.put("table", "1");
@@ -101,8 +101,8 @@ public class News {
             prop.put("table_page", tableID + 1);
             
             if (sb.webIndex.seedDB != null) {
-                final int maxCount = Math.min(1000, sb.webIndex.newsPool.size(tableID));
-                final Iterator<yacyNewsRecord> recordIterator = sb.webIndex.newsPool.recordIterator(tableID, false);
+                final int maxCount = Math.min(1000, sb.webIndex.seedDB.newsPool.size(tableID));
+                final Iterator<yacyNewsRecord> recordIterator = sb.webIndex.seedDB.newsPool.recordIterator(tableID, false);
                 yacyNewsRecord record;
                 yacySeed seed;
                 int i = 0;

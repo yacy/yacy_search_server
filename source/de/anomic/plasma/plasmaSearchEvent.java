@@ -51,6 +51,7 @@ import de.anomic.server.serverProfiling;
 import de.anomic.yacy.yacySearch;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyURL;
+import de.anomic.yacy.dht.FlatWordPartitionScheme;
 
 public final class plasmaSearchEvent {
     
@@ -169,13 +170,10 @@ public final class plasmaSearchEvent {
             if (generateAbstracts) {
                 // compute index abstracts
                 final long timer = System.currentTimeMillis();
-                final Iterator<Map.Entry<String, indexContainer>> ci = this.rankedCache.searchContainerMaps()[0].entrySet().iterator();
-                Map.Entry<String, indexContainer> entry;
                 int maxcount = -1;
                 long mindhtdistance = Long.MAX_VALUE, l;
                 String wordhash;
-                while (ci.hasNext()) {
-                    entry = ci.next();
+                for (Map.Entry<String, indexContainer> entry : this.rankedCache.searchContainerMaps()[0].entrySet()) {
                     wordhash = entry.getKey();
                     final indexContainer container = entry.getValue();
                     assert (container.getWordHash().equals(wordhash));
@@ -183,7 +181,7 @@ public final class plasmaSearchEvent {
                         IAmaxcounthash = wordhash;
                         maxcount = container.size();
                     }
-                    l = yacySeed.dhtDistance(wordhash, wordIndex.seedDB.mySeed());
+                    l = FlatWordPartitionScheme.std.dhtDistance(wordhash, null, wordIndex.seedDB.mySeed());
                     if (l < mindhtdistance) {
                         // calculate the word hash that is closest to our dht position
                         mindhtdistance = l;

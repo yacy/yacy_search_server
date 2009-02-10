@@ -173,14 +173,15 @@ import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyTray;
 import de.anomic.yacy.yacyURL;
 import de.anomic.yacy.yacyVersion;
+import de.anomic.yacy.dht.Dispatcher;
+import de.anomic.yacy.dht.PeerSelection;
 
 public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.QueueEntry> implements serverSwitch<IndexingStack.QueueEntry> {
     
     // load slots
-    public static int xstackCrawlSlots      = 2000;
-    
-    private int       dhtTransferIndexCount = 100;    
-    public static long lastPPMUpdate = System.currentTimeMillis()- 30000;
+    public  static int  xstackCrawlSlots      = 2000;
+    private        int  dhtTransferIndexCount = 100;
+    public  static long lastPPMUpdate         = System.currentTimeMillis()- 30000;
 
     // colored list management
     public static TreeSet<String> badwords = null;
@@ -220,8 +221,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     public  bookmarksDB                    bookmarksDB;
     public  plasmaWebStructure             webStructure;
     public  ImporterManager                dbImportManager;
-    public  plasmaDHTFlush                 transferIdxThread = null;
-    private plasmaDHTChunk                 dhtTransferChunk = null;
     public  ArrayList<plasmaSearchQuery>   localSearches; // array of search result properties as HashMaps
     public  ArrayList<plasmaSearchQuery>   remoteSearches; // array of search result properties as HashMaps
     public  HashMap<String, TreeSet<Long>> localSearchTracker, remoteSearchTracker; // mappings from requesting host to a TreeSet of Long(access time)
@@ -236,6 +235,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     public  URLLicense                     licensedURLs;
     public  Timer                          moreMemory;
     public  List<Pattern>                  networkWhitelist, networkBlacklist;
+    public  Dispatcher                     dhtDispatcher;
     public  List<String>                   trail;
     
     public serverProcessor<indexingQueueEntry> indexingDocumentProcessor;
@@ -271,8 +271,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         // remote proxy configuration
         httpRemoteProxyConfig.init(this);
         
-        this.trail = new ArrayList<String>();
-        
         // load values from configs        
         this.plasmaPath   = getConfigPath(plasmaSwitchboardConstants.PLASMA_PATH, plasmaSwitchboardConstants.PLASMA_PATH_DEFAULT);
         this.log.logConfig("Plasma DB Path: " + this.plasmaPath.toString());
@@ -307,7 +305,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         log.logConfig("Starting Indexing Management");
         final String networkName = getConfig(plasmaSwitchboardConstants.NETWORK_NAME, "");
         final boolean useCommons = getConfigBool("index.storeCommons", false);
-        final int redundancy = (int) sb.getConfigLong("network.unit.dhtredundancy.senior", 1);
+        final int redundancy = (int) sb.getConfigLong("network.unit.dhtredundancy.senior", 1);        
         final int paritionExponent = (int) sb.getConfigLong("network.unit.dht.partitionExponent", 0);
         webIndex = new plasmaWordIndex(
                 networkName,
@@ -325,6 +323,14 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         this.yc = new yacyCore(this);
         serverInstantBusyThread.oneTimeJob(this, "loadSeedLists", yacyCore.log, 0);
         //final long startedSeedListAquisition = System.currentTimeMillis();
+        
+        // init a DHT transmission dispatcher
+        this.dhtDispatcher = new Dispatcher(
+                webIndex,
+                webIndex.referenceURL,
+                webIndex.seedDB,
+                true, 
+                30000);
         
         // set up local robots.txt
         this.robotstxtConfig = httpdRobotsTxtConfig.init(this);
@@ -561,7 +567,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
                 "global.any".indexOf(getConfig("network.unit.domain", "global")) >= 0);
         
         // initializing dht chunk generation
-        this.dhtTransferChunk = null;
         this.dhtTransferIndexCount = (int) getConfigLong(plasmaSwitchboardConstants.INDEX_DIST_CHUNK_SIZE_START, 50);
         
         // init robinson cluster
@@ -616,7 +621,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         deployThread(plasmaSwitchboardConstants.PEER_PING, "YaCy Core", "this is the p2p-control and peer-ping task", null,
                      new serverInstantBusyThread(yc, plasmaSwitchboardConstants.PEER_PING_METHOD_START, plasmaSwitchboardConstants.PEER_PING_METHOD_JOBCOUNT, plasmaSwitchboardConstants.PEER_PING_METHOD_FREEMEM), 2000);
         deployThread(plasmaSwitchboardConstants.INDEX_DIST, "DHT Distribution", "selection, transfer and deletion of index entries that are not searched on your peer, but on others", null,
-            new serverInstantBusyThread(this, plasmaSwitchboardConstants.INDEX_DIST_METHOD_START, plasmaSwitchboardConstants.INDEX_DIST_METHOD_JOBCOUNT, plasmaSwitchboardConstants.INDEX_DIST_METHOD_FREEMEM), 60000,
+            new serverInstantBusyThread(this, plasmaSwitchboardConstants.INDEX_DIST_METHOD_START, plasmaSwitchboardConstants.INDEX_DIST_METHOD_JOBCOUNT, plasmaSwitchboardConstants.INDEX_DIST_METHOD_FREEMEM), 5000,
             Long.parseLong(getConfig(plasmaSwitchboardConstants.INDEX_DIST_IDLESLEEP , "5000")),
             Long.parseLong(getConfig(plasmaSwitchboardConstants.INDEX_DIST_BUSYSLEEP , "0")),
             Long.parseLong(getConfig(plasmaSwitchboardConstants.INDEX_DIST_MEMPREREQ , "1000000")));
@@ -1077,7 +1082,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         serverProfiling.stopSystemProfiling();
         moreMemory.cancel();
         terminateAllThreads(true);
-        if (transferIdxThread != null) stopTransferWholeIndex(false);
         log.logConfig("SWITCHBOARD SHUTDOWN STEP 2: sending termination signal to threaded indexing");
         // closing all still running db importer jobs
         indexingDocumentProcessor.announceShutdown();
@@ -1185,26 +1189,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             }
             
             boolean doneSomething = false;
-            
-            // possibly delete entries from last chunk
-            if ((this.dhtTransferChunk != null) && (this.dhtTransferChunk.getStatus() == plasmaDHTChunk.chunkStatus_COMPLETE)) {
-                final String deletedURLs = this.dhtTransferChunk.deleteTransferIndexes();
-                if (this.log.isFine()) this.log.logFine("Deleted from " + this.dhtTransferChunk.containers().length + " transferred RWIs locally, removed " + deletedURLs + " URL references");
-                this.dhtTransferChunk = null;
-            }
-
-            // generate a dht chunk
-            if ((dhtShallTransfer() == null) && (
-                    (this.dhtTransferChunk == null) ||
-                    (this.dhtTransferChunk.getStatus() == plasmaDHTChunk.chunkStatus_UNDEFINED) ||
-                    // (this.dhtTransferChunk.getStatus() == plasmaDHTChunk.chunkStatus_COMPLETE) ||
-                    (this.dhtTransferChunk.getStatus() == plasmaDHTChunk.chunkStatus_FAILED)
-               )) {
-                // generate new chunk
-                final int minChunkSize = (int) getConfigLong(plasmaSwitchboardConstants.INDEX_DIST_CHUNK_SIZE_MIN, 30);
-                dhtTransferChunk = new plasmaDHTChunk(this.log, webIndex, minChunkSize, dhtTransferIndexCount, 5000, plasmaDHTChunk.selectTransferStart());
-                doneSomething = true;
-            }
 
             // check for interruption
             checkInterruption();
@@ -1381,14 +1365,14 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             // clean up news
             checkInterruption();
             try {                
-                if (this.log.isFine()) log.logFine("Cleaning Incoming News, " + this.webIndex.newsPool.size(yacyNewsPool.INCOMING_DB) + " entries on stack");
-                if (this.webIndex.newsPool.automaticProcess(webIndex.seedDB) > 0) hasDoneSomething = true;
+                if (this.log.isFine()) log.logFine("Cleaning Incoming News, " + this.webIndex.seedDB.newsPool.size(yacyNewsPool.INCOMING_DB) + " entries on stack");
+                if (this.webIndex.seedDB.newsPool.automaticProcess(webIndex.seedDB) > 0) hasDoneSomething = true;
             } catch (final IOException e) {}
             if (getConfigBool("cleanup.deletionProcessedNews", true)) {
-                this.webIndex.newsPool.clear(yacyNewsPool.PROCESSED_DB);
+                this.webIndex.seedDB.newsPool.clear(yacyNewsPool.PROCESSED_DB);
             }
             if (getConfigBool("cleanup.deletionPublishedNews", true)) {
-                this.webIndex.newsPool.clear(yacyNewsPool.PUBLISHED_DB);
+                this.webIndex.seedDB.newsPool.clear(yacyNewsPool.PUBLISHED_DB);
             }
             
             // clean up seed-dbs
@@ -1445,7 +1429,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             }
             
             // initiate broadcast about peer startup to spread supporter url
-            if (this.webIndex.newsPool.size(yacyNewsPool.OUTGOING_DB) == 0) {
+            if (this.webIndex.seedDB.newsPool.size(yacyNewsPool.OUTGOING_DB) == 0) {
                 // read profile
                 final Properties profile = new Properties();
                 FileInputStream fileIn = null;
@@ -1460,7 +1444,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
                 if ((homepage != null) && (homepage.length() > 10)) {
                     final Properties news = new Properties();
                     news.put("homepage", profile.get("homepage"));
-                    this.webIndex.newsPool.publishMyNews(yacyNewsRecord.newRecord(webIndex.seedDB.mySeed(), yacyNewsPool.CATEGORY_PROFILE_BROADCAST, news));
+                    this.webIndex.seedDB.newsPool.publishMyNews(yacyNewsRecord.newRecord(webIndex.seedDB.mySeed(), yacyNewsPool.CATEGORY_PROFILE_BROADCAST, news));
                 }
             }
             
@@ -1886,33 +1870,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     	return accessSet.tailSet(Long.valueOf(System.currentTimeMillis() - timeInterval)).size();
     }
     
-    public void startTransferWholeIndex(final yacySeed seed, final boolean delete) {
-        if (transferIdxThread == null) {
-            this.transferIdxThread = new plasmaDHTFlush(this.log, this.webIndex, seed, delete,
-                                                        "true".equalsIgnoreCase(getConfig(plasmaSwitchboardConstants.INDEX_TRANSFER_GZIP_BODY, "false")),
-                                                        (int) getConfigLong(plasmaSwitchboardConstants.INDEX_TRANSFER_TIMEOUT, 60000));
-            this.transferIdxThread.start();
-        }
-    }    
-
-    public void stopTransferWholeIndex(final boolean wait) {
-        if ((transferIdxThread != null) && (transferIdxThread.isAlive()) && (!transferIdxThread.isFinished())) {
-            try {
-                this.transferIdxThread.stopIt(wait);
-            } catch (final InterruptedException e) { }
-        }
-    }    
-
-    public void abortTransferWholeIndex(final boolean wait) {
-        if (transferIdxThread != null) {
-            if (!transferIdxThread.isFinished())
-                try {
-                    this.transferIdxThread.stopIt(wait);
-                } catch (final InterruptedException e) { }
-                transferIdxThread = null;
-        }
-    }
-    
     public String dhtShallTransfer() {
         if (this.webIndex.seedDB == null) {
             return "no DHT distribution: seedDB == null";
@@ -1953,132 +1910,30 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             if (this.log.isFine()) log.logFine(rejectReason);
             return false;
         }
-        if (this.dhtTransferChunk == null) {
-            if (this.log.isFine()) log.logFine("no DHT distribution: no transfer chunk defined");
-            return false;
-        }
-        if ((this.dhtTransferChunk != null) && (this.dhtTransferChunk.getStatus() != plasmaDHTChunk.chunkStatus_FILLED)) {
-            if (this.log.isFine()) log.logFine("no DHT distribution: index distribution is in progress, status=" + this.dhtTransferChunk.getStatus());
-            return false;
-        }
-        
-        // do the transfer
-        final int peerCount = Math.max(1, (this.webIndex.seedDB.mySeed().isJunior()) ?
-                           (int) getConfigLong("network.unit.dhtredundancy.junior", 1) :
-                           (int) getConfigLong("network.unit.dhtredundancy.senior", 1)); // set redundancy factor
-        final long starttime = System.currentTimeMillis();
-        
-        final boolean ok = dhtTransferProcess(dhtTransferChunk, peerCount);
-
-        final boolean success;
-        if (ok) {
-            dhtTransferChunk.setStatus(plasmaDHTChunk.chunkStatus_COMPLETE);
-            if (this.log.isFine()) log.logFine("DHT distribution: transfer COMPLETE");
-            // adopt transfer count
-            if ((System.currentTimeMillis() - starttime) > (10000 * peerCount)) {
-                dhtTransferIndexCount--;
-            } else {
-                if (dhtTransferChunk.indexCount() >= dhtTransferIndexCount) dhtTransferIndexCount++;
-            }
-            final int minChunkSize = (int) getConfigLong(plasmaSwitchboardConstants.INDEX_DIST_CHUNK_SIZE_MIN, 30);
-            final int maxChunkSize = (int) getConfigLong(plasmaSwitchboardConstants.INDEX_DIST_CHUNK_SIZE_MAX, 3000);
-            if (dhtTransferIndexCount < minChunkSize) dhtTransferIndexCount = minChunkSize;
-            if (dhtTransferIndexCount > maxChunkSize) dhtTransferIndexCount = maxChunkSize;
-            
-            // show success
-            success = true;
-        } else {
-            dhtTransferChunk.incTransferFailedCounter();
-            final int maxChunkFails = (int) getConfigLong(plasmaSwitchboardConstants.INDEX_DIST_CHUNK_FAILS_MAX, 1);
-            if (dhtTransferChunk.getTransferFailedCounter() >= maxChunkFails) {
-                //System.out.println("DEBUG: " + dhtTransferChunk.getTransferFailedCounter() + " of " + maxChunkFails + " sendings failed for this chunk, aborting!");
-                dhtTransferChunk.setStatus(plasmaDHTChunk.chunkStatus_FAILED);
-                if (this.log.isFine()) log.logFine("DHT distribution: transfer FAILED");   
-            }
-            else {
-                //System.out.println("DEBUG: " + dhtTransferChunk.getTransferFailedCounter() + " of " + maxChunkFails + " sendings failed for this chunk, retrying!");
-                if (this.log.isFine()) log.logFine("DHT distribution: transfer FAILED, sending this chunk again");   
-            }
-            success = false;
-        }
-        return success;
-    }
-
-    public boolean dhtTransferProcess(final plasmaDHTChunk dhtChunk, final int peerCount) {
-        if ((this.webIndex.seedDB == null) || (this.webIndex.seedDB.sizeConnected() == 0)) return false;
-
+        String startHash = PeerSelection.selectTransferStart();
+        log.logInfo("dhtTransferJob: selected " + startHash + " as start hash");
+        String limitHash = PeerSelection.limitOver(this.webIndex.seedDB, startHash);
+        log.logInfo("dhtTransferJob: selected " + limitHash + " as limit hash");
         try {
-            // find a list of DHT-peers
-            if (log != null) log.logInfo("Collecting DHT target peers for first_hash = " + dhtChunk.firstContainer().getWordHash() + ", last_hash = " + dhtChunk.lastContainer().getWordHash());
-            final Iterator<yacySeed> seedIter = dhtChunk.targets().iterator();
-
-            // send away the indexes to all these peers
-            int hc1 = 0;
-
-            // getting distribution configuration values
-            final boolean gzipBody = getConfig(plasmaSwitchboardConstants.INDEX_DIST_GZIP_BODY, "false").equalsIgnoreCase("true");
-            final int timeout = (int)getConfigLong(plasmaSwitchboardConstants.INDEX_DIST_TIMEOUT, 60000);
-            
-            // starting up multiple DHT transfer threads
-            yacySeed seed;
-            long firstdist, lastdist;
-            final ArrayList<plasmaDHTTransfer> transfer = new ArrayList<plasmaDHTTransfer>(peerCount);
-            while (hc1 < peerCount && (transfer.size() > 0 || seedIter.hasNext())) {
-                
-                // starting up some transfer threads
-                final int transferThreadCount = transfer.size();
-                for (int i=0; i < peerCount-hc1-transferThreadCount; i++) {
-                    // check for interruption
-                    checkInterruption();
-                                        
-                    if (seedIter.hasNext()) {
-                        seed = seedIter.next();
-                        firstdist = yacySeed.dhtDistance(dhtChunk.firstContainer().getWordHash(), seed);
-                        lastdist = yacySeed.dhtDistance(dhtChunk.lastContainer().getWordHash(), seed);
-                        if (log != null) log.logInfo("Selected DHT target peer " + seed.getName() + ":" + seed.hash + ", distance2first = " + firstdist + ", distance2last = " + lastdist);
-                        final plasmaDHTTransfer t = new plasmaDHTTransfer(log, webIndex.seedDB, webIndex.peerActions, seed, dhtChunk, gzipBody, timeout);
-                        t.start();
-                        transfer.add(t);
-                    } else {
-                        break;
-                    }
-                }
-
-                // waiting for the transfer threads to finish
-                final Iterator<plasmaDHTTransfer> transferIter = transfer.iterator();
-                while (transferIter.hasNext()) {
-                    // check for interruption
-                    checkInterruption();
-                    
-                    final plasmaDHTTransfer t = transferIter.next();
-                    if (!t.isAlive()) {
-                        // remove finished thread from the list
-                        transferIter.remove();
-
-                        // count successful transfers
-                        if (t.getStatus() == plasmaDHTChunk.chunkStatus_COMPLETE) {
-                            this.log.logInfo("DHT distribution: transfer to peer " + t.getSeed().getName() + " finished.");
-                            hc1++;
-                        }
-                    }
-                }
-
-                if (hc1 < peerCount) Thread.sleep(100);
-            }
-
-
-            // clean up and finish with deletion of indexes
-            if (hc1 >= peerCount) {
-                // success
-                return true;
-            }
-            this.log.logSevere("Index distribution failed. Too few peers (" + hc1 + ") received the index, not deleted locally.");
-            return false;
-        } catch (final InterruptedException e) {
+            int c = this.dhtDispatcher.selectContainersToCache(
+                    startHash,
+                    limitHash,
+                    dhtTransferIndexCount,
+                    2000);
+            log.logInfo("dhtTransferJob: Dispatcher selected " + c + " containers");
+        } catch (IOException e) {
+            log.logSevere("dhtTransferJob: interrupted with exception: " + e.getMessage(), e);
             return false;
         }
+        int splitted = this.dhtDispatcher.splitContainersFromCache();
+        log.logInfo("dhtTransferJob: splitted selected container in " + splitted + " parts");
+        boolean enqueued = this.dhtDispatcher.enqueueContainersFromCache();
+        log.logInfo("dhtTransferJob: result from enqueueing: " + ((enqueued) ? "true" : "false"));
+        boolean dequeued = this.dhtDispatcher.dequeueContainer();
+        log.logInfo("dhtTransferJob: result from dequeueing: " + ((dequeued) ? "true" : "false"));
+        return dequeued;
     }
-    
+
     private void addURLtoErrorDB(
             final yacyURL url, 
             final String referrerHash, 
@@ -2212,7 +2067,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
                             ys = yacySeed.genRemoteSeed(enu.next(), null, false);
                             if ((ys != null) &&
                                 ((!webIndex.seedDB.mySeedIsDefined()) || !webIndex.seedDB.mySeed().hash.equals(ys.hash))) {
-                                if (webIndex.peerActions.connectPeer(ys, false)) lc++;
+                                if (webIndex.seedDB.peerActions.connectPeer(ys, false)) lc++;
                                 //seedDB.writeMap(ys.hash, ys.getMap(), "init");
                                 //System.out.println("BOOTSTRAP: received peer " + ys.get(yacySeed.NAME, "anonymous") + "/" + ys.getAddress());
                                 //lc++;

@@ -38,6 +38,7 @@ import de.anomic.data.listManager;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.index.indexAbstractReferenceBlacklist;
 import de.anomic.index.indexContainer;
+import de.anomic.index.indexContainerCache;
 import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexRWIRowEntry;
 import de.anomic.index.indexURLReference;
@@ -218,13 +219,16 @@ public class IndexControlRWIs_p {
                     }
                 }
                 
+                // make an indexContainerCache
+                indexContainerCache icc = new indexContainerCache(index.rowdef);
+                icc.addEntries(index);
+                
                 // transport to other peer
                 final String gzipBody = sb.getConfig("indexControl.gzipBody","false");
                 final int timeout = (int) sb.getConfigLong("indexControl.timeout",60000);
                 final HashMap<String, Object> resultObj = yacyClient.transferIndex(
-                             sb.webIndex.seedDB,
                              seed,
-                             new indexContainer[]{index},
+                             icc,
                              knownURLs,
                              "true".equalsIgnoreCase(gzipBody),
                              timeout);

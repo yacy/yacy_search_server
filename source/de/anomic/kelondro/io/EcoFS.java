@@ -190,6 +190,7 @@ public class EcoFS {
      * @throws IOException
      */
     private void fillCache(long index) throws IOException {
+    	//System.out.println("*** DEBUG FillCache " + this.tablefile.getName() + " at index " + index);
         // first check if the index is inside the current cache
         assert inCache(index) < 0;
         if (inCache(index) >= 0) return;

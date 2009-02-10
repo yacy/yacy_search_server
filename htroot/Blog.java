@@ -169,7 +169,7 @@ public class Blog {
             map.put("page", pagename);
             map.put("subject", StrSubject.replace(',', ' '));
             map.put("author", StrAuthor.replace(',', ' '));
-            sb.webIndex.newsPool.publishMyNews(yacyNewsRecord.newRecord(sb.webIndex.seedDB.mySeed(), yacyNewsPool.CATEGORY_BLOG_ADD, map));
+            sb.webIndex.seedDB.newsPool.publishMyNews(yacyNewsRecord.newRecord(sb.webIndex.seedDB.mySeed(), yacyNewsPool.CATEGORY_BLOG_ADD, map));
         }
 
         page = sb.blogDB.readBlogEntry(pagename); //maybe "if(page == null)"

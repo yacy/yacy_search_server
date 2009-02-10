@@ -59,6 +59,7 @@ import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSearchRankingProcess;
 import de.anomic.plasma.plasmaSearchRankingProfile;
 import de.anomic.plasma.plasmaWordIndex;
+import de.anomic.yacy.dht.PeerSelection;
 
 public class yacySearch extends Thread {
 
@@ -169,7 +170,7 @@ public class yacySearch extends Thread {
     	//return (yacySeed[]) l.toArray();
     }
     
-    private static yacySeed[] selectSearchTargets(final yacySeedDB seedDB, final Set<String> wordhashes, int seedcount, int redundancy, int partitionExponent) {
+    private static yacySeed[] selectSearchTargets(final yacySeedDB seedDB, final Set<String> wordhashes, int seedcount, int redundancy) {
         // find out a specific number of seeds, that would be relevant for the given word hash(es)
         // the result is ordered by relevance: [0] is most relevant
         // the seedcount is the maximum number of wanted results
@@ -186,7 +187,7 @@ public class yacySearch extends Thread {
         Iterator<yacySeed> dhtEnum;         
         Iterator<String> iter = wordhashes.iterator();
         while (iter.hasNext()) {
-            yacyPeerSelection.selectDHTPositions(seedDB, iter.next(), redundancy, partitionExponent, regularSeeds, ranking);
+            PeerSelection.selectDHTPositions(seedDB, iter.next(), redundancy, regularSeeds, ranking);
         }
 
         // put in seeds according to size of peer
@@ -268,8 +269,7 @@ public class yacySearch extends Thread {
                             wordIndex.seedDB,
                             plasmaSearchQuery.hashes2Set(wordhashes),
                             targets,
-                            wordIndex.seedDB.netRedundancy,
-                            wordIndex.seedDB.partitionExponent)
+                            wordIndex.seedDB.redundancy())
                   : selectClusterPeers(wordIndex.seedDB, clusterselection);
         if (targetPeers == null) return new yacySearch[0];
         targets = targetPeers.length;

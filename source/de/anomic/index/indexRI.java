@@ -37,7 +37,7 @@ public interface indexRI {
     
     public int size();
     public int minMem();
-    public CloneableIterator<indexContainer> wordContainers(String startWordHash, boolean rot) throws IOException; // method to replace wordHashes
+    public CloneableIterator<indexContainer> wordContainerIterator(String startWordHash, boolean rot, boolean ram) throws IOException; // method to replace wordHashes
     public boolean hasContainer(String wordHash); // should only be used if in case that true is returned the getContainer is NOT called
     public indexContainer getContainer(String wordHash, Set<String> urlselection) throws IOException; // if urlselection != null all url references which are not in urlselection are removed from the container
     public indexContainer deleteContainer(String wordHash) throws IOException;

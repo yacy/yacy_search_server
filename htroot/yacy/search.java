@@ -160,7 +160,7 @@ public final class search {
         if (sb.webIndex.seedDB == null) {
             yacyCore.log.logSevere("yacy.search: seed cache not initialized");
         } else {
-            sb.webIndex.peerActions.peerArrival(remoteSeed, true);
+            sb.webIndex.seedDB.peerActions.peerArrival(remoteSeed, true);
         }
 
         // prepare search

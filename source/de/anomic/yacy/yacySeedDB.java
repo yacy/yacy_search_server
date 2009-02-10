@@ -56,6 +56,8 @@ import de.anomic.plasma.plasmaHTCache;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDomains;
 import de.anomic.server.serverSwitch;
+import de.anomic.yacy.dht.PartitionScheme;
+import de.anomic.yacy.dht.VerticalWordPartitionScheme;
 
 public final class yacySeedDB implements httpdAlternativeDomainNames {
   
@@ -90,8 +92,11 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
     public long lastSeedUpload_timeStamp = System.currentTimeMillis();
     public String lastSeedUpload_myIP = "";
 
-    public  int netRedundancy;
-    public  int partitionExponent;
+    public  yacyPeerActions peerActions;
+    public  yacyNewsPool newsPool;
+    
+    private int netRedundancy;
+    public  PartitionScheme scheme;
     
     private yacySeed mySeed; // my own seed
     
@@ -99,19 +104,20 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
     private final Hashtable<InetAddress, SoftReference<yacySeed>> ipLookupCache;
     
     public yacySeedDB(
-            final File seedActiveDBFile,
-            final File seedPassiveDBFile,
-            final File seedPotentialDBFile,
+            final File networkRoot,
+            final String seedActiveDBFileName,
+            final String seedPassiveDBFileName,
+            final String seedPotentialDBFileName,
             final File myOwnSeedFile, 
             final int redundancy,
             final int partitionExponent) {
-        this.seedActiveDBFile = seedActiveDBFile;
-        this.seedPassiveDBFile = seedPassiveDBFile;
-        this.seedPotentialDBFile = seedPotentialDBFile;
+        this.seedActiveDBFile = new File(networkRoot, seedActiveDBFileName);
+        this.seedPassiveDBFile = new File(networkRoot, seedPassiveDBFileName);
+        this.seedPotentialDBFile = new File(networkRoot, seedPotentialDBFileName);
         this.mySeed = null; // my own seed
         this.myOwnSeedFile = myOwnSeedFile;
         this.netRedundancy = redundancy;
-        this.partitionExponent = partitionExponent;
+        this.scheme = new VerticalWordPartitionScheme(partitionExponent);
         
         // set up seed database
         seedActiveDB = openSeedTable(seedActiveDBFile);
@@ -131,6 +137,12 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
 
         // tell the httpdProxy how to find this table as address resolver
         httpd.setAlternativeResolver(this);
+        
+        // create or init news database
+        this.newsPool = new yacyNewsPool(networkRoot);
+        
+        // deploy peer actions
+        this.peerActions = new yacyPeerActions(this, newsPool);
     }
     
     private synchronized void initMySeed() {
@@ -169,6 +181,11 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
         mySeed.put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN); // markup startup condition
     }
 
+    public int redundancy() {
+        if (this.mySeed.isJunior()) return 1;
+        return this.netRedundancy;
+    }
+    
     public boolean mySeedIsDefined() {
         return this.mySeed != null;
     }
@@ -281,6 +298,8 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
         if (seedActiveDB != null) seedActiveDB.close();
         if (seedPassiveDB != null) seedPassiveDB.close();
         if (seedPotentialDB != null) seedPotentialDB.close();
+        newsPool.close();
+        peerActions.close();
     }
 
     @SuppressWarnings("unchecked")

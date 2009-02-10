@@ -67,8 +67,6 @@ import de.anomic.server.serverProfiling;
 import de.anomic.tools.iso639;
 import de.anomic.xml.RSSFeed;
 import de.anomic.xml.RSSMessage;
-import de.anomic.yacy.yacyNewsPool;
-import de.anomic.yacy.yacyPeerActions;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyURL;
 
@@ -97,13 +95,12 @@ public final class plasmaWordIndex implements indexRI {
     public static final long CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA_RECRAWL_CYCLE = 60L * 24L * 30L;
     
     
-    private final ByteOrder        indexOrder = Base64Order.enhancedCoder;
+    private final ByteOrder                indexOrder = Base64Order.enhancedCoder;
     private final indexRAMRI               dhtCache;
     private final indexCollectionRI        collections;          // new database structure to replace AssortmentCluster and FileCluster
     private final Log                log;
-    private indexRepositoryReference       referenceURL;
+    public indexRepositoryReference       referenceURL;
     public  final yacySeedDB               seedDB;
-    public        yacyNewsPool             newsPool;
     private final File                     primaryRoot, secondaryRoot;
     public        IndexingStack            queuePreStack;
     public        CrawlProfile             profilesActiveCrawls, profilesPassiveCrawls;
@@ -112,7 +109,6 @@ public final class plasmaWordIndex implements indexRI {
     public  CrawlProfile.entry             defaultTextSnippetLocalProfile, defaultTextSnippetGlobalProfile;
     public  CrawlProfile.entry             defaultMediaSnippetLocalProfile, defaultMediaSnippetGlobalProfile;
     private final File                     queuesRoot;
-    public  yacyPeerActions                peerActions;
 
     public plasmaWordIndex(
             final String networkName,
@@ -232,19 +228,13 @@ public final class plasmaWordIndex implements indexRI {
         final File oldSeedFile = new File(new File(indexPrimaryRoot.getParentFile(), "YACYDB"), "mySeed.txt");
         if (oldSeedFile.exists()) oldSeedFile.renameTo(mySeedFile);
         seedDB = new yacySeedDB(
-                new File(networkRoot, "seed.new.heap"),
-                new File(networkRoot, "seed.old.heap"),
-                new File(networkRoot, "seed.pot.heap"),
+                networkRoot,
+                "seed.new.heap",
+                "seed.old.heap",
+                "seed.pot.heap",
                 mySeedFile,
                 redundancy,
-                partitionExponent
-                );
-        
-        // create or init news database
-        newsPool = new yacyNewsPool(networkRoot);
-        
-        // deploy peer actions
-        this.peerActions = new yacyPeerActions(seedDB, newsPool);
+                partitionExponent);
     }
     
     public void clearCache() {
@@ -450,7 +440,7 @@ public final class plasmaWordIndex implements indexRI {
         final long entryBytes = indexRWIRowEntry.urlEntryRow.objectsize;
         final indexRAMRI cache = (dhtCache);
         synchronized (cache) {
-            final Iterator<indexContainer> it = cache.wordContainers(null, false);
+            final Iterator<indexContainer> it = cache.wordContainerIterator(null, false, true);
             while (it.hasNext()) cacheBytes += it.next().size() * entryBytes;
         }
         return cacheBytes;
@@ -694,10 +684,8 @@ public final class plasmaWordIndex implements indexRI {
         collections.close();
         referenceURL.close();
         seedDB.close();
-        newsPool.close();
         profilesActiveCrawls.close();
         queuePreStack.close();
-        peerActions.close();
     }
     
     public indexContainer deleteContainer(final String wordHash) {
@@ -769,7 +757,7 @@ public final class plasmaWordIndex implements indexRI {
         final Order<indexContainer> containerOrder = new indexContainerOrder(indexOrder.clone());
         containerOrder.rotate(emptyContainer(startHash, 0));
         final TreeSet<indexContainer> containers = new TreeSet<indexContainer>(containerOrder);
-        final Iterator<indexContainer> i = wordContainers(startHash, ram, rot);
+        final Iterator<indexContainer> i = wordContainerIterator(startHash, rot, ram);
         if (ram) count = Math.min(dhtCache.size(), count);
         indexContainer container;
         // this loop does not terminate using the i.hasNex() predicate when rot == true
@@ -900,7 +888,7 @@ public final class plasmaWordIndex implements indexRI {
         return newEntry;
     }
     
-    public synchronized CloneableIterator<indexContainer> wordContainers(final String startHash, final boolean ram, final boolean rot) {
+    public synchronized CloneableIterator<indexContainer> wordContainerIterator(final String startHash, final boolean rot, final boolean ram) {
         final CloneableIterator<indexContainer> i = wordContainers(startHash, ram);
         if (rot) {
             return new RotateIterator<indexContainer>(i, new String(Base64Order.zero(startHash.length())), dhtCache.size() + ((ram) ? 0 : collections.size()));
@@ -908,15 +896,15 @@ public final class plasmaWordIndex implements indexRI {
         return i;
     }
 
-    public synchronized CloneableIterator<indexContainer> wordContainers(final String startWordHash, final boolean ram) {
+    private synchronized CloneableIterator<indexContainer> wordContainers(final String startWordHash, final boolean ram) {
         final Order<indexContainer> containerOrder = new indexContainerOrder(indexOrder.clone());
         containerOrder.rotate(emptyContainer(startWordHash, 0));
         if (ram) {
-            return dhtCache.wordContainers(startWordHash, false);
+            return dhtCache.wordContainerIterator(startWordHash, false, true);
         }
         return new MergeIterator<indexContainer>(
-                dhtCache.wordContainers(startWordHash, false),
-                collections.wordContainers(startWordHash, false),
+                dhtCache.wordContainerIterator(startWordHash, false, true),
+                collections.wordContainerIterator(startWordHash, false, false),
                 containerOrder,
                 indexContainer.containerMergeMethod,
                 true);
@@ -1028,6 +1016,10 @@ public final class plasmaWordIndex implements indexRI {
                 }
             }
         }
+    }
+
+    public int sizeEntry(String key) {
+        return dhtCache.sizeEntry(key) + collections.sizeEntry(key);
     }
     
 }

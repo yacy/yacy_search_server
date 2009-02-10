@@ -95,7 +95,7 @@ public final class indexContainerBLOBArray {
      * objects in the cache.
      * @throws IOException 
      */
-    public synchronized CloneableIterator<indexContainer> wordContainers(final String startWordHash, final boolean rot) throws IOException {
+    public synchronized CloneableIterator<indexContainer> wordContainerIterator(final String startWordHash, final boolean rot, final boolean ram) throws IOException {
         return new heapCacheIterator(startWordHash, rot);
     }
 

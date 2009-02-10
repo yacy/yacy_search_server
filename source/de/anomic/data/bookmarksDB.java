@@ -287,7 +287,7 @@ public class bookmarksDB {
                         m.remove("generalFilter");
                         m.remove("specificFilter");
                         m.put("intention", "Automatic ReCrawl!");
-                        sb.webIndex.newsPool.publishMyNews(yacyNewsRecord.newRecord(sb.webIndex.seedDB.mySeed(), yacyNewsPool.CATEGORY_CRAWL_START, m));	                      
+                        sb.webIndex.seedDB.newsPool.publishMyNews(yacyNewsRecord.newRecord(sb.webIndex.seedDB.mySeed(), yacyNewsPool.CATEGORY_CRAWL_START, m));	                      
                     }
 	    		} catch (MalformedURLException e1) {}
 			} // if

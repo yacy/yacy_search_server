@@ -68,6 +68,7 @@ import de.anomic.http.JakartaCommonsHttpResponse;
 import de.anomic.http.httpRemoteProxyConfig;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.index.indexContainer;
+import de.anomic.index.indexContainerCache;
 import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexRWIRowEntry;
 import de.anomic.index.indexReferenceBlacklist;
@@ -480,7 +481,7 @@ public final class yacyClient {
         try {
           	result = FileUtils.table(wput("http://" + target.getClusterAddress() + "/yacy/search.html", target.getHexHash() + ".yacyh", post, 60000), "UTF-8");
         } catch (final IOException e) {
-            yacyCore.log.logInfo("SEARCH failed, Peer: " + target.hash + ":" + target.getName() + " (" + e.getMessage() + "), score=" + target.selectscore + ", DHTdist=" + yacySeed.dhtDistance(wordhashes.substring(0, 12), target));
+            yacyCore.log.logInfo("SEARCH failed, Peer: " + target.hash + ":" + target.getName() + " (" + e.getMessage() + "), score=" + target.selectscore);
             //yacyCore.peerActions.peerDeparture(target, "search request to peer created io exception: " + e.getMessage());
             return null;
         }
@@ -491,9 +492,7 @@ public final class yacyClient {
 					+ ":"
 					+ target.getName()
 					+ " (zero response), score="
-					+ target.selectscore
-					+ ", DHTdist="
-					+ yacySeed.dhtDistance(wordhashes.substring(0, 12), target));
+					+ target.selectscore);
 			return null;
 		}
 
@@ -657,8 +656,6 @@ public final class yacyClient {
 				+ target.getName()
 				+ ", score="
 				+ target.selectscore
-				+ ", DHTdist="
-				+ ((wordhashes.length() < 12) ? "void" : yacySeed.dhtDistance(wordhashes.substring(0, 12), target))
 				+ ", searchtime=" + searchtime + ", netdelay="
 				+ (totalrequesttime - searchtime) + ", references="
 				+ result.get("references"));
@@ -847,7 +844,12 @@ public final class yacyClient {
         }
     }
 
-    public static HashMap<String, Object> transferIndex(final yacySeedDB seedDB, final yacySeed targetSeed, final indexContainer[] indexes, final HashMap<String, indexURLReference> urlCache, final boolean gzipBody, final int timeout) {
+    public static HashMap<String, Object> transferIndex(
+            final yacySeed targetSeed,
+            final indexContainerCache indexes,
+            final HashMap<String, indexURLReference> urlCache,
+            final boolean gzipBody,
+            final int timeout) {
         
         final HashMap<String, Object> resultObj = new HashMap<String, Object>();
         int payloadSize = 0;
@@ -856,8 +858,8 @@ public final class yacyClient {
             // check if we got all necessary urls in the urlCache (only for debugging)
             Iterator<indexRWIRowEntry> eenum;
             indexRWIEntry entry;
-            for (int i = 0; i < indexes.length; i++) {
-                eenum = indexes[i].entries();
+            for (indexContainer ic: indexes) {
+                eenum = ic.entries();
                 while (eenum.hasNext()) {
                     entry = eenum.next();
                     if (urlCache.get(entry.urlHash()) == null) {
@@ -867,7 +869,7 @@ public final class yacyClient {
             }        
             
             // transfer the RWI without the URLs
-            HashMap<String, String> in = transferRWI(seedDB, targetSeed, indexes, gzipBody, timeout);
+            HashMap<String, String> in = transferRWI(targetSeed, indexes, gzipBody, timeout);
             resultObj.put("resultTransferRWI", in);
             
             if (in == null) {
@@ -883,7 +885,6 @@ public final class yacyClient {
             }
             if (!(result.equals("ok"))) {
                 targetSeed.setFlagAcceptRemoteIndex(false);
-                seedDB.update(targetSeed.hash, targetSeed);
                 resultObj.put("result", result);
                 return resultObj;
             }
@@ -908,7 +909,7 @@ public final class yacyClient {
                 }
             }
             
-            in = transferURL(seedDB, targetSeed, urls, gzipBody, timeout);
+            in = transferURL(targetSeed, urls, gzipBody, timeout);
             resultObj.put("resultTransferURL", in);
             
             if (in == null) {
@@ -924,7 +925,6 @@ public final class yacyClient {
             }
             if (!(result.equals("ok"))) {
                 targetSeed.setFlagAcceptRemoteIndex(false);
-                seedDB.update(targetSeed.hash, targetSeed);
                 resultObj.put("result",result);
                 return resultObj;
             }
@@ -937,7 +937,11 @@ public final class yacyClient {
         }
     }
 
-    private static HashMap<String, String> transferRWI(final yacySeedDB seedDB, final yacySeed targetSeed, final indexContainer[] indexes, boolean gzipBody, final int timeout) {
+    private static HashMap<String, String> transferRWI(
+            final yacySeed targetSeed,
+            final indexContainerCache indexes,
+            boolean gzipBody,
+            final int timeout) {
         final String address = targetSeed.getPublicAddress();
         if (address == null) { yacyCore.log.logWarning("no address for transferRWI"); return null; }
 
@@ -949,17 +953,17 @@ public final class yacyClient {
         if (gzipBody && (targetSeed.getVersion() < yacyVersion.YACY_SUPPORTS_GZIP_POST_REQUESTS_CHUNKED)) {
             gzipBody = false;
         }
-        post.add(new DefaultCharsetStringPart("wordc", Integer.toString(indexes.length)));
+        post.add(new DefaultCharsetStringPart("wordc", Integer.toString(indexes.size())));
         
         int indexcount = 0;
-        final StringBuilder entrypost = new StringBuilder(indexes.length*73);
+        final StringBuilder entrypost = new StringBuilder(indexes.size() * 73);
         Iterator<indexRWIRowEntry> eenum;
         indexRWIEntry entry;
-        for (int i = 0; i < indexes.length; i++) {
-            eenum = indexes[i].entries();
+        for (indexContainer ic: indexes) {
+            eenum = ic.entries();
             while (eenum.hasNext()) {
                 entry = eenum.next();
-                entrypost.append(indexes[i].getWordHash()) 
+                entrypost.append(ic.getWordHash()) 
                          .append(entry.toPropertyForm()) 
                          .append(serverCore.CRLF_STRING);
                 indexcount++;
@@ -980,9 +984,6 @@ public final class yacyClient {
             final byte[] content = wput("http://" + address + "/yacy/transferRWI.html", targetSeed.getHexHash() + ".yacyh", post, timeout, gzipBody);
             final ArrayList<String> v = FileUtils.strings(content, "UTF-8");
             // this should return a list of urlhashes that are unknown
-            if ((v != null) && (v.size() > 0)) {
-                seedDB.mySeed().incSI(indexcount);
-            }
             
             final HashMap<String, String> result = FileUtils.table(v);
             // return the transfered index data in bytes (for debugging only)
@@ -994,7 +995,7 @@ public final class yacyClient {
         }
     }
 
-    private static HashMap<String, String> transferURL(final yacySeedDB seedDB, final yacySeed targetSeed, final indexURLReference[] urls, boolean gzipBody, final int timeout) {
+    private static HashMap<String, String> transferURL(final yacySeed targetSeed, final indexURLReference[] urls, boolean gzipBody, final int timeout) {
         // this post a message to the remote message board
         final String address = targetSeed.getPublicAddress();
         if (address == null) { return null; }
@@ -1025,10 +1026,6 @@ public final class yacyClient {
         try {
             final byte[] content = wput("http://" + address + "/yacy/transferURL.html", targetSeed.getHexHash() + ".yacyh", post, timeout, gzipBody);
             final ArrayList<String> v = FileUtils.strings(content, "UTF-8");
-            
-            if ((v != null) && (v.size() > 0)) {
-                seedDB.mySeed().incSU(urlc);
-            }
             
             final HashMap<String, String> result = FileUtils.table(v);
             // return the transfered url data in bytes (for debugging only)

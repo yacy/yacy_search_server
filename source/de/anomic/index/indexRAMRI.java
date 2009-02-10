@@ -4,9 +4,9 @@
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
-// $LastChangedDate$
-// $LastChangedRevision$
-// $LastChangedBy$
+// $LastChangedDate: 2009-01-31 00:33:47 +0100 (Sa, 31 Jan 2009) $
+// $LastChangedRevision: 5544 $
+// $LastChangedBy: orbiter $
 //
 // LICENSE
 // 
@@ -49,7 +49,7 @@ public final class indexRAMRI implements indexRI, indexRIReader, Iterable<indexC
     public  long  cacheReferenceAgeLimit;    // the maximum age (= time not changed) of a RWI entity
     private final Log log;
     private final File dumpFile;
-    private indexContainerRAMHeap heap;
+    private indexContainerCache heap;
     
     @SuppressWarnings("unchecked")
     public indexRAMRI(
@@ -71,7 +71,7 @@ public final class indexRAMRI implements indexRI, indexRIReader, Iterable<indexC
         this.cacheReferenceAgeLimit = wCacheReferenceAgeLimitInit;
         this.log = log;
         this.dumpFile = new File(databaseRoot, newHeapName);
-        this.heap = new indexContainerRAMHeap(payloadrow);
+        this.heap = new indexContainerCache(payloadrow);
         
         // read in dump of last session
         boolean initFailed = false;
@@ -87,7 +87,7 @@ public final class indexRAMRI implements indexRI, indexRIReader, Iterable<indexC
             heap.initWriteMode();
         } else if (dumpFile.exists()) {
             // initialize scores for cache organization
-            for (final indexContainer ic : (Iterable<indexContainer>) heap.wordContainers(null, false)) {
+            for (final indexContainer ic : (Iterable<indexContainer>) heap.wordContainerIterator(null, false, true)) {
                 this.hashDate.setScore(ic.getWordHash(), intTime(ic.lastWrote()));
                 this.hashScore.setScore(ic.getWordHash(), ic.size());
             }
@@ -141,11 +141,12 @@ public final class indexRAMRI implements indexRI, indexRIReader, Iterable<indexC
         return heap.size();
     }
 
-    public synchronized CloneableIterator<indexContainer> wordContainers(final String startWordHash, final boolean rot) {
+    public synchronized CloneableIterator<indexContainer> wordContainerIterator(final String startWordHash, final boolean rot, final boolean ram) {
         // we return an iterator object that creates top-level-clones of the indexContainers
         // in the cache, so that manipulations of the iterated objects do not change
         // objects in the cache.
-        return heap.wordContainers(startWordHash, rot);
+    	assert ram == true;
+        return heap.wordContainerIterator(startWordHash, rot, ram);
     }
 
     public synchronized String maxScoreWordHash() {
@@ -189,7 +190,7 @@ public final class indexRAMRI implements indexRI, indexRIReader, Iterable<indexC
                 hash = hashDate.getMinObject(); // flush oldest entries
             }
             if (hash == null) {
-                final indexContainer ic = heap.wordContainers(null, false).next();
+                final indexContainer ic = heap.wordContainerIterator(null, false, true).next();
                 if (ic != null) hash = ic.getWordHash();
             }
             return hash;
@@ -207,7 +208,7 @@ public final class indexRAMRI implements indexRI, indexRIReader, Iterable<indexC
         for (int i = 0; i < count; i++) {
             hash = bestFlushWordHash();
             if (hash == null) return containerList;
-            container = heap.delete(hash);
+            container = heap.deleteContainer(hash);
             assert (container != null);
             if (container == null) return containerList;
             hashScore.deleteScore(hash);
@@ -226,11 +227,11 @@ public final class indexRAMRI implements indexRI, indexRIReader, Iterable<indexC
     }
     
     public boolean hasContainer(final String wordHash) {
-        return heap.has(wordHash);
+        return heap.hasContainer(wordHash);
     }
     
     public int sizeContainer(final String wordHash) {
-        final indexContainer c = heap.get(wordHash);
+        final indexContainer c = heap.getContainer(wordHash, null);
         return (c == null) ? 0 : c.size();
     }
 
@@ -238,7 +239,7 @@ public final class indexRAMRI implements indexRI, indexRIReader, Iterable<indexC
         if (wordHash == null) return null;
         
         // retrieve container
-        indexContainer container = heap.get(wordHash);
+        indexContainer container = heap.getContainer(wordHash, null);
         
         // We must not use the container from cache to store everything we find,
         // as that container remains linked to in the cache and might be changed later
@@ -255,16 +256,16 @@ public final class indexRAMRI implements indexRI, indexRIReader, Iterable<indexC
     public synchronized indexContainer deleteContainer(final String wordHash) {
         // returns the index that had been deleted
     	if (wordHash == null) return null;
-        final indexContainer container = heap.delete(wordHash);
+        final indexContainer container = heap.deleteContainer(wordHash);
         hashScore.deleteScore(wordHash);
         hashDate.deleteScore(wordHash);
         return container;
     }
 
     public synchronized boolean removeEntry(final String wordHash, final String urlHash) {
-        final boolean removed = heap.removeReference(wordHash, urlHash);
+        final boolean removed = heap.removeEntry(wordHash, urlHash);
         if (removed) {
-            if (heap.has(wordHash)) {
+            if (heap.hasContainer(wordHash)) {
                 hashScore.decScore(wordHash);
                 hashDate.setScore(wordHash, intTime(System.currentTimeMillis()));
             } else {
@@ -278,10 +279,10 @@ public final class indexRAMRI implements indexRI, indexRIReader, Iterable<indexC
     
     public synchronized int removeEntries(final String wordHash, final Set<String> urlHashes) {
         if (urlHashes.size() == 0) return 0;
-        final int c = heap.removeReferences(wordHash, urlHashes);
+        final int c = heap.removeEntries(wordHash, urlHashes);
         if (c > 0) {
             // removal successful
-            if (heap.has(wordHash)) {
+            if (heap.hasContainer(wordHash)) {
                 hashScore.addScore(wordHash, -c);
                 hashDate.setScore(wordHash, intTime(System.currentTimeMillis()));
             } else {
@@ -295,14 +296,12 @@ public final class indexRAMRI implements indexRI, indexRIReader, Iterable<indexC
     
     public synchronized void addEntries(final indexContainer container) {
         // this puts the entries into the cache, not into the assortment directly
-        if ((container == null) || (container.size() == 0)) return;
+        if ((container == null) || (container.size() == 0) || heap == null) return;
 
         // put new words into cache
-        final int added = heap.add(container);
-        if (added > 0) {
-            hashScore.addScore(container.getWordHash(), added);
-            hashDate.setScore(container.getWordHash(), intTime(System.currentTimeMillis()));
-        }
+        heap.addEntries(container);
+        hashScore.setScore(container.getWordHash(), heap.sizeEntry(container.getWordHash()));
+        hashDate.setScore(container.getWordHash(), intTime(System.currentTimeMillis()));
     }
 
     public synchronized void addEntry(final String wordHash, final indexRWIRowEntry newEntry, final long updateTime, final boolean dhtCase) {
@@ -325,6 +324,10 @@ public final class indexRAMRI implements indexRI, indexRIReader, Iterable<indexC
     }
 
     public Iterator<indexContainer> iterator() {
-        return wordContainers(null, false);
+        return wordContainerIterator(null, false, true);
+    }
+
+    public int sizeEntry(String key) {
+        return this.heap.sizeEntry(key);
     }
 }

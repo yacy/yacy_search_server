@@ -1,4 +1,4 @@
-// indexContainerRAMHeap.java
+// indexContainerCache.java
 // (C) 2008 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 30.03.2008 on http://yacy.net
 //
@@ -41,14 +41,14 @@ import java.util.TreeMap;
 
 import de.anomic.kelondro.blob.HeapReader;
 import de.anomic.kelondro.blob.HeapWriter;
-import de.anomic.kelondro.index.Row;
-import de.anomic.kelondro.index.RowSet;
+import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.ByteOrder;
-import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.util.Log;
+import de.anomic.kelondro.index.Row;
+import de.anomic.kelondro.index.RowSet;
 
-public final class indexContainerRAMHeap {
+public final class indexContainerCache implements Iterable<indexContainer>, indexRI {
 
     private final Row payloadrow;
     private SortedMap<String, indexContainer> cache;
@@ -60,7 +60,7 @@ public final class indexContainerRAMHeap {
      * @param payloadrow
      * @param log
      */
-    public indexContainerRAMHeap(final Row payloadrow) {
+    public indexContainerCache(final Row payloadrow) {
         this.payloadrow = payloadrow;
         this.cache = null;
     }
@@ -332,10 +332,16 @@ public final class indexContainerRAMHeap {
      * in the cache, so that manipulations of the iterated objects do not change
      * objects in the cache.
      */
-    public synchronized CloneableIterator<indexContainer> wordContainers(final String startWordHash, final boolean rot) {
+    public synchronized CloneableIterator<indexContainer> wordContainerIterator(final String startWordHash, final boolean rot, final boolean ram) {
         return new heapCacheIterator(startWordHash, rot);
     }
 
+
+    public Iterator<indexContainer> iterator() {
+        return wordContainerIterator(null, false, true);
+    }
+    
+    
     /**
      * cache iterator: iterates objects within the heap cache. This can only be used
      * for write-enabled heaps, read-only heaps do not have a heap cache
@@ -393,7 +399,7 @@ public final class indexContainerRAMHeap {
      * @param key
      * @return true, if the key is used in the heap; false othervise
      */
-    public boolean has(final String key) {
+    public boolean hasContainer(final String key) {
         return this.cache.containsKey(key);
     }
     
@@ -402,8 +408,30 @@ public final class indexContainerRAMHeap {
      * @param key
      * @return the indexContainer if one exist, null otherwise
      */
-    public indexContainer get(final String key) {
-        return this.cache.get(key);
+    public indexContainer getContainer(final String key, Set<String> urlselection) {
+        if (urlselection == null) return this.cache.get(key);
+        indexContainer c = this.cache.get(key);
+        if (c == null) return null;
+        // because this is all in RAM, we must clone the entries (flat)
+        indexContainer c1 = new indexContainer(c.getWordHash(), c.row(), c.size());
+        Iterator<indexRWIRowEntry> e = c.entries();
+        indexRWIRowEntry ee;
+        while (e.hasNext()) {
+            ee = e.next();
+            if (urlselection.contains(ee.urlHash())) c1.add(ee);
+        }
+        return c1;
+    }
+
+    /**
+     * return the size of the container with corresponding key
+     * @param key
+     * @return
+     */
+    public int sizeEntry(final String key) {
+        indexContainer c = this.cache.get(key);
+        if (c == null) return 0;
+        return c.size();
     }
     
     /**
@@ -411,20 +439,19 @@ public final class indexContainerRAMHeap {
      * @param wordHash
      * @return the indexContainer if the cache contained the container, null othervise
      */
-    public synchronized indexContainer delete(final String wordHash) {
+    public synchronized indexContainer deleteContainer(final String wordHash) {
         // returns the index that had been deleted
         assert this.cache != null;
         return cache.remove(wordHash);
     }
 
-    
-    public synchronized boolean removeReference(final String wordHash, final String urlHash) {
+    public synchronized boolean removeEntry(final String wordHash, final String urlHash) {
         assert this.cache != null;
         final indexContainer c = cache.get(wordHash);
         if ((c != null) && (c.remove(urlHash) != null)) {
             // removal successful
             if (c.size() == 0) {
-                delete(wordHash);
+                deleteContainer(wordHash);
             } else {
                 cache.put(wordHash, c);
             }
@@ -433,7 +460,7 @@ public final class indexContainerRAMHeap {
         return false;
     }
     
-    public synchronized int removeReferences(final String wordHash, final Set<String> urlHashes) {
+    public synchronized int removeEntries(final String wordHash, final Set<String> urlHashes) {
         assert this.cache != null;
         if (urlHashes.size() == 0) return 0;
         final indexContainer c = cache.get(wordHash);
@@ -441,7 +468,7 @@ public final class indexContainerRAMHeap {
         if ((c != null) && ((count = c.removeEntries(urlHashes)) > 0)) {
             // removal successful
             if (c.size() == 0) {
-                delete(wordHash);
+                deleteContainer(wordHash);
             } else {
                 cache.put(wordHash, c);
             }
@@ -450,10 +477,10 @@ public final class indexContainerRAMHeap {
         return 0;
     }
  
-    public synchronized int add(final indexContainer container) {
+    public synchronized void addEntries(final indexContainer container) {
         // this puts the entries into the cache
         int added = 0;
-        if ((container == null) || (container.size() == 0)) return 0;
+        if ((container == null) || (container.size() == 0)) return;
         assert this.cache != null;
         
         // put new words into cache
@@ -469,7 +496,7 @@ public final class indexContainerRAMHeap {
             cache.put(wordHash, entries);
         }
         entries = null;
-        return added;
+        return;
     }
 
     public synchronized void addEntry(final String wordHash, final indexRWIRowEntry newEntry) {
@@ -479,5 +506,9 @@ public final class indexContainerRAMHeap {
         container.put(newEntry);
         cache.put(wordHash, container);
     }
-    
+
+    public int minMem() {
+        return 0;
+    }
+
 }

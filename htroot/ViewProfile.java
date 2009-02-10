@@ -94,8 +94,8 @@ public class ViewProfile {
             } else {
                 // process news if existent
                 try {
-                    final yacyNewsRecord record = sb.webIndex.newsPool.getByOriginator(yacyNewsPool.INCOMING_DB, yacyNewsPool.CATEGORY_PROFILE_UPDATE, seed.hash);
-                    if (record != null) sb.webIndex.newsPool.moveOff(yacyNewsPool.INCOMING_DB, record.id());
+                    final yacyNewsRecord record = sb.webIndex.seedDB.newsPool.getByOriginator(yacyNewsPool.INCOMING_DB, yacyNewsPool.CATEGORY_PROFILE_UPDATE, seed.hash);
+                    if (record != null) sb.webIndex.seedDB.newsPool.moveOff(yacyNewsPool.INCOMING_DB, record.id());
                 } catch (final IOException e) {}
                 
                 // try to get the profile from remote peer
