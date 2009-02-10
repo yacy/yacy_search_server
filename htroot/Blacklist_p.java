@@ -403,8 +403,13 @@ public class Blacklist_p {
             int start = -1;
             if (sortedlist.length > 0) {
                 while (end < sortedlist.length) {
-                    start = entryCount * size;
-                    end = (entryCount + 1) * size;
+                    if (size > 0) {
+                        start = entryCount * size;
+                        end = (entryCount + 1) * size;
+                    } else {
+                        start = 0;
+                        end = sortedlist.length;
+                    }
                     prop.put(DISABLED + EDIT + "subListOffset_" + entryCount + "_value", start);
                     prop.put(DISABLED + EDIT + "subListOffset_" + entryCount + "_fvalue", start + 1);
                     if (end > sortedlist.length) {
