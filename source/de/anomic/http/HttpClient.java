@@ -75,6 +75,9 @@ public abstract class HttpClient {
      * @param timeout in milliseconds
      * @return
      */
+    public static byte[] wget(final String uri) {
+        return wget(uri, new httpRequestHeader(), 10000, null);
+    }
     public static byte[] wget(final String uri, final httpRequestHeader header, final int timeout) {
         return wget(uri, header, timeout, null);
     }

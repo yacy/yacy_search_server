@@ -67,8 +67,8 @@ public class EcoFS {
     /**
      * stay below hard disc cache (is that necessary?)
      */
-    private static final int maxReadCache = 256 * 1024;
-    private static final int maxWriteBuffer = 256 * 1024;
+    private static final int maxReadCache = 16 * 1024;
+    private static final int maxWriteBuffer = 16 * 1024;
     
     
     public EcoFS(final File tablefile, final int recordsize) throws IOException {

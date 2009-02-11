@@ -635,6 +635,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         //plasmaSnippetCache.result scr = snippetCache.retrieve(new URL("http://www.heise.de/kiosk/archiv/ct/2003/4/20"), query, true, 260);
 
         this.dbImportManager = new ImporterManager();
+        this.trail = new ArrayList<String>();
         
         log.logConfig("Finished Switchboard Initialization");
     }

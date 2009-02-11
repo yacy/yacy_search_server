@@ -33,7 +33,7 @@ public final class BufferedIOChunks extends AbstractIOChunks implements IOChunks
     protected RandomAccessInterface ra;
     private int bufferSize;
     private final long commitTimeout;
-    private final byte[] buffer;
+    private byte[] buffer;
     private long lastCommit = 0;
     
     public BufferedIOChunks(final RandomAccessInterface ra, final String name, final int buffersize, final long commitTimeout) {
@@ -41,7 +41,7 @@ public final class BufferedIOChunks extends AbstractIOChunks implements IOChunks
         this.ra = ra;
         this.bufferSize = 0;
         this.commitTimeout = commitTimeout;
-        this.buffer = new byte[buffersize]; // this is a buffer at the end of the file
+        this.buffer = null; // this is a buffer at the end of the file. It will be initialized if necessary
         this.lastCommit = System.currentTimeMillis();
     }
 
@@ -64,6 +64,7 @@ public final class BufferedIOChunks extends AbstractIOChunks implements IOChunks
         // do the read
         if (pos >= this.ra.length()) {
             // read from the buffer
+            if (this.buffer == null) this.buffer = new byte[this.bufferSize];
             System.arraycopy(this.buffer, (int) (pos - this.ra.length()), b, off, len);
         } else if (pos + len >= this.ra.length()) {
             // the content is partly in the file and partly in the buffer
@@ -84,13 +85,14 @@ public final class BufferedIOChunks extends AbstractIOChunks implements IOChunks
         if (len == 0) return;
         if (pos >= this.ra.length()) {
             // the position is fully outside of the file
-            if (pos - this.ra.length() + len > this.buffer.length) {
+            if (this.buffer != null && pos - this.ra.length() + len > this.buffer.length) {
                 // this does not fit into the buffer
                 commit();
                 this.ra.seek(pos);
                 this.ra.write(b, off, len);
                 return;
             }
+            if (this.buffer == null) this.buffer = new byte[this.bufferSize];
             System.arraycopy(b, off, this.buffer, (int) (pos - this.ra.length()), len);
             this.bufferSize = (int) Math.max(this.bufferSize, pos - this.ra.length() + len);
             return;
@@ -110,7 +112,7 @@ public final class BufferedIOChunks extends AbstractIOChunks implements IOChunks
 
     public synchronized void commit() throws IOException {
         this.lastCommit = System.currentTimeMillis();
-        if (this.bufferSize == 0) return;
+        if (this.buffer == null || this.bufferSize == 0) return;
         this.ra.seek(this.ra.length()); // move to end of file
         this.ra.write(this.buffer, 0, this.bufferSize);
         this.bufferSize = 0;
