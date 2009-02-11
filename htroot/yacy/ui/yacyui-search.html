@@ -4,8 +4,8 @@
 		$("#side1").accordion("activate", 0);
 		$("#side2").accordion("activate", 0);
 		
-		var height = document.documentElement.clientHeight - 240;
-		var url = $(tabid).attr('resource');		
+		var height = document.documentElement.clientHeight - 240;	
+		var url = $(tabid).attr('resource');	
 				    			
  		$(tabid+" .yresult").flexigrid({
 	 		url: url,
@@ -14,7 +14,7 @@
 	 		query: $(tabid).attr('search'),
 	 		colModel: [	
 				{display: 'Hash', name : 'hash', width : 50, sortable : false, align: 'center', hide: true},
-				{display: 'Public', name : 'public', width : 25, sortable : true, align: 'center'},
+				{display: '', name : 'favicon', width : 25, sortable : true, align: 'center'},
 				{display: 'Title', name : 'title', width : 450, sortable : true, align: 'left'},
 				{display: 'Tags', name : 'tags', width : 240, sortable : false, align: 'left'},
 				{display: 'Folders', name : 'folders', width : 240, sortable : false, align: 'left', hide: true},

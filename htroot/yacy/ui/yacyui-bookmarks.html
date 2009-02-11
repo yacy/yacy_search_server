@@ -78,21 +78,21 @@
 		else if (com=='Add') {			
 			$('#bmaddform').resetForm();
 			$("#bm_url").blur(function() { 
-				var url = $("input[@name='bm_url']").getValue();
+				var url = $("input[name='bm_url']").getValue();
 				$.ajax({
 					type: "GET",
 					url: "/api/util/getpageinfo_p.xml?url="+url,			
 					dataType: "xml",
 					success: function(xml) {
 						var title = $(xml).find('title').text();
-						$("textarea[@name='bm_title']").setValue(title);
+						$("input[name='bm_title']").setValue(title);
 						var desc = $(xml).find('desc').text();					
-						$("textarea[@name='bm_desc']").setValue(desc);					
+						$("textarea[name='bm_desc']").setValue(desc);					
 						tags = "";
 						$(xml).find('tag').each(function(){
 							tags = tags + "," + $(this).attr('name');
 						});
-						$("input[@name='bm_tags']").setValue(tags);									
+						$("input[name='bm_tags']").setValue(tags);									
 					}					
 				});
 			});						
@@ -103,12 +103,12 @@
 				alert("Edit of more than one selected bookmark is currently not supportet!");
 				return false;
 			}
-			$("input[@name='bm_url']").setValue($('.trSelected',grid).find('.url').text());
-            $("textarea[@name='bm_title']").setValue($('.trSelected',grid).find('h3.linktitle').text().trim());
-            $("textarea[@name='bm_desc']").setValue($('.trSelected',grid).find('p.desc').text().trim());            		
-            $("input[@name='bm_tags']").setValue($('.trSelected',grid).find('p.tags').text().trim().replace(/,\s/g,","));            
-            $("input[@name='bm_path']").setValue($('.trSelected',grid).find('p.folders').text().replace(/,\s/g,","));
-            $("select[@name='bm_public']").setValue($('.trSelected',grid).find('img').attr('alt'));
+			$("input[name='bm_url']").setValue($('.trSelected',grid).find('.url').text());
+            $("input[name='bm_title']").setValue($('.trSelected',grid).find('h3.linktitle').text().trim());
+            $("textarea[name='bm_desc']").setValue($('.trSelected',grid).find('p.desc').text().trim());            		
+            $("input[name='bm_tags']").setValue($('.trSelected',grid).find('p.tags').text().trim().replace(/,\s/g,","));            
+            $("input[name='bm_path']").setValue($('.trSelected',grid).find('p.folders').text().replace(/,\s/g,","));
+            $("select[name='bm_public']").setValue($('.trSelected',grid).find('img').attr('alt'));
             $("#bmadd").dialog('open'); 
 		}		
 	}

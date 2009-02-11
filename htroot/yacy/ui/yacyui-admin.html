@@ -10,6 +10,9 @@ function loadBanner() {
 }
 $(function() {
 	loaderBanner = window.setInterval("loadBanner()", 5000);
+	$('.styleswitch').click(function() {
+		$("#theme_select").dialog('open');
+	});
 	$("#login").click(function() {
 		$.ajax({
    			url: "/api/bookmarks/xbel/xbel.xml?login=true",
@@ -35,6 +38,13 @@ $(function() {
 			</a>
 		</td>
 		<td>
+			<a href="#" rel="base" class="styleswitch">
+				<img alt="Themes" title="Themes" src="img-1/Desktop.png" border="0"/>
+				<br />
+				Themes
+			</a>
+		</td>
+		<td>
 			<a href="#Messages">
 				<img alt="Messages" title="Messages" src="img-1/New%20Mail.png" border="0"/>
 				<br />
@@ -55,7 +65,7 @@ $(function() {
 				Shutdown
 			</a>
 		</td>
-		<td>&nbsp;</td><td>&nbsp;</td>		
+		<td>&nbsp;</td>	
 	</tr>
 	<tr><td class="head" colspan="7"><h3>Web Indexing</h3><hr /></td></tr>
 	<tr>

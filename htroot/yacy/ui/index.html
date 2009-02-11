@@ -10,14 +10,24 @@
   <meta name="Content-Language" content="English, Englisch" />
   
   <link media="screen" type="text/css" href="css/base.css" rel="stylesheet" />
-  <link media="screen" type="text/css" href="css/jquery.tabs.css" rel="stylesheet" />
-  <link media="screen" type="text/css" href="css/jquery.accordion.css" rel="stylesheet" />
-  <link media="screen" type="text/css" href="css/jquery.pagination.css" rel="stylesheet" />
-  <link media="screen" type="text/css" href="css/jquery.flexigrid.css" rel="stylesheet" />
-  <link media="screen" type="text/css" href="css/jquery.dialog.css" rel="stylesheet" />		
+  
+  <link media="screen" type="text/css" href="css/themes/base/ui.base.css" rel="stylesheet" title="base"/>
+  <link media="screen" type="text/css" href="css/themes/base/ui.theme.css" rel="stylesheet" title="base"/>
+  <link media="screen" type="text/css" href="css/themes/humanity/ui.base.css" rel="alternate stylesheet" title="humanity"/>	
+  <link media="screen" type="text/css" href="css/themes/humanity/ui.theme.css" rel="alternate stylesheet" title="humanity"/>
+  <link media="screen" type="text/css" href="css/themes/cupertino/ui.base.css" rel="alternate stylesheet" title="cupertino"/>	
+  <link media="screen" type="text/css" href="css/themes/cupertino/ui.theme.css" rel="alternate stylesheet" title="cupertino"/>
+  <link media="screen" type="text/css" href="css/themes/redmond/ui.base.css" rel="alternate stylesheet" title="redmond"/>	
+  <link media="screen" type="text/css" href="css/themes/redmond/ui.theme.css" rel="alternate stylesheet" title="redmond"/>
+  <link media="screen" type="text/css" href="css/themes/smoothness/ui.base.css" rel="alternate stylesheet" title="smoothness"/>	
+  <link media="screen" type="text/css" href="css/themes/smoothness/ui.theme.css" rel="alternate stylesheet" title="smoothness"/>
+  <link media="screen" type="text/css" href="css/themes/darkness/ui.base.css" rel="alternate stylesheet" title="darkness"/>	
+  <link media="screen" type="text/css" href="css/themes/darkness/ui.theme.css" rel="alternate stylesheet" title="darkness"/>
+  
+  <link media="screen" type="text/css" href="css/jquery.flexigrid.css" rel="stylesheet" />	
   <link media="screen" type="text/css" href="css/jquery.treeview.css" rel="stylesheet" /> 
   
-  <script src="js/jquery-1.2.6.min.js" type="text/javascript"></script>    
+  <script src="js/jquery-1.3.1.min.js" type="text/javascript"></script>    
   <script src="js/jquery.ui.all.min.js" type="text/javascript"></script>
     
   <script src="js/jquery.dimensions.min.js" type="text/javascript"></script>  
@@ -49,85 +59,125 @@
 	$(function() {		
 		qtag = "";
 		flex = {};
-		tabid = "Welcome";
+		tabid = "#Welcome";
 		/* Initialize Tabs and set up close function */
-		$tabs = $('#container ul').tabs({
-        	add: function(e, ui) {
-            	var li = $(ui.tab).parents('li:eq(0)')[0];
-                $('<img class="close" alt="close" src="/yacy/ui/img/cancel.png" border="0"/>')
-					.appendTo(li)
-                	.bind('click', function() {
-						$tabs.tabs('remove', $('li', $tabs).index(li));						
-					});
-				/* save search options from form to tab attributes*/			
-				var search = $("input[@name='search']").getValue();
-				var contentdom = $("input[@name='contentdom']").getValue();
-				var count = $("select[@name='itemsPerPage']").getValue();
-				var offset = 0;
-				var resource = $("select[@name='resource']").getValue();
-				var constraint= $("select[@name='constraint']").getValue();
-				var prefermaskfilter = $("input[@name='prefermaskfilter']").getValue();				
-				var urlmaskfilter = $("input[@name='urlmaskfilter']").getValue();
-				var language = $("select[@name='language']").getValue();
-				
-				$('#' + ui.panel.id).attr('search', search);
-				$('#' + ui.panel.id).attr('contentdom', contentdom);
-				$('#' + ui.panel.id).attr('count', count);
-	        	$('#' + ui.panel.id).attr('offset', offset);
-				$('#' + ui.panel.id).attr('resource', resource);
-				$('#' + ui.panel.id).attr('constraint', constraint);
-	        	$('#' + ui.panel.id).attr('prefermaskfilter', prefermaskfilter);
-				$('#' + ui.panel.id).attr('urlmaskfilter', urlmaskfilter);
-				$('#' + ui.panel.id).attr('language', language);
-            },
-			select: function(e, ui) {             	
-				/* set global variable tabid */
-				tabid = '#' + ui.panel.id;						
-				if (tabid == "#Bookmarks") {
-					$("select[@name='resource']").setValue('ymarks');
-					$("input[@name='contentdom']").setValue('text');
-					$("input[@name='search']").setValue(qtag);									
-				} else {
-					var search = $(tabid).attr('search');
-					var contentdom = $(tabid).attr('contentdom');
-					var resource = $(tabid).attr('resource');
-					var constraint= $(tabid).attr('constraint');
-					var prefermaskfilter = $(tabid).attr('prefermaskfilter');
-					var urlmaskfilter = $(tabid).attr('urlmaskfilter');
-					var language = $(tabid).attr('language');
-					
-					$("input[@name='search']").setValue(search);
-					$("input[@name='contentdom']").setValue(contentdom);
-					$("select[@name='constraint']").setValue(constraint);
-					$("input[@name='prefermaskfilter']").setValue(prefermaskfilter);
-					$("input[@name='urlmaskfilter']").setValue(urlmaskfilter);
-					$("select[@name='language']").setValue(language);
-					$('#yoptions').trigger('update');
-				}
-			}
+		$tabs = $('#tabs-container').tabs({
+			// tabs options
 		});
+		$tabs.tabs().find(".ui-tabs-nav").sortable();
+		$tabs.bind('tabsadd', function(event, ui) {
+            	var li = $(ui.tab).parents('li:eq(0)')[0];
+                var close = $('<div style="float: right; margin-left: 8px;" class="ui-icon ui-icon-close" role="button" unselectable="on">close</div>').appendTo($(ui.tab));
+                close.bind('click', function() {
+					$tabs.tabs('remove', $('li', $tabs).index(li));						
+				});
+				close.bind('mouseover', function() {
+					close.toggleClass("ui-icon-closethick");					
+				});
+				close.bind('mouseout', function() {
+					close.toggleClass("ui-icon-closethick");					
+				});
+				var search = $("#searchbox input[name='search']").getValue();
+				var contentdom = $("#searchbox input[name='contentdom']").getValue();
+				var count = $("#searchbox select[name='itemsPerPage']").getValue();
+				var offset = 0;
+				var resource = $("#searchbox select[name='resource']").getValue();
+				var constraint= $("#searchbox select[name='constraint']").getValue();
+				var prefermaskfilter = $("#searchbox input[name='prefermaskfilter']").getValue();				
+				var urlmaskfilter = $("#searchbox input[name='urlmaskfilter']").getValue();
+				var language = $("#searchbox select[name='language']").getValue();
+				
+				tabid = "#"+ui.panel.id;
+				$(tabid).attr('search', search);
+				$(tabid).attr('contentdom', contentdom);
+				$(tabid).attr('count', count);
+	        	$(tabid).attr('offset', offset);
+				$(tabid).attr('resource', resource);
+				$(tabid).attr('constraint', constraint);
+	        	$(tabid).attr('prefermaskfilter', prefermaskfilter);
+				$(tabid).attr('urlmaskfilter', urlmaskfilter);
+				$(tabid).attr('language', language);		
+		});
+		$tabs.bind('tabsselect', function(event, ui) {
+			/* 
+		    Objects available in the function context:
+			    ui.tab     - anchor element of the selected (clicked) tab
+			    ui.panel   - element, that contains the selected/clicked tab contents
+			    ui.index   - zero-based index of the selected (clicked) tab
+		    */
+	    	tabid = "#"+ui.panel.id;						
+			var bmk_tab = 2;
+			if (ui.index == bmk_tab) {
+				$("#searchbox select[name='resource']").setValue('ymarks');
+				$("#searchbox input[name='contentdom']").setValue('text');
+				$("#searchbox input[name='search']").setValue(qtag);
+			} else if (ui.index > bmk_tab) {
+				var search = $(tabid).attr('search');
+				var contentdom = $(tabid).attr('contentdom');
+				var resource = $(tabid).attr('resource');
+				var constraint= $(tabid).attr('constraint');
+				var prefermaskfilter = $(tabid).attr('prefermaskfilter');
+				var urlmaskfilter = $(tabid).attr('urlmaskfilter');
+				var language = $(tabid).attr('language');
+				
+				$("#searchbox input[name='search']").setValue(search);
+				$("#searchbox input[name='contentdom']").setValue(contentdom);
+				$("#searchbox select[name='constraint']").setValue(constraint);
+				$("#searchbox input[name='prefermaskfilter']").setValue(prefermaskfilter);
+				$("#searchbox input[name='urlmaskfilter']").setValue(urlmaskfilter);
+				$("#searchbox select[name='language']").setValue(language);
+				$('#yoptions').trigger('update');
+			}
+			return true;
+		});
+		
 		/* Initialize Bookmark Dialog */		
 		$("#bmadd").dialog({			
 			autoOpen: false,
-			height: 400,
-			width: 250,
+			height: 365,
+			width: 400,
+			position: ['top',100],
+			modal: true,			
 			resizable: false,
 			buttons: { 
         		OK: bookmark,
         		Cancel: function() { $("#bmadd").dialog("close"); }
     		} 
 		});
+		/* Select Theme Dialog */		
+		$("#theme_select").dialog({			
+			autoOpen: false,
+			height: 220,
+			width: 275,
+			position: ['top',200],
+			modal: true,
+			resizable: false,
+			buttons: { 
+        		OK: function() { 
+        			var rel = $("#theme").getValue();
+        			switchStylestyle(rel);
+        			$("#theme_select").dialog("close");
+        		},
+        		Cancel: function() { $("#theme_select").dialog("close"); }
+    		} 
+		});
+		$("#theme").change(function() { 
+			var src = "css/themes/" + $("#theme").getValue() +"/images/theme.png";
+			$("#theme_preview").attr("src", src).trigger("update");
+		});
 		/* Initialize Edit Tags Dialog */		
 		$("#tagedit").dialog({			
 			autoOpen: false,
 			height: 250,
 			width: 250,
+			position: ['top',100],
+			modal: true,
 			resizable: false,
 			buttons: { 
         		Add: function() {
 					data = {
-						selectTag: $("input[@name='tag1']").getValue(),
-						addTag: $("input[@name='tag2']").getValue()
+						selectTag: $("input[name='tag1']").getValue(),
+						addTag: $("input[name='tag2']").getValue()
 					};
 					$.ajax({
 						type: "GET",
@@ -144,8 +194,13 @@
         		},
         		Edit: function() {
 					data = {
+<<<<<<< .mine
+						"old": $("input[name='tag1']").getValue(),
+						"new": $("input[name='tag2']").getValue()
+=======
 						"old": $("input[@name='tag1']").getValue(),
 						"new": $("input[@name='tag2']").getValue()
+>>>>>>> .r5596
 					};
 					$.ajax({
 						type: "GET",
@@ -165,13 +220,15 @@
 			autoOpen: false,
 			height: 225,
 			width: 250,
+			position: ['top',100],
+			modal: true,
 			resizable: false,
 			buttons: { 
         		Add: function() { 
 					$('.trSelected',flex).each(function() {
 						data = {
 							urlhash: $(this).find('td :first').text(),
-							addTag: $("input[@name='tag']").getValue()
+							addTag: $("input[name='tag']").getValue()
 						};					
 						$.ajax({
 							type: 'POST',
@@ -185,7 +242,7 @@
 					$("#tagadd").dialog("close");	 
         		},
         		Cancel: function() {
-        			$("input[@name='tag1']").setValue("cancel");
+        			$("input[name='tag1']").setValue("cancel");
         			$("#tagadd").dialog("close"); 
         		}
     		} 
@@ -196,12 +253,12 @@
 		$tabs.tabs('select',1);
 	});	
    	function bookmark() {
-		var url = $("input[@name='bm_url']").getValue();
-        var title = $("textarea[@name='bm_title']").getValue();
-        var desc = $("textarea[@name='bm_desc']").getValue();            		
-        var tags = $("input[@name='bm_tags']").getValue()
-        var path = $("input[@name='bm_path']").getValue();
-        var pub = $("select[@name='bm_public']").getValue();
+		var url = $("input[name='bm_url']").getValue();
+        var title = $("input[name='bm_title']").getValue();
+        var desc = $("textarea[name='bm_desc']").getValue();            		
+        var tags = $("input[name='bm_tags']").getValue()
+        var path = $("input[name='bm_path']").getValue();
+        var pub = $("select[name='bm_public']").getValue();
         $.ajax({
 			type: "POST",
 			url: "/api/bookmarks/posts/add_p.xml",
@@ -224,6 +281,13 @@
 		$('div.ftitle').empty().html('YaCy Bookmarks: ' + HTMLenc(qtag));
 		$('#ymarks').flexReload();
 	}
+	function switchStylestyle(styleName) {
+		$('link[rel*=style][title]').each(function(i) 
+		{
+			this.disabled = true;
+			if (this.getAttribute('title') == styleName) this.disabled = false;
+		});
+	}
 	//]]>	
   </script>  
 </head>
@@ -233,10 +297,10 @@
 		<div class="basic" id="side0">
 			<img alt="YaCy Logo" title="YaCy Logo" class="logo" src="img/kaskelix.png" />	
 		</div>
-		<div class="basic" id="side1"></div>
-		<div class="basic" id="side2"></div>
+		<div id="side1"></div>
+		<div id="side2"></div>
 	</div>
-	<div id="container" class="main">
+	<div id="tabs-container" class="main">
 		<ul>
 			<!-- initial tabs only, dynamic tabs are loaded via jQuery -->
 			<li><a href="yacyui-welcome.html" title="About YaCy-UI"><span>About YaCy-UI</span></a></li>
@@ -244,62 +308,82 @@
 			<li><a href="yacyui-bookmarks.html" title="Bookmarks"><span>Bookmarks</span></a></li>			
 		</ul>		
 	</div>
-	<!-- Bookmarks Edit Dialog -->	
-	<div id="bmadd" class="bmdialog" title="YaCy Bookmarks">
-		<form id="bmaddform" class="small" method="post" accept-charset="UTF-8" action="jQuery"><div>
-			<label for="bm_url">URL:</label>
-			<br />					
-			<input type="text" name="bm_url" id="bm_url" class="filter" size="80" />
-			<br />
-			<label for="bm_title">Title:</label>
-			<br />
-			<textarea name="bm_title" id="bm_title" class="filter" rows="1" cols="20">
-			</textarea>
-			<br />
-			<label for="bm_desc">Description:</label>
-			<br />
-			<textarea name="bm_desc" id="bm_desc" class="filter" rows="3" cols="20">
-			</textarea>		
-			<br />
-			<label for="bm_path">Folder (/folder/subfolder):</label>
-			<br />
-			<input type="text" name="bm_path" id="bm_path" class="filter" size="80" />
-			<br />
-			<label for="bm_tags">Tags (comma separated):</label>
-			<br />
-			<input type="text" name="bm_tags" id="bm_tags" class="filter" size="80" />
-			<br />
-			<label for="bm_public">Public:</label>
-			<br />
-			<select name="bm_public" id="bm_public" class="selector">
-				<option value="public">yes</option>
-				<option value="private">no</option>
-			</select>
-		</div></form>
-	</div>
-	<!-- Tag Edit Dialog -->	
-	<div id="tagedit" class="bmdialog" title="YaCy Bookmark Edit Tags">
-		<p>This dialog lets you rename (edit) tag names. You can also add a new tag to all bookmarks tagged with old tag. 
-		</p>
-		<form id="tageditform" class="small" method="post" accept-charset="UTF-8" action="jQuery"><div>
-			<label for="tag1">Old Tag:</label>
-			<br />					
-			<input type="text" name="tag1" id="tag1" class="filter" size="80" />
-			<br />
-			<label for="tag2">New Tag:</label>
-			<br />					
-			<input type="text" name="tag2" id="tag2" class="filter" size="80" />
-			<br />		
-		</div></form>
-	</div>
-	<!-- Tag Add Dialog -->	
-	<div id="tagadd" class="bmdialog" title="YaCy Bookmark Add Tags">
-		<p>This dialog lets you add tags or folders to the selected bookmarks.</p>
-		<form id="tagaddform" class="small" method="post" accept-charset="UTF-8" action="jQuery"><div>
-			<label for="tag">Tag Name:</label>
-			<br />					
-			<input type="text" name="tag" id="tag" class="filter" size="80" />
-		</div></form>
+	<div id="dialog-container">
+		<!-- Bookmarks Edit Dialog -->	
+		<div id="bmadd" class="bm_dialog" title="YaCy Bookmarks">
+			<form id="bmaddform" method="post" accept-charset="UTF-8" action="jQuery"><div>
+				<label for="bm_url">URL:</label>
+				<br />					
+				<input type="text" name="bm_url" id="bm_url" class="bm_input" size="80" />
+				<br />
+				<label for="bm_title">Title:</label>
+				<br />
+				<input type="text" name="bm_title" id="bm_title" class="bm_input" size="80">
+				</textarea>
+				<br />
+				<label for="bm_desc">Description:</label>
+				<br />
+				<textarea name="bm_desc" id="bm_desc" class="bm_input" rows="3" cols="20">
+				</textarea>		
+				<br />
+				<label for="bm_path">Folder (/folder/subfolder):</label>
+				<br />
+				<input type="text" name="bm_path" id="bm_path" class="bm_input" size="80" />
+				<br />
+				<label for="bm_tags">Tags (comma separated):</label>
+				<br />
+				<input type="text" name="bm_tags" id="bm_tags" class="bm_input" size="80" />
+				<br />
+				<label for="bm_public">Public:</label>
+				<br />
+				<select name="bm_public" id="bm_public" class="selector">
+					<option value="public">yes</option>
+					<option value="private">no</option>
+				</select>
+			</div></form>
+		</div>
+		<!-- Tag Edit Dialog -->	
+		<div id="tagedit" title="YaCy Bookmark Edit Tags">
+			<p>This dialog lets you rename (edit) tag names. You can also add a new tag to all bookmarks tagged with old tag. 
+			</p>
+			<form id="tageditform" method="post" accept-charset="UTF-8" action="jQuery"><div>
+				<label for="tag1">Old Tag:</label>
+				<br />					
+				<input type="text" name="tag1" id="tag1" class="filter" size="80" />
+				<br />
+				<label for="tag2">New Tag:</label>
+				<br />					
+				<input type="text" name="tag2" id="tag2" class="filter" size="80" />
+				<br />		
+			</div></form>
+		</div>
+		<!-- Tag Add Dialog -->	
+		<div id="tagadd" title="YaCy Bookmark Add Tags">
+			<p>This dialog lets you add tags or folders to the selected bookmarks.</p>
+			<form id="tagaddform" method="post" accept-charset="UTF-8" action="jQuery"><div>
+				<label for="tag">Tag Name:</label>
+				<br />					
+				<input type="text" name="tag" id="tag" class="filter" size="80" />
+			</div></form>
+		</div>
+		<!-- Theme Select Dialog -->	
+		<div id="theme_select" title="Select YaCy-UI Theme">
+			<p>This dialog lets you select an alternate theme/skin for YaCy-UI.</p>
+			<form method="post" accept-charset="UTF-8" action="jQuery">
+				<div>	
+					<select id="theme" name="theme" class="selector">		
+						<option value="base" selected="selected">Base Theme</option>
+						<option value="redmond" >Redmond</option>
+						<option value="cupertino" >Cupertino</option>
+						<option value="smoothness" >Smoothness</option>
+						<option value="darkness" >Darkness</option>
+						<option value="humanity" >Humanity</option>
+						<option value="custom" >Custom Theme</option>
+					</select>
+					<img id="theme_preview" src="css/themes/base/images/theme.png" style="padding-left: 10px;"/>
+				</div>
+			</form>
+		</div>
 	</div>		
 </body>
 </html>

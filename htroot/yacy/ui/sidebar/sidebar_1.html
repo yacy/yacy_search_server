@@ -8,7 +8,7 @@
 			clearStyle: true,
 			header: "h3"
 		});
-		$("#side1").accordion("activate", 2);		
+		$("#side1").accordion("activate", 1);		
 
 		$("#yfolder").treeview({
 			url: "/api/bookmarks/get_folders.json?bmtype=href",
@@ -40,8 +40,8 @@
 		
 		/* Load Search Result into new Tab */
 		$('#searchbox').submit(function() {			
-			if ($("select[@name='resource']").getValue() == "ymarks") {								
-				qtag = $("input[@name='search']").getValue();				
+			if ($("select[name='resource']").getValue() == "ymarks") {								
+				qtag = $("input[name='search']").getValue();				
 				if (tabid == "#Bookmarks") {
 					reloadBM();
 				} else {
@@ -49,7 +49,7 @@
 				}						
 			} else {			
 				var tabnr = $tabs.tabs('length');			
-				var tabname = $("input[@name='search']").getValue();			
+				var tabname = $("input[name='search']").getValue();			
 				$tabs.tabs('add', "yacyui-search.html", '*' + HTMLenc(tabname));
 				$tabs.tabs('select',tabnr);
 			}
@@ -59,7 +59,7 @@
   //]]>
 </script>
 
-<h3>YaCy P2P Websearch</h3><!-- 0 -->
+<h3><a href="#">YaCy P2P Websearch</a></h3><!-- 0 -->
 <div class="yform">		
 	<form id="searchbox" class="small" method="get" accept-charset="UTF-8" action="">								
 		<p>
@@ -241,8 +241,8 @@
 		</p>
 	</form>
 </div>
-<h3>Bookmark Folders<span id="sidebar-1-3"></span></h3><!-- 1 --> 
-<div class="menu">
+<h3><a href="#">Bookmark Folders</a></h3><!-- 1 -->
+<div>
 	<ul class="filetree" id="yfolder"></ul>
 </div>
 

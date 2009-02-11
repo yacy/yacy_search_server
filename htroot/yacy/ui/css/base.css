@@ -1,11 +1,21 @@
+/* Body */
+body {
+	font-size: 62.5%;
+}
 /* Main */
-
 div.main { 
   float:left;
   margin-top:1.5em;
   width:75%;
   height:100%;
 }
+/* Sidebar */ 
+div.sidebar {     
+  margin-right: 1em;
+  float:left;
+  width:250px;
+}
+
 
 .yresult .favicon {
 	width: 16px; 
@@ -34,8 +44,8 @@ table.adminconsole td.head {
 table.adminconsole h3 {
 	margin-top: 15px;
 	margin-bottom: 5px;
-	font-size: 14px;
-	color: #27537a;	
+	text-decoration:none;
+	font-size: 12px;	
 }
 table.adminconsole img {
 	width: 32px; 
@@ -44,8 +54,7 @@ table.adminconsole img {
 	vertical-align: middle;
 }
 table.adminconsole a {
-	text-decoration:none;
-	color: black;	
+	text-decoration:none;	
 }
 
 
@@ -90,19 +99,13 @@ div.ys {
 }
 .small {
   font-family: "Trebuchet MS", Trebuchet, Verdana, Helvetica, Arial, sans-serif;
-  font-size: 10px;
+  font-size: 11px;
 }
 .normal {
   font: "Trebuchet MS", Trebuchet, Verdana, Helvetica, Arial, sans-serif;
   font-size: 12px;  
 }
 
-/* Sidebar */
-div.sidebar {     
-  margin-right: 1em;
-  float:left;
-  width:250px;
-}
 .menu img.logo {
   width: 256px; 
   height: 128px;  
@@ -193,6 +196,18 @@ h3.linktitle {
   	line-height: 1.2em;
   	margin-bottom:-1em; 	
 }
+.bm_input {
+  width: 340px;  
+  margin-bottom: .5em;
+  padding: 2px 0px 2px 0px /* top right bottom left */
+  border: 1px solid #CCCCCC;
+  font-family: "Trebuchet MS", Trebuchet, Verdana, Helvetica, Arial, sans-serif;
+  font-size: 12px;
+}
+.bm_dialog {
+	margin: 15px 15px 15px 15px;
+	font-size: 11px;
+}
 
 /* YaCy Search Results ---------------------------*/
 
@@ -263,63 +278,13 @@ dl.pairs dt {
   text-align:left;
   padding: 5px; 
 }
-/* jQuery Accordion */
-.basic  {
-	font-family: "Trebuchet MS", Trebuchet, Verdana, Helvetica, Arial, sans-serif;    
-	width: 250px;	
-}
-.basic div.yform, .basic div.menu  {
-	background-color: white;
-	margin-bottom : 10px;
-	border: none;	
-	margin: 0px;
-	padding: 5px 10px 5px 10px; /* top right bottom left */
-	border: 1px solid black;
-	text-decoration: none;	
-	font-size: 14px;
-	max-height: 320px;
-	overflow-x: hidden;
-	overflow-y: auto;
-}
-
-.basic p {
-	
-}
-.basic h3 {
-	cursor:pointer;
-	display:block;
-	padding:4px 12px;
-	margin-top: 0;
-	margin-bottom: 0px;
-	text-decoration: none;
-	/* font-weight: bold; */
-	font-size: 12px;
-	color: #27537a;
-	background: url(../img/box250.png) no-repeat;
-	border-top: 1px solid #FFFFFF;
-	border-bottom: 1px solid #999;	
-}
-.basic h3:hover {
-	
-}
-.basic h3.selected {
-	
-}
-.basic h3 span.loading {
-	padding: 0px 15px 0px 10px;
-    margin-left: 5px;
-    background: url(../img/loading.gif) no-repeat 0 50%;
-}
 
 #yfolder {	
-	font-family: "Trebuchet MS", Trebuchet, Verdana, Helvetica, Arial, sans-serif;
-	font-size: 12px;
-	color: black;
+	margin: 5px 5px 10px 20px; /* top right bottom left */
 }
 
 #tagcloud {
-	text-align: justify;
-	line-height: 120%;
+	margin: 5px 5px 5px 5px; /* top right bottom left */
 }
 
 #tagcloud a {
@@ -332,3 +297,27 @@ dl.pairs dt {
 .hidden {
 	display:hidden;
 }
+
+/* overrides for ui-tab styles
+-------------------------------------*/
+#tabs-container .ui-tabs-nav li a:link,
+#tabs-container .ui-tabs-nav li a:visited,
+#tabs-container .ui-tabs-nav li a:hover,
+#tabs-container .ui-tabs-nav li a:active, 
+#tabs-container .ui-tabs-nav li.ui-tabs-selected a:link,
+#tabs-container .ui-tabs-nav li.ui-tabs-selected a:visited,
+#tabs-container .ui-tabs-nav li.ui-tabs-selected a:hover,
+#tabs-container .ui-tabs-nav li.ui-tabs-selected a:active { font-size: 1.1em; font-style: bold; }
+#tabs-container .ui-tabs-panel { padding:0px 0px; font-size:11px; }
+
+/* overrides for ui-accordion styles
+-------------------------------------*/
+#sidebar .ui-accordion-header a { display: block; font-size: 1.1em; font-style:bold; padding: .25em .25em .25em 1.5em; }
+#sidebar .ui-accordion-header .ui-icon { position: absolute; left: .25em; top: 50%; margin-top: -8px; }
+#sidebar .ui-accordion-content { padding: 0.8em 0.5em; border-top: 0; margin-top: -2px; position: relative; top: 1px; margin-bottom: 2px; overflow: auto; display: none; font-size:11px;}
+
+
+
+
+
+
