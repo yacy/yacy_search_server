@@ -69,7 +69,7 @@ public class icapd implements serverHandler, Cloneable {
     private int keepAliveRequestCount = 0;
     
     // needed for logging
-    private final Log log = new Log("ICAPD");
+    private static final Log log = new Log("ICAPD");
     
     private static plasmaSwitchboard sb = null;
     private static String virtualHost = null;
@@ -311,7 +311,7 @@ public class icapd implements serverHandler, Cloneable {
             httpRequestHeader.parseRequestLine(httpRequestLine,httpReqProps,virtualHost);
             
             if (!httpReqProps.getProperty(httpRequestHeader.CONNECTION_PROP_METHOD).equals(httpRequestHeader.METHOD_GET)) {
-                this.log.logInfo("Wrong http request method for indexing:" +
+                log.logInfo("Wrong http request method for indexing:" +
                         "\nRequest Method: " + httpReqProps.getProperty(httpRequestHeader.CONNECTION_PROP_METHOD) + 
                         "\nRequest Line:   " + httpRequestLine);
                 reader.close();
@@ -345,7 +345,7 @@ public class icapd implements serverHandler, Cloneable {
             final Object[] httpRespStatus = httpResponseHeader.parseResponseLine(httpRespStatusLine);
             
             if (!(httpRespStatus[1].equals(Integer.valueOf(200)) || httpRespStatus[1].equals(Integer.valueOf(203)))) {
-                this.log.logInfo("Wrong status code for indexing:" +
+                log.logInfo("Wrong status code for indexing:" +
                                  "\nStatus Code:   " + httpRespStatus[1] +
                                  "\nRequest Line:  " + httpRequestLine + 
                                  "\nResponse Line: " + httpRespStatusLine);
@@ -365,7 +365,7 @@ public class icapd implements serverHandler, Cloneable {
             }
             
             if (!plasmaParser.supportedContent(plasmaParser.PARSER_MODE_ICAP, httpRequestURL, httpResHeader.mime())) {
-                this.log.logInfo("Wrong mimeType or fileExtension for indexing:" +
+                log.logInfo("Wrong mimeType or fileExtension for indexing:" +
                                  "\nMimeType:    " + httpResHeader.mime() +
                                  "\nRequest Line:" + httpRequestLine);
                 return ;

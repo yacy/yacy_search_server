@@ -38,8 +38,8 @@ import de.anomic.htmlFilter.htmlFilterCharacterCoding;
 public class diff {
     
     private final ArrayList <Part> parts = new ArrayList<Part>();
-    final Object[] o;
-    final Object[] n;
+    private final Object[] o;
+    private final Object[] n;
     
     /**
      * @param o the original <code>String</code>

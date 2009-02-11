@@ -35,7 +35,7 @@ public class BinSearch {
     private final byte[] chunks;
     private final int    chunksize;
     private final int    count;
-    private final ByteOrder objectOrder = new NaturalOrder(true);
+    private static final ByteOrder objectOrder = new NaturalOrder(true);
     
     public BinSearch(final byte[] chunks, final int chunksize) {
         this.chunks = chunks;

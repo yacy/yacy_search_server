@@ -24,7 +24,7 @@ public class urlRedirectord implements serverHandler, Cloneable {
     
     private serverCore.Session session;
     private static plasmaSwitchboard sb = null;
-    private final Log theLogger = new Log("URL-REDIRECTOR");
+    private static final Log theLogger = new Log("URL-REDIRECTOR");
     private static CrawlProfile.entry profile = null;
     private String nextURL;
     
@@ -150,7 +150,7 @@ public class urlRedirectord implements serverHandler, Cloneable {
                     final int pos = line.indexOf(" ");
                     if (pos != -1) {
                         final String newDepth = line.substring(pos).trim();
-                        this.theLogger.logFine("Changing crawling depth to '" + newDepth + "'.");
+                        theLogger.logFine("Changing crawling depth to '" + newDepth + "'.");
                         sb.webIndex.profilesActiveCrawls.changeEntry(profile, "generalDepth",newDepth);
                     }
                     outputWriter.print("\r\n");
@@ -159,7 +159,7 @@ public class urlRedirectord implements serverHandler, Cloneable {
                     final int pos = line.indexOf(" ");
                     if (pos != -1) {
                         final String newValue = line.substring(pos).trim();
-                        this.theLogger.logFine("Changing crawl dynamic setting to '" + newValue + "'");
+                        theLogger.logFine("Changing crawl dynamic setting to '" + newValue + "'");
                         sb.webIndex.profilesActiveCrawls.changeEntry(profile, "crawlingQ",newValue);
                     }
                     outputWriter.print("\r\n");
@@ -172,7 +172,7 @@ public class urlRedirectord implements serverHandler, Cloneable {
                     final int pos = line.indexOf(" ");
                     this.nextURL = (pos != -1) ? line.substring(0,pos):line; 
                     
-                    this.theLogger.logFine("Receiving request " + line);
+                    theLogger.logFine("Receiving request " + line);
                     outputWriter.print("\r\n");
                     outputWriter.flush();
                     
@@ -216,18 +216,18 @@ public class urlRedirectord implements serverHandler, Cloneable {
                     }
                         
                     if (reasonString != null) {
-                        this.theLogger.logFine("URL " + nextURL + " rejected. Reason: " + reasonString);
+                        theLogger.logFine("URL " + nextURL + " rejected. Reason: " + reasonString);
                     }
                     nextURL = null;
                 }
             }        
             
-            this.theLogger.logFine("Connection terminated");
+            theLogger.logFine("Connection terminated");
             
             // Terminating connection
             return serverCore.TERMINATE_CONNECTION;
         } catch (final Exception e) {
-            this.theLogger.logSevere("Unexpected Error: " + e.getMessage(),e);
+            theLogger.logSevere("Unexpected Error: " + e.getMessage(),e);
             return serverCore.TERMINATE_CONNECTION;
         }
     }

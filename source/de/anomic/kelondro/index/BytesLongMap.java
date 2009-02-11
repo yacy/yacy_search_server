@@ -214,11 +214,11 @@ public class BytesLongMap {
             this.l = l;
         }
     }
+    private static final entry poisonEntry = new entry(new byte[0], 0);
     
     public static class initDataConsumer implements Callable<BytesLongMap> {
 
         private BlockingQueue<entry> cache;
-        private final entry poison = new entry(new byte[0], 0);
         private BytesLongMap map;
         private Future<BytesLongMap> result;
         
@@ -250,7 +250,7 @@ public class BytesLongMap {
          */
         public void finish() {
             try {
-                cache.put(poison);
+                cache.put(poisonEntry);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -271,7 +271,7 @@ public class BytesLongMap {
         public BytesLongMap call() throws IOException {
             try {
                 entry c;
-                while ((c = cache.take()) != poison) {
+                while ((c = cache.take()) != poisonEntry) {
                     map.addl(c.key, c.l);
                 }
             } catch (InterruptedException e) {

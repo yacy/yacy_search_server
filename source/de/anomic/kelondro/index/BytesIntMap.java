@@ -143,6 +143,7 @@ public class BytesIntMap {
             this.l = l;
         }
     }
+    private static final entry poisonEntry = new entry(new byte[0], 0);
     
     /**
      * this method creates a concurrent thread that can take entries that are used to initialize the map
@@ -165,7 +166,6 @@ public class BytesIntMap {
     public static class initDataConsumer implements Callable<BytesIntMap> {
 
         private BlockingQueue<entry> cache;
-        private final entry poison = new entry(new byte[0], 0);
         private BytesIntMap map;
         private Future<BytesIntMap> result;
         private boolean sortAtEnd;
@@ -200,7 +200,7 @@ public class BytesIntMap {
         public void finish(boolean sortAtEnd) {
             this.sortAtEnd = sortAtEnd;
             try {
-                cache.put(poison);
+                cache.put(poisonEntry);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -221,7 +221,7 @@ public class BytesIntMap {
         public BytesIntMap call() throws IOException {
             try {
                 entry c;
-                while ((c = cache.take()) != poison) {
+                while ((c = cache.take()) != poisonEntry) {
                     map.addi(c.key, c.l);
                 }
             } catch (InterruptedException e) {

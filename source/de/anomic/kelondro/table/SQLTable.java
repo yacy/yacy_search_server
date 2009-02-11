@@ -67,7 +67,7 @@ public class SQLTable implements ObjectIndex {
     private static final String db_pwd_str    = "yacy";
     
     private Connection theDBConnection = null;
-    private final ByteOrder order = new NaturalOrder(true);
+    private static final ByteOrder order = new NaturalOrder(true);
     private final Row rowdef;
     
     public SQLTable(final String dbType, final Row rowdef) throws Exception {
@@ -274,7 +274,7 @@ public class SQLTable implements ObjectIndex {
     }
 
     public ByteOrder order() {
-        return this.order;
+        return order;
     }
     
     public int primarykey() {

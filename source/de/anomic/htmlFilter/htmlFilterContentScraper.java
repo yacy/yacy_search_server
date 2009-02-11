@@ -85,7 +85,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
     //private String headline;
     private List<String>[] headlines;
     private serverCharBuffer content;
-    private final EventListenerList htmlFilterEventListeners = new EventListenerList();
+    private final EventListenerList htmlFilterEventListeners;
     
     /**
      * {@link yacyURL} to the favicon that belongs to the document
@@ -110,6 +110,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         this.headlines = new ArrayList[4];
         for (int i = 0; i < 4; i++) headlines[i] = new ArrayList<String>();
         this.content = new serverCharBuffer(1024);
+        this.htmlFilterEventListeners = new EventListenerList();
     }
     
     public final static boolean punctuation(final char c) {
@@ -463,7 +464,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         }        
     }
     
-    void fireScrapeTag0(final String tagname, final Properties tagopts) {
+    private void fireScrapeTag0(final String tagname, final Properties tagopts) {
         final Object[] listeners = this.htmlFilterEventListeners.getListenerList();
         for (int i=0; i<listeners.length; i+=2) {
             if (listeners[i]==htmlFilterEventListener.class) {
@@ -472,7 +473,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         }
     }    
     
-    void fireScrapeTag1(final String tagname, final Properties tagopts, final char[] text) {
+    private void fireScrapeTag1(final String tagname, final Properties tagopts, final char[] text) {
         final Object[] listeners = this.htmlFilterEventListeners.getListenerList();
         for (int i=0; i<listeners.length; i+=2) {
             if (listeners[i]==htmlFilterEventListener.class) {

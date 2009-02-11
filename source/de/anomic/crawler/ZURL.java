@@ -57,8 +57,8 @@ public class ZURL {
             0);
 
     // the class object
-    ObjectIndex urlIndex = null;
-    private final LinkedList<String> stack = new LinkedList<String>(); // strings: url
+    private final ObjectIndex urlIndex;
+    private final LinkedList<String> stack;
     
     public ZURL(final File cachePath, final String tablename, final boolean startWithEmptyFile) {
         // creates a new ZURL in a file
@@ -69,13 +69,15 @@ public class ZURL {
                 if (f.isDirectory()) FlexWidthArray.delete(cachePath, tablename); else f.delete();
             }
         }
-        urlIndex = new EcoTable(f, rowdef, EcoTable.tailCacheDenyUsage, EcoFSBufferSize, 0);
+        this.urlIndex = new EcoTable(f, rowdef, EcoTable.tailCacheDenyUsage, EcoFSBufferSize, 0);
         //urlIndex = new kelondroFlexTable(cachePath, tablename, -1, rowdef, 0, true);
+        this.stack = new LinkedList<String>();
     }
     
     public ZURL() {
         // creates a new ZUR in RAM
-        urlIndex = new RowSet(rowdef, 0);
+        this.urlIndex = new RowSet(rowdef, 0);
+        this.stack = new LinkedList<String>();
     }
     
     public int size() {
@@ -83,15 +85,13 @@ public class ZURL {
     }
     
     public void clear() throws IOException {
-        urlIndex.clear();
-        stack.clear();
+        if (urlIndex != null) urlIndex.clear();
+        if (stack != null) stack.clear();
     }
 
     public void close() {
-        if (urlIndex != null) {
-            urlIndex.close();
-            urlIndex = null;
-        }
+        try {this.clear();} catch (IOException e) {}
+        if (urlIndex != null) urlIndex.close();
     }
 
     public synchronized Entry newEntry(

@@ -85,12 +85,14 @@ public final class serverCore extends serverAbstractBusyThread implements server
     /**
      * Line End of HTTP/ICAP headers
      */
-    public static final byte[] CRLF = {CR, LF};
-    public static final String CRLF_STRING = new String(CRLF);
-    public static final String LF_STRING = new String(new byte[]{LF});
-    public static final Class<?>[] stringType = {"".getClass()}; //  set up some reflection
-    public static final long startupTime = System.currentTimeMillis();
-    public static final ThreadGroup sessionThreadGroup = new ThreadGroup("sessionThreadGroup");
+    public  static final byte[] CRLF = {CR, LF};
+    public  static final String CRLF_STRING = new String(CRLF);
+    public  static final String LF_STRING = new String(new byte[]{LF});
+    public  static final Class<?>[] stringType = {"".getClass()}; //  set up some reflection
+    public  static final long startupTime = System.currentTimeMillis();
+    public  static final ThreadGroup sessionThreadGroup = new ThreadGroup("sessionThreadGroup");
+    private static final HashMap<String, Object> commandObjMethodCache = new HashMap<String, Object>(5);
+    
     /**
      * will be increased with each session and is used to return a hash code
      */
@@ -465,7 +467,6 @@ public final class serverCore extends serverAbstractBusyThread implements server
         
         private long start;                // startup time
         private serverHandler commandObj;
-        private final HashMap<String, Object> commandObjMethodCache = new HashMap<String, Object>(5);
         
     	private String request;            // current command line
     	private int commandCounter;        // for logging: number of commands in this session
@@ -747,11 +748,11 @@ public final class serverCore extends serverAbstractBusyThread implements server
                         this.controlSocket.setSoTimeout(this.socketTimeout);
                         
                         // exec command and return value
-                        Object commandMethod = this.commandObjMethodCache.get(reqProtocol + "_" + reqCmd);
+                        Object commandMethod = commandObjMethodCache.get(reqProtocol + "_" + reqCmd);
                         if (commandMethod == null) {
                             try {
                                 commandMethod = this.commandObj.getClass().getMethod(reqCmd, stringType);
-                                this.commandObjMethodCache.put(reqProtocol + "_" + reqCmd, commandMethod);
+                                commandObjMethodCache.put(reqProtocol + "_" + reqCmd, commandMethod);
                             } catch (final NoSuchMethodException noMethod) {
                                 commandMethod = this.commandObj.getClass().getMethod("UNKNOWN", stringType);
                                 stringParameter[0] = this.request.trim();

@@ -173,10 +173,10 @@ public final class plasmaParser {
         loadAvailableParserList();      
     }
     
-    private final Log theLogger = new Log("PARSER");
+    private static final Log theLogger = new Log("PARSER");
     
     public Log getLogger() {
-        return this.theLogger;
+        return theLogger;
     }
     
     public static HashMap<String, plasmaParserConfig> getParserConfigList() {
@@ -539,13 +539,13 @@ public final class plasmaParser {
     throws InterruptedException, ParserException {
         ByteArrayInputStream byteIn = null;
         try {
-            if (this.theLogger.isFine())
-                this.theLogger.logFine("Parsing '" + location + "' from byte-array");
+            if (theLogger.isFine())
+                theLogger.logFine("Parsing '" + location + "' from byte-array");
             
             // testing if the resource is not empty
             if (sourceArray == null || sourceArray.length == 0) {
                 final String errorMsg = "No resource content available (1) " + ((sourceArray == null) ? "source == null" : "source.length() == 0");
-                this.theLogger.logInfo("Unable to parse '" + location + "'. " + errorMsg);
+                theLogger.logInfo("Unable to parse '" + location + "'. " + errorMsg);
                 throw new ParserException(errorMsg,location, errorMsg);
             }              
             
@@ -561,7 +561,7 @@ public final class plasmaParser {
             if (e instanceof ParserException) throw (ParserException) e;
             
             // log unexpected error
-            this.theLogger.logSevere("Unexpected exception in parseSource from byte-array: " + e.getMessage(), e);
+            theLogger.logSevere("Unexpected exception in parseSource from byte-array: " + e.getMessage(), e);
             throw new ParserException("Unexpected exception while parsing " + location,location, e);
         } finally {
             if (byteIn != null) try { byteIn.close(); } catch (final Exception ex){/* ignore this */}
@@ -573,13 +573,13 @@ public final class plasmaParser {
         
         BufferedInputStream sourceStream = null;
         try {
-            if (this.theLogger.isFine())
-                this.theLogger.logFine("Parsing '" + location + "' from file");
+            if (theLogger.isFine())
+                theLogger.logFine("Parsing '" + location + "' from file");
             
             // testing if the resource is not empty
             if (!(sourceFile.exists() && sourceFile.canRead() && sourceFile.length() > 0)) {
                 final String errorMsg = sourceFile.exists() ? "Empty resource file." : "No resource content available (2).";
-                this.theLogger.logInfo("Unable to parse '" + location + "'. " + errorMsg);
+                theLogger.logInfo("Unable to parse '" + location + "'. " + errorMsg);
                 throw new ParserException(errorMsg,location, "document has no content");
             }        
             
@@ -595,7 +595,7 @@ public final class plasmaParser {
             if (e instanceof ParserException) throw (ParserException) e;
 
             // log unexpected error
-            this.theLogger.logSevere("Unexpected exception in parseSource from File: " + e.getMessage(), e);
+            theLogger.logSevere("Unexpected exception in parseSource from File: " + e.getMessage(), e);
             throw new ParserException("Unexpected exception while parsing " + location,location, e);
         } finally {
             if (sourceStream != null) try { sourceStream.close(); } catch (final Exception ex){/* ignore this */}
@@ -617,8 +617,8 @@ public final class plasmaParser {
         Parser theParser = null;
         String mimeType = null;
         try {
-            if (this.theLogger.isFine())
-                this.theLogger.logFine("Parsing '" + location + "' from stream");            
+            if (theLogger.isFine())
+                theLogger.logFine("Parsing '" + location + "' from stream");            
             
             // getting the mimetype of the document
             mimeType = normalizeMimeType(theMimeType);
@@ -633,12 +633,12 @@ public final class plasmaParser {
             // testing if parsing is supported for this resource
             if (!plasmaParser.supportedContent(location,mimeType)) {
                 final String errorMsg = "No parser available to parse mimetype '" + mimeType + "'";
-                this.theLogger.logInfo("Unable to parse '" + location + "'. " + errorMsg);
+                theLogger.logInfo("Unable to parse '" + location + "'. " + errorMsg);
                 throw new ParserException(errorMsg,location, "wrong mime type or wrong extension");
             }
             
-            if (this.theLogger.isFine())
-                this.theLogger.logInfo("Parsing " + location + " with mimeType '" + mimeType + 
+            if (theLogger.isFine())
+                theLogger.logInfo("Parsing " + location + " with mimeType '" + mimeType + 
                                        "' and file extension '" + fileExt + "'.");                
             
             // getting the correct parser for the given mimeType
@@ -655,21 +655,21 @@ public final class plasmaParser {
                 doc = parseHtml(location, mimeType, documentCharset, sourceStream);
             } else {
                 final String errorMsg = "No parser available to parse mimetype '" + mimeType + "'";
-                this.theLogger.logInfo("Unable to parse '" + location + "'. " + errorMsg);
+                theLogger.logInfo("Unable to parse '" + location + "'. " + errorMsg);
                 throw new ParserException(errorMsg,location, "wrong mime type or wrong extension");                
             }
             
             // check result
             if (doc == null) {
                 final String errorMsg = "Unexpected error. Parser returned null.";
-                this.theLogger.logInfo("Unable to parse '" + location + "'. " + errorMsg);
+                theLogger.logInfo("Unable to parse '" + location + "'. " + errorMsg);
                 throw new ParserException(errorMsg,location);                
             }
             return doc;
             
         } catch (final UnsupportedEncodingException e) {
             final String errorMsg = "unsupported charset encoding: " + e.getMessage();
-            this.theLogger.logSevere("Unable to parse '" + location + "'. " + errorMsg, e);
+            theLogger.logSevere("Unable to parse '" + location + "'. " + errorMsg, e);
             throw new ParserException(errorMsg,location, errorMsg);                	
         } catch (final Exception e) {
             // Interrupted- and Parser-Exceptions should pass through
@@ -678,7 +678,7 @@ public final class plasmaParser {
             
             // log unexpected error
             final String errorMsg = "Unexpected exception. " + e.getMessage();
-            this.theLogger.logSevere("Unable to parse '" + location + "'. " + errorMsg, e);
+            theLogger.logSevere("Unable to parse '" + location + "'. " + errorMsg, e);
             throw new ParserException(errorMsg,location,e);            
             
         } finally {
@@ -700,7 +700,7 @@ public final class plasmaParser {
         }
         
         if (!documentCharset.equalsIgnoreCase(charset)) {
-            this.theLogger.logInfo("Charset transformation needed from '" + documentCharset + "' to '" + charset + "' for URL = " + location.toNormalform(true, true));
+            theLogger.logInfo("Charset transformation needed from '" + documentCharset + "' to '" + charset + "' for URL = " + location.toNormalform(true, true));
         }
         
         // parsing the content
@@ -713,7 +713,7 @@ public final class plasmaParser {
         //hfos.close();
         if (writer.binarySuspect()) {
             final String errorMsg = "Binary data found in resource";
-            this.theLogger.logSevere("Unable to parse '" + location + "'. " + errorMsg);
+            theLogger.logSevere("Unable to parse '" + location + "'. " + errorMsg);
             throw new ParserException(errorMsg,location);    
         }
         return transformScraper(location, mimeType, documentCharset, scraper);

@@ -39,10 +39,12 @@ public final class ConsoleOutErrHandler extends Handler {
 
     private boolean ignoreCtrlChr = false;
     private Level splitLevel = Level.WARNING;
-    private final Handler stdOutHandler = new ConsoleOutHandler();
-    private final Handler stdErrHandler = new ConsoleHandler();    
+    private final Handler stdOutHandler;
+    private final Handler stdErrHandler;    
     
     public ConsoleOutErrHandler() {
+        this.stdOutHandler = new ConsoleOutHandler();
+        this.stdErrHandler = new ConsoleHandler(); 
         this.stdOutHandler.setLevel(Level.FINEST);
         this.stdErrHandler.setLevel(Level.WARNING);
         configure();

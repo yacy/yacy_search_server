@@ -114,7 +114,7 @@ public class SitemapParser extends DefaultHandler {
     /**
      * the logger
      */
-    private final Log logger = new Log("SITEMAP");
+    private static final Log logger = new Log("SITEMAP");
 
     /**
      * The location of the sitemap file
@@ -158,7 +158,7 @@ public class SitemapParser extends DefaultHandler {
         try {
             res = client.GET(siteMapURL.toString());
             if (res.getStatusCode() != 200) {
-                this.logger.logWarning("Unable to download the sitemap file " + this.siteMapURL +
+                logger.logWarning("Unable to download the sitemap file " + this.siteMapURL +
                         "\nServer returned status: " + res.getStatusLine());
                 return;
             }
@@ -171,13 +171,13 @@ public class SitemapParser extends DefaultHandler {
                 InputStream contentStream = res.getDataAsStream();
                 if ((contentMimeType != null) &&
                         (contentMimeType.equals("application/x-gzip") || contentMimeType.equals("application/gzip"))) {
-                    if (this.logger.isFine()) this.logger.logFine("Sitemap file has mimetype " + contentMimeType);
+                    if (logger.isFine()) logger.logFine("Sitemap file has mimetype " + contentMimeType);
                     contentStream = new GZIPInputStream(contentStream);
                 }
 
                 final httpdByteCountInputStream counterStream = new httpdByteCountInputStream(contentStream, null);
                 // parse it
-                this.logger.logInfo("Start parsing sitemap file " + this.siteMapURL + "\n\tMimeType: " + contentMimeType +
+                logger.logInfo("Start parsing sitemap file " + this.siteMapURL + "\n\tMimeType: " + contentMimeType +
                         "\n\tLength:   " + this.contentLength);
                 final SAXParser saxParser = SAXParserFactory.newInstance().newSAXParser();
                 saxParser.parse(counterStream, this);
@@ -186,7 +186,7 @@ public class SitemapParser extends DefaultHandler {
                 res.closeStream();
             }
         } catch (final Exception e) {
-            this.logger.logWarning("Unable to parse sitemap file " + this.siteMapURL, e);
+            logger.logWarning("Unable to parse sitemap file " + this.siteMapURL, e);
         } finally {
             if (res != null) {
                 // release connection
@@ -283,7 +283,7 @@ public class SitemapParser extends DefaultHandler {
                     0,
                     0
                     ));
-            this.logger.logInfo("New URL '" + this.nextURL + "' added for crawling.");
+            logger.logInfo("New URL '" + this.nextURL + "' added for crawling.");
             this.urlCounter++;
         }
     }
@@ -293,7 +293,7 @@ public class SitemapParser extends DefaultHandler {
             // TODO: we need to decode the URL here
             this.nextURL = (new String(buf, offset, len)).trim();
             if (!this.nextURL.startsWith("http") && !this.nextURL.startsWith("https")) {
-                this.logger.logInfo("The url '" + this.nextURL + "' has a wrong format. Ignore it.");
+                logger.logInfo("The url '" + this.nextURL + "' has a wrong format. Ignore it.");
                 this.nextURL = null;
             }
         } else if (this.currentElement.equalsIgnoreCase(SITEMAP_URL_LASTMOD)) {
@@ -301,7 +301,7 @@ public class SitemapParser extends DefaultHandler {
             try {
                 this.lastMod = DateFormatter.parseISO8601(dateStr);
             } catch (final ParseException e) {
-                this.logger.logInfo("Unable to parse datestring '" + dateStr + "'");
+                logger.logInfo("Unable to parse datestring '" + dateStr + "'");
             }
         }
     }

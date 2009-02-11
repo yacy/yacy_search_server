@@ -77,6 +77,7 @@ public final class plasmaWordIndex implements indexRI {
     public  static final int  wCacheMaxChunk  =  800;           // maximum number of references for each urlhash
     public  static final int  lowcachedivisor =  900;
     public  static final int  maxCollectionPartition = 7;       // should be 7
+    private static final ByteOrder indexOrder = Base64Order.enhancedCoder;
     
 
     public static final String CRAWL_PROFILE_PROXY                 = "proxy";
@@ -95,7 +96,6 @@ public final class plasmaWordIndex implements indexRI {
     public static final long CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA_RECRAWL_CYCLE = 60L * 24L * 30L;
     
     
-    private final ByteOrder                indexOrder = Base64Order.enhancedCoder;
     private final indexRAMRI               indexCache;
     private final indexCollectionRI        collections;          // new database structure to replace AssortmentCluster and FileCluster
     private final Log                      log;

@@ -35,7 +35,7 @@ import de.anomic.tools.diskUsage;
 
 public final class ResourceObserver {
     // Unknown for now
-    //private final static long MIN_FREE_MEMORY = 0;
+    //private static final static long MIN_FREE_MEMORY = 0;
     // We are called with the cleanup job every five minutes;
     // the disk usage should be checked with every run
     private static final int CHECK_DISK_USAGE_FREQ = 1;
@@ -47,7 +47,7 @@ public final class ResourceObserver {
     private static final int MEDIUM = 1;
     private static final int HIGH = 2;
     
-    private final Log log = new Log("RESOURCE OBSERVER");
+    private static final Log log = new Log("RESOURCE OBSERVER");
     private final plasmaSwitchboard sb;
 
     private int checkDiskUsageCount;
@@ -62,7 +62,7 @@ public final class ResourceObserver {
      */
     public ResourceObserver(final plasmaSwitchboard sb) {
         this.sb = sb;
-        this.log.logInfo("initializing the resource observer");
+        log.logInfo("initializing the resource observer");
 
         final ArrayList<String> pathsToCheck = new ArrayList<String>();
         //  FIXME whats about the secondary path???
@@ -84,7 +84,7 @@ public final class ResourceObserver {
         diskUsage.init(pathsToCheck);
         
         if (!diskUsage.isUsable())
-            this.log.logWarning("Disk usage returned: " + diskUsage.getErrorMessage());
+            log.logWarning("Disk usage returned: " + diskUsage.getErrorMessage());
         
         checkDiskUsageCount = 0;
         checkMemoryUsageCount = 0;
@@ -113,24 +113,24 @@ public final class ResourceObserver {
         
         if (tmpDisksFree < HIGH || tmpMemoryFree < HIGH) {
             if (!sb.crawlJobIsPaused(plasmaSwitchboardConstants.CRAWLJOB_LOCAL_CRAWL)) {
-                this.log.logInfo("pausing local crawls");
+                log.logInfo("pausing local crawls");
                 sb.pauseCrawlJob(plasmaSwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
             }
             if (!sb.crawlJobIsPaused(plasmaSwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL)) {
-                this.log.logInfo("pausing remote triggered crawls");
+                log.logInfo("pausing remote triggered crawls");
                 sb.pauseCrawlJob(plasmaSwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
             }
             if (tmpDisksFree == LOW && sb.getConfigBool(plasmaSwitchboardConstants.INDEX_RECEIVE_ALLOW, false)) {
-            	this.log.logInfo("disabling index receive");
+            	log.logInfo("disabling index receive");
                 sb.setConfig(plasmaSwitchboardConstants.INDEX_RECEIVE_ALLOW, false);
                 sb.webIndex.seedDB.mySeed().setFlagAcceptRemoteIndex(false);
             }
         }
         else {
             if (diskUsage.isUsable())
-                this.log.logInfo("run completed; everything in order");
+                log.logInfo("run completed; everything in order");
             else
-                this.log.logInfo("The observer is out of order: " + diskUsage.getErrorMessage());
+                log.logInfo("The observer is out of order: " + diskUsage.getErrorMessage());
         }
     }
     
@@ -173,9 +173,9 @@ public final class ResourceObserver {
         long[] val;
         for (final Map.Entry<String, long[]> entry: usage.entrySet()) {
             val = entry.getValue();
-            this.log.logInfo("df of Volume " + entry.getKey() + ": " + (val[1] / 1024 / 1024) + " MB");
+            log.logInfo("df of Volume " + entry.getKey() + ": " + (val[1] / 1024 / 1024) + " MB");
             if (val[1] < getMinFreeDiskSpace()) {
-                this.log.logWarning("Volume " + entry.getKey() + ": free space (" + (val[1] / 1024 / 1024) + " MB) is too low (< " + (getMinFreeDiskSpace() / 1024 / 1024) + " MB)");
+                log.logWarning("Volume " + entry.getKey() + ": free space (" + (val[1] / 1024 / 1024) + " MB) is too low (< " + (getMinFreeDiskSpace() / 1024 / 1024) + " MB)");
                 ret = MEDIUM;
             }
             if (val[1] < Math.min(getMinFreeDiskSpace() / 5L, 100L)) {

@@ -6,11 +6,14 @@ import de.anomic.kelondro.util.Log;
 
 public class ImporterManager {
 
-    public final Vector<Importer> finishedJobs = new Vector<Importer>();
-    public final ThreadGroup runningJobs = new ThreadGroup("ImporterThreads");
-    public  int currMaxJobNr = 0;
+    public final Vector<Importer> finishedJobs;
+    public final ThreadGroup runningJobs;
+    public  int currMaxJobNr;
     
     public ImporterManager() {
+        this.finishedJobs = new Vector<Importer>();
+        this.runningJobs = new ThreadGroup("ImporterThreads");
+        this.currMaxJobNr = 0;
     }
     
     public int generateUniqueJobID() {

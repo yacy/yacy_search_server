@@ -47,7 +47,7 @@ public class yacyURL implements Serializable {
      */
     private static final long serialVersionUID = -1173233022912141884L;
     public  static final int TLD_any_zone_filter = 255; // from TLD zones can be filtered during search; this is the catch-all filter
-    private final static Pattern backPathPattern = Pattern.compile("(/[^/]+(?<!/\\.{1,2})/)[.]{2}(?=/|$)|/\\.(?=/)|/(?=/)");
+    private static final Pattern backPathPattern = Pattern.compile("(/[^/]+(?<!/\\.{1,2})/)[.]{2}(?=/|$)|/\\.(?=/)|/(?=/)");
     
     // class variables
     private String protocol, host, userInfo, path, quest, ref, hash;

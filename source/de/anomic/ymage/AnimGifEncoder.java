@@ -267,7 +267,7 @@ public class AnimGifEncoder {
      *  This hashtable uses the same hash mechanism as the LZH compressor: a
      *  double hash without chaining.
      */
-    static private final int            CHSIZE  = 1023;
+    private final static int   CHSIZE  = 1023;
 
     /// The color hashtable's COLOR table (int rcolors)
     private int[]               m_ccolor_ar;

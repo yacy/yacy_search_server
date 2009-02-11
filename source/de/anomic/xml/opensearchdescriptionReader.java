@@ -97,7 +97,7 @@ public class opensearchdescriptionReader extends DefaultHandler {
     private Item channel;
     private final StringBuilder buffer;
     private boolean parsingChannel;
-    private final String imageURL = null;
+    private final String imageURL;
     private final ArrayList<String> itemsGUID; // a list of GUIDs, so the items can be retrieved by a specific order
     private final HashMap<String, Item> items; // a guid:Item map
     
@@ -108,6 +108,7 @@ public class opensearchdescriptionReader extends DefaultHandler {
         buffer = new StringBuilder();
         channel = null;
         parsingChannel = false;
+        imageURL = null;
     }
     
     public opensearchdescriptionReader(final String path) {

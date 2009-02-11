@@ -66,7 +66,7 @@ public class htmlFilterInputStream extends InputStream implements htmlFilterEven
         this.bufferedIn.mark((int) preBufferSize);
         
         final htmlFilterContentScraper scraper = new htmlFilterContentScraper(rooturl);
-        scraper.registerHtmlFilterEventListener(this);
+        //scraper.registerHtmlFilterEventListener(this);
         
         this.reader = new InputStreamReader(this,inputStreamCharset); 
         this.writer = new htmlFilterWriter(null,null,scraper,transformer,passbyIfBinarySuspect);
