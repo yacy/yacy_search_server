@@ -32,7 +32,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Random;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
@@ -42,7 +41,6 @@ import java.util.logging.Logger;
 import de.anomic.kelondro.index.Column;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.Row.EntryIndex;
-import de.anomic.kelondro.io.BufferedIOChunks;
 import de.anomic.kelondro.io.ChannelRandomAccess;
 import de.anomic.kelondro.io.FileRandomAccess;
 import de.anomic.kelondro.io.IOChunksInterface;
@@ -112,7 +110,7 @@ public abstract class AbstractRecords implements RandomAccessRecords {
     protected boolean fileExisted;
     
     // Random. This is used to shift flush-times of write-buffers to differrent time
-    private static Random random = new Random(System.currentTimeMillis());
+    //private static Random random = new Random(System.currentTimeMillis());
 
     // check for debug mode
     public static boolean debugmode = false;
@@ -554,11 +552,11 @@ public abstract class AbstractRecords implements RandomAccessRecords {
     private void initExistingFile(final RandomAccessInterface ra, boolean useBuffer) throws IOException {
         // read from Chunked IO
         //useBuffer = false;
-        if (useBuffer) {
+        /*if (useBuffer) {
             this.entryFile = new BufferedIOChunks(ra, ra.name(), 1024*1024, 30000 + random.nextLong() % 30000);
-        } else {
+        } else {*/
             this.entryFile = new RandomAccessIOChunks(ra, ra.name());
-        }
+        //}
 
         // read dynamic variables that are back-ups of stored values in file;
         // read/defined on instantiation

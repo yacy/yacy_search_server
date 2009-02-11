@@ -93,7 +93,14 @@ public final class BufferedIOChunks extends AbstractIOChunks implements IOChunks
                 return;
             }
             if (this.buffer == null) this.buffer = new byte[this.bufferSize];
-            System.arraycopy(b, off, this.buffer, (int) (pos - this.ra.length()), len);
+            assert b != null;
+            assert off >= 0 : "off = " + off;
+            assert off  + len <= b.length : "off = " + off + ", len = " + len + ", b.length = " + b.length;
+            assert this.buffer != null;
+            assert pos - this.ra.length() >= 0 : "pos = " + pos + ", this.ra.length() = " + this.ra.length();
+            assert pos - this.ra.length() + len <= this.buffer.length : "pos = " + pos + ", this.ra.length() = " + this.ra.length() + ", len = " + len + ", buffer.length = " + buffer.length;
+            //pos = 1216, this.ra.length() = 1208, len = 386, buffer.length = 0
+            System.arraycopy(b, off, this.buffer, (int) (pos - this.ra.length()), len); // OOB Exception :-(
             this.bufferSize = (int) Math.max(this.bufferSize, pos - this.ra.length() + len);
             return;
         } else if (pos + len >= this.ra.length()) {
