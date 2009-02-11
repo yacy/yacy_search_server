@@ -42,6 +42,7 @@ import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexRWIVarEntry;
 import de.anomic.index.indexURLReference;
 import de.anomic.kelondro.order.Bitfield;
+import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.SetTools;
 import de.anomic.kelondro.util.SortStack;
 import de.anomic.kelondro.util.SortStore;
@@ -66,7 +67,7 @@ public final class plasmaSearchEvent {
     public static int workerThreadCount = 10;
     public static String lastEventID = "";
     private static ConcurrentHashMap<String, plasmaSearchEvent> lastEvents = new ConcurrentHashMap<String, plasmaSearchEvent>(); // a cache for objects from this class: re-use old search requests
-    public static final long eventLifetime = 600000; // the time an event will stay in the cache, 10 Minutes
+    public static final long eventLifetime = 60000; // the time an event will stay in the cache, 1 Minute
     private static final int max_results_preparation = 300;
     
     private long eventTime;
@@ -215,6 +216,7 @@ public final class plasmaSearchEvent {
         serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), "event-cleanup", 0, 0));
         
         // store this search to a cache so it can be re-used
+        if (MemoryControl.available() < 1024 * 1024 * 10) cleanupEvents(true);
         lastEventID = query.id(false);
         lastEvents.put(lastEventID, this);
     }

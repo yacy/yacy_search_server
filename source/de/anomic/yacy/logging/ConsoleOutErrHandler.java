@@ -135,6 +135,7 @@ public final class ConsoleOutErrHandler extends Handler {
         } else {
             this.stdOutHandler.publish(record);
         }
+        flush();
     }
 
     public void flush() {

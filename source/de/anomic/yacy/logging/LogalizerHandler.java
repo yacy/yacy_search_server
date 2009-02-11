@@ -131,6 +131,7 @@ public class LogalizerHandler extends Handler {
                 if (debug) System.out.println("Logalizertest: " + returnV + " --- " + record.getLevel());
             }
         }
+        flush();
     }
     
     public Set<String> getParserNames() {

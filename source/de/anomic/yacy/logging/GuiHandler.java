@@ -126,7 +126,8 @@ public class GuiHandler extends Handler {
             this.count++;
         } else {
             this.start++;
-        }     
+        }
+        flush();
     }
     
     public synchronized LogRecord[] getLogArray() {

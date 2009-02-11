@@ -26,8 +26,8 @@
 
 package de.anomic.index;
 
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Set;
@@ -40,13 +40,14 @@ import de.anomic.yacy.yacySeedDB;
 
 public class indexWord {
 
-    // object carries statistics for words and sentences
+    private static final HashMap<String, String> hashCache = new HashMap<String, String>(1000);
     
-    public  int              count;       // number of occurrences
-    public  int              posInText;   // unique handle, is initialized with word position (excluding double occurring words)
-    public  int              posInPhrase; // position of word in phrase
-    public  int              numOfPhrase; // number of phrase. 'normal' phrases begin with number 100
-    HashSet<Integer>         phrases;        // a set of handles to all phrases where this word appears
+    // object carries statistics for words and sentences
+    public  int      count;       // number of occurrences
+    public  int      posInText;   // unique handle, is initialized with word position (excluding double occurring words)
+    public  int      posInPhrase; // position of word in phrase
+    public  int      numOfPhrase; // number of phrase. 'normal' phrases begin with number 100
+    HashSet<Integer> phrases;     // a set of handles to all phrases where this word appears
     public  Bitfield flags;       // the flag bits for each word
 
     public indexWord(final int handle, final int pip, final int nop) {
@@ -78,13 +79,15 @@ public class indexWord {
     // static methods
 
     // create a word hash
-    private static final Hashtable<String, String> hashCache = new Hashtable<String, String>();
     public static final String word2hash(final String word) {
         String h = hashCache.get(word);
         if (h != null) return h;
         h = Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(word.toLowerCase(Locale.ENGLISH))).substring(0, yacySeedDB.commonHashLength);
         hashCache.put(word, h); // prevent expensive MD5 computation and encoding
-        if (hashCache.size() > 100000) hashCache.clear(); // prevent memory laeak
+        if (hashCache.size() > 20000) {
+            // prevent memory leak
+            hashCache.clear();
+        }
         return h;
     }
     
