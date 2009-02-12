@@ -142,10 +142,11 @@ public class Dispatcher {
             final String hash,
             final String limitHash,
             final int maxContainerCount,
+            final int maxReferenceCount,
             final int maxtime) throws IOException {
         
     	// prefer file
-        ArrayList<indexContainer> containers = selectContainers(hash, limitHash, maxContainerCount, maxtime, false);
+        ArrayList<indexContainer> containers = selectContainers(hash, limitHash, maxContainerCount, maxReferenceCount, maxtime, false);
 
         // if ram does not provide any result, take from file
         //if (containers.size() == 0) containers = selectContainers(hash, limitHash, maxContainerCount, maxtime, false);
@@ -156,6 +157,7 @@ public class Dispatcher {
             final String hash,
             final String limitHash,
             final int maxContainerCount,
+            final int maxReferenceCount,
             final int maxtime,
             final boolean ram) throws IOException {
         
@@ -168,14 +170,17 @@ public class Dispatcher {
         // first select the container
         final long timeout = (maxtime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxtime;
         while (
-                (maxContainerCount > refcount) &&
+                (containers.size() < maxContainerCount) &&
+                (refcount < maxReferenceCount) &&
                 (indexContainerIterator.hasNext()) &&
+                (System.currentTimeMillis() < timeout) &&
                 ((container = indexContainerIterator.next()) != null) &&
-                (container.size() > 0) &&
                 ((containers.size() == 0) ||
-                 (Base64Order.enhancedComparator.compare(container.getWordHash(), limitHash) < 0)) &&
-                (System.currentTimeMillis() < timeout)
+                 (Base64Order.enhancedComparator.compare(container.getWordHash(), limitHash) < 0))
+                
         ) {
+            if (container.size() == 0) continue;
+            refcount += container.size();
             containers.add(container);
         }
         // then remove the container from the backend
@@ -198,12 +203,13 @@ public class Dispatcher {
             final String hash,
             final String limitHash,
             final int maxContainerCount,
+            final int maxReferenceCount,
             final int maxtime) throws IOException {
         if (this.selectedContainerCache != null && this.selectedContainerCache.size() > 0) {
         	this.log.logInfo("selectContainersToCache: selectedContainerCache is already filled, no selection done.");
         	return 0;
         }
-        this.selectedContainerCache = selectContainers(hash, limitHash, maxContainerCount, maxtime);
+        this.selectedContainerCache = selectContainers(hash, limitHash, maxContainerCount, maxReferenceCount, maxtime);
         this.log.logInfo("selectContainersToCache: selectedContainerCache was filled with " + this.selectedContainerCache.size() + " entries");
     	return this.selectedContainerCache.size();
     }

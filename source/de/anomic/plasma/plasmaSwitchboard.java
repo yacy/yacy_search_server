@@ -179,9 +179,10 @@ import de.anomic.yacy.dht.PeerSelection;
 public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.QueueEntry> implements serverSwitch<IndexingStack.QueueEntry> {
     
     // load slots
-    public  static int  xstackCrawlSlots      = 2000;
-    private        int  dhtTransferIndexCount = 100;
-    public  static long lastPPMUpdate         = System.currentTimeMillis()- 30000;
+    public  static int  xstackCrawlSlots     = 2000;
+    private        int  dhtMaxContainerCount = 100;
+    private        int  dhtMaxReferenceCount = 1000;
+    public  static long lastPPMUpdate        = System.currentTimeMillis()- 30000;
 
     // colored list management
     public static TreeSet<String> badwords = null;
@@ -567,7 +568,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
                 "global.any".indexOf(getConfig("network.unit.domain", "global")) >= 0);
         
         // initializing dht chunk generation
-        this.dhtTransferIndexCount = (int) getConfigLong(plasmaSwitchboardConstants.INDEX_DIST_CHUNK_SIZE_START, 50);
+        this.dhtMaxReferenceCount = (int) getConfigLong(plasmaSwitchboardConstants.INDEX_DIST_CHUNK_SIZE_START, 50);
         
         // init robinson cluster
         // before we do that, we wait some time until the seed list is loaded.
@@ -1920,7 +1921,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             int c = this.dhtDispatcher.selectContainersToCache(
                     startHash,
                     limitHash,
-                    dhtTransferIndexCount,
+                    dhtMaxContainerCount,
+                    dhtMaxReferenceCount,
                     2000);
             log.logInfo("dhtTransferJob: Dispatcher selected " + c + " containers");
         } catch (IOException e) {
