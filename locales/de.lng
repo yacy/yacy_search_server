@@ -88,10 +88,16 @@ Delete selected pattern\(s\)==L&ouml;sche gew&auml;hlten Eintrag
 Move selected pattern\(s\) to==Verschiebe gew&auml;hlten Eintrag zu
 "Save URL pattern"=="URL-Eintrag speichern"
 You can select them here for deletion==Sie k&ouml;nnen sie einzeln zum L&ouml;schen w&auml;hlen
-Add URL pattern==URL hinzuf&uuml;gen
+Add new pattern:==Neuen Eintrag hinzuf&uuml;gen: 
+"Add URL pattern"=="URL hinzuf&uuml;gen"
 was removed from blacklist==wurde aus Blacklist entfernt
 was added to the blacklist==wurde zur Blacklist hinzugef&uuml;gt
 Activate this list for==Diese Liste ist g&uuml;ltig f&uuml;r
+Show entries:==Zeige Eintr&auml;ge:
+Entries per page:==Eintr&auml;ge pro Seite:
+"Go"=="Los"
+Edit existing pattern\(s\):==Bearbeite existierende Eintr&auml;ge:
+"Save URL pattern\(s\)"=="URL Eintr&auml;ge speichern"
 #---------------------------
 
 #File: BlacklistCleaner_p.html
@@ -235,13 +241,6 @@ next page==n&auml;chste Seite
 All==Alle
 Show==Zeige
 Bookmarks per page.==Lesezeichen pro Seite.
-#-----------------------------
-
-#File: CacheAdmin_p.html
-#---------------------------
-Web Cache==Internet Cache
-The current cache size is==Die aktuelle Gr&ouml;&szlig;e des Caches betr&auml;gt
-The maximum cache size is==Die maximale Gr&ouml;&szlig;e betr&auml;gt
 #-----------------------------
 
 #File: Collage.html
@@ -744,14 +743,11 @@ A questionmark is usually a hint for a dynamic page. URLs pointing to dynamic co
 is accessed with URLs containing question marks. If you are unsure, do not check this to avoid crawl loops.==nur von URLs zu erreichen sind, die ein Fragezeichen enthalten. Wenn Sie unsicher sind, aktivieren Sie diese Funktion nicht, um Crawl Schleifen zu vermeiden.
 Store to Web Cache==Speichern im Web-Cache
 This option is used by default for proxy prefetch, but is not needed for explicit crawling.==Diese Option ist standardm&auml;ssig beim Proxy aktiviert, wird aber zum reinen Crawlen nicht gebraucht.
-We recommend to leave this switched off unless you want to control the crawl results with the==Wir raten Ihnen, sie nicht zu aktivieren, ausser Sie wollen die Crawl Resulate mit
-Cache Monitor==Cache Monitor kontrollieren.
 Do Local Indexing:==Lokales Indexieren:
 index text==Indexiere Text
 index media==Indexiere Media
 This enables indexing of the wepages the crawler will download. This should be switched on by default, unless you want to crawl only to fill the==Dies aktiviert die Indexierung von Webseiten, die der Crawler runterl&auml;dt. Dies sollte standardm&auml;ssig aktiviert sein, ausser Sie wollen den
-Proxy Cache</a> without indexing.==Proxy Cache</a> ohne Indexierung f&uuml;llen.
-Do Remote Indexing==Indexieren auf anderen Peers
+Document Cache without indexing.==Dokumenten Cache ohne Indexierung f&uuml;llen.
 Describe your intention to start this global crawl \(optional\)==Beschreiben Sie warum Sie diesen globalen Crawl starten (optional)
 This message will appear in the 'Other Peer Crawl Start' table of other peers.==Diese Nachricht wird bei anderen Peers in der 'Anderer Peer Crawl Start' Tabelle angezeigt.
 If checked, the crawler will contact other peers and use them as remote indexers for your crawl.==Wenn aktiviert, wird der Crawler mit anderen Peers Kontakt aufnehmen und diese als Remote Indexierer f&uuml;r Ihren Crawl benutzen.
@@ -912,7 +908,6 @@ Retrieve by Word-Hash==Abfrage nach Wort-Hash
 Cleanup==Aufr&auml;umen
 Index Deletion<br />\(deletes all words and all urls\)==Index L&ouml;schung<br />(l&ouml;scht alle W&ouml;rter und alle URLs)
 "Delete index"=="Index l&ouml;schen" 
-Confirm: You want to delete the complete index==Best&auml;tigen: Sie wollen den kompletten Index l&ouml;schen
 No entry for word \'\#\[word\]\#\'==Keinen Eintrag zu Wort '#[word]#'
 No entry for word hash==Keinen Eintrag zu Wort-Hash
 Search result==Suchergebnis
@@ -1473,9 +1468,7 @@ Full Description==vollst&auml;ndige Beschreibung
 Submit New Delay Values==Neue Verz&ouml;gerungswerte speichern
 Changes take effect immediately==&Auml;nderungen werden sofort wirksam
 Cache Settings:==Cache Einstellungen:
-Cache Type==Cache Typ
-DHT-Out==DHT-Ausgehend
-DHT-In==DHT-Eingehend
+#RAM Cache==RAM Cache
 <td>Description==<td>Beschreibung
 URLs in RAM buffer:==URLs im RAM Puffer:
 This is the size of the URL write buffer. Its purpose is to buffer incoming URLs==Dies ist die Gr&ouml;sse des URLs write Puffer. Seine Aufgabe ist es die eingehenden URLs zu puffern
@@ -1498,7 +1491,7 @@ flushed to disc; this may last some minutes.==auf die Festplatte gesichert werde
 Initial space of words in cache:==Anfangs Freiraum im Word Cache:
 This is is the init size of space for words in cache.==Dies ist die Anfangsgr&ouml;sse von W&ouml;rtern im Cache.
 Enter New Cache Size==Neue Cachegr&ouml;&szlig;e eintragen
-Thread pool settings:==Threadpool Einstellungen:
+Thread Pool Settings:==Threadpool Einstellungen:
 maximum Active==max. aktiv
 current Active==derzeit aktiv
 Enter new Threadpool Configuration==neue Threadpoolkonfiguration eintragen
@@ -2415,6 +2408,15 @@ This tag creates links to external websites.==Dieser Tag erstellt einen Link zu 
 alt text==alt Beschreibung
 #-----------------------------
 
+#File: yacyinteractive.html
+#---------------------------
+YaCy Interactive Search==YaCy interaktive Suche
+>total results==>Ergebnisse insgesamt
+&nbsp;topwords:==&nbsp;Topw&ouml;rter:
+>Name==>Name
+#>Link==>Link
+#-----------------------------
+
 #File: yacysearch.html
 #---------------------------
 Search Page==Suchseite
@@ -2464,6 +2466,7 @@ YaCy - Distributed Search Engine==YaCy - Verteilte Suchmaschine
 Search&nbsp;&amp;&nbsp;Browse==Suchen&nbsp;&amp;&nbsp;Surfen
 Search Page==Suchseite
 Rich Client Search==Rich Client Suche
+Interactive local Search==Interaktive lokale Suche
 Compare Search==Vergleichs-Suche
 Ranking Config==Ranking Einstellungen
 >Surftips==>Surftipps
@@ -2529,13 +2532,11 @@ Peer Administration Console==Peer Administrations Konsole
 #Status==Status
 Basic Configuration==Eingangskonfiguration
 >Accounts==>Konten
-System Update==System Aktualisierung
 Network Configuration==Netzwerk Konfiguration
+System Update==System Aktualisierung
+>Performance==>Leistung
 Advanced Settings==Erweiterte Einstellungen
 Advanced Properties==Erweitertes Verhalten
->Performance==>Leistung
->Memory==>Speicher
-Search Sequence==Suchablauf
 #-----------------------------
 
 #File: env/templates/submenuCookie.template
@@ -2571,7 +2572,6 @@ Start a Web Crawl==Starte einen Web Crawl
 Crawl Start==Crawl starten
 Crawl Profile Editor==Crawl Profil Editor
 Crawler Queues==Crawler Puffer
-Control Queues==Kontrolle des Puffers
 Indexing<==Indexierung<
 Loader<==Lader<
 URLs to be processed==zu verarbeitende URLs
@@ -2605,7 +2605,6 @@ Log Statistics==Logstatistik
 Web Visualization==Internet Visualisierung
 Web Structure==Internet Struktur
 Image Collage==Bilder Collage
-Web Cache==Internet Zwischenspeicher
 #-----------------------------
 
 
@@ -2702,54 +2701,45 @@ PLEASE REPLACE THIS PAGE BY PUTTING A FILE index.html INTO THE PATH==BITTE ERSET
 
 #File: yacy/ui/index.html
 #-----------------------------
-"Welcome"=="Willkommen"
->Welcome==>Willkommen
-"Classic Search"=="Klassische Suche"
->Classic Search==>Klassische Suche
-"Admin Console"=="Admin Konsole"
-Compare Search==Vergleichs-Suche
->Admin Console==>Admin Konsole
+About YaCy-UI==&Uuml;ber YaCy-UI
+Admin Console==Admin Konsole
 "Bookmarks"=="Lesezeichen"
 >Bookmarks==>Lesezeichen				
 #-----------------------------
 
-#File: yacy/ui/sidebar/sidebar_1.html
+#File: yacy/ui/yacyui-admin.html
 #-----------------------------
-YaCy P2P Websearch==YaCy P2P Websuche
-YaCy Project==YaCy Projekt
-YaCy Peer Admin==YaCy Peer Administration
-"Search"=="Suchen"
->Text==>Text
->Images==>Bilder
->Audio==>Audio
->Video==>Video
->Application==>Anwendungen
-Search term:==Suchbegriff:
-"help"=="Hilfe"
-Resource/Network:==Ressource/Netzwerk:
-freeworld==freeworld
-local peer==lokaler Peer
-bookmarks==Lesezeichen
-sciencenet==ScienceNet
->Language:==>Sprache:
->Admin Console==>Admin Konsole
->Re-Start==>Neustart
->Shutdown==>Herunterfahren
-#-----------------------------
-
-#File: yacy/ui/sidebar/sidebar_2.html
-#-----------------------------
-Search Options==Suchoptionen
-Items per page:==Ergebnisse pro Seite:
-Constraint:==Einschr&auml;nkungen:
-all pages==alle Seiten
-index pages==Index Seiten
-URL mask:==URL Filter:
-Prefer mask:==Vorzugsmaske:
-Bookmark TagCloud==Lesezeichen TagWolke
-Bookmark Folders==Lesezeichen Ordner
-alt="help"==alt="Hilfe"
-title="help"==title="Hilfe"
+Peer Control==Peer
+"Login"=="Login"
+#Login==Anmelden
+Themes==Aussehen
+Messages==Nachrichten
+Re-Start==Neustart
+Shutdown==Beenden
+Web Indexing==Web Indexierung
+Crawl Start==Crawl starten
+Monitoring==&Uuml;berwachung
+YaCy Network==YaCy Netzwerk
+>Settings==>Einstellungen
+"Basic Settings"=="Eingangskonfiguration"
+#Basic==Basis
+Accounts==Konten
+"Network"=="Netzwerk"
+#Network==Netzwerk
+"Advanced Settings"=="Erweiterte Einstellungen"
+#Advanced==Erweitert
+"Update Settings"=="System Aktualisierung"
+#Update==Aktualisierung
+>YaCy Project==>YaCy Projekt
+"YaCy Project Home"=="YaCy Projekt Homepage"
+#Project==Projekt
+"YaCy Statistics"=="YaCy Statistiken"
+#Statistics==Statistiken
+"YaCy Forum"=="YaCy Forum"
+#Forum==Forum
+"Help"=="Hilfe"
+#"YaCy Wiki"=="YaCy Wiki"
+#Wiki==Wiki
 #-----------------------------
 
 #File: yacy/ui/yacyui-bookmarks.html
@@ -2762,4 +2752,38 @@ title="help"==title="Hilfe"
 >Title==>Titel
 >Tags==>Tags
 >Date==>Datum
+#-----------------------------
+
+#File: yacy/ui/sidebar/sidebar_1.html
+#-----------------------------
+YaCy P2P Websearch==YaCy P2P Websuche
+"Search"=="Suchen"
+>Text==>Text
+>Images==>Bilder
+>Audio==>Audio
+>Video==>Video
+>Application==>Anwendungen
+Search term:==Suchbegriff:
+"help"=="Hilfe"
+Resource/Network:==Ressource/Netzwerk:
+freeworld==freeworld
+local peer==lokaler Peer
+>bookmarks==>Lesezeichen
+sciencenet==ScienceNet
+>Language:==>Sprache:
+any language==jede Sprache
+Bookmark Folders==Lesezeichen Ordner
+#-----------------------------
+
+#File: yacy/ui/sidebar/sidebar_2.html
+#-----------------------------
+Search Options==Suchoptionen
+Constraint:==Einschr&auml;nkungen:
+all pages==alle Seiten
+index pages==Index Seiten
+URL mask:==URL Filter:
+Prefer mask:==Vorzugsmaske:
+Bookmark TagCloud==Lesezeichen TagWolke
+alt="help"==alt="Hilfe"
+title="help"==title="Hilfe"
 #-----------------------------
