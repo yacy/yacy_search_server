@@ -397,10 +397,10 @@ public final class DateFormatter {
     
     /** called by all public format...(..., TimeZone) methods */
     private static String format(final SimpleDateFormat format, final Date date, final TimeZone tz) {
-        final TimeZone bakTZ = format.getTimeZone();
         String result;
         
         synchronized (format) {
+            final TimeZone bakTZ = format.getTimeZone();
             format.setTimeZone(tz == null ? TZ_GMT : tz);
             result = format.format(date);
             format.setTimeZone(bakTZ);
