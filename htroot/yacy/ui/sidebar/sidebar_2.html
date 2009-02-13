@@ -14,7 +14,7 @@
 	
 	function loadTagCloud() {		
 		$("#tagcloud *").remove();
-		$("#sidebar-2-1").toggleClass("loading");
+		$("#sidebar-2-1").toggleClass("ui.loading");
 		$.ajax({
 			type: "POST",
 			url: "/api/bookmarks/tags/getTag.xml?top=25&sort=alpha",			
@@ -31,8 +31,8 @@
 						.appendTo('#tagcloud')
 						.bind('click', function() {
 							qtag = $(this).text().replace(/\s+/g,"");
-							$("select[@name='resource']").setValue('ymarks');
-							$("input[@name='search']").setValue(qtag);
+							$("select[name='resource']").setValue('ymarks');
+							$("input[name='search']").setValue(qtag);
 							if (tabid == "#Bookmarks") {
 								reloadBM();
 							} else {
@@ -40,7 +40,7 @@
 							}							
 						});																										
 				}); //close each(
-				$("#sidebar-2-1").toggleClass("loading");
+				$("#sidebar-2-1").toggleClass("ui.loading");
 			}
 		}); //close $.ajax(	
 	}	
@@ -71,8 +71,8 @@
 		</form>			
 </div>
 
-<h3><a href="#">Bookmark TagCloud</a></h3><!-- 1 -->
-<div class="menu">	
+<h3 id="sidebar-2-1"><a href="#">Bookmark TagCloud</a></h3><!-- 1 -->
+<div>
 	<p id="tagcloud"></p>	
 </div>
 

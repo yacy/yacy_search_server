@@ -198,15 +198,15 @@ h3.linktitle {
 }
 .bm_input {
   width: 340px;  
-  margin-bottom: .5em;
   padding: 2px 0px 2px 0px /* top right bottom left */
   border: 1px solid #CCCCCC;
+  margin-bottom: 2px;
   font-family: "Trebuchet MS", Trebuchet, Verdana, Helvetica, Arial, sans-serif;
-  font-size: 12px;
+  font-size: 1.0em;
 }
 .bm_dialog {
-	margin: 15px 15px 15px 15px;
-	font-size: 11px;
+	margin: 10px 10px 10px 10px;
+	font-size: .9em;
 }
 
 /* YaCy Search Results ---------------------------*/
@@ -281,10 +281,15 @@ dl.pairs dt {
 
 #yfolder {	
 	margin: 5px 5px 10px 20px; /* top right bottom left */
+	max-height: 250px;
+	overflow-x: hidden;
+	overflow-y: auto;
 }
 
 #tagcloud {
-	margin: 5px 5px 5px 5px; /* top right bottom left */
+	margin: 10px 10px 10px 7px; /* top right bottom left */
+	text-align: justify;
+	line-height: 1.2em;
 }
 
 #tagcloud a {
@@ -307,7 +312,7 @@ dl.pairs dt {
 #tabs-container .ui-tabs-nav li.ui-tabs-selected a:link,
 #tabs-container .ui-tabs-nav li.ui-tabs-selected a:visited,
 #tabs-container .ui-tabs-nav li.ui-tabs-selected a:hover,
-#tabs-container .ui-tabs-nav li.ui-tabs-selected a:active { font-size: 1.1em; font-style: bold; }
+#tabs-container .ui-tabs-nav li.ui-tabs-selected a:active { font-size: 1.1em; font-style: bold; padding-left: 5px;}
 #tabs-container .ui-tabs-panel { padding:0px 0px; font-size:11px; }
 
 /* overrides for ui-accordion styles

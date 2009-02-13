@@ -35,7 +35,8 @@
 		
 		/* Menu .click(function() */
 		$("#searchtext").click(function () { 
-			$("#side2").accordion("activate", 0); 
+			$("#side2").accordion("activate", 0);
+			$("#searchtext").focus(); 
 		});
 		
 		/* Load Search Result into new Tab */
@@ -243,7 +244,7 @@
 </div>
 <h3><a href="#">Bookmark Folders</a></h3><!-- 1 -->
 <div>
-	<ul class="filetree" id="yfolder"></ul>
+	<ul id="yfolder" class="filetree"></ul>
 </div>
 
 
