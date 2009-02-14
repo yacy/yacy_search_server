@@ -194,13 +194,15 @@ public class Threaddump_p {
                 }                
                 String threadtitle = tracename + "Thread= " + thread.getName() + " " + (thread.isDaemon()?"daemon":"") + " id=" + thread.getId() + " " + thread.getState().toString();
                 String className;
+                boolean cutcore = true;
                 for (int i = 0; i < stackTraceElements.length; i++) {
                     ste = stackTraceElements[i];
                     className = ste.getClassName();
-                    if (className.startsWith("java.") || className.startsWith("sun.")) {
+                    if (cutcore && (className.startsWith("java.") || className.startsWith("sun."))) {
                     	sb.setLength(0);
                     	bufferappend(sb, plain, tracename + "at " + htmlFilterCharacterCoding.unicode2html(ste.toString(), true));
                     } else {
+                    	cutcore = false;
 	                    if (i == 0) {
 	                        line = getLine(getClassFile(classPath, className), ste.getLineNumber());
 	                    } else {
