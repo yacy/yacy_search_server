@@ -1913,29 +1913,38 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             if (this.log.isFine()) log.logFine(rejectReason);
             return false;
         }
-        String startHash = PeerSelection.selectTransferStart();
-        log.logInfo("dhtTransferJob: selected " + startHash + " as start hash");
-        String limitHash = PeerSelection.limitOver(this.webIndex.seedDB, startHash);
-        log.logInfo("dhtTransferJob: selected " + limitHash + " as limit hash");
-        try {
-            int c = this.dhtDispatcher.selectContainersToCache(
-                    startHash,
-                    limitHash,
-                    dhtMaxContainerCount,
-                    dhtMaxReferenceCount,
-                    2000);
-            log.logInfo("dhtTransferJob: Dispatcher selected " + c + " containers");
-        } catch (IOException e) {
-            log.logSevere("dhtTransferJob: interrupted with exception: " + e.getMessage(), e);
-            return false;
+        boolean hasDoneSomething = false;
+        if (this.dhtDispatcher.cloudSize() > this.webIndex.seedDB.scheme.verticalPartitions() * 4) {
+        	log.logInfo("dhtTransferJob: no selection, too many entries in transmission cloud: " + this.dhtDispatcher.cloudSize());
+        } else if (MemoryControl.available() < 1024*1024*20) {
+        	log.logInfo("dhtTransferJob: no selection, too less memory available : " + (MemoryControl.available() / 1024 / 1024) + " MB");
+        } else {
+	        String startHash = PeerSelection.selectTransferStart();
+	        log.logInfo("dhtTransferJob: selected " + startHash + " as start hash");
+	        String limitHash = PeerSelection.limitOver(this.webIndex.seedDB, startHash);
+	        log.logInfo("dhtTransferJob: selected " + limitHash + " as limit hash");
+	        try {
+	            boolean enqueued = this.dhtDispatcher.selectContainersEnqueueToCloud(
+	                    startHash,
+	                    limitHash,
+	                    dhtMaxContainerCount,
+	                    dhtMaxReferenceCount,
+	                    2000);
+	            hasDoneSomething = hasDoneSomething | enqueued;
+	            log.logInfo("dhtTransferJob: result from enqueueing: " + ((enqueued) ? "true" : "false"));
+	        } catch (IOException e) {
+	            log.logSevere("dhtTransferJob: interrupted with exception: " + e.getMessage(), e);
+	            return false;
+	        }
         }
-        int splitted = this.dhtDispatcher.splitContainersFromCache();
-        log.logInfo("dhtTransferJob: splitted selected container in " + splitted + " parts");
-        boolean enqueued = this.dhtDispatcher.enqueueContainersFromCache();
-        log.logInfo("dhtTransferJob: result from enqueueing: " + ((enqueued) ? "true" : "false"));
-        boolean dequeued = this.dhtDispatcher.dequeueContainer();
-        log.logInfo("dhtTransferJob: result from dequeueing: " + ((dequeued) ? "true" : "false"));
-        return dequeued;
+        if (this.dhtDispatcher.transmissionSize() >= 10) {
+        	log.logInfo("dhtTransferJob: no dequeueing from cloud to transmission: too many concurrent sessions: " + this.dhtDispatcher.transmissionSize());
+        } else {
+        	boolean dequeued = this.dhtDispatcher.dequeueContainer();
+        	hasDoneSomething = hasDoneSomething | dequeued;
+        	log.logInfo("dhtTransferJob: result from dequeueing: " + ((dequeued) ? "true" : "false"));
+        }
+        return hasDoneSomething;
     }
 
     private void addURLtoErrorDB(
