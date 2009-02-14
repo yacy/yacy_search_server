@@ -41,6 +41,7 @@ import de.anomic.server.serverDomains;
 import de.anomic.server.serverInstantBusyThread;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.tools.UPnP;
 import de.anomic.yacy.yacySeed;
 
 public class ConfigBasic {
@@ -95,7 +96,16 @@ public class ConfigBasic {
         	final boolean nameOK = Pattern.compile("[A-Za-z0-9\\-_]{3,80}").matcher(peerName).matches();
             if (nameOK) env.setConfig("peerName", peerName);
         }
- 
+        
+        // UPnP config
+        boolean upnp = false;
+        if(post != null && post.containsKey("port")) { // hack to allow checkbox
+        	if (post.containsKey("enableUpnp")) upnp = true;
+        	if (upnp && !sb.getConfigBool(plasmaSwitchboardConstants.UPNP_ENABLED, false)) UPnP.addPortMapping();
+        	sb.setConfig(plasmaSwitchboardConstants.UPNP_ENABLED, upnp);
+        	if(!upnp) UPnP.deletePortMapping();
+        }
+        
         // check port
         boolean reconnect = false;
         if (!(env.getConfigLong("port", port) == port)) {
@@ -105,6 +115,9 @@ public class ConfigBasic {
             
             // redirect the browser to the new port
             reconnect = true;
+            
+            // renew upnp port mapping
+            if (upnp) UPnP.addPortMapping();
             
             String host = null;
             if (header.containsKey(httpRequestHeader.HOST)) {
@@ -198,7 +211,9 @@ public class ConfigBasic {
         } else {
             prop.put("nextStep", NEXTSTEP_FINISHED);
         }
-        
+                
+        prop.put("upnp", "1");
+        prop.put("upnp_enabled", (env.getConfigBool(plasmaSwitchboardConstants.UPNP_ENABLED, false)) ? "1" : "0");
         
         // set default values       
         prop.putHTML("defaultName", env.getConfig("peerName", ""));

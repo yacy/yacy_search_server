@@ -191,6 +191,9 @@
       <pathelement location="${lib}/commons-logging-1.1.1.jar" />
       <pathelement location="${lib}/commons-io-1.4.jar" />
       <pathelement location="${lib}/servlet-api.jar" />
+      <!-- upnp (+ commons-logging) -->
+      <pathelement location="${lib}/sbbi-upnplib-1.0.4.jar" />
+      <pathelement location="${lib}/commons-jxpath-1.1.jar" />
     </path>
 
     <!-- compiling yacy.java -->
@@ -889,6 +892,8 @@
         <pathelement location="${lib}/commons-logging-1.1.1.jar" />
         <pathelement location="${lib}/commons-io-1.4.jar" />
         <pathelement location="${lib}/servlet-api.jar" />
+        <pathelement location="${lib}/sbbi-upnplib-1.0.4.jar" />
+        <pathelement location="${lib}/commons-jxpath-1.1.jar" />
         <pathelement location="${libx}" />
         <fileset dir="${libx}" includes="**/*.jar" />
       </classpath>

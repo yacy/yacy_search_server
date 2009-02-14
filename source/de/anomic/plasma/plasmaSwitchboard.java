@@ -117,6 +117,7 @@ import de.anomic.crawler.HTTPLoader;
 import de.anomic.crawler.ImporterManager;
 import de.anomic.crawler.IndexingStack;
 import de.anomic.crawler.NoticedURL;
+import de.anomic.crawler.ProtocolLoader;
 import de.anomic.crawler.ResourceObserver;
 import de.anomic.crawler.ResultImages;
 import de.anomic.crawler.ResultURLs;
@@ -147,10 +148,10 @@ import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.kelondro.order.Digest;
 import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.table.CachedRecords;
+import de.anomic.kelondro.util.FileUtils;
+import de.anomic.kelondro.util.Log;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.SetTools;
-import de.anomic.kelondro.util.Log;
-import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.parser.ParserException;
 import de.anomic.server.serverAbstractSwitch;
 import de.anomic.server.serverBusyThread;
@@ -164,6 +165,7 @@ import de.anomic.server.serverProfiling;
 import de.anomic.server.serverSemaphore;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.serverThread;
+import de.anomic.tools.UPnP;
 import de.anomic.tools.crypt;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacyCore;
@@ -265,6 +267,11 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         // set loglevel and log
         setLog(new Log("PLASMA"));
         if (applyPro) this.log.logInfo("This is the pro-version of YaCy");
+        
+        // UPnP port mapping
+        UPnP.setSb(sb);
+        if (getConfigBool(plasmaSwitchboardConstants.UPNP_ENABLED, false))
+        	serverInstantBusyThread.oneTimeJob(UPnP.class, "addPortMapping", UPnP.log, 0);
         
         // init TrayIcon if possible
         yacyTray.init(this);
@@ -1113,6 +1120,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         log.logConfig("SWITCHBOARD SHUTDOWN STEP 3: sending termination signal to database manager (stand by...)");
         webIndex.close();
         plasmaHTCache.close();
+        UPnP.deletePortMapping();
         yacyTray.removeTray();
         log.logConfig("SWITCHBOARD SHUTDOWN TERMINATED");
     }

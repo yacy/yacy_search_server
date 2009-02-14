@@ -540,4 +540,6 @@ public final class plasmaSwitchboardConstants {
     public static final String BROWSER_POP_UP_TRIGGER     = "browserPopUpTrigger";
     public static final String BROWSER_POP_UP_APPLICATION = "browserPopUpApplication";
     public static final String BROWSER_POP_UP_PAGE        = "browserPopUpPage";
+    
+    public static final String UPNP_ENABLED			= "upnp.enabled";
 }
