@@ -26,12 +26,12 @@
 
 package de.anomic.index;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
 
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.Bitfield;
@@ -40,7 +40,7 @@ import de.anomic.yacy.yacySeedDB;
 
 public class indexWord {
 
-    private static final HashMap<String, String> hashCache = new HashMap<String, String>(1000);
+    private static final ConcurrentHashMap<String, String> hashCache = new ConcurrentHashMap<String, String>(1000);
     
     // object carries statistics for words and sentences
     public  int      count;       // number of occurrences
