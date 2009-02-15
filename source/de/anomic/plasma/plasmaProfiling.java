@@ -62,8 +62,8 @@ public class plasmaProfiling {
         final int rightborder = 30;
         final int topborder = 20;
         final int bottomborder = 20;
-        final int leftscale = 10000;
-        final int rightscale; if (maxmbytes > 3000) rightscale = 500; else if (maxmbytes > 1500) rightscale = 200; else rightscale = 100;
+        final int leftscale; if(maxwords > 150000) leftscale = maxwords / 150000 * 20000; else leftscale  = 10000;
+        final int rightscale; if (maxmbytes > 1500) rightscale = maxmbytes / 1500 * 200; else rightscale = 100;
         final int anotscale = 50;
         final int bottomscale = 60;
         final int vspace = height - topborder - bottomborder;
