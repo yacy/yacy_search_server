@@ -46,6 +46,7 @@ public class MemoryControl {
      * @param info additional info for log
      */
     public final synchronized static void gc(final int last, final String info) { // thq
+    	assert last >= 10000; // too many forced GCs will cause bad execution performance
         final long elapsed = System.currentTimeMillis() - lastGC;
         if (elapsed > last) {
             final long before = free();
@@ -71,7 +72,7 @@ public class MemoryControl {
      */
     private static long runGC(final boolean count) {
         final long memBefore = available();
-        gc(1000, "serverMemory.runGC(...)");
+        gc(10000, "serverMemory.runGC(...)");
         final long freed = available() - memBefore;
         if (count) {
             gcs[gcs_pos] = freed;
@@ -159,7 +160,7 @@ public class MemoryControl {
         final long avg = getAverageGCFree();
         if (force || avg == 0 || avg + avail >= size) {
             // this is only called if we expect that an allocation of <size> bytes would cause the jvm to call the GC anyway
-            final long freed = runGC(!force);
+            final long freed = runGC(false);
             avail = available();
             log.logInfo("performed " + ((force) ? "explicit" : "necessary") + " GC, freed " + (freed >> 10)
                     + " KB (requested/available/average: "

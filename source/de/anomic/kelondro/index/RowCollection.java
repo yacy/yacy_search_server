@@ -194,6 +194,12 @@ public class RowCollection implements Iterable<Row.Entry> {
         chunkcache = newChunkcache;
     }
     
+    /**
+     * compute the needed memory in case of a cache extension. That is, if the cache is full and must
+     * be copied into a new cache which is larger. In such a case the Collection needs more than the double size
+     * than is necessary to store the data. This method coputes the extra memory that is needed to perform this task.
+     * @return
+     */
     public final long memoryNeededForGrow() {
         return (long) ((((long) (chunkcount + 1)) * ((long) rowdef.objectsize)) * growfactor);
     }

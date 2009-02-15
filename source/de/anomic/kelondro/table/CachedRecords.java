@@ -46,9 +46,9 @@ public class CachedRecords extends AbstractRecords implements RandomAccessRecord
     private   static final int element_in_cache = 4; // for kelondroCollectionObjectMap: 4; for HashMap: 52
     
     // static supervision objects: recognize and coordinate all activites
-    private static TreeMap<String, CachedRecords> recordTracker = new TreeMap<String, CachedRecords>();
-    private static long memStopGrow    = 10000000; // a limit for the node cache to stop growing if less than this memory amount is available
-    private static long memStartShrink =  6000000; // a limit for the node cache to start with shrinking if less than this memory amount is available
+    private static final TreeMap<String, CachedRecords> recordTracker = new TreeMap<String, CachedRecords>();
+    private static final long memStopGrow    = 40 * 1024 * 1024; // a limit for the node cache to stop growing if less than this memory amount is available
+    private static final long memStartShrink = 20 * 1024 * 1024; // a limit for the node cache to start with shrinking if less than this memory amount is available
     
     // caching buffer
     private IntBytesMap   cacheHeaders; // the cache; holds overhead values and key element
@@ -120,9 +120,9 @@ public class CachedRecords extends AbstractRecords implements RandomAccessRecord
         }
     }
 
-    int cacheGrowStatus() {
+    public int cacheGrowStatus() {
         final long available = MemoryControl.available();
-        if ((cacheHeaders != null) && (available < cacheHeaders.memoryNeededForGrow())) return 0;
+        if ((cacheHeaders != null) && (available  - 2 * 1024 * 1024 < cacheHeaders.memoryNeededForGrow())) return 0;
         return cacheGrowStatus(available, memStopGrow, memStartShrink);
     }
     
@@ -133,16 +133,11 @@ public class CachedRecords extends AbstractRecords implements RandomAccessRecord
         // 2: cache is allowed to grow and must not shrink
         if (available > stopGrow) return 2;
         if (available > startShrink) {
-            MemoryControl.gc(30000, "kelendroCacheRecords.cacheGrowStatus(...) 1"); // thq
+            MemoryControl.gc(60000, "kelendroCacheRecords.cacheGrowStatus(...) 1"); // thq
             return 1;
         }
-        MemoryControl.gc(3000, "kelendroCacheRecords.cacheGrowStatus(...) 0"); // thq
+        MemoryControl.gc(30000, "kelendroCacheRecords.cacheGrowStatus(...) 0"); // thq
         return 0;
-    }
-    
-    public static void setCacheGrowStati(final long memStopGrowNew, final long memStartShrinkNew) {
-        memStopGrow = memStopGrowNew;
-        memStartShrink =  memStartShrinkNew;
     }
     
     public static long getMemStopGrow() {

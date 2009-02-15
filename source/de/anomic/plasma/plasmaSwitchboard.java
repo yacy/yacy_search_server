@@ -103,8 +103,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
@@ -143,11 +141,9 @@ import de.anomic.http.httpdRobotsTxtConfig;
 import de.anomic.index.indexDocumentMetadata;
 import de.anomic.index.indexReferenceBlacklist;
 import de.anomic.index.indexURLReference;
-import de.anomic.kelondro.blob.Cache;
 import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.kelondro.order.Digest;
 import de.anomic.kelondro.order.NaturalOrder;
-import de.anomic.kelondro.table.CachedRecords;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.Log;
 import de.anomic.kelondro.util.MemoryControl;
@@ -236,7 +232,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     public  double                         totalQPM = 0d;
     public  TreeMap<String, String>        clusterhashes; // map of peerhash(String)/alternative-local-address as ip:port or only ip (String) or null if address in seed should be used
     public  URLLicense                     licensedURLs;
-    public  Timer                          moreMemory;
     public  List<Pattern>                  networkWhitelist, networkBlacklist;
     public  Dispatcher                     dhtDispatcher;
     public  List<String>                   trail;
@@ -458,13 +453,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         //Init bookmarks DB
         initBookmarks();
         
-        // set a maximum amount of memory for the caches
-        // long memprereq = Math.max(getConfigLong(INDEXER_MEMPREREQ, 0), wordIndex.minMem());
-        // setConfig(INDEXER_MEMPREREQ, memprereq);
-        // setThreadPerformance(INDEXER, getConfigLong(INDEXER_IDLESLEEP, 0), getConfigLong(INDEXER_BUSYSLEEP, 0), memprereq);
-        CachedRecords.setCacheGrowStati(40 * 1024 * 1024, 20 * 1024 * 1024);
-        Cache.setCacheGrowStati(40 * 1024 * 1024, 20 * 1024 * 1024);
-        
         // make parser
         log.logConfig("Starting Parser");
         this.parser = new plasmaParser();
@@ -607,10 +595,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         
         // deploy busy threads
         log.logConfig("Starting Threads");
-        MemoryControl.gc(1000, "plasmaSwitchboard, help for profiler"); // help for profiler - thq
-
-        moreMemory = new Timer(); // init GC Thread - thq
-        moreMemory.schedule(new MoreMemory(), 300000, 600000);
+        MemoryControl.gc(10000, "plasmaSwitchboard, help for profiler"); // help for profiler - thq
         
         deployThread(plasmaSwitchboardConstants.CLEANUP, "Cleanup", "simple cleaning process for monitoring information", null,
                      new serverInstantBusyThread(this, plasmaSwitchboardConstants.CLEANUP_METHOD_START, plasmaSwitchboardConstants.CLEANUP_METHOD_JOBCOUNT, plasmaSwitchboardConstants.CLEANUP_METHOD_FREEMEM), 600000); // all 5 Minutes, wait 10 minutes until first run
@@ -1089,7 +1074,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     public void close() {
         log.logConfig("SWITCHBOARD SHUTDOWN STEP 1: sending termination signal to managed threads:");
         serverProfiling.stopSystemProfiling();
-        moreMemory.cancel();
         terminateAllThreads(true);
         log.logConfig("SWITCHBOARD SHUTDOWN STEP 2: sending termination signal to threaded indexing");
         // closing all still running db importer jobs
@@ -1150,14 +1134,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     
     public void deQueueFreeMem() {
         // flush some entries from the RAM cache
-        webIndex.flushCacheFor(3000);
+        webIndex.flushCacheFor(5000);
         // empty some caches
         webIndex.clearCache();
         plasmaSearchEvent.cleanupEvents(true);
-        // adopt maximum cache size to current size to prevent that further OutOfMemoryErrors occur
-/*      int newMaxCount = Math.max(1200, Math.min((int) getConfigLong(WORDCACHE_MAX_COUNT, 1200), wordIndex.dhtOutCacheSize()));
-        setConfig(WORDCACHE_MAX_COUNT, Integer.toString(newMaxCount));
-        wordIndex.setMaxWordCount(newMaxCount); */
     }
     
     public IndexingStack.QueueEntry deQueue() {
@@ -2154,12 +2134,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         } catch (final Exception e) {
             return new HashMap<String, String>();
         }
-    }
-}
-
-class MoreMemory extends TimerTask {
-    public final void run() {
-        MemoryControl.gc(10000, "MoreMemory()");
     }
 }
 

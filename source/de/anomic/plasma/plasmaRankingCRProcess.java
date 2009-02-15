@@ -365,7 +365,6 @@ public class plasmaRankingCRProcess {
         // finished. write to file
         cr = null;
         cr_in = null;
-        MemoryControl.gc(1000, "plasmaRankingCRProcess.genrci(...)"); // thq
         rci.toFile(rci_out);
         return count;
     }

@@ -124,11 +124,11 @@ public class Dispatcher {
     }
     
     public int cloudSize() {
-    	return this.transmissionCloud.size();
+    	return (this.transmissionCloud == null) ? 0 : this.transmissionCloud.size();
     }
     
     public int transmissionSize() {
-    	return this.indexingTransmissionProcessor.queueSize();
+    	return (this.indexingTransmissionProcessor == null) ? 0 : this.indexingTransmissionProcessor.queueSize();
     }
     
     /**

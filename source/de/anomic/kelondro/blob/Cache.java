@@ -1,4 +1,4 @@
-// kelondroCache.java
+// kelondro.blob.Cache.java
 // (C) 2006 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 26.10.2006 on http://www.anomic.de
 //
@@ -58,16 +58,16 @@ public class Cache implements ObjectIndex {
 
     // static object tracker; stores information about object cache usage
     private static final TreeMap<String, Cache> objectTracker = new TreeMap<String, Cache>();
-    private static long memStopGrow    = 12 * 1024 * 1024; // a limit for the node cache to stop growing if less than this memory amount is available
-    private static long memStartShrink =  8 * 1024 * 1024; // a limit for the node cache to start with shrinking if less than this memory amount is available
+    private static final long memStopGrow    = 40 * 1024 * 1024; // a limit for the node cache to stop growing if less than this memory amount is available
+    private static final long memStartShrink = 20 * 1024 * 1024; // a limit for the node cache to start with shrinking if less than this memory amount is available
     
     // class objects
-    private RowSet readHitCache;
-    private RowSet readMissCache;
-    private final ObjectIndex  index;
-    private Row    keyrow;
-    private int            readHit, readMiss, writeUnique, writeDouble, cacheDelete, cacheFlush;
-    private int            hasnotHit, hasnotMiss, hasnotUnique, hasnotDouble, hasnotDelete;
+    private final ObjectIndex index;         // the back-end of the cache
+    private       RowSet      readHitCache;  // contains a complete copy of the cached objects
+    private       RowSet      readMissCache; // contains only the keys of the objects that had been a miss
+    private       Row         keyrow;
+    private       int         readHit, readMiss, writeUnique, writeDouble, cacheDelete, cacheFlush;
+    private       int         hasnotHit, hasnotMiss, hasnotUnique, hasnotDouble, hasnotDelete;
     
     public Cache(final ObjectIndex backupIndex) {
         this.index = backupIndex;
@@ -99,11 +99,6 @@ public class Cache implements ObjectIndex {
     public int writeBufferSize() {
         return 0;
     }
-
-    public static void setCacheGrowStati(final long memStopGrowNew, final long memStartShrinkNew) {
-        memStopGrow = memStopGrowNew;
-        memStartShrink =  memStartShrinkNew;
-    }
     
     public static long getMemStopGrow() {
         return memStopGrow ;
@@ -131,7 +126,7 @@ public class Cache implements ObjectIndex {
         final HashMap<String, String> map = new HashMap<String, String>();
         map.put("objectHitChunkSize", (readHitCache == null) ? "0" : Integer.toString(readHitCache.rowdef.objectsize));
         map.put("objectHitCacheCount", (readHitCache == null) ? "0" : Integer.toString(readHitCache.size()));
-        map.put("objectHitMem", (readHitCache == null) ? "0" : Integer.toString((int) (readHitCache.rowdef.objectsize * readHitCache.size() * RowCollection.growfactor)));
+        map.put("objectHitMem", (readHitCache == null) ? "0" : Long.toString(readHitCache.rowdef.objectsize * readHitCache.size()));
         map.put("objectHitCacheReadHit", Integer.toString(readHit));
         map.put("objectHitCacheReadMiss", Integer.toString(readMiss));
         map.put("objectHitCacheWriteUnique", Integer.toString(writeUnique));
@@ -141,7 +136,7 @@ public class Cache implements ObjectIndex {
         
         map.put("objectMissChunkSize", (readMissCache == null) ? "0" : Integer.toString(readMissCache.rowdef.objectsize));
         map.put("objectMissCacheCount", (readMissCache == null) ? "0" : Integer.toString(readMissCache.size()));
-        map.put("objectMissMem", (readMissCache == null) ? "0" : Integer.toString((int) (readMissCache.rowdef.objectsize * readMissCache.size() * RowCollection.growfactor)));
+        map.put("objectMissMem", (readMissCache == null) ? "0" : Long.toString(readMissCache.rowdef.objectsize * readMissCache.size()));
         map.put("objectMissCacheReadHit", Integer.toString(hasnotHit));
         map.put("objectMissCacheReadMiss", Integer.toString(hasnotMiss));
         map.put("objectMissCacheWriteUnique", Integer.toString(hasnotUnique));
@@ -153,13 +148,20 @@ public class Cache implements ObjectIndex {
         return map;
     }
     
-    private int cacheGrowStatus() {
+    private int cacheGrowStatus(long available) {
         return CachedRecords.cacheGrowStatus(MemoryControl.available(), memStopGrow, memStartShrink);
     }
     
     private boolean checkMissSpace() {
         // returns true if it is allowed to write into this cache
-        if (cacheGrowStatus() < 1) {
+    	long available = MemoryControl.available();
+    	if (available - 2 * 1024 * 1024 < readMissCache.memoryNeededForGrow()) {
+    		if (readMissCache != null) {
+    			readMissCache.clear();
+            }
+    		return false;
+    	}
+        if (cacheGrowStatus(available) < 1) {
             if (readMissCache != null) {
                 readMissCache.clear();
             }
@@ -170,7 +172,14 @@ public class Cache implements ObjectIndex {
     
     private boolean checkHitSpace() {
         // returns true if it is allowed to write into this cache
-        final int status = cacheGrowStatus();
+    	long available = MemoryControl.available();
+    	if (available - 2 * 1024 * 1024 < readHitCache.memoryNeededForGrow()) {
+    		if (readHitCache != null) {
+                readHitCache.clear();
+            }
+    		return false;
+    	}
+        final int status = cacheGrowStatus(available);
         if (status < 1) {
             if (readHitCache != null) {
                 readHitCache.clear();
