@@ -373,13 +373,14 @@ public final class serverCore extends serverAbstractBusyThread implements server
                 }
                 // keep-alive: if set to true, the server frequently sends keep-alive packets to the client which the client must respond to
                 // we set this to false to prevent that a missing ack from the client forces the server to close the connection
-                // controlSocket.setKeepAlive(false); 
+                controlSocket.setKeepAlive(false); 
                 
                 // disable Nagle's algorithm (waiting for more data until packet is full)
                 // controlSocket.setTcpNoDelay(true);
                 
                 // set a non-zero linger, that means that a socket.close() blocks until all data is written
                 // controlSocket.setSoLinger(false, this.timeout);
+                controlSocket.setSoLinger(true, this.timeout);
                 
                 // ensure that MTU-48 is not exceeded to prevent that routers cannot handle large data packets
                 // read http://www.cisco.com/warp/public/105/38.shtml for explanation
@@ -528,15 +529,12 @@ public final class serverCore extends serverAbstractBusyThread implements server
         }
         
         public void close() {
-            if (this.isAlive()) {
-                try {
-                    // closing the socket to the client
-                    if ((this.controlSocket != null)&&(this.controlSocket.isConnected())) {
-                        this.controlSocket.close();
-                        serverCore.this.log.logInfo("Closing main socket of thread '" + this.getName() + "'");
-                    }
-                } catch (final Exception e) {}
-            }            
+            // closing the socket to the client
+            if (this.controlSocket != null) try {
+                this.controlSocket.close();
+                serverCore.this.log.logInfo("Closing main socket of thread '" + this.getName() + "'");
+                this.controlSocket = null;
+            } catch (final Exception e) {}
         }
         
         public long getRequestStartTime() {
@@ -550,12 +548,6 @@ public final class serverCore extends serverAbstractBusyThread implements server
     	public void setIdentity(final String id) {
     	    this.identity = id;
     	}
-    
-    	/*
-    	public void setPromiscuous() {
-    	    this.promiscuous = true;
-    	}
-    	*/
     
     	public void log(final boolean outgoing, final String request) {
     	    if (serverCore.this.log.isFine()) serverCore.this.log.logFine(this.userAddress.getHostAddress() + "/" + this.identity + " " +
@@ -660,29 +652,16 @@ public final class serverCore extends serverAbstractBusyThread implements server
             
         }
         
-        /*
-         * (non-Javadoc)
-         * 
-         * @see java.lang.Object#finalize()
-         */
         protected void finalize() {
-            if (busySessions != null && busySessions.contains(this))
-            {
+            if (busySessions != null && busySessions.contains(this)) {
                 busySessions.remove(this);
                 if(log.isFinest()) log.logFinest("* removed session "+ this.controlSocket.getRemoteSocketAddress() + this.request);
             }
+            this.close();
         }
         
         private void listen() {
             try {
-                
-                Object result;
-//                // send greeting
-//                Object result = commandObj.greeting();
-//                if (result != null) {
-//                    if ((result instanceof String) && (((String) result).length() > 0)) writeLine((String) result);
-//                }
-                
                 // start dialog
                 byte[] requestBytes = null;
                 boolean terminate = false;
@@ -757,7 +736,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
                             }
                         }
                         //long commandStart = System.currentTimeMillis();
-                        result = ((Method)commandMethod).invoke(this.commandObj, stringParameter);
+                        Object result = ((Method)commandMethod).invoke(this.commandObj, stringParameter);
                         //announceMoreExecTime(commandStart - System.currentTimeMillis()); // shall be negative!
                         //log.logDebug("* session " + handle + " completed command '" + request + "'. time = " + (System.currentTimeMillis() - handle));
                         this.out.flush();
