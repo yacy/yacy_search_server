@@ -178,7 +178,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     
     // load slots
     public  static int  xstackCrawlSlots     = 2000;
-    private        int  dhtMaxContainerCount = 100;
+    private        int  dhtMaxContainerCount = 500;
     private        int  dhtMaxReferenceCount = 1000;
     public  static long lastPPMUpdate        = System.currentTimeMillis()- 30000;
 
@@ -1917,7 +1917,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
 	                    limitHash,
 	                    dhtMaxContainerCount,
 	                    dhtMaxReferenceCount,
-	                    2000);
+	                    5000);
 	            hasDoneSomething = hasDoneSomething | enqueued;
 	            log.logInfo("dhtTransferJob: result from enqueueing: " + ((enqueued) ? "true" : "false"));
 	        } catch (IOException e) {
