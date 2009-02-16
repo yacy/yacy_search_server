@@ -199,7 +199,6 @@ public class IndexControlRWIs_p {
                 
                 // prepare index
                 indexContainer index;
-                String result;
                 final long starttime = System.currentTimeMillis();
                 index = sb.webIndex.getContainer(keyhash, null);
                 // built urlCache
@@ -226,14 +225,13 @@ public class IndexControlRWIs_p {
                 // transport to other peer
                 final String gzipBody = sb.getConfig("indexControl.gzipBody","false");
                 final int timeout = (int) sb.getConfigLong("indexControl.timeout",60000);
-                final HashMap<String, Object> resultObj = yacyClient.transferIndex(
+                final String error = yacyClient.transferIndex(
                              seed,
                              icc,
                              knownURLs,
                              "true".equalsIgnoreCase(gzipBody),
                              timeout);
-                result = (String) resultObj.get("result");
-                prop.put("result", (result == null) ? ("Successfully transferred " + knownURLs.size() + " words in " + ((System.currentTimeMillis() - starttime) / 1000) + " seconds, " + unknownURLEntries + " URL not found") : result);
+                prop.put("result", (error == null) ? ("Successfully transferred " + knownURLs.size() + " words in " + ((System.currentTimeMillis() - starttime) / 1000) + " seconds, " + unknownURLEntries + " URL not found") : "error: " + error);
                 index = null;
             }
     

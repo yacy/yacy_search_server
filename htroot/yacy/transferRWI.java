@@ -82,15 +82,14 @@ public final class transferRWI {
         byte[] indexes        = post.get("indexes", "").getBytes();       // the indexes, as list of word entries
         boolean granted       = sb.getConfig("allowReceiveIndex", "false").equals("true");
         final boolean blockBlacklist = sb.getConfig("indexReceiveBlockBlacklist", "false").equals("true");
-        final boolean checkLimit    = sb.getConfigBool("indexDistribution.transferRWIReceiptLimitEnabled", true);
-        final long cachelimit = sb.getConfigLong(plasmaSwitchboardConstants.INDEX_DIST_DHT_RECEIPT_LIMIT, 10000);
+        final long cachelimit = sb.getConfigLong(plasmaSwitchboardConstants.WORDCACHE_MAX_COUNT, 100000);
         final yacySeed otherPeer = sb.webIndex.seedDB.get(iam);
         final String otherPeerName = iam + ":" + ((otherPeer == null) ? "NULL" : (otherPeer.getName() + "/" + otherPeer.getVersion()));                
         
         // response values
-        String       result      = "ok";
+        int pause = 0;
+        String result = "ok";
         final StringBuilder unknownURLs = new StringBuilder();
-        int          pause       = 10000;
         
         if ((youare == null) || (!youare.equals(sb.webIndex.seedDB.mySeed().hash))) {
         	sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". Wrong target. Wanted peer=" + youare + ", iam=" + sb.webIndex.seedDB.mySeed().hash);
@@ -101,19 +100,13 @@ public final class transferRWI {
             sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". Not granted.");
             result = "not_granted";
             pause = 0;
-        } else if (checkLimit && sb.webIndex.indexCacheSize() > cachelimit) {
+        } else if (sb.webIndex.indexCacheSize() > cachelimit) {
             // we are too busy to receive indexes
             sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". We are too busy (buffersize=" + sb.webIndex.indexCacheSize() + ").");
             granted = false; // don't accept more words if there are too many words to flush
             result = "busy";
             pause = 60000;
-        } /* else if ((checkLimit && sb.wordIndex.dhtOutCacheSize() > sb.getConfigLong(plasmaSwitchboard.WORDCACHE_MAX_COUNT, 20000)) || ((sb.wordIndex.busyCacheFlush) && (!shortCacheFlush))) {
-            // we are too busy flushing the ramCache to receive indexes
-            sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". We are too busy (wordcachesize=" + sb.wordIndex.dhtOutCacheSize() + ").");
-            granted = false; // don't accept more words if there are too many words to flush
-            result = "busy";
-            pause = 300000;
-        } */ else {
+        } else {
             // we want and can receive indexes
             // log value status (currently added to find outOfMemory error
             if (sb.getLog().isFine()) sb.getLog().logFine("Processing " + indexes.length + " bytes / " + wordc + " words / " + entryc + " entries from " + otherPeerName);
@@ -186,7 +179,7 @@ public final class transferRWI {
 
             // finally compose the unknownURL hash list
             final Iterator<String> it = unknownURL.iterator();  
-            unknownURLs.ensureCapacity(unknownURL.size()*13);
+            unknownURLs.ensureCapacity(unknownURL.size() * 25);
             while (it.hasNext()) {
                 unknownURLs.append(",").append(it.next());
             }
@@ -200,9 +193,7 @@ public final class transferRWI {
             }
             result = "ok";
             
-            if (checkLimit) {
-                pause = (sb.webIndex.indexCacheSize() < 500) ? 0 : sb.webIndex.indexCacheSize(); // estimation of necessary pause time
-            }
+            pause = (int) (sb.webIndex.indexCacheSize() * 20000 / sb.getConfigLong(plasmaSwitchboardConstants.WORDCACHE_MAX_COUNT, 100000)); // estimation of necessary pause time
         }
 
         prop.put("unknownURL", unknownURLs.toString());

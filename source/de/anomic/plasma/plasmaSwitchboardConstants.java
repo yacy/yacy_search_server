@@ -214,12 +214,6 @@ public final class plasmaSwitchboardConstants {
      */
     public static final String RAM_CACHE_BLOG_TIME      = "ramCacheBlog_time";
     /**
-     * <p><code>public static final String <strong>INDEX_DIST_DHT_RECEIPT_LIMIT</strong> = "indexDistribution.dhtReceiptLimit"</code></p>
-     * <p>Name of the setting how many words the DHT-In cache may contain maximal before new DHT receipts
-     * will be rejected</p>
-     */
-    public static final String INDEX_DIST_DHT_RECEIPT_LIMIT     = "indexDistribution.dhtReceiptLimit";
-    /**
      * <p><code>public static final String <strong>INDEX_DIST_CHUNK_SIZE_START</strong> = "indexDistribution.startChunkSize"</code></p>
      * <p>Name of the setting specifying how many words the very first chunk will contain when the DHT-thread starts</p>
      */

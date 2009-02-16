@@ -724,16 +724,7 @@ indexTransfer.maxOpenFiles = 800
 indexDistribution.minChunkSize = 10
 indexDistribution.maxChunkSize = 1000
 indexDistribution.startChunkSize = 200
-
 indexDistribution.maxChunkFails = 1
-
-# defines if the peer should reject incoming index transfer
-# request if a given limit is reached
-indexDistribution.transferRWIReceiptLimitEnabled = true
-
-# defines the word cache for DHT reaches this level
-# the peer reports itself as busy
-indexDistribution.dhtReceiptLimit = 10000
 
 # Distribution of Citation-Reference (CR-) files
 # The distribution is done in two steps:

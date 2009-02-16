@@ -844,7 +844,17 @@ public final class yacyClient {
         }
     }
 
-    public static HashMap<String, Object> transferIndex(
+    /**
+     * transfer the index. If the transmission fails, return a string describing the cause.
+     * If everything is ok, return null.
+     * @param targetSeed
+     * @param indexes
+     * @param urlCache
+     * @param gzipBody
+     * @param timeout
+     * @return
+     */
+    public static String transferIndex(
             final yacySeed targetSeed,
             final indexContainerCache indexes,
             final HashMap<String, indexURLReference> urlCache,
@@ -873,32 +883,30 @@ public final class yacyClient {
             resultObj.put("resultTransferRWI", in);
             
             if (in == null) {
-                resultObj.put("result", "no_connection_1");
-                return resultObj;
-            }        
+                return "no connection from transferRWI";
+            }
+            
             if (in.containsKey("indexPayloadSize")) payloadSize += Integer.parseInt(in.get("indexPayloadSize"));
             
             String result = in.get("result");
-            if (result == null) { 
-                resultObj.put("result", "no_result_1"); 
-                return resultObj;
+            if (result == null) {
+                return "no result from transferRWI";
             }
+            
             if (!(result.equals("ok"))) {
-                targetSeed.setFlagAcceptRemoteIndex(false);
-                resultObj.put("result", result);
-                return resultObj;
+                return result;
             }
             
             // in now contains a list of unknown hashes
-            final String uhss = in.get("unknownURL");
+            String uhss = in.get("unknownURL");
             if (uhss == null) {
-                resultObj.put("result","no_unknownURL_tag_in_response");
-                return resultObj;
+                return "no unknownURL tag in response";
             }
-            if (uhss.length() == 0) { return resultObj; } // all url's known, we are ready here
+            uhss = uhss.trim();
+            if (uhss.length() == 0 || uhss.equals(",")) { return null; } // all url's known, we are ready here
             
             final String[] uhs = uhss.split(",");
-            if (uhs.length == 0) { return resultObj; } // all url's known
+            if (uhs.length == 0) { return null; } // all url's known
             
             // extract the urlCache from the result
             final indexURLReference[] urls = new indexURLReference[uhs.length];
@@ -913,25 +921,21 @@ public final class yacyClient {
             resultObj.put("resultTransferURL", in);
             
             if (in == null) {
-                resultObj.put("result","no_connection_2");
-                return resultObj;
+                return "no connection from transferURL";
             }
+            
             if (in.containsKey("urlPayloadSize")) payloadSize += Integer.parseInt(in.get("urlPayloadSize"));
             
             result = in.get("result");
             if (result == null) {
-                resultObj.put("result","no_result_2");
-                return resultObj;
+                return "no result from transferURL";
             }
-            if (!(result.equals("ok"))) {
-                targetSeed.setFlagAcceptRemoteIndex(false);
-                resultObj.put("result",result);
-                return resultObj;
-            }
-    //      int doubleentries = Integer.parseInt((String) in.get("double"));
-    //      System.out.println("DEBUG tansferIndex: transferred " + uhs.length + " URL's, double=" + doubleentries);
             
-            return resultObj;
+            if (!(result.equals("ok"))) {
+                return result;
+            }
+            
+            return null;
         } finally {
             resultObj.put("payloadSize", Integer.valueOf(payloadSize));
         }

@@ -196,12 +196,10 @@ public class Transmission  {
             }
             log.logInfo("starting new index transmission request to " + this.primaryTarget);
             long start = System.currentTimeMillis();
-            final HashMap<String, Object> ohm = yacyClient.transferIndex(target, this.containers, this.references, gzipBody4Transfer, timeout4Transfer);
-            final String result = (String) ohm.get("result");
-            if (result == null) {
+            final String error = yacyClient.transferIndex(target, this.containers, this.references, gzipBody4Transfer, timeout4Transfer);
+            if (error == null) {
                 // words successfully transfered
-                long transferTime = System.currentTimeMillis() - start;                
-                int payloadSize = ((Integer) ohm.get("payloadSize")).intValue();
+                long transferTime = System.currentTimeMillis() - start;
                 Iterator<indexContainer> i = this.containers.iterator();
                 indexContainer firstContainer = (i == null) ? null : i.next();
                 log.logInfo("Index transfer of " + this.containers.size() + 
@@ -210,7 +208,7 @@ public class Transmission  {
                                  " to peer " + target.getName() + ":" + target.hash + 
                                  " in " + (transferTime / 1000) + 
                                  " seconds successful ("  + (1000 * this.containers.size() / (transferTime + 1)) + 
-                                 " words/s, " + payloadSize + " Bytes)");
+                                 " words/s)");
                 
                 // if the peer has set a pause time and we are in flush mode (index transfer)
                 // then we pause for a while now
@@ -222,7 +220,7 @@ public class Transmission  {
             // write information that peer does not receive index transmissions
             target.setFlagAcceptRemoteIndex(false);
             seeds.update(target.hash, target);
-            log.logInfo("Transfer failed of chunk to target " + target.hash + "/" + target.getName());
+            log.logInfo("Transfer failed of chunk to target " + target.hash + "/" + target.getName() + ": " + error);
             return false;
         }
         
