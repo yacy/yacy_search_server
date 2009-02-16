@@ -320,6 +320,7 @@ public class EcoTable implements ObjectIndex {
             this.removeInFile(s.intValue());
             if (System.currentTimeMillis() - lastlog > 30000) {
                 Log.logInfo("EcoTable", "removing " + d.size() + " entries in " + this.filename());
+                lastlog = System.currentTimeMillis();
             }
         }
         assert file.size() == index.size() + fail : "file.size() = " + file.size() + ", index.size() = " + index.size();
