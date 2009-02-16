@@ -44,6 +44,7 @@ public interface indexRI {
     public boolean removeEntry(String wordHash, String urlHash) throws IOException;
     public int removeEntries(String wordHash, Set<String> urlHashes) throws IOException;
     public void addEntries(indexContainer newEntries) throws IOException;
+    public int sizeEntry(final String key);
     public void clear() throws IOException;
     public void close();
 

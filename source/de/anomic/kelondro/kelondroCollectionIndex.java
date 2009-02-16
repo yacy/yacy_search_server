@@ -263,7 +263,7 @@ public class kelondroCollectionIndex {
         Row.Entry maxentry;
         int doublecount = 0;
         ArrayList<RowCollection> doubles = index.removeDoubles();
-        if (doubles.size() > 0) Log.logWarning("COLLECTION INDEX STARTUP", "found " + doubles + " doubles in collections, removing them in arrays");
+        if (doubles.size() > 0) Log.logWarning("COLLECTION INDEX STARTUP", "found " + doubles.size() + " doubles in collections, removing them in arrays");
         for (final RowCollection doubleset: doubles) {
             // for each entry in doubleset choose one which we want to keep
             maxentry = null;

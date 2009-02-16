@@ -96,8 +96,10 @@ public class EcoTable implements ObjectIndex {
         this.taildef = new Row(cols, NaturalOrder.naturalOrder, -1);
         
         // initialize table file
+        boolean freshFile = false;
         if (!tablefile.exists()) {
             // make new file
+            freshFile = true;
             FileOutputStream fos = null;
             try {
                 fos = new FileOutputStream(tablefile);
@@ -167,43 +169,40 @@ public class EcoTable implements ObjectIndex {
                 }
             }
             
-            // check consistency
-            //System.out.print(" -ordering- ..");
-            //System.out.flush();
+            // open the file
             this.file = new BufferedEcoFS(new EcoFS(tablefile, rowdef.objectsize), this.buffersize);
-            final ArrayList<Integer[]> doubles = index.removeDoubles();
-            //assert index.size() + doubles.size() + fail == i;
-            //System.out.println(" -removed " + doubles.size() + " doubles- done.");
-            if (doubles.size() > 0) {
-                Log.logInfo("ECOTABLE", tablefile + ": WARNING - EcoTable " + tablefile + " has " + doubles.size() + " doubles");
-                // from all the doubles take one, put it back to the index and remove the others from the file
-                // first put back one element each
-                final byte[] record = new byte[rowdef.objectsize];
-                key = new byte[rowdef.primaryKeyLength];
-                for (final Integer[] ds: doubles) {
-                    file.get(ds[0].intValue(), record, 0);
-                    System.arraycopy(record, 0, key, 0, rowdef.primaryKeyLength);
-                    index.addi(key, ds[0].intValue());
-                }
-                // then remove the other doubles by removing them from the table, but do a re-indexing while doing that
-                // first aggregate all the delete positions because the elements from the top positions must be removed first
-                final TreeSet<Integer> delpos = new TreeSet<Integer>();
-                for (final Integer[] ds: doubles) {
-                    for (int j = 1; j < ds.length; j++) delpos.add(ds[j]);
-                }
-                // now remove the entries in a sorted way (top-down)
-                Integer top;
-                while (delpos.size() > 0) {
-                    top = delpos.last();
-                    delpos.remove(top);
-                    removeInFile(top.intValue());
+ 
+            // remove doubles
+            if (!freshFile) {
+                final ArrayList<Integer[]> doubles = index.removeDoubles();
+                //assert index.size() + doubles.size() + fail == i;
+                //System.out.println(" -removed " + doubles.size() + " doubles- done.");
+                if (doubles.size() > 0) {
+                    Log.logInfo("ECOTABLE", tablefile + ": WARNING - EcoTable " + tablefile + " has " + doubles.size() + " doubles");
+                    // from all the doubles take one, put it back to the index and remove the others from the file
+                    // first put back one element each
+                    final byte[] record = new byte[rowdef.objectsize];
+                    key = new byte[rowdef.primaryKeyLength];
+                    for (final Integer[] ds: doubles) {
+                        file.get(ds[0].intValue(), record, 0);
+                        System.arraycopy(record, 0, key, 0, rowdef.primaryKeyLength);
+                        index.addi(key, ds[0].intValue());
+                    }
+                    // then remove the other doubles by removing them from the table, but do a re-indexing while doing that
+                    // first aggregate all the delete positions because the elements from the top positions must be removed first
+                    final TreeSet<Integer> delpos = new TreeSet<Integer>();
+                    for (final Integer[] ds: doubles) {
+                        for (int j = 1; j < ds.length; j++) delpos.add(ds[j]);
+                    }
+                    // now remove the entries in a sorted way (top-down)
+                    Integer top;
+                    while (delpos.size() > 0) {
+                        top = delpos.last();
+                        delpos.remove(top);
+                        removeInFile(top.intValue());
+                    }
                 }
             }
-            /* try {
-                assert file.size() == index.size() + doubles.size() + fail : "file.size() = " + file.size() + ", index.size() = " + index.size() + ", doubles.size() = " + doubles.size() + ", fail = " + fail + ", i = " + i;
-            } catch (IOException e) {
-                e.printStackTrace();
-            }*/
         } catch (final FileNotFoundException e) {
             // should never happen
             e.printStackTrace();
@@ -297,6 +296,7 @@ public class EcoTable implements ObjectIndex {
         Integer L;
         Row.Entry inconsistentEntry;
         // iterate over all entries that have inconsistent index references
+        long lastlog = System.currentTimeMillis();
         for (final Integer[] is: index.removeDoubles()) {
             // 'is' is the set of all indexes, that have the same reference
             // we collect that entries now here
@@ -318,6 +318,9 @@ public class EcoTable implements ObjectIndex {
             s = d.last();
             d.remove(s);
             this.removeInFile(s.intValue());
+            if (System.currentTimeMillis() - lastlog > 30000) {
+                Log.logInfo("EcoTable", "removing " + d.size() + " entries in " + this.filename());
+            }
         }
         assert file.size() == index.size() + fail : "file.size() = " + file.size() + ", index.size() = " + index.size();
         return report;
