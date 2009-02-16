@@ -49,7 +49,7 @@ public class RAMIndex implements ObjectIndex {
 		reset(0);
 	}
     
-	public void reset(final int initialspace) {
+	public synchronized void reset(final int initialspace) {
 	    this.index0 = null; // first flush RAM to make room
 		this.index0 = new RowSet(rowdef, initialspace);
         this.index1 = null; // to show that this is the initialization phase
@@ -77,7 +77,7 @@ public class RAMIndex implements ObjectIndex {
         return index1.get(key);
     }
 
-	public boolean has(final byte[] key) {
+	public synchronized boolean has(final byte[] key) {
 		assert (key != null);
         finishInitialization();
         assert index0.isSorted();

@@ -44,7 +44,7 @@ public final class ScoreCluster<E> {
         encnt = 0;
     }
     
-    public void clear() {
+    public synchronized void clear() {
         refkeyDB.clear();
         keyrefDB.clear();
         gcount = 0;

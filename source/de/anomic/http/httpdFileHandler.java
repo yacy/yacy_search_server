@@ -77,7 +77,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.zip.GZIPOutputStream;
 
@@ -608,9 +607,8 @@ public final class httpdFileHandler {
                 }
 
                 // add values from request header to environment (see: http://hoohoo.ncsa.uiuc.edu/cgi/env.html#headers)
-                Set<String> requestHeaderKeys = requestHeader.keySet();
-                for (String requestHeaderKey : requestHeaderKeys) {
-                    env.put("HTTP_" + requestHeaderKey.toUpperCase().replace("-", "_"), requestHeader.get(requestHeaderKey));
+                for (Map.Entry<String, String> requestHeaderEntry : requestHeader.entrySet()) {
+                    env.put("HTTP_" + requestHeaderEntry.getKey().toUpperCase().replace("-", "_"), requestHeaderEntry.getValue());
                 }
 
                 int exitValue = 0;

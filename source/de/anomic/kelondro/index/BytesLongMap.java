@@ -81,6 +81,7 @@ public class BytesLongMap {
             if (c <= 0) break;
             this.index.addUnique(this.rowdef.newEntry(a));
         }
+        is.close();
         assert this.index.size() == file.length() / (keylength + 8);
     }
 
