@@ -32,6 +32,7 @@ package de.anomic.kelondro;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -142,7 +143,7 @@ public class kelondroCollectionIndex {
             FlexTable.delete(path, filenameStub + ".index");
         }
         if (f.exists()) {
-            Log.logFine("STARTUP", "OPENING COLLECTION INDEX");
+            Log.logFine("COLLECTION INDEX STARTUP", "OPENING COLLECTION INDEX");
             
             // open index and array files
             this.arrays = new HashMap<String, FixedWidthArray>(); // all entries will be dynamically created with getArray()
@@ -168,7 +169,7 @@ public class kelondroCollectionIndex {
                     continue;
                 }
             }
-            Log.logFine("STARTUP", "STARTED INITIALIZATION OF NEW COLLECTION INDEX WITH " + initialSpace + " ENTRIES.  THIS WILL TAKE SOME TIME. " + (MemoryControl.available() / 1024 / 1024) + "MB AVAILABLE.");
+            Log.logFine("COLLECTION INDEX STARTUP", "STARTED INITIALIZATION OF NEW COLLECTION INDEX WITH " + initialSpace + " ENTRIES.  THIS WILL TAKE SOME TIME. " + (MemoryControl.available() / 1024 / 1024) + "MB AVAILABLE.");
             final Row indexRowdef = indexRow(keyLength, indexOrder);
             final long necessaryRAM4fullTable = minimumRAM4Eco + (indexRowdef.objectsize + 4) * initialSpace * 3 / 2;
             
@@ -178,6 +179,7 @@ public class kelondroCollectionIndex {
             // open array files
             this.arrays = new HashMap<String, FixedWidthArray>(); // all entries will be dynamically created with getArray()
             openAllArrayFiles(true, indexOrder);
+            Log.logFine("COLLECTION INDEX STARTUP", "FINISHED INITIALIZATION OF NEW COLLECTION INDEX.");            
         }
     }
     
@@ -227,15 +229,19 @@ public class kelondroCollectionIndex {
                 final long start = System.currentTimeMillis();
                 long lastlog = start;
                 int count = 0;
+                int chunkcount;
                 while (ei.hasNext()) {
                     aentry = ei.next();
                     key = aentry.getColBytes(0);
                     assert (key != null);
                     if (key == null) continue; // skip deleted entries
+                    chunkcount = RowCollection.sizeOfExportedCollectionRows(aentry, 1);
+                    assert chunkcount > 0;
+                    if (chunkcount == 0) continue;
                     ientry = irow.newEntry();
                     ientry.setCol(idx_col_key,        key);
                     ientry.setCol(idx_col_chunksize,  chunksize);
-                    ientry.setCol(idx_col_chunkcount, RowCollection.sizeOfExportedCollectionRows(aentry, 1));
+                    ientry.setCol(idx_col_chunkcount, chunkcount);
                     ientry.setCol(idx_col_clusteridx, (byte) partitionNumber);
                     ientry.setCol(idx_col_flags,      (byte) 0);
                     ientry.setCol(idx_col_indexpos,   aentry.index());
@@ -246,7 +252,7 @@ public class kelondroCollectionIndex {
                     
                     // write a log
                     if (System.currentTimeMillis() - lastlog > 30000) {
-                        Log.logFine("STARTUP", "created " + count + " RWI index entries. " + (((System.currentTimeMillis() - start) * (array.size() + array.free() - count) / count) / 60000) + " minutes remaining for this array");
+                        Log.logFine("COLLECTION INDEX STARTUP", "created " + count + " RWI index entries. " + (((System.currentTimeMillis() - start) * (array.size() + array.free() - count) / count) / 60000) + " minutes remaining for this array");
                         lastlog = System.currentTimeMillis();
                     }
                 }
@@ -256,7 +262,9 @@ public class kelondroCollectionIndex {
         int partition, maxpartition;
         Row.Entry maxentry;
         int doublecount = 0;
-        for (final RowCollection doubleset: index.removeDoubles()) {
+        ArrayList<RowCollection> doubles = index.removeDoubles();
+        if (doubles.size() > 0) Log.logWarning("COLLECTION INDEX STARTUP", "found " + doubles + " doubles in collections, removing them in arrays");
+        for (final RowCollection doubleset: doubles) {
             // for each entry in doubleset choose one which we want to keep
             maxentry = null;
             maxpartition = -1;

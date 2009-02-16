@@ -129,6 +129,7 @@ public class RAMIndex implements ObjectIndex {
 	public synchronized ArrayList<RowCollection> removeDoubles() {
 	    // finish initialization phase explicitely
 	    if (index1 == null) index1 = new RowSet(rowdef, 0);
+	    index0.sort();
 	    return index0.removeDoubles();
 	}
 	

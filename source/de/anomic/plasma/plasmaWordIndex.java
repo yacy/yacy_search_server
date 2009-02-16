@@ -596,6 +596,7 @@ public final class plasmaWordIndex implements indexRI {
         
         // check doubles
         final int beforeDouble = container.size();
+        container.sort();
         final ArrayList<RowCollection> d = container.removeDoubles();
         RowCollection set;
         for (int i = 0; i < d.size(); i++) {
