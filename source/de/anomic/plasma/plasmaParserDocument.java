@@ -335,6 +335,7 @@ dc_rights
     }
     
     private synchronized void resortLinks() {
+        if (this.resorted) return;
         
         // extract hyperlinks, medialinks and emaillinks from anchorlinks
         yacyURL url;

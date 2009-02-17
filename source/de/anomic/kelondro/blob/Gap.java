@@ -68,7 +68,7 @@ public class Gap extends TreeMap<Long, Integer> {
             try {
                 p = is.readLong();
                 l = is.readInt();
-                this.put(new Long(p), new Integer(l));
+                this.put(Long.valueOf(p), Integer.valueOf(l));
             } catch (IOException e) {
                 break;
             }

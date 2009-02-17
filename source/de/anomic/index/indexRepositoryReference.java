@@ -574,7 +574,7 @@ public final class indexRepositoryReference {
         return (statsDump == null) ? new ArrayList<hostStat>().iterator() : statsDump.iterator();
     }
     
-    public class hashStat {
+    private static class hashStat {
         public String urlhash;
         public int count;
         public hashStat(String urlhash) {
@@ -583,7 +583,7 @@ public final class indexRepositoryReference {
         }
     }
     
-    public class hostStat {
+    public static class hostStat {
         public String hostname, hosthash;
         public int port;
         public int count;

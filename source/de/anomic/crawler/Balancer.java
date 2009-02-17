@@ -234,17 +234,17 @@ public class Balancer {
        return removedCounter;
     }
     
-    public boolean has(final String urlhash) {
+    public synchronized boolean has(final String urlhash) {
         return urlFileIndex.has(urlhash.getBytes());
     }
     
-    public boolean notEmpty() {
+    public synchronized boolean notEmpty() {
         // alternative method to the property size() > 0
         // this is better because it may avoid synchronized access to domain stack summarization
         return urlRAMStack.size() > 0 || urlFileStack.size() > 0 || domainStacksNotEmpty();
     }
     
-    public int size() {
+    public synchronized int size() {
         final int componentsize = urlFileIndex.size();
         /*
         assert componentsize == urlFileStack.size() + urlRAMStack.size() + sizeDomainStacks() :

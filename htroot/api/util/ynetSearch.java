@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Scanner;
 
 import de.anomic.http.httpRequestHeader;
@@ -35,12 +36,12 @@ public class ynetSearch {
     			    }
     			    post.remove("url");
     			    post.remove("login");
-    			    final Iterator <String> it = post.keySet().iterator();
+    			    final Iterator <Map.Entry<String, String>> it = post.entrySet().iterator();
     			    String s = searchaddress;
-    			    String k = "";
+    			    Map.Entry<String, String> k;
     			    while(it.hasNext()) {
     			    	k = it.next();
-    			    	s = s + "&"+k+"="+post.get(k);    			    	
+    			    	s = s + "&" + k.getKey() + "=" + k.getValue();    			    	
     			    }
     				// final String s = searchaddress+"&search="+post.get("search")+"&maximumRecords="+post.get("maximumRecords")+"&startRecord="+post.get("startRecord");    				   				
     				final URL url = new URL(s);     				

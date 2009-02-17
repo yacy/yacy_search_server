@@ -177,12 +177,12 @@ public class htmlFilterCharacterCoding {
     static {
         Character c;
         for (int i = 0; i < mapping4html.length; i += 2) {
-            c = new Character(mapping4html[i].charAt(0));
+            c = Character.valueOf(mapping4html[i].charAt(0));
             html2unicode4html.put(mapping4html[i + 1], c);
             unicode2html4html.put(c, mapping4html[i + 1]);
         }
         for (int i = 0; i < mapping4xml.length; i += 2) {
-            c = new Character(mapping4xml[i].charAt(0));
+            c = Character.valueOf(mapping4xml[i].charAt(0));
             html2unicode4xml.put(mapping4xml[i + 1], c);
             unicode2html4xml.put(c, mapping4xml[i + 1]);
         }

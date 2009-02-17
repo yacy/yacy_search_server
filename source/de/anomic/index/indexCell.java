@@ -202,7 +202,7 @@ public final class indexCell implements indexRI {
                 true);
     }
 
-    public class RemoveRewriter implements indexContainerBLOBArray.ContainerRewriter {
+    private static class RemoveRewriter implements indexContainerBLOBArray.ContainerRewriter {
         
         Set<String> urlHashes;
         

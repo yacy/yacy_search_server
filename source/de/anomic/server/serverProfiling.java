@@ -71,10 +71,10 @@ public class serverProfiling extends Thread {
     	// get event history container
         Long lastAcc = eventAccess.get(eventName);
         if (lastAcc == null) {
-            eventAccess.put(eventName, new Long(System.currentTimeMillis()));
+            eventAccess.put(eventName, Long.valueOf(System.currentTimeMillis()));
         } else {
             if (System.currentTimeMillis() - lastAcc.longValue() > 1000) {
-                eventAccess.put(eventName, new Long(System.currentTimeMillis()));
+                eventAccess.put(eventName, Long.valueOf(System.currentTimeMillis()));
             } else {
                 return; // protect against too heavy load
             }

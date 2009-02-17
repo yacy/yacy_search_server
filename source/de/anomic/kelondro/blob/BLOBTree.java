@@ -152,7 +152,7 @@ public class BLOBTree implements BLOB {
         }
     }
     
-    public void clear() throws IOException {
+    public synchronized void clear() throws IOException {
     	final String name = this.index.filename();
     	this.index.clear();
     	this.buffer = new ObjectBuffer(name);

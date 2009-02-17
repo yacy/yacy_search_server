@@ -161,8 +161,8 @@ public class diskUsage {
                 for (int i = 0; i < yacyUsedVolumes.size(); i++){
                     if (yacyUsedVolumes.get(i).equals(tokens[0])) {
                         final long[] vals = new long[2];
-                        try { vals[0] = new Long(tokens[1]); } catch (final NumberFormatException e) { continue nextLine; }
-                        try { vals[1] = new Long(tokens[3]); } catch (final NumberFormatException e) { continue nextLine; }
+                        try { vals[0] = Long.valueOf(tokens[1]); } catch (final NumberFormatException e) { continue nextLine; }
+                        try { vals[1] = Long.valueOf(tokens[3]); } catch (final NumberFormatException e) { continue nextLine; }
                         vals[0] *= 1024;
                         vals[1] *= 1024;
                         diskUsages.put(yacyUsedMountPoints.get(i), vals);
@@ -331,7 +331,7 @@ public class diskUsage {
                 final String[] tokens = line.trim().split(" ++");
                 final long[] vals = new long[2];
                 vals[0] = -1;
-                try { vals[1] = new Long(tokens[2].replaceAll("[.,]", "")); } catch (final NumberFormatException e) {continue;}
+                try { vals[1] = Long.valueOf(tokens[2].replaceAll("[.,]", "")); } catch (final NumberFormatException e) {continue;}
                 diskUsages.put (yacyUsedVolumes.get(i), vals);
             } catch (final IOException e) {
                 usageError = "dfWindows: " + e.getMessage();

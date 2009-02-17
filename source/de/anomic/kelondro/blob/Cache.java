@@ -203,7 +203,7 @@ public class Cache implements ObjectIndex {
         readMissCache = null;
     }
 
-    public boolean has(final byte[] key) {
+    public synchronized boolean has(final byte[] key) {
         // first look into the miss cache
         if (readMissCache != null) {
             if (readMissCache.get(key) == null) {

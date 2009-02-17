@@ -61,8 +61,12 @@ public class RobotsTxt {
     
     MapView robotsTable;
     private final File robotsTableFile;
-    private final ConcurrentHashMap<String, Long> syncObjects;
+    private final ConcurrentHashMap<String, DomSync> syncObjects;
     //private static final HashSet<String> loadedRobots = new HashSet<String>(); // only for debugging
+    
+    private static class DomSync {
+    	public DomSync() {}
+    }
     
     public RobotsTxt(final File robotsTableFile) {
         this.robotsTableFile = robotsTableFile;
@@ -74,7 +78,7 @@ public class RobotsTxt {
             e.printStackTrace();
         }
         robotsTable = new MapView(blob, 100);
-        syncObjects = new ConcurrentHashMap<String, Long>();
+        syncObjects = new ConcurrentHashMap<String, DomSync>();
     }
     
     private void resetDatabase() {
@@ -123,9 +127,9 @@ public class RobotsTxt {
            )) {
             
             // make or get a synchronization object
-            Long syncObj = this.syncObjects.get(urlHostPort);
+        	DomSync syncObj = this.syncObjects.get(urlHostPort);
             if (syncObj == null) {
-                syncObj = new Long(System.currentTimeMillis());
+                syncObj = new DomSync();
                 this.syncObjects.put(urlHostPort, syncObj);
             }
             

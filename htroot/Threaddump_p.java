@@ -159,9 +159,9 @@ public class Threaddump_p {
             for (final Entry<String, ArrayList<String>> e: x.entrySet()) {
                 Integer c = result.get(e.getKey());
                 count = e.getValue().size();
-                if (c == null) result.put(e.getKey(), new Integer(count));
+                if (c == null) result.put(e.getKey(), Integer.valueOf(count));
                 else {
-                    c = new Integer(c.intValue() + count);
+                    c = Integer.valueOf(c.intValue() + count);
                     result.put(e.getKey(), c);
                 }
             }

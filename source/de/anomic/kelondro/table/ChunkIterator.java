@@ -214,7 +214,7 @@ public class ChunkIterator implements Iterator<byte[]> {
                 e.printStackTrace();
             }
             
-            return new Integer(0);
+            return Integer.valueOf(0);
         }
         
     }
@@ -290,7 +290,7 @@ public class ChunkIterator implements Iterator<byte[]> {
                 e.printStackTrace();
                 throw new RuntimeException(e.getMessage());
             }
-            return new Integer(0);
+            return Integer.valueOf(0);
         }
         
     }

@@ -169,7 +169,7 @@ public class mediawikiIndex {
             entries.clear();
             out.println("</index>");
             out.close();
-            return new Integer(count);
+            return Integer.valueOf(count);
         }
         
     }
@@ -216,7 +216,7 @@ public class mediawikiIndex {
                 e.printStackTrace();
             }
             entries.clear();
-            return new Integer(count);
+            return Integer.valueOf(count);
         }
         
     }

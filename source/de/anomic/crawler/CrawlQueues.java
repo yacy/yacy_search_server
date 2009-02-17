@@ -248,7 +248,7 @@ public class CrawlQueues {
     }
 
     /**
-     * if crawling was paused we have to wait until we wer notified to continue
+     * if crawling was paused we have to wait until we were notified to continue
      * blocks until pause is ended
      * @param crawljob
      * @return

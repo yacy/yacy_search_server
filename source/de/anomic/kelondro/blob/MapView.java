@@ -95,7 +95,7 @@ public class MapView {
      * clears the content of the database
      * @throws IOException
      */
-    public void clear() throws IOException {
+    public synchronized void clear() throws IOException {
     	this.blob.clear();
         this.cache = new HashMap<String, Map<String, String>>();
         this.cacheScore = new ScoreCluster<String>();
@@ -180,7 +180,7 @@ public class MapView {
      * @return
      * @throws IOException
      */
-    public boolean has(String key) throws IOException {
+    public synchronized boolean has(String key) throws IOException {
         assert key != null;
         if (cache == null) return false; // case may appear during shutdown
         while (key.length() < blob.keylength()) key += "_";

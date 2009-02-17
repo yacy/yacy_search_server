@@ -71,7 +71,7 @@ public class dbtest {
         public boolean isValid() {
             final String s = new String(this.value).trim();
             if (s.length() == 0) return false;
-            final long source = new Long(s).longValue();
+            final long source = Long.valueOf(s).longValue();
             return new String(this.key).equals(new String(randomHash(source, source)));
         }
 

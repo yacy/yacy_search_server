@@ -239,7 +239,7 @@ public class BLOBCompressor extends Thread implements BLOB {
         if (rx > 0) this.bufferlength -= rx;
     }
 
-    public int size() {
+    public synchronized int size() {
         return this.backend.size() + this.buffer.size();
     }
     

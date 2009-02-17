@@ -122,6 +122,7 @@ public class yacyNewsDB {
         }
 
         public void remove() {
+            throw new UnsupportedOperationException();
         }
 
     }

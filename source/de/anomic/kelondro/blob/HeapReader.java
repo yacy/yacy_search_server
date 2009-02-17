@@ -44,12 +44,12 @@ import de.anomic.kelondro.util.Log;
 
 public class HeapReader {
 
-    protected int                     keylength;  // the length of the primary key
-    protected BytesLongMap    index;      // key/seek relation for used records
-    protected Gap         free;       // set of {seek, size} pairs denoting space and position of free records
-    protected final File              heapFile;   // the file of the heap
-    protected final ByteOrder ordering;   // the ordering on keys
-    protected CachedRandomAccess    file;       // a random access to the file
+    protected int                keylength;  // the length of the primary key
+    protected BytesLongMap       index;      // key/seek relation for used records
+    protected Gap                free;       // set of {seek, size} pairs denoting space and position of free records
+    protected final File         heapFile;   // the file of the heap
+    protected final ByteOrder    ordering;   // the ordering on keys
+    protected CachedRandomAccess file;       // a random access to the file
     
     public HeapReader(
             final File heapFile,
@@ -266,7 +266,7 @@ public class HeapReader {
      * @return the size of the BLOB or -1 if the BLOB does not exist
      * @throws IOException
      */
-    public long length(byte[] key) throws IOException {
+    public synchronized long length(byte[] key) throws IOException {
         assert index.row().primaryKeyLength == key.length : index.row().primaryKeyLength + "!=" + key.length;
         
         // check if the index contains the key
