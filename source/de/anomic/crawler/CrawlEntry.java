@@ -132,6 +132,7 @@ public class CrawlEntry extends serverProcessorJob {
         assert url != null;
         assert initiator != null;
         assert profileHandle == null || profileHandle.length() == yacySeedDB.commonHashLength : profileHandle + " != " + yacySeedDB.commonHashLength;
+        url.removeRef(); // remove anchor reference
         this.initiator     = initiator;
         this.url           = url;
         this.refhash       = (referrerhash == null) ? "" : referrerhash;

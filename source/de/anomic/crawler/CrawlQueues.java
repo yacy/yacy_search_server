@@ -508,7 +508,7 @@ public class CrawlQueues {
     
     protected final class crawlWorker extends Thread {
         
-        public CrawlEntry entry;
+        private CrawlEntry entry;
         private final Integer code;
         
         public crawlWorker(final CrawlEntry entry) {

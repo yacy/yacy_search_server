@@ -526,6 +526,10 @@ public class yacyURL implements Serializable {
         return ref;
     }
 
+    public void removeRef() {
+    	ref = null;
+    }
+    
     public String getUserInfo() {
         return userInfo;
     }
@@ -680,7 +684,7 @@ public class yacyURL implements Serializable {
         // the url hash computation needs a DNS lookup to check if the addresses domain is local
         // that causes that this method may be very slow
         
-        assert this.hash == null; // should only be called if the hash was not computed bevore
+        assert this.hash == null; // should only be called if the hash was not computed before
 
         final int id = serverDomains.getDomainID(this.host); // id=7: tld is local
         final boolean isHTTP = this.protocol.equals("http");
@@ -894,6 +898,7 @@ public class yacyURL implements Serializable {
             environment = test[i][0];
             url = test[i][1];
             try {aURL = yacyURL.newURL(environment, url);} catch (final MalformedURLException e) {aURL = null;}
+            if (aURL != null) System.out.println("normalized: " + aURL.toNormalform(true, true));
             if (environment == null) {
                 try {jURL = new java.net.URL(url);} catch (final MalformedURLException e) {jURL = null;}
             } else {
