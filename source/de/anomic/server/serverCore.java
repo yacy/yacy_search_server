@@ -135,46 +135,41 @@ public final class serverCore extends serverAbstractBusyThread implements server
     int commandMaxLength;
     private int maxBusySessions;
     final ConcurrentHashMap<Session, Object> busySessions;
+    private long lastAutoTermination;
     
-    /*
-    private static ServerSocketFactory getServerSocketFactory(boolean dflt, File keyfile, String passphrase) {
-        // see doc's at
-        // http://java.sun.com/developer/technicalArticles/Security/secureinternet/
-        if (dflt) {
-            return ServerSocketFactory.getDefault();
-        } else {
-	    SSLServerSocketFactory ssf = null;
-	    try {
-		// set up key manager to do server authentication
-		SSLContext ctx;
-		KeyManagerFactory kmf;
-		KeyStore ks;
-		char[] pp = passphrase.toCharArray();
-
-                // open keystore
-		ks = KeyStore.getInstance("JKS");
-		ks.load(new FileInputStream(keyfile), pp);
+    public final void terminateOldSessions(long minage) {
+        if (System.currentTimeMillis() - lastAutoTermination < 30000) return;
+        this.lastAutoTermination = System.currentTimeMillis();
+        
+        int threadCount = serverCore.sessionThreadGroup.activeCount();    
+        final Thread[] threadList = new Thread[this.getJobCount()];     
+        threadCount = serverCore.sessionThreadGroup.enumerate(threadList);
+        for ( int currentThreadIdx = 0; currentThreadIdx < threadCount; currentThreadIdx++ )  {                        
+            final Thread currentThread = threadList[currentThreadIdx];
+            if (
+                    (currentThread != null) && 
+                    (currentThread instanceof Session) && 
+                    (currentThread.isAlive()) &&
+                    (((Session) currentThread).getTime() > minage) 
+            ) {
+                log.logInfo("check for " + currentThread.getName() + ": " + ((Session) currentThread).getTime() + " ms alive, stopping thread");
+                // trying to stop session
+                ((Session)currentThread).setStopped(true);
+                try { Thread.sleep(100); } catch (final InterruptedException ex) {}
                 
-                // get a KeyManager Factory
-                String algorithm = KeyManagerFactory.getDefaultAlgorithm(); // should be "SunX509"
-                kmf = KeyManagerFactory.getInstance(algorithm);
-                kmf.init(ks, pp);
+                // trying to interrupt session
+                if (currentThread.isAlive()) {
+                    currentThread.interrupt();
+                    try { Thread.sleep(10); } catch (final InterruptedException ex) {}
+                } 
                 
-                // create a ssl context with the keyManager Factory
-                //ctx = SSLContext.getInstance("TLS");
-                ctx = SSLContext.getInstance("SSLv3");
-                
-		ctx.init(kmf.getKeyManagers(), null, null);
-
-		ssf = ctx.getServerSocketFactory();
-		return ssf;
-	    } catch (Exception e) {
-		e.printStackTrace();
-                return null;
-	    }
-	}
+                // trying to close socket
+                if (currentThread.isAlive()) {
+                    ((Session)currentThread).close();
+                }
+            }
+        }
     }
-    */
     
     public static String clientAddress(final Socket s) {
         final InetAddress uAddr = s.getInetAddress();
@@ -212,6 +207,8 @@ public final class serverCore extends serverAbstractBusyThread implements server
         // init session parameter
         maxBusySessions = Math.max(1, Integer.valueOf(switchboard.getConfig("httpdMaxBusySessions","100")).intValue());
         busySessions = new ConcurrentHashMap<Session, Object>();
+        
+        this.lastAutoTermination = System.currentTimeMillis();
         
         // init servercore
         init();
@@ -485,6 +482,9 @@ public final class serverCore extends serverAbstractBusyThread implements server
             this.controlSocket = controlSocket;
             this.hashIndex = sessionCounter;
             sessionCounter++;
+
+            // close old sessions
+            terminateOldSessions(60000);
             
             if (!this.runningsession)  {
                // this.setDaemon(true);
