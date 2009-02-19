@@ -36,7 +36,7 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import de.anomic.crawler.HTTPLoader;
-import de.anomic.http.HttpClient;
+import de.anomic.http.httpClient;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -145,7 +145,7 @@ public class Network {
                 prop.put("table_my-url", seed.get(yacySeed.SEEDLIST, ""));
                 
                 // generating the location string
-                prop.putHTML("table_my-location", HttpClient.generateLocation());
+                prop.putHTML("table_my-location", httpClient.generateLocation());
             }
 
             // overall results: Network statistics
@@ -348,7 +348,7 @@ public class Network {
                             userAgent = null;
                             if (seed.hash != null && seed.hash.equals(sb.webIndex.seedDB.mySeed().hash)) {
                                 userAgent = HTTPLoader.yacyUserAgent;
-                                location = HttpClient.generateLocation();
+                                location = httpClient.generateLocation();
                             } else {
                                userAgent = sb.webIndex.seedDB.peerActions.getUserAgent(seed.getIP());
                                location = parseLocationInUserAgent(userAgent);

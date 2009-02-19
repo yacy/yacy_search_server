@@ -131,8 +131,7 @@ import de.anomic.data.messageBoard;
 import de.anomic.data.userDB;
 import de.anomic.data.wikiBoard;
 import de.anomic.data.wiki.wikiParser;
-import de.anomic.http.HttpClient;
-import de.anomic.http.JakartaCommonsHttpClient;
+import de.anomic.http.httpClient;
 import de.anomic.http.httpRemoteProxyConfig;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpResponseHeader;
@@ -1089,7 +1088,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         indexingStorageProcessor.awaitShutdown(12000);
         crawlStacker.close();
         this.dbImportManager.close();
-        JakartaCommonsHttpClient.closeAllConnections();
+        httpClient.closeAllConnections();
         wikiDB.close();
         blogDB.close();
         blogCommentDB.close();
@@ -1306,10 +1305,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             } catch (final IOException e) {};
             
             // close unused connections
-            JakartaCommonsHttpClient.cleanup();
-
-            // clean up too old connection information
-            super.cleanupAccessTracker(1000 * 60 * 60);
+            httpClient.cleanup();
             
             // do transmission of CR-files
             checkInterruption();
@@ -2046,7 +2042,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
                     
                     url = new yacyURL(seedListFileURL, null);
                     final long start = System.currentTimeMillis();
-                    header = HttpClient.whead(url.toString(), reqHeader); 
+                    header = httpClient.whead(url.toString(), reqHeader); 
                     final long loadtime = System.currentTimeMillis() - start;
                     if (header == null) {
                         if (loadtime > getConfigLong("bootstrapLoadTimeout", 6000)) {
@@ -2060,7 +2056,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
                         yacyCore.log.logInfo("BOOTSTRAP: seed-list URL " + seedListFileURL + " too old (" + (header.age() / 86400000) + " days)");
                     } else {
                         ssc++;
-                        final byte[] content = HttpClient.wget(url.toString(), reqHeader, (int) getConfigLong("bootstrapLoadTimeout", 20000));
+                        final byte[] content = httpClient.wget(url.toString(), reqHeader, (int) getConfigLong("bootstrapLoadTimeout", 20000));
                         seedList = FileUtils.strings(content, "UTF-8");
                         enu = seedList.iterator();
                         lc = 0;
@@ -2128,7 +2124,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             // sending request
             final httpRequestHeader reqHeader = new httpRequestHeader();
             reqHeader.put(httpRequestHeader.USER_AGENT, HTTPLoader.yacyUserAgent);
-            final HashMap<String, String> result = FileUtils.table(HttpClient.wget(url.toString(), reqHeader, 10000), "UTF-8");
+            final HashMap<String, String> result = FileUtils.table(httpClient.wget(url.toString(), reqHeader, 10000), "UTF-8");
             if (result == null) return new HashMap<String, String>();
             return result;
         } catch (final Exception e) {

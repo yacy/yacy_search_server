@@ -43,7 +43,7 @@ import com.catcode.odf.OpenDocumentMetadata;
 import com.catcode.odf.OpenDocumentTextInputStream;
 
 import de.anomic.crawler.HTTPLoader;
-import de.anomic.http.HttpClient;
+import de.anomic.http.httpClient;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.util.Log;
 import de.anomic.kelondro.util.FileUtils;
@@ -246,7 +246,7 @@ public class odtParser extends AbstractParser implements Parser {
             // downloading the document content
             final httpRequestHeader reqHeader = new httpRequestHeader();
             reqHeader.put(httpRequestHeader.USER_AGENT, HTTPLoader.crawlerUserAgent);
-            final byte[] content = HttpClient.wget(contentUrl.toString(), reqHeader, 10000);
+            final byte[] content = httpClient.wget(contentUrl.toString(), reqHeader, 10000);
             final ByteArrayInputStream input = new ByteArrayInputStream(content);
             
             // parsing the document

@@ -28,9 +28,8 @@ package de.anomic.crawler;
 import java.io.IOException;
 import java.util.Date;
 
-import de.anomic.http.HttpClient;
-import de.anomic.http.JakartaCommonsHttpClient;
-import de.anomic.http.JakartaCommonsHttpResponse;
+import de.anomic.http.httpClient;
+import de.anomic.http.httpResponse;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpResponseHeader;
 import de.anomic.http.httpdProxyCacheEntry;
@@ -49,8 +48,8 @@ public final class HTTPLoader {
     private static final String DEFAULT_CHARSET = "ISO-8859-1,utf-8;q=0.7,*;q=0.7";
     private static final long   DEFAULT_MAXFILESIZE = 1024 * 1024 * 10;
     public  static final int    DEFAULT_CRAWLING_RETRY_COUNT = 5;
-    public  static final String crawlerUserAgent = "yacybot (" + HttpClient.getSystemOST() +") http://yacy.net/bot.html";
-    public  static final String yacyUserAgent = "yacy (" + HttpClient.getSystemOST() +") yacy.net";
+    public  static final String crawlerUserAgent = "yacybot (" + httpClient.getSystemOST() +") http://yacy.net/bot.html";
+    public  static final String yacyUserAgent = "yacy (" + httpClient.getSystemOST() +") yacy.net";
     
     /**
      * The socket timeout that should be used
@@ -139,9 +138,9 @@ public final class HTTPLoader {
             requestHeader.put(httpRequestHeader.ACCEPT_ENCODING, sb.getConfig("crawler.http.acceptEncoding", DEFAULT_ENCODING));
 
             // HTTP-Client
-            final JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(socketTimeout, requestHeader);
+            final httpClient client = new httpClient(socketTimeout, requestHeader);
             
-            JakartaCommonsHttpResponse res = null;
+            httpResponse res = null;
             //try {
                 // send request
                 res = client.GET(entry.url().toString());

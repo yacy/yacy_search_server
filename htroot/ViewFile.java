@@ -36,7 +36,7 @@ import java.util.Map;
 
 import de.anomic.htmlFilter.htmlFilterImageEntry;
 import de.anomic.htmlFilter.htmlFilterCharacterCoding;
-import de.anomic.http.HttpClient;
+import de.anomic.http.httpClient;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpResponseHeader;
 import de.anomic.index.indexDocumentMetadata;
@@ -199,7 +199,7 @@ public class ViewFile {
                     return prop;
                 }
 
-                responseHeader = HttpClient.whead(url.toString());
+                responseHeader = httpClient.whead(url.toString());
                 if (responseHeader == null) {
                     prop.put("error", "4");
                     prop.put("error_errorText", "Unable to load resource metadata.");

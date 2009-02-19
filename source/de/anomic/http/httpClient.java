@@ -23,6 +23,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+
 package de.anomic.http;
 
 import java.io.ByteArrayOutputStream;
@@ -67,7 +68,7 @@ import de.anomic.kelondro.util.Log;
  * @author danielr
  * 
  */
-public class JakartaCommonsHttpClient {
+public class httpClient {
 
     /**
      * "the HttpClient instance and connection manager should be shared among all threads for maximum efficiency."
@@ -85,7 +86,7 @@ public class JakartaCommonsHttpClient {
          * set options for client
          */
         // simple user agent
-        setUserAgent("yacy (www.yacy.net; " + de.anomic.http.HttpClient.getSystemOST() + ")");
+        setUserAgent("yacy (www.yacy.net; " + getSystemOST() + ")");
         // only one retry
         apacheHttpClient.getParams().setParameter(HttpMethodParams.RETRY_HANDLER,
                                                   new DefaultHttpMethodRetryHandler(1, false));
@@ -152,7 +153,7 @@ public class JakartaCommonsHttpClient {
      *
      * @param timeout in milliseconds
      */
-    public JakartaCommonsHttpClient(final int timeout) {
+    public httpClient(final int timeout) {
         this(timeout, null);
     }
 
@@ -162,7 +163,7 @@ public class JakartaCommonsHttpClient {
      * @param timeout in milliseconds
      * @param header header options to send
      */
-    public JakartaCommonsHttpClient(final int timeout, final httpRequestHeader header) {
+    public httpClient(final int timeout, final httpRequestHeader header) {
         super();
         setTimeout(timeout);
         setHeader(header);
@@ -177,7 +178,7 @@ public class JakartaCommonsHttpClient {
      * @param header header options to send
      * @param proxyConfig
      */
-    public JakartaCommonsHttpClient(final int timeout, final httpRequestHeader header, final httpRemoteProxyConfig proxyConfig) {
+    public httpClient(final int timeout, final httpRequestHeader header, final httpRemoteProxyConfig proxyConfig) {
         super();
         setTimeout(timeout);
         setHeader(header);
@@ -246,7 +247,7 @@ public class JakartaCommonsHttpClient {
      * @return InputStream of content (body)
      * @throws IOException
      */
-    public JakartaCommonsHttpResponse GET(final String uri) throws IOException {
+    public httpResponse GET(final String uri) throws IOException {
         final HttpMethod get = new GetMethod(uri);
         get.setFollowRedirects(followRedirects);
         return execute(get);
@@ -259,7 +260,7 @@ public class JakartaCommonsHttpClient {
      * @return Instance of response with the content.
      * @throws IOException
      */
-    public JakartaCommonsHttpResponse HEAD(final String uri) throws IOException {
+    public httpResponse HEAD(final String uri) throws IOException {
         assert uri != null : "precondition violated: uri != null";
         final HttpMethod head = new HeadMethod(uri);
         head.setFollowRedirects(followRedirects);
@@ -276,7 +277,7 @@ public class JakartaCommonsHttpClient {
      * @return Instance of response with the content.
      * @throws IOException
      */
-    public JakartaCommonsHttpResponse POST(final String uri, final InputStream ins) throws IOException {
+    public httpResponse POST(final String uri, final InputStream ins) throws IOException {
         assert uri != null : "precondition violated: uri != null";
         assert ins != null : "precondition violated: ins != null";
         final PostMethod post = new PostMethod(uri);
@@ -295,7 +296,7 @@ public class JakartaCommonsHttpClient {
      * @return
      * @throws IOException
      */
-    public JakartaCommonsHttpResponse POST(final String uri, final List<Part> multiparts) throws IOException {
+    public httpResponse POST(final String uri, final List<Part> multiparts) throws IOException {
         return POST(uri, multiparts, false);
     }
 
@@ -308,7 +309,7 @@ public class JakartaCommonsHttpClient {
      * @return Instance of response with the content.
      * @throws IOException
      */
-    public JakartaCommonsHttpResponse POST(final String uri, final List<Part> multiparts, final boolean gzipBody)
+    public httpResponse POST(final String uri, final List<Part> multiparts, final boolean gzipBody)
             throws IOException {
         assert uri != null : "precondition violated: uri != null";
         final PostMethod post = new PostMethod(uri);
@@ -358,7 +359,7 @@ public class JakartaCommonsHttpClient {
      * (non-Javadoc)
      * @see de.anomic.http.HttpClient#CONNECT(java.lang.String, int, de.anomic.http.httpHeader)
      */
-    public JakartaCommonsHttpResponse CONNECT(final String host, final int port) throws IOException {
+    public httpResponse CONNECT(final String host, final int port) throws IOException {
         final HostConfiguration hostConfig = new HostConfiguration();
         hostConfig.setHost(host, port);
         final HttpMethod connect = new ConnectMethod(hostConfig);
@@ -424,7 +425,7 @@ public class JakartaCommonsHttpClient {
      * @return
      * @throws IOException
      */
-    private JakartaCommonsHttpResponse execute(final HttpMethod method) throws IOException {
+    private httpResponse execute(final HttpMethod method) throws IOException {
         assert method != null : "precondition violated: method != null";
         checkIgnoreCookies(method);
         setHeader(method);
@@ -458,7 +459,7 @@ public class JakartaCommonsHttpClient {
                 Arrays.toString(method.getResponseHeaders()));
 
         // return response
-        return new JakartaCommonsHttpResponse(method);
+        return new httpResponse(method);
     }
 
     /**
@@ -611,7 +612,7 @@ public class JakartaCommonsHttpClient {
      * @param args
      */
     public static void main(final String[] args) {
-        JakartaCommonsHttpResponse resp = null;
+        httpResponse resp = null;
         String url = args[0];
         if (!url.toUpperCase().startsWith("HTTP://")) {
             url = "http://" + url;
@@ -625,7 +626,7 @@ public class JakartaCommonsHttpClient {
                 files.add(new FilePart("anotherfile.raw", new ByteArrayPartSource("anotherfile.raw",
                         "this is not a binary file ;)".getBytes())));
                 System.out.println("POST " + files.size() + " elements to " + url);
-                final JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(1000);
+                final httpClient client = new httpClient(1000);
                 resp = client.POST(url, files);
                 System.out.println("----- Header: -----");
                 System.out.println(resp.getResponseHeader().toString());
@@ -635,12 +636,12 @@ public class JakartaCommonsHttpClient {
                 // whead
                 System.out.println("whead " + url);
                 System.out.println("--------------------------------------");
-                System.out.println(de.anomic.http.HttpClient.whead(url).toString());
+                System.out.println(whead(url).toString());
             } else {
                 // wget
                 System.out.println("wget " + url);
                 System.out.println("--------------------------------------");
-                System.out.println(new String(de.anomic.http.HttpClient.wget(url, null, 10000)));
+                System.out.println(new String(wget(url, null, 10000)));
             }
         } catch (final IOException e) {
             e.printStackTrace();
@@ -687,5 +688,116 @@ public class JakartaCommonsHttpClient {
      */
     public static int connectionCount() {
         return conManager.getConnectionsInPool();
+    }
+    
+    
+
+    /**
+     * provide system information for client identification
+     */
+    private static final String systemOST = System.getProperty("os.arch", "no-os-arch") + " " +
+            System.getProperty("os.name", "no-os-name") + " " + System.getProperty("os.version", "no-os-version") +
+            "; " + "java " + System.getProperty("java.version", "no-java-version") + "; " + generateLocation();
+
+    /**
+     * generating the location string
+     * 
+     * @return
+     */
+    public static String generateLocation() {
+        String loc = System.getProperty("user.timezone", "nowhere");
+        final int p = loc.indexOf("/");
+        if (p > 0) {
+            loc = loc.substring(0, p);
+        }
+        loc = loc + "/" + System.getProperty("user.language", "dumb");
+        return loc;
+    }
+
+    /**
+     * @return the systemOST
+     */
+    public static String getSystemOST() {
+        return systemOST;
+    }
+    
+    /**
+     * Gets a page (as raw bytes) addressing vhost at host in uri with specified header and timeout
+     * 
+     * @param uri
+     * @param header
+     * @param vhost
+     * @param timeout in milliseconds
+     * @return
+     */
+    public static byte[] wget(final String uri) {
+        return wget(uri, new httpRequestHeader(), 10000, null);
+    }
+    public static byte[] wget(final String uri, final httpRequestHeader header, final int timeout) {
+        return wget(uri, header, timeout, null);
+    }
+    public static byte[] wget(final String uri, final httpRequestHeader header, final int timeout, final String vhost) {
+        assert uri != null : "precondition violated: uri != null";
+        addHostHeader(header, vhost);
+        final httpClient client = new httpClient(timeout, header);
+
+        // do the request
+        try {
+            final httpResponse response = client.GET(uri);
+            return response.getData();
+        } catch (final IOException e) {
+            Log.logWarning("HTTPC", "wget(" + uri + ") failed: " + e.getMessage());
+        }
+        return null;
+    }
+
+    /**
+     * adds a Host-header to the header if vhost is not null
+     * 
+     * @param header
+     * @param vhost
+     * @return
+     */
+    private static void addHostHeader(httpRequestHeader header, final String vhost) {
+        if (vhost != null) {
+            if (header != null) {
+                header = new httpRequestHeader();
+            }
+            // set host-header
+            header.add(httpRequestHeader.HOST, vhost);
+        }
+    }
+
+    /**
+     * Gets a page-header
+     * 
+     * @param uri
+     * @return
+     */
+    public static httpResponseHeader whead(final String uri) {
+        return whead(uri, null);
+    }
+
+    /**
+     * Gets a page-header
+     * 
+     * @param uri
+     * @param header request header
+     * @return null on error
+     */
+    public static httpResponseHeader whead(final String uri, final httpRequestHeader header) {
+        final httpClient client = new httpClient(10000, header);
+        httpResponse response = null;
+        try {
+            response = client.HEAD(uri);
+            return response.getResponseHeader();
+        } catch (final IOException e) {
+            Log.logWarning("HTTPC", "whead(" + uri + ") failed: " + e.getMessage());
+            return null;
+        } finally {
+            if (response != null) {
+                response.closeStream();
+            }
+        }
     }
 }

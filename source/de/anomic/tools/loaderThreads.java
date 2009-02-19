@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 
 import de.anomic.crawler.HTTPLoader;
-import de.anomic.http.HttpClient;
+import de.anomic.http.httpClient;
 import de.anomic.http.httpRemoteProxyConfig;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.util.FileUtils;
@@ -125,7 +125,7 @@ public class loaderThreads {
             try {
                 final httpRequestHeader reqHeader = new httpRequestHeader();
                 reqHeader.put(httpRequestHeader.USER_AGENT, HTTPLoader.crawlerUserAgent);
-                page = HttpClient.wget(url.toString(), reqHeader, timeout);
+                page = httpClient.wget(url.toString(), reqHeader, timeout);
                 loaded = true;
                 process.feed(page);
                 if (process.status() == loaderCore.STATUS_FAILED) {

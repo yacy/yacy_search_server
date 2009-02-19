@@ -56,8 +56,8 @@ import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterImageEntry;
 import de.anomic.htmlFilter.htmlFilterInputStream;
 import de.anomic.htmlFilter.htmlFilterWriter;
-import de.anomic.http.JakartaCommonsHttpClient;
-import de.anomic.http.JakartaCommonsHttpResponse;
+import de.anomic.http.httpClient;
+import de.anomic.http.httpResponse;
 import de.anomic.kelondro.util.Log;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.parser.Parser;
@@ -880,7 +880,7 @@ public final class plasmaParser {
             }            
                         
             final String mode = args[0];
-            JakartaCommonsHttpResponse res = null;
+            httpResponse res = null;
             plasmaParserDocument document = null;
             try { // close InputStream when done
             if (mode.equalsIgnoreCase("-f")) {
@@ -890,7 +890,7 @@ public final class plasmaParser {
                 contentURL = new yacyURL(args[1], null);
                 
                 // downloading the document content
-                final JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(5000);
+                final httpClient client = new httpClient(5000);
                 
                 res = client.GET(args[1]);
                 if (res.getStatusCode() != 200) {

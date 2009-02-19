@@ -438,7 +438,7 @@ public final class httpdProxyHandler {
         
         final GZIPOutputStream gzippedOut = null; 
        
-        JakartaCommonsHttpResponse res = null;                
+        httpResponse res = null;                
         try {
             final int reqID = requestHeader.hashCode();
 
@@ -473,7 +473,7 @@ public final class httpdProxyHandler {
             final String connectHost = hostPart(host, port, yAddress);
             final String getUrl = "http://"+ connectHost + remotePath;
             
-            final JakartaCommonsHttpClient client = setupHttpClient(requestHeader, connectHost);
+            final httpClient client = setupHttpClient(requestHeader, connectHost);
             
             // send request
             try {
@@ -724,7 +724,7 @@ public final class httpdProxyHandler {
 
     public static void doHead(final Properties conProp, final httpRequestHeader requestHeader, OutputStream respond) {
         
-        JakartaCommonsHttpResponse res = null;
+        httpResponse res = null;
         yacyURL url = null;
         try {
             final int reqID = requestHeader.hashCode();
@@ -793,7 +793,7 @@ public final class httpdProxyHandler {
             final String getUrl = "http://"+ connectHost + remotePath;
             if (theLogger.isFinest()) theLogger.logFinest(reqID +"    using url: "+ getUrl);
             
-            final JakartaCommonsHttpClient client = setupHttpClient(requestHeader, connectHost);
+            final httpClient client = setupHttpClient(requestHeader, connectHost);
             
             // send request
             try {
@@ -884,7 +884,7 @@ public final class httpdProxyHandler {
             final String getUrl = "http://"+ connectHost + remotePath;
             if (theLogger.isFinest()) theLogger.logFinest(reqID +"    using url: "+ getUrl);
             
-            final JakartaCommonsHttpClient client = setupHttpClient(requestHeader, connectHost);
+            final httpClient client = setupHttpClient(requestHeader, connectHost);
             
             // check input
             if(body == null) {
@@ -910,7 +910,7 @@ public final class httpdProxyHandler {
                 }
                 body = new ByteArrayInputStream(bodyData);
             }
-            JakartaCommonsHttpResponse res = null;
+            httpResponse res = null;
             try {
             // sending the request
             res = client.POST(getUrl, body);
@@ -1050,9 +1050,9 @@ public final class httpdProxyHandler {
      * @param connectHost may be 'host:port' or 'host:port/path'
      * @return
      */
-    private static JakartaCommonsHttpClient setupHttpClient(final httpRequestHeader requestHeader, final String connectHost) {
+    private static httpClient setupHttpClient(final httpRequestHeader requestHeader, final String connectHost) {
         // setup HTTP-client
-        final JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(timeout, requestHeader);
+        final httpClient client = new httpClient(timeout, requestHeader);
         client.setFollowRedirects(false);
         // cookies are handled by the user's browser
         client.setIgnoreCookies(true);
@@ -1232,10 +1232,10 @@ public final class httpdProxyHandler {
                 (proxyConfig.useProxy()) &&
                 (proxyConfig.useProxy4SSL())
         ) {
-            final JakartaCommonsHttpClient remoteProxy = new JakartaCommonsHttpClient(timeout, requestHeader, proxyConfig);
+            final httpClient remoteProxy = new httpClient(timeout, requestHeader, proxyConfig);
             remoteProxy.setFollowRedirects(false); // should not be needed, but safe is safe 
     
-            JakartaCommonsHttpResponse response = null;
+            httpResponse response = null;
             try {
                 response = remoteProxy.CONNECT(host, port);
                 // outputs a logline to the serverlog with the current status

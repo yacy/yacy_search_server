@@ -67,6 +67,13 @@ pkcs12ImportPwd =
 # value is in milliseconds, default is one hour
 server.maxTrackingTime = 3600000
 
+# maximum number of tracks per host
+server.maxTrackingCount = 1000
+
+# maximum number of hosts that are tracked
+server.maxTrackingHostCount = 100
+
+
 # Network Definition
 # There can be separate YaCy networks, and managed sub-groups of the general network.
 # The essentials of the network definition are attached in separate property files.

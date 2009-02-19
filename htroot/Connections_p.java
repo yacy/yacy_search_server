@@ -34,7 +34,7 @@ import java.util.Properties;
 import java.util.Set;
 
 import de.anomic.http.HttpConnectionInfo;
-import de.anomic.http.JakartaCommonsHttpClient;
+import de.anomic.http.httpClient;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpd;
 import de.anomic.kelondro.order.DateFormatter;
@@ -226,7 +226,7 @@ public final class Connections_p {
         }
         }
         prop.put("clientList", c);
-        prop.put("clientActive", JakartaCommonsHttpClient.connectionCount());
+        prop.put("clientActive", httpClient.connectionCount());
         
         // return rewrite values for templates
         return prop;

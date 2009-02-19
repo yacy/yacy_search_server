@@ -41,7 +41,7 @@ import java.util.regex.Pattern;
 
 import de.anomic.htmlFilter.htmlFilterCharacterCoding;
 import de.anomic.htmlFilter.htmlFilterImageEntry;
-import de.anomic.http.HttpClient;
+import de.anomic.http.httpClient;
 import de.anomic.http.httpResponseHeader;
 import de.anomic.index.indexDocumentMetadata;
 import de.anomic.index.indexURLReference;
@@ -852,7 +852,7 @@ public class plasmaSnippetCache {
                 
                 // getting URL mimeType
                 try {
-                    responseHeader = HttpClient.whead(url.toString());
+                    responseHeader = httpClient.whead(url.toString());
                 } catch (final Exception e) {
                     // ingore this. http header download failed
                 } 

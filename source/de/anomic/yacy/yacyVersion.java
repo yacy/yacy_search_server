@@ -44,8 +44,8 @@ import java.util.regex.Pattern;
 
 import de.anomic.crawler.HTTPLoader;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
-import de.anomic.http.JakartaCommonsHttpClient;
-import de.anomic.http.JakartaCommonsHttpResponse;
+import de.anomic.http.httpClient;
+import de.anomic.http.httpResponse;
 import de.anomic.http.httpResponseHeader;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.util.Log;
@@ -346,8 +346,8 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
         File download = null;
         final httpRequestHeader header = new httpRequestHeader();
         header.put(httpResponseHeader.USER_AGENT, HTTPLoader.yacyUserAgent);
-        final JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(120000, header);
-        JakartaCommonsHttpResponse res = null;
+        final httpClient client = new httpClient(120000, header);
+        httpResponse res = null;
         final String name = release.url.getFileName();
         try {
             res = client.GET(release.url.toString());

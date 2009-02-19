@@ -40,8 +40,8 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import de.anomic.http.JakartaCommonsHttpClient;
-import de.anomic.http.JakartaCommonsHttpResponse;
+import de.anomic.http.httpClient;
+import de.anomic.http.httpResponse;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.blob.BLOB;
 import de.anomic.kelondro.blob.BLOBHeap;
@@ -528,8 +528,8 @@ public class RobotsTxt {
         
         // setup http-client
         //TODO: adding Traffic statistic for robots download?
-        final JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(10000, reqHeaders);
-        JakartaCommonsHttpResponse res = null;
+        final httpClient client = new httpClient(10000, reqHeaders);
+        httpResponse res = null;
         try {
             // sending the get request
             res = client.GET(robotsURL.toString());

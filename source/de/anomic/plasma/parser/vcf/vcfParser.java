@@ -35,7 +35,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 
 import de.anomic.crawler.HTTPLoader;
-import de.anomic.http.HttpClient;
+import de.anomic.http.httpClient;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.plasma.plasmaParserDocument;
@@ -277,7 +277,7 @@ public class vcfParser extends AbstractParser implements Parser {
             final vcfParser testParser = new vcfParser();
             final httpRequestHeader reqHeader = new httpRequestHeader();
             reqHeader.put(httpRequestHeader.USER_AGENT, HTTPLoader.crawlerUserAgent);
-            final byte[] content = HttpClient.wget(contentUrl.toString(), reqHeader, 10000);
+            final byte[] content = httpClient.wget(contentUrl.toString(), reqHeader, 10000);
             final ByteArrayInputStream input = new ByteArrayInputStream(content);
             testParser.parse(contentUrl, "text/x-vcard", "UTF-8",input);
         } catch (final Exception e) {

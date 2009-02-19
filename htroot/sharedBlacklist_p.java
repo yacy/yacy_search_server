@@ -40,7 +40,7 @@ import java.util.List;
 import de.anomic.crawler.HTTPLoader;
 import de.anomic.data.listManager;
 import de.anomic.htmlFilter.htmlFilterCharacterCoding;
-import de.anomic.http.HttpClient;
+import de.anomic.http.httpClient;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.index.indexAbstractReferenceBlacklist;
 import de.anomic.kelondro.util.FileUtils;
@@ -139,7 +139,7 @@ public class sharedBlacklist_p {
                         // get List
                         yacyURL u = new yacyURL(downloadURLOld, null);
 
-                        otherBlacklist = FileUtils.strings(HttpClient.wget(u.toString(), reqHeader, 1000), "UTF-8");
+                        otherBlacklist = FileUtils.strings(httpClient.wget(u.toString(), reqHeader, 1000), "UTF-8");
                     } catch (final Exception e) {
                         prop.put("status", STATUS_PEER_UNKNOWN);
                         prop.putHTML("status_name", Hash);
@@ -158,7 +158,7 @@ public class sharedBlacklist_p {
                     final yacyURL u = new yacyURL(downloadURL, null);
                     final httpRequestHeader reqHeader = new httpRequestHeader();
                     reqHeader.put(httpRequestHeader.USER_AGENT, HTTPLoader.yacyUserAgent);
-                    otherBlacklist = FileUtils.strings(HttpClient.wget(u.toString(), reqHeader, 10000), "UTF-8"); //get List
+                    otherBlacklist = FileUtils.strings(httpClient.wget(u.toString(), reqHeader, 10000), "UTF-8"); //get List
                 } catch (final Exception e) {
                     prop.put("status", STATUS_URL_PROBLEM);
                     prop.putHTML("status_address",downloadURL);

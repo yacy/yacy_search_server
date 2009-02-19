@@ -29,15 +29,12 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import de.anomic.kelondro.util.Log;
 import de.anomic.kelondro.util.FileUtils;
 
 public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
-    
-    private static final long maxTrackingTimeDefault = 1000 * 60 * 60; // store only access data from the last hour to save ram space
     
     // configuration management
     private   final File    configFile;
@@ -46,14 +43,13 @@ public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
     protected       boolean firstInit;
     protected       Log     log;
     protected       int     serverJobs;
-    private         long    maxTrackingTime;
     private         Map<String, String>                  configProps;
     private   final Map<String, String>                  configRemoved;
     private   final HashMap<InetAddress, String>         authorization;
     private   final TreeMap<String, serverBusyThread>    workerThreads;
     private   final TreeMap<String, serverSwitchAction>  switchActions;
     private   final LinkedBlockingQueue<E>               cacheStack;
-    private   final ConcurrentHashMap<String, SortedMap<Long, String>> accessTracker; // mappings from requesting host to an ArrayList of serverTrack-entries
+    private   final serverAccessTracker                  accessTracker;
     
     public serverAbstractSwitch(final File rootPath, final String initPath, final String configPath, final boolean applyPro) {
         // we initialize the switchboard with a property file,
@@ -133,7 +129,6 @@ public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
 
         // other settings
         authorization = new HashMap<InetAddress, String>();
-        accessTracker = new ConcurrentHashMap<String, SortedMap<Long, String>>();
 
         // init thread control
         workerThreads = new TreeMap<String, serverBusyThread>();
@@ -145,7 +140,11 @@ public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
         serverJobs = 0;
         
         // init server tracking
-        maxTrackingTime = getConfigLong("maxTrackingTime", maxTrackingTimeDefault);
+        this.accessTracker = new serverAccessTracker(
+            getConfigLong("server.maxTrackingTime", 60 * 60 * 1000),
+            (int) getConfigLong("server.maxTrackingCount", 1000),
+            (int) getConfigLong("server.maxTrackingHostCount", 100)
+        );        
     }
     
     // a logger for this switchboard
@@ -155,59 +154,6 @@ public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
 
     public Log getLog() {
 	return log;
-    }
-    
-    /*
-     * remove all entries from the access tracker where the age of the last access is greater than the given timeout
-     */
-    public void cleanupAccessTracker(final long timeout) {
-        final Iterator<Map.Entry<String, SortedMap<Long, String>>> i = accessTracker.entrySet().iterator();
-        while (i.hasNext()) {
-            if (i.next().getValue().tailMap(Long.valueOf(System.currentTimeMillis() - timeout)).size() == 0) i.remove();
-        }
-    }
-    
-    public void track(final String host, String accessPath) {
-        // learn that a specific host has accessed a specific path
-        if (accessPath == null) accessPath="NULL";
-        SortedMap<Long, String> access = accessTracker.get(host);
-        if (access == null) access = new TreeMap<Long, String>();
-        
-        synchronized (access) {
-            access.put(Long.valueOf(System.currentTimeMillis()), accessPath);
-            // write back to tracker
-            accessTracker.put(host, clearTooOldAccess(access));
-        }
-    }
-    
-    public SortedMap<Long, String> accessTrack(final String host) {
-        // returns mapping from Long(accesstime) to path
-        
-        SortedMap<Long, String> access = accessTracker.get(host);
-        if (access == null) return null;
-        // clear too old entries
-        synchronized (access) {
-            if ((access = clearTooOldAccess(access)).size() != access.size()) {
-                // write back to tracker
-                if (access.size() == 0) {
-                    accessTracker.remove(host);
-                } else {
-                    accessTracker.put(host, access);
-                }
-            }
-        }
-        return access;
-    }
-    
-    private SortedMap<Long, String> clearTooOldAccess(final SortedMap<Long, String> access) {
-        return access.tailMap(Long.valueOf(System.currentTimeMillis() - maxTrackingTime));
-    }
-    
-    public Iterator<String> accessHosts() {
-        // returns an iterator of hosts in tracker (String)
-    	final HashMap<String, SortedMap<Long, String>> accessTrackerClone = new HashMap<String, SortedMap<Long, String>>();
-    	accessTrackerClone.putAll(accessTracker);
-    	return accessTrackerClone.keySet().iterator();
     }
 
     public void setConfig(final Map<String, String> otherConfigs) {
@@ -547,4 +493,17 @@ public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
     public void handleBusyState(final int jobs) {
         serverJobs = jobs;
     }
+    
+    public void track(String host, String accessPath) {
+        this.accessTracker.track(host, accessPath);
+    }
+    
+    public SortedMap<Long, String> accessTrack(String host) {
+        return this.accessTracker.accessTrack(host);
+    } 
+    
+    public Iterator<String> accessHosts() {
+        return this.accessTracker.accessHosts();
+    }
+    
 }

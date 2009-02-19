@@ -48,9 +48,8 @@ import java.util.zip.ZipOutputStream;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 
 import de.anomic.data.translator;
-import de.anomic.http.HttpClient;
-import de.anomic.http.JakartaCommonsHttpClient;
-import de.anomic.http.JakartaCommonsHttpResponse;
+import de.anomic.http.httpClient;
+import de.anomic.http.httpResponse;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpd;
 import de.anomic.index.indexContainer;
@@ -317,8 +316,8 @@ public final class yacy {
             
             // set user-agent
             final String userAgent = "yacy/" + Double.toString(version) + " (www.yacy.net; "
-                    + de.anomic.http.HttpClient.getSystemOST() + ")";
-            JakartaCommonsHttpClient.setUserAgent(userAgent);
+                    + httpClient.getSystemOST() + ")";
+            httpClient.setUserAgent(userAgent);
             
             // start main threads
             final String port = sb.getConfig("port", "8080");
@@ -430,12 +429,12 @@ public final class yacy {
                     if (server.isAlive()) try {
                         // TODO only send request, don't read response (cause server is already down resulting in error)
                         final yacyURL u = new yacyURL((server.withSSL()?"https":"http")+"://localhost:" + serverCore.getPortNr(port), null);
-                        HttpClient.wget(u.toString(), null, 10000); // kick server
+                        httpClient.wget(u.toString(), null, 10000); // kick server
                         Log.logConfig("SHUTDOWN", "sent termination signal to server socket");
                     } catch (final IOException ee) {
                         Log.logConfig("SHUTDOWN", "termination signal to server socket missed (server shutdown, ok)");
                     }
-                    JakartaCommonsHttpClient.closeAllConnections();
+                    httpClient.closeAllConnections();
                     MultiThreadedHttpConnectionManager.shutdownAll();
                     
                     // idle until the processes are down
@@ -568,8 +567,8 @@ public final class yacy {
         // send 'wget' to web interface
         final httpRequestHeader requestHeader = new httpRequestHeader();
         requestHeader.put(httpRequestHeader.AUTHORIZATION, "realm=" + encodedPassword); // for http-authentify
-        final JakartaCommonsHttpClient con = new JakartaCommonsHttpClient(10000, requestHeader);
-        JakartaCommonsHttpResponse res = null;
+        final httpClient con = new httpClient(10000, requestHeader);
+        httpResponse res = null;
         try {
             res = con.GET("http://localhost:"+ port +"/Steering.html?shutdown=");
 

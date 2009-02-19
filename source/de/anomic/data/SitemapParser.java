@@ -41,8 +41,8 @@ import org.xml.sax.helpers.DefaultHandler;
 import de.anomic.crawler.CrawlEntry;
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.HTTPLoader;
-import de.anomic.http.JakartaCommonsHttpClient;
-import de.anomic.http.JakartaCommonsHttpResponse;
+import de.anomic.http.httpClient;
+import de.anomic.http.httpResponse;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpdByteCountInputStream;
 import de.anomic.index.indexURLReference;
@@ -153,8 +153,8 @@ public class SitemapParser extends DefaultHandler {
         // download document
         final httpRequestHeader requestHeader = new httpRequestHeader();
         requestHeader.put(httpRequestHeader.USER_AGENT, HTTPLoader.crawlerUserAgent);
-        final JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(5000, requestHeader);
-        JakartaCommonsHttpResponse res = null;
+        final httpClient client = new httpClient(5000, requestHeader);
+        httpResponse res = null;
         try {
             res = client.GET(siteMapURL.toString());
             if (res.getStatusCode() != 200) {

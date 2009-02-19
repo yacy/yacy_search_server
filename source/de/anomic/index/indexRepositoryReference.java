@@ -40,8 +40,8 @@ import java.util.Map;
 import java.util.TreeSet;
 
 import de.anomic.htmlFilter.htmlFilterCharacterCoding;
-import de.anomic.http.JakartaCommonsHttpClient;
-import de.anomic.http.JakartaCommonsHttpResponse;
+import de.anomic.http.httpClient;
+import de.anomic.http.httpResponse;
 import de.anomic.http.httpRemoteProxyConfig;
 import de.anomic.kelondro.blob.Cache;
 import de.anomic.kelondro.index.Row;
@@ -243,9 +243,9 @@ public final class indexRepositoryReference {
                         final yacyURL newUrl = new yacyURL(newUrlStr, null);
 
                         // doing a http head request to test if the url is correct
-                        final JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(10000);
+                        final httpClient client = new httpClient(10000);
                         client.setProxy(proxyConfig);
-                        JakartaCommonsHttpResponse res = null;
+                        httpResponse res = null;
                         try {
                             res = client.HEAD(newUrl.toString());
                         } finally {

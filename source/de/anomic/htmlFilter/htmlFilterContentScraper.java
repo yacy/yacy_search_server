@@ -44,7 +44,7 @@ import java.util.Properties;
 import javax.swing.event.EventListenerList;
 
 import de.anomic.crawler.HTTPLoader;
-import de.anomic.http.HttpClient;
+import de.anomic.http.httpClient;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaParser;
@@ -503,7 +503,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         // load page
         final httpRequestHeader reqHeader = new httpRequestHeader();
         reqHeader.put(httpRequestHeader.USER_AGENT, HTTPLoader.crawlerUserAgent);
-        final byte[] page = HttpClient.wget(location.toString(), reqHeader, 10000);
+        final byte[] page = httpClient.wget(location.toString(), reqHeader, 10000);
         if (page == null) throw new IOException("no response from url " + location.toString());
         
         // scrape content

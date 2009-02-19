@@ -41,8 +41,8 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import de.anomic.crawler.HTTPLoader;
-import de.anomic.http.JakartaCommonsHttpClient;
-import de.anomic.http.JakartaCommonsHttpResponse;
+import de.anomic.http.httpClient;
+import de.anomic.http.httpResponse;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpd;
 import de.anomic.http.httpdAlternativeDomainNames;
@@ -823,9 +823,9 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
         reqHeader.put(httpRequestHeader.USER_AGENT, HTTPLoader.yacyUserAgent);
         
         // init http-client
-        final JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(10000, reqHeader);
+        final httpClient client = new httpClient(10000, reqHeader);
         byte[] content = null;
-        JakartaCommonsHttpResponse res = null;
+        httpResponse res = null;
         try {
             // send request
             res = client.GET(seedURL.toString());

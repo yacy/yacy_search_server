@@ -41,7 +41,7 @@ import de.anomic.kelondro.util.FileUtils;
  * @author daniel
  * @since 21.03.2008
  */
-public class JakartaCommonsHttpResponse {
+public class httpResponse {
 	private final HttpMethod method;
 	private String incomingAccountingName = null;
 
@@ -56,7 +56,7 @@ public class JakartaCommonsHttpResponse {
 	 * @param method
 	 * @throws IOException
 	 */
-	public JakartaCommonsHttpResponse(final HttpMethod method) {
+	public httpResponse(final HttpMethod method) {
 		super();
 
 		this.method = method;
