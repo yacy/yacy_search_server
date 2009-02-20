@@ -152,7 +152,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
                     (currentThread.isAlive()) &&
                     (((Session) currentThread).getTime() > minage) 
             ) {
-                log.logInfo("check for " + currentThread.getName() + ": " + ((Session) currentThread).getTime() + " ms alive, stopping thread");
+                this.log.logInfo("check for " + currentThread.getName() + ": " + ((Session) currentThread).getTime() + " ms alive, stopping thread");
                 // trying to stop session
                 ((Session)currentThread).setStopped(true);
                 try { Thread.sleep(100); } catch (final InterruptedException ex) {}
@@ -321,7 +321,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
             // prepare for new connection
             // idleThreadCheck();
             this.switchboard.handleBusyState(this.busySessions.size());
-            if (log.isFinest()) this.log.logFinest("* waiting for connections, " + this.busySessions.size() + " sessions running");
+            if (this.log.isFinest()) this.log.logFinest("* waiting for connections, " + this.busySessions.size() + " sessions running");
             
             announceThreadBlockApply();
             
@@ -333,7 +333,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
             if(this.busySessions.size() >= this.maxBusySessions)
             {
                 // immediatly close connection if too much sessions are still running
-                if (log.isFinest()) this.log.logFinest("* connections exceeding limit, closing new incoming connection from "+ controlSocket.getRemoteSocketAddress());
+                if (this.log.isFinest()) this.log.logFinest("* connections exceeding limit, closing new incoming connection from "+ controlSocket.getRemoteSocketAddress());
                 controlSocket.close();
                 return false;
             }
@@ -620,7 +620,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
                 System.err.println("ERROR: (internal) " + e);        
             } finally {
                 try {
-                    if (this.controlSocket.isClosed()) return;
+                    if ((this.controlSocket == null) || this.controlSocket.isClosed()) return;
                     
                     // flush data
                     this.out.flush();
@@ -644,7 +644,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
                 if (busySessions != null)
                 {
                     busySessions.remove(this);
-                    if(log.isFinest()) log.logFinest("* removed session "+ this.controlSocket.getRemoteSocketAddress() + " " + this.request);
+                    if(serverCore.this.log.isFinest()) serverCore.this.log.logFinest("* removed session "+ this.controlSocket.getRemoteSocketAddress() + " " + this.request);
                 }
                 this.controlSocket = null;
             }
@@ -654,7 +654,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
         protected void finalize() {
             if (busySessions != null && busySessions.contains(this)) {
                 busySessions.remove(this);
-                if(log.isFinest()) log.logFinest("* removed session "+ this.controlSocket.getRemoteSocketAddress() + this.request);
+                if(serverCore.this.log.isFinest()) serverCore.this.log.logFinest("* removed session "+ this.controlSocket.getRemoteSocketAddress() + this.request);
             }
             this.close();
         }
@@ -673,7 +673,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
                             "#" + this.commandCounter);
                     
                     this.request = new String(requestBytes);
-                    //log.logDebug("* session " + handle + " received command '" + request + "'. time = " + (System.currentTimeMillis() - handle));
+                    //this.log.logDebug("* session " + handle + " received command '" + request + "'. time = " + (System.currentTimeMillis() - handle));
                     log(false, this.request);
                     try {                        
                         // if we can not determine the proper command string we try to call function emptyRequest
@@ -737,7 +737,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
                         //long commandStart = System.currentTimeMillis();
                         Object result = ((Method)commandMethod).invoke(this.commandObj, stringParameter);
                         //announceMoreExecTime(commandStart - System.currentTimeMillis()); // shall be negative!
-                        //log.logDebug("* session " + handle + " completed command '" + request + "'. time = " + (System.currentTimeMillis() - handle));
+                        //this.log.logDebug("* session " + handle + " completed command '" + request + "'. time = " + (System.currentTimeMillis() - handle));
                         this.out.flush();
                         if (result != null) {
                             if (result instanceof Boolean) {
