@@ -53,10 +53,10 @@ import de.anomic.yacy.dht.PeerSelection;
 
 public class CrawlQueues {
 
-    plasmaSwitchboard sb;
-    Log log;
-    Map<Integer, crawlWorker> workers; // mapping from url hash to Worker thread object
-    ProtocolLoader loader;
+    private plasmaSwitchboard sb;
+    private Log log;
+    private Map<Integer, crawlWorker> workers; // mapping from url hash to Worker thread object
+    private ProtocolLoader loader;
     private final ArrayList<String> remoteCrawlProviderHashes;
 
     public  NoticedURL noticeURL;
@@ -115,6 +115,14 @@ public class CrawlQueues {
             if (w.entry.url().hash().equals(urlhash)) return w.entry.url();
         }
         return null;
+    }
+    
+    public void cleanup() {
+        // wait for all workers to finish
+        int timeout = (int) sb.getConfigLong("crawler.clientTimeout", 10000);
+        for (final crawlWorker w: workers.values()) {
+            if (w.age() > timeout) w.interrupt();
+        }
     }
     
     public void clear() {
@@ -278,14 +286,21 @@ public class CrawlQueues {
             //log.logDebug("GlobalCrawl: queue is empty");
             return false;
         }
+        
         if (sb.webIndex.queuePreStack.size() >= (int) sb.getConfigLong(plasmaSwitchboardConstants.INDEXER_SLOTS, 30)) {
             if (this.log.isFine()) log.logFine(type + "Crawl: too many processes in indexing queue, dismissed (" + "sbQueueSize=" + sb.webIndex.queuePreStack.size() + ")");
             return false;
         }
         if (this.size() >= sb.getConfigLong(plasmaSwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX, 10)) {
+            // try a cleanup
+            this.cleanup();
+        }
+        // check again
+        if (this.size() >= sb.getConfigLong(plasmaSwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX, 10)) {
             if (this.log.isFine()) log.logFine(type + "Crawl: too many processes in loader queue, dismissed (" + "cacheLoader=" + this.size() + ")");
             return false;
         }
+        
         if (sb.onlineCaution()) {
             if (this.log.isFine()) log.logFine(type + "Crawl: online caution, omitting processing");
             return false;
@@ -311,6 +326,11 @@ public class CrawlQueues {
             return false;
         }
         
+        if (this.size() >= sb.getConfigLong(plasmaSwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX, 10)) {
+            // try a cleanup
+            cleanup();
+        }
+        // check again
         if (this.size() >= sb.getConfigLong(plasmaSwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX, 10)) {
             if (this.log.isFine()) log.logFine("remoteCrawlLoaderJob: too many processes in loader queue, dismissed (" + "cacheLoader=" + this.size() + ")");
             return false;
@@ -510,8 +530,10 @@ public class CrawlQueues {
         
         private CrawlEntry entry;
         private final Integer code;
+        private long start;
         
         public crawlWorker(final CrawlEntry entry) {
+            this.start = System.currentTimeMillis();
             this.entry = entry;
             this.entry.setStatus("worker-initialized", serverProcessorJob.STATUS_INITIATED);
             this.code = Integer.valueOf(entry.hashCode());
@@ -519,6 +541,10 @@ public class CrawlQueues {
                 workers.put(code, this);
                 this.start();
             }
+        }
+        
+        public long age() {
+            return System.currentTimeMillis() - start;
         }
         
         public void run() {

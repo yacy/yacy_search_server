@@ -135,7 +135,7 @@ public final class indexContainerCache implements Iterable<indexContainer>, inde
     
     public void dump(final File heapFile) throws IOException {
         assert this.cache != null;
-        Log.logInfo("indexContainerRAMHeap", "creating alternative rwi heap dump '" + heapFile.getName() + "', " + cache.size() + " rwi's");
+        Log.logInfo("indexContainerRAMHeap", "creating rwi heap dump '" + heapFile.getName() + "', " + cache.size() + " rwi's");
         if (heapFile.exists()) heapFile.delete();
         final HeapWriter dump = new HeapWriter(heapFile, payloadrow.primaryKeyLength, Base64Order.enhancedCoder);
         final long startTime = System.currentTimeMillis();
