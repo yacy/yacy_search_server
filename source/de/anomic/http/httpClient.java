@@ -446,6 +446,10 @@ public class httpClient {
             } else {
                 apacheHttpClient.executeMethod(hostConfig, method);
             }
+        } catch (final IllegalThreadStateException e) {
+        	// cleanUp statistics
+            HttpConnectionInfo.removeConnection(generateConInfo(method));
+            throw e;
         } catch (final IOException e) {
             // cleanUp statistics
             HttpConnectionInfo.removeConnection(generateConInfo(method));
