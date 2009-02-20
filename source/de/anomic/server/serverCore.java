@@ -532,7 +532,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
             if (this.controlSocket != null) try {
                 this.controlSocket.close();
                 serverCore.this.log.logInfo("Closing main socket of thread '" + this.getName() + "'");
-                this.controlSocket = null;
+                //this.controlSocket = null;
             } catch (final Exception e) {}
         }
         
@@ -620,24 +620,23 @@ public final class serverCore extends serverAbstractBusyThread implements server
                 System.err.println("ERROR: (internal) " + e);        
             } finally {
                 try {
-                    if ((this.controlSocket == null) || this.controlSocket.isClosed()) return;
+                    if ((this.controlSocket != null) && (! this.controlSocket.isClosed())) {
+                        // flush data
+                        this.out.flush();
                     
-                    // flush data
-                    this.out.flush();
+                        // maybe this doesn't work for all SSL socket implementations
+                        if (!(this.controlSocket instanceof SSLSocket)) {
+                            this.controlSocket.shutdownInput();
+                            this.controlSocket.shutdownOutput();
+                        }
                     
-                    // maybe this doesn't work for all SSL socket implementations
-                    if (!(this.controlSocket instanceof SSLSocket)) {
-                        this.controlSocket.shutdownInput();
-                        this.controlSocket.shutdownOutput();
+                        // close streams
+                        this.in.close();                    
+                        this.out.close();                   
+                    
+                        // close everything                    
+                        this.controlSocket.close();
                     }
-                    
-                    // close streams
-                    this.in.close();                    
-                    this.out.close();                   
-                    
-                    // close everything                    
-                    this.controlSocket.close();
-
                 } catch (final IOException e) {
                     e.printStackTrace();
                 }

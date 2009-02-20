@@ -338,6 +338,8 @@ public final class yacy {
                     // first start the server
                     sb.deployThread("10_httpd", "HTTPD Server/Proxy", "the HTTPD, used as web server and proxy", null, server, 0, 0, 0, 0);
                     //server.start();
+                    // repair log settings, gets overwritten with "PLASMA" in deployThread
+                    server.setLog(new Log("SERVER"));
 
                     // open the browser window
                     final boolean browserPopUpTrigger = sb.getConfig(plasmaSwitchboardConstants.BROWSER_POP_UP_TRIGGER, "true").equals("true");
