@@ -100,7 +100,7 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
     
     private yacySeed mySeed; // my own seed
     
-    private final Hashtable<String, yacySeed> nameLookupCache;
+    private final Hashtable<String, String> nameLookupCache; // a name-to-hash relation
     private final Hashtable<InetAddress, SoftReference<yacySeed>> ipLookupCache;
     
     public yacySeedDB(
@@ -125,7 +125,7 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
         seedPotentialDB = openSeedTable(seedPotentialDBFile);
         
         // start our virtual DNS service for yacy peers with empty cache
-        nameLookupCache = new Hashtable<String, yacySeed>();
+        nameLookupCache = new Hashtable<String, String>();
         
         // cache for reverse name lookup
         ipLookupCache = new Hashtable<InetAddress, SoftReference<yacySeed>>();
@@ -416,7 +416,7 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
         if (seed.isProper(false) != null) return;
         //seed.put(yacySeed.LASTSEEN, yacyCore.shortFormatter.format(new Date(yacyCore.universalTime())));
         try {
-            nameLookupCache.put(seed.getName(), seed);
+            nameLookupCache.put(seed.getName(), seed.hash);
             final Map<String, String> seedPropMap = seed.getMap();
             synchronized (seedPropMap) {
                 seedActiveDB.put(seed.hash, seedPropMap);
@@ -582,9 +582,13 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
         }
         
         // then try to use the cache
-        yacySeed seed = nameLookupCache.get(peerName);
-        if (seed != null) return seed;
-
+        String seedhash = nameLookupCache.get(peerName);
+        yacySeed seed;
+        if (seedhash != null) {
+        	seed = this.get(seedhash);
+        	if (seed != null) return seed;
+        }
+        
         // enumerate the cache and simultanous insert values
         String name;
     	for (int table = 0; table < 2; table++) {
@@ -593,7 +597,7 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
         		seed = e.next();
         		if (seed != null) {
         			name = seed.getName().toLowerCase();
-        			if (seed.isProper(false) == null) nameLookupCache.put(name, seed);
+        			if (seed.isProper(false) == null) nameLookupCache.put(name, seed.hash);
         			if (name.equals(peerName)) return seed;
         		}
         	}
@@ -601,7 +605,7 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
         // check local seed
         if (this.mySeed == null) initMySeed();
         name = mySeed.getName().toLowerCase();
-        if (mySeed.isProper(false) == null) nameLookupCache.put(name, mySeed);
+        if (mySeed.isProper(false) == null) nameLookupCache.put(name, mySeed.hash);
         if (name.equals(peerName)) return mySeed;
         // nothing found
         return null;
