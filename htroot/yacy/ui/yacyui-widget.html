@@ -31,16 +31,35 @@
 		   //<![CDATA[
 			$(document).ready(function() {
 				
-				var style = $.query.get('style');	
-				$.query.REMOVE('style');
-				if (style) {
-					switchStylestyle(style);
-				}
+				var style = $.query.get('style');				
+				if (style) { switchStylestyle(style); }
+				
+				var height = $.query.get('height');
+				if (!height) { height = 600; }
+				
+				var width = $.query.get('width');
+				if (!width) { width = 400; }
+							
+				var size = $.query.get('fontsize');
+				if (size) {
+					$('body').removeClass();
+					switch(size) {
+						case 'normal':
+							$('body').addClass('normal');
+							break;
+						case 'small':
+							$('body').addClass('small');
+							break;
+						case 'big':
+							$('body').addClass('big');
+							break;
+					}
+				}				
 				
 				$("#yresult").dialog({			
 					autoOpen: false,
-					height: 600,
-					width: 500,
+					height: height,
+					width: width,
 					position: ['top',50],
 					modal: false,			
 					resizable: true,
@@ -113,7 +132,7 @@
 		</script>		
 		<title>YaCy-UI Widget</title>		  
 	</head>
-	<body>
+	<body class="normal">
 		<div class="yform">
 			<form id="searchbox" class="small" method="get" accept-charset="UTF-8" action="jQuery">
 				<input id="search" name="search" type="text" size="15" maxlength="80" value=""/>				

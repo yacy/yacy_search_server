@@ -1,6 +1,12 @@
 /* Body */
-body {
+body.normal {
 	font-size: 75.0%;
+}
+body.small {
+	font-size: 55.0%;
+}
+body.big {
+	font-size: 85.0%;
 }
 p.url {
 	padding-top: 1px;
@@ -25,5 +31,6 @@ img.favicon{
   width: 16px;
   height: 16px;
   vertical-align: middle;
-  margin-bottom: -40px; 
+  margin-bottom: -40px;
+  padding: 5px 5px 5px 5px; 
 }
