@@ -45,7 +45,7 @@ public final class yacyTray {
 	private static plasmaSwitchboard sb;
 	
 	private static nativeTrayIcon ti;
-	private static boolean isDooble; // dooble browser integration
+	private static boolean isIntegrated; // browser integration
 	private static boolean isShown = false;
 	final private static boolean deutsch = System.getProperty("user.language","").equals("de");
 	
@@ -54,7 +54,7 @@ public final class yacyTray {
 	
 	public static void init(final plasmaSwitchboard par_sb) {
 		sb = par_sb;
-		isDooble = sb.getConfigBool("dooble", false);
+		isIntegrated = sb.getConfigBool("browserintegration", false);
 		try {
 			final boolean trayIcon = sb.getConfigBool("trayIcon", false);
 			if (trayIcon && serverSystem.isWindows) {
@@ -86,7 +86,7 @@ public final class yacyTray {
 		PopupMenu menu = new PopupMenu();
 		MenuItem menuItem;
 		
-		if(isDooble) return menu;
+		if(isIntegrated) return menu;
 		
 		// YaCy Search
 		if(deutsch) label = "YaCy Suche";
@@ -150,7 +150,7 @@ public final class yacyTray {
 	}
 	
 	private static void openBrowser(final String browserPopUpPage){
-		if(isDooble) return;
+		if(isIntegrated) return;
 		// no need for https, because we are on localhost
 		serverSystem.openBrowser("http://localhost:" + sb.getConfig("port", "8080") + "/" + browserPopUpPage);
 	}

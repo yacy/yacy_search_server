@@ -897,5 +897,5 @@ disk.free = 3000
 cgi.allow = false
 cgi.suffixes = cgi,pl
 
-# whether this is a version for dooble browser
-dooble = false
+# whether this is a version for a web browser
+browserintegration = false
