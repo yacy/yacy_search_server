@@ -15,24 +15,26 @@
 			unique: false,
 			toggle: function() {
 				var $this = $(this);
-				if ($this.hasClass("expandable")) {					
-					var select = "li:has(ul li[id="+$this.attr("id")+"])";
-					qtag = $(select).attr("id");
-					if (!qtag) qtag = "/";
-					$this.addClass("hasChildren");
-					$this.find("ul").empty();
-					if (tabid == "#Bookmarks") {
-						reloadBM();
-					}					
-				} else if ($this.hasClass("collapsable")) {					
-					qtag = $this.attr("id");
-					if (tabid == "#Bookmarks") {
-						reloadBM();
-					} 		
+				if (!$this.attr("id") == "bmk_tags_folder") {
+					if ($this.hasClass("expandable")) {					
+						var select = "li:has(ul li[id="+$this.attr("id")+"])";
+						qtag = $(select).attr("id");
+						if (!qtag) qtag = "/";
+						$this.addClass("hasChildren");					
+						$this.find("ul").empty();
+						if ($tabs.tabs.index == bmk_tab) {
+							reloadBM();
+						}					
+					} else if ($this.hasClass("collapsable")) {					
+						qtag = $this.attr("id");
+						if ($tabs.tabs.index == bmk_tab) {
+							reloadBM();
+						} 		
+					}
 				}
 			}				
 		});
-		
+						
 		/* Menu .click(function() */
 		$("#searchtext").click(function () { 
 			$("#side2").accordion("activate", 0);

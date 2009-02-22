@@ -37,6 +37,7 @@
 	 		height: height,
 	 		autoload: true,
 	 		onSuccess: function() {
+	 			$("#side2").accordion("activate", 2);
 	 			$("a.favicon").faviconize({
 					position: "before",
 					defaultImage: "img-2/article.png",
@@ -45,7 +46,8 @@
 	 		},
 	 		preProcess: function(data) {
 		   		var total = data.channels[0].totalResults.replace(/[,.]/,"");  		
-		   		var page = (data.channels[0].startIndex / data.channels[0].itemsPerPage) + 1;				   		   	
+		   		var page = (data.channels[0].startIndex / data.channels[0].itemsPerPage) + 1;
+			   	var search = data.channels[0].searchTerms;
 			   	var rows = {};
 			   	$.each (
 					data.channels[0].items,
@@ -56,7 +58,22 @@
 							rows[i] = {id: item.guid, cell: [item.guid, fav, html, "Tags", "Folders", item.pubDate]};
 						}								
 					}
+				);				
+				var bhtml = "<li id='"+search+"'><span class='folder'>"+search+"</span><ul>";
+				$.each (
+					data.channels[0].topwords,
+					function(i,topword) {
+						if (topword) {							
+							bhtml = bhtml + "<li><span class='topword'>"+topword.word+"</span></li>";
+						}								
+					}
 				);
+				bhtml = bhtml + "</ul></li>";
+				var bfold = $(bhtml).prependTo("#topul");
+				$("#topwords").treeview({
+					add: bfold
+				});
+								
 				var pdata = {
 					page: page,
 					total: total,
@@ -99,7 +116,7 @@
 				   dataType: p.dataType,
 				   success: function(data){
 				   		/* yacy limits itemsPerPage for unauthenticated users */
-						p.rp = parseInt(data.channels[0].itemsPerPage);											
+						p.rp = parseInt(data.channels[0].itemsPerPage);
 						g.flexAddData(data);
 				   },
 				   error: function(data) { 

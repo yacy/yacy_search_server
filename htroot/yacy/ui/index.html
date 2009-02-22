@@ -58,6 +58,7 @@
 	$(function() {		
 		qtag = "";
 		flex = {};
+		bmk_tab = 2;
 		tabid = "#Welcome";
 		/* Initialize Tabs and set up close function */
 		$tabs = $('#tabs-container').tabs({
@@ -105,8 +106,7 @@
 			    ui.panel   - element, that contains the selected/clicked tab contents
 			    ui.index   - zero-based index of the selected (clicked) tab
 		    */
-	    	tabid = "#"+ui.panel.id;						
-			var bmk_tab = 2;
+	    	tabid = "#"+ui.panel.id;
 			if (ui.index == bmk_tab) {
 				$("#searchbox select[name='resource']").setValue('ymarks');
 				$("#searchbox input[name='contentdom']").setValue('text');

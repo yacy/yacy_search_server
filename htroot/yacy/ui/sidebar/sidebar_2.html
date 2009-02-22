@@ -12,6 +12,10 @@
 		loadTagCloud();
 	});
 	
+	$("#topwords").treeview({
+			unique: true
+	});
+		
 	function loadTagCloud() {		
 		$("#tagcloud *").remove();
 		$("#sidebar-2-1").toggleClass("ui.loading");
@@ -21,6 +25,7 @@
 			dataType: "xml",
 			cache: false,
 			success: function(xml) {				
+				var bhtml = "<li id='bmk_tags_folder' class='closed'><span class='folder'>Bookmark Tags</span><ul>";
 				$(xml).find('tag').each(function(){					
 					var count = $(this).attr('count');
 					var tag = $(this).attr('tag');										
@@ -33,13 +38,19 @@
 							qtag = $(this).text().replace(/\s+/g,"");
 							$("select[name='resource']").setValue('ymarks');
 							$("input[name='search']").setValue(qtag);
-							if (tabid == "#Bookmarks") {
+							if ($tabs.tabs.index == bmk_tab) {
 								reloadBM();
 							} else {
 								$tabs.tabs('select',2);
 							}							
-						});																										
+						});
+					bhtml = bhtml + "<li><span class='tag'>"+tag+"</span></li>";																										
 				}); //close each(
+				bhtml = bhtml + "</ul></li>";
+				var bfold = $(bhtml).prependTo("#yfolder");
+				$("#yfolder").treeview({
+					add: bfold
+				});		
 				$("#sidebar-2-1").toggleClass("ui.loading");
 			}
 		}); //close $.ajax(	
@@ -47,7 +58,7 @@
   //]]>  
 </script>
 
-<h3><a href="#">Search Options</a></h3><!-- 0 -->
+<h3 id="sidebar-2-0"><a href="#">Search Options</a></h3><!-- 0 -->
 <div class="yform">	
 		<form id="yoptions" class="small" method="get" action="" accept-charset="UTF-8">			
 			<p>			
@@ -74,6 +85,16 @@
 <h3 id="sidebar-2-1"><a href="#">Bookmark TagCloud</a></h3><!-- 1 -->
 <div>
 	<p id="tagcloud"></p>	
+</div>
+
+<h3 id="sidebar-2-2"><a href="#">Topwords</a></h3><!-- 2 -->
+<div>
+	<ul id="topwords" class="filetree">
+		<li><span class='folder'>Topwords</span>
+			<ul id="topul">
+			</ul>
+		</li>
+	</ul>	
 </div>
 
 
