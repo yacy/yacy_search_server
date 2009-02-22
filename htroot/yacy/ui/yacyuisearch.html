@@ -15,8 +15,9 @@
 			$(document).ready(function() {
 				
 				var height = document.documentElement.clientHeight - 240;
-				var query = $.query.get('search');				
-				$.query.REMOVE('search');				
+				var query = $.query.get('search');
+				if (query == '') query = $.query.get('query');
+				$.query.REMOVE('search');
 										    			
 		 		$(".yresult").flexigrid({
 			 		url: '/yacysearch.json',
@@ -101,7 +102,7 @@
 						var param = [
 							 { name : 'startRecord', value : offset }
 							,{ name : 'maximumRecords', value : p.rp }		
-							,{ name : 'search', value : p.query}
+							,{ name : 'query', value : p.query}
 							,{ name : 'urlmaskfilter', value : urlmaskfilter}
 							,{ name : 'prefermaskfilter', value: prefermaskfilter}
 							,{ name : 'verify', value : verify}
