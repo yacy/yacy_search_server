@@ -15,8 +15,6 @@ div.sidebar {
   float:left;
   width:250px;
 }
-
-
 .yresult .favicon {
 	width: 16px; 
 	height: 16px;
@@ -56,8 +54,6 @@ table.adminconsole img {
 table.adminconsole a {
 	text-decoration:none;	
 }
-
-
 /* Searchbox */
 table.contentdom {
 	width:100%;
@@ -105,7 +101,6 @@ div.ys {
   font: "Trebuchet MS", Trebuchet, Verdana, Helvetica, Arial, sans-serif;
   font-size: 12px;  
 }
-
 .menu img.logo {
   width: 256px; 
   height: 128px;  
@@ -114,6 +109,12 @@ div.ys {
 }
 img {
   vertical-align: top;
+}
+img.favicon{  
+  width: 16px;
+  height: 16px;
+  vertical-align: middle;  
+  margin-left: -20px;
 }
 img.help {
   vertical-align: middle;
@@ -208,88 +209,24 @@ h3.linktitle {
 	margin: 10px 10px 10px 10px;
 	font-size: .9em;
 }
-
-/* YaCy Search Results ---------------------------*/
-
-div.searchresults {
-  	width:100%;
-	margin-top: 1.0em;
-	margin-left: 5px;		
-}
-div.searchselect {
-	width:100%;
-	margin-top: 1.0em;
-	margin-left: 5px;
-	background-color:#F0F0F6;	
-}
-
-div.searchresults.hidden {
-  display:none;
-}
-
-.searchresults h3.linktitle, .searchselect h3.linktitle {	
-	margin:2px;
-	padding-left: 20px;
-	margin-bottom: -0.5em;
-    font-size: 1.0em;
-    line-height: 1.2em
-}
-.snippet {
-  	font-style:italic;
-	font-size: 0.9em;
-  	color: #808080;
-  	line-height: 1.2em;
-  	margin-bottom:-1em;
-  	margin-left:22px;
-}
-.snippet b {
-  	color: black;
-}
-.searchresults .linktitle a, .searchselect .linktitle a {
-	color:#239AFF;  	
-  	text-decoration:none;
-}
-.searchresults .url, .searchselect .url {
-	font-size: 0.9em;
-  	line-height: 1.2em;
-  	margin-bottom:0.6em;
-  	margin-left:22px;
-}
-.searchresults .url a, .searchselect .url a {
-  	color:#20A020;
-  	text-decoration:none;
-}
-img.favicon{  
-  width: 16px;
-  height: 16px;
-  vertical-align: middle;  
-  margin-left: -20px;
-}
-/* <dl>, <dd>, <dt> */
-
-dl.pairs dd { 
-  float:right;
-  padding: 2px;
-  margin-right:15px; 
-}
-
-dl.pairs dt {
-  float:left;  
-  text-align:left;
-  padding: 5px; 
-}
-
 #yfolder {	
 	margin: 5px 5px 10px 20px; /* top right bottom left */
 	max-height: 250px;
 	overflow-x: hidden;
 	overflow-y: auto;
 }
-
 #tagcloud {
 	margin: 10px 10px 10px 7px; /* top right bottom left */
 	text-align: justify;
 	line-height: 1.2em;
+}
+#topwords {
+	max-height: 160px;
+	overflow-x: hidden;
+	overflow-y: auto;
+}
+#yfolder li, #topwords li, #topul li {
+	display: block;
 }
 
 #tagcloud a {
@@ -321,8 +258,17 @@ dl.pairs dt {
 #sidebar .ui-accordion-header .ui-icon { position: absolute; left: .25em; top: 50%; margin-top: -8px; }
 #sidebar .ui-accordion-content { padding: 0.8em 0.5em; border-top: 0; margin-top: -2px; position: relative; top: 1px; margin-bottom: 2px; overflow: auto; display: none; font-size:11px;}
 
-
-
-
+/* overrides for treeview styles
+-------------------------------------*/
+.filetree span.tag { 
+	background: url(../img/tags/tag_blue.png) 0 0 no-repeat;
+	padding: 1px 0px 0px 18px; 
+	display: block;
+}
+.filetree span.topword { 
+	background: url(../img/flexigrid/magnifier.png) 0 0 no-repeat;
+	padding: 1px 0px 0px 18px; 
+	display: block;
+}
 
 
