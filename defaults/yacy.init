@@ -896,3 +896,6 @@ disk.free = 3000
 # setting if execution of CGI files is allowed or not
 cgi.allow = false
 cgi.suffixes = cgi,pl
+
+# whether this is a version for dooble browser
+dooble = false
