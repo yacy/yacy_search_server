@@ -63,17 +63,19 @@
 			window.document.location.href = '/api/bookmarks/get_bookmarks.xml?tag='+qtag;
 		}
 		else if (com=='Delete') {
-			confirm('Delete ' + $('.trSelected',grid).length + ' bookmark(s)?')				
-			$('.trSelected',grid).each(function(){
-				var url = "/api/bookmarks/posts/delete_p.xml?login=&urlhash="+$(this).find('td :first').text();					
-				$.ajax({
-					type: 'POST',
-					url: url,			
-					dataType: 'xml'						
-				}); // close $.ajax(					
-			}); //close each(
-			loadTagCloud();
-			reloadBM();	
+			var check = confirm('Delete ' + $('.trSelected',grid).length + ' bookmark(s)?');
+			if(check == true) {				
+				$('.trSelected',grid).each(function(){
+					var url = "/api/bookmarks/posts/delete_p.xml?login=&urlhash="+$(this).find('td :first').text();					
+					$.ajax({
+						type: 'POST',
+						url: url,			
+						dataType: 'xml'						
+					}); // close $.ajax(					
+				}); //close each(
+				loadTagCloud();
+				reloadBM();
+			}
 		}
 		else if (com=='Add') {			
 			$('#bmaddform').resetForm();
