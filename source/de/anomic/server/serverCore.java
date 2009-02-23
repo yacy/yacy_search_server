@@ -141,10 +141,11 @@ public final class serverCore extends serverAbstractBusyThread implements server
         if (System.currentTimeMillis() - lastAutoTermination < 30000) return;
         this.lastAutoTermination = System.currentTimeMillis();
         
-        int threadCount = serverCore.sessionThreadGroup.activeCount();    
+        int threadCount = serverCore.sessionThreadGroup.activeCount();
+        if (threadCount < maxBusySessions - 10) return; // don't panic
         final Thread[] threadList = new Thread[this.getJobCount()];     
         threadCount = serverCore.sessionThreadGroup.enumerate(threadList);
-        for ( int currentThreadIdx = 0; currentThreadIdx < threadCount; currentThreadIdx++ )  {                        
+        for (int currentThreadIdx = 0; currentThreadIdx < threadCount; currentThreadIdx++ )  {                        
             final Thread currentThread = threadList[currentThreadIdx];
             if (
                     (currentThread != null) && 
@@ -153,8 +154,9 @@ public final class serverCore extends serverAbstractBusyThread implements server
                     (((Session) currentThread).getTime() > minage) 
             ) {
                 this.log.logInfo("check for " + currentThread.getName() + ": " + ((Session) currentThread).getTime() + " ms alive, stopping thread");
+                Session session = (Session) currentThread;
                 // trying to stop session
-                ((Session)currentThread).setStopped(true);
+                session.setStopped(true);
                 try { Thread.sleep(100); } catch (final InterruptedException ex) {}
                 
                 // trying to interrupt session
