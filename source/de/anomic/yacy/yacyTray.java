@@ -49,12 +49,15 @@ public final class yacyTray {
 	private static boolean isShown = false;
 	final private static boolean deutsch = System.getProperty("user.language","").equals("de");
 	
+	public static String trayLabel;
+	
 	public static boolean lockBrowserPopup = true;
 	
 	
 	public static void init(final plasmaSwitchboard par_sb) {
 		sb = par_sb;
 		isIntegrated = sb.getConfigBool("browserintegration", false);
+		trayLabel = sb.getConfig("tray.label", "YaCy");
 		try {
 			final boolean trayIcon = sb.getConfigBool("trayIcon", false);
 			if (trayIcon && serverSystem.isWindows) {
@@ -202,7 +205,7 @@ class nativeTrayIcon {
 
 			Object arglist1[] = new Object[3];
 			arglist1[0] = i;
-			arglist1[1] = "YaCy";
+			arglist1[1] = yacyTray.trayLabel;
 			arglist1[2] = menu;
 			this.TrayIcon = TrayIconConstructor.newInstance(arglist1);
 
