@@ -125,6 +125,7 @@ public class yacysearchitem {
             prop.put("content_date822", plasmaSwitchboard.dateString822(result.modified()));
             prop.put("content_ybr", plasmaSearchRankingProcess.ybr(result.hash()));
             prop.putNum("content_size", result.filesize());
+            prop.putHTML("content_sizename", sizename(result.filesize()));
             prop.put("content_nl", (item == 0) ? 0 : 1);
             
             final TreeSet<String>[] query = theQuery.queryWords();
@@ -203,6 +204,16 @@ public class yacysearchitem {
         final int p = s.lastIndexOf('.');
         if (p < 0) return s.substring(0, length - 3) + "...";
         return s.substring(0, length - (s.length() - p) - 3) + "..." + s.substring(p);
+    }
+    
+    private static String sizename(int size) {
+        if (size < 1024) return size + " bytes";
+        size = size / 1024;
+        if (size < 1024) return size + " kbyte";
+        size = size / 1024;
+        if (size < 1024) return size + " mbyte";
+        size = size / 1024;
+        return size + " gbyte";
     }
 
 }

@@ -3,5 +3,7 @@
 <link>#[link]#</link>
 <description>#[description-xml]#</description>
 <pubDate>#[date822]#</pubDate>
+<yacy:size>#[size]#</yacy:size>
+<yacy:sizename>#[sizename]#</yacy:sizename>
 <guid isPermaLink="false">#[urlhash]#</guid>
 </item>#(/content)#

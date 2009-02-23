@@ -4,5 +4,7 @@
       "link": "#[link]#",
       "description": "#[description]#",
       "pubDate": "#[date822]#",
+      "size": "#[size]#",
+      "sizename": "#[sizename]#",
       "guid": "#[urlhash]#"
     }#(/content)#
