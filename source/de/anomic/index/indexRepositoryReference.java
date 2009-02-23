@@ -423,7 +423,7 @@ public final class indexRepositoryReference {
                 if (format == 2) {
                     pw.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
                     pw.println("<?xml-stylesheet type='text/xsl' href='/yacysearch.xsl' version='1.0'?>");
-                    pw.println("<rss version=\"2.0\">");
+                    pw.println("<rss version=\"2.0\" xmlns:yacy=\"http://www.yacy.net/\" xmlns:opensearch=\"http://a9.com/-/spec/opensearch/1.1/\" xmlns:atom=\"http://www.w3.org/2005/Atom\">");
                     pw.println("<channel>");
                     pw.println("<title>YaCy Peer-to-Peer - Web-Search LURL Export</title>");
                     pw.println("<description></description>");
@@ -461,6 +461,7 @@ public final class indexRepositoryReference {
                             if (comp.dc_creator().length() > 0) pw.println("<author>" + htmlFilterCharacterCoding.unicode2xml(comp.dc_creator(), true) + "</author>");
                             if (comp.dc_subject().length() > 0) pw.println("<description>" + htmlFilterCharacterCoding.unicode2xml(comp.dc_subject(), true) + "</description>");
                             pw.println("<pubDate>" + entry.moddate().toString() + "</pubDate>");
+                            pw.println("<yacy:size>" + entry.size() + "</yacy:size>");
                             pw.println("<guid isPermaLink=\"false\">" + entry.hash() + "</guid>");
                             pw.println("</item>");
                         }

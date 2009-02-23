@@ -5,5 +5,8 @@
 <pubDate>#[date822]#</pubDate>
 <yacy:size>#[size]#</yacy:size>
 <yacy:sizename>#[sizename]#</yacy:sizename>
+<yacy:host>#[host]#</yacy:host>
+<yacy:path>#[path]#</yacy:path>
+<yacy:file>#[file]#</yacy:file>
 <guid isPermaLink="false">#[urlhash]#</guid>
 </item>#(/content)#

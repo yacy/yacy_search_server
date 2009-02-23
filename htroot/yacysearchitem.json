@@ -6,5 +6,8 @@
       "pubDate": "#[date822]#",
       "size": "#[size]#",
       "sizename": "#[sizename]#",
-      "guid": "#[urlhash]#"
+      "guid": "#[urlhash]#",
+      "host": "#[host]#",
+      "path": "#[path]#",
+      "file": "#[file]#"
     }#(/content)#

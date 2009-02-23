@@ -124,8 +124,11 @@ public class yacysearchitem {
             prop.put("content_date", plasmaSwitchboard.dateString(result.modified()));
             prop.put("content_date822", plasmaSwitchboard.dateString822(result.modified()));
             prop.put("content_ybr", plasmaSearchRankingProcess.ybr(result.hash()));
-            prop.putNum("content_size", result.filesize());
+            prop.putHTML("content_size", Integer.toString(result.filesize())); // we don't use putNUM here because that number shall be usable as sorting key. To print the size, use 'sizename'
             prop.putHTML("content_sizename", sizename(result.filesize()));
+            prop.putHTML("content_host", result.url().getHost());
+            prop.putHTML("content_file", result.url().getFile());
+            prop.putHTML("content_path", result.url().getPath());
             prop.put("content_nl", (item == 0) ? 0 : 1);
             
             final TreeSet<String>[] query = theQuery.queryWords();
