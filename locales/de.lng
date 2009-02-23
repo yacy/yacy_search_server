@@ -286,10 +286,17 @@ Greeting Line==Begr&uuml;ssungszeile
 URL of Home Page==Homepage URL
 URL of a Small Corporate Image==URL der kleinen Grafik
 URL of a Large Corporate Image==URL der grossen Grafik
+Default Pop-Up Page==Standard Pop-Up Seite
+Status Page==Status Seite
+Search Front Page==Suchseite
+Search Page \(small header\)==Suchseite (kleiner Kopf)
+Interactive Search Page==Interaktive Suchseite
 "Change Search Page"=="Suchseite &auml;ndern"
 "Set to Default Values"=="Standardwerte wiederherstellen"
 The search page can be integrated in your own web pages with an iframe. Simply use the following code:==Die Suchseite kann mit einem iframe in Ihre eigene Website integriert werden. Benutzen Sie einfach folgenden Code:
 This would look like:==Das wird dann so aussehen:
+For a search page with a small header, use this code:==F&uuml;r eine Seite mit einem kleinen Kopf benutzen Sie diesen Code:
+A third option is the interactive search. Use this code:==Eine dritte Option ist die interaktive Suche. Benutzen Sie dazu diesen Code: 
 #-----------------------------
 
 #File: ConfigAccounts_p.html
@@ -2222,6 +2229,7 @@ View as==Zeige als
 Plain Text==Quelltext
 Parsed Text==Geparster Text
 Parsed Sentences==Geparste S&auml;tze
+Parsed Tokens/Words==Geparste Zeichen/W&ouml;rter
 Link List==Linkliste
 "Show"=="Anzeigen"
 No URL hash submitted.==Es wurde kein URL Hash &uuml;bertragen.
@@ -2414,6 +2422,8 @@ YaCy Interactive Search==YaCy interaktive Suche
 >total results==>Ergebnisse insgesamt
 &nbsp;topwords:==&nbsp;Topw&ouml;rter:
 >Name==>Name
+>Size==>Gr&ouml;sse
+>Date==>Datum
 #>Link==>Link
 #-----------------------------
 
@@ -2744,9 +2754,16 @@ Accounts==Konten
 
 #File: yacy/ui/yacyui-bookmarks.html
 #-----------------------------
+'Add'=='Hinzuf&uuml;gen'
+'Crawl'=='Crawlen'
+'Edit'=='Bearbeiten'
+'Delete'=='L&ouml;schen'
+'Rename'=='Umbenennen'
+'Help'=='Hilfe'
+
 "public bookmark"=="&ouml;ffentliches Lesezeichen"
 "private bookmark"=="privates Lesezeichen"
-"edit bookmark"=="Lesezeichen bearbeiten"
+
 "delete bookmark"=="Lesezeichen l&ouml;schen"
 "YaCy Bookmarks"=="YaCy Lesezeichen"
 >Title==>Titel
