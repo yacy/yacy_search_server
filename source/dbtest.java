@@ -222,7 +222,7 @@ public class dbtest {
         boolean eq = true;
         Row.Entry test_entry, reference_entry;
         
-        Iterator<Row.Entry> i = test.rows(true, null);
+        Iterator<Row.Entry> i = test.rows();
         System.out.println("* Testing now by enumeration over test table");
         final long ts = System.currentTimeMillis();
         while (i.hasNext()) {
@@ -234,7 +234,7 @@ public class dbtest {
             }
         }
         
-        i = reference.rows(true, null);
+        i = reference.rows();
         System.out.println("* Testing now by enumeration over reference table");
         final long rs = System.currentTimeMillis();
         while (i.hasNext()) {
@@ -390,8 +390,8 @@ public class dbtest {
             
             if (command.equals("list")) {
                 CloneableIterator<Row.Entry> i = null;
-                if (table_test instanceof Tree) i = ((Tree) table_test).rows(true, null);
-                if (table_test instanceof SQLTable) i = ((SQLTable) table_test).rows(true, null);
+                if (table_test instanceof Tree) i = ((Tree) table_test).rows();
+                if (table_test instanceof SQLTable) i = ((SQLTable) table_test).rows();
                 if(i != null) {
                     Row.Entry row;
                     while (i.hasNext()) {

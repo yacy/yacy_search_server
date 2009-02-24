@@ -164,7 +164,7 @@ public class Balancer {
         // returns number of deletions
         
         // first find a list of url hashes that shall be deleted
-        final Iterator<Row.Entry> i = urlFileIndex.rows(true, null);
+        final Iterator<Row.Entry> i = urlFileIndex.rows();
         final HashSet<String> urlHashes = new HashSet<String>();
         Row.Entry rowEntry;
         CrawlEntry crawlEntry;
@@ -646,7 +646,7 @@ public class Balancer {
         private Iterator<Row.Entry> rowIterator;
         
         public EntryIterator() throws IOException {
-            rowIterator = urlFileIndex.rows(true, null);
+            rowIterator = urlFileIndex.rows();
         }
         
         public boolean hasNext() {

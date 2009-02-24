@@ -336,6 +336,10 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
         return new rowIterator(up, firstKey);
     }
     
+    public synchronized CloneableIterator<Row.Entry> rows() {
+        return new rowIterator(true, null);
+    }
+    
     public class rowIterator implements CloneableIterator<Row.Entry> {
 
         private final boolean up;

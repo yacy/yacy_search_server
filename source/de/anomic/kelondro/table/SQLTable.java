@@ -258,6 +258,10 @@ public class SQLTable implements ObjectIndex {
         return null;
     }
 
+    public CloneableIterator<Row.Entry> rows() throws IOException {
+        return null;
+    }
+
     public CloneableIterator<byte[]> keys(final boolean up, final byte[] startKey) {
         // Objects are of type byte[]
         return null;

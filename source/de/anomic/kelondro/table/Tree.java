@@ -1007,6 +1007,10 @@ public class Tree extends CachedRecords implements ObjectIndex {
         return new rowIterator(up, firstKey, this.size());
     }
     
+    public CloneableIterator<Row.Entry> rows() throws IOException {
+        return new rowIterator(true, null, this.size());
+    }
+    
     public class rowIterator implements CloneableIterator<Row.Entry> {
         
         int chunkSize;
@@ -1615,7 +1619,7 @@ public class Tree extends CachedRecords implements ObjectIndex {
     public static int countElements(final ObjectIndex t) {
         int count = 0;
         try {
-            final Iterator<Row.Entry> iter = t.rows(true, null);
+            final Iterator<Row.Entry> iter = t.rows();
             Row.Entry row;
             while (iter.hasNext()) {
                 count++;

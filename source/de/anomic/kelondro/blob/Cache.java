@@ -454,6 +454,10 @@ public class Cache implements ObjectIndex {
         return index.rows(up, firstKey);
     }
 
+    public synchronized CloneableIterator<Row.Entry> rows() throws IOException {
+        return index.rows();
+    }
+
     public int size() {
         return index.size();
     }

@@ -79,11 +79,12 @@ public class EcoTable implements ObjectIndex {
     BufferedEcoFS file;
     Row rowdef;
     int fail;
-
+    File tablefile;
     Row taildef;
     private final int buffersize;
     
     public EcoTable(final File tablefile, final Row rowdef, final int useTailCache, final int buffersize, final int initialSpace) {
+        this.tablefile = tablefile;
         this.rowdef = rowdef;
         this.buffersize = buffersize;
         //this.fail = 0;
@@ -574,6 +575,40 @@ public class EcoTable implements ObjectIndex {
         return index.size();
     }
 
+    public synchronized CloneableIterator<Entry> rows() throws IOException {
+        return new rowIteratorNoOrder();
+    }
+
+    public class rowIteratorNoOrder implements CloneableIterator<Entry> {
+        final Iterator<byte[]> ri;
+        
+        public rowIteratorNoOrder() throws IOException {
+            ri = new ChunkIterator(tablefile, rowdef.objectsize, rowdef.objectsize);
+        }
+        
+        public CloneableIterator<Entry> clone(Object modifier) {
+            try {
+                return new rowIteratorNoOrder();
+            } catch (IOException e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
+        
+        public boolean hasNext() {
+            return ri.hasNext();
+        }
+        
+        public Entry next() {
+            byte[] r = ri.next();
+            return rowdef.newEntry(r);
+        }
+        
+        public void remove() {
+            throw new UnsupportedOperationException("no remove in row iterator");
+        }
+        
+    }
 
     public synchronized CloneableIterator<Entry> rows(final boolean up, final byte[] firstKey) throws IOException {
         return new rowIterator(up, firstKey);

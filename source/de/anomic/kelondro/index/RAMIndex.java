@@ -24,6 +24,7 @@
 
 package de.anomic.kelondro.index;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -32,6 +33,7 @@ import java.util.List;
 import de.anomic.kelondro.index.Row.Entry;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.MergeIterator;
+import de.anomic.kelondro.order.StackIterator;
 
 public class RAMIndex implements ObjectIndex {
     
@@ -224,6 +226,27 @@ public class RAMIndex implements ObjectIndex {
                 entryComparator,
                 MergeIterator.simpleMerge,
                 true);
+    }
+    
+    public synchronized CloneableIterator<Row.Entry> rows() throws IOException {
+        // returns the row-iterator of the underlying kelondroIndex
+        if (index1 == null) {
+            // finish initialization phase
+            index0.sort();
+            index0.uniq();
+            index1 = new RowSet(rowdef, 0);
+            return index0.rows();
+        }
+        assert (index1 != null);
+        if (index0 == null) {
+            //assert consistencyAnalysis0() : "consistency problem: " + consistencyAnalysis();
+            return index1.rows();
+        }
+        // index0 should be sorted
+        // sort index1 to enable working of the merge iterator
+        index1.sort();
+        //assert consistencyAnalysis0() : "consistency problem: " + consistencyAnalysis();
+        return new StackIterator<Row.Entry>(index0.rows(), index1.rows());
     }
     
     public synchronized void close() {

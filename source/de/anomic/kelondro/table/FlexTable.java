@@ -345,10 +345,14 @@ public class FlexTable extends FlexWidthArray implements ObjectIndex {
     	return index.keys(up, firstKey);
     }
     
+    public synchronized CloneableIterator<Row.Entry> rows() throws IOException {
+        return new rowIterator(true, null);
+    }
+    
     public synchronized CloneableIterator<Row.Entry> rows(final boolean up, final byte[] firstKey) throws IOException {
         if (index == null) return new rowIterator(up, firstKey);
         assert this.size() == index.size() : "content.size() = " + this.size() + ", index.size() = " + index.size();
-		return new rowIterator(up, firstKey);
+        return new rowIterator(up, firstKey);
     }
     
     public class rowIterator implements CloneableIterator<Row.Entry> {

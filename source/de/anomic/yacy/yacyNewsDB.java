@@ -110,7 +110,7 @@ public class yacyNewsDB {
         Iterator<Row.Entry> rowIterator;
 
         public recordIterator() throws IOException {
-            rowIterator = news.rows(true, null);
+            rowIterator = news.rows();
         }
 
         public boolean hasNext() {

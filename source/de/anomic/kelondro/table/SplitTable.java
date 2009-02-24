@@ -56,6 +56,7 @@ import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.order.MergeIterator;
 import de.anomic.kelondro.order.Order;
+import de.anomic.kelondro.order.StackIterator;
 import de.anomic.kelondro.util.Log;
 import de.anomic.kelondro.util.NamePrefixThreadFactory;
 
@@ -379,6 +380,15 @@ public class SplitTable implements ObjectIndex {
             c.add(i.next().rows(up, firstKey));
         }
         return MergeIterator.cascade(c, entryOrder, MergeIterator.simpleMerge, up);
+    }
+    
+    public synchronized CloneableIterator<Row.Entry> rows() throws IOException {
+        final List<CloneableIterator<Row.Entry>> c = new ArrayList<CloneableIterator<Row.Entry>>(tables.size());
+        final Iterator<ObjectIndex> i = tables.values().iterator();
+        while (i.hasNext()) {
+            c.add(i.next().rows());
+        }
+        return StackIterator.stack(c);
     }
 
     public final int cacheObjectChunkSize() {

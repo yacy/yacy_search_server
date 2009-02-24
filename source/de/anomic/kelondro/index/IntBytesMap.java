@@ -188,17 +188,11 @@ public class IntBytesMap {
                 index0.uniq();
                 index1 = new RowSet(rowdef, 0);
             }
-            return index0.rows(true, null);
+            return index0.rows();
         } else {
         	assert (index1 != null);
-            return index1.rows(true, null);
+            return index1.rows();
         }
-//        return new kelondroMergeIterator<kelondroRow.Entry>(
-//    				index0.rows(true, null),
-//    				index1.rows(true, null),
-//    				entryOrder,
-//    				kelondroMergeIterator.simpleMerge,
-//                    true);
     }
     
     public void flush() {

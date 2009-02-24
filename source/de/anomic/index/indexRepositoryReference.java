@@ -151,6 +151,11 @@ public final class indexRepositoryReference {
         return urlIndexFile.has(urlHash.getBytes());
     }
 
+    public CloneableIterator<indexURLReference> entries() throws IOException {
+        // enumerates entry elements
+        return new kiter();
+    }
+
     public CloneableIterator<indexURLReference> entries(final boolean up, final String firstHash) throws IOException {
         // enumerates entry elements
         return new kiter(up, firstHash);
@@ -161,6 +166,12 @@ public final class indexRepositoryReference {
         private final Iterator<Row.Entry> iter;
         private final boolean error;
         boolean up;
+
+        public kiter() throws IOException {
+            this.up = true;
+            this.iter = urlIndexFile.rows();
+            this.error = false;
+        }
 
         public kiter(final boolean up, final String firstHash) throws IOException {
             this.up = up;
@@ -439,7 +450,7 @@ public final class indexRepositoryReference {
                         count++;
                     }
                 } else {
-                    final Iterator<indexURLReference> i = entries(true, null); // iterates indexURLEntry objects
+                    final Iterator<indexURLReference> i = entries(); // iterates indexURLEntry objects
                     indexURLReference entry;
                     indexURLReference.Components comp;
                     String url;
