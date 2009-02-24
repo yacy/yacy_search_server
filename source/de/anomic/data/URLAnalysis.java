@@ -35,11 +35,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
 
+import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.yacy.yacyURL;
 
 public class URLAnalysis {
@@ -69,13 +72,14 @@ public class URLAnalysis {
         
         public void run() {
             yacyURL url;
+            Pattern p = Pattern.compile("~|\\(|\\)|\\+|-|@|:|%|\\.|;|_");
             while (true) {
                 try {
                     url = in.take();
                     if (url == poison) break;
                     //System.out.println(url);
                     update(url.getHost().replaceAll("-", "\\.").split("\\."));
-                    update(url.getPath().replaceAll("~", "/").replaceAll("\\(", "/").replaceAll("\\)", "/").replaceAll("\\+", "/").replaceAll("-", "/").replaceAll("@", "/").replaceAll(":", "/").replaceAll("%", "/").replaceAll("\\.", "/").replaceAll(";", "/").replaceAll("_", "/").split("/"));
+                    update(p.matcher(url.getPath()).replaceAll("/").split("/"));
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -108,6 +112,7 @@ public class URLAnalysis {
         File outfile = new File(analysis);
         BufferedReader reader = null;
         long time = System.currentTimeMillis();
+        long start = time;
         int count = 0;
 
         System.out.println("start processing");
@@ -125,9 +130,9 @@ public class URLAnalysis {
                     }
                 }
                 count++;
-                if (System.currentTimeMillis() - time > 10000) {
+                if (System.currentTimeMillis() - time > 1000) {
                     time = System.currentTimeMillis();
-                    System.out.println("processed " + count + " urls.");
+                    System.out.println("processed " + count + " urls, " + (MemoryControl.available() / 1024 / 1024) + " mb left, " + count * 1000L / (time - start) + " url/second");
                 }
             }
             reader.close();
@@ -154,12 +159,16 @@ public class URLAnalysis {
         System.out.println("start processing results");
         TreeMap<String, Integer> results = new TreeMap<String, Integer>();
         count = 0;
-        for (Map.Entry<String, Integer> entry: out.entrySet()) {
+        Map.Entry<String, Integer> entry;
+        Iterator<Map.Entry<String, Integer>> i = out.entrySet().iterator();
+        while (i.hasNext()) {
+            entry = i.next();
             results.put(num(entry.getValue().intValue() * (entry.getKey().length() - 1)) + " - " + entry.getKey(), entry.getValue());
             count++;
+            i.remove(); // free memory
             if (System.currentTimeMillis() - time > 10000) {
                 time = System.currentTimeMillis();
-                System.out.println("processed " + count + " results.");
+                System.out.println("processed " + count + " results, " + (MemoryControl.available() / 1024 / 1024) + " mb left");
             }
         }
         
@@ -168,10 +177,10 @@ public class URLAnalysis {
         try {
             BufferedOutputStream os = new BufferedOutputStream(new FileOutputStream(outfile));
             count = 0;
-            for (Map.Entry<String, Integer> entry: results.entrySet()) {
-                os.write(entry.getKey().getBytes());
+            for (Map.Entry<String, Integer> e: results.entrySet()) {
+                os.write(e.getKey().getBytes());
                 os.write(new byte[]{'\t'});
-                os.write(("" + entry.getValue()).getBytes());
+                os.write(("" + e.getValue()).getBytes());
                 os.write(new byte[]{'\n'});
                 count++;
                 if (System.currentTimeMillis() - time > 10000) {
