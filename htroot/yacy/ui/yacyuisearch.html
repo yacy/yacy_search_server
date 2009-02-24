@@ -87,37 +87,12 @@
 						if (p.page>p.pages) p.page = p.pages;
 		
 						var offset = p.newp * p.rp -p.rp;												
+						$.query.SET('startRecord', offset);
+						$.query.SET('maximumRecords', p.rp);
 						
-						var prefermaskfilter = $.query.get('prefermaskfilter');
-						if(!prefermaskfilter) prefermaskfilter = '';						
-						var constraint = $.query.get('constraint');
-						if(!constraint) constraint = '';						
-						var language = $.query.get('language');
-						if (!language) language = '';						
-						var verify = $.query.get('verify');
-						if (!verify) verify = 'true';						
-						var urlmaskfilter = $.query.get('urlmaskfilter');
-						if (!urlmaskfilter) urlmaskfilter = '.*';						
-						
-						var param = [
-							 { name : 'startRecord', value : offset }
-							,{ name : 'maximumRecords', value : p.rp }		
-							,{ name : 'query', value : p.query}
-							,{ name : 'urlmaskfilter', value : urlmaskfilter}
-							,{ name : 'prefermaskfilter', value: prefermaskfilter}
-							,{ name : 'verify', value : verify}
-							,{ name : 'contentdom', value : 'text'}
-							,{ name : 'constraint', value : constraint}
-							,{ name : 'language', value : language}
-						];											
-										 
-						if (p.params) {
-							for (var pi = 0; pi < p.params.length; pi++) param[param.length] = p.params[pi];
-						}
 						$.ajax({
 						   type: p.method,
-						   url: p.url,
-						   data: param,
+						   url: p.url + $.query.toString(),
 						   dataType: p.dataType,
 						   success: function(data){
 						   		/* yacy limits itemsPerPage for unauthenticated users */
