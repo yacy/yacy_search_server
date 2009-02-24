@@ -50,6 +50,8 @@ public class URLAnalysis {
     /**
      * processes to analyse URL lists
      */
+	
+	private static final long cleanuplimit = 50 * 1024 * 1024;
     
     public static yacyURL poison = null;
     static {
@@ -77,7 +79,6 @@ public class URLAnalysis {
                 try {
                     url = in.take();
                     if (url == poison) break;
-                    //System.out.println(url);
                     update(url.getHost().replaceAll("-", "\\.").split("\\."));
                     update(p.matcher(url.getPath()).replaceAll("/").split("/"));
                 } catch (InterruptedException e) {
@@ -94,6 +95,30 @@ public class URLAnalysis {
                 out.put(t, (c == null) ? 1 : c.intValue() + 1);
             }
         }
+    }
+    
+    public static void cleanup(ConcurrentHashMap<String, Integer> stat) {
+    	Map.Entry<String, Integer> entry;
+    	int c, low = Integer.MAX_VALUE;
+    	Iterator<Map.Entry<String, Integer>> i = stat.entrySet().iterator();
+    	while (i.hasNext()) {
+    		entry = i.next();
+    		c = entry.getValue().intValue();
+    		if (c == 1) {
+    			i.remove();
+    		} else {
+    			if (c < low) low = c;
+    		}
+    	}
+    	i = stat.entrySet().iterator();
+    	while (i.hasNext()) {
+    		entry = i.next();
+    		c = entry.getValue().intValue();
+    		if (c == low) {
+    			i.remove();
+    		}
+    	}
+    	Runtime.getRuntime().gc();
     }
     
     public static void main(String[] args) {
@@ -133,6 +158,11 @@ public class URLAnalysis {
                 if (System.currentTimeMillis() - time > 1000) {
                     time = System.currentTimeMillis();
                     System.out.println("processed " + count + " urls, " + (MemoryControl.available() / 1024 / 1024) + " mb left, " + count * 1000L / (time - start) + " url/second");
+                    if (MemoryControl.available() < cleanuplimit) {
+                    	System.out.println("starting cleanup, " + out.size() + " entries in statistic");
+                    	cleanup(out);
+                    	System.out.println("finished cleanup, " + out.size() + " entries in statistic left, " + (MemoryControl.available() / 1024 / 1024) + " mb left");
+                    }
                 }
             }
             reader.close();
