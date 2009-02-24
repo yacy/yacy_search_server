@@ -35,9 +35,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
@@ -121,9 +123,9 @@ public class URLAnalysis {
     	Runtime.getRuntime().gc();
     }
     
-    public static void main(String[] args) {
-        String filename = args[0];
-        String analysis = filename + ".stats";
+    public static void genstat(String urlfile) {
+
+        String analysis = urlfile + ".stats";
 
         // start threads
         ArrayBlockingQueue<yacyURL> in = new ArrayBlockingQueue<yacyURL>(1000);
@@ -133,7 +135,7 @@ public class URLAnalysis {
         spl.start();
 
         // put urls in queue
-        File infile = new File(filename);
+        File infile = new File(urlfile);
         File outfile = new File(analysis);
         BufferedReader reader = null;
         long time = System.currentTimeMillis();
@@ -224,6 +226,89 @@ public class URLAnalysis {
         }
         
         System.out.println("finished");
+    }
+    
+    public static void genhost(String urlfile) {
+
+        String host = urlfile + ".host";
+        HashSet<String> hosts = new HashSet<String>();
+        File infile = new File(urlfile);
+        File outfile = new File(host);
+        BufferedReader reader = null;
+        long time = System.currentTimeMillis();
+        long start = time;
+        int count = 0;
+
+        System.out.println("start processing");
+        try {
+            reader = new BufferedReader(new InputStreamReader(new FileInputStream(infile)));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                line = line.trim();
+                if (line.length() > 0) {
+                    yacyURL url = new yacyURL(line, null);
+                    hosts.add(url.getHost());
+                }
+                count++;
+                if (System.currentTimeMillis() - time > 1000) {
+                    time = System.currentTimeMillis();
+                    System.out.println("processed " + count + " urls, " + (MemoryControl.available() / 1024 / 1024) + " mb left, " + count * 1000L / (time - start) + " url/second");
+                }
+            }
+            reader.close();
+        } catch (final IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (reader != null) try { reader.close(); } catch (final Exception e) {}
+        }
+        
+        // copy everything into a TreeSet to order it
+        System.out.println("start processing results");
+        TreeSet<String> results = new TreeSet<String>();
+        count = 0;
+        Iterator<String> i = hosts.iterator();
+        while (i.hasNext()) {
+            results.add(i.next());
+            count++;
+            i.remove(); // free memory
+            if (System.currentTimeMillis() - time > 10000) {
+                time = System.currentTimeMillis();
+                System.out.println("processed " + count + " results, " + (MemoryControl.available() / 1024 / 1024) + " mb left");
+            }
+        }
+        
+        // write hosts
+        System.out.println("start writing results");
+        try {
+            BufferedOutputStream os = new BufferedOutputStream(new FileOutputStream(outfile));
+            count = 0;
+            for (String h: results) {
+                os.write(h.getBytes());
+                os.write(new byte[]{'\n'});
+                count++;
+                if (System.currentTimeMillis() - time > 10000) {
+                    time = System.currentTimeMillis();
+                    System.out.println("wrote " + count + " lines.");
+                }
+            }
+            os.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        
+        System.out.println("finished");
+    }
+    
+    public static void main(String[] args) {
+    	if (args[0].equals("-stat") && args.length == 2) {
+    		genstat(args[1]);
+    	} else if (args[0].equals("-host") && args.length == 2) {
+    		genhost(args[1]);
+    	} else {
+    		System.out.println("usage:");
+    		System.out.println("-stat <file>    generate a statistics about common words in file, store to <file>.stat");
+    		System.out.println("-host <file>    generate a file <file>.host containing only the hosts of the urls");
+    	}
     }
     
     private static final String num(int i) {
