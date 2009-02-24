@@ -38,7 +38,7 @@
 							qtag = $(this).text().replace(/\s+/g,"");
 							$("select[name='resource']").setValue('ymarks');
 							$("input[name='search']").setValue(qtag);
-							if ($tabs.tabs.index == bmk_tab) {
+							if ($tabs.data('selected.tabs') == bmk_tab) {
 								reloadBM();
 							} else {
 								$tabs.tabs('select',2);
