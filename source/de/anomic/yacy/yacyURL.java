@@ -274,26 +274,30 @@ public class yacyURL implements Serializable {
     
     private void escapePath() {
         final String[] pathp = path.split("/", -1);
-        String ptmp = "";
+        StringBuilder ptmp = new StringBuilder(pathp.length + 10);
         for (int i = 0; i < pathp.length; i++) {
-            ptmp += "/" + escape(pathp[i]);
+            ptmp.append('/');
+            ptmp.append(escape(pathp[i]));
         }
         path = ptmp.substring((ptmp.length() > 0) ? 1 : 0);
     }
     
     private void escapeRef() {
-        ref = escape(ref);
+        ref = escape(ref).toString();
     }
     
     private void escapeQuest() {
         final String[] questp = quest.split("&", -1);
-        String qtmp = "";
+        StringBuilder qtmp = new StringBuilder(questp.length + 10);
         for (int i = 0; i < questp.length; i++) {
             if (questp[i].indexOf('=') != -1) {
-                qtmp += "&" + escape(questp[i].substring(0, questp[i].indexOf('=')));
-                qtmp += "=" + escape(questp[i].substring(questp[i].indexOf('=') + 1));
+                qtmp.append('&');
+                qtmp.append(escape(questp[i].substring(0, questp[i].indexOf('='))));
+                qtmp.append('=');
+                qtmp.append(escape(questp[i].substring(questp[i].indexOf('=') + 1)));
             } else {
-                qtmp += "&" + escape(questp[i]);
+            	qtmp.append('&');
+                qtmp.append(escape(questp[i]));
             }
         }
         quest = qtmp.substring((qtmp.length() > 0) ? 1 : 0);
@@ -358,9 +362,9 @@ public class yacyURL implements Serializable {
      * @return The encoded string
      */
     // from: http://www.w3.org/International/URLUTF8Encoder.java
-    public static String escape(final String s)
+    public static StringBuilder escape(final String s)
     {
-        final StringBuilder sbuf = new StringBuilder();
+        final StringBuilder sbuf = new StringBuilder(s.length() + 10);
         final int len = s.length();
         for (int i = 0; i < len; i++) {
             final int ch = s.charAt(i);
@@ -390,7 +394,7 @@ public class yacyURL implements Serializable {
                 sbuf.append(hex[0x80 | (ch & 0x3F)]);
             }
         }
-        return sbuf.toString();
+        return sbuf;
     }
     
     // from: http://www.w3.org/International/unescape.java
