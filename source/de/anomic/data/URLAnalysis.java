@@ -27,13 +27,16 @@
 
 package de.anomic.data;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -43,6 +46,8 @@ import java.util.TreeSet;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.yacy.yacyURL;
@@ -125,8 +130,9 @@ public class URLAnalysis {
     
     public static void genstat(String urlfile) {
 
-        String analysis = urlfile + ".stats";
-
+        boolean gz = urlfile.endsWith(".gz");
+        String analysis = (gz) ? urlfile.substring(0, urlfile.length() - 3) + ".stats.gz" : urlfile  + ".stats";
+        
         // start threads
         ArrayBlockingQueue<yacyURL> in = new ArrayBlockingQueue<yacyURL>(1000);
         ConcurrentHashMap<String, Integer> out = new ConcurrentHashMap<String, Integer>();
@@ -144,7 +150,9 @@ public class URLAnalysis {
 
         System.out.println("start processing");
         try {
-            reader = new BufferedReader(new InputStreamReader(new FileInputStream(infile)));
+            InputStream is = new BufferedInputStream(new FileInputStream(infile));
+            if (gz) is = new GZIPInputStream(is);
+            reader = new BufferedReader(new InputStreamReader(is));
             String line;
             while ((line = reader.readLine()) != null) {
                 line = line.trim();
@@ -207,7 +215,8 @@ public class URLAnalysis {
         // write statistics
         System.out.println("start writing results");
         try {
-            BufferedOutputStream os = new BufferedOutputStream(new FileOutputStream(outfile));
+            OutputStream os = new BufferedOutputStream(new FileOutputStream(outfile));
+            if (gz) os = new GZIPOutputStream(os);
             count = 0;
             for (Map.Entry<String, Integer> e: results.entrySet()) {
                 os.write(e.getKey().getBytes());
@@ -230,7 +239,8 @@ public class URLAnalysis {
     
     public static void genhost(String urlfile) {
 
-        String host = urlfile + ".host";
+        boolean gz = urlfile.endsWith(".gz");
+        String host = (gz) ? urlfile.substring(0, urlfile.length() - 3) + ".host.gz" : urlfile  + ".host";
         HashSet<String> hosts = new HashSet<String>();
         File infile = new File(urlfile);
         File outfile = new File(host);
@@ -241,7 +251,9 @@ public class URLAnalysis {
 
         System.out.println("start processing");
         try {
-            reader = new BufferedReader(new InputStreamReader(new FileInputStream(infile)));
+            InputStream is = new BufferedInputStream(new FileInputStream(infile));
+            if (gz) is = new GZIPInputStream(is);
+            reader = new BufferedReader(new InputStreamReader(is));
             String line;
             while ((line = reader.readLine()) != null) {
                 line = line.trim();
@@ -280,7 +292,8 @@ public class URLAnalysis {
         // write hosts
         System.out.println("start writing results");
         try {
-            BufferedOutputStream os = new BufferedOutputStream(new FileOutputStream(outfile));
+            OutputStream os = new BufferedOutputStream(new FileOutputStream(outfile));
+            if (gz) os = new GZIPOutputStream(os);
             count = 0;
             for (String h: results) {
                 os.write(h.getBytes());
@@ -300,6 +313,7 @@ public class URLAnalysis {
     }
     
     public static void main(String[] args) {
+        // example: java -Xmx1000m -cp classes de.anomic.data.URLAnalysis -stat DATA/EXPORT/urls1.txt.gz 
     	if (args[0].equals("-stat") && args.length == 2) {
     		genstat(args[1]);
     	} else if (args[0].equals("-host") && args.length == 2) {
