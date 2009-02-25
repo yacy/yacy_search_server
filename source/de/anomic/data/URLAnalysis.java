@@ -57,9 +57,7 @@ public class URLAnalysis {
     /**
      * processes to analyse URL lists
      */
-	
-	private static final long cleanuplimit = 50 * 1024 * 1024;
-    
+
     public static yacyURL poison = null;
     static {
         try {
@@ -132,7 +130,8 @@ public class URLAnalysis {
 
         boolean gz = urlfile.endsWith(".gz");
         String analysis = (gz) ? urlfile.substring(0, urlfile.length() - 3) + ".stats.gz" : urlfile  + ".stats";
-        
+        long cleanuplimit = Math.max(50 * 1024 * 1024, MemoryControl.available() / 8);
+
         // start threads
         ArrayBlockingQueue<yacyURL> in = new ArrayBlockingQueue<yacyURL>(1000);
         ConcurrentHashMap<String, Integer> out = new ConcurrentHashMap<String, Integer>();

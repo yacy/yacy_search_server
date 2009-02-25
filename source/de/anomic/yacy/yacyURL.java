@@ -48,6 +48,9 @@ public class yacyURL implements Serializable {
     private static final long serialVersionUID = -1173233022912141884L;
     public  static final int TLD_any_zone_filter = 255; // from TLD zones can be filtered during search; this is the catch-all filter
     private static final Pattern backPathPattern = Pattern.compile("(/[^/]+(?<!/\\.{1,2})/)[.]{2}(?=/|$)|/\\.(?=/)|/(?=/)");
+    private static final Pattern patternDot = Pattern.compile("\\.");
+    private static final Pattern patternSlash = Pattern.compile("/");
+    private static final Pattern patternAmp = Pattern.compile("&");
     
     // class variables
     private String protocol, host, userInfo, path, quest, ref, hash;
@@ -125,7 +128,7 @@ public class yacyURL implements Serializable {
         
         // handle international domains
         if (!Punycode.isBasic(host)) try {
-            final String[] domainParts = host.split("\\.");
+            final String[] domainParts = patternDot.split(host, 0);
             StringBuilder buffer = new StringBuilder();
             // encode each domainpart seperately
             for(int i=0; i<domainParts.length; i++) {
@@ -273,8 +276,8 @@ public class yacyURL implements Serializable {
     }
     
     private void escapePath() {
-        final String[] pathp = path.split("/", -1);
-        StringBuilder ptmp = new StringBuilder(pathp.length + 10);
+        final String[] pathp = patternSlash.split(path, 0);
+        StringBuilder ptmp = new StringBuilder(path.length() + 10);
         for (int i = 0; i < pathp.length; i++) {
             ptmp.append('/');
             ptmp.append(escape(pathp[i]));
@@ -287,8 +290,8 @@ public class yacyURL implements Serializable {
     }
     
     private void escapeQuest() {
-        final String[] questp = quest.split("&", -1);
-        StringBuilder qtmp = new StringBuilder(questp.length + 10);
+        final String[] questp = patternAmp.split(quest, 0);
+        StringBuilder qtmp = new StringBuilder(quest.length() + 10);
         for (int i = 0; i < questp.length; i++) {
             if (questp[i].indexOf('=') != -1) {
                 qtmp.append('&');
@@ -362,10 +365,9 @@ public class yacyURL implements Serializable {
      * @return The encoded string
      */
     // from: http://www.w3.org/International/URLUTF8Encoder.java
-    public static StringBuilder escape(final String s)
-    {
-        final StringBuilder sbuf = new StringBuilder(s.length() + 10);
+    public static StringBuilder escape(final String s) {
         final int len = s.length();
+        final StringBuilder sbuf = new StringBuilder(len + 10);
         for (int i = 0; i < len; i++) {
             final int ch = s.charAt(i);
             if ('A' <= ch && ch <= 'Z') {           // 'A'..'Z'
@@ -704,7 +706,7 @@ public class yacyURL implements Serializable {
         // find rootpath
         int rootpathStart = 0;
         int rootpathEnd = this.path.length() - 1;
-        if (this.path.startsWith("/"))
+        if (this.path.length() > 0 && this.path.charAt(0) == '/')
             rootpathStart = 1;
         if (this.path.endsWith("/"))
             rootpathEnd = this.path.length() - 2;
@@ -869,31 +871,33 @@ public class yacyURL implements Serializable {
     
     public static void main(final String[] args) {
         final String[][] test = new String[][]{
-          new String[]{null, "http://www.anomic.de/home/test?x=1#home"},
+		  new String[]{null, "http://www.anomic.de"},
+		  new String[]{null, "http://www.anomic.de/"},
+		  new String[]{null, "http://www.anomic.de/home/test?x=1#home"},
           new String[]{null, "http://www.anomic.de/home/test?x=1"},
-          new String[]{null, "http://www.anomic.de/home/test#home"},
-          new String[]{null, "ftp://ftp.anomic.de/home/test#home"},
-          new String[]{null, "http://www.anomic.de/home/../abc/"},
-          new String[]{null, "mailto:abcdefg@nomailnomail.com"},
-          new String[]{"http://www.anomic.de/home", "test"},
-          new String[]{"http://www.anomic.de/home", "test/"},
-          new String[]{"http://www.anomic.de/home/", "test"},
-          new String[]{"http://www.anomic.de/home/", "test/"},
-          new String[]{"http://www.anomic.de/home/index.html", "test.htm"},
-          new String[]{"http://www.anomic.de/home/index.html", "http://www.yacy.net/test"},
-          new String[]{"http://www.anomic.de/home/index.html", "ftp://ftp.yacy.net/test"},
-          new String[]{"http://www.anomic.de/home/index.html", "../test"},
-          new String[]{"http://www.anomic.de/home/index.html", "mailto:abcdefg@nomailnomail.com"},
-          new String[]{null, "news:de.test"},
-          new String[]{"http://www.anomic.de/home", "news:de.test"},
-          new String[]{"http://www.anomic.de/home", "ftp://ftp.anomic.de/src"},
-          new String[]{null, "ftp://ftp.delegate.org/"},
-          new String[]{"http://www.anomic.de/home", "ftp://ftp.delegate.org/"},
-          new String[]{"http://www.anomic.de","mailto:yacy@weltherrschaft.org"},
-          new String[]{"http://www.anomic.de","javascipt:temp"},
-          new String[]{null,"http://yacy-websuche.de/wiki/index.php?title=De:IntroInformationFreedom&action=history"},
-          new String[]{null, "http://diskusjion.no/index.php?s=5bad5f431a106d9a8355429b81bb0ca5&showuser=23585"},
-          new String[]{null, "http://diskusjion.no/index.php?s=5bad5f431a106d9a8355429b81bb0ca5&amp;showuser=23585"}
+	      new String[]{null, "http://www.anomic.de/home/test#home"},
+	      new String[]{null, "ftp://ftp.anomic.de/home/test#home"},
+	      new String[]{null, "http://www.anomic.de/home/../abc/"},
+	      new String[]{null, "mailto:abcdefg@nomailnomail.com"},
+	      new String[]{"http://www.anomic.de/home", "test"},
+	      new String[]{"http://www.anomic.de/home", "test/"},
+	      new String[]{"http://www.anomic.de/home/", "test"},
+	      new String[]{"http://www.anomic.de/home/", "test/"},
+	      new String[]{"http://www.anomic.de/home/index.html", "test.htm"},
+	      new String[]{"http://www.anomic.de/home/index.html", "http://www.yacy.net/test"},
+	      new String[]{"http://www.anomic.de/home/index.html", "ftp://ftp.yacy.net/test"},
+	      new String[]{"http://www.anomic.de/home/index.html", "../test"},
+	      new String[]{"http://www.anomic.de/home/index.html", "mailto:abcdefg@nomailnomail.com"},
+	      new String[]{null, "news:de.test"},
+	      new String[]{"http://www.anomic.de/home", "news:de.test"},
+	      new String[]{"http://www.anomic.de/home", "ftp://ftp.anomic.de/src"},
+	      new String[]{null, "ftp://ftp.delegate.org/"},
+	      new String[]{"http://www.anomic.de/home", "ftp://ftp.delegate.org/"},
+	      new String[]{"http://www.anomic.de","mailto:yacy@weltherrschaft.org"},
+	      new String[]{"http://www.anomic.de","javascipt:temp"},
+	      new String[]{null,"http://yacy-websuche.de/wiki/index.php?title=De:IntroInformationFreedom&action=history"},
+	      new String[]{null, "http://diskusjion.no/index.php?s=5bad5f431a106d9a8355429b81bb0ca5&showuser=23585"},
+	      new String[]{null, "http://diskusjion.no/index.php?s=5bad5f431a106d9a8355429b81bb0ca5&amp;showuser=23585"}
           };
         String environment, url;
         yacyURL aURL, aURL1;
