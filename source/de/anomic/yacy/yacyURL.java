@@ -568,7 +568,7 @@ public class yacyURL implements Serializable {
         } else if (this.protocol.equals("https")) {
             if (this.port < 0 || this.port == 443) { defaultPort = true; }
         }
-        final String path = resolveBackpath(this.getFile(includeReference));
+        final String path = this.getFile(includeReference);
         
         if (defaultPort) {
             return this.protocol + "://" +
