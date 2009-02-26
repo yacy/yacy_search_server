@@ -41,6 +41,7 @@ import java.net.MalformedURLException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -156,11 +157,13 @@ public class URLAnalysis {
             while ((line = reader.readLine()) != null) {
                 line = line.trim();
                 if (line.length() > 0) {
-                    yacyURL url = new yacyURL(line, null);
                     try {
+                        yacyURL url = new yacyURL(line, null);
                         in.put(url);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
+                    } catch (MalformedURLException e) {
+                        continue;
                     }
                 }
                 count++;
@@ -239,10 +242,9 @@ public class URLAnalysis {
     public static void genhost(String urlfile) {
 
         boolean gz = urlfile.endsWith(".gz");
-        String host = (gz) ? urlfile.substring(0, urlfile.length() - 3) + ".host.gz" : urlfile  + ".host";
+        String trunk = (gz) ? urlfile.substring(0, urlfile.length() - 3) + ".host" : urlfile  + ".host";
         HashSet<String> hosts = new HashSet<String>();
         File infile = new File(urlfile);
-        File outfile = new File(host);
         BufferedReader reader = null;
         long time = System.currentTimeMillis();
         long start = time;
@@ -257,8 +259,12 @@ public class URLAnalysis {
             while ((line = reader.readLine()) != null) {
                 line = line.trim();
                 if (line.length() > 0) {
-                    yacyURL url = new yacyURL(line, null);
-                    hosts.add(url.getHost());
+                    try {
+                        yacyURL url = new yacyURL(line, null);
+                        hosts.add(url.getHost());
+                    } catch (MalformedURLException e) {
+                        continue;
+                    }
                 }
                 count++;
                 if (System.currentTimeMillis() - time > 1000) {
@@ -289,12 +295,22 @@ public class URLAnalysis {
         }
         
         // write hosts
+        writeSet(trunk, gz, results);
+        
+        System.out.println("finished");
+    }
+    
+    private static void writeSet(String trunk, boolean gz, Set<String> set) {
+
+        // write hosts
         System.out.println("start writing results");
+        File outfile = new File(trunk + ((gz) ? ".gz" : ""));
+        long time = System.currentTimeMillis();
         try {
             OutputStream os = new BufferedOutputStream(new FileOutputStream(outfile));
             if (gz) os = new GZIPOutputStream(os);
-            count = 0;
-            for (String h: results) {
+            int count = 0;
+            for (String h: set) {
                 os.write(h.getBytes());
                 os.write(new byte[]{'\n'});
                 count++;
@@ -307,7 +323,61 @@ public class URLAnalysis {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        System.out.println("finished writing results");
+    }
+    
+    public static void sortsplit(String urlfile) {
+
+        boolean gz = urlfile.endsWith(".gz");
+        String trunk = ((gz) ? urlfile.substring(0, urlfile.length() - 3) : urlfile) + ".sort";
+        File infile = new File(urlfile);
+        TreeSet<String> urls = new TreeSet<String>();
+        BufferedReader reader = null;
+        long time = System.currentTimeMillis();
+        long start = time;
+        int count = 0;
+        int filecount = 0;
+        long cleanuplimit = Math.max(50 * 1024 * 1024, MemoryControl.available() / 8);
+
+        System.out.println("start processing");
+        try {
+            InputStream is = new BufferedInputStream(new FileInputStream(infile));
+            if (gz) is = new GZIPInputStream(is);
+            reader = new BufferedReader(new InputStreamReader(is));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                line = line.trim();
+                if (line.length() > 0) {
+                    try {
+                        yacyURL url = new yacyURL(line, null);
+                        urls.add(url.toNormalform(true, true));
+                    } catch (MalformedURLException e) {
+                        continue;
+                    }
+                }
+                count++;
+                if (System.currentTimeMillis() - time > 1000) {
+                    time = System.currentTimeMillis();
+                    System.out.println("processed " + count + " urls, " + (MemoryControl.available() / 1024 / 1024) + " mb left, " + count * 1000L / (time - start) + " url/second");
+                }
+                if (MemoryControl.available() < cleanuplimit) {
+                    writeSet(trunk + "." + filecount, gz, urls);
+                    filecount++;
+                    urls.clear();
+                    Runtime.getRuntime().gc();
+                }
+            }
+            reader.close();
+        } catch (final IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (reader != null) try { reader.close(); } catch (final Exception e) {}
+        }
         
+        // write hosts
+        writeSet(trunk + "." + filecount, gz, urls);
+
         System.out.println("finished");
     }
     
@@ -316,11 +386,14 @@ public class URLAnalysis {
     	if (args[0].equals("-stat") && args.length == 2) {
     		genstat(args[1]);
     	} else if (args[0].equals("-host") && args.length == 2) {
-    		genhost(args[1]);
-    	} else {
+            genhost(args[1]);
+        } else if (args[0].equals("-sort") && args.length == 2) {
+            sortsplit(args[1]);
+        } else {
     		System.out.println("usage:");
     		System.out.println("-stat <file>    generate a statistics about common words in file, store to <file>.stat");
     		System.out.println("-host <file>    generate a file <file>.host containing only the hosts of the urls");
+    		System.out.println("-sort <file>    generate file <file>.x.sort with sorted lists and split the file in smaller pieces");
     	}
     }
     
