@@ -383,12 +383,12 @@ public class URLAnalysis {
     
     public static void main(String[] args) {
         // example: java -Xmx1000m -cp classes de.anomic.data.URLAnalysis -stat DATA/EXPORT/urls1.txt.gz 
-    	if (args[0].equals("-stat") && args.length == 2) {
-    		genstat(args[1]);
-    	} else if (args[0].equals("-host") && args.length == 2) {
-            genhost(args[1]);
-        } else if (args[0].equals("-sort") && args.length == 2) {
-            sortsplit(args[1]);
+    	if (args[0].equals("-stat") && args.length >= 2) {
+    		for (int i = 1; i < args.length; i++) genstat(args[i]);
+    	} else if (args[0].equals("-host") && args.length >= 2) {
+    		for (int i = 1; i < args.length; i++) genhost(args[i]);
+        } else if (args[0].equals("-sort") && args.length >= 2) {
+        	for (int i = 1; i < args.length; i++) sortsplit(args[i]);
         } else {
     		System.out.println("usage:");
     		System.out.println("-stat <file>    generate a statistics about common words in file, store to <file>.stat");
