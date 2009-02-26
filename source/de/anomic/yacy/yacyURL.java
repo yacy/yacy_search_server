@@ -276,7 +276,7 @@ public class yacyURL implements Serializable {
     }
     
     private void escapePath() {
-        final String[] pathp = patternSlash.split(path, 0);
+        final String[] pathp = patternSlash.split(path, -1);
         StringBuilder ptmp = new StringBuilder(path.length() + 10);
         for (int i = 0; i < pathp.length; i++) {
             ptmp.append('/');
@@ -290,7 +290,7 @@ public class yacyURL implements Serializable {
     }
     
     private void escapeQuest() {
-        final String[] questp = patternAmp.split(quest, 0);
+        final String[] questp = patternAmp.split(quest, -1);
         StringBuilder qtmp = new StringBuilder(quest.length() + 10);
         for (int i = 0; i < questp.length; i++) {
             if (questp[i].indexOf('=') != -1) {
@@ -871,9 +871,10 @@ public class yacyURL implements Serializable {
     
     public static void main(final String[] args) {
         final String[][] test = new String[][]{
-		  new String[]{null, "http://www.anomic.de"},
+		  new String[]{null, "http://www.anomic.de/test/"},
 		  new String[]{null, "http://www.anomic.de/"},
-		  new String[]{null, "http://www.anomic.de/home/test?x=1#home"},
+          new String[]{null, "http://www.anomic.de"},
+          new String[]{null, "http://www.anomic.de/home/test?x=1#home"},
           new String[]{null, "http://www.anomic.de/home/test?x=1"},
 	      new String[]{null, "http://www.anomic.de/home/test#home"},
 	      new String[]{null, "ftp://ftp.anomic.de/home/test#home"},
