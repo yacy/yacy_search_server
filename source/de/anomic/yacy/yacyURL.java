@@ -92,7 +92,7 @@ public class yacyURL implements Serializable {
                 }
                 path = "/";
             } else {
-                host = url.substring(p + 3, q);
+                host = url.substring(p + 3, q).trim();
                 if ((r = host.indexOf('@')) < 0) {
                     userInfo = null;
                 } else {
@@ -101,7 +101,8 @@ public class yacyURL implements Serializable {
                 }
                 path = url.substring(q);
             }
-            
+            if (host.length() < 4) throw new MalformedURLException("host too short: '" + host + "'");
+            if (host.indexOf('&') >= 0) throw new MalformedURLException("invalid '&' in host");
             path = resolveBackpath(path);
             identPort(url, (protocol.equals("http") ? 80 : ((protocol.equals("https")) ? 443 : ((protocol.equals("ftp")) ? 21 : -1))));
             identRef();
@@ -871,8 +872,8 @@ public class yacyURL implements Serializable {
     
     public static void main(final String[] args) {
         final String[][] test = new String[][]{
-		  new String[]{null, "http://www.anomic.de/test/"},
-		  new String[]{null, "http://www.anomic.de/"},
+          new String[]{null, "http://www.anomic.de/test/"},
+          new String[]{null, "http://www.anomic.de/"},
           new String[]{null, "http://www.anomic.de"},
           new String[]{null, "http://www.anomic.de/home/test?x=1#home"},
           new String[]{null, "http://www.anomic.de/home/test?x=1"},
