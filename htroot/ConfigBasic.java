@@ -34,6 +34,7 @@ import de.anomic.data.translator;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpd;
 import de.anomic.http.httpdFileHandler;
+import de.anomic.net.UPnP;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.server.serverCore;
@@ -41,7 +42,6 @@ import de.anomic.server.serverDomains;
 import de.anomic.server.serverInstantBusyThread;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.tools.UPnP;
 import de.anomic.yacy.yacySeed;
 
 public class ConfigBasic {

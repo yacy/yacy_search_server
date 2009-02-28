@@ -24,15 +24,21 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.tools;
+package de.anomic.net;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.MalformedURLException;
+import java.net.URL;
 
+import net.sbbi.upnp.DiscoveryAdvertisement;
+import net.sbbi.upnp.DiscoveryEventHandler;
+import net.sbbi.upnp.devices.UPNPRootDevice;
 import net.sbbi.upnp.impls.InternetGatewayDevice;
 import net.sbbi.upnp.messages.UPNPResponseException;
 import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaSwitchboardConstants;
 
 public class UPnP {
 	
@@ -48,14 +54,28 @@ public class UPnP {
 	private static int mappedPort = 0;
 	private static String localHostIP = null;;
 	
+	/* Discovery message sender IP /10.100.100.2 does not match device description IP /192.168.1.254 skipping message,
+	set the net.sbbi.upnp.ddos.matchip system property to false to avoid this check
+	static {
+		System.setProperty("net.sbbi.upnp.ddos.matchip", "false");
+	} */
+	
 	public static void setSb(plasmaSwitchboard switchboard) {
 		sb = switchboard;
+	}
+	
+	public static boolean setIGDs(InternetGatewayDevice[] igds) {
+		if(IGDs == null) {
+			IGDs = igds; // set only once to prevent many same devices by advertisement events
+			return true;
+		}
+		return false;
 	}
 	
 	private static boolean init() {
 		boolean init = true;
 		try {
-			IGDs = InternetGatewayDevice.getDevices(discoveryTimeout);
+			if (IGDs == null) IGDs = InternetGatewayDevice.getDevices(discoveryTimeout);
 			localHostIP = InetAddress.getLocalHost().getHostAddress();
 		} catch (IOException e) {
 			init = false;
@@ -67,6 +87,8 @@ public class UPnP {
 		} else {
 			log.logInfo("no device found");
 			init = false;
+			log.logInfo("listening for device");
+			Listener.register();
 		}
 		
 		return init;
@@ -131,6 +153,62 @@ public class UPnP {
 		addPortMapping(40000); // unmap, map
 		deletePortMapping(); // unmap
 		deletePortMapping(); // nothing
+	}
+	
+	/**
+	 * register devices that do not respond to discovery but advertise themselves
+	 */
+	public static class Listener {
+		
+		private final static Handler handler = new Handler();
+		private final static String devicetype = "urn:schemas-upnp-org:device:InternetGatewayDevice:1";
+		
+		public static void register() {
+			try {
+				DiscoveryAdvertisement.getInstance().registerEvent(DiscoveryAdvertisement.EVENT_SSDP_ALIVE, devicetype, handler);
+//				DiscoveryAdvertisement.getInstance().registerEvent(DiscoveryAdvertisement.EVENT_SSDP_BYE_BYE, devicetype, handler);
+			} catch (IOException e) {}
+		}
+		
+		public static void unregister() {
+			DiscoveryAdvertisement.getInstance().unRegisterEvent(DiscoveryAdvertisement.EVENT_SSDP_ALIVE, devicetype, handler);
+//			DiscoveryAdvertisement.getInstance().unRegisterEvent(DiscoveryAdvertisement.EVENT_SSDP_BYE_BYE, devicetype, handler);
+		}
+		
+		private static class Handler implements DiscoveryEventHandler {
+			
+			private final Log log = UPnP.log;
+		
+			public void eventSSDPAlive(String usn, String udn, String nt, String maxAge, URL location) {
+				InternetGatewayDevice[] newIGD = { null };
+				boolean error = false;
+				String errorMsg = null;
+				try {
+					newIGD[0] = new InternetGatewayDevice(new UPNPRootDevice(location, maxAge, "", usn, udn));
+				} catch (UnsupportedOperationException e) {
+					error = true;
+					errorMsg = e.getMessage();
+				} catch (MalformedURLException e) {
+					error = true;
+					errorMsg = e.getMessage();
+				} catch (IllegalStateException e) {
+					error = true;
+					errorMsg = e.getMessage();
+				}
+				if (error && errorMsg != null)
+					log.logSevere("eventSSDPAlive: " + errorMsg);
+				if (newIGD[0] == null) return;
+				log.logInfo("discovered device: " + newIGD[0].getIGDRootDevice().getFriendlyName());
+				if (UPnP.setIGDs(newIGD) &&
+					plasmaSwitchboard.getSwitchboard().getConfigBool(plasmaSwitchboardConstants.UPNP_ENABLED, false))
+					UPnP.addPortMapping();
+				Listener.unregister();
+			}
+		
+			public void eventSSDPByeBye(String usn, String udn, String nt) {}
+			
+		}
+		
 	}
 
 }
