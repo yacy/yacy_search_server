@@ -309,15 +309,20 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         final boolean useCommons = getConfigBool("index.storeCommons", false);
         final int redundancy = (int) sb.getConfigLong("network.unit.dhtredundancy.senior", 1);        
         final int paritionExponent = (int) sb.getConfigLong("network.unit.dht.partitionExponent", 0);
-        webIndex = new plasmaWordIndex(
-                networkName,
-                log,
-                indexPrimaryPath,
-                indexSecondaryPath,
-                wordCacheMaxCount,
-                useCommons,
-                redundancy,
-                paritionExponent);
+        try {
+			webIndex = new plasmaWordIndex(
+			        networkName,
+			        log,
+			        indexPrimaryPath,
+			        indexSecondaryPath,
+			        wordCacheMaxCount,
+			        useCommons,
+			        redundancy,
+			        paritionExponent);
+		} catch (IOException e1) {
+			e1.printStackTrace();
+			webIndex = null;
+		}
         crawlResults = new ResultURLs();
         
         // start yacy core
@@ -754,15 +759,20 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             final boolean useCommons = getConfigBool("index.storeCommons", false);
             final int redundancy = (int) sb.getConfigLong("network.unit.dhtredundancy.senior", 1);
             final int paritionExponent = (int) sb.getConfigLong("network.unit.dht.partitionExponent", 0);
-            this.webIndex = new plasmaWordIndex(
-                    getConfig(plasmaSwitchboardConstants.NETWORK_NAME, ""),
-                    getLog(),
-                    indexPrimaryPath,
-                    indexSecondaryPath,
-                    wordCacheMaxCount,
-                    useCommons,
-                    redundancy,
-                    paritionExponent);
+            try {
+				this.webIndex = new plasmaWordIndex(
+				        getConfig(plasmaSwitchboardConstants.NETWORK_NAME, ""),
+				        getLog(),
+				        indexPrimaryPath,
+				        indexSecondaryPath,
+				        wordCacheMaxCount,
+				        useCommons,
+				        redundancy,
+				        paritionExponent);
+			} catch (IOException e) {
+				e.printStackTrace();
+				this.webIndex = null;
+			}
             // we need a new stacker, because this uses network-specific attributes to sort out urls (local, global)
             this.crawlStacker = new CrawlStacker(
                     crawlQueues,

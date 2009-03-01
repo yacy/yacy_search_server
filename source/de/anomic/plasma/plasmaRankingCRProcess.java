@@ -30,12 +30,14 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 
-import de.anomic.kelondro.kelondroCollectionIndex;
+import de.anomic.index.indexCollectionRI;
+import de.anomic.index.indexContainer;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.RowSet;
 import de.anomic.kelondro.index.ObjectIndex;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.Bitfield;
+import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.kelondro.order.MicroDate;
 import de.anomic.kelondro.table.EcoTable;
@@ -139,7 +141,7 @@ public class plasmaRankingCRProcess {
         return true;
     }
     
-    private static boolean accumulate_upd(final File f, final ObjectIndex acc, final kelondroCollectionIndex seq) throws IOException {
+    private static boolean accumulate_upd(final File f, final ObjectIndex acc, final indexCollectionRI seq) throws IOException {
         // open file
         AttrSeq source_cr = null;
         try {
@@ -239,11 +241,11 @@ public class plasmaRankingCRProcess {
         // open target file
         AttrSeq acc = null;
         ObjectIndex newacc = null;
-        kelondroCollectionIndex newseq = null;
+        indexCollectionRI newseq = null;
         if (newdb) {
             final File path = to_file.getParentFile(); // path to storage place
             newacc = new EcoTable(new File(path, CRG_accname), CRG_accrow, EcoTable.tailCacheUsageAuto, 0, 0);
-            newseq = new kelondroCollectionIndex(path, CRG_seqname, 12, Base64Order.enhancedCoder, 2, 9, CRG_colrow, false);
+            newseq = new indexCollectionRI(path, CRG_seqname, 12, Base64Order.enhancedCoder, 9, CRG_colrow, false);
         } else {
             if (!(to_file.exists())) {
                 acc = new AttrSeq("Global Ranking Accumulator File",
@@ -371,31 +373,34 @@ public class plasmaRankingCRProcess {
     
     public static int genrcix(final File cr_path_in, final File rci_path_out) throws IOException {
         //kelondroFlexTable       acc = new kelondroFlexTable(cr_path_in, CRG_accname, kelondroBase64Order.enhancedCoder, 128 * 1024 * 1024, -1, CRG_accrow, true);
-        final kelondroCollectionIndex seq = new kelondroCollectionIndex(cr_path_in, CRG_seqname, 12, Base64Order.enhancedCoder, 2, 9, CRG_colrow, false);
-        final kelondroCollectionIndex rci = new kelondroCollectionIndex(rci_path_out, RCI_colname, 6, Base64Order.enhancedCoder, 2, 9, RCI_coli, false);
+        final indexCollectionRI seq = new indexCollectionRI(cr_path_in, CRG_seqname, 12, Base64Order.enhancedCoder, 9, CRG_colrow, false);
+        final indexCollectionRI rci = new indexCollectionRI(rci_path_out, RCI_colname, 6, Base64Order.enhancedCoder, 9, RCI_coli, false);
         
         // loop over all referees
         int count = 0;
         final int size = seq.size();
         final long start = System.currentTimeMillis();
         long l;
-        final Iterator<Object[]> i = seq.keycollections(null, null, false);
-        Object[] keycollection;
+        final CloneableIterator<indexContainer> i = seq.wordContainerIterator(null, false, false);
+        indexContainer keycollection;
         String referee, refereeDom, anchor, anchorDom;
-        RowSet cr_entry, rci_entry;
+        RowSet rci_entry;
+        CloneableIterator<Row.Entry> cr_entry;
         while (i.hasNext()) {
             keycollection = i.next();
-            referee = new String((byte[]) keycollection[0]);
+            referee = keycollection.getWordHash();
             if (referee.length() == 6) refereeDom = referee; else refereeDom = referee.substring(6);
-            cr_entry = (RowSet) keycollection[1];
+            cr_entry = keycollection.rows();
             
             // loop over all anchors
-            for (Row.Entry entry: cr_entry) {
+            Row.Entry entry;
+            while (cr_entry.hasNext()) {
+            	entry = cr_entry.next();
                 anchor = entry.getColString(0, null);
                 if (anchor.length() == 6) anchorDom = anchor; else anchorDom = anchor.substring(6);
 
                 // update domain-specific entry
-                rci_entry = rci.get(anchorDom.getBytes());
+                rci_entry = rci.getContainer(anchorDom, null);
                 if (rci_entry == null) rci_entry = new RowSet(RCI_coli, 0);
                 rci_entry.add(refereeDom.getBytes());
                 

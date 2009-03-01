@@ -118,7 +118,7 @@ public final class plasmaWordIndex implements indexRI {
             final int entityCacheMaxSize,
             final boolean useCommons, 
             final int redundancy,
-            final int partitionExponent) {
+            final int partitionExponent) throws IOException {
         if (networkName == null || networkName.length() == 0) {
             log.logSevere("no network name given - shutting down");
             System.exit(0);
@@ -161,7 +161,14 @@ public final class plasmaWordIndex implements indexRI {
         // create collections storage path
         final File textindexcollections = new File(indexPrimaryTextLocation, "RICOLLECTION");
         if (!(textindexcollections.exists())) textindexcollections.mkdirs();
-        this.collections = new indexCollectionRI(textindexcollections, "collection", maxCollectionPartition, indexRWIRowEntry.urlEntryRow, useCommons);
+        this.collections = new indexCollectionRI(
+					textindexcollections, 
+					"collection",
+					12,
+					Base64Order.enhancedCoder,
+			        maxCollectionPartition, 
+					indexRWIRowEntry.urlEntryRow, 
+					useCommons);
 
         // create LURL-db
         referenceURL = new indexRepositoryReference(this.secondaryRoot);
@@ -243,7 +250,11 @@ public final class plasmaWordIndex implements indexRI {
 
     public void clear() {
         indexCache.clear();
-        collections.clear();
+        try {
+			collections.clear();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
         try {
             referenceURL.clear();
         } catch (final IOException e) {
