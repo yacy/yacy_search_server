@@ -31,7 +31,7 @@ import java.io.IOException;
 
 import de.anomic.crawler.ZURL;
 import de.anomic.http.httpRequestHeader;
-import de.anomic.index.indexURLReference;
+import de.anomic.index.URLMetadata;
 import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
@@ -112,14 +112,14 @@ public final class crawlReceipt {
     	}
         
         // generating a new loaded URL entry
-        final indexURLReference entry = indexURLReference.importEntry(propStr);
+        final URLMetadata entry = URLMetadata.importEntry(propStr);
         if (entry == null) {
             log.logWarning("crawlReceipt: RECEIVED wrong RECEIPT (entry null) from peer " + iam + "\n\tURL properties: "+ propStr);
             prop.put("delay", "3600");
             return prop;
         }
         
-        final indexURLReference.Components comp = entry.comp();
+        final URLMetadata.Components comp = entry.comp();
         if (comp.url() == null) {
             log.logWarning("crawlReceipt: RECEIVED wrong RECEIPT (url null) for hash " + entry.hash() + " from peer " + iam + "\n\tURL properties: "+ propStr);
             prop.put("delay", "3600");

@@ -30,12 +30,12 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 
-import de.anomic.index.indexContainer;
+import de.anomic.index.ReferenceContainer;
 import de.anomic.index.indexContainerCache;
-import de.anomic.index.indexRI;
-import de.anomic.index.indexRWIRowEntry;
-import de.anomic.index.indexRepositoryReference;
-import de.anomic.index.indexURLReference;
+import de.anomic.index.ReverseIndex;
+import de.anomic.index.ReferenceRow;
+import de.anomic.index.URLMetadataRepository;
+import de.anomic.index.URLMetadata;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.util.Log;
 import de.anomic.server.serverProcessorJob;
@@ -46,17 +46,17 @@ import de.anomic.yacy.yacySeedDB;
 public class Transmission  {
 
     private Log log;
-    private indexRepositoryReference repository;
+    private URLMetadataRepository repository;
     private yacySeedDB seeds;
-    private indexRI backend;
+    private ReverseIndex backend;
     private boolean gzipBody4Transfer;
     private int timeout4Transfer;
     
     public Transmission(
             Log log,
-            indexRepositoryReference repository, 
+            URLMetadataRepository repository, 
             yacySeedDB seeds,
-            indexRI backend,
+            ReverseIndex backend,
             boolean gzipBody4Transfer,
             int timeout4Transfer) {
         this.log = log;
@@ -74,7 +74,7 @@ public class Transmission  {
         return new Chunk(primaryTarget, targets, payloadrow);
     }
     
-    public class Chunk extends serverProcessorJob implements Iterable<indexContainer> {
+    public class Chunk extends serverProcessorJob implements Iterable<ReferenceContainer> {
         /**
          * a dispatcher entry contains
          * - the primary target, which is a word hash, as marker for the entry
@@ -87,7 +87,7 @@ public class Transmission  {
          */
         private String                             primaryTarget;
         private indexContainerCache                containers;
-        private HashMap<String, indexURLReference> references;
+        private HashMap<String, URLMetadata> references;
         private HashSet<String>                    badReferences;
         private ArrayList<yacySeed>                targets;
         private int                                hit, miss;
@@ -108,7 +108,7 @@ public class Transmission  {
             this.primaryTarget = primaryTarget;
             this.containers = new indexContainerCache(payloadrow);
             this.containers.initWriteMode();
-            this.references = new HashMap<String, indexURLReference>();
+            this.references = new HashMap<String, URLMetadata>();
             this.badReferences = new HashSet<String>();
             this.targets    = targets;
             this.hit = 0;
@@ -120,14 +120,14 @@ public class Transmission  {
          * all entries in the container are checked and only such are stored which have a reference entry
          * @param container
          */
-        public void add(indexContainer container) {
+        public void add(ReferenceContainer container) {
             // iterate through the entries in the container and check if the reference is in the repository
-            Iterator<indexRWIRowEntry>  i = container.entries();
+            Iterator<ReferenceRow>  i = container.entries();
             ArrayList<String> notFound = new ArrayList<String>();
             while (i.hasNext()) {
-                indexRWIRowEntry e = i.next();
+                ReferenceRow e = i.next();
                 if (references.containsKey(e.urlHash()) || badReferences.contains(e.urlHash())) continue;
-                indexURLReference r = repository.load(e.urlHash(), null, 0);
+                URLMetadata r = repository.load(e.urlHash(), null, 0);
                 if (r == null) {
                     notFound.add(e.urlHash());
                     badReferences.add(e.urlHash());
@@ -138,14 +138,14 @@ public class Transmission  {
             // now delete all references that were not found
             for (String s : notFound) container.remove(s);
             // finally add the remaining container to the cache
-            containers.addEntries(container);
+            containers.addReferences(container);
         }
         
         /**
          * get all containers from the entry. This method may be used to flush remaining entries
          * if they had been finished transmission without success (not enough peers arrived)
          */
-        public Iterator<indexContainer> iterator() {
+        public Iterator<ReferenceContainer> iterator() {
             return this.containers.iterator();
         }
         
@@ -200,8 +200,8 @@ public class Transmission  {
             if (error == null) {
                 // words successfully transfered
                 long transferTime = System.currentTimeMillis() - start;
-                Iterator<indexContainer> i = this.containers.iterator();
-                indexContainer firstContainer = (i == null) ? null : i.next();
+                Iterator<ReferenceContainer> i = this.containers.iterator();
+                ReferenceContainer firstContainer = (i == null) ? null : i.next();
                 log.logInfo("Index transfer of " + this.containers.size() + 
                                  " words [" + ((firstContainer == null) ? null : firstContainer.getWordHash()) + " .. " + this.primaryTarget + "]" + 
                                  " and " + this.references.size() + " URLs" +
@@ -235,8 +235,8 @@ public class Transmission  {
         }
 
         public void restore() {
-            for (indexContainer ic : this) try {
-                backend.addEntries(ic);
+            for (ReferenceContainer ic : this) try {
+                backend.addReferences(ic);
             } catch (IOException e1) {
                 e1.printStackTrace();
             }

@@ -1,4 +1,4 @@
-// indexRWIVarEntry.java
+// ReferenceVars.java
 // (C) 2007 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 07.11.2007 on http://yacy.net
 //
@@ -29,7 +29,7 @@ package de.anomic.index;
 import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.order.MicroDate;
 
-public class indexRWIVarEntry implements indexRWIEntry, Cloneable {
+public class ReferenceVars implements Reference, Cloneable {
 
     public Bitfield flags;
     public long freshUntil, lastModified;
@@ -41,7 +41,7 @@ public class indexRWIVarEntry implements indexRWIEntry, Cloneable {
                worddistance, wordsintext, wordsintitle;
     public double termFrequency;
     
-    public indexRWIVarEntry(final String  urlHash,
+    public ReferenceVars(final String  urlHash,
             final int      urlLength,     // byte-length of complete URL
             final int      urlComps,      // number of path components
             final int      titleLength,   // length of description/length (longer are better?)
@@ -86,7 +86,7 @@ public class indexRWIVarEntry implements indexRWIEntry, Cloneable {
         this.termFrequency = termfrequency;
     }
     
-    public indexRWIVarEntry(final indexRWIRowEntry e) {
+    public ReferenceVars(final ReferenceRow e) {
         this.flags = e.flags();
         this.freshUntil = e.freshUntil();
         this.lastModified = e.lastModified();
@@ -109,8 +109,8 @@ public class indexRWIVarEntry implements indexRWIEntry, Cloneable {
         this.termFrequency = e.termFrequency();
     }
     
-    public indexRWIVarEntry clone() {
-        final indexRWIVarEntry c = new indexRWIVarEntry(
+    public ReferenceVars clone() {
+        final ReferenceVars c = new ReferenceVars(
                 this.urlHash,
                 this.urllength,
                 this.urlcomps,
@@ -133,7 +133,7 @@ public class indexRWIVarEntry implements indexRWIEntry, Cloneable {
         return c;
     }
     
-    public void join(final indexRWIVarEntry oe) {
+    public void join(final ReferenceVars oe) {
         // combine the distance
         this.worddistance = this.worddistance + oe.worddistance + Math.abs(this.posintext - oe.posintext);
         this.posintext = Math.min(this.posintext, oe.posintext);
@@ -165,12 +165,12 @@ public class indexRWIVarEntry implements indexRWIEntry, Cloneable {
         return hitcount;
     }
 
-    public boolean isNewer(final indexRWIEntry other) {
+    public boolean isNewer(final Reference other) {
         assert false; // should not be used
         return false;
     }
 
-    public boolean isOlder(final indexRWIEntry other) {
+    public boolean isOlder(final Reference other) {
         assert false; // should not be used
         return false;
     }
@@ -203,8 +203,8 @@ public class indexRWIVarEntry implements indexRWIEntry, Cloneable {
         return posofphrase;
     }
     
-    public indexRWIRowEntry toRowEntry() {
-        return new indexRWIRowEntry(
+    public ReferenceRow toRowEntry() {
+        return new ReferenceRow(
                 urlHash,
                 urllength,     // byte-length of complete URL
                 urlcomps,      // number of path components
@@ -262,7 +262,7 @@ public class indexRWIVarEntry implements indexRWIEntry, Cloneable {
         return this.termFrequency;
     }
     
-    public final void min(final indexRWIVarEntry other) {
+    public final void min(final ReferenceVars other) {
         int v;
         long w;
         double d;
@@ -284,7 +284,7 @@ public class indexRWIVarEntry implements indexRWIEntry, Cloneable {
         if (this.termFrequency > (d = other.termFrequency)) this.termFrequency = d;
     }
     
-    public final void max(final indexRWIVarEntry other) {
+    public final void max(final ReferenceVars other) {
         int v;
         long w;
         double d;
@@ -306,7 +306,7 @@ public class indexRWIVarEntry implements indexRWIEntry, Cloneable {
         if (this.termFrequency < (d = other.termFrequency)) this.termFrequency = d;
     }
 
-    public void join(final indexRWIEntry oe) {
+    public void join(final Reference oe) {
         // joins two entries into one entry
         
         // combine the distance

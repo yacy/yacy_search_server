@@ -139,7 +139,7 @@ import de.anomic.http.httpd;
 import de.anomic.http.httpdRobotsTxtConfig;
 import de.anomic.index.indexDocumentMetadata;
 import de.anomic.index.indexReferenceBlacklist;
-import de.anomic.index.indexURLReference;
+import de.anomic.index.URLMetadata;
 import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.kelondro.order.Digest;
 import de.anomic.kelondro.order.NaturalOrder;
@@ -928,7 +928,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         if (urlhash.length() == 0) return null;
         final yacyURL ne = crawlQueues.getURL(urlhash);
         if (ne != null) return ne;
-        final indexURLReference le = webIndex.getURL(urlhash, null, 0);
+        final URLMetadata le = webIndex.getURL(urlhash, null, 0);
         if (le != null) return le.comp().url();
         return null;
     }
@@ -1642,7 +1642,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         log.logInfo("Excluded " + condenser.excludeWords(stopwords) + " words in URL " + queueEntry.url());
 
         // STORE URL TO LOADED-URL-DB
-        indexURLReference newEntry = null;
+        URLMetadata newEntry = null;
         try {
             newEntry = webIndex.storeDocument(queueEntry, document, condenser);
         } catch (final IOException e) {
@@ -1690,9 +1690,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     
     public class receiptSending implements Runnable {
         yacySeed initiatorPeer;
-        indexURLReference reference;
+        URLMetadata reference;
         
-        public receiptSending(final yacySeed initiatorPeer, final indexURLReference reference) {
+        public receiptSending(final yacySeed initiatorPeer, final URLMetadata reference) {
             this.initiatorPeer = initiatorPeer;
             this.reference = reference;
         }
@@ -1737,9 +1737,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         
         if (urlhash == null) return 0;
         // determine the url string
-        final indexURLReference entry = webIndex.getURL(urlhash, null, 0);
+        final URLMetadata entry = webIndex.getURL(urlhash, null, 0);
         if (entry == null) return 0;
-        final indexURLReference.Components comp = entry.comp();
+        final URLMetadata.Components comp = entry.comp();
         if (comp.url() == null) return 0;
         
         InputStream resourceContent = null;

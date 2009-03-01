@@ -31,8 +31,8 @@ import java.net.MalformedURLException;
 import java.util.Iterator;
 
 import de.anomic.http.httpRequestHeader;
-import de.anomic.index.indexRepositoryReference;
-import de.anomic.index.indexURLReference;
+import de.anomic.index.URLMetadataRepository;
+import de.anomic.index.URLMetadata;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.kelondro.order.RotateIterator;
@@ -61,7 +61,7 @@ public class IndexControlURLs_p {
         prop.put("reload", 0);
         
         // show export messages
-        final indexRepositoryReference.Export export = sb.webIndex.exportURL();
+        final URLMetadataRepository.Export export = sb.webIndex.exportURL();
         if ((export != null) && (export.isAlive())) {
         	// there is currently a running export
             prop.put("lurlexport", 2);
@@ -115,7 +115,7 @@ public class IndexControlURLs_p {
         }
 
         if (post.containsKey("urlhashdelete")) {
-            final indexURLReference entry = sb.webIndex.getURL(urlhash, null, 0);
+            final URLMetadata entry = sb.webIndex.getURL(urlhash, null, 0);
             if (entry == null) {
                 prop.putHTML("result", "No Entry for URL hash " + urlhash + "; nothing deleted.");
             } else {
@@ -149,7 +149,7 @@ public class IndexControlURLs_p {
                 final yacyURL url = new yacyURL(urlstring, null);
                 urlhash = url.hash();
                 prop.put("urlhash", urlhash);
-                final indexURLReference entry = sb.webIndex.getURL(urlhash, null, 0);
+                final URLMetadata entry = sb.webIndex.getURL(urlhash, null, 0);
                 if (entry == null) {
                     prop.putHTML("urlstring", "unknown url: " + urlstring);
                     prop.put("urlhash", "");
@@ -166,7 +166,7 @@ public class IndexControlURLs_p {
         }
 
         if (post.containsKey("urlhashsearch")) {
-            final indexURLReference entry = sb.webIndex.getURL(urlhash, null, 0);
+            final URLMetadata entry = sb.webIndex.getURL(urlhash, null, 0);
             if (entry == null) {
                 prop.putHTML("result", "No Entry for URL hash " + urlhash);
             } else {
@@ -181,9 +181,9 @@ public class IndexControlURLs_p {
         // generate list
         if (post.containsKey("urlhashsimilar")) {
             try {
-                final Iterator<indexURLReference> entryIt = new RotateIterator<indexURLReference>(sb.webIndex.entriesURL(true, urlhash), new String(Base64Order.zero((urlhash == null ? 0 : urlhash.length()))), sb.webIndex.size()); 
+                final Iterator<URLMetadata> entryIt = new RotateIterator<URLMetadata>(sb.webIndex.entriesURL(true, urlhash), new String(Base64Order.zero((urlhash == null ? 0 : urlhash.length()))), sb.webIndex.size()); 
                 final StringBuilder result = new StringBuilder("Sequential List of URL-Hashes:<br />");
-                indexURLReference entry;
+                URLMetadata entry;
                 int i = 0;
                 int rows = 0, cols = 0;
                 prop.put("urlhashsimilar", "1");
@@ -228,7 +228,7 @@ public class IndexControlURLs_p {
         	final File f = new File(s);
 			f.getParentFile().mkdirs();
 			final String filter = post.get("exportfilter", ".*");
-			final indexRepositoryReference.Export running = sb.webIndex.exportURL(f, filter, format, dom);
+			final URLMetadataRepository.Export running = sb.webIndex.exportURL(f, filter, format, dom);
 
 			prop.put("lurlexport_exportfile", s);
 			prop.put("lurlexport_urlcount", running.count());
@@ -253,13 +253,13 @@ public class IndexControlURLs_p {
         
         if (post.containsKey("statistics")) {
             int count = post.getInt("lines", 100);
-            Iterator<indexRepositoryReference.hostStat> statsiter;
+            Iterator<URLMetadataRepository.hostStat> statsiter;
             prop.put("statistics_lines", count);
             int cnt = 0;
             try {
                 statsiter = sb.webIndex.statistics(count);
                 boolean dark = true;
-                indexRepositoryReference.hostStat hs;
+                URLMetadataRepository.hostStat hs;
                 while (statsiter.hasNext() && cnt < count) {
                     hs = statsiter.next();
                     prop.put("statisticslines_domains_" + cnt + "_dark", (dark) ? "1" : "0");
@@ -285,15 +285,15 @@ public class IndexControlURLs_p {
         return prop;
     }
     
-    private static serverObjects genUrlProfile(final plasmaSwitchboard switchboard, final indexURLReference entry, final String urlhash) {
+    private static serverObjects genUrlProfile(final plasmaSwitchboard switchboard, final URLMetadata entry, final String urlhash) {
         final serverObjects prop = new serverObjects();
         if (entry == null) {
             prop.put("genUrlProfile", "1");
             prop.put("genUrlProfile_urlhash", urlhash);
             return prop;
         }
-        final indexURLReference.Components comp = entry.comp();
-        final indexURLReference le = ((entry.referrerHash() == null) || (entry.referrerHash().length() != yacySeedDB.commonHashLength)) ? null : switchboard.webIndex.getURL(entry.referrerHash(), null, 0);
+        final URLMetadata.Components comp = entry.comp();
+        final URLMetadata le = ((entry.referrerHash() == null) || (entry.referrerHash().length() != yacySeedDB.commonHashLength)) ? null : switchboard.webIndex.getURL(entry.referrerHash(), null, 0);
         if (comp.url() == null) {
             prop.put("genUrlProfile", "1");
             prop.put("genUrlProfile_urlhash", urlhash);

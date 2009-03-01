@@ -41,7 +41,7 @@ import de.anomic.data.listManager;
 import de.anomic.data.userDB;
 import de.anomic.data.bookmarksDB.Tag;
 import de.anomic.http.httpRequestHeader;
-import de.anomic.index.indexURLReference;
+import de.anomic.index.URLMetadata;
 import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaParserDocument;
@@ -183,10 +183,10 @@ public class Bookmarks {
                     final bookmarksDB.Bookmark bookmark = sb.bookmarksDB.getBookmark(urlHash);
                     if (bookmark == null) {
                         // try to get the bookmark from the LURL database
-                        final indexURLReference urlentry = sb.webIndex.getURL(urlHash, null, 0);
+                        final URLMetadata urlentry = sb.webIndex.getURL(urlHash, null, 0);
                         plasmaParserDocument document = null;
                         if (urlentry != null) {
-                            final indexURLReference.Components comp = urlentry.comp();
+                            final URLMetadata.Components comp = urlentry.comp();
                             document = plasmaSnippetCache.retrieveDocument(comp.url(), true, 5000, true, false);
                             prop.put("mode_edit", "0"); // create mode
                             prop.put("mode_url", comp.url().toNormalform(false, true));

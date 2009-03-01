@@ -1,4 +1,4 @@
-// indexRWIRowEntry.java
+// ReferenceRow.java
 // (C) 2006 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 20.05.2006 on http://yacy.net
 //
@@ -34,7 +34,7 @@ import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.order.MicroDate;
 import de.anomic.yacy.yacySeedDB;
 
-public final class indexRWIRowEntry implements indexRWIEntry, Cloneable {
+public final class ReferenceRow implements Reference, Cloneable {
 
     // this object stores attributes to URL references inside RWI collections
 
@@ -90,7 +90,7 @@ public final class indexRWIRowEntry implements indexRWIEntry, Cloneable {
 
     private final Row.Entry entry;
     
-    public indexRWIRowEntry(final String  urlHash,
+    public ReferenceRow(final String  urlHash,
             final int      urlLength,     // byte-length of complete URL
             final int      urlComps,      // number of path components
             final int      titleLength,   // length of description/length (longer are better?)
@@ -136,32 +136,32 @@ public final class indexRWIRowEntry implements indexRWIEntry, Cloneable {
         this.entry.setCol(col_reserve2, 0);
     }
     
-    public indexRWIRowEntry(final String urlHash, final String code) {
+    public ReferenceRow(final String urlHash, final String code) {
         // the code is the external form of the row minus the leading urlHash entry
         this.entry = urlEntryRow.newEntry((urlHash + code).getBytes());
     }
     
-    public indexRWIRowEntry(final String external) {
+    public ReferenceRow(final String external) {
         this.entry = urlEntryRow.newEntry(external, true);
     }
     
-    public indexRWIRowEntry(final byte[] row) {
+    public ReferenceRow(final byte[] row) {
         this.entry = urlEntryRow.newEntry(row);
     }
     
-    public indexRWIRowEntry(final byte[] row, final int offset, final boolean clone) {
+    public ReferenceRow(final byte[] row, final int offset, final boolean clone) {
         this.entry = urlEntryRow.newEntry(row, offset, clone);
     }
     
-    public indexRWIRowEntry(final Row.Entry rentry) {
+    public ReferenceRow(final Row.Entry rentry) {
         // FIXME: see if cloning is necessary
         this.entry = rentry;
     }
     
-    public indexRWIRowEntry clone() {
+    public ReferenceRow clone() {
         final byte[] b = new byte[urlEntryRow.objectsize];
         System.arraycopy(entry.bytes(), 0, b, 0, urlEntryRow.objectsize);
-        return new indexRWIRowEntry(b);
+        return new ReferenceRow(b);
     }
 
     public String toPropertyForm() {
@@ -252,13 +252,13 @@ public final class indexRWIRowEntry implements indexRWIEntry, Cloneable {
         return toPropertyForm();
     }
 
-    public boolean isNewer(final indexRWIEntry other) {
+    public boolean isNewer(final Reference other) {
         if (other == null) return true;
         if (this.lastModified() > other.lastModified()) return true;
         return false;
     }
  
-    public boolean isOlder(final indexRWIEntry other) {
+    public boolean isOlder(final Reference other) {
         if (other == null) return false;
         if (this.lastModified() < other.lastModified()) return true;
         return false;

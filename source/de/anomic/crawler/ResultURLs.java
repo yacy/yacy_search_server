@@ -39,7 +39,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import de.anomic.index.indexURLReference;
+import de.anomic.index.URLMetadata;
 import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.util.ScoreCluster;
 import de.anomic.kelondro.util.Log;
@@ -82,7 +82,7 @@ public final class ResultURLs {
         gcrawlResultDomains = new ScoreCluster<String>();
     }
 
-    public synchronized void stack(final indexURLReference e, final String initiatorHash, final String executorHash, final int stackType) {
+    public synchronized void stack(final URLMetadata e, final String initiatorHash, final String executorHash, final int stackType) {
         assert initiatorHash != null;
         assert executorHash != null;
         if (e == null) { return; }
@@ -305,7 +305,7 @@ public final class ResultURLs {
         final ResultURLs results = new ResultURLs();
         try {
             final yacyURL url = new yacyURL("http", "www.yacy.net", 80, "/");
-            final indexURLReference urlRef = new indexURLReference(url, "YaCy Homepage", "", "", "", new Date(), new Date(), new Date(), "", new byte[] {}, 123, 42, '?', new Bitfield(), "de", 0, 0, 0, 0, 0, 0);
+            final URLMetadata urlRef = new URLMetadata(url, "YaCy Homepage", "", "", "", new Date(), new Date(), new Date(), "", new byte[] {}, 123, 42, '?', new Bitfield(), "de", 0, 0, 0, 0, 0, 0);
             int stackNo = 1;
             System.out.println("valid test:\n=======");
             // add

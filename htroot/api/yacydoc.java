@@ -28,7 +28,7 @@
 import java.net.MalformedURLException;
 
 import de.anomic.http.httpRequestHeader;
-import de.anomic.index.indexURLReference;
+import de.anomic.index.URLMetadata;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -68,14 +68,14 @@ public class yacydoc {
         }
         if (urlhash == null || urlhash.length() == 0) return prop;
         
-        final indexURLReference entry = sb.webIndex.getURL(urlhash, null, 0);
+        final URLMetadata entry = sb.webIndex.getURL(urlhash, null, 0);
         if (entry == null) return prop;
 
-        final indexURLReference.Components comp = entry.comp();
+        final URLMetadata.Components comp = entry.comp();
         if (comp.url() == null) {
             return prop;
         }
-        final indexURLReference le = ((entry.referrerHash() == null) || (entry.referrerHash().length() != yacySeedDB.commonHashLength)) ? null : sb.webIndex.getURL(entry.referrerHash(), null, 0);
+        final URLMetadata le = ((entry.referrerHash() == null) || (entry.referrerHash().length() != yacySeedDB.commonHashLength)) ? null : sb.webIndex.getURL(entry.referrerHash(), null, 0);
         
         prop.putXML("dc_title", comp.dc_title());
         prop.putXML("dc_creator", comp.dc_creator());

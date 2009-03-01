@@ -31,10 +31,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import de.anomic.index.indexContainer;
-import de.anomic.index.indexRI;
-import de.anomic.index.indexRWIRowEntry;
-import de.anomic.index.indexRepositoryReference;
+import de.anomic.index.ReferenceContainer;
+import de.anomic.index.ReverseIndex;
+import de.anomic.index.ReferenceRow;
+import de.anomic.index.URLMetadataRepository;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.util.Log;
 import de.anomic.server.serverProcessor;
@@ -80,7 +80,7 @@ public class Dispatcher {
     private HashMap<String, Transmission.Chunk> transmissionCloud;
     
     // the backend is used to store the remaining indexContainers in case that the object is closed
-    private indexRI backend;
+    private ReverseIndex backend;
     
     // the seed database
     private yacySeedDB seeds;
@@ -95,8 +95,8 @@ public class Dispatcher {
     private Transmission transmission;
     
     public Dispatcher(
-            final indexRI backend,
-            final indexRepositoryReference repository,
+            final ReverseIndex backend,
+            final URLMetadataRepository repository,
             final yacySeedDB seeds,
             final boolean gzipBody, 
             final int timeout
@@ -142,7 +142,7 @@ public class Dispatcher {
      * @return
      * @throws IOException
      */
-    private ArrayList<indexContainer> selectContainers(
+    private ArrayList<ReferenceContainer> selectContainers(
             final String hash,
             final String limitHash,
             final int maxContainerCount,
@@ -150,14 +150,14 @@ public class Dispatcher {
             final int maxtime) throws IOException {
         
     	// prefer file
-        ArrayList<indexContainer> containers = selectContainers(hash, limitHash, maxContainerCount, maxReferenceCount, maxtime, false);
+        ArrayList<ReferenceContainer> containers = selectContainers(hash, limitHash, maxContainerCount, maxReferenceCount, maxtime, false);
 
         // if ram does not provide any result, take from file
         //if (containers.size() == 0) containers = selectContainers(hash, limitHash, maxContainerCount, maxtime, false);
         return containers;
     }
     
-    private ArrayList<indexContainer> selectContainers(
+    private ArrayList<ReferenceContainer> selectContainers(
             final String hash,
             final String limitHash,
             final int maxContainerCount,
@@ -165,10 +165,10 @@ public class Dispatcher {
             final int maxtime,
             final boolean ram) throws IOException {
         
-        final ArrayList<indexContainer> containers = new ArrayList<indexContainer>(maxContainerCount);
+        final ArrayList<ReferenceContainer> containers = new ArrayList<ReferenceContainer>(maxContainerCount);
         
-        final Iterator<indexContainer> indexContainerIterator = this.backend.wordContainerIterator(hash, true, ram);
-        indexContainer container;
+        final Iterator<ReferenceContainer> indexContainerIterator = this.backend.referenceIterator(hash, true, ram);
+        ReferenceContainer container;
         int refcount = 0;
 
         // first select the container
@@ -188,7 +188,7 @@ public class Dispatcher {
             containers.add(container);
         }
         // then remove the container from the backend
-        for (indexContainer c: containers) this.backend.deleteContainer(c.getWordHash());
+        for (ReferenceContainer c: containers) this.backend.deleteAllReferences(c.getWordHash());
         
         // finished. The caller must take care of the containers and must put them back if not needed
         return containers;
@@ -202,24 +202,24 @@ public class Dispatcher {
      * @return
      */
     @SuppressWarnings("unchecked")
-    private ArrayList<indexContainer>[] splitContainers(ArrayList<indexContainer> containers) {
+    private ArrayList<ReferenceContainer>[] splitContainers(ArrayList<ReferenceContainer> containers) {
         
         // init the result vector
         int partitionCount = this.seeds.scheme.verticalPartitions();
-        ArrayList<indexContainer>[] partitions = (ArrayList<indexContainer>[]) new ArrayList[partitionCount];
-        for (int i = 0; i < partitions.length; i++) partitions[i] = new ArrayList<indexContainer>();
+        ArrayList<ReferenceContainer>[] partitions = (ArrayList<ReferenceContainer>[]) new ArrayList[partitionCount];
+        for (int i = 0; i < partitions.length; i++) partitions[i] = new ArrayList<ReferenceContainer>();
         
         // check all entries and split them to the partitions
-        indexContainer[] partitionBuffer = new indexContainer[partitionCount];
-        indexRWIRowEntry re;
-        for (indexContainer container: containers) {
+        ReferenceContainer[] partitionBuffer = new ReferenceContainer[partitionCount];
+        ReferenceRow re;
+        for (ReferenceContainer container: containers) {
             // init the new partitions
             for (int j = 0; j < partitionBuffer.length; j++) {
-                partitionBuffer[j] = new indexContainer(container.getWordHash(), container.row(), container.size() / partitionCount);
+                partitionBuffer[j] = new ReferenceContainer(container.getWordHash(), container.row(), container.size() / partitionCount);
             }
 
             // split the container
-            Iterator<indexRWIRowEntry> i = container.entries();
+            Iterator<ReferenceRow> i = container.entries();
             while (i.hasNext()) {
                 re = i.next();
                 if (re == null) continue;
@@ -244,8 +244,8 @@ public class Dispatcher {
      * stored in a cache of the Entry for later transmission to the targets, which means that
      * then no additional IO is necessary.
      */
-    private void enqueueContainersToCloud(final ArrayList<indexContainer>[] containers) {
-        indexContainer lastContainer;
+    private void enqueueContainersToCloud(final ArrayList<ReferenceContainer>[] containers) {
+        ReferenceContainer lastContainer;
         String primaryTarget;
         Transmission.Chunk entry;
         for (int vertical = 0; vertical < containers.length; vertical++) {
@@ -264,7 +264,7 @@ public class Dispatcher {
             if (entry == null) entry = transmission.newChunk(primaryTarget, targets, lastContainer.row());
             
             // fill the entry with the containers
-            for (indexContainer c: containers[vertical]) {
+            for (ReferenceContainer c: containers[vertical]) {
                 entry.add(c);
             }
             
@@ -280,7 +280,7 @@ public class Dispatcher {
             final int maxReferenceCount,
             final int maxtime) throws IOException {
 
-    	ArrayList<indexContainer> selectedContainerCache = selectContainers(hash, limitHash, maxContainerCount, maxReferenceCount, maxtime);
+    	ArrayList<ReferenceContainer> selectedContainerCache = selectContainers(hash, limitHash, maxContainerCount, maxReferenceCount, maxtime);
         this.log.logInfo("selectContainersToCache: selectedContainerCache was filled with " + selectedContainerCache.size() + " entries");
         
         if (selectedContainerCache == null || selectedContainerCache.size() == 0) {
@@ -288,7 +288,7 @@ public class Dispatcher {
         	return false;
         }
 
-        ArrayList<indexContainer>[] splittedContainerCache = splitContainers(selectedContainerCache);
+        ArrayList<ReferenceContainer>[] splittedContainerCache = splitContainers(selectedContainerCache);
         selectedContainerCache = null;
         if (splittedContainerCache == null) {
         	this.log.logInfo("enqueueContainersFromCache: splittedContainerCache is empty, cannot do anything here.");
@@ -364,7 +364,7 @@ public class Dispatcher {
         if (indexingTransmissionProcessor != null) this.indexingTransmissionProcessor.announceShutdown();
         if (this.transmissionCloud != null) {
         	for (Map.Entry<String, Transmission.Chunk> e : this.transmissionCloud.entrySet()) {
-        		for (indexContainer i : e.getValue()) try {this.backend.addEntries(i);} catch (IOException e1) {}
+        		for (ReferenceContainer i : e.getValue()) try {this.backend.addReferences(i);} catch (IOException e1) {}
         	}
         	this.transmissionCloud.clear();
         }

@@ -1,4 +1,4 @@
-// indexURLReference.java
+// URLMetadata.java
 // (C) 2006 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 2006 on http://www.anomic.de
 //
@@ -48,7 +48,7 @@ import de.anomic.server.serverCodings;
 import de.anomic.tools.crypt;
 import de.anomic.yacy.yacyURL;
 
-public class indexURLReference {
+public class URLMetadata {
 
     // this object stores attributes for URL entries
     
@@ -116,10 +116,10 @@ public class indexURLReference {
     
     private final Row.Entry entry;
     private final String snippet;
-    private indexRWIEntry word; // this is only used if the url is transported via remote search requests
+    private Reference word; // this is only used if the url is transported via remote search requests
     private final long ranking; // during generation of a search result this value is set
     
-    public indexURLReference(
+    public URLMetadata(
             final yacyURL url,
             final String dc_title,
             final String dc_creator,
@@ -198,14 +198,14 @@ public class indexURLReference {
 		}
     }
     
-    public indexURLReference(final Row.Entry entry, final indexRWIEntry searchedWord, final long ranking) {
+    public URLMetadata(final Row.Entry entry, final Reference searchedWord, final long ranking) {
         this.entry = entry;
         this.snippet = null;
         this.word = searchedWord;
         this.ranking = ranking;
     }
 
-    public indexURLReference(final Properties prop) {
+    public URLMetadata(final Properties prop) {
         // generates an plasmaLURLEntry using the properties from the argument
         // the property names must correspond to the one from toString
         //System.out.println("DEBUG-ENTRY: prop=" + prop.toString());
@@ -264,17 +264,17 @@ public class indexURLReference {
         this.word = null;
         if (prop.containsKey("word")) throw new kelondroException("old database structure is not supported");
         if (prop.containsKey("wi")) {
-            this.word = new indexRWIRowEntry(Base64Order.enhancedCoder.decodeString(prop.getProperty("wi", ""), "de.anomic.index.indexURLEntry.indexURLEntry()"));
+            this.word = new ReferenceRow(Base64Order.enhancedCoder.decodeString(prop.getProperty("wi", ""), "de.anomic.index.indexURLEntry.indexURLEntry()"));
         }
         this.ranking = 0;
     }
 
-    public static indexURLReference importEntry(final String propStr) {
+    public static URLMetadata importEntry(final String propStr) {
         if (propStr == null || !propStr.startsWith("{") || !propStr.endsWith("}")) {
             return null;
         }
         try {
-            return new indexURLReference(serverCodings.s2p(propStr.substring(1, propStr.length() - 1)));
+            return new URLMetadata(serverCodings.s2p(propStr.substring(1, propStr.length() - 1)));
         } catch (final kelondroException e) {
                 // wrong format
                 return null;
@@ -283,7 +283,7 @@ public class indexURLReference {
 
     private StringBuilder corePropList() {
         // generate a parseable string; this is a simple property-list
-        final indexURLReference.Components comp = this.comp();
+        final URLMetadata.Components comp = this.comp();
         final StringBuilder s = new StringBuilder(300);
         //System.out.println("author=" + comp.author());
         try {
@@ -341,9 +341,9 @@ public class indexURLReference {
     	return this.ranking;
     }
     
-    public indexURLReference.Components comp() {
+    public URLMetadata.Components comp() {
         final ArrayList<String> cl = FileUtils.strings(this.entry.getCol("comp", null), "UTF-8");
-        return new indexURLReference.Components(
+        return new URLMetadata.Components(
                 (cl.size() > 0) ? (cl.get(0)).trim() : "",
                 hash(),
                 (cl.size() > 1) ? (cl.get(1)).trim() : "",
@@ -424,11 +424,11 @@ public class indexURLReference {
         return snippet;
     }
 
-    public indexRWIEntry word() {
+    public Reference word() {
         return word;
     }
 
-    public boolean isOlder(final indexURLReference other) {
+    public boolean isOlder(final URLMetadata other) {
         if (other == null) return false;
         final Date tmoddate = moddate();
         final Date omoddate = other.moddate();

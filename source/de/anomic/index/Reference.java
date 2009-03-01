@@ -1,4 +1,4 @@
-// indexRWIEntry.java
+// Reference.java
 // (C) 2007 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 07.11.2007 on http://www.anomic.de
 //
@@ -28,7 +28,7 @@ package de.anomic.index;
 
 import de.anomic.kelondro.order.Bitfield;
 
-public interface indexRWIEntry {
+public interface Reference {
 
     // appearance flags, used in RWI entry
     // some names are derived from the Dublin Core Metadata tag set
@@ -82,9 +82,9 @@ public interface indexRWIEntry {
     
     public String toString();
     
-    public boolean isNewer(indexRWIEntry other);
+    public boolean isNewer(Reference other);
  
-    public boolean isOlder(indexRWIEntry other);
+    public boolean isOlder(Reference other);
 
     public int hashCode();
 }

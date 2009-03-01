@@ -6,10 +6,10 @@ import java.util.TreeSet;
 
 import de.anomic.crawler.AbstractImporter;
 import de.anomic.crawler.Importer;
-import de.anomic.index.indexContainer;
-import de.anomic.index.indexRWIEntry;
-import de.anomic.index.indexRWIRowEntry;
-import de.anomic.index.indexURLReference;
+import de.anomic.index.ReferenceContainer;
+import de.anomic.index.Reference;
+import de.anomic.index.ReferenceRow;
+import de.anomic.index.URLMetadata;
 import de.anomic.kelondro.order.DateFormatter;
 
 public class plasmaDbImporter extends AbstractImporter implements Importer {
@@ -101,11 +101,11 @@ public class plasmaDbImporter extends AbstractImporter implements Importer {
 			
             // iterate over all words from import db
             //Iterator importWordHashIterator = this.importWordIndex.wordHashes(this.wordChunkStartHash, plasmaWordIndex.RL_WORDFILES, false);
-            Iterator<indexContainer> indexContainerIterator = this.importWordIndex.indexContainerSet(this.wordChunkStartHash, false, false, 100).iterator();
+            Iterator<ReferenceContainer> indexContainerIterator = this.importWordIndex.indexContainerSet(this.wordChunkStartHash, false, false, 100).iterator();
             while (!isAborted() && indexContainerIterator.hasNext()) {
                 
                 final TreeSet<String> entityUrls = new TreeSet<String>();
-                indexContainer newContainer = null;
+                ReferenceContainer newContainer = null;
                 try {
                     this.wordCounter++;
                     newContainer = indexContainerIterator.next();
@@ -113,8 +113,8 @@ public class plasmaDbImporter extends AbstractImporter implements Importer {
                     
                     // loop throug the entities of the container and get the
                     // urlhash
-                    final Iterator<indexRWIRowEntry> importWordIdxEntries = newContainer.entries();
-                    indexRWIEntry importWordIdxEntry;
+                    final Iterator<ReferenceRow> importWordIdxEntries = newContainer.entries();
+                    Reference importWordIdxEntry;
                     while (importWordIdxEntries.hasNext()) {
                         // testing if import process was aborted
                         if (isAborted()) break;
@@ -141,7 +141,7 @@ public class plasmaDbImporter extends AbstractImporter implements Importer {
                             // we need to import the url
 
                             // getting the url entry
-                            final indexURLReference urlEntry = this.importWordIndex.getURL(urlHash, null, 0);
+                            final URLMetadata urlEntry = this.importWordIndex.getURL(urlHash, null, 0);
                             if (urlEntry != null) {
 
                                 /* write it into the home url db */
@@ -169,10 +169,10 @@ public class plasmaDbImporter extends AbstractImporter implements Importer {
                     if (isAborted()) break;
                     
                     // importing entity container to home db
-                    if (newContainer.size() > 0) { homeWordIndex.addEntries(newContainer); }
+                    if (newContainer.size() > 0) { homeWordIndex.addReferences(newContainer); }
                     
                     // delete complete index entity file
-                    this.importWordIndex.deleteContainer(this.wordHash);                 
+                    this.importWordIndex.deleteAllReferences(this.wordHash);                 
                     
                     // print out some statistical information
                     if (this.entryCounter % 500 == 0) {
@@ -203,7 +203,7 @@ public class plasmaDbImporter extends AbstractImporter implements Importer {
 
                 if (!indexContainerIterator.hasNext()) {
                     // We may not be finished yet, try to get the next chunk of wordHashes
-                    final TreeSet<indexContainer> containers = this.importWordIndex.indexContainerSet(this.wordHash, false, false, 100);
+                    final TreeSet<ReferenceContainer> containers = this.importWordIndex.indexContainerSet(this.wordHash, false, false, 100);
                     indexContainerIterator = containers.iterator();
                     // Make sure we don't get the same wordhash twice, but don't skip a word
                     if ((indexContainerIterator.hasNext())&&(!this.wordHash.equals((indexContainerIterator.next()).getWordHash()))) {

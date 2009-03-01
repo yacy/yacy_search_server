@@ -28,7 +28,7 @@ import java.util.TreeSet;
 
 import de.anomic.htmlFilter.htmlFilterAbstractScraper;
 import de.anomic.htmlFilter.htmlFilterCharacterCoding;
-import de.anomic.index.indexWord;
+import de.anomic.index.Word;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.order.NaturalOrder;
@@ -90,9 +90,9 @@ public final class plasmaSearchQuery {
     	} else {
     		this.queryString = queryString;
     		final TreeSet<String>[] cq = cleanQuery(queryString);
-    		this.queryHashes = indexWord.words2hashes(cq[0]);
-    		this.excludeHashes = indexWord.words2hashes(cq[1]);
-    		this.fullqueryHashes = indexWord.words2hashes(cq[2]);
+    		this.queryHashes = Word.words2hashes(cq[0]);
+    		this.excludeHashes = Word.words2hashes(cq[1]);
+    		this.fullqueryHashes = Word.words2hashes(cq[2]);
     	}
     	this.ranking = ranking;
         this.maxDistance = Integer.MAX_VALUE;
@@ -230,7 +230,7 @@ public final class plasmaSearchQuery {
     public static final boolean matches(final String text, final TreeSet<String> keyhashes) {
     	// returns true if any of the word hashes in keyhashes appear in the String text
     	// to do this, all words in the string must be recognized and transcoded to word hashes
-    	final TreeSet<String> wordhashes = indexWord.words2hashes(plasmaCondenser.getWords(text).keySet());
+    	final TreeSet<String> wordhashes = Word.words2hashes(plasmaCondenser.getWords(text).keySet());
     	return SetTools.anymatch(wordhashes, keyhashes);
     }
     
@@ -288,7 +288,7 @@ public final class plasmaSearchQuery {
     public void filterOut(final Set<String> blueList) {
         // filter out words that appear in this set
     	// this is applied to the queryHashes
-    	final TreeSet<String> blues = indexWord.words2hashes(blueList);
+    	final TreeSet<String> blues = Word.words2hashes(blueList);
     	SetTools.excludeDestructive(queryHashes, blues);
     }
 
@@ -298,7 +298,7 @@ public final class plasmaSearchQuery {
             "*" + this.domType + 
             "*" + this.contentdom +
             "*" + this.zonecode +
-            "*" + indexWord.word2hash(this.ranking.toExternalString()) +
+            "*" + Word.word2hash(this.ranking.toExternalString()) +
             "*" + this.prefer +
             "*" + this.urlMask +
             "*" + this.targetlang +

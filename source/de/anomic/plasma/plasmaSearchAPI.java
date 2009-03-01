@@ -33,9 +33,9 @@ import java.util.Iterator;
 import java.util.List;
 
 import de.anomic.data.listManager;
-import de.anomic.index.indexRWIEntry;
+import de.anomic.index.Reference;
 import de.anomic.index.indexReferenceBlacklist;
-import de.anomic.index.indexURLReference;
+import de.anomic.index.URLMetadata;
 import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.server.serverObjects;
@@ -54,12 +54,12 @@ public class plasmaSearchAPI {
             if (post.get("flags","").length() == 0) return null;
             return new Bitfield(4, post.get("flags"));
         }
-        if (post.get("description", "").equals("on")) b.set(indexRWIEntry.flag_app_dc_description, true);
-        if (post.get("title", "").equals("on")) b.set(indexRWIEntry.flag_app_dc_title, true);
-        if (post.get("creator", "").equals("on")) b.set(indexRWIEntry.flag_app_dc_creator, true);
-        if (post.get("subject", "").equals("on")) b.set(indexRWIEntry.flag_app_dc_subject, true);
-        if (post.get("url", "").equals("on")) b.set(indexRWIEntry.flag_app_dc_identifier, true);
-        if (post.get("emphasized", "").equals("on")) b.set(indexRWIEntry.flag_app_emphasized, true);
+        if (post.get("description", "").equals("on")) b.set(Reference.flag_app_dc_description, true);
+        if (post.get("title", "").equals("on")) b.set(Reference.flag_app_dc_title, true);
+        if (post.get("creator", "").equals("on")) b.set(Reference.flag_app_dc_creator, true);
+        if (post.get("subject", "").equals("on")) b.set(Reference.flag_app_dc_subject, true);
+        if (post.get("url", "").equals("on")) b.set(Reference.flag_app_dc_identifier, true);
+        if (post.get("emphasized", "").equals("on")) b.set(Reference.flag_app_emphasized, true);
         if (post.get("image", "").equals("on")) b.set(plasmaCondenser.flag_cat_hasimage, true);
         if (post.get("audio", "").equals("on")) b.set(plasmaCondenser.flag_cat_hasaudio, true);
         if (post.get("video", "").equals("on")) b.set(plasmaCondenser.flag_cat_hasvideo, true);
@@ -96,12 +96,12 @@ public class plasmaSearchAPI {
         } else {
             prop.put("searchresult", 3);
             prop.put("searchresult_allurl", ranked.filteredCount());
-            prop.put("searchresult_description", ranked.flagCount()[indexRWIEntry.flag_app_dc_description]);
-            prop.put("searchresult_title", ranked.flagCount()[indexRWIEntry.flag_app_dc_title]);
-            prop.put("searchresult_creator", ranked.flagCount()[indexRWIEntry.flag_app_dc_creator]);
-            prop.put("searchresult_subject", ranked.flagCount()[indexRWIEntry.flag_app_dc_subject]);
-            prop.put("searchresult_url", ranked.flagCount()[indexRWIEntry.flag_app_dc_identifier]);
-            prop.put("searchresult_emphasized", ranked.flagCount()[indexRWIEntry.flag_app_emphasized]);
+            prop.put("searchresult_description", ranked.flagCount()[Reference.flag_app_dc_description]);
+            prop.put("searchresult_title", ranked.flagCount()[Reference.flag_app_dc_title]);
+            prop.put("searchresult_creator", ranked.flagCount()[Reference.flag_app_dc_creator]);
+            prop.put("searchresult_subject", ranked.flagCount()[Reference.flag_app_dc_subject]);
+            prop.put("searchresult_url", ranked.flagCount()[Reference.flag_app_dc_identifier]);
+            prop.put("searchresult_emphasized", ranked.flagCount()[Reference.flag_app_emphasized]);
             prop.put("searchresult_image", ranked.flagCount()[plasmaCondenser.flag_cat_hasimage]);
             prop.put("searchresult_audio", ranked.flagCount()[plasmaCondenser.flag_cat_hasaudio]);
             prop.put("searchresult_video", ranked.flagCount()[plasmaCondenser.flag_cat_hasvideo]);
@@ -126,7 +126,7 @@ public class plasmaSearchAPI {
             prop.put("genUrlList_lines", maxlines);
             int i = 0;
             yacyURL url;
-            indexURLReference entry;
+            URLMetadata entry;
             String us;
             long rn = -1;
             while ((ranked.size() > 0) && ((entry = ranked.bestURL(false)) != null)) {
@@ -166,12 +166,12 @@ public class plasmaSearchAPI {
                         ((entry.word().flags().get(plasmaCondenser.flag_cat_hasaudio)) ? "contains audio, " : "") +
                         ((entry.word().flags().get(plasmaCondenser.flag_cat_hasvideo)) ? "contains video, " : "") +
                         ((entry.word().flags().get(plasmaCondenser.flag_cat_hasapp)) ? "contains applications, " : "") +
-                        ((entry.word().flags().get(indexRWIEntry.flag_app_dc_identifier)) ? "appears in url, " : "") +
-                        ((entry.word().flags().get(indexRWIEntry.flag_app_dc_title)) ? "appears in title, " : "") +
-                        ((entry.word().flags().get(indexRWIEntry.flag_app_dc_creator)) ? "appears in author, " : "") +
-                        ((entry.word().flags().get(indexRWIEntry.flag_app_dc_subject)) ? "appears in subject, " : "") +
-                        ((entry.word().flags().get(indexRWIEntry.flag_app_dc_description)) ? "appears in description, " : "") +
-                        ((entry.word().flags().get(indexRWIEntry.flag_app_emphasized)) ? "appears emphasized, " : "") +
+                        ((entry.word().flags().get(Reference.flag_app_dc_identifier)) ? "appears in url, " : "") +
+                        ((entry.word().flags().get(Reference.flag_app_dc_title)) ? "appears in title, " : "") +
+                        ((entry.word().flags().get(Reference.flag_app_dc_creator)) ? "appears in author, " : "") +
+                        ((entry.word().flags().get(Reference.flag_app_dc_subject)) ? "appears in subject, " : "") +
+                        ((entry.word().flags().get(Reference.flag_app_dc_description)) ? "appears in description, " : "") +
+                        ((entry.word().flags().get(Reference.flag_app_emphasized)) ? "appears emphasized, " : "") +
                         ((yacyURL.probablyRootURL(entry.word().urlHash())) ? "probably root url" : "")
                 );
                 if (plasmaSwitchboard.urlBlacklist.isListed(indexReferenceBlacklist.BLACKLIST_DHT, url)) {

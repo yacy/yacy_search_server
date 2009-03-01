@@ -1,4 +1,4 @@
-// indexWord.java
+// Word.java
 // (C) 2008 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 26.03.2008 on http://yacy.net
 //
@@ -38,7 +38,7 @@ import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.order.Digest;
 import de.anomic.yacy.yacySeedDB;
 
-public class indexWord {
+public class Word {
 
     private static final ConcurrentHashMap<String, String> hashCache = new ConcurrentHashMap<String, String>(1000);
     
@@ -50,7 +50,7 @@ public class indexWord {
     HashSet<Integer> phrases;     // a set of handles to all phrases where this word appears
     public  Bitfield flags;       // the flag bits for each word
 
-    public indexWord(final int handle, final int pip, final int nop) {
+    public Word(final int handle, final int pip, final int nop) {
         this.count = 1;
         this.posInText = handle;
         this.posInPhrase = pip;

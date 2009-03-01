@@ -35,7 +35,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import de.anomic.http.httpRequestHeader;
-import de.anomic.index.indexContainer;
+import de.anomic.index.ReferenceContainer;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.util.SortStack;
@@ -185,18 +185,18 @@ public final class search {
             yacyCore.log.logInfo("INIT HASH SEARCH (abstracts only): " + plasmaSearchQuery.anonymizedQueryHashes(theQuery.queryHashes) + " - " + theQuery.displayResults() + " links");
 
             final long timer = System.currentTimeMillis();
-            final Map<String, indexContainer>[] containers = sb.webIndex.localSearchContainers(theQuery, plasmaSearchQuery.hashes2Set(urls));
+            final Map<String, ReferenceContainer>[] containers = sb.webIndex.localSearchContainers(theQuery, plasmaSearchQuery.hashes2Set(urls));
             serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(theQuery.id(true), plasmaSearchEvent.COLLECTION, containers[0].size(), System.currentTimeMillis() - timer));
             if (containers != null) {
-                final Iterator<Map.Entry<String, indexContainer>> ci = containers[0].entrySet().iterator();
-                Map.Entry<String, indexContainer> entry;
+                final Iterator<Map.Entry<String, ReferenceContainer>> ci = containers[0].entrySet().iterator();
+                Map.Entry<String, ReferenceContainer> entry;
                 String wordhash;
                 while (ci.hasNext()) {
                     entry = ci.next();
                     wordhash = entry.getKey();
-                    final indexContainer container = entry.getValue();
+                    final ReferenceContainer container = entry.getValue();
                     indexabstractContainercount += container.size();
-                    indexabstract.append("indexabstract." + wordhash + "=").append(indexContainer.compressIndex(container, null, 1000).toString()).append(serverCore.CRLF_STRING);                
+                    indexabstract.append("indexabstract." + wordhash + "=").append(ReferenceContainer.compressIndex(container, null, 1000).toString()).append(serverCore.CRLF_STRING);                
                 }
             }
             

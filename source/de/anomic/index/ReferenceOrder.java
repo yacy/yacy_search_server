@@ -1,4 +1,4 @@
-// indexRWIEntryOrder.java
+// ReferenceOrder.java
 // (C) 2007 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 07.11.2007 on http://yacy.net
 //
@@ -39,14 +39,14 @@ import de.anomic.plasma.plasmaSearchRankingProfile;
 import de.anomic.server.serverProcessor;
 import de.anomic.yacy.yacyURL;
 
-public class indexRWIEntryOrder {
-    private indexRWIVarEntry min, max;
+public class ReferenceOrder {
+    private ReferenceVars min, max;
     private final plasmaSearchRankingProfile ranking;
     private final ScoreCluster<String> doms; // collected for "authority" heuristic 
     private int maxdomcount;
     private String language;
     
-    public indexRWIEntryOrder(final plasmaSearchRankingProfile profile, String language) {
+    public ReferenceOrder(final plasmaSearchRankingProfile profile, String language) {
         this.min = null;
         this.max = null;
         this.ranking = profile;
@@ -55,10 +55,10 @@ public class indexRWIEntryOrder {
         this.language = language;
     }
     
-    public ArrayList<indexRWIVarEntry> normalizeWith(final indexContainer container) {
+    public ArrayList<ReferenceVars> normalizeWith(final ReferenceContainer container) {
         // normalize ranking: find minimum and maxiumum of separate ranking criteria
         assert (container != null);
-        ArrayList<indexRWIVarEntry> result = null;
+        ArrayList<ReferenceVars> result = null;
         
         //long s0 = System.currentTimeMillis();
         if ((serverProcessor.useCPU > 1) && (container.size() > 600)) {
@@ -112,7 +112,7 @@ public class indexRWIEntryOrder {
     	return (doms.getScore(urlHash.substring(6)) << 8) / (1 + this.maxdomcount);
     }
 
-    public long cardinal(final indexRWIVarEntry t) {
+    public long cardinal(final ReferenceVars t) {
         //return Long.MAX_VALUE - preRanking(ranking, iEntry, this.entryMin, this.entryMax, this.searchWords);
         // the normalizedEntry must be a normalized indexEntry
         final Bitfield flags = t.flags();
@@ -136,12 +136,12 @@ public class indexRWIEntryOrder {
            + ((max.hitcount()      == min.hitcount())      ? 0 : (((t.hitcount()     - min.hitcount()      ) << 8) / (max.hitcount()     - min.hitcount())      ) << ranking.coeff_hitcount)
            + tf
            + ((ranking.coeff_authority > 12) ? (authority(t.urlHash()) << ranking.coeff_authority) : 0)
-           + ((flags.get(indexRWIEntry.flag_app_dc_identifier))  ? 255 << ranking.coeff_appurl             : 0)
-           + ((flags.get(indexRWIEntry.flag_app_dc_title))       ? 255 << ranking.coeff_app_dc_title       : 0)
-           + ((flags.get(indexRWIEntry.flag_app_dc_creator))     ? 255 << ranking.coeff_app_dc_creator     : 0)
-           + ((flags.get(indexRWIEntry.flag_app_dc_subject))     ? 255 << ranking.coeff_app_dc_subject     : 0)
-           + ((flags.get(indexRWIEntry.flag_app_dc_description)) ? 255 << ranking.coeff_app_dc_description : 0)
-           + ((flags.get(indexRWIEntry.flag_app_emphasized))     ? 255 << ranking.coeff_appemph            : 0)
+           + ((flags.get(Reference.flag_app_dc_identifier))  ? 255 << ranking.coeff_appurl             : 0)
+           + ((flags.get(Reference.flag_app_dc_title))       ? 255 << ranking.coeff_app_dc_title       : 0)
+           + ((flags.get(Reference.flag_app_dc_creator))     ? 255 << ranking.coeff_app_dc_creator     : 0)
+           + ((flags.get(Reference.flag_app_dc_subject))     ? 255 << ranking.coeff_app_dc_subject     : 0)
+           + ((flags.get(Reference.flag_app_dc_description)) ? 255 << ranking.coeff_app_dc_description : 0)
+           + ((flags.get(Reference.flag_app_emphasized))     ? 255 << ranking.coeff_appemph            : 0)
            + ((flags.get(plasmaCondenser.flag_cat_indexof))      ? 255 << ranking.coeff_catindexof         : 0)
            + ((flags.get(plasmaCondenser.flag_cat_hasimage))     ? 255 << ranking.coeff_cathasimage        : 0)
            + ((flags.get(plasmaCondenser.flag_cat_hasaudio))     ? 255 << ranking.coeff_cathasaudio        : 0)
@@ -161,33 +161,33 @@ public class indexRWIEntryOrder {
     
     public static class minmaxfinder extends Thread {
 
-        indexRWIVarEntry entryMin;
-        indexRWIVarEntry entryMax;
-        private final indexContainer container;
+        ReferenceVars entryMin;
+        ReferenceVars entryMax;
+        private final ReferenceContainer container;
         private final int start, end;
         private final HashMap<String, Integer> doms;
         private final Integer int1;
-        ArrayList<indexRWIVarEntry> decodedEntries;
+        ArrayList<ReferenceVars> decodedEntries;
         
-        public minmaxfinder(final indexContainer container, final int start /*including*/, final int end /*excluding*/) {
+        public minmaxfinder(final ReferenceContainer container, final int start /*including*/, final int end /*excluding*/) {
             this.container = container;
             this.start = start;
             this.end = end;
             this.doms = new HashMap<String, Integer>();
             this.int1 = 1;
-            this.decodedEntries = new ArrayList<indexRWIVarEntry>();
+            this.decodedEntries = new ArrayList<ReferenceVars>();
         }
         
         public void run() {
             // find min/max to obtain limits for normalization
             this.entryMin = null;
             this.entryMax = null;
-            indexRWIVarEntry iEntry;
+            ReferenceVars iEntry;
             int p = this.start;
             String dom;
             Integer count;
             while (p < this.end) {
-                iEntry = new indexRWIVarEntry(new indexRWIRowEntry(container.get(p++, false)));
+                iEntry = new ReferenceVars(new ReferenceRow(container.get(p++, false)));
                 this.decodedEntries.add(iEntry);
                 // find min/max
                 if (this.entryMin == null) this.entryMin = iEntry.clone(); else this.entryMin.min(iEntry);
@@ -203,7 +203,7 @@ public class indexRWIEntryOrder {
             }
         }
         
-        public ArrayList<indexRWIVarEntry> decodedContainer() {
+        public ArrayList<ReferenceVars> decodedContainer() {
             return this.decodedEntries;
         }
         

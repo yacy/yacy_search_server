@@ -95,7 +95,7 @@ public final class indexContainerBLOBArray {
      * objects in the cache.
      * @throws IOException 
      */
-    public synchronized CloneableIterator<indexContainer> wordContainerIterator(final String startWordHash, final boolean rot, final boolean ram) throws IOException {
+    public synchronized CloneableIterator<ReferenceContainer> wordContainerIterator(final String startWordHash, final boolean rot, final boolean ram) throws IOException {
         return new heapCacheIterator(startWordHash, rot);
     }
 
@@ -103,7 +103,7 @@ public final class indexContainerBLOBArray {
      * cache iterator: iterates objects within the heap cache. This can only be used
      * for write-enabled heaps, read-only heaps do not have a heap cache
      */
-    public class heapCacheIterator implements CloneableIterator<indexContainer>, Iterable<indexContainer> {
+    public class heapCacheIterator implements CloneableIterator<ReferenceContainer>, Iterable<ReferenceContainer> {
 
         // this class exists, because the wCache cannot be iterated with rotation
         // and because every indexContainer Object that is iterated must be returned as top-level-clone
@@ -133,7 +133,7 @@ public final class indexContainerBLOBArray {
             return iterator.hasNext();
         }
 
-        public indexContainer next() {
+        public ReferenceContainer next() {
         	try {
 				if (iterator.hasNext()) {
                 	return get(new String(iterator.next()));
@@ -154,7 +154,7 @@ public final class indexContainerBLOBArray {
             iterator.remove();
         }
 
-        public Iterator<indexContainer> iterator() {
+        public Iterator<ReferenceContainer> iterator() {
             return this;
         }
         
@@ -177,13 +177,13 @@ public final class indexContainerBLOBArray {
      * @return the indexContainer if one exist, null otherwise
      * @throws IOException 
      */
-    public synchronized indexContainer get(final String key) throws IOException {
+    public synchronized ReferenceContainer get(final String key) throws IOException {
     	List<byte[]> entries = this.array.getAll(key.getBytes());
     	if (entries == null || entries.size() == 0) return null;
     	byte[] a = entries.remove(0);
-    	indexContainer c = new indexContainer(key, RowSet.importRowSet(a, payloadrow));
+    	ReferenceContainer c = new ReferenceContainer(key, RowSet.importRowSet(a, payloadrow));
     	while (entries.size() > 0) {
-    		c = c.merge(new indexContainer(key, RowSet.importRowSet(entries.remove(0), payloadrow)));
+    		c = c.merge(new ReferenceContainer(key, RowSet.importRowSet(entries.remove(0), payloadrow)));
     	}
     	return c;
     }
@@ -215,7 +215,7 @@ public final class indexContainerBLOBArray {
         
         public byte[] rewrite(byte[] b) {
             if (b == null) return null;
-            indexContainer c = rewriter.rewrite(new indexContainer(this.wordHash, RowSet.importRowSet(b, payloadrow)));
+            ReferenceContainer c = rewriter.rewrite(new ReferenceContainer(this.wordHash, RowSet.importRowSet(b, payloadrow)));
             if (c == null) return null;
             return c.exportCollection();
         }
@@ -253,7 +253,7 @@ public final class indexContainerBLOBArray {
     
     public interface ContainerRewriter {
         
-        public indexContainer rewrite(indexContainer container);
+        public ReferenceContainer rewrite(ReferenceContainer container);
         
     }
 

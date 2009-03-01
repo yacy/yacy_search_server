@@ -44,8 +44,8 @@ import de.anomic.htmlFilter.htmlFilterImageEntry;
 import de.anomic.http.httpClient;
 import de.anomic.http.httpResponseHeader;
 import de.anomic.index.indexDocumentMetadata;
-import de.anomic.index.indexURLReference;
-import de.anomic.index.indexWord;
+import de.anomic.index.URLMetadata;
+import de.anomic.index.Word;
 import de.anomic.kelondro.util.ScoreCluster;
 import de.anomic.kelondro.util.SetTools;
 import de.anomic.kelondro.util.Log;
@@ -229,14 +229,14 @@ public class plasmaSnippetCache {
                 for(int k=0; k < word.length(); k++) {
                     //is character a special character?
                     if(p4.matcher(word.substring(k,k+1)).find()) {
-                        if (indexWord.word2hash(temp).equals(h)) temp = "<b>" + htmlFilterCharacterCoding.unicode2html(temp, false) + "</b>";
+                        if (Word.word2hash(temp).equals(h)) temp = "<b>" + htmlFilterCharacterCoding.unicode2html(temp, false) + "</b>";
                         out = out + temp + htmlFilterCharacterCoding.unicode2html(word.substring(k,k+1), false);
                         temp = "";
                     }
                     //last character
                     else if(k == (word.length()-1)) {
                         temp = temp + word.substring(k,k+1);
-                        if (indexWord.word2hash(temp).equals(h)) temp = "<b>" + htmlFilterCharacterCoding.unicode2html(temp, false) + "</b>";
+                        if (Word.word2hash(temp).equals(h)) temp = "<b>" + htmlFilterCharacterCoding.unicode2html(temp, false) + "</b>";
                         out = out + temp;
                         temp = "";
                     }
@@ -246,7 +246,7 @@ public class plasmaSnippetCache {
             }
 
             //end contrib [MN]
-            else if (indexWord.word2hash(word).equals(h)) word = "<b>" + htmlFilterCharacterCoding.unicode2html(word, false) + "</b>";
+            else if (Word.word2hash(word).equals(h)) word = "<b>" + htmlFilterCharacterCoding.unicode2html(word, false) + "</b>";
 
             word = htmlFilterCharacterCoding.unicode2html(prefix, false)
             	+ word
@@ -302,7 +302,7 @@ public class plasmaSnippetCache {
     }
     
     @SuppressWarnings("unchecked")
-    public static TextSnippet retrieveTextSnippet(final indexURLReference.Components comp, final Set<String> queryhashes, final boolean fetchOnline, final boolean pre, final int snippetMaxLength, final int timeout, final int maxDocLen, final boolean reindexing) {
+    public static TextSnippet retrieveTextSnippet(final URLMetadata.Components comp, final Set<String> queryhashes, final boolean fetchOnline, final boolean pre, final int snippetMaxLength, final int timeout, final int maxDocLen, final boolean reindexing) {
         // heise = "0OQUNU3JSs05"
         final yacyURL url = comp.url();
         if (queryhashes.size() == 0) {
@@ -802,7 +802,7 @@ public class plasmaSnippetCache {
         String hash;
         while (words.hasMoreElements()) {
             word = words.nextElement();
-            hash = indexWord.word2hash(new String(word));
+            hash = Word.word2hash(new String(word));
             if (!map.containsKey(hash)) map.put(hash, Integer.valueOf(pos)); // dont overwrite old values, that leads to too far word distances
             pos += word.length() + 1;
         }

@@ -31,7 +31,7 @@ import java.text.ParseException;
 
 import de.anomic.http.httpRequestHeader;
 import de.anomic.index.indexReferenceBlacklist;
-import de.anomic.index.indexURLReference;
+import de.anomic.index.URLMetadata;
 import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
@@ -84,7 +84,7 @@ public final class transferURL {
             final int sizeBefore = sb.webIndex.countURL();
             // read the urls from the other properties and store
             String urls;
-            indexURLReference lEntry;
+            URLMetadata lEntry;
             for (int i = 0; i < urlc; i++) {
                 serverCore.checkInterruption();
                 
@@ -97,7 +97,7 @@ public final class transferURL {
                 }
 
                 // parse new lurl-entry
-                lEntry = indexURLReference.importEntry(urls);
+                lEntry = URLMetadata.importEntry(urls);
                 if (lEntry == null) {
                     yacyCore.log.logWarning("transferURL: received invalid URL (entry null) from peer " + otherPeerName + "\n\tURL Property: " + urls);
                     blocked++;
@@ -105,7 +105,7 @@ public final class transferURL {
                 }
                 
                 // check if entry is well-formed
-                final indexURLReference.Components comp = lEntry.comp();
+                final URLMetadata.Components comp = lEntry.comp();
                 if (comp.url() == null) {
                     yacyCore.log.logWarning("transferURL: received invalid URL from peer " + otherPeerName + "\n\tURL Property: " + urls);
                     blocked++;

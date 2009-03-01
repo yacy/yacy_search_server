@@ -49,8 +49,8 @@ import java.util.TreeSet;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterImageEntry;
 import de.anomic.index.indexPhrase;
-import de.anomic.index.indexRWIEntry;
-import de.anomic.index.indexWord;
+import de.anomic.index.Reference;
+import de.anomic.index.Word;
 import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.util.SetTools;
 import de.anomic.language.identification.Identificator;
@@ -89,7 +89,7 @@ public final class plasmaCondenser {
     private final static int numlength = 5;
 
     //private Properties analysis;
-    private TreeMap<String, indexWord> words; // a string (the words) to (indexWord) - relation
+    private TreeMap<String, Word> words; // a string (the words) to (indexWord) - relation
     private final int wordminsize;
     private final int wordcut;
 
@@ -106,7 +106,7 @@ public final class plasmaCondenser {
         // added media words are flagged with the appropriate media flag
         this.wordminsize = 3;
         this.wordcut = 2;
-        this.words = new TreeMap<String, indexWord>();
+        this.words = new TreeMap<String, Word>();
         this.RESULT_FLAGS = new Bitfield(4);
 
         // construct flag set for document
@@ -133,13 +133,13 @@ public final class plasmaCondenser {
             // phrase  99 is taken from the media Link url and anchor description
             // phrase 100 and above are lines from the text
       
-            insertTextToWords(document.dc_title(),    1, indexRWIEntry.flag_app_dc_title, RESULT_FLAGS, true);
-            insertTextToWords(document.dc_description(), 3, indexRWIEntry.flag_app_dc_description, RESULT_FLAGS, true);
-            insertTextToWords(document.dc_creator(),   4, indexRWIEntry.flag_app_dc_creator, RESULT_FLAGS, true);
+            insertTextToWords(document.dc_title(),    1, Reference.flag_app_dc_title, RESULT_FLAGS, true);
+            insertTextToWords(document.dc_description(), 3, Reference.flag_app_dc_description, RESULT_FLAGS, true);
+            insertTextToWords(document.dc_creator(),   4, Reference.flag_app_dc_creator, RESULT_FLAGS, true);
             // missing: tags!
             final String[] titles = document.getSectionTitles();
             for (int i = 0; i < titles.length; i++) {
-                insertTextToWords(titles[i], i + 10, indexRWIEntry.flag_app_emphasized, RESULT_FLAGS, true);
+                insertTextToWords(titles[i], i + 10, Reference.flag_app_emphasized, RESULT_FLAGS, true);
             }
             
             // anchors: for text indexing we add only the anchor description
@@ -164,7 +164,7 @@ public final class plasmaCondenser {
         }
         
         // add the URL components to the word list
-        insertTextToWords(document.dc_source().toNormalform(false, true), 0, indexRWIEntry.flag_app_dc_identifier, RESULT_FLAGS, false);
+        insertTextToWords(document.dc_source().toNormalform(false, true), 0, Reference.flag_app_dc_identifier, RESULT_FLAGS, false);
 
         if (indexMedia) {
             // add anchor descriptions: here, we also add the url components
@@ -202,9 +202,9 @@ public final class plasmaCondenser {
             }
         
             // finally check all words for missing flag entry
-            final Iterator<Map.Entry<String, indexWord>> k = words.entrySet().iterator();
-            indexWord wprop;
-            Map.Entry<String, indexWord> we;
+            final Iterator<Map.Entry<String, Word>> k = words.entrySet().iterator();
+            Word wprop;
+            Map.Entry<String, Word> we;
             while (k.hasNext()) {
                 we = k.next();
                 wprop = we.getValue();
@@ -218,7 +218,7 @@ public final class plasmaCondenser {
     
     private void insertTextToWords(final String text, final int phrase, final int flagpos, final Bitfield flagstemplate, boolean useForLanguageIdentification) {
         String word;
-        indexWord wprop;
+        Word wprop;
         sievedWordsEnum wordenum;
         try {
             wordenum = new sievedWordsEnum(new ByteArrayInputStream(text.getBytes("UTF-8")));
@@ -231,7 +231,7 @@ public final class plasmaCondenser {
             if (useForLanguageIdentification) languageIdentificator.add(word);
             if (word.length() < 3) continue;
             wprop = words.get(word);
-            if (wprop == null) wprop = new indexWord(0, pip, phrase);
+            if (wprop == null) wprop = new Word(0, pip, phrase);
             if (wprop.flags == null) wprop.flags = flagstemplate.clone();
             wprop.flags.set(flagpos, true);
             words.put(word, wprop);
@@ -250,7 +250,7 @@ public final class plasmaCondenser {
         this.wordcut = wordcut;
         this.languageIdentificator = null; // we don't need that here
         // analysis = new Properties();
-        words = new TreeMap<String, indexWord>();
+        words = new TreeMap<String, Word>();
         createCondensement(text, charset);
     }
     
@@ -262,7 +262,7 @@ public final class plasmaCondenser {
         return oldsize - words.size();
     }
 
-    public Map<String, indexWord> words() {
+    public Map<String, Word> words() {
         // returns the words as word/indexWord relation map
         return words;
     }
@@ -283,7 +283,7 @@ public final class plasmaCondenser {
         String word = "";
         String k;
         int wordlen;
-        indexWord wsp, wsp1;
+        Word wsp, wsp1;
         indexPhrase psp;
         int wordHandle;
         int wordHandleCount = 0;
@@ -374,7 +374,7 @@ public final class plasmaCondenser {
                 } else {
                     // word does not yet exist, create new word entry
                     wordHandle = wordHandleCount++;
-                    wsp = new indexWord(wordHandle, wordInSentenceCounter, sentences.size() + 100);
+                    wsp = new Word(wordHandle, wordInSentenceCounter, sentences.size() + 100);
                     wsp.flags = RESULT_FLAGS.clone();
                 }
                 words.put(word, wsp);
@@ -430,10 +430,10 @@ public final class plasmaCondenser {
             }
         }
 
-        Map.Entry<String, indexWord> entry;
+        Map.Entry<String, Word> entry;
         // we search for similar words and reorganize the corresponding sentences
         // a word is similar, if a shortened version is equal
-        final Iterator<Map.Entry<String, indexWord>> wi = words.entrySet().iterator(); // enumerates the keys in descending order
+        final Iterator<Map.Entry<String, Word>> wi = words.entrySet().iterator(); // enumerates the keys in descending order
         wordsearch: while (wi.hasNext()) {
             entry = wi.next();
             word = entry.getKey();
@@ -705,7 +705,7 @@ public final class plasmaCondenser {
         return s;
     }
 
-    public static Map<String, indexWord> getWords(final String text) {
+    public static Map<String, Word> getWords(final String text) {
         // returns a word/indexWord relation map
         if (text == null) return null;
         ByteArrayInputStream buffer;
@@ -734,7 +734,7 @@ public final class plasmaCondenser {
                 final String s = p.getProperty("keywords" + i);
                 final String[] l = s.split(",");
                 for (int j = 0; j < l.length; j++) {
-                    sb.append(indexWord.word2hash(l[j]));
+                    sb.append(Word.word2hash(l[j]));
                 }
                 if (i < 15) sb.append(",\n");
             }

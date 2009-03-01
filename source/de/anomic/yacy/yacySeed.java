@@ -55,7 +55,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
 
-import de.anomic.index.indexWord;
+import de.anomic.index.Word;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.kelondro.order.Digest;
@@ -586,7 +586,7 @@ public class yacySeed implements Cloneable {
         final Set<String> tags = serverCodings.string2set(peertags, "|");
         final Iterator<String> i = tags.iterator();
         while (i.hasNext()) {
-        	if (searchHashes.contains(indexWord.word2hash(i.next()))) return true;
+        	if (searchHashes.contains(Word.word2hash(i.next()))) return true;
         }
         return false;
     }

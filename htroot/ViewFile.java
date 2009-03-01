@@ -40,7 +40,7 @@ import de.anomic.http.httpClient;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpResponseHeader;
 import de.anomic.index.indexDocumentMetadata;
-import de.anomic.index.indexURLReference;
+import de.anomic.index.URLMetadata;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaCondenser;
 import de.anomic.plasma.plasmaHTCache;
@@ -94,7 +94,7 @@ public class ViewFile {
         final String urlHash = post.get("urlHash","");
         if (urlHash.length() > 0) {
             // getting the urlEntry that belongs to the url hash
-            indexURLReference urlEntry = null;
+            URLMetadata urlEntry = null;
             urlEntry = sb.webIndex.getURL(urlHash, null, 0);
             if (urlEntry == null) {
                 prop.put("error", "2");
@@ -103,7 +103,7 @@ public class ViewFile {
             }            
             
                 // getting the url that belongs to the entry
-            final indexURLReference.Components comp = urlEntry.comp();
+            final URLMetadata.Components comp = urlEntry.comp();
             if ((comp == null) || (comp.url() == null)) {
                 prop.put("error", "3");
                 prop.put("viewMode", VIEW_MODE_NO_TEXT);

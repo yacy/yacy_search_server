@@ -52,12 +52,12 @@ import de.anomic.http.httpClient;
 import de.anomic.http.httpResponse;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpd;
-import de.anomic.index.indexContainer;
-import de.anomic.index.indexRWIEntry;
-import de.anomic.index.indexRWIRowEntry;
-import de.anomic.index.indexRepositoryReference;
-import de.anomic.index.indexURLReference;
-import de.anomic.index.indexWord;
+import de.anomic.index.ReferenceContainer;
+import de.anomic.index.Reference;
+import de.anomic.index.ReferenceRow;
+import de.anomic.index.URLMetadataRepository;
+import de.anomic.index.URLMetadata;
+import de.anomic.index.Word;
 import de.anomic.kelondro.blob.BLOBHeap;
 import de.anomic.kelondro.blob.MapDataMining;
 import de.anomic.kelondro.index.RowCollection;
@@ -667,35 +667,35 @@ public final class yacy {
             log.logInfo("STARTING URL CLEANUP");
             
             // db containing all currently loades urls
-            final indexRepositoryReference currentUrlDB = new indexRepositoryReference(new File(indexSecondaryRoot, networkName));
+            final URLMetadataRepository currentUrlDB = new URLMetadataRepository(new File(indexSecondaryRoot, networkName));
             
             // db used to hold all neede urls
-            final indexRepositoryReference minimizedUrlDB = new indexRepositoryReference(new File(indexRoot2, networkName));
+            final URLMetadataRepository minimizedUrlDB = new URLMetadataRepository(new File(indexRoot2, networkName));
             
             final int cacheMem = (int)(MemoryControl.max() - MemoryControl.total());
             if (cacheMem < 2048000) throw new OutOfMemoryError("Not enough memory available to start clean up.");
                 
             final plasmaWordIndex wordIndex = new plasmaWordIndex(networkName, log, indexPrimaryRoot, indexSecondaryRoot, 10000, false, 1, 0);
-            final Iterator<indexContainer> indexContainerIterator = wordIndex.wordContainerIterator("AAAAAAAAAAAA", false, false);
+            final Iterator<ReferenceContainer> indexContainerIterator = wordIndex.referenceIterator("AAAAAAAAAAAA", false, false);
             
             long urlCounter = 0, wordCounter = 0;
             long wordChunkStart = System.currentTimeMillis(), wordChunkEnd = 0;
             String wordChunkStartHash = "AAAAAAAAAAAA", wordChunkEndHash;
             
             while (indexContainerIterator.hasNext()) {
-                indexContainer wordIdxContainer = null;
+                ReferenceContainer wordIdxContainer = null;
                 try {
                     wordCounter++;
                     wordIdxContainer = indexContainerIterator.next();
                     
                     // the combined container will fit, read the container
-                    final Iterator<indexRWIRowEntry> wordIdxEntries = wordIdxContainer.entries();
-                    indexRWIEntry iEntry;
+                    final Iterator<ReferenceRow> wordIdxEntries = wordIdxContainer.entries();
+                    Reference iEntry;
                     while (wordIdxEntries.hasNext()) {
                         iEntry = wordIdxEntries.next();
                         final String urlHash = iEntry.urlHash();                    
                         if ((currentUrlDB.exists(urlHash)) && (!minimizedUrlDB.exists(urlHash))) try {
-                            final indexURLReference urlEntry = currentUrlDB.load(urlHash, null, 0);                       
+                            final URLMetadata urlEntry = currentUrlDB.load(urlHash, null, 0);                       
                             urlCounter++;
                             minimizedUrlDB.store(urlEntry);
                             if (urlCounter % 500 == 0) {
@@ -759,7 +759,7 @@ public final class yacy {
         try {
             String word;
             final BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(wordlist)));
-            while ((word = br.readLine()) != null) wordmap.put(indexWord.word2hash(word), word);
+            while ((word = br.readLine()) != null) wordmap.put(Word.word2hash(word), word);
             br.close();
         } catch (final IOException e) {}
         return wordmap;
@@ -849,7 +849,7 @@ public final class yacy {
         final File root = homePath;
         final File indexroot = new File(root, "DATA/INDEX");
         try {Log.configureLogging(homePath, new File(homePath, "DATA/LOG/yacy.logging"));} catch (final Exception e) {}
-        final indexRepositoryReference currentUrlDB = new indexRepositoryReference(new File(indexroot, networkName));
+        final URLMetadataRepository currentUrlDB = new URLMetadataRepository(new File(indexroot, networkName));
         currentUrlDB.deadlinkCleaner(null);
         currentUrlDB.close();
     }
@@ -864,13 +864,13 @@ public final class yacy {
         log.logInfo("STARTING CREATION OF RWI-HASHLIST");
         final File root = homePath;
         try {
-            Iterator<indexContainer> indexContainerIterator = null;
+            Iterator<ReferenceContainer> indexContainerIterator = null;
             if (resource.equals("all")) {
                 WordIndex = new plasmaWordIndex("freeworld", log, indexPrimaryRoot, indexSecondaryRoot, 10000, false, 1, 0);
-                indexContainerIterator = WordIndex.wordContainerIterator(wordChunkStartHash, false, false);
+                indexContainerIterator = WordIndex.referenceIterator(wordChunkStartHash, false, false);
             }
             int counter = 0;
-            indexContainer container = null;
+            ReferenceContainer container = null;
             if (format.equals("zip")) {
                 log.logInfo("Writing Hashlist to ZIP-file: " + targetName + ".zip");
                 final ZipEntry zipEntry = new ZipEntry(targetName + ".txt");

@@ -31,8 +31,8 @@ import java.util.HashMap;
 import java.util.TreeSet;
 
 import de.anomic.http.httpRequestHeader;
-import de.anomic.index.indexURLReference;
-import de.anomic.index.indexWord;
+import de.anomic.index.URLMetadata;
+import de.anomic.index.Word;
 import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.SetTools;
@@ -321,9 +321,9 @@ public class yacysearch {
                     return prop;
                 }
                 final String recommendHash = post.get("recommendref", ""); // urlhash
-                final indexURLReference urlentry = sb.webIndex.getURL(recommendHash, null, 0);
+                final URLMetadata urlentry = sb.webIndex.getURL(recommendHash, null, 0);
                 if (urlentry != null) {
-                    final indexURLReference.Components comp = urlentry.comp();
+                    final URLMetadata.Components comp = urlentry.comp();
                     plasmaParserDocument document;
                     document = plasmaSnippetCache.retrieveDocument(comp.url(), true, 5000, true, false);
                     if (document != null) {
@@ -345,12 +345,12 @@ public class yacysearch {
             final boolean globalsearch = (global) /* && (yacyonline)*/ && (sb.getConfigBool(plasmaSwitchboardConstants.INDEX_RECEIVE_ALLOW, false));
         
             // do the search
-            final TreeSet<String> queryHashes = indexWord.words2hashes(query[0]);
+            final TreeSet<String> queryHashes = Word.words2hashes(query[0]);
             final plasmaSearchQuery theQuery = new plasmaSearchQuery(
         			querystring,
         			queryHashes,
-        			indexWord.words2hashes(query[1]),
-        			indexWord.words2hashes(query[2]),
+        			Word.words2hashes(query[1]),
+        			Word.words2hashes(query[2]),
                     ranking,
                     maxDistance,
                     prefermask,

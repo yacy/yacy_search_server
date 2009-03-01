@@ -37,10 +37,10 @@ import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
 import de.anomic.crawler.ResultURLs;
-import de.anomic.index.indexContainer;
-import de.anomic.index.indexRWIEntry;
-import de.anomic.index.indexRWIVarEntry;
-import de.anomic.index.indexURLReference;
+import de.anomic.index.ReferenceContainer;
+import de.anomic.index.Reference;
+import de.anomic.index.ReferenceVars;
+import de.anomic.index.URLMetadata;
 import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.SetTools;
@@ -174,9 +174,9 @@ public final class plasmaSearchEvent {
                 int maxcount = -1;
                 long mindhtdistance = Long.MAX_VALUE, l;
                 String wordhash;
-                for (Map.Entry<String, indexContainer> entry : this.rankedCache.searchContainerMaps()[0].entrySet()) {
+                for (Map.Entry<String, ReferenceContainer> entry : this.rankedCache.searchContainerMaps()[0].entrySet()) {
                     wordhash = entry.getKey();
-                    final indexContainer container = entry.getValue();
+                    final ReferenceContainer container = entry.getValue();
                     assert (container.getWordHash().equals(wordhash));
                     if (container.size() > maxcount) {
                         IAmaxcounthash = wordhash;
@@ -189,7 +189,7 @@ public final class plasmaSearchEvent {
                         IAneardhthash = wordhash;
                     }
                     IACount.put(wordhash, Integer.valueOf(container.size()));
-                    IAResults.put(wordhash, indexContainer.compressIndex(container, null, 1000).toString());
+                    IAResults.put(wordhash, ReferenceContainer.compressIndex(container, null, 1000).toString());
                 }
                 serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), "abstract generation", this.rankedCache.searchContainerMaps()[0].size(), System.currentTimeMillis() - timer));
             }
@@ -257,7 +257,7 @@ public final class plasmaSearchEvent {
         }
     }
     
-    ResultEntry obtainResultEntry(final indexURLReference page, final int snippetFetchMode) {
+    ResultEntry obtainResultEntry(final URLMetadata page, final int snippetFetchMode) {
 
         // a search result entry needs some work to produce a result Entry:
         // - check if url entry exists in LURL-db
@@ -273,7 +273,7 @@ public final class plasmaSearchEvent {
         // find the url entry
 
         long startTime = System.currentTimeMillis();
-        final indexURLReference.Components comp = page.comp();
+        final URLMetadata.Components comp = page.comp();
         final String pagetitle = comp.dc_title().toLowerCase();
         if (comp.url() == null) {
             registerFailure(page.hash(), "url corrupted (null)");
@@ -300,7 +300,7 @@ public final class plasmaSearchEvent {
             (query.constraint.get(plasmaCondenser.flag_cat_indexof)) &&
             (!(comp.dc_title().startsWith("Index of")))) {
             final Iterator<String> wi = query.queryHashes.iterator();
-            while (wi.hasNext()) wordIndex.removeEntry(wi.next(), page.hash());
+            while (wi.hasNext()) wordIndex.removeReference(wi.next(), page.hash());
             registerFailure(page.hash(), "index-of constraint not fullfilled");
             return null;
         }
@@ -500,7 +500,7 @@ public final class plasmaSearchEvent {
         public void run() {
 
             // start fetching urls and snippets
-            indexURLReference page;
+            URLMetadata page;
             final int fetchAhead = snippetMode == 0 ? 0 : 10;
             while (System.currentTimeMillis() < this.timeout) {
                 this.lastLifeSign = System.currentTimeMillis();
@@ -791,8 +791,8 @@ public final class plasmaSearchEvent {
     
     public static class ResultEntry {
         // payload objects
-        private final indexURLReference urlentry;
-        private final indexURLReference.Components urlcomps; // buffer for components
+        private final URLMetadata urlentry;
+        private final URLMetadata.Components urlcomps; // buffer for components
         private String alternative_urlstring;
         private String alternative_urlname;
         private final plasmaSnippetCache.TextSnippet textSnippet;
@@ -801,7 +801,7 @@ public final class plasmaSearchEvent {
         // statistic objects
         public long dbRetrievalTime, snippetComputationTime;
         
-        public ResultEntry(final indexURLReference urlentry, final plasmaWordIndex wordIndex,
+        public ResultEntry(final URLMetadata urlentry, final plasmaWordIndex wordIndex,
                            final plasmaSnippetCache.TextSnippet textSnippet,
                            final ArrayList<plasmaSnippetCache.MediaSnippet> mediaSnippets,
                            final long dbRetrievalTime, final long snippetComputationTime) {
@@ -883,10 +883,10 @@ public final class plasmaSearchEvent {
         public int lapp() {
             return urlentry.lapp();
         }
-        public indexRWIVarEntry word() {
-            final indexRWIEntry word = urlentry.word();
-            assert word instanceof indexRWIVarEntry;
-            return (indexRWIVarEntry) word;
+        public ReferenceVars word() {
+            final Reference word = urlentry.word();
+            assert word instanceof ReferenceVars;
+            return (ReferenceVars) word;
         }
         public boolean hasTextSnippet() {
             return (this.textSnippet != null) && (this.textSnippet.getErrorCode() < 11);

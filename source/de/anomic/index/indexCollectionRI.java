@@ -60,7 +60,7 @@ import de.anomic.kelondro.util.kelondroOutOfLimitsException;
 import de.anomic.kelondro.util.Log;
 import de.anomic.yacy.yacyURL;
 
-public class indexCollectionRI implements indexRI {
+public class indexCollectionRI implements ReverseIndex {
 
 	private static final int loadfactor = 4;
     private static final int serialNumber = 0;
@@ -154,11 +154,11 @@ public class indexCollectionRI implements indexRI {
         }
     }
 
-    public synchronized CloneableIterator<indexContainer> wordContainerIterator(final String startWordHash, final boolean rot, final boolean ram) {
+    public synchronized CloneableIterator<ReferenceContainer> referenceIterator(final String startWordHash, final boolean rot, final boolean ram) {
         return new wordContainersIterator(startWordHash, rot);
     }
 
-    public class wordContainersIterator implements CloneableIterator<indexContainer> {
+    public class wordContainersIterator implements CloneableIterator<ReferenceContainer> {
 
         private final Iterator<Object[]> wci;
         private final boolean rot;
@@ -176,13 +176,13 @@ public class indexCollectionRI implements indexRI {
             return wci.hasNext();
         }
 
-        public indexContainer next() {
+        public ReferenceContainer next() {
             final Object[] oo = wci.next();
             if (oo == null) return null;
             final byte[] key = (byte[]) oo[0];
             final RowSet collection = (RowSet) oo[1];
             if (collection == null) return null;
-            return new indexContainer(new String(key), collection);
+            return new ReferenceContainer(new String(key), collection);
         }
         
         public void remove() {
@@ -191,38 +191,38 @@ public class indexCollectionRI implements indexRI {
 
     }
 
-    public boolean hasContainer(final String wordHash) {
+    public boolean hasReferences(final String wordHash) {
         return this.has(wordHash.getBytes());
     }
     
-    public indexContainer getContainer(final String wordHash, final Set<String> urlselection) {
+    public ReferenceContainer getReferences(final String wordHash, final Set<String> urlselection) {
         try {
             final RowSet collection = this.get(wordHash.getBytes());
             if (collection != null) collection.select(urlselection);
             if ((collection == null) || (collection.size() == 0)) return null;
-            return new indexContainer(wordHash, collection);
+            return new ReferenceContainer(wordHash, collection);
         } catch (final IOException e) {
             return null;
         }
     }
 
-    public indexContainer deleteContainer(final String wordHash) {
+    public ReferenceContainer deleteAllReferences(final String wordHash) {
         try {
             final RowSet collection = this.delete(wordHash.getBytes());
             if (collection == null) return null;
-            return new indexContainer(wordHash, collection);
+            return new ReferenceContainer(wordHash, collection);
         } catch (final IOException e) {
             return null;
         }
     }
 
-    public boolean removeEntry(final String wordHash, final String urlHash) {
+    public boolean removeReference(final String wordHash, final String urlHash) {
         final HashSet<String> hs = new HashSet<String>();
         hs.add(urlHash);
-        return removeEntries(wordHash, hs) == 1;
+        return removeReferences(wordHash, hs) == 1;
     }
     
-    public int removeEntries(final String wordHash, final Set<String> urlHashes) {
+    public int removeReferences(final String wordHash, final Set<String> urlHashes) {
         try {
             return this.remove(wordHash.getBytes(), urlHashes);
         } catch (final kelondroOutOfLimitsException e) {
@@ -234,7 +234,7 @@ public class indexCollectionRI implements indexRI {
         }
     }
 
-    public void addEntries(final indexContainer newEntries) {
+    public void addReferences(final ReferenceContainer newEntries) {
     	if (newEntries == null) return;
         try {
             this.merge(newEntries);
@@ -245,7 +245,7 @@ public class indexCollectionRI implements indexRI {
         }
     }
 
-    public int sizeEntry(String key) {
+    public int countReferences(String key) {
         try {
             final RowSet collection = this.get(key.getBytes());
             if (collection == null) return 0;
@@ -620,7 +620,7 @@ public class indexCollectionRI implements indexRI {
         index.put(indexrow); // write modified indexrow
     }
     
-    private synchronized void merge(final indexContainer container) throws IOException, kelondroOutOfLimitsException {
+    private synchronized void merge(final ReferenceContainer container) throws IOException, kelondroOutOfLimitsException {
         if ((container == null) || (container.size() == 0)) return;
         final byte[] key = container.getWordHash().getBytes();
         
@@ -997,7 +997,7 @@ public class indexCollectionRI implements indexRI {
                 for (int j = 0; j < i; j++) {
                     collection.addUnique(rowdef.newEntry(new byte[][]{("def" + j).getBytes(), "xxx".getBytes()}));
                 }
-                collectionIndex.merge(new indexContainer("key-" + i, collection));
+                collectionIndex.merge(new ReferenceContainer("key-" + i, collection));
             }
             
             // printout of index

@@ -64,7 +64,7 @@ import de.anomic.crawler.CrawlEntry;
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterWriter;
-import de.anomic.index.indexWord;
+import de.anomic.index.Word;
 import de.anomic.kelondro.blob.BLOBTree;
 import de.anomic.kelondro.blob.MapView;
 import de.anomic.kelondro.order.CloneableIterator;
@@ -305,10 +305,10 @@ public class bookmarksDB {
      *        tagName is converted to lower case before hash is generated!
      */
     public static String tagHash(final String tagName){
-        return indexWord.word2hash(tagName.toLowerCase());
+        return Word.word2hash(tagName.toLowerCase());
     }    
     public static String tagHash(final String tagName, final String user){
-        return indexWord.word2hash(user+":"+tagName.toLowerCase());
+        return Word.word2hash(user+":"+tagName.toLowerCase());
     }
     
     public Iterator<String> getFolderList(final boolean priv){    

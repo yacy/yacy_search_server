@@ -32,7 +32,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import de.anomic.http.httpRequestHeader;
-import de.anomic.index.indexRWIRowEntry;
+import de.anomic.index.ReferenceRow;
 import de.anomic.index.indexReferenceBlacklist;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.Log;
@@ -126,7 +126,7 @@ public final class transferRWI {
             int p;
             String wordHash;
             String urlHash;
-            indexRWIRowEntry iEntry;
+            ReferenceRow iEntry;
             final HashSet<String> unknownURL = new HashSet<String>();
             final HashSet<String> knownURL = new HashSet<String>();
             final String[] wordhashes = new String[v.size()];
@@ -146,7 +146,7 @@ public final class transferRWI {
                 }
                 wordHash = estring.substring(0, p);
                 wordhashes[received] = wordHash;
-                iEntry = new indexRWIRowEntry(estring.substring(p));
+                iEntry = new ReferenceRow(estring.substring(p));
                 urlHash = iEntry.urlHash();
                 
                 // block blacklisted entries

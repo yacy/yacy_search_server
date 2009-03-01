@@ -30,7 +30,7 @@ import java.util.Date;
 import de.anomic.crawler.CrawlEntry;
 import de.anomic.crawler.NoticedURL;
 import de.anomic.http.httpRequestHeader;
-import de.anomic.index.indexURLReference;
+import de.anomic.index.URLMetadata;
 import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
@@ -108,8 +108,8 @@ public class urls {
             if (urlhashes.length() % 12 != 0) return prop;
             final int count = urlhashes.length() / 12;
         	int c = 0;
-        	indexURLReference entry;
-        	indexURLReference.Components comp;
+        	URLMetadata entry;
+        	URLMetadata.Components comp;
             yacyURL referrer;
             for (int i = 0; i < count; i++) {
                 entry = sb.webIndex.getURL(urlhashes.substring(12 * i, 12 * (i + 1)), null, 0);

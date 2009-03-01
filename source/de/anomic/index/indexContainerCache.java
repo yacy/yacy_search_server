@@ -48,10 +48,10 @@ import de.anomic.kelondro.util.Log;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.RowSet;
 
-public final class indexContainerCache implements Iterable<indexContainer>, indexRI {
+public final class indexContainerCache implements Iterable<ReferenceContainer>, ReverseIndex {
 
     private final Row payloadrow;
-    private SortedMap<String, indexContainer> cache;
+    private SortedMap<String, ReferenceContainer> cache;
     
     /**
      * opens an existing heap file in undefined mode
@@ -83,7 +83,7 @@ public final class indexContainerCache implements Iterable<indexContainer>, inde
      * another dump reading afterwards is not possible
      */
     public void initWriteMode() {
-        this.cache = Collections.synchronizedSortedMap(new TreeMap<String, indexContainer>(new ByteOrder.StringOrder(payloadrow.getOrdering())));
+        this.cache = Collections.synchronizedSortedMap(new TreeMap<String, ReferenceContainer>(new ByteOrder.StringOrder(payloadrow.getOrdering())));
     }
     
     /**
@@ -96,10 +96,10 @@ public final class indexContainerCache implements Iterable<indexContainer>, inde
     public void initWriteModeFromHeap(final File heapFile) throws IOException {
         Log.logInfo("indexContainerRAMHeap", "restoring dump for rwi heap '" + heapFile.getName() + "'");
         final long start = System.currentTimeMillis();
-        this.cache = Collections.synchronizedSortedMap(new TreeMap<String, indexContainer>(new ByteOrder.StringOrder(payloadrow.getOrdering())));
+        this.cache = Collections.synchronizedSortedMap(new TreeMap<String, ReferenceContainer>(new ByteOrder.StringOrder(payloadrow.getOrdering())));
         int urlCount = 0;
         synchronized (cache) {
-            for (final indexContainer container : new heapFileEntries(heapFile, this.payloadrow)) {
+            for (final ReferenceContainer container : new heapFileEntries(heapFile, this.payloadrow)) {
                 // TODO: in this loop a lot of memory may be allocated. A check if the memory gets low is necessary. But what do when the memory is low?
                 if (container == null) break;
                 cache.put(container.getWordHash(), container);
@@ -117,10 +117,10 @@ public final class indexContainerCache implements Iterable<indexContainer>, inde
     public void initWriteModeFromBLOB(final File blobFile) throws IOException {
         Log.logInfo("indexContainerRAMHeap", "restoring rwi blob dump '" + blobFile.getName() + "'");
         final long start = System.currentTimeMillis();
-        this.cache = Collections.synchronizedSortedMap(new TreeMap<String, indexContainer>(new ByteOrder.StringOrder(payloadrow.getOrdering())));
+        this.cache = Collections.synchronizedSortedMap(new TreeMap<String, ReferenceContainer>(new ByteOrder.StringOrder(payloadrow.getOrdering())));
         int urlCount = 0;
         synchronized (cache) {
-            for (final indexContainer container : new blobFileEntries(blobFile, this.payloadrow)) {
+            for (final ReferenceContainer container : new blobFileEntries(blobFile, this.payloadrow)) {
                 // TODO: in this loop a lot of memory may be allocated. A check if the memory gets low is necessary. But what do when the memory is low?
                 if (container == null) break;
                 //System.out.println("***DEBUG indexContainerHeap.initwriteModeFromBLOB*** container.size = " + container.size() + ", container.sorted = " + container.sorted());
@@ -141,11 +141,11 @@ public final class indexContainerCache implements Iterable<indexContainer>, inde
         final long startTime = System.currentTimeMillis();
         long wordcount = 0, urlcount = 0;
         String wordHash;
-        indexContainer container;
+        ReferenceContainer container;
         
         // write wCache
         synchronized (cache) {
-            for (final Map.Entry<String, indexContainer> entry: cache.entrySet()) {
+            for (final Map.Entry<String, ReferenceContainer> entry: cache.entrySet()) {
                 // get entries
                 wordHash = entry.getKey();
                 container = entry.getValue();
@@ -169,11 +169,11 @@ public final class indexContainerCache implements Iterable<indexContainer>, inde
     /**
      * static iterator of heap files: is used to import heap dumps into a write-enabled index heap
      */
-    public static class heapFileEntries implements Iterator<indexContainer>, Iterable<indexContainer> {
+    public static class heapFileEntries implements Iterator<ReferenceContainer>, Iterable<ReferenceContainer> {
         DataInputStream is;
         byte[] word;
         Row payloadrow;
-        indexContainer nextContainer;
+        ReferenceContainer nextContainer;
         
         public heapFileEntries(final File heapFile, final Row payloadrow) throws IOException {
             if (!(heapFile.exists())) throw new IOException("file " + heapFile + " does not exist");
@@ -187,10 +187,10 @@ public final class indexContainerCache implements Iterable<indexContainer>, inde
             return this.nextContainer != null;
         }
 
-        private indexContainer next0() {
+        private ReferenceContainer next0() {
             try {
                 is.readFully(word);
-                return new indexContainer(new String(word), RowSet.importRowSet(is, payloadrow));
+                return new ReferenceContainer(new String(word), RowSet.importRowSet(is, payloadrow));
             } catch (final IOException e) {
                 return null;
             }
@@ -200,8 +200,8 @@ public final class indexContainerCache implements Iterable<indexContainer>, inde
          * return an index container
          * because they may get very large, it is wise to deallocate some memory before calling next()
          */
-        public indexContainer next() {
-            final indexContainer n = this.nextContainer;
+        public ReferenceContainer next() {
+            final ReferenceContainer n = this.nextContainer;
             this.nextContainer = next0();
             return n;
         }
@@ -210,7 +210,7 @@ public final class indexContainerCache implements Iterable<indexContainer>, inde
             throw new UnsupportedOperationException("heap dumps are read-only");
         }
 
-        public Iterator<indexContainer> iterator() {
+        public Iterator<ReferenceContainer> iterator() {
             return this;
         }
         
@@ -227,7 +227,7 @@ public final class indexContainerCache implements Iterable<indexContainer>, inde
     /**
      * static iterator of BLOBHeap files: is used to import heap dumps into a write-enabled index heap
      */
-    public static class blobFileEntries implements Iterator<indexContainer>, Iterable<indexContainer> {
+    public static class blobFileEntries implements Iterator<ReferenceContainer>, Iterable<ReferenceContainer> {
         Iterator<Map.Entry<String, byte[]>> blobs;
         Row payloadrow;
         
@@ -244,17 +244,17 @@ public final class indexContainerCache implements Iterable<indexContainer>, inde
          * return an index container
          * because they may get very large, it is wise to deallocate some memory before calling next()
          */
-        public indexContainer next() {
+        public ReferenceContainer next() {
             Map.Entry<String, byte[]> entry = blobs.next();
             byte[] payload = entry.getValue();
-            return new indexContainer(entry.getKey(), RowSet.importRowSet(payload, payloadrow));
+            return new ReferenceContainer(entry.getKey(), RowSet.importRowSet(payload, payloadrow));
         }
         
         public void remove() {
             throw new UnsupportedOperationException("heap dumps are read-only");
         }
 
-        public Iterator<indexContainer> iterator() {
+        public Iterator<ReferenceContainer> iterator() {
             return this;
         }
         
@@ -270,7 +270,7 @@ public final class indexContainerCache implements Iterable<indexContainer>, inde
     public synchronized int maxReferences() {
         // iterate to find the max score
         int max = 0;
-        for (indexContainer container : cache.values()) {
+        for (ReferenceContainer container : cache.values()) {
             if (container.size() > max) max = container.size();
         }
         return max;
@@ -280,7 +280,7 @@ public final class indexContainerCache implements Iterable<indexContainer>, inde
         // iterate to find the max score
         int max = 0;
         String hash = null;
-        for (indexContainer container : cache.values()) {
+        for (ReferenceContainer container : cache.values()) {
             if (container.size() > max) {
                 max = container.size();
                 hash = container.getWordHash();
@@ -292,7 +292,7 @@ public final class indexContainerCache implements Iterable<indexContainer>, inde
     public synchronized ArrayList<String> maxReferencesHash(int bound) {
         // iterate to find the max score
         ArrayList<String> hashes = new ArrayList<String>();
-        for (indexContainer container : cache.values()) {
+        for (ReferenceContainer container : cache.values()) {
             if (container.size() >= bound) {
                 hashes.add(container.getWordHash());
             }
@@ -300,18 +300,18 @@ public final class indexContainerCache implements Iterable<indexContainer>, inde
         return hashes;
     }
     
-    public synchronized indexContainer latest() {
-        indexContainer c = null;
-        for (indexContainer container : cache.values()) {
+    public synchronized ReferenceContainer latest() {
+        ReferenceContainer c = null;
+        for (ReferenceContainer container : cache.values()) {
             if (c == null) {c = container; continue;}
             if (container.lastWrote() > c.lastWrote()) {c = container; continue;}
         }
         return c;
     }
     
-    public synchronized indexContainer first() {
-        indexContainer c = null;
-        for (indexContainer container : cache.values()) {
+    public synchronized ReferenceContainer first() {
+        ReferenceContainer c = null;
+        for (ReferenceContainer container : cache.values()) {
             if (c == null) {c = container; continue;}
             if (container.lastWrote() < c.lastWrote()) {c = container; continue;}
         }
@@ -321,7 +321,7 @@ public final class indexContainerCache implements Iterable<indexContainer>, inde
     public synchronized ArrayList<String> overAge(long maxage) {
         ArrayList<String> hashes = new ArrayList<String>();
         long limit = System.currentTimeMillis() - maxage;
-        for (indexContainer container : cache.values()) {
+        for (ReferenceContainer container : cache.values()) {
             if (container.lastWrote() < limit) hashes.add(container.getWordHash());
         }
         return hashes;
@@ -332,13 +332,13 @@ public final class indexContainerCache implements Iterable<indexContainer>, inde
      * in the cache, so that manipulations of the iterated objects do not change
      * objects in the cache.
      */
-    public synchronized CloneableIterator<indexContainer> wordContainerIterator(final String startWordHash, final boolean rot, final boolean ram) {
+    public synchronized CloneableIterator<ReferenceContainer> referenceIterator(final String startWordHash, final boolean rot, final boolean ram) {
         return new heapCacheIterator(startWordHash, rot);
     }
 
 
-    public Iterator<indexContainer> iterator() {
-        return wordContainerIterator(null, false, true);
+    public Iterator<ReferenceContainer> iterator() {
+        return referenceIterator(null, false, true);
     }
     
     
@@ -346,7 +346,7 @@ public final class indexContainerCache implements Iterable<indexContainer>, inde
      * cache iterator: iterates objects within the heap cache. This can only be used
      * for write-enabled heaps, read-only heaps do not have a heap cache
      */
-    public class heapCacheIterator implements CloneableIterator<indexContainer>, Iterable<indexContainer> {
+    public class heapCacheIterator implements CloneableIterator<ReferenceContainer>, Iterable<ReferenceContainer> {
 
         // this class exists, because the wCache cannot be iterated with rotation
         // and because every indexContainer Object that is iterated must be returned as top-level-clone
@@ -354,7 +354,7 @@ public final class indexContainerCache implements Iterable<indexContainer>, inde
         // plus the mentioned features
         
         private final boolean rot;
-        private Iterator<indexContainer> iterator;
+        private Iterator<ReferenceContainer> iterator;
         
         public heapCacheIterator(final String startWordHash, final boolean rot) {
             this.rot = rot;
@@ -371,7 +371,7 @@ public final class indexContainerCache implements Iterable<indexContainer>, inde
             return iterator.hasNext();
         }
 
-        public indexContainer next() {
+        public ReferenceContainer next() {
             if (iterator.hasNext()) {
                 return (iterator.next()).topLevelClone();
             }
@@ -387,7 +387,7 @@ public final class indexContainerCache implements Iterable<indexContainer>, inde
             iterator.remove();
         }
 
-        public Iterator<indexContainer> iterator() {
+        public Iterator<ReferenceContainer> iterator() {
             return this;
         }
         
@@ -399,7 +399,7 @@ public final class indexContainerCache implements Iterable<indexContainer>, inde
      * @param key
      * @return true, if the key is used in the heap; false othervise
      */
-    public boolean hasContainer(final String key) {
+    public boolean hasReferences(final String key) {
         return this.cache.containsKey(key);
     }
     
@@ -408,14 +408,14 @@ public final class indexContainerCache implements Iterable<indexContainer>, inde
      * @param key
      * @return the indexContainer if one exist, null otherwise
      */
-    public indexContainer getContainer(final String key, Set<String> urlselection) {
+    public ReferenceContainer getReferences(final String key, Set<String> urlselection) {
         if (urlselection == null) return this.cache.get(key);
-        indexContainer c = this.cache.get(key);
+        ReferenceContainer c = this.cache.get(key);
         if (c == null) return null;
         // because this is all in RAM, we must clone the entries (flat)
-        indexContainer c1 = new indexContainer(c.getWordHash(), c.row(), c.size());
-        Iterator<indexRWIRowEntry> e = c.entries();
-        indexRWIRowEntry ee;
+        ReferenceContainer c1 = new ReferenceContainer(c.getWordHash(), c.row(), c.size());
+        Iterator<ReferenceRow> e = c.entries();
+        ReferenceRow ee;
         while (e.hasNext()) {
             ee = e.next();
             if (urlselection.contains(ee.urlHash())) c1.add(ee);
@@ -428,8 +428,8 @@ public final class indexContainerCache implements Iterable<indexContainer>, inde
      * @param key
      * @return
      */
-    public int sizeEntry(final String key) {
-        indexContainer c = this.cache.get(key);
+    public int countReferences(final String key) {
+        ReferenceContainer c = this.cache.get(key);
         if (c == null) return 0;
         return c.size();
     }
@@ -439,19 +439,19 @@ public final class indexContainerCache implements Iterable<indexContainer>, inde
      * @param wordHash
      * @return the indexContainer if the cache contained the container, null othervise
      */
-    public synchronized indexContainer deleteContainer(final String wordHash) {
+    public synchronized ReferenceContainer deleteAllReferences(final String wordHash) {
         // returns the index that had been deleted
         assert this.cache != null;
         return cache.remove(wordHash);
     }
 
-    public synchronized boolean removeEntry(final String wordHash, final String urlHash) {
+    public synchronized boolean removeReference(final String wordHash, final String urlHash) {
         assert this.cache != null;
-        final indexContainer c = cache.get(wordHash);
+        final ReferenceContainer c = cache.get(wordHash);
         if ((c != null) && (c.remove(urlHash) != null)) {
             // removal successful
             if (c.size() == 0) {
-                deleteContainer(wordHash);
+                deleteAllReferences(wordHash);
             } else {
                 cache.put(wordHash, c);
             }
@@ -460,15 +460,15 @@ public final class indexContainerCache implements Iterable<indexContainer>, inde
         return false;
     }
     
-    public synchronized int removeEntries(final String wordHash, final Set<String> urlHashes) {
+    public synchronized int removeReferences(final String wordHash, final Set<String> urlHashes) {
         assert this.cache != null;
         if (urlHashes.size() == 0) return 0;
-        final indexContainer c = cache.get(wordHash);
+        final ReferenceContainer c = cache.get(wordHash);
         int count;
         if ((c != null) && ((count = c.removeEntries(urlHashes)) > 0)) {
             // removal successful
             if (c.size() == 0) {
-                deleteContainer(wordHash);
+                deleteAllReferences(wordHash);
             } else {
                 cache.put(wordHash, c);
             }
@@ -477,7 +477,7 @@ public final class indexContainerCache implements Iterable<indexContainer>, inde
         return 0;
     }
  
-    public synchronized void addEntries(final indexContainer container) {
+    public synchronized void addReferences(final ReferenceContainer container) {
         // this puts the entries into the cache
         int added = 0;
         if ((container == null) || (container.size() == 0)) return;
@@ -485,7 +485,7 @@ public final class indexContainerCache implements Iterable<indexContainer>, inde
         
         // put new words into cache
         final String wordHash = container.getWordHash();
-        indexContainer entries = cache.get(wordHash); // null pointer exception? wordhash != null! must be cache==null
+        ReferenceContainer entries = cache.get(wordHash); // null pointer exception? wordhash != null! must be cache==null
         if (entries == null) {
             entries = container.topLevelClone();
             added = entries.size();
@@ -499,10 +499,10 @@ public final class indexContainerCache implements Iterable<indexContainer>, inde
         return;
     }
 
-    public synchronized void addEntry(final String wordHash, final indexRWIRowEntry newEntry) {
+    public synchronized void addEntry(final String wordHash, final ReferenceRow newEntry) {
         assert this.cache != null;
-        indexContainer container = cache.get(wordHash);
-        if (container == null) container = new indexContainer(wordHash, this.payloadrow, 1);
+        ReferenceContainer container = cache.get(wordHash);
+        if (container == null) container = new ReferenceContainer(wordHash, this.payloadrow, 1);
         container.put(newEntry);
         cache.put(wordHash, container);
     }

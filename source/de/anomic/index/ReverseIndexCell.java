@@ -1,6 +1,6 @@
-// indexRAMRI.java
-// (C) 2005, 2006 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
-// first published 2005 on http://yacy.net
+// ReverseIndexCell.java
+// (C) 2009 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
+// first published 1.3.2009 on http://yacy.net
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
@@ -47,14 +47,14 @@ import de.anomic.kelondro.order.Order;
  * another BLOB file in the index array.
  */
 
-public final class indexCell implements indexRI {
+public final class ReverseIndexCell implements ReverseIndex {
 
     // class variables
     private indexContainerBLOBArray array;
     private indexContainerCache ram;
     private int maxRamEntries;
     
-    public indexCell(
+    public ReverseIndexCell(
             final File cellPath,
             final Row payloadrow,
             final int maxRamEntries
@@ -78,8 +78,8 @@ public final class indexCell implements indexRI {
      * add entries to the cell: this adds the new entries always to the RAM part, never to BLOBs
      * @throws IOException 
      */
-    public synchronized void addEntries(indexContainer newEntries) throws IOException {
-        this.ram.addEntries(newEntries);
+    public synchronized void addReferences(ReferenceContainer newEntries) throws IOException {
+        this.ram.addReferences(newEntries);
         if (this.ram.size() > this.maxRamEntries) cacheDump();
     }
 
@@ -112,9 +112,9 @@ public final class indexCell implements indexRI {
      * deleting a container affects the containers in RAM and all the BLOB files
      * the deleted containers are merged and returned as result of the method
      */
-    public indexContainer deleteContainer(String wordHash) throws IOException {
-        indexContainer c0 = this.ram.deleteContainer(wordHash);
-        indexContainer c1 = this.array.get(wordHash);
+    public ReferenceContainer deleteAllReferences(String wordHash) throws IOException {
+        ReferenceContainer c0 = this.ram.deleteAllReferences(wordHash);
+        ReferenceContainer c1 = this.array.get(wordHash);
         if (c1 == null) {
             if (c0 == null) return null;
             return c0;
@@ -127,9 +127,9 @@ public final class indexCell implements indexRI {
     /**
      * all containers in the BLOBs and the RAM are merged and returned
      */
-    public indexContainer getContainer(String wordHash, Set<String> urlselection) throws IOException {
-        indexContainer c0 = this.ram.getContainer(wordHash, null);
-        indexContainer c1 = this.array.get(wordHash);
+    public ReferenceContainer getReferences(String wordHash, Set<String> urlselection) throws IOException {
+        ReferenceContainer c0 = this.ram.getReferences(wordHash, null);
+        ReferenceContainer c1 = this.array.get(wordHash);
         if (c1 == null) {
             if (c0 == null) return null;
             return c0;
@@ -138,9 +138,9 @@ public final class indexCell implements indexRI {
         return c1.merge(c0);
     }
 
-    public int sizeEntry(String wordHash) {
-        indexContainer c0 = this.ram.getContainer(wordHash, null);
-        indexContainer c1;
+    public int countReferences(String wordHash) {
+        ReferenceContainer c0 = this.ram.getReferences(wordHash, null);
+        ReferenceContainer c1;
         try {
             c1 = this.array.get(wordHash);
         } catch (IOException e) {
@@ -157,8 +157,8 @@ public final class indexCell implements indexRI {
     /**
      * checks if there is any container for this wordHash, either in RAM or any BLOB
      */
-    public boolean hasContainer(String wordHash) {
-        if (this.ram.hasContainer(wordHash)) return true;
+    public boolean hasReferences(String wordHash) {
+        if (this.ram.hasReferences(wordHash)) return true;
         return this.array.has(wordHash);
     }
 
@@ -174,12 +174,12 @@ public final class indexCell implements indexRI {
      * @throws IOException 
      * @throws IOException 
      */
-    public int removeEntries(String wordHash, Set<String> urlHashes) throws IOException {
+    public int removeReferences(String wordHash, Set<String> urlHashes) throws IOException {
         int reduced = this.array.replace(wordHash, new RemoveRewriter(urlHashes));
         return reduced / this.array.rowdef().objectsize;
     }
 
-    public boolean removeEntry(String wordHash, String urlHash) throws IOException {
+    public boolean removeReference(String wordHash, String urlHash) throws IOException {
         int reduced = this.array.replace(wordHash, new RemoveRewriter(urlHash));
         return reduced > 0;
     }
@@ -188,17 +188,17 @@ public final class indexCell implements indexRI {
         return this.ram.size() + this.array.size();
     }
 
-    public CloneableIterator<indexContainer> wordContainerIterator(String startWordHash, boolean rot, boolean ram) throws IOException {
-        final Order<indexContainer> containerOrder = new indexContainerOrder(this.ram.rowdef().getOrdering().clone());
-        containerOrder.rotate(new indexContainer(startWordHash, this.ram.rowdef(), 0));
+    public CloneableIterator<ReferenceContainer> referenceIterator(String startWordHash, boolean rot, boolean ram) throws IOException {
+        final Order<ReferenceContainer> containerOrder = new indexContainerOrder(this.ram.rowdef().getOrdering().clone());
+        containerOrder.rotate(new ReferenceContainer(startWordHash, this.ram.rowdef(), 0));
         if (ram) {
-            return this.ram.wordContainerIterator(startWordHash, rot, true);
+            return this.ram.referenceIterator(startWordHash, rot, true);
         }
-        return new MergeIterator<indexContainer>(
-                this.ram.wordContainerIterator(startWordHash, false, true),
+        return new MergeIterator<ReferenceContainer>(
+                this.ram.referenceIterator(startWordHash, false, true),
                 this.array.wordContainerIterator(startWordHash, false, false),
                 containerOrder,
-                indexContainer.containerMergeMethod,
+                ReferenceContainer.containerMergeMethod,
                 true);
     }
 
@@ -215,7 +215,7 @@ public final class indexCell implements indexRI {
             this.urlHashes.add(urlHash);
         }
         
-        public indexContainer rewrite(indexContainer container) {
+        public ReferenceContainer rewrite(ReferenceContainer container) {
             container.removeEntries(urlHashes);
             return container;
         }

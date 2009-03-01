@@ -37,12 +37,12 @@ import java.util.Set;
 import de.anomic.data.listManager;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.index.indexAbstractReferenceBlacklist;
-import de.anomic.index.indexContainer;
+import de.anomic.index.ReferenceContainer;
 import de.anomic.index.indexContainerCache;
-import de.anomic.index.indexRWIEntry;
-import de.anomic.index.indexRWIRowEntry;
-import de.anomic.index.indexURLReference;
-import de.anomic.index.indexWord;
+import de.anomic.index.Reference;
+import de.anomic.index.ReferenceRow;
+import de.anomic.index.URLMetadata;
+import de.anomic.index.Word;
 import de.anomic.kelondro.order.Bitfield;
 import de.anomic.plasma.plasmaSearchAPI;
 import de.anomic.plasma.plasmaSearchEvent;
@@ -86,7 +86,7 @@ public class IndexControlRWIs_p {
             final boolean delurlref = post.containsKey("delurlref");
 
             if (post.containsKey("keystringsearch")) {
-                keyhash = indexWord.word2hash(keystring);
+                keyhash = Word.word2hash(keystring);
                 prop.put("keyhash", keyhash);
                 final plasmaSearchRankingProcess ranking = plasmaSearchAPI.genSearchresult(prop, sb, keyhash, null);
                 if (ranking.filteredCount() == 0) {
@@ -96,7 +96,7 @@ public class IndexControlRWIs_p {
             }
     
             if (post.containsKey("keyhashsearch")) {
-                if (keystring.length() == 0 || !indexWord.word2hash(keystring).equals(keyhash)) {
+                if (keystring.length() == 0 || !Word.word2hash(keystring).equals(keyhash)) {
                     prop.put("keystring", "&lt;not possible to compute word from hash&gt;");
                 }
                 final plasmaSearchRankingProcess ranking = plasmaSearchAPI.genSearchresult(prop, sb, keyhash, null);
@@ -123,9 +123,9 @@ public class IndexControlRWIs_p {
             if (post.containsKey("keyhashdeleteall")) {
                 if (delurl || delurlref) {
                     // generate an urlx array
-                    indexContainer index = null;
-                    index = sb.webIndex.getContainer(keyhash, null);
-                    final Iterator<indexRWIRowEntry> en = index.entries();
+                    ReferenceContainer index = null;
+                    index = sb.webIndex.getReferences(keyhash, null);
+                    final Iterator<ReferenceRow> en = index.entries();
                     int i = 0;
                     urlx = new String[index.size()];
                     while (en.hasNext()) {
@@ -141,7 +141,7 @@ public class IndexControlRWIs_p {
                         sb.urlRemove(urlx[i]);
                     }
                 }
-                sb.webIndex.deleteContainer(keyhash);
+                sb.webIndex.deleteAllReferences(keyhash);
                 post.remove("keyhashdeleteall");
                 post.put("urllist", "generated");
             }
@@ -158,7 +158,7 @@ public class IndexControlRWIs_p {
                 }
                 final Set<String> urlHashes = new HashSet<String>();
                 for (int i = 0; i < urlx.length; i++) urlHashes.add(urlx[i]);
-                sb.webIndex.removeEntries(keyhash, urlHashes);
+                sb.webIndex.removeReferences(keyhash, urlHashes);
                 // this shall lead to a presentation of the list; so handle that the remaining program
                 // thinks that it was called for a list presentation
                 post.remove("keyhashdelete");
@@ -166,7 +166,7 @@ public class IndexControlRWIs_p {
             }
             
             if (post.containsKey("urllist")) {
-                if (keystring.length() == 0 || !indexWord.word2hash(keystring).equals(keyhash)) {
+                if (keystring.length() == 0 || !Word.word2hash(keystring).equals(keyhash)) {
                     prop.put("keystring", "&lt;not possible to compute word from hash&gt;");
                 }
                 final Bitfield flags = plasmaSearchAPI.compileFlags(post);
@@ -177,7 +177,7 @@ public class IndexControlRWIs_p {
 
             // transfer to other peer
             if (post.containsKey("keyhashtransfer")) {
-                if (keystring.length() == 0 || !indexWord.word2hash(keystring).equals(keyhash)) {
+                if (keystring.length() == 0 || !Word.word2hash(keystring).equals(keyhash)) {
                     prop.put("keystring", "&lt;not possible to compute word from hash&gt;");
                 }
                 
@@ -198,15 +198,15 @@ public class IndexControlRWIs_p {
                 }
                 
                 // prepare index
-                indexContainer index;
+                ReferenceContainer index;
                 final long starttime = System.currentTimeMillis();
-                index = sb.webIndex.getContainer(keyhash, null);
+                index = sb.webIndex.getReferences(keyhash, null);
                 // built urlCache
-                final Iterator<indexRWIRowEntry> urlIter = index.entries();
-                final HashMap<String, indexURLReference> knownURLs = new HashMap<String, indexURLReference>();
+                final Iterator<ReferenceRow> urlIter = index.entries();
+                final HashMap<String, URLMetadata> knownURLs = new HashMap<String, URLMetadata>();
                 final HashSet<String> unknownURLEntries = new HashSet<String>();
-                indexRWIEntry iEntry;
-                indexURLReference lurl;
+                Reference iEntry;
+                URLMetadata lurl;
                 while (urlIter.hasNext()) {
                     iEntry = urlIter.next();
                     lurl = sb.webIndex.getURL(iEntry.urlHash(), null, 0);
@@ -220,7 +220,7 @@ public class IndexControlRWIs_p {
                 
                 // make an indexContainerCache
                 indexContainerCache icc = new indexContainerCache(index.rowdef);
-                icc.addEntries(index);
+                icc.addReferences(index);
                 
                 // transport to other peer
                 final String gzipBody = sb.getConfig("indexControl.gzipBody","false");
@@ -237,8 +237,8 @@ public class IndexControlRWIs_p {
     
             // generate list
             if (post.containsKey("keyhashsimilar")) {
-                final Iterator<indexContainer> containerIt = sb.webIndex.indexContainerSet(keyhash, false, true, 256).iterator();
-                    indexContainer container;
+                final Iterator<ReferenceContainer> containerIt = sb.webIndex.indexContainerSet(keyhash, false, true, 256).iterator();
+                    ReferenceContainer container;
                     int i = 0;
                     int rows = 0, cols = 0;
                     prop.put("keyhashsimilar", "1");
@@ -269,7 +269,7 @@ public class IndexControlRWIs_p {
                         yacyURL url;
                         for (int i=0; i<urlx.length; i++) {
                             urlHashes.add(urlx[i]);
-                            final indexURLReference e = sb.webIndex.getURL(urlx[i], null, 0);
+                            final URLMetadata e = sb.webIndex.getURL(urlx[i], null, 0);
                             sb.webIndex.removeURL(urlx[i]);
                             if (e != null) {
                                 url = e.comp().url();
@@ -297,7 +297,7 @@ public class IndexControlRWIs_p {
                         yacyURL url;
                         for (int i=0; i<urlx.length; i++) {
                             urlHashes.add(urlx[i]);
-                            final indexURLReference e = sb.webIndex.getURL(urlx[i], null, 0);
+                            final URLMetadata e = sb.webIndex.getURL(urlx[i], null, 0);
                             sb.webIndex.removeURL(urlx[i]);
                             if (e != null) {
                                 url = e.comp().url();
@@ -315,7 +315,7 @@ public class IndexControlRWIs_p {
                     } catch (final IOException e) {
                     }
                 }
-                sb.webIndex.removeEntries(keyhash, urlHashes);
+                sb.webIndex.removeReferences(keyhash, urlHashes);
             }
         
             if (prop.getInt("searchresult", 0) == 3) plasmaSearchAPI.listHosts(prop, keyhash, sb);

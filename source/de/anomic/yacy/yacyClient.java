@@ -66,13 +66,13 @@ import de.anomic.http.httpClient;
 import de.anomic.http.httpResponse;
 import de.anomic.http.httpRemoteProxyConfig;
 import de.anomic.http.httpRequestHeader;
-import de.anomic.index.indexContainer;
+import de.anomic.index.ReferenceContainer;
 import de.anomic.index.indexContainerCache;
-import de.anomic.index.indexRWIEntry;
-import de.anomic.index.indexRWIRowEntry;
+import de.anomic.index.Reference;
+import de.anomic.index.ReferenceRow;
 import de.anomic.index.indexReferenceBlacklist;
-import de.anomic.index.indexURLReference;
-import de.anomic.index.indexWord;
+import de.anomic.index.URLMetadata;
+import de.anomic.index.Word;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.order.Digest;
@@ -526,21 +526,21 @@ public final class yacyClient {
 
 		// create containers
 		final int words = wordhashes.length() / yacySeedDB.commonHashLength;
-		final indexContainer[] container = new indexContainer[words];
+		final ReferenceContainer[] container = new ReferenceContainer[words];
 		for (int i = 0; i < words; i++) {
 			container[i] = plasmaWordIndex.emptyContainer(wordhashes.substring(i * yacySeedDB.commonHashLength, (i + 1) * yacySeedDB.commonHashLength), count);
 		}
 
 		// insert results to containers
-		indexURLReference urlEntry;
+		URLMetadata urlEntry;
 		final String[] urls = new String[results];
 		for (int n = 0; n < results; n++) {
 			// get one single search result
-			urlEntry = indexURLReference.importEntry(result.get("resource" + n));
+			urlEntry = URLMetadata.importEntry(result.get("resource" + n));
 			if (urlEntry == null) continue;
 			assert (urlEntry.hash().length() == 12) : "urlEntry.hash() = " + urlEntry.hash();
 			if (urlEntry.hash().length() != 12) continue; // bad url hash
-			final indexURLReference.Components comp = urlEntry.comp();
+			final URLMetadata.Components comp = urlEntry.comp();
 			if (blacklist.isListed(indexReferenceBlacklist.BLACKLIST_SEARCH, comp.url())) {
 				yacyCore.log.logInfo("remote search (client): filtered blacklisted url " + comp.url() + " from peer " + target.getName());
 				continue; // block with backlist
@@ -553,7 +553,7 @@ public final class yacyClient {
             }
 
 			// save the url entry
-			indexRWIEntry entry;
+			Reference entry;
 			if (urlEntry.word() == null) {
 				yacyCore.log.logWarning("remote search (client): no word attached from peer " + target.getName() + ", version " + target.getVersion());
 				continue; // no word attached
@@ -628,7 +628,7 @@ public final class yacyClient {
 							return null;
 						}
 						//System.out.println("DEBUG-ABSTRACTFETCH: for word hash " + wordhash + " received " + ci.toString());
-						indexContainer.decompressIndex(singleAbstract, ci, target.hash);
+						ReferenceContainer.decompressIndex(singleAbstract, ci, target.hash);
 						abstractCache.put(wordhash, singleAbstract);
 					}
 				}
@@ -637,7 +637,7 @@ public final class yacyClient {
 
 		// insert the containers to the index
         for (int m = 0; m < words; m++) {
-            wordIndex.addEntries(container[m]);
+            wordIndex.addReferences(container[m]);
         }
         
         // generate statistics
@@ -793,7 +793,7 @@ public final class yacyClient {
         return "wrong protocol: " + protocol;
     }
 
-    public static HashMap<String, String> crawlReceipt(final yacySeed mySeed, final yacySeed target, final String process, final String result, final String reason, final indexURLReference entry, final String wordhashes) {
+    public static HashMap<String, String> crawlReceipt(final yacySeed mySeed, final yacySeed target, final String process, final String result, final String reason, final URLMetadata entry, final String wordhashes) {
         assert (target != null);
         assert (mySeed != null);
         assert (mySeed != target);
@@ -856,7 +856,7 @@ public final class yacyClient {
     public static String transferIndex(
             final yacySeed targetSeed,
             final indexContainerCache indexes,
-            final HashMap<String, indexURLReference> urlCache,
+            final HashMap<String, URLMetadata> urlCache,
             final boolean gzipBody,
             final int timeout) {
         
@@ -865,9 +865,9 @@ public final class yacyClient {
         try {
             
             // check if we got all necessary urls in the urlCache (only for debugging)
-            Iterator<indexRWIRowEntry> eenum;
-            indexRWIEntry entry;
-            for (indexContainer ic: indexes) {
+            Iterator<ReferenceRow> eenum;
+            Reference entry;
+            for (ReferenceContainer ic: indexes) {
                 eenum = ic.entries();
                 while (eenum.hasNext()) {
                     entry = eenum.next();
@@ -908,7 +908,7 @@ public final class yacyClient {
             if (uhs.length == 0) { return null; } // all url's known
             
             // extract the urlCache from the result
-            final indexURLReference[] urls = new indexURLReference[uhs.length];
+            final URLMetadata[] urls = new URLMetadata[uhs.length];
             for (int i = 0; i < uhs.length; i++) {
                 urls[i] = urlCache.get(uhs[i]);
                 if (urls[i] == null) {
@@ -960,9 +960,9 @@ public final class yacyClient {
         
         int indexcount = 0;
         final StringBuilder entrypost = new StringBuilder(indexes.size() * 73);
-        Iterator<indexRWIRowEntry> eenum;
-        indexRWIEntry entry;
-        for (indexContainer ic: indexes) {
+        Iterator<ReferenceRow> eenum;
+        Reference entry;
+        for (ReferenceContainer ic: indexes) {
             eenum = ic.entries();
             while (eenum.hasNext()) {
                 entry = eenum.next();
@@ -998,7 +998,7 @@ public final class yacyClient {
         }
     }
 
-    private static HashMap<String, String> transferURL(final yacySeed targetSeed, final indexURLReference[] urls, boolean gzipBody, final int timeout) {
+    private static HashMap<String, String> transferURL(final yacySeed targetSeed, final URLMetadata[] urls, boolean gzipBody, final int timeout) {
         // this post a message to the remote message board
         final String address = targetSeed.getPublicAddress();
         if (address == null) { return null; }
@@ -1074,7 +1074,7 @@ public final class yacyClient {
             /*final yacyCore core =*/ new yacyCore(sb);
             sb.loadSeedLists();
             final yacySeed target = sb.webIndex.seedDB.getConnected(args[1]);
-            final String wordhashe = indexWord.word2hash("test");
+            final String wordhashe = Word.word2hash("test");
             //System.out.println("permission=" + permissionMessage(args[1]));
             
             final httpRequestHeader reqHeader = new httpRequestHeader();

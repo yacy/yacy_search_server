@@ -35,7 +35,7 @@ import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 
 import de.anomic.http.httpResponseHeader;
-import de.anomic.index.indexURLReference;
+import de.anomic.index.URLMetadata;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.DateFormatter;
@@ -367,7 +367,7 @@ public class IndexingStack {
             if (referrerURL == null) {
                 // FIXME the equals seems to be incorrect: String.equals(boolean)
                 if ((referrerHash == null) || ((initiator != null) && (referrerHash.equals(initiator.length() == 0)))) return null;
-                final indexURLReference entry = wordIndex.getURL(referrerHash, null, 0);
+                final URLMetadata entry = wordIndex.getURL(referrerHash, null, 0);
                 if (entry == null) referrerURL = null; else referrerURL = entry.comp().url();
             }
             return referrerURL;

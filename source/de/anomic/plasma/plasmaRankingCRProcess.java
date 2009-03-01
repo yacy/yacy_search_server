@@ -31,7 +31,7 @@ import java.io.IOException;
 import java.util.Iterator;
 
 import de.anomic.index.indexCollectionRI;
-import de.anomic.index.indexContainer;
+import de.anomic.index.ReferenceContainer;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.RowSet;
 import de.anomic.kelondro.index.ObjectIndex;
@@ -381,8 +381,8 @@ public class plasmaRankingCRProcess {
         final int size = seq.size();
         final long start = System.currentTimeMillis();
         long l;
-        final CloneableIterator<indexContainer> i = seq.wordContainerIterator(null, false, false);
-        indexContainer keycollection;
+        final CloneableIterator<ReferenceContainer> i = seq.referenceIterator(null, false, false);
+        ReferenceContainer keycollection;
         String referee, refereeDom, anchor, anchorDom;
         RowSet rci_entry;
         CloneableIterator<Row.Entry> cr_entry;
@@ -400,7 +400,7 @@ public class plasmaRankingCRProcess {
                 if (anchor.length() == 6) anchorDom = anchor; else anchorDom = anchor.substring(6);
 
                 // update domain-specific entry
-                rci_entry = rci.getContainer(anchorDom, null);
+                rci_entry = rci.getReferences(anchorDom, null);
                 if (rci_entry == null) rci_entry = new RowSet(RCI_coli, 0);
                 rci_entry.add(refereeDom.getBytes());
                 

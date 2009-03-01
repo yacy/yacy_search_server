@@ -52,7 +52,7 @@ import de.anomic.kelondro.util.ScoreCluster;
 import de.anomic.kelondro.util.Log;
 import de.anomic.yacy.yacyURL;
 
-public final class indexRepositoryReference {
+public final class URLMetadataRepository {
 
     // class objects
     ObjectIndex urlIndexFile;
@@ -60,10 +60,10 @@ public final class indexRepositoryReference {
     private File        location        = null;
     ArrayList<hostStat> statsDump       = null;
     
-    public indexRepositoryReference(final File indexSecondaryPath) {
+    public URLMetadataRepository(final File indexSecondaryPath) {
         super();
         this.location = new File(indexSecondaryPath, "TEXT");        
-        urlIndexFile = new Cache(new SplitTable(this.location, "urls", indexURLReference.rowdef, false));
+        urlIndexFile = new Cache(new SplitTable(this.location, "urls", URLMetadata.rowdef, false));
     }
 
     public void clearCache() {
@@ -95,7 +95,7 @@ public final class indexRepositoryReference {
         return 0;
     }
 
-    public synchronized indexURLReference load(final String urlHash, final indexRWIEntry searchedWord, final long ranking) {
+    public synchronized URLMetadata load(final String urlHash, final Reference searchedWord, final long ranking) {
         // generates an plasmaLURLEntry using the url hash
         // if the url cannot be found, this returns null
         if (urlHash == null) return null;
@@ -103,15 +103,15 @@ public final class indexRepositoryReference {
         try {
             final Row.Entry entry = urlIndexFile.get(urlHash.getBytes());
             if (entry == null) return null;
-            return new indexURLReference(entry, searchedWord, ranking);
+            return new URLMetadata(entry, searchedWord, ranking);
         } catch (final IOException e) {
             return null;
         }
     }
 
-    public synchronized void store(final indexURLReference entry) throws IOException {
+    public synchronized void store(final URLMetadata entry) throws IOException {
         // Check if there is a more recent Entry already in the DB
-        indexURLReference oldEntry;
+        URLMetadata oldEntry;
         try {
             if (exists(entry.hash())) {
                 oldEntry = load(entry.hash(), null, 0);
@@ -151,17 +151,17 @@ public final class indexRepositoryReference {
         return urlIndexFile.has(urlHash.getBytes());
     }
 
-    public CloneableIterator<indexURLReference> entries() throws IOException {
+    public CloneableIterator<URLMetadata> entries() throws IOException {
         // enumerates entry elements
         return new kiter();
     }
 
-    public CloneableIterator<indexURLReference> entries(final boolean up, final String firstHash) throws IOException {
+    public CloneableIterator<URLMetadata> entries(final boolean up, final String firstHash) throws IOException {
         // enumerates entry elements
         return new kiter(up, firstHash);
     }
 
-    public class kiter implements CloneableIterator<indexURLReference> {
+    public class kiter implements CloneableIterator<URLMetadata> {
         // enumerates entry elements
         private final Iterator<Row.Entry> iter;
         private final boolean error;
@@ -193,12 +193,12 @@ public final class indexRepositoryReference {
             return this.iter.hasNext();
         }
 
-        public final indexURLReference next() {
+        public final URLMetadata next() {
             Row.Entry e = null;
             if (this.iter == null) { return null; }
             if (this.iter.hasNext()) { e = this.iter.next(); }
             if (e == null) { return null; }
-            return new indexURLReference(e, null, 0);
+            return new URLMetadata(e, null, 0);
         }
 
         public final void remove() {
@@ -217,7 +217,7 @@ public final class indexRepositoryReference {
         final Log log = new Log("URLDBCLEANUP");
         final HashSet<String> damagedURLS = new HashSet<String>();
         try {
-            final Iterator<indexURLReference> eiter = entries(true, null);
+            final Iterator<URLMetadata> eiter = entries(true, null);
             int iteratorCount = 0;
             while (eiter.hasNext()) try {
                 eiter.next();
@@ -310,7 +310,7 @@ public final class indexRepositoryReference {
         public void run() {
             try {
                 Log.logInfo("URLDBCLEANER", "UrldbCleaner-Thread startet");
-                final Iterator<indexURLReference> eiter = entries(true, null);
+                final Iterator<URLMetadata> eiter = entries(true, null);
                 while (eiter.hasNext() && run) {
                     synchronized (this) {
                         if (this.pause) {
@@ -323,13 +323,13 @@ public final class indexRepositoryReference {
                             }
                         }
                     }
-                    final indexURLReference entry = eiter.next();
+                    final URLMetadata entry = eiter.next();
                     if (entry == null) {
                         if (Log.isFine("URLDBCLEANER")) Log.logFine("URLDBCLEANER", "entry == null");
                     } else if (entry.hash() == null) {
                         if (Log.isFine("URLDBCLEANER")) Log.logFine("URLDBCLEANER", ++blacklistedUrls + " blacklisted (" + ((double) blacklistedUrls / totalSearchedUrls) * 100 + "%): " + "hash == null");
                     } else {
-                        final indexURLReference.Components comp = entry.comp();
+                        final URLMetadata.Components comp = entry.comp();
                         totalSearchedUrls++;
                         if (comp.url() == null) {
                             if (Log.isFine("URLDBCLEANER")) Log.logFine("URLDBCLEANER", ++blacklistedUrls + " blacklisted (" + ((double) blacklistedUrls / totalSearchedUrls) * 100 + "%): " + entry.hash() + "URL == null");
@@ -450,9 +450,9 @@ public final class indexRepositoryReference {
                         count++;
                     }
                 } else {
-                    final Iterator<indexURLReference> i = entries(); // iterates indexURLEntry objects
-                    indexURLReference entry;
-                    indexURLReference.Components comp;
+                    final Iterator<URLMetadata> i = entries(); // iterates indexURLEntry objects
+                    URLMetadata entry;
+                    URLMetadata.Components comp;
                     String url;
                     while (i.hasNext()) {
                         entry = i.next();
@@ -533,7 +533,7 @@ public final class indexRepositoryReference {
         HashMap<String, hashStat> map = domainSampleCollector();
         
         // fetch urls from the database to determine the host in clear text
-        indexURLReference urlref;
+        URLMetadata urlref;
         if (count < 0 || count > map.size()) count = map.size();
         statsDump = new ArrayList<hostStat>();
         TreeSet<String> set = new TreeSet<String>();
@@ -563,12 +563,12 @@ public final class indexRepositoryReference {
     
         // fetch urls from the database to determine the host in clear text
         Iterator<String> j = s.scores(false); // iterate urlhash-examples in reverse order (biggest first)
-        indexURLReference urlref;
+        URLMetadata urlref;
         String urlhash;
         count += 10; // make some more to prevent that we have to do this again after deletions too soon.
         if (count < 0 || count > s.size()) count = s.size();
         statsDump = new ArrayList<hostStat>();
-        indexURLReference.Components comps;
+        URLMetadata.Components comps;
         yacyURL url;
         while (j.hasNext()) {
             urlhash = j.next();

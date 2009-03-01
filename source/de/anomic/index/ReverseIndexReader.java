@@ -1,4 +1,4 @@
-// indexRIReader.java
+// ReverseIndexReader.java
 // (C) 2008 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 2.4.2008 on http://yacy.net
 //
@@ -30,12 +30,12 @@ import java.util.Set;
 
 import de.anomic.kelondro.order.CloneableIterator;
 
-public interface indexRIReader {
+public interface ReverseIndexReader {
 
     public int size();
-    public boolean hasContainer(String wordHash); // should only be used if in case that true is returned the getContainer is NOT called
-    public indexContainer getContainer(String wordHash, Set<String> urlselection); 
-    public CloneableIterator<indexContainer> wordContainerIterator(String startWordHash, boolean rot, boolean ram);
+    public boolean hasReferences(String wordHash); // should only be used if in case that true is returned the getContainer is NOT called
+    public ReferenceContainer getReferences(String wordHash, Set<String> urlselection); 
+    public CloneableIterator<ReferenceContainer> referenceIterator(String startWordHash, boolean rot, boolean ram);
     public void close();
     
 }

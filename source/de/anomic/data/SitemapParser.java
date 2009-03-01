@@ -45,7 +45,7 @@ import de.anomic.http.httpClient;
 import de.anomic.http.httpResponse;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpdByteCountInputStream;
-import de.anomic.index.indexURLReference;
+import de.anomic.index.URLMetadata;
 import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -260,7 +260,7 @@ public class SitemapParser extends DefaultHandler {
                 final String dbocc = this.sb.urlExists(nexturlhash);
                 if ((dbocc != null) && (dbocc.equalsIgnoreCase("loaded"))) {
                     // the url was already loaded. we need to check the date
-                    final indexURLReference oldEntry = this.sb.webIndex.getURL(nexturlhash, null, 0);
+                    final URLMetadata oldEntry = this.sb.webIndex.getURL(nexturlhash, null, 0);
                     if (oldEntry != null) {
                         final Date modDate = oldEntry.moddate();
                         // check if modDate is null
