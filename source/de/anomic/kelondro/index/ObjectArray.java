@@ -27,7 +27,7 @@ package de.anomic.kelondro.index;
 import java.io.IOException;
 
 
-public interface Array {
+public interface ObjectArray {
 
     public int size();
     

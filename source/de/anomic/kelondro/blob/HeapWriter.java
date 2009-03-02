@@ -30,7 +30,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-import de.anomic.kelondro.index.BytesLongMap;
+import de.anomic.kelondro.index.LongHandleIndex;
 import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.Digest;
 import de.anomic.kelondro.util.Log;
@@ -38,7 +38,7 @@ import de.anomic.kelondro.util.Log;
 public final class HeapWriter  {
 
     private int                     keylength;  // the length of the primary key
-    private BytesLongMap    index;      // key/seek relation for used records
+    private LongHandleIndex    index;      // key/seek relation for used records
     private final File              heapFile;   // the file of the heap
     private DataOutputStream        os;         // the output stream where the BLOB is written
     private long                    seek;       // the current write position
@@ -71,7 +71,7 @@ public final class HeapWriter  {
     public HeapWriter(final File heapFile, final int keylength, final ByteOrder ordering) throws IOException {
         this.heapFile = heapFile;
         this.keylength = keylength;
-        this.index = new BytesLongMap(keylength, ordering, 10);
+        this.index = new LongHandleIndex(keylength, ordering, 10);
         this.os = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(heapFile), 1024 * 1024));
         this.seek = 0;
     }

@@ -34,7 +34,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
 
-import de.anomic.kelondro.index.BytesLongMap;
+import de.anomic.kelondro.index.LongHandleIndex;
 import de.anomic.kelondro.io.CachedRandomAccess;
 import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.CloneableIterator;
@@ -45,7 +45,7 @@ import de.anomic.kelondro.util.Log;
 public class HeapReader {
 
     protected int                keylength;  // the length of the primary key
-    protected BytesLongMap       index;      // key/seek relation for used records
+    protected LongHandleIndex       index;      // key/seek relation for used records
     protected Gap                free;       // set of {seek, size} pairs denoting space and position of free records
     protected final File         heapFile;   // the file of the heap
     protected final ByteOrder    ordering;   // the ordering on keys
@@ -106,7 +106,7 @@ public class HeapReader {
         // there is an index and a gap file:
         // read the index file:
         try {
-            this.index = new BytesLongMap(this.keylength, this.ordering, fif);
+            this.index = new LongHandleIndex(this.keylength, this.ordering, fif);
         } catch (IOException e) {
             e.printStackTrace();
             return false;
@@ -132,7 +132,7 @@ public class HeapReader {
         // this initializes the this.index object by reading positions from the heap file
 
         this.free = new Gap();
-        BytesLongMap.initDataConsumer indexready = BytesLongMap.asynchronusInitializer(keylength, this.ordering, 0, Math.max(10, (int) (Runtime.getRuntime().freeMemory() / (10 * 1024 * 1024))));
+        LongHandleIndex.initDataConsumer indexready = LongHandleIndex.asynchronusInitializer(keylength, this.ordering, 0, Math.max(10, (int) (Runtime.getRuntime().freeMemory() / (10 * 1024 * 1024))));
         byte[] key = new byte[keylength];
         int reclen;
         long seek = 0;

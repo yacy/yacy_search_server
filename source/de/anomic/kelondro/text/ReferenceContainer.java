@@ -24,7 +24,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.index;
+package de.anomic.kelondro.text;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
@@ -207,7 +207,7 @@ public class ReferenceContainer extends RowSet {
     static {
         Method meth = null;
         try {
-            final Class<?> c = Class.forName("de.anomic.index.ReferenceContainer");
+            final Class<?> c = Class.forName("de.anomic.kelonodro.text.ReferenceContainer");
             meth = c.getMethod("mergeUnique", new Class[]{Object.class, Object.class});
         } catch (final SecurityException e) {
             System.out.println("Error while initializing containerMerge.SecurityException: " + e.getMessage());

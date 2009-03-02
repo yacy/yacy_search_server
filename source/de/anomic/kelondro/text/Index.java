@@ -26,14 +26,14 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 
-package de.anomic.index;
+package de.anomic.kelondro.text;
 
 import java.io.IOException;
 import java.util.Set;
 
 import de.anomic.kelondro.order.CloneableIterator;
 
-public interface ReverseIndex {
+public interface Index {
     
 	/**
 	 * add references to the reverse index

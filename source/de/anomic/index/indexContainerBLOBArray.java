@@ -37,6 +37,7 @@ import de.anomic.kelondro.blob.BLOBArray;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.RowSet;
 import de.anomic.kelondro.order.CloneableIterator;
+import de.anomic.kelondro.text.ReferenceContainer;
 
 public final class indexContainerBLOBArray {
 

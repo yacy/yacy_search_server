@@ -31,7 +31,7 @@ import java.util.Random;
 
 import de.anomic.kelondro.order.NaturalOrder;
 
-public class IntBytesMap {
+public class ObjectArrayCache {
 
 	// we use two indexes: one for initialization, and one for data aquired during runtime
 	// this has a gread advantage, if the setup-data is large. Then a re-organisation of
@@ -45,7 +45,7 @@ public class IntBytesMap {
     private RowSet index1;
     //private final kelondroOrder<kelondroRow.Entry> entryOrder;
     
-    public IntBytesMap(final int payloadSize, final int initSize) {
+    public ObjectArrayCache(final int payloadSize, final int initSize) {
     	this.rowdef = new Row("Cardinal key-4 {b256}, byte[] payload-" + payloadSize, NaturalOrder.naturalOrder, 0);
     	this.index0 = new RowSet(rowdef, initSize);
     	this.index1 = null;
@@ -218,7 +218,7 @@ public class IntBytesMap {
 		int p, rc = 0;
 		final ArrayList<Long> ra = new ArrayList<Long>();
 		final HashSet<Long> jcontrol = new HashSet<Long>();
-		final IntBytesMap kcontrol = new IntBytesMap(1, 0);
+		final ObjectArrayCache kcontrol = new ObjectArrayCache(1, 0);
 		for (int i = 0; i < 1000000; i++) {
 			r = Math.abs(random.nextLong() % 10000);
 			//System.out.println("add " + r);

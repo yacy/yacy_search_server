@@ -42,16 +42,10 @@ import de.anomic.crawler.IndexingStack;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.http.httpdProxyCacheEntry;
 import de.anomic.index.indexCollectionRI;
-import de.anomic.index.ReferenceContainer;
 import de.anomic.index.indexContainerOrder;
-import de.anomic.index.ReverseIndexCache;
-import de.anomic.index.ReverseIndex;
-import de.anomic.index.Reference;
-import de.anomic.index.ReferenceRow;
 import de.anomic.index.indexReferenceBlacklist;
 import de.anomic.index.URLMetadataRepository;
 import de.anomic.index.URLMetadata;
-import de.anomic.index.Word;
 import de.anomic.index.URLMetadataRepository.Export;
 import de.anomic.kelondro.index.RowCollection;
 import de.anomic.kelondro.order.Base64Order;
@@ -60,6 +54,12 @@ import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.MergeIterator;
 import de.anomic.kelondro.order.Order;
 import de.anomic.kelondro.order.RotateIterator;
+import de.anomic.kelondro.text.Index;
+import de.anomic.kelondro.text.IndexCache;
+import de.anomic.kelondro.text.Reference;
+import de.anomic.kelondro.text.ReferenceContainer;
+import de.anomic.kelondro.text.ReferenceRow;
+import de.anomic.kelondro.text.Word;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.kelondroException;
 import de.anomic.kelondro.util.Log;
@@ -70,7 +70,7 @@ import de.anomic.xml.RSSMessage;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyURL;
 
-public final class plasmaWordIndex implements ReverseIndex {
+public final class plasmaWordIndex implements Index {
 
     // environment constants
     public  static final long wCacheMaxAge    = 1000 * 60 * 30; // milliseconds; 30 minutes
@@ -96,7 +96,7 @@ public final class plasmaWordIndex implements ReverseIndex {
     public static final long CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA_RECRAWL_CYCLE = 60L * 24L * 30L;
     
     
-    private final ReverseIndexCache               indexCache;
+    private final IndexCache               indexCache;
     private final indexCollectionRI        collections;          // new database structure to replace AssortmentCluster and FileCluster
     private final Log                      log;
     public URLMetadataRepository        referenceURL;
@@ -147,15 +147,15 @@ public final class plasmaWordIndex implements ReverseIndex {
         if (!(textindexcache.exists())) textindexcache.mkdirs();
         if (new File(textindexcache, "index.dhtin.blob").exists()) {
         	// migration of the both caches into one
-        	this.indexCache = new ReverseIndexCache(textindexcache, ReferenceRow.urlEntryRow, entityCacheMaxSize, wCacheMaxChunk, wCacheMaxAge, "index.dhtout.blob", log);
-            ReverseIndexCache dhtInCache  = new ReverseIndexCache(textindexcache, ReferenceRow.urlEntryRow, entityCacheMaxSize, wCacheMaxChunk, wCacheMaxAge, "index.dhtin.blob", log);
+        	this.indexCache = new IndexCache(textindexcache, ReferenceRow.urlEntryRow, entityCacheMaxSize, wCacheMaxChunk, wCacheMaxAge, "index.dhtout.blob", log);
+            IndexCache dhtInCache  = new IndexCache(textindexcache, ReferenceRow.urlEntryRow, entityCacheMaxSize, wCacheMaxChunk, wCacheMaxAge, "index.dhtin.blob", log);
             for (ReferenceContainer c: dhtInCache) {
         		this.indexCache.addReferences(c);
             }
             new File(textindexcache, "index.dhtin.blob").delete();
         } else {
         	// read in new BLOB
-        	this.indexCache = new ReverseIndexCache(textindexcache, ReferenceRow.urlEntryRow, entityCacheMaxSize, wCacheMaxChunk, wCacheMaxAge, "index.dhtout.blob", log);            
+        	this.indexCache = new IndexCache(textindexcache, ReferenceRow.urlEntryRow, entityCacheMaxSize, wCacheMaxChunk, wCacheMaxAge, "index.dhtout.blob", log);            
         }
         
         // create collections storage path
@@ -449,7 +449,7 @@ public final class plasmaWordIndex implements ReverseIndex {
         // calculate the real size in bytes of the index cache
         long cacheBytes = 0;
         final long entryBytes = ReferenceRow.urlEntryRow.objectsize;
-        final ReverseIndexCache cache = (indexCache);
+        final IndexCache cache = (indexCache);
         synchronized (cache) {
             final Iterator<ReferenceContainer> it = cache.referenceIterator(null, false, true);
             while (it.hasNext()) cacheBytes += it.next().size() * entryBytes;
@@ -461,7 +461,7 @@ public final class plasmaWordIndex implements ReverseIndex {
         indexCache.setMaxWordCount(maxWords);
     }
 
-    public void cacheFlushControl(final ReverseIndexCache theCache) {
+    public void cacheFlushControl(final IndexCache theCache) {
         // check for forced flush
         int cs = cacheSize();
         if (cs > 0) {
@@ -512,11 +512,11 @@ public final class plasmaWordIndex implements ReverseIndex {
     	}
     }
     
-    private synchronized void flushCacheOne(final ReverseIndexCache ram) {
+    private synchronized void flushCacheOne(final IndexCache ram) {
     	if (ram.size() > 0) collections.addReferences(flushContainer(ram));
     }
     
-    private ReferenceContainer flushContainer(final ReverseIndexCache ram) {
+    private ReferenceContainer flushContainer(final IndexCache ram) {
         String wordHash;
         ReferenceContainer c;
         wordHash = ram.maxScoreWordHash();

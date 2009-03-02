@@ -32,8 +32,8 @@ import java.util.TreeSet;
 
 import de.anomic.http.httpRequestHeader;
 import de.anomic.index.URLMetadata;
-import de.anomic.index.Word;
 import de.anomic.kelondro.order.Bitfield;
+import de.anomic.kelondro.text.Word;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.SetTools;
 import de.anomic.kelondro.util.Log;

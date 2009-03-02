@@ -1,6 +1,6 @@
-// kelondroBytesIntMap.java
-// (C) 2006 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
-// first published 18.06.2006 on http://www.anomic.de
+// kelondroBytesLongMap.java
+// (C) 2008 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
+// first published 08.04.2008 on http://yacy.net
 //
 // $LastChangedDate: 2006-04-02 22:40:07 +0200 (So, 02 Apr 2006) $
 // $LastChangedRevision: 1986 $
@@ -24,8 +24,16 @@
 
 package de.anomic.kelondro.index;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
@@ -37,85 +45,131 @@ import java.util.concurrent.Future;
 import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.CloneableIterator;
 
-public class BytesIntMap {
+public class LongHandleIndex {
     
     private final Row rowdef;
-    private ObjectIndex index;
+    private ObjectIndexCache index;
     
-    public BytesIntMap(final int keylength, final ByteOrder objectOrder, final int space) {
-        this.rowdef = new Row(new Column[]{new Column("key", Column.celltype_binary, Column.encoder_bytes, keylength, "key"), new Column("int c-4 {b256}")}, objectOrder, 0);
-        this.index = new RAMIndex(rowdef, space);
+    /**
+     * initialize a BytesLongMap
+     * This may store a key and a long value for each key.
+     * The class is used as index for database files
+     * @param keylength
+     * @param objectOrder
+     * @param space
+     */
+    public LongHandleIndex(final int keylength, final ByteOrder objectOrder, final int space) {
+        this.rowdef = new Row(new Column[]{new Column("key", Column.celltype_binary, Column.encoder_bytes, keylength, "key"), new Column("long c-8 {b256}")}, objectOrder, 0);
+        this.index = new ObjectIndexCache(rowdef, space);
     }
-    
+
+    /**
+     * initialize a BytesLongMap with the content of a dumped index
+     * @param keylength
+     * @param objectOrder
+     * @param file
+     * @throws IOException 
+     */
+    public LongHandleIndex(final int keylength, final ByteOrder objectOrder, final File file) throws IOException {
+        this(keylength, objectOrder, (int) (file.length() / (keylength + 8)));
+        // read the index dump and fill the index
+        InputStream is = new BufferedInputStream(new FileInputStream(file), 1024 * 1024);
+        byte[] a = new byte[keylength + 8];
+        int c;
+        while (true) {
+            c = is.read(a);
+            if (c <= 0) break;
+            this.index.addUnique(this.rowdef.newEntry(a));
+        }
+        is.close();
+        assert this.index.size() == file.length() / (keylength + 8);
+    }
+
+    /**
+     * write a dump of the index to a file. All entries are written in order
+     * which makes it possible to read them again in a fast way
+     * @param file
+     * @return the number of written entries
+     * @throws IOException
+     */
+    public int dump(File file) throws IOException {
+        // we must use an iterator from the combined index, because we need the entries sorted
+        // otherwise we could just write the byte[] from the in kelondroRowSet which would make
+        // everything much faster, but this is not an option here.
+        Iterator<Row.Entry> i = this.index.rows(true, null);
+        OutputStream os = new BufferedOutputStream(new FileOutputStream(file), 1024 * 1024);
+        int c = 0;
+        while (i.hasNext()) {
+            os.write(i.next().bytes());
+            c++;
+        }
+        os.flush();
+        os.close();
+        return c;
+    }
+
     public Row row() {
         return index.row();
     }
     
     public void clear() throws IOException {
-        this.index.clear();
+        index.clear();
     }
     
-    public synchronized boolean has(final byte[] key) {
-        assert (key != null);
-        return index.has(key);
-    }
-    
-    public synchronized int geti(final byte[] key) throws IOException {
+    public synchronized long getl(final byte[] key) throws IOException {
         assert (key != null);
         final Row.Entry indexentry = index.get(key);
         if (indexentry == null) return -1;
-        return (int) indexentry.getColLong(1);
+        return indexentry.getColLong(1);
     }
     
-    public synchronized int puti(final byte[] key, final int i) throws IOException {
-        assert i >= 0 : "i = " + i;
+    public synchronized long putl(final byte[] key, final long l) throws IOException {
+        assert l >= 0 : "l = " + l;
         assert (key != null);
         final Row.Entry newentry = index.row().newEntry();
         newentry.setCol(0, key);
-        newentry.setCol(1, i);
+        newentry.setCol(1, l);
         final Row.Entry oldentry = index.put(newentry);
         if (oldentry == null) return -1;
-        return (int) oldentry.getColLong(1);
+        return oldentry.getColLong(1);
     }
     
-    public synchronized void addi(final byte[] key, final int i) throws IOException {
-        assert i >= 0 : "i = " + i;
+    public synchronized void addl(final byte[] key, final long l) throws IOException {
+        assert l >= 0 : "l = " + l;
         assert (key != null);
         final Row.Entry newentry = this.rowdef.newEntry();
         newentry.setCol(0, key);
-        newentry.setCol(1, i);
+        newentry.setCol(1, l);
         index.addUnique(newentry);
     }
     
-    public synchronized ArrayList<Integer[]> removeDoubles() throws IOException {
-        final ArrayList<Integer[]> report = new ArrayList<Integer[]>();
-        Integer[] is;
-        int c, i;
-        final int initialSize = this.size();
-        for (final RowCollection delset: index.removeDoubles()) {
-            is = new Integer[delset.size()];
+    public synchronized ArrayList<Long[]> removeDoubles() throws IOException {
+        final ArrayList<RowCollection> indexreport = index.removeDoubles();
+        final ArrayList<Long[]> report = new ArrayList<Long[]>();
+        Long[] is;
+        int c;
+        for (final RowCollection rowset: indexreport) {
+            is = new Long[rowset.size()];
             c = 0;
-            for (Row.Entry e : delset) {
-                i = (int) e.getColLong(1);
-                assert i < initialSize : "i = " + i + ", initialSize = " + initialSize;
-                is[c++] = Integer.valueOf(i);
+            for (Row.Entry e: rowset) {
+                is[c++] = Long.valueOf(e.getColLong(1));
             }
             report.add(is);
         }
         return report;
     }
     
-    public synchronized int removei(final byte[] key) throws IOException {
+    public synchronized long removel(final byte[] key) throws IOException {
         assert (key != null);
         final Row.Entry indexentry = index.remove(key);
         if (indexentry == null) return -1;
-        return (int) indexentry.getColLong(1);
+        return indexentry.getColLong(1);
     }
 
-    public synchronized int removeonei() throws IOException {
+    public synchronized long removeonel() throws IOException {
         final Row.Entry indexentry = index.removeOne();
         if (indexentry == null) return -1;
-        return (int) indexentry.getColLong(1);
+        return indexentry.getColLong(1);
     }
     
     public synchronized int size() {
@@ -135,16 +189,6 @@ public class BytesIntMap {
         index = null;
     }
     
-    private static class entry {
-        public byte[] key;
-        public int l;
-        public entry(final byte[] key, final int l) {
-            this.key = key;
-            this.l = l;
-        }
-    }
-    private static final entry poisonEntry = new entry(new byte[0], 0);
-    
     /**
      * this method creates a concurrent thread that can take entries that are used to initialize the map
      * it should be used when a bytesLongMap is initialized when a file is read. Concurrency of FileIO and
@@ -156,27 +200,35 @@ public class BytesIntMap {
      * @return
      */
     public static initDataConsumer asynchronusInitializer(final int keylength, final ByteOrder objectOrder, final int space, int bufferSize) {
-        initDataConsumer initializer = new initDataConsumer(new BytesIntMap(keylength, objectOrder, space), bufferSize);
+        initDataConsumer initializer = new initDataConsumer(new LongHandleIndex(keylength, objectOrder, space), bufferSize);
         ExecutorService service = Executors.newSingleThreadExecutor();
         initializer.setResult(service.submit(initializer));
         service.shutdown();
         return initializer;
     }
+
+    private static class entry {
+        public byte[] key;
+        public long l;
+        public entry(final byte[] key, final long l) {
+            this.key = key;
+            this.l = l;
+        }
+    }
+    private static final entry poisonEntry = new entry(new byte[0], 0);
     
-    public static class initDataConsumer implements Callable<BytesIntMap> {
+    public static class initDataConsumer implements Callable<LongHandleIndex> {
 
         private BlockingQueue<entry> cache;
-        private BytesIntMap map;
-        private Future<BytesIntMap> result;
-        private boolean sortAtEnd;
+        private LongHandleIndex map;
+        private Future<LongHandleIndex> result;
         
-        public initDataConsumer(BytesIntMap map, int bufferCount) {
+        public initDataConsumer(LongHandleIndex map, int bufferCount) {
             this.map = map;
             cache = new ArrayBlockingQueue<entry>(bufferCount);
-            sortAtEnd = false;
         }
         
-        protected void setResult(Future<BytesIntMap> result) {
+        protected void setResult(Future<LongHandleIndex> result) {
             this.result = result;
         }
         
@@ -185,7 +237,7 @@ public class BytesIntMap {
          * @param key
          * @param l
          */
-        public void consume(final byte[] key, final int l) {
+        public void consume(final byte[] key, final long l) {
             try {
                 cache.put(new entry(key, l));
             } catch (InterruptedException e) {
@@ -197,8 +249,7 @@ public class BytesIntMap {
          * to signal the initialization thread that no more entries will be sublitted with consumer()
          * this method must be called. The process will not terminate if this is not called before.
          */
-        public void finish(boolean sortAtEnd) {
-            this.sortAtEnd = sortAtEnd;
+        public void finish() {
             try {
                 cache.put(poisonEntry);
             } catch (InterruptedException e) {
@@ -214,22 +265,20 @@ public class BytesIntMap {
          * @throws InterruptedException
          * @throws ExecutionException
          */
-        public BytesIntMap result() throws InterruptedException, ExecutionException {
+        public LongHandleIndex result() throws InterruptedException, ExecutionException {
             return this.result.get();
         }
         
-        public BytesIntMap call() throws IOException {
+        public LongHandleIndex call() throws IOException {
             try {
                 entry c;
                 while ((c = cache.take()) != poisonEntry) {
-                    map.addi(c.key, c.l);
+                    map.addl(c.key, c.l);
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            if (sortAtEnd && map.index instanceof RAMIndex) {
-                ((RAMIndex) map.index).finishInitialization();
-            }
+            map.index.finishInitialization();
             return map;
         }
         

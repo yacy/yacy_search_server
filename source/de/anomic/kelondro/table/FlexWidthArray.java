@@ -32,14 +32,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import de.anomic.kelondro.index.Array;
+import de.anomic.kelondro.index.ObjectArray;
 import de.anomic.kelondro.index.Column;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.util.kelondroException;
 import de.anomic.kelondro.util.Log;
 
-public class FlexWidthArray implements Array {
+public class FlexWidthArray implements ObjectArray {
 
     protected FixedWidthArray[] col;
     protected Row rowdef;

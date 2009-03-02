@@ -28,6 +28,7 @@ package de.anomic.index;
 
 import de.anomic.kelondro.order.AbstractOrder;
 import de.anomic.kelondro.order.Order;
+import de.anomic.kelondro.text.ReferenceContainer;
 
 public class indexContainerOrder extends AbstractOrder<ReferenceContainer> implements Order<ReferenceContainer>, Cloneable {
 

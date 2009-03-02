@@ -38,7 +38,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import de.anomic.kelondro.index.BytesIntMap;
+import de.anomic.kelondro.index.IntegerHandleIndex;
 import de.anomic.kelondro.index.Column;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.RowCollection;
@@ -75,7 +75,7 @@ public class EcoTable implements ObjectIndex {
     public static final long maxarraylength = 134217727L; // that may be the maxmimum size of array length in some JVMs
     private static final long minmemremaining = 20 * 1024 * 1024; // if less than this memory is remaininig, the memory copy of a table is abandoned
     RowSet table;
-    BytesIntMap index;
+    IntegerHandleIndex index;
     BufferedEcoFS file;
     Row rowdef;
     int fail;
@@ -132,7 +132,7 @@ public class EcoTable implements ObjectIndex {
                 table = null; System.gc();
                 Log.logSevere("ECOTABLE", tablefile + ": RAM after releasing the table: " + (MemoryControl.available() / 1024 / 1024) + "MB");
             }
-            index = new BytesIntMap(rowdef.primaryKeyLength, rowdef.objectOrder, records);
+            index = new IntegerHandleIndex(rowdef.primaryKeyLength, rowdef.objectOrder, records);
             Log.logInfo("ECOTABLE", tablefile + ": EcoTable " + tablefile.toString() + " has table copy " + ((table == null) ? "DISABLED" : "ENABLED"));
 
             // read all elements from the file into the copy table
@@ -564,7 +564,7 @@ public class EcoTable implements ObjectIndex {
         
         // initialize index and copy table
         table = (table == null) ? null : new RowSet(taildef, 1);
-        index = new BytesIntMap(rowdef.primaryKeyLength, rowdef.objectOrder, 1);        
+        index = new IntegerHandleIndex(rowdef.primaryKeyLength, rowdef.objectOrder, 1);        
     }
 
     public Row row() {

@@ -37,11 +37,11 @@ import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
 import de.anomic.crawler.ResultURLs;
-import de.anomic.index.ReferenceContainer;
-import de.anomic.index.Reference;
-import de.anomic.index.ReferenceVars;
 import de.anomic.index.URLMetadata;
 import de.anomic.kelondro.order.Bitfield;
+import de.anomic.kelondro.text.Reference;
+import de.anomic.kelondro.text.ReferenceContainer;
+import de.anomic.kelondro.text.ReferenceVars;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.SetTools;
 import de.anomic.kelondro.util.SortStack;

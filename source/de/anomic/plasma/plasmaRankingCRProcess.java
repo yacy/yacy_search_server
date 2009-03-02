@@ -31,7 +31,6 @@ import java.io.IOException;
 import java.util.Iterator;
 
 import de.anomic.index.indexCollectionRI;
-import de.anomic.index.ReferenceContainer;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.RowSet;
 import de.anomic.kelondro.index.ObjectIndex;
@@ -41,6 +40,7 @@ import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.kelondro.order.MicroDate;
 import de.anomic.kelondro.table.EcoTable;
+import de.anomic.kelondro.text.ReferenceContainer;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.AttrSeq;
 import de.anomic.kelondro.util.FileUtils;

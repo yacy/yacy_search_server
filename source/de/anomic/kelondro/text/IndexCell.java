@@ -24,13 +24,16 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.index;
+package de.anomic.kelondro.text;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
+import de.anomic.index.indexContainerBLOBArray;
+import de.anomic.index.indexContainerCache;
+import de.anomic.index.indexContainerOrder;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.MergeIterator;
@@ -47,14 +50,14 @@ import de.anomic.kelondro.order.Order;
  * another BLOB file in the index array.
  */
 
-public final class ReverseIndexCell implements ReverseIndex {
+public final class IndexCell implements Index {
 
     // class variables
     private indexContainerBLOBArray array;
     private indexContainerCache ram;
     private int maxRamEntries;
     
-    public ReverseIndexCell(
+    public IndexCell(
             final File cellPath,
             final Row payloadrow,
             final int maxRamEntries

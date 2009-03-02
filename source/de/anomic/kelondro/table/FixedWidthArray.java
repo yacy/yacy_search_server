@@ -33,12 +33,12 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
-import de.anomic.kelondro.index.Array;
+import de.anomic.kelondro.index.ObjectArray;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.io.RandomAccessInterface;
 import de.anomic.kelondro.order.NaturalOrder;
 
-public class FixedWidthArray extends FullRecords implements Array {
+public class FixedWidthArray extends FullRecords implements ObjectArray {
 
     // define the Over-Head-Array
     private static short thisOHBytes   = 0; // our record definition does not need extra bytes

@@ -28,10 +28,10 @@ import java.util.TreeSet;
 
 import de.anomic.htmlFilter.htmlFilterAbstractScraper;
 import de.anomic.htmlFilter.htmlFilterCharacterCoding;
-import de.anomic.index.Word;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.order.NaturalOrder;
+import de.anomic.kelondro.text.Word;
 import de.anomic.kelondro.util.SetTools;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacySeedDB;

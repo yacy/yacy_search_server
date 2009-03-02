@@ -53,6 +53,8 @@ import de.anomic.kelondro.order.RotateIterator;
 import de.anomic.kelondro.table.EcoTable;
 import de.anomic.kelondro.table.FixedWidthArray;
 import de.anomic.kelondro.table.FlexTable;
+import de.anomic.kelondro.text.Index;
+import de.anomic.kelondro.text.ReferenceContainer;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.kelondroException;
@@ -60,7 +62,7 @@ import de.anomic.kelondro.util.kelondroOutOfLimitsException;
 import de.anomic.kelondro.util.Log;
 import de.anomic.yacy.yacyURL;
 
-public class indexCollectionRI implements ReverseIndex {
+public class indexCollectionRI implements Index {
 
 	private static final int loadfactor = 4;
     private static final int serialNumber = 0;

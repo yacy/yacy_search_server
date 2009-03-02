@@ -44,11 +44,14 @@ import de.anomic.kelondro.blob.HeapWriter;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.ByteOrder;
+import de.anomic.kelondro.text.Index;
+import de.anomic.kelondro.text.ReferenceContainer;
+import de.anomic.kelondro.text.ReferenceRow;
 import de.anomic.kelondro.util.Log;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.RowSet;
 
-public final class indexContainerCache implements Iterable<ReferenceContainer>, ReverseIndex {
+public final class indexContainerCache implements Iterable<ReferenceContainer>, Index {
 
     private final Row payloadrow;
     private SortedMap<String, ReferenceContainer> cache;

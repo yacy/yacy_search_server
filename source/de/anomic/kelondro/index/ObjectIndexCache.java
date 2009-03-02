@@ -35,13 +35,13 @@ import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.MergeIterator;
 import de.anomic.kelondro.order.StackIterator;
 
-public class RAMIndex implements ObjectIndex {
+public class ObjectIndexCache implements ObjectIndex {
     
     private final Row rowdef;
     private RowSet index0, index1;
     private final Row.EntryComparator entryComparator;
     
-    public RAMIndex(final Row rowdef, final int initialspace) {
+    public ObjectIndexCache(final Row rowdef, final int initialspace) {
     	this.rowdef = rowdef;
     	this.entryComparator = new Row.EntryComparator(rowdef.objectOrder);
         reset(initialspace);

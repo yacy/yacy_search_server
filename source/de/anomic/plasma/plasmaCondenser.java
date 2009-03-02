@@ -48,10 +48,10 @@ import java.util.TreeSet;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterImageEntry;
-import de.anomic.index.indexPhrase;
-import de.anomic.index.Reference;
-import de.anomic.index.Word;
 import de.anomic.kelondro.order.Bitfield;
+import de.anomic.kelondro.text.Phrase;
+import de.anomic.kelondro.text.Reference;
+import de.anomic.kelondro.text.Word;
 import de.anomic.kelondro.util.SetTools;
 import de.anomic.language.identification.Identificator;
 import de.anomic.yacy.yacyURL;
@@ -284,7 +284,7 @@ public final class plasmaCondenser {
         String k;
         int wordlen;
         Word wsp, wsp1;
-        indexPhrase psp;
+        Phrase psp;
         int wordHandle;
         int wordHandleCount = 0;
         int sentenceHandleCount = 0;
@@ -295,7 +295,7 @@ public final class plasmaCondenser {
         boolean comb_indexof = false, last_last = false, last_index = false;
         RandomAccessFile fa;
         final boolean dumpWords = false;
-        final HashMap<StringBuilder, indexPhrase> sentences = new HashMap<StringBuilder, indexPhrase>();
+        final HashMap<StringBuilder, Phrase> sentences = new HashMap<StringBuilder, Phrase>();
         
         if (dumpWords) try {
             fa = new RandomAccessFile(new File("dump.txt"), "rw");
@@ -339,7 +339,7 @@ public final class plasmaCondenser {
                     } else {
                         // create new sentence
                         idx = sentenceHandleCount++;
-                        sentences.put(sentence, new indexPhrase(idx));
+                        sentences.put(sentence, new Phrase(idx));
                     }
                     // store to the words a link to this sentence
                     it = currsentwords.iterator();
@@ -392,7 +392,7 @@ public final class plasmaCondenser {
                 psp.inc();
                 sentences.put(sentence, psp);
             } else {
-                sentences.put(sentence, new indexPhrase(sentenceHandleCount++));
+                sentences.put(sentence, new Phrase(sentenceHandleCount++));
             }
         }
         

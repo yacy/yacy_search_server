@@ -30,13 +30,13 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 
-import de.anomic.index.ReferenceContainer;
 import de.anomic.index.indexContainerCache;
-import de.anomic.index.ReverseIndex;
-import de.anomic.index.ReferenceRow;
 import de.anomic.index.URLMetadataRepository;
 import de.anomic.index.URLMetadata;
 import de.anomic.kelondro.index.Row;
+import de.anomic.kelondro.text.Index;
+import de.anomic.kelondro.text.ReferenceContainer;
+import de.anomic.kelondro.text.ReferenceRow;
 import de.anomic.kelondro.util.Log;
 import de.anomic.server.serverProcessorJob;
 import de.anomic.yacy.yacyClient;
@@ -48,7 +48,7 @@ public class Transmission  {
     private Log log;
     private URLMetadataRepository repository;
     private yacySeedDB seeds;
-    private ReverseIndex backend;
+    private Index backend;
     private boolean gzipBody4Transfer;
     private int timeout4Transfer;
     
@@ -56,7 +56,7 @@ public class Transmission  {
             Log log,
             URLMetadataRepository repository, 
             yacySeedDB seeds,
-            ReverseIndex backend,
+            Index backend,
             boolean gzipBody4Transfer,
             int timeout4Transfer) {
         this.log = log;

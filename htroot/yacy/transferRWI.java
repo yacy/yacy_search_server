@@ -32,8 +32,8 @@ import java.util.Iterator;
 import java.util.List;
 
 import de.anomic.http.httpRequestHeader;
-import de.anomic.index.ReferenceRow;
 import de.anomic.index.indexReferenceBlacklist;
+import de.anomic.kelondro.text.ReferenceRow;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaSwitchboard;

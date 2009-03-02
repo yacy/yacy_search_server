@@ -15,7 +15,7 @@ import javax.imageio.ImageIO;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.RowSet;
 import de.anomic.kelondro.index.ObjectIndex;
-import de.anomic.kelondro.index.IntBytesMap;
+import de.anomic.kelondro.index.ObjectArrayCache;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.NaturalOrder;
@@ -425,7 +425,7 @@ public class dbtest {
                 int p, rc=0;
                 final ArrayList<Long> ra = new ArrayList<Long>();
                 final HashSet<Long> jcontrol = new HashSet<Long>();
-                final IntBytesMap kcontrol = new IntBytesMap(1, 0);
+                final ObjectArrayCache kcontrol = new ObjectArrayCache(1, 0);
                 for (int i = 0; i < writeCount; i++) {
                     r = Math.abs(random.nextLong() % 1000);
                     jcontrol.add(Long.valueOf(r));
@@ -465,7 +465,7 @@ public class dbtest {
                 int p, rc=0;
                 final ArrayList<Long> ra = new ArrayList<Long>();
                 final HashSet<Long> jcontrol = new HashSet<Long>();
-                final IntBytesMap kcontrol = new IntBytesMap(1, 0);
+                final ObjectArrayCache kcontrol = new ObjectArrayCache(1, 0);
                 for (int i = 0; i < writeCount; i++) {
                     //if (i == 30) random = new Random(randomstart);
                     r = Math.abs(random.nextLong() % 1000);

@@ -24,7 +24,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.index;
+package de.anomic.kelondro.text;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,13 +32,14 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Set;
 
+import de.anomic.index.indexContainerCache;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.ScoreCluster;
 import de.anomic.kelondro.util.Log;
 
-public final class ReverseIndexCache implements ReverseIndex, ReverseIndexReader, Iterable<ReferenceContainer> {
+public final class IndexCache implements Index, IndexReader, Iterable<ReferenceContainer> {
 
     // class variables
     private final ScoreCluster<String> hashScore;
@@ -52,7 +53,7 @@ public final class ReverseIndexCache implements ReverseIndex, ReverseIndexReader
     private indexContainerCache heap;
     
     @SuppressWarnings("unchecked")
-    public ReverseIndexCache(
+    public IndexCache(
             final File databaseRoot,
             final Row payloadrow,
             final int entityCacheMaxSize,

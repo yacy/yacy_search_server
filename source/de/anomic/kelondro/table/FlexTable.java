@@ -35,7 +35,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import de.anomic.kelondro.index.BytesIntMap;
+import de.anomic.kelondro.index.IntegerHandleIndex;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.RowCollection;
 import de.anomic.kelondro.index.RowSet;
@@ -52,7 +52,7 @@ public class FlexTable extends FlexWidthArray implements ObjectIndex {
     private static TreeMap<String, FlexTable> tableTracker = new TreeMap<String, FlexTable>();
     
     // class objects
-    protected BytesIntMap index;
+    protected IntegerHandleIndex index;
     private boolean RAMIndex;
     
     /**
@@ -112,7 +112,7 @@ public class FlexTable extends FlexWidthArray implements ObjectIndex {
     	} catch (final IOException e) {
     		if (resetOnFail) {
     			RAMIndex = true;
-    	        index = new BytesIntMap(super.row().column(0).cellwidth, super.rowdef.objectOrder, 0);
+    	        index = new IntegerHandleIndex(super.row().column(0).cellwidth, super.rowdef.objectOrder, 0);
     		} else {
     			throw new kelondroException(e.getMessage());
     		}
@@ -122,7 +122,7 @@ public class FlexTable extends FlexWidthArray implements ObjectIndex {
     public void clear() throws IOException {
     	super.reset();
     	RAMIndex = true;
-        index = new BytesIntMap(super.row().column(0).cellwidth, super.rowdef.objectOrder, 0);
+        index = new IntegerHandleIndex(super.row().column(0).cellwidth, super.rowdef.objectOrder, 0);
     }
     
     public static int staticSize(final File path, final String tablename) {
@@ -145,10 +145,10 @@ public class FlexTable extends FlexWidthArray implements ObjectIndex {
         return index.has(key);
     }
     
-    private BytesIntMap initializeRamIndex(final int initialSpace) {
+    private IntegerHandleIndex initializeRamIndex(final int initialSpace) {
     	final int space = Math.max(super.col[0].size(), initialSpace) + 1;
     	if (space < 0) throw new kelondroException("wrong space: " + space);
-        final BytesIntMap ri = new BytesIntMap(super.row().column(0).cellwidth, super.rowdef.objectOrder, space);
+        final IntegerHandleIndex ri = new IntegerHandleIndex(super.row().column(0).cellwidth, super.rowdef.objectOrder, space);
         final Iterator<Node> content = super.col[0].contentNodes(-1);
         Node node;
         int i;

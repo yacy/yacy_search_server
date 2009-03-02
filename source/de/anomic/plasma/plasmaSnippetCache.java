@@ -45,7 +45,7 @@ import de.anomic.http.httpClient;
 import de.anomic.http.httpResponseHeader;
 import de.anomic.index.indexDocumentMetadata;
 import de.anomic.index.URLMetadata;
-import de.anomic.index.Word;
+import de.anomic.kelondro.text.Word;
 import de.anomic.kelondro.util.ScoreCluster;
 import de.anomic.kelondro.util.SetTools;
 import de.anomic.kelondro.util.Log;

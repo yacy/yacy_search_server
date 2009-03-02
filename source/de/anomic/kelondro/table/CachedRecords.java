@@ -34,7 +34,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import de.anomic.kelondro.index.Row;
-import de.anomic.kelondro.index.IntBytesMap;
+import de.anomic.kelondro.index.ObjectArrayCache;
 import de.anomic.kelondro.io.RandomAccessInterface;
 import de.anomic.kelondro.io.RandomAccessRecords;
 import de.anomic.kelondro.util.MemoryControl;
@@ -51,7 +51,7 @@ public class CachedRecords extends AbstractRecords implements RandomAccessRecord
     private static final long memStartShrink = 20 * 1024 * 1024; // a limit for the node cache to start with shrinking if less than this memory amount is available
     
     // caching buffer
-    private IntBytesMap   cacheHeaders; // the cache; holds overhead values and key element
+    private ObjectArrayCache   cacheHeaders; // the cache; holds overhead values and key element
     private int readHit;
     private int readMiss;
     private int writeUnique;
@@ -88,7 +88,7 @@ public class CachedRecords extends AbstractRecords implements RandomAccessRecord
     
     private void initCache(final boolean useNodeCache, final long preloadTime) {
         if (useNodeCache) {
-            this.cacheHeaders = new IntBytesMap(this.headchunksize, 0);
+            this.cacheHeaders = new ObjectArrayCache(this.headchunksize, 0);
         } else {
             this.cacheHeaders = null;
         }

@@ -31,11 +31,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import de.anomic.index.ReferenceContainer;
-import de.anomic.index.ReverseIndex;
-import de.anomic.index.ReferenceRow;
 import de.anomic.index.URLMetadataRepository;
 import de.anomic.kelondro.order.Base64Order;
+import de.anomic.kelondro.text.Index;
+import de.anomic.kelondro.text.ReferenceContainer;
+import de.anomic.kelondro.text.ReferenceRow;
 import de.anomic.kelondro.util.Log;
 import de.anomic.server.serverProcessor;
 import de.anomic.yacy.yacySeed;
@@ -80,7 +80,7 @@ public class Dispatcher {
     private HashMap<String, Transmission.Chunk> transmissionCloud;
     
     // the backend is used to store the remaining indexContainers in case that the object is closed
-    private ReverseIndex backend;
+    private Index backend;
     
     // the seed database
     private yacySeedDB seeds;
@@ -95,7 +95,7 @@ public class Dispatcher {
     private Transmission transmission;
     
     public Dispatcher(
-            final ReverseIndex backend,
+            final Index backend,
             final URLMetadataRepository repository,
             final yacySeedDB seeds,
             final boolean gzipBody, 

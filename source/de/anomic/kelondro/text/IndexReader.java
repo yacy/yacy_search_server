@@ -1,11 +1,11 @@
-// indexPhrase.java
+// ReverseIndexReader.java
 // (C) 2008 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
-// first published 26.03.2008 on http://yacy.net
+// first published 2.4.2008 on http://yacy.net
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
-// $LastChangedDate: 2006-04-02 22:40:07 +0200 (So, 02 Apr 2006) $
-// $LastChangedRevision: 1986 $
+// $LastChangedDate: 2008-03-14 01:16:04 +0100 (Fr, 14 Mrz 2008) $
+// $LastChangedRevision: 4558 $
 // $LastChangedBy: orbiter $
 //
 // LICENSE
@@ -24,38 +24,18 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.index;
+package de.anomic.kelondro.text;
 
-import java.util.HashSet;
+import java.util.Set;
 
-public class indexPhrase {
-    // object carries statistics for words and sentences
-    
-    private int count;             // number of occurrences
-    private final int handle;            // unique handle, is initialized with sentence counter
-    private final HashSet<Integer> hash; //
+import de.anomic.kelondro.order.CloneableIterator;
 
-    public indexPhrase(final int handle) {
-        this.count = 1;
-        this.handle = handle;
-        this.hash = new HashSet<Integer>();
-    }
+public interface IndexReader {
 
-    public int handle() {
-        return this.handle;
-    }
-    
-    public int occurrences() {
-        return count;
-    }
-
-    public void inc() {
-        count++;
-    }
-
-    public void check(final int i) {
-        hash.add(Integer.valueOf(i));
-    }
-
+    public int size();
+    public boolean hasReferences(String wordHash); // should only be used if in case that true is returned the getContainer is NOT called
+    public ReferenceContainer getReferences(String wordHash, Set<String> urlselection); 
+    public CloneableIterator<ReferenceContainer> referenceIterator(String startWordHash, boolean rot, boolean ram);
+    public void close();
     
 }
