@@ -663,17 +663,20 @@ public final class plasmaWordIndex implements ReverseIndex {
     }
 
     @SuppressWarnings("unchecked")
-    public HashMap<String, ReferenceContainer>[] localSearchContainers(final plasmaSearchQuery query, final Set<String> urlselection) {
+    public HashMap<String, ReferenceContainer>[] localSearchContainers(
+                            final TreeSet<String> queryHashes, 
+                            final TreeSet<String> excludeHashes, 
+                            final Set<String> urlselection) {
         // search for the set of hashes and return a map of of wordhash:indexContainer containing the seach result
 
         // retrieve entities that belong to the hashes
-        HashMap<String, ReferenceContainer> inclusionContainers = (query.queryHashes.size() == 0) ? new HashMap<String, ReferenceContainer>(0) : getContainers(
-                        query.queryHashes,
+        HashMap<String, ReferenceContainer> inclusionContainers = (queryHashes.size() == 0) ? new HashMap<String, ReferenceContainer>(0) : getContainers(
+                        queryHashes,
                         urlselection,
                         true);
-        if ((inclusionContainers.size() != 0) && (inclusionContainers.size() < query.queryHashes.size())) inclusionContainers = new HashMap<String, ReferenceContainer>(0); // prevent that only a subset is returned
+        if ((inclusionContainers.size() != 0) && (inclusionContainers.size() < queryHashes.size())) inclusionContainers = new HashMap<String, ReferenceContainer>(0); // prevent that only a subset is returned
         final HashMap<String, ReferenceContainer> exclusionContainers = (inclusionContainers.size() == 0) ? new HashMap<String, ReferenceContainer>(0) : getContainers(
-                query.excludeHashes,
+                excludeHashes,
                 urlselection,
                 true);
         return new HashMap[]{inclusionContainers, exclusionContainers};

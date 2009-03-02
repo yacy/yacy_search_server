@@ -109,7 +109,7 @@ public final class plasmaSearchRankingProcess {
     public void execQuery() {
         
         long timer = System.currentTimeMillis();
-        this.localSearchContainerMaps = wordIndex.localSearchContainers(query, null);
+        this.localSearchContainerMaps = wordIndex.localSearchContainers(query.queryHashes, query.excludeHashes, null);
         serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), plasmaSearchEvent.COLLECTION, this.localSearchContainerMaps[0].size(), System.currentTimeMillis() - timer));
         
         // join and exclude the local result
