@@ -90,8 +90,8 @@ public final class serverCharBuffer extends Writer {
         // initially fill the buffer with the content of a file
         if (f.length() > Integer.MAX_VALUE) throw new IOException("file is too large for buffering");
 
-        length = (int) f.length();
-        buffer = new char[length*2];
+        length = 0;
+        buffer = new char[(int) f.length()*2];
         offset = 0;
 
         FileReader fr = null;

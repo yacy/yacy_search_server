@@ -1078,4 +1078,13 @@
                   match="yacy \(.*\) unstable; urgency=low"
                   replace="yacy (*auto-svn-version*) unstable; urgency=low" />
   </target>
+
+  <target name="sign" depends="readBuildProperties" description="sign all files in RELEASE/ with $privateKey">
+    <java classname="de.anomic.tools.CryptoLib" failonerror="true">
+      <classpath>
+        <pathelement location="${build}"/>
+      </classpath>
+      <arg line="--sign ${privateKeyFile} ${release}/${stdReleaseFile}"/>
+    </java>
+  </target>
 </project>
