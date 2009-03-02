@@ -52,16 +52,16 @@ import de.anomic.http.httpClient;
 import de.anomic.http.httpResponse;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpd;
-import de.anomic.index.URLMetadataRepository;
-import de.anomic.index.URLMetadata;
 import de.anomic.kelondro.blob.BLOBHeap;
 import de.anomic.kelondro.blob.MapDataMining;
 import de.anomic.kelondro.index.RowCollection;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.DateFormatter;
+import de.anomic.kelondro.text.MetadataRowContainer;
 import de.anomic.kelondro.text.Reference;
 import de.anomic.kelondro.text.ReferenceContainer;
 import de.anomic.kelondro.text.ReferenceRow;
+import de.anomic.kelondro.text.MetadataRepository;
 import de.anomic.kelondro.text.Word;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.ScoreCluster;
@@ -667,10 +667,10 @@ public final class yacy {
             log.logInfo("STARTING URL CLEANUP");
             
             // db containing all currently loades urls
-            final URLMetadataRepository currentUrlDB = new URLMetadataRepository(new File(indexSecondaryRoot, networkName));
+            final MetadataRepository currentUrlDB = new MetadataRepository(new File(indexSecondaryRoot, networkName));
             
             // db used to hold all neede urls
-            final URLMetadataRepository minimizedUrlDB = new URLMetadataRepository(new File(indexRoot2, networkName));
+            final MetadataRepository minimizedUrlDB = new MetadataRepository(new File(indexRoot2, networkName));
             
             final int cacheMem = (int)(MemoryControl.max() - MemoryControl.total());
             if (cacheMem < 2048000) throw new OutOfMemoryError("Not enough memory available to start clean up.");
@@ -695,7 +695,7 @@ public final class yacy {
                         iEntry = wordIdxEntries.next();
                         final String urlHash = iEntry.urlHash();                    
                         if ((currentUrlDB.exists(urlHash)) && (!minimizedUrlDB.exists(urlHash))) try {
-                            final URLMetadata urlEntry = currentUrlDB.load(urlHash, null, 0);                       
+                            final MetadataRowContainer urlEntry = currentUrlDB.load(urlHash, null, 0);                       
                             urlCounter++;
                             minimizedUrlDB.store(urlEntry);
                             if (urlCounter % 500 == 0) {
@@ -849,7 +849,7 @@ public final class yacy {
         final File root = homePath;
         final File indexroot = new File(root, "DATA/INDEX");
         try {Log.configureLogging(homePath, new File(homePath, "DATA/LOG/yacy.logging"));} catch (final Exception e) {}
-        final URLMetadataRepository currentUrlDB = new URLMetadataRepository(new File(indexroot, networkName));
+        final MetadataRepository currentUrlDB = new MetadataRepository(new File(indexroot, networkName));
         currentUrlDB.deadlinkCleaner(null);
         currentUrlDB.close();
     }

@@ -74,9 +74,9 @@ import java.util.zip.GZIPOutputStream;
 import de.anomic.crawler.HTTPLoader;
 import de.anomic.htmlFilter.htmlFilterContentTransformer;
 import de.anomic.htmlFilter.htmlFilterTransformer;
-import de.anomic.index.indexDocumentMetadata;
-import de.anomic.index.indexReferenceBlacklist;
 import de.anomic.kelondro.order.DateFormatter;
+import de.anomic.kelondro.text.Blacklist;
+import de.anomic.kelondro.text.Document;
 import de.anomic.kelondro.util.Log;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaHTCache;
@@ -345,7 +345,7 @@ public final class httpdProxyHandler {
             // respond a 404 for all AGIS ("all you get is shit") servers
             final String hostlow = host.toLowerCase();
             if (args != null) { path = path + "?" + args; }
-            if (plasmaSwitchboard.urlBlacklist.isListed(indexReferenceBlacklist.BLACKLIST_PROXY, hostlow, path)) {
+            if (plasmaSwitchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_PROXY, hostlow, path)) {
                 theLogger.logInfo("AGIS blocking of host '" + hostlow + "'");
                 httpd.sendRespondError(conProp,countedRespond,4,403,null,
                         "URL '" + hostlow + "' blocked by yacy proxy (blacklisted)",null);
@@ -385,7 +385,7 @@ public final class httpdProxyHandler {
                 if (theLogger.isFinest()) theLogger.logFinest(reqID + " page not in cache: fulfill request from web");
                     fulfillRequestFromWeb(conProp, url, ext, requestHeader, cachedResponseHeader, countedRespond);
             } else {
-                final indexDocumentMetadata cacheEntry = new httpdProxyCacheEntry(
+                final Document cacheEntry = new httpdProxyCacheEntry(
                         0,                               // crawling depth
                         url,                             // url
                         "",                              // name of the url is unknown
@@ -499,7 +499,7 @@ public final class httpdProxyHandler {
                 }
 
                 // reserver cache entry
-                final indexDocumentMetadata cacheEntry = new httpdProxyCacheEntry(
+                final Document cacheEntry = new httpdProxyCacheEntry(
                         0,
                         url,
                         "",
@@ -768,7 +768,7 @@ public final class httpdProxyHandler {
             // re-calc the url path
             String remotePath = (args == null) ? path : (path + "?" + args);
 
-            if (plasmaSwitchboard.urlBlacklist.isListed(indexReferenceBlacklist.BLACKLIST_PROXY, hostlow, remotePath)) {
+            if (plasmaSwitchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_PROXY, hostlow, remotePath)) {
                 httpd.sendRespondError(conProp,respond,4,403,null,
                         "URL '" + hostlow + "' blocked by yacy proxy (blacklisted)",null);
                 theLogger.logInfo("AGIS blocking of host '" + hostlow + "'");
@@ -1217,7 +1217,7 @@ public final class httpdProxyHandler {
         // blacklist idea inspired by [AS]:
         // respond a 404 for all AGIS ("all you get is shit") servers
         final String hostlow = host.toLowerCase();
-        if (plasmaSwitchboard.urlBlacklist.isListed(indexReferenceBlacklist.BLACKLIST_PROXY, hostlow, path)) {
+        if (plasmaSwitchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_PROXY, hostlow, path)) {
             httpd.sendRespondError(conProp,clientOut,4,403,null,
                     "URL '" + hostlow + "' blocked by yacy proxy (blacklisted)",null);
             theLogger.logInfo("AGIS blocking of host '" + hostlow + "'");

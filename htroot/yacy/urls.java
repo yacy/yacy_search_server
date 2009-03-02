@@ -30,8 +30,9 @@ import java.util.Date;
 import de.anomic.crawler.CrawlEntry;
 import de.anomic.crawler.NoticedURL;
 import de.anomic.http.httpRequestHeader;
-import de.anomic.index.URLMetadata;
 import de.anomic.kelondro.order.DateFormatter;
+import de.anomic.kelondro.text.MetadataRowContainer;
+import de.anomic.kelondro.text.URLMetadata;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -108,8 +109,8 @@ public class urls {
             if (urlhashes.length() % 12 != 0) return prop;
             final int count = urlhashes.length() / 12;
         	int c = 0;
-        	URLMetadata entry;
-        	URLMetadata.Components comp;
+        	MetadataRowContainer entry;
+        	URLMetadata metadata;
             yacyURL referrer;
             for (int i = 0; i < count; i++) {
                 entry = sb.webIndex.getURL(urlhashes.substring(12 * i, 12 * (i + 1)), null, 0);
@@ -117,12 +118,12 @@ public class urls {
                 // find referrer, if there is one
                 referrer = sb.getURL(entry.referrerHash());
                 // create RSS entry
-                comp = entry.comp();
-                prop.put("item_" + c + "_title", comp.dc_title());
-                prop.putXML("item_" + c + "_link", comp.url().toNormalform(true, false));
+                metadata = entry.metadata();
+                prop.put("item_" + c + "_title", metadata.dc_title());
+                prop.putXML("item_" + c + "_link", metadata.url().toNormalform(true, false));
                 prop.putXML("item_" + c + "_referrer", (referrer == null) ? "" : referrer.toNormalform(true, false));
-                prop.putXML("item_" + c + "_description", comp.dc_title());
-                prop.put("item_" + c + "_author", comp.dc_creator());
+                prop.putXML("item_" + c + "_description", metadata.dc_title());
+                prop.put("item_" + c + "_author", metadata.dc_creator());
                 prop.put("item_" + c + "_pubDate", DateFormatter.formatShortSecond(entry.moddate()));
                 prop.put("item_" + c + "_guid", entry.hash());
                 c++;

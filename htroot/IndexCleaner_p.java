@@ -25,14 +25,14 @@
 //Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import de.anomic.http.httpRequestHeader;
-import de.anomic.index.URLMetadataRepository;
+import de.anomic.kelondro.text.MetadataRepository;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 public class IndexCleaner_p {
-    private static URLMetadataRepository.BlacklistCleaner urldbCleanerThread = null;
+    private static MetadataRepository.BlacklistCleaner urldbCleanerThread = null;
     private static plasmaWordIndex.ReferenceCleaner indexCleanerThread = null;
 
     public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {

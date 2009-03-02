@@ -30,13 +30,13 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 
-import de.anomic.index.indexContainerCache;
-import de.anomic.index.URLMetadataRepository;
-import de.anomic.index.URLMetadata;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.text.Index;
+import de.anomic.kelondro.text.MetadataRowContainer;
 import de.anomic.kelondro.text.ReferenceContainer;
+import de.anomic.kelondro.text.ReferenceContainerCache;
 import de.anomic.kelondro.text.ReferenceRow;
+import de.anomic.kelondro.text.MetadataRepository;
 import de.anomic.kelondro.util.Log;
 import de.anomic.server.serverProcessorJob;
 import de.anomic.yacy.yacyClient;
@@ -46,7 +46,7 @@ import de.anomic.yacy.yacySeedDB;
 public class Transmission  {
 
     private Log log;
-    private URLMetadataRepository repository;
+    private MetadataRepository repository;
     private yacySeedDB seeds;
     private Index backend;
     private boolean gzipBody4Transfer;
@@ -54,7 +54,7 @@ public class Transmission  {
     
     public Transmission(
             Log log,
-            URLMetadataRepository repository, 
+            MetadataRepository repository, 
             yacySeedDB seeds,
             Index backend,
             boolean gzipBody4Transfer,
@@ -86,8 +86,8 @@ public class Transmission  {
          * - a counter that gives the number of sucessful and unsuccessful transmissions so far
          */
         private String                             primaryTarget;
-        private indexContainerCache                containers;
-        private HashMap<String, URLMetadata> references;
+        private ReferenceContainerCache                containers;
+        private HashMap<String, MetadataRowContainer> references;
         private HashSet<String>                    badReferences;
         private ArrayList<yacySeed>                targets;
         private int                                hit, miss;
@@ -106,9 +106,9 @@ public class Transmission  {
                 final Row payloadrow) {
             super();
             this.primaryTarget = primaryTarget;
-            this.containers = new indexContainerCache(payloadrow);
+            this.containers = new ReferenceContainerCache(payloadrow);
             this.containers.initWriteMode();
-            this.references = new HashMap<String, URLMetadata>();
+            this.references = new HashMap<String, MetadataRowContainer>();
             this.badReferences = new HashSet<String>();
             this.targets    = targets;
             this.hit = 0;
@@ -127,7 +127,7 @@ public class Transmission  {
             while (i.hasNext()) {
                 ReferenceRow e = i.next();
                 if (references.containsKey(e.urlHash()) || badReferences.contains(e.urlHash())) continue;
-                URLMetadata r = repository.load(e.urlHash(), null, 0);
+                MetadataRowContainer r = repository.load(e.urlHash(), null, 0);
                 if (r == null) {
                     notFound.add(e.urlHash());
                     badReferences.add(e.urlHash());

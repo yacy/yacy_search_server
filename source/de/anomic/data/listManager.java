@@ -42,8 +42,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
-import de.anomic.index.indexAbstractReferenceBlacklist;
-import de.anomic.index.indexReferenceBlacklist.blacklistFile;
+import de.anomic.kelondro.text.AbstractBlacklist;
+import de.anomic.kelondro.text.Blacklist.blacklistFile;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 
@@ -392,7 +392,7 @@ public class listManager {
      * Load or reload all active Blacklists
      */
     public static void reloadBlacklists(){
-        final String supportedBlacklistTypesStr = indexAbstractReferenceBlacklist.BLACKLIST_TYPES_STRING;
+        final String supportedBlacklistTypesStr = AbstractBlacklist.BLACKLIST_TYPES_STRING;
         final String[] supportedBlacklistTypes = supportedBlacklistTypesStr.split(",");
         
         final ArrayList<blacklistFile> blacklistFiles = new ArrayList<blacklistFile>(supportedBlacklistTypes.length);

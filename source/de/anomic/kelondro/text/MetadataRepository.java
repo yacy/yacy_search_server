@@ -24,7 +24,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.index;
+package de.anomic.kelondro.text;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -48,12 +48,11 @@ import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.ObjectIndex;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.table.SplitTable;
-import de.anomic.kelondro.text.Reference;
 import de.anomic.kelondro.util.ScoreCluster;
 import de.anomic.kelondro.util.Log;
 import de.anomic.yacy.yacyURL;
 
-public final class URLMetadataRepository {
+public final class MetadataRepository {
 
     // class objects
     ObjectIndex urlIndexFile;
@@ -61,10 +60,10 @@ public final class URLMetadataRepository {
     private File        location        = null;
     ArrayList<hostStat> statsDump       = null;
     
-    public URLMetadataRepository(final File indexSecondaryPath) {
+    public MetadataRepository(final File indexSecondaryPath) {
         super();
         this.location = new File(indexSecondaryPath, "TEXT");        
-        urlIndexFile = new Cache(new SplitTable(this.location, "urls", URLMetadata.rowdef, false));
+        urlIndexFile = new Cache(new SplitTable(this.location, "urls", MetadataRowContainer.rowdef, false));
     }
 
     public void clearCache() {
@@ -96,7 +95,7 @@ public final class URLMetadataRepository {
         return 0;
     }
 
-    public synchronized URLMetadata load(final String urlHash, final Reference searchedWord, final long ranking) {
+    public synchronized MetadataRowContainer load(final String urlHash, final Reference searchedWord, final long ranking) {
         // generates an plasmaLURLEntry using the url hash
         // if the url cannot be found, this returns null
         if (urlHash == null) return null;
@@ -104,15 +103,15 @@ public final class URLMetadataRepository {
         try {
             final Row.Entry entry = urlIndexFile.get(urlHash.getBytes());
             if (entry == null) return null;
-            return new URLMetadata(entry, searchedWord, ranking);
+            return new MetadataRowContainer(entry, searchedWord, ranking);
         } catch (final IOException e) {
             return null;
         }
     }
 
-    public synchronized void store(final URLMetadata entry) throws IOException {
+    public synchronized void store(final MetadataRowContainer entry) throws IOException {
         // Check if there is a more recent Entry already in the DB
-        URLMetadata oldEntry;
+        MetadataRowContainer oldEntry;
         try {
             if (exists(entry.hash())) {
                 oldEntry = load(entry.hash(), null, 0);
@@ -152,17 +151,17 @@ public final class URLMetadataRepository {
         return urlIndexFile.has(urlHash.getBytes());
     }
 
-    public CloneableIterator<URLMetadata> entries() throws IOException {
+    public CloneableIterator<MetadataRowContainer> entries() throws IOException {
         // enumerates entry elements
         return new kiter();
     }
 
-    public CloneableIterator<URLMetadata> entries(final boolean up, final String firstHash) throws IOException {
+    public CloneableIterator<MetadataRowContainer> entries(final boolean up, final String firstHash) throws IOException {
         // enumerates entry elements
         return new kiter(up, firstHash);
     }
 
-    public class kiter implements CloneableIterator<URLMetadata> {
+    public class kiter implements CloneableIterator<MetadataRowContainer> {
         // enumerates entry elements
         private final Iterator<Row.Entry> iter;
         private final boolean error;
@@ -194,12 +193,12 @@ public final class URLMetadataRepository {
             return this.iter.hasNext();
         }
 
-        public final URLMetadata next() {
+        public final MetadataRowContainer next() {
             Row.Entry e = null;
             if (this.iter == null) { return null; }
             if (this.iter.hasNext()) { e = this.iter.next(); }
             if (e == null) { return null; }
-            return new URLMetadata(e, null, 0);
+            return new MetadataRowContainer(e, null, 0);
         }
 
         public final void remove() {
@@ -218,7 +217,7 @@ public final class URLMetadataRepository {
         final Log log = new Log("URLDBCLEANUP");
         final HashSet<String> damagedURLS = new HashSet<String>();
         try {
-            final Iterator<URLMetadata> eiter = entries(true, null);
+            final Iterator<MetadataRowContainer> eiter = entries(true, null);
             int iteratorCount = 0;
             while (eiter.hasNext()) try {
                 eiter.next();
@@ -288,7 +287,7 @@ public final class URLMetadataRepository {
         }
     }
 
-    public BlacklistCleaner getBlacklistCleaner(final indexReferenceBlacklist blacklist) {
+    public BlacklistCleaner getBlacklistCleaner(final Blacklist blacklist) {
         return new BlacklistCleaner(blacklist);
     }
     
@@ -302,16 +301,16 @@ public final class URLMetadataRepository {
         public String lastBlacklistedHash = "";
         public String lastUrl = "";
         public String lastHash = "";
-        private final indexReferenceBlacklist blacklist;
+        private final Blacklist blacklist;
 
-        public BlacklistCleaner(final indexReferenceBlacklist blacklist) {
+        public BlacklistCleaner(final Blacklist blacklist) {
             this.blacklist = blacklist;
         }
 
         public void run() {
             try {
                 Log.logInfo("URLDBCLEANER", "UrldbCleaner-Thread startet");
-                final Iterator<URLMetadata> eiter = entries(true, null);
+                final Iterator<MetadataRowContainer> eiter = entries(true, null);
                 while (eiter.hasNext() && run) {
                     synchronized (this) {
                         if (this.pause) {
@@ -324,28 +323,28 @@ public final class URLMetadataRepository {
                             }
                         }
                     }
-                    final URLMetadata entry = eiter.next();
+                    final MetadataRowContainer entry = eiter.next();
                     if (entry == null) {
                         if (Log.isFine("URLDBCLEANER")) Log.logFine("URLDBCLEANER", "entry == null");
                     } else if (entry.hash() == null) {
                         if (Log.isFine("URLDBCLEANER")) Log.logFine("URLDBCLEANER", ++blacklistedUrls + " blacklisted (" + ((double) blacklistedUrls / totalSearchedUrls) * 100 + "%): " + "hash == null");
                     } else {
-                        final URLMetadata.Components comp = entry.comp();
+                        final URLMetadata metadata = entry.metadata();
                         totalSearchedUrls++;
-                        if (comp.url() == null) {
+                        if (metadata.url() == null) {
                             if (Log.isFine("URLDBCLEANER")) Log.logFine("URLDBCLEANER", ++blacklistedUrls + " blacklisted (" + ((double) blacklistedUrls / totalSearchedUrls) * 100 + "%): " + entry.hash() + "URL == null");
                             remove(entry.hash());
-                        } else if (blacklist.isListed(indexReferenceBlacklist.BLACKLIST_CRAWLER, comp.url()) ||
-                                blacklist.isListed(indexReferenceBlacklist.BLACKLIST_DHT, comp.url())) {
-                            lastBlacklistedUrl = comp.url().toNormalform(true, true);
+                        } else if (blacklist.isListed(Blacklist.BLACKLIST_CRAWLER, metadata.url()) ||
+                                blacklist.isListed(Blacklist.BLACKLIST_DHT, metadata.url())) {
+                            lastBlacklistedUrl = metadata.url().toNormalform(true, true);
                             lastBlacklistedHash = entry.hash();
-                            if (Log.isFine("URLDBCLEANER")) Log.logFine("URLDBCLEANER", ++blacklistedUrls + " blacklisted (" + ((double) blacklistedUrls / totalSearchedUrls) * 100 + "%): " + entry.hash() + " " + comp.url().toNormalform(false, true));
+                            if (Log.isFine("URLDBCLEANER")) Log.logFine("URLDBCLEANER", ++blacklistedUrls + " blacklisted (" + ((double) blacklistedUrls / totalSearchedUrls) * 100 + "%): " + entry.hash() + " " + metadata.url().toNormalform(false, true));
                             remove(entry.hash());
                             if (blacklistedUrls % 100 == 0) {
                                 Log.logInfo("URLDBCLEANER", "Deleted " + blacklistedUrls + " URLs until now. Last deleted URL-Hash: " + lastBlacklistedUrl);
                             }
                         }
-                        lastUrl = comp.url().toNormalform(true, true);
+                        lastUrl = metadata.url().toNormalform(true, true);
                         lastHash = entry.hash();
                     }
                 }
@@ -451,27 +450,27 @@ public final class URLMetadataRepository {
                         count++;
                     }
                 } else {
-                    final Iterator<URLMetadata> i = entries(); // iterates indexURLEntry objects
-                    URLMetadata entry;
-                    URLMetadata.Components comp;
+                    final Iterator<MetadataRowContainer> i = entries(); // iterates indexURLEntry objects
+                    MetadataRowContainer entry;
+                    URLMetadata metadata;
                     String url;
                     while (i.hasNext()) {
                         entry = i.next();
-                        comp = entry.comp();
-                        url = comp.url().toNormalform(true, false);
+                        metadata = entry.metadata();
+                        url = metadata.url().toNormalform(true, false);
                         if (!url.matches(filter)) continue;
                         if (format == 0) {
                             pw.println(url);
                         }
                         if (format == 1) {
-                            pw.println("<a href=\"" + url + "\">" + htmlFilterCharacterCoding.unicode2xml(comp.dc_title(), true) + "</a><br>");
+                            pw.println("<a href=\"" + url + "\">" + htmlFilterCharacterCoding.unicode2xml(metadata.dc_title(), true) + "</a><br>");
                         }
                         if (format == 2) {
                             pw.println("<item>");
-                            pw.println("<title>" + htmlFilterCharacterCoding.unicode2xml(comp.dc_title(), true) + "</title>");
+                            pw.println("<title>" + htmlFilterCharacterCoding.unicode2xml(metadata.dc_title(), true) + "</title>");
                             pw.println("<link>" + yacyURL.escape(url) + "</link>");
-                            if (comp.dc_creator().length() > 0) pw.println("<author>" + htmlFilterCharacterCoding.unicode2xml(comp.dc_creator(), true) + "</author>");
-                            if (comp.dc_subject().length() > 0) pw.println("<description>" + htmlFilterCharacterCoding.unicode2xml(comp.dc_subject(), true) + "</description>");
+                            if (metadata.dc_creator().length() > 0) pw.println("<author>" + htmlFilterCharacterCoding.unicode2xml(metadata.dc_creator(), true) + "</author>");
+                            if (metadata.dc_subject().length() > 0) pw.println("<description>" + htmlFilterCharacterCoding.unicode2xml(metadata.dc_subject(), true) + "</description>");
                             pw.println("<pubDate>" + entry.moddate().toString() + "</pubDate>");
                             pw.println("<yacy:size>" + entry.size() + "</yacy:size>");
                             pw.println("<guid isPermaLink=\"false\">" + entry.hash() + "</guid>");
@@ -534,15 +533,15 @@ public final class URLMetadataRepository {
         HashMap<String, hashStat> map = domainSampleCollector();
         
         // fetch urls from the database to determine the host in clear text
-        URLMetadata urlref;
+        MetadataRowContainer urlref;
         if (count < 0 || count > map.size()) count = map.size();
         statsDump = new ArrayList<hostStat>();
         TreeSet<String> set = new TreeSet<String>();
         for (hashStat hs: map.values()) {
             if (hs == null) continue;
             urlref = this.load(hs.urlhash, null, 0);
-            if (urlref == null || urlref.comp() == null || urlref.comp().url() == null || urlref.comp().url().getHost() == null) continue;
-            set.add(urlref.comp().url().getHost());
+            if (urlref == null || urlref.metadata() == null || urlref.metadata().url() == null || urlref.metadata().url().getHost() == null) continue;
+            set.add(urlref.metadata().url().getHost());
             count--;
             if (count == 0) break;
         }
@@ -564,20 +563,20 @@ public final class URLMetadataRepository {
     
         // fetch urls from the database to determine the host in clear text
         Iterator<String> j = s.scores(false); // iterate urlhash-examples in reverse order (biggest first)
-        URLMetadata urlref;
+        MetadataRowContainer urlref;
         String urlhash;
         count += 10; // make some more to prevent that we have to do this again after deletions too soon.
         if (count < 0 || count > s.size()) count = s.size();
         statsDump = new ArrayList<hostStat>();
-        URLMetadata.Components comps;
+        URLMetadata comps;
         yacyURL url;
         while (j.hasNext()) {
             urlhash = j.next();
             if (urlhash == null) continue;
             urlref = this.load(urlhash, null, 0);
-            if (urlref == null || urlref.comp() == null || urlref.comp().url() == null || urlref.comp().url().getHost() == null) continue;
+            if (urlref == null || urlref.metadata() == null || urlref.metadata().url() == null || urlref.metadata().url().getHost() == null) continue;
             if (statsDump == null) return new ArrayList<hostStat>().iterator(); // some other operation has destroyed the object
-            comps = urlref.comp();
+            comps = urlref.metadata();
             url = comps.url();
             statsDump.add(new hostStat(url.getHost(), url.getPort(), urlhash.substring(6), s.getScore(urlhash)));
             count--;

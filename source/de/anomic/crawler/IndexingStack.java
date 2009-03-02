@@ -35,12 +35,12 @@ import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 
 import de.anomic.http.httpResponseHeader;
-import de.anomic.index.URLMetadata;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.table.Stack;
+import de.anomic.kelondro.text.MetadataRowContainer;
 import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaSwitchboardConstants;
@@ -367,8 +367,8 @@ public class IndexingStack {
             if (referrerURL == null) {
                 // FIXME the equals seems to be incorrect: String.equals(boolean)
                 if ((referrerHash == null) || ((initiator != null) && (referrerHash.equals(initiator.length() == 0)))) return null;
-                final URLMetadata entry = wordIndex.getURL(referrerHash, null, 0);
-                if (entry == null) referrerURL = null; else referrerURL = entry.comp().url();
+                final MetadataRowContainer entry = wordIndex.getURL(referrerHash, null, 0);
+                if (entry == null) referrerURL = null; else referrerURL = entry.metadata().url();
             }
             return referrerURL;
         }

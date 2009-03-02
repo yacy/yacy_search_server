@@ -31,7 +31,8 @@ import java.io.IOException;
 
 import de.anomic.crawler.ZURL;
 import de.anomic.http.httpRequestHeader;
-import de.anomic.index.URLMetadata;
+import de.anomic.kelondro.text.MetadataRowContainer;
+import de.anomic.kelondro.text.URLMetadata;
 import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
@@ -112,22 +113,22 @@ public final class crawlReceipt {
     	}
         
         // generating a new loaded URL entry
-        final URLMetadata entry = URLMetadata.importEntry(propStr);
+        final MetadataRowContainer entry = MetadataRowContainer.importEntry(propStr);
         if (entry == null) {
             log.logWarning("crawlReceipt: RECEIVED wrong RECEIPT (entry null) from peer " + iam + "\n\tURL properties: "+ propStr);
             prop.put("delay", "3600");
             return prop;
         }
         
-        final URLMetadata.Components comp = entry.comp();
-        if (comp.url() == null) {
+        final URLMetadata metadata = entry.metadata();
+        if (metadata.url() == null) {
             log.logWarning("crawlReceipt: RECEIVED wrong RECEIPT (url null) for hash " + entry.hash() + " from peer " + iam + "\n\tURL properties: "+ propStr);
             prop.put("delay", "3600");
             return prop;
         }
         
         // check if the entry is in our network domain
-        final String urlRejectReason = sb.crawlStacker.urlInAcceptedDomain(comp.url());
+        final String urlRejectReason = sb.crawlStacker.urlInAcceptedDomain(metadata.url());
         if (urlRejectReason != null) {
             log.logWarning("crawlReceipt: RECEIVED wrong RECEIPT (" + urlRejectReason + ") for hash " + entry.hash() + " from peer " + iam + "\n\tURL properties: "+ propStr);
             prop.put("delay", "9999");
@@ -139,7 +140,7 @@ public final class crawlReceipt {
             sb.webIndex.putURL(entry);
             sb.crawlResults.stack(entry, youare, iam, 1);
             sb.crawlQueues.delegatedURL.remove(entry.hash()); // the delegated work has been done
-            log.logInfo("crawlReceipt: RECEIVED RECEIPT from " + otherPeerName + " for URL " + entry.hash() + ":" + comp.url().toNormalform(false, true));
+            log.logInfo("crawlReceipt: RECEIVED RECEIPT from " + otherPeerName + " for URL " + entry.hash() + ":" + metadata.url().toNormalform(false, true));
 
             // ready for more
             prop.put("delay", "10");

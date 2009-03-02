@@ -28,7 +28,8 @@
 import java.net.MalformedURLException;
 
 import de.anomic.http.httpRequestHeader;
-import de.anomic.index.URLMetadata;
+import de.anomic.kelondro.text.MetadataRowContainer;
+import de.anomic.kelondro.text.URLMetadata;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -68,20 +69,20 @@ public class yacydoc {
         }
         if (urlhash == null || urlhash.length() == 0) return prop;
         
-        final URLMetadata entry = sb.webIndex.getURL(urlhash, null, 0);
+        final MetadataRowContainer entry = sb.webIndex.getURL(urlhash, null, 0);
         if (entry == null) return prop;
 
-        final URLMetadata.Components comp = entry.comp();
-        if (comp.url() == null) {
+        final URLMetadata metadata = entry.metadata();
+        if (metadata.url() == null) {
             return prop;
         }
-        final URLMetadata le = ((entry.referrerHash() == null) || (entry.referrerHash().length() != yacySeedDB.commonHashLength)) ? null : sb.webIndex.getURL(entry.referrerHash(), null, 0);
+        final MetadataRowContainer le = ((entry.referrerHash() == null) || (entry.referrerHash().length() != yacySeedDB.commonHashLength)) ? null : sb.webIndex.getURL(entry.referrerHash(), null, 0);
         
-        prop.putXML("dc_title", comp.dc_title());
-        prop.putXML("dc_creator", comp.dc_creator());
+        prop.putXML("dc_title", metadata.dc_title());
+        prop.putXML("dc_creator", metadata.dc_creator());
         prop.putXML("dc_description", "");
-        prop.putXML("dc_subject", comp.dc_subject());
-        prop.putXML("dc_publisher", comp.url().toNormalform(false, true));
+        prop.putXML("dc_subject", metadata.dc_subject());
+        prop.putXML("dc_publisher", metadata.url().toNormalform(false, true));
         prop.putXML("dc_contributor", "");
         prop.putXML("dc_date", entry.moddate().toString());
         prop.putXML("dc_type", "" + entry.doctype());
@@ -90,7 +91,7 @@ public class yacydoc {
 
         prop.putXML("yacy_loaddate", entry.loaddate().toString());
         prop.putXML("yacy_referrer_hash", (le == null) ? "" : le.hash());
-        prop.putXML("yacy_referrer_url", (le == null) ? "" : le.comp().url().toNormalform(false, true));
+        prop.putXML("yacy_referrer_url", (le == null) ? "" : le.metadata().url().toNormalform(false, true));
         prop.put("yacy_size", entry.size());
         prop.put("yacy_words",entry.wordCount());
         

@@ -338,11 +338,11 @@ public final class plasmaSwitchboardConstants {
     public static final String BLACKLIST_CLASS          = "BlackLists.class";
     /**
      * <p><code>public static final String <strong>BLACKLIST_CLASS_DEFAULT</strong> = "de.anomic.plasma.urlPattern.defaultURLPattern"</code></p>
-     * <p>Package and name of YaCy's {@link indexDefaultReferenceBlacklist default} blacklist implementation</p>
+     * <p>Package and name of YaCy's {@link DefaultBlacklist default} blacklist implementation</p>
      * 
-     * @see indexDefaultReferenceBlacklist for a detailed overview about the syntax of the default implementation
+     * @see DefaultBlacklist for a detailed overview about the syntax of the default implementation
      */
-    public static final String BLACKLIST_CLASS_DEFAULT  = "de.anomic.index.indexDefaultReferenceBlacklist";
+    public static final String BLACKLIST_CLASS_DEFAULT  = "de.anomic.kelondro.text.DefaultBlacklist";
     public static final String LIST_BLUE                = "plasmaBlueList";
     public static final String LIST_BLUE_DEFAULT        = null;
     public static final String LIST_BADWORDS_DEFAULT    = "yacy.badwords";

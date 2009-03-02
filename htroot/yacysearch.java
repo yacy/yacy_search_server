@@ -31,8 +31,9 @@ import java.util.HashMap;
 import java.util.TreeSet;
 
 import de.anomic.http.httpRequestHeader;
-import de.anomic.index.URLMetadata;
 import de.anomic.kelondro.order.Bitfield;
+import de.anomic.kelondro.text.MetadataRowContainer;
+import de.anomic.kelondro.text.URLMetadata;
 import de.anomic.kelondro.text.Word;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.SetTools;
@@ -321,16 +322,16 @@ public class yacysearch {
                     return prop;
                 }
                 final String recommendHash = post.get("recommendref", ""); // urlhash
-                final URLMetadata urlentry = sb.webIndex.getURL(recommendHash, null, 0);
+                final MetadataRowContainer urlentry = sb.webIndex.getURL(recommendHash, null, 0);
                 if (urlentry != null) {
-                    final URLMetadata.Components comp = urlentry.comp();
+                    final URLMetadata metadata = urlentry.metadata();
                     plasmaParserDocument document;
-                    document = plasmaSnippetCache.retrieveDocument(comp.url(), true, 5000, true, false);
+                    document = plasmaSnippetCache.retrieveDocument(metadata.url(), true, 5000, true, false);
                     if (document != null) {
                         // create a news message
                         final HashMap<String, String> map = new HashMap<String, String>();
-                        map.put("url", comp.url().toNormalform(false, true).replace(',', '|'));
-                        map.put("title", comp.dc_title().replace(',', ' '));
+                        map.put("url", metadata.url().toNormalform(false, true).replace(',', '|'));
+                        map.put("title", metadata.dc_title().replace(',', ' '));
                         map.put("description", document.dc_title().replace(',', ' '));
                         map.put("author", document.dc_creator());
                         map.put("tags", document.dc_subject(' '));

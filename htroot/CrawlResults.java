@@ -31,7 +31,8 @@ import java.util.Iterator;
 import java.util.Locale;
 
 import de.anomic.http.httpRequestHeader;
-import de.anomic.index.URLMetadata;
+import de.anomic.kelondro.text.MetadataRowContainer;
+import de.anomic.kelondro.text.URLMetadata;
 import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
@@ -169,8 +170,8 @@ public class CrawlResults {
             String urlHash, initiatorHash, executorHash;
             String urlstr, urltxt;
             yacySeed initiatorSeed, executorSeed;
-            URLMetadata urle;
-            URLMetadata.Components comp;
+            MetadataRowContainer urle;
+            URLMetadata metadata;
 
             int i, cnt = 0;
             for (i = sb.crawlResults.getStackSize(tabletype) - 1; i >= (sb.crawlResults.getStackSize(tabletype) - lines); i--) {
@@ -183,10 +184,10 @@ public class CrawlResults {
                         Log.logWarning("PLASMA", "CrawlResults: URL not in index for crawl result "+ i +" with hash "+ urlHash);
                         urlstr = null;
                         urltxt = null;
-                        comp = null;
+                        metadata = null;
                     } else {
-                        comp = urle.comp();
-                        urlstr = comp.url().toNormalform(false, true);
+                        metadata = urle.metadata();
+                        urlstr = metadata.url().toNormalform(false, true);
                         urltxt = nxTools.shortenURLString(urlstr, 72); // shorten the string text like a URL
                     }
                     initiatorSeed = sb.webIndex.seedDB.getConnected(initiatorHash);
@@ -225,11 +226,11 @@ public class CrawlResults {
                         prop.put("table_indexed_" + cnt + "_showTitle", (showTitle) ? "1" : "0");
                             prop.put("table_indexed_" + cnt + "_showTitle_available", "1");
 
-                            if (comp == null || comp.dc_title() == null || comp.dc_title().trim().length() == 0)
+                            if (metadata == null || metadata.dc_title() == null || metadata.dc_title().trim().length() == 0)
                                 prop.put("table_indexed_" + cnt + "_showTitle_available_nodescr", "0");
                             else {
                                 prop.put("table_indexed_" + cnt + "_showTitle_available_nodescr", "1");
-                                prop.putHTML("table_indexed_" + cnt + "_showTitle_available_nodescr_urldescr", comp.dc_title());
+                                prop.putHTML("table_indexed_" + cnt + "_showTitle_available_nodescr_urldescr", metadata.dc_title());
                             }
 
                             prop.put("table_indexed_" + cnt + "_showTitle_available_urlHash", urlHash);

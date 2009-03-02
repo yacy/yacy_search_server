@@ -33,11 +33,11 @@ import java.util.Iterator;
 import java.util.List;
 
 import de.anomic.data.listManager;
-import de.anomic.index.indexReferenceBlacklist;
-import de.anomic.index.URLMetadata;
 import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.order.DateFormatter;
+import de.anomic.kelondro.text.MetadataRowContainer;
 import de.anomic.kelondro.text.Reference;
+import de.anomic.kelondro.text.Blacklist;
 import de.anomic.server.serverObjects;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyURL;
@@ -126,12 +126,12 @@ public class plasmaSearchAPI {
             prop.put("genUrlList_lines", maxlines);
             int i = 0;
             yacyURL url;
-            URLMetadata entry;
+            MetadataRowContainer entry;
             String us;
             long rn = -1;
             while ((ranked.size() > 0) && ((entry = ranked.bestURL(false)) != null)) {
-                if ((entry == null) || (entry.comp() == null)) continue;
-                url = entry.comp().url();
+                if ((entry == null) || (entry.metadata() == null)) continue;
+                url = entry.metadata().url();
                 if (url == null) continue;
                 us = url.toNormalform(false, false);
                 if (rn == -1) rn = entry.ranking();
@@ -174,7 +174,7 @@ public class plasmaSearchAPI {
                         ((entry.word().flags().get(Reference.flag_app_emphasized)) ? "appears emphasized, " : "") +
                         ((yacyURL.probablyRootURL(entry.word().urlHash())) ? "probably root url" : "")
                 );
-                if (plasmaSwitchboard.urlBlacklist.isListed(indexReferenceBlacklist.BLACKLIST_DHT, url)) {
+                if (plasmaSwitchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_DHT, url)) {
                     prop.put("genUrlList_urlList_"+i+"_urlExists_urlhxChecked", "1");
                 }
                 i++;

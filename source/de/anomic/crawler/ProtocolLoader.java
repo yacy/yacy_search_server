@@ -33,7 +33,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import de.anomic.index.indexDocumentMetadata;
+import de.anomic.kelondro.text.Document;
 import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
@@ -70,7 +70,7 @@ public final class ProtocolLoader {
         return (HashSet<String>) this.supportedProtocols.clone();
     }
     
-    public indexDocumentMetadata load(final CrawlEntry entry, final String parserMode) throws IOException {
+    public Document load(final CrawlEntry entry, final String parserMode) throws IOException {
         // getting the protocol of the next URL
         final String protocol = entry.url().getProtocol();
         final String host = entry.url().getHost();
@@ -114,7 +114,7 @@ public final class ProtocolLoader {
     public String process(final CrawlEntry entry, final String parserMode) {
         // load a resource, store it to htcache and push queue entry to switchboard queue
         // returns null if everything went fine, a fail reason string if a problem occurred
-        indexDocumentMetadata h;
+        Document h;
         try {
             entry.setStatus("loading", serverProcessorJob.STATUS_RUNNING);
             h = load(entry, parserMode);

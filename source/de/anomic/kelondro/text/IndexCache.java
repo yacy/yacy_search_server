@@ -32,7 +32,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Set;
 
-import de.anomic.index.indexContainerCache;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.util.MemoryControl;
@@ -50,7 +49,7 @@ public final class IndexCache implements Index, IndexReader, Iterable<ReferenceC
     public  long  cacheReferenceAgeLimit;    // the maximum age (= time not changed) of a RWI entity
     private final Log log;
     private final File dumpFile;
-    private indexContainerCache heap;
+    private ReferenceContainerCache heap;
     
     @SuppressWarnings("unchecked")
     public IndexCache(
@@ -72,7 +71,7 @@ public final class IndexCache implements Index, IndexReader, Iterable<ReferenceC
         this.cacheReferenceAgeLimit = wCacheReferenceAgeLimitInit;
         this.log = log;
         this.dumpFile = new File(databaseRoot, newHeapName);
-        this.heap = new indexContainerCache(payloadrow);
+        this.heap = new ReferenceContainerCache(payloadrow);
         
         // read in dump of last session
         boolean initFailed = false;

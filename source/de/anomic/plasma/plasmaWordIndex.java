@@ -41,12 +41,6 @@ import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.IndexingStack;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.http.httpdProxyCacheEntry;
-import de.anomic.index.indexCollectionRI;
-import de.anomic.index.indexContainerOrder;
-import de.anomic.index.indexReferenceBlacklist;
-import de.anomic.index.URLMetadataRepository;
-import de.anomic.index.URLMetadata;
-import de.anomic.index.URLMetadataRepository.Export;
 import de.anomic.kelondro.index.RowCollection;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.ByteOrder;
@@ -56,10 +50,16 @@ import de.anomic.kelondro.order.Order;
 import de.anomic.kelondro.order.RotateIterator;
 import de.anomic.kelondro.text.Index;
 import de.anomic.kelondro.text.IndexCache;
+import de.anomic.kelondro.text.IndexCollection;
+import de.anomic.kelondro.text.MetadataRowContainer;
 import de.anomic.kelondro.text.Reference;
 import de.anomic.kelondro.text.ReferenceContainer;
+import de.anomic.kelondro.text.ReferenceContainerOrder;
 import de.anomic.kelondro.text.ReferenceRow;
+import de.anomic.kelondro.text.MetadataRepository;
 import de.anomic.kelondro.text.Word;
+import de.anomic.kelondro.text.Blacklist;
+import de.anomic.kelondro.text.MetadataRepository.Export;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.kelondroException;
 import de.anomic.kelondro.util.Log;
@@ -97,9 +97,9 @@ public final class plasmaWordIndex implements Index {
     
     
     private final IndexCache               indexCache;
-    private final indexCollectionRI        collections;          // new database structure to replace AssortmentCluster and FileCluster
+    private final IndexCollection        collections;          // new database structure to replace AssortmentCluster and FileCluster
     private final Log                      log;
-    public URLMetadataRepository        referenceURL;
+    public MetadataRepository        referenceURL;
     public  final yacySeedDB               seedDB;
     private final File                     primaryRoot, secondaryRoot;
     public        IndexingStack            queuePreStack;
@@ -161,7 +161,7 @@ public final class plasmaWordIndex implements Index {
         // create collections storage path
         final File textindexcollections = new File(indexPrimaryTextLocation, "RICOLLECTION");
         if (!(textindexcollections.exists())) textindexcollections.mkdirs();
-        this.collections = new indexCollectionRI(
+        this.collections = new IndexCollection(
 					textindexcollections, 
 					"collection",
 					12,
@@ -171,7 +171,7 @@ public final class plasmaWordIndex implements Index {
 					useCommons);
 
         // create LURL-db
-        referenceURL = new URLMetadataRepository(this.secondaryRoot);
+        referenceURL = new MetadataRepository(this.secondaryRoot);
         
         // make crawl profiles database and default profiles
         this.queuesRoot = new File(this.primaryRoot, "QUEUES");
@@ -377,11 +377,11 @@ public final class plasmaWordIndex implements Index {
         return (primary) ? this.primaryRoot : this.secondaryRoot;
     }
 
-    public void putURL(final URLMetadata entry) throws IOException {
+    public void putURL(final MetadataRowContainer entry) throws IOException {
         this.referenceURL.store(entry);
     }
     
-    public URLMetadata getURL(final String urlHash, final Reference searchedWord, final long ranking) {
+    public MetadataRowContainer getURL(final String urlHash, final Reference searchedWord, final long ranking) {
         return this.referenceURL.load(urlHash, searchedWord, ranking);
     }
     
@@ -405,11 +405,11 @@ public final class plasmaWordIndex implements Index {
         return this.referenceURL.export();
     }
     
-    public CloneableIterator<URLMetadata> entriesURL(final boolean up, final String firstHash) throws IOException {
+    public CloneableIterator<MetadataRowContainer> entriesURL(final boolean up, final String firstHash) throws IOException {
         return this.referenceURL.entries(up, firstHash);
     }
     
-    public Iterator<URLMetadataRepository.hostStat> statistics(int count) throws IOException {
+    public Iterator<MetadataRepository.hostStat> statistics(int count) throws IOException {
         return this.referenceURL.statistics(count);
     }
     
@@ -417,7 +417,7 @@ public final class plasmaWordIndex implements Index {
         return this.referenceURL.deleteDomain(urlfragment);
     }
     
-    public URLMetadataRepository.BlacklistCleaner getURLCleaner(final indexReferenceBlacklist blacklist) {
+    public MetadataRepository.BlacklistCleaner getURLCleaner(final Blacklist blacklist) {
         return this.referenceURL.getBlacklistCleaner(blacklist); // thread is not already started after this is called!
     }
     
@@ -769,7 +769,7 @@ public final class plasmaWordIndex implements Index {
     public synchronized TreeSet<ReferenceContainer> indexContainerSet(final String startHash, final boolean ram, final boolean rot, int count) {
         // creates a set of indexContainers
         // this does not use the cache
-        final Order<ReferenceContainer> containerOrder = new indexContainerOrder(indexOrder.clone());
+        final Order<ReferenceContainer> containerOrder = new ReferenceContainerOrder(indexOrder.clone());
         containerOrder.rotate(emptyContainer(startHash, 0));
         final TreeSet<ReferenceContainer> containers = new TreeSet<ReferenceContainer>(containerOrder);
         final Iterator<ReferenceContainer> i = referenceIterator(startHash, rot, ram);
@@ -789,7 +789,7 @@ public final class plasmaWordIndex implements Index {
         return containers; // this may return less containers as demanded
     }
 
-    public URLMetadata storeDocument(final IndexingStack.QueueEntry entry, final plasmaParserDocument document, final plasmaCondenser condenser) throws IOException {
+    public MetadataRowContainer storeDocument(final IndexingStack.QueueEntry entry, final plasmaParserDocument document, final plasmaCondenser condenser) throws IOException {
         final long startTime = System.currentTimeMillis();
 
         // CREATE INDEX
@@ -842,7 +842,7 @@ public final class plasmaWordIndex implements Index {
         
         // create a new loaded URL db entry
         final long ldate = System.currentTimeMillis();
-        final URLMetadata newEntry = new URLMetadata(
+        final MetadataRowContainer newEntry = new MetadataRowContainer(
                 entry.url(),                               // URL
                 dc_title,                                  // document description
                 document.dc_creator(),                     // author
@@ -912,7 +912,7 @@ public final class plasmaWordIndex implements Index {
     }
 
     private synchronized CloneableIterator<ReferenceContainer> wordContainers(final String startWordHash, final boolean ram) {
-        final Order<ReferenceContainer> containerOrder = new indexContainerOrder(indexOrder.clone());
+        final Order<ReferenceContainer> containerOrder = new ReferenceContainerOrder(indexOrder.clone());
         containerOrder.rotate(emptyContainer(startWordHash, 0));
         if (ram) {
             return indexCache.referenceIterator(startWordHash, false, true);
@@ -963,12 +963,12 @@ public final class plasmaWordIndex implements Index {
                     entry = containerIterator.next();
                     // System.out.println("Wordhash: "+wordHash+" UrlHash:
                     // "+entry.getUrlHash());
-                    final URLMetadata ue = referenceURL.load(entry.urlHash(), entry, 0);
+                    final MetadataRowContainer ue = referenceURL.load(entry.urlHash(), entry, 0);
                     if (ue == null) {
                         urlHashs.add(entry.urlHash());
                     } else {
-                        url = ue.comp().url();
-                        if ((url == null) || (plasmaSwitchboard.urlBlacklist.isListed(indexReferenceBlacklist.BLACKLIST_CRAWLER, url) == true)) {
+                        url = ue.metadata().url();
+                        if ((url == null) || (plasmaSwitchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_CRAWLER, url) == true)) {
                             urlHashs.add(entry.urlHash());
                         }
                     }

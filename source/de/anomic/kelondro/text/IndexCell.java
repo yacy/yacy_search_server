@@ -31,9 +31,6 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
-import de.anomic.index.indexContainerBLOBArray;
-import de.anomic.index.indexContainerCache;
-import de.anomic.index.indexContainerOrder;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.MergeIterator;
@@ -53,8 +50,8 @@ import de.anomic.kelondro.order.Order;
 public final class IndexCell implements Index {
 
     // class variables
-    private indexContainerBLOBArray array;
-    private indexContainerCache ram;
+    private ReferenceContainerArray array;
+    private ReferenceContainerCache ram;
     private int maxRamEntries;
     
     public IndexCell(
@@ -62,8 +59,8 @@ public final class IndexCell implements Index {
             final Row payloadrow,
             final int maxRamEntries
             ) throws IOException {
-        this.array = new indexContainerBLOBArray(cellPath, payloadrow);
-        this.ram = new indexContainerCache(payloadrow);
+        this.array = new ReferenceContainerArray(cellPath, payloadrow);
+        this.ram = new ReferenceContainerCache(payloadrow);
         this.maxRamEntries = maxRamEntries;
     }
     
@@ -72,7 +69,7 @@ public final class IndexCell implements Index {
         File dumpFile = this.array.newContainerBLOBFile();
         this.ram.dump(dumpFile);
         // get a fresh ram cache
-        this.ram = new indexContainerCache(this.array.rowdef());
+        this.ram = new ReferenceContainerCache(this.array.rowdef());
         // add the dumped indexContainerBLOB to the array
         this.array.mountBLOBContainer(dumpFile);
     }
@@ -192,7 +189,7 @@ public final class IndexCell implements Index {
     }
 
     public CloneableIterator<ReferenceContainer> referenceIterator(String startWordHash, boolean rot, boolean ram) throws IOException {
-        final Order<ReferenceContainer> containerOrder = new indexContainerOrder(this.ram.rowdef().getOrdering().clone());
+        final Order<ReferenceContainer> containerOrder = new ReferenceContainerOrder(this.ram.rowdef().getOrdering().clone());
         containerOrder.rotate(new ReferenceContainer(startWordHash, this.ram.rowdef(), 0));
         if (ram) {
             return this.ram.referenceIterator(startWordHash, rot, true);
@@ -205,7 +202,7 @@ public final class IndexCell implements Index {
                 true);
     }
 
-    private static class RemoveRewriter implements indexContainerBLOBArray.ContainerRewriter {
+    private static class RemoveRewriter implements ReferenceContainerArray.ContainerRewriter {
         
         Set<String> urlHashes;
         

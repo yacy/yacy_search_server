@@ -42,13 +42,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import de.anomic.http.httpResponseHeader;
-import de.anomic.index.indexDocumentMetadata;
 import de.anomic.kelondro.blob.BLOB;
 import de.anomic.kelondro.blob.BLOBArray;
 import de.anomic.kelondro.blob.BLOBCompressor;
 import de.anomic.kelondro.blob.BLOBHeap;
 import de.anomic.kelondro.blob.MapView;
 import de.anomic.kelondro.order.Base64Order;
+import de.anomic.kelondro.text.Document;
 import de.anomic.kelondro.util.Log;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.yacy.yacySeedDB;
@@ -208,7 +208,7 @@ public final class plasmaHTCache {
     
     public static void storeMetadata(
             final httpResponseHeader responseHeader,
-            indexDocumentMetadata metadata
+            Document metadata
     ) {
         if (responseHeader != null) try {
             // store the response header into the header database

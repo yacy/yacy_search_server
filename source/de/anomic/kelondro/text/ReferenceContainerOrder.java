@@ -24,17 +24,16 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.index;
+package de.anomic.kelondro.text;
 
 import de.anomic.kelondro.order.AbstractOrder;
 import de.anomic.kelondro.order.Order;
-import de.anomic.kelondro.text.ReferenceContainer;
 
-public class indexContainerOrder extends AbstractOrder<ReferenceContainer> implements Order<ReferenceContainer>, Cloneable {
+public class ReferenceContainerOrder extends AbstractOrder<ReferenceContainer> implements Order<ReferenceContainer>, Cloneable {
 
     private final Order<byte[]> embeddedOrder;
 
-    public indexContainerOrder(final Order<byte[]> embedOrder) {
+    public ReferenceContainerOrder(final Order<byte[]> embedOrder) {
         this.embeddedOrder = embedOrder;
     }
 
@@ -60,7 +59,7 @@ public class indexContainerOrder extends AbstractOrder<ReferenceContainer> imple
     }
 
     public Order<ReferenceContainer> clone() {
-        return new indexContainerOrder(this.embeddedOrder.clone());
+        return new ReferenceContainerOrder(this.embeddedOrder.clone());
     }
 
     public String signature() {
@@ -72,8 +71,8 @@ public class indexContainerOrder extends AbstractOrder<ReferenceContainer> imple
     }
     
     public boolean equals(final Order<ReferenceContainer> otherOrder) {
-        if (!(otherOrder instanceof indexContainerOrder)) return false;
-        return this.embeddedOrder.equals(((indexContainerOrder) otherOrder).embeddedOrder);
+        if (!(otherOrder instanceof ReferenceContainerOrder)) return false;
+        return this.embeddedOrder.equals(((ReferenceContainerOrder) otherOrder).embeddedOrder);
     }
 
 	public long cardinal(final ReferenceContainer key) {

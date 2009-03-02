@@ -31,8 +31,8 @@ package de.anomic.crawler;
 import java.net.UnknownHostException;
 import java.util.Date;
 
-import de.anomic.index.indexReferenceBlacklist;
-import de.anomic.index.URLMetadata;
+import de.anomic.kelondro.text.MetadataRowContainer;
+import de.anomic.kelondro.text.Blacklist;
 import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaWordIndex;
@@ -182,7 +182,7 @@ public final class CrawlStacker {
         }
         
         // check blacklist
-        if (plasmaSwitchboard.urlBlacklist.isListed(indexReferenceBlacklist.BLACKLIST_CRAWLER, entry.url())) {
+        if (plasmaSwitchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_CRAWLER, entry.url())) {
             reason = "url in blacklist";
             if (this.log.isFine()) this.log.logFine("URL '" + entry.url().toString() + "' is in blacklist. " +
                              "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
@@ -256,7 +256,7 @@ public final class CrawlStacker {
         // check if the url is double registered
         final String dbocc = nextQueue.urlExists(entry.url().hash());
         if (dbocc != null || wordIndex.existsURL(entry.url().hash())) {
-            final URLMetadata oldEntry = wordIndex.getURL(entry.url().hash(), null, 0);
+            final MetadataRowContainer oldEntry = wordIndex.getURL(entry.url().hash(), null, 0);
             final boolean recrawl = (oldEntry != null) && (profile.recrawlIfOlder() > oldEntry.loaddate().getTime());
             // do double-check
             if ((dbocc != null) && (!recrawl)) {

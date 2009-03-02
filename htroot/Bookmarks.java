@@ -41,8 +41,9 @@ import de.anomic.data.listManager;
 import de.anomic.data.userDB;
 import de.anomic.data.bookmarksDB.Tag;
 import de.anomic.http.httpRequestHeader;
-import de.anomic.index.URLMetadata;
 import de.anomic.kelondro.order.DateFormatter;
+import de.anomic.kelondro.text.MetadataRowContainer;
+import de.anomic.kelondro.text.URLMetadata;
 import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.plasmaSnippetCache;
@@ -183,17 +184,17 @@ public class Bookmarks {
                     final bookmarksDB.Bookmark bookmark = sb.bookmarksDB.getBookmark(urlHash);
                     if (bookmark == null) {
                         // try to get the bookmark from the LURL database
-                        final URLMetadata urlentry = sb.webIndex.getURL(urlHash, null, 0);
+                        final MetadataRowContainer urlentry = sb.webIndex.getURL(urlHash, null, 0);
                         plasmaParserDocument document = null;
                         if (urlentry != null) {
-                            final URLMetadata.Components comp = urlentry.comp();
-                            document = plasmaSnippetCache.retrieveDocument(comp.url(), true, 5000, true, false);
+                            final URLMetadata metadata = urlentry.metadata();
+                            document = plasmaSnippetCache.retrieveDocument(metadata.url(), true, 5000, true, false);
                             prop.put("mode_edit", "0"); // create mode
-                            prop.put("mode_url", comp.url().toNormalform(false, true));
-                            prop.putHTML("mode_title", comp.dc_title());
-                            prop.putHTML("mode_description", (document == null) ? comp.dc_title(): document.dc_title());
-                            prop.putHTML("mode_author", comp.dc_creator());
-                            prop.putHTML("mode_tags", (document == null) ? comp.dc_subject() : document.dc_subject(','));
+                            prop.put("mode_url", metadata.url().toNormalform(false, true));
+                            prop.putHTML("mode_title", metadata.dc_title());
+                            prop.putHTML("mode_description", (document == null) ? metadata.dc_title(): document.dc_title());
+                            prop.putHTML("mode_author", metadata.dc_creator());
+                            prop.putHTML("mode_tags", (document == null) ? metadata.dc_subject() : document.dc_subject(','));
                             prop.putHTML("mode_path","");
                             prop.put("mode_public", "0");
                             prop.put("mode_feed", "0"); //TODO: check if it IS a feed

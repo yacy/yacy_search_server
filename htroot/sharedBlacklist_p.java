@@ -42,7 +42,7 @@ import de.anomic.data.listManager;
 import de.anomic.htmlFilter.htmlFilterCharacterCoding;
 import de.anomic.http.httpClient;
 import de.anomic.http.httpRequestHeader;
-import de.anomic.index.indexAbstractReferenceBlacklist;
+import de.anomic.kelondro.text.AbstractBlacklist;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
@@ -219,7 +219,7 @@ public class sharedBlacklist_p {
 
                             count++;
                             if (plasmaSwitchboard.urlBlacklist != null) {
-                                final String supportedBlacklistTypesStr = indexAbstractReferenceBlacklist.BLACKLIST_TYPES_STRING;
+                                final String supportedBlacklistTypesStr = AbstractBlacklist.BLACKLIST_TYPES_STRING;
                                 final String[] supportedBlacklistTypes = supportedBlacklistTypesStr.split(",");  
 
                                 for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {

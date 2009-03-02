@@ -5,9 +5,9 @@
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
-// $LastChangedDate$
-// $LastChangedRevision$
-// $LastChangedBy$
+// $LastChangedDate: 2009-01-30 23:44:20 +0100 (Fr, 30 Jan 2009) $
+// $LastChangedRevision: 5543 $
+// $LastChangedBy: orbiter $
 //
 // LICENSE
 // 
@@ -25,7 +25,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.index;
+package de.anomic.kelondro.text;
 
 import java.io.File;
 import java.io.IOException;
@@ -43,15 +43,15 @@ import java.util.regex.PatternSyntaxException;
 import de.anomic.kelondro.util.SetTools;
 import de.anomic.yacy.yacyURL;
 
-public abstract class indexAbstractReferenceBlacklist implements indexReferenceBlacklist {
+public abstract class AbstractBlacklist implements Blacklist {
 
     protected static final HashSet<String> BLACKLIST_TYPES = new HashSet<String>(Arrays.asList(new String[]{
-            indexReferenceBlacklist.BLACKLIST_CRAWLER,
-            indexReferenceBlacklist.BLACKLIST_PROXY,
-            indexReferenceBlacklist.BLACKLIST_DHT,
-            indexReferenceBlacklist.BLACKLIST_SEARCH,
-            indexReferenceBlacklist.BLACKLIST_SURFTIPS,
-            indexReferenceBlacklist.BLACKLIST_NEWS
+            Blacklist.BLACKLIST_CRAWLER,
+            Blacklist.BLACKLIST_PROXY,
+            Blacklist.BLACKLIST_DHT,
+            Blacklist.BLACKLIST_SEARCH,
+            Blacklist.BLACKLIST_SURFTIPS,
+            Blacklist.BLACKLIST_NEWS
     }));
     public static final String BLACKLIST_TYPES_STRING="proxy,crawler,dht,search,surftips,news";
     
@@ -61,7 +61,7 @@ public abstract class indexAbstractReferenceBlacklist implements indexReferenceB
     protected HashMap<String, HashMap<String, ArrayList<String>>> hostpaths_matchable = null; // key=host, value=path; mapped url is http://host/path; path does not start with '/' here
     protected HashMap<String, HashMap<String, ArrayList<String>>> hostpaths_notmatchable = null; // key=host, value=path; mapped url is http://host/path; path does not start with '/' here
     
-    public indexAbstractReferenceBlacklist(final File rootPath) {
+    public AbstractBlacklist(final File rootPath) {
         this.setRootPath(rootPath);
         
         this.blacklistRootPath = rootPath;

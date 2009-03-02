@@ -32,8 +32,8 @@ import java.util.Iterator;
 import java.util.List;
 
 import de.anomic.http.httpRequestHeader;
-import de.anomic.index.indexReferenceBlacklist;
 import de.anomic.kelondro.text.ReferenceRow;
+import de.anomic.kelondro.text.Blacklist;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -150,7 +150,7 @@ public final class transferRWI {
                 urlHash = iEntry.urlHash();
                 
                 // block blacklisted entries
-                if ((blockBlacklist) && (plasmaSwitchboard.urlBlacklist.hashInBlacklistedCache(indexReferenceBlacklist.BLACKLIST_DHT, urlHash))) {
+                if ((blockBlacklist) && (plasmaSwitchboard.urlBlacklist.hashInBlacklistedCache(Blacklist.BLACKLIST_DHT, urlHash))) {
                     if (yacyCore.log.isFine()) yacyCore.log.logFine("transferRWI: blocked blacklisted URLHash '" + urlHash + "' from peer " + otherPeerName);
                     blocked++;
                     continue;

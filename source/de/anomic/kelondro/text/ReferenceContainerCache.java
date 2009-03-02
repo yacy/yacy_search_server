@@ -24,7 +24,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.index;
+package de.anomic.kelondro.text;
 
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
@@ -44,14 +44,11 @@ import de.anomic.kelondro.blob.HeapWriter;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.ByteOrder;
-import de.anomic.kelondro.text.Index;
-import de.anomic.kelondro.text.ReferenceContainer;
-import de.anomic.kelondro.text.ReferenceRow;
 import de.anomic.kelondro.util.Log;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.RowSet;
 
-public final class indexContainerCache implements Iterable<ReferenceContainer>, Index {
+public final class ReferenceContainerCache implements Iterable<ReferenceContainer>, Index {
 
     private final Row payloadrow;
     private SortedMap<String, ReferenceContainer> cache;
@@ -63,7 +60,7 @@ public final class indexContainerCache implements Iterable<ReferenceContainer>, 
      * @param payloadrow
      * @param log
      */
-    public indexContainerCache(final Row payloadrow) {
+    public ReferenceContainerCache(final Row payloadrow) {
         this.payloadrow = payloadrow;
         this.cache = null;
     }

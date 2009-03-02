@@ -29,12 +29,12 @@ package de.anomic.http;
 import java.util.Date;
 
 import de.anomic.crawler.CrawlProfile;
-import de.anomic.index.indexDocumentMetadata;
 import de.anomic.kelondro.order.DateFormatter;
+import de.anomic.kelondro.text.Document;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.yacy.yacyURL;
 
-public class httpdProxyCacheEntry implements indexDocumentMetadata {
+public class httpdProxyCacheEntry implements Document {
     
     // doctypes:
     public static final char DT_PDFPS   = 'p';

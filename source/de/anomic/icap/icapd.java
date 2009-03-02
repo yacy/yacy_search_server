@@ -40,8 +40,8 @@ import de.anomic.http.httpChunkedInputStream;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpResponseHeader;
 import de.anomic.http.httpdProxyCacheEntry;
-import de.anomic.index.indexDocumentMetadata;
 import de.anomic.kelondro.order.DateFormatter;
+import de.anomic.kelondro.text.Document;
 import de.anomic.kelondro.util.Log;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaHTCache;
@@ -377,7 +377,7 @@ public class icapd implements serverHandler, Cloneable {
              * ========================================================================= */
             
             // generating a htcache entry object
-            final indexDocumentMetadata cacheEntry = new httpdProxyCacheEntry(
+            final Document cacheEntry = new httpdProxyCacheEntry(
                     0, 
                     httpRequestURL,
                     "",

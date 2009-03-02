@@ -1,4 +1,4 @@
-// indexCollectionRI.java
+// iIndexCollection.java
 // (C) 2006 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 03.07.2006 on http://yacy.net
 //
@@ -24,7 +24,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.index;
+package de.anomic.kelondro.text;
 
 import java.io.File;
 import java.io.IOException;
@@ -53,8 +53,6 @@ import de.anomic.kelondro.order.RotateIterator;
 import de.anomic.kelondro.table.EcoTable;
 import de.anomic.kelondro.table.FixedWidthArray;
 import de.anomic.kelondro.table.FlexTable;
-import de.anomic.kelondro.text.Index;
-import de.anomic.kelondro.text.ReferenceContainer;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.kelondroException;
@@ -62,7 +60,7 @@ import de.anomic.kelondro.util.kelondroOutOfLimitsException;
 import de.anomic.kelondro.util.Log;
 import de.anomic.yacy.yacyURL;
 
-public class indexCollectionRI implements Index {
+public class IndexCollection implements Index {
 
 	private static final int loadfactor = 4;
     private static final int serialNumber = 0;
@@ -89,7 +87,7 @@ public class indexCollectionRI implements Index {
     private static final int idx_col_lastread   = 6;  // a time stamp, update time in days since 1.1.2000
     private static final int idx_col_lastwrote  = 7;  // a time stamp, update time in days since 1.1.2000
     
-    public indexCollectionRI(
+    public IndexCollection(
     		final File path, 
     		final String filenameStub, 
     		final int keyLength, 
@@ -974,7 +972,7 @@ public class indexCollectionRI implements Index {
         final String filenameStub = args[1];
         try {
             // initialize collection index
-            final indexCollectionRI collectionIndex  = new indexCollectionRI(
+            final IndexCollection collectionIndex  = new IndexCollection(
                         path, filenameStub, 9 /*keyLength*/,
                         NaturalOrder.naturalOrder,
                         7, rowdef, false);
@@ -1004,7 +1002,7 @@ public class indexCollectionRI implements Index {
             
             // printout of index
             collectionIndex.close();
-            final EcoTable index = new EcoTable(new File(path, filenameStub + ".index"), indexCollectionRI.indexRow(9, NaturalOrder.naturalOrder), EcoTable.tailCacheUsageAuto, 0, 0);
+            final EcoTable index = new EcoTable(new File(path, filenameStub + ".index"), IndexCollection.indexRow(9, NaturalOrder.naturalOrder), EcoTable.tailCacheUsageAuto, 0, 0);
             index.print();
             index.close();
         } catch (final IOException e) {

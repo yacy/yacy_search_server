@@ -30,9 +30,10 @@ import java.io.IOException;
 import java.text.ParseException;
 
 import de.anomic.http.httpRequestHeader;
-import de.anomic.index.indexReferenceBlacklist;
-import de.anomic.index.URLMetadata;
 import de.anomic.kelondro.order.DateFormatter;
+import de.anomic.kelondro.text.MetadataRowContainer;
+import de.anomic.kelondro.text.URLMetadata;
+import de.anomic.kelondro.text.Blacklist;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
@@ -84,7 +85,7 @@ public final class transferURL {
             final int sizeBefore = sb.webIndex.countURL();
             // read the urls from the other properties and store
             String urls;
-            URLMetadata lEntry;
+            MetadataRowContainer lEntry;
             for (int i = 0; i < urlc; i++) {
                 serverCore.checkInterruption();
                 
@@ -97,7 +98,7 @@ public final class transferURL {
                 }
 
                 // parse new lurl-entry
-                lEntry = URLMetadata.importEntry(urls);
+                lEntry = MetadataRowContainer.importEntry(urls);
                 if (lEntry == null) {
                     yacyCore.log.logWarning("transferURL: received invalid URL (entry null) from peer " + otherPeerName + "\n\tURL Property: " + urls);
                     blocked++;
@@ -105,8 +106,8 @@ public final class transferURL {
                 }
                 
                 // check if entry is well-formed
-                final URLMetadata.Components comp = lEntry.comp();
-                if (comp.url() == null) {
+                final URLMetadata metadata = lEntry.metadata();
+                if (metadata.url() == null) {
                     yacyCore.log.logWarning("transferURL: received invalid URL from peer " + otherPeerName + "\n\tURL Property: " + urls);
                     blocked++;
                     continue;
@@ -120,17 +121,17 @@ public final class transferURL {
                 }
                 
                 // check if the entry is blacklisted
-                if ((blockBlacklist) && (plasmaSwitchboard.urlBlacklist.isListed(indexReferenceBlacklist.BLACKLIST_DHT, comp.url()))) {
-                    if (yacyCore.log.isFine()) yacyCore.log.logFine("transferURL: blocked blacklisted URL '" + comp.url().toNormalform(false, true) + "' from peer " + otherPeerName);
+                if ((blockBlacklist) && (plasmaSwitchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_DHT, metadata.url()))) {
+                    if (yacyCore.log.isFine()) yacyCore.log.logFine("transferURL: blocked blacklisted URL '" + metadata.url().toNormalform(false, true) + "' from peer " + otherPeerName);
                     lEntry = null;
                     blocked++;
                     continue;
                 }
                 
                 // check if the entry is in our network domain
-                final String urlRejectReason = sb.crawlStacker.urlInAcceptedDomain(comp.url());
+                final String urlRejectReason = sb.crawlStacker.urlInAcceptedDomain(metadata.url());
                 if (urlRejectReason != null) {
-                    if (yacyCore.log.isFine()) yacyCore.log.logFine("transferURL: blocked URL '" + comp.url() + "' (" + urlRejectReason + ") from peer " + otherPeerName);
+                    if (yacyCore.log.isFine()) yacyCore.log.logFine("transferURL: blocked URL '" + metadata.url() + "' (" + urlRejectReason + ") from peer " + otherPeerName);
                     lEntry = null;
                     blocked++;
                     continue;
@@ -140,7 +141,7 @@ public final class transferURL {
                 try {
                     sb.webIndex.putURL(lEntry);
                     sb.crawlResults.stack(lEntry, iam, iam, 3);
-                    if (yacyCore.log.isFine()) yacyCore.log.logFine("transferURL: received URL '" + comp.url().toNormalform(false, true) + "' from peer " + otherPeerName);
+                    if (yacyCore.log.isFine()) yacyCore.log.logFine("transferURL: received URL '" + metadata.url().toNormalform(false, true) + "' from peer " + otherPeerName);
                     received++;
                 } catch (final IOException e) {
                     e.printStackTrace();

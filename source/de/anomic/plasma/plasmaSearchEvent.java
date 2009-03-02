@@ -37,11 +37,12 @@ import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
 import de.anomic.crawler.ResultURLs;
-import de.anomic.index.URLMetadata;
 import de.anomic.kelondro.order.Bitfield;
+import de.anomic.kelondro.text.MetadataRowContainer;
 import de.anomic.kelondro.text.Reference;
 import de.anomic.kelondro.text.ReferenceContainer;
 import de.anomic.kelondro.text.ReferenceVars;
+import de.anomic.kelondro.text.URLMetadata;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.SetTools;
 import de.anomic.kelondro.util.SortStack;
@@ -257,7 +258,7 @@ public final class plasmaSearchEvent {
         }
     }
     
-    ResultEntry obtainResultEntry(final URLMetadata page, final int snippetFetchMode) {
+    ResultEntry obtainResultEntry(final MetadataRowContainer page, final int snippetFetchMode) {
 
         // a search result entry needs some work to produce a result Entry:
         // - check if url entry exists in LURL-db
@@ -273,14 +274,14 @@ public final class plasmaSearchEvent {
         // find the url entry
 
         long startTime = System.currentTimeMillis();
-        final URLMetadata.Components comp = page.comp();
-        final String pagetitle = comp.dc_title().toLowerCase();
-        if (comp.url() == null) {
+        final URLMetadata metadata = page.metadata();
+        final String pagetitle = metadata.dc_title().toLowerCase();
+        if (metadata.url() == null) {
             registerFailure(page.hash(), "url corrupted (null)");
             return null; // rare case where the url is corrupted
         }
-        final String pageurl = comp.url().toString().toLowerCase();
-        final String pageauthor = comp.dc_creator().toLowerCase();
+        final String pageurl = metadata.url().toString().toLowerCase();
+        final String pageauthor = metadata.dc_creator().toLowerCase();
         final long dbRetrievalTime = System.currentTimeMillis() - startTime;
         
         // check exclusion
@@ -298,7 +299,7 @@ public final class plasmaSearchEvent {
         // check constraints
         if ((query.constraint != null) &&
             (query.constraint.get(plasmaCondenser.flag_cat_indexof)) &&
-            (!(comp.dc_title().startsWith("Index of")))) {
+            (!(metadata.dc_title().startsWith("Index of")))) {
             final Iterator<String> wi = query.queryHashes.iterator();
             while (wi.hasNext()) wordIndex.removeReference(wi.next(), page.hash());
             registerFailure(page.hash(), "index-of constraint not fullfilled");
@@ -330,9 +331,9 @@ public final class plasmaSearchEvent {
         if (query.contentdom == plasmaSearchQuery.CONTENTDOM_TEXT) {
             // attach text snippet
             startTime = System.currentTimeMillis();
-            final plasmaSnippetCache.TextSnippet snippet = plasmaSnippetCache.retrieveTextSnippet(comp, snippetFetchWordHashes, (snippetFetchMode == 2), ((query.constraint != null) && (query.constraint.get(plasmaCondenser.flag_cat_indexof))), 180, 3000, (snippetFetchMode == 2) ? Integer.MAX_VALUE : 30000, query.isGlobal());
+            final plasmaSnippetCache.TextSnippet snippet = plasmaSnippetCache.retrieveTextSnippet(metadata, snippetFetchWordHashes, (snippetFetchMode == 2), ((query.constraint != null) && (query.constraint.get(plasmaCondenser.flag_cat_indexof))), 180, 3000, (snippetFetchMode == 2) ? Integer.MAX_VALUE : 30000, query.isGlobal());
             final long snippetComputationTime = System.currentTimeMillis() - startTime;
-            Log.logInfo("SEARCH_EVENT", "text snippet load time for " + comp.url() + ": " + snippetComputationTime + ", " + ((snippet.getErrorCode() < 11) ? "snippet found" : ("no snippet found (" + snippet.getError() + ")")));
+            Log.logInfo("SEARCH_EVENT", "text snippet load time for " + metadata.url() + ": " + snippetComputationTime + ", " + ((snippet.getErrorCode() < 11) ? "snippet found" : ("no snippet found (" + snippet.getError() + ")")));
             
             if (snippet.getErrorCode() < 11) {
                 // we loaded the file and found the snippet
@@ -343,16 +344,16 @@ public final class plasmaSearchEvent {
                 return new ResultEntry(page, wordIndex, null, null, dbRetrievalTime, snippetComputationTime); // result without snippet
             } else {
                 // problems with snippet fetch
-                registerFailure(page.hash(), "no text snippet for URL " + comp.url());
+                registerFailure(page.hash(), "no text snippet for URL " + metadata.url());
                 if (!wordIndex.seedDB.mySeed().isVirgin()) plasmaSnippetCache.failConsequences(snippet, query.id(false));
                 return null;
             }
         } else {
             // attach media information
             startTime = System.currentTimeMillis();
-            final ArrayList<MediaSnippet> mediaSnippets = plasmaSnippetCache.retrieveMediaSnippets(comp.url(), snippetFetchWordHashes, query.contentdom, (snippetFetchMode == 2), 6000, query.isGlobal());
+            final ArrayList<MediaSnippet> mediaSnippets = plasmaSnippetCache.retrieveMediaSnippets(metadata.url(), snippetFetchWordHashes, query.contentdom, (snippetFetchMode == 2), 6000, query.isGlobal());
             final long snippetComputationTime = System.currentTimeMillis() - startTime;
-            Log.logInfo("SEARCH_EVENT", "media snippet load time for " + comp.url() + ": " + snippetComputationTime);
+            Log.logInfo("SEARCH_EVENT", "media snippet load time for " + metadata.url() + ": " + snippetComputationTime);
             
             if ((mediaSnippets != null) && (mediaSnippets.size() > 0)) {
                 // found media snippets, return entry
@@ -361,7 +362,7 @@ public final class plasmaSearchEvent {
                 return new ResultEntry(page, wordIndex, null, null, dbRetrievalTime, snippetComputationTime);
             } else {
                 // problems with snippet fetch
-                registerFailure(page.hash(), "no media snippet for URL " + comp.url());
+                registerFailure(page.hash(), "no media snippet for URL " + metadata.url());
                 return null;
             }
         }
@@ -500,7 +501,7 @@ public final class plasmaSearchEvent {
         public void run() {
 
             // start fetching urls and snippets
-            URLMetadata page;
+            MetadataRowContainer page;
             final int fetchAhead = snippetMode == 0 ? 0 : 10;
             while (System.currentTimeMillis() < this.timeout) {
                 this.lastLifeSign = System.currentTimeMillis();
@@ -791,8 +792,8 @@ public final class plasmaSearchEvent {
     
     public static class ResultEntry {
         // payload objects
-        private final URLMetadata urlentry;
-        private final URLMetadata.Components urlcomps; // buffer for components
+        private final MetadataRowContainer urlentry;
+        private final URLMetadata urlcomps; // buffer for components
         private String alternative_urlstring;
         private String alternative_urlname;
         private final plasmaSnippetCache.TextSnippet textSnippet;
@@ -801,12 +802,12 @@ public final class plasmaSearchEvent {
         // statistic objects
         public long dbRetrievalTime, snippetComputationTime;
         
-        public ResultEntry(final URLMetadata urlentry, final plasmaWordIndex wordIndex,
+        public ResultEntry(final MetadataRowContainer urlentry, final plasmaWordIndex wordIndex,
                            final plasmaSnippetCache.TextSnippet textSnippet,
                            final ArrayList<plasmaSnippetCache.MediaSnippet> mediaSnippets,
                            final long dbRetrievalTime, final long snippetComputationTime) {
             this.urlentry = urlentry;
-            this.urlcomps = urlentry.comp();
+            this.urlcomps = urlentry.metadata();
             this.alternative_urlstring = null;
             this.alternative_urlname = null;
             this.textSnippet = textSnippet;

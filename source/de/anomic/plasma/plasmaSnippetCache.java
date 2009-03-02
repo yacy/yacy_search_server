@@ -43,8 +43,8 @@ import de.anomic.htmlFilter.htmlFilterCharacterCoding;
 import de.anomic.htmlFilter.htmlFilterImageEntry;
 import de.anomic.http.httpClient;
 import de.anomic.http.httpResponseHeader;
-import de.anomic.index.indexDocumentMetadata;
-import de.anomic.index.URLMetadata;
+import de.anomic.kelondro.text.Document;
+import de.anomic.kelondro.text.URLMetadata;
 import de.anomic.kelondro.text.Word;
 import de.anomic.kelondro.util.ScoreCluster;
 import de.anomic.kelondro.util.SetTools;
@@ -302,7 +302,7 @@ public class plasmaSnippetCache {
     }
     
     @SuppressWarnings("unchecked")
-    public static TextSnippet retrieveTextSnippet(final URLMetadata.Components comp, final Set<String> queryhashes, final boolean fetchOnline, final boolean pre, final int snippetMaxLength, final int timeout, final int maxDocLen, final boolean reindexing) {
+    public static TextSnippet retrieveTextSnippet(final URLMetadata comp, final Set<String> queryhashes, final boolean fetchOnline, final boolean pre, final int snippetMaxLength, final int timeout, final int maxDocLen, final boolean reindexing) {
         // heise = "0OQUNU3JSs05"
         final yacyURL url = comp.url();
         if (queryhashes.size() == 0) {
@@ -349,7 +349,7 @@ public class plasmaSnippetCache {
                 // if not found try to download it
                 
                 // download resource using the crawler and keep resource in memory if possible
-                final indexDocumentMetadata entry = plasmaSwitchboard.getSwitchboard().crawlQueues.loadResourceFromWeb(url, timeout, true, true, reindexing);
+                final Document entry = plasmaSwitchboard.getSwitchboard().crawlQueues.loadResourceFromWeb(url, timeout, true, true, reindexing);
                 
                 // getting resource metadata (e.g. the http headers for http resources)
                 if (entry != null) {
@@ -460,7 +460,7 @@ public class plasmaSnippetCache {
                 // if not found try to download it
                 
                 // download resource using the crawler and keep resource in memory if possible
-                final indexDocumentMetadata entry = plasmaSwitchboard.getSwitchboard().crawlQueues.loadResourceFromWeb(url, timeout, true, forText, global);
+                final Document entry = plasmaSwitchboard.getSwitchboard().crawlQueues.loadResourceFromWeb(url, timeout, true, forText, global);
                 
                 // getting resource metadata (e.g. the http headers for http resources)
                 if (entry != null) {
@@ -917,7 +917,7 @@ public class plasmaSnippetCache {
                 // if the content is not available in cache try to download it from web
                 
                 // try to download the resource using a crawler
-                final indexDocumentMetadata entry = plasmaSwitchboard.getSwitchboard().crawlQueues.loadResourceFromWeb(url, (socketTimeout < 0) ? -1 : socketTimeout, true, forText, reindexing);
+                final Document entry = plasmaSwitchboard.getSwitchboard().crawlQueues.loadResourceFromWeb(url, (socketTimeout < 0) ? -1 : socketTimeout, true, forText, reindexing);
                 if (entry == null) return null; // not found in web
                 
                 // read resource body (if it is there)

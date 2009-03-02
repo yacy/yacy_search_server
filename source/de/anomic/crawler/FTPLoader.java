@@ -35,8 +35,8 @@ import java.util.Date;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpResponseHeader;
 import de.anomic.http.httpdProxyCacheEntry;
-import de.anomic.index.indexDocumentMetadata;
 import de.anomic.kelondro.order.DateFormatter;
+import de.anomic.kelondro.text.Document;
 import de.anomic.kelondro.util.Log;
 import de.anomic.net.ftpc;
 import de.anomic.plasma.plasmaHTCache;
@@ -56,14 +56,14 @@ public class FTPLoader {
         maxFileSize = (int) sb.getConfigLong("crawler.ftp.maxFileSize", -1l);
     }
 
-    protected indexDocumentMetadata createCacheEntry(final CrawlEntry entry, final String mimeType, final Date fileDate) {
+    protected Document createCacheEntry(final CrawlEntry entry, final String mimeType, final Date fileDate) {
         if (entry == null) return null;
         httpRequestHeader requestHeader = new httpRequestHeader();
         if (entry.referrerhash() != null) requestHeader.put(httpRequestHeader.REFERER, sb.getURL(entry.referrerhash()).toNormalform(true, false));
         httpResponseHeader responseHeader = new httpResponseHeader();
         responseHeader.put(httpResponseHeader.LAST_MODIFIED, DateFormatter.formatRFC1123(fileDate));
         responseHeader.put(httpResponseHeader.CONTENT_TYPE, mimeType);
-        indexDocumentMetadata metadata = new httpdProxyCacheEntry(
+        Document metadata = new httpdProxyCacheEntry(
                 entry.depth(), entry.url(), entry.name(), "OK",
                 requestHeader, responseHeader,
                 entry.initiator(), sb.webIndex.profilesActiveCrawls.getEntry(entry.profileHandle()));
@@ -77,12 +77,12 @@ public class FTPLoader {
      * @param entry
      * @return
      */
-    public indexDocumentMetadata load(final CrawlEntry entry) throws IOException {
+    public Document load(final CrawlEntry entry) throws IOException {
         final yacyURL entryUrl = entry.url();
         final String fullPath = getPath(entryUrl);
 
         // the return value
-        indexDocumentMetadata htCache = null;
+        Document htCache = null;
 
         // determine filename and path
         String file, path;
@@ -212,7 +212,7 @@ public class FTPLoader {
      * @return
      * @throws Exception
      */
-    private indexDocumentMetadata getFile(final ftpc ftpClient, final CrawlEntry entry) throws Exception {
+    private Document getFile(final ftpc ftpClient, final CrawlEntry entry) throws Exception {
         // determine the mimetype of the resource
         final yacyURL entryUrl = entry.url();
         final String extension = plasmaParser.getFileExt(entryUrl);
@@ -221,7 +221,7 @@ public class FTPLoader {
 
         // if the mimetype and file extension is supported we start to download
         // the file
-        indexDocumentMetadata htCache = null;
+        Document htCache = null;
         if (plasmaParser.supportedContent(plasmaParser.PARSER_MODE_CRAWLER, entryUrl, mimeType)) {
             // aborting download if content is too long
             final int size = ftpClient.fileSize(path);

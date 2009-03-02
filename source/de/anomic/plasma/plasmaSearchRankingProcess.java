@@ -37,13 +37,14 @@ import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
-import de.anomic.index.URLMetadata;
 import de.anomic.kelondro.index.BinSearch;
 import de.anomic.kelondro.order.Digest;
+import de.anomic.kelondro.text.MetadataRowContainer;
 import de.anomic.kelondro.text.Reference;
 import de.anomic.kelondro.text.ReferenceContainer;
 import de.anomic.kelondro.text.ReferenceOrder;
 import de.anomic.kelondro.text.ReferenceVars;
+import de.anomic.kelondro.text.URLMetadata;
 import de.anomic.kelondro.text.Word;
 import de.anomic.kelondro.util.ScoreCluster;
 import de.anomic.kelondro.util.SortStack;
@@ -288,16 +289,16 @@ public final class plasmaSearchRankingProcess {
         return bestEntry;
     }
     
-    public URLMetadata bestURL(final boolean skipDoubleDom) {
+    public MetadataRowContainer bestURL(final boolean skipDoubleDom) {
         // returns from the current RWI list the best URL entry and removed this entry from the list
         while ((stack.size() > 0) || (size() > 0)) {
                 if (((stack.size() == 0) && (size() == 0))) break;
                 final SortStack<ReferenceVars>.stackElement obrwi = bestRWI(skipDoubleDom);
                 if (obrwi == null) continue; // *** ? this happened and the thread was suspended silently. cause?
-                final URLMetadata u = wordIndex.getURL(obrwi.element.urlHash(), obrwi.element, obrwi.weight.longValue());
+                final MetadataRowContainer u = wordIndex.getURL(obrwi.element.urlHash(), obrwi.element, obrwi.weight.longValue());
                 if (u != null) {
-                    final URLMetadata.Components comp = u.comp();
-                    if (comp.url() != null) this.handover.put(u.hash(), comp.url().toNormalform(true, false)); // remember that we handed over this url
+                    final URLMetadata metadata = u.metadata();
+                    if (metadata.url() != null) this.handover.put(u.hash(), metadata.url().toNormalform(true, false)); // remember that we handed over this url
                     return u;
                 }
                 misses.add(obrwi.element.urlHash());

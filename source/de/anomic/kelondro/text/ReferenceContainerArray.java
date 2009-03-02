@@ -24,7 +24,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.index;
+package de.anomic.kelondro.text;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,9 +37,8 @@ import de.anomic.kelondro.blob.BLOBArray;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.RowSet;
 import de.anomic.kelondro.order.CloneableIterator;
-import de.anomic.kelondro.text.ReferenceContainer;
 
-public final class indexContainerBLOBArray {
+public final class ReferenceContainerArray {
 
     private final Row payloadrow;
     private final BLOBArray array;
@@ -54,7 +53,7 @@ public final class indexContainerBLOBArray {
      * @param log
      * @throws IOException 
      */
-    public indexContainerBLOBArray(
+    public ReferenceContainerArray(
     		final File heapLocation,
     		final Row payloadrow) throws IOException {
         this.payloadrow = payloadrow;

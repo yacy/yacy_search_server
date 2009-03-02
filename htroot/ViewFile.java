@@ -39,8 +39,9 @@ import de.anomic.htmlFilter.htmlFilterCharacterCoding;
 import de.anomic.http.httpClient;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpResponseHeader;
-import de.anomic.index.indexDocumentMetadata;
-import de.anomic.index.URLMetadata;
+import de.anomic.kelondro.text.Document;
+import de.anomic.kelondro.text.MetadataRowContainer;
+import de.anomic.kelondro.text.URLMetadata;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaCondenser;
 import de.anomic.plasma.plasmaHTCache;
@@ -94,7 +95,7 @@ public class ViewFile {
         final String urlHash = post.get("urlHash","");
         if (urlHash.length() > 0) {
             // getting the urlEntry that belongs to the url hash
-            URLMetadata urlEntry = null;
+            MetadataRowContainer urlEntry = null;
             urlEntry = sb.webIndex.getURL(urlHash, null, 0);
             if (urlEntry == null) {
                 prop.put("error", "2");
@@ -103,14 +104,14 @@ public class ViewFile {
             }            
             
                 // getting the url that belongs to the entry
-            final URLMetadata.Components comp = urlEntry.comp();
-            if ((comp == null) || (comp.url() == null)) {
+            final URLMetadata metadata = urlEntry.metadata();
+            if ((metadata == null) || (metadata.url() == null)) {
                 prop.put("error", "3");
                 prop.put("viewMode", VIEW_MODE_NO_TEXT);
                 return prop;
             }
-            url = comp.url();
-            descr = comp.dc_title();
+            url = metadata.url();
+            descr = metadata.dc_title();
             urlEntry.wordCount();
             size = urlEntry.size();
             pre = urlEntry.flags().get(plasmaCondenser.flag_cat_indexof);
@@ -157,7 +158,7 @@ public class ViewFile {
 
         // if the resource body was not cached we try to load it from web
         if (resource == null) {
-            indexDocumentMetadata entry = null;
+            Document entry = null;
             try {
                 entry = sb.crawlQueues.loadResourceFromWeb(url, 5000, false, true, false);
             } catch (final Exception e) {

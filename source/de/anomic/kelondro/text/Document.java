@@ -24,14 +24,14 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.index;
+package de.anomic.kelondro.text;
 
 import java.util.Date;
 
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.yacy.yacyURL;
 
-public interface indexDocumentMetadata {
+public interface Document {
 
     /**
      * @return an anchor name; can be either the text inside the anchor tag or the

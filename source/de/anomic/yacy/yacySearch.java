@@ -51,8 +51,8 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import de.anomic.crawler.ResultURLs;
-import de.anomic.index.indexReferenceBlacklist;
 import de.anomic.kelondro.order.Bitfield;
+import de.anomic.kelondro.text.Blacklist;
 import de.anomic.kelondro.util.ScoreCluster;
 import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaSearchQuery;
@@ -69,7 +69,7 @@ public class yacySearch extends Thread {
     final private plasmaWordIndex wordIndex;
     final private plasmaSearchRankingProcess containerCache;
     final private Map<String, TreeMap<String, String>> abstractCache;
-    final private indexReferenceBlacklist blacklist;
+    final private Blacklist blacklist;
     final private yacySeed targetPeer;
     private String[] urls;
     private final int count, maxDistance;
@@ -86,7 +86,7 @@ public class yacySearch extends Thread {
                       final ResultURLs crawlResults,
                       final plasmaSearchRankingProcess containerCache,
                       final Map<String, TreeMap<String, String>> abstractCache,
-                      final indexReferenceBlacklist blacklist,
+                      final Blacklist blacklist,
                       final plasmaSearchRankingProfile rankingProfile,
                       final Bitfield constraint) {
         super("yacySearch_" + targetPeer.getName());
@@ -254,7 +254,7 @@ public class yacySearch extends Thread {
             final plasmaSearchRankingProcess containerCache,
             final Map<String, TreeMap<String, String>> abstractCache,
             int targets,
-            final indexReferenceBlacklist blacklist,
+            final Blacklist blacklist,
             final plasmaSearchRankingProfile rankingProfile,
             final Bitfield constraint,
             final TreeMap<String, String> clusterselection) {
@@ -290,7 +290,7 @@ public class yacySearch extends Thread {
             final plasmaWordIndex wordIndex,
             final ResultURLs crawlResults,
             final plasmaSearchRankingProcess containerCache,
-            final String targethash, final indexReferenceBlacklist blacklist,
+            final String targethash, final Blacklist blacklist,
             final plasmaSearchRankingProfile rankingProfile,
             final Bitfield constraint, final TreeMap<String, String> clusterselection) {
         // check own peer status

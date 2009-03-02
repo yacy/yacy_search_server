@@ -31,11 +31,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import de.anomic.index.URLMetadataRepository;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.text.Index;
 import de.anomic.kelondro.text.ReferenceContainer;
 import de.anomic.kelondro.text.ReferenceRow;
+import de.anomic.kelondro.text.MetadataRepository;
 import de.anomic.kelondro.util.Log;
 import de.anomic.server.serverProcessor;
 import de.anomic.yacy.yacySeed;
@@ -96,7 +96,7 @@ public class Dispatcher {
     
     public Dispatcher(
             final Index backend,
-            final URLMetadataRepository repository,
+            final MetadataRepository repository,
             final yacySeedDB seeds,
             final boolean gzipBody, 
             final int timeout

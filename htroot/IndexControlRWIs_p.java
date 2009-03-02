@@ -36,14 +36,14 @@ import java.util.Set;
 
 import de.anomic.data.listManager;
 import de.anomic.http.httpRequestHeader;
-import de.anomic.index.indexAbstractReferenceBlacklist;
-import de.anomic.index.indexContainerCache;
-import de.anomic.index.URLMetadata;
 import de.anomic.kelondro.order.Bitfield;
+import de.anomic.kelondro.text.MetadataRowContainer;
 import de.anomic.kelondro.text.Reference;
 import de.anomic.kelondro.text.ReferenceContainer;
+import de.anomic.kelondro.text.ReferenceContainerCache;
 import de.anomic.kelondro.text.ReferenceRow;
 import de.anomic.kelondro.text.Word;
+import de.anomic.kelondro.text.AbstractBlacklist;
 import de.anomic.plasma.plasmaSearchAPI;
 import de.anomic.plasma.plasmaSearchEvent;
 import de.anomic.plasma.plasmaSearchRankingProcess;
@@ -203,10 +203,10 @@ public class IndexControlRWIs_p {
                 index = sb.webIndex.getReferences(keyhash, null);
                 // built urlCache
                 final Iterator<ReferenceRow> urlIter = index.entries();
-                final HashMap<String, URLMetadata> knownURLs = new HashMap<String, URLMetadata>();
+                final HashMap<String, MetadataRowContainer> knownURLs = new HashMap<String, MetadataRowContainer>();
                 final HashSet<String> unknownURLEntries = new HashSet<String>();
                 Reference iEntry;
-                URLMetadata lurl;
+                MetadataRowContainer lurl;
                 while (urlIter.hasNext()) {
                     iEntry = urlIter.next();
                     lurl = sb.webIndex.getURL(iEntry.urlHash(), null, 0);
@@ -219,7 +219,7 @@ public class IndexControlRWIs_p {
                 }
                 
                 // make an indexContainerCache
-                indexContainerCache icc = new indexContainerCache(index.rowdef);
+                ReferenceContainerCache icc = new ReferenceContainerCache(index.rowdef);
                 icc.addReferences(index);
                 
                 // transport to other peer
@@ -269,10 +269,10 @@ public class IndexControlRWIs_p {
                         yacyURL url;
                         for (int i=0; i<urlx.length; i++) {
                             urlHashes.add(urlx[i]);
-                            final URLMetadata e = sb.webIndex.getURL(urlx[i], null, 0);
+                            final MetadataRowContainer e = sb.webIndex.getURL(urlx[i], null, 0);
                             sb.webIndex.removeURL(urlx[i]);
                             if (e != null) {
-                                url = e.comp().url();
+                                url = e.metadata().url();
                                 pw.println(url.getHost() + "/" + url.getFile());
                                 for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
                                     if (listManager.listSetContains(supportedBlacklistTypes[blTypes] + ".BlackLists", blacklist)) {
@@ -292,15 +292,15 @@ public class IndexControlRWIs_p {
                 if (post.containsKey("blacklistdomains")) {
                     PrintWriter pw;
                     try {
-                        final String[] supportedBlacklistTypes = indexAbstractReferenceBlacklist.BLACKLIST_TYPES_STRING.split(",");
+                        final String[] supportedBlacklistTypes = AbstractBlacklist.BLACKLIST_TYPES_STRING.split(",");
                         pw = new PrintWriter(new FileWriter(new File(listManager.listsPath, blacklist), true));
                         yacyURL url;
                         for (int i=0; i<urlx.length; i++) {
                             urlHashes.add(urlx[i]);
-                            final URLMetadata e = sb.webIndex.getURL(urlx[i], null, 0);
+                            final MetadataRowContainer e = sb.webIndex.getURL(urlx[i], null, 0);
                             sb.webIndex.removeURL(urlx[i]);
                             if (e != null) {
-                                url = e.comp().url();
+                                url = e.metadata().url();
                                 pw.println(url.getHost() + "/.*");
                                 for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
                                     if (listManager.listSetContains(supportedBlacklistTypes[blTypes] + ".BlackLists", blacklist)) {

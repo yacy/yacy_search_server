@@ -6,8 +6,8 @@ import java.util.TreeSet;
 
 import de.anomic.crawler.AbstractImporter;
 import de.anomic.crawler.Importer;
-import de.anomic.index.URLMetadata;
 import de.anomic.kelondro.order.DateFormatter;
+import de.anomic.kelondro.text.MetadataRowContainer;
 import de.anomic.kelondro.text.Reference;
 import de.anomic.kelondro.text.ReferenceContainer;
 import de.anomic.kelondro.text.ReferenceRow;
@@ -141,7 +141,7 @@ public class plasmaDbImporter extends AbstractImporter implements Importer {
                             // we need to import the url
 
                             // getting the url entry
-                            final URLMetadata urlEntry = this.importWordIndex.getURL(urlHash, null, 0);
+                            final MetadataRowContainer urlEntry = this.importWordIndex.getURL(urlHash, null, 0);
                             if (urlEntry != null) {
 
                                 /* write it into the home url db */

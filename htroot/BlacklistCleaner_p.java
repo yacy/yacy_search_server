@@ -47,9 +47,9 @@ import java.util.regex.PatternSyntaxException;
 
 import de.anomic.data.listManager;
 import de.anomic.http.httpRequestHeader;
-import de.anomic.index.indexAbstractReferenceBlacklist;
-import de.anomic.index.indexDefaultReferenceBlacklist;
-import de.anomic.index.indexReferenceBlacklist;
+import de.anomic.kelondro.text.Blacklist;
+import de.anomic.kelondro.text.AbstractBlacklist;
+import de.anomic.kelondro.text.DefaultBlacklist;
 import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
@@ -72,7 +72,7 @@ public class BlacklistCleaner_p {
     private final static String BLACKLIST_FILENAME_FILTER = "^.*\\.black$";
     
     public static final Class<?>[] supportedBLEngines = {
-        indexDefaultReferenceBlacklist.class
+        DefaultBlacklist.class
     };
     
     public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
@@ -84,7 +84,7 @@ public class BlacklistCleaner_p {
         String blacklistToUse = null;
         
         // getting the list of supported blacklist types
-        final String supportedBlacklistTypesStr = indexAbstractReferenceBlacklist.BLACKLIST_TYPES_STRING;
+        final String supportedBlacklistTypesStr = AbstractBlacklist.BLACKLIST_TYPES_STRING;
         final String[] supportedBlacklistTypes = supportedBlacklistTypesStr.split(","); 
         
         if (post == null) {
@@ -192,7 +192,7 @@ public class BlacklistCleaner_p {
         return r.toArray(new String[r.size()]);
     }
     
-    private static HashMap<String, Integer>/* entry, error-code */ getIllegalEntries(final String blacklistToUse, final String[] supportedBlacklistTypes, final indexReferenceBlacklist blEngine) {
+    private static HashMap<String, Integer>/* entry, error-code */ getIllegalEntries(final String blacklistToUse, final String[] supportedBlacklistTypes, final Blacklist blEngine) {
         final HashMap<String, Integer> r = new HashMap<String, Integer>();
         final HashSet<String> ok = new HashSet<String>();
         
@@ -200,7 +200,7 @@ public class BlacklistCleaner_p {
         final Iterator<String> it = list.iterator();
         String s, host, path;
         
-        if (blEngine instanceof indexDefaultReferenceBlacklist) {
+        if (blEngine instanceof DefaultBlacklist) {
             int slashPos;
             while (it.hasNext()) {
                 s = (it.next()).trim();

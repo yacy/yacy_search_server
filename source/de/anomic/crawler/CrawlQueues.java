@@ -36,9 +36,9 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import de.anomic.index.indexDocumentMetadata;
 import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.kelondro.table.FlexWidthArray;
+import de.anomic.kelondro.text.Document;
 import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -492,7 +492,7 @@ public class CrawlQueues {
         return;
     }
     
-    public indexDocumentMetadata loadResourceFromWeb(
+    public Document loadResourceFromWeb(
             final yacyURL url, 
             final int socketTimeout,
             final boolean keepInMemory,

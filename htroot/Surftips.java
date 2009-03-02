@@ -32,11 +32,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 import de.anomic.http.httpRequestHeader;
-import de.anomic.index.indexReferenceBlacklist;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.Row.Entry;
 import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.kelondro.order.NaturalOrder;
+import de.anomic.kelondro.text.Blacklist;
 import de.anomic.kelondro.util.ScoreCluster;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
@@ -133,7 +133,7 @@ public class Surftips {
                 
                 url = row.getColString(0, null);
                 try{
-                	if(plasmaSwitchboard.urlBlacklist.isListed(indexReferenceBlacklist.BLACKLIST_SURFTIPS ,new yacyURL(url, null)))
+                	if(plasmaSwitchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_SURFTIPS ,new yacyURL(url, null)))
                 		continue;
                 }catch(final MalformedURLException e){continue;};
                 title = row.getColString(1,"UTF-8");

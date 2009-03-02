@@ -137,12 +137,13 @@ import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpResponseHeader;
 import de.anomic.http.httpd;
 import de.anomic.http.httpdRobotsTxtConfig;
-import de.anomic.index.indexDocumentMetadata;
-import de.anomic.index.indexReferenceBlacklist;
-import de.anomic.index.URLMetadata;
 import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.kelondro.order.Digest;
 import de.anomic.kelondro.order.NaturalOrder;
+import de.anomic.kelondro.text.Document;
+import de.anomic.kelondro.text.MetadataRowContainer;
+import de.anomic.kelondro.text.URLMetadata;
+import de.anomic.kelondro.text.Blacklist;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.Log;
 import de.anomic.kelondro.util.MemoryControl;
@@ -185,7 +186,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     public static TreeSet<String> badwords = null;
     public static TreeSet<String> blueList = null;
     public static TreeSet<String> stopwords = null;    
-    public static indexReferenceBlacklist urlBlacklist = null;
+    public static Blacklist urlBlacklist = null;
     
     public static wikiParser wikiParser = null;
     
@@ -364,25 +365,29 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         
         // load the black-list / inspired by [AS]
         final File blacklistsPath = getConfigPath(plasmaSwitchboardConstants.LISTS_PATH, plasmaSwitchboardConstants.LISTS_PATH_DEFAULT);
-        String blacklistClassName = getConfig(plasmaSwitchboardConstants.BLACKLIST_CLASS, plasmaSwitchboardConstants.BLACKLIST_CLASS_DEFAULT);
-        if (blacklistClassName.equals("de.anomic.plasma.urlPattern.defaultURLPattern")) {
-            // patch old class location
-            blacklistClassName = plasmaSwitchboardConstants.BLACKLIST_CLASS_DEFAULT;
-            setConfig(plasmaSwitchboardConstants.BLACKLIST_CLASS, blacklistClassName);
-        }
+        String[] blacklistClassName = new String[] {
+                                getConfig(plasmaSwitchboardConstants.BLACKLIST_CLASS, plasmaSwitchboardConstants.BLACKLIST_CLASS_DEFAULT),
+                                plasmaSwitchboardConstants.BLACKLIST_CLASS_DEFAULT
+        };
             
         this.log.logConfig("Starting blacklist engine ...");
-        try {
-            final Class<?> blacklistClass = Class.forName(blacklistClassName);
-            final Constructor<?> blacklistClassConstr = blacklistClass.getConstructor( new Class[] { File.class } );
-            urlBlacklist = (indexReferenceBlacklist) blacklistClassConstr.newInstance(new Object[] { blacklistsPath });
-            this.log.logFine("Used blacklist engine class: " + blacklistClassName);
-            this.log.logConfig("Using blacklist engine: " + urlBlacklist.getEngineInfo());
-        } catch (final Exception e) {
-            this.log.logSevere("Unable to load the blacklist engine",e);
-            System.exit(-1);
-        } catch (final Error e) {
-            this.log.logSevere("Unable to load the blacklist engine",e);
+        urlBlacklist = null;
+        for (int i = 0; i < blacklistClassName.length; i++) {
+            try {
+                final Class<?> blacklistClass = Class.forName(blacklistClassName[i]);
+                final Constructor<?> blacklistClassConstr = blacklistClass.getConstructor( new Class[] { File.class } );
+                urlBlacklist = (Blacklist) blacklistClassConstr.newInstance(new Object[] { blacklistsPath });
+                this.log.logFine("Used blacklist engine class: " + blacklistClassName);
+                this.log.logConfig("Using blacklist engine: " + urlBlacklist.getEngineInfo());
+                break;
+            } catch (final Exception e) {
+                continue; // try next
+            } catch (final Error e) {
+                continue; // try next
+            }
+        }
+        if (urlBlacklist == null) {
+            this.log.logSevere("Unable to load the blacklist engine");
             System.exit(-1);
         }
       
@@ -928,8 +933,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         if (urlhash.length() == 0) return null;
         final yacyURL ne = crawlQueues.getURL(urlhash);
         if (ne != null) return ne;
-        final URLMetadata le = webIndex.getURL(urlhash, null, 0);
-        if (le != null) return le.comp().url();
+        final MetadataRowContainer le = webIndex.getURL(urlhash, null, 0);
+        if (le != null) return le.metadata().url();
         return null;
     }
     
@@ -985,7 +990,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         return this.webIndex.cleanProfiles();
     }
     
-    public boolean htEntryStoreProcess(final indexDocumentMetadata entry) {
+    public boolean htEntryStoreProcess(final Document entry) {
         
         if (entry == null) return false;
 
@@ -1642,7 +1647,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         log.logInfo("Excluded " + condenser.excludeWords(stopwords) + " words in URL " + queueEntry.url());
 
         // STORE URL TO LOADED-URL-DB
-        URLMetadata newEntry = null;
+        MetadataRowContainer newEntry = null;
         try {
             newEntry = webIndex.storeDocument(queueEntry, document, condenser);
         } catch (final IOException e) {
@@ -1690,9 +1695,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     
     public class receiptSending implements Runnable {
         yacySeed initiatorPeer;
-        URLMetadata reference;
+        MetadataRowContainer reference;
         
-        public receiptSending(final yacySeed initiatorPeer, final URLMetadata reference) {
+        public receiptSending(final yacySeed initiatorPeer, final MetadataRowContainer reference) {
             this.initiatorPeer = initiatorPeer;
             this.reference = reference;
         }
@@ -1737,17 +1742,17 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         
         if (urlhash == null) return 0;
         // determine the url string
-        final URLMetadata entry = webIndex.getURL(urlhash, null, 0);
+        final MetadataRowContainer entry = webIndex.getURL(urlhash, null, 0);
         if (entry == null) return 0;
-        final URLMetadata.Components comp = entry.comp();
-        if (comp.url() == null) return 0;
+        final URLMetadata metadata = entry.metadata();
+        if (metadata.url() == null) return 0;
         
         InputStream resourceContent = null;
         try {
             // get the resource content
             Object[] resource = null;
             try {
-                resource = plasmaSnippetCache.getResource(comp.url(), fetchOnline, 10000, true, false);
+                resource = plasmaSnippetCache.getResource(metadata.url(), fetchOnline, 10000, true, false);
             } catch (IOException e) {
                 Log.logWarning("removeAllUrlReferences", "cannot load: " + e.getMessage());
             }
@@ -1760,7 +1765,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
                 final Long resourceContentLength = (Long) resource[1];
                 
                 // parse the resource
-                final plasmaParserDocument document = plasmaSnippetCache.parseDocument(comp.url(), resourceContentLength.longValue(), resourceContent);
+                final plasmaParserDocument document = plasmaSnippetCache.parseDocument(metadata.url(), resourceContentLength.longValue(), resourceContent);
                 
                 // get the word set
                 Set<String> words = null;

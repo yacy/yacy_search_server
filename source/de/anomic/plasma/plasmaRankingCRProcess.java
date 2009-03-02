@@ -30,7 +30,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 
-import de.anomic.index.indexCollectionRI;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.RowSet;
 import de.anomic.kelondro.index.ObjectIndex;
@@ -40,6 +39,7 @@ import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.kelondro.order.MicroDate;
 import de.anomic.kelondro.table.EcoTable;
+import de.anomic.kelondro.text.IndexCollection;
 import de.anomic.kelondro.text.ReferenceContainer;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.AttrSeq;
@@ -141,7 +141,7 @@ public class plasmaRankingCRProcess {
         return true;
     }
     
-    private static boolean accumulate_upd(final File f, final ObjectIndex acc, final indexCollectionRI seq) throws IOException {
+    private static boolean accumulate_upd(final File f, final ObjectIndex acc, final IndexCollection seq) throws IOException {
         // open file
         AttrSeq source_cr = null;
         try {
@@ -241,11 +241,11 @@ public class plasmaRankingCRProcess {
         // open target file
         AttrSeq acc = null;
         ObjectIndex newacc = null;
-        indexCollectionRI newseq = null;
+        IndexCollection newseq = null;
         if (newdb) {
             final File path = to_file.getParentFile(); // path to storage place
             newacc = new EcoTable(new File(path, CRG_accname), CRG_accrow, EcoTable.tailCacheUsageAuto, 0, 0);
-            newseq = new indexCollectionRI(path, CRG_seqname, 12, Base64Order.enhancedCoder, 9, CRG_colrow, false);
+            newseq = new IndexCollection(path, CRG_seqname, 12, Base64Order.enhancedCoder, 9, CRG_colrow, false);
         } else {
             if (!(to_file.exists())) {
                 acc = new AttrSeq("Global Ranking Accumulator File",
@@ -373,8 +373,8 @@ public class plasmaRankingCRProcess {
     
     public static int genrcix(final File cr_path_in, final File rci_path_out) throws IOException {
         //kelondroFlexTable       acc = new kelondroFlexTable(cr_path_in, CRG_accname, kelondroBase64Order.enhancedCoder, 128 * 1024 * 1024, -1, CRG_accrow, true);
-        final indexCollectionRI seq = new indexCollectionRI(cr_path_in, CRG_seqname, 12, Base64Order.enhancedCoder, 9, CRG_colrow, false);
-        final indexCollectionRI rci = new indexCollectionRI(rci_path_out, RCI_colname, 6, Base64Order.enhancedCoder, 9, RCI_coli, false);
+        final IndexCollection seq = new IndexCollection(cr_path_in, CRG_seqname, 12, Base64Order.enhancedCoder, 9, CRG_colrow, false);
+        final IndexCollection rci = new IndexCollection(rci_path_out, RCI_colname, 6, Base64Order.enhancedCoder, 9, RCI_coli, false);
         
         // loop over all referees
         int count = 0;

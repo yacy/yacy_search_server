@@ -33,8 +33,8 @@ import de.anomic.http.httpResponse;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpResponseHeader;
 import de.anomic.http.httpdProxyCacheEntry;
-import de.anomic.index.indexDocumentMetadata;
-import de.anomic.index.indexReferenceBlacklist;
+import de.anomic.kelondro.text.Blacklist;
+import de.anomic.kelondro.text.Document;
 import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaParser;
@@ -83,8 +83,8 @@ public final class HTTPLoader {
      * @param responseStatus Status-Code SPACE Reason-Phrase
      * @return
      */
-    protected indexDocumentMetadata createCacheEntry(final CrawlEntry entry, final Date requestDate, final httpRequestHeader requestHeader, final httpResponseHeader responseHeader, final String responseStatus) {
-        indexDocumentMetadata metadata = new httpdProxyCacheEntry(
+    protected Document createCacheEntry(final CrawlEntry entry, final Date requestDate, final httpRequestHeader requestHeader, final httpResponseHeader responseHeader, final String responseStatus) {
+        Document metadata = new httpdProxyCacheEntry(
                 entry.depth(),
                 entry.url(),
                 entry.name(),
@@ -98,11 +98,11 @@ public final class HTTPLoader {
         return metadata;
     }    
    
-    public indexDocumentMetadata load(final CrawlEntry entry, final String parserMode) throws IOException {
+    public Document load(final CrawlEntry entry, final String parserMode) throws IOException {
         return load(entry, parserMode, DEFAULT_CRAWLING_RETRY_COUNT);
     }
     
-    private indexDocumentMetadata load(final CrawlEntry entry, final String parserMode, final int retryCount) throws IOException {
+    private Document load(final CrawlEntry entry, final String parserMode, final int retryCount) throws IOException {
 
         if (retryCount < 0) {
             sb.crawlQueues.errorURL.newEntry(entry, sb.webIndex.seedDB.mySeed().hash, new Date(), 1, "redirection counter exceeded").store();
@@ -118,13 +118,13 @@ public final class HTTPLoader {
         
         // check if url is in blacklist
         final String hostlow = host.toLowerCase();
-        if (plasmaSwitchboard.urlBlacklist.isListed(indexReferenceBlacklist.BLACKLIST_CRAWLER, hostlow, path)) {
+        if (plasmaSwitchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_CRAWLER, hostlow, path)) {
             sb.crawlQueues.errorURL.newEntry(entry, sb.webIndex.seedDB.mySeed().hash, new Date(), 1, "url in blacklist").store();
             throw new IOException("CRAWLER Rejecting URL '" + entry.url().toString() + "'. URL is in blacklist.");
         }
         
         // take a file from the net
-        indexDocumentMetadata htCache = null;
+        Document htCache = null;
         final long maxFileSize = sb.getConfigLong("crawler.http.maxFileSize", DEFAULT_MAXFILESIZE);
         //try {
             // create a request header

@@ -4,7 +4,7 @@ import java.util.List;
 
 import de.anomic.data.listManager;
 import de.anomic.http.httpRequestHeader;
-import de.anomic.index.indexAbstractReferenceBlacklist;
+import de.anomic.kelondro.text.AbstractBlacklist;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -34,7 +34,7 @@ public class blacklists_p {
                         prop.put("lists_" + blacklistCount + "_shared", "0");
                     }
 
-                    final String[] types = indexAbstractReferenceBlacklist.BLACKLIST_TYPES_STRING.split(",");
+                    final String[] types = AbstractBlacklist.BLACKLIST_TYPES_STRING.split(",");
                     for (int j=0; j<types.length; j++) {
                         prop.putXML("lists_" + blacklistCount + "_types_" + j + "_name", types[j]);
                         prop.put("lists_" + blacklistCount + "_types_" + j + "_value",

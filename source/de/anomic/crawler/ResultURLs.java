@@ -39,8 +39,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import de.anomic.index.URLMetadata;
 import de.anomic.kelondro.order.Bitfield;
+import de.anomic.kelondro.text.MetadataRowContainer;
 import de.anomic.kelondro.util.ScoreCluster;
 import de.anomic.kelondro.util.Log;
 import de.anomic.yacy.yacySeedDB;
@@ -82,7 +82,7 @@ public final class ResultURLs {
         gcrawlResultDomains = new ScoreCluster<String>();
     }
 
-    public synchronized void stack(final URLMetadata e, final String initiatorHash, final String executorHash, final int stackType) {
+    public synchronized void stack(final MetadataRowContainer e, final String initiatorHash, final String executorHash, final int stackType) {
         assert initiatorHash != null;
         assert executorHash != null;
         if (e == null) { return; }
@@ -98,7 +98,7 @@ public final class ResultURLs {
         try {
             final ScoreCluster<String> domains = getDomains(stackType);
             if (domains != null) {
-                domains.incScore(e.comp().url().getHost());
+                domains.incScore(e.metadata().url().getHost());
             }
         } catch (final Exception ex) {
             System.out.println("INTERNAL ERROR in newEntry/3: " + ex.toString());
@@ -305,7 +305,7 @@ public final class ResultURLs {
         final ResultURLs results = new ResultURLs();
         try {
             final yacyURL url = new yacyURL("http", "www.yacy.net", 80, "/");
-            final URLMetadata urlRef = new URLMetadata(url, "YaCy Homepage", "", "", "", new Date(), new Date(), new Date(), "", new byte[] {}, 123, 42, '?', new Bitfield(), "de", 0, 0, 0, 0, 0, 0);
+            final MetadataRowContainer urlRef = new MetadataRowContainer(url, "YaCy Homepage", "", "", "", new Date(), new Date(), new Date(), "", new byte[] {}, 123, 42, '?', new Bitfield(), "de", 0, 0, 0, 0, 0, 0);
             int stackNo = 1;
             System.out.println("valid test:\n=======");
             // add

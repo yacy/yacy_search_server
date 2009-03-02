@@ -4,9 +4,9 @@
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
-// $LastChangedDate$
-// $LastChangedRevision$
-// $LastChangedBy$
+// $LastChangedDate: 2008-08-20 09:54:56 +0200 (Mi, 20 Aug 2008) $
+// $LastChangedRevision: 5063 $
+// $LastChangedBy: danielr $
 //
 // LICENSE
 // 
@@ -24,7 +24,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.index;
+package de.anomic.kelondro.text;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -34,9 +34,10 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 
-public class indexDefaultReferenceBlacklist extends indexAbstractReferenceBlacklist implements indexReferenceBlacklist {
 
-    public indexDefaultReferenceBlacklist(final File rootPath) {
+public class DefaultBlacklist extends AbstractBlacklist implements Blacklist {
+
+    public DefaultBlacklist(final File rootPath) {
         super(rootPath);
     }
 

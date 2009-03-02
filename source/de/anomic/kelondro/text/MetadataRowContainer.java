@@ -24,7 +24,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.index;
+package de.anomic.kelondro.text;
 
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
@@ -40,8 +40,6 @@ import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.kelondro.order.Digest;
 import de.anomic.kelondro.order.NaturalOrder;
-import de.anomic.kelondro.text.Reference;
-import de.anomic.kelondro.text.ReferenceRow;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.kelondroException;
 import de.anomic.plasma.plasmaSearchQuery;
@@ -50,7 +48,7 @@ import de.anomic.server.serverCodings;
 import de.anomic.tools.crypt;
 import de.anomic.yacy.yacyURL;
 
-public class URLMetadata {
+public class MetadataRowContainer {
 
     // this object stores attributes for URL entries
     
@@ -121,7 +119,7 @@ public class URLMetadata {
     private Reference word; // this is only used if the url is transported via remote search requests
     private final long ranking; // during generation of a search result this value is set
     
-    public URLMetadata(
+    public MetadataRowContainer(
             final yacyURL url,
             final String dc_title,
             final String dc_creator,
@@ -200,14 +198,14 @@ public class URLMetadata {
 		}
     }
     
-    public URLMetadata(final Row.Entry entry, final Reference searchedWord, final long ranking) {
+    public MetadataRowContainer(final Row.Entry entry, final Reference searchedWord, final long ranking) {
         this.entry = entry;
         this.snippet = null;
         this.word = searchedWord;
         this.ranking = ranking;
     }
 
-    public URLMetadata(final Properties prop) {
+    public MetadataRowContainer(final Properties prop) {
         // generates an plasmaLURLEntry using the properties from the argument
         // the property names must correspond to the one from toString
         //System.out.println("DEBUG-ENTRY: prop=" + prop.toString());
@@ -271,12 +269,12 @@ public class URLMetadata {
         this.ranking = 0;
     }
 
-    public static URLMetadata importEntry(final String propStr) {
+    public static MetadataRowContainer importEntry(final String propStr) {
         if (propStr == null || !propStr.startsWith("{") || !propStr.endsWith("}")) {
             return null;
         }
         try {
-            return new URLMetadata(serverCodings.s2p(propStr.substring(1, propStr.length() - 1)));
+            return new MetadataRowContainer(serverCodings.s2p(propStr.substring(1, propStr.length() - 1)));
         } catch (final kelondroException e) {
                 // wrong format
                 return null;
@@ -285,16 +283,16 @@ public class URLMetadata {
 
     private StringBuilder corePropList() {
         // generate a parseable string; this is a simple property-list
-        final URLMetadata.Components comp = this.comp();
+        final URLMetadata metadata = this.metadata();
         final StringBuilder s = new StringBuilder(300);
         //System.out.println("author=" + comp.author());
         try {
             s.append("hash=").append(hash());
-            s.append(",url=").append(crypt.simpleEncode(comp.url().toNormalform(false, true)));
-            s.append(",descr=").append(crypt.simpleEncode(comp.dc_title()));
-            s.append(",author=").append(crypt.simpleEncode(comp.dc_creator()));
-            s.append(",tags=").append(crypt.simpleEncode(comp.dc_subject()));
-            s.append(",ETag=").append(crypt.simpleEncode(comp.ETag()));
+            s.append(",url=").append(crypt.simpleEncode(metadata.url().toNormalform(false, true)));
+            s.append(",descr=").append(crypt.simpleEncode(metadata.dc_title()));
+            s.append(",author=").append(crypt.simpleEncode(metadata.dc_creator()));
+            s.append(",tags=").append(crypt.simpleEncode(metadata.dc_subject()));
+            s.append(",ETag=").append(crypt.simpleEncode(metadata.ETag()));
             s.append(",mod=").append(DateFormatter.formatShortDay(moddate()));
             s.append(",load=").append(DateFormatter.formatShortDay(loaddate()));
             s.append(",fresh=").append(DateFormatter.formatShortDay(freshdate()));
@@ -343,9 +341,9 @@ public class URLMetadata {
     	return this.ranking;
     }
     
-    public URLMetadata.Components comp() {
+    public URLMetadata metadata() {
         final ArrayList<String> cl = FileUtils.strings(this.entry.getCol("comp", null), "UTF-8");
-        return new URLMetadata.Components(
+        return new URLMetadata(
                 (cl.size() > 0) ? (cl.get(0)).trim() : "",
                 hash(),
                 (cl.size() > 1) ? (cl.get(1)).trim() : "",
@@ -430,7 +428,7 @@ public class URLMetadata {
         return word;
     }
 
-    public boolean isOlder(final URLMetadata other) {
+    public boolean isOlder(final MetadataRowContainer other) {
         if (other == null) return false;
         final Date tmoddate = moddate();
         final Date omoddate = other.moddate();
@@ -462,9 +460,9 @@ public class URLMetadata {
     public CrawlEntry toBalancerEntry(final String initiatorHash) {
         return new CrawlEntry(
                 initiatorHash, 
-                comp().url(), 
+                metadata().url(), 
                 referrerHash(), 
-                comp().dc_title(),
+                metadata().dc_title(),
                 null,
                 loaddate(), 
                 null,
@@ -487,35 +485,6 @@ public class URLMetadata {
 
         return new String(core);
         //return "{" + core + "}";
-    }
-
-    public static class Components {
-        private yacyURL url;
-        private final String dc_title, dc_creator, dc_subject, ETag;
-        
-        public Components(final String url, final String urlhash, final String title, final String author, final String tags, final String ETag) {
-            try {
-                this.url = new yacyURL(url, urlhash);
-            } catch (final MalformedURLException e) {
-                this.url = null;
-            }
-            this.dc_title = title;
-            this.dc_creator = author;
-            this.dc_subject = tags;
-            this.ETag = ETag;
-        }
-        public Components(final yacyURL url, final String descr, final String author, final String tags, final String ETag) {
-            this.url = url;
-            this.dc_title = descr;
-            this.dc_creator = author;
-            this.dc_subject = tags;
-            this.ETag = ETag;
-        }
-        public yacyURL url()    { return this.url; }
-        public String  dc_title()  { return this.dc_title; }
-        public String  dc_creator() { return this.dc_creator; }
-        public String  dc_subject()   { return this.dc_subject; }
-        public String  ETag()   { return this.ETag; }
     }
     
 }
