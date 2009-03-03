@@ -170,8 +170,11 @@ public final class BLOBHeap extends BLOBHeapModifier implements BLOB {
             index.putl(key, posFile);
             b = AbstractRandomAccess.int2array(key.length + blob.length);
             assert b.length == 4;
+            assert posBuffer + 4 < ba.length : "posBuffer = " + posBuffer + ", ba.length = " + ba.length;
             System.arraycopy(b, 0, ba, posBuffer, 4);
+            assert posBuffer + 4 + key.length <= ba.length : "posBuffer = " + posBuffer + ", key.length = " + key.length + ", ba.length = " + ba.length;
             System.arraycopy(key, 0, ba, posBuffer + 4, key.length);
+            assert posBuffer + 4 + key.length + blob.length <= ba.length : "posBuffer = " + posBuffer + ", key.length = " + key.length + ", blob.length = " + blob.length + ", ba.length = " + ba.length;
             System.arraycopy(blob, 0, ba, posBuffer + 4 + key.length, blob.length);
             posFile += 4 + key.length + blob.length;
             posBuffer += 4 + key.length + blob.length;
