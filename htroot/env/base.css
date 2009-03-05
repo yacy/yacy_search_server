@@ -830,7 +830,7 @@ ul.folder li.treeMenu_closed ul {
 
 /* API */
 div#api {
-  position:fixed;
+  position:absolute;
   top:20px;
   right:20px;
   z-index: 100;
